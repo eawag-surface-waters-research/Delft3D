@@ -35,7 +35,6 @@ contains
 subroutine tests_cross_sections
     call test( test_circular_cross_section,     'Tests circular cross section' )
     call test( test_rectangular_cross_section,  'Tests rectangular cross section' )
-    call test( test_egg_type_cross_section,     'Tests egg type cross section' )
     call test( test_tabulated_cross_section,    'Tests tabulated cross section' )
     call test( test_yz_cross_section,           'Tests yz type cross section' )
 end subroutine tests_cross_sections
@@ -46,7 +45,7 @@ subroutine test_circular_cross_section
    
    type(t_network), target :: network
    character(len=256)      :: cross_section_definition_file
-   integer, parameter      :: n_crs_def = 5
+   integer, parameter      :: n_crs_def = 4
    integer                 :: i
    double precision        :: dpt
    double precision        :: flowarea
@@ -115,7 +114,6 @@ subroutine test_rectangular_cross_section
    
    type(t_network), target :: network
    character(len=256)      :: cross_section_definition_file
-   integer, parameter      :: n_crs_def = 3
    integer                 :: i
    double precision        :: dpt
    double precision        :: flowarea
@@ -151,12 +149,13 @@ subroutine test_rectangular_cross_section
                  3.599999845027924D-002, 0.200000000000000, 3.599999845027924D-002, 0.200000000000000, 3.599999845027924D-002, 0.200000000000000, 0.000000000000000D+000, 0.000000000000000D+000                       , &
                  3.799999952316285D-002, 0.200000000000000, 3.799999952316285D-002, 0.200000000000000, 3.799999952316285D-002, 0.200000000000000, 0.000000000000000D+000, 0.000000000000000D+000                       , &
                  3.999999761581421D-002, 0.200000000000000, 3.999999761581421D-002, 0.200000000000000, 3.999999761581421D-002, 0.200000000000000, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 4.000100005000001D-002, 1.000000000000000D-002, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005        , &
-                 4.000100005000001D-002, 1.000000000000000D-002, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005        , &
-                 4.000100005000001D-002, 1.000000000000000D-002, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005        , &
-                 4.000100005000001D-002, 1.000000000000000D-002, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005        /
+                 4.010050505000001D-002, 1.000000000000000D-002, 4.010050505000001D-002, 1.000000000000000D-005, 4.010050505000001D-002, 1.000000000000000D-005, 4.010050505000001D-002, 1.000000000000000D-005        , &
+                 4.010050505000001D-002, 1.000000000000000D-002, 4.010050505000001D-002, 1.000000000000000D-005, 4.010050505000001D-002, 1.000000000000000D-005, 4.010050505000001D-002, 1.000000000000000D-005        , &
+                 4.010050505000001D-002, 1.000000000000000D-002, 4.010050505000001D-002, 1.000000000000000D-005, 4.010050505000001D-002, 1.000000000000000D-005, 4.010050505000001D-002, 1.000000000000000D-005        , &
+                 4.010050505000001D-002, 1.000000000000000D-002, 4.010050505000001D-002, 1.000000000000000D-005, 4.010050505000001D-002, 1.000000000000000D-005, 4.010050505000001D-002, 1.000000000000000D-005        /
    
    cross_section_definition_file = 'cross_sections/crsdef.ini'
+
    call test_cross_section_helper(network, cross_section_definition_file)
    cross => network%crs%cross(2)
    
@@ -180,82 +179,11 @@ subroutine test_rectangular_cross_section
    
 end subroutine test_rectangular_cross_section
 
-subroutine test_egg_type_cross_section
-   use m_network
-   
-   type(t_network), target :: network
-   character(len=256)      :: cross_section_definition_file
-   integer, parameter      :: n_crs_def = 3
-   integer                 :: i
-   double precision        :: dpt
-   double precision        :: flowarea
-   double precision        :: flowwidth
-   double precision        :: wetperimeter
-   double precision        :: totalarea
-   double precision        :: totalwidth
-   double precision        :: plusarea
-   double precision        :: pluswidth
-   double precision        :: minarea
-   double precision        :: minwidth
-   type(t_CrossSection), pointer :: cross
-   double precision        :: refdata(8,25)
-   
-   data refdata /0.000000000000000D+000, 1.000000000000000D-002, 0.000000000000000D+000, 1.000000000000000D-002, 0.000000000000000D+000, 1.000000000000000D-002, 0.000000000000000D+000, 1.000000000000000D-002        , &
-                 1.118238118519718D-003, 7.999999932944774D-002, 1.318238114049370D-003, 8.999999932944773D-002, 1.318238114049370D-003, 8.999999932944773D-002, 0.000000000000000D+000, 0.000000000000000D+000        , &
-                 3.001630699382438D-003, 0.107543100490580, 3.401630690441742D-003, 0.117543100490580, 3.401630690441742D-003, 0.117543100490580, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 5.390512100106582D-003, 0.130659965041610, 5.990512086695537D-003, 0.140659965041610, 5.990512086695537D-003, 0.140659965041610, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 8.202279516104631D-003, 0.149909081833885, 9.002279498223237D-003, 0.159909081833885, 9.002279498223237D-003, 0.159909081833885, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 1.136374684802399D-002, 0.165685420734553, 1.236374678841934D-002, 0.175685420734553, 1.236374678841934D-002, 0.175685420734553, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 1.480845715906485D-002, 0.178273290307780, 1.600845713224276D-002, 0.188273290307780, 1.600845713224276D-002, 0.188273290307780, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 1.847480202673402D-002, 0.187877538511298, 1.987480203269449D-002, 0.197877538511298, 1.987480203269449D-002, 0.197877538511298, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 2.230464219307269D-002, 0.194642748930474, 2.390464215730990D-002, 0.204642748930474, 2.390464215730990D-002, 0.204642748930474, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 2.624223421878257D-002, 0.198665180848380, 2.804223414129653D-002, 0.208665180848380, 2.804223414129653D-002, 0.208665180848380, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 3.023333854973315D-002, 0.200000000000000, 3.223333843052387D-002, 0.210000000000000, 3.223333843052387D-002, 0.210000000000000, 0.000000000000000D+000, 0.000000000000000D+000                       , &
-                 3.420650864770922D-002, 0.195959179909324, 3.640650863578829D-002, 0.205959179909324, 3.643334068357944D-002, 0.210000000000000, 2.683204779115045D-005, 4.040820090675828D-003                       , &
-                 3.801456591250638D-002, 0.183303032480681, 4.041456585886220D-002, 0.193303032480681, 4.063333980739116D-002, 0.210000000000000, 2.187739485289553D-004, 1.669696751931873D-002                       , &
-                 4.146834744123478D-002, 0.160000014305113, 4.406834734586735D-002, 0.170000014305113, 4.483333893120288D-002, 0.210000000000000, 7.649915853355296D-004, 3.999998569488700D-002                       , &
-                 4.430629020224818D-002, 0.119999996821086, 4.710629021416911D-002, 0.129999996821086, 4.903334118425844D-002, 0.210000000000000, 1.927050970089335D-003, 8.000000317891426D-002                       , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 4.894130021333695D-002, 1.000000000000000D-002, 5.323333717882632D-002, 0.210000000000000, 4.292036965489368D-003, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 4.914130032062531D-002, 1.000000000000000D-002, 5.743333943188188D-002, 0.210000000000000, 8.292039111256574D-003, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 4.934130042791367D-002, 1.000000000000000D-002, 6.163334168493747D-002, 0.210000000000000, 1.229204125702379D-002, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 4.954130023717881D-002, 1.000000000000000D-002, 6.583333767950533D-002, 0.210000000000000, 1.629203744232652D-002, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 4.974130034446717D-002, 1.000000000000000D-002, 7.003333993256089D-002, 0.210000000000000, 2.029203958809372D-002, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 4.994130015373231D-002, 1.000000000000000D-002, 7.423333592712879D-002, 0.210000000000000, 2.429203577339648D-002, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 5.014130026102067D-002, 1.000000000000000D-002, 7.843333818018434D-002, 0.210000000000000, 2.829203791916368D-002, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 5.034130036830903D-002, 1.000000000000000D-002, 8.263334043323992D-002, 0.210000000000000, 3.229204006493089D-002, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 5.054130017757416D-002, 1.000000000000000D-002, 8.683333642780779D-002, 0.210000000000000, 3.629203625023363D-002, 0.200000000000000                  , &
-                 4.594130039215089D-002, 1.000000000000000D-002, 5.074130028486253D-002, 1.000000000000000D-002, 9.103333868086336D-002, 0.210000000000000, 4.029203839600083D-002, 0.200000000000000                  /
-                                                                                                                                                                                                                                                                                                                                                                                                                 
-   cross_section_definition_file = 'cross_sections/crsdef.ini'
-   call test_cross_section_helper(network, cross_section_definition_file)
-   cross => network%crs%cross(3)
-   
-   do i = 1, 25
-      dpt = (i-1)*0.02
-      call GetCSParsFlow(cross, dpt, flowArea, wetPerimeter, flowWidth)   
-      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN, hysteresis)
-      call GetCSParsTotal(cross, dpt, plusArea,  plusWidth,  CS_TYPE_PLUS, hysteresis)
-      call GetCSParsTotal(cross, dpt, minArea,   minWidth,   CS_TYPE_MIN, hysteresis)
-      call assert_comparable( flowArea  , refdata(1,i), eps, "flowArea   is not correct" )
-      call assert_comparable( flowWidth , refdata(2,i), eps, "flowWidth  is not correct" )
-      call assert_comparable( totalArea , refdata(3,i), eps, "totalArea  is not correct" )
-      call assert_comparable( totalWidth, refdata(4,i), eps, "totalWidth is not correct" )
-      call assert_comparable( plusArea  , refdata(5,i), eps, "plusArea   is not correct" )
-      call assert_comparable( plusWidth , refdata(6,i), eps, "plusWidth  is not correct" )
-      call assert_comparable( minArea   , refdata(7,i), eps, "minArea    is not correct" )
-      call assert_comparable( minWidth  , refdata(8,i), eps, "minWidth   is not correct" )
-
-      continue
-   enddo
-   
-end subroutine test_egg_type_cross_section
-
 subroutine test_tabulated_cross_section
    use m_network
    
    type(t_network), target :: network
    character(len=256)      :: cross_section_definition_file
-   integer, parameter      :: n_crs_def = 3
    integer                 :: i
    double precision        :: dpt
    double precision        :: flowarea
@@ -298,7 +226,7 @@ subroutine test_tabulated_cross_section
                                                                                                                                                                                                                    
    cross_section_definition_file = 'cross_sections/crsdef.ini'
    call test_cross_section_helper(network, cross_section_definition_file)
-   cross => network%crs%cross(4)
+   cross => network%crs%cross(3)
    
    do i = 1, 25
       dpt = (i-1)*0.4
@@ -319,7 +247,6 @@ subroutine test_yz_cross_section
    
    type(t_network), target :: network
    character(len=256)      :: cross_section_definition_file
-   integer, parameter      :: n_crs_def = 3
    integer                 :: i
    double precision        :: dpt
    double precision        :: flowarea
@@ -362,7 +289,7 @@ subroutine test_yz_cross_section
                                                                                                                                                                                                                                                                                                                                                                                                                  
    cross_section_definition_file = 'cross_sections/crsdef.ini'
    call test_cross_section_helper(network, cross_section_definition_file)
-   cross => network%crs%cross(5)
+   cross => network%crs%cross(4)
    cross%frictionSectionsCount = 1
    allocate(cross%frictionSectionID(1))     
    allocate(cross%frictionSectionFrom(1)) 
