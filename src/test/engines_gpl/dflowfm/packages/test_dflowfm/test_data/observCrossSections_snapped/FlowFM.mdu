@@ -20,10 +20,10 @@ FixedWeirFile     =
 PillarFile        =
 StructureFile     =
 VertplizFile      =
-CrossDefFile      = crsdef.ini
-CrossLocFile      = crsloc.ini
-RoughnessFiles    = roughness-Main.ini;roughness-Sewer.ini
-NodeFile          = nodeFile.ini
+CrossDefFile      = 
+CrossLocFile      = 
+RoughnessFiles    = 
+NodeFile          = 
 RoofsFile         =
 LeveeBreachFile   =
 ProfdefxyzFile    =
@@ -158,8 +158,8 @@ RestartFile       =
 RestartDateTime   = 20190313
 
 [external forcing]
-#ExtForceFile      = ext_force.ext
-#ExtForceFileNew   = FlowFM_bnd.ext
+#ExtForceFile      = 
+#ExtForceFileNew   = 
 
 [trachytopes]
 TrtRou            = N
