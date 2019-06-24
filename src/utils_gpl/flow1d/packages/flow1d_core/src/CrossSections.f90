@@ -203,10 +203,10 @@ module m_CrossSections
        integer                                  :: frictionSectionsCount = 0  !< Number of actual friction sections
        character(IdLen), allocatable            :: frictionSectionID(:)       !< Friction Section Identification
        integer         , allocatable            :: frictionSectionIndex(:)    !< Friction Section index
-       double precision, allocatable            :: frictionSectionFrom(:)     !< Start point of friction section
-       double precision, allocatable            :: frictionSectionTo(:)       !< End point of friction section
-       integer, allocatable                     :: frictionType(:)            !< Friction type 
-       double precision, allocatable            :: frictionValue(:)           !< Friction value
+       double precision, allocatable            :: frictionSectionFrom(:)     !< For YZ: Start point (y) of friction section.
+       double precision, allocatable            :: frictionSectionTo(:)       !< For yz: End point (y) of friction section.
+       integer, allocatable                     :: frictionType(:)            !< Friction type  (Only when FrictionSectionID not specified).
+       double precision, allocatable            :: frictionValue(:)           !< Friction value  (Only when FrictionSectionID not specified).
 
    end type t_CSType
 
