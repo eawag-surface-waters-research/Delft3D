@@ -315,11 +315,14 @@ module m_readCrossSections
       logical                       :: plural                 !< indicates whether friction input is plural or not (e.g. frictionId or frictionIds)
       type(t_CSType), pointer       :: pCS
       character(len=IdLen), allocatable :: fricTypes(:)
+      integer                       :: maxnumsections ! Max number of friction sections, to realloc some arrays
       
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
          numstr = size(md_ptr%child_nodes)
       end if
+
+      maxnumsections = 3
 
   crs:do i = 1, numstr
          
@@ -431,7 +434,8 @@ module m_readCrossSections
          allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
          allocate(pCS%frictionSectionIndex(pCs%frictionSectionsCount))
          allocate(pCS%frictionType       (pCs%frictionSectionsCount))
-         allocate(fricTypes              (pCs%frictionSectionsCount))
+         maxnumsections = max(maxnumsections, pCs%frictionSectionsCount)
+         call realloc(fricTypes, maxnumsections, keepExisting = .false.)
          allocate(pCS%frictionValue      (pCs%frictionSectionsCount))
 
          if (plural) then
