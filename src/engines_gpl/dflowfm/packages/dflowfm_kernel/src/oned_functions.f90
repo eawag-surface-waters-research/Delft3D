@@ -297,10 +297,6 @@ module m_oned_functions
          pstru   => network%sts%struct(istru)
          pbranch => network%brs%branch(pstru%ibran)
          ierr = findlink(pstru%ibran, pstru%chainage, pstru%link_number)
-         if (pstru%link_number > 0) then
-            pstru%left_calc_point  = ln(1,pstru%link_number)
-            pstru%right_calc_point = ln(2,pstru%link_number)
-         endif
          L1strucsg(istru) = istru
          L2strucsg(istru) = istru
          network%adm%lin2str(network%sts%struct(istru)%link_number) = istru

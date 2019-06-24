@@ -41,12 +41,7 @@
     write(msgbuf,*) 'setting structure%chainage to', c_weir%chainage
     call mess(LEVEL_DEBUG, msgbuf)
     structure%chainage = c_weir%chainage
-    write(msgbuf,*) 'setting structure%left_calc_point to', c_weir%left_calc_point
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%left_calc_point = c_weir%left_calc_point
-    write(msgbuf,*) 'setting structure%right_calc_point to', c_weir%right_calc_point
-    call mess(LEVEL_DEBUG, msgbuf)
-    structure%right_calc_point = c_weir%right_calc_point
     write(msgbuf,*) 'setting structure%link_number to', c_weir%link_number
     call mess(LEVEL_DEBUG, msgbuf)
     structure%link_number = c_weir%link_number
@@ -107,12 +102,7 @@
     write(msgbuf,*) 'setting structure%chainage to', c_orifice%chainage
     call mess(LEVEL_DEBUG, msgbuf)
     structure%chainage = c_orifice%chainage
-    write(msgbuf,*) 'setting structure%left_calc_point to', c_orifice%left_calc_point
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%left_calc_point = c_orifice%left_calc_point
-    write(msgbuf,*) 'setting structure%right_calc_point to', c_orifice%right_calc_point
-    call mess(LEVEL_DEBUG, msgbuf)
-    structure%right_calc_point = c_orifice%right_calc_point
     write(msgbuf,*) 'setting structure%link_number to', c_orifice%link_number
     call mess(LEVEL_DEBUG, msgbuf)
     structure%link_number = c_orifice%link_number
@@ -182,12 +172,7 @@
     write(msgbuf,*) 'setting structure%chainage to', c_pump%chainage
     call mess(LEVEL_DEBUG, msgbuf)
     structure%chainage = c_pump%chainage
-    write(msgbuf,*) 'setting structure%left_calc_point to', c_pump%left_calc_point
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%left_calc_point = c_pump%left_calc_point
-    write(msgbuf,*) 'setting structure%right_calc_point to', c_pump%right_calc_point
-    call mess(LEVEL_DEBUG, msgbuf)
-    structure%right_calc_point = c_pump%right_calc_point
     write(msgbuf,*) 'setting structure%link_number to', c_pump%link_number
     call mess(LEVEL_DEBUG, msgbuf)
     structure%link_number = c_pump%link_number
@@ -254,12 +239,6 @@
     write(msgbuf,*) 'setting structure%chainage to', c_culvert%chainage
     call mess(LEVEL_DEBUG, msgbuf)
     structure%chainage = c_culvert%chainage
-    write(msgbuf,*) 'setting structure%left_calc_point to', c_culvert%left_calc_point
-    call mess(LEVEL_DEBUG, msgbuf)
-    structure%left_calc_point = c_culvert%left_calc_point
-    write(msgbuf,*) 'setting structure%right_calc_point to', c_culvert%right_calc_point
-    call mess(LEVEL_DEBUG, msgbuf)
-    structure%right_calc_point = c_culvert%right_calc_point
     write(msgbuf,*) 'setting structure%link_number to', c_culvert%link_number
     call mess(LEVEL_DEBUG, msgbuf)
     structure%link_number = c_culvert%link_number

@@ -96,11 +96,6 @@ module m_1d_structures
       module procedure AddStructureByBranchLocation
    end interface
 
-   interface printData
-      module procedure printStrucureSet
-      module procedure printStructure
-   end interface
-
    interface getTableValue
       module procedure getTableValueStruc
    end interface
@@ -138,8 +133,6 @@ module m_1d_structures
       character(IdLen)                 :: st_name
       integer                          :: st_type
       integer                          :: ibran
-      integer                          :: left_calc_point
-      integer                          :: right_calc_point
       integer                          :: link_number
       double precision                 :: x, y
       double precision                 :: chainage
@@ -242,18 +235,16 @@ module m_1d_structures
       x = 0d0
       y = 0d0
       ibranch = 0
-      AddStructure_short = AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, chainage, icompound, compoundName, id, structureType, x, y, ibranch)
+      AddStructure_short = AddStructureByCalcPoints(sts, linknumber, chainage, icompound, compoundName, id, structureType, x, y, ibranch)
    end function AddStructure_short
 
-   integer function AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, chainage, icompound, compoundName, id, structureType, x, y, ibranch)
+   integer function AddStructureByCalcPoints(sts, linknumber, chainage, icompound, compoundName, id, structureType, x, y, ibranch)
       ! Modules
 
       implicit none
 
       ! Input/output parameters
       type(t_StructureSet) :: sts
-      integer              :: leftcalc
-      integer              :: rightcalc
       integer              :: linknumber
       double precision     :: chainage
       integer              :: icompound
@@ -280,8 +271,6 @@ module m_1d_structures
       call incStructureCount(sts, structureType)
 
       sts%struct(i)%id                 = id
-      sts%struct(i)%left_calc_point    = leftcalc
-      sts%struct(i)%right_calc_point   = rightcalc
       sts%struct(i)%link_number        = linknumber
       sts%struct(i)%chainage           = chainage
       sts%struct(i)%compound           = icompound
@@ -300,21 +289,6 @@ module m_1d_structures
          sts%struct(i)%ibran = 0
       end if
 
-
-      if (icompound == 0) then
-         ! look up compound structure
-         do j = 1, i-1
-            pstru => sts%struct(j)
-            if ( (pstru%left_calc_point == leftcalc) .and. (pstru%right_calc_point == rightcalc) ) then
-!               if (pstru%compound==0) then
-!                  sts%compoundCount = sts%compoundCount+1
-!                  pstru%compound = sts%compoundCount
-!               endif
-               sts%struct(i)%compound = pstru%compound
-               exit
-            endif
-         enddo
-      endif
       AddStructureByCalcPoints = sts%count
    end function AddStructureByCalcPoints
 
@@ -757,31 +731,6 @@ end subroutine
        endif
 
    end function getValueStruc
-
-   subroutine printStrucureSet(sts, unit)
-      type(t_structureSet) sts
-      integer unit
-
-      integer i
-      write(99, '(a)') ''
-      write(99, '(a)') 'Structures'
-      write(99, '(a)') '=========='
-      do i = 1, sts%count
-         write (unit, '(a)') ''
-         write(unit, '(a, i8)') 'structure number', i
-         call printData(sts%struct(i), unit)
-      enddo
-   end subroutine printStrucureSet
-
-   subroutine printStructure(struc, unit)
-      type(t_structure) struc
-      integer unit
-
-      write(unit, '(a, i5)') 'id = '//trim(struc%id)
-      write(unit, '(''branch = '' , i7, '' left calc point = '', i7, ''right calc point = '', i7)')  &
-                  struc%ibran, struc%left_calc_point, struc%right_calc_point
-      write(unit, '(''chainage = '', f10.3)') struc%chainage
-   end subroutine printStructure
 
    subroutine reIndexCrossSections(sts, crs)
       ! modules

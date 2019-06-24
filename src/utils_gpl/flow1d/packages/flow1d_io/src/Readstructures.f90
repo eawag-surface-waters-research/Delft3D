@@ -336,8 +336,6 @@ module m_readstructures
          read(ibin) pstr%st_name
          read(ibin) pstr%st_type
          read(ibin) pstr%ibran
-         read(ibin) pstr%left_calc_point
-         read(ibin) pstr%right_calc_point
          read(ibin) pstr%link_number
          read(ibin) pstr%x
          read(ibin) pstr%y
@@ -565,8 +563,6 @@ module m_readstructures
          write(ibin) pstr%st_name
          write(ibin) pstr%st_type
          write(ibin) pstr%ibran
-         write(ibin) pstr%left_calc_point
-         write(ibin) pstr%right_calc_point
          write(ibin) pstr%link_number
          write(ibin) pstr%x
          write(ibin) pstr%y

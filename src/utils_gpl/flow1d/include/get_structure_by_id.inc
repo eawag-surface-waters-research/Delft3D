@@ -32,8 +32,6 @@
     c_weir%y = structure%y
     c_weir%branchid = structure%ibran
     c_weir%chainage = structure%chainage
-    c_weir%left_calc_point = structure%left_calc_point
-    c_weir%right_calc_point = structure%right_calc_point
     c_weir%link_number = structure%link_number
     c_weir%crest_level = fortranweir%crestlevel
     c_weir%crest_width = fortranweir%crestwidth
@@ -74,8 +72,6 @@
     c_orifice%y = structure%y
     c_orifice%branchid = structure%ibran
     c_orifice%chainage = structure%chainage
-    c_orifice%left_calc_point = structure%left_calc_point
-    c_orifice%right_calc_point = structure%right_calc_point
     c_orifice%link_number = structure%link_number
     c_orifice%crest_level = fortranorifice%crestlevel
     c_orifice%crest_width = fortranorifice%crestwidth
@@ -119,8 +115,6 @@
     c_pump%y = structure%y
     c_pump%branchid = structure%ibran
     c_pump%chainage = structure%chainage
-    c_pump%left_calc_point = structure%left_calc_point
-    c_pump%right_calc_point = structure%right_calc_point
     c_pump%link_number = structure%link_number
     c_pump%start_level_suction_side = fortranpump%ss_onlevel(1)
     c_pump%stop_level_suction_side = fortranpump%ss_offlevel(1)
@@ -163,8 +157,6 @@
     c_culvert%y = structure%y
     c_culvert%branchid = structure%ibran
     c_culvert%chainage = structure%chainage
-    c_culvert%left_calc_point = structure%left_calc_point
-    c_culvert%right_calc_point = structure%right_calc_point
     c_culvert%link_number = structure%link_number
     c_culvert%left_level = fortranculvert%leftlevel
     c_culvert%right_level = fortranculvert%rightlevel
