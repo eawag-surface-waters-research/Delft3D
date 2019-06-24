@@ -57,6 +57,7 @@ module m_oned_functions
       use m_spatial_data
       use m_branch
       use m_hash_search
+      use m_read_roughness, only: RoughFileMajorVersion
 
       implicit none
 
@@ -104,7 +105,7 @@ module m_oned_functions
                   iRough = hashsearch(network%rgs%hashlist, crs(cross)%tabdef%frictionSectionID(1))
                endif
                if (iRough > 0) then
-                  if (network%rgs%version == 2) then
+                  if (network%rgs%version == RoughFileMajorVersion) then
                      do i = 1, pbr%uPointsCount
                         L = pbr%lin(i)
                         k = pbr%points(1) -1 + i
