@@ -2440,6 +2440,21 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
        call addclosed_2D_walls()                   ! 2D Dichte wanden
     endif
 
+    ! check for zero values in a1 for 1D nodes
+    ! a1 = 0 might result in instabilities in the nonlinear solver
+    ! The surface area from a neigbouring gridpoint is taken. 
+    ! When flooded, in the next iteration, the correct surface area is calculated.
+    do L = 1, lnx1d
+       k1 = ln(1,L)
+       k2 = ln(2,L)
+       if (a1(k1) == 0d0) then
+          a1(k1) = a1(k2)
+       endif
+       if (a1(k2) == 0d0) then
+          a1(k2) = a1(k1)
+       endif
+    enddo
+
  endif
 
  end subroutine VOL12D
