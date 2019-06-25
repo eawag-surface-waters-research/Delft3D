@@ -422,6 +422,10 @@ namespace General.tests
         private static extern int ionc_put_1d_mesh_discretisation_points_v1_dll([In] ref int ioncid, [In] ref int meshid, [In] ref IntPtr c_branchidx, [In] ref IntPtr c_offset, interop_charinfo[] nodeinfo, [In] ref int nmeshpoints, [In] ref int startIndex, [In] ref IntPtr c_coordx, [In] ref IntPtr c_coordy);
 
 
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_1d_mesh_discretisation_points_v2", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_put_1d_mesh_discretisation_points_v2_dll([In] ref int ioncid, [In] ref int meshid, [In] ref IntPtr c_branchidx, [In] ref IntPtr c_offset, [In] ref IntPtr c_ids, [In] ref IntPtr c_long_names, [In] ref int nmeshpoints, [In] ref int startIndex, [In] ref IntPtr c_coordx, [In] ref IntPtr c_coordy);
+
+
         /// <summary>
         /// Get the number of network nodes
         /// </summary>
@@ -857,6 +861,13 @@ namespace General.tests
             ref IntPtr c_offset, interop_charinfo[] nodeinfo, ref int nmeshpoints, ref int startIndex, ref IntPtr c_coordx, ref IntPtr c_coordy)
         {
             return ionc_put_1d_mesh_discretisation_points_v1_dll(ref ioncid, ref networkid, ref c_branchidx, ref c_offset, nodeinfo, ref nmeshpoints, ref startIndex, ref c_coordx, ref c_coordy);
+        }
+
+
+        public virtual int ionc_put_1d_mesh_discretisation_points_v2(ref int ioncid, ref int networkid, ref IntPtr c_branchidx,
+            ref IntPtr c_offset, ref IntPtr nodeids, ref IntPtr nodelongnames, ref int nmeshpoints, ref int startIndex, ref IntPtr c_coordx, ref IntPtr c_coordy)
+        {
+            return  ionc_put_1d_mesh_discretisation_points_v2_dll(ref ioncid, ref networkid, ref c_branchidx, ref c_offset, ref nodeids,  ref nodelongnames,ref nmeshpoints, ref startIndex, ref c_coordx, ref c_coordy);
         }
 
         public int ionc_get_1d_network_nodes_count(ref int ioncid, ref int networkid, ref int nNodes)
