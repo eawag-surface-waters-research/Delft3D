@@ -409,7 +409,7 @@ module m_ec_typedefs
       integer , dimension(:,:),   pointer :: indices       => null() !< indices: ([row,column]:nCoordinates)
       ! FM: tdataprovider wfn
       real(hp), dimension(:,:),   pointer :: weightFactors => null() !< weightfactors: ([1,2,3,4]:nCoordinates)
-      integer, dimension(:),      pointer :: substndx                !< substitutes target value j by target value [substndx(j)]
+      integer, dimension(:),      pointer :: substndx      => null() !< substitutes target value j by target value [substndx(j)]
       ! for extrapolation with e.g. 4 nearest neighbours
       type(tFlexibleIndexWeightFactor), pointer :: flexIndexWeights(:) => null()
       integer                                   :: curSizeFlex = 0

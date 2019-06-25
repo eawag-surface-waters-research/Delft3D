@@ -365,9 +365,8 @@ module m_ec_converter
                weight%indices = ec_undef_int
                if (associated(weight%weightFactors)) deallocate(weight%weightFactors)
                allocate(weight%weightFactors(4, n_points))
-               weight%weightFactors = ec_undef_hp
-               if (associated(weight%substndx)) deallocate(weight%substndx)
                allocate(weight%substndx(n_points))
+               weight%weightFactors = ec_undef_hp
                weight%substndx = 0
                iimin=n_cols
                jjmin=n_rows
