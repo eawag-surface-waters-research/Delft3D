@@ -289,7 +289,7 @@ Lp:do Lf=1,Lnx
 !  allocate other arrays
    call realloc(sol, Lnx, keepExisting=.false., fill=0d0)
    call realloc(ustar, Lnkx, keepExisting=.false., fill=0d0)
-   call realloc(eps, Lnx, keepExisting=.false., fill=0d0)
+   call realloc(eps, (/kmx,Lnx/), keepExisting=.false., fill=0d0)
    call realloc(Deltax, Lnx, keepExisting=.false., fill=0d0)
    
 !  get typical mesh width
@@ -474,11 +474,11 @@ subroutine comp_filter_predictor()
    
    solver_filter%A = 0d0
    ustar = 0d0
-   do klay=1,kmx
          
-!     get filter coefficient
-      call get_filter_coeff(klay)
-      
+!  get filter coefficient
+   call get_filter_coeff()
+   
+   do klay=1,kmx
 !     compute number of sub time steps and sub time step
       Nt = 1
       dt = dts
@@ -487,7 +487,7 @@ subroutine comp_filter_predictor()
 !        compute sub time step
          dt = huge(1d0)
          do LL=1,Lnx
-            dt = min(dt, dtmaxeps(LL)/max(eps(LL),1e-10))
+            dt = min(dt, dtmaxeps(LL)/max(eps(klay,LL),1e-10))
          end do
          
          dt = facmax * dt
@@ -521,17 +521,17 @@ subroutine comp_filter_predictor()
          end if
          
          if ( order.eq.1 ) then
-            fac = -eps(LL) * Dt * dsign
+            fac = -eps(klay,LL) * Dt * dsign
          else if ( order.eq.2 ) then
-            fac = eps(LL) * Dt * dsign
+            fac = eps(klay,LL) * Dt * dsign
          else
-            fac = eps(LL) * Dt * dsign
+            fac = eps(klay,LL) * Dt * dsign
          end if
-         plotlin(L) = eps(LL)
+         plotlin(L) = eps(klay,LL)
             
 !        BEGIN DEBUG
          if ( itype.eq.1 ) then
-            plotlin(L) = dts/(dtmaxeps(LL)/max(eps(LL),1e-10))
+            plotlin(L) = dts/(dtmaxeps(LL)/max(eps(klay,LL),1e-10))
          else
             plotlin(L) = 1d0
          end if
@@ -617,174 +617,6 @@ subroutine comp_filter_predictor()
    return
 end subroutine comp_filter_predictor
 
-!> get filter coefficient (sigma only)
-subroutine get_filter_coeff(klay)
-   use m_flowgeom, only: Lnx, ln, nd, acL, wcx1, wcx2, wcy1, wcy2, csu, snu, Dx, ba
-   use m_flow, only: q1, vol1, kmx, vicLu
-   use m_filter, only: iLvec, jLvec, ALvec, jadebug, eps, order, Deltax
-   implicit none
-   
-   integer,          intent(in)  :: klay   !< layer number
-   
-   double precision              :: eps1   ! first-order filter coefficient
-   double precision              :: eps2   ! second-order filter coefficient
-   double precision              :: eps3   ! third-order filter coefficient
-   
-   double precision              :: dsign
-   double precision              :: Q
-   double precision              :: wcx, wcy, w, alpha
-   double precision              :: volu
-!   double precision              :: Deltax   !< typical mesh width
-   double precision              :: vicouv   !< typical viscosity
-   double precision              :: maxeps
-   double precision              :: dinpr
-   
-   integer                       :: LL
-   integer                       :: Lb, Lt, L
-   integer                       :: LL1, iLL1, L1
-   integer                       :: kk
-   integer                       :: k1, k2
-   integer                       :: i, ik, iL, j
-   
-   integer                       :: ierror
-   
-   double precision, parameter   :: dtol = 0.01d0
-   
-   ierror = 1
-   
-   do LL=1,Lnx
-!     get 3D link number (sigma only)
-      call getLbotLtop(LL,Lb,Lt)
-      L = Lb+klay-1
-      
-!     compute first-order filter coefficient
-      eps1 = 0d0
-!      Deltax = Dx(LL)
-      vicouv = vicLu(L)
-      
-!     get advection volume
-      k1 = ln(1,L)
-      k2 = ln(2,L)
-      
-      volu  = acL(LL)*vol1(k1) + (1d0-acL(LL))*vol1(k2)
-            
-!     loop over left/right neighboring cell
-      do ik=1,2
-         kk=ln(ik,LL)
-         
-         alpha = acL(LL)
-         if ( ik.eq.2 ) then
-            alpha = 1d0-acL(LL)
-         end if
-         
-!        loop over links in cell
-         do iL=1,nd(kk)%lnx
-            iLL1 = nd(kk)%ln(iL)
-            LL1 = iabs(iLL1)
-            
-!           exclude self
-            if ( LL1.eq.LL ) then
-               cycle
-            end if
-            
-!           safety            
-            if ( abs(csu(LL)*csu(LL1)+snu(LL)*snu(LL1)) .lt. dtol ) then
-               cycle
-            end if
-            
-!           update typical viscosity
-!            vicouv = max(vicouv, vicLu(L))
-            
-!           get orientation of link
-            dsign = 1d0 ! outward
-            wcx = wcx1(LL1)
-            wcy = wcy1(LL1)
-            if ( ln(2,LL1).eq.kk) then
-               dsign = -1d0   ! inward
-               wcx = wcx2(LL1)
-               wcy = wcy2(LL1)
-            end if
-            
-!           get 3D link number (sigma only)
-            call getLbotLtop(LL1,Lb,Lt)
-            L1 = Lb+klay-1
-            
-!           get outward positive flux
-            Q = q1(L1)*dsign
-            
-!           outflowing only
-            if ( Q.le.0d0 ) then
-               cycle
-            else
-               continue
-            end if
-            
-!           compute weight of this link (L1) in advection of link L
-            w = (wcx*csu(LL)+wcy*snu(LL)) * alpha / volu
-            
-            w = w*Q
-            
-!           compare with vector Laplacian
-            do i=iLvec(LL),ILvec(LL+1)-1
-               j=jLvec(i)
-               if ( j.eq.LL1 ) exit
-            end do
-            
-            if ( j.ne.LL1 ) then ! safety
-               goto 1234
-            end if
-            
-            if ( ALvec(i).ne.0d0 ) then
-               eps1 = max(eps1, w/ALvec(i))
-            else
-               continue
-            end if
-            
-            if ( w*ALvec(i).gt.0d0 .and. Q.lt.0d0 ) then
-               continue
-            end if
-            
-         end do
-      end do
-      
-!     BEGIN DEBUG
-!      Deltax = 1d0
-!     END DEBUG
-      
-!     compute third-order filter coefficient from first-order filter coefficient
-      eps3 = 0.25 * Deltax(LL)**2 * eps1
-      
-!     compute second-order filter coefficient
-      eps2 = max(eps3, 0.25 * Deltax(LL)**2 * vicouv)
-      
-      
-!     BEGIN DEBUG
-!      eps2 = max(eps3, 0.25 * Deltax**2 * max(vicouv,1d0))
-!     END DEBUG
-      
-      if ( order.eq.1 ) then
-         eps(LL) = eps1
-      else if ( order.eq.2 ) then
-         eps(LL) = eps2
-      else if ( order.eq.3 ) then
-         eps(LL) = eps3
-      end if
-   end do
-   
-!!  BEGIN DEBUG
-!   maxeps = 0d0
-!   do LL=1,Lnx
-!      maxeps = max(maxeps, eps(LL))
-!   end do
-!   
-!   eps = maxeps
-!!  END DEBUG
-   
-   ierror = 0
-1234 continue
-   
-   return
-end subroutine get_filter_coeff
 
 !> get maximum filter time step mulitplied with filter coefficient
 subroutine get_dtmaxeps()
@@ -936,3 +768,156 @@ subroutine comp_checkmonitor()
    
    return
 end subroutine comp_checkmonitor
+
+
+!> get filter coefficient (sigma only)
+subroutine get_filter_coeff()
+   use m_flowgeom, only: Lnx, ln, nd, acL, wcx1, wcx2, wcy1, wcy2, csu, snu, Dx, ba
+   use m_flow, only: q1, vol1, kmx, vicLu
+   use m_filter, only: iLvec, jLvec, ALvec, jadebug, eps, order, Deltax
+   
+   double precision, dimension(kmx) :: eps1   ! first-order filter coefficient
+   double precision              :: eps2   ! second-order filter coefficient
+   double precision              :: eps3   ! third-order filter coefficient
+   
+   double precision              :: dsign
+   double precision              :: Q
+   double precision              :: wcx, wcy, w, alpha
+   double precision              :: volu
+   double precision              :: vicouv   !< typical viscosity
+   double precision              :: maxeps
+   double precision              :: dinpr
+   
+   integer                       :: klay
+   integer                       :: LL
+   integer                       :: Lb, Lt, L
+   integer                       :: LL1, iLL1
+   integer                       :: Lb1, Lt1, L1
+   integer                       :: kk
+   integer                       :: k1, k2
+   integer                       :: i, ik, iL, j
+   
+   integer                       :: ierror
+!   
+   double precision, parameter   :: dtol = 0.01d0
+   
+   ierror = 1
+   
+   do LL=1,Lnx
+!     compute first-order filter coefficient
+      eps1 = 0d0
+      
+      call getLbotLtop(LL,Lb,Lt)
+               
+!     loop over left/right neighboring cell
+      do ik=1,2
+         kk=ln(ik,LL)
+         
+         alpha = acL(LL)
+         if ( ik.eq.2 ) then
+            alpha = 1d0-acL(LL)
+         end if
+         
+!        loop over links in cell
+         do iL=1,nd(kk)%lnx
+            iLL1 = nd(kk)%ln(iL)
+            LL1 = iabs(iLL1)
+            
+!           exclude self
+            if ( LL1.eq.LL ) then
+               cycle
+            end if
+!            
+!           safety            
+            if ( abs(csu(LL)*csu(LL1)+snu(LL)*snu(LL1)) .lt. dtol ) then
+               cycle
+            end if
+            
+            call getLbotLtop(LL1,Lb1,Lt1)
+            
+!           get orientation of link
+            dsign = 1d0 ! outward
+            wcx = wcx1(LL1)
+            wcy = wcy1(LL1)
+            if ( ln(2,LL1).eq.kk) then
+               dsign = -1d0   ! inward
+               wcx = wcx2(LL1)
+               wcy = wcy2(LL1)
+            end if
+               
+!           compare with vector Laplacian
+            do i=iLvec(LL),ILvec(LL+1)-1
+               j=jLvec(i)
+               if ( j.eq.LL1 ) exit
+            end do
+               
+            if ( j.ne.LL1 ) then ! safety
+               goto 1234
+            end if
+   
+!           loop over water column
+            do klay=1,kmx
+!              get 3D link number (sigma only)
+               L = Lb+klay-1
+               
+!              get advection volume
+               k1 = ln(1,L)
+               k2 = ln(2,L)
+               
+               volu  = acL(LL)*vol1(k1) + (1d0-acL(LL))*vol1(k2)
+            
+!              get 3D link number (sigma only)
+               L1 = Lb1+klay-1
+               
+!              get outward positive flux
+               Q = q1(L1)*dsign
+               
+!              outflowing only
+               if ( Q.le.0d0 ) then
+                  cycle
+               else
+                  continue
+               end if
+               
+!              compute weight of this link (L1) in advection of link L
+               w = (wcx*csu(LL)+wcy*snu(LL)) * alpha / volu
+               
+               w = w*Q
+               
+               if ( ALvec(i).ne.0d0 ) then
+                  eps1(klay) = max(eps1(klay), w/ALvec(i))
+               else
+                  continue
+               end if
+               
+            end do
+         end do
+      end do
+      
+      do klay=1,kmx
+!       get 3D link number (sigma only)
+        L = Lb+klay-1
+        
+        vicouv = vicLu(L)
+               
+!       compute third-order filter coefficient from first-order filter coefficient
+        eps3 = 0.25 * Deltax(LL)**2 * eps1(klay)
+        
+!       compute second-order filter coefficient
+        eps2 = max(eps3, 0.25 * Deltax(LL)**2 * vicouv)
+      
+        if ( order.eq.1 ) then
+           eps(klay,LL) = eps1(klay)
+        else if ( order.eq.2 ) then
+           eps(klay,LL) = eps2
+        else if ( order.eq.3 ) then
+           eps(klay,LL) = eps3
+        end if
+      end do
+   end do
+   
+   ierror = 0
+1234 continue
+   
+   return
+end subroutine get_filter_coeff

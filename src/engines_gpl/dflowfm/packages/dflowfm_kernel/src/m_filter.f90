@@ -11,7 +11,7 @@ module m_filter
 
    double precision, dimension(:), allocatable :: sol      !< solution of "filter" solve, dim(Lnx)
    double precision, dimension(:), allocatable :: ustar    !< predictor, dim(Lnkx)
-   double precision, dimension(:), allocatable :: eps       !< filter coefficient, dim(Lnx)
+   double precision, dimension(:,:), allocatable :: eps       !< filter coefficient, dim(kmx,Lnx)
    double precision, dimension(:), allocatable :: dtmaxeps  !< maximum time step multiplied with filter coefficient, dim(Lnx)
    double precision, dimension(:), allocatable :: Deltax    !< typical mesh width, dim(Lnx)
    double precision, dimension(:), allocatable :: checkmonitor   !< "checkerboard" mode monitor, dim(kmx+1)
