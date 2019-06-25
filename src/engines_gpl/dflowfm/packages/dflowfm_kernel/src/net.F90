@@ -14150,7 +14150,7 @@ subroutine crosssections_on_flowgeom()
         num = 0
 !       determine polyline size
         do ic=1,ncrs
-           if (crs(ic)%loccrs == 0) then  ! only for crs which are snapped to 1d+2d flowlinks
+           if (crs(ic)%loc2OC == 0) then  ! only for crs which are polyline-based
               num = num+crs(ic)%path%np+1 ! add space for missing value
               istartcrs(ic+1) = num+1
            end if
@@ -14162,7 +14162,7 @@ subroutine crosssections_on_flowgeom()
 !       determine paths to single polyline map
         num = 0
         do ic=1,ncrs
-           if (crs(ic)%loccrs == 0) then
+           if (crs(ic)%loc2OC == 0) then
               do i=1,crs(ic)%path%np
                  num = num+1
                  xx(num) = crs(ic)%path%xp(i)
@@ -14194,7 +14194,7 @@ subroutine crosssections_on_flowgeom()
 
            do i=1,numcrossedlinks
               do ic=1,ncrs
-                 if (crs(ic)%loccrs == 0) then
+                 if (crs(ic)%loc2OC == 0) then
                     istart  = istartcrs(ic)
                     iend    = istartcrs(ic+1)-1
                     if ( ipol(i).ge.istart .and. ipol(i).le.iend ) then
@@ -14233,14 +14233,14 @@ subroutine crosssections_on_flowgeom()
         if (mod(ic,icMOD) == 0) then
             CALL READYY('Enabling cross sections on grid', dble(ic)/dble(ncrs))
         end if
-        if (crs(ic)%loccrs == 0) then
+        if (crs(ic)%loc2OC == 0) then
           if ( jakdtree.eq.0 ) then
              call crspath_on_flowgeom(crs(ic)%path,0,0,1,idum, 0)
           else
              call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 0)
           end if
-        else if (crs(ic)%loccrs == 3) then ! snap to only 1d flow link
-          ii = crs(ic)%loc3crs
+        else  ! snap to only 1d flow link
+          ii = crs(ic)%loc2OC
           pCrs => network%observcrs%observcross(ii)
           branchIdx = pCrs%branchIdx
           if (branchIdx > 0) then

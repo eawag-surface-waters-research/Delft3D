@@ -566,26 +566,9 @@ subroutine loadModel(filename)
     ! Load cross sections polygons from file, and load observation cross sections from *.ini files
     if (len_trim(md_crsfile) > 0) then
         call strsplit(md_crsfile,1,fnames,1)
-        ! firstly handle all *.pli files
-        ipli = 0
-        do ifil = 1,size(fnames)
-           tok = index(fnames(ifil), '.pli')
-           if (tok > 0) then
-              call oldfil(minp, fnames(ifil))
-              if (ifil == 1) then
-                 call reapol_nampli(minp, 0, 1, ipli)
-              else
-                 call reapol_nampli(minp, 1, 1, ipli)
-              end if
-           end if
-        end do
-        call pol_to_crosssections(xpl, ypl, npl, names=nampli)
-        ! secondly handle all *.ini files
-        do ifil = 1,size(fnames)
-           tok = index(fnames(ifil), '.ini')
-           if (tok > 0) then
-              call loadObservCrossSections(network, fnames(ifil))
-           end if
+        call loadObservCrossSections(fnames(1), 0)
+        do ifil=2,size(fnames)
+           call loadObservCrossSections(fnames(ifil), 1)
         enddo
         deallocate(fnames)
     end if

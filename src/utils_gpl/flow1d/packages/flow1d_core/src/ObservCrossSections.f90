@@ -63,9 +63,6 @@ module m_ObservCrossSections
       double precision              :: chainage         !< offset in meters along branch
       integer                       :: branchIdx = 0    !< branch index
       integer                       :: numValues        !< (optional) number of values in xy-coordinates
-      integer                       :: locationType = 0 !< location type:=0, snap to 1d+2d,
-                                                        !! =1(or 2), defined by xy coordinate, snap to 1d (or 2d) flowlinks; 
-                                                        !! =3, defined by branchID and chainage (snap to 1d flowlinks)
       double precision, allocatable :: x(:)             !< (optional) x-coordinates of crosssection line. (size=numValues)
       double precision, allocatable :: y(:)             !< (optional) y-coordinates of crosssection line. (size=numValues)
    end type t_ObservCrossSection

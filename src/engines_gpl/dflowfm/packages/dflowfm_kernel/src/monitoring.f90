@@ -991,8 +991,7 @@ type tcrs
     character(len=64)             :: name          !< Name
     integer                       :: nval          !< Nr. of different quantities monitored
     type(tcrspath)                :: path          !< Polyline+crossed flow links that defines this cross section.
-    integer                       :: loccrs = 0    !< location type:=3, defined by branchID and chainage (snap to 1d flowlinks). =0, snap to 1d+2d
-    integer                       :: loc3crs= 0    !< mapping from global obs index to obs that are defined by branchID and chainage 
+    integer                       :: loc2OC = 0    !< mapping from global obs index to obs that are defined by branchID and chainage 
     double precision, allocatable :: sumvalcur(:)  !< Values integrated over the crs
     double precision, allocatable :: sumvalcum(:)  !< Values integrated over crs *and* time
     double precision, allocatable :: sumvalavg(:)  !< Values integrated over crs and averaged in time.
@@ -1146,11 +1145,10 @@ end subroutine increaseCrossSections
 
 
 !> Starts a new cross section in the active array of crs, increasing memory when necessary.
-subroutine addCrossSections(name, xp, yp, loctype, icrs3)
+subroutine addCrossSections(name, xp, yp, iOC)
     character(len=*), intent(in) :: name
     double precision, intent(in) :: xp(:), yp(:)
-    integer, optional, intent(in):: loctype                 !< location type
-    integer, optional, intent(in):: icrs3                   !< local index of crs that are defiend by branchID and chainage (locationtype == 3)
+    integer, optional, intent(in):: iOC          !< local index of cross sections that are defined via *.ini, in the m_network%network%observcrs set.
     
     integer :: m
     character(len=1) :: cdigits
@@ -1173,17 +1171,11 @@ subroutine addCrossSections(name, xp, yp, loctype, icrs3)
         iUniq_ = iUniq_ + 1
     end if
     
-    ! Set locationtype and mapping from global index to local crs that are defined by branchId and chainage
-    if (present(loctype)) then
-       crs(ncrs)%loccrs = loctype
+    ! Set mapping from global index to local crs that are defined by branchId and chainage
+    if (present(iOC)) then
+       crs(ncrs)%loc2OC = iOC
     else
-       crs(ncrs)%loccrs = 0
-    end if
-    
-    if (present(icrs3)) then
-       crs(ncrs)%loc3crs = icrs3
-    else
-       crs(ncrs)%loc3crs = 0
+       crs(ncrs)%loc2OC = 0
     end if
     
 end subroutine addCrossSections
@@ -1206,21 +1198,62 @@ subroutine delCrossSections()
     ! Do not reset crs data, just let it be overwritten later.
 end subroutine delCrossSections
 
-!> Reads observation cross sections defined in a *.ini file,
-!! then adds them to the normal crs adm
-subroutine loadObservCrossSections(network, filename)
+!> Reads observation cross sections and adds them to the normal crs adm
+!! Two file types are supported: *_crs.pli and *_crs.ini.
+subroutine loadObservCrossSections(filename, jadoorladen)
+   use unstruc_messages
    use m_readObservCrossSections, only: readObservCrossSections
-   use m_network
+   use unstruc_channel_flow, only: network
    
    implicit none
-   type(t_network),  intent(inout)        :: network
-   character(len=*), intent(in   )        :: filename
-   
-   call readObservCrossSections(network, filename)
-   call addObservCrsFromIni(network, filename)
-   
+   character(len=*), intent(in   ) :: filename    !< File containing the observation cross sections. Either a *_crs.pli or a *_crs.ini.
+   integer,          intent(in   ) :: jadoorladen !< Append to existing observation cross sections or not
+
+   logical :: jawel
+   integer :: tok
+
+   !!!!!
+   inquire(file = filename, exist = jawel)
+   if (jawel) then
+      if (jadoorladen == 0) then
+         call delCrossSections()
+      end if
+      tok = index(filename, '.pli')
+      if (tok > 0) then
+         call loadObservCrossSections_from_pli(filename)
+      else
+         tok = index(filename, '.ini')
+         if (tok > 0) then
+            call readObservCrossSections(network, filename)
+            call addObservCrsFromIni(network, filename)
+         end if
+      end if
+   else
+       call mess(LEVEL_ERROR, "Observation cross section file '"//trim(filename)//"' not found!")
+   endif
 end subroutine loadObservCrossSections
 
+
+!> Reads observation points from an *.pli file.
+! Typically called via loadObservCrossSections().
+subroutine loadObservCrossSections_from_pli(filename)
+   use messageHandling
+   use dfm_error
+   use m_polygon
+   implicit none
+   character(len=*), intent(in) :: filename
+
+   integer :: minp, ipli
+
+   call oldfil(minp, filename)
+   ipli = 0
+   call reapol_nampli(minp, 0, 1, ipli)
+   call pol_to_crosssections(xpl, ypl, npl, names=nampli)
+   call doclose(minp)
+
+end subroutine loadObservCrossSections_from_pli
+
+   
 !> Adds observation cross sections, that are read from *.ini file, to the normal cross section adm
 subroutine addObservCrsFromIni(network, filename)
    use m_network
@@ -1234,7 +1267,7 @@ subroutine addObservCrsFromIni(network, filename)
    type(t_network),  intent(inout)       :: network            !< network
    character(len=*), intent(in   )       :: filename           !< filename of the cross section file
    
-   integer                               :: nbrch              ! number of cross sections that are defined by branchID and chainage
+   integer                               :: nByBrch            ! number of cross sections that are defined by branchID and chainage
    integer                               :: ierr, ncrsini, i, numv
    type(t_observCrossSection), pointer   :: pCrs
    integer,              allocatable     :: branchIdx_tmp(:), ibrch2crs(:)
@@ -1242,7 +1275,7 @@ subroutine addObservCrsFromIni(network, filename)
    
    
    ierr    = DFM_NOERR
-   nbrch   = 0
+   nByBrch   = 0
    ncrsini = network%observcrs%count
    
    !! Step 1. get x- and y-coordinates of crs that are defined by branchID and chainage
@@ -1254,25 +1287,25 @@ subroutine addObservCrsFromIni(network, filename)
    do i=1, ncrsini
       pCrs => network%observcrs%observcross(i)
       if (pCrs%branchIdx > 0) then
-         nbrch = nbrch + 1
-         branchIdx_tmp(nbrch) = pCrs%branchIdx
-         Chainage_tmp(nbrch)  = pCrs%chainage
-         ibrch2crs(nbrch)     = i
+         nByBrch = nByBrch + 1
+         branchIdx_tmp(nByBrch) = pCrs%branchIdx
+         Chainage_tmp(nByBrch)  = pCrs%chainage
+         ibrch2crs(nByBrch)     = i
       end if
    end do
          
    ! 1b. get the corresponding x- and y-coordinates
-   if (nbrch > 0) then
-      allocate(xx_tmp(nbrch))
-      allocate(yy_tmp(nbrch))
-      ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nbrch), Chainage_tmp(1: nbrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
+   if (nByBrch > 0) then
+      allocate(xx_tmp(nByBrch))
+      allocate(yy_tmp(nByBrch))
+      ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nByBrch), Chainage_tmp(1: nByBrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
                                     meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, jsferic, xx_tmp, yy_tmp)
       
       if (ierr /= DFM_NOERR) then
          call mess(LEVEL_ERROR, "Error occurs when getting xy coordinates for observation cross sections from file '"//trim(filename)//".")
       end if
       
-      do i=1, nbrch
+      do i=1, nByBrch
          pCrs => network%observcrs%observcross(ibrch2crs(i))
          pCrs%x(1) = xx_tmp(i)
          pCrs%y(1) = yy_tmp(i)
@@ -1284,7 +1317,7 @@ subroutine addObservCrsFromIni(network, filename)
       pCrs => network%observcrs%observcross(i)
       numv = pCrs%numValues
       if (pCrs%branchIdx > 0) then ! crs which is defined by branchID and chainage
-         call addCrossSections(pCrs%name, pCrs%x(1:numv), pCrs%y(1:numv), loctype = pCrs%locationtype, icrs3 = i)
+         call addCrossSections(pCrs%name, pCrs%x(1:numv), pCrs%y(1:numv), iOC = i)
       else
          call addCrossSections(pCrs%name, pCrs%x(1:numv), pCrs%y(1:numv))
       end if
