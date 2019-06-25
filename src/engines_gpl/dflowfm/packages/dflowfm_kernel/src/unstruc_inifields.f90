@@ -110,7 +110,7 @@ function initInitialFields(inifilename) result(ierr)
    use m_alloc
    use dfm_error
    implicit none
-   character(len=*), intent(in   ) :: inifilename            !< name of initial field file
+   character(len=*), intent(in   ) :: inifilename         !< name of initial field file
    integer                         :: ierr                !< Result status (DFM_NOERR on success)
 
    type(tree_data),  pointer       :: inifield_ptr        !< tree of inifield-file's [Initial] or [Parameter] blocks
@@ -161,6 +161,9 @@ function initInitialFields(inifilename) result(ierr)
          call resolvePath(filename, basedir, filename)
          ib = ib + 1
       else
+         cycle
+      end if
+      if ((.not. strcmpi(groupname, 'Initial')) .and. (.not. strcmpi(groupname, 'Parameter'))) then
          cycle
       end if
 
@@ -251,7 +254,11 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
    groupname = tree_get_name(node_ptr)
    
    ! TODO: support reading from ini of varname, smask and maxSearchRadius.
-
+   if (strcmpi(groupname,'General')) then
+      ja = 1
+      goto 888
+   end if
+   
    transformcoef = -999d0
 
    if ((.not. strcmpi(groupname,'Initial')) .and. (.not.(strcmpi(groupname,'Parameter')))) then
@@ -294,7 +301,7 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
       
    ! if dataFileType is 1dField, then it is not necessary to read interpolationMethod, operand, averagingType,  
    ! averagingRelSize, averagingNumMin, averagingPercentile, locationType, extrapolationMethod, value
-   if (filetype == field1D) then 
+   if (filetype /= field1D) then 
       ! read interpolationMethod
       call prop_get_string(node_ptr, '', 'interpolationMethod ', interpolationMethod , retVal)
       if (.not. retVal) then
@@ -574,7 +581,10 @@ subroutine init1dField(filename, inifieldfilename, quant)
       else if (strcmpi(quantity, 'frictioncoefficient')) then
          call spaceInit1dfield(branchId, chainage, values, 1, frcu)
       else if (strcmpi(quantity, 'bedlevel')) then
-         call spaceInit1dfield(branchId, chainage, values, 2, zk)
+         !call spaceInit1dfield(branchId, chainage, values, 2, zk)
+         ! TODO: UNST-2694, Reading bedlevel from 1dFiled file type is not yet supported.
+         write(msgbuf, '(5a)') 'Unsupported block in file ''', trim(filename), ''': [', trim(groupname), ']. Reading bedlevel from 1dFiled file type is not yet supported. Ignoring this block.'
+         call warn_flush()
       end if 
    end do
    
@@ -638,7 +648,7 @@ end subroutine methodStringToInteger
 subroutine averagingTypeStringToInteger(sAveragingType, iAveragingType)
    implicit none
    character(len=*), intent(in   ) :: sAveragingType        ! averaging type string
-   integer,          intent(  out) :: iAveragingType        ! averaging type double precision value
+   integer,          intent(  out) :: iAveragingType        ! averaging type integer
    
    call str_lower(sAveragingType)
    select case (trim(sAveragingType))

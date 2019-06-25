@@ -31337,7 +31337,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
 
  logical :: jawel
  logical :: bl_set_from_zkuni = .false.
- integer              :: mxyb, ja, method, iprimpos
+ integer              :: mxyb, ja, ja1, ja2, method, iprimpos
  integer              :: k, L, k1, k2, mx
  integer, allocatable :: kcc(:), kc1D(:), kc2D(:)
  integer              :: ibathyfiletype
@@ -31417,10 +31417,12 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     endif
 
     ja = 0
+    ja1= 0
+    ja2= 0
     ! 0.b Prepare loop across old ext file:
     if (mext > 0) then
        rewind(mext)
-       ja = 1
+       ja1 = 1
     end if
 
     ! 0.c Prepare loop across new initial field file:
@@ -31437,7 +31439,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
        endif
        if (num_items_in_file > 0) then
           i  = 1
-          ja = 1
+          ja2 = 1
        end if
     end if
 
@@ -31445,8 +31447,14 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     do ibathyfiletype=1,2
     if (ibathyfiletype == 1) then
        call split_filename(md_extfile,      basedir, fnam) ! Remember base dir of *.ext file, to resolve all refenced files below w.r.t. that base dir.
+       if (ja1 .eq. 1) then
+          ja = 1
+       end if
     else if (ibathyfiletype == 2) then
        call split_filename(md_inifieldfile, basedir, fnam) ! Remember base dir of *.ini file, to resolve all refenced files below w.r.t. that base dir.
+       if (ja2 .eq. 1) then
+          ja = 1
+       end if
     end if
 
     do while (ja .eq. 1)
