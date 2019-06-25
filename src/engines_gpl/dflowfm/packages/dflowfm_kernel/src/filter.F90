@@ -529,13 +529,13 @@ subroutine comp_filter_predictor()
          end if
          plotlin(L) = eps(LL)
             
-!!        BEGIN DEBUG
-!         if ( itype.eq.1 ) then
-!            plotlin(L) = dts/(dtmaxeps(LL)/max(eps(LL),1e-10))
-!         else
-!            plotlin(L) = 1d0
-!         end if
-!!        END DEBUG
+!        BEGIN DEBUG
+         if ( itype.eq.1 ) then
+            plotlin(L) = dts/(dtmaxeps(LL)/max(eps(LL),1e-10))
+         else
+            plotlin(L) = 1d0
+         end if
+!        END DEBUG
             
          
 !        loop over columns
@@ -648,6 +648,8 @@ subroutine get_filter_coeff(klay)
    
    integer                       :: ierror
    
+   double precision, parameter   :: dtol = 0.01d0
+   
    ierror = 1
    
    do LL=1,Lnx
@@ -682,6 +684,11 @@ subroutine get_filter_coeff(klay)
             
 !           exclude self
             if ( LL1.eq.LL ) then
+               cycle
+            end if
+            
+!           safety            
+            if ( abs(csu(LL)*csu(LL1)+snu(LL)*snu(LL1)) .lt. dtol ) then
                cycle
             end if
             
