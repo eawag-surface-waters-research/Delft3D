@@ -23153,15 +23153,15 @@ endif
  allocate ( cfuhi(lnx)   , stat=ierr)            ! hk: hier stond + 1, heb ik weggehaald
  call aerr('cfuhi(lnx)'  , ierr, lnx)   ; cfuhi   = 0
  allocate ( frcu (lnx)   , stat = ierr)
- call aerr('frcu (lnx)'  , ierr,   ndx) ; frcu    = dmiss
+ call aerr('frcu (lnx)'  , ierr,   lnx) ; frcu    = dmiss
  if (jacali == 1) then
      allocate ( frcu_bkp (lnx)   , stat = ierr)
-     call aerr('frcu_bkp (lnx)'  , ierr,   ndx) ; frcu_bkp    = dmiss
+     call aerr('frcu_bkp (lnx)'  , ierr,   lnx) ; frcu_bkp    = dmiss
  endif
  allocate ( frcu_mor (lnx)   , stat = ierr)
- call aerr('frcu_mor (lnx)'  , ierr,   ndx) ; frcu_mor    = dmiss
+ call aerr('frcu_mor (lnx)'  , ierr,   lnx) ; frcu_mor    = dmiss
  allocate ( ifrcutp(lnx) , stat = ierr)
- call aerr('ifrcutp(lnx)', ierr,   ndx) ; ifrcutp = abs(ifrctypuni)
+ call aerr('ifrcutp(lnx)', ierr,   lnx) ; ifrcutp = abs(ifrctypuni)
  allocate ( wdsu  (lnx)  , stat=ierr  )
  call aerr('wdsu  (lnx)' , ierr, lnx  ) ; wdsu     = 0
  allocate ( u0   (lnkx)  , stat = ierr)
