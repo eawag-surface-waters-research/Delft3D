@@ -31362,6 +31362,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  
 
  kc_size_store = 0
+ inifield_ptr => null() 
 
  inquire(file = md_xybfile, exist=jawel)
  jawel = jawel .and. (len_trim(md_xybfile) > 0) ! strange behavior on some Linux systems if file name is empty, but reported exist=.true.
