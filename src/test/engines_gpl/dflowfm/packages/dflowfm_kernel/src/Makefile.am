@@ -19,8 +19,8 @@ test_dflowfm_kernel_SOURCES = \
 	test_roughness.f90 \
 	test_observ_Cross_Sections.f90 \
 	test_iniField_1dField.f90 \
-	test_dflowfm_kernel_f.f90 \
-	test_MDU_File_Version.f90
+	test_MDU_File_Version.f90 \
+	test_dflowfm_kernel_f.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
