@@ -261,6 +261,7 @@ module m_1d_networkreader
    ! Fill the array storing the mesh1d node ids for each network node.
    if(nodesOnBranchVertices==0) then
       allocate(idMeshNodesInNetworkNodes(meshgeom%numnode))
+      idMeshNodesInNetworkNodes = ' '
       do ibran = 1, meshgeom%nbranches
          firstNode = gpFirst(ibran)
          lastNode  = gpLast(ibran)
