@@ -305,7 +305,7 @@ module m_1d_networkreader
       localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
 
       if(nodesOnBranchVertices==0) then
-         if(localOffsets(1)>snapping_tolerance .and. abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))< snapping_tolerance) then
+         if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
             !start point missing
             localOffsets(1:gridPointsCount+1)=(/ 0.0d0, localOffsets(1:gridPointsCount) /)
             localGpsX(1:gridPointsCount+1)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount) /)
@@ -313,21 +313,13 @@ module m_1d_networkreader
             localGpsID(1:gridPointsCount+1)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount) /)
             gridPointsCount = gridPointsCount + 1
          endif
-         if(localOffsets(1)<snapping_tolerance .and. abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance) then
+         if(abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance .or. gridpointsCount == 1) then
             !end point missing
             localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
             localGpsX(1:gridPointsCount+1)=(/ localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
             localGpsY(1:gridPointsCount+1)=(/ localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
             localGpsID(1:gridPointsCount+1)=(/ localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
             gridPointsCount = gridPointsCount + 1
-         endif
-         if(localOffsets(1)>snapping_tolerance .and. abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance) then
-            !start and end points missing
-            localOffsets(1:gridPointsCount+2)=(/ 0.0d0, localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
-            localGpsX(1:gridPointsCount+2)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
-            localGpsY(1:gridPointsCount+2)=(/ meshgeom%nnodey(meshgeom%nedge_nodes(1,ibran)), localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
-            localGpsID(1:gridPointsCount+2)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
-            gridPointsCount = gridPointsCount + 2
          endif
       endif
 
