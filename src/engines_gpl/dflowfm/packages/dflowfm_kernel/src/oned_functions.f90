@@ -58,7 +58,8 @@ module m_oned_functions
 
       implicit none
 
-      
+      ! FRCU and FRCU_MOR should only be used after SETAU - VOL12D. 
+      ! Therefore initialise these arrays with a negative value.
       if (network%loaded) then
          frcu(1:lnx1d) = -10d0
          ifrcutp(1:lnx1d) = 0
