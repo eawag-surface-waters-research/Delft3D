@@ -295,14 +295,21 @@ module m_1d_networkreader
       lastNode  = gpLast(ibran)
       ! if no mesh points in the branch, cycle
       if(firstNode==-1 .or. lastNode==-1) then
-         cycle
+         ! end node and begin node are missing and no internal gridpoints on branch.
+         localOffsets = 0d0
+         gridpointscount = 0
+         ! set dummy local offset to half the branch length
+         localGpsX   = 0d0
+         localGpsY   = 0d0
+         localGpsID  = ''
+      else
+         localOffsets = 0d0
+         gridPointsCount                 = lastNode - firstNode + 1
+         localOffsets(1:gridPointsCount) = meshgeom%branchoffsets(firstNode:lastNode)
+         localGpsX(1:gridPointsCount)    = gpsX(firstNode:lastNode)
+         localGpsY(1:gridPointsCount)    = gpsY(firstNode:lastNode)
+         localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
       endif
-
-      gridPointsCount                 = lastNode - firstNode + 1
-      localOffsets(1:gridPointsCount) = meshgeom%branchoffsets(firstNode:lastNode)
-      localGpsX(1:gridPointsCount)    = gpsX(firstNode:lastNode)
-      localGpsY(1:gridPointsCount)    = gpsY(firstNode:lastNode)
-      localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
 
       if(nodesOnBranchVertices==0) then
          if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
@@ -313,6 +320,7 @@ module m_1d_networkreader
             localGpsID(1:gridPointsCount+1)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount) /)
             gridPointsCount = gridPointsCount + 1
          endif
+         ! TODO: consider using a relative tolerance
          if(abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance .or. gridpointsCount == 1) then
             !end point missing
             localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
