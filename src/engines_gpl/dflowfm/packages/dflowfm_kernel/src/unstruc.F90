@@ -1555,7 +1555,13 @@ if(q /= 0) then
 
 
     if (kcs(k1) == 1) then
-       hpr = max(0d0,s1(k1)-bob0(1,L))                ! this statement is called most nr of times through waterlevel iteration
+       ! When hpr +epshu > 0 then this node might be flooded in this or the next time step
+       ! make sure A1 gets a value, by computing the profile data, using a water depth of epshu.
+       hpr = s1(k1)-bob0(1,L)                
+       if (hpr <= epshu) then
+          hpr = hpr + epshu
+       endif
+       
        if (hpr > 0) then                             !
           call getprof_1D(L, hpr, ar1, wid1, japerim, calcConv, perim)
           a1(k1) =   a1(k1) + dx1*wid1
@@ -1571,7 +1577,13 @@ if(q /= 0) then
     endif
 
     if (kcs(k2) == 1) then
-       hpr = max(0d0,s1(k2)-bob0(2,L))
+       ! When hpr +epshu > 0 then this node might be flooded in this or the next time step
+       ! make sure A1 gets a value, by computing the profile data, using a water depth of epshu.
+       hpr = s1(k2)-bob0(2,L)
+       if (hpr <= epshu) then
+          hpr = hpr + epshu
+       endif
+
        if (hpr > 0) then                             !
           call getprof_1D(L, hpr, ar2, wid2, japerim, calcConv, perim)
           a1(k2) =   a1(k2) + dx2*wid2
@@ -1634,7 +1646,7 @@ if(q /= 0) then
     calcConv = 1
     call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
                                                             ! getprof1D sets cfu
-    endif
+ endif
 
  end subroutine addlink1D
 
@@ -2439,21 +2451,6 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     if (nonlin2D > 0) then
        call addclosed_2D_walls()                   ! 2D Dichte wanden
     endif
-
-    ! check for zero values in a1 for 1D nodes
-    ! a1 = 0 might result in instabilities in the nonlinear solver
-    ! The surface area from a neigbouring gridpoint is taken. 
-    ! When flooded, in the next iteration, the correct surface area is calculated.
-    do L = 1, lnx1d
-       k1 = ln(1,L)
-       k2 = ln(2,L)
-       if (a1(k1) == 0d0) then
-          a1(k1) = a1(k2)
-       endif
-       if (a1(k2) == 0d0) then
-          a1(k2) = a1(k1)
-       endif
-    enddo
 
  endif
 
