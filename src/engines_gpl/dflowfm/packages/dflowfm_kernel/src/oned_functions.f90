@@ -52,95 +52,17 @@ module m_oned_functions
 
    !> IFRCUTP and FRCu are filled, using 1D roughness values from Network structure 
    subroutine set_1d_roughnesses()
+      use m_flowgeom
       use m_flow, only: frcu, ifrcutp, frcu_mor
       use unstruc_channel_flow
-      use m_spatial_data
-      use m_branch
-      use m_hash_search
-      use m_read_roughness, only: RoughFileMajorVersion
 
       implicit none
 
-      integer :: L, i, k
-      integer :: ibr
-      integer :: cross
-      integer :: irough
-
-      type(t_branch), pointer                 :: pbr
-      double precision, dimension(:), pointer :: cpar
-      integer,          dimension(:), pointer :: rgh_type
-      integer,          dimension(:), pointer :: fun_type
-      integer,          dimension(0:9)          :: rgh_mapping ! mapping table, only for v1 roughness files, from flow1d types to dflowfm types.
-      type(t_CrossSection), dimension(:), pointer :: crs
       
-      logical stop_warnings
-      
-      stop_warnings = .false.
       if (network%loaded) then
-         ! RGH_TYPE is similar to IFRCUTP, only with different type numbers
-         ! Dflow1D also supports water level or discharge dependent roughness parameters (FUN_TYPE )
-         rgh_mapping = -1
-         rgh_mapping(R_Chezy         ) = 0
-         rgh_mapping(R_Manning       ) = 1
-         rgh_mapping(R_WhiteColebrook) = 3
-
-         crs => network%crs%cross
-
-         do ibr = 1, network%brs%Count
-            pbr => network%brs%branch(ibr)
-            L = pbr%lin(1)
-            cross = network%adm%line2cross(l)%c1
-            
-            if (cross < 0) then
-               !use default
-               do i = 1, pbr%uPointsCount
-                  L = pbr%lin(i)
-                  ifrcutp(L) = 0
-                  frcu(L) = 60d0
-                  frcu_mor(L) = frcu(L)
-               enddo
-            else
-               iRough = hashsearch(network%rgs%hashlist, crs(cross)%frictionSectionID(1))
-               if (iRough <=0) then
-                  iRough = hashsearch(network%rgs%hashlist, crs(cross)%tabdef%frictionSectionID(1))
-               endif
-               if (iRough > 0) then
-                  if (network%rgs%version == RoughFileMajorVersion) then
-                     do i = 1, pbr%uPointsCount
-                        L = pbr%lin(i)
-                        k = pbr%points(1) -1 + i
-                        call getFrictionParameters(network%rgs%rough(irough),  1d0, pbr%index, pbr%uPointsChainages(i), &
-                                                   ifrcutp(L), frcu(L))
-                        
-                        frcu_mor(L) = frcu(L)
-                     enddo
-                  else
-                     rgh_type => network%rgs%rough(irough)%rgh_type_pos
-                     fun_type => network%rgs%rough(irough)%fun_type_pos
-                     cpar     => network%spData%quant(network%rgs%rough(irough)%spd_pos_idx)%values
-                     do i = 1, pbr%uPointsCount
-                        L = pbr%lin(i)
-                        k = pbr%points(1) -1 + i
-                        ifrcutp(L) = rgh_mapping(rgh_type(ibr))
-                        if (ifrcutp(L) >=0) then
-                           ! R_FunctionConstant, R_FunctionDischarge, R_FunctionLevel are computed as Chezy, frcu(L) and frcu_mor(L) are set in getprof_1D 
-                           ifrcutp(L) = 0
-                        else
-                           if (.not. stop_warnings) then
-                              call setmessage(LEVEL_WARN, '1D roughness type on branch '//pbr%id//' is not available in D-FlowFM')
-                              stop_warnings = .true.
-                           endif
-                        
-                           ifrcutp(L) = 0
-                           frcu(L)    = 45d0
-                           frcu_mor(L) = frcu(L)
-                        endif
-                     enddo
-                  endif
-                  
-               endif
-            endif
-         enddo
+         frcu(1:lnx1d) = -10d0
+         ifrcutp(1:lnx1d) = 0
+         frcu_mor(1:lnx1d) = -10d0
       endif
 
    end subroutine set_1d_roughnesses
