@@ -40951,7 +40951,6 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
             u_to_umain(L)  = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
             cfuhi(L)       = ag/(conv/area)**2
             frcu(L)        = cz
-            ifrcutp(L)     = 0 ! Explicitly change it to Chezy, to match with frcu (later used in setcfuhi).
             frcu_mor(L)    = cz_sub(1)
             call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
             q1_main(L) = q_sub(1)
