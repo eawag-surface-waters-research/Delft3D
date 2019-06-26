@@ -10706,12 +10706,12 @@ subroutine unc_read_map(filename, tim, ierr)
          call realloc(xmc, ndxi_read, keepExisting=.false.)
          call realloc(ymc, ndxi_read, keepExisting=.false.)
          ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-         call check_error(ierr, 'center of mass x-coordinate')
-         ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-         call check_error(ierr, 'center of mass y-coordinate')
+         if (ierr == nf90_noerr) call check_error(ierr, 'center of mass x-coordinate')
+         if (ierr == nf90_noerr) ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+         if (ierr == nf90_noerr) call check_error(ierr, 'center of mass y-coordinate')
          
-         ierr = nf90_get_var(imapfile, id_xzw, xmc)
-         ierr = nf90_get_var(imapfile, id_yzw, ymc)
+         if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_xzw, xmc)
+         if (ierr == nf90_noerr) ierr = nf90_get_var(imapfile, id_yzw, ymc)
          
          if (ierr == nf90_noerr) then
             ! check flownodes numbering with rst file
