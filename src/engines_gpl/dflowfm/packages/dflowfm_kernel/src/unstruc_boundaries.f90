@@ -1005,7 +1005,7 @@ logical function initboundaryblocksforcings(filename)
                 call register_quantity_pli_combination(quantity, locationfile)
                 if (file_type == node_id) then
                    select case(quantity)
-                   case ('waterlevelbnd')
+                   case ('waterlevelbnd', 'qhbnd')
                       targetindex = maxloc(itpenz(1:nbndz),itpenz(1:nbndz)==ib)   
                    case ('dischargebnd')
                       targetindex = maxloc(itpenu(1:nbndu),itpenu(1:nbndu)==ib)   

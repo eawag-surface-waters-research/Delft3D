@@ -1046,7 +1046,7 @@ module m_meteo
       ! ==========================
       ! Construct a new Converter.
       ! ==========================
-      call ec_filetype_to_conv_type(ec_filetype, ec_convtype)
+      call ec_filetype_to_conv_type(ec_filetype, name, ec_convtype)
       if (ec_convtype == convType_undefined) then
          call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported converter.')
          return
@@ -1068,9 +1068,9 @@ module m_meteo
          ! count qh boundaries
          n_qhbnd = n_qhbnd + 1
          success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, interpolate_passthrough)
+         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, targetIndex)
          ! Each qhbnd polytim file replaces exactly one element in the target data array.
          ! Converter will put qh value in target_array(n_qhbnd)
-         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
       case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
             'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy','humidity','airtemperature','cloudiness','solarradiation' )
          if (present(srcmaskfile)) then 
@@ -1162,16 +1162,38 @@ module m_meteo
             endif 
             if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)) return 
             if (.not.ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)) return 
-         case ('velocitybnd', 'dischargebnd', 'waterlevelbnd', 'salinitybnd', 'tracerbnd',           &
-               'neumannbnd', 'riemannbnd', 'absgenbnd', 'outflowbnd',                      &
-               'temperaturebnd', 'sedimentbnd', 'tangentialvelocitybnd', 'uxuyadvectionvelocitybnd', & 
-               'normalvelocitybnd', 'qhbnd','criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    !JRE DEBUG sedfrac
+         case ('qhbnd')
             if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
                  (.not. checkFileType(ec_filetype, provFile_bc, target_name))  ) then
                return
             end if
             if (ec_filetype == provFile_poly_tim) then
-            sourceItemName = 'polytim_item'
+               sourceItemName = 'polytim_item'
+            else if (ec_filetype == provFile_bc) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'discharge')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'waterlevel')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'slope')
+               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'crossing')
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)
+               if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)
+               if (.not. success) then
+                  goto 1234
+               end if
+            end if
+         case ('velocitybnd', 'dischargebnd', 'waterlevelbnd', 'salinitybnd', 'tracerbnd',           &
+               'neumannbnd', 'riemannbnd', 'absgenbnd', 'outflowbnd',                      &
+               'temperaturebnd', 'sedimentbnd', 'tangentialvelocitybnd', 'uxuyadvectionvelocitybnd', & 
+               'normalvelocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    !JRE DEBUG sedfrac
+            if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
+                 (.not. checkFileType(ec_filetype, provFile_bc, target_name))  ) then
+               return
+            end if
+            if (ec_filetype == provFile_poly_tim) then
+               sourceItemName = 'polytim_item'
             else if (ec_filetype == provFile_bc) then
                sourceItemName = name
                call str_upper(sourceItemName)

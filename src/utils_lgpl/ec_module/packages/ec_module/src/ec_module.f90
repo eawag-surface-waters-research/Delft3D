@@ -512,7 +512,7 @@ module m_ec_module
          end if
          
          ! Construct a new Converter.
-         call ec_filetype_to_conv_type(filetype, convtype)
+         call ec_filetype_to_conv_type(filetype, name, convtype)
          if (convtype == convType_undefined) then
             call setECMessage("Unsupported converter for file '"//filename//"'.")
             return
@@ -696,12 +696,20 @@ module m_ec_module
       ! ==========================================================================
 
       !> Translate EC's 'filetype' to EC's 'convType' enum.
-      subroutine ec_filetype_to_conv_type(filetype, convtype)
+      subroutine ec_filetype_to_conv_type(filetype, quantity, convtype)
       integer, intent(in)  :: filetype
+      character(len=*), intent(in)     :: quantity
       integer, intent(out) :: convtype
       !
       select case (filetype)
-      case (provFile_uniform, provFile_bc)
+      case (provFile_bc)
+         select case (quantity)
+         case ('qhbnd')    
+            convtype = convType_qhtable
+         case default    
+            convtype = convType_uniform
+         end select
+      case (provFile_uniform)
          convtype = convType_uniform
       case (provFile_fourier)
          convtype = convType_fourier
