@@ -928,6 +928,7 @@ module m_readCrossSections
       integer          :: i
       double precision :: locShift
       logical          :: xyz_cross_section 
+      character(len=idlen) :: conv_text
 
       
       readYZCS = .false.
@@ -949,7 +950,16 @@ module m_readCrossSections
       endif
 
       pCS%conveyanceType = CS_VERT_SEGM
-      call prop_get(node_ptr, '', 'conveyance', pCS%conveyanceType)
+      conv_text = 'segmented'
+      call prop_get(node_ptr, '', 'conveyance', conv_text)
+      if (trim(conv_text) =='segmented') then
+         pCS%conveyanceType = CS_VERT_SEGM
+      elseif(trim(conv_text) =='lumped') then
+         pCS%conveyanceType = CS_LUMPED
+      else
+         msgbuf = 'Incorrect conveyance type for cross section definition '//trim(pCS%id)//': '//trim(conv_text)
+      endif
+         
       if (frictionCount > 1 .and. pCS%conveyanceType == CS_LUMPED) then
          msgbuf = 'In cross section definition '//trim(pCS%id)//' lumped conveyance in combination with multiple friction sections is used, this is not allowed'
          call err_flush()
