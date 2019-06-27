@@ -947,6 +947,13 @@ module m_readCrossSections
             call SetMessage(LEVEL_ERROR, 'Error while reading number of levels/sections for YZ-Cross-Section Definition ID: '//trim(pCS%id))
             return
       endif
+
+      pCS%conveyanceType = CS_VERT_SEGM
+      call prop_get(node_ptr, '', 'conveyance', pCS%conveyanceType)
+      if (frictionCount > 1 .and. pCS%conveyanceType == CS_LUMPED) then
+         msgbuf = 'In cross section definition '//trim(pCS%id)//' lumped conveyance in combination with multiple friction sections is used, this is not allowed'
+         call err_flush()
+      endif
       
       pCS%levelsCount           = numLevels
       pCS%frictionSectionsCount = frictionCount

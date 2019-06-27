@@ -188,6 +188,7 @@ module m_CrossSections
        !*** data for yz cross sections
        double precision, allocatable            :: y(:)                 !< tranversal co-ordinate
        double precision, allocatable            :: z(:)                 !< z-co-ordinate
+       integer                                  :: conveyanceType       !< Conveyance type possible values CS_LUMPED or CS_VERT_SEGM
        integer                                  :: storLevelsCount = 0  !< Number of actual storage levels
        double precision, allocatable            :: storLevels(:)        !< Storage levels
        double precision, allocatable            :: YZstorage(:)         !< Storage levels
@@ -2435,9 +2436,9 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter, calculationOption)
 end subroutine EggProfile
 
 !> Calculate area, width and perimeter for a circle type cross section 
-subroutine YZProfile(dpt, convtab, i012, area, width, perimeter, u1, cz, conv)
+subroutine YZProfile(dpt, convtab, i012, area, width, perimeter, u1, cz, conv, frictionType, frictionValue)
    use m_GlobalParameters
-
+   use m_Roughness
    implicit none
 
    double precision, intent(in)              :: dpt            !< Water depth
@@ -2449,7 +2450,9 @@ subroutine YZProfile(dpt, convtab, i012, area, width, perimeter, u1, cz, conv)
    double precision, intent(in)   , optional :: u1             !< Flow velocity
    double precision, intent(inout), optional :: cz             !< Chezy value, when a lumped definition would be used
    double precision, intent(out),   optional :: conv           !< Calculated conveyance 
-
+   integer,          intent(out),   optional :: frictionType   !< friction type
+   double precision, intent(out),   optional :: frictionValue  !< friction value
+   
 ! locals
 integer            :: nr, i1, i2, i, japos
 double precision   :: a1, a2, c1, c2, z1, z2, hu1, hu2, hh1, hh2, dh1, dh2
@@ -2516,6 +2519,7 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
          endif
          !
          if (convtab%conveyType==CS_LUMPED) then
+            cz = getchezy(frictionType, frictionValue, area/perimeter, dpt, 0d0)
             conv = (cz)*area*sqrt(area/perimeter)
          elseif (convtab%conveyType==CS_VERT_SEGM) then
             conv  = a1*c1 + a2*c2
@@ -2650,6 +2654,7 @@ use messageHandling
                         crs%groundFriction, crs%tabdef%y, crs%tabdef%z,                                                        &
                         crs%frictionSectionFrom, crs%frictionSectionTo, crs%frictionTypePos,              &
                         crs%frictionValuePos, crs%frictionTypeNeg, crs%frictionValueNeg )
+   convTab%conveyType = crs%tabDef%conveyanceType
    crs%convTab => convTab
 
 end subroutine CalcConveyance
@@ -3307,10 +3312,10 @@ subroutine createTablesForTabulatedProfile(crossDef)
       f = line2cross%f
       if(cross1%crossIndx == cross2%crossIndx) then
          ! Same Cross-Section, no interpolation needed 
-         call YZProfile(dpt, cross1%convTab, 0, area, width, perimeter, u1, cz, conv)
+         call YZProfile(dpt, cross1%convTab, 0, area, width, perimeter, u1, cz, conv, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
       else
-         call YZProfile(dpt, cross1%convTab, 0, area, width, perimeter, u1, cz1, conv1)
-         call YZProfile(dpt, cross2%convTab, 0, area, width, perimeter, u1, cz2, conv2)
+         call YZProfile(dpt, cross1%convTab, 0, area, width, perimeter, u1, cz1, conv1, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
+         call YZProfile(dpt, cross2%convTab, 0, area, width, perimeter, u1, cz2, conv2, cross2%frictionTypePos(1), cross2%frictionValuePos(1))
          cz   = (1.0d0 - f) * cz1   + f * cz2
          conv = (1.0d0 - f) * conv1 + f * conv2
       endif
