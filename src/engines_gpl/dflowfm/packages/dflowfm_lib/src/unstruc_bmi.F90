@@ -1462,6 +1462,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   use m_1d_structures , only: get_crest_level_c_loc
   use m_wind
   use unstruc_channel_flow, only: network
+  use unstruc_messages
   
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1634,6 +1635,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
         return
      case default
         ! TODO: AvD: error to warn for unimplemented feature?
+        call mess(LEVEL_ERROR,'get_compound_field, unsupported request: ' // trim(var_name) // '/' // trim(item_name) // '/' // trim(field_name))
         return
      end select
   ! MONITORING CROSSSECTIONS
