@@ -6893,7 +6893,7 @@ if (numsrc > 0) then ! waq
                   else    
                      qsrck = qsrc(isrc)/( ktsor - kbsor + 1)
                   endif
-                  ip = ksrcwaq(isrc) + (kktxsor - k + 1)
+                  ip = ksrcwaq(isrc) + waqpar%ilaggr(kktxsor - k + 1)
                   qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
                enddo 
             else if (kksin/=0.and.kksor==0) then
@@ -6906,11 +6906,40 @@ if (numsrc > 0) then ! waq
                   else    
                      qsrck = qsrc(isrc)/( ktsin - kbsin + 1)
                   endif
-                  ip = ksrcwaq(isrc) + (kktxsin - k + 1)
+                  ip = ksrcwaq(isrc) + waqpar%ilaggr(kktxsin - k + 1)
                   qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
                enddo 
             else if(kksin/=0.and.kksor/=0) then
+               call getkbotktopmax(kksin,kkbsin,kktsin,kktxsin)
+               call getkbotktopmax(kksor,kkbsor,kktsor,kktxsor)
                ! coupled sink-source will follow!
+               if(kbsin==ktsin) then
+                  ! sink side has only one layer
+                  dzss  = zws(ktsor) - zws(kbsor-1) 
+                  do k = kbsor , ktsor
+                     if (dzss > epshs) then 
+                        qsrck = qsrc(isrc)*( zws(k) - zws(k-1) ) / dzss
+                     else    
+                        qsrck = qsrc(isrc)/( ktsor - kbsor + 1)
+                     endif
+                     ip = ksrcwaq(isrc) + waqpar%ilaggr(kktxsin - kbsin + 1) + waqpar%kmxnxa * (waqpar%ilaggr(kktxsor - k + 1) - 1)
+                     qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
+                  enddo 
+               else if(kbsor==ktsor) then
+                  ! sor side has only one layer
+                  dzss  = zws(ktsin) - zws(kbsin-1) 
+                  do k = kbsin , ktsin
+                     if (dzss > epshs) then 
+                        qsrck = qsrc(isrc)*( zws(k) - zws(k-1) ) / dzss
+                     else    
+                        qsrck = qsrc(isrc)/( ktsin - kbsin + 1)
+                     endif
+                     ip = ksrcwaq(isrc) + waqpar%ilaggr(kktxsin - k + 1) + waqpar%kmxnxa * (waqpar%ilaggr(kktxsor - kbsor + 1) - 1)
+                     qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
+                  enddo 
+               else
+                  ! multiple layers on both side... it's complicated...
+               endif  
             endif
          endif
       endif
