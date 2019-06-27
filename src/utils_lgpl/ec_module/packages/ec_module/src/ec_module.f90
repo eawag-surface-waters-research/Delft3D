@@ -512,7 +512,7 @@ module m_ec_module
          end if
          
          ! Construct a new Converter.
-         call ec_filetype_to_conv_type(filetype, name, convtype)
+         convtype = ec_filetype_to_conv_type(filetype, name)
          if (convtype == convType_undefined) then
             call setECMessage("Unsupported converter for file '"//filename//"'.")
             return
@@ -684,6 +684,7 @@ module m_ec_module
          integer :: sourceItemId
          integer :: n, i, isrc
          !
+         success = .False. 
          do isrc = 1, size(qnames)
             sourceItemId = ecFindItemInFileReader(instancePtr, fileReaderId, trim(qnames(i)))
             if (sourceItemId==ec_undef_int) then
@@ -691,15 +692,16 @@ module m_ec_module
             endif
             if (.not.ecAddConnectionSourceItem(instancePtr, connectionId, sourceItemId)) return
          enddo
+         success = .True. 
       end function ecModuleConnectSrc      
       
       ! ==========================================================================
 
       !> Translate EC's 'filetype' to EC's 'convType' enum.
-      subroutine ec_filetype_to_conv_type(filetype, quantity, convtype)
-      integer, intent(in)  :: filetype
-      character(len=*), intent(in)     :: quantity
-      integer, intent(out) :: convtype
+      function ec_filetype_to_conv_type(filetype, quantity) result (convtype)
+      integer                          :: convtype !< converter type number (m_ec_parameters)
+      integer, intent(in)              :: filetype !< file type (m_ec_parameters)
+      character(len=*), intent(in)     :: quantity !< quantity name
       !
       select case (filetype)
       case (provFile_bc)
@@ -734,7 +736,7 @@ module m_ec_module
          case default
          convtype = convType_undefined
       end select
-      end subroutine ec_filetype_to_conv_type
+      end function ec_filetype_to_conv_type
 
       ! ==========================================================================
 

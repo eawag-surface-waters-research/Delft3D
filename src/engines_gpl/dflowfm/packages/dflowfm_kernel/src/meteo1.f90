@@ -1047,7 +1047,7 @@ module m_meteo
       ! ==========================
       ! Construct a new Converter.
       ! ==========================
-      call ec_filetype_to_conv_type(ec_filetype, name, ec_convtype)
+      ec_convtype = ec_filetype_to_conv_type(ec_filetype, name)
       if (ec_convtype == convType_undefined) then
          call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported converter.')
          return
