@@ -6849,72 +6849,75 @@ end subroutine getucmag
 !! In the waq-output, the cumulative values should be divided
 !! by ti_waq, as the cumulative values are multiplied by each
 !! timestep dts (necessary because of non-constant timestep).
-subroutine update_waqfluxes()
+subroutine update_waq_sink_source_fluxes()
 use waq
 use m_flow
 use m_flowgeom
 use m_flowtimes
 implicit none
 
-integer :: L, k, isrc, ip, kmxnxa2, kk,kb,kt
-integer :: k1, kk1, kmax1, ktx1, kb1
-integer :: k2, kk2, kmax2, ktx2, kb2
+integer :: k, isrc, ip
+integer :: kksin, kbsin, ktsin, kksor, kbsor, ktsor
+integer :: kkksin, kkbsin, kktsin, kktxsin, kkksor, kkbsor, kktsor, kktxsor
+real(8) :: dzss, qsrck
 
 if (int(ti_waq) <= 0) then ! No waq output necessary
     return
 end if
 
-!do L = 1,lnkx
-!    q1waq(L) = q1waq(L) + dts*q1(L)                  ! (teta(L)*q1(L) + (1d0-teta(L))*q0(L))
-!end do
-!if(kmx > 1) then
-!    do k = ndx + 1,ndkx
-!       qwwaq(k) = qwwaq(k) + dts*qw(k)              ! (teta(k)*qw(k) + (1d0-teta(k))*q0(k))
-!    end do
-!end if
-
 if (numsrc > 0) then ! waq
-    do isrc = 1, numsrc  ! waq
+   do isrc = 1, numsrc  ! waq
       if (ksrcwaq(isrc).ge.0) then
-        ! If ksrcwaq < 0, then the sink source is not in the current domain
-        if (waqpar%kmxnxa == 1) then
-           ip = ksrcwaq(isrc)
-           if ( ip.gt.0 ) then
-              qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrc(isrc)
-           end if
-        else ! Need to be changed
-          if ( .not. ( ksrc(1,isrc) == 0 .and. ksrc(4,isrc) == 0 )) then
-            kk1 = ksrc(1,isrc)
-            k1  = max(ksrc(2,isrc) - ksrc(3,isrc) + 1 , 1) ! 2, 3 are now kb,kt resp.
-            kk2 = ksrc(4,isrc)
-            k2  = max(ksrc(5,isrc) - ksrc(6,isrc) + 1 , 1)
-            kmxnxa2 = waqpar%kmxnxa
-            if (kk1 > 0) then
-                call getkbotktopmax(kk1,kb1,kt,ktx1)
-                kmax1 = ktx1 - kb1 + 1
-            else
-                kmax1 = 1
-                kmxnxa2 = 1
+         ! If ksrcwaq < 0, then the sink source is not in the current domain
+         if (waqpar%kmxnxa == 1) then
+            ! 2D case
+            ip = ksrcwaq(isrc) + 1
+            if ( ip.gt.0 ) then
+               qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrc(isrc)
+            end if
+         else
+            ! 3D case
+            kksin = ksrc(1,isrc)
+            kbsin = ksrc(2,isrc)
+            ktsin = ksrc(3,isrc)
+            kksor = ksrc(4,isrc)
+            kbsor = ksrc(5,isrc)
+            ktsor = ksrc(6,isrc)
+            if(kksin==0.and.kksor/=0) then
+               ! there is only a source side
+               call getkbotktopmax(kksor,kkbsor,kktsor,kktxsor)
+               dzss  = zws(ktsor) - zws(kbsor-1) 
+               do k = kbsor , ktsor
+                  if (dzss > epshs) then 
+                     qsrck = qsrc(isrc)*( zws(k) - zws(k-1) ) / dzss
+                  else    
+                     qsrck = qsrc(isrc)/( ktsor - kbsor + 1)
+                  endif
+                  ip = ksrcwaq(isrc) + (kktxsor - k + 1)
+                  qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
+               enddo 
+            else if (kksin/=0.and.kksor==0) then
+               ! there is only a sink side (used?)
+               call getkbotktopmax(kksin,kkbsin,kktsin,kktxsin)
+               dzss  = zws(ktsin) - zws(kbsin-1) 
+               do k = kbsin , ktsin
+                  if (dzss > epshs) then 
+                     qsrck = qsrc(isrc)*( zws(k) - zws(k-1) ) / dzss
+                  else    
+                     qsrck = qsrc(isrc)/( ktsin - kbsin + 1)
+                  endif
+                  ip = ksrcwaq(isrc) + (kktxsin - k + 1)
+                  qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
+               enddo 
+            else if(kksin/=0.and.kksor/=0) then
+               ! coupled sink-source will follow!
             endif
-            if (kk2 > 0) then
-                call getkbotktopmax(kk2,kb2,kt,ktx2)
-                kmax2 = ktx2 - kb2 + 1
-            else
-                kmax2 = 1
-            endif
-            if (waqpar%aggrel == 1) then
-                ip = ksrcwaq(isrc) + (waqpar%ilaggr(kmax1 - k1 + 1)) + kmxnxa2 * (waqpar%ilaggr(kmax2 - k2 + 1) - 1)
-            else
-                ip = ksrcwaq(isrc) + (kmax1 - k1 + 1) + kmxnxa2 * (kmax2 - k2 + 1 - 1)
-            endif
-            qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrc(isrc)
-           endif
          endif
       endif
     enddo
 end if
 
-end subroutine update_waqfluxes
+end subroutine update_waq_sink_source_fluxes
 
 
  subroutine setlinktocenterweights()                 ! set center related linkxy weights
@@ -35347,7 +35350,7 @@ end function ispumpon
 
  endif
 
- ! call update_waqfluxes()
+ call update_waq_sink_source_fluxes()
 
  sq = sqi-squ                                        ! arrays, later put in loop anyway
 
