@@ -807,6 +807,7 @@ module m_meteo
       integer :: sourceItemId_2 !< Unique additional source item id.
       integer :: sourceItemId_3 !< Unique additional third source item id.
       integer :: sourceItemId_4 !< Unique additional fourth source item id.
+      integer :: ndx
       !
       character(len=maxnamelen)       :: sourceItemName           !< name of source item (as created by provider)
       character(len=maxnamelen)       :: target_name              !< Unstruc target name derived from user-specified name 
@@ -1068,7 +1069,12 @@ module m_meteo
          ! count qh boundaries
          n_qhbnd = n_qhbnd + 1
          success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, interpolate_passthrough)
-         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, targetIndex)
+         if (present(targetIndex)) then
+            ndx = targetIndex
+         else
+            ndx = n_qhbnd
+         end if
+         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, ndx)
          ! Each qhbnd polytim file replaces exactly one element in the target data array.
          ! Converter will put qh value in target_array(n_qhbnd)
       case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
