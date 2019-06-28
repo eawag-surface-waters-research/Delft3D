@@ -593,10 +593,7 @@ module m_ec_converter
                allocate(weight%weightFactors(2, n_points))
                weight%weightFactors = ec_undef_hp
                tgt_ndx = connection%converterPtr%targetindex
-               if (tgt_ndx/=ec_undef_int) then
-                  weight%indices(1,tgt_ndx) = 1
-                  weight%weightFactors(1,tgt_ndx) = 1.d0
-               else
+               if (.not.any((/interpolate_passthrough,interpolate_time,interpolate_time_extrapolation_ok/)==connection%converterPtr%interpolationType)) then
                   do i=1, n_points
                      call polyindexweight(targetElementSet%x(i), &
                                           targetElementSet%y(i), &
