@@ -280,7 +280,7 @@ rem ====================
     call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
 
     call :copyFile engines_gpl\dflowfm\scripts\MSDOS\run_dflowfm_processes.bat !dest_scripts!
-    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm\run_dflowfm_parallel.bat !dest_scripts!
+    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm_parallel.bat !dest_scripts!
     call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat       !dest_scripts!
     call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat     !dest_scripts!
 	
