@@ -280,6 +280,7 @@ rem ====================
     call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
 
     call :copyFile engines_gpl\dflowfm\scripts\MSDOS\run_dflowfm_processes.bat !dest_scripts!
+    call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm\run_dflowfm_parallel.bat !dest_scripts!
     call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dflowfm.bat       !dest_scripts!
     call :copyFile engines_gpl\dflowfm\scripts\team-city\run_dfmoutput.bat     !dest_scripts!
 	
@@ -291,7 +292,7 @@ rem ====================
         rem Note the awkward usage of !-characters
         call :copyFile !!localstring! !dest_bin!!
         call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"  !dest_bin!
-        rem is needed for dimr nuget package? please check 
+        rem is needed for dimr nuget package? please check
         call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"  !dest_share!
     )
 
@@ -306,11 +307,11 @@ rem ====================
         call :copyFile !!localstring! !dest_bin!
         set localstring="!mkl_redist_dir!mkl_avx.dll"
         call :copyFile !!localstring! !dest_bin!
-        rem is needed for dimr nuget package? please check 
+        rem is needed for dimr nuget package? please check
         call :copyFile !!localstring! !dest_share!
         set localstring="!mkl_redist_dir!mkl_intel_thread.dll"
         call :copyFile !!localstring! !dest_bin!
-        rem is needed for dimr nuget package?  please check 
+        rem is needed for dimr nuget package?  please check
         call :copyFile !!localstring! !dest_share!
         call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"  !dest_bin!
     )

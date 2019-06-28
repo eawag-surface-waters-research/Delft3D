@@ -6,7 +6,7 @@ title %CD%
     rem
     rem adri.mourits@deltares.nl
     rem 19 Dec 2013
-    rem 
+    rem
     rem
     rem This script starts a DFlowFM calculation on Windows
     rem
@@ -31,7 +31,7 @@ set mpidir=%D3D_HOME%\%ARCH%\mpiexec
     rem
 
     rem Run
-    rem Setting up the amount of the OMP threads to 1 
+    rem Setting up the amount of the OMP threads to 1
 set OMP_NUM_THREADS=1
 set PATH=%dflowfmexedir%;%PATH%
 
@@ -39,4 +39,4 @@ set PATH=%dflowfmexedir%;%PATH%
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
-pause
+    rem pause
