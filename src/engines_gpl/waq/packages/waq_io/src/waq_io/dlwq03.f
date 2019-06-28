@@ -245,17 +245,19 @@
                endif
             endif
 
-            write ( lunut , 2550 ) trim(mesh_name)
+            if ( lncout ) then
+               write ( lunut , 2550 ) trim(mesh_name)
 
-            ! Get the meshid
-            inc_error = nf90_inq_varid( ncid, mesh_name, meshid )
-            if ( inc_error /= nf90_noerr ) then
-                write ( lunut , 2556 ) trim(mesh_name)
-                write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-!                ierr      = ierr + 1
-                lncout    = .false.
-                lchar(46) = ' '
-                iwar = iwar + 1
+               ! Get the meshid
+               inc_error = nf90_inq_varid( ncid, mesh_name, meshid )
+               if ( inc_error /= nf90_noerr ) then
+                  write ( lunut , 2556 ) trim(mesh_name)
+                  write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
+!                 ierr      = ierr + 1
+                  lncout    = .false.
+                  lchar(46) = ' '
+                  iwar = iwar + 1
+               endif
             endif
             ! Everything seems to be fine for now, switch on netcdf output
          endif
