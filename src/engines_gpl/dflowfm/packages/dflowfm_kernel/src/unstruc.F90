@@ -6856,10 +6856,11 @@ use m_flowgeom
 use m_flowtimes
 implicit none
 
-integer :: k, isrc, ip
+integer :: k, k1, k2, isrc, ip, ilaysin
 integer :: kksin, kbsin, ktsin, kksor, kbsor, ktsor
 integer :: kkksin, kkbsin, kktsin, kktxsin, kkksor, kkbsor, kktsor, kktxsor
-real(8) :: dzss, qsrck
+real(8) :: dzss, qsrck, fsor, fsorlay
+real(8), allocatable :: fsin(:)
 
 if (int(ti_waq) <= 0) then ! No waq output necessary
     return
@@ -6912,7 +6913,6 @@ if (numsrc > 0) then ! waq
             else if(kksin/=0.and.kksor/=0) then
                call getkbotktopmax(kksin,kkbsin,kktsin,kktxsin)
                call getkbotktopmax(kksor,kkbsor,kktsor,kktxsor)
-               ! coupled sink-source will follow!
                if(kbsin==ktsin) then
                   ! sink side has only one layer
                   dzss  = zws(ktsor) - zws(kbsor-1) 
@@ -6938,7 +6938,35 @@ if (numsrc > 0) then ! waq
                      qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
                   enddo 
                else
-                  ! multiple layers on both side... it's complicated...
+                  ! multiple layers on both side... it's a bit more complicated...
+                  ! determine fractions on sink side
+                  call realloc(fsin, kmx, keepExisting=.false., fill=0.0d0)
+                  dzss  = zws(ktsin) - zws(kbsin-1) 
+                  do k = kbsin , ktsin
+                     ilaysin = kktxsin - k + 1
+                     if (dzss > epshs) then 
+                        fsin(ilaysin) = ( zws(k) - zws(k-1) ) / dzss
+                     else    
+                        fsin(ilaysin) = 1.0d0 /( ktsin - kbsin + 1)
+                     endif
+                  enddo
+                  ! distribute sink side fractions over source side
+                  do k1 = kbsor , ktsor
+                     dzss  = zws(ktsor) - zws(kbsor-1) 
+                     if (dzss > epshs) then 
+                        fsor = ( zws(k1) - zws(k1-1) ) / dzss
+                     else    
+                        fsor = 1.0d0/( ktsor - kbsor + 1)
+                     endif
+                     do k2 = kbsin , ktsin
+                        ilaysin = kktxsin - k2 + 1
+                        fsorlay = min (fsin(ilaysin), fsor) 
+                        fsin(ilaysin) = fsin(ilaysin) - fsorlay
+                        fsor = fsor - fsorlay
+                        ip = ksrcwaq(isrc) + waqpar%ilaggr(ilaysin) + waqpar%kmxnxa * (waqpar%ilaggr(kktxsor - k1 + 1) - 1)
+                        qsrcwaq(ip) = qsrcwaq(ip) + dts*fsorlay*qsrc(isrc)
+                     enddo
+                  enddo
                endif  
             endif
          endif
