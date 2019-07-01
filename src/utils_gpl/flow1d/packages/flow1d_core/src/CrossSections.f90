@@ -2577,6 +2577,7 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
                convtab%chezy_act = conv / (AREA * DSQRT(r3))
                cz = convtab%chezy_act
             else
+               cz = getchezy(frictionType, frictionValue, area/perimeter, dpt, 0d0)
                conv = cz*area*sqrt(area/perimeter)
             endif
          endif
