@@ -1463,6 +1463,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   use m_wind
   use unstruc_channel_flow, only: network
   use unstruc_messages
+  use m_transport, only: NUMCONST, constituents, const_names, ITRA1
   
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1470,6 +1471,9 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   type(c_ptr),            intent(inout) :: x            !< Pointer (by reference) to requested value data, NULL if not available.
 
   integer :: item_index
+  
+  integer :: iconst
+  integer :: itrac
 
   ! The fortran name of the attribute name
   character(len=MAXSTRLEN) :: var_name
@@ -1633,9 +1637,26 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
      case("salinity")
         x = c_loc(valobs(IPNT_SA1, item_index))
         return
+     case("temperature")
+        x = c_loc(valobs(IPNT_TEM1, item_index))
+        return
      case default
-        ! TODO: AvD: error to warn for unimplemented feature?
-        call mess(LEVEL_ERROR,'get_compound_field, unsupported request: ' // trim(var_name) // '/' // trim(item_name) // '/' // trim(field_name))
+!       assume this is a tracer
+!       get constituent number for this tracer     
+        iconst = findname(NUMCONST, const_names, field_name)
+        
+        if ( iconst==0 ) then
+!          tracer not found
+           call mess(LEVEL_ERROR, 'get_compound_field: cannot find ' // trim(var_name) // '/' // trim(item_name) // '/' // trim(field_name))
+        else
+           if ( kmx>1 ) then
+              call mess(LEVEL_ERROR, 'get_compound_field: 3D not supported for ' // trim(var_name) // '/' // trim(item_name) // '/' // trim(field_name))
+           else
+!             find tracer number
+              itrac = iconst-ITRA1+1
+              x = c_loc(VALOBS(IPNT_TRA1+(itrac-1), item_index))
+           end if
+        end if
         return
      end select
   ! MONITORING CROSSSECTIONS
