@@ -315,7 +315,6 @@ module m_ec_converter
          
          real(hp), dimension(4) :: xfindpoly, yfindpoly
          integer                :: imin, jmin, iii, jjj
-         integer                :: tgt_ndx
 
          logical hasKDTree
          
@@ -592,8 +591,9 @@ module m_ec_converter
                if (associated(weight%weightFactors)) deallocate(weight%weightFactors)
                allocate(weight%weightFactors(2, n_points))
                weight%weightFactors = ec_undef_hp
-               tgt_ndx = connection%converterPtr%targetindex
-               if (.not.any((/interpolate_passthrough,interpolate_time,interpolate_time_extrapolation_ok/)==connection%converterPtr%interpolationType)) then
+               if (     connection%converterPtr%interpolationType /= interpolate_passthrough &
+                  .and. connection%converterPtr%interpolationType /= interpolate_time        &
+                  .and. connection%converterPtr%interpolationType /= interpolate_time_extrapolation_ok ) then
                   do i=1, n_points
                      call polyindexweight(targetElementSet%x(i), &
                                           targetElementSet%y(i), &
