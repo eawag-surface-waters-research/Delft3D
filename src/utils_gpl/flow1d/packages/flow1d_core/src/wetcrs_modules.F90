@@ -43,8 +43,8 @@ public dealloc
 public write_conv_tab
 
  integer, parameter                             :: ncx = 144
- integer, parameter, public                             :: CS_LUMPED = 0
- integer, parameter, public                             :: CS_VERT_SEGM = 1
+ integer, parameter, public                             :: CS_LUMPED    = 0 !< Lumped option for yz-type conveyance calculation.
+ integer, parameter, public                             :: CS_VERT_SEGM = 1 !< Vertically segmented option for yz-type conveyance calculation.
  integer, public     :: lcnvmax
  
 interface dealloc
