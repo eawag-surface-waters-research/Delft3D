@@ -4280,6 +4280,7 @@ end subroutine reset_flowgeom
  double precision                  :: ti_waq      !< Interval between output in delwaq files (s).
  double precision                  :: ti_waqs     !< Start of WAQ output period
  double precision                  :: ti_waqe     !< End   of WAQ output period
+ logical                           :: wrwaqon = .false. !< Waq output was initialised
  double precision                  :: ti_waqproc  !< Time step for water quality processes
  double precision                  :: ti_waqbal   !< Time step for water quality mass balance output
 

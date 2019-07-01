@@ -6862,7 +6862,7 @@ integer :: kkksin, kkbsin, kktsin, kktxsin, kkksor, kkbsor, kktsor, kktxsor
 real(8) :: dzss, qsrck, fsor, fsorlay
 real(8), allocatable :: fsin(:)
 
-if (int(ti_waq) <= 0) then ! No waq output necessary
+if (.not.wrwaqon) then ! No waq output necessary
     return
 end if
 
@@ -16062,6 +16062,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
          if (comparereal(time_waq, ti_waqs, eps10) == 0) then
             call waq_wri_model_files()
+            wrwaqon = .true.
          endif
 
          call waq_wri_couple_files(tim)
