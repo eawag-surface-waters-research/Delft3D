@@ -124,8 +124,9 @@ contains
       if (doReadCache .and. file_exist) then
          open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
          if (istat /= 0) then
-            call setmessage(LEVEL_FATAL, 'Error opening Roughness Cache file')
+            call setmessage(LEVEL_ERROR, 'Error opening Roughness Cache file')
             ibin = 0
+            return
          endif
          call read_roughness_cache(ibin, network)
          close(ibin)
@@ -197,13 +198,13 @@ contains
       enddo
    
       if (rgs%version == 1) then
-         ! Note: for v2 roughness files, the check on valid roughness types is already in the cross section readers.
+         ! Note: for v>=2 roughness files, the check on valid roughness types is already in the cross section readers.
          if (rgs%rough(1)%iSection == 1 .and. .not. associated(rgs%rough(1)%fun_type_pos)) then
-            call setmessage(LEVEL_FATAL, 'Obligatory main roughness section for ZW cross sections is missing')
+            call setmessage(LEVEL_ERROR, 'Obligatory main roughness section for ZW cross sections is missing')
          elseif (rgs%rough(2)%iSection == 2 .and. .not. associated(rgs%rough(2)%fun_type_pos)) then
-            call setmessage(LEVEL_FATAL, 'roughness section FloodPlain1 is missing, while at least one ZW cross section contains section Floodplain1')
+            call setmessage(LEVEL_ERROR, 'roughness section FloodPlain1 is missing, while at least one ZW cross section contains section Floodplain1')
          elseif (rgs%rough(3)%iSection == 3 .and. .not. associated(rgs%rough(3)%fun_type_pos)) then
-            call setmessage(LEVEL_FATAL, 'roughness section FloodPlain2 is missing, while at least one ZW cross section contains section Floodplain2')
+            call setmessage(LEVEL_ERROR, 'roughness section FloodPlain2 is missing, while at least one ZW cross section contains section Floodplain2')
          endif
       end if
 
@@ -237,7 +238,8 @@ contains
       if (rgs%version == -1) then
          rgs%version = major
       else if (rgs%version /= major) then
-         call setmessage(LEVEL_FATAL, 'Roughness files with different versions are not allowed in one model')
+         call setmessage(LEVEL_ERROR, 'Roughness files with different versions are not allowed in one model')
+         return
       endif
       
       select case(major)
@@ -246,7 +248,8 @@ contains
       case(RoughFileMajorVersion)
          call scan_roughness_input(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
       case default
-         call SetMessage(LEVEL_FATAL,'Unsupported fileVersion for roughness file: '//trim(inputfile))
+         call SetMessage(LEVEL_ERROR,'Unsupported fileVersion for roughness file: '//trim(inputfile))
+         return
       end select
    end subroutine read_roughnessfile
 
@@ -322,7 +325,8 @@ contains
          ! *If* there's [Branch] blocks, then there will be one and only one [Global] block.
          call prop_get_string(tree_ptr, 'Global', 'frictionId', frictionId, success)
          if (.not. success) then
-            call setmessage(LEVEL_FATAL, 'frictionId not found in roughness definition file: '//trim(inputfile))
+            call setmessage(LEVEL_ERROR, 'frictionId not found in roughness definition file: '//trim(inputfile))
+            return
          endif
          irgh = hashsearch_or_add(rgs%hashlist, frictionId)
          if (irgh > rgs%size) then
@@ -488,7 +492,8 @@ contains
       ! Get section id
       call prop_get_string(tree_ptr, 'Content', 'sectionId', sectionId, success)
       if (.not. success) then
-         call setmessage(LEVEL_FATAL, 'SectionId not found in roughness definition file: '//trim(inputfile))
+         call setmessage(LEVEL_ERROR, 'SectionId not found in roughness definition file: '//trim(inputfile))
+         return
       endif
       call prop_get_integer(tree_ptr, 'Content', 'globalType', def_type, success)
       def_type = frictiontype_v1_to_new(def_type)
@@ -517,17 +522,17 @@ contains
       call prop_get_logical(tree_ptr, 'Content', 'flowDirection', flowdir, success)
    
       if (.not.flowdir) then
-   
-      if (associated(rgh%rgh_type_pos)) then
-         call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(sectionId)//'and positive flow direction is defined twice. Second time was in '//trim(inputfile))
-      endif
-      allocate(rgh%rgh_type_pos(brs%count))
-      allocate(rgh%fun_type_pos(brs%count))
-      rgh_type => rgh%rgh_type_pos
-      fun_type => rgh%fun_type_pos
+         if (associated(rgh%rgh_type_pos)) then
+            call setmessage(LEVEL_ERROR, 'Roughness section with section Id: '//trim(sectionId)//'and positive flow direction is defined twice. Second time was in '//trim(inputfile))
+            return
+         endif
+         allocate(rgh%rgh_type_pos(brs%count))
+         allocate(rgh%fun_type_pos(brs%count))
+         rgh_type => rgh%rgh_type_pos
+         fun_type => rgh%fun_type_pos
       else
          if (associated(rgh%rgh_type_neg)) then
-            call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(sectionId)//'and negative flow direction is defined twice. Second time was in '//trim(inputfile))
+            call setmessage(LEVEL_ERROR, 'Roughness section with section Id: '//trim(sectionId)//'and negative flow direction is defined twice. Second time was in '//trim(inputfile))
          endif
          allocate(rgh%rgh_type_neg(brs%count))
          allocate(rgh%fun_type_neg(brs%count))
