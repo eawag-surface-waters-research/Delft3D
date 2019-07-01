@@ -23162,39 +23162,30 @@ end subroutine unstruc_guimessage
       use unstruc_display, only: jaGUI
       implicit none
 
+      character(len=*), intent(in) :: W1, W2, W3
+
       integer :: infoattribute
-      integer :: k
       integer :: key
       integer :: nbck
       integer :: nfor
-      integer :: L1, L2, L3
       integer :: nLEVEL
+      character(len=600) :: REC, rec2
 
       COMMON /HELPNOW/   WRDKEY,NLEVEL
       CHARACTER WRDKEY*40
-      CHARACTER W1*(*),W2*(*),W3*(*),REC*600, rec2*600
-      REC =                                                               &
-      '                                                             '//   &
-      '                                                             '//   &
-      '          '
-      L1 = MAX(1,len_trim(W1))
-      L2 = MAX(1,len_trim(W2))
-      L3 = MAX(1,len_trim(W3))
-      WRITE(REC(1:),'(A)') W1(:L1)
-      WRITE(REC(2+L1:),'(A)') W2(:L2)
-      WRITE(REC(3+L1+L2:),'(A)') W3(:L3)
-      
-      if (len_trim(W2) == 0) then 
-         WRITE(rec2,'(A)') msgbuf(1: min(600, len_trim (msgbuf) )  )
-      endif       
-      WRITE(msgbuf,'(A)') REC(1:3+L1+L2+L3)
-         
-      call warn_flush()
+
+      REC = trim(W1) // ' ' // trim(W2) // ' ' // trim(W2)
+
+      if (len_trim(W2) == 0) then
+         rec2 = msgbuf
+      else
+         rec2 = ' '
+      endif
+      msgbuf = REC
 
       ! No user dialog in batchmode runs:
-      if (md_jaAutoStart == MD_AUTOSTARTSTOP) return
-
-      if ( jaGUI.eq.1 ) then
+      if ( jaGUI == 1 .and. md_jaAutoStart /= MD_AUTOSTARTSTOP) then
+         call warn_flush()
    !     inquire current colors
          NFOR = InfoAttribute(13)
          NBCK = InfoAttribute(14)
@@ -23205,11 +23196,11 @@ end subroutine unstruc_guimessage
          CALL IWINOUTSTRINGXY(IWS-15,3,'press any key')
          CALL OKAY(0)
          CALL ITEXTCOLOUR('BLUE','BWHITE')
-         CALL IWINOutCentre   (2,REC(1:3+L1+L2+L3))
+         CALL IWINOutCentre   (2,trim(REC))
          
          if (len_trim(rec2) > 0) then 
             CALL IWINOutCentre   (3, trim(rec2) )
-         endif            
+         endif
 
       10 CONTINUE
    !     CALL INFLUSH()
@@ -23219,8 +23210,7 @@ end subroutine unstruc_guimessage
          ELSE
             CALL GETKEY2(KEY)
             IF (KEY .GE. 24 .AND. KEY .LE. 26) THEN
-               K = MIN(40,3+L1+L2+L3)
-               WRDKEY = REC(1:K)
+               WRDKEY = REC
                NLEVEL = 4
                CALL FKEYS(KEY)
                GOTO 10
@@ -23231,11 +23221,11 @@ end subroutine unstruc_guimessage
    !                            reset colors
          CALL ITEXTCOLOURN(NFOR, NBCK)
 
-      else    
-         
-         call mess (LEVEL_ERROR, trim(msgbuf) )  
-      
-      endif   ! if ( jaGUI.eq.1 )
+      else
+
+         call mess (LEVEL_ERROR, trim(msgbuf) )
+
+      endif
 
       RETURN
       END
