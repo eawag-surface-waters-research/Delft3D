@@ -33772,8 +33772,8 @@ end subroutine setbobs_fixedweirs
                 case (ST_GENERAL_ST)
                    firstiter = .true.
                    jarea = .false.
-                   as1 = wu(L)*(s1(k1)-bob(1,L))
-                   as2 = wu(L)*(s1(k2)-bob(2,L))
+                   as1 = wu(L)*(s1(k1)-bob0(1,L))
+                   as2 = wu(L)*(s1(k2)-bob0(2,L))
                    qtotal = q1(L)
                    call computeGeneralStructure(pstru%generalst, fu(L), ru(L), s_on_crest, &
                           au(L), as1, as2, width, kfu, s1(k1), s1(k2), s1(k1), s1(k2), q1(L), & !s00(k1), s00(k2), q1(Lf), & ! TODO: find proper s00 or s2 iterand
