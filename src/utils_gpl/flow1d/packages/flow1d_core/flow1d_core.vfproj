@@ -44,7 +44,6 @@
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\advanced_weir.f90"/>
 		<File RelativePath=".\src\BoundaryConditions.f90"/>
 		<File RelativePath=".\src\branches.f90"/>
 		<File RelativePath=".\src\bridge.f90"/>
@@ -74,7 +73,6 @@
 		<File RelativePath=".\src\Pump.f90"/>
 		<File RelativePath=".\src\Qsort.f90"/>
 		<File RelativePath=".\src\quantity_statistics.f90"/>
-		<File RelativePath=".\src\river_weir.f90"/>
 		<File RelativePath=".\src\Roughness.f90"/>
 		<File RelativePath=".\src\spatial_data.f90"/>
 		<File RelativePath=".\src\Storage.f90"/>
