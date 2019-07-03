@@ -33,6 +33,8 @@ contains
 !==============================================================================
 subroutine tests_iniField_1dField
     call test( test_iniField1dField, 'Tests the reading and interpolation of 1dField file via a iniField file.' )
+    call test( test_iniField1dField_waterdepth, 'Tests iniField file with waterdepths.' )
+    call test( test_iniField1dField_waterlevel, 'Tests iniField file with waterlevels.' )
 end subroutine tests_iniField_1dField
 !
 !
@@ -148,5 +150,106 @@ subroutine test_iniField1dField
     
     
 end subroutine test_iniField1dField
+!
+!
+!==============================================================================
+subroutine test_iniField1dField_waterdepth
+    use gridoperations
+    use m_cell_geometry, only: ndx
+    use m_flow, only: s1
+    use m_netw
+    use unstruc_model
+    use unstruc_channel_flow
+    use m_network
+    use m_inquire_flowgeom
+    use dfm_error
+    use m_partitioninfo, only: jampi
+    use unstruc_files
+    use ifport
+    !
+    ! Externals
+    integer, external :: flow_modelinit
+    !
+    ! Locals  
+    integer                                     :: i
+    integer                                     :: istat, ierr
+    double precision, dimension(:), allocatable :: refs1
+    !
+    ! Body
+    jampi = 0
+    kmax  = 2
+    lmax  = 2
+    numk  = 0
+    allocate(refs1(168), stat=istat)
+    refs1 = 0.0d0
+    !call inidat()
+    
+    call increaseNetw(kmax, lmax)
+
+    call resetFullFlowModel()
+    !
+    istat = CHANGEDIRQQ("IniField1dField_waterdepth")
+    call loadModel('dflow1d.mdu')
+    istat = flow_modelinit()
+    istat = CHANGEDIRQQ("..")
+    
+    do i = 1, ndx
+       call assert_comparable(s1(i), refs1(i), eps, 'initial waterlevel on branch 1 incorrect' )
+    end do
+    
+    deallocate(refs1, stat=istat)
+end subroutine test_iniField1dField_waterdepth
+!
+!
+!==============================================================================
+subroutine test_iniField1dField_waterlevel
+    use gridoperations
+    use m_cell_geometry, only: ndx
+    use m_flow, only: s1
+    use m_netw
+    use unstruc_model
+    use unstruc_channel_flow
+    use m_network
+    use m_inquire_flowgeom
+    use dfm_error
+    use m_partitioninfo, only: jampi
+    use unstruc_files
+    use ifport
+    !
+    ! Externals
+    integer, external :: flow_modelinit
+    !
+    ! Locals  
+    integer                                     :: i
+    integer                                     :: istat, ierr
+    double precision, dimension(:), allocatable :: refs1
+    !
+    ! Body
+    jampi = 0
+    kmax  = 2
+    lmax  = 2
+    numk  = 0
+    allocate(refs1(168), stat=istat)
+    refs1 = 5.0d0
+    do i = 9, 21
+        refs1(i) = 7.0d0
+    end do
+    !call inidat()
+    
+    call increaseNetw(kmax, lmax)
+
+    call resetFullFlowModel()
+    !
+    istat = CHANGEDIRQQ("IniField1dField_waterlevel")
+    call loadModel('dflow1d.mdu')
+    istat = flow_modelinit()
+    istat = CHANGEDIRQQ("..")
+    
+    do i = 1, ndx
+       call assert_comparable(s1(i), refs1(i), eps, 'initial waterlevel is incorrect' )
+    end do
+    
+    deallocate(refs1, stat=istat)
+end subroutine test_iniField1dField_waterlevel
 
 end module test_ini_Field_1dField
