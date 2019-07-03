@@ -2844,6 +2844,7 @@ end subroutine default_turbulence
  integer                           :: jamaptur                  !< k, eps and vicww to map file, 0: no, 1: yes
  integer                           :: jamaptrachy               !< trachytope roughnesses to map file, 0: no, 1: yes
  integer                           :: jamapwind                 !< wind velocities to map file, 0: no, 1: yes
+ integer                           :: jamapwindstress           !< wind stress to map file, 0: no, 1: yes
  integer                           :: jamapviu                  !< horizontal viscosity to map file, 0: no, 1: yes
  integer                           :: jamapdiu                  !< horizontal diffusity to map file, 0: no, 1: yes
  integer                           :: jamaprho                  !< flow density to map file, 0: no, 1: yes
@@ -3198,6 +3199,7 @@ subroutine default_flowparameters()
     jamaptrachy = 1
     jamapcali = 1
     jamapwind = 1
+    jamapwindstress = 0
     jamapviu = 1
     jamapdiu = 1
     jamaprho = 1

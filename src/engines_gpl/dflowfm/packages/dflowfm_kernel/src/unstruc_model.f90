@@ -1519,6 +1519,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_trachytopes', jamaptrachy, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_calibration', jamapcali, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_wind', jamapwind, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_windstress', jamapwindstress, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_heat_fluxes', jamapheatflux, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_tidal_potential', jamaptidep, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamapIntTidesDiss, success)
@@ -3062,6 +3063,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if(writeall .or. jamapwind /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_wind', jamapwind, 'Write wind velocities to map file (1: yes, 0: no)')
+    endif
+    if(writeall .or. jamapwindstress /= 1) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_windstress', jamapwindstress, 'Write wind stress to map file (1: yes, 0: no)')
     endif
     if(writeall .or. jatekcd /= 1) then
         call prop_set(prop_ptr, 'output', 'Writek_CdWind', jatekcd, 'Write wind friction coeffs to tek file (1: yes, 0: no)')

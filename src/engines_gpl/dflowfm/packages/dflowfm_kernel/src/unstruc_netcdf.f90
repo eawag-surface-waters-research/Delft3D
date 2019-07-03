@@ -265,6 +265,7 @@ type t_unc_mapids
    integer :: id_windy(4)    = -1 !< Variable ID for wind on cell center, y-component
    integer :: id_windxu(4)   = -1 !< Variable ID for wind on flow links, x-component
    integer :: id_windyu(4)   = -1 !< Variable ID for wind on flow links, y-component
+   integer :: id_windstress(4) = -1  !< Variable ID for wind stress
    integer :: id_turkin1(4)  = -1 !< Variable ID for 
    integer :: id_vicwwu(4)   = -1 !< Variable ID for 
    integer :: id_tureps1(4)  = -1 !< Variable ID for 
@@ -4071,7 +4072,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_patm,  nf90_double, UNC_LOC_S, 'Patm',  'surface_air_pressure', 'Atmospheric pressure near surface', 'N m-2')
       end if
 
-      if (jamapwind > 0 .and. jawind /= 0) then
+      if (jamapwind > 0 .and. jawind /= 0 .and. jawindstressgiven == 0) then
          if (jsferic == 0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windx,  nf90_double, UNC_LOC_S, 'windx',  'x_wind', 'velocity of air on flow element center, x-component', 'm s-1')
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windy,  nf90_double, UNC_LOC_S, 'windy',  'y_wind', 'velocity of air on flow element center, y-component', 'm s-1')
@@ -4085,6 +4086,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windxu, nf90_double, UNC_LOC_U, 'windxu', 'eastward_wind', 'velocity of air on flow links, x-component', 'm s-1')
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windyu, nf90_double, UNC_LOC_U, 'windyu', 'northward_wind', 'velocity of air on flow links, y-component', 'm s-1')
          end if
+      endif
+
+      if (jawind /= 0 .and. jamapwindstress > 0) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstress, nf90_double, UNC_LOC_U, 'wdsu', 'wind_stress', 'momentum flux', 'N m-2')
       endif
 
       ! Heat fluxes
@@ -5502,7 +5507,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    end if
 
    ! Meteo forcings
-   if (jamapwind > 0 .and. jawind /= 0) then
+   if (jamapwind > 0 .and. jawind /= 0 .and. jawindstressgiven == 0) then
       allocate (windx(ndxndxi), stat=ierr)
       allocate (windy(ndxndxi), stat=ierr)
       !windx/y is not set for flownodes without links
@@ -5763,7 +5768,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     id_q1main, &
     id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_ucxa, id_ucya, id_unorm, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, id_cfcl, id_cftrt, id_czs, & 
     id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
-    id_wind, id_patm, id_tair, id_rhum, id_clou, id_E, id_R, id_H, id_D, id_DR, id_urms, id_thetamean, &
+    id_wind, id_windstress, id_patm, id_tair, id_rhum, id_clou, id_E, id_R, id_H, id_D, id_DR, id_urms, id_thetamean, &
     id_cwav, id_cgwav, id_sigmwav, id_SwE, id_SwT, &
     id_ust, id_Fx, id_Fy, id_vst, id_windx, id_windy, id_windxu, id_windyu, id_numlimdt, id_hs, id_bl, id_zk, &
     id_1d2d_edges, id_1d2d_zeta1d, id_1d2d_crest_level, id_1d2d_b_2di, id_1d2d_b_2dv, id_1d2d_d_2dv, id_1d2d_q_zeta, id_1d2d_q_lat, &
@@ -7004,11 +7009,16 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
 
            end if
         endif
+
         if (jamapwind > 0 .and. japatm > 0) then
-            call definencvar(imapfile,id_patm(iid)   ,nf90_double,idims,2, 'Patm'  , 'Atmospheric Pressure', 'N m-2', 'FlowElem_xcc FlowElem_ycc')   
+            call definencvar(imapfile,id_patm(iid)   ,nf90_double,idims,2, 'Patm'  , 'Atmospheric Pressure', 'N m-2', 'FlowElem_xcc FlowElem_ycc')
         endif
 
-        if (jamapwind > 0 .and. jawind /= 0) then
+        if (jawind /= 0 .and. jamapwindstress > 0) then
+            call definencvar(imapfile, id_windstress(iid), nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/), 2, 'wdsu', 'Wind stress', 'N m-2', 'FlowLink_xu FlowLink_yu')
+        endif
+
+        if (jamapwind > 0 .and. jawind /= 0 .and. jawindstressgiven == 0) then
            ierr = nf90_def_var(imapfile, 'windx', nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_windx(iid))
            ierr = nf90_def_var(imapfile, 'windy', nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_windy(iid))
       
@@ -7056,8 +7066,8 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            endif
            ierr = nf90_put_att(imapfile, id_windyu(iid),  'units'        , 'm s-1')
         endif
-           !
-           ierr = unc_add_gridmapping_att(imapfile, (/ id_windx(iid), id_windy(iid), id_windxu(iid), id_windyu(iid),  nf90_global /), jsferic)
+        !
+        ierr = unc_add_gridmapping_att(imapfile, (/ id_windx(iid), id_windy(iid), id_windxu(iid), id_windyu(iid),  nf90_global /), jsferic)
 
         ierr = nf90_enddef(imapfile)
 
@@ -8253,9 +8263,13 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        ierr = nf90_put_var(imapfile, id_windxu  (iid), wx,  (/ 1, itim /), (/ lnx, 1 /))
        ierr = nf90_put_var(imapfile, id_windyu  (iid), wy,  (/ 1, itim /), (/ lnx, 1 /))
     endif
-                
+
     if (jamapwind > 0 .and. japatm > 0) then
        ierr = nf90_put_var(imapfile, id_patm(iid)  , Patm, (/ 1, itim /), (/ ndxndxi, 1 /))
+    endif
+
+    if (jawind /= 0 .and. jamapwindstress > 0) then
+       ierr = nf90_put_var(imapfile, id_windstress(iid), wdsu, (/ 1, itim /), (/ lnx, 1 /))
     endif
 
     if (jamapheatflux > 0 .and. jatem > 1) then    ! Heat modelling only
