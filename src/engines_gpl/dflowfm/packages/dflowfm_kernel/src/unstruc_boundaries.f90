@@ -2382,7 +2382,7 @@ end do
          select case(trim(rec))
          case ('from_left', 'fromleft')
             istrtmp = IOPENDIR_FROMLEFT
-         case ('from_right', 'fromright)
+         case ('from_right', 'fromright')
             istrtmp = IOPENDIR_FROMRIGHT
          case ('symmetric')
             istrtmp = IOPENDIR_SYMMETRIC
