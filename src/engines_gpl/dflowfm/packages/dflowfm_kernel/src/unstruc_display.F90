@@ -1324,10 +1324,6 @@ if (network%loaded) then
          call movabs(x, y)
          ! Uses same symbols and colors as for Sobek 2.
          select case(network%sts%struct(is)%st_type)
-         case (ST_RIVER_WEIR)
-            call drawTriangle(x, y, icon_rw_size, ncolcyan, ncolblack, active)
-         case (ST_ADV_WEIR)
-            call drawTriangle(x, y, icon_rw_size, ncolteal, ncolblack, active)
          case (ST_PUMP)
             active = network%sts%struct(is)%pump%is_active
             call drawTriangle(x, y, icon_rw_size, ncolorange, ncolblack, active)
