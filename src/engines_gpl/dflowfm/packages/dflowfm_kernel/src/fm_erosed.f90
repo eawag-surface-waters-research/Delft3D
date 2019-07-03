@@ -1713,9 +1713,10 @@ end module m_fm_update_crosssections
             !             !
             !             ! 3D CASE
             !
+            concin3d = 0.0_fp
             if (suspfrac) then
                !
-               ! Fill local 1dv arrays with fall velocity and diffusivity.
+               ! Fill local 1dv arrays with settling velocity, diffusivity and concentration.
                !
                klc    = 0
                dcwwlc = 0.0_fp
@@ -1725,14 +1726,14 @@ end module m_fm_update_crosssections
                   wslc(klc)   = ws(kk, l)
                   klc=klc+1
                enddo
+               !
+               klc    = 1
+               do kk = kt, kb, -1
+                  concin3d(klc) = max(0.0_fp , constituents(ll,kk))
+                  klc=klc+1
+               enddo
             endif
             taks = 0.0_fp
-            !
-            klc    = 1
-            do kk = kt, kb, -1
-               concin3d(klc) = max(0.0_fp , constituents(ll,kk))
-               klc=klc+1
-            enddo
             !
             ! Solve equilibrium concentration vertical and
             ! integrate over vertical
