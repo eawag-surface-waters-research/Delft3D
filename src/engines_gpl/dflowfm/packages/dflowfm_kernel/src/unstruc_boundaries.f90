@@ -1790,6 +1790,7 @@ use geometry_module
 USE gridoperations, only: incells
 use unstruc_model, only: md_structurefile_dir
 use unstruc_files, only: resolvePath
+use string_module, only: str_lower
  
 implicit none
 logical                       :: status
@@ -2377,10 +2378,11 @@ end do
             call prop_get(str_ptr, '', 'horizontal_opening_direction', rec, success)
          endif
          success = .true. ! horizontal_opening_direction is optional
+         call str_lower(rec)
          select case(trim(rec))
-         case ('from_left')
+         case ('from_left', 'fromleft')
             istrtmp = IOPENDIR_FROMLEFT
-         case ('from_right')
+         case ('from_right', 'fromright)
             istrtmp = IOPENDIR_FROMRIGHT
          case ('symmetric')
             istrtmp = IOPENDIR_SYMMETRIC
