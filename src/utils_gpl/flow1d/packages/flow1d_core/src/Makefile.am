@@ -32,14 +32,12 @@ libflow1d_core_la_SOURCES = \
          ExtraResistance.f90 \
          weir.f90 \
          universal_weir.f90 \
-         river_weir.f90 \
          Pump.f90 \
          Dambreak.f90 \
          Orifice.f90 \
          general_structure.f90 \
          culvert.f90 \
          bridge.f90 \
-         advanced_weir.f90 \
          structures.f90 \
          Laterals.F90 \
          ModelGlobalData.f90 \

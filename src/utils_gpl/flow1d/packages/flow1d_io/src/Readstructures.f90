@@ -36,8 +36,6 @@ module m_readstructures
    use m_1d_structures
    use m_Weir
    use m_Universal_Weir
-   use m_River_Weir
-   use m_Advanced_Weir
    use m_Culvert
    use m_Bridge
    use m_pump
@@ -186,12 +184,6 @@ module m_readstructures
                case ('universalweir')
                   iStrucType = ST_UNI_WEIR
                
-               case ('riverweir')
-                  iStrucType = ST_RIVER_WEIR
-               
-               case ('advancedweir')
-                  iStrucType = ST_ADV_WEIR
-               
                case ('culvert')
                   iStrucType = ST_CULVERT
                
@@ -237,12 +229,6 @@ module m_readstructures
                
                case (ST_UNI_WEIR)
                   call readUniversalWeir(network%sts%struct(istru)%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
-               
-               case (ST_RIVER_WEIR)
-                  call readRiverWeir(network%sts%struct(istru)%riverweir, md_ptr%child_nodes(i)%node_ptr, success)
-               
-               case (ST_ADV_WEIR)
-                  call readAdvancedWeir(network%sts%struct(istru)%advweir, md_ptr%child_nodes(i)%node_ptr, success)
                
                case (ST_CULVERT)
                   call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
@@ -461,34 +447,6 @@ module m_readstructures
                read(ibin) pstr%bridge%inletlosscoeff
                read(ibin) pstr%bridge%outletlosscoeff
             
-            case(ST_RIVER_WEIR)
-               allocate(pstr%riverweir)
-               read(ibin) pstr%riverweir%crestlevel
-               read(ibin) pstr%riverweir%crestwidth
-               read(ibin) pstr%riverweir%pos_cwcoeff
-               read(ibin) pstr%riverweir%pos_slimlimit
-               read(ibin) pstr%riverweir%neg_cwcoeff
-               read(ibin) pstr%riverweir%neg_slimlimit
-               read(ibin) pstr%riverweir%dynstrucfact
-               
-               call read_table_cache(ibin, pstr%riverweir%pos_reducfact)
-               call read_table_cache(ibin, pstr%riverweir%neg_reducfact)
-            
-            case(ST_ADV_WEIR)
-               allocate(pstr%advweir)
-               read(ibin) pstr%advweir%crestlevel
-               read(ibin) pstr%advweir%totwidth
-               read(ibin) pstr%advweir%npiers
-               read(ibin) pstr%advweir%pos_height
-               read(ibin) pstr%advweir%pos_designhead
-               read(ibin) pstr%advweir%pos_piercontractcoeff
-               read(ibin) pstr%advweir%pos_abutcontractcoeff
-               read(ibin) pstr%advweir%neg_height
-               read(ibin) pstr%advweir%neg_designhead
-               read(ibin) pstr%advweir%neg_piercontractcoeff
-               read(ibin) pstr%advweir%neg_abutcontractcoeff
-               read(ibin) pstr%advweir%dynstrucfact
-            
             case(ST_GENERAL_ST)
                allocate(pstr%generalst)
                read(ibin) pstr%generalst%widthleftW1
@@ -502,7 +460,6 @@ module m_readstructures
                read(ibin) pstr%generalst%widthrightW2
                read(ibin) pstr%generalst%levelrightZb2
                read(ibin) pstr%generalst%gateheight
-               read(ibin) pstr%generalst%gateheightintervalcntrl
                read(ibin) pstr%generalst%pos_freegateflowcoeff
                read(ibin) pstr%generalst%pos_drowngateflowcoeff
                read(ibin) pstr%generalst%pos_freeweirflowcoeff
@@ -514,8 +471,6 @@ module m_readstructures
                read(ibin) pstr%generalst%neg_drownweirflowcoeff
                read(ibin) pstr%generalst%neg_contrcoeffreegate
                read(ibin) pstr%generalst%extraresistance
-               read(ibin) pstr%generalst%stabilitycounter
-               read(ibin) pstr%generalst%dynstrucfact
             
             case(ST_EXTRA_RES)
                allocate(pstr%extrares)
@@ -653,32 +608,6 @@ module m_readstructures
                write(ibin) pstr%bridge%inletlosscoeff
                write(ibin) pstr%bridge%outletlosscoeff
             
-            case(ST_RIVER_WEIR)
-               write(ibin) pstr%riverweir%crestlevel
-               write(ibin) pstr%riverweir%crestwidth
-               write(ibin) pstr%riverweir%pos_cwcoeff
-               write(ibin) pstr%riverweir%pos_slimlimit
-               write(ibin) pstr%riverweir%neg_cwcoeff
-               write(ibin) pstr%riverweir%neg_slimlimit
-               write(ibin) pstr%riverweir%dynstrucfact
-               
-               call write_table_cache(ibin, pstr%riverweir%pos_reducfact)
-               call write_table_cache(ibin, pstr%riverweir%neg_reducfact)
-            
-            case(ST_ADV_WEIR)
-               write(ibin) pstr%advweir%crestlevel
-               write(ibin) pstr%advweir%totwidth
-               write(ibin) pstr%advweir%npiers
-               write(ibin) pstr%advweir%pos_height
-               write(ibin) pstr%advweir%pos_designhead
-               write(ibin) pstr%advweir%pos_piercontractcoeff
-               write(ibin) pstr%advweir%pos_abutcontractcoeff
-               write(ibin) pstr%advweir%neg_height
-               write(ibin) pstr%advweir%neg_designhead
-               write(ibin) pstr%advweir%neg_piercontractcoeff
-               write(ibin) pstr%advweir%neg_abutcontractcoeff
-               write(ibin) pstr%advweir%dynstrucfact
-            
             case(ST_GENERAL_ST)
                write(ibin) pstr%generalst%widthleftW1
                write(ibin) pstr%generalst%levelleftZb1
@@ -691,7 +620,6 @@ module m_readstructures
                write(ibin) pstr%generalst%widthrightW2
                write(ibin) pstr%generalst%levelrightZb2
                write(ibin) pstr%generalst%gateheight
-               write(ibin) pstr%generalst%gateheightintervalcntrl
                write(ibin) pstr%generalst%pos_freegateflowcoeff
                write(ibin) pstr%generalst%pos_drowngateflowcoeff
                write(ibin) pstr%generalst%pos_freeweirflowcoeff
@@ -703,8 +631,6 @@ module m_readstructures
                write(ibin) pstr%generalst%neg_drownweirflowcoeff
                write(ibin) pstr%generalst%neg_contrcoeffreegate
                write(ibin) pstr%generalst%extraresistance
-               write(ibin) pstr%generalst%stabilitycounter
-               write(ibin) pstr%generalst%dynstrucfact
 
             case(ST_EXTRA_RES)
                write(ibin) pstr%extrares%erType
@@ -776,98 +702,6 @@ module m_readstructures
       enddo
 
    end subroutine readUniversalWeir
-   
-   subroutine readRiverWeir(riverweir, md_ptr, success)
-   
-      type(t_riverweir), pointer, intent(inout)     :: riverweir
-      type(tree_data), pointer, intent(in)          :: md_ptr
-      logical, intent(inout)                        :: success 
-
-      integer                                       :: istat
-      integer                                       :: sf_count
-      double precision, allocatable, dimension(:)   :: sf
-      double precision, allocatable, dimension(:)   :: red
-      
-      allocate(riverweir)
-
-      call prop_get_double(md_ptr, 'structure', 'crestlevel', riverweir%crestlevel, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'crestwidth', riverweir%crestwidth, success)
-
-      if (success) call prop_get_double(md_ptr, 'structure', 'poscwcoef', riverweir%pos_cwcoeff, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'posslimlimit', riverweir%pos_slimlimit, success)
-
-      if (success) call prop_get_double(md_ptr, 'structure', 'negcwcoef', riverweir%neg_cwcoeff, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'negslimlimit', riverweir%neg_slimlimit, success)
-
-      ! Reduction Factors, First in positive Direction, Then in Negative Direction.
-      if (success) call prop_get_integer(md_ptr, 'structure', 'possfcount', sf_count, success)
-      if (.not. success) return
-            
-      call realloc(sf, sf_count, stat=istat)
-      if (istat == 0) call realloc(red, sf_count, stat=istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Reading River Weir: Error Allocating Reduction Table Arrays')
-      endif
-
-      call prop_get_doubles(md_ptr, 'structure', 'possf', sf, sf_count, success)
-      if (success)call prop_get_doubles(md_ptr, 'structure', 'posred', red, sf_count, success)
-      if (.not. success) return
-      
-      call setTable(riverweir%pos_reducfact, 0, sf, red, sf_count)
-      
-      if (success) call prop_get_integer(md_ptr, 'structure', 'negsfcount', sf_count, success)
-      if (.not. success) return
-            
-      call realloc(sf, sf_count, stat=istat)
-      if (istat == 0) call realloc(red, sf_count, stat=istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Reading River Weir: Error Allocating Reduction Table Arrays')
-      endif
-
-      call prop_get_doubles(md_ptr, 'structure', 'negsf', sf, sf_count, success)
-      if (success) call prop_get_doubles(md_ptr, 'structure', 'negred', red, sf_count, success)
-      if (.not. success) return
-      
-      call setTable(riverweir%neg_reducfact, 0, sf, red, sf_count)
-
-      riverweir%dynstrucfact   = -1.0d0
-
-      ! Clear Reduction Table Arrays
-      istat = 0
-      if (allocated(sf)) deallocate(sf, stat=istat)
-      if (istat == 0 .and. allocated(red)) deallocate(red, stat=istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Reading River Weir: Error Deallocating Gridpoint Arrays')
-      endif
-
-   end subroutine readRiverWeir
-   
-   subroutine readAdvancedWeir(advweir, md_ptr, success)
-   
-      type(t_advweir), pointer, intent(inout)     :: advweir
-      type(tree_data), pointer, intent(in)        :: md_ptr
-      logical, intent(inout)                      :: success 
-
-      allocate(advweir)
-
-      call prop_get_double(md_ptr, 'structure', 'crestlevel', advweir%crestlevel, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'crestwidth', advweir%totwidth, success)
-      if (success) call prop_get_integer(md_ptr, 'structure', 'npiers', advweir%npiers, success)
-
-      if (success) call prop_get_double(md_ptr, 'structure', 'posheight', advweir%pos_height, success)
-
-      if (success) call prop_get_double(md_ptr, 'structure', 'posdesignhead', advweir%pos_designhead, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'pospiercontractcoef', advweir%pos_piercontractcoeff, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'posabutcontractcoef', advweir%pos_abutcontractcoeff, success)
-
-      if (success) call prop_get_double(md_ptr, 'structure', 'negheight', advweir%neg_height, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'negdesignhead', advweir%neg_designhead, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'negpiercontractcoef', advweir%neg_piercontractcoeff, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'negabutcontractcoef', advweir%neg_abutcontractcoeff, success)
-      
-      advweir%dynstrucfact          = -1.0d0
-            
-   end subroutine readAdvancedWeir
    
    subroutine readCulvert(network, istru, md_ptr, success)
    
@@ -1414,8 +1248,7 @@ module m_readstructures
       if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZb2', generalst%levelrightZb2, success)
       
       if (success) call prop_get_double(md_ptr, 'structure', 'gateheight', generalst%gateheight, success)
-      if (success) generalst%gateheightintervalcntrl = generalst%gateheight
-      
+
       call prop_get_double(md_ptr, 'structure', 'pos_freegateflowcoeff',  generalst%pos_freegateflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',   generalst%pos_freegateflowcoeff, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
@@ -1450,9 +1283,6 @@ module m_readstructures
       
       if (success) call prop_get_double(md_ptr, 'structure', 'extraresistance', generalst%extraresistance, success)
       
-      generalst%stabilitycounter = 0.0d0
-      generalst%dynstrucfact     = -1.0d0
-
    end subroutine readGeneralStructure
    
    subroutine readExtraResistance(extrares, md_ptr, success)

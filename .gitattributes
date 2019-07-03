@@ -12942,7 +12942,6 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/Qsort.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/Roughness.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/Storage.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/Trenches.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_core/src/advanced_weir.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/branches.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/bridge.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/c_structures.f90 -text
@@ -12956,7 +12955,6 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/general_structure.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/initialize_1d.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/nodes.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/quantity_statistics.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_core/src/river_weir.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/spatial_data.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/struc_helper.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/structures.f90 -text

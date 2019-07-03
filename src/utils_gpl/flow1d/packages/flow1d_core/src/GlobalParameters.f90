@@ -148,8 +148,6 @@ module m_GlobalParameters
    integer, public, parameter              :: ST_WEIR       =  2
    integer, public, parameter              :: ST_ORIFICE    =  3
    integer, public, parameter              :: ST_PUMP       =  4
-   integer, public, parameter              :: ST_RIVER_WEIR =  5
-   integer, public, parameter              :: ST_ADV_WEIR   =  6
    integer, public, parameter              :: ST_GENERAL_ST =  8
    integer, public, parameter              :: ST_EXTRA_RES  =  9
    integer, public, parameter              :: ST_UNI_WEIR   = 11

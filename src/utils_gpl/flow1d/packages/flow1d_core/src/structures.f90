@@ -41,9 +41,7 @@ module m_1d_structures
    use m_Orifice
    use m_General_Structure
    use m_Universal_Weir
-   use m_Advanced_Weir
    use m_Bridge
-   use m_River_Weir
    use m_ExtraResistance
    use m_hash_search
    use m_Dambreak
@@ -154,8 +152,6 @@ module m_1d_structures
       type(t_culvert),pointer          :: culvert => null()
       type(t_uni_weir),pointer         :: uniweir => null()
       type(t_bridge),pointer           :: bridge => null()
-      type(t_riverweir),pointer        :: riverweir => null()
-      type(t_advweir),pointer          :: advweir => null()
       type(t_GeneralStructure),pointer :: generalst => null()
       type(t_ExtraResistance),pointer  :: extrares => null()
       type(t_dambreak),pointer         :: dambreak => null()
@@ -390,8 +386,6 @@ subroutine deallocstructure(sts)
          if (associated(sts%struct(i)%culvert))    call dealloc(sts%struct(i)%culvert)
          if (associated(sts%struct(i)%uniweir))    call dealloc(sts%struct(i)%uniweir)
          if (associated(sts%struct(i)%bridge))     deallocate(sts%struct(i)%bridge)
-         if (associated(sts%struct(i)%riverweir))  call dealloc(sts%struct(i)%riverweir)
-         if (associated(sts%struct(i)%advweir))    deallocate(sts%struct(i)%advweir)
          if (associated(sts%struct(i)%generalst))  deallocate(sts%struct(i)%generalst)
          if (associated(sts%struct(i)%extrares))   call dealloc(sts%struct(i)%extrares)
          
@@ -401,8 +395,6 @@ subroutine deallocstructure(sts)
          sts%struct(i)%culvert   => null()  
          sts%struct(i)%uniweir   => null() 
          sts%struct(i)%bridge    => null() 
-         sts%struct(i)%riverweir => null()
-         sts%struct(i)%advweir   => null()
          sts%struct(i)%generalst => null()
          sts%struct(i)%extrares  => null()
       enddo
@@ -615,24 +607,6 @@ end subroutine
            else
              SetValueStruc = .false.
            endif
-       case (ST_RIVER_WEIR)
-          select case (iparam)
-          case (CFiCrestLevel)
-             sts%struct(istru)%riverweir%crestlevel=value
-          case (CFiCrestWidth)
-             sts%struct(istru)%riverweir%crestwidth=value
-          case default
-             SetValueStruc = .false.
-          end select
-       case (ST_ADV_WEIR)
-          select case (iparam)
-          case (CFiCrestLevel)
-             sts%struct(istru)%advweir%crestlevel=value
-          case (CFiCrestWidth)
-             sts%struct(istru)%advweir%totwidth=value
-          case default
-             SetValueStruc = .false.
-          end select
        case (ST_GENERAL_ST)
           select case (iparam)
           case (CFiCrestLevel)
@@ -709,12 +683,6 @@ end subroutine
              call setMessage(LEVEL_ERROR, line)
              getValueStruc = sts%struct(istru)%pump%capacity(1)
            endif
-       case (ST_RIVER_WEIR)
-           if (iparam == CFiCrestLevel) getValueStruc = sts%struct(istru)%riverweir%crestlevel
-           if (iparam == CFiCrestWidth) getValueStruc = sts%struct(istru)%riverweir%crestwidth
-       case (ST_ADV_WEIR)
-           if (iparam == CFiCrestLevel) getValueStruc = sts%struct(istru)%advweir%crestlevel
-           if (iparam == CFiCrestWidth) getValueStruc = sts%struct(istru)%advweir%totwidth
        case (ST_GENERAL_ST)
            if (iparam == CFiCrestLevel)         getValueStruc = sts%struct(istru)%generalst%levelcenter
            if (iparam == CFiCrestWidth)         getValueStruc = sts%struct(istru)%generalst%widthcenter
@@ -794,10 +762,6 @@ end subroutine
       character(len=*) :: string
 
       select case(trim(string))
-      case ('river_weir')
-         GetStrucType_from_string = ST_RIVER_WEIR
-      case ('advanced_weir')
-         GetStrucType_from_string = ST_ADV_WEIR
       case ('pump')
          GetStrucType_from_string = ST_PUMP
       case ('general_structure')
@@ -830,10 +794,6 @@ end subroutine
       character (len=*), intent(out) :: strng
       
       select case(istrtype)
-         case (ST_RIVER_WEIR)
-            strng = 'river_weir'
-         case (ST_ADV_WEIR)
-            strng = 'advanced_weir'
          case (ST_PUMP)
             strng = 'pump'
          case (ST_GENERAL_ST)
@@ -890,10 +850,6 @@ end subroutine
              get_crest_level = max(struc%culvert%leftlevel, struc%culvert%rightlevel)
           case (ST_PUMP)
              get_crest_level = huge(1d0)
-          case (ST_RIVER_WEIR)
-             get_crest_level = struc%riverweir%crestlevel
-          case (ST_ADV_WEIR)
-             get_crest_level = struc%advweir%crestlevel
           case (ST_GENERAL_ST)
              get_crest_level = struc%generalst%levelcenter
           case default
@@ -912,10 +868,6 @@ end subroutine
              get_crest_level_c_loc = c_loc(struc%uniweir%crestlevel)
           case (ST_ORIFICE)
              get_crest_level_c_loc = c_loc(struc%orifice%crestlevel)
-          case (ST_RIVER_WEIR)
-             get_crest_level_c_loc = c_loc(struc%riverweir%crestlevel)
-          case (ST_ADV_WEIR)
-             get_crest_level_c_loc = c_loc(struc%advweir%crestlevel)
           case (ST_GENERAL_ST)
              get_crest_level_c_loc = c_loc(struc%generalst%levelcenter)
           case default
@@ -930,10 +882,6 @@ end subroutine
        select case (struc%st_type)
           case (ST_WEIR)
              get_width = struc%weir%crestwidth
-          case (ST_RIVER_WEIR)
-             get_width = struc%riverweir%crestwidth
-          case (ST_ADV_WEIR)
-             get_width = struc%advweir%totwidth
           case (ST_GENERAL_ST)
              get_width = struc%generalst%widthcenter
           case (ST_ORIFICE)
@@ -1032,7 +980,7 @@ end subroutine
       
       do ist = 1, sts%count
          select case(sts%struct(ist)%st_type)
-         case (ST_WEIR, ST_ORIFICE, ST_RIVER_WEIR, ST_ADV_WEIR, ST_GENERAL_ST, ST_UNI_WEIR)
+         case (ST_WEIR, ST_ORIFICE,ST_GENERAL_ST, ST_UNI_WEIR)
             ids_weir(ist) = sts%struct(ist)%id
          case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
             ids_culvert(ist) = sts%struct(ist)%id
@@ -1060,10 +1008,6 @@ end subroutine
          struc%weir%crestlevel=value
       case (ST_ORIFICE)
          struc%orifice%crestlevel=value
-      case (ST_RIVER_WEIR)
-         struc%riverweir%crestlevel=value
-      case (ST_ADV_WEIR)
-         struc%advweir%crestlevel=value
       case (ST_UNI_WEIR)
          struc%uniweir%crestlevel=value
       case (ST_GENERAL_ST)
@@ -1083,10 +1027,6 @@ end subroutine
          struc%weir%crestwidth=value
       case (ST_ORIFICE)
          struc%orifice%crestwidth=value
-      case (ST_RIVER_WEIR)
-         struc%riverweir%crestwidth=value
-      case (ST_ADV_WEIR)
-         struc%advweir%totwidth=value
       case (ST_GENERAL_ST)
          struc%generalst%widthcenter=value
       end select
