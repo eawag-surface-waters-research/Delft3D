@@ -37099,6 +37099,9 @@ end function is_1d_boundary_candidate
     inquire (file = trim(md_inifieldfile), exist = exist)
     if (exist) then
        iresult = initInitialFields(md_inifieldfile)
+       if (iresult /= DFM_NOERR) then
+          goto 888
+       end if
     else
        call qnerror( 'Initial fields and parameters file '''//trim(md_inifieldfile)//''' not found.', '  ', ' ')
        write(msgbuf, '(a,a,a)') 'Initial fields and parameters file ''', trim(md_inifieldfile), ''' not found.'
