@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace General.tests
 {
@@ -39,13 +42,17 @@ namespace General.tests
 
         public IntPtr layer_zs;
         public IntPtr interface_zs;
+
+        public int startIndex;
+        public IntPtr nodeids;
+        public IntPtr nodelongnames;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct meshgeomdim
     {       
         //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        public char[] meshname;
+        public IntPtr meshname;
         public int dim;
         public int numnode;
         public int numedge;
@@ -57,6 +64,7 @@ namespace General.tests
         public int nbranches;
         public int ngeometry;
         public int epgs;
+        public int numlinks;
     }
 
     #endregion meshgeom
@@ -64,72 +72,199 @@ namespace General.tests
     public static class MeshgeomMemoryManager
     {
 
-        public static void allocate(ref meshgeomdim meshdim, ref meshgeom mesh)
-        {
-            if (meshdim.numnode > 0)
-                mesh.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
-            if (meshdim.numnode > 0)
-                mesh.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
-            if (meshdim.numnode > 0)
-                mesh.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
-            if (meshdim.numedge > 0)
-                mesh.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.numedge * 2);
-            if (meshdim.numface > 0)
-                mesh.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes * meshdim.numface);
-            if (meshdim.numedge > 0)
-                mesh.edge_faces = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.numedge * 2);
-            if (meshdim.numface > 0)
-                mesh.face_edges = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes * meshdim.numface);
-            if (meshdim.numface > 0)
-                mesh.face_links = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes * meshdim.numface);
-            if (meshdim.nnodes > 0)
-                mesh.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
-            if (meshdim.nnodes > 0)
-                mesh.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
-            if (meshdim.nnodes > 0)
-                mesh.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
-            if (meshdim.numedge > 0)
-                mesh.edgex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numedge);
-            if (meshdim.numedge > 0)
-                mesh.edgey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numedge);
-            if (meshdim.numface > 0)
-                mesh.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numface);
-            if (meshdim.numface > 0)
-                mesh.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numface);
-            //network part
-            if (meshdim.nnodes > 0)
-                mesh.nnodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
-            if (meshdim.nnodes > 0)
-                mesh.nnodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
-            if (meshdim.nnodes > 0)
-                mesh.branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.numnode);
-            if (meshdim.nnodes > 0)
-                mesh.branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
-            if (meshdim.nbranches > 0)
-                mesh.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nbranches);
-            if (meshdim.nbranches > 0)
-                mesh.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.nbranches);
-            if (meshdim.ngeometry > 0)
-                mesh.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.ngeometry);
-            if (meshdim.ngeometry > 0)
-                mesh.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.ngeometry);
+        
+    }
 
-            if (meshdim.nbranches > 0)
-                mesh.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.nbranches);
-            if (meshdim.nbranches > 0)
-                mesh.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.nbranches);
+
+    public class StringBufferHandling
+    {
+        // make filled buffers for writing
+        public static string MakeStringBuffer(ref string[] strings, int padding)
+        {
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < strings.Length; i++)
+            {
+                var idsString = strings[i];
+                idsString = idsString.PadRight(padding, ' ');
+                stringBuilder.Append(idsString);
+            }
+
+            return stringBuilder.ToString();
         }
 
-        public static void deallocate(ref meshgeom mesh)
+        //make empty string buffers for reading
+        public static string MakeStringBuffer(int nstrings, int padding)
         {
-            foreach (var field in typeof(meshgeom).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+
+            var str = new string('_', nstrings * padding);
+            return str;
+        }
+
+        public static IList<string> ParseString(IntPtr c_str, int numElements, int chunkSize)
+        {
+            var byteArray = new byte[numElements * chunkSize];
+            Marshal.Copy(c_str, byteArray, 0, numElements * chunkSize);
+            var str = Encoding.ASCII.GetString(byteArray);
+            return Split(str, chunkSize);
+        }
+
+        public static IList<string> Split(string str, int chunkSize)
+        {
+
+            var en = Enumerable.Range(0, str.Length / chunkSize)
+                .Select(i => str.Substring(i * chunkSize, chunkSize));
+            var l = new List<string>();
+            foreach (var e in en)
             {
-                var ptr = (IntPtr)field.GetValue(mesh);
-                if (ptr != IntPtr.Zero)
-                {
-                    Marshal.FreeCoTaskMem(ptr);
-                }
+                l.Add(e);
             }
+
+            return l;
+        }
+    }
+
+    // Unmanaged memory bookeeping
+    public class UnmanagedMemoryRegister : IDisposable
+    {
+
+        private readonly List<GCHandle> objectGarbageCollectHandles = new List<GCHandle>();
+
+        public void Add(ref string str, ref IntPtr ptr)
+        {
+            Encoding ascii = Encoding.ASCII;
+            Encoding unicode = Encoding.Unicode;
+
+            byte[] unicodeArray = unicode.GetBytes(str.ToString());
+            byte[] asciiArray = Encoding.Convert(unicode, ascii, unicodeArray);
+            PinMemory(asciiArray);
+            ptr = objectGarbageCollectHandles.Last().AddrOfPinnedObject();
+        }
+
+        public void Add(ref double[] arr, ref IntPtr ptr)
+        {
+            PinMemory(arr);
+            ptr = objectGarbageCollectHandles.Last().AddrOfPinnedObject();
+        }
+
+        public void Add(ref int[] arr, ref IntPtr ptr)
+        {
+            PinMemory(arr);
+            ptr = objectGarbageCollectHandles.Last().AddrOfPinnedObject();
+        }
+
+
+        public void Add<T>(int dim, ref IntPtr ptr)
+        {
+            T[] arr = new T[dim];
+            PinMemory(arr);
+            ptr = objectGarbageCollectHandles.Last().AddrOfPinnedObject();
+        }
+
+        public void Add(ref meshgeomdim meshdim, ref meshgeom mesh)
+        {
+            if (meshdim.numnode > 0)
+            {
+                Add<double>(meshdim.numnode, ref mesh.nodex);
+                int idssize = 40;
+                int longnamessize = 80;
+                Add<char>(meshdim.numnode * idssize, ref mesh.nodeids);
+                Add<char>(meshdim.numnode * idssize, ref mesh.nodelongnames);
+            }
+
+            if (meshdim.numnode > 0)
+                Add<char>(meshdim.numnode, ref mesh.nodey);
+
+            if (meshdim.numnode > 0)
+                Add<double>(meshdim.numnode, ref mesh.nodez);
+
+            if (meshdim.numedge > 0)
+                Add<int>(meshdim.numedge * 2, ref mesh.edge_nodes);
+
+            if (meshdim.numface > 0)
+                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_nodes);
+
+            if (meshdim.numedge > 0)
+                Add<int>(meshdim.numedge * 2, ref mesh.edge_faces);
+
+            if (meshdim.numface > 0)
+                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_edges);
+
+            if (meshdim.numface > 0)
+                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_links);
+
+            if (meshdim.nnodes > 0)
+                Add<double>(meshdim.nnodes, ref mesh.nodex);
+
+            if (meshdim.nnodes > 0)
+                Add<double>(meshdim.nnodes, ref mesh.nodey);
+
+            if (meshdim.nnodes > 0)
+                Add<double>(meshdim.nnodes, ref mesh.nodez);
+             
+            if (meshdim.numedge > 0)
+                Add<double>(meshdim.numedge, ref mesh.edgex);
+     
+            if (meshdim.numedge > 0)
+                Add<double>(meshdim.numedge, ref mesh.edgey);
+       
+            if (meshdim.numface > 0)
+                Add<double>(meshdim.numface, ref mesh.facex);
+
+            if (meshdim.numface > 0)
+                Add<double>(meshdim.numface, ref mesh.facey);
+       
+            //network part
+            if (meshdim.nnodes > 0)
+                Add<double>(meshdim.nnodes, ref mesh.nnodex);
+   
+            if (meshdim.nnodes > 0)
+                Add<double>(meshdim.nnodes, ref mesh.nnodey);
+       
+            if (meshdim.nnodes > 0)
+                Add<int>(meshdim.nnodes, ref mesh.branchidx);
+          
+            if (meshdim.nnodes > 0)
+                Add<double>(meshdim.nnodes, ref mesh.branchoffsets);
+            
+            if (meshdim.nbranches > 0)
+                Add<double>(meshdim.nbranches, ref mesh.nbranchlengths);
+
+            if (meshdim.nbranches > 0)
+                Add<int>(meshdim.nbranches, ref mesh.nbranchgeometrynodes);
+
+            if (meshdim.ngeometry > 0)
+                Add<double>(meshdim.ngeometry, ref mesh.ngeopointx);
+
+            if (meshdim.ngeometry > 0)
+                Add<double>(meshdim.ngeometry, ref mesh.ngeopointy);
+
+            if (meshdim.nbranches > 0)
+                Add<int>(meshdim.nbranches, ref mesh.nedge_nodes);
+
+            if (meshdim.nbranches > 0)
+                Add<int>(meshdim.nbranches, ref mesh.nbranchorder);
+        }
+        
+        public void Dispose()
+        {
+            UnPinMemory();
+        }
+
+        private void UnPinMemory()
+        {
+            foreach (var handle in objectGarbageCollectHandles)
+            {
+                handle.Free();
+            }
+
+            objectGarbageCollectHandles.Clear();
+        }
+
+        private void PinMemory(object o)
+        {
+            // once pinned the object cannot be deleted by the garbage collector
+            objectGarbageCollectHandles.Add(GCHandle.Alloc(o, GCHandleType.Pinned));
         }
     }
 

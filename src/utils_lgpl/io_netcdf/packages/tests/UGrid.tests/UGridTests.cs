@@ -2104,129 +2104,6 @@ namespace UGrid.tests
         // Test: get only 1d network using get mesh geom
         [Test]
         [NUnit.Framework.Category("Read1dNetworkUsingGetMeshGeom")]
-        public void Get1dNetworkUsingGetMeshGeom()
-        {
-            //1.Open a netcdf file
-            string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1dNetwork.nc";
-            Assert.IsTrue(File.Exists(c_path));
-            int ioncid = 0; //file variable 
-            int mode = 0; //create in read mode
-            var wrapper = new IoNetcdfLibWrapper();
-            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            //2. Get 1d mesh dimensions
-            var networkdim = new meshgeomdim();
-            int l_meshid = 0; //set an invalid index
-            int nnumNetworks = -1;
-            ierr = wrapper.ionc_get_number_of_networks(ref ioncid, ref nnumNetworks);
-            Assert.That(ierr, Is.EqualTo(0));
-            Assert.That(nnumNetworks, Is.EqualTo(1));
-            IntPtr c_networkids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nnumNetworks);
-            
-            //3. Get a valid networkid
-            ierr = wrapper.ionc_get_network_ids(ref ioncid, ref c_networkids, ref nnumNetworks);
-            Assert.That(ierr, Is.EqualTo(0));
-            int[] l_networkid = new int[nnumNetworks];
-            Marshal.Copy(c_networkids, l_networkid, 0, nnumNetworks);
-
-            //4. Get network dimensions using meshgeom
-            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref l_meshid, ref l_networkid[0], ref networkdim);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            //5. Allocate memory
-            var network = new meshgeom();
-            MeshgeomMemoryManager.allocate(ref networkdim, ref network);
-
-            var includeArrays = true;
-            int start_index = 1;
-            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref l_meshid, ref l_networkid[0], ref network, ref start_index, ref includeArrays);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            //2. Define the network
-            int l_nnodes = 2;
-            int l_nbranches = 1;
-            int l_nGeometry = 25;
-            double[] l_nodesX = new double[networkdim.nnodes];
-            double[] l_nodesY = new double[networkdim.nnodes];
-            int[] l_nedge_nodes = new int[networkdim.nbranches];
-            double[] l_nbranchlengths = new double[networkdim.nbranches];
-            double[] l_ngeopointx = new double[networkdim.ngeometry];
-            double[] l_ngeopointy = new double[networkdim.ngeometry];
-
-            Marshal.Copy(network.nnodex, l_nodesX, 0, networkdim.nnodes);
-            Marshal.Copy(network.nnodey, l_nodesY, 0, networkdim.nnodes);
-            Marshal.Copy(network.nedge_nodes, l_nedge_nodes, 0, networkdim.nbranches);
-            Marshal.Copy(network.nbranchlengths, l_nbranchlengths, 0, networkdim.nbranches);
-            Marshal.Copy(network.ngeopointx, l_ngeopointx, 0, networkdim.ngeometry);
-            Marshal.Copy(network.ngeopointy, l_ngeopointy, 0, networkdim.ngeometry);
-
-            //8. Close the file
-            ierr = wrapper.ionc_close(ref ioncid);
-            Assert.That(ierr, Is.EqualTo(0));
-
-        }
-
-        // Test: get only 1d network using get mesh geom
-        [Test]
-        [NUnit.Framework.Category("Read1dNetworkUsingGetMeshGeom")]
-        public void Put2dMeshUsingPutMeshGeom()
-        {
-            //1. Open a netcdf file
-            string c_path = TestHelper.TestFilesDirectoryPath() + @"\Custom_Ugrid.nc";
-            Assert.IsTrue(File.Exists(c_path));
-            int ioncid  = -1; 
-            int mode    =  0; //read mode
-            var wrapper = new IoNetcdfLibWrapper();
-            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            //2. Get the mesh dimensions in meshdim
-            int existingMeshId = 1;
-            int existingNetworkId = -1;
-            var meshdim = new meshgeomdim();
-            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref existingMeshId, ref existingNetworkId, ref meshdim);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            //3. Allocate mesh
-            var mesh = new meshgeom();
-            MeshgeomMemoryManager.allocate(ref meshdim, ref mesh);
-
-            //4. Get mesh variables
-            int start_index = 1; //arrays are 1 based
-            bool includeArrays = true;
-            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref existingMeshId, ref existingNetworkId, ref mesh, ref start_index, ref includeArrays);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            //5. Close the file
-            ierr = wrapper.ionc_close(ref ioncid);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            //6. Create a new netcdf file
-            int targetioncid = -1; //file id  
-            int targetmode = 1; //create in write mode
-            string target_path = TestHelper.TestDirectoryPath() + "/target.nc";
-            TestHelper.DeleteIfExists(target_path);
-            Assert.IsFalse(File.Exists(target_path));
-            ierr = wrapper.ionc_create(target_path, ref targetmode, ref targetioncid);
-            Assert.That(ierr, Is.EqualTo(0));
-            Assert.IsTrue(File.Exists(target_path));
-
-            //7. write a 2d mesh using ionc_put_meshgeom
-            string meshname = "my_mesh";
-            string networkname = ""; //empty string if mesh not available
-            int newMeshId    = -1;
-            int newNetworkId = -1;
-            ierr = wrapper.ionc_put_meshgeom(ref targetioncid, ref newMeshId, ref newNetworkId, ref mesh, ref meshdim, meshname, networkname, ref start_index);
-            Assert.That(ierr, Is.EqualTo(0));
-            //8. Close the file
-            ierr = wrapper.ionc_close(ref targetioncid);
-            Assert.That(ierr, Is.EqualTo(0));
-        }
-
-        // Test: get only 1d network using get mesh geom
-        [Test]
-        [NUnit.Framework.Category("Read1dNetworkUsingGetMeshGeom")]
         public void Put2dMeshUsingPutMeshGeomPutNodeZ()
         {
             //1. Open a netcdf file
@@ -2247,7 +2124,8 @@ namespace UGrid.tests
 
             //3. Allocate mesh
             var mesh = new meshgeom();
-            MeshgeomMemoryManager.allocate(ref meshdim, ref mesh);
+            var register = new UnmanagedMemoryRegister();
+            register.Add(ref meshdim, ref mesh);
 
             //4. Get mesh variables
             int start_index = 1; //arrays are 1 based
@@ -2295,7 +2173,7 @@ namespace UGrid.tests
             ierr = wrapper.ionc_close(ref myioncid);
             Assert.That(ierr, Is.EqualTo(0));
 
-
+            register.Dispose();
         }
 
 
@@ -2564,6 +2442,303 @@ namespace UGrid.tests
             asciiIdsAllocator.Free();
             asciiLongNamesAllocator.Free();
         }
+
+
+        // Create a 1d mesh using ionc_put_meshgeom: NOTE now meshgeom includes mesh and network array, this is not good.
+        // To be refactored later
+        [Test]
+        [NUnit.Framework.Category("PutAndGetMeshGeom")]
+        public void Put1dMeshUsingPutMeshGeom()
+        {
+            // Create a netcdf file 
+            int ioncid = 0; //file variable 
+            int mode = 1; //create in write mode
+            var ierr = -1;
+            string tmpstring; //temporary string for several operations
+            string c_path = TestHelper.TestDirectoryPath() + @"\Written1DMesh.nc";
+            TestHelper.DeleteIfExists(c_path);
+            Assert.IsFalse(File.Exists(c_path));
+            var wrapper = new IoNetcdfLibWrapper();
+
+            // Make a local copy of the variables 
+            int l_nnodes = nNodes;
+            int l_nbranches = nBranches;
+            int l_nGeometry = nGeometry;
+            double[] l_nodesX = nodesX;
+            double[] l_nodesY = nodesY;
+            int[] l_sourcenodeid = sourcenodeid;
+            int[] l_targetnodeid = targetnodeid;
+            double[] l_branchlengths = branchlengths;
+            int[] l_nbranchgeometrypoints = nbranchgeometrypoints;
+            double[] l_geopointsX = geopointsX;
+            double[] l_geopointsY = geopointsY;
+            int[] l_branch_order = branch_order;
+
+            IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
+            IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
+
+            for (int i = 0; i < l_nnodes; i++)
+            {
+                tmpstring = nodesids[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                l_nodesinfo[i].ids = tmpstring.ToCharArray();
+                tmpstring = nodeslongNames[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                l_nodesinfo[i].longnames = tmpstring.ToCharArray();
+            }
+
+            for (int i = 0; i < l_nbranches; i++)
+            {
+                tmpstring = branchids[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                l_branchinfo[i].ids = tmpstring.ToCharArray();
+                tmpstring = branchlongNames[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                l_branchinfo[i].longnames = tmpstring.ToCharArray();
+            }
+
+            // Create the file, will not add any dataset 
+            ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.IsTrue(File.Exists(c_path));
+
+            // For reading the grid later on we need to add metadata to the netcdf file. 
+            // The function ionc_add_global_attributes adds to the netCDF file the UGRID convention
+            addglobalattributes(ioncid, ref wrapper);
+
+            // Create a 1d network
+            int networkid = -1;
+            StringBuilder l_networkName = new StringBuilder(networkName);
+            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, l_networkName.ToString(), ref nNodes, ref nBranches, ref nGeometry);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Write 1d network (groups old calls, would be nice to have a coll put_network)
+            write1dnetwork(ioncid,
+                networkid,
+                ref wrapper,
+                l_nnodes,
+                l_nbranches,
+                l_nGeometry,
+                ref l_nodesinfo,
+                ref l_branchinfo,
+                ref l_nodesX,
+                ref l_nodesY,
+                ref l_sourcenodeid,
+                ref l_targetnodeid,
+                ref l_branchlengths,
+                ref l_nbranchgeometrypoints,
+                ref l_geopointsX,
+                ref l_geopointsY,
+                ref l_branch_order);
+
+            // Write a 1d mesh using ionc_put_meshgeom
+            var meshdim = new meshgeomdim();
+            meshdim.dim = 1;
+            meshdim.numnode = nmeshpoints;
+            meshdim.numedge = nedgenodes;
+            meshdim.nbranches = nBranches;
+            meshdim.numlinks = 0;
+            meshdim.numedge = 0;
+            meshdim.numface = 0;
+
+            var mesh = new meshgeom();
+            var register = new UnmanagedMemoryRegister();
+
+            // The arrays we provide in this test are 1 based, we need to tell to the put call
+            mesh.startIndex = startIndex;
+            
+            // Copy arrays to unmanaged memory ad assign pointers
+            register.Add(ref offset, ref mesh.branchoffsets);
+            register.Add(ref branchidx, ref mesh.branchidx);
+            register.Add(ref mesh1dCoordX, ref mesh.nodex);
+            register.Add(ref mesh1dCoordY, ref mesh.nodey);
+
+            // Strings are passed by pointers to avoid stack overflow
+            var nodeidsBuffer = StringBufferHandling.MakeStringBuffer(ref meshnodeids, IoNetcdfLibWrapper.idssize);
+            var nodelongnamesBuffer = StringBufferHandling.MakeStringBuffer(ref meshnodelongnames, IoNetcdfLibWrapper.longnamessize);
+            register.Add(ref nodeidsBuffer, ref mesh.nodeids);
+            register.Add(ref nodelongnamesBuffer, ref mesh.nodelongnames);
+            meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
+            register.Add(ref meshname, ref meshdim.meshname);
+
+            int meshid = -1;
+            ierr = wrapper.ionc_put_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh, ref meshdim);
+            Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapper.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //Clean memory
+            register.Dispose();
+        }
+
+        // Create a 2d mesh using ionc_put_meshgeom: NOTE now meshgeom includes mesh and network array, this is not good (To be refactored later)
+        [Test]
+        [NUnit.Framework.Category("PutAndGetMeshGeom")]
+        public void Put2dMeshUsingPutMeshGeom()
+        {
+            // Open a netcdf file
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\Custom_Ugrid.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = -1;
+            int mode = 0; //read mode
+            var wrapper = new IoNetcdfLibWrapper();
+            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Get the mesh dimensions in meshdim
+            int existingMeshId = 1;
+            int existingNetworkId = -1;
+            var meshdim = new meshgeomdim();
+            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref existingMeshId, ref existingNetworkId, ref meshdim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Allocate mesh
+            var mesh = new meshgeom();
+            var register = new UnmanagedMemoryRegister();
+            register.Add(ref meshdim, ref mesh);
+
+            // Get 0 based
+            mesh.startIndex = 0;
+            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref existingMeshId, ref existingNetworkId, ref mesh);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Close the file
+            ierr = wrapper.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Create a new netcdf file
+            int targetioncid = -1; //file id  
+            int targetmode = 1;    //create in write mode
+            string target_path = TestHelper.TestDirectoryPath() + @"\Written2DMesh.nc";
+            TestHelper.DeleteIfExists(target_path);
+            Assert.IsFalse(File.Exists(target_path));
+            ierr = wrapper.ionc_create(target_path, ref targetmode, ref targetioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.IsTrue(File.Exists(target_path));
+
+            // Write a 2d mesh using ionc_put_meshgeom
+            string meshname = "my_mesh";
+            meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
+            register.Add(ref meshname, ref meshdim.meshname);
+            int meshid = -1;
+            int networkid = -1;
+
+            ierr = wrapper.ionc_put_meshgeom(ref targetioncid, ref meshid, ref networkid, ref mesh, ref meshdim);
+            Assert.That(ierr, Is.EqualTo(0));
+            
+            // Close the file
+            ierr = wrapper.ionc_close(ref targetioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Clean memory
+            register.Dispose();
+        }
+
+        // Get only 1d network using ionc_get_meshgeom
+        [Test]
+        [NUnit.Framework.Category("PutAndGetMeshGeom")]
+        public void Get1dNetworkUsingGetMeshGeom()
+        {
+            // Open a netcdf file
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1dNetwork.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = 0; //file variable 
+            int mode = 0; //create in read mode
+            var wrapper = new IoNetcdfLibWrapper();
+            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Get 1d mesh dimensions
+            var networkdim = new meshgeomdim();
+            int nnumNetworks = -1;
+            ierr = wrapper.ionc_get_number_of_networks(ref ioncid, ref nnumNetworks);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.That(nnumNetworks, Is.EqualTo(1));
+            IntPtr c_networkids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nnumNetworks);
+
+            // Get a valid networkid
+            ierr = wrapper.ionc_get_network_ids(ref ioncid, ref c_networkids, ref nnumNetworks);
+            Assert.That(ierr, Is.EqualTo(0));
+            int[] l_networkid = new int[nnumNetworks];
+            Marshal.Copy(c_networkids, l_networkid, 0, nnumNetworks);
+
+            // Get network dimensions using meshgeom
+            int meshid = -1; //set an invalid index
+            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid[0], ref networkdim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Register unmanaged memory and pointers 
+            var network = new meshgeom();
+            var register = new UnmanagedMemoryRegister();
+            register.Add(ref networkdim, ref network);
+            
+            // Client wants 0 based arrays
+            network.startIndex = 0;
+            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid[0], ref network);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Reconstruct the arrays
+            int l_nnodes = 2;
+            int l_nbranches = 1;
+            int l_nGeometry = 25;
+            double[] l_nodesX = new double[networkdim.nnodes];
+            double[] l_nodesY = new double[networkdim.nnodes];
+            int[] l_nedge_nodes = new int[networkdim.nbranches * 2];
+            double[] l_nbranchlengths = new double[networkdim.nbranches];
+            double[] l_ngeopointx = new double[networkdim.ngeometry];
+            double[] l_ngeopointy = new double[networkdim.ngeometry];
+
+            Marshal.Copy(network.nnodex, l_nodesX, 0, networkdim.nnodes);
+            Marshal.Copy(network.nnodey, l_nodesY, 0, networkdim.nnodes);
+            Marshal.Copy(network.nedge_nodes, l_nedge_nodes, 0, networkdim.nbranches * 2);
+            Marshal.Copy(network.nbranchlengths, l_nbranchlengths, 0, networkdim.nbranches);
+            Marshal.Copy(network.ngeopointx, l_ngeopointx, 0, networkdim.ngeometry);
+            Marshal.Copy(network.ngeopointy, l_ngeopointy, 0, networkdim.ngeometry);
+
+            // Close the file
+            ierr = wrapper.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Clean memory
+            register.Dispose();
+        }
+
+        // Get only 1d MESH using ionc_get_meshgeom
+        [Test]
+        [NUnit.Framework.Category("PutAndGetMeshGeom")]
+        public void Get1dMeshUsingGetMeshGeom()
+        {
+            // Open a netcdf file
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1d.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = 0; //file variable 
+            int mode = 0; //create in read mode
+            var wrapper = new IoNetcdfLibWrapper();
+            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Get network dimensions using meshgeom
+            int meshid =  1;   //set an invalid meshid index, here we now is 1
+            int networkid = -1; //set an invalid index because we do not want to get the network information
+            var meshdim = new meshgeomdim();
+            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref networkid, ref meshdim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Register unmanaged memory and pointers 
+            var mesh = new meshgeom();
+            var register = new UnmanagedMemoryRegister();
+            register.Add(ref meshdim, ref mesh);
+
+            // Client wants 0 based arrays
+            mesh.startIndex = 0;
+            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // Clean memory
+            register.Dispose();
+        }
+
+
     }
 }
 

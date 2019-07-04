@@ -291,6 +291,7 @@ namespace General.tests
         /// </summary>
         public const int idssize = 40;
         public const int longnamessize = 80;
+        public const int namesize = 256;
         [StructLayout(LayoutKind.Sequential)]
         public struct interop_charinfo
         {
@@ -661,6 +662,21 @@ namespace General.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_meshgeom_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int networkid, [In, Out] ref meshgeom meshgeom, [In] ref int start_index, [In] ref bool includeArrays);
 
+
+        /// <summary>
+        /// Get meshgeom without start_index and includeArrays parameters
+        /// </summary>
+        /// <param name="ioncid"> The input file id</param>
+        /// <param name="meshid"> The input meshid</param>
+        /// <param name="networkid">The input network id. If set to -1 no network arrays will be returned </param>
+        /// <param name="meshgeom"> The output structure containing the pointers to the arrays</param>
+        /// <param name="meshgeomdim">The output structure containing the arrays dimensions</param>
+        /// <returns></returns>
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom_v1", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_meshgeom_v1_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int networkid, [In, Out] ref meshgeom meshgeom);
+        
+
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom_dim", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_meshgeom_dim_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int networkid, [In, Out] ref meshgeomdim meshgeomdim);
 
@@ -675,6 +691,19 @@ namespace General.tests
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_meshgeom", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_put_meshgeom_dll([In] ref int ioncid, [In,Out] ref int meshid, [In, Out] ref int networkid, [In] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim, [In] string c_meshname, [In] string c_networkName, [In] ref int start_index);
+
+
+        /// <summary>
+        /// Put meshgeom without start_index and network name parameters
+        /// </summary>
+        /// <param name="ioncid"> The input file id</param>
+        /// <param name="meshid"> The returned meshid</param>
+        /// <param name="networkid">The returned network id. If set to -1 no network will be written </param>
+        /// <param name="meshgeom"> The input structure containing the arrays to write</param>
+        /// <param name="meshgeomdim">The input structure containing the dimensions of the arrays</param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_meshgeom_v1", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_put_meshgeom_v1_dll([In] ref int ioncid, [In, Out] ref int meshid, [In, Out] ref int networkid, [In] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim);
 
         #region Implementation of LibWrapper
 
@@ -1008,6 +1037,11 @@ namespace General.tests
             return ionc_get_meshgeom_dll(ref ioncid, ref meshid, ref networkid, ref meshgeom, ref start_index, ref includeArrays);
         }
 
+        public int ionc_get_meshgeom(ref int ioncid, ref int meshid, ref int networkid, ref meshgeom meshgeom)
+        {
+            return ionc_get_meshgeom_v1_dll(ref ioncid, ref meshid, ref networkid, ref meshgeom);
+        }
+
         public int ionc_get_meshgeom_dim(ref int ioncid, ref int meshid, ref int networkid, ref meshgeomdim meshgeomdim)
         {
             return ionc_get_meshgeom_dim_dll(ref  ioncid, ref  meshid, ref networkid, ref meshgeomdim);
@@ -1031,6 +1065,11 @@ namespace General.tests
         public int ionc_put_meshgeom(ref int ioncid, ref int meshid, ref int networkid, ref meshgeom meshgeom, ref meshgeomdim meshgeomdim, string c_meshname, string c_networkName, ref int start_index)
         {
             return ionc_put_meshgeom_dll(ref ioncid, ref  meshid, ref  networkid, ref  meshgeom, ref  meshgeomdim,  c_meshname,  c_networkName, ref  start_index);
+        }
+
+        public int ionc_put_meshgeom(ref int ioncid, ref int meshid, ref int networkid, ref meshgeom meshgeom, ref meshgeomdim meshgeomdim)
+        {
+            return ionc_put_meshgeom_v1_dll(ref ioncid, ref meshid, ref networkid, ref meshgeom, ref meshgeomdim);
         }
 
         public int ionc_inq_varid_by_standard_name(ref int ioncid, ref int meshId, ref int location, string standardName, ref int varId)

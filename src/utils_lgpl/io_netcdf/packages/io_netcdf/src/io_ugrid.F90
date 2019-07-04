@@ -1090,6 +1090,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                               nodeids, nodelongnames, branchidx, branchoffsets, &
                               writeopts) result(ierr)
    use m_alloc
+   use string_module
 
    implicit none
 
@@ -1147,6 +1148,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    logical :: add_layers                 !< Specifies whether layer and interface vertical dimensions should be added.
    logical :: add_latlon                 !< Specifies whether latlon coordinates should be added.
    integer :: offset
+   logical :: is1dUgridNetwork
+   integer :: lengthOfNetwork1dname
    
    
    offset = 0
@@ -1189,7 +1192,15 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    ierr = ug_add_coordmapping(ncid, crs)
 
-   if (.not.present(ngeopointx) .or. (.not.associated(ngeopointx))) then !2d/3d and 1d not UGRID 1.6
+   is1dUgridNetwork = .false.
+   if (present(network1dname)) then
+      call remove_all_spaces(network1dname, lengthOfNetwork1dname)
+      if (lengthOfNetwork1dname.gt.0) then
+          is1dUgridNetwork = .true.
+      endif
+   endif
+
+   if (.not.is1dUgridNetwork) then !2d/3d and 1d not UGRID 1.6
       ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layers, add_latlon)
       ! Dimensions
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))
@@ -1233,12 +1244,16 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       end if
 
 
-   else if (dim == 1 .and. present(ngeopointx) .and. associated(ngeopointx)) then !1d UGRID 1.6
-      !some results might still be saved at the edges, also for 1d 
-      ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))   
-      ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
-      ierr = ug_create_1d_mesh_v1(ncid, network1dname, meshids, meshname, numNode, 1)
-      ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
+   else 
+      if ( dim == 1 ) then
+         if ( present(ngeopointx).and. associated(ngeopointx)) then !1d UGRID 1.6
+            !some results might still be saved at the edges, also for 1d 
+            ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))   
+            ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
+         endif
+        ierr = ug_create_1d_mesh_v1(ncid, network1dname, meshids, meshname, numNode, 1)
+        ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
+     endif	
    endif
    
    if (ierr /= UG_NOERR) then
@@ -1430,7 +1445,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Edges:
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       !if is UGRID 1.0 network, we need to write the network here
-      if (present(ngeopointx).and.associated(ngeopointx)) then   
+      if (is1dUgridNetwork .and. present(ngeopointx) .and. associated(ngeopointx)) then   
          ! write network
          ierr = ug_write_1d_network_nodes(ncid, networkids, nnodex, nnodey, nnodeids, nnodelongnames)  
       
@@ -1440,17 +1455,25 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          
          ierr = ug_put_1d_network_branches(ncid, networkids, sourceNodeId,targetNodeId, nbranchids, nbranchlengths, nbranchlongnames, nbranchgeometrynodes, nbranches, start_index)
          ierr = ug_put_1d_network_branchorder(ncid, networkids, nbranchorder)
-         ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)
-         ! write mesh1d
-         ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, branchoffsets, start_index, xn, yn)   
+         ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)   
       endif
-        ! always write edge nodes
-        ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))
+      ! write mesh1d
+      if (present(network1dname).and.(lengthOfNetwork1dname.gt.0)) then
+          ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, branchoffsets, start_index, xn, yn)
+      endif
+      ! always write edge nodes
+	  if (meshids%varids(mid_edgenodes).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))
+	  endif
    end if
 
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
-      ierr = nf90_put_var(ncid, meshids%varids(mid_edgex), xe(1:numEdge))
-      ierr = nf90_put_var(ncid, meshids%varids(mid_edgey), ye(1:numEdge))
+      if (meshids%varids(mid_edgex).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_edgex), xe(1:numEdge))
+      endif
+      if (meshids%varids(mid_edgey).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_edgey), ye(1:numEdge))
+      endif
       ! end point coordinates:
       allocate(edgexbnd(2, numEdge), edgeybnd(2, numEdge))
       edgexbnd = dmiss
@@ -1459,17 +1482,25 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          edgexbnd(1:2, n) = xn(edge_nodes(1:2, n)+offset)
          edgeybnd(1:2, n) = yn(edge_nodes(1:2, n)+offset)
       end do
-      ierr = nf90_put_var(ncid, meshids%varids(mid_edgexbnd), edgexbnd)
-      ierr = nf90_put_var(ncid, meshids%varids(mid_edgeybnd), edgeybnd)
-      deallocate(edgexbnd, edgeybnd)
+     if (meshids%varids(mid_edgexbnd).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_edgexbnd), edgexbnd)
+     endif
+     if (meshids%varids(mid_edgeybnd).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_edgeybnd), edgeybnd)
+     endif
+     deallocate(edgexbnd, edgeybnd)
 
 #ifdef HAVE_PROJ
       if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          call realloc(lone, size(xe), fill=dmiss, keepExisting=.false.)
          call realloc(late, size(ye), fill=dmiss, keepExisting=.false.)
          call transform_coordinates(crs%proj_string, WGS84_PROJ_STRING, xe, ye, lone, late)
-         ierr = nf90_put_var(ncid, meshids%varids(mid_edgelon), lone(1:numEdge))
-         ierr = nf90_put_var(ncid, meshids%varids(mid_edgelat), late(1:numEdge))
+         if (meshids%varids(mid_edgelon).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_edgelon), lone(1:numEdge))
+         endif
+        if (meshids%varids(mid_edgelat).ne.-1) then
+           ierr = nf90_put_var(ncid, meshids%varids(mid_edgelat), late(1:numEdge))
+         endif
          deallocate(lone)
          deallocate(late)
 
@@ -1481,8 +1512,12 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
             edgelonbnd(1:2, n) = lonn(edge_nodes(1:2, n)+offset)
             edgelatbnd(1:2, n) = latn(edge_nodes(1:2, n)+offset)
          end do
-         ierr = nf90_put_var(ncid, meshids%varids(mid_edgelonbnd), edgelonbnd)
-         ierr = nf90_put_var(ncid, meshids%varids(mid_edgelatbnd), edgelatbnd)
+         if (meshids%varids(mid_edgelonbnd).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_edgelonbnd), edgelonbnd)
+         endif
+         if (meshids%varids(mid_edgelatbnd).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_edgelatbnd), edgelatbnd)
+         endif
          deallocate(edgelonbnd, edgelatbnd)
       end if
 #endif
@@ -1491,19 +1526,26 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Faces:
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ! Write mesh faces (2D cells)
-      ierr = nf90_put_var(ncid, meshids%varids(mid_facenodes), face_nodes)
-
+      if (meshids%varids(mid_facenodes).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_facenodes), face_nodes)
+      endif
       ! Face edge connectivity:
       if (add_face_edge_connectivity) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_faceedges), face_edges, count=(/ maxnv, numFace /))
+        if (meshids%varids(mid_faceedges).ne.-1) then
+           ierr = nf90_put_var(ncid, meshids%varids(mid_faceedges), face_edges, count=(/ maxnv, numFace /))
+        endif
       end if
       ! Face face connectivity:
       if (add_face_face_connectivity) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_facelinks), face_links, count=(/ maxnv, numFace /))
+         if (meshids%varids(mid_facelinks).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_facelinks), face_links, count=(/ maxnv, numFace /))
+         endif
       end if
       ! Edge face connectivity:
       if (add_edge_face_connectivity) then
-         ierr = nf90_put_var(ncid, meshids%varids(mid_edgefaces), edge_faces, count=(/ 2, numEdge /))
+         if (meshids%varids(mid_edgefaces).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_edgefaces), edge_faces, count=(/ 2, numEdge /))
+         endif
       end if
 
       ! corner point coordinates:
@@ -1516,13 +1558,17 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
             if (face_nodes(k, n) == imiss) then
                exit ! This face has less corners than maxnv, we're done for this one.
             end if
-
             facexbnd(k, n) = xn(face_nodes(k, n) + offset)
             faceybnd(k, n) = yn(face_nodes(k, n) + offset)
          end do
       end do
-      ierr = nf90_put_var(ncid, meshids%varids(mid_facexbnd), facexbnd)
-      ierr = nf90_put_var(ncid, meshids%varids(mid_faceybnd), faceybnd)
+
+      if (meshids%varids(mid_facexbnd).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_facexbnd), facexbnd)
+      endif
+      if (meshids%varids(mid_faceybnd).ne.-1) then
+        ierr = nf90_put_var(ncid, meshids%varids(mid_faceybnd), faceybnd)
+      endif  
       deallocate(facexbnd, faceybnd)
 
 #ifdef HAVE_PROJ
@@ -1542,24 +1588,37 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                facelatbnd(k, n) = latn(face_nodes(k, n) + offset)
             end do
          end do
-         ierr = nf90_put_var(ncid, meshids%varids(mid_facelonbnd), facelonbnd)
-         ierr = nf90_put_var(ncid, meshids%varids(mid_facelatbnd), facelatbnd)
+         if (meshids%varids(mid_facelonbnd).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_facelonbnd), facelonbnd)
+         endif
+         if (meshids%varids(mid_facelatbnd).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_facelatbnd), facelatbnd)
+         endif
          deallocate(facelonbnd, facelatbnd)
       end if
 #endif
    end if
    
    if (ug_checklocation(dataLocs, UG_LOC_FACE)) then
-      ierr = nf90_put_var(ncid, meshids%varids(mid_facex),    xf(1:numFace))
-      ierr = nf90_put_var(ncid, meshids%varids(mid_facey),    yf(1:numFace))
+   
+      if (meshids%varids(mid_facex).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_facex),    xf(1:numFace))
+      endif
+      if (meshids%varids(mid_facey).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_facey),    yf(1:numFace))
+      endif
 
 #ifdef HAVE_PROJ
       if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          call realloc(lonf, size(xf), fill=dmiss, keepExisting=.false.)
          call realloc(latf, size(yf), fill=dmiss, keepExisting=.false.)
          call transform_coordinates(crs%proj_string, WGS84_PROJ_STRING, xf, yf, lonf, latf)
-         ierr = nf90_put_var(ncid, meshids%varids(mid_facelon), lonf(1:numFace))
-         ierr = nf90_put_var(ncid, meshids%varids(mid_facelat), latf(1:numFace))
+         if (meshids%varids(mid_facelon).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_facelon), lonf(1:numFace))
+         endif
+         if (meshids%varids(mid_facelat).ne.-1) then
+            ierr = nf90_put_var(ncid, meshids%varids(mid_facelat), latf(1:numFace))
+         endif
          deallocate(lonf)
          deallocate(latf)
       end if
@@ -1572,8 +1631,12 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Layers
    if (add_layers) then
       ! Write mesh layer distribution (mesh-global, not per face)
-      ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs),     layer_zs(1:numLayer))
-      ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(1:numLayer + 1))
+      if (meshids%varids(mid_layerzs).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs),     layer_zs(1:numLayer))
+      endif
+      if (meshids%varids(mid_interfacezs).ne.-1) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(1:numLayer + 1))
+      endif
    end if
 
    ! Check for any remaining native NetCDF errors

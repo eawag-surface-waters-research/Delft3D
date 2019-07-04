@@ -166,6 +166,7 @@ public :: ionc_getfullversionstring_io_netcdf
 public :: ionc_get_dimid
 public :: ionc_get_contact_id_ugrid
 public :: ionc_put_meshgeom
+public :: ionc_put_meshgeom_v1
 public :: ionc_get_contact_topo_count
 
 private
@@ -552,6 +553,36 @@ function ionc_put_meshgeom(ioncid, meshgeom, meshid, networkid, meshname, networ
    ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom)
 
 end function ionc_put_meshgeom 
+
+
+function ionc_put_meshgeom_v1(ioncid, meshgeom, meshid, networkid) result(ierr)
+
+   integer,             intent(in   )                       :: ioncid        !< The IONC data set id.
+   type(t_ug_meshgeom)                                      :: meshgeom      !< Structure in which all mesh geometry is be stored.
+   integer,             intent(inout)                       :: meshid        !< The mesh id in the specified data set.
+   integer,             intent(inout)                       :: networkid     !< The network id in the specified data set.
+   integer                                                  :: ierr          !< Result status, ionc_noerr if successful.
+   
+   ! Locals (default values)
+   type(t_ug_mesh)                                          :: meshids 
+   type(t_ug_network)                                       :: networkids
+   
+   if (len_trim(meshgeom%meshname).gt.0) then 
+      !adds a meshids structure
+      ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
+      ! set the meshname
+      datasets(ioncid)%ug_file%meshnames(meshid) = meshgeom%meshname
+      meshids = datasets(ioncid)%ug_file%meshids(meshid)
+   endif
+   
+   if (networkid.gt.0) then 
+      networkids = datasets(ioncid)%ug_file%netids(networkid)
+   endif
+   
+   !this call writes mesh and network data contained in meshgeom
+   ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom)
+
+end function ionc_put_meshgeom_v1 
 
 
 !> Reads the actual mesh geometry and network from the specified mesh in a IONC/UGRID dataset.
@@ -1207,8 +1238,22 @@ function ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom) result(ie
    type(t_ug_network),  intent(inout) :: networkids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_meshgeom), intent(in)    :: meshgeom    !< The complete mesh geometry in a single struct.
    integer                            :: ierr        !< Result status, ionc_noerr if successful.
+   
+   !Locals
+   character(len=MAXSTRLEN)                          :: network1dname !< The name of the mesh topology variable.
+   character(len=ug_idsLen), allocatable             :: nodeids(:)
+   character(len=ug_idsLongNamesLen), allocatable    :: nodelongnames(:)
 
-   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, networkids, datasets(ioncid)%crs, meshgeom)
+   allocate(nodeids(meshgeom%numnode))
+   allocate(nodelongnames(meshgeom%numnode))
+   !gen the network name
+   network1dname(:) = ' '
+   ierr = nf90_inquire_variable(datasets(ioncid)%ncid, networkids%varids(ntid_1dtopo), name=network1dname)
+   nodeids       = meshgeom%nodeids
+   nodelongnames = meshgeom%nodelongnames
+   
+   ierr = ug_write_mesh_struct( ncid = datasets(ioncid)%ncid, meshids = meshids, networkids = networkids, crs = datasets(ioncid)%crs, meshgeom = meshgeom, nodeids=nodeids, nodelongnames=nodelongnames, network1dname = network1dname)
+   
 end function ionc_write_mesh_struct
 
 !> Initializes the io_netcdf library, setting up the logger.
