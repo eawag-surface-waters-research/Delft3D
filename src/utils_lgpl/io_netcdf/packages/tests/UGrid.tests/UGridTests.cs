@@ -31,7 +31,7 @@ namespace UGrid.tests
         public static IntPtr m_libgridgeom;
 
         //network name
-        private string networkName = "network";
+        private string networkname = "network";
 
         //dimension info
         private int nNodes = 4;
@@ -746,7 +746,7 @@ namespace UGrid.tests
 
             //6. Create a 1d network
             int networkid = -1;
-            StringBuilder l_networkName = new StringBuilder(networkName);
+            StringBuilder l_networkName = new StringBuilder(networkname);
             ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, l_networkName.ToString(), ref nNodes, ref nBranches,
                 ref nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
@@ -892,7 +892,7 @@ namespace UGrid.tests
                     ref l_branch_order);
 
                 //4. check the read values
-                Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkName));
+                Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname));
                 Assert.That(l_nnodes, Is.EqualTo(l_nnodes));
                 Assert.That(l_nbranches, Is.EqualTo(nBranches));
                 Assert.That(l_nGeometry, Is.EqualTo(nGeometry));
@@ -1037,11 +1037,11 @@ namespace UGrid.tests
 
             //6. Create 1d geometry and mesh in the new file (target.nc)
             int networkid = -1;
-            ierr = wrapper.ionc_create_1d_network(ref targetioncid, ref networkid, networkName, ref nNodes,
+            ierr = wrapper.ionc_create_1d_network(ref targetioncid, ref networkid, networkname, ref nNodes,
                 ref nBranches, ref nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
 
-            StringBuilder l_networkName = new StringBuilder(networkName);
+            StringBuilder l_networkName = new StringBuilder(networkname);
             StringBuilder l_meshname = new StringBuilder(meshname);
             StringBuilder l_linkmeshname = new StringBuilder(linkmeshname);
             int l_nmeshpoints = nmeshpoints;
@@ -1179,7 +1179,7 @@ namespace UGrid.tests
                 ref l_branch_order);
 
             //4. check the read values
-            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkName));
+            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname));
             Assert.That(l_nnodes, Is.EqualTo(l_nnodes));
             Assert.That(l_nbranches, Is.EqualTo(nBranches));
             Assert.That(l_nGeometry, Is.EqualTo(nGeometry));
@@ -1285,7 +1285,7 @@ namespace UGrid.tests
 
             //4. Create a 1d network
             int networkid = -1;
-            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkName, ref nNodes,
+            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkname, ref nNodes,
                 ref nBranches, ref nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -1378,7 +1378,7 @@ namespace UGrid.tests
                 ref l_branch_order);
 
             //4. check the read values
-            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkName));
+            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname));
             Assert.That(l_nnodes, Is.EqualTo(l_nnodes));
             Assert.That(l_nbranches, Is.EqualTo(nBranches));
             Assert.That(l_nGeometry, Is.EqualTo(nGeometry));
@@ -1820,11 +1820,11 @@ namespace UGrid.tests
 
             //5. Create 1d geometry and mesh in the new file (target.nc)
             int networkid = -1;
-            ierr = wrapperNetcdf.ionc_create_1d_network(ref targetioncid, ref networkid, networkName, ref l_nnodes, ref l_nbranches, ref l_nGeometry);
+            ierr = wrapperNetcdf.ionc_create_1d_network(ref targetioncid, ref networkid, networkname, ref l_nnodes, ref l_nbranches, ref l_nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
 
             //6. define the network variables
-            StringBuilder l_networkName = new StringBuilder(networkName);
+            StringBuilder l_networkName = new StringBuilder(networkname);
             StringBuilder l_meshname = new StringBuilder(meshname);
             int l_nmeshpoints = 25;
             int l_nedgenodes = 24;
@@ -2349,7 +2349,7 @@ namespace UGrid.tests
 
             //6. Create a 1d network
             int networkid = -1;
-            StringBuilder l_networkName = new StringBuilder(networkName);
+            StringBuilder l_networkName = new StringBuilder(networkname);
             ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, l_networkName.ToString(), ref nNodes, ref nBranches,
                 ref nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
@@ -2448,57 +2448,65 @@ namespace UGrid.tests
         // To be refactored later
         [Test]
         [NUnit.Framework.Category("PutAndGetMeshGeom")]
-        public void Put1dMeshUsingPutMeshGeom()
+        public void Put1dMeshAndNetworkUsingPutMeshGeom()
         {
             // Create a netcdf file 
-            int ioncid = 0; //file variable 
-            int mode = 1; //create in write mode
-            var ierr = -1;
-            string tmpstring; //temporary string for several operations
-            string c_path = TestHelper.TestDirectoryPath() + @"\Written1DMesh.nc";
+            int ioncid = 0; // file variable 
+            int mode = 1;   // create in write mode
+            string c_path = TestHelper.TestDirectoryPath() + @"\Written1DMeshAndNetwork.nc";
             TestHelper.DeleteIfExists(c_path);
             Assert.IsFalse(File.Exists(c_path));
             var wrapper = new IoNetcdfLibWrapper();
 
             // Make a local copy of the variables 
-            int l_nnodes = nNodes;
-            int l_nbranches = nBranches;
-            int l_nGeometry = nGeometry;
             double[] l_nodesX = nodesX;
             double[] l_nodesY = nodesY;
-            int[] l_sourcenodeid = sourcenodeid;
-            int[] l_targetnodeid = targetnodeid;
+            var l_edge_nodes = new int[sourcenodeid.Length + targetnodeid.Length];
+            sourcenodeid.CopyTo(l_edge_nodes, 0);
+            targetnodeid.CopyTo(l_edge_nodes, sourcenodeid.Length);
             double[] l_branchlengths = branchlengths;
-            int[] l_nbranchgeometrypoints = nbranchgeometrypoints;
             double[] l_geopointsX = geopointsX;
             double[] l_geopointsY = geopointsY;
             int[] l_branch_order = branch_order;
+            int[] l_nbranchgeometrypoints = nbranchgeometrypoints;
 
-            IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
-            IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
+            // Write a 1d network using ionc_put_meshgeom
+            var networkdim = new meshgeomdim();
+            networkdim.dim = 1;
+            networkdim.nnodes = nNodes;
+            networkdim.nbranches = nBranches;
+            networkdim.ngeometry = nGeometry;
+            networkdim.numlinks = 0;
+            networkdim.numedge = 0;
+            networkdim.numface = 0;
 
-            for (int i = 0; i < l_nnodes; i++)
-            {
-                tmpstring = nodesids[i];
-                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
-                l_nodesinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = nodeslongNames[i];
-                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
-                l_nodesinfo[i].longnames = tmpstring.ToCharArray();
-            }
+            var network = new meshgeom();
+            var register = new UnmanagedMemoryRegister();
+            register.Add(ref l_nodesX, ref network.nnodex);
+            register.Add(ref l_nodesY, ref network.nnodey);
+            register.Add(ref l_edge_nodes, ref network.nedge_nodes);
+            register.Add(ref l_branchlengths, ref network.nbranchlengths);
+            register.Add(ref l_geopointsX, ref network.ngeopointx);
+            register.Add(ref l_geopointsY, ref network.ngeopointy);
+            register.Add(ref l_branch_order, ref network.nbranchorder);
+            register.Add(ref l_nbranchgeometrypoints, ref network.nbranchgeometrynodes);
 
-            for (int i = 0; i < l_nbranches; i++)
-            {
-                tmpstring = branchids[i];
-                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
-                l_branchinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = branchlongNames[i];
-                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
-                l_branchinfo[i].longnames = tmpstring.ToCharArray();
-            }
+            // Strings are passed by pointers to avoid stack overflow
+
+
+            var networkNodeidsBuffer = StringBufferHandling.MakeStringBuffer(ref nodesids, IoNetcdfLibWrapper.idssize);
+            var networkNodelongnamesBuffer = StringBufferHandling.MakeStringBuffer(ref nodeslongNames, IoNetcdfLibWrapper.longnamessize);
+            var networkBranchesidsBuffer = StringBufferHandling.MakeStringBuffer(ref branchids, IoNetcdfLibWrapper.idssize);
+            var networkBrancheslongnamesBuffer = StringBufferHandling.MakeStringBuffer(ref branchlongNames, IoNetcdfLibWrapper.longnamessize);
+            register.Add(ref networkNodeidsBuffer, ref network.nnodeids);
+            register.Add(ref networkNodelongnamesBuffer, ref network.nnodelongnames);
+            register.Add(ref networkBranchesidsBuffer, ref network.nbranchids);
+            register.Add(ref networkBrancheslongnamesBuffer, ref network.nbranchlongnames);
+            networkname = networkname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
+            register.Add(ref networkname, ref networkdim.name);
 
             // Create the file, will not add any dataset 
-            ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
+            var ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
             Assert.That(ierr, Is.EqualTo(0));
             Assert.IsTrue(File.Exists(c_path));
 
@@ -2506,30 +2514,10 @@ namespace UGrid.tests
             // The function ionc_add_global_attributes adds to the netCDF file the UGRID convention
             addglobalattributes(ioncid, ref wrapper);
 
-            // Create a 1d network
-            int networkid = -1;
-            StringBuilder l_networkName = new StringBuilder(networkName);
-            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, l_networkName.ToString(), ref nNodes, ref nBranches, ref nGeometry);
+            // Put 1d network
+            int networkid = 0;
+            ierr = wrapper.ionc_put_network(ref ioncid, ref networkid, ref network, ref networkdim);
             Assert.That(ierr, Is.EqualTo(0));
-
-            // Write 1d network (groups old calls, would be nice to have a coll put_network)
-            write1dnetwork(ioncid,
-                networkid,
-                ref wrapper,
-                l_nnodes,
-                l_nbranches,
-                l_nGeometry,
-                ref l_nodesinfo,
-                ref l_branchinfo,
-                ref l_nodesX,
-                ref l_nodesY,
-                ref l_sourcenodeid,
-                ref l_targetnodeid,
-                ref l_branchlengths,
-                ref l_nbranchgeometrypoints,
-                ref l_geopointsX,
-                ref l_geopointsY,
-                ref l_branch_order);
 
             // Write a 1d mesh using ionc_put_meshgeom
             var meshdim = new meshgeomdim();
@@ -2542,7 +2530,6 @@ namespace UGrid.tests
             meshdim.numface = 0;
 
             var mesh = new meshgeom();
-            var register = new UnmanagedMemoryRegister();
 
             // The arrays we provide in this test are 1 based, we need to tell to the put call
             mesh.startIndex = startIndex;
@@ -2559,9 +2546,9 @@ namespace UGrid.tests
             register.Add(ref nodeidsBuffer, ref mesh.nodeids);
             register.Add(ref nodelongnamesBuffer, ref mesh.nodelongnames);
             meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
-            register.Add(ref meshname, ref meshdim.meshname);
+            register.Add(ref meshname, ref meshdim.name);
 
-            int meshid = -1;
+            int meshid = 0;
             ierr = wrapper.ionc_put_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh, ref meshdim);
             Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapper.ionc_close(ref ioncid);
@@ -2619,7 +2606,7 @@ namespace UGrid.tests
             // Write a 2d mesh using ionc_put_meshgeom
             string meshname = "my_mesh";
             meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
-            register.Add(ref meshname, ref meshdim.meshname);
+            register.Add(ref meshname, ref meshdim.name);
             int meshid = -1;
             int networkid = -1;
 

@@ -130,6 +130,7 @@ public :: ionc_get_1d_mesh_discretisation_points_count_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_ugrid_v1
 public :: ionc_create_1d_mesh_ugrid_v1
+public :: ionc_put_network
 !links functions
 public :: ionc_def_mesh_contact_ugrid
 public :: ionc_get_contacts_count_ugrid
@@ -583,6 +584,40 @@ function ionc_put_meshgeom_v1(ioncid, meshgeom, meshid, networkid) result(ierr)
    ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom)
 
 end function ionc_put_meshgeom_v1 
+
+
+function ionc_put_network(ioncid, networkgeom, networkid) result(ierr)
+
+   integer,             intent(in   )                       :: ioncid        !< The IONC data set id.
+   type(t_ug_meshgeom)                                      :: networkgeom   !< Structure in which all mesh geometry is be stored.
+   integer,             intent(inout)                       :: networkid     !< The network id in the specified data set.
+   integer                                                  :: ierr          !< Result status, ionc_noerr if successful.
+   
+   ! Locals (default values)
+   type(t_ug_mesh)                                          :: meshids
+   type(t_ug_network)                                       :: networkids
+   
+   character(len=ug_idsLen), allocatable                     :: nnodeids(:), nbranchids(:)       
+   character(len=ug_idsLongNamesLen), allocatable            :: nnodelongnames(:), nbranchlongnames(:) 
+   
+   allocate(nnodeids(networkgeom%nnodes))
+   allocate(nnodelongnames(networkgeom%nnodes))
+   allocate(nbranchids(networkgeom%nbranches))
+   allocate(nbranchlongnames(networkgeom%nbranches))
+   nnodeids = networkgeom%nnodeids
+   nnodelongnames = networkgeom%nnodelongnames
+   nbranchids = networkgeom%nbranchids
+   nbranchlongnames = networkgeom%nbranchlongnames
+   
+   ierr = ug_add_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
+   networkids = datasets(ioncid)%ug_file%netids(networkid)
+   
+   !this call writes mesh and network data contained in meshgeom
+   ierr = ug_write_mesh_struct(ncid = datasets(ioncid)%ncid, meshids = meshids, networkids = networkids, crs = datasets(ioncid)%crs, &
+      meshgeom = networkgeom, nnodeids = nnodeids, nnodelongnames = nnodelongnames, nbranchids = nbranchids, nbranchlongnames = nbranchlongnames, network1dname = networkgeom%meshname)
+	  
+
+end function ionc_put_network
 
 
 !> Reads the actual mesh geometry and network from the specified mesh in a IONC/UGRID dataset.

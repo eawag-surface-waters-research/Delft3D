@@ -1148,8 +1148,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    logical :: add_layers                 !< Specifies whether layer and interface vertical dimensions should be added.
    logical :: add_latlon                 !< Specifies whether latlon coordinates should be added.
    integer :: offset
-   logical :: is1dUgridNetwork
-   integer :: lengthOfNetwork1dname
+   logical :: is1dugridnetwork
+   integer :: lengthofnetworkname
    
    
    offset = 0
@@ -1192,15 +1192,15 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    ierr = ug_add_coordmapping(ncid, crs)
 
-   is1dUgridNetwork = .false.
+   is1dugridnetwork = .false.
    if (present(network1dname)) then
-      call remove_all_spaces(network1dname, lengthOfNetwork1dname)
-      if (lengthOfNetwork1dname.gt.0) then
-          is1dUgridNetwork = .true.
+      call remove_all_spaces(network1dname, lengthofnetworkname)
+      if (lengthofnetworkname.gt.0) then
+          is1dugridnetwork = .true.
       endif
    endif
 
-   if (.not.is1dUgridNetwork) then !2d/3d and 1d not UGRID 1.6
+   if (.not.is1dugridnetwork) then !2d/3d and 1d not UGRID 1.6
       ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layers, add_latlon)
       ! Dimensions
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))
@@ -1251,8 +1251,10 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
             ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))   
             ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
          endif
-        ierr = ug_create_1d_mesh_v1(ncid, network1dname, meshids, meshname, numNode, 1)
-        ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
+		 if (numNode.gt.0) then
+             ierr = ug_create_1d_mesh_v1(ncid, network1dname, meshids, meshname, numNode, 1)
+             ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
+		 endif
      endif	
    endif
    
@@ -1445,22 +1447,26 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Edges:
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       !if is UGRID 1.0 network, we need to write the network here
-      if (is1dUgridNetwork .and. present(ngeopointx) .and. associated(ngeopointx)) then   
-         ! write network
-         ierr = ug_write_1d_network_nodes(ncid, networkids, nnodex, nnodey, nnodeids, nnodelongnames)  
-      
-         !write node ids and node long names
-         ierr = nf90_put_var(ncid, meshids%varids(mid_node_ids), nodeids)
-         ierr = nf90_put_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
-         
-         ierr = ug_put_1d_network_branches(ncid, networkids, sourceNodeId,targetNodeId, nbranchids, nbranchlengths, nbranchlongnames, nbranchgeometrynodes, nbranches, start_index)
-         ierr = ug_put_1d_network_branchorder(ncid, networkids, nbranchorder)
-         ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)   
+      if (is1dugridnetwork .and. present(ngeopointx) .and. associated(ngeopointx)) then   
+        ! write network
+        ierr = ug_write_1d_network_nodes(ncid, networkids, nnodex, nnodey, nnodeids, nnodelongnames)           
+        ierr = ug_put_1d_network_branches(ncid, networkids, sourceNodeId,targetNodeId, nbranchids, nbranchlengths, nbranchlongnames, nbranchgeometrynodes, nbranches, start_index)
+        ierr = ug_put_1d_network_branchorder(ncid, networkids, nbranchorder)
+        ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)   
       endif
       ! write mesh1d
-      if (present(network1dname).and.(lengthOfNetwork1dname.gt.0)) then
-          ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, branchoffsets, start_index, xn, yn)
-      endif
+      if (lengthofnetworkname.gt.0) then
+	    if (present(branchidx) .and. associated(branchidx)) then
+			ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, branchoffsets, start_index, xn, yn)
+		endif
+        !write node ids and node long names
+        if (present(nodeids) .and. allocated(nodeids)) then
+			ierr = nf90_put_var(ncid, meshids%varids(mid_node_ids), nodeids)
+		endif
+        if (present(nodelongnames).and.allocated(nodelongnames)) then
+			ierr = nf90_put_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
+		endif
+	  endif
       ! always write edge nodes
 	  if (meshids%varids(mid_edgenodes).ne.-1) then
          ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))

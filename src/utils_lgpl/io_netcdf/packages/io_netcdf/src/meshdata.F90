@@ -82,10 +82,14 @@ type t_ug_meshgeom
    integer,                           pointer :: nbranchorder(:)         => null()   !< the branch order
    
    !Mesh1d variables
-   integer,                           pointer :: branchidx(:)    => null()           !< The branch index of each 1d mesh point
-   double precision,                  pointer :: branchoffsets(:)=> null()           !< The branch offset of each 1d mesh point
-   character(len=ug_idsLen),          pointer :: nodeids(:)      => null()                
-   character(len=ug_idsLongNamesLen), pointer :: nodelongnames(:)=> null()
+   integer,                           pointer :: branchidx(:)      => null()           !< The branch index of each 1d mesh point
+   double precision,                  pointer :: branchoffsets(:)  => null()           !< The branch offset of each 1d mesh point
+   character(len=ug_idsLen),          pointer :: nodeids(:)        => null()                
+   character(len=ug_idsLongNamesLen), pointer :: nodelongnames(:)  => null()
+   character(len=ug_idsLen),          pointer :: branchids(:)      => null()                
+   character(len=ug_idsLongNamesLen), pointer :: branchlongnames(:)=> null()
+   character(len=ug_idsLen),          pointer :: nnodesids(:)      => null()                
+   character(len=ug_idsLongNamesLen), pointer :: nnodesnames(:)    => null()
 
    double precision, pointer :: nodex(:)=> null()       !< x-coordinates of the mesh nodes.
    double precision, pointer :: nodey(:)=> null()       !< y-coordinates of the mesh nodes.
@@ -104,7 +108,7 @@ end type t_ug_meshgeom
 
 type, bind(C) :: c_t_ug_meshgeomdim
 
-   type(c_ptr)         :: meshname           !< Name of this mesh ! TODO: AvD: should this be in this data type?
+   type(c_ptr)              :: meshname           !< Name of this mesh ! TODO: AvD: should this be in this data type?
    integer(kind=c_int)      :: dim                !< Dimensionality of the mesh (1/2/3)
    integer(kind=c_int)      :: numnode            !< Number of mesh nodes.
    integer(kind=c_int)      :: numedge            !< Number of mesh edges.
@@ -154,8 +158,13 @@ type, bind(C) :: c_t_ug_meshgeom
    type(c_ptr)  :: interface_zs           !< Vertical coordinates of the mesh layers' interface (either z or sigma).
    integer(kind=c_int)  :: start_index    !< Start index of the arrays
 
-   type(c_ptr)  :: nodeids                !< The branch offset of each 1d mesh point
-   type(c_ptr)  :: nodelongnames          !< The branch offset of each 1d mesh point
+   type(c_ptr)  :: nodeids                !< The mesh node ids
+   type(c_ptr)  :: nodelongnames          !< The mesh node longnames
+   
+   type(c_ptr)  :: nbranchids             !< The network branch ids
+   type(c_ptr)  :: nbranchlongnames       !< The network branch longnames
+   type(c_ptr)  :: nnodeids               !< The network node ids
+   type(c_ptr)  :: nnodelongnames         !< The network node longnames
    
 end type c_t_ug_meshgeom
 
@@ -200,10 +209,14 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomdim) result(ie
    double precision, pointer :: layer_zs(:) => null()     !< Vertical coordinates of the mesh layers' center (either z or sigma).
    double precision, pointer :: interface_zs(:) => null() !< Vertical coordinates of the mesh layers' interface (either z or sigma).
 
-   character(len=ug_idsLen),          pointer :: nodeids(:)      => null()                
-   character(len=ug_idsLongNamesLen), pointer :: nodelongnames(:)=> null()
+   character(len=ug_idsLen),          pointer :: nodeids(:)         => null()                
+   character(len=ug_idsLongNamesLen), pointer :: nodelongnames(:)   => null()
+   character(len=ug_idsLen),          pointer :: nbranchids(:)      => null()                
+   character(len=ug_idsLongNamesLen), pointer :: nbranchlongnames(:)=> null()
+   character(len=ug_idsLen),          pointer :: nnodeids(:)        => null()                
+   character(len=ug_idsLongNamesLen), pointer :: nnodelongnames(:)  => null()   
    character(len=ug_nameLen), pointer         :: meshname
-   
+
    ierr = 0
    !dimension variables
    c_meshgeomdim%dim = meshgeom%dim                
@@ -366,6 +379,26 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomdim) result(ie
       call c_f_pointer(c_meshgeom%nodelongnames, nodelongnames, shape(meshgeom%nodelongnames))
 	  nodelongnames= meshgeom%nodelongnames
    endif
+
+   if (associated(meshgeom%nbranchids).and.c_associated(c_meshgeom%nbranchids)) then
+      call c_f_pointer(c_meshgeom%nbranchids, nbranchids, shape(meshgeom%nbranchids))
+	  nbranchids= meshgeom%nbranchids
+   endif
+
+   if (associated(meshgeom%nbranchlongnames).and.c_associated(c_meshgeom%nbranchlongnames)) then
+      call c_f_pointer(c_meshgeom%nbranchlongnames, nbranchlongnames, shape(meshgeom%nbranchlongnames))
+	  nbranchlongnames= meshgeom%nbranchlongnames
+   endif
+   
+   if (associated(meshgeom%nnodeids).and.c_associated(c_meshgeom%nnodeids)) then
+      call c_f_pointer(c_meshgeom%nnodeids, nnodeids, shape(meshgeom%nnodeids))
+	  nnodeids= meshgeom%nnodeids
+   endif
+   
+   if (associated(meshgeom%nnodelongnames).and.c_associated(c_meshgeom%nnodelongnames)) then
+      call c_f_pointer(c_meshgeom%nnodelongnames, nnodelongnames, shape(meshgeom%nnodelongnames))
+	  nnodelongnames= meshgeom%nnodelongnames
+   endif
    
 end function convert_meshgeom_to_cptr
 
@@ -438,11 +471,14 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
    if(c_associated(c_meshgeom%layer_zs)) call c_f_pointer(c_meshgeom%layer_zs, meshgeom%layer_zs,(/c_meshgeomdim%numlayer/))
    if(c_associated(c_meshgeom%interface_zs)) call c_f_pointer(c_meshgeom%interface_zs, meshgeom%interface_zs,(/c_meshgeomdim%numlayer + 1/))
    
-   
    if(c_associated(c_meshgeom%nodeids)) call c_f_pointer(c_meshgeom%nodeids, meshgeom%nodeids,(/c_meshgeomdim%numnode/))
    if(c_associated(c_meshgeom%nodelongnames)) call c_f_pointer(c_meshgeom%nodelongnames, meshgeom%nodelongnames,(/c_meshgeomdim%numnode/))
+
+   if(c_associated(c_meshgeom%nbranchids)) call c_f_pointer(c_meshgeom%nbranchids, meshgeom%nbranchids,(/c_meshgeomdim%nbranches/))
+   if(c_associated(c_meshgeom%nbranchlongnames)) call c_f_pointer(c_meshgeom%nbranchlongnames, meshgeom%nbranchlongnames,(/c_meshgeomdim%nbranches/))
+   if(c_associated(c_meshgeom%nnodeids)) call c_f_pointer(c_meshgeom%nnodeids, meshgeom%nnodeids,(/c_meshgeomdim%nnodes/))
+   if(c_associated(c_meshgeom%nnodelongnames)) call c_f_pointer(c_meshgeom%nnodelongnames, meshgeom%nnodelongnames,(/c_meshgeomdim%nnodes/))
    
-      
 end function convert_cptr_to_meshgeom
 
 !> by deallocating what is associated, no memory leaks
@@ -491,6 +527,8 @@ function t_ug_meshgeom_destructor(meshgeom) result(ierr)
    if(associated(meshgeom%nodeids)) deallocate(meshgeom%nodeids)
    if(associated(meshgeom%nodelongnames)) deallocate(meshgeom%nodelongnames)
    
+   if(associated(meshgeom%nbranchids)) deallocate(meshgeom%nbranchids)
+   if(associated(meshgeom%nbranchlongnames)) deallocate(meshgeom%nbranchlongnames)
   
    meshgeom%dim             = -1 
    meshgeom%numnode         = -1    
@@ -545,6 +583,9 @@ function t_ug_meshgeom_destructor(meshgeom) result(ierr)
    
    meshgeom%nodeids       => null()
    meshgeom%nodelongnames => null()
+   
+   meshgeom%nnodeids         => null()
+   meshgeom%nnodelongnames   => null()
    
    end function t_ug_meshgeom_destructor
 

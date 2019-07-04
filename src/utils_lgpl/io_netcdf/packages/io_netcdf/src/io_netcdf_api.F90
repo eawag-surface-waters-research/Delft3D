@@ -1536,4 +1536,26 @@ function ionc_put_meshgeom_v1_dll(ioncid, meshid, networkid, c_meshgeom, c_meshg
    
 end function ionc_put_meshgeom_v1_dll
 
+
+function ionc_put_network_dll(ioncid, networkid, c_networkgeom, c_networkgeomdim) result(ierr) bind(C, name="ionc_put_network")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_network_dll
+
+   use meshdata
+   integer, intent(in)                         :: ioncid
+   integer, intent (inout)                     :: networkid
+   type (c_t_ug_meshgeom), intent(in)          :: c_networkgeom
+   type (c_t_ug_meshgeomdim)                   :: c_networkgeomdim
+   integer                                     :: ierr
+   ! Locals
+   type(t_ug_meshgeom)                         :: networkgeom
+
+   !initialize meshgeom
+   ierr = t_ug_meshgeom_destructor(networkgeom)
+   !convert c_meshgeom to meshgeom
+   ierr = convert_cptr_to_meshgeom(c_networkgeom, c_networkgeomdim, networkgeom)
+   !write meshgeom 
+   ierr = ionc_put_network(ioncid, networkgeom, networkid)
+
+end function ionc_put_network_dll
+
 end module io_netcdf_api

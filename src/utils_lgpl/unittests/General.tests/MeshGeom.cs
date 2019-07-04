@@ -46,13 +46,18 @@ namespace General.tests
         public int startIndex;
         public IntPtr nodeids;
         public IntPtr nodelongnames;
+
+        public IntPtr nbranchids;
+        public IntPtr nbranchlongnames;
+        public IntPtr nnodeids;
+        public IntPtr nnodelongnames;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct meshgeomdim
     {       
         //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        public IntPtr meshname;
+        public IntPtr name;
         public int dim;
         public int numnode;
         public int numedge;
@@ -68,13 +73,6 @@ namespace General.tests
     }
 
     #endregion meshgeom
-
-    public static class MeshgeomMemoryManager
-    {
-
-        
-    }
-
 
     public class StringBufferHandling
     {

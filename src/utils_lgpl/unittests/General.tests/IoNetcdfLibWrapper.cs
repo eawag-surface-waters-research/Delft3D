@@ -705,6 +705,18 @@ namespace General.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_meshgeom_v1", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_put_meshgeom_v1_dll([In] ref int ioncid, [In, Out] ref int meshid, [In, Out] ref int networkid, [In] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim);
 
+        /// <summary>
+        /// Put a network to file
+        /// </summary>
+        /// <param name="ioncid"></param>
+        /// <param name="networkid"></param>
+        /// <param name="networkgeom"></param>
+        /// <param name="networkgeomdim"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_network", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_put_network_dll([In] ref int ioncid, [In, Out] ref int networkid, [In] ref meshgeom networkgeom, [In] ref meshgeomdim networkgeomdim);
+
+
         #region Implementation of LibWrapper
 
         public bool ionc_adheresto_conventions(ref int ioncid, ref int iconvtype)
@@ -1040,6 +1052,11 @@ namespace General.tests
         public int ionc_get_meshgeom(ref int ioncid, ref int meshid, ref int networkid, ref meshgeom meshgeom)
         {
             return ionc_get_meshgeom_v1_dll(ref ioncid, ref meshid, ref networkid, ref meshgeom);
+        }
+
+        public int ionc_put_network(ref int ioncid, ref int networkid, ref meshgeom networkgeom, ref meshgeomdim networkgeomdim)
+        {
+            return ionc_put_network_dll(ref  ioncid, ref networkid, ref  networkgeom, ref networkgeomdim);
         }
 
         public int ionc_get_meshgeom_dim(ref int ioncid, ref int meshid, ref int networkid, ref meshgeomdim meshgeomdim)
