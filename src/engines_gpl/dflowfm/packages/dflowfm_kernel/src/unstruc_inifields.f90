@@ -181,8 +181,7 @@ function initInitialFields(inifilename) result(ierr)
             call prepare_lateral_mask(kcsini, iLocType)
             
             success = timespaceinitialfield(xz, yz, hs, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
-            ! TODO: translate hs into s1.
-            !s1 = bl + hs ...
+            s1(1:ndxi) = bl(1:ndxi) + hs(1:ndxi)
             
          else if (strcmpi(qid, 'frictioncoefficient')) then
             ! TODO: masking u points
@@ -578,6 +577,7 @@ subroutine init1dField(filename, inifieldfilename, quant)
          call spaceInit1dfield(branchId, chainage, values, 2, s1)
       else if (strcmpi(quantity, 'waterdepth')) then
          call spaceInit1dfield(branchId, chainage, values, 2, hs)
+         s1(1:ndxi) = bl(1:ndxi) + hs(1:ndxi)
       else if (strcmpi(quantity, 'frictioncoefficient')) then
          call spaceInit1dfield(branchId, chainage, values, 1, frcu)
       else if (strcmpi(quantity, 'bedlevel')) then
