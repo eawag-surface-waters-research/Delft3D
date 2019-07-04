@@ -17826,7 +17826,7 @@ subroutine unc_write_his(tim)            ! wrihis
     if (jahissourcesink > 0 .and. numsrc > 0) then
       if (tim == tstart_user) then
         do i = 1, numsrc
-          ierr = nf90_put_var(ihisfile, id_srcname, srcname(i), (/ 1, i/) )
+          ierr = nf90_put_var(ihisfile, id_srcname, trim(srcname(i)), (/ 1, i/) )
           ierr = nf90_put_var(ihisfile, id_qsrccur, qstss((numconst+1)*(i-1)+1), (/ i, it_his /))
         enddo
         ierr = nf90_put_var(ihisfile, id_srcx, xsrc)
