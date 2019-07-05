@@ -2738,6 +2738,15 @@ namespace UGrid.tests
             ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh);
             Assert.That(ierr, Is.EqualTo(0));
 
+            var l_meshnodeids = StringBufferHandling.ParseString(mesh.nodeids, meshdim.numnode, IoNetcdfLibWrapper.idssize);
+            var l_meshnodelongnames = StringBufferHandling.ParseString(mesh.nodelongnames, meshdim.numnode, IoNetcdfLibWrapper.longnamessize);
+
+            for (int i = 0; i < meshdim.numnode; i++)
+            {
+                Assert.That(l_meshnodeids[i], Is.EqualTo(meshnodeids[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                Assert.That(l_meshnodelongnames[i], Is.EqualTo(meshnodelongnames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+            }
+            
             // Clean memory
             register.Dispose();
         }
