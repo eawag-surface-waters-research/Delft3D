@@ -60,6 +60,28 @@ module m_readstructures
    public readPump
    public readDambreak
 
+   !> The file version number of the structure file format: d.dd, [config_major].[config_minor], e.g., 1.03
+   !!
+   !! Note: read config_minor as a 2 digit-number, i.e., 1.1 > 1.02 (since .1 === .10 > .02).
+   !! Convention for format version changes:
+   !! * if a new format is backwards compatible with old files, only
+   !!   the minor version number is incremented.
+   !! * if a new format is not backwards compatible (i.e., old files
+   !!   need to be converted/updated by user), then the major version number
+   !!   is incremented.
+   
+   ! Structure file current version: 1.00
+   integer, parameter :: StructureFileMajorVersion = 1
+   integer, parameter :: StructureFileMinorVersion = 0
+   
+   ! History structure file versions:
+
+   ! 0.00 (pre-2019  ): Unversioned flow1d/SOBEK3 version of *.ini type structure file.
+   ! 1.00 (2019-07-05): Consistent renaming,
+   !                    * pumps: nrStages -> numStages, reductionFactorLevels -> numReductionLevels
+   !                    * culverts: lossCoeffCount -> numLossCoeff
+   !                    * universal weir: levelsCount -> numLevels
+
    contains
 
    subroutine readStructures(network, structureFile)
@@ -97,7 +119,8 @@ module m_readstructures
       integer                       :: ibin = 0
       character(len=Charln)         :: binfile
       logical                       :: file_exist
-      
+      integer                       :: major, minor, ierr
+
       pos = index(structureFile, '.', back = .true.)
       binfile = structureFile(1:pos)//'cache'
       inquire(file=binfile, exist=file_exist)
@@ -116,6 +139,21 @@ module m_readstructures
       call tree_create(trim(structurefile), md_ptr, maxlenpar)
       call prop_file('ini',trim(structurefile),md_ptr,istat)
       
+      ! check FileVersion
+      ierr = 0
+      major = 0
+      minor = 0
+      call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
+      if (.not. success .or. major < StructureFileMajorVersion) then
+         write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of structure file detected in '''//trim(structurefile)//''': v', major, minor, '. Current format: v',StructureFileMajorVersion,StructureFileMinorVersion,'. Ignoring this file.'
+         call warn_flush()
+         ierr = 1
+      end if
+
+      if (ierr /= 0) then
+         goto 999
+      end if
+
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
          numstr = size(md_ptr%child_nodes)
@@ -292,6 +330,7 @@ module m_readstructures
          network%sts%restartData = missingValue
       endif
 
+999   continue
       call tree_destroy(md_ptr)
 
    end subroutine readStructures
@@ -684,7 +723,7 @@ module m_readstructures
       if (success) call prop_get_double(md_ptr, 'structure', 'freesubmergedfactor', uniweir%freesubmergedfactor, success)
       if (.not. success) uniweir%freesubmergedfactor = 0.667d0
       
-      call prop_get_integer(md_ptr, 'structure', 'levelsCount', uniweir%yzcount, success)
+      call prop_get_integer(md_ptr, 'structure', 'numLevels', uniweir%yzcount, success) ! UNST-2714: new consistent keyword
       if (.not. success) return
       
       call realloc(uniweir%y, uniweir%yzcount, stat=istat)
@@ -769,7 +808,7 @@ module m_readstructures
          
          call prop_get_double(md_ptr, 'structure', 'inivalveopen', culvert%inivalveopen, success)
 
-         if (success) call prop_get_integer(md_ptr, 'structure', 'lossCoeffCount', lossCoeffCount, success)
+         if (success) call prop_get_integer(md_ptr, 'structure', 'numLossCoeff',   lossCoeffCount, success) ! UNST-2710: new consistent keyword
          if (.not. success) return
             
          call realloc(relOpen, lossCoeffCount, stat=istat)
@@ -1091,7 +1130,7 @@ module m_readstructures
       allocate(pump)
 
       call prop_get_integer(md_ptr, 'structure', 'direction', pump%direction, success)
-      if (success) call prop_get_integer(md_ptr, 'structure', 'nrstages', pump%nrstages, success)
+      if (success) call prop_get_integer(md_ptr, 'structure', 'numStages', pump%nrstages, success) ! UNST-2709: new consistent keyword
       if (.not. success) then
          pump%nrstages = 1
          success = .true.
@@ -1127,7 +1166,7 @@ module m_readstructures
       pump%ds_trigger = .true.
 
       ! Reduction Table
-      call prop_get_integer(md_ptr, 'structure', 'reductionfactorlevels', tabsize, success)
+      call prop_get_integer(md_ptr, 'structure', 'numReductionLevels', tabsize, success) ! UNST-2709: new consistent keyword
       if (.not. success .or. tabsize < 1) then
          tabsize = 1
       endif
