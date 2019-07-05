@@ -54,13 +54,14 @@ module m_readObservCrossSections
    !!   need to be converted/updated by user), then the major version number
    !!   is incremented.
    
-   ! Observation cross section file current version: 1.01
-   integer, parameter :: ObservCrsFileMajorVersion = 1
-   integer, parameter :: ObservCrsFileMinorVersion = 1
+   ! Observation cross section file current version: 2.00
+   integer, parameter :: ObservCrsFileMajorVersion = 2
+   integer, parameter :: ObservCrsFileMinorVersion = 0
    
    ! History observation cross section file versions:
 
    ! 1.01 (2019-03-12): First version of *.ini type observation cross section file.
+   ! 2.00 (2019-07-05): renamed numValues -> numCoordinates.
 
    contains
    
@@ -91,7 +92,7 @@ module m_readObservCrossSections
       integer                               :: ibin = 0
       character(len=Charln)                 :: binfile
       logical                               :: file_exist
-      integer                               :: formatbr       ! =1: use branchid and chainage, =0: use xy coordinate and numValues
+      integer                               :: formatbr       ! =1: use branchid and chainage, =0: use xy coordinate and numCoordinates
       integer                               :: major, minor, ierr
       
       Chainage   = dmiss
@@ -151,10 +152,10 @@ module m_readObservCrossSections
                   call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationcrosssection', 'chainage', chainage, success)
                else ! the crs is defined by x, y coordinate
                   formatbr = 0
-                  call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'observationcrosssection', 'numValues', numv, success)
+                  call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'observationcrosssection', 'numCoordinates', numv, success) ! UNST-2390: new consistent keyword
                   if (success) then
                      if (numv < 2) then
-                        call SetMessage(LEVEL_ERROR, 'Observation cross section '''//trim(observcrsName)//''' should have more than 1 point (numValues > 1).')     
+                        call SetMessage(LEVEL_ERROR, 'Observation cross section '''//trim(observcrsName)//''' should have more than 1 point (numCoordinates > 1).')     
                         cycle
                      else if (numv > 0) then
                         call realloc(xx, numv)
