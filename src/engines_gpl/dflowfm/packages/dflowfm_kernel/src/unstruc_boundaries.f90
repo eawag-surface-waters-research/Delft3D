@@ -2697,7 +2697,7 @@ if (npump > 0) then
       istrtype  = getStructype_from_string(strtype)
 
       ! Do a try-read to determine whether this is a staged flow1d pump. If not, just continue (capacity is enough then).
-      call prop_get_integer(str_ptr, 'structure', 'nrstages', itmp, success)
+      call prop_get_integer(str_ptr, 'structure', 'numStages', itmp, success) ! UNST-2709: new consistent keyword
       if (success) then
          ! flow1d_io library: add and read SOBEK pump
          ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number  is not used in computations)
