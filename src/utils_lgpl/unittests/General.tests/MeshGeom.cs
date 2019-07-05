@@ -161,87 +161,67 @@ namespace General.tests
 
         public void Add(ref meshgeomdim meshdim, ref meshgeom mesh)
         {
+            int idssize = 40;
+            int longnamessize = 80;
             if (meshdim.numnode > 0)
             {
                 Add<double>(meshdim.numnode, ref mesh.nodex);
-                int idssize = 40;
-                int longnamessize = 80;
                 Add<char>(meshdim.numnode * idssize, ref mesh.nodeids);
-                Add<char>(meshdim.numnode * idssize, ref mesh.nodelongnames);
+                Add<char>(meshdim.numnode * longnamessize, ref mesh.nodelongnames);
+                Add<char>(meshdim.numnode, ref mesh.nodey);
+                Add<double>(meshdim.numnode, ref mesh.nodez);
+            }
+
+            if (meshdim.numedge > 0)
+            {
+                Add<int>(meshdim.numedge * 2, ref mesh.edge_nodes);
+                Add<int>(meshdim.numedge * 2, ref mesh.edge_faces);
+                Add<double>(meshdim.numedge, ref mesh.edgex);
+                Add<double>(meshdim.numedge, ref mesh.edgey);
+            }
+
+            if (meshdim.numface > 0)
+            {
+                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_nodes);
+                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_edges);
+                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_links);
+                Add<double>(meshdim.numface, ref mesh.facex);
+                Add<double>(meshdim.numface, ref mesh.facey);
             }
 
             if (meshdim.numnode > 0)
-                Add<char>(meshdim.numnode, ref mesh.nodey);
-
-            if (meshdim.numnode > 0)
+            {
+                Add<double>(meshdim.numnode, ref mesh.nodex);
+                Add<double>(meshdim.numnode, ref mesh.nodey);
                 Add<double>(meshdim.numnode, ref mesh.nodez);
+            }
 
-            if (meshdim.numedge > 0)
-                Add<int>(meshdim.numedge * 2, ref mesh.edge_nodes);
-
-            if (meshdim.numface > 0)
-                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_nodes);
-
-            if (meshdim.numedge > 0)
-                Add<int>(meshdim.numedge * 2, ref mesh.edge_faces);
-
-            if (meshdim.numface > 0)
-                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_edges);
-
-            if (meshdim.numface > 0)
-                Add<int>(meshdim.maxnumfacenodes * meshdim.numface, ref mesh.face_links);
-
-            if (meshdim.nnodes > 0)
-                Add<double>(meshdim.nnodes, ref mesh.nodex);
-
-            if (meshdim.nnodes > 0)
-                Add<double>(meshdim.nnodes, ref mesh.nodey);
-
-            if (meshdim.nnodes > 0)
-                Add<double>(meshdim.nnodes, ref mesh.nodez);
-             
-            if (meshdim.numedge > 0)
-                Add<double>(meshdim.numedge, ref mesh.edgex);
-     
-            if (meshdim.numedge > 0)
-                Add<double>(meshdim.numedge, ref mesh.edgey);
-       
-            if (meshdim.numface > 0)
-                Add<double>(meshdim.numface, ref mesh.facex);
-
-            if (meshdim.numface > 0)
-                Add<double>(meshdim.numface, ref mesh.facey);
-       
             //network part
             if (meshdim.nnodes > 0)
+            {
                 Add<double>(meshdim.nnodes, ref mesh.nnodex);
-   
-            if (meshdim.nnodes > 0)
                 Add<double>(meshdim.nnodes, ref mesh.nnodey);
-       
-            if (meshdim.nnodes > 0)
                 Add<int>(meshdim.nnodes, ref mesh.branchidx);
-          
-            if (meshdim.nnodes > 0)
                 Add<double>(meshdim.nnodes, ref mesh.branchoffsets);
-            
+                Add<char>(meshdim.nnodes * idssize, ref mesh.nnodeids);
+                Add<char>(meshdim.nnodes * longnamessize, ref mesh.nnodelongnames);
+            }
+
             if (meshdim.nbranches > 0)
+            {
                 Add<double>(meshdim.nbranches, ref mesh.nbranchlengths);
-
-            if (meshdim.nbranches > 0)
                 Add<int>(meshdim.nbranches, ref mesh.nbranchgeometrynodes);
-
-            if (meshdim.ngeometry > 0)
-                Add<double>(meshdim.ngeometry, ref mesh.ngeopointx);
-
-            if (meshdim.ngeometry > 0)
-                Add<double>(meshdim.ngeometry, ref mesh.ngeopointy);
-
-            if (meshdim.nbranches > 0)
                 Add<int>(meshdim.nbranches, ref mesh.nedge_nodes);
-
-            if (meshdim.nbranches > 0)
                 Add<int>(meshdim.nbranches, ref mesh.nbranchorder);
+                Add<char>(meshdim.nbranches * idssize, ref mesh.nbranchids);
+                Add<char>(meshdim.nbranches * longnamessize, ref mesh.nbranchlongnames);
+            }
+
+            if (meshdim.ngeometry > 0)
+            {
+                Add<double>(meshdim.ngeometry, ref mesh.ngeopointx);
+                Add<double>(meshdim.ngeometry, ref mesh.ngeopointy);
+            }
         }
         
         public void Dispose()

@@ -2650,8 +2650,8 @@ namespace UGrid.tests
             Marshal.Copy(c_networkids, l_networkid, 0, nnumNetworks);
 
             // Get network dimensions using meshgeom
-            int meshid = -1; //set an invalid index
-            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid[0], ref networkdim);
+            int networkid = -1; //set an invalid index
+            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref networkid, ref l_networkid[0], ref networkdim);
             Assert.That(ierr, Is.EqualTo(0));
 
             // Register unmanaged memory and pointers 
@@ -2661,7 +2661,7 @@ namespace UGrid.tests
             
             // Client wants 0 based arrays
             network.startIndex = 0;
-            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid[0], ref network);
+            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref networkid, ref l_networkid[0], ref network);
             Assert.That(ierr, Is.EqualTo(0));
 
             // Reconstruct the arrays
@@ -2681,6 +2681,23 @@ namespace UGrid.tests
             Marshal.Copy(network.nbranchlengths, l_nbranchlengths, 0, networkdim.nbranches);
             Marshal.Copy(network.ngeopointx, l_ngeopointx, 0, networkdim.ngeometry);
             Marshal.Copy(network.ngeopointy, l_ngeopointy, 0, networkdim.ngeometry);
+            var l_networkNodeIds = StringBufferHandling.ParseString(network.nnodeids, networkdim.nnodes, IoNetcdfLibWrapper.idssize);
+            var l_networkLongNames = StringBufferHandling.ParseString(network.nnodelongnames, networkdim.nnodes, IoNetcdfLibWrapper.longnamessize);
+            var l_branchids = StringBufferHandling.ParseString(network.nbranchids, networkdim.nbranches, IoNetcdfLibWrapper.idssize);
+            var l_branchlongnames = StringBufferHandling.ParseString(network.nbranchlongnames, networkdim.nbranches, IoNetcdfLibWrapper.longnamessize);
+
+            for (int i = 0; i < networkdim.nnodes; i++)
+            {
+                Assert.That(l_networkNodeIds[i], Is.EqualTo(nodesids[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                Assert.That(l_networkLongNames[i], Is.EqualTo(nodeslongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+            }
+
+            for (int i = 0; i < networkdim.nbranches; i++)
+            {
+                Assert.That(l_branchids[i], Is.EqualTo(branchids[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                Assert.That(l_branchlongnames[i], Is.EqualTo(branchlongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+            }
+
 
             // Close the file
             ierr = wrapper.ionc_close(ref ioncid);

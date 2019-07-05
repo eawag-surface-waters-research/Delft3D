@@ -1469,17 +1469,44 @@ end function ionc_get_meshgeom_dll
 function ionc_get_meshgeom_v1_dll(ioncid, meshid, networkid, c_meshgeom) result(ierr) bind(C, name="ionc_get_meshgeom_v1")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_meshgeom_v1_dll
    use meshdata
-   integer, intent(in)                         :: ioncid, meshid, networkid
-   type (c_t_ug_meshgeom), intent(inout)       :: c_meshgeom
-   integer                                     :: ierr
-   type(t_ug_meshgeom)                         :: meshgeom
-   type (c_t_ug_meshgeomdim)                   :: c_meshgeomDim !currently this is not an output argument, but it could be considered
+   integer, intent(in)                            :: ioncid, meshid, networkid
+   type (c_t_ug_meshgeom), intent(inout)          :: c_meshgeom
+   integer                                        :: ierr
+   type(t_ug_meshgeom)                            :: meshgeom
+   type (c_t_ug_meshgeomdim)                      :: c_meshgeomDim !currently this is not an output argument, but it could be considered
+
+   character(len=ug_idsLen), allocatable, target           :: nnodeids(:), nbranchids(:), nodeids(:)    
+   character(len=ug_idsLongNamesLen), allocatable,target   :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:) 
+   character(len=ug_nameLen)                               :: mesh1dname   
+   character(len=ug_nameLen)                               :: network1dname   
    
    !initialize meshgeom
    ierr = t_ug_meshgeom_destructor(meshgeom)
+   
+   !get the sizes first
+   ierr = ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom)
+   
+   !allocate the arrays
+   allocate(nbranchids(meshgeom%nbranches))
+   allocate(nbranchlongnames(meshgeom%nbranches))
+   allocate(nnodeids(meshgeom%nnodes))
+   allocate(nnodelongnames(meshgeom%nnodes)) 
+   allocate(nodeids(meshgeom%numnode ))
+   allocate(nodelongnames(meshgeom%numnode)) 
+   
    !get the mesh geometry
-   ierr = ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom, c_meshgeom%start_index, .true.)
+   ierr = ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom, c_meshgeom%start_index, .true.,nbranchids=nbranchids,&
+                            nbranchlongnames=nbranchlongnames, nnodeids=nnodeids, nnodelongnames=nnodelongnames, nodeids=nodeids, nodelongnames=nodelongnames,&
+                            mesh1dname=mesh1dname, network1dname=network1dname)
+   
    !set the pointers in c_meshgeom
+   meshgeom%nbranchids=>nbranchids
+   meshgeom%nbranchlongnames=>nbranchlongnames
+   meshgeom%nnodeids=>nnodeids
+   meshgeom%nnodelongnames=>nnodelongnames
+   meshgeom%nodeids=>nodeids
+   meshgeom%nodelongnames=>nodelongnames
+   
    ierr = convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomDim)
    
 end function ionc_get_meshgeom_v1_dll
