@@ -463,6 +463,8 @@
 !
             if ( isrtou .eq. imnf .or.
      +           isrtou .eq. ihnf .or.
+     +           isrtou .eq. ihnf .or.
+     +           isrtou .eq. ihnc3 .or.
      +           isrtou .eq. imo3 .or.
      +           isrtou .eq. ihi3 .or.
      +           isrtou .eq. ihn3     ) then
