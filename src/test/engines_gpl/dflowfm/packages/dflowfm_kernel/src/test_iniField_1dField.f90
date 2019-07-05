@@ -222,6 +222,7 @@ subroutine test_iniField1dField_waterlevel
     ! Locals  
     integer                                     :: i
     integer                                     :: istat, ierr
+    double precision                            :: deltas
     double precision, dimension(:), allocatable :: refs1
     !
     ! Body
@@ -231,8 +232,28 @@ subroutine test_iniField1dField_waterlevel
     numk  = 0
     allocate(refs1(168), stat=istat)
     refs1 = 5.0d0
+    !
+    ! Branch 2
     do i = 9, 21
         refs1(i) = 7.0d0
+    end do
+    !
+    ! Branch 3
+    deltas = 3.0d0/22.0d0
+    do i = 22, 44
+        refs1(i) = 8.0d0 - dble(i-22) * deltas
+    end do
+    !
+    ! Branch 4
+    deltas = 3.0d0/42.0d0
+    do i = 45, 88
+        refs1(i) = 8.0d0 - dble(i-45) * deltas
+    end do
+    !
+    ! Branch 5
+    deltas = 3.0d0/80.0d0
+    do i = 89, 168
+        refs1(i) = 8.0d0 - dble(i-89) * deltas
     end do
     !call inidat()
     

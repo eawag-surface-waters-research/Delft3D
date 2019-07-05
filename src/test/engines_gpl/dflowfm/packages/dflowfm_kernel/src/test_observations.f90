@@ -144,7 +144,7 @@ subroutine test_read_snapped_obs_points
         call assert_equal     (kobs(i)    , ref_k    (i), 'index of snapped observation points incorrect' )
         call assert_comparable(xz(kobs(i)), refdata(1,i), eps, 'x-coordinate of snapped observation points incorrect' )
         call assert_comparable(yz(kobs(i)), refdata(2,i), eps, 'y-coordinate of snapped observation points incorrect' )
-        call assert_equal     (namobs(i)  , refnames (i), "Snapped obeservation point name incorrect" )
+        call assert_equal     (namobs(i)  , refnames (i), "Snapped observation point name incorrect" )
     enddo
 end subroutine test_read_snapped_obs_points
 
