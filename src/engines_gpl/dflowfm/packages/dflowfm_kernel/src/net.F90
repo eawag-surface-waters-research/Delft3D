@@ -13243,7 +13243,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       N1 = 0
       DISMIN = 9E+33
       DO L = 1,numl
-         IF (kn(3,L) == 1 .or. kn(3,L) == 6) then !  .or. kn(3,L) == 4) THEN
+         IF (kn(3,L) == 1 .or. kn(3,L) == 6  .or. kn(3,L) == 5 .or. kn(3,L) == 7) then !  .or. kn(3,L) == 4) THEN
              K1 = kn(1,L) ; K2 = kn(2,L)
              XA = Xk(K1)
              YA = Yk(K1)

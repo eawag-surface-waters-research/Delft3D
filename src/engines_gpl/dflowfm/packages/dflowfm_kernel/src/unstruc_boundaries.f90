@@ -148,14 +148,14 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
 
  if (allocated(kez)) then
     ! If flow_geominit was called separately from a flow_modelinit:
-    deallocate (             kez,     keu,     kes,     ketm,     kesd,     keuxy,     ket,     ken,     ke1d2d,     keg,     ked,     kep, kedb, keklep,     kegs,     kegen,     itpez,     itpenz,     itpeu,      itpenu,     kew)
+    deallocate (             kez,     keu,     kes,     ketm,     kesd,     keuxy,     ket,     ken,     ke1d2d,     keg,     ked,     kep,     kedb,     keklep,     kevalv,     kegs,     kegen,     itpez,     itpenz,     itpeu,      itpenu,     kew)
  end if
  if (allocated(ftpet) ) then
     deallocate(ftpet)
  end if
- allocate ( kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), kedb(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx), kew(nx), ftpet(nx), stat=ierr )
- call aerr('kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), kedb(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx) , kew(nx), ftpet(nx)',ierr, 17*nx)
-            kce = 0; ke = 0; kez = 0; keu = 0; kes = 0; ketm = 0; kesd = 0; keuxy = 0; ket = 0; ken = 0; ke1d2d = 0; keg = 0; ked = 0; kep=  0; kedb=0; keklep=0; kegen= 0; itpez = 0; itpenz = 0; itpeu = 0 ; itpenu = 0 ; kew = 0; ftpet = 1d6
+ allocate ( kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), kedb(nx), keklep(nx), kevalv(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx), kew(nx), ftpet(nx), stat=ierr )
+ call aerr('kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), kedb(nx), keklep(nx), kevalv(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx), kew(nx), ftpet(nx)',ierr, 17*nx)
+            kce = 0; ke = 0; kez = 0; keu = 0; kes = 0; ketm = 0; kesd = 0; keuxy = 0; ket = 0; ken = 0; ke1d2d = 0; keg = 0; ked = 0; kep=  0; kedb=0  ; keklep=0  ; kevalv=0  ; kegen= 0; itpez = 0; itpenz = 0; itpeu = 0 ; itpenu = 0 ; kew = 0; ftpet = 1d6
 
  if (allocated(ketr) ) deallocate(ketr)          
  allocate ( ketr(nx,1), stat = ierr )
@@ -1257,6 +1257,8 @@ subroutine prepare_lateral_mask(kc, ilattype)
          if (abs(prof1D(3,L)) .ne. 1 .and. prof1D(3,L) > 0 ) then ! no pipes pos or neg, others only if pos
             k1 = ln(1,L) ; kc(k1) = 1
             k2 = ln(2,L) ; kc(k2) = 1
+         else
+            continue
          endif   
       enddo   
       do L = lnx1D+1,lnxi
@@ -1836,7 +1838,7 @@ else
    jaoldstr = 1
    status = .True.
    RETURN ! DEZE SUBROUTINE IS EEN KOPIE VAN MIJN CODE EN DAT BRENGT ME IN DE WAR
-          ! DAAROM VOORLOPIG UIT UNSTRUC.F90 VERPLAATST
+                         ! DAAROM VOORLOPIG UIT UNSTRUC.F90 VERPLAATST
 end if
 
 if (allocated(strnums)) deallocate(strnums)

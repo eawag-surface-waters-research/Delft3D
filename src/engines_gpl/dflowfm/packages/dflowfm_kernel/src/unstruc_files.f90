@@ -51,6 +51,7 @@ implicit none
     integer :: mhlp = 0 !< File pointer to help file
     
     character(len=60)  :: pathdi          ! TODO: AvD: TEMP. moved from hwsw.inc
+    character(len=86)  :: Filnammenu      ! name of selected file in nfiles
    
 contains
 

@@ -134,6 +134,7 @@ module m_meteo
    integer, target :: item_shiptxy                                           !< Unique Item id of the ext-file's 'shiptxy' quantity
    integer, target :: item_movingstationtxy                                  !< Unique Item id of the ext-file's 'movingstationtxy' quantity
    integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantity
+   integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantity
    integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
    integer, target :: item_gateloweredgelevel                                !< Unique Item id of the ext-file's 'gateloweredgelevel' quantity
    integer, target :: item_generalstructure                                  !< Unique Item id of the ext-file's 'generalstructure' quantity
@@ -225,6 +226,7 @@ module m_meteo
       item_shiptxy                               = ec_undef_int
       item_movingstationtxy                      = ec_undef_int
       item_pump                                  = ec_undef_int
+      item_valve1D                               = ec_undef_int    
       item_lateraldischarge                      = ec_undef_int
       item_damlevel                              = ec_undef_int
       item_gateloweredgelevel                    = ec_undef_int
@@ -527,6 +529,8 @@ module m_meteo
          case ('pump')
             itemPtr1 => item_pump
             !dataPtr1      => qpump
+         case ('valve1D')
+            itemPtr1 => item_valve1D
          case ('damlevel')
             itemPtr1 => item_damlevel
          case ('dambreakLevelsAndWidths')      
@@ -1056,7 +1060,7 @@ module m_meteo
       converterId = ecCreateConverter(ecInstancePtr)
       
       select case(target_name)
-      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'lateraldischarge','dambreakLevelsAndWidths')
+      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'valve1D', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'lateraldischarge','dambreakLevelsAndWidths')
          ! for the FM 'target' arrays, the index is provided by the caller
          if (.not. present(targetIndex)) then
             message = 'Internal program error: missing targetIndex for quantity '''//trim(target_name)
@@ -1140,7 +1144,7 @@ module m_meteo
             end if
             ! the file reader will have created an item called 'uniform_item'
             sourceItemName = 'uniform_item'
-         case ('pump','generalstructure','damlevel','gateloweredgelevel','lateraldischarge','dambreakLevelsAndWidths')
+         case ('pump','generalstructure','damlevel', 'valve1D','gateloweredgelevel','lateraldischarge','dambreakLevelsAndWidths')
             if (checkFileType(ec_filetype, provFile_uniform, target_name)) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
                if (sourceItemId==ec_undef_int) then 

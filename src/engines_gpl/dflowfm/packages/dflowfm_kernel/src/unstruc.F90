@@ -3177,6 +3177,11 @@ end subroutine sethu
     endif
  enddo
 
+ do n   = 1, nvalv             ! smoren
+    L   = Lvalv(n)
+    fac = max(0d0,min(1d0,valv(n)))
+    au(L) = fac*au(L)
+ enddo
 
  if ( nqbnd.eq.0 ) return
 
@@ -14980,6 +14985,12 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
 !   !$OMP SECTION
 
+   if (nvalv > 0) then
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_valve1D, irefdate, tzone, tunit,tim, valv)
+   endif
+
+!   !$OMP SECTION
+
    if (jatidep > 0) then
       call flow_settidepotential(timmin)
    endif
@@ -20190,6 +20201,21 @@ end subroutine unc_write_shp
  IF (ALLOCATED (prof1D) ) deallocate( prof1D)
  allocate  ( prof1D(3,lnx1D) , stat= ierr)
  call aerr ('prof1D(3,lnx1D)', ierr, 2*lnx1D)
+ do L = 1,lnx1D
+    if (kn(3,L) == 5) then             !  restricting dimensions of streetinlet
+       prof1D(1,L) = wu1Duni5          !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
+       prof1D(2,L) = hh1Duni5          !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
+       prof1D(3,L) = iproftypuni5      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
+    else if (kn(3,L) == 7) then        !  restricting dimensions of roofgutterpipe
+       prof1D(1,L) = wu1Duni7          !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
+       prof1D(2,L) = hh1Duni7          !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
+       prof1D(3,L) = iproftypuni7      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
+    else
+       prof1D(1,L) = wu1Duni           !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
+       prof1D(2,L) = hh1Duni           !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
+       prof1D(3,L) = iproftypuni       !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
+    endif
+ enddo
 
  IF (ALLOCATED (Lbnd1D) ) deallocate( Lbnd1D)
  allocate  ( Lbnd1D(lnxi+1:lnx) , stat= ierr) ;  Lbnd1D = 0
@@ -21126,10 +21152,16 @@ end subroutine unc_write_shp
  use m_missing
  use m_polygon
  use unstruc_model
+ use m_sferic
+ use geometry_module, only: dbdistance
  implicit none
 
  integer          :: minp, Ls, Lf, n, k1, k2
- double precision :: x1,y1,z1,x2,y2,z2,xc,yc,XLS,YLS,dum,w1,w2
+ double precision :: x1,y1,z1,x2,y2,z2,xc,yc,XLS,YLS,dum,w1,w2,h1,h2
+ logical          :: jawel
+
+ inquire(file=trim(md_pipefile) , exist=jawel)
+ if (.not. jawel) return 
 
  call oldfil(minp, md_pipefile)
  call reapol(minp,0)
@@ -21137,8 +21169,8 @@ end subroutine unc_write_shp
 
  do n  = 1,npl-1
 
-    x1 = xpl(n)   ; y1 = ypl(n)   ; z1 = zpl(n)   ; w1 = dzL(n)
-    x2 = xpl(n+1) ; y2 = ypl(n+1) ; z2 = zpl(n+1) ; w2 = dzL(n+1)
+    x1 = xpl(n)   ; y1 = ypl(n)   ; z1 = zpl(n)   ; w1 = dzL(n)   ; h1 = dzR(n)
+    x2 = xpl(n+1) ; y2 = ypl(n+1) ; z2 = zpl(n+1) ; w2 = dzL(n+1) ; h2 = dzR(n+1) 
     if (x1 == DMISS .or. x2 == DMISS) cycle
     if (w1 <= 0d0 .or. w2 <= 0d0) then
        call qnerror(' pipes: width <= 0d0, fourth column', 'in', md_pipefile)
@@ -21152,12 +21184,18 @@ end subroutine unc_write_shp
         if (Ls > 0) then
             Lf = lne2ln(Ls)
             if (kcu(Lf) == 1 .or. kcu(Lf) == 5) then
-               k1 = ln(1,Lf)  ; bob(1,Lf) = max(z1,bl(k1))
-               k2 = ln(2,Lf)  ; bob(2,Lf) = max(z2,bl(k2))              ! flat
-               prof1D(1,Lf)   = w1
-               prof1D(2,Lf)   = w1
-               prof1D(3,Lf)   =  2                                      ! for now, simple rectan
-               jaduiktmp(Lf)  = 1
+               k1 = ln(1,Lf) ; k2 = ln(2,Lf)  
+               IF ( dbdistance(X1,Y1,Xzw(K1),Yzw(K1), jsferic, jasfer3D, dmiss) < dbdistance(X1,Y1,Xzw(K2),Yzw(K2), jsferic, jasfer3D, dmiss) ) THEN
+                  bob(1,Lf)  = z1 ; bl(k1) = min(z1, bl(k1) )   
+                  bob(2,Lf)  = z2 ; bl(k2) = min(z2, bl(k2) )  
+                else
+                  bob(1,Lf)  = z2 ; bl(k1) = min(z2, bl(k1) )   
+                  bob(2,Lf)  = z1 ; bl(k2) = min(z1, bl(k2) )
+               endif  
+               prof1D(1,Lf)  = w1 ; wu(Lf) = w1 
+               prof1D(2,Lf)  = h1
+               prof1D(3,Lf)  =  2                                      ! for now, simple rectan
+               jaduiktmp(Lf) =  1
             endif
          endif
      endif
@@ -21217,22 +21255,6 @@ end subroutine unc_write_shp
  if ( jampi.ne.1 ) then
     if (lnx1D == 0) return
  end if
-
- do L = 1,lnx1D
-    if (kn(3,L) == 5) then             !  restricting dimensions of streetinlet
-       prof1D(1,L) = wu1Duni5          !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
-       prof1D(2,L) = hh1Duni5          !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
-       prof1D(3,L) = iproftypuni5      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
-    else if (kn(3,L) == 7) then        !  restricting dimensions of roofgutterpipe
-       prof1D(1,L) = wu1Duni7          !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
-       prof1D(2,L) = hh1Duni7          !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
-       prof1D(3,L) = iproftypuni7      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
-    else
-       prof1D(1,L) = wu1Duni           !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
-       prof1D(2,L) = hh1Duni           !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
-       prof1D(3,L) = iproftypuni       !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
-    endif
- enddo
 
  fnam =  trim(md_proflocfile)
  inquire(file=trim(fnam) , exist=jawel)
@@ -21539,18 +21561,8 @@ end subroutine unc_write_shp
 
  endif
 
- fnam =  trim(md_pipefile)
- inquire(file=trim(fnam) , exist=jawel)
- if (jawel) then
-    call duikerstoprofs()
- endif
-
- do L = 1,lnx1D
-    if (abs(prof1D(3,L)) == 1) then ! circles are round
-        prof1D(2,L) = prof1D(1,L)
-    endif
- enddo
-
+ !call duikerstoprofs()
+ 
  end subroutine setprofs1D
 
  subroutine readprofilesloc(minp)
@@ -31920,33 +31932,29 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     bob0(2,L)  = zn2
     bl(n1)    = min(bl(n1) , blv)
     bl(n2)    = min(bl(n2) , blv)
- else if (kcu(L) == 5 .or. kcu(L) == 7) then         ! keep 1D and 2D levels
+ else if (kcu(L) == 5 .or. kcu(L) == 7) then         ! keep 1D and 2D levels 
     if (bl(n1) .ne. 1d30 ) then
        bob(1,L) = bl(n1)
-       bob0(1,L) = bl(n1)
     else
        bob(1,L) = zn1
-       bob0(1,L) = zn1
     endif
-    if (bl(n1) .ne. 1d30 ) then
+    if (bl(n2) .ne. 1d30 ) then
        bob(2,L) = bl(n2)
-       bob0(2,L) = bl(n2)
     else
        bob(2,L) = zn2
-       bob0(2,L) = zn2
     endif
-    if (bl(n1) .ne. 1d30 ) then
-       bob(2,L) = bl(n2)
-       bob0(2,L) = bl(n2)
-    else
-       bob(2,L) = zn2
-       bob0(2,L) = zn2
+    if (zk(k1) .ne. dmiss .and. nmk(k1) == 1) then   ! if zk specified at endpoint 
+        bob(1,L) = zk(k1)  
     endif
+    if (zk(k2) .ne. dmiss .and. nmk(k2) == 1) then   ! if zk specified at endpoint
+        bob(2,L) = zk(k2) 
+    endif             
     if (setHorizontalBobsFor1d2d) then
        bob(:,L) = max(bob(1,L), bob(2,L))
-       bob0(:,L) = max(bob(1,L), bob(2,L))
     endif
-
+    bob0(:,L) = bob0(:,L) 
+    bl(n1) = min( bl(n1) , bob(1,L) )
+    bl(n2) = min( bl(n2) , bob(2,L) )
  endif
 
  enddo
@@ -32017,6 +32025,8 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
         endif
      endif
  enddo
+
+ call duikerstoprofs()
 
  if (blmeanbelow .ne. -999d0) then
     do n = 1,ndx2D
@@ -37041,7 +37051,7 @@ end function is_1d_boundary_candidate
  integer, allocatable          :: lnxbnd(:)          ! temp
  double precision, allocatable :: viuh(:)            ! temp
  logical :: exist
- integer                       :: numz, numu, numq, numg, numd, numgen, npum, numklep, jaifrcutp
+ integer                       :: numz, numu, numq, numg, numd, numgen, npum, numklep, numvalv, jaifrcutp
  integer                       :: numnos, numnot, numnon ! < Nr. of unassociated flow links (not opened due to missing z- or u-boundary)
 
  double precision, allocatable :: xdum(:), ydum(:), xy2dum(:,:)
@@ -38531,6 +38541,18 @@ if (mext > 0) then
            nklep = nklep + numklep
            call realloc(Lklep,nklep) ; Lklep = keklep(1:nklep)
 
+        else if (jaoldstr > 0 .and. qid == 'valve1D' ) then
+
+           call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx1D, kevalv(nvalv+1:numl), numvalv, linktype = IFLTP_1D )
+           success = .true.
+           WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numvalv, ' nr of valves ' ; call msg_flush()
+
+           nvalv = nvalv + numvalv
+           call realloc(Lvalv,nvalv) ; Lvalv = kevalv(1:nvalv) ; call realloc(valv,nvalv)
+
+           L = index(filename,'.', back=.true.) - 1
+           success = adduniformtimerelation_objects(qid, filename, 'valve1D', filename(1:L), 'flow', '', nvalv, 1, valv)
+
         else if (qid == 'discharge_salinity_temperature_sorsin') then
 
            ! 1. Prepare source-sink location (will increment numsrc, and prepare geometric position), based on .pli file (transformcoef(4)=AREA).
@@ -38997,7 +39019,7 @@ endif ! read mext file
  endif
 
  if (allocated(kez)) then  ! mext > 0 .or. len_trim(md_extfile_new) > 0) then
-    deallocate ( kez, keu, kes, ketm, kesd, ket, keuxy, ken, ke1d2d, keg, ked, kep, kedb, keklep, kegs, kegen, itpez, itpenz, itpeu, itpenu, kew, ketr)
+    deallocate ( kez, keu, kes, ketm, kesd, ket, keuxy, ken, ke1d2d, keg, ked, kep, kedb, keklep, kevalv, kegs, kegen, itpez, itpenz, itpeu, itpenu, kew, ketr)
 end if
 
  if (mext > 0) then

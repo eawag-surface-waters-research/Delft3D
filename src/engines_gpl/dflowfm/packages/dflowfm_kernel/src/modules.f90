@@ -1746,6 +1746,7 @@ end module m_crspath
  integer         , allocatable     :: kegs (:)          !< temp (numl) edge oriented general structure new style
  integer         , allocatable     :: kep  (:)          !< temp (numl) edge oriented p pump
  integer         , allocatable     :: keklep(:)         !< temp (numl) edge oriented check valve
+ integer         , allocatable     :: kevalv(:)         !< temp (numl) edge oriented check valve
  integer         , allocatable     :: kew  (:)          !< temp (numl) edge oriented w waves
  integer         , allocatable     :: ketr (:,:)        !< temp (numl) edge oriented tracer
  integer         , allocatable     :: kesf (:,:)        !< temp (numl) edge oriented sedfrac
@@ -2056,6 +2057,10 @@ end module m_crspath
 
  integer                           :: nklep              !< nr of kleps
  integer         , allocatable     :: Lklep(:)           !< klep links index array, pos=allow 1->2, neg= allow 2->1
+
+ integer                           :: nvalv              !< nr of valvs
+ integer         , allocatable     :: Lvalv(:)           !< valv links index array, pos=allow 1->2, neg= allow 2->1
+ double precision, allocatable     :: valv(:)            !< open fraction of Au 
 
  integer                           :: nbndqh             !< q-h boundary points dimension
  double precision, allocatable     :: xbndqh(:)          !< q-h boundary points xcor
