@@ -524,20 +524,29 @@ subroutine comp_filter_predictor()
       
 !     construct matrix
       call starttimer(IFILT_MAT)
-      do LL=1,Lnx
-         call getLbotLtop(LL, Lb, Lt)
-!        get 3D link index (sigma only)
-         L = Lb + klay-1
-         
-!        fill right-hand side
-         if ( itype.eq.3 ) then
-            solver_filter%rhs(LL) = u0(L) - adve(L)*Dt
-         else
+      
+      if ( itype.eq.1 ) then
+         do LL=1,Lnx
+            call getLbotLtop(LL, Lb, Lt)
+!           get 3D link index (sigma only)
+            L = Lb + klay-1
+            
+!           fill right-hand side
             solver_filter%rhs(LL) = u0(L)
-         end if
-         
-         if ( itype.eq.2 .or. itype.eq.3 ) then
-         
+         end do
+      else
+         do LL=1,Lnx
+            call getLbotLtop(LL, Lb, Lt)
+!           get 3D link index (sigma only)
+            L = Lb + klay-1
+            
+!           fill right-hand side
+            if ( itype.eq.3 ) then
+               solver_filter%rhs(LL) = u0(L) - adve(L)*Dt
+            else
+               solver_filter%rhs(LL) = u0(L)
+            end if
+            
             if ( order.eq.1 ) then
                fac = -eps(klay,LL) * Dt * dsign
             else if ( order.eq.2 ) then
@@ -573,9 +582,9 @@ subroutine comp_filter_predictor()
                   solver_filter%A(i) = solver_filter%A(i) + 1d0
                end if
             end do
-         
-         end if
-      end do
+            
+         end do
+      end if
       
       call stoptimer(IFILT_MAT)
       
