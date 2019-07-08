@@ -90,6 +90,11 @@ subroutine ini_filter(jafilter, filterorder, jacheckmonitor, ierr)
       call mess(LEVEL_ERROR, 'filter: only explicit filter supported in parallel simulations')
    end if
    
+!  check explicit filter
+   if ( itype.eq.1 .and. order.eq.1 ) then
+      call mess(LEVEL_ERROR, 'filter: first-order, explicit filter not supported')
+   end if
+   
 !  construct vector Laplacian
 !  boundary conditions: u.n = 0, n.du/ds = 0
    
@@ -429,6 +434,7 @@ subroutine comp_filter_predictor()
    use unstruc_messages
    use m_saad, only: jasafe   ! for amux
    use m_partitioninfo, only: jampi, update_ghosts, ITYPE_U, reduce_int1_max
+   use m_timer
    implicit none
    
    double precision            :: fac, dsign
@@ -448,8 +454,10 @@ subroutine comp_filter_predictor()
    integer                     :: ierror   ! error (1) or not (0)
    
    double precision, parameter :: facmax = 0.9d0 ! safety factor for maximum allowed sub time step
-   
+ 
    if ( itype.eq.0 ) return
+   
+   call starttimer(IFILT)
    
    ierror = 1
    
@@ -472,13 +480,18 @@ subroutine comp_filter_predictor()
    
 !  loop over layers
    
+   call starttimer(IFILT_OTHER)
    solver_filter%A = 0d0
    ustar = 0d0
+   call stoptimer(IFILT_OTHER)
          
 !  get filter coefficient
+   call starttimer(IFILT_COEF)
    call get_filter_coeff()
+   call stoptimer(IFILT_COEF)
    
    do klay=1,kmx
+      call starttimer(IFILT_OTHER)
 !     compute number of sub time steps and sub time step
       Nt = 1
       dt = dts
@@ -507,7 +520,10 @@ subroutine comp_filter_predictor()
          end if
       end if
       
+      call stoptimer(IFILT_OTHER)
+      
 !     construct matrix
+      call starttimer(IFILT_MAT)
       do LL=1,Lnx
          call getLbotLtop(LL, Lb, Lt)
 !        get 3D link index (sigma only)
@@ -520,42 +536,48 @@ subroutine comp_filter_predictor()
             solver_filter%rhs(LL) = u0(L)
          end if
          
-         if ( order.eq.1 ) then
-            fac = -eps(klay,LL) * Dt * dsign
-         else if ( order.eq.2 ) then
-            fac = eps(klay,LL) * Dt * dsign
-         else
-            fac = eps(klay,LL) * Dt * dsign
-         end if
-         plotlin(L) = eps(klay,LL)
-            
-!        BEGIN DEBUG
-         if ( itype.eq.1 ) then
-            plotlin(L) = dts/(dtmaxeps(LL)/max(eps(klay,LL),1e-10))
-         else
-            plotlin(L) = 1d0
-         end if
-!        END DEBUG
-            
+         if ( itype.eq.2 .or. itype.eq.3 ) then
          
-!        loop over columns
-         do i=solver_filter%ia(LL),solver_filter%ia(LL+1)-1
-!           get column number
-            j = solver_filter%ja(i)
-            
-!           add scaled biharmonic operator
             if ( order.eq.1 ) then
-               solver_filter%A(i) = fac*ALvec(i)
-            else if ( order.eq.2 .or. order.eq.3 ) then
-               solver_filter%A(i) = fac*ALvec2(i)
+               fac = -eps(klay,LL) * Dt * dsign
+            else if ( order.eq.2 ) then
+               fac = eps(klay,LL) * Dt * dsign
+            else
+               fac = eps(klay,LL) * Dt * dsign
             end if
+            plotlin(L) = eps(klay,LL)
+               
+!           BEGIN DEBUG
+            if ( itype.eq.1 ) then
+               plotlin(L) = dts/(dtmaxeps(LL)/max(eps(klay,LL),1e-10))
+            else
+               plotlin(L) = 1d0
+            end if
+!           END DEBUG
+               
             
-!           add diagonal entry
-            if ( j.eq.LL ) then
-               solver_filter%A(i) = solver_filter%A(i) + 1d0
-            end if
-         end do
+!           loop over columns
+            do i=solver_filter%ia(LL),solver_filter%ia(LL+1)-1
+!              get column number
+               j = solver_filter%ja(i)
+               
+!              add scaled biharmonic operator
+               if ( order.eq.1 ) then
+                  solver_filter%A(i) = fac*ALvec(i)
+               else if ( order.eq.2 .or. order.eq.3 ) then
+                  solver_filter%A(i) = fac*ALvec2(i)
+               end if
+               
+!              add diagonal entry
+               if ( j.eq.LL ) then
+                  solver_filter%A(i) = solver_filter%A(i) + 1d0
+               end if
+            end do
+         
+         end if
       end do
+      
+      call stoptimer(IFILT_MAT)
       
       if ( jadebug.eq.1 ) then
          call writematrix(FNAM, Lnx, num, dum, solver_filter%rhs, 'rhs', 1)
@@ -563,11 +585,21 @@ subroutine comp_filter_predictor()
          jadebug = 0
       end if
       
+      call starttimer(IFILT_SOLV)
+      
       if ( itype.eq.1 ) then
 !        explicit filter
 !        sub time steps
          do it=1,Nt
-            call amux(Lnx, solver_filter%rhs, sol, solver_filter%A, solver_filter%jA, solver_filter%iA)
+!            call amux(Lnx, solver_filter%rhs, sol, solver_filter%A, solver_filter%jA, solver_filter%iA)
+
+!           compute sol = Lvec2 u
+            call amux(Lnx, solver_filter%rhs, sol, ALvec2, solver_filter%jA, solver_filter%iA)
+            
+!           compute u - eps*Dt*Lvec2 u
+            do LL=1,Lnx
+               sol(LL) = solver_filter%rhs(LL) - eps(klay,LL) * Dt * sol(LL)
+            end do
             
             if ( jampi.eq.1 ) then
                call update_ghosts(ITYPE_U, 1, Lnx, sol, ierror)
@@ -587,6 +619,10 @@ subroutine comp_filter_predictor()
          goto 1234
       end if
       
+      call stoptimer(IFILT_SOLV)
+      
+      call starttimer(IFILT_COPYBACK)
+      
 !     copy layer data back to 3D arrays
       do LL=1,Lnx
          call getLbotLtop(LL, Lb, Lt)
@@ -596,6 +632,8 @@ subroutine comp_filter_predictor()
 !        fill layer data
          ustar(L) = sol(LL)
       end do
+      
+      call stoptimer(IFILT_COPYBACK)
    end do
    
    ierror = 0
@@ -613,6 +651,8 @@ subroutine comp_filter_predictor()
    if ( jadebug.eq.1 ) then
       close(2345)
    end if
+   
+   call stoptimer(IFILT)
    
    return
 end subroutine comp_filter_predictor

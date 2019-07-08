@@ -10477,6 +10477,21 @@ end subroutine cosphiunetcheck
     endif
     write(msgbuf,'(a,F25.10)') 'time debug     [s]         :' , gettimer(1,IDEBUG)
     call msg_flush()
+    
+    if ( jatimer.eq.1 ) then
+       write(msgbuf,'(a,F25.10)') 'time filter coeff.      [s]:' , gettimer(1,IFILT_COEF)
+       call msg_flush()                                   
+       write(msgbuf,'(a,F25.10)') 'time filter solve       [s]:' , gettimer(1,IFILT_SOLV)
+       call msg_flush()
+       write(msgbuf,'(a,F25.10)') 'time filter cnstr. mat. [s]:' , gettimer(1,IFILT_MAT)
+       call msg_flush()
+       write(msgbuf,'(a,F25.10)') 'time filter copy back   [s]:' , gettimer(1,IFILT_COPYBACK)
+       call msg_flush()
+       write(msgbuf,'(a,F25.10)') 'time filter other       [s]:' , gettimer(1,IFILT_OTHER)
+       call msg_flush()
+       write(msgbuf,'(a,F25.10)') 'time filter             [s]:' , gettimer(1,IFILT)
+       call msg_flush()
+    end if
  end if
 
  do k = 1,3
