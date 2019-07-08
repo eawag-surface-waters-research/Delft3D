@@ -2626,85 +2626,89 @@ namespace UGrid.tests
         [NUnit.Framework.Category("PutAndGetMeshGeom")]
         public void Get1dNetworkUsingGetMeshGeom()
         {
-            // Open a netcdf file
-            string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1dNetwork.nc";
-            Assert.IsTrue(File.Exists(c_path));
-            int ioncid = 0; //file variable 
-            int mode = 0; //create in read mode
-            var wrapper = new IoNetcdfLibWrapper();
-            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            // Get 1d mesh dimensions
-            var networkdim = new meshgeomdim();
-            int nnumNetworks = -1;
-            ierr = wrapper.ionc_get_number_of_networks(ref ioncid, ref nnumNetworks);
-            Assert.That(ierr, Is.EqualTo(0));
-            Assert.That(nnumNetworks, Is.EqualTo(1));
-            IntPtr c_networkids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nnumNetworks);
-
-            // Get a valid networkid
-            ierr = wrapper.ionc_get_network_ids(ref ioncid, ref c_networkids, ref nnumNetworks);
-            Assert.That(ierr, Is.EqualTo(0));
-            int[] l_networkid = new int[nnumNetworks];
-            Marshal.Copy(c_networkids, l_networkid, 0, nnumNetworks);
-
-            // Get network dimensions using meshgeom
-            int networkid = -1; //set an invalid index
-            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref networkid, ref l_networkid[0], ref networkdim);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            // Register unmanaged memory and pointers 
-            var network = new meshgeom();
-            var register = new UnmanagedMemoryRegister();
-            register.Add(ref networkdim, ref network);
-            
-            // Client wants 0 based arrays
-            network.startIndex = 0;
-            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref networkid, ref l_networkid[0], ref network);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            // Reconstruct the arrays
-            int l_nnodes = 2;
-            int l_nbranches = 1;
-            int l_nGeometry = 25;
-            double[] l_nodesX = new double[networkdim.nnodes];
-            double[] l_nodesY = new double[networkdim.nnodes];
-            int[] l_nedge_nodes = new int[networkdim.nbranches * 2];
-            double[] l_nbranchlengths = new double[networkdim.nbranches];
-            double[] l_ngeopointx = new double[networkdim.ngeometry];
-            double[] l_ngeopointy = new double[networkdim.ngeometry];
-
-            Marshal.Copy(network.nnodex, l_nodesX, 0, networkdim.nnodes);
-            Marshal.Copy(network.nnodey, l_nodesY, 0, networkdim.nnodes);
-            Marshal.Copy(network.nedge_nodes, l_nedge_nodes, 0, networkdim.nbranches * 2);
-            Marshal.Copy(network.nbranchlengths, l_nbranchlengths, 0, networkdim.nbranches);
-            Marshal.Copy(network.ngeopointx, l_ngeopointx, 0, networkdim.ngeometry);
-            Marshal.Copy(network.ngeopointy, l_ngeopointy, 0, networkdim.ngeometry);
-            var l_networkNodeIds = StringBufferHandling.ParseString(network.nnodeids, networkdim.nnodes, IoNetcdfLibWrapper.idssize);
-            var l_networkLongNames = StringBufferHandling.ParseString(network.nnodelongnames, networkdim.nnodes, IoNetcdfLibWrapper.longnamessize);
-            var l_branchids = StringBufferHandling.ParseString(network.nbranchids, networkdim.nbranches, IoNetcdfLibWrapper.idssize);
-            var l_branchlongnames = StringBufferHandling.ParseString(network.nbranchlongnames, networkdim.nbranches, IoNetcdfLibWrapper.longnamessize);
-
-            for (int i = 0; i < networkdim.nnodes; i++)
+            using (var register = new UnmanagedMemoryRegister())
             {
-                Assert.That(l_networkNodeIds[i], Is.EqualTo(nodesids[i].PadRight(IoNetcdfLibWrapper.idssize)));
-                Assert.That(l_networkLongNames[i], Is.EqualTo(nodeslongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                // Open a netcdf file
+                string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1dNetwork.nc";
+                Assert.IsTrue(File.Exists(c_path));
+                int ioncid = 0; //file variable 
+                int mode = 0; //create in read mode
+                var wrapper = new IoNetcdfLibWrapper();
+                var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                // Get 1d mesh dimensions
+                var networkdim = new meshgeomdim();
+                int nnumNetworks = -1;
+                ierr = wrapper.ionc_get_number_of_networks(ref ioncid, ref nnumNetworks);
+                Assert.That(ierr, Is.EqualTo(0));
+                Assert.That(nnumNetworks, Is.EqualTo(1));
+                IntPtr c_networkids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nnumNetworks);
+
+                // Get a valid networkid
+                ierr = wrapper.ionc_get_network_ids(ref ioncid, ref c_networkids, ref nnumNetworks);
+                Assert.That(ierr, Is.EqualTo(0));
+                int[] l_networkid = new int[nnumNetworks];
+                Marshal.Copy(c_networkids, l_networkid, 0, nnumNetworks);
+
+                // Get network dimensions using meshgeom
+                int networkid = -1; //set an invalid index
+                ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref networkid, ref l_networkid[0], ref networkdim);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                // Register unmanaged memory and pointers 
+                var network = new meshgeom();
+                register.Add(ref networkdim, ref network);
+
+                // Client wants 0 based arrays
+                network.startIndex = 0;
+                ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref networkid, ref l_networkid[0], ref network);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                // Reconstruct the arrays
+                int l_nnodes = 2;
+                int l_nbranches = 1;
+                int l_nGeometry = 25;
+                double[] l_nodesX = new double[networkdim.nnodes];
+                double[] l_nodesY = new double[networkdim.nnodes];
+                int[] l_nedge_nodes = new int[networkdim.nbranches * 2];
+                double[] l_nbranchlengths = new double[networkdim.nbranches];
+                double[] l_ngeopointx = new double[networkdim.ngeometry];
+                double[] l_ngeopointy = new double[networkdim.ngeometry];
+
+                Marshal.Copy(network.nnodex, l_nodesX, 0, networkdim.nnodes);
+                Marshal.Copy(network.nnodey, l_nodesY, 0, networkdim.nnodes);
+                Marshal.Copy(network.nedge_nodes, l_nedge_nodes, 0, networkdim.nbranches * 2);
+                Marshal.Copy(network.nbranchlengths, l_nbranchlengths, 0, networkdim.nbranches);
+                Marshal.Copy(network.ngeopointx, l_ngeopointx, 0, networkdim.ngeometry);
+                Marshal.Copy(network.ngeopointy, l_ngeopointy, 0, networkdim.ngeometry);
+                var l_networkNodeIds =
+                    StringBufferHandling.ParseString(network.nnodeids, networkdim.nnodes, IoNetcdfLibWrapper.idssize);
+                var l_networkLongNames = StringBufferHandling.ParseString(network.nnodelongnames, networkdim.nnodes,
+                    IoNetcdfLibWrapper.longnamessize);
+                var l_branchids = StringBufferHandling.ParseString(network.nbranchids, networkdim.nbranches,
+                    IoNetcdfLibWrapper.idssize);
+                var l_branchlongnames = StringBufferHandling.ParseString(network.nbranchlongnames, networkdim.nbranches,
+                    IoNetcdfLibWrapper.longnamessize);
+
+                for (int i = 0; i < networkdim.nnodes; i++)
+                {
+                    Assert.That(l_networkNodeIds[i], Is.EqualTo(nodesids[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                    Assert.That(l_networkLongNames[i],
+                        Is.EqualTo(nodeslongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                }
+
+                for (int i = 0; i < networkdim.nbranches; i++)
+                {
+                    Assert.That(l_branchids[i], Is.EqualTo(branchids[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                    Assert.That(l_branchlongnames[i],
+                        Is.EqualTo(branchlongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                }
+
+                // Close the file
+                ierr = wrapper.ionc_close(ref ioncid);
+                Assert.That(ierr, Is.EqualTo(0));
             }
-
-            for (int i = 0; i < networkdim.nbranches; i++)
-            {
-                Assert.That(l_branchids[i], Is.EqualTo(branchids[i].PadRight(IoNetcdfLibWrapper.idssize)));
-                Assert.That(l_branchlongnames[i], Is.EqualTo(branchlongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
-            }
-
-
-            // Close the file
-            ierr = wrapper.ionc_close(ref ioncid);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            // Clean memory
-            register.Dispose();
         }
 
         // Get only 1d MESH using ionc_get_meshgeom
@@ -2712,44 +2716,45 @@ namespace UGrid.tests
         [NUnit.Framework.Category("PutAndGetMeshGeom")]
         public void Get1dMeshUsingGetMeshGeom()
         {
-            // Open a netcdf file
-            string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1d.nc";
-            Assert.IsTrue(File.Exists(c_path));
-            int ioncid = 0; //file variable 
-            int mode = 0; //create in read mode
-            var wrapper = new IoNetcdfLibWrapper();
-            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            // Get network dimensions using meshgeom
-            int meshid =  1;   //set an invalid meshid index, here we now is 1
-            int networkid = -1; //set an invalid index because we do not want to get the network information
-            var meshdim = new meshgeomdim();
-            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref networkid, ref meshdim);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            // Register unmanaged memory and pointers 
-            var mesh = new meshgeom();
-            var register = new UnmanagedMemoryRegister();
-            register.Add(ref meshdim, ref mesh);
-
-            // Client wants 0 based arrays
-            mesh.startIndex = 0;
-            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh);
-            Assert.That(ierr, Is.EqualTo(0));
-
-            var l_meshnodeids = StringBufferHandling.ParseString(mesh.nodeids, meshdim.numnode, IoNetcdfLibWrapper.idssize);
-            var l_meshnodelongnames = StringBufferHandling.ParseString(mesh.nodelongnames, meshdim.numnode, IoNetcdfLibWrapper.longnamessize);
-
-            for (int i = 0; i < meshdim.numnode; i++)
+            using (var register = new UnmanagedMemoryRegister())
             {
-                Assert.That(l_meshnodeids[i], Is.EqualTo(meshnodeids[i].PadRight(IoNetcdfLibWrapper.idssize)));
-                Assert.That(l_meshnodelongnames[i], Is.EqualTo(meshnodelongnames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                // Open a netcdf file
+                string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1d.nc";
+                Assert.IsTrue(File.Exists(c_path));
+                int ioncid = 0; //file variable 
+                int mode = 0; //create in read mode
+                var wrapper = new IoNetcdfLibWrapper();
+                var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                // Get network dimensions using meshgeom
+                int meshid = 1; //set an invalid meshid index, here we now is 1
+                int networkid = -1; //set an invalid index because we do not want to get the network information
+                var meshdim = new meshgeomdim();
+                ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref networkid, ref meshdim);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                // Register unmanaged memory and pointers 
+                var mesh = new meshgeom();
+                register.Add(ref meshdim, ref mesh);
+
+                // Client wants 0 based arrays
+                mesh.startIndex = 0;
+                ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                var l_meshnodeids = StringBufferHandling.ParseString(mesh.nodeids, meshdim.numnode, IoNetcdfLibWrapper.idssize);
+                var l_meshnodelongnames = StringBufferHandling.ParseString(mesh.nodelongnames, meshdim.numnode, IoNetcdfLibWrapper.longnamessize);
+
+                for (int i = 0; i < meshdim.numnode; i++)
+                {
+                    Assert.That(l_meshnodeids[i], Is.EqualTo(meshnodeids[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                    Assert.That(l_meshnodelongnames[i],
+                        Is.EqualTo(meshnodelongnames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                }
             }
-            
-            // Clean memory
-            register.Dispose();
         }
+
 
 
     }
