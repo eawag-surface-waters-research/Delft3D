@@ -549,8 +549,10 @@
       !!!!!!!!!! give it another try with nearest neighbour opr inverse distance.
       if (intri == 0 .and. R2search > 0d0) then
 
-!  this part is probably not prepared for spherical coordinates (and "jspheric" isn't put to "0" temporarily either)
-         call mess(LEVEL_ERROR, 'triintfast: smallest distance search not prepared for spherical coordinates, see UNST-1720')
+         if (jsferic /= 0) then
+!           this part is probably not prepared for spherical coordinates (and "jspheric" isn't put to "0" temporarily either)
+            call mess(LEVEL_ERROR, 'triintfast: smallest distance search not prepared for spherical coordinates, see UNST-1720')
+         endif
 
          if (RD == dmiss) then
             if( jakdtree2 == 1 ) then
