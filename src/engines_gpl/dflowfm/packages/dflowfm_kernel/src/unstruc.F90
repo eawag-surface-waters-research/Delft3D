@@ -12761,7 +12761,13 @@ if (ti_waq > 0d0 .and. max(limtypmom, limtypsa, limtypTM) <= 0) then
     ti_waq = 0d0
 end if
 
- s1  = sini                          ! initial values
+ s1  = max(sini,bl)                                  ! initial values
+ if (waterdepthini1D > 0) then
+    do k = ndx2D+1, ndxi
+       s1(k) = bl(k) + waterdepthini1D
+    enddo
+ endif
+
  u1  = uini
  if (jasal > 0) then
     sa1 = salini
