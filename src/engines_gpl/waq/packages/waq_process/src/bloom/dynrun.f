@@ -62,17 +62,25 @@
 !  expressed in various units, which are not returned in the stand-alone
 !  version of BLOOM II.
 !
-      SUBROUTINE DYNRUN(EXTTOT,EXTB,TMP,SOL,DEP,DAYL,CHLOR,ID,ISEG,
-     1                  NSET,EXTLIM,DEAT,TOTCHL,TOTDRY,TOTCAR,SWBLSA)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      subroutine dynrun(exttot,extb,tmp,sol,dep,dayl,chlor,id,iseg,
+     1                  nset,extlim,deat,totchl,totdry,totcar,swblsa)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_caldynam
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+!      use bloom_data_putin   
+!      use bloom_data_sumou   
+!      use bloom_data_xvect   
+
+      implicit none
 
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
-      INCLUDE 'putin2.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'sumout.inc'
       INCLUDE 'dynam.inc'
@@ -80,7 +88,21 @@
 !
       CHARACTER*8 CDATE
       INTEGER NONUN(MT)
-      REAL*8  ZOODII(0:MG)
+      integer    :: i, id, igdump, iseg, k, nset, numun
+      integer    :: swblsa, infeas
+      real(8)    :: sol
+      real(8)    :: dep
+      real(8)    :: tmp
+      real(8)    :: chlor
+      real(8)    :: extb
+      real(8)    :: dayl
+      real(8)    :: deat
+      real(8)    :: totchl
+      real(8)    :: exttot
+      real(8)    :: extlim
+      real(8)    :: totdry
+      real(8)    :: totcar
+      
 !
 !  Check whether a selective dump for periods and/or segments is requested for this period.
       IDUMP = 0
@@ -125,7 +147,7 @@
 !  **** Update for ECOLUMN version:
 !       TOTDRY (total dry weight) passed in position NUCOLS+2 of XDEF.
 !
-      CALL BLOOM(CDATE,ID,MI,TMP,SOL,CHLOR,EXTB,DAYL,DEAT,ZOODII,
+      CALL BLOOM(CDATE,ID,MI,TMP,SOL,CHLOR,EXTB,DAYL,DEAT,
      1           DEP,XINIT,XDEF,XECO,TOTCHL,EXTTOT,EXTLIM,NSET,INFEAS,
      2           NONUN,NUMUN,SWBLSA)
       TOTDRY = XDEF (NUCOLS+2)

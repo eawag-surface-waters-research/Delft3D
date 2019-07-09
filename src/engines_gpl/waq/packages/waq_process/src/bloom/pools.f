@@ -28,13 +28,17 @@
 !  *********************************************************************
 !
       SUBROUTINE POOLS(CDATE,DEATH,ALIVE,TEMP)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'cal1.inc'
       INCLUDE 'ioblck.inc'
-      CHARACTER*8 CDATE
+
+      real(8)      :: dead,death,sedead,alive,temp
+      character(8) :: cdate
 !
 !  Calculate the total concentrations of living and dead algae
 !  at equlibrium.

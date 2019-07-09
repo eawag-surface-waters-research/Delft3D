@@ -45,20 +45,25 @@
 !
 !
       SUBROUTINE PRINUN (CDATE, TOTAL, PHYT, EXTTOT, EXLIVE, EXDEAD,
-     1                   EXTB, T, CSOL, DAY, DEP , ZOOD,ZMAX,GRAMX)
-      IMPLICIT REAL*8 (A-H,O-Z)
+     1                   EXTB, T, CSOL, DAY, DEP, ZMAX, GRAMX)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'arran.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'sumout.inc'
       INCLUDE 'matri.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'xvect.inc'
       INCLUDE 'postbl.inc'
-      REAL*8 TOTAL, EXTTOT, EXLIVE, EXDEAD, ZOOD(0:MG)
+
+      real(8)   :: total, exttot, exlive, exdead
+      real(8)   :: gramx, zmax, phyt, extb, t, csol, day, dep 
+
+      integer   :: i, j, k
       CHARACTER*8 CDATE
       LOGICAL FIRST
       DATA FIRST /.TRUE./
@@ -73,11 +78,7 @@
       END IF
 
       IF (GRAMX.GT.1000.) GRAMX = -999.
-      IF (ZMAX.GT.1000.) THEN
-        ZMAX = -999.
-      ELSE
-        ZMAX = ZMAX * GCTDRY(1)
-      ENDIF
+      ZMAX = -999.
       WRITE (IOU(26))    NREP, CDATE, LIMIT,
      1                    (ISPLIM(J), J = 1, NUSPEC),
      1                    (PMAX(J),   J = 1, NUSPEC),

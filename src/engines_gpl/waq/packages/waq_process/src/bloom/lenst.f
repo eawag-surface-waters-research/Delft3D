@@ -26,8 +26,15 @@
 ! string. Because there is a variable LENSTR in BLOOM, the function
 ! LENSTR cannot be called directly.
 !
-      INTEGER FUNCTION LENST (SOURCE,MAXLEN)
-      CHARACTER*1 SOURCE(*)
-      LENST = LENSTR(SOURCE,MAXLEN)
-      RETURN
-      END
+      integer function lenst (source,maxlen)
+
+      implicit none
+
+      character*1 source(*)
+      integer           :: maxlen
+      integer, external :: lenstr
+
+      lenst = lenstr(source,maxlen)
+
+      return
+      end

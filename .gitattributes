@@ -2238,6 +2238,7 @@ src/engines_gpl/waq/packages/waq_process/src/bloom/blinit.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/blinpu.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/blmort.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/bloom.f -text
+src/engines_gpl/waq/packages/waq_process/src/bloom/bloom_data.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/bloutc.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/blprim.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/bvect.f -text
@@ -2254,7 +2255,6 @@ src/engines_gpl/waq/packages/waq_process/src/bloom/ebcalc.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/edit.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/exclud.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/fixinf.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/grazin.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/hdrblm.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/headin.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/iblbal.f -text

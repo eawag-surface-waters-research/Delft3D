@@ -884,7 +884,7 @@
          endif
       enddo
 
-      RETURN
+      return
 !
   901 call getmlu(lunrep)
       write (lunrep, *) 'ERROR D40BLO: DIMENSION NTYP_M TOO SMALL'
@@ -895,31 +895,38 @@
       write (lunrep, *) 'ERROR D40BLO: DAYLEN > 1.0 DAY'
       write (*, *) 'ERROR D40BLO: DAYLEN > 1.0 DAY'
       call srstop (1)
-      END
+      end
 
-      SUBROUTINE BLSTOP(MES,I)
+      subroutine blstop(mes,i)
 
-      CHARACTER*12 MES
+      character*12 mes
 
-      WRITE(*,*) 'ERROR IN BLOOM: '
-      WRITE(*,*) 'CHARACTERISTIC ',MES,' FOR ALGAE TYPE ',I,
-     1           ' MUST BE A CONSTANT!'
+      write(*,*) 'ERROR in bloom: '
+      write(*,*) 'Characteristic ',mes,' for algae type ',i,' must be a constant!'
 
-      CALL SRSTOP(1)
+      call srstop(1)
 
-      RETURN
+      return
 
-      END
-      SUBROUTINE BL_NO_AUTOLYSE(ORG_AVAILN)
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      REAL*8 ORG_AVAILN(MT)
-      ORG_AVAILN(1:MT) = AVAILN(1:MT)
-      AVAILN     = 0.0
-      END
-      SUBROUTINE BL_RESTORE_AUTOLYSE(ORG_AVAILN)
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      REAL*8 ORG_AVAILN(MT)
-      AVAILN(1:MT) = ORG_AVAILN(1:MT)
-      END
+      end
+      
+      subroutine bl_no_autolyse(org_availn)
+
+      implicit none
+
+      include 'blmdim.inc'
+      include 'phyt1.inc'
+      real*8 org_availn(mt)
+      org_availn(1:mt) = availn(1:mt)
+      availn     = 0.0
+      end
+
+      subroutine bl_restore_autolyse(org_availn)
+
+      implicit none
+
+      include 'blmdim.inc'
+      include 'phyt1.inc'
+      real*8 org_availn(mt)
+      availn(1:mt) = org_availn(1:mt)
+      end

@@ -32,10 +32,17 @@
 ! Program written by Hans Los.
 !-----------------------------------------------------------------------
       SUBROUTINE QSLP(A,IA,NR,NC,B,LSC,C,IOPT,IRS,LIB,D,ID,X,P,IER)
-      IMPLICIT REAL*8 (A-H,O-Z)
-      DIMENSION A(1:IA,1:ID),B(*),C(*),D(*),X(*),P(*)
-      INTEGER LIB(*),IER,LSC(*),IOPT(*),IRS(*)
-      DATA NQSLP /0/
+
+      implicit none
+
+      real(8)   :: a(1:ia,1:id),b(*),c(*),d(*),x(*),p(*)
+      REAL(8)   :: xopt, bpivot, bmin, cpivot, apivot, aipj, cj, aijp, bi, ap, cjpap
+      integer   :: lib(*),ier,lsc(*),iopt(*),irs(*), nqslp
+      integer   :: i, j, k, l, ia, id, ip, jp, jpneg
+      integer   :: ineg, iter, itflag, ihelp1, ihelp2
+      integer   :: nr, nc, method
+
+      data nqslp /0/
 !
 ! If the subroutine is called for the first time, perform some initial
 ! checks.

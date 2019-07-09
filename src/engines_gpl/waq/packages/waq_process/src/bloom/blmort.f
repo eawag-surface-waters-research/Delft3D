@@ -36,6 +36,10 @@
      J                   FLOOXN, FLMORA, DEAT4 , TSTEPI, LMIXO , LFIXN ,
      J                   LCARB , NUTCON, FLXCON)
 
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_phyt    
+
       IMPLICIT NONE
 
 !     Arguments
@@ -84,7 +88,6 @@
 !
 !     TEMP8   R*8   1             Temperature (deg.C)
 !     DEAT    R*8   1             ??
-!     ZOODD   R*8   1             Dummy??$Check$
 !     CPHYT   R*4   1             Biomass (gC/m3)
 !     CMORT   R*4   1             Mortality flux (gC/m3/d)
 !     CMORTA  R*4   1             Autolysis flux (gC/m3/d)
@@ -93,7 +96,7 @@
 !     J       I     1
 
       REAL            CMORT , CMORTA, CMORTD, CMORTO, CPHYT
-      REAL*8          FOOX  , TEMP8 , ZOODD , DEAT
+      REAL*8          FOOX  , TEMP8 , DEAT
       INTEGER         I, J, K
 !
 !  Zero fluxes
@@ -107,9 +110,8 @@
 !  Call subroutine NATMOR: calculate natural mortality rate constants.
 !
       DEAT  = 0D0
-      ZOODD = 0D0
       TEMP8 = DBLE(TEMP)
-      CALL NATMOR ( DEAT  , ZOODD , TEMP8)
+      CALL NATMOR (DEAT, TEMP8)
       DEAT4 = SNGL(DEAT)
 !
 !  Mortality module.

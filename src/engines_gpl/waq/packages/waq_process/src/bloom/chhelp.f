@@ -27,21 +27,29 @@
 !  *********************************************************************
 !
       SUBROUTINE CHHELP (OUTUNI)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_dim
+!      use bloom_data_caldynam
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+!      use bloom_data_putin   
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'cal1.inc'
-      INTEGER OUTUNI
+
+      integer i, j, nnrun, outuni
 !
 !  Clear the screen and write a formfeed character to OUTUNI.
 !
 !  Print everything which can be altered in subroutine CHANGE.
 !
 !
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUTUNI,99999) IYEAR,(CASE(I),I=1,9)
       WRITE (OUTUNI,99990) COM
       WRITE (OUTUNI,99980) TEMPMU,TEMPAD
@@ -69,18 +77,14 @@
       ELSE
          WRITE (OUTUNI,99890) FLUSH
       END IF
-      IF (IOFLAG .EQ. 1) CALL MORESC
       WRITE (OUTUNI,99850) SEDRAT
       WRITE (OUTUNI,99840) FLUSH
       WRITE (OUTUNI,99830) REMIOR
       WRITE (OUTUNI,99820) REMILI(1),REMILI(2)
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99810)
       DO I=1,NUSPEC
          WRITE(OUUNI,99800) SPNAME(I),AVAILN(I)
       END DO
-
-      IF (IOFLAG .EQ. 1) CALL MORESC
 !
 !  Formats for this subroutine
 !

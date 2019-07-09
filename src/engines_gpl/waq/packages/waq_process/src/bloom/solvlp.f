@@ -27,7 +27,9 @@
 !  *********************************************************************
 !
       SUBROUTINE SOLVLP(INOW,X,BIOMAX,IER,IRS,NONUNI,NUMUNI,LIB)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+      implicit none
+
 !
 ! This subroutine sets up the A matrix, and B and C vectors for the
 ! linear programming routine QSLP.
@@ -57,6 +59,10 @@
      1          BTMP(IA)
       INTEGER LSC(IA),LSCTMP(IA),IOPT(4),IRS(3),LIB(MX),LIBTMP(MX),
      1        LIBBAS(MX),NONUNI(MT)
+      integer   :: i, j, j1, k, l
+      integer   :: index, ier, inow, numuni, nsolve, nustmp, nurtmp, nsolv
+      real(8)   :: atmp, btmp, ctmp, xtmp
+      real(8)   :: biomax, d, p, x, sumx
       SAVE    LSC, IOPT
       LOGICAL LBASIS (MX)
       DATA NSOLV /0/

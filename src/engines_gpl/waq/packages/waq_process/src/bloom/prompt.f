@@ -40,10 +40,16 @@
 ! message.
 !
       SUBROUTINE BLPROMPT (INDEX, ARG)
+
+      implicit none
+
       CHARACTER*80 OUTSTR
       CHARACTER*1 OUTST2 (80), ESCAPE, BLANK
       INTEGER STOS, IESCAP, ARG
       INCLUDE 'ioblck.inc'
+      
+      integer :: i, index, irc, lenout, lenst, lenou2
+
       DATA BLANK  /' '/
       DATA IESCAP /27/
 !

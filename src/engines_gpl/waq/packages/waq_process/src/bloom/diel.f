@@ -28,12 +28,34 @@
 !  *********************************************************************
 !
       SUBROUTINE DIEL(SUMPOX,SUMROX,DAY,CDATE)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_io  
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'ioblck.inc'
-      DIMENSION PRORA(MS),RESRA(MS),PRONET(MS),TIME(7),DIST1(7),
-     1          DIST2(7),TINVAL(6),TIMUL(3),DAYPER(3)
+
+      real(8)   :: prora(ms)
+      real(8)   :: resra(ms)
+      real(8)   :: pronet(ms)
+      real(8)   :: time(7)
+      real(8)   :: dist1(7)
+      real(8)   :: dist2(7)
+      real(8)   :: tinval(6)
+      real(8)   :: timul(3)
+      real(8)   :: dayper(3)
+      real(8)   :: day
+      real(8)   :: rhour
+      real(8)   :: sumrox
+      real(8)   :: sumpox
+      real(8)   :: sumnet
+      real(8)   :: pronig
+      real(8)   :: phores
+      integer   :: j, k, linepa, idist
       CHARACTER*8 CDATE
       DATA DIST1 /0.16,0.18,0.16,0.16,0.18,0.16,0.00/
       DATA DIST2 /0.363,0.280,0.122,0.093,0.102,0.040,0.000/

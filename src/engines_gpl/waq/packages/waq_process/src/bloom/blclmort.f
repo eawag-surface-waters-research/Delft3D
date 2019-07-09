@@ -28,7 +28,12 @@
 !     And a routine to set ppmax for a specific alg
 !     BLSPPM - set ppmax
 
-      SUBROUTINE BLCLST (MRTM1,MRTM2,MRTB1,MRTB2,NTYP_A,CL)
+      subroutine blclst (mrtm1,mrtm2,mrtb1,mrtb2,ntyp_a,cl)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+
+      implicit none
 
 !     Arguments
 !

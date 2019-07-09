@@ -51,7 +51,17 @@
 
       USE DATA_3DL
 
-      IMPLICIT REAL*8 (A-H,O-Z)
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_arran   
+!      use bloom_data_caldynam
+!      use bloom_data_io  
+!      use bloom_data_matrix  
+!      use bloom_data_phyt    
+!      use bloom_data_putin   
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'size.inc'
@@ -62,7 +72,11 @@
       INCLUDE 'dynam.inc'
       INCLUDE 'arran.inc'
       INCLUDE 'ioblck.inc'
-      REAL*8 ROOT(*),XINIT(*)
+
+      real(8) :: root(*),xinit(*)
+      real(8) :: effi, exttot, grlim, bt, eadj, dep
+      integer :: iskmax, j, k
+
 !----------------------------------------------------------------------
 ! Purpose of this subroutine: find the growth efficiency EFFI for each
 ! phytoplankton species at the current total extinction level EXTTOT.

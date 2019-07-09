@@ -36,9 +36,14 @@
 !  *********************************************************************
 !
       INTEGER FUNCTION INPTNM(PRMPT,DNUM,INUM,TYPE)
+
+!      use bloom_data_io  
+
+      implicit none
+
       INCLUDE 'ioblck.inc'
-      REAL*8 DNUM
-      INTEGER PRMPT,TYPE,STOI,STOR,STOD,UPRCAS
+      real(8)  :: dnum, rnum
+      integer  :: prmpt,type,stoi,stor,stod,uprcas, inum, irc
 !
 !  TYPE INDICATES TYPE OF VARIABLE:
 !    TYPE = 1: DOUBLE PRECISSION REAL

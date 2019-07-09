@@ -43,7 +43,7 @@ C   MX = maximum dimension of X vector. This is equal to maximum number
 C        of constraints IA + MT + 1 (optimum)
 C   MG = maximum number of zooplankton types (0895 MvdV)
 C
-      INTEGER MT,MS,MN,IA,MX,MG
+      INTEGER MT,MS,MN,IA,MX,MG,IPERM
 
       PARAMETER (MT = 30)
       PARAMETER (MS = 15)

@@ -31,7 +31,13 @@
 !    Called by: BLOOMC
 !    Calls    : -
 
-      SUBROUTINE BLOUTC (HISTOR,LPRINO,LDUMPO)
+      subroutine bloutc (histor,lprino,ldumpo)
+      
+!      use bloom_data_dim 
+!      use bloom_data_phyt    
+!      use bloom_data_sumou   
+      
+      implicit none
 !
 !     Arguments
 !

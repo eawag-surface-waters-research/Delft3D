@@ -26,31 +26,39 @@
 !  *         SUBROUTINE TO PERFORM SPECIAL INTERPOLATION               *
 !  *********************************************************************
 !
-      SUBROUTINE EBCALC(X,F,FPR,NUMGR)
-      IMPLICIT REAL*8 (A-H,O-Z)
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'arran.inc'
+      subroutine ebcalc(x,f,fpr,numgr)
+
+!      use bloom_data_dim
+!      use bloom_data_arran   
+
+      implicit none
+      
+      include 'blmdim.inc'
+      include 'arran.inc'
+      
+      real(8)    :: x, f, fpr, ex, ei, ei1, alam, c0, c1
+      integer    :: i, numgr
 !
 !  CHECK WHETHER X IS TOO LOW OR TOO HIGH
 !
-      IF (X .GT. ZVEC(1)) GO TO 20
-      F=FUN(1,NUMGR)
-      FPR=0.0
-      RETURN
-   20 IF (X .LT. ZVEC(NZ)) GO TO 40
-      F=FUN(NZ,NUMGR)
-      FPR=0.0
-      RETURN
-   40 DO 60 I=2,NZ
-      IF (X .LE. ZVEC(I)) GO TO 80
-   60 CONTINUE
-   80 EX=DEXP(-X)
-      EI=DEXP(-ZVEC(I))
-      EI1=DEXP(-ZVEC(I-1))
-      ALAM=(EX-EI)/(EI1-EI)
-      FPR=ALAM*DER(I-1,NUMGR)+(1.0-ALAM)*DER(I,NUMGR)
-      C0=((EX/EI1)-1.0+X-ZVEC(I-1))/((EX/EI1)-1.0)
-      C1=((EI1/EX)-1.0+ZVEC(I-1)-X)/((EI1/EX)-1.0)
-      F=FUN(I-1,NUMGR)-C0*FPR+C1*DER(I-1,NUMGR)
-      RETURN
-      END
+      if (x .gt. zvec(1)) go to 20
+      f=fun(1,numgr)
+      fpr=0.0
+      return
+   20 if (x .lt. zvec(nz)) go to 40
+      f=fun(nz,numgr)
+      fpr=0.0
+      return
+   40 do 60 i=2,nz
+      if (x .le. zvec(i)) go to 80
+   60 continue
+   80 ex=dexp(-x)
+      ei=dexp(-zvec(i))
+      ei1=dexp(-zvec(i-1))
+      alam=(ex-ei)/(ei1-ei)
+      fpr=alam*der(i-1,numgr)+(1.0-alam)*der(i,numgr)
+      c0=((ex/ei1)-1.0+x-zvec(i-1))/((ex/ei1)-1.0)
+      c1=((ei1/ex)-1.0+zvec(i-1)-x)/((ei1/ex)-1.0)
+      f=fun(i-1,numgr)-c0*fpr+c1*der(i-1,numgr)
+      return
+      end

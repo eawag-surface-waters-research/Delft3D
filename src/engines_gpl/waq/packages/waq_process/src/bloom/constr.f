@@ -26,11 +26,39 @@
 !  *    SUBROUTINE TO DETERMINE LIMITS ON THE EXTINCTION COEFFICIENT   *
 !  *********************************************************************
 !
-      SUBROUTINE CONSTR(SURF,DMIX,EMIN,ROOT,NUMGR)
-      IMPLICIT REAL*8 (A-H,O-Z)
-      DIMENSION A(2),B(2),ROOT(2)
+      subroutine constr(surf,dmix,emin,root,numgr)
+
+!      use bloom_data_dim 
+!      use bloom_data_arran   
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'arran.inc'
+
+      real(8) :: root(2)
+      real(8) :: s0
+      real(8) :: surf
+      real(8) :: x
+      real(8) :: dlog
+      real(8) :: fx
+      real(8) :: derx
+      real(8) :: phi
+      real(8) :: emin
+      real(8) :: y
+      real(8) :: dmix
+      real(8) :: b(2)
+      real(8) :: a(2)
+      real(8) :: fm
+      real(8) :: fpr
+      real(8) :: ebar
+      real(8) :: deriv
+      real(8) :: xm
+      real(8) :: fp
+
+      integer     :: i, k, numgr
+      
+      
 !
 !  DETERMINES LIMITS ON THE EXTINCTION COEFFICIENT
 !

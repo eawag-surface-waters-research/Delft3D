@@ -76,7 +76,17 @@
 !
       SUBROUTINE FIXINF(X,BIO,EXTTOT,EXTB,INHIB,NI,IRERUN,IRS,INFEAS,
      &                  ERRIND,JKMAX,AROOT,CDATE,SWBLSA)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_caldynam
+!      use bloom_data_io  
+!      use bloom_data_matrix  
+!      use bloom_data_phyt    
+!      use bloom_data_sumou   
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
@@ -85,10 +95,25 @@
       INCLUDE 'ioblck.inc'
       INCLUDE 'dynam.inc'
       INCLUDE 'sumout.inc'
-      DIMENSION X(*),BIO(*),SUMNUT(MN),AROOT(*)
-      INTEGER IRS (*),JKMAX(*),SWBLSA
-      CHARACTER*8 CDATE
-      CHARACTER*1 ERRIND
+      real(8)      :: x(*),bio(*),sumnut(mn),aroot(*)
+      integer      :: irs (*),jkmax(*),swblsa, i, j, k
+      character(8) :: cdate
+      character(1) :: errind
+      
+      integer      :: nout
+      integer      :: inhib
+      integer      :: irerun
+      integer      :: ni
+      integer      :: index
+      integer      :: irmax
+      integer      :: mof
+      integer      :: infeas
+      real(8)      :: exttot
+      real(8)      :: extb
+      real(8)      :: extrem
+      real(8)      :: biomax
+      real(8)      :: xdefk
+      real(8)      :: xi
 !
 ! Determine output unit for error messages.
 !

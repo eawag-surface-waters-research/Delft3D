@@ -53,6 +53,7 @@
 		<File RelativePath=".\src\bloom\blinpu.f"/>
 		<File RelativePath=".\src\bloom\blmort.f"/>
 		<File RelativePath=".\src\bloom\bloom.f"/>
+		<File RelativePath=".\src\bloom\bloom_data.f90"/>
 		<File RelativePath=".\src\bloom\bloutc.f"/>
 		<File RelativePath=".\src\bloom\blprim.f"/>
 		<File RelativePath=".\src\bloom\bvect.f"/>
@@ -69,7 +70,6 @@
 		<File RelativePath=".\src\bloom\edit.f"/>
 		<File RelativePath=".\src\bloom\exclud.f"/>
 		<File RelativePath=".\src\bloom\fixinf.f"/>
-		<File RelativePath=".\src\bloom\grazin.f"/>
 		<File RelativePath=".\src\bloom\hdrblm.f"/>
 		<File RelativePath=".\src\bloom\headin.f"/>
 		<File RelativePath=".\src\bloom\iblbal.f"/>

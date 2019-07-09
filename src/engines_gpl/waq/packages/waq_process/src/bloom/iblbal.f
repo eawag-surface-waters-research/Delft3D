@@ -21,49 +21,35 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE IBLBAL( NTYP_M, NTYP_A, ALGTYP, IPOINT)
+      subroutine iblbal( ntyp_m, ntyp_a, algtyp, ipoint)
+      
+      use bloom_data_mass_balance
+      
+      implicit none
 !
 !     Function : set common CBLBAL communication with balance routines
 !     Jos van Gils, May 2011: bug fix for N-fixers and heterotrophs
 !
-!     NTYP_M    INPUT   Max number of types
-!     NTYP_A    INPUT   Actual number of types
-!     ALGTYP    INPUT   Characteristics per algae type
-!     IPOINT    INPUT   pointers to bloom algea concentration array
-!
-      INTEGER         NTYP_M, NTYP_A
-      INTEGER         IPOINT(NTYP_A)
-      REAL            ALGTYP(0:20,NTYP_M)
+      integer        ::  ntyp_m              ! Max number of types
+      integer        ::  ntyp_a              ! Actual number of types
+      real           ::  algtyp(0:20,ntyp_m) ! Characteristics per algae type
+      integer        ::  ipoint(ntyp_a)      ! pointers to bloom algea concentration array
 
+      integer        :: ialg
 !                     index  4 is NC-ratio
 !                     index  5 is PC-ratio
 !                     index 16 is NC-ratio detritus uptake
 !                     index 17 is PC-ratio detritus uptake
 !                     index 18 is NC-ratio N fixers
 !
-      INCLUDE 'cblbal.inc'
-      INCLUDE 'sysa.inc'
+      include 'sysa.inc'
 !
-      NTYPA2 = NTYP_A
-      DO IALG = 1 , NTYP_A
-         IBLSUB(IALG) = IPOINT(IALG) - ICONC + 1
-!         NCRALG(IALG) = ALGTYP(4,IALG)
-         NCRALG(IALG) = MAX(ALGTYP(4,IALG),0.0)
-     J                + MAX(ALGTYP(16,IALG),0.0)
-     J                + MAX(ALGTYP(18,IALG),0.0)
-!         PCRALG(IALG) = ALGTYP(5,IALG)
-         PCRALG(IALG) = MAX(ALGTYP(5,IALG),0.0)
-     J                + MAX(ALGTYP(17,IALG),0.0)
-      ENDDO
+      ntypa2 = ntyp_a
+      do ialg = 1 , ntyp_a
+         iblsub(ialg) = ipoint(ialg) - iconc + 1
+         ncralg(ialg) = max(algtyp(4,ialg),0.0) + max(algtyp(16,ialg),0.0) + max(algtyp(18,ialg),0.0)
+         pcralg(ialg) = max(algtyp(5,ialg),0.0) + max(algtyp(17,ialg),0.0)
+      enddo
 !
-      RETURN
-      END
-      BLOCK DATA BBLBAL
-!
-!     Function : set common CBLBAL for the case no bloom
-!
-      INCLUDE 'cblbal.inc'
-!
-      DATA   NTYPA2 / 0 /
-!
-      END
+      return
+      end

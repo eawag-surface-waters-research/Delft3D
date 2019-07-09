@@ -33,14 +33,14 @@
 !              : Include new section to compute surface light intensity
 !                and mixing depth fraction of bottom algae (Ulva)
 !
-!    0895 MvdV  dimension for more than one grazer type added to ZOOD
-!
 !  *********************************************************************
 !  *          SUBROUTINE TO SET MATRIX A AND B                         *
 !  *********************************************************************
 !
-      SUBROUTINE SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      SUBROUTINE SETABC(XINIT,EXTB,EXTTOT,CSOL,DSOL,T,DEP,ID,NSET)
+
+      implicit none
+
       SAVE
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
@@ -49,11 +49,14 @@
       INCLUDE 'phyt2.inc'
       INCLUDE 'cal1.inc'
       INCLUDE 'arran.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'matri.inc'
       INCLUDE 'dynam.inc'
       INCLUDE 'ioblck.inc'
-      REAL*8 XINIT(*),PMAX20(MT),TCORR(MT),SDMIXN(MT),ZOOD(0:MG)
+
+      real(8)  :: xinit(*),pmax20(mt),tcorr(mt),sdmixn(mt)
+      real(8)  :: csol, dsol, dep, expmul, extb, exttot, t
+      integer  :: k, j, nset, id, idrem,  idprev,  imprev
+      
 !      INTEGER SWBLSA
 !
 !  If this is the first time through the subroutine,

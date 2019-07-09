@@ -26,15 +26,25 @@
 !  *      SUBROUTINE CSPSTO TO MODIFY SPECIES STOCHIOMETRY             *
 !  *********************************************************************
 !
-      SUBROUTINE CSPSTO (LERR)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      subroutine cspsto (lerr)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'ioblck.inc'
-      PARAMETER (NSPE = 8)
-      INTEGER STOS, MATCH
+      
+      integer, parameter :: nspe = 8
+      integer            :: stos, match, i, irc, igro, j, k, lerr, lenwrd
+      integer            :: numca, nsgr, nsgr2, numgr, numsp, numco
+      integer, external  :: inptdt, inptnm
       CHARACTER*8 WSPE(NSPE),FNAME,PROFIL,WORD1,WORD2,WORD3
       CHARACTER*3 NEW, OLD
       DATA FNAME /'BLOOMED '/
@@ -50,7 +60,6 @@
 !  Hence a batch job will be terminated,
 !  but re-entry is possible in an interactive run.
 !
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       LERR=0
    10 CONTINUE
       I=INPTDT(1037,WORD1,LENWRD)
@@ -70,7 +79,6 @@
 !  Print characteristics which may be modified.
 !
   100 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99970)
       WRITE (OUUNI,99965) (WSPE(I),I=3,NSPE)
       WRITE (OUUNI,99960)
@@ -82,7 +90,6 @@
 !  Print present set of stochiometric coefficients.
 !
   300 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99920) (CSTRA(I),I=1,NUNUCO),(WSPE(I),I=5,4,-1)
       DO 310 I=1,NUSPEC
       WRITE(OUUNI,99910) SPNAME(I),EKX(I),(AA(K,I),K=1,NUNUCO),
@@ -157,9 +164,6 @@
 !  Modify specific extinction coefficient.
 !
   600 CONTINUE
-      IF (IOFLAG .EQ. 1)
-     1    WRITE (OUUNI,99840) OLD,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
-     2                        EKX(NUMSP)
       I=INPTNM(1034,EKX(NUMSP),0,1)
       WRITE (OUUNI,99840) NEW,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
      1                    EKX(NUMSP)
@@ -176,9 +180,6 @@
       IF (IOFLAG .EQ. 0) GO TO 30
       GO TO 700
   710 CONTINUE
-      IF (IOFLAG .EQ. 1)
-     1    WRITE (OUUNI,99810) OLD,CSTRA(NUMCO),NSGR2,SPNAME(NUMSP),
-     2                        AA(NUMCO,NUMSP)
       I=INPTNM(1036,AA(NUMCO,NUMSP),0,1)
       WRITE (OUUNI,99810) NEW,CSTRA(NUMCO),NSGR2,SPNAME(NUMSP),
      1                    AA(NUMCO,NUMSP)
@@ -187,9 +188,6 @@
 !  Modify chlorophyll to carbon ratio.
 !
   800 CONTINUE
-      IF (IOFLAG .EQ. 1)
-     1   WRITE (OUUNI,99810) OLD,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
-     2                       CHLTOC(NUMSP)
       I=INPTNM(1038,CHLTOC(NUMSP),0,1)
       WRITE (OUUNI,99810) NEW,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
      1                    CHLTOC(NUMSP)
@@ -203,9 +201,6 @@
 !  Modify carbon to dry weight ratio.
 !
   900 CONTINUE
-      IF (IOFLAG .EQ. 1)
-     1 WRITE (OUUNI,99810) OLD,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
-     2                     CTODRY(NUMSP)
       I=INPTNM(1039,CTODRY(NUMSP),0,1)
       WRITE (OUUNI,99810) NEW,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
      1                    CTODRY(NUMSP)

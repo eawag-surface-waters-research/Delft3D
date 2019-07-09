@@ -28,19 +28,25 @@
 !  *********************************************************************
 !
       SUBROUTINE OPTION(LOMODE,LPARAM)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'sumout.inc'
       INCLUDE 'dynam.inc'
       INCLUDE 'arran.inc'
 !
-      PARAMETER (NOPT = 33)
+      integer, parameter :: nopt = 33
+
+      integer            :: i, j, k, irc, memory, lomode, igdump
+      integer            :: lgramo, lpf, lparam, lenout, lenwrd, match, num, num2, numwrd
+      integer, external  :: inptdt, inptnm 
+      real(8)            :: pllim
       INTEGER CMS,STOS
       INTEGER OFON(NOPT)
       CHARACTER*56 TITLE
@@ -91,7 +97,6 @@
 !  If subroutine OPTION is called by CHANGE, options "RUN" and "STOP"
 !  are automatically reset.
 !
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       IF (LOMODE .EQ. 1) GO TO 60
       DO 20 I = 1,NOPT
    20 OFON(I) = 0
@@ -222,7 +227,6 @@
   190 CONTINUE
       GO TO 70
   200 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99930)
       WRITE (OUUNI,99925) WOPTIO(1), (WOPTIO(I),I=3,14),
      1                   (WOPTIO(I),I=16,NOPT)
@@ -304,16 +308,12 @@
 !  empty line is entered (user hits carriage return).
 !
   340 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       LPLOT=1
       OFON(NUMWRD)=1
       REWIND IPL1
       REWIND IPL3
-  350 IF (IOFLAG .EQ. 1) THEN
-         WRITE(OUUNI,360)
-      END IF
+  350 CONTINUE
   360 FORMAT(' Enter main title for every plot:')
-      IF (IOFLAG .EQ. 1) REWIND (INUNI, ERR = 370, IOSTAT= IRC)
   370 READ(INUNI,380,END=350) TITLE
       WRITE(IPL1,390) CASE(11) (8:), (CASE(I),I=12,13), TITLE
       WRITE(IPL1,400) CPLVAR
@@ -350,7 +350,6 @@
       WRITE (OUUNI,99970) WOPTIO(NUMWRD)
       GO TO 70
   480 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       DO 490 K = 1,NOPT
       IF (OFON(K) .LE. 0) GO TO 490
       WRITE (OUUNI,99970) WOPTIO(K)
@@ -558,7 +557,6 @@
       WRITE (OUUNI,99960) WOPTIO(NUM2)
       GO TO 620
   740 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
   750 WRITE (OUUNI,99880)
       WRITE (OUUNI,99925) WOPTIO(3),(WOPTIO(I),I=6,13),
      1      (WOPTIO(I),I=16,17),WOPTIO(19),
@@ -599,7 +597,6 @@
       OFON(NUM2)=-1
       GO TO 620
   830 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       DO 840 K = 1,NOPT
       IF (OFON(K) .GE. 0) GO TO 840
       WRITE (OUUNI,99960) WOPTIO(K)
@@ -678,10 +675,8 @@
 !  Exit after "STOP"/"CONTINUE" has been set.
 !
   930 LSTOP=0
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       GO TO 950
   940 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       IF (LPF .EQ. 1) IRC=CMS(PFOFF,11)
 !
 ! Exit the subroutine. In a dynamic run check whether both

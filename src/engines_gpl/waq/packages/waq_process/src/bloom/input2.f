@@ -30,14 +30,23 @@
 !  Lahey fortran PC version: use FORMATTED input for efficiency curves.
 !
       SUBROUTINE INPUT2 (NDEC,INPU,INEFF)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_arran   
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+!      use bloom_data_putin   
+!      use bloom_data_sumou   
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'size.inc'
       INCLUDE 'arran.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'cal1.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'sumout.inc'
@@ -51,6 +60,10 @@
       DATA CWORDS /'TEMPDEP ','NOMINAL ','MULTIPLI','INCREM  ',
      1             'DUMMY   ','TOTALRAD','EXPONENT','LINEAR  '/
       DATA BLANK /'        '/
+      
+      real(8)      :: zoonut(nunuco,0), zook, zoogr, xmin, gramo1
+      integer      :: i, ioff, ineff, inpu, j, k, nimp
+      integer      :: nuadco, nunuc2, ndec
 !
 !  Equate CWORDS and CONTRO.
 !

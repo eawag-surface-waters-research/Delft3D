@@ -31,7 +31,11 @@
 !    Called by: BLOOMC
 !    Calls    : SETUNI
 
-      SUBROUTINE BLFILE (RUNNAM)
+      subroutine blfile (runnam)
+
+!      use bloom_data_io  
+
+      implicit none
 
 !     Arguments
 !

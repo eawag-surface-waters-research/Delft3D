@@ -26,28 +26,39 @@
 !  *      SUBROUTINE CHANGE TO MODIFY NOMINAL INPUTS TO THE MODEL      *
 !  *********************************************************************
 !
-!  0895 MvdV goto subroutine CCONS instead of CZOOPL if NUGRAZ > 0
-      SUBROUTINE CHANGE(LCHA)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      subroutine change(lcha)
+
+!      use bloom_data_dim 
+!      use bloom_data_caldynam
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+!      use bloom_data_putin   
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'cal1.inc'
       INCLUDE 'ioblck.inc'
-      PARAMETER (NCHANG = 25)
-      REAL*4 RESULT
-      CHARACTER*8 WCHANG(NCHANG),FNAME,PROFIL
-      CHARACTER*8 WORD,WNUNAM,WMORT
-      CHARACTER*3 OLD,NEW
+
+      integer, parameter :: nchang = 25
+      real*4 result
+      character*8 wchang(nchang),fname,profil
+      character*8 word,wnunam,wmort
+      character*3 old,new
       character*8 indepen(3)
-      INTEGER CMS,CALC,STOS,MATCH
-      DATA FNAME /'BLOOMED '/
-      DATA PROFIL /'PROFBLM '/
-      DATA NEW /'New'/
-      DATA OLD /'Old'/
-      DATA WCHANG /'?       ','END     ','PARAM   ','OPTION  ',
+      integer cms,calc,stos,match
+      integer :: i, ifin, iline, irc, i1, i2, j, k, lcha, lenwrd, lerr, len, lparam
+      integer :: bnuti, dnutma, dnuti, numnut, numwrd, num, nummor
+      integer, external :: inptdt, inptnm
+      real(8) :: rate
+      data fname /'BLOOMED '/
+      data profil /'PROFBLM '/
+      data new /'New'/
+      data old /'Old'/
+      data wchang /'?       ','END     ','PARAM   ','OPTION  ',
      1             'AUTOLYSE','BACKEXT ','CALCULAT','CHL-MINE',
      2             'CMS-DOS ','DAYLNGTH','DEPTH   ','FLUSH   ',
      3             'GROWTH  ','MORTAL  ','NUTRCONC','NUTRMINE',
@@ -78,7 +89,6 @@
       LRUN=0
       RETURN
    40 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE(OUUNI,99830)
       WRITE(OUUNI,99850)
       GO TO 10
@@ -87,7 +97,7 @@
 !     * START CHANGE PARAMETER MODE *
 !     *******************************
 !
-   50 IF (IOFLAG .EQ. 1) CALL CLRSCR
+   50 CONTINUE
   100 CONTINUE
       I=INPTDT(1002,WORD,LENWRD)
       IF (MATCH(WCHANG,NCHANG,8,WORD,LENWRD,0,NUMWRD) .NE. 1)
@@ -122,7 +132,6 @@
 ! ? was entered.
 !
   130 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE(OUUNI,99810)
       WRITE(OUUNI,99805) (WCHANG(I),I=5,NCHANG)
       WRITE(OUUNI,99800)
@@ -131,7 +140,6 @@
 !  Modify temperature
 !
   200 CONTINUE
-      IF (IOFLAG .EQ. 1) WRITE(OUUNI,99990) OLD,TEMPMU,TEMPAD
       I=INPTNM(1003,TEMPMU,0,1)
       I=INPTNM(1004,TEMPAD,0,1)
       IF (TEMPMU .GT. 2.0) WRITE (OUUNI,99650) TEMPMU,WCHANG(NUMWRD)
@@ -142,7 +150,6 @@
 !  Modify solar intensity
 !
   300 CONTINUE
-      IF (IOFLAG .EQ. 1) WRITE(OUUNI,99980) OLD,SOLAMU,SOLAAD
       I=INPTNM(1003,SOLAMU,0,1)
       I=INPTNM(1004,SOLAAD,0,1)
       IF (SOLAMU .GT. 2.0) WRITE (OUUNI,99650) SOLAMU,WCHANG(NUMWRD)
@@ -153,7 +160,6 @@
 !  Modify background extinction coefficient
 !
   400 CONTINUE
-      IF ( IOFLAG .EQ. 1) WRITE(OUUNI,99970) OLD,BACKMU,BACKAD
       I=INPTNM(1003,BACKMU,0,1)
       I=INPTNM(1004,BACKAD,0,1)
       IF (BACKMU .GT. 2.0) WRITE (OUUNI,99650) BACKMU,WCHANG(NUMWRD)
@@ -164,7 +170,6 @@
 !  Modify depth
 !
   500 CONTINUE
-      IF (IOFLAG .EQ. 1) WRITE(OUUNI,99960) OLD,DEPTMU,DEPTAD
       I=INPTNM(1003,DEPTMU,0,1)
       I=INPTNM(1004,DEPTAD,0,1)
       IF (DEPTMU .GT. 5.0) WRITE (OUUNI,99650) DEPTMU,WCHANG(NUMWRD)
@@ -177,8 +182,6 @@
   600 CONTINUE
       I = INPTDT(1005,WNUNAM,LENWRD)
       IF (MATCH(CSTRA,NUNUCO,8,WNUNAM,LENWRD,0,NUMNUT).NE.1) GOTO 610
-      IF (IOFLAG .EQ. 1)
-     1    WRITE(OUUNI,99940) OLD,CSTRA(NUMNUT),BNUT(NUMNUT),DNUT(NUMNUT)
       I=INPTNM(1003,BNUTI,0,1)
       I=INPTNM(1004,DNUTI,0,1)
       DNUTMA = 5.0
@@ -208,13 +211,6 @@
   700 CONTINUE
       I = INPTDT(1005,WNUNAM,LENWRD)
       IF (MATCH(CSTRA,NUNUCO,8,WNUNAM,LENWRD,0,NUMNUT).NE.1) GOTO 720
-      IF (IOFLAG .EQ. 1) THEN
-         IF (RNUT(2,NUMNUT) .GT. 0.5) THEN
-             WRITE(OUUNI,99910) OLD,CSTRA(NUMNUT),RNUT(1,NUMNUT)
-         ELSE
-             WRITE(OUUNI,99920) OLD,CSTRA(NUMNUT),RNUT(1,NUMNUT)
-         END IF
-      END IF
   702 CONTINUE
       I = INPTDT(1013,WORD,LENWRD)
 !     IF (MATCH('DEPENDEN',1,8,WORD,LENWRD,0,NUM).EQ.1) THEN
@@ -336,7 +332,6 @@
 !  Modify sedimentation rate constant
 !
  1200 CONTINUE
-      IF (IOFLAG .EQ. 1) WRITE(OUUNI,99770) OLD,SEDRAT
       I = INPTNM(1017,SEDRAT,0,1)
       IF (SEDRAT .GT. 0.5) WRITE (OUUNI,99630) SEDRAT,WCHANG(NUMWRD)
       IF (IOFLAG .EQ. 0) GO TO 100
@@ -346,7 +341,6 @@
 !  Modify flushing rate constant
 !
  1300 CONTINUE
-      IF (IOFLAG .EQ. 1) WRITE(OUUNI,99760) OLD,FLUSH
       I = INPTNM(1018,FLUSH,0,1)
       IF (FLUSH .GT. 0.5) WRITE (OUUNI,99630) FLUSH,WCHANG(NUMWRD)
       IF (IOFLAG .EQ. 0) GO TO 100
@@ -356,7 +350,6 @@
 !  Modify mineralization rate detritus
 !
  1400 CONTINUE
-      IF (IOFLAG .EQ. 1) WRITE(OUUNI,99750) OLD,REMIOR
       I = INPTNM(1019,REMIOR,0,1)
       IF (REMIOR .GT. 0.05) WRITE (OUUNI,99650) REMIOR,WCHANG(NUMWRD)
       WRITE(OUUNI,99750) NEW,REMIOR
@@ -365,7 +358,6 @@
 !  Modify disappearance rate light absorption by dead algae
 !
  1500 CONTINUE
-      IF (IOFLAG .EQ. 1) WRITE (OUUNI,99740) OLD,REMILI(1),REMILI(2)
       I = INPTNM(1020,REMILI(1),0,1)
       I = INPTNM(1021,REMILI(2),0,1)
       WRITE (OUUNI,99740) NEW,REMILI(1),REMILI(2)
@@ -375,7 +367,6 @@
 !
  1600 CONTINUE
 !      NOT ALLOWED ANY MORE (AVAILN BECAME AN ARRAY)
-!      IF (IOFLAG .EQ. 1) WRITE(OUUNI,99730) OLD,1.0-AVAILN
 !      I = INPTNM(1022,AUTO,0,1)
 !      AVAILN=1.0-AUTO
 !      IF (AUTO .GT. 1.0 .OR. AUTO .LT. 0.0)
@@ -450,7 +441,6 @@
 !     Modify the daylength
 !
  2200 CONTINUE
-      IF (IOFLAG .EQ. 1) WRITE(OUUNI,99610) OLD,DLGTMU,DLGTAD
       I=INPTNM(1003,DLGTMU,0,1)
       I=INPTNM(1004,DLGTAD,0,1)
       IF (DLGTMU .GT. 1.5) WRITE (OUUNI,99650) DLGTMU,WCHANG(NUMWRD)
@@ -461,7 +451,6 @@
 !  Call subroutine CHHELP to print current parameter settings.
 !
  2300 CALL CHHELP (OUUNI)
-      IF (IOFLAG .EQ. 1) CALL CHHELP (IOU(21))
       GO TO 100
 !
 !  Modify zooplankton characteristics

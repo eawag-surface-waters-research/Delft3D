@@ -48,21 +48,23 @@
 !  *         SUBROUTINE TO PRINT SUMMARIZED SOLUTIONS                  *
 !  *********************************************************************
 !
-!  0895 MvdV dimension added to ZOOD
-!            output of extra items for more grazer types
-!
-      SUBROUTINE PRINSU(X,XECO,BIO2,TOTAL,ZOOD,COUT,OUT,NTSTOT,
-     1                  ITNUM,NTAPE)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      SUBROUTINE PRINSU(X,XECO,BIO2,TOTAL,COUT,OUT,NTSTOT,ITNUM,NTAPE)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'size.inc'
       INCLUDE 'sumout.inc'
       INCLUDE 'matri.inc'
       INCLUDE 'postbl.inc'
-      REAL*8 X(*),OUT(*),XECO(*),ZOOD(0:MG)
+      
+      integer  ::  i, i1, i2, j, k, k1, k2
+      integer  ::  itnum, ntape, ntstot, numlim, ncon
+      real (8) :: bio2, xbio, total, tot2
+      
+      REAL*8 X(*),OUT(*),XECO(*)
       CHARACTER*8 WORDS(14)
       CHARACTER*4 COUT(*)
       LOGICAL LCON

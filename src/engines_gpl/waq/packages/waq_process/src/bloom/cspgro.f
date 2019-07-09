@@ -28,14 +28,27 @@
 !
 !  0895 MvdV adaptation dimension ZOOPR for more than one grazer type
       SUBROUTINE CSPGRO(LERR)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+!      use bloom_data_putin   
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'ioblck.inc'
-      PARAMETER (NSPE = 9)
+
+      integer, parameter :: nspe = 9
+      integer            :: i, igro, irc, ipos, j, k, len, lerr, lenwrd
+      integer            :: numca, numpma, nsgr, nsgr2, numgr, numsp
+      integer, external  :: inptnm, inptdt
+      
       CHARACTER*8 PWORDS(MT),WORD
       INTEGER GETS,UPRCAS,STOS,MATCH
       CHARACTER*8 WSPE(NSPE),FNAME,PROFIL,PWORD,WORD2,PWORD1
@@ -54,7 +67,6 @@
 !  Hence a batch job will be terminated,
 !  but re-entry is possible in an interactive run.
 !
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       LERR=0
    10 CONTINUE
       I=INPTDT(1051,WORD,LENWRD)
@@ -74,7 +86,6 @@
 !  Print characteristics which may be modified.
 !
   100 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99970)
       WRITE (OUUNI,99965) (WSPE(I),I=4,NSPE)
       WRITE (OUUNI,99960)
@@ -86,7 +97,6 @@
 !  Print present growth characteristics.
 !
   300 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99920)
       DO 310 I=1,NUSPEC
       K = 7
@@ -190,15 +200,6 @@
 !  Modify Pmax.
 !
   600 CONTINUE
-      IF (IOFLAG .EQ. 1) THEN
-        IF (LPMAX(NUMSP) .EQ. 1) THEN
-          WRITE (OUUNI,99830) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
-     1                        WSPE(NUMCA),PMAX1(NUMSP),PMAX2(NUMSP)
-       ELSE
-          WRITE (OUUNI,99820) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
-     1                        WSPE(NUMCA),PMAX1(NUMSP),PMAX2(NUMSP)
-        END IF
-      END IF
       I=INPTNM(1052,PMAX1(NUMSP),0,1)
       I=INPTNM(1053,PMAX2(NUMSP),0,1)
   610 CONTINUE
@@ -229,9 +230,6 @@
 !  Modify mortality.
 !
   700 CONTINUE
-      IF (IOFLAG .EQ. 1)
-     1   WRITE (OUUNI,99820) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
-     2                       WSPE(NUMCA),RMORT1(NUMSP),RMORT2(NUMSP)
       I=INPTNM(1057,RMORT1(NUMSP),0,1)
       I=INPTNM(1058,RMORT2(NUMSP),0,1)
       WRITE (OUUNI,99820) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
@@ -241,9 +239,6 @@
 !  Modify respiration.
 !
   800 CONTINUE
-      IF (IOFLAG .EQ. 1)
-     1   WRITE (OUUNI,99820) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
-     2                       WSPE(NUMCA),RES1(NUMSP),RES2(NUMSP)
       I=INPTNM(1059,RES1(NUMSP),0,1)
       I=INPTNM(1060,RES2(NUMSP),0,1)
       WRITE (OUUNI,99820) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
@@ -253,9 +248,6 @@
 !  Modify mixing depth multiplier.
 !
   900 CONTINUE
-      IF (IOFLAG .EQ. 1)
-     1    WRITE (OUUNI,99800) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
-     2                        SDMIX(NUMSP)
       I=INPTNM(1055,SDMIX(NUMSP),0,1)
       WRITE (OUUNI,99800) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
      1                    SDMIX(NUMSP)
@@ -264,9 +256,6 @@
 !  Modify zooplankton preference rates.
 !
  1000 CONTINUE
-      IF (IOFLAG .EQ. 1)
-     1  WRITE (OUUNI,99800) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
-     2                      ZOOPR(NUMSP,0)
       I=INPTNM(1056,ZOOPR(NUMSP,0),0,1)
       WRITE (OUUNI,99800) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
      1                    ZOOPR(NUMSP,0)

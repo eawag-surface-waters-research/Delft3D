@@ -30,15 +30,18 @@
 !  971217 MvdV extra mortality above critical temp for ulvae
 !  0895 MvdV output of grazer biomass extended for multiple grazer types
 
-      SUBROUTINE NATMOR(DEATH,ZOOD,TEMP)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      SUBROUTINE NATMOR(DEATH,TEMP)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'cal1.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'ioblck.inc'
-      REAL*8 ZOOD(0:MG)
+      
+      integer  :: i
+      real(8)  :: death, temp, temp2, tmpcor
 !
 !  IF LCAL=1 DEATH IS PUT EQUAL TO THE INPUT VALUE
 !

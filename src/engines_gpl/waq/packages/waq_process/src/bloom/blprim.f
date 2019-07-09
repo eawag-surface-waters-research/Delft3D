@@ -34,18 +34,25 @@
 
 !     22062006 Bugfixes Uptake fluxes, streamlining of NUNUCO based loops
 
-      SUBROUTINE BLPRIM (BIOMAS, CNH4  , CNO3  , CPO4  , CSIO  , 
-     J                   CDETN , CDETP ,         CCO2  , CTIC  ,
-     J                   FLMORA, FLDETN, TSTEPI, EXTOT , EXALG , TEMP  ,
-     J                   RAD   , DEPTH , DAYL  , ID    , NSET  ,
-     J                   DEAT4 , TOTNUT, CHLTOT, FLPRPA, FLUPTN, FACLIM,
-     J                   UPTNIT, FRACAM, FBOD5 , RATGRO, RATMOR, ALGDM ,
-     J                   ISEG  , CGROUP, LMIXO , LFIXN , LCARB , NUTCON,
-     J                   FLXCON, NOUTLIM, OUTLIM, NUNUCOM, NUECOGM, 
-     J                   CON2OUT,SWBLSA , TotNin, TotPin, TotSIin )
+      subroutine blprim (biomas, cnh4  , cno3  , cpo4  , csio  , 
+     j                   cdetn , cdetp ,         cco2  , ctic  ,
+     j                   flmora, fldetn, tstepi, extot , exalg , temp  ,
+     j                   rad   , depth , dayl  , id    , nset  ,
+     j                   deat4 , totnut, chltot, flprpa, fluptn, faclim,
+     j                   uptnit, fracam, fbod5 , ratgro, ratmor, algdm ,
+     j                   iseg  , cgroup, lmixo , lfixn , lcarb , nutcon,
+     j                   flxcon, noutlim, outlim, nunucom, nuecogm, 
+     j                   con2out,swblsa , totnin, totpin, totsiin )
 
-      IMPLICIT NONE
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_caldynam
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+!      use bloom_data_sumou   
+!      use bloom_data_xvect   
 
+      implicit none
 !  
 !     Arguments
 !
@@ -319,17 +326,9 @@
       EXTLIM = 0D0
       DEAT   = DBLE(DEAT4)
 
-!      write (1961,*   ) 'BLOOM   ',NREP
-!      write (1961,1001) 'XINIT   ',(XINIT(J), J=1,NUECOG)
-!      write (1961,1001) 'CONCEN  ',(CONCEN(J), J=1,NUNUCO)
-!      write (1961,1001) 'X       ',(X(J), J=1,NUSPEC)
-
       CALL DYNRUN (EXTOT8, EXBAC8, TEMP8 , RAD8  , DEPTH8, DAYL8 ,
      J             CHLOR8, ID    , ISEG  , NSET  , EXTLIM,
      J             DEAT  , TOTCHL, TOTDRY, TOTCAR, SWBLSA)
-
-!      write (1961,1001) 'XDEFA   ',(XDEF(J), J=1,NUNUCO)
-!      write (1961,1001) 'XDEFB   ',(XDEF(NUROWS+J), J=1,NUSPEC)
 
 !
 ! Store total carbon and chlorophyll concentration

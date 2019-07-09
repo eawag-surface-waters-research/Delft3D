@@ -26,10 +26,21 @@
 !    Called by: BLOOMC
 !    Calls    : INPUT2, OPTION, CHANGE
 !
-      SUBROUTINE BLINPU (NTYP_M, NTYP_A, NGRO_A, ALGTYP, LMIXO , LFIXN ,
-     J                   LCARB , NUNUCOM, NUTCON, FLXCON, CON2OUT)
+      subroutine blinpu (ntyp_m, ntyp_a, ngro_a, algtyp, lmixo , lfixn ,
+     j                   lcarb , nunucom, nutcon, flxcon, con2out)
       
-      IMPLICIT NONE
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_arran   
+!      use bloom_data_mass_balance  
+!      use bloom_data_caldynam
+!      use bloom_data_io  
+!      use bloom_data_matrix  
+!      use bloom_data_phyt    
+!      use bloom_data_putin   
+!      use bloom_data_sumou   
+
+      implicit none
 
 !     Arguments
 !
@@ -78,7 +89,6 @@
 
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
-      INCLUDE 'putin2.inc'
       INCLUDE 'size.inc'
       INCLUDE 'arran.inc'
       INCLUDE 'phyt1.inc'
@@ -105,11 +115,6 @@
 !
       READ (INUNI, '(I4,1X,9A8)') IYEAR, (CASE (I), I = 1,9)
       READ (INUNI, '(9A8,8X)') COM
-      DO I = 0 , MG
-         DO J = 1 , 52
-            ZOOD(J,I) = 0.0D0
-         ENDDO
-      ENDDO
 
 !  DETERMINE NUSPEC AND NUECOG
       IS = 0

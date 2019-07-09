@@ -35,13 +35,25 @@
 !  *  SUBROUTINE TO SET THE MORTALITY CONSTRAINTS INTO THE B-VECTOR    *
 !  *********************************************************************
 !
-      SUBROUTINE BVECT(X,XDEF)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      subroutine bvect(x,xdef)
+      
+!      use bloom_data_dim 
+!      use bloom_data_matrix  
+!      use bloom_data_phyt    
+
+      implicit none
 !
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'matri.inc'
-      DIMENSION X(*),B2(MS),XDEF(*)
+
+      real(8)      :: x(*)
+      real(8)      :: b2(ms)
+      real(8)      :: xdef(*)
+      real(8)      :: sumsp
+      real(8)      :: dmax1
+      integer      :: i, i1, k, k1, l1, l2
+      
 !
 ! To tell Bloom how much biomass of the living phytoplankton
 ! species is left at the end of the time-step, the 'minimum

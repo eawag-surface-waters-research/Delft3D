@@ -36,10 +36,16 @@
 !  *          INTERACTIVE ROUTINES IN "INTERACT TXTLIB"                *
 !  *********************************************************************
 !
-      INTEGER FUNCTION INPTDT(PRMPT,TOKEN,LEN)
+      integer function inptdt(prmpt,token,len)
+
+!      use bloom_data_io  
+
+      implicit none
+
       INCLUDE 'ioblck.inc'
-      CHARACTER*8 TOKEN
-      INTEGER PRMPT,GETS,LEN,UPRCAS
+
+      character*8 token
+      integer prmpt,gets,len,uprcas,irc
 !
       INPTDT = 0
     1 CONTINUE

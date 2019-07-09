@@ -17,7 +17,9 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libbloom_la_SOURCES = blclmort.f \
+libbloom_la_SOURCES = \
+       bloom_data.f90 \
+       blclmort.f \
        blfile.f \
        blinit.f \
        blinpu.f \
@@ -39,7 +41,6 @@ libbloom_la_SOURCES = blclmort.f \
        edit.f \
        exclud.f \
        fixinf.f \
-       grazin.f \
        hdrblm.f \
        headin.f \
        iblbal.f \

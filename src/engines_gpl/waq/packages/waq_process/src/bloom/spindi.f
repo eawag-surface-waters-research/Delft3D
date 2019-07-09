@@ -28,11 +28,15 @@
 !
 !
       SUBROUTINE SPINDI(LSPIND)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'ioblck.inc'
+      
+      integer  :: i, j, lspind, ngr
 !
 !  Determine the number of the first and last type of each species.
 !  Check whether the number of different names agrees with the total

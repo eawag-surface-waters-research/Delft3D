@@ -45,10 +45,18 @@
 !  produced.
 !
       SUBROUTINE HDRBLM
+
+!      use bloom_data_dim
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+!      use bloom_data_putin   
+!      use bloom_data_sumou  
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'phyt2.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'sumout.inc'
 !

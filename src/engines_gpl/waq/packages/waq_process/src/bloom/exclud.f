@@ -26,15 +26,23 @@
 !  * SUBROUTINE EXCLUD TO DETERMINE SPECIES PERMITTED IN EACH INTERVAL *
 !  *********************************************************************
 !
-      SUBROUTINE EXCLUD (INOW,LINF,IRS)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      subroutine exclud (inow,linf,irs)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_matrix  
+!      use bloom_data_phyt    
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'matri.inc'
       INCLUDE 'size.inc'
-      INTEGER NTYPES (MS),IRS(3)
-      SAVE NTYPES
-      DATA NEXCLU /0/
+
+      integer ntypes (ms),irs(3), i, inow, k, nexclu, notprs, linf, iform
+      save ntypes
+      data nexclu /0/
 !
 ! If the subroutine is called for the first time, compute and store
 ! the number of types in each phytoplankton group.

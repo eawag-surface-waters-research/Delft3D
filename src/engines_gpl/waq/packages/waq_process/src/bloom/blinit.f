@@ -31,7 +31,15 @@
 !    Called by: BLOOMC
 !    Calls    : CVRBLM, HDRBLM
 
-      SUBROUTINE BLINIT (LPRINO,LDUMPO)
+      subroutine blinit (lprino,ldumpo)
+
+!      use bloom_data_dim
+!      use bloom_data_matrix  
+!      use bloom_data_phyt    
+!      use bloom_data_sumou   
+
+      implicit none
+
 !
 !     Arguments
 !

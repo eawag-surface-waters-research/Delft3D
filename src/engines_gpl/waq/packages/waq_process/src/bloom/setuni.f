@@ -45,9 +45,13 @@
 !  units.
 !
       SUBROUTINE SETUNI
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'ioblck.inc'
+      
+      integer :: i, ioux
 !
 ! In ECOLUMN/NZBLOOM version:
 !

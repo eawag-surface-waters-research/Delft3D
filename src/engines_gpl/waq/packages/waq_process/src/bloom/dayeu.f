@@ -28,9 +28,21 @@
 !   ******************************************************************
 !
       SUBROUTINE DAYEU(DAY,DAYEUF,EXTTOT,DEP,DEPEUF,DSOL,EULIGH,IDUMP)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_io  
+
+      implicit none
       INCLUDE 'ioblck.inc'
-!
+      
+      real(8)    :: dsol
+      real(8)    :: euligh
+      real(8)    :: depeuf
+      real(8)    :: exttot
+      real(8)    :: dep
+      real(8)    :: dayeuf
+      real(8)    :: day
+      integer    :: idump
+      !
 ! Compute the euphotic depth.
 !
       IF (EULIGH .GT. DSOL) EULIGH = DSOL

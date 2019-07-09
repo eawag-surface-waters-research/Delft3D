@@ -22,8 +22,14 @@
 !!  rights reserved.
 
       SUBROUTINE EDIT (FNAME,PROFIL,IRC)
-      CHARACTER*8 FNAME,PROFIL
-      INTEGER CMS
+
+!      use bloom_data_io
+
+      implicit none
+
+      character*8 fname,profil
+      integer cms, irc
+
       INCLUDE 'ioblck.inc'
 !
 ! Call EDITBLM.BAT to invoke a user-specified editor.

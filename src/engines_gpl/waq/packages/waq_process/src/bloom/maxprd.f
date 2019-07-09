@@ -28,11 +28,22 @@
 !  *********************************************************************
 !
       SUBROUTINE MAXPRD(T)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'ioblck.inc'
+      
+      real*8  :: t
+      integer :: i, k
+      
 !
 !  Calculate respiration rate constants.
 !  Calculate the maximum gross growth rate per day as a linear or

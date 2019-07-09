@@ -26,39 +26,47 @@
 !  *    SUBROUTINE TO CHECK FEASIBILITY OF NUTRIENT CONSTRAINTS        *
 !  *********************************************************************
 !
-      SUBROUTINE NUTFEA(INFEAS)
-      IMPLICIT REAL*8 (A-H,O-Z)
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'ioblck.inc'
-      DIMENSION X(MX)
-      DATA SLACK/1.D-12/
+      subroutine nutfea(infeas)
+      
+      use bloom_data_dim
+      use bloom_data_io  
+      use bloom_data_matrix  
+      use bloom_data_phyt    
+
+      implicit none
+
+!      include 'blmdim.inc'
+!      include 'phyt1.inc'
+!      include 'phyt2.inc'
+!      include 'matri.inc'
+!      include 'ioblck.inc'
+
+      real(8)   :: x(mx), slack = 1.d-12
+      integer   :: i, j, infeas
 !
 !  If a negative righthand side is determined, check whther all species
 !  have a positive A-coefficient or not; introduce slack to avoid
 !  negative concentrations.
 !
-      INFEAS=0
-      DO 40 I=1,NUNUCO
-      IF (B(I) .GE. 0.0) GO TO 40
-      DO 10 J=1,NUSPEC
-      IF (AA(I,J) .LT. 1.0D-6) GO TO 20
-   10 CONTINUE
-      IF (IDUMP .EQ. 1) WRITE (IOU(6),99999) CSTRA(I),B(I)
-      INFEAS=1
-      GO TO 30
-   20 CONTINUE
-      IF (IDUMP .EQ. 1) WRITE (IOU(6),99990) CSTRA(I),B(I)
-   30 B(I)=SLACK
-   40 CONTINUE
-99999 FORMAT (2X,'The nutrient constraint',1X,A8,1X,'has a negative',
+      infeas=0
+      do 40 i=1,nunuco
+      if (b(i) .ge. 0.0) go to 40
+      do 10 j=1,nuspec
+      if (aa(i,j) .lt. 1.0d-6) go to 20
+   10 continue
+      if (idump .eq. 1) write (iou(6),99999) cstra(i),b(i)
+      infeas=1
+      go to 30
+   20 continue
+      if (idump .eq. 1) write (iou(6),99990) cstra(i),b(i)
+   30 b(i)=slack
+   40 continue
+99999 format (2X,'The nutrient constraint',1X,A8,1X,'has a negative',
      1        ' right hand side =',2X,F8.3,/,1X,'and positive',
      2        ' A-coefficients for all species; problem is infeasible.')
-99990 FORMAT (2X,'The nutrient constraint',1X,A8,1X,'has a negative',
+99990 format (2X,'The nutrient constraint',1X,A8,1X,'has a negative',
      1        ' right hand side =',2X,F8.3,/,1X,'and zero',
      2        ' A-coefficients for at least one species;',
      3        ' slack introduced.')
-      RETURN
-      END
+      return
+      end

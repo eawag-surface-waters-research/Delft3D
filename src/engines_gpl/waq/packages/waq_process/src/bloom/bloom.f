@@ -99,13 +99,24 @@
 !  *********************************************************************
 !
 !
-      SUBROUTINE BLOOM(CDATE,ID,MI,T,CSOL,PHYT,EXTB,DAY,DEATH,ZOOD,
-     1           DEP,XINIT,XDEF,XECO,TOTAL,EXTTOT,EXTLIM,NSET,INFEAS,
-     2           NONUN,NUMUN,SWBLSA)
+      subroutine bloom(cdate,id,mi,t,csol,phyt,extb,day,death,
+     1           dep,xinit,xdef,xeco,total,exttot,extlim,nset,infeas,
+     2           nonun,numun,swblsa)
 
-      USE DATA_3DL
+      use data_3dl
+!      use bloom_data_dim
+!      use bloom_data_size
+!      use bloom_data_arran
+!      use bloom_data_caldynam
+!      use bloom_data_io
+!      use bloom_data_matrix
+!      use bloom_data_phyt
+!      use bloom_data_sumou
+      
+!      IMPLICIT REAL*8 (A-H,O-Z)
 
-      IMPLICIT REAL*8 (A-H,O-Z)
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'arran.inc'
@@ -116,18 +127,45 @@
       INCLUDE 'matri.inc'
       INCLUDE 'dynam.inc'
       INCLUDE 'ioblck.inc'
-      INTEGER IRS3, SWBLSA
-      INTEGER NONUNI(MT),NONUN(MT),IRS(3),LIB(MX),JKMAX(MS)
-      SAVE    IRS, IRS3
-      DIMENSION X(MX),XINIT(*),XDEF(*),BIO(2),GROOT(2),
-     1          OROOT(2*MT),ROOT(2),EMIN(MT),
-     2          OUT15(20+MG),OUTST(20+MG),XECO(*),XECOST(MS),ZOOD(0:MG)
-      CHARACTER*8 CDATE
-*     CHARACTER*4 COUT(10),COUTST(10)
-      CHARACTER*4 COUT(MN+5),COUTST(MN+5)
-      CHARACTER*1 ERRIND
-      LOGICAL LSOLU
-      PARAMETER (SOLMIN=100.0)
+
+      integer irs3, i, id, ier, index1, index2, infeas, inow, int, inhib, ismax, iskmax, irerun
+      integer j, k, l1, l2, linf, ni, nin, nset, numuni, numun, swblsa
+      integer ntstot, itnum, ntsst, k1, mi
+      integer nonuni(mt),nonun(mt),irs(3),lib(mx),jkmax(ms)
+      save    irs, irs3
+      real(8) :: x(mx),xinit(*),xdef(*),bio(2),groot(2),
+     1           oroot(2*mt),root(2),emin(mt),
+     2           out15(20+mg),outst(20+mg),xeco(*),xecost(ms),zood(0:mg)
+      real(8) :: t
+      real(8) :: usol
+      real(8) :: csol
+      real(8) :: extb
+      real(8) :: exttot
+      real(8) :: dsol
+      real(8) :: dep
+      real(8) :: day
+      real(8) :: dayeuf
+      real(8) :: depeuf
+      real(8) :: daym
+      real(8) :: effi
+      real(8) :: extlim
+      real(8) :: biomax
+      real(8) :: total
+      real(8) :: totst
+      real(8) :: exdead
+      real(8) :: exlive
+      real(8) :: ekxi
+      real(8) :: phyt
+      real(8) :: zmax
+      real(8) :: gramx
+      real(8) :: death
+      
+      character*8 cdate
+*     character*4 cout(10),coutst(10)
+      character*4 cout(mn+5),coutst(mn+5)
+      character*1 errind
+      logical lsolu
+      real(8), parameter :: solmin=100.0
 
 !
 !
@@ -141,7 +179,7 @@
 !  Update 28 oct 92: added DEP to argument list.
 !
       USOL = CSOL
-      CALL SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET)
+      CALL SETABC(XINIT,EXTB,EXTTOT,CSOL,DSOL,T,DEP,ID,NSET)
 !
 !   Test for (in)feasibility of the nutrient constraints in
 !   a run with a dynamic detritus computation.
@@ -383,7 +421,7 @@
 !  on unit 15.
 !
   280 CONTINUE
-      CALL PRINSU(XDEF,XECO,BIO(2),TOTAL,ZOOD,COUT,OUT15,NTSTOT,
+      CALL PRINSU(XDEF,XECO,BIO(2),TOTAL,COUT,OUT15,NTSTOT,
      1     ITNUM,15)
       IF (IDUMP .NE. 0) CALL PRINMA(XDEF,BIO(2),TOTAL,NI,NIN,INT)
 !
@@ -391,7 +429,7 @@
 !  in the complete and summarized output.
 !
       IF (LST .EQ. 1) THEN
-        CALL PRINSU(XST,XECOST,BIOST,TOTST,ZOOD,COUTST,OUTST,
+        CALL PRINSU(XST,XECOST,BIOST,TOTST,COUTST,OUTST,
      1       NTSTOT,ITNUM,15)
         NTSST = NTSTOT
         IF (IDUMP .NE. 0) CALL PRINMA(XST,BIOST,TOTST,NI,NIN,INTST)
@@ -432,7 +470,7 @@
 !
       IF (LPRINT .GE. 1)
      1    CALL PRINUN (CDATE, TOTAL, PHYT, EXTTOT, EXLIVE, EXDEAD,
-     2                 EXTB, T, USOL, DAY, DEP , ZOOD,ZMAX,GRAMX)
+     2                 EXTB, T, USOL, DAY, DEP, ZMAX, GRAMX)
 !
 !  Return the converted and corrected solar radiation level as
 !  CSOL in Joules / cm2 / hour.

@@ -27,16 +27,25 @@
 !  *********************************************************************
 !
       SUBROUTINE HEADIN(NZOUT,WORDS)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_arran   
+!      use bloom_data_io  
+!      use bloom_data_phyt    
+!      use bloom_data_sumou   
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'arran.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'size.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'sumout.inc'
       INCLUDE 'ioblck.inc'
-      INTEGER NUMTYP(MT)
+
+      INTEGER NUMTYP(MT), i, j, k, kk, nueco2, nzout
       CHARACTER*4 WORDS2(12),WORDS3(20),WORDS4(20)
       CHARACTER*8 WORDS(*),WWORDS(MG)
 !
@@ -102,7 +111,6 @@
 !  Write heading for standard output file (OUUNI).
 !
       WRITE(OUUNI,25) (WORDS4(I),I=1,J)
-      IF (IOFLAG .EQ. 1) WRITE(IOU(21),25) (WORDS4(I),I=1,J)
       WRITE(OUUNI,30)
    25 FORMAT(4X,'Model objective: Maximize ',2A4,/,
      1       4X,'Main active program options: ',9(A4,A4,'; '))

@@ -27,16 +27,19 @@
 !  *********************************************************************
 !
       SUBROUTINE PRINMA(X,BIO2,TOTAL,NI,NIN,INT)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
-      DIMENSION X(MX)
+
+      real(8)   :: x(mx), biopos, bio2, total
+      integer   :: int, j, k, k2, l1, l2, ni, nin
 !
 !  PRINT MAXIMUM SOLUTION ON UNIT IOU(6)
 !
-      IF (IOFLAG .EQ. 1) CALL MORESC
       WRITE (IOU(6),10)
    10 FORMAT (12X,'******* MAXIMUM SOLUTION *******')
       WRITE(IOU(6),20)
@@ -64,6 +67,5 @@
       WRITE(IOU(6),120) NI,NIN,INT
   120 FORMAT ('  Number of intervals:',I3,2X,'Infeasible:',I3,
      1        2X,'Maximum interval:',I3,//)
-      IF (IOFLAG .EQ. 1) CALL MORESC
       RETURN
       END

@@ -1115,25 +1115,27 @@
       RETURN
       END
 
-      SUBROUTINE COMSUM (NOSUM , TFACTO, NOTOT , SYNAME, SFACTO,
-     J                   NOCONS, CONAME, CONS  )
+      subroutine comsum (nosum , tfacto, notot , syname, sfacto, nocons, coname, cons  )
+
       use timers
-      INTEGER            NOSUM , NOTOT , NOCONS
-      CHARACTER*20       SYNAME(NOTOT),  CONAME(NOCONS)
-      REAL               TFACTO(NOSUM), SFACTO(NOSUM,NOTOT),
-     J                   CONS(NOCONS)
+      use bloom_data_mass_balance
+      
+      implicit none
 
-      INCLUDE 'cblbal.inc'
+      integer            nosum , notot , nocons
+      character*20       syname(notot),  coname(nocons)
+      real               tfacto(nosum), sfacto(nosum,notot), cons(nocons)
 
-      INTEGER              ISUM  , ISYS  , ICONS , IRES  , NRES1 ,
-     J                     NRES2 , ITYP
-      REAL                 FACTOR
-      PARAMETER           (NRES1 = 23, NRES2 = 2)
-      CHARACTER*20         RESNA1(NRES1),RESNA2(NRES2)
-      character*10         RATNA2(2,NRES2)
-      REAL                 FACRES(2,NRES1),RATDEF(2,NRES2)
+!      INCLUDE 'cblbal.inc'
 
-      DATA RESNA1   / 'DetP                ',
+      integer              isum, isys, icons, ires, nres1, nres2, ityp, lunrep
+      real                 factor
+      parameter           (nres1 = 23, nres2 = 2)
+      character*20         resna1(nres1),resna2(nres2)
+      character*10         ratna2(2,nres2)
+      real                 facres(2,nres1),ratdef(2,nres2)
+
+      data resna1   / 'DetP                ',
      J                'OOP                 ',
      J                'AlgP                ',
      J                'AAP                 ',
@@ -1156,7 +1158,7 @@
      J                'PON3                ',
      J                'PON4                ',
      J                'DON                 '/
-      DATA FACRES   / 0.0,1.0,
+      data facres   / 0.0,1.0,
      J                0.0,1.0,
      J                0.0,1.0,
      J                0.0,1.0,
@@ -1179,19 +1181,20 @@
      J                1.0,0.0,
      J                1.0,0.0,
      J                1.0,0.0/
-      DATA RESNA2   / 'Diat                ',
+      data resna2   / 'Diat                ',
      J                'Green               '/
-      DATA RATNA2   / 'NCRatDiat ','PCRatDiat ',
+      data ratna2   / 'NCRatDiat ','PCRatDiat ',
      J                'NCRatGreen','PCRatGreen'/
-      DATA RATDEF   / 0.16,0.02,
+      data ratdef   / 0.16,0.02,
      J                0.16,0.02/
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "consum", ithandl )
 
 !     Compose sum parameters
-!     LOCAL FUNCTIONALITY NOSUM = 2, CHECK!!!!!!!!!!!!!
+!     local functionality nosum = 2, check!!!!!!!!!!!!!
 
-      IF ( NOSUM .NE. 2 ) then
+      if ( nosum .ne. 2 ) then
+         call getmlu(lunrep)
          write (lunrep,*) 'BUG IN COMSUM!'
          write (*,*) 'BUG IN COMSUM!'
          call srstop(1)
@@ -1200,60 +1203,60 @@
 !     Initialise substance shares in sum parameters as well as totals
 !     (totals are used to find out if sum parameter is active)
 
-      DO ISUM = 1,NOSUM
-          TFACTO(ISUM) = 0.0
-          DO ISYS = 1,NOTOT
-              SFACTO(ISUM,ISYS) = 0.0
-          ENDDO
-      ENDDO
+      do isum = 1,nosum
+          tfacto(isum) = 0.0
+          do isys = 1,notot
+              sfacto(isum,isys) = 0.0
+          enddo
+      enddo
 
-      DO ISYS = 1,NOTOT
+      do isys = 1,notot
 
 !         Reserved substance names, FIXED scale factor
-          CALL ZOEK   (SYNAME(ISYS),NRES1,RESNA1,20,IRES)
-          IF ( IRES .GT. 0 ) THEN
-              DO ISUM = 1,NOSUM
-                  TFACTO(ISUM) = TFACTO(ISUM) + FACRES(ISUM,IRES)
-                  SFACTO(ISUM,ISYS) = FACRES(ISUM,IRES)
-              ENDDO
-          ENDIF
+          call zoek   (syname(isys),nres1,resna1,20,ires)
+          if ( ires .gt. 0 ) then
+              do isum = 1,nosum
+                  tfacto(isum) = tfacto(isum) + facres(isum,ires)
+                  sfacto(isum,isys) = facres(isum,ires)
+              enddo
+          endif
 
 !         Reserved substance names, scale factors from CONS with default
-          CALL ZOEK   (SYNAME(ISYS),NRES2,RESNA2,20,IRES)
-          IF ( IRES .GT. 0 ) THEN
-              DO ISUM = 1,NOSUM
-                  CALL ZOEK   (RATNA2(ISUM,IRES),NOCONS,CONAME,10,ICONS)
-                  IF ( ICONS .GT. 0 ) THEN
-                      FACTOR = CONS(ICONS)
-                  ELSE
-                      FACTOR = RATDEF(ISUM,IRES)
-                  ENDIF
-                  TFACTO(ISUM) = TFACTO(ISUM) + FACTOR
-                  SFACTO(ISUM,ISYS) = FACTOR
-              ENDDO
-          ENDIF
-      ENDDO
+          call zoek   (syname(isys),nres2,resna2,20,ires)
+          if ( ires .gt. 0 ) then
+              do isum = 1,nosum
+                  call zoek   (ratna2(isum,ires),nocons,coname,10,icons)
+                  if ( icons .gt. 0 ) then
+                      factor = cons(icons)
+                  else
+                      factor = ratdef(isum,ires)
+                  endif
+                  tfacto(isum) = tfacto(isum) + factor
+                  sfacto(isum,isys) = factor
+              enddo
+          endif
+      enddo
 
 !     BLOOM algae
 
-      IF ( NTYPA2 .GT. 0 ) THEN
+      if ( ntypa2 .gt. 0 ) then
 
 !         BLOOM active!
 
-          DO ITYP = 1,NTYPA2
-              ISYS = IBLSUB(ITYP)
-              FACTOR = NCRALG(ITYP)
-              TFACTO(1) = TFACTO(1) + FACTOR
-              SFACTO(1,ISYS) = FACTOR
-              FACTOR = PCRALG(ITYP)
-              TFACTO(2) = TFACTO(2) + FACTOR
-              SFACTO(2,ISYS) = FACTOR
-          ENDDO
-      ENDIF
+          do ityp = 1,ntypa2
+              isys = iblsub(ityp)
+              factor = ncralg(ityp)
+              tfacto(1) = tfacto(1) + factor
+              sfacto(1,isys) = factor
+              factor = pcralg(ityp)
+              tfacto(2) = tfacto(2) + factor
+              sfacto(2,isys) = factor
+          enddo
+      endif
 
       if ( timon ) call timstop ( ithandl )
-      RETURN
-      END
+      return
+      end
 
       SUBROUTINE UPDBAL ( IDUMP , NOTOT , IMASSA, ITERMS, IOFFSE,
      J                    BALANS, NOSUM , DMASSA, FACTOR, NTEL  ,

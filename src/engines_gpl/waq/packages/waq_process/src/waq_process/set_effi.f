@@ -28,76 +28,76 @@
 
 !     modules
 
-      USE      DATA_3DL   ! data and routine for 3D light approach
+      use      data_3dl   ! data and routine for 3D light approach
+      
+      implicit none
 
 !     BLOOM commons
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'arran.inc'
+      include 'blmdim.inc'
+      include 'size.inc'
+      include 'phyt2.inc'
+      include 'putin1.inc'
+      include 'arran.inc'
 
 !     arguments
 
-      REAL     TEMPER     ! input , temperature
-      REAL     RADIAT     ! input , radiation
-      REAL     EXT        ! input , total extinction
-      REAL     DEPTHW     ! input , depth of the layer
-      REAL     DAYLEN     ! input , daylength in hours
-      INTEGER  ID         ! input , weeknumber
+      real     temper     ! input , temperature
+      real     radiat     ! input , radiation
+      real     ext        ! input , total extinction
+      real     depthw     ! input , depth of the layer
+      real     daylen     ! input , daylength in hours
+      integer  id         ! input , weeknumber
 
 !     local decalarations
 
-      REAL*8   ALPHA      ! reflection factor
-      REAL*8   TEMP       ! temperature
-      REAL*8   CSOL       ! radiation
-      REAL*8   DSOL       ! radiation
-      REAL*8   DEP        ! depth
-      REAL*8   EXTTOT     ! total extinction
-      REAL*8   DAY        ! daylength in hours
-      REAL*8   DEAT       ! DEAT
-      REAL*8   ZOODD      ! ZOODD
-      REAL*8   TCORR      ! TCORR
-      REAL*8   SURF_TYP   ! scaled, converted and corrected radiation for a type
-      INTEGER  IGROUP     ! index number of BLOOM algae group
-      INTEGER  ITYPE      ! index number of BLOOM algae type
-      REAL*8   PMAX20(MT),SDMIXN(MT)
+      real*8   alpha      ! reflection factor
+      real*8   temp       ! temperature
+      real*8   csol       ! radiation
+      real*8   dsol       ! radiation
+      real*8   dep        ! depth
+      real*8   exttot     ! total extinction
+      real*8   day        ! daylength in hours
+      real*8   deat       ! DEAT
+      real*8   tcorr      ! TCORR
+      real*8   surf_typ   ! scaled, converted and corrected radiation for a type
+      integer  igroup     ! index number of BLOOM algae group
+      integer  itype      ! index number of BLOOM algae type
+      real*8   pmax20(mt),sdmixn(mt)
 
 
-      DEP    = DEPTHW
-      EXTTOT = EXT
-      TEMP   = TEMPER
-      CSOL   = SOLACO * RADIAT
-      DAY    = DAYLEN
-      DEAT   = 0D0
-      ZOODD  = 0D0
-      CALL NATMOR ( DEAT  , ZOODD , TEMP)
-      DO ITYPE = 1,NTYP_3DL
-         IF (SDMIX(ITYPE) .LT. 0.0) THEN
-            SDMIXN(ITYPE) = 1.0D0 + SDMIX(ITYPE)
-!           DMIX(K) = DABS(SDMIX(ITYPE)) * DEP
-         ELSE
-            SDMIXN(ITYPE) = 0.0D0
-         ENDIF
-      ENDDO
+      dep    = depthw
+      exttot = ext
+      temp   = temper
+      csol   = solaco * radiat
+      day    = daylen
+      deat   = 0d0
+      call natmor (deat, temp)
+      do itype = 1,ntyp_3dl
+         if (sdmix(itype) .lt. 0.0) then
+            sdmixn(itype) = 1.0d0 + sdmix(itype)
+!           dmix(k) = dabs(sdmix(itype)) * dep
+         else
+            sdmixn(itype) = 0.0d0
+         endif
+      enddo
 
 
-      CALL MAXPRD ( TEFCUR )
-      DO ITYPE = 1,NTYP_3DL
-         PMAX20(ITYPE) = PMAX(ITYPE)
-      ENDDO
-      CALL MAXPRD ( TEMP  )
+      call maxprd ( tefcur )
+      do itype = 1,ntyp_3dl
+         pmax20(itype) = pmax(itype)
+      enddo
+      call maxprd ( temp  )
 
-      DSOL=1428.57*CSOL
-      DO IGROUP = 1 , NGRO_3DL
-         DO ITYPE = IT2(IGROUP,1),IT2(IGROUP,2)
-            TCORR      = PMAX20(ITYPE)/PMAX(ITYPE)
-            SURF_TYP   = TCORR * DSOL * DEXP (- EXTTOT * SDMIXN(ITYPE) * DEP)
-            SURF_TYP   = SURF_TYP/DAY
-            CALL EFFILAY_3DL( SURF_TYP, EXTTOT, DEP   , IGROUP, ITYPE )
-         ENDDO
-      ENDDO
+      dsol=1428.57*csol
+      do igroup = 1 , ngro_3dl
+         do itype = it2(igroup,1),it2(igroup,2)
+            tcorr      = pmax20(itype)/pmax(itype)
+            surf_typ   = tcorr * dsol * dexp (- exttot * sdmixn(itype) * dep)
+            surf_typ   = surf_typ/day
+            call effilay_3dl( surf_typ, exttot, dep   , igroup, itype )
+         enddo
+      enddo
 
-      RETURN
-      END SUBROUTINE SET_EFFI
+      return
+      end subroutine set_effi

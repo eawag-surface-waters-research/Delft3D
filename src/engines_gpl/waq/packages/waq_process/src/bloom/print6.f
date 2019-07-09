@@ -42,7 +42,9 @@
 !
       SUBROUTINE PRINT6(BIO,BIOMAX,X,XDEF,INOW,JNOW,LINF,IRS,INT,NIN,
      1           NONUNI,NONUN,NUMUNI,NUMUN,LIB)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'phyt1.inc'
@@ -51,9 +53,11 @@
       INCLUDE 'size.inc'
       INCLUDE 'sumout.inc'
       INCLUDE 'postbl.inc'
-      INTEGER JT(MT),NONUNI(*),NONUN(*),IRS(*),LIB(*)
-      DIMENSION X(*),XDEF(*),BIO(*)
-      DATA NPAUSE /0/
+      integer    :: jt(mt),nonuni(*),nonun(*),irs(*),lib(*)
+      real(8)    :: x(*),xdef(*),bio(*), xopt, biomax, dbio
+      integer    :: npause=0
+      integer    :: ii, ii1, ii2, ii2max, inow, int, jjj, jnow
+      integer    :: k, klx, linf, nin, numun, numuni
       
       SAVE
 !
@@ -64,7 +68,6 @@
       IF (IDUMP .EQ. 0) GO TO 40
       IF (INOW .EQ. 1 .OR. NPAUSE .GE. 20) THEN
          NPAUSE = 0
-      IF (IOFLAG .EQ. 1) CALL MORESC
       END IF
       WRITE (IOU(6),10) JNOW,(B(II),II=NUFILI,NUABCO)
    10 FORMAT (30X,'Interval ',I2,/,2X,'Extinction limits',3X,

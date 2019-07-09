@@ -54,12 +54,21 @@
 !     essential BLOOM II outputs in the future.
 !
       SUBROUTINE CVRBLM
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+!      use bloom_data_dim
+!      use bloom_data_size 
+!      use bloom_data_caldynam
+!      use bloom_data_phyt    
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'dynam.inc'
+      
+      integer :: i
 !
 ! Assuming that concentration units in the calling program are g/m3,
 ! where as BLOOM II uses mg/m3, it is necessary to convert

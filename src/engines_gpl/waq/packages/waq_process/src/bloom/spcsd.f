@@ -35,11 +35,17 @@
 !  *********************************************************************
 !
       SUBROUTINE SPCSD(XVEC,RVEC,ACO,EXTLIM,EXTB,NI)
-      IMPLICIT REAL*8 (A-H,O-Z)
+
+      implicit none
+
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt2.inc'
-      DIMENSION ACO(MT,MT),RVEC(2*MT),SVEC(2*MT),DVEC(2*MT),XVEC(2*MT)
+
+      real(8)  :: aco(mt,mt),rvec(2*mt),svec(2*mt),dvec(2*mt),xvec(2*mt)
+      real(8)  :: extb, rtemp, extlim
+      
+      integer  :: i, ij, il, j, jk, k, k3, m, n, ni, nn
 !
 !  Initialize.
 !

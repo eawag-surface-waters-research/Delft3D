@@ -31,9 +31,14 @@
 !            CONSBL starting with label 1085
 
       SUBROUTINE PROMES (INDEX, ARG, OUTSTR)
+      
+      implicit none
+      
       CHARACTER*80 OUTSTR
       INTEGER ARG
       INCLUDE 'ioblck.inc'
+      
+      integer :: i, index, indata, ndx
 !
       IF (INDEX.GT.1000) GOTO 3000
       GOTO (1), INDEX
