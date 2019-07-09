@@ -36525,9 +36525,9 @@ ilp:do isplit=1,MAXSPLIT
    ierror = 1
    
 !  allocate
-   allocate(kn(MC+1,NC+1))
+   allocate(kn(MC,NC))
    kn = 0
-   allocate(kc(MC,NC))
+   allocate(kc(MC-1,NC-1))
    kc = 0
    
 !  convert global polygon to array of tpoly-type polygons
@@ -36537,8 +36537,8 @@ ilp:do isplit=1,MAXSPLIT
    do ipol=1,numpols
 !     mask grid points that are inside a polygon
       inpol = 0  ! do not initialize (already in pol_to_tpoly)
-      do j=1,NC+1
-         do i=1,MC+1
+      do j=1,NC
+         do i=1,MC
             call dbpinpol_tpoly(pols(ipol), xc(i,j),yc(i,j),inpol)
             if ( inpol.eq.1 ) then
                kn(i,j) = 1
@@ -36548,8 +36548,8 @@ ilp:do isplit=1,MAXSPLIT
    end do
    
 !  mark grid cells inside oudside polygons when at least one of its nodes is inside
-   do j=1,NC
-      do i=1,MC
+   do j=1,NC-1
+      do i=1,MC-1
          if ( kn(i,j).eq.1 .or. kn(i+1,j).eq.1 .or. kn(i,j+1).eq.1 .or. kn(i+1,j+1).eq.1 ) then
             kc(i,j) = 1
          end if
@@ -36558,8 +36558,8 @@ ilp:do isplit=1,MAXSPLIT
    
 !  mark nodes that are member of a cell inside the polygon(s)
    kn = 0
-   do j=1,NC
-      do i=1,MC
+   do j=1,NC-1
+      do i=1,MC-1
          if ( kc(i,j).eq.1 ) then
             kn(i,j)     = 1
             kn(i+1,j)   = 1
@@ -36570,8 +36570,8 @@ ilp:do isplit=1,MAXSPLIT
    end do
    
 !  remove grid cells outside polygon
-   do j=1,NC+1
-      do i=1,MC+1
+   do j=1,NC
+      do i=1,MC
          if ( kn(i,j).eq.0 ) then
             xc(i,j)     = DMISS
             yc(i,j)     = DMISS
