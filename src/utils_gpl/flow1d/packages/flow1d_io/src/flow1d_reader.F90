@@ -302,15 +302,16 @@ module m_flow1d_reader
      call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')
      call timstop(timerReadCsLocs)
      
-     
-     ! Read structure file
-     call timstrt('ReadStructures', timerReadStructs)
-     call SetMessage(LEVEL_INFO, 'Reading Structures ...')
+     if (len_trim(filenames%structures) > 0) then
+        ! Read structure file
+        call timstrt('ReadStructures', timerReadStructs)
+        call SetMessage(LEVEL_INFO, 'Reading Structures ...')
 
-     call readStructures(network, filenames%structures)
+        call readStructures(network, filenames%structures)
 
-     call SetMessage(LEVEL_INFO, 'Reading Structures Done')
-     call timstop(timerReadStructs)
+        call SetMessage(LEVEL_INFO, 'Reading Structures Done')
+        call timstop(timerReadStructs)
+     endif
      
      ! Create Storage Mapping to Grid Points
      if (.not. allocated(network%storS%mapping)) then
