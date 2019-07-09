@@ -180,6 +180,10 @@ contains
       double precision, intent(in)     :: aum
       double precision, intent(inout)  :: u1m
       double precision, intent(in)     :: dxdt
+      double precision, intent(in)     :: Cz
+      double precision, intent(in)     :: lambda
+      double precision, intent(in)     :: hu
+      double precision, intent(in)     :: dx_struc
       !
       ! Local variables
       !
