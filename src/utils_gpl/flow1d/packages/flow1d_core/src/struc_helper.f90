@@ -135,7 +135,7 @@ contains
        
    end subroutine UpAndDownstreamParameters
           
-   subroutine furu_iter(fum, rum, s1m2, s1m1, u1m, qL, aum, fr, cu, rhsc, dxdt)
+   subroutine furu_iter(fum, rum, s1m2, s1m1, u1m, qL, aum, fr, cu, rhsc, dxdt, dx_struc, hu, lambda, Cz)
       !!--description-----------------------------------------------------------------
       ! NONE
       !!--pseudo code and references--------------------------------------------------
@@ -186,11 +186,17 @@ contains
       !
       double precision                 :: bu
       double precision                 :: du
+      double precision                 :: dxfrL
 
       !
       !! executable statements -------------------------------------------------------
       !
-      bu   = dxdt + fr
+      dxfrL = 0d0
+      if (lambda ==0d0 .and. Cz > 0.1d0) then
+         dxfrl = dx_struc*gravity/(Cz*Cz*hu)
+      endif
+      
+      bu   = dxdt + (1+dxfrL) * fr
       du   = (strucalfa  * qL / max(aum, 1.0d-4) + (1 - strucalfa) * u1m) * dxdt + rhsc
       fum  = cu / bu
       rum  = du / bu

@@ -81,7 +81,7 @@ contains
 
    !> compute FU, RU and AU for general structure genstr
    subroutine computeGeneralStructure(genstr, L0, maxWidth, fuL, ruL, s_on_crest, auL, as1, as2, dadsL, kfuL, s1m1, s1m2, &
-                                      qtotal, dxL, dt, jarea, state)
+                                      qtotal, Cz, dxL, dt, jarea, state)
       ! modules
 
       ! Global variables
@@ -100,6 +100,7 @@ contains
       double precision, intent(in)                 :: s1m2          !< (geometrical) downstream water level
       double precision, intent(in)                 :: qtotal        !< Total discharge (in case of a compound structure this is not equal to 
                                                                     !< the discharge through the structure)
+      double precision, intent(in)                 :: Cz            !< Chezy value
       double precision, intent(in)                 :: dxL           !< length of the flow link
       double precision, intent(in)                 :: dt            !< time step
       logical, intent(in)                          :: jarea         !< Flag indicating only the flow area is required or the full 
@@ -142,6 +143,7 @@ contains
       double precision               :: zs
       double precision               :: zgate
       double precision               :: gatefraction
+      double precision               :: dx_struc  
       double precision               :: dsL
       double precision               :: u1L           
       double precision, dimension(3) :: fu
@@ -159,6 +161,7 @@ contains
       dsL   = s1m2 - s1m1 
        
       crest = genstr%levelcenter
+      dx_struc = genstr%crest_length
       
       velheight = genstr%velheight
       !
@@ -187,7 +190,7 @@ contains
 
          call flqhgs(fu(1), ru(1), u1L, dxL, dt, dadsL, kfuL, au(1), qL, flowDir, &
                      hu, hd, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, jarea, ds, state)
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, state)
          
          !calculate flow over gate
          dg = huge(1d0)
@@ -197,7 +200,7 @@ contains
 
          call flqhgs(fu(2), ru(2), u1L, dxL, dt, dadsL, kfuL, au(2), qL, flowDir, &
                      hu, hd, uu, zgate, wstr, w2, wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, jarea, ds, state)
+                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, state)
       endif
       
       if (gatefraction< 1d0 - eps) then
@@ -208,7 +211,7 @@ contains
          
          call flqhgs(fu(3), ru(3), u1L, dxL, dt, dadsL, kfuL, au(3), qL, flowDir, &
                      hu, hd, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, jarea, ds, state)
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, state)
       endif
       
       auL =  gatefraction*(      au(1)+      au(2)) +(1d0-gatefraction)*      au(3)
@@ -332,7 +335,7 @@ contains
    !> FLow QH relation for General Structure
    subroutine flqhgs(fuL, ruL, u1L, dxL, dt, dadsm, kfuL, auL, qL, flowDir, &
                   hu, hd, uu, zs, wstr, w2, wsd, zb2, ds1, ds2,   &
-                  dg, rhoast, cgf, cgd, cwf, cwd, mugf, lambda,    &
+                  dg, rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc,  &
                   jarea, ds, state)
        use m_GlobalParameters
        implicit none
@@ -341,35 +344,38 @@ contains
       !
       integer, intent(out)            :: kfuL      !< Flag indicating whether the structure link is wet (=1) or not (=0)
       logical, intent(in)             :: jarea     !< Flag indicating only the flow area is required 
-      double precision                :: auL       !< flow area
-      double precision                :: fuL       !< fu component of momentum equation
-      double precision                :: ruL       !< Right hand side component of momentum equation
+      double precision, intent(inout) :: auL       !< flow area
+      double precision, intent(inout) :: fuL       !< fu component of momentum equation
+      double precision, intent(inout) :: ruL       !< Right hand side component of momentum equation
       double precision, intent(inout) :: u1L       !< Flow velocity at current time step
       double precision, intent(inout) :: qL        !< Discharge through structure
-      double precision                :: dxL       !< Length of flow link
-      double precision                :: dt        !< Time step 
+      double precision, intent(in)    :: dxL       !< Length of flow link
+      double precision, intent(in)    :: dt        !< Time step 
       double precision, intent(out)  :: dadsm      !< Flow width
-      double precision               :: cgd        !< Contraction coefficient for drowned gate flow
-      double precision               :: cgf        !< Contraction coefficient for gate flow
-      double precision               :: cwd        !< Contraction coefficient for drowned weir flow.
+      double precision, intent(in)   :: cgd        !< Contraction coefficient for drowned gate flow
+      double precision, intent(in)   :: cgf        !< Contraction coefficient for gate flow
+      double precision, intent(in)   :: cwd        !< Contraction coefficient for drowned weir flow.
       double precision, intent(in)   :: cwf        !< Contraction coefficient for free weir flow.
-      double precision               :: dg         !< Gate opening height.
-      double precision               :: ds         !< Water level immediately downstream the gate.
-      double precision               :: ds1        !< Delta s1 general structure.
-      double precision               :: ds2        !< Delta s2 general structure.
-      double precision               :: hd         !< Downstream water level.
-      double precision               :: hu         !< Upstream water level.
-      double precision               :: lambda     !< Extra resistance
-      double precision               :: mugf       !< Vertical contraction coefficient for free gate flow.
-      double precision               :: rhoast     !< Ratio of density right and left of structure
-      double precision               :: flowDir    !< Flow direction (+1/-1).
+      double precision, intent(in)   :: dg         !< Gate opening height.
+      double precision, intent(inout):: ds         !< Water level immediately downstream the gate.
+      double precision, intent(in)   :: ds1        !< Delta s1 general structure.
+      double precision, intent(in)   :: ds2        !< Delta s2 general structure.
+      double precision, intent(in)   :: hd         !< Downstream water level.
+      double precision, intent(in)   :: hu         !< Upstream water level.
+      double precision, intent(in)   :: lambda     !< Extra resistance
+      double precision, intent(in)   :: Cz         !< Chezy value
+      double precision, intent(in)   :: mugf       !< Vertical contraction coefficient for free gate flow.
+      double precision, intent(in)   :: rhoast     !< Ratio of density right and left of structure
+      double precision, intent(in)   :: flowDir    !< Flow direction (+1/-1).
       double precision, intent(in)   :: uu         !< Upstream velocity.
-      double precision               :: w2         !< Width at right side of structure.
-      double precision               :: wsd        !< Width structure right or left side.
-      double precision               :: wstr       !< Width at centre of structure.
-      double precision               :: zb2        !< Bed level at right side of structure.
-      double precision               :: zs         !< Bed level at centre of structure.
+      double precision, intent(in)   :: w2         !< Width at right side of structure.
+      double precision, intent(in)   :: wsd        !< Width structure right or left side.
+      double precision, intent(in)   :: wstr       !< Width at centre of structure.
+      double precision, intent(in)   :: zb2        !< Bed level at right side of structure.
+      double precision, intent(in)   :: zs         !< Bed level at centre of structure.
       integer, intent(out)           :: state      !< Flow state of the structure
+      double precision, intent(in)   :: dx_struc   !< length of structure
+      
       !
       !
       ! Local variables
@@ -522,7 +528,7 @@ contains
       else
          call flgsfuru(fuL, ruL, u1L, auL, qL, dxL, dt, dadsm, kfuL, state, &
                        flowDir, hu, hd, velhght, zs, ds, dg, dc, wstr,   &
-                       cwfa, cwd, mugfa, cgfa, cgda)
+                       cwfa, cwd, mugfa, cgfa, cgda, dx_struc, lambda, Cz)
       endif
    end subroutine flqhgs
 
@@ -828,7 +834,7 @@ contains
    !! The stage of the flow was already determined.
    subroutine flgsfuru(fuL, ruL, u1L, auL, qL, dxL, dt, dadsm, kfuL, state, &
                        flowDir, hu, hd, velhght, zs, ds, dg, dc, wstr,&
-                       cwfa, cwd, mugfa, cgfa, cgda)
+                       cwfa, cwd, mugfa, cgfa, cgda, dx_struc, lambda, Cz)
       use m_GlobalParameters
       use m_Weir
       implicit none
@@ -868,6 +874,9 @@ contains
       double precision, intent(in)   :: velhght    !< Velocity height
       double precision, intent(in)   :: wstr       !< Width at centre of structure.
       double precision, intent(in)   :: zs         !< Bed level at centre of structure.
+      double precision, intent(in)   :: lambda     !< extra resistance
+      double precision, intent(in)   :: cz         !< Chezy value
+      double precision, intent(in)   :: dx_struc   !< length of structure
       !
       !
       ! Local variables
@@ -947,7 +956,7 @@ contains
           su = hd
       endif
       
-      call furu_iter(fuL, ruL, su, sd, u1L, qL, auL, ustru, cu, rhsc, dxdt)
+      call furu_iter(fuL, ruL, su, sd, u1L, qL, auL, ustru, cu, rhsc, dxdt, dx_struc, hu, lambda, Cz)
 
       qL = auL*u1L
    end subroutine flgsfuru
