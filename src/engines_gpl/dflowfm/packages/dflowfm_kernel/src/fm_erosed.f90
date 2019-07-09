@@ -3678,6 +3678,7 @@ end module m_fm_update_crosssections
       ! From time series bnd, or 0d0
       do ll = 1, numfracs
          iconst = ifrac2const(ll)
+         if (iconst==0) cycle
          if (stmpar%sedpar%sedtyp(sedtot2sedsus(iconst-ISED1+1))==SEDTYP_NONCOHESIVE_SUSPENDED) then
             do k=1,nbndsf(ll)
                LLL = bndsf(ll)%k(3,k)
@@ -3721,7 +3722,8 @@ end module m_fm_update_crosssections
    else
       ! From time series bnd, or 0d0
       do ll = 1, numfracs
-         iconst = ifrac2const(ll)
+         iconst = ifrac2const(ll)   ! allow for combo equilibrium/dirichlet bc concentrations
+         if (iconst==0) cycle
          if (stmpar%sedpar%sedtyp(sedtot2sedsus(iconst-ISED1+1))==SEDTYP_COHESIVE) then
             do k=1,nbndsf(ll)
                LLL = bndsf(ll)%k(3,k)

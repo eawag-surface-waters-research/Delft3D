@@ -628,7 +628,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
   ! DEBUG JRE sedfrac
   else if (qidfm(1:10) == 'sedfracbnd' .and. jased > 0) then
      
-     kce = 1     
+     kce = abs(kce)   ! kce=1     
      call get_sedfracname(qidfm, sfnam, qidnam)    
      isf = findname(numfracs, sfnames, sfnam)
 
@@ -1478,6 +1478,7 @@ subroutine init_threttimes()
              ierr = 1
           endif
           iconst = ifrac2const(ifrac)
+          if (iconst==0) cycle
           threttim(iconst,nseg) = thrtt(i)
        else
            ierr = 1
@@ -1540,11 +1541,16 @@ subroutine init_threttimes()
     allocate(bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd), stat=ierr)
     call aerr('bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd)', ierr, n*(kmxd+1))
 
+    bndsf(ifrac)%thz = dmiss
     ! mapping to constituents, just in case fracs do not map sequentially to ised1 and so on
     iconst = ifrac2const(ifrac)
-    do i = 1,n
-      bndsf(ifrac)%tht(i) = threttim(iconst,bndsf(ifrac)%k(5,i))
-    enddo
+    if (iconst==0) then
+       bndsf(ifrac)%tht = 0d0
+    else
+       do i = 1,n
+         bndsf(ifrac)%tht(i) = threttim(iconst,bndsf(ifrac)%k(5,i))
+       enddo
+    end if
  enddo
        
 end subroutine

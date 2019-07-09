@@ -9449,8 +9449,8 @@ subroutine flow_sedmorinit()
           end if
        end do
 
-       if (have_mudbnd)  stmpar%morpar%eqmbcmud = .false.
-       if (have_sandbnd) stmpar%morpar%eqmbcsand = .false.
+       !if (have_mudbnd)  stmpar%morpar%eqmbcmud = .false.
+       !if (have_sandbnd) stmpar%morpar%eqmbcsand = .false.
 
     end if
     !
@@ -13780,6 +13780,12 @@ end if
        call setwavmubnd()
     end if
  end if
+ 
+ ! DEBUG
+ !if (jawave==5) then
+ !   call wave_uorbrlabda()
+ !   call tauwave()
+ !endif
 
 
  if (iresult /= DFM_NOERR) then
