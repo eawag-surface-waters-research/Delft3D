@@ -567,6 +567,7 @@ function ionc_put_meshgeom_v1(ioncid, meshgeom, meshid, networkid) result(ierr)
    ! Locals (default values)
    type(t_ug_mesh)                                          :: meshids 
    type(t_ug_network)                                       :: networkids
+   character(len=MAXSTRLEN)                                 :: networkname
    
    if (len_trim(meshgeom%meshname).gt.0) then 
       !adds a meshids structure
@@ -578,10 +579,11 @@ function ionc_put_meshgeom_v1(ioncid, meshgeom, meshid, networkid) result(ierr)
    
    if (networkid.gt.0) then 
       networkids = datasets(ioncid)%ug_file%netids(networkid)
+      networkname = datasets(ioncid)%ug_file%networksnames(networkid) 
    endif
    
    !this call writes mesh and network data contained in meshgeom
-   ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom)
+   ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom, networkname)
 
 end function ionc_put_meshgeom_v1 
 
@@ -610,6 +612,8 @@ function ionc_put_network(ioncid, networkgeom, networkid) result(ierr)
    nbranchlongnames = networkgeom%nbranchlongnames
    
    ierr = ug_add_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
+   ! set the network name
+   datasets(ioncid)%ug_file%networksnames(networkid) = networkgeom%meshname
    networkids = datasets(ioncid)%ug_file%netids(networkid)
    
    !this call writes mesh and network data contained in meshgeom
@@ -1267,23 +1271,21 @@ end function ionc_def_var
 
 
 !> Writes the complete mesh geometry
-function ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom) result(ierr)
+function ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom, network1dname) result(ierr)
    integer,             intent(in)    :: ioncid      !< The IONC data set id.
    type(t_ug_mesh),     intent(inout) :: meshids     !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_network),  intent(inout) :: networkids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_meshgeom), intent(in)    :: meshgeom    !< The complete mesh geometry in a single struct.
+   character(len=MAXSTRLEN), optional :: network1dname !< The name of the mesh topology variable.
    integer                            :: ierr        !< Result status, ionc_noerr if successful.
    
    !Locals
-   character(len=MAXSTRLEN)                          :: network1dname !< The name of the mesh topology variable.
+   
    character(len=ug_idsLen), allocatable             :: nodeids(:)
    character(len=ug_idsLongNamesLen), allocatable    :: nodelongnames(:)
 
    allocate(nodeids(meshgeom%numnode))
    allocate(nodelongnames(meshgeom%numnode))
-   !gen the network name
-   network1dname(:) = ' '
-   ierr = nf90_inquire_variable(datasets(ioncid)%ncid, networkids%varids(ntid_1dtopo), name=network1dname)
    nodeids       = meshgeom%nodeids
    nodelongnames = meshgeom%nodelongnames
    

@@ -470,9 +470,6 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
    if(c_associated(c_meshgeom%facez)) call c_f_pointer(c_meshgeom%facez, meshgeom%facez,(/c_meshgeomdim%numface/))
    if(c_associated(c_meshgeom%layer_zs)) call c_f_pointer(c_meshgeom%layer_zs, meshgeom%layer_zs,(/c_meshgeomdim%numlayer/))
    if(c_associated(c_meshgeom%interface_zs)) call c_f_pointer(c_meshgeom%interface_zs, meshgeom%interface_zs,(/c_meshgeomdim%numlayer + 1/))
-   
-   if(c_associated(c_meshgeom%nodeids)) call c_f_pointer(c_meshgeom%nodeids, meshgeom%nodeids,(/c_meshgeomdim%numnode/))
-   if(c_associated(c_meshgeom%nodelongnames)) call c_f_pointer(c_meshgeom%nodelongnames, meshgeom%nodelongnames,(/c_meshgeomdim%numnode/))
 
    if(c_associated(c_meshgeom%nbranchids)) call c_f_pointer(c_meshgeom%nbranchids, meshgeom%nbranchids,(/c_meshgeomdim%nbranches/))
    if(c_associated(c_meshgeom%nbranchlongnames)) call c_f_pointer(c_meshgeom%nbranchlongnames, meshgeom%nbranchlongnames,(/c_meshgeomdim%nbranches/))
