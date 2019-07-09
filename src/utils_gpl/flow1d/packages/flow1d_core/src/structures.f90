@@ -614,9 +614,9 @@ end subroutine
           case (CFiCrestWidth)
              sts%struct(istru)%generalst%widthcenter=value
           case (CFiGateLowerEdgeLevel)
-             sts%struct(istru)%generalst%gateheight =value
+             sts%struct(istru)%generalst%gateLowerEdgeLevel =value
           case (CFiGateOpeningHeight)
-             sts%struct(istru)%generalst%gateheight =value + sts%struct(istru)%generalst%levelcenter
+             sts%struct(istru)%generalst%gateLowerEdgeLevel =value + sts%struct(istru)%generalst%levelcenter
           case default
              SetValueStruc = .false.
           end select
@@ -686,8 +686,8 @@ end subroutine
        case (ST_GENERAL_ST)
            if (iparam == CFiCrestLevel)         getValueStruc = sts%struct(istru)%generalst%levelcenter
            if (iparam == CFiCrestWidth)         getValueStruc = sts%struct(istru)%generalst%widthcenter
-           if (iparam == CFiGateLowerEdgeLevel) getValueStruc = sts%struct(istru)%generalst%gateheight
-           if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%generalst%gateheight - sts%struct(istru)%generalst%levelcenter
+           if (iparam == CFiGateLowerEdgeLevel) getValueStruc = sts%struct(istru)%generalst%gateLowerEdgeLevel
+           if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%generalst%gateLowerEdgeLevel - sts%struct(istru)%generalst%levelcenter
        case default
          !nothing
        end select
@@ -917,7 +917,7 @@ end subroutine
       case (ST_ORIFICE)
          get_gle = struc%orifice%openlevel 
       case (ST_GENERAL_ST)
-         get_gle = struc%generalst%gateheight 
+         get_gle = struc%generalst%gateLowerEdgeLevel
       case default
          get_gle = huge(1d0)
       end select
@@ -931,7 +931,7 @@ end subroutine
       case (ST_ORIFICE)
          get_opening_height = struc%orifice%openlevel - struc%orifice%crestlevel
       case (ST_GENERAL_ST)
-         get_opening_height = struc%generalst%gateheight - struc%generalst%levelcenter
+         get_opening_height = struc%generalst%gateLowerEdgeLevel - struc%generalst%levelcenter
       end select
    end function get_opening_height
    
@@ -1041,7 +1041,7 @@ end subroutine
       case (ST_ORIFICE)
          struc%orifice%openlevel =value
       case (ST_GENERAL_ST)
-         struc%generalst%gateheight =value
+         struc%generalst%gateLowerEdgeLevel =value
       end select
    end subroutine set_gle
    
@@ -1054,7 +1054,7 @@ end subroutine
       case (ST_ORIFICE)
          struc%orifice%openlevel=value + struc%orifice%crestlevel
       case (ST_GENERAL_ST)
-         struc%generalst%gateheight =value + struc%generalst%levelcenter
+         struc%generalst%gateLowerEdgeLevel =value + struc%generalst%levelcenter
       end select
    end subroutine set_opening_height
    

@@ -33834,10 +33834,9 @@ end subroutine setbobs_fixedweirs
                    jarea = .false.
                    as1 = wu(L)*(s1(k1)-bob0(1,L))
                    as2 = wu(L)*(s1(k2)-bob0(2,L))
-                   qtotal = q1(L)
-                   call computeGeneralStructure(pstru%generalst, fu(L), ru(L), s_on_crest, &
-                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), s1(k1), s1(k2), q1(L), & !s00(k1), s00(k2), q1(Lf), & ! TODO: find proper s00 or s2 iterand
-                          q1(L), qtotal, u1(L), u0(L), dx(L), dts, firstiter, jarea, state)
+                   call computeGeneralStructure(pstru%generalst, 1, huge(1d0), fu(L), ru(L), s_on_crest, &
+                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), & !s00(k1), s00(k2), q1(Lf), & ! TODO: find proper s00 or s2 iterand
+                          dx(L), dts, jarea, state)
                 case (ST_PUMP)
                    continue ! WIP carniato: pumps should not be in network data structure, furu computation is in npumpsg loop, and not here.
                 case (ST_DAMBREAK)

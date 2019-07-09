@@ -216,7 +216,7 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
     endif
     dxdt = 1.0/dt
     
-    call furu_iter(fum, rum, s1m2, s1m1, u1m, u0m, q0m, aum, fr, cu, rhsc, dxdt)
+    call furu_iter(fum, rum, s1m2, s1m1, u1m, q0m, aum, fr, cu, rhsc, dxdt)
 
     qtm = aum*u1m
     !

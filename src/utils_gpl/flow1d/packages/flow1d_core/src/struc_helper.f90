@@ -38,8 +38,8 @@ module m_struc_helper
 
 contains
 
-   subroutine UpAndDownstreamParameters(s1ml, s1mr, s2ml, s2mr, alm, arm, qtotal, velheight, &
-                                        rholeft, rhoright, crest, hu, hd, uu, ud, flowdir, relax)
+   subroutine UpAndDownstreamParameters(s1ml, s1mr, alm, arm, qtotal, velheight, &
+                                        rholeft, rhoright, crest, hu, hd, uu, ud, flowdir)
       !!--declarations----------------------------------------------------------------
       use m_GlobalParameters
       implicit none
@@ -49,15 +49,12 @@ contains
       logical, intent(in)            :: velheight
       double precision, intent(in)   :: s1ml
       double precision, intent(in)   :: s1mr
-      double precision, intent(in)   :: s2ml
-      double precision, intent(in)   :: s2mr
       double precision, intent(in)   :: alm
       double precision, intent(in)   :: arm
       double precision, intent(in)   :: qtotal
       double precision, intent(in)   :: crest
       double precision               :: hd
       double precision               :: hu
-      double precision, intent(in)   :: relax
       double precision               :: rholeft
       double precision               :: rhoright
       double precision               :: flowdir
@@ -69,7 +66,6 @@ contains
       !
       double precision               :: eld
       double precision               :: elu
-      double precision               :: fac
        double precision               :: temp
       !
       !
@@ -78,10 +74,12 @@ contains
       rholeft = 1000.0D0
       rhoright = 1000.0D0
       !
-      if (relax>0.D0) then
-         hu = s1ml * relax + (1.0D0 - relax) * s2ml
-         hd = s1mr * relax + (1.0D0 - relax) * s2mr
-      endif
+      !if (relax>0.D0) then
+      !   hu = s1ml * relax + (1.0D0 - relax) * s2ml
+      !   hd = s1mr * relax + (1.0D0 - relax) * s2mr
+      !endif
+      hu = s1ml
+      hd = s1mr
       !
       if (velheight) then
          if (alm < 1.0D-6) then
@@ -101,21 +99,6 @@ contains
       endif
       !
       !     Calculate discharge ratio of the last 2 successive iteration steps
-      !
-      fac = qtotal
-      if (abs(fac)<=1d-10) then
-         fac = 0.5d0
-      else
-         fac = qtotal/fac
-      endif
-      !
-      fac = 0.0d0
-      if (fac < 0.8d0) then
-      !
-      !        The direction of flow is determined by the sign of
-      !        the force difference per unit width
-      !
-      !
       !
       if (hu>crest) then
          elu = hu + (uu * uu) / (2.0d0 * gravity)
@@ -137,16 +120,6 @@ contains
          flowdir = -1.0d0
       endif
       !
-      elseif (qtotal > 0.0d0) then
-         !
-         !        The direction of flow is assumed to be equal to the
-         !        direction in the previous iteration step
-         !
-         flowdir = 1.0d0
-      else
-         flowdir = -1.0d0
-      endif
-      !
       !     Water levels & Velocities for reverse flow
       !
       if (flowdir < 0.0d0) then
@@ -162,7 +135,7 @@ contains
        
    end subroutine UpAndDownstreamParameters
           
-   subroutine furu_iter(fum, rum, s1m2, s1m1, u1m, u0m, q0m, aum, fr, cu, rhsc, dxdt)
+   subroutine furu_iter(fum, rum, s1m2, s1m1, u1m, qL, aum, fr, cu, rhsc, dxdt)
       !!--description-----------------------------------------------------------------
       ! NONE
       !!--pseudo code and references--------------------------------------------------
@@ -203,9 +176,8 @@ contains
       double precision, intent(in)     :: rhsc
       double precision, intent(in)     :: s1m2
       double precision, intent(in)     :: s1m1
-      double precision, intent(in)     :: q0m
+      double precision, intent(in)     :: qL
       double precision, intent(in)     :: aum
-      double precision, intent(in)     :: u0m
       double precision, intent(inout)  :: u1m
       double precision, intent(in)     :: dxdt
       !
@@ -219,7 +191,7 @@ contains
       !! executable statements -------------------------------------------------------
       !
       bu   = dxdt + fr
-      du   = (strucalfa  * q0m / max(aum, 1.0d-4) + (1 - strucalfa) * u0m) * dxdt + rhsc
+      du   = (strucalfa  * qL / max(aum, 1.0d-4) + (1 - strucalfa) * u1m) * dxdt + rhsc
       fum  = cu / bu
       rum  = du / bu
       u1m  = rum - fum * (s1m2 - s1m1)

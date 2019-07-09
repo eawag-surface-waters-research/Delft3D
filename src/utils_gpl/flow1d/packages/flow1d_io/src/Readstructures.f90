@@ -498,7 +498,7 @@ module m_readstructures
                read(ibin) pstr%generalst%levelrightZbsr
                read(ibin) pstr%generalst%widthrightW2
                read(ibin) pstr%generalst%levelrightZb2
-               read(ibin) pstr%generalst%gateheight
+               read(ibin) pstr%generalst%gateloweredgelevel
                read(ibin) pstr%generalst%pos_freegateflowcoeff
                read(ibin) pstr%generalst%pos_drowngateflowcoeff
                read(ibin) pstr%generalst%pos_freeweirflowcoeff
@@ -658,7 +658,7 @@ module m_readstructures
                write(ibin) pstr%generalst%levelrightZbsr
                write(ibin) pstr%generalst%widthrightW2
                write(ibin) pstr%generalst%levelrightZb2
-               write(ibin) pstr%generalst%gateheight
+               write(ibin) pstr%generalst%gateLowerEdgeLevel
                write(ibin) pstr%generalst%pos_freegateflowcoeff
                write(ibin) pstr%generalst%pos_drowngateflowcoeff
                write(ibin) pstr%generalst%pos_freeweirflowcoeff
@@ -1274,6 +1274,13 @@ module m_readstructures
 
       allocate(generalst)
 
+      allocate(generalst%fu(3,1), generalst%ru(3,1), generalst%au(3,1))
+      allocate(generalst%widthcenteronlink(1), generalst%gateclosedfractiononlink(1))
+      generalst%numlinks = 1
+      generalst%widthcenteronlink(1) = 10d0
+      generalst%gateclosedfractiononlink(1) = 0.5d0
+      generalst%gatedoorheight = 1d0
+      generalst%velheight = .true.
       call prop_get_double(md_ptr, 'structure', 'widthleftW1', generalst%widthleftW1, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'widthleftWsdl', generalst%widthleftWsdl, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'widthcenter', generalst%widthcenter, success)
@@ -1286,37 +1293,37 @@ module m_readstructures
       if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZbsr', generalst%levelrightZbsr, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZb2', generalst%levelrightZb2, success)
       
-      if (success) call prop_get_double(md_ptr, 'structure', 'gateheight', generalst%gateheight, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, success)
 
-      call prop_get_double(md_ptr, 'structure', 'pos_freegateflowcoeff',  generalst%pos_freegateflowcoeff, success1)
+      call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',  generalst%pos_freegateflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',   generalst%pos_freegateflowcoeff, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'pos_drowngateflowcoeff', generalst%pos_drowngateflowcoeff, success1)
+      call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff', generalst%pos_drowngateflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff',  generalst%pos_drowngateflowcoeff, success2) ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'pos_freeweirflowcoeff',  generalst%pos_freeweirflowcoeff, success1)
+      call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',  generalst%pos_freeweirflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',   generalst%pos_freeweirflowcoeff, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'pos_drownweirflowcoeff', generalst%pos_drownweirflowcoeff, success1)
+      call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff', generalst%pos_drownweirflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff',  generalst%pos_drownweirflowcoeff, success2) ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'pos_contrcoeffreegate',  generalst%pos_contrcoeffreegate, success1)
+      call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',  generalst%pos_contrcoeffreegate, success1)
       call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',   generalst%pos_contrcoeffreegate, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
       
-      call prop_get_double(md_ptr, 'structure', 'neg_freegateflowcoeff',  generalst%neg_freegateflowcoeff, success1)
+      call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',  generalst%neg_freegateflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',   generalst%neg_freegateflowcoeff, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'neg_drowngateflowcoeff', generalst%neg_drowngateflowcoeff, success1)
+      call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff', generalst%neg_drowngateflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff',  generalst%neg_drowngateflowcoeff, success2) ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'neg_freeweirflowcoeff',  generalst%neg_freeweirflowcoeff, success1)
+      call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',  generalst%neg_freeweirflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',   generalst%neg_freeweirflowcoeff, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'neg_drownweirflowcoeff', generalst%neg_drownweirflowcoeff, success1)
+      call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff', generalst%neg_drownweirflowcoeff, success1)
       call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff',  generalst%neg_drownweirflowcoeff, success2) ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'neg_contrcoeffreegate',  generalst%neg_contrcoeffreegate, success1)
+      call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',  generalst%neg_contrcoeffreegate, success1)
       call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',   generalst%neg_contrcoeffreegate, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
       
