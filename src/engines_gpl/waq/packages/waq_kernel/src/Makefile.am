@@ -26,6 +26,7 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/dlwq_netcdf \
+		-I$(top_builddir)/engines_gpl/waq/packages/waq_process/src/bloom \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/ \
         -I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
