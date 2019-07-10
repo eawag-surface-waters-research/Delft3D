@@ -351,21 +351,21 @@
          isffetch = 0
       end if
       
-      if ( jatem.gt.1 ) then  ! copied from "heatun"
-         nosfun = nosfun+1
-         call realloc(sfname, nosfun, keepExisting=.true., fill='RadSurf')
-         isfradsurf = nosfun
-      else
+!      if ( jatem.gt.1 ) then  ! copied from "heatun"
+!         nosfun = nosfun+1
+!         call realloc(sfname, nosfun, keepExisting=.true., fill='RadSurf')
+!         isfradsurf = nosfun
+!      else
          isfradsurf = 0
-      end if
+!      end if
       
-      if ( jarain.gt.0 ) then
-         nosfun = nosfun+1
-         call realloc(sfname, nosfun, keepExisting=.true., fill='Rain')
-         isfrain = nosfun
-      else
+!      if ( jarain.gt.0 ) then
+!         nosfun = nosfun+1
+!         call realloc(sfname, nosfun, keepExisting=.true., fill='Rain')
+!         isfrain = nosfun
+!      else
          isfrain = 0
-      end if
+!      end if
 
       noconm = nocons + 1000
       call realloc(coname, noconm)
