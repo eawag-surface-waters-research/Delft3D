@@ -2,9 +2,9 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using NUnit.Framework;
-using General.tests;
 using System.Threading;
+using General.tests;
+using NUnit.Framework;
 
 // The build of this test is disabled by default because it requires NUnit.
 // If you decide to build the test make sure to install Nunit in your solution.
@@ -83,7 +83,7 @@ namespace UGrid.tests
         //netcdf file specifications 
         private int iconvtype = 2;
 
-        private double convversion = 0.0;
+        private double convversion;
 
         //mesh links
         private string linkmeshname = "links";
@@ -215,7 +215,7 @@ namespace UGrid.tests
                 var rmeshName = new StringBuilder(IoNetcdfLibWrapper.LibDetails.MAXSTRLEN);
                 ierr = wrapper.ionc_get_mesh_name(ref ioncid, ref meshid, rmeshName);
                 Assert.That(ierr, Is.EqualTo(0));
-                Assert.That(rmeshName.ToString().Trim(), Is.EqualTo(meshname));
+                Assert.That(rmeshName.ToString().Trim(), Is.EqualTo(meshname.Trim()));
 
                 //2. Get the number of mesh points
                 int rnmeshpoints = -1;
@@ -684,7 +684,7 @@ namespace UGrid.tests
 
         // Create the netcdf files
         [Test]
-        [NUnit.Framework.Category("UGRIDTests")]
+        [Category("UGRIDTests")]
         public void create1dUGridNetworkAndMeshNetcdf()
         {
             //1. Create a netcdf file 
@@ -820,7 +820,7 @@ namespace UGrid.tests
 
         ////// read the netcdf file created in the test above
         [Test]
-        [NUnit.Framework.Category("UGRIDTests")]
+        [Category("UGRIDTests")]
         public void read1dUGRIDNetcdf()
         {
             IntPtr c_meshidsfromnetworkid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)));
@@ -891,7 +891,7 @@ namespace UGrid.tests
                     ref l_branch_order);
 
                 //4. check the read values
-                Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname));
+                Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname.Trim()));
                 Assert.That(l_nnodes, Is.EqualTo(l_nnodes));
                 Assert.That(l_nbranches, Is.EqualTo(nBranches));
                 Assert.That(l_nGeometry, Is.EqualTo(nGeometry));
@@ -959,7 +959,7 @@ namespace UGrid.tests
         //// Deltashell creates a new file to write the 1d geometry and mesh as in the first test create1dUGRIDNetcdf
         //// and clones the 2d mesh data read from a file produced by RGFgrid. 
         [Test]
-        [NUnit.Framework.Category("UGRIDTests")]
+        [Category("UGRIDTests")]
         public void Clones2dMesh()
         {
             var wrapper = new IoNetcdfLibWrapper();
@@ -1223,7 +1223,7 @@ namespace UGrid.tests
 
         // Create a standalone network
         [Test]
-        [NUnit.Framework.Category("UGRIDTests")]
+        [Category("UGRIDTests")]
         public void create1dNetwork()
         {
             //1. Create a netcdf file 
@@ -1313,7 +1313,7 @@ namespace UGrid.tests
 
         // read the standalone network
         [Test]
-        [NUnit.Framework.Category("UGRIDTests")]
+        [Category("UGRIDTests")]
         public void read1dNetwork()
         {
             //1. Open a netcdf file (file from test data, but actually created previously)
@@ -1377,7 +1377,7 @@ namespace UGrid.tests
                 ref l_branch_order);
 
             //4. check the read values
-            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname));
+            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname.Trim()));
             Assert.That(l_nnodes, Is.EqualTo(l_nnodes));
             Assert.That(l_nbranches, Is.EqualTo(nBranches));
             Assert.That(l_nGeometry, Is.EqualTo(nGeometry));
@@ -1430,14 +1430,14 @@ namespace UGrid.tests
         13)	Closes the file
         */
         [Test]
-        [NUnit.Framework.Category("UGRIDTests")]
+        [Category("UGRIDTests")]
         public void LargeSewerSystem()
         {
-            int stackSize = 1024 * 1024 * 16; //LC: in C# the default stack size is 1 MB, increase it to something larger for this test!
+            int stackSize = 1024 * 1024 * 64; //LC: in C# the default stack size is 1 MB, increase it to something larger for this test!
             Thread th = new Thread(() =>
             {
                 //1. Allocates the arrays defining the network 
-                int firstCaseNumberOfNodes = 100000; //5000 limit win64, without stack increase
+                int firstCaseNumberOfNodes = 5000; //5000 limit win64, without stack increase
                 string tmpstring;
 
                 int l_nnodes = firstCaseNumberOfNodes + 1;
@@ -1460,10 +1460,10 @@ namespace UGrid.tests
 
                 for (int i = 0; i < l_nnodes; i++)
                 {
-                    tmpstring = "node_id_" + i.ToString();
+                    tmpstring = "node_id_" + i;
                     tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                     l_nodesinfo[i].ids = tmpstring.ToCharArray();
-                    tmpstring = "node_longname_" + i.ToString();
+                    tmpstring = "node_longname_" + i;
                     tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                     l_nodesinfo[i].longnames = tmpstring.ToCharArray();
                     l_nodesX[i] = i;
@@ -1472,10 +1472,10 @@ namespace UGrid.tests
 
                 for (int i = 0; i < l_nbranches; i++)
                 {
-                    tmpstring = "branch_id_" + i.ToString();
+                    tmpstring = "branch_id_" + i;
                     tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                     l_branchinfo[i].ids = tmpstring.ToCharArray();
-                    tmpstring = "branch_longname_" + i.ToString();
+                    tmpstring = "branch_longname_" + i;
                     tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                     l_branchinfo[i].longnames = tmpstring.ToCharArray();
                     l_branchlengths[i] = 1.414;
@@ -1691,7 +1691,7 @@ namespace UGrid.tests
 
         // Load 2D, create 1D, create links 1D-2D, save them to file for later processing
         [Test]
-        [NUnit.Framework.Category("CreateNetInputFile")]
+        [Category("CreateNetInputFile")]
         public void CreateNetInputFile()
         {
 
@@ -2097,7 +2097,7 @@ namespace UGrid.tests
 
         // Test: get only 1d network using get mesh geom
         [Test]
-        [NUnit.Framework.Category("Read1dNetworkUsingGetMeshGeom")]
+        [Category("Read1dNetworkUsingGetMeshGeom")]
         public void Put2dMeshUsingPutMeshGeomPutNodeZ()
         {
             //1. Open a netcdf file
@@ -2233,7 +2233,7 @@ namespace UGrid.tests
 
         //open a file test
         [Test]
-        [NUnit.Framework.Category("UGRIDTests")]
+        [Category("UGRIDTests")]
         public void openAfile()
         {
             var wrapper = new IoNetcdfLibWrapper();
@@ -2554,7 +2554,7 @@ namespace UGrid.tests
 
         // Create a 2d mesh using ionc_put_meshgeom: NOTE now meshgeom includes mesh and network array, this is not good (To be refactored later)
         [Test]
-        [NUnit.Framework.Category("PutAndGetMeshGeom")]
+        [Category("PutAndGetMeshGeom")]
         public void Put2dMeshUsingPutMeshGeom()
         {
             // Open a netcdf file
@@ -2617,7 +2617,7 @@ namespace UGrid.tests
 
         // Get only 1d network using ionc_get_meshgeom
         [Test]
-        [NUnit.Framework.Category("PutAndGetMeshGeom")]
+        [Category("PutAndGetMeshGeom")]
         public void Get1dNetworkUsingGetMeshGeom()
         {
             using (var register = new UnmanagedMemoryRegister())
@@ -2707,7 +2707,7 @@ namespace UGrid.tests
 
         // Get only 1d MESH using ionc_get_meshgeom
         [Test]
-        [NUnit.Framework.Category("PutAndGetMeshGeom")]
+        [Category("PutAndGetMeshGeom")]
         public void Get1dMeshUsingGetMeshGeom()
         {
             using (var register = new UnmanagedMemoryRegister())
