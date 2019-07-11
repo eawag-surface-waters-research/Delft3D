@@ -279,12 +279,12 @@ double precision function GetChezy(frictType, cpar, rad, dep, u)
       !           Manning-formula
       GetChezy = rad0**sixth/cpar
    case (2) 
-     !            White Colebrook Delft3d
+     !            White Colebrook Delft3D
      z0        = min( cpar / 30d0 , rad0*0.3d0)
      sqcf      = vonkar/log( rad0/(ee*z0) )
      getChezy  = sag/sqcf
    case (3) 
-      !           White Colebrook WAQUA / Nikuradze-formula
+      !           White Colebrook WAQUA / Nikuradse-formula
       GetChezy = 18.0d0*log10(12.d0*rad0/cpar)
    case (7) 
       !           Strickler-1 formula
