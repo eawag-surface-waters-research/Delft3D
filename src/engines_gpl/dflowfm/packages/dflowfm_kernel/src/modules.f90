@@ -3721,7 +3721,7 @@ end module m_vegetation
  integer                           :: Lnmin         !< link nr where min zlin is found in viewing area
  integer                           :: Lnmax         !< link nr where max zlin is found in viewing area
 
- integer, parameter :: MAX_IDX        = 21
+ integer, parameter :: MAX_IDX        = 22
  double precision, dimension(MAX_IDX)    :: volcur !< Volume totals in *current* timestep only (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: cumvolcur =0d0 !< Cumulative volume totals starting from the previous His output time, cumulate with volcur (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: voltot
@@ -3736,17 +3736,18 @@ end module m_vegetation
  integer, parameter :: IDX_EXCHOUT    = 8
  integer, parameter :: IDX_EXCHTOT    = 9
  integer, parameter :: IDX_PRECIP     = 10
- integer, parameter :: IDX_SOUR       = 11
- integer, parameter :: IDX_InternalTidesDissipation = 12
- integer, parameter :: IDX_GravInput  = 13
- integer, parameter :: IDX_SALInput   = 14
- integer, parameter :: IDX_SALInput2  = 15
- integer, parameter :: IDX_GRWIN      = 16
- integer, parameter :: IDX_GRWOUT     = 17
- integer, parameter :: IDX_GRWTOT     = 18
- integer, parameter :: IDX_LATIN      = 19
- integer, parameter :: IDX_LATOUT     = 20
- integer, parameter :: IDX_LATTOT     = 21
+ integer, parameter :: IDX_EVAP       = 11
+ integer, parameter :: IDX_SOUR       = 12
+ integer, parameter :: IDX_InternalTidesDissipation = 13
+ integer, parameter :: IDX_GravInput  = 14
+ integer, parameter :: IDX_SALInput   = 15
+ integer, parameter :: IDX_SALInput2  = 16
+ integer, parameter :: IDX_GRWIN      = 17
+ integer, parameter :: IDX_GRWOUT     = 18
+ integer, parameter :: IDX_GRWTOT     = 19
+ integer, parameter :: IDX_LATIN      = 20
+ integer, parameter :: IDX_LATOUT     = 21
+ integer, parameter :: IDX_LATTOT     = 22
 
 
 ! Delft3D structure of grid dimensions
@@ -3884,6 +3885,7 @@ subroutine reset_flow()
     voltotname(IDX_EXCHOUT) = 'exchange_with_1D_out'
     voltotname(IDX_EXCHTOT) = 'exchange_with_1D_total'
     voltotname(IDX_PRECIP ) = 'precipitation'
+    voltotname(IDX_EVAP   ) = 'evaporation'
     voltotname(IDX_SOUR   ) = 'source_sink'
     voltotname(IDX_InternalTidesDissipation) = 'InternalTidesDissipation'
     voltotname(IDX_GravInput) = 'Gravitational_Input'

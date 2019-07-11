@@ -6362,6 +6362,7 @@ subroutine updateBalance()
    voltot(IDX_LATIN )  = voltot(IDX_LATIN )  + cumvolcur(IDX_LATIN ) 
    voltot(IDX_LATOUT)  = voltot(IDX_LATOUT)  + cumvolcur(IDX_LATOUT) 
    voltot(IDX_LATTOT)  = voltot(IDX_LATTOT)  + cumvolcur(IDX_LATTOT) 
+   voltot(IDX_EVAP)    = voltot(IDX_EVAP)    + cumvolcur(IDX_EVAP)
 
    cumvolcur = 0d0
 end subroutine updateBalance

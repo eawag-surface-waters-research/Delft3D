@@ -35625,6 +35625,7 @@ if (jahisbal > 0) then
       endif
     end do
     volcur(IDX_PRECIP) = vinrain
+    volcur(IDX_EVAP)   = vouteva
     volcur(IDX_SOUR  ) = vinsrc - voutsrc
 
     if ( jaFrcInternalTides2D.eq.1 ) then
