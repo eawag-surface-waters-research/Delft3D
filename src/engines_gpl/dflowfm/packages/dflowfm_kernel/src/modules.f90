@@ -3735,7 +3735,7 @@ end module m_vegetation
  integer, parameter :: IDX_EXCHIN     = 7
  integer, parameter :: IDX_EXCHOUT    = 8
  integer, parameter :: IDX_EXCHTOT    = 9
- integer, parameter :: IDX_PARTIP     = 10
+ integer, parameter :: IDX_PRECIP     = 10
  integer, parameter :: IDX_SOUR       = 11
  integer, parameter :: IDX_InternalTidesDissipation = 12
  integer, parameter :: IDX_GravInput  = 13
@@ -3883,7 +3883,7 @@ subroutine reset_flow()
     voltotname(IDX_EXCHIN ) = 'exchange_with_1D_in'
     voltotname(IDX_EXCHOUT) = 'exchange_with_1D_out'
     voltotname(IDX_EXCHTOT) = 'exchange_with_1D_total'
-    voltotname(IDX_PARTIP ) = 'precipitation'
+    voltotname(IDX_PRECIP ) = 'precipitation'
     voltotname(IDX_SOUR   ) = 'source_sink'
     voltotname(IDX_InternalTidesDissipation) = 'InternalTidesDissipation'
     voltotname(IDX_GravInput) = 'Gravitational_Input'

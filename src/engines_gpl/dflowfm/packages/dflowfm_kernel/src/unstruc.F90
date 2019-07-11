@@ -35624,7 +35624,7 @@ if (jahisbal > 0) then
          volcur(IDX_EXCHOUT) = volcur(IDX_EXCHOUT) - q1(Lf)*dts
       endif
     end do
-    volcur(IDX_PARTIP) = vinrain
+    volcur(IDX_PRECIP) = vinrain
     volcur(IDX_SOUR  ) = vinsrc - voutsrc
 
     if ( jaFrcInternalTides2D.eq.1 ) then
