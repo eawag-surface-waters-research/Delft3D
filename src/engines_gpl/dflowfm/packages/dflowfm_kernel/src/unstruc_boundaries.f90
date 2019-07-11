@@ -2714,7 +2714,7 @@ if (npump > 0) then
             if (istrtmp == -1) then
                k = L1pumpsg(n)
                istrtmp   = addStructure(network%sts, kpump(1,k), kpump(2,k), iabs(kpump(3,k)), -1, "", strid, istrtype)
-               call readPump(network%sts%struct(istrtmp)%pump, str_ptr, success)
+               call readPump(network%sts%struct(istrtmp)%pump, str_ptr, strid, network%forcinglist, success)
             endif
          endif
       end if

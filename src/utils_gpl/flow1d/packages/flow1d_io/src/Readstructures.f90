@@ -278,7 +278,7 @@ module m_readstructures
                   call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
                
                case (ST_PUMP)
-                  call readPump(network%sts%struct(istru)%pump, md_ptr%child_nodes(i)%node_ptr, success)
+                  call readPump(network%sts%struct(istru)%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
                
                case (ST_ORIFICE)
                   call readOrifice(network%sts%struct(istru)%orifice, md_ptr%child_nodes(i)%node_ptr, success)
@@ -1115,16 +1115,19 @@ module m_readstructures
       
    end subroutine
 
-   subroutine readPump(pump, md_ptr, success)
+   subroutine readPump(pump, md_ptr, st_id, forcinglist, success)
    
-      type(t_pump), pointer, intent(inout)     :: pump
-      type(tree_data), pointer, intent(in)     :: md_ptr
-      logical, intent(inout)                   :: success
+      type(t_pump), pointer,        intent(inout) :: pump        !< The pump structure to be read into.
+      type(tree_data), pointer,     intent(in   ) :: md_ptr      !< ini tree pointer with user input.
+      character(IdLen),             intent(in   ) :: st_id       !< Structure character Id.
+      type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
+      logical,                      intent(inout) :: success
       
       integer                                      :: tabsize
       integer                                      :: istat
       double precision, allocatable, dimension(:)  :: head   
       double precision, allocatable, dimension(:)  :: redfac   
+      character(CharLn) :: tmpstr
       
       
       allocate(pump)
@@ -1149,7 +1152,29 @@ module m_readstructures
       if (istat == 0) allocate(pump%ds_trigger(pump%nrstages), stat=istat)
 
       
-      call prop_get_doubles(md_ptr, 'structure', 'capacity', pump%capacity, pump%nrstages, success)     
+      if (pump%nrstages == 1) then
+         ! In case of only 1 stage, capacity is either scalar double, or filename, or 'realtime'.
+         call prop_get_double(md_ptr, 'structure', 'capacity', pump%capacity(1), success)
+         if (.not. success) then
+            call prop_get_string(md_ptr, 'structure', 'capacity', tmpstr, success)
+            if (success) then
+               forcinglist%Count = forcinglist%Count+1
+               if (forcinglist%Count > forcinglist%Size) then
+                  call realloc(forcinglist)
+               end if
+
+               forcinglist%forcing(forcinglist%Count)%st_id      = st_id
+               forcinglist%forcing(forcinglist%Count)%st_type    = ST_PUMP
+               forcinglist%forcing(forcinglist%Count)%param_name = 'capacity'
+               forcinglist%forcing(forcinglist%Count)%targetptr  => pump%capacity(1)
+               forcinglist%forcing(forcinglist%Count)%filename   = tmpstr
+            end if
+         end if
+         ! addtimespace gaat qid='pump' gebruiken, de bc provider moet via FM juiste name doorkrijgen (==structureid)
+      else
+         ! Multiple stages: only support table with double precision values.
+         call prop_get_doubles(md_ptr, 'structure', 'capacity', pump%capacity, pump%nrstages, success)     
+      end if
       if (iabs(pump%direction) == 1 .or. iabs(pump%direction) == 3) then
          if (success) call prop_get_doubles(md_ptr, 'structure', 'startlevelsuctionside', pump%ss_onlevel, pump%nrstages, success)      
          if (success) call prop_get_doubles(md_ptr, 'structure', 'stoplevelsuctionside', pump%ss_offlevel, pump%nrstages, success)      

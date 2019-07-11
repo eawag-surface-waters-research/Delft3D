@@ -102,6 +102,7 @@ module m_network
       type(t_boundarySet)                       :: boundaries
       type(t_transportSet)                      :: trans
       type(t_ObservCrossSectionSet)             :: observcrs               !< set of observation Cross-Sections 
+      type(t_forcingList)                       :: forcinglist             !< Work list of read-in (structure) forcing data, to be initialized by calling kernel later.
       logical                                   :: loaded      = .false.
       logical                                   :: initialized = .false.
    end type
