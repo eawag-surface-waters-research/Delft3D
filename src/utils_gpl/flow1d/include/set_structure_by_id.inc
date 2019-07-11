@@ -19,7 +19,7 @@
     do istruct=1,pnetwork%sts%Count
        structure => pnetwork%sts%struct(istruct)
        if (structure%id == id) then
-          if (.not. structure%st_type .eq. ST_WEIR) then
+          if (.not. structure%type .eq. ST_WEIR) then
              write(msgbuf,*) "Structure", id, "is not of type weir"
              call MESS(LEVEL_ERROR, msgbuf)
           end if
@@ -80,7 +80,7 @@
     do istruct=1,pnetwork%sts%Count
        structure => pnetwork%sts%struct(istruct)
        if (structure%id == id) then
-          if (.not. structure%st_type .eq. ST_ORIFICE) then
+          if (.not. structure%type .eq. ST_ORIFICE) then
              write(msgbuf,*) "Structure", id, "is not of type orifice"
              call MESS(LEVEL_ERROR, msgbuf)
           end if
@@ -150,7 +150,7 @@
     do istruct=1,pnetwork%sts%Count
        structure => pnetwork%sts%struct(istruct)
        if (structure%id == id) then
-          if (.not. structure%st_type .eq. ST_PUMP) then
+          if (.not. structure%type .eq. ST_PUMP) then
              write(msgbuf,*) "Structure", id, "is not of type pump"
              call MESS(LEVEL_ERROR, msgbuf)
           end if
@@ -217,7 +217,7 @@
     do istruct=1,pnetwork%sts%Count
        structure => pnetwork%sts%struct(istruct)
        if (structure%id == id) then
-          if (.not. structure%st_type .eq. ST_CULVERT) then
+          if (.not. structure%type .eq. ST_CULVERT) then
              write(msgbuf,*) "Structure", id, "is not of type culvert"
              call MESS(LEVEL_ERROR, msgbuf)
           end if

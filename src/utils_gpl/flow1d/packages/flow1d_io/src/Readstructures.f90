@@ -317,7 +317,7 @@ module m_readstructures
       
          ! Copy ID'S to Names
          do i = 1, network%sts%Count
-            network%sts%struct(i)%st_name = network%sts%struct(i)%id
+            network%sts%struct(i)%name = network%sts%struct(i)%id
          enddo
       
       endif
@@ -358,8 +358,8 @@ module m_readstructures
          pstr => network%sts%struct(i)
          
          read(ibin) pstr%id
-         read(ibin) pstr%st_name
-         read(ibin) pstr%st_type
+         read(ibin) pstr%name
+         read(ibin) pstr%type
          read(ibin) pstr%ibran
          read(ibin) pstr%link_number
          read(ibin) pstr%x
@@ -368,7 +368,7 @@ module m_readstructures
          read(ibin) pstr%compound
          read(ibin) pstr%compoundName
          
-         select case(pstr%st_type)
+         select case(pstr%type)
             case(ST_WEIR)
                allocate(pstr%weir)
                read(ibin) pstr%weir%allowedflowdir
@@ -554,8 +554,8 @@ module m_readstructures
          pstr => sts%struct(i)
          
          write(ibin) pstr%id
-         write(ibin) pstr%st_name
-         write(ibin) pstr%st_type
+         write(ibin) pstr%name
+         write(ibin) pstr%type
          write(ibin) pstr%ibran
          write(ibin) pstr%link_number
          write(ibin) pstr%x
@@ -564,7 +564,7 @@ module m_readstructures
          write(ibin) pstr%compound
          write(ibin) pstr%compoundName
          
-         select case(pstr%st_type)
+         select case(pstr%type)
             case(ST_WEIR)
                write(ibin) pstr%weir%allowedflowdir
                write(ibin) pstr%weir%crestlevel

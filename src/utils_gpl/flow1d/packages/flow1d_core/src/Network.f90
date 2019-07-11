@@ -689,7 +689,7 @@ contains
    
       do i = 1, network%sts%Count
          pstru => network%sts%struct(i)
-         select case (pstru%st_type) 
+         select case (pstru%type) 
          case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON) 
             pcul => pstru%culvert
             pcul%pcross => network%crs%cross(pcul%crosssectionnr)
@@ -712,7 +712,7 @@ contains
    
       ! Program code
       do istru = 1, network%sts%count
-         if (network%sts%struct(istru)%st_type==ST_CULVERT) then
+         if (network%sts%struct(istru)%type==ST_CULVERT) then
             icrs = network%sts%struct(istru)%culvert%crosssectionnr
             pcross => network%crs%cross(icrs)
             network%sts%struct(istru)%culvert%pcross => pcross

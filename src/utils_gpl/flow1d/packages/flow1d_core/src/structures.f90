@@ -128,8 +128,8 @@ module m_1d_structures
     !---------------------------------------------------------
    type, public :: t_structure
       character(IdLen)                 :: id
-      character(IdLen)                 :: st_name
-      integer                          :: st_type
+      character(IdLen)                 :: name
+      integer                          :: type
       integer                          :: ibran
       integer                          :: link_number
       double precision                 :: x, y
@@ -271,7 +271,7 @@ module m_1d_structures
       sts%struct(i)%chainage           = chainage
       sts%struct(i)%compound           = icompound
       sts%struct(i)%compoundName       = compoundName
-      sts%struct(i)%st_type            = structureType
+      sts%struct(i)%type            = structureType
       if (present(x) .and. present(y)) then
          sts%struct(i)%x = x
          sts%struct(i)%y = y
@@ -326,7 +326,7 @@ module m_1d_structures
       sts%struct(i)%chainage           = chainage
       sts%struct(i)%compound           = icompound
       sts%struct(i)%compoundName       = compoundName
-      sts%struct(i)%st_type            = structureType
+      sts%struct(i)%type            = structureType
       sts%struct(i)%ibran = ibranch
 
       AddStructureByBranchLocation = sts%count
@@ -503,7 +503,7 @@ end subroutine
       double precision :: x
       type(t_structure) :: pstru
 
-      select case (pstru%st_type)
+      select case (pstru%type)
       case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
           res = interpolate(pstru%culvert%lossCoeff, x)
       case default
@@ -520,7 +520,7 @@ end subroutine
 
       integer           :: icross
 
-      select case(sts%struct(istru)%st_type)
+      select case(sts%struct(istru)%type)
          case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
             icross = sts%struct(istru)%culvert%crosssectionnr
          case (ST_BRIDGE)
@@ -565,7 +565,7 @@ end subroutine
           return
        endif
 
-       select case (sts%struct(istru)%st_type)
+       select case (sts%struct(istru)%type)
        case (ST_WEIR)
           select case (iparam)
           case (CFiCrestLevel)
@@ -656,7 +656,7 @@ end subroutine
 !
 !! executable statements -------------------------------------------------------
 !
-       select case (sts%struct(istru)%st_type)
+       select case (sts%struct(istru)%type)
        case (ST_WEIR)
            if (iparam == CFiCrestLevel) getValueStruc = sts%struct(istru)%weir%crestlevel
            if (iparam == CFiCrestWidth) getValueStruc = sts%struct(istru)%weir%crestwidth
@@ -714,7 +714,7 @@ end subroutine
       ! Check for structures with cross sections.
       ! since the cross section list is now sorted the locations are changed
       do i = 1, sts%count
-         select case(sts%struct(i)%st_type)
+         select case(sts%struct(i)%type)
             case(ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
                if (sts%struct(i)%culvert%crosssectionnr > 0) then
                   sts%struct(i)%culvert%crosssectionnr = crs%crossSectionIndex(sts%struct(i)%culvert%crosssectionnr)
@@ -839,7 +839,7 @@ end subroutine
    double precision function get_crest_level(struc)
       type(t_structure), intent(in) :: struc
       
-       select case (struc%st_type)
+       select case (struc%type)
           case (ST_WEIR)
              get_crest_level = struc%weir%crestlevel
           case (ST_UNI_WEIR)
@@ -861,7 +861,7 @@ end subroutine
    type(c_ptr) function get_crest_level_c_loc(struc)
       type(t_structure), intent(in) :: struc
       
-       select case (struc%st_type)
+       select case (struc%type)
           case (ST_WEIR)
              get_crest_level_c_loc = c_loc(struc%weir%crestlevel)
           case (ST_UNI_WEIR)
@@ -879,7 +879,7 @@ end subroutine
    double precision function get_width(struc)
       type(t_structure), intent(in) :: struc
       
-       select case (struc%st_type)
+       select case (struc%type)
           case (ST_WEIR)
              get_width = struc%weir%crestwidth
           case (ST_GENERAL_ST)
@@ -900,7 +900,7 @@ end subroutine
    double precision function get_watershed_threshold(struc)
       type(t_structure), intent(in) :: struc
       
-       select case (struc%st_type)
+       select case (struc%type)
        case (ST_ORIFICE)
           get_watershed_threshold = huge(1d0)
        case default
@@ -913,7 +913,7 @@ end subroutine
       
       type (t_structure), intent(inout) :: struc
       
-      select case(struc%st_type)
+      select case(struc%type)
       case (ST_ORIFICE)
          get_gle = struc%orifice%openlevel 
       case (ST_GENERAL_ST)
@@ -927,7 +927,7 @@ end subroutine
       
       type (t_structure), intent(inout) :: struc
       
-      select case(struc%st_type)
+      select case(struc%type)
       case (ST_ORIFICE)
          get_opening_height = struc%orifice%openlevel - struc%orifice%crestlevel
       case (ST_GENERAL_ST)
@@ -939,7 +939,7 @@ end subroutine
       
       type (t_structure), intent(inout) :: struc
       
-      select case(struc%st_type)
+      select case(struc%type)
       case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
          get_valve_opening = struc%culvert%inivalveopen
       end select
@@ -979,7 +979,7 @@ end subroutine
       
       
       do ist = 1, sts%count
-         select case(sts%struct(ist)%st_type)
+         select case(sts%struct(ist)%type)
          case (ST_WEIR, ST_ORIFICE,ST_GENERAL_ST, ST_UNI_WEIR)
             ids_weir(ist) = sts%struct(ist)%id
          case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
@@ -1003,7 +1003,7 @@ end subroutine
       type (t_structure), intent(inout) :: struc
       double precision, intent(in)      :: value
    
-      select case(struc%st_type)
+      select case(struc%type)
       case (ST_WEIR)
          struc%weir%crestlevel=value
       case (ST_ORIFICE)
@@ -1022,7 +1022,7 @@ end subroutine
       type (t_structure), intent(inout) :: struc
       double precision, intent(in)      :: value
       
-      select case(struc%st_type)
+      select case(struc%type)
       case (ST_WEIR)
          struc%weir%crestwidth=value
       case (ST_ORIFICE)
@@ -1037,7 +1037,7 @@ end subroutine
       type (t_structure), intent(inout) :: struc
       double precision, intent(in)      :: value
       
-      select case(struc%st_type)
+      select case(struc%type)
       case (ST_ORIFICE)
          struc%orifice%openlevel =value
       case (ST_GENERAL_ST)
@@ -1050,7 +1050,7 @@ end subroutine
       type (t_structure), intent(inout) :: struc
       double precision, intent(in)      :: value
       
-      select case(struc%st_type)
+      select case(struc%type)
       case (ST_ORIFICE)
          struc%orifice%openlevel=value + struc%orifice%crestlevel
       case (ST_GENERAL_ST)
@@ -1063,7 +1063,7 @@ end subroutine
       type (t_structure), intent(inout) :: struc
       double precision, intent(in)      :: value
       
-      select case(struc%st_type)
+      select case(struc%type)
       case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
          struc%culvert%inivalveopen=value
       end select
@@ -1088,7 +1088,7 @@ end subroutine
    double precision function get_capacity(struc)
       
       type (t_structure), intent(inout) :: struc
-      if (struc%st_type /= ST_PUMP) then
+      if (struc%type /= ST_PUMP) then
          get_capacity = huge(1d0)
          return
       endif

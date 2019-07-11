@@ -33828,7 +33828,7 @@ end subroutine setbobs_fixedweirs
              k1 = ln(1,L)
              k2 = ln(2,L)
 
-            select case(network%sts%struct(istru)%ST_TYPE)
+            select case(network%sts%struct(istru)%type)
                 case (ST_WEIR)
                    call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
                                     q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
@@ -33864,7 +33864,7 @@ end subroutine setbobs_fixedweirs
                    ! TODO: implement this?!
                 continue
                 case default
-                   write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%ST_TYPE
+                   write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
                    call err_flush()
              end select
           endif

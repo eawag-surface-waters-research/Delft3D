@@ -24,7 +24,7 @@
 
     do istruct=1,structures%Count
        structure => structures%struct(istruct)
-       if ( structure%st_type .eq. ST_WEIR ) then
+       if ( structure%type .eq. ST_WEIR ) then
           fortranweir => structure%weir
           nweirs = nweirs + 1
        end if
@@ -48,7 +48,7 @@
     iweir = 0
     do istruct=1,structures%Count
        structure => structures%struct(istruct)
-       if ( structure%st_type .eq. ST_WEIR ) then
+       if ( structure%type .eq. ST_WEIR ) then
           fortranweir => structure%weir
           iweir = iweir + 1
           c_weir%id = string_to_char_array(structure%id)
@@ -95,7 +95,7 @@
 
     do istruct=1,structures%Count
        structure => structures%struct(istruct)
-       if ( structure%st_type .eq. ST_ORIFICE ) then
+       if ( structure%type .eq. ST_ORIFICE ) then
           fortranorifice => structure%orifice
           norifices = norifices + 1
        end if
@@ -119,7 +119,7 @@
     iorifice = 0
     do istruct=1,structures%Count
        structure => structures%struct(istruct)
-       if ( structure%st_type .eq. ST_ORIFICE ) then
+       if ( structure%type .eq. ST_ORIFICE ) then
           fortranorifice => structure%orifice
           iorifice = iorifice + 1
           c_orifice%id = string_to_char_array(structure%id)
@@ -169,7 +169,7 @@
 
     do istruct=1,structures%Count
        structure => structures%struct(istruct)
-       if ( structure%st_type .eq. ST_PUMP ) then
+       if ( structure%type .eq. ST_PUMP ) then
           fortranpump => structure%pump
           npumps = npumps + 1
        end if
@@ -193,7 +193,7 @@
     ipump = 0
     do istruct=1,structures%Count
        structure => structures%struct(istruct)
-       if ( structure%st_type .eq. ST_PUMP ) then
+       if ( structure%type .eq. ST_PUMP ) then
           fortranpump => structure%pump
           ipump = ipump + 1
           c_pump%id = string_to_char_array(structure%id)
@@ -242,7 +242,7 @@
 
     do istruct=1,structures%Count
        structure => structures%struct(istruct)
-       if ( structure%st_type .eq. ST_CULVERT ) then
+       if ( structure%type .eq. ST_CULVERT ) then
           fortranculvert => structure%culvert
           nculverts = nculverts + 1
        end if
@@ -266,7 +266,7 @@
     iculvert = 0
     do istruct=1,structures%Count
        structure => structures%struct(istruct)
-       if ( structure%st_type .eq. ST_CULVERT ) then
+       if ( structure%type .eq. ST_CULVERT ) then
           fortranculvert => structure%culvert
           iculvert = iculvert + 1
           c_culvert%id = string_to_char_array(structure%id)

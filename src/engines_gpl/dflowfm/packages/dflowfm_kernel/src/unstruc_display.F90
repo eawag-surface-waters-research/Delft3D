@@ -1323,7 +1323,7 @@ if (network%loaded) then
          active = hu(link) > epshu         
          call movabs(x, y)
          ! Uses same symbols and colors as for Sobek 2.
-         select case(network%sts%struct(is)%st_type)
+         select case(network%sts%struct(is)%type)
          case (ST_PUMP)
             active = network%sts%struct(is)%pump%is_active
             call drawTriangle(x, y, icon_rw_size, ncolorange, ncolblack, active)
@@ -1556,7 +1556,7 @@ end if
 if (nstruc > 0) then
    call Write2Scr(linec, 'Structure id', network%sts%struct(nstruc)%id(1:21))
    
-   istrtype = network%sts%struct(nstruc)%st_type
+   istrtype = network%sts%struct(nstruc)%type
    call GetStrucType_from_int(istrtype, str_type)
    call Write2Scr(linec, 'Structure type', str_type)   
    
