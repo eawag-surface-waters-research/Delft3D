@@ -23,7 +23,6 @@ namespace General.tests
         public IntPtr nedge_nodes;
         public IntPtr nbranchlengths;
         public IntPtr nbranchgeometrynodes;
-
         public IntPtr ngeopointx;
         public IntPtr ngeopointy;
         public IntPtr nbranchorder;
@@ -43,14 +42,13 @@ namespace General.tests
         public IntPtr layer_zs;
         public IntPtr interface_zs;
 
-        public int startIndex;
         public IntPtr nodeids;
         public IntPtr nodelongnames;
-
         public IntPtr nbranchids;
         public IntPtr nbranchlongnames;
         public IntPtr nnodeids;
         public IntPtr nnodelongnames;
+        public int startIndex;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -163,13 +161,14 @@ namespace General.tests
         {
             int idssize = 40;
             int longnamessize = 80;
+            int namesize = 255;
             if (meshdim.numnode > 0)
             {
                 Add<double>(meshdim.numnode, ref mesh.nodex);
+                Add<double>(meshdim.numnode, ref mesh.nodey);
+                Add<double>(meshdim.numnode, ref mesh.nodez);
                 Add<char>(meshdim.numnode * idssize, ref mesh.nodeids);
                 Add<char>(meshdim.numnode * longnamessize, ref mesh.nodelongnames);
-                Add<char>(meshdim.numnode, ref mesh.nodey);
-                Add<double>(meshdim.numnode, ref mesh.nodez);
             }
 
             if (meshdim.numedge > 0)
@@ -189,13 +188,6 @@ namespace General.tests
                 Add<double>(meshdim.numface, ref mesh.facey);
             }
 
-            if (meshdim.numnode > 0)
-            {
-                Add<double>(meshdim.numnode, ref mesh.nodex);
-                Add<double>(meshdim.numnode, ref mesh.nodey);
-                Add<double>(meshdim.numnode, ref mesh.nodez);
-            }
-
             //network part
             if (meshdim.nnodes > 0)
             {
@@ -211,7 +203,7 @@ namespace General.tests
             {
                 Add<double>(meshdim.nbranches, ref mesh.nbranchlengths);
                 Add<int>(meshdim.nbranches, ref mesh.nbranchgeometrynodes);
-                Add<int>(meshdim.nbranches, ref mesh.nedge_nodes);
+                Add<int>(meshdim.nbranches * 2, ref mesh.nedge_nodes);
                 Add<int>(meshdim.nbranches, ref mesh.nbranchorder);
                 Add<char>(meshdim.nbranches * idssize, ref mesh.nbranchids);
                 Add<char>(meshdim.nbranches * longnamessize, ref mesh.nbranchlongnames);

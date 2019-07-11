@@ -1978,10 +1978,8 @@ namespace UGrid.tests
 
             //14. Get the 2d mesh arrays
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            var unmanagedMemoryRegister=new UnmanagedMemoryRegister();
+            unmanagedMemoryRegister.Add(ref meshtwoddim, ref meshtwod);
             bool includeArrays = true;
             int start_index = 1;
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref targetioncid, ref mesh2d, ref l_networkid, ref meshtwod, ref start_index, ref includeArrays);
@@ -2083,12 +2081,9 @@ namespace UGrid.tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //22. Free memory  
-               //Free 2d arrays
-            Marshal.FreeCoTaskMem(meshtwod.nodex);
-            Marshal.FreeCoTaskMem(meshtwod.nodey);
-            Marshal.FreeCoTaskMem(meshtwod.nodez);
-            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
-              //Free 1d arrays
+            //Free 2d arrays
+                unmanagedMemoryRegister.Dispose();
+            //Free 1d arrays
             Marshal.FreeCoTaskMem(c_meshXCoords);
             Marshal.FreeCoTaskMem(c_meshYCoords);
             Marshal.FreeCoTaskMem(c_branchoffset);
@@ -2749,8 +2744,7 @@ namespace UGrid.tests
                 for (int i = 0; i < meshdim.numnode; i++)
                 {
                     Assert.That(l_meshnodeids[i], Is.EqualTo(meshnodeids[i].PadRight(IoNetcdfLibWrapper.idssize)));
-                    Assert.That(l_meshnodelongnames[i],
-                        Is.EqualTo(meshnodelongnames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                    Assert.That(l_meshnodelongnames[i], Is.EqualTo(meshnodelongnames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
                 }
             }
         }

@@ -3178,8 +3178,8 @@
    !Prepare net vars for new data and fill with values from file, increases nod, xk, yk, zk, kn if needed
 
    call increasenetw(numk_last + meshgeom%numnode, numl_last + meshgeom%numedge)
-   XK(numk_last+1:numk_last+numk_read) = meshgeom%nodex(:)
-   YK(numk_last+1:numk_last+numk_read) = meshgeom%nodey(:)
+   XK(numk_last+1:numk_last+numk_read) = meshgeom%nodex(1:meshgeom%numnode)
+   YK(numk_last+1:numk_last+numk_read) = meshgeom%nodey(1:meshgeom%numnode)
    ZK(numk_last+1:numk_last+numk_read) = dmiss
 
    do l=1,meshgeom%numedge

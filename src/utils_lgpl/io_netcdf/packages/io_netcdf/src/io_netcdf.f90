@@ -525,7 +525,7 @@ function ionc_put_meshgeom(ioncid, meshgeom, meshid, networkid, meshname, networ
    type(t_ug_meshgeom)                                      :: meshgeom      !< Structure in which all mesh geometry is be stored.
    integer,             intent(inout)                       :: meshid        !< The mesh id in the specified data set.
    integer,             intent(inout)                       :: networkid     !< The network id in the specified data set.
-   character(len=*)                                         :: meshname      !< The mesh name
+   character(len=*), target                                 :: meshname      !< The mesh name
    character(len=*)                                         :: networkName   !< The network name
    integer                                                  :: ierr          !< Result status, ionc_noerr if successful.
    
@@ -538,7 +538,7 @@ function ionc_put_meshgeom(ioncid, meshgeom, meshid, networkid, meshname, networ
       ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
       ! set the meshname
       datasets(ioncid)%ug_file%meshnames(meshid) = meshname
-      meshgeom%meshname = trim(meshname)
+      meshgeom%meshname => meshname
       meshids = datasets(ioncid)%ug_file%meshids(meshid)
    endif
    
@@ -567,9 +567,8 @@ function ionc_put_meshgeom_v1(ioncid, meshgeom, meshid, networkid) result(ierr)
    ! Locals (default values)
    type(t_ug_mesh)                                          :: meshids 
    type(t_ug_network)                                       :: networkids
-   character(len=MAXSTRLEN)                                 :: networkname
    
-   if (len_trim(meshgeom%meshname).gt.0) then 
+   if (associated(meshgeom%meshname).and.len_trim(meshgeom%meshname).gt.0) then 
       !adds a meshids structure
       ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
       ! set the meshname
@@ -579,11 +578,12 @@ function ionc_put_meshgeom_v1(ioncid, meshgeom, meshid, networkid) result(ierr)
    
    if (networkid.gt.0) then 
       networkids = datasets(ioncid)%ug_file%netids(networkid)
-      networkname = datasets(ioncid)%ug_file%networksnames(networkid) 
+      ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom, datasets(ioncid)%ug_file%networksnames(networkid) )
+   else
+      ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom)
    endif
    
-   !this call writes mesh and network data contained in meshgeom
-   ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom, networkname)
+
 
 end function ionc_put_meshgeom_v1 
 
