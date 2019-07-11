@@ -1246,16 +1246,19 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    else 
       if ( dim == 1 ) then
-         if ( present(ngeopointx).and. associated(ngeopointx)) then !1d UGRID 1.6
+        if ( present(ngeopointx).and. associated(ngeopointx)) then !1d UGRID 1.6
             !some results might still be saved at the edges, also for 1d 
-            ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))   
+            ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge', numEdge,   meshids%dimids(mdim_edge))   
             ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
-         endif
-		 if (numNode.gt.0) then
+        endif
+        if (numNode.gt.0) then
+             if ((numEdge.gt. 0).and. meshids%varids(mid_edgenodes) == -1) then 
+                 ierr  = nf90_def_dim(ncid, 'n'//prefix//'_edge', numEdge, meshids%dimids(mdim_edge))
+             endif
              ierr = ug_create_1d_mesh_v1(ncid, network1dname, meshids, meshname, numNode, 1)
              ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
-		 endif
-     endif	
+        endif
+      endif	
    endif
    
    if (ierr /= UG_NOERR) then
