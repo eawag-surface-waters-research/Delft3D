@@ -36,8 +36,9 @@ module m_struc_helper
    public UpAndDownstreamParameters
    public furu_iter
 
-contains
+   contains
 
+   !> Determine up and downstream parameters, depending on flow direction for structures
    subroutine UpAndDownstreamParameters(s1ml, s1mr, alm, arm, qtotal, velheight, &
                                         rholeft, rhoright, crest, hu, hd, uu, ud, flowdir)
       !!--declarations----------------------------------------------------------------
@@ -46,20 +47,21 @@ contains
       !
       ! Global variables
       !
-      logical, intent(in)            :: velheight
-      double precision, intent(in)   :: s1ml
-      double precision, intent(in)   :: s1mr
-      double precision, intent(in)   :: alm
-      double precision, intent(in)   :: arm
-      double precision, intent(in)   :: qtotal
-      double precision, intent(in)   :: crest
-      double precision               :: hd
-      double precision               :: hu
-      double precision               :: rholeft
-      double precision               :: rhoright
-      double precision               :: flowdir
-      double precision               :: ud
-      double precision               :: uu
+      logical, intent(in)             :: velheight     !< Indicates whether the velocity height is taken into account or if the water level is used
+      double precision, intent(in)    :: s1ml          !< Water level at geometrical left side
+      double precision, intent(in)    :: s1mr          !< Water level at geometrical right side
+      double precision, intent(in)    :: alm           !< FLow area at geometrical left side
+      double precision, intent(in)    :: arm           !< FLow area at geometrical right side
+      double precision, intent(in)    :: qtotal        !< Total discharge through flow link (in case of compound structures this might be larger than the
+                                                       !< discharge through the actual structure
+      double precision, intent(in)    :: crest         !< crest level
+      double precision, intent(  out) :: hd            !< downstream water level
+      double precision, intent(  out) :: hu            !< upstream water level
+      double precision, intent(  out) :: rholeft       !< water density at left side of structure
+      double precision, intent(  out) :: rhoright      !< water density at right side of structure
+      double precision, intent(  out) :: flowdir       !< flow direction 1 positive direction, -1 negative direction 
+      double precision, intent(  out) :: ud            !< downstream velocity
+      double precision, intent(  out) :: uu            !< upstream velocity
       !
       !
       ! Local variables
@@ -134,13 +136,9 @@ contains
       endif
        
    end subroutine UpAndDownstreamParameters
-          
-   subroutine furu_iter(fum, rum, s1m2, s1m1, u1m, qL, aum, fr, cu, rhsc, dxdt, dx_struc, hu, lambda, Cz)
-      !!--description-----------------------------------------------------------------
-      ! NONE
-      !!--pseudo code and references--------------------------------------------------
-      ! NONE
-      !!--declarations----------------------------------------------------------------
+   
+   !> Calculate FU and RU
+   subroutine furu_iter(fuL, ruL, s1k2, s1k1, u1L, qL, auL, fr, cu, rhsc, dxdt, dx_struc, hu, lambda, Cz)
       !=======================================================================
       !                       Deltares
       !                One-Two Dimensional Modelling System
@@ -169,21 +167,21 @@ contains
       ! Global variables
       !
       !
-      double precision, intent(out)    :: fum
-      double precision, intent(out)    :: rum
-      double precision, intent(in)     :: fr
-      double precision, intent(in)     :: cu
-      double precision, intent(in)     :: rhsc
-      double precision, intent(in)     :: s1m2
-      double precision, intent(in)     :: s1m1
-      double precision, intent(in)     :: qL
-      double precision, intent(in)     :: aum
-      double precision, intent(inout)  :: u1m
-      double precision, intent(in)     :: dxdt
-      double precision, intent(in)     :: Cz
-      double precision, intent(in)     :: lambda
-      double precision, intent(in)     :: hu
-      double precision, intent(in)     :: dx_struc
+      double precision, intent(out)             :: fuL      !< Fu component of momentum equation
+      double precision, intent(out)             :: ruL      !< Right hand side component of momentum equation
+      double precision, intent(in)              :: fr       !< Structure velocity (u_s)
+      double precision, intent(in)              :: cu       !< coefficient for calculating fuL = cu/bu
+      double precision, intent(in)              :: rhsc     !< right hand side term in structure equation
+      double precision, intent(in)              :: s1k2     !< water level s1(k2)
+      double precision, intent(in)              :: s1k1     !< water level s1(k1)
+      double precision, intent(in)              :: qL       !< discharge through structure
+      double precision, intent(in)              :: auL      !< Flow area of structure
+      double precision, intent(inout)           :: u1L      !< Flow velocity through structure
+      double precision, intent(in)              :: dxdt     !< dx/dt
+      double precision, intent(in), optional    :: Cz       !< Chezy value
+      double precision, intent(in), optional    :: lambda   !< extra resistance
+      double precision, intent(in), optional    :: hu       !< upstream water level
+      double precision, intent(in), optional    :: dx_struc !< crest length 
       !
       ! Local variables
       !
@@ -196,15 +194,17 @@ contains
       !! executable statements -------------------------------------------------------
       !
       dxfrL = 0d0
-      if (lambda ==0d0 .and. Cz > 0.1d0) then
-         dxfrl = dx_struc*gravity/(Cz*Cz*hu)
+      if (present(dx_struc)) then
+         if (lambda ==0d0 .and. Cz > 0d0) then
+            dxfrl = dx_struc*gravity/(Cz*Cz*hu)
+         endif
       endif
       
       bu   = dxdt + (1+dxfrL) * fr
-      du   = (strucalfa  * qL / max(aum, 1.0d-4) + (1 - strucalfa) * u1m) * dxdt + rhsc
-      fum  = cu / bu
-      rum  = du / bu
-      u1m  = rum - fum * (s1m2 - s1m1)
+      du   = (strucalfa  * qL / max(auL, 1.0d-4) + (1 - strucalfa) * u1L) * dxdt + rhsc
+      fuL  = cu / bu
+      ruL  = du / bu
+      u1L  = ruL - fuL * (s1k2 - s1k1)
       
    end subroutine furu_iter
 
