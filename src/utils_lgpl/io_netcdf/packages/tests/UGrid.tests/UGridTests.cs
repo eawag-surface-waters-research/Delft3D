@@ -699,6 +699,8 @@ namespace UGrid.tests
 
             Marshal.Copy(meshgeom.nnodex, l_networkNodesX, 0, l_networkNodesX.Length);
             Marshal.Copy(meshgeom.nnodey, l_networkNodesY, 0, l_networkNodesY.Length);
+            Marshal.Copy(meshgeom.nedge_nodes, l_networkEdgeNode, 0, l_networkEdgeNode.Length);
+
             Marshal.Copy(meshgeom.nbranchlengths, l_networkBranchLengths, 0, l_networkBranchLengths.Length);
             Marshal.Copy(meshgeom.nbranchgeometrynodes, l_networkGeometryPointsInBranches, 0, l_networkGeometryPointsInBranches.Length);
             Marshal.Copy(meshgeom.nbranchorder, l_networkBranchOrder, 0, l_networkBranchOrder.Length);
@@ -711,6 +713,8 @@ namespace UGrid.tests
             var l_branchids = StringBufferHandling.ParseString(meshgeom.nbranchids, meshgeomdim.nbranches, IoNetcdfLibWrapper.idssize);
             var l_branchlongNames = StringBufferHandling.ParseString(meshgeom.nbranchlongnames, meshgeomdim.nbranches, IoNetcdfLibWrapper.longnamessize);
 
+
+            // checks
             for (int i = 0; i < meshgeomdim.nnodes; i++)
             {
                 Assert.That(l_networkNodesIds[i], Is.EqualTo(networkNodesIds[i].PadRight(IoNetcdfLibWrapper.idssize)));
@@ -731,6 +735,17 @@ namespace UGrid.tests
             {
                 Assert.That(l_networkGeometryPointsX[i], Is.EqualTo(networkGeometryPointsX[i]));
                 Assert.That(l_networkGeometryPointsY[i], Is.EqualTo(networkGeometryPointsY[i]));
+            }
+
+
+            int edgeIndex = 0;
+            for (int i = 0; i < meshgeomdim.nbranches; i++)
+            {
+                //written 1 based, but retrived 0 based
+                Assert.That(l_networkEdgeNode[edgeIndex] + 1, Is.EqualTo(networkEdgeNodes[edgeIndex]));
+                edgeIndex++;
+                Assert.That(l_networkEdgeNode[edgeIndex] + 1, Is.EqualTo(networkEdgeNodes[edgeIndex]));
+                edgeIndex++;
             }
         }
         
@@ -2749,7 +2764,7 @@ namespace UGrid.tests
                 ierr = wrapper.ionc_close(ref ioncid);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                // Check the network
+                // Check the network values
                 check1DNetwork(ref networkdim, ref network);
             }
 
