@@ -31,36 +31,36 @@ namespace UGrid.tests
         public static IntPtr m_libgridgeom;
 
         //network name
-        private string networkname = "network";
+        private string networkName = "network";
 
         //dimension info
-        private int nNodes = 4;
-        private int nBranches = 3;
-        private int nGeometry = 9;
+        private int numNetworkNodes = 4;
+        private int numNetworkBranches = 3;
+        private int numGeometryPoints = 9;
         private int startIndex = 1;
 
         //node info
-        private double[] nodesX = { 1.0, 5.0, 5.0, 8.0 };
-        private double[] nodesY = { 4.0, 4.0, 1.0, 4.0 };
-        private string[] nodesids = { "node1", "node2", "node3", "node4" };
-        private string[] nodeslongNames = { "nodelong1", "nodelong2", "nodelong3", "nodelong4" };
-        private int[] sourcenodeid = { 1, 2, 2 };
-        private int[] targetnodeid = { 2, 3, 4 };
-        private int[] nedge_nodes = { 1, 2, 2, 3, 2, 4 };
+        private double[] networkNodesX = { 1.0, 5.0, 5.0, 8.0 };
+        private double[] networkNodesY = { 4.0, 4.0, 1.0, 4.0 };
+        private string[] networkNodesIds = { "node1", "node2", "node3", "node4" };
+        private string[] networkNodesLongNames = { "nodelong1", "nodelong2", "nodelong3", "nodelong4" };
+        private int[] networkSourceNodes = { 1, 2, 2 };
+        private int[] networkTargetNodes = { 2, 3, 4 };
+        private int[] networkEdgeNodes = { 1, 2, 2, 3, 2, 4 };
 
         //branches info
-        private double[] branchlengths = { 4.0, 3.0, 3.0 };
-        private int[] nbranchgeometrypoints = { 3, 3, 3 };
-        private string[] branchids = { "branch1", "branch2", "branch3" };
-        private string[] branchlongNames = { "branchlong1", "branchlong2", "branchlong3" };
-        private int[] branch_order = { -1, -1, -1 };
+        private double[] networkBranchLengths = { 4.0, 3.0, 3.0 };
+        private int[] networkGeometryPointsInBranches = { 3, 3, 3 };
+        private string[] networkBranchIds = { "branch1", "branch2", "branch3" };
+        private string[] networkBranchLongNames = { "branchlong1", "branchlong2", "branchlong3" };
+        private int[] networkBranchOrder = { -1, -1, -1 };
 
         //geometry info
-        double[] geopointsX = { 1.0, 3.0, 5.0, 5.0, 5.0, 5.0, 5.0, 7.0, 8.0 };
-        double[] geopointsY = { 4.0, 4.0, 4.0, 4.0, 2.0, 1.0, 4.0, 4.0, 4.0 };
+        double[] networkGeometryPointsX = { 1.0, 3.0, 5.0, 5.0, 5.0, 5.0, 5.0, 7.0, 8.0 };
+        double[] networkGeometryPointsY = { 4.0, 4.0, 4.0, 4.0, 2.0, 1.0, 4.0, 4.0, 4.0 };
 
         //mesh name
-        private string meshname = "1dmesh";
+        private string meshName = "1dmesh";
 
         //mesh dimension
         private int nmeshpoints = 8;
@@ -181,7 +181,7 @@ namespace UGrid.tests
             Marshal.Copy(c_geopointsY, l_geopointsY, 0, l_geopointsY.Length);
 
             //8. Get the branch order 
-            ierr = wrapper.ionc_get_1d_network_branchorder(ref ioncid, ref networkid, ref c_branch_order, ref nBranches);
+            ierr = wrapper.ionc_get_1d_network_branchorder(ref ioncid, ref networkid, ref c_branch_order, ref numNetworkBranches);
             Assert.That(ierr, Is.EqualTo(0));
 
             Marshal.Copy(c_branch_order, l_branch_order, 0, l_branch_order.Length);
@@ -215,7 +215,7 @@ namespace UGrid.tests
                 var rmeshName = new StringBuilder(IoNetcdfLibWrapper.LibDetails.MAXSTRLEN);
                 ierr = wrapper.ionc_get_mesh_name(ref ioncid, ref meshid, rmeshName);
                 Assert.That(ierr, Is.EqualTo(0));
-                Assert.That(rmeshName.ToString().Trim(), Is.EqualTo(meshname.Trim()));
+                Assert.That(rmeshName.ToString().Trim(), Is.EqualTo(meshName.Trim()));
 
                 //2. Get the number of mesh points
                 int rnmeshpoints = -1;
@@ -384,8 +384,7 @@ namespace UGrid.tests
             ref int[] l_targetnodeid, 
             int l_startIndex,
             ref double[] l_mesh1dCoordX,
-            ref double[] l_mesh1dCoordY
-            )
+            ref double[] l_mesh1dCoordY)
         {
             // Mesh variables
             IntPtr c_branchidx    = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int))    * l_nmeshpoints);
@@ -682,6 +681,60 @@ namespace UGrid.tests
             meshid = rc_meshids[0];
         }
 
+
+        // Check 1d network using meshgeom
+        private void check1DNetwork(ref meshgeomdim meshgeomdim, ref meshgeom meshgeom)
+        {
+            var l_networkNodesX = new double[networkNodesX.Length];
+            var l_networkNodesY = new double[networkNodesY.Length];
+            var l_networkEdgeNode = new int[networkEdgeNodes.Length];
+
+            var l_networkBranchLengths = new double[networkBranchLengths.Length];
+            var l_networkGeometryPointsInBranches = new int[networkGeometryPointsInBranches.Length];
+            var l_networkBranchOrder = new int[networkBranchOrder.Length];
+
+            var l_networkGeometryPointsX = new double[networkGeometryPointsX.Length];
+            var l_networkGeometryPointsY = new double[networkGeometryPointsY.Length];
+
+
+            Marshal.Copy(meshgeom.nnodex, l_networkNodesX, 0, l_networkNodesX.Length);
+            Marshal.Copy(meshgeom.nnodey, l_networkNodesY, 0, l_networkNodesY.Length);
+            Marshal.Copy(meshgeom.nbranchlengths, l_networkBranchLengths, 0, l_networkBranchLengths.Length);
+            Marshal.Copy(meshgeom.nbranchgeometrynodes, l_networkGeometryPointsInBranches, 0, l_networkGeometryPointsInBranches.Length);
+            Marshal.Copy(meshgeom.nbranchorder, l_networkBranchOrder, 0, l_networkBranchOrder.Length);
+            Marshal.Copy(meshgeom.ngeopointx, l_networkGeometryPointsX, 0, l_networkGeometryPointsX.Length);
+            Marshal.Copy(meshgeom.ngeopointy, l_networkGeometryPointsY, 0, l_networkGeometryPointsY.Length);
+
+
+            var l_networkNodesIds = StringBufferHandling.ParseString(meshgeom.nnodeids, meshgeomdim.nnodes, IoNetcdfLibWrapper.idssize);
+            var l_networkNodesLongNames = StringBufferHandling.ParseString(meshgeom.nnodelongnames, meshgeomdim.nnodes, IoNetcdfLibWrapper.longnamessize);
+            var l_branchids = StringBufferHandling.ParseString(meshgeom.nbranchids, meshgeomdim.nbranches, IoNetcdfLibWrapper.idssize);
+            var l_branchlongNames = StringBufferHandling.ParseString(meshgeom.nbranchlongnames, meshgeomdim.nbranches, IoNetcdfLibWrapper.longnamessize);
+
+            for (int i = 0; i < meshgeomdim.nnodes; i++)
+            {
+                Assert.That(l_networkNodesIds[i], Is.EqualTo(networkNodesIds[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                Assert.That(l_networkNodesLongNames[i], Is.EqualTo(networkNodesLongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                Assert.That(l_networkNodesX[i], Is.EqualTo(networkNodesX[i]));
+            }
+
+            for (int i = 0; i < meshgeomdim.nbranches; i++)
+            {
+                Assert.That(l_branchids[i], Is.EqualTo(networkBranchIds[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                Assert.That(l_branchlongNames[i], Is.EqualTo(networkBranchLongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                Assert.That(l_networkBranchLengths[i], Is.EqualTo(networkBranchLengths[i]));
+                Assert.That(l_networkGeometryPointsInBranches[i], Is.EqualTo(networkGeometryPointsInBranches[i]));
+                Assert.That(l_networkBranchOrder[i], Is.EqualTo(networkBranchOrder[i]));
+            }
+
+            for (int i = 0; i < meshgeomdim.ngeometry; i++)
+            {
+                Assert.That(l_networkGeometryPointsX[i], Is.EqualTo(networkGeometryPointsX[i]));
+                Assert.That(l_networkGeometryPointsY[i], Is.EqualTo(networkGeometryPointsY[i]));
+            }
+        }
+        
+
         // Create the netcdf files
         [Test]
         [Category("UGRIDTests")]
@@ -698,38 +751,38 @@ namespace UGrid.tests
             var wrapper = new IoNetcdfLibWrapper();
 
             //2. make a local copy of the variables 
-            int l_nnodes = nNodes;
-            int l_nbranches = nBranches;
-            int l_nGeometry = nGeometry;
-            double[] l_nodesX = nodesX;
-            double[] l_nodesY = nodesY;
-            int[] l_sourcenodeid = sourcenodeid;
-            int[] l_targetnodeid = targetnodeid;
-            double[] l_branchlengths = branchlengths;
-            int[] l_nbranchgeometrypoints = nbranchgeometrypoints;
-            double[] l_geopointsX = geopointsX;
-            double[] l_geopointsY = geopointsY;
-            int[] l_branch_order = branch_order;
+            int l_nnodes = numNetworkNodes;
+            int l_nbranches = numNetworkBranches;
+            int l_nGeometry = numGeometryPoints;
+            double[] l_nodesX = networkNodesX;
+            double[] l_nodesY = networkNodesY;
+            int[] l_sourcenodeid = networkSourceNodes;
+            int[] l_targetnodeid = networkTargetNodes;
+            double[] l_branchlengths = networkBranchLengths;
+            int[] l_nbranchgeometrypoints = networkGeometryPointsInBranches;
+            double[] l_geopointsX = networkGeometryPointsX;
+            double[] l_geopointsY = networkGeometryPointsY;
+            int[] l_branch_order = networkBranchOrder;
 
             IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
             IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
 
             for (int i = 0; i < l_nnodes; i++)
             {
-                tmpstring = nodesids[i];
+                tmpstring = networkNodesIds[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_nodesinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = nodeslongNames[i];
+                tmpstring = networkNodesLongNames[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_nodesinfo[i].longnames = tmpstring.ToCharArray();
             }
 
             for (int i = 0; i < l_nbranches; i++)
             {
-                tmpstring = branchids[i];
+                tmpstring = networkBranchIds[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_branchinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = branchlongNames[i];
+                tmpstring = networkBranchLongNames[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_branchinfo[i].longnames = tmpstring.ToCharArray();
             }
@@ -745,18 +798,18 @@ namespace UGrid.tests
 
             //6. Create a 1d network
             int networkid = -1;
-            StringBuilder l_networkName = new StringBuilder(networkname);
-            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, l_networkName.ToString(), ref nNodes, ref nBranches,
-                ref nGeometry);
+            StringBuilder l_networkName = new StringBuilder(networkName);
+            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, l_networkName.ToString(), ref numNetworkNodes, ref numNetworkBranches,
+                ref numGeometryPoints);
             Assert.That(ierr, Is.EqualTo(0));
 
-            StringBuilder l_meshname = new StringBuilder(meshname);
+            StringBuilder l_meshname = new StringBuilder(meshName);
             int l_nmeshpoints = nmeshpoints;
             int l_nedgenodes = nedgenodes;
-            int l_nBranches = nBranches;
+            int l_nBranches = numNetworkBranches;
             int l_nlinks = nlinks;
             double[] l_branchoffset = offset;
-            double[] l_branchlength = branchlengths;
+            double[] l_branchlength = networkBranchLengths;
             int[] l_branchidx = branchidx;
             int l_startIndex = startIndex;
             double[] l_mesh1dCoordX = mesh1dCoordX;
@@ -857,17 +910,17 @@ namespace UGrid.tests
                 int l_nGeometry = -1;
                 int l_startIndex = startIndex;
                 StringBuilder l_networkName = new StringBuilder(IoNetcdfLibWrapper.LibDetails.MAXSTRLEN);
-                IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[nNodes];
-                IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[nNodes];
-                double[] l_nodesX = new double[nNodes];
-                double[] l_nodesY = new double[nNodes];
-                int[] l_sourcenodeid = new int[nBranches];
-                int[] l_targetnodeid = new int[nBranches];
-                double[] l_branchlengths = new double[nBranches];
-                int[] l_nbranchgeometrypoints = new int[nBranches];
-                double[] l_geopointsX = new double[nGeometry];
-                double[] l_geopointsY = new double[nGeometry];
-                int[] l_branch_order = new int[nBranches];
+                IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[numNetworkNodes];
+                IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[numNetworkNodes];
+                double[] l_nodesX = new double[numNetworkNodes];
+                double[] l_nodesY = new double[numNetworkNodes];
+                int[] l_sourcenodeid = new int[numNetworkBranches];
+                int[] l_targetnodeid = new int[numNetworkBranches];
+                double[] l_branchlengths = new double[numNetworkBranches];
+                int[] l_nbranchgeometrypoints = new int[numNetworkBranches];
+                double[] l_geopointsX = new double[numGeometryPoints];
+                double[] l_geopointsY = new double[numGeometryPoints];
+                int[] l_branch_order = new int[numNetworkBranches];
 
                 read1dnetwork(
                     ioncid,
@@ -891,38 +944,38 @@ namespace UGrid.tests
                     ref l_branch_order);
 
                 //4. check the read values
-                Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname.Trim()));
+                Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkName.Trim()));
                 Assert.That(l_nnodes, Is.EqualTo(l_nnodes));
-                Assert.That(l_nbranches, Is.EqualTo(nBranches));
-                Assert.That(l_nGeometry, Is.EqualTo(nGeometry));
+                Assert.That(l_nbranches, Is.EqualTo(numNetworkBranches));
+                Assert.That(l_nGeometry, Is.EqualTo(numGeometryPoints));
 
                 for (int i = 0; i < l_nnodes; i++)
                 {
                     string tmpstring = new string(l_nodesinfo[i].ids);
-                    Assert.That(tmpstring.Trim(), Is.EqualTo(nodesids[i]));
+                    Assert.That(tmpstring.Trim(), Is.EqualTo(networkNodesIds[i]));
                     tmpstring = new string(l_nodesinfo[i].longnames);
-                    Assert.That(tmpstring.Trim(), Is.EqualTo(nodeslongNames[i]));
-                    Assert.That(l_nodesX[i], Is.EqualTo(nodesX[i]));
-                    Assert.That(l_nodesY[i], Is.EqualTo(nodesY[i]));
+                    Assert.That(tmpstring.Trim(), Is.EqualTo(networkNodesLongNames[i]));
+                    Assert.That(l_nodesX[i], Is.EqualTo(networkNodesX[i]));
+                    Assert.That(l_nodesY[i], Is.EqualTo(networkNodesY[i]));
                 }
 
                 for (int i = 0; i < l_nbranches; i++)
                 {
                     string tmpstring = new string(l_branchinfo[i].ids);
-                    Assert.That(tmpstring.Trim(), Is.EqualTo(branchids[i]));
+                    Assert.That(tmpstring.Trim(), Is.EqualTo(networkBranchIds[i]));
                     tmpstring = new string(l_branchinfo[i].longnames);
-                    Assert.That(tmpstring.Trim(), Is.EqualTo(branchlongNames[i]));
-                    Assert.That(l_targetnodeid[i], Is.EqualTo(targetnodeid[i]));
-                    Assert.That(l_sourcenodeid[i], Is.EqualTo(sourcenodeid[i]));
-                    Assert.That(l_branchlengths[i], Is.EqualTo(branchlengths[i]));
-                    Assert.That(l_nbranchgeometrypoints[i], Is.EqualTo(nbranchgeometrypoints[i]));
-                    Assert.That(l_branch_order[i], Is.EqualTo(branch_order[i]));
+                    Assert.That(tmpstring.Trim(), Is.EqualTo(networkBranchLongNames[i]));
+                    Assert.That(l_targetnodeid[i], Is.EqualTo(networkTargetNodes[i]));
+                    Assert.That(l_sourcenodeid[i], Is.EqualTo(networkSourceNodes[i]));
+                    Assert.That(l_branchlengths[i], Is.EqualTo(networkBranchLengths[i]));
+                    Assert.That(l_nbranchgeometrypoints[i], Is.EqualTo(networkGeometryPointsInBranches[i]));
+                    Assert.That(l_branch_order[i], Is.EqualTo(networkBranchOrder[i]));
                 }
 
                 for (int i = 0; i < l_nGeometry; i++)
                 {
-                    Assert.That(l_geopointsX[i], Is.EqualTo(geopointsX[i]));
-                    Assert.That(l_geopointsY[i], Is.EqualTo(geopointsY[i]));
+                    Assert.That(l_geopointsX[i], Is.EqualTo(networkGeometryPointsX[i]));
+                    Assert.That(l_geopointsY[i], Is.EqualTo(networkGeometryPointsY[i]));
                 }
 
                 // LC: REFACTOR NEEDED!
@@ -975,18 +1028,18 @@ namespace UGrid.tests
             Assert.That(ierr, Is.EqualTo(0));
 
             // make a local copy of the variables 
-            int l_nnodes = nNodes;
-            int l_nbranches = nBranches;
-            int l_nGeometry = nGeometry;
-            double[] l_nodesX = nodesX;
-            double[] l_nodesY = nodesY;
-            int[] l_sourcenodeid = sourcenodeid;
-            int[] l_targetnodeid = targetnodeid;
-            double[] l_branchlengths = branchlengths;
-            int[] l_nbranchgeometrypoints = nbranchgeometrypoints;
-            double[] l_geopointsX = geopointsX;
-            double[] l_geopointsY = geopointsY;
-            int[] l_branch_order = branch_order;
+            int l_nnodes = numNetworkNodes;
+            int l_nbranches = numNetworkBranches;
+            int l_nGeometry = numGeometryPoints;
+            double[] l_nodesX = networkNodesX;
+            double[] l_nodesY = networkNodesY;
+            int[] l_sourcenodeid = networkSourceNodes;
+            int[] l_targetnodeid = networkTargetNodes;
+            double[] l_branchlengths = networkBranchLengths;
+            int[] l_nbranchgeometrypoints = networkGeometryPointsInBranches;
+            double[] l_geopointsX = networkGeometryPointsX;
+            double[] l_geopointsY = networkGeometryPointsY;
+            int[] l_branch_order = networkBranchOrder;
 
             IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
             IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
@@ -994,10 +1047,10 @@ namespace UGrid.tests
             for (int i = 0; i < l_nnodes; i++)
             {
                 string tmpstring = "";
-                tmpstring = nodesids[i];
+                tmpstring = networkNodesIds[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_nodesinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = nodeslongNames[i];
+                tmpstring = networkNodesLongNames[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_nodesinfo[i].longnames = tmpstring.ToCharArray();
             }
@@ -1005,10 +1058,10 @@ namespace UGrid.tests
             for (int i = 0; i < l_nbranches; i++)
             {
                 string tmpstring = "";
-                tmpstring = branchids[i];
+                tmpstring = networkBranchIds[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_branchinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = branchlongNames[i];
+                tmpstring = networkBranchLongNames[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_branchinfo[i].longnames = tmpstring.ToCharArray();
             }
@@ -1036,19 +1089,19 @@ namespace UGrid.tests
 
             //6. Create 1d geometry and mesh in the new file (target.nc)
             int networkid = -1;
-            ierr = wrapper.ionc_create_1d_network(ref targetioncid, ref networkid, networkname, ref nNodes,
-                ref nBranches, ref nGeometry);
+            ierr = wrapper.ionc_create_1d_network(ref targetioncid, ref networkid, networkName, ref numNetworkNodes,
+                ref numNetworkBranches, ref numGeometryPoints);
             Assert.That(ierr, Is.EqualTo(0));
 
-            StringBuilder l_networkName = new StringBuilder(networkname);
-            StringBuilder l_meshname = new StringBuilder(meshname);
+            StringBuilder l_networkName = new StringBuilder(networkName);
+            StringBuilder l_meshname = new StringBuilder(meshName);
             StringBuilder l_linkmeshname = new StringBuilder(linkmeshname);
             int l_nmeshpoints = nmeshpoints;
             int l_nedgenodes = nedgenodes;
-            int l_nBranches = nBranches;
+            int l_nBranches = numNetworkBranches;
             int l_nlinks = nlinks;
             double[] l_branchoffset = offset;
-            double[] l_branchlength = branchlengths;
+            double[] l_branchlength = networkBranchLengths;
             int[] l_branchidx = branchidx;
             int l_startIndex = startIndex;
             double[] l_mesh1dCoordX = mesh1dCoordX;
@@ -1178,38 +1231,38 @@ namespace UGrid.tests
                 ref l_branch_order);
 
             //4. check the read values
-            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname));
+            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkName));
             Assert.That(l_nnodes, Is.EqualTo(l_nnodes));
-            Assert.That(l_nbranches, Is.EqualTo(nBranches));
-            Assert.That(l_nGeometry, Is.EqualTo(nGeometry));
+            Assert.That(l_nbranches, Is.EqualTo(numNetworkBranches));
+            Assert.That(l_nGeometry, Is.EqualTo(numGeometryPoints));
 
             for (int i = 0; i < l_nnodes; i++)
             {
                 string tmpstring = new string(l_nodesinfo[i].ids);
-                Assert.That(tmpstring.Trim(), Is.EqualTo(nodesids[i]));
+                Assert.That(tmpstring.Trim(), Is.EqualTo(networkNodesIds[i]));
                 tmpstring = new string(l_nodesinfo[i].longnames);
-                Assert.That(tmpstring.Trim(), Is.EqualTo(nodeslongNames[i]));
+                Assert.That(tmpstring.Trim(), Is.EqualTo(networkNodesLongNames[i]));
                 Assert.That(l_nodesX[i], Is.EqualTo(l_nodesX[i]));
-                Assert.That(l_nodesY[i], Is.EqualTo(nodesY[i]));
+                Assert.That(l_nodesY[i], Is.EqualTo(networkNodesY[i]));
             }
 
             for (int i = 0; i < l_nbranches; i++)
             {
                 string tmpstring = new string(l_branchinfo[i].ids);
-                Assert.That(tmpstring.Trim(), Is.EqualTo(branchids[i]));
+                Assert.That(tmpstring.Trim(), Is.EqualTo(networkBranchIds[i]));
                 tmpstring = new string(l_branchinfo[i].longnames);
-                Assert.That(tmpstring.Trim(), Is.EqualTo(branchlongNames[i]));
-                Assert.That(l_targetnodeid[i], Is.EqualTo(targetnodeid[i]));
-                Assert.That(l_sourcenodeid[i], Is.EqualTo(sourcenodeid[i]));
-                Assert.That(l_branchlengths[i], Is.EqualTo(branchlengths[i]));
-                Assert.That(l_nbranchgeometrypoints[i], Is.EqualTo(nbranchgeometrypoints[i]));
-                Assert.That(l_branch_order[i], Is.EqualTo(branch_order[i]));
+                Assert.That(tmpstring.Trim(), Is.EqualTo(networkBranchLongNames[i]));
+                Assert.That(l_targetnodeid[i], Is.EqualTo(networkTargetNodes[i]));
+                Assert.That(l_sourcenodeid[i], Is.EqualTo(networkSourceNodes[i]));
+                Assert.That(l_branchlengths[i], Is.EqualTo(networkBranchLengths[i]));
+                Assert.That(l_nbranchgeometrypoints[i], Is.EqualTo(networkGeometryPointsInBranches[i]));
+                Assert.That(l_branch_order[i], Is.EqualTo(networkBranchOrder[i]));
             }
 
             for (int i = 0; i < l_nGeometry; i++)
             {
-                Assert.That(l_geopointsX[i], Is.EqualTo(geopointsX[i]));
-                Assert.That(l_geopointsY[i], Is.EqualTo(geopointsY[i]));
+                Assert.That(l_geopointsX[i], Is.EqualTo(networkGeometryPointsX[i]));
+                Assert.That(l_geopointsY[i], Is.EqualTo(networkGeometryPointsY[i]));
             }
 
             //LC refactor needed also for this part!
@@ -1236,18 +1289,18 @@ namespace UGrid.tests
             var wrapper = new IoNetcdfLibWrapper();
 
             // make a local copy of the variables 
-            int l_nnodes = nNodes;
-            int l_nbranches = nBranches;
-            int l_nGeometry = nGeometry;
-            double[] l_nodesX = nodesX;
-            double[] l_nodesY = nodesY;
-            int[] l_sourcenodeid = sourcenodeid;
-            int[] l_targetnodeid = targetnodeid;
-            double[] l_branchlengths = branchlengths;
-            int[] l_nbranchgeometrypoints = nbranchgeometrypoints;
-            double[] l_geopointsX = geopointsX;
-            double[] l_geopointsY = geopointsY;
-            int[] l_branch_order = branch_order;
+            int l_nnodes = numNetworkNodes;
+            int l_nbranches = numNetworkBranches;
+            int l_nGeometry = numGeometryPoints;
+            double[] l_nodesX = networkNodesX;
+            double[] l_nodesY = networkNodesY;
+            int[] l_sourcenodeid = networkSourceNodes;
+            int[] l_targetnodeid = networkTargetNodes;
+            double[] l_branchlengths = networkBranchLengths;
+            int[] l_nbranchgeometrypoints = networkGeometryPointsInBranches;
+            double[] l_geopointsX = networkGeometryPointsX;
+            double[] l_geopointsY = networkGeometryPointsY;
+            int[] l_branch_order = networkBranchOrder;
 
 
             IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
@@ -1255,20 +1308,20 @@ namespace UGrid.tests
 
             for (int i = 0; i < l_nnodes; i++)
             {
-                string tmpstring = nodesids[i];
+                string tmpstring = networkNodesIds[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_nodesinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = nodeslongNames[i];
+                tmpstring = networkNodesLongNames[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_nodesinfo[i].longnames = tmpstring.ToCharArray();
             }
 
             for (int i = 0; i < l_nbranches; i++)
             {
-                string tmpstring = branchids[i];
+                string tmpstring = networkBranchIds[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_branchinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = branchlongNames[i];
+                tmpstring = networkBranchLongNames[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_branchinfo[i].longnames = tmpstring.ToCharArray();
             }
@@ -1284,8 +1337,8 @@ namespace UGrid.tests
 
             //4. Create a 1d network
             int networkid = -1;
-            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkname, ref nNodes,
-                ref nBranches, ref nGeometry);
+            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkName, ref numNetworkNodes,
+                ref numNetworkBranches, ref numGeometryPoints);
             Assert.That(ierr, Is.EqualTo(0));
 
             //5. Write 1d network and mesh
@@ -1343,17 +1396,17 @@ namespace UGrid.tests
             int l_nGeometry = -1;
             int l_startIndex = startIndex;
             StringBuilder l_networkName = new StringBuilder(IoNetcdfLibWrapper.LibDetails.MAXSTRLEN);
-            IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[nNodes];
-            IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[nNodes];
-            double[] l_nodesX = new double[nNodes];
-            double[] l_nodesY = new double[nNodes];
-            int[] l_sourcenodeid = new int[nBranches];
-            int[] l_targetnodeid = new int[nBranches];
-            double[] l_branchlengths = new double[nBranches];
-            int[] l_nbranchgeometrypoints = new int[nBranches];
-            double[] l_geopointsX = new double[nGeometry];
-            double[] l_geopointsY = new double[nGeometry];
-            int[] l_branch_order = new int[nBranches];
+            IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[numNetworkNodes];
+            IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[numNetworkNodes];
+            double[] l_nodesX = new double[numNetworkNodes];
+            double[] l_nodesY = new double[numNetworkNodes];
+            int[] l_sourcenodeid = new int[numNetworkBranches];
+            int[] l_targetnodeid = new int[numNetworkBranches];
+            double[] l_branchlengths = new double[numNetworkBranches];
+            int[] l_nbranchgeometrypoints = new int[numNetworkBranches];
+            double[] l_geopointsX = new double[numGeometryPoints];
+            double[] l_geopointsY = new double[numGeometryPoints];
+            int[] l_branch_order = new int[numNetworkBranches];
 
             read1dnetwork(
                 ioncid,
@@ -1377,38 +1430,38 @@ namespace UGrid.tests
                 ref l_branch_order);
 
             //4. check the read values
-            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkname.Trim()));
+            Assert.That(l_networkName.ToString().Trim(), Is.EqualTo(networkName.Trim()));
             Assert.That(l_nnodes, Is.EqualTo(l_nnodes));
-            Assert.That(l_nbranches, Is.EqualTo(nBranches));
-            Assert.That(l_nGeometry, Is.EqualTo(nGeometry));
+            Assert.That(l_nbranches, Is.EqualTo(numNetworkBranches));
+            Assert.That(l_nGeometry, Is.EqualTo(numGeometryPoints));
 
             for (int i = 0; i < l_nnodes; i++)
             {
                 string tmpstring = new string(l_nodesinfo[i].ids);
-                Assert.That(tmpstring.Trim(), Is.EqualTo(nodesids[i]));
+                Assert.That(tmpstring.Trim(), Is.EqualTo(networkNodesIds[i]));
                 tmpstring = new string(l_nodesinfo[i].longnames);
-                Assert.That(tmpstring.Trim(), Is.EqualTo(nodeslongNames[i]));
+                Assert.That(tmpstring.Trim(), Is.EqualTo(networkNodesLongNames[i]));
                 Assert.That(l_nodesX[i], Is.EqualTo(l_nodesX[i]));
-                Assert.That(l_nodesY[i], Is.EqualTo(nodesY[i]));
+                Assert.That(l_nodesY[i], Is.EqualTo(networkNodesY[i]));
             }
 
             for (int i = 0; i < l_nbranches; i++)
             {
                 string tmpstring = new string(l_branchinfo[i].ids);
-                Assert.That(tmpstring.Trim(), Is.EqualTo(branchids[i]));
+                Assert.That(tmpstring.Trim(), Is.EqualTo(networkBranchIds[i]));
                 tmpstring = new string(l_branchinfo[i].longnames);
-                Assert.That(tmpstring.Trim(), Is.EqualTo(branchlongNames[i]));
-                Assert.That(l_targetnodeid[i], Is.EqualTo(targetnodeid[i]));
-                Assert.That(l_sourcenodeid[i], Is.EqualTo(sourcenodeid[i]));
-                Assert.That(l_branchlengths[i], Is.EqualTo(branchlengths[i]));
-                Assert.That(l_nbranchgeometrypoints[i], Is.EqualTo(nbranchgeometrypoints[i]));
-                Assert.That(l_branch_order[i], Is.EqualTo(branch_order[i]));
+                Assert.That(tmpstring.Trim(), Is.EqualTo(networkBranchLongNames[i]));
+                Assert.That(l_targetnodeid[i], Is.EqualTo(networkTargetNodes[i]));
+                Assert.That(l_sourcenodeid[i], Is.EqualTo(networkSourceNodes[i]));
+                Assert.That(l_branchlengths[i], Is.EqualTo(networkBranchLengths[i]));
+                Assert.That(l_nbranchgeometrypoints[i], Is.EqualTo(networkGeometryPointsInBranches[i]));
+                Assert.That(l_branch_order[i], Is.EqualTo(networkBranchOrder[i]));
             }
 
             for (int i = 0; i < l_nGeometry; i++)
             {
-                Assert.That(l_geopointsX[i], Is.EqualTo(geopointsX[i]));
-                Assert.That(l_geopointsY[i], Is.EqualTo(geopointsY[i]));
+                Assert.That(l_geopointsX[i], Is.EqualTo(networkGeometryPointsX[i]));
+                Assert.That(l_geopointsY[i], Is.EqualTo(networkGeometryPointsY[i]));
             }
             //4. Close the file
             ierr = wrapper.ionc_close(ref ioncid);
@@ -1819,12 +1872,12 @@ namespace UGrid.tests
 
             //5. Create 1d geometry and mesh in the new file (target.nc)
             int networkid = -1;
-            ierr = wrapperNetcdf.ionc_create_1d_network(ref targetioncid, ref networkid, networkname, ref l_nnodes, ref l_nbranches, ref l_nGeometry);
+            ierr = wrapperNetcdf.ionc_create_1d_network(ref targetioncid, ref networkid, networkName, ref l_nnodes, ref l_nbranches, ref l_nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
 
             //6. define the network variables
-            StringBuilder l_networkName = new StringBuilder(networkname);
-            StringBuilder l_meshname = new StringBuilder(meshname);
+            StringBuilder l_networkName = new StringBuilder(networkName);
+            StringBuilder l_meshname = new StringBuilder(meshName);
             int l_nmeshpoints = 25;
             int l_nedgenodes = 24;
             int l_nlinks = 10;
@@ -1999,8 +2052,8 @@ namespace UGrid.tests
             Marshal.Copy(l_branchoffset, 0, c_branchoffset, l_nmeshpoints);
             Marshal.Copy(l_branchlengths, 0, c_branchlength, l_nbranches);
             Marshal.Copy(l_branchidx, 0, c_branchids, l_nmeshpoints);
-            Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, l_nbranches);
-            Marshal.Copy(targetnodeid, 0, c_targetnodeid, l_nbranches);
+            Marshal.Copy(networkSourceNodes, 0, c_sourcenodeid, l_nbranches);
+            Marshal.Copy(networkTargetNodes, 0, c_targetnodeid, l_nbranches);
 
             //16. fill kn (Herman datastructure) for creating the links
             var wrapperGridgeom = new GridGeomLibWrapper();
@@ -2296,38 +2349,38 @@ namespace UGrid.tests
             var wrapper = new IoNetcdfLibWrapper();
 
             //2. make a local copy of the variables 
-            int l_nnodes = nNodes;
-            int l_nbranches = nBranches;
-            int l_nGeometry = nGeometry;
-            double[] l_nodesX = nodesX;
-            double[] l_nodesY = nodesY;
-            int[] l_sourcenodeid = sourcenodeid;
-            int[] l_targetnodeid = targetnodeid;
-            double[] l_branchlengths = branchlengths;
-            int[] l_nbranchgeometrypoints = nbranchgeometrypoints;
-            double[] l_geopointsX = geopointsX;
-            double[] l_geopointsY = geopointsY;
-            int[] l_branch_order = branch_order;
+            int l_nnodes = numNetworkNodes;
+            int l_nbranches = numNetworkBranches;
+            int l_nGeometry = numGeometryPoints;
+            double[] l_nodesX = networkNodesX;
+            double[] l_nodesY = networkNodesY;
+            int[] l_sourcenodeid = networkSourceNodes;
+            int[] l_targetnodeid = networkTargetNodes;
+            double[] l_branchlengths = networkBranchLengths;
+            int[] l_nbranchgeometrypoints = networkGeometryPointsInBranches;
+            double[] l_geopointsX = networkGeometryPointsX;
+            double[] l_geopointsY = networkGeometryPointsY;
+            int[] l_branch_order = networkBranchOrder;
 
             IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
             IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
 
             for (int i = 0; i < l_nnodes; i++)
             {
-                tmpstring = nodesids[i];
+                tmpstring = networkNodesIds[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_nodesinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = nodeslongNames[i];
+                tmpstring = networkNodesLongNames[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_nodesinfo[i].longnames = tmpstring.ToCharArray();
             }
 
             for (int i = 0; i < l_nbranches; i++)
             {
-                tmpstring = branchids[i];
+                tmpstring = networkBranchIds[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_branchinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = branchlongNames[i];
+                tmpstring = networkBranchLongNames[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_branchinfo[i].longnames = tmpstring.ToCharArray();
             }
@@ -2343,18 +2396,18 @@ namespace UGrid.tests
 
             //6. Create a 1d network
             int networkid = -1;
-            StringBuilder l_networkName = new StringBuilder(networkname);
-            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, l_networkName.ToString(), ref nNodes, ref nBranches,
-                ref nGeometry);
+            StringBuilder l_networkName = new StringBuilder(networkName);
+            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, l_networkName.ToString(), ref numNetworkNodes, ref numNetworkBranches,
+                ref numGeometryPoints);
             Assert.That(ierr, Is.EqualTo(0));
 
-            StringBuilder l_meshname = new StringBuilder(meshname);
+            StringBuilder l_meshname = new StringBuilder(meshName);
             int l_nmeshpoints = nmeshpoints;
             int l_nedgenodes = nedgenodes;
-            int l_nBranches = nBranches;
+            int l_nBranches = numNetworkBranches;
             int l_nlinks = nlinks;
             double[] l_branchoffset = offset;
-            double[] l_branchlength = branchlengths;
+            double[] l_branchlength = networkBranchLengths;
             int[] l_branchidx = branchidx;
             int l_startIndex = startIndex;
             double[] l_mesh1dCoordX = mesh1dCoordX;
@@ -2455,28 +2508,27 @@ namespace UGrid.tests
                 var wrapper = new IoNetcdfLibWrapper();
 
                 // Make a local copy of the variables 
-                double[] l_nodesX = nodesX;
-                double[] l_nodesY = nodesY;
-                var l_edge_nodes = new int[sourcenodeid.Length + targetnodeid.Length];
-                sourcenodeid.CopyTo(l_edge_nodes, 0);
-                targetnodeid.CopyTo(l_edge_nodes, sourcenodeid.Length);
-                double[] l_branchlengths = branchlengths;
-                double[] l_geopointsX = geopointsX;
-                double[] l_geopointsY = geopointsY;
-                int[] l_branch_order = branch_order;
-                int[] l_nbranchgeometrypoints = nbranchgeometrypoints;
+                double[] l_nodesX = networkNodesX;
+                double[] l_nodesY = networkNodesY;
+                var l_edge_nodes = new int[networkSourceNodes.Length + networkTargetNodes.Length];
+                networkSourceNodes.CopyTo(l_edge_nodes, 0);
+                networkTargetNodes.CopyTo(l_edge_nodes, networkSourceNodes.Length);
+                double[] l_branchlengths = networkBranchLengths;
+                double[] l_geopointsX = networkGeometryPointsX;
+                double[] l_geopointsY = networkGeometryPointsY;
+                int[] l_branch_order = networkBranchOrder;
+                int[] l_nbranchgeometrypoints = networkGeometryPointsInBranches;
 
                 // Write a 1d network using ionc_put_meshgeom
                 var networkdim = new meshgeomdim();
                 networkdim.dim = 1;
-                networkdim.nnodes = nNodes;
-                networkdim.nbranches = nBranches;
-                networkdim.ngeometry = nGeometry;
+                networkdim.nnodes = numNetworkNodes;
+                networkdim.nbranches = numNetworkBranches;
+                networkdim.ngeometry = numGeometryPoints;
                 networkdim.numlinks = 0;
                 networkdim.numface = 0;
 
                 var network = new meshgeom();
-
                 register.Add(ref l_nodesX, ref network.nnodex);
                 register.Add(ref l_nodesY, ref network.nnodey);
                 register.Add(ref l_edge_nodes, ref network.nedge_nodes);
@@ -2488,16 +2540,16 @@ namespace UGrid.tests
 
 
                 // Strings are passed by pointers to avoid stack overflow
-                var networkNodeidsBuffer = StringBufferHandling.MakeStringBuffer(ref nodesids, IoNetcdfLibWrapper.idssize);
-                var networkNodelongnamesBuffer = StringBufferHandling.MakeStringBuffer(ref nodeslongNames, IoNetcdfLibWrapper.longnamessize);
-                var networkBranchesidsBuffer = StringBufferHandling.MakeStringBuffer(ref branchids, IoNetcdfLibWrapper.idssize);
-                var networkBrancheslongnamesBuffer = StringBufferHandling.MakeStringBuffer(ref branchlongNames, IoNetcdfLibWrapper.longnamessize);
+                var networkNodeidsBuffer = StringBufferHandling.MakeStringBuffer(ref networkNodesIds, IoNetcdfLibWrapper.idssize);
+                var networkNodelongnamesBuffer = StringBufferHandling.MakeStringBuffer(ref networkNodesLongNames, IoNetcdfLibWrapper.longnamessize);
+                var networkBranchesidsBuffer = StringBufferHandling.MakeStringBuffer(ref networkBranchIds, IoNetcdfLibWrapper.idssize);
+                var networkBrancheslongnamesBuffer = StringBufferHandling.MakeStringBuffer(ref networkBranchLongNames, IoNetcdfLibWrapper.longnamessize);
                 register.Add(ref networkNodeidsBuffer, ref network.nnodeids);
                 register.Add(ref networkNodelongnamesBuffer, ref network.nnodelongnames);
                 register.Add(ref networkBranchesidsBuffer, ref network.nbranchids);
                 register.Add(ref networkBrancheslongnamesBuffer, ref network.nbranchlongnames);
-                networkname = networkname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
-                register.Add(ref networkname, ref networkdim.name);
+                networkName = networkName.PadRight(IoNetcdfLibWrapper.namesize, ' ');
+                register.Add(ref networkName, ref networkdim.name);
 
                 // Create the file, will not add any dataset 
                 var ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
@@ -2518,7 +2570,7 @@ namespace UGrid.tests
                 meshdim.dim = 1;
                 meshdim.numnode = nmeshpoints;
                 meshdim.numedge = nedgenodes;
-                meshdim.nbranches = nBranches;
+                meshdim.nbranches = numNetworkBranches;
                 meshdim.numedge = 6;
                 meshdim.numlinks = 0;
                 meshdim.numface = 0;
@@ -2533,15 +2585,15 @@ namespace UGrid.tests
                 register.Add(ref branchidx, ref mesh.branchidx);
                 register.Add(ref mesh1dCoordX, ref mesh.nodex);
                 register.Add(ref mesh1dCoordY, ref mesh.nodey);
-                register.Add(ref edge_nodes, ref mesh.edge_nodes);
-
-                // Strings are passed by pointers to avoid stack overflow
+                register.Add(ref edge_nodes, ref mesh.edge_nodes); 
+                
+                // Strings are passed by pointers to avoid overflow for large grids
                 var nodeidsBuffer = StringBufferHandling.MakeStringBuffer(ref meshnodeids, IoNetcdfLibWrapper.idssize);
                 var nodelongnamesBuffer = StringBufferHandling.MakeStringBuffer(ref meshnodelongnames, IoNetcdfLibWrapper.longnamessize);
                 register.Add(ref nodeidsBuffer, ref mesh.nodeids);
                 register.Add(ref nodelongnamesBuffer, ref mesh.nodelongnames);
-                meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
-                register.Add(ref meshname, ref meshdim.name);
+                meshName = meshName.PadRight(IoNetcdfLibWrapper.namesize, ' ');
+                register.Add(ref meshName, ref meshdim.name);
 
                 int meshid = 0;
                 ierr = wrapper.ionc_put_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh, ref meshdim);
@@ -2676,33 +2728,31 @@ namespace UGrid.tests
                 Marshal.Copy(network.nbranchlengths, l_nbranchlengths, 0, networkdim.nbranches);
                 Marshal.Copy(network.ngeopointx, l_ngeopointx, 0, networkdim.ngeometry);
                 Marshal.Copy(network.ngeopointy, l_ngeopointy, 0, networkdim.ngeometry);
-                var l_networkNodeIds =
-                    StringBufferHandling.ParseString(network.nnodeids, networkdim.nnodes, IoNetcdfLibWrapper.idssize);
-                var l_networkLongNames = StringBufferHandling.ParseString(network.nnodelongnames, networkdim.nnodes,
-                    IoNetcdfLibWrapper.longnamessize);
-                var l_branchids = StringBufferHandling.ParseString(network.nbranchids, networkdim.nbranches,
-                    IoNetcdfLibWrapper.idssize);
-                var l_branchlongnames = StringBufferHandling.ParseString(network.nbranchlongnames, networkdim.nbranches,
-                    IoNetcdfLibWrapper.longnamessize);
+                var l_networkNodeIds =StringBufferHandling.ParseString(network.nnodeids, networkdim.nnodes, IoNetcdfLibWrapper.idssize);
+                var l_networkLongNames = StringBufferHandling.ParseString(network.nnodelongnames, networkdim.nnodes, IoNetcdfLibWrapper.longnamessize);
+                var l_branchids = StringBufferHandling.ParseString(network.nbranchids, networkdim.nbranches, IoNetcdfLibWrapper.idssize);
+                var l_branchlongnames = StringBufferHandling.ParseString(network.nbranchlongnames, networkdim.nbranches, IoNetcdfLibWrapper.longnamessize);
 
                 for (int i = 0; i < networkdim.nnodes; i++)
                 {
-                    Assert.That(l_networkNodeIds[i], Is.EqualTo(nodesids[i].PadRight(IoNetcdfLibWrapper.idssize)));
-                    Assert.That(l_networkLongNames[i],
-                        Is.EqualTo(nodeslongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                    Assert.That(l_networkNodeIds[i], Is.EqualTo(networkNodesIds[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                    Assert.That(l_networkLongNames[i],Is.EqualTo(networkNodesLongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
                 }
 
                 for (int i = 0; i < networkdim.nbranches; i++)
                 {
-                    Assert.That(l_branchids[i], Is.EqualTo(branchids[i].PadRight(IoNetcdfLibWrapper.idssize)));
-                    Assert.That(l_branchlongnames[i],
-                        Is.EqualTo(branchlongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                    Assert.That(l_branchids[i], Is.EqualTo(networkBranchIds[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                    Assert.That(l_branchlongnames[i],Is.EqualTo(networkBranchLongNames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
                 }
 
                 // Close the file
                 ierr = wrapper.ionc_close(ref ioncid);
                 Assert.That(ierr, Is.EqualTo(0));
+
+                // Check the network
+                check1DNetwork(ref networkdim, ref network);
             }
+
         }
 
         // Get only 1d MESH using ionc_get_meshgeom
