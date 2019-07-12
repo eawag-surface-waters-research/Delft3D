@@ -9539,7 +9539,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
             cycle
          end if
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays) 
-         mesh2dname = meshgeom%meshname
+         if(associated(meshgeom%meshname)) mesh2dname = meshgeom%meshname
          !Variable to store the coordinates of face centres
          allocate(xface(meshgeom%numface)) ! TODO: LC: this is only used when there are mesh contacts. Also: have these not already been read into meshgeom%facex/y?
          allocate(yface(meshgeom%numface))
