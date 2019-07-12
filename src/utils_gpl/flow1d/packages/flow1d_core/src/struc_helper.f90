@@ -38,7 +38,10 @@ module m_struc_helper
 
    contains
 
-   !> Determine up and downstream parameters, depending on flow direction for structures
+   !> Determine up and downstream parameters, depending on flow direction for structures.
+   !! All input parameters are oriented w.r.t. the flow link's orientation, i.e.,
+   !! independent of left-right orientation of the structure itself.
+   !! (Motivation: a single structure in 2D may be crossed by multiple flow links, with varying 1->2 orientation.)
    subroutine UpAndDownstreamParameters(s1ml, s1mr, alm, arm, qtotal, velheight, &
                                         rholeft, rhoright, crest, hu, hd, uu, ud, flowdir)
       !!--declarations----------------------------------------------------------------
@@ -47,21 +50,21 @@ module m_struc_helper
       !
       ! Global variables
       !
-      logical, intent(in)             :: velheight     !< Indicates whether the velocity height is taken into account or if the water level is used
-      double precision, intent(in)    :: s1ml          !< Water level at geometrical left side
-      double precision, intent(in)    :: s1mr          !< Water level at geometrical right side
-      double precision, intent(in)    :: alm           !< FLow area at geometrical left side
-      double precision, intent(in)    :: arm           !< FLow area at geometrical right side
+      logical, intent(in)             :: velheight     !< Indicates whether the velocity height is taken into account or if the water level is used.
+      double precision, intent(in)    :: s1ml          !< Water level at flow link's left side.
+      double precision, intent(in)    :: s1mr          !< Water level at flow link's right side.
+      double precision, intent(in)    :: alm           !< Flow area at flow link's left side.
+      double precision, intent(in)    :: arm           !< Flow area at flow link's right side.
       double precision, intent(in)    :: qtotal        !< Total discharge through flow link (in case of compound structures this might be larger than the
-                                                       !< discharge through the actual structure
-      double precision, intent(in)    :: crest         !< crest level
-      double precision, intent(  out) :: hd            !< downstream water level
-      double precision, intent(  out) :: hu            !< upstream water level
-      double precision, intent(  out) :: rholeft       !< water density at left side of structure
-      double precision, intent(  out) :: rhoright      !< water density at right side of structure
-      double precision, intent(  out) :: flowdir       !< flow direction 1 positive direction, -1 negative direction 
-      double precision, intent(  out) :: ud            !< downstream velocity
-      double precision, intent(  out) :: uu            !< upstream velocity
+                                                       !< discharge through the actual structure).
+      double precision, intent(in)    :: crest         !< Crest level.
+      double precision, intent(  out) :: hd            !< Downstream water level.
+      double precision, intent(  out) :: hu            !< Upstream water level.
+      double precision, intent(  out) :: rholeft       !< Water density at geometrical left side of structure (unimplemented).
+      double precision, intent(  out) :: rhoright      !< Water density at right side of structure (unimplemented).
+      double precision, intent(  out) :: flowdir       !< Flow direction 1 positive direction, -1 negative direction.
+      double precision, intent(  out) :: ud            !< Downstream velocity.
+      double precision, intent(  out) :: uu            !< Upstream velocity.
       !
       !
       ! Local variables
@@ -167,21 +170,21 @@ module m_struc_helper
       ! Global variables
       !
       !
-      double precision, intent(out)             :: fuL      !< Fu component of momentum equation
-      double precision, intent(out)             :: ruL      !< Right hand side component of momentum equation
-      double precision, intent(in)              :: fr       !< Structure velocity (u_s)
-      double precision, intent(in)              :: cu       !< coefficient for calculating fuL = cu/bu
-      double precision, intent(in)              :: rhsc     !< right hand side term in structure equation
-      double precision, intent(in)              :: s1k2     !< water level s1(k2)
-      double precision, intent(in)              :: s1k1     !< water level s1(k1)
-      double precision, intent(in)              :: qL       !< discharge through structure
-      double precision, intent(in)              :: auL      !< Flow area of structure
-      double precision, intent(inout)           :: u1L      !< Flow velocity through structure
+      double precision, intent(out)             :: fuL      !< Fu component of momentum equation.
+      double precision, intent(out)             :: ruL      !< Right hand side component of momentum equation.
+      double precision, intent(in)              :: fr       !< Structure velocity (u_s).
+      double precision, intent(in)              :: cu       !< Coefficient for calculating fuL = cu/bu.
+      double precision, intent(in)              :: rhsc     !< Right hand side term in structure equation.
+      double precision, intent(in)              :: s1k2     !< water level s1(k2).
+      double precision, intent(in)              :: s1k1     !< water level s1(k1).
+      double precision, intent(in)              :: qL       !< discharge on flow link through structure.
+      double precision, intent(in)              :: auL      !< Flow area of structure.
+      double precision, intent(inout)           :: u1L      !< Flow velocity on flow link through structure.
       double precision, intent(in)              :: dxdt     !< dx/dt
-      double precision, intent(in), optional    :: Cz       !< Chezy value
-      double precision, intent(in), optional    :: lambda   !< extra resistance
-      double precision, intent(in), optional    :: hu       !< upstream water level
-      double precision, intent(in), optional    :: dx_struc !< crest length 
+      double precision, intent(in), optional    :: Cz       !< Chezy value, used for resistance on structure, see also ::dx_struc.
+      double precision, intent(in), optional    :: lambda   !< Extra resistance.
+      double precision, intent(in), optional    :: hu       !< upstream water level.
+      double precision, intent(in), optional    :: dx_struc !< Crest length (in flow direction), used only when lambda is 0 or absent. For resistance on structure.
       !
       ! Local variables
       !
