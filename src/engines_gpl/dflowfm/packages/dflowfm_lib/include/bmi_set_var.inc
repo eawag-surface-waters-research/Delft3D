@@ -418,4 +418,8 @@
   case("ba")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(ba))
      ba(:) = x_1d_double_ptr
+  case("md_pdffile")
+     md_pdffile = ''
+	 call c_f_pointer(xptr, x_0d_char_ptr, [MAXSTRLEN])
+	 md_pdffile = char_array_to_string(x_0d_char_ptr, strlen(x_0d_char_ptr))
   end select

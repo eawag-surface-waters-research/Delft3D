@@ -536,4 +536,7 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      ba(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("md_pdffile")
+     ! Does not apply to scalar variables
+     continue
   end select

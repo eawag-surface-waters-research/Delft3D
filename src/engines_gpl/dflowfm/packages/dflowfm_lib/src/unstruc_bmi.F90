@@ -54,6 +54,7 @@ module bmi
   use m_sediment
   use m_integralstats
   use gridoperations
+  use unstruc_model
 
   implicit none
 
@@ -1160,6 +1161,7 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
   character(kind=c_char), intent(in) :: c_var_name(*)
   type(c_ptr), value, intent(in) :: xptr
 
+  character(kind=c_char), dimension(:), pointer :: x_0d_char_ptr => null()
   real(c_double), pointer :: x_0d_double_ptr
 
   real(c_double), pointer :: x_1d_double_ptr(:)

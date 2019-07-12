@@ -288,6 +288,8 @@ select case(var_name)
     type_name = "double"
   case("ba")
     type_name = "double"
+  case("md_pdffile")
+    type_name = "char"
   case default
     type_name = ""
 end select

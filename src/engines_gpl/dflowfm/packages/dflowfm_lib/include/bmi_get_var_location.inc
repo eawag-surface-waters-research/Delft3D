@@ -288,6 +288,8 @@ select case(var_name)
     location_name = "face"
   case("ba")
     location_name = "face"
+  case("md_pdffile")
+    location_name = ""
   case default
     location_name = ""
 end select

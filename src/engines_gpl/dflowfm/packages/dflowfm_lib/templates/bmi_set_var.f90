@@ -31,7 +31,13 @@
 %for var in variables:
   case("${var['name']}")
      %if var['rank']==0:
+         %if var['type']=='char':
+     ${var['name']} = ''
+     call c_f_pointer(xptr, x_0d_char_ptr, [MAXSTRLEN])
+     ${var['name']} = char_array_to_string(x_0d_char_ptr, strlen(x_0d_char_ptr))
+         %else:
      call c_f_pointer(xptr, x_${var['rank']}d_${var['type']}_ptr)
+         %endif
      %else:
      call c_f_pointer(xptr, x_${var['rank']}d_${var['type']}_ptr, shape(${var['name']}))
      %endif

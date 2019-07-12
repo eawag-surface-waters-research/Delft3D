@@ -288,5 +288,7 @@
      x = c_loc(yz)
   case("ba") !<  [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
      x = c_loc(ba)
+  case("md_pdffile") !<  [-] process library file {"rank": 0}
+     x = c_loc(md_pdffile)
   end select
 

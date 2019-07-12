@@ -288,6 +288,8 @@
      rank = 1
   case("ba")
      rank = 1
+  case("md_pdffile")
+     rank = 0
   case default
      rank = 0
   end select

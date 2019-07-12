@@ -298,4 +298,6 @@
        shape(1) = ndx
     case("ba")
        shape(1) = ndx
+    case("md_pdffile")
+       shape(1) = 0
   end select
