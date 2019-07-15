@@ -61,7 +61,7 @@
      1             'DUMMY   ','TOTALRAD','EXPONENT','LINEAR  '/
       DATA BLANK /'        '/
       
-      real(8)      :: zoonut(nunuco,0), zook, zoogr, xmin, gramo1
+      real(8)      :: zoonut(mn,0:mg), zook, zoogr, xmin, gramo1
       integer      :: i, ioff, ineff, inpu, j, k, nimp
       integer      :: nuadco, nunuc2, ndec
 !
