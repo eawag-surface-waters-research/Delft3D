@@ -7302,7 +7302,7 @@ contains
      elseif (filetype == node_id) then
         
         ierr = findlink_by_nodeid(filename, m)
-        if (m==0) then
+        if (m <= 0) then
            errormessage = 'Unknown node id: '// trim(filename)
            return
         endif
