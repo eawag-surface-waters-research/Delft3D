@@ -8,6 +8,7 @@ using System.Text;
 
 namespace General.tests
 {
+
     #region meshgeom
     [StructLayout(LayoutKind.Sequential)]
     public struct meshgeom
@@ -53,9 +54,9 @@ namespace General.tests
 
     [StructLayout(LayoutKind.Sequential)]
     public struct meshgeomdim
-    {       
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        public IntPtr name;
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 255)]
+        public char[] name;
         public int dim;
         public int numnode;
         public int numedge;
@@ -123,7 +124,6 @@ namespace General.tests
     // Unmanaged memory bookeeping
     public class UnmanagedMemoryRegister : IDisposable
     {
-
         private readonly List<GCHandle> objectGarbageCollectHandles = new List<GCHandle>();
 
         public void Add(ref string str, ref IntPtr ptr)
@@ -159,16 +159,13 @@ namespace General.tests
 
         public void Add(ref meshgeomdim meshdim, ref meshgeom mesh)
         {
-            int idssize = 40;
-            int longnamessize = 80;
-            int namesize = 255;
             if (meshdim.numnode > 0)
             {
                 Add<double>(meshdim.numnode, ref mesh.nodex);
                 Add<double>(meshdim.numnode, ref mesh.nodey);
                 Add<double>(meshdim.numnode, ref mesh.nodez);
-                Add<char>(meshdim.numnode * idssize, ref mesh.nodeids);
-                Add<char>(meshdim.numnode * longnamessize, ref mesh.nodelongnames);
+                Add<char>(meshdim.numnode * IoNetcdfLibWrapper.idssize, ref mesh.nodeids);
+                Add<char>(meshdim.numnode * IoNetcdfLibWrapper.longnamessize, ref mesh.nodelongnames);
             }
 
             if (meshdim.numedge > 0)
@@ -195,8 +192,8 @@ namespace General.tests
                 Add<double>(meshdim.nnodes, ref mesh.nnodey);
                 Add<int>(meshdim.nnodes, ref mesh.branchidx);
                 Add<double>(meshdim.nnodes, ref mesh.branchoffsets);
-                Add<char>(meshdim.nnodes * idssize, ref mesh.nnodeids);
-                Add<char>(meshdim.nnodes * longnamessize, ref mesh.nnodelongnames);
+                Add<char>(meshdim.nnodes * IoNetcdfLibWrapper.idssize, ref mesh.nnodeids);
+                Add<char>(meshdim.nnodes * IoNetcdfLibWrapper.longnamessize, ref mesh.nnodelongnames);
             }
 
             if (meshdim.nbranches > 0)
@@ -205,8 +202,8 @@ namespace General.tests
                 Add<int>(meshdim.nbranches, ref mesh.nbranchgeometrynodes);
                 Add<int>(meshdim.nbranches * 2, ref mesh.nedge_nodes);
                 Add<int>(meshdim.nbranches, ref mesh.nbranchorder);
-                Add<char>(meshdim.nbranches * idssize, ref mesh.nbranchids);
-                Add<char>(meshdim.nbranches * longnamessize, ref mesh.nbranchlongnames);
+                Add<char>(meshdim.nbranches * IoNetcdfLibWrapper.idssize, ref mesh.nbranchids);
+                Add<char>(meshdim.nbranches * IoNetcdfLibWrapper.longnamessize, ref mesh.nbranchlongnames);
             }
 
             if (meshdim.ngeometry > 0)

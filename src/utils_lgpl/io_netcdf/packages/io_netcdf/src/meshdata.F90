@@ -46,7 +46,7 @@ integer, parameter :: ug_nameLen         = 255
 !> This is general data structures shared also by gridgeom
 type t_ug_meshgeom
 ! TODO: AvD: extend this to 3D (volumes)
-   character(len=ug_nameLen), pointer  :: meshname        => null()         !< Name of this mesh ! TODO: AvD: should this be in this data type?
+   character(len=ug_nameLen) :: meshname                !< Name of this mesh ! TODO: AvD: should this be in this data type?
    integer                   :: dim             = -1    !< Dimensionality of the mesh (1/2/3)
    integer                   :: numnode         = -1    !< Number of mesh nodes.
    integer                   :: numedge         = -1    !< Number of mesh edges (size of kn)
@@ -108,7 +108,7 @@ end type t_ug_meshgeom
 
 type, bind(C) :: c_t_ug_meshgeomdim
 
-   type(c_ptr)              :: meshname           !< Name of this mesh ! TODO: AvD: should this be in this data type?
+   character(len=ug_nameLen)  :: meshname           !< Name of this mesh ! TODO: AvD: should this be in this data type?
    integer(kind=c_int)      :: dim                !< Dimensionality of the mesh (1/2/3)
    integer(kind=c_int)      :: numnode            !< Number of mesh nodes.
    integer(kind=c_int)      :: numedge            !< Number of mesh edges.
@@ -214,8 +214,7 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomdim) result(ie
    character(len=ug_idsLen),          pointer :: nbranchids(:)      => null()                
    character(len=ug_idsLongNamesLen), pointer :: nbranchlongnames(:)=> null()
    character(len=ug_idsLen),          pointer :: nnodeids(:)        => null()                
-   character(len=ug_idsLongNamesLen), pointer :: nnodelongnames(:)  => null()   
-   character(len=ug_nameLen), pointer         :: meshname           => null()  
+   character(len=ug_idsLongNamesLen), pointer :: nnodelongnames(:)  => null()    
 
    ierr = 0
    !dimension variables
@@ -231,10 +230,7 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomdim) result(ie
    c_meshgeomdim%nbranches = meshgeom%nbranches       
    c_meshgeomdim%ngeometry = meshgeom%ngeometry
    c_meshgeomdim%epsg = meshgeom%epsg
-   
-   if (associated(meshname).and.c_associated(c_meshgeomdim%meshname)) then
-      call c_f_pointer(c_meshgeomdim%meshname, meshname)
-   endif
+   c_meshgeomdim%meshname = meshgeom%meshname
    
    !! array variables
    if (associated(meshgeom%edge_nodes).and.c_associated(c_meshgeom%edge_nodes)) then
@@ -427,10 +423,9 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
    meshgeom%nbranches = c_meshgeomdim%nbranches       
    meshgeom%ngeometry = c_meshgeomdim%ngeometry
    meshgeom%epsg = c_meshgeomdim%epsg
-   
+   meshgeom%meshname = c_meshgeomdim%meshname
    
    meshgeom%start_index =  c_meshgeom%start_index
-   if(c_associated(c_meshgeomdim%meshname)) call c_f_pointer(c_meshgeomdim%meshname, meshgeom%meshname)
    if(c_associated(c_meshgeom%edge_nodes)) call c_f_pointer(c_meshgeom%edge_nodes, meshgeom%edge_nodes, (/ 2, c_meshgeomdim%numedge /)) 
    if(c_associated(c_meshgeom%face_nodes)) call c_f_pointer(c_meshgeom%face_nodes, meshgeom%face_nodes, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
    if(c_associated(c_meshgeom%edge_faces)) call c_f_pointer(c_meshgeom%edge_faces, meshgeom%edge_faces, (/ 2, c_meshgeomdim%numedge /))
@@ -530,10 +525,10 @@ function t_ug_meshgeom_destructor(meshgeom) result(ierr)
    meshgeom%ngeometry       = -1    
    meshgeom%start_index     = -1 
    meshgeom%epsg            = -1 
+   meshgeom%meshname        = ''
    ierr = 0
 
    !nullify
-   meshgeom%meshname   => null()
    meshgeom%edge_nodes => null()
    meshgeom%face_nodes => null()
    meshgeom%edge_faces => null()

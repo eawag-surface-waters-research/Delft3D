@@ -291,7 +291,7 @@ namespace General.tests
         /// </summary>
         public const int idssize = 40;
         public const int longnamessize = 80;
-        public const int namesize = 256;
+        public const int namesize = 255;
         [StructLayout(LayoutKind.Sequential)]
         public struct interop_charinfo
         {

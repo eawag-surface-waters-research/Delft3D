@@ -271,7 +271,7 @@ namespace UGrid.tests
                 register.Add(ref networkBranchesidsBuffer, ref network.nbranchids);
                 register.Add(ref networkBrancheslongnamesBuffer, ref network.nbranchlongnames);
                 networkName = networkName.PadRight(IoNetcdfLibWrapper.namesize, ' ');
-                register.Add(ref networkName, ref networkdim.name);
+                networkdim.name = networkName.ToCharArray();
 
                 // Create the file, will not add any dataset 
                 var ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
@@ -315,7 +315,7 @@ namespace UGrid.tests
                 register.Add(ref nodeidsBuffer, ref mesh.nodeids);
                 register.Add(ref nodelongnamesBuffer, ref mesh.nodelongnames);
                 meshName = meshName.PadRight(IoNetcdfLibWrapper.namesize, ' ');
-                register.Add(ref meshName, ref meshdim.name);
+                meshdim.name = meshName.ToCharArray();
 
                 int meshid = 0;
                 ierr = wrapper.ionc_put_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh, ref meshdim);
@@ -374,7 +374,7 @@ namespace UGrid.tests
             // Write a 2d mesh using ionc_put_meshgeom
             string meshname = "my_mesh";
             meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
-            register.Add(ref meshname, ref meshdim.name);
+            meshdim.name = meshname.ToCharArray();
             int meshid = -1;
             int networkid = -1;
 
@@ -497,6 +497,9 @@ namespace UGrid.tests
                 int meshid = 1; //set an invalid meshid index, here we now is 1
                 int networkid = -1; //set an invalid index because we do not want to get the network information
                 var meshdim = new meshgeomdim();
+                string meshname = "";
+                meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
+                meshdim.name = meshname.ToCharArray();
                 ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref networkid, ref meshdim);
                 Assert.That(ierr, Is.EqualTo(0));
 
@@ -519,6 +522,72 @@ namespace UGrid.tests
                 }
             }
         }
+
+        //[Test]
+        //[Category("PutAndGetMeshGeom")]
+        //public void GetFirstMeshUsingMeshGeom()
+        //{
+        //    // Open a netcdf file
+        //    string c_path = TestHelper.TestFilesDirectoryPath() + @"\1_net.nc";
+        //    Assert.IsTrue(File.Exists(c_path));
+        //    int ioncid = -1;
+        //    int mode = 0; //read mode
+        //    var wrapper = new IoNetcdfLibWrapper();
+        //    var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+        //    Assert.That(ierr, Is.EqualTo(0));
+
+        //    // Get the mesh dimensions in meshdim
+        //    int existingMeshId = 1;
+        //    int existingNetworkId = -1;
+        //    var meshdim = new meshgeomdim();
+        //    string meshname = "";
+        //    meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
+        //    meshdim.name = meshname.ToCharArray();
+        //    ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref existingMeshId, ref existingNetworkId, ref meshdim);
+        //    Assert.That(ierr, Is.EqualTo(0));
+
+        //    // Allocate mesh
+        //    var mesh = new meshgeom();
+        //    var register = new UnmanagedMemoryRegister();
+        //    register.Add(ref meshdim, ref mesh);
+
+        //    // Get 0 based
+        //    mesh.startIndex = 0;
+        //    ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref existingMeshId, ref existingNetworkId, ref mesh);
+        //    Assert.That(ierr, Is.EqualTo(0));
+
+        //    // Close the file
+        //    ierr = wrapper.ionc_close(ref ioncid);
+        //    Assert.That(ierr, Is.EqualTo(0));
+
+        //    // Write file
+        //    int targetioncid = -1; //file id  
+        //    int targetmode = 1;    //create in write mode
+        //    string target_path = TestHelper.TestDirectoryPath() + @"\1_net_write.nc";
+        //    TestHelper.DeleteIfExists(target_path);
+        //    Assert.IsFalse(File.Exists(target_path));
+        //    ierr = wrapper.ionc_create(target_path, ref targetmode, ref targetioncid);
+        //    Assert.That(ierr, Is.EqualTo(0));
+        //    Assert.IsTrue(File.Exists(target_path));
+
+        //    // Write a 2d mesh using ionc_put_meshgeom
+        //    meshname = meshname.PadRight(IoNetcdfLibWrapper.namesize, ' ');
+        //    meshdim.name = meshname.ToCharArray();
+        //    int meshid = -1;
+        //    int networkid = -1;
+
+        //    ierr = wrapper.ionc_put_meshgeom(ref targetioncid, ref meshid, ref networkid, ref mesh, ref meshdim);
+        //    Assert.That(ierr, Is.EqualTo(0));
+
+        //    // Close the file
+        //    ierr = wrapper.ionc_close(ref targetioncid);
+        //    Assert.That(ierr, Is.EqualTo(0));
+
+        //    // Clean memory
+        //    register.Dispose();
+
+        //}
+
 
     }
 }
