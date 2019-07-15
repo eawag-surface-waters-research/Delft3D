@@ -92,6 +92,7 @@ module m_1d_structures
    interface AddStructure
       module procedure AddStructure_short
       module procedure AddStructureByCalcPoints
+      module procedure AddStructureByBranchLocation
    end interface
 
    interface getTableValue
@@ -313,6 +314,52 @@ module m_1d_structures
 
       AddStructureByCalcPoints = sts%count
    end function AddStructureByCalcPoints
+
+   integer function AddStructureByBranchLocation(sts, brs, ibranch, chainage, icompound, compoundName, id, structureType)
+      ! Modules
+
+      implicit none
+
+      ! Input/output parameters
+      integer              :: ibranch
+      double precision                 :: chainage
+      character(*)         :: id
+
+      integer              :: icompound
+      character(*)         :: compoundName
+      
+      type(t_StructureSet) :: sts
+      type(t_BranchSet)    :: brs
+      integer              :: structureType
+      ! Local variables
+      integer              :: leftcalc
+      integer              :: rightcalc
+      integer              :: ilink
+
+      ! Local variables
+      integer              :: i, j
+
+      type(t_structure), pointer       :: pstru
+
+      ! Program code
+      sts%Count = sts%Count+1
+      i = sts%Count
+      if (sts%Count > sts%Size) then
+         call realloc(sts)
+      endif
+      call incStructureCount(sts, structureType)
+
+      sts%struct(i)%id                 = id
+      sts%struct(i)%chainage           = chainage
+      sts%struct(i)%compound           = icompound
+      sts%struct(i)%compoundName       = compoundName
+      sts%struct(i)%type            = structureType
+      sts%struct(i)%ibran = ibranch
+
+      AddStructureByBranchLocation = sts%count
+      
+   end function AddStructureByBranchLocation
+
 
    !> Increments the counter for a specific type in the overall structure set.
    subroutine incStructureCount(sts, type)
