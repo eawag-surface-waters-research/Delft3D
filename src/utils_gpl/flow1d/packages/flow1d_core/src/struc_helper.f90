@@ -60,8 +60,8 @@ module m_struc_helper
       double precision, intent(in)    :: crest         !< Crest level.
       double precision, intent(  out) :: hd            !< Downstream water level.
       double precision, intent(  out) :: hu            !< Upstream water level.
-      double precision, intent(  out) :: rholeft       !< Water density at geometrical left side of structure (unimplemented).
-      double precision, intent(  out) :: rhoright      !< Water density at right side of structure (unimplemented).
+      double precision, intent(  out) :: rholeft       !< Water density at flow link's  left side of structure (unimplemented).
+      double precision, intent(  out) :: rhoright      !< Water density at flow link's right side of structure (unimplemented).
       double precision, intent(  out) :: flowdir       !< Flow direction 1 positive direction, -1 negative direction.
       double precision, intent(  out) :: ud            !< Downstream velocity.
       double precision, intent(  out) :: uu            !< Upstream velocity.
@@ -71,7 +71,7 @@ module m_struc_helper
       !
       double precision               :: eld
       double precision               :: elu
-       double precision               :: temp
+      double precision               :: temp
       !
       !
       !! executable statements -------------------------------------------------------
