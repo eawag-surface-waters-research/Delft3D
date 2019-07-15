@@ -38,6 +38,12 @@ module m_General_Structure
    double precision            :: eps = 1d-5
 
    public ComputeGeneralStructure
+   public dealloc
+
+   interface dealloc
+      module procedure deallocGenstru
+   end interface dealloc
+
 
    type, public :: t_GeneralStructure ! see flgtar.f90
       double precision                 :: widthleftW1                   !< w_u1
@@ -63,13 +69,13 @@ module m_General_Structure
       double precision                 :: neg_contrcoeffreegate         !< Negative flow contraction coefficient function 
       double precision                 :: extraresistance               !< Extra resistance
       double precision                 :: gatedoorheight                !< height of the doors
-      double precision                 :: dooropeningwidth              !< width between the doors
-      double precision                 :: crest_length = 0d0            !< length of the crest for computing the extra resistance using bedfriction over the crest of the weir
-      double precision, allocatable    :: widthcenteronlink(:)          !< For each crossed flow link the the center width portion of this genstr. (sum(widthcenteronlink(1:numlink)) should equal widthcenter)
-      double precision, allocatable    :: gateclosedfractiononlink(:)   !< part of the link width that is closed by the gate
-      double precision, allocatable    :: fu(:,:)                       !< fu(1:3,L0) contains the partial computational value for fu
-      double precision, allocatable    :: ru(:,:)                       !< ru(1:3,L0) contains the partial computational value for ru
-      double precision, allocatable    :: au(:,:)                       !< au(1:3,L0) contains the partial computational value for au
+      double precision                 :: gateopeningwidth              !< width between the doors
+      double precision                 :: crestlength                   !< length of the crest for computing the extra resistance using bedfriction over the crest of the weir
+      double precision, pointer        :: widthcenteronlink(:)          !< For each crossed flow link the the center width portion of this genstr. (sum(widthcenteronlink(1:numlink)) should equal widthcenter)
+      double precision, pointer        :: gateclosedfractiononlink(:)   !< part of the link width that is closed by the gate
+      double precision, pointer        :: fu(:,:)                       !< fu(1:3,L0) contains the partial computational value for fu
+      double precision, pointer        :: ru(:,:)                       !< ru(1:3,L0) contains the partial computational value for ru
+      double precision, pointer        :: au(:,:)                       !< au(1:3,L0) contains the partial computational value for au
       integer                          :: numlinks                      !< Nr of flow links that cross this generalstructure.
       logical                          :: velheight                     !< Flag indicates the use of the velocity height or not
    end type
@@ -94,7 +100,7 @@ contains
       double precision, intent(in)                 :: as1           !< (geometrical) upstream flow area.
       double precision, intent(in)                 :: as2           !< (geometrical) downstream flow area.
       double precision, intent(out)                :: dadsL         !< flow width of structure
-      integer, intent(in)                          :: L0            !< local link number
+      integer, intent(in)                          :: L0            !< local link index
       integer, intent(out)                         :: kfuL          !< Flag indicating whether the structure link is wet (=1) or not (=0)
       double precision, intent(in)                 :: s1m1          !< (geometrical) upstream water level
       double precision, intent(in)                 :: s1m2          !< (geometrical) downstream water level
@@ -161,7 +167,7 @@ contains
       dsL   = s1m2 - s1m1 
        
       crest = genstr%levelcenter
-      dx_struc = genstr%crest_length
+      dx_struc = genstr%crestlength
       
       velheight = genstr%velheight
       !
@@ -980,5 +986,19 @@ contains
       !
       GS_dpsequ = abs(dvar1 - dvar2)<eps
    end function GS_dpsequ
-
+   
+   !> deallocate general structure pointer
+   subroutine deallocGenstru(genstru)
+      implicit none
+      
+      type(t_GeneralStructure), pointer, intent(inout) :: genstru !< pointer to general structure data type
+      
+      if (associated(genstru%widthcenteronlink       )) deallocate(genstru%widthcenteronlink       )
+      if (associated(genstru%gateclosedfractiononlink)) deallocate(genstru%gateclosedfractiononlink)
+      if (associated(genstru%fu                      )) deallocate(genstru%fu                    )
+      if (associated(genstru%ru                      )) deallocate(genstru%ru                    )
+      if (associated(genstru%au                      )) deallocate(genstru%au                    )
+      deallocate(genstru)
+   end subroutine deallocGenstru
+   
 end module m_General_Structure
