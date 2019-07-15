@@ -508,7 +508,7 @@ module m_readstructures
                read(ibin) pstr%generalst%cgd_neg
                read(ibin) pstr%generalst%cwf_pos
                read(ibin) pstr%generalst%cwd_neg
-               read(ibin) pstr%generalst%neg_contrcoeffreegate
+               read(ibin) pstr%generalst%mugf_neg
                read(ibin) pstr%generalst%extraresistance
             
             case(ST_EXTRA_RES)
