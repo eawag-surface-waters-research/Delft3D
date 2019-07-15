@@ -141,8 +141,8 @@ enum, bind(C)
 enumerator::mid_start = 1
 !1d variables
 enumerator mid_1dtopo                     !< The network used by this topology
-enumerator mid_1dmeshtobranch             !< Variable ID for 1d branches ids of each mesh point 
-enumerator mid_1doffset                   !< Coordinate variable ID for mesh offsets
+enumerator mid_1dnodebranch               !< Variable ID for 1d branches ids of each mesh point 
+enumerator mid_1dnodeoffset               !< Coordinate variable ID for mesh offsets
 !2d variables
 enumerator mid_meshtopo                    !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
 enumerator mid_edgenodes                   !< Variable ID for edge-to-node mapping table.
@@ -1072,7 +1072,7 @@ function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids
                                meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, & 
                                meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%ngeometry, &
                                meshgeom%nbranchorder, &
-                               nodeids, nodelongnames, meshgeom%branchidx, meshgeom%branchoffsets)
+                               nodeids, nodelongnames, meshgeom%nodebranchidx, meshgeom%nodeoffsets)
    
 end function ug_write_mesh_struct
 
@@ -1087,7 +1087,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                               sourceNodeId, targetNodeId, nbranchids, nbranchlongnames, nbranchlengths, nbranchgeometrynodes, nbranches, &
                               ngeopointx, ngeopointy, ngeometry, &
                               nbranchorder, &
-                              nodeids, nodelongnames, branchidx, branchoffsets, &
+                              nodeids, nodelongnames, nodebranchidx, nodeoffsets, &
                               writeopts) result(ierr)
    use m_alloc
    use string_module
@@ -1128,8 +1128,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    character(len=ug_idsLongNamesLen), optional, allocatable  :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:) 
    character(len=*), optional                                :: network1dname
    ! Optional mesh1d variables for 1d UGrid
-   integer, optional, pointer,intent(in)                     :: branchidx(:)
-   double precision, optional, pointer,intent(in)            :: branchoffsets(:)
+   integer, optional, pointer,intent(in)                     :: nodebranchidx(:) !< Branch indexes for each mesh1d node.
+   double precision, optional, pointer,intent(in)            :: nodeoffsets(:)   !< Offset along branch on which each mesh1d node lies.
    integer,                           optional, intent(in)   :: writeopts !< integer option, currently only: UG_WRITE_LATLON
    
    integer                                               :: ierr !< Result status (UG_NOERR==NF90_NOERR) if successful.
@@ -1258,7 +1258,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
              ierr = ug_create_1d_mesh_v1(ncid, network1dname, meshids, meshname, numNode, 1)
              ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
         endif
-      endif	
+      endif
    endif
    
    if (ierr /= UG_NOERR) then
@@ -1459,21 +1459,21 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       endif
       ! write mesh1d
       if (lengthofnetworkname.gt.0) then
-	    if (present(branchidx) .and. associated(branchidx)) then
-			ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, branchoffsets, start_index, xn, yn)
-		endif
+        if (present(nodebranchidx) .and. associated(nodebranchidx)) then
+            ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, nodeoffsets, start_index, xn, yn)
+        endif
         !write node ids and node long names
         if (present(nodeids) .and. allocated(nodeids)) then
-			ierr = nf90_put_var(ncid, meshids%varids(mid_node_ids), nodeids)
-		endif
+            ierr = nf90_put_var(ncid, meshids%varids(mid_node_ids), nodeids)
+        endif
         if (present(nodelongnames).and.allocated(nodelongnames)) then
-			ierr = nf90_put_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
-		endif
-	  endif
+            ierr = nf90_put_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
+        endif
+      endif
       ! always write edge nodes
-	  if (meshids%varids(mid_edgenodes).ne.-1) then
+      if (meshids%varids(mid_edgenodes).ne.-1) then
          ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))
-	  endif
+      endif
    end if
 
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
@@ -2047,7 +2047,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       !inquire the variable with that name 
       ierr = att_to_varid(ncid, varid, 'coordinate_space', meshids%varids(mid_1dtopo))
       !read branch id and offsets
-      ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', meshids%varids(mid_1dmeshtobranch), meshids%varids(mid_1doffset))
+      ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', meshids%varids(mid_1dnodebranch), meshids%varids(mid_1dnodeoffset))
    end if
 
    !
@@ -2695,6 +2695,7 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
             call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)            
             ! Edge nodes
             ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes, meshgeom%start_index)
+
          endif
 
 
@@ -2719,9 +2720,9 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
 
          if (meshgeom%dim == 1) then
             !Mesh variables
-            call reallocP(meshgeom%branchidx, meshgeom%numnode, keepExisting = .false., fill = -999)
-            call reallocP(meshgeom%branchoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
-            ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%start_index)
+            call reallocP(meshgeom%nodebranchidx, meshgeom%numnode, keepExisting = .false., fill = -999)
+            call reallocP(meshgeom%nodeoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
+            ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%start_index)
             !Here i can not use gridgeom to get xy coordinates of the mesh1d (gridgeom depends on io_netcdf)
             
             if (present(network1dname)) then
@@ -3850,12 +3851,12 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    endif
    
    ! 1. mesh1D :assign the branch number to each node
-   ierr = nf90_def_var(ncid, prefix//'_nodes_branch_id', nf90_int, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dmeshtobranch))
-   ierr = nf90_put_att(ncid, meshids%varids(mid_1dmeshtobranch), 'long_name', 'Number of the branch on which the node is located')
+   ierr = nf90_def_var(ncid, prefix//'_nodes_branch_id', nf90_int, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dnodebranch))
+   ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodebranch), 'long_name', 'Number of the branch on which the node is located')
    ! 2. mesh1D :assign the the offset from the starting node
-   ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1doffset))
-   ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'long_name', 'Offset along the branch at which the node is located')   
-   ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'units', 'm')   
+   ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dnodeoffset))
+   ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodeoffset), 'long_name', 'Offset along the branch at which the node is located')   
+   ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodeoffset), 'units', 'm')   
    
    if (writexy == 1) then
        ierr = nf90_def_var(ncid, prefix//'_node_x', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodex))
@@ -4217,28 +4218,28 @@ end function ug_write_1d_network_branches_geometry
 
 
 !> This function writes the mesh points
-function ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset, startIndex) result(ierr)
+function ug_put_1d_mesh_discretisation_points(ncid, meshids, nodebranchidx, nodeoffset, startIndex) result(ierr)
 
-   integer, intent(in)                :: ncid, branchidx(:), startIndex
-   double precision, intent(in)       :: offset(:)
+   integer, intent(in)                :: ncid, nodebranchidx(:), startIndex
+   double precision, intent(in)       :: nodeoffset(:)
    type(t_ug_mesh), intent(in)        :: meshids 
    
-   integer,          allocatable      :: shiftedBranchidx(:), shiftedEdgeNodes(:,:)
+   integer,          allocatable      :: shiftednodebranchidx(:), shiftedEdgeNodes(:,:)
    integer                            :: ierr,nmeshpoints
 
    ierr = UG_SOMEERR
-   ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, offset, startIndex) 
+   ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, nodeoffset, startIndex) 
 
 end function ug_put_1d_mesh_discretisation_points
 
 !> This function writes the mesh points
-function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, offset, startIndex, coordx, coordy) result(ierr)
+function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, nodeoffset, startIndex, coordx, coordy) result(ierr)
    use array_module
-   integer, intent(in)                                  :: ncid, branchidx(:), startIndex
-   double precision, intent(in)                         :: offset(:)
+   integer, intent(in)                                  :: ncid, nodebranchidx(:), startIndex
+   double precision, intent(in)                         :: nodeoffset(:)
    type(t_ug_mesh), intent(in)                          :: meshids 
    double precision, dimension(:), optional, intent(in) :: coordx, coordy 
-   integer, allocatable                                 :: shiftedBranchidx(:), shiftedEdgeNodes(:,:)
+   integer, allocatable                                 :: shiftednodebranchidx(:), shiftedEdgeNodes(:,:)
    integer                                              :: ierr,nmeshpoints
 
    ierr = UG_SOMEERR
@@ -4250,14 +4251,14 @@ function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, offse
    end if
    
    !we have not defined the start_index, so when we put the variable it must be zero based
-   allocate(shiftedBranchidx(size(branchidx)))
-   shiftedBranchidx = branchidx
+   allocate(shiftednodebranchidx(size(nodebranchidx)))
+   shiftednodebranchidx = nodebranchidx
    if (startIndex.ne.-1) then
-       ierr = convert_start_index(shiftedBranchidx, imiss, startIndex, 0)
+       ierr = convert_start_index(shiftednodebranchidx, imiss, startIndex, 0)
    endif
 
-   ierr = nf90_put_var(ncid, meshids%varids(mid_1dmeshtobranch), shiftedBranchidx)
-   ierr = nf90_put_var(ncid, meshids%varids(mid_1doffset), offset)
+   ierr = nf90_put_var(ncid, meshids%varids(mid_1dnodebranch), shiftednodebranchidx)
+   ierr = nf90_put_var(ncid, meshids%varids(mid_1dnodeoffset), nodeoffset)
    
    if( present(coordx) .and. present(coordy) ) then
       ierr = nf90_put_var(ncid, meshids%varids(mid_nodex), coordx)
@@ -4454,63 +4455,63 @@ function ug_get_1d_mesh_discretisation_points_count(ncid, meshids, nmeshpoints) 
 end function ug_get_1d_mesh_discretisation_points_count
 
 !> This function reads the geometry information for the mesh points
-function ug_get_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets, startIndex) result(ierr)
+function ug_get_1d_mesh_discretisation_points(ncid, meshids, nodebranchidx, nodeoffsets, startIndex) result(ierr)
    use array_module
    integer, intent(in)                      :: ncid, startIndex
    type(t_ug_mesh), intent(in)              :: meshids 
-   real(kind=dp),   intent(out)             :: offsets(:)
-   integer,intent(out)                      :: branchidx(:)
+   real(kind=dp),   intent(out)             :: nodeoffsets(:)
+   integer,intent(out)                      :: nodebranchidx(:)
    integer                                  :: ierr,varStartIndex
          
-   ierr = nf90_get_var(ncid, meshids%varids(mid_1dmeshtobranch), branchidx)
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodebranch), nodebranchidx)
 
    !we check for the start_index, we do not know if the variable was written as 0 based
-   ierr = nf90_get_att(ncid, meshids%varids(mid_1dmeshtobranch),'start_index', varStartIndex)
+   ierr = nf90_get_att(ncid, meshids%varids(mid_1dnodebranch),'start_index', varStartIndex)
    if (ierr .eq. UG_NOERR) then
-        ierr = convert_start_index(branchidx, imiss, varStartIndex, startIndex)
+        ierr = convert_start_index(nodebranchidx, imiss, varStartIndex, startIndex)
    else
-        ierr = convert_start_index(branchidx, imiss, 0, startIndex)
+        ierr = convert_start_index(nodebranchidx, imiss, 0, startIndex)
    endif
    
    !define dim
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'could not read the branch ids')
    end if 
-   ierr = nf90_get_var(ncid, meshids%varids(mid_1doffset), offsets)
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodeoffset), nodeoffsets)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the branch offsets')
+       Call SetMessage(Level_Fatal, 'could not read the node offsets')
    end if 
     
 end function  ug_get_1d_mesh_discretisation_points
 
 !> This function reads the geometry information for the mesh points
-function ug_get_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, offsets, startIndex, coordx, coordy) result(ierr)
+function ug_get_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, nodeoffsets, startIndex, coordx, coordy) result(ierr)
    use array_module
    integer, intent(in)                      :: ncid, startIndex
    type(t_ug_mesh), intent(in)              :: meshids 
-   real(kind=dp),   intent(out)             :: offsets(:)
-   integer,intent(out)                      :: branchidx(:)
+   real(kind=dp),   intent(out)             :: nodeoffsets(:)
+   integer,intent(out)                      :: nodebranchidx(:)
    
    real(kind=dp),   intent(out), optional   :: coordx(:), coordy(:) 
    integer                                  :: ierr,varStartIndex
          
-   ierr = nf90_get_var(ncid, meshids%varids(mid_1dmeshtobranch), branchidx)
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodebranch), nodebranchidx)
 
    !we check for the start_index, we do not know if the variable was written as 0 based
-   ierr = nf90_get_att(ncid, meshids%varids(mid_1dmeshtobranch),'start_index', varStartIndex)
+   ierr = nf90_get_att(ncid, meshids%varids(mid_1dnodebranch),'start_index', varStartIndex)
    if (ierr .eq. UG_NOERR) then
-        ierr = convert_start_index(branchidx, imiss, varStartIndex, startIndex)
+        ierr = convert_start_index(nodebranchidx, imiss, varStartIndex, startIndex)
    else
-        ierr = convert_start_index(branchidx, imiss, 0, startIndex)
+        ierr = convert_start_index(nodebranchidx, imiss, 0, startIndex)
    endif
    
    !define dim
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'could not read the branch ids')
    end if 
-   ierr = nf90_get_var(ncid, meshids%varids(mid_1doffset), offsets)
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodeoffset), nodeoffsets)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the branch offsets')
+       Call SetMessage(Level_Fatal, 'could not read the node offsets')
    end if 
    
    if(present(coordx)) then
