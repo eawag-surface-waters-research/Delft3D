@@ -214,8 +214,8 @@ module m_1d_networkreader
    if (.not.associated(meshgeom%nodey)) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodey')
    endif
-   if (.not.associated(meshgeom%branchoffsets)) then
-      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%branchoffsets')
+   if (.not.associated(meshgeom%nodeoffsets)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodeoffsets')
    endif
    if (.not.allocated(gpsID)) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in gpsID')
@@ -239,7 +239,7 @@ module m_1d_networkreader
    else
       jsferic = 0
    endif
-   ierr = ggeo_get_xy_coordinates(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
+   ierr = ggeo_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
       meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, gpsX, gpsY)
    if (ierr .ne. 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data')
@@ -253,7 +253,7 @@ module m_1d_networkreader
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Branches')
    endif
 
-   ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%branchidx, gpFirst, gpLast)
+   ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%nodebranchidx, gpFirst, gpLast)
    if (ierr .ne. 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
    endif
@@ -270,10 +270,10 @@ module m_1d_networkreader
             cycle
          endif
          do inode = firstNode, lastNode
-            if(meshgeom%branchoffsets(inode)<snapping_tolerance) then
+            if(meshgeom%nodeoffsets(inode)<snapping_tolerance) then
                idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran))(1:len_trim(gpsID(inode))) = gpsID(inode)(1:len_trim(gpsID(inode)))
             endif
-            if(abs(meshgeom%branchoffsets(inode)-meshgeom%nbranchlengths(ibran))<snapping_tolerance) then
+            if(abs(meshgeom%nodeoffsets(inode)-meshgeom%nbranchlengths(ibran))<snapping_tolerance) then
                idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran))(1:len_trim(gpsID(inode))) = gpsID(inode)(1:len_trim(gpsID(inode)))
             endif
          enddo
@@ -305,7 +305,7 @@ module m_1d_networkreader
       else
          localOffsets = 0d0
          gridPointsCount                 = lastNode - firstNode + 1
-         localOffsets(1:gridPointsCount) = meshgeom%branchoffsets(firstNode:lastNode)
+         localOffsets(1:gridPointsCount) = meshgeom%nodeoffsets(firstNode:lastNode)
          localGpsX(1:gridPointsCount)    = gpsX(firstNode:lastNode)
          localGpsY(1:gridPointsCount)    = gpsY(firstNode:lastNode)
          localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)

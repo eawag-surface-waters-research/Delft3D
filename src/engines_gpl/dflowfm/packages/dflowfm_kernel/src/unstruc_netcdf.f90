@@ -9111,7 +9111,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
          xe(Lnew) = .5d0*(xk(K1) + xk(K2)) ! TODO: AvD: make this sferic+3D-safe
          ye(Lnew) = .5d0*(yk(K1) + yk(K2)) ! TODO: AvD: make this sferic+3D-safe
       enddo
-      
+
       if (associated(meshgeom1d%ngeopointx)) then
          if (meshgeom1d%numnode .ge. 0) then ! TODO: LC:  check the number of mesh nodes has not changed 
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, numl1d, 0, 0, &
@@ -9121,7 +9121,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
                                     meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                     meshgeom1d%nbranchorder, &
-                                    nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets)
+                                    nodeids, nodelongnames, meshgeom1d%nodebranchidx, meshgeom1d%nodeoffsets)
          else
                call mess(LEVEL_ERROR, 'Could not put header in net geometry file.')
                return
@@ -9603,7 +9603,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       else
          ! 1d part
          koffset1dmesh = numk_last
-         ierr = odu_get_xy_coordinates(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, meshgeom%nodeX, meshgeom%nodeY)
+         ierr = odu_get_xy_coordinates(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, meshgeom%nodeX, meshgeom%nodeY)
          XK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeX
          YK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeY
          network%numk = meshgeom%numnode
@@ -9614,10 +9614,10 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          endif
          ! get the edge nodes, usually not available (needs to be generated)
          if (meshgeom%numedge.eq.-1) then
-            ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)
+            ierr = ggeo_count_or_create_edge_nodes(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)
             call reallocP(meshgeom%edge_nodes,(/ 2, meshgeom%numedge /), keepExisting = .false.)
             meshgeom%edge_nodes = 0
-            ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge, meshgeom%edge_nodes)
+            ierr = ggeo_count_or_create_edge_nodes(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge, meshgeom%edge_nodes)
          endif
          network%numl = meshgeom%numedge
       endif
@@ -12067,7 +12067,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                        meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                        meshgeom1d%nbranchorder, &
-                                       nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets,&
+                                       nodeids, nodelongnames, meshgeom1d%nodebranchidx, meshgeom1d%nodeoffsets,&
                                        writeopts=unc_writeopts)
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &

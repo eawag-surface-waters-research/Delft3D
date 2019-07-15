@@ -3274,17 +3274,17 @@
    end function ggeo_get_links
 
    !< create meshgeom from array
-   function ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchidx, sourcenodeid, targetnodeid, meshgeom, startindex) result(ierr)
+   function ggeo_convert_1d_arrays(nodex, nodey, nodeoffset, branchlength, nodebranchidx, sourcenodeid, targetnodeid, meshgeom, startindex) result(ierr)
 
    use meshdata
    use odugrid
    use m_alloc
 
-   double precision, intent(in)         :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
-   integer, intent(in)                  :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
+   double precision, intent(in)         :: nodex(:), nodey(:), nodeoffset(:), branchlength(:)
+   integer, intent(in)                  :: nodebranchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
    integer                              :: ierr, nbranches, branch, numkUnMerged, numk, numl, st, en, stn, enn, stnumk, ennumk, k, numNetworkNodes, firstvalidarraypos, numINodes
-   integer, allocatable                 :: networkNodesUnmerged(:), meshnodemapping(:,:), edge_nodes(:,:), correctedBranchidx(:), nodeids(:)
+   integer, allocatable                 :: networkNodesUnmerged(:), meshnodemapping(:,:), edge_nodes(:,:), correctedNodeBranchidx(:), nodeids(:)
    double precision, allocatable        :: xk(:), yk(:)
 
    !initial size
@@ -3294,7 +3294,7 @@
       firstvalidarraypos = 1
    endif
    nbranches       = size(sourcenodeid)
-   numkUnMerged    = size(branchidx,1)
+   numkUnMerged    = size(nodebranchidx,1)
    numNetworkNodes = max(maxval(sourcenodeid) + firstvalidarraypos, maxval(targetnodeid) + firstvalidarraypos)
    
    ! allocate enough space for temp arrays
@@ -3303,7 +3303,7 @@
    allocate(nodeids(numkUnMerged))
    allocate(networkNodesUnmerged(numNetworkNodes)); networkNodesUnmerged = 0
    allocate(edge_nodes(2,numkUnMerged*3)) !rough estimate of the maximum number of edges given a certain amount of nodes
-   allocate(correctedBranchidx(numkUnMerged))
+   allocate(correctedNodeBranchidx(numkUnMerged))
    allocate(meshnodemapping(2,nbranches)); meshnodemapping = -1
 
    !check if mesh1dMergedToUnMergedGridGeom is already allocated
@@ -3319,8 +3319,8 @@
    allocate(mesh1dUnMergedToMergedGridGeom(numkUnMerged))
    
    !map the mesh nodes
-   correctedBranchidx = branchidx + firstvalidarraypos
-   ierr = odu_get_start_end_nodes_of_branches(correctedBranchidx, meshnodemapping(1,:), meshnodemapping(2,:))
+   correctedNodeBranchidx = nodebranchidx + firstvalidarraypos
+   ierr = odu_get_start_end_nodes_of_branches(correctedNodeBranchidx, meshnodemapping(1,:), meshnodemapping(2,:))
 
    !do the merging
    numk = 0
@@ -3390,10 +3390,10 @@
 
    allocate(meshgeom%nodex(numk))
    allocate(meshgeom%nodey(numk))
-   allocate(meshgeom%branchidx(numkUnMerged))
+   allocate(meshgeom%nodebranchidx(numkUnMerged))
    allocate(meshgeom%edge_nodes(2, numl))
 
-   meshgeom%branchidx  = branchidx
+   meshgeom%nodebranchidx  = nodebranchidx
    meshgeom%nodex      = xk(1:numk)
    meshgeom%nodey      = yk(1:numk)
    meshgeom%edge_nodes = edge_nodes(:,1:numl)
@@ -3404,7 +3404,7 @@
    deallocate(nodeids)
    deallocate(networkNodesUnmerged)
    deallocate(edge_nodes) !rough estimate of the maximum number of edges given a certain amount of nodes
-   deallocate(correctedBranchidx)
+   deallocate(correctedNodeBranchidx)
    deallocate(meshnodemapping)
 
    end function ggeo_convert_1d_arrays

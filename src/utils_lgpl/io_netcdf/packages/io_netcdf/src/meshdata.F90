@@ -82,8 +82,8 @@ type t_ug_meshgeom
    integer,                           pointer :: nbranchorder(:)         => null()   !< the branch order
    
    !Mesh1d variables
-   integer,                           pointer :: branchidx(:)      => null()           !< The branch index of each 1d mesh point
-   double precision,                  pointer :: branchoffsets(:)  => null()           !< The branch offset of each 1d mesh point
+   integer,                           pointer :: nodebranchidx(:)  => null()           !< The branch index of each 1d mesh point
+   double precision,                  pointer :: nodeoffsets(:)    => null()           !< The branch offset of each 1d mesh point
    character(len=ug_idsLen),          pointer :: nodeids(:)        => null()                
    character(len=ug_idsLongNamesLen), pointer :: nodelongnames(:)  => null()
    character(len=ug_idsLen),          pointer :: branchids(:)      => null()                
@@ -141,8 +141,8 @@ type, bind(C) :: c_t_ug_meshgeom
    type(c_ptr)  :: ngeopointx             !< x-coordinates of geometry points.
    type(c_ptr)  :: ngeopointy             !< y-coordinates of geometry points.
    type(c_ptr)  :: nbranchorder           !< the branch order
-   type(c_ptr)  :: branchidx              !< The branch index of each 1d mesh point
-   type(c_ptr)  :: branchoffsets          !< The branch offset of each 1d mesh point
+   type(c_ptr)  :: nodebranchidx              !< The branch index of each 1d mesh point
+   type(c_ptr)  :: nodeoffsets          !< The branch offset of each 1d mesh point
    
    type(c_ptr) :: nodex                   !< x-coordinates of the mesh nodes.
    type(c_ptr) :: nodey                   !< y-coordinates of the mesh nodes.
@@ -193,8 +193,8 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomdim) result(ie
    double precision, pointer :: ngeopointy(:)   => null() 
    integer,          pointer :: nbranchorder(:) => null()   
    !Mesh1d variables
-   integer,          pointer :: branchidx(:) => null()    !< Branch id of each mesh node 
-   double precision, pointer :: branchoffsets(:)=> null() !< Branch offset of each mesh node
+   integer,          pointer :: nodebranchidx(:) => null()    !< Branch id of each mesh node 
+   double precision, pointer :: nodeoffsets(:)=> null() !< Branch offset of each mesh node
    
    double precision, pointer :: nodex(:) => null()       !< x-coordinates of the mesh nodes.
    double precision, pointer :: nodey(:) => null()      !< y-coordinates of the mesh nodes.
@@ -304,14 +304,14 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomdim) result(ie
    endif
    
    !Mesh1d
-   if (associated(meshgeom%branchidx).and.c_associated(c_meshgeom%branchidx)) then
-      call c_f_pointer(c_meshgeom%branchidx, branchidx, shape(meshgeom%branchidx))
-      branchidx = meshgeom%branchidx
+   if (associated(meshgeom%nodebranchidx).and.c_associated(c_meshgeom%nodebranchidx)) then
+      call c_f_pointer(c_meshgeom%nodebranchidx, nodebranchidx, shape(meshgeom%nodebranchidx))
+      nodebranchidx = meshgeom%nodebranchidx
    endif
       
-   if (associated(meshgeom%branchoffsets).and.c_associated(c_meshgeom%branchoffsets)) then
-      call c_f_pointer(c_meshgeom%branchoffsets, branchoffsets, shape(meshgeom%branchoffsets))
-      branchoffsets = meshgeom%branchoffsets
+   if (associated(meshgeom%nodeoffsets).and.c_associated(c_meshgeom%nodeoffsets)) then
+      call c_f_pointer(c_meshgeom%nodeoffsets, nodeoffsets, shape(meshgeom%nodeoffsets))
+      nodeoffsets = meshgeom%nodeoffsets
    endif
                
    !mesh nodes
@@ -446,8 +446,8 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
    if(c_associated(c_meshgeom%ngeopointx)) call c_f_pointer(c_meshgeom%ngeopointx, meshgeom%ngeopointx, (/ c_meshgeomdim%ngeometry/))
    if(c_associated(c_meshgeom%ngeopointy)) call c_f_pointer(c_meshgeom%ngeopointy, meshgeom%ngeopointy, (/ c_meshgeomdim%ngeometry/))   
    if(c_associated(c_meshgeom%nbranchorder)) call c_f_pointer(c_meshgeom%nbranchorder, meshgeom%nbranchorder, (/ c_meshgeomdim%nbranches/))   
-   if(c_associated(c_meshgeom%branchidx)) call c_f_pointer(c_meshgeom%branchidx, meshgeom%branchidx, (/ c_meshgeomdim%numnode/))
-   if(c_associated(c_meshgeom%branchoffsets)) call c_f_pointer(c_meshgeom%branchoffsets, meshgeom%branchoffsets, (/ c_meshgeomdim%numnode /))   
+   if(c_associated(c_meshgeom%nodebranchidx)) call c_f_pointer(c_meshgeom%nodebranchidx, meshgeom%nodebranchidx, (/ c_meshgeomdim%numnode/))
+   if(c_associated(c_meshgeom%nodeoffsets)) call c_f_pointer(c_meshgeom%nodeoffsets, meshgeom%nodeoffsets, (/ c_meshgeomdim%numnode /))   
    
    if(c_associated(c_meshgeom%nodex)) call c_f_pointer(c_meshgeom%nodex, meshgeom%nodex,(/c_meshgeomdim%numnode/))
    if(c_associated(c_meshgeom%nodey)) call c_f_pointer(c_meshgeom%nodey, meshgeom%nodey,(/c_meshgeomdim%numnode/))
@@ -495,8 +495,8 @@ function t_ug_meshgeom_destructor(meshgeom) result(ierr)
    if(associated(meshgeom%ngeopointy)) deallocate(meshgeom%ngeopointy)
    if(associated(meshgeom%nbranchorder)) deallocate(meshgeom%nbranchorder)
    
-   if(associated(meshgeom%branchidx)) deallocate(meshgeom%branchidx)
-   if(associated(meshgeom%branchoffsets)) deallocate(meshgeom%branchoffsets)
+   if(associated(meshgeom%nodebranchidx)) deallocate(meshgeom%nodebranchidx)
+   if(associated(meshgeom%nodeoffsets)) deallocate(meshgeom%nodeoffsets)
    
    if(associated(meshgeom%nodex)) deallocate(meshgeom%nodex)
    if(associated(meshgeom%nodey)) deallocate(meshgeom%nodey)
@@ -551,8 +551,8 @@ function t_ug_meshgeom_destructor(meshgeom) result(ierr)
    meshgeom%ngeopointx => null()
    meshgeom%ngeopointy => null()
    meshgeom%nbranchorder => null()
-   meshgeom%branchidx => null()
-   meshgeom%branchoffsets => null()
+   meshgeom%nodebranchidx => null()
+   meshgeom%nodeoffsets => null()
    
    meshgeom%nodex => null()
    meshgeom%nodey => null()
