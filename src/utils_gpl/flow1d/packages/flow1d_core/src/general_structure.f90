@@ -46,27 +46,27 @@ module m_General_Structure
 
 
    type, public :: t_GeneralStructure ! see flgtar.f90
-      double precision                 :: widthleftW1                   !< w_u1
-      double precision                 :: levelleftZb1                  !< z_u1
-      double precision                 :: widthleftWsdl                 !< w_u2
-      double precision                 :: levelleftZbsl                 !< z_u2
-      double precision                 :: widthcenter                   !< crest width
-      double precision                 :: levelcenter                   !< crest level
-      double precision                 :: widthrightWsdr                !< w_d1
-      double precision                 :: levelrightZbsr                !< z_d1
-      double precision                 :: widthrightW2                  !< w_d2
-      double precision                 :: levelrightZb2                 !< z_d2
+      double precision                 :: wu1                           !< w_u1
+      double precision                 :: zu1                           !< z_u1
+      double precision                 :: wu2                           !< w_u2
+      double precision                 :: zu2                           !< z_u2
+      double precision                 :: ws                            !< crest width
+      double precision                 :: zs                            !< crest level
+      double precision                 :: wd1                           !< w_d1
+      double precision                 :: zd1                           !< z_d1
+      double precision                 :: wd2                           !< w_d2
+      double precision                 :: zd2                           !< z_d2
       double precision                 :: gateLowerEdgeLevel            !< gate lower edge level
-      double precision                 :: pos_freegateflowcoeff         !< Positive free gate flow function 
-      double precision                 :: pos_drowngateflowcoeff        !< Positive drowned gate flow function 
-      double precision                 :: pos_freeweirflowcoeff         !< Positive free weir flow function 
-      double precision                 :: pos_drownweirflowcoeff        !< Positive drowned weir flow function 
-      double precision                 :: pos_contrcoeffreegate         !< Positive flow contraction coefficient function 
-      double precision                 :: neg_freegateflowcoeff         !< Negative free gate flow function 
-      double precision                 :: neg_drowngateflowcoeff        !< Negative drowned gate flow function 
-      double precision                 :: neg_freeweirflowcoeff         !< Negative free weir flow function 
-      double precision                 :: neg_drownweirflowcoeff        !< Negative drowned weir flow function 
-      double precision                 :: neg_contrcoeffreegate         !< Negative flow contraction coefficient function 
+      double precision                 :: cgf_pos                       !< Positive free gate flow function 
+      double precision                 :: cgd_pos                       !< Positive drowned gate flow function 
+      double precision                 :: cwf_pos                       !< Positive free weir flow function 
+      double precision                 :: cwd_pos                       !< Positive drowned weir flow function 
+      double precision                 :: mugf_pos                      !< Positive flow contraction coefficient function 
+      double precision                 :: cgf_neg                       !< Negative free gate flow function 
+      double precision                 :: cgd_neg                       !< Negative drowned gate flow function 
+      double precision                 :: cwf_neg                       !< Negative free weir flow function 
+      double precision                 :: cwd_neg                       !< Negative drowned weir flow function 
+      double precision                 :: mugf_neg                      !< Negative flow contraction coefficient function 
       double precision                 :: extraresistance               !< Extra resistance
       double precision                 :: gatedoorheight                !< height of the doors
       double precision                 :: gateopeningwidth              !< width between the doors
@@ -166,7 +166,7 @@ contains
       s1mr = s1m2
       dsL   = s1m2 - s1m1 
        
-      crest = genstr%levelcenter
+      crest = genstr%zs
       dx_struc = genstr%crestlength
       
       velheight = genstr%velheight
@@ -281,11 +281,11 @@ contains
       wstr = min(maxWidth, genstr%widthcenteronlink(L0))
       
       if (genstr%numlinks == 1) then
-         w1   = min(maxWidth, genstr%widthleftW1   )
-         wsdl = min(maxWidth, genstr%widthleftWsdl )
-         wstr = min(maxWidth, genstr%widthcenter   )
-         wsdr = min(maxWidth, genstr%widthrightWsdr)
-         w2   = min(maxWidth, genstr%widthrightW2  )
+         w1   = min(maxWidth, genstr%wu1   )
+         wsdl = min(maxWidth, genstr%wu2 )
+         wstr = min(maxWidth, genstr%ws   )
+         wsdr = min(maxWidth, genstr%wd1)
+         w2   = min(maxWidth, genstr%wd2  )
       else  ! Structure crosses more than one link: nonsensible to use single width left/right etc. 
             ! same for all links. Use center linkwidth instead (i.e., typically wu(Lf))
          w1   = wstr
@@ -295,28 +295,28 @@ contains
          w2   = wstr
       endif
       
-      zs = genstr%levelcenter
-      zb1 = genstr%levelleftZb1
-      zbsl = genstr%levelleftZbsl
-      zbsr = genstr%levelrightZbsr
-      zb2 = genstr%levelrightZb2
+      zs = genstr%zs
+      zb1 = genstr%zu1
+      zbsl = genstr%zu2
+      zbsr = genstr%zd1
+      zb2 = genstr%zd2
       lambda = genstr%extraresistance
       !
       !     Determine cgf, cgd, cwf, cwd, mugf
       !     (flow direction dependent)
       !
       if (flowDir > 0.0D0) then
-         cgf = genstr%pos_freegateflowcoeff
-         cgd = genstr%pos_drowngateflowcoeff
-         cwf = genstr%pos_freeweirflowcoeff
-         cwd = genstr%pos_drownweirflowcoeff
-         mugf = genstr%pos_contrcoeffreegate
+         cgf = genstr%cgf_pos
+         cgd = genstr%cgd_pos
+         cwf = genstr%cwf_pos
+         cwd = genstr%cwd_pos
+         mugf = genstr%mugf_pos
       else
-         cgf = genstr%neg_freegateflowcoeff
-         cgd = genstr%neg_drowngateflowcoeff
-         cwf = genstr%neg_freeweirflowcoeff
-         cwd = genstr%neg_drownweirflowcoeff
-         mugf = genstr%neg_contrcoeffreegate
+         cgf = genstr%cgf_neg
+         cgd = genstr%cgd_neg
+         cwf = genstr%cwf_neg
+         cwd = genstr%cwd_neg
+         mugf = genstr%mugf_neg
       endif
       !
       !     Determine flow direction dependent parameters

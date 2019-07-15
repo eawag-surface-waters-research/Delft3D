@@ -488,26 +488,26 @@ module m_readstructures
             
             case(ST_GENERAL_ST)
                allocate(pstr%generalst)
-               read(ibin) pstr%generalst%widthleftW1
-               read(ibin) pstr%generalst%levelleftZb1
-               read(ibin) pstr%generalst%widthleftWsdl
-               read(ibin) pstr%generalst%levelleftZbsl
-               read(ibin) pstr%generalst%widthcenter
-               read(ibin) pstr%generalst%levelcenter
-               read(ibin) pstr%generalst%widthrightWsdr
-               read(ibin) pstr%generalst%levelrightZbsr
-               read(ibin) pstr%generalst%widthrightW2
-               read(ibin) pstr%generalst%levelrightZb2
+               read(ibin) pstr%generalst%wu1
+               read(ibin) pstr%generalst%zu1
+               read(ibin) pstr%generalst%wu2
+               read(ibin) pstr%generalst%zu2
+               read(ibin) pstr%generalst%ws
+               read(ibin) pstr%generalst%zs
+               read(ibin) pstr%generalst%wd1
+               read(ibin) pstr%generalst%zd1
+               read(ibin) pstr%generalst%wd2
+               read(ibin) pstr%generalst%zd2
                read(ibin) pstr%generalst%gateloweredgelevel
-               read(ibin) pstr%generalst%pos_freegateflowcoeff
-               read(ibin) pstr%generalst%pos_drowngateflowcoeff
-               read(ibin) pstr%generalst%pos_freeweirflowcoeff
-               read(ibin) pstr%generalst%pos_drownweirflowcoeff
-               read(ibin) pstr%generalst%pos_contrcoeffreegate
-               read(ibin) pstr%generalst%neg_freegateflowcoeff
-               read(ibin) pstr%generalst%neg_drowngateflowcoeff
-               read(ibin) pstr%generalst%neg_freeweirflowcoeff
-               read(ibin) pstr%generalst%neg_drownweirflowcoeff
+               read(ibin) pstr%generalst%cgf_pos
+               read(ibin) pstr%generalst%cgd_pos
+               read(ibin) pstr%generalst%cwf_pos
+               read(ibin) pstr%generalst%cwd_pos
+               read(ibin) pstr%generalst%mugf_pos
+               read(ibin) pstr%generalst%cgf_neg
+               read(ibin) pstr%generalst%cgd_neg
+               read(ibin) pstr%generalst%cwf_pos
+               read(ibin) pstr%generalst%cwd_neg
                read(ibin) pstr%generalst%neg_contrcoeffreegate
                read(ibin) pstr%generalst%extraresistance
             
@@ -648,27 +648,27 @@ module m_readstructures
                write(ibin) pstr%bridge%outletlosscoeff
             
             case(ST_GENERAL_ST)
-               write(ibin) pstr%generalst%widthleftW1
-               write(ibin) pstr%generalst%levelleftZb1
-               write(ibin) pstr%generalst%widthleftWsdl
-               write(ibin) pstr%generalst%levelleftZbsl
-               write(ibin) pstr%generalst%widthcenter
-               write(ibin) pstr%generalst%levelcenter
-               write(ibin) pstr%generalst%widthrightWsdr
-               write(ibin) pstr%generalst%levelrightZbsr
-               write(ibin) pstr%generalst%widthrightW2
-               write(ibin) pstr%generalst%levelrightZb2
+               write(ibin) pstr%generalst%wu1
+               write(ibin) pstr%generalst%zu1
+               write(ibin) pstr%generalst%wu2
+               write(ibin) pstr%generalst%zu2
+               write(ibin) pstr%generalst%ws
+               write(ibin) pstr%generalst%zs
+               write(ibin) pstr%generalst%wd1
+               write(ibin) pstr%generalst%zd1
+               write(ibin) pstr%generalst%wd2
+               write(ibin) pstr%generalst%zd2
                write(ibin) pstr%generalst%gateLowerEdgeLevel
-               write(ibin) pstr%generalst%pos_freegateflowcoeff
-               write(ibin) pstr%generalst%pos_drowngateflowcoeff
-               write(ibin) pstr%generalst%pos_freeweirflowcoeff
-               write(ibin) pstr%generalst%pos_drownweirflowcoeff
-               write(ibin) pstr%generalst%pos_contrcoeffreegate
-               write(ibin) pstr%generalst%neg_freegateflowcoeff
-               write(ibin) pstr%generalst%neg_drowngateflowcoeff
-               write(ibin) pstr%generalst%neg_freeweirflowcoeff
-               write(ibin) pstr%generalst%neg_drownweirflowcoeff
-               write(ibin) pstr%generalst%neg_contrcoeffreegate
+               write(ibin) pstr%generalst%cgf_pos
+               write(ibin) pstr%generalst%cgd_pos
+               write(ibin) pstr%generalst%cwf_pos
+               write(ibin) pstr%generalst%cwd_pos
+               write(ibin) pstr%generalst%mugf_pos
+               write(ibin) pstr%generalst%cgf_neg
+               write(ibin) pstr%generalst%cgd_neg
+               write(ibin) pstr%generalst%cwf_neg
+               write(ibin) pstr%generalst%cwd_neg
+               write(ibin) pstr%generalst%mugf_neg
                write(ibin) pstr%generalst%extraresistance
 
             case(ST_EXTRA_RES)
@@ -1306,50 +1306,50 @@ module m_readstructures
       generalst%gateclosedfractiononlink(1) = 0.5d0
       generalst%gatedoorheight = 1d0
       generalst%velheight = .true.
-      call prop_get_double(md_ptr, 'structure', 'widthleftW1', generalst%widthleftW1, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'widthleftWsdl', generalst%widthleftWsdl, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'widthcenter', generalst%widthcenter, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'widthrightWsdr', generalst%widthrightWsdr, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'widthrightW2', generalst%widthrightW2, success)
+      call prop_get_double(md_ptr, 'structure', 'widthleftW1', generalst%wu1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'widthleftWsdl',  generalst%wu2, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'widthcenter',    generalst%ws, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'widthrightWsdr', generalst%wd1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'widthrightW2',   generalst%wd2, success)
+                                                                               
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelleftZb1',   generalst%zu1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelleftZbsl',  generalst%zu2, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelcenter',    generalst%zs, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZbsr', generalst%zd1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZb2',  generalst%zd2, success)
 
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelleftZb1', generalst%levelleftZb1, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelleftZbsl', generalst%levelleftZbsl, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelcenter', generalst%levelcenter, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZbsr', generalst%levelrightZbsr, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZb2', generalst%levelrightZb2, success)
-      
       if (success) call prop_get_double(md_ptr, 'structure', 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, success)
 
-      call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',  generalst%pos_freegateflowcoeff, success1)
-      call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',   generalst%pos_freegateflowcoeff, success2)  ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',  generalst%cgf_pos, success1)
+      call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',   generalst%cgf_pos, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff', generalst%pos_drowngateflowcoeff, success1)
-      call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff',  generalst%pos_drowngateflowcoeff, success2) ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff', generalst%cgd_pos, success1)
+      call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff',  generalst%cgd_pos, success2) ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',  generalst%pos_freeweirflowcoeff, success1)
-      call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',   generalst%pos_freeweirflowcoeff, success2)  ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',  generalst%cwf_pos, success1)
+      call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',   generalst%cwf_pos, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff', generalst%pos_drownweirflowcoeff, success1)
-      call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff',  generalst%pos_drownweirflowcoeff, success2) ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff', generalst%cwd_pos, success1)
+      call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff',  generalst%cwd_pos, success2) ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',  generalst%pos_contrcoeffreegate, success1)
-      call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',   generalst%pos_contrcoeffreegate, success2)  ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',  generalst%mugf_pos, success1)
+      call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',   generalst%mugf_pos, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
       
-      call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',  generalst%neg_freegateflowcoeff, success1)
-      call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',   generalst%neg_freegateflowcoeff, success2)  ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',  generalst%cgf_neg, success1)
+      call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',   generalst%cgf_neg, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff', generalst%neg_drowngateflowcoeff, success1)
-      call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff',  generalst%neg_drowngateflowcoeff, success2) ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff', generalst%cgd_neg, success1)
+      call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff',  generalst%cgd_neg, success2) ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',  generalst%neg_freeweirflowcoeff, success1)
-      call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',   generalst%neg_freeweirflowcoeff, success2)  ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',  generalst%cwf_pos, success1)
+      call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',   generalst%cwf_pos, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff', generalst%neg_drownweirflowcoeff, success1)
-      call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff',  generalst%neg_drownweirflowcoeff, success2) ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff', generalst%cwd_neg, success1)
+      call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff',  generalst%cwd_neg, success2) ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',  generalst%neg_contrcoeffreegate, success1)
-      call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',   generalst%neg_contrcoeffreegate, success2)  ! Backwards compatible reading of old keyword
+      call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',  generalst%mugf_neg, success1)
+      call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',   generalst%mugf_neg, success2)  ! Backwards compatible reading of old keyword
       success = success .and. (success1 .or. success2)
       
       if (success) call prop_get_double(md_ptr, 'structure', 'extraresistance', generalst%extraresistance, success)

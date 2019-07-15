@@ -691,13 +691,13 @@ end subroutine
        case (ST_GENERAL_ST)
           select case (iparam)
           case (CFiCrestLevel)
-             sts%struct(istru)%generalst%levelcenter=value
+             sts%struct(istru)%generalst%zs=value
           case (CFiCrestWidth)
-             sts%struct(istru)%generalst%widthcenter=value
+             sts%struct(istru)%generalst%ws=value
           case (CFiGateLowerEdgeLevel)
              sts%struct(istru)%generalst%gateLowerEdgeLevel =value
           case (CFiGateOpeningHeight)
-             sts%struct(istru)%generalst%gateLowerEdgeLevel =value + sts%struct(istru)%generalst%levelcenter
+             sts%struct(istru)%generalst%gateLowerEdgeLevel =value + sts%struct(istru)%generalst%zs
           case default
              SetValueStruc = .false.
           end select
@@ -765,10 +765,10 @@ end subroutine
              getValueStruc = sts%struct(istru)%pump%capacity(1)
            endif
        case (ST_GENERAL_ST)
-           if (iparam == CFiCrestLevel)         getValueStruc = sts%struct(istru)%generalst%levelcenter
-           if (iparam == CFiCrestWidth)         getValueStruc = sts%struct(istru)%generalst%widthcenter
+           if (iparam == CFiCrestLevel)         getValueStruc = sts%struct(istru)%generalst%zs
+           if (iparam == CFiCrestWidth)         getValueStruc = sts%struct(istru)%generalst%ws
            if (iparam == CFiGateLowerEdgeLevel) getValueStruc = sts%struct(istru)%generalst%gateLowerEdgeLevel
-           if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%generalst%gateLowerEdgeLevel - sts%struct(istru)%generalst%levelcenter
+           if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%generalst%gateLowerEdgeLevel - sts%struct(istru)%generalst%zs
        case default
          !nothing
        end select
@@ -932,7 +932,7 @@ end subroutine
           case (ST_PUMP)
              get_crest_level = huge(1d0)
           case (ST_GENERAL_ST)
-             get_crest_level = struc%generalst%levelcenter
+             get_crest_level = struc%generalst%zs
           case default
              get_crest_level = huge(1d0)
        end select
@@ -950,7 +950,7 @@ end subroutine
           case (ST_ORIFICE)
              get_crest_level_c_loc = c_loc(struc%orifice%crestlevel)
           case (ST_GENERAL_ST)
-             get_crest_level_c_loc = c_loc(struc%generalst%levelcenter)
+             get_crest_level_c_loc = c_loc(struc%generalst%zs)
           case default
              get_crest_level_c_loc = C_NULL_PTR
        end select
@@ -964,7 +964,7 @@ end subroutine
           case (ST_WEIR)
              get_width = struc%weir%crestwidth
           case (ST_GENERAL_ST)
-             get_width = struc%generalst%widthcenter
+             get_width = struc%generalst%ws
           case (ST_ORIFICE)
              get_width = struc%orifice%crestwidth
           case default
@@ -1012,7 +1012,7 @@ end subroutine
       case (ST_ORIFICE)
          get_opening_height = struc%orifice%openlevel - struc%orifice%crestlevel
       case (ST_GENERAL_ST)
-         get_opening_height = struc%generalst%gateLowerEdgeLevel - struc%generalst%levelcenter
+         get_opening_height = struc%generalst%gateLowerEdgeLevel - struc%generalst%zs
       end select
    end function get_opening_height
    
@@ -1092,7 +1092,7 @@ end subroutine
       case (ST_UNI_WEIR)
          struc%uniweir%crestlevel=value
       case (ST_GENERAL_ST)
-         struc%generalst%levelcenter=value
+         struc%generalst%zs=value
       case default
          !nothing
       end select
@@ -1109,7 +1109,7 @@ end subroutine
       case (ST_ORIFICE)
          struc%orifice%crestwidth=value
       case (ST_GENERAL_ST)
-         struc%generalst%widthcenter=value
+         struc%generalst%ws=value
       end select
    end subroutine set_crest_width
 
@@ -1135,7 +1135,7 @@ end subroutine
       case (ST_ORIFICE)
          struc%orifice%openlevel=value + struc%orifice%crestlevel
       case (ST_GENERAL_ST)
-         struc%generalst%gateLowerEdgeLevel =value + struc%generalst%levelcenter
+         struc%generalst%gateLowerEdgeLevel =value + struc%generalst%zs
       end select
    end subroutine set_opening_height
    
