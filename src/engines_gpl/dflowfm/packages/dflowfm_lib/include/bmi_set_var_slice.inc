@@ -539,4 +539,7 @@
   case("md_pdffile")
      ! Does not apply to scalar variables
      continue
+  case("md_blmfile")
+     ! Does not apply to scalar variables
+     continue
   end select

@@ -155,7 +155,7 @@ implicit none
     character(len=255) :: md_subfile = ' '      !< substance file
     character(len=255) :: md_ehofile = ' '      !< extra history output file
     character(len=255), target :: md_pdffile = ' ' !< [-] process library file  {"rank": 0}
-    character(len=255) :: md_blmfile = ' '      !< BLOOM aglae species definition file
+    character(len=255), target :: md_blmfile = ' ' !< [-] BLOOM aglae species definition file  {"rank": 0}
     character(len=255) :: md_sttfile = ' '      !< statistics definition file
     double precision   :: md_thetav_waq = 0d0   !< thetav for waq
     double precision   :: md_dt_waqproc = 0d0   !< processes time step

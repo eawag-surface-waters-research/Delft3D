@@ -422,4 +422,8 @@
      md_pdffile = ''
 	 call c_f_pointer(xptr, x_0d_char_ptr, [MAXSTRLEN])
 	 md_pdffile = char_array_to_string(x_0d_char_ptr, strlen(x_0d_char_ptr))
+  case("md_blmfile")
+     md_blmfile = ''
+	 call c_f_pointer(xptr, x_0d_char_ptr, [MAXSTRLEN])
+	 md_blmfile = char_array_to_string(x_0d_char_ptr, strlen(x_0d_char_ptr))
   end select

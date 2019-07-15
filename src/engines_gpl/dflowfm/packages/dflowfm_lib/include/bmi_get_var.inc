@@ -290,5 +290,7 @@
      x = c_loc(ba)
   case("md_pdffile") !<  [-] process library file {"rank": 0}
      x = c_loc(md_pdffile)
+  case("md_blmfile") !<  [-] BLOOM aglae species definition file {"rank": 0}
+     x = c_loc(md_blmfile)
   end select
 

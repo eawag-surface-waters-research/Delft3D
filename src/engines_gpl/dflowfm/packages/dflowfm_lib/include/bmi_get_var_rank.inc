@@ -290,6 +290,8 @@
      rank = 1
   case("md_pdffile")
      rank = 0
+  case("md_blmfile")
+     rank = 0
   case default
      rank = 0
   end select
