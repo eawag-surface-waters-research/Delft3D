@@ -265,7 +265,8 @@ type t_unc_mapids
    integer :: id_windy(4)    = -1 !< Variable ID for wind on cell center, y-component
    integer :: id_windxu(4)   = -1 !< Variable ID for wind on flow links, x-component
    integer :: id_windyu(4)   = -1 !< Variable ID for wind on flow links, y-component
-   integer :: id_windstress(4) = -1  !< Variable ID for wind stress
+   integer :: id_windstressx(4) = -1  !< Variable ID for wind stress, on cell center, x-component
+   integer :: id_windstressy(4) = -1  !< Variable ID for wind stress, on cell center, y-component
    integer :: id_turkin1(4)  = -1 !< Variable ID for 
    integer :: id_vicwwu(4)   = -1 !< Variable ID for 
    integer :: id_tureps1(4)  = -1 !< Variable ID for 
@@ -4073,7 +4074,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       if ((jamapwind > 0 .or. jamapwindstress > 0) .and. jawind /= 0) then
-         if (jawindstressgiven == 0) then
+         if (jawindstressgiven == 0 .and. jamapwind > 0) then
             if (jsferic == 0) then
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windx,  nf90_double, UNC_LOC_S, 'windx',  'x_wind', 'velocity of air on flow element center, x-component', 'm s-1')
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windy,  nf90_double, UNC_LOC_S, 'windy',  'y_wind', 'velocity of air on flow element center, y-component', 'm s-1')
@@ -4087,19 +4088,20 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windxu, nf90_double, UNC_LOC_U, 'windxu', 'eastward_wind', 'velocity of air on flow links, x-component', 'm s-1')
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windyu, nf90_double, UNC_LOC_U, 'windyu', 'northward_wind', 'velocity of air on flow links, y-component', 'm s-1')
             end if
-         else
+         endif
+         if (jamapwindstress > 0) then
             if (jsferic == 0) then
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windx,  nf90_double, UNC_LOC_S, 'windstressx',  'x_windstress', 'wind stress flow element center, x-component', 'N m-2')
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windy,  nf90_double, UNC_LOC_S, 'windstressy',  'y_windstress', 'wind stress of air on flow element center, y-component', 'N m-2')
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressx, nf90_double, UNC_LOC_S, 'windstressx',  &
+                  'surface_downward_x_stress', 'wind stress on flow element center, x-component', 'N m-2')
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressy, nf90_double, UNC_LOC_S, 'windstressy',  &
+                  'surface_downward_y_stress', 'wind stress on flow element center, y-component', 'N m-2')
             else
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windx,  nf90_double, UNC_LOC_S, 'windstressx',  'eastward_windstress',  'wind stress on flow element center, x-component', 'N m-2')
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windy,  nf90_double, UNC_LOC_S, 'windstressy',  'northward_windstress', 'wind stress on flow element center, y-component', 'N m-2')
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressx, nf90_double, UNC_LOC_S, 'windstressx',  &
+                  'surface_downward_eastward_stress',  'wind stress on flow element center, x-component', 'N m-2')
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressy, nf90_double, UNC_LOC_S, 'windstressy',  &
+                  'surface_downward_northward_stress', 'wind stress on flow element center, y-component', 'N m-2')
             end if
          endif
-      endif
-
-      if (jawind /= 0 .and. jamapwindstress > 0) then
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstress, nf90_double, UNC_LOC_U, 'wdsu', 'wind_stress', 'momentum flux', 'N m-2')
       endif
 
       ! Heat fluxes
@@ -5517,12 +5519,11 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    end if
 
    ! Meteo forcings
-   if ((jamapwind > 0 .or. jamapwindstress > 0) .and. jawind /= 0) then
-      allocate (windx(ndxndxi), stat=ierr)
-      allocate (windy(ndxndxi), stat=ierr)
-      !windx/y is not set for flownodes without links
-      !windx = -999.0d0
-      !windy = -999.0d0
+   if (jamapwind > 0 .and. jawind /= 0 .and. jawindstressgiven == 0) then
+      allocate (windx(ndxndxi), windy(ndxndxi), stat=ierr)
+      if (ierr /= 0) call aerr( 'windx/windy', ierr, ndxndxi)
+
+      !windx/y is set to 0.0 for flownodes without links
       windx = 0.0d0
       windy = 0.0d0
       do n = 1,ndxndxi
@@ -5536,16 +5537,33 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       end do
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windx , UNC_LOC_S, windx)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windy , UNC_LOC_S, windy)
-      deallocate (windx, stat=ierr)
-      deallocate (windy, stat=ierr)
-      if (jawindstressgiven == 0) then
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windxu, UNC_LOC_U, wx)
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windyu, UNC_LOC_U, wy)
-      endif
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windxu, UNC_LOC_U, wx)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windyu, UNC_LOC_U, wy)
+      deallocate (windx, windy, stat=ierr)
    end if
 
    if (jamapwind > 0 .and. japatm > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_patm  , UNC_LOC_S, patm)
+   endif
+
+   if (jawind /= 0 .and. jamapwindstress > 0) then
+      allocate (windx(ndxndxi), windy(ndxndxi), stat=ierr)
+      if (ierr /= 0) call aerr( 'windx/windy', ierr, ndxndxi)
+
+      windx = 0.0d0
+      windy = 0.0d0
+      do n = 1,ndxndxi
+         do LL=1,nd(n)%lnx
+            LLL = iabs(nd(n)%ln(LL))
+            k1 = ln(1,LLL) ; k2 = ln(2,LLL)
+            k3 = 1 ; if( nd(n)%ln(LL) > 0 ) k3 = 2
+            windx(n) = windx(n) + wdsu(LLL) * wcL(k3,LLL) * csu(LLL)
+            windy(n) = windy(n) + wdsu(LLL) * wcL(k3,LLL) * snu(LLL)
+         end do
+      end do
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressx, UNC_LOC_S, windx)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressy, UNC_LOC_S, windy)
+      deallocate(windx, windy, stat=ierr)
    endif
 
    ! Heat flux models
@@ -5780,7 +5798,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     id_q1main, &
     id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_ucxa, id_ucya, id_unorm, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, id_cfcl, id_cftrt, id_czs, & 
     id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
-    id_wind, id_windstress, id_patm, id_tair, id_rhum, id_clou, id_E, id_R, id_H, id_D, id_DR, id_urms, id_thetamean, &
+    id_wind, id_patm, id_tair, id_rhum, id_clou, id_E, id_R, id_H, id_D, id_DR, id_urms, id_thetamean, &
     id_cwav, id_cgwav, id_sigmwav, id_SwE, id_SwT, &
     id_ust, id_Fx, id_Fy, id_vst, id_windx, id_windy, id_windxu, id_windyu, id_numlimdt, id_hs, id_bl, id_zk, &
     id_1d2d_edges, id_1d2d_zeta1d, id_1d2d_crest_level, id_1d2d_b_2di, id_1d2d_b_2dv, id_1d2d_d_2dv, id_1d2d_q_zeta, id_1d2d_q_lat, &
@@ -7026,10 +7044,6 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
             call definencvar(imapfile,id_patm(iid)   ,nf90_double,idims,2, 'Patm'  , 'Atmospheric Pressure', 'N m-2', 'FlowElem_xcc FlowElem_ycc')
         endif
 
-        if (jawind /= 0 .and. jamapwindstress > 0) then
-            call definencvar(imapfile, id_windstress(iid), nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/), 2, 'wdsu', 'Wind stress', 'N m-2', 'FlowLink_xu FlowLink_yu')
-        endif
-
         if ((jamapwind > 0 .or. jamapwindstress > 0) .and. jawind /= 0) then
            if (jawindstressgiven == 0) then
               ierr = nf90_def_var(imapfile, 'windx', nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_windx(iid))
@@ -8273,12 +8287,10 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        end if
     endif
 
-    if (jawind > 0 .and. (jamapwind > 0 .or. jamapwindstress > 0)) then
-       allocate (windx(ndxndxi), stat=ierr)
-       allocate (windy(ndxndxi), stat=ierr)
-       !windx/y is not set for flownodes without links
-       !windx = -999.0d0
-       !windy = -999.0d0
+    if (jawind > 0 .and. jamapwind > 0 .and. jawindstressgiven == 0) then
+       allocate (windx(ndxndxi), windy(ndxndxi), stat=ierr)
+       if (ierr /= 0) call aerr( 'windx/windy', ierr, ndxndxi)
+       !windx/y is not set to 0.0 for flownodes without links
        windx = 0.0d0
        windy = 0.0d0
        do n = 1,ndxndxi
@@ -8300,19 +8312,12 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        ierr = nf90_put_var(imapfile, id_windx  (iid), windx,  (/ 1, itim /), (/ ndxndxi, 1 /))
        ierr = nf90_put_var(imapfile, id_windy  (iid), windy,  (/ 1, itim /), (/ ndxndxi, 1 /))
        deallocate (windx, stat=ierr)
-       deallocate (windy, stat=ierr)
-       if (jamapwindstress == 0) then
-          ierr = nf90_put_var(imapfile, id_windxu  (iid), wx,  (/ 1, itim /), (/ lnx, 1 /))
-          ierr = nf90_put_var(imapfile, id_windyu  (iid), wy,  (/ 1, itim /), (/ lnx, 1 /))
-       endif
+       ierr = nf90_put_var(imapfile, id_windxu  (iid), wx,  (/ 1, itim /), (/ lnx, 1 /))
+       ierr = nf90_put_var(imapfile, id_windyu  (iid), wy,  (/ 1, itim /), (/ lnx, 1 /))
     endif
 
     if (jamapwind > 0 .and. japatm > 0) then
        ierr = nf90_put_var(imapfile, id_patm(iid)  , Patm, (/ 1, itim /), (/ ndxndxi, 1 /))
-    endif
-
-    if (jawind /= 0 .and. jamapwindstress > 0) then
-       ierr = nf90_put_var(imapfile, id_windstress(iid), wdsu, (/ 1, itim /), (/ lnx, 1 /))
     endif
 
     if (jamapheatflux > 0 .and. jatem > 1) then    ! Heat modelling only
