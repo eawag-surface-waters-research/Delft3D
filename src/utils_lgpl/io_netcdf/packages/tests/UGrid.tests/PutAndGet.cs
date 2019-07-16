@@ -195,12 +195,45 @@ namespace UGrid.tests
                 Assert.That(l_networkEdgeNode[edgeIndex] + 1, Is.EqualTo(networkEdgeNodes[edgeIndex]));
                 edgeIndex++;
             }
+
         }
-
-
-        //To be completed
+        
         private void check1DMesh(ref meshgeomdim meshgeomdim, ref meshgeom meshgeom)
         {
+            var l_branchidx = new int[branchidx.Length];
+            var l_offset = new double[offset.Length];
+            var l_edge_nodes = new int[edge_nodes.Length];
+
+            var l_mesh1dCoordX = new double[mesh1dCoordX.Length];
+            var l_mesh1dCoordY = new double[mesh1dCoordY.Length];
+
+            Marshal.Copy(meshgeom.branchidx, l_branchidx, 0, l_branchidx.Length);
+            Marshal.Copy(meshgeom.branchoffsets, l_offset, 0, l_offset.Length);
+            Marshal.Copy(meshgeom.edge_nodes, l_edge_nodes, 0, l_edge_nodes.Length);
+            Marshal.Copy(meshgeom.nodex, l_mesh1dCoordX, 0, l_mesh1dCoordX.Length);
+            Marshal.Copy(meshgeom.nodey, l_mesh1dCoordY, 0, l_mesh1dCoordY.Length);
+
+            var l_meshnodeids = StringBufferHandling.ParseString(meshgeom.nodeids, meshgeomdim.numnode, IoNetcdfLibWrapper.idssize);
+            var l_meshnodelongnames = StringBufferHandling.ParseString(meshgeom.nodelongnames, meshgeomdim.numnode, IoNetcdfLibWrapper.longnamessize);
+
+            // checks
+            for (int i = 0; i < meshgeomdim.numnode; i++)
+            {
+                Assert.That(l_meshnodeids[i], Is.EqualTo(meshnodeids[i].PadRight(IoNetcdfLibWrapper.idssize)));
+                Assert.That(l_meshnodelongnames[i], Is.EqualTo(meshnodelongnames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
+                Assert.That(l_offset[i], Is.EqualTo(offset[i]));
+                Assert.That(l_branchidx[i], Is.EqualTo(branchidx[i]));
+            }
+            
+            int edgeIndex = 0;
+            for (int i = 0; i < meshgeomdim.nbranches; i++)
+            {
+                //written 1 based, but retrived 0 based
+                Assert.That(l_edge_nodes[edgeIndex], Is.EqualTo(edge_nodes[edgeIndex]));
+                edgeIndex++;
+                Assert.That(l_edge_nodes[edgeIndex], Is.EqualTo(edge_nodes[edgeIndex]));
+                edgeIndex++;
+            }
 
         }
 
@@ -208,10 +241,7 @@ namespace UGrid.tests
         //To be completed
         private void checkLinks(ref meshgeomdim meshgeomdim, ref meshgeom meshgeom)
         {
-
         }
-
-
 
         // Create a 1d mesh using ionc_put_meshgeom: NOTE now meshgeom includes mesh and network array, this is not good.
         // To be refactored later
@@ -507,19 +537,13 @@ namespace UGrid.tests
                 var mesh = new meshgeom();
                 register.Add(ref meshdim, ref mesh);
 
-                // Client wants 0 based arrays
-                mesh.startIndex = 0;
+                // Here we retrive 1 based arrays
+                mesh.startIndex = 1;
                 ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref mesh);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                var l_meshnodeids = StringBufferHandling.ParseString(mesh.nodeids, meshdim.numnode, IoNetcdfLibWrapper.idssize);
-                var l_meshnodelongnames = StringBufferHandling.ParseString(mesh.nodelongnames, meshdim.numnode, IoNetcdfLibWrapper.longnamessize);
-
-                for (int i = 0; i < meshdim.numnode; i++)
-                {
-                    Assert.That(l_meshnodeids[i], Is.EqualTo(meshnodeids[i].PadRight(IoNetcdfLibWrapper.idssize)));
-                    Assert.That(l_meshnodelongnames[i], Is.EqualTo(meshnodelongnames[i].PadRight(IoNetcdfLibWrapper.longnamessize)));
-                }
+                // Check the network values
+                check1DMesh(ref meshdim, ref mesh);
             }
         }
 

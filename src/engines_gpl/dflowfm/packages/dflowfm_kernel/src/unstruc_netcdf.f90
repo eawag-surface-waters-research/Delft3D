@@ -9121,7 +9121,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
                                     meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                     meshgeom1d%nbranchorder, &
-                                    nodeids, nodelongnames, meshgeom1d%nodebranchidx, meshgeom1d%nodeoffsets)
+                                    nodeids = nodeids, nodelongnames = nodelongnames, nodebranchidx = meshgeom1d%nodebranchidx, nodeoffsets = meshgeom1d%nodeoffsets)
          else
                call mess(LEVEL_ERROR, 'Could not put header in net geometry file.')
                return

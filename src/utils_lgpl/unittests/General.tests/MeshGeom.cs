@@ -164,6 +164,8 @@ namespace General.tests
                 Add<double>(meshdim.numnode, ref mesh.nodex);
                 Add<double>(meshdim.numnode, ref mesh.nodey);
                 Add<double>(meshdim.numnode, ref mesh.nodez);
+                Add<int>(meshdim.numnode, ref mesh.branchidx);
+                Add<double>(meshdim.numnode, ref mesh.branchoffsets);
                 Add<char>(meshdim.numnode * IoNetcdfLibWrapper.idssize, ref mesh.nodeids);
                 Add<char>(meshdim.numnode * IoNetcdfLibWrapper.longnamessize, ref mesh.nodelongnames);
             }
@@ -190,8 +192,6 @@ namespace General.tests
             {
                 Add<double>(meshdim.nnodes, ref mesh.nnodex);
                 Add<double>(meshdim.nnodes, ref mesh.nnodey);
-                Add<int>(meshdim.nnodes, ref mesh.branchidx);
-                Add<double>(meshdim.nnodes, ref mesh.branchoffsets);
                 Add<char>(meshdim.nnodes * IoNetcdfLibWrapper.idssize, ref mesh.nnodeids);
                 Add<char>(meshdim.nnodes * IoNetcdfLibWrapper.longnamessize, ref mesh.nnodelongnames);
             }
