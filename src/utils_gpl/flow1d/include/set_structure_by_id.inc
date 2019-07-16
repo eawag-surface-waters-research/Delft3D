@@ -29,12 +29,12 @@
     end do
 
     structure%id = char_array_to_string(c_weir%id)
-    write(msgbuf,*) 'setting structure%x to', c_weir%x
+    write(msgbuf,*) 'setting structure%xCoordinates(1) to', c_weir%x
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%x = c_weir%x
-    write(msgbuf,*) 'setting structure%y to', c_weir%y
+    structure%xCoordinates(1) = c_weir%x
+    write(msgbuf,*) 'setting structure%yCoordinates(1) to', c_weir%y
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%y = c_weir%y
+    structure%yCoordinates(1) = c_weir%y
     write(msgbuf,*) 'setting structure%ibran to', c_weir%branchid
     call mess(LEVEL_DEBUG, msgbuf)
     structure%ibran = c_weir%branchid
@@ -42,9 +42,9 @@
     call mess(LEVEL_DEBUG, msgbuf)
     structure%chainage = c_weir%chainage
     call mess(LEVEL_DEBUG, msgbuf)
-    write(msgbuf,*) 'setting structure%link_number to', c_weir%link_number
+    write(msgbuf,*) 'setting structure%linknumbers(1) to', c_weir%link_number
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%link_number = c_weir%link_number
+    structure%linknumbers(1) = c_weir%link_number
     write(msgbuf,*) 'setting fortranweir%crestlevel to', c_weir%crest_level
     call mess(LEVEL_DEBUG, msgbuf)
     fortranweir%crestlevel = c_weir%crest_level
@@ -90,12 +90,12 @@
     end do
 
     structure%id = char_array_to_string(c_orifice%id)
-    write(msgbuf,*) 'setting structure%x to', c_orifice%x
+    write(msgbuf,*) 'setting structure%xCoordinates(1) to', c_orifice%x
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%x = c_orifice%x
-    write(msgbuf,*) 'setting structure%y to', c_orifice%y
+    structure%xCoordinates(1) = c_orifice%x
+    write(msgbuf,*) 'setting structure%yCoordinates(1) to', c_orifice%y
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%y = c_orifice%y
+    structure%yCoordinates(1) = c_orifice%y
     write(msgbuf,*) 'setting structure%ibran to', c_orifice%branchid
     call mess(LEVEL_DEBUG, msgbuf)
     structure%ibran = c_orifice%branchid
@@ -103,9 +103,9 @@
     call mess(LEVEL_DEBUG, msgbuf)
     structure%chainage = c_orifice%chainage
     call mess(LEVEL_DEBUG, msgbuf)
-    write(msgbuf,*) 'setting structure%link_number to', c_orifice%link_number
+    write(msgbuf,*) 'setting structure%linknumbers(1) to', c_orifice%link_number
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%link_number = c_orifice%link_number
+    structure%linknumbers(1) = c_orifice%link_number
     write(msgbuf,*) 'setting fortranorifice%crestlevel to', c_orifice%crest_level
     call mess(LEVEL_DEBUG, msgbuf)
     fortranorifice%crestlevel = c_orifice%crest_level
@@ -160,12 +160,12 @@
     end do
 
     structure%id = char_array_to_string(c_pump%id)
-    write(msgbuf,*) 'setting structure%x to', c_pump%x
+    write(msgbuf,*) 'setting structure%xCoordinates(1) to', c_pump%x
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%x = c_pump%x
-    write(msgbuf,*) 'setting structure%y to', c_pump%y
+    structure%xCoordinates(1) = c_pump%x
+    write(msgbuf,*) 'setting structure%yCoordinates(1) to', c_pump%y
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%y = c_pump%y
+    structure%yCoordinates(1) = c_pump%y
     write(msgbuf,*) 'setting structure%ibran to', c_pump%branchid
     call mess(LEVEL_DEBUG, msgbuf)
     structure%ibran = c_pump%branchid
@@ -173,9 +173,9 @@
     call mess(LEVEL_DEBUG, msgbuf)
     structure%chainage = c_pump%chainage
     call mess(LEVEL_DEBUG, msgbuf)
-    write(msgbuf,*) 'setting structure%link_number to', c_pump%link_number
+    write(msgbuf,*) 'setting structure%linknumbers(1) to', c_pump%link_number
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%link_number = c_pump%link_number
+    structure%linknumbers(1) = c_pump%link_number
     write(msgbuf,*) 'setting fortranpump%ss_onlevel(1) to', c_pump%start_level_suction_side
     call mess(LEVEL_DEBUG, msgbuf)
     fortranpump%ss_onlevel(1) = c_pump%start_level_suction_side
@@ -227,21 +227,21 @@
     end do
 
     structure%id = char_array_to_string(c_culvert%id)
-    write(msgbuf,*) 'setting structure%x to', c_culvert%x
+    write(msgbuf,*) 'setting structure%xCoordinates(1) to', c_culvert%x
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%x = c_culvert%x
-    write(msgbuf,*) 'setting structure%y to', c_culvert%y
+    structure%xCoordinates(1) = c_culvert%x
+    write(msgbuf,*) 'setting structure%yCoordinates(1) to', c_culvert%y
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%y = c_culvert%y
+    structure%yCoordinates(1) = c_culvert%y
     write(msgbuf,*) 'setting structure%ibran to', c_culvert%branchid
     call mess(LEVEL_DEBUG, msgbuf)
     structure%ibran = c_culvert%branchid
     write(msgbuf,*) 'setting structure%chainage to', c_culvert%chainage
     call mess(LEVEL_DEBUG, msgbuf)
     structure%chainage = c_culvert%chainage
-    write(msgbuf,*) 'setting structure%link_number to', c_culvert%link_number
+    write(msgbuf,*) 'setting structure%linknumbers(1) to', c_culvert%link_number
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%link_number = c_culvert%link_number
+    structure%linknumbers(1) = c_culvert%link_number
     write(msgbuf,*) 'setting fortranculvert%leftlevel to', c_culvert%left_level
     call mess(LEVEL_DEBUG, msgbuf)
     fortranculvert%leftlevel = c_culvert%left_level

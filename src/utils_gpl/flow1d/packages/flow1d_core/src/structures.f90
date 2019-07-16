@@ -92,7 +92,6 @@ module m_1d_structures
    interface AddStructure
       module procedure AddStructure_short
       module procedure AddStructureByCalcPoints
-      module procedure AddStructureByBranchLocation
    end interface
 
    interface getTableValue
@@ -136,11 +135,11 @@ module m_1d_structures
       integer                          :: ibran          !< branch index
       double precision                 :: chainage       !< Chainage
       integer                          :: numCoordinates !< number of coordinates in the location polygon
-      double precision, allocatable, dimension(:)   :: xCoordinates   !< x-coordinates of the location polygon
-      double precision, allocatable, dimension(:)   :: yCoordinates   !< y-coordinates of the location polygon
+      double precision, pointer, dimension(:)   :: xCoordinates   !< x-coordinates of the location polygon
+      double precision, pointer, dimension(:)   :: yCoordinates   !< y-coordinates of the location polygon
       
-      integer                          :: link_number    !< link number of structure
-      double precision                 :: x, y           !< (x,y) coordinate of the structure
+      integer                          :: numlinks       !< number of links in structure
+      integer, pointer, dimension(:)   :: linknumbers    !< link numbers of structure (length = numlinks)
       integer                          :: state = -1     !< State of the Structure for General Structure, Weir, Orifice and Culvert/Siphon
                                                          !< 0 = No Flow
                                                          !< 1 = Free Weir Flow
@@ -293,18 +292,20 @@ module m_1d_structures
       endif
       call incStructureCount(sts, structureType)
 
+      allocate(sts%struct(i)%linknumbers(1), sts%struct(i)%xCoordinates(1), sts%struct(i)%yCoordinates(1))
+      
       sts%struct(i)%id                 = id
-      sts%struct(i)%link_number        = linknumber
+      sts%struct(i)%linknumbers(1)     = linknumber
       sts%struct(i)%chainage           = chainage
       sts%struct(i)%compound           = icompound
       sts%struct(i)%compoundName       = compoundName
       sts%struct(i)%type            = structureType
       if (present(x) .and. present(y)) then
-         sts%struct(i)%x = x
-         sts%struct(i)%y = y
+         sts%struct(i)%xCoordinates(1) = x
+         sts%struct(i)%yCoordinates(1) = y
       else
-         sts%struct(i)%x = 0d0
-         sts%struct(i)%y = 0d0
+         sts%struct(i)%xCoordinates(1) = 0d0
+         sts%struct(i)%yCoordinates(1) = 0d0
       endif
       if (present(ibranch)) then
          sts%struct(i)%ibran = ibranch
@@ -314,52 +315,6 @@ module m_1d_structures
 
       AddStructureByCalcPoints = sts%count
    end function AddStructureByCalcPoints
-
-   integer function AddStructureByBranchLocation(sts, brs, ibranch, chainage, icompound, compoundName, id, structureType)
-      ! Modules
-
-      implicit none
-
-      ! Input/output parameters
-      integer              :: ibranch
-      double precision                 :: chainage
-      character(*)         :: id
-
-      integer              :: icompound
-      character(*)         :: compoundName
-      
-      type(t_StructureSet) :: sts
-      type(t_BranchSet)    :: brs
-      integer              :: structureType
-      ! Local variables
-      integer              :: leftcalc
-      integer              :: rightcalc
-      integer              :: ilink
-
-      ! Local variables
-      integer              :: i, j
-
-      type(t_structure), pointer       :: pstru
-
-      ! Program code
-      sts%Count = sts%Count+1
-      i = sts%Count
-      if (sts%Count > sts%Size) then
-         call realloc(sts)
-      endif
-      call incStructureCount(sts, structureType)
-
-      sts%struct(i)%id                 = id
-      sts%struct(i)%chainage           = chainage
-      sts%struct(i)%compound           = icompound
-      sts%struct(i)%compoundName       = compoundName
-      sts%struct(i)%type            = structureType
-      sts%struct(i)%ibran = ibranch
-
-      AddStructureByBranchLocation = sts%count
-      
-   end function AddStructureByBranchLocation
-
 
    !> Increments the counter for a specific type in the overall structure set.
    subroutine incStructureCount(sts, type)
@@ -415,6 +370,9 @@ subroutine deallocstructure(sts)
          if (associated(sts%struct(i)%bridge))     deallocate(sts%struct(i)%bridge)
          if (associated(sts%struct(i)%generalst))  call dealloc(sts%struct(i)%generalst)
          if (associated(sts%struct(i)%extrares))   call dealloc(sts%struct(i)%extrares)
+         if (associated(sts%struct(i)%xCoordinates)) deallocate(sts%struct(i)%xCoordinates)
+         if (associated(sts%struct(i)%yCoordinates)) deallocate(sts%struct(i)%yCoordinates)
+         if (associated(sts%struct(i)%linknumbers )) deallocate(sts%struct(i)%linknumbers )
          
          sts%struct(i)%weir      => null()
          sts%struct(i)%orifice   => null()
@@ -424,6 +382,9 @@ subroutine deallocstructure(sts)
          sts%struct(i)%bridge    => null() 
          sts%struct(i)%generalst => null()
          sts%struct(i)%extrares  => null()
+         sts%struct(i)%xCoordinates => null()
+         sts%struct(i)%yCoordinates => null()
+         sts%struct(i)%linknumbers  => null()
       enddo
       deallocate(sts%struct)
    endif

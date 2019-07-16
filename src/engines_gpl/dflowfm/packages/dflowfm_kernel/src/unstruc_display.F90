@@ -1313,7 +1313,7 @@ if (network%loaded) then
    do is = 1,network%sts%Count
    
       ! Get structure x,y coordinates.
-      link = network%sts%struct(is)%link_number
+      link = network%sts%struct(is)%linknumbers(1)
       if (link > 0 .and. link <= lnx) then ! for safety
          x = xu(link)
          y = yu(link)

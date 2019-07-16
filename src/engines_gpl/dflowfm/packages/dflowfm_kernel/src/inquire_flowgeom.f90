@@ -280,7 +280,7 @@ module m_inquire_flowgeom
       do i = 1, network%sts%Count
          strucid_tmp = network%sts%struct(i)%id
          if (trim(strucid_tmp) == trim(strucid)) then
-            L = network%sts%struct(i)%link_number
+            L = network%sts%struct(i)%linknumbers(1)
             exit
          end if
       end do

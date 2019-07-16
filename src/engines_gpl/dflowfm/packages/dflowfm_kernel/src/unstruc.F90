@@ -2494,6 +2494,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     double precision :: zcdamn, blmx
     type(t_structure), pointer :: pstru
 
+    integer :: L0
     integer          :: ng, k1, k2, L, n, istru
 
     do ng = 1,ncdamsg                                   ! loop over cdam signals, sethu
@@ -2529,13 +2530,16 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
            cycle
         end if
 
-        L  = pstru%link_number
-        k1 = ln(1,L)
-        k2 = ln(2,L)
-        blmx     = max(bl(k1), bl(k2))
-        bob(1,L) = max(zcdamn,blmx)
-        bob(2,L) = max(zcdamn,blmx)
-        call switchiadvnearlink(L)
+        do L0 = 1, pstru%numlinks
+           L  = pstru%linknumbers(L0)
+           k1 = ln(1,L)
+           k2 = ln(2,L)
+           blmx     = max(bl(k1), bl(k2))
+           bob(1,L) = max(zcdamn,blmx)
+           bob(2,L) = max(zcdamn,blmx)
+           call switchiadvnearlink(L)
+        enddo
+        
     enddo
 
    !Adjust bobs for dambreak
@@ -33823,7 +33827,7 @@ end subroutine setbobs_fixedweirs
        !do istru = L1strucsg(ns), L2strucsg(ns)
        istru = ns
           pstru => network%sts%struct(istru)
-          L = pstru%link_number
+          L = pstru%linknumbers((1))
           if (hu(l) > 0) then
              k1 = ln(1,L)
              k2 = ln(2,L)

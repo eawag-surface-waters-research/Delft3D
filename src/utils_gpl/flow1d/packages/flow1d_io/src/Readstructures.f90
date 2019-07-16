@@ -71,7 +71,7 @@ module m_readstructures
    !!   is incremented.
    
    ! Structure file current version: 1.00
-   integer, parameter :: StructureFileMajorVersion = 1
+   integer, parameter :: StructureFileMajorVersion = 2
    integer, parameter :: StructureFileMinorVersion = 0
    
    ! History structure file versions:
@@ -113,7 +113,7 @@ module m_readstructures
       
       integer                                                :: iStrucType
       integer                                                :: istru
-      type(t_branch), pointer                                :: pbr
+      type(t_structure), pointer                             :: pstru
       
       integer                       :: pos
       integer                       :: ibin = 0
@@ -144,7 +144,7 @@ module m_readstructures
       major = 0
       minor = 0
       call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
-      if (.not. success .or. major < StructureFileMajorVersion) then
+      if (.not. success .or. (major /= StructureFileMajorVersion .and. major /= 1) ) then
          write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of structure file detected in '''//trim(structurefile)//''': v', major, minor, '. Current format: v',StructureFileMajorVersion,StructureFileMinorVersion,'. Ignoring this file.'
          call warn_flush()
          ierr = 1
@@ -163,22 +163,46 @@ module m_readstructures
          
          if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .eq. 'structure') then
             
+            if (network%sts%count+1 > network%sts%Size) then
+               call realloc(network%sts)
+            endif
+            
             ! Read Common Structure Data
             
-            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'id', structureId, success)
+            call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'id', pstru%id, success)
             if (.not. success) then
                write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ' from '''//trim(structureFile)//''', Id is missing.'
                call err_flush()
                cycle
             endif
-            
+            pstru%name = pstru%id
+            call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'name', pstru%name)
             if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'branchid', branchID, success)
             if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'structure', 'chainage', Chainage, success)
 
-            if (.not. success) then
+            pstru%numCoordinates = 0
+            if (success) then
+               pstru%ibran = hashsearch(network%brs%hashlist, branchID)
+               if (pstru%ibran <= 0) then
+                  msgbuf = 'Branchid '//trim(branchID)//' not found, check '//trim(pstru%id)
+               endif
+            else
+               call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'numCoordinates', pstru%numCoordinates, success)
+               if (success) then
+                  allocate(pstru%xCoordinates(pstru%numCoordinates), pstru%yCoordinates(pstru%numCoordinates))
+                  call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'xCoordinates', pstru%xCoordinates, &
+                                pstru%numCoordinates, success)
+                  if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'yCoordinates', pstru%yCoordinates, &
+                                pstru%numCoordinates, success)
+               endif
+            endif
+            
+            if (.not.success) then
+               msgbuf = 'Location specification is missing for structure '//trim(pstru%id)
+               call err_flush()
                cycle
             endif
-
+            
             if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'type', typestr, success)
             if (.not. success) then
                write (msgbuf, '(a,i0,a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', Type is missing.'
@@ -209,91 +233,73 @@ module m_readstructures
                compoundName = ' '
             endif
             
-            branchIdx = hashsearch(network%brs%hashlist, branchID)
-            
-            pbr => network%brs%branch(branchIdx)
-            
             call lowercase(typestr, 999)
             select case (typestr)
-               
-               case ('weir')
-                  iStrucType = ST_WEIR
-               
-               case ('universalweir')
-                  iStrucType = ST_UNI_WEIR
-               
-               case ('culvert')
-                  iStrucType = ST_CULVERT
-               
-               case ('siphon')
-                  iStrucType = ST_SIPHON
-                  isInvertedSiphon = .false.
-               
-               case ('invertedsiphon')
-                  iStrucType = ST_INV_SIPHON
-                  isInvertedSiphon = .true.
-               
-               case ('bridge')
-                  iStrucType = ST_BRIDGE
-                  isPillarBridge = .false.
-               
-               case ('bridgepillar')
-                  iStrucType = ST_BRIDGE
-                  isPillarBridge = .true.
-               
-               case ('pump')
-                  iStrucType = ST_PUMP
-               
-               case ('orifice', 'gate')
-                  iStrucType = ST_ORIFICE
-               
-               case ('generalstructure')
-                  iStrucType = ST_GENERAL_ST
-               
-               case ('extraresistance')
-                  iStrucType = ST_EXTRA_RES
-               
-               case default
-                  call SetMessage(LEVEL_FATAL, 'Unknown Structure Type')
-
+            case ('weir')
+               iStrucType = ST_WEIR
+            case ('universalweir')
+               iStrucType = ST_UNI_WEIR
+            case ('culvert')
+               iStrucType = ST_CULVERT
+            case ('bridge')
+               iStrucType = ST_BRIDGE
+            case ('pump')
+               iStrucType = ST_PUMP
+            case ('orifice')
+               iStrucType = ST_ORIFICE
+            case ('gate')
+               iStrucType = ST_ORIFICE
+            case ('generalstructure')
+               iStrucType = ST_GENERAL_ST
+            case default
+               call SetMessage(LEVEL_FATAL, 'Unknown Structure Type for '//trim(pstru%id))
+               cycle
             end select
-            
-            istru = Addstructure(network%sts, network%brs, branchIdx, Chainage, iCompound, compoundName, structureId, iStrucType)
-               
-            select case (iStrucType)
-               
+
+            if (major ==1) then   
+               ! support for version 1.0 structure files
+               select case (iStrucType)
                case (ST_WEIR)
                   call readWeir(network%sts%struct(istru)%weir, md_ptr%child_nodes(i)%node_ptr, success)
-               
                case (ST_UNI_WEIR)
                   call readUniversalWeir(network%sts%struct(istru)%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
-               
                case (ST_CULVERT)
                   call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
-               
-               case (ST_SIPHON, ST_INV_SIPHON)
-                  call readSiphon(network, istru, md_ptr%child_nodes(i)%node_ptr, isInvertedSiphon, success)
-               
                case (ST_BRIDGE)
                   call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
-               
                case (ST_PUMP)
                   call readPump(network%sts%struct(istru)%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
-               
                case (ST_ORIFICE)
                   call readOrifice(network%sts%struct(istru)%orifice, md_ptr%child_nodes(i)%node_ptr, success)
-               
                case (ST_GENERAL_ST)
-                  call readGeneralStructure(network%sts%struct(istru)%generalst, md_ptr%child_nodes(i)%node_ptr, success)
-               
-               case (ST_EXTRA_RES)
-                  network%sts%hasExtraResistance = .true.
-                  call readExtraResistance(network%sts%struct(istru)%extrares, md_ptr%child_nodes(i)%node_ptr, success)
-               
-            end select
-
+                  call readGeneralStructure_v100(network%sts%struct(istru)%generalst, md_ptr%child_nodes(i)%node_ptr, success)
+               end select
+            elseif (major ==2) then
+               select case (iStrucType)
+               !case (ST_WEIR)
+               !   call readWeir(network%sts%struct(istru)%weir, md_ptr%child_nodes(i)%node_ptr, success)
+               !case (ST_UNI_WEIR)
+               !   call readUniversalWeir(network%sts%struct(istru)%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
+               !case (ST_CULVERT)
+               !   call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
+               !case (ST_BRIDGE)
+               !   call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
+               !case (ST_PUMP)
+               !   call readPump(network%sts%struct(istru)%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
+               !case (ST_ORIFICE)
+               !   call readOrifice(network%sts%struct(istru)%orifice, md_ptr%child_nodes(i)%node_ptr, success)
+               !case (ST_GENERAL_ST)
+               !   call readGeneralStructure(network%sts%struct(istru)%generalst, md_ptr%child_nodes(i)%node_ptr, success)
+               case default
+                  call setmessage(LEVEL_ERROR,  trim(typestr)//' not implemented for version 2.00, see '//trim(pstru%id))
+               end select
+            endif
+            
             if (.not. success) then
                call SetMessage(LEVEL_FATAL, 'Error Reading Structure '''//trim(network%sts%struct(istru)%id)//'''')
+            else 
+               network%sts%Count = network%sts%Count + 1
+               call incStructureCount(network%sts, iStrucType)
             endif
          
          endif
@@ -361,9 +367,9 @@ module m_readstructures
          read(ibin) pstr%name
          read(ibin) pstr%type
          read(ibin) pstr%ibran
-         read(ibin) pstr%link_number
-         read(ibin) pstr%x
-         read(ibin) pstr%y
+         read(ibin) pstr%linknumbers(1)
+         read(ibin) pstr%xCoordinates(1)
+         read(ibin) pstr%yCoordinates(1)
          read(ibin) pstr%chainage
          read(ibin) pstr%compound
          read(ibin) pstr%compoundName
@@ -557,9 +563,9 @@ module m_readstructures
          write(ibin) pstr%name
          write(ibin) pstr%type
          write(ibin) pstr%ibran
-         write(ibin) pstr%link_number
-         write(ibin) pstr%x
-         write(ibin) pstr%y
+         write(ibin) pstr%linknumbers(1)
+         write(ibin) pstr%xCoordinates(1)
+         write(ibin) pstr%yCoordinates(1)
          write(ibin) pstr%chainage
          write(ibin) pstr%compound
          write(ibin) pstr%compoundName
@@ -1299,12 +1305,6 @@ module m_readstructures
 
       allocate(generalst)
 
-      allocate(generalst%fu(3,1), generalst%ru(3,1), generalst%au(3,1))
-      allocate(generalst%widthcenteronlink(1), generalst%gateclosedfractiononlink(1))
-      generalst%numlinks = 1
-      generalst%widthcenteronlink(1) = 10d0
-      generalst%gateclosedfractiononlink(1) = 0.5d0
-      generalst%gatedoorheight = 1d0
       generalst%velheight = .true.
       call prop_get_double(md_ptr, 'structure', 'widthleftW1', generalst%wu1, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'widthleftWsdl',  generalst%wu2, success)
@@ -1320,78 +1320,67 @@ module m_readstructures
 
       if (success) call prop_get_double(md_ptr, 'structure', 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, success)
 
-      call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',  generalst%cgf_pos, success1)
-      call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',   generalst%cgf_pos, success2)  ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff', generalst%cgd_pos, success1)
-      call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff',  generalst%cgd_pos, success2) ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',  generalst%cwf_pos, success1)
-      call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',   generalst%cwf_pos, success2)  ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff', generalst%cwd_pos, success1)
-      call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff',  generalst%cwd_pos, success2) ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',  generalst%mugf_pos, success1)
-      call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',   generalst%mugf_pos, success2)  ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
+      if (success) call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',  generalst%cgf_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff', generalst%cgd_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',  generalst%cwf_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff', generalst%cwd_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',  generalst%mugf_pos, success)
       
-      call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',  generalst%cgf_neg, success1)
-      call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',   generalst%cgf_neg, success2)  ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff', generalst%cgd_neg, success1)
-      call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff',  generalst%cgd_neg, success2) ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',  generalst%cwf_pos, success1)
-      call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',   generalst%cwf_pos, success2)  ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff', generalst%cwd_neg, success1)
-      call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff',  generalst%cwd_neg, success2) ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
-      call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',  generalst%mugf_neg, success1)
-      call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',   generalst%mugf_neg, success2)  ! Backwards compatible reading of old keyword
-      success = success .and. (success1 .or. success2)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',  generalst%cgf_neg, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff', generalst%cgd_neg, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',  generalst%cwf_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff', generalst%cwd_neg, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',  generalst%mugf_neg, success)
       
       if (success) call prop_get_double(md_ptr, 'structure', 'extraresistance', generalst%extraresistance, success)
       
    end subroutine readGeneralStructure
+  
    
-   subroutine readExtraResistance(extrares, md_ptr, success)
+   subroutine readGeneralStructure_v100(generalst, md_ptr, success)
    
-      type(t_ExtraResistance), pointer, intent(inout)     :: extrares
-      type(tree_data), pointer, intent(in)                :: md_ptr
-      logical, intent(inout)                              :: success 
+      type(t_GeneralStructure), pointer, intent(inout)     :: generalst
+      type(tree_data), pointer, intent(in)                 :: md_ptr
+      logical, intent(inout)                               :: success 
       
-      integer                                             :: istat
-      integer                                             :: numValues
-      double precision, allocatable, dimension(:)         :: levels
-      double precision, allocatable, dimension(:)         :: ksi
+      logical                               :: success1, success2 
 
-      allocate(extrares)
+      allocate(generalst)
+
+      allocate(generalst%fu(3,1), generalst%ru(3,1), generalst%au(3,1))
+      allocate(generalst%widthcenteronlink(1), generalst%gateclosedfractiononlink(1))
+      generalst%numlinks = 1
+      generalst%gateclosedfractiononlink(1) = 1d0
+      generalst%gatedoorheight = huge(1d0)
+      generalst%velheight = .true.
+      call prop_get_double(md_ptr, 'structure', 'widthleftW1', generalst%wu1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'widthleftWsdl',  generalst%wu2, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'widthcenter',    generalst%ws, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'widthrightWsdr', generalst%wd1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'widthrightW2',   generalst%wd2, success)
+                                                                               
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelleftZb1',   generalst%zu1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelleftZbsl',  generalst%zu2, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelcenter',    generalst%zs, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZbsr', generalst%zd1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZb2',  generalst%zd2, success)
+
+      if (success) call prop_get_double(md_ptr, 'structure', 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, success)
+
+      if (success) call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',  generalst%cgf_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff', generalst%cgd_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',  generalst%cwf_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'posdrownweirflowcoeff', generalst%cwd_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'poscontrcoeffreegate',  generalst%mugf_pos, success)
       
-      call prop_get_integer(md_ptr, 'structure', 'numvalues', numValues, success)
-      if (.not. success) return
+      if (success) call prop_get_double(md_ptr, 'structure', 'negfreegateflowcoeff',  generalst%cgf_neg, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negdrowngateflowcoeff', generalst%cgd_neg, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negfreeweirflowcoeff',  generalst%cwf_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negdrownweirflowcoeff', generalst%cwd_neg, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'negcontrcoeffreegate',  generalst%mugf_neg, success)
       
-      call realloc(levels, numValues, stat=istat)
-      if (istat == 0) call realloc(ksi, numValues, stat=istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Reading Extra Resistance: Error Allocating Arrays')
-      endif
-
-      call prop_get_doubles(md_ptr, 'structure', 'levels', levels, numValues, success)
-      if (success)call prop_get_doubles(md_ptr, 'structure', 'ksi', ksi, numValues, success)
-      if (.not. success) return
-      
-      call setTable(extraRes%values, 0, levels, ksi, numValues)
-
-      ! Clear Arrays
-      istat = 0
-      if (allocated(levels)) deallocate(levels, stat=istat)
-      if (istat == 0 .and. allocated(ksi)) deallocate(ksi, stat=istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Reading Extra Resistance: Error Deallocating Arrays')
-      endif
-
-   end subroutine readExtraResistance
-   
+      if (success) call prop_get_double(md_ptr, 'structure', 'extraresistance', generalst%extraresistance, success)
+     
+   end subroutine readGeneralStructure_v100
+  
 end module m_readstructures

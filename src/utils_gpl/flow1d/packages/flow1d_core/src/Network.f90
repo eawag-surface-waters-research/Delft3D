@@ -337,6 +337,7 @@ contains
       double precision                   :: wetperimeter
       type(t_administration_1d)          :: adm
       type(t_branch), pointer            :: pbran
+      type(t_structure), pointer         :: pstru
 
       integer, allocatable, dimension(:) :: crossOrder
       integer, allocatable, dimension(:) :: lastAtBran
@@ -361,8 +362,11 @@ contains
          adm%hasStructures = .false.
       endif
       do istru = 1, network%sts%Count
-         if (network%sts%struct(istru)%link_number > 0) then
-            adm%lin2str(network%sts%struct(istru)%link_number) = istru
+         pstru => network%sts%struct(istru)
+         if (pstru%ibran > 0) then
+            if (network%sts%struct(istru)%linknumbers(1) > 0) then
+               adm%lin2str(network%sts%struct(istru)%linknumbers(1)) = istru
+            endif
          endif
       enddo
       

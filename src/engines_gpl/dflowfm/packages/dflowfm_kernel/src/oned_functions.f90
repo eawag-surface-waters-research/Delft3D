@@ -219,10 +219,12 @@ module m_oned_functions
       do istru = 1, nstru
          pstru   => network%sts%struct(istru)
          pbranch => network%brs%branch(pstru%ibran)
-         ierr = findlink(pstru%ibran, pstru%chainage, pstru%link_number)
+         pstru%numlinks = 1
+         allocate(pstru%linknumbers(1))
+         ierr = findlink(pstru%ibran, pstru%chainage, pstru%linknumbers(1))
          L1strucsg(istru) = istru
          L2strucsg(istru) = istru
-         network%adm%lin2str(network%sts%struct(istru)%link_number) = istru
+         network%adm%lin2str(network%sts%struct(istru)%linknumbers(1)) = istru
       enddo
       
    end subroutine set_structure_grid_numbers
@@ -407,7 +409,7 @@ module m_oned_functions
    implicit none
    
    integer :: i
-   integer :: L
+   integer :: L, L0
    integer :: n1
    integer :: n2
    integer :: nstor
@@ -445,17 +447,19 @@ module m_oned_functions
       pstruc => network%sts%struct(i)
       crest_level = get_crest_level(pstruc)
       if (crest_level < 0.5*huge(1d0)) then
-         L = pstruc%link_number
-         bob(1,L) = crest_level
-         if (bob0(1,L) > 0.5*huge(1d0)) then
-            ! in case no cross section is available for this link also set BOB0 to crest level
-            bob0(1,L) = bob(1,L)
-         endif
-         bob(2,L) = crest_level
-         if (bob0(2,L) > 0.5*huge(1d0)) then
-            ! in case no cross section is available for this link also set BOB0 to crest level
-            bob0(2,L) = bob(2,L)
-         endif
+         do L0 = 1, pstruc%numlinks
+            L = pstruc%linknumbers(L0)
+            bob(1,L) = crest_level
+            if (bob0(1,L) > 0.5*huge(1d0)) then
+               ! in case no cross section is available for this link also set BOB0 to crest level
+               bob0(1,L) = bob(1,L)
+            endif
+            bob(2,L) = crest_level
+            if (bob0(2,L) > 0.5*huge(1d0)) then
+               ! in case no cross section is available for this link also set BOB0 to crest level
+               bob0(2,L) = bob(2,L)
+            endif
+         enddo
       endif
    enddo
    

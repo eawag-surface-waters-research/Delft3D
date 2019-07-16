@@ -28,11 +28,11 @@
 
 
     c_weir%id = string_to_char_array(structure%id)
-    c_weir%x = structure%x
-    c_weir%y = structure%y
+    c_weir%x = structure%xCoordinates(1)
+    c_weir%y = structure%yCoordinates(1)
     c_weir%branchid = structure%ibran
     c_weir%chainage = structure%chainage
-    c_weir%link_number = structure%link_number
+    c_weir%link_number = structure%linknumbers(1)
     c_weir%crest_level = fortranweir%crestlevel
     c_weir%crest_width = fortranweir%crestwidth
     c_weir%discharge_coeff = fortranweir%dischargecoeff
@@ -68,11 +68,11 @@
 
 
     c_orifice%id = string_to_char_array(structure%id)
-    c_orifice%x = structure%x
-    c_orifice%y = structure%y
+    c_orifice%x = structure%xCoordinates(1)
+    c_orifice%y = structure%yCoordinates(1)
     c_orifice%branchid = structure%ibran
     c_orifice%chainage = structure%chainage
-    c_orifice%link_number = structure%link_number
+    c_orifice%link_number = structure%linknumbers(1)
     c_orifice%crest_level = fortranorifice%crestlevel
     c_orifice%crest_width = fortranorifice%crestwidth
     c_orifice%open_level = fortranorifice%openlevel
@@ -111,11 +111,11 @@
 
 
     c_pump%id = string_to_char_array(structure%id)
-    c_pump%x = structure%x
-    c_pump%y = structure%y
+    c_pump%x = structure%xCoordinates(1)
+    c_pump%y = structure%yCoordinates(1)
     c_pump%branchid = structure%ibran
     c_pump%chainage = structure%chainage
-    c_pump%link_number = structure%link_number
+    c_pump%link_number = structure%linknumbers(1)
     c_pump%start_level_suction_side = fortranpump%ss_onlevel(1)
     c_pump%stop_level_suction_side = fortranpump%ss_offlevel(1)
     c_pump%capacity = fortranpump%capacity(1)
@@ -153,11 +153,11 @@
 
 
     c_culvert%id = string_to_char_array(structure%id)
-    c_culvert%x = structure%x
-    c_culvert%y = structure%y
+    c_culvert%x = structure%xCoordinates(1)
+    c_culvert%y = structure%yCoordinates(1)
     c_culvert%branchid = structure%ibran
     c_culvert%chainage = structure%chainage
-    c_culvert%link_number = structure%link_number
+    c_culvert%link_number = structure%linknumbers(1)
     c_culvert%left_level = fortranculvert%leftlevel
     c_culvert%right_level = fortranculvert%rightlevel
     c_culvert%allowed_flow_dir = fortranculvert%allowedflowdir
