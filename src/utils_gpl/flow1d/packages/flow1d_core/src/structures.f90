@@ -175,6 +175,18 @@ module m_1d_structures
       type(t_hashlist)                                      :: hashlist_culvert
       type(t_hashlist)                                      :: hashlist_bridge
       type(t_hashlist)                                      :: hashlist_pump
+      integer                                               :: numWeirs
+      integer                                               :: numCulverts
+      integer                                               :: numPumps
+      integer                                               :: numBridges
+      integer                                               :: numOrifices
+      integer                                               :: numGeneralStructures
+      integer, pointer, dimension(:)                        :: weirIndices
+      integer, pointer, dimension(:)                        :: culvertIndices 
+      integer, pointer, dimension(:)                        :: pumpIndices
+      integer, pointer, dimension(:)                        :: bridgeIndices
+      integer, pointer, dimension(:)                        :: orificeIndices
+      integer, pointer, dimension(:)                        :: generalStructureIndices
    end type t_structureSet
 
    type, public :: t_compound

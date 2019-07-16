@@ -114,7 +114,12 @@ module m_readstructures
       integer                                                :: iStrucType
       integer                                                :: istru
       type(t_structure), pointer                             :: pstru
-      
+      integer                                                ::  nweir
+      integer                                                ::  nculvert
+      integer                                                ::  norifice
+      integer                                                ::  ngenstru
+      integer                                                ::  nbridge
+
       integer                       :: pos
       integer                       :: ibin = 0
       character(len=Charln)         :: binfile
@@ -278,8 +283,6 @@ module m_readstructures
                select case (iStrucType)
                !case (ST_WEIR)
                !   call readWeir(network%sts%struct(istru)%weir, md_ptr%child_nodes(i)%node_ptr, success)
-               !case (ST_UNI_WEIR)
-               !   call readUniversalWeir(network%sts%struct(istru)%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
                !case (ST_CULVERT)
                !   call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
                !case (ST_BRIDGE)
@@ -305,6 +308,38 @@ module m_readstructures
          endif
 
       end do
+      
+      network%sts%numweirs = network%sts%countByType(st_weir)
+      allocate(network%sts%weirIndices(network%sts%numweirs))
+      allocate(network%sts%culvertIndices(network%sts%numCulverts))
+      allocate(network%sts%orificeIndices(network%sts%numOrifices))
+      allocate(network%sts%bridgeIndices(network%sts%numBridges))
+      allocate(network%sts%generalStructureIndices(network%sts%numGeneralStructures))
+      nweir = 0
+      nculvert = 0
+      norifice = 0
+      ngenstru = 0
+      nbridge = 0
+      do istru = 1, network%sts%Count
+         select case (network%sts%struct(istru)%type)
+         case (ST_WEIR)
+            nweir = nweir+1
+            network%sts%weirIndices(nweir) = istru
+         case (ST_CULVERT)
+            nculvert = nculvert + 1
+            network%sts%culvertIndices(nculvert) = istru
+         case (ST_ORIFICE)
+            norifice = norifice + 1
+            network%sts%orificeIndices(norifice) = istru
+         case (ST_BRIDGE)
+            nbridge = nbridge + 1
+            network%sts%bridgeIndices(nbridge) = istru
+         case (ST_GENERAL_ST)
+            ngenstru = ngenstru + 1
+            network%sts%generalStructureIndices(ngenstru) = istru
+         end select
+         
+      enddo
       
       ! Handle the Structure and Compound Names
       if (allocated(compoundNames)) then
