@@ -269,7 +269,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     !---------------------------------------------------------!
 
     ! Delwaq files: filecat is identical to file extension
-    case ('hyd','vol','are','flo','poi','len','srf','tau','vdf','tem','sal','atr','bnd','waqgeom')
+    case ('hyd','vol','are','flo','vel','poi','len','srf','tau','vdf','tem','sal','atr','bnd','waqgeom')
         if (prefix_dir) then
            basename = getoutputdir('waq')
         end if

@@ -346,6 +346,7 @@ type gd_waqpar
     integer                        :: aggre         !  0: no aggregation (=active cells only in FM), 1: aggregation according to content of flhoraggr
     integer                        :: aggrel        !  0: no layer aggregation, 1: layer aggregation
     integer                        :: lunvol        !  file unit number to an output file
+    integer                        :: lunvel        !  file unit number to an output file
     integer                        :: lunare        !  file unit number to an output file
     integer                        :: lunflo        !  file unit number to an output file
     integer                        :: lunsal        !  file unit number to an output file
@@ -379,6 +380,7 @@ type gd_waqpar
     integer,           allocatable :: kmk2(:)       ! Second WAQ segment features at start of calculation (1 surface, 3 bottom, 0 both, 2 neither)
     double precision,  allocatable :: horsurf(:)    ! horizontal surfaces of segments
     double precision,  allocatable :: vol(:)        ! WAQ (aggregated) volumes
+    double precision,  allocatable :: vel(:)        ! WAQ (aggregated) velocities
     double precision,  allocatable :: sal(:)        ! WAQ (aggregated) salinity
     double precision,  allocatable :: tem(:)        ! WAQ (aggregated) temperature
     double precision,  allocatable :: tau(:)        ! WAQ (aggregated) taus
@@ -403,6 +405,7 @@ subroutine reset_waq()
     implicit none
     
     call close_and_reset(waqpar%lunvol)
+    call close_and_reset(waqpar%lunvel)
     call close_and_reset(waqpar%lunsal)
     call close_and_reset(waqpar%luntem)
     call close_and_reset(waqpar%lunare)
@@ -539,6 +542,7 @@ subroutine waq_wri_hyd()
     write (lunhyd, '(a,a)') 'volumes-file                ', ''''//trim(defaultFilename('vol', prefixWithDirectory=.false.))//''''
     write (lunhyd, '(a,a)') 'areas-file                  ', ''''//trim(defaultFilename('are', prefixWithDirectory=.false.))//''''
     write (lunhyd, '(a,a)') 'flows-file                  ', ''''//trim(defaultFilename('flo', prefixWithDirectory=.false.))//''''
+    write (lunhyd, '(a,a)') 'velocities-file             ', ''''//trim(defaultFilename('vel', prefixWithDirectory=.false.))//''''
     write (lunhyd, '(a,a)') 'pointers-file               ', ''''//trim(defaultFilename('poi', prefixWithDirectory=.false.))//''''
     write (lunhyd, '(a,a)') 'lengths-file                ', ''''//trim(defaultFilename('len', prefixWithDirectory=.false.))//''''
  
@@ -1580,7 +1584,7 @@ end subroutine waq_wri_model_files
 
 
 !> Writes all necessary time-dependent couple files for DelWAQ.
-!! (.are, .flo, .vol)
+!! (.are, .flo, .vol, .vel)
 !!
 !! Note: flow-related files (.are and .flo) are not written for first
 !! time. Thereafter, accumulated flux is associated with previous
@@ -1619,6 +1623,9 @@ subroutine waq_wri_couple_files(time)
     call waq_wri_vol(itim, defaultFilename('vol'), waqpar%lunvol)
     ! TODO: AvD: add a 'mode' 0/1/2 similar to Delft3D, so that we can write some quantities
     ! at *start* of *next* timestep instead of currently at the *end* of *current* timestep.
+
+    ! Flow velocity file (Flow element center velocity magnitude)
+    call waq_wri_vel(itim, defaultFilename('vel'), waqpar%lunvel)
 
     ! Salinty file (salinity of computational cells)
     if (jasal > 0) then
@@ -1828,6 +1835,7 @@ subroutine waq_prepare_aggr()
     waqpar%noseg = waqpar%nosegl * waqpar%kmxnxa
     call realloc(waqpar%nosega, waqpar%noseg, keepExisting=.false., fill=0)
     call realloc(waqpar%vol, waqpar%noseg, keepExisting=.false., fill=0d0)
+    call realloc(waqpar%vel, waqpar%noseg, keepExisting=.false., fill=0d0)
     call realloc(waqpar%sal, waqpar%noseg, keepExisting=.false., fill=0d0)
     call realloc(waqpar%tem, waqpar%noseg, keepExisting=.false., fill=0d0)
     call realloc(waqpar%tau, waqpar%noseg, keepExisting=.false., fill=0d0)
@@ -2407,6 +2415,65 @@ end subroutine waq_wri_vol
 !------------------------------------------------------------------------------
 
 
+!> Write WAQ vel file.
+!! (contains flow element center velocity magnitude)
+subroutine waq_wri_vel(itim, filenamevel, lunvel)
+    use m_flowgeom
+    use m_flow
+    use wrwaq
+    implicit none
+!
+!           Global variables
+!
+    integer,          intent(in)    :: itim     !< time (seconds) since simulation start
+    character(len=*), intent(in)    :: filenamevel !< Output filename for vel (only used when lunvel < 0).
+    integer,          intent(inout) :: lunvel   !< File pointer for output vel-file (opened upon first call).
+!
+!           Local variables
+!
+    integer :: i, k, kb, kt, ktx, kk
+!
+!! executable statements -------------------------------------------------------
+!
+    waqpar%vel = 0d0
+
+    ! Update velocity magnitudes (only available on request)
+    call getucxucyeulmag(ndkx, workx, worky, ucmag, 1, 1)
+ 
+    if (waqpar%aggre == 0 .and. waqpar%kmxnxa == 1) then
+        do i = 1, ndxi
+            waqpar%vel(i) = ucmag(i)
+        end do
+    else if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
+        do k = 1, ndxi
+            call getkbotktopmax(k,kb,kt,ktx)
+            do kk = kb, ktx
+                waqpar%vel(waqpar%isaggr(kk)) = ucmag(k)
+            end do
+        end do
+    else
+        ! vels are aggregated horizontal surface weighted
+        do k = 1, ndxi
+            waqpar%vel(waqpar%isaggr(k)) = waqpar%vel(waqpar%isaggr(k)) + ucmag(k) * max(ba(k), 0d0)
+        end do
+        do i = 1, waqpar%nosegl
+            if (waqpar%horsurf(i) > 1d-25) then
+                waqpar%vel(i) = waqpar%vel(i) / waqpar%horsurf(i)
+            end if
+        end do
+        do i = 1, waqpar%nosegl
+            do k = 1, waqpar%kmxnxa - 1
+                waqpar%vel(i + k * waqpar%nosegl) = waqpar%vel(i)
+            end do
+        end do
+    end if            
+            
+    ! Call the waq-vol file writer for vel
+    call wrwaqbin(itim, waqpar%vel, waqpar%noseg, filenamevel, waq_format_ascii, lunvel)
+
+end subroutine waq_wri_vel
+!
+!------------------------------------------------------------------------------
 
 
 !> Write WAQ sal file.
