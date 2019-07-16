@@ -2978,11 +2978,14 @@ endif
 
 if (jawaveswartdelwaq == 0) then 
    taucurc = rhomean*ust2
-else if (jawaveSwartDelwaq == 1) then  
-   call Swart(Twav(n), uorb(n), z0wav, fw)
-   taucurc = rhomean* (ust2 + 0.5d0*fw*uorb(n)*uorb(n) )         ! Swart
+else if (jawaveSwartDelwaq == 1) then 
+   if (twav(n) > 1d-2) then 
+      call Swart(Twav(n), uorb(n), z0wav, fw)
+      ust2 = ust2 + 0.5d0*fw*uorb(n)*uorb(n)       ! Swart          
+   endif
+   taucurc = rhomean*ust2          
 else if (jawaveSwartDelwaq == 2) then 
-   taucurc = ust                                                 ! area averaged taubxu
+   taucurc = ust                                   ! area averaged taubxu
 endif
 
 end subroutine gettau
