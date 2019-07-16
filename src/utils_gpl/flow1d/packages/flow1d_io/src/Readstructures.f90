@@ -1160,23 +1160,9 @@ module m_readstructures
       
       if (pump%nrstages == 1) then
          ! In case of only 1 stage, capacity is either scalar double, or filename, or 'realtime'.
-         call prop_get_double(md_ptr, 'structure', 'capacity', pump%capacity(1), success)
-         if (.not. success) then
-            call prop_get_string(md_ptr, 'structure', 'capacity', tmpstr, success)
-            if (success) then
-               forcinglist%Count = forcinglist%Count+1
-               if (forcinglist%Count > forcinglist%Size) then
-                  call realloc(forcinglist)
-               end if
-
-               forcinglist%forcing(forcinglist%Count)%st_id      = st_id
-               forcinglist%forcing(forcinglist%Count)%st_type    = ST_PUMP
-               forcinglist%forcing(forcinglist%Count)%param_name = 'capacity'
-               forcinglist%forcing(forcinglist%Count)%targetptr  => pump%capacity(1)
-               forcinglist%forcing(forcinglist%Count)%filename   = tmpstr
-            end if
-         end if
+         call get_value_or_addto_forcinglist(md_ptr, 'capacity', pump%capacity(1), st_id, ST_PUMP, forcinglist, success)
          ! addtimespace gaat qid='pump' gebruiken, de bc provider moet via FM juiste name doorkrijgen (==structureid)
+         
       else
          ! Multiple stages: only support table with double precision values.
          call prop_get_doubles(md_ptr, 'structure', 'capacity', pump%capacity, pump%nrstages, success)     
@@ -1243,6 +1229,41 @@ module m_readstructures
       
    end subroutine readPump
    
+   subroutine get_value_or_addto_forcinglist(md_ptr, key, value, st_id, st_type, forcinglist, success)
+      type(tree_data), pointer,     intent(in   ) :: md_ptr      !< ini tree pointer with user input.
+      character(IdLen),             intent(in   ) :: st_id       !< Structure character Id.
+      type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
+      logical,                      intent(inout) :: success
+      double precision, target,     intent(  out) :: value
+      integer,                      intent(in   ) :: st_type     !< structure type
+      character(len=*),             intent(in   ) :: key
+      integer                                     :: tabsize
+      integer                                     :: istat
+      double precision, allocatable, dimension(:) :: head   
+      double precision, allocatable, dimension(:) :: redfac   
+      character(CharLn) :: tmpstr
+      
+      
+      call prop_get_double(md_ptr, 'structure', key, value, success)
+      if (.not. success) then
+         call prop_get_string(md_ptr, 'structure', key, tmpstr, success)
+         if (success) then
+            forcinglist%Count = forcinglist%Count+1
+            if (forcinglist%Count > forcinglist%Size) then
+               call realloc(forcinglist)
+            end if
+
+            forcinglist%forcing(forcinglist%Count)%st_id      = st_id
+            forcinglist%forcing(forcinglist%Count)%st_type    = ST_PUMP
+            forcinglist%forcing(forcinglist%Count)%param_name = key
+            forcinglist%forcing(forcinglist%Count)%targetptr  => value
+            forcinglist%forcing(forcinglist%Count)%filename   = tmpstr
+         end if
+      endif
+      
+
+   end subroutine get_value_or_addto_forcinglist
+   
    subroutine readOrifice(orifice, md_ptr, success)
    
       type(t_orifice), pointer, intent(inout)     :: orifice
@@ -1297,29 +1318,38 @@ module m_readstructures
    
    subroutine readGeneralStructure(generalst, md_ptr, success)
    
+      use messageHandling
+      
       type(t_GeneralStructure), pointer, intent(inout)     :: generalst
       type(tree_data), pointer, intent(in)                 :: md_ptr
       logical, intent(inout)                               :: success 
       
       logical                               :: success1, success2 
+      
+      character(len=Idlen) :: dirstring
 
       allocate(generalst)
 
       generalst%velheight = .true.
-      call prop_get_double(md_ptr, 'structure', 'widthleftW1', generalst%wu1, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'widthleftWsdl',  generalst%wu2, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'widthcenter',    generalst%ws, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'widthrightWsdr', generalst%wd1, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'widthrightW2',   generalst%wd2, success)
+      call prop_get_double(md_ptr, 'structure', 'upstream1Width', generalst%wu1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'upstream2Width',  generalst%wu2, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'crestWidth',    generalst%ws, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'downstream1Width', generalst%wd1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'downstream2Width',   generalst%wd2, success)
                                                                                
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelleftZb1',   generalst%zu1, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelleftZbsl',  generalst%zu2, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelcenter',    generalst%zs, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZbsr', generalst%zd1, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'levelrightZb2',  generalst%zd2, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'upstream1Level',   generalst%zu1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'upstream2Level',  generalst%zu2, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'crestLevel',    generalst%zs, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'downstream1Level', generalst%zd1, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'downstream2Level',  generalst%zd2, success)
 
       if (success) call prop_get_double(md_ptr, 'structure', 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, success)
-
+      if (success) call prop_get_double(md_ptr, 'structure', 'crestLength',   generalst%crestlength, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'gateHeight',   generalst%gatedoorheight, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'gateOpeningWidth',   generalst%gateopeningwidth, success)
+      if (success) call prop_get_string(md_ptr, 'structure', 'gateOpeningHorizontalDirection',   dirString, success)
+! TODO add extra parameter in t_GeneralStructure
+      
       if (success) call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',  generalst%cgf_pos, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'posdrowngateflowcoeff', generalst%cgd_pos, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'posfreeweirflowcoeff',  generalst%cwf_pos, success)
@@ -1353,7 +1383,7 @@ module m_readstructures
       generalst%gateclosedfractiononlink(1) = 1d0
       generalst%gatedoorheight = huge(1d0)
       generalst%velheight = .true.
-      call prop_get_double(md_ptr, 'structure', 'widthleftW1', generalst%wu1, success)
+      call prop_get_double(md_ptr, 'structure', 'upstream1Width', generalst%wu1, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'widthleftWsdl',  generalst%wu2, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'widthcenter',    generalst%ws, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'widthrightWsdr', generalst%wd1, success)
