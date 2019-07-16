@@ -2448,23 +2448,21 @@ subroutine waq_wri_vel(itim, filenamevel, lunvel)
         do k = 1, ndxi
             call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
-                waqpar%vel(waqpar%isaggr(kk)) = ucmag(k)
+                waqpar%vel(waqpar%isaggr(kk)) = ucmag(kk)
             end do
         end do
     else
         ! vels are aggregated horizontal surface weighted
         do k = 1, ndxi
-            waqpar%vel(waqpar%isaggr(k)) = waqpar%vel(waqpar%isaggr(k)) + ucmag(k) * max(ba(k), 0d0)
-        end do
-        do i = 1, waqpar%nosegl
-            if (waqpar%horsurf(i) > 1d-25) then
-                waqpar%vel(i) = waqpar%vel(i) / waqpar%horsurf(i)
-            end if
-        end do
-        do i = 1, waqpar%nosegl
-            do k = 1, waqpar%kmxnxa - 1
-                waqpar%vel(i + k * waqpar%nosegl) = waqpar%vel(i)
+            call getkbotktopmax(k,kb,kt,ktx)
+            do kk = kb, ktx
+                waqpar%vel(waqpar%isaggr(kk)) = waqpar%vel(waqpar%isaggr(kk)) + ucmag(kk) * max(ba(k), 0d0)
             end do
+        end do
+        do i = 1, waqpar%noseg
+            if (waqpar%horsurf(i) > 1d-25) then
+               waqpar%vel(i) = waqpar%vel(i) / waqpar%horsurf(i)
+            endif
         end do
     end if            
             
