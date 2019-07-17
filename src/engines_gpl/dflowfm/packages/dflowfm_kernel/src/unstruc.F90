@@ -33642,7 +33642,7 @@ end subroutine setbobs_fixedweirs
 
  implicit none
 
- integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns, nstrucsg
+ integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns, nstrucsg, L0
  integer          :: kfu, istru
  integer          :: state
  integer          :: mdown
@@ -33822,12 +33822,11 @@ end subroutine setbobs_fixedweirs
     enddo
 
     nstrucsg = network%sts%count
-    !do ns = 1, nstrucsg
-    do ns = 1, nstrucsg
-       !do istru = L1strucsg(ns), L2strucsg(ns)
-       istru = ns
-          pstru => network%sts%struct(istru)
-          L = pstru%linknumbers((1))
+    do istru = 1, nstrucsg
+       pstru => network%sts%struct(istru)
+
+       do L0 = 1, pstru%numlinks
+          L = pstru%linknumbers(L0)
           if (hu(l) > 0) then
              k1 = ln(1,L)
              k2 = ln(2,L)
@@ -33845,7 +33844,7 @@ end subroutine setbobs_fixedweirs
                    as1 = wu(L)*(s1(k1)-bob0(1,L))
                    as2 = wu(L)*(s1(k2)-bob0(2,L))
                    call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L) 
-                   call computeGeneralStructure(pstru%generalst, 1, huge(1d0), fu(L), ru(L), s_on_crest, &
+                   call computeGeneralStructure(pstru%generalst, L0, wu(L), fu(L), ru(L), s_on_crest, &
                           au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea, state)
                 case (ST_PUMP)
                    continue ! WIP carniato: pumps should not be in network data structure, furu computation is in npumpsg loop, and not here.
@@ -33872,7 +33871,7 @@ end subroutine setbobs_fixedweirs
                    call err_flush()
              end select
           endif
-       !enddo
+       enddo
     enddo
 
  else                                                  ! 3D

@@ -361,15 +361,7 @@ contains
       else
          adm%hasStructures = .false.
       endif
-      do istru = 1, network%sts%Count
-         pstru => network%sts%struct(istru)
-         if (pstru%ibran > 0) then
-            if (network%sts%struct(istru)%linknumbers(1) > 0) then
-               adm%lin2str(network%sts%struct(istru)%linknumbers(1)) = istru
-            endif
-         endif
-      enddo
-      
+
       adm%lin2ibr   = -huge(1)
       adm%lin2point = -huge(1)  
       adm%lin2local = -huge(1)

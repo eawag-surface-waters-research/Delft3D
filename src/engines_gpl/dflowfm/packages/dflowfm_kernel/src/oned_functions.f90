@@ -222,9 +222,18 @@ module m_oned_functions
          pstru%numlinks = 1
          allocate(pstru%linknumbers(1))
          ierr = findlink(pstru%ibran, pstru%chainage, pstru%linknumbers(1))
-         L1strucsg(istru) = istru
-         L2strucsg(istru) = istru
          network%adm%lin2str(network%sts%struct(istru)%linknumbers(1)) = istru
+         !TODO: Temporary solution. this should be done in flow_init_structurecontrol
+         if (pstru%type == ST_GENERAL_ST) then
+            allocate(pstru%generalst%widthcenteronlink(1), pstru%generalst%gateclosedfractiononlink(1))
+            allocate(pstru%generalst%fu(3,1), pstru%generalst%ru(3,1), pstru%generalst%au(3,1))
+            pstru%generalst%widthcenteronlink(1) = pstru%generalst%ws
+            pstru%generalst%gateclosedfractiononlink(1) = (pstru%generalst%ws - pstru%generalst%gateopeningwidth)/pstru%generalst%ws
+            pstru%generalst%fu = 0d0
+            pstru%generalst%ru = 0d0
+            pstru%generalst%au = 0d0
+         endif
+         
       enddo
       
    end subroutine set_structure_grid_numbers

@@ -221,9 +221,10 @@ contains
       endif
       
       auL =  gatefraction*(      au(1)+      au(2)) +(1d0-gatefraction)*      au(3)
-      fuL = (gatefraction*(fu(1)*au(1)+fu(2)*au(2)) +(1d0-gatefraction)*fu(3)*au(3))/auL
-      ruL = (gatefraction*(ru(1)*au(1)+ru(2)*au(2)) +(1d0-gatefraction)*ru(3)*au(3))/auL
-
+      if (auL > 0d0) then
+         fuL = (gatefraction*(fu(1)*au(1)+fu(2)*au(2)) +(1d0-gatefraction)*fu(3)*au(3))/auL
+         ruL = (gatefraction*(ru(1)*au(1)+ru(2)*au(2)) +(1d0-gatefraction)*ru(3)*au(3))/auL
+      endif
       genstr%fu(:,L0) = fu
       genstr%ru(:,L0) = ru
       genstr%au(:,L0) = au
