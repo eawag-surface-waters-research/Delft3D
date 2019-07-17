@@ -7305,19 +7305,23 @@ contains
         if (m <= 0) then
            errormessage = 'Unknown node id: '// trim(filename)
            return
-        endif
-        
-        if (usemask .and. kc(m) .eq. -1 ) then
-           errormessage = 'Boundary location already claimed; Overlap with other bnds?'
-           return
         else
-           num     =  num + 1
-           ki(num) =  m
-           if (usemask) then ! If we don't use the mask, also don't administer this opened bnd location (e.g. for salinitybnd)
-              kc(m)   = -1                ! this tells you this point is already claimed by some bnd
+           if (usemask .and. kc(m) .eq. -1 ) then
+              errormessage = 'Boundary with nodeId '''//trim(filename)//''' already claimed; Overlap with other bnds?'
+              call mess(LEVEL_WARN, errormessage)
+              return
+           else if (usemask .and. kc(m) == 0 ) then
+              errormessage = 'Boundary with nodeId '''//trim(filename)//''' is not an allowed location.  AllowBndAtBifurcation=1 might solve this.'
+              call mess(LEVEL_WARN, errormessage)
+              return
+           else
+              num     =  num + 1
+              ki(num) =  m
+              if (usemask) then ! If we don't use the mask, also don't administer this opened bnd location (e.g. for salinitybnd)
+                 kc(m)   = -1                ! this tells you this point is already claimed by some bnd
+              end if
            end if
-        end if
-        
+         endif
      end if
    end subroutine selectelset
    !
