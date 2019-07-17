@@ -84,12 +84,13 @@ module m_readstructures
 
    contains
 
+   !> Read the structure.ini file
    subroutine readStructures(network, structureFile)
       use m_GlobalParameters
       implicit none
       
-      type(t_network), intent(inout) :: network
-      character*(*), intent(in)      :: structureFile
+      type(t_network), intent(inout) :: network              !< Network pointer
+      character*(*), intent(in)      :: structureFile        !< Name of the structure file
 
       logical                                                :: success
       type(tree_data), pointer                               :: md_ptr 
@@ -195,7 +196,7 @@ module m_readstructures
                   success = .false.
                   cycle
                endif
-            else !TODO maak foutmeldingen consistent
+            else 
                call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'numCoordinates', pstru%numCoordinates, success)
                if (success) then
                   allocate(pstru%xCoordinates(pstru%numCoordinates), pstru%yCoordinates(pstru%numCoordinates))
@@ -207,7 +208,7 @@ module m_readstructures
             endif
             
             if (.not.success) then
-               msgbuf = 'Location specification is missing for structure '//trim(pstru%id)
+               msgbuf = 'Location specification is missing for structure '//trim(pstru%id)//' in '//trim(structureFile)
                call warn_flush()
                cycle
             endif
@@ -316,6 +317,7 @@ module m_readstructures
          
       end do
       
+      ! Set counters for number of weirs, culverts, etc
       network%sts%numweirs    = network%sts%countByType(ST_WEIR)
       network%sts%numculverts = network%sts%countByType(ST_CULVERT)
       network%sts%numOrifices = network%sts%countByType(ST_PUMP)
@@ -326,6 +328,8 @@ module m_readstructures
       allocate(network%sts%orificeIndices(network%sts%numOrifices))
       allocate(network%sts%bridgeIndices(network%sts%numBridges))
       allocate(network%sts%generalStructureIndices(network%sts%numGeneralStructures))
+      
+      !set structure indices for different structure types
       nweir = 0
       nculvert = 0
       norifice = 0
@@ -1275,14 +1279,16 @@ module m_readstructures
       
    end subroutine readPump
    
+   !> Either retrieve a constant value for parameter KEY, or get the filename for the time series
    subroutine get_value_or_addto_forcinglist(md_ptr, key, value, st_id, st_type, forcinglist, success)
       type(tree_data), pointer,     intent(in   ) :: md_ptr      !< ini tree pointer with user input.
       character(IdLen),             intent(in   ) :: st_id       !< Structure character Id.
       type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
-      logical,                      intent(inout) :: success
-      double precision, target,     intent(  out) :: value
+      logical,                      intent(inout) :: success     
+      double precision, target,     intent(  out) :: value       !< constant value from input
       integer,                      intent(in   ) :: st_type     !< structure type
-      character(len=*),             intent(in   ) :: key
+      character(len=*),             intent(in   ) :: key         !< name of the item in the input file
+      
       integer                                     :: tabsize
       integer                                     :: istat
       double precision, allocatable, dimension(:) :: head   
@@ -1298,7 +1304,6 @@ module m_readstructures
             if (forcinglist%Count > forcinglist%Size) then
                call realloc(forcinglist)
             end if
-
             forcinglist%forcing(forcinglist%Count)%st_id      = st_id
             forcinglist%forcing(forcinglist%Count)%st_type    = ST_PUMP
             forcinglist%forcing(forcinglist%Count)%param_name = key
@@ -1362,6 +1367,7 @@ module m_readstructures
    
    end subroutine readOrifice
 
+   !> Read the general structure parameters
    subroutine readGeneralStructure(generalst, md_ptr, st_id, forcinglist, success)
    
       use messageHandling
@@ -1415,11 +1421,11 @@ module m_readstructures
       
    end subroutine readGeneralStructure
   
-   
+   !> Read the general structure parameters for version 1.00 files
    subroutine readGeneralStructure_v100(generalst, md_ptr, success)
    
-      type(t_GeneralStructure), pointer, intent(inout)     :: generalst
-      type(tree_data), pointer, intent(in)                 :: md_ptr
+      type(t_GeneralStructure), pointer, intent(inout)     :: generalst     !< general structure to be read into 
+      type(tree_data), pointer, intent(in)                 :: md_ptr        !< ini tree pointer with user input.
       logical, intent(inout)                               :: success 
       
       logical                               :: success1, success2 
