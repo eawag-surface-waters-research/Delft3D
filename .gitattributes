@@ -3073,6 +3073,7 @@ src/third_party/interacter_stub/src/interacter_stub.f90 -text
 src/third_party_open/Makefile.am -text
 src/third_party_open/Makefile_cf_rr_rtc.am -text
 src/third_party_open/Makefile_tools.am -text
+src/third_party_open/SonarQube/README -text
 src/third_party_open/Tecplot/README.txt -text
 src/third_party_open/Tecplot/include/ADDON.h -text
 src/third_party_open/Tecplot/include/ADKUTIL.h -text
