@@ -309,7 +309,11 @@ module m_readstructures
 
       end do
       
-      network%sts%numweirs = network%sts%countByType(st_weir)
+      network%sts%numweirs    = network%sts%countByType(ST_WEIR)
+      network%sts%numculverts = network%sts%countByType(ST_CULVERT)
+      network%sts%numOrifices = network%sts%countByType(ST_PUMP)
+      network%sts%numBridges  = network%sts%countByType(ST_ORIFICE)
+      network%sts%numGeneralStructures = network%sts%countByType(ST_GENERAL_ST)
       allocate(network%sts%weirIndices(network%sts%numweirs))
       allocate(network%sts%culvertIndices(network%sts%numCulverts))
       allocate(network%sts%orificeIndices(network%sts%numOrifices))
