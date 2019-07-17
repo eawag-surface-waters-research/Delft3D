@@ -973,7 +973,11 @@ use m_tablematrices
     !
     if (associated(cross)) then
        ! section refers to the roughness section *within* the cross section. Actual friction section index then comes from lookup.
-       isec = cross%frictionsectionIndex(section)
+       if (cross%frictionSectionsCount > 0) then
+         isec = cross%frictionsectionIndex(min(cross%frictionSectionsCount, section))
+       else
+          isec = section
+       endif
     else
        ! No cross section definition: section directly refers to a friction section index.
        isec = section
