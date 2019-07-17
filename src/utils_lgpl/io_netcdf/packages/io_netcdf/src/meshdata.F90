@@ -84,6 +84,8 @@ type t_ug_meshgeom
    !Mesh1d variables
    integer,                           pointer :: nodebranchidx(:)  => null()           !< The branch index of each 1d mesh point
    double precision,                  pointer :: nodeoffsets(:)    => null()           !< The branch offset of each 1d mesh point
+   integer,                           pointer :: edgebranchidx(:)  => null()           !< The branch index of each 1d mesh edge ! TODO: UNST-2716: also incorporate these two new fields in _c interface and C# wrappers.
+   double precision,                  pointer :: edgeoffsets(:)    => null()           !< The branch offset of each 1d mesh edge
    character(len=ug_idsLen),          pointer :: nodeids(:)        => null()                
    character(len=ug_idsLongNamesLen), pointer :: nodelongnames(:)  => null()
    character(len=ug_idsLen),          pointer :: branchids(:)      => null()                

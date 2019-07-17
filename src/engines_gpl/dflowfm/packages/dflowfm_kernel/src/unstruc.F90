@@ -20191,6 +20191,13 @@ end subroutine unc_write_shp
     endif
 
     dx(L) = dbdistance ( xz(k1), yz(k1), xz(k2), yz(k2), jsferic, jasfer3D, dmiss)  ! set link length
+    ! Optionally, override dx(L) with netlink length as read from file (typically 1D with user-defined branch lengths).
+    if (allocated(dxe)) then
+       LL = ln2lne(L)
+       if (dxe(LL) /= dmiss) then
+          dx(L) = dxe(LL)
+       end if
+    end if
 
     if (kcu(L) == 4) then                                  ! 1D2D lateral link, normal to 2D netlink
        call normalout(xk(k3), yk(k3), xk(k4), yk(k4), xn, yn, jsferic, jasfer3D, dmiss, dxymis)

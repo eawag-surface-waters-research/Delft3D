@@ -141,8 +141,10 @@ enum, bind(C)
 enumerator::mid_start = 1
 !1d variables
 enumerator mid_1dtopo                     !< The network used by this topology
-enumerator mid_1dnodebranch               !< Variable ID for 1d branches ids of each mesh point 
-enumerator mid_1dnodeoffset               !< Coordinate variable ID for mesh offsets
+enumerator mid_1dnodebranch               !< Variable ID for 1d branch indexes of each mesh point 
+enumerator mid_1dnodeoffset               !< Coordinate variable ID for mesh point offsets on branches
+enumerator mid_1dedgebranch               !< Variable ID for 1d branch indexes of each mesh edge
+enumerator mid_1dedgeoffset               !< Coordinate variable ID for mesh edge offsets on branches
 !2d variables
 enumerator mid_meshtopo                    !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
 enumerator mid_edgenodes                   !< Variable ID for edge-to-node mapping table.
@@ -2048,6 +2050,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       ierr = att_to_varid(ncid, varid, 'coordinate_space', meshids%varids(mid_1dtopo))
       !read branch id and offsets
       ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', meshids%varids(mid_1dnodebranch), meshids%varids(mid_1dnodeoffset))
+      ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'edge_coordinates', meshids%varids(mid_1dedgebranch), meshids%varids(mid_1dedgeoffset))
    end if
 
    !
@@ -2059,8 +2062,9 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       if (ierr == nf90_noerr .and. meshids%dimids(mdim_node) == -1) then
          ierr = varid_to_dimid(ncid, meshids%varids(mid_nodex), meshids%dimids(mdim_node))
       end if
+      ! TODO: UNST-2763: once we support both branchid/offset AND x/y, move the next line out of this IF again.
+      ierr = att_to_coordvarids(ncid, varid, 'edge_coordinates', meshids%varids(mid_edgex), meshids%varids(mid_edgey))
    endif
-   ierr = att_to_coordvarids(ncid, varid, 'edge_coordinates', meshids%varids(mid_edgex), meshids%varids(mid_edgey))
    ierr = att_to_coordvarids(ncid, varid, 'face_coordinates', meshids%varids(mid_facex), meshids%varids(mid_facey))
 
    !
@@ -2725,6 +2729,10 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
             ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%start_index)
             !Here i can not use gridgeom to get xy coordinates of the mesh1d (gridgeom depends on io_netcdf)
             
+            call reallocP(meshgeom%edgebranchidx, meshgeom%numedge, keepExisting = .false., fill = -999)
+            call reallocP(meshgeom%edgeoffsets, meshgeom%numedge, keepExisting = .false., fill = -999d0)
+            ierr = ug_get_1d_mesh_edge_coordinates(ncid, meshids, meshgeom%edgebranchidx, meshgeom%edgeoffsets, meshgeom%start_index)
+
             if (present(network1dname)) then
                ierr = ug_get_network_name_from_mesh1d(ncid, meshids, network1dname)
             endif
@@ -3844,17 +3852,18 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension','n'//prefix//'_node')
    if (writexy == 1) then
-       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset '//prefix//'_node_x '//prefix//'_node_y')
+       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_node_branch '//prefix//'_node_offset '//prefix//'_node_x '//prefix//'_node_y')
+       ! TODO: UNST-2763: do we need to add edge coordinates here as well for writing? Same below.
    endif
    if (writexy == 0) then
-       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset')
+       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_node_branch '//prefix//'_node_offset')
    endif
    
    ! 1. mesh1D :assign the branch number to each node
-   ierr = nf90_def_var(ncid, prefix//'_nodes_branch_id', nf90_int, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dnodebranch))
+   ierr = nf90_def_var(ncid, prefix//'_node_branch', nf90_int, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dnodebranch))
    ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodebranch), 'long_name', 'Number of the branch on which the node is located')
    ! 2. mesh1D :assign the the offset from the starting node
-   ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dnodeoffset))
+   ierr = nf90_def_var(ncid, prefix//'_node_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dnodeoffset))
    ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodeoffset), 'long_name', 'Offset along the branch at which the node is located')   
    ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodeoffset), 'units', 'm')   
    
@@ -4439,7 +4448,7 @@ function ug_read_1d_network_branches_geometry(ncid, netids, geopointsX, geopoint
 
 end function ug_read_1d_network_branches_geometry
 
-!> This function gets the number of mesh points
+!> This function gets the number of mesh points (i.e., the nodes).
 function ug_get_1d_mesh_discretisation_points_count(ncid, meshids, nmeshpoints) result(ierr)
 
    integer, intent(in)               :: ncid
@@ -4455,37 +4464,7 @@ function ug_get_1d_mesh_discretisation_points_count(ncid, meshids, nmeshpoints) 
 end function ug_get_1d_mesh_discretisation_points_count
 
 !> This function reads the geometry information for the mesh points
-function ug_get_1d_mesh_discretisation_points(ncid, meshids, nodebranchidx, nodeoffsets, startIndex) result(ierr)
-   use array_module
-   integer, intent(in)                      :: ncid, startIndex
-   type(t_ug_mesh), intent(in)              :: meshids 
-   real(kind=dp),   intent(out)             :: nodeoffsets(:)
-   integer,intent(out)                      :: nodebranchidx(:)
-   integer                                  :: ierr,varStartIndex
-         
-   ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodebranch), nodebranchidx)
-
-   !we check for the start_index, we do not know if the variable was written as 0 based
-   ierr = nf90_get_att(ncid, meshids%varids(mid_1dnodebranch),'start_index', varStartIndex)
-   if (ierr .eq. UG_NOERR) then
-        ierr = convert_start_index(nodebranchidx, imiss, varStartIndex, startIndex)
-   else
-        ierr = convert_start_index(nodebranchidx, imiss, 0, startIndex)
-   endif
-   
-   !define dim
-   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the branch ids')
-   end if 
-   ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodeoffset), nodeoffsets)
-   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the node offsets')
-   end if 
-    
-end function  ug_get_1d_mesh_discretisation_points
-
-!> This function reads the geometry information for the mesh points
-function ug_get_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, nodeoffsets, startIndex, coordx, coordy) result(ierr)
+function ug_get_1d_mesh_discretisation_points(ncid, meshids, nodebranchidx, nodeoffsets, startIndex, coordx, coordy) result(ierr)
    use array_module
    integer, intent(in)                      :: ncid, startIndex
    type(t_ug_mesh), intent(in)              :: meshids 
@@ -4528,7 +4507,68 @@ function ug_get_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, n
       end if
    endif
     
-end function  ug_get_1d_mesh_discretisation_points_v1
+end function  ug_get_1d_mesh_discretisation_points
+
+!> This function reads the coordinate values for the mesh edges.
+!! That is, branch index and offsets, and optionally the x/y coordinates.
+!! For x/y coordinates: these are only read from file when present, not calculated from offsets.
+function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffsets, startIndex, edgex, edgey) result(ierr)
+   use array_module
+   integer,         intent(in)              :: ncid               !< NetCDF dataset id, should be already open.
+   integer,         intent(in)              :: startIndex         !< Desired startIndex in output arrays. May be different from startIndex in the file's variables.
+   type(t_ug_mesh), intent(in)              :: meshids            !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,         intent(  out)           :: edgebranchidx(:)   !< Array in which the branch index for all edges will be stored.
+   real(kind=dp),   intent(  out)           :: edgeoffsets(:)     !< Array in which the offset for all edges will be stored.
+
+   real(kind=dp),   intent(  out), optional :: edgex(:), edgey(:) !< The array in which the x and y coordinates for all edges will be stored (if present).
+   integer                                  :: ierr               !< Result status, ug_noerr if successful. Nonzero if some arrays could not be read from file.
+   
+   integer :: varStartIndex
+
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1dedgebranch), edgebranchidx)
+   if (ierr /= nf90_noerr)  then
+      call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the edge branch ids')
+      goto 888
+   end if 
+
+   !we check for the start_index, we do not know if the variable was written as 0 based
+   ierr = nf90_get_att(ncid, meshids%varids(mid_1dedgebranch),'start_index', varStartIndex)
+   if (ierr == nf90_noerr) then
+        ierr = convert_start_index(edgebranchidx, imiss, varStartIndex, startIndex)
+   else
+        ierr = convert_start_index(edgebranchidx, imiss, 0, startIndex)
+   endif
+   
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1dedgeoffset), edgeoffsets)
+   if (ierr /= nf90_noerr) then 
+      call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the edge offsets')
+      goto 888
+   end if
+
+   if (present(edgex)) then
+      ierr = nf90_get_var(ncid, meshids%varids(mid_edgex), edgex)
+      if (ierr /= nf90_noerr) then 
+         call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the mesh edge x coords')
+         goto 888
+      end if 
+   endif
+   
+   if (present(edgey)) then
+      ierr = nf90_get_var(ncid, meshids%varids(mid_edgey), edgey)
+      if (ierr /= nf90_noerr) then 
+         call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the mesh edge y coords')
+         goto 888
+      end if
+   endif
+
+   ! Success
+   ierr = ug_noerr
+   return
+
+888 continue
+   ! Some error occurred
+
+end function  ug_get_1d_mesh_edge_coordinates
 
 !
 ! Cloning functions

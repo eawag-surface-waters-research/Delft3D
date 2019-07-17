@@ -92,6 +92,11 @@
    KN(:,1:NUML0) = KN0(:,1:NUML0)
    LC(  1:NUML0) = LC0(  1:NUML0)
 
+   ! Only restore optional dxe when it is there already
+   if (allocated(dxe)) then
+      dxe(1:NUML0) = dxe0(1:NUML0)
+   end if
+
    NODSIZ = SIZE(NOD)
 
    DO K = 1,NUMK0
@@ -161,6 +166,14 @@
    KN0(:,1:NUML) = KN(:,1:NUML)
    LC0(  1:NUML) = LC(  1:NUML)
 
+   ! Only save optional dxe when it is there already
+   if (allocated(dxe)) then
+      if (allocated(dxe0)) deallocate(dxe0)
+      allocate(dxe0(LX), STAT=IERR)
+      dxe0(1:NUML) = dxe(1:NUML)
+   end if
+
+
    DO K   = 1,NUMK
       LS  = NMK(K) ! SIZE(NOD (K)%LIN )
       IF (LS .GE. 1) THEN
@@ -184,17 +197,32 @@
    END SUBROUTINE SAVENET
 
    !> Increase the number of net links
-   SUBROUTINE INCREASENETW(K0,L0) ! TODO AFMAKEN
+   SUBROUTINE INCREASENETW(K0,L0, also_dxe)
    !LC removed use m_netw
    use network_data
    use m_alloc
    use m_missing, only : xymis, dmiss
 
    implicit none
+   integer,           intent(in) :: K0       !< New number of net nodes.
+   integer,           intent(in) :: L0       !< New number of net links
+   logical, optional, intent(in) :: also_dxe !< Also allocate the optional dxe array for edge lengths. Default: .false.
+
    integer :: ierr
    integer :: k
    integer :: knxx
-   INTEGER :: K0, L0
+   logical :: also_dxe_
+
+   if (present(also_dxe)) then
+      also_dxe_ = also_dxe
+   else
+      also_dxe_ = .false.
+   end if
+
+   if (also_dxe_) then
+      ! Directly ensure dxe allocation, since it may not have been allocated before (as it is optional).
+      call realloc(dxe, LMAX, keepExisting = .true., fill = dmiss)
+   end if
 
    if (K0 < KMAX .and. L0 < LMAX) RETURN
 
@@ -233,6 +261,12 @@
       ENDIF
       ALLOCATE (KN (3,LMAX), LC (LMAX), STAT=IERR) ; KN = 0 ; LC = 0 ! TODO: AvD: catch memory error
       ALLOCATE (RLIN (LMAX), STAT=IERR)
+      
+      if (also_dxe_) then
+         if (allocated(dxe)) deallocate(dxe)
+         allocate(dxe(LMAX))
+         dxe = dmiss
+      end if
    ENDIF
 
    CALL RESTORE()

@@ -9474,7 +9474,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    
    type(t_branch), pointer      :: pbr
    type(t_node), pointer        :: pnod
-   integer                      :: istat, minp, ifil, inod, ibr, ngrd, k, k1, k2
+   integer                      :: istat, minp, ifil, inod, ngrd, k, k1, k2
    type (t_structure), pointer  :: pstru
    integer                      :: nstru
    
@@ -9486,10 +9486,13 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    character(len=80), allocatable            :: contactslongnames(:)
    character(len=40)                         :: currentNodeId
    logical                                   :: includeArrays
+   logical                                   :: do_edgelengths, need_edgelengths
    double precision, allocatable             :: xface(:), yface(:)
    integer, allocatable                      :: branchStartNode(:), branchEndNode(:)
    integer                                   :: nodesOnBranchVertices
    character(len=255)                        :: tmpstring
+   integer :: n1, n2, ibr_n1, ibr_n2, ibr
+   double precision :: off1, off2
 
    numk_read = 0
    numl_read = 0
@@ -9497,6 +9500,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    numk_last = numk_keep
    numl_last = numl_keep
    includeArrays = .true.
+   do_edgelengths = .false.
    networkIndex = 0
    koffset1dmesh = 0
 
@@ -9600,8 +9604,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          cycle
       end if
       
+      do_edgelengths = (meshgeom%dim == 1 .and. networkIndex > 0)
+      need_edgelengths = allocated(dxe) .or. do_edgelengths ! Either from a previous meshgeom, or now for the first time.
+      
       !increasenetw 
-      call increasenetw(numk_last + meshgeom%numnode, numl_last + meshgeom%numedge) ! increases XK, YK, KN
+      call increasenetw(numk_last + meshgeom%numnode, numl_last + meshgeom%numedge, also_dxe=need_edgelengths) ! increases XK, YK, KN, optionally dxe
       if (meshgeom%dim.ne.1) then
       ! not 1d
          ierr = ionc_get_node_coordinates(ioncid, im, XK(numk_last+1:numk_last + meshgeom%numnode), YK(numk_last+1:numk_last + meshgeom%numnode)) ! TODO: LC: this duplicates with the above get_meshgeom with includearrays=.true.
@@ -9720,6 +9727,40 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          ! Append the netlink table, and also increment netnode numbers in netlink array to ensure unique ids.
          kn(1:2,numl_last+L) = numk_last + kn12(:,L)
          kn(3,  numl_last+L) = kn3(L)
+
+         ! Determine edge (==netlink) lengths, IF present in the file.
+         if (do_edgelengths) then
+            ibr = meshgeom%edgebranchidx(L)
+            if (ibr <= 0 .or. ibr > meshgeom%nbranches) then
+               cycle
+            end if
+            n1 = meshgeom%edge_nodes(1,L)
+            n2 = meshgeom%edge_nodes(2,L)
+            ibr_n1 = meshgeom%nodebranchidx(n1)
+            ibr_n2 = meshgeom%nodebranchidx(n2)
+            if (ibr_n1 /= ibr .and. ibr_n2 /= ibr) then
+               off1 = 0d0                             ! Start of branch
+               off2 = meshgeom%nbranchlengths(ibr)    ! End of branch
+            else if (ibr_n1 == ibr .and. ibr_n2 /= ibr) then
+               off1 = meshgeom%nodeoffsets(n1)
+               if (meshgeom%nodeoffsets(n1) < meshgeom%edgeoffsets(L)) then
+                  off2 = meshgeom%nbranchlengths(ibr) ! End of branch
+               else
+                  off2 = 0d0                          ! Start of branch
+               end if
+            else if (ibr_n1 /= ibr .and. ibr_n2 == ibr) then
+               off2 = meshgeom%nodeoffsets(n2)
+               if (meshgeom%nodeoffsets(n2) < meshgeom%edgeoffsets(L)) then
+                  off1 = meshgeom%nbranchlengths(ibr) ! End of branch
+               else
+                  off1 = 0d0                          ! Start of branch
+               end if
+            else if (ibr_n1 == ibr .and. ibr_n2 == ibr) then
+               off1 = meshgeom%nodeoffsets(n1)
+               off2 = meshgeom%nodeoffsets(n2)
+            end if
+            dxe(numl_last+L) = abs(off2 - off1)
+         end if
       end do
       
       numk_read = numk_read + meshgeom%numnode 

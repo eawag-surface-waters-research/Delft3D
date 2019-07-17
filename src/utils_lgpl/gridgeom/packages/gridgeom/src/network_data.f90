@@ -116,6 +116,8 @@ module network_data
   integer,  allocatable            :: LC0(:)          !< Backup for lc.
   real   , allocatable             :: RLIN(:)         !< (numl) Placeholder for link values to be displayed.
   double precision, allocatable    :: xe(:), ye(:)    !< (numl) Edge (link) center coordinates.
+  double precision, allocatable    :: dxe(:)          !< (numl) Edge (link) actual length. OPTIONAL. When unallocated, we default to Euclidean distance between the netnodes xk,yk.
+  double precision, allocatable    :: dxe0(:)         !< Backup for dxe.
   integer,  allocatable            :: KTRI(:), KTON(:), KBT (:)
 
   ! Edge (and cell) related :      ! there are more edges than flow links .....
@@ -284,6 +286,8 @@ module network_data
    if(allocated(RLIN)) deallocate(RLIN)
    if(allocated(xe)) deallocate(xe)
    if(allocated(ye)) deallocate(ye)
+   if(allocated(dxe)) deallocate(dxe)
+   if(allocated(dxe0)) deallocate(dxe0)
    if(allocated(KTRI)) deallocate(KTRI)
    if(allocated(KTON)) deallocate(KTON)
    if(allocated(KBT)) deallocate(KBT)

@@ -1795,6 +1795,7 @@ function ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx,
    
 end function ionc_get_1d_mesh_discretisation_points_ugrid
 
+!> Gets the 1D mesh discretisation points, both the branchidx/offset and the x/y coordinates.
 function ionc_get_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchidx, offset, startIndex, coordx, coordy) result(ierr) 
 
   integer, intent(in)         :: ioncid, meshid, startIndex 
@@ -1802,7 +1803,7 @@ function ionc_get_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchi
   double precision,intent(out):: offset(:), coordx(:), coordy(:)
   integer                     :: ierr
   
-  ierr = ug_get_1d_mesh_discretisation_points_v1(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex, coordx, coordy)
+  ierr = ug_get_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex, coordx, coordy)
    
 end function ionc_get_1d_mesh_discretisation_points_ugrid_v1
 
