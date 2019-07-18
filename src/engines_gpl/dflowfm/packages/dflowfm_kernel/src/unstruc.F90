@@ -12494,6 +12494,7 @@ else if (nodval == 27) then
  endif
 
  linval = ndraw(29)
+ zlin   = -999d0
  if (       linval == 2) then
     zlin = abs(u1(L))
  else if (  linval == 3) then
@@ -12606,11 +12607,23 @@ else if (nodval == 27) then
  else if ( linval == 40) then
     zlin = ifrcutp(LL)
  else if ( linval == 41) then
-    zlin = turkin0(L)
+    if (kmx > 0) then 
+       zlin = turkin0(L)
+    else 
+       if (LL <= lnx1D) zlin = prof1D(1,LL)  
+    endif
  else if ( linval == 42) then
-    zlin = tureps0(L)
+    if (kmx > 0) then 
+       zlin = tureps0(L)
+    else
+        if (LL <= lnx1D) zlin = prof1D(2,LL)  
+    endif
  else if ( linval == 43) then
-    zlin = vicwwu(L)
+    if (kmx > 0) then 
+       zlin = vicwwu(L)
+    else
+        if (LL <= lnx1D) zlin = prof1D(3,LL)  
+    endif
  else if ( linval == 44) then
     zlin = ustb(LL)
  else if ( linval == 45) then
@@ -21554,7 +21567,7 @@ end subroutine unc_write_shp
                             WA      = profiles1D(-KA)%width
                             WB      = profiles1D(-KB)%width
                             zuL     = (1d0-ALFA)*ZA + ALFA*ZB  ! z on these links
-                            wuL     = (1d0-ALFA)*WA + ALFA*WB  ! z on these links
+                            wuL     = 1d0 ! (1d0-ALFA)*WA + ALFA*WB  ! z on these links
                             LL      = abs( ln2lne(L) )
                             k       = kn(1,LL)
                             zkk(k)  = zkk(k) + zul*wuL
@@ -33676,13 +33689,20 @@ end subroutine setbobs_fixedweirs
  hminlwi=1d0/hminlw
  fsqrtt = sqrt(0.5d0)
  call klok(cpufuru(1))
- if (kmx < 1) then ! original 2D coding
+ 
+ if (kmx == 0 .or. ifixedweirscheme > 0)  then  ! original 2D coding
 
     !$OMP PARALLEL DO                       &
     !$OMP PRIVATE(L,k1,k2,slopec,hup,gdxi,cu,du,du0,ds,u1L,v2,itu1,frL,bui,u1L0,st2,agp)
     do L  = 1,lnx
 
        if (hu(L) > 0) then
+
+          if (kmx > 0) then 
+             if (.not. (iadv(L) == 21 .or. iadv(L) >= 23 .and. iadv(L) <= 25) ) then  ! in 3D, only do this for weir points
+                cycle
+             endif 
+          endif
 
           k1  = ln(1,L) ; k2 = ln(2,L)
 
@@ -33881,13 +33901,27 @@ end subroutine setbobs_fixedweirs
        enddo
     enddo
 
- else                                                  ! 3D
+ endif
+
+ if (kmx > 0) then 
 
     if ( jafilter.ne.0 ) then
       call comp_filter_predictor()
     end if
 
     call update_verticalprofiles()
+
+    if (Ifixedweirscheme > 0) then 
+       do L = 1,lnxi
+          if (iadv(L) == 21 .or. iadv(L) >= 23 .and. iadv(L) <=25) then 
+             call getLbotLtop(L,Lb,Lt)
+             do LL = Lb, Lt
+                fu(LL) = fu(L) ; ru(LL) = ru(L)
+                au(LL) = au(L)*( hu(LL)-hu(LL-1) ) / ( hu(Lt)-hu(Lb-1) )
+             enddo
+          endif
+       enddo 
+    endif
 
  endif
 
@@ -40902,15 +40936,17 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
 
  slopec = 0d0
  if (drop3D > 0d0) then
-     hup = s0(k2) - ( min(bob(1,LL), bob(2,LL) ) + drop3D*twot*hu(LL) )
-     if (hup < 0) then
-         slopec = hup
-     else
-         hup = s0(k1) - ( min( bob(1,LL), bob(2,LL) ) + drop3D*twot*hu(LL) )
-         if (hup < 0) then
-             slopec = -hup
-         endif
-     endif
+     if (.not. ( iadv(LL) == 21 .or. iadv(LL) >= 23 .and. iadv(LL) <=25)  ) then  ! don't do this for weirs  
+        hup = s0(k2) - ( min(bob(1,LL), bob(2,LL) ) + drop3D*twot*hu(LL) )
+        if (hup < 0) then
+            slopec = hup
+        else
+            hup = s0(k1) - ( min( bob(1,LL), bob(2,LL) ) + drop3D*twot*hu(LL) )
+            if (hup < 0) then
+                slopec = -hup
+            endif
+        endif
+     endif  
  endif
 
  cu      = gdxi*teta(LL)

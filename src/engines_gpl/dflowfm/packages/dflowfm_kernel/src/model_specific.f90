@@ -160,7 +160,7 @@ subroutine textflowspecific()
         WRITE (TEX(24:33),'(F10.7)')  avedif
        ! CALL ICTEXT(TRIM(TEX),4,25,ncolana)
 
-    else if (md_IDENT == 'weir1') then  ! aligned channel  
+    else if (md_IDENT(1:5) == 'weir1') then  ! aligned channel  
 
         call weirtheo(1)
 
@@ -435,7 +435,7 @@ use m_flowtimes
 use unstruc_model, only: getoutputdir
 implicit none
 integer, intent(in) :: j12
-integer             :: k, L, LL, num  , kk, k1, k2
+integer             :: k, L, LL, num  , kk, k1, k2, Lweir, ncgentst
 double precision    :: slinks,srechts, eup, edo, dE, dH, foot, zg, z1, z2, z3, qg, a, cc, f1, f2, qglab, z2lab, qsimple, tim
 double precision    :: zupstream,zdownstream,crestheight,zcrestperfect,zminsub,zcrest, submer,qfree, g=9.81d0 , qg12, qgen, zg12   
 double precision    :: qweirana,qweirc,uupstream,ucrest,udownstream,bedlev,crestlev, qsub, qsup, qcond, qthd, gateheight, qcrit
@@ -447,12 +447,9 @@ character(len= 15)  :: datetime
 integer, save       :: mout = 0, nt = 0, minp = 0, mou2 = 0
 
 if (mout == 0) then 
-   if (ifixedweirscheme == 6) then 
-       call newfil(mout, trim(getoutputdir())//'qweirs6.out')
-   else if (ifixedweirscheme == 8) then 
-       call newfil(mout, trim(getoutputdir())//'qweirs8.out')
-   else 
-   endif   
+   tex = 'qweirs6.out'
+   write(tex(7:7) , '(i1.1)' ) ifixedweirscheme  
+   call newfil(mout, trim(getoutputdir())//tex)
    write(mout,'(A)') ' submergence  analytic  subgrid'   
 endif
 
@@ -461,13 +458,21 @@ srechts     = s1(kobs(3))
 bedlev      = bl(kobs(1)) 
 crestlev    = 1d0
 
-if (ncgen <= 0) then 
-   do L = 1,lnx
-      if (iadv(L) == 21 .or. iadv(L) >= 23 .and. iadv(L) <= 25) then 
-         crestlev  = min( bob(1,L), bob(2,L) )    
-      endif   
-   enddo    
-else
+Lweir = 0
+do L = 1,lnx
+   if (iadv(L) == 21 .or. iadv(L) >= 23 .and. iadv(L) <= 25) then 
+      crestlev  = min( bob(1,L), bob(2,L) )    
+      Lweir     = L ; exit  
+   endif   
+enddo    
+
+if (Lweir == 0) then 
+   return 
+else if (hu(Lweir) == 0) then 
+   return 
+endif
+
+if (ncgen > 0) then 
    crestlev   = zcgen(1)
    gateheight = zcgen(2) - crestlev
 endif
@@ -483,7 +488,8 @@ regime      = 'subcritial'
 
 qweirana = 0d0 ;dE = 0d0 ; uupstream = 0d0 ; udownstream = 0d0
 
-if (ncgen > 0) then 
+ncgentst = -1
+if (ncgentst > 0) then 
 
    foot       = 0.3048d0
 
@@ -529,8 +535,6 @@ if (ncgen > 0) then
    
    endif
    
-   
-   
 else 
 
    gateheight = 9d9
@@ -538,7 +542,7 @@ else
    call weirtheory(zupstream,zdownstream,crestheight,zcrestperfect,zminsub,zcrest,  &
                 qweirana,uupstream,ucrest,udownstream, regime, qfree, gateheight)
    
-   qrajaratnam = zdownstream * sqrt(2d0*ag*(zupstream - zdownstream) ) 
+   qrajaratnam = zdownstream * sqrt(2d0*ag*(max(0d0, zupstream - zdownstream ) ) ) 
    
 endif
 
@@ -587,7 +591,7 @@ if (j12 == 1) then
    WRITE (TEX(47:56),'(f10.3)')  qsub/qweirana
    CALL ICTEXT(TRIM(TEX),5,24,221)
 
-   TEX   =  'Q control dam  :            (m2/s); Q/Qana =                              '
+   TEX   =  'Q General      :            (m2/s); Q/Qana =                              '
    qcond = 0.1D0*crs(2)%sumvalcur(IPNT_Q1C) ! specific
    WRITE (TEX(18:27),'(f10.3)')  qcond
    WRITE (TEX(47:56),'(f10.3)')  qcond/qweirana
