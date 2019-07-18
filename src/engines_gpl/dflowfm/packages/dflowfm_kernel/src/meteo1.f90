@@ -48,6 +48,7 @@ module timespace_parameters
   integer, parameter :: triangulationmagdir            =  8  ! 2 velden u,v per tijdstap 3 dim array  triang, vectormax = 2
                                                              ! op basis van windreeksen op stations mag/dir
   integer, parameter :: node_id                        = -1  ! for a reference to a node ID
+  integer, parameter :: link_id                        = -1  ! for a reference to a link ID
   integer, parameter :: poly_tim                       =  9  ! for line oriented bnd conditions, refs to uniform, fourier or harmonic
   integer, parameter :: inside_polygon                 = 10  ! Constant value inside polygon, used for initial fields.
   integer, parameter :: ncgrid                         = 11  ! NetCDF grid, rectangular type as arcinfo  
@@ -7328,22 +7329,29 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol, sortLinks, linktype) ! find links cut by polyline filetype 9  
+   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol, sortLinks, linktype, &
+                                          branchindex, chainage, xpin, ypin, nump) ! find links cut by polyline filetype 9  
      use m_inquire_flowgeom
+     use dfm_error
      use messageHandling
      use sorting_algorithms, only: sort
      
      implicit none
      
      !inputs
-     character(len=*), intent(in)    :: filename   ! file name for meteo data file
-     integer     ,     intent(in)    :: filetype   ! spw, arcinfo, uniuvp etc
-     double precision, intent(in)    :: xz (:)
-     double precision, intent(in)    :: yz (:)
-     integer         , intent(in)    :: ln (:,:)
-     integer         , intent(in)    :: lnx    
-     integer         , intent(out)   :: keg(:)
-     integer         , intent(out)   :: numg
+     character(len=*), intent(in)              :: filename   ! file name for meteo data file
+     integer     ,     intent(in)              :: filetype   ! spw, arcinfo, uniuvp etc
+     double precision, intent(in)              :: xz (:)
+     double precision, intent(in)              :: yz (:)
+     integer         , intent(in)              :: ln (:,:)
+     integer         , intent(in)              :: lnx    
+     integer         , intent(in), optional    :: branchindex
+     double precision, intent(in), optional    :: chainage
+     double precision, intent(in), optional    :: xpin(:)
+     double precision, intent(in), optional    :: ypin(:)
+     integer         , intent(in), optional    :: nump
+     integer         , intent(  out)           :: keg(:)
+     integer         , intent(  out)           :: numg
 
      !optional inputs/outputs
      double precision, allocatable, optional, intent(inout) :: xps(:), yps(:) !< (Optional) Arrays in which the read in polyline x,y-points can be stored.
@@ -7367,14 +7375,33 @@ contains
      end if
 
      numg = 0 
+     np = 0
+     call realloc(xp,100000)
+     call realloc(yp,100000)
      if (filetype == poly_tim) then
    
-        call realloc(xp,100000)
-        call realloc(yp,100000)
     
         call oldfil(minp, filename)
         call read1polylin(minp,xp,yp,np)
-        
+     else if (filetype ==LINK_ID .and. present(xpin) .and. present(ypin) .and. present(nump) .and. nump > 0) then
+        xp = xpin
+        yp = ypin
+        np = nump
+     end if
+     
+     if (present(branchindex) .and. present(chainage) ) then
+        if (branchindex > 0) then
+           ierr = findlink(branchindex, chainage, L)
+           if (ierr==DFM_NOERR) then
+              keg(1) = L
+              numg = 1
+           else
+              numg = 0
+           end if
+        endif
+     endif
+     
+     if (numg ==0) then
         opts = 0
         if (present(lftopol)) then
            opts = opts+1

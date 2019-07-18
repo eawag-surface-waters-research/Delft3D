@@ -1403,6 +1403,7 @@ module m_readstructures
 
       dirString = 'symmetric'
       if (success) call prop_get_string(md_ptr, 'structure', 'gateOpeningHorizontalDirection',   dirString)
+      generalst%openingDirection = openingDirectionToInt(dirString)
 ! TODO add extra parameter in t_GeneralStructure
       
       if (success) call prop_get_double(md_ptr, 'structure', 'posfreegateflowcoeff',  generalst%cgf_pos, success)
@@ -1420,6 +1421,22 @@ module m_readstructures
       if (success) call prop_get_double(md_ptr, 'structure', 'extraresistance', generalst%extraresistance, success)
       
    end subroutine readGeneralStructure
+   
+   integer function  openingDirectionToInt(dirString)
+      character(len=*), intent(inout) :: dirString
+      call str_lower(dirString)
+      select case(dirString)
+      case('symmetric')
+         openingDirectionToInt = GEN_SYMMETRIC
+      case('fromleft')
+         openingDirectionToInt = GEN_FROMLEFT
+      case('fromright')
+         openingDirectionToInt = GEN_FROMRIGHT
+      case default
+         openingDirectionToInt = GEN_SYMMETRIC
+      end select
+      
+   end function  openingDirectionToInt
   
    !> Read the general structure parameters for version 1.00 files
    subroutine readGeneralStructure_v100(generalst, md_ptr, success)

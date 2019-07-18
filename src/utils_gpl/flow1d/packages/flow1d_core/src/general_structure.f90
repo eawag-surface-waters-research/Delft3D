@@ -39,6 +39,11 @@ module m_General_Structure
 
    public ComputeGeneralStructure
    public dealloc
+   public update_widths
+   
+   integer, public, parameter :: GEN_SYMMETRIC = 1
+   integer, public, parameter :: GEN_FROMLEFT  = 2
+   integer, public, parameter :: GEN_FROMRIGHT = 3
 
    interface dealloc
       module procedure deallocGenstru
@@ -78,6 +83,7 @@ module m_General_Structure
       double precision, pointer        :: au(:,:)                       !< au(1:3,L0) contains the partial computational value for au
       integer                          :: numlinks                      !< Nr of flow links that cross this generalstructure.
       logical                          :: velheight                     !< Flag indicates the use of the velocity height or not
+      integer                          :: openingDirection              !< possible values GEN_SYMMETRIC, GEN_FROMLEFT, GEN_FROMRIGHT
    end type
 
 
@@ -86,7 +92,7 @@ module m_General_Structure
 contains
 
    !> compute FU, RU and AU for general structure genstr
-   subroutine computeGeneralStructure(genstr, L0, maxWidth, fuL, ruL, s_on_crest, auL, as1, as2, dadsL, kfuL, s1m1, s1m2, &
+   subroutine computeGeneralStructure(genstr, direction, L0, maxWidth, fuL, ruL, s_on_crest, auL, as1, as2, dadsL, kfuL, s1m1, s1m2, &
                                       qtotal, Cz, dxL, dt, jarea, state)
       ! modules
 
@@ -100,6 +106,7 @@ contains
       double precision, intent(in)                 :: as1           !< (geometrical) upstream flow area.
       double precision, intent(in)                 :: as2           !< (geometrical) downstream flow area.
       double precision, intent(out)                :: dadsL         !< flow width of structure
+      integer, intent(in)                          :: direction     !< orientation of the structure
       integer, intent(in)                          :: L0            !< local link index
       integer, intent(out)                         :: kfuL          !< Flag indicating whether the structure link is wet (=1) or not (=0)
       double precision, intent(in)                 :: s1m1          !< (geometrical) upstream water level
@@ -174,6 +181,8 @@ contains
       call UpAndDownstreamParameters(s1ml, s1mr, alm, arm, qtotal, velheight, &
                                      rholeft, rhoright, crest, hu, hd,uu, ud, flowDir)
       !
+      ! apply orientation of the flow link to the direction dependend parameters
+      flowDir = direction*flowDir
       
       call flgtar(genstr, L0, maxWidth, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf, cgd,   &
                   cwf, cwd, mugf, lambda)
@@ -1001,5 +1010,127 @@ contains
       if (associated(genstru%au                      )) deallocate(genstru%au                    )
       deallocate(genstru)
    end subroutine deallocGenstru
+
+   !> Computes and sets the widths and gate lower edge levels on each of the flow links
+   !! crossed by a general structure (gate/weir/true genstru).
+   !! This is now an extended version of SOBEK's setLineStructure, because it also enables
+   !! a sideways closing gate with two doors from the left and right side, where the partially
+   !! closed portions have gate flow, and the center open portion still only has normal weir
+   !! flow across the sill.
+   subroutine update_widths(genstru, numlinks, links, wu)
+      implicit none
+
+      type(t_generalStructure), intent(inout)          :: genstru
+      integer,                  intent(in   )          :: numlinks
+      integer, dimension(:),    intent(in   )          :: links
+      double precision, dimension(:),    intent(in   ) :: wu
+      
+      double precision :: crestwidth, totalWidth, closedWidth, closedGateWidthL, closedGateWidthR, help
+      integer :: ng, L, L0, Lf
+
+      ! 1: First determine total width of all genstru links (TODO: AvD: we should not recompute this every user time step)
+      totalWidth = 0d0
+      if (numlinks == 0) then
+         return ! Only upon invalid input (see warnings in log about missing structure params)
+      end if
+
+      genstru%numlinks= numlinks
+      if (numlinks==1) then
+         genstru%widthcenteronlink(1) = genstru%ws
+         genstru%gateclosedfractiononlink(1) = 1d0 - genstru%gateopeningwidth/genstru%ws
+      else
+         do L0=1,numlinks
+            Lf = iabs(links(L0))
+            genstru%widthcenteronlink(L0) = wu(Lf)
+            totalWidth = totalWidth + wu(Lf)
+         end do
+
+         ! 2a: the desired crest width for this overall structure (hereafter, the open links for this genstru should add up to this width)
+         !     Also: only for gates, the desired door opening width for this overall structure
+         !           (should be smaller than crestwidth, and for this portion the open gate door is emulated by dummy very high lower edge level)
+         crestwidth = min(totalWidth, genstru%ws)
+         if (genstru%openingDirection == GEN_FROMLEFT) then
+            closedGateWidthL = max(0d0, totalWidth - genstru%gateopeningwidth)
+            closedGateWidthR = 0d0
+         else if (genstru%openingDirection == GEN_FROMRIGHT) then
+            closedGateWidthL = 0d0
+            closedGateWidthR = max(0d0, totalWidth - genstru%gateopeningwidth)
+         else ! GEN_SYMMETRIC
+            closedGateWidthL = max(0d0, .5d0*(totalWidth - genstru%gateopeningwidth))
+            closedGateWidthR = max(0d0, .5d0*(totalWidth - genstru%gateopeningwidth))
+         end if
+
+         ! 2b: Determine the width that needs to be fully closed on 'left' side
+         ! close the line structure from the outside to the inside: first step increasing increments
+         ! NOTE: closed means: fully closed because sill_width (crest_width) is smaller that totalwidth.
+         !       NOT because of gate door closing: that is handled by closedGateWidthL/R and may still
+         !       have flow underneath doors if they are up high enough.
+         closedWidth = max(0d0, totalWidth - crestwidth)/2d0 ! Intentionally symmetric: if crest/sill_width < totalwidth. Only gate door motion may have a direction, was already handled above.
    
+         genstru%gateclosedfractiononlink = 0d0
+   
+         do L0=1,numlinks
+            
+            Lf = iabs(links(L0))
+
+            if (closedWidth > 0d0) then
+               help = min (wu(Lf), closedWidth)
+               genstru%widthcenteronlink(L0) = wu(Lf) - help ! 0d0 if closed
+               closedWidth = closedWidth - help
+            else
+               genstru%widthcenteronlink(L0) = wu(Lf)
+            end if
+
+            if (closedGateWidthL > 0d0 ) then
+               help = min (wu(Lf), closedGateWidthL)
+               closedGateWidthL = closedGateWidthL - help
+               if ( wu(Lf).gt.0d0 ) then
+                  genstru%gateclosedfractiononlink(L0) = genstru%gateclosedfractiononlink(L0) + help/wu(Lf)
+               end if
+            else    
+         
+            end if
+
+            if (closedWidth <= 0d0 .and. closedGateWidthL <= 0d0) then
+               ! finished
+               exit
+            endif
+         enddo
+
+         ! 2c: Determine the width that needs to be fully closed on 'right' side
+         ! close the line structure from the outside to the inside: first step increasing increments
+         ! NOTE: closed means: fully closed because sill_width (crest_width) is smaller that totalwidth.
+         !       NOT because of gate door closing: that is handled by closedGateWidthL/R and may still
+         !       have flow underneath doors if they are up high enough.
+         closedWidth = max(0d0, totalWidth - crestwidth)/2d0 ! Intentionally symmetric: if crest/sill_width < totalwidth. Only gate door motion may have a direction, was already handled above.
+         do L0=numlinks,1,-1
+            Lf = iabs(links(L0))
+
+            if (closedWidth > 0d0) then
+               help = min (wu(Lf), closedWidth)
+               genstru%widthcenteronlink(L0) = wu(Lf) - help ! 0d0 if closed
+               closedWidth = closedWidth - help
+            else
+               genstru%widthcenteronlink(L0) = wu(Lf)
+            end if
+
+            if (closedGateWidthR > 0d0) then
+               help = min (wu(Lf), closedGateWidthR)
+               closedGateWidthR = closedGateWidthR - help
+         
+               if ( wu(Lf).gt.0d0 ) then
+                  genstru%gateclosedfractiononlink(L0) = genstru%gateclosedfractiononlink(L0) + help/wu(Lf)
+               end if
+            end if
+
+             if (closedWidth <= 0d0 .and. closedGateWidthR <= 0d0) then
+               ! finished
+               exit
+            endif
+         enddo
+   
+      endif 
+
+   end subroutine update_widths
+
 end module m_General_Structure

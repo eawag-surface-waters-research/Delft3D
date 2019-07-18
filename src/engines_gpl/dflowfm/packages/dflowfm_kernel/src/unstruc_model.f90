@@ -370,6 +370,7 @@ end subroutine resetModel
 
 !> Loads a model definition from file and makes it active.
 subroutine loadModel(filename)
+    use m_readstructures
     use m_netw
     use m_observations
     use m_monitoring_crosssections
@@ -407,6 +408,7 @@ subroutine loadModel(filename)
     logical                   :: found_1d_network
 
     integer :: istat, minp, ifil, jadoorladen
+    integer :: timerReadStructs   = 0
 
     integer :: i, ipli
     integer :: L, k1, k2, tok
@@ -440,6 +442,13 @@ subroutine loadModel(filename)
     endif
 
     call loadNetwork(md_netfile, istat, jadoorladen)
+    
+    
+    if (len_trim(md_1dfiles%structures) > 0) then
+       call SetMessage(LEVEL_INFO, 'Reading Structures ...')
+       call readStructures(network, md_1dfiles%structures)
+       call SetMessage(LEVEL_INFO, 'Reading Structures Done')
+    endif
 
     network%sferic = jsferic==1
     

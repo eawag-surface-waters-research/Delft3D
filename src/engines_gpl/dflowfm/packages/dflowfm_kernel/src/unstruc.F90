@@ -2531,7 +2531,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
         end if
 
         do L0 = 1, pstru%numlinks
-           L  = pstru%linknumbers(L0)
+           L  = iabs(pstru%linknumbers(L0))
            k1 = ln(1,L)
            k2 = ln(2,L)
            blmx     = max(bl(k1), bl(k2))
@@ -33697,7 +33697,7 @@ end subroutine setbobs_fixedweirs
  implicit none
 
  integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns, nstrucsg, L0
- integer          :: kfu, istru
+ integer          :: kfu, istru, direction
  integer          :: state
  integer          :: mdown
 
@@ -33887,7 +33887,8 @@ end subroutine setbobs_fixedweirs
        pstru => network%sts%struct(istru)
 
        do L0 = 1, pstru%numlinks
-          L = pstru%linknumbers(L0)
+          L = iabs(pstru%linknumbers(L0))
+          direction = sign(1, L)
           if (hu(l) > 0) then
              k1 = ln(1,L)
              k2 = ln(2,L)
@@ -33905,7 +33906,7 @@ end subroutine setbobs_fixedweirs
                    as1 = wu(L)*(s1(k1)-bob0(1,L))
                    as2 = wu(L)*(s1(k2)-bob0(2,L))
                    call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L) 
-                   call computeGeneralStructure(pstru%generalst, L0, wu(L), fu(L), ru(L), s_on_crest, &
+                   call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), fu(L), ru(L), s_on_crest, &
                           au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea, state)
                 case (ST_PUMP)
                    continue ! WIP carniato: pumps should not be in network data structure, furu computation is in npumpsg loop, and not here.

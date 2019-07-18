@@ -85,6 +85,7 @@ module m_1d_structures
    public GetPumpStage
    public GetPumpReductionFactor
    
+   public initialize_structure
 
    public printData
 
@@ -1183,5 +1184,31 @@ end subroutine
 
       GetPumpReductionFactor = stru%pump%reduction_factor
    end function GetPumpReductionFactor
+   
+   subroutine initialize_structure(struct, numlinks, links, wu)
+
+      type(t_structure),               intent(inout) :: struct
+      integer,                         intent(in   ) :: numlinks
+      integer, dimension(:),           intent(in   ) :: links
+      double precision, dimension(:),  intent(in   ) :: wu
+      
+      allocate(struct%linknumbers(numlinks))
+      struct%numlinks = numlinks
+      struct%linknumbers = links(1:numlinks)
+      
+      select case(struct%type)
+      case (ST_GENERAL_ST)
+         allocate(struct%generalst%widthcenteronlink(numlinks), struct%generalst%gateclosedfractiononlink(numlinks))
+         allocate(struct%generalst%fu(3,numlinks), struct%generalst%ru(3,numlinks), struct%generalst%au(3,numlinks))
+         struct%generalst%fu = 0d0
+         struct%generalst%ru = 0d0
+         struct%generalst%au = 0d0
+         call update_widths(struct%generalst, numlinks, links, wu)
+      case default
+         ! A reminder not to forget other structures that are added:
+         call setMessage(LEVEL_ERROR, 'Internal error, this structure type is not (yet) implemented in initialize_structure')
+      end select
+
+   end subroutine initialize_structure
    
 end module m_1d_structures

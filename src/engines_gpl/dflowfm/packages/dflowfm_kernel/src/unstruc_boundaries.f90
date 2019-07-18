@@ -1775,6 +1775,7 @@ end function flow_initwaveforcings_runtime
 !> Initializes controllers that force structures.
 !! Currently only time series files, in the future also realtime control (RTC).
 function flow_init_structurecontrol() result (status)
+use m_1d_structures
 use m_flowexternalforcings
 use m_hash_search
 use m_alloc
@@ -1820,6 +1821,7 @@ character(len=IdLen)          :: strid ! TODO: where to put IdLen (now in Messag
 character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in MessageHandling)
                                     ! TODO: in readstruc* change incoming ids to len=*
 character(len=idLen)          :: branchid
+type(t_structure), pointer    :: pstru
 
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
@@ -1870,6 +1872,39 @@ allocate(dambridx(nstr))
 allocate(dambreakPolygons(nstr))
 !initialize the index
 dambridx = -1
+
+! NOTE: readStructures(network, md_structurefile) has already been called.
+do i=1,network%sts%count
+   pstru => network%sts%struct(i)
+   call selectelset_internal_links( plifile, link_id, xz, yz, ln, lnx, kegen(1:numl), numgen, sortLinks = 1 , &
+                                    branchindex = pstru%ibran, chainage = pstru%chainage, &
+                                    xpin = pstru%xCoordinates, ypin = pstru%yCoordinates, nump = pstru%numCoordinates)
+   if (numgen > 0) then
+      call initialize_structure(pstru, numgen, kegen(1:numgen), wu)
+   else
+      msgbuf = 'No intersecting links found for structure with name '//trim(pstru%name)//' and id '//trim(pstru%id)
+      call warn_flush()
+   endif
+   
+end do
+
+! TODO handle the forcinglist for moveable structrures
+!do i=1,network%forcingList%Count
+!   pForcing => network%forcingList%forcing(i)
+!   
+!   if (strcmpi(pForcing%filename, 'realtime')) then
+!      call mess(.. info realtime)
+!      cycle
+!   else
+!      inquire file exists...
+!      if not
+!      error message met md_structurefile, forcing%st_id, forcing%param_name, pForcing%filename
+!      else
+!      ! call resolvePath(filename, md_structurefile_dir, filename)
+!         ! TODO: addtimespacerelation (EC..)
+!      end if
+!end do
+
 do i=1,nstr
    plifile = ''
    qid = ''
