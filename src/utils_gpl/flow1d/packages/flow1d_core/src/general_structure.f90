@@ -1016,7 +1016,9 @@ contains
    !! This is now an extended version of SOBEK's setLineStructure, because it also enables
    !! a sideways closing gate with two doors from the left and right side, where the partially
    !! closed portions have gate flow, and the center open portion still only has normal weir
-   !! flow across the sill.
+   !! flow across the sill. \n
+   !! NOTE: The implementation for gates coming in from left or right is not corrrect. 
+   !! The total crest width becomes incorrect, when the gatedooropening is less than half the totalwidth.
    subroutine update_widths(genstru, numlinks, links, wu)
       implicit none
 
