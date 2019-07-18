@@ -1020,10 +1020,10 @@ contains
    subroutine update_widths(genstru, numlinks, links, wu)
       implicit none
 
-      type(t_generalStructure), intent(inout)          :: genstru
-      integer,                  intent(in   )          :: numlinks
-      integer, dimension(:),    intent(in   )          :: links
-      double precision, dimension(:),    intent(in   ) :: wu
+      type(t_generalStructure), intent(inout)          :: genstru      !< general structure data
+      integer,                  intent(in   )          :: numlinks     !< number of links
+      integer, dimension(:),    intent(in   )          :: links        !< array containing linknumbers
+      double precision, dimension(:),    intent(in   ) :: wu           !< flow widths
       
       double precision :: crestwidth, totalWidth, closedWidth, closedGateWidthL, closedGateWidthR, help
       integer :: ng, L, L0, Lf
