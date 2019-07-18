@@ -1479,8 +1479,8 @@ subroutine flqhgsfm(m, teken, husb, hdsb, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, 
     hs1 = elu - zs
     !
     tr  = 1d-4
-    if (hs1 < tr .or. wstr < tr .or. dg < tr) THEN   !  .or. min(cgf, cgd, cwf, cwd)<=0. .or.       &
-                                                     !  & dg<.0001) then !hk: or gate closed
+    if (hs1 < tr .or. wstr < tr .or. dg < tr .or. min(cgf, cgd, cwf, cwd) <= 0.) then   !  & dg<.0001) then !hk: or gate closed
+
        formno = 0 ; return  
                  
     else
