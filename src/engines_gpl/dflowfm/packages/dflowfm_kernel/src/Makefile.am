@@ -80,6 +80,7 @@ libdflowfm_la_SOURCES=\
         dredgepolygon.f90 \
         bedform_io.f90 \
         unstruc_boundaries.f90 \
+        unstruc_structures.f90 \
         unstruc_inifields.f90 \
         unstruc_startup.f90 \
         unstruc_opengis.f90 \

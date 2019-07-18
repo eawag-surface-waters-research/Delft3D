@@ -73,7 +73,6 @@ module m_1d_structures
    public get_gle
    public get_opening_height
    public get_valve_opening
-   public get_capacity
    public fill_hashtable
    public set_crest_level
    public set_crest_width
@@ -82,6 +81,10 @@ module m_1d_structures
    public set_valve_opening
    public set_capacity
    public incStructureCount
+   public GetPumpCapacity
+   public GetPumpStage
+   public GetPumpReductionFactor
+   
 
    public printData
 
@@ -1139,20 +1142,46 @@ end subroutine
       struc%pump%capacitySetpoint = value
    end subroutine set_capacity
    
-   double precision function get_capacity(struc)
-      
-      type (t_structure), intent(inout) :: struc
-      if (struc%type /= ST_PUMP) then
-         get_capacity = huge(1d0)
+   !> Gets pump capacity.
+   double precision function GetPumpCapacity(stru)
+      implicit none
+      type(t_structure), intent(in)   :: stru !< Structure
+         
+      if (stru%type /= ST_PUMP) then
          return
-      endif
-      
-      if (struc%pump%isControlled) then
-         get_capacity = struc%pump%capacitySetpoint
+      end if
+
+      if (stru%pump%is_active) then
+         GetPumpCapacity = stru%pump%direction * stru%pump%stage_capacity
       else
-         get_capacity = struc%pump%capacity(1)
-      endif
+         GetPumpCapacity = 0d0
+      end if
+
+   end function GetPumpCapacity
+   
+   !> Gets pump actual stage.
+   double precision function GetPumpStage(stru)
+      implicit none   
+      type(t_structure), intent(in)   :: stru !< Structure 
+
+      if (stru%type /= ST_PUMP) then
+         return
+      end if
+         
+      GetPumpStage = dble(stru%pump%actual_stage)
       
-   end function get_capacity
+   end function GetPumpStage
+   
+   !> Gets pump reduction factor.
+   double precision function GetPumpReductionFactor(stru)
+      implicit none   
+      type(t_structure), intent(in)   :: stru !< Structure
+         
+      if (stru%type /= ST_PUMP) then
+         return
+      end if
+
+      GetPumpReductionFactor = stru%pump%reduction_factor
+   end function GetPumpReductionFactor
    
 end module m_1d_structures

@@ -540,6 +540,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_opengis.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_opengl.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_shapefile.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_startup.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_structures.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_version.F90.svn -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/waves.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/wrwaq.F90 -text
