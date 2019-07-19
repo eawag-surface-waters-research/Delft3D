@@ -62,6 +62,7 @@ libdflowfm_la_SOURCES=\
         unstruc_netcdf.f90 \
         network.f90 \
         monitoring.f90 \
+        unstruc_structures.f90 \
         manholes.f90 \
         splines.f90 \
         step_to_screen.f90 \
@@ -80,7 +81,6 @@ libdflowfm_la_SOURCES=\
         dredgepolygon.f90 \
         bedform_io.f90 \
         unstruc_boundaries.f90 \
-        unstruc_structures.f90 \
         unstruc_inifields.f90 \
         unstruc_startup.f90 \
         unstruc_opengis.f90 \
