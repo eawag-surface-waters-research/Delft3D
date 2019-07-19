@@ -1159,8 +1159,8 @@ double precision                  :: cdb(3)          !< breakpoints cd function 
 double precision                  :: wdb(3)          !< breakpoints cd function windspeed
 integer                           :: ICdtyp          !< 1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Hwang 2005, 6=Wuest 2005
 integer                           :: jarelativewind  !< 1 = relative, 0 not relative
-integer                           :: jawindhuorzwsbased    !< 1 = finite volume , 0 = hu
-
+integer                           :: jawindhuorzwsbased   !< 1 = finite volume , 0 = hu
+integer                           :: jawindpartialdry     !< Reduce windstress on water if link partially dry, only for bedlevtyp=3, 0 = no, 1 = yes
 contains
 
 !> Sets ALL (scalar) variables in this module to their default values.
@@ -1185,6 +1185,7 @@ use m_physcoef, only : rhomean
     icdtyp  = 2
     jarelativewind = 0    !< wind relative
     jawindhuorzwsbased   = 0    !<
+    jawindpartialdry     = 1
 
     windxav = 0d0
     windyav = 0d0

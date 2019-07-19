@@ -1201,7 +1201,9 @@ subroutine readMDUFile(filename, istat)
     else 
        jawindhuorzwsbased = 0
     endif
-    call prop_get_integer(md_ptr, 'wind',  'Windhuorzwsbased'            , jawindhuorzwsbased)
+    call prop_get_integer(md_ptr, 'wind',  'Windhuorzwsbased'         , jawindhuorzwsbased)
+    call prop_get_integer(md_ptr, 'wind',  'Windpartialdry'           , jawindpartialdry)
+    
     call prop_get_double (md_ptr, 'wind' , 'Rhoair'                   , rhoair )
     call prop_get_double (md_ptr, 'wind' , 'PavIni'                   , PavIni )
     call prop_get_double (md_ptr, 'wind' , 'PavBnd'                   , PavBnd )
@@ -2683,9 +2685,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr,    'wind', 'Relativewind',      jarelativewind,   'Wind speed relative to top-layer water speed, 1=yes, 0 = no) ' )
     endif
     if (kmx == 0 .and. jawindhuorzwsbased == 0 .or. kmx > 0 .and. jawindhuorzwsbased == 0) then
-       call prop_set(prop_ptr,    'wind', 'Windhuorzwsbased', jawindhuorzwsbased,   'Wind hu or zws based , 0 = hu, 1 = zws) ' )
+       call prop_set(prop_ptr, 'wind', 'Windhuorzwsbased', jawindhuorzwsbased,   'Wind hu or zws based , 0 = hu, 1 = zws ' )
     endif
-  
+    if (writeall .or. jawindpartialdry == 0) then
+       call prop_set(prop_ptr, 'wind', 'Windpartialdry', jawindpartialdry, 'Reduce windstress on water if link partially dry, only for bedlevtyp=3, 0 = no, 1 = yes = default ' )
+    endif
+
     call prop_set(prop_ptr, 'wind', 'Rhoair',                  Rhoair,   'Air density (kg/m3)')
     call prop_set(prop_ptr, 'wind', 'PavBnd',                  PavBnd,   'Average air pressure on open boundaries (N/m2) (only applied if > 0)')
     call prop_set(prop_ptr, 'wind', 'Pavini',                  PavIni,   'Average air pressure for initial water level correction (N/m2) (only applied if > 0)')

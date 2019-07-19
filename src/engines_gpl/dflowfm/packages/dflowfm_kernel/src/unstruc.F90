@@ -5051,7 +5051,7 @@ if (jawind > 0) then
         do LL = 1,lnx
            if ( hu(LL) > 0 ) then
                wfac = 1d0
-               if (ibedlevtyp == 3) then
+               if (jawindpartialdry == 1) then
                   Dzk  = abs( zk(lncn(1,LL)) - zk(lncn(2,LL)) )
                   if (Dzk > 0d0) then
                      wfac = min( 1d0, hu(LL) / Dzk )
@@ -5072,7 +5072,7 @@ if (jawind > 0) then
         do LL  = 1,lnx
            if (hu(LL) > 0d0) then
                wfac = 1d0
-               if (ibedlevtyp == 3) then
+               if (jawindpartialdry == 1) then
                   Dzk  = abs( zk(lncn(1,LL)) - zk(lncn(2,LL)) )
                   if (Dzk > 0d0) then
                      wfac = min( 1d0, hu(LL) / Dzk )
@@ -20535,6 +20535,12 @@ end subroutine unc_write_shp
 
  call setbobs()
  call setbobsonroofs()
+
+ if (jawindpartialdry == 1) then 
+    if (ibedlevtyp .ne. 3) then 
+        jawindpartialdry = 0
+    endif 
+ endif
 
 
  !-------------------------------------------------- CLOSED WALL (STRESS) RELATED -----------------------------------------------
