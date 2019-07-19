@@ -288,8 +288,8 @@ module m_readstructures
                end select
             elseif (major ==2) then
                select case (iStrucType)
-               !case (ST_WEIR)
-               !   call readWeir(pstru%weir, md_ptr%child_nodes(i)%node_ptr, success)
+               case (ST_WEIR)
+                  call readWeirAsGenstru(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
                !case (ST_CULVERT)
                !   call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
                !case (ST_BRIDGE)
@@ -340,12 +340,16 @@ module m_readstructures
          case (ST_WEIR)
             nweir = nweir+1
             network%sts%weirIndices(nweir) = istru
+            ! From now on this is a general structure
+            network%sts%struct(istru)%type = ST_GENERAL_ST
          case (ST_CULVERT)
             nculvert = nculvert + 1
             network%sts%culvertIndices(nculvert) = istru
          case (ST_ORIFICE)
             norifice = norifice + 1
             network%sts%orificeIndices(norifice) = istru
+            ! From now on this is a general structure
+            network%sts%struct(istru)%type = ST_GENERAL_ST
          case (ST_BRIDGE)
             nbridge = nbridge + 1
             network%sts%bridgeIndices(nbridge) = istru
@@ -1367,6 +1371,54 @@ module m_readstructures
    
    end subroutine readOrifice
 
+   !> Read the weir parameters and define a general structure
+   subroutine readWeirAsGenStru(generalst, md_ptr, st_id, forcinglist, success)
+   
+      use messageHandling
+      
+      type(t_GeneralStructure), pointer,  intent(inout) :: generalst   !< general structure to be read into 
+      type(tree_data), pointer,           intent(in   ) :: md_ptr      !< ini tree pointer with user input.
+      logical,                            intent(inout) :: success     !< logical indicating, the reading of the structure was successfull
+      character(IdLen),                   intent(in   ) :: st_id       !< Structure character Id.
+      type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
+      
+      character(len=Idlen) :: dirstring
+
+      allocate(generalst)
+
+      generalst%velheight = .true.
+      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
+      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'corrCoeff',  generalst%mugf_pos, success)
+
+      generalst%wu1                = generalst%ws
+      generalst%zu1                = generalst%zs
+      generalst%wu2                = generalst%ws
+      generalst%zu2                = generalst%zs
+      generalst%zs                 = generalst%zs
+      generalst%wd1                = generalst%ws
+      generalst%zd1                = generalst%zs
+      generalst%wd2                = generalst%ws
+      generalst%zd2                = generalst%zs
+      generalst%gateLowerEdgeLevel = huge(1d0)
+      generalst%cgf_pos            = 1d0
+      generalst%cgd_pos            = 1d0
+      generalst%cwf_pos            = 1d0
+      generalst%cwd_pos            = 1d0
+      generalst%cgf_neg            = 1d0
+      generalst%cgd_neg            = 1d0
+      generalst%cwf_neg            = 1d0
+      generalst%cwd_neg            = 1d0
+      generalst%mugf_neg           = generalst%mugf_pos
+      generalst%extraresistance    = 0d0
+      generalst%gatedoorheight     = huge(1d0)
+      generalst%gateopeningwidth   = generalst%ws
+      generalst%crestlength        = 0d0
+      generalst%velheight          = .true.
+      generalst%openingDirection   = GEN_SYMMETRIC
+
+   end subroutine readWeirAsGenStru
+ 
    !> Read the general structure parameters
    subroutine readGeneralStructure(generalst, md_ptr, st_id, forcinglist, success)
    
@@ -1385,14 +1437,13 @@ module m_readstructures
       generalst%velheight = .true.
       call prop_get_double(md_ptr, 'structure', 'upstream1Width', generalst%wu1, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'upstream2Width',  generalst%wu2, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'crestWidth',    generalst%ws, success)
       if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'downstream1Width', generalst%wd1, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'downstream2Width',   generalst%wd2, success)
                                                                                
       if (success) call prop_get_double(md_ptr, 'structure', 'upstream1Level',   generalst%zu1, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'upstream2Level',  generalst%zu2, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'crestLevel',    generalst%zs, success)
+      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestLevel',    generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'downstream1Level', generalst%zd1, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'downstream2Level',  generalst%zd2, success)
 
