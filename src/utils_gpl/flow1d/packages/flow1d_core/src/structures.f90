@@ -184,12 +184,14 @@ module m_1d_structures
       integer                                               :: numPumps
       integer                                               :: numBridges
       integer                                               :: numOrifices
+      integer                                               :: numGates
       integer                                               :: numGeneralStructures
       integer, pointer, dimension(:)                        :: weirIndices
       integer, pointer, dimension(:)                        :: culvertIndices 
       integer, pointer, dimension(:)                        :: pumpIndices
       integer, pointer, dimension(:)                        :: bridgeIndices
       integer, pointer, dimension(:)                        :: orificeIndices
+      integer, pointer, dimension(:)                        :: gateIndices
       integer, pointer, dimension(:)                        :: generalStructureIndices
    end type t_structureSet
 
@@ -817,8 +819,11 @@ end subroutine
    end subroutine SetRestartDataForStructures
 
    integer function GetStrucType_from_string(string)
+      use properties
+      
       character(len=*) :: string
 
+      call lowercase(string, 999)
       select case(trim(string))
       case ('pump')
          GetStrucType_from_string = ST_PUMP
@@ -828,6 +833,8 @@ end subroutine
          GetStrucType_from_string = ST_WEIR
       case ('orifice')
          GetStrucType_from_string = ST_ORIFICE
+      case ('gate')
+         GetStrucType_from_string = ST_GATE
       case ('culvert')
          GetStrucType_from_string = ST_CULVERT
       case ('siphon')
@@ -860,6 +867,8 @@ end subroutine
             strng = 'weir'
          case (ST_ORIFICE)
             strng = 'orifice'
+         case (ST_GATE)
+            strng = 'gate'
          case (ST_CULVERT)
             strng = 'culvert'
          case (ST_SIPHON)

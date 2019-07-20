@@ -87,6 +87,7 @@ module m_readstructures
    !> Read the structure.ini file
    subroutine readStructures(network, structureFile)
       use m_GlobalParameters
+      use m_1d_Structures
       implicit none
       
       type(t_network), intent(inout) :: network              !< Network pointer
@@ -120,13 +121,13 @@ module m_readstructures
       integer                                                ::  norifice
       integer                                                ::  ngenstru
       integer                                                ::  nbridge
+      integer                                                ::  ngate
 
       integer                       :: pos
       integer                       :: ibin = 0
       character(len=Charln)         :: binfile
       logical                       :: file_exist
       integer                       :: major, minor, ierr
-
       pos = index(structureFile, '.', back = .true.)
       binfile = structureFile(1:pos)//'cache'
       inquire(file=binfile, exist=file_exist)
@@ -243,29 +244,7 @@ module m_readstructures
                compoundName = ' '
             endif
             
-            call lowercase(typestr, 999)
-            select case (typestr)
-            case ('weir')
-               iStrucType = ST_WEIR
-            case ('universalweir')
-               iStrucType = ST_UNI_WEIR
-            case ('culvert')
-               iStrucType = ST_CULVERT
-            case ('bridge')
-               iStrucType = ST_BRIDGE
-            case ('pump')
-               iStrucType = ST_PUMP
-            case ('orifice')
-               iStrucType = ST_ORIFICE
-            case ('gate')
-               iStrucType = ST_ORIFICE
-            case ('generalstructure')
-               iStrucType = ST_GENERAL_ST
-            case default
-               call SetMessage(LEVEL_ERROR, 'Unknown Structure Type for '//trim(pstru%id))
-               success = .false.
-               cycle
-            end select
+            iStrucType = GetStrucType_from_string(typestr)
             pstru%type = iStrucType
 
             if (major ==1) then   
@@ -281,7 +260,7 @@ module m_readstructures
                   call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
                case (ST_PUMP)
                   call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
-               case (ST_ORIFICE)
+               case (ST_ORIFICE, ST_GATE)
                   call readOrifice(pstru%orifice, md_ptr%child_nodes(i)%node_ptr, success)
                case (ST_GENERAL_ST)
                   call readGeneralStructure_v100(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, success)
@@ -296,8 +275,8 @@ module m_readstructures
                !   call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
                case (ST_PUMP)
                   call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
-               !case (ST_ORIFICE)
-               !   call readOrifice(pstru%orifice, md_ptr%child_nodes(i)%node_ptr, success)
+               case (ST_ORIFICE, ST_GATE)
+                  call readOrificeAsGenstru(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
                case (ST_GENERAL_ST)
                   call readGeneralStructure(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
                 case default
@@ -320,12 +299,15 @@ module m_readstructures
       ! Set counters for number of weirs, culverts, etc
       network%sts%numweirs    = network%sts%countByType(ST_WEIR)
       network%sts%numculverts = network%sts%countByType(ST_CULVERT)
-      network%sts%numOrifices = network%sts%countByType(ST_PUMP)
-      network%sts%numBridges  = network%sts%countByType(ST_ORIFICE)
+      network%sts%numPumps    = network%sts%countByType(ST_PUMP)
+      network%sts%numOrifices = network%sts%countByType(ST_ORIFICE)
+      network%sts%numGates    = network%sts%countByType(ST_GATE)
       network%sts%numGeneralStructures = network%sts%countByType(ST_GENERAL_ST)
       allocate(network%sts%weirIndices(network%sts%numweirs))
       allocate(network%sts%culvertIndices(network%sts%numCulverts))
+      allocate(network%sts%pumpIndices(network%sts%numPumps))
       allocate(network%sts%orificeIndices(network%sts%numOrifices))
+      allocate(network%sts%gateIndices(network%sts%numGates))
       allocate(network%sts%bridgeIndices(network%sts%numBridges))
       allocate(network%sts%generalStructureIndices(network%sts%numGeneralStructures))
       
@@ -335,6 +317,7 @@ module m_readstructures
       norifice = 0
       ngenstru = 0
       nbridge = 0
+      ngate = 0
       do istru = 1, network%sts%Count
          select case (network%sts%struct(istru)%type)
          case (ST_WEIR)
@@ -348,6 +331,11 @@ module m_readstructures
          case (ST_ORIFICE)
             norifice = norifice + 1
             network%sts%orificeIndices(norifice) = istru
+            ! From now on this is a general structure
+            network%sts%struct(istru)%type = ST_GENERAL_ST
+         case (ST_GATE)
+            ngate = ngate + 1
+            network%sts%gateIndices(ngate) = istru
             ! From now on this is a general structure
             network%sts%struct(istru)%type = ST_GENERAL_ST
          case (ST_BRIDGE)
@@ -1418,6 +1406,63 @@ module m_readstructures
       generalst%openingDirection   = GEN_SYMMETRIC
 
    end subroutine readWeirAsGenStru
+ 
+   !> Read the orifice or gate parameters and define a general structure
+   subroutine readOrificeAsGenStru(generalst, md_ptr, st_id, forcinglist, success)
+   
+      use messageHandling
+      
+      type(t_GeneralStructure), pointer,  intent(inout) :: generalst   !< general structure to be read into 
+      type(tree_data), pointer,           intent(in   ) :: md_ptr      !< ini tree pointer with user input.
+      logical,                            intent(inout) :: success     !< logical indicating, the reading of the structure was successfull
+      character(IdLen),                   intent(in   ) :: st_id       !< Structure character Id.
+      type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
+      
+      character(len=Idlen) :: dirstring
+      double precision :: area
+      allocate(generalst)
+
+      generalst%velheight = .true.
+      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'corrCoeff',  generalst%mugf_pos, success)
+      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
+      if (.not. success) then
+         call  prop_get_double(md_ptr, 'structure', 'area',  area, success)
+         if (success) then
+            generalst%ws = sqrt(area)
+            generalst%gateLowerEdgeLevel = generalst%ws + generalst%zs
+         endif
+      else
+         call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, &
+                                                       forcinglist, success)
+      endif
+      
+      generalst%wu1                = generalst%ws
+      generalst%zu1                = generalst%zs
+      generalst%wu2                = generalst%ws
+      generalst%zu2                = generalst%zs
+      generalst%zs                 = generalst%zs
+      generalst%wd1                = generalst%ws
+      generalst%zd1                = generalst%zs
+      generalst%wd2                = generalst%ws
+      generalst%zd2                = generalst%zs
+      generalst%cgf_pos            = 1d0
+      generalst%cgd_pos            = 1d0
+      generalst%cwf_pos            = 1d0
+      generalst%cwd_pos            = 1d0
+      generalst%cgf_neg            = 1d0
+      generalst%cgd_neg            = 1d0
+      generalst%cwf_neg            = 1d0
+      generalst%cwd_neg            = 1d0
+      generalst%mugf_neg           = generalst%mugf_pos
+      generalst%extraresistance    = 0d0
+      generalst%gatedoorheight     = huge(1d0)
+      generalst%gateopeningwidth   = 0d0
+      generalst%crestlength        = 0d0
+      generalst%velheight          = .true.
+      generalst%openingDirection   = GEN_SYMMETRIC
+
+   end subroutine readOrificeAsGenStru
  
    !> Read the general structure parameters
    subroutine readGeneralStructure(generalst, md_ptr, st_id, forcinglist, success)
