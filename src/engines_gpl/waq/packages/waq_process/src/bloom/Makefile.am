@@ -57,7 +57,6 @@ libbloom_la_SOURCES = \
        prinma.f \
        prinsu.f \
        print6.f \
-       prinun.f \
        promes.f \
        prompt.f \
        qslp.f \

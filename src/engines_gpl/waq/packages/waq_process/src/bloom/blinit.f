@@ -21,16 +21,6 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       7 Januari 1994
-!    Program:    BLINIT.FOR
-!    Version:    0.1
-!    Programmer: Jos van Gils
-!
-!    Initialization
-!
-!    Called by: BLOOMC
-!    Calls    : CVRBLM, HDRBLM
-
       subroutine blinit (lprino,ldumpo)
 
       use bloom_data_dim
@@ -40,74 +30,37 @@
 
       implicit none
 
-!
-!     Arguments
-!
-!     Name    Type  Length   I/O  Description
-!
-!     LPRINO  I     1        O    Saves original value of LPRINT
-!     LDUMPO  I     1        O    Saves original value of IDUMP
+      integer lprino              ! Saves original value of LPRINT
+      integer ldumpo              ! Saves original value of IDUMP
 
-      INTEGER         LPRINO, LDUMPO
-
-!     Common block variables used
-!
-!     Name    Type  Length   I/O  Inc-file  Description
-!
-!     NUSPEC  I     1        I    phyt2     Number of types
-!     NUNUCO  I     1        I    phyt2     Number of nutrients
-!     NUFILI  I     1        I    phyt2     First position of EKX in A
-!     NUABCO  I     1        I    phyt2     Last position of EKX in A
-!     A       R*8   IA,MT    O    matri     System matrix Bloom
-!     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
-!     EKX     R*8   MT       I    phyt1     Specific extinctions, converted
-!                                           to be (1/m/(gDW/m3))
-!     LPRINT  I     1        I    sumout    Print flag
-!     IDUMP   I     1        I    sumout    Print flag
-
-!
 !     Local variables
-!
-!     Name    Type  Length   I/O  Description
-!
-!     J       I     1
-!     I       I     1
-
-      INTEGER         J    , I
+      integer i, j                ! indexes
 
 !     Convert BLOOM II specific units to DLWQWQ specific units
+      call cvrblm
 
-      CALL CVRBLM
-!
 ! Set A-matrix. Copy nutrient rows from AA (stochiometry matrix).
 ! Copy the extinction rows.
 ! Note: in steady state version of BLOOM the A matrix is updated each
 ! call of subroutine SETABC. This is not necessary now; the section
 ! in SETABC is skipped in the the dynamic version of the model.
-!
-      DO 80 J = 1,NUSPEC
-         DO 75 I = 1,NUNUCO
-            A(I,J) = AA(I,J)
-   75    CONTINUE
-   80 CONTINUE
-      DO 90 J = 1,NUSPEC
-         DO 85 I = NUFILI,NUABCO
-            A(I,J) = EKX(J)
-   85    CONTINUE
-   90 CONTINUE
-!
-!  Call subroutine HDRBLM to write the headers for a number of output
-!  files.
-!
-      IF (LPRINT .GT. 1) CALL HDRBLM
+      do j = 1,nuspec
+         do i = 1,nunuco
+            a(i,j) = aa(i,j)
+         enddo
+      enddo
+      do j = 1,nuspec
+         do i = nufili,nuabco
+            a(i,j) = ekx(j)
+         enddo
+      enddo 
+
+!  Call subroutine HDRBLM to write the headers for a number of output files.
+      if (lprint .gt. 1) call hdrblm
 
 !  Save originals of print flags for later use in BLOUTC
+      lprino = lprint
+      ldumpo = idump
 
-      LPRINO = LPRINT
-      LDUMPO = IDUMP
-!
-!  Exit
-!
-      RETURN
-      END
-
+      return
+      end

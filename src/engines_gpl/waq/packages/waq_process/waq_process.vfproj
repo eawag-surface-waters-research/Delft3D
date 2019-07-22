@@ -86,7 +86,6 @@
 		<File RelativePath=".\src\bloom\prinma.f"/>
 		<File RelativePath=".\src\bloom\prinsu.f"/>
 		<File RelativePath=".\src\bloom\print6.f"/>
-		<File RelativePath=".\src\bloom\prinun.f"/>
 		<File RelativePath=".\src\bloom\promes.f"/>
 		<File RelativePath=".\src\bloom\prompt.f"/>
 		<File RelativePath=".\src\bloom\qslp.f"/>

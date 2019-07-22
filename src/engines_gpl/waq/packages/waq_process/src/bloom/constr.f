@@ -33,9 +33,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'arran.inc'
-
       real(8) :: root(2)
       real(8) :: s0
       real(8) :: surf

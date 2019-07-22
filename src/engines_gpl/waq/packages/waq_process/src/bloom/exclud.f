@@ -35,11 +35,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'matri.inc'
-!      INCLUDE 'size.inc'
-
       integer ntypes (ms),irs(3), i, inow, k, nexclu, notprs, linf, iform
       save ntypes
       data nexclu /0/

@@ -42,10 +42,6 @@
       use bloom_data_phyt    
 
       implicit none
-!
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'matri.inc'
 
       real(8)      :: x(*)
       real(8)      :: b2(ms)

@@ -42,8 +42,6 @@
 
       implicit none
 
-!      INCLUDE 'ioblck.inc'
-
       character*8 token
       integer prmpt,gets,len,uprcas,irc
 !

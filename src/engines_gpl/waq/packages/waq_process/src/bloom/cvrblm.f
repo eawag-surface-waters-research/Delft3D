@@ -62,12 +62,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'dynam.inc'
-      
       integer :: i
 !
 ! Assuming that concentration units in the calling program are g/m3,

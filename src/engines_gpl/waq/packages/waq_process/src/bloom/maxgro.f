@@ -61,17 +61,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'cal1.inc'
-!      INCLUDE 'matri.inc'
-!      INCLUDE 'dynam.inc'
-!      INCLUDE 'arran.inc'
-!      INCLUDE 'ioblck.inc'
-
       real(8) :: root(*),xinit(*)
       real(8) :: effi, exttot, grlim, bt, eadj, dep
       integer :: iskmax, j, k

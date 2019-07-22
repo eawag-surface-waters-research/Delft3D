@@ -37,12 +37,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'cal1.inc'
-!      INCLUDE 'ioblck.inc'
-
       real(8)      :: dead,death,sedead,alive,temp
       character(8) :: cdate
 !

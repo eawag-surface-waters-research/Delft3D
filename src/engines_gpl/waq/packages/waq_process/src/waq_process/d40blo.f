@@ -187,8 +187,9 @@
          SWBLSA = PMSA(IPOINT(29))
 
 !     Set logical numbers and open autonomous I/O files Bloom
+         CALL GETMLU(LUNREP)
          RUNNAM = 'bloominp.XXX'
-         CALL BLFILE (RUNNAM)
+         CALL BLFILE (RUNNAM, LUNREP)
 
 !        Copy algae type properties for input
          DO 40 IALG=1,NTYP_M

@@ -21,18 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    23-12-97: Store computed biomass in BIOMAS array for use in D40BLO
-!    Version 0.2 22 July 1994
-!    Version 0.1 7 Januari 1994
-!    Program:    BLPRIM.FOR
-!    Programmer: Jos van Gils
-!
+!    Store computed biomass in BIOMAS array for use in D40BLO
 !    Compute primary production and associated fluxes
-!
-!    Called by: BLOOMC
-!    Calls    : BVECT , DYNRUN
-
-!     22062006 Bugfixes Uptake fluxes, streamlining of NUNUCO based loops
 
       subroutine blprim (biomas, cnh4  , cno3  , cpo4  , csio  , 
      j                   cdetn , cdetp ,         cco2  , ctic  ,
@@ -58,424 +48,357 @@
 !
 !     Name    Type  Length   I/O  Description
 !
-!     BIOMAS  R*4   NUSPEC   I    Biomass (gC/m3)
-!     CNH4    R*4   1        I    Concentration NH4 (gN/m3)
-!     CNO3    R*4   1        I    Concentration NO3 (gN/m3)
-!     CPO4    R*4   1        I    Concentration PO4 (gP/m3)
-!     CSIO    R*4   1        I    Concentration SIO (gSi/m3)
-!     CDETN   R*4   1        I    Concentration DetN (gN/m3)
-!     CDETP   R*4   1        I    Concentration DetP (gP/m3) 
-!     CCO2    R*4   1        I    Concentration CO2 (g/m3)
-!     CTIC    R*4   1        I    Concentration TIC (gC/m3)
-!     FLMORA  R*4   NUSPEC   I/O  Mortality fluxes (gC/m3/d)
-!     FLDETN  R*4   4        I/O  Detritus production (g/m3/d)
-!     TSTEPI  R*4   1        I    Time step (d)
-!     EXTOT   R*4   1        I    Total extinction (1/m)
-!     EXALG   R*4   1        I    Extinction from living algae (1/m)
-!     TEMP    R*4   1        I    Temperature (deg.C)
-!     RAD     R*4   1        I    Radiation (J/cm2/week)
-!     DEPTH   R*4   1        I    Depth (m)
-!     DAYL    R*4   1        I    Length of light period (h)
-!     ID      I     1        I    Week number (1 to 52)
-!     NSET    I     1        I    Counter
-!     DEAT4   R*4   1        I    ??
-!     TOTNUT  R*4   4        O    Total C,N,P,Si in algae (g/m3)
-!     CHLTOT  R*4   1        O    Total chlorophyl in algae (mgChl/m3)
-!     FLPRPA  R*4   NUSPEC   O    Primary production fluxes (gC/m3/d)
-!     FLUPTN  R*4   5        O    Uptake fluxes (g/m3/d)
-!     FACLIM  R*4   6        O    Limiting factors (-)
-!     UPTNIT  R*4   1        O    Nitrogen uptake per day
-!     FRACAM  R*4   1        O    Fraction NH4 of N uptake
-!     FBOD5   R*4   1        O    BOD5/BODinf in algae
-!     RATGRO  R*4   NUECOG   O    Effective growth rate per group (1/day)
-!     RATMOR  R*4   NUECOG   O    Effective mortality per group (1/day)
-!     ALGDM   R*4   1        O    Dry matter in algae (gDM/m3)
-!     ISEG    I     1        I    Segment number
-!     CGROUP  r*4   NUECOG   O    Group biomass
-!     LMIXO   L     1        I    FLAG mixotrophy
-!     LFIXN   L     1        I    FLAG N fixation
-!     LCARB   L     1        I    FLAG C limitation
-!     NOUTLIM I     1        I    dimension of OUTLIM
-!     OUTLIM  R*4   NOUTLIM  O    limiting factors (extended)
-!     NUNUCOM I     1        I    max nr of nutrient constraints in DELWAQ output
-!     NUECOGM I     1        I    max nr of algae groups in DELWAQ in/out
-!     CON2OUT I     1        I    mapping of actual nutrient constraints to DELWAQ output
-!     SWBLSA  I     1        I    switch for BLOOM stand alone option
-!
-      REAL            BIOMAS(*), CNH4, CNO3, CPO4, CSIO, RATGRO(*),
-     J                CCO2  , CTIC  , CDETN , CDETP,
-     J                FLMORA(*), FLDETN(*), TSTEPI, EXTOT, EXALG, TEMP,
-     J                RAD, DEPTH, DAYL, DEAT4, TOTNUT(*), CHLTOT, FBOD5,
-     J                FLPRPA(*), FLUPTN(*), FACLIM(*), UPTNIT, FRACAM,
-     J                RATMOR(*), ALGDM, CGROUP(*)
-      INTEGER         NSET, ID, ISEG, NOUTLIM, NUNUCOM, NUECOGM
-      INTEGER         CON2OUT(NUNUCOM), NUTCON(NUNUCOM), FLXCON(NUNUCOM)
-      REAL            OUTLIM(NOUTLIM), TotNin, TotPin, TotSIin
-      LOGICAL         LMIXO , LFIXN , LCARB
-      INTEGER         SWBLSA
+      real(4)    biomas(nuspec)   ! Biomass (gC/m3)
+      real(4)    cnh4             ! Concentration NH4 (gN/m3)
+      real(4)    cno3             ! Concentration NO3 (gN/m3)
+      real(4)    cpo4             ! Concentration PO4 (gP/m3)
+      real(4)    csio             ! Concentration SIO (gSi/m3)
+      real(4)    cdetn            ! Concentration DetN (gN/m3)
+      real(4)    cdetp            ! Concentration DetP (gP/m3) 
+      real(4)    cco2             ! Concentration CO2 (g/m3)
+      real(4)    ctic             ! Concentration TIC (gC/m3)
+      real(4)    flmora(nuspec)   ! Mortality fluxes (gC/m3/d)
+      real(4)    fldetn(4)        ! Detritus production (g/m3/d)
+      real(4)    tstepi           ! Time step (d)
+      real(4)    extot            ! Total extinction (1/m)
+      real(4)    exalg            ! Extinction from living algae (1/m)
+      real(4)    temp             ! Temperature (deg.C)
+      real(4)    rad              ! Radiation (J/cm2/week)
+      real(4)    depth            ! Depth (m)
+      real(4)    dayl             ! Length of light period (h)
+      integer    id               ! Week number (1 to 52)
+      integer    nset             ! Counter
+      real(4)    deat4            ! ??
+      real(4)    totnut(4)        ! Total C,N,P,Si in algae (g/m3)
+      real(4)    chltot           ! Total chlorophyl in algae (mgChl/m3)
+      real(4)    flprpa(nuspec)   ! Primary production fluxes (gC/m3/d)
+      real(4)    fluptn(5)        ! Uptake fluxes (g/m3/d)
+      real(4)    faclim(6)        ! Limiting factors (-)
+      real(4)    uptnit           ! Nitrogen uptake per day
+      real(4)    fracam           ! Fraction NH4 of N uptake
+      real(4)    fbod5            ! BOD5/BODinf in algae
+      real(4)    ratgro(nuecog)   ! Effective growth rate per group (1/day)
+      real(4)    ratmor(nuecog)   ! Effective mortality per group (1/day)
+      real(4)    algdm            ! Dry matter in algae (gDM/m3)
+      integer    iseg             ! Segment number
+      real(4)    cgroup(nuecog)   ! Group biomass
+      logical    lmixo            ! FLAG mixotrophy
+      logical    lfixn            ! FLAG N fixation
+      logical    lcarb            ! FLAG C limitation
+      integer    noutlim          ! dimension of OUTLIM
+      real(4)    outlim(noutlim)  ! limiting factors (extended)
+      integer    nunucom          ! max nr of nutrient constraints in DELWAQ output
+      integer    nuecogm          ! max nr of algae groups in DELWAQ in/out
+      integer    con2out          ! mapping of actual nutrient constraints to DELWAQ output
+      integer    swblsa           ! switch for BLOOM stand alone option
+
+      integer    nutcon(nunucom)  ! Nutrients involved in active nutrient constraints
+      integer    flxcon(nunucom)  ! Uptake fluxes involved in active nutrient constraints
+      real(4)    TotNin           ! Total nitrogen for BLOOM stand alone        (g/m3)
+      real(4)    TotPin           ! Total phosphorous for BLOOM stand alone     (g/m3)
+      real(4)    TotSIin          ! Total silicium for BLOOM stand alone        (g/m3)       
       
-!     Common block variables used
-!
-!     Name    Type  Length   I/O  Inc-file  Description
-!
-!     NUSPEC  I     1        I    phyt2     Number of types
-!     NUECOG  I     1        I    phyt2     Number of groups
-!     NUROWS  I     1        I    phyt2
-!     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
-!     CTODRY  R*8   MT       I    size      Conversion (gDW/gC)
-!     NREP    I     1        I/O  phyt2     Counter
-!     IT2     I     MS,2     I    phyt2     Administration of groups/types
-!     BIOBAS  R*8   1        I    size      Base level per group (gDW/m3)
-!     TOPLEV  R*8   1        I    size      Base level per type (gDW/m3)
-!     CONCEN  R*8   3        I/O  phyt1     Available nutrients (g/m3)
-!     IOU     I     99       I    ioblck    Logical unit numbers
-!     ISDPER  I     2        I    sumout    First and last week selective dump
-!     XDEF    R*8   MX+1     I    xvect     System vector of Bloom
-!     LIMIT   C*18  1        I    sumout    Limiting factors
-!     XINIT   R*8   MS       O    xvect     Initial biomass per group
-!     TSTEP   R*8   1        O    dynam     Time step
-!     RMORT   R*8   MT       I    size      Mortality rate (1/day)
-!
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'sumout.inc'
-!      INCLUDE 'xvect.inc'
-!      INCLUDE 'dynam.inc'
-!
 !     Local variables
-!
-!     Name    Type  Length   I/O  Description
-!
-!     CMORT   R*4   1             Additional mortality flux (gDW/m3/d)
-!     X       R*8   MT            Remaining after mortality (gDW/m3)
-!     XJ      R*8   1             Biomass per group (gDW/m3)
-!     J       I     1
-!     IHULP   I     1
-!     IERROR  I     1             Present number of mass errors
-!     MERROR  I     1             Maximum number of mass errors
-!     EXTOT8  R*8   1             Real*8 version of input parameter
-!     EXBAC8  R*8   1             ..
-!     TEMP8   R*8   1             ..
-!     RAD8    R*8   1             ..
-!     DEPTH8  R*8   1             ..
-!     DAYL8   R*8   1             ..
-!     CHLOR8  R*8   1             ..
-!     EXTLIM  R*8   1             ??
-!     DEAT    R*8   1             ??
-!     TOTCHL  R*8   1             Real*8 version of output parameter
-!     TOTDRY  R*8   1             Real*8 version of output parameter
-!     TOTCAR  R*8   1             Real*8 version of output parameter
-!     UPTAKE  R*4   1             Nitrogen uptake (gN/m3/d)
-!     I       I     1
-!     FRMIXX  R*4   1             Fraction of mixotrophy in production
-!     NUTCON  I*4   8             Nutrients involved in active nutrient constraints
-!     FLXCON  I*4   8             Uptake fluxes involved in active nutrient constraints
+      real(4)    cmort            ! Additional mortality flux (gDW/m3/d)
+      real(8)    x(mt)            ! Remaining after mortality (gDW/m3)
+      real(8)    xj               ! Biomass per group (gDW/m3)
+      integer    i                ! 
+      integer    i2               ! 
+      integer    ihulp            ! 
+      integer    inuco            ! 
+      integer    j                ! 
+      integer    k                ! 
+      integer    ierror           ! Present number of mass errors
+      real(8)    extot8           ! Real*8 version of input parameter
+      real(8)    exbac8           ! ..
+      real(8)    temp8            ! ..
+      real(8)    rad8             ! ..
+      real(8)    depth8           ! ..
+      real(8)    dayl8            ! ..
+      real(8)    chlor8           ! ..
+      real(8)    extlim           ! ??
+      real(8)    deat             ! ??
+      real(8)    totchl           ! Real*8 version of output parameter
+      real(8)    totdry           ! Real*8 version of output parameter
+      real(8)    totcar           ! Real*8 version of output parameter
+      real(4)    uptake           ! Nitrogen uptake (gN/m3/d)
+      real(4)    frmixx           ! Fraction of mixotrophy in production
 
-      REAL*8          EXTOT8, EXBAC8, TEMP8, RAD8, DAYL8, CHLOR8, XJ,
-     J                DEPTH8, EXTLIM, DEAT, TOTCHL, TOTDRY, TOTCAR,
-     J                X(MT), AUTO(3), FIXINF, AUTNUT
-      REAL            CMORT , UPTAKE, FRMIXN, FRMIXP, FRMIX
-      INTEGER         IERROR, MERROR, K, J, I, IHULP, I2, INUCO
-      PARAMETER      (MERROR = 100,FIXINF=1.0D+03)
-      SAVE IERROR
-      DATA IERROR /0/
+      real(8)    auto(3)
+      real(8)    autnut
+      real(4)    frmixn
+      real(4)    frmixp
+      real(4)    frmix
 
-!
+      real(8), parameter ::  fixinf=1.0d+03
+      integer,parameter  ::  merror=100           ! Maximum number of mass errors
+
+      save ierror
+      data ierror /0/
+
 ! Increase BLOOM II indicator for the number of runs.
-      NREP = NREP + 1
-!
-!  Transfer actual time step to Bloom (through common variable TSTEP)
-      TSTEP = DBLE(TSTEPI)
+      nrep = nrep + 1
 
-!
+!  Transfer actual time step to Bloom (through common variable TSTEP)
+      tstep = dble(tstepi)
+
 !  Compute totals per species group (XINIT), limit to BIOBAS
-      DO J=1,NUECOG
-        XJ = 0D0
-        DO I = IT2(J,1), IT2(J,2)
-          XJ = XJ + DBLE(BIOMAS(I)) * CTODRY(I)
-        ENDDO
-        XINIT(J) = MAX(XJ,BIOBAS)
-      ENDDO
-!
+      do j=1,nuecog
+         xj = 0d0
+         do i = it2(j,1), it2(j,2)
+            xj = xj + dble(biomas(i)) * ctodry(i)
+         enddo
+         xinit(j) = max(xj,biobas)
+      enddo
+
 !  Compute available nutrients (CONCEN) start with nutrients outside algae pool (dissolved , detritus)
-!
-      CONCEN (1) = DBLE(CNO3 + CNH4)
-      CONCEN (2) = DBLE(CPO4)
-      CONCEN (3) = DBLE(CSIO)
-      INUCO = 3
-      IF (LCARB) THEN 
-        CONCEN (INUCO+1) = DBLE(CTIC)          ! DECIDE IF THIS SHOULD BE TIC
-        INUCO = INUCO + 1
-      ENDIF
-!     MIXOTROPHY
-      IF (LMIXO) THEN
-        CONCEN(INUCO+1) = DBLE(CDETN)
-        CONCEN(INUCO+2) = DBLE(CDETP)
-        INUCO = INUCO + 2
-      ENDIF
-!     N-FIXATION
-      IF (LFIXN) THEN
-        CONCEN(INUCO+1) = FIXINF
-        INUCO = INUCO + 1
-      ENDIF
-      AUTO = 0.D0
-!
+      concen (1) = dble(cno3 + cnh4)
+      concen (2) = dble(cpo4)
+      concen (3) = dble(csio)
+      inuco = 3
+      if (lcarb) then 
+         concen (inuco+1) = dble(ctic)          ! Decide if this should be tic
+         inuco = inuco + 1
+      endif
+!     Mixotrophy
+      if (lmixo) then
+         concen(inuco+1) = dble(cdetn)
+         concen(inuco+2) = dble(cdetp)
+         inuco = inuco + 2
+      endif
+!     N-Fixation
+      if (lfixn) then
+         concen(inuco+1) = fixinf
+         inuco = inuco + 1
+      endif
+      auto = 0.d0
+
 ! Check whether biomass minus mortality is reasonably large.
 ! If the value has dropped below TOPLEV, then set the biomass to
 ! zero and correct the detritus fluxes.
 ! Otherwise add nutrients in live phytoplankton to CONCEN.
 !
 ! Loop over algae species
+      do j=1,nuspec
+! compute remaining biomass after mortality
+         if (biomas (j) .lt. 0.0) then
+            x (j) = biomas (j)
+         else
+            x(j) = dble( biomas(j) - tstepi * flmora(j) ) * ctodry(j)
+!  Add nutrients in autolyses to concen and auto
+            do k=1,nunuco
+               i = nutcon(k)
+               autnut  = dble( tstepi * flmora(j)) * ctodry(j) * (1.d0 - availn(j)) * aa(k,j)
+               if (i.le.3) then
+                  auto(i) = auto(i) + autnut                   ! only for N,P,Si
+                  concen(i) = concen(i) + autnut
+               endif
+            enddo
 
-      DO J=1,NUSPEC
-
-! Compute remaining biomass after mortality
-
-         IF (BIOMAS (J) .LT. 0.0) THEN
-            X (J) = BIOMAS (J)
-         ELSE
-            X(J) = DBLE( BIOMAS(J) - TSTEPI * FLMORA(J) ) * CTODRY(J)
-!
-!  Add nutrients in autolyses to CONCEN and AUTO
-!
-            DO K=1,NUNUCO
-               I = NUTCON(K)
-               AUTNUT  = DBLE( TSTEPI * FLMORA(J)) * CTODRY(J) *
-     1                   (1.D0 - AVAILN(J)) * AA(K,J)
-               IF (I.LE.3) THEN
-                 AUTO(I) = AUTO(I) + AUTNUT                   ! ONLY FOR N,P,Si
-                 CONCEN(I) = CONCEN(I) + AUTNUT
-               ENDIF
-            ENDDO
-!
 ! Negative biomass after mortality? Message!
-!
-            IF (X(J) .LT. -1.0D-2) THEN
-               IERROR = IERROR + 1
-               WRITE (IOU(61), 1050) IERROR,J,BIOMAS(J), ISEG, X(J)
-               IF (IERROR .EQ. MERROR) GOTO 901
-            END IF
- 1050    FORMAT ( ' Integration error number ',I3,/,
+            if (x(j) .lt. -1.0d-2) then
+               ierror = ierror + 1
+               write (iou(61), 1050) ierror,j,biomas(j), iseg, x(j)
+               if (ierror .eq. merror) goto 901
+            end if
+ 1050    format ( ' Integration error number ',I3,/,
      &            ' Current biomass of type ',I3,' = ',E15.5,/,
      &            ' in segment',I8,/,
      &            ' Remaining after mortality = ',E15.5,/,
      &            ' Serious error: time step is too big to model',
      &            ' mortality')
 
-            IF (X(J) .LT. TOPLEV) THEN
-!
+            if (x(j) .lt. toplev) then
 !  Set small biomasses to zero, putting mass into the detritus pools,
 !  by increasing the mortality and detritus production fluxes
-!
-               CMORT = SNGL(X(J))/TSTEPI
-               FLMORA(J) = FLMORA(J) + CMORT/SNGL(CTODRY(J))
-               FLDETN(1) = FLDETN(1) + CMORT/SNGL(CTODRY(J))
-               DO K=1,NUNUCO
-                   I = NUTCON(K)
-                   IF (I.LE.3)                         ! ONLY N,P,Si
-     J             FLDETN(I+1) = FLDETN(I+1) + CMORT*SNGL(AA(K,J))
-               ENDDO
+               cmort = sngl(x(j))/tstepi
+               flmora(j) = flmora(j) + cmort/sngl(ctodry(j))
+               fldetn(1) = fldetn(1) + cmort/sngl(ctodry(j))
+               do k=1,nunuco
+                   i = nutcon(k)
+                   if (i.le.3)                         ! only N,P,Si
+     j             fldetn(i+1) = fldetn(i+1) + cmort*sngl(aa(k,j))
+               enddo
 !  Biomass set to zero, for BLOOM to make proper mortality constraint
 !  and for correct calculation of production fluxes afterwards
 !  (JvG, June 2006)
-
-               X(J) = 0.0D0
-            ENDIF
+               x(j) = 0.0d0
+            endif
 !  End of code for positive biomass
-         ENDIF
-!
+      endif
+
 !  Add nutrients in live phytoplankton to CONCEN.
 !  Contrary to earlier versions ALL cases pass this
 !  code, because X(J) is used afterwards to calculate 
 !  production flux, the same value needs to be given to 
 !  BLOOM as available nutrients in CONCEN
 !  (JvG, June 2006)
-!
-         DO K=1,NUNUCO
-             I = NUTCON(K)
-             CONCEN(I) = CONCEN(I) + AA(K,J) * X(J)
-         ENDDO
+         do k=1,nunuco
+             i = nutcon(k)
+             concen(i) = concen(i) + aa(k,j) * x(j)
+         enddo
 
 !  End of loop over algae species
-      ENDDO
+      enddo
+
 !   In case of running in stand alone modus (SWBLSA=1) a steady state
 !   is calculated on basis of prescribed total nutrients and 
 !   detritus as based on the previous time step (TT dec 2015). 
-       IF (SWBLSA.EQ.1) THEN    
-         CONCEN (1) = DBLE(TotNin-CDETN)
-         CONCEN (2) = DBLE(TotPin-CDETP)
-         CONCEN (3) = DBLE(TotSIin)     
-       ENDIF 
-!
+      if (swblsa.eq.1) then    
+         concen (1) = dble(totnin-cdetn)
+         concen (2) = dble(totpin-cdetp)
+         concen (3) = dble(totsiin)     
+      endif 
+
 ! Call BVECT to set the mortality constraints.
-!
-      CALL BVECT (X, XDEF)
-!
+      call bvect (x, xdef)
+
 !  Call DYNRUN. This routine calls the actual BLOOM II module
-!
-      EXTOT8 = DBLE(EXTOT)
-      EXBAC8 = DBLE(EXTOT-EXALG)
-      TEMP8  = DBLE(TEMP)
-      RAD8   = DBLE(RAD)
-      DEPTH8 = DBLE(DEPTH)
-      DAYL8  = DBLE(DAYL)
-      CHLOR8 = -1D0
-      EXTLIM = 0D0
-      DEAT   = DBLE(DEAT4)
+      extot8 = dble(extot)
+      exbac8 = dble(extot-exalg)
+      temp8  = dble(temp)
+      rad8   = dble(rad)
+      depth8 = dble(depth)
+      dayl8  = dble(dayl)
+      chlor8 = -1d0
+      extlim = 0d0
+      deat   = dble(deat4)
 
-      CALL DYNRUN (EXTOT8, EXBAC8, TEMP8 , RAD8  , DEPTH8, DAYL8 ,
-     J             CHLOR8, ID    , ISEG  , NSET  , EXTLIM,
-     J             DEAT  , TOTCHL, TOTDRY, TOTCAR, SWBLSA)
+      call dynrun (extot8, exbac8, temp8 , rad8  , depth8, dayl8 ,
+     j             chlor8, id    , iseg  , nset  , extlim,
+     j             deat  , totchl, totdry, totcar, swblsa)
 
-!
 ! Store total carbon and chlorophyll concentration
-!
-      TOTNUT(1) = SNGL(TOTCAR)
-      CHLTOT    = SNGL(TOTCHL)
-      ALGDM     = SNGL(TOTDRY)
+      totnut(1) = sngl(totcar)
+      chltot    = sngl(totchl)
+      algdm     = sngl(totdry)
 
-      DO I=2,4
-         TOTNUT(I) = 0.0
-      ENDDO
-      DO I=1,9
-         FLUPTN(I) = 0.0
-      ENDDO
-      FBOD5     = 0.0
+      do i=2,4
+         totnut(i) = 0.0
+      enddo
+      do i=1,9
+         fluptn(i) = 0.0
+      enddo
+      fbod5     = 0.0
 
 ! Compute gross production: computed biomass by Bloom is in XDEF(NUROWS+J)
 ! Loop over algae species, compute production per species and total pr.pr.
 ! Added: computation of total nutrients
 ! Added: Calculate uptake fluxes (JvG, June 2006)
 
-      DO J = 1, NUSPEC
-         FLPRPA(J) = SNGL( (XDEF(J+NUROWS)-X(J)) / CTODRY(J) ) / TSTEPI
-         IF (.NOT.LCARB) FLUPTN(1) = FLUPTN(1) + FLPRPA(J)
-         FBOD5 = FBOD5 + SNGL( XDEF(J+NUROWS)/CTODRY(J) )
-     J             * ( 1. - EXP(-5.*RMORT(J)) )
-         DO K = 1,NUNUCO
-             I = NUTCON(K)
-             I2 = FLXCON(K)
-             IF (I.LE.3)
-     J       TOTNUT(I+1) = TOTNUT(I+1) + SNGL( XDEF(J+NUROWS)*AA(K,J) )
-             FLUPTN(I2)  = FLUPTN(I2) + FLPRPA(J)*AA(K,J)*CTODRY(J)
-         ENDDO
+      do j = 1, nuspec
+         flprpa(j) = sngl( (xdef(j+nurows)-x(j)) / ctodry(j) ) / tstepi
+         if (.not.lcarb) fluptn(1) = fluptn(1) + flprpa(j)
+         fbod5 = fbod5 + sngl(xdef(j+nurows) / ctodry(j)) * ( 1. - exp(-5.0 * rmort(j)))
+         do k = 1,nunuco
+             i = nutcon(k)
+             i2 = flxcon(k)
+             if (i.le.3) then
+                totnut(i+1) = totnut(i+1) + sngl(xdef(j+nurows)*aa(k,j))
+             endif
+             fluptn(i2)  = fluptn(i2) + flprpa(j)*aa(k,j)*ctodry(j)
+         enddo
 
 ! Determine carbon uptake mixotrophy
 
-         IF (LMIXO) THEN
-!           FRACTION MIXOTROPHY IN PRODUCTION
-           IF (LCARB) THEN
-            FRMIXN = AA(5,J) / (AA(1,J) + AA(5,J))
-            FRMIXP = AA(6,J) / (AA(2,J) + AA(6,J))
-           ELSE
-            FRMIXN = AA(4,J) / (AA(1,J) + AA(4,J))
-            FRMIXP = AA(5,J) / (AA(2,J) + AA(5,J))
-           ENDIF
-           FRMIX  = MAX(FRMIXN,FRMIXP)
-           FLUPTN(9) = FLUPTN(9) + FRMIX*FLPRPA(J)
-!          Uptake of DetC should be subtracted from total C-uptake 
-           FLUPTN(1) = FLUPTN(1) - FRMIX*FLPRPA(J)
-         ENDIF
-      ENDDO   
+         if (lmixo) then
+! Fraction mixotrophy in production
+            if (lcarb) then
+               frmixn = aa(5,j) / (aa(1,j) + aa(5,j))
+               frmixp = aa(6,j) / (aa(2,j) + aa(6,j))
+            else
+               frmixn = aa(4,j) / (aa(1,j) + aa(4,j))
+               frmixp = aa(5,j) / (aa(2,j) + aa(5,j))
+            endif
+            frmix  = max(frmixn,frmixp)
+            fluptn(9) = fluptn(9) + frmix*flprpa(j)
+!           Uptake of DetC should be subtracted from total C-uptake 
+            fluptn(1) = fluptn(1) - frmix*flprpa(j)
+         endif
+      enddo   
 
-      IF (TOTNUT(1) .GT. 1E-30) THEN
-          FBOD5 = FBOD5/TOTNUT(1)
-      ELSE
-          FBOD5 = 1.0
-      ENDIF
+      if (totnut(1) .gt. 1e-30) then
+         fbod5 = fbod5/totnut(1)
+      else
+         fbod5 = 1.0
+      endif
 
 !  Correct for depletion of NH4 assume that
 !  phytoplankton first depletes ammonia (completely)
 
 !  If BLOOM stand alone then derive steady state surplus nutrients 
-      IF (SWBLSA.EQ.1) then
-         FLUPTN(2) =  (CNH4 + AUTO(1)) /TSTEPI 
-         FLUPTN(3) =  (CNO3 - TotNin + TOTNUT(2) + CDETN) /TSTEPI 
-         FLUPTN(4) =  (CPO4 - TotPin + TOTNUT(3) + CDETP) / TSTEPI 
-         FLUPTN(5) =  (CSIO - TotSIin + TOTNUT(4) ) / TSTEPI 
-      ELSE 
-         IF (XDEF(1) .LE. CNO3) THEN
-            UPTAKE = FLUPTN(2)
-            FLUPTN(2) = (CNH4 + AUTO(1)) / TSTEPI
-            FLUPTN(3) = UPTAKE - FLUPTN(2)
-         ENDIF
-      ENDIF
-      UPTNIT = FLUPTN(2) + FLUPTN(3)
-      IF (UPTNIT .GT. 1E-30) THEN
-          FRACAM = FLUPTN(2)/UPTNIT
-      ELSE
-          FRACAM = 1.0
-      ENDIF
+      if (swblsa.eq.1) then
+         fluptn(2) =  (cnh4 + auto(1)) /tstepi 
+         fluptn(3) =  (cno3 - totnin + totnut(2) + cdetn) /tstepi 
+         fluptn(4) =  (cpo4 - totpin + totnut(3) + cdetp) / tstepi 
+         fluptn(5) =  (csio - totsiin + totnut(4) ) / tstepi 
+      else 
+         if (xdef(1) .le. cno3) then
+            uptake = fluptn(2)
+            fluptn(2) = (cnh4 + auto(1)) / tstepi
+            fluptn(3) = uptake - fluptn(2)
+         endif
+      endif
+      uptnit = fluptn(2) + fluptn(3)
+      if (uptnit .gt. 1e-30) then
+         fracam = fluptn(2)/uptnit
+      else
+         fracam = 1.0
+      endif
 
 ! Find limiting factors, this algorithm just takes first 3 (inorganic N,P,Si) and last 3 (e,gro,mor)
 ! regardless of additional nutrient constraints. This cnnects to traditional 6 limiting factors output
 ! For extended output (extra nutrient contstraints, grow/mort per group) see below
 
-      I = 0
-      DO J = 1,NUNUCO + 3
-          READ ( LIMIT((2*J-1):(2*J)),'(I2)') IHULP
-          IF ((J.LE.3).OR.(J.GT.NUNUCO)) THEN
-            I = I + 1
-            FACLIM(I) = REAL(IHULP)
-          ENDIF
-      ENDDO
-!      write (1963,*) 'stap ',nrep
-!      write (1963,*) 'faclim ',(faclim(i),i=1,6)
+      i = 0
+      do j = 1,nunuco + 3
+         read ( limit((2*j-1):(2*j)),'(i2)') ihulp
+         if ((j.le.3).or.(j.gt.nunuco)) then
+            i = i + 1
+            faclim(i) = real(ihulp)
+         endif
+      enddo
       
 !     Extended output for limiting factors
 
-      CALL BL_ISPLIM(NOUTLIM,OUTLIM,NUNUCOM,NUECOGM,CON2OUT)
+      call bl_isplim(noutlim,outlim,nunucom,nuecogm,con2out)
 !
 ! Loop to compute effective growth and mortality rates
 !
-      DO  J=1,NUECOG
-          RATGRO(J) = 0.0
-          RATMOR(J) = 0.0
-          CGROUP(J) = 0.0
-          DO I = IT2(J,1), IT2(J,2)
-              RATGRO(J) = RATGRO(J)
-     J              + SNGL( XDEF(I+NUROWS)-X(I) )
-              RATMOR(J) = RATMOR(J)
-     J              + SNGL(CTODRY(I))*BIOMAS(I) - SNGL(X(I))
-              BIOMAS(I) = SNGL(XDEF(I+NUROWS)/CTODRY(I))
-              CGROUP(J) = CGROUP(J) + BIOMAS(I)
-          ENDDO
-          RATGRO(J) = RATGRO(J) / SNGL(XINIT(J)) / TSTEPI
-          RATMOR(J) = RATMOR(J) / SNGL(XINIT(J)) / TSTEPI
-      ENDDO
+      do j=1,nuecog
+         ratgro(j) = 0.0
+         ratmor(j) = 0.0
+         cgroup(j) = 0.0
+         do i = it2(j,1), it2(j,2)
+            ratgro(j) = ratgro(j) + sngl( xdef(i+nurows)-x(i) )
+            ratmor(j) = ratmor(j) + sngl(ctodry(i))*biomas(i) - sngl(x(i))
+            biomas(i) = sngl(xdef(i+nurows)/ctodry(i))
+            cgroup(j) = cgroup(j) + biomas(i)
+         enddo
+         ratgro(j) = ratgro(j) / sngl(xinit(j)) / tstepi
+         ratmor(j) = ratmor(j) / sngl(xinit(j)) / tstepi
+      enddo
 
-!      write (1961,1001) 'FLMORA  ',(FLMORA(J), J=1,NUSPEC)
-!      write (1961,1001) 'FLDETN  ',(FLDETN(J), J=1,4)
-!      write (1961,1001) 'FLUPTN  ',(FLUPTN(J), J=1,9)
-!
-! Exit
-!
-      RETURN
+      return
 
-  901 WRITE (*,*) 'Fatal ERROR in Bloom module: time step too big'
-      CALL SRSTOP(1)
- 1001 FORMAT (A,1X,99E15.5)
- 1002 FORMAT (A,1X,i5,1x,99E15.5)
+  901 write (*,*) 'Fatal ERROR in Bloom module: time step too big'
+      call srstop(1)
+ 1001 format (A,1X,99E15.5)
+ 1002 format (A,1X,i5,1x,99E15.5)
 
-      END
-      SUBROUTINE BL_ISPLIM(NOUTLIM,OUTLIM,NUNUCOM,NUECOGM,CON2OUT)
+      end
+      subroutine bl_isplim(noutlim,outlim,nunucom,nuecogm,con2out)
       
       use bloom_data_dim
       use bloom_data_matrix
       use bloom_data_phyt
       
-      IMPLICIT NONE
+      implicit none
       
-      INTEGER NOUTLIM,NUNUCOM,NUECOGM
-      INTEGER CON2OUT(NUNUCOM)
-      REAL OUTLIM(NOUTLIM)
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'matri.inc'
-!      INCLUDE 'phyt2.inc'
-      INTEGER II,ICON,ICONOUT
+      integer noutlim,nunucom,nuecogm
+      integer con2out(nunucom)
+      real(4) outlim(noutlim)
+      integer ii,icon,iconout
 !
 !     ISPLIM  holds a list of actually limiting constraint numbers.
 !             The constraint nrs are dependent of actual NUNUCO (nr of nutrient constraints)
@@ -501,33 +424,25 @@
 !       NUNUCOM + 2 + NUECOGM + 1 to NUNUCOM + 2 + 2*NUECOGM for mortality limitation
 !
 !      WRITE (*,*) 'in'
-!      write (1963,*) 'isplim ',(isplim(i),i=1,12)
-      OUTLIM = 0.0
-!                  write (1963,*) 'NUECOG ',NUECOG
-!                  write (1963,*) 'NUNUCO ',NUNUCO
-      DO II = 1,MT   ! MT is dimension of ISPLIM according to blmdim.inc
-          ICON = ISPLIM(II)
-          IF (ICON.GT.0) THEN
-              IF (ICON.LE.NUNUCO) THEN
-                  ICONOUT = CON2OUT(ICON) ! this array determines the mapping of the actual BLOOM constraints to the fixed array of DELWAQ, filled in BLINPU
-              ELSEIF (ICON.LE.NUNUCO+2) THEN
-                  ICONOUT = NUNUCOM+(ICON-NUNUCO)
-              ELSEIF (ICON.LE.NUNUCO+3) THEN
-!                 this is the constraint NUNUCO + 3 that we can neglect
-              ELSEIF (ICON.LE.NUNUCO+3+NUECOG) THEN
-                  ICONOUT = NUNUCOM+2+ICON-(NUNUCO+3) 
-              ELSE
-                  ICONOUT = NUNUCOM+2+NUECOGM+ICON-(NUNUCO+3+NUECOG) 
-              ENDIF
-              OUTLIM(ICONOUT) = 1.0
-          ENDIF
-!          write (1963,*) 'loop ',ii,icon,iconout
-      ENDDO
-!      WRITE (*,*) 'UIT'
-!      write (1963,*) 'outlim ',(outlim(i),i=1,10)
-!      write (1963,*) 'grow  ',(outlim(i),i=11,13)
-!      write (1963,*) 'mort  ',(outlim(i),i=41,43)
-
-      RETURN
-      END
+      outlim = 0.0
+      do ii = 1,mt   ! MT is dimension of ISPLIM according to blmdim.inc
+         icon = isplim(ii)
+         if (icon.gt.0) then
+            if (icon.le.nunuco) then
+               iconout = con2out(icon) ! this array determines the mapping of the actual BLOOM constraints to the fixed array of DELWAQ, filled in BLINPU
+            elseif (icon.le.nunuco+2) then
+               iconout = nunucom+(icon-nunuco)
+            elseif (icon.le.nunuco+3) then
+      !                 this is the constraint NUNUCO + 3 that we can neglect
+            elseif (icon.le.nunuco+3+nuecog) then
+               iconout = nunucom+2+icon-(nunuco+3)
+            else
+               iconout = nunucom+2+nuecogm+icon-(nunuco+3+nuecog)
+            endif
+            outlim(iconout) = 1.0
+         endif
+      enddo
+      
+      return
+      end
 

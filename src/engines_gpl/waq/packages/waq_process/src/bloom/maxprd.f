@@ -36,11 +36,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'ioblck.inc'
-      
       real*8  :: t
       integer :: i, k
       

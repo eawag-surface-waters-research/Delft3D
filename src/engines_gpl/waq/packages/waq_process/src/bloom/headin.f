@@ -37,14 +37,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'arran.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'sumout.inc'
-!      INCLUDE 'ioblck.inc'
-
       INTEGER NUMTYP(MT), i, j, k, kk, nueco2, nzout
       CHARACTER*4 WORDS2(12),WORDS3(20),WORDS4(20)
       CHARACTER*8 WORDS(*),WWORDS(MG)

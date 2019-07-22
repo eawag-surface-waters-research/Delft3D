@@ -76,16 +76,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'sumout.inc'
-!      INCLUDE 'dynam.inc'
-!      INCLUDE 'xvect.inc'
-!
       CHARACTER*8 CDATE
       INTEGER NONUN(MT)
       integer    :: i, id, iseg, k, nset, numun

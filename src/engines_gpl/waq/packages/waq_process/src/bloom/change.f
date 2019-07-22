@@ -36,13 +36,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'cal1.inc'
-!      INCLUDE 'ioblck.inc'
-
       integer, parameter :: nchang = 25
       real*4 result
       character*8 wchang(nchang),fname,profil

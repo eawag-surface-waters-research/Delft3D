@@ -42,10 +42,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt2.inc'
-
       real(8)  :: aco(mt,mt),rvec(2*mt),svec(2*mt),dvec(2*mt),xvec(2*mt)
       real(8)  :: extb, rtemp, extlim
       

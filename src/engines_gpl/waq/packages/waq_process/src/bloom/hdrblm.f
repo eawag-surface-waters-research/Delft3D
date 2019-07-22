@@ -53,12 +53,6 @@
       use bloom_data_sumou  
 
       implicit none
-
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'sumout.inc'
 !
 !  Write heading for output on units IOU(6), OUUNI, IOU(15) and
 !  optionally IOU(21).

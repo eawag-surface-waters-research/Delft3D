@@ -30,7 +30,6 @@
       character*8 fname,profil
       integer cms, irc
 
-!      INCLUDE 'ioblck.inc'
 !
 ! Call EDITBLM.BAT to invoke a user-specified editor.
 !

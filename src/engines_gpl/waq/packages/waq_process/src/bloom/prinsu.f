@@ -59,14 +59,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'sumout.inc'
-!      INCLUDE 'matri.inc'
-!      INCLUDE 'postbl.inc'
-      
       integer  ::  i, i1, i2, j, k, k1, k2
       integer  ::  itnum, ntape, ntstot, numlim, ncon
       real (8) :: bio2, xbio, total, tot2

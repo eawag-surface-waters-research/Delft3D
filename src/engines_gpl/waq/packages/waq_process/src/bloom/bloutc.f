@@ -38,35 +38,11 @@
       use bloom_data_sumou   
       
       implicit none
-!
-!     Arguments
-!
-!     Name    Type  Length   I/O  Description
-!
-!     HISTOR  L     1        I    Flag to activate output
-!     LPRINO  I     1        I    Saves original value of LPRINT
-!     LDUMPO  I     1        I    Saves original value of IDUMP
 
-      LOGICAL         HISTOR
-      INTEGER         LPRINO, LDUMPO
+      logical histor    !  Flag to activate output
+      integer lprino    !  Saves original value of LPRINT
+      integer ldumpo    !  Saves original value of IDUMP
 
-!     Common block variables used
-!
-!     Name    Type  Length   I/O  Inc-file  Description
-!
-!     LPRINT  I     1        I    sumout    Print flag
-!     IDUMP   I     1        I    phyt2     Print flag
-
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'sumout.inc'
-!
-!     Local variables
-!
-!     Name    Type  Length   I/O  Description
-!
-!     -
-!
 !     LPRINT and IDUMP are output control flags of Bloom
 !     They have been read from the input and their value has been
 !     saved in LPRINO and LDUMPU
@@ -74,13 +50,13 @@
 !     true, that is for history elements at history times.
 !     This is to avoid excessively sized output files of Bloom
 
-      LPRINT = 0
-      IDUMP  = 0
-      IF (HISTOR) THEN
-          LPRINT = LPRINO
-          IDUMP  = LDUMPO
-      ENDIF
+      lprint = 0
+      idump  = 0
+      if (histor) then
+          lprint = lprino
+          idump  = ldumpo
+      endif
 
-      RETURN
-      END
+      return
+      end
 

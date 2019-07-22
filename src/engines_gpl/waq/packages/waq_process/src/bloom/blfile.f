@@ -21,74 +21,45 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       30 December 1993
-!    Program:    BLFILE.FOR
-!    Version:    0.1
-!    Programmer: Jos van Gils
-!
-!    Module that opens files for autonomous I/O of BLOOM
-!
-!    Called by: BLOOMC
-!    Calls    : SETUNI
-
-      subroutine blfile (runnam)
+      subroutine blfile (runnam, lunrep)
 
       use bloom_data_io  
 
       implicit none
 
-!     Arguments
-!
-!     Name    Type  Length   I/O  Description
-!
-!     RUNNAM  C*(*) 1        I    Filename consisting of runid (no ext)
-!
-      CHARACTER*12   RUNNAM
-!
-!     Local variables
-!
-!     Name    Type  Length   I/O  Description
-!
-!     IOST    I     1             I/O-status
+      character(12)  runnam       ! Filename consisting of runid (no ext)
+      integer        lunrep       ! Report file for error messages
 
-      INTEGER      IOST
+      integer        iost         ! I/O-status
 
-!
 !  Call subroutine SETUNI to set I/O unit numbers for BLOOM II.
-!
-      CALL SETUNI
-!
+      call setuni
+
 !  Open statement for BLOOM II input files.
-!
-      WRITE (RUNNAM(10:12),'(''frm'')')
-      OPEN (IOU(12),FILE=RUNNAM,IOSTAT = IOST)
-      IF (IOST .NE. 0) GOTO 901
+      write (runnam(10:12),'(''frm'')')
+      open (iou(12),file=runnam,iostat = iost)
+      if (iost .ne. 0) then
+         write (*,*) 'blfile: error opening .frm file'
+         write (lunrep,*) 'blfile: error opening .frm file'
+         call srstop(1)
+      endif
 
-      WRITE (RUNNAM(10:12),'(''d09'')')
-      OPEN (IOU( 9),FILE=RUNNAM,IOSTAT = IOST)
-      IF (IOST .NE. 0) GOTO 902
-!
-! Open BLOOM output file as unformatted, binary = transparent.
-!
-      WRITE (RUNNAM(10:12),'(''blm'')')
-      OPEN (IOU(26),FILE=RUNNAM,
-     &         FORM='UNFORMATTED', IOSTAT=IOST)
-!     ENDFILE (IOU(26))
-      IF (IOST .NE. 0) GOTO 903
-!
-!  Open statement for BLOOM II debug file.
-!
-      WRITE (RUNNAM(10:12),'(''dbg'')')
-      OPEN (IOU(10),FILE=RUNNAM,IOSTAT = IOST)
-      IF (IOST .NE. 0) GOTO 904
+      write (runnam(10:12),'(''d09'')')
+      open (iou( 9),file=runnam,iostat = iost)
+      if (iost .ne. 0) then
+         write (*,*) 'blfile: error opening .d09 file'
+         write (lunrep,*) 'blfile: error opening .d09 file'
+         call srstop(1)
+      endif
 
-      RETURN
+! Open statement for BLOOM II debug file.
+      write (runnam(10:12),'(''dbg'')')
+      open (iou(10),file=runnam,iostat = iost)
+      if (iost .ne. 0) then
+         write (*,*) 'blfile: error opening .dbg file'
+         write (lunrep,*) 'blfile: error opening .dbg file'
+         call srstop(1)
+      endif
 
-!     $Neatly process these error messages
-
-  901 STOP 'BLFILE: Error opening .frm file'
-  902 STOP 'BLFILE: Error opening .d09 file'
-  903 STOP 'BLFILE: Error opening .blm file'
-  904 STOP 'BLFILE: Error opening .dbg file'
-
-      END
+      return
+      end

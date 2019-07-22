@@ -50,17 +50,7 @@
 
       implicit none
 
-      SAVE
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'cal1.inc'
-!      INCLUDE 'arran.inc'
-!      INCLUDE 'matri.inc'
-!      INCLUDE 'dynam.inc'
-!      INCLUDE 'ioblck.inc'
+      save
 
       real(8)  :: xinit(*),pmax20(mt),tcorr(mt),sdmixn(mt)
       real(8)  :: csol, dsol, dep, expmul, extb, exttot, t

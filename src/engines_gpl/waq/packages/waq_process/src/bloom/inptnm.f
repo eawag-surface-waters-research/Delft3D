@@ -41,7 +41,6 @@
 
       implicit none
 
-!      INCLUDE 'ioblck.inc'
       real(8)  :: dnum, rnum
       integer  :: prmpt,type,stoi,stor,stod,uprcas, inum, irc
 !

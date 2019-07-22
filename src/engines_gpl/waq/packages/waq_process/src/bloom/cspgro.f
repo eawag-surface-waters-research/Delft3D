@@ -37,13 +37,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'ioblck.inc'
-
       integer, parameter :: nspe = 9
       integer            :: i, igro, irc, ipos, j, k, len, lerr, lenwrd
       integer            :: numca, numpma, nsgr, nsgr2, numgr, numsp

@@ -42,16 +42,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'arran.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'cal1.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'sumout.inc'
-!
       character*60 aline
 
       CHARACTER*8 CUDATE(3)

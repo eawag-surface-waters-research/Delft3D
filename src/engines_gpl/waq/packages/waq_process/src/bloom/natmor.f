@@ -40,12 +40,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'cal1.inc'
-!      INCLUDE 'ioblck.inc'
-      
       integer  :: i
       real(8)  :: death, temp, temp2, tmpcor
 !

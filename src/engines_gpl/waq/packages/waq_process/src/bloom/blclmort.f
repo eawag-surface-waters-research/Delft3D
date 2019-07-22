@@ -21,162 +21,106 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!     This file contains the subroutines concerning the chlorinity
-!     dependend mortality rates:
-!     BLCLST - adapt the rates
-!     BLCLRS - reset the rates
-!     And a routine to set ppmax for a specific alg
-!     BLSPPM - set ppmax
+!     This file contains various subroutines concerning the setting of BLOOM parameters
 
-      subroutine blclst (mrtm1,mrtm2,mrtb1,mrtb2,ntyp_a,cl)
+      subroutine blclst(mrtm1, mrtm2, mrtb1, mrtb2, ntyp_a, cl)
 
       use bloom_data_dim
       use bloom_data_size 
 
       implicit none
 
-!     Arguments
-!
-!     Name    Type  Length   I/O  Description
-!
-!     MRTM1   R     NTYP_A   O    Original mortality rates
-!     MRTM2   R     NTYP_A   I    M2 mort rate coeff
-!     MRTB1   R     NTYP_A   I    B1 mort rate sal stress coeff
-!     MRTB2   R     NTYP_A   I    B2 mort rate sal stress coeff
-!
-      INTEGER NTYP_A
-      REAL    MRTM1(NTYP_A),MRTM2(NTYP_A),MRTB1(NTYP_A),MRTB2(NTYP_A),CL
-      INTEGER IALG
+      integer ntyp_a              ! Actual number of algae types
+      real    mrtm1(ntyp_a)       ! Original mortality rates
+      real    mrtm2(ntyp_a)       ! M2 mort rate coeff
+      real    mrtb1(ntyp_a)       ! B1 mort rate sal stress coeff
+      real    mrtb2(ntyp_a)       ! B2 mort rate sal stress coeff
+      real    cl                  ! Chlorine concentration
+      integer ialg                ! Counter over algae types
 
 !     Loop over algae types
-      DO 10 IALG = 1, NTYP_A
-!       Store the original value
-        MRTM1(IALG) = RMORT1(IALG)
-!       Salinity dep. mortality ??
-        IF (MRTM2(IALG).GT.0.) THEN
-          CL = MIN(CL,35000.)
-          RMORT1(IALG) =  (MRTM2(IALG)-MRTM1(IALG))/
-     1      (1.+EXP(MRTB1(IALG)*(CL-MRTB2(IALG))))+MRTM1(IALG)
-        ENDIF
-   10 CONTINUE
+      do ialg = 1, ntyp_a
+!        Store the original value
+         mrtm1(ialg) = rmort1(ialg)
+!        Salinity dep. mortality ??
+         if (mrtm2(ialg).gt.0.) then
+            cl = min(cl, 35000.0)
+            rmort1(ialg) =  (mrtm2(ialg) - mrtm1(ialg)) / (1.0 + exp(mrtb1(ialg) * (cl-mrtb2(ialg)))) + mrtm1(ialg)
+         endif
+      enddo
 
-      RETURN
+      return
+      end
 
-      END
-      SUBROUTINE BLCLRS (MRTM1,NTYP_A)
+      
+      subroutine blclrs(mrtm1, ntyp_a)
 
       use bloom_data_dim
       use bloom_data_size 
 
       implicit none
 
-!     Arguments
-!
-!     Name    Type  Length   I/O  Description
-!
-!     MRTM1   R     NTYP_A   O    Original mortality rates
-!
-      INTEGER NTYP_A
-      REAL    MRTM1(NTYP_A)
-!
-!     Local variables
-!
-!     Name    Type  Length   I/O  Description
-!
-!     IALG    I     1             counter over algae types
-
-      INTEGER      IALG
+      integer ntyp_a              ! Actual number of algae types
+      real    mrtm1(ntyp_a)       ! Original mortality rates
+      integer ialg                ! Counter over algae types
 
 !     Loop over algae types
-      DO 20 IALG = 1, NTYP_A
-!       Store the original value
-        RMORT1(IALG)= MRTM1(IALG)
-   20 CONTINUE
+      do ialg = 1, ntyp_a
+!        Store the original value
+         rmort1(ialg)= mrtm1(ialg)
+      end do
 
-      RETURN
+      return
+      end
 
-      END
-      SUBROUTINE BLSPPM (IALG  , PPMAX )
+      
+      subroutine blsppm(ialg, ppmax)
 
       use bloom_data_dim
       use bloom_data_size 
       
       implicit none
 
-!
-!     Set PPMAX in BLOOM array for specific alg
-!
-!     Arguments
-!
-!     Name    Type  Length   I/O  Description
-!
-!     IALG    1     1        I    index alg involved
-!     PPMAX   R     1        I    PPMAX value to be set
-!
-      INTEGER IALG
-      REAL    PPMAX
-!
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!
-      PMAX1(IALG) = PPMAX
-!
-      RETURN
-      END
-      SUBROUTINE BLSSDM (IALG  , SDMIXN )
+      integer ialg                ! index alg involved
+      real    ppmax               ! PPMAX value to be set
+
+      pmax1(ialg) = ppmax
+
+      return
+      end
+
+      
+      subroutine blssdm (ialg  , sdmixn )
 
       use bloom_data_dim
       use bloom_data_size 
       
       implicit none
 
-!
-!     Set SDMIX in BLOOM array for specific alg
-!
-!     Arguments
-!
-!     Name    Type  Length   I/O  Description
-!
-!     IALG    1     1        I    index alg involved
-!     SDMIXN  R     1        I    SDMIX value to be set
-!
-      INTEGER IALG
-      REAL    SDMIXN
-!
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!
-      SDMIX(IALG) = SDMIXN
-!
-      RETURN
-      END
-      SUBROUTINE BLSAEF (IGROUP  , EFFIN )
+      integer ialg                ! index alg involved
+      real    sdmixn              ! SDMIX value to be set
+
+      sdmix(ialg) = sdmixn
+
+      return
+      end
+
+      
+      subroutine blsaef(igroup  , effin )
 
       use bloom_data_dim
       use bloom_data_size 
       use bloom_data_phyt
       
       implicit none
-!
-!     Set AVEFFI in BLOOM array for specific alg
-!
-!     Arguments
-!
-!     Name    Type  Length   I/O  Description
-!
-!     IALG    1     1        I    index alg involved
-!     EFFIN   R     1        I    EFFI value to be set
-!
-      INTEGER IGROUP, ITYPE
-      REAL    EFFIN
-!
-!      include 'blmdim.inc'
-!      include 'size.inc'
-!      include 'phyt2.inc'
-!
-      DO ITYPE = IT2(IGROUP,1),IT2(IGROUP,2)
-         AVEFFI(ITYPE) = EFFIN
-      END DO
-!
-      RETURN
-      END
+
+      integer igroup              ! Index of group involved
+      integer itype               ! Index of algae involved
+      real    effin               ! EFFI value to be set
+
+      do itype = it2(igroup,1),it2(igroup,2)
+         aveffi(itype) = effin
+      end do
+
+      return
+      end

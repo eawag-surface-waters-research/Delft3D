@@ -36,13 +36,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'cal1.inc'
-
       integer i, j, nnrun, outuni
 !
 !  Clear the screen and write a formfeed character to OUTUNI.

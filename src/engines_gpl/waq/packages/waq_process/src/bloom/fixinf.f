@@ -87,14 +87,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'matri.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'dynam.inc'
-!      INCLUDE 'sumout.inc'
       real(8)      :: x(*),bio(*),sumnut(mn),aroot(*)
       integer      :: irs (*),jkmax(*),swblsa, i, j, k
       character(8) :: cdate

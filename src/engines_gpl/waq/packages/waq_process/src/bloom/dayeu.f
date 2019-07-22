@@ -32,7 +32,6 @@
       use bloom_data_io  
 
       implicit none
-!      INCLUDE 'ioblck.inc'
       
       real(8)    :: dsol
       real(8)    :: euligh

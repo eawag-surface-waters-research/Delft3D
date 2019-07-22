@@ -33,9 +33,6 @@
 
       implicit none
       
-!      include 'blmdim.inc'
-!      include 'arran.inc'
-      
       real(8)    :: x, f, fpr, ex, ei, ei1, alam, c0, c1
       integer    :: i, numgr
 !

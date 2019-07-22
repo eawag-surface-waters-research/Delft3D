@@ -51,9 +51,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'ioblck.inc'
-      
       integer :: i, ioux
 !
 ! In ECOLUMN/NZBLOOM version:

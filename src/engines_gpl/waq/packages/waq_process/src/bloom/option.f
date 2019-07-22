@@ -40,16 +40,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'putin1.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'sumout.inc'
-!      INCLUDE 'dynam.inc'
-!      INCLUDE 'arran.inc'
-!
       integer, parameter :: nopt = 33
 
       integer            :: i, j, k, irc, memory, lomode

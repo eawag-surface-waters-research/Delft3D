@@ -34,11 +34,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-
       real(8)   :: x(mx), biopos, bio2, total
       integer   :: int, j, k, k2, l1, l2, ni, nin
 !

@@ -38,7 +38,6 @@
       
       CHARACTER*80 OUTSTR
       INTEGER ARG
-!      INCLUDE 'ioblck.inc'
       
       integer :: i, index, indata, ndx
 !

@@ -68,20 +68,6 @@
       REAL            BIOMAS(*), TEMP, FAUT(*), FDET(*), FLAUTN(*),
      J                FLDETN(*), FLOOXN(*), FLMORA(*), DEAT4, TSTEPI
 
-!     Common block variables used
-!
-!     Name    Type  Length   I/O  Inc-file  Description
-!
-!     NUSPEC  I     1        I    phyt2     Number of types
-!     RMORT   R*8   MT       O    size      Mortality rate (1/day)
-!     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
-!     CTODRY  R*8   MT       I    size      Conversion (gDW/gC)
-
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'size.inc'
-!
 !     Local variables
 !
 !     Name    Type  Length   I/O  Description

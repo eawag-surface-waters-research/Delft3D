@@ -35,10 +35,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'ioblck.inc'
-
       real(8)   :: prora(ms)
       real(8)   :: resra(ms)
       real(8)   :: pronet(ms)

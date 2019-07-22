@@ -35,12 +35,6 @@
 
       implicit none
 
-!      include 'blmdim.inc'
-!      include 'phyt1.inc'
-!      include 'phyt2.inc'
-!      include 'matri.inc'
-!      include 'ioblck.inc'
-
       real(8)   :: x(mx), slack = 1.d-12
       integer   :: i, j, infeas
 !

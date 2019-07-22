@@ -52,14 +52,6 @@
 
       implicit none
 
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'ioblck.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'matri.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'sumout.inc'
-!      INCLUDE 'postbl.inc'
       integer    :: jt(mt),nonuni(*),nonun(*),irs(*),lib(*)
       real(8)    :: x(*),xdef(*),bio(*), xopt, biomax, dbio
       integer    :: npause=0

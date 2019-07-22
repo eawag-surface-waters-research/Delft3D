@@ -113,20 +113,7 @@
       use bloom_data_phyt
       use bloom_data_sumou
       
-!      IMPLICIT REAL*8 (A-H,O-Z)
-
       implicit none
-
-!      INCLUDE 'blmdim.inc'
-!      INCLUDE 'size.inc'
-!      INCLUDE 'arran.inc'
-!      INCLUDE 'phyt1.inc'
-!      INCLUDE 'phyt2.inc'
-!      INCLUDE 'sumout.inc'
-!      INCLUDE 'cal1.inc'
-!      INCLUDE 'matri.inc'
-!      INCLUDE 'dynam.inc'
-!      INCLUDE 'ioblck.inc'
 
       integer irs3, i, id, ier, index1, index2, infeas, inow, int, inhib, ismax, iskmax, irerun
       integer j, k, l1, l2, linf, ni, nin, nset, numuni, numun, swblsa
@@ -156,7 +143,6 @@
       real(8) :: ekxi
       real(8) :: phyt
       real(8) :: zmax
-      real(8) :: gramx
       real(8) :: death
       
       character*8 cdate
@@ -459,13 +445,6 @@
      1        ' 0.0 and might replace',/'  one of the species in the ',
      2        'bloom:',1X,20I3)
   460 CONTINUE
-!
-!  Print Relevant information.
-!  Update 11-10-90:
-!  Call prinun, when  LPRINT >= 1
-!
-      IF (LPRINT .GE. 1)
-     1    CALL PRINUN (CDATE, TOTAL, PHYT, EXTTOT, EXLIVE, EXTB, T, USOL, DAY, DEP, ZMAX, GRAMX)
 !
 !  Return the converted and corrected solar radiation level as
 !  CSOL in Joules / cm2 / hour.
