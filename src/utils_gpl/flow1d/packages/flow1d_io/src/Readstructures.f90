@@ -1284,10 +1284,10 @@ module m_readstructures
       character(CharLn) :: tmpstr
       
       
-      call prop_get_double(md_ptr, '', key, value, success)
-      if (.not. success) then
-         call prop_get_string(md_ptr, '', key, tmpstr, success)
-         if (success) then
+      call prop_get_string(md_ptr, '', key, tmpstr, success)
+      if (success) then
+         read(tmpstr, *, iostat = istat) value
+         if (istat /= 0) then ! No number, so assume it was a filename
             forcinglist%Count = forcinglist%Count+1
             if (forcinglist%Count > forcinglist%Size) then
                call realloc(forcinglist)
