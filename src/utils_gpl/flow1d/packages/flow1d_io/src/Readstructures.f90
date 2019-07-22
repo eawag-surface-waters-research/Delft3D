@@ -1368,11 +1368,17 @@ module m_readstructures
       
       character(len=Idlen) :: dirstring
 
+      success = .true.
       allocate(generalst)
 
       generalst%velheight = .true.
-      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
-      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
+      generalst%ws = 1d10
+      call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
+      call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
+      if (.not. success) then
+         write (msgbuf, '(a)') 'Error Reading Structure '''//trim(st_id)//''', crestLevel is missing.'
+         call err_flush()
+      end if
       if (success) call prop_get_double(md_ptr, 'structure', 'corrCoeff',  generalst%mugf_pos, success)
 
       generalst%wu1                = generalst%ws
@@ -1384,7 +1390,7 @@ module m_readstructures
       generalst%zd1                = generalst%zs
       generalst%wd2                = generalst%ws
       generalst%zd2                = generalst%zs
-      generalst%gateLowerEdgeLevel = huge(1d0)
+      generalst%gateLowerEdgeLevel = 1d10
       generalst%cgf_pos            = 1d0
       generalst%cgd_pos            = 1d0
       generalst%cwf_pos            = 1d0
@@ -1395,7 +1401,7 @@ module m_readstructures
       generalst%cwd_neg            = 1d0
       generalst%mugf_neg           = generalst%mugf_pos
       generalst%extraresistance    = 0d0
-      generalst%gatedoorheight     = huge(1d0)
+      generalst%gatedoorheight     = 1d10
       generalst%gateopeningwidth   = generalst%ws
       generalst%crestlength        = 0d0
       generalst%velheight          = .true.
