@@ -248,44 +248,38 @@ module m_readstructures
             iStrucType = GetStrucType_from_string(typestr)
             pstru%type = iStrucType
 
-            if (major ==1) then   
-               ! support for version 1.0 structure files
-               select case (iStrucType)
-               case (ST_WEIR)
+            select case (iStrucType)
+            case (ST_WEIR)
+               if (major ==1) then 
+                  ! support for version 1.0 structure files weirs as weir 
                   call readWeir(pstru%weir, md_ptr%child_nodes(i)%node_ptr, success)
-               case (ST_UNI_WEIR)
-                  call readUniversalWeir(pstru%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
-               case (ST_CULVERT)
-                  call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
-               case (ST_BRIDGE)
-                  call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
-               case (ST_PUMP)
-                  call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
-               case (ST_ORIFICE, ST_GATE)
-                  call readOrifice(pstru%orifice, md_ptr%child_nodes(i)%node_ptr, success)
-               case (ST_GENERAL_ST)
-                  call readGeneralStructure_v100(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, success)
-               end select
-            elseif (major ==2) then
-               select case (iStrucType)
-               case (ST_WEIR)
+               else
+                  ! support for version >= 2.0 structure files weirs as general structure
                   call readWeirAsGenstru(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
-               !case (ST_UNI_WEIR)
-               !   call readUniversalWeir(pstru%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
-               case (ST_CULVERT)
-                  call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
-               !case (ST_BRIDGE)
-               !   call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
-               case (ST_PUMP)
-                  call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
-               case (ST_ORIFICE, ST_GATE)
+               endif
+                  
+            case (ST_UNI_WEIR)
+               call readUniversalWeir(pstru%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
+            case (ST_CULVERT)
+               call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
+            case (ST_BRIDGE)
+               call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
+            case (ST_PUMP)
+               call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
+            case (ST_ORIFICE, ST_GATE)
+               if (major ==1) then 
+                  ! support for version 1.0 structure files weirs as weir 
+                  call readOrifice(pstru%orifice, md_ptr%child_nodes(i)%node_ptr, success)
+               else
+                  ! support for version >= 2.0 structure files weirs as general structure
                   call readOrificeAsGenstru(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
-               case (ST_GENERAL_ST)
-                  call readGeneralStructure(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
-                case default
-                  call setmessage(LEVEL_ERROR,  trim(typestr)//' not implemented for version 2.00, see '//trim(pstru%id))
-               end select
-            endif
+               endif
+            case (ST_GENERAL_ST)
+               call readGeneralStructure(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
+            case default
+               call setmessage(LEVEL_ERROR,  'Structure type: '//trim(typestr)//' not supported, see '//trim(pstru%id))
+               success = .false.
+            end select
             
             if (.not. success) then
                write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//'''.'
