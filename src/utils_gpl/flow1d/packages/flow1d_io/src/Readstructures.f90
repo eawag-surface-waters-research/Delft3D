@@ -169,7 +169,7 @@ module m_readstructures
 
       do i = 1, numstr
          
-         if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .eq. 'structure') then
+         if (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Structure')) then
             
             if (network%sts%count+1 > network%sts%Size) then
                call realloc(network%sts)
@@ -177,7 +177,7 @@ module m_readstructures
             pstru => network%sts%struct(network%sts%count+1)
             ! Read Common Structure Data
             
-            call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'id', structureID, success)
+            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'id', structureID, success)
             pstru%id = structureID
             if (.not. success) then
                write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ' from '''//trim(structureFile)//''', Id is missing.'
@@ -185,49 +185,49 @@ module m_readstructures
                cycle
             endif
             pstru%name = pstru%id
-            call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'name', pstru%name)
-            if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'branchid', branchID, success)
-            if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'structure', 'chainage', pstru%chainage, success)
+            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'name', pstru%name)
+            if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'branchId', branchID, success)
+            if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', pstru%chainage, success)
 
             pstru%numCoordinates = 0
             if (success) then
                pstru%ibran = hashsearch(network%brs%hashlist, branchID)
                if (pstru%ibran <= 0) then
-                  msgbuf = 'Branchid '//trim(branchID)//' not found, check '//trim(pstru%id)
+                  write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', branchId '''//trim(branchID)//''' not found.'
                   call err_flush()
                   success = .false.
                   cycle
                endif
             else 
-               call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'numCoordinates', pstru%numCoordinates, success)
+               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'numCoordinates', pstru%numCoordinates, success)
                if (success) then
                   allocate(pstru%xCoordinates(pstru%numCoordinates), pstru%yCoordinates(pstru%numCoordinates))
-                  call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'xCoordinates', pstru%xCoordinates, &
+                  call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'xCoordinates', pstru%xCoordinates, &
                                 pstru%numCoordinates, success)
-                  if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, 'structure', 'yCoordinates', pstru%yCoordinates, &
+                  if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'yCoordinates', pstru%yCoordinates, &
                                 pstru%numCoordinates, success)
                endif
             endif
             
             if (.not.success) then
-               msgbuf = 'Location specification is missing for structure '//trim(pstru%id)//' in '//trim(structureFile)
-               call warn_flush()
+               write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', location specification is missing.'
+               call err_flush()
                cycle
             endif
             
-            if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'type', typestr, success)
+            if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success)
             if (.not. success) then
-               write (msgbuf, '(a,i0,a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', Type is missing.'
+               write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', type is missing.'
                call err_flush()
                cycle
             endif
       
-            call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'structure', 'compound', iCompound, success)
+            call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'compound', iCompound, success)
             if (.not. success) iCompound = 0
             
             if (iCompound > 0) then
             
-               call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'compoundName', compoundName, success)
+               call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'compoundName', compoundName, success)
                if (success .and. len_trim(compoundName) > 0) then
                   if (.not. allocated(compoundNames)) then
                      allocate(compoundNames(numstr))
@@ -288,7 +288,8 @@ module m_readstructures
             endif
             
             if (.not. success) then
-               call SetMessage(LEVEL_FATAL, 'Error Reading Structure '''//trim(pstru%id)//'''')
+               write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//'''.'
+               call SetMessage(LEVEL_FATAL, trim(msgbuf))
             else 
                network%sts%Count = network%sts%Count + 1
                call incStructureCount(network%sts, iStrucType)
