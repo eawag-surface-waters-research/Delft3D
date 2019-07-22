@@ -8,5 +8,5 @@
 include $(top_srcdir)/common.am
 
 SUBDIRS = proc_preprocess \
-          waq_process \
-          bloom
+          bloom \
+          waq_process
