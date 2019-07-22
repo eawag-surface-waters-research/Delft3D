@@ -148,10 +148,11 @@ module m_readstructures
       
       ! check FileVersion
       ierr = 0
-      major = 0
+      major = 1
       minor = 0
       call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
-      if (.not. success .or. (major /= StructureFileMajorVersion .and. major /= 1) ) then
+      ! by exception, we backwards-support majorVersion=1 (for orifice and weir)
+      if ((major /= StructureFileMajorVersion .and. major /= 1) .or. minor > StructureFileMinorversion) then
          write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of structure file detected in '''//trim(structurefile)//''': v', major, minor, '. Current format: v',StructureFileMajorVersion,StructureFileMinorVersion,'. Ignoring this file.'
          call warn_flush()
          ierr = 1
