@@ -1266,15 +1266,16 @@ module m_readstructures
       
    end subroutine readPump
    
-   !> Either retrieve a constant value for parameter KEY, or get the filename for the time series
+   !> Either retrieve a constant value for parameter KEY, or get the filename for the time series.
    subroutine get_value_or_addto_forcinglist(md_ptr, key, value, st_id, st_type, forcinglist, success)
       type(tree_data), pointer,     intent(in   ) :: md_ptr      !< ini tree pointer with user input.
-      character(IdLen),             intent(in   ) :: st_id       !< Structure character Id.
-      type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
-      logical,                      intent(inout) :: success     
-      double precision, target,     intent(  out) :: value       !< constant value from input
-      integer,                      intent(in   ) :: st_type     !< structure type
       character(len=*),             intent(in   ) :: key         !< name of the item in the input file
+      double precision, target,     intent(  out) :: value       !< The variable into which the read value may be stored.
+                                                                 !< In case of a time series/realtime forcing, this variable will be pointed to in the forcinglist.
+      character(IdLen),             intent(in   ) :: st_id       !< Structure character Id.
+      integer,                      intent(in   ) :: st_type     !< structure type
+      type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which structure forcing will be added if needed.
+      logical,                      intent(inout) :: success     
       
       integer                                     :: tabsize
       integer                                     :: istat
@@ -1283,16 +1284,16 @@ module m_readstructures
       character(CharLn) :: tmpstr
       
       
-      call prop_get_double(md_ptr, 'structure', key, value, success)
+      call prop_get_double(md_ptr, '', key, value, success)
       if (.not. success) then
-         call prop_get_string(md_ptr, 'structure', key, tmpstr, success)
+         call prop_get_string(md_ptr, '', key, tmpstr, success)
          if (success) then
             forcinglist%Count = forcinglist%Count+1
             if (forcinglist%Count > forcinglist%Size) then
                call realloc(forcinglist)
             end if
             forcinglist%forcing(forcinglist%Count)%st_id      = st_id
-            forcinglist%forcing(forcinglist%Count)%st_type    = ST_PUMP
+            forcinglist%forcing(forcinglist%Count)%st_type    = st_type
             forcinglist%forcing(forcinglist%Count)%param_name = key
             forcinglist%forcing(forcinglist%Count)%targetptr  => value
             forcinglist%forcing(forcinglist%Count)%filename   = tmpstr
