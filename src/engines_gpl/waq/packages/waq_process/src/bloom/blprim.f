@@ -44,13 +44,13 @@
      j                   flxcon, noutlim, outlim, nunucom, nuecogm, 
      j                   con2out,swblsa , totnin, totpin, totsiin )
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_caldynam
-!      use bloom_data_io  
-!      use bloom_data_phyt    
-!      use bloom_data_sumou   
-!      use bloom_data_xvect   
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_sumou   
+      use bloom_data_xvect   
 
       implicit none
 !  
@@ -136,14 +136,14 @@
 !     TSTEP   R*8   1        O    dynam     Time step
 !     RMORT   R*8   MT       I    size      Mortality rate (1/day)
 !
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'sumout.inc'
-      INCLUDE 'xvect.inc'
-      INCLUDE 'dynam.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'sumout.inc'
+!      INCLUDE 'xvect.inc'
+!      INCLUDE 'dynam.inc'
 !
 !     Local variables
 !
@@ -462,12 +462,19 @@
 
       END
       SUBROUTINE BL_ISPLIM(NOUTLIM,OUTLIM,NUNUCOM,NUECOGM,CON2OUT)
+      
+      use bloom_data_dim
+      use bloom_data_matrix
+      use bloom_data_phyt
+      
+      IMPLICIT NONE
+      
       INTEGER NOUTLIM,NUNUCOM,NUECOGM
       INTEGER CON2OUT(NUNUCOM)
       REAL OUTLIM(NOUTLIM)
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'phyt2.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'matri.inc'
+!      INCLUDE 'phyt2.inc'
       INTEGER II,ICON,ICONOUT
 !
 !     ISPLIM  holds a list of actually limiting constraint numbers.

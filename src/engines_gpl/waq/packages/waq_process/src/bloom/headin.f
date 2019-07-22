@@ -28,22 +28,22 @@
 !
       SUBROUTINE HEADIN(NZOUT,WORDS)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_arran   
-!      use bloom_data_io  
-!      use bloom_data_phyt    
-!      use bloom_data_sumou   
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_arran   
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_sumou   
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'arran.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'sumout.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'arran.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'sumout.inc'
+!      INCLUDE 'ioblck.inc'
 
       INTEGER NUMTYP(MT), i, j, k, kk, nueco2, nzout
       CHARACTER*4 WORDS2(12),WORDS3(20),WORDS4(20)
@@ -54,7 +54,6 @@
 !
 !  Set print-array indices.
 !
-      NUNU2 = NUNUCO * 2
       NTS6=NUABCO+3
       NTS7=NTS6+1
       NTS14=NUECOG+NTS7+1
@@ -62,14 +61,6 @@
 ! Exit if LPRINT <= 1: nothing more to be done here.
 !
       IF (LPRINT .LE. 1) RETURN
-      IF (IPERM .GT. 1) THEN
-         WRITE(NZOUT,10)
-   10    FORMAT(2X,'Summary of all solutions for this run:',/,' ')
-         WRITE(NZOUT,20) (WORDS(K),K=1,5),(GRNAME(K),K=1,NUECOG),
-     1                (WORDS(K),K=6,7)
-   20    FORMAT(2X,A4,2X,2(A8,1X),7X,2(A4,1X),1X,12(A8,1X))
-         WRITE (NZOUT,150)
-      END IF
 !
 !  Determine main active program options and store them in WORDS4.
 !

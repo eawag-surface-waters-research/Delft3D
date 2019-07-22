@@ -37,11 +37,11 @@
 !
       INTEGER FUNCTION INPTNM(PRMPT,DNUM,INUM,TYPE)
 
-!      use bloom_data_io  
+      use bloom_data_io  
 
       implicit none
 
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'ioblck.inc'
       real(8)  :: dnum, rnum
       integer  :: prmpt,type,stoi,stor,stod,uprcas, inum, irc
 !

@@ -33,7 +33,7 @@
 ! write a default d09 file
       write (lund09,'(a)')'1985   ECOLUMN - BLOOM II model'
       write (lund09,'(a)')' Based on coefficients of ECOLUMN - BLOOM, but modified'
-      write (lund09,'(a)')' Diatom-E and Flag-E as in 2 species calculation! C/CHL E-types lowerd'
+      write (lund09,'(a)')' Diatom-E and Flag-E as in 2 species calculation! C/CHL E-types lowered'
       write (lund09,'(a)')'TYPES          SPECIES        NUTRIENT    3  ADDITION    1'
       write (lund09,'(a)')'FIRST       1  LAST       52  INCREM      1'
       write (lund09,'(a)')'NITROGEN       TEMPDEP  0.006 NOMINAL        MULTIPLI  1.0  INCREM  0.0'

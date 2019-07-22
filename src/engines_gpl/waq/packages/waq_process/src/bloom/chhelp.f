@@ -28,20 +28,20 @@
 !
       SUBROUTINE CHHELP (OUTUNI)
 
-!      use bloom_data_dim
-!      use bloom_data_caldynam
-!      use bloom_data_io  
-!      use bloom_data_phyt    
-!      use bloom_data_putin   
+      use bloom_data_dim
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_putin   
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'cal1.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'putin1.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'cal1.inc'
 
       integer i, j, nnrun, outuni
 !
@@ -72,15 +72,10 @@
       DO 40 J=1,NRUN
    40 WRITE (OUTUNI,99900) NPER(J,1),NPER(J,2),NPER(J,3)
 !
-      IF (LCAL .EQ. 4) THEN
-         WRITE (OUTUNI,99870)
-      ELSE
-         WRITE (OUTUNI,99890) FLUSH
-      END IF
+      WRITE (OUTUNI,99870)
       WRITE (OUTUNI,99850) SEDRAT
       WRITE (OUTUNI,99840) FLUSH
       WRITE (OUTUNI,99830) REMIOR
-      WRITE (OUTUNI,99820) REMILI(1),REMILI(2)
       WRITE (OUUNI,99810)
       DO I=1,NUSPEC
          WRITE(OUUNI,99800) SPNAME(I),AVAILN(I)
@@ -116,8 +111,6 @@
 99840 FORMAT (1X,'Flushing rate =',F6.3)
 99830 FORMAT (1X,'Mineralization rate of detritus =',2X,F6.3,2X,
      1        '*  Temperature')
-99820 FORMAT (1X,'Mineralization rate of chlorophyll is:',1X,
-     1        'EXP (',2X,F7.4,' * Temperature- ',2X,F7.4,' )')
 99810 FORMAT (1X,'Nutrient fraction becoming detritus: ',/,' Species ',
      1        'fDet')
 99800 FORMAT (1X,A10,F6.3)

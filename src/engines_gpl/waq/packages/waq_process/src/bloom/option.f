@@ -29,21 +29,30 @@
 !
       SUBROUTINE OPTION(LOMODE,LPARAM)
 
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_arran   
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_putin   
+      use bloom_data_sumou   
+
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'sumout.inc'
-      INCLUDE 'dynam.inc'
-      INCLUDE 'arran.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'putin1.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'sumout.inc'
+!      INCLUDE 'dynam.inc'
+!      INCLUDE 'arran.inc'
 !
       integer, parameter :: nopt = 33
 
-      integer            :: i, j, k, irc, memory, lomode, igdump
+      integer            :: i, j, k, irc, memory, lomode
       integer            :: lgramo, lpf, lparam, lenout, lenwrd, match, num, num2, numwrd
       integer, external  :: inptdt, inptnm 
       real(8)            :: pllim
@@ -117,9 +126,6 @@
       LOXOUT=0
       LDYDEA=0
       LDYEXT=0
-      LPLOT=0
-      LSCR=0
-      LDOM=0
       LPF=0
       LDAYEU=0
       LPMORT=0
@@ -127,8 +133,6 @@
       LOBFUN=0
       IPL1 = 41
       IPL2 = 42
-      IPL3 = 43
-      OPL = 45
       IF (LMORCH .NE. 1) GO TO 50
       LMORCH=0
       IF (LOMODE .EQ. 0) GO TO 50
@@ -143,7 +147,6 @@
       NUCOLS=NUCOLS-NUECOG
    60 LRUN=0
       LPARAM=0
-      LSTOP=1
 !
 !----------------------------------------------------------------------
 !      Start INPUT option mode
@@ -308,10 +311,8 @@
 !  empty line is entered (user hits carriage return).
 !
   340 CONTINUE
-      LPLOT=1
       OFON(NUMWRD)=1
       REWIND IPL1
-      REWIND IPL3
   350 CONTINUE
   360 FORMAT(' Enter main title for every plot:')
   370 READ(INUNI,380,END=350) TITLE
@@ -345,8 +346,7 @@
 !
 !  Put option "DOMINANCE" on.
 !
-  470 LDOM = 1
-      OFON(NUMWRD)=1
+  470 OFON(NUMWRD)=1
       WRITE (OUUNI,99970) WOPTIO(NUMWRD)
       GO TO 70
   480 CONTINUE
@@ -374,10 +374,8 @@
 !  Put unit number for in- and output; rewind plot input units.
 !
   510 CONTINUE
-      LSCR=1
       OFON(NUMWRD)=1
       REWIND IPL2
-      REWIND IPL3
       WRITE(IPL2,515) CASE(11) (8:), (CASE(I),I=12,13), (CASE(I),I=1,8)
   515 FORMAT (1X,A1,2A8,1X,8A8)
       WRITE(IPL2,400) CPLVAR
@@ -588,12 +586,10 @@
       GO TO 620
   810 CONTINUE
       WRITE (OUUNI,99960) WOPTIO(NUM2)
-      LPLOT=0
       OFON(NUM2)=-1
       GO TO 620
   820 CONTINUE
       WRITE (OUUNI,99960) WOPTIO(NUM2)
-      LDOM=0
       OFON(NUM2)=-1
       GO TO 620
   830 CONTINUE
@@ -609,7 +605,6 @@
       GO TO 620
   860 CONTINUE
       WRITE (OUUNI,99960) WOPTIO(NUM2)
-      LSCR = 0
       OFON(NUM2)=-1
       GO TO 620
 !
@@ -674,8 +669,7 @@
 !
 !  Exit after "STOP"/"CONTINUE" has been set.
 !
-  930 LSTOP=0
-      GO TO 950
+  930 GO TO 950
   940 CONTINUE
       IF (LPF .EQ. 1) IRC=CMS(PFOFF,11)
 !
@@ -685,7 +679,6 @@
 !
   950 CONTINUE
       IF (LRUN .EQ. 0) RETURN
-      IF (LDYN .EQ. 0) RETURN
       IF (LMORCH .EQ. 1) THEN
          IF (LGROCH .EQ. 1) THEN
             RETURN

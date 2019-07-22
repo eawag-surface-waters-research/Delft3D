@@ -32,45 +32,23 @@
 
       SUBROUTINE NATMOR(DEATH,TEMP)
 
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_phyt    
+
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'cal1.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'cal1.inc'
+!      INCLUDE 'ioblck.inc'
       
       integer  :: i
       real(8)  :: death, temp, temp2, tmpcor
 !
-!  IF LCAL=1 DEATH IS PUT EQUAL TO THE INPUT VALUE
-!
-!  IF LCAL=4 DEATH IS CALCULATED AS RMORT1(I) * RMORT2(I) ** TEMP
-!
-!  DETERMINE HOW DEATH IS TO BE ESTABLISHED
-!
-      IF (LCAL .EQ. 4) GO TO 70
-!
-!  LCAL=1
-!
-      DO 10 I = 1,NUSPEC
-   10 RMORT(I) = DEATH
-      IF (NREP .GT. 1) GO TO 110
-      IF (FLUSH .LT. 1.0D-6) GO TO 30
-      IF (IDUMP .EQ. 1) WRITE(IOU(6),20) FLUSH
-   20 FORMAT(2X,'Input mortality rates +',2X,F6.2,2X,'are used')
-      GO TO 50
-   30 CONTINUE
-      IF (IDUMP .EQ. 1) WRITE(IOU(6),40)
-   40 FORMAT(2X,'Input natural mortality rates are used')
-   50 CONTINUE
-      GO TO 110
-!
-!  LCAL=4. STORE MAXIMUM DEATH RATE IN DEATH.
-!  Compute mortatlity rate constant or set to BASMOR if option TEMPLIM
-!  is on and TEMP is below TEMLIM.
-!
-   70 CONTINUE
       TEMP2 = TEMP
       IF (LTLIM .EQ. 0) GO TO 90
       IF (TEMP .GE. TEMLIM) GO TO 90

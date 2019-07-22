@@ -25,16 +25,14 @@
 !>\file
 !>       calculate and store efficiency for all species
 
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_arran   
+      use bloom_data_phyt    
+      use bloom_data_putin
+
       implicit none
       
-!     BLOOM commons
-
-      include 'blmdim.inc'
-      include 'size.inc'
-      include 'phyt2.inc'
-      include 'putin1.inc'
-      include 'arran.inc'
-
 !     arguments
 
       integer  SWEff      ! input , Switch to use classic(1) or direct(2) BLOOM Efficiency calculation
@@ -198,9 +196,11 @@
       end subroutine get_effi
 
       subroutine lookupeffi(rad,effi,numgr)
+      
+      use bloom_data_dim
+      use bloom_data_arran
+      
       implicit none
-      include 'blmdim.inc'
-      include 'arran.inc'
 
       real*8  rad
       real*8  effi
@@ -236,10 +236,12 @@
 
 
       subroutine get_nspe( nspe )
+
+      use bloom_data_phyt
+      
+      implicit none
+
       integer  nspe       ! input , number of bloom algea types
-      include 'blmdim.inc'
-      include 'size.inc'
-      include 'phyt2.inc'
 
       nspe   = nuecog
 

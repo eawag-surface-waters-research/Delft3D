@@ -28,20 +28,20 @@
 !
       subroutine change(lcha)
 
-!      use bloom_data_dim 
-!      use bloom_data_caldynam
-!      use bloom_data_io  
-!      use bloom_data_phyt    
-!      use bloom_data_putin   
+      use bloom_data_dim 
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_putin   
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'cal1.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'putin1.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'cal1.inc'
+!      INCLUDE 'ioblck.inc'
 
       integer, parameter :: nchang = 25
       real*4 result
@@ -318,15 +318,8 @@
       IF (MATCH(CONTRO,7,8,WMORT,LENWRD,0,NUMMOR).NE.1) GOTO 990
       GO TO ( 990, 1020,  990, 990,  990, 990, 1040), NUMMOR
  1020 WRITE(OUUNI,99890) FLUSH
-      LCAL=1
-      DO 1030 K = 1,52
-      IF (DEATH(K) .GT. 1.0D-6) GO TO 100
- 1030 CONTINUE
-      WRITE (OUUNI,99880)
       GO TO 100
  1040 CONTINUE
-      WRITE(OUUNI,99870)
-      LCAL=4
       GO TO 100
 !
 !  Modify sedimentation rate constant
@@ -358,9 +351,6 @@
 !  Modify disappearance rate light absorption by dead algae
 !
  1500 CONTINUE
-      I = INPTNM(1020,REMILI(1),0,1)
-      I = INPTNM(1021,REMILI(2),0,1)
-      WRITE (OUUNI,99740) NEW,REMILI(1),REMILI(2)
       GO TO 100
 !
 !  Modify autolysing fraction
@@ -486,11 +476,6 @@
      1        ' computation.')
 99904 FORMAT ('  Valid mortality control words are:',/,1X,4(A8,2X))
 99890 FORMAT (1X,A3,' mortality is input + ',F7.4)
-99880 FORMAT (' *** WARNING MESSAGE ***',//,
-     1        ' All input mortality rates are 0.0.')
-99870 FORMAT (1X,'Mortality rate calculated as exponential function ',
-     1        'of temperature.',/,' To modify the specific values, ',
-     2        'enter "GROWTH" command.')
 99860 FORMAT (1X,'You are in parameter command mode and have',
      1        ' specified:',2X,A8)
 99850 FORMAT (1X,'To proceed you should first enter',

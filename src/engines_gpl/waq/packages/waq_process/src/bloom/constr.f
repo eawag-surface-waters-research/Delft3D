@@ -28,13 +28,13 @@
 !
       subroutine constr(surf,dmix,emin,root,numgr)
 
-!      use bloom_data_dim 
-!      use bloom_data_arran   
+      use bloom_data_dim 
+      use bloom_data_arran   
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'arran.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'arran.inc'
 
       real(8) :: root(2)
       real(8) :: s0

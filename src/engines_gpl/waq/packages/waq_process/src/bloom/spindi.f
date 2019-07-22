@@ -29,12 +29,16 @@
 !
       SUBROUTINE SPINDI(LSPIND)
 
+      use bloom_data_dim
+      use bloom_data_io  
+      use bloom_data_phyt  
+
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'ioblck.inc'
       
       integer  :: i, j, lspind, ngr
 !

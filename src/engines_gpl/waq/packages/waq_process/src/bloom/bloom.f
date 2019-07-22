@@ -104,29 +104,29 @@
      2           nonun,numun,swblsa)
 
       use data_3dl
-!      use bloom_data_dim
-!      use bloom_data_size
-!      use bloom_data_arran
-!      use bloom_data_caldynam
-!      use bloom_data_io
-!      use bloom_data_matrix
-!      use bloom_data_phyt
-!      use bloom_data_sumou
+      use bloom_data_dim
+      use bloom_data_size
+      use bloom_data_arran
+      use bloom_data_caldynam
+      use bloom_data_io
+      use bloom_data_matrix
+      use bloom_data_phyt
+      use bloom_data_sumou
       
 !      IMPLICIT REAL*8 (A-H,O-Z)
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'arran.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'sumout.inc'
-      INCLUDE 'cal1.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'dynam.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'arran.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'sumout.inc'
+!      INCLUDE 'cal1.inc'
+!      INCLUDE 'matri.inc'
+!      INCLUDE 'dynam.inc'
+!      INCLUDE 'ioblck.inc'
 
       integer irs3, i, id, ier, index1, index2, infeas, inow, int, inhib, ismax, iskmax, irerun
       integer j, k, l1, l2, linf, ni, nin, nset, numuni, numun, swblsa
@@ -152,7 +152,6 @@
       real(8) :: biomax
       real(8) :: total
       real(8) :: totst
-      real(8) :: exdead
       real(8) :: exlive
       real(8) :: ekxi
       real(8) :: phyt
@@ -440,19 +439,16 @@
 !  with buoyancy regulation; definitaly incorrect for species at the
 !  bottom.
 !
-      EXDEAD = 0.0
       EXLIVE = 0.0
       K1 = NUROWS
       DO 320 K = 1,NUSPEC
       K1 = K1 + 1
       IF (XDEF(K1) .LT. 1.D-6) GO TO 310
       EKXI = EKX (K) * XDEF (K1)
-      EXDEAD = EXDEAD + QMREM * RMORT(K) * EKXI
-*     EXLIVE = EXLIVE + EKXI/SDMIX(K)
       EXLIVE = EXLIVE + EKXI
   310 CONTINUE
   320 CONTINUE
-      EXTTOT = EXDEAD + EXLIVE + EXTB
+      EXTTOT = EXLIVE + EXTB
 !
 !  Print a warning message if potential non-unique solutions have been
 !  determined by subroutine SOLVLP.
@@ -469,8 +465,7 @@
 !  Call prinun, when  LPRINT >= 1
 !
       IF (LPRINT .GE. 1)
-     1    CALL PRINUN (CDATE, TOTAL, PHYT, EXTTOT, EXLIVE, EXDEAD,
-     2                 EXTB, T, USOL, DAY, DEP, ZMAX, GRAMX)
+     1    CALL PRINUN (CDATE, TOTAL, PHYT, EXTTOT, EXLIVE, EXTB, T, USOL, DAY, DEP, ZMAX, GRAMX)
 !
 !  Return the converted and corrected solar radiation level as
 !  CSOL in Joules / cm2 / hour.

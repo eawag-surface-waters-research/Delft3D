@@ -41,12 +41,14 @@
 !
       SUBROUTINE BLPROMPT (INDEX, ARG)
 
+      use bloom_data_io  
+
       implicit none
 
       CHARACTER*80 OUTSTR
       CHARACTER*1 OUTST2 (80), ESCAPE, BLANK
       INTEGER STOS, IESCAP, ARG
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'ioblck.inc'
       
       integer :: i, index, irc, lenout, lenst, lenou2
 

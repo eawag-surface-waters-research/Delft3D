@@ -29,16 +29,16 @@
       subroutine blinpu (ntyp_m, ntyp_a, ngro_a, algtyp, lmixo , lfixn ,
      j                   lcarb , nunucom, nutcon, flxcon, con2out)
       
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_arran   
-!      use bloom_data_mass_balance  
-!      use bloom_data_caldynam
-!      use bloom_data_io  
-!      use bloom_data_matrix  
-!      use bloom_data_phyt    
-!      use bloom_data_putin   
-!      use bloom_data_sumou   
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_arran   
+      use bloom_data_mass_balance  
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_matrix  
+      use bloom_data_phyt    
+      use bloom_data_putin   
+      use bloom_data_sumou   
 
       implicit none
 
@@ -63,40 +63,6 @@
       REAL         ALGTYP(0:20,NTYP_M)
       LOGICAL      LMIXO,LFIXN,LCARB
       INTEGER      NUTCON(NUNUCOM), FLXCON(NUNUCOM), CON2OUT(NUNUCOM)
-!
-!     Common block variables used
-!
-!     Name    Type  Length   I/O  Inc-file  Description
-!
-!     IOU     I     99       I    ioblck    Logical unit numbers
-!     INUNI   I     1        I    ioblck    Logical unit number
-!     OUUNI   I     1        I    ioblck    Logical unit number
-!     IYEAR   I     1        O    putin1
-!     CASE    C*8   13       O    putin1
-!     COM     C*8   18       O    putin1
-!     NREP    I     1        O    phyt2
-!     NPRINT  I     1        O    sumout
-!     NPRODU  I     1        O    size
-!     LPRINT  I     1        O    sumout
-!     LDYN    I     1        O    dynam
-!     MI      I     1        O    putin1
-!     NPER    I     10,3     I    putin1
-!     IMU     I     1        O    putin1
-!     NUSPEC  I     1        I    phyt2
-!     NUECOG  I     1        I    phyt2
-!     MT      I     1        I    blmdim
-!     LRUN    I     1        I    putin1
-
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'arran.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'sumout.inc'
-      INCLUDE 'cal1.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'dynam.inc'
 !
 !     Local variables
 !
@@ -251,8 +217,6 @@
 !           used here).
 !  LPRINT = flag indicating whether normal BLOOM II output routines
 !           are called (LPRINT = 1) or not (LPRINT = 0).
-!  LDYN   = flag indicating whether BLOOM II runs in full dynamic mode
-!           (LDYN = 1)
 !  MI     = number of time periods considered in one computation step of
 !           BLOOM II.
 !
@@ -260,7 +224,6 @@
       NPRINT = 0
       NPRODU = 0
       LPRINT = 1
-      LDYN   = 1
       MI     = NPER (1,3)
       IMU    = 1
 !

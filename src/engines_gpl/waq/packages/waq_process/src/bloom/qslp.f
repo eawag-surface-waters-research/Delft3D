@@ -36,7 +36,7 @@
       implicit none
 
       real(8)   :: a(1:ia,1:id),b(*),c(*),d(*),x(*),p(*)
-      REAL(8)   :: xopt, bpivot, bmin, cpivot, apivot, aipj, cj, aijp, bi, ap, cjpap
+      real(8)   :: xopt, bpivot, bmin, cpivot, apivot, aipj, cj, aijp, bi, ap, cjpap
       integer   :: lib(*),ier,lsc(*),iopt(*),irs(*), nqslp
       integer   :: i, j, k, l, ia, id, ip, jp, jpneg
       integer   :: ineg, iter, itflag, ihelp1, ihelp2

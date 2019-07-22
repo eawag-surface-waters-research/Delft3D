@@ -26,16 +26,19 @@
 ! The non-significant characters are initially set to a space and
 ! a comma, but can be reset by function SETDLM.
 !
-      INTEGER FUNCTION LENSTR (SOURCE,MAXLEN)
-      CHARACTER*1 SOURCE(*)
-      CHARACTER*255 RESULT
-      INTEGER GETS, POS
+      integer function lenstr (source,maxlen)
+
+      implicit none
+
+      character*1 source(*)
+      character*255 result
+      integer gets, pos, i, lenout, maxlen
 !
-      POS = 1
-      DO 10 I = 1,MAXLEN
-      IF (GETS(SOURCE,POS,MAXLEN,255,RESULT,LENOUT) .NE. 0) GO TO 20
-10    CONTINUE
-20    CONTINUE
-      LENSTR = POS - 1
-      RETURN
-      END
+      pos = 1
+      do 10 i = 1,maxlen
+      if (gets(source,pos,maxlen,255,result,lenout) .ne. 0) go to 20
+10    continue
+20    continue
+      lenstr = pos - 1
+      return
+      end

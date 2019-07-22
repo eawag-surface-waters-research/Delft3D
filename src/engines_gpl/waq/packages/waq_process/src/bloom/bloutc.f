@@ -33,9 +33,9 @@
 
       subroutine bloutc (histor,lprino,ldumpo)
       
-!      use bloom_data_dim 
-!      use bloom_data_phyt    
-!      use bloom_data_sumou   
+      use bloom_data_dim 
+      use bloom_data_phyt    
+      use bloom_data_sumou   
       
       implicit none
 !
@@ -57,9 +57,9 @@
 !     LPRINT  I     1        I    sumout    Print flag
 !     IDUMP   I     1        I    phyt2     Print flag
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'sumout.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'sumout.inc'
 !
 !     Local variables
 !

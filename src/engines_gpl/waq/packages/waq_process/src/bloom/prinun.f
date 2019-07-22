@@ -44,23 +44,31 @@
 !  *********************************************************************
 !
 !
-      SUBROUTINE PRINUN (CDATE, TOTAL, PHYT, EXTTOT, EXLIVE, EXDEAD,
-     1                   EXTB, T, CSOL, DAY, DEP, ZMAX, GRAMX)
+      SUBROUTINE PRINUN (CDATE, TOTAL, PHYT, EXTTOT, EXLIVE, EXTB, T, CSOL, DAY, DEP, ZMAX, GRAMX)
+
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_arran   
+      use bloom_data_matrix   
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_sumou  
+      use bloom_data_xvect
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'arran.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'sumout.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'xvect.inc'
-      INCLUDE 'postbl.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'arran.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'sumout.inc'
+!      INCLUDE 'matri.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'xvect.inc'
+!      INCLUDE 'postbl.inc'
 
-      real(8)   :: total, exttot, exlive, exdead
+      real(8)   :: total, exttot, exlive
       real(8)   :: gramx, zmax, phyt, extb, t, csol, day, dep 
 
       integer   :: i, j, k
@@ -91,7 +99,7 @@
      8                    XDEF (NUCOLS+2), TOTAL, PHYT,
      9                    (CONCEN (I), I = 1, NUNUCO),
      A                    (XDEF (I), I = 1, NUNUCO), EXTTOT, EXLIVE,
-     B                    EXDEAD, EXTB, T, CSOL, DAY, DEP,
+     B                    0.0D0, EXTB, T, CSOL, DAY, DEP,
      C                    ZMAX,GRAMX
       RETURN
       END

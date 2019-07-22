@@ -38,11 +38,11 @@
 !
       integer function inptdt(prmpt,token,len)
 
-!      use bloom_data_io  
+      use bloom_data_io  
 
       implicit none
 
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'ioblck.inc'
 
       character*8 token
       integer prmpt,gets,len,uprcas,irc

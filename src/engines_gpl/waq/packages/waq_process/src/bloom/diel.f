@@ -29,15 +29,15 @@
 !
       SUBROUTINE DIEL(SUMPOX,SUMROX,DAY,CDATE)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_io  
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_io  
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'ioblck.inc'
 
       real(8)   :: prora(ms)
       real(8)   :: resra(ms)

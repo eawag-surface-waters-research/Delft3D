@@ -29,20 +29,20 @@
 !  0895 MvdV adaptation dimension ZOOPR for more than one grazer type
       SUBROUTINE CSPGRO(LERR)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_io  
-!      use bloom_data_phyt    
-!      use bloom_data_putin   
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_putin   
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'putin1.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'ioblck.inc'
 
       integer, parameter :: nspe = 9
       integer            :: i, igro, irc, ipos, j, k, len, lerr, lenwrd

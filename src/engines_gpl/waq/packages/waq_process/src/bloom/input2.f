@@ -31,25 +31,26 @@
 !
       SUBROUTINE INPUT2 (NDEC,INPU,INEFF)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_arran   
-!      use bloom_data_io  
-!      use bloom_data_phyt    
-!      use bloom_data_putin   
-!      use bloom_data_sumou   
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_arran   
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_putin   
+      use bloom_data_sumou   
+      use bloom_data_caldynam
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'arran.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'cal1.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'sumout.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'putin1.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'arran.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'cal1.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'sumout.inc'
 !
       character*60 aline
 
@@ -198,28 +199,13 @@
 !  Read names of light constraints and the constants to calculate
 !  the disappearance rate of light absorption by dead phytoplankton.
 !
-      READ (INPU,99996) (CSTRA(J),J=NUFILI,NUABCO),REMILI(1),REMILI(2)
+      READ (INPU,99996) (CSTRA(J),J=NUFILI,NUABCO)
 !
 !  Read natural mortality rate constants:
-!  options are: (1) Nominal (=input) values.
-!               (2) A species dependent function. The coefficients
-!                   are read following lable 140 of this subroutine.
+!  Only default option is a species dependent function.
 !
       READ (INPU,99995) WMODE,FLUSH
-      IF (WMODE .NE. CONTRO(2)) GO TO 90
-      LCAL=1
-      DO 85 K = 1,NDEC
-      IF (DEATH(K) .GT. 0.0) GO TO 120
-   85 CONTINUE
-      WRITE (OUUNI,99982)
-      GO TO 120
-   90 CONTINUE
-      IF (WMODE .EQ. CONTRO(7)) GO TO 110
-      WRITE (OUUNI,99986) WMODE
-      CALL SRSTOP(6)
-  110 CONTINUE
-      LCAL=4
-  120 CONTINUE
+
 !
 !  Read zooplankton composition.
 !  Read grazing coefficients.
@@ -229,7 +215,7 @@
 !  will supress the output on unit 15.
 !
       READ (INPU,99994) (ZOONUT(I,0),I=1,NUNUCO)
-      READ (INPU,99993) ZOOK,ZOOGR,XMIN,GRAMO1,IPERM
+      READ (INPU,99993) ZOOK,ZOOGR,XMIN,GRAMO1
 !
 !  Read fraction of nutrients from dying phytoplankton, which is release
 !  instantaneously at autolysis and does not enter the dead algal pool.
@@ -337,7 +323,6 @@
      1        ' computation.', /'  Excecution terminates.')
 99983 FORMAT ('  The number of species ',I2,' exceeds the maximum ',
      1        I2,' set by the program.',/'  Excecution terminates.')
-99982 FORMAT ('  WARNING MESSAGE: All input mortality rates are 0.0.')
 99981 FORMAT ('  The number of nutrients ',I2,' exceeds the maximum ',
      1        I2,' set by the program.',/'  Excecution terminates.')
 99980 FORMAT (53X,I5)

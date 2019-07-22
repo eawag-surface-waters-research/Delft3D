@@ -37,15 +37,15 @@
 !
       subroutine bvect(x,xdef)
       
-!      use bloom_data_dim 
-!      use bloom_data_matrix  
-!      use bloom_data_phyt    
+      use bloom_data_dim 
+      use bloom_data_matrix  
+      use bloom_data_phyt    
 
       implicit none
 !
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'matri.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'matri.inc'
 
       real(8)      :: x(*)
       real(8)      :: b2(ms)

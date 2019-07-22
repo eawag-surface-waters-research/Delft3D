@@ -33,10 +33,10 @@
 
       subroutine blinit (lprino,ldumpo)
 
-!      use bloom_data_dim
-!      use bloom_data_matrix  
-!      use bloom_data_phyt    
-!      use bloom_data_sumou   
+      use bloom_data_dim
+      use bloom_data_matrix  
+      use bloom_data_phyt    
+      use bloom_data_sumou   
 
       implicit none
 
@@ -65,11 +65,6 @@
 !     LPRINT  I     1        I    sumout    Print flag
 !     IDUMP   I     1        I    sumout    Print flag
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'sumout.inc'
 !
 !     Local variables
 !
@@ -81,8 +76,6 @@
       INTEGER         J    , I
 
 !     Convert BLOOM II specific units to DLWQWQ specific units
-!     (The module still converts SPEXDE, although this variable
-!     is not used anymore)
 
       CALL CVRBLM
 !

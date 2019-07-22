@@ -29,13 +29,19 @@
 !
       SUBROUTINE POOLS(CDATE,DEATH,ALIVE,TEMP)
 
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_phyt    
+
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'cal1.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'cal1.inc'
+!      INCLUDE 'ioblck.inc'
 
       real(8)      :: dead,death,sedead,alive,temp
       character(8) :: cdate

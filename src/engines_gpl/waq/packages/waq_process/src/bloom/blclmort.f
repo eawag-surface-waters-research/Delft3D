@@ -30,8 +30,8 @@
 
       subroutine blclst (mrtm1,mrtm2,mrtb1,mrtb2,ntyp_a,cl)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
+      use bloom_data_dim
+      use bloom_data_size 
 
       implicit none
 
@@ -45,25 +45,8 @@
 !     MRTB2   R     NTYP_A   I    B2 mort rate sal stress coeff
 !
       INTEGER NTYP_A
-      REAL    MRTM1(NTYP_A),MRTM2(NTYP_A),MRTB1(NTYP_A),MRTB2(NTYP_A),
-     1        CL
-!
-!     Common block variables used
-!
-!     Name    Type  Length   I/O  Inc-file  Description
-!
-!     SIZE    I     ??       I/O  size      A.o.mortality rate in RMORT1
-!
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
-!
-!     Local variables
-!
-!     Name    Type  Length   I/O  Description
-!
-!     IALG    I     1             counter over algae types
-
-      INTEGER      IALG
+      REAL    MRTM1(NTYP_A),MRTM2(NTYP_A),MRTB1(NTYP_A),MRTB2(NTYP_A),CL
+      INTEGER IALG
 
 !     Loop over algae types
       DO 10 IALG = 1, NTYP_A
@@ -82,6 +65,11 @@
       END
       SUBROUTINE BLCLRS (MRTM1,NTYP_A)
 
+      use bloom_data_dim
+      use bloom_data_size 
+
+      implicit none
+
 !     Arguments
 !
 !     Name    Type  Length   I/O  Description
@@ -90,15 +78,6 @@
 !
       INTEGER NTYP_A
       REAL    MRTM1(NTYP_A)
-!
-!     Common block variables used
-!
-!     Name    Type  Length   I/O  Inc-file  Description
-!
-!     SIZE    I     ??       I/O  size      A.o.mortality rate in RMORT1
-!
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
 !
 !     Local variables
 !
@@ -118,6 +97,12 @@
 
       END
       SUBROUTINE BLSPPM (IALG  , PPMAX )
+
+      use bloom_data_dim
+      use bloom_data_size 
+      
+      implicit none
+
 !
 !     Set PPMAX in BLOOM array for specific alg
 !
@@ -131,14 +116,20 @@
       INTEGER IALG
       REAL    PPMAX
 !
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'size.inc'
 !
       PMAX1(IALG) = PPMAX
 !
       RETURN
       END
       SUBROUTINE BLSSDM (IALG  , SDMIXN )
+
+      use bloom_data_dim
+      use bloom_data_size 
+      
+      implicit none
+
 !
 !     Set SDMIX in BLOOM array for specific alg
 !
@@ -152,14 +143,20 @@
       INTEGER IALG
       REAL    SDMIXN
 !
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'size.inc'
 !
       SDMIX(IALG) = SDMIXN
 !
       RETURN
       END
       SUBROUTINE BLSAEF (IGROUP  , EFFIN )
+
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_phyt
+      
+      implicit none
 !
 !     Set AVEFFI in BLOOM array for specific alg
 !
@@ -170,12 +167,12 @@
 !     IALG    1     1        I    index alg involved
 !     EFFIN   R     1        I    EFFI value to be set
 !
-      INTEGER IGROUP
+      INTEGER IGROUP, ITYPE
       REAL    EFFIN
 !
-      include 'blmdim.inc'
-      include 'size.inc'
-      include 'phyt2.inc'
+!      include 'blmdim.inc'
+!      include 'size.inc'
+!      include 'phyt2.inc'
 !
       DO ITYPE = IT2(IGROUP,1),IT2(IGROUP,2)
          AVEFFI(ITYPE) = EFFIN

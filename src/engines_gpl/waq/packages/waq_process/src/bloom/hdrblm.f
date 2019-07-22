@@ -46,19 +46,19 @@
 !
       SUBROUTINE HDRBLM
 
-!      use bloom_data_dim
-!      use bloom_data_io  
-!      use bloom_data_phyt    
-!      use bloom_data_putin   
-!      use bloom_data_sumou  
+      use bloom_data_dim
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_putin   
+      use bloom_data_sumou  
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'sumout.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'putin1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'sumout.inc'
 !
 !  Write heading for output on units IOU(6), OUUNI, IOU(15) and
 !  optionally IOU(21).
@@ -69,11 +69,7 @@
       CALL FORMFE (IOU(14))
       WRITE (IOU(14),99999) IYEAR,CASE
       WRITE (IOU(14),99990) COM
-      IF (IPERM .LE. 1) GO TO 50
-      CALL FORMFE (IOU(15))
-      WRITE (IOU(15),99999) IYEAR,CASE
-      WRITE (IOU(15),99990) COM
-   50 IF ( IOFLAG .EQ. 0) GO TO 60
+      IF ( IOFLAG .EQ. 0) GO TO 60
       CALL FORMFE (IOU(21))
       WRITE (IOU(21),99999) IYEAR,CASE
       WRITE (IOU(21),99990) COM

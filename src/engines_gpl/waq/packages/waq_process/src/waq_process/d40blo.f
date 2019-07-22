@@ -895,7 +895,7 @@
       write (lunrep, *) 'ERROR D40BLO: DAYLEN > 1.0 DAY'
       write (*, *) 'ERROR D40BLO: DAYLEN > 1.0 DAY'
       call srstop (1)
-      end
+      end subroutine d40blo
 
       subroutine blstop(mes,i)
 
@@ -908,25 +908,33 @@
 
       return
 
-      end
+      end subroutine blstop
+
       
       subroutine bl_no_autolyse(org_availn)
 
-      implicit none
+      use bloom_data_dim
+      use bloom_data_phyt    
 
-      include 'blmdim.inc'
-      include 'phyt1.inc'
+      implicit none
+      
       real*8 org_availn(mt)
+
       org_availn(1:mt) = availn(1:mt)
       availn     = 0.0
-      end
 
+      end subroutine bl_no_autolyse
+
+      
       subroutine bl_restore_autolyse(org_availn)
+
+      use bloom_data_dim
+      use bloom_data_phyt    
 
       implicit none
 
-      include 'blmdim.inc'
-      include 'phyt1.inc'
       real*8 org_availn(mt)
+
       availn(1:mt) = org_availn(1:mt)
-      end
+
+      end subroutine bl_restore_autolyse

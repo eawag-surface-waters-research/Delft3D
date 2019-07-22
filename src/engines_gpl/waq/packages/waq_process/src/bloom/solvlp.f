@@ -28,6 +28,12 @@
 !
       SUBROUTINE SOLVLP(INOW,X,BIOMAX,IER,IRS,NONUNI,NUMUNI,LIB)
 
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_matrix   
+      use bloom_data_io  
+      use bloom_data_phyt  
+
       implicit none
 
 !
@@ -50,11 +56,11 @@
 !     REAL*8 XTMP(50),BTMP(29),ATMP(29,20)
 !     INTEGER LIBTMP(50),LIBBAS(50),LSCTMP(29),LBASIS(50)
 !
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'matri.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'matri.inc'
       DIMENSION CTMP(MT),D(1),X(MX),P(1),XTMP(MX),ATMP(IA,MT),
      1          BTMP(IA)
       INTEGER LSC(IA),LSCTMP(IA),IOPT(4),IRS(3),LIB(MX),LIBTMP(MX),

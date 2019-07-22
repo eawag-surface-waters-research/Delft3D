@@ -77,24 +77,24 @@
       SUBROUTINE FIXINF(X,BIO,EXTTOT,EXTB,INHIB,NI,IRERUN,IRS,INFEAS,
      &                  ERRIND,JKMAX,AROOT,CDATE,SWBLSA)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_caldynam
-!      use bloom_data_io  
-!      use bloom_data_matrix  
-!      use bloom_data_phyt    
-!      use bloom_data_sumou   
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_matrix  
+      use bloom_data_phyt    
+      use bloom_data_sumou   
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'dynam.inc'
-      INCLUDE 'sumout.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'matri.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'dynam.inc'
+!      INCLUDE 'sumout.inc'
       real(8)      :: x(*),bio(*),sumnut(mn),aroot(*)
       integer      :: irs (*),jkmax(*),swblsa, i, j, k
       character(8) :: cdate

@@ -33,7 +33,7 @@
 
       subroutine blfile (runnam)
 
-!      use bloom_data_io  
+      use bloom_data_io  
 
       implicit none
 
@@ -44,14 +44,6 @@
 !     RUNNAM  C*(*) 1        I    Filename consisting of runid (no ext)
 !
       CHARACTER*12   RUNNAM
-!
-!     Common block variables used
-!
-!     Name    Type  Length   I/O  Inc-file  Description
-!
-!     IOU     I     99       I    ioblck    Array of logical unit numbers
-!
-      INCLUDE 'ioblck.inc'
 !
 !     Local variables
 !

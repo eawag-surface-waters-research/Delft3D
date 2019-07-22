@@ -30,15 +30,13 @@
 
       use      data_3dl   ! data and routine for 3D light approach
       
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_arran   
+      use bloom_data_phyt    
+      use bloom_data_putin
+
       implicit none
-
-!     BLOOM commons
-
-      include 'blmdim.inc'
-      include 'size.inc'
-      include 'phyt2.inc'
-      include 'putin1.inc'
-      include 'arran.inc'
 
 !     arguments
 

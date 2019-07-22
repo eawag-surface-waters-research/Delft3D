@@ -55,18 +55,18 @@
 !
       SUBROUTINE CVRBLM
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_caldynam
-!      use bloom_data_phyt    
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_caldynam
+      use bloom_data_phyt    
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'dynam.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'dynam.inc'
       
       integer :: i
 !
@@ -84,7 +84,6 @@
          CHLR(I)   = CHLTOC(I) * CTODRY(I)
          EKX(I)    = EKX(I)    * 1000.0D0
 10    CONTINUE
-      SPEXDE = SPEXDE * 1000.0D0
 !     BIOBAS = BIOBAS * TSTEP * 1.0D-3
 !     TOPLEV = TOPLEV * TSTEP * 1.0D-3
       BIOBAS = BIOBAS * 1.0D-3

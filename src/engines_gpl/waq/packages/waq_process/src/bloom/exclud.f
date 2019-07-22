@@ -28,17 +28,17 @@
 !
       subroutine exclud (inow,linf,irs)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_matrix  
-!      use bloom_data_phyt    
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_matrix  
+      use bloom_data_phyt    
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'size.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'matri.inc'
+!      INCLUDE 'size.inc'
 
       integer ntypes (ms),irs(3), i, inow, k, nexclu, notprs, linf, iform
       save ntypes

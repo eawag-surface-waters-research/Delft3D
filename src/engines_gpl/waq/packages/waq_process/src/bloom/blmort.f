@@ -36,9 +36,9 @@
      J                   FLOOXN, FLMORA, DEAT4 , TSTEPI, LMIXO , LFIXN ,
      J                   LCARB , NUTCON, FLXCON)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_phyt    
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_phyt    
 
       IMPLICIT NONE
 
@@ -77,10 +77,10 @@
 !     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
 !     CTODRY  R*8   MT       I    size      Conversion (gDW/gC)
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'size.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'size.inc'
 !
 !     Local variables
 !

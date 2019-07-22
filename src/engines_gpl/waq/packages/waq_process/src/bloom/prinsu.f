@@ -50,15 +50,22 @@
 !
       SUBROUTINE PRINSU(X,XECO,BIO2,TOTAL,COUT,OUT,NTSTOT,ITNUM,NTAPE)
 
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_matrix
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_sumou   
+
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'sumout.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'postbl.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'sumout.inc'
+!      INCLUDE 'matri.inc'
+!      INCLUDE 'postbl.inc'
       
       integer  ::  i, i1, i2, j, k, k1, k2
       integer  ::  itnum, ntape, ntstot, numlim, ncon
@@ -94,7 +101,7 @@
 !
 !  Blank for exclusion row
 !
-!    1             IT2,NSPF,NSF,NREP,NUSPEC,NUECOG,NUNUCO,
+!    1             IT2,NREP,NUSPEC,NUECOG,NUNUCO,
 !    1             NUCOLS,NUFILI,NUABCO,NUEXRO,NUROWS,NUSPE1,IDUMP
 
       CNAMES (NUEXRO) = WORDS (8)
@@ -235,28 +242,6 @@
   140 CONTINUE
   150 CONTINUE
       OUT(NTS7) = 0.
-!
-! Exit if LPRINT <= 1: nothing more to be done here.
-!
-      IF (LPRINT .LE. 1) RETURN
-!
-!  Print solution for iteration ITNUM on tape NTAPE
-!  if zooplankton iterations are possible this run.
-!
-      IF (IPERM .LE. 1) GO TO 170
-      WRITE(NTAPE,160) (COUT(K),K=1,NTS6),ITNUM,(OUT(K),K=NTS7,NTSTOT)
-  160 FORMAT(2X,A4,2X,6(A3,1X),A3,I2,1X,33(F8.2,1X))
-  170 CONTINUE
-!
-!  Calculate particulate and dissolved concentrations for nutrients,
-!  record predicted and observed chlorophyll.
-!
-      J=0
-      DO 180 K=1,NUNUCO
-         J=J+1
-         PARDIS(J)=CONCEN(K)-X(K)
-         J=J+1
-         PARDIS(J)=X(K)
-  180 CONTINUE
+
       RETURN
       END

@@ -28,12 +28,16 @@
 !
       SUBROUTINE PRINMA(X,BIO2,TOTAL,NI,NIN,INT)
 
+      use bloom_data_dim
+      use bloom_data_io  
+      use bloom_data_phyt    
+
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
 
       real(8)   :: x(mx), biopos, bio2, total
       integer   :: int, j, k, k2, l1, l2, ni, nin

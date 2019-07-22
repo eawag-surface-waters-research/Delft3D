@@ -39,19 +39,28 @@
 !
       SUBROUTINE SETABC(XINIT,EXTB,EXTTOT,CSOL,DSOL,T,DEP,ID,NSET)
 
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_arran   
+      use bloom_data_matrix   
+      use bloom_data_io  
+      use bloom_data_phyt  
+      use bloom_data_caldynam
+      use bloom_data_putin
+
       implicit none
 
       SAVE
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'cal1.inc'
-      INCLUDE 'arran.inc'
-      INCLUDE 'matri.inc'
-      INCLUDE 'dynam.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'putin1.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'cal1.inc'
+!      INCLUDE 'arran.inc'
+!      INCLUDE 'matri.inc'
+!      INCLUDE 'dynam.inc'
+!      INCLUDE 'ioblck.inc'
 
       real(8)  :: xinit(*),pmax20(mt),tcorr(mt),sdmixn(mt)
       real(8)  :: csol, dsol, dep, expmul, extb, exttot, t
@@ -179,45 +188,6 @@
       DO 110 K=1,NUSPEC
  110  SURF(K)= TCORR(K) * DSOL * DEXP (- EXTTOT * SDMIXN(K) * DEP)
       IF (IDUMP .EQ. 1) WRITE (IOU(6),99997) (TCORR(K),K=1,NUSPEC)
-!
-!  Calculate nutrient coefficients, unless BLOOM II is invoked by the
-!  coupled model. In this case resetting of A-coefficients can be
-!  skipped.
-!
-!  If RNUT(2,I)=0.0, remineralisation rate I =RNUT(1,I)
-!  If RNUT(2,I)=1.0, remineralisation rate I =RNUT(1,I) * temperature
-!
-      QMREM = 0.0
-!  From now on this will always be skipped, also in 'stand alone' mode, because
-!  the equilibrium detritus concentration was deducted twice (also in blprim.f)
-!
-!     IF (SWBLSA .NE. 1) GO TO 170
-!     DO 150 J=1,NUNUCO
-!     IF (RNUT(2,J) .LT. 1.0D-6) THEN
-!        RNUTRI=RNUT(1,J)+SEDRAT+FLUSH
-!     ELSE
-!        RNUTRI=RNUT(1,J)*T+SEDRAT+FLUSH
-!     END IF
-!     EXPNUT=DEXP(-RNUTRI*TSTEP*MI)
-!     EXPNUT=EXPMUL*EXPNUT
-!     REMEXP(J)=EXPNUT
-!     REMINU(J)=RNUTRI
-!     DO 140 K=1,NUSPEC
-! 140 A(J,K)=AA(J,K)*(AVAILN(K)*RMORT(K)*(1.0-EXPNUT)+RNUTRI)/RNUTRI
-! 150 CONTINUE
-!
-!  Calculate extinction coefficients
-!  Update nov 4 1992:
-!  Use absolute value of SDMIX; SDMIX can be negative for types attached
-!  to the bottom.
-!
-!
-!     REMIT=DEXP(REMILI(1)*T-REMILI(2))
-!     DO 160 K=1,NUSPEC
-!       QMREM=AVAILN(K)/(REMIT+SEDRAT+FLUSH)
-!       ATEMP=EKX(K)*(QMREM*RMORT(K)*DABS(SDMIX(K))+1.0)
-!       DO 160 J=NUFILI,NUABCO
-! 160     A(J,K)=ATEMP
 !
 !  Set "B" values for nutrients by substracting the amount in
 !  zooplankton from the input values and correcting for deviations

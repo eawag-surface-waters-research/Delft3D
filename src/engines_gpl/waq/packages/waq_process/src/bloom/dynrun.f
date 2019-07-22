@@ -65,30 +65,30 @@
       subroutine dynrun(exttot,extb,tmp,sol,dep,dayl,chlor,id,iseg,
      1                  nset,extlim,deat,totchl,totdry,totcar,swblsa)
 
-!      use bloom_data_dim
-!      use bloom_data_size 
-!      use bloom_data_caldynam
-!      use bloom_data_io  
-!      use bloom_data_phyt    
-!      use bloom_data_putin   
-!      use bloom_data_sumou   
-!      use bloom_data_xvect   
+      use bloom_data_dim
+      use bloom_data_size 
+      use bloom_data_caldynam
+      use bloom_data_io  
+      use bloom_data_phyt    
+      use bloom_data_putin   
+      use bloom_data_sumou   
+      use bloom_data_xvect   
 
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'putin1.inc'
-      INCLUDE 'size.inc'
-      INCLUDE 'phyt1.inc'
-      INCLUDE 'phyt2.inc'
-      INCLUDE 'ioblck.inc'
-      INCLUDE 'sumout.inc'
-      INCLUDE 'dynam.inc'
-      INCLUDE 'xvect.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'putin1.inc'
+!      INCLUDE 'size.inc'
+!      INCLUDE 'phyt1.inc'
+!      INCLUDE 'phyt2.inc'
+!      INCLUDE 'ioblck.inc'
+!      INCLUDE 'sumout.inc'
+!      INCLUDE 'dynam.inc'
+!      INCLUDE 'xvect.inc'
 !
       CHARACTER*8 CDATE
       INTEGER NONUN(MT)
-      integer    :: i, id, igdump, iseg, k, nset, numun
+      integer    :: i, id, iseg, k, nset, numun
       integer    :: swblsa, infeas
       real(8)    :: sol
       real(8)    :: dep

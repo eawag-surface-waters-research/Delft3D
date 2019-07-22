@@ -46,10 +46,13 @@
 !
       SUBROUTINE SETUNI
 
+      use bloom_data_dim
+      use bloom_data_io  
+
       implicit none
 
-      INCLUDE 'blmdim.inc'
-      INCLUDE 'ioblck.inc'
+!      INCLUDE 'blmdim.inc'
+!      INCLUDE 'ioblck.inc'
       
       integer :: i, ioux
 !
@@ -87,8 +90,6 @@
       OUUNI  = IOU(10)
       IPL1 = IOU(41)
       IPL2 = IOU(42)
-      IPL3 = IOU(43)
-      OPL  = IOU(45)
 !
 ! In PC version: use the standard BLOOM II file OUUNI also for EKOBLM
 ! BLOOM II and DLWQWQ, which use IOU(61), IOU(62), IOU(6) and
