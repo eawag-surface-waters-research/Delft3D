@@ -1184,6 +1184,7 @@ module m_readstructures
       allocate(pump)
 
       call prop_get_integer(md_ptr, 'structure', 'direction', pump%direction, success)
+      pump%nrstages = 1
       if (success) call prop_get_integer(md_ptr, 'structure', 'numStages', pump%nrstages, success) ! UNST-2709: new consistent keyword
       if (.not. success) then
          pump%nrstages = 1
