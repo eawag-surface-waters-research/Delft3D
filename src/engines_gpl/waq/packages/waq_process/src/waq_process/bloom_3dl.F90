@@ -21,29 +21,13 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      MODULE DATA_3DL
+      subroutine init_3dl( noseg , nosegw, nosegl, nolay , ngro  , ntyp  )
       
-      IMPLICIT NONE
+      use bloom_data_3dl
 
-      INTEGER, SAVE ::  NOSEG_3DL                 ! number of segments, copy of NOSEG
-      INTEGER, SAVE ::  NOSEGL_3DL                ! number of segments per layer
-      INTEGER, SAVE ::  NOLAY_3DL                 ! number of layers
-      INTEGER, SAVE ::  NGRO_3DL                  ! number of BLOOM algae groups, copy of NGRO_A
-      INTEGER, SAVE ::  NTYP_3DL                  ! number of BLOOM algae types, copy of NTYP_A
-      INTEGER, SAVE ::  ISEG_3DL                  ! actual segment for which bloom is called
-      INTEGER, SAVE ::  ILAY_3DL                  ! actual layer for which bloom is called
-      LOGICAL, SAVE ::  ACTIVE_3DL                ! switch indicating if 3DL functionality is active
-      LOGICAL, SAVE ::  ACTIVE_EFFT               ! switch indicating if efficincy tracer functionality is active
+      implicit none
 
-      REAL, ALLOCATABLE, SAVE :: RADSURF_3DL(:)   ! radiation at segment surface, is updated with actual extinction from top to bottom after BLOOM call
-      REAL, ALLOCATABLE, SAVE :: EFFIC_3DL(:,:)   ! efficiency per algae group, is using total extinction
-      REAL, ALLOCATABLE, SAVE :: IFIX_3DL(:)      ! copy of the IFIX array, indication if alg is fixed
-
-      CONTAINS
-
-      SUBROUTINE INIT_3DL( NOSEG , NOSEGW, NOSEGL, NOLAY , NGRO  , NTYP  )
-
-!     FUNCTION : set dimensions and allocate memory for DATA_3DL
+!     FUNCTION : set dimensions and allocate memory for bloom_data_3dl
 
 !     subroutines called
 
@@ -94,7 +78,10 @@
 
 !     use the results from the vertical distribution VTRANS
 
-      USE      DATA_VTRANS
+      use bloom_data_vtrans
+      use bloom_data_3dl
+
+      implicit none
 
 !     arguments
 
@@ -154,7 +141,10 @@
 
 !     use the results from the vertical distribution VTRANS
 
-      USE      DATA_VTRANS
+      use bloom_data_vtrans
+      use bloom_data_3dl
+
+      implicit none
 
 !     arguments
 
@@ -196,6 +186,10 @@
 
       SUBROUTINE EFFILAY_3DL( SURF, EXTTOT, DEP   , IGROUP, ITYPE )
 
+      use bloom_data_3dl
+
+      implicit none
+
 !     FUNCTION : calculate and store efficiency for this layer
 
 !     arguments
@@ -233,5 +227,3 @@
 
       RETURN
       END SUBROUTINE EFFILAY_3DL
-
-      END MODULE DATA_3DL

@@ -2391,6 +2391,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/apatit.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/atmdep.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/attout.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/bacmrt.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/bloom_3dl.F90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/bodcod.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/botmin.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/bottom_set.f -text
@@ -2405,8 +2406,6 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/consbl.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/covmac.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/cselac.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/d40blo.f -text
-src/engines_gpl/waq/packages/waq_process/src/waq_process/data_3dl.F90 -text
-src/engines_gpl/waq/packages/waq_process/src/waq_process/data_vtrans.F90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/dayl.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/dayrad.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/ddepth.f -text

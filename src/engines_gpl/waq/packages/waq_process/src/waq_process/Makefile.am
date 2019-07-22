@@ -20,8 +20,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libwaq_process_la_SOURCES = \
-       data_vtrans.F90 \
-       data_3dl.F90 \
        bottom_set.f \
        get_effi.f \
        adspo4.f \
@@ -30,6 +28,7 @@ libwaq_process_la_SOURCES = \
        atmdep.f \
        attout.f \
        bacmrt.f \
+       bloom_3dl.F90 \
        bodcod.f \
        botmin.f \
        burial.f \

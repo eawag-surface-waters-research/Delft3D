@@ -35,7 +35,7 @@
 ! NOLAY   I*4 1 I     number of layers
 !
 
-      USE      DATA_VTRANS
+      USE      bloom_data_vtrans
 
       IMPLICIT NONE
 
@@ -87,7 +87,7 @@
       CALL DHNOSEG(NOSEGW)
       CALL DHNOLAY(NOLAY)
 !
-!     initialise and allocate memory in module data_vtrans
+!     initialise and allocate memory in module bloom_data_vtrans
 !
       IF ( .NOT. INIT_VTRANS ) THEN
          INIT_VTRANS = .TRUE.

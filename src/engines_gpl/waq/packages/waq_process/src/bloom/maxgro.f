@@ -49,8 +49,7 @@
 !
       SUBROUTINE MAXGRO(XINIT,ROOT,EXTTOT,EADJ,J,ISKMAX,DEP)
 
-      USE DATA_3DL
-
+      use bloom_data_3dl
       use bloom_data_dim
       use bloom_data_size 
       use bloom_data_arran   

@@ -103,7 +103,7 @@
      1           dep,xinit,xdef,xeco,total,exttot,extlim,nset,infeas,
      2           nonun,numun,swblsa)
 
-      use data_3dl
+      use bloom_data_3dl
       use bloom_data_dim
       use bloom_data_size
       use bloom_data_arran

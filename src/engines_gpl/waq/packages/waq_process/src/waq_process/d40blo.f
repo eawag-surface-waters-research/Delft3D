@@ -41,8 +41,8 @@
 !     ------   -----  ------------
 
 ! 3DL
-      USE      DATA_3DL
-      USE      DATA_VTRANS
+      use      bloom_data_3dl
+      use      bloom_data_vtrans
 ! END3DL
 
       IMPLICIT NONE

@@ -37,6 +37,8 @@
 !!    - bloom_data_putin         input data
 !!    - bloom_data_sumou         summary output
 !!    - bloom_data_xvect         x vectors
+!!    - bloom_data_3dl           data for 3d light
+!!    - bloom_data_vtrans        results and storage for the VTRANS routine
 
 module bloom_data_dim
    integer, parameter :: mt = 30                  ! Maximum number of phytoplankton types
@@ -227,3 +229,33 @@ module bloom_data_xvect
    real(8)            :: xinit(ms)                ! Initial biomass per group
    real(8)            :: xeco(mt)                 ! Totals per species group
 end module bloom_data_xvect
+
+module bloom_data_3dl
+   integer            ::  noseg_3dl                 ! number of segments, copy of NOSEG
+   integer            ::  nosegl_3dl                ! number of segments per layer
+   integer            ::  nolay_3dl                 ! number of layers
+   integer            ::  ngro_3dl                  ! number of BLOOM algae groups, copy of NGRO_A
+   integer            ::  ntyp_3dl                  ! number of BLOOM algae types, copy of NTYP_A
+   integer            ::  iseg_3dl                  ! actual segment for which bloom is called
+   integer            ::  ilay_3dl                  ! actual layer for which bloom is called
+   logical            ::  active_3dl                ! switch indicating if 3DL functionality is active
+   logical            ::  active_efft               ! switch indicating if efficincy tracer functionality is active
+
+   real, allocatable  :: radsurf_3dl(:)             ! radiation at segment surface, is updated with actual extinction from top to bottom after BLOOM call
+   real, allocatable  :: effic_3dl(:,:)             ! efficiency per algae group, is using total extinction
+   real, allocatable  :: ifix_3dl(:)                ! copy of the IFIX array, indication if alg is fixed
+end module bloom_data_3dl
+   
+module bloom_data_vtrans
+   integer            :: noseglocal                 ! number of segments, copy of NOSEG
+   integer            :: nolaylocal                 ! number of layers
+   real               :: timtot                     ! total time
+   logical            :: active_vtrans = .false.    ! switch indicating if VTRANS functionality is active
+   logical            :: reset_vtrans  = .true.     ! switch indicating if new distribution step is needed
+   logical            :: init_vtrans   = .false.    ! switch indicating if VTRANS is initialised
+  
+   real, allocatable  :: concv(:,:)                 ! calculated concentration distribution per layer
+   real, allocatable  :: timev(:,:)                 ! accumulated time per layer
+   real, allocatable  :: fracv(:,:)                 ! fraction of the time per layer, updated every accumulating step
+   real, allocatable  :: dervv(:,:)                 ! help array
+end module

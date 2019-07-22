@@ -28,7 +28,7 @@
 
 !     modules
 
-      use      data_3dl   ! data and routine for 3D light approach
+      use      bloom_data_3dl   ! data and routine for 3D light approach
       
       use bloom_data_dim
       use bloom_data_size 
