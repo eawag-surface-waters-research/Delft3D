@@ -1379,7 +1379,7 @@ module m_readstructures
          write (msgbuf, '(a)') 'Error Reading Structure '''//trim(st_id)//''', crestLevel is missing.'
          call err_flush()
       end if
-      if (success) call prop_get_double(md_ptr, 'structure', 'corrCoeff',  generalst%mugf_pos, success)
+      if (success) call prop_get_double(md_ptr, 'structure', 'corrCoeff',  generalst%mugf_pos)
 
       generalst%wu1                = generalst%ws
       generalst%zu1                = generalst%zs
