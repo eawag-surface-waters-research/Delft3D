@@ -1186,10 +1186,6 @@ module m_readstructures
       call prop_get_integer(md_ptr, 'structure', 'direction', pump%direction, success)
       pump%nrstages = 1
       if (success) call prop_get_integer(md_ptr, 'structure', 'numStages', pump%nrstages, success) ! UNST-2709: new consistent keyword
-      if (.not. success) then
-         pump%nrstages = 1
-         success = .true.
-      endif
       
       if (pump%nrstages < 1) then
          call setMessage(LEVEL_FATAL, "Error Reading Pump: No Stages Defined")
