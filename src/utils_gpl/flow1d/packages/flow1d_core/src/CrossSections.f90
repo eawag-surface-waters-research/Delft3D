@@ -239,8 +239,6 @@ module m_CrossSections
        double precision             :: charHeight           !< Characteristic height
        double precision             :: charWidth            !< Characteristic width
        logical                      :: closed               !< Flag indicates whether the cross section is closed
-       integer                      :: bedFrictionType      !< Type of bed friction
-       double precision             :: bedFriction          !< Bed friction parameter value
        integer                      :: groundFrictionType   !< Type of ground friction
        double precision             :: groundFriction       !< Ground friction parameter
        integer                      :: iTabDef              !< Temporary item to save ireference number to cross section definition
@@ -759,9 +757,13 @@ integer function  AddCrossSectionByVariables(crs, CSDef, branchid, chainage, ire
    crs%cross(i)%chainage            = chainage
    crs%cross(i)%bedLevel            = bedLevel
    crs%cross(i)%shift               = bedlevel
+   crs%cross(i)%frictionSectionsCount = 1
+   allocate(crs%cross(i)%frictionTypePos(1), crs%cross(i)%frictionTypeNeg(1), crs%cross(i)%frictionValuePos(1), crs%cross(i)%frictionValueNeg(1))
    
-   crs%cross(i)%bedFrictionType     = bedFrictionType
-   crs%cross(i)%bedFriction         = bedFriction
+   crs%cross(i)%frictionTypePos(1)  = bedFrictionType
+   crs%cross(i)%frictionTypeNeg(1)  = bedFrictionType
+   crs%cross(i)%frictionValuePos(1) = bedFriction
+   crs%cross(i)%frictionValueNeg(1) = bedFriction
    crs%cross(i)%groundFrictionType  = groundFrictionType
    crs%cross(i)%groundFriction      = groundFriction
    crs%cross(i)%itabDef             = iref
@@ -1251,8 +1253,6 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
             crossi%bedLevel           = (1.0d0 - f) * cross1%bedLevel + f * cross2%bedLevel
             crossi%surfaceLevel       = (1.0d0 - f) * cross1%surfaceLevel + f * cross2%surfaceLevel
             ! for circular cross sections there is only one roughness value set in bedfriction
-            crossi%bedFrictionType    = cross1%frictionTypePos(1)
-            crossi%bedFriction        = (1.0d0 - f) * cross1%frictionValuePos(1) + f * cross2%frictionValuePos(1)
             crossi%groundFriction     = (1.0d0 - f) * cross1%groundFriction + f * cross2%groundFriction
             crossi%groundFrictionType = cross1%groundFrictionType
             crossi%tabDef%diameter    = (1.0d0 - f) * cross1%tabDef%diameter + f * cross2%tabDef%diameter
@@ -1423,8 +1423,6 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
          crossi%crosstype          = cross1%crosstype   
          crossi%bedLevel           = (1.0d0 - f) * cross1%bedLevel + f * cross2%bedLevel
          crossi%surfaceLevel       = (1.0d0 - f) * cross1%surfaceLevel + f * cross2%surfaceLevel
-         crossi%bedFrictionType    = cross1%bedFrictionType
-         crossi%bedFriction        = (1.0d0 - f) * cross1%bedFriction + f * cross2%bedFriction
          crossi%groundFriction     = (1.0d0 - f) * cross1%groundFriction + f * cross2%groundFriction
          crossi%groundFrictionType = cross1%groundFrictionType
          crossi%tabDef%diameter    = (1.0d0 - f) * cross1%tabDef%diameter + f * cross2%tabDef%diameter
@@ -2651,7 +2649,7 @@ use messageHandling
    enddo
    
    call generateConvtab(convtab, crs%tabDef%levelsCount, crs%shift, crs%tabDef%groundLayer%thickness, crs%tabDef%crossType, &
-                        nc, crs%tabDef%frictionSectionsCount, crs%branchid, crs%bedFrictionType,                               &
+                        nc, crs%tabDef%frictionSectionsCount, crs%branchid, crs%frictionTypePos(1),                               &
                         crs%groundFriction, crs%tabdef%y, crs%tabdef%z,                                                        &
                         crs%frictionSectionFrom, crs%frictionSectionTo, crs%frictionTypePos,              &
                         crs%frictionValuePos, crs%frictionTypeNeg, crs%frictionValueNeg )
@@ -2737,8 +2735,6 @@ type(t_CrossSection) function CopyCross(CrossFrom)
    CopyCross%charHeight         = CrossFrom%charHeight
    CopyCross%charWidth          = CrossFrom%charWidth
    CopyCross%closed             = CrossFrom%closed
-   CopyCross%bedFrictionType    = CrossFrom%bedFrictionType
-   CopyCross%bedFriction        = CrossFrom%bedFriction
    CopyCross%groundFrictionType = CrossFrom%groundFrictionType
    CopyCross%groundFriction     = CrossFrom%groundFriction
    CopyCross%iTabDef            = CrossFrom%iTabDef
