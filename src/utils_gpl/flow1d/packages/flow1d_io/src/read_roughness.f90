@@ -739,57 +739,5 @@ contains
       call write_hash_list_cache(ibin, rgs%hashlist)
 
    end subroutine write_roughness_cache
-   
-   !> Converts a friction type as text string into the integer parameter constant.
-   !! E.g. R_Manning, etc. If input string is invalid, -1 is returned.
-   subroutine frictionTypeStringToInteger(sfricType, ifricType)
-      implicit none
-      character(len=*), intent(in   ) :: sfricType !< Friction type string.
-      integer,          intent(  out) :: ifricType !< Friction type integer. When string is invalid, -1 is returned.
-      
-      call str_lower(sfricType)
-      select case (trim(sfricType))
-         case ('chezy')
-            ifricType = R_Chezy
-         case ('manning')
-            ifricType = R_Manning
-         case ('walllawnikuradse')
-            ifricType = 2 ! TODO: JN: White-Colebrook $k_n$ (m) -- Delft3D style not available yet, no PARAMETER.
-         case ('whitecolebrook')
-            ifricType = R_WhiteColebrook
-         case ('stricklernikuradse')
-            ifricType = R_Nikuradse
-         case ('strickler')
-            ifricType = R_Strickler
-         case ('debosbijkerk')
-            ifricType = R_BosBijkerk
-         case default
-            ifricType = -1
-      end select
-      return
-   
-   end subroutine frictionTypeStringToInteger
-   
-   !> Converts a (friction) function type as text string into the integer parameter constant.
-   !! E.g. R_FunctionConstant, etc. If input string is invalid, -1 is returned.
-   subroutine functionTypeStringToInteger(sfuncType, ifuncType)
-      implicit none
-      character(len=*), intent(in   ) :: sfuncType !< Function type string.
-      integer,          intent(  out) :: ifuncType !< Function type integer. When string is invalid, -1 is returned.
-      
-      call str_lower(sfuncType)
-      select case (trim(sfuncType))
-         case ('constant')
-            ifuncType = R_FunctionConstant
-         case ('absdischarge')
-            ifuncType = R_FunctionDischarge
-         case ('waterlevel ')
-            ifuncType = R_FunctionLevel
-         case default
-            ifuncType = -1
-      end select
-      return
-   
-   end subroutine functionTypeStringToInteger
 
     end module m_read_roughness
