@@ -33698,6 +33698,7 @@ end subroutine setbobs_fixedweirs
  use m_orifice
  use m_sferic
  use m_culvert
+ use m_Universal_Weir
  use m_trachy, only: trachy_resistance
 
  implicit none
@@ -33931,6 +33932,9 @@ end subroutine setbobs_fixedweirs
                    wetdown = max(wetdown, 0.0001d0)
                    call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
                        q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, network%sts%struct(istru)%state, .true.)
+                case (ST_UNI_WEIR)
+                   call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, .true.)
                 case (ST_BRIDGE)
                    ! TODO: implement this?!
                 continue
