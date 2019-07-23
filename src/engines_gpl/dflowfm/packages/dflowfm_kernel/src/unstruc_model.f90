@@ -443,13 +443,6 @@ subroutine loadModel(filename)
 
     call loadNetwork(md_netfile, istat, jadoorladen)
     
-    
-    if (len_trim(md_1dfiles%structures) > 0) then
-       call SetMessage(LEVEL_INFO, 'Reading Structures ...')
-       call readStructures(network, md_1dfiles%structures)
-       call SetMessage(LEVEL_INFO, 'Reading Structures Done')
-    endif
-
     network%sferic = jsferic==1
     
     if (jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
@@ -487,6 +480,12 @@ subroutine loadModel(filename)
           zk(k2) = min(zk(k2),tempbob(2))
        enddo
 
+    endif
+    
+    if (len_trim(md_1dfiles%structures) > 0) then
+       call SetMessage(LEVEL_INFO, 'Reading Structures ...')
+       call readStructures(network, md_1dfiles%structures)
+       call SetMessage(LEVEL_INFO, 'Reading Structures Done')
     endif
 
     if (istat == 0) then
