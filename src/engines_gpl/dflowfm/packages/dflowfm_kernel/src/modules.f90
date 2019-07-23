@@ -1184,8 +1184,8 @@ use m_physcoef, only : rhomean
     wdb(3)  = 30
     icdtyp  = 2
     jarelativewind = 0    !< wind relative
-    jawindhuorzwsbased   = 0    !<
-    jawindpartialdry     = 1
+    jawindhuorzwsbased   = 0    !< default: HU-based both in 2D and 3D (and not zws-based)
+    jawindpartialdry     = 0    !< default: partially dry cells switched off
 
     windxav = 0d0
     windyav = 0d0
