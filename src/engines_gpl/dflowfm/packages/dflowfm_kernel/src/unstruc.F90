@@ -15430,10 +15430,9 @@ end subroutine adjust_bobs_on_dambreak_breach
  windxav = 0d0
  windyav = 0d0
 
- roro = rhoair/rhomean
  if (jawindstressgiven == 1) then
     do L = 1, lnx
-       wdsu(L) = roro * ( wx(L)*csu(L) + wy(L)*snu(L) )
+       wdsu(L) = ( wx(L)*csu(L) + wy(L)*snu(L) ) / rhomean
     enddo
     if (jatem == 5) then
        do L = 1, lnx
@@ -15441,6 +15440,7 @@ end subroutine adjust_bobs_on_dambreak_breach
        enddo
     endif
  else
+    roro = rhoair/rhomean
     wdsu   = 0d0
     numwav = 0
     do L = 1, lnx
