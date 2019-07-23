@@ -758,16 +758,20 @@ module m_readstructures
       
       integer                                      :: istat
       integer                                      :: i
+      double precision                             :: lowestz
+      character(len=Idlen)                         :: txt
 
       allocate(uniweir)
       
-      call prop_get_double(md_ptr, 'structure', 'crestlevel', uniweir%crestlevel, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'dischargecoeff', uniweir%dischargecoeff, success)
-      if (success) call prop_get_integer(md_ptr, 'structure', 'allowedflowdir', uniweir%allowedflowdir, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'freesubmergedfactor', uniweir%freesubmergedfactor, success)
-      if (.not. success) uniweir%freesubmergedfactor = 0.667d0
+      call prop_get_double(md_ptr, '', 'crestlevel', uniweir%crestlevel, success)
+      if (success) call prop_get_double(md_ptr, '', 'dischargecoeff', uniweir%dischargecoeff, success)
+      if (success) call prop_get_string(md_ptr, '', 'allowedflowdir', txt, success)
+      uniweir%allowedflowdir = allowedFlowDirToInt(txt)
       
-      call prop_get_integer(md_ptr, 'structure', 'numLevels', uniweir%yzcount, success) ! UNST-2714: new consistent keyword
+      uniweir%freesubmergedfactor = 0.667d0
+      if (success) call prop_get_double(md_ptr, '', 'freesubmergedfactor', uniweir%freesubmergedfactor)
+      
+      call prop_get_integer(md_ptr, '', 'levelsCount', uniweir%yzcount, success) ! UNST-2714: new consistent keyword
       if (.not. success) return
       
       call realloc(uniweir%y, uniweir%yzcount, stat=istat)
@@ -776,12 +780,16 @@ module m_readstructures
          call SetMessage(LEVEL_FATAL, 'Reading Universal Weir: Error Allocating Y/Z Arrays')
       endif
 
-      call prop_get_doubles(md_ptr, 'structure', 'yValues', uniweir%y, uniweir%yzcount, success)
-      if (success) call prop_get_doubles(md_ptr, 'structure', 'zValues', uniweir%z, uniweir%yzcount, success)
+      call prop_get_doubles(md_ptr, '', 'yValues', uniweir%y, uniweir%yzcount, success)
+      if (success) call prop_get_doubles(md_ptr, '', 'zValues', uniweir%z, uniweir%yzcount, success)
       if (.not. success) return
       
+      lowestz = huge(1d0)
       do i = 1, uniweir%yzcount
-         uniweir%z(i) = uniweir%z(i) - uniweir%crestlevel
+         lowestz = min(lowestz, uniweir%z(i))
+      enddo
+      do i = 1, uniweir%yzcount
+         uniweir%z(i) = uniweir%z(i) - lowestz
       enddo
 
    end subroutine readUniversalWeir
@@ -1146,7 +1154,7 @@ module m_readstructures
       integer,                      intent(in   ) :: st_type     !< structure type
       type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which structure forcing will be added if needed.
       logical,                      intent(inout) :: success     
-      
+      integer           :: istat   
       character(CharLn) :: tmpstr
       
       
