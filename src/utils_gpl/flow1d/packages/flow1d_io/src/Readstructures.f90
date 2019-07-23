@@ -898,7 +898,6 @@ module m_readstructures
       endif
    
    end subroutine readCulvert
-   
    subroutine readBridge(network, istru, md_ptr, isPillarBridge, success)
    
       type(t_network), intent(inout)             :: network

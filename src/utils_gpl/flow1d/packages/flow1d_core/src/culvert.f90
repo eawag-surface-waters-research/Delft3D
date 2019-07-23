@@ -46,37 +46,33 @@ module m_Culvert
    end interface dealloc
    
    type, public :: t_culvert
-      integer                         :: culvertType ! ST_CULVERT, ST_SIPHON or ST_INV_SIPHON
-      double precision                :: leftlevel
-      double precision                :: rightlevel
-      type(t_crosssection), pointer   :: pcross => null()              
-      integer                         :: crosssectionnr      
-      integer                         :: allowedflowdir
-      double precision                :: length
-      double precision                :: inletlosscoeff
-      double precision                :: outletlosscoeff
-      logical                         :: has_valve
-      double precision                :: valveOpening
-      type(t_table), pointer          :: losscoeff => null()
-      
-      ! Bend Loss for Siphons
-      double precision                :: bendlosscoeff
-
-      ! Levels for Normal Siphon
-      double precision                :: turnonlevel
-      double precision                :: turnofflevel
-      logical                         :: is_siphon_on = .false.
-
+      integer                         :: culvertType           !< ST_CULVERT, ST_SIPHON or ST_INV_SIPHON
+      double precision                :: leftlevel             !< left invert level of culvert
+      double precision                :: rightlevel            !< right invert level of culvert
+      type(t_crosssection), pointer   :: pcross => null()      !< pointer to cross section of culvert
+      integer                         :: crosssectionnr        !< cross section index in cross section array
+      integer                         :: allowedflowdir        !< allowed flow direction
+                                                               !< 0 all directions
+                                                               !< 1 only positive flow
+                                                               !< 2 only negative flow
+                                                               !< 3 no flow allowed
+      double precision                :: length                !< length of the culvert
+      double precision                :: inletlosscoeff        !< loss coefficient at inflow point
+      double precision                :: outletlosscoeff       !< loss coefficient at outflow point
+      logical                         :: has_valve             !< Indicates whether a valve has been added
+      double precision                :: valveOpening          !< Current valve opening
+      type(t_table), pointer          :: losscoeff => null()   !< table containing loss coefficients as a function of the relative opening
    end type
 
 contains
 
+   !> deallocate culvert 
    subroutine deallocCulvert(culvert)
       ! Modules
 
       implicit none
       ! Input/output parameters
-      type(t_culvert), pointer   :: culvert
+      type(t_culvert), pointer, intent(inout)   :: culvert     !< culvert object
 
       ! Local variables
 
@@ -91,6 +87,7 @@ contains
       
    end subroutine deallocCulvert
                               
+   !> 
    subroutine ComputeCulvert(culvert, fum, rum, aum, dadsm, kfum, cmustr, s1m1, s1m2, qm,  &
                              q0m, u1m, u0m, dxm, dt, bobgrm1, bobgrm2, wetdown, state, infuru)
       use m_Roughness
@@ -337,26 +334,7 @@ contains
             return
          endif
 
-         ! Siphon
-         ! Check for switch on or off of siphon
-         if (s1m2 <= culvert%turnonlevel) then
-            culvert%is_siphon_on = .true.
-         elseif (s1m2 >= culvert%turnofflevel) then
-            culvert%is_siphon_on = .false.
-         else
-         endif
-
          ! Check if siphon is in operation
-         if (.not. culvert%is_siphon_on) then
-            kfum = 0
-            fum = 0.0d0
-            rum = 0.0d0
-            u1m = 0.0d0
-            qm  = 0.0d0
-            q0m = 0.0d0
-            return
-         endif
-
       endif
 
       ! Calculate cross-section values in culvert
@@ -413,11 +391,7 @@ contains
       endif
       
       totalLoss = exitloss + frictloss + culvert%inletlosscoeff + valveloss
-      
-      if (.not. IsCulvert) then        ! Is a Siphon
-         totalLoss = totalLoss + culvert%bendlosscoeff
-      endif
-      
+            
       totalLoss = max(totalLoss, 0.01d0)
       
       cmus = 1.0d0 / sqrt(totalLoss)
