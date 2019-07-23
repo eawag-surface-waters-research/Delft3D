@@ -1607,7 +1607,7 @@ if (nstruc > 0) then
       call write2scr(linec, 'Length', pculvert%length, 'm')
       
       if (pculvert%has_valve) then
-         call write2scr(linec, 'Valve opening', pculvert%inivalveopen, 'm')
+         call write2scr(linec, 'Valve opening', pculvert%valveOpening, 'm')
       end if
 
       call write2scr(linec, 'Inlet loss coef.', pculvert%inletlosscoeff, '-')

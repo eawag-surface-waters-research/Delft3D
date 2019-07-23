@@ -104,10 +104,7 @@ module m_readstructures
       character(len=IdLen)                                   :: structureID
       character(len=IdLen)                                   :: branchID
       
-      double precision                                       :: Chainage
-      integer                                                :: branchIdx
       logical                                                :: isPillarBridge
-      logical                                                :: isInvertedSiphon
 
       integer                                                :: iCompound
       character(len=IdLen)                                   :: compoundName
@@ -116,18 +113,19 @@ module m_readstructures
       integer                                                :: iStrucType
       integer                                                :: istru
       type(t_structure), pointer                             :: pstru
-      integer                                                ::  nweir
-      integer                                                ::  nculvert
-      integer                                                ::  norifice
-      integer                                                ::  ngenstru
-      integer                                                ::  nbridge
-      integer                                                ::  ngate
+      integer                                                :: nweir
+      integer                                                :: nculvert
+      integer                                                :: norifice
+      integer                                                :: ngenstru
+      integer                                                :: nbridge
+      integer                                                :: ngate
 
-      integer                       :: pos
-      integer                       :: ibin = 0
-      character(len=Charln)         :: binfile
-      logical                       :: file_exist
-      integer                       :: major, minor, ierr
+      integer                                                :: pos
+      integer                                                :: ibin = 0
+      character(len=Charln)                                  :: binfile
+      logical                                                :: file_exist
+      integer                                                :: major, minor, ierr
+      
       pos = index(structureFile, '.', back = .true.)
       binfile = structureFile(1:pos)//'cache'
       inquire(file=binfile, exist=file_exist)
@@ -261,7 +259,7 @@ module m_readstructures
             case (ST_UNI_WEIR)
                call readUniversalWeir(pstru%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
             case (ST_CULVERT)
-               call readCulvert(network, istru, md_ptr%child_nodes(i)%node_ptr, success)
+               call readCulvert(pstru%culvert, network, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
             case (ST_BRIDGE)
                call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
             case (ST_PUMP)
@@ -487,7 +485,7 @@ module m_readstructures
                read(ibin) pstr%culvert%outletlosscoeff
                read(ibin) pstr%culvert%has_valve
                if (pstr%culvert%has_valve) then
-                   read(ibin) pstr%culvert%inivalveopen
+                   read(ibin) pstr%culvert%valveOpening
                    call read_table_cache(ibin, pstr%culvert%losscoeff)
                endif
             
@@ -657,7 +655,7 @@ module m_readstructures
                write(ibin) pstr%culvert%outletlosscoeff
                write(ibin) pstr%culvert%has_valve
                if (pstr%culvert%has_valve) then
-                  write(ibin) pstr%culvert%inivalveopen
+                  write(ibin) pstr%culvert%valveOpening
                   call write_table_cache(ibin, pstr%culvert%losscoeff)
                endif
       
@@ -788,15 +786,19 @@ module m_readstructures
 
    end subroutine readUniversalWeir
    
-   subroutine readCulvert(network, istru, md_ptr, success)
+   !> read the culvert specific data
+   subroutine readCulvert(culvert, network, md_ptr, st_id, forcinglist, success)
    
-      type(t_network), intent(inout)              :: network
-      integer                                     :: istru
-      type(tree_data), pointer, intent(in)        :: md_ptr
-      logical, intent(inout)                      :: success 
+      use messageHandling
       
-      type(t_culvert), pointer                    :: culvert
-      character(len=IdLen)                        :: CrsDefID
+      type(t_culvert), pointer,           intent(inout) :: culvert         !< general structure to be read into 
+      type(t_network),                    intent(in   ) :: network         !< network data structure
+      type(tree_data), pointer,           intent(in   ) :: md_ptr          !< ini tree pointer with user input.
+      character(IdLen),                   intent(in   ) :: st_id           !< Structure character Id.
+      type(t_forcinglist),                intent(inout) :: forcinglist     !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
+      logical,                            intent(inout) :: success         !< logical indicating, the reading of the structure was successfull
+ 
+      character(len=IdLen)                        :: CrsDefID, txt
       integer                                     :: CrsDefIndx
       integer                                     :: icross
       
@@ -811,11 +813,9 @@ module m_readstructures
       double precision, allocatable, dimension(:) :: relOpen
       double precision, allocatable, dimension(:) :: lossCoeff
 
-      allocate(network%sts%struct(istru)%culvert)
-      
-      culvert => network%sts%struct(istru)%culvert
+      allocate(culvert)
 
-      call prop_get_string(md_ptr, 'structure', 'csDefId', CrsDefID, success)
+      call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success)
       if (.not. success) return
          
       CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
@@ -823,10 +823,14 @@ module m_readstructures
          call setMessage(LEVEL_FATAL, 'Error Reading Culvert: Cross-Section Definition not Found')
       endif
 
-      call prop_get_integer(md_ptr, 'structure', 'bedFrictionType', bedFrictionType, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'bedFriction', bedFriction, success)
-      if (success) call prop_get_integer(md_ptr, 'structure', 'groundFrictionType', groundFrictionType, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'groundFriction', groundFriction, success)
+      call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success)
+      call frictionTypeStringToInteger(txt, bedFrictionType)
+       
+      if (success) call prop_get_double(md_ptr, '', 'bedFriction', bedFriction, success)
+      groundFrictionType = 0
+      groundFriction = 45d0
+      if (success) call prop_get_integer(md_ptr, '', 'groundFrictionType', groundFrictionType)
+      if (success) call prop_get_double(md_ptr, '', 'groundFriction', groundFriction)
       if (.not. success) return
          
       icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
@@ -838,23 +842,24 @@ module m_readstructures
       
       culvert%culvertType    = ST_CULVERT
       
-      call prop_get_integer(md_ptr, 'structure', 'allowedflowdir', culvert%allowedflowdir, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'length', culvert%length, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'leftlevel', culvert%leftlevel, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'rightlevel', culvert%rightlevel, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'inletlosscoeff', culvert%inletlosscoeff, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'outletlosscoeff', culvert%outletlosscoeff, success) 
+      call prop_get_string(md_ptr, '', 'allowedflowdir', txt, success)
+      culvert%allowedflowdir =allowedFlowDirToInt(txt)
+      if (success) call prop_get_double(md_ptr, '', 'length', culvert%length, success) 
+      if (success) call prop_get_double(md_ptr, '', 'leftlevel', culvert%leftlevel, success) 
+      if (success) call prop_get_double(md_ptr, '', 'rightlevel', culvert%rightlevel, success) 
+      if (success) call prop_get_double(md_ptr, '', 'inletlosscoeff', culvert%inletlosscoeff, success) 
+      if (success) call prop_get_double(md_ptr, '', 'outletlosscoeff', culvert%outletlosscoeff, success) 
 
-      call prop_get_integer(md_ptr, 'structure', 'valveonoff', valveonoff, success)
+      call prop_get_integer(md_ptr, '', 'valveonoff', valveonoff, success)
       if (.not. success) return
       
       if (valveonoff == 1) then
          
          culvert%has_valve = .true.
          
-         call prop_get_double(md_ptr, 'structure', 'inivalveopen', culvert%inivalveopen, success)
-
-         if (success) call prop_get_integer(md_ptr, 'structure', 'numLossCoeff',   lossCoeffCount, success) ! UNST-2710: new consistent keyword
+         call prop_get_double(md_ptr, '', 'valveOpeningHeight', culvert%valveOpening, success)
+         call get_value_or_addto_forcinglist(md_ptr, 'valveOpeningHeight', culvert%valveOpening, st_id, ST_CULVERT, forcinglist, success)
+         if (success) call prop_get_integer(md_ptr, '', 'lossCoeffCount',   lossCoeffCount, success) ! UNST-2710: new consistent keyword
          if (.not. success) return
             
          call realloc(relOpen, lossCoeffCount, stat=istat)
@@ -863,8 +868,8 @@ module m_readstructures
             call SetMessage(LEVEL_FATAL, 'Reading Culvert: Error Allocating Valve Loss Arrays')
          endif
 
-         call prop_get_doubles(md_ptr, 'structure', 'relativeOpening', relOpen, lossCoeffCount, success)
-         if (success) call prop_get_doubles(md_ptr, 'structure', 'lossCoefficient', lossCoeff, lossCoeffCount, success)
+         call prop_get_doubles(md_ptr, '', 'relOpening', relOpen, lossCoeffCount, success)
+         if (success) call prop_get_doubles(md_ptr, '', 'lossCoeff', lossCoeff, lossCoeffCount, success)
          if (.not. success) return
       
          call setTable(culvert%lossCoeff, 0, relOpen, lossCoeff, lossCoeffCount)
@@ -880,145 +885,11 @@ module m_readstructures
       else
          
          culvert%has_valve = .false.
-         culvert%inivalveopen = 0.0d0
+         culvert%valveOpening = 0.0d0
          
       endif
    
    end subroutine readCulvert
-   
-   subroutine readSiphon(network, istru, md_ptr, isInvertedSiphon, success)
-   
-      type(t_network), intent(inout)              :: network
-      integer                                     :: istru
-      type(tree_data), pointer, intent(in)        :: md_ptr
-      logical                                     :: isInvertedSiphon
-      logical, intent(inout)                      :: success 
-
-      type(t_culvert), pointer                    :: culvert
-
-      character(len=IdLen)                        :: CrsDefID
-      integer                                     :: CrsDefIndx
-      integer                                     :: icross
-
-      integer                                     :: bedFrictionType
-      double precision                            :: bedFriction
-      integer                                     :: groundFrictionType
-      double precision                            :: groundFriction
-      integer                                     :: valveonoff
-      
-      integer                                     :: allowedflowdir
-      double precision                            :: length
-      double precision                            :: leftlevel
-      double precision                            :: rightlevel
-      double precision                            :: inletlosscoeff
-      double precision                            :: outletlosscoeff
-      double precision                            :: bendLossCoeff
-
-      integer                                     :: lossCoeffCount
-      integer                                     :: istat
-      logical                                     :: has_valve
-      double precision                            :: inivalveopen
-      double precision, allocatable, dimension(:) :: relOpen
-      double precision, allocatable, dimension(:) :: lossCoeff
-
-      call prop_get_string(md_ptr, 'structure', 'csDefId', CrsDefID, success)
-      if (.not. success) return
-         
-      CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
-      if (CrsDefIndx <= 0) then
-         call setMessage(LEVEL_FATAL, 'Error Reading Culvert: Cross-Section Definition not Found')
-      endif
-
-      call prop_get_integer(md_ptr, 'structure', 'bedFrictionType', bedFrictionType, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'bedFriction', bedFriction, success)
-      if (success) call prop_get_integer(md_ptr, 'structure', 'groundFrictionType', groundFrictionType, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'groundFriction', groundFriction, success)
-      if (.not. success) return
-         
-      icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
-                               bedFrictionType, bedFriction, groundFrictionType, groundFriction)
-      network%crs%cross(icross)%branchid = -1
-      
-      call prop_get_integer(md_ptr, 'structure', 'allowedflowdir', allowedflowdir, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'length', length, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'leftlevel', leftlevel, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'rightlevel', rightlevel, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'inletlosscoeff', inletlosscoeff, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'outletlosscoeff', outletlosscoeff, success) 
-      if (success) call prop_get_double(md_ptr, 'structure', 'bendLosscoeff', bendLossCoeff, success) 
-
-      if (success) call prop_get_integer(md_ptr, 'structure', 'valveonoff', valveonoff, success)
-      if (.not. success) return
-      
-      if (valveonoff == 1) then
-         
-         has_valve = .true.
-         
-         call prop_get_double(md_ptr, 'structure', 'inivalveopen', inivalveopen, success)
-
-         if (success) call prop_get_integer(md_ptr, 'structure', 'lossCoeffCount', lossCoeffCount, success)
-         if (.not. success) return
-            
-         call realloc(relOpen, lossCoeffCount, stat=istat)
-         if (istat == 0) call realloc(lossCoeff, lossCoeffCount, stat=istat)
-         if (istat .ne. 0) then
-            call SetMessage(LEVEL_FATAL, 'Reading Siphon: Error Allocating Valve Loss Arrays')
-         endif
-
-         call prop_get_doubles(md_ptr, 'structure', 'relativeOpening', relOpen, lossCoeffCount, success)
-         if (success) call prop_get_doubles(md_ptr, 'structure', 'lossCoefficient', lossCoeff, lossCoeffCount, success)
-         if (.not. success) return
-      
-      else
-         
-         has_valve = .false.
-         inivalveopen = 0.0d0
-         
-      endif
-
-      allocate(network%sts%struct(istru)%culvert)
-      culvert => network%sts%struct(istru)%culvert
-
-      culvert%pcross          => network%crs%cross(icross)
-      culvert%crosssectionnr  =  icross
-
-      culvert%leftlevel       =  leftlevel
-      culvert%rightlevel      =  rightlevel
-      culvert%allowedflowdir  =  allowedflowdir
-      culvert%length          =  length
-      culvert%inletlosscoeff  =  inletlosscoeff
-      culvert%outletlosscoeff =  outletlosscoeff
-      culvert%bendlosscoeff   =  bendlosscoeff
-      culvert%has_valve       =  has_valve
-      culvert%inivalveopen    =  inivalveopen
-      
-      if (has_valve) then
-         call setTable(culvert%lossCoeff, 0, relOpen, lossCoeff, lossCoeffCount)
-      endif
-
-      if (.not. isInvertedSiphon) then
-         
-         culvert%culvertType =  ST_SIPHON
-         
-         call prop_get_double(md_ptr, 'structure', 'turnonlevel', culvert%turnonlevel, success) 
-         if (success) call prop_get_double(md_ptr, 'structure', 'turnofflevel', culvert%turnofflevel, success)
-         if (.not. success) return
-         
-         culvert%is_siphon_on = .false.
-
-      else
-         culvert%culvertType =  ST_INV_SIPHON
-      endif
-      
-      ! Clear Valve Loss Arrays
-      istat = 0
-      if (allocated(relOpen)) deallocate(relOpen, stat=istat)
-      if (istat == 0 .and. allocated(lossCoeff)) deallocate(lossCoeff, stat=istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Reading Siphon: Error Deallocating Valve Loss Arrays')
-      endif
-         
-   end subroutine readSiphon
    
    subroutine readBridge(network, istru, md_ptr, isPillarBridge, success)
    
@@ -1173,7 +1044,6 @@ module m_readstructures
       integer                                      :: istat
       double precision, allocatable, dimension(:)  :: head   
       double precision, allocatable, dimension(:)  :: redfac   
-      character(CharLn) :: tmpstr
       
       
       allocate(pump)
@@ -1277,10 +1147,6 @@ module m_readstructures
       type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which structure forcing will be added if needed.
       logical,                      intent(inout) :: success     
       
-      integer                                     :: tabsize
-      integer                                     :: istat
-      double precision, allocatable, dimension(:) :: head   
-      double precision, allocatable, dimension(:) :: redfac   
       character(CharLn) :: tmpstr
       
       
@@ -1366,8 +1232,6 @@ module m_readstructures
       character(IdLen),                   intent(in   ) :: st_id       !< Structure character Id.
       type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
       
-      character(len=Idlen) :: dirstring
-
       success = .true.
       allocate(generalst)
 
@@ -1420,7 +1284,6 @@ module m_readstructures
       character(IdLen),                   intent(in   ) :: st_id       !< Structure character Id.
       type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
       
-      character(len=Idlen) :: dirstring
       double precision :: area
       allocate(generalst)
 
@@ -1535,6 +1398,25 @@ module m_readstructures
       end select
       
    end function  openingDirectionToInt
+   
+   integer function allowedFlowDirToInt(flowdirString)
+      character(len=*), intent(inout) :: flowdirString
+   
+      call str_lower(flowdirString)
+      select case(flowdirString)
+      case('both')
+         allowedFlowDirToInt = 0
+      case('positive')
+         allowedFlowDirToInt = 1
+      case('negative')
+         allowedFlowDirToInt = 2
+      case('none')
+         allowedFlowDirToInt = 3
+      case default
+         allowedFlowDirToInt = 0
+      end select
+      
+   end function  allowedFlowDirToInt
   
    !> Read the general structure parameters for version 1.00 files
    subroutine readGeneralStructure_v100(generalst, md_ptr, success)
@@ -1543,8 +1425,6 @@ module m_readstructures
       type(tree_data), pointer, intent(in)                 :: md_ptr        !< ini tree pointer with user input.
       logical, intent(inout)                               :: success 
       
-      logical                               :: success1, success2 
-
       allocate(generalst)
 
       allocate(generalst%fu(3,1), generalst%ru(3,1), generalst%au(3,1))

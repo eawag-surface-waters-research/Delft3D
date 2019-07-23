@@ -650,7 +650,7 @@ end subroutine
           end select
        case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
           if (iparam==CFiValveOpening) then
-             sts%struct(istru)%culvert%inivalveopen=value
+             sts%struct(istru)%culvert%valveOpening=value
           else
             SetValueStruc = .false.
           endif
@@ -827,7 +827,7 @@ end subroutine
       select case(trim(string))
       case ('pump')
          GetStrucType_from_string = ST_PUMP
-      case ('general_structure')
+      case ('generalstructure')
          GetStrucType_from_string = ST_GENERAL_ST
       case ('weir')
          GetStrucType_from_string = ST_WEIR
@@ -1008,7 +1008,7 @@ end subroutine
       
       select case(struc%type)
       case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
-         get_valve_opening = struc%culvert%inivalveopen
+         get_valve_opening = struc%culvert%valveOpening
       end select
    end function get_valve_opening
 
@@ -1132,7 +1132,7 @@ end subroutine
       
       select case(struc%type)
       case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
-         struc%culvert%inivalveopen=value
+         struc%culvert%valveOpening=value
       end select
    end subroutine set_valve_opening
    
@@ -1213,6 +1213,10 @@ end subroutine
          struct%generalst%ru = 0d0
          struct%generalst%au = 0d0
          call update_widths(struct%generalst, numlinks, links, wu)
+      case (ST_CULVERT)
+         if (numlinks > 1) then
+            call setmessage(LEVEL_ERROR, 'Multiple links for culvert structures is not supported, check structure'//trim(struct%id))
+         endif
       case default
          ! A reminder not to forget other structures that are added:
          call setMessage(LEVEL_ERROR, 'Internal error, this structure type is not (yet) implemented in initialize_structure')

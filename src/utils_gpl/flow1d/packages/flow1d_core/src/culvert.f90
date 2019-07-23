@@ -56,7 +56,7 @@ module m_Culvert
       double precision                :: inletlosscoeff
       double precision                :: outletlosscoeff
       logical                         :: has_valve
-      double precision                :: inivalveopen
+      double precision                :: valveOpening
       type(t_table), pointer          :: losscoeff => null()
       
       ! Bend Loss for Siphons
@@ -150,7 +150,7 @@ contains
       double precision               :: dummy
       double precision               :: dpt                 !< upstream water depth
       double precision               :: openingfac
-      double precision               :: inivalveopen
+      double precision               :: valveOpening
       double precision               :: chezyCulvert
       double precision               :: culvertChezy
       double precision               :: chezyValve
@@ -218,7 +218,7 @@ contains
       gl_thickness = getGroundLayer(CrossSection)
 
       ! Check on Valve
-      if (culvert%has_valve .and. ((culvert%inivalveopen - gl_thickness) < thresholdDry)) then
+      if (culvert%has_valve .and. ((culvert%valveOpening - gl_thickness) < thresholdDry)) then
          kfum  = 0
          fum   = 0.0d0
          rum   = 0.0d0
@@ -371,11 +371,11 @@ contains
       chezyCulvert = getchezy(CrossSection%frictionTypePos(1), CrossSection%frictionValuePos(1), warea/wPerimiter, dpt, 1d0)
                   
       ! Valve Loss
-      if (culvert%has_valve .and. (culvert%inivalveopen < dpt)) then
-         inivalveopen = culvert%inivalveopen
+      if (culvert%has_valve .and. (culvert%valveOpening < dpt)) then
+         valveOpening = culvert%valveOpening
          chezyValve = 0.0d0
-         call GetCSParsFlow(CrossSection, inivalveopen, valveArea, valvePerimiter, valveWidth)     
-         openingfac = (inivalveopen - gl_thickness) / (CrossSection%charHeight - gl_thickness)
+         call GetCSParsFlow(CrossSection, valveOpening, valveArea, valvePerimiter, valveWidth)     
+         openingfac = (valveOpening - gl_thickness) / (CrossSection%charHeight - gl_thickness)
       else
          openingfac = 2.0d0     ! >> 1, so not influenced by valve
       endif

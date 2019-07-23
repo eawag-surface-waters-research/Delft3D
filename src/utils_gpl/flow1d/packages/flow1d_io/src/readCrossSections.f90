@@ -1321,8 +1321,6 @@ module m_readCrossSections
          write(ibin) pcross%charWidth
          write(ibin) pcross%shift
          
-         write(ibin) pcross%bedFrictionType
-         write(ibin) pcross%bedFriction
          write(ibin) pcross%groundFrictionType
          write(ibin) pcross%groundFriction
          
@@ -1388,8 +1386,6 @@ module m_readCrossSections
          read(ibin) pcross%charWidth
          read(ibin) pcross%shift
          
-         read(ibin) pcross%bedFrictionType
-         read(ibin) pcross%bedFriction
          read(ibin) pcross%groundFrictionType
          read(ibin) pcross%groundFriction
          
@@ -1633,8 +1629,6 @@ module m_readCrossSections
          write(dmpUnit, *) pcross%shift
          
          write(dmpUnit, *) '################### FRICTION ######################'
-         write(dmpUnit, *) pcross%bedFrictionType
-         write(dmpUnit, *) pcross%bedFriction
          write(dmpUnit, *) pcross%groundFrictionType
          write(dmpUnit, *) pcross%groundFriction
          

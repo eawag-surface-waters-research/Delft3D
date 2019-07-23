@@ -260,7 +260,7 @@
     write(msgbuf,*) 'setting fortranculvert%valve_onoff to', c_culvert%valve_inuse
     call mess(LEVEL_DEBUG, msgbuf)
     fortranculvert%has_valve = c_culvert%valve_inuse
-    write(msgbuf,*) 'setting fortranculvert%inivalveopen to', c_culvert%valve_opening
+    write(msgbuf,*) 'setting fortranculvert%valveOpening to', c_culvert%valve_opening
     call mess(LEVEL_DEBUG, msgbuf)
-    fortranculvert%inivalveopen = c_culvert%valve_opening
+    fortranculvert%valveOpening = c_culvert%valve_opening
   end subroutine set_culvert_by_id

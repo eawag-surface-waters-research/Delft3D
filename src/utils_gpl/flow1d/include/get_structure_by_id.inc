@@ -164,6 +164,6 @@
     c_culvert%crosssection_id = fortranculvert%crosssectionnr
     c_culvert%length = fortranculvert%length
     c_culvert%valve_inuse = fortranculvert%has_valve
-    c_culvert%valve_opening = fortranculvert%inivalveopen
+    c_culvert%valve_opening = fortranculvert%valveOpening
 
   end subroutine get_culvert_by_id
