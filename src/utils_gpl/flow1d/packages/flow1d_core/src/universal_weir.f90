@@ -41,13 +41,18 @@ module m_Universal_Weir
    public ComputeUniversalWeir
 
    type, public :: t_uni_weir
-      integer                                      :: yzcount
-      double precision, allocatable, dimension(:)  :: y
-      double precision, allocatable, dimension(:)  :: z
-      double precision                             :: crestlevel
-      double precision                             :: dischargecoeff
-      integer                                      :: allowedflowdir
-      double precision                             :: freesubmergedfactor
+      integer                                      :: yzcount                 !< Number of yz combinations for this structure
+      double precision, allocatable, dimension(:)  :: y                       !< Y-coordinates of the profile
+      double precision, allocatable, dimension(:)  :: z                       !< Z-coordinates of the profile, with respect to the crestlevel. 
+                                                                              !< The lowest value of Z is equal to 0
+      double precision                             :: crestlevel              !< Crest level
+      double precision                             :: dischargecoeff          !< Discharge loss coefficient
+      integer                                      :: allowedflowdir          !< allowed flow direction
+                                                                              !< 0 all directions
+                                                                              !< 1 only positive flow
+                                                                              !< 2 only negative flow
+                                                                              !< 3 no flow allowed
+      double precision                             :: freesubmergedfactor     !< factor to distinguish between free flow and submerged flow
    end type
 
    interface dealloc
@@ -58,6 +63,7 @@ module m_Universal_Weir
 
    contains
  
+   !> Deallocate the universal weir object
    subroutine deallocUniWeir(uniweir)
       ! Modules
 
@@ -79,56 +85,27 @@ module m_Universal_Weir
       
    end subroutine deallocUniWeir
    
+   !> Compute the coefficients FU, RU and AU for this universal weir
    subroutine ComputeUniversalWeir(uniweir, fum, rum, aum, dadsm, kfum, s1m1, s1m2, &
-                                   qm, q0m, u1m, u0m, dxm, dt, infuru)
-      !!--description-----------------------------------------------------------------
-      ! NONE
-      !!--pseudo code and references--------------------------------------------------
-      ! NONE
-      !!--declarations----------------------------------------------------------------
-      !=======================================================================
-      !                       Deltares
-      !                One-Two Dimensional Modelling System
-      !                           S O B E K
-      !
-      ! Subsystem:          Flow Module
-      !
-      ! Programmer:         P.J. van Overloop
-      !
-      ! Module:             weiruni (WEIR UNIversal)
-      !
-      ! Module description: coefficients for momentum equation in wet weir
-      !                     universal point
-      !
-      !
-      !     update information
-      !     person                    date
-      !
-      !
-      ! coefficients for momentum equation in wet weir point
-      !
-      !     Include Pluvius data space
-      !
-
+                                   qm, q0m, u1m, u0m, dxm, dt)
       implicit none
       !
       ! Global variables
       !
-      type(t_uni_weir), pointer, intent(in)          :: uniweir
-      integer, intent(out)                           :: kfum
-      double precision, intent(out)                  :: aum
-      double precision, intent(out)                  :: dadsm
-      double precision, intent(out)                  :: fum
-      double precision, intent(inout)                :: q0m
-      double precision, intent(out)                  :: qm
-      double precision, intent(out)                  :: rum
-      double precision, intent(in)                   :: u0m
-      double precision, intent(inout)                :: u1m
-      double precision, intent(in)                   :: s1m2
-      double precision, intent(in)                   :: s1m1
-      double precision, intent(in)                   :: dxm
-      double precision, intent(in)                   :: dt
-      logical, intent(in)                            :: infuru
+      type(t_uni_weir), pointer, intent(in)          :: uniweir  !< Universal weir object
+      integer, intent(out)                           :: kfum     !< Flag for drying and flooding
+      double precision, intent(out)                  :: aum      !< Flow area of structure
+      double precision, intent(out)                  :: dadsm    !< Width of structure
+      double precision, intent(out)                  :: fum      !< FU
+      double precision, intent(inout)                :: q0m      !< Discharge
+      double precision, intent(out)                  :: qm       !< Discharge
+      double precision, intent(out)                  :: rum      !< RU
+      double precision, intent(in)                   :: u0m      !< Flow velocity at previous time step
+      double precision, intent(inout)                :: u1m      !< Flow velocity
+      double precision, intent(in)                   :: s1m2     !< Water level at left side of universal weir
+      double precision, intent(in)                   :: s1m1     !< Water level at right side of universal weir
+      double precision, intent(in)                   :: dxm      !< Length of flow link
+      double precision, intent(in)                   :: dt       !< time step in seconds
       !
       !
       ! Local variables
@@ -187,10 +164,8 @@ module m_Universal_Weir
       else
       endif
       if (kfum == 0) then
-         if (infuru) then
-            fum = 0.0
-            rum = 0.0
-         endif
+         fum = 0.0
+         rum = 0.0
          !        same as weir
          u1m = 0.0
          qm = 0.0
@@ -212,61 +187,43 @@ module m_Universal_Weir
       aum = wetaavg
       dadsm = dwddavg
       !
-      if (infuru) then
-         !
-         !        The subroutine linearizeweiruni is called again twice with a
-         !        small incremental on the water levels to compute the
-         !        derivatives dQ/dh1 and dQ/dh2
-         !
-         sinc = 1.0d-4
-         smax1 = smax + sinc
-         call linearizeweiruni(uniweir, switchfactor, smax1, smin, cmus, wetaavg, dwddavg, qflowmax)
-         smin1 = smin - sinc
-         call linearizeweiruni(uniweir, switchfactor, smax, smin1, cmus, wetaavg, dwddavg, qflowmin)
-         if (dir==1) then
-            dqdh1 = (qflowmax - qflow)/(sinc)
-            dqdh2 = (qflowmin - qflow)/(-sinc)
-         else
-            dqdh1 = -(qflowmin - qflow)/(-sinc)
-            dqdh2 = -(qflowmax - qflow)/(sinc)
-            qflow = -qflow
-         endif
-         !
-         call uniweir_furu(s1m1, s1m2, qflow, dqdh1, dqdh2, dxm, dt, aum, fum, rum, u1m, u0m, q0m, qm)
       !
+      !        The subroutine linearizeweiruni is called again twice with a
+      !        small incremental on the water levels to compute the
+      !        derivatives dQ/dh1 and dQ/dh2
+      !
+      sinc = 1.0d-4
+      smax1 = smax + sinc
+      call linearizeweiruni(uniweir, switchfactor, smax1, smin, cmus, wetaavg, dwddavg, qflowmax)
+      smin1 = smin - sinc
+      call linearizeweiruni(uniweir, switchfactor, smax, smin1, cmus, wetaavg, dwddavg, qflowmin)
+      if (dir==1) then
+         dqdh1 = (qflowmax - qflow)/(sinc)
+         dqdh2 = (qflowmin - qflow)/(-sinc)
+      else
+         dqdh1 = -(qflowmin - qflow)/(-sinc)
+         dqdh2 = -(qflowmax - qflow)/(sinc)
+         qflow = -qflow
       endif
-                          
+      !
+      call uniweir_furu(s1m1, s1m2, qflow, dqdh1, dqdh2, dxm, dt, aum, fum, rum, u1m, u0m, q0m, qm)
                           
    end subroutine ComputeUniversalWeir
 
+   !> Compute the discharge over the weir, using the current water level s1 (which
    subroutine linearizeweiruni(uniweir, switchfactor, smax, smin, cmus, wetaavg, dwddavg, qflow)
-      !
-      !=======================================================================
-      !                       Deltares
-      !                One-Two Dimensional Modelling System
-      !                           S O B E K
-      !
-      ! Subsystem:          Flow Module
-      !
-      ! Programmer:         P.J. van Overloop
-      !
-      ! Module:             linearizeweiruni (LINEARIZE WEIR UNIversal)
-      !
-      ! Module description: The discharge Q and the partial derivatives dQ/dh1
-      !                     and dQ/dh2 are computed with numerical derivative
-
       implicit none
       !
       ! Global variables
       !
-      type(t_uni_weir), pointer, intent(in)          :: uniweir
-      double precision                               :: cmus
-      double precision                               :: dwddavg
-      double precision                               :: qflow
-      double precision, intent(in)                   :: smax
-      double precision, intent(in)                   :: smin
-      double precision, intent(in)                   :: switchfactor
-      double precision                               :: wetaavg
+      type(t_uni_weir), pointer, intent(in   )    :: uniweir       !< Universal weir object
+      double precision         , intent(  out)    :: cmus          !< Mu (loss coefficient)
+      double precision         , intent(  out)    :: dwddavg       !< Flow width
+      double precision         , intent(  out)    :: qflow         !< Computed discharge over the structure
+      double precision         , intent(in   )    :: smax          !< Upstream waterlevel
+      double precision         , intent(in   )    :: smin          !< Downstream waterlevel
+      double precision         , intent(in   )    :: switchfactor  !< Drowning factor
+      double precision         , intent(  out)    :: wetaavg       !< Flow area
       !
       !
       ! Local variables
@@ -380,6 +337,7 @@ module m_Universal_Weir
        
    end subroutine linearizeweiruni
 
+   !> Calculate FU and RU
    subroutine uniweir_furu(s1m1, s1m2, qstru, qdh1, qdh2, dxm, dt, aum, fum, rum, u1m, u0m, q0m, qm)
    
       use  m_struc_helper
@@ -392,20 +350,20 @@ module m_Universal_Weir
       !
       ! Global variables
       !
-      double precision, intent(in)    :: s1m1
-      double precision, intent(in)    :: s1m2
-      double precision, intent(in)    :: qdh1
-      double precision, intent(in)    :: qdh2
-      double precision, intent(in)    :: qstru
-      double precision, intent(in)    :: dxm
-      double precision, intent(in)    :: dt
-      double precision, intent(in)    :: aum
-      double precision, intent(inout) :: fum
-      double precision, intent(inout) :: rum
-      double precision, intent(inout) :: u1m
-      double precision, intent(in)    :: u0m
-      double precision, intent(in)    :: q0m
-      double precision, intent(out)   :: qm
+      double precision, intent(in   ) :: s1m1     !< Waterlevel at left side of the weir
+      double precision, intent(in   ) :: s1m2     !< Waterlevel at right side of the weir
+      double precision, intent(in   ) :: qdh1     !< (dQ/dh1) determined for approximation function
+      double precision, intent(in   ) :: qdh2     !< (dQ/dh2) determined for approximation function
+      double precision, intent(in   ) :: qstru    !< Resulting Q value for given h1 and h2
+      double precision, intent(in   ) :: dxm      !< Delta X
+      double precision, intent(in   ) :: dt       !< Time step
+      double precision, intent(in   ) :: aum      !< Flow area at link
+      double precision, intent(inout) :: fum      !< FU at link
+      double precision, intent(inout) :: rum      !< RU at link
+      double precision, intent(inout) :: u1m      !< Flow velocity at current time step
+      double precision, intent(in   ) :: u0m      !< Flow velocity at previous time step
+      double precision, intent(in   ) :: q0m      !< Discharge
+      double precision, intent(  out) :: qm       !< Discharge
       !
       !
       ! Local variables
@@ -419,38 +377,6 @@ module m_Universal_Weir
       !
       !
       !! executable statements -------------------------------------------------------
-      !
-      !
-      !=======================================================================
-      !                      Deltares
-      !                One-Two Dimensional Modelling System
-      !                           S O B E K
-      !
-      ! Subsystem:          Flow Module
-      !
-      ! Programmer:         J.Kuipers
-      !
-      ! Module:             FLTSFURU (FLow Tabulated Structure, calculate FU and RU)
-      !
-      ! Module description: The linearization coefficients FU and RU are
-      !                     calculated for the tabulated structure
-      !
-      !
-      ! Parameters:
-      ! NR NAME            IO DESCRIPTION
-      !  1 formno           I  Flow condition of general structure:
-      !                         0 : closed or dry
-      !                         1 : open
-      !  3 h1               I  water level at the left  of the structure
-      !  4 h2               I  water level at the right of the structure
-      !  2 m                I  Grid index of structure
-      !  6 qdh1             I  (dQ/dh1) determined for approximation function
-      !  7 qdh2             I  (dQ/dh2) determined for approximation function
-      !  5 qstru            I  resulting Q value for given h1 and h2
-      !=======================================================================
-      !     Include Pluvius data space
-      !     Declaration of parameters:
-      !     Declaration of local variables:
       !
 
       dxdt = dxm / dt
@@ -468,37 +394,17 @@ module m_Universal_Weir
       
    end subroutine uniweir_furu
 
+   !> Computes wet area and width for given segment of cross section
    subroutine wetdimuni(dpt, warea, dwdd, uniweir, isect)
-   
-      !=======================================================================
-      !                       Deltares
-      !                One-Two Dimensional Modelling System
-      !                           S O B E K
-      !
-      ! Subsystem:          Flow Module
-      !
-      ! Programmer:         J.J. Noort
-      !
-      ! Module:             WETDIMUNI (computes wet area and width for given segment of 
-      !                                cross section)
-      !
-      ! Module description: The wetted area, and width of a tabulated yz profile
-      !     is computed 
-      !
-      !
-      !     update information
-      !     person                    date
-      !
-      !
       implicit none
       !
       ! Global variables
       !
-      type(t_uni_weir), pointer      :: uniweir
-      integer, intent(in)            :: isect
-      double precision, intent(in)   :: dpt
-      double precision, intent(out)  :: warea
-      double precision, intent(out)  :: dwdd
+      type(t_uni_weir), pointer        :: uniweir   !< Universal weir object
+      integer         , intent(in   )  :: isect     !< Section number of the yz-profile (between (y(isect) and y(isect
+      double precision, intent(in   )  :: dpt       !< Water depth above crest. (lowest part of the weir's crest)
+      double precision, intent(  out)  :: warea     !< Wet area of isect
+      double precision, intent(  out)  :: dwdd      !< Width of isect
       !
       !
       ! Local variables

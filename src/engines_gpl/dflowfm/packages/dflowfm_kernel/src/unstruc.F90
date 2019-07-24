@@ -33934,7 +33934,7 @@ end subroutine setbobs_fixedweirs
                        q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, network%sts%struct(istru)%state, .true.)
                 case (ST_UNI_WEIR)
                    call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, .true.)
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts)
                 case (ST_BRIDGE)
                    ! TODO: implement this?!
                 continue

@@ -742,11 +742,12 @@ module m_readstructures
 
    end subroutine readWeir
    
+   !> Read specific data for the universal weir structrue
    subroutine readUniversalWeir(uniweir, md_ptr, success)
    
-      type(t_uni_weir), pointer, intent(inout)     :: uniweir
-      type(tree_data), pointer, intent(in)         :: md_ptr
-      logical, intent(inout)                       :: success
+      type(t_uni_weir), pointer, intent(inout)     :: uniweir    !< universal weir opject
+      type(tree_data), pointer, intent(in)         :: md_ptr     !< ini tree pointer with user input.
+      logical, intent(inout)                       :: success    !< indicates whether the reading was succesful
       
       integer                                      :: istat
       integer                                      :: i
@@ -776,6 +777,8 @@ module m_readstructures
       if (success) call prop_get_doubles(md_ptr, '', 'zValues', uniweir%z, uniweir%yzcount, success)
       if (.not. success) return
       
+      ! The z-values contains a relative height with respect to the crest level
+      ! As a result the minimal value for Z is 0.
       lowestz = huge(1d0)
       do i = 1, uniweir%yzcount
          lowestz = min(lowestz, uniweir%z(i))
