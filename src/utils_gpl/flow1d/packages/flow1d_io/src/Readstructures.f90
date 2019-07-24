@@ -489,13 +489,6 @@ module m_readstructures
                    call read_table_cache(ibin, pstr%culvert%losscoeff)
                endif
             
-               ! Bend Loss for Siphons
-               read(ibin) pstr%culvert%bendlosscoeff
-            
-               ! Levels for Normal Siphon
-               read(ibin) pstr%culvert%turnonlevel
-               read(ibin) pstr%culvert%turnofflevel
-               
             case(ST_UNI_WEIR)
                allocate(pstr%uniweir)
                read(ibin) pstr%uniweir%allowedflowdir
@@ -659,13 +652,6 @@ module m_readstructures
                   call write_table_cache(ibin, pstr%culvert%losscoeff)
                endif
       
-               ! Bend Loss for Siphons
-               write(ibin) pstr%culvert%bendlosscoeff
-
-               ! Levels for Normal Siphon
-               write(ibin) pstr%culvert%turnonlevel
-               write(ibin) pstr%culvert%turnofflevel
-               
             case(ST_UNI_WEIR)
                write(ibin) pstr%uniweir%allowedflowdir
                write(ibin) pstr%uniweir%crestlevel
