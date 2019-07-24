@@ -27,7 +27,7 @@ namespace UGrid.tests
 
 
         //network name
-        private string networkName = "network";
+        private string networkName = "network1d";
 
         //dimension info
         private int numNetworkNodes = 4;
