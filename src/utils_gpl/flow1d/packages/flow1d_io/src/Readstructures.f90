@@ -320,7 +320,9 @@ module m_readstructures
             nweir = nweir+1
             network%sts%weirIndices(nweir) = istru
             ! From now on this is a general structure
-            network%sts%struct(istru)%type = ST_GENERAL_ST
+            if (major/=1) then
+              network%sts%struct(istru)%type = ST_GENERAL_ST
+            endif
          case (ST_CULVERT)
             nculvert = nculvert + 1
             network%sts%culvertIndices(nculvert) = istru
@@ -328,12 +330,16 @@ module m_readstructures
             norifice = norifice + 1
             network%sts%orificeIndices(norifice) = istru
             ! From now on this is a general structure
-            network%sts%struct(istru)%type = ST_GENERAL_ST
+            if (major/=1) then
+               network%sts%struct(istru)%type = ST_GENERAL_ST
+            endif
          case (ST_GATE)
             ngate = ngate + 1
             network%sts%gateIndices(ngate) = istru
             ! From now on this is a general structure
-            network%sts%struct(istru)%type = ST_GENERAL_ST
+            if (major/=1) then
+               network%sts%struct(istru)%type = ST_GENERAL_ST
+            endif
          case (ST_BRIDGE)
             nbridge = nbridge + 1
             network%sts%bridgeIndices(nbridge) = istru
