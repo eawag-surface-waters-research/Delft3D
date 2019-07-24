@@ -1328,7 +1328,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       if (add_face_edge_connectivity) then
          ierr = nf90_def_var(ncid, prefix//'_face_edges', nf90_int, (/ meshids%dimids(mdim_maxfacenodes), meshids%dimids(mdim_face) /) , meshids%varids(mid_faceedges))
          ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'cf_role',     'face_edge_connectivity')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'long_name',   'Side edges of mesh faces (in counterclockwise order)')
+         ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'long_name',   'Side edges of mesh faces (counterclockwise)')
          if (start_index.ne.-1) then
             ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'start_index', start_index)
          endif
