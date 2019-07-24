@@ -23682,7 +23682,7 @@ endif
  integer          :: jazws0
 
  integer          :: k2, kb, k, n, kk, nL, nR, nlayb, nlayt, nrlay, ktx, kL, ndz, i
- integer          :: ktmn, ktmx, kt0, kt1, kt2, kt3, LL, L, Lb, Lt, n1,n2, kb1,kb2,ki,kt, kkk, Ltn, Ldn
+ integer          :: ktmn, ktmx, kt0, kt1, kt2, kt3, LL, L, Lb, Lt, n1,n2, kb1,kb2,ki,kt, kkk, kwaq, Ltn, Ldn
  double precision :: zkk, h0, zks, zkz, sigm, hdz, toplaymint, volkt, savolkt, tevolkt, dtopsi
  double precision :: w1, w2, w3, h1, h2, h3, dz1, dz2, dz3, zw1, zw2, zw3, bL1, bL2, bL3, ht1, ht2, ht3
  integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3, numtopsig2
@@ -23993,6 +23993,11 @@ endif
            vol0(kt)  = volkt
            if (jasal > 0) savolkt   = savolkt  + vol0(kkk)*sa1(kkk)
            if (jatem > 0) tevolkt   = tevolkt  + vol0(kkk)*constituents(itemp, kkk)
+           if (ti_waq > 0) then
+              do kwaq = kkk, kt + 1, -1
+                 qwwaq(kwaq-1) = qwwaq(kwaq-1) - vol0(kkk)
+              enddo
+           endif 
            vol0(kkk) = 0d0
         enddo
         if (volkt > 0) then
@@ -35189,7 +35194,7 @@ end function ispumpon
 
  implicit none
 
- integer          :: L, k1, k2, LL, k, n, nn, km, n1, n2, Ld, kb, kt, ks, Lb, Lt, kmxLL, ng
+ integer          :: L, k1, k2, k01, k02, LL, k, n, nn, km, n1, n2, Ld, kb, kt, ks, Lb, Lt, kmxLL, ng
  double precision :: qt, zws0k
  double precision :: accur = 1e-30, wb, ac1, ac2, dsL, sqiuh, qwb, qsigma
  double precision :: qwave
@@ -35420,6 +35425,24 @@ end function ispumpon
              endif
              if (ti_waq > 0d0) then
                 q1waq(L) = q1waq(L) + q1(L)*dts
+                if (layertype.ne.LAYTP_SIGMA) then
+!                  check for differences with original linkage in cases other than sigma models
+                   k01 = ln0(1,L) ; k02 = ln0(2,L)
+                   if (k01.ne.k1.or.k02.ne.k2) then
+                      if (k01.ne.k1) then
+!                        diferences in from node, positive extra discharges in the vertical
+                         do k=k1,k01-1
+                             qwwaq(k) = qwwaq(k) + q1(L)*dts
+                         enddo
+                      endif
+                      if (k02.ne.k2) then
+!                        diferences in to node, negative extra discharges in the vertical
+                         do k=k2,k02-1
+                             qwwaq(k) = qwwaq(k) - q1(L)*dts
+                         enddo
+                      endif
+                   end if
+                end if
              endif
           else
              q1(L)  = 0d0
