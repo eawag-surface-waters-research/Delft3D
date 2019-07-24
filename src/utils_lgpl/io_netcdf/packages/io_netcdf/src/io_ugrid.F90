@@ -3682,16 +3682,16 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
     
    !Dimensions
    ierr  = nf90_def_dim(ncid, prefix//'_nEdges'         , nBranches, netids%dimids(ntdim_1dedges))
-   ierr  = nf90_def_dim(ncid, 'n'//prefix//'_node'      , nNodes,    netids%dimids(ntdim_1dnodes))
-   ierr  = nf90_def_dim(ncid, 'n'//prefix//'_geometry'  , nGeometry, netids%dimids(ntdim_1dgeopoints))
+   ierr  = nf90_def_dim(ncid, prefix//'_nNodes'         , nNodes,    netids%dimids(ntdim_1dnodes))
+   ierr  = nf90_def_dim(ncid, prefix//'_nGeometryNodes' , nGeometry, netids%dimids(ntdim_1dgeopoints))
    !These dimensions might already be defined, check first if they are present 
-   ierr = nf90_inq_dimid(ncid, 'idstrlength', netids%dimids(ntdim_idstring))
+   ierr = nf90_inq_dimid(ncid, 'strLengthIds', netids%dimids(ntdim_idstring))
    if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'idstrlength', ug_idsLen,  netids%dimids(ntdim_idstring))   
+   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen,  netids%dimids(ntdim_idstring))   
    endif
-   ierr = nf90_inq_dimid(ncid, 'longstrlength', netids%dimids(ntdim_longnamestring))
+   ierr = nf90_inq_dimid(ncid, 'strLengthLongNames', netids%dimids(ntdim_longnamestring))
    if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'longstrlength', ug_idsLongNamesLen,  netids%dimids(ntdim_longnamestring))   
+   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen,  netids%dimids(ntdim_longnamestring))   
    endif
    
    ! Dimension 2 might already be present
@@ -3708,7 +3708,7 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_geometry', prefix//'_geometry')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_coordinates', prefix//'_node_x '//prefix//'_node_y')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_dimension', 'n'//prefix//'_node')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_dimension', prefix//'_nNodes')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'topology_dimension', 1)
    !nodes attributes
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_ids', prefix//'_node_ids')
@@ -3721,38 +3721,39 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    !2. Branch: the start and the end nodes of each branch
    ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ netids%dimids(ntdim_two), netids%dimids(ntdim_1dedges) /), netids%varids(ntid_1dedgenodes))
    ierr = nf90_put_att(ncid,  netids%varids(ntid_1dedgenodes), 'cf_role', 'edge_node_connectivity')
-   ierr = nf90_put_att(ncid,  netids%varids(ntid_1dedgenodes), 'long_name', 'start and end nodes of each branch in the network')
+   ierr = nf90_put_att(ncid,  netids%varids(ntid_1dedgenodes), 'long_name', 'Start and end nodes of network edges')
    !2. Branch: the branch ids
    ierr = nf90_def_var(ncid, prefix//'_branch_ids', nf90_char, (/ netids%dimids(ntdim_idstring), netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchids))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchids), 'long_name', 'ids of the branches')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchids), 'long_name', 'ID of branch geometries')
    !2. Branch: the long names of the branches
    ierr = nf90_def_var(ncid, prefix//'_branch_long_names', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchlongnames))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlongnames), 'long_name', 'the branches long names')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlongnames), 'long_name', 'Long name of branch geometries')
    !2. Branch: the branch lengths
    ierr = nf90_def_var(ncid, prefix//'_edge_length', nf90_double, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchlengths))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlengths), 'long_name', 'the branch lengths')
- 
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlengths), 'long_name', 'Real length of branch geometries')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlengths), 'unit', 'm')
+
    !3. Nodes: the ids of the nodes
    ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ netids%dimids(ntdim_idstring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodids))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodids), 'long_name', 'ids of the network connection nodes')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodids), 'long_name', 'ID of network nodes')
    !3. Nodes: the long names of the nodes
    ierr = nf90_def_var(ncid, prefix//'_nodes_long_names', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodlongnames))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodlongnames), 'long_name', 'long names of the network connection nodes')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodlongnames), 'long_name', 'Long name of network nodes')
    !3. Nodes: x+y coord
    ierr = nf90_def_var(ncid, prefix//'_node_x', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodex))
    ierr = nf90_def_var(ncid, prefix//'_node_y', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodey))
    ierr = ug_addcoordatts(ncid, netids%varids(ntid_1dnodex), netids%varids(ntid_1dnodey), crs)
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodex), 'long_name', 'x coordinates of the network connection nodes')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'long_name', 'y coordinates of the network connection nodes')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodex), 'long_name', 'x coordinates of network nodes')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'long_name', 'y coordinates of network nodes')
 
    !4. Geometry
    ierr = nf90_def_var(ncid, prefix//'_geometry', nf90_int, netids%varids(ntid_1dgeometry))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'geometry_type', 'line')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'node_count', prefix//'_node_count')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'node_count', prefix//'_geom_node_count')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'node_coordinates', prefix//'_geom_x '//prefix//'_geom_y')
    !4. Geometry: number of geometry points per each branch
-   ierr = nf90_def_var(ncid, prefix//'_node_count', nf90_int, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dgeopointsperbranch))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeopointsperbranch), 'long_name', 'number of geometry nodes per branch')
+   ierr = nf90_def_var(ncid, prefix//'_geom_node_count', nf90_int, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dgeopointsperbranch))
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeopointsperbranch), 'long_name', 'Number of geometry nodes per branch')
    !4. Geometry points x coordinates
    !4. Geometry points y coordinates
    ierr = nf90_def_var(ncid, prefix//'_geom_x', nf90_double, (/ netids%dimids(ntdim_1dgeopoints) /) , netids%varids(ntid_1dgeox))
@@ -3763,6 +3764,7 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    
    !5 Branch order : might be temporary, could be defined, written and retrived using ug_def_var, ug_put_var, ug_get_var
    ierr = nf90_def_var(ncid, prefix//'_branch_order', nf90_int, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchorder))
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'long_name', 'Order of branches for interpolation')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'mesh', prefix)
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'location', 'edge')
 
@@ -3838,11 +3840,10 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    if ( ierr /= UG_NOERR) then 
    ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))   
    endif
-   ierr = nf90_inq_dimid(ncid, 'n'//prefix//'_node', meshids%dimids(mdim_node))
+   ierr = nf90_inq_dimid(ncid, prefix//'_nNodes', meshids%dimids(mdim_node))
    if ( ierr /= UG_NOERR) then 
-         ierr  = nf90_def_dim(ncid, 'n'//prefix//'_node', nmeshpoints, meshids%dimids(mdim_node))
+         ierr  = nf90_def_dim(ncid, prefix//'_nNodes', nmeshpoints, meshids%dimids(mdim_node))
    endif
-   ierr = nf90_inq_dimid(ncid, 'n'//prefix//'_edge', meshids%dimids(mdim_edge))  ! UNST-2755: Backwards compatibility.
    ierr = nf90_inq_dimid(ncid, prefix//'_nEdges',    meshids%dimids(mdim_edge))  
    
    !define mesh1d accordingly to the UGRID format
@@ -3851,7 +3852,7 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'topology_dimension', 1)
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space',  trim(networkname))
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
-   ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension','n'//prefix//'_node')
+   ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension',prefix//'_nNodes')
    if (writexy == 1) then
        ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_node_branch '//prefix//'_node_offset '//prefix//'_node_x '//prefix//'_node_y')
        ! TODO: UNST-2763: do we need to add edge coordinates here as well for writing? Same below.
@@ -3901,13 +3902,13 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
       wasInDefine = 1 ! Was still in define mode.
    endif  
 
-   ierr = nf90_inq_dimid(ncid, 'idstrlength', meshids%dimids(mdim_idstring))
+   ierr = nf90_inq_dimid(ncid, 'strLengthIds', meshids%dimids(mdim_idstring))
    if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'idstrlength', ug_idsLen, meshids%dimids(mdim_idstring))   
+   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen, meshids%dimids(mdim_idstring))   
    endif
-   ierr = nf90_inq_dimid(ncid, 'longstrlength', meshids%dimids(mdim_longnamestring))
+   ierr = nf90_inq_dimid(ncid, 'strLengthLongNames', meshids%dimids(mdim_longnamestring))
    if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'longstrlength', ug_idsLongNamesLen, meshids%dimids(mdim_longnamestring))   
+   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen, meshids%dimids(mdim_longnamestring))   
    endif
 
    if(locationType == UG_LOC_NODE ) then
@@ -3974,13 +3975,13 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    !define dim
    ierr  = nf90_def_dim(ncid, 'n'//prefix//'_connections'       ,ncontacts ,contactids%dimids(cdim_ncontacts))
    !These dimensions might already be defined, check first if they are present 
-   ierr = nf90_inq_dimid(ncid, 'idstrlength', contactids%dimids(cdim_idstring))
+   ierr = nf90_inq_dimid(ncid, 'strLengthIds', contactids%dimids(cdim_idstring))
    if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'idstrlength', ug_idsLen, contactids%dimids(cdim_idstring))   
+   ierr = nf90_def_dim(ncid, 'strLengthIds', ug_idsLen, contactids%dimids(cdim_idstring))   
    endif
-   ierr = nf90_inq_dimid(ncid, 'longstrlength', contactids%dimids(cdim_longnamestring))
+   ierr = nf90_inq_dimid(ncid, 'strLengthLongNames', contactids%dimids(cdim_longnamestring))
    if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'longstrlength', ug_idsLongNamesLen, contactids%dimids(cdim_longnamestring))   
+   ierr = nf90_def_dim(ncid, 'strLengthLongNames', ug_idsLongNamesLen, contactids%dimids(cdim_longnamestring))   
    endif
    ierr = nf90_inq_dimid(ncid, 'Two', contactids%dimids(cdim_two))
    if ( ierr /= UG_NOERR) then 
