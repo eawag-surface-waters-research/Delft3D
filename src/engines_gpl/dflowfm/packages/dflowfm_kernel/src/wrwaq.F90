@@ -1941,7 +1941,7 @@ subroutine waq_make_aggr_lnk()
     implicit none
     
     integer :: dseg, dbnd, isrc
-    integer :: L, LL, Lb, Ltx, ip, ip1, ip2, ip3, ip4, iq
+    integer :: L, LL, Lb, Lbb, Ltx, ip, ip1, ip2, ip3, ip4, iq
     integer :: k, kk, kb, kt, ktx
     
 ! first 2D
@@ -2002,25 +2002,36 @@ subroutine waq_make_aggr_lnk()
 ! In 3D copy aggregated 2D exchanges to all layers
         do L=1,lnx
             call getLbotLtopmax(L,Lb,Ltx)
+            ip = waqpar%iqaggr(L)
+            if (ip.eq.0) cycle
             do LL = Ltx, Lb, -1
-                ip = waqpar%iqaggr(L)
-                if (ip == 0) then
-                    waqpar%iqaggr(LL) = 0
-                else
-                    waqpar%iqaggr(LL) = ip + sign((waqpar%ilaggr(Ltx - LL + 1) - 1) * waqpar%noq12,ip)
-                    iq = abs(waqpar%iqaggr(LL))
-                    dseg = (waqpar%ilaggr(Ltx - LL + 1) - 1) * waqpar%nosegl
-                    dbnd = (waqpar%ilaggr(Ltx - LL + 1) - 1) * (ndx - ndxi + waqpar%numsrcbnd)  ! current number of external links in FM, account for sinks sources here too!
-                    if (waqpar%ifrmto(1,iq) == 0) then
-                        if (waqpar%ifrmto(1,ip) > 0) waqpar%ifrmto(1,iq) = waqpar%ifrmto(1,ip) + dseg
-                        if (waqpar%ifrmto(1,ip) < 0) waqpar%ifrmto(1,iq) = waqpar%ifrmto(1,ip) - dbnd
-                        if (waqpar%ifrmto(2,ip) > 0) waqpar%ifrmto(2,iq) = waqpar%ifrmto(2,ip) + dseg
-                        if (waqpar%ifrmto(2,ip) < 0) waqpar%ifrmto(2,iq) = waqpar%ifrmto(2,ip) - dbnd
-                        if (waqpar%ifrmto(3,ip) > 0) waqpar%ifrmto(3,iq) = waqpar%ifrmto(3,ip) + dseg
-                        if (waqpar%ifrmto(4,ip) > 0) waqpar%ifrmto(4,iq) = waqpar%ifrmto(4,ip) + dseg
-                    end if
+                waqpar%iqaggr(LL) = ip + sign((waqpar%ilaggr(Ltx - LL + 1) - 1) * waqpar%noq12,ip)
+                iq = abs(waqpar%iqaggr(LL))
+                dseg = (waqpar%ilaggr(Ltx - LL + 1) - 1) * waqpar%nosegl
+                dbnd = (waqpar%ilaggr(Ltx - LL + 1) - 1) * (ndx - ndxi + waqpar%numsrcbnd)  ! current number of external links in FM, account for sinks sources here too!
+                if (waqpar%ifrmto(1,iq) == 0) then
+                    if (waqpar%ifrmto(1,ip) > 0) waqpar%ifrmto(1,iq) = waqpar%ifrmto(1,ip) + dseg
+                    if (waqpar%ifrmto(1,ip) < 0) waqpar%ifrmto(1,iq) = waqpar%ifrmto(1,ip) - dbnd
+                    if (waqpar%ifrmto(2,ip) > 0) waqpar%ifrmto(2,iq) = waqpar%ifrmto(2,ip) + dseg
+                    if (waqpar%ifrmto(2,ip) < 0) waqpar%ifrmto(2,iq) = waqpar%ifrmto(2,ip) - dbnd
+                    if (waqpar%ifrmto(3,ip) > 0) waqpar%ifrmto(3,iq) = waqpar%ifrmto(3,ip) + dseg
+                    if (waqpar%ifrmto(4,ip) > 0) waqpar%ifrmto(4,iq) = waqpar%ifrmto(4,ip) + dseg
                 end if
             end do
+            Lbb = Ltx - waqpar%kmxnxa + 1
+            if (Lbb.lt.Lb) then
+!              add extra (dummy) exchanges for boundaries below the bed to trick delwaq
+               do LL = Lb-1, Lbb, -1
+                    if (waqpar%ifrmto(1,ip) < 0.or.waqpar%ifrmto(2,ip) < 0) then
+                        iq = ip + sign((waqpar%ilaggr(Ltx - LL + 1) - 1) * waqpar%noq12,ip)
+                        dbnd = (waqpar%ilaggr(Ltx - LL + 1) - 1) * (ndx - ndxi + waqpar%numsrcbnd)  ! current number of external links in FM, account for sinks sources here too!
+                        if (waqpar%ifrmto(1,iq) == 0) then
+                            if (waqpar%ifrmto(1,ip) < 0) waqpar%ifrmto(1,iq) = waqpar%ifrmto(1,ip) - dbnd
+                            if (waqpar%ifrmto(2,ip) < 0) waqpar%ifrmto(2,iq) = waqpar%ifrmto(2,ip) - dbnd
+                        end if
+                    endif
+                end do
+            endif           
         end do
         waqpar%noq12 = waqpar%noq12 * waqpar%kmxnxa
         waqpar%noq = waqpar%noq12
