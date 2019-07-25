@@ -269,7 +269,7 @@ module m_readstructures
             case (ST_CULVERT)
                call readCulvert(pstru%culvert, network, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
             case (ST_BRIDGE)
-               call readBridge(network, istru, md_ptr%child_nodes(i)%node_ptr, isPillarBridge, success)
+               call readBridge(pstru%bridge, network, md_ptr%child_nodes(i)%node_ptr, structureID, success)
             case (ST_PUMP)
                call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
             case (ST_ORIFICE, ST_GATE)
@@ -901,31 +901,44 @@ module m_readstructures
       endif
    
    end subroutine readCulvert
-   subroutine readBridge(network, istru, md_ptr, isPillarBridge, success)
    
-      type(t_network), intent(inout)             :: network
-      integer                                    :: istru
-      type(tree_data), pointer, intent(in)       :: md_ptr
-      logical, intent(in)                        :: isPillarBridge 
-      logical, intent(inout)                     :: success 
+   !> Read the bridge specific data for a bridge structure
+   subroutine readBridge(bridge,network, md_ptr, st_id, success)
+      
+      type(t_bridge),  pointer,  intent(inout)  :: bridge          !< object containing bridge specific data
+      type(t_network),           intent(in   )  :: network         !< network data structure
+      type(tree_data), pointer,  intent(in   )  :: md_ptr          !< ini tree pointer with user input.
+      character(IdLen),          intent(in   )  :: st_id           !< Structure character Id.
+      logical,                   intent(inout)  :: success         !< Indicates whether reading of the bridge data was successful
 
-      type(t_bridge), pointer                    :: bridge
+      character(len=IdLen)                       :: txt
       character(len=IdLen)                       :: CrsDefID
       integer                                    :: CrsDefIndx
       integer                                    :: icross
+      logical                                    :: isPillarBridge
       
-      allocate(network%sts%struct(istru)%bridge)
       
-      bridge => network%sts%struct(istru)%bridge
-      
-      call prop_get_integer(md_ptr, 'structure', 'allowedflowdir', bridge%allowedflowdir, success)
-      if (.not. success) return
+      allocate(bridge)
 
-      if (isPillarBridge) then
+      call prop_get_string(md_ptr, 'structure', 'allowedflowdir', txt, success)
+      bridge%allowedflowdir = allowedFlowDirToInt(txt)
+      if (.not. success) then
+         call setMessage(LEVEL_ERROR, 'required key allowedFlowdir not found for structure '//trim(st_id))
+         return
+      endif
+      
+      ! Make distinction between a pillar bridge and a standard bridge
+      
+      bridge%pillarwidth = 0d0
+      call prop_get_double(md_ptr, 'structure', 'pillarwidth', bridge%pillarwidth, success)
+      if (success) then
+         ! pillar bridge
+         call prop_get_double(md_ptr, 'structure', 'formfactor', bridge%formfactor, success)
+         if (.not. success) then
+            call setMessage(LEVEL_ERROR, 'formfactor not found for structure '//trim(st_id))
+            return
+         endif
          
-         call prop_get_double(md_ptr, 'structure', 'pillarwidth', bridge%pillarwidth, success)
-         if (success) call prop_get_double(md_ptr, 'structure', 'formfactor', bridge%formfactor, success)
-         if (.not. success) return
       
          bridge%bedLevel           = 0.0d0
          bridge%useOwnCrossSection = .false.
@@ -940,20 +953,23 @@ module m_readstructures
          bridge%outletlosscoeff    = 0.0d0
          
       else
-         
+         ! Standard bridge
          call prop_get_string(md_ptr, 'structure', 'csDefId', CrsDefID, success)
-         if (.not. success) return
+         if (.not. success) then
+            call setmessage(LEVEL_ERROR, 'error reading key csDefId for bridge '//trim(st_id))
+            return
+         endif
          
          CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
          if (CrsDefIndx <= 0) then
-            call setMessage(LEVEL_FATAL, 'Error Reading Bridge: Cross-Section Definition not Found')
+            call setMessage(LEVEL_FATAL, 'Error Reading Bridge: Cross-Section Definition '//trim(CrsDefID)// ' not Found for structure '//trim(st_id))
+            success = .false.
+            return
          endif
 
-         call prop_get_integer(md_ptr, 'structure', 'bedFrictionType', bridge%bedFrictionType, success)
+         call prop_get_string(md_ptr, 'structure', 'bedFrictionType', txt, success)
+         call frictionTypeStringToInteger(txt, bridge%bedFrictionType)
          if (success) call prop_get_double(md_ptr, 'structure', 'bedFriction', bridge%bedFriction, success)
-         if (success) call prop_get_integer(md_ptr, 'structure', 'groundFrictionType', bridge%groundFrictionType, success)
-         if (success) call prop_get_double(md_ptr, 'structure', 'groundFriction', bridge%groundFriction, success)
-         if (.not. success) return
          
          icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
                                   bridge%bedFrictionType, bridge%bedFriction, bridge%groundFrictionType, bridge%groundFriction)
@@ -967,7 +983,10 @@ module m_readstructures
          if (success) call prop_get_double(md_ptr, 'structure', 'length', bridge%length, success)
          if (success) call prop_get_double(md_ptr, 'structure', 'inletlosscoeff', bridge%inletlosscoeff, success)
          if (success) call prop_get_double(md_ptr, 'structure', 'outletlosscoeff', bridge%outletlosscoeff, success)
-         if (.not. success) return
+         if (.not. success) then
+            call setmessage(LEVEL_ERROR, 'Error reading bridge data for structure '//trim(st_id))
+         endif
+         
          
          bridge%pillarwidth = 0.0d0
          bridge%formfactor  = 0.0d0

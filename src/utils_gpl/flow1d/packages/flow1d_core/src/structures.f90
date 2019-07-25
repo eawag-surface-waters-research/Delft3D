@@ -1213,7 +1213,7 @@ end subroutine
          struct%generalst%ru = 0d0
          struct%generalst%au = 0d0
          call update_widths(struct%generalst, numlinks, links, wu)
-      case (ST_CULVERT, ST_UNI_WEIR, ST_ORIFICE, ST_GATE, ST_WEIR, ST_PUMP)
+      case (ST_CULVERT, ST_UNI_WEIR, ST_ORIFICE, ST_GATE, ST_WEIR, ST_PUMP, ST_BRIDGE)
          if (numlinks > 1) then
             call setmessage(LEVEL_ERROR, 'Multiple links for culvert structures is not supported, check structure'//trim(struct%id))
          endif
