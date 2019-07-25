@@ -6871,10 +6871,6 @@ integer :: kkksin, kkbsin, kktsin, kktxsin, kkksor, kkbsor, kktsor, kktxsor
 real(8) :: dzss, qsrck, fsor, fsorlay
 real(8), allocatable :: fsin(:)
 
-if (.not.wrwaqon) then ! No waq output necessary
-    return
-end if
-
 if (numsrc > 0) then ! waq
    do isrc = 1, numsrc  ! waq
       if (ksrcwaq(isrc).ge.0) then
@@ -35140,6 +35136,10 @@ end function ispumpon
 
  enddo
 
+ if (wrwaqon) then ! Update waq output
+    call update_waq_sink_source_fluxes()
+ end if
+
  do n  = 1,numsrc
     if (jamess(n) == 1) then
         write(msgbuf, *) 'Extraction flux larger than cell volume at point 1 of : ', trim( srcname(n) )
@@ -35555,9 +35555,7 @@ end function ispumpon
     enddo
 
  endif
-
- call update_waq_sink_source_fluxes()
-
+ 
  sq = sqi-squ                                        ! arrays, later put in loop anyway
 
  end subroutine u1q1
