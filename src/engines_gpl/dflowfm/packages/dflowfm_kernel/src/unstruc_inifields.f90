@@ -126,7 +126,7 @@ function initInitialFields(inifilename) result(ierr)
    character(len=255)              :: basedir
    integer                         :: i, ib, L, iprimpos, kc_size_store, mx, k1, k2, ja
    integer, allocatable            :: kcc(:), kc1D(:), kc2D(:)
-   integer :: method, iloctype, filetype
+   integer :: method, iloctype, filetype, ierr_loc
    
    logical, external :: timespaceinitialfield_mpi
    
@@ -169,7 +169,11 @@ function initInitialFields(inifilename) result(ierr)
 
       !! Step 2: operation for each block
       if (filetype == field1D) then
-         call init1dField(filename,inifilename, qid) ! todo: underneath timespaceinitial?
+         ierr_loc = init1dField(filename,inifilename, qid) ! todo: underneath timespaceinitial?
+         if (ierr_loc /= DFM_NOERR) then
+            success = .false.
+            exit ! Or, consider cycle instead, to try all remaining blocks and return with an error only at the very end.
+         end if
       else
          if (strcmpi(qid, 'waterlevel')) then
             call realloc(kcsini, ndx, keepExisting=.false.)
@@ -415,8 +419,8 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
 end subroutine readIniFieldProvider
 
 
-!> Reads and initilazes a 1d Field file (*.ini). 
-subroutine init1dField(filename, inifieldfilename, quant)
+!> Reads and initializes a 1d Field file (*.ini). 
+function init1dField(filename, inifieldfilename, quant) result (ierr)
    use tree_data_types
    use tree_structures
    use messageHandling
@@ -427,11 +431,13 @@ subroutine init1dField(filename, inifieldfilename, quant)
    use m_flow
    use m_flowgeom
    use network_data
+   use dfm_error
    implicit none
    
    character(len=*), intent(in) :: filename            !< file name for 1dField file
    character(len=*), intent(in) :: inifieldfilename    !< file name of iniField file (only for messages)
    character(len=*), intent(in) :: quant               !< quantity that is specified in iniField file
+   integer                      :: ierr                !< Result status (DFM_NOERR on success)
    
    type(tree_data), pointer     :: field_ptr           !< tree of inifield-file's [Initial] or [Parameter] blocks
    type(tree_data), pointer     :: node_ptr            !
@@ -452,9 +458,11 @@ subroutine init1dField(filename, inifieldfilename, quant)
    integer                      :: num_items_in_file   !
    logical                      :: retVal
    character(len=ini_value_len) :: fnam
-   integer                      :: ib, jaglobal, i, j
+   integer                      :: ib, jaglobal, i, j, numerr
    double precision             :: mchainage
    
+   ierr = DFM_NOERR
+
    call tree_create(trim(filename), field_ptr)
    call prop_file('ini',trim(filename),field_ptr,istat) 
       
@@ -466,6 +474,7 @@ subroutine init1dField(filename, inifieldfilename, quant)
    ib = 0
    jaglobal = 0
    numLocations = 0
+   numerr = 0
    
    
    ! loop on each block
@@ -483,42 +492,53 @@ subroutine init1dField(filename, inifieldfilename, quant)
             ! read quantity
             call prop_get_string(node_ptr, '', 'quantity', quantity, retVal)
             if (.not. retVal) then
+               numerr = numerr + 1
                write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''quantity'' is missing.'
-               call err_flush()
+               call warn_flush()
+               cycle
             end if
             if (.not. strcmpi(quantity, quant)) then
+               numerr = numerr + 1
                write(msgbuf, '(7a)') 'Wrong block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''quantity'' does not match the "quantity" which is specified in iniField file ''', trim(inifieldfilename), '''.'
-               call err_flush()
+               call warn_flush()
+               cycle
             end if
             if ((.not. strcmpi(quantity, 'bedlevel')) .and. (.not.strcmpi(quantity, 'waterlevel')) .and. (.not. strcmpi(quantity,'waterdepth')) .and. (.not. strcmpi(quantity, 'frictioncoefficient'))) then
-               write(msgbuf, '(5a)') 'Wrong block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''quantity'' does not match (refer to User Manual).'
-               call err_flush()
+               numerr = numerr + 1
+               write(msgbuf, '(7a)') 'Wrong block in file ''', trim(filename), ''': [', trim(groupname), ']. Quantity ''', trim(quantity), ''' is unknown.'
+               call warn_flush()
+               cycle
             end if
             ! read unit
             call prop_get_string(node_ptr, '', 'unit', unit, retVal)
             if (.not. retVal) then
+               numerr = numerr + 1
                write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''unit'' is missing.'
-               call err_flush()
+               call warn_flush()
+               cycle
             end if
             
             call realloc(values, 1, keepExisting=.false., fill = dmiss)
             call prop_get_double(node_ptr, '', 'value', values(1), retVal)
             if (.not. retVal) then
+               numerr = numerr + 1
                write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''value'' is missing.'
-               call err_flush()
+               call warn_flush()
+               cycle
             end if
             branchId = ''
             call realloc(chainage, 1, keepExisting = .false., fill=dmiss)
             jaglobal = 1
          else
-            write(msgbuf, '(5a)') 'In file ''', trim(filename), ''': [', trim(groupname), ']. Only the first [Global] block is read, other [global] blocks are ignored.'
+            write(msgbuf, '(5a)') 'In file ''', trim(filename), ''': [', trim(groupname), ']. Only the first [Global] block is read, other [Global] blocks are ignored.'
             call warn_flush()
             cycle
          end if
       else if (strcmpi(groupname, 'Branch')) then
          call prop_get_string(node_ptr, '', 'branchId', branchId, retVal)
          if (.not. retVal) then
-            write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''branchId'' is missing. Ignore this block.'
+            numerr = numerr + 1
+            write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''branchId'' is missing.'
             call warn_flush()
             cycle
          end if
@@ -532,7 +552,8 @@ subroutine init1dField(filename, inifieldfilename, quant)
             call realloc(chainage, numLocations, keepExisting = .false.)
             call prop_get_doubles(node_ptr, '', 'chainage', chainage, numLocations, retVal)
             if (.not. retVal) then
-               write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''chainage'' is missing. Ignore this block.'
+               numerr = numerr + 1
+               write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''chainage'' could not be read.'
                call warn_flush()
                cycle
             end if
@@ -543,7 +564,10 @@ subroutine init1dField(filename, inifieldfilename, quant)
                if (chainage(j) > mchainage) then
                   mchainage = chainage(j)
                else
-                  call mess(LEVEL_ERROR, 'The locations are not sorted by increasing chainage in 1dField file '''//trim(filename)//'''.')
+                  numerr = numerr + 1
+                  write (msgbuf, '(3a)') 'Invalid data in file ''', trim(filename), ''': the locations are not sorted by increasing chainage.')
+                  call warn_flush()
+                  cycle
                end if
             end do
                           
@@ -551,7 +575,8 @@ subroutine init1dField(filename, inifieldfilename, quant)
             call realloc(values, numLocations, keepExisting = .false.)
             call prop_get_doubles(node_ptr, '', 'values', values, numLocations, retVal)
             if (.not. retVal) then
-               write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''values'' is missing. Ignore this block.'
+               numerr = numerr + 1
+               write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''values'' could not be read.'
                call warn_flush()
                cycle
             end if
@@ -559,7 +584,8 @@ subroutine init1dField(filename, inifieldfilename, quant)
             call realloc(values, 1, keepExisting = .false.)
             call prop_get_double(node_ptr, '', 'values', values(1),retVal)
             if (.not. retVal) then
-               write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''values'' is missing. Ignore this block.'
+               numerr = numerr + 1
+               write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''values'' could not be read.'
                call warn_flush()
                cycle
             end if
@@ -582,16 +608,31 @@ subroutine init1dField(filename, inifieldfilename, quant)
          call spaceInit1dfield(branchId, chainage, values, 1, frcu)
       else if (strcmpi(quantity, 'bedlevel')) then
          !call spaceInit1dfield(branchId, chainage, values, 2, zk)
-         ! TODO: UNST-2694, Reading bedlevel from 1dFiled file type is not yet supported.
-         write(msgbuf, '(5a)') 'Unsupported block in file ''', trim(filename), ''': [', trim(groupname), ']. Reading bedlevel from 1dFiled file type is not yet supported. Ignoring this block.'
+         ! TODO: UNST-2694, Reading bedlevel from 1dField file type is not yet supported.
+         numerr = numerr + 1
+         write(msgbuf, '(5a)') 'Unsupported block in file ''', trim(filename), ''': [', trim(groupname), ']. Reading bedlevel from 1dField file type is not yet supported.'
          call warn_flush()
+         cycle
       end if 
    end do
-   
+
+   if (numerr > 0) then
+      goto 888
+   end if
+
+   ! No errors
    write(msgbuf,'(a, i10,a)') 'Finish initializing 1dField file '''//trim(filename)//''':', ib , ' [Branch] blocks have been read and handled.'
    call msg_flush()    
+   return
 
-end subroutine init1dField
+888 continue
+   ! There were errors
+   ierr = DFM_WRONGINPUT
+   return
+
+      
+
+end function init1dField
 
 
 !> Converts fileType string to an integer.
