@@ -565,7 +565,7 @@ function init1dField(filename, inifieldfilename, quant) result (ierr)
                   mchainage = chainage(j)
                else
                   numerr = numerr + 1
-                  write (msgbuf, '(3a)') 'Invalid data in file ''', trim(filename), ''': the locations are not sorted by increasing chainage.')
+                  write (msgbuf, '(3a)') 'Invalid data in file ''', trim(filename), ''': the locations are not sorted by increasing chainage.'
                   call warn_flush()
                   cycle
                end if
