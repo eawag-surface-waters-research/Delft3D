@@ -742,7 +742,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
     call prop_get_string ( md_ptr, 'geometry', 'NodeFile',         md_1dfiles%retentions,                success)
     call prop_get_string ( md_ptr, 'geometry', 'RoughnessFiles',   md_1dfiles%roughness,                 success)
-    call prop_get_string ( md_ptr, 'geometry', 'NodeFile',         md_1dfiles%retentions,                 success)
     call prop_get_string ( md_ptr, 'geometry', 'StructureFile',    md_1dfiles%structures,                 success)
     md_1dfiles%roughnessdir = ' ' 
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
