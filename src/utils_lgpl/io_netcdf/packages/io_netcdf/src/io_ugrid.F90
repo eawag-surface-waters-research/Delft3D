@@ -540,10 +540,13 @@ function ug_addcoordvars(ncid, id_varx, id_vary, id_dimension, name_varx, name_v
    ierr = nf90_def_var(ncid, name_varx, nf90_double, id_dimension, id_varx)
    ierr = nf90_def_var(ncid, name_vary, nf90_double, id_dimension, id_vary)
    ierr = ug_addcoordatts(ncid, id_varx, id_vary, crs)
-   ierr = nf90_put_att(ncid, id_varx, 'mesh',      mesh)
-   ierr = nf90_put_att(ncid, id_vary, 'mesh',      mesh)
-   ierr = nf90_put_att(ncid, id_varx, 'location',  location)
-   ierr = nf90_put_att(ncid, id_vary, 'location',  location)
+
+   ! UNST-2791: until further notice we will *not* write :mesh and :location attributes for UGRID coordinate variables anymore.
+   !ierr = nf90_put_att(ncid, id_varx, 'mesh',      mesh)
+   !ierr = nf90_put_att(ncid, id_vary, 'mesh',      mesh)
+   !ierr = nf90_put_att(ncid, id_varx, 'location',  location)
+   !ierr = nf90_put_att(ncid, id_vary, 'location',  location)
+
    ierr = nf90_put_att(ncid, id_varx, 'long_name', longname_varx)
    ierr = nf90_put_att(ncid, id_vary, 'long_name', longname_vary)
 end function ug_addcoordvars
@@ -568,14 +571,17 @@ function ug_addlonlatcoordvars(ncid, id_varlon, id_varlat, id_dimension, name_va
    ierr = nf90_def_var(ncid, name_varlon, nf90_double, id_dimension, id_varlon)
    ierr = nf90_def_var(ncid, name_varlat, nf90_double, id_dimension, id_varlat)
    ierr = ug_addlonlatcoordatts(ncid, id_varlon, id_varlat)
-   if (present(mesh)) then
-      ierr = nf90_put_att(ncid, id_varlon, 'mesh',      mesh)
-      ierr = nf90_put_att(ncid, id_varlat, 'mesh',      mesh)
-   end if
-   if (present(location)) then
-      ierr = nf90_put_att(ncid, id_varlon, 'location',  location)
-      ierr = nf90_put_att(ncid, id_varlat, 'location',  location)
-   end if
+
+   ! UNST-2791: until further notice we will *not* write :mesh and :location attributes for UGRID coordinate variables anymore.
+   !if (present(mesh)) then
+   !   ierr = nf90_put_att(ncid, id_varlon, 'mesh',      mesh)
+   !   ierr = nf90_put_att(ncid, id_varlat, 'mesh',      mesh)
+   !end if
+   !if (present(location)) then
+   !   ierr = nf90_put_att(ncid, id_varlon, 'location',  location)
+   !   ierr = nf90_put_att(ncid, id_varlat, 'location',  location)
+   !end if
+
    ierr = nf90_put_att(ncid, id_varlon, 'long_name', longname_varlon)
    ierr = nf90_put_att(ncid, id_varlat, 'long_name', longname_varlat)
 end function ug_addlonlatcoordvars
@@ -1272,21 +1278,23 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ! edge x,y-coordinates.
       ierr = ug_addcoordvars(ncid, meshids%varids(mid_edgex), meshids%varids(mid_edgey), (/ meshids%dimids(mdim_edge) /), prefix//'_edge_x', prefix//'_edge_y', &
                              'characteristic x-coordinate of the mesh edge (e.g. midpoint)', 'characteristic y-coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge', crs)
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgex), 'bounds',    prefix//'_edge_x_bnd')
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgey), 'bounds',    prefix//'_edge_y_bnd')
       ! Add bounds.
-      ierr = ug_addcoordvars(ncid, meshids%varids(mid_edgexbnd), meshids%varids(mid_edgeybnd), (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /), prefix//'_edge_x_bnd', prefix//'_edge_y_bnd', &
-                             'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge', crs)
+      ! UNST-2791: until further notice we will not write edge bounds anymore (at least not until we have a full polygon bounds shape for each edge, that is, with at least four points).
+      !ierr = nf90_put_att(ncid, meshids%varids(mid_edgex), 'bounds',    prefix//'_edge_x_bnd')
+      !ierr = nf90_put_att(ncid, meshids%varids(mid_edgey), 'bounds',    prefix//'_edge_y_bnd')
+      !ierr = ug_addcoordvars(ncid, meshids%varids(mid_edgexbnd), meshids%varids(mid_edgeybnd), (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /), prefix//'_edge_x_bnd', prefix//'_edge_y_bnd', &
+                             !'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge', crs)
 
 #ifdef HAVE_PROJ
       if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          ierr = ug_addlonlatcoordvars(ncid, meshids%varids(mid_edgelon), meshids%varids(mid_edgelat), (/ meshids%dimids(mdim_edge) /), prefix//'_edge_lon', prefix//'_edge_lat', &
                                       'characteristic longitude coordinate of the mesh edge (e.g. midpoint)', 'characteristic latitude coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgelon), 'bounds',    prefix//'_edge_lon_bnd')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgelat), 'bounds',    prefix//'_edge_lat_bnd')
          ! Add bounds.
-         ierr = ug_addlonlatcoordvars(ncid, meshids%varids(mid_edgelonbnd), meshids%varids(mid_edgelatbnd), (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /), prefix//'_edge_lon_bnd', prefix//'_edge_lat_bnd', &
-                                      'longitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'latitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge')
+         ! UNST-2791: until further notice we will not write edge bounds anymore (at least not until we have a full polygon bounds shape for each edge, that is, with at least four points).
+         !ierr = nf90_put_att(ncid, meshids%varids(mid_edgelon), 'bounds',    prefix//'_edge_lon_bnd')
+         !ierr = nf90_put_att(ncid, meshids%varids(mid_edgelat), 'bounds',    prefix//'_edge_lat_bnd')
+         !ierr = ug_addlonlatcoordvars(ncid, meshids%varids(mid_edgelonbnd), meshids%varids(mid_edgelatbnd), (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /), prefix//'_edge_lon_bnd', prefix//'_edge_lat_bnd', &
+         !                             'longitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'latitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge')
       end if
 #endif
    end if
