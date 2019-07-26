@@ -16309,6 +16309,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_dad
     use m_filter, only: checkmonitor
     use m_alloc
+    use unstruc_channel_flow, only: network
 
     implicit none
 
@@ -16333,6 +16334,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
                      id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_cresth,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
                      id_weirgendim, id_weirgenname, id_weirgen_dis, id_weirgen_cresth, id_weirgen_crestw, id_weirgen_s1up,  id_weirgen_s1dn,  &        ! id_weirgen_head,
+                     id_weir_stat,  id_weirgen_vel, id_weirgen_au,  id_weirgen_head,   id_weirgen_forcedif, id_weirgen_s1crest,               &
                      id_gategendim, id_gategenname, id_gategen_dis, id_gategen_sillh,  id_gategen_sillw,  id_gategen_edgel, id_gategen_openw, &           ! id_gategen_head,
                      id_gategen_flowh, id_gategen_s1up, id_gategen_s1dn,                                                                      &
                      id_genstrudim, id_genstruname, id_genstru_dis, id_genstru_cresth, id_genstru_crestw, id_genstru_edgel, id_genstru_openw, &           ! id_genstru_head,
@@ -17402,6 +17404,42 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_weirgen_s1dn, 'long_name', 'weir water level down (via general structure)')
             ierr = nf90_put_att(ihisfile, id_weirgen_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_weirgen_s1dn, 'coordinates', 'weirgen_name')
+            
+            if (network%sts%numWeirs > 0) then ! write extra files for new weirs
+               ierr = nf90_def_var(ihisfile, 'weirgen_structure_head', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_head)
+               ierr = nf90_put_att(ihisfile, id_weirgen_head, 'long_name', 'weir structure head')
+               ierr = nf90_put_att(ihisfile, id_weirgen_head, 'units', 'm')
+               ierr = nf90_put_att(ihisfile, id_weirgen_head, 'coordinates', 'weirgen_name')
+               
+               ierr = nf90_def_var(ihisfile, 'weirgen_velocity', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_vel)
+               ierr = nf90_put_att(ihisfile, id_weirgen_vel, 'long_name', 'weir velocity')
+               ierr = nf90_put_att(ihisfile, id_weirgen_vel, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_weirgen_vel, 'coordinates', 'weirgen_name')
+               
+               ierr = nf90_def_var(ihisfile, 'weirgen_flow_area', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_au)
+               ierr = nf90_put_att(ihisfile, id_weirgen_au, 'long_name', 'weir flow area')
+               ierr = nf90_put_att(ihisfile, id_weirgen_au, 'units', 'm2')
+               ierr = nf90_put_att(ihisfile, id_weirgen_au, 'coordinates', 'weirgen_name')
+               
+               ierr = nf90_def_var(ihisfile, 'weirgen_state', nf90_int, (/ id_weirgendim, id_timedim /), id_weir_stat)
+               ierr = nf90_put_att(ihisfile, id_weir_stat, 'long_name', 'weir state')
+               ierr = nf90_put_att(ihisfile, id_weir_stat, 'units', '-')
+               ierr = nf90_put_att(ihisfile, id_weir_stat, 'coordinates', 'weirgen_name')
+               ierr = nf90_put_att(ihisfile, id_weir_stat, 'flag_values', '0, 1, 2')
+               ierr = nf90_put_att(ihisfile, id_weir_stat, 'flag_meanings', 'no_flow weir_free weir_submerged')
+               ierr = nf90_put_att(ihisfile, id_weir_stat, 'valid_range', '0, 2')
+               ierr = nf90_put_att(ihisfile, id_weir_stat, '_FillValue', imiss)
+               
+               ierr = nf90_def_var(ihisfile, 'weirgen_force_difference', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_forcedif)
+               ierr = nf90_put_att(ihisfile, id_weirgen_forcedif, 'long_name', 'weir force difference per unit width')
+               ierr = nf90_put_att(ihisfile, id_weirgen_forcedif, 'units', 'N m-1')
+               ierr = nf90_put_att(ihisfile, id_weirgen_forcedif, 'coordinates', 'weirgen_name')
+               
+               ierr = nf90_def_var(ihisfile, 'weirgen_s1_on_crest', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_s1crest)
+               ierr = nf90_put_att(ihisfile, id_weirgen_s1crest, 'long_name', 'weir water level on crest')
+               ierr = nf90_put_att(ihisfile, id_weirgen_s1crest, 'units', 'm')
+               ierr = nf90_put_att(ihisfile, id_weirgen_s1crest, 'coordinates', 'weirgen_name')
+            end if
         endif
         ! Dambreak
         if (jahisdambreak > 0 .and. ndambreaksg > 0 ) then
@@ -18002,12 +18040,19 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisweir > 0 .and. nweirgen > 0) then
          do i = 1,nweirgen
-            igen = weir2cgen(i)
             ierr = nf90_put_var(ihisfile, id_weirgen_dis   , valweirgen(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_cresth, valweirgen(7,i), (/ i, it_his /)) ! changed
-            ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(6,i), (/ i, it_his /)) ! changed TODO: AvD: is zcgen(3) to be interpreted as crestw or openw?
             ierr = nf90_put_var(ihisfile, id_weirgen_s1up  , valweirgen(3,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valweirgen(4,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_cresth, valweirgen(9,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(10,i),(/ i, it_his /))
+            if (network%sts%numWeirs > 0) then ! write extra files for new weirs
+               ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weir_stat, int(valweirgen(11,i)),(/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valweirgen(12,i),(/i, it_his /))
+            end if       
          end do
       end if
 
@@ -33713,7 +33758,7 @@ end subroutine setbobs_fixedweirs
  double precision :: bui, cu, du, du0, gdxi, ds, riep, as, gdxids
  double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
  double precision :: qk0, qk1, dzb, hdzb, z00  !
- double precision :: as1, as2, qtotal, s_on_crest, width, st2, cmustr, wetdown, dpt
+ double precision :: as1, as2, qtotal, width, st2, cmustr, wetdown, dpt
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
  double precision :: hminlwi,fsqrtt
  double precision :: perimeter, conv, czdum
@@ -33915,8 +33960,8 @@ end subroutine setbobs_fixedweirs
                    as1 = wu(L)*(s1(k1)-bob0(1,L))
                    as2 = wu(L)*(s1(k2)-bob0(2,L))
                    call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L) 
-                   call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), fu(L), ru(L), s_on_crest, &
-                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea, state)
+                   call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), fu(L), ru(L), &
+                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
                 case (ST_PUMP)
                    continue ! WIP carniato: pumps should not be in network data structure, furu computation is in npumpsg loop, and not here.
                 case (ST_DAMBREAK)
@@ -33933,7 +33978,7 @@ end subroutine setbobs_fixedweirs
 
                    wetdown = max(wetdown, 0.0001d0)
                    call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, network%sts%struct(istru)%state, .true.)
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, pstru%generalst%state(L), .true.)
                 case (ST_UNI_WEIR)
                    call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
                        q1(L), q1(L), u1(L), u0(L), dx(L), dts)
@@ -35823,7 +35868,7 @@ if (jahisbal > 0) then
       use unstruc_channel_flow, only: network
       use m_1d_structures
       implicit none
-      integer                       :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd, istru
+      integer                       :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd, istru, nlinks
       double precision              :: dir
       integer                       :: jaghost, idmn_ghost
       double precision, save        :: timprev = -1d0
@@ -35865,9 +35910,9 @@ if (jahisbal > 0) then
             if( Ln(1,La) /= kpump(1,L) ) then
                dir = -1d0
             end if
-            call fill_valstruct_perlink(valpump(1:5,n), La, dir)
+            call fill_valstruct_perlink(valpump(1:5,n), La, dir, 0, istru, L)
          enddo
-         call average_valstruct(valpump(1:5,n))
+         call average_valstruct(valpump(1:5,n), 0, istru)
          if (istru > 0) then ! TODO: UNST-2587: once all pump code is done, remove this temp IF.
          pstru => network%sts%struct(istru)
          valpump(6,n) = GetPumpCapacity(pstru)
@@ -36042,45 +36087,51 @@ if (jahisbal > 0) then
       !
       ! === Weirs
       !
-      do n = 1,nweirgen
-         i = weir2cgen(n)
-         valweirgen(:,n) = 0d0
-         do L = L1cgensg(i),L2cgensg(i)
-            Lf = kcgen(3,L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = 1d0
-            ku = ln(1,La)
-            kd = ln(2,La)
-            if( Ln(1,La) /= kcgen(1,L) ) then
-               dir = -1d0
-               ku = ln(2,La)
-               kd = ln(1,La)
-            end if
-            valweirgen(1,n) = valweirgen(1,n) + wu(La)
-            valweirgen(2,n) = valweirgen(2,n) + q1(La) * dir
-            valweirgen(3,n) = valweirgen(3,n) + s1(ku) * wu(La)
-            valweirgen(4,n) = valweirgen(4,n) + s1(kd) * wu(La)
+      if (network%sts%numWeirs > 0) then ! new weir
+         do n = 1, nweirgen
+            valweirgen(1:NUMVALS_WEIRGEN,n) = 0d0
+            istru = network%sts%weirIndices(n)
+            pstru => network%sts%struct(istru)
+            nlinks = pstru%numlinks
+            do L = 1, nlinks
+               Lf = pstru%linknumbers(L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = sign(1d0,dble(Lf))
+               call fill_valstruct_perlink(valweirgen(1:NUMVALS_WEIRGEN,n), La, dir, 1, istru, L)
+            enddo
+            call average_valstruct(valweirgen(1:NUMVALS_WEIRGEN,n), 1, istru)
          enddo
-         if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
-            valweirgen(5,n) = 1               ! rank contains the weir.
-            valweirgen(6,n) = zcgen(3*i  )    ! id_weirgen_crestw.
-            valweirgen(7,n) = zcgen(3*i-2)    ! id_weirgen_cresth.
-         end if
-         if( jampi == 0 ) then
-            if( valweirgen(1,n) == 0d0 ) then
-               valweirgen(2,n) = dmiss
-               valweirgen(3,n) = dmiss
-               valweirgen(4,n) = dmiss
-            else
-               valweirgen(3,n) = valweirgen(3,n) / valweirgen(1,n)
-               valweirgen(4,n) = valweirgen(4,n) / valweirgen(1,n)
-            endif
-         endif
-      enddo
+      else
+         ! old weir, do not compute the new extra fileds
+         do n = 1, nweirgen
+            i = weir2cgen(n)
+            valweirgen(1:NUMVALS_WEIRGEN,n) = 0d0
+            do L = L1cgensg(i),L2cgensg(i)
+               Lf = kcgen(3,L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = 1d0
+               if( Ln(1,La) /= kcgen(1,L) ) then
+                  dir = -1d0
+               end if
+               call fill_valstruct_perlink(valweirgen(1:5,n), La, dir, 0, 0, 0)
+            enddo
+            call average_valstruct(valweirgen(1:5,n), 0, 0)
+            if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
+               !valweirgen(5,n) = 1               ! rank contains the weir.
+               valweirgen(10,n) = zcgen(3*i  )    ! id_weirgen_crestw.
+               valweirgen(9,n) = zcgen(3*i-2)    ! id_weirgen_cresth.
+            end if
+         enddo
+      end if
+      
       !
       ! ==dambreak
       !

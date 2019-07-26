@@ -84,6 +84,15 @@ module m_General_Structure
       integer                          :: numlinks                      !< Nr of flow links that cross this generalstructure.
       logical                          :: velheight                     !< Flag indicates the use of the velocity height or not
       integer                          :: openingDirection              !< possible values GEN_SYMMETRIC, GEN_FROMLEFT, GEN_FROMRIGHT
+      double precision, pointer        :: sOnCrest(:)                   !< water level on crest per link (length = numlinks)
+      integer,          pointer        :: state(:)                      !< State of the Structure for General Structure, Weir, Orifice and Culvert/Siphon
+                                                                        !< 0 = No Flow
+                                                                        !< 1 = Free Weir Flow
+                                                                        !< 2 = Drowned Weir Flow
+                                                                        !< 3 = Free Gate Flow
+                                                                        !< 4 = Drowned Gate Flow
+                                                                        !< 5 = Free Flow for Culvert and Siphons
+                                                                        !< 6 = Drowned Flow for Culvert and Siphons
    end type
 
 
@@ -92,8 +101,8 @@ module m_General_Structure
 contains
 
    !> compute FU, RU and AU for general structure genstr
-   subroutine computeGeneralStructure(genstr, direction, L0, maxWidth, fuL, ruL, s_on_crest, auL, as1, as2, dadsL, kfuL, s1m1, s1m2, &
-                                      qtotal, Cz, dxL, dt, jarea, state)
+   subroutine computeGeneralStructure(genstr, direction, L0, maxWidth, fuL, ruL, auL, as1, as2, dadsL, kfuL, s1m1, s1m2, &
+                                      qtotal, Cz, dxL, dt, jarea)
       ! modules
 
       ! Global variables
@@ -101,7 +110,6 @@ contains
       double precision, intent(in)                 :: maxWidth      !< Maximal width of the structure. Normally the the width of the flowlink
       double precision, intent(out)                :: fuL           !< fu component of momentum equation
       double precision, intent(out)                :: ruL           !< Right hand side component of momentum equation
-      double precision, intent(out)                :: s_on_crest    !< Water level on crest
       double precision, intent(inout)              :: auL           !< Flow area of structue opening
       double precision, intent(in)                 :: as1           !< (geometrical) upstream flow area.
       double precision, intent(in)                 :: as2           !< (geometrical) downstream flow area.
@@ -117,7 +125,6 @@ contains
       double precision, intent(in)                 :: dxL           !< length of the flow link
       double precision, intent(in)                 :: dt            !< time step
       logical, intent(in)                          :: jarea         !< Flag indicating only the flow area is required or the full 
-      integer, intent(inout)                       :: state         !< Flow state of the structure
       
       !
       !
@@ -205,7 +212,7 @@ contains
 
          call flqhgs(fu(1), ru(1), u1L, dxL, dt, dadsL, kfuL, au(1), qL, flowDir, &
                      hu, hd, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, state)
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
          
          !calculate flow over gate
          dg = huge(1d0)
@@ -215,7 +222,7 @@ contains
 
          call flqhgs(fu(2), ru(2), u1L, dxL, dt, dadsL, kfuL, au(2), qL, flowDir, &
                      hu, hd, uu, zgate, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, state)
+                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(L0))
       endif
       
       if (gatefraction< 1d0 - eps) then
@@ -226,7 +233,7 @@ contains
          
          call flqhgs(fu(3), ru(3), u1L, dxL, dt, dadsL, kfuL, au(3), qL, flowDir, &
                      hu, hd, uu, zs, (1d0-gatefraction)*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, state)
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
       endif
       
       auL =  (au(1) + au(2)) + au(3)
@@ -238,7 +245,7 @@ contains
       genstr%ru(:,L0) = ru
       genstr%au(:,L0) = au
       !TEMP = laatste statement
-      s_on_crest = ds + crest     ! waterlevel on crest
+      genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
       
    end subroutine computeGeneralStructure
 
@@ -1008,6 +1015,8 @@ contains
       if (associated(genstru%fu                      )) deallocate(genstru%fu                    )
       if (associated(genstru%ru                      )) deallocate(genstru%ru                    )
       if (associated(genstru%au                      )) deallocate(genstru%au                    )
+      if (associated(genstru%sOnCrest                )) deallocate(genstru%sOnCrest              )
+      if (associated(genstru%state                   )) deallocate(genstru%state              )
       deallocate(genstru)
    end subroutine deallocGenstru
 

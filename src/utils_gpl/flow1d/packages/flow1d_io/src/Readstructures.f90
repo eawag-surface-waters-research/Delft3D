@@ -1457,7 +1457,7 @@ module m_readstructures
       allocate(generalst)
 
       allocate(generalst%fu(3,1), generalst%ru(3,1), generalst%au(3,1))
-      allocate(generalst%widthcenteronlink(1), generalst%gateclosedfractiononlink(1))
+      allocate(generalst%widthcenteronlink(1), generalst%gateclosedfractiononlink(1), generalst%sOnCrest(1), generalst%state(1))
       generalst%numlinks = 1
       generalst%gateclosedfractiononlink(1) = 1d0
       generalst%gatedoorheight = huge(1d0)

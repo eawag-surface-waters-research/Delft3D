@@ -33,6 +33,7 @@ module m_structures
 
 use properties
 use m_GlobalParameters
+use unstruc_channel_flow, only: network
 implicit none
 
 type(tree_data), pointer, public :: strs_ptr !< A property list with all input structure specifications of the current model. Not the actual structure set.
@@ -58,8 +59,18 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  double precision, dimension(:,:), allocatable :: valgategen  !< Array for gate(new), (1,:) discharge through gate
                                                               !<                      (2,:) Upstream average water level
                                                               !<                      (3,:) gate width
- double precision, dimension(:,:), allocatable :: valweirgen  !< Array for weir;      (1,:) discharge through weir
+ double precision, dimension(:,:), allocatable :: valweirgen  !< Array for weir;      (1,:) flow link width, used for averaging.
                                                               !<                      (2,:) discharge through weir
+                                                              !<                      (3,:) weir structure water level up
+                                                              !<                      (4,:) weir structure water level down
+                                                              !<                      (5,:) weir structure head
+                                                              !<                      (6,:) weir flow area
+                                                              !<                      (7,:) weir velocity
+                                                              !<                      (8,:) water level on crest
+                                                              !<                      (9,:) weir crest level
+                                                              !<                      (10,:) weir crest width
+                                                              !<                      (11,:) weir state (0: closed, 1: free weir, 2: drowned/submerged weir)
+                                                              !<                      (12,:) weir force difference per unit width
  double precision, dimension(:,:), allocatable :: valcgen     !< Array for general structure (old ext), (1,:) discharge
  double precision, dimension(:,:), allocatable :: valgenstru  !< Array for general structure (new ext), (1,:) discharge
  double precision, dimension(:,:), allocatable, target :: valdambreak !< Array for dambreak, (1,:) instantanuous, (2,:) cumulative
@@ -69,7 +80,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
  integer                           :: NUMVALS_CGEN = 4        !< Number of variables for general structure (old ext file)
  integer                           :: NUMVALS_GATEGEN = 9     !< Number of variables for gate (new)
- integer                           :: NUMVALS_WEIRGEN = 7     !< Number of variables for weir
+ integer                           :: NUMVALS_WEIRGEN = 12    !< Number of variables for weir
  integer                           :: NUMVALS_GENSTRU = 8     !< Number of variables for general structure( new exe file)
  integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
 
@@ -142,6 +153,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
          if( allocated( valcdam) ) deallocate( valcdam )
          allocate( valcdam(NUMVALS_CDAM,ncdamsg) ) ; valcdam = 0d0
       endif
+      if (nweirgen == 0) then ! If it is new 1D weir, the weir is stored in the network type
+         nweirgen = network%sts%numWeirs
+      end if
+      
       if( jahisweir > 0 .and. nweirgen > 0) then
          if( allocated( valweirgen) ) deallocate( valweirgen )
          allocate( valweirgen(NUMVALS_WEIRGEN,nweirgen) ) ; valweirgen = 0d0
@@ -176,48 +191,65 @@ subroutine reset_structures()
    if (allocated(gates)) deallocate(gates)
 end subroutine reset_structures
 
-!> Fills the valstruct array for one given structure on a given link L.
+!> Fills the valstruct array for one given structure on a given link LL.
 !! This is an array with output values that are useful for all types of structures.
-subroutine fill_valstruct_perlink(valstruct, L, dir)
+!! Note: if it is a general structure (jagenst == 1), then (6)-(12) are computed as well.
+subroutine fill_valstruct_perlink(valstruct, LL, dir, jagenst, istru, L)
    use m_missing, only: dmiss
-   use m_flow, only: q1, s1
+   use m_flow, only: q1, s1, au
    use m_flowgeom, only: wu, ln
    implicit none
-   double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valpumps(:)):
+   double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
                                                                 !< (1) total width
                                                                 !< (2) structure discharge
                                                                 !< (3) structure water level up
                                                                 !< (4) structure water level down
                                                                 !< (5) structure head
-   integer,                        intent(in   ) :: L           !< flow link index
+                                                                !< (6) flow area (if jagenst == 1)
+                                                                !< (7) velocity (if jagenst == 1)
+                                                                !< (8) water level on crest (if jagenst == 1)
+                                                                !< (9) crest level (if jagenst == 1)
+                                                                !< (10) crest width (if jagenst == 1)
+                                                                !< (11) state (if jagenst == 1)
+                                                                !< (12) force difference per unit width (if jagenst == 1)
+   integer,                        intent(in   ) :: LL          !< flow link index
    double precision,               intent(in   ) :: dir         !< direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
-
+   integer,                        intent(in   ) :: jagenst     !< a general structure (1) or not (0).
+   integer,                        intent(in   ) :: istru       !< structure index
+   integer,                        intent(in   ) :: L           !< local flow link index in the gernal structure
    integer :: ku, kd
    
    if (dir > 0) then
-      ku = ln(1,L)
-      kd = ln(2,L)
+      ku = ln(1,LL)
+      kd = ln(2,LL)
    else
-      ku = ln(2,L)
-      kd = ln(1,L)
+      ku = ln(2,LL)
+      kd = ln(1,LL)
    end if
 
-   valstruct(1) = valstruct(1) + wu(L)
-   valstruct(2) = valstruct(2) + q1(L)*dir
-   valstruct(3) = valstruct(3) + s1(ku)*wu(L)
-   valstruct(4) = valstruct(4) + s1(kd)*wu(L)
-   valstruct(5) = valstruct(5) + (s1(ku)- s1(kd))*wu(L)
+   valstruct(1) = valstruct(1) + wu(LL)
+   valstruct(2) = valstruct(2) + q1(LL)*dir
+   valstruct(3) = valstruct(3) + s1(ku)*wu(LL)
+   valstruct(4) = valstruct(4) + s1(kd)*wu(LL)
+   valstruct(5) = valstruct(5) + (s1(ku)- s1(kd))*wu(LL)
+   if (jagenst == 1) then
+      valstruct(6) = valstruct(6) + au(LL)
+      valstruct(8) = valstruct(8) + network%sts%struct(istru)%generalst%sOnCrest(L)*wu(LL)
+      valstruct(12)= valstruct(12) + get_force_difference(istru, L)*wu(LL)
+   end if
    
 end subroutine fill_valstruct_perlink
 
 
 !> Averages the values on one structure across all links,
 !! where needed taking care of partition models.
-!! Note: fill_valstructs_perlink must have been called in
+!! Note 1: fill_valstructs_perlink must have been called in
 !! a loop prior to calling this averaging routine.
-subroutine average_valstruct(valstruct)
+!! Note 2: if it is a general structure (jagenst == 1), then (6)-(12) are computed as well.
+subroutine average_valstruct(valstruct, jagenst, istru)
    use m_missing, only: dmiss
    use m_partitioninfo, only: jampi
+   use m_1d_structures
    implicit none
    double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valpump(:)):
                                                                 !< (1) total width (unchanged)
@@ -225,22 +257,101 @@ subroutine average_valstruct(valstruct)
                                                                 !< (3) structure water level up (averaged)
                                                                 !< (4) structure water level down (averaged)
                                                                 !< (5) structure head (averaged)
-
+                                                                !< (6) flow area (unchanged)
+                                                                !< (7) velocity (computed)
+                                                                !< (8) water level on crest (averaged)
+                                                                !< (9) crest level (computed)
+                                                                !< (10) crest width (computed)
+                                                                !< (11) state (if all links have the same state, then write it. Otherwise it is missing value)
+                                                                !< (12) force difference per unit width (averaged)
+   integer,                        intent(in   ) :: jagenst     !< a general structure (1) or not (0)
+   integer,                        intent(in   ) :: istru       !< structure index      
+   
+   integer:: i
+   type(t_structure), pointer :: pstru
+   
    if( jampi == 0 ) then
       if(valstruct(1) == 0d0 ) then
          valstruct(2) = dmiss  ! discharge
          valstruct(3) = dmiss  ! s1up
          valstruct(4) = dmiss  ! s1down
          valstruct(5) = dmiss  ! head
+         if (jagenst == 1) then
+            valstruct(6) = dmiss ! flow area
+            valstruct(7) = dmiss ! velocity
+            valstruct(8) = dmiss ! water level on crest
+            valstruct(9) = dmiss ! crest level
+            valstruct(10)= dmiss ! crest width
+            valstruct(11)= dmiss ! state
+            valstruct(12)= dmiss ! force difference per unit width
+         end if
       else
          ! valstruct(2): keep discharge at the summed value
          ! Average the remaining values:
-         valstruct(3) = valstruct(3) / valstruct(1)
-         valstruct(4) = valstruct(4) / valstruct(1)
-         valstruct(5) = valstruct(5) / valstruct(1)
+         valstruct(3) = valstruct(3) / valstruct(1)        ! s1up
+         valstruct(4) = valstruct(4) / valstruct(1)        ! s1down
+         valstruct(5) = valstruct(5) / valstruct(1)        ! head
+         
+         if (jagenst == 1) then
+            pstru => network%sts%struct(istru)
+            if (valstruct(6) > 0d0) then
+               valstruct(7) = valstruct(2) / valstruct(6)  ! velocity
+            else
+               valstruct(7) = 0d0
+            end if
+            valstruct(8) = valstruct(8) / valstruct(1)     ! water level on crest
+            valstruct(9) = get_crest_level(pstru)          ! crest level
+            valstruct(10)= get_width(pstru)                ! crest width
+            
+            ! determine state
+            valstruct(11) = dble(pstru%generalst%state(1))
+            do i = 2, pstru%numlinks
+               if (valstruct(11) /= dble(pstru%generalst%state(i))) then
+                  valstruct(11) = dmiss
+                  exit
+               end if
+            end do
+
+            valstruct(12)= valstruct(12)/ valstruct(1)      ! force difference per unit width
+            
+         end if
       endif
    endif
 
 end subroutine average_valstruct
+
+!!> Gets force difference per unit width over structure (weir, gate, general structure) per link
+double precision function get_force_difference(istru, L)
+   use m_missing
+   use m_flowgeom, only: ln
+   use m_flow, only: s1
+   use m_1d_structures, only: get_crest_level
+   implicit none   
+   integer, intent(in   )   :: istru !< structure index
+   integer, intent(in   )   :: L     !< current link L
+   
+   double precision  :: s1up   !< water level up
+   double precision  :: s1dn   !< water level down
+   double precision  :: crestl
+   integer           :: k1, k2
+   double precision  :: rholeft, rhoright
+   
+   crestl = get_crest_level(network%sts%struct(istru))
+  
+   k1 = ln(1,L)
+   k2 = ln(2,L)
+   s1up = max(s1(k1), s1(k2))
+   s1dn = min(s1(k1), s1(k2))
+   if (crestl > dmiss + 0.1d0) then
+      rholeft  = 1000.0d0
+      rhoright = 1000.0d0
+      
+      get_force_difference =  max((s1up - crestl), 0.0d0)**2 * rholeft  * gravity / 2.0d0 -  &
+                            max((s1dn - crestl), 0.0d0)**2 * rhoright * gravity / 2.0d0
+   else
+      get_force_difference = dmiss
+   end if
+
+end function get_force_difference
 
 end module m_structures

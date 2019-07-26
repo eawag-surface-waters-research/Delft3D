@@ -144,14 +144,7 @@ module m_1d_structures
       
       integer                          :: numlinks       !< number of links in structure
       integer, pointer, dimension(:)   :: linknumbers    !< link numbers of structure (length = numlinks)
-      integer                          :: state = -1     !< State of the Structure for General Structure, Weir, Orifice and Culvert/Siphon
-                                                         !< 0 = No Flow
-                                                         !< 1 = Free Weir Flow
-                                                         !< 2 = Drowned Weir Flow
-                                                         !< 3 = Free Gate Flow
-                                                         !< 4 = Drowned Gate Flow
-                                                         !< 5 = Free Flow for Culvert and Siphons
-                                                         !< 6 = Drowned Flow for Culvert and Siphons
+    
       integer                          :: compound
       character(IdLen)                 :: compoundName = ' '
       type(t_weir), pointer            :: weir => null()
@@ -1207,7 +1200,9 @@ end subroutine
       
       select case(struct%type)
       case (ST_GENERAL_ST)
-         allocate(struct%generalst%widthcenteronlink(numlinks), struct%generalst%gateclosedfractiononlink(numlinks))
+         allocate(struct%generalst%widthcenteronlink(numlinks), struct%generalst%gateclosedfractiononlink(numlinks), struct%generalst%sOnCrest(numlinks), struct%generalst%state(numlinks))
+         struct%generalst%sOnCrest(numlinks) = 0d0
+         struct%generalst%state(numlinks) = 0
          allocate(struct%generalst%fu(3,numlinks), struct%generalst%ru(3,numlinks), struct%generalst%au(3,numlinks))
          struct%generalst%fu = 0d0
          struct%generalst%ru = 0d0
