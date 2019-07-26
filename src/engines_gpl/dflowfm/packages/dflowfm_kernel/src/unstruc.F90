@@ -13605,7 +13605,7 @@ end if
     call reduce_error(iresult)
  end if
  if (iresult /= DFM_NOERR) then
-    call qnerror('Error occurred while running, please inspect your diagnostic output.',' ', ' ')
+    call qnerror('Error occurred while initializing external forcings, please inspect your diagnostic output.',' ', ' ')
     if (jampi == 1) then
         call qnerror('Error occurs on one or more processes when initializing external forcings.',' ', ' ')
     end if
