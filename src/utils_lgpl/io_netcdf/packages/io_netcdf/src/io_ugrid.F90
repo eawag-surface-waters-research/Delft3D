@@ -4529,6 +4529,7 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dedgebranch), edgebranchidx)
    if (ierr /= nf90_noerr)  then
+      edgebranchidx(:) = imiss ! UNST-2795: Protect against a bug in NetCDF lib: when variable does not exist, returned array may be polluted.
       call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the edge branch ids')
       goto 888
    end if 
