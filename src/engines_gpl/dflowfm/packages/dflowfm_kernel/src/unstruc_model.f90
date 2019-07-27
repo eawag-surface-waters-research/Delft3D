@@ -52,12 +52,13 @@ implicit none
     !!   need to be converted/updated by user), then the major version number
     !!   is incremented.
 
-    ! MDUFormatVersion = 1.07
+    ! MDUFormatVersion = 1.08
     integer, parameter       :: MDUFormatMajorVersion = 1
-    integer, parameter       :: MDUFormatMinorVersion = 7
+    integer, parameter       :: MDUFormatMinorVersion = 8
 
     ! History MDUFormatVersion:
 
+    ! 1.08 (2019-07-27): Default option for density changed from Eckart to UNESCO (idensform=2 instead of 1)
     ! 1.07 (2019-06-13): Renamed [model] block as [General] block, replace keyword MDUFormatVersion by FileVersion 
     ! 1.06 (2016-05-16): Removed 1 variable for secondary flow, EffectSpiral as it is given by Espir contained in .mor file
     ! 1.05 (2015-07-22): The structure parameters are added (jahisstr, jahisdam, jahispump, jahisgate)

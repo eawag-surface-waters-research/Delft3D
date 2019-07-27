@@ -189,7 +189,7 @@ xlozmidov                   = 0d0           ! Ozmidov length scale
 
 alph0                       = 0.698d0       ! =Eckart density parameters
 
-idensform                   = 1             !< 0 = no, 1 = eckart
+idensform                   = 2             !< 0 = no, 1 = Eckart, 2 = UNESCO
 limiterhordif               = 2             !< 0=No, 1=Horizontal gradient densitylimiter, 2=Finite volume
 
 Stanton                     = -1            !< coeff for convective  heat flux, if negative , take wind Cd
