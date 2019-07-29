@@ -1904,6 +1904,8 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
        nttaru        => gdtrachy%dir(jdir)%nttaru
        nttaru = 0
     end do    
+    prev_trt_no   = TRACHY_UNDEFINED
+    prev_trt_type = TRACHY_UNDEFINED    
     !
     ! Read value of Trtrou, default NO
     !
