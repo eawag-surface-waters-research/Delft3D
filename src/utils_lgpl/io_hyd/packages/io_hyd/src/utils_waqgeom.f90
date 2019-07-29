@@ -56,6 +56,8 @@ module m_utils_waqgeom
 !> Determine all mass centers (facex, facey) of a waqgeom
  subroutine add_facexy_waqgeom(waqgeom)
  
+ use geometry_module
+ 
  type(t_ug_meshgeom), intent(inout)       :: waqgeom
 
  integer, parameter                       :: missing_value = -999
@@ -84,7 +86,7 @@ module m_utils_waqgeom
 !
     ! Note that passed xs and ys arrays are larger than the passed polygon size (extra elements are not used in subroutine comp_masscenter).
     call comp_masscenter(node_count, waqgeom%nodex(nodes(1:node_count)), waqgeom%nodey(nodes(1:node_count)), &
-            waqgeom%facex(i_face), waqgeom%facey(i_face), area, counterclockwise)
+            waqgeom%facex(i_face), waqgeom%facey(i_face), area, counterclockwise, 0, 0, -999.0D0)
 !    ! Face z coordinates are unknown.
  end do
  end subroutine add_facexy_waqgeom
@@ -346,117 +348,6 @@ subroutine swap(a, b)
     b = temp
 
 end subroutine swap
-
-!> compute area and mass center of polygon
-subroutine comp_masscenter(N, xin , y, xcg, ycg, area, jacounterclockwise)
-
-   implicit none
-
-   integer,                        intent(in)    :: N        !< polygon size
-   double precision, dimension(N), intent(in)    :: xin, y   !< polygon coordinates
-   double precision,               intent(out)   :: xcg, ycg !< polygon mass center coordinates
-   double precision,               intent(out)   :: area     !< polygon area
-   integer,                        intent(out)   :: jacounterclockwise  !< counterclockwise (1) or not (0)
-
-   integer                                       :: jsferic = 0 ! xy pair is in : 0=cart, 1=sferic coordinates (no taken into account yet)
-
-   double precision, dimension(N) :: x  ! Copy of xin, with possibly periodic fixes.
-   double precision                              :: dsx, dsy, xc, yc, dcos, xds, fac, x0, y0, x1, dx0, dx1, dy0, dy1
-   double precision                              :: xdum
-
-   integer                                       :: i, ip1
-
-   double precision, external                    :: getdx, getdy
-
-   double precision, parameter                   :: dtol=1d-8
-   double precision, parameter                   :: ra = 6378137d0    ! earth radius (m)
-   double precision                              :: pi
-   double precision                              :: dg2rd             ! degrees to radians
-   pi    = acos(-1d0)
-   dg2rd = pi/180d0
-
-   area = 0d0
-   xcg  = 0d0
-   ycg  = 0d0
-   jacounterclockwise = 1
-
-   if ( N.lt.1 ) goto 1234
-
-   x = xin
-
-!  set reference point (furthest away from poles)   
-   x0 = minval(x(1:N))
-   y0 = y(1)
-   do i=2,N
-      if ( abs(y(i)).lt.abs(y0) ) then
-         y0 = y(i)
-      end if
-   end do
-
-   !  fix for periodic, spherical coordinates
-   if ( jsferic.eq.1 ) then
-      x1 = maxval(x(1:N))
-      if ( x1-x0.gt.180d0 ) then
-!        determine cutline
-         xdum = x1-180d0
-         do i=1,N
-            if ( x(i).lt.xdum ) then
-               x(i) = x(i) + 360d0
-            end if
-         end do
-         x0 = minval(x(1:N))
-      end if
-   end if
-
-   do i=1,N
-      ip1 = i+1; if ( ip1.gt.N ) ip1=ip1-N
-
-      
-      call getdxdy(x0,y0,x(i),y(i), dx0,dy0)
-      call getdxdy(x0,y0,x(ip1),y(ip1), dx1, dy1)
-      xc = 0.5d0*(dx0 + dx1)
-      yc = 0.5d0*(dy0 + dy1) 
-      
-      call getdxdy(x(i), y(i), x(ip1), y(ip1), dx0, dy0) 
-      dsx = dy0 ; dsy = -dx0
-      
-      xds  = xc*dsx+yc*dsy
-      area = area + 0.5d0*xds
-      xcg  = xcg  + xds * xc
-      ycg  = ycg  + xds * yc
-   end do
-
-!  for clockwise oriented cells, the normal will be inward, and consequently the area negative
-!  it must stay negative in the computation of the cell center (xcg,ycg)
-   area = sign(max(abs(area),dtol),area)
-
-   fac = 1d0/(3d0*area)
-
-   xcg = fac * xcg
-   ycg = fac * ycg
-
-   if ( JSFERIC.ne.0 ) then
-      ycg = ycg / (Ra*dg2rd)
-      xcg = xcg / (Ra*dg2rd*cos((ycg+y0)*dg2rd))
-   end if
-
-   xcg = xcg + x0
-   ycg = ycg + y0
-   
-!  output cell orientation
-   if ( area.gt.0d0 ) then
-      jacounterclockwise = 1
-   else
-      jacounterclockwise = 0
-   end if
-   
-!  fix for inward normals (clockwise oriented cells)   
-   area = abs(area)
-
-1234 continue
-
-   return
-end subroutine comp_masscenter
 
  subroutine getdxdy(x1,y1,x2,y2,dx,dy)
  implicit none

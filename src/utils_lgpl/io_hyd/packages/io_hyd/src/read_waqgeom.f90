@@ -48,12 +48,12 @@ module m_read_waqgeom
         implicit none
 
         character(len=*)                       :: filename
-        type(t_ug_meta), intent(out)           :: meta      
-        type(t_crs), intent(out)               :: crs
+        type(t_ug_meta)    , intent(out)       :: meta      
+        type(t_crs)        , intent(out)       :: crs
         type(t_ug_meshgeom), intent(out)       :: waqgeom
-        integer, pointer, intent(out)          :: edge_type(:)
-        integer, pointer, intent(out)          :: idomain(:)
-        integer, pointer, intent(out)          :: iglobal(:)
+        integer, pointer   , intent(out)       :: edge_type(:)
+        integer, pointer   , intent(out)       :: idomain(:)
+        integer, pointer   , intent(out)       :: iglobal(:)
         integer                                :: conv_type 
         real(8)                                :: conv_version
 

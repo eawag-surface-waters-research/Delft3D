@@ -47,6 +47,7 @@ contains
 !! since array pointers will become disassociated, possibly causing memory leaks.
 function aggregate_ugrid_geometry(input, output, input_edge_type, output_edge_type, face_mapping_table) result(success)
     use io_ugrid
+    use geometry_module
     use m_alloc
 
     implicit none
@@ -257,7 +258,7 @@ function aggregate_ugrid_geometry(input, output, input_edge_type, output_edge_ty
 
         ! Note that passed xs and ys arrays are larger than the passed polygon size (extra elements are not used in subroutine comp_masscenter).
         call comp_masscenter(node_count, output%nodex(nodes(1:node_count)), output%nodey(nodes(1:node_count)), &
-                output%facex(output_face), output%facey(output_face), area, counterclockwise)
+                output%facex(output_face), output%facey(output_face), area, counterclockwise, 0, 0, -999.0D0)
         ! Face z coordinates are unknown.
     end do
 
