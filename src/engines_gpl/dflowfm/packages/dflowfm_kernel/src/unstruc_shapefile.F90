@@ -780,7 +780,7 @@ type(shpfileobject)         :: shphandle
 type(shpobject)             :: shpobj
 integer                     :: i, j, Lf, La, L, k, k1, k2, ii, nshp, ishape
 character(len=lencharattr)  :: filename, objectid
-character(len=4)            :: lenobj_loc
+character(len=6)            :: lenobj_loc
 integer                     :: id_objectid, id_crestlev, id_crestlen, id_sillhl, id_sillhr, id_taludslpl, id_taludslpr, &
                                id_vegcoef, id_weirtype, id_advtype, id_effwu, id_flowlinknr 
 double precision            :: tmp_x(2), tmp_y(2)
@@ -878,7 +878,7 @@ double precision            :: tmp_x(2), tmp_y(2)
    ! add nshp shapes
    do i = 0, nshp - 1
       ii = i + 1
-      write(lenobj_loc, '(I4.4)') i
+      write(lenobj_loc, '(I6.6)') i
       objectid = 'Fixed_weir'//'_'//lenobj_loc
       !call mess(LEVEL_INFO, 'SHAPEFILE: Creating shape: '''//trim(objectid)//'''.')
          
@@ -1296,7 +1296,7 @@ type(shpfileobject)         :: shphandle
 type(shpobject)             :: shpobj
 integer                     :: i, j, n, ishape, igen, Lf, La, L, k, k1, k2
 character(len=lencharattr)  :: filename, objectid
-character(len=4)            :: lenobj_loc
+character(len=6)            :: lenobj_loc
 integer                     :: id_objectid, id_flowlinknr, id_linktype
 double precision            :: tmp_x(2), tmp_y(2)
    if (jampi .eq. 0) then
@@ -1334,7 +1334,7 @@ double precision            :: tmp_x(2), tmp_y(2)
    endif
 
    do L = 1,nDryLinks
-      write(lenobj_loc, '(I4.4)') L
+      write(lenobj_loc, '(I6.6)') L
       objectid = 'dryarea_'//lenobj_loc
       !call mess(LEVEL_INFO, 'SHAPEFILE: Creating shape: '''//trim(objectid)//'''.')
          
