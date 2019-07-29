@@ -641,6 +641,7 @@ src/engines_gpl/dimr/packages/DimrTesting/DimrDllNative.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/DimrTesting.csproj -text
 src/engines_gpl/dimr/packages/DimrTesting/IBasicModelInterface.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/Program.cs -text
+src/engines_gpl/dimr/packages/DimrTesting/Properties/AssemblyInfo.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/Sobek3ModelWrapper.cs -text
 src/engines_gpl/dimr/packages/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/Makefile.am -text
@@ -708,6 +709,7 @@ src/engines_gpl/dimr/scripts/generic/win32/run_dimr_parallel.bat -text
 src/engines_gpl/dimr/scripts/generic/win64/dimr_config_example.xml -text
 src/engines_gpl/dimr/scripts/generic/win64/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/generic/win64/run_dimr_parallel.bat -text
+src/engines_gpl/dimr/scripts/template/dimr_open_template.sln -text
 src/engines_gpl/dimr/scripts/waq/dimr_config.xml -text
 src/engines_gpl/dimr/scripts/waq/dimr_config_linux.xml -text
 src/engines_gpl/dimr/scripts/waq/parameter_substitution/dimr_config.xml -text
