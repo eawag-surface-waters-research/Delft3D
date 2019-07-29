@@ -19090,7 +19090,7 @@ subroutine unc_write_shp()
     use unstruc_shapefile
     use m_monitoring_crosssections, only: ncrs, crs
     use m_observations, only: numobs, kobs
-    use m_flowexternalforcings, only: nweirgen, ngategen, numsrc, ksrc, gate2cgen, L1cgensg, L2cgensg, npumpsg, L1pumpsg, L2pumpsg, ngenstru, genstru2cgen
+    use m_flowexternalforcings, only: nweirgen, ngategen, numsrc, ksrc, gate2cgen, L1cgensg, L2cgensg, npumpsg, L1pumpsg, L2pumpsg, ngenstru, genstru2cgen, weir2cgen
     use m_thindams
     use m_sobekdfm, only: nbnd1d2d
     use m_fixedweirs, only: nfxw
@@ -19155,13 +19155,13 @@ subroutine unc_write_shp()
     ! weirs
      if (jashp_weir > 0) then
        if (jampi .eq. 0) then
-          if (nweirgen > 0) then
+          if (nweirgen > 0 .and. allocated(weir2cgen)) then
              call unc_write_shp_weir()
           else
              call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for weirs is written because no weir is found.')
           endif
        else
-          if (nweirgen > 0) then
+          if (nweirgen > 0 .and. allocated(weir2cgen)) then
              jawrite = nweirgen
              do n = 1, nweirgen
                 if (L1cgensg(n) > L2cgensg(n)) then
