@@ -14138,6 +14138,8 @@ subroutine crosssections_on_flowgeom()
 
     if ( ncrs.lt.1 ) return
 
+    numcrossedlinks = 0
+
 !   allocate
     allocate(istartcrs(ncrs+1))
     istartcrs = 1
@@ -14227,6 +14229,9 @@ subroutine crosssections_on_flowgeom()
     end if
 
     icMOD = MAX(1,ncrs/100)
+
+    call realloc(numlist, ncrs, keepExisting = .true., fill = 0) ! In case pli-based cross sections have not allocated this yet.
+    call realloc(linklist, (/ max(numcrossedlinks, 1), ncrs /), keepExisting = .true., fill = 0)  ! In addition to pli-based cross sections (if any), also support 1D branchid-based cross sections.
 
     CALL READYY('Enabling cross sections on grid', 0d0)
     do ic=1,ncrs
