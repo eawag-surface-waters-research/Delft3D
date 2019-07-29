@@ -16365,7 +16365,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
     character(len=255)           :: filename
     character(len=25)            :: transpunit
-    integer                      :: igen
+    integer                      :: igen, istru
     integer                      :: ndims
     character(len=255)           :: tmpstr, tmpstr2, tmpstr3, unit1, unit2, unit3
     integer                      :: jawrizc = 0
@@ -17657,11 +17657,18 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_var(ihisfile, id_cdamname,  trim(cdam_ids(i)),      (/ 1, i /))
             end do
         end if
-        if (jahisweir > 0 .and. nweirgen > 0 .and. allocated(weir2cgen)) then
-            do i=1,nweirgen
-               igen = weir2cgen(i)
-               ierr = nf90_put_var(ihisfile, id_weirgenname,  trim(cgen_ids(igen)),      (/ 1, i /))
-            end do
+        if (jahisweir > 0 .and. nweirgen > 0 ) then
+           if (allocated(weir2cgen)) then
+              do i=1,nweirgen
+                 igen = weir2cgen(i)
+                 ierr = nf90_put_var(ihisfile, id_weirgenname,  trim(cgen_ids(igen)),      (/ 1, i /))
+              end do
+           else if (network%sts%numWeirs > 0) then
+              do i=1,nweirgen
+                 istru = network%sts%weirIndices(i)
+                 ierr = nf90_put_var(ihisfile, id_weirgenname,  trim(network%sts%struct(istru)%id),      (/ 1, i /))
+              end do
+           end if
         end if
 
         if (jahisdambreak > 0 .and. ndambreak > 0) then
