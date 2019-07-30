@@ -329,7 +329,7 @@
       
       if ( jatem.gt.0 ) then
         nosfun = nosfun+1
-        call realloc(sfname, nosfun, keepExisting=.true., fill='Temperature')
+        call realloc(sfname, nosfun, keepExisting=.true., fill='Temp')
         isftem = nosfun
       else
         isftem = 0
