@@ -34479,6 +34479,7 @@ function read_commandline() result(istat)
             
          case ('cutcells')
             md_cutcells = 1
+            md_cutcelllist = 'cutcellpolygons.lst'
 
          case ('processlibrary')
 !           read next argument as well for the filename:
