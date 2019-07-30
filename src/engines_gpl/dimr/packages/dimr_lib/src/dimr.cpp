@@ -65,6 +65,7 @@ using namespace std;
 #include <ctime>
 # include <stdio.h>
 #include <fstream>
+#include <iomanip>
 
 #if defined (WIN32)
 //#  include "getopt.h"
@@ -1060,7 +1061,8 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         // Add station name
                         std::ostringstream varName;
                         varName << sourceComponentName << " -> " << targetComponentName;
-                        const string varNamestr(varName.str());
+                        varName << std::left << std::setfill(' ') << std::setw(name_strlen) << varName.str();
+                        const string varNamestr{ varName.str() };
                         nc_put_var_text(ncid, station_var, varNamestr.c_str());
                     }
 
