@@ -924,7 +924,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                     }
 
 					// create netcdf logfiles
-					if (thisCoupler->logger != NULL)
+                    if (thisCoupler->logger != NULL  && my_rank == 0)
 					{
                         // create netcdf file in workingdir
 
@@ -1244,8 +1244,8 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                                          thisCoupler->items[k].targetProcess,
                                          transferValuePtr);
 
-
-                                if (thisCoupler->logger != NULL) {
+                                if (thisCoupler->logger != NULL && my_rank == 0)
+                                {
                                     string fileName = thisCoupler->logger->GetLoggerFilename(thisDimr->dimrWorkingDirectory, thisDimr->dirSeparator);
 
                                     int ncid = ncfiles[fileName];
