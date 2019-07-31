@@ -1,4 +1,14 @@
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/*.mod
+src/engines_gpl/dimr/packages/dimr_lib_tests/*.aps
+src/engines_gpl/dimr/packages/dimr_lib_tests/*.eto
+src/engines_gpl/dimr/packages/dimr_lib_tests/*.user
+src/engines_gpl/dimr/packages/dimr_lib_tests/ClientBin
+src/engines_gpl/dimr/packages/dimr_lib_tests/GeneratedArtifacts
+src/engines_gpl/dimr/packages/dimr_lib_tests/[Bb]in
+src/engines_gpl/dimr/packages/dimr_lib_tests/[Dd]ebug
+src/engines_gpl/dimr/packages/dimr_lib_tests/[Rr]elease
+src/engines_gpl/dimr/packages/dimr_lib_tests/_Pvt_Extensions
+src/engines_gpl/dimr/packages/dimr_lib_tests/obj
 src/engines_gpl/dimr/packages/dimr_testcomponent/*.aps
 src/engines_gpl/dimr/packages/dimr_testcomponent/*.eto
 src/engines_gpl/dimr/packages/dimr_testcomponent/*.user

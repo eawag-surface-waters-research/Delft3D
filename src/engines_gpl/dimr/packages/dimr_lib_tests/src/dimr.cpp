@@ -24,8 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: dimr.cpp 962 2011-10-31 21:52:47Z elshoff $
-// $HeadURL: $
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
 //  dimr Main Program
 //
@@ -142,7 +142,7 @@ extern "C" {
       thisDimr->log = loggerFromDimrExe;
    }
 
-   BMI_API void set_logger(Logger logger)
+   BMI_API void set_logger(BMILogger logger)
    {
       if (thisDimr == NULL)
       {
@@ -1062,9 +1062,10 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         std::ostringstream varName;
                         varName << sourceComponentName << " -> " << targetComponentName;
                         varName << std::left << std::setfill(' ') << std::setw(name_strlen) << varName.str();
-                        const string varNamestr( varName.str() );
+                        const string varNamestr{ varName.str() };
                         nc_put_var_text(ncid, station_var, varNamestr.c_str());
                     }
+
                     // Het hele spul MOET NAAR DELTARES_COMMON_C !!!
                 }
             }
@@ -1809,7 +1810,7 @@ void Dimr::scanCoupler(XmlTree * xmlCoupler, dimr_coupler * newCoup) {
         }
     }
 
-	// Logger (optional)
+	// BMILogger (optional)
     newCoup->logger = NULL;
     XmlTree * logger = xmlCoupler->Lookup("logger");
 	if (logger != NULL) {
@@ -2034,23 +2035,23 @@ void Dimr::connectLibs (void) {
             componentsList.components[i].dllSetVar = NULL;
       }
 
-      // Logger callback: FLOW1D uses BmiSetLogger
+      // BMILogger callback: FLOW1D uses BmiSetLogger
       if (componentsList.components[i].type == COMP_TYPE_FLOW1D) {
          componentsList.components[i].setLogger = (BMI_SET_LOGGER)GETPROCADDRESS(dllhandle, BmiSetLogger);
          if (componentsList.components[i].setLogger == NULL) {
             throw Exception(true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetLogger, lib, GetLastError());
          }
-         componentsList.components[i].setLogger((Logger)&_log);
+         componentsList.components[i].setLogger((BMILogger)&_log);
          double level = (double)this->logLevel;
          componentsList.components[i].dllSetVar("debugLevel", (const void *)&level);
       }
-      // Logger callback: FLOWFM uses BmiSetLogger2
+      // BMILogger callback: FLOWFM uses BmiSetLogger2
       if (componentsList.components[i].type == COMP_TYPE_FM) {
          componentsList.components[i].setLogger = (BMI_SET_LOGGER)GETPROCADDRESS(dllhandle, BmiSetLogger);
          if (componentsList.components[i].setLogger == NULL) {
             throw Exception(true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetLogger, lib, GetLastError());
          }
-         componentsList.components[i].setLogger((Logger)&_log);
+         componentsList.components[i].setLogger((BMILogger)&_log);
          // Is it possible to set the debugLevel in FM? componentsList.components[i].dllSetVar("debugLevel", (const void *)&level);
       }
 

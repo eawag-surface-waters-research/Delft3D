@@ -24,73 +24,52 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: log.h 962 2011-10-31 21:52:47Z elshoff $
-// $HeadURL: $
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
-//  Log Object - Definitions
+//  COREDUMP Function
+//  Cause a core dump for debugging purposes; callable from Fortran and C/C++
 //
 //  Irv.Elshoff@Deltares.NL
-//  30 oct 11
+//  29 oct 11
 //------------------------------------------------------------------------------
 
 
-#pragma once
-#ifdef WIN32
-#include "Windows.h"
-#define STDCALL __stdcall
+#include "dimr.h"
+
+#if HAVE_CONFIG_H
+#   include "config.h"
+#   define STDCALL  /* nothing */
+#   define Dimr_CoreDump FC_FUNC(dimr_coredump,DIMR_COREDUMP)
 #else
-#define STDCALL
+// WIN32
+#   define STDCALL  /* nothing */
+#   define Dimr_CoreDump DIMR_COREDUMP
 #endif
 
+
+#if (defined(__cplusplus)||defined(_cplusplus))
 extern "C" {
-	typedef void(STDCALL * WriteCallback)(char* time, char* message, unsigned int level);
+#endif
+
+void STDCALL
+Dimr_CoreDump (
+    void
+    ) {
+
+    // ToDo: Check whether the core dump was actually requested.
+    //       Only activate the printf statement when a core dump is actually requested
+    // printf ("\n!! INTENDED CORE DUMP OF DIMR FOR DEBUGGING PURPOSES !!\n\n");
+    fflush (stdout);
+    fflush (stderr);
+
+    // When requested: generate a core dump:
+    // int * null = NULL;
+    // int never = *null;
+
+    }
+
+
+#if (defined(__cplusplus)||defined(_cplusplus))
 }
-#include "dimr.h"
-#include "bmi.h"
-
-class Log {
-
-public:
-	Log( FILE * output, Clock * clock, Level level = FATAL, Level feedbackLevel = FATAL );
-
-	~Log( void );
-
-	Level GetLevel( void );
-
-	void SetLevel( Level level );
-
-	Level GetFeedbackLevel( void );
-
-	void SetFeedbackLevel( Level feedbackLevel );
-
-	void RegisterThread( const char * id );
-
-	void RenameThread( const char * id );
-
-	void UnregisterThread( void );
-
-	const char * AddLeadingZero(int, int);
-
-	bool Write(Level level, int rank, const char * format, ...);
-
-	void SetWriteCallBack( WriteCallback writeCallback );
-
-	void SetExternalLogger( Logger logger );
-
-    void logLevelToString( int level, char ** levelString );
-
-
-private:
-	FILE *        output;
-	Clock *       clock;
-	Level         level;
-	Level         feedbackLevel;
-
-	pthread_key_t thkey;      // contains key for thread-specific log data
-	WriteCallback writeCallback;
-	Logger        externalLogger;
-
-
-public:
-	char *        redirectFile;
-};
+#endif

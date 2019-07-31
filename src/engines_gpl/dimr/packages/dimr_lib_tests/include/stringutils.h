@@ -24,73 +24,33 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: log.h 962 2011-10-31 21:52:47Z elshoff $
-// $HeadURL: $
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
-//  Log Object - Definitions
+//  String Utility Routines - DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  30 oct 11
+//  2 jun 11
 //------------------------------------------------------------------------------
 
 
 #pragma once
-#ifdef WIN32
-#include "Windows.h"
-#define STDCALL __stdcall
-#else
-#define STDCALL
-#endif
 
-extern "C" {
-	typedef void(STDCALL * WriteCallback)(char* time, char* message, unsigned int level);
-}
-#include "dimr.h"
-#include "bmi.h"
+namespace String {
+    void
+    Chomp (
+        char * string
+        );
 
-class Log {
+    void
+    CollapseAllWhitespace (
+        char * string
+        );
 
-public:
-	Log( FILE * output, Clock * clock, Level level = FATAL, Level feedbackLevel = FATAL );
+    void
+    Tidy (
+        char * string
+        );
 
-	~Log( void );
+    };
 
-	Level GetLevel( void );
-
-	void SetLevel( Level level );
-
-	Level GetFeedbackLevel( void );
-
-	void SetFeedbackLevel( Level feedbackLevel );
-
-	void RegisterThread( const char * id );
-
-	void RenameThread( const char * id );
-
-	void UnregisterThread( void );
-
-	const char * AddLeadingZero(int, int);
-
-	bool Write(Level level, int rank, const char * format, ...);
-
-	void SetWriteCallBack( WriteCallback writeCallback );
-
-	void SetExternalLogger( Logger logger );
-
-    void logLevelToString( int level, char ** levelString );
-
-
-private:
-	FILE *        output;
-	Clock *       clock;
-	Level         level;
-	Level         feedbackLevel;
-
-	pthread_key_t thkey;      // contains key for thread-specific log data
-	WriteCallback writeCallback;
-	Logger        externalLogger;
-
-
-public:
-	char *        redirectFile;
-};

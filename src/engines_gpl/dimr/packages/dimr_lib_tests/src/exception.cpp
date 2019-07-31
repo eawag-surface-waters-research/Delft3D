@@ -24,73 +24,43 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: log.h 962 2011-10-31 21:52:47Z elshoff $
-// $HeadURL: $
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
-//  Log Object - Definitions
+//  Exception Object - Implementation
 //
 //  Irv.Elshoff@Deltares.NL
-//  30 oct 11
+//  20 jan 11
 //------------------------------------------------------------------------------
 
 
-#pragma once
-#ifdef WIN32
-#include "Windows.h"
-#define STDCALL __stdcall
-#else
-#define STDCALL
-#endif
+#include "exception.h"
 
-extern "C" {
-	typedef void(STDCALL * WriteCallback)(char* time, char* message, unsigned int level);
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+
+
+Exception::Exception(bool fatal, ErrorCode errorCode, const char * format, ...) : errorCode(errorCode)
+{
+   const int bufsize = 256 * 1024;
+   char * buffer = new char[bufsize]; // really big temporary buffer, just in case
+
+   va_list arguments;
+   va_start(arguments, format);
+   int len = vsnprintf(buffer, bufsize - 1, format, arguments);
+   va_end(arguments);
+   buffer[bufsize - 1] = '\0';
+
+   this->fatal = fatal;
+   this->message = new char[len + 1];
+   strcpy(this->message, buffer);
+
+   delete[] buffer;
 }
-#include "dimr.h"
-#include "bmi.h"
-
-class Log {
-
-public:
-	Log( FILE * output, Clock * clock, Level level = FATAL, Level feedbackLevel = FATAL );
-
-	~Log( void );
-
-	Level GetLevel( void );
-
-	void SetLevel( Level level );
-
-	Level GetFeedbackLevel( void );
-
-	void SetFeedbackLevel( Level feedbackLevel );
-
-	void RegisterThread( const char * id );
-
-	void RenameThread( const char * id );
-
-	void UnregisterThread( void );
-
-	const char * AddLeadingZero(int, int);
-
-	bool Write(Level level, int rank, const char * format, ...);
-
-	void SetWriteCallBack( WriteCallback writeCallback );
-
-	void SetExternalLogger( Logger logger );
-
-    void logLevelToString( int level, char ** levelString );
 
 
-private:
-	FILE *        output;
-	Clock *       clock;
-	Level         level;
-	Level         feedbackLevel;
-
-	pthread_key_t thkey;      // contains key for thread-specific log data
-	WriteCallback writeCallback;
-	Logger        externalLogger;
-
-
-public:
-	char *        redirectFile;
-};
+Exception::~Exception(void)
+{
+   delete[] this->message;
+}

@@ -24,8 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: dimr.h 933 2011-10-25 10:01:26Z mourits $
-// $HeadURL: $
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
 //  DEFINITIONS
 //
@@ -150,7 +150,7 @@ const char BmiGetAttributeEntryPoint   [] = "get_attribute";
 typedef int  (CDECLOPT *BMI_DIMR_SET_LOGGER)(Log *);
 /* logger to be set from outside so we can log messages */
 //typedef int  (CDECLOPT *BMI_SET_LOGGER)		(void(*)(int, char *));
-typedef int  (CDECLOPT *BMI_SET_LOGGER)		(Logger);
+typedef int  (CDECLOPT *BMI_SET_LOGGER)		(BMILogger);
 typedef int  (CDECLOPT *BMI_INITIALIZE)     (const char *);
 typedef void (CDECLOPT *BMI_UPDATE)         (double);
 typedef void (CDECLOPT *BMI_FINALIZE)       (void);
@@ -384,7 +384,7 @@ class Dimr {
 
 
 //------------------------------------------------------------------------------
-/* Logger function */
+/* BMILogger function */
 void _log(Level, const char*);
 
 extern "C" {

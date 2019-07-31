@@ -24,8 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: log.cpp 962 2011-10-31 21:52:47Z elshoff $
-// $HeadURL: $
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
 //  Log Object - Implementation
 //
@@ -188,7 +188,7 @@ void Log::SetWriteCallBack( WriteCallback writeCallback ) {
 }
 
 
-void Log::SetExternalLogger( Logger logger ) {
+void Log::SetExternalLogger( BMILogger logger ) {
 	this->externalLogger = logger;
 	this->Write(INFO, 0, "External logger is set");
 }

@@ -24,8 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: log.h 962 2011-10-31 21:52:47Z elshoff $
-// $HeadURL: $
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
 //  Log Object - Definitions
 //
@@ -75,7 +75,7 @@ public:
 
 	void SetWriteCallBack( WriteCallback writeCallback );
 
-	void SetExternalLogger( Logger logger );
+	void SetExternalLogger( BMILogger logger );
 
     void logLevelToString( int level, char ** levelString );
 
@@ -88,7 +88,7 @@ private:
 
 	pthread_key_t thkey;      // contains key for thread-specific log data
 	WriteCallback writeCallback;
-	Logger        externalLogger;
+	BMILogger        externalLogger;
 
 
 public:
