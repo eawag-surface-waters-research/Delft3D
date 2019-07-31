@@ -806,7 +806,7 @@ module m_readstructures
       use messageHandling
       
       type(t_culvert), pointer,           intent(inout) :: culvert         !< Culvert structure to be read into.
-      type(t_network),                    intent(inout) :: network         !< Network data structure, to which a crosssection definition may be added for the culvert.
+      type(t_network),                    intent(inout) :: network         !< Network data structure, to which a crosssection may be added for the culvert.
       type(tree_data), pointer,           intent(in   ) :: md_ptr          !< ini tree pointer with user input.
       character(IdLen),                   intent(in   ) :: st_id           !< Structure character Id.
       type(t_forcinglist),                intent(inout) :: forcinglist     !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
