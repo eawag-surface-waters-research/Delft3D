@@ -56,7 +56,7 @@ type(shpfileobject)         :: shphandle
 type(shpobject)             :: shpobj
 integer                     :: i, j, n, ii, ishape, nshp
 character(len=lencharattr)  :: filename, objectid
-character(len=4)            :: lenobj_loc
+character(len=6)            :: lenobj_loc
 integer                     :: id_objectid, id_flowlinknr
    if (jampi .eq. 0) then
       call mess(LEVEL_INFO, 'SHAPEFILE: Writing a shape file for cross sections.')
@@ -91,7 +91,7 @@ integer                     :: id_objectid, id_flowlinknr
       nshp = crs(n)%PATH%LNX ! Nr. links(shapes)
       !! add nshp shapes
       do i = 0, nshp - 1
-         write(lenobj_loc, '(I4.4)') i
+         write(lenobj_loc, '(I6.6)') i
          objectid = trim(crs(n)%NAME)//'_'//lenobj_loc
          !call mess(LEVEL_INFO, 'SHAPEFILE: Creating shape: '''//trim(objectid)//'''.')
          
