@@ -660,8 +660,6 @@ src/engines_gpl/dimr/packages/dimr/src/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/src/dimr_exe.cpp -text
 src/engines_gpl/dimr/packages/dimr/src/dimr_exe_version.cpp -text
 src/engines_gpl/dimr/packages/dimr/src/readme.txt -text
-src/engines_gpl/dimr/packages/dimr_lib/DimrTests.cpp -text
-src/engines_gpl/dimr/packages/dimr_lib/DimrTests.h -text
 src/engines_gpl/dimr/packages/dimr_lib/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj.filters -text
@@ -690,6 +688,8 @@ src/engines_gpl/dimr/packages/dimr_lib/src/exception.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/log.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/stringutils.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/xmltree.cpp -text
+src/engines_gpl/dimr/packages/dimr_lib/tests/DimrTests.cpp -text
+src/engines_gpl/dimr/packages/dimr_lib/tests/DimrTests.h -text
 src/engines_gpl/dimr/packages/dimr_testcomponent/ReadMe.txt -text
 src/engines_gpl/dimr/packages/dimr_testcomponent/dimr_testcomponent.f90 -text
 src/engines_gpl/dimr/packages/dimr_testcomponent/dimr_testcomponent.vfproj -text
