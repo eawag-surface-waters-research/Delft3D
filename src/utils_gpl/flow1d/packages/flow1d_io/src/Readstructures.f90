@@ -797,17 +797,18 @@ module m_readstructures
 
    end subroutine readUniversalWeir
    
-   !> read the culvert specific data
+   !> Read the culvert specific data.
+   !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readCulvert(culvert, network, md_ptr, st_id, forcinglist, success)
    
       use messageHandling
       
-      type(t_culvert), pointer,           intent(inout) :: culvert         !< general structure to be read into 
-      type(t_network),                    intent(in   ) :: network         !< network data structure
+      type(t_culvert), pointer,           intent(inout) :: culvert         !< Culvert structure to be read into.
+      type(t_network),                    intent(inout) :: network         !< Network data structure, to which a crosssection definition may be added for the culvert.
       type(tree_data), pointer,           intent(in   ) :: md_ptr          !< ini tree pointer with user input.
       character(IdLen),                   intent(in   ) :: st_id           !< Structure character Id.
       type(t_forcinglist),                intent(inout) :: forcinglist     !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
-      logical,                            intent(inout) :: success         !< logical indicating, the reading of the structure was successfull
+      logical,                            intent(  out) :: success         !< Result status, whether reading of the structure was successful.
  
       character(len=IdLen)                        :: CrsDefID, txt
       integer                                     :: CrsDefIndx
@@ -824,6 +825,7 @@ module m_readstructures
       double precision, allocatable, dimension(:) :: relOpen
       double precision, allocatable, dimension(:) :: lossCoeff
 
+      success = .true.
       allocate(culvert)
 
       call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success)
@@ -853,22 +855,21 @@ module m_readstructures
       
       culvert%culvertType    = ST_CULVERT
       
-      call prop_get_string(md_ptr, '', 'allowedflowdir', txt, success)
+      call prop_get_string(md_ptr, '', 'allowedFlowDir', txt, success)
       culvert%allowedflowdir =allowedFlowDirToInt(txt)
       if (success) call prop_get_double(md_ptr, '', 'length', culvert%length, success) 
-      if (success) call prop_get_double(md_ptr, '', 'leftlevel', culvert%leftlevel, success) 
-      if (success) call prop_get_double(md_ptr, '', 'rightlevel', culvert%rightlevel, success) 
-      if (success) call prop_get_double(md_ptr, '', 'inletlosscoeff', culvert%inletlosscoeff, success) 
-      if (success) call prop_get_double(md_ptr, '', 'outletlosscoeff', culvert%outletlosscoeff, success) 
+      if (success) call prop_get_double(md_ptr, '', 'leftLevel', culvert%leftlevel, success) 
+      if (success) call prop_get_double(md_ptr, '', 'rightLevel', culvert%rightlevel, success) 
+      if (success) call prop_get_double(md_ptr, '', 'inletLossCoeff', culvert%inletlosscoeff, success) 
+      if (success) call prop_get_double(md_ptr, '', 'outletLossCoeff', culvert%outletlosscoeff, success) 
 
-      call prop_get_integer(md_ptr, '', 'valveonoff', valveonoff, success)
+      call prop_get_integer(md_ptr, '', 'valveOnOff', valveonoff, success)
       if (.not. success) return
       
       if (valveonoff == 1) then
          
          culvert%has_valve = .true.
          
-         call prop_get_double(md_ptr, '', 'valveOpeningHeight', culvert%valveOpening, success)
          call get_value_or_addto_forcinglist(md_ptr, 'valveOpeningHeight', culvert%valveOpening, st_id, ST_CULVERT, forcinglist, success)
          if (success) call prop_get_integer(md_ptr, '', 'lossCoeffCount',   lossCoeffCount, success) ! UNST-2710: new consistent keyword
          if (.not. success) return
