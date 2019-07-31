@@ -1302,35 +1302,50 @@ module m_readstructures
 
    end subroutine readWeirAsGenStru
  
-   !> Read the orifice or gate parameters and define a general structure
+   !> Read the orifice or gate parameters and define a general structure.
+   !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readOrificeAsGenStru(generalst, md_ptr, st_id, forcinglist, success)
    
       use messageHandling
       
-      type(t_GeneralStructure), pointer,  intent(inout) :: generalst   !< general structure to be read into 
+      type(t_GeneralStructure), pointer,  intent(inout) :: generalst   !< General structure to be read into. 
       type(tree_data), pointer,           intent(in   ) :: md_ptr      !< ini tree pointer with user input.
-      logical,                            intent(inout) :: success     !< logical indicating, the reading of the structure was successfull
       character(IdLen),                   intent(in   ) :: st_id       !< Structure character Id.
       type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
+      logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
       double precision :: area
+      
+      success = .true.
       allocate(generalst)
 
       generalst%velheight = .true.
-      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'corrCoeff',  generalst%mugf_pos, success)
-      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
+      call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
       if (.not. success) then
-         call  prop_get_double(md_ptr, 'structure', 'area',  area, success)
+         write (msgbuf, '(a,a,a)') 'Error Reading Structure ''', st_id, ''', crestLevel is missing.'
+         call warn_flush()
+         goto 888
+      endif
+
+      call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos, success)
+      if (.not. success) then
+         generalst%mugf_pos = 1d0
+      end if
+
+      call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
+      if (.not. success) then
+         call  prop_get_double(md_ptr, '', 'area',  area, success)
          if (success) then
             generalst%ws = sqrt(area)
             generalst%gateLowerEdgeLevel = generalst%ws + generalst%zs
+            ! TODO: JN: is area optional, or not?
+            ! success = .true.
          endif
       else
          call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, &
                                                        forcinglist, success)
       endif
-      
+
       generalst%wu1                = generalst%ws
       generalst%zu1                = generalst%zs
       generalst%wu2                = generalst%ws
@@ -1350,11 +1365,17 @@ module m_readstructures
       generalst%cwd_neg            = 1d0
       generalst%mugf_neg           = generalst%mugf_pos
       generalst%extraresistance    = 0d0
-      generalst%gatedoorheight     = huge(1d0)
+      generalst%gatedoorheight     = 1d10
       generalst%gateopeningwidth   = 0d0
       generalst%crestlength        = 0d0
       generalst%velheight          = .true.
-      generalst%openingDirection   = GEN_SYMMETRIC
+      generalst%openingDirection   = GEN_SYMMETRIC ! TODO: once 2D structures are being read by this reader, also support fromleft and fromright
+
+      ! success
+      return
+
+888   continue
+      ! Some error occurred
 
    end subroutine readOrificeAsGenStru
  
