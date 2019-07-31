@@ -750,27 +750,29 @@ module m_readstructures
 
    end subroutine readWeir
    
-   !> Read specific data for the universal weir structrue
+   !> Read specific data for the universal weir structure.
+   !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readUniversalWeir(uniweir, md_ptr, success)
    
-      type(t_uni_weir), pointer, intent(inout)     :: uniweir    !< universal weir opject
-      type(tree_data), pointer, intent(in)         :: md_ptr     !< ini tree pointer with user input.
-      logical, intent(inout)                       :: success    !< indicates whether the reading was succesful
-      
+      type(t_uni_weir), pointer, intent(inout) :: uniweir    !< Universal weir structure to be read into.
+      type(tree_data), pointer,  intent(in)    :: md_ptr     !< ini tree pointer with user input.
+      logical,                   intent(  out) :: success     !< Result status, whether reading of the structure was successful.
+
       integer                                      :: istat
       integer                                      :: i
       double precision                             :: lowestz
       character(len=Idlen)                         :: txt
 
+      success = .true.
       allocate(uniweir)
       
-      call prop_get_double(md_ptr, '', 'crestlevel', uniweir%crestlevel, success)
-      if (success) call prop_get_double(md_ptr, '', 'dischargecoeff', uniweir%dischargecoeff, success)
-      if (success) call prop_get_string(md_ptr, '', 'allowedflowdir', txt, success)
+      call prop_get_double(md_ptr, '', 'crestLevel', uniweir%crestlevel, success)
+      if (success) call prop_get_double(md_ptr, '', 'dischargeCoeff', uniweir%dischargecoeff, success)
+      if (success) call prop_get_string(md_ptr, '', 'allowedFlowDir', txt, success)
       uniweir%allowedflowdir = allowedFlowDirToInt(txt)
       
       uniweir%freesubmergedfactor = 0.667d0
-      if (success) call prop_get_double(md_ptr, '', 'freesubmergedfactor', uniweir%freesubmergedfactor)
+      if (success) call prop_get_double(md_ptr, '', 'freeSubMergedFactor', uniweir%freesubmergedfactor)
       
       call prop_get_integer(md_ptr, '', 'levelsCount', uniweir%yzcount, success) ! UNST-2714: new consistent keyword
       if (.not. success) return
