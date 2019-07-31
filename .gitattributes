@@ -638,11 +638,15 @@ src/engines_gpl/dimr/doc/DimrAndBMIDesign_v03.docx -text
 src/engines_gpl/dimr/doc/classDiagramDimr.pdf -text
 src/engines_gpl/dimr/doc/use_dimr_dll_example.c -text
 src/engines_gpl/dimr/packages/DimrTesting/DimrDllNative.cs -text
+src/engines_gpl/dimr/packages/DimrTesting/DimrTestComponentBMITests.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/DimrTesting.csproj -text
 src/engines_gpl/dimr/packages/DimrTesting/IBasicModelInterface.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/Program.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/Properties/AssemblyInfo.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/Sobek3ModelWrapper.cs -text
+src/engines_gpl/dimr/packages/DimrTesting/app.config -text
+src/engines_gpl/dimr/packages/DimrTesting/dimr.xml -text
+src/engines_gpl/dimr/packages/DimrTesting/packages.config -text
 src/engines_gpl/dimr/packages/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/dimr_class_diagram.cd -text
@@ -656,8 +660,11 @@ src/engines_gpl/dimr/packages/dimr/src/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/src/dimr_exe.cpp -text
 src/engines_gpl/dimr/packages/dimr/src/dimr_exe_version.cpp -text
 src/engines_gpl/dimr/packages/dimr/src/readme.txt -text
+src/engines_gpl/dimr/packages/dimr_lib/DimrTests.cpp -text
+src/engines_gpl/dimr/packages/dimr_lib/DimrTests.h -text
 src/engines_gpl/dimr/packages/dimr_lib/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj -text
+src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj.filters -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib_class_diagram.cd -text
 src/engines_gpl/dimr/packages/dimr_lib/include/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/include/bmi.h -text

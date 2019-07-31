@@ -32,7 +32,7 @@ namespace DimrTesting
                 Console.WriteLine(e.Message);
             }
             
-            DimrDllNative.initialize(filepath);
+            DimrDllNative.Initialize(filepath);
             return 0;
         }
 

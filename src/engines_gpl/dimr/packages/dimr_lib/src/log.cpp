@@ -188,7 +188,7 @@ void Log::SetWriteCallBack( WriteCallback writeCallback ) {
 }
 
 
-void Log::SetExternalLogger( Logger logger ) {
+void Log::SetExternalLogger( BMILogger logger ) {
 	this->externalLogger = logger;
 	this->Write(INFO, 0, "External logger is set");
 }
