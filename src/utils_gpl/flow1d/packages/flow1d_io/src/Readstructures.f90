@@ -905,14 +905,15 @@ module m_readstructures
    
    end subroutine readCulvert
    
-   !> Read the bridge specific data for a bridge structure
+   !> Read the bridge specific data for a bridge structure.
+   !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readBridge(bridge,network, md_ptr, st_id, success)
       
-      type(t_bridge),  pointer,  intent(inout)  :: bridge          !< object containing bridge specific data
-      type(t_network),           intent(in   )  :: network         !< network data structure
-      type(tree_data), pointer,  intent(in   )  :: md_ptr          !< ini tree pointer with user input.
-      character(IdLen),          intent(in   )  :: st_id           !< Structure character Id.
-      logical,                   intent(inout)  :: success         !< Indicates whether reading of the bridge data was successful
+      type(t_bridge),  pointer,  intent(inout) :: bridge          !< Bridge object to be read into.
+      type(t_network),           intent(inout) :: network         !< Network data structure, to which a crosssection may be added for the bridge.
+      type(tree_data), pointer,  intent(in   ) :: md_ptr          !< ini tree pointer with user input.
+      character(IdLen),          intent(in   ) :: st_id           !< Structure character Id.
+      logical,                   intent(  out) :: success         !< Result status, whether reading of the structure was successful.
 
       character(len=IdLen)                       :: txt
       character(len=IdLen)                       :: CrsDefID
@@ -921,24 +922,25 @@ module m_readstructures
       logical                                    :: isPillarBridge
       
       
+      success = .true.
       allocate(bridge)
 
-      call prop_get_string(md_ptr, 'structure', 'allowedflowdir', txt, success)
+      call prop_get_string(md_ptr, 'structure', 'allowedFlowDir', txt, success)
       bridge%allowedflowdir = allowedFlowDirToInt(txt)
       if (.not. success) then
-         call setMessage(LEVEL_ERROR, 'required key allowedFlowdir not found for structure '//trim(st_id))
+         call setMessage(LEVEL_ERROR, 'required key allowedFlowDir not found for structure '//trim(st_id))
          return
       endif
       
       ! Make distinction between a pillar bridge and a standard bridge
       
       bridge%pillarwidth = 0d0
-      call prop_get_double(md_ptr, 'structure', 'pillarwidth', bridge%pillarwidth, success)
+      call prop_get_double(md_ptr, '', 'pillarWidth', bridge%pillarwidth, success)
       if (success) then
          ! pillar bridge
-         call prop_get_double(md_ptr, 'structure', 'formfactor', bridge%formfactor, success)
+         call prop_get_double(md_ptr, '', 'formFactor', bridge%formfactor, success)
          if (.not. success) then
-            call setMessage(LEVEL_ERROR, 'formfactor not found for structure '//trim(st_id))
+            call setMessage(LEVEL_ERROR, 'formFactor not found for structure '//trim(st_id))
             return
          endif
          
@@ -957,7 +959,7 @@ module m_readstructures
          
       else
          ! Standard bridge
-         call prop_get_string(md_ptr, 'structure', 'csDefId', CrsDefID, success)
+         call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success)
          if (.not. success) then
             call setmessage(LEVEL_ERROR, 'error reading key csDefId for bridge '//trim(st_id))
             return
@@ -970,7 +972,7 @@ module m_readstructures
             return
          endif
 
-         call prop_get_string(md_ptr, 'structure', 'bedFrictionType', txt, success)
+         call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success)
          call frictionTypeStringToInteger(txt, bridge%bedFrictionType)
          if (success) call prop_get_double(md_ptr, 'structure', 'bedFriction', bridge%bedFriction, success)
          
@@ -982,10 +984,10 @@ module m_readstructures
          bridge%pcross             => network%crs%cross(icross)
          bridge%crosssectionnr     = icross
 
-         call prop_get_double(md_ptr, 'structure', 'bedlevel', bridge%bedLevel, success)
-         if (success) call prop_get_double(md_ptr, 'structure', 'length', bridge%length, success)
-         if (success) call prop_get_double(md_ptr, 'structure', 'inletlosscoeff', bridge%inletlosscoeff, success)
-         if (success) call prop_get_double(md_ptr, 'structure', 'outletlosscoeff', bridge%outletlosscoeff, success)
+         call prop_get_double(md_ptr, '', 'bedLevel', bridge%bedLevel, success)
+         if (success) call prop_get_double(md_ptr, '', 'length', bridge%length, success)
+         if (success) call prop_get_double(md_ptr, '', 'inletLossCoeff', bridge%inletlosscoeff, success)
+         if (success) call prop_get_double(md_ptr, '', 'outletLossCoeff', bridge%outletlosscoeff, success)
          if (.not. success) then
             call setmessage(LEVEL_ERROR, 'Error reading bridge data for structure '//trim(st_id))
          endif
