@@ -9,25 +9,35 @@ namespace DimrTesting
     public class DimrTestComponentBMITests 
     {
         private DimrDllNative dimrDllNative;
+        private string currentDir;
 
         [SetUp]
         public void SetupDLL()
         {
-            var currentDir = Environment.CurrentDirectory;
+            currentDir = Environment.CurrentDirectory;
             if (File.Exists(currentDir + DimrDllNative.dllName))
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(currentDir + DimrDllNative.dllName));
             dimrDllNative = new DimrDllNative();
         }
+
         [TearDown]
         public void DisposeDLL()
         {
             dimrDllNative.Dispose();
+            Directory.SetCurrentDirectory(currentDir);
         }
 
         [Test]
-        public void Initialize()
+        public void InitializeWithGoodFile()
         {
-            dimrDllNative.Initialize("dimr.xml");
+            
+            Assert.That(dimrDllNative.Initialize(Path.Combine(currentDir, "dimr.xml")), Is.EqualTo(0));
+        }
+        [Test]
+        public void InitializeWithWrongFile()
+        {
+            
+            Assert.That(dimrDllNative.Initialize(Path.Combine(currentDir, "notdimr.xml")), Is.EqualTo(-2));
         }
     }
     

@@ -47,26 +47,9 @@ namespace DimrTesting
         }
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void Initialize_dll_type([MarshalAs(UnmanagedType.LPStr)]string path);
+        public delegate int Initialize_dll_type([MarshalAs(UnmanagedType.LPStr)]string path);
         public Initialize_dll_type Initialize = null;
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate void Open_dll_type([MarshalAs(UnmanagedType.LPStr)]string path);
-        public Open_dll_type Open_DLL = null;
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        public delegate double GetDataFileVersion_dll_type();
-        public GetDataFileVersion_dll_type GetDataFileVersion = null;
-
         
-
-        public virtual void Open(string file)
-        {
-            if (GetDataFileVersion() < 1.1)
-                throw new Exception("f");
-            Open_DLL(file);
-        }
-
         /*
         [DllImport(dllName)]
         public static extern void finalize();
@@ -93,16 +76,6 @@ namespace DimrTesting
         public void Dispose()
         {
             Win32NativeMethods.FreeLibrary(dimrDLL);
-        }
-    }
-
-    public class MichalsDimr : DimrDllNative
-    {
-        public override void Open(string file)
-        {
-            if (GetDataFileVersion() > 1.1)
-                throw new Exception("f");
-            Open_DLL(file);
         }
     }
 }
