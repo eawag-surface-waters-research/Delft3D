@@ -172,20 +172,20 @@ module m_1d_structures
       type(t_hashlist)                                      :: hashlist_culvert
       type(t_hashlist)                                      :: hashlist_bridge
       type(t_hashlist)                                      :: hashlist_pump
-      integer                                               :: numWeirs
-      integer                                               :: numCulverts
-      integer                                               :: numPumps
-      integer                                               :: numBridges
-      integer                                               :: numOrifices
-      integer                                               :: numGates
-      integer                                               :: numGeneralStructures
-      integer, pointer, dimension(:)                        :: weirIndices
-      integer, pointer, dimension(:)                        :: culvertIndices 
-      integer, pointer, dimension(:)                        :: pumpIndices
-      integer, pointer, dimension(:)                        :: bridgeIndices
-      integer, pointer, dimension(:)                        :: orificeIndices
-      integer, pointer, dimension(:)                        :: gateIndices
-      integer, pointer, dimension(:)                        :: generalStructureIndices
+      integer                                               :: numWeirs                 !< Total number of weirs in this structure set. See indices array below.
+      integer                                               :: numCulverts              !< Total number of culverts in this structure set. See indices array below.
+      integer                                               :: numPumps                 !< Total number of pumps in this structure set. See indices array below.
+      integer                                               :: numBridges               !< Total number of bridges in this structure set. See indices array below.
+      integer                                               :: numOrifices              !< Total number of orifices in this structure set. See indices array below.
+      integer                                               :: numGates                 !< Total number of gates in this structure set. See indices array below.
+      integer                                               :: numGeneralStructures     !< Total number of general structures in this structure set. See indices array below.
+      integer, pointer, dimension(:)                        :: weirIndices              !< (numWeirs) indices of the weirs in the overall struct(:) array. Note: some may actually be of type ST_GENERAL_ST.
+      integer, pointer, dimension(:)                        :: culvertIndices           !< (numCulverts) indices of the culverts in the overall struct(:) array.
+      integer, pointer, dimension(:)                        :: pumpIndices              !< (numPumps) indices of the pumps in the overall struct(:) array.
+      integer, pointer, dimension(:)                        :: bridgeIndices            !< (numBridges) indices of the bridges in the overall struct(:) array.
+      integer, pointer, dimension(:)                        :: orificeIndices           !< (numOrifices) indices of the orifices in the overall struct(:) array. Note: some may actually be of type ST_GENERAL_ST.
+      integer, pointer, dimension(:)                        :: gateIndices              !< (numGates) indices of the gates in the overall struct(:) array. Note: some may actually be of type ST_GENERAL_ST.
+      integer, pointer, dimension(:)                        :: generalStructureIndices  !< (numGeneralStructures) indices of the general structures in the overall struct(:) array.
    end type t_structureSet
 
    type, public :: t_compound
