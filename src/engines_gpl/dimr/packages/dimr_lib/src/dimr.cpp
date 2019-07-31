@@ -1062,10 +1062,9 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         std::ostringstream varName;
                         varName << sourceComponentName << " -> " << targetComponentName;
                         varName << std::left << std::setfill(' ') << std::setw(name_strlen) << varName.str();
-                        const string varNamestr{ varName.str() };
+                        const string varNamestr( varName.str() );
                         nc_put_var_text(ncid, station_var, varNamestr.c_str());
                     }
-
                     // Het hele spul MOET NAAR DELTARES_COMMON_C !!!
                 }
             }
