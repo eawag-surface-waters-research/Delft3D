@@ -2120,7 +2120,7 @@ end subroutine count_occurrences
 
           icount = icount + 1
 
-          value(icount) = trim(localvalue(1:ipos - 1))
+          value(icount) = trim(adjustl(localvalue(1:ipos - 1)))
 
           localvalue = localvalue(ipos+1:)
 
@@ -2132,7 +2132,7 @@ end subroutine count_occurrences
 
        if (ipos == 0 .and. icount < valuelength) then
           icount = icount + 1
-          value(icount) = trim(localvalue)
+          value(icount) = trim(adjustl(localvalue))
        endif
 
     else
