@@ -10,7 +10,7 @@
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\stringutils.cpp" />
     <ClCompile Include="src\xmltree.cpp" />
-    <ClCompile Include="DimrTests.cpp">
+    <ClCompile Include="tests\DimrTests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
   </ItemGroup>
@@ -24,7 +24,7 @@
     <ClInclude Include="include\log.h" />
     <ClInclude Include="include\stringutils.h" />
     <ClInclude Include="include\xmltree.h" />
-    <ClInclude Include="DimrTests.h">
+    <ClInclude Include="tests\DimrTests.h">
       <Filter>tests</Filter>
     </ClInclude>
   </ItemGroup>
