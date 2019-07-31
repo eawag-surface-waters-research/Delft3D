@@ -1311,7 +1311,7 @@ module m_readstructures
       type(t_GeneralStructure), pointer,  intent(inout) :: generalst   !< General structure to be read into. 
       type(tree_data), pointer,           intent(in   ) :: md_ptr      !< ini tree pointer with user input.
       character(IdLen),                   intent(in   ) :: st_id       !< Structure character Id.
-      type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
+      type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which orifice forcing will be added if needed.
       logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
       double precision :: area
