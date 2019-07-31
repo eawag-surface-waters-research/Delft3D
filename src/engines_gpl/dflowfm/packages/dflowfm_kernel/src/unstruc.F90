@@ -39013,7 +39013,9 @@ if (mext > 0) then
           !end if
        endif
     enddo
-    deallocate(kclat)
+    if (allocated(kclat)) then
+       deallocate(kclat)
+    endif
  endif
 
  if (jaoldstr > 0 .and. ncgensg > 0) then
