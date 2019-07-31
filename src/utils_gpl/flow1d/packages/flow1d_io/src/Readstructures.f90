@@ -1255,16 +1255,17 @@ module m_readstructures
    
    end subroutine readOrifice
 
-   !> Read the weir parameters and define a general structure
+   !> Read the weir parameters and define a general structure.
+   !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readWeirAsGenStru(generalst, md_ptr, st_id, forcinglist, success)
    
       use messageHandling
       
-      type(t_GeneralStructure), pointer,  intent(inout) :: generalst   !< general structure to be read into 
+      type(t_GeneralStructure), pointer,  intent(inout) :: generalst   !< General structure to be read into.
       type(tree_data), pointer,           intent(in   ) :: md_ptr      !< ini tree pointer with user input.
-      logical,                            intent(inout) :: success     !< logical indicating, the reading of the structure was successfull
       character(IdLen),                   intent(in   ) :: st_id       !< Structure character Id.
-      type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
+      type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which weir forcing will be added if needed.
+      logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
       success = .true.
       allocate(generalst)
@@ -1277,7 +1278,8 @@ module m_readstructures
          write (msgbuf, '(a)') 'Error Reading Structure '''//trim(st_id)//''', crestLevel is missing.'
          call err_flush()
       end if
-      if (success) call prop_get_double(md_ptr, 'structure', 'corrCoeff',  generalst%mugf_pos)
+      generalst%mugf_pos = 1d0
+      if (success) call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos)
 
       generalst%wu1                = generalst%ws
       generalst%zu1                = generalst%zs
