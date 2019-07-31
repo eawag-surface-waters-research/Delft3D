@@ -84,6 +84,10 @@
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</GenerateManifest>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(VCInstallDir)UnitTest\include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(VCInstallDir)UnitTest\lib</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
       <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini
@@ -212,6 +216,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="tests\DimrTests.cpp" />
     <ClCompile Include="src\clock.cpp" />
     <ClCompile Include="src\component.cpp" />
     <ClCompile Include="src\coredump.cpp" />
@@ -223,6 +228,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
     <ClCompile Include="src\xmltree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="tests\DimrTests.h" />
     <ClInclude Include="include\bmi.h" />
     <ClInclude Include="include\clock.h" />
     <ClInclude Include="include\component.h" />
