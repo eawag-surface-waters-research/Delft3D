@@ -826,27 +826,34 @@ module m_readstructures
       integer                                     :: istat
       double precision, allocatable, dimension(:) :: relOpen
       double precision, allocatable, dimension(:) :: lossCoeff
+      logical                                     :: success1 
 
       success = .true.
       allocate(culvert)
 
-      call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success)
-      if (.not. success) return
+      call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success1)
+      success = success .and. check_input_result(success1, st_id, 'csDefId')
+      
+      if (success) then
          
-      CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
-      if (CrsDefIndx <= 0) then
-         call setMessage(LEVEL_FATAL, 'Error Reading Culvert: Cross-Section Definition not Found')
+         CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
+         if (CrsDefIndx <= 0) then
+            call setMessage(LEVEL_ERROR, 'Error Reading Culvert: Cross-Section Definition not Found')
+            success = .false.
+         endif
       endif
-
-      call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success)
-      call frictionTypeStringToInteger(txt, bedFrictionType)
+   
+      call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success1)
+      success = success .and. check_input_result(success1, st_id, 'bedFrictionType')
+      if (success) call frictionTypeStringToInteger(txt, bedFrictionType)
        
-      if (success) call prop_get_double(md_ptr, '', 'bedFriction', bedFriction, success)
+      call prop_get_double(md_ptr, '', 'bedFriction', bedFriction, success1)
+      success = success .and. check_input_result(success1, st_id, 'bedFriction')
+      
       groundFrictionType = 0
       groundFriction = 45d0
-      if (success) call prop_get_integer(md_ptr, '', 'groundFrictionType', groundFrictionType)
-      if (success) call prop_get_double(md_ptr, '', 'groundFriction', groundFriction)
-      if (.not. success) return
+      call prop_get_integer(md_ptr, '', 'groundFrictionType', groundFrictionType)
+      call prop_get_double(md_ptr, '', 'groundFriction', groundFriction)
          
       icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
                                bedFrictionType, bedFriction, groundFrictionType, groundFriction)
@@ -857,43 +864,58 @@ module m_readstructures
       
       culvert%culvertType    = ST_CULVERT
       
-      call prop_get_string(md_ptr, '', 'allowedFlowDir', txt, success)
-      culvert%allowedflowdir =allowedFlowDirToInt(txt)
-      if (success) call prop_get_double(md_ptr, '', 'length', culvert%length, success) 
-      if (success) call prop_get_double(md_ptr, '', 'leftLevel', culvert%leftlevel, success) 
-      if (success) call prop_get_double(md_ptr, '', 'rightLevel', culvert%rightlevel, success) 
-      if (success) call prop_get_double(md_ptr, '', 'inletLossCoeff', culvert%inletlosscoeff, success) 
-      if (success) call prop_get_double(md_ptr, '', 'outletLossCoeff', culvert%outletlosscoeff, success) 
+      call prop_get_string(md_ptr, '', 'allowedFlowDir', txt, success1)
+      success = success .and. check_input_result(success1, st_id, 'allowedFlowDir')
+      if (success) culvert%allowedflowdir =allowedFlowDirToInt(txt)
+      
+      call prop_get_double(md_ptr, '', 'length', culvert%length, success1) 
+      success = success .and. check_input_result(success1, st_id, 'length')
+      
+      call prop_get_double(md_ptr, '', 'leftLevel', culvert%leftlevel, success1) 
+      success = success .and. check_input_result(success1, st_id, 'leftLevel')
+      
+      call prop_get_double(md_ptr, '', 'rightLevel', culvert%rightlevel, success1) 
+      success = success .and. check_input_result(success1, st_id, 'rightLevel')
+      
+      call prop_get_double(md_ptr, '', 'inletLossCoeff', culvert%inletlosscoeff, success1) 
+      success = success .and. check_input_result(success1, st_id, 'inletLossCoeff')
+      
+      call prop_get_double(md_ptr, '', 'outletLossCoeff', culvert%outletlosscoeff, success1) 
+      success = success .and. check_input_result(success1, st_id, 'outletLossCoeff')
 
-      call prop_get_integer(md_ptr, '', 'valveOnOff', valveonoff, success)
-      if (.not. success) return
+      call prop_get_integer(md_ptr, '', 'valveOnOff', valveonoff, success1)
+      success = success .and. check_input_result(success1, st_id, 'valveOnOff')
       
       if (valveonoff == 1) then
          
          culvert%has_valve = .true.
          
-         call get_value_or_addto_forcinglist(md_ptr, 'valveOpeningHeight', culvert%valveOpening, st_id, ST_CULVERT, forcinglist, success)
-         if (success) call prop_get_integer(md_ptr, '', 'lossCoeffCount',   lossCoeffCount, success) ! UNST-2710: new consistent keyword
-         if (.not. success) return
+         call get_value_or_addto_forcinglist(md_ptr, 'valveOpeningHeight', culvert%valveOpening, st_id, ST_CULVERT, forcinglist, success1)
+         success = success .and. check_input_result(success1, st_id, 'valveOpeningHeight')
+         
+         call prop_get_integer(md_ptr, '', 'numLossCoeff', lossCoeffCount, success1) ! UNST-2710: new consistent keyword
+         success = success .and. check_input_result(success1, st_id, 'numLossCoeff')
+         if (success) then   
+            call realloc(relOpen, lossCoeffCount, stat=istat)
+            if (istat == 0) call realloc(lossCoeff, lossCoeffCount, stat=istat)
+            if (istat .ne. 0) then
+               call SetMessage(LEVEL_FATAL, 'Reading Culvert: Error Allocating Valve Loss Arrays')
+            endif
+
+            call prop_get_doubles(md_ptr, '', 'relOpening', relOpen, lossCoeffCount, success1)
+            success = success .and. check_input_result(success1, st_id, 'relOpening')
             
-         call realloc(relOpen, lossCoeffCount, stat=istat)
-         if (istat == 0) call realloc(lossCoeff, lossCoeffCount, stat=istat)
-         if (istat .ne. 0) then
-            call SetMessage(LEVEL_FATAL, 'Reading Culvert: Error Allocating Valve Loss Arrays')
-         endif
-
-         call prop_get_doubles(md_ptr, '', 'relOpening', relOpen, lossCoeffCount, success)
-         if (success) call prop_get_doubles(md_ptr, '', 'lossCoeff', lossCoeff, lossCoeffCount, success)
-         if (.not. success) return
-      
-         call setTable(culvert%lossCoeff, 0, relOpen, lossCoeff, lossCoeffCount)
-
-         ! Clear Valve Loss Arrays
-         istat = 0
-         if (allocated(relOpen)) deallocate(relOpen, stat=istat)
-         if (istat == 0 .and. allocated(lossCoeff)) deallocate(lossCoeff, stat=istat)
-         if (istat .ne. 0) then
-            call SetMessage(LEVEL_FATAL, 'Reading Culvert: Error Deallocating Valve Loss Arrays')
+            call prop_get_doubles(md_ptr, '', 'lossCoeff', lossCoeff, lossCoeffCount, success1)
+            success = success .and. check_input_result(success1, st_id, 'lossCoeff')
+         
+            call setTable(culvert%lossCoeff, 0, relOpen, lossCoeff, lossCoeffCount)
+            ! Clear Valve Loss Arrays
+            istat = 0
+            if (allocated(relOpen)) deallocate(relOpen, stat=istat)
+            if (istat == 0 .and. allocated(lossCoeff)) deallocate(lossCoeff, stat=istat)
+            if (istat .ne. 0) then
+               call SetMessage(LEVEL_FATAL, 'Reading Culvert: Error Deallocating Valve Loss Arrays')
+            endif
          endif
          
       else
