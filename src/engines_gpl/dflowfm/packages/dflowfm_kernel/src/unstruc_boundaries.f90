@@ -1189,8 +1189,10 @@ logical function initboundaryblocksforcings(filename)
        if (n > 0) then 
           balat(n) = balat(n) + ba(k)
        endif   
-    enddo   
-    deallocate(kclat) 
+    enddo
+    if (allocated(kclat)) then
+       deallocate(kclat)
+    endif
  end if
  
  call tree_destroy(bnd_ptr)
