@@ -1182,13 +1182,14 @@ module m_readstructures
       character(IdLen),             intent(in   ) :: st_id       !< Structure character Id.
       integer,                      intent(in   ) :: st_type     !< structure type
       type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which structure forcing will be added if needed.
-      logical,                      intent(inout) :: success     
+      logical,          optional,   intent(inout) :: success     
+      
       integer           :: istat   
       character(CharLn) :: tmpstr
+      logical           :: success1
       
-      
-      call prop_get_string(md_ptr, '', key, tmpstr, success)
-      if (success) then
+      call prop_get_string(md_ptr, '', key, tmpstr, success1)
+      if (success1) then
          read(tmpstr, *, iostat = istat) value
          if (istat /= 0) then ! No number, so assume it was a filename
             forcinglist%Count = forcinglist%Count+1
@@ -1203,7 +1204,10 @@ module m_readstructures
          end if
       endif
       
-
+      if (present(success)) then
+         success = success1
+      endif
+      
    end subroutine get_value_or_addto_forcinglist
    
    subroutine readOrifice(orifice, md_ptr, success)
@@ -1324,38 +1328,27 @@ module m_readstructures
       type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which orifice forcing will be added if needed.
       logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
-      double precision :: area
+      logical        :: success1
       
       success = .true.
       allocate(generalst)
 
       generalst%velheight = .true.
-      call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
-      if (.not. success) then
-         write (msgbuf, '(a,a,a)') 'Error Reading Structure ''', st_id, ''', crestLevel is missing.'
-         call warn_flush()
-         goto 888
-      endif
+      
+      call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success1)
+      success = success .and. check_input_result(success1, st_id, 'crestLevel')
 
-      call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos, success)
-      if (.not. success) then
-         generalst%mugf_pos = 1d0
-      end if
+      generalst%mugf_pos = 1d0
+      call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos)
 
-      call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
-      if (.not. success) then
-         call  prop_get_double(md_ptr, '', 'area',  area, success)
-         if (success) then
-            generalst%ws = sqrt(area)
-            generalst%gateLowerEdgeLevel = generalst%ws + generalst%zs
-            ! TODO: JN: is area optional, or not?
-            ! success = .true.
-         endif
-      else
-         call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, &
-                                                       forcinglist, success)
-      endif
+      generalst%ws = 1d10
+      call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist)
+      
+      call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, &
+                                                       forcinglist, success1)
+      success = success .and. check_input_result(success1, st_id, 'gateLowerEdgeLevel')
 
+      ! Set default/standard values for orifice
       generalst%wu1                = generalst%ws
       generalst%zu1                = generalst%zs
       generalst%wu2                = generalst%ws
@@ -1389,6 +1382,21 @@ module m_readstructures
 
    end subroutine readOrificeAsGenStru
  
+   !> Check if success is true or false, when false generate an error message
+   !! result value is success
+   logical function check_input_result(success, st_id, key)
+      logical         , intent(in   )    :: success   !< result value of the prop_get subroutine
+      character(len=*), intent(in   )    :: st_id     !< id of the current structure
+      character(len=*), intent(in   )    :: key       !< key of the input value 
+      
+      if (.not. success) then
+         write (msgbuf, '(a,a,a)') 'Error Reading Structure ''', trim(st_id), ''', ''', trim(key), ''' is missing.'
+         call err_flush()
+      endif
+      check_input_result = success
+      return 
+   end function check_input_result
+   
    !> Read the general structure parameters.
    !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readGeneralStructure(generalst, md_ptr, st_id, forcinglist, success)
