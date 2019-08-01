@@ -265,7 +265,7 @@ module m_readstructures
                endif
                   
             case (ST_UNI_WEIR)
-               call readUniversalWeir(pstru%uniweir, md_ptr%child_nodes(i)%node_ptr, success)
+               call readUniversalWeir(pstru%uniweir, md_ptr%child_nodes(i)%node_ptr, structureId, success)
             case (ST_CULVERT)
                call readCulvert(pstru%culvert, network, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
             case (ST_BRIDGE)
@@ -752,40 +752,54 @@ module m_readstructures
    
    !> Read specific data for the universal weir structure.
    !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
-   subroutine readUniversalWeir(uniweir, md_ptr, success)
+   subroutine readUniversalWeir(uniweir, md_ptr, st_id, success)
    
       type(t_uni_weir), pointer, intent(inout) :: uniweir    !< Universal weir structure to be read into.
-      type(tree_data), pointer,  intent(in)    :: md_ptr     !< ini tree pointer with user input.
-      logical,                   intent(  out) :: success     !< Result status, whether reading of the structure was successful.
+      type(tree_data),  pointer, intent(in)    :: md_ptr     !< ini tree pointer with user input.
+      character(IdLen),          intent(in   ) :: st_id      !< Structure character Id.
+      logical,                   intent(  out) :: success    !< Result status, whether reading of the structure was successful.
 
       integer                                      :: istat
       integer                                      :: i
       double precision                             :: lowestz
       character(len=Idlen)                         :: txt
+      logical                                      :: success1
 
       success = .true.
       allocate(uniweir)
       
-      call prop_get_double(md_ptr, '', 'crestLevel', uniweir%crestlevel, success)
-      if (success) call prop_get_double(md_ptr, '', 'dischargeCoeff', uniweir%dischargecoeff, success)
-      if (success) call prop_get_string(md_ptr, '', 'allowedFlowDir', txt, success)
+      call prop_get_double(md_ptr, '', 'crestLevel', uniweir%crestlevel, success1)
+      success = success .and. check_input_result(success1, st_id, 'crestLevel')
+      
+      call prop_get_double(md_ptr, '', 'dischargeCoeff', uniweir%dischargecoeff, success1)
+      success = success .and. check_input_result(success1, st_id, 'dischargeCoeff')
+      
+      call prop_get_string(md_ptr, '', 'allowedFlowDir', txt, success1)
+      success = success .and. check_input_result(success1, st_id, 'allowedFlowDir')
+      
       uniweir%allowedflowdir = allowedFlowDirToInt(txt)
       
       uniweir%freesubmergedfactor = 0.667d0
-      if (success) call prop_get_double(md_ptr, '', 'freeSubMergedFactor', uniweir%freesubmergedfactor)
+      call prop_get_double(md_ptr, '', 'freeSubMergedFactor', uniweir%freesubmergedfactor)
       
-      call prop_get_integer(md_ptr, '', 'levelsCount', uniweir%yzcount, success) ! UNST-2714: new consistent keyword
-      if (.not. success) return
-      
-      call realloc(uniweir%y, uniweir%yzcount, stat=istat)
-      if (istat == 0) call realloc(uniweir%z, uniweir%yzcount, stat=istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Reading Universal Weir: Error Allocating Y/Z Arrays')
-      endif
+      call prop_get_integer(md_ptr, '', 'numLevels', uniweir%yzcount, success1) 
+      success = success .and. check_input_result(success1, st_id, 'allowedFlowDir')
 
-      call prop_get_doubles(md_ptr, '', 'yValues', uniweir%y, uniweir%yzcount, success)
-      if (success) call prop_get_doubles(md_ptr, '', 'zValues', uniweir%z, uniweir%yzcount, success)
-      if (.not. success) return
+      if (success) then
+         call realloc(uniweir%y, uniweir%yzcount, stat=istat)
+         if (istat == 0) call realloc(uniweir%z, uniweir%yzcount, stat=istat)
+         if (istat .ne. 0) then
+            call SetMessage(LEVEL_ERROR, 'Reading Universal Weir: '''//trim(st_id)/''' Error Allocating Y/Z Arrays')
+            success = .false.
+            return
+         endif
+
+         call prop_get_doubles(md_ptr, '', 'yValues', uniweir%y, uniweir%yzcount, success1)
+         success = success .and. check_input_result(success1, st_id, 'yValues')
+      
+         call prop_get_doubles(md_ptr, '', 'zValues', uniweir%z, uniweir%yzcount, success1)
+         success = success .and. check_input_result(success1, st_id, 'zValues')
+      endif
       
       ! The z-values contains a relative height with respect to the crest level
       ! As a result the minimal value for Z is 0.
