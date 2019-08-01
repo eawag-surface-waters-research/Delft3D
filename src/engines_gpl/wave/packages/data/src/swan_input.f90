@@ -5010,7 +5010,11 @@ subroutine write_swan_inp (wavedata, calccount, &
           j          = 16
           line(j:j)  = ''''''
           k          = k + 1
-          write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
+          if (sferic) then
+             write (line(21:48), '(2(F10.6,4X))') xpcu(k), ypcu(k)
+          else
+             write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
+          endif
           line(49:49) = '_'
           write (luninp, '(1X,A)') line
           line        = ' '
@@ -5019,7 +5023,11 @@ subroutine write_swan_inp (wavedata, calccount, &
              k = k + 1
              line       = ' '
              write (line(11:15), '(I5)') nclin(k)
-             write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
+             if (sferic) then
+                write (line(21:48), '(2(F10.6,4X))') xpcu(k), ypcu(k)
+             else
+                write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
+             endif
              !              Modification
              if (j/=jendcrv) line(50:50) = '_'
              write (luninp, '(1X,A)') line
@@ -5391,7 +5399,9 @@ subroutine outputCurvesFromFile()
     do i = 1,size(pol_ptr%child_nodes)
        cur_ptr => pol_ptr%child_nodes(i)%node_ptr
        curname = tree_get_name(cur_ptr)
-       write(luninp,'(1x,3a)') 'CURVE  ''', trim(curname), '''  _'
+       line = trim(curname)
+       line = line(1:8)      ! sname can only be 8 characters long in SWAN source code (subroutine SWTABP)
+       write(luninp,'(1x,3a)') 'CURVE  ''', trim(line), '''  _'
        do j = 1,size(cur_ptr%child_nodes)
           tmp_ptr => cur_ptr%child_nodes(j)%node_ptr
 
@@ -5404,7 +5414,7 @@ subroutine outputCurvesFromFile()
           ! call transfer with a real(sp) constant as second parameter
           !
           inputvals = transfer( data_ptr, 0., 2 )
-          write(line,'(18x,2(f10.2,4x))') inputvals(1), inputvals(2)
+          write(line,'(18x,2(f10.6,4x))') inputvals(1), inputvals(2)   ! needed in case of spherical output, was f10.2
           if (j /= 1) then
              line(14:14) = '1'
           endif
@@ -5419,7 +5429,9 @@ subroutine outputCurvesFromFile()
           write (number, '(I6.6)') calccount
        endif
        write(luninp,'(1x,a)') '$ '
-       write(luninp,'(1x,6a)') 'TABLE  ''', trim(curname), '''    NOHEAD    ''SWANOUT_', trim(curname), trim(number), '''   _'
+       line = trim(curname)
+       line = line(1:8)      ! sname can only be 8 characters long in SWAN source code
+       write(luninp,'(1x,6a)') 'TABLE  ''', trim(line), '''    NOHEAD    ''SWANOUT_', trim(curname), trim(number), '''   _'
        write(luninp, '(4(2X,A),A)') varnam1(11), varnam1(12), varnam1(13),     &
                                   & varnam1(4), ' _'
        write(luninp, '(5(2X,A),A)') varnam1(1), varnam1(3), varnam1(2),        &
