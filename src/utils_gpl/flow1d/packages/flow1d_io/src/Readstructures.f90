@@ -1066,13 +1066,15 @@ module m_readstructures
       
    end subroutine
 
+   !> Read the pump specific data for a pump structure.
+   !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readPump(pump, md_ptr, st_id, forcinglist, success)
    
-      type(t_pump), pointer,        intent(inout) :: pump        !< The pump structure to be read into.
+      type(t_pump), pointer,        intent(inout) :: pump        !< Pump structure to be read into.
       type(tree_data), pointer,     intent(in   ) :: md_ptr      !< ini tree pointer with user input.
       character(IdLen),             intent(in   ) :: st_id       !< Structure character Id.
       type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which pump forcing will be added if needed.
-      logical,                      intent(inout) :: success
+      logical,                      intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
       integer                                      :: tabsize
       integer                                      :: istat
@@ -1080,11 +1082,12 @@ module m_readstructures
       double precision, allocatable, dimension(:)  :: redfac   
       
       
+      success = .true.
       allocate(pump)
 
-      call prop_get_integer(md_ptr, 'structure', 'direction', pump%direction, success)
+      call prop_get_integer(md_ptr, '', 'direction', pump%direction, success)
       pump%nrstages = 1
-      if (success) call prop_get_integer(md_ptr, 'structure', 'numStages', pump%nrstages, success) ! UNST-2709: new consistent keyword
+      if (success) call prop_get_integer(md_ptr, '', 'numStages', pump%nrstages, success) ! UNST-2709: new consistent keyword
       
       if (pump%nrstages < 1) then
          call setMessage(LEVEL_FATAL, "Error Reading Pump: No Stages Defined")
@@ -1106,16 +1109,16 @@ module m_readstructures
          
       else
          ! Multiple stages: only support table with double precision values.
-         call prop_get_doubles(md_ptr, 'structure', 'capacity', pump%capacity, pump%nrstages, success)     
+         call prop_get_doubles(md_ptr, '', 'capacity', pump%capacity, pump%nrstages, success)     
       end if
       if (iabs(pump%direction) == 1 .or. iabs(pump%direction) == 3) then
-         if (success) call prop_get_doubles(md_ptr, 'structure', 'startlevelsuctionside', pump%ss_onlevel, pump%nrstages, success)      
-         if (success) call prop_get_doubles(md_ptr, 'structure', 'stoplevelsuctionside', pump%ss_offlevel, pump%nrstages, success)      
+         if (success) call prop_get_doubles(md_ptr, '', 'startLevelSuctionSide', pump%ss_onlevel, pump%nrstages, success)      
+         if (success) call prop_get_doubles(md_ptr, '', 'stopLevelSuctionSide', pump%ss_offlevel, pump%nrstages, success)      
       endif
       
       if (iabs(pump%direction) == 2 .or. iabs(pump%direction) == 3) then
-         if (success) call prop_get_doubles(md_ptr, 'structure', 'startleveldeliveryside', pump%ds_onlevel, pump%nrstages, success)      
-         if (success) call prop_get_doubles(md_ptr, 'structure', 'stopleveldeliveryside', pump%ds_offlevel, pump%nrstages, success)
+         if (success) call prop_get_doubles(md_ptr, '', 'startLevelDeliverySide', pump%ds_onlevel, pump%nrstages, success)      
+         if (success) call prop_get_doubles(md_ptr, '', 'stopLevelDeliverySide', pump%ds_offlevel, pump%nrstages, success)
       endif
       
       if (.not. success) return
@@ -1135,8 +1138,8 @@ module m_readstructures
          call SetMessage(LEVEL_FATAL, 'Error Reading Pump: Error Allocating Reduction Factor Arrays')
       endif
 
-      call prop_get_doubles(md_ptr, 'structure', 'head', head, tabsize, success)
-      if (success)call prop_get_doubles(md_ptr, 'structure', 'reductionfactor', redfac, tabsize, success)
+      call prop_get_doubles(md_ptr, '', 'head', head, tabsize, success)
+      if (success)call prop_get_doubles(md_ptr, '', 'reductionFactor', redfac, tabsize, success)
       if (.not. success .and. tabsize == 1) then
          head(1)   = 0.0d0
          redfac(1) = 1.0d0
