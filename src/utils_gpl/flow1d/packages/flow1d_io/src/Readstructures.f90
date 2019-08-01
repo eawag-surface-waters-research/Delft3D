@@ -1448,54 +1448,86 @@ module m_readstructures
       logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
       character(len=Idlen) :: dirstring
+      logical              :: success1
 
       success = .true.
       allocate(generalst)
 
       generalst%velheight = .true.
-      call prop_get_double(md_ptr, '', 'upstream1Width', generalst%wu1, success)
-      if (success) call prop_get_double(md_ptr, '', 'upstream2Width',  generalst%wu2, success)
-      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
-      if (success) call prop_get_double(md_ptr, '', 'downstream1Width', generalst%wd1, success)
-      if (success) call prop_get_double(md_ptr, '', 'downstream2Width',   generalst%wd2, success)
-                                                                               
-      if (success) call prop_get_double(md_ptr, '', 'upstream1Level',   generalst%zu1, success)
-      if (success) call prop_get_double(md_ptr, '', 'upstream2Level',  generalst%zu2, success)
-      if (success) call get_value_or_addto_forcinglist(md_ptr, 'crestLevel',    generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
-      if (success) call prop_get_double(md_ptr, '', 'downstream1Level', generalst%zd1, success)
-      if (success) call prop_get_double(md_ptr, '', 'downstream2Level',  generalst%zd2, success)
+      call prop_get_double(md_ptr, '', 'upstream1Width', generalst%wu1, success1)
+      success = success .and. check_input_result(success1, st_id, 'upstream1Width')
+      
+      call prop_get_double(md_ptr, '', 'upstream2Width',  generalst%wu2, success1)
+      success = success .and. check_input_result(success1, st_id, 'upstream2Width')
+      
+      call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist)
+      
+      call prop_get_double(md_ptr, '', 'downstream1Width', generalst%wd1, success1)
+      success = success .and. check_input_result(success1, st_id, 'downstream1Width')
+      
+      call prop_get_double(md_ptr, '', 'downstream2Width',   generalst%wd2, success1)
+      success = success .and. check_input_result(success1, st_id, 'downstream2Width')
+                                                                  
+      call prop_get_double(md_ptr, '', 'upstream1Level',   generalst%zu1, success1)
+      success = success .and. check_input_result(success1, st_id, 'upstream1Level')
+      
+      call prop_get_double(md_ptr, '', 'upstream2Level',  generalst%zu2, success1)
+      success = success .and. check_input_result(success1, st_id, 'upstream2Level')
+      
+      call get_value_or_addto_forcinglist(md_ptr, 'crestLevel',    generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success1)
+      success = success .and. check_input_result(success1, st_id, 'crestLevel')
+      
+      call prop_get_double(md_ptr, '', 'downstream1Level', generalst%zd1, success1)
+      success = success .and. check_input_result(success1, st_id, 'downstream1Level')
+      
+      call prop_get_double(md_ptr, '', 'downstream2Level',  generalst%zd2, success1)
+      success = success .and. check_input_result(success1, st_id, 'downstream2Level')
 
-      if (success) call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, forcinglist, success)
-      if (success) call prop_get_double(md_ptr, '', 'crestLength',   generalst%crestlength, success)
-      if (success) call prop_get_double(md_ptr, '', 'gateHeight',   generalst%gatedoorheight, success)
-      if (success) call get_value_or_addto_forcinglist(md_ptr, 'gateOpeningWidth', generalst%gateopeningwidth, st_id, ST_GENERAL_ST, forcinglist, success)
+      call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, forcinglist, success1)
+      success = success .and. check_input_result(success1, st_id, 'gateLowerEdgeLevel')
+
+      generalst%crestlength        = 0d0
+      call prop_get_double(md_ptr, '', 'crestLength',   generalst%crestlength)
+      
+      call prop_get_double(md_ptr, '', 'gateHeight',   generalst%gatedoorheight, success1)
+      success = success .and. check_input_result(success1, st_id, 'gateHeight')
+      
+      call get_value_or_addto_forcinglist(md_ptr, 'gateOpeningWidth', generalst%gateopeningwidth, st_id, ST_GENERAL_ST, forcinglist, success1)
+      success = success .and. check_input_result(success1, st_id, 'gateOpeningWidth')
 
       dirString = 'symmetric'
-      if (success) call prop_get_string(md_ptr, '', 'gateOpeningHorizontalDirection',   dirString)
+      call prop_get_string(md_ptr, '', 'gateOpeningHorizontalDirection',   dirString)
       generalst%openingDirection = openingDirectionToInt(dirString)
-! TODO add extra parameter in t_GeneralStructure
       
-      if (success) call prop_get_double(md_ptr, '', 'posFreeGateflowCoeff',  generalst%cgf_pos, success)
-      if (success) call prop_get_double(md_ptr, '', 'posDrownGateFlowCoeff', generalst%cgd_pos, success)
-      if (success) call prop_get_double(md_ptr, '', 'posFreeWeirFlowCoeff',  generalst%cwf_pos, success)
-      if (success) call prop_get_double(md_ptr, '', 'posDrownWeirFlowCoeff', generalst%cwd_pos, success)
-      if (success) call prop_get_double(md_ptr, '', 'posContrCoefFreeGate',  generalst%mugf_pos, success)
+
+      generalst%cgf_pos            = 1d0
+      call prop_get_double(md_ptr, '', 'posFreeGateflowCoeff',  generalst%cgf_pos)
+      generalst%cgd_pos            = 1d0
+      call prop_get_double(md_ptr, '', 'posDrownGateFlowCoeff', generalst%cgd_pos)
+      generalst%cwf_pos            = 1d0
+      call prop_get_double(md_ptr, '', 'posFreeWeirFlowCoeff',  generalst%cwf_pos)
+      generalst%cwd_pos            = 1d0
+      call prop_get_double(md_ptr, '', 'posDrownWeirFlowCoeff', generalst%cwd_pos)
+      generalst%mugf_pos           = 1d0  
+      call prop_get_double(md_ptr, '', 'posContrCoefFreeGate',  generalst%mugf_pos)
       
-      if (success) call prop_get_double(md_ptr, '', 'negFreeGateFlowCoeff',  generalst%cgf_neg, success)
-      if (success) call prop_get_double(md_ptr, '', 'negDrownGateFlowCoeff', generalst%cgd_neg, success)
-      if (success) call prop_get_double(md_ptr, '', 'negFreeWeirFlowCoeff',  generalst%cwf_neg, success)
-      if (success) call prop_get_double(md_ptr, '', 'negDrownWeirFlowCoeff', generalst%cwd_neg, success)
-      if (success) call prop_get_double(md_ptr, '', 'negContrCoefFreeGate',  generalst%mugf_neg, success)
+      generalst%cgf_neg            = 1d0
+      call prop_get_double(md_ptr, '', 'negFreeGateFlowCoeff',  generalst%cgf_neg)
+      generalst%cgd_neg            = 1d0
+      call prop_get_double(md_ptr, '', 'negDrownGateFlowCoeff', generalst%cgd_neg)
+      generalst%cwf_neg            = 1d0
+      call prop_get_double(md_ptr, '', 'negFreeWeirFlowCoeff',  generalst%cwf_neg)
+      generalst%cwd_neg            = 1d0
+      call prop_get_double(md_ptr, '', 'negDrownWeirFlowCoeff', generalst%cwd_neg)
+      generalst%mugf_neg           = 1d0
+      call prop_get_double(md_ptr, '', 'negContrCoefFreeGate',  generalst%mugf_neg)
       
-      if (success) call prop_get_double(md_ptr, '', 'extraResistance', generalst%extraresistance, success)
+      generalst%extraresistance    = 0d0
+      call prop_get_double(md_ptr, '', 'extraResistance', generalst%extraresistance)
       
-      ! success
+      ! success1
       return
-
-888   continue
-      ! Some error occurred
-
-  end subroutine readGeneralStructure
+   end subroutine readGeneralStructure
    
    integer function  openingDirectionToInt(dirString)
       character(len=*), intent(inout) :: dirString
