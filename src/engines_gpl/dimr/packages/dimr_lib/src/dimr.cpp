@@ -1059,11 +1059,9 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         nc_enddef(ncid);
 
                         // Add station name
-                        std::ostringstream varName;
-                        varName << sourceComponentName << " -> " << targetComponentName;
-                        varName << std::left << std::setfill(' ') << std::setw(name_strlen) << varName.str();
-                        const string varNamestr( varName.str() );
-                        nc_put_var_text(ncid, station_var, varNamestr.c_str());
+                        std::string varName = sourceComponentName + " -> " + targetComponentName;
+                        varName.append(name_strlen - varName.length(), ' ');
+                        nc_put_var_text(ncid, station_var, varName.c_str());
                     }
                     // Het hele spul MOET NAAR DELTARES_COMMON_C !!!
                 }
@@ -1512,7 +1510,7 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
 //------------------------------------------------------------------------------
 void Dimr::scanConfigFile (void) {
 
-    XmlTree * rootXml     = config->Lookup ("/dimrConfig");
+    XmlTree * rootXml     = config == nullptr ? NULL : config->Lookup ("/dimrConfig");
     if (rootXml == NULL)
         throw Exception (true, Exception::ERR_INVALID_INPUT, "Configuration file \"%s\" does not have a <dimrConfig> root element", configfile);
     XmlTree * fileversion = rootXml->Lookup ("documentation/fileVersion");
