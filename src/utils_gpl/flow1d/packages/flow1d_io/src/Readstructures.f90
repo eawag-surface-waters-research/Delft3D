@@ -899,7 +899,8 @@ module m_readstructures
             call realloc(relOpen, lossCoeffCount, stat=istat)
             if (istat == 0) call realloc(lossCoeff, lossCoeffCount, stat=istat)
             if (istat .ne. 0) then
-               call SetMessage(LEVEL_FATAL, 'Reading Culvert: Error Allocating Valve Loss Arrays')
+               call SetMessage(LEVEL_ERROR, 'Reading Culvert: Error Allocating Valve Loss Arrays')
+               success = .false.
             endif
 
             call prop_get_doubles(md_ptr, '', 'relOpening', relOpen, lossCoeffCount, success1)
@@ -914,7 +915,8 @@ module m_readstructures
             if (allocated(relOpen)) deallocate(relOpen, stat=istat)
             if (istat == 0 .and. allocated(lossCoeff)) deallocate(lossCoeff, stat=istat)
             if (istat .ne. 0) then
-               call SetMessage(LEVEL_FATAL, 'Reading Culvert: Error Deallocating Valve Loss Arrays')
+               call SetMessage(LEVEL_ERROR, 'Reading Culvert: Error Deallocating Valve Loss Arrays')
+               success = .false.
             endif
          endif
          
