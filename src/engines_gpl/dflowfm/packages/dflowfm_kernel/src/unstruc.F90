@@ -20287,12 +20287,20 @@ end subroutine unc_write_shp
 
     dx(L) = dbdistance ( xz(k1), yz(k1), xz(k2), yz(k2), jsferic, jasfer3D, dmiss)  ! set link length
     ! Optionally, override dx(L) with netlink length as read from file (typically 1D with user-defined branch lengths).
-    if (allocated(dxe) .and. L <= lnxi) then
-       ! NOTE: we only override dx lengths of internal flow links.
-       ! TODO: UNST-2832: later also use custom net link lengths for the boundary flow link lengths, but also respecting the izbndpos setting (needs changes in addexternalboundarypoints). 
+    if (allocated(dxe) .and. ja1D == 1) then
        LL = ln2lne(L)
        if (dxe(LL) /= dmiss) then
-          dx(L) = dxe(LL)
+          if (L <= lnxi) then
+             dx(L) = dxe(LL)
+          else ! Boundary link
+             if (izbndpos == 0) then                      ! full grid cell outward
+                dx(L) = dxe(LL)
+             else if (izbndpos == 1) then                 ! half a grid cell outward
+                dx(L) = .5d0*dxe(LL)
+             else ! izbndpos==2                           ! on specified boundary polyline
+                continue ! nowhere supported yet
+             end if
+          end if
        end if
     end if
 
