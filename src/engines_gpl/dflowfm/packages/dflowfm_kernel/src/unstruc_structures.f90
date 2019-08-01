@@ -36,6 +36,7 @@ use m_GlobalParameters
 use unstruc_channel_flow, only: network
 implicit none
 
+double precision            :: eps = 1d-5
 type(tree_data), pointer, public :: strs_ptr !< A property list with all input structure specifications of the current model. Not the actual structure set.
 integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and from structure-input files. Use one or the other.
 
@@ -72,16 +73,37 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (11,:) weir state (0: closed, 1: free weir, 2: drowned/submerged weir)
                                                               !<                      (12,:) weir force difference per unit width
  double precision, dimension(:,:), allocatable :: valcgen     !< Array for general structure (old ext), (1,:) discharge
- double precision, dimension(:,:), allocatable :: valgenstru  !< Array for general structure (new ext), (1,:) discharge
+ double precision, dimension(:,:), allocatable :: valgenstru  !< Array for general structure (1,:) flow link width, used for averaging.
+                                                              !<                      (2,:) discharge through general structure
+                                                              !<                      (3,:) general structure water level up
+                                                              !<                      (4,:) general structure water level down
+                                                              !<                      (5,:) general structure head
+                                                              !<                      (6,:) general structure flow area
+                                                              !<                      (7,:) general structure velocity
+                                                              !<                      (8,:) general structure water level on crest
+                                                              !<                      (9,:) general structure crest level
+                                                              !<                      (10,:) general structure crest width
+                                                              !<                      (11,:) general structure state (0: closed, 1: free weir, 2: drowned/submerged weir)
+                                                              !<                      (12,:) general structure force difference per unit width
+                                                              !<                      (13,:) general structure gate opening width
+                                                              !<                      (14,:) general structure gate lower edge level
+                                                              !<                      (15,:) general structure gate opening height
+                                                              !<                      (16,:) general structure gate upper edge level
+                                                              !<                      (17,:) general structure discharge through gate opening
+                                                              !<                      (18,:) general structure discharge over gate upper edge level
+                                                              !<                      (19,:) general structure flow area in gate opening
+                                                              !<                      (20,:) general structure flow area above upper edge level
+                                                              !<                      (21,:) general structure velocity through gate opening
+                                                              !<                      (22,:) general structure velocity over gate upper edge level
  double precision, dimension(:,:), allocatable, target :: valdambreak !< Array for dambreak, (1,:) instantanuous, (2,:) cumulative
 
- integer                           :: NUMVALS_PUMP = 11        !< Number of variables for pump
+ integer                           :: NUMVALS_PUMP = 11       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
  integer                           :: NUMVALS_CGEN = 4        !< Number of variables for general structure (old ext file)
  integer                           :: NUMVALS_GATEGEN = 9     !< Number of variables for gate (new)
  integer                           :: NUMVALS_WEIRGEN = 12    !< Number of variables for weir
- integer                           :: NUMVALS_GENSTRU = 8     !< Number of variables for general structure( new exe file)
+ integer                           :: NUMVALS_GENSTRU = 22    !< Number of variables for general structure( new exe file)
  integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
 
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
@@ -134,6 +156,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
             if( allocated( valcgen ) ) deallocate( valcgen )
             allocate( valcgen(NUMVALS_CGEN,ncgensg) ) ; valcgen = 0d0
          endif
+         
+         if (ngenstru == 0) then ! If it is new general structure, then it is stored in the network type
+            ngenstru = network%sts%numGeneralStructures
+         end if
          if( ngenstru > 0 ) then
             if( allocated( valgenstru ) ) deallocate( valgenstru )
             allocate( valgenstru(NUMVALS_GENSTRU,ngenstru) ) ; valgenstru  = 0d0
@@ -353,5 +379,163 @@ double precision function get_force_difference(istru, L)
    end if
 
 end function get_force_difference
+
+!> Fills (17)-(20) elements of array valstruct for one given structure istru on a given link L
+subroutine fill_others_perlink(valstruct, istru, L, L0, dir)
+   use m_flowgeom, only: ln
+   use m_flow, only: s1, hu
+   use m_General_Structure, only: t_GeneralStructure
+   implicit none
+   double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
+                                                                !< (1) total width
+                                                                !< (2) structure discharge
+                                                                !< (3) structure water level up
+                                                                !< (4) structure water level down
+                                                                !< (5) structure head
+                                                                !< (6) flow area 
+                                                                !< (7) velocity 
+                                                                !< (8) water level on crest 
+                                                                !< (9) crest level 
+                                                                !< (10) crest width
+                                                                !< (11) state
+                                                                !< (12) force difference per unit width
+                                                                !< (13) gate opening width
+                                                                !< (14) gate lower edge level
+                                                                !< (15) gate opening height
+                                                                !< (16) gate upper edge level
+                                                                !< (17) discharge through gate opening
+                                                                !< (18) discharge over gate upper edge level
+                                                                !< (19) flow area in gate opening
+                                                                !< (20) flow area above upper edge level
+                                                                !< (21) velocity through gate opening
+                                                                !< (22) velocity over gate upper edge level
+   integer,                        intent(in   )   :: L         !< flow link index
+   integer,                        intent(in   )   :: istru     !< structure index in network type
+   integer,                        intent(in   )   :: L0        !< local link index
+   double precision,               intent(in   )   :: dir       !< direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
+   
+   type(t_GeneralStructure), pointer :: genstr
+   integer                           :: k1, k2
+   
+   if (hu(L) > 0) then
+      k1 = ln(1,L)
+      k2 = ln(2,L)
+      
+      genstr => network%sts%struct(istru)%generalst
+      valstruct(17) = valstruct(17) + get_discharge_through_gate_opening(genstr, L0, s1(k1), s1(k2))*dir
+      valstruct(18) = valstruct(18) + get_discharge_over_gate_uppedge(genstr, L0, s1(k1), s1(k2))*dir
+      
+      valstruct(19) = valstruct(19) + genstr%au(3,L0)
+      valstruct(20) = valstruct(20) + genstr%au(2,L0)
+   end if
+end subroutine fill_others_perlink
+
+!> Fills (13)-(16), (21)-(22) elements of array valstruct across all links,
+!! where needed taking care of partition models.
+!! Note: fill_others_perlink must have been called in
+!! a loop prior to calling this routine.
+subroutine fill_others(valstruct, istru, L)
+   use m_General_Structure, only: t_GeneralStructure
+   use m_flow, only: hu
+   use m_missing, only: dmiss
+   use m_partitioninfo, only: jampi
+   implicit none
+   double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
+                                                                !< (1) total width
+                                                                !< (2) structure discharge
+                                                                !< (3) structure water level up
+                                                                !< (4) structure water level down
+                                                                !< (5) structure head
+                                                                !< (6) flow area 
+                                                                !< (7) velocity 
+                                                                !< (8) water level on crest 
+                                                                !< (9) crest level 
+                                                                !< (10) crest width
+                                                                !< (11) state
+                                                                !< (12) force difference per unit width
+                                                                !< (13) gate opening width
+                                                                !< (14) gate lower edge level
+                                                                !< (15) gate opening height
+                                                                !< (16) gate upper edge level
+                                                                !< (17) discharge through gate opening
+                                                                !< (18) discharge over gate upper edge level
+                                                                !< (19) flow area in gate opening
+                                                                !< (20) flow area above upper edge level
+                                                                !< (21) velocity through gate opening
+                                                                !< (22) velocity over gate upper edge level
+   integer,                        intent(in   )   :: L         !< flow link index
+   integer,                        intent(in   )   :: istru     !< structure index in network type
+   
+   type(t_GeneralStructure), pointer :: genstr
+   
+   if (jampi == 0) then
+      genstr => network%sts%struct(istru)%generalst
+      valstruct(13) = genstr%gateopeningwidth                  ! gate opening width
+      valstruct(14) = genstr%gateLowerEdgeLevel                ! gate lower edge level
+      valstruct(15) = valstruct(14) - genstr%zs                ! gate opening height
+      valstruct(16) = valstruct(14) + genstr%gatedoorheight    ! gate upper edge level
+      
+      if (valstruct(1) == 0d0) then
+         valstruct(13:NUMVALS_GENSTRU) = dmiss
+      else
+         if (hu(L) > 0) then
+            if (valstruct(19) > 0) then
+               valstruct(21) = valstruct(21) / valstruct(19) ! velocity through gate opening
+            end if
+            if (valstruct(20) > 0) then
+               valstruct(22) = valstruct(22) / valstruct(20) ! velocity over gate upper edge level
+            end if
+         end if
+      end if
+   end if 
+
+end subroutine fill_others
+
+!> Gets discharge through gate opening per link
+double precision function get_discharge_through_gate_opening(genstr, L0, s1m1, s1m2)
+   use m_missing
+   use m_General_Structure
+   implicit none   
+   type(t_GeneralStructure), pointer, intent(in   ) :: genstr !< Derived type containing general structure information
+   integer,                           intent(in   ) :: L0     !< local link index
+   double precision,                  intent(in   ) :: s1m1   !< (geometrical) upstream water level
+   double precision,                  intent(in   ) :: s1m2   !< (geometrical) downstream water level
+   double precision  :: u1L, dsL, gatefraction
+   
+   dsL = s1m2 - s1m1 
+   gatefraction = genstr%gateclosedfractiononlink(L0)
+   
+   if (gatefraction > eps) then
+      u1L = genstr%ru(3,L0) - genstr%fu(3,L0)*dsL
+      get_discharge_through_gate_opening = genstr%au(3,L0) * u1L
+   else
+      get_discharge_through_gate_opening = 0d0
+   end if
+
+end function get_discharge_through_gate_opening
+
+!> Gets discharge through gate opening per link
+double precision function get_discharge_over_gate_uppedge(genstr, L0, s1m1, s1m2)
+   use m_missing
+   use m_General_Structure
+   implicit none   
+   type(t_GeneralStructure), pointer, intent(in   ) :: genstr !< Derived type containing general structure information
+   integer,                           intent(in   ) :: L0     !< local link index
+   double precision,                  intent(in   ) :: s1m1   !< (geometrical) upstream water level
+   double precision,                  intent(in   ) :: s1m2   !< (geometrical) downstream water level
+   double precision  :: u1L, dsL, gatefraction
+   
+   dsL = s1m2 -s1m1
+   gatefraction = genstr%gateclosedfractiononlink(L0)
+   
+   if (gatefraction > eps) then
+      u1L = genstr%ru(2,L0) - genstr%fu(2,L0)*dsL
+      get_discharge_over_gate_uppedge = genstr%au(2,L0) * u1L
+   else
+      get_discharge_over_gate_uppedge = 0d0
+   end if
+
+end function get_discharge_over_gate_uppedge
+
 
 end module m_structures

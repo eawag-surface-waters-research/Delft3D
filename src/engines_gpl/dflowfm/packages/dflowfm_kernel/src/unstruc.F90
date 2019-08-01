@@ -16338,7 +16338,9 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_gategendim, id_gategenname, id_gategen_dis, id_gategen_sillh,  id_gategen_sillw,  id_gategen_edgel, id_gategen_openw, &           ! id_gategen_head,
                      id_gategen_flowh, id_gategen_s1up, id_gategen_s1dn,                                                                      &
                      id_genstrudim, id_genstruname, id_genstru_dis, id_genstru_cresth, id_genstru_crestw, id_genstru_edgel, id_genstru_openw, &           ! id_genstru_head,
-                     id_genstru_s1up, id_genstru_s1dn,                                                                                        &
+                     id_genstru_s1up, id_genstru_s1dn, id_genstru_dis_gate_open, id_genstru_dis_gate_upp, id_genstru_openh, id_genstru_uppl,  &
+                     id_genstru_vel, id_genstru_au, id_genstru_au_open, id_genstru_au_upp, id_genstru_stat, id_genstru_head,  id_genstru_velgateopen, &
+                     id_genstru_velgateupp, id_genstru_s1crest, id_genstru_forcedif, &
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
@@ -17185,6 +17187,83 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_genstru_s1dn, 'long_name', 'general structure water level down')
             ierr = nf90_put_att(ihisfile, id_genstru_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_genstru_s1dn, 'coordinates', 'general_structure_name')
+            
+            if (network%sts%numGeneralStructures > 0) then ! write extra fields for new general structure
+               ierr = nf90_def_var(ihisfile, 'general_structure_discharge_through_gate_opening', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis_gate_open)
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'long_name', 'general structure discharge through gate opening')
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'units', 'm3 s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_discharge_over_gate_upper_edge_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis_gate_upp)
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'long_name', 'general structure discharge over gate upper edge level')
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'units', 'm3 s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_gate_opening_height', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_openh)
+               ierr = nf90_put_att(ihisfile, id_genstru_openh, 'long_name', 'general structure gate opening height')
+               ierr = nf90_put_att(ihisfile, id_genstru_openh, 'units', 'm')
+               ierr = nf90_put_att(ihisfile, id_genstru_openh, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_gate_upper_edge_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_uppl)
+               ierr = nf90_put_att(ihisfile, id_genstru_uppl, 'long_name', 'general structure gate upper edge level')
+               ierr = nf90_put_att(ihisfile, id_genstru_uppl, 'units', 'm')
+               ierr = nf90_put_att(ihisfile, id_genstru_uppl, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_head', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_head)
+               ierr = nf90_put_att(ihisfile, id_genstru_head, 'long_name', 'general structure head')
+               ierr = nf90_put_att(ihisfile, id_genstru_head, 'units', 'm')
+               ierr = nf90_put_att(ihisfile, id_genstru_head, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_velocity_throught_gate_opening', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_velgateopen)
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateopen, 'long_name', 'general structure velocity through gate opening')
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateopen, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateopen, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_velocity_over_gate_upper_edge_level ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_velgateupp)
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'long_name', 'general structure velocity over gate upper edge level')
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_flow_area ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au)
+               ierr = nf90_put_att(ihisfile, id_genstru_au, 'long_name', 'general structure flow area')
+               ierr = nf90_put_att(ihisfile, id_genstru_au, 'units', 'm2')
+               ierr = nf90_put_att(ihisfile, id_genstru_au, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_flow_area_in_gate_opening ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au_open)
+               ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'long_name', 'general structure flow area in gate opening')
+               ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'units', 'm2')
+               ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_flow_area_above_upper_edge_level ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au_upp)
+               ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'long_name', 'general structure flow area above upper edge level')
+               ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'units', 'm2')
+               ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_state ', nf90_int, (/ id_genstrudim, id_timedim /), id_genstru_stat)
+               ierr = nf90_put_att(ihisfile, id_genstru_stat, 'long_name', 'general structure state')
+               ierr = nf90_put_att(ihisfile, id_genstru_stat, 'units', '-')
+               ierr = nf90_put_att(ihisfile, id_genstru_stat, 'units', '-')
+               ierr = nf90_put_att(ihisfile, id_genstru_stat, 'coordinates', 'general_structure_name')
+               ierr = nf90_put_att(ihisfile, id_genstru_stat, 'flag_values', '0, 1, 2, 3, 4')
+               ierr = nf90_put_att(ihisfile, id_genstru_stat, 'flag_meanings', 'no_flow weir_free weir_submerged gate_free gate_submerged')
+               ierr = nf90_put_att(ihisfile, id_genstru_stat, 'valid_range', '0, 4')
+               ierr = nf90_put_att(ihisfile, id_genstru_stat, '_FillValue', imiss)
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_s1_on_crest ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_s1crest)
+               ierr = nf90_put_att(ihisfile, id_genstru_s1crest, 'long_name', 'general structure water level on crest')
+               ierr = nf90_put_att(ihisfile, id_genstru_s1crest, 'units', 'm')
+               ierr = nf90_put_att(ihisfile, id_genstru_s1crest, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_velocity ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_vel)
+               ierr = nf90_put_att(ihisfile, id_genstru_vel, 'long_name', 'general structure velocity')
+               ierr = nf90_put_att(ihisfile, id_genstru_vel, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_vel, 'coordinates', 'general_structure_name')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_force_difference ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_forcedif)
+               ierr = nf90_put_att(ihisfile, id_genstru_forcedif, 'long_name', 'general structure force difference per unit')
+               ierr = nf90_put_att(ihisfile, id_genstru_forcedif, 'units', 'N s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_forcedif, 'coordinates', 'general_structure_name')
+            end if            
         endif
 
         if(jahispump > 0 .and. npumpsg > 0) then
@@ -17587,7 +17666,13 @@ subroutine unc_write_his(tim)            ! wrihis
                if (jaoldstr == 1) then
                   igen = i
                else
-                  igen = genstru2cgen(i)
+                  if (network%sts%numGeneralStructures > 0) then
+                     istru = network%sts%generalStructureIndices(i)
+                     ierr = nf90_put_var(ihisfile, id_genstruname,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
+                     cycle
+                  else
+                     igen = genstru2cgen(i)
+                  end if
                end if
 
                ierr = nf90_put_var(ihisfile, id_genstruname,  trim(cgen_ids(igen)),      (/ 1, i /))
@@ -17988,13 +18073,30 @@ subroutine unc_write_his(tim)            ! wrihis
          end if
          if (ngenstru > 0) then
             do i=1,ngenstru
-               igen = genstru2cgen(i)
+               !igen = genstru2cgen(i)
                ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i), (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_cresth, valgenstru(8,i), (/ i, it_his /)) ! changed
-               ierr = nf90_put_var(ihisfile, id_genstru_edgel , valgenstru(7,i), (/ i, it_his /)) ! changed
-               ierr = nf90_put_var(ihisfile, id_genstru_openw , valgenstru(6,i), (/ i, it_his /)) ! changed
+               ierr = nf90_put_var(ihisfile, id_genstru_cresth, valgenstru(9,i), (/ i, it_his /)) ! changed
+               ierr = nf90_put_var(ihisfile, id_genstru_edgel , valgenstru(14,i), (/ i, it_his /)) ! changed
+               ierr = nf90_put_var(ihisfile, id_genstru_openw , valgenstru(13,i), (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i), (/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i), (/ i, it_his /))
+               if (network%sts%numGeneralStructures > 0) then
+                  ierr = nf90_put_var(ihisfile, id_genstru_head,          valgenstru(5,i),  (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_au,            valgenstru(6,i),  (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_vel,           valgenstru(7,i),  (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_s1crest,       valgenstru(8,i),  (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_crestw,        valgenstru(10,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_stat,     int(valgenstru(11,i)), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_forcedif,      valgenstru(12,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_openh,         valgenstru(15,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_uppl,          valgenstru(16,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_open, valgenstru(17,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_upp,  valgenstru(18,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_au_open,       valgenstru(19,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_au_upp,        valgenstru(20,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valgenstru(21,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_velgateupp,    valgenstru(22,i), (/ i, it_his /))
+               end if
             enddo
          endif
       endif
@@ -19326,13 +19428,13 @@ subroutine unc_write_shp()
     ! general structures
     if (jashp_genstruc > 0) then
        if (jampi .eq. 0) then
-          if (ngenstru > 0) then
+          if (ngenstru > 0 .and. allocated(genstru2cgen)) then
              call unc_write_shp_genstruc()
           else
              call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for general structures is written because no gate is found.')
           endif
        else
-          if (ngenstru > 0) then
+          if (ngenstru > 0 .and. allocated(genstru2cgen)) then
              jawrite = ngenstru
              do n = 1, ngenstru
                 igen = genstru2cgen(n)
@@ -36173,46 +36275,53 @@ if (jahisbal > 0) then
       !
       ! === General structures (from new ext file)
       !
-      do n = 1,ngenstru
-         i = genstru2cgen(n)
-         valgenstru(:,n) = 0d0
-         do L = L1cgensg(i),L2cgensg(i)
-            Lf = kcgen(3,L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = 1d0
-            ku = ln(1,La)
-            kd = ln(2,La)
-            if( Ln(1,La) /= kcgen(1,L) ) then
-               dir = -1d0
-               ku = ln(2,La)
-               kd = ln(1,La)
-            end if
-            valgenstru(1,n) = valgenstru(1,n) + wu(La)
-            valgenstru(2,n) = valgenstru(2,n) + q1(La) * dir
-            valgenstru(3,n) = valgenstru(3,n) + s1(ku) * wu(La)
-            valgenstru(4,n) = valgenstru(4,n) + s1(kd) * wu(La)
+      if (network%sts%numGeneralStructures > 0) then
+         do n = 1, ngenstru
+            valgenstru(1:NUMVALS_GENSTRU,n) = 0d0
+            istru = network%sts%generalStructureIndices(n)
+            pstru => network%sts%struct(istru)
+            nlinks = pstru%numlinks
+            do L = 1, nlinks
+               Lf = pstru%linknumbers(L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = sign(1d0,dble(Lf))
+               call fill_valstruct_perlink(valgenstru(1:12,n), La, dir, 1, istru, L)
+               call fill_others_perlink(valgenstru(1:NUMVALS_GENSTRU,n), istru, La, L, dir)
+            enddo
+            call average_valstruct(valgenstru(1:12,n), 1, istru)
+            call fill_others(valgenstru(1:NUMVALS_GENSTRU,n), istru, La)
          enddo
-         if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
-            valgenstru(5,n) = 1               ! rank contains the general structure.
-            valgenstru(6,n) = zcgen(3*i  )    ! id_genstru_openw.
-            valgenstru(7,n) = zcgen(3*i-1)    ! id_genstru_edgel.
-            valgenstru(8,n) = zcgen(3*i-2)    ! id_genstru_cresth.
-         end if
-         if( jampi == 0 ) then
-            if( valgenstru(1,n) == 0d0 ) then
-               valgenstru(2,n) = dmiss
-               valgenstru(3,n) = dmiss
-               valgenstru(4,n) = dmiss
-            else
-               valgenstru(3,n) = valgenstru(3,n) / valgenstru(1,n)
-               valgenstru(4,n) = valgenstru(4,n) / valgenstru(1,n)
-            endif
-         endif
-      enddo
+      else
+         ! old general structure, do not compute the new extra fileds
+         do n = 1,ngenstru
+            i = genstru2cgen(n)
+            valgenstru(1:NUMVALS_GENSTRU,n) = 0d0
+            do L = L1cgensg(i),L2cgensg(i)
+               Lf = kcgen(3,L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = 1d0
+               if( Ln(1,La) /= kcgen(1,L) ) then
+                  dir = -1d0
+               end if
+              call fill_valstruct_perlink(valgenstru(1:5,n), La, dir, 0, 0, 0)
+            enddo
+            call average_valstruct(valgenstru(1:5,n), 0, 0)
+            if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
+               !valgenstru(5,n) = 1               ! rank contains the general structure.
+               valgenstru(13,n) = zcgen(3*i  )    ! id_genstru_openw.
+               valgenstru(14,n) = zcgen(3*i-1)    ! id_genstru_edgel.
+               valgenstru(9,n)  = zcgen(3*i-2)    ! id_genstru_cresth.
+            end if
+         enddo
+      end if
       !
       ! === Reduction of structur parameters for parallel
       !

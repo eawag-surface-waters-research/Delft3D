@@ -213,6 +213,7 @@ contains
          call flqhgs(fu(1), ru(1), u1L, dxL, dt, dadsL, kfuL, au(1), qL, flowDir, &
                      hu, hd, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
+         genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
          
          !calculate flow over gate
          dg = huge(1d0)
@@ -234,6 +235,8 @@ contains
          call flqhgs(fu(3), ru(3), u1L, dxL, dt, dadsL, kfuL, au(3), qL, flowDir, &
                      hu, hd, uu, zs, (1d0-gatefraction)*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
+         genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
+
       endif
       
       auL =  (au(1) + au(2)) + au(3)
@@ -245,7 +248,6 @@ contains
       genstr%ru(:,L0) = ru
       genstr%au(:,L0) = au
       !TEMP = laatste statement
-      genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
       
    end subroutine computeGeneralStructure
 
@@ -427,6 +429,7 @@ contains
       if (hs1<=0.0D0 .or. wstr<=0.0D0 .or. min(cgf, cgd, cwf, cwd)<=0. .or.       &
         & dg<.0001) then          !hk: or gate closed
          state = 0
+         ds = hs1
       else
          !
          !        Compute critical water depth at the
