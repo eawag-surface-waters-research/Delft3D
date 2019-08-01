@@ -71,6 +71,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DimrApiTests.cs" />
     <Compile Include="DimrDllNative.cs" />
     <Compile Include="DimrTestComponentBMITests.cs" />
     <Compile Include="IBasicModelInterface.cs" />
