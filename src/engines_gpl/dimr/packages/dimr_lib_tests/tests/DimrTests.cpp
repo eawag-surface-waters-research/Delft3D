@@ -1,9 +1,6 @@
 #include "DimrTests.h"
 #include "dimr.h"
-#include <memory>
 #include <direct.h>
-#include <functional>
-
 
 TEST_CLASS(DimrGlobalTests)
 {
@@ -31,102 +28,108 @@ public:
 
 TEST_CLASS(DimrTests)
 {
+
 public:
 	TEST_METHOD(ConstructDimr)
 	{
 		Dimr * dimr = new Dimr();
-		Assert::AreEqual((int)dimr->logLevel, (int)WARNING);
-		Assert::AreEqual((int)dimr->feedbackLevel, (int)INFO);
-        Assert::AreEqual(dimr->ready, false);
-        Assert::AreEqual(dimr->exePath, NULL);
-        Assert::AreEqual((int)dimr->config, NULL);
-        Assert::AreEqual(dimr->mainArgs, NULL);
-        Assert::AreEqual(dimr->slaveArg, NULL);
-        Assert::AreEqual((int)dimr->control, NULL);
-        Assert::AreEqual((int)dimr->componentsList.numComponents, 0);
-        Assert::AreEqual((int)dimr->couplersList.numCouplers , 0);
-        Assert::AreEqual(dimr->use_mpi ,false);
-        Assert::AreEqual(dimr->my_rank ,0);
-        Assert::AreEqual(dimr->numranks ,1);
-        Assert::AreEqual(dimr->configfile ,NULL);
-        Assert::AreEqual(dimr->done ,false);
-        Assert::AreEqual(dimr->redirectFile, "dimr_redirected.log");
-        //Cannot delete properly yet
-        //delete dimr;
+        //thisDimr = dimr;
+		Assert::AreEqual((int)WARNING, (int)dimr->logLevel);
+		Assert::AreEqual((int)INFO,(int)dimr->feedbackLevel);
+        Assert::AreEqual(false,dimr->ready);
+        Assert::AreEqual(NULL, dimr->exePath);
+        Assert::AreEqual(NULL, (int)dimr->config);
+        Assert::AreEqual(NULL, dimr->mainArgs);
+        Assert::AreEqual(NULL, dimr->slaveArg);
+        Assert::AreEqual(NULL, (int)dimr->control);
+        Assert::AreEqual(0,(int)dimr->componentsList.numComponents);
+        Assert::AreEqual(0,(int)dimr->couplersList.numCouplers);
+        Assert::AreEqual(false,dimr->use_mpi );
+        Assert::AreEqual(0,dimr->my_rank );
+        Assert::AreEqual(1,dimr->numranks);
+        Assert::AreEqual(NULL, dimr->configfile);
+        Assert::AreEqual(false, dimr->done);
+        Assert::AreEqual("dimr_redirected.log", dimr->redirectFile);
+        //Can not delete, destructor refers to the static global dimr instance, which is only assigned in dimr initialize
+        //auto func2 = [dimr] { delete dimr; };
+        //Assert::ExpectException<std::exception>(func2);
 	}
 
 
     TEST_METHOD(scanConfigIsEmptyTest)
     {
         Dimr* dimr = new Dimr();
+
+        //thisDimr = dimr;
         //dimr->config = new XmlTree();
-        auto func = [dimr] {dimr->scanConfigFile(); };
-        Assert::ExpectException<Exception>(func);
-        //Cannot delete properly yet
-        //delete dimr;
+        auto func1 = [dimr] {dimr->scanConfigFile(); };
+        Assert::ExpectException<Exception>(func1);
+        //Can not delete, destructor refers to the static global dimr instance, which is only assigned in dimr initialize
+        //auto func2 = [dimr] { delete dimr; };
+        //Assert::ExpectException<std::exception>(func2);
     }
     
     TEST_METHOD(scanConfigIsNotEmptyButFileVersionIsNullTest)
     {
         Dimr* dimr = new Dimr();
         //dimr->config = new XmlTree();
-        auto func = [dimr] {dimr->scanConfigFile(); };
-        Assert::ExpectException<Exception>(func);
-        //Cannot delete properly yet
-        //delete dimr;
+        auto func1= [dimr] {dimr->scanConfigFile(); };
+        Assert::ExpectException<Exception>(func1);
+        //Can not delete, destructor refers to the static global dimr instance, which is only assigned in dimr initialize
+        //auto func2 = [dimr] { delete dimr; };
+        //Assert::ExpectException<std::exception>(func2);
     }
     
     TEST_METHOD(WhenInvalidLibIsUsedIn_ConnectLibsThrowsAnException)
     {
+        // Set up
         Dimr* dimr = new Dimr();
-
-        // sets component
         dimr_component component;
         component.onThisRank = true;
         component.library = "invalidLib";
-
-        // set the componentsList
-        auto componentsList = dimr_components();
+        dimr_components componentsList;
         componentsList.components = &component;
         componentsList.numComponents = 1;
-
         dimr->componentsList = componentsList;
-        auto func = [&] {dimr->connectLibs(); };
-        Assert::ExpectException<Exception>(func);
-        //Cannot delete properly yet
-	    //delete dimr;
+
+        // Act
+	    auto func1 = [&] {dimr->connectLibs(); };
+        Assert::ExpectException<Exception>(func1);
+        //Can not delete, destructor refers to the static global dimr instance, which is only assigned in dimr initialize
+        //auto func2 = [dimr] { delete dimr; };
+        //Assert::ExpectException<std::exception>(func2);
     }
 
     TEST_METHOD(WhenInvalidLibPathIsUsedIn_ConnectLibsThrowsAnException)
     {
-        Dimr* dimr = new Dimr();
-
-        // sets component
+        // Set up
+	    Dimr* dimr = new Dimr();
         dimr_component component;
         component.onThisRank = true;
         component.library = "\dimr_testcomponent.dll";
 
         // set the componentsList
-        auto componentsList = dimr_components();
+        dimr_components componentsList;
         componentsList.components = &component;
         componentsList.numComponents = 1;
-
         dimr->componentsList = componentsList;
-        auto func = [&] {dimr->connectLibs(); };
-        Assert::ExpectException<Exception>(func);
-        //Cannot delete properly yet
-        //delete dimr;
+
+        // Act
+        auto func1 = [&] {dimr->connectLibs(); };
+        Assert::ExpectException<Exception>(func1);
+        //Can not delete, destructor refers to the static global dimr instance, which is only assigned in dimr initialize
+        //auto func2 = [dimr] { delete dimr; };
+        //Assert::ExpectException<std::exception>(func2);
     }
 
     //cannot go further, need a valid dll to test the rest of the connectLibs
 
     TEST_METHOD(WhenRunParallelInitIsUsedWithValidMasterComponent_EverythingIsFine)
     {
+        // Set up
         Dimr* dimr = new Dimr();
         Clock clock;
         dimr->clock = &clock;
-
-        // Set up
         dimr_control_block cb;
         cb.numSubBlocks = 1;
 
@@ -151,12 +154,91 @@ public:
         cb.subBlocks = &controlBlock;
         cb.masterSubBlockId = -1;
 
-        // set the componentsList
+        // Act
         dimr->runParallelInit(&cb);
-        //Cannot delete properly yet
-        //delete dimr;
+        //Can not delete, destructor refers to the static global dimr instance, which is only assigned in dimr initialize
+        //auto func2 = [dimr] { delete dimr; };
+        //Assert::ExpectException<std::exception>(func2);
     }
 
+    TEST_METHOD(WhenRunParallelFinishIsUsedWithValidMasterComponent_EverythingIsFine)
+    {
+        Dimr* dimr = new Dimr();
+        Clock clock;
+        dimr->clock = &clock;
+
+        // Set up
+        dimr_control_block cb;
+        cb.numSubBlocks = 1;
+
+        dimr_control_block controlBlock;
+        dimr_unit dimrUnit;
+        dimr_component masterComponent;
+        masterComponent.name = "masterComponent";
+        char cCurrentPath[FILENAME_MAX];
+        _getcwd(cCurrentPath, sizeof(cCurrentPath));
+        masterComponent.workingDir = cCurrentPath;
+        masterComponent.inputFile = "";
+        masterComponent.dllFinalize = []() {};
+
+        dimrUnit.component = &masterComponent;
+        controlBlock.unit = dimrUnit;
+
+        controlBlock.type = CT_START;
+        cb.subBlocks = &controlBlock;
+        cb.masterSubBlockId = -1;
+
+        // Act
+        dimr->runParallelFinish(&cb);
+
+        //Can not delete, destructor refers to the static global dimr instance, which is only assigned in dimr initialize
+        //auto func2 = [dimr] { delete dimr; };
+        //Assert::ExpectException<std::exception>(func2);
+    }
+
+    TEST_METHOD(WhenTimersInitIsCalled_TimersAreSetToZero)
+    {
+        Dimr* dimr = new Dimr();
+        Clock clock;
+        dimr->clock = &clock;
+        
+	    // Set up
+        dimr_components componentList;
+        dimr_component childComponent;
+        componentList.components = &childComponent;
+	    dimr->componentsList = componentList;
+        dimr->componentsList.numComponents = 1;
+
+        //Can not call timersInit() because thisDimr is a global static instance in dimr.cpp
+	    // dimr->timersInit();
+    }
+
+    TEST_METHOD(WhenTimerStartIsCalled_timerStartIsSet)
+    {
+        Dimr* dimr = new Dimr();
+        Clock clock;
+        dimr->clock = &clock;
+
+        // Set up
+        dimr_component component;
+        dimr->timerStart(&component);
+        Assert::AreNotEqual(Clock::Timestamp(), component.timerStart);
+    }
+
+
+
+    TEST_METHOD(WhenTimerEndIsCalled_timerEndIsSet)
+    {
+        Dimr* dimr = new Dimr();
+        Clock clock;
+        dimr->clock = &clock;
+
+        // Set up
+        dimr_component component;
+        dimr->timerEnd(&component);
+        Assert::AreNotEqual(Clock::Timestamp(0), component.timerSum);
+	    Assert::AreEqual(Clock::Timestamp(0), component.timerStart);
+    }
 };
 
 /*
