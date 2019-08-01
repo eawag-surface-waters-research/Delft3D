@@ -789,7 +789,7 @@ module m_readstructures
          call realloc(uniweir%y, uniweir%yzcount, stat=istat)
          if (istat == 0) call realloc(uniweir%z, uniweir%yzcount, stat=istat)
          if (istat .ne. 0) then
-            call SetMessage(LEVEL_ERROR, 'Reading Universal Weir: '''//trim(st_id)/''' Error Allocating Y/Z Arrays')
+            call SetMessage(LEVEL_ERROR, 'Reading Universal Weir: '''//trim(st_id)//''' Error Allocating Y/Z Arrays')
             success = .false.
             return
          endif
