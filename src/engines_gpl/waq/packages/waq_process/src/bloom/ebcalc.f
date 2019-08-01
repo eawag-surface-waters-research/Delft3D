@@ -35,27 +35,33 @@
       
       real(8)    :: x, f, fpr, ex, ei, ei1, alam, c0, c1
       integer    :: i, numgr
-!
-!  CHECK WHETHER X IS TOO LOW OR TOO HIGH
-!
-      if (x .gt. zvec(1)) go to 20
-      f=fun(1,numgr)
-      fpr=0.0
-      return
-   20 if (x .lt. zvec(nz)) go to 40
-      f=fun(nz,numgr)
-      fpr=0.0
-      return
-   40 do 60 i=2,nz
-      if (x .le. zvec(i)) go to 80
-   60 continue
-   80 ex=dexp(-x)
-      ei=dexp(-zvec(i))
-      ei1=dexp(-zvec(i-1))
-      alam=(ex-ei)/(ei1-ei)
-      fpr=alam*der(i-1,numgr)+(1.0-alam)*der(i,numgr)
-      c0=((ex/ei1)-1.0+x-zvec(i-1))/((ex/ei1)-1.0)
-      c1=((ei1/ex)-1.0+zvec(i-1)-x)/((ei1/ex)-1.0)
-      f=fun(i-1,numgr)-c0*fpr+c1*der(i-1,numgr)
+
+! Check whether x is too low or too high
+      if (x .le. zvec(1)) then
+         f=fun(1,numgr)
+         fpr=0.0
+         return
+      end if
+      
+      if (x .ge. zvec(nz)) then
+         f=fun(nz,numgr)
+         fpr=0.0
+         return
+      end if
+
+! Look up x
+      do i=2,nz
+         if (x .le. zvec(i)) exit
+      end do
+
+      ex = dexp(-x)
+      ei = dexp(-zvec(i))
+      ei1 = dexp(-zvec(i-1))
+      alam = (ex - ei) / (ei1 - ei)
+      fpr = alam * der(i - 1, numgr) + (1.0 - alam) * der(i, numgr)
+      c0 = ((ex / ei1) - 1.0 + x - zvec(i - 1)) / ((ex / ei1) - 1.0)
+      c1 = ((ei1 / ex) - 1.0 + zvec(i - 1) - x) / ((ei1 / ex) - 1.0)
+      f = fun(i - 1, numgr) - c0 * fpr + c1 * der(i - 1, numgr)
+
       return
       end

@@ -64,10 +64,8 @@
 		<File RelativePath=".\src\bloom\cspsto.f"/>
 		<File RelativePath=".\src\bloom\cvrblm.f"/>
 		<File RelativePath=".\src\bloom\dayeu.f"/>
-		<File RelativePath=".\src\bloom\diel.f"/>
 		<File RelativePath=".\src\bloom\dynrun.f"/>
 		<File RelativePath=".\src\bloom\ebcalc.f"/>
-		<File RelativePath=".\src\bloom\edit.f"/>
 		<File RelativePath=".\src\bloom\exclud.f"/>
 		<File RelativePath=".\src\bloom\fixinf.f"/>
 		<File RelativePath=".\src\bloom\hdrblm.f"/>
@@ -82,12 +80,9 @@
 		<File RelativePath=".\src\bloom\natmor.f"/>
 		<File RelativePath=".\src\bloom\nutfea.f"/>
 		<File RelativePath=".\src\bloom\option.f"/>
-		<File RelativePath=".\src\bloom\pools.f"/>
 		<File RelativePath=".\src\bloom\prinma.f"/>
 		<File RelativePath=".\src\bloom\prinsu.f"/>
 		<File RelativePath=".\src\bloom\print6.f"/>
-		<File RelativePath=".\src\bloom\promes.f"/>
-		<File RelativePath=".\src\bloom\prompt.f"/>
 		<File RelativePath=".\src\bloom\qslp.f"/>
 		<File RelativePath=".\src\bloom\setabc.f"/>
 		<File RelativePath=".\src\bloom\setuni.f"/>
@@ -285,6 +280,15 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
+		<File RelativePath=".\src\waq_process\bloom_3dl.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_process\bodcod.f">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
@@ -403,7 +407,6 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
-		<File RelativePath=".\src\waq_process\bloom_3dl.F90"/>
 		<File RelativePath=".\src\waq_process\dayl.f">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>

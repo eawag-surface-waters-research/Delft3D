@@ -21,23 +21,6 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       26 Feb 1992
-!    Time:       19:10
-!    Program:    FIXINF.FOR
-!    Version:    2.0
-!    Programmer: Hans Los
-!    Previous version(s):
-!    1.1 -- 25 Feb 1992 -- 13:42 -- Operating System: DOS
-!    1.0 -- 11 Oct 1990 -- 13:09 -- Operating System: DOS
-!    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
-!
-!  Update 1.1: store total biomass not only in BIO(2) but also in
-!  X(NUCOLS+2)
-!
-!  Update 2.0: Included a new section for coupled model versions.
-!              Changed the subroutine call.
-!              Cosmetics and comments.
-!
 !  Purpose of this module: modify some of the boundary conditions for
 !  infeasible systems. We follow a different approach for different
 !  model versions for reasons to be explained here. Infeasible systems
@@ -46,7 +29,6 @@
 !  this problem we must either lower the value of the mortality
 !  constraint, or increase the available amount of the maximum
 !  constraint, which is violated.
-!
 !
 !  1. Stand alone BLOOM II
 !     a. Steady state computation.
@@ -73,9 +55,8 @@
 !  *********************************************************************
 !  * SUBROUTINE TO DEAL WITH CASES WHERE ALL INTERVALS ARE INFEASIBLE  *
 !  *********************************************************************
-!
-      SUBROUTINE FIXINF(X,BIO,EXTTOT,EXTB,INHIB,NI,IRERUN,IRS,INFEAS,
-     &                  ERRIND,JKMAX,AROOT,CDATE,SWBLSA)
+
+      subroutine fixinf(x,bio,exttot,extb,inhib,ni,irerun,irs,infeas,errind,jkmax,aroot,cdate,swblsa)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -106,17 +87,16 @@
       real(8)      :: biomax
       real(8)      :: xdefk
       real(8)      :: xi
-!
+
 ! Determine output unit for error messages.
-!
-      IF (IOFLAG .EQ. 0) THEN
-         NOUT = IOU(6)
-      ELSE
-         NOUT = IOU(10)
-      END IF
-!
+      if (ioflag .eq. 0) then
+         nout = iou(6)
+      else
+         nout = iou(10)
+      end if
+
 ! Set flag for non-unique solutions (LST) to 0.
-      LST = 0
+      lst = 0
 
 ! ----------------------------------------------------------------------
 ! Start of steady state BLOOM section.
@@ -125,47 +105,46 @@
 ! total extinction to the background extinction.
 ! Note: this is also the final solution in dynamic runs when everything
 ! else fails.
-!
-      IF (LMORCH .EQ. 1) GO TO 40
-   10 CONTINUE
-      DO 20 J=1,NUNUCO
-   20 X(J)=B(J)
-      X(NUABCO)=0.0
-      IF (INHIB .EQ. 1) THEN
-         X(NUFILI)=0.0
-      ELSE
-         X(NUFILI)=1.0
-      END IF
-      DO 30 J=NUROWS,NUCOLS
-   30 X(J)=0.0
-      BIO(2)=-1.0
-      X(NUCOLS+2) = BIO(2)
-      EXTTOT=EXTB
-      IRERUN = 0
-      RETURN
+      if (lmorch .eq. 1) go to 40
+   10 continue
+      do j=1,nunuco
+         x(j)=b(j)
+      end do
+      x(nuabco)=0.0
+      if (inhib .eq. 1) then
+         x(nufili)=0.0
+      else
+         x(nufili)=1.0
+      end if
+      do j=nurows,nucols
+         x(j)=0.0
+      end do
+      bio(2)=-1.0
+      x(nucols+2) = bio(2)
+      exttot=extb
+      irerun = 0
+      return
 
 ! ----------------------------------------------------------------------
 ! The ultimate solution: put all biomasses to 0!
 ! Was the problem rerun already? Is there still hope for a neat
 ! solution?
-!
-   40 CONTINUE
-      IF (IRERUN .EQ. 3) THEN
-         WRITE (NOUT,50) CDATE
-   50    FORMAT (/,' ',' !!! SEVERE ERROR MESSAGE time ',A8,'.')
-         WRITE (NOUT,60) IRS(2)
-   60    FORMAT ('  Problem remains infeasible due to constraint ',I2,
+   40 continue
+      if (irerun .eq. 3) then
+         write (nout,50) cdate
+   50    format (/,' ',' !!! SEVERE ERROR MESSAGE time ',A8,'.')
+         write (nout,60) irs(2)
+   60    format ('  Problem remains infeasible due to constraint ',I2,
      &           '.',/,'  All biomasses set to 0.0.')
-         ERRIND = '!'
-         GO TO 10
-      END IF
+         errind = '!'
+         go to 10
+      end if
 
 ! ----------------------------------------------------------------------
 ! If there are no intervals at all, or if the infeasibility is not due
 ! to a mortality constraint, set all species at their mortality
 ! constraint.
-!
-      IF (NI .EQ. 0 .OR. IRS(3) .LE. NUEXRO + NUECOG) GO TO 130
+      if (ni .eq. 0 .or. irs(3) .le. nuexro + nuecog) go to 130
 
 ! ----------------------------------------------------------------------
 ! Problem is infeasible due to a mortality constraint. 
@@ -182,42 +161,38 @@
 ! coefficient. This is quite logical, and therefore UNCHECKED!
 !
 ! Note: Restore the original growth constraint vector.
-!
-         INDEX = IRS(3) - NUEXRO - NUECOG
-         IF (INDEX .GT. NUECOG) GO TO 130
-         IF (IRERUN .NE. 2) IRMAX = 0
-         IRMAX = IRMAX + 1
-         IF (IRMAX .GT. NUSPEC) GO TO 130
-         IRERUN = 2
-         ERRIND = '*'
-         EXTREM = EXTB
-         IF (LPRINT .EQ. 2) WRITE (NOUT,90) CDATE
-   90    FORMAT (/,' ',' *** Warning message for time ',A8,'.')
-         DO 100 K = 1,NUECOG
-            B(K + NUEXRO) = BGRO(K)
-            EXTREM = EXTREM + B(NUEXRO+NUECOG+K) * A(NUABCO,JKMAX(K))
-  100    CONTINUE
+         index = irs(3) - nuexro - nuecog
+         if (index .gt. nuecog) go to 130
+         if (irerun .ne. 2) irmax = 0
+         irmax = irmax + 1
+         if (irmax .gt. nuspec) go to 130
+         irerun = 2
+         errind = '*'
+         extrem = extb
+         if (lprint .eq. 2) write (nout,90) cdate
+   90    format (/,' ',' *** Warning message for time ',A8,'.')
+         do k = 1,nuecog
+            b(k + nuexro) = bgro(k)
+            extrem = extrem + b(nuexro+nuecog+k) * a(nuabco,jkmax(k))
+         end do
 
-         IF (SWBLSA .EQ. 1) THEN
-            B(IRS(3)) = 0.0
-            IF (LPRINT .EQ. 2) WRITE (NOUT,110) GRNAME (INDEX)
-  110          FORMAT (' Mortality constraint of species ',A8,' is '//
-     &         'violated.',/,' This constraint is dropped.')
-         ELSE
-            DO 125 K = IT2(INDEX,1), IT2(INDEX,2)
-               IF (AROOT(2*K) .LT. EXTREM) THEN
-                   AROOT(2*K) = EXTREM
-                   IF (LPRINT .EQ. 2) WRITE (NOUT, 120) GRNAME(INDEX)
-  120              FORMAT (' Mortality constraint of species ',A8,
-     &             'is violated.',/,' KMAX NOW set above mortality '//
-     &             'constaint.')
-               ELSE
-                   B(IRS(3)) = 0.0
-                   IF (LPRINT .EQ. 2) WRITE (NOUT, 110) GRNAME(INDEX)
-               END IF
-  125       CONTINUE
-         END IF
-         RETURN
+         if (swblsa .eq. 1) then
+            b(irs(3)) = 0.0
+            if (lprint .eq. 2) write (nout,110) grname (index)
+  110          format (' Mortality constraint of species ',A8,' is violated.',/,' This constraint is dropped.')
+         else
+            do k = it2(index,1), it2(index,2)
+               if (aroot(2*k) .lt. extrem) then
+                   aroot(2*k) = extrem
+                   if (lprint .eq. 2) write (nout, 120) grname(index)
+  120              format (' Mortality constraint of species ',A8,'is violated.',/,' KMAX NOW set above mortality constaint.')
+               else
+                   b(irs(3)) = 0.0
+                   if (lprint .eq. 2) write (nout, 110) grname(index)
+               end if
+            end do
+         end if
+         return
 
 ! ----------------------------------------------------------------------
 ! In a final attempt to fix the problem set all biomasses to their
@@ -234,28 +209,29 @@
 ! detritus. Compute the total biomass. Set slacks for mortality
 ! constraints of all species, whose biomasses are set equal to the
 ! mortality constraint.
-!
-  130 CONTINUE
-      DO 140 I = 1,NUNUCO
-  140 SUMNUT(I) = 0.0
-      BIOMAX = 0.0
-      DO 170 J = 1,NUECOG
-         MOF = 0
-         DO 160 K = IT2(J,1),IT2(J,2)
-            XDEFK = X(NUROWS + K)
-            ISPLIM(K) = 0
-            IF (XDEFK .LT. 1.D-6) GO TO 160
-            MOF = MOF + 1
-            ISPLIM(K) = NUROWS - NUECOG + J
-            BIOMAX = BIOMAX + XDEFK
-            DO 150 I = 1,NUNUCO
-  150       SUMNUT(I) = SUMNUT(I) + A(I,K) * XDEFK
-  160    CONTINUE
-         IF (MOF .GT. 0) X(NUROWS-NUECOG+J) = 0.0D1
-  170 CONTINUE
-      BIO(2) = BIOMAX
-      X(NUCOLS+2) = BIO(2)
-!
+  130 continue
+      do i = 1,nunuco
+         sumnut(i) = 0.0
+      end do
+      biomax = 0.0
+      do j = 1,nuecog
+         mof = 0
+         do k = it2(j,1),it2(j,2)
+            xdefk = x(nurows + k)
+            isplim(k) = 0
+            if (xdefk .lt. 1.d-6) cycle
+            mof = mof + 1
+            isplim(k) = nurows - nuecog + j
+            biomax = biomax + xdefk
+            do i = 1,nunuco
+               sumnut(i) = sumnut(i) + a(i,k) * xdefk
+            end do
+         end do
+         if (mof .gt. 0) x(nurows-nuecog+j) = 0.0d1
+      end do
+      bio(2) = biomax
+      x(nucols+2) = bio(2)
+
 !  Compute the nutrient slacks. Check, whether they are positive.
 !  If not, perform various actions depending on the kind of run:
 !
@@ -266,61 +242,56 @@
 !     no extinction intervals exist,
 !  3. Release the mortality constraints and re-run the problem if
 !     valid extinction intervals do exist.
-!
-      DO 220 I = 1,NUNUCO
-      XI = B(I) - SUMNUT(I)
-      IF (XI .LT. 0.0) THEN
-         IF (SWBLSA .NE. 1) THEN
-            IF (LPRINT .EQ. 2) THEN
-              WRITE (NOUT,50) CDATE
-              WRITE (NOUT,180) CSTRA(I)
-  180         FORMAT (' One of the mortality constraints violates the ',
-     &                 A8,' constraint.',/,' Problem is infeasible.')
-              ERRIND = '!'
-            END IF
-            GO TO 10
-         ELSE
-            IF (NI .EQ. 0) THEN
-              XI = 0.0
-              IF (LPRINT .EQ. 2) THEN
-                WRITE (NOUT,90) CDATE
-                WRITE (NOUT,190) CSTRA(I)
-  190         FORMAT (' One of the mortality constraints violates the ',
-     &                 A8,' constraint.',/,' Negative concentrations ',
-     &                 'are tolerated.',/,' All species set to their ',
-     &                 'mortality constraints.')
-                ERRIND = '*'
-            END IF
-            ELSE
-              IF (LPRINT .EQ. 2) THEN
-                WRITE (NOUT,90) CDATE
-                WRITE (NOUT,200) CSTRA(I)
-  200         FORMAT (' One of the mortality constraints violates the ',
-     &                 A8,' constraint.',/,' All mortality constaints ',
-     &                 'will be released.')
-                ERRIND = '*'
-              END IF
-              DO 210 K = 1,NUECOG
-              B(K + NUEXRO + NUECOG) = 0.0
-  210         B(K + NUEXRO) = BGRO(K)
-              IRERUN = 3
-              RETURN
-            END IF
-         END IF
-      END IF
-  220 X(I) = XI
-      IF (INHIB .EQ. 1) THEN
-         X(NUFILI)=0.0D0
-      ELSE
-         X(NUFILI)=1.0
-      END IF
-!     IF (NI .EQ. 0 .AND. BIOMAX .LT. 1.0D-6) THEN
-      IF (NI .EQ. 0) THEN
-         X(NUABCO) = 0.0D0
-      ELSE
-         X(NUABCO) = 1.0
-      END IF
-      IRERUN = 0
-      INFEAS = 0
-      RETURN
-      END
+      do 220 i = 1,nunuco
+      xi = b(i) - sumnut(i)
+      if (xi .lt. 0.0) then
+         if (swblsa .ne. 1) then
+            if (lprint .eq. 2) then
+               write (nout,50) cdate
+               write (nout,180) cstra(i)
+  180          format (' One of the mortality constraints violates the ',A8,' constraint.',/,' Problem is infeasible.')
+               errind = '!'
+            end if
+            go to 10
+         else
+            if (ni .eq. 0) then
+               xi = 0.0
+               if (lprint .eq. 2) then
+                   write (nout,90) cdate
+                   write (nout,190) cstra(i)
+  190              format (' One of the mortality constraints violates the ',A8,' constraint.',/,' Negative concentrations ',
+     &                     'are tolerated.',/,' All species set to their mortality constraints.')
+                   errind = '*'
+            end if
+            else
+              if (lprint .eq. 2) then
+                 write (nout,90) cdate
+                 write (nout,200) cstra(i)
+  200            format (' One of the mortality constraints violates the ',A8,' constraint.',/,
+     &                   ' All mortality constaints will be released.')
+                 errind = '*'
+              end if
+              do k = 1,nuecog
+                 b(k + nuexro + nuecog) = 0.0
+                 b(k + nuexro) = bgro(k)
+              end do
+              irerun = 3
+              return
+            end if
+         end if
+      end if
+  220 x(i) = xi
+      if (inhib .eq. 1) then
+         x(nufili)=0.0d0
+      else
+         x(nufili)=1.0
+      end if
+      if (ni .eq. 0) then
+         x(nuabco) = 0.0d0
+      else
+         x(nuabco) = 1.0
+      end if
+      irerun = 0
+      infeas = 0
+      return
+      end

@@ -21,30 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       7 Dec 1989
-!    Time:       13:05
-!    Program:    HDRBLM   FORTRAN
-!    Version:    1.3
-!    Programmer: Hans Los
-!    Previous version(s):
-!    1.2 -- 24 Oct 1989 -- 08:27 -- Operating System: CMS
-!    1.1 -- 24 Oct 1989 -- 08:25
-!    1.0 -- 23 Oct 1989 -- 13:20
-!    0.0 -- 3 Oct 1989 --  8:22
-!
-!  *********************************************************************
-!  *  SUBROUTINE TO CONVERT UNITS BETWEEN BLOOM II AND ECOLUMN         *
-!  *********************************************************************
-!
-!  *********************************************************************
-!  *      SPECIAL ECOLUMN - BLOOM II PROGRAM VERSION                   *
-!  *********************************************************************
-!
 !  This module writes the headers for BLOOM II output files if
 !  LPRINT = 1. Otherwise no BLOOM II specific output should be
 !  produced.
-!
-      SUBROUTINE HDRBLM
+
+      subroutine hdrblm
 
       use bloom_data_dim
       use bloom_data_io  
@@ -53,29 +34,27 @@
       use bloom_data_sumou  
 
       implicit none
-!
-!  Write heading for output on units IOU(6), OUUNI, IOU(15) and
-!  optionally IOU(21).
-!
-      CALL FORMFE (OUUNI)
-      WRITE (OUUNI,99999) IYEAR,CASE
-      WRITE (OUUNI,99990) COM
-      CALL FORMFE (IOU(14))
-      WRITE (IOU(14),99999) IYEAR,CASE
-      WRITE (IOU(14),99990) COM
-      IF ( IOFLAG .EQ. 0) GO TO 60
-      CALL FORMFE (IOU(21))
-      WRITE (IOU(21),99999) IYEAR,CASE
-      WRITE (IOU(21),99990) COM
-   60 IF ( IDUMP .EQ. 0) GO TO 70
-      CALL FORMFE (IOU(6))
-      WRITE (IOU(6),99999) IYEAR,CASE
-      WRITE (IOU(6),99990) COM
-   70 CONTINUE
-!
+
+!  Write heading for output on units IOU(6), OUUNI, IOU(15) and optionally IOU(21).
+      call formfe (ouuni)
+      write (ouuni,99999) iyear,case
+      write (ouuni,99990) com
+      call formfe (iou(14))
+      write (iou(14),99999) iyear,case
+      write (iou(14),99990) com
+      if ( ioflag .ne. 0) then
+         call formfe (iou(21))
+         write (iou(21),99999) iyear,case
+         write (iou(21),99990) com
+      end if
+      if ( idump .ne. 0) then
+         call formfe (iou(6))
+         write (iou(6),99999) iyear,case
+         write (iou(6),99990) com
+      end if
+
 ! Formats this subroutine.
-!
-99999 FORMAT (1X,'YEAR',1X,I4,3X,13A8)
-99990 FORMAT (3X,9A8)
-      RETURN
-      END
+99999 format (1X,'YEAR',1X,I4,3X,13A8)
+99990 format (3X,9A8)
+      return
+      end

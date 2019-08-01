@@ -27,7 +27,7 @@
 !   *                     EUPHOTIC ZONE                              *
 !   ******************************************************************
 !
-      SUBROUTINE DAYEU(DAY,DAYEUF,EXTTOT,DEP,DEPEUF,DSOL,EULIGH,IDUMP)
+      subroutine dayeu(day, dayeuf, exttot, dep, depeuf, dsol, euligh, idump)
 
       use bloom_data_io  
 
@@ -41,26 +41,21 @@
       real(8)    :: dayeuf
       real(8)    :: day
       integer    :: idump
-      !
+
 ! Compute the euphotic depth.
-!
-      IF (EULIGH .GT. DSOL) EULIGH = DSOL
-      DEPEUF=DLOG(DSOL/EULIGH)
-      DEPEUF=DEPEUF/EXTTOT
-!
+      if (euligh .gt. dsol) euligh = dsol
+      depeuf=dlog(dsol/euligh)
+      depeuf=depeuf/exttot
+
 ! Check whether the euphotic depth exceeds the physical depth. If it
-! does, set DEPEUF = DEP.
-!
-      IF (DEPEUF .GT. DEP) DEPEUF=DEP
-!
+! does, set depeuf = dep.
+      if (depeuf .gt. dep) depeuf=dep
+
 ! Compute the euphotic day length.
-!
-      DAYEUF=DAY * (DEPEUF/DEP)
-!
+      dayeuf=day * (depeuf/dep)
+
 ! Print the euphotic day length and depth.
-!
-      IF (IDUMP .EQ. 1) WRITE(OUUNI,10) DAY,DAYEUF,DEP,DEPEUF
-   10 FORMAT (' Day length = ',F5.2,' Euphotic day length = ',F5.2,
-     1        ' Depth = ',F5.2,' Euphotic depth = ',F5.2)
-      RETURN
-      END
+      if (idump .eq. 1) write(ouuni,10) day, dayeuf, dep, depeuf
+   10 format (' Day length = ',F5.2,' Euphotic day length = ',F5.2,' Depth = ',F5.2,' Euphotic depth = ',F5.2)
+      return
+      end

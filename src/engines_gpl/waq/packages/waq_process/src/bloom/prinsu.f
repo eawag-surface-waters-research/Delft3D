@@ -21,34 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       30 Dec 1999
-!    Time:       09:12
-!    Program:    PRINSU.FOR
-!    Version:    1.32
-!    Programmer: Hans Los
-!    Previous version(s):
-!    1.3 -- 4 Jan 1994 -- 19:45 -- Operating System: DOS
-!    1.2 -- 19 Feb 1992 -- 14:04 -- Operating System: DOS
-!    1.1 -- 11 Oct 1990 -- 13:10 -- Operating System: DOS
-!    1.0 -- 14 Nov 1989 -- 11:24 -- Operating System: DOS
-!    0.0 -- 7 Jul 1989 --  9:34 -- Operating System: DOS
-!
-!  Update 1.32: Changed format at 160 for zooplankton output
-!  Update 1.31: No output for bottom algae
-!  Update 1.3: Extended registration of limiting factors.
-!              Array ISPLIM is filled with ALL limiting factors for
-!              each type in the optimum solution. ISPLIM is printed
-!              by PRINUN and postprocessed by POSTBL.
-!  Update 1.2:
-!  Use 1.0D-4 rather than 1.0D-6 to determine limiting factors:
-!  due to round-off errors the previous values sometimes suggested
-!  that a factor was not limiting when in fact it was.
-!
 !  *********************************************************************
 !  *         SUBROUTINE TO PRINT SUMMARIZED SOLUTIONS                  *
 !  *********************************************************************
 !
-      SUBROUTINE PRINSU(X,XECO,BIO2,TOTAL,COUT,OUT,NTSTOT,ITNUM,NTAPE)
+      subroutine prinsu(x,xeco,bio2,total,cout,out,ntstot,itnum,ntape)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -59,15 +36,15 @@
 
       implicit none
 
-      integer  ::  i, i1, i2, j, k, k1, k2
-      integer  ::  itnum, ntape, ntstot, numlim, ncon
+      integer  :: i, i1, i2, j, k, k1, k2
+      integer  :: itnum, ntape, ntstot, numlim, ncon
       real (8) :: bio2, xbio, total, tot2
       
-      REAL*8 X(*),OUT(*),XECO(*)
-      CHARACTER*8 WORDS(14)
-      CHARACTER*4 COUT(*)
-      LOGICAL LCON
-      DATA WORDS  /'Date    ','Limiting','Factors ','Iter    ',
+      real*8 x(*),out(*),xeco(*)
+      character*8 words(14)
+      character*4 cout(*)
+      logical lcon
+      data words  /'Date    ','Limiting','Factors ','Iter    ',
      1             'Zood    ','Total   ','CHL-pred','        ',
      2             'Plank.  ','Diss.   ','CHL-obs ','Tot Ext.',
      3             'Growth  ','Mortalit'/
@@ -75,165 +52,137 @@
 !  Call subroutines to print headings for output on tape 10,14 and ntape
 !  if this is the first time through the subroutine.
 !  Set print array indices.
-!
-      IF (LPRINT .EQ. 2) NPRINT=NPRINT+1
-      IF (NPRINT .GT. 1) GO TO 40
-      CALL HEADIN (NTAPE,WORDS)
+      if (lprint .eq. 2) nprint=nprint+1
+      if (nprint .gt. 1) go to 40
+      call headin (ntape,words)
+      ntstot=nts14+1
 
-      NTSTOT=NTS14+1
-!
-!  Update 1.3. Construct constraint names and store them in CNAMES.
-!  This array is printed by PRINUN.
-!
 !  Abiotic constraints
-!
-      DO 10 I = 1, NUABCO
-         CNAMES (I) = CSTRA (I)
-   10 CONTINUE
-!
-!  Blank for exclusion row
-!
-!    1             IT2,NREP,NUSPEC,NUECOG,NUNUCO,
-!    1             NUCOLS,NUFILI,NUABCO,NUEXRO,NUROWS,NUSPE1,IDUMP
+      do i = 1, nuabco
+         cnames (i) = cstra (i)
+      end do
 
-      CNAMES (NUEXRO) = WORDS (8)
-!
+!  Blank for exclusion row
+      cnames (nuexro) = words (8)
+
 !  Growth and mortality constraints: name + group name.
-!
-      I1 = NUEXRO
-      I2 = NUEXRO + NUECOG
-      DO 20 I = 1, NUECOG
-         I1 = I1 + 1
-         I2 = I2 + 1
-         WRITE(CNAMES (I1), 30) WORDS (13), GRNAME(I)
-         WRITE(CNAMES (I2), 30) WORDS (14), GRNAME(I)
-   20 CONTINUE
-   30 FORMAT (A6,'-',A8)
-!
+      i1 = nuexro
+      i2 = nuexro + nuecog
+      do i = 1, nuecog
+         i1 = i1 + 1
+         i2 = i2 + 1
+         write(cnames (i1), 30) words (13), grname(i)
+         write(cnames (i2), 30) words (14), grname(i)
+      end do
+   30 format (a6,'-',a8)
+
 !  Start writing the output into print-arrays.
-!
-   40 CONTINUE
-!
+   40 continue
+
 !  Calculate totals for species, the total chlorophyll concentration
 !  and record in OUT.
-!
-      TOTAL=0.
-      DO 60 K=1,NUECOG
-         TOT2=0.
-         DO 50 J=IT2(K,1),IT2(K,2)
-            XBIO = X(J+NUROWS)
-            TOT2=TOT2+XBIO
-            IF (SDMIX (K) .LT. 0.0) GO TO 50
-            TOTAL=TOTAL+XBIO/CHLR(J)
-   50    CONTINUE
-         XECO(K)=TOT2
-   60 OUT(K+NTS7)=TOT2
-      OUT(NTS14)=BIO2
-      IF (BIO2 .LT. 0.0) OUT(NTS14) = 0.0
-      OUT(NTSTOT)=TOTAL
-!
+      total=0.
+      do k=1,nuecog
+         tot2=0.
+         do j=it2(k,1),it2(k,2)
+            xbio = x(j+nurows)
+            tot2=tot2+xbio
+            if (sdmix (k) .lt. 0.0) cycle
+            total=total+xbio/chlr(j)
+         end do
+         xeco(k)=tot2
+         out(k+nts7)=tot2
+      end do         
+      out(nts14)=bio2
+      if (bio2 .lt. 0.0) out(nts14) = 0.0
+      out(ntstot)=total
+
 !  Determine limiting factors and record their names in COUT.
 !  Record in LIMIT in 1,0 notation.
-!
-      WRITE (LIMIT,70) ('0',K=1,NUABCO+1)
-   70 FORMAT (9(1X,A1))
-      DO 80 K=2,NTS6
-         COUT(K) = WORDS(8) (1:4)
-   80 CONTINUE
-!
-!  Update 1.3
+      write (limit,70) ('0',k=1,nuabco+1)
+   70 format (9(1x,a1))
+      do k=2,nts6
+         cout(k) = words(8) (1:4)
+      end do
+
 !  Initiate ISPLIM at 0
-!
-      DO 90 I = 1, NUSPEC
-         ISPLIM(I) = 0
-   90 CONTINUE
-!
-!  Update 1.3: modified section.
-!  Two changes with respect to previous versions:
-!  1.  Register detailed constraint numbers in ISPLIM
-!  2.  To this purpose do not leave DO loops for growth and mortality
-!      constraints when the first limitation is found: there may be more
-!      types growth respectively mortality limited.
-!      These duplicate limitations should NOT be written to LIMIT!
-!
+      do i = 1, nuspec
+         isplim(i) = 0
+      end do
+
 ! 1. nutrient constraints.
-!
-      K1=1
-      NUMLIM = 0
-      NCON = 0
-      DO 100 K=1,NUNUCO
-         NCON = NCON + 1
-         IF (X(K) .GT. 1.D-4 ) GO TO 100
-         K1=K1+1
-         NUMLIM = NUMLIM + 1
-         ISPLIM (NUMLIM) = NCON
-         COUT(K1) = CSTRA(K) (1:4)
-         LIMIT (2*K:2*K) = '1'
-  100 CONTINUE
-!
+      k1=1
+      numlim = 0
+      ncon = 0
+      do k=1,nunuco
+         ncon = ncon + 1
+         if (x(k) .gt. 1.d-4 ) cycle
+         k1=k1+1
+         numlim = numlim + 1
+         isplim (numlim) = ncon
+         cout(k1) = cstra(k) (1:4)
+         limit (2*k:2*k) = '1'
+      end do
+
 ! 2. energy constraints.
-!
-      K2 = 2 + 2 * NUNUCO
-      DO 110 K=NUNUCO+1,NUABCO
-         NCON = NCON + 1
-         IF (X(K) .GT. 1.D-4 ) GO TO 110
-         NUMLIM = NUMLIM + 1
-         ISPLIM (NUMLIM) = NCON
-         K1=K1+1
-         COUT(K1) = CSTRA(K) (1:4)
-         LIMIT (K2:K2) = '1'
-  110 CONTINUE
-!
+      k2 = 2 + 2 * nunuco
+      do k=nunuco+1,nuabco
+         ncon = ncon + 1
+         if (x(k) .gt. 1.d-4 ) cycle
+         numlim = numlim + 1
+         isplim (numlim) = ncon
+         k1=k1+1
+         cout(k1) = cstra(k) (1:4)
+         limit (k2:k2) = '1'
+      end do
+
 !  Increment NCON by 1 to skip exclusion row!
-!
-      NCON = NCON + 1
-!
+      ncon = ncon + 1
+
 ! 3. Growth constraints.
 !
 !  Print slacks for (optional) growth constraints.
 !  Note: if both the growth and mortality slack of a phytoplankton
 !  are 0.0, assume that the mortality constraint is the actual
 !  limitation: do not write "GRO" to output files.
-!
-      LCON = .FALSE.
-      IF (LGROCH .EQ. 0) GO TO 150
-      K2 = 2 * (NUABCO -1) + 2
-      DO 120 I=1,NUECOG
-         NCON = NCON + 1
-         IF (X(I+NUEXRO) .GT. 1.D-4) GO TO 120
-         IF (X(I+NUEXRO+NUECOG) .LT. 1.D-4 .AND. LMORCH .EQ. 1) GOTO 120
-         NUMLIM = NUMLIM + 1
-         ISPLIM (NUMLIM) = NCON
-         IF ( .NOT. LCON) THEN
-            K1=K1+1
-            COUT(K1) = WORDS(13) (1:4)
-            LIMIT (K2:K2) = '1'
-            LCON = .TRUE.
-         END IF
-  120 CONTINUE
-!
+      lcon = .false.
+      if (lgroch .eq. 0) go to 150
+      k2 = 2 * (nuabco -1) + 2
+      do i=1,nuecog
+         ncon = ncon + 1
+         if (x(i+nuexro) .gt. 1.d-4) cycle
+         if (x(i+nuexro+nuecog) .lt. 1.d-4 .and. lmorch .eq. 1) cycle
+         numlim = numlim + 1
+         isplim (numlim) = ncon
+         if ( .not. lcon) then
+            k1=k1+1
+            cout(k1) = words(13) (1:4)
+            limit (k2:k2) = '1'
+            lcon = .true.
+         end if
+      end do
+
 ! 4. Mortality constraints.
 !  Print slacks for (optional) mortality constraints.
-!
-  130 CONTINUE
-      LCON = .FALSE.
-      IF (LMORCH .EQ. 0) GO TO 150
-      K2 = K2 + 2
-      DO 140 I=1,NUECOG
-         NCON = NCON + 1
-         IF (X(I+NUEXRO+NUECOG) .GT. 1.D-4) GO TO 140
-         IF (XECO(I) .LT. 1.D-4) GO TO 140
-         NUMLIM = NUMLIM + 1
-         ISPLIM (NUMLIM) = NCON
-         IF ( .NOT. LCON) THEN
-            K1=K1+1
-            COUT(K1) = WORDS(14) (1:4)
-            LIMIT (K2:K2) = '1'
-            LCON = .TRUE.
-         END IF
-  140 CONTINUE
-  150 CONTINUE
-      OUT(NTS7) = 0.
+  130 continue
+      lcon = .false.
+      if (lmorch .eq. 0) go to 150
+      k2 = k2 + 2
+      do i=1,nuecog
+         ncon = ncon + 1
+         if (x(i+nuexro+nuecog) .gt. 1.d-4) cycle
+         if (xeco(i) .lt. 1.d-4) cycle
+         numlim = numlim + 1
+         isplim (numlim) = ncon
+         if ( .not. lcon) then
+            k1=k1+1
+            cout(k1) = words(14) (1:4)
+            limit (k2:k2) = '1'
+            lcon = .true.
+         end if
+      end do
+  150 continue
+      out(nts7) = 0.
 
-      RETURN
-      END
+      return
+      end

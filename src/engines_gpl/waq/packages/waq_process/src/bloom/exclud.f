@@ -21,11 +21,10 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!
 !  *********************************************************************
 !  * SUBROUTINE EXCLUD TO DETERMINE SPECIES PERMITTED IN EACH INTERVAL *
 !  *********************************************************************
-!
+
       subroutine exclud (inow,linf,irs)
 
       use bloom_data_dim
@@ -38,42 +37,39 @@
       integer ntypes (ms),irs(3), i, inow, k, nexclu, notprs, linf, iform
       save ntypes
       data nexclu /0/
-!
+
 ! If the subroutine is called for the first time, compute and store
 ! the number of types in each phytoplankton group.
-!
-      NEXCLU = NEXCLU + 1
-      IF (NEXCLU .EQ. 1) THEN
-         DO 10 I = 1,NUECOG
-         NTYPES(I) = IT2(I,2) - IT2(I,1) + 1
-   10    CONTINUE
-      END IF
-!
+      nexclu = nexclu + 1
+      if (nexclu .eq. 1) then
+         do i = 1,nuecog
+            ntypes(i) = it2(i,2) - it2(i,1) + 1
+         end do
+      end if
+
 !  If a species is not permitted in a feasibility interval,
 !  put 1.0 in the exclusion row of matrix A.
 !  If no species is permitted in interval INOW, exit with LINF = 2
-!
-      DO 20 K=1,NUSPEC
-      IF(ACO(INOW,K) .LT. 1.0D-6) GO TO 30
-   20 CONTINUE
-      LINF=2
-      RETURN
-!
+      do k=1,nuspec
+         if(aco(inow,k) .lt. 1.0d-6) go to 30
+      end do
+      linf=2
+      return
+
 !  Determine species permitted in interval INOW
-!
-   30 CONTINUE
-!
+   30 continue
+
 ! Correct for species with a positive mortality constraint, that are
 ! no longer permitted in interval INOW: allow all types in this interval,
 ! but limit their biomasses requiring that the B values for the growth
 ! and mortality constraint are the same.
-!
-      IF (LMORCH .EQ. 0) THEN
-         DO 40 K=1,NUSPEC
-   40    A(NUEXRO,K)=ACO(INOW,K)
-         GO TO 90
-      END IF
-!
+      if (lmorch .eq. 0) then
+         do k=1,nuspec
+            a(nuexro,k)=aco(inow,k)
+         end do
+         go to 90
+      end if
+
 ! Use ACO (INOW,K) if the Kmax of SOME type of species I is not yet
 ! exceeded, or if the mortality constraint is 0.0: nothing to conserve.
 ! Otherwise allow EACH type of I, but make the growth constraint equal
@@ -82,46 +78,45 @@
 ! all types premitted in any interval. This information is used to
 ! determine, whether or not simplex should be called AFTER infeasible
 ! intervals have been detected.
-!
-      DO 80 I = 1,NUECOG
-      NOTPRS = 0
-      DO 50 K = IT2(I,1),IT2(I,2)
-      IF (ACO(INOW,K) .GT. 0.0) NOTPRS = NOTPRS + 1
-   50 CONTINUE
-      IF (NOTPRS .LT. NTYPES(I) .OR. B(NUEXRO+NUECOG+I) .LT. 1.D-6) THEN
-         DO 60 K = IT2(I,1),IT2(I,2)
-   60       A(NUEXRO,K)=ACO(INOW,K)
-      ELSE
-         DO 70 K = IT2(I,1),IT2(I,2)
-            ACO(INOW,K) = 0.0
-   70       A(NUEXRO,K)=0.0
-         B(NUEXRO + I) = B(NUEXRO + NUECOG + I)
-      END IF
-   80 CONTINUE
-!
+      do i = 1,nuecog
+         notprs = 0
+         do k = it2(i,1),it2(i,2)
+            if (aco(inow,k) .gt. 0.0) notprs = notprs + 1
+         end do
+         if (notprs .lt. ntypes(i) .or. b(nuexro+nuecog+i) .lt. 1.d-6) then
+            do k = it2(i,1),it2(i,2)
+               a(nuexro,k) = aco(inow,k)
+            end do
+         else
+            do k = it2(i,1),it2(i,2)
+               aco(inow,k) = 0.0
+               a(nuexro,k)=0.0
+            end do
+            b(nuexro + i) = b(nuexro + nuecog + i)
+         end if
+      end do
+
 !  Exit if the previous interval was feasible (IRS(2) = 0)).
 !  Exit if the previous interval was infeasible due to a mortality
 !  contstraint: call simplex for the next interval, it might be
 !  feasible.
-!
-   90 CONTINUE
-      IF (IRS(2) .EQ. 0) RETURN
-      IF (LMORCH .EQ. 1 .AND. IRS(3) .GT. NUEXRO + NUECOG) THEN
-         LINF = 0
-         RETURN
-      END IF
-!
+   90 continue
+      if (irs(2) .eq. 0) return
+      if (lmorch .eq. 1 .and. irs(3) .gt. nuexro + nuecog) then
+         linf = 0
+         return
+      end if
+
 !  If interval IFORM was infeasible and if no new types
 !  are permitted in INOW,
 !  INOW must be infeasible too: exit with LINF = 1
-!
-      LINF = 1
-      IFORM = INOW-1
-      DO 100 K=1,NUSPEC
-      IF (ACO(INOW,K) .LT. ACO(IFORM,K)) THEN
-         LINF = 0
-         RETURN
-      END IF
-  100 CONTINUE
-      RETURN
-      END
+      linf = 1
+      iform = inow-1
+      do k=1,nuspec
+         if (aco(inow,k) .lt. aco(iform,k)) then
+            linf = 0
+            return
+         end if
+      end do
+      return
+      end

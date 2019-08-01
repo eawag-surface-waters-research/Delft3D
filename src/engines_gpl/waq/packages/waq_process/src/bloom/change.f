@@ -273,7 +273,6 @@
       GO TO 920
   930 J=0
   940 J=J+1
-      CALL BLPROMPT(1,J)
   950 I = INPTNM(1007,0.0D0,NPER(J,1),2)
       I = INPTNM(1008,0.0D0,NPER(J,2),2)
       IF (NPER(J,1) .LE. NPER(J,2)) GO TO 960
@@ -378,19 +377,6 @@
 !  editor, otherwise simply type new title.
 !
  1900 CONTINUE
-      IF (IOFLAG .EQ. 0) GO TO 1910
-      OPEN (IOU(29), FILE = FNAME)
-      WRITE (IOU(29),99710) (CASE(I),I=1,9)
-      WRITE (IOU(29),99710) COM
-      CALL EDIT (FNAME,PROFIL,IRC)
-      IF (IRC .EQ. -3) THEN
-         CLOSE (IOU(29), STATUS = 'DELETE')
-         GO TO 1910
-      END IF
-      REWIND IOU(29)
-      READ (IOU(29),99710) (CASE(I),I=1,9)
-      READ (IOU(29),99710) COM
-      CLOSE (IOU(29), STATUS = 'DELETE')
       GO TO 100
 !
 !  Get new title if system editor cannot be used.

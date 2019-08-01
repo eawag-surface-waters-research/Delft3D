@@ -21,23 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       4 Nov 1992
-!    Time:       14:32
-!    Program:    SETABC.FOR
-!    Version:    1.0
-!    Programmer: Hans Los
-!    Previous version(s):
-!    0.0 -- 26 Sep 1989 -- 14:15 -- Operating System: DOS
-!
-!    Update 1.0: Added DEP to parameter list
-!              : Include new section to compute surface light intensity
-!                and mixing depth fraction of bottom algae (Ulva)
-!
 !  *********************************************************************
 !  *          SUBROUTINE TO SET MATRIX A AND B                         *
 !  *********************************************************************
-!
-      SUBROUTINE SETABC(XINIT,EXTB,EXTTOT,CSOL,DSOL,T,DEP,ID,NSET)
+
+      subroutine setabc(xinit,extb,exttot,csol,dsol,t,dep,id,nset)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -64,147 +52,106 @@
 
 !jvb  , perform this every time for Ulva
 !
-      IDREM = IDUMP
-      IDUMP = 0
-      CALL MAXPRD(TEFCUR)
-      DO 20 K = 1,NUSPEC
-   20 PMAX20(K) = PMAX(K)
-      CALL MAXPRD(T)
-      IDUMP = IDREM
+      idrem = idump
+      idump = 0
+      call maxprd(tefcur)
+      do k = 1,nuspec
+         pmax20(k) = pmax(k)
+      end do
+      call maxprd(t)
+      idump = idrem
 !
-      IDREM = 0
-      DO 30 K = 1, NUSPEC
-      IF (SDMIX(K) .LT. 0.0) THEN
-         SDMIXN(K) = 1.0D0 + SDMIX(K)
-         DMIX(K) = DABS(SDMIX(K)) * DEP
-         IDREM = 1
-      ELSE
-         SDMIXN(K) = 0.0D0
-      END IF
-30    CONTINUE
+      idrem = 0
+      do k = 1, nuspec
+         if (sdmix(k) .lt. 0.0) then
+            sdmixn(k) = 1.0d0 + sdmix(k)
+            dmix(k) = dabs(sdmix(k)) * dep
+            idrem = 1
+         else
+            sdmixn(k) = 0.0d0
+         end if
+      end do
 !jvb
-      NSET = NSET + 1
-      IF (NSET .GT. 1) GO TO 70
-!
+      nset = nset + 1
+      if (nset .le. 1) then
 !  Initialize "C" values for all species to 1.0: maximize.
 !  (See also subroutines SOLVLP and MAXGROGR)
-!
-      DO 10 J=1,NUSPEC
-   10 C(J)=1.0
-!
+         do j=1,nuspec
+            c(j)=1.0
+         end do
+
 !  Initiate multiplier for exponential term at zero:
 !  start with steady state solution for the dead algal pool
-!
-      EXPMUL=0.0
-!
-!  Find PMAX values at TEFCUR degrees to determine temperature
-!  correction for the efficiency curves.
-!
-!     IDREM = IDUMP
-!     IDUMP = 0
-!     CALL MAXPRD(TEFCUR)
-!     DO 20 K = 1,NUSPEC
-!  20 PMAX20(K) = PMAX(K)
-!     CALL MAXPRD(T)
-!     IDUMP = IDREM
-!
-!  Update november 1992.
-!  If a negative value of SDMIX was specified in the input, we are
-!  dealing with a type that is only mixed over the lower fraction SDMIX
-!  of the water column. Determine:
-!  1. The fraction of the depth over which this type is NOT mixed
-!     (SDMIXN). This is used to compute the "surface" light intensity.
-!  2. The fraction of the depth over which this type DOES get mixed.
-!  Note: DMIX has been already computed by RUN, but as we reset SDMIX
-!  here we must also recompute DMIX for the initial time step.
-!
-!     IDREM = 0
-!     DO 30 K = 1, NUSPEC
-!     IF (SDMIX(K) .LT. 0.0) THEN
-!        SDMIXN(K) = 1.0D0 + SDMIX(K)
-!        DMIX(K) = DABS(SDMIX(K)) * DEP
-!        IDREM = 1
-!     ELSE
-!        SDMIXN(K) = 0.0D0
-!     END IF
-!  30 CONTINUE
-      IF (IDREM .EQ. 1) THEN
-         WRITE (IOU(10), 99996) (DABS(SDMIX(K)), K = 1, NUSPEC)
-         WRITE (IOU(10), 99995) (SDMIXN(K), K = 1, NUSPEC)
-      END IF
-!
+         expmul=0.0
+         if (idrem .eq. 1) then
+            write (iou(10), 99996) (dabs(sdmix(k)), k = 1, nuspec)
+            write (iou(10), 99995) (sdmixn(k), k = 1, nuspec)
+         end if
+
 !  Print warning message if a non-zero value is specified for the
 !  sedimentation or flushing rate
-!
-      IF ( SEDRAT .LT. 1.0D-6) GO TO 60
-      WRITE (IOU(10),99999) SEDRAT
-   60 CONTINUE
-      IF ( FLUSH .LT. 1.0D-6) GO TO 70
-      WRITE (IOU(10),99998) FLUSH
-   70 CONTINUE
+         if ( sedrat .ge. 1.0d-6) write (iou(10),99999) sedrat
+         if ( flush .ge. 1.0d-6) write (iou(10),99998) flush
+      end if
+      
 !  Convert CSOL from:
 !  Joules per cm2 per week to Joules per m2 per day.
 !  Determine temperature correction, assuming that the nominal
 !  efficiency curves are all for temperatures of TEFCUR deg. centigrade.
-!
-      DSOL=1428.57*CSOL
-!
+      dsol=1428.57*csol
+
 !  Determine the base level for the growth constraints (optionally).
 !  If there is a discontinuity in the period numbers, EXTTOT and XINIT
 !  are reinitialized.
-!
-      IF (NRUN .LE. 1) GO TO 90
-      IF (IMU .EQ. 1) GO TO 90
-      IDPREV = ID - MI
-      IF (IDPREV .GE. NPER(IMU,1)) GO TO 90
-      IMPREV = IMU - 1
-      IF (IDPREV .GE. NPER(IMPREV,1) .AND.
-     1    IDPREV .LE. NPER(IMPREV,2)) GO TO 90
-      EXTTOT = EXTB
-      IF (LGROCH .NE. 1) GO TO 90
-      DO 80 J=1,NUECOG
-   80 XINIT(J)=1.D+6
-   90 CONTINUE
-!
+      if (nrun .le. 1) go to 90
+      if (imu .eq. 1) go to 90
+      idprev = id - mi
+      if (idprev .ge. nper(imu,1)) go to 90
+      imprev = imu - 1
+      if (idprev .ge. nper(imprev,1) .and. idprev .le. nper(imprev,2)) go to 90
+      exttot = extb
+      if (lgroch .ne. 1) go to 90
+      do j=1,nuecog
+         xinit(j)=1.d+6
+      end do
+   90 continue
+
 !  Compute equivalent radiation level.
-!  Update November 1992.
-!110  SURF(K)= TCORR(K) * DSOL
 !  Multiply by the light reduction of overlying water columns. Usually
 !  this factor is 1.0 as SDMIXN = 0.0; for types attached to the bottom
 !  (Ulva) this factor is not 1.0, however.
-!
-      DO 100 K=1,NUSPEC
- 100  TCORR(K) = PMAX20(K)/PMAX(K)
-      DO 110 K=1,NUSPEC
- 110  SURF(K)= TCORR(K) * DSOL * DEXP (- EXTTOT * SDMIXN(K) * DEP)
-      IF (IDUMP .EQ. 1) WRITE (IOU(6),99997) (TCORR(K),K=1,NUSPEC)
-!
+      do k=1,nuspec
+         tcorr(k) = pmax20(k)/pmax(k)
+      end do
+      do k=1,nuspec
+         surf(k)= tcorr(k) * dsol * dexp (- exttot * sdmixn(k) * dep)
+      end do
+      if (idump .eq. 1) write (iou(6),99997) (tcorr(k),k=1,nuspec)
+
 !  Set "B" values for nutrients by substracting the amount in
 !  zooplankton from the input values and correcting for deviations
 !  from steady state if option DYNADEAD was selected
-!
-  170 DO 180 K=1,NUNUCO
-        B(K)=CONCEN(K)    
-  180 CONTINUE
-      IF (LDYDEA .EQ. 0) RETURN
-      EXPMUL=1.0
-!
+  170 do k=1,nunuco
+        b(k)=concen(k)    
+      end do
+      if (ldydea .eq. 0) return
+      expmul=1.0
+
 !  Formats for this subroutine
-!
-99999 FORMAT (//,1X,'* WARNING *   A sedimentation rate of',2X,F6.3,2X,
+99999 format (//,1X,'* WARNING *   A sedimentation rate of',2X,F6.3,2X,
      1        'has been specified.',/,1X,'In order to keep the total',
      2        ' amount of nutrients constant, the program assumes',/,
      3        1X,'the amount of sedimented nutrients to be replaced',/,
      4        ' by dissolved nutrients from the bottom.',//)
-99998 FORMAT (//,1X,'* WARNING *  A flushing rate of',2X,F6.3,2X,
+99998 format (//,1X,'* WARNING *  A flushing rate of',2X,F6.3,2X,
      1        'has been specified.',/,1X,'In order to keep the total',
      2        ' amount of nutrients constant, the program assumes',/,
      3        1X,'the amount of nutrients flushed from the dead algal',
      4        ' pool',/,' to be replaced by dissolved nutrients',
      5        ' from the intake water.',//)
-99997 FORMAT ('  Tcorr(j):  ',30(F5.2,1X))
-99996 FORMAT (//,1X,'Computation with inhomogeneous mixing.',/,
+99997 format ('  Tcorr(j):  ',30(F5.2,1X))
+99996 format (//,1X,'Computation with inhomogeneous mixing.',/,
      1        '  SDMIX(J):   ',30(F5.2,1X))
-99995 FORMAT ('  SDMIXN(J):  ',30(F5.2,1X))
-      RETURN
-      END
+99995 format ('  SDMIXN(J):  ',30(F5.2,1X))
+      return
+      end

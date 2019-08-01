@@ -21,20 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       4 Nov 1992
-!    Time:       14:27
-!    Program:    SPCSD.FOR
-!    Version:    1.0
-!    Programmer: Hans Los
-!    Previous version(s):
-!    0.0 -- 6 Jun 1989 -- 10:01 -- Operating System: DOS
-!
 !  *********************************************************************
 !  *  SUBROUTINE FOR ORDERING EXTINCTION COEFFICIENTS AND DETERMINING  *
 !  *         EXISTENCE OF SPECIES IN COEFFICIENT INTERVALS             *
 !  *********************************************************************
-!
-      SUBROUTINE SPCSD(XVEC,RVEC,ACO,EXTLIM,EXTB,NI)
+
+      subroutine spcsd(xvec,rvec,aco,extlim,extb,ni)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -46,81 +38,77 @@
       real(8)  :: extb, rtemp, extlim
       
       integer  :: i, ij, il, j, jk, k, k3, m, n, ni, nn
-!
+
 !  Initialize.
-!
-      DO 10 I=1,NUSPEC
-      DO 10 J=1,NUSPEC
-   10 ACO(I,J)=1.0
-      DO 20 I=1,2*NUSPEC
-      DVEC(I)=0.0
-      SVEC(I)=0.0
-   20 RVEC(I)=0.0
-!
+      do i=1,nuspec
+         do j=1,nuspec
+            aco(i,j)=1.0
+         end do
+      end do
+      do i=1,2*nuspec
+         dvec(i)=0.0
+         svec(i)=0.0
+         rvec(i)=0.0
+      end do
+
 !  Determine type roots, subtract EXTB * SDMIX(I).
 !  Update nov 4 1992:
 !  Use absolute value of SDMIX; SDMIX can be negative for types attached
 !  to the bottom.
-!
-      N=0
-      DO 40 I=1,NUSPEC
-      IJ=2*I-1
-      DO 40 K3=1,2
-      N=N+1
-      JK=IJ+K3-1
-      SVEC(N)=XVEC(JK)-EXTB*DABS(SDMIX(I))
-      DVEC(N)=SVEC(N)
-   40 CONTINUE
-!
+      n=0
+      do i=1,nuspec
+         ij=2*i-1
+         do k3=1,2
+            n=n+1
+            jk=ij+k3-1
+            svec(n)=xvec(jk)-extb*dabs(sdmix(i))
+            dvec(n)=svec(n)
+         end do
+      end do
+
 !  Order values in vector DVEC.
-!
-      NN=N-1
-      DO 80 I=1,NN
-      IL=I+1
-      DO 80 J=IL,N
-      IF (DVEC(I) .LE. DVEC(J)) GO TO 80
-      RTEMP=DVEC(I)
-      DVEC(I)=DVEC(J)
-      DVEC(J)=RTEMP
-   80 CONTINUE
+      nn=n-1
+      do i=1,nn
+         il=i+1
+         do j=il,n
+            if (dvec(i) .le. dvec(j)) cycle
+            rtemp=dvec(i)
+            dvec(i)=dvec(j)
+            dvec(j)=rtemp
+         end do
+      end do
+
 !
 !  Are there any valid intervals?
-!
-      IF (DVEC(N) .LE. 0.0) GO TO 130
-!
+      if (dvec(n) .le. 0.0) go to 130
+
 !  Eliminate intervals whose maximum root is either negative or
 !  (in a dynamic run) smaller than the extinction of the remaining
 !  biomass.
-!
-      DO 90 K=1,N
-      IF (DVEC(K) .GT. EXTLIM) GO TO 100
-   90 CONTINUE
-  100 CONTINUE
-!     MvdV 960515 - K cannot become 0, because of DVEC(K) at line 77
-      IF (K.GT.1) K=K-1
-!
+      do k=1,n
+         if (dvec(k) .gt. extlim) exit
+      end do
+      if (k.gt.1) k=k-1
+
 !  Eliminate duplicates in output vector.
-!
-      M=1
-      RVEC(1)=DVEC(K)
-      DO 110 I=K,NN
-      IF (DVEC(I+1) .LE. DVEC(I)) GO TO 110
-      M=M+1
-      RVEC(M)=DVEC(I+1)
-  110 CONTINUE
-!
+      m=1
+      rvec(1)=dvec(k)
+      do i=k,nn
+         if (dvec(i+1) .le. dvec(i)) cycle
+         m=m+1
+         rvec(m)=dvec(i+1)
+      end do
+
 !  Determine types in intervals.
-!
-      NI=M-1
-      DO 125 I=1,NUSPEC
-      IJ=2*I-1
-      IF ((SVEC(IJ+1) .LT. 0.)) GO TO 125
-      DO 120 J=1,NI
-      IF ((SVEC(IJ) .LE. RVEC(J)) .AND. (SVEC(IJ+1) .GE. RVEC(J+1)))
-     1ACO(J,I)=0.0
-  120 CONTINUE
-  125 CONTINUE
-      RETURN
-  130 NI=0
-      RETURN
-      END
+      ni=m-1
+      do i=1,nuspec
+         ij=2*i-1
+         if ((svec(ij+1) .lt. 0.)) cycle
+         do j=1,ni
+            if ((svec(ij) .le. rvec(j)) .and. (svec(ij+1) .ge. rvec(j+1))) aco(j,i)=0.0
+         end do
+      end do
+      return
+  130 ni=0
+      return
+      end

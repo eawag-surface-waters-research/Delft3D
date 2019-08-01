@@ -35,10 +35,8 @@ libbloom_la_SOURCES = \
        cspsto.f \
        cvrblm.f \
        dayeu.f \
-       diel.f \
        dynrun.f \
        ebcalc.f \
-       edit.f \
        exclud.f \
        fixinf.f \
        hdrblm.f \
@@ -53,12 +51,9 @@ libbloom_la_SOURCES = \
        natmor.f \
        nutfea.f \
        option.f \
-       pools.f \
        prinma.f \
        prinsu.f \
        print6.f \
-       promes.f \
-       prompt.f \
        qslp.f \
        setabc.f \
        setuni.f \

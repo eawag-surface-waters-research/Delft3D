@@ -21,16 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!
 !  *********************************************************************
 !  *     SUBROUTINE TO SET,CALCULATE OR CALIBRATE NATURAL MORTALITY    *
 !  *                       RATE CONSTANT                               *
 !  *********************************************************************
-!
-!  971217 MvdV extra mortality above critical temp for ulvae
-!  0895 MvdV output of grazer biomass extended for multiple grazer types
 
-      SUBROUTINE NATMOR(DEATH,TEMP)
+      subroutine natmor(death,temp)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -43,30 +39,27 @@
       integer  :: i
       real(8)  :: death, temp, temp2, tmpcor
 !
-      TEMP2 = TEMP
-      IF (LTLIM .EQ. 0) GO TO 90
-      IF (TEMP .GE. TEMLIM) GO TO 90
-      DO 80 I = 1,NUSPEC
-         RMORT(I) = BASMOR
-   80 CONTINUE
-      DEATH = BASMOR
-      GO TO 110
-   90 DEATH = 0.0
-      DO 100 I = 1,NUSPEC
-!       MvdV 971217 addition for ulvae
-!       critical temperature in RMORT2
-!       RMORT2 (temperature correction) = 1.0
-!       temperature muliplication factor in RMORT3
-        IF (RMORT2(I).GE.0) THEN
-          TMPCOR = RMORT2(I)
-        ELSE
-          TMPCOR = 1.0
-        ENDIF
-        RMORT(I) = RMORT1(I) * TMPCOR ** TEMP2
-        IF ((RMORT2(I).LT.0.).AND.(TEMP.GT.-1.*RMORT2(I)))
-     1    RMORT(I) = MAX(RMORT(I),(TEMP+RMORT2(I)) * RMORT3(I))
-        IF (RMORT(I) .GT. DEATH) DEATH = RMORT(I)
-  100 CONTINUE
-  110 CONTINUE
-      RETURN
-      END
+      temp2 = temp
+      if (ltlim .eq. 0) go to 90
+      if (temp .ge. temlim) go to 90
+      do i = 1,nuspec
+         rmort(i) = basmor
+      end do
+      death = basmor
+      go to 110
+   90 death = 0.0
+      do i = 1,nuspec
+         if (rmort2(i).ge.0) then
+            tmpcor = rmort2(i)
+         else
+            tmpcor = 1.0
+         endif
+         rmort(i) = rmort1(i) * tmpcor ** temp2
+         if ((rmort2(i).lt.0.).and.(temp.gt.-1.*rmort2(i))) then
+            rmort(i) = max(rmort(i),(temp+rmort2(i)) * rmort3(i))
+         end if
+         if (rmort(i) .gt. death) death = rmort(i)
+      end do
+  110 continue
+      return
+      end

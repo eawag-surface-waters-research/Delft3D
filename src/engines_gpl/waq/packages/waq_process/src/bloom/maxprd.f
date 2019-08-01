@@ -21,13 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!
 !  *********************************************************************
 !  *    SUBROUTINE TO CALCULATE MAXIMAL PRIMARY PRODUCTION AND         *
 !  *                  RESPIRATION RATES                                *
 !  *********************************************************************
-!
-      SUBROUTINE MAXPRD(T)
+
+      subroutine maxprd(t)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -39,7 +38,6 @@
       real*8  :: t
       integer :: i, k
       
-!
 !  Calculate respiration rate constants.
 !  Calculate the maximum gross growth rate per day as a linear or
 !  exponential function of the temperature T.
@@ -51,41 +49,39 @@
 !  If, however, NREP is 1, the temperature limitation option is ignored
 !  because otherwise the model does not have an intial solution for the
 !  first time step.
-!
-      IF (LTLIM .EQ. 0) GO TO 20
-      IF (T .GE. TEMLIM) GO TO 20
-      IF (NREP .EQ. 1) GO TO 20
-         DO 10 I = 1,NUSPEC
-         RESP(I) = RES1(I) * RES2(I) ** T
-         PMAX(I) = BASMOR
-   10    CONTINUE
-         GO TO 40
-   20 CONTINUE
-      DO 30 I = 1,NUSPEC
-      RESP(I) = RES1(I) * RES2(I) ** T
-      IF (LPMAX(I) .EQ. 0) THEN
-        PMAX(I) = (PMAX1(I) * PMAX2(I) ** T) + RESP(I) + LPMORT*RMORT(I)
-      ELSE
-        IF (T .LE. PMAX2(I)) THEN
-           PMAX(I) = 0.01
-        ELSE
-          PMAX(I) = PMAX1(I) * (T - PMAX2(I)) + RESP(I) +LPMORT*RMORT(I)
-        END IF
-      END IF
-   30 CONTINUE
-   40 CONTINUE
-!
-!  If option "DUMP" was turned on, print PMAX, RESP and RMORT.
-!
-      IF (IDUMP .NE. 0) THEN
-         WRITE (IOU(6),50) (PMAX(K),K=1,NUSPEC)
-   50    FORMAT ('  Pmax(T,j): ',30(F5.2,1X))
-         WRITE (IOU(6),60) (RESP(K),K=1,NUSPEC)
-   60    FORMAT ('  Resp(T,j): ',30(F5.2,1X))
-         WRITE (IOU(6),70) (RMORT (K),K=1,NUSPEC)
-   70    FORMAT ('  Rmort(T,j):',30(F5.2,1X))
-         WRITE (IOU(6),80) (SDMIX (K),K=1,NUSPEC)
-   80    FORMAT ('  Sdmix(j):  ',30(F5.2,1X))
-      END IF
-      RETURN
-      END
+      if (ltlim .eq. 0) go to 20
+      if (t .ge. temlim) go to 20
+      if (nrep .eq. 1) go to 20
+         do i = 1,nuspec
+            resp(i) = res1(i) * res2(i) ** t
+            pmax(i) = basmor
+         end do
+         go to 40
+   20 continue
+      do i = 1,nuspec
+         resp(i) = res1(i) * res2(i) ** t
+         if (lpmax(i) .eq. 0) then
+            pmax(i) = (pmax1(i) * pmax2(i) ** t) + resp(i) + lpmort*rmort(i)
+         else
+            if (t .le. pmax2(i)) then
+               pmax(i) = 0.01
+            else
+               pmax(i) = pmax1(i) * (t - pmax2(i)) + resp(i) +lpmort*rmort(i)
+            end if
+         end if
+      end do
+   40 continue
+
+!  If option "dump" was turned on, print pmax, resp and rmort.
+      if (idump .ne. 0) then
+         write (iou(6),50) (pmax(k),k=1,nuspec)
+   50    format ('  Pmax(T,j): ',30(F5.2,1X))
+         write (iou(6),60) (resp(k),k=1,nuspec)
+   60    format ('  Resp(T,j): ',30(F5.2,1X))
+         write (iou(6),70) (rmort (k),k=1,nuspec)
+   70    format ('  Rmort(T,j):',30(F5.2,1X))
+         write (iou(6),80) (sdmix (k),k=1,nuspec)
+   80    format ('  Sdmix(j):  ',30(F5.2,1X))
+      end if
+      return
+      end

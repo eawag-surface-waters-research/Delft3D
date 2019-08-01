@@ -21,12 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!
 !  *********************************************************************
 !  *     SUBROUTINE TO PRINT HEADINGS FOR SEVERAL OUTPUT FILES         *
 !  *********************************************************************
-!
-      SUBROUTINE HEADIN(NZOUT,WORDS)
+
+      subroutine headin(nzout,words)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -37,171 +36,151 @@
 
       implicit none
 
-      INTEGER NUMTYP(MT), i, j, k, kk, nueco2, nzout
-      CHARACTER*4 WORDS2(12),WORDS3(20),WORDS4(20)
-      CHARACTER*8 WORDS(*),WWORDS(MG)
-!
-!  Print heading for output on units OUUNI, IOU(14), NZOUT, IOU(21),
-!  IOU(24) and IOU(25).
+      integer numtyp(mt), i, j, k, kk, nueco2, nzout
+      character*4 words2(12),words3(20),words4(20)
+      character*8 words(*),wwords(mg)
+
+!  Print heading for output on units OUUNI, IOU(14), NZOUT, IOU(21), IOU(24) and IOU(25).
 !
 !  Set print-array indices.
-!
-      NTS6=NUABCO+3
-      NTS7=NTS6+1
-      NTS14=NUECOG+NTS7+1
-!
+
+      nts6=nuabco+3
+      nts7=nts6+1
+      nts14=nuecog+nts7+1
+
 ! Exit if LPRINT <= 1: nothing more to be done here.
-!
-      IF (LPRINT .LE. 1) RETURN
-!
+      if (lprint .le. 1) return
+
 !  Determine main active program options and store them in WORDS4.
-!
-      J = 1
-      IF (LOBFUN .EQ. 1) THEN
-         WORDS4(J) = 'Grow'
-         J = J + 1
-         WORDS4(J) = 'th. '
-      ELSE
-         WORDS4(J) = 'Biom'
-         J = J + 1
-         WORDS4(J) = 'ass.'
-      END IF
-      IF (LGROCH .EQ. 1) THEN
-         J = J + 1
-         WORDS4(J) = 'Groc'
-         J = J + 1
-         WORDS4(J) = 'heck'
-      END IF
-      IF (LMORCH .EQ. 1) THEN
-         J = J + 1
-         WORDS4(J) = 'Morc'
-         J = J + 1
-         WORDS4(J) = 'heck'
-      END IF
-      IF (LDAYEU .EQ. 1) THEN
-         J = J + 1
-         WORDS4(J) = 'Daye'
-         J = J + 1
-         WORDS4(J) = 'upho'
-      END IF
-      IF (LPMORT .EQ. 1) THEN
-         J = J + 1
-         WORDS4(J) = 'Pmax'
-         J = J + 1
-         WORDS4(J) = '+Mor'
-      END IF
-!
+      j = 1
+      if (lobfun .eq. 1) then
+         words4(j) = 'Grow'
+         j = j + 1
+         words4(j) = 'th. '
+      else
+         words4(j) = 'Biom'
+         j = j + 1
+         words4(j) = 'ass.'
+      end if
+      if (lgroch .eq. 1) then
+         j = j + 1
+         words4(j) = 'Groc'
+         j = j + 1
+         words4(j) = 'heck'
+      end if
+      if (lmorch .eq. 1) THEN
+         j = j + 1
+         words4(j) = 'Morc'
+         j = j + 1
+         words4(j) = 'heck'
+      end if
+      if (ldayeu .eq. 1) then
+         j = j + 1
+         words4(j) = 'Daye'
+         j = j + 1
+         words4(j) = 'upho'
+      end if
+      if (lpmort .eq. 1) then
+         j = j + 1
+         words4(j) = 'Pmax'
+         j = j + 1
+         words4(j) = '+Mor'
+      end if
+
 !  Write heading for standard output file (OUUNI).
-!
-      WRITE(OUUNI,25) (WORDS4(I),I=1,J)
-      WRITE(OUUNI,30)
-   25 FORMAT(4X,'Model objective: Maximize ',2A4,/,
-     1       4X,'Main active program options: ',9(A4,A4,'; '))
-   30 FORMAT(2(' ',/),14X,'Summary of solutions for this run:',/,' ')
-!
+      write(ouuni,25) (words4(i),i=1,j)
+      write(ouuni,30)
+   25 format(4X,'Model objective: Maximize ',2A4,/,4X,'Main active program options: ',9(A4,A4,'; '))
+   30 format(2(' ',/),14X,'Summary of solutions for this run:',/,' ')
+
 !  Write heading unit IOU(24). This file contains biomasses of all
 !  types.
-!
-      CALL FORMFE (IOU(24))
-      WRITE(IOU(24),40)
-   40 FORMAT(8X,'Dry weight biomasses of phytoplankton types:',2(/,' '))
-!
+      call formfe (iou(24))
+      write(iou(24),40)
+   40 format(8X,'Dry weight biomasses of phytoplankton types:',2(/,' '))
+
 !  Split species names in two parts and store truncated second parts
 !  of names in "WORDS2".
-!
-      DO 50 K=1,NUECOG
-      WORDS2(K) = GRNAME(K) (5:8)
-   50 CONTINUE
-      WORDS2(NUECOG+1) = WORDS(6) (5:8)
-      WORDS2(NUECOG+2) = WORDS(7) (5:8)
-      NUECO2=NUECOG+2
-!
+      do 50 k=1,nuecog
+      words2(k) = grname(k) (5:8)
+   50 continue
+      words2(nuecog+1) = words(6) (5:8)
+      words2(nuecog+2) = words(7) (5:8)
+      nueco2=nuecog+2
+
 ! Get names and relative numbers of types for heading unit IOU(24).
 ! Store first parts of names in WORDS3, get second parts from WORDS2.
-!
-      KK = 0
-      DO 70 I = 1,NUECOG
-      K = 0
-      DO 60 J = IT2(I,1),IT2(I,2)
-         KK =KK + 1
-         K = K + 1
-         NUMTYP(KK) = K
-         WORDS3(KK) = GRNAME (I) (1:4)
-         WORDS4(KK) = WORDS2(I)
-   60 CONTINUE
-   70 CONTINUE
-!
+      kk = 0
+      do i = 1,nuecog
+      k = 0
+         do j = it2(i,1),it2(i,2)
+            kk =kk + 1
+            k = k + 1
+            numtyp(kk) = k
+            words3(kk) = grname (i) (1:4)
+            words4(kk) = words2(i)
+         end do
+      end do
+
 ! Print names and relative numbers of types to unit IOU(24).
-!
-      WRITE(IOU(24),80) WORDS(1),(WORDS3(K),K=1,NUSPEC)
-      WRITE(IOU(24),90) (WORDS4(K),K=1,NUSPEC)
-   80 FORMAT (1X,A4,1X,2X,20(A4,'-',1X))
-   90 FORMAT (9X,20(A4,2X))
-      WRITE(IOU(24),100) (NUMTYP(K),K=1,NUSPEC)
-  100 FORMAT (7X,20(I4,2X))
-!
+      write(iou(24),80) words(1),(words3(k),k=1,nuspec)
+      write(iou(24),90) (words4(k),k=1,nuspec)
+   80 format (1x,a4,1x,2x,20(a4,'-',1x))
+   90 format (9x,20(a4,2x))
+      write(iou(24),100) (numtyp(k),k=1,nuspec)
+  100 format (7x,20(i4,2x))
+
 ! Write heading for unit OUUNI. This heading differs for interactive
 ! and batch runs.
-!
-      IF (IOFLAG .EQ. 0) THEN
-        WRITE(OUUNI,140) (WORDS(K),K=1,3),WORDS(5),
-     1                   (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
-      ELSE
+      if (ioflag .eq. 0) then
+         write(ouuni,140) (words(k),k=1,3),words(5),(grname(k),k=1,nuecog),(words(k),k=6,7)
+      else
+         write(ouuni,110) (words(k),k=1,3),(grname(k),k=1,nuecog),(words(k),k=6,7)
+  110    format(1x,a4,1x,a5,4x,a4,3x,11(a4,'-',1x))
+         write(ouuni,120) (words2(k),k=1,nueco2)
+  120    format(24x,11(a4,2x))
 
-         WRITE(OUUNI,110) (WORDS(K),K=1,3),(GRNAME(K),K=1,NUECOG),
-     1                    (WORDS(K),K=6,7)
-  110    FORMAT(1X,A4,1X,A5,4X,A4,3X,11(A4,'-',1X))
-         WRITE(OUUNI,120) (WORDS2(K),K=1,NUECO2)
-  120    FORMAT(24X,11(A4,2X))
-!
 !  Write heading for output IOU(21). This is the same heading written to
 !  unit OUUNI in a batch job.
-!
-         WRITE(IOU(21),30)
-         WRITE(IOU(21),140) (WORDS(K),K=1,3),WORDS(5),
-     1                      (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
-  140    FORMAT(2X,A4,2X,2(A8,1X),8X,A4,5X,12(A8,1X))
-  141    FORMAT(2X,A4,2X,2(A8,1X),8X,32(A8,1X))
-         WRITE (IOU(21),150)
+         write(iou(21),30)
+         write(iou(21),140) (words(k),k=1,3),words(5),(grname(k),k=1,nuecog),(words(k),k=6,7)
+  140    format(2x,a4,2x,2(a8,1x),8x,a4,5x,12(a8,1x))
+  141    format(2x,a4,2x,2(a8,1x),8x,32(a8,1x))
+         write (iou(21),150)
+      end if
+      write (ouuni,150)
+  150 format(' ',/,' ')
 
-      END IF
-      WRITE (OUUNI,150)
-  150 FORMAT(' ',/,' ')
-!
 !  Write heading unit IOU(25). This unit contains forcing function
 !  values. Overwrite (!) WORDS3, which is no longer needed for species
 !  names.
-!
-      CALL FORMFE (IOU(25))
-      WRITE (IOU(25),160)
-  160 FORMAT (10X,'Summary of forcing functions used this run.',
-     1        /,' ',/,' ')
-      WORDS3(1) = 'Date'
-      WORDS3(2) = 'Temp'
-      WORDS3(3) = 'Sola'
-      WORDS3(4) = 'Chl '
-      DO 170 I = 1,NUNUCO
-      WORDS3(I+4) = CSTRA (I) (1:4)
-  170 CONTINUE
-      WORDS3(NUNUCO+5) = 'Kb  '
-      WORDS3(NUNUCO+6) = 'Dayl'
-      WORDS3(NUNUCO+7) = 'Mort'
-      WORDS3(NUNUCO+8) = 'Zood'
-      WORDS3(NUNUCO+9) = 'Dept'
-      WRITE(IOU(25),180) (WORDS3(I),I=1,NUNUCO+9)
-  180 FORMAT(1X,15(A4,4X))
-!
+      call formfe (iou(25))
+      write (iou(25),160)
+  160 format (10x,'Summary of forcing functions used this run.',/,' ',/,' ')
+      words3(1) = 'Date'
+      words3(2) = 'Temp'
+      words3(3) = 'Sola'
+      words3(4) = 'Chl '
+      do i = 1,nunuco
+         words3(i+4) = cstra (i) (1:4)
+      end do
+      words3(nunuco+5) = 'Kb  '
+      words3(nunuco+6) = 'Dayl'
+      words3(nunuco+7) = 'Mort'
+      words3(nunuco+8) = 'Zood'
+      words3(nunuco+9) = 'Dept'
+      write(iou(25),180) (words3(i),i=1,nunuco+9)
+  180 format(1x,15(a4,4x))
+
 !  Write heading for output IOU(14).
-!
-      WRITE (IOU(14),200)
-  200 FORMAT (2X,'Particulate organic and dissolved nutrient concentra',
+      write (iou(14),200)
+  200 format (2X,'Particulate organic and dissolved nutrient concentra',
      1        'tions at equilibrium in mg / m3',/,'  Comparison of ',
      2        'calculated maximum steady state values of chlorophyll',
      3        ' to observations',3(/,' '))
-      WRITE (IOU(14),220) WORDS(1),(WORDS(9),WORDS(10),K=1,NUNUCO),
-     1                    WORDS(12),WORDS(7),WORDS(11)
-  220 FORMAT (2X,A4,6X,12(A8,4X))
-      WRITE (IOU(14),240) ((CSTRA(K),I=1,2),K=1,NUNUCO)
-  240 FORMAT (10X,10(A8,4X))
-      RETURN
-      END
+      write (iou(14),220) words(1),(words(9),words(10),k=1,nunuco),words(12),words(7),words(11)
+  220 format (2x,a4,6x,12(a8,4x))
+      write (iou(14),240) ((cstra(k),i=1,2),k=1,nunuco)
+  240 format (10x,10(a8,4x))
+      return
+      end

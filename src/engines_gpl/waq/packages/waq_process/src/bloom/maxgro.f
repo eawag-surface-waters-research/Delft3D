@@ -21,33 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       4 Nov 1992
-!    Time:       14:23
-!    Program:    MAXGRO.FOR
-!    Version:    1.0
-!    Programmer: Hans Los
-!    Previous version(s):
-!    0.0 -- 21 Feb 1992 --  8:47 -- Operating System: DOS
-!
 !  *********************************************************************
 !  *      SUBROUTINE TO CALCULATE MAXIMUM ATTAINABLE EQUILIBRIUM       *
 !  *            VALUES BASED UPON THE INITIAL GROWTH RATE              *
 !  *********************************************************************
-!
-!    Module revision november 1992.
-!    Use the TOTAL depth and the TOTAL extinction to compute the
-!    growth rate of inhomogeously mixed species. To that purpose
-!    "DEP" was added to the parameter list.
-!    Corrected (old) error in format 99995.
-!
-!    Module revision december 1991 and february 1992.
-!    Two important modifications:
-!    1. All types of a species now have the same KMAX, but a different
-!       objective function. (See also BLOOM.FOR).
-!    2. Use XINIT for the growth constraint if the total extinction
-!       gets too large; NO extra biomass reduction.
-!
-      SUBROUTINE MAXGRO(XINIT,ROOT,EXTTOT,EADJ,J,ISKMAX,DEP)
+
+      subroutine maxgro(xinit,root,exttot,eadj,j,iskmax,dep)
 
       use bloom_data_3dl
       use bloom_data_dim
@@ -69,39 +48,35 @@
 ! Purpose of this subroutine: find the growth efficiency EFFI for each
 ! phytoplankton species at the current total extinction level EXTTOT.
 !
-!  get average efficiency over the layers
-!
-      IF ( ACTIVE_EFFT ) THEN
-         EFFI = AVEFFI(ISKMAX)
-      ELSE
-         IF ( IFIX_3DL(IT2(J,1)) .LT. 0 ) THEN
-            EFFI = EFFIC_3DL(ISKMAX,ISEG_3DL)
-         ELSE
-            CALL EFFI_3DL(EFFI,ISKMAX)
-         ENDIF
-      ENDIF
-!
-!  Check whether ROOT(2) (UKmax) is larger than EXTTOT.
-!
-      IF (ROOT(2) .LE. EXTTOT) THEN
-!
-!  Kmax {=ROOT(2)} is smaller than the total extinction, indicating that
-!  the species cannot maintain its current biomass.
-!  We do need the average efficiency
-!  EFFI, however, to compute the coefficients for the objective
-!  function.
-!  When Kmax is negative for a species, its biomass should approach
-!  zero as quickly as possible. Therefore put 0.01 in the objective
-!  function.
-!  Note: do not use a negative number because the mortality constraint
-!  of the species could be positive, indicating that it should be
-!  included in the final solution.
-!
-         IF (ROOT(2) .LE. 0.0) THEN
-            EFFI = 0.01
-         END IF
-         IF (LGROCH .EQ. 1) THEN
-!
+! get average efficiency over the layers
+      if ( active_efft ) then
+         effi = aveffi(iskmax)
+      else
+         if ( ifix_3dl(it2(j,1)) .lt. 0 ) then
+            effi = effic_3dl(iskmax,iseg_3dl)
+         else
+            call effi_3dl(effi,iskmax)
+         endif
+      endif
+
+! Check whether ROOT(2) (UKmax) is larger than EXTTOT.
+      if (root(2) .le. exttot) then
+
+! Kmax {=ROOT(2)} is smaller than the total extinction, indicating that
+! the species cannot maintain its current biomass.
+! We do need the average efficiency
+! EFFI, however, to compute the coefficients for the objective
+! function.
+! When Kmax is negative for a species, its biomass should approach
+! zero as quickly as possible. Therefore put 0.01 in the objective
+! function.
+! Note: do not use a negative number because the mortality constraint
+! of the species could be positive, indicating that it should be
+! included in the final solution.
+         if (root(2) .le. 0.0) then
+            effi = 0.01
+         end if
+         if (lgroch .eq. 1) then
 ! Compute the right hand side of the growth constraint for a species,
 ! whose Kmax < EXTTOT of previous time-step. Normally we might put ANY
 ! value into the growth constraint as long as it exceeds the energy
@@ -112,54 +87,40 @@
 ! increase in biomass.
 ! Check and correct for growth constraints which are lower than the
 ! mortality constraints.
-!
-            GRLIM = XINIT(J)
-            IF (LMORCH .EQ. 0) THEN
-               B(J+NUEXRO) = GRLIM
-               RETURN
-            END IF
-            IF (GRLIM .GT. B(J+NUEXRO+NUECOG)) THEN
-               B(J+NUEXRO) = GRLIM
-            ELSE
-               B(J+NUEXRO) = B(J+NUEXRO+NUECOG)
-            END IF
-         END IF
-      ELSE
-!
-!  Compute value BT for the growth constraint.
-!
-         BT=DEXP( ( (PMAX(ISKMAX)-LPMORT*RMORT(ISKMAX))*EFFI - FLUSH
-     *              - RESP(ISKMAX) ) *TSTEP*MI)
-         BT = BT*XINIT(J)
-!
+            grlim = xinit(j)
+            if (lmorch .eq. 0) then
+               b(j+nuexro) = grlim
+               return
+            end if
+            if (grlim .gt. b(j+nuexro+nuecog)) then
+               b(j+nuexro) = grlim
+            else
+               b(j+nuexro) = b(j+nuexro+nuecog)
+            end if
+         end if
+      else
+! Compute value BT for the growth constraint.
+         bt=dexp( ( (pmax(iskmax)-lpmort*rmort(iskmax))*effi - flush - resp(iskmax) ) *tstep*mi)
+         bt = bt*xinit(j)
 ! Set the growth constraint to 0.0 when BT is negative.
-!
-         IF (BT .LT. 0.0) THEN
-            WRITE(IOU(6), 99995) BT, GRNAME(J)
-            BT = 0.0D0
-         END IF
-!
-!  Store growth constraint value in B-vector. Optionally print results
-!  to unit IOU(6).
-!
-         B(J+NUEXRO)=BT
-         IF (IDUMP .EQ. 1) WRITE (IOU(6),99990) GRNAME(J),EFFI,
-     *                     EFFI*PMAX(ISKMAX),B(J+NUEXRO)
-!
-      END IF
-!
+         if (bt .lt. 0.0) then
+            write(iou(6), 99995) bt, grname(j)
+            bt = 0.0d0
+         end if
+!  Store growth constraint value in B-vector. Optionally print results to unit IOU(6).
+         b(j+nuexro)=bt
+         if (idump .eq. 1) write (iou(6),99990) grname(j),effi,effi*pmax(iskmax),b(j+nuexro)
+      end if
+
 ! Store the nett growth rate of each phytoplankton type in the row
 ! for the objective function if growth is maximized.
-!
-      IF (LOBFUN .EQ. 1) THEN
-         DO K = IT2(J,1),IT2(J,2)
-            C(K) = DMAX1 ((EFFI * PMAX(K) - RESP(K)), 1.0D-6)
-         END DO
-      END IF
-!
-99995 FORMAT (' Warning from MAXGRO: negative growth constraint of ',
-     1        ' species ',A8,' = ',F10.5,/,' replaced by 0.0')
-99990 FORMAT ('  Species ',A8,' EFFI = ',F5.2,' Growth rate = ',F5.2,
-     1        ' B-value = ',F7.3)
-      RETURN
-      END
+      if (lobfun .eq. 1) then
+         do k = it2(j,1),it2(j,2)
+            c(k) = dmax1 ((effi * pmax(k) - resp(k)), 1.0d-6)
+         end do
+      end if
+
+99995 format (' Warning from MAXGRO: negative growth constraint of species ',A8,' = ',F10.5,/,' replaced by 0.0')
+99990 format ('  Species ',A8,' EFFI = ',F5.2,' Growth rate = ',F5.2,' B-value = ',F7.3)
+      return
+      end

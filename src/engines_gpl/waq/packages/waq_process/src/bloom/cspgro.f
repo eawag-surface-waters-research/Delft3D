@@ -25,8 +25,7 @@
 !  *********************************************************************
 !  *      SUBROUTINE CSPGRO TO MODIFY SPECIES GROWTH COEFFICIENTS      *
 !  *********************************************************************
-!
-!  0895 MvdV adaptation dimension ZOOPR for more than one grazer type
+
       SUBROUTINE CSPGRO(LERR)
 
       use bloom_data_dim
@@ -125,10 +124,6 @@
      1                RMORT1(I),RMORT2(I),RES1(I),RES2(I),SDMIX(I),
      2                ZOOPR(I,0)
   420 CONTINUE
-      CALL EDIT (FNAME,PROFIL,IRC)
-      IF (IRC .NE. -3) GO TO 425
-      WRITE (OUUNI,99790) IRC
-      CLOSE (IOU(29), STATUS = 'DELETE')
       GO TO 10
   425 REWIND IOU(29)
       READ (IOU(29),99905)
@@ -176,7 +171,6 @@
   510 CONTINUE
       IGRO=IT2(NUMGR,2)-IT2(NUMGR,1)+1
       IF (IGRO .EQ. 1) GO TO 540
-      CALL BLPROMPT (1,IGRO)
       IRC = STOS(GRNAME(NUMGR),1,8,STRING,LENSTR)
   520 I=INPTNM(1033,0.0D0,NSGR,2)
       IF (NSGR .NE. 0 .AND. NSGR .LE. IGRO) GO TO 530

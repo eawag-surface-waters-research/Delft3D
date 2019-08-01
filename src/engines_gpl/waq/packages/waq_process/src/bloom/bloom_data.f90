@@ -78,8 +78,6 @@ module bloom_data_size
    integer            :: lpmax(mt)                ! Input parameter TFPMxAlg
    integer            :: nprodu                   ! Counter for BLOOM II production routines
    integer            :: lprodu                   ! Obsolete, to be deleted
-   integer            :: ldiel                    ! Obsolete, to be deleted
-   integer            :: lpools                   ! Obsolete, to be deleted
    integer            :: loxout                   ! Switch to write oxygen production
    integer            :: ldydea                   ! Test for (in)feasibility of the nutrient constraints in a run with a dynamic detritus computation
    integer            :: ldyext                   ! Obsolete, to be deleted
@@ -96,8 +94,8 @@ module bloom_data_arran
    real(8)            :: fun(51,ms)               ! Convolutions (light curve interpretation by bleffpro)
    real(8)            :: der(51,ms)               ! Derivatives (light curve interpretation by bleffpro)
    real(8)            :: zvec(51)                 ! Minus the natural logarithm of surface radiation for convolutions and their derivatives
-   real(8)            :: daymul(24,ms)            ! Day length multiplier
-   real(8)            :: dl(24)                   ! Day length
+   real(8)            :: daymul(0:24,ms)          ! Day length multiplier
+   real(8)            :: dl(0:24)                 ! Day length
    real(8)            :: verfrm                   ! Version number of frm-file
    real(8)            :: tefcur                   ! Reference temperatures of light curves
    real(8)            :: power(51)                ! Solar radiation in light curve

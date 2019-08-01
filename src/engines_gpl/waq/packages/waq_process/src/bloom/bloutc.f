@@ -21,16 +21,6 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       7 Januari 1994
-!    Program:    BLOUTC.FOR
-!    Version:    0.1
-!    Programmer: Jos van Gils
-!
-!    Set output controls for BLOOM
-!
-!    Called by: BLOOMC
-!    Calls    : -
-
       subroutine bloutc (histor,lprino,ldumpo)
       
       use bloom_data_dim 

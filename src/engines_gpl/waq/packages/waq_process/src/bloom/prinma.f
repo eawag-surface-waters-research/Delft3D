@@ -21,12 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!
 !  *********************************************************************
-!  *        SUBROUTINE TO PRINT MAXIMUM SOLUTION ON TAPE IOU(6)        *
+!  *        SUBROUTINE TO PRINT MAXIMUM SOLUTION TO DEBUG FILE         *
 !  *********************************************************************
-!
-      SUBROUTINE PRINMA(X,BIO2,TOTAL,NI,NIN,INT)
+
+      subroutine prinma(x,bio2,total,ni,nin,int)
 
       use bloom_data_dim
       use bloom_data_io  
@@ -36,35 +35,31 @@
 
       real(8)   :: x(mx), biopos, bio2, total
       integer   :: int, j, k, k2, l1, l2, ni, nin
-!
-!  PRINT MAXIMUM SOLUTION ON UNIT IOU(6)
-!
-      WRITE (IOU(6),10)
-   10 FORMAT (12X,'******* MAXIMUM SOLUTION *******')
-      WRITE(IOU(6),20)
-   20 FORMAT (2X,'Species',34X,'Types',/,26X,'1',13X,'2',13X,'3',
-     1        13X,'4')
-      DO 60 J=1,NUECOG
-      L1=IT2(J,1)
-      L2=IT2(J,2)
-      WRITE (IOU(6),50) GRNAME(J), (X(K+NUROWS),K=L1,L2)
-   50 FORMAT (2X,A8,11X,4(F11.4,3X))
-   60 CONTINUE
-      BIOPOS = BIO2
-      IF (BIOPOS .LT. 0.0) BIOPOS = 0.0
-      WRITE (IOU(6),70) BIOPOS
-   70 FORMAT (2X,'Total biomass',6X,F11.4,3X,'g/m3')
-      WRITE (IOU(6),90) TOTAL
-   90 FORMAT (2X,'Chlorophyll',8X,F11.4,3X,'mg/m3',/)
-!
-!  PRINT NUTRIENT CONCENTRATIONS
-!
-      WRITE (IOU(6),100)
-  100 FORMAT (2X,'Nutrient',14X,'Total',9X,'Slacks')
-      WRITE (IOU(6),110) (CSTRA(K),CONCEN(K),X(K),K=1,NUNUCO)
-  110 FORMAT (6(2X,A8,11X,F11.4,3X,F11.4,/))
-      WRITE(IOU(6),120) NI,NIN,INT
-  120 FORMAT ('  Number of intervals:',I3,2X,'Infeasible:',I3,
-     1        2X,'Maximum interval:',I3,//)
-      RETURN
-      END
+
+!  Print maximum solution on unit iou(6)
+      write (iou(6),10)
+   10 format (12X,'******* MAXIMUM SOLUTION *******')
+      write(iou(6),20)
+   20 format (2X,'Species',34X,'Types',/,26X,'1',13X,'2',13X,'3',13X,'4')
+      do j=1,nuecog
+         l1=it2(j,1)
+         l2=it2(j,2)
+         write (iou(6),50) grname(j), (x(k+nurows),k=l1,l2)
+   50    format (2x,a8,11x,4(f11.4,3x))
+      end do
+      biopos = bio2
+      if (biopos .lt. 0.0) biopos = 0.0
+      write (iou(6),70) biopos
+   70 format (2X,'Total biomass',6X,F11.4,3X,'g/m3')
+      write (iou(6),90) total
+   90 format (2X,'Chlorophyll',8X,F11.4,3X,'mg/m3',/)
+
+!  Print nutrient concentrations
+      write (iou(6),100)
+  100 format (2X,'Nutrient',14X,'Total',9X,'Slacks')
+      write (iou(6),110) (cstra(k),concen(k),x(k),k=1,nunuco)
+  110 format (6(2X,A8,11X,F11.4,3X,F11.4,/))
+      write(iou(6),120) ni,nin,int
+  120 format ('  Number of intervals:',I3,2X,'Infeasible:',I3,2X,'Maximum interval:',I3,//)
+      return
+      end

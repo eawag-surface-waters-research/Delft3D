@@ -40,8 +40,7 @@
 !  *         DETERMINE AND RECORD THE MAXIMUM SOLUTION                 *
 !  *********************************************************************
 !
-      SUBROUTINE PRINT6(BIO,BIOMAX,X,XDEF,INOW,JNOW,LINF,IRS,INT,NIN,
-     1           NONUNI,NONUN,NUMUNI,NUMUN,LIB)
+      subroutine print6(bio,biomax,x,xdef,inow,jnow,linf,irs,int,nin,nonuni,nonun,numuni,numun,lib)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -58,163 +57,147 @@
       integer    :: ii, ii1, ii2, ii2max, inow, int, jjj, jnow
       integer    :: k, klx, linf, nin, numun, numuni
       
-      SAVE
-!
+      save
+
 !  Initialize XOPT if this is the first interval for a time period.
 !  If DUMP is specified, then print solution for interval JNOW.
-!
-      IF (INOW .EQ. 1) XOPT = 0.0D0
-      IF (IDUMP .EQ. 0) GO TO 40
-      IF (INOW .EQ. 1 .OR. NPAUSE .GE. 20) THEN
-         NPAUSE = 0
-      END IF
-      WRITE (IOU(6),10) JNOW,(B(II),II=NUFILI,NUABCO)
-   10 FORMAT (30X,'Interval ',I2,/,2X,'Extinction limits',3X,
-     1        2(3X,F8.4))
-      KLX=0
-      DO 20 JJJ=1,NUSPEC
-      JT(JJJ)=0
-      IF (A(NUEXRO,JJJ) .GT. 1.0 - 1.0D-6) GO TO 20
-      KLX=KLX+1
-      JT(KLX)=JJJ
-   20 CONTINUE
-      WRITE (IOU(6),30) (JT(JJJ),JJJ=1,KLX)
-   30 FORMAT(2X,'Types permitted',4X,20I4)
-      WRITE (IOU(6),31) (SPNAME(JT(JJJ)),JJJ=1,KLX)
-   31 FORMAT(2X,'Types permitted',4X,30(A8,1X))
-   40 CONTINUE
-!
+      if (inow .eq. 1) xopt = 0.0d0
+      if (idump .eq. 0) go to 40
+      if (inow .eq. 1 .or. npause .ge. 20) then
+         npause = 0
+      end if
+      write (iou(6),10) jnow,(b(ii),ii=nufili,nuabco)
+   10 format (30X,'Interval ',I2,/,2X,'Extinction limits',3X,2(3X,F8.4))
+      klx=0
+      do jjj=1,nuspec
+         jt(jjj)=0
+         if (a(nuexro,jjj) .gt. 1.0 - 1.0d-6) cycle
+         klx=klx+1
+         jt(klx)=jjj
+      end do
+      write (iou(6),30) (jt(jjj),jjj=1,klx)
+   30 format(2X,'Types permitted',4X,20I4)
+      write (iou(6),31) (spname(jt(jjj)),jjj=1,klx)
+   31 format(2X,'Types permitted',4X,30(A8,1X))
+   40 continue
+
 !  Check for feasibility of interval JNOW.
 !  if LINF ne 0, exit after increasing NIN with 1
-!
-      IF (LINF .EQ. 0) GO TO 180
-      IF (INOW .EQ. 1 .AND. LMORCH .EQ. 0) GO TO 50
-      IF (IDUMP .EQ. 0) GO TO 170
-   50 NPAUSE = NPAUSE + 5
-      WRITE (IOU(6),60) JNOW
-   60 FORMAT ('  Error message issued for interval ',I2,':')
-      GO TO ( 70, 90, 110, 130, 150), IRS(2)
-   70 WRITE (IOU(6),80)
-   80 FORMAT('  Solution is feasible, but not yet optimal')
-      GO TO 170
-   90 WRITE (IOU(6),100)
-  100 FORMAT('  A feasible solution in not yet obtained')
-      GO TO 170
-  110 WRITE (IOU(6),120)
-  120 FORMAT('  A finite solution does not exist, solution is ',
-     1       'unbounded')
-      GO TO 170
-  130 WRITE (IOU(6),140) CNAMES(IRS(3))
-  140 FORMAT('  A feasible solution does not exist due to constraint ',A16)
-      GO TO 170
-  150 WRITE (IOU(6),160)
-  160 FORMAT('  A finite solution can not be found',/,
-     1       '  all elements of a prospective pivot column are zero')
-  170 NIN = NIN + 1
-      RETURN
-!
+      if (linf .eq. 0) go to 180
+      if (inow .eq. 1 .and. lmorch .eq. 0) go to 50
+      if (idump .eq. 0) go to 170
+   50 npause = npause + 5
+      write (iou(6),60) jnow
+   60 format ('  Error message issued for interval ',I2,':')
+      go to ( 70, 90, 110, 130, 150), irs(2)
+   70 write (iou(6),80)
+   80 format('  Solution is feasible, but not yet optimal')
+      go to 170
+   90 write (iou(6),100)
+  100 format('  A feasible solution in not yet obtained')
+      go to 170
+  110 write (iou(6),120)
+  120 format('  A finite solution does not exist, solution is unbounded')
+      go to 170
+  130 write (iou(6),140) cnames(irs(3))
+  140 format('  A feasible solution does not exist due to constraint ',A16)
+      go to 170
+  150 write (iou(6),160)
+  160 format('  A finite solution can not be found',/,'  all elements of a prospective pivot column are zero')
+  170 nin = nin + 1
+      return
+
 !  Solution for interval JNOW is feasible.
 !  Determine maximum biomass and record in BIO(1)
-!
-  180 CONTINUE
-      BIO(1)=BIOMAX
-!
+  180 continue
+      bio(1)=biomax
+
 !  Print solution for interval JNOW, if DUMP was specified.
-!
-      IF (IDUMP .EQ. 0) GO TO 290
-      NPAUSE = NPAUSE + 10
-      WRITE (IOU(6),190) (X(II),II=1,NUNUCO)
-  190 FORMAT (2X,'Nutrient Slacks',2X,6(F8.2,2X))
-      WRITE (IOU(6),200) (X(II),II=NUFILI,NUABCO)
-  200 FORMAT (4X,'Energy Slacks',2X,2(F8.2,2X))
-!
+      if (idump .eq. 0) go to 290
+      npause = npause + 10
+      write (iou(6),190) (x(ii),ii=1,nunuco)
+  190 format (2X,'Nutrient Slacks',2X,6(F8.2,2X))
+      write (iou(6),200) (x(ii),ii=nufili,nuabco)
+  200 format (4X,'Energy Slacks',2X,2(F8.2,2X))
+
 !  Print slacks for (optional) growth constraints.
-!
-      IF (LGROCH .EQ. 0) GO TO 250
-      II1 = NUEXRO - 4
-      II2 = II1 + 5
-      II2MAX = NUEXRO + NUECOG
-  210 II1 = II1 + 5
-      II2 = II2 + 5
-      II2 = MIN0(II2,II2MAX)
-      WRITE (IOU(6),220) (X(II),II=II1,II2)
-  220 FORMAT (4X,'Growth slacks',2X,10(F8.2,2X))
-      IF (II2 .LT. II2MAX) GO TO 210
-!
+      if (lgroch .eq. 0) go to 250
+      ii1 = nuexro - 4
+      ii2 = ii1 + 5
+      ii2max = nuexro + nuecog
+  210 ii1 = ii1 + 5
+      ii2 = ii2 + 5
+      ii2 = min0(ii2,ii2max)
+      write (iou(6),220) (x(ii),ii=ii1,ii2)
+  220 format (4X,'Growth slacks',2X,10(F8.2,2X))
+      if (ii2 .lt. ii2max) go to 210
+
 !  Print slacks for (optional) mortality constraints.
-!
-      IF (LMORCH .EQ. 0) GO TO 250
-      II1 = NUEXRO + NUECOG- 4
-      II2 = II1 + 5
-      II2MAX = NUEXRO + 2 * NUECOG
-  230 II1 = II1 + 5
-      II2 = II2 + 5
-      II2 = MIN0(II2,II2MAX)
-      WRITE (IOU(6),240) (X(II),II=II1,II2)
-  240 FORMAT (3X,'Mortal. slacks',2X,10(F8.2,2X))
-      IF (II2 .LT. II2MAX) GO TO 230
-!
+      if (lmorch .eq. 0) go to 250
+      ii1 = nuexro + nuecog- 4
+      ii2 = ii1 + 5
+      ii2max = nuexro + 2 * nuecog
+  230 ii1 = ii1 + 5
+      ii2 = ii2 + 5
+      ii2 = min0(ii2,ii2max)
+      write (iou(6),240) (x(ii),ii=ii1,ii2)
+  240 format (3x,'Mortal. slacks',2x,10(f8.2,2x))
+      if (ii2 .lt. ii2max) go to 230
+
 ! Print type biomasses and the optimum of the solution.
-!
-  250 CONTINUE
-      II1 = NUSPE1 - 5
-      II2 = NUSPE1 - 1
-  260 II1 = II1 + 5
-      II2 = II2 + 5
-      II2 = MIN0(II2,NUCOLS)
-      WRITE (IOU(6),270) (X(II),II=II1,II2)
-  270 FORMAT (2X,'Types   ',5(F8.2,2X))
-      IF (II2 .LT. NUCOLS) GO TO 260
-      WRITE (IOU(6),280) BIOMAX,X(NUCOLS+1)
-  280 FORMAT (2X,'Total biomass',2X,F8.2,2X,'Optimum',2X,F8.2)
-  290 CONTINUE
-!
+  250 continue
+      ii1 = nuspe1 - 5
+      ii2 = nuspe1 - 1
+  260 ii1 = ii1 + 5
+      ii2 = ii2 + 5
+      ii2 = min0(ii2,nucols)
+      write (iou(6),270) (x(ii),ii=ii1,ii2)
+  270 format (2x,'Types   ',5(f8.2,2x))
+      if (ii2 .lt. nucols) go to 260
+      write (iou(6),280) biomax,x(nucols+1)
+  280 format (2x,'Total biomass',2x,f8.2,2x,'Optimum',2x,f8.2)
+  290 continue
+
 !  Compare optimum solution of JNOW to the absolute optimum of ALL
 !  previous intervals recorded in XOPT, and exit if XOPT is larger.
-!
-!  Update 14 june 1991.
-!  Use a truely small number rather than 0.01 to determine whether
-!  solutions are unique. Never check the first interval.
-!
-      DBIO=X(NUCOLS+1) - XOPT
-      IF (INOW .EQ. 1) GO TO 310
-      IF (DBIO .LT. -1.0D-6) RETURN
-      IF (DBIO .GT.  1.0D-6) GO TO 310
-!
+      dbio=x(nucols+1) - xopt
+      if (inow .eq. 1) go to 310
+      if (dbio .lt. -1.0d-6) return
+      if (dbio .gt.  1.0d-6) go to 310
+
 !  BIO(1) is equal to BIO(2):
 !  two intervals have (approximately) the same total biomass.
 !  Record solution in XST, maximum in BIOST,
 !  and the interval number in INTST.
-!
-      LST=1
-      BIOST=BIO(1)
-      XOPT = X(NUCOLS+1)
-      XDEF(NUCOLS+2) = BIO(2)
-      INTST=JNOW
-      DO 300 K=1,NUCOLS+1
-  300 XST(K)=X(K)
-      RETURN
-!
+      lst=1
+      biost=bio(1)
+      xopt = x(nucols+1)
+      xdef(nucols+2) = bio(2)
+      intst=jnow
+      do k=1,nucols+1
+         xst(k)=x(k)
+      end do
+      return
+
 !  BIO(1) is larger than BIO(2):
 !  Record solution in XDEF, maximum in BIO(2), the number of types
 !  with 0.0 reduced cost in NUMUN and the types with reduced costs
 !  of 0.0 in NONUM(20). Put the interval number in INT.
-!
-  310 CONTINUE
-      LST=0
-      BIO(2)=BIO(1)
-      XOPT = X(NUCOLS+1)
-      XDEF(NUCOLS+2) = BIO(2)
-      INT=JNOW
-      DO 320 K=1,NUCOLS+1
-  320 XDEF(K)=X(K)
-!
+  310 continue
+      lst=0
+      bio(2)=bio(1)
+      xopt = x(nucols+1)
+      xdef(nucols+2) = bio(2)
+      int=jnow
+      do 320 k=1,nucols+1
+  320 xdef(k)=x(k)
+
 ! Update 1.2: removed storage limiting factors in ISPLIM.
 ! Implemented new agorithm in PRINT6
-!
-      NUMUN = NUMUNI
-      IF (NUMUN .EQ. 0) RETURN
-      DO 350 K=1,NUMUN
-  350 NONUN(K)=NONUNI(K)
-      RETURN
-      END
+      numun = numuni
+      if (numun .eq. 0) return
+      do k=1,numun
+         nonun(k)=nonuni(k)
+      end do
+      return
+      end

@@ -21,26 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       4 Dec 1989
-!    Time:       11:50
-!    Program:    CVRBLM   FORTRAN
-!    Version:    1.6
-!    Programmer: Hans Los
-!    Previous version(s):
-!    1.5 -- 4 Dec 1989 -- 11:25 -- Operating System: CMS
-!    1.4 -- 4 Dec 1989 -- 11:18 -- Operating System: CMS
-!    1.3 -- 4 Dec 1989 -- 11:14 -- Operating System: CMS
-!    1.2 -- 4 Dec 1989 -- 10:50 -- Operating System: CMS
-!    1.1 -- 24 Oct 1989 -- 11:17 -- Operating System: CMS
-!    1.0 -- 23 Oct 1989 -- 13:25
-!    0.0 -- 3 Oct 1989 --  8:06
-!
 !  *********************************************************************
-!  *  SUBROUTINE TO CONVERT UNITS BETWEEN BLOOM II AND ECOLUMN         *
-!  *********************************************************************
-!
-!  *********************************************************************
-!  *      SPECIAL ECOLUMN - BLOOM II PROGRAM VERSION                   *
+!  *  SUBROUTINE TO CONVERT UNITS BETWEEN BLOOM II AND DELWAQ          *
 !  *********************************************************************
 !
 !  This module converts some of the inputs of BLOOM II to enable the
@@ -52,8 +34,8 @@
 !     numbers of some variables are printed in a rather akward format.
 !     It is assumed, however, that ECOLUMN itself will handle all
 !     essential BLOOM II outputs in the future.
-!
-      SUBROUTINE CVRBLM
+
+      subroutine cvrblm
 
       use bloom_data_dim
       use bloom_data_size 
@@ -63,7 +45,7 @@
       implicit none
 
       integer :: i
-!
+
 ! Assuming that concentration units in the calling program are g/m3,
 ! where as BLOOM II uses mg/m3, it is necessary to convert
 ! 1.  the specific extinction coefficients
@@ -72,15 +54,12 @@
 ! of all phytoplankton types.
 ! The specific extinction coefficient of detritus.
 ! The base and top levels of the growth and mortality constraints.
-!
-      DO 10 I = 1, NUSPEC
-         CHLTOC(I) = CHLTOC(I) * 1.0D-3
-         CHLR(I)   = CHLTOC(I) * CTODRY(I)
-         EKX(I)    = EKX(I)    * 1000.0D0
-10    CONTINUE
-!     BIOBAS = BIOBAS * TSTEP * 1.0D-3
-!     TOPLEV = TOPLEV * TSTEP * 1.0D-3
-      BIOBAS = BIOBAS * 1.0D-3
-      TOPLEV = TOPLEV * 1.0D-3
-      RETURN
-      END
+      do i = 1, nuspec
+         chltoc(i) = chltoc(i) * 1.0d-3
+         chlr(i)   = chltoc(i) * ctodry(i)
+         ekx(i)    = ekx(i)    * 1000.0d0
+      enddo
+      biobas = biobas * 1.0d-3
+      toplev = toplev * 1.0d-3
+      return
+      end

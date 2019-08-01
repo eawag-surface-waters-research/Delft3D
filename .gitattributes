@@ -2263,10 +2263,8 @@ src/engines_gpl/waq/packages/waq_process/src/bloom/cspgro.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/cspsto.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/cvrblm.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/dayeu.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/diel.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/dynrun.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/ebcalc.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/edit.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/exclud.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/fixinf.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/hdrblm.f -text
@@ -2281,12 +2279,10 @@ src/engines_gpl/waq/packages/waq_process/src/bloom/maxprd.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/natmor.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/nutfea.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/option.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/pools.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/prinma.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/prinsu.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/print6.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/promes.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/prompt.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/qslp.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/setabc.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/setuni.f -text

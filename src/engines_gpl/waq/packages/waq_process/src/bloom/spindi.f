@@ -25,9 +25,8 @@
 !  *********************************************************************
 !  *         SUBROUTINE SPINDI TO DETERMINE TYPE INDICES               *
 !  *********************************************************************
-!
-!
-      SUBROUTINE SPINDI(LSPIND)
+
+      subroutine spindi(lspind)
 
       use bloom_data_dim
       use bloom_data_io  
@@ -36,33 +35,30 @@
       implicit none
 
       integer  :: i, j, lspind, ngr
-!
+
 !  Determine the number of the first and last type of each species.
 !  Check whether the number of different names agrees with the total
 !  number of species which has previously been read by the program.
-!
-      LSPIND = 0
-      NGR = 0
-      J = 0
-   5  I = J + 1
-  10  J = J + 1
-      IF (J .GT. NUSPEC) GO TO 15
-      IF (SPNAME(J) .EQ. SPNAME(I)) GO TO 10
-  15  NGR = NGR + 1
-      J=J-1
-      IT2(NGR,1)=I
-      IT2(NGR,2)=J
-      GRNAME (NGR) = SPNAME (I)
-      IF (J .EQ. NUSPEC) GO TO 20
-      GO TO 5
-!
+      lspind = 0
+      ngr = 0
+      j = 0
+   5  i = j + 1
+  10  j = j + 1
+      if (j .gt. nuspec) go to 15
+      if (spname(j) .eq. spname(i)) go to 10
+  15  ngr = ngr + 1
+      j=j-1
+      it2(ngr,1)=i
+      it2(ngr,2)=j
+      grname (ngr) = spname (i)
+      if (j .eq. nuspec) go to 20
+      go to 5
+
 !  Check the number of species.
-!
-  20  IF (NGR .EQ. NUECOG) RETURN
-      LSPIND = 1
-      WRITE (IOU(10),30) NGR,NUECOG
-  30  FORMAT (' The number of different species names ',I2,/,' is not',
-     1        ' consistent with the number of species ',I2,/,
-     2        ' Execution terminates.')
-      RETURN
-      END
+  20  if (ngr .eq. nuecog) return
+      lspind = 1
+      write (iou(10),30) ngr,nuecog
+  30  format (' The number of different species names ',I2,/,' is not',
+     1        ' consistent with the number of species ',I2,/,' Execution terminates.')
+      return
+      end

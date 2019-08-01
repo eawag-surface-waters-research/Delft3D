@@ -21,30 +21,17 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       23 Oct 1989
-!    Time:       13:24
-!    Program:    SETUNI   FORTRAN
-!    Version:    1.0
-!    Programmer: Hans Los
-!    (c) 1989 Deltares Sektor W&M
-!    Previous versions:
-!    0.0 -- 28 Sep 1989 -- 20:01
-!
 !  *********************************************************************
 !  *          SUBROUTINE TO SET I/O UNIT NUMBERS FOR BLOOM II          *
 !  *********************************************************************
-!
-!  *********************************************************************
-!  *      SPECIAL NZBLOOM PROGRAM VERSION                              *
-!  *********************************************************************
-!
+
 !  This module determines ALL I/O units for BLOOM II.
 !  For historic reasons this subroutine
 !  is configured such that BLOOM II units will be number 51 and up,
 !  with the exception of units 5 and 6, which are the default console
 !  units.
-!
-      SUBROUTINE SETUNI
+
+      subroutine setuni
 
       use bloom_data_dim
       use bloom_data_io  
@@ -52,49 +39,43 @@
       implicit none
 
       integer :: i, ioux
-!
+
 ! In ECOLUMN/NZBLOOM version:
-!
-      IOUX = 50
-      DO 10 I = 1, 30
-         IOU (I) = I + IOUX
-10    CONTINUE
-      IOU(5) = 5
-      IOU(6) = 6
-!
+      ioux = 50
+      do i = 1, 30
+         iou (i) = i + ioux
+      end do
+      iou(5) = 5
+      iou(6) = 6
+
 ! NZBLOOM: change IOU(10) to 70.
-!
-      IOU(10) = 70
-!
+      iou(10) = 70
+
 ! In ECOLUMN/NZBLOOM version:
-!
-      IOUX = 40
-      DO 20 I = 41, 45
-         IOU (I) = I + IOUX
-20    CONTINUE
-!
+      ioux = 40
+      do i = 41, 45
+         iou (i) = i + ioux
+      end do
+
 ! In ECOLUMN/NZBLOOM version:
-!
-      IOUX = 30
-      DO 30 I = 61, 69
-         IOU (I) = I + IOUX
-30    CONTINUE
-!
+      ioux = 30
+      do i = 61, 69
+         iou (i) = i + ioux
+      end do
+
 !  Initialize (old) unit names previously set in various other
 !  subroutines of BLOOM II.
-!
-      INUNI  = IOU(9)
-      OUUNI  = IOU(10)
-      IPL1 = IOU(41)
-      IPL2 = IOU(42)
-!
+      inuni  = iou(9)
+      ouuni  = iou(10)
+      ipl1 = iou(41)
+      ipl2 = iou(42)
+
 ! In PC version: use the standard BLOOM II file OUUNI also for EKOBLM
 ! BLOOM II and DLWQWQ, which use IOU(61), IOU(62), IOU(6) and
 ! IOU(3).
-!
-      IOU(61) = OUUNI
-      IOU(62) = OUUNI
-      IOU(6)  = OUUNI
-      IOU(3)  = OUUNI
-      RETURN
-      END
+      iou(61) = ouuni
+      iou(62) = ouuni
+      iou(6)  = ouuni
+      iou(3)  = ouuni
+      return
+      end

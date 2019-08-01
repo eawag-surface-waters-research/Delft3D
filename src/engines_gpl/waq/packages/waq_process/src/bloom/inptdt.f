@@ -21,21 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       27 Dec 1989
-!    Time:       09:33
-!    Program:    INPTDT.FOR
-!    Version:    1.2
-!    Programmer: Hans Los
-!    Previous version(s):
-!    1.1 -- 27 Dec 1989 -- 09:32 -- Operating System: DOS
-!    1.0 -- 12 Dec 1989 -- 11:59 -- Operating System: DOS
-!    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
-!
 !  *********************************************************************
 !  *  INTEGER FUNCTION INPTDT TO READ CHARACTER STRINGS USING          *
 !  *          INTERACTIVE ROUTINES IN "INTERACT TXTLIB"                *
 !  *********************************************************************
-!
+
       integer function inptdt(prmpt,token,len)
 
       use bloom_data_io  
@@ -45,19 +35,19 @@
       character*8 token
       integer prmpt,gets,len,uprcas,irc
 !
-      INPTDT = 0
-    1 CONTINUE
-      IF (GETS(LINE,POSIT,80,8,TOKEN,LEN) .EQ. 0) RETURN
-    4 READ (INUNI,10,END=2) LINE
-   10 FORMAT (10A8)
-      IRC = UPRCAS (LINE,LINE,80)
-      POSIT=1
-      GO TO 1
-    2 CONTINUE
-      IF (INUNI.NE.5) GO TO 999
-      REWIND (INUNI, ERR = 999)
-      GO TO 4
- 999  WRITE (IOU(6),1004) INUNI
-1004  FORMAT (' Hit end of file on unit ',I5)
-      CALL SRSTOP(6)
-      END
+      inptdt = 0
+    1 continue
+      if (gets(line,posit,80,8,token,len) .eq. 0) return
+    4 read (inuni,10,end=2) line
+   10 format (10a8)
+      irc = uprcas (line,line,80)
+      posit=1
+      go to 1
+    2 continue
+      if (inuni.ne.5) go to 999
+      rewind (inuni, err = 999)
+      go to 4
+ 999  write (iou(6),1004) inuni
+1004  format (' Hit end of file on unit ',I5)
+      call srstop(6)
+      end

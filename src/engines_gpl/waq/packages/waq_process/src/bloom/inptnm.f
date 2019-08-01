@@ -21,21 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       27 Dec 1989
-!    Time:       09:32
-!    Program:    INPTNM.FOR
-!    Version:    1.1
-!    Programmer: Hans Los
-!    Previous version(s):
-!    1.0 -- 12 Dec 1989 -- 11:58 -- Operating System: DOS
-!    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
-!
 !  *********************************************************************
 !  *  INTEGER FUNCTION INPTNM TO READ VARIABLES USING INTERACTIVE      *
 !  *              ROUTINES IN "INTERACT TXTLIB"                        *
 !  *********************************************************************
-!
-      INTEGER FUNCTION INPTNM(PRMPT,DNUM,INUM,TYPE)
+
+      integer function inptnm(prmpt,dnum,inum,type)
 
       use bloom_data_io  
 
@@ -43,32 +34,31 @@
 
       real(8)  :: dnum, rnum
       integer  :: prmpt,type,stoi,stor,stod,uprcas, inum, irc
-!
-!  TYPE INDICATES TYPE OF VARIABLE:
-!    TYPE = 1: DOUBLE PRECISSION REAL
-!    TYPE = 2: INTEGER
-!    TYPE = 3: SINGLE PRECISSION REAL
-!
-      INPTNM = 0
-1     CONTINUE
-      GO TO (10,20,30), TYPE
-      CALL SRSTOP(6)
-   10 IF (STOD(LINE,POSIT,80,DNUM) .EQ. 0) RETURN
-      GO TO 2
-   20 IF (STOI(LINE,POSIT,80,INUM) .EQ. 0) RETURN
-      GO TO 2
-   30 IF (STOR(LINE,POSIT,80,RNUM) .EQ. 0) RETURN
-    2 CONTINUE
-    5 READ(INUNI,100,END=3) LINE
-100   FORMAT (10A8)
-      IRC = UPRCAS (LINE,LINE,80)
-      POSIT=1
-      GO TO 1
-    3 CONTINUE
-      IF (INUNI.NE.5) GO TO 999
-      REWIND (INUNI, ERR = 999)
-      GO TO 5
- 999  WRITE (IOU(6),1004) INUNI
-1004  FORMAT (' Hit end of file on unit ',I5)
-      CALL SRSTOP(6)
-      END
+
+!  Type indicates type of variable:
+!    type = 1: double precission real
+!    type = 2: integer
+!    type = 3: single precission real
+      inptnm = 0
+    1 continue
+      go to (10,20,30), type
+      call srstop(6)
+   10 if (stod(line,posit,80,dnum) .eq. 0) return
+      go to 2
+   20 if (stoi(line,posit,80,inum) .eq. 0) return
+      go to 2
+   30 if (stor(line,posit,80,rnum) .eq. 0) return
+    2 continue
+    5 read(inuni,100,end=3) line
+  100 format (10a8)
+      irc = uprcas (line,line,80)
+      posit=1
+      go to 1
+    3 continue
+      if (inuni.ne.5) go to 999
+      rewind (inuni, err = 999)
+      go to 5
+ 999  write (iou(6),1004) inuni
+1004  format (' Hit end of file on unit ',I5)
+      call srstop(6)
+      end

@@ -21,32 +21,9 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       24 Feb 1992
-!    Time:       20:53
-!    Program:    DYNRUN.FOR
-!    Version:    1.91
-!    Programmer: Hans Los
-!    Previous version(s):
-!    DYNRUN FORTRAN -- 14 Nov 1989 -- 18:35 -- Operating System: DOS
-!    1.8 -- 14 Nov 1989 -- 18:35 -- Operating System: CMS
-!    1.7 -- 14 Nov 1989 -- 11:34 -- Operating System: CMS
-!    1.6 -- 14 Nov 1989 -- 11:14 -- Operating System: CMS
-!    1.5 -- 9 Nov 1989 -- 15:18 -- Operating System: CMS
-!    1.4 -- 9 Nov 1989 -- 15:10 -- Operating System: CMS
-!    1.3 -- 31 Oct 1989 -- 14:36 -- Operating System: CMS
-!    1.2 -- 31 Oct 1989 -- 11:24
-!    1.1 -- 31 Oct 1989 -- 09:03
-!    1.0 -- 23 Oct 1989 -- 13:21
-!    0.0 -- 23 Oct 1989 --  9:46
-!
 !  *********************************************************************
 !  *         SUBROUTINE DYNRUN TO SOLVE BLOOM PROBLEM                  *
 !  *********************************************************************
-!
-!  *********************************************************************
-!  *      SPECIAL ECOLUMN - BLOOM II PROGRAM VERSION                   *
-!  *********************************************************************
-!
 !
 !  Dynamic version of subroutine RUN. Initial conditions are specified
 !  by the caller. Final conditions are returned to the caller.
@@ -61,9 +38,8 @@
 !  The program returns several variables such as the total biomass
 !  expressed in various units, which are not returned in the stand-alone
 !  version of BLOOM II.
-!
-      subroutine dynrun(exttot,extb,tmp,sol,dep,dayl,chlor,id,iseg,
-     1                  nset,extlim,deat,totchl,totdry,totcar,swblsa)
+
+      subroutine dynrun(exttot,extb,tmp,sol,dep,dayl,chlor,id,iseg,nset,extlim,deat,totchl,totdry,totcar,swblsa)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -76,90 +52,74 @@
 
       implicit none
 
-      CHARACTER*8 CDATE
-      INTEGER NONUN(MT)
-      integer    :: i, id, iseg, k, nset, numun
-      integer    :: swblsa, infeas
-      real(8)    :: sol
-      real(8)    :: dep
-      real(8)    :: tmp
-      real(8)    :: chlor
-      real(8)    :: extb
-      real(8)    :: dayl
-      real(8)    :: deat
-      real(8)    :: totchl
-      real(8)    :: exttot
-      real(8)    :: extlim
-      real(8)    :: totdry
-      real(8)    :: totcar
+      character*8 :: cdate
+      integer     :: nonun(mt)
+      integer     :: i, id, iseg, k, nset, numun
+      integer     :: swblsa, infeas
+      real(8)     :: sol
+      real(8)     :: dep
+      real(8)     :: tmp
+      real(8)     :: chlor
+      real(8)     :: extb
+      real(8)     :: dayl
+      real(8)     :: deat
+      real(8)     :: totchl
+      real(8)     :: exttot
+      real(8)     :: extlim
+      real(8)     :: totdry
+      real(8)     :: totcar
       
-!
 !  Check whether a selective dump for periods and/or segments is requested for this period.
-      IDUMP = 0
-      IF (ISDUMP .EQ. 1) THEN
-         IF ((ID .GE. ISDPER(1) .AND. ID .LE. ISDPER(2)) .AND.
-     &       (IGDUMP .EQ. 0 .OR. IGDUMP .EQ. ISEG)) THEN
-            IDUMP = 1
-         END IF
-      ELSE
-         IF  (IGDUMP .EQ. ISEG) THEN
-            IDUMP = 1
-         END IF
-      END IF
+      idump = 0
+      if (isdump .eq. 1) then
+         if ((id .ge. isdper(1) .and. id .le. isdper(2)) .and. (igdump .eq. 0 .or. igdump .eq. iseg)) then
+            idump = 1
+         end if
+      else
+         if  (igdump .eq. iseg) then
+            idump = 1
+         end if
+      end if
 
-!
 !  Calculate solarradion level for week; correct for total radiadion.
-!
-      SOL=SOLACO * SOL
-!
+      sol=solaco * sol
+
 !  Calculate mixing depths of species.
-!
-      DO 110 K=1,NUSPEC
-  110 DMIX(K)=SDMIX(K) * DEP
-!
+      do k=1,nuspec
+         dmix(k)=sdmix(k) * dep
+      end do
+
 !  Construct date indicator.
 !  Print heading for output on unit IOU(6) if "DUMP" is specified.
-!  Update 1.91: allow large segment numbers: use I5
-!
-      WRITE (CDATE, 115) ISEG, ID
-115   FORMAT (I5,1X,I2)
-      IF ( IDUMP .EQ. 0) GO TO 120
-      WRITE (IOU(6),99960) ISEG, ID
-!
-!  Print parameter values on unit IOU(6) if "DUMP" is specified.
-!
-      WRITE (IOU(6),99950) TMP,SOL,DEP
-  120 CONTINUE
-!
+      write (cdate, 115) iseg, id
+115   format (i5,1x,i2)
+      if ( idump .ne. 0) then
+         write (iou(6),99960) iseg, id
+         write (iou(6),99950) tmp, sol, dep
+      end if
+
 !  Call subroutine BLOOM to set up and solve the linear programs
 !  for week I; BLOOM will call all other subroutines
 !  to solve the problem.
 !  **** Update for ECOLUMN version:
 !       TOTDRY (total dry weight) passed in position NUCOLS+2 of XDEF.
-!
-      CALL BLOOM(CDATE,ID,MI,TMP,SOL,CHLOR,EXTB,DAYL,DEAT,
-     1           DEP,XINIT,XDEF,XECO,TOTCHL,EXTTOT,EXTLIM,NSET,INFEAS,
-     2           NONUN,NUMUN,SWBLSA)
-      TOTDRY = XDEF (NUCOLS+2)
-      TOTCAR = 0.0
-      DO 130 I = 1, NUSPEC
-         TOTCAR = TOTCAR + XDEF(I+NUROWS)/CTODRY(I)
- 130  CONTINUE
-!
-!  Print warning message if potential degenenarate solutions have been
-!  detected.
-!
-!     IF (NUMUN .NE. 0 .AND. LPRINT .EQ. 1)
-!    1    WRITE (IOU(21),99930) ID,(NONUN(K),K=1,NUMUN)
-!
-99980 FORMAT(2X,'The following species have reduced relative depth',/,
+      call bloom(cdate,id,mi,tmp,sol,chlor,extb,dayl,deat,
+     1           dep,xinit,xdef,xeco,totchl,exttot,extlim,nset,infeas,
+     2           nonun,numun,swblsa)
+      totdry = xdef(nucols+2)
+      totcar = 0.0
+      do i = 1, nuspec
+         totcar = totcar + xdef(i+nurows)/ctodry(i)
+      end do
+
+99980 format(2X,'The following species have reduced relative depth',/,
      1       2X,'for buoyancy control: ')
-99970 FORMAT(2X,'Species ',A8,' has relative depth of ',F5.2)
-99960 FORMAT (/,23X,'******',2X,' SEGMENT ',I8,' WEEK ',
+99970 format(2X,'Species ',A8,' has relative depth of ',F5.2)
+99960 format (/,23X,'******',2X,' SEGMENT ',I8,' WEEK ',
      1       I2, 2X,'******',/)
-99950 FORMAT(2X,'Important parameter values for this week:',/,
+99950 format(2X,'Important parameter values for this week:',/,
      1       2X,'Temperature =',F5.1,4X,'Solar radiation =',F8.1,
      2       4X,'Total depth =',F5.2)
-99930 FORMAT (' Period: ',I4,' Potential degeneracy for species: ',20I3)
-      RETURN
-      END
+99930 format (' Period: ',I4,' Potential degeneracy for species: ',20I3)
+      return
+      end

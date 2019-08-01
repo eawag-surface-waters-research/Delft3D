@@ -21,11 +21,10 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!
 !  *********************************************************************
 !  *    SUBROUTINE TO CHECK FEASIBILITY OF NUTRIENT CONSTRAINTS        *
 !  *********************************************************************
-!
+
       subroutine nutfea(infeas)
       
       use bloom_data_dim
@@ -37,24 +36,23 @@
 
       real(8)   :: x(mx), slack = 1.d-12
       integer   :: i, j, infeas
-!
+
 !  If a negative righthand side is determined, check whther all species
 !  have a positive A-coefficient or not; introduce slack to avoid
 !  negative concentrations.
-!
       infeas=0
-      do 40 i=1,nunuco
-      if (b(i) .ge. 0.0) go to 40
-      do 10 j=1,nuspec
-      if (aa(i,j) .lt. 1.0d-6) go to 20
-   10 continue
-      if (idump .eq. 1) write (iou(6),99999) cstra(i),b(i)
-      infeas=1
-      go to 30
-   20 continue
-      if (idump .eq. 1) write (iou(6),99990) cstra(i),b(i)
-   30 b(i)=slack
-   40 continue
+      do i=1,nunuco
+         if (b(i) .ge. 0.0) cycle
+         do 10 j=1,nuspec
+            if (aa(i,j) .lt. 1.0d-6) go to 20
+   10    continue
+         if (idump .eq. 1) write (iou(6),99999) cstra(i),b(i)
+         infeas=1
+         go to 30
+   20    continue
+         if (idump .eq. 1) write (iou(6),99990) cstra(i),b(i)
+   30    b(i)=slack
+      end do
 99999 format (2X,'The nutrient constraint',1X,A8,1X,'has a negative',
      1        ' right hand side =',2X,F8.3,/,1X,'and positive',
      2        ' A-coefficients for all species; problem is infeasible.')

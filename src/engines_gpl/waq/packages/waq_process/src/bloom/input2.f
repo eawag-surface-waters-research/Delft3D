@@ -29,7 +29,7 @@
 !
 !  Lahey fortran PC version: use FORMATTED input for efficiency curves.
 !
-      SUBROUTINE INPUT2 (NDEC,INPU,INEFF)
+      SUBROUTINE INPUT2 (INPU,INEFF)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -54,7 +54,7 @@
       
       real(8)      :: zoonut(mn,0:mg), zook, zoogr, xmin, gramo1
       integer      :: i, ioff, ineff, inpu, j, k, nimp
-      integer      :: nuadco, nunuc2, ndec
+      integer      :: nuadco, nunuc2
 !
 !  Equate CWORDS and CONTRO.
 !
@@ -223,13 +223,6 @@
 !  from unit 12. These data are produced by the efficiency program
 !  "BLEFFPRO" and transformed for unformatted read.
 !
-!     READ (INEFF) NZ,TEFCUR,(ZVEC(I),I=1,NZ),NZ
-!     DO 160 I=1,NZ
-!     READ (INEFF) (FUN(I,J),J=1,NUECOG)
-! 160 READ (INEFF) (DER(I,J),J=1,NUECOG)
-!     DO 170 I=1,24
-! 170 READ (INEFF) DL(I),(DAYMUL(I,J),J=1,NUECOG)
-!
 !----------------------------------------------------------------------
 !  Input section for FORMATTED read of efficiency curves!
 !
@@ -269,6 +262,8 @@
   199 FORMAT (30(A10,X))
   200 FORMAT (I5,5X,F10.2)
   210 FORMAT (10(D15.8,3X))
+      DAYMUL = 0.0D0
+      DL = 0.0D0
       DO 230 I=1,24
   230 READ (INEFF,240) DL(I),(DAYMUL(I,J),J=1,NUECOG)
   240 FORMAT (11F5.0)

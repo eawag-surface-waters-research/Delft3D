@@ -21,20 +21,10 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-!    Date:       30 Oct 1989
-!    Time:       14:47
-!    Program:    BVECT    FORTRAN
-!    Version:    1.1
-!    Programmer: Hans Los
-!    (c) 1989 Deltares Sektor W&M
-!    Previous versions:
-!    1.0 -- 30 Oct 1989 -- 14:45
-!    BVECT.FOR  -- 25 Apr 1989 -- 10:28
-!
 !  *********************************************************************
 !  *  SUBROUTINE TO SET THE MORTALITY CONSTRAINTS INTO THE B-VECTOR    *
 !  *********************************************************************
-!
+
       subroutine bvect(x,xdef)
       
       use bloom_data_dim 
@@ -50,7 +40,6 @@
       real(8)      :: dmax1
       integer      :: i, i1, k, k1, l1, l2
       
-!
 ! To tell Bloom how much biomass of the living phytoplankton
 ! species is left at the end of the time-step, the 'minimum
 ! biomass' of each species is set in the B-vector. This value is used
@@ -59,28 +48,27 @@
 ! The new, minimum biomass levels are also stored in the original
 ! XDEF-vector. This is to enable the program to deal with infeasible
 ! solutions for example due to light limitation.
-!
 
-      I1 = 0
-      K1 = NUROWS
-      DO 40 I=1,NUECOG
-          SUMSP = 0.0
-          L1 = IT2(I,1)
-          L2 = IT2(I,2)
-          DO 30 K=L1,L2
-              I1 = I1 + 1
-              K1 = K1 + 1
-              SUMSP = SUMSP + X(I1)
-              XDEF(K1) = X(I1)
-   30     CONTINUE
-          B2(I) = DMAX1(SUMSP,0.0D0)
-   40 CONTINUE
-!
-      I1 = NUEXRO + NUECOG
-      DO 53 I = 1,NUECOG
-          I1 = I1 + 1
-          B(I1) = B2(I)
-53    CONTINUE
-!
-      RETURN
-      END
+      i1 = 0
+      k1 = nurows
+      do i=1,nuecog
+         sumsp = 0.0
+         l1 = it2(i,1)
+         l2 = it2(i,2)
+         do k=l1,l2
+            i1 = i1 + 1
+            k1 = k1 + 1
+            sumsp = sumsp + x(i1)
+            xdef(k1) = x(i1)
+         end do
+         b2(i) = dmax1(sumsp,0.0d0)
+      end do
+
+      i1 = nuexro + nuecog
+      do i = 1,nuecog
+         i1 = i1 + 1
+         b(i1) = b2(i)
+      end do
+
+      return
+      end
