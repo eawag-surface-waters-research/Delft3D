@@ -93,7 +93,7 @@ module m_readstructures
       type(t_network), intent(inout) :: network              !< Network pointer
       character*(*), intent(in)      :: structureFile        !< Name of the structure file
 
-      logical                                                :: success
+      logical                                                :: success, success1
       type(tree_data), pointer                               :: md_ptr 
       integer                                                :: istat
       integer                                                :: numstr
@@ -101,7 +101,7 @@ module m_readstructures
       character(len=IdLen)                                   :: str_buf
 
       character(len=IdLen)                                   :: typestr
-      character(len=IdLen)                                   :: structureID
+      character(len=IdLen)                                   :: st_id
       character(len=IdLen)                                   :: branchID
       
       logical                                                :: isPillarBridge
@@ -126,6 +126,7 @@ module m_readstructures
       logical                                                :: file_exist
       integer                                                :: major, minor, ierr
       
+      success = .true.
       pos = index(structureFile, '.', back = .true.)
       binfile = structureFile(1:pos)//'cache'
       inquire(file=binfile, exist=file_exist)
@@ -148,11 +149,11 @@ module m_readstructures
       ierr = 0
       major = 1
       minor = 0
-      call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
+      call prop_get_version_number(md_ptr, major = major, minor = minor, success = success1)
       ! by exception, we backwards-support majorVersion=1 (for orifice and weir)
       if ((major /= StructureFileMajorVersion .and. major /= 1) .or. minor > StructureFileMinorversion) then
          write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of structure file detected in '''//trim(structurefile)//''': v', major, minor, '. Current format: v',StructureFileMajorVersion,StructureFileMinorVersion,'. Ignoring this file.'
-         call warn_flush()
+         call err_flush()
          ierr = 1
       end if
 
@@ -176,84 +177,60 @@ module m_readstructures
             ! Read Common Structure Data
             
             ! TODO: UNST-2799: temporary check on polylinefile to prevent stopping on old (1.00) structure files. They will be read by dflowfm kernel itself.
-            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'polylinefile', str_buf, success)
-            if (success .and. major == 1) then
+            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'polylinefile', str_buf, success1)
+            if (success1 .and. major == 1) then
                write (msgbuf, '(a,i0,a)') 'Detected structure #', i, ' from '''//trim(structureFile)//''' as an old v1.00 structure. Skipping.'
                call dbg_flush()
                cycle
             end if
 
-            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'id', structureID, success)
-            pstru%id = structureID
-            if (.not. success) then
-               write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ' from '''//trim(structureFile)//''', Id is missing.'
-               call err_flush()
-               cycle
-            endif
+            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'id', st_id, success1)
+            success = success .and. check_input_result(success1, '?', 'id')
+            pstru%id = st_id
+
             pstru%name = pstru%id
             call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'name', pstru%name)
-            if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'branchId', branchID, success)
-            if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', pstru%chainage, success)
+            
+            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'branchId', branchID, success1)
+            success = success .and. check_input_result(success1, st_id, 'branchId')
+            
+            call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', pstru%chainage, success1)
 
             pstru%numCoordinates = 0
-            if (success) then
+            if (success1) then
                pstru%ibran = hashsearch(network%brs%hashlist, branchID)
                if (pstru%ibran <= 0) then
-                  write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', branchId '''//trim(branchID)//''' not found.'
+                  write (msgbuf, '(a)') 'Error Reading Structure '''//trim(st_id)//''' from '''//trim(structureFile)//''', branchId '''//trim(branchID)//''' not found.'
                   call err_flush()
                   success = .false.
-                  cycle
                endif
             else 
-               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'numCoordinates', pstru%numCoordinates, success)
+               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'numCoordinates', pstru%numCoordinates, success1)
+               success = success .and. check_input_result(success1, st_id, 'numCoordinates')
                if (success) then
                   allocate(pstru%xCoordinates(pstru%numCoordinates), pstru%yCoordinates(pstru%numCoordinates))
+                  
                   call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'xCoordinates', pstru%xCoordinates, &
-                                pstru%numCoordinates, success)
-                  if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'yCoordinates', pstru%yCoordinates, &
-                                pstru%numCoordinates, success)
+                                pstru%numCoordinates, success1)
+                  success = success .and. check_input_result(success1, st_id, 'xCoordinates')
+                  
+                  call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'yCoordinates', pstru%yCoordinates, &
+                                pstru%numCoordinates, success1)
+                  success = success .and. check_input_result(success1, st_id, 'yCoordinates')
                endif
             endif
             
-            if (.not.success) then
-               write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', location specification is missing.'
-               call err_flush()
-               cycle
-            endif
-            
-            if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success)
-            if (.not. success) then
-               write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', type is missing.'
-               call err_flush()
-               cycle
-            endif
+            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success1)
+            success = success .and. check_input_result(success1, st_id, 'type')
       
-            call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'compound', iCompound, success)
-            if (.not. success) iCompound = 0
-            
-            if (iCompound > 0) then
-            
-               call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'compoundName', compoundName, success)
-               if (success .and. len_trim(compoundName) > 0) then
-                  if (.not. allocated(compoundNames)) then
-                     allocate(compoundNames(numstr))
-                     compoundNames = ' '
-                  endif
-                  if (len_trim(compoundNames(iCompound)) <= 0) then
-                     compoundNames(iCompound) = compoundName
-                  endif
-               else
-                  write(str_buf, *) iCompound
-                  call remove_leading_spaces(str_buf)
-                  compoundName = 'Cmp'//trim(str_buf)
-               endif
-            else
-               compoundName = ' '
-            endif
-            
             iStrucType = GetStrucType_from_string(typestr)
             pstru%type = iStrucType
 
+            if (.not. success) then
+               ! Error(s) found while scanning the structuretype independend stuff. Do not read the type dependend items
+               cycle
+            endif
+            
             select case (iStrucType)
             case (ST_WEIR)
                if (major ==1) then 
@@ -261,36 +238,33 @@ module m_readstructures
                   call readWeir(pstru%weir, md_ptr%child_nodes(i)%node_ptr, success)
                else
                   ! support for version >= 2.0 structure files weirs as general structure
-                  call readWeirAsGenstru(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
+                  call readWeirAsGenstru(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
                endif
                   
             case (ST_UNI_WEIR)
-               call readUniversalWeir(pstru%uniweir, md_ptr%child_nodes(i)%node_ptr, structureId, success)
+               call readUniversalWeir(pstru%uniweir, md_ptr%child_nodes(i)%node_ptr, st_id, success)
             case (ST_CULVERT)
-               call readCulvert(pstru%culvert, network, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
+               call readCulvert(pstru%culvert, network, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
             case (ST_BRIDGE)
-               call readBridge(pstru%bridge, network, md_ptr%child_nodes(i)%node_ptr, structureID, success)
+               call readBridge(pstru%bridge, network, md_ptr%child_nodes(i)%node_ptr, st_id, success)
             case (ST_PUMP)
-               call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, structureId, network%forcinglist, success)
+               call readPump(pstru%pump, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
             case (ST_ORIFICE, ST_GATE)
                if (major ==1) then 
                   ! support for version 1.0 structure files weirs as weir 
                   call readOrifice(pstru%orifice, md_ptr%child_nodes(i)%node_ptr, success)
                else
                   ! support for version >= 2.0 structure files weirs as general structure
-                  call readOrificeAsGenstru(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
+                  call readOrificeAsGenstru(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
                endif
             case (ST_GENERAL_ST)
-               call readGeneralStructure(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, structureID, network%forcinglist, success)
+               call readGeneralStructure(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
             case default
                call setmessage(LEVEL_ERROR,  'Structure type: '//trim(typestr)//' not supported, see '//trim(pstru%id))
                success = .false.
             end select
             
-            if (.not. success) then
-               write (msgbuf, '(a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//'''.'
-               call SetMessage(LEVEL_FATAL, trim(msgbuf))
-            else 
+            if (success) then
                network%sts%Count = network%sts%Count + 1
                call incStructureCount(network%sts, iStrucType)
             endif
@@ -358,29 +332,7 @@ module m_readstructures
          
       enddo
       
-      ! Handle the Structure and Compound Names
-      if (allocated(compoundNames)) then
-      
-         do i = 1, network%sts%Count
-            if (network%sts%struct(i)%compound > 0) then
-               if (len_trim(compoundNames(network%sts%struct(i)%compound)) > 0) then
-                  network%sts%struct(i)%compoundName = compoundNames(network%sts%struct(i)%compound)
-               endif
-            endif
-         enddo
-         
-         deallocate(compoundNames)
-
-      else
-      
-         ! Copy ID'S to Names
-         do i = 1, network%sts%Count
-            network%sts%struct(i)%name = network%sts%struct(i)%id
-         enddo
-      
-      endif
-         
-      
+      ! fill the hashtable for searching on Id's
       call fill_hashtable(network%sts)
       
       if (.not. allocated(network%sts%restartData) .and. (network%sts%count > 0)) then
@@ -1312,17 +1264,18 @@ module m_readstructures
       type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which weir forcing will be added if needed.
       logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
+      logical           :: success1
       success = .true.
+      
       allocate(generalst)
 
       generalst%velheight = .true.
       generalst%ws = 1d10
-      call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist, success)
-      call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success)
-      if (.not. success) then
-         write (msgbuf, '(a)') 'Error Reading Structure '''//trim(st_id)//''', crestLevel is missing.'
-         call err_flush()
-      end if
+      call prop_get_double(md_ptr, '', 'crestWidth', generalst%ws)
+
+      call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success1)
+      success = success .and. check_input_result(success1, st_id, 'crestLevel')
+
       generalst%mugf_pos = 1d0
       if (success) call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos)
 
