@@ -958,30 +958,24 @@ module m_readstructures
       integer                                    :: CrsDefIndx
       integer                                    :: icross
       logical                                    :: isPillarBridge
+      logical                                    :: success1
       
       
       success = .true.
       allocate(bridge)
 
-      call prop_get_string(md_ptr, 'structure', 'allowedFlowDir', txt, success)
-      bridge%allowedflowdir = allowedFlowDirToInt(txt)
-      if (.not. success) then
-         call setMessage(LEVEL_ERROR, 'required key allowedFlowDir not found for structure '//trim(st_id))
-         return
-      endif
+      call prop_get_string(md_ptr, 'structure', 'allowedFlowDir', txt, success1)
+      success = success .and. check_input_result(success1, st_id, 'allowedFlowDir')
+      if (success) bridge%allowedflowdir = allowedFlowDirToInt(txt)
       
       ! Make distinction between a pillar bridge and a standard bridge
       
       bridge%pillarwidth = 0d0
-      call prop_get_double(md_ptr, '', 'pillarWidth', bridge%pillarwidth, success)
-      if (success) then
+      call prop_get_double(md_ptr, '', 'pillarWidth', bridge%pillarwidth, success1)
+      if (success1) then
          ! pillar bridge
-         call prop_get_double(md_ptr, '', 'formFactor', bridge%formfactor, success)
-         if (.not. success) then
-            call setMessage(LEVEL_ERROR, 'formFactor not found for structure '//trim(st_id))
-            return
-         endif
-         
+         call prop_get_double(md_ptr, '', 'formFactor', bridge%formfactor, success1)
+         success = success .and. check_input_result(success1, st_id, 'formFactor')
       
          bridge%bedLevel           = 0.0d0
          bridge%useOwnCrossSection = .false.
@@ -997,38 +991,44 @@ module m_readstructures
          
       else
          ! Standard bridge
-         call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success)
-         if (.not. success) then
-            call setmessage(LEVEL_ERROR, 'error reading key csDefId for bridge '//trim(st_id))
-            return
+         call prop_get_string(md_ptr, '', 'csDefId', CrsDefID, success1)
+         success = success .and. check_input_result(success1, st_id, 'csDefId')
+         if (success) then
+            CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
+            if (CrsDefIndx <= 0) then
+               call setMessage(LEVEL_ERROR, 'Error Reading Bridge: Cross-Section Definition '//trim(CrsDefID)// ' not Found for structure '//trim(st_id))
+               success = .false.
+            endif
          endif
          
-         CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
-         if (CrsDefIndx <= 0) then
-            call setMessage(LEVEL_FATAL, 'Error Reading Bridge: Cross-Section Definition '//trim(CrsDefID)// ' not Found for structure '//trim(st_id))
-            success = .false.
-            return
-         endif
-
-         call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success)
-         call frictionTypeStringToInteger(txt, bridge%bedFrictionType)
-         if (success) call prop_get_double(md_ptr, 'structure', 'bedFriction', bridge%bedFriction, success)
+         call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success1)
+         success = success .and. check_input_result(success1, st_id, 'bedFrictionType')
+         if (success) call frictionTypeStringToInteger(txt, bridge%bedFrictionType)
          
-         icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
-                                  bridge%bedFrictionType, bridge%bedFriction, bridge%groundFrictionType, bridge%groundFriction)
-         network%crs%cross(icross)%branchid = -1
+         call prop_get_double(md_ptr, '', 'bedFriction', bridge%bedFriction, success1)
+         success = success .and. check_input_result(success1, st_id, 'bedFriction')
          
-         bridge%useOwnCrossSection = .true.
-         bridge%pcross             => network%crs%cross(icross)
-         bridge%crosssectionnr     = icross
-
-         call prop_get_double(md_ptr, '', 'bedLevel', bridge%bedLevel, success)
-         if (success) call prop_get_double(md_ptr, '', 'length', bridge%length, success)
-         if (success) call prop_get_double(md_ptr, '', 'inletLossCoeff', bridge%inletlosscoeff, success)
-         if (success) call prop_get_double(md_ptr, '', 'outletLossCoeff', bridge%outletlosscoeff, success)
-         if (.not. success) then
-            call setmessage(LEVEL_ERROR, 'Error reading bridge data for structure '//trim(st_id))
+         if (success) then
+            icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
+                                     bridge%bedFrictionType, bridge%bedFriction, bridge%groundFrictionType, bridge%groundFriction)
+            network%crs%cross(icross)%branchid = -1
+         
+            bridge%useOwnCrossSection = .true.
+            bridge%pcross             => network%crs%cross(icross)
+            bridge%crosssectionnr     = icross
          endif
+         
+         call prop_get_double(md_ptr, '', 'bedLevel', bridge%bedLevel, success1)
+         success = success .and. check_input_result(success1, st_id, 'bedLevel')
+         
+         call prop_get_double(md_ptr, '', 'length', bridge%length, success1)
+         success = success .and. check_input_result(success1, st_id, 'length')
+         
+         call prop_get_double(md_ptr, '', 'inletLossCoeff', bridge%inletlosscoeff, success1)
+         success = success .and. check_input_result(success1, st_id, 'inletLossCoeff')
+         
+         call prop_get_double(md_ptr, '', 'outletLossCoeff', bridge%outletlosscoeff, success1)
+         success = success .and. check_input_result(success1, st_id, 'outletLossCoeff')
          
          
          bridge%pillarwidth = 0.0d0
