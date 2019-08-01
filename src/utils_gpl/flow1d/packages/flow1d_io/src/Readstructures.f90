@@ -909,7 +909,7 @@ module m_readstructures
    !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readBridge(bridge,network, md_ptr, st_id, success)
       
-      type(t_bridge),  pointer,  intent(inout) :: bridge          !< Bridge object to be read into.
+      type(t_bridge),  pointer,  intent(inout) :: bridge          !< Bridge structure to be read into.
       type(t_network),           intent(inout) :: network         !< Network data structure, to which a crosssection may be added for the bridge.
       type(tree_data), pointer,  intent(in   ) :: md_ptr          !< ini tree pointer with user input.
       character(IdLen),          intent(in   ) :: st_id           !< Structure character Id.
