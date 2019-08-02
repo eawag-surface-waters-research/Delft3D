@@ -953,14 +953,20 @@ module m_readstructures
          if (success) then
             CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
             if (CrsDefIndx <= 0) then
-               call setMessage(LEVEL_ERROR, 'Error Reading Bridge: Cross-Section Definition '//trim(CrsDefID)// ' not Found for structure '//trim(st_id))
+               call setMessage(LEVEL_ERROR, 'Error Reading Bridge '''//trim(st_id)//''': Cross-Section Definition '''//trim(CrsDefID)// ''' not found.')
                success = .false.
             endif
          endif
          
          call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success1)
          success = success .and. check_input_result(success1, st_id, 'bedFrictionType')
-         if (success) call frictionTypeStringToInteger(txt, bridge%bedFrictionType)
+         if (success) then
+            call frictionTypeStringToInteger(txt, bridge%bedFrictionType)
+            if (bridge%bedFrictionType < 0) then
+               call setMessage(LEVEL_ERROR, 'Error Reading Bridge '''//trim(st_id)//''': invalid bedFrictionType '''//trim(txt)//'''.')
+               success = .false.
+            end if
+         end if
          
          call prop_get_double(md_ptr, '', 'bedFriction', bridge%bedFriction, success1)
          success = success .and. check_input_result(success1, st_id, 'bedFriction')
@@ -994,7 +1000,8 @@ module m_readstructures
       endif
       
    end subroutine readBridge
-   
+
+
    subroutine readDambreak(dambr, md_ptr, success)
 
       type(t_dambreak), pointer, intent(inout) :: dambr      
