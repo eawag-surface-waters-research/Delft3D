@@ -1344,7 +1344,6 @@ module m_readstructures
       generalst%zu1                = generalst%zs
       generalst%wu2                = generalst%ws
       generalst%zu2                = generalst%zs
-      generalst%zs                 = generalst%zs
       generalst%wd1                = generalst%ws
       generalst%zd1                = generalst%zs
       generalst%wd2                = generalst%ws
@@ -1365,29 +1364,28 @@ module m_readstructures
       generalst%velheight          = .true.
       generalst%openingDirection   = GEN_SYMMETRIC ! TODO: once 2D structures are being read by this reader, also support fromleft and fromright
 
-      ! success
-      return
-
-888   continue
-      ! Some error occurred
-
    end subroutine readOrificeAsGenStru
- 
-   !> Check if success is true or false, when false generate an error message
-   !! result value is success
-   logical function check_input_result(success, st_id, key)
-      logical         , intent(in   )    :: success   !< result value of the prop_get subroutine
-      character(len=*), intent(in   )    :: st_id     !< id of the current structure
-      character(len=*), intent(in   )    :: key       !< key of the input value 
-      
+
+
+   !> Helper routine to check the result status of a read/prop_get action.
+   !! Checks if success is true or false, when false generate an error message.
+   !! Result value is the original success value.
+   function check_input_result(success, st_id, key) result (res)
+      logical         , intent(in   )    :: success   !< Result value of the prop_get subroutine.
+      character(len=*), intent(in   )    :: st_id     !< Id of the current structure.
+      character(len=*), intent(in   )    :: key       !< Key of the input value.
+      logical                            :: res       !< Result status, is equal to the original success value.
+                                                      !< Recommended use: successall = successall .and. check_input_result(success, ..)
+
       if (.not. success) then
          write (msgbuf, '(a,a,a)') 'Error Reading Structure ''', trim(st_id), ''', ''', trim(key), ''' is missing.'
          call err_flush()
       endif
-      check_input_result = success
+      res = success
       return 
    end function check_input_result
-   
+
+
    !> Read the general structure parameters.
    !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readGeneralStructure(generalst, md_ptr, st_id, forcinglist, success)
