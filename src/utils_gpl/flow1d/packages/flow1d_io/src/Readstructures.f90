@@ -1488,10 +1488,9 @@ module m_readstructures
       generalst%extraresistance    = 0d0
       call prop_get_double(md_ptr, '', 'extraResistance', generalst%extraresistance)
       
-      ! success1
-      return
    end subroutine readGeneralStructure
-   
+
+
    integer function  openingDirectionToInt(dirString)
       character(len=*), intent(inout) :: dirString
       call str_lower(dirString)
