@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using NUnit.Framework;
 
 namespace DimrTesting
 {
     [TestFixture]
+    [Category("Integration")]
     public class DimrTestComponentBMITests 
     {
         private DimrDllNative dimrDllNative;
