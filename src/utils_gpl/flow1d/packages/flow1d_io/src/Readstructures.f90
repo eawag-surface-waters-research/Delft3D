@@ -805,7 +805,7 @@ module m_readstructures
       if (success) then
          CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
          if (CrsDefIndx <= 0) then
-            call setMessage(LEVEL_ERROR, 'Error Reading Culvert: Cross-Section Definition '''//trim(CrsDefID)//''' not Found')
+            call setMessage(LEVEL_ERROR, 'Error Reading Culvert '''//trim(st_id)//''': Cross-Section Definition '''//trim(CrsDefID)//''' not Found')
             success = .false.
          endif
       endif
