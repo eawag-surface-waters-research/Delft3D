@@ -1510,7 +1510,7 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
 //------------------------------------------------------------------------------
 void Dimr::scanConfigFile (void) {
 
-    XmlTree * rootXml     = config == nullptr ? NULL : config->Lookup ("/dimrConfig");
+    XmlTree * rootXml     = config->Lookup ("/dimrConfig");
     if (rootXml == NULL)
         throw Exception (true, Exception::ERR_INVALID_INPUT, "Configuration file \"%s\" does not have a <dimrConfig> root element", configfile);
     XmlTree * fileversion = rootXml->Lookup ("documentation/fileVersion");
