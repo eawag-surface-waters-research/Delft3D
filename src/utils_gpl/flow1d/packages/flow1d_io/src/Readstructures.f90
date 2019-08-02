@@ -801,18 +801,23 @@ module m_readstructures
       success = success .and. check_input_result(success1, st_id, 'csDefId')
       
       if (success) then
-         
          CrsDefIndx = hashsearch(network%CSDefinitions%hashlist, CrsDefID)
          if (CrsDefIndx <= 0) then
-            call setMessage(LEVEL_ERROR, 'Error Reading Culvert: Cross-Section Definition not Found')
+            call setMessage(LEVEL_ERROR, 'Error Reading Culvert: Cross-Section Definition '''//trim(CrsDefID)//''' not Found')
             success = .false.
          endif
       endif
    
       call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success1)
       success = success .and. check_input_result(success1, st_id, 'bedFrictionType')
-      if (success) call frictionTypeStringToInteger(txt, bedFrictionType)
-       
+      if (success) then
+         call frictionTypeStringToInteger(txt, bedFrictionType)
+         if (bedFrictionType < 0) then
+            call setMessage(LEVEL_ERROR, 'Error Reading Culvert '''//trim(st_id)//''': invalid bedFrictionType '''//trim(txt)//'''.')
+            success = .false.
+         end if
+      end if
+
       call prop_get_double(md_ptr, '', 'bedFriction', bedFriction, success1)
       success = success .and. check_input_result(success1, st_id, 'bedFriction')
       
@@ -832,7 +837,7 @@ module m_readstructures
       
       call prop_get_string(md_ptr, '', 'allowedFlowDir', txt, success1)
       success = success .and. check_input_result(success1, st_id, 'allowedFlowDir')
-      if (success) culvert%allowedflowdir =allowedFlowDirToInt(txt)
+      if (success) culvert%allowedflowdir = allowedFlowDirToInt(txt)
       
       call prop_get_double(md_ptr, '', 'length', culvert%length, success1) 
       success = success .and. check_input_result(success1, st_id, 'length')
@@ -861,10 +866,10 @@ module m_readstructures
          
          call prop_get_integer(md_ptr, '', 'numLossCoeff', lossCoeffCount, success1) ! UNST-2710: new consistent keyword
          success = success .and. check_input_result(success1, st_id, 'numLossCoeff')
-         if (success) then   
+         if (success1) then   
             call realloc(relOpen, lossCoeffCount, stat=istat)
             if (istat == 0) call realloc(lossCoeff, lossCoeffCount, stat=istat)
-            if (istat .ne. 0) then
+            if (istat /= 0) then
                call SetMessage(LEVEL_ERROR, 'Reading Culvert: Error Allocating Valve Loss Arrays')
                success = .false.
             endif
@@ -887,10 +892,8 @@ module m_readstructures
          endif
          
       else
-         
          culvert%has_valve = .false.
          culvert%valveOpening = 0.0d0
-         
       endif
    
    end subroutine readCulvert
