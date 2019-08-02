@@ -20392,17 +20392,7 @@ end subroutine unc_write_shp
     if (allocated(dxe) .and. ja1D == 1) then
        LL = ln2lne(L)
        if (dxe(LL) /= dmiss) then
-          if (L <= lnxi) then
-             dx(L) = dxe(LL)
-          else ! Boundary link
-             if (izbndpos == 0) then                      ! full grid cell outward
-                dx(L) = dxe(LL)
-             else if (izbndpos == 1) then                 ! half a grid cell outward
-                dx(L) = .5d0*dxe(LL)
-             else ! izbndpos==2                           ! on specified boundary polyline
-                continue ! nowhere supported yet
-             end if
-          end if
+          dx(L) = dxe(LL) ! NOTE: also see izbndpos correction after this loop
        end if
     end if
 
@@ -20435,6 +20425,23 @@ end subroutine unc_write_shp
 
     csu(L) = rn ; snu(L) = rt
  enddo
+ 
+ if (allocated(dxe) .and. izbndpos /= 0) then
+    ! Optionally fix dx for waterlevel type boundaries affected by izbndpos
+    do k = 1, nbndz
+       L  = kez(k)
+       Lf = lne2ln(L)
+       if (dxe(L) /= dmiss .and. L <= numl1d) then ! 1D Boundary
+          if (izbndpos == 0) then                      ! full grid cell outward
+             dx(Lf) = dxe(L)
+          else if (izbndpos == 1) then                 ! half a grid cell outward
+             dx(Lf) = .5d0*dxe(L)
+          else ! izbndpos==2                           ! on specified boundary polyline
+             continue ! nowhere supported yet
+          end if
+       end if
+    end do
+ end if
 
  ! end of first phase
  if ( iphase.eq.1 ) then
