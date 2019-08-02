@@ -34114,7 +34114,7 @@ end subroutine setbobs_fixedweirs
                    wu(L) = as1/dpt
                    dpt = max(epshu, s1(k2) - bob0(2,L))
                    call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
-                   ! WU(L) is the average width at the bridge. 
+                   ! WU(L) is the average width at the bridge (max of up/downstream side). 
                    wu(L) = max(wu(L), as2/dpt)
                    call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
                             as1, as2, bob(:,L))
