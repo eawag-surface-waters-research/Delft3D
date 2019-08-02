@@ -701,7 +701,8 @@ module m_readstructures
       if (success) call prop_get_integer(md_ptr, 'structure', 'allowedflowdir', weir%allowedflowdir, success)
 
    end subroutine readWeir
-   
+
+
    !> Read specific data for the universal weir structure.
    !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readUniversalWeir(uniweir, md_ptr, st_id, success)
@@ -735,13 +736,13 @@ module m_readstructures
       call prop_get_double(md_ptr, '', 'freeSubMergedFactor', uniweir%freesubmergedfactor)
       
       call prop_get_integer(md_ptr, '', 'numLevels', uniweir%yzcount, success1) 
-      success = success .and. check_input_result(success1, st_id, 'allowedFlowDir')
+      success = success .and. check_input_result(success1, st_id, 'numLevels')
 
       if (success) then
          call realloc(uniweir%y, uniweir%yzcount, stat=istat)
          if (istat == 0) call realloc(uniweir%z, uniweir%yzcount, stat=istat)
          if (istat .ne. 0) then
-            call SetMessage(LEVEL_ERROR, 'Reading Universal Weir: '''//trim(st_id)//''' Error Allocating Y/Z Arrays')
+            call SetMessage(LEVEL_ERROR, 'Reading Universal Weir: '''//trim(st_id)//'''. Error Allocating Y/Z Arrays')
             success = .false.
             return
          endif
@@ -753,8 +754,8 @@ module m_readstructures
          success = success .and. check_input_result(success1, st_id, 'zValues')
       endif
       
-      ! The z-values contains a relative height with respect to the crest level
-      ! As a result the minimal value for Z is 0.
+      ! The z-values contains a relative height with respect to the crest level.
+      ! As a result the minimal value for Z must be 0. Shift-user-specified values to 0.
       lowestz = huge(1d0)
       do i = 1, uniweir%yzcount
          lowestz = min(lowestz, uniweir%z(i))
@@ -764,7 +765,8 @@ module m_readstructures
       enddo
 
    end subroutine readUniversalWeir
-   
+
+
    !> Read the culvert specific data.
    !! The common fields for the structure (e.g. branchId) must have been read elsewhere.
    subroutine readCulvert(culvert, network, md_ptr, st_id, forcinglist, success)
