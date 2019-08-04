@@ -5308,23 +5308,7 @@ implicit none
 end module dfm_error
 
 module m_strucs
-
-integer, public, parameter               :: ST_UNSET      = -1
-integer, public, parameter               :: ST_RIVER_WEIR = 5
-integer, public, parameter               :: ST_ADV_WEIR   = 6
-integer, public, parameter               :: ST_DATABASE_ST= 7
-integer, public, parameter               :: ST_PUMP       = 4
-integer, public, parameter               :: ST_GENERAL_ST = 8
-integer, public, parameter               :: ST_WEIR       = 2
-integer, public, parameter               :: ST_ORIFICE    = 3
-integer, public, parameter               :: ST_CULVERT    = 21
-integer, public, parameter               :: ST_SIPHON     = 22
-integer, public, parameter               :: ST_INV_SIPHON = 23
-integer, public, parameter               :: ST_UNI_WEIR   = 11
-integer, public, parameter               :: ST_BRIDGE     = 32
-integer, public, parameter               :: ST_DAMBREAK   = 13
-integer, public, parameter               :: ST_MAX_TYPE   = 32 !< Max id of structure types. The preceding ids must be lower than this.
-
+use m_GlobalParameters
 integer                                  :: nstru               !< total nr of structures
 
 integer                                  :: mxgeneral           !< total nr of general structures
@@ -5355,7 +5339,6 @@ double precision, allocatable            :: strhis(:,:)         !< For all struc
 
 double precision, allocatable            :: strhis2(:,:)        !< holds values of strhis of step n-1
 
-double precision                         :: strucalfa = 0.9d0   !< 0.9d0 relaxf
 
 type tgeneralstruc
    double precision                      :: widthleftW1         !< this and following: see Sobek manual

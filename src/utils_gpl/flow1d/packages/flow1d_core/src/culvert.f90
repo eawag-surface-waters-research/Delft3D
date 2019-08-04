@@ -46,7 +46,7 @@ module m_Culvert
    end interface dealloc
    
    type, public :: t_culvert
-      integer                         :: culvertType           !< ST_CULVERT, ST_SIPHON or ST_INV_SIPHON
+      integer                         :: culvertType           !< ST_CULVERT
       double precision                :: leftlevel             !< left invert level of culvert
       double precision                :: rightlevel            !< right invert level of culvert
       type(t_crosssection), pointer   :: pcross => null()      !< pointer to cross section of culvert
@@ -165,19 +165,9 @@ contains
       double precision               :: totalLoss
 
       ! Culvert Type
-      if (culvert%culvertType == ST_SIPHON) then
-         IsCulvert        = .false.
-         IsSiphon         = .true.
-         IsInvertedSiphon = .false.
-      elseif (culvert%culvertType == ST_INV_SIPHON) then
-         IsCulvert        = .false.
-         IsSiphon         = .false.
-         IsInvertedSiphon = .true.
-      else
-         IsCulvert        = .true.
-         IsSiphon         = .false.
-         IsInvertedSiphon = .false.
-      endif
+      IsCulvert        = .true.
+      IsSiphon         = .false.
+      IsInvertedSiphon = .false.
 
       ! Find the flow direction
       if (s1m1 > s1m2) then

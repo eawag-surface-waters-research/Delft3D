@@ -1335,12 +1335,6 @@ if (network%loaded) then
             call drawTriangle(x, y, icon_rw_size, ncoldarkgreen, ncolblack, active)
          case (ST_CULVERT)
             call drawTriangle(x, y, icon_rw_size, ncolmaroon, ncolblack, active)      
-         case (ST_SIPHON)
-            ! Same icon as culvert.
-            call drawTriangle(x, y, icon_rw_size, ncolmaroon, ncolblack, active)
-         case (ST_INV_SIPHON)
-            ! Same icon as culvert.
-            call drawTriangle(x, y, icon_rw_size, ncolmaroon, ncolblack, active)
          case (ST_UNI_WEIR)
             call drawTriangle(x, y, icon_rw_size, ncolgray, ncolblack, active)
          case (ST_BRIDGE)

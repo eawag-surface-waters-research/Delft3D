@@ -149,15 +149,13 @@ module m_GlobalParameters
    integer, public, parameter              :: ST_ORIFICE    =  3
    integer, public, parameter              :: ST_PUMP       =  4
    integer, public, parameter              :: ST_GATE       =  5
-   integer, public, parameter              :: ST_GENERAL_ST =  8
-   integer, public, parameter              :: ST_EXTRA_RES  =  9
-   integer, public, parameter              :: ST_UNI_WEIR   = 11
-   integer, public, parameter              :: ST_DAMBREAK   = 13
-   integer, public, parameter              :: ST_CULVERT    = 21
-   integer, public, parameter              :: ST_SIPHON     = 22
-   integer, public, parameter              :: ST_INV_SIPHON = 23
-   integer, public, parameter              :: ST_BRIDGE     = 32
-   integer, public, parameter              :: ST_MAX_TYPE   = 32 !< Max id of structure types. The preceding ids must be lower than this.
+   integer, public, parameter              :: ST_GENERAL_ST =  6
+   integer, public, parameter              :: ST_UNI_WEIR   =  7
+   integer, public, parameter              :: ST_DAMBREAK   =  8
+   integer, public, parameter              :: ST_CULVERT    =  9
+   integer, public, parameter              :: ST_BRIDGE     = 10
+   integer, public, parameter              :: ST_COMPOUND   = 11
+   integer, public, parameter              :: ST_MAX_TYPE   = 11 !< Max id of structure types. The preceding ids must be lower than this.
 
    ! Flow geometry / computational grid
    integer, public, parameter              :: INDTP_1D      = 1  !< Type code for flow nodes that are 1D
