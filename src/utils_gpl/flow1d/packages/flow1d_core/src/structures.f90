@@ -146,7 +146,6 @@ module m_1d_structures
       integer, pointer, dimension(:)   :: linknumbers    !< link numbers of structure (length = numlinks)
     
       integer                          :: compound
-      character(IdLen)                 :: compoundName = ' '
       type(t_weir), pointer            :: weir => null()
       type(t_orifice), pointer         :: orifice => null()
       type(t_pump), pointer            :: pump => null()
@@ -172,6 +171,7 @@ module m_1d_structures
       type(t_hashlist)                                      :: hashlist_culvert
       type(t_hashlist)                                      :: hashlist_bridge
       type(t_hashlist)                                      :: hashlist_pump
+      type(t_hashlist)                                      :: hashlist_structure
       integer                                               :: numWeirs                 !< Total number of weirs in this structure set. See indices array below.
       integer                                               :: numCulverts              !< Total number of culverts in this structure set. See indices array below.
       integer                                               :: numPumps                 !< Total number of pumps in this structure set. See indices array below.
@@ -189,23 +189,11 @@ module m_1d_structures
    end type t_structureSet
 
    type, public :: t_compound
-      character(IdLen)               :: id
-      character(IdLen)               :: compoundName
-      integer nrstruc
-      !    integer, dimension(:), pointer :: struct ! vooralsnog niet nodig
-      integer gridpoint1
-      integer gridpoint2
-      integer istru               !< help variable to remove compounds with one structure
-      logical cleared             ! To Check if compound is still cleared
-      double precision totalDischarge
-      double precision elementDischarge      !< contains the discharge of the first element of the compound structure (which is located on the branch link of the network)
-      double precision totalVelocity
-      double precision elementVelocity       !< contains the velocity of the first element of the compound structure (which is located on the branch link of the network)
-      double precision water_level_up
-      double precision water_level_down
-      double precision head
-      double precision difu
-      double precision area
+      character(IdLen)                   :: id
+      character(IdLen)                   :: Name
+      integer                            :: nrstruc
+      integer, dimension(:), allocatable :: link_numbers
+      integer, dimension(:), allocatable :: structure_indices  
    end type t_compound
 
    type, public :: t_compoundSet
@@ -309,8 +297,7 @@ module m_1d_structures
       sts%struct(i)%linknumbers(1)     = linknumber
       sts%struct(i)%chainage           = chainage
       sts%struct(i)%compound           = icompound
-      sts%struct(i)%compoundName       = compoundName
-      sts%struct(i)%type            = structureType
+      sts%struct(i)%type               = structureType
       if (present(x) .and. present(y)) then
          sts%struct(i)%xCoordinates(1) = x
          sts%struct(i)%yCoordinates(1) = y
@@ -557,7 +544,7 @@ end subroutine
       type(t_structure) :: pstru
 
       select case (pstru%type)
-      case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+      case (ST_CULVERT)
           res = interpolate(pstru%culvert%lossCoeff, x)
       case default
           res = 0.0d0
@@ -574,7 +561,7 @@ end subroutine
       integer           :: icross
 
       select case(sts%struct(istru)%type)
-         case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+         case (ST_CULVERT)
             icross = sts%struct(istru)%culvert%crosssectionnr
          case (ST_BRIDGE)
             icross = sts%struct(istru)%bridge%crosssectionnr
@@ -641,7 +628,7 @@ end subroutine
           case default
              SetValueStruc = .false.
           end select
-       case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+       case (ST_CULVERT)
           if (iparam==CFiValveOpening) then
              sts%struct(istru)%culvert%valveOpening=value
           else
@@ -722,8 +709,6 @@ end subroutine
            if (iparam == CFiCrestLevel)         getValueStruc = sts%struct(istru)%orifice%crestlevel
            if (iparam == CFiGateLowerEdgeLevel) getValueStruc = sts%struct(istru)%orifice%openlevel
            if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%orifice%openlevel - sts%struct(istru)%orifice%crestlevel
-       case (ST_SIPHON, ST_INV_SIPHON)
-           if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%orifice%openlevel - sts%struct(istru)%orifice%crestlevel
        case (ST_PUMP)
            getValueStruc = sts%struct(istru)%pump%capacitySetpoint
            if (sts%struct(istru)%pump%capacity(1)*getValueStruc < -1e-6) then
@@ -768,7 +753,7 @@ end subroutine
       ! since the cross section list is now sorted the locations are changed
       do i = 1, sts%count
          select case(sts%struct(i)%type)
-            case(ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+            case(ST_CULVERT)
                if (sts%struct(i)%culvert%crosssectionnr > 0) then
                   sts%struct(i)%culvert%crosssectionnr = crs%crossSectionIndex(sts%struct(i)%culvert%crosssectionnr)
                   sts%struct(i)%culvert%pcross => crs%cross(sts%struct(i)%culvert%crosssectionnr)
@@ -830,16 +815,14 @@ end subroutine
          GetStrucType_from_string = ST_GATE
       case ('culvert')
          GetStrucType_from_string = ST_CULVERT
-      case ('siphon')
-         GetStrucType_from_string = ST_SIPHON
-      case ('inverted_siphon')
-         GetStrucType_from_string = ST_INV_SIPHON
       case ('universalweir')
          GetStrucType_from_string = ST_UNI_WEIR
       case ('dambreak')
          GetStrucType_from_string = ST_DAMBREAK
       case ('bridge')
          GetStrucType_from_string = ST_BRIDGE
+      case ('compound')
+         GetStrucType_from_string = ST_COMPOUND
       case default
          GetStrucType_from_string = -1
       end select
@@ -864,10 +847,6 @@ end subroutine
             strng = 'gate'
          case (ST_CULVERT)
             strng = 'culvert'
-         case (ST_SIPHON)
-            strng = 'siphon'
-         case (ST_INV_SIPHON)
-            strng = 'inverted_siphon'
          case (ST_UNI_WEIR)
             strng = 'universal_weir'
          case (ST_DAMBREAK)
@@ -906,7 +885,7 @@ end subroutine
              get_crest_level = struc%uniweir%crestlevel
           case (ST_ORIFICE)
              get_crest_level = struc%orifice%crestlevel
-          case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+          case (ST_CULVERT)
              get_crest_level = max(struc%culvert%leftlevel, struc%culvert%rightlevel)
           case (ST_PUMP)
              get_crest_level = huge(1d0)
@@ -1000,7 +979,7 @@ end subroutine
       type (t_structure), intent(inout) :: struc
       
       select case(struc%type)
-      case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+      case (ST_CULVERT)
          get_valve_opening = struc%culvert%valveOpening
       end select
    end function get_valve_opening
@@ -1014,6 +993,7 @@ end subroutine
       character(len=idlen), dimension(:), pointer  :: ids_culvert
       character(len=idlen), dimension(:), pointer  :: ids_bridge
       character(len=idlen), dimension(:), pointer  :: ids_pump
+      character(len=idlen), dimension(:), pointer  :: ids_structure
       
       if (sts%Count <= 0) return    ! Nothing to hash
       
@@ -1021,28 +1001,32 @@ end subroutine
       allocate(sts%hashlist_culvert%id_list(sts%Count))
       allocate(sts%hashlist_bridge%id_list(sts%Count))
       allocate(sts%hashlist_pump%id_list(sts%Count))
+      allocate(sts%hashlist_structure%id_list(sts%Count))
       
       sts%hashlist_weir%id_count = sts%Count
       sts%hashlist_culvert%id_count = sts%Count
       sts%hashlist_bridge%id_count = sts%Count
       sts%hashlist_pump%id_count = sts%Count
+      sts%hashlist_structure%id_count = sts%Count
       
       ids_weir => sts%hashlist_weir%id_list
       ids_culvert => sts%hashlist_culvert%id_list
       ids_bridge => sts%hashlist_bridge%id_list
       ids_pump => sts%hashlist_pump%id_list
-      
+      ids_structure => sts%hashlist_structure%id_list
       ids_weir    = ' '
       ids_culvert = ' '
       ids_bridge  = ' '
       ids_pump    = ' '
+      ids_structure = ' '
       
       
       do ist = 1, sts%count
+         ids_structure(ist) = sts%struct(ist)%id
          select case(sts%struct(ist)%type)
          case (ST_WEIR, ST_ORIFICE,ST_GENERAL_ST, ST_UNI_WEIR)
             ids_weir(ist) = sts%struct(ist)%id
-         case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+         case (ST_CULVERT)
             ids_culvert(ist) = sts%struct(ist)%id
          case (ST_BRIDGE)
             ids_bridge(ist) = sts%struct(ist)%id
@@ -1055,6 +1039,7 @@ end subroutine
       call hashfill(sts%hashlist_culvert)
       call hashfill(sts%hashlist_bridge )
       call hashfill(sts%hashlist_pump   )
+      call hashfill(sts%hashlist_structure   )
       
    end subroutine fill_hashtable_sts
    
@@ -1124,7 +1109,7 @@ end subroutine
       double precision, intent(in)      :: value
       
       select case(struc%type)
-      case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+      case (ST_CULVERT)
          struc%culvert%valveOpening=value
       end select
    end subroutine set_valve_opening

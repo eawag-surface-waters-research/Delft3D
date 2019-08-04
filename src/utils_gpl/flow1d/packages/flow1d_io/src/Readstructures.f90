@@ -97,7 +97,7 @@ module m_readstructures
       type(tree_data), pointer                               :: md_ptr 
       integer                                                :: istat
       integer                                                :: numstr
-      integer                                                :: i
+      integer                                                :: i, j
       character(len=IdLen)                                   :: str_buf
 
       character(len=IdLen)                                   :: typestr
@@ -108,17 +108,19 @@ module m_readstructures
 
       integer                                                :: iCompound
       character(len=IdLen)                                   :: compoundName
-      character(len=IdLen), allocatable, dimension(:)        :: compoundNames
+      character(len=IdLen), allocatable, dimension(:)        :: structureNames
       
       integer                                                :: iStrucType
       integer                                                :: istru
       type(t_structure), pointer                             :: pstru
+      type(t_compound), pointer                              :: pcompound
       integer                                                :: nweir
       integer                                                :: nculvert
       integer                                                :: norifice
       integer                                                :: ngenstru
       integer                                                :: nbridge
       integer                                                :: ngate
+      integer                                                :: numStructures
 
       integer                                                :: pos
       integer                                                :: ibin = 0
@@ -191,10 +193,18 @@ module m_readstructures
             pstru%name = pstru%id
             call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'name', pstru%name)
             
-            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'branchId', branchID, success1)
-            success = success .and. check_input_result(success1, st_id, 'branchId')
+            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success1)
+            success = success .and. check_input_result(success1, st_id, 'type')
+      
+            iStrucType = GetStrucType_from_string(typestr)
+            pstru%type = iStrucType
+            if (iStrucType == ST_COMPOUND) then
+               ! compound structures are processed later on
+               cycle
+            endif
             
-            call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', pstru%chainage, success1)
+            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'branchId', branchID, success1)
+            if (success1) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', pstru%chainage, success1)
 
             pstru%numCoordinates = 0
             if (success1) then
@@ -220,12 +230,7 @@ module m_readstructures
                endif
             endif
             
-            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success1)
-            success = success .and. check_input_result(success1, st_id, 'type')
-      
-            iStrucType = GetStrucType_from_string(typestr)
-            pstru%type = iStrucType
-
+            pstru%compound = 0
             if (.not. success) then
                ! Error(s) found while scanning the structuretype independend stuff. Do not read the type dependend items
                cycle
@@ -259,6 +264,9 @@ module m_readstructures
                endif
             case (ST_GENERAL_ST)
                call readGeneralStructure(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
+            case (ST_COMPOUND)
+               ! skip the compound structures for now
+               continue
             case default
                call setmessage(LEVEL_ERROR,  'Structure type: '//trim(typestr)//' not supported, see '//trim(pstru%id))
                success = .false.
@@ -340,6 +348,56 @@ module m_readstructures
          network%sts%restartData = missingValue
       endif
 
+      allocate(structureNames(network%sts%count))
+      do i = 1, numstr
+         
+         if (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Structure')) then
+            typestr = ''
+            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr)
+            iStrucType = GetStrucType_from_string(typestr)
+            if (iStrucType.ne. ST_COMPOUND) then
+               cycle
+            endif
+            
+            if (network%cmps%count+1 > network%cmps%Size) then
+               call realloc(network%cmps)
+            endif
+
+            pcompound => network%cmps%compound(network%cmps%count+1)
+            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'id', st_id, success1)
+            success = success .and. check_input_result(success1, '?', 'id')
+            pcompound%id = st_id
+            pcompound%name = pcompound%id
+            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'name', pcompound%name)
+            
+            call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'numStructures', pcompound%nrstruc, success1)
+            success = success .and. check_input_result(success1, st_id, 'numStructures')
+
+            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'structureIds', pcompound%nrstruc, structureNames, success1)
+            success = success .and. check_input_result(success1, st_id, 'numStructures')
+            if (.not. success) then
+               ! Stop processing this structure
+               cycle
+            endif
+            
+            allocate(pcompound%structure_indices(pcompound%nrstruc))
+            do j = 1, pcompound%nrstruc
+               pcompound%structure_indices(j) = hashsearch(network%sts%hashlist_structure, structureNames(j))
+               network%sts%struct(pcompound%structure_indices(j))%compound = pcompound%nrstruc
+               
+               if (pcompound%structure_indices(j) <=0) then
+                  msgbuf = 'Error reading compound structure '''// trim(st_id) // ''' structure '''//trim(structureNames(j))//''' was not found.'
+                  success = .false.
+               endif
+            enddo
+            if (success) then
+               network%cmps%Count = network%cmps%Count + 1
+            endif
+         endif
+      enddo
+
+         
+      deallocate(structureNames)
 999   continue
       call tree_destroy(md_ptr)
 
@@ -376,7 +434,6 @@ module m_readstructures
          read(ibin) pstr%yCoordinates(1)
          read(ibin) pstr%chainage
          read(ibin) pstr%compound
-         read(ibin) pstr%compoundName
          
          select case(pstr%type)
             case(ST_WEIR)
@@ -438,7 +495,7 @@ module m_readstructures
                pstr%pump%ds_level          = 0.0d0
                pstr%pump%stage_capacity    = 0.0d0
             
-            case(ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+            case(ST_CULVERT)
                allocate(pstr%culvert)
                read(ibin) pstr%culvert%culvertType
                read(ibin) pstr%culvert%leftlevel
@@ -514,11 +571,6 @@ module m_readstructures
                read(ibin) pstr%generalst%mugf_neg
                read(ibin) pstr%generalst%extraresistance
             
-            case(ST_EXTRA_RES)
-               allocate(pstr%extrares)
-               read(ibin) pstr%extrares%erType
-               call read_table_cache(ibin, pstr%extrares%values)
-            
          end select
       
       enddo
@@ -565,7 +617,6 @@ module m_readstructures
          write(ibin) pstr%yCoordinates(1)
          write(ibin) pstr%chainage
          write(ibin) pstr%compound
-         write(ibin) pstr%compoundName
          
          select case(pstr%type)
             case(ST_WEIR)
@@ -603,7 +654,7 @@ module m_readstructures
             
                call write_table_cache(ibin, pstr%pump%reducfact)
             
-            case(ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
+            case(ST_CULVERT)
                write(ibin) pstr%culvert%culvertType
                write(ibin) pstr%culvert%leftlevel
                write(ibin) pstr%culvert%rightlevel
@@ -667,10 +718,6 @@ module m_readstructures
                write(ibin) pstr%generalst%mugf_neg
                write(ibin) pstr%generalst%extraresistance
 
-            case(ST_EXTRA_RES)
-               write(ibin) pstr%extrares%erType
-               call write_table_cache(ibin, pstr%extrares%values)
-            
          end select
       
       enddo
@@ -1390,7 +1437,7 @@ module m_readstructures
                                                       !< Recommended use: successall = successall .and. check_input_result(success, ..)
 
       if (.not. success) then
-         write (msgbuf, '(a,a,a)') 'Error Reading Structure ''', trim(st_id), ''', ''', trim(key), ''' is missing.'
+         write (msgbuf, '(a,a,a,a,a)') 'Error Reading Structure ''', trim(st_id), ''', ''', trim(key), ''' is missing.'
          call err_flush()
       endif
       res = success
