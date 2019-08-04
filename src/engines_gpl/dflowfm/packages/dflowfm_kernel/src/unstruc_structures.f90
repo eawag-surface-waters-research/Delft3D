@@ -72,6 +72,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (10,:) weir crest width
                                                               !<                      (11,:) weir state (0: closed, 1: free weir, 2: drowned/submerged weir)
                                                               !<                      (12,:) weir force difference per unit width
+                                                              !<                      (13,:) weir counters of partitions for parallel
  double precision, dimension(:,:), allocatable :: valcgen     !< Array for general structure (old ext), (1,:) discharge
  double precision, dimension(:,:), allocatable :: valgenstru  !< Array for general structure (1,:) flow link width, used for averaging.
                                                               !<                      (2,:) discharge through general structure
@@ -95,6 +96,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (20,:) general structure flow area above upper edge level
                                                               !<                      (21,:) general structure velocity through gate opening
                                                               !<                      (22,:) general structure velocity over gate upper edge level
+                                                              !<                      (23,:) general structure counters of partitions for parallel
  double precision, dimension(:,:), allocatable, target :: valdambreak !< Array for dambreak, (1,:) instantanuous, (2,:) cumulative
 
  integer                           :: NUMVALS_PUMP = 11       !< Number of variables for pump
@@ -102,8 +104,8 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
  integer                           :: NUMVALS_CGEN = 4        !< Number of variables for general structure (old ext file)
  integer                           :: NUMVALS_GATEGEN = 9     !< Number of variables for gate (new)
- integer                           :: NUMVALS_WEIRGEN = 12    !< Number of variables for weir
- integer                           :: NUMVALS_GENSTRU = 22    !< Number of variables for general structure( new exe file)
+ integer                           :: NUMVALS_WEIRGEN = 13    !< Number of variables for weir
+ integer                           :: NUMVALS_GENSTRU = 23    !< Number of variables for general structure( new exe file)
  integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
 
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
@@ -272,7 +274,7 @@ end subroutine fill_valstruct_perlink
 !! Note 1: fill_valstructs_perlink must have been called in
 !! a loop prior to calling this averaging routine.
 !! Note 2: if it is a general structure (jagenst == 1), then (6)-(12) are computed as well.
-subroutine average_valstruct(valstruct, jagenst, istru)
+subroutine average_valstruct(valstruct, jagenst, istru, nlinks, icount)
    use m_missing, only: dmiss
    use m_partitioninfo, only: jampi
    use m_1d_structures
@@ -290,11 +292,28 @@ subroutine average_valstruct(valstruct, jagenst, istru)
                                                                 !< (10) crest width (computed)
                                                                 !< (11) state (if all links have the same state, then write it. Otherwise it is missing value)
                                                                 !< (12) force difference per unit width (averaged)
-   integer,                        intent(in   ) :: jagenst     !< a general structure (1) or not (0)
+   integer,                        intent(in   ) :: jagenst     !< a new general structure (1) or not (0)
    integer,                        intent(in   ) :: istru       !< structure index      
+   integer,                        intent(in   ) :: nlinks      !< number of links on the current partition
+   integer,                        intent(in   ) :: icount      !< index of the counter element in valstruct array,
+                                                                !! it is the last element of the array
    
    integer:: i
    type(t_structure), pointer :: pstru
+   
+   if (jagenst == 1 .and. nlinks > 0) then      ! If it is a new general structure, and there are links
+      valstruct(icount) = 1                     ! count the current partition
+      valstruct(9) = get_crest_level(pstru)     ! crest level
+      valstruct(10)= get_width(pstru)           ! crest width
+      ! determine state
+      valstruct(11) = dble(pstru%generalst%state(1))
+      do i = 2, nlinks
+         if (valstruct(11) /= dble(pstru%generalst%state(i))) then
+            valstruct(11) = dmiss
+            exit
+         end if
+      end do
+   end if
    
    if( jampi == 0 ) then
       if(valstruct(1) == 0d0 ) then
@@ -326,18 +345,6 @@ subroutine average_valstruct(valstruct, jagenst, istru)
                valstruct(7) = 0d0
             end if
             valstruct(8) = valstruct(8) / valstruct(1)     ! water level on crest
-            valstruct(9) = get_crest_level(pstru)          ! crest level
-            valstruct(10)= get_width(pstru)                ! crest width
-            
-            ! determine state
-            valstruct(11) = dble(pstru%generalst%state(1))
-            do i = 2, pstru%numlinks
-               if (valstruct(11) /= dble(pstru%generalst%state(i))) then
-                  valstruct(11) = dmiss
-                  exit
-               end if
-            end do
-
             valstruct(12)= valstruct(12)/ valstruct(1)      ! force difference per unit width
             
          end if
@@ -434,7 +441,7 @@ end subroutine fill_others_perlink
 !! where needed taking care of partition models.
 !! Note: fill_others_perlink must have been called in
 !! a loop prior to calling this routine.
-subroutine fill_others(valstruct, istru, L)
+subroutine fill_others(valstruct, istru, L, nlinks, icount)
    use m_General_Structure, only: t_GeneralStructure
    use m_flow, only: hu
    use m_missing, only: dmiss
@@ -465,26 +472,29 @@ subroutine fill_others(valstruct, istru, L)
                                                                 !< (22) velocity over gate upper edge level
    integer,                        intent(in   )   :: L         !< flow link index
    integer,                        intent(in   )   :: istru     !< structure index in network type
-   
+   integer,                        intent(in   )   :: nlinks    !< number of links in the current parition
+   integer,                        intent(in   )   :: icount    !< index of the counter element in valstruct array,
+                                                                !! it is the last element of the array
    type(t_GeneralStructure), pointer :: genstr
    
-   if (jampi == 0) then
+   if (nlinks > 0) then
       genstr => network%sts%struct(istru)%generalst
       valstruct(13) = genstr%gateopeningwidth                  ! gate opening width
       valstruct(14) = genstr%gateLowerEdgeLevel                ! gate lower edge level
       valstruct(15) = valstruct(14) - genstr%zs                ! gate opening height
       valstruct(16) = valstruct(14) + genstr%gatedoorheight    ! gate upper edge level
-      
+      valstruct(icount) = 1
+   end if
+   
+   if (jampi == 0 ) then
       if (valstruct(1) == 0d0) then
          valstruct(13:NUMVALS_GENSTRU) = dmiss
       else
-         if (hu(L) > 0) then
-            if (valstruct(19) > 0) then
-               valstruct(21) = valstruct(21) / valstruct(19) ! velocity through gate opening
-            end if
-            if (valstruct(20) > 0) then
-               valstruct(22) = valstruct(22) / valstruct(20) ! velocity over gate upper edge level
-            end if
+         if (valstruct(19) > 0) then
+            valstruct(21) = valstruct(21) / valstruct(19) ! velocity through gate opening
+         end if
+         if (valstruct(20) > 0) then
+            valstruct(22) = valstruct(22) / valstruct(20) ! velocity over gate upper edge level
          end if
       end if
    end if 

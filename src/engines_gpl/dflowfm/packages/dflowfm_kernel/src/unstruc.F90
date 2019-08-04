@@ -36038,7 +36038,7 @@ if (jahisbal > 0) then
             end if
             call fill_valstruct_perlink(valpump(1:5,n), La, dir, 0, istru, L)
          enddo
-         call average_valstruct(valpump(1:5,n), 0, istru)
+         call average_valstruct(valpump(1:5,n), 0, istru, 0, 0)
          if (istru > 0) then ! TODO: UNST-2587: once all pump code is done, remove this temp IF.
          pstru => network%sts%struct(istru)
          valpump(6,n) = GetPumpCapacity(pstru)
@@ -36229,7 +36229,7 @@ if (jahisbal > 0) then
                dir = sign(1d0,dble(Lf))
                call fill_valstruct_perlink(valweirgen(1:NUMVALS_WEIRGEN,n), La, dir, 1, istru, L)
             enddo
-            call average_valstruct(valweirgen(1:NUMVALS_WEIRGEN,n), 1, istru)
+            call average_valstruct(valweirgen(1:NUMVALS_WEIRGEN,n), 1, istru, nlinks, NUMVALS_WEIRGEN)
          enddo
       else
          ! old weir, do not compute the new extra fileds
@@ -36249,11 +36249,11 @@ if (jahisbal > 0) then
                end if
                call fill_valstruct_perlink(valweirgen(1:5,n), La, dir, 0, 0, 0)
             enddo
-            call average_valstruct(valweirgen(1:5,n), 0, 0)
-            if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
-               !valweirgen(5,n) = 1               ! rank contains the weir.
+            call average_valstruct(valweirgen(1:5,n), 0, 0, 0, 0)
+            if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
+               valweirgen(NUMVALS_WEIRGEN,n) = 1  ! rank contains the weir.
                valweirgen(10,n) = zcgen(3*i  )    ! id_weirgen_crestw.
-               valweirgen(9,n) = zcgen(3*i-2)    ! id_weirgen_cresth.
+               valweirgen(9,n) = zcgen(3*i-2)     ! id_weirgen_cresth.
             end if
          enddo
       end if
@@ -36299,8 +36299,8 @@ if (jahisbal > 0) then
                call fill_valstruct_perlink(valgenstru(1:12,n), La, dir, 1, istru, L)
                call fill_others_perlink(valgenstru(1:NUMVALS_GENSTRU,n), istru, La, L, dir)
             enddo
-            call average_valstruct(valgenstru(1:12,n), 1, istru)
-            call fill_others(valgenstru(1:NUMVALS_GENSTRU,n), istru, La)
+            call average_valstruct(valgenstru(1:12,n), 1, istru, nlinks, NUMVALS_GENSTRU)
+            call fill_others(valgenstru(1:NUMVALS_GENSTRU,n), istru, La, nlinks, NUMVALS_GENSTRU)
          enddo
       else
          ! old general structure, do not compute the new extra fileds
@@ -36320,9 +36320,9 @@ if (jahisbal > 0) then
                end if
               call fill_valstruct_perlink(valgenstru(1:5,n), La, dir, 0, 0, 0)
             enddo
-            call average_valstruct(valgenstru(1:5,n), 0, 0)
-            if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
-               !valgenstru(5,n) = 1               ! rank contains the general structure.
+            call average_valstruct(valgenstru(1:5,n), 0, 0, 0, 0)
+            if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
+               valgenstru(NUMVALS_GENSTRU,n) = 1  ! rank contains the general structure.
                valgenstru(13,n) = zcgen(3*i  )    ! id_genstru_openw.
                valgenstru(14,n) = zcgen(3*i-1)    ! id_genstru_edgel.
                valgenstru(9,n)  = zcgen(3*i-2)    ! id_genstru_cresth.
@@ -36377,18 +36377,33 @@ if (jahisbal > 0) then
             call subsitute_reduce_buffer( valgenstru, ngenstru*NUMVALS_GENSTRU )
             do n = 1,ngenstru
                if( valgenstru(1,n) == 0d0 ) then
-                  valgenstru(2,n) = dmiss
-                  valgenstru(3,n) = dmiss
-                  valgenstru(4,n) = dmiss
-                  valgenstru(6,n) = dmiss
-                  valgenstru(7,n) = dmiss
-                  valgenstru(8,n) = dmiss
+                  valgenstru(2:NUMVALS_GENSTRU,n) = dmiss
                else
-                  valgenstru(3,n) = valgenstru(3,n) / valgenstru(1,n)
-                  valgenstru(4,n) = valgenstru(4,n) / valgenstru(1,n)
-                  valgenstru(6,n) = valgenstru(6,n) / valgenstru(5,n)    ! id_genstru_openw
-                  valgenstru(7,n) = valgenstru(7,n) / valgenstru(5,n)    ! id_genstru_edgel
-                  valgenstru(8,n) = valgenstru(8,n) / valgenstru(5,n)    ! id_genstru_cresth
+                  valgenstru(3,n)  = valgenstru(3,n) / valgenstru(1,n)
+                  valgenstru(4,n)  = valgenstru(4,n) / valgenstru(1,n)
+                  valgenstru(13,n) = valgenstru(13,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_openw
+                  valgenstru(14,n) = valgenstru(14,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_edgel
+                  valgenstru(9,n)  = valgenstru(9,n) / valgenstru(NUMVALS_GENSTRU,n)     ! id_genstru_cresth
+                  valgenstru(11,n) = valgenstru(11,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_stat
+                  if (network%sts%numGeneralStructures > 0) then ! new general structure
+                     valgenstru(5,n)  = valgenstru(5,n) / valgenstru(1,n)
+                     valgenstru(10,n) = valgenstru(10,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_crestw
+                     if (valgenstru(6,n) > 0d0) then
+                        valgenstru(7,n) = valgenstru(2,n) / valgenstru(6,n)  ! velocity
+                     else
+                        valgenstru(7,n) = 0d0
+                     end if
+                     valgenstru(8,n) = valgenstru(8,n) / valgenstru(1,n)     ! water level on crest
+                     valgenstru(12,n)= valgenstru(12,n)/ valgenstru(1,n)      ! force difference per unit width
+                     valgenstru(15,n) = valgenstru(15,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_openw
+                     valgenstru(16,n) = valgenstru(16,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_edgel
+                     if (valgenstru(19,n) > 0) then
+                        valgenstru(21,n) = valgenstru(21,n) / valgenstru(19,n) ! velocity through gate opening
+                     end if
+                     if (valgenstru(20,n) > 0) then
+                        valgenstru(22,n) = valgenstru(22,n) / valgenstru(20,n) ! velocity over gate upper edge level
+                     end if   
+                  end if         
                endif
             enddo
          endif
@@ -36397,16 +36412,24 @@ if (jahisbal > 0) then
             call subsitute_reduce_buffer( valweirgen, nweirgen*NUMVALS_WEIRGEN )
             do n = 1,nweirgen
                if( valweirgen(1,n) == 0d0 ) then
-                  valweirgen(2,n) = dmiss
-                  valweirgen(3,n) = dmiss
-                  valweirgen(4,n) = dmiss
-                  valweirgen(6,n) = dmiss
-                  valweirgen(7,n) = dmiss
+                  valweirgen(2:NUMVALS_WEIRGEN,n) = dmiss
                else
                   valweirgen(3,n) = valweirgen(3,n) / valweirgen(1,n)
                   valweirgen(4,n) = valweirgen(4,n) / valweirgen(1,n)
-                  valweirgen(6,n) = valweirgen(6,n) / valweirgen(5,n)  ! id_weirgen_crestw
-                  valweirgen(7,n) = valweirgen(7,n) / valweirgen(5,n)  ! id_weirgen_cresth
+                  valweirgen(10,n) = valweirgen(10,n) / valweirgen(NUMVALS_WEIRGEN,n)    ! id_weirgen_crestw
+                  valweirgen(9,n) = valweirgen(9,n) / valweirgen(NUMVALS_WEIRGEN,n)      ! id_weirgen_cresth
+                  valgenstru(11,n) = valgenstru(11,n) / valgenstru(NUMVALS_WEIRGEN,n)    ! id_weirgen_stat
+                  if (network%sts%numWeirs > 0) then ! new weir
+                     valweirgen(5,n) = valweirgen(5,n) / valweirgen(1,n)
+                     if (valweirgen(6,n) > 0d0) then
+                        valweirgen(7,n) = valweirgen(2,n) / valweirgen(6,n)  ! velocity
+                     else
+                        valweirgen(7,n) = 0d0
+                     end if
+                     valweirgen(8,n) = valweirgen(8,n) / valweirgen(1,n)     ! water level on crest
+                     valweirgen(12,n)= valweirgen(12,n)/ valweirgen(1,n)      ! force difference per unit width
+                  end if
+                  
                endif
             enddo
          endif
