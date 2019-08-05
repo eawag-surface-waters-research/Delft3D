@@ -1392,7 +1392,7 @@ module m_readstructures
       call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos)
 
       generalst%ws = 1d10
-      call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist)
+      call prop_get_double(md_ptr, '', 'crestWidth',  generalst%ws)
       
       call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, &
                                                        forcinglist, success1)
