@@ -1026,7 +1026,7 @@ subroutine ftnunit_write_html_header
         '   background: red;', &
         '}', &
         'span.green {', &
-        '   background: green;', &
+        '   background: lime;', &
         '}', &
         '</style>', &
         '</header>', &
