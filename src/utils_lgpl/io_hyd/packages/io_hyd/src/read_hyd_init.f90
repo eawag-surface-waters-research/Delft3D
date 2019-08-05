@@ -78,6 +78,10 @@
       hyd%noseg = hyd%nosegl*hyd%nolay
       hyd%noq   = hyd%noq1 + hyd%noq2 + hyd%noq3
 
+      allocate(hyd%depth(hyd%noseg),stat=ierr_alloc)
+      if ( ierr_alloc .ne. 0 ) goto 970
+      hyd%depth = 0.0
+
       if(hyd%geometry .eq. HYD_GEOM_CURVI) then
          ! allocate and read cco file
    
@@ -133,9 +137,6 @@
          call read_hsrf(hyd%file_hsrf, hyd%noseg, hyd%surf )
       endif
 
-      allocate(hyd%depth(hyd%noseg),stat=ierr_alloc)
-      if ( ierr_alloc .ne. 0 ) goto 970
-      hyd%depth = 0.0
       if ( hyd%file_dps%name .ne. ' ' ) then
          call read_srf(hyd%file_dps, hyd%mmax, hyd%nmax, hyd%nosegl, hyd%depth )
       endif
