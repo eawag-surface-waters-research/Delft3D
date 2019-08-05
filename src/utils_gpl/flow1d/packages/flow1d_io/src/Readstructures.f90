@@ -283,62 +283,70 @@ module m_readstructures
       end do
       
       ! Set counters for number of weirs, culverts, etc
-      network%sts%numweirs    = network%sts%countByType(ST_WEIR)
-      network%sts%numculverts = network%sts%countByType(ST_CULVERT)
-      network%sts%numPumps    = network%sts%countByType(ST_PUMP)
-      network%sts%numOrifices = network%sts%countByType(ST_ORIFICE)
-      network%sts%numGates    = network%sts%countByType(ST_GATE)
-      network%sts%numGeneralStructures = network%sts%countByType(ST_GENERAL_ST)
-      allocate(network%sts%weirIndices(network%sts%numweirs))
-      allocate(network%sts%culvertIndices(network%sts%numCulverts))
-      allocate(network%sts%pumpIndices(network%sts%numPumps))
-      allocate(network%sts%orificeIndices(network%sts%numOrifices))
-      allocate(network%sts%gateIndices(network%sts%numGates))
-      allocate(network%sts%bridgeIndices(network%sts%numBridges))
-      allocate(network%sts%generalStructureIndices(network%sts%numGeneralStructures))
+      network%sts%numweirs    = 0
+      network%sts%numculverts = 0
+      network%sts%numPumps    = 0
+      network%sts%numOrifices = 0
+      network%sts%numGates    = 0
+      network%sts%numGeneralStructures = 0
+      if (major ==2) then
+         network%sts%numweirs    = network%sts%countByType(ST_WEIR)
+         network%sts%numculverts = network%sts%countByType(ST_CULVERT)
+         network%sts%numPumps    = network%sts%countByType(ST_PUMP)
+         network%sts%numOrifices = network%sts%countByType(ST_ORIFICE)
+         network%sts%numGates    = network%sts%countByType(ST_GATE)
+         network%sts%numGeneralStructures = network%sts%countByType(ST_GENERAL_ST)
+         allocate(network%sts%weirIndices(network%sts%numweirs))
+         allocate(network%sts%culvertIndices(network%sts%numCulverts))
+         allocate(network%sts%pumpIndices(network%sts%numPumps))
+         allocate(network%sts%orificeIndices(network%sts%numOrifices))
+         allocate(network%sts%gateIndices(network%sts%numGates))
+         allocate(network%sts%bridgeIndices(network%sts%numBridges))
+         allocate(network%sts%generalStructureIndices(network%sts%numGeneralStructures))
       
-      !set structure indices for different structure types
-      nweir = 0
-      nculvert = 0
-      norifice = 0
-      ngenstru = 0
-      nbridge = 0
-      ngate = 0
-      do istru = 1, network%sts%Count
-         select case (network%sts%struct(istru)%type)
-         case (ST_WEIR)
-            nweir = nweir+1
-            network%sts%weirIndices(nweir) = istru
-            ! From now on this is a general structure
-            if (major/=1) then
-              network%sts%struct(istru)%type = ST_GENERAL_ST
-            endif
-         case (ST_CULVERT)
-            nculvert = nculvert + 1
-            network%sts%culvertIndices(nculvert) = istru
-         case (ST_ORIFICE)
-            norifice = norifice + 1
-            network%sts%orificeIndices(norifice) = istru
-            ! From now on this is a general structure
-            if (major/=1) then
-               network%sts%struct(istru)%type = ST_GENERAL_ST
-            endif
-         case (ST_GATE)
-            ngate = ngate + 1
-            network%sts%gateIndices(ngate) = istru
-            ! From now on this is a general structure
-            if (major/=1) then
-               network%sts%struct(istru)%type = ST_GENERAL_ST
-            endif
-         case (ST_BRIDGE)
-            nbridge = nbridge + 1
-            network%sts%bridgeIndices(nbridge) = istru
-         case (ST_GENERAL_ST)
-            ngenstru = ngenstru + 1
-            network%sts%generalStructureIndices(ngenstru) = istru
-         end select
+         !set structure indices for different structure types
+         nweir = 0
+         nculvert = 0
+         norifice = 0
+         ngenstru = 0
+         nbridge = 0
+         ngate = 0
+         do istru = 1, network%sts%Count
+            select case (network%sts%struct(istru)%type)
+            case (ST_WEIR)
+               nweir = nweir+1
+               network%sts%weirIndices(nweir) = istru
+               ! From now on this is a general structure
+               if (major/=1) then
+                 network%sts%struct(istru)%type = ST_GENERAL_ST
+               endif
+            case (ST_CULVERT)
+               nculvert = nculvert + 1
+               network%sts%culvertIndices(nculvert) = istru
+            case (ST_ORIFICE)
+               norifice = norifice + 1
+               network%sts%orificeIndices(norifice) = istru
+               ! From now on this is a general structure
+               if (major/=1) then
+                  network%sts%struct(istru)%type = ST_GENERAL_ST
+               endif
+            case (ST_GATE)
+               ngate = ngate + 1
+               network%sts%gateIndices(ngate) = istru
+               ! From now on this is a general structure
+               if (major/=1) then
+                  network%sts%struct(istru)%type = ST_GENERAL_ST
+               endif
+            case (ST_BRIDGE)
+               nbridge = nbridge + 1
+               network%sts%bridgeIndices(nbridge) = istru
+            case (ST_GENERAL_ST)
+               ngenstru = ngenstru + 1
+               network%sts%generalStructureIndices(ngenstru) = istru
+            end select
          
-      enddo
+         enddo
+      endif
       
       ! fill the hashtable for searching on Id's
       call fill_hashtable(network%sts)

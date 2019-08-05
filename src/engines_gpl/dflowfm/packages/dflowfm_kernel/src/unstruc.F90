@@ -34213,7 +34213,7 @@ end subroutine setbobs_fixedweirs
 
                    wetdown = max(wetdown, 0.0001d0)
                    call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, pstru%generalst%state(L), .true.)
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, state, .true.)
                 case (ST_UNI_WEIR)
                    call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
                        q1(L), q1(L), u1(L), u0(L), dx(L), dts)
