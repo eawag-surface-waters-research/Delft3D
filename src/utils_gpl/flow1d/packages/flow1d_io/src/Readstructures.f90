@@ -1124,15 +1124,21 @@ module m_readstructures
       integer                                      :: istat
       double precision, allocatable, dimension(:)  :: head
       double precision, allocatable, dimension(:)  :: redfac
-      integer :: numcap, numred
+      integer :: numcap, numred, iside
       logical :: success1
-      
-      
+      character(len=IdLen) :: txt
+
       success = .true.
       allocate(pump)
 
-      pump%direction = 1
-      call prop_get_integer(md_ptr, '', 'direction', pump%direction)
+      ! Compute the pump%direction from two parts: orientation and optionally controlSide.
+      txt = 'positive'
+      call prop_get_string(md_ptr, '', 'orientation', txt)
+      pump%direction = orientationToInt(txt) ! will become +1 or -1
+      if (abs(pump%direction) /= 1) then
+         call setMessage(LEVEL_ERROR, 'Error Reading Pump '''//trim(st_id)//''': orientation has invalid value '''//trim(txt)// '''.')
+         success = .false.
+      end if
 
       pump%nrstages = 0
       call prop_get_integer(md_ptr, '', 'numStages', pump%nrstages) ! UNST-2709: new consistent keyword
@@ -1154,22 +1160,34 @@ module m_readstructures
          ! addtimespace gaat qid='pump' gebruiken, de bc provider moet via FM juiste name doorkrijgen (==structureid)
          success = success .and. check_input_result(success1, st_id, 'capacity')
       else
-         ! Multiple stages: only support table with double precision values.
+         ! Stages with control: only support table with double precision values.
          call prop_get_doubles(md_ptr, '', 'capacity', pump%capacity, pump%nrstages, success1)
          success = success .and. check_input_result(success1, st_id, 'capacity')
-      end if
-      if (iabs(pump%direction) == 1 .or. iabs(pump%direction) == 3) then
-         call prop_get_doubles(md_ptr, '', 'startLevelSuctionSide', pump%ss_onlevel, pump%nrstages, success1)
-         success = success .and. check_input_result(success1, st_id, 'startLevelSuctionSide')
-         call prop_get_doubles(md_ptr, '', 'stopLevelSuctionSide', pump%ss_offlevel, pump%nrstages, success1)
-         success = success .and. check_input_result(success1, st_id, 'stopLevelSuctionSide')
-      end if
+
+         txt = '' ! No default controlSide
+         call prop_get_string(md_ptr, '', 'controlSide', txt, success1)
+         success = success .and. check_input_result(success1, st_id, 'controlSide')
+         iside = controlSideToInt(txt) ! will become +1 or -1
+         if (.not. (iside >= 1 .and. iside <= 3)) then
+            call setMessage(LEVEL_ERROR, 'Error Reading Pump '''//trim(st_id)//''': controlSide has invalid value '''//trim(txt)// '''.')
+            success = .false.
+         end if
+
+         pump%direction = pump%direction * iside  ! (+/-1 * 1 or 2 or 3)
+
+         if (iabs(pump%direction) == 1 .or. iabs(pump%direction) == 3) then
+            call prop_get_doubles(md_ptr, '', 'startLevelSuctionSide', pump%ss_onlevel, pump%nrstages, success1)
+            success = success .and. check_input_result(success1, st_id, 'startLevelSuctionSide')
+            call prop_get_doubles(md_ptr, '', 'stopLevelSuctionSide', pump%ss_offlevel, pump%nrstages, success1)
+            success = success .and. check_input_result(success1, st_id, 'stopLevelSuctionSide')
+         end if
       
-      if (iabs(pump%direction) == 2 .or. iabs(pump%direction) == 3) then
-         call prop_get_doubles(md_ptr, '', 'startLevelDeliverySide', pump%ds_onlevel, pump%nrstages, success1)
-         success = success .and. check_input_result(success1, st_id, 'startLevelDeliverySide')
-         call prop_get_doubles(md_ptr, '', 'stopLevelDeliverySide', pump%ds_offlevel, pump%nrstages, success1)
-         success = success .and. check_input_result(success1, st_id, 'stopLevelDeliverySide')
+         if (iabs(pump%direction) == 2 .or. iabs(pump%direction) == 3) then
+            call prop_get_doubles(md_ptr, '', 'startLevelDeliverySide', pump%ds_onlevel, pump%nrstages, success1)
+            success = success .and. check_input_result(success1, st_id, 'startLevelDeliverySide')
+            call prop_get_doubles(md_ptr, '', 'stopLevelDeliverySide', pump%ds_offlevel, pump%nrstages, success1)
+            success = success .and. check_input_result(success1, st_id, 'stopLevelDeliverySide')
+         end if
       end if
       
       if (.not. success) return
@@ -1543,6 +1561,44 @@ module m_readstructures
       call prop_get_double(md_ptr, '', 'extraResistance', generalst%extraresistance)
       
    end subroutine readGeneralStructure
+
+
+   !> Parses a (pump's) orientation string into an integer
+   !! that can be used in its direction field.
+   function orientationToInt(orientationString) result (res)
+      character(len=*), intent(in) :: orientationString !< Orientation value as given in input file.
+      integer                      :: res               !< The returned orientation integer code. +1 for positive, -1 for negative, 0 for invalid input.
+
+      select case(str_tolower(trim(orientationString)))
+      case('positive')
+         res = 1
+      case('negative')
+         res = -1
+      case default
+         res = 0
+      end select
+      
+   end function orientationToInt
+
+
+   !> Parses a (pump's) controlSide string into an integer
+   !! that can be used as part of its direction field.
+   function controlSideToInt(controlSideString) result (res)
+      character(len=*), intent(in) :: controlSideString !< controlSide value as given in input file.
+      integer                      :: res               !< The returned controlSide integer code. 1 for suctionSide, 2 for deliverySide, 3 for both, 0 for invalid input.
+
+      select case(str_tolower(trim(controlSideString)))
+      case('suctionSide')
+         res = 1
+      case('deliverySide')
+         res = 2
+      case('both')
+         res = 3
+      case default
+         res = 0
+      end select
+      
+   end function controlSideToInt
 
 
    integer function  openingDirectionToInt(dirString)
