@@ -194,12 +194,12 @@ module m_1d_structures
    end type t_structureSet
 
    type, public :: t_compound
-      character(IdLen)                   :: id
-      character(IdLen)                   :: name
-      integer                            :: numstructs
-      integer, dimension(:), pointer     :: structure_indices  
-      integer                            :: numlinks
-      integer, dimension(:), pointer     :: linknumbers
+      character(IdLen)                   :: id                    !< Id of the compound structure.
+      character(IdLen)                   :: name                  !< Name of the compound structure.
+      integer                            :: numstructs            !< Number of the structure elements in the compound.
+      integer, dimension(:), pointer     :: structure_indices     !< Indices of the structure elements.
+      integer                            :: numlinks              !< Number of links .
+      integer, dimension(:), pointer     :: linknumbers           !< Link numbers.
    end type t_compound
 
    type, public :: t_compoundSet
@@ -226,9 +226,9 @@ module m_1d_structures
    !> An ordered list of structure forcing items.
    type, public :: t_forcingList
       integer                                :: Size     = 0  !< Current maximum size of the forcing list.
-      integer                                :: growsBy  = 20 !< increment upon each realloc call.
+      integer                                :: growsBy  = 20 !< Increment upon each realloc call.
       integer                                :: Count    = 0  !< Current actual number of items in the forcing list.
-      type(t_forcing), pointer, dimension(:) :: forcing       !< actual forcing list.
+      type(t_forcing), pointer, dimension(:) :: forcing       !< Actual forcing list.
    end type
 
    contains
