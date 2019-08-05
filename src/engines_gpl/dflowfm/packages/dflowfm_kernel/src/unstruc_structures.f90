@@ -98,7 +98,29 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (22,:) general structure velocity over gate upper edge level
                                                               !<                      (23,:) general structure counters of partitions for parallel
  double precision, dimension(:,:), allocatable, target :: valdambreak !< Array for dambreak, (1,:) instantanuous, (2,:) cumulative
-
+ double precision, dimension(:,:), allocatable :: valorifgen  !< Array for orifice (1,:) flow link width, used for averaging.
+                                                              !<                      (2,:) discharge through orifice
+                                                              !<                      (3,:) orifice water level up
+                                                              !<                      (4,:) orifice water level down
+                                                              !<                      (5,:) orifice head
+                                                              !<                      (6,:) orifice flow area
+                                                              !<                      (7,:) orifice velocity
+                                                              !<                      (8,:) orifice water level on crest
+                                                              !<                      (9,:) orifice crest level
+                                                              !<                      (10,:) orifice crest width
+                                                              !<                      (11,:) orifice state (0: closed, 1: free weir, 2: drowned/submerged weir)
+                                                              !<                      (12,:) orifice force difference per unit width
+                                                              !<                      (13,:) orifice gate opening width (not applicable)
+                                                              !<                      (14,:) orifice gate lower edge level
+                                                              !<                      (15,:) orifice gate opening height
+                                                              !<                      (16,:) orifice gate upper edge level (not applicable)
+                                                              !<                      (17,:) orifice discharge through gate opening (not applicable)
+                                                              !<                      (18,:) orifice discharge over gate upper edge level (not applicable)
+                                                              !<                      (19,:) orifice flow area in gate opening (not applicable)
+                                                              !<                      (20,:) orifice flow area above upper edge level (not applicable)
+                                                              !<                      (21,:) orifice velocity through gate opening (not applicable)
+                                                              !<                      (22,:) orifice velocity over gate upper edge level (not applicable)
+                                                              !<                      (23,:) orifice counters of partitions for parallel
  integer                           :: NUMVALS_PUMP = 11       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
@@ -107,14 +129,16 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_WEIRGEN = 13    !< Number of variables for weir
  integer                           :: NUMVALS_GENSTRU = 23    !< Number of variables for general structure( new exe file)
  integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
-
+ integer                           :: NUMVALS_ORIFGEN = 23    !< Number of variables for orific
+ 
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
  integer                           :: jahispump               !< Write pump      parameters to his file, 0: n0, 1: yes
  integer                           :: jahisgate               !< Write gate      parameters to his file, 0: n0, 1: yes
  integer                           :: jahiscdam               !< Write dam       parameters to his file, 0: n0, 1: yes
  integer                           :: jahisweir               !< Write weir      parameters to his file, 0: n0, 1: yes
  integer                           :: jahisdambreak           !< Write dambreak  parameters to his file, 0: n0, 1: yes
-
+ integer                           :: jahisorif               !< Write orifice   parameters to his file, 0: no, 1: yes
+ 
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
  integer, parameter :: IOPENDIR_SYMMETRIC =  0 !< Gate door opens/closes symmetrically (from center).
@@ -147,6 +171,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       jahisgate = 1
       jahiscdam = 1
       jahisweir = 1
+      jahisorif = 1
       jahisdambreak = 1
 
       if( jahispump > 0 .and. npumpsg > 0) then
@@ -192,6 +217,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       if( jahisdambreak > 0 .and. ndambreaksg > 0) then
          if( allocated( valdambreak ) ) deallocate( valdambreak )
          allocate( valdambreak(NUMVALS_DAMBREAK,ndambreaksg) ) ; valdambreak = 0d0
+      endif
+      if( jahisorif > 0 .and. network%sts%numOrifices > 0) then
+         if( allocated( valorifgen) ) deallocate( valorifgen )
+         allocate( valorifgen(NUMVALS_ORIFGEN,network%sts%numOrifices) ) ; valorifgen = 0d0
       endif
 
 ! TIDAL TURBINES: Insert init_turbines here
@@ -301,20 +330,6 @@ subroutine average_valstruct(valstruct, jagenst, istru, nlinks, icount)
    integer:: i
    type(t_structure), pointer :: pstru
    
-   if (jagenst == 1 .and. nlinks > 0) then      ! If it is a new general structure, and there are links
-      valstruct(icount) = 1                     ! count the current partition
-      valstruct(9) = get_crest_level(pstru)     ! crest level
-      valstruct(10)= get_width(pstru)           ! crest width
-      ! determine state
-      valstruct(11) = dble(pstru%generalst%state(1))
-      do i = 2, nlinks
-         if (valstruct(11) /= dble(pstru%generalst%state(i))) then
-            valstruct(11) = dmiss
-            exit
-         end if
-      end do
-   end if
-   
    if( jampi == 0 ) then
       if(valstruct(1) == 0d0 ) then
          valstruct(2) = dmiss  ! discharge
@@ -351,6 +366,19 @@ subroutine average_valstruct(valstruct, jagenst, istru, nlinks, icount)
       endif
    endif
 
+   if (jagenst == 1 .and. nlinks > 0) then      ! If it is a new general structure, and there are links
+      valstruct(icount) = 1                     ! count the current partition
+      valstruct(9) = get_crest_level(pstru)     ! crest level
+      valstruct(10)= get_width(pstru)           ! crest width
+      ! determine state
+      valstruct(11) = dble(pstru%generalst%state(1))
+      do i = 2, nlinks
+         if (valstruct(11) /= dble(pstru%generalst%state(i))) then
+            valstruct(11) = dmiss
+            exit
+         end if
+      end do
+   end if
 end subroutine average_valstruct
 
 !!> Gets force difference per unit width over structure (weir, gate, general structure) per link

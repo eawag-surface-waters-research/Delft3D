@@ -16300,9 +16300,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_sediment
     use m_flowexternalforcings, only: numtracers, trnames
     use m_transport, only: NUMCONST_MDU, ITRA1, ITRAN, ISED1, ISEDN, const_names, const_units, NUMCONST, itemp, isalt
-    use m_structures, only: valcgen, valgenstru, valpump, valgate, valcdam, valgategen, valweirgen, &
-                            jahiscgen, jahispump, jahisgate, jahiscdam, jahisweir, jaoldstr, jahisdambreak, &
-                            valdambreak
+    use m_structures
     use m_particles, only: japart
     use m_fm_wq_processes
     use string_module
@@ -16341,6 +16339,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_genstru_s1up, id_genstru_s1dn, id_genstru_dis_gate_open, id_genstru_dis_gate_upp, id_genstru_openh, id_genstru_uppl,  &
                      id_genstru_vel, id_genstru_au, id_genstru_au_open, id_genstru_au_upp, id_genstru_stat, id_genstru_head,  id_genstru_velgateopen, &
                      id_genstru_velgateupp, id_genstru_s1crest, id_genstru_forcedif, &
+                     id_orifgendim, id_orifgenname, id_orifgen_dis, id_orifgen_cresth, id_orifgen_crestw, id_orifgen_edgel, id_orifgen_stat,  &
+                     id_orifgen_s1dn, id_orifgen_openh, id_orifgen_vel, id_orifgen_au, id_orifgen_s1up, id_orifgen_head, id_orifgen_s1crest, id_orifgen_forcedif,&
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
@@ -17520,6 +17520,87 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_weirgen_s1crest, 'coordinates', 'weirgen_name')
             end if
         endif
+        
+        ! Orifice
+        if(jahisorif > 0 .and. network%sts%numOrifices > 0) then
+            ierr = nf90_def_dim(ihisfile, 'orifice', network%sts%numOrifices, id_orifgendim)
+            ierr = nf90_def_var(ihisfile, 'orifice_name',  nf90_char,   (/ id_strlendim, id_orifgendim /), id_orifgenname)
+            ierr = nf90_put_att(ihisfile, id_orifgenname,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_orifgenname,  'long_name', 'orifice name'    )
+
+            ierr = nf90_def_var(ihisfile, 'orifice_discharge',     nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_dis)
+            ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'long_name', 'orifice discharge')
+            ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'coordinates', 'orifice_name')
+
+            ierr = nf90_def_var(ihisfile, 'orifice_crest_level', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_cresth)
+            ierr = nf90_put_att(ihisfile, id_orifgen_cresth, 'long_name', 'orifice crest level')
+            ierr = nf90_put_att(ihisfile, id_orifgen_cresth, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_cresth, 'coordinates', 'orifice_name')
+
+            ierr = nf90_def_var(ihisfile, 'orifice_crest_width', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_crestw)
+            ierr = nf90_put_att(ihisfile, id_orifgen_crestw, 'long_name', 'orifice crest width')
+            ierr = nf90_put_att(ihisfile, id_orifgen_crestw, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_crestw, 'coordinates', 'orifice_name')
+
+            ierr = nf90_def_var(ihisfile, 'orifice_gate_lower_edge_level', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_edgel)
+            ierr = nf90_put_att(ihisfile, id_orifgen_edgel, 'long_name', 'orifice gate lower edge level')
+            ierr = nf90_put_att(ihisfile, id_orifgen_edgel, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_edgel, 'coordinates', 'orifice_name')
+
+            ierr = nf90_def_var(ihisfile, 'orifice_s1up',     nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_s1up)
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'long_name', 'orifice water level up')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'coordinates', 'orifice_name')
+
+            ierr = nf90_def_var(ihisfile, 'orifice_s1dn',     nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_s1dn)
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'long_name', 'orifice water level down')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'coordinates', 'orifice_name')
+            
+            ierr = nf90_def_var(ihisfile, 'orifice_gate_opening_height', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_openh)
+            ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'long_name', 'orifice gate opening height')
+            ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'coordinates', 'orifice_name')
+            
+            ierr = nf90_def_var(ihisfile, 'orifice_head', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_head)
+            ierr = nf90_put_att(ihisfile, id_orifgen_head, 'long_name', 'orifice head')
+            ierr = nf90_put_att(ihisfile, id_orifgen_head, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_head, 'coordinates', 'orifice_name')
+            
+            ierr = nf90_def_var(ihisfile, 'orifice_flow_area ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_au)
+            ierr = nf90_put_att(ihisfile, id_orifgen_au, 'long_name', 'orifice flow area')
+            ierr = nf90_put_att(ihisfile, id_orifgen_au, 'units', 'm2')
+            ierr = nf90_put_att(ihisfile, id_orifgen_au, 'coordinates', 'orifice_name')
+            
+            ierr = nf90_def_var(ihisfile, 'orifice_state ', nf90_int, (/ id_orifgendim, id_timedim /), id_orifgen_stat)
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'long_name', 'orifice state')
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'units', '-')
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'units', '-')
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'coordinates', 'orifice_name')
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'flag_values', '0, 1, 2, 3, 4')
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'flag_meanings', 'no_flow weir_free weir_submerged gate_free gate_submerged')
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'valid_range', '0, 4')
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, '_FillValue', imiss)
+            
+            ierr = nf90_def_var(ihisfile, 'orifice_s1_on_crest ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_s1crest)
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'long_name', 'orifice water level on crest')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'coordinates', 'orifice_name')
+            
+            ierr = nf90_def_var(ihisfile, 'orifice_velocity ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_vel)
+            ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'long_name', 'orifice velocity')
+            ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'units', 'm s-1')
+            ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'coordinates', 'orifice_name')
+            
+            ierr = nf90_def_var(ihisfile, 'orifice_force_difference ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_forcedif)
+            ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'long_name', 'orifice force difference per unit')
+            ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'units', 'N s-1')
+            ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'coordinates', 'orifice_name')
+        endif
+        
         ! Dambreak
         if (jahisdambreak > 0 .and. ndambreaksg > 0 ) then
 
@@ -17678,6 +17759,14 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_var(ihisfile, id_genstruname,  trim(cgen_ids(igen)),      (/ 1, i /))
             end do
         end if
+        
+        if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
+           do i = 1, network%sts%numOrifices
+              istru = network%sts%orificeIndices(i)
+              ierr = nf90_put_var(ihisfile, id_orifgenname,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
+           end do
+        end if
+        
         if (jahispump > 0 .and. npumpsg > 0) then
             do i=1,npumpsg
                ierr = nf90_put_var(ihisfile, id_pumpname,  trim(pump_ids(i)),      (/ 1, i /))
@@ -18116,6 +18205,24 @@ subroutine unc_write_his(tim)            ! wrihis
          end do
       end if
 
+      if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
+         do i=1,network%sts%numOrifices
+            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_cresth,        valorifgen(9,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_stat,     int(valorifgen(11,i)), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i), (/ i, it_his /))
+         enddo
+      end if
+      
       if (jahisgate > 0 .and. ngatesg > 0) then
          do i=1,ngatesg
             ierr = nf90_put_var(ihisfile, id_gate_dis  , valgate(2,i) , (/ i, it_his /))
@@ -36273,6 +36380,29 @@ if (jahisbal > 0) then
             end if
          enddo
       end if
+      
+      !
+      ! === Orifice
+      !      
+      do n = 1, network%sts%numOrifices
+         valorifgen(1:NUMVALS_ORIFGEN,n) = 0d0
+         istru = network%sts%orificeIndices(n)
+         pstru => network%sts%struct(istru)
+         nlinks = pstru%numlinks
+         do L = 1, nlinks
+            Lf = pstru%linknumbers(L)
+            La = abs( Lf )
+            if( jampi > 0 ) then
+               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+               if ( jaghost.eq.1 ) cycle
+            endif
+            dir = sign(1d0,dble(Lf))
+            call fill_valstruct_perlink(valorifgen(1:12,n), La, dir, 1, istru, L)
+            call fill_others_perlink(valorifgen(1:NUMVALS_ORIFGEN,n), istru, La, L, dir)
+         enddo
+         call average_valstruct(valorifgen(1:NUMVALS_ORIFGEN,n), 1, istru, nlinks, NUMVALS_ORIFGEN)
+         call fill_others(valorifgen(1:NUMVALS_ORIFGEN,n), istru, La, nlinks, NUMVALS_ORIFGEN)
+      enddo
       
       !
       ! ==dambreak

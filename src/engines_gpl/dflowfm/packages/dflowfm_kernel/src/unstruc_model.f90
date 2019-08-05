@@ -1442,6 +1442,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_pump', jahispump, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_gate', jahisgate, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_weir', jahisweir, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_orifice', jahisorif, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_turbulence', jahistur, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_wind', jahiswind, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_rain', jahisrain, success)
@@ -2056,7 +2057,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_fm_wq_processes
     use m_trachy
     use m_transport, only: ITRA1
-    use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir
+    use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir, jahisorif
     use m_sobekdfm,              only : sbkdfm_umin, sbkdfm_umin_method, minimal_1d2d_embankment, sbkdfm_relax
 
     integer, intent(in)  :: mout  !< File pointer where to write to.
@@ -2941,6 +2942,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
         if (writeall .or. jahisweir /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_structure_weir', jahisweir, 'Write weir parameters to his file (1: yes, 0: no)' )
+    endif
+    if (writeall .or. jahisorif /= 1) then
+       call prop_set(prop_ptr, 'output', 'Wrihis_structure_orifice', jahisweir, 'Write orifice parameters to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahistur /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_turbulence', jahistur, 'Write k, eps and vicww to his file (1: yes, 0: no)' )
