@@ -29,10 +29,11 @@ libIOHyd_la_SOURCES = \
          filmod.f90 \
          wstmod.f90 \
          hydmod.f90 \
+         write_waqgeom.f90 \
+         read_waqgeom.f90 \
          hyd_waqgeom_mod_old.f90 \
          hyd_waqgeom_old.f90 \
          aggregate_waqgeom.f90 \
-         read_waqgeom.f90 \
          wrwaqgeomcl.f90 \
          read_atr.f90 \
          read_bnd.f90 \
@@ -51,7 +52,6 @@ libIOHyd_la_SOURCES = \
          merge_domains.f90 \
          set_hyd.f90 \
          write_atr.f90 \
-         write_waqgeom.f90 \
          write_bnd.f90 \
          write_cco.f90 \
          write_data.f90 \
