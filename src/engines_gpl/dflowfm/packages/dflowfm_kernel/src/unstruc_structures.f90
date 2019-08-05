@@ -121,6 +121,13 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (21,:) orifice velocity through gate opening (not applicable)
                                                               !<                      (22,:) orifice velocity over gate upper edge level (not applicable)
                                                               !<                      (23,:) orifice counters of partitions for parallel
+ double precision, dimension(:,:), allocatable :: valbridge   !< Array for bridge;    (1,:) flow link width, used for averaging.
+                                                              !<                      (2,:) discharge through bridge
+                                                              !<                      (3,:) bridge structure water level up
+                                                              !<                      (4,:) bridge structure water level down
+                                                              !<                      (5,:) bridge structure head
+                                                              !<                      (6,:) bridge flow area
+                                                              !<                      (7,:) bridge velocity
  integer                           :: NUMVALS_PUMP = 11       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
@@ -130,6 +137,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_GENSTRU = 23    !< Number of variables for general structure( new exe file)
  integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
  integer                           :: NUMVALS_ORIFGEN = 23    !< Number of variables for orific
+ integer                           :: NUMVALS_BRIDGE  = 7    !< Number of variables for bridge
  
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
  integer                           :: jahispump               !< Write pump      parameters to his file, 0: n0, 1: yes
@@ -138,6 +146,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: jahisweir               !< Write weir      parameters to his file, 0: n0, 1: yes
  integer                           :: jahisdambreak           !< Write dambreak  parameters to his file, 0: n0, 1: yes
  integer                           :: jahisorif               !< Write orifice   parameters to his file, 0: no, 1: yes
+ integer                           :: jahisbridge             !< Write bridge    parameters to his file, 0: no, 1: yes
  
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
@@ -172,6 +181,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       jahiscdam = 1
       jahisweir = 1
       jahisorif = 1
+      jahisbridge   = 1
       jahisdambreak = 1
 
       if( jahispump > 0 .and. npumpsg > 0) then
@@ -221,6 +231,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       if( jahisorif > 0 .and. network%sts%numOrifices > 0) then
          if( allocated( valorifgen) ) deallocate( valorifgen )
          allocate( valorifgen(NUMVALS_ORIFGEN,network%sts%numOrifices) ) ; valorifgen = 0d0
+      endif
+      if( jahisbridge > 0 .and. network%sts%numBridges > 0) then
+         if( allocated( valbridge) ) deallocate( valbridge )
+         allocate( valbridge(NUMVALS_BRIDGE,network%sts%numBridges) ) ; valbridge = 0d0
       endif
 
 ! TIDAL TURBINES: Insert init_turbines here
