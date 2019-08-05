@@ -52,7 +52,6 @@ module m_Universal_Weir
                                                                               !< 1 only positive flow
                                                                               !< 2 only negative flow
                                                                               !< 3 no flow allowed
-      double precision                             :: freesubmergedfactor     !< factor to distinguish between free flow and submerged flow
    end type
 
    interface dealloc
