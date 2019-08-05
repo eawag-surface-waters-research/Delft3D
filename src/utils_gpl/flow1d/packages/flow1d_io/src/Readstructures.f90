@@ -779,9 +779,6 @@ module m_readstructures
       
       uniweir%allowedflowdir = allowedFlowDirToInt(txt)
       
-      uniweir%freesubmergedfactor = 0.667d0
-      call prop_get_double(md_ptr, '', 'freeSubMergedFactor', uniweir%freesubmergedfactor)
-      
       call prop_get_integer(md_ptr, '', 'numLevels', uniweir%yzcount, success1) 
       success = success .and. check_input_result(success1, st_id, 'numLevels')
 
