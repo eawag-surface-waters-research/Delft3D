@@ -49,8 +49,6 @@ subroutine write_waqgeom(hyd, version_full)
        real*8, allocatable           :: xutmp(:)          ! xu
        real*8, allocatable           :: yutmp(:)          ! yu
        integer                       :: nobndl            !  number of boundary links per layer
-       integer                       :: len_geo           ! length of old waqgeom filename
-       character(len=255)            :: new_geom          ! name for new UGRID 1.1 _waqgeom file
 
        ! copy relevant dimensions
 
@@ -170,11 +168,6 @@ subroutine write_waqgeom(hyd, version_full)
        filename = hyd%file_geo%name
        call unc_write_waqgeom(filename, version_full)
        
-       len_geo = len(trim(hyd%file_geo%name))
-       new_geom = hyd%file_geo%name(1:len_geo-11)//'_new'//hyd%file_geo%name(len_geo-10:len_geo)
-
-       call write_waqgeom_ugrid(new_geom, hyd )
-
 end subroutine write_waqgeom
 
 subroutine read_waqgeom(hyd)
@@ -400,7 +393,10 @@ subroutine unc_read_waqgeom_filepointer(igeomfile)
     end if
     if (ierr == nf90_noerr) then
         ierr = nf90_inquire_variable(igeomfile, id_crsvar, name = crs%varname)
-        ierr = nf90_get_var(igeomfile, id_crsvar, crs%epsg_code)
+        ierr = nf90_get_att(igeomfile, id_crsvar, 'epsg', crs%epsg_code)
+        if (ierr /= nf90_noerr) then 
+           ierr = nf90_get_att(igeomfile, id_crsvar, 'EPSG', crs%epsg_code)
+        end if
         ierr = ug_get_var_attset(igeomfile, id_crsvar, crs%attset)
     end if
 
@@ -677,13 +673,14 @@ subroutine check_error(ierr, info)
 end subroutine check_error
 
 !> Write a new waqgeom file, in UGRID-format this time
-subroutine write_waqgeom_ugrid( filename, hyd )
+subroutine write_waqgeom_ugrid( filename, hyd, version_full)
     use hydmod
     use wq_ugrid
     character(len=*)  :: filename
     type(t_hyd)       :: hyd
+    character(len=*)  :: version_full
 
-    call wrwaqgeom( filename, "DDCOUPLEFM 1.1", sferic = .false., epsg = 0, nr_nodes = hyd%numk, &
+    call wrwaqgeom( filename, version_full, sferic = .false., epsg = hyd%crs%epsg_code, nr_nodes = hyd%numk, &
              xk = hyd%xk, yk = hyd%yk, zk = hyd%zk, max_vertex = hyd%nv, nr_elems = hyd%nump, &
              netelem = hyd%netcellnod, nr_edges = hyd%numl, netlink = kn, &
              nr_flowlinks = hyd%lnx, flowlink = ln, xu = hyd%xu, yu = hyd%yu )
@@ -698,8 +695,12 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
       !===============================================================================
       !
 
+      use m_alloc
       use netcdf
       use wq_ugrid
+      use io_netcdf
+      use io_ugrid
+      use m_write_waqgeom
 
       implicit none
 
@@ -718,7 +719,6 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
       integer :: flowlink(2, nr_flowlinks)
       real(hp) :: xu(nr_flowlinks), yu(nr_flowlinks)
 
-      integer :: lundia = 1999
 !
 !           Local variables
 !
@@ -734,130 +734,100 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
       integer :: id_flowlink, id_flowlinkdim, id_flowlinkptsdim, id_flowlinktype, id_flowlinkxu, id_flowlinkyu
       integer :: id_cfdim, id_cfmesh
       integer :: id_facexcrd, id_faceycrd
-      real(hp), dimension(:), allocatable :: xcrd, ycrd
+      real(hp), dimension(:), allocatable :: xcrd, ycrd, zcrd
 
-      type(t_crs) :: crs
+      type(t_ug_meta)     :: meta                      ! netcdf meta data
+      integer             :: conv_type                 ! netcdf convention type
+      real(8)             :: conv_version              ! netcdf convension version
+      type(t_crs)         :: crs                       ! projection code
+      type(t_ug_meshgeom) :: waqgeom                   ! geometry data
+      integer , dimension(:), pointer :: edge_type     ! edge type variable to be written to the NetCDF file.
 
       character(len=20)  :: rundat
       character(len=20)  :: datetime
-      integer            :: iyea, imon, iday, ihou, imin, isec, i100th
+      integer            :: iyea, imon, iday, ihou, imin, isec
       integer            :: i, j, k, nk
+      logical            :: success
 
       !
       !! executable statements -------------------------------------------------------
 
-      call dattim(rundat)
-      datetime = rundat(1:4)//'-'//rundat(6:7)//'-'//rundat(9:10)//','//rundat(11:19)//' '
-      !
+      meta%institution = "Deltares"
+      meta%source = version_full
+      meta%references = "http://www.deltares.nl"
+      conv_type = IONC_CONV_UGRID
+      conv_version = 1.0
+
       ierr = 0
       !
-      ! create or open the file
-      !
-      ierr = nf90_create(filename, 0, igeomfile); call check_error(ierr, "creating file " // trim(filename) )
-      if (ierr/=0) goto 9999
-      !
-      ! global attributes
-      !
-      ierr = ug_addglobalatts(igeomfile, trim(version_full))
 
-      ierr = nf90_def_dim(igeomfile, 'dim'       ,   1, id_cfdim)
-      ierr = nf90_def_var(igeomfile, 'mesh', nf90_int, id_cfdim, id_cfmesh)
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'long_name'             , 'Delft3D FM aggregated mesh')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'cf_role'               , 'mesh_topology')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'topology_dimension'    , 2)
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'node_coordinates'      , 'NetNode_x NetNode_y')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'face_node_connectivity', 'NetElemNode')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'edge_node_connectivity', 'NetLink')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'edge_face_connectivity', 'FlowLink')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'face_dimension        ', 'nNetElem')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'edge_dimension        ', 'nNetLink')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'node_dimension        ', 'nNetNode')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'face_coordinates      ', 'Face_x Face_y')
-      ierr = nf90_put_att(igeomfile, id_cfmesh, 'edge_coordinates      ', 'FlowLink_xu FlowLink_yu')
-      !
-      ! Dimensions
-      !
-      ierr = nf90_def_dim(igeomfile, 'nNetNode'       ,   nr_nodes, id_netnodedim)
-      ierr = nf90_def_dim(igeomfile, 'nNetLink'       ,   nr_edges, id_netlinkdim)
-      ierr = nf90_def_dim(igeomfile, 'nNetLinkPts'    ,          2, id_netlinkptsdim) ! each edges has only a begin and end point
-      ierr = nf90_def_dim(igeomfile, 'nNetElem'       ,   nr_elems, id_netelemdim) ! number of elements
-      ierr = nf90_def_dim(igeomfile, 'nNetElemMaxNode', max_vertex, id_netelemmaxnodedim) ! each element has exactly four vertices
-      !
-      ierr = nf90_def_dim(igeomfile, 'nFlowLink'      , nr_flowlinks, id_flowlinkdim)
-      ierr = nf90_def_dim(igeomfile, 'nFlowLinkPts'   ,            2, id_flowlinkptsdim) ! each flow link has only a begin and end point
-      !
-      ! Coordinates
-      !
-      ierr = ug_add_coordmapping(igeomfile,crs)
-      !
-      ierr = nf90_def_var(igeomfile, 'NetNode_x', nf90_double, id_netnodedim, id_netnodex)
-      ierr = nf90_def_var(igeomfile, 'NetNode_y', nf90_double, id_netnodedim, id_netnodey)
+      ierr = t_ug_meshgeom_destructor(waqgeom)
+      waqgeom%meshname = 'mesh2d'
+      waqgeom%dim = 2
+      waqgeom%numnode = nr_nodes
+      waqgeom%numedge = nr_edges
+      waqgeom%numface = nr_elems
+      waqgeom%maxnumfacenodes = max_vertex
+      waqgeom%start_index = 1
+      waqgeom%epsg = epsg
       crs%epsg_code = epsg
-      ierr = ug_addcoordatts(igeomfile, id_netnodex, id_netnodey, crs)
-      !
-      ierr = nf90_def_var(igeomfile, 'NetNode_z', nf90_double, id_netnodedim, id_netnodez)
-      ierr = nf90_put_att(igeomfile, id_netnodez, 'units',         'm')
-      ierr = nf90_put_att(igeomfile, id_netnodez, 'positive',      'up')
-      ierr = nf90_put_att(igeomfile, id_netnodez, 'standard_name', 'sea_floor_depth')
-      ierr = nf90_put_att(igeomfile, id_netnodez, 'long_name',     'Bottom level at net nodes (flow element''s corners)') !
-      ierr = nf90_put_att(igeomfile, id_netnodez, 'coordinates',   'NetNode_x NetNode_y')
-      !
-      ! Netlinks
-      !
-      ierr = nf90_def_var(igeomfile, 'NetLink', nf90_int, (/ id_netlinkptsdim, id_netlinkdim /) , id_netlink)
-      ierr = nf90_put_att(igeomfile, id_netlink, 'long_name'   ,     'link between two netnodes')
-      ierr = nf90_put_att(igeomfile, id_netlink, 'start_index', 1)
 
-      ! NetElements
-      ierr = nf90_def_var(igeomfile, 'NetElemNode', nf90_int, (/ id_netelemmaxnodedim, id_netelemdim /) , id_netelem)
-      ierr = nf90_put_att(igeomfile, id_netelem, 'long_name'  ,     'Net element defined by nodes')
-      ierr = nf90_put_att(igeomfile, id_netelem, 'start_index', 1)
-      ierr = nf90_put_att(igeomfile, id_netelem, '_FillValue' , 0)
+      call reallocP(waqgeom%edge_nodes, (/2, nr_edges/))
+      do i = 1, nr_edges
+         waqgeom%edge_nodes(1,i) = netlink(1,i)
+         waqgeom%edge_nodes(2,i) = netlink(2,i)
+      end do
 
-      ! FLowlinks
-      ierr = nf90_def_var(igeomfile, 'FlowLink', nf90_int, (/ id_flowlinkptsdim, id_flowlinkdim /) ,   id_flowlink)
-      ierr = nf90_put_att(igeomfile, id_flowlink, 'long_name'    , 'link/interface between two flow elements')
-      ierr = nf90_put_att(igeomfile, id_flowlink, 'start_index', 1)
-      !
-      ierr = nf90_def_var(igeomfile, 'FlowLinkType', nf90_int, (/ id_flowlinkdim /) ,   id_flowlinktype)
-      ierr = nf90_put_att(igeomfile, id_flowlinktype, 'long_name'    ,   'type of flowlink')
-      ierr = nf90_put_att(igeomfile, id_flowlinktype, 'valid_range'  ,   (/ 1, 2 /))
-      ierr = nf90_put_att(igeomfile, id_flowlinktype, 'flag_values'  ,   (/ 1, 2 /))
-      ierr = nf90_put_att(igeomfile, id_flowlinktype, 'flag_meanings', 'link_between_1D_flow_elements link_between_2D_flow_elements')
-      !
-      ierr = nf90_def_var(igeomfile, 'FlowLink_xu',     nf90_double, (/ id_flowlinkdim /) ,   id_flowlinkxu)
-      ierr = nf90_def_var(igeomfile, 'FlowLink_yu',     nf90_double, (/ id_flowlinkdim /) ,   id_flowlinkyu)
-      ierr = ug_addcoordatts(igeomfile, id_flowlinkxu, id_flowlinkyu, crs)
-      ierr = nf90_put_att(igeomfile, id_flowlinkxu, 'long_name'    , 'x-Coordinate of velocity point on flow link.')
-      ierr = nf90_put_att(igeomfile, id_flowlinkyu, 'long_name'    , 'y-Coordinate of velocity point on flow link.')
-      !
-      ierr = nf90_def_var(igeomfile, 'Face_x', nf90_double, (/ id_netelemdim /) , id_facexcrd)
-      ierr = nf90_def_var(igeomfile, 'Face_y', nf90_double, (/ id_netelemdim /) , id_faceycrd)
-      ierr = nf90_put_att(igeomfile, id_facexcrd, 'long_name', 'x-Coordinate of face (element) centre.')
-      ierr = nf90_put_att(igeomfile, id_faceycrd, 'long_name', 'y-Coordinate of face (element) centre.')
-      !
-      ierr = nf90_enddef(igeomfile)
-      !
-      !===================================================================================================================
-      !
-      ! write data
-      !
-      ierr = nf90_put_var(igeomfile, id_netnodex,    xk(1:nr_nodes))
-      ierr = nf90_put_var(igeomfile, id_netnodey,    yk(1:nr_nodes))
-      ierr = nf90_put_var(igeomfile, id_netnodez,    zk(1:nr_nodes))
-      !
-      ierr = nf90_put_var(igeomfile, id_netlink,     netlink, count=(/ 2, nr_edges /))
-      ierr = nf90_put_var(igeomfile, id_netelem,     netelem, count=(/ max_vertex, nr_elems /))
-      !
-      ierr = nf90_put_var(igeomfile, id_flowlink,   flowlink(:,1:nr_flowlinks))
-      ierr = nf90_put_var(igeomfile, id_flowlinkxu, xu(1:nr_flowlinks))
-      ierr = nf90_put_var(igeomfile, id_flowlinkyu, yu(1:nr_flowlinks))
-      !
-      allocate( xcrd(nr_elems), ycrd(nr_elems) )
+      call reallocP(waqgeom%face_nodes, (/max_vertex, nr_elems/))
+      do i = 1, max_vertex
+         do j = 1, nr_elems
+            waqgeom%face_nodes(i, j) = netelem(i, j)
+         end do
+      end do
+
+      call reallocP(waqgeom%edge_faces, (/2, nr_edges/))
+      do i = 1, nr_edges
+         waqgeom%edge_faces(1,i) = -999 ! TODO
+         waqgeom%edge_faces(2,i) = -999 ! TODO
+      end do
+
+      call reallocP(waqgeom%face_edges, (/max_vertex, nr_elems/))
+      do i = 1, max_vertex
+         do j = 1, nr_elems
+            waqgeom%face_edges(i, j) = -999 ! TODO
+         end do
+      end do
+
+      call reallocP(waqgeom%face_links, (/max_vertex, nr_elems/))
+      do i = 1, max_vertex
+         do j = 1, nr_elems
+            waqgeom%face_links(i, j) = -999 ! TODO
+         end do
+      end do
+
+      call reallocP(waqgeom%nodex, nr_nodes)
+      call reallocP(waqgeom%nodey, nr_nodes)
+      call reallocP(waqgeom%nodez, nr_nodes)
+      do i = 1, nr_nodes
+         waqgeom%nodex(i) = xk(i)
+         waqgeom%nodey(i) = yk(i)
+         waqgeom%nodez(i) = zk(i)
+      end do
+
+      call reallocP(waqgeom%edgex, nr_flowlinks)
+      call reallocP(waqgeom%edgey, nr_flowlinks)
+      call reallocP(waqgeom%edgez, nr_flowlinks)
+      do i = 1, nr_flowlinks
+         waqgeom%edgex(i) = xu(i)
+         waqgeom%edgey(i) = yu(i)
+         waqgeom%edgez(i) = -999.0_hp ! TODO
+      end do
+
+      allocate( xcrd(nr_elems), ycrd(nr_elems), zcrd(nr_elems))
       do i = 1,nr_elems
           xcrd(i) = 0.0_hp
           ycrd(i) = 0.0_hp
-
+          zcrd(i) = 0.0_hp
           nk = 0
           do j = 1,max_vertex
               k  = netelem(j,i)
@@ -865,27 +835,35 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
                   nk      = nk + 1
                   xcrd(i) = xcrd(i) + xk(k)
                   ycrd(i) = ycrd(i) + yk(k)
+                  zcrd(i) = zcrd(i) + zk(k)
               endif
           enddo
           if ( nk > 0 ) then
               xcrd(i) = xcrd(i) / nk
               ycrd(i) = ycrd(i) / nk
+              zcrd(i) = zcrd(i) / nk
           else
-              xcrd(i) = -999.0
-              ycrd(i) = -999.0
+              xcrd(i) = -999.0_hp
+              ycrd(i) = -999.0_hp
+              zcrd(i) = -999.0_hp
           endif
       enddo
-
-      ierr = nf90_put_var(igeomfile, id_facexcrd,   xcrd)
-      ierr = nf90_put_var(igeomfile, id_faceycrd,   ycrd)
-
+      call reallocP(waqgeom%facex, nr_elems)
+      call reallocP(waqgeom%facey, nr_elems)
+      call reallocP(waqgeom%facez, nr_elems)
+      do i = 1, nr_elems
+         waqgeom%facex(i) = xcrd(i)
+         waqgeom%facey(i) = ycrd(i)
+         waqgeom%facez(i) = zcrd(i)
+      end do
       deallocate( xcrd, ycrd )
-      !
- 9999 continue
-      ierr = nf90_sync(igeomfile)
-      call check_error( ierr, "sync file " // trim(filename) )
-      ierr = nf90_close(igeomfile)
-      call check_error( ierr, "closing file" // trim(filename) )
+      
+      call reallocP(edge_type, nr_edges)
+      do i = 1, nr_edges
+         edge_type(i) = 0 ! TODO
+      end do
+      
+      success = write_waqgeom_file(filename, meta, crs, waqgeom, edge_type, conv_type, conv_version)
       
 end subroutine wrwaqgeom
 
