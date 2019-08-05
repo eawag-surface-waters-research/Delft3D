@@ -1124,22 +1124,24 @@ module m_readstructures
       
       integer                                      :: tabsize
       integer                                      :: istat
-      double precision, allocatable, dimension(:)  :: head   
-      double precision, allocatable, dimension(:)  :: redfac   
+      double precision, allocatable, dimension(:)  :: head
+      double precision, allocatable, dimension(:)  :: redfac
+      integer :: numcap, numred
+      logical :: success1
       
       
       success = .true.
       allocate(pump)
 
-      call prop_get_integer(md_ptr, '', 'direction', pump%direction, success)
-      pump%nrstages = 1
-      if (success) call prop_get_integer(md_ptr, '', 'numStages', pump%nrstages, success) ! UNST-2709: new consistent keyword
-      
-      if (pump%nrstages < 1) then
-         call setMessage(LEVEL_FATAL, "Error Reading Pump: No Stages Defined")
-      endif
+      pump%direction = 1
+      call prop_get_integer(md_ptr, '', 'direction', pump%direction)
 
-      allocate(pump%capacity(pump%nrstages), stat=istat)
+      pump%nrstages = 0
+      call prop_get_integer(md_ptr, '', 'numStages', pump%nrstages) ! UNST-2709: new consistent keyword
+
+      numcap = max(1, pump%nrstages)
+      allocate(pump%capacity(numcap), stat=istat)
+      ! NOTE: numStages may be 0, but always read at least 1 capacity value.
       if (istat == 0) allocate(pump%ss_onlevel(pump%nrstages), stat=istat)
       if (istat == 0) allocate(pump%ss_offlevel(pump%nrstages), stat=istat)
       if (istat == 0) allocate(pump%ds_onlevel(pump%nrstages), stat=istat)
@@ -1148,24 +1150,29 @@ module m_readstructures
       if (istat == 0) allocate(pump%ds_trigger(pump%nrstages), stat=istat)
 
       
-      if (pump%nrstages == 1) then
-         ! In case of only 1 stage, capacity is either scalar double, or filename, or 'realtime'.
-         call get_value_or_addto_forcinglist(md_ptr, 'capacity', pump%capacity(1), st_id, ST_PUMP, forcinglist, success)
+      if (pump%nrstages == 0) then
+         ! In case of 0 stages, capacity is either scalar double, or filename, or 'realtime'.
+         call get_value_or_addto_forcinglist(md_ptr, 'capacity', pump%capacity(1), st_id, ST_PUMP, forcinglist, success1)
          ! addtimespace gaat qid='pump' gebruiken, de bc provider moet via FM juiste name doorkrijgen (==structureid)
-         
+         success = success .and. check_input_result(success1, st_id, 'capacity')
       else
          ! Multiple stages: only support table with double precision values.
-         call prop_get_doubles(md_ptr, '', 'capacity', pump%capacity, pump%nrstages, success)     
+         call prop_get_doubles(md_ptr, '', 'capacity', pump%capacity, pump%nrstages, success1)
+         success = success .and. check_input_result(success1, st_id, 'capacity')
       end if
       if (iabs(pump%direction) == 1 .or. iabs(pump%direction) == 3) then
-         if (success) call prop_get_doubles(md_ptr, '', 'startLevelSuctionSide', pump%ss_onlevel, pump%nrstages, success)      
-         if (success) call prop_get_doubles(md_ptr, '', 'stopLevelSuctionSide', pump%ss_offlevel, pump%nrstages, success)      
-      endif
+         call prop_get_doubles(md_ptr, '', 'startLevelSuctionSide', pump%ss_onlevel, pump%nrstages, success1)
+         success = success .and. check_input_result(success1, st_id, 'startLevelSuctionSide')
+         call prop_get_doubles(md_ptr, '', 'stopLevelSuctionSide', pump%ss_offlevel, pump%nrstages, success1)
+         success = success .and. check_input_result(success1, st_id, 'stopLevelSuctionSide')
+      end if
       
       if (iabs(pump%direction) == 2 .or. iabs(pump%direction) == 3) then
-         if (success) call prop_get_doubles(md_ptr, '', 'startLevelDeliverySide', pump%ds_onlevel, pump%nrstages, success)      
-         if (success) call prop_get_doubles(md_ptr, '', 'stopLevelDeliverySide', pump%ds_offlevel, pump%nrstages, success)
-      endif
+         call prop_get_doubles(md_ptr, '', 'startLevelDeliverySide', pump%ds_onlevel, pump%nrstages, success1)
+         success = success .and. check_input_result(success1, st_id, 'startLevelDeliverySide')
+         call prop_get_doubles(md_ptr, '', 'stopLevelDeliverySide', pump%ds_offlevel, pump%nrstages, success1)
+         success = success .and. check_input_result(success1, st_id, 'stopLevelDeliverySide')
+      end if
       
       if (.not. success) return
 
@@ -1173,27 +1180,31 @@ module m_readstructures
       pump%ds_trigger = .true.
 
       ! Reduction Table
-      call prop_get_integer(md_ptr, 'structure', 'numReductionLevels', tabsize, success) ! UNST-2709: new consistent keyword
-      if (.not. success .or. tabsize < 1) then
-         tabsize = 1
-      endif
-      
-      call realloc(head, tabsize, stat=istat)
-      if (istat == 0) call realloc(redfac, tabsize, stat=istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Error Reading Pump: Error Allocating Reduction Factor Arrays')
-      endif
+      tabsize = 0
+      call prop_get_integer(md_ptr, '', 'numReductionLevels', tabsize) ! UNST-2709: new consistent keyword
 
-      call prop_get_doubles(md_ptr, '', 'head', head, tabsize, success)
-      if (success)call prop_get_doubles(md_ptr, '', 'reductionFactor', redfac, tabsize, success)
-      if (.not. success .and. tabsize == 1) then
+      numred = max(1, tabsize)
+      call realloc(head, numred, stat=istat)
+      if (istat == 0) call realloc(redfac, numred, stat=istat)
+      if (istat /= 0) then
+         call SetMessage(LEVEL_ERROR, 'Error Reading Pump: Error Allocating Reduction Factor Arrays.')
+         success = .false.
+         return
+      end if
+
+      if (tabsize > 0) then
+         call prop_get_doubles(md_ptr, '', 'head', head, tabsize, success1)
+         success = success .and. check_input_result(success1, st_id, 'head')
+
+         call prop_get_doubles(md_ptr, '', 'reductionFactor', redfac, tabsize, success1)
+         success = success .and. check_input_result(success1, st_id, 'reductionFactor')
+      else
+         ! When no reduction table given in input, always create one dummy entry in table with 100% pump capacity.
+         tabsize   = 1
          head(1)   = 0.0d0
          redfac(1) = 1.0d0
-         success = .true.
-      elseif (.not. success) then
-         call SetMessage(LEVEL_FATAL, 'Error Reading Pump: No Proper Reduction Table')
       endif
-      
+
       call setTable(pump%reducfact, 0, head, redfac, tabsize)
 
       ! Clear Arrays
@@ -1201,7 +1212,7 @@ module m_readstructures
       if (allocated(head)) deallocate(head, stat=istat)
       if (istat == 0 .and. allocated(redfac)) deallocate(redfac, stat=istat)
       if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Error Reading Pump: Error Dellocating Reduction Factor Arrays')
+         call SetMessage(LEVEL_ERROR, 'Error Reading Pump: Error Dellocating Reduction Factor Arrays.')
       endif
       
       ! Initialize Parameters for Pump
@@ -1218,7 +1229,8 @@ module m_readstructures
       pump%stage_capacity    = 0.0d0
       
    end subroutine readPump
-   
+
+
    !> Either retrieve a constant value for parameter KEY, or get the filename for the time series.
    subroutine get_value_or_addto_forcinglist(md_ptr, key, value, st_id, st_type, forcinglist, success)
       type(tree_data), pointer,     intent(in   ) :: md_ptr      !< ini tree pointer with user input.
