@@ -36445,7 +36445,7 @@ if (jahisbal > 0) then
                call fill_valstruct_perlink(valgenstru(1:12,n), La, dir, 1, istru, L)
                call fill_others_perlink(valgenstru(1:NUMVALS_GENSTRU,n), istru, La, L, dir)
             enddo
-            call average_valstruct(valgenstru(1:12,n), 1, istru, nlinks, NUMVALS_GENSTRU)
+            call average_valstruct(valgenstru(1:NUMVALS_GENSTRU,n), 1, istru, nlinks, NUMVALS_GENSTRU)
             call fill_others(valgenstru(1:NUMVALS_GENSTRU,n), istru, La, nlinks, NUMVALS_GENSTRU)
          enddo
       else
