@@ -84,8 +84,10 @@ module m_1d_structures
    public GetPumpCapacity
    public GetPumpStage
    public GetPumpReductionFactor
-   
+   public initialize_compounds
    public initialize_structure
+   public set_fu_ru
+   public computeCompound
 
    public printData
 
@@ -144,6 +146,9 @@ module m_1d_structures
       
       integer                          :: numlinks       !< number of links in structure
       integer, pointer, dimension(:)   :: linknumbers    !< link numbers of structure (length = numlinks)
+      double precision, pointer, dimension(:)   :: fu    !< fu coefficient for momentum equation
+      double precision, pointer, dimension(:)   :: ru    !< ru coefficient for momentum equation
+      double precision, pointer, dimension(:)   :: au    !< flow area
     
       integer                          :: compound
       type(t_weir), pointer            :: weir => null()
@@ -190,10 +195,11 @@ module m_1d_structures
 
    type, public :: t_compound
       character(IdLen)                   :: id
-      character(IdLen)                   :: Name
-      integer                            :: nrstruc
-      integer, dimension(:), allocatable :: link_numbers
-      integer, dimension(:), allocatable :: structure_indices  
+      character(IdLen)                   :: name
+      integer                            :: numstructs
+      integer, dimension(:), pointer     :: structure_indices  
+      integer                            :: numlinks
+      integer, dimension(:), pointer     :: linknumbers
    end type t_compound
 
    type, public :: t_compoundSet
@@ -370,19 +376,25 @@ subroutine deallocstructure(sts)
          if (associated(sts%struct(i)%extrares))   call dealloc(sts%struct(i)%extrares)
          if (associated(sts%struct(i)%xCoordinates)) deallocate(sts%struct(i)%xCoordinates)
          if (associated(sts%struct(i)%yCoordinates)) deallocate(sts%struct(i)%yCoordinates)
-         if (associated(sts%struct(i)%linknumbers )) deallocate(sts%struct(i)%linknumbers )
+         if (associated(sts%struct(i)%linknumbers))  deallocate(sts%struct(i)%linknumbers)
+         if (associated(sts%struct(i)%fu))           deallocate(sts%struct(i)%fu)
+         if (associated(sts%struct(i)%ru))           deallocate(sts%struct(i)%ru)
+         if (associated(sts%struct(i)%au))           deallocate(sts%struct(i)%au)
          
-         sts%struct(i)%weir      => null()
-         sts%struct(i)%orifice   => null()
-         sts%struct(i)%pump      => null()
-         sts%struct(i)%culvert   => null()  
-         sts%struct(i)%uniweir   => null() 
-         sts%struct(i)%bridge    => null() 
-         sts%struct(i)%generalst => null()
-         sts%struct(i)%extrares  => null()
+         sts%struct(i)%weir         => null()
+         sts%struct(i)%orifice      => null()
+         sts%struct(i)%pump         => null()
+         sts%struct(i)%culvert      => null()  
+         sts%struct(i)%uniweir      => null() 
+         sts%struct(i)%bridge       => null() 
+         sts%struct(i)%generalst    => null()
+         sts%struct(i)%extrares     => null()
          sts%struct(i)%xCoordinates => null()
          sts%struct(i)%yCoordinates => null()
          sts%struct(i)%linknumbers  => null()
+         sts%struct(i)%fu           => null()
+         sts%struct(i)%ru           => null()
+         sts%struct(i)%au           => null()
       enddo
       deallocate(sts%struct)
    endif
@@ -414,9 +426,17 @@ subroutine deallocCompound(cmps)
    type(t_compoundSet), intent(inout)          :: cmps
 
    ! Local variables
+   integer  :: length, i
 
    ! Program code
    if (associated(cmps%compound)) then
+      length = cmps%size
+      do i = 1, length
+         if (associated(cmps%compound(i)%structure_indices)) deallocate(cmps%compound(i)%structure_indices)
+         if (associated(cmps%compound(i)%linknumbers))       deallocate(cmps%compound(i)%linknumbers)
+         cmps%compound(i)%structure_indices => null()
+         cmps%compound(i)%linknumbers       => null()
+      enddo
       deallocate(cmps%compound)
    endif
    
@@ -1179,12 +1199,15 @@ end subroutine
       integer, dimension(:),           intent(in   ) :: links
       double precision, dimension(:),  intent(in   ) :: wu
       
-      allocate(struct%linknumbers(numlinks))
+      allocate(struct%linknumbers(numlinks), struct%fu(numlinks), struct%ru(numlinks), struct%au(numlinks))
       struct%numlinks = numlinks
       struct%linknumbers = links(1:numlinks)
+      struct%fu = 0d0
+      struct%ru = 0d0
+      struct%au = 0d0
       
       select case(struct%type)
-      case (ST_GENERAL_ST)
+      case (ST_GENERAL_ST) ! REMARK: for version 2 files weirs, orifices and gates are implemented as general structures
          allocate(struct%generalst%widthcenteronlink(numlinks), struct%generalst%gateclosedfractiononlink(numlinks), struct%generalst%sOnCrest(numlinks), struct%generalst%state(numlinks))
          struct%generalst%sOnCrest(1:numlinks) = 0d0
          struct%generalst%state(1:numlinks) = 0
@@ -1203,5 +1226,86 @@ end subroutine
       end select
 
    end subroutine initialize_structure
+
+   !> Initialize compound structures. Set the link numbers and check if all structures links
+   !! are consistent.
+   subroutine initialize_compounds(cmps, sts)
+      type(t_structureSet), intent(in   )   :: sts    !< Structure set
+      type (t_compoundSet), intent(inout)   :: cmps   !< Compounds set
+      
+      integer :: i, j
+      integer :: L0
+      integer :: istru
+      integer :: numlinks
+      
+      do i = 1, cmps%count
+         istru = cmps%compound(i)%structure_indices(1)
+         numlinks = sts%struct(istru)%numlinks
+         allocate(cmps%compound(i)%linknumbers(numlinks))
+         cmps%compound(i)%linknumbers = sts%struct(istru)%linknumbers
+         cmps%compound(i)%numlinks = numlinks
+         ! now check if other members contain the same links
+         do j = 2, cmps%compound(i)%numstructs
+            istru = cmps%compound(i)%structure_indices(j)
+            if (cmps%compound(i)%numlinks /= sts%struct(istru)%numlinks) then
+               msgbuf = 'Error in compound ''' // trim(cmps%compound(i)%id) //''' the number of links in structure element ''' // &
+                  trim(sts%struct(istru)%id) //''' is different from the first structure element.'
+               call err_flush()
+               cycle
+            endif
+            do L0 = 1, numlinks
+               if (cmps%compound(i)%linknumbers(L0) /= sts%struct(j)%linknumbers(L0)) then
+                  msgbuf = 'Error in compound ''' // trim(cmps%compound(i)%id) //''' the link numbers in structure element ''' // &
+                     trim(sts%struct(istru)%id) //''' is inconsistent with the first structure element.'
+                  call err_flush()
+                  cycle
+               endif
+            enddo
+         enddo
+      enddo
+      
+   end subroutine initialize_compounds
+
+   !> Set fu, ru and au in structure. This subroutine is essential for compound
+   !! structures. Since the compound structure relies on the fact that FU, RU and 
+   !! AU are set.
+   subroutine set_fu_ru(struct, L0, fu, ru, au)
+      type (t_structure) , intent(inout)  :: struct    !< Structure object.
+      integer,             intent(in   )  :: L0        !< Internal link number.
+      double precision,    intent(in   )  :: fu        !< FU coefficient.
+      double precision,    intent(in   )  :: ru        !< RU coefficient.
+      double precision,    intent(in   )  :: au        !< Flow area.
+      
+      struct%fu(L0) = fu
+      struct%ru(L0) = ru
+      struct%au(L0) = au
+   end subroutine set_fu_ru
    
+   !> Compute FU, RU and AU for compound at internal linknumber L0
+   subroutine computeCompound(compound, struct, L0, fu, ru, au)
+      type(t_compound),                intent(in   )  :: compound  !< Compound structure object.
+      type(t_structure), dimension(:), intent(in   )  :: struct    !< Array containing structures.
+      integer,                         intent(in   )  :: L0        !< Internal link number.
+      double precision,                intent(  out)  :: fu        !< FU coefficient.
+      double precision,                intent(  out)  :: ru        !< RU coefficient.
+      double precision,                intent(  out)  :: au        !< Flow area.
+      
+      integer :: istru, i
+      
+      fu = 0d0
+      ru = 0d0
+      au = 0d0
+      
+      do i = 1, compound%numstructs
+         istru = compound%structure_indices(i)
+         fu = fu + struct(istru)%fu(L0)*struct(istru)%au(L0) 
+         ru = ru + struct(istru)%ru(L0)*struct(istru)%au(L0) 
+         au = au + struct(istru)%au(L0) 
+      enddo
+      if (au > 0d0) then
+         fu = fu/au
+         ru = ru/au
+      endif
+      
+   end subroutine computeCompound
 end module m_1d_structures

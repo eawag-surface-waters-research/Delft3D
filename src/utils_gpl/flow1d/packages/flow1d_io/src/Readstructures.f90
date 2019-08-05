@@ -370,20 +370,20 @@ module m_readstructures
             pcompound%name = pcompound%id
             call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'name', pcompound%name)
             
-            call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'numStructures', pcompound%nrstruc, success1)
+            call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'numStructures', pcompound%numstructs, success1)
             success = success .and. check_input_result(success1, st_id, 'numStructures')
 
-            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'structureIds', pcompound%nrstruc, structureNames, success1)
+            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'structureIds', pcompound%numstructs, structureNames, success1)
             success = success .and. check_input_result(success1, st_id, 'numStructures')
             if (.not. success) then
                ! Stop processing this structure
                cycle
             endif
             
-            allocate(pcompound%structure_indices(pcompound%nrstruc))
-            do j = 1, pcompound%nrstruc
+            allocate(pcompound%structure_indices(pcompound%numstructs))
+            do j = 1, pcompound%numstructs
                pcompound%structure_indices(j) = hashsearch(network%sts%hashlist_structure, structureNames(j))
-               network%sts%struct(pcompound%structure_indices(j))%compound = pcompound%nrstruc
+               network%sts%struct(pcompound%structure_indices(j))%compound = network%cmps%count+1
                
                if (pcompound%structure_indices(j) <=0) then
                   msgbuf = 'Error reading compound structure '''// trim(st_id) // ''' structure '''//trim(structureNames(j))//''' was not found.'

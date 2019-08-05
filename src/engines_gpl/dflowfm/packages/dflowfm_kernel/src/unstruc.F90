@@ -33877,9 +33877,10 @@ end subroutine setbobs_fixedweirs
  implicit none
 
  integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns, nstrucsg, L0
- integer          :: kfu, istru, direction
+ integer          :: kfu, istru, direction, i
  integer          :: state
  integer          :: mdown
+ integer          :: ncompound
 
  double precision :: bui, cu, du, du0, gdxi, ds, riep, as, gdxids
  double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
@@ -33890,6 +33891,7 @@ end subroutine setbobs_fixedweirs
  double precision :: perimeter, conv, czdum
  logical          :: firstiter, jarea
  type(t_structure), pointer :: pstru
+ type(t_compound), pointer :: pcompound
 
  integer          :: np, L1     ! pumpstuff
  double precision :: ap, qp, vp ! pumpstuff
@@ -34122,10 +34124,24 @@ end subroutine setbobs_fixedweirs
                    write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
                    call err_flush()
              end select
+             
+             ! store computed fu, ru and au in structure object. In case this structure
+             ! is a part of a compound structure this data will be used in computeCompound
+             call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
           endif
        enddo
     enddo
 
+    ! Compute FU, RA and AU for compound structures
+    ncompound = network%cmps%Count
+    do i = 1, ncompound
+       pcompound => network%cmps%compound(i)
+       do L0 = 1, pcompound%numlinks
+          L = pcompound%linknumbers(L0)
+          call computeCompound(pcompound, network%sts%struct, L0, fu(L), ru(L), au(L))
+       enddo
+    enddo
+       
  endif
 
  if (kmx > 0) then 

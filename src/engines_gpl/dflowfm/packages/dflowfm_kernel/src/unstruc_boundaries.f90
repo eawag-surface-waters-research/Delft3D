@@ -1890,6 +1890,11 @@ do i=1,network%sts%count
    
 end do
 
+if (network%cmps%Count > 0) then
+   call initialize_compounds(network%cmps, network%sts)
+endif
+
+
 ! TODO handle the forcinglist for moveable structrures
 !do i=1,network%forcingList%Count
 !   pForcing => network%forcingList%forcing(i)
