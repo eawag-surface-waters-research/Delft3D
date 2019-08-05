@@ -517,7 +517,6 @@ module m_readstructures
                read(ibin) pstr%uniweir%allowedflowdir
                read(ibin) pstr%uniweir%crestlevel
                read(ibin) pstr%uniweir%dischargecoeff
-               read(ibin) pstr%uniweir%freesubmergedfactor
             
                read(ibin) pstr%uniweir%yzcount
                
@@ -673,7 +672,6 @@ module m_readstructures
                write(ibin) pstr%uniweir%allowedflowdir
                write(ibin) pstr%uniweir%crestlevel
                write(ibin) pstr%uniweir%dischargecoeff
-               write(ibin) pstr%uniweir%freesubmergedfactor
             
                write(ibin) pstr%uniweir%yzcount
                write(ibin) (pstr%uniweir%y(j), j = 1, pstr%uniweir%yzcount)
