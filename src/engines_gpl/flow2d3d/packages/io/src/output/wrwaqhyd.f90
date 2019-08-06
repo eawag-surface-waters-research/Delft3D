@@ -104,7 +104,7 @@
       character(20)  rundat            !! Current date and time containing a combination of DATE and TIME
       character(21)  datetime          !! Date/time to be filled in the header
       character(256) filstring, file1, file2
-      character(5) sf                  !! character variable for s(ediment)f(iles)
+      character(6) sf                  !! character variable for s(ediment)f(iles)
       integer, external :: newunit
       integer(4)    lunout1 !! write hyd file for structured grid needed for delpar
       integer(4)    lunout2 !! write hyd-file for DeltaShell (unstructured format)
@@ -265,7 +265,7 @@
       write ( lunout2 , '(a,a    )' ) 'temperature-file         ',trim(filstring)
       do l = 1, lsed
          sf = ".sed00"
-         write( sf(4:5), '(i2.2)' ) l
+         write( sf(5:6), '(i2.2)' ) l
          filstring = ''''//trim(filnam)//sf//''''
          write ( lunout1 , '(A,A )' ) 'sediment-file            ',trim(filstring)
          write ( lunout2 , '(A,A )' ) 'sediment-file            ',trim(filstring)
