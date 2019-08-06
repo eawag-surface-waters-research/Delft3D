@@ -1314,7 +1314,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE))  then
       ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgenodes))
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'cf_role',   'edge_node_connectivity')
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'long_name',  'Start and end nodes of mesh edges')
       if (start_index.ne.-1) then
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  start_index)
@@ -1325,7 +1324,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ierr = nf90_def_var(ncid, prefix//'_face_nodes', nf90_int, (/ meshids%dimids(mdim_maxfacenodes), meshids%dimids(mdim_face) /) , meshids%varids(mid_facenodes))
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'cf_role',   'face_node_connectivity')
-      ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'mesh', trim(meshName))
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'long_name',  'Vertex nodes of mesh faces (counterclockwise)')
       if (start_index.ne.-1) then
             ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'start_index',  start_index)
@@ -1347,7 +1345,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       if (add_face_face_connectivity) then
          ierr = nf90_def_var(ncid, prefix//'_face_links', nf90_int, (/ meshids%dimids(mdim_maxfacenodes), meshids%dimids(mdim_face) /) , meshids%varids(mid_facelinks))
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'cf_role',     'face_face_connectivity')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'mesh', trim(meshName))
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'long_name',   'Neighboring faces of mesh faces (counterclockwise)')
          if (start_index.ne.-1) then
             ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'start_index', start_index)
