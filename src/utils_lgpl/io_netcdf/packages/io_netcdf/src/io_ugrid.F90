@@ -3720,7 +3720,7 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'topology_dimension', 1)
    !nodes attributes
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_ids', prefix//'_node_ids')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_long_names', prefix//'_nodes_long_names')   
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_long_names', prefix//'_node_long_names')   
    !branches attrubutes
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_ids', prefix//'_branch_ids')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_long_names', prefix//'_branch_long_names')   
@@ -3745,7 +3745,7 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ netids%dimids(ntdim_idstring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodids))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodids), 'long_name', 'ID of network nodes')
    !3. Nodes: the long names of the nodes
-   ierr = nf90_def_var(ncid, prefix//'_nodes_long_names', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodlongnames))
+   ierr = nf90_def_var(ncid, prefix//'_node_long_names', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodlongnames))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodlongnames), 'long_name', 'Long name of network nodes')
    !3. Nodes: x+y coord
    ierr = nf90_def_var(ncid, prefix//'_node_x', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodex))
