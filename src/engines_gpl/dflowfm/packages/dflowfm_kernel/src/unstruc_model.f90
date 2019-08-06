@@ -2945,14 +2945,14 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jahisgate /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_structure_gate', jahisgate, 'Write gate parameters to his file (1: yes, 0: no)' )
     endif
-        if (writeall .or. jahisweir /= 1) then
+    if (writeall .or. jahisweir /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_structure_weir', jahisweir, 'Write weir parameters to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahisorif /= 1) then
-       call prop_set(prop_ptr, 'output', 'Wrihis_structure_orifice', jahisweir, 'Write orifice parameters to his file (1: yes, 0: no)' )
+       call prop_set(prop_ptr, 'output', 'Wrihis_structure_orifice', jahisorif, 'Write orifice parameters to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahisbridge /= 1) then
-       call prop_set(prop_ptr, 'output', 'Wrihis_structure_bridge', jahisweir, 'Write bridge parameters to his file (1: yes, 0: no)' )
+       call prop_set(prop_ptr, 'output', 'Wrihis_structure_bridge', jahisbridge, 'Write bridge parameters to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahistur /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_turbulence', jahistur, 'Write k, eps and vicww to his file (1: yes, 0: no)' )
