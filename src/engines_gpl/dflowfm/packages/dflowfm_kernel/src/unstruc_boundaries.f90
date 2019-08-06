@@ -279,6 +279,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  use unstruc_files, only: resolvePath
  use m_alloc
  use string_module, only: strcmpi
+ use unstruc_model, only: ExtfileNewMajorVersion, ExtfileNewMinorVersion
 
  implicit none
 
@@ -306,6 +307,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  logical                      :: group_ok            !
  logical                      :: property_ok         !
  character(len=256)           :: basedir, fnam
+ integer                      :: major, minor
 
  call tree_create(trim(filename), bnd_ptr)
  call prop_file('ini',trim(filename),bnd_ptr,istat)
@@ -314,6 +316,16 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
      return
  end if
 
+ ! check FileVersion
+ major = 1
+ minor = 0
+ call prop_get_version_number(bnd_ptr, major = major, minor = minor, success = file_ok)
+ if ((major /= ExtfileNewMajorVersion .and. major /= 1) .or. minor > ExtfileNewMinorVersion) then
+    write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of new external forcing file detected in '''//trim(filename)//''': v', major, minor, '. Current format: v',ExtfileNewMajorVersion,ExtfileNewMinorVersion,'. Ignoring this file.'
+    call err_flush()
+    return
+ end if
+ 
  call split_filename(filename, basedir, fnam) ! Remember base dir of input file, to resolve all refenced files below w.r.t. that base dir.
 
  num_items_in_file = 0
@@ -872,6 +884,7 @@ logical function initboundaryblocksforcings(filename)
  use m_meteo, only: countbndpoints
  use system_utils
  use unstruc_files, only: resolvePath
+ use unstruc_model, only: ExtfileNewMajorVersion, ExtfileNewMinorVersion
 
  implicit none
 
@@ -908,6 +921,7 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex 
  integer                      :: ib
+ integer                      :: major, minor
  
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
@@ -921,6 +935,17 @@ logical function initboundaryblocksforcings(filename)
 
  call tree_create(trim(filename), bnd_ptr)
  call prop_file('ini',trim(filename),bnd_ptr,istat)
+ 
+ ! check FileVersion
+ major = 1
+ minor = 0
+ call prop_get_version_number(bnd_ptr, major = major, minor = minor, success = retVal)
+ if ((major /= ExtfileNewMajorVersion .and. major /= 1) .or. minor > ExtfileNewMinorVersion) then
+    write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of new external forcing file detected in '''//trim(filename)//''': v', major, minor, '. Current format: v',ExtfileNewMajorVersion,ExtfileNewMinorVersion,'. Ignoring this file.'
+    call err_flush()
+    return
+ end if
+ 
  call init_registered_items()
 
  call split_filename(filename, basedir, fnam) ! Remember base dir of input file, to resolve all refenced files below w.r.t. that base dir.
