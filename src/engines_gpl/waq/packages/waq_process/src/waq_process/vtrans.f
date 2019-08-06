@@ -93,7 +93,11 @@
          INIT_VTRANS = .TRUE.
          CALL GETMLU(LUNREP)
          IF ( NOQ3 .GT. 0 ) THEN
-            NOSEGL = NOSEGW/NOLAY
+            IF (NOLAY.NE.0) THEN
+               NOSEGL = NOSEGW/NOLAY
+            ELSE
+               NOSEGW = -1
+            ENDIF
             ACTIVE_VTRANS=.TRUE.
             PMSA(IP11) = 1.0
             IF ( NOSEGL*NOLAY .NE. NOSEGW ) THEN
@@ -160,6 +164,7 @@
          l_initial = .false.
       ENDIF
 !
+      WRITE (*,*) 'ACTIVE_VTRANS:', ACTIVE_VTRANS
       IF ( .NOT. ACTIVE_VTRANS ) RETURN
 !
       NOLAY  = NOLAYLOCAL
