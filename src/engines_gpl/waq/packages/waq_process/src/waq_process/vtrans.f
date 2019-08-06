@@ -164,7 +164,6 @@
          l_initial = .false.
       ENDIF
 !
-      WRITE (*,*) 'ACTIVE_VTRANS:', ACTIVE_VTRANS
       IF ( .NOT. ACTIVE_VTRANS ) RETURN
 !
       NOLAY  = NOLAYLOCAL
