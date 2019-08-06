@@ -287,6 +287,7 @@ module m_readstructures
       network%sts%numculverts = 0
       network%sts%numPumps    = 0
       network%sts%numOrifices = 0
+      network%sts%numBridges  = 0
       network%sts%numGates    = 0
       network%sts%numGeneralStructures = 0
       if (major ==2) then
@@ -294,6 +295,7 @@ module m_readstructures
          network%sts%numculverts = network%sts%countByType(ST_CULVERT)
          network%sts%numPumps    = network%sts%countByType(ST_PUMP)
          network%sts%numOrifices = network%sts%countByType(ST_ORIFICE)
+         network%sts%numBridges  = network%sts%countByType(ST_BRIDGE)
          network%sts%numGates    = network%sts%countByType(ST_GATE)
          network%sts%numGeneralStructures = network%sts%countByType(ST_GENERAL_ST)
          allocate(network%sts%weirIndices(network%sts%numweirs))
