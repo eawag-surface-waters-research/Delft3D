@@ -440,6 +440,7 @@ src/buildvs15_dev.cmd -text
 src/buildvs15_sonarqube.cmd -text
 src/buildvs15_test.cmd -text
 src/buildvs15fm.cmd -text
+src/buildvs15fm_coverage.cmd -text
 src/buildvs17.cmd -text
 src/clean.cmd -text
 src/clean.sh -text
