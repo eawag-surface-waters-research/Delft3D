@@ -1027,7 +1027,7 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
 
    ierr = nf90_put_att(ncid, id_var, 'standard_name', trim(standard_name))
    ierr = nf90_put_att(ncid, id_var, 'long_name'    , trim(long_name))
-   ierr = nf90_put_att(ncid, id_var, 'units'        , trim(unit))
+   ierr = nf90_put_att(ncid, id_var, 'units'        , trim(units))
 
    if (present(crs)) then
       ierr = ug_put_gridmapping_att(ncid, (/ id_var /), crs)
