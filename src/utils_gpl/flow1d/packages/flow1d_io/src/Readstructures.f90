@@ -181,7 +181,7 @@ module m_readstructures
             ! TODO: UNST-2799: temporary check on polylinefile to prevent stopping on old (1.00) structure files. They will be read by dflowfm kernel itself.
             call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'polylinefile', str_buf, success1)
             if (success1 .and. major == 1) then
-               write (msgbuf, '(a,i0,a)') 'Detected structure #', i, ' from '''//trim(structureFile)//''' as an old v1.00 structure. Skipping.'
+               write (msgbuf, '(a,i0,a)') 'Detected structure #', i, ' from '''//trim(structureFile)//''' as an old v1.00 structure. Will be read later by main program.'
                call dbg_flush()
                cycle
             end if
