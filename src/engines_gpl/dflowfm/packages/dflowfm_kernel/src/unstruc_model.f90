@@ -747,7 +747,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
     call prop_get_string ( md_ptr, 'geometry', 'NodeFile',         md_1dfiles%retentions,                success)
     call prop_get_string ( md_ptr, 'geometry', 'RoughnessFiles',   md_1dfiles%roughness,                 success)
-    call prop_get_string ( md_ptr, 'geometry', 'StructureFile',    md_1dfiles%structures,                 success)
+    call prop_get_string ( md_ptr, 'geometry', 'StructureFile',    md_1dfiles%structures,                 success)       ! pending code merge, structure file either applies to v2.00 structure file, or the old one, so store in both
     md_1dfiles%roughnessdir = ' ' 
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'GridEnclosureFile',md_encfile,      success)
@@ -2097,6 +2097,26 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', 'GridEnclosureFile',trim(md_encfile),       'Enclosure file to clip outer parts from the grid *.pol')
     call prop_set(prop_ptr, 'geometry', 'BedlevelFile',     trim(md_xybfile),       'Bedlevels points file e.g. *.xyz, only needed for bedlevtype not equal 3')
     call prop_set(prop_ptr, 'geometry', 'DryPointsFile',    trim(md_dryptsfile),    'Dry points file *.xyz (third column dummy z values), or dry areas polygon file *.pol (third column 1/-1: inside/outside)')
+
+    ! 1D network related input
+    if (writeall .or. len_trim(md_1dfiles%cross_section_definitions) > 0) then
+       call prop_set(prop_ptr, 'geometry', 'CrossDefFile',     trim(md_1dfiles%cross_section_definitions), '1D Cross section definition file (*.ini)')
+    end if
+    if (writeall .or. len_trim(md_1dfiles%cross_section_locations) > 0) then
+       call prop_set(prop_ptr, 'geometry', 'CrossLocFile',     trim(md_1dfiles%cross_section_locations),   '1D Cross section location file (*.ini)')
+    end if
+    if (writeall .or. len_trim(md_1dfiles%retentions) > 0) then
+       call prop_set(prop_ptr, 'geometry', 'NodeFile',         trim(md_1dfiles%retentions),                '1D Storage node/manhole file (*.ini)')
+    end if
+    if (writeall .or. len_trim(md_1dfiles%roughness) > 0) then
+       call prop_set(prop_ptr, 'geometry', 'RoughnessFiles',   trim(md_1dfiles%roughness),                 '1D Roughness files (*.ini)')
+    end if
+    if (writeall .or. len_trim(md_1dfiles%structures) > 0) then
+       call prop_set(prop_ptr, 'geometry', 'StructureFile',    trim(md_1dfiles%structures),                'Hydraulic structure file (*.ini)')
+    else if (writeall .or. len_trim(md_structurefile) > 0) then
+       ! pending code merge, structure file either applies to v2.00 structure file, or the old one.
+       call prop_set(prop_ptr,'geometry', 'StructureFile',    trim(md_structurefile), 'File *.ini containing list of structures (pumps, weirs, gates and general structures)')
+    end if
     call prop_set(prop_ptr, 'geometry', 'WaterLevIniFile',  trim(md_s1inifile),     'Initial water levels sample file *.xyz')
     call prop_set(prop_ptr, 'geometry', 'LandBoundaryFile', trim(md_ldbfile),       'Land boundaries file *.ldb, used for visualization')
     call prop_set(prop_ptr, 'geometry', 'ThinDamFile',      trim(md_thdfile),       'Polyline file *_thd.pli, containing thin dams')
@@ -2155,9 +2175,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', '1D2Dinternallinktype', ja1D2Dinternallinktype, 'Uniform width for channel profiles not specified by profloc')
     endif
 
-    if (writeall .or. len_trim(md_structurefile) > 0) then
-       call prop_set(prop_ptr,'geometry', 'StructureFile',    trim(md_structurefile), 'File *.ini containing list of structures (pumps, weirs, gates and general structures)')
-    end if
     call prop_set(prop_ptr, 'geometry', 'ManholeFile',      trim(md_manholefile),   'File *.ini containing manholes'  )
     if ( len(md_pipefile) > 1) then
        call prop_set(prop_ptr, 'geometry', 'PipeFile',      trim(md_pipefile),      'File *.pliz containing pipe-based ''culverts'''  )
