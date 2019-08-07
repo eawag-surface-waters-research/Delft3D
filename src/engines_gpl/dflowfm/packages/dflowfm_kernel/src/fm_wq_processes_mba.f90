@@ -154,11 +154,17 @@
    do isrc = 1, numsrc
       kk1    = ksrc(1,isrc)                   ! 2D pressure cell nr FROM
       kk2    = ksrc(4,isrc)                   ! 2D pressure cell nr TO
-      if(kk1 > 0) mbasorsin(1,isrc) = mbadef(kk1)
-      if(kk2 > 0) mbasorsin(2,isrc) = mbadef(kk2)
-      if ( jampi.eq.1 ) then
-         if ( idomain(kk1).ne.my_rank ) mbasorsin(1,isrc) = 0
-         if ( idomain(kk2).ne.my_rank ) mbasorsin(2,isrc) = 0
+      if(kk1 > 0) then
+         mbasorsin(1,isrc) = mbadef(kk1)
+         if ( jampi.eq.1 ) then
+            if ( idomain(kk1) /= my_rank ) mbasorsin(1,isrc) = 0
+         endif
+      endif
+      if(kk2 > 0) then
+         mbasorsin(2,isrc) = mbadef(kk2)
+         if ( jampi.eq.1 ) then
+            if ( idomain(kk2) /= my_rank ) mbasorsin(2,isrc) = 0
+         endif
       endif
       mbasorsinout(1,isrc) = mbasorsin(1,isrc)
       mbasorsinout(2,isrc) = mbasorsin(2,isrc)
