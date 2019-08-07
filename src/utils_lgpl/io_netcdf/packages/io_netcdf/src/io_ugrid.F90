@@ -1414,8 +1414,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_put_att(ncid, meshids%varids(mid_interfacezs), 'standard_name', 'altitude')
          ierr = nf90_put_att(ncid, meshids%varids(mid_layerzs),     'long_name',     'Vertical coordinate of layer centres')
          ierr = nf90_put_att(ncid, meshids%varids(mid_interfacezs), 'long_name',     'Vertical coordinate of layer interfaces')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_layerzs),     'unit',          'm')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_interfacezs), 'unit',          'm')
+         ierr = nf90_put_att(ncid, meshids%varids(mid_layerzs),     'units',         'm')
+         ierr = nf90_put_att(ncid, meshids%varids(mid_interfacezs), 'units',         'm')
       case default
          ierr = UG_INVALID_LAYERS
          goto 888
@@ -3736,7 +3736,7 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    !2. Branch: the branch lengths
    ierr = nf90_def_var(ncid, prefix//'_edge_length', nf90_double, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchlengths))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlengths), 'long_name', 'Real length of branch geometries')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlengths), 'unit', 'm')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlengths), 'units', 'm')
 
    !3. Nodes: the ids of the nodes
    ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ netids%dimids(ntdim_idstring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodids))
