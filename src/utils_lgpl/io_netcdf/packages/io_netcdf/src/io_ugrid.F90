@@ -45,9 +45,9 @@ implicit none
 ! TODO: AvD: GL2: move grid_mapping attribute to all data variables, not coordinate variables.
 
 !! Conventions
-character(len=6), parameter :: UG_CONV_CF        = 'CF-1.6'      !< Version of CF conventions currently adopted.
-character(len=9), parameter :: UG_CONV_UGRID     = 'UGRID-1.0'  !< Version of UGRID conventions currently adopted.
-character(len=16), parameter :: UG_CONV_DELTARES = 'Deltares-0.8' !< Version of Deltares extension.
+character(len=6),  parameter :: UG_CONV_CF       = 'CF-1.8'       !< Version of CF conventions currently adopted.
+character(len=9),  parameter :: UG_CONV_UGRID    = 'UGRID-1.0'    !< Version of UGRID conventions currently adopted.
+character(len=16), parameter :: UG_CONV_DELTARES = 'Deltares-0.9' !< Version of Deltares extension.
 
 !! Meta data
 type, BIND(C) ::t_ug_meta
