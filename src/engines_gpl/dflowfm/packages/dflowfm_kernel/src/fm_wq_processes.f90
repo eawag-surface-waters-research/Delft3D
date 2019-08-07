@@ -74,6 +74,7 @@
       integer  ( 4), parameter :: nomult = 0      !< number of multiple substances
       integer  ( 4)            :: imultp(2,nomult)!< multiple substance administration
       type(t_dlwq_item)        :: constants       !< delwaq constants list
+      integer                  :: rank            !< mpi rank (-1 is no mpi)
       integer                  :: noinfo          !< count of informative message
       integer                  :: nowarn          !< count of warnings
       integer                  :: ierr            !< error count
@@ -335,21 +336,21 @@
         isftem = 0
       end if
       
-      if ( jawind.eq.1 ) then
-        nosfun = nosfun+1
-        call realloc(sfname, nosfun, keepExisting=.true., fill='VWind')
-        isfvwind = nosfun
-      else
+!      if ( jawind.eq.1 ) then
+!        nosfun = nosfun+1
+!        call realloc(sfname, nosfun, keepExisting=.true., fill='VWind')
+!        isfvwind = nosfun
+!      else
          isfvwind = 0
-      end if
+!      end if
       
-      if ( jawave.eq.1 .or. jawave.eq.2 ) then  ! copied from "flow_setexternalforcings", call to "tauwavefetch"
-         nosfun = nosfun+1
-         call realloc(sfname, nosfun, keepExisting=.true., fill='Fetch')
-         isffetch = nosfun
-      else
+!      if ( jawave.eq.1 .or. jawave.eq.2 ) then  ! copied from "flow_setexternalforcings", call to "tauwavefetch"
+!         nosfun = nosfun+1
+!         call realloc(sfname, nosfun, keepExisting=.true., fill='Fetch')
+!         isffetch = nosfun
+!      else
          isffetch = 0
-      end if
+!      end if
       
 !      if ( jatem.gt.1 ) then  ! copied from "heatun"
 !         nosfun = nosfun+1
@@ -443,8 +444,13 @@
 
 !     Finally, evaluate the processes using the proces library
 !     --------------------------------------------------------
+      rank = -1
+      if (jampi.eq.1) then
+         rank = my_rank
+      endif
+
       call wq_processes_initialise ( lunlsp, proc_def_file, bloom_file, statistics_file, statprocesdef, outputs, &
-                                     nomult, imultp, constants, noinfo, nowarn, ierr)
+                                     nomult, imultp, constants, rank, noinfo, nowarn, ierr)
       if (ierr .ne. 0) then
          call mess(LEVEL_ERROR, 'Something went wrong during initialisation of the processes. Check the lsp-file: ', trim(proc_log_file))
       endif

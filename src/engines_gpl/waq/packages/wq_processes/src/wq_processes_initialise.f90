@@ -24,7 +24,8 @@
       subroutine wq_processes_initialise ( lunlsp       , pdffil       , blmfil    , &
                                            sttfil       , statprocesdef, outputs   , &
                                            nomult       , imultp       , constants , &
-                                           noinfo       , nowarn       , ierr)
+                                           rank         , noinfo       , nowarn    , &
+                                           ierr)
 
 !       Deltares Software Centre
 
@@ -43,6 +44,7 @@
       
       use dlwq_data
       use dlwq0t_data
+      use bloom_data_io, only:runnam
       use processet
       use output
       use string_module
@@ -67,6 +69,7 @@
       integer  ( 4)       , intent(in   ) :: nomult          !< number of multiple substances
       integer  ( 4)       , intent(in   ) :: imultp(2,nomult)!< multiple substance administration
       type(t_dlwq_item)   , intent(inout) :: constants       !< delwaq constants list
+      integer                             :: rank            !< mpi rank (-1 is no mpi)
       integer             , intent(inout) :: noinfo          !< count of informative message
       integer             , intent(inout) :: nowarn          !< count of warnings
       integer             , intent(inout) :: ierr            !< error count
@@ -174,6 +177,7 @@
       character*10  outgrp(maxtyp), outtyp(maxtyp)
       integer       noprot , nopralg
       character*10  namprot(maxtyp), nampact(maxtyp), nampralg(maxtyp)
+      character(256) filnam       ! File name with extention
 
       ! actual algae
 
@@ -592,18 +596,22 @@
                        nogrp    , grpnam, grpabr, nouttyp, outtyp, &
                        noutgrp  , outgrp)
 
+         if (rank.ge.0) then
+            write(runnam(9:13),'("_",I4.4)') rank
+         end if
+         
          ! write the bloom efficiency file
-
-         lunfrm = 89
-         open ( lunfrm    , file='bloominp.frm' )
+         filnam = trim(runnam)//'.frm'
+         open ( newunit=lunfrm, file=filnam )
          call blmeff (lunlsp , lunblm, verspe, lunfrm, grpnam, nogrp , typnam, noalg)
          close(lunblm)
          close(lunfrm)
 
-         inquire (file = 'bloominp.d09', exist = ex)
+         filnam = trim(runnam)//'.d09'
+         inquire (file = filnam, exist = ex)
          if(.not.ex) then
             lund09 = 89
-            open ( lund09    , file='bloominp.d09' )
+            open ( newunit=lund09, file=filnam )
             call blmd09 (lunlsp , lund09)
             close(lund09)
          endif

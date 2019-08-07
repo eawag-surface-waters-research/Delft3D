@@ -106,7 +106,6 @@
 !     PHOSPH  R     1             Phosphate (gP/m3)
 !     RATGRO  R     NGRO          Effective growth rate per group (1/d)
 !     RATMOR  R     NGRO          Effective mortality per group (1/d)
-!     RUNNAM  C*12  1             Filename consisting of runid without
 !     RADIAT  R     1             Irradiation (W/m2)
 !     SILICA  R     1             Silicate (gSi/m3)
 !     SWCLIM  I     1             Carbon limitation switch (0 inactive, 1 active)
@@ -132,7 +131,6 @@
      2         MRTB1(NTYP_M), MRTB2(NTYP_M), CGROUP(NTYP_M)
       INTEGER  IFIX(NTYP_M)
       REAL     RATGRO(NTYP_M), RATMOR(NTYP_M)
-      CHARACTER*12    RUNNAM
       LOGICAL  HISTOR, THIS, LMIXO,LFIXN,LCARB
       INTEGER  NTYP_A, NGRO_A,
      J         NSET  , LPRINO, LDUMPO, ID
@@ -188,8 +186,7 @@
 
 !     Set logical numbers and open autonomous I/O files Bloom
          CALL GETMLU(LUNREP)
-         RUNNAM = 'bloominp.XXX'
-         CALL BLFILE (RUNNAM, LUNREP)
+         CALL BLFILE(LUNREP)
 
 !        Copy algae type properties for input
          DO 40 IALG=1,NTYP_M

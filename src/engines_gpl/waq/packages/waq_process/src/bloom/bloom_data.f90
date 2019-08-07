@@ -124,6 +124,7 @@ end module bloom_data_caldynam
 
 module bloom_data_io
    use bloom_data_dim
+   character(256)     :: runnam = 'bloominp'      ! Base name for bloom files
    character(1)       :: string(48)               ! String help variable
    character(8)       :: line(10)                 ! Line of maximum of 10 keywords of 8 character length
    character(16)      :: cnames(ia)               ! Constraint names 

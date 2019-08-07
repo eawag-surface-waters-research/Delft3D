@@ -21,31 +21,31 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine blfile (runnam, lunrep)
+      subroutine blfile (lunrep)
 
       use bloom_data_io  
 
       implicit none
 
-      character(12)  runnam       ! Filename consisting of runid (no ext)
       integer        lunrep       ! Report file for error messages
 
+      character(256) filnam       ! File name with extention
       integer        iost         ! I/O-status
 
 !  Call subroutine SETUNI to set I/O unit numbers for BLOOM II.
       call setuni
 
 !  Open statement for BLOOM II input files.
-      write (runnam(10:12),'(''frm'')')
-      open (iou(12),file=runnam,iostat = iost)
+      filnam = trim(runnam)//'.frm'
+      open (iou(12),file=filnam,iostat = iost)
       if (iost .ne. 0) then
          write (*,*) 'blfile: error opening .frm file'
          write (lunrep,*) 'blfile: error opening .frm file'
          call srstop(1)
       endif
 
-      write (runnam(10:12),'(''d09'')')
-      open (iou( 9),file=runnam,iostat = iost)
+      filnam = trim(runnam)//'.d09'
+      open (iou( 9),file=filnam,iostat = iost)
       if (iost .ne. 0) then
          write (*,*) 'blfile: error opening .d09 file'
          write (lunrep,*) 'blfile: error opening .d09 file'
@@ -53,8 +53,8 @@
       endif
 
 ! Open statement for BLOOM II debug file.
-      write (runnam(10:12),'(''dbg'')')
-      open (iou(10),file=runnam,iostat = iost)
+      filnam = trim(runnam)//'.dbg'
+      open (iou(10),file=filnam,iostat = iost)
       if (iost .ne. 0) then
          write (*,*) 'blfile: error opening .dbg file'
          write (lunrep,*) 'blfile: error opening .dbg file'
