@@ -42331,7 +42331,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
            N2 = N2 - 1
        end if
        if (jawriteDFMinterpretedvalues > 0) then
-          call newfil(mout, 'DFM_interpreted_fxwvalues_'//fnames(ifil)(n1+1:n2)//trim(sd)//'.xyz')
+          call newfil(mout, trim(getoutputdir())//'DFM_interpreted_fxwvalues_'//fnames(ifil)(n1+1:n2)//trim(sd)//'.xyz')
           write (mout, '(a)') '* xu yu crest(bob) width(wu) xk3 yk3 xk4 yk4'
        end if
        call reapol(minp, jadoorladen)
