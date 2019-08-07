@@ -1266,12 +1266,12 @@ end subroutine
       
    end subroutine initialize_compounds
 
-   !> Set fu, ru and au in structure. This subroutine is essential for compound
+   !> Set fu, ru and au in a structure. This subroutine is essential for compound
    !! structures. Since the compound structure relies on the fact that FU, RU and 
-   !! AU are set.
+   !! AU are set for all of its underlying structures.
    subroutine set_fu_ru(struct, L0, fu, ru, au)
       type (t_structure) , intent(inout)  :: struct    !< Structure object.
-      integer,             intent(in   )  :: L0        !< Internal link number.
+      integer,             intent(in   )  :: L0        !< Internal link index.
       double precision,    intent(in   )  :: fu        !< FU coefficient.
       double precision,    intent(in   )  :: ru        !< RU coefficient.
       double precision,    intent(in   )  :: au        !< Flow area.
