@@ -1849,6 +1849,7 @@ character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in Mess
                                     ! TODO: in readstruc* change incoming ids to len=*
 character(len=idLen)          :: branchid
 type(t_structure), pointer    :: pstru
+logical                       :: successloc
 
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
@@ -2482,8 +2483,8 @@ end do
             else
                key = generalkeywrd_old(k)
             endif
-            call prop_get(str_ptr, '', trim(key), rec, success)
-            if (.not. success .or. len_trim(rec) == 0) then
+            call prop_get(str_ptr, '', trim(key), rec, successloc)
+            if (.not. successloc .or. len_trim(rec) == 0) then
                ! consider all fields optional for now.
                cycle
             end if
@@ -2499,9 +2500,7 @@ end do
                   case default
                      success = .false.
                      call mess(LEVEL_ERROR, 'Programming error: general structure via structures.ini file does not support REALTIME control for '//trim(generalkeywrd(k)))
-               end select
-                  
-                     
+                  end select
                else
                   success = .false.
                   select case (key)
