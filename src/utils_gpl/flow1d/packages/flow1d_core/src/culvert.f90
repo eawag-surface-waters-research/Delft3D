@@ -62,6 +62,14 @@ module m_Culvert
       logical                         :: has_valve             !< Indicates whether a valve has been added
       double precision                :: valveOpening          !< Current valve opening
       type(t_table), pointer          :: losscoeff => null()   !< table containing loss coefficients as a function of the relative opening
+      integer                         :: state                 !< State of Culvert/Siphon
+                                                               !< 0 = No Flow
+                                                               !< 1 = Free Weir Flow
+                                                               !< 2 = Drowned Weir Flow
+                                                               !< 3 = Free Gate Flow
+                                                               !< 4 = Drowned Gate Flow
+                                                               !< 5 = Free Flow for Culvert and Siphons
+                                                               !< 6 = Drowned Flow for Culvert and Siphons
    end type
 
 contains
@@ -89,7 +97,7 @@ contains
                               
    !> 
    subroutine ComputeCulvert(culvert, fum, rum, aum, dadsm, kfum, cmustr, s1m1, s1m2, qm,  &
-                             q0m, u1m, u0m, dxm, dt, bobgrm1, bobgrm2, wetdown, state, infuru)
+                             q0m, u1m, u0m, dxm, dt, bobgrm1, bobgrm2, wetdown, infuru)
       use m_Roughness
       
       implicit none
@@ -114,7 +122,6 @@ contains
       double precision, intent(in)                 :: bobgrm1
       double precision, intent(in)                 :: bobgrm2
       double precision, intent(in)                 :: wetdown
-      integer, intent(inout)                       :: state
       logical, intent(in)                          :: infuru
          
       ! Local variables
@@ -197,7 +204,7 @@ contains
          u0m   = 0.0d0
          qm    = 0.0d0
          q0m   = 0.0d0
-         state = 0
+         culvert%state = 0
          return
       endif
 
@@ -213,7 +220,7 @@ contains
          u0m   = 0.0d0
          qm    = 0.0d0
          q0m   = 0.0d0
-         state = 0
+         culvert%state = 0
          return
       endif
 
@@ -257,7 +264,7 @@ contains
             u0m   = 0.0d0
             qm    = 0.0d0
             q0m   = 0.0d0
-            state = 0
+            culvert%state = 0
             return
          endif
       
@@ -283,7 +290,7 @@ contains
             u0m   = 0.0d0
             qm    = 0.0d0
             q0m   = 0.0d0
-            state = 0
+            culvert%state = 0
             return
          endif
 
@@ -445,9 +452,9 @@ contains
       endif
       
       if (isfreeflow) then
-         state = 5
+         culvert%state = 5
       else
-         state = 6
+         culvert%state = 6
       endif
     
    end subroutine ComputeCulvert

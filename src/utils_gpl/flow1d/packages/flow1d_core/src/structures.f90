@@ -73,6 +73,7 @@ module m_1d_structures
    public get_gle
    public get_opening_height
    public get_valve_opening
+   public get_culvert_state
    public fill_hashtable
    public set_crest_level
    public set_crest_width
@@ -977,6 +978,8 @@ end subroutine
          get_gle = struc%orifice%openlevel 
       case (ST_GENERAL_ST)
          get_gle = struc%generalst%gateLowerEdgeLevel
+      case (ST_CULVERT)
+         get_gle = max(struc%culvert%leftlevel, struc%culvert%rightlevel) + struc%culvert%valveOpening
       case default
          get_gle = huge(1d0)
       end select
@@ -991,7 +994,9 @@ end subroutine
          get_opening_height = struc%orifice%openlevel - struc%orifice%crestlevel
       case (ST_GENERAL_ST)
          get_opening_height = struc%generalst%gateLowerEdgeLevel - struc%generalst%zs
-      end select
+      case (ST_CULVERT)
+         get_opening_height = struc%culvert%valveOpening
+     end select
    end function get_opening_height
    
    double precision function get_valve_opening(struc)
@@ -1003,6 +1008,19 @@ end subroutine
          get_valve_opening = struc%culvert%valveOpening
       end select
    end function get_valve_opening
+ 
+   !> Gets culvert state for a given structure
+   integer function get_culvert_state(struc)
+      
+      type (t_structure), intent(inout) :: struc
+      
+      select case(struc%type)
+      case (ST_CULVERT)
+         get_culvert_state = struc%culvert%state
+      case default
+         get_culvert_state = -999 ! unknown
+      end select
+   end function get_culvert_state
 
    subroutine fill_hashtable_sts(sts)
    

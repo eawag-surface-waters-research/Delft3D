@@ -128,6 +128,17 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (5,:) bridge structure head
                                                               !<                      (6,:) bridge flow area
                                                               !<                      (7,:) bridge velocity
+ double precision, dimension(:,:), allocatable :: valculvert  !< Array for culvert;   (1,:) flow link width, used for averaging.
+                                                              !<                      (2,:) discharge through bridge
+                                                              !<                      (3,:) culvert water level up
+                                                              !<                      (4,:) culvert water level down
+                                                              !<                      (5,:) culvert structure head
+                                                              !<                      (6,:) culvert flow area
+                                                              !<                      (7,:) culvert velocity
+                                                              !<                      (8,:) culvert crest level
+                                                              !<                      (9,:) culvert state (0: closed, 1: free weir, 2: drowned/submerged weir)
+                                                              !<                      (10,:) culvert gate lower edge level
+                                                              !<                      (11,:) culvert gate opening height
  integer                           :: NUMVALS_PUMP = 11       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
@@ -138,6 +149,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
  integer                           :: NUMVALS_ORIFGEN = 23    !< Number of variables for orific
  integer                           :: NUMVALS_BRIDGE  = 7    !< Number of variables for bridge
+ integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
  
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
  integer                           :: jahispump               !< Write pump      parameters to his file, 0: n0, 1: yes
@@ -147,6 +159,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: jahisdambreak           !< Write dambreak  parameters to his file, 0: n0, 1: yes
  integer                           :: jahisorif               !< Write orifice   parameters to his file, 0: no, 1: yes
  integer                           :: jahisbridge             !< Write bridge    parameters to his file, 0: no, 1: yes
+ integer                           :: jahisculv               !< Write culvert   parameters to his file, 0: no, 1: yes
  
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
@@ -181,6 +194,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       jahiscdam = 1
       jahisweir = 1
       jahisorif = 1
+      jahisculv = 1
       jahisbridge   = 1
       jahisdambreak = 1
 
@@ -235,6 +249,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       if( jahisbridge > 0 .and. network%sts%numBridges > 0) then
          if( allocated( valbridge) ) deallocate( valbridge )
          allocate( valbridge(NUMVALS_BRIDGE,network%sts%numBridges) ) ; valbridge = 0d0
+      endif
+      if( jahisculv > 0 .and. network%sts%numCulverts > 0) then
+         if( allocated( valculvert) ) deallocate( valculvert )
+         allocate( valculvert(NUMVALS_CULVERT,network%sts%numCulverts) ) ; valculvert = 0d0
       endif
 
 ! TIDAL TURBINES: Insert init_turbines here
