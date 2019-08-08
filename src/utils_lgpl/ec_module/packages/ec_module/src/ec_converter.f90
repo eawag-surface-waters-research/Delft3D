@@ -317,7 +317,7 @@ module m_ec_converter
          real(hp), dimension(4) :: xfindpoly, yfindpoly
          integer                :: imin, jmin, iii, jjj
          
-         integer                              :: issparse = 0
+         integer                              :: issparse
          integer, dimension(:),   allocatable :: ia
          integer, dimension(:),   allocatable :: ja
          integer, dimension(:,:), allocatable :: imask
@@ -325,6 +325,8 @@ module m_ec_converter
          type(tEcField),          pointer     :: srcfld0, srcfld1
 
          logical hasKDTree
+         
+         issparse = 0
          
          !
          hasKDTree = .True.
