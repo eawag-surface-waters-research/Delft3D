@@ -836,7 +836,7 @@ module m_meteo
       logical                   :: exist, opened, withCharnock, withStress
       
       double precision          :: relrow, relcol
-      integer                   :: row0, row1, col0, col1, ncols, nrows
+      integer                   :: row0, row1, col0, col1, ncols, nrows, issparse, Ndatasize
       character(len=128)        :: txt1, txt2, txt3
 
       ec_addtimespacerelation = .false.
@@ -1587,13 +1587,19 @@ module m_meteo
       success = ecSetConnectionIndexWeights(ecInstancePtr, connectionId)
             
       if ( target_name=='nudge_salinity_temperature' ) then
-         call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows)
+         call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows, issparse, Ndatasize)
          relcol = dble(col1-col0+1)/dble(ncols)
          relrow = dble(row1-row0+1)/dble(nrows)
          write(txt1,"('nudge_salinity_temperature: bounding box')")
          write(txt2,"('col0-col1 X row0-row1 = ', I0, '-', I0, ' X ', I0, '-', I0, ', ncols X nrows = ', I0, ' X ', I0)") col0, col1, row0, row1, ncols, nrows
          write(txt3,"('relcol X relrow = ', F4.2, ' X ', F4.2, ' = ', F4.2)") relcol, relrow, relcol*relrow
          call mess(LEVEL_INFO, trim(txt1) // ' ' // trim(txt2) // ', ' // trim(txt3))
+         
+         if ( issparse.eq.1 ) then
+            write(txt1,"('sparse: data size = ', I0, ', ncols X nrows = ', I0, ' X ', I0, ' = ', I0)") Ndatasize, ncols, nrows, ncols*nrows
+            write(txt2,"('factor = ', F4.2)") dble(Ndatasize)/dble(Ncols*Nrows)
+            call mess(LEVEL_INFO, trim(txt1) // ' ' // trim(txt2))
+         end if
       end if
 
       ec_addtimespacerelation = .true.

@@ -284,6 +284,7 @@ module m_ec_converter
       !> Update the weight factors of a Converter.
       function ecConverterUpdateWeightFactors(instancePtr, connection) result (success)
       use kdtree2Factory
+      use m_alloc
       implicit none
          logical                            :: success     !< function status
          type(tEcInstance), pointer         :: instancePtr !< intent(inout)
@@ -315,6 +316,13 @@ module m_ec_converter
          
          real(hp), dimension(4) :: xfindpoly, yfindpoly
          integer                :: imin, jmin, iii, jjj
+         
+         integer                              :: issparse = 0
+         integer, dimension(:),   allocatable :: ia
+         integer, dimension(:),   allocatable :: ja
+         integer, dimension(:,:), allocatable :: imask
+         
+         type(tEcField),          pointer     :: srcfld0, srcfld1
 
          logical hasKDTree
          
@@ -377,6 +385,15 @@ module m_ec_converter
                      src_y=>sourceElementSet%y
                      nsx=n_cols
                      nsy=n_rows
+                     
+                     if ( connection%converterPtr%ofType.eq.convType_netcdf ) then
+                        issparse = 1   ! sparse storage
+                     end if
+                     
+                     if ( issparse.eq.1 ) then
+                        call realloc(imask,(/n_cols,n_rows/),fill=0)
+                     end if
+                     
                      do i=1, n_points
                         tgt_x=targetElementSet%x(i)
                         tgt_y=targetElementSet%y(i)
@@ -412,6 +429,14 @@ module m_ec_converter
                            jjmin=min(weight%indices(2,i),jjmin)
                            iimax=max(weight%indices(1,i)+1,iimax)
                            jjmax=max(weight%indices(2,i)+1,jjmax)
+                           
+                           if ( issparse.eq.1 ) then
+   !                          update mask array
+                              imask(mp,  np)   = 1
+                              imask(mp+1,np)   = 1
+                              imask(mp,  np+1) = 1
+                              imask(mp+1,np+1) = 1
+                           end if
                         end if
                      end do
                   case (elmSetType_spheric, elmSetType_Cartesian)
@@ -462,6 +487,10 @@ module m_ec_converter
                                         jjmin=min(jj,jjmin)
                                         iimax=max(ii+1,iimax)
                                         jjmax=max(jj+1,jjmax)
+                                        
+                                        if ( issparse.eq.1 ) then
+!                                          not supported yet                                        
+                                        end if
                                     end if
                                  end do
                               end if
@@ -568,18 +597,45 @@ module m_ec_converter
                      call setECMessage("Unknown element type set for interpolation weights in NetCDF file.")
                      return
                   end select
-                  ! Shift indices (m and n), to run from (1,1) to (iimax-iimin+1,jjmax-jjmin+1), only for the netCDF type
-                  if (connection%converterPtr%ofType == convType_netcdf) then
-                     do i = 1, n_points
-                        weight%indices(1,i) = weight%indices(1,i) - iimin + 1
-                        weight%indices(2,i) = weight%indices(2,i) - jjmin + 1
+                  
+                  if ( issparse.eq.1 ) then
+!                    make sparsity pattern, effectively disable bounding box and overwrite indices
+                     call MaskToSparse(n_cols,n_rows,imask,ia,ja)
+                     
+!                    deallocate mask
+                     if ( allocated(imask) ) deallocate(imask)
+                     
+!                    copy sparsity pattern to source fields and effectively disable bounding box
+                     do i = 1, connection%nSourceItems
+                        srcfld0 => connection%sourceItemsPtr(i)%ptr%sourceT0fieldPtr
+                        srcfld1 => connection%sourceItemsPtr(i)%ptr%sourceT1fieldPtr
+                        
+                        call SetSparsityPattern(srcfld0, n_cols, n_rows, ia, ja)
+                        call SetSparsityPattern(srcfld1, n_cols, n_rows, ia, ja)
+                     end do   
+                     
+!                    overwrite indices (mcol,nrow) with sparse indices
+                     call ConvertToSparseIndices(n_points, weight%indices, n_rows, ia, ja)
+                     
+!                    deallocate sparsity pattern
+                     if ( allocated(ia) ) deallocate(ia)
+                     if ( allocated(ja) ) deallocate(ja)
+                  else
+                  
+                      ! Shift indices (m and n), to run from (1,1) to (iimax-iimin+1,jjmax-jjmin+1), only for the netCDF type
+                     if (connection%converterPtr%ofType == convType_netcdf) then
+                        do i = 1, n_points
+                           weight%indices(1,i) = weight%indices(1,i) - iimin + 1
+                           weight%indices(2,i) = weight%indices(2,i) - jjmin + 1
+                        end do
+                     endif
+                     ! Set bounding box for reading in the source T0 and T1 fields
+                     do i = 1, connection%nSourceItems
+                        connection%sourceItemsPtr(i)%ptr%sourceT0fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
+                        connection%sourceItemsPtr(i)%ptr%sourceT1fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
                      end do
-                  endif
-                  ! Set bounding box for reading in the source T0 and T1 fields
-                  do i = 1, connection%nSourceItems
-                     connection%sourceItemsPtr(i)%ptr%sourceT0fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
-                     connection%sourceItemsPtr(i)%ptr%sourceT1fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
-                  end do
+                  end if
+                  
                success = .true.
             case(convType_polytim)
                sourceElementSet => connection%sourceItemsPtr(1)%ptr%elementSetPtr
@@ -2412,6 +2468,7 @@ module m_ec_converter
          real(hp)                :: sourceMissing !< Source side missing value 
          real(hp), dimension(:,:,:), pointer :: s3D_T0, s3D_T1   !< 3D representation of linearly indexed array arr1D
          real(hp), dimension(:,:),   pointer :: s2D_T0, s2D_T1   !< 2D representation of linearly indexed array arr1D
+         real(hp), dimension(:),     pointer :: s1D_T0, s1D_T1   !< 1D representation of linearly indexed array arr1D
          type(tEcIndexWeight), pointer :: indexWeight !< helper pointer, saved index weights
          type(tEcElementSet), pointer :: sourceElementSet !< source ElementSet
          type(tEcElementSet), pointer :: targetElementSet !< target ElementSet
@@ -2437,6 +2494,13 @@ module m_ec_converter
          type(kdtree_instance)      :: treeinst
          real(hp), dimension(:), allocatable :: x_extrapolate    ! temporary array holding targetelementset x for setting up kdtree for interpolation
          integer                    :: col0, row0, col1, row1    ! bounding box in meteo-space spanned by the target elementset
+         
+         integer                        :: issparse
+         integer, dimension(:), pointer :: ia                    ! sparsity pattern in CRS format, startpointers
+         integer, dimension(:), pointer :: ja                    ! sparsity pattern in CRS format, column numbers
+         
+         integer                        :: Ndatasize
+         integer, dimension(2)          :: idx
 
          !
          PI = datan(1.d0)*4.d0
@@ -2510,12 +2574,20 @@ module m_ec_converter
                   row0 = sourceItem%sourceT0FieldPtr%bbox(2)
                   col1 = sourceItem%sourceT0FieldPtr%bbox(3)
                   row1 = sourceItem%sourceT0FieldPtr%bbox(4)
+                  
+!                 note: it is assumed that the sparsity pattern of the T1field is the same as of the T0field
+                  issparse = sourceItem%sourceT0FieldPtr%issparse
+                  ia => sourceItem%sourceT0FieldPtr%ia
+                  ja => sourceItem%sourceT0FieldPtr%ja
 
                   n_points = targetElementSet%nCoordinates
-                  !n_cols = sourceElementSet%n_cols
-                  !n_rows = sourceElementSet%n_rows
-                  n_rows = row1 - row0 + 1
-                  n_cols = col1 - col0 + 1
+                  if ( issparse.eq.1 ) then
+                     n_cols = sourceElementSet%n_cols
+                     n_rows = sourceElementSet%n_rows
+                  else
+                     n_rows = row1 - row0 + 1
+                     n_cols = col1 - col0 + 1
+                  end if
                   n_layers = sourceElementSet%n_layers
                   t0 = sourceT0Field%timesteps
                   t1 = sourceT1Field%timesteps
@@ -2524,8 +2596,14 @@ module m_ec_converter
                   
                   if (n_layers>0 .and. associated(targetElementSet%z) .and. associated(sourceElementSet%z)) then 
                      allocate(zsrc(n_layers))
-                     s3D_T0(1:n_cols,1:n_rows,1:n_layers) => sourceT0Field%arr1d
-                     s3D_T1(1:n_cols,1:n_rows,1:n_layers) => sourceT1Field%arr1d
+                     if ( issparse.eq.1 ) then
+                        Ndatasize = ia(n_rows+1)-1
+                        s2D_T0(1:Ndatasize,1:n_layers) => sourceT0Field%arr1d
+                        s2D_T1(1:Ndatasize,1:n_layers) => sourceT1Field%arr1d
+                     else
+                        s3D_T0(1:n_cols,1:n_rows,1:n_layers) => sourceT0Field%arr1d
+                        s3D_T1(1:n_cols,1:n_rows,1:n_layers) => sourceT1Field%arr1d
+                     end if
                      do j=1, n_points
                         kbot = targetElementSet%kbot(j)
                         ktop = targetElementSet%ktop(j)
@@ -2575,6 +2653,10 @@ module m_ec_converter
                               dkp = -1
                            end if      ! write source vertical coordinate in terms of target system
                            
+                           if ( issparse.eq.1 ) then
+                             idx = (/ np, mp /) ! (bottom-left, upper-left) indices
+                           end if
+                           
                            do k = kbot, ktop
                               ztgt = targetElementSet%z(k)
                               
@@ -2598,14 +2680,25 @@ module m_ec_converter
                               end if
                               
                               ! fill source values
-                              do kk=0,1
-                                 do jj=0,1
-                                    do ii=0,1
-                                       sourcevals(1+ii,1+jj,1+kk,1) = s3D_T0(mp+ii, np+jj, kp+dkp*(kk-1) )
-                                       sourcevals(1+ii,1+jj,1+kk,2) = s3D_T1(mp+ii, np+jj, kp+dkp*(kk-1) )
+                              if ( issparse.eq.1 ) then
+                                 do kk=0,1
+                                    do jj=0,1
+                                       do ii=0,1
+                                          sourcevals(1+ii,1+jj,1+kk,1) = s2D_T0(idx(1+jj)+ii, kp+dkp*(kk-1))
+                                          sourcevals(1+ii,1+jj,1+kk,2) = s2D_T1(idx(1+jj)+ii, kp+dkp*(kk-1))
+                                       end do
                                     end do
                                  end do
-                              end do
+                              else
+                                 do kk=0,1
+                                    do jj=0,1
+                                       do ii=0,1
+                                          sourcevals(1+ii,1+jj,1+kk,1) = s3D_T0(mp+ii, np+jj, kp+dkp*(kk-1) )
+                                          sourcevals(1+ii,1+jj,1+kk,2) = s3D_T1(mp+ii, np+jj, kp+dkp*(kk-1) )
+                                       end do
+                                    end do
+                                 end do
+                              end if
                               
                               call extrapolate_missing(sourcevals, sourceMissing, jamissing)
                               
@@ -2655,8 +2748,15 @@ module m_ec_converter
                      end do
                      if (allocated(zsrc)) deallocate(zsrc)
                   else
-                     s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
-                     s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
+                     if ( issparse.eq.1 ) then
+                        Ndatasize = ia(n_rows+1)-1
+                        S1D_T0(1:Ndatasize) => sourceT0Field%arr1d
+                        S1D_T1(1:Ndatasize) => sourceT1Field%arr1d
+                     else
+                        s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
+                        s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
+                     end if
+                     
                      if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
                         allocate(x_extrapolate(n_points))
                         x_extrapolate = targetElementSet%x
@@ -2669,13 +2769,36 @@ module m_ec_converter
                         jamissing = 0
                         if (mp > 0 .and. np > 0) then ! if mp and np both valid, this is an interior point of the meteo domain, else ignore
                                                       ! check missing values for points with valid mp and np
+                        
+                           if ( issparse.eq.1 ) then
+                             idx = (/ np, mp /) ! (bottom-left, upper-left) indices
+                           end if
+                           
+                           ! fill source values
+                           kk = 0   ! 2D only
+                           if ( issparse.eq.1 ) then
+                              do jj=0,1
+                                 do ii=0,1
+                                    sourcevals(1+ii,1+jj,1+kk,1) = s1D_T0(idx(1+jj)+ii)
+                                    sourcevals(1+ii,1+jj,1+kk,2) = s1D_T1(idx(1+jj)+ii)
+                                 end do
+                              end do
+                           else
+                              do jj=0,1
+                                 do ii=0,1
+                                    sourcevals(1+ii,1+jj,1+kk,1) = s2D_T0(mp+ii, np+jj)
+                                    sourcevals(1+ii,1+jj,1+kk,2) = s2D_T1(mp+ii, np+jj)
+                                 end do
+                              end do
+                           end if
+                        
                            if (connection%converterPtr%operandType==operand_replace) then ! Dit hoort in de loop beneden per target gridpunt!
                               targetValues(j) = 0.0_hp
                            end if
                   kloop2D: do jj=0,1
                               do ii=0,1
-                                 if ( comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 .or.   &
-                                      comparereal(s2D_T1(mp+ii, np+jj), sourceMissing)==0 ) then
+                                 if ( comparereal(sourcevals(1+ii, 1+jj, 1, 1), sourceMissing)==0 .or.   &
+                                      comparereal(sourcevals(1+ii, 1+jj, 1, 2), sourceMissing)==0 ) then
                                     jamissing = jamissing + 1
                                     exit kloop2D
                                  end if
@@ -2685,14 +2808,14 @@ module m_ec_converter
                               missing(j) = .True.    ! Mark missings in the target grid in a temporary logical array  
                               if (allocated(x_extrapolate)) x_extrapolate(j)=ec_undef_hp                                ! no-data -> unelectable for kdtree later
                            else
-                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp  , np  ) * indexWeight%weightFactors(1,j)        !  4                 3
-                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp  , np  ) * indexWeight%weightFactors(1,j)
-                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp+1, np  ) * indexWeight%weightFactors(2,j)
-                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp+1, np  ) * indexWeight%weightFactors(2,j)
-                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp+1, np+1) * indexWeight%weightFactors(3,j)
-                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp+1, np+1) * indexWeight%weightFactors(3,j)
-                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp  , np+1) * indexWeight%weightFactors(4,j)
-                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp  , np+1) * indexWeight%weightFactors(4,j)        !  1                 2
+                              targetValues(j) = targetValues(j) + a0 * sourcevals(1, 1, 1, 1) * indexWeight%weightFactors(1,j)        !  4                 3
+                              targetValues(j) = targetValues(j) + a1 * sourcevals(1, 1, 1, 2) * indexWeight%weightFactors(1,j)
+                              targetValues(j) = targetValues(j) + a0 * sourcevals(2, 1, 1, 1) * indexWeight%weightFactors(2,j)
+                              targetValues(j) = targetValues(j) + a1 * sourcevals(2, 1, 1, 2) * indexWeight%weightFactors(2,j)
+                              targetValues(j) = targetValues(j) + a0 * sourcevals(2, 2, 1, 1) * indexWeight%weightFactors(3,j)
+                              targetValues(j) = targetValues(j) + a1 * sourcevals(2, 2, 1, 2) * indexWeight%weightFactors(3,j)
+                              targetValues(j) = targetValues(j) + a0 * sourcevals(1, 2, 1, 1) * indexWeight%weightFactors(4,j)
+                              targetValues(j) = targetValues(j) + a1 * sourcevals(1, 2, 1, 2) * indexWeight%weightFactors(4,j)        !  1                 2
                               if (allocated(x_extrapolate)) x_extrapolate(j)=targetElementSet%x(j)                      ! x_extrapolate is a copy of the x with missing points marked by ec_undef_hp
                            end if
                         end if
@@ -2977,7 +3100,9 @@ module m_ec_converter
       end function dbdistance
       
 !>    get field bounding box indices
-      subroutine ecConverterGetBbox(instancePtr, itemID, t01, col0, col1, row0, row1, ncols, nrows)
+      subroutine ecConverterGetBbox(instancePtr, itemID, t01, col0, col1, row0, row1, ncols, nrows, issparse, Ndatasize)
+         implicit none
+         
          type(tEcInstance), pointer :: instancePtr  !< intent(in)
          integer,       intent(in)  :: itemId       !< unique Item id
          integer,       intent(in)  :: t01          !< field 0 (0) or 1 (other)
@@ -2986,6 +3111,9 @@ module m_ec_converter
          
          type(tEcItem),     pointer :: itemPtr       !< Item corresponding to itemId
          type(tEcField),    pointer :: FieldPtr
+         
+         integer,       intent(out) :: issparse
+         integer,       intent(out) :: Ndatasize
          
          col0 = 0
          row0 = 0
@@ -3007,9 +3135,145 @@ module m_ec_converter
             
             ncols = itemPtr%elementSetPtr%n_cols
             nrows = itemPtr%elementSetPtr%n_rows
+            
+            issparse = FieldPtr%issparse
+            Ndatasize = FieldPtr%ia(nrows+1)-1
          end if
          
          return
       end subroutine ecConverterGetBbox
+      
+      subroutine MaskToSparse(n_cols,n_rows,imask, ia, ja)
+         implicit none
+         
+         integer,                            intent(in)  :: n_cols    !< number of columns
+         integer,                            intent(in)  :: n_rows    !< number of rows
+         integer, dimension(n_cols,n_rows),  intent(in)  :: imask     !< active (1) or not (0)
+         integer, dimension(:), allocatable, intent(out) :: ia        !< startpointers
+         integer, dimension(:), allocatable, intent(out) :: ja        !< column numbers
+         
+         integer                                         :: mp        ! column
+         integer                                         :: np        ! row
+         integer                                         :: i
+         
+!        allocate startpointer (increments)
+         allocate(ia(n_rows+1))
+         
+!        store increments of startpointer in ia
+         do np=1,n_rows
+           ia(np+1) = 0
+           do mp=1,n_cols
+              if ( imask(mp,np).eq.1 ) then
+                 ia(np+1) = ia(np+1) + 1
+              end if
+           end do
+         end do
+         
+!        make startpointers from increments
+         ia(1) = 1
+         do np=1,n_rows
+            ia(np+1) = ia(np) + ia(np+1)
+         end do
+         
+!        allocate 2nd-index numbers
+         allocate(ja(ia(n_rows+1)-1))
+         
+!        fill 2nd-index numbers
+         i = 0
+         do np=1,n_rows
+            do mp=1,n_cols
+               if ( imask(mp,np).eq.1 ) then
+                  i = i+1
+                  ja(i) = mp
+               end if
+            end do
+         end do
+         
+         return
+      end subroutine MaskToSparse
+      
+      subroutine SetSparsityPattern(srcfld, n_cols, n_rows, ia, ja)
+         implicit none
+         
+         type(tEcField),                       intent(inout) :: srcfld  !< source field
+         integer,                              intent(in)    :: n_cols  !< number of columns
+         integer,                              intent(in)    :: n_rows  !< number of rows
+         integer, dimension(:),   allocatable, intent(in)    :: ia      !< sparsity pattern in CRS format, start pointers
+         integer, dimension(:),   allocatable, intent(in)    :: ja      !< sparsity pattern in CRS format, column numbers
+         
+         
+         if ( associated(srcfld%ia) ) deallocate(srcfld%ia)
+         allocate(srcfld%ia(n_rows+1))
+         srcfld%ia = ia
+         if ( associated(srcfld%ja) ) deallocate(srcfld%ja)
+         allocate(srcfld%ja(ia(n_rows+1)-1))
+         srcfld%ja = ja
+         srcfld%issparse = 1
+         
+!        effectively bounding box
+         srcfld%bbox = (/ 1, 1, n_cols, n_rows/)
+                        
+         return
+      end subroutine SetSparsityPattern
+      
+!< convert (1:ncol,2:mrow) indices of lower-left source point to sparse indices of (1:lower-left,2:upper-left) source points (out),
+!<  left-right: increasing column index,
+!<  down-up: increasing row index
+!< note: input indices are (row,col), not (col,row)
+      subroutine ConvertToSparseIndices(n_points, indices, n_rows, ia, ja)
+         implicit none
+         
+         integer,                        intent(in)    :: n_points  !< number of target points
+         integer, dimension(2,n_points), intent(inout) :: indices   !<(mrow,ncol) indices of lower-left source point (in), sparse index of (lower-left,upper-left) source points (out)
+         integer,                        intent(in)    :: n_rows    !< number of rows of source
+         integer, dimension(n_rows),     intent(in)    :: ia        !< sparsity pattern in CRS format, start pointers
+         integer, dimension(:),          intent(in)    :: ja        !< sparsity pattern in CRS format, column numbers
+         
+         character(len=128)                            :: mesg
+         
+         integer                                       :: idx
+         integer                                       :: i, j
+         integer                                       :: irow, idownup
+         integer                                       :: mcol, nrow
+         
+         do i=1,n_points
+!           get (mcol,nrow) of lower-left source point
+            mcol = indices(2,i)
+            nrow = indices(1,i)
+            
+!           check if indices are assigned
+            if ( mcol.eq.0 .or. nrow.eq.0 ) then
+               cycle
+            end if
+            
+!           find sparse indeces of lower-left and upper-left source points
+            idx = 0
+            idownup = 0
+            do idownup=1,2
+               irow = nrow + idownup-1
+               
+               idx = 0
+               do j=ia(irow),ia(irow+1)-1
+                  if ( ja(j).eq.mcol ) then
+                     idx = j
+                     exit
+                  end if
+               end do
+            
+!              check if index is found
+               if ( idx.gt.0 ) then
+!                 overwrite index
+                  indices(idownup,i) = idx
+               else
+!                 error
+                  write(mesg, "(I0)") i
+                  call setECMessage("ERROR: conversion to sparse indices failed for point " // trim(mesg))
+               end if
+            end do
+            
+         end do
+         
+         return
+      end subroutine ConvertToSparseIndices
 
 end module m_ec_converter

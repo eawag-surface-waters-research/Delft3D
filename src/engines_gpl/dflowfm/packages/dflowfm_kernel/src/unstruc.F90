@@ -14732,6 +14732,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    use m_flowexternalforcings
    use m_partitioninfo
    use time_class
+   use unstruc_messages
 
    implicit none
 
@@ -15103,6 +15104,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    ! Update nudging temperature (and salinity)
    if (item_nudge_tem /= ec_undef_int ) then ! .and. .not.l_initphase) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_nudge_tem, irefdate, tzone, tunit, tim)
+!      tmpstr = dumpECMessageStack(LEVEL_INFO, callback_msg)
    endif
 
 !   call fm_wq_processes_step(dt_user,time_user)

@@ -137,7 +137,7 @@ module m_ec_message
          retval    = ' '
          my_msg => EcMessages
          do while (associated(my_msg))
-            retval = retval // my_msg%message
+            retval = retval // ' ' // my_msg%message
             my_msg => my_msg%next_message
          enddo
          call clearECMessage()
@@ -159,10 +159,13 @@ module m_ec_message
 
       type (TEcMessage), pointer    :: my_msg !< local pointer to one of the messages in the stack
 
-      call messenger (msglevel, "...")! separator
-
       !> loop over all messages in the stack
       my_msg => EcMessages
+
+      if ( associated(my_msg) ) then
+         call messenger (msglevel, "...")! separator
+      end if
+      
       do while (associated(my_msg))
          call messenger (msglevel, my_msg%message)
          my_msg => my_msg%next_message
