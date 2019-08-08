@@ -5,7 +5,8 @@ import os.path
 import pprint as pp
 
 def add_cov(inproj, outproj, CoveragePath):
-    coverage_options = " /Qcov-gen /Qcov-dir  "+ CoveragePath
+  # coverage_options = " /Qcov-gen /Qcov-dir  "+ CoveragePath   # with path specification for output
+    coverage_options = " /Qcov-gen "                            # without path specification for output
     xmltree = etree.parse(inproj)
     root=xmltree.getroot()
     for child in root:
