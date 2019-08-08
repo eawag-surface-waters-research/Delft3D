@@ -511,6 +511,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/oned_functions.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/part.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/partition.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/rcm.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/read_forcings.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/removedcode.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/rest.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/rgfstuff.f90 -text
