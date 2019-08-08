@@ -39,7 +39,8 @@ def iter_projects(solution,covpath):
             if re.match(".*proj$",project_full_path):
                 inproj = project_full_path
                 outproj = project_full_path
-                resultpath = os.path.join(slndir,covpath)
+#               resultpath = os.path.join(slndir,covpath)
+                resultpath = "."
                 if not(os.path.exists(resultpath)):
                     os.makedirs(resultpath)
                 add_cov(inproj, outproj, resultpath)
