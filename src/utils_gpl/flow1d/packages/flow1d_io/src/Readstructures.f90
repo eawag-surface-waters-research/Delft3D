@@ -232,7 +232,7 @@ module m_readstructures
             
             pstru%compound = 0
             if (.not. success) then
-               ! Error(s) found while scanning the structuretype independend stuff. Do not read the type dependend items
+               ! Error(s) found while scanning the structuretype independent stuff. Do not read the type dependent items
                cycle
             endif
             
