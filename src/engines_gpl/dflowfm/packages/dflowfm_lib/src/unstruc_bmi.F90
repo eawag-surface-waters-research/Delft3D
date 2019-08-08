@@ -2780,18 +2780,22 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
       call snappnt(ntemp, xintemp, yintemp, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
    endif
    ! re-map feature_ids array
-   i = 1
-   ntemp   = 0
-   feautureIncrement = 1
+   ntemp = 1 ! first feature Index
    do i = 1, size(xout)
-      if(xout(i) == dmiss) then
-         feature_ids(i) = 0
-         feautureIncrement = 1
+      if (xintemp(i) == dmiss) then
+         ! Input was a separator value
+         ntemp = ntemp+1 ! hereafter starts a new feature Index
+         feature_ids(i) = 0 ! 0 means: separator
       else
-         ntemp = ntemp + feautureIncrement
-         feautureIncrement = 0
-         feature_ids(i) = ntemp
-      endif
+         ! Input was an actual sourcesink start or endpoint. Check snapped value now.
+         if (xout(i) == dmiss) then
+            ! Input point lies outside of grid.
+            feature_ids(i) = 0 ! 0 means: non-snapped.
+         else
+            ! Input was snapped to a grid cell.
+            feature_ids(i) = ntemp ! ntemp is: current feature Index
+         endif
+      end if
    enddo
    case("dambreak")
       ! Extract polygon and the breach point coordinates
