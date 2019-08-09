@@ -204,17 +204,19 @@ contains
    
       ! Program code
       if (storS%count > 0) then
-         do i = 1, storS%Count
-            if (associated(storS%stor(i)%storageArea)) then
-               call dealloc(storS%stor(i)%storageArea)
-               storS%stor(i)%storageArea => null()
-            endif
-            if (associated(storS%stor(i)%streetArea)) then
-               call dealloc(storS%stor(i)%streetArea)
-               storS%stor(i)%streetArea => null()
-            endif
-         enddo
-         deallocate(storS%stor)
+         if (associated(storS%stor)) then 
+            do i = 1, storS%Count
+               if (associated(storS%stor(i)%storageArea)) then
+                  call dealloc(storS%stor(i)%storageArea)
+                  storS%stor(i)%storageArea => null()
+               endif
+               if (associated(storS%stor(i)%streetArea)) then
+                  call dealloc(storS%stor(i)%streetArea)
+                  storS%stor(i)%streetArea => null()
+               endif
+            enddo
+            deallocate(storS%stor)
+         endif
       endif
       storS%stor => null()
       storS%Size  = 0

@@ -288,11 +288,13 @@ contains
       ! Program code
       do i = 1, NUM_BOUN_TYPE
          count = boundaries%tp(i)%count
-         do j = 1, count
-            deallocate(boundaries%tp(i)%bd(j)%table)
-            boundaries%tp(i)%bd(j)%table => null()
-         enddo
-         if (count > 0) deallocate(boundaries%tp(i)%bd)
+         if (associated(boundaries%tp(i)%bd)) then
+            do j = 1, count
+               deallocate(boundaries%tp(i)%bd(j)%table)
+               boundaries%tp(i)%bd(j)%table => null()
+            enddo
+            if (count > 0) deallocate(boundaries%tp(i)%bd)
+         endif
          boundaries%tp(i)%bd => null()
          boundaries%tp(i)%Size  = 0
          boundaries%tp(i)%Count = 0

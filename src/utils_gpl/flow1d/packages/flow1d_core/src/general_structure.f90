@@ -106,7 +106,7 @@ contains
       ! modules
 
       ! Global variables
-      type(t_GeneralStructure), pointer, intent(in):: genstr        !< Derived type containing general structure information
+      type(t_GeneralStructure), pointer, intent(inout):: genstr        !< Derived type containing general structure information
       double precision, intent(in)                 :: maxWidth      !< Maximal width of the structure. Normally the the width of the flowlink
       double precision, intent(out)                :: fuL           !< fu component of momentum equation
       double precision, intent(out)                :: ruL           !< Right hand side component of momentum equation
