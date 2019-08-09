@@ -265,7 +265,7 @@ module m_readstructures
             case (ST_GENERAL_ST)
                call readGeneralStructure(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
             case (ST_COMPOUND)
-               ! skip the compound structures for now
+               ! Compound structures have been cycled above already.
                continue
             case default
                call setmessage(LEVEL_ERROR,  'Structure type: '//trim(typestr)//' not supported, see '//trim(pstru%id))
@@ -375,7 +375,12 @@ module m_readstructures
 
             pcompound => network%cmps%compound(network%cmps%count+1)
             call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'id', st_id, success1)
-            success = success .and. check_input_result(success1, '?', 'id')
+            if (.not. success1) then
+               write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ', id is missing.'
+               call err_flush()
+               success = .false.
+            end if
+
             pcompound%id = st_id
             pcompound%name = pcompound%id
             call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'name', pcompound%name)
@@ -392,12 +397,14 @@ module m_readstructures
             
             allocate(pcompound%structure_indices(pcompound%numstructs))
             do j = 1, pcompound%numstructs
-               pcompound%structure_indices(j) = hashsearch(network%sts%hashlist_structure, structureNames(j))
-               network%sts%struct(pcompound%structure_indices(j))%compound = network%cmps%count+1
+               istru = hashsearch(network%sts%hashlist_structure, structureNames(j))
                
-               if (pcompound%structure_indices(j) <=0) then
-                  msgbuf = 'Error reading compound structure '''// trim(st_id) // ''' structure '''//trim(structureNames(j))//''' was not found.'
+               if (istru <= 0) then
+                  msgbuf = 'Error reading compound structure '''// trim(st_id) // ''', structure '''//trim(structureNames(j))//''' was not found.'
+                  call err_flush()
                   success = .false.
+               else
+                  network%sts%struct(istru)%compound = network%cmps%count+1
                endif
             enddo
             if (success) then
