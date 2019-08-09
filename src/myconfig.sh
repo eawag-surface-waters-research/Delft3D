@@ -18,7 +18,7 @@
 # Patch the generated lib dependencies string in libtool:
 # On some systems, mglob_options_string contains confusing double quotes.
 # This sed command replaces, e.g., -lutils\"  ->  -lutils
-sed -i -e 's/\(-l[^ ]*\)\\\"/\1/' libtool
+#sed -i -e 's/\(-l[^ ]*\)\\\"/\1/' libtool
 
 #LISA, scalasca
 #FC="skin mpif90" CC="icc" F77="skin mpif90" MPIFC="skin mpif90" FCFLAGS=-lhdf5 ./configure --disable-openmp --with-mpi --prefix=$HOME --with-petsc=$PETSC_DIR
@@ -51,10 +51,11 @@ sed -i -e 's/\(-l[^ ]*\)\\\"/\1/' libtool
 
 
 # DEBUG
-source ./prebuild-h6.sh
+source ./prebuild-h6_buildserver_intel16.sh
 export FC=mpif90
 export F77=$FC
+export FCFLAGS="-O0 -g"
 #export FCFLAGS="-O0 -g -threads"
 #export FFLAGS="-O0 -g -threads"
-./configure --with-mpi --prefix=$HOME --disable-openmp --with-metis --with-petsc
 
+LDFLAGS="-L$PROJ_DIR/lib -L$SHAPELIB_DIR/lib $LDFLAGS" CPPFLAGS="-I$PROJ_DIR/include -I$SHAPELIB_DIR/include $CPPFLAGS" ./configure --with-mpi --prefix=$HOME --disable-openmp --with-metis --with-petsc --with-shapelib=$SHAPELIB_DIR --with-proj=$PROJ_DIR --disable-gdal
