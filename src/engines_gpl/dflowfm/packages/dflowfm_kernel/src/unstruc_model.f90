@@ -654,7 +654,7 @@ subroutine readMDUFile(filename, istat)
 
 
 
-    character(*), intent(in)  :: filename !< Name of file to be read (in current directory or with full path).
+    character(*), intent(in)  :: filename !< Name of file to be read (the MDU file must be in current working directory).
     integer,      intent(out) :: istat    !< Return status (0=success)
 
     character(len=32):: program
