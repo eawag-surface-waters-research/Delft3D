@@ -91,7 +91,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, allocatable :: nfaceedges(:)   ! total number of edges that surround a face
    double precision, allocatable :: node_x(:), node_y(:), edge_x(:), edge_y(:) !< coordinates
    double precision              :: xx, yy
-   integer :: im, ikk, ic, iii, k1c, g1, g2, nfaces, iedge, iface, tmpvarDim, jafound
+   integer :: im,nm,topodim, ikk, ic, iii, k1c, g1, g2, nfaces, iedge, iface, tmpvarDim, jafound
    integer :: ifacefile, ifacein, ifaceout, ifacec
    integer :: id_nodex, id_nodey, id_edgex, id_edgey
    integer :: intmiss = -2147483647 ! integer fillvalue
@@ -343,7 +343,15 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
 
       if (jaugrid == 1) then ! UGRID format
+         ierr = ionc_get_mesh_count(ioncids(ii), nm) 
          im = 1 ! only 2D mesh now, TODO: 1D mesh
+         do im=1,nm
+            ierr = ionc_get_topology_dimension(ioncids(ii), im, topodim)
+            if (topodim == 2) then
+               exit ! We found the correct mesh in #im, no further searching
+            end if
+         end do
+
          ! find the mesh topology variables
          ! face -netelem
          ierr = ionc_get_dimid(ioncids(ii), im, mdim_face, id)
@@ -364,7 +372,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ! max face node
          ierr = ionc_get_dimid(ioncids(ii), im, mdim_maxfacenodes, id)
          ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
-         dimids(id, ii) = id
+         if (id > 0) then
+            dimids(id, ii) = id
+         end if
+
          id_netfacemaxnodesdim(ii) = id
          netfacemaxnodes(ii)       = nlen
 
