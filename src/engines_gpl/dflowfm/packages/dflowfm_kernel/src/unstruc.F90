@@ -16332,19 +16332,19 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_pumpdim,    id_pumpname,    id_pump_dis,     id_pump_cap,      id_pump_s1up,      id_pump_s1dn,     id_pump_head,      &
                      id_pump_xmid,  id_pump_ymid,   id_pump_struhead,id_pump_stage,    id_pump_redufact,  id_pump_s1del,    id_pump_s1suc,     &
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
-                     id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_cresth,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
-                     id_weirgendim, id_weirgenname, id_weirgen_dis, id_weirgen_cresth, id_weirgen_crestw, id_weirgen_s1up,  id_weirgen_s1dn,  &        ! id_weirgen_head,
+                     id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_crestl,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
+                     id_weirgendim, id_weirgenname, id_weirgen_dis, id_weirgen_crestl, id_weirgen_crestw, id_weirgen_s1up,  id_weirgen_s1dn,  &        ! id_weirgen_head,
                      id_weir_stat,  id_weirgen_vel, id_weirgen_au,  id_weirgen_head,   id_weirgen_forcedif, id_weirgen_s1crest,               &
                      id_gategendim, id_gategenname, id_gategen_dis, id_gategen_sillh,  id_gategen_sillw,  id_gategen_edgel, id_gategen_openw, &           ! id_gategen_head,
                      id_gategen_flowh, id_gategen_s1up, id_gategen_s1dn,                                                                      &
-                     id_genstrudim, id_genstruname, id_genstru_dis, id_genstru_cresth, id_genstru_crestw, id_genstru_edgel, id_genstru_openw, &           ! id_genstru_head,
+                     id_genstrudim, id_genstruname, id_genstru_dis, id_genstru_crestl, id_genstru_crestw, id_genstru_edgel, id_genstru_openw, &           ! id_genstru_head,
                      id_genstru_s1up, id_genstru_s1dn, id_genstru_dis_gate_open, id_genstru_dis_gate_upp, id_genstru_openh, id_genstru_uppl,  &
                      id_genstru_vel, id_genstru_au, id_genstru_au_open, id_genstru_au_upp, id_genstru_stat, id_genstru_head,  id_genstru_velgateopen, &
                      id_genstru_velgateupp, id_genstru_s1crest, id_genstru_forcedif, &
-                     id_orifgendim, id_orifgenname, id_orifgen_dis, id_orifgen_cresth, id_orifgen_crestw, id_orifgen_edgel, id_orifgen_stat,  &
+                     id_orifgendim, id_orifgenname, id_orifgen_dis, id_orifgen_crestl, id_orifgen_crestw, id_orifgen_edgel, id_orifgen_stat,  &
                      id_orifgen_s1dn, id_orifgen_openh, id_orifgen_vel, id_orifgen_au, id_orifgen_s1up, id_orifgen_head, id_orifgen_s1crest, id_orifgen_forcedif,&
                      id_bridgedim, id_bridgename, id_bridge_dis, id_bridge_s1up,  id_bridge_s1dn, id_bridge_vel, id_bridge_au,  id_bridge_head, &
-                     id_culvertdim, id_culvertname, id_culvert_dis, id_culvert_s1up,  id_culvert_s1dn, id_culvert_cresth, id_culvert_openh, &
+                     id_culvertdim, id_culvertname, id_culvert_dis, id_culvert_s1up,  id_culvert_s1dn, id_culvert_crestl, id_culvert_openh, &
                      id_culvert_edgel, id_culvert_vel, id_culvert_stat, id_culvert_au,  id_culvert_head, & 
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
@@ -17159,11 +17159,11 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_genstru_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_genstru_dis, 'coordinates', 'general_structure_name')
 
-            ierr = nf90_def_var(ihisfile, 'general_structure_crest_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_cresth)
-            !ierr = nf90_put_att(ihisfile, id_genstru_cresth, 'standard_name', 'cgen_crest_level')
-            ierr = nf90_put_att(ihisfile, id_genstru_cresth, 'long_name', 'general structure crest level')
-            ierr = nf90_put_att(ihisfile, id_genstru_cresth, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_genstru_cresth, 'coordinates', 'general_structure_name')
+            ierr = nf90_def_var(ihisfile, 'general_structure_crest_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_crestl)
+            !ierr = nf90_put_att(ihisfile, id_genstru_crestl, 'standard_name', 'cgen_crest_level')
+            ierr = nf90_put_att(ihisfile, id_genstru_crestl, 'long_name', 'general structure crest level')
+            ierr = nf90_put_att(ihisfile, id_genstru_crestl, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_genstru_crestl, 'coordinates', 'general_structure_name')
 
             ierr = nf90_def_var(ihisfile, 'general_structure_crest_width', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_crestw)
             !ierr = nf90_put_att(ihisfile, id_genstru_crestw, 'standard_name', 'genstru_crest_width')
@@ -17434,11 +17434,11 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_cdam_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_cdam_dis, 'coordinates', 'cdam_name')
 
-            ierr = nf90_def_var(ihisfile, 'cdam_crest_level',     nf90_double, (/ id_cdamdim, id_timedim /), id_cdam_cresth)
-            !ierr = nf90_put_att(ihisfile, id_cdam_cresth, 'standard_name', 'cdam_crest_level')
-            ierr = nf90_put_att(ihisfile, id_cdam_cresth, 'long_name', 'controllable dam crest level')
-            ierr = nf90_put_att(ihisfile, id_cdam_cresth, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_cdam_cresth, 'coordinates', 'cdam_name')
+            ierr = nf90_def_var(ihisfile, 'cdam_crest_level',     nf90_double, (/ id_cdamdim, id_timedim /), id_cdam_crestl)
+            !ierr = nf90_put_att(ihisfile, id_cdam_crestl, 'standard_name', 'cdam_crest_level')
+            ierr = nf90_put_att(ihisfile, id_cdam_crestl, 'long_name', 'controllable dam crest level')
+            ierr = nf90_put_att(ihisfile, id_cdam_crestl, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_cdam_crestl, 'coordinates', 'cdam_name')
 
             ierr = nf90_def_var(ihisfile, 'cdam_s1up',     nf90_double, (/ id_cdamdim, id_timedim /), id_cdam_s1up)
             ierr = nf90_put_att(ihisfile, id_cdam_s1up, 'standard_name', 'sea_surface_height')
@@ -17465,11 +17465,11 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_weirgen_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_weirgen_dis, 'coordinates', 'weirgen_name')
 
-            ierr = nf90_def_var(ihisfile, 'weirgen_crest_level', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_cresth)
-            !ierr = nf90_put_att(ihisfile, id_weirgen_cresth, 'standard_name', 'weirgen_crest_level')
-            ierr = nf90_put_att(ihisfile, id_weirgen_cresth, 'long_name', 'weir crest level (via general structure)')
-            ierr = nf90_put_att(ihisfile, id_weirgen_cresth, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_weirgen_cresth, 'coordinates', 'weirgen_name')
+            ierr = nf90_def_var(ihisfile, 'weirgen_crest_level', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_crestl)
+            !ierr = nf90_put_att(ihisfile, id_weirgen_crestl, 'standard_name', 'weirgen_crest_level')
+            ierr = nf90_put_att(ihisfile, id_weirgen_crestl, 'long_name', 'weir crest level (via general structure)')
+            ierr = nf90_put_att(ihisfile, id_weirgen_crestl, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_weirgen_crestl, 'coordinates', 'weirgen_name')
 
             ierr = nf90_def_var(ihisfile, 'weirgen_crest_width', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_crestw)
             !ierr = nf90_put_att(ihisfile, id_weirgen_crestw, 'standard_name', 'weirgen_crest_width')
@@ -17538,10 +17538,10 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'coordinates', 'orifice_name')
 
-            ierr = nf90_def_var(ihisfile, 'orifice_crest_level', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_cresth)
-            ierr = nf90_put_att(ihisfile, id_orifgen_cresth, 'long_name', 'orifice crest level')
-            ierr = nf90_put_att(ihisfile, id_orifgen_cresth, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_orifgen_cresth, 'coordinates', 'orifice_name')
+            ierr = nf90_def_var(ihisfile, 'orifice_crest_level', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_crestl)
+            ierr = nf90_put_att(ihisfile, id_orifgen_crestl, 'long_name', 'orifice crest level')
+            ierr = nf90_put_att(ihisfile, id_orifgen_crestl, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_orifgen_crestl, 'coordinates', 'orifice_name')
 
             ierr = nf90_def_var(ihisfile, 'orifice_crest_width', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_crestw)
             ierr = nf90_put_att(ihisfile, id_orifgen_crestw, 'long_name', 'orifice crest width')
@@ -17658,10 +17658,10 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_culvert_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_culvert_dis, 'coordinates', 'culvert_name')
 
-            ierr = nf90_def_var(ihisfile, 'culvert_crest_level', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_cresth)
-            ierr = nf90_put_att(ihisfile, id_culvert_cresth, 'long_name', 'culvert crest level')
-            ierr = nf90_put_att(ihisfile, id_culvert_cresth, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_culvert_cresth, 'coordinates', 'culvert_name')
+            ierr = nf90_def_var(ihisfile, 'culvert_crest_level', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_crestl)
+            ierr = nf90_put_att(ihisfile, id_culvert_crestl, 'long_name', 'culvert crest level')
+            ierr = nf90_put_att(ihisfile, id_culvert_crestl, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_culvert_crestl, 'coordinates', 'culvert_name')
 
             ierr = nf90_def_var(ihisfile, 'culvert_gate_lower_edge_level', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_edgel)
             ierr = nf90_put_att(ihisfile, id_culvert_edgel, 'long_name', 'culvert gate lower edge level')
@@ -18278,7 +18278,7 @@ subroutine unc_write_his(tim)            ! wrihis
             do i = 1,ncgensg
                igen = i
                ierr = nf90_put_var(ihisfile, id_genstru_dis   , valcgen(2,i)   , (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_cresth, zcgen(3*igen-2), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_crestl, zcgen(3*igen-2), (/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_edgel , zcgen(3*igen-1), (/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_openw , zcgen(3*igen  ), (/ i, it_his /)) ! TODO: AvD: this part seems not entirely correct, double check with block below and duplication with gategen, etc.
                ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valcgen(3,i)   , (/ i, it_his /))
@@ -18289,7 +18289,7 @@ subroutine unc_write_his(tim)            ! wrihis
             do i=1,ngenstru
                !igen = genstru2cgen(i)
                ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i), (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_cresth, valgenstru(9,i), (/ i, it_his /)) ! changed
+               ierr = nf90_put_var(ihisfile, id_genstru_crestl, valgenstru(9,i), (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_edgel , valgenstru(14,i), (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_openw , valgenstru(13,i), (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i), (/ i, it_his /))
@@ -18339,7 +18339,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),  (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),  (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_cresth,        valorifgen(9,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestl,        valorifgen(9,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_orifgen_stat,     int(valorifgen(11,i)), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i), (/ i, it_his /))
@@ -18367,7 +18367,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_culvert_head,   valculvert(5,i),      (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_culvert_au,     valculvert(6,i),      (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_culvert_vel,    valculvert(7,i),      (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_culvert_cresth, valculvert(8,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_culvert_crestl, valculvert(8,i),      (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_culvert_stat,  int(valculvert(9,i)),  (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_culvert_edgel , valculvert(10,i),     (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_culvert_openh,  valculvert(11,i),     (/ i, it_his /))
@@ -18399,7 +18399,7 @@ subroutine unc_write_his(tim)            ! wrihis
       if (jahiscdam > 0 .and. ncdamsg > 0) then
          do i = 1,ncdamsg
             ierr = nf90_put_var(ihisfile, id_cdam_dis   , valcdam(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_cdam_cresth, zcdam(i)    , (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cdam_crestl, zcdam(i)    , (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_cdam_s1up  , valcdam(3,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_cdam_s1dn  , valcdam(4,i), (/ i, it_his /))
          end do
@@ -18410,7 +18410,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_weirgen_dis   , valweirgen(2,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_s1up  , valweirgen(3,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valweirgen(4,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_weirgen_cresth, valweirgen(9,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valweirgen(9,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(10,i),(/ i, it_his /))
             if (network%sts%numWeirs > 0) then ! write extra files for new weirs
                ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i), (/ i, it_his /))
