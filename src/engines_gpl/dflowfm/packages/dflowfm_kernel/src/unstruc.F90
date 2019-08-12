@@ -16341,7 +16341,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_genstru_s1up, id_genstru_s1dn, id_genstru_dis_gate_open, id_genstru_dis_gate_upp, id_genstru_openh, id_genstru_uppl,  &
                      id_genstru_vel, id_genstru_au, id_genstru_au_open, id_genstru_au_upp, id_genstru_stat, id_genstru_head,  id_genstru_velgateopen, &
                      id_genstru_velgateupp, id_genstru_s1crest, id_genstru_forcedif, &
-                     id_orifgendim, id_orifgenname, id_orifgen_dis, id_orifgen_crestl, id_orifgen_crestw, id_orifgen_edgel, id_orifgen_stat,  &
+                     id_orifgendim, id_orifgen_id, id_orifgen_dis, id_orifgen_crestl, id_orifgen_crestw, id_orifgen_edgel, id_orifgen_stat,  &
                      id_orifgen_s1dn, id_orifgen_openh, id_orifgen_vel, id_orifgen_au, id_orifgen_s1up, id_orifgen_head, id_orifgen_s1crest, id_orifgen_forcedif,&
                      id_bridgedim, id_bridgename, id_bridge_dis, id_bridge_s1up,  id_bridge_s1dn, id_bridge_vel, id_bridge_au,  id_bridge_head, &
                      id_culvertdim, id_culvertname, id_culvert_dis, id_culvert_s1up,  id_culvert_s1dn, id_culvert_crestl, id_culvert_openh, &
@@ -17529,80 +17529,80 @@ subroutine unc_write_his(tim)            ! wrihis
         ! Orifice
         if(jahisorif > 0 .and. network%sts%numOrifices > 0) then
             ierr = nf90_def_dim(ihisfile, 'orifice', network%sts%numOrifices, id_orifgendim)
-            ierr = nf90_def_var(ihisfile, 'orifice_name',  nf90_char,   (/ id_strlendim, id_orifgendim /), id_orifgenname)
-            ierr = nf90_put_att(ihisfile, id_orifgenname,  'cf_role',   'timeseries_id')
-            ierr = nf90_put_att(ihisfile, id_orifgenname,  'long_name', 'orifice name'    )
+            ierr = nf90_def_var(ihisfile, 'orifice_id',  nf90_char,   (/ id_strlendim, id_orifgendim /), id_orifgen_id)
+            ierr = nf90_put_att(ihisfile, id_orifgen_id,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_orifgen_id,  'long_name', 'Id of orifice')
 
             ierr = nf90_def_var(ihisfile, 'orifice_discharge',     nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_dis)
-            ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'long_name', 'orifice discharge')
+            ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'long_name', 'Discharge through orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_orifgen_dis, 'coordinates', 'orifice_name')
 
             ierr = nf90_def_var(ihisfile, 'orifice_crest_level', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_crestl)
-            ierr = nf90_put_att(ihisfile, id_orifgen_crestl, 'long_name', 'orifice crest level')
+            ierr = nf90_put_att(ihisfile, id_orifgen_crestl, 'long_name', 'Crest level of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_crestl, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_crestl, 'coordinates', 'orifice_name')
 
             ierr = nf90_def_var(ihisfile, 'orifice_crest_width', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_crestw)
-            ierr = nf90_put_att(ihisfile, id_orifgen_crestw, 'long_name', 'orifice crest width')
+            ierr = nf90_put_att(ihisfile, id_orifgen_crestw, 'long_name', 'Crest width of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_crestw, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_crestw, 'coordinates', 'orifice_name')
 
             ierr = nf90_def_var(ihisfile, 'orifice_gate_lower_edge_level', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_edgel)
-            ierr = nf90_put_att(ihisfile, id_orifgen_edgel, 'long_name', 'orifice gate lower edge level')
+            ierr = nf90_put_att(ihisfile, id_orifgen_edgel, 'long_name', 'Gate lower edge level of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_edgel, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_edgel, 'coordinates', 'orifice_name')
 
             ierr = nf90_def_var(ihisfile, 'orifice_s1up',     nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_s1up)
             ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'standard_name', 'sea_surface_height')
-            ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'long_name', 'orifice water level up')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'long_name', 'Water level upstream of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1up, 'coordinates', 'orifice_name')
 
             ierr = nf90_def_var(ihisfile, 'orifice_s1dn',     nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_s1dn)
             ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'standard_name', 'sea_surface_height')
-            ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'long_name', 'orifice water level down')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'long_name', 'Water level downstream of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'coordinates', 'orifice_name')
             
             ierr = nf90_def_var(ihisfile, 'orifice_gate_opening_height', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_openh)
-            ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'long_name', 'orifice gate opening height')
+            ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'long_name', 'Gate opening height of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'coordinates', 'orifice_name')
             
             ierr = nf90_def_var(ihisfile, 'orifice_head', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_head)
-            ierr = nf90_put_att(ihisfile, id_orifgen_head, 'long_name', 'orifice head')
+            ierr = nf90_put_att(ihisfile, id_orifgen_head, 'long_name', 'Head difference across orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_head, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_head, 'coordinates', 'orifice_name')
             
             ierr = nf90_def_var(ihisfile, 'orifice_flow_area ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_au)
-            ierr = nf90_put_att(ihisfile, id_orifgen_au, 'long_name', 'orifice flow area')
+            ierr = nf90_put_att(ihisfile, id_orifgen_au, 'long_name', 'Flow area at orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_au, 'units', 'm2')
             ierr = nf90_put_att(ihisfile, id_orifgen_au, 'coordinates', 'orifice_name')
             
             ierr = nf90_def_var(ihisfile, 'orifice_state ', nf90_int, (/ id_orifgendim, id_timedim /), id_orifgen_stat)
-            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'long_name', 'orifice state')
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'long_name', 'Flow state at orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'units', '-')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'units', '-')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'coordinates', 'orifice_name')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'flag_values', '0, 1, 2, 3, 4')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'flag_meanings', 'no_flow weir_free weir_submerged gate_free gate_submerged')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'valid_range', '0, 4')
-            ierr = nf90_put_att(ihisfile, id_orifgen_stat, '_FillValue', imiss)
+            ierr = nf90_put_att(ihisfile, id_orifgen_stat, '_FillValue', int(dmiss))
             
             ierr = nf90_def_var(ihisfile, 'orifice_s1_on_crest ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_s1crest)
-            ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'long_name', 'orifice water level on crest')
+            ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'long_name', 'Water level on crest of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'coordinates', 'orifice_name')
             
             ierr = nf90_def_var(ihisfile, 'orifice_velocity ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_vel)
-            ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'long_name', 'orifice velocity')
+            ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'long_name', 'Velocity through orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'coordinates', 'orifice_name')
             
             ierr = nf90_def_var(ihisfile, 'orifice_force_difference ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_forcedif)
-            ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'long_name', 'orifice force difference per unit')
-            ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'units', 'N s-1')
+            ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'long_name', 'Force difference per unit width at orifice')
+            ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'units', 'N m-1')
             ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'coordinates', 'orifice_name')
         endif
         
@@ -17874,7 +17874,7 @@ subroutine unc_write_his(tim)            ! wrihis
         if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
            do i = 1, network%sts%numOrifices
               istru = network%sts%orificeIndices(i)
-              ierr = nf90_put_var(ihisfile, id_orifgenname,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_orifgen_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
         
@@ -18332,19 +18332,19 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
          do i=1,network%sts%numOrifices
-            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_crestl,        valorifgen(9,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_stat,     int(valorifgen(11,i)), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestl,        valorifgen(9,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_stat,      int(valorifgen(11,i)), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i),  (/ i, it_his /))
          enddo
       end if
       
@@ -36314,9 +36314,9 @@ if (jahisbal > 0) then
             if( Ln(1,La) /= kpump(1,L) ) then
                dir = -1d0
             end if
-            call fill_valstruct_perlink(valpump(1:5,n), La, dir, 0, istru, L)
+            call fill_valstruct_perlink(valpump(:,n), La, dir, ST_PUMP, istru, L)
          enddo
-         call average_valstruct(valpump(1:5,n), 0, istru, 0, 0)
+         call average_valstruct(valpump(:,n), ST_UNSET, 0, 0, 0) ! TODO: UNST-2705: move code above and below to valstruct routines.
          if (istru > 0) then ! TODO: UNST-2587: once all pump code is done, remove this temp IF.
          pstru => network%sts%struct(istru)
          valpump(6,n) = GetPumpCapacity(pstru)
@@ -36505,9 +36505,9 @@ if (jahisbal > 0) then
                   if ( jaghost.eq.1 ) cycle
                endif
                dir = sign(1d0,dble(Lf))
-               call fill_valstruct_perlink(valweirgen(1:NUMVALS_WEIRGEN,n), La, dir, 1, istru, L)
+               call fill_valstruct_perlink(valweirgen(:,n), La, dir, ST_WEIR, istru, L)
             enddo
-            call average_valstruct(valweirgen(1:NUMVALS_WEIRGEN,n), 1, istru, nlinks, NUMVALS_WEIRGEN)
+            call average_valstruct(valweirgen(:,n), ST_WEIR, istru, nlinks, NUMVALS_WEIRGEN)
          enddo
       else
          ! old weir, do not compute the new extra fileds
@@ -36525,9 +36525,9 @@ if (jahisbal > 0) then
                if( Ln(1,La) /= kcgen(1,L) ) then
                   dir = -1d0
                end if
-               call fill_valstruct_perlink(valweirgen(1:5,n), La, dir, 0, 0, 0)
+               call fill_valstruct_perlink(valweirgen(:,n), La, dir, ST_UNSET, 0, 0)
             enddo
-            call average_valstruct(valweirgen(1:5,n), 0, 0, 0, 0)
+            call average_valstruct(valweirgen(:,n), ST_UNSET, 0, 0, 0)
             if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
                valweirgen(NUMVALS_WEIRGEN,n) = 1  ! rank contains the weir.
                valweirgen(10,n) = zcgen(3*i  )    ! id_weirgen_crestw.
@@ -36552,11 +36552,9 @@ if (jahisbal > 0) then
                if ( jaghost.eq.1 ) cycle
             endif
             dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valorifgen(1:12,n), La, dir, 1, istru, L)
-            call fill_others_perlink(valorifgen(1:NUMVALS_ORIFGEN,n), istru, La, L, dir)
+            call fill_valstruct_perlink(valorifgen(:,n), La, dir, ST_ORIFICE, istru, L)
          enddo
-         call average_valstruct(valorifgen(1:NUMVALS_ORIFGEN,n), 1, istru, nlinks, NUMVALS_ORIFGEN)
-         call fill_others(valorifgen(1:NUMVALS_ORIFGEN,n), istru, La, nlinks, NUMVALS_ORIFGEN)
+         call average_valstruct(valorifgen(:,n), ST_ORIFICE, istru, nlinks, NUMVALS_ORIFGEN)
       enddo  
       
       !
@@ -36575,10 +36573,10 @@ if (jahisbal > 0) then
                if ( jaghost.eq.1 ) cycle
             endif
             dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valbridge(1:NUMVALS_BRIDGE,n), La, dir, 0, 0, 0)
+            call fill_valstruct_perlink(valbridge(:,n), La, dir, ST_BRIDGE, istru, 0)
             valbridge(6,n) = valbridge(6, n) + au(La)
          enddo
-         call average_valstruct(valbridge(1:NUMVALS_BRIDGE,n), 0, 0, 0, 0)
+         call average_valstruct(valbridge(:,n), ST_BRIDGE, istru, nlinks, NUMVALS_BRIDGE) ! TODO: UNST-2720: move code below/above to valustruc* routines
          if (valbridge(1,n) == 0) then
             valbridge(6,n) = dmiss
             valbridge(7,n) = dmiss
@@ -36605,10 +36603,10 @@ if (jahisbal > 0) then
                if ( jaghost.eq.1 ) cycle
             endif
             dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valculvert(1:NUMVALS_CULVERT,n), La, dir, 0, 0, 0)
+            call fill_valstruct_perlink(valculvert(:,n), La, dir, ST_CULVERT, istru, 0)
             valculvert(6,n) = valculvert(6, n) + au(La)
          enddo
-         call average_valstruct(valculvert(1:NUMVALS_CULVERT,n), 0, 0, 0, 0)
+         call average_valstruct(valculvert(:,n), ST_CULVERT, istru, nlinks, NUMVALS_CULVERT) ! TODO: UNST-2719: move code aboe/below to valstruc* routines
          if (valculvert(1,n) == 0) then
             valculvert(6:NUMVALS_CULVERT,n) = dmiss
          else
@@ -36660,11 +36658,9 @@ if (jahisbal > 0) then
                   if ( jaghost.eq.1 ) cycle
                endif
                dir = sign(1d0,dble(Lf))
-               call fill_valstruct_perlink(valgenstru(1:12,n), La, dir, 1, istru, L)
-               call fill_others_perlink(valgenstru(1:NUMVALS_GENSTRU,n), istru, La, L, dir)
+               call fill_valstruct_perlink(valgenstru(:,n), La, dir, ST_GENERAL_ST, istru, L)
             enddo
-            call average_valstruct(valgenstru(1:NUMVALS_GENSTRU,n), 1, istru, nlinks, NUMVALS_GENSTRU)
-            call fill_others(valgenstru(1:NUMVALS_GENSTRU,n), istru, La, nlinks, NUMVALS_GENSTRU)
+            call average_valstruct(valgenstru(:,n), ST_GENERAL_ST, istru, nlinks, NUMVALS_GENSTRU)
          enddo
       else
          ! old general structure, do not compute the new extra fileds
@@ -36682,9 +36678,9 @@ if (jahisbal > 0) then
                if( Ln(1,La) /= kcgen(1,L) ) then
                   dir = -1d0
                end if
-              call fill_valstruct_perlink(valgenstru(1:5,n), La, dir, 0, 0, 0)
+              call fill_valstruct_perlink(valgenstru(:,n), La, dir, ST_UNSET, 0, 0)
             enddo
-            call average_valstruct(valgenstru(1:5,n), 0, 0, 0, 0)
+            call average_valstruct(valgenstru(:,n), ST_UNSET, 0, 0, 0)
             if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
                valgenstru(NUMVALS_GENSTRU,n) = 1  ! rank contains the general structure.
                valgenstru(13,n) = zcgen(3*i  )    ! id_genstru_openw.

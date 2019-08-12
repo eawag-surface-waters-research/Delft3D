@@ -148,7 +148,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_GENSTRU = 23    !< Number of variables for general structure( new exe file)
  integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
  integer                           :: NUMVALS_ORIFGEN = 23    !< Number of variables for orific
- integer                           :: NUMVALS_BRIDGE  = 7    !< Number of variables for bridge
+ integer                           :: NUMVALS_BRIDGE  = 7     !< Number of variables for bridge
  integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
  
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
@@ -281,12 +281,13 @@ subroutine reset_structures()
 end subroutine reset_structures
 
 !> Fills the valstruct array for one given structure on a given link LL.
-!! This is an array with output values that are useful for all types of structures.
-!! Note: if it is a general structure (jagenst == 1), then (6)-(12) are computed as well.
-subroutine fill_valstruct_perlink(valstruct, LL, dir, jagenst, istru, L)
+!! All values are filled, both the generic ones, as well as the type-specific ones.
+!! Note: old-style structures may call this with istrtypein = ST_UNSET.
+subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    use m_missing, only: dmiss
    use m_flow, only: q1, s1, au
    use m_flowgeom, only: wu, ln
+   use m_General_Structure
    implicit none
    double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
                                                                 !< (1) total width
@@ -294,39 +295,70 @@ subroutine fill_valstruct_perlink(valstruct, LL, dir, jagenst, istru, L)
                                                                 !< (3) structure water level up
                                                                 !< (4) structure water level down
                                                                 !< (5) structure head
-                                                                !< (6) flow area (if jagenst == 1)
-                                                                !< (7) velocity (if jagenst == 1)
-                                                                !< (8) water level on crest (if jagenst == 1)
-                                                                !< (9) crest level (if jagenst == 1)
-                                                                !< (10) crest width (if jagenst == 1)
-                                                                !< (11) state (if jagenst == 1)
-                                                                !< (12) force difference per unit width (if jagenst == 1)
-   integer,                        intent(in   ) :: LL          !< flow link index
-   double precision,               intent(in   ) :: dir         !< direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
-   integer,                        intent(in   ) :: jagenst     !< a general structure (1) or not (0).
-   integer,                        intent(in   ) :: istru       !< structure index
-   integer,                        intent(in   ) :: L           !< local flow link index in the gernal structure
-   integer :: ku, kd
-   
+                                                                !< (6) flow area
+                                                                !< (7) velocity
+                                                                !< (8) water level on crest
+                                                                !< (9) crest level
+                                                                !< (10) crest width
+                                                                !< (11) state
+                                                                !< (12) force difference per unit width
+                                                                !< (13) gate opening width
+                                                                !< (14) gate lower edge level
+                                                                !< (15) gate opening height
+                                                                !< (16) gate upper edge level
+                                                                !< (17) discharge through gate opening
+                                                                !< (18) discharge over gate upper edge level
+                                                                !< (19) flow area in gate opening
+                                                                !< (20) flow area above upper edge level
+                                                                !< (21) velocity through gate opening
+                                                                !< (22) velocity over gate upper edge level
+   integer,                        intent(in   ) :: L           !< Flow link number.
+   double precision,               intent(in   ) :: dir         !< Direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
+   integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
+                                                                !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
+   integer,                        intent(in   ) :: istru       !< Structure index in network%sts set.
+   integer,                        intent(in   ) :: L0          !< Local flow link index in the struct%linknumbers array.
+
+   integer :: ku, kd, k1, k2
+   type(t_GeneralStructure), pointer :: genstr
+
    if (dir > 0) then
-      ku = ln(1,LL)
-      kd = ln(2,LL)
+      ku = ln(1,L)
+      kd = ln(2,L)
    else
-      ku = ln(2,LL)
-      kd = ln(1,LL)
+      ku = ln(2,L)
+      kd = ln(1,L)
    end if
 
-   valstruct(1) = valstruct(1) + wu(LL)
-   valstruct(2) = valstruct(2) + q1(LL)*dir
-   valstruct(3) = valstruct(3) + s1(ku)*wu(LL)
-   valstruct(4) = valstruct(4) + s1(kd)*wu(LL)
-   valstruct(5) = valstruct(5) + (s1(ku)- s1(kd))*wu(LL)
-   if (jagenst == 1) then
-      valstruct(6) = valstruct(6) + au(LL)
-      valstruct(8) = valstruct(8) + network%sts%struct(istru)%generalst%sOnCrest(L)*wu(LL)
-      valstruct(12)= valstruct(12) + get_force_difference(istru, L)*wu(LL)
+   ! 1. Generic values that apply to all structure types
+   valstruct(1) = valstruct(1) + wu(L)
+   valstruct(2) = valstruct(2) + q1(L)*dir
+   valstruct(3) = valstruct(3) + s1(ku)*wu(L)
+   valstruct(4) = valstruct(4) + s1(kd)*wu(L)
+   valstruct(5) = valstruct(5) + (s1(ku) - s1(kd))*wu(L)
+
+   ! 2. More specific valus that apply to certain structure types only
+
+   ! General structure-based structures with a crest.
+   if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE, ST_UNI_WEIR
+      valstruct(6)  = valstruct(6) + au(L)
+      valstruct(8)  = valstruct(8) + network%sts%struct(istru)%generalst%sOnCrest(L0)*wu(L)
+      valstruct(12) = valstruct(12) + get_force_difference(istru, L0)*wu(L)
    end if
    
+   ! General structure-based structures with a (gate) door.
+   if (any(istrtypein == (/ ST_GENERAL_ST, ST_ORIFICE /))) then ! TODO: ST_GATE
+      k1 = ln(1,L)
+      k2 = ln(2,L)
+
+      genstr => network%sts%struct(istru)%generalst
+      valstruct(17) = valstruct(17) + get_discharge_through_gate_opening(genstr, L0, s1(k1), s1(k2))*dir
+      valstruct(18) = valstruct(18) + get_discharge_over_gate_uppedge(genstr, L0, s1(k1), s1(k2))*dir
+      
+      valstruct(19) = valstruct(19) + genstr%au(3,L0)
+      valstruct(20) = valstruct(20) + genstr%au(2,L0)
+  end if
+
 end subroutine fill_valstruct_perlink
 
 
@@ -335,10 +367,11 @@ end subroutine fill_valstruct_perlink
 !! Note 1: fill_valstructs_perlink must have been called in
 !! a loop prior to calling this averaging routine.
 !! Note 2: if it is a general structure (jagenst == 1), then (6)-(12) are computed as well.
-subroutine average_valstruct(valstruct, jagenst, istru, nlinks, icount)
+subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
    use m_missing, only: dmiss
    use m_partitioninfo, only: jampi
    use m_1d_structures
+   use m_General_Structure, only: t_GeneralStructure
    implicit none
    double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valpump(:)):
                                                                 !< (1) total width (unchanged)
@@ -353,22 +386,36 @@ subroutine average_valstruct(valstruct, jagenst, istru, nlinks, icount)
                                                                 !< (10) crest width (computed)
                                                                 !< (11) state (if all links have the same state, then write it. Otherwise it is missing value)
                                                                 !< (12) force difference per unit width (averaged)
-   integer,                        intent(in   ) :: jagenst     !< a new general structure (1) or not (0)
-   integer,                        intent(in   ) :: istru       !< structure index      
-   integer,                        intent(in   ) :: nlinks      !< number of links on the current partition
-   integer,                        intent(in   ) :: icount      !< index of the counter element in valstruct array,
-                                                                !! it is the last element of the array
+                                                                !< (13) gate opening width
+                                                                !< (14) gate lower edge level
+                                                                !< (15) gate opening height
+                                                                !< (16) gate upper edge level
+                                                                !< (17) discharge through gate opening
+                                                                !< (18) discharge over gate upper edge level
+                                                                !< (19) flow area in gate opening
+                                                                !< (20) flow area above upper edge level
+                                                                !< (21) velocity through gate opening
+                                                                !< (22) velocity over gate upper edge level
+                                                                !< (icount) counters of partitions for parallel
+   integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
+                                                                !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
+   integer,                        intent(in   ) :: istru       !< Structure index in network%sts set.
+   integer,                        intent(in   ) :: nlinks      !< Number of flow links for this structure (on the current partition)
+   integer,                        intent(in   ) :: icount      !< Index of the counter element in valstruct array,
+                                                                !! it is the last element of the array.
    
    integer:: i
    type(t_structure), pointer :: pstru
+   type(t_GeneralStructure), pointer :: genstr
    
-   if( jampi == 0 ) then
-      if(valstruct(1) == 0d0 ) then
+   ! 1. Generic values that apply to all structure types
+   if (jampi == 0) then
+      if (valstruct(1) == 0d0 ) then ! zero width
          valstruct(2) = dmiss  ! discharge
          valstruct(3) = dmiss  ! s1up
          valstruct(4) = dmiss  ! s1down
          valstruct(5) = dmiss  ! head
-         if (jagenst == 1) then
+         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE, ST_UNI_WEIR
             valstruct(6) = dmiss ! flow area
             valstruct(7) = dmiss ! velocity
             valstruct(8) = dmiss ! water level on crest
@@ -384,21 +431,25 @@ subroutine average_valstruct(valstruct, jagenst, istru, nlinks, icount)
          valstruct(4) = valstruct(4) / valstruct(1)        ! s1down
          valstruct(5) = valstruct(5) / valstruct(1)        ! head
          
-         if (jagenst == 1) then
+         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE, ST_UNI_WEIR
             pstru => network%sts%struct(istru)
-            if (valstruct(6) > 0d0) then
+            if (valstruct(6) > 0d0) then ! non-zero flow area
                valstruct(7) = valstruct(2) / valstruct(6)  ! velocity
             else
                valstruct(7) = 0d0
             end if
             valstruct(8) = valstruct(8) / valstruct(1)     ! water level on crest
-            valstruct(12)= valstruct(12)/ valstruct(1)      ! force difference per unit width
+            valstruct(12)= valstruct(12)/ valstruct(1)     ! force difference per unit width
             
          end if
       endif
    endif
 
-   if (jagenst == 1 .and. nlinks > 0) then      ! If it is a new general structure, and there are links
+   ! 2. More specific valus that apply to certain structure types only
+
+   ! General structure-based structures with a crest.
+   if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /)) & ! TODO: ST_GATE, ST_UNI_WEIR
+       .and. nlinks > 0) then ! If it is a new general structure, and there are links
       valstruct(icount) = 1                     ! count the current partition
       valstruct(9) = get_crest_level(pstru)     ! crest level
       valstruct(10)= get_width(pstru)           ! crest width
@@ -411,9 +462,36 @@ subroutine average_valstruct(valstruct, jagenst, istru, nlinks, icount)
          end if
       end do
    end if
+
+   ! General structure-based structures with a (gate) door.
+   if (any(istrtypein == (/ ST_GENERAL_ST, ST_ORIFICE /))) then ! TODO: ST_GATE
+      if (nlinks > 0) then ! If it is a new general structure, and there are links
+         genstr => network%sts%struct(istru)%generalst
+         valstruct(13) = genstr%gateopeningwidth                  ! gate opening width
+         valstruct(14) = genstr%gateLowerEdgeLevel                ! gate lower edge level
+         valstruct(15) = valstruct(14) - genstr%zs                ! gate opening height
+         valstruct(16) = valstruct(14) + genstr%gatedoorheight    ! gate upper edge level
+         valstruct(icount) = 1
+      end if
+
+      if (jampi == 0 ) then
+         if (valstruct(1) == 0d0) then ! zero width
+            valstruct(13:) = dmiss ! TODO: is it allowed to overwrite valstruct(icount) here?
+         else
+            if (valstruct(19) > 0) then ! flow area in gate opening
+               valstruct(21) = valstruct(21) / valstruct(19) ! velocity through gate opening
+            end if
+            if (valstruct(20) > 0) then ! flow area above gate upper edge level
+               valstruct(22) = valstruct(22) / valstruct(20) ! velocity over gate upper edge level
+            end if
+         end if
+      end if 
+   end if
+
 end subroutine average_valstruct
 
-!!> Gets force difference per unit width over structure (weir, gate, general structure) per link
+
+!!> Gets force difference per unit width over structure (weir, gate, general structure) per link.
 double precision function get_force_difference(istru, L)
    use m_missing
    use m_flowgeom, only: ln
@@ -447,119 +525,6 @@ double precision function get_force_difference(istru, L)
 
 end function get_force_difference
 
-!> Fills (17)-(20) elements of array valstruct for one given structure istru on a given link L
-subroutine fill_others_perlink(valstruct, istru, L, L0, dir)
-   use m_flowgeom, only: ln
-   use m_flow, only: s1, hu
-   use m_General_Structure, only: t_GeneralStructure
-   implicit none
-   double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
-                                                                !< (1) total width
-                                                                !< (2) structure discharge
-                                                                !< (3) structure water level up
-                                                                !< (4) structure water level down
-                                                                !< (5) structure head
-                                                                !< (6) flow area 
-                                                                !< (7) velocity 
-                                                                !< (8) water level on crest 
-                                                                !< (9) crest level 
-                                                                !< (10) crest width
-                                                                !< (11) state
-                                                                !< (12) force difference per unit width
-                                                                !< (13) gate opening width
-                                                                !< (14) gate lower edge level
-                                                                !< (15) gate opening height
-                                                                !< (16) gate upper edge level
-                                                                !< (17) discharge through gate opening
-                                                                !< (18) discharge over gate upper edge level
-                                                                !< (19) flow area in gate opening
-                                                                !< (20) flow area above upper edge level
-                                                                !< (21) velocity through gate opening
-                                                                !< (22) velocity over gate upper edge level
-   integer,                        intent(in   )   :: L         !< flow link index
-   integer,                        intent(in   )   :: istru     !< structure index in network type
-   integer,                        intent(in   )   :: L0        !< local link index
-   double precision,               intent(in   )   :: dir       !< direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
-   
-   type(t_GeneralStructure), pointer :: genstr
-   integer                           :: k1, k2
-   
-   if (hu(L) > 0) then
-      k1 = ln(1,L)
-      k2 = ln(2,L)
-      
-      genstr => network%sts%struct(istru)%generalst
-      valstruct(17) = valstruct(17) + get_discharge_through_gate_opening(genstr, L0, s1(k1), s1(k2))*dir
-      valstruct(18) = valstruct(18) + get_discharge_over_gate_uppedge(genstr, L0, s1(k1), s1(k2))*dir
-      
-      valstruct(19) = valstruct(19) + genstr%au(3,L0)
-      valstruct(20) = valstruct(20) + genstr%au(2,L0)
-   end if
-end subroutine fill_others_perlink
-
-!> Fills (13)-(16), (21)-(22) elements of array valstruct across all links,
-!! where needed taking care of partition models.
-!! Note: fill_others_perlink must have been called in
-!! a loop prior to calling this routine.
-subroutine fill_others(valstruct, istru, L, nlinks, icount)
-   use m_General_Structure, only: t_GeneralStructure
-   use m_flow, only: hu
-   use m_missing, only: dmiss
-   use m_partitioninfo, only: jampi
-   implicit none
-   double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
-                                                                !< (1) total width
-                                                                !< (2) structure discharge
-                                                                !< (3) structure water level up
-                                                                !< (4) structure water level down
-                                                                !< (5) structure head
-                                                                !< (6) flow area 
-                                                                !< (7) velocity 
-                                                                !< (8) water level on crest 
-                                                                !< (9) crest level 
-                                                                !< (10) crest width
-                                                                !< (11) state
-                                                                !< (12) force difference per unit width
-                                                                !< (13) gate opening width
-                                                                !< (14) gate lower edge level
-                                                                !< (15) gate opening height
-                                                                !< (16) gate upper edge level
-                                                                !< (17) discharge through gate opening
-                                                                !< (18) discharge over gate upper edge level
-                                                                !< (19) flow area in gate opening
-                                                                !< (20) flow area above upper edge level
-                                                                !< (21) velocity through gate opening
-                                                                !< (22) velocity over gate upper edge level
-   integer,                        intent(in   )   :: L         !< flow link index
-   integer,                        intent(in   )   :: istru     !< structure index in network type
-   integer,                        intent(in   )   :: nlinks    !< number of links in the current parition
-   integer,                        intent(in   )   :: icount    !< index of the counter element in valstruct array,
-                                                                !! it is the last element of the array
-   type(t_GeneralStructure), pointer :: genstr
-   
-   if (nlinks > 0) then
-      genstr => network%sts%struct(istru)%generalst
-      valstruct(13) = genstr%gateopeningwidth                  ! gate opening width
-      valstruct(14) = genstr%gateLowerEdgeLevel                ! gate lower edge level
-      valstruct(15) = valstruct(14) - genstr%zs                ! gate opening height
-      valstruct(16) = valstruct(14) + genstr%gatedoorheight    ! gate upper edge level
-      valstruct(icount) = 1
-   end if
-   
-   if (jampi == 0 ) then
-      if (valstruct(1) == 0d0) then
-         valstruct(13:NUMVALS_GENSTRU) = dmiss
-      else
-         if (valstruct(19) > 0) then
-            valstruct(21) = valstruct(21) / valstruct(19) ! velocity through gate opening
-         end if
-         if (valstruct(20) > 0) then
-            valstruct(22) = valstruct(22) / valstruct(20) ! velocity over gate upper edge level
-         end if
-      end if
-   end if 
-
-end subroutine fill_others
 
 !> Gets discharge through gate opening per link
 double precision function get_discharge_through_gate_opening(genstr, L0, s1m1, s1m2)
