@@ -1868,6 +1868,7 @@ double precision              :: chainage
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
 status = .False.
+istat = 0
 ngs = 0 ! Local counter for all crossed flow liks by *all* general structures.
 nstr = tree_num_nodes(strs_ptr) ! TODO: minor issue: will count *all* children in structure file.
 if (nstr > 0) then
