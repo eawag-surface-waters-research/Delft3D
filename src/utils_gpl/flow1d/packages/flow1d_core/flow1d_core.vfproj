@@ -41,7 +41,11 @@
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
 	<Files>
-		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Header Files" Filter="fi;fd">
+		<File RelativePath="..\..\include\c_structures.inc"/>
+		<File RelativePath="..\..\include\get_structure_by_id.inc"/>
+		<File RelativePath="..\..\include\set_structure_by_id.inc"/>
+		<File RelativePath="..\..\include\update_structures.inc"/></Filter>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\BoundaryConditions.f90"/>
@@ -50,6 +54,7 @@
 		<File RelativePath=".\src\c_structures.f90"/>
 		<File RelativePath=".\src\callback_functions.F90"/>
 		<File RelativePath=".\src\cf_timers.f90"/>
+		<File RelativePath=".\src\compound.f90"/>
 		<File RelativePath=".\src\cross_helper.f90"/>
 		<File RelativePath=".\src\CrossSections.f90"/>
 		<File RelativePath=".\src\culvert.f90"/>

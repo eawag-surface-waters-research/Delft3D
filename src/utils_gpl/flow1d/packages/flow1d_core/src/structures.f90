@@ -85,10 +85,8 @@ module m_1d_structures
    public GetPumpCapacity
    public GetPumpStage
    public GetPumpReductionFactor
-   public initialize_compounds
    public initialize_structure
    public set_fu_ru
-   public computeCompound
 
    public printData
 
@@ -115,13 +113,11 @@ module m_1d_structures
 
    interface realloc
       module procedure reallocstructure
-      module procedure reallocCompound
       module procedure reallocForcingList
    end interface
 
    interface dealloc
       module procedure deallocstructure
-      module procedure deallocCompound
       module procedure deallocForcingList
    end interface dealloc
 
@@ -193,22 +189,6 @@ module m_1d_structures
       integer, pointer, dimension(:)                        :: gateIndices              !< (numGates) indices of the gates in the overall struct(:) array. Note: some may actually be of type ST_GENERAL_ST.
       integer, pointer, dimension(:)                        :: generalStructureIndices  !< (numGeneralStructures) indices of the general structures in the overall struct(:) array.
    end type t_structureSet
-
-   type, public :: t_compound
-      character(IdLen)                   :: id                    !< Id of the compound structure.
-      character(IdLen)                   :: name                  !< Name of the compound structure.
-      integer                            :: numstructs            !< Number of the structure elements in the compound.
-      integer, dimension(:), pointer     :: structure_indices     !< Indices of the structure elements.
-      integer                            :: numlinks              !< Number of links .
-      integer, dimension(:), pointer     :: linknumbers           !< Link numbers.
-   end type t_compound
-
-   type, public :: t_compoundSet
-      integer                                               :: Size     = 0
-      integer                                               :: growsBy = 2000
-      integer                                               :: Count    = 0
-     type(t_compound), pointer, dimension(:)                :: compound
-   end type t_compoundSet
 
    !> Data type to store user input for structure forcings, to be processed later by a kernel.
    !! For example, a pump's capacity may be prescribed by a time series in a .bc file.
@@ -418,36 +398,6 @@ subroutine deallocstructure(sts)
 
 end subroutine deallocstructure
 !
-subroutine deallocCompound(cmps)
-   ! Modules
-
-   implicit none
-
-   ! Input/output parameters
-   type(t_compoundSet), intent(inout)          :: cmps
-
-   ! Local variables
-   integer  :: length, i
-
-   ! Program code
-   if (associated(cmps%compound)) then
-      length = cmps%size
-      do i = 1, length
-         if (associated(cmps%compound(i)%structure_indices)) deallocate(cmps%compound(i)%structure_indices)
-         if (associated(cmps%compound(i)%linknumbers))       deallocate(cmps%compound(i)%linknumbers)
-         cmps%compound(i)%structure_indices => null()
-         cmps%compound(i)%linknumbers       => null()
-      enddo
-      deallocate(cmps%compound)
-   endif
-   
-   cmps%compound => null()
-   cmps%size  = 0
-   cmps%count = 0
-
-end subroutine
-!
-!
    subroutine reallocstructure(sts)
       ! Modules
 
@@ -476,36 +426,6 @@ end subroutine
       endif
       sts%Size = sts%Size+sts%growsBy
    end subroutine
-
-   subroutine reallocCompound(cmps)
-      ! Modules
-
-      implicit none
-
-      ! Input/output parameters
-      type(t_compoundSet), intent(inout)          :: cmps
-
-      ! Local variables
-      type(t_compound), pointer, dimension(:)      :: oldcmps
-
-      ! Program code
-
-      if (cmps%Size > 0) then
-         oldcmps=>cmps%compound
-      endif
-
-      if (cmps%growsBy <=0) then
-         cmps%growsBy = 200
-      endif
-      allocate(cmps%compound(cmps%Size+cmps%growsBy))
-
-      if (cmps%Size > 0) then
-         cmps%compound(1:cmps%Size) = oldcmps(1:cmps%Size)
-         deallocate(oldcmps)
-      endif
-      cmps%Size = cmps%Size+cmps%growsBy
-   end subroutine
-
 
 !> Deallocates a forcing list and sets all counters to zero.
 subroutine deallocForcingList(fs)
@@ -1208,13 +1128,15 @@ end subroutine
       GetPumpReductionFactor = stru%pump%reduction_factor
    end function GetPumpReductionFactor
    
-   subroutine initialize_structure(struct, numlinks, links, wu)
+   function initialize_structure(struct, numlinks, links, wu) result(istat)
 
       type(t_structure),               intent(inout) :: struct
       integer,                         intent(in   ) :: numlinks
       integer, dimension(:),           intent(in   ) :: links
       double precision, dimension(:),  intent(in   ) :: wu
+      integer                                        :: istat
       
+      istat = 0
       allocate(struct%linknumbers(numlinks), struct%fu(numlinks), struct%ru(numlinks), struct%au(numlinks))
       struct%numlinks = numlinks
       struct%linknumbers = links(1:numlinks)
@@ -1234,53 +1156,16 @@ end subroutine
          call update_widths(struct%generalst, numlinks, links, wu)
       case (ST_CULVERT, ST_UNI_WEIR, ST_ORIFICE, ST_GATE, ST_WEIR, ST_PUMP, ST_BRIDGE)
          if (numlinks > 1) then
+            istat = 1
             call setmessage(LEVEL_ERROR, 'Multiple links for culvert structures is not supported, check structure'//trim(struct%id))
          endif
       case default
          ! A reminder not to forget other structures that are added:
+         istat = 1
          call setMessage(LEVEL_ERROR, 'Internal error, this structure type is not (yet) implemented in initialize_structure')
       end select
 
-   end subroutine initialize_structure
-
-   !> Initialize compound structures. Set the link numbers and check if all structures links
-   !! are consistent.
-   subroutine initialize_compounds(cmps, sts)
-      type(t_structureSet), intent(in   )   :: sts    !< Structure set
-      type (t_compoundSet), intent(inout)   :: cmps   !< Compounds set
-      
-      integer :: i, j
-      integer :: L0
-      integer :: istru
-      integer :: numlinks
-      
-      do i = 1, cmps%count
-         istru = cmps%compound(i)%structure_indices(1)
-         numlinks = sts%struct(istru)%numlinks
-         allocate(cmps%compound(i)%linknumbers(numlinks))
-         cmps%compound(i)%linknumbers = sts%struct(istru)%linknumbers
-         cmps%compound(i)%numlinks = numlinks
-         ! now check if other members contain the same links
-         do j = 2, cmps%compound(i)%numstructs
-            istru = cmps%compound(i)%structure_indices(j)
-            if (cmps%compound(i)%numlinks /= sts%struct(istru)%numlinks) then
-               msgbuf = 'Error in compound ''' // trim(cmps%compound(i)%id) //''' the number of links in structure element ''' // &
-                  trim(sts%struct(istru)%id) //''' is different from the first structure element.'
-               call err_flush()
-               cycle
-            endif
-            do L0 = 1, numlinks
-               if (cmps%compound(i)%linknumbers(L0) /= sts%struct(j)%linknumbers(L0)) then
-                  msgbuf = 'Error in compound ''' // trim(cmps%compound(i)%id) //''' the link numbers in structure element ''' // &
-                     trim(sts%struct(istru)%id) //''' is inconsistent with the first structure element.'
-                  call err_flush()
-                  cycle
-               endif
-            enddo
-         enddo
-      enddo
-      
-   end subroutine initialize_compounds
+   end function initialize_structure
 
    !> Set fu, ru and au in a structure. This subroutine is essential for compound
    !! structures. Since the compound structure relies on the fact that FU, RU and 
@@ -1297,31 +1182,4 @@ end subroutine
       struct%au(L0) = au
    end subroutine set_fu_ru
    
-   !> Compute FU, RU and AU for compound at internal linknumber L0
-   subroutine computeCompound(compound, struct, L0, fu, ru, au)
-      type(t_compound),                intent(in   )  :: compound  !< Compound structure object.
-      type(t_structure), dimension(:), intent(in   )  :: struct    !< Array containing structures.
-      integer,                         intent(in   )  :: L0        !< Internal link number.
-      double precision,                intent(  out)  :: fu        !< FU coefficient.
-      double precision,                intent(  out)  :: ru        !< RU coefficient.
-      double precision,                intent(  out)  :: au        !< Flow area.
-      
-      integer :: istru, i
-      
-      fu = 0d0
-      ru = 0d0
-      au = 0d0
-      
-      do i = 1, compound%numstructs
-         istru = compound%structure_indices(i)
-         fu = fu + struct(istru)%fu(L0)*struct(istru)%au(L0) 
-         ru = ru + struct(istru)%ru(L0)*struct(istru)%au(L0) 
-         au = au + struct(istru)%au(L0) 
-      enddo
-      if (au > 0d0) then
-         fu = fu/au
-         ru = ru/au
-      endif
-      
-   end subroutine computeCompound
 end module m_1d_structures

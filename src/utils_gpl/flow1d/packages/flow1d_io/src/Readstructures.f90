@@ -88,6 +88,8 @@ module m_readstructures
    subroutine readStructures(network, structureFile)
       use m_GlobalParameters
       use m_1d_Structures
+      use m_compound
+      
       implicit none
       
       type(t_network), intent(inout) :: network              !< Network pointer
@@ -404,6 +406,7 @@ module m_readstructures
                   call err_flush()
                   success = .false.
                else
+                  pcompound%structure_indices(j) = istru
                   network%sts%struct(istru)%compound = network%cmps%count+1
                endif
             enddo

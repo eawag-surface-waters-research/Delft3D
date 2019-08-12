@@ -39,12 +39,13 @@ libflow1d_core_la_SOURCES = \
          culvert.f90 \
          bridge.f90 \
          structures.f90 \
+         compound.f90 \
          Laterals.F90 \
          ModelGlobalData.f90 \
          ModelParameters.f90 \
          Storage.f90 \
          ObservationPoints.f90 \
-		 ObservCrossSections.f90 \
+         ObservCrossSections.f90 \
          NetworkTypes.f90 \
          Trenches.f90 \
          df1d_transport.f90 \

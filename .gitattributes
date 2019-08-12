@@ -13057,6 +13057,7 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/bridge.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/c_structures.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/callback_functions.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/cf_timers.f90 -text
+src/utils_gpl/flow1d/packages/flow1d_core/src/compound.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/cross_helper.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/culvert.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/df1d_transport.f90 -text

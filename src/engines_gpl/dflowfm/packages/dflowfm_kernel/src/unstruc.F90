@@ -34132,6 +34132,7 @@ end subroutine setbobs_fixedweirs
  use m_bridge
  use m_trachy, only: trachy_resistance
  use m_oned_functions
+ use m_compound
 
  implicit none
 
@@ -34386,7 +34387,7 @@ end subroutine setbobs_fixedweirs
              
                 ! store computed fu, ru and au in structure object. In case this structure
                 ! is a part of a compound structure this data will be used in computeCompound
-                call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
+                 call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
              endif
           enddo
        endif

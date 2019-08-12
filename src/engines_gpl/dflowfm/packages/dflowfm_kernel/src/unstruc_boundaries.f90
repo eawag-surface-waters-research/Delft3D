@@ -1802,6 +1802,7 @@ end function flow_initwaveforcings_runtime
 !> Initializes controllers that force structures.
 !! Currently only time series files, in the future also realtime control (RTC).
 function flow_init_structurecontrol() result (status)
+use dfm_error
 use m_1d_structures
 use m_flowexternalforcings
 use m_hash_search
@@ -1862,6 +1863,7 @@ double precision              :: xla, xlb, yla, ylb, rn, rt
 integer, allocatable          :: lftopol(:)
 double precision, allocatable :: xl(:,:), yl(:,:)
 integer                       :: branchIndex   
+integer                       :: istat
 double precision              :: chainage
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
@@ -1908,8 +1910,9 @@ do i=1,network%sts%count
                                     branchindex = pstru%ibran, chainage = pstru%chainage, &
                                     xpin = pstru%xCoordinates, ypin = pstru%yCoordinates, nump = pstru%numCoordinates)
    if (numgen > 0) then
-      call initialize_structure(pstru, numgen, kegen(1:numgen), wu)
+      istat =  initialize_structure(pstru, numgen, kegen(1:numgen), wu)
    else
+      istat = DFM_GENERICERROR
       msgbuf = 'No intersecting links found for structure with name '//trim(pstru%name)//' and id '//trim(pstru%id)
       call warn_flush()
    endif
@@ -1917,7 +1920,7 @@ do i=1,network%sts%count
 end do
 
 if (network%cmps%Count > 0) then
-   call initialize_compounds(network%cmps, network%sts)
+    istat = istat + initialize_compounds(network%cmps, network%sts)
 endif
 
 
@@ -1938,6 +1941,8 @@ endif
 !      end if
 !end do
 
+
+! TODO missing input values results in skipping the structure, but the return status will be .true.
 do i=1,nstr
    plifile = ''
    qid = ''
@@ -2386,6 +2391,7 @@ end do
             call warn_flush()
             cycle
          end if
+
 
          read(rec, *, iostat = ierr) tmpval
          if (ierr /= 0) then ! No number, so check for timeseries filename
@@ -3102,10 +3108,15 @@ if (ndambreak > 0) then
       deallocate(dambreakPolygons(indexInStructure)%xp)
    enddo
 endif
-status = .True.
+if (istat == DFM_NOERR) then
+   status = .true.
+else
+   status = .false.
+endif
 
 ! Cleanup:
 888 continue
+    
  if (mext > 0) then
 !    call doclose(mext) ! close ext file
 !    deallocate ( keg, ked, kep, kegs) ! TODO: AvD: cleanup now still done in initexternalforcings. Split off later, or not?

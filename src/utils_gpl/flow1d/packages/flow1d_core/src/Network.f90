@@ -38,6 +38,7 @@ module m_network
    use m_ExtraResistance
    use m_df1d_transport
    use m_ObservCrossSections
+   use m_compound
    
    implicit none
 
