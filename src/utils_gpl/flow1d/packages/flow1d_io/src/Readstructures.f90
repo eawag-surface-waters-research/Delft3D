@@ -501,12 +501,8 @@ module m_readstructures
                
                ! Initialize Parameters for Pump
                pstr%pump%actual_stage      = 0
-               pstr%pump%capacitySetpoint  = 0.0d0
-               pstr%pump%computed_capacity = 0.0d0
                pstr%pump%discharge         = 0.0d0
                pstr%pump%is_active         = .true.
-               pstr%pump%isControlled      = .false.
-               pstr%pump%pump_head         = 0.0d0
                pstr%pump%reduction_factor  = 1.0d0
                pstr%pump%ss_level          = 0.0d0
                pstr%pump%ds_level          = 0.0d0
@@ -1250,11 +1246,8 @@ module m_readstructures
       
       ! Initialize Parameters for Pump
       pump%actual_stage      = 0
-      pump%capacitySetpoint  = 0.0d0
-      pump%computed_capacity = 0.0d0
       pump%discharge         = 0.0d0
       pump%is_active         = .true.
-      pump%isControlled      = .false.
       pump%pump_head         = 0.0d0
       pump%reduction_factor  = 1.0d0
       pump%ss_level          = 0.0d0
@@ -1605,9 +1598,9 @@ module m_readstructures
       integer                      :: res               !< The returned controlSide integer code. 1 for suctionSide, 2 for deliverySide, 3 for both, 0 for invalid input.
 
       select case(str_tolower(trim(controlSideString)))
-      case('suctionSide')
+      case('suctionside')
          res = 1
-      case('deliverySide')
+      case('deliveryside')
          res = 2
       case('both')
          res = 3

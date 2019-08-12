@@ -185,9 +185,6 @@
     write(msgbuf,*) 'setting fortranpump%capacity(1) to', c_pump%capacity
     call mess(LEVEL_DEBUG, msgbuf)
     fortranpump%capacity(1) = c_pump%capacity
-    write(msgbuf,*) 'setting fortranpump%oldcapacity to', c_pump%oldcapacity
-    call mess(LEVEL_DEBUG, msgbuf)
-    fortranpump%oldcapacity = c_pump%oldcapacity
     write(msgbuf,*) 'setting fortranpump%reduction_factor to', c_pump%reduction_factor
     call mess(LEVEL_DEBUG, msgbuf)
     fortranpump%reduction_factor = c_pump%reduction_factor

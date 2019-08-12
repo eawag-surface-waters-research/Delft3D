@@ -37,7 +37,6 @@
      real(c_double) :: start_level_suction_side
      real(c_double) :: stop_level_suction_side
      real(c_double) :: capacity
-     real(c_double) :: oldcapacity
      real(c_double) :: reduction_factor
      integer(c_int) :: actual_stage
      logical(c_bool) :: is_active

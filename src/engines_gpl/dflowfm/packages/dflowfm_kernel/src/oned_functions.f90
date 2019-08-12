@@ -40,6 +40,7 @@ module m_oned_functions
    public save_1d_nrd_vars_in_stm
    public setbobs_1d
    public gridpoint2cross
+   public computePump
 
    type, public :: t_gridp2cs
       integer :: num_cross_sections
@@ -431,26 +432,34 @@ module m_oned_functions
          bl(n2) = min(bl(n2), bob(2,L))
       endif
    enddo
-      
+
+   ! In case of compound structures bob is set to the lowest crest level
+   ! Pumping stations get the bob of the channel
+   ! First step is to initialise all structure bobs to huge
+   nstruc = network%sts%count
+   do i = 1, nstruc
+      pstruc => network%sts%struct(i)
+      do L0 = 1, pstruc%numlinks
+         L = pstruc%linknumbers(L0)
+         bob(:,L) = huge(1d0)
+      enddo
+   enddo
+   
    nstruc = network%sts%count
    do i = 1, nstruc
       pstruc => network%sts%struct(i)
       crest_level = get_crest_level(pstruc)
-      if (crest_level < 0.5*huge(1d0)) then
-         do L0 = 1, pstruc%numlinks
-            L = pstruc%linknumbers(L0)
-            bob(1,L) = crest_level
-            if (bob0(1,L) > 0.5*huge(1d0)) then
-               ! in case no cross section is available for this link also set BOB0 to crest level
-               bob0(1,L) = bob(1,L)
-            endif
-            bob(2,L) = crest_level
-            if (bob0(2,L) > 0.5*huge(1d0)) then
-               ! in case no cross section is available for this link also set BOB0 to crest level
-               bob0(2,L) = bob(2,L)
-            endif
-         enddo
-      endif
+      do L0 = 1, pstruc%numlinks
+         L = pstruc%linknumbers(L0)
+         if (crest_level < huge(1d0)) then
+            bob(1,L) = min(bob(1,L), crest_level)
+            bob(2,L) = min(bob(2,L), crest_level)
+         else
+            ! pumping station
+            bob(1,L) = min(bob(1,L), bob0(1,L))
+            bob(2,L) = min(bob(2,L), bob0(2,L))
+         endif
+      enddo
    enddo
    
    if (time_user<= tstart_user) then
@@ -504,4 +513,88 @@ module m_oned_functions
    
    end subroutine setbobs_1d
 
+   subroutine computePump(struct)
+      use m_1d_structures
+      use m_pump
+      use m_flowtimes
+      use m_flowgeom 
+      use m_flow
+      
+      type(t_structure), intent(inout) :: struct
+                
+      double precision     :: s1k1
+      double precision     :: s1k2
+      double precision     :: qp
+      double precision     :: ap
+      double precision     :: vp
+      integer              :: L   
+      integer              :: L0   
+      integer              :: k1   
+      integer              :: k2
+      integer              :: dir
+      integer              :: n
+      
+      ! First compute average waterlevels to the left and the right of the pump
+      s1k1 = 0d0
+      s1k2 = 0d0
+      ap = 0d0
+      vp = 0d0
+      qp = 0d0
+      do L0 = 1, struct%numlinks
+         L = struct%linknumbers(L0)
+         dir = sign(1, L * struct%pump%direction)
+         L = iabs(L)
+         if ( dir > 0) then         
+            k1 = ln(1,L)
+            k2 = ln(2,L)
+         else
+            k1 = ln(2,L)
+            k2 = ln(1,L)
+         endif
+         
+         if (hs(k1) > 1d-2) then
+            au(L) = 1d0
+            ap    = ap + au(L)
+            vp    = vp + vol1(k1)
+            s1k1 = s1k1 + s1(k1)
+            s1k2 = s1k2 + s1(k2)
+         endif
+      enddo
+      if (ap > 0d0) then
+         s1k1 = s1k1/ap
+         s1k2 = s1k2/ap
+         call PrepareComputePump(struct%pump, s1k1, s1k2)
+         qp    = struct%pump%discharge
+      endif          
+
+      if (qp ==0d0 .or. ap == 0 .or. vp == 0d0) then
+         fu(L) = 0d0
+         ru(L) = 0d0
+         struct%fu = 0d0
+         struct%ru = 0d0
+         struct%au = 0d0
+      else
+
+         if (abs(qp) > 0.9d0*vp/dts) then
+            qp = sign(qp,0.9d0*vp/dts)
+         endif
+         
+         do L0  = 1, struct%numlinks
+            L = struct%linknumbers(L0)
+            dir = sign(1, L * struct%pump%direction)
+            L = iabs(L)
+            if ( dir > 0) then         
+               k1 = ln(1,L)
+            else
+               k1 = ln(2,L)
+            endif
+         
+            if (hs(k1) > 1d-2) then
+               fu(L) = 0d0
+               ru(L) =  qp/ap
+            endif
+         enddo
+      endif
+
+   end subroutine
 end module m_oned_functions

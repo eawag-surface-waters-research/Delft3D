@@ -205,7 +205,6 @@
           c_pump%start_level_suction_side = fortranpump%ss_onlevel(1)
           c_pump%stop_level_suction_side = fortranpump%ss_offlevel(1)
           c_pump%capacity = fortranpump%capacity(1)
-          c_pump%oldcapacity = fortranpump%oldcapacity
           c_pump%reduction_factor = fortranpump%reduction_factor
           c_pump%actual_stage = fortranpump%actual_stage
           c_pump%is_active = fortranpump%is_active

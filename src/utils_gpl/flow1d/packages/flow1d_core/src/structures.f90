@@ -663,8 +663,7 @@ end subroutine
                 call setMessage(LEVEL_ERROR, line)
                 return
              endif
-             sts%struct(istru)%pump%isControlled = .true.
-             sts%struct(istru)%pump%capacitySetpoint = value
+             sts%struct(istru)%pump%capacity(1) = value
            else
              SetValueStruc = .false.
            endif
@@ -731,7 +730,7 @@ end subroutine
            if (iparam == CFiGateLowerEdgeLevel) getValueStruc = sts%struct(istru)%orifice%openlevel
            if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%orifice%openlevel - sts%struct(istru)%orifice%crestlevel
        case (ST_PUMP)
-           getValueStruc = sts%struct(istru)%pump%capacitySetpoint
+           getValueStruc = sts%struct(istru)%pump%capacity(1)
            if (sts%struct(istru)%pump%capacity(1)*getValueStruc < -1e-6) then
              ! The pump direction may not be changed.
              line = 'The pumping direction of pump '//trim(sts%struct(istru)%id) //' is changed. This is not allowed.'
@@ -1164,8 +1163,7 @@ end subroutine
          call setMessage(LEVEL_ERROR, msgbuf)
          return
       endif
-      struc%pump%isControlled = .true.
-      struc%pump%capacitySetpoint = value
+      struc%pump%capacity(1) = value
    end subroutine set_capacity
    
    !> Gets pump capacity.
