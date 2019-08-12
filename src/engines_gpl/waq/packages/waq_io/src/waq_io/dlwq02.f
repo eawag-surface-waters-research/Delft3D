@@ -446,7 +446,7 @@
 
 !     Copy timers data to dlwqt0_data
       dlwq0t_itstrt = itstrt
-      dlwq0t_itstop = itstop  
+      dlwq0t_itstop = itstop
 
 !     Read monitoring area's
 
@@ -601,7 +601,8 @@
  2140 format ( /' ERROR: Absolute timer does not fit in timer format :',A,/
      &          ' Is your T0 setting in block #1 correct?'/,
      &          ' Allowed difference with T0 is usually ca. 68 years.' )
- 2150 format ( /' ERROR: String is not a valid absolute timer :',A)
+ 2150 format ( /' ERROR: String is not recognised as a keyword and',
+     &          ' it is not a valid absolute timer :',A)
  2155 format (  ' ERROR: Start time (',I10,') absolute timer is less than zero',
      &          ' or auxiliary timer is set before T0.'/
      &          '        This is not supported!' )
