@@ -506,6 +506,7 @@ module m_readstructures
                pstr%pump%actual_stage      = 0
                pstr%pump%discharge         = 0.0d0
                pstr%pump%is_active         = .true.
+               pstr%pump%pump_head         = 0.0d0
                pstr%pump%reduction_factor  = 1.0d0
                pstr%pump%ss_level          = 0.0d0
                pstr%pump%ds_level          = 0.0d0

@@ -513,7 +513,7 @@ module m_oned_functions
    
    end subroutine setbobs_1d
 
-   subroutine computePump(struct)
+   subroutine computePump_all_links(struct)
       use m_1d_structures
       use m_pump
       use m_flowtimes
@@ -534,7 +534,7 @@ module m_oned_functions
       integer              :: dir
       integer              :: n
       
-      ! First compute average waterlevels to the left and the right of the pump
+      ! First compute average waterlevels on suction side and delivery side of the pump
       s1k1 = 0d0
       s1k2 = 0d0
       ap = 0d0
@@ -542,6 +542,9 @@ module m_oned_functions
       qp = 0d0
       do L0 = 1, struct%numlinks
          L = struct%linknumbers(L0)
+         ! Note: Link L may have negative sign if flow link is opposite pump's orientation
+         ! (pump orientation is polyline+righthand rule, or network branch direction)
+         ! Pump *direction* may be negative to indicate that pump is pumping opposite its *orientation*.
          dir = sign(1, L * struct%pump%direction)
          L = iabs(L)
          if ( dir > 0) then         
@@ -553,13 +556,16 @@ module m_oned_functions
          endif
          
          if (hs(k1) > 1d-2) then
+            ! NOTE: pump area-weighting across links is uniform for all links (au=1).
             au(L) = 1d0
             ap    = ap + au(L)
             vp    = vp + vol1(k1)
-            s1k1 = s1k1 + s1(k1)
-            s1k2 = s1k2 + s1(k2)
+            s1k1 = s1k1 + au(L)*s1(k1)
+            s1k2 = s1k2 + au(L)*s1(k2)
          endif
       enddo
+
+      ! With these average waterlevels, evaluate the pump discharge.
       if (ap > 0d0) then
          s1k1 = s1k1/ap
          s1k2 = s1k2/ap
@@ -567,7 +573,8 @@ module m_oned_functions
          qp    = struct%pump%discharge
       endif          
 
-      if (qp ==0d0 .or. ap == 0 .or. vp == 0d0) then
+      ! Finally, redistribute the requested pump discharge across all flow links.
+      if (qp == 0d0 .or. ap == 0 .or. vp == 0d0) then
          fu(L) = 0d0
          ru(L) = 0d0
          struct%fu = 0d0
@@ -596,5 +603,6 @@ module m_oned_functions
          enddo
       endif
 
-   end subroutine
+   end subroutine computePump_all_links
+
 end module m_oned_functions

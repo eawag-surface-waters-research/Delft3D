@@ -34339,7 +34339,7 @@ end subroutine setbobs_fixedweirs
     do istru = 1, nstrucsg
        pstru => network%sts%struct(istru)
        if (pstru%type == ST_PUMP) then
-          call computePump(pstru)
+          call computePump_all_links(pstru)
        else
           do L0 = 1, pstru%numlinks
              L = iabs(pstru%linknumbers(L0))
