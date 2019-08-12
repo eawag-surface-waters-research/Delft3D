@@ -409,6 +409,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
    integer :: nstru, i
    double precision, dimension(2) :: tempbob
    character(len=255) :: filename
+   integer :: threshold_abort_current
 
    ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
    
@@ -421,6 +422,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
    endif
 
    ! MessageHandling has already been set up via initMessaging() earlier.
+   threshold_abort_current = threshold_abort
    threshold_abort = LEVEL_FATAL
    call read_1d_mdu(filenames, network, found_1d_network)
    if (.not. found_1d_network) then 
@@ -497,6 +499,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
    
    ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.
    jainterpolatezk1D = 0
+   threshold_abort = threshold_abort_current
 
 end subroutine load_network_from_flow1d
 

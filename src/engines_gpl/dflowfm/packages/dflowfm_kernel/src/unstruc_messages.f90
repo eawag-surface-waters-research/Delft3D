@@ -38,7 +38,7 @@ use MessageHandling
 implicit none
 
 logical, parameter, private :: printToStdout = .true.
-integer :: threshold_abort = level_error
+integer :: threshold_abort = LEVEL_ERROR
 
 ! Verbosity levels for logging on screen and in diagnostics file.
 ! Configurable at runtime with '--verbose:...'-flag.
