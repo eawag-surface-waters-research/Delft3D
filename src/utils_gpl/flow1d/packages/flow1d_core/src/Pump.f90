@@ -35,7 +35,6 @@ module m_Pump
    implicit none
 
    public PrepareComputePump
-   public ComputePump
    public dealloc
 
    interface dealloc
@@ -114,30 +113,12 @@ contains
       
    end subroutine deallocPump
 
+   !> The discharge through a pump with different capacities
+   !! and control on suction and pressure side is calculated.
    subroutine PrepareComputePump(pump, ss_level, ds_level)
-      !=======================================================================
-      !                       Deltares
-      !                One-Two Dimensional Modelling System
-      !                           S O B E K
-      !
-      ! Subsystem:          Flow Module
-      !
-      ! Programmer:         J. van Beek
-      !
-      ! Module:             PLQHAP (PLuvius Q Discharge Advance Pump)
-      !
-      ! Module description: The discharge through an advanced pump with different capacities
-      !     and control on sucktion and pressure side is calculated.
-      !
-      !     update information
-      !     person                    date
-      !
-      !     23-03-2012: Redesigned by Jaap Zeekant based on algorithm specified by Thieu van Mierlo
-      !
-      !
       implicit none
 
-      type(t_pump), pointer          :: pump
+      type(t_pump), pointer          :: pump     !< Object containing pump specific data
       double precision, intent(in)   :: ss_level !< Suction Side level
       double precision, intent(in)   :: ds_level !< Delivery Side Level
       !
@@ -165,6 +146,11 @@ contains
       else
          
          ! Check Suction Side Conditions
+         ! * IF water level is ABOVE the on level of a stage, according to
+         !   the suction side, the stage is turned on.
+         ! * ELSEIF the water level is BELOW the off level of a stage, according to 
+         !   the suction side, the stage is turned off
+         ! * ELSE no action is taken. (on stays on, off stays off)
 
          if (abs(pump%direction) == 1 .or. abs(pump%direction) == 3) then
            do istage = 1, nstages
@@ -182,6 +168,12 @@ contains
          endif
 
          ! Check Delivery Side Conditions
+         ! * IF water level is BELOW the on level of a stage, according to
+         !   the suction side, the stage is turned on.
+         ! * ELSEIF the water level is ABOVE the off level of a stage, according to 
+         !   the suction side, the stage is turned off
+         ! * ELSE no action is taken. (on stays on, off stays off)
+
          if (abs(pump%direction) == 2 .or. abs(pump%direction) == 3) then
            do istage = 1, nstages
               ds_switch_on = (ds_level < pump%ds_onlevel(istage))
@@ -204,7 +196,9 @@ contains
            pump%ss_trigger = .true.
          endif
 
-         ! Find the active stage
+         ! Find the active stage 
+         ! The highest stage, with both suction side and delivery side turned on results in a 
+         ! actual stage.
          pump%actual_stage = 0
          do istage = nstages, 1, -1
            if (pump%ss_trigger(istage) .and. pump%ds_trigger(istage)) then
@@ -233,26 +227,24 @@ contains
          pump%stage_capacity = -pump%stage_capacity
       endif
 
-      !
-      !     Function return value is discharge Q for pump
-      !
    end subroutine PrepareComputePump
 
-   subroutine computePump(pump, fum, rum, um, qm, aum)
-      ! modules
-
-      ! Global variables
-      type(t_pump), pointer, intent(in)            :: pump
-      double precision, intent(out)                :: fum
-      double precision, intent(out)                :: rum
-      double precision, intent(out)                :: um
-      double precision, intent(out)                :: qm
-      double precision, intent(in)                 :: aum
-
-      fum = 0.0
-      rum = pump%discharge/max(aum, 1.0D-2)
-      um = rum
-      qm  = pump%discharge
-   end subroutine computePump
+    
+   !subroutine computePump(pump, fum, rum, um, qm, aum)
+   !   ! modules
+   !
+   !   ! Global variables
+   !   type(t_pump), pointer, intent(in)            :: pump
+   !   double precision, intent(out)                :: fum
+   !   double precision, intent(out)                :: rum
+   !   double precision, intent(out)                :: um
+   !   double precision, intent(out)                :: qm
+   !   double precision, intent(in)                 :: aum
+   !
+   !   fum = 0.0
+   !   rum = pump%discharge/max(aum, 1.0D-2)
+   !   um = rum
+   !   qm  = pump%discharge
+   !end subroutine computePump
 
 end module m_Pump

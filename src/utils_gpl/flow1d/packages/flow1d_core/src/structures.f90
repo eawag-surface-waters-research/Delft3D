@@ -80,7 +80,6 @@ module m_1d_structures
    public set_gle
    public set_opening_height
    public set_valve_opening
-   public set_capacity
    public incStructureCount
    public GetPumpCapacity
    public GetPumpStage
@@ -577,12 +576,6 @@ end subroutine
           endif
        case (ST_PUMP)
           if (iparam==CFiPumpCapacity) then
-             if (sts%struct(istru)%pump%capacity(1)*value < -1e-6) then
-                ! The pump direction may not be changed.
-                line = 'The pumping direction of pump '//trim(sts%struct(istru)%id) //' is changed. This is not allowed.'
-                call setMessage(LEVEL_ERROR, line)
-                return
-             endif
              sts%struct(istru)%pump%capacity(1) = value
            else
              SetValueStruc = .false.
@@ -651,16 +644,6 @@ end subroutine
            if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%orifice%openlevel - sts%struct(istru)%orifice%crestlevel
        case (ST_PUMP)
            getValueStruc = sts%struct(istru)%pump%capacity(1)
-           if (sts%struct(istru)%pump%capacity(1)*getValueStruc < -1e-6) then
-             ! The pump direction may not be changed.
-             line = 'The pumping direction of pump '//trim(sts%struct(istru)%id) //' is changed. This is not allowed.'
-             call setMessage(LEVEL_ERROR, line)
-             return
-           elseif (sts%struct(istru)%pump%capacity(1) < getValueStruc) then
-             write(line, '(''The controlled capacity (='', g12.4, '') is higher than the maximum capacity (= '', g12.4, ''). The capacity is reduced to the maximum capacity'')' ) getValueStruc, sts%struct(istru)%pump%capacity(1)
-             call setMessage(LEVEL_ERROR, line)
-             getValueStruc = sts%struct(istru)%pump%capacity(1)
-           endif
        case (ST_GENERAL_ST)
            if (iparam == CFiCrestLevel)         getValueStruc = sts%struct(istru)%generalst%zs
            if (iparam == CFiCrestWidth)         getValueStruc = sts%struct(istru)%generalst%ws
@@ -1070,21 +1053,6 @@ end subroutine
          struc%culvert%valveOpening=value
       end select
    end subroutine set_valve_opening
-   
-   subroutine set_capacity(struc, value)
-      
-      type (t_structure), intent(inout) :: struc
-      double precision, intent(in)      :: value
-      
-      
-      if (struc%pump%capacity(1)*value < -1e-6) then
-         ! The pump direction may not be changed.
-         msgbuf = 'The pumping direction of pump '//trim(struc%id) //' is changed. This is not allowed.'
-         call setMessage(LEVEL_ERROR, msgbuf)
-         return
-      endif
-      struc%pump%capacity(1) = value
-   end subroutine set_capacity
    
    !> Gets pump capacity.
    double precision function GetPumpCapacity(stru)

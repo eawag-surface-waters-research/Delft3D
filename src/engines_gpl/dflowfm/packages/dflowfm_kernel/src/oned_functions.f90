@@ -40,7 +40,7 @@ module m_oned_functions
    public save_1d_nrd_vars_in_stm
    public setbobs_1d
    public gridpoint2cross
-   public computePump
+   public computePump_all_links
 
    type, public :: t_gridp2cs
       integer :: num_cross_sections
@@ -513,6 +513,8 @@ module m_oned_functions
    
    end subroutine setbobs_1d
 
+   !> Compute FU and RU coefficients for each flow link, that is part of 
+   !! the pump.
    subroutine computePump_all_links(struct)
       use m_1d_structures
       use m_pump
@@ -564,7 +566,7 @@ module m_oned_functions
             s1k2 = s1k2 + au(L)*s1(k2)
          endif
       enddo
-
+      
       ! With these average waterlevels, evaluate the pump discharge.
       if (ap > 0d0) then
          s1k1 = s1k1/ap
@@ -575,14 +577,14 @@ module m_oned_functions
 
       ! Finally, redistribute the requested pump discharge across all flow links.
       if (qp == 0d0 .or. ap == 0 .or. vp == 0d0) then
-         fu(L) = 0d0
-         ru(L) = 0d0
+         ! Pump is off
          struct%fu = 0d0
          struct%ru = 0d0
          struct%au = 0d0
       else
 
-         if (abs(qp) > 0.9d0*vp/dts) then
+         ! Limit the pump discharge in case the volume in the cells at the suction side is limited.
+          if (abs(qp) > 0.9d0*vp/dts) then
             qp = sign(qp,0.9d0*vp/dts)
          endif
          
@@ -597,12 +599,23 @@ module m_oned_functions
             endif
          
             if (hs(k1) > 1d-2) then
-               fu(L) = 0d0
-               ru(L) =  qp/ap
+               struct%fu(L0) =  0d0
+               struct%ru(L0) =  qp/ap
+               struct%au(L0) =  ap
+            else 
+               struct%fu(L0) = 0d0
+               struct%ru(L0) = 0d0
+               struct%au(L0) = 0d0
             endif
          enddo
       endif
+      
+      do L0  = 1, struct%numlinks
+         L = iabs(struct%linknumbers(L0))
+         fu(L) = struct%fu(L0)
+         ru(L) = struct%ru(L0)
+         au(L) = struct%au(L0)
+      enddo
 
    end subroutine computePump_all_links
-
 end module m_oned_functions
