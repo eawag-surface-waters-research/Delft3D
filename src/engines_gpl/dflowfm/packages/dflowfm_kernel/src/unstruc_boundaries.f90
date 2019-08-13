@@ -1911,7 +1911,7 @@ do i=1,network%sts%count
                                     branchindex = pstru%ibran, chainage = pstru%chainage, &
                                     xpin = pstru%xCoordinates, ypin = pstru%yCoordinates, nump = pstru%numCoordinates)
    if (numgen > 0) then
-      istat =  initialize_structure(pstru, numgen, kegen(1:numgen), wu)
+      istat =  initialize_structure_links(pstru, numgen, kegen(1:numgen), wu)
    else
       istat = DFM_NOERR
       msgbuf = 'No intersecting flow links found for structure with id '''//trim(pstru%id)//'''.'

@@ -84,7 +84,7 @@ module m_1d_structures
    public GetPumpCapacity
    public GetPumpStage
    public GetPumpReductionFactor
-   public initialize_structure
+   public initialize_structure_links
    public set_fu_ru
 
    public printData
