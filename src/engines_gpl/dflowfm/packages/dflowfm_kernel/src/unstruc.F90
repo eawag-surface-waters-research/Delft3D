@@ -17297,7 +17297,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ierr = nf90_def_var(ihisfile, 'pump_s1up',     nf90_double, (/ id_pumpdim, id_timedim /), id_pump_s1up)    ! Nabi
             ierr = nf90_put_att(ihisfile, id_pump_s1up, 'standard_name', 'sea_surface_height')
-            ierr = nf90_put_att(ihisfile, id_pump_s1up, 'long_name', 'Water level upstream of pump)
+            ierr = nf90_put_att(ihisfile, id_pump_s1up, 'long_name', 'Water level upstream of pump')
             ierr = nf90_put_att(ihisfile, id_pump_s1up, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_pump_s1up, 'coordinates', 'pump_id')
 
