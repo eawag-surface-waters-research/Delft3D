@@ -50,5 +50,5 @@ def iter_projects(solution,covpath):
 
 fsln = sys.argv[1]
 slndir = os.path.dirname(fsln)
-iter_projects(fsln,'coverage_results')
+iter_projects(fsln,'d:\tmp\cov')
 
