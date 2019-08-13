@@ -1921,7 +1921,7 @@ do i=1,network%sts%count
 end do
 
 if (network%cmps%Count > 0) then
-    istat = max(istat, initialize_compounds(network%cmps, network%sts)
+    istat = max(istat, initialize_compounds(network%cmps, network%sts))
 endif
 
 
