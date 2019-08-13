@@ -134,9 +134,9 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (23,:) orifice counters of partitions for parallel
  double precision, dimension(:,:), allocatable :: valbridge   !< Array for bridge;    (1,:) flow link width, used for averaging.
                                                               !<                      (2,:) discharge through bridge
-                                                              !<                      (3,:) bridge structure water level up
-                                                              !<                      (4,:) bridge structure water level down
-                                                              !<                      (5,:) bridge structure head
+                                                              !<                      (3,:) bridge water level up
+                                                              !<                      (4,:) bridge water level down
+                                                              !<                      (5,:) bridge head
                                                               !<                      (6,:) bridge flow area
                                                               !<                      (7,:) bridge velocity
  double precision, dimension(:,:), allocatable :: valculvert  !< Array for culvert;   (1,:) flow link width, used for averaging.

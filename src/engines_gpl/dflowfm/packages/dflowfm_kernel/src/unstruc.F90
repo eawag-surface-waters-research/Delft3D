@@ -17612,7 +17612,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_dim(ihisfile, 'bridge', network%sts%numbridges, id_bridgedim)
             ierr = nf90_def_var(ihisfile, 'bridge_id',  nf90_char,   (/ id_strlendim, id_bridgedim /), id_bridge_id)
             ierr = nf90_put_att(ihisfile, id_bridge_id,  'cf_role',   'timeseries_id')
-            ierr = nf90_put_att(ihisfile, id_bridge_id,  'long_name', 'bridge id'    )
+            ierr = nf90_put_att(ihisfile, id_bridge_id,  'long_name', 'Id of bridge')
 
             ierr = nf90_def_var(ihisfile, 'bridge_discharge',     nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_dis)
             ierr = nf90_put_att(ihisfile, id_bridge_dis, 'long_name', 'Discharge through bridge')
@@ -34398,7 +34398,7 @@ end subroutine setbobs_fixedweirs
              
                 ! store computed fu, ru and au in structure object. In case this structure
                 ! is a part of a compound structure this data will be used in computeCompound
-                 call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
+                call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
              endif
           enddo
        endif
@@ -36576,7 +36576,7 @@ if (jahisbal > 0) then
          istru = network%sts%bridgeIndices(n)
          pstru => network%sts%struct(istru)
          nlinks = pstru%numlinks
-         do L = 1, nlinks
+         do L = 1, nlinks ! Currently bridges have always only 1 link.
             Lf = pstru%linknumbers(L)
             La = abs( Lf )
             if( jampi > 0 ) then
@@ -36584,7 +36584,7 @@ if (jahisbal > 0) then
                if ( jaghost.eq.1 ) cycle
             endif
             dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valbridge(:,n), La, dir, ST_BRIDGE, istru, 0)
+            call fill_valstruct_perlink(valbridge(:,n), La, dir, ST_BRIDGE, istru, L)
             valbridge(6,n) = valbridge(6, n) + au(La)
          enddo
          call average_valstruct(valbridge(:,n), ST_BRIDGE, istru, nlinks, NUMVALS_BRIDGE) ! TODO: UNST-2720: move code below/above to valustruc* routines
@@ -36768,7 +36768,7 @@ if (jahisbal > 0) then
                   valgenstru(4,n)  = valgenstru(4,n) / valgenstru(1,n)
                   valgenstru(13,n) = valgenstru(13,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_openw
                   valgenstru(14,n) = valgenstru(14,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_edgel
-                  valgenstru(9,n)  = valgenstru(9,n) / valgenstru(NUMVALS_GENSTRU,n)     ! id_genstru_cresth
+                  valgenstru(9,n)  = valgenstru(9,n) / valgenstru(NUMVALS_GENSTRU,n)     ! id_genstru_crestl
                   valgenstru(11,n) = valgenstru(11,n) / valgenstru(NUMVALS_GENSTRU,n)    ! id_genstru_stat
                   if (network%sts%numGeneralStructures > 0) then ! new general structure
                      valgenstru(5,n)  = valgenstru(5,n) / valgenstru(1,n)
@@ -36802,7 +36802,7 @@ if (jahisbal > 0) then
                   valweirgen(3,n) = valweirgen(3,n) / valweirgen(1,n)
                   valweirgen(4,n) = valweirgen(4,n) / valweirgen(1,n)
                   valweirgen(10,n) = valweirgen(10,n) / valweirgen(NUMVALS_WEIRGEN,n)    ! id_weirgen_crestw
-                  valweirgen(9,n) = valweirgen(9,n) / valweirgen(NUMVALS_WEIRGEN,n)      ! id_weirgen_cresth
+                  valweirgen(9,n) = valweirgen(9,n) / valweirgen(NUMVALS_WEIRGEN,n)      ! id_weirgen_crestl
                   valgenstru(11,n) = valgenstru(11,n) / valgenstru(NUMVALS_WEIRGEN,n)    ! id_weirgen_stat
                   if (network%sts%numWeirs > 0) then ! new weir
                      valweirgen(5,n) = valweirgen(5,n) / valweirgen(1,n)
