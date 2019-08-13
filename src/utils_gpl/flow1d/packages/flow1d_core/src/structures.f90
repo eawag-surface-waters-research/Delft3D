@@ -1095,15 +1095,17 @@ end subroutine
 
       GetPumpReductionFactor = stru%pump%reduction_factor
    end function GetPumpReductionFactor
-   
-   function initialize_structure(struct, numlinks, links, wu) result(istat)
 
-      type(t_structure),               intent(inout) :: struct
-      integer,                         intent(in   ) :: numlinks
-      integer, dimension(:),           intent(in   ) :: links
-      double precision, dimension(:),  intent(in   ) :: wu
-      integer                                        :: istat
-      
+
+   !> Initializes the flow link administration for a single structure.
+   function initialize_structure_links(struct, numlinks, links, wu) result(istat)
+
+      type(t_structure),               intent(inout) :: struct   !< The structure object to be initialized.
+      integer,                         intent(in   ) :: numlinks !< The number of flow links affected by this structure.
+      integer, dimension(:),           intent(in   ) :: links    !< (numlinks) The flow link numbers affected by this structure.
+      double precision, dimension(:),  intent(in   ) :: wu       !< (numlinks) The width of the flow links affected by this structure.
+      integer                                        :: istat    !< Result status (0 if successful).
+
       istat = 0
       allocate(struct%linknumbers(numlinks), struct%fu(numlinks), struct%ru(numlinks), struct%au(numlinks))
       struct%numlinks = numlinks
@@ -1133,7 +1135,7 @@ end subroutine
          call setMessage(LEVEL_ERROR, 'Internal error, this structure type is not (yet) implemented in initialize_structure')
       end select
 
-   end function initialize_structure
+   end function initialize_structure_links
 
    !> Set fu, ru and au in a structure. This subroutine is essential for compound
    !! structures. Since the compound structure relies on the fact that FU, RU and 

@@ -1913,15 +1913,15 @@ do i=1,network%sts%count
    if (numgen > 0) then
       istat =  initialize_structure(pstru, numgen, kegen(1:numgen), wu)
    else
-      istat = DFM_GENERICERROR
-      msgbuf = 'No intersecting links found for structure with name '//trim(pstru%name)//' and id '//trim(pstru%id)
-      call warn_flush()
+      istat = DFM_NOERR
+      msgbuf = 'No intersecting flow links found for structure with id '''//trim(pstru%id)//'''.'
+      call msg_flush()
    endif
    
 end do
 
 if (network%cmps%Count > 0) then
-    istat = istat + initialize_compounds(network%cmps, network%sts)
+    istat = max(istat, initialize_compounds(network%cmps, network%sts)
 endif
 
 
