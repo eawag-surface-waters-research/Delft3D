@@ -16344,7 +16344,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_orifgendim, id_orifgen_id, id_orifgen_dis, id_orifgen_crestl, id_orifgen_crestw, id_orifgen_edgel, id_orifgen_stat,  &
                      id_orifgen_s1dn, id_orifgen_openh, id_orifgen_vel, id_orifgen_au, id_orifgen_s1up, id_orifgen_head, id_orifgen_s1crest, id_orifgen_forcedif,&
                      id_bridgedim, id_bridge_id, id_bridge_dis, id_bridge_s1up,  id_bridge_s1dn, id_bridge_vel, id_bridge_au,  id_bridge_head, &
-                     id_culvertdim, id_culvertname, id_culvert_dis, id_culvert_s1up,  id_culvert_s1dn, id_culvert_crestl, id_culvert_openh, &
+                     id_culvertdim, id_culvert_id, id_culvert_dis, id_culvert_s1up,  id_culvert_s1dn, id_culvert_crestl, id_culvert_openh, &
                      id_culvert_edgel, id_culvert_vel, id_culvert_stat, id_culvert_au,  id_culvert_head, & 
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
@@ -17650,66 +17650,65 @@ subroutine unc_write_his(tim)            ! wrihis
         ! Culvert
         if(jahisculv > 0 .and. network%sts%numculverts > 0) then
             ierr = nf90_def_dim(ihisfile, 'culvert', network%sts%numculverts, id_culvertdim)
-            ierr = nf90_def_var(ihisfile, 'culvert_name',  nf90_char,   (/ id_strlendim, id_culvertdim /), id_culvertname)
-            ierr = nf90_put_att(ihisfile, id_culvertname,  'cf_role',   'timeseries_id')
-            ierr = nf90_put_att(ihisfile, id_culvertname,  'long_name', 'culvert name'    )
+            ierr = nf90_def_var(ihisfile, 'culvert_id',  nf90_char,   (/ id_strlendim, id_culvertdim /), id_culvert_id)
+            ierr = nf90_put_att(ihisfile, id_culvert_id,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_culvert_id,  'long_name', 'Id of culvert'    )
 
             ierr = nf90_def_var(ihisfile, 'culvert_discharge',     nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_dis)
-            ierr = nf90_put_att(ihisfile, id_culvert_dis, 'long_name', 'culvert discharge')
+            ierr = nf90_put_att(ihisfile, id_culvert_dis, 'long_name', 'Discharge through culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_dis, 'units', 'm3 s-1')
-            ierr = nf90_put_att(ihisfile, id_culvert_dis, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_dis, 'coordinates', 'culvert_id')
 
             ierr = nf90_def_var(ihisfile, 'culvert_crest_level', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_crestl)
-            ierr = nf90_put_att(ihisfile, id_culvert_crestl, 'long_name', 'culvert crest level')
+            ierr = nf90_put_att(ihisfile, id_culvert_crestl, 'long_name', 'Crest level of culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_crestl, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_culvert_crestl, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_crestl, 'coordinates', 'culvert_id')
 
             ierr = nf90_def_var(ihisfile, 'culvert_gate_lower_edge_level', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_edgel)
-            ierr = nf90_put_att(ihisfile, id_culvert_edgel, 'long_name', 'culvert gate lower edge level')
+            ierr = nf90_put_att(ihisfile, id_culvert_edgel, 'long_name', 'Gate lower edge level of culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_edgel, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_culvert_edgel, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_edgel, 'coordinates', 'culvert_id')
 
             ierr = nf90_def_var(ihisfile, 'culvert_s1up',     nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_s1up)
             ierr = nf90_put_att(ihisfile, id_culvert_s1up, 'standard_name', 'sea_surface_height')
-            ierr = nf90_put_att(ihisfile, id_culvert_s1up, 'long_name', 'culvert water level up')
+            ierr = nf90_put_att(ihisfile, id_culvert_s1up, 'long_name', 'Water level upstream of culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_s1up, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_culvert_s1up, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_s1up, 'coordinates', 'culvert_id')
 
             ierr = nf90_def_var(ihisfile, 'culvert_s1dn',     nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_s1dn)
             ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'standard_name', 'sea_surface_height')
-            ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'long_name', 'culvert water level down')
+            ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'long_name', 'Water level downstream of culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'coordinates', 'culvert_id')
             
             ierr = nf90_def_var(ihisfile, 'culvert_gate_opening_height', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_openh)
-            ierr = nf90_put_att(ihisfile, id_culvert_openh, 'long_name', 'culvert gate opening height')
+            ierr = nf90_put_att(ihisfile, id_culvert_openh, 'long_name', 'Gate opening height of culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_openh, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_culvert_openh, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_openh, 'coordinates', 'culvert_id')
             
             ierr = nf90_def_var(ihisfile, 'culvert_head', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_head)
-            ierr = nf90_put_att(ihisfile, id_culvert_head, 'long_name', 'culvert head')
+            ierr = nf90_put_att(ihisfile, id_culvert_head, 'long_name', 'Head difference across culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_head, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_culvert_head, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_head, 'coordinates', 'culvert_id')
             
             ierr = nf90_def_var(ihisfile, 'culvert_flow_area ', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_au)
-            ierr = nf90_put_att(ihisfile, id_culvert_au, 'long_name', 'culvert flow area')
+            ierr = nf90_put_att(ihisfile, id_culvert_au, 'long_name', 'Flow area in culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_au, 'units', 'm2')
-            ierr = nf90_put_att(ihisfile, id_culvert_au, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_au, 'coordinates', 'culvert_id')
             
             ierr = nf90_def_var(ihisfile, 'culvert_state ', nf90_int, (/ id_culvertdim, id_timedim /), id_culvert_stat)
-            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'long_name', 'culvert state')
+            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'long_name', 'Flow state in culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'units', '-')
-            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'units', '-')
-            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'coordinates', 'culvert_id')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'flag_values', '0, 1, 2, 3, 4')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'flag_meanings', 'no_flow weir_free weir_submerged gate_free gate_submerged')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'valid_range', '0, 4')
-            ierr = nf90_put_att(ihisfile, id_culvert_stat, '_FillValue', imiss)
+            ierr = nf90_put_att(ihisfile, id_culvert_stat, '_FillValue', int(dmiss))
             
             ierr = nf90_def_var(ihisfile, 'culvert_velocity ', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_vel)
-            ierr = nf90_put_att(ihisfile, id_culvert_vel, 'long_name', 'culvert velocity')
+            ierr = nf90_put_att(ihisfile, id_culvert_vel, 'long_name', 'Velocity in culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_vel, 'units', 'm s-1')
-            ierr = nf90_put_att(ihisfile, id_culvert_vel, 'coordinates', 'culvert_name')
+            ierr = nf90_put_att(ihisfile, id_culvert_vel, 'coordinates', 'culvert_id')
         endif
         
         
@@ -17897,7 +17896,7 @@ subroutine unc_write_his(tim)            ! wrihis
         if (jahisculv > 0 .and. network%sts%numCulverts > 0) then
            do i = 1, network%sts%numCulverts
               istru = network%sts%culvertIndices(i)
-              ierr = nf90_put_var(ihisfile, id_culvertname,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_culvert_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
         
@@ -36614,7 +36613,7 @@ if (jahisbal > 0) then
                if ( jaghost.eq.1 ) cycle
             endif
             dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valculvert(:,n), La, dir, ST_CULVERT, istru, 0)
+            call fill_valstruct_perlink(valculvert(:,n), La, dir, ST_CULVERT, istru, L)
             valculvert(6,n) = valculvert(6, n) + au(La)
          enddo
          call average_valstruct(valculvert(:,n), ST_CULVERT, istru, nlinks, NUMVALS_CULVERT) ! TODO: UNST-2719: move code aboe/below to valstruc* routines
