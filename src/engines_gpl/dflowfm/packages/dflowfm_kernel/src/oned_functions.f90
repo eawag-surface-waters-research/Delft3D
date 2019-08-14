@@ -513,8 +513,9 @@ module m_oned_functions
    
    end subroutine setbobs_1d
 
-   !> Compute FU and RU coefficients for each flow link, that is part of 
-   !! the pump.
+   !> Compute FU and RU coefficients for each flow link that is part of 
+   !! the pump. Values are stored in struct%fu(:), etc. and *also* set
+   !! in m_flow::fu(:), etc.
    subroutine computePump_all_links(struct)
       use m_1d_structures
       use m_pump
@@ -522,7 +523,7 @@ module m_oned_functions
       use m_flowgeom 
       use m_flow
       
-      type(t_structure), intent(inout) :: struct
+      type(t_structure), intent(inout) :: struct !< The parent structure of the pump (which also contains the flow link information).
                 
       double precision     :: s1k1
       double precision     :: s1k2

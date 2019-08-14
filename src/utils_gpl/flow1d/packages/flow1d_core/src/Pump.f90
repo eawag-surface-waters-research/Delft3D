@@ -114,7 +114,8 @@ contains
    end subroutine deallocPump
 
    !> The discharge through a pump with different capacities
-   !! and control on suction and pressure side is calculated.
+   !! and possible control on suction and pressure side is calculated.
+   !! Result is stored in pump%discharge, for later use in some computePump.
    subroutine PrepareComputePump(pump, ss_level, ds_level)
       implicit none
 
