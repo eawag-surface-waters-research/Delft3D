@@ -3713,7 +3713,7 @@ end subroutine setdt
           endif
         enddo
 
-     else if (  ja_timestep_auto .eq. 8 ) then   ! full 3D
+     else if (  ja_timestep_auto .eq. 8 ) then   ! full 3D except top layer
 
         do kk=1,Ndxi
           if ( jampi.eq.1 ) then
@@ -3735,6 +3735,61 @@ end subroutine setdt
              enddo
           endif
         enddo
+
+     else if (  ja_timestep_auto .eq. 9 ) then   ! 2D outgoing and 3D incoming fluxes 
+
+        do kk=1,Ndxi
+          if ( jampi.eq.1 ) then
+!            do not include ghost cells
+             if ( idomain(kk).ne.my_rank ) cycle
+          end if
+          if ( hs(kk).gt.epshu ) then
+             dtsc = 9d9
+             if ( squ(kk).gt.eps10) then 
+                dtsc = cflmx*vol1(kk)/squ(kk)  
+             endif
+             call getkbotktop(kk,kb,kt)
+             do k=kb, kt 
+                if ( sqi(k).gt.eps10 ) then
+                   dtsc = min(dtsc, cflmx*vol1(k)/sqi(k) )
+                   if (jamapdtcell > 0) then
+                      dtcell(k) = dtsc
+                   endif
+                   if ( dtsc.lt.dts ) then
+                      dts     = dtsc ; kkcflmx = kk
+                   endif
+                endif
+             enddo
+          endif
+        enddo
+
+     else if (  ja_timestep_auto .eq. 10 ) then   ! 2D outgoing and 3D incoming fluxes 
+
+        do kk=1,Ndxi
+          if ( jampi.eq.1 ) then
+!            do not include ghost cells
+             if ( idomain(kk).ne.my_rank ) cycle
+          end if
+          if ( hs(kk).gt.epshu ) then
+             dtsc = 9d9
+             if ( squ(kk).gt.eps10) then 
+                dtsc = cflmx*vol1(kk)/squ(kk)  
+             endif
+             call getkbotktop(kk,kb,kt)
+             do k=kb, kt - 1 
+                if ( sqi(k).gt.eps10 ) then
+                   dtsc = min(dtsc, cflmx*vol1(k)/sqi(k) )
+                   if (jamapdtcell > 0) then
+                      dtcell(k) = dtsc
+                   endif
+                   if ( dtsc.lt.dts ) then
+                      dts     = dtsc ; kkcflmx = kk
+                   endif
+                endif
+             enddo
+          endif
+        enddo
+
 
     endif
 
@@ -23145,7 +23200,15 @@ end do
            if (Floorlevtoplay == dmiss) then
               zmx  = sini
            else
-              zmx  = Floorlevtoplay
+              if (jaorgFloorlevtoplaydef == 1) then 
+                 zmx  = Floorlevtoplay
+              else 
+                 if (dztop == dmiss) then 
+                    zmx  = Floorlevtoplay
+                 else
+                    zmx  = Floorlevtoplay + dztop
+                 endif  
+              endif
            endif
         endif
 
@@ -45000,15 +45063,15 @@ end subroutine makethindamadmin
 !     NOV. 1987
 !
       double precision :: Y0(*),U,DUDY,TKE,EPS,NUT,GAMT
-      double precision :: AU(50,5),CMU,DY,KAP,ST,Y
-      INTEGER          :: J, NPOINTS
+      double precision :: AU(50,5),CMU,DY,KAP,ST,Y , uwall, uplate
+      INTEGER          :: J, NPOINTS , nupnts, ip
 !
       DATA AU( 1,1)/   .00/,AU( 1,2)/   .00/,AU( 1,3)/ .1605E+03/, &
            AU( 1,4)/ .0000E+00/,AU( 1,5)/-.2652E+02/
       DATA AU( 2,1)/  1.00/,AU( 2,2)/134.00/,AU( 2,3)/ .8097E+02/, &
            AU( 2,4)/-.7955E+02/,AU( 2,5)/ .2958E+02/
       DATA AU( 3,1)/  2.00/,AU( 3,2)/165.00/,AU( 3,3)/ .1062E+02/, &
-           AU( 3,4)/ .9203E+01/,AU( 3,5)/-.4821E+01/
+            AU( 3,4)/ .9203E+01/,AU( 3,5)/-.4821E+01/
       DATA AU( 4,1)/  3.00/,AU( 4,2)/180.00/,AU( 4,3)/ .1456E+02/, &
            AU( 4,4)/-.5261E+01/,AU( 4,5)/ .1450E+01/
       DATA AU( 5,1)/  4.00/,AU( 5,2)/190.75/,AU( 5,3)/ .8390E+01/, &

@@ -848,6 +848,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double ( md_ptr, 'geometry', 'Dztop'            , Dztop )
     call prop_get_double ( md_ptr, 'geometry', 'Toplayminthick'   , Toplayminthick)
     call prop_get_double ( md_ptr, 'geometry', 'Floorlevtoplay'   , Floorlevtoplay )
+    call prop_get_integer( md_ptr, 'geometry', 'OrgFloorlevtoplaydef'   , jaorgFloorlevtoplaydef )
     call prop_get_double ( md_ptr, 'geometry', 'Tsigma'           , Tsigma )
     call prop_get_double ( md_ptr, 'geometry', 'ZlayBot'          , zlaybot )
     call prop_get_double ( md_ptr, 'geometry', 'ZlayTop'          , zlaytop )
@@ -2294,6 +2295,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
        if (Floorlevtoplay .ne. dmiss) then
           call prop_set(prop_ptr, 'geometry', 'Floorlevtoplay', Floorlevtoplay, 'Floor level of top layer')
+       endif
+
+       if (jaorgFloorlevtoplaydef .ne. 0) then
+          call prop_set(prop_ptr, 'geometry', 'OrgFloorlevtoplaydef', jaorgFloorlevtoplaydef, 'keep original definition of Floor level of top layer')
        endif
 
        if (zlaybot .ne. dmiss) then

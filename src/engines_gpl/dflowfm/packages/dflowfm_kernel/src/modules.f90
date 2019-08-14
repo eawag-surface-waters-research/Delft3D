@@ -3228,6 +3228,7 @@ end module m_vegetation
  double precision                  :: dztopuniabovez  = -999d0     !< bottom level of lowest uniform layer == blmin if not specified
  double precision                  :: Floorlevtoplay  = -999d0     !< floor  level of top zlayer, == sini if not specified
  double precision                  :: dztop = -999d0     !< if specified, dz of top layer, kmx = computed, if not, dz = (ztop-zbot)/kmx
+ integer                           :: jaorgFloorlevtoplaydef=0 !< 0=correct floorlevtoplay, 1 = org wrong floorlevtoplay  
  double precision                  :: zlaybot = -999d0  !< if specified, first zlayer starts from zlaybot, if not, it starts from the lowest bed point
  double precision                  :: zlaytop = -999d0  !< if specified, highest zlayer ends at zlaytop, if not, it ends at the initial water level
  double precision, allocatable     :: aak (:)           !< coefficient vertical mom exchange of kmx layers
