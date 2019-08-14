@@ -40,7 +40,6 @@ module m_ec_message
 
    public :: clearECMessage
    public :: setECMessage
-   public :: getECMessage
    public :: dumpECMessageStack
 
    integer, parameter, public :: maxMessageLen = 1000
@@ -125,23 +124,6 @@ module m_ec_message
          call setEcMessage(trim(adjustl(string)) // ' ' // trim(cvalue))
 
       end subroutine setECMessage_int
-
-      ! =======================================================================
-
-      !> get all messages of the messagestack in a long string
-      function getECMessage() result(retval)
-         character(len=maxMessageLen) :: retval
-
-         type (TEcMessage), pointer    :: my_msg
-         !
-         retval    = ' '
-         my_msg => EcMessages
-         do while (associated(my_msg))
-            retval = retval // ' ' // my_msg%message
-            my_msg => my_msg%next_message
-         enddo
-         call clearECMessage()
-      end function getECMessage
 
       ! =======================================================================
 

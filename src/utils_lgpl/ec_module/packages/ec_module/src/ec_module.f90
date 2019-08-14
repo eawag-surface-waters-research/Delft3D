@@ -33,7 +33,8 @@
 !!
 !! @author adri.mourits@deltares.nl
 !! @author stef.hummel@deltares.nl
-!! @author edwin.bos@deltares.nl
+!! @author edwin.spee@deltares.nl
+!! @author robert.leander@deltares.nl
 module m_ec_module
    use m_ec_typedefs
    use m_ec_connection
@@ -143,11 +144,7 @@ module m_ec_module
    interface ecFindXthItemInFileReader
       module procedure ecFileReaderGetItem
    end interface ecFindXthItemInFileReader
-   
-   interface ecGetMessage
-      module procedure getECMessage
-   end interface ecGetMessage
-   
+
    ! ===== setters =====
    ! No convenience methods defined yet.
    

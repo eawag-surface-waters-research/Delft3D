@@ -772,14 +772,14 @@ module m_ec_provider
                      itemPeriod%sourceT1FieldPtr%astro_components(i) = components(i)
                   end if
                end do
-               
-               if(istat /= 0) then 
+
+               if (istat /= 0) then
                   if (associated(fileReaderPtr%bc)) then 
-                     call setECMessage(trim(getECMessage())//" in file "//trim(fileReaderPtr%bc%fname))
-                  else 
-                     call setECMessage(trim(getECMessage())//" in file "//trim(fileReaderPtr%fileName))
-                  endif 
-                   
+                     call setECMessage("Error in file " // trim(fileReaderPtr%bc%fname))
+                  else
+                     call setECMessage("Error in file " // trim(fileReaderPtr%fileName))
+                  endif
+
                   success=.false.
                   return
                endif

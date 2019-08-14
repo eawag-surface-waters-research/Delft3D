@@ -22,6 +22,9 @@ module m_ec_unit_tests
 
    public :: TestEcGetTimesteps
 
+   character(len=:), allocatable :: dumpedString  !< the last dumped error message
+   integer                       :: lastLevel     !< the type of the last dumped error message
+
    contains
 
    subroutine TestEcGetTimesteps(success, errMessage)
@@ -30,6 +33,7 @@ module m_ec_unit_tests
 
       character(len=*), parameter :: rec1 = 'TIME = 0 hours since 2006-01-01 00:00:00 +00:00'
       character(len=*), parameter :: rec2 = 'TIME = 0 hour since 2006-01-01 00:00:00 +00:00'
+      character(len=:), allocatable :: s
       real(kind=hp) :: time_steps
       real(kind=hp), parameter :: time_step_expected1 = 53736.0_hp
       real(kind=hp), parameter :: time_step_expected2 = 0.0_hp
@@ -66,7 +70,8 @@ module m_ec_unit_tests
       !
       success = .not. ecGetTimesteps(rec2, time_steps)
       if (success) then
-         success = (getEcMessage() == '|ec_support::ecGetTimesteps: can not find time step in: time = 0 hour since 2006-01-01 00:00:00 +00:00.|')
+         s = dumpECMessageStack(0, copyLastMsg)
+         success = (dumpedString == 'ec_support::ecGetTimesteps: can not find time step in: time = 0 hour since 2006-01-01 00:00:00 +00:00.')
       endif
       if (.not. success) then
          errMessage = 'error handling record with unknown time unit'
@@ -78,7 +83,8 @@ module m_ec_unit_tests
       !
       success = .not. ecGetTimesteps(' ', time_steps)
       if (success) then
-         success = (getEcMessage() == '|ec_support::ecGetTimesteps: Input string is empty.|')
+         s = dumpECMessageStack(0, copyLastMsg)
+         success = (dumpedString == 'ec_support::ecGetTimesteps: Input string is empty.')
       endif
       if (.not. success) then
          errMessage = 'error handling empty record'
@@ -87,4 +93,14 @@ module m_ec_unit_tests
 
       call clearECMessage()
    end subroutine TestEcGetTimesteps
+
+   !> helper function to copy the last EC message into a module variable
+   subroutine copyLastMsg(lvl, msg)
+      integer, intent(in)              :: lvl  !< the type of the message
+      character(len=*), intent(in)     :: msg  !< the actual message
+
+      lastLevel = lvl
+      dumpedString = msg
+   end subroutine copyLastMsg
+
 end module m_ec_unit_tests
