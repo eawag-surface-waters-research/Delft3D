@@ -36333,8 +36333,8 @@ if (jahisbal > 0) then
          valpump(6,n) = GetPumpCapacity(pstru)
          valpump(7,n) = GetPumpStage(pstru)
          if (pstru%pump%direction >= 0) then
-            valpump(10,n) = valpump(4,n) ! Delivery side
-            valpump(11,n) = valpump(3,n) ! Suction  side
+            valpump(10,n) = valpump(4,n) ! Delivery side = downstream side
+            valpump(11,n) = valpump(3,n) ! Suction  side = upstream side
          else
             valpump(10,n) = valpump(3,n)
             valpump(11,n) = valpump(4,n)
