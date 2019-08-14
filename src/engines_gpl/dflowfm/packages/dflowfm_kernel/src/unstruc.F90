@@ -39271,7 +39271,8 @@ if (mext > 0) then
            call prepare_lateral_mask(kclat, ilattype)
 
            numlatsg = numlatsg + 1
-           call selectelset_internal_nodes( filename, filetype, xz, yz, kclat, ndxi, numlatsg, nnLat) ! find nodes in polygon
+           call selectelset_internal_nodes(xz, yz, kclat, ndxi, numlatsg, nnLat, &
+                                           POLYGON_FILE, filename)
 
            jaqin = 1 ; success = .true.  ! geen gezeik, iedereen reik
 

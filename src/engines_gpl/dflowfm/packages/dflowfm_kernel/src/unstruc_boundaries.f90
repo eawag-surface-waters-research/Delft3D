@@ -885,6 +885,7 @@ logical function initboundaryblocksforcings(filename)
  use system_utils
  use unstruc_files, only: resolvePath
  use unstruc_model, only: ExtfileNewMajorVersion, ExtfileNewMinorVersion
+ use m_missing
 
  implicit none
 
@@ -909,10 +910,13 @@ logical function initboundaryblocksforcings(filename)
  character(len=1)             :: oper                !
  character (len=300)          :: rec
 
+ character(len=ini_value_len) :: branchid
+
  character(len=ini_value_len) :: locid
  character(len=ini_value_len) :: itemtype
  character(len=256)           :: fnam
  character(len=256)           :: basedir
+ double precision             :: chainage
  double precision             :: tmpval
  integer                      :: iostat, ierr
  integer                      :: ilattype
@@ -922,7 +926,9 @@ logical function initboundaryblocksforcings(filename)
  integer, dimension(1)        :: targetindex 
  integer                      :: ib
  integer                      :: major, minor
- 
+ integer                      :: loc_spec_type
+ integer                      :: numcoordinates
+ double precision, allocatable :: xcoordinates(:), ycoordinates(:)
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
 
@@ -1075,7 +1081,7 @@ logical function initboundaryblocksforcings(filename)
           call mess(LEVEL_WARN, 'initboundaryblockforcings: Error while initializing quantity '''//trim(quantity)//'''. Check preceding log lines for details.')
        end if
     case ('lateral')
-       ! [lateral]
+       ! [Lateral]
        ! Id = ...
        locid = ' '
        call prop_get(node_ptr, '', 'Id', locid, success)
@@ -1085,45 +1091,87 @@ logical function initboundaryblocksforcings(filename)
           cycle
        end if
  
-       ! [lateral]
-       ! Type = 1d | 2d | 1d2d
+       ! locationType = optional for lateral
+       ! fileVersion >= 2: locationType = 1d | 2d | all
+       ! fileVersion <= 1: Type         = 1d | 2d | 1d2d
        itemtype = ' '
-       call prop_get(node_ptr, '', 'Type',         itemtype, success)
-       ! Type = optional for lateral
+       if (major >= 2) then
+          call prop_get(node_ptr, '', 'locationType', itemtype, success)
+       else
+          call prop_get(node_ptr, '', 'Type',         itemtype, success)
+       end if
        select case (str_tolower(trim(itemtype)))
        case ('1d')
           ilattype = ILATTP_1D
        case ('2d')
           ilattype = ILATTP_2D
-       case ('1d2d')
+       case ('1d2d', 'all')
           ilattype = ILATTP_ALL
        case default
           ilattype = ILATTP_ALL
        end select
 
        ! [lateral]
-       ! LocationFile = test.pol
-       locationfile = ' '
-       call prop_get(node_ptr, '', 'LocationFile', locationfile, success)
-       if (.not. success .or. len_trim(locationfile) == 0) then
-          write(msgbuf, '(a,a,a)') 'Required field ''LocationFile'' missing in lateral ''', trim(locid), '''.'
+       ! fileVersion >= 2: branchId+chainage       => location_specifier = BRANCH_CHAINAGE
+       !                   numcoor+xcoors+ycoors   => location_specifier = XY_POLYGON
+       ! fileVersion <= 1: LocationFile = test.pol => location_specifier = POLYGON_FILE
+       loc_spec_type      = imiss
+       branchid           = ' '
+       chainage           = dmiss
+       numcoordinates     = imiss
+       !
+       if (major >= 2) then
+          call prop_get(node_ptr, '', 'branchId',         branchid, success)
+          if (success) then
+             call prop_get(node_ptr, '', 'chainage',         chainage, success)
+          end if
+          if (success) then
+             if (len_trim(branchid)>0 .and. chainage /= dmiss .and. chainage >= 0.0d0) then
+                loc_spec_type = BRANCHID_CHAINAGE
+             end if
+          else
+             call prop_get(node_ptr, '', 'numCoordinates',   numcoordinates, success)
+             if (success .and. numcoordinates > 0) then
+                allocate(xcoordinates(numcoordinates), stat=ierr)
+                allocate(ycoordinates(numcoordinates), stat=ierr)
+                call prop_get_doubles(node_ptr, '', 'xCoordinates',     xcoordinates, numcoordinates, success)
+                call prop_get_doubles(node_ptr, '', 'yCoordinates',     ycoordinates, numcoordinates, success)
+                if (success) then
+                   loc_spec_type = POLYGON_XY
+                end if
+             end if
+          end if
+       else ! fileVersion <= 1
+          loc_spec_type = POLYGON_FILE
+          !
+          locationfile = ''
+          call prop_get(node_ptr, '', 'LocationFile', locationfile, success)
+          if (.not. success .or. len_trim(locationfile) == 0) then
+             write(msgbuf, '(a,a,a)') 'Required field ''LocationFile'' missing in lateral ''', trim(locid), '''.'
+             call warn_flush()
+             cycle
+          else
+             call resolvePath(locationfile, basedir, locationfile)
+          end if
+       end if
+       if (loc_spec_type == imiss) then
+          write(msgbuf, '(a,a,a)') 'Unrecognized location specification in lateral ''', trim(locid), '''.'
           call warn_flush()
           cycle
-       else
-          call resolvePath(locationfile, basedir, locationfile)
        end if
-       
-       ! TODO: AvD: support NodeIds instead of LocationFile
 
        call ini_alloc_laterals()
 
        call prepare_lateral_mask(kclat, ilattype)
 
        numlatsg = numlatsg + 1
-       call selectelset_internal_nodes( locationfile, 10, xz, yz, kclat, ndxi, numlatsg, nnLat) ! find nodes in polygon  
+       call selectelset_internal_nodes(xz, yz, kclat, ndxi, numlatsg, nnLat, &
+                                       loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage)
 
        call realloc(qplat, numlatsg, keepExisting = .true.)
        call realloc(lat_ids, numlatsg, keepExisting = .true.)
+       if (allocated(xcoordinates)) deallocate(xcoordinates, stat=ierr)
+       if (allocated(ycoordinates)) deallocate(ycoordinates, stat=ierr)
      
        ! [lateral]
        ! Flow = 1.23 | test.tim | REALTIME

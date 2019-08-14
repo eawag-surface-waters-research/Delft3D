@@ -68,6 +68,11 @@ module timespace_parameters
   !                            d) is daarmee bepalend voor de toepasbare interpolatiemethodes
   !
 
+  ! Enumeration for location specification types (used in selectelset_internal_nodes).
+  integer, parameter :: POLYGON_FILE                   = 10 !< A polygon input file used for inside-polygon check.
+  integer, parameter :: POLYGON_XY                     = 11 !< x/y arrays containing a polygon used for inside-polygon check.
+  integer, parameter :: BRANCHID_CHAINAGE              = 12 !< branchid+chainage combination to select the nearest 1D network point.
+
   integer            :: mdia                           =  0 !  -1  ! -1 = write dia, 0 = do not write dia
 
   ! enumeration for interpolation methods of providers
@@ -7447,39 +7452,73 @@ contains
       deallocate(xp,yp)
    end subroutine selectelset_internal_links
    
-   subroutine selectelset_internal_nodes( filename, filetype, xz, yz, kc, nx, numprov, kp) ! find nodes contained inside polygon filetype 10
+                                          
+   !> Find and select flow nodes contained inside polygon, or by NodeId.
+   !! A mask can be used to limit which flow nodes are a candidate at all.
+   !! The output array will be set to value numprov for the flow node numbers
+   !! that were selected, such that the call site can know which input file
+   !! is affecting which flow nodes.
+   subroutine selectelset_internal_nodes(xz, yz, kc, nx, numprov, kp, &
+                                       & loc_spec_type, loc_file, numcoord, xpin, ypin, branchid, chainage)
+   use m_inquire_flowgeom
+   use m_polygon
+   use m_alloc
+   use m_missing
+   
    implicit none
    
-   character(len=*), intent(in)    :: filename   ! file name for meteo data file
-   integer     ,     intent(in)    :: filetype   ! spw, arcinfo, uniuvp etc
-   integer         , intent(in)    :: nx         ! dim of nodes
-   double precision, intent(in)    :: xz(nx)     ! nodes coord
-   double precision, intent(in)    :: yz(nx)
-   integer         , intent(in)    :: kc(nx)     ! allow search in this node 1/0
-   integer         , intent(in)    :: numprov    ! this is provider nr so much
+   double precision,           intent(in   ) :: xz(nx)     !< Flow nodes center x-coordinates.
+   double precision,           intent(in   ) :: yz(nx)     !< Flow nodes center y-coordinates.
+   integer,                    intent(in   ) :: kc(nx)     !< Mask for which flow nodes are allowed for selection (1/0 = yes/no).
+   integer,                    intent(in   ) :: nx         !< Number of flow nodes in input.
+   integer,                    intent(in   ) :: numprov    !< Provider nr from call site, to be used in setting output kp array.
+   integer,                    intent(  out) :: kp(nx)     !< Output array, set to value numprov when flow node was selected.
+   integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: POLYGON_FILE, POLYGON_XY or BRANCH_CHAINAGE.
+   character(len=*), optional, intent(in   ) :: loc_file   !< File name of a polygon file (when loc_spec_type==POLYGON_FILE).
+   integer,          optional, intent(in   ) :: numcoord   !< Number of coordinates in input arrays (when loc_spec_type==POLYGON_XY).
+   double precision, optional, intent(in   ) :: xpin(:)    !< Polygon x-coordinates (when loc_spec_type==POLYGON_XY).
+   double precision, optional, intent(in   ) :: ypin(:)    !< Polygon y-coordinates (when loc_spec_type==POLYGON_XY).
+   character(len=*), optional, intent(in   ) :: branchId   !< Branch id (when loc_spec_type==BRANCHID_CHAINAGE).
+   double precision, optional, intent(in   ) :: chainage   !< Chainage along branch (when loc_spec_type==BRANCHID_CHAINAGE).
+   !
+   ! locals
+   integer   :: minp, inp, n, ierr
+   !
+   ! body
+   select case(loc_spec_type)
+   case (POLYGON_FILE)
+      ! Fill npl, xpl, ypl from file
+      call oldfil(minp, loc_file)
+      call reapol (minp, 0)
+   case (POLYGON_XY)
+      ! Fill npl, xpl, ypl from input arrays
+      call increasepol(numcoord, 0)
+      xpl(1:numcoord) = xpin(1:numcoord)
+      ypl(1:numcoord) = ypin(1:numcoord)
+      npl = numcoord
+   case (BRANCHID_CHAINAGE)
+      ierr = findnode(branchId, chainage, n)
+      if (ierr /= 0) return
+      kp(n) = numprov
+   case default
+      return
 
-   integer         , intent(out)   :: kp(nx)     ! point is found in provider nr so much 
-   
-   integer                         :: minp, inp, n
-   
-   
-   if (filetype == 10) then ! inside polygon 
-   
-        call oldfil(minp, filename)
-        call reapol (minp, 0)
- 
-        inp  = -1 
-        do n = 1,nx
-           if (kc(n) > 0) then ! search allowed, (not allowed like closed pipes point etc) 
-              call inwhichpolygon(xz(n), yz(n), inp)
-              if (inp > 0) then
-                 kp(n) = numprov 
-              endif   
-           endif   
-        enddo   
-   endif
+   end select
+
+   if (loc_spec_type == POLYGON_FILE .or. loc_spec_type == POLYGON_XY) then
+      ! Check which points are inside polygon npl-xpl-ypl
+      inp  = -1 
+      do n = 1,nx
+         if (kc(n) > 0) then ! search allowed, (not allowed like closed pipes point etc) 
+            call inwhichpolygon(xz(n), yz(n), inp)
+            if (inp > 0) then
+               kp(n) = numprov 
+            endif   
+         endif   
+      enddo   
+   end if
    end subroutine selectelset_internal_nodes
-   
+
    !
    !
    ! ==========================================================================
