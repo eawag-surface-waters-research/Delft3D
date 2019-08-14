@@ -976,7 +976,7 @@ logical function initboundaryblocksforcings(filename)
        call prop_get_string(node_ptr, '', 'nodeId', locationfile, retVal)
        if (retVal) then
           file_type = node_id
-          fmmethod  = uniform
+          fmmethod  = spaceandtime
        else
           file_type = poly_tim
           fmmethod  = weightfactors
