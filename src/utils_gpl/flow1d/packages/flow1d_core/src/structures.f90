@@ -1054,7 +1054,8 @@ end subroutine
       end select
    end subroutine set_valve_opening
    
-   !> Gets pump capacity.
+   !> Gets pump capacity, in the direction of the pump's orientation.
+   !! (So possibly negative, when direction < 0.)
    double precision function GetPumpCapacity(stru)
       implicit none
       type(t_structure), intent(in)   :: stru !< Structure
@@ -1064,7 +1065,7 @@ end subroutine
       end if
 
       if (stru%pump%is_active) then
-         GetPumpCapacity = stru%pump%direction * stru%pump%stage_capacity
+         GetPumpCapacity = stru%pump%current_capacity
       else
          GetPumpCapacity = 0d0
       end if

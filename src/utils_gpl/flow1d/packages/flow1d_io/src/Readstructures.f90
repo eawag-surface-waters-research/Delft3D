@@ -510,7 +510,7 @@ module m_readstructures
                pstr%pump%reduction_factor  = 1.0d0
                pstr%pump%ss_level          = 0.0d0
                pstr%pump%ds_level          = 0.0d0
-               pstr%pump%stage_capacity    = 0.0d0
+               pstr%pump%current_capacity  = 0.0d0
             
             case(ST_CULVERT)
                allocate(pstr%culvert)
@@ -1256,7 +1256,7 @@ module m_readstructures
       pump%reduction_factor  = 1.0d0
       pump%ss_level          = 0.0d0
       pump%ds_level          = 0.0d0
-      pump%stage_capacity    = 0.0d0
+      pump%current_capacity  = 0.0d0
       
    end subroutine readPump
 

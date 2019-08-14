@@ -65,7 +65,7 @@ module m_Pump
       double precision                        :: pump_head
       integer                                 :: actual_stage
       logical                                 :: is_active
-      double precision                        :: stage_capacity
+      double precision                        :: current_capacity
       double precision                        :: reduction_factor
       double precision                        :: discharge
 
@@ -142,7 +142,8 @@ contains
       if (nstages == 0) then
          ! No stages for this pump. pump%capacity(1) is the pump capacity to be used
          pump%is_active = .true.
-         qp = pump%reduction_factor * pump%capacity(pump%actual_stage)
+         qp = pump%reduction_factor * pump%capacity(1)
+         pump%current_capacity = pump%capacity(1)
       else
          
          ! Check Suction Side Conditions
@@ -224,7 +225,7 @@ contains
          pump%discharge = qp
       else
          pump%discharge = -qp
-         pump%stage_capacity = -pump%stage_capacity
+         pump%current_capacity = -pump%current_capacity
       endif
 
    end subroutine PrepareComputePump

@@ -1572,7 +1572,7 @@ if (nstruc > 0) then
       else
          call Write2Scr(linec, 'Is active?', 0, '-')
       end if
-      call Write2Scr(linec, 'Stage capacity', ppump%stage_capacity, 'm3/s')
+      call Write2Scr(linec, 'Current capacity', ppump%current_capacity, 'm3/s')
       call Write2Scr(linec, 'Reduction factor', ppump%reduction_factor, '-')
    case (ST_ORIFICE)
       porifice=>network%sts%struct(nstruc)%orifice
