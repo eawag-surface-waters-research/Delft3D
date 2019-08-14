@@ -442,6 +442,7 @@ src/buildvs15_test.cmd -text
 src/buildvs15fm.cmd -text
 src/buildvs15fm_coverage.cmd -text
 src/buildvs17.cmd -text
+src/catfiles.py -text
 src/clean.cmd -text
 src/clean.sh -text
 src/common.am -text
