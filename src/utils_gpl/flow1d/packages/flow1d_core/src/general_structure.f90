@@ -35,7 +35,7 @@ module m_General_Structure
    implicit none
    
    double precision, public    :: extra_resist_genstruc = 0d0
-   double precision            :: eps = 1d-5
+   double precision, public    :: gatefrac_eps = 1d-5
 
    public ComputeGeneralStructure
    public dealloc
@@ -203,7 +203,7 @@ contains
       fu = genstr%fu(:,L0) 
       ru = genstr%ru(:,L0) 
       au = genstr%au(:,L0) 
-      if (gatefraction > eps) then
+      if (gatefraction > gatefrac_eps) then
          ! calculate flow under gate
          dg = genstr%gateLowerEdgeLevel - zs
 
@@ -226,7 +226,7 @@ contains
                      rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(L0))
       endif
       
-      if (gatefraction< 1d0 - eps) then
+      if (gatefraction< 1d0 - gatefrac_eps) then
          ! calculate flow asif no door is present
          dg = huge(1d0)
          u1L = ru(3) - fu(3)*dsL 

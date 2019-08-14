@@ -36,7 +36,6 @@ use m_GlobalParameters
 use unstruc_channel_flow, only: network
 implicit none
 
-double precision            :: eps = 1d-5
 type(tree_data), pointer, public :: strs_ptr !< A property list with all input structure specifications of the current model. Not the actual structure set.
 integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and from structure-input files. Use one or the other.
 
@@ -487,7 +486,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
 
       if (jampi == 0 ) then
          if (valstruct(1) == 0d0) then ! zero width
-            valstruct(13:) = dmiss ! TODO: is it allowed to overwrite valstruct(icount) here?
+            valstruct(13:) = dmiss
          else
             if (valstruct(19) > 0) then ! flow area in gate opening
                valstruct(21) = valstruct(21) / valstruct(19) ! velocity through gate opening
@@ -537,21 +536,21 @@ double precision function get_force_difference(istru, L)
 end function get_force_difference
 
 
-!> Gets discharge through gate opening per link
+!> Gets discharge through gate opening per link.
 double precision function get_discharge_through_gate_opening(genstr, L0, s1m1, s1m2)
    use m_missing
    use m_General_Structure
    implicit none   
-   type(t_GeneralStructure), pointer, intent(in   ) :: genstr !< Derived type containing general structure information
-   integer,                           intent(in   ) :: L0     !< local link index
-   double precision,                  intent(in   ) :: s1m1   !< (geometrical) upstream water level
-   double precision,                  intent(in   ) :: s1m2   !< (geometrical) downstream water level
+   type(t_GeneralStructure), pointer, intent(in   ) :: genstr !< Derived type containing general structure information.
+   integer,                           intent(in   ) :: L0     !< Local link index in genstr%..(:) link-based arrays.
+   double precision,                  intent(in   ) :: s1m1   !< (geometrical) upstream water level.
+   double precision,                  intent(in   ) :: s1m2   !< (geometrical) downstream water level.
    double precision  :: u1L, dsL, gatefraction
    
    dsL = s1m2 - s1m1 
    gatefraction = genstr%gateclosedfractiononlink(L0)
    
-   if (gatefraction > eps) then
+   if (gatefraction > gatefrac_eps) then
       u1L = genstr%ru(3,L0) - genstr%fu(3,L0)*dsL
       get_discharge_through_gate_opening = genstr%au(3,L0) * u1L
    else
@@ -560,21 +559,21 @@ double precision function get_discharge_through_gate_opening(genstr, L0, s1m1, s
 
 end function get_discharge_through_gate_opening
 
-!> Gets discharge through gate opening per link
+!> Gets discharge through gate opening per link.
 double precision function get_discharge_over_gate_uppedge(genstr, L0, s1m1, s1m2)
    use m_missing
    use m_General_Structure
    implicit none   
    type(t_GeneralStructure), pointer, intent(in   ) :: genstr !< Derived type containing general structure information
-   integer,                           intent(in   ) :: L0     !< local link index
-   double precision,                  intent(in   ) :: s1m1   !< (geometrical) upstream water level
-   double precision,                  intent(in   ) :: s1m2   !< (geometrical) downstream water level
+   integer,                           intent(in   ) :: L0     !< Local link index in genstr%..(:) link-based arrays.
+   double precision,                  intent(in   ) :: s1m1   !< (geometrical) upstream water level.
+   double precision,                  intent(in   ) :: s1m2   !< (geometrical) downstream water level.
    double precision  :: u1L, dsL, gatefraction
    
-   dsL = s1m2 -s1m1
+   dsL = s1m2 - s1m1
    gatefraction = genstr%gateclosedfractiononlink(L0)
    
-   if (gatefraction > eps) then
+   if (gatefraction > gatefrac_eps) then
       u1L = genstr%ru(2,L0) - genstr%fu(2,L0)*dsL
       get_discharge_over_gate_uppedge = genstr%au(2,L0) * u1L
    else
