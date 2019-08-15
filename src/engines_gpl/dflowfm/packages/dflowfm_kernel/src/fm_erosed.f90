@@ -3991,14 +3991,14 @@ end module m_fm_update_crosssections
 
    sfname = ''
 
-   if ( qid(1:10).eq.'sedfracbnd' ) then
+   if ( index(qid,'sedfracbnd') == 1 ) then
       qidname = qid(1:10)
       if ( len_trim(qid)>10 ) then
          sfname = trim(qid(11:))
       else
          sfname = trim('unknown_sediment_fraction')
       end if
-   else if (qid(1:14).eq.'initialsedfrac' ) then
+   else if (index(qid,'initialsedfrac') == 1 ) then
       qidname = qid(1:14)
       if ( len_trim(qid)>14 ) then
          sfname = trim(qid(15:))
