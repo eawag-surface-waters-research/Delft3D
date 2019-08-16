@@ -430,7 +430,7 @@ contains
         & dg<.0001) then          !hk: or gate closed
          state = 0
          ds = hs1
-      else
+        else
          !
          !        Compute critical water depth at the
          !        sill, dc and water depth at the sill,ds
@@ -445,7 +445,7 @@ contains
          call flgsd3(wsd, wstr, zs, w2, zb2, ds1, ds2, elu, hd1, rhoast, cwd, ds, &
                    & lambda)
          !
-         if (ds>=dc) then
+          if (ds>=dc) then
             if (dg>=ds) then
                !
                !              - drowned weir -

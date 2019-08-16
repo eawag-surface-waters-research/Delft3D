@@ -74,6 +74,7 @@ module m_compound
       integer, dimension(:), pointer     :: structure_indices     !< Indices of the structure elements.
       integer                            :: numlinks              !< Number of links .
       integer, dimension(:), pointer     :: linknumbers           !< Link numbers.
+      character(len=IdLen), dimension(:), pointer :: structureIds !< ids of the structure elements
    end type t_compound
 
    type, public :: t_compoundSet

@@ -85,7 +85,42 @@ module m_readstructures
    contains
 
    !> Read the structure.ini file
-   subroutine readStructures(network, structureFile)
+   subroutine readStructures(network, structureFiles)
+   
+      type(t_network),  intent(inout)    :: network
+      character(len=*), intent(in   )    :: structurefiles
+   
+      integer  :: isemi, ispace
+      character(len=CharLn) :: file
+      character(len=CharLn) :: inputFiles
+      
+      inputFiles = structurefiles
+      do while (len_trim(inputfiles) > 0) 
+         isemi = scan(inputfiles, ';')
+         if (isemi == 0) isemi = len_trim(inputfiles)+1
+         ispace = scan(inputfiles, ' ')
+         isemi = min(isemi, ispace)
+         if (isemi ==0) then
+            isemi = len_trim(inputfiles)+1
+         endif
+         
+         file = inputfiles(1:isemi-1)
+         inputfiles = inputfiles(isemi+1:)
+         call remove_leading_spaces(trim(file))
+         call readStructureFile(network, file)
+      enddo
+      ! fill the hashtable for searching on Id's
+      
+      if (.not. allocated(network%sts%restartData) .and. (network%sts%count > 0)) then
+         allocate(network%sts%restartData(network%sts%count, CFiHighestParameter))
+         network%sts%restartData = missingValue
+      endif
+      ! Fill indirection tables and set indices for compoundss
+      call finishReading(network%sts, network%cmps)
+   end subroutine readStructures
+
+   !> read a single ini file and add the structures to the structure sets
+   subroutine readStructureFile(network, structureFile)
       use m_GlobalParameters
       use m_1d_Structures
       use m_compound
@@ -170,6 +205,12 @@ module m_readstructures
          numstr = size(md_ptr%child_nodes)
       end if
 
+      if (network%sts%count == 0) then
+         network%sts%currentFileVersion = major
+      else
+         network%sts%currentFileVersion = min(major, network%sts%currentFileVersion)
+      endif
+
       do i = 1, numstr
          
          if (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Structure')) then
@@ -201,7 +242,7 @@ module m_readstructures
             iStrucType = GetStrucType_from_string(typestr)
             pstru%type = iStrucType
             if (iStrucType == ST_COMPOUND) then
-               ! compound structures are processed later on
+               call readCompound(network%cmps, md_ptr%child_nodes(i)%node_ptr, success)
                cycle
             endif
             
@@ -283,146 +324,161 @@ module m_readstructures
 
          
       end do
-      
-      ! Set counters for number of weirs, culverts, etc
-      network%sts%numweirs    = 0
-      network%sts%numculverts = 0
-      network%sts%numPumps    = 0
-      network%sts%numOrifices = 0
-      network%sts%numBridges  = 0
-      network%sts%numGates    = 0
-      network%sts%numGeneralStructures = 0
-      if (major ==2) then
-         network%sts%numweirs    = network%sts%countByType(ST_WEIR)
-         network%sts%numculverts = network%sts%countByType(ST_CULVERT)
-         network%sts%numPumps    = network%sts%countByType(ST_PUMP)
-         network%sts%numOrifices = network%sts%countByType(ST_ORIFICE)
-         network%sts%numBridges  = network%sts%countByType(ST_BRIDGE)
-         network%sts%numGates    = network%sts%countByType(ST_GATE)
-         network%sts%numGeneralStructures = network%sts%countByType(ST_GENERAL_ST)
-         allocate(network%sts%weirIndices(network%sts%numweirs))
-         allocate(network%sts%culvertIndices(network%sts%numCulverts))
-         allocate(network%sts%pumpIndices(network%sts%numPumps))
-         allocate(network%sts%orificeIndices(network%sts%numOrifices))
-         allocate(network%sts%gateIndices(network%sts%numGates))
-         allocate(network%sts%bridgeIndices(network%sts%numBridges))
-         allocate(network%sts%generalStructureIndices(network%sts%numGeneralStructures))
-      
-         !set structure indices for different structure types
-         nweir = 0
-         nculvert = 0
-         norifice = 0
-         ngenstru = 0
-         nbridge = 0
-         ngate = 0
-         do istru = 1, network%sts%Count
-            select case (network%sts%struct(istru)%type)
-            case (ST_WEIR)
-               nweir = nweir+1
-               network%sts%weirIndices(nweir) = istru
-               ! From now on this is a general structure
-               if (major/=1) then
-                 network%sts%struct(istru)%type = ST_GENERAL_ST
-               endif
-            case (ST_CULVERT)
-               nculvert = nculvert + 1
-               network%sts%culvertIndices(nculvert) = istru
-            case (ST_ORIFICE)
-               norifice = norifice + 1
-               network%sts%orificeIndices(norifice) = istru
-               ! From now on this is a general structure
-               if (major/=1) then
-                  network%sts%struct(istru)%type = ST_GENERAL_ST
-               endif
-            case (ST_GATE)
-               ngate = ngate + 1
-               network%sts%gateIndices(ngate) = istru
-               ! From now on this is a general structure
-               if (major/=1) then
-                  network%sts%struct(istru)%type = ST_GENERAL_ST
-               endif
-            case (ST_BRIDGE)
-               nbridge = nbridge + 1
-               network%sts%bridgeIndices(nbridge) = istru
-            case (ST_GENERAL_ST)
-               ngenstru = ngenstru + 1
-               network%sts%generalStructureIndices(ngenstru) = istru
-            end select
-         
-         enddo
-      endif
-      
-      ! fill the hashtable for searching on Id's
-      call fill_hashtable(network%sts)
-      
-      if (.not. allocated(network%sts%restartData) .and. (network%sts%count > 0)) then
-         allocate(network%sts%restartData(network%sts%count, CFiHighestParameter))
-         network%sts%restartData = missingValue
-      endif
 
-      allocate(structureNames(network%sts%count))
-      do i = 1, numstr
-         
-         if (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Structure')) then
-            typestr = ''
-            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr)
-            iStrucType = GetStrucType_from_string(typestr)
-            if (iStrucType.ne. ST_COMPOUND) then
-               cycle
-            endif
-            
-            if (network%cmps%count+1 > network%cmps%Size) then
-               call realloc(network%cmps)
-            endif
-
-            pcompound => network%cmps%compound(network%cmps%count+1)
-            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'id', st_id, success1)
-            if (.not. success1) then
-               write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ', id is missing.'
-               call err_flush()
-               success = .false.
-            end if
-
-            pcompound%id = st_id
-            pcompound%name = pcompound%id
-            call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'name', pcompound%name)
-            
-            call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'numStructures', pcompound%numstructs, success1)
-            success = success .and. check_input_result(success1, st_id, 'numStructures')
-
-            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'structureIds', pcompound%numstructs, structureNames, success1)
-            success = success .and. check_input_result(success1, st_id, 'numStructures')
-            if (.not. success) then
-               ! Stop processing this structure
-               cycle
-            endif
-            
-            allocate(pcompound%structure_indices(pcompound%numstructs))
-            do j = 1, pcompound%numstructs
-               istru = hashsearch(network%sts%hashlist_structure, structureNames(j))
-               
-               if (istru <= 0) then
-                  msgbuf = 'Error reading compound structure '''// trim(st_id) // ''', structure '''//trim(structureNames(j))//''' was not found.'
-                  call err_flush()
-                  success = .false.
-               else
-                  pcompound%structure_indices(j) = istru
-                  network%sts%struct(istru)%compound = network%cmps%count+1
-               endif
-            enddo
-            if (success) then
-               network%cmps%Count = network%cmps%Count + 1
-            endif
-         endif
-      enddo
-
-         
-      deallocate(structureNames)
 999   continue
       call tree_destroy(md_ptr)
 
-   end subroutine readStructures
+   end subroutine readStructureFile
+   
+   !> Read the data for a compound structure and store the ids of the structure  elements
+   subroutine readCompound(cmps, md_ptr, success)
+   
+      use messageHandling
+      
+      type(t_compoundSet),                intent(inout) :: cmps         !< compound data set
+      type(tree_data), pointer,           intent(in   ) :: md_ptr       !< ini tree pointer with user input.
+      logical,                            intent(inout) :: success 
 
+      type(t_compound), pointer           :: pcompound
+      integer                             :: i
+      character(len=IdLen)                :: st_id
+      logical                             :: success1
+      
+      if (cmps%count+1 > cmps%Size) then
+         call realloc(cmps)
+      endif
+
+      pcompound => cmps%compound(cmps%count+1)
+      call prop_get(md_ptr, '', 'id', st_id, success1)
+      if (.not. success1) then
+         write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ', id is missing.'
+         call err_flush()
+         success = .false.
+      end if
+
+      pcompound%id = st_id
+      pcompound%name = pcompound%id
+      call prop_get(md_ptr, '', 'name', pcompound%name)
+            
+      call prop_get_integer(md_ptr, '', 'numStructures', pcompound%numstructs, success1)
+      success = success .and. check_input_result(success1, st_id, 'numStructures')
+      
+      if (.not. success) then
+         return
+      endif
+      
+      allocate(pcompound%structureIds(pcompound%numstructs))
+
+      call prop_get_strings(md_ptr, '', 'structureIds', pcompound%numstructs, pcompound%structureIds, success1)
+      success = success .and. check_input_result(success1, st_id, 'structureIds')
+      if (.not. success) then
+         ! Stop processing this structure
+         return
+      endif
+            
+      allocate(pcompound%structure_indices(pcompound%numstructs))
+      if (success) then
+         cmps%Count = cmps%Count + 1
+      endif
+      
+   end subroutine readCompound
+   
+   !> At the end of the reading of all structure files, fill the indices arrays for the different
+   !! structure types. And find the integer indices for all compound structures
+   subroutine finishReading(sts, cmps)
+      type(t_structureSet),               intent(inout) :: sts    !< structure data set
+      type(t_compoundSet),                intent(inout) :: cmps   !< compound data set
+   
+      integer :: i
+      integer :: istru
+      integer :: nweir
+      integer :: nculvert
+      integer :: norifice
+      integer :: nbridge
+      integer :: ngate
+      integer :: ngenstru
+      integer,          dimension(:), pointer :: indices
+      character(len=IdLen), dimension(:), pointer :: ids
+      
+      ! Set counters for number of weirs, culverts, etc
+      sts%numweirs    = 0
+      sts%numculverts = 0
+      sts%numPumps    = 0
+      sts%numOrifices = 0
+      sts%numBridges  = 0
+      sts%numGates    = 0
+      sts%numGeneralStructures = 0
+      sts%numweirs    = sts%countByType(ST_WEIR)
+      sts%numculverts = sts%countByType(ST_CULVERT)
+      sts%numPumps    = sts%countByType(ST_PUMP)
+      sts%numOrifices = sts%countByType(ST_ORIFICE)
+      sts%numBridges  = sts%countByType(ST_BRIDGE)
+      sts%numGates    = sts%countByType(ST_GATE)
+      sts%numGeneralStructures = sts%countByType(ST_GENERAL_ST)
+      allocate(sts%weirIndices(sts%numweirs))
+      allocate(sts%culvertIndices(sts%numCulverts))
+      allocate(sts%pumpIndices(sts%numPumps))
+      allocate(sts%orificeIndices(sts%numOrifices))
+      allocate(sts%gateIndices(sts%numGates))
+      allocate(sts%bridgeIndices(sts%numBridges))
+      allocate(sts%generalStructureIndices(sts%numGeneralStructures))
+      
+      !set structure indices for different structure types
+      nweir = 0
+      nculvert = 0
+      norifice = 0
+      ngenstru = 0
+      nbridge = 0
+      ngate = 0
+      do istru = 1, sts%Count
+         select case (sts%struct(istru)%type)
+         case (ST_WEIR)
+            nweir = nweir+1
+            sts%weirIndices(nweir) = istru
+            ! From now on this is a general structure
+            sts%struct(istru)%type = ST_GENERAL_ST
+         case (ST_CULVERT)
+            nculvert = nculvert + 1
+            sts%culvertIndices(nculvert) = istru
+         case (ST_ORIFICE)
+            norifice = norifice + 1
+            sts%orificeIndices(norifice) = istru
+            ! From now on this is a general structure
+            sts%struct(istru)%type = ST_GENERAL_ST
+         case (ST_GATE)
+            ngate = ngate + 1
+            sts%gateIndices(ngate) = istru
+            ! From now on this is a general structure
+            sts%struct(istru)%type = ST_GENERAL_ST
+         case (ST_BRIDGE)
+            nbridge = nbridge + 1
+            sts%bridgeIndices(nbridge) = istru
+         case (ST_GENERAL_ST)
+            ngenstru = ngenstru + 1
+            sts%generalStructureIndices(ngenstru) = istru
+         end select
+      enddo
+      
+      call fill_hashtable(sts)
+            
+      ! Initialise compounds and searc for all structure elements
+      do istru = 1, cmps%Count
+         indices => cmps%compound(istru)%structure_indices
+         ids =>  cmps%compound(istru)%structureIds
+         do i = 1,  cmps%compound(istru)%numstructs
+            indices(i) = hashsearch(sts%hashlist_structure, ids(i))
+            if (indices(i) <=0) then
+               msgbuf = 'Error in compound '''//trim(cmps%compound(istru)%id)//''' structure element with id '''//trim(ids(i))//&
+                        ''' was not found in the structure list'
+               call err_flush()
+            endif
+            
+         enddo
+         
+      enddo
+   end subroutine finishreading
+   
+   
    subroutine read_structure_cache(ibin, network)
    
       type(t_network), intent(inout)         :: network

@@ -173,6 +173,7 @@ module m_1d_structures
       type(t_hashlist)                                      :: hashlist_bridge
       type(t_hashlist)                                      :: hashlist_pump
       type(t_hashlist)                                      :: hashlist_structure
+      integer                                               :: currentFileVersion       !< Lowest file version used in the input 
       integer                                               :: numWeirs                 !< Total number of weirs in this structure set. See indices array below.
       integer                                               :: numCulverts              !< Total number of culverts in this structure set. See indices array below.
       integer                                               :: numPumps                 !< Total number of pumps in this structure set. See indices array below.
