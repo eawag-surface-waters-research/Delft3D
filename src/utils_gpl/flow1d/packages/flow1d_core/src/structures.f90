@@ -771,7 +771,7 @@ end subroutine
          case (ST_CULVERT)
             strng = 'culvert'
          case (ST_UNI_WEIR)
-            strng = 'universal_weir'
+            strng = 'universalweir'
          case (ST_DAMBREAK)
             strng = 'dambreak'
          case (ST_BRIDGE)

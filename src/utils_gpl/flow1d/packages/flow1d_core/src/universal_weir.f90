@@ -84,27 +84,27 @@ module m_Universal_Weir
       
    end subroutine deallocUniWeir
    
-   !> Compute the coefficients FU, RU and AU for this universal weir
+   !> Compute the coefficients FU, RU and AU for this universal weir.
    subroutine ComputeUniversalWeir(uniweir, fum, rum, aum, dadsm, kfum, s1m1, s1m2, &
                                    qm, q0m, u1m, u0m, dxm, dt)
       implicit none
       !
       ! Global variables
       !
-      type(t_uni_weir), pointer, intent(in)          :: uniweir  !< Universal weir object
-      integer, intent(out)                           :: kfum     !< Flag for drying and flooding
-      double precision, intent(out)                  :: aum      !< Flow area of structure
-      double precision, intent(out)                  :: dadsm    !< Width of structure
-      double precision, intent(out)                  :: fum      !< FU
-      double precision, intent(inout)                :: q0m      !< Discharge
-      double precision, intent(out)                  :: qm       !< Discharge
-      double precision, intent(out)                  :: rum      !< RU
-      double precision, intent(in)                   :: u0m      !< Flow velocity at previous time step
-      double precision, intent(inout)                :: u1m      !< Flow velocity
-      double precision, intent(in)                   :: s1m2     !< Water level at left side of universal weir
-      double precision, intent(in)                   :: s1m1     !< Water level at right side of universal weir
-      double precision, intent(in)                   :: dxm      !< Length of flow link
-      double precision, intent(in)                   :: dt       !< time step in seconds
+      type(t_uni_weir), pointer, intent(in)          :: uniweir  !< Universal weir object.
+      double precision, intent(out)                  :: fum      !< FU.
+      double precision, intent(out)                  :: rum      !< RU.
+      double precision, intent(out)                  :: aum      !< Computed flow area at structure.
+      double precision, intent(out)                  :: dadsm    !< Computed flow width at structure.
+      integer,          intent(out)                  :: kfum     !< Flag for drying and flooding.
+      double precision, intent(in)                   :: s1m2     !< Water level at left side of universal weir.
+      double precision, intent(in)                   :: s1m1     !< Water level at right side of universal weir.
+      double precision, intent(out)                  :: qm       !< Computed discharge at structure.
+      double precision, intent(inout)                :: q0m      !< Discharge at previous timestep.
+      double precision, intent(inout)                :: u1m      !< Computed flow velocity.
+      double precision, intent(in)                   :: u0m      !< Flow velocity at previous time step.
+      double precision, intent(in)                   :: dxm      !< Length of flow link.
+      double precision, intent(in)                   :: dt       !< Time step in seconds.
       !
       !
       ! Local variables
