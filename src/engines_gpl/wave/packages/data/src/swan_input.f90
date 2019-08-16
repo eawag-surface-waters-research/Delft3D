@@ -292,6 +292,7 @@ module swan_input
        real                                    :: veg_drag
        !
        real                                    :: wlevelcorr       ! Overall water level correction; see Time frame input in GUI
+       real                                    :: alfawind         ! Overall wind speed multipliction factor; 
        real          , dimension(:), pointer   :: timwav
        real          , dimension(:), pointer   :: zeta             ! Default water level of a selected time point (when running stand-alone); see Time frame input in GUI
        real          , dimension(:), pointer   :: ux0
@@ -1613,6 +1614,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%quadruplets   = .false.
     sr%refraction    = .true.
     sr%fshift        = .true.
+    sr%alfawind      = 1.0
     !
     call prop_get_integer(mdw_ptr, 'Processes', 'GenModePhys', sr%genmode)
     if (sr%genmode < 0 .or. sr%genmode > 3) then
@@ -1671,6 +1673,11 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     endif
     !
     call prop_get_logical(mdw_ptr, 'Processes', 'WindGrowth'  , sr%windgrowth)
+    call prop_get_real   (mdw_ptr, 'Processes', 'AlfaWind'    , sr%alfawind)
+    if (sr%alfawind<1d-6 .and. sr%alfawind>-1d-6) then
+       write (*,'(a)') 'SWAN_INPUT: AlfaWind is not allowed to be equal to 0.0.'
+       goto 999
+    endif
     parname = ''
     call prop_get_string (mdw_ptr, 'Processes', 'WhiteCapping', parname)
     call lowercase(parname, len(parname))
@@ -4349,8 +4356,10 @@ subroutine write_swan_inp (wavedata, calccount, &
        !
        !        *** read wind grid ***
        !
-       line(1:20)  = 'READ WIN FAC= 1.   _'
-       line(21:)   = ' '
+       line(1:13)  = 'READ WIN FAC='
+       write (line(14:25), '(1X,F6.2)') sr%alfawind
+       line(26:28) = ' _ '
+       line(29:)   = ' '
        write (luninp, '(1X,A)') trim(line)
        line        = ' '
        ind         = index(wfil, ' ')
