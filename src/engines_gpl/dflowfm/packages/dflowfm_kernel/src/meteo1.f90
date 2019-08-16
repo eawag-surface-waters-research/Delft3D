@@ -7361,7 +7361,8 @@ contains
      double precision, intent(in), optional    :: xpin(:)
      double precision, intent(in), optional    :: ypin(:)
      integer         , intent(in), optional    :: nump
-     integer         , intent(  out)           :: keg(:)
+     integer         , intent(  out)           :: keg(:)      !< Output array containing the flow link numbers that were selected.
+                                                              !< Size of array is responsability of call site, and filling starts at index 1 upon each call.
      integer         , intent(  out)           :: numg
 
      !optional inputs/outputs
@@ -7472,7 +7473,8 @@ contains
    integer,                    intent(in   ) :: kc(nx)     !< Mask for which flow nodes are allowed for selection (1/0 = yes/no).
    integer,                    intent(in   ) :: nx         !< Number of flow nodes in input.
    integer,                    intent(in   ) :: numprov    !< Provider nr from call site, to be used in setting output kp array.
-   integer,                    intent(  out) :: kp(nx)     !< Output array, set to value numprov when flow node was selected.
+   integer,                    intent(inout) :: kp(nx)     !< Output array, same size as flow nod input arrays. On index of every flow node that was selected: set to value numprov.
+                                                           !< Note that this kp array is used in a fundamentally different way from the keg array in selectelset_internal_links().
    integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: POLYGON_FILE, POLYGON_XY or BRANCH_CHAINAGE.
    character(len=*), optional, intent(in   ) :: loc_file   !< File name of a polygon file (when loc_spec_type==POLYGON_FILE).
    integer,          optional, intent(in   ) :: numcoord   !< Number of coordinates in input arrays (when loc_spec_type==POLYGON_XY).
