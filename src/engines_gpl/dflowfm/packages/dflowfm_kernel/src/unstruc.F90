@@ -2581,7 +2581,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  double precision  :: twot = 2d0/3d0
  double precision  :: tgi  = 1d0/(2d0*9.81d0)
  double precision  :: ds, ds1, ds2, ds0, xx, hdl, bupmin, he, zcdamn, hcrest, uin, blmx, fdx
- double precision  :: h0, dzb, cz, sixth = 1d0/6d0, frcn, z00, sqcf, uuL, vhei, eup, ucxku, ucyku, vben
+ double precision  :: h0, dzb, cz, sixth = 1d0/6d0, frcn, z00, sqcf, uuL, vhei, eup, ucxku, ucyku, vben, uLL, agwdxi
 
  double precision  :: Qweir_super, Qweir_sub, wu_orig
  double precision  :: weirrelax = 0.75d0
@@ -2799,7 +2799,6 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
                  vhei   =  0.5d0*vben*vben / ag
                  ewben  =  max (0.000001d0, wsben + hkruin) + vhei
                 
-                 
                  ! Qunit  = abs(q1(L)) / wu(L)
 
                  hov    =  wsbov + hkruin
@@ -2829,7 +2828,15 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
                      vbov = qvolk/max(hunoweir, 1d-6 )
                  endif
                  if (vbov > 1d-4) then
-                     advi(L) = advi(L) + ag*weirdte(nfw)*dxi(L)/vbov     ! 1/s
+                     agwdxi  = ag*weirdte(nfw)*dxi(L)
+                     if (kmx == 0) then 
+                        advi(L) = advi(L) + agwdxi/vbov        ! 1/s
+                     else
+                        do LL = Lbot(L), Ltop(L)
+                           uLL      = max(1d-4, abs(u1(LL)))
+                           advi(LL) = advi(LL) + agwdxi/uLL 
+                        enddo 
+                     endif
                  endif
                  huL = hunoweir
 
@@ -2874,17 +2881,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
              endif
              au(L) = au(L) + au(LL) ! add to integrated 2Dh layer
           enddo
-
-          if (ifixedweirscheme > 0) then
-             if ( iadv(L) == 21 .or. iadv(L) >= 23 .and. iadv(L) <= 25 ) then
-                do LL = Lb, Ltop(L)
-                   sigm     = (zws(kb+LL-Lb)-zws(kb0)) / hsku
-                   !adve(LL) = adve(L)*sigm
-                   !advi(LL) = advi(L)*sigm
-                enddo
-             endif
-          endif
-
+ 
        else
           Ltop(L) = 1 ! lb - 1 ! 1 ! flag dry
        endif
@@ -34477,19 +34474,7 @@ end subroutine setbobs_fixedweirs
     end if
 
     call update_verticalprofiles()
-
-    if (Ifixedweirscheme > 0) then
-       do L = 1,lnxi
-          if (iadv(L) == 21 .or. iadv(L) >= 23 .and. iadv(L) <=25) then
-             call getLbotLtop(L,Lb,Lt)
-             do LL = Lb, Lt
-                fu(LL) = fu(L) ; ru(LL) = ru(L)
-                au(LL) = au(L)*( hu(LL)-hu(LL-1) ) / ( hu(Lt)-hu(Lb-1) )
-             enddo
-          endif
-       enddo
-    endif
-
+   
  endif
 
  do n  = 1, nbndu
