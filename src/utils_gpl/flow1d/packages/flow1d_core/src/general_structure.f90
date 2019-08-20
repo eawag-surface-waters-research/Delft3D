@@ -100,31 +100,31 @@ module m_General_Structure
 
 contains
 
-   !> compute FU, RU and AU for general structure genstr
+   !> compute FU, RU and AU for a single flow link in a general structure.
    subroutine computeGeneralStructure(genstr, direction, L0, maxWidth, fuL, ruL, auL, as1, as2, dadsL, kfuL, s1m1, s1m2, &
                                       qtotal, Cz, dxL, dt, jarea)
       ! modules
 
       ! Global variables
-      type(t_GeneralStructure), pointer, intent(inout):: genstr        !< Derived type containing general structure information
-      double precision, intent(in)                 :: maxWidth      !< Maximal width of the structure. Normally the the width of the flowlink
-      double precision, intent(out)                :: fuL           !< fu component of momentum equation
-      double precision, intent(out)                :: ruL           !< Right hand side component of momentum equation
-      double precision, intent(inout)              :: auL           !< Flow area of structue opening
+      type(t_GeneralStructure), pointer, intent(inout):: genstr     !< Derived type containing general structure information.
+      double precision, intent(in)                 :: maxWidth      !< Maximal width of the structure. Normally the the width of the flow link.
+      double precision, intent(out)                :: fuL           !< fu component of momentum equation.
+      double precision, intent(out)                :: ruL           !< Right hand side component of momentum equation.
+      double precision, intent(inout)              :: auL           !< Flow area of structure opening.
       double precision, intent(in)                 :: as1           !< (geometrical) upstream flow area.
       double precision, intent(in)                 :: as2           !< (geometrical) downstream flow area.
-      double precision, intent(out)                :: dadsL         !< flow width of structure
-      integer, intent(in)                          :: direction     !< orientation of the structure
-      integer, intent(in)                          :: L0            !< local link index
-      integer, intent(out)                         :: kfuL          !< Flag indicating whether the structure link is wet (=1) or not (=0)
-      double precision, intent(in)                 :: s1m1          !< (geometrical) upstream water level
-      double precision, intent(in)                 :: s1m2          !< (geometrical) downstream water level
+      double precision, intent(out)                :: dadsL         !< flow width of structure.
+      integer, intent(in)                          :: direction     !< Orientation of flow link w.r.t. the structure. (1d0 for same direction, -1d0 for reverse.)
+      integer, intent(in)                          :: L0            !< Local link index.
+      integer, intent(out)                         :: kfuL          !< Flag indicating whether the structure link is wet (=1) or not (=0).
+      double precision, intent(in)                 :: s1m1          !< (geometrical) upstream water level.
+      double precision, intent(in)                 :: s1m2          !< (geometrical) downstream water level.
       double precision, intent(in)                 :: qtotal        !< Total discharge (in case of a compound structure this is not equal to 
-                                                                    !< the discharge through the structure)
-      double precision, intent(in)                 :: Cz            !< Chezy value
-      double precision, intent(in)                 :: dxL           !< length of the flow link
-      double precision, intent(in)                 :: dt            !< time step
-      logical, intent(in)                          :: jarea         !< Flag indicating only the flow area is required or the full 
+                                                                    !< the discharge through the structure).
+      double precision, intent(in)                 :: Cz            !< Chezy value.
+      double precision, intent(in)                 :: dxL           !< Length of the flow link.
+      double precision, intent(in)                 :: dt            !< Time step (s).
+      logical, intent(in)                          :: jarea         !< Flag indicating only the flow area is required or the full .
       
       !
       !
@@ -211,7 +211,7 @@ contains
          qL = Au(1)*u1L
 
          call flqhgs(fu(1), ru(1), u1L, dxL, dt, dadsL, kfuL, au(1), qL, flowDir, &
-                     hu, hd, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
+                     hu, hd, uu, zs, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
          
@@ -222,7 +222,7 @@ contains
          qL = Au(2)*u1L
 
          call flqhgs(fu(2), ru(2), u1L, dxL, dt, dadsL, kfuL, au(2), qL, flowDir, &
-                     hu, hd, uu, zgate, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
+                     hu, hd, uu, zgate, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(L0))
       endif
       
@@ -233,7 +233,7 @@ contains
          qL = Au(3)*u1L
          
          call flqhgs(fu(3), ru(3), u1L, dxL, dt, dadsL, kfuL, au(3), qL, flowDir, &
-                     hu, hd, uu, zs, (1d0-gatefraction)*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
+                     hu, hd, uu, zs, (1d0-gatefraction)*wstr, (1d0-gatefraction)*w2, (1d0-gatefraction)*wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
 
