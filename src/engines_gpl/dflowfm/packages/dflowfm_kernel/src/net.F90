@@ -36013,6 +36013,7 @@ ilp:do isplit=1,MAXSPLIT
                       NPL_prev = NPL
                       call PPINPO (XCCP,YCCP,NCCP,pli(ipol)%x, pli(ipol)%y, pli(ipol)%len, rwrk, iwrk, lrwk, addtopol, ierr) 
                       if ( ierr.ne.0 ) then
+                         NPL = NPL_prev               ! Restore the counter that was modified by callback addtopol().
                          lrwk = int(1.2d0*dble(lrwk))+1
                          call realloc(rwrk,lrwk,keepExisting=.false.)
                          call realloc(iwrk,lrwk,keepExisting=.false.)
