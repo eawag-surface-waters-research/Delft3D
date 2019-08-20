@@ -1557,11 +1557,11 @@ if(q /= 0) then
     if (kcs(k1) == 1) then
        ! When hpr +epshu > 0 then this node might be flooded in this or the next time step
        ! make sure A1 gets a value, by computing the profile data, using a water depth of epshu.
-       hpr = s1(k1)-bob0(1,L)
+       hpr = s1(k1)-bob0(1,L)                
        if (hpr <= epshu) then
           hpr = hpr + epshu
        endif
-
+       
        if (hpr > 0) then                             !
           call getprof_1D(L, hpr, ar1, wid1, japerim, calcConv, perim)
           a1(k1) =   a1(k1) + dx1*wid1
@@ -2540,7 +2540,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
            iadv(L) = 0
            call switchiadvnearlink(L)
         enddo
-
+        
     enddo
 
    !Adjust bobs for dambreak
@@ -2798,7 +2798,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
                  vben   = qunit / max (0.000001d0,wsben - bl(kd))
                  vhei   =  0.5d0*vben*vben / ag
                  ewben  =  max (0.000001d0, wsben + hkruin) + vhei
-                
+
                  ! Qunit  = abs(q1(L)) / wu(L)
 
                  hov    =  wsbov + hkruin
@@ -2836,7 +2836,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
                            uLL      = max(1d-4, abs(u1(LL)))
                            advi(LL) = advi(LL) + agwdxi/uLL 
                         enddo 
-                     endif
+                 endif
                  endif
                  huL = hunoweir
 
@@ -2881,7 +2881,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
              endif
              au(L) = au(L) + au(LL) ! add to integrated 2Dh layer
           enddo
- 
+
        else
           Ltop(L) = 1 ! lb - 1 ! 1 ! flag dry
        endif
@@ -3741,7 +3741,7 @@ end subroutine setdt
           if ( jampi.eq.1 ) then
 !            do not include ghost cells
              if ( idomain(kk).ne.my_rank ) cycle
-          end if
+    endif
           if ( hs(kk).gt.epshu ) then
              dtsc = 9d9
              if ( squ(kk).gt.eps10) then
@@ -5112,7 +5112,7 @@ if (jawind > 0) then
                   endif
                endif
                ! wdsu/huvli = [(m^2/s^2)*m^-1]
-               if (jawindhuorzwsbased == 0) then
+               if (jawindhuorzwsbased == 0) then  
                   adve(LL) = adve(LL) - wdsu(LL)*wfac/hu(LL)
                else
                   adve(LL) = adve(LL) - wdsu(LL)*wfac*huvli(LL)
@@ -5137,11 +5137,11 @@ if (jawind > 0) then
                ! adve(Lt) = adve(Lt) - wdsu(LL) / max( toplayminthick, hu(Lt) - hu(Lt-1)  )
 
                alf = 1d0
-               if (jawindhuorzwsbased == 0) then
-                  dzt = hu(Lt) - hu(Lt-1)
-               else
-                  kt1 = ktop( ln(1,LL) ) ; kt2 = ktop( ln(2,LL) )
-                  dzt = acL(LL)*(zws(kt1) - zws(kt1-1)) + (1d0-acL(LL))*(zws(kt2) - zws(kt2-1))
+               if (jawindhuorzwsbased == 0) then 
+                  dzt = hu(Lt) - hu(Lt-1) 
+               else   
+                  kt1 = ktop( ln(1,LL) ) ; kt2 = ktop( ln(2,LL) ) 
+                  dzt = acL(LL)*(zws(kt1) - zws(kt1-1)) + (1d0-acL(LL))*(zws(kt2) - zws(kt2-1)) 
                endif
                if ( Lbot(LL) < Lt ) then
                   dztm  =  hu(Lt-1) - hu(Lt-2)
@@ -5221,7 +5221,7 @@ if (jawind > 0) then
 
           endif
 
-          if (jatidep > 0) then
+          if (jatidep > 0 .or. jaselfal > 0) then
              tidp  = ( tidep(1,k2) - tidep(1,k1) )*dxi(L)
              if ( hu(L) < trshcorio) then
                 tidp = tidp*hu(L)*trshcorioi
@@ -5239,7 +5239,7 @@ if (jawind > 0) then
     enddo
     !$OMP END PARALLEL DO
 
-    if ( jatidep.gt.0 .and. kmx.eq.0 ) then
+    if ( jatidep.gt.0 .or. jaselfal.gt.0 .and. kmx.eq.0 ) then
        call comp_GravInput()
     end if
 
@@ -6946,87 +6946,87 @@ if (numsrc > 0) then ! waq
             if(kksin==0.and.kksor/=0) then
                ! there is only a source side
                call getkbotktopmax(kksor,kkbsor,kktsor,kktxsor)
-               dzss  = zws(ktsor) - zws(kbsor-1)
+               dzss  = zws(ktsor) - zws(kbsor-1) 
                do k = kbsor , ktsor
-                  if (dzss > epshs) then
+                  if (dzss > epshs) then 
                      qsrck = qsrc(isrc)*( zws(k) - zws(k-1) ) / dzss
-                  else
+                  else    
                      qsrck = qsrc(isrc)/( ktsor - kbsor + 1)
                   endif
                   ip = ksrcwaq(isrc) + waqpar%ilaggr(kktxsor - k + 1)
                   qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
-               enddo
+               enddo 
             else if (kksin/=0.and.kksor==0) then
                ! there is only a sink side (used?)
                call getkbotktopmax(kksin,kkbsin,kktsin,kktxsin)
-               dzss  = zws(ktsin) - zws(kbsin-1)
+               dzss  = zws(ktsin) - zws(kbsin-1) 
                do k = kbsin , ktsin
-                  if (dzss > epshs) then
+                  if (dzss > epshs) then 
                      qsrck = qsrc(isrc)*( zws(k) - zws(k-1) ) / dzss
-                  else
+                  else    
                      qsrck = qsrc(isrc)/( ktsin - kbsin + 1)
                   endif
                   ip = ksrcwaq(isrc) + waqpar%ilaggr(kktxsin - k + 1)
                   qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
-               enddo
+               enddo 
             else if(kksin/=0.and.kksor/=0) then
                call getkbotktopmax(kksin,kkbsin,kktsin,kktxsin)
                call getkbotktopmax(kksor,kkbsor,kktsor,kktxsor)
                if(kbsin==ktsin) then
                   ! sink side has only one layer
-                  dzss  = zws(ktsor) - zws(kbsor-1)
+                  dzss  = zws(ktsor) - zws(kbsor-1) 
                   do k = kbsor , ktsor
-                     if (dzss > epshs) then
+                     if (dzss > epshs) then 
                         qsrck = qsrc(isrc)*( zws(k) - zws(k-1) ) / dzss
-                     else
+                     else    
                         qsrck = qsrc(isrc)/( ktsor - kbsor + 1)
                      endif
                      ip = ksrcwaq(isrc) + waqpar%ilaggr(kktxsin - kbsin + 1) + waqpar%kmxnxa * (waqpar%ilaggr(kktxsor - k + 1) - 1)
                      qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
-                  enddo
+                  enddo 
                else if(kbsor==ktsor) then
                   ! sor side has only one layer
-                  dzss  = zws(ktsin) - zws(kbsin-1)
+                  dzss  = zws(ktsin) - zws(kbsin-1) 
                   do k = kbsin , ktsin
-                     if (dzss > epshs) then
+                     if (dzss > epshs) then 
                         qsrck = qsrc(isrc)*( zws(k) - zws(k-1) ) / dzss
-                     else
+                     else    
                         qsrck = qsrc(isrc)/( ktsin - kbsin + 1)
                      endif
                      ip = ksrcwaq(isrc) + waqpar%ilaggr(kktxsin - k + 1) + waqpar%kmxnxa * (waqpar%ilaggr(kktxsor - kbsor + 1) - 1)
                      qsrcwaq(ip) = qsrcwaq(ip) + dts*qsrck
-                  enddo
+                  enddo 
                else
                   ! multiple layers on both side... it's a bit more complicated...
                   ! determine fractions on sink side
                   call realloc(fsin, kmx, keepExisting=.false., fill=0.0d0)
-                  dzss  = zws(ktsin) - zws(kbsin-1)
+                  dzss  = zws(ktsin) - zws(kbsin-1) 
                   do k = kbsin , ktsin
                      ilaysin = kktxsin - k + 1
-                     if (dzss > epshs) then
+                     if (dzss > epshs) then 
                         fsin(ilaysin) = ( zws(k) - zws(k-1) ) / dzss
-                     else
+                     else    
                         fsin(ilaysin) = 1.0d0 /( ktsin - kbsin + 1)
                      endif
                   enddo
                   ! distribute sink side fractions over source side
                   do k1 = kbsor , ktsor
-                     dzss  = zws(ktsor) - zws(kbsor-1)
-                     if (dzss > epshs) then
+                     dzss  = zws(ktsor) - zws(kbsor-1) 
+                     if (dzss > epshs) then 
                         fsor = ( zws(k1) - zws(k1-1) ) / dzss
-                     else
+                     else    
                         fsor = 1.0d0/( ktsor - kbsor + 1)
                      endif
                      do k2 = kbsin , ktsin
                         ilaysin = kktxsin - k2 + 1
-                        fsorlay = min (fsin(ilaysin), fsor)
+                        fsorlay = min (fsin(ilaysin), fsor) 
                         fsin(ilaysin) = fsin(ilaysin) - fsorlay
                         fsor = fsor - fsorlay
                         ip = ksrcwaq(isrc) + waqpar%ilaggr(ilaysin) + waqpar%kmxnxa * (waqpar%ilaggr(kktxsor - k1 + 1) - 1)
                         qsrcwaq(ip) = qsrcwaq(ip) + dts*fsorlay*qsrc(isrc)
                      enddo
                   enddo
-               endif
+               endif  
             endif
          endif
       endif
@@ -10531,10 +10531,10 @@ end subroutine cosphiunetcheck
     endif
     write(msgbuf,'(a,F25.10)') 'time debug     [s]         :' , gettimer(1,IDEBUG)
     call msg_flush()
-
+    
     if ( jatimer.eq.1 ) then
        write(msgbuf,'(a,F25.10)') 'time filter coeff.      [s]:' , gettimer(1,IFILT_COEF)
-       call msg_flush()
+       call msg_flush()                                   
        write(msgbuf,'(a,F25.10)') 'time filter solve       [s]:' , gettimer(1,IFILT_SOLV)
        call msg_flush()
        write(msgbuf,'(a,F25.10)') 'time filter cnstr. mat. [s]:' , gettimer(1,IFILT_MAT)
@@ -11529,7 +11529,7 @@ end subroutine copynetlinkstosam
  integer           :: n, nn, in, kb, L, nstart, nend
  double precision  :: dxx, dyy, r
 
- ! define the searching range, this is especially for the purpose of snapping obs to 1D, 2D or 1D+2D flownodes.
+ ! define the searching range, this is especially for the purpose of snapping obs to 1D, 2D or 1D+2D flownodes. 
  ! For other purpose it should stay as before
  select case(iLocTp)
    case (INDTP_ALL)
@@ -11540,9 +11540,9 @@ end subroutine copynetlinkstosam
       nend   = ndxi
    case(INDTP_2D) ! 2d flownodes coordinates
       nstart = 1
-      nend   = ndx2D
+      nend   = ndx2D 
  end select
-
+     
  k = 0
  do n = nstart,nend
      nn = size( nd(n)%x )
@@ -12196,7 +12196,13 @@ else if (nodval == 27) then
     if (kmx>1) znod = vicwws(k)
  ! 28 = substi/cg
  else if (nodval == 29) then
-    if ( allocated(tidep) ) znod = tidep(1,kk)
+    if ( allocated(tidep) ) then
+       if ( ubound(tidep,1).eq.2 ) then
+          znod = tidep(2,kk)
+       else
+          znod = tidep(1,kk)
+       end if
+   end if
 !     znod = plotlin(kk)
  else if (nodval == 30) then
     znod = dt_max
@@ -12657,22 +12663,22 @@ else if (nodval == 27) then
  else if ( linval == 40) then
     zlin = ifrcutp(LL)
  else if ( linval == 41) then
-    if (kmx > 0) then
+    if (kmx > 0) then 
        zlin = turkin0(L)
-    else
-       if (LL <= lnx1D) zlin = prof1D(1,LL)
+    else 
+       if (LL <= lnx1D) zlin = prof1D(1,LL)  
     endif
  else if ( linval == 42) then
-    if (kmx > 0) then
+    if (kmx > 0) then 
        zlin = tureps0(L)
     else
-        if (LL <= lnx1D) zlin = prof1D(2,LL)
+        if (LL <= lnx1D) zlin = prof1D(2,LL)  
     endif
  else if ( linval == 43) then
-    if (kmx > 0) then
+    if (kmx > 0) then 
        zlin = vicwwu(L)
     else
-        if (LL <= lnx1D) zlin = prof1D(3,LL)
+        if (LL <= lnx1D) zlin = prof1D(3,LL)  
     endif
  else if ( linval == 44) then
     zlin = ustb(LL)
@@ -12799,6 +12805,7 @@ else if (nodval == 27) then
 
  double precision  :: xm, ym
  double precision  :: trshcorioi
+ double precision  :: Ds
 
  iresult = DFM_GENERICERROR
 
@@ -12820,6 +12827,10 @@ else if (nodval == 27) then
        ! call qnerror('Tide generating potential only supported for sferical models ' ,' ',' ')
        jatidep = 0
     endif
+    if (jaselfal > 0) then
+       ! call qnerror('Self attraction and loading only supported for sferical models ' ,' ',' ')
+       jaselfal = 0
+    end if
  endif
  call inidensconstants()                             ! Some density parameters
 
@@ -13704,7 +13715,7 @@ end if
        iadv(L) = 8
     endif
  enddo
-
+ 
 ! check if at most one structure claims a flowlink
  call check_structures_and_fixed_weirs()
 
@@ -13853,7 +13864,7 @@ end if
        call setwavmubnd()
     end if
  end if
-
+ 
  ! DEBUG
  !if (jawave==5) then
  !   call wave_uorbrlabda()
@@ -13988,7 +13999,10 @@ endif
        end if
        do k = 1,ndxi
 !          ss    = min( 1d0,  max(s1(k),bl(k)) - bl(k) )        ! reduced correction values at low depths
-          s1(k) = s1(k) - ( patm(k) - PavIni ) / (ag*rhomean)
+          Ds = - ( patm(k) - PavIni ) / (ag*rhomean)
+          s1(k) = s1(k) + Ds
+          
+          if ( jaSELFALcorrectWLwithIni ) Dsini(k) = max(s1(k), bl(k))
        enddo
     endif
     s0 = s1 ; u0 = u1
@@ -14023,6 +14037,11 @@ endif
  else ! If one restarts a simulation, then use s0 to compute hs
     hs = s0 -bl
  endif
+ 
+ if ( jaselfal.gt.0 ) then
+!  with hs available: recompute SAL potential
+   call flow_settidepotential(tstart_user/60d0)
+ end if
 
 
  if (jagrw > 0) then
@@ -15086,7 +15105,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
 !   !$OMP SECTION
 
-   if (jatidep > 0) then
+   if (jatidep > 0 .or. jaselfal > 0) then
       call flow_settidepotential(timmin)
    endif
 
@@ -16399,7 +16418,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_orifgen_s1dn, id_orifgen_openh, id_orifgen_vel, id_orifgen_au, id_orifgen_s1up, id_orifgen_head, id_orifgen_s1crest, id_orifgen_forcedif,&
                      id_bridgedim, id_bridge_id, id_bridge_dis, id_bridge_s1up,  id_bridge_s1dn, id_bridge_vel, id_bridge_au,  id_bridge_head, &
                      id_culvertdim, id_culvert_id, id_culvert_dis, id_culvert_s1up,  id_culvert_s1dn, id_culvert_crestl, id_culvert_openh, &
-                     id_culvert_edgel, id_culvert_vel, id_culvert_stat, id_culvert_au,  id_culvert_head, &
+                     id_culvert_edgel, id_culvert_vel, id_culvert_stat, id_culvert_au,  id_culvert_head, & 
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
@@ -16407,7 +16426,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_dambreakdim, id_dambreakname, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_breach_depth,id_dambreak_breach_width, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
                      id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy
-
+                     
 
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
@@ -16434,7 +16453,7 @@ subroutine unc_write_his(tim)            ! wrihis
     double precision             :: w1, pumplensum, pumplenmid, pumpxmid, pumpymid
     double precision             :: rhol
     double precision, allocatable::toutputx(:,:), toutputy(:,:)
-
+    
     if (jahiszcor > 0) then
        jawrizc = 1
        jawrizw = 1
@@ -16954,7 +16973,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_def_var(ihisfile, 'Wave related bedload transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwx)
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'long_name', 'Wave related bedload transport, x-component')
                   ierr = nf90_put_att(ihisfile, id_sbwx, 'units', transpunit)
-                  ierr = nf90_put_att(ihisfile, id_sbwx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_sbwx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')               
                   ierr = nf90_def_var(ihisfile, 'Wave related bedload transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwy)
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'long_name', 'Wave related bedload transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sbwy, 'units', transpunit)
@@ -17246,58 +17265,58 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_genstru_s1dn, 'long_name', 'Water level downstream of general structure')
             ierr = nf90_put_att(ihisfile, id_genstru_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_genstru_s1dn, 'coordinates', 'general_structure_id')
-
+            
             if (network%sts%numGeneralStructures > 0) then ! write extra fields for new general structure
                ierr = nf90_def_var(ihisfile, 'general_structure_discharge_through_gate_opening', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis_gate_open)
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'long_name', 'Discharge through gate opening of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'units', 'm3 s-1')
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_discharge_over_gate_upper_edge_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis_gate_upp)
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'long_name', 'Discharge over gate upper edge level of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'units', 'm3 s-1')
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_gate_opening_height', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_openh)
                ierr = nf90_put_att(ihisfile, id_genstru_openh, 'long_name', 'Gate opening height of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_openh, 'units', 'm')
                ierr = nf90_put_att(ihisfile, id_genstru_openh, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_gate_upper_edge_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_uppl)
                ierr = nf90_put_att(ihisfile, id_genstru_uppl, 'long_name', 'Gate upper edge level of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_uppl, 'units', 'm')
                ierr = nf90_put_att(ihisfile, id_genstru_uppl, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_head', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_head)
                ierr = nf90_put_att(ihisfile, id_genstru_head, 'long_name', 'Head difference across general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_head, 'units', 'm')
                ierr = nf90_put_att(ihisfile, id_genstru_head, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_velocity_through_gate_opening', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_velgateopen)
                ierr = nf90_put_att(ihisfile, id_genstru_velgateopen, 'long_name', 'Velocity through gate opening of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_velgateopen, 'units', 'm s-1')
                ierr = nf90_put_att(ihisfile, id_genstru_velgateopen, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_velocity_over_gate_upper_edge_level ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_velgateupp)
                ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'long_name', 'Velocity over gate upper edge level of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'units', 'm s-1')
                ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_flow_area ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au)
                ierr = nf90_put_att(ihisfile, id_genstru_au, 'long_name', 'Flow area at general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_au, 'units', 'm2')
                ierr = nf90_put_att(ihisfile, id_genstru_au, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_flow_area_in_gate_opening ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au_open)
                ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'long_name', 'Flow area in gate opening of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'units', 'm2')
                ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_flow_area_above_upper_edge_level ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au_upp)
                ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'long_name', 'Flow area above upper edge level of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'units', 'm2')
                ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_state ', nf90_int, (/ id_genstrudim, id_timedim /), id_genstru_stat)
                ierr = nf90_put_att(ihisfile, id_genstru_stat, 'long_name', 'Flow state at general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_stat, 'units', '-')
@@ -17307,22 +17326,22 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_genstru_stat, 'flag_meanings', 'no_flow weir_free weir_submerged gate_free gate_submerged')
                ierr = nf90_put_att(ihisfile, id_genstru_stat, 'valid_range', '0, 4')
                ierr = nf90_put_att(ihisfile, id_genstru_stat, '_FillValue', int(dmiss))
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_s1_on_crest ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_s1crest)
                ierr = nf90_put_att(ihisfile, id_genstru_s1crest, 'long_name', 'Water level on crest of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_s1crest, 'units', 'm')
                ierr = nf90_put_att(ihisfile, id_genstru_s1crest, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_velocity ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_vel)
                ierr = nf90_put_att(ihisfile, id_genstru_vel, 'long_name', 'Velocity through general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_vel, 'units', 'm s-1')
                ierr = nf90_put_att(ihisfile, id_genstru_vel, 'coordinates', 'general_structure_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'general_structure_force_difference ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_forcedif)
                ierr = nf90_put_att(ihisfile, id_genstru_forcedif, 'long_name', 'Force difference per unit at general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_forcedif, 'units', 'N m-1')
                ierr = nf90_put_att(ihisfile, id_genstru_forcedif, 'coordinates', 'general_structure_id')
-            end if
+            end if            
         endif
 
         if(jahispump > 0 .and. npumpsg > 0) then
@@ -17359,33 +17378,33 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_pump_s1dn, 'long_name', 'Water level downstream of pump')
             ierr = nf90_put_att(ihisfile, id_pump_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_pump_s1dn, 'coordinates', 'pump_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'pump_structure_head', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_struhead)
             ierr = nf90_put_att(ihisfile, id_pump_struhead, 'long_name', 'Head difference across pump structure')
             ierr = nf90_put_att(ihisfile, id_pump_struhead, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_pump_struhead, 'coordinates', 'pump_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'pump_actual_stage',    nf90_int, (/ id_pumpdim, id_timedim /), id_pump_stage)
             ierr = nf90_put_att(ihisfile, id_pump_stage, 'long_name', 'Actual stage of pump')
             ierr = nf90_put_att(ihisfile, id_pump_stage, 'units', '-')
             ierr = nf90_put_att(ihisfile, id_pump_stage, 'coordinates', 'pump_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'pump_head', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_head)
             ierr = nf90_put_att(ihisfile, id_pump_head, 'long_name', 'Head difference across pump')
             ierr = nf90_put_att(ihisfile, id_pump_head, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_pump_head, 'coordinates', 'pump_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'pump_reduction_factor',    nf90_double, (/ id_pumpdim, id_timedim /), id_pump_redufact)
             ierr = nf90_put_att(ihisfile, id_pump_redufact, 'long_name', 'Reduction factor of pump')
             ierr = nf90_put_att(ihisfile, id_pump_redufact, 'units', '-')
             ierr = nf90_put_att(ihisfile, id_pump_redufact, 'coordinates', 'pump_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'pump_s1_delivery_side', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_s1del)
             ierr = nf90_put_att(ihisfile, id_pump_s1del, 'standard_name', 'sea_surface_height')
             ierr = nf90_put_att(ihisfile, id_pump_s1del, 'long_name', 'Water level at delivery side of pump')
             ierr = nf90_put_att(ihisfile, id_pump_s1del, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_pump_s1del, 'coordinates', 'pump_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'pump_s1_suction_side', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_s1suc)
             ierr = nf90_put_att(ihisfile, id_pump_s1suc, 'standard_name', 'sea_surface_height')
             ierr = nf90_put_att(ihisfile, id_pump_s1suc, 'long_name', 'water level at suction side of pump')
@@ -17542,23 +17561,23 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_weirgen_s1dn, 'long_name', 'Water level downstream of weir')
             ierr = nf90_put_att(ihisfile, id_weirgen_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_weirgen_s1dn, 'coordinates', 'weirgen_id')
-
+            
             if (network%sts%numWeirs > 0) then ! write extra files for new weirs
                ierr = nf90_def_var(ihisfile, 'weirgen_structure_head', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_head)
                ierr = nf90_put_att(ihisfile, id_weirgen_head, 'long_name', 'Head difference across weir')
                ierr = nf90_put_att(ihisfile, id_weirgen_head, 'units', 'm')
                ierr = nf90_put_att(ihisfile, id_weirgen_head, 'coordinates', 'weirgen_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'weirgen_velocity', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_vel)
                ierr = nf90_put_att(ihisfile, id_weirgen_vel, 'long_name', 'Velocity through weir')
                ierr = nf90_put_att(ihisfile, id_weirgen_vel, 'units', 'm s-1')
                ierr = nf90_put_att(ihisfile, id_weirgen_vel, 'coordinates', 'weirgen_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'weirgen_flow_area', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_au)
                ierr = nf90_put_att(ihisfile, id_weirgen_au, 'long_name', 'Flow area at weir')
                ierr = nf90_put_att(ihisfile, id_weirgen_au, 'units', 'm2')
                ierr = nf90_put_att(ihisfile, id_weirgen_au, 'coordinates', 'weirgen_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'weirgen_state', nf90_int, (/ id_weirgendim, id_timedim /), id_weir_stat)
                ierr = nf90_put_att(ihisfile, id_weir_stat, 'long_name', 'Flow state at weir')
                ierr = nf90_put_att(ihisfile, id_weir_stat, 'units', '-')
@@ -17567,19 +17586,19 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_weir_stat, 'flag_meanings', 'no_flow weir_free weir_submerged')
                ierr = nf90_put_att(ihisfile, id_weir_stat, 'valid_range', '0, 2')
                ierr = nf90_put_att(ihisfile, id_weir_stat, '_FillValue', int(dmiss))
-
+               
                ierr = nf90_def_var(ihisfile, 'weirgen_force_difference', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_forcedif)
                ierr = nf90_put_att(ihisfile, id_weirgen_forcedif, 'long_name', 'Force difference per unit width at weir')
                ierr = nf90_put_att(ihisfile, id_weirgen_forcedif, 'units', 'N m-1')
                ierr = nf90_put_att(ihisfile, id_weirgen_forcedif, 'coordinates', 'weirgen_id')
-
+               
                ierr = nf90_def_var(ihisfile, 'weirgen_s1_on_crest', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_s1crest)
                ierr = nf90_put_att(ihisfile, id_weirgen_s1crest, 'long_name', 'Water level on crest of weir')
                ierr = nf90_put_att(ihisfile, id_weirgen_s1crest, 'units', 'm')
                ierr = nf90_put_att(ihisfile, id_weirgen_s1crest, 'coordinates', 'weirgen_id')
             end if
         endif
-
+        
         ! Orifice
         if(jahisorif > 0 .and. network%sts%numOrifices > 0) then
             ierr = nf90_def_dim(ihisfile, 'orifice', network%sts%numOrifices, id_orifgendim)
@@ -17618,22 +17637,22 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'long_name', 'Water level downstream of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1dn, 'coordinates', 'orifice_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'orifice_gate_opening_height', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_openh)
             ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'long_name', 'Gate opening height of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_openh, 'coordinates', 'orifice_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'orifice_head', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_head)
             ierr = nf90_put_att(ihisfile, id_orifgen_head, 'long_name', 'Head difference across orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_head, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_head, 'coordinates', 'orifice_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'orifice_flow_area ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_au)
             ierr = nf90_put_att(ihisfile, id_orifgen_au, 'long_name', 'Flow area at orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_au, 'units', 'm2')
             ierr = nf90_put_att(ihisfile, id_orifgen_au, 'coordinates', 'orifice_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'orifice_state ', nf90_int, (/ id_orifgendim, id_timedim /), id_orifgen_stat)
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'long_name', 'Flow state at orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'units', '-')
@@ -17643,23 +17662,23 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'flag_meanings', 'no_flow weir_free weir_submerged gate_free gate_submerged')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, 'valid_range', '0, 4')
             ierr = nf90_put_att(ihisfile, id_orifgen_stat, '_FillValue', int(dmiss))
-
+            
             ierr = nf90_def_var(ihisfile, 'orifice_s1_on_crest ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_s1crest)
             ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'long_name', 'Water level on crest of orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_orifgen_s1crest, 'coordinates', 'orifice_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'orifice_velocity ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_vel)
             ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'long_name', 'Velocity through orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_orifgen_vel, 'coordinates', 'orifice_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'orifice_force_difference ', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_forcedif)
             ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'long_name', 'Force difference per unit width at orifice')
             ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'units', 'N m-1')
             ierr = nf90_put_att(ihisfile, id_orifgen_forcedif, 'coordinates', 'orifice_id')
         endif
-
+        
         ! Bridge
         if(jahisbridge > 0 .and. network%sts%numBridges > 0) then
             ierr = nf90_def_dim(ihisfile, 'bridge', network%sts%numbridges, id_bridgedim)
@@ -17688,18 +17707,18 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_bridge_head, 'long_name', 'Head difference across bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_head, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_head, 'coordinates', 'bridge_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'bridge_flow_area ', nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_au)
             ierr = nf90_put_att(ihisfile, id_bridge_au, 'long_name', 'Flow area at bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_au, 'units', 'm2')
             ierr = nf90_put_att(ihisfile, id_bridge_au, 'coordinates', 'bridge_id')
-
+         
             ierr = nf90_def_var(ihisfile, 'bridge_velocity ', nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_vel)
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'long_name', 'Velocity through bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'coordinates', 'bridge_id')
         endif
-
+        
         ! Culvert
         if(jahisculv > 0 .and. network%sts%numculverts > 0) then
             ierr = nf90_def_dim(ihisfile, 'culvert', network%sts%numculverts, id_culvertdim)
@@ -17733,22 +17752,22 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'long_name', 'Water level downstream of culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_culvert_s1dn, 'coordinates', 'culvert_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'culvert_gate_opening_height', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_openh)
             ierr = nf90_put_att(ihisfile, id_culvert_openh, 'long_name', 'Gate opening height of culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_openh, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_culvert_openh, 'coordinates', 'culvert_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'culvert_head', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_head)
             ierr = nf90_put_att(ihisfile, id_culvert_head, 'long_name', 'Head difference across culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_head, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_culvert_head, 'coordinates', 'culvert_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'culvert_flow_area ', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_au)
             ierr = nf90_put_att(ihisfile, id_culvert_au, 'long_name', 'Flow area in culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_au, 'units', 'm2')
             ierr = nf90_put_att(ihisfile, id_culvert_au, 'coordinates', 'culvert_id')
-
+            
             ierr = nf90_def_var(ihisfile, 'culvert_state ', nf90_int, (/ id_culvertdim, id_timedim /), id_culvert_stat)
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'long_name', 'Flow state in culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'units', '-')
@@ -17757,14 +17776,14 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'flag_meanings', 'no_flow weir_free weir_submerged gate_free gate_submerged')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'valid_range', '0, 4')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, '_FillValue', int(dmiss))
-
+            
             ierr = nf90_def_var(ihisfile, 'culvert_velocity ', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_vel)
             ierr = nf90_put_att(ihisfile, id_culvert_vel, 'long_name', 'Velocity in culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_culvert_vel, 'coordinates', 'culvert_id')
         endif
-
-
+        
+        
         ! Dambreak
         if (jahisdambreak > 0 .and. ndambreaksg > 0 ) then
 
@@ -17923,28 +17942,28 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_var(ihisfile, id_genstru_id,  trim(cgen_ids(igen)), (/ 1, i /))
             end do
         end if
-
+        
         if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
            do i = 1, network%sts%numOrifices
               istru = network%sts%orificeIndices(i)
               ierr = nf90_put_var(ihisfile, id_orifgen_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
-
+        
         if (jahisbridge > 0 .and. network%sts%numBridges > 0) then
            do i = 1, network%sts%numBridges
               istru = network%sts%bridgeIndices(i)
               ierr = nf90_put_var(ihisfile, id_bridge_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
-
+        
         if (jahisculv > 0 .and. network%sts%numCulverts > 0) then
            do i = 1, network%sts%numCulverts
               istru = network%sts%culvertIndices(i)
               ierr = nf90_put_var(ihisfile, id_culvert_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
-
+        
         if (jahispump > 0 .and. npumpsg > 0) then
             do i=1,npumpsg
                ierr = nf90_put_var(ihisfile, id_pump_id,  trim(pump_ids(i)),      (/ 1, i /))
@@ -18028,7 +18047,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_var(ihisfile, id_dambreakname, trim(dambreak_ids(i)),(/ 1, i /))
             end do
         end if
-
+        
         if (jased>0 .and. stm_included .and. jahissed>0) then
            do i=1,stmpar%lsedtot
               ierr = nf90_put_var(ihisfile, id_frac_name, trim(stmpar%sedpar%namsed(i)), (/ 1, i /))
@@ -18341,12 +18360,12 @@ subroutine unc_write_his(tim)            ! wrihis
          if (ngenstru > 0) then
             do i=1,ngenstru
                !igen = genstru2cgen(i)
-               ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i), (/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_crestl, valgenstru(9,i),  (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_edgel , valgenstru(14,i), (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_openw , valgenstru(13,i), (/ i, it_his /)) ! changed
-               ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i), (/ i, it_his /))
                if (network%sts%numGeneralStructures > 0) then
                   ierr = nf90_put_var(ihisfile, id_genstru_head,          valgenstru(5,i),  (/ i, it_his /))
                   ierr = nf90_put_var(ihisfile, id_genstru_au,            valgenstru(6,i),  (/ i, it_his /))
@@ -18385,22 +18404,22 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
          do i=1,network%sts%numOrifices
-            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),  (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_orifgen_crestl,        valorifgen(9,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_stat,      int(valorifgen(11,i)), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_stat,     int(valorifgen(11,i)), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i), (/ i, it_his /))
          enddo
       end if
-
+      
       if (jahisbridge > 0 .and. network%sts%numBridges > 0) then
          do i=1,network%sts%numBridges
             ierr = nf90_put_var(ihisfile, id_bridge_dis,   valbridge(2,i), (/ i, it_his /))
@@ -18411,7 +18430,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_bridge_vel,   valbridge(7,i), (/ i, it_his /))
          enddo
       end if
-
+      
       if (jahisculv > 0 .and. network%sts%numCulverts > 0) then
          do i=1,network%sts%numCulverts
             ierr = nf90_put_var(ihisfile, id_culvert_dis,    valculvert(2,i),      (/ i, it_his /))
@@ -18426,7 +18445,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_culvert_openh,  valculvert(11,i),     (/ i, it_his /))
          enddo
       end if
-
+      
       if (jahisgate > 0 .and. ngatesg > 0) then
          do i=1,ngatesg
             ierr = nf90_put_var(ihisfile, id_gate_dis  , valgate(2,i) , (/ i, it_his /))
@@ -18466,13 +18485,13 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valweirgen(9,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(10,i),(/ i, it_his /))
             if (network%sts%numWeirs > 0) then ! write extra files for new weirs
-               ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weir_stat, int(valweirgen(11,i)), (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valweirgen(12,i),(/ i, it_his /))
-            end if
+               ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weir_stat, int(valweirgen(11,i)),(/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valweirgen(12,i),(/i, it_his /))
+            end if       
          end do
       end if
 
@@ -18586,7 +18605,7 @@ subroutine unc_write_his(tim)            ! wrihis
              ierr = nf90_put_var(ihisfile, id_voltot(num), 1d-12*voltot(num),  start=(/ it_his /))
           end if
        else if ( num.eq.IDX_GravInput ) then
-          if ( jatidep.eq.1 ) then
+          if ( jatidep.eq.1 .or. jaselfal.gt.0 ) then
              ierr = nf90_put_var(ihisfile, id_voltot(num), 1d-12*voltot(num),  start=(/ it_his /))
           end if
        else if ( num.eq.IDX_SALInput .or. num.eq.IDX_SALInput2 ) then
@@ -18907,7 +18926,7 @@ subroutine fill_valobs()
             valobs(IPNT_WAVEU,i) = uorb(k)
             valobs(IPNT_WAVETAU,i) = taus(k)
          endif
-
+         
          if (stm_included .and. jased>0) then
             do j = IVAL_SBCX1, IVAL_SBCXN
                ii = j-IVAL_SBCX1+1
@@ -20740,7 +20759,7 @@ end subroutine unc_write_shp
 
     csu(L) = rn ; snu(L) = rt
  enddo
-
+ 
  if (allocated(dxe) .and. izbndpos /= 0) then
     ! Optionally fix dx for waterlevel type boundaries affected by izbndpos
     do k = 1, nbndz
@@ -21018,10 +21037,10 @@ end subroutine unc_write_shp
  call setbobs()
  call setbobsonroofs()
 
- if (jawindpartialdry == 1) then
-    if (ibedlevtyp .ne. 3) then
+ if (jawindpartialdry == 1) then 
+    if (ibedlevtyp .ne. 3) then 
         jawindpartialdry = 0
-    endif
+    endif 
  endif
 
 
@@ -21734,7 +21753,7 @@ end subroutine unc_write_shp
  logical          :: jawel
 
  inquire(file=trim(md_pipefile) , exist=jawel)
- if (.not. jawel) return
+ if (.not. jawel) return 
 
  call oldfil(minp, md_pipefile)
  call reapol(minp,0)
@@ -21743,7 +21762,7 @@ end subroutine unc_write_shp
  do n  = 1,npl-1
 
     x1 = xpl(n)   ; y1 = ypl(n)   ; z1 = zpl(n)   ; w1 = dzL(n)   ; h1 = dzR(n)
-    x2 = xpl(n+1) ; y2 = ypl(n+1) ; z2 = zpl(n+1) ; w2 = dzL(n+1) ; h2 = dzR(n+1)
+    x2 = xpl(n+1) ; y2 = ypl(n+1) ; z2 = zpl(n+1) ; w2 = dzL(n+1) ; h2 = dzR(n+1) 
     if (x1 == DMISS .or. x2 == DMISS) cycle
     if (w1 <= 0d0 .or. w2 <= 0d0) then
        call qnerror(' pipes: width <= 0d0, fourth column', 'in', md_pipefile)
@@ -21757,15 +21776,15 @@ end subroutine unc_write_shp
         if (Ls > 0) then
             Lf = lne2ln(Ls)
             if (kcu(Lf) == 1 .or. kcu(Lf) == 5) then
-               k1 = ln(1,Lf) ; k2 = ln(2,Lf)
+               k1 = ln(1,Lf) ; k2 = ln(2,Lf)  
                IF ( dbdistance(X1,Y1,Xzw(K1),Yzw(K1), jsferic, jasfer3D, dmiss) < dbdistance(X1,Y1,Xzw(K2),Yzw(K2), jsferic, jasfer3D, dmiss) ) THEN
-                  bob(1,Lf)  = z1 ; bl(k1) = min(z1, bl(k1) )
-                  bob(2,Lf)  = z2 ; bl(k2) = min(z2, bl(k2) )
+                  bob(1,Lf)  = z1 ; bl(k1) = min(z1, bl(k1) )   
+                  bob(2,Lf)  = z2 ; bl(k2) = min(z2, bl(k2) )  
                 else
-                  bob(1,Lf)  = z2 ; bl(k1) = min(z2, bl(k1) )
+                  bob(1,Lf)  = z2 ; bl(k1) = min(z2, bl(k1) )   
                   bob(2,Lf)  = z1 ; bl(k2) = min(z1, bl(k2) )
-               endif
-               prof1D(1,Lf)  = w1 ; wu(Lf) = w1
+               endif  
+               prof1D(1,Lf)  = w1 ; wu(Lf) = w1 
                prof1D(2,Lf)  = h1
                prof1D(3,Lf)  =  2                                      ! for now, simple rectan
                jaduiktmp(Lf) =  1
@@ -21854,7 +21873,7 @@ end subroutine unc_write_shp
        end if
 
        if ( allocated(xllin) ) then
-           deallocate(xllin)
+           deallocate(xllin)   
        endif
        ierr = 0
        allocate ( XLLIN(numL) , stat = ierr)
@@ -22075,7 +22094,7 @@ end subroutine unc_write_shp
 
           IF (jainterpolatezk1D > 0) THEN
 
-              allocate ( zkk(numk), wkk(numk))
+              allocate ( zkk(numk), wkk(numk)) 
               do kn3now = 6,1,-5
                  wkk = 0d0 ; zkk = 0d0
                  do L = 1, lnx1D
@@ -22107,7 +22126,7 @@ end subroutine unc_write_shp
                        endif
                     endif
                  enddo
-              enddo
+              enddo   
               deallocate (zkk, wkk)
           ENDIF
 
@@ -22135,7 +22154,7 @@ end subroutine unc_write_shp
  endif
 
  !call duikerstoprofs()
-
+ 
  end subroutine setprofs1D
 
  subroutine readprofilesloc(minp)
@@ -23193,14 +23212,14 @@ end do
               zmx  = sini
            else
               if (jaorgFloorlevtoplaydef == 1) then
-                 zmx  = Floorlevtoplay
+              zmx  = Floorlevtoplay
               else
                  if (dztop == dmiss) then
                     zmx  = Floorlevtoplay
                  else
                     zmx  = Floorlevtoplay + dztop
-                 endif
-              endif
+           endif
+        endif
            endif
         endif
 
@@ -23719,7 +23738,8 @@ endif
  if (jsferic == 1) then
     if (allocated (tidep) ) deallocate(tidep)
     if ( allocated(tidef) ) deallocate(tidef)
-    if ( jatidep.gt.0 .and. jaselfal.gt.0 ) then
+    if ( allocated(Dsini)  ) deallocate(Dsini)
+    if ( jaselfal.gt.0 ) then
 !      also store SAL potential
        allocate ( tidep (2,ndx) , stat = ierr)
        call aerr('tidep (2,ndx)', ierr, 2*ndx) ; tidep = 0
@@ -23728,10 +23748,16 @@ endif
        call aerr('tidep (1,ndx)', ierr,   ndx) ; tidep = 0
     end if
 
-    if ( jatidep.eq.1 ) then
+    if ( jatidep.eq.1 .or. jaselfal.gt.0 ) then
        allocate(tidef(Lnx), stat=ierr)
        call aerr('tidef(Lnx)', ierr, Lnx)
        tidef = 0d0
+    end if
+    
+    if ( jaselfal.gt.0 .and. jaSELFALcorrectWLwithIni.eq.1 ) then
+       allocate(Dsini(Ndx), stat=ierr)
+       call aerr('Dsini(Ndx)', ierr, Ndx)
+       Dsini = 0d0
     end if
  endif
 
@@ -24487,7 +24513,7 @@ endif
               do kwaq = kkk, kt + 1, -1
                  qwwaq(kwaq-1) = qwwaq(kwaq-1) - vol0(kkk)
               enddo
-           endif
+           endif 
            vol0(kkk) = 0d0
         enddo
         if (volkt > 0) then
@@ -32005,20 +32031,20 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
 ! double precision   :: transformcoef(25) !< Transform coefficients a+b*x
 
  type(tree_data),  pointer       :: inifield_ptr        !< tree of inifield-file's [Initial] or [Parameter] blocks
- type(tree_data),  pointer       :: node_ptr
- integer                         :: istat
- integer                         :: num_items_in_file
- integer, parameter              :: ini_key_len   = 32
- integer, parameter              :: ini_value_len = 256
- character(len=ini_key_len)      :: groupname
+ type(tree_data),  pointer       :: node_ptr            
+ integer                         :: istat               
+ integer                         :: num_items_in_file   
+ integer, parameter              :: ini_key_len   = 32  
+ integer, parameter              :: ini_value_len = 256 
+ character(len=ini_key_len)      :: groupname           
  character(len=255)              :: fnam
  character(len=255)              :: basedir
  integer :: major, minor
  integer :: i, iLocType
-
+ 
 
  kc_size_store = 0
- inifield_ptr => null()
+ inifield_ptr => null() 
 
  inquire(file = md_xybfile, exist=jawel)
  jawel = jawel .and. (len_trim(md_xybfile) > 0) ! strange behavior on some Linux systems if file name is empty, but reported exist=.true.
@@ -32084,7 +32110,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     ! 0.c Prepare loop across new initial field file:
     if (len_trim(md_inifieldfile) > 0) then
        call tree_create(trim(md_inifieldfile), inifield_ptr)
-       call prop_file('ini',trim(md_inifieldfile),inifield_ptr,istat)
+       call prop_file('ini',trim(md_inifieldfile),inifield_ptr,istat) 
        call split_filename(md_inifieldfile, basedir, fnam)
        istat = checkIniFieldFileVersion(md_inifieldfile, inifield_ptr)
        if (istat /= DFM_NOERR) then
@@ -32166,7 +32192,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
 
     ! Clean up *.ext file
     rewind (mext)
-
+    
     ! Clean up *.ini file.
     call tree_destroy(inifield_ptr)
 
@@ -32518,7 +32544,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     bob0(2,L)  = zn2
     bl(n1)    = min(bl(n1) , blv)
     bl(n2)    = min(bl(n2) , blv)
- else if (kcu(L) == 5 .or. kcu(L) == 7) then         ! keep 1D and 2D levels
+ else if (kcu(L) == 5 .or. kcu(L) == 7) then         ! keep 1D and 2D levels 
     if (bl(n1) .ne. 1d30 ) then
        bob(1,L) = bl(n1)
     else
@@ -32529,16 +32555,16 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     else
        bob(2,L) = zn2
     endif
-    if (zk(k1) .ne. dmiss .and. nmk(k1) == 1) then   ! if zk specified at endpoint
-        bob(1,L) = zk(k1)
+    if (zk(k1) .ne. dmiss .and. nmk(k1) == 1) then   ! if zk specified at endpoint 
+        bob(1,L) = zk(k1)  
     endif
     if (zk(k2) .ne. dmiss .and. nmk(k2) == 1) then   ! if zk specified at endpoint
-        bob(2,L) = zk(k2)
-    endif
+        bob(2,L) = zk(k2) 
+    endif             
     if (setHorizontalBobsFor1d2d) then
        bob(:,L) = max(bob(1,L), bob(2,L))
     endif
-    bob0(:,L) = bob0(:,L)
+    bob0(:,L) = bob0(:,L) 
     bl(n1) = min( bl(n1) , bob(1,L) )
     bl(n2) = min( bl(n2) , bob(2,L) )
  endif
@@ -34230,7 +34256,7 @@ end subroutine setbobs_fixedweirs
  hminlwi=1d0/hminlw
  fsqrtt = sqrt(0.5d0)
  call klok(cpufuru(1))
-
+ 
  if (kmx == 0 .or. ifixedweirscheme > 0)  then  ! original 2D coding
 
     !$OMP PARALLEL DO                       &
@@ -34239,10 +34265,10 @@ end subroutine setbobs_fixedweirs
 
        if (hu(L) > 0) then
 
-          if (kmx > 0) then
+          if (kmx > 0) then 
              if (.not. (iadv(L) == 21 .or. iadv(L) >= 23 .and. iadv(L) <= 25) ) then  ! in 3D, only do this for weir points
                 cycle
-             endif
+             endif 
           endif
 
           k1  = ln(1,L) ; k2 = ln(2,L)
@@ -34395,66 +34421,66 @@ end subroutine setbobs_fixedweirs
        if (pstru%type == ST_PUMP) then
           call computePump_all_links(pstru)
        else
-          do L0 = 1, pstru%numlinks
-             L = iabs(pstru%linknumbers(L0))
-             direction = sign(1, L)
-             if (hu(l) > 0) then
-                k1 = ln(1,L)
-                k2 = ln(2,L)
+       do L0 = 1, pstru%numlinks
+          L = iabs(pstru%linknumbers(L0))
+          direction = sign(1, L)
+          if (hu(l) > 0) then
+             k1 = ln(1,L)
+             k2 = ln(2,L)
 
-               select case(network%sts%struct(istru)%type)
-                   case (ST_WEIR)
-                      call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
-                   case (ST_ORIFICE)
-                      call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
-                       & u1(L), u0(L), dx(L), dts, state)
-                   case (ST_GENERAL_ST)
-                      firstiter = .true.
-                      jarea = .false.
-                      as1 = wu(L)*(s1(k1)-bob0(1,L))
-                      as2 = wu(L)*(s1(k2)-bob0(2,L))
-                      call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
-                      call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), fu(L), ru(L), &
-                             au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
-                   case (ST_DAMBREAK)
-                      continue
-                   case (ST_CULVERT)
-                      if (s1(k1) > s1(k2)) then
-                         mdown = k2
-                      else
-                         mdown = k1
-                      endif
-                      dpt = s1(mdown) - bl(mdown)
+            select case(network%sts%struct(istru)%type)
+                case (ST_WEIR)
+                   call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                                    q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
+                case (ST_ORIFICE)
+                   call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
+                    & u1(L), u0(L), dx(L), dts, state)
+                case (ST_GENERAL_ST)
+                   firstiter = .true.
+                   jarea = .false.
+                   as1 = wu(L)*(s1(k1)-bob0(1,L))
+                   as2 = wu(L)*(s1(k2)-bob0(2,L))
+                   call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L) 
+                   call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), fu(L), ru(L), &
+                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
+                case (ST_DAMBREAK)
+                   continue
+                case (ST_CULVERT)
+                   if (s1(k1) > s1(k2)) then
+                      mdown = k2
+                   else
+                      mdown = k1
+                   endif
+                   dpt = s1(mdown) - bl(mdown)
 
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
+                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
 
-                      wetdown = max(wetdown, 0.0001d0)
-                      call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                          q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, .true.)
-                   case (ST_UNI_WEIR)
-                      call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                          q1(L), q1(L), u1(L), u0(L), dx(L), dts)
-                   case (ST_BRIDGE)
-                      dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
-                      wu(L) = as1/dpt
-                      dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
-                      ! WU(L) is the average width at the bridge (max of up/downstream side).
-                      wu(L) = max(wu(L), as2/dpt)
-                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
-                               as1, as2, bob(:,L))
-                   case default
-                      write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
-                      call err_flush()
-                end select
-
-                ! store computed fu, ru and au in structure object. In case this structure
-                ! is a part of a compound structure this data will be used in computeCompound
-                call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
-             endif
-          enddo
+                   wetdown = max(wetdown, 0.0001d0)
+                   call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, .true.)
+                case (ST_UNI_WEIR)
+                   call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts)
+                case (ST_BRIDGE)
+                   dpt = max(epshu, s1(k1) - bob0(1,L))
+                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
+                   wu(L) = as1/dpt
+                   dpt = max(epshu, s1(k2) - bob0(2,L))
+                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
+                   ! WU(L) is the average width at the bridge (max of up/downstream side). 
+                   wu(L) = max(wu(L), as2/dpt)
+                   call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
+                            as1, as2, bob(:,L))
+                case default
+                   write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
+                   call err_flush()
+             end select
+             
+             ! store computed fu, ru and au in structure object. In case this structure
+             ! is a part of a compound structure this data will be used in computeCompound
+             call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
+          endif
+       enddo
        endif
 
     enddo
@@ -34468,18 +34494,18 @@ end subroutine setbobs_fixedweirs
           call computeCompound(pcompound, network%sts%struct, L0, fu(L), ru(L), au(L))
        enddo
     enddo
-
+       
  endif
 
- if (kmx > 0) then
+ if (kmx > 0) then 
 
     if ( jafilter.ne.0 ) then
       call comp_filter_predictor()
     end if
 
     call update_verticalprofiles()
-   
- endif
+
+          endif
 
  do n  = 1, nbndu
     LL    = kbndu(3,n)
@@ -36065,7 +36091,7 @@ end function ispumpon
     enddo
 
  endif
-
+ 
  sq = sqi-squ                                        ! arrays, later put in loop anyway
 
  end subroutine u1q1
@@ -36254,7 +36280,7 @@ if (jahisbal > 0) then
        volcur(IDX_InternalTidesDIssipation) = 0d0
     end if
 
-    if ( jatidep.eq.1 ) then
+    if ( jatidep.eq.1 .or. jaselfal.gt.0 ) then
        volcur(IDX_GravInput) = GravInput*dts
     else
        volcur(IDX_GravInput) = 0d0
@@ -36331,7 +36357,7 @@ if (jahisbal > 0) then
       double precision, save        :: timprev = -1d0
       double precision              :: timstep
       type(t_structure), pointer    :: pstru
-
+      
       if (jampi > 0) then
          if( .not.allocated( reducebuf ) ) then
             nreducebuf = npumpsg*NUMVALS_PUMP + ngatesg*NUMVALS_GATE + ncdamsg*NUMVALS_CDAM + ncgensg*NUMVALS_CGEN &
@@ -36588,10 +36614,10 @@ if (jahisbal > 0) then
             end if
          enddo
       end if
-
+      
       !
       ! === Orifice
-      !
+      !      
       do n = 1, network%sts%numOrifices
          valorifgen(1:NUMVALS_ORIFGEN,n) = 0d0
          istru = network%sts%orificeIndices(n)
@@ -36608,11 +36634,11 @@ if (jahisbal > 0) then
             call fill_valstruct_perlink(valorifgen(:,n), La, dir, ST_ORIFICE, istru, L)
          enddo
          call average_valstruct(valorifgen(:,n), ST_ORIFICE, istru, nlinks, NUMVALS_ORIFGEN)
-      enddo
-
+      enddo  
+      
       !
       ! === Bridge
-      !
+      !      
       do n = 1, network%sts%numBridges
          valbridge(1:NUMVALS_BRIDGE,n) = 0d0
          istru = network%sts%bridgeIndices(n)
@@ -36637,12 +36663,12 @@ if (jahisbal > 0) then
             if (valbridge(6,n) > 0) then
                valbridge(7,n) = valbridge(2,n) / valbridge(6,n)
             end if
-         end if
+         end if   
       enddo
-
+      
       !
       ! === Culvert
-      !
+      !      
       do n = 1, network%sts%numCulverts
          valculvert(1:NUMVALS_CULVERT,n) = 0d0
          istru = network%sts%culvertIndices(n)
@@ -36670,9 +36696,9 @@ if (jahisbal > 0) then
             valculvert(9,n) = dble(get_culvert_state(pstru))
             valculvert(10,n) = get_gle(pstru)
             valculvert(11,n) = get_opening_height(pstru)
-         end if
+         end if   
       enddo
-
+      
       !
       ! ==dambreak
       !
@@ -36815,8 +36841,8 @@ if (jahisbal > 0) then
                      end if
                      if (valgenstru(20,n) > 0) then
                         valgenstru(22,n) = valgenstru(22,n) / valgenstru(20,n) ! velocity over gate upper edge level
-                     end if
-                  end if
+                     end if   
+                  end if         
                endif
             enddo
          endif
@@ -36842,7 +36868,7 @@ if (jahisbal > 0) then
                      valweirgen(8,n) = valweirgen(8,n) / valweirgen(1,n)     ! water level on crest
                      valweirgen(12,n)= valweirgen(12,n)/ valweirgen(1,n)      ! force difference per unit width
                   end if
-
+                  
                endif
             enddo
          endif
@@ -37884,7 +37910,7 @@ end function is_1d_boundary_candidate
        goto 888
     endif
  end if
-
+ 
 
  if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
@@ -38652,7 +38678,7 @@ if (mext > 0) then
               call mess(LEVEL_WARN, 'Initial water level should be defined in file '''//trim(md_inifieldfile)//'''. Quantity '//trim(qid)//' ignored in external forcing file '''//trim(md_extfile)//'''.')
               cycle
            end if
-
+           
            call realloc(kcsini, ndx, keepExisting=.false.)
 
            ! NOTE: we intentionally re-use the lateral coding here for selection of 1D and/or 2D flow nodes
@@ -38662,7 +38688,7 @@ if (mext > 0) then
            case ('2d')
               ilattype = ILATTP_2D ; call prepare_lateral_mask(kcsini, ilattype)
             case default
-              kcsini = 1
+              kcsini = 1 
            end select
 
            success = timespaceinitialfield(xz, yz, s1, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini) ! zie meteo module
@@ -41632,7 +41658,7 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
 
  slopec = 0d0
  if (drop3D > 0d0) then
-     if (.not. ( iadv(LL) == 21 .or. iadv(LL) >= 23 .and. iadv(LL) <=25)  ) then  ! don't do this for weirs
+     if (.not. ( iadv(LL) == 21 .or. iadv(LL) >= 23 .and. iadv(LL) <=25)  ) then  ! don't do this for weirs  
         hup = s0(k2) - ( min(bob(1,LL), bob(2,LL) ) + drop3D*twot*hu(LL) )
         if (hup < 0) then
             slopec = hup
@@ -41642,7 +41668,7 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
                 slopec = -hup
             endif
         endif
-     endif
+     endif  
  endif
 
  cu      = gdxi*teta(LL)
@@ -41814,7 +41840,7 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
             cfuhi(L) = 0d0
          endif
       endif
-
+      
       wu(L) = max(0.01d0,area/hpr)
    endif
    ! finished for 1d network from flow1d
@@ -42775,7 +42801,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     else
        if ( ifirstweir(L) == 0  .and. (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) ) then   !  only for fixed weirs under the bed level for Tabellenboek or Villemonte and not for the first time that a fixed weir is set on this link
           ! check for larger ground height height values if at this link already a fixed weir exist
-           
+
           call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)  ! test EdG
           zhu =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
           zhd =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
@@ -42783,12 +42809,12 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              zh = zhd; zhd = zhu;  zhu = zh
           endif
           !
-          ! check whether crest level is higher
+          ! check whether crestlevel is higher
           !
           if (zc > zcrest(L)) then
              zcrest(L) = zc
              !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  zcrest(L); call msg_flush()
-          endif
+         endif
          !
          ! Check whether toe is lower. If so, also adjust toe level and the ground height
          ! If ground height is smaller than 1 cm, then this neglected 
@@ -42806,7 +42832,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        endif
     endif
     !! write (msgbuf,'(a,2i5,7f10.3)') 'Projected fixed weir', L, iweirtyp(L), zcrest(L), ztoeu(L), dzsillu(L),ztoed(L),dzsilld(L),taludu(L),taludd(L); call msg_flush()
- 
+
  enddo
  if (jawriteDFMinterpretedvalues > 0) then
     call doclose(mout)
@@ -45040,7 +45066,7 @@ end subroutine makethindamadmin
       DATA AU( 2,1)/  1.00/,AU( 2,2)/134.00/,AU( 2,3)/ .8097E+02/, &
            AU( 2,4)/-.7955E+02/,AU( 2,5)/ .2958E+02/
       DATA AU( 3,1)/  2.00/,AU( 3,2)/165.00/,AU( 3,3)/ .1062E+02/, &
-            AU( 3,4)/ .9203E+01/,AU( 3,5)/-.4821E+01/
+           AU( 3,4)/ .9203E+01/,AU( 3,5)/-.4821E+01/
       DATA AU( 4,1)/  3.00/,AU( 4,2)/180.00/,AU( 4,3)/ .1456E+02/, &
            AU( 4,4)/-.5261E+01/,AU( 4,5)/ .1450E+01/
       DATA AU( 5,1)/  4.00/,AU( 5,2)/190.75/,AU( 5,3)/ .8390E+01/, &

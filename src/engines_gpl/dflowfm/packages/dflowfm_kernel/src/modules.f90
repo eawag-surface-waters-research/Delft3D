@@ -2389,6 +2389,7 @@ end subroutine default_turbulence
  integer                           :: jatidep           !< use tide potential forcing yes no
 
  integer                           :: jaselfal          !< use self attraction and loading yes no
+ integer                           :: jaSELFALcorrectWLwithIni   !< correct water level with initial water level in SAL
 
  double precision                  :: doodsonstart, doodsonstop , doodsoneps
 
@@ -2719,6 +2720,7 @@ end subroutine default_turbulence
  integer                           :: jamapq1main               !< main channel flow flux to map file, 0: no, 1: yes
  integer                           :: jamapspir                 !< spiral flow to map file, 0: no, 1: yes
  integer                           :: jamaptidep                !< tidal potential to map file, 0: no, 1: yes
+ integer                           :: jamapselfal               !< self attraction and loading potential to map file, 0: no, 1: yes
  integer                           :: jamapIntTidesDiss         !< internal tides dissipation to map file, 0: no, 1: yes
  integer                           :: jamapNudge                !< output nudging to map file, 0: no, 1: yes
  integer                           :: jamapwav                  !< output waves to map file, 0: no, 1: yes
@@ -2811,6 +2813,8 @@ subroutine default_flowparameters()
     jatidep   = 1     ! use tide potential forcing yes no
 
     jaselfal  = 0     ! use self attraction and loading yes no
+    jaSELFALcorrectWLwithIni = 0   !< correct water level with initial atmospheric pressure in SAL
+ 
     ! DOODSONSTART = 55.565D0 ; DOODSONSTOP = 375.575D0 ; Doodsoneps = .00D0    ! standaard triwaq alle 484 cmp
       DOODSONSTART = 55.565D0 ; DOODSONSTOP = 375.575D0 ; Doodsoneps = .03D0    ! standaard triwaq       60 cmp
     ! DOODSONSTART = 57.555D0 ; DOODSONSTOP = 275.555D0 ; Doodsoneps = .03D0    ! Delft3d
@@ -2826,7 +2830,7 @@ subroutine default_flowparameters()
     jacreep  = 0      ! Include anti-creep calculation, (0=no, 1=yes)
 
     jasal    = 0      ! Include salinity (autoset by flow_initexternalforcings())
-
+    
     jatem    = 0      ! Temperature model
 
     janudge  = 0      ! temperature and salinity nudging
@@ -3075,6 +3079,7 @@ subroutine default_flowparameters()
     jamapq1main = 0
     jamapspir = 1
     jamaptidep = 1
+    jamapselfal = 1
     jamapIntTidesDiss = 1
     jamapNudge = 1
     jamapwav = 1
@@ -3401,6 +3406,7 @@ end module m_vegetation
  double precision, allocatable     :: qw    (:)   !< vertical flux through interface (m3/s)
  double precision, allocatable     :: tidep (:,:) !< tidal potential (m2/s2)
  double precision, allocatable     :: tidef (:)   !< tidal force (m/s2)
+ double precision, allocatable     :: Dsini  (:)   !< initial water level perturbation due to atmospheric pressure
 
  double precision, allocatable     :: steric(:,:) !< sal and temp for steric correction in 1,* and 2,*
  double precision                  :: rhosteric   !< later maybe in spatial refdensity

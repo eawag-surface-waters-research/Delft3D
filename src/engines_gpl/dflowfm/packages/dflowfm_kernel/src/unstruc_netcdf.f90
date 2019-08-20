@@ -5977,6 +5977,8 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                   ierr = nf90_put_att(imapfile, id_tidep(iid),  'long_name'    , 'TidalPotential without SAL in flow element center')
                   ierr = nf90_put_att(imapfile, id_tidep(iid),  'units'        , 'm2 s-2')
                end if
+            end if
+            if (jamapselfal > 0) then
                if ( jaselfal.gt.0 ) then
                   ierr = nf90_def_var(imapfile, 'SALPotential', nf90_double, (/ id_flowelemdim(iid), id_timedim(iid)/), id_salp(iid))
                   ierr = nf90_put_att(imapfile, id_salp(iid),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
@@ -8275,11 +8277,17 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
           else ! write potential without SAL and SAL potential
              do k=1,Ndx
                 workx(k) = tidep(1,k) - tidep(2,k)
-                worky(k) = tidep(2,k)
+!                worky(k) = tidep(2,k)
              end do
              ierr = nf90_put_var(imapfile, id_tidep(iid), workx,  (/ 1, itim /), (/ ndxndxi, 1 /))
-             ierr = nf90_put_var(imapfile, id_salp(iid),  worky,  (/ 1, itim /), (/ ndxndxi, 1 /))
+!             ierr = nf90_put_var(imapfile, id_salp(iid),  worky,  (/ 1, itim /), (/ ndxndxi, 1 /))
           end if
+       end if
+       if ( jaselfal.gt.0 .and. jamapselfal.eq.1 ) then
+          do k=1,Ndx
+             worky(k) = tidep(2,k)
+          end do
+          ierr = nf90_put_var(imapfile, id_salp(iid),  worky,  (/ 1, itim /), (/ ndxndxi, 1 /))
        end if
        
        if ( jaFrcInternalTides2D.gt.0 .and. jamapIntTidesDiss.eq.1 ) then

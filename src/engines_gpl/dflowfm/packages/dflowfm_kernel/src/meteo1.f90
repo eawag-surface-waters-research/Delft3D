@@ -2273,7 +2273,7 @@ contains
    !> 
    subroutine meteo_tidepotential(jul0, TIME , xz , yz , Np, TIDEP, ndx, dstart, dstop , eps) ! call schrama's routines on reduced set
    use m_sferic
-   use m_flowparameters, only: jaselfal, jamaptidep
+   use m_flowparameters, only: jatidep, jaselfal, jamaptidep
    use m_partitioninfo
    integer                                             :: jul0, ndx                                       ! interpolate results in ndx 
    integer,                              intent(in)    :: Np      !< number of potentials in tidep
@@ -2320,7 +2320,8 @@ contains
       IF (ALLOCATED (XZ2) ) DEALLOCATE (XZ2,YZ2,TD2)
       allocate ( xz2(i1:i2,j1:j2), stat=ierr)   ! tot aerr 
       allocate ( yz2(i1:i2,j1:j2), stat=ierr)  
-      allocate ( td2(i1:i2,j1:j2), stat=ierr)  
+      allocate ( td2(i1:i2,j1:j2), stat=ierr)
+      td2 = 0d0
    
       if ((jaselfal == 1) .OR. (jaselfal == 2)) then
 !         if (allocated(self) ) deallocate ( self, avhs, area ) MVL ask Camille
@@ -2352,8 +2353,11 @@ contains
    
    end if       
    
-         
-   call tforce( jul0, TIME , xz2 , yz2 , Td2, ndx2, dstart, dstop , eps) 
+   if ( jatidep.gt.0 ) then      
+      call tforce( jul0, TIME , xz2 , yz2 , Td2, ndx2, dstart, dstop , eps) 
+   else
+      td2 = 0d0   ! safety
+   end if
          
    if ((jaselfal == 1) .OR. (jaselfal == 2)) then 
       call aggregatewaterlevels(avhs, i1,i2,j1,j2 )
@@ -2422,6 +2426,7 @@ contains
    
    double precision    :: t0, t1
    double precision    :: wo
+   double precision    :: Ds
    
    double precision, allocatable, save :: jasea(:,:)
    
@@ -2544,9 +2549,17 @@ contains
       do k = 1,ndx
          i = nint(xz(k))
          j = nint(yz(k))
+         
+         Ds = 0d0
+         if ( jaSELFALcorrectWLwithIni.eq.1 ) then
+!           water level rise
+            Ds = Dsini(k)
+         end if
+         
          if (hs(k)>0.0) then
-                    avhs(i,j) = avhs(i,j) + s1(k)*ba(k)
-                    area(i,j) = area(i,j) + ba(k)
+                     
+            avhs(i,j) = avhs(i,j) + (s1(k)-Ds)*ba(k)
+            area(i,j) = area(i,j) + ba(k)
          endif
       enddo
    else  ! parallel
@@ -2563,10 +2576,17 @@ contains
             k1 = ln(1,LL) + ln(2,LL) - k
          end if
          
+         Ds = 0d0
+         if ( jaSELFALcorrectWLwithIni.eq.1 ) then
+!           water level rise
+            Ds = Dsini(k)
+         end if
+         
          if (hs(k)>0.0 .and. idomain(k1).eq.my_rank ) then
 !                    avhs(i,j) = avhs(i,j) + s1(k)*ba(k)
 !                    area(i,j) = area(i,j) + ba(k)
-            workin(1,i-i1+1,j-j1+1) = workin(1,i-i1+1,j-j1+1) + s1(k)*ba(k)
+         
+            workin(1,i-i1+1,j-j1+1) = workin(1,i-i1+1,j-j1+1) + (s1(k)-Ds)*ba(k)
             workin(2,i-i1+1,j-j1+1) = workin(2,i-i1+1,j-j1+1) + ba(k)
          endif
       enddo

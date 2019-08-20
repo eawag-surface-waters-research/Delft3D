@@ -1055,6 +1055,7 @@ subroutine readMDUFile(filename, istat)
     wall_z0 = wall_ks/30d0
     call prop_get_integer(md_ptr, 'physics', 'TidalForcing'   , jatidep)
     call prop_get_integer(md_ptr, 'physics', 'SelfAttractionLoading', jaselfal)
+    call prop_get_integer(md_ptr, 'physics', 'SelfAttractionLoading_correct_wl_with_ini',  jaSELFALcorrectWLwithIni)
     call prop_get_double (md_ptr, 'physics', 'ITcap'          , ITcap)
     call prop_get_double (md_ptr, 'physics', 'Doodsonstart'   , Doodsonstart)
     call prop_get_double (md_ptr, 'physics', 'Doodsonstop'    , Doodsonstop)
@@ -1540,6 +1541,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_windstress', jamapwindstress, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_heat_fluxes', jamapheatflux, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_tidal_potential', jamaptidep, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_sal_potential', jamapselfal, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamapIntTidesDiss, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_nudging', jamapnudge, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waves',jamapwav, success)
@@ -2569,6 +2571,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'physics', 'Ag'     ,          ag ,          'Gravitational acceleration')
     call prop_set(prop_ptr, 'physics', 'TidalForcing',     jatidep,      'Tidal forcing, if jsferic=1 (0: no, 1: yes)')
     call prop_set(prop_ptr, 'physics', 'SelfAttractionLoading',  jaselfal,     'Self attraction and loading (0=no, 1=yes, 2=only self attraction)')
+    call prop_set(prop_ptr, 'physics', 'SelfAttractionLoading_correct_wl_with_ini',  jaSELFALcorrectWLwithIni,     'correct water level with initial water level in Self attraction and loading (0=no, 1=yes)')
 
     call prop_set(prop_ptr, 'physics', 'ITcap',  ITcap,     'Upper limit on internal tides dissipation (W/m^2)')
 
@@ -3133,8 +3136,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'output', 'Wrimap_tidal_potential', jamaptidep, 'Write tidal potential to map file (1: yes, 0: no)')
     end if
 
+    if (jaselfal > 0 .and. (writeall .or. jamapselfal /= 1)) then
+       call prop_set(prop_ptr, 'output', 'Wrimap_sal_potential', jamapselfal, 'Write self attraction and loading potential to map file (1: yes, 0: no)')
+    end if
+
     if (jaFrcInternalTides2D > 0 .and. (writeall .or. jamapIntTidesDiss /=1 )) then
-       call prop_set(prop_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamaptidep, 'Write tidal potential to map file (1: yes, 0: no)')
+       call prop_set(prop_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamapIntTidesDiss, 'Write internal tides dissipation to map file (1: yes, 0: no)')
     end if
 
     call prop_set(prop_ptr, 'output', 'Writepart_domain', japartdomain, 'Write partition domain info. for postprocessing')
