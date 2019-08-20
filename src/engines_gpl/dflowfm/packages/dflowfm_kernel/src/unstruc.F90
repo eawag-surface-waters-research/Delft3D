@@ -42425,7 +42425,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  integer                       :: np, k, kk, n1, n2, n12, n, nn, L, LL, ja,  jacros, minp, kint, ierr, nt, nh, nhh, i, Lf
  integer                       :: jaweir, Lastfoundk, kf, kL, jarestorepol, Lnt, k1, nna, nnb, nl1, nl2, k3, k4
  integer         , allocatable :: iwu(:), ihu(:)
- double precision              :: SL, SM, XCR, YCR, CRP, Xa, Ya, Xb, Yb, zc, zh, af, dz1, dz2, xn, yn, adjacentbob, cosphi, sig, bobL
+ double precision              :: SL, SM, XCR, YCR, CRP, Xa, Ya, Xb, Yb, zc, zh, zhu, zhd, af, dz1, dz2, xn, yn, adjacentbob, cosphi, sig, bobL
  double precision, allocatable :: csh(:), snh(:), zcrest(:), dzsillu(:), dzsilld(:), crestlen(:), taludu(:), taludd(:), vegetat(:),ztoeu(:),ztoed(:)
  integer         , allocatable :: iweirtyp(:)
  integer         , allocatable :: ifirstweir(:)
@@ -42702,21 +42702,8 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              endif
              !
              zcrest(L)  = zc
-             !
-             ! lowest toe is applied
-             !
-             zh = (1d0-sl)*dzl(k) + sl*dzl(k+1)
-             if (zc-zh .lt. ztoeu(L)) then
-                ztoeu(L)   = zc - zh
-                dzsillu(L)  = zcrest(L) - ztoeu(L)
-             endif
-             zh = (1d0-sl)*dzr(k) + sl*dzr(k+1)
-             if (zc-zh .lt. ztoed(L)) then
-                ztoed(L)   = zc - zh
-                dzsilld(L)  = zcrest(L) - ztoed(L)
-             endif
-             !! write (msgbuf,'(a,i5,4f10.3)') 'Crest and Toe level ', L, zcrest(L), ztoeu(L), ztoed(L); call msg_flush()
-
+             zhu = (1d0-sl)*dzl(k) + sl*dzl(k+1)                 ! ground height left
+             zhd = (1d0-sl)*dzr(k) + sl*dzr(k+1)                 ! ground height right
              crestlen(L) = (1d0-sl)*dcrest(k) + sl*dcrest(k+1)   ! crest length
              taludu(L)   = (1d0-sl)*dtl(k)    + sl*dtl(k+1)      ! talud at ln(1,L)
              taludd(L)   = (1d0-sl)*dtr(k)    + sl*dtr(k+1)      ! talud at ln(2,L)
@@ -42729,9 +42716,23 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              else
                  iadv(L) = 21                                    !  Subgrid, ifixedweirscheme = 6 or 7
              endif
+             !
+             ! If link is reversed, exchange ground height levels and taluds
+             !
              if (xn*csu(L) + yn*snu(L) < 0d0) then  ! check left/right
-                 zh = dzsilld(L) ; dzsilld(L) = dzsillu(L) ; dzsillu(L) = zh
                  zh = taludd(L)  ; taludd(L)  = taludu(L)  ; taludu(L)  = zh
+                 zh = zhd; zhd = zhu;  zhu = zh
+             endif
+             !
+             ! lowest toe is applied
+             !
+             if (zc-zhu .lt. ztoeu(L)) then
+                ztoeu(L)   = zc - zhu
+                dzsillu(L)  = zcrest(L) - ztoeu(L)
+             endif
+             if (zc-zhd .lt. ztoed(L)) then
+                ztoed(L)   = zc - zhd
+                dzsilld(L)  = zcrest(L) - ztoed(L)
              endif
              !! write (msgbuf,'(a,2i5,7f10.3)') 'Projected fixed weir', L, iweirtyp(L), zc, bobL, dzsillu(L), dzsilld(L),crestlen(L),taludu(L),taludd(L); call msg_flush()
           else                                                       ! use global type definition
@@ -42769,14 +42770,14 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        endif
     else
        if ( ifirstweir(L) == 0  .and. (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) ) then   !  only for fixed weirs under the bed level for Tabellenboek or Villemonte and not for the first time that a fixed weir is set on this link
-          ! check for larger sill height values if at this link already a fixed weir exist
-
+          ! check for larger ground height height values if at this link already a fixed weir exist
+           
+          call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)  ! test EdG
+          zhu =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
+          zhd =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
           if (xn*csu(L) + yn*snu(L) < 0d0) then  ! check left/right
-             zh = dzsilld(L) ; dzsilld(L) = dzsillu(L) ; dzsillu(L) = zh
-             zh = taludd(L)  ; taludd(L)  = taludu(L)  ; taludu(L)  = zh
+             zh = zhd; zhd = zhu;  zhu = zh
           endif
-
-          zh =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
           !
           ! check whether crestlevel is higher
           !
@@ -42787,20 +42788,20 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
          !
          ! check whether toe is lower. If so, also adjust sill height
          !
-         if (zc-zh .lt. ztoeu(L)) then
-            ztoeu(L)   = zc - zh
+         if (zc-zhu .lt. ztoeu(L)) then
+            ztoeu(L)   = zc - zhu
             dzsillu(L)  = zcrest(L) - ztoeu(L)
             !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
          endif
-         zh =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
-         if (zc-zh .lt. ztoed(L)) then
-            ztoed(L)   = zc - zh
+         if (zc-zhd .lt. ztoed(L)) then
+            ztoed(L)   = zc - zhd
             dzsilld(L)  = zcrest(L) - ztoed(L)
             !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
          endif
        endif
     endif
-
+    !! write (msgbuf,'(a,2i5,7f10.3)') 'Projected fixed weir', L, iweirtyp(L), zcrest(L), ztoeu(L), dzsillu(L),ztoed(L),dzsilld(L),taludu(L),taludd(L); call msg_flush()
+ 
  enddo
  if (jawriteDFMinterpretedvalues > 0) then
     call doclose(mout)
