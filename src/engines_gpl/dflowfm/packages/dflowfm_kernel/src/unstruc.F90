@@ -42779,21 +42779,22 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              zh = zhd; zhd = zhu;  zhu = zh
           endif
           !
-          ! check whether crestlevel is higher
+          ! check whether crest level is higher
           !
           if (zc > zcrest(L)) then
              zcrest(L) = zc
              !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  zcrest(L); call msg_flush()
-         endif
+          endif
          !
-         ! check whether toe is lower. If so, also adjust sill height
+         ! Check whether toe is lower. If so, also adjust toe level and the ground height
+         ! If ground height is smaller than 1 cm, then this neglected 
          !
-         if (zc-zhu .lt. ztoeu(L)) then
+         if (zc-zhu .lt. ztoeu(L) .and. zhu .gt. 0.01) then
             ztoeu(L)   = zc - zhu
             dzsillu(L)  = zcrest(L) - ztoeu(L)
             !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
          endif
-         if (zc-zhd .lt. ztoed(L)) then
+         if (zc-zhd .lt. ztoed(L) .and. zhd .gt. 0.01) then
             ztoed(L)   = zc - zhd
             dzsilld(L)  = zcrest(L) - ztoed(L)
             !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
