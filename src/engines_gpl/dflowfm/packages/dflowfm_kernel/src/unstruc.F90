@@ -15611,7 +15611,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       ! vind bijbehorende zbndz punten
       do i = 1,nqhbnd
          do n   = L1qhbnd(i), L2qhbnd(i)
-            zbndz(n) = qhrelax*qhbndz(i) + (1d0-qhrelax)*s1( kbndz(1,n) )
+            zbndz(n) = qhrelax*qhbndz(i) + (1d0-qhrelax)*max(s1( kbndz(1,n) ), bl( kbndz(1,n) ))
          end do
       end do
    endif
