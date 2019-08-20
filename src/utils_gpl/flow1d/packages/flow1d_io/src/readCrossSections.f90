@@ -388,11 +388,6 @@ module m_readCrossSections
                numlevels = numlevels + 1
                level(numLevels) = height
                width(numLevels) = width(1)
-               if (closed) then
-                  numlevels = numLevels + 1
-                  level(numLevels) = height + 1d-3
-                  width(numLevels) = 1d-3
-               endif
                
             endif
 
