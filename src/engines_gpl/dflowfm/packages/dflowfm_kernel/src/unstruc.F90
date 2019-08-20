@@ -19048,7 +19048,11 @@ subroutine fill_valobs()
             call getLbotLtop(LL,Lb,Lt)
             do L = Lb-1, Lt
                klay = L-Lb+2
-               valobs(IPNT_ZWS+klay-1,i) = bob(1,LL) + hu(L)  !zws(kb + L-Lb)
+               if (layertype == 2) then
+                  valobs(IPNT_ZWS+klay-1,i) = zws(kb + L-Lb)
+               else
+                  valobs(IPNT_ZWS+klay-1,i) = min(bob(1,LL),bob(2,LL)) + hu(L)
+               end if
 
                if ( IVAL_WS1.gt.0 ) then
                   do j=IVAL_WS1,IVAL_WSN
