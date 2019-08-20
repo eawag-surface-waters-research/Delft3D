@@ -14001,10 +14001,15 @@ endif
 !          ss    = min( 1d0,  max(s1(k),bl(k)) - bl(k) )        ! reduced correction values at low depths
           Ds = - ( patm(k) - PavIni ) / (ag*rhomean)
           s1(k) = s1(k) + Ds
-          
-          if ( jaSELFALcorrectWLwithIni ) Dsini(k) = max(s1(k), bl(k))
-       enddo
+       end do   
     endif
+    
+    if  ( jaselfal.gt.0 .and. jaSELFALcorrectWLwithIni.eq.1 ) then
+       do k=1,Ndxi
+           s1init(k) = max(s1(k), bl(k))
+       end do
+    end if
+    
     s0 = s1 ; u0 = u1
  endif
  s1  = max(bl, s1)
@@ -23756,7 +23761,7 @@ endif
  if (jsferic == 1) then
     if (allocated (tidep) ) deallocate(tidep)
     if ( allocated(tidef) ) deallocate(tidef)
-    if ( allocated(Dsini)  ) deallocate(Dsini)
+    if ( allocated(s1init) ) deallocate(s1init)
     if ( jaselfal.gt.0 ) then
 !      also store SAL potential
        allocate ( tidep (2,ndx) , stat = ierr)
@@ -23773,9 +23778,9 @@ endif
     end if
     
     if ( jaselfal.gt.0 .and. jaSELFALcorrectWLwithIni.eq.1 ) then
-       allocate(Dsini(Ndx), stat=ierr)
-       call aerr('Dsini(Ndx)', ierr, Ndx)
-       Dsini = 0d0
+       allocate(s1init(Ndx), stat=ierr)
+       call aerr('s1init(Ndx)', ierr, Ndx)
+       s1init = 0d0
     end if
  endif
 

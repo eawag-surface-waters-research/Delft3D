@@ -2553,7 +2553,7 @@ contains
          Ds = 0d0
          if ( jaSELFALcorrectWLwithIni.eq.1 ) then
 !           water level rise
-            Ds = Dsini(k)
+            Ds = s1init(k)
          end if
          
          if (hs(k)>0.0) then
@@ -2579,7 +2579,7 @@ contains
          Ds = 0d0
          if ( jaSELFALcorrectWLwithIni.eq.1 ) then
 !           water level rise
-            Ds = Dsini(k)
+            Ds = s1init(k)
          end if
          
          if (hs(k)>0.0 .and. idomain(k1).eq.my_rank ) then

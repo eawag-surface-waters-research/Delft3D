@@ -3406,7 +3406,7 @@ end module m_vegetation
  double precision, allocatable     :: qw    (:)   !< vertical flux through interface (m3/s)
  double precision, allocatable     :: tidep (:,:) !< tidal potential (m2/s2)
  double precision, allocatable     :: tidef (:)   !< tidal force (m/s2)
- double precision, allocatable     :: Dsini  (:)   !< initial water level perturbation due to atmospheric pressure
+ double precision, allocatable     :: s1init (:)   !< initial water level, for correction in SAL
 
  double precision, allocatable     :: steric(:,:) !< sal and temp for steric correction in 1,* and 2,*
  double precision                  :: rhosteric   !< later maybe in spatial refdensity
