@@ -611,9 +611,7 @@ module m_readstructures
                   pstr%bridge%pcross => network%crs%cross(pstr%bridge%crosssectionnr)
                endif
                read(ibin) pstr%bridge%bedFrictionType
-               read(ibin) pstr%bridge%groundFrictionType
                read(ibin) pstr%bridge%bedFriction
-               read(ibin) pstr%bridge%groundFriction
                read(ibin) pstr%bridge%length
                read(ibin) pstr%bridge%inletlosscoeff
                read(ibin) pstr%bridge%outletlosscoeff
@@ -758,9 +756,7 @@ module m_readstructures
                write(ibin) pstr%bridge%useOwnCrossSection
                write(ibin) pstr%bridge%crosssectionnr
                write(ibin) pstr%bridge%bedFrictionType
-               write(ibin) pstr%bridge%groundFrictionType
                write(ibin) pstr%bridge%bedFriction
-               write(ibin) pstr%bridge%groundFriction
                write(ibin) pstr%bridge%length
                write(ibin) pstr%bridge%inletlosscoeff
                write(ibin) pstr%bridge%outletlosscoeff
