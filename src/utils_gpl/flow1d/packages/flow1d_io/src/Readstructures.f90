@@ -1046,20 +1046,23 @@ module m_readstructures
       call prop_get_double(md_ptr, '', 'pillarWidth', bridge%pillarwidth, success1)
       if (success1) then
          ! pillar bridge
-         call prop_get_double(md_ptr, '', 'formFactor', bridge%formfactor, success1)
-         success = success .and. check_input_result(success1, st_id, 'formFactor')
-      
-         bridge%bedLevel           = 0.0d0
-         bridge%useOwnCrossSection = .false.
-         bridge%pcross             => null()
-         bridge%crosssectionnr     = 0
-         bridge%bedFrictionType    = 0
-         bridge%groundFrictionType = 0
-         bridge%bedFriction        = 0.0d0
-         bridge%groundFriction     = 0.0d0
-         bridge%length             = 0.0d0
-         bridge%inletlosscoeff     = 0.0d0
-         bridge%outletlosscoeff    = 0.0d0
+         call setMessage(LEVEL_ERROR, 'Error Reading Bridge '''//trim(st_id)//''': pillar bridge is currently unsupported. Only standard bridge is supported.')
+         success = .false.
+         ! UNST-2907: pillar bridge support removed. Keep code below for future re-enabling.
+         !call prop_get_double(md_ptr, '', 'formFactor', bridge%formfactor, success1)
+         !success = success .and. check_input_result(success1, st_id, 'formFactor')
+         !
+         !bridge%bedLevel           = 0.0d0
+         !bridge%useOwnCrossSection = .false.
+         !bridge%pcross             => null()
+         !bridge%crosssectionnr     = 0
+         !bridge%bedFrictionType    = 0
+         !bridge%groundFrictionType = 0
+         !bridge%bedFriction        = 0.0d0
+         !bridge%groundFriction     = 0.0d0
+         !bridge%length             = 0.0d0
+         !bridge%inletlosscoeff     = 0.0d0
+         !bridge%outletlosscoeff    = 0.0d0
          
       else
          ! Standard bridge
