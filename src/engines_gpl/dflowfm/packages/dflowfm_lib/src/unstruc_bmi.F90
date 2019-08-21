@@ -1860,7 +1860,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
 	 
    ! LATERAL DISCHARGES
    case("laterals")
-      call getStructureIndex('laterals', item_name, item_index)
+      call getLateralIndex(item_name, item_index)
       if (item_index == 0) then
          return
       endif
