@@ -522,8 +522,8 @@ module m_ec_item
                call real2stringLeft(strnum1, '(f22.3)', item%sourceT0FieldPtr%timesteps)
                call setECMessage("       Current EC-time: t= " // trim(strnum1) // ' seconds')
                call real2stringLeft(strnum1, '(f22.3)', item%sourceT0FieldPtr%timesteps-timesteps%mjd())
-               call real2stringLeft(strnum2, '(f22.3)', (item%sourceT0FieldPtr%timesteps-timesteps%mjd())/86400)
-               call setECMessage("Requested time preceeds current forcing EC-timelevel by " // trim(strnum1) // " seconds = " // trim(strnum2) // " days.")
+               call real2stringLeft(strnum2, '(f22.3)', (item%sourceT0FieldPtr%timesteps-timesteps%mjd())*86400)
+               call setECMessage("Requested time preceeds current forcing EC-timelevel by " // trim(strnum1) // " days = " // trim(strnum2) // " seconds.")
             else
                success = .true.
             endif
