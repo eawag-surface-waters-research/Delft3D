@@ -292,7 +292,7 @@ module swan_input
        real                                    :: veg_drag
        !
        real                                    :: wlevelcorr       ! Overall water level correction; see Time frame input in GUI
-       real                                    :: alfawind         ! Overall wind speed multipliction factor; 
+       real                                    :: alfawind         ! Overall wind speed multiplication factor; 
        real          , dimension(:), pointer   :: timwav
        real          , dimension(:), pointer   :: zeta             ! Default water level of a selected time point (when running stand-alone); see Time frame input in GUI
        real          , dimension(:), pointer   :: ux0
