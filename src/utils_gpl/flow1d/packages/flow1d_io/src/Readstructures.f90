@@ -1073,18 +1073,18 @@ module m_readstructures
             endif
          endif
          
-         call prop_get_string(md_ptr, '', 'bedFrictionType', txt, success1)
-         success = success .and. check_input_result(success1, st_id, 'bedFrictionType')
+         call prop_get_string(md_ptr, '', 'frictionType', txt, success1)
+         success = success .and. check_input_result(success1, st_id, 'frictionType')
          if (success) then
             call frictionTypeStringToInteger(txt, bridge%bedFrictionType)
             if (bridge%bedFrictionType < 0) then
-               call setMessage(LEVEL_ERROR, 'Error Reading Bridge '''//trim(st_id)//''': invalid bedFrictionType '''//trim(txt)//'''.')
+               call setMessage(LEVEL_ERROR, 'Error Reading Bridge '''//trim(st_id)//''': invalid frictionType '''//trim(txt)//'''.')
                success = .false.
             end if
          end if
          
-         call prop_get_double(md_ptr, '', 'bedFriction', bridge%bedFriction, success1)
-         success = success .and. check_input_result(success1, st_id, 'bedFriction')
+         call prop_get_double(md_ptr, '', 'friction', bridge%bedFriction, success1)
+         success = success .and. check_input_result(success1, st_id, 'friction')
          
          if (success) then
             icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
