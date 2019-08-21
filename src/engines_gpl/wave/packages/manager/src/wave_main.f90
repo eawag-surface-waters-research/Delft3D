@@ -106,8 +106,6 @@ function wave_main_init(mode_in, mdw_file) result(retval)
    ! NEW_FPE_FLAGS = FPE_M_TRAP_OVF + FPE_M_TRAP_DIV0 + FPE_M_TRAP_INV
    ! OLD_FPE_FLAGS = FOR_SET_FPE (NEW_FPE_FLAGS)
    !
-   call small(mdw_file,len(mdw_file))
-
    call checklicense(success)
    if ( .not. success ) then
       write(*,'(a)') '*** ERROR: No authorization'
