@@ -1485,7 +1485,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          if (present(doSummerDike))then
             getSummerdikes = doSummerdike
          else
-            getSummerDikes = .true.
+            getSummerDikes = .false.
          endif
          call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, wetPerimeter, af_sub, perim_sub, calculationOption, hysteresis)
       case (CS_CIRCLE)
