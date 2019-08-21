@@ -54,10 +54,11 @@ implicit none
 
     ! MDUFormatVersion = 1.08
     integer, parameter       :: MDUFormatMajorVersion = 1
-    integer, parameter       :: MDUFormatMinorVersion = 8
+    integer, parameter       :: MDUFormatMinorVersion = 9
 
     ! History MDUFormatVersion:
 
+    ! 1.09 (2019-08-21): Renamed [geometry] roughnessFiles to frictFile.
     ! 1.08 (2019-07-27): Default option for density changed from Eckart to UNESCO (idensform=2 instead of 1)
     ! 1.07 (2019-06-13): Renamed [model] block as [General] block, replace keyword MDUFormatVersion by FileVersion 
     ! 1.06 (2016-05-16): Removed 1 variable for secondary flow, EffectSpiral as it is given by Espir contained in .mor file
@@ -746,7 +747,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'CrossDefFile',     md_1dfiles%cross_section_definitions, success)
     call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
     call prop_get_string ( md_ptr, 'geometry', 'NodeFile',         md_1dfiles%retentions,                success)
-    call prop_get_string ( md_ptr, 'geometry', 'RoughnessFiles',   md_1dfiles%roughness,                 success)
+    call prop_get_string ( md_ptr, 'geometry', 'frictFile',        md_1dfiles%roughness,                 success)
     call prop_get_string ( md_ptr, 'geometry', 'StructureFile',    md_1dfiles%structures,                 success)       ! pending code merge, structure file either applies to v2.00 structure file, or the old one, so store in both
     md_1dfiles%roughnessdir = ' ' 
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
@@ -2113,7 +2114,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'geometry', 'NodeFile',         trim(md_1dfiles%retentions),                '1D Storage node/manhole file (*.ini)')
     end if
     if (writeall .or. len_trim(md_1dfiles%roughness) > 0) then
-       call prop_set(prop_ptr, 'geometry', 'RoughnessFiles',   trim(md_1dfiles%roughness),                 '1D Roughness files (*.ini)')
+       call prop_set(prop_ptr, 'geometry', 'frictFile',   trim(md_1dfiles%roughness),                      '1D Roughness files (*.ini)')
     end if
     if (writeall .or. len_trim(md_1dfiles%structures) > 0) then
        call prop_set(prop_ptr, 'geometry', 'StructureFile',    trim(md_1dfiles%structures),                'Hydraulic structure file (*.ini)')
