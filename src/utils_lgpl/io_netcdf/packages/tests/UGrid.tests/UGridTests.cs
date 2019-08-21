@@ -280,7 +280,7 @@ namespace UGrid.tests
                 //}
 
                 //6. Get the written nodes ids
-                //StringBuilder varname = new StringBuilder("node_ids");
+                //StringBuilder varname = new StringBuilder("node_id");
                 //IoNetcdfLibWrapper.interop_charinfo[] nodeidsvalues = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
 
                 //ierr = wrapper.ionc_get_var_chars(ref ioncid, ref meshid, varname, nodeidsvalues, ref nmesh1dPoints);

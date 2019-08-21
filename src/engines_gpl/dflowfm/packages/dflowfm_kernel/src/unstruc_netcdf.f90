@@ -9533,7 +9533,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    ierr = nf90_get_att(ncid, nf90_global, 'Conventions', tmpstring)
    if (ierr == NF90_ENOTATT) then
       nodesOnBranchVertices = 0 ! New format.
-      call mess(LEVEL_DEBUG,  'No NetCDF Conventions found. Defaulting to current format (>= "CF-1.8 UGRID-1.0 Deltares-0.9") for '''//trim(filename)//'''.')
+      call mess(LEVEL_DEBUG,  'No NetCDF Conventions found. Defaulting to current format (>= "CF-1.8 UGRID-1.0 Deltares-0.10") for '''//trim(filename)//'''.')
    elseif (ierr == nf90_noerr) then
       i = index(tmpstring, 'Deltares')
       if (i > 0 .and. tmpstring(i+9:i+11) == '0.8') then

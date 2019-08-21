@@ -30,6 +30,7 @@
 
 !> I/O module for reading and writing NetCDF files with UGRID-compliant data on unstructured grids.
 !! UGRID Conventions website: https://github.com/ugrid-conventions/ugrid-conventions
+!! Deltares 1D network proposal: https://content.oss.deltares.nl/delft3d/manuals/D-Flow_FM_User_Manual.pdf#section.B.2
 
 module io_ugrid
 use netcdf
@@ -45,9 +46,15 @@ implicit none
 ! TODO: AvD: GL2: move grid_mapping attribute to all data variables, not coordinate variables.
 
 !! Conventions
-character(len=6),  parameter :: UG_CONV_CF       = 'CF-1.8'       !< Version of CF conventions currently adopted.
-character(len=9),  parameter :: UG_CONV_UGRID    = 'UGRID-1.0'    !< Version of UGRID conventions currently adopted.
-character(len=16), parameter :: UG_CONV_DELTARES = 'Deltares-0.9' !< Version of Deltares extension.
+character(len=6),  parameter :: UG_CONV_CF       = 'CF-1.8'        !< Version of CF conventions currently adopted.
+character(len=9),  parameter :: UG_CONV_UGRID    = 'UGRID-1.0'     !< Version of UGRID conventions currently adopted.
+character(len=16), parameter :: UG_CONV_DELTARES = 'Deltares-0.10' !< Version of Deltares extension.
+!! Conventions history Deltares-x.y:
+! 0.10 (2019-08-21): Consistent renaming of variables and attribute names, singular instead of plural.
+! 0.9 (2019-04-25): Duplicate mesh nodes on network (connection) nodes discouraged.
+! 0.8 (2017-04-21): Initial version for 1D network extension to regular UGRID.
+
+
 
 !! Meta data
 type, BIND(C) ::t_ug_meta
@@ -399,7 +406,7 @@ function ug_addglobalatts(ncid, meta) result(ierr)
       'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// &
       ', '//trim(meta%source))
 
-   ierr = nf90_put_att(ncid, nf90_global,  'Conventions', trim(UG_CONV_CF)//' '//trim(UG_CONV_UGRID)//'/'//trim(UG_CONV_DELTARES))
+   ierr = nf90_put_att(ncid, nf90_global,  'Conventions', trim(UG_CONV_CF)//' '//trim(UG_CONV_UGRID)//' '//trim(UG_CONV_DELTARES))
 
    ! Leave the dataset in the same mode as we got it.
    if (wasInDefine == 0) then
@@ -1934,9 +1941,17 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    ierr = UG_NOERR
    
    contactids%varids(cid_contacttopo) = varid  
-   ierr = att_to_dimid(ncid, varid, 'link_dimension'  , contactids%dimids(cdim_ncontacts))
-   ierr = att_to_varid(ncid, varid, 'contact_ids'       , contactids%varids(cid_contactids))
-   ierr = att_to_varid(ncid, varid, 'contact_long_names', contactids%varids(cid_contactlongnames))
+   ierr = att_to_dimid(ncid, varid, 'link_dimension'   , contactids%dimids(cdim_ncontacts))
+   ierr = att_to_varid(ncid, varid, 'contact_id'       , contactids%varids(cid_contactids))
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'contact_ids'   , contactids%varids(cid_contactids))
+   end if
+   ierr = att_to_varid(ncid, varid, 'contact_long_name', contactids%varids(cid_contactlongnames))
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'contact_long_names', contactids%varids(cid_contactlongnames))
+   end if
    ierr = att_to_varid(ncid, varid, 'contact_type', contactids%varids(cid_contacttype))
    
    ierr = UG_NOERR
@@ -1966,21 +1981,34 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
 
    !node variables ids
    ierr = att_to_coordvarids(ncid, varid, 'node_coordinates', netids%varids(ntid_1dnodex), netids%varids(ntid_1dnodey))
-   ierr = att_to_varid(ncid, varid, 'node_ids'       , netids%varids(ntid_1dnodids))
-   ierr = att_to_varid(ncid, varid, 'node_long_names', netids%varids(ntid_1dnodlongnames))
+   ierr = att_to_varid(ncid, varid, 'node_id'        , netids%varids(ntid_1dnodids))
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'node_ids'    , netids%varids(ntid_1dnodids))
+   end if
+   ierr = att_to_varid(ncid, varid, 'node_long_name' , netids%varids(ntid_1dnodlongnames))
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'node_long_names', netids%varids(ntid_1dnodlongnames))
+   end if
    !branch variables ids
    ierr = att_to_varid(ncid, varid, 'edge_node_connectivity', netids%varids(ntid_1dedgenodes))
-   ierr = att_to_varid(ncid, varid, 'branch_ids'            , netids%varids(ntid_1dbranchids))
-   ierr = att_to_varid(ncid, varid, 'branch_long_names'     , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
+   ierr = att_to_varid(ncid, varid, 'branch_id'             , netids%varids(ntid_1dbranchids))
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'branch_ids'         , netids%varids(ntid_1dbranchids))
+   end if
+   ierr = att_to_varid(ncid, varid, 'branch_long_name'      , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'branch_long_names'  , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
+   end if
 
    ! branch_lengths/edge_length
-   ierr = nf90_inquire_attribute(ncid, varid, 'branch_lengths')
-   if ( ierr == 0 ) then
+   ierr = att_to_varid(ncid, varid, 'edge_length'           , netids%varids(ntid_1dbranchlengths))
+   if ( ierr /= UG_NOERR ) then
       ! for backward compatibility: branch_lengths was used rather than edge_length. If there get the varid of the attribute
-      ierr = att_to_varid(ncid, varid, 'branch_lengths'        , netids%varids(ntid_1dbranchlengths))
-   else 
-      ! try to get the edge_length
-      ierr = att_to_varid(ncid, varid, 'edge_length'        , netids%varids(ntid_1dbranchlengths))
+      ierr = att_to_varid(ncid, varid, 'branch_lengths'     , netids%varids(ntid_1dbranchlengths))
    endif
 
    !get the number of geometric points for each branch
@@ -2109,16 +2137,40 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ! 
    ! Get the ids defined in nodes/edges/faces
    !
-   ierr = att_to_varid(ncid, varid, 'node_ids', meshids%varids(mid_node_ids)) !< Variable ID for node ids
-   ierr = att_to_varid(ncid, varid, 'edge_ids', meshids%varids(mid_edge_ids)) !< Variable ID for edge ids
-   ierr = att_to_varid(ncid, varid, 'face_ids', meshids%varids(mid_face_ids)) !< Variable ID for face ids
+   ierr = att_to_varid(ncid, varid, 'node_id',     meshids%varids(mid_node_ids)) !< Variable ID for node ids
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'node_ids', meshids%varids(mid_node_ids)) !< Variable ID for node ids
+   end if
+   ierr = att_to_varid(ncid, varid, 'edge_id',     meshids%varids(mid_edge_ids)) !< Variable ID for edge ids
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'edge_ids', meshids%varids(mid_edge_ids)) !< Variable ID for edge ids
+   end if
+   ierr = att_to_varid(ncid, varid, 'face_id',     meshids%varids(mid_face_ids)) !< Variable ID for face ids
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'face_ids', meshids%varids(mid_face_ids)) !< Variable ID for face ids
+   end if
    
    ! 
    ! Get the longnames defined in nodes/edges/faces
    !
-   ierr = att_to_varid(ncid, varid, 'node_long_names', meshids%varids(mid_node_longnames)) !< Variable ID for node ids
-   ierr = att_to_varid(ncid, varid, 'edge_long_names', meshids%varids(mid_edge_longnames)) !< Variable ID for edge ids
-   ierr = att_to_varid(ncid, varid, 'face_long_names', meshids%varids(mid_face_longnames)) !< Variable ID for face ids
+   ierr = att_to_varid(ncid, varid, 'node_long_name',     meshids%varids(mid_node_longnames)) !< Variable ID for node ids
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'node_long_names', meshids%varids(mid_node_longnames)) !< Variable ID for node ids
+   end if
+   ierr = att_to_varid(ncid, varid, 'edge_long_name',     meshids%varids(mid_edge_longnames)) !< Variable ID for edge ids
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'edge_long_names', meshids%varids(mid_edge_longnames)) !< Variable ID for edge ids
+   end if
+   ierr = att_to_varid(ncid, varid, 'face_long_name',     meshids%varids(mid_face_longnames)) !< Variable ID for face ids
+   if (ierr /= UG_NOERR) then
+      ! Backwards compatible read of Deltares-0.9 plural-names.
+      ierr = att_to_varid(ncid, varid, 'face_long_names', meshids%varids(mid_face_longnames)) !< Variable ID for face ids
+   end if
    
    ierr = UG_NOERR
 
@@ -3716,11 +3768,11 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_dimension', prefix//'_nNodes')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'topology_dimension', 1)
    !nodes attributes
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_ids', prefix//'_node_ids')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_long_names', prefix//'_node_long_names')   
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_id', prefix//'_node_id')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_long_name', prefix//'_node_long_name')   
    !branches attrubutes
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_ids', prefix//'_branch_ids')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_long_names', prefix//'_branch_long_names')   
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_id', prefix//'_branch_id')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_long_name', prefix//'_branch_long_name')   
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_length', prefix//'_edge_length')  
 
    !2. Branch: the start and the end nodes of each branch
@@ -3728,10 +3780,10 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_put_att(ncid,  netids%varids(ntid_1dedgenodes), 'cf_role', 'edge_node_connectivity')
    ierr = nf90_put_att(ncid,  netids%varids(ntid_1dedgenodes), 'long_name', 'Start and end nodes of network edges')
    !2. Branch: the branch ids
-   ierr = nf90_def_var(ncid, prefix//'_branch_ids', nf90_char, (/ netids%dimids(ntdim_idstring), netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchids))
+   ierr = nf90_def_var(ncid, prefix//'_branch_id', nf90_char, (/ netids%dimids(ntdim_idstring), netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchids))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchids), 'long_name', 'ID of branch geometries')
    !2. Branch: the long names of the branches
-   ierr = nf90_def_var(ncid, prefix//'_branch_long_names', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchlongnames))
+   ierr = nf90_def_var(ncid, prefix//'_branch_long_name', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchlongnames))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlongnames), 'long_name', 'Long name of branch geometries')
    !2. Branch: the branch lengths
    ierr = nf90_def_var(ncid, prefix//'_edge_length', nf90_double, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchlengths))
@@ -3739,10 +3791,10 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlengths), 'units', 'm')
 
    !3. Nodes: the ids of the nodes
-   ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ netids%dimids(ntdim_idstring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodids))
+   ierr = nf90_def_var(ncid, prefix//'_node_id', nf90_char, (/ netids%dimids(ntdim_idstring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodids))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodids), 'long_name', 'ID of network nodes')
    !3. Nodes: the long names of the nodes
-   ierr = nf90_def_var(ncid, prefix//'_node_long_names', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodlongnames))
+   ierr = nf90_def_var(ncid, prefix//'_node_long_name', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodlongnames))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodlongnames), 'long_name', 'Long name of network nodes')
    !3. Nodes: x+y coord
    ierr = nf90_def_var(ncid, prefix//'_node_x', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodex))
@@ -3925,30 +3977,30 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
 
    if(locationType == UG_LOC_NODE ) then
       !ids
-      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_ids',prefix//'_node_ids')
-      ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_ids))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_id',prefix//'_node_id')
+      ierr = nf90_def_var(ncid, prefix//'_node_id', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_ids))
       ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'long_name', 'ID of mesh nodes')
       !long_names
-      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_long_names',prefix//'_node_long_names')
-      ierr = nf90_def_var(ncid, prefix//'_node_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_longnames))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_long_name',prefix//'_node_long_name')
+      ierr = nf90_def_var(ncid, prefix//'_node_long_name', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_longnames))
       ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'long_name', 'Long name of mesh nodes')
    else if (locationType == UG_LOC_EDGE ) then
       !ids
-      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_ids',prefix//'_edge_ids')
-      ierr = nf90_def_var(ncid, prefix//'_edge_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edge_ids))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_id',prefix//'_edge_id')
+      ierr = nf90_def_var(ncid, prefix//'_edge_id', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edge_ids))
       ierr = nf90_put_att(ncid, meshids%varids(mid_edge_ids), 'long_name', 'ID of mesh edges')
       !long names
-      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_long_names',prefix//'_edge_long_names')
-      ierr = nf90_def_var(ncid, prefix//'_edge_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edge_longnames))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_long_name',prefix//'_edge_long_name')
+      ierr = nf90_def_var(ncid, prefix//'_edge_long_name', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edge_longnames))
       ierr = nf90_put_att(ncid, meshids%varids(mid_edge_longnames), 'long_name', 'Long name of mesh edges')
    else if (locationType == UG_LOC_FACE ) then
       !ids
-      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'face_ids',prefix//'_face_ids')
-      ierr = nf90_def_var(ncid, prefix//'_face_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_face) /) , meshids%varids(mid_face_ids))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'face_id',prefix//'_face_id')
+      ierr = nf90_def_var(ncid, prefix//'_face_id', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_face) /) , meshids%varids(mid_face_ids))
       ierr = nf90_put_att(ncid, meshids%varids(mid_face_ids), 'long_name', 'ID of mesh faces')
       !long names
-      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'face_long_names',prefix//'_face_long_names')
-      ierr = nf90_def_var(ncid, prefix//'_face_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_face) /) , meshids%varids(mid_face_longnames))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'face_long_name',prefix//'_face_long_name')
+      ierr = nf90_def_var(ncid, prefix//'_face_long_name', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_face) /) , meshids%varids(mid_face_longnames))
       ierr = nf90_put_att(ncid, meshids%varids(mid_face_longnames), 'long_name', 'Long name of mesh faces')
    end if
 
@@ -4013,19 +4065,19 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'cf_role'              , 'mesh_topology_contact')
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact'              , trim(mesh1)//': '//trim(locationType1)//' '//trim(mesh2)//': '//trim(locationType2)) 
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_type'         , prefix//'_contact_type') 
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_ids'         , prefix//'_ids')
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_long_names'  , prefix//'_long_names') 
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_id'           , prefix//'_contact_id')
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_long_name'    , prefix//'_contact_long_name') 
    if (present(start_index)) then
       if (start_index.ne.0) ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'start_index'  , start_index) 
    endif
    
    !define the variable and attributes contacts id
-   ierr = nf90_def_var(ncid, prefix//'_ids', nf90_char, (/ contactids%dimids(cdim_idstring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactids))
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contactids), 'long_name',' ids of the contacts')
+   ierr = nf90_def_var(ncid, prefix//'_contact_id', nf90_char, (/ contactids%dimids(cdim_idstring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactids))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contactids), 'long_name',' ID of mesh contacts')
    
    !define the variable and attributes long names
-   ierr = nf90_def_var(ncid, prefix//'_long_names', nf90_char, (/ contactids%dimids(cdim_longnamestring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactlongnames))
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contactlongnames), 'long_name', 'long names of the contacts')
+   ierr = nf90_def_var(ncid, prefix//'_long_name', nf90_char, (/ contactids%dimids(cdim_longnamestring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactlongnames))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contactlongnames), 'long_name', 'Long name of mesh contacts')
    
    !define the variable and attributes long names
    ierr = nf90_def_var(ncid, prefix//'_contact_type', nf90_int, (/ contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contacttype))

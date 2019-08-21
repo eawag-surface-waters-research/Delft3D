@@ -983,9 +983,9 @@ function ionc_put_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx,
   end do
   
   !these are hard-coded variable names for node ids of the network
-  varnameids        = 'node_ids'
+  varnameids        = 'node_id'
   ierr              = ionc_put_var_chars(ioncid, meshid, varnameids, nodeids)
-  varnamelongnames  = 'node_long_names'
+  varnamelongnames  = 'node_long_name'
   ierr              = ionc_put_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
   
 end function ionc_put_1d_mesh_discretisation_points_dll
@@ -1019,9 +1019,9 @@ function ionc_put_1d_mesh_discretisation_points_v1_dll(ioncid, meshid, c_branchi
   end do
   
   !these are hard-coded variable names for node ids of the network
-  varnameids        = 'node_ids'
+  varnameids        = 'node_id'
   ierr              = ionc_put_var_chars(ioncid, meshid, varnameids, nodeids)
-  varnamelongnames  = 'node_long_names'
+  varnamelongnames  = 'node_long_name'
   ierr              = ionc_put_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
   
 end function ionc_put_1d_mesh_discretisation_points_v1_dll
@@ -1065,9 +1065,9 @@ function ionc_put_1d_mesh_discretisation_points_v2_dll(ioncid, meshid, c_branchi
   end do
     
   !these are hard-coded variable names for node ids of the network
-  varnameids        = 'node_ids'
+  varnameids        = 'node_id'
   ierr              = ionc_put_var_chars(ioncid, meshid, varnameids, nodeids)
-  varnamelongnames  = 'node_long_names'
+  varnamelongnames  = 'node_long_name'
   ierr              = ionc_put_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
   
 end function ionc_put_1d_mesh_discretisation_points_v2_dll
@@ -1103,9 +1103,9 @@ function ionc_get_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx,
   ierr = ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset, startIndex)
   
   !The names of the variables are hard-coded
-  varnameids        = 'node_ids'
+  varnameids        = 'node_id'
   ierr              = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
-  varnamelongnames  = 'node_long_names'
+  varnamelongnames  = 'node_long_name'
   ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
   
   do i=1,nmeshpoints
@@ -1137,9 +1137,9 @@ function ionc_get_1d_mesh_discretisation_points_v1_dll(ioncid, meshid, c_branchi
   ierr = ionc_get_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchidx, offset, startIndex, coordx, coordy )
   
   !The names of the variables are hard-coded
-  varnameids        = 'node_ids'
+  varnameids        = 'node_id'
   ierr              = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
-  varnamelongnames  = 'node_long_names'
+  varnamelongnames  = 'node_long_name'
   ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
   
   do i=1,nmeshpoints
