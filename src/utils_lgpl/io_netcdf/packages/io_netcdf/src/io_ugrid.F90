@@ -1032,9 +1032,15 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
       goto 888
    end select
 
-   ierr = nf90_put_att(ncid, id_var, 'standard_name', trim(standard_name))
-   ierr = nf90_put_att(ncid, id_var, 'long_name'    , trim(long_name))
-   ierr = nf90_put_att(ncid, id_var, 'units'        , trim(units))
+   if (len_trim(standard_name) > 0) then
+      ierr = nf90_put_att(ncid, id_var, 'standard_name', trim(standard_name))
+   endif
+   if (len_trim(long_name) > 0) then
+      ierr = nf90_put_att(ncid, id_var, 'long_name'    , trim(long_name))
+   endif
+   if (len_trim(units) > 0) then
+      ierr = nf90_put_att(ncid, id_var, 'units'        , trim(units))
+   endif
 
    if (present(crs)) then
       ierr = ug_put_gridmapping_att(ncid, (/ id_var /), crs)
