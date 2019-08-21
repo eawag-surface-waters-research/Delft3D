@@ -160,7 +160,10 @@ contains
       endif
       
       if (.not. bridge%useOwnCrossSection) then
-
+         !
+         ! NOTE: Under UNST-2907 the pillar bridge support was removed from readBridge().
+         !       Computational code below is kept for future re-enabling or complete removal.
+         !
          ! Pillar Bridge; wetted profile at upstream side
          aum   = wetup
 
