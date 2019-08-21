@@ -500,7 +500,11 @@ module m_flow1d_reader
       call SetMessage(LEVEL_INFO, 'Reading Roughness ...')
 
       ! Read roughnessFile file
-            
+      
+      !
+      ! NOTE: UNST-2871: the MD1D keyword roughnessFile is still supported.
+      !       But when used directly in the D-Flow FM .mdu file, use frictFile instead.
+      !
       call prop_get_string(md_ptr, 'Files', 'roughnessFile', filestring, success)
       if (.not. success) then
          return
