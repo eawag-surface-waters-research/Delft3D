@@ -1091,7 +1091,7 @@ module m_readstructures
          
          if (success) then
             icross = AddCrossSection(network%crs, network%CSDefinitions, 0, 0.0d0, CrsDefIndx, 0.0d0, &
-                                     bridge%bedFrictionType, bridge%bedFriction, bridge%groundFrictionType, bridge%groundFriction)
+                                     bridge%bedFrictionType, bridge%bedFriction, groundFrictionType = -1, groundFriction = -1d0)
             network%crs%cross(icross)%branchid = -1
          
             bridge%useOwnCrossSection = .true.

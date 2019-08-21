@@ -50,9 +50,7 @@ module m_Bridge
       type(t_crosssection), pointer :: pcross => null()              
       integer                       :: crosssectionnr
       integer                       :: bedFrictionType
-      integer                       :: groundFrictionType
       double precision              :: bedFriction
-      double precision              :: groundFriction
       double precision              :: length
       double precision              :: inletlosscoeff
       double precision              :: outletlosscoeff
