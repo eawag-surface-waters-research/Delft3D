@@ -20095,6 +20095,7 @@ end subroutine unc_write_shp
  end subroutine checkcellfile
 
  subroutine flow_geominit(iphase)                          ! initialise flow geometry
+ use m_globalparameters
  use m_netw
  use m_flowgeom
  use m_GlobalParameters, only: INDTP_2D
@@ -20858,6 +20859,7 @@ end subroutine unc_write_shp
           if (network%loaded) then
              ! Calculate maximal total area by using a water depth of 1000 m.
              call GetCSParsTotal(network%adm%line2cross(LL), network%crs%cross, 1d3, area, wu(L), CS_TYPE_NORMAL)
+             wu(L) = max(wu(L), sl)
           else if ( prof1D(1,LL) > 0) THEN
              wu(L) = prof1d(1,LL)                         ! todo, wu1DUNI from max width of profile interpolations
           ELSE
