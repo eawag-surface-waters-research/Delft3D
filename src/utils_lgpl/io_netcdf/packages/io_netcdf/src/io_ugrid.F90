@@ -71,15 +71,17 @@ type, BIND(C) :: t_ug_charinfo
     character(len=ug_idsLongNamesLen)   :: longnames
 end type t_ug_charinfo
 !! Error codes
-integer, parameter :: UG_NOERR                 = NF90_NOERR
+integer, parameter :: UG_NOERR                 = NF90_NOERR !< No error, success. It is convenient to have this identical to NF90_NOERR (==0).
 integer, parameter :: UG_SOMEERR               = -1010 !< Some unspecified error.
 integer, parameter :: UG_INVALID_MESHNAME      = -1011
 integer, parameter :: UG_INVALID_MESHDIMENSION = -1012
 integer, parameter :: UG_INVALID_DATALOCATION  = -1013
 integer, parameter :: UG_ARRAY_TOOSMALL        = -1014 !< If while getting data, the target array is too small for the amount of data that needs to be put into it.
-integer, parameter :: UG_VAR_NOTFOUND          = -1015 !< Some variable was not found.
+integer, parameter :: UG_ENOTVAR               = -1015 !< Some variable was not found. Probably due to a native NF90_ENOTVAR.
 integer, parameter :: UG_VAR_TOOMANYFOUND      = -1016 !< Multiple variables were found in an inquiry whereas only one was expected or requested.
 integer, parameter :: UG_INVALID_LAYERS        = -1017
+integer, parameter :: UG_ENOTATT               = -1018 !< Some attribute was not found. Probably due to a native NF90_ENOTATT.
+integer, parameter :: UG_ENOTDIM               = -1019 !< Some dimension was not found. Probably due to a native NF90_EBADDIM      
 integer, parameter :: UG_INVALID_CRS           = -1030 !< Invalid/missing coordinate reference system (using default)
 integer, parameter :: UG_INVALID_NETNAME       = -1031 !< Invalid network name
 integer, parameter :: UG_NOTIMPLEMENTED        = -1099
@@ -318,7 +320,9 @@ function ug_strerror(ugerr) result(str)
    case (UG_INVALID_MESHDIMENSION); str = 'Invalid mesh topology dimension'
    case (UG_INVALID_DATALOCATION);  str = 'Invalid topological data location'
    case (UG_ARRAY_TOOSMALL);        str = 'Output array too small to store all values'
-   case (UG_VAR_NOTFOUND);          str = 'Variable not found in dataset'
+   case (UG_ENOTVAR);               str = 'Variable not in dataset'
+   case (UG_ENOTATT);               str = 'Attribute not in dataset'
+   case (UG_ENOTDIM);               str = 'Dimension not in dataset'
    case (UG_VAR_TOOMANYFOUND);      str = 'Too many matching variables found in dataset'  
    case (UG_INVALID_LAYERS);        str = 'Invalid layer type'    
    case (UG_INVALID_CRS);           str = 'Invalid coordinate reference system'       
@@ -348,7 +352,9 @@ integer function ug_get_constant(constname, constvalue) result(ierr)
    case('UG_INVALID_MESHDIMENSION');    constvalue = UG_INVALID_MESHDIMENSION
    case('UG_INVALID_DATALOCATION');     constvalue = UG_INVALID_DATALOCATION 
    case('UG_ARRAY_TOOSMALL');           constvalue = UG_ARRAY_TOOSMALL    
-   case('UG_VAR_NOTFOUND');             constvalue = UG_VAR_NOTFOUND      
+   case('UG_ENOTVAR');                  constvalue = UG_ENOTVAR
+   case('UG_ENOTATT');                  constvalue = UG_ENOTATT
+   case('UG_ENOTDIM');                  constvalue = UG_ENOTDIM
    case('UG_VAR_TOOMANYFOUND');         constvalue = UG_VAR_TOOMANYFOUND  
    case('UG_INVALID_LAYERS');           constvalue = UG_INVALID_LAYERS    
    case('UG_INVALID_CRS');              constvalue = UG_INVALID_CRS       
@@ -2260,18 +2266,20 @@ function att_to_varid(ncid, varin, attname, id) result(ierr)
    varname = ''
    ierr = nf90_get_att(ncid, varin, attname, varname)
    if (ierr /= nf90_noerr) then
+      ierr = UG_ENOTATT
       goto 999
    end if
    ierr = nf90_inq_varid(ncid, trim(varname), id)
    if (ierr /= nf90_noerr) then
+      ierr = UG_ENOTVAR
       goto 999
    end if
+
+   ! Return with success
    return
 
 999 continue 
-   ! we should not return an error if the variable is not defined,
-   ! it is possible in ug_init_mesh_topolology
-   ierr = UG_NOERR 
+   ! An error occurred, keep ierr nonzero and set undefined id.
    id = -1         ! undefined id
 end function att_to_varid
 
@@ -2292,17 +2300,22 @@ function att_to_dimid(ncid, varin, attname, id) result(ierr)
    varname = ''
    ierr = nf90_get_att(ncid, varin, attname, varname)
    if (ierr /= nf90_noerr) then
+      ierr = UG_ENOTATT
       goto 999
    end if
-      ierr = nf90_inq_dimid(ncid, trim(varname), id)
+
+   ierr = nf90_inq_dimid(ncid, trim(varname), id)
    if (ierr /= nf90_noerr) then
+      ierr = UG_ENOTDIM
       goto 999
    end if
-   return 
-    
+   ! Return with success
+   return
+
 999 continue 
-    ! here we should return an error is the variable is undefined, following up actions are taken in ug_init_mesh_topology
-    id = -1           ! undefined id 
+   ! An error occurred, keep ierr nonzero and set undefined id.
+   id = -1         ! undefined id
+
 end function att_to_dimid 
 
 
@@ -3176,7 +3189,7 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
    end if
    if (ierr /= nf90_noerr) then
       ug_messagestr = 'ug_inc_varid: no candidate variable could be found for name'''//trim(varname)//'''.'
-      ierr = UG_VAR_NOTFOUND
+      ierr = UG_ENOTVAR
       goto 999
    end if
 
@@ -3256,7 +3269,7 @@ function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) 
    end do
 
    if (varid == -1) then
-      ierr = UG_VAR_NOTFOUND
+      ierr = UG_ENOTVAR
       goto 999
    end if
    
