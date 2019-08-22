@@ -17395,7 +17395,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_pump_stage, 'coordinates', 'pump_id')
             
             ierr = nf90_def_var(ihisfile, 'pump_head', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_head)
-            ierr = nf90_put_att(ihisfile, id_pump_head, 'long_name', 'Head difference across pump')
+            ierr = nf90_put_att(ihisfile, id_pump_head, 'long_name', 'Head difference in pumping direction')
             ierr = nf90_put_att(ihisfile, id_pump_head, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_pump_head, 'coordinates', 'pump_id')
             
