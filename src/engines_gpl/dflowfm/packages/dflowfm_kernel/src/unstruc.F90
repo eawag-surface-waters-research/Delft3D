@@ -24303,6 +24303,12 @@ endif
 
           endif
        endif
+ 
+       if (keepzlayeringatbed == 2) then 
+           if (ktop(n) > kb) then 
+               zws(kb) = 0.5d0*( zws(kb+1) + zws(kb-1) ) 
+           endif 
+       endif
 
     enddo
 
@@ -40828,7 +40834,7 @@ subroutine update_verticalprofiles()
            gradk  = gradd + gradu
            grad   = gradk - gradt                                                            ! D_kt - D_tt
 
-           grad   = -grad*sigtkei*cmukep           ! This is positive advection, dc/dt + wdc/dz
+           grad   = -grad*sigepsi*cmukep           ! This is positive advection, dc/dt + wdc/dz
            grad   =  grad/dzw(k)                   ! dzw is receiving volume
            if (grad > 0d0) then
               bk(k) = bk(k) + grad
