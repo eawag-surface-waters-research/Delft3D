@@ -37034,7 +37034,7 @@ subroutine reconstructucz(k)
            dzL = zws(kk)-zws(kk-1);
            wsigma1 = (zws(kk-1) - zws0(kk-1))/dts
            wsigma2 = (zws(kk) - zws0(kk))/dts
-           ucz(kk) =         - (ww1(kk-1)+wsigma1)*0.5d0*dzL*ba(k1)    ! add velocity at surface level (kk-1)
+           ucz(kk) =         + (ww1(kk-1)+wsigma1)*0.5d0*dzL*ba(k1)    ! add velocity at surface level (kk-1)
            ucz(kk) = ucz(kk) + (ww1(kk)  +wsigma2)*0.5d0*dzL*ba(k1)    ! add velocity at surface level (kk)
            !
            end do
@@ -37103,7 +37103,7 @@ subroutine reconstructucz(k)
           dzL = zws(kk)-zws(kk-1);
           wsigma1 = (zws(kk-1) - zws0(kk-1))/dts
           wsigma2 = (zws(kk) - zws0(kk))/dts
-          ucz(kk) =         - (ww1(kk-1)+wsigma1)*0.5d0*dzL*ba(k)    ! add velocity at surface level (kk-1)
+          ucz(kk) =         + (ww1(kk-1)+wsigma1)*0.5d0*dzL*ba(k)    ! add velocity at surface level (kk-1)
           ucz(kk) = ucz(kk) + (ww1(kk)  +wsigma2)*0.5d0*dzL*ba(k)    ! add velocity at surface level (kk)
           !
        end do
