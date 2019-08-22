@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 import sys
 import os
+import shutil
 import subprocess
-skipmerge = True
-version = sys.argv[1]       # ifort version number
-fprname = sys.argv[2]       # name of the file with the projectlist
-slndir  = sys.argv[3]       # path to the solution
-f = sys.stdout				# replace by files to redirect stdout and stdin 
+
+pathname = os.path.dirname(sys.argv[0])        
+scriptpath = os.path.abspath(pathname) 
+
+skipmerge = False
+version = sys.argv[1]                                # ifort version number
+fprname = os.path.join(scriptpath,sys.argv[2])       # name of the file with the projectlist
+slndir  = scriptpath        # path to the solution
 
 env_ifortdir = "IFORT_COMPILER"+version
 try:
@@ -26,29 +30,29 @@ else:
 # execute the profmerge tool
 if not skipmerge:
     cmd = profmergetool
-    proc_rtn = subprocess.Popen(cmd, stdout=f, stderr=f).wait()    # proc_rtn!=0 in case of an error
-    f.close()
-if proc_rtn != 0:
-    sys.stderr.write("Merge tool exited with error code %d\n\n"%proc_rtn)
+    proc_rtn = subprocess.Popen(cmd).wait()    # proc_rtn!=0 in case of an error
 
 fpr = open(fprname,'r') 
 prlist = fpr.readlines()
 fpr.close()
 
-os.mkdir('cov_results')
-os.chdir('cov_results')
+cov_results = 'cov_results'
+if os.path.isdir(cov_results):
+    shutil.rmtree(cov_results)
+os.mkdir(cov_results)
+os.chdir(cov_results)
 
 mwd = os.getcwd()
 for entry in prlist:
+    spi_file = entry.rstrip()
+    pad, file = os.path.split(spi_file)
+    prname = os.path.split(pad.rstrip())[1]
     os.mkdir(prname)
     os.chdir(prname)
-    spi_file = entry.rstrip()
-    pad, file = os.path.split(fullpath)
-    prname = os.path.split(pad.rstrip())[1]
-    cmd = codecovtool + ' -dpi pgopti.dpi -spi ' +os.path.join(slndir,spi_file) \
+    cmd = codecovtool + ' -dpi ..\..\pgopti.dpi -spi ' +os.path.join(slndir,spi_file) \
 	                  +' -xmlbcvrgfull code_coverage.xml' +' -txtbcvrgfull code_coverage.txt'
-    proc_rtn = subprocess.Popen(cmd, stdout=f, stderr=f).wait()    # proc_rtn!=0 in case of an error
+    print (cmd)
+    proc_rtn = subprocess.Popen(cmd).wait()    # proc_rtn!=0 in case of an error
     print (prname)
     os.chdir(mwd)
-    f.close()
 
