@@ -43,6 +43,7 @@ implicit none
 function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, jsferic, meshXCoords, meshYCoords) result(ierr)
 
    use geometry_module, only: sphertocart3D, cart3Dtospher
+   use sorting_algorithms, only: indexx
    use m_missing, only : dmiss
    
    integer, intent(in)               :: branchids(:), nbranchgeometrynodes(:)
@@ -50,7 +51,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    double precision, intent(inout)   :: meshXCoords(:), meshYCoords(:)
    integer, intent(in)               :: jsferic
 
-   integer                           :: angle, i, k, ierr, ind, branchid, nsegments
+   integer                           :: angle, i, iin, k, ierr, ind, branchid, nsegments
    double precision, allocatable     :: branchSegmentLengths(:)
    double precision, allocatable     :: xincrement(:), yincrement(:), zincrement(:)
    double precision, allocatable     :: deltaX(:), deltaY(:), deltaZ(:)
@@ -63,6 +64,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    integer                           :: startGeometryNode, endGeometryNode, nGeometrySegments
    integer                           :: startMeshNode, endMeshNode 
    integer, allocatable              :: meshnodemapping(:,:)
+   integer, allocatable              :: ibranchsort(:)
       
    ierr = 0
    ! the number of geometry segments is always equal to number of geopoints - 1
@@ -81,6 +83,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    allocate(cartGeopointsY(size(geopointsX,1)))
    allocate(cartGeopointsZ(size(geopointsX,1)))
    
+   allocate(ibranchsort(size(meshXCoords,1))) ! to locally sort input points in increasing chainage.
    allocate(cartMeshXCoords(size(meshXCoords,1)))
    allocate(cartMeshYCoords(size(meshXCoords,1)))
    allocate(cartMeshZCoords(size(meshXCoords,1)))
@@ -147,25 +150,28 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          endif
       enddo
       !now loop over the mesh points
+      ! The loop below assumes that the points to be placed (from branchids/offsets) are sorted by increasing chainage per branch.
+      call indexx(endMeshNode-startMeshNode+1, branchoffsets(startMeshNode:endMeshNode), ibranchsort(startMeshNode:endMeshNode))
       ind            = startGeometryNode
       totallength    = 0.d0
       previousLength = 0.d0 
       do i = startMeshNode, endMeshNode         
+         iin = startMeshNode-1 + ibranchsort(i)
          !determine max and min lengths
          totalLength = previousLength
          do k = ind, endGeometryNode - 1
             totalLength = totalLength + branchSegmentLengths(k)
-            if (totalLength > branchoffsets(i)) then
+            if (totalLength > branchoffsets(iin)) then
                   previousLength = totalLength - branchSegmentLengths(k)
                   ind = k
                exit
             endif
          enddo
-         fractionbranchlength =  branchoffsets(i) - previousLength
-         cartMeshXCoords(i) = cartGeopointsX(ind) + fractionbranchlength * xincrement(ind)
-         cartMeshYCoords(i) = cartGeopointsY(ind) + fractionbranchlength * yincrement(ind)
+         fractionbranchlength =  branchoffsets(iin) - previousLength
+         cartMeshXCoords(iin) = cartGeopointsX(ind) + fractionbranchlength * xincrement(ind)
+         cartMeshYCoords(iin) = cartGeopointsY(ind) + fractionbranchlength * yincrement(ind)
          !TODO: this function should also return meshZCoords (it is relevant if coordinates are spheric) 
-         cartMeshZCoords(i) = cartGeopointsZ(ind) + fractionbranchlength * zincrement(ind)
+         cartMeshZCoords(iin) = cartGeopointsZ(ind) + fractionbranchlength * zincrement(ind)
       enddo
       !update geometry indexes
       startGeometryNode = endGeometryNode + 1
