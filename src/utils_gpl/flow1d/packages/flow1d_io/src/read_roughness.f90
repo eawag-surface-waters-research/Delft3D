@@ -230,6 +230,11 @@ contains
       call tree_create(trim(inputfile), tree_ptr, maxlenpar)
       call prop_file('ini',trim(inputfile),tree_ptr,istat)
    
+      if (istat /= 0) then
+         call setmessage(LEVEL_ERROR, 'Roughness file '''//trim(inputfile)//''' could not be opened.')
+         return
+      end if
+
       call prop_get_version_number(tree_ptr, major = major, minor = minor, success = success)
       if (.not. success) then
          major = 1
