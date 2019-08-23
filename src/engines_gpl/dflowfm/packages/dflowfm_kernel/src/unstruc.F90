@@ -17082,7 +17082,7 @@ subroutine unc_write_his(tim)            ! wrihis
                idims(1) = id_laydimw
                idims(2) = id_statdim
                idims(3) = id_timedim
-               call definencvar   (ihisfile, id_zws, nf90_double, idims,3, 'zcoordinate_w' , 'vertical coordinate at center of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+               call definencvar   (ihisfile, id_zws, nf90_double, idims,3, 'zcoordinate_w' , 'vertical coordinate at face of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
                ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
             endif
         end if
