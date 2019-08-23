@@ -230,7 +230,12 @@ module m_readstructures
             end if
 
             call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'id', st_id, success1)
-            success = success .and. check_input_result(success1, '?', 'id')
+            if (.not. success1) then
+               write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ', id is missing.'
+               call err_flush()
+               success = .false.
+            end if
+
             pstru%id = st_id
 
             pstru%name = pstru%id
