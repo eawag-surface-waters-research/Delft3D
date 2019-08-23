@@ -1550,6 +1550,11 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Writek_CdWind', jatekcd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrirst_bnd', jarstbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Writepart_domain', japartdomain, success)
+
+    if (md_mapformat /= 4 .and. jamapwindstress /= 0) then
+       call mess(LEVEL_ERROR, 'writing windstress to mapfile is only implemented for NetCDF - UGrid (mapformat=4)')
+    endif
+
     if (jatem <= 1) then
       jamapheatflux = 0
       jahisheatflux = 0
