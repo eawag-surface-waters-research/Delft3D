@@ -943,7 +943,8 @@ end subroutine
       allocate(sts%hashlist_bridge%id_list(sts%Count))
       allocate(sts%hashlist_pump%id_list(sts%Count))
       allocate(sts%hashlist_structure%id_list(sts%Count))
-      
+
+      ! TODO: needs if(allocated's)
       sts%hashlist_weir%id_count = sts%Count
       sts%hashlist_culvert%id_count = sts%Count
       sts%hashlist_bridge%id_count = sts%Count
@@ -964,6 +965,10 @@ end subroutine
       
       do ist = 1, sts%count
          ids_structure(ist) = sts%struct(ist)%id
+         !
+         ! NOTE: UNST-2576: the mapping below are still old and aimed at SOBEK3.
+         !       Under D-Flow FM/RHU, we'll consider separate hashlists for each type, not alltogether as weir. 
+         !
          select case(sts%struct(ist)%type)
          case (ST_WEIR, ST_ORIFICE,ST_GENERAL_ST, ST_UNI_WEIR)
             ids_weir(ist) = sts%struct(ist)%id
