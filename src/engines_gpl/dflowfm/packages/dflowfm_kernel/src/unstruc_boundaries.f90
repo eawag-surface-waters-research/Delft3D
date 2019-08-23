@@ -3056,7 +3056,8 @@ if (ndambreak > 0) then
          endif
 
          ! inquire if the water level upstream has to be taken from a location or be a result of averaging
-         if (network%sts%struct(istrtmp)%dambreak%algorithm == 2) then
+         if (network%sts%struct(istrtmp)%dambreak%algorithm == 2&          ! 2: Needed for computation and output
+            .or. network%sts%struct(istrtmp)%dambreak%algorithm == 3) then ! 3: Needed for output only.
             xla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationX
             yla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationY
             if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then
@@ -3073,7 +3074,8 @@ if (ndambreak > 0) then
          endif
 
          ! inquire if the water level downstream has to be taken from a location or be a result of averaging
-         if (network%sts%struct(istrtmp)%dambreak%algorithm == 2) then
+         if (network%sts%struct(istrtmp)%dambreak%algorithm == 2 &         ! 2: Needed for computation and output
+            .or. network%sts%struct(istrtmp)%dambreak%algorithm == 3) then ! 3: Needed for output only.
             xla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationX
             yla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationY
             if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then

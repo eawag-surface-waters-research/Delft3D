@@ -96,7 +96,18 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (21,:) general structure velocity through gate opening
                                                               !<                      (22,:) general structure velocity over gate upper edge level
                                                               !<                      (23,:) general structure counters of partitions for parallel
- double precision, dimension(:,:), allocatable, target :: valdambreak !< Array for dambreak, (1,:) instantanuous, (2,:) cumulative
+ double precision, dimension(:,:), allocatable, target :: valdambreak !< Array for dambreak, (1,:)  flow link width
+                                                              !<                      (2,:) instantanuous discharge
+                                                              !<                      (3,:) dambreak water level up
+                                                              !<                      (4,:) dambreak water level down
+                                                              !<                      (5,:) dambreak structure head
+                                                              !<                      (6,:) dambreak flow area
+                                                              !<                      (7,:) dambreak normal velocity
+                                                              !<                      (8,:) dambreak crest level
+                                                              !<                      (9,:) dambreak crest width
+                                                              !<                      (10,:) dambreak water level jump
+                                                              !<                      (11,:) dambreak breach width time derivative
+                                                              !<                      (12,:) cumulative discharge
  double precision, dimension(:,:), allocatable :: valorifgen  !< Array for orifice (1,:) flow link width, used for averaging.
                                                               !<                      (2,:) discharge through orifice
                                                               !<                      (3,:) orifice water level up
@@ -145,7 +156,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_GATEGEN = 9     !< Number of variables for gate (new)
  integer                           :: NUMVALS_WEIRGEN = 13    !< Number of variables for weir
  integer                           :: NUMVALS_GENSTRU = 23    !< Number of variables for general structure( new exe file)
- integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
+ integer                           :: NUMVALS_DAMBREAK = 12   !< Number of variables for dambreak
  integer                           :: NUMVALS_ORIFGEN = 23    !< Number of variables for orific
  integer                           :: NUMVALS_BRIDGE  = 7     !< Number of variables for bridge
  integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
@@ -571,5 +582,26 @@ double precision function get_discharge_over_gate_uppedge(genstr, L0, s1m1, s1m2
 
 end function get_discharge_over_gate_uppedge
 
-
+!> Fills in array valdambreak when there is no breach 
+subroutine fill_valdambreak_no_breach(L, n)
+   use m_missing, only: dmiss
+   use m_flowgeom, only:bob
+   use m_flowexternalforcings
+   implicit none
+   integer, intent(in) :: L   !< index of link where the breach starts
+   integer, intent(in) :: n   !< index of dambreak
+   
+   valdambreak(1:NUMVALS_DAMBREAK-1,n) = dmiss
+   valdambreak(2,n)  = 0d0
+   valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
+   valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
+   valdambreak(5,n)  = valdambreak(3,n)- valdambreak(4,n)
+   valdambreak(6,n)  = 0d0
+   valdambreak(7,n)  = 0d0
+   valdambreak(8,n)  = bob(1,L)
+   valdambreak(9,n)  = 0d0
+   valdambreak(10,n) = waterLevelJumpDambreak(n)
+   valdambreak(11,n) = breachWidthDerivativeDambreak(n)
+   
+end subroutine fill_valdambreak_no_breach
 end module m_structures
