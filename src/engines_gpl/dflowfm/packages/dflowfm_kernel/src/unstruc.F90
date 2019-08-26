@@ -15258,17 +15258,18 @@ subroutine update_pumps_with_levels()
          endif
       enddo
 
-      !Compute pump discharges
-      do n = 1, npumpsg
-         ! Retrive a valid index in the network%sts%struct
-         istru = pumpsWithLevels(n)
-         ! Do not use PrepareComputePump to compute the legacy pumps discharges
-         if (istru.eq.-1) cycle
-         if (associated(network%sts%struct(istru)%pump)) then
-            call PrepareComputePump(network%sts%struct(istru)%pump, waterLevelsPumpLeft(n), waterLevelsPumpRight(n))
-            qpump(n) = network%sts%struct(istru)%pump%discharge
-         endif
-      enddo
+      !TODO remove this code:
+      !Compute pump discharges 
+      !do n = 1, npumpsg
+      !   ! Retrive a valid index in the network%sts%struct
+      !   istru = pumpsWithLevels(n)
+      !   ! Do not use PrepareComputePump to compute the legacy pumps discharges
+      !   if (istru.eq.-1) cycle
+      !   if (associated(network%sts%struct(istru)%pump)) then
+      !      !call PrepareComputePump(network%sts%struct(istru)%pump, waterLevelsPumpLeft(n), waterLevelsPumpRight(n))
+      !      !qpump(n) = network%sts%struct(istru)%pump%discharge
+      !   endif
+      !enddo
    end if
 
 end subroutine update_pumps_with_levels
