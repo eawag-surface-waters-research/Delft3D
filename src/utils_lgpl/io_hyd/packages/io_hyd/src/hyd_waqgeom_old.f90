@@ -859,9 +859,9 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
       deallocate( xcrd, ycrd )
       
       call reallocP(edge_type, nr_edges, keepExisting=.false., fill=0)
-      do i = 1, nr_edges
-         edge_type(i) = 0 ! TODO
-      end do
+!      do i = 1, nr_edges
+!         edge_type(i) = 0 ! TODO
+!      end do
       
       success = write_waqgeom_file(filename, meta, crs, waqgeom, edge_type, conv_type, conv_version)
       
