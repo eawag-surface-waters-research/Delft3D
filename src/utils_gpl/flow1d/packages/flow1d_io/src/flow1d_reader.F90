@@ -61,7 +61,7 @@ module m_flow1d_reader
       use m_readBoundaries
       use m_readLaterals
       use m_readObservationPoints
-      use m_readRetentions
+      use m_readStorageNodes
       use properties
       use cf_timers
    
@@ -182,7 +182,7 @@ module m_flow1d_reader
       use m_readBoundaries
       use m_readLaterals
       use m_readObservationPoints
-      use m_readRetentions
+      use m_readStorageNodes
       use properties
       use cf_timers
    
@@ -207,7 +207,7 @@ module m_flow1d_reader
       integer                         :: timerReadCsDefs    = 0
       integer                         :: timerReadCsLocs    = 0
       integer                         :: timerReadStructs   = 0
-      integer                         :: timerReadRetentions= 0
+      integer                         :: timerReadStorgNodes= 0
       integer                         :: timerReadRoughness = 0
       integer                         :: timerFileUnit
       character(len=255)              :: md1d_flow1d_file
@@ -256,7 +256,7 @@ module m_flow1d_reader
             call set_filename(md_ptr, 'files', 'crossDefFile'  , filenames%cross_section_definitions,  folder)
             call set_filename(md_ptr, 'files', 'crossLocFile'  , filenames%cross_section_locations,    folder)
             call set_filename(md_ptr, 'files', 'structureFile' , filenames%structures,                 folder)
-            call set_filename(md_ptr, 'files', 'retentionFile' , filenames%retentions,                 folder)
+            call set_filename(md_ptr, 'files', 'StorageNodeFile',filenames%storage_nodes,              folder)
          endif
       endif
       
@@ -307,14 +307,14 @@ module m_flow1d_reader
         call create(network%storS, network%nds%count, network%brs%gridpointsCount)
      endif
 
-     call timstrt('ReadRetentions', timerReadRetentions)
-     call SetMessage(LEVEL_INFO, 'Reading Retentions ...')
+     call timstrt('ReadStorageNodes', timerReadStorgNodes)
+     call SetMessage(LEVEL_INFO, 'Reading Storage Nodes ...')
 
-     ! Read Retentions file
-     call readRetentions(network, filenames%retentions)
+     ! Read storage nodes file
+     call readStorageNodes(network, filenames%storage_nodes)
       
-     call SetMessage(LEVEL_INFO, 'Reading Retentions Done')
-     call timstop(timerReadRetentions)
+     call SetMessage(LEVEL_INFO, 'Reading Storage Nodes Done')
+     call timstop(timerReadStorgNodes)
 
      if (len_trim(md1d_flow1d_file) > 0) then
 
@@ -369,7 +369,7 @@ module m_flow1d_reader
       use m_readBoundaries
       use m_readLaterals
       use m_readObservationPoints
-      use m_readRetentions
+      use m_readStorageNodes
       use properties
       use cf_timers
 
@@ -405,7 +405,7 @@ module m_flow1d_reader
       integer                         :: timerReadBoundLocs = 0
       integer                         :: timerReadLatLocs   = 0
       integer                         :: timerReadObsPoints = 0
-      integer                         :: timerReadRetentions= 0
+      integer                         :: timerReadStorgNodes= 0
       integer                         :: timerReadInitial   = 0
       integer                         :: timerReadRoughness = 0
       integer                         :: timerReadBoundData = 0
@@ -608,19 +608,19 @@ module m_flow1d_reader
 
       call SetMessage(LEVEL_INFO, 'Reading Observation Points Done')
       call timstop(timerReadObsPoints)
-      call timstrt('ReadRetentions', timerReadRetentions)
-      call SetMessage(LEVEL_INFO, 'Reading Retentions ...')
+      call timstrt('ReadStorageNodes', timerReadStorgNodes)
+      call SetMessage(LEVEL_INFO, 'Reading Storage Nodes ...')
 
-      ! Read Retentions file
+      ! Read Storage Nodes file
       inputfile=''
-      call prop_get_string(md_ptr, 'files', 'retentionFile', inputfile, success)
+      call prop_get_string(md_ptr, 'files', 'StorageNodeFile', inputfile, success)
       inputfile = md_flow1d_file(1:posslash)//inputfile
       if (success .and. len_trim(inputfile) > 0) then
-         call readRetentions(network, inputfile)
+         call readStorageNodes(network, inputfile)
       endif
       
-      call SetMessage(LEVEL_INFO, 'Reading Retentions Done')
-      call timstop(timerReadRetentions)
+      call SetMessage(LEVEL_INFO, 'Reading Storage Nodes Done')
+      call timstop(timerReadStorgNodes)
       call timstrt('ReadInitData', timerReadInitial)
       call SetMessage(LEVEL_INFO, 'Reading Initial Data ...')
       

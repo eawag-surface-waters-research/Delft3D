@@ -271,7 +271,7 @@ use unstruc_channel_flow
     md_1dfiles%cross_section_locations = ' '
     md_1dfiles%roughness = ' '
     md_1dfiles%roughnessdir = ' '
-    md_1dfiles%retentions = ' '
+    md_1dfiles%storage_nodes = ' '
     md_1dfiles%structures = ' '
     
     md_flowgeomfile = ' '
@@ -746,7 +746,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'OneDNetworkFile',  md_1dfiles%onednetwork,               success)
     call prop_get_string ( md_ptr, 'geometry', 'CrossDefFile',     md_1dfiles%cross_section_definitions, success)
     call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
-    call prop_get_string ( md_ptr, 'geometry', 'NodeFile',         md_1dfiles%retentions,                success)
+    call prop_get_string ( md_ptr, 'geometry', 'StorageNodeFile',  md_1dfiles%storage_nodes,             success)
     call prop_get_string ( md_ptr, 'geometry', 'frictFile',        md_1dfiles%roughness,                 success)
     call prop_get_string ( md_ptr, 'geometry', 'StructureFile',    md_1dfiles%structures,                 success)       ! pending code merge, structure file either applies to v2.00 structure file, or the old one, so store in both
     md_1dfiles%roughnessdir = ' ' 
@@ -2116,8 +2116,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. len_trim(md_1dfiles%cross_section_locations) > 0) then
        call prop_set(prop_ptr, 'geometry', 'CrossLocFile',     trim(md_1dfiles%cross_section_locations),   '1D Cross section location file (*.ini)')
     end if
-    if (writeall .or. len_trim(md_1dfiles%retentions) > 0) then
-       call prop_set(prop_ptr, 'geometry', 'NodeFile',         trim(md_1dfiles%retentions),                '1D Storage node/manhole file (*.ini)')
+    if (writeall .or. len_trim(md_1dfiles%storage_nodes) > 0) then
+       call prop_set(prop_ptr, 'geometry', 'StorageNodeFile',         trim(md_1dfiles%storage_nodes),          '1D Storage node/manhole file (*.ini)')
     end if
     if (writeall .or. len_trim(md_1dfiles%roughness) > 0) then
        call prop_set(prop_ptr, 'geometry', 'frictFile',   trim(md_1dfiles%roughness),                      '1D Roughness files (*.ini)')

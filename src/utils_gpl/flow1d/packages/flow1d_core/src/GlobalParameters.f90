@@ -102,7 +102,7 @@ module m_GlobalParameters
       character(len=255) :: cross_section_locations      = ' ' !< 1d cross section locations
       character(len=1024):: roughness                    = ' ' !< 1d roughness files
       character(len=255) :: roughnessdir                 = ' ' !< location of roughness files
-      character(len=255) :: retentions                   = ' ' !< 1d cross section retention manhole definitions
+      character(len=255) :: storage_nodes                = ' ' !< 1d cross section retention manhole definitions
       character(len=255) :: structures                   = ' ' !< structure file
    end type
 
@@ -178,7 +178,7 @@ module m_GlobalParameters
    integer, public, parameter :: CFiBranches                = 13
    integer, public, parameter :: CFiObservationpoints       = 14
    integer, public, parameter :: CFiStructuresAndPumps      = 15
-   integer, public, parameter :: CFiRetentions              = 16
+   integer, public, parameter :: CFiStorageNodes            = 16
    integer, public, parameter :: CFiVolumesOnReachSegments  = 17
    integer, public, parameter :: CFiVolumesOnGridPoints     = 18
    integer, public, parameter :: CFiLateralsOnReachSegments = 19

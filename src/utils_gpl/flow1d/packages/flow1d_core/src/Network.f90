@@ -855,7 +855,7 @@ contains
 
    end subroutine crossSectionsSort
    
-   function getRetentionId(network, gridpoint) result(id)
+   function getStorageNodeId(network, gridpoint) result(id)
    
       use m_Storage
       use m_node
@@ -876,9 +876,9 @@ contains
          endif
       enddo
 
-      id = 'No retention area assigned to node '//getnodeid(network%nds, gridpoint)
+      id = 'No storage area assigned to node '//getnodeid(network%nds, gridpoint)
       
-   end function getRetentionId
+   end function getStorageNodeId
 
 
 !> Get friction value (Chezy) for a specific point in the network

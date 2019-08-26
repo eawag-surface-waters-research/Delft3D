@@ -70,7 +70,7 @@ module m_oned_functions
    end subroutine set_1d_roughnesses
 
    !> Sets the flowgeom link and node numbers of the computational grid 
-   !! into the 1D network structure for branches, retention nodes, 
+   !! into the 1D network structure for branches, storage nodes, 
    !! cross sections and structures, etc. 
    subroutine set_1d_indices_in_network()
       use m_sediment
@@ -98,7 +98,7 @@ module m_oned_functions
       
       if (.not. network%initialized) then
          call set_linknumbers_in_branches()
-         call set_retention_grid_numbers()
+         call set_node_numbers_for_xy_storage_nodes()
          call set_structure_grid_numbers()
       
          if (jased > 0 .and. stm_included) then
@@ -159,13 +159,14 @@ module m_oned_functions
       enddo
    end subroutine set_linknumbers_in_branches
 
-   !> Set the node numbers from flowgeom in the retention structure
-   subroutine set_retention_grid_numbers()
+   !> Set the node numbers from flowgeom for the storage nodes that are defined by x-, y-coordinates
+   subroutine set_node_numbers_for_xy_storage_nodes()
    
       use unstruc_channel_flow
       use m_flowgeom
       use m_sediment
       use messageHandling
+      use m_GlobalParameters, only: INDTP_ALL
 
       implicit none
 
@@ -179,24 +180,52 @@ module m_oned_functions
       integer :: storage_count
       type(t_branch), pointer                 :: pbr
       type(t_storage), pointer                :: pstor
-      integer, dimension(:), pointer          :: lin
-      integer, dimension(:), pointer          :: grd
-      double precision, dimension(:), pointer :: chainage
-      type(t_chainage2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
-      type (t_CrossSection), pointer          :: cross1, cross2
+      integer, allocatable                    :: ixy2stor(:), k_tmp(:)
+      double precision, allocatable           :: x_tmp(:), y_tmp(:)
+      character(len=IdLen), allocatable       :: name_tmp(:)
+      integer                                 :: nxy, countxy, jakdtree
 
-
-      storageCount = network%storS%count
-      do i = 1, storageCount
-         pstor => network%storS%stor(i)
-         if (pstor%branch_index <= 0) then
-            pstor%gridPoint = network%nds%node(iabs(pstor%node_index))%gridNumber
-         else
-            pbr => network%brs%branch(pstor%branch_index)
-            pstor%gridPoint = pbr%grd(pstor%local_grid_index)
-         endif
-      enddo
-   end subroutine set_retention_grid_numbers
+      ! snap the storage nodes that are defined by x-, y-coordinates
+      countxy = network%storS%Count_xy
+      if (countxy > 0) then
+         call realloc(ixy2stor,    countxy, keepExisting=.false.)
+         call realloc(k_tmp,       countxy, keepExisting=.false.)
+         call realloc(x_tmp,       countxy, keepExisting=.false.)
+         call realloc(y_tmp,       countxy, keepExisting=.false.)
+         call realloc(name_tmp,    countxy, keepExisting=.false.)
+         nxy = 0
+         do i = 1, network%storS%count
+            pstor => network%storS%stor(i)
+            if (pstor%gridPoint < 0) then
+               nxy = nxy + 1
+               ixy2stor(nxy) = i
+               x_tmp(nxy)    = pstor%x
+               y_tmp(nxy)    = pstor%y
+               name_tmp(nxy) = pstor%id
+            end if
+         end do
+         
+         ! find flow nodes
+         jakdtree = 1
+         call find_flownode(nxy, x_tmp(1:nxy), y_tmp(1:nxy), name_tmp(1:nxy), k_tmp(1:nxy), jakdtree, 0, INDTP_ALL)
+         do i = 1, nxy
+            if (k_tmp(i) > 0) then
+               pstor => network%storS%stor(ixy2stor(i))
+               pstor%gridPoint = k_tmp(i)
+               network%storS%mapping(k_tmp(i)) = network%storS%Count
+            else
+               call SetMessage(LEVEL_ERROR, 'Error when snapping storage node '''//trim(name_tmp(i))//''' to a flow node.')
+            end if
+         end do
+         
+         if (allocated(k_tmp))    deallocate(k_tmp)
+         if (allocated(x_tmp))    deallocate(x_tmp)
+         if (allocated(y_tmp))    deallocate(y_tmp)
+         if (allocated(ixy2stor)) deallocate(ixy2stor)
+         if (allocated(name_tmp)) deallocate(name_tmp)
+      end if
+      
+   end subroutine set_node_numbers_for_xy_storage_nodes
    
    subroutine set_structure_grid_numbers()
       use unstruc_channel_flow

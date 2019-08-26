@@ -96,26 +96,27 @@ module m_Storage
     !---------------------------------------------------------
   
    type, public :: t_storage
-      character(len=idlen)    :: id                      !< name of storage area
+      character(len=idlen)    :: id                      !< unique id of storage area
+      character(len=idlen)    :: nodeId                  !< Node Id
+      character(len=idlen)    :: name                    !< Long name in the user interface
       integer                 :: gridPoint               !< gridpoint index
-      integer                 :: branch_index            !< branch index of the corresponding branch. (-1 when retention is connected to a node)
-      integer                 :: local_grid_index        !< location of retention on the corresponding branch. (-1 when retention is connected to a node)
-      integer                 :: node_index              !< node index in nds array
-                                                         !> type of storage on street\n
-                                                         !! 0: no storage \n
-                                                         !! 2: reservoir storage \n
-                                                         !! 3: closed manhole \n
-                                                         !! 4: loss
-      integer                 :: storageType             
+      integer                 :: storageType             !< type of storage on street
+                                                         !! 0: no storage
+                                                         !! 2: reservoir storage
+                                                         !! 3: closed manhole
       type(t_table), pointer  :: storageArea             !< table containing storage area and levels
       type(t_table), pointer  :: streetArea              !< table containing storage area and levels on street level
       logical                 :: useStreetStorage        !< flag indicating whether streetstorage is to be used
+      double precision        :: x                       !< (optional) x-coordinate
+      double precision        :: y                       !< (optional) y-cooridnate
+      logical                 :: useTable                !< flag indicating whether table is to be used
    end type
    
    type, public :: t_storageSet
       integer                                               :: Size = 0
       integer                                               :: growsBy = 2000
       integer                                               :: Count= 0
+      integer                                               :: Count_xy = 0 ! Number of storage nodes that are defined by x-, y-coordinates
       type(t_storage), pointer, dimension(:)                :: stor
       integer, dimension(:), allocatable                    :: mapping
       type(t_hashlist)                                      :: hashlist
