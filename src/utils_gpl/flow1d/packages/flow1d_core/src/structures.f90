@@ -86,6 +86,7 @@ module m_1d_structures
    public GetPumpReductionFactor
    public initialize_structure_links
    public set_fu_ru
+   public check_for_changes
 
    public printData
 
@@ -1158,5 +1159,35 @@ end subroutine
       struct%ru(L0) = ru
       struct%au(L0) = au
    end subroutine set_fu_ru
+   
+   !> check for differences between input parameters and actual parameters
+   subroutine check_for_changes(level, pstru)
+      use messagehandling
+      use precision_basics
+      type (t_structure), pointer, intent(in) :: pstru
+      integer,                     intent(in) :: level
+      
+      select case(pstru%type)
+      case (ST_GENERAL_ST)
+         if (comparereal(pstru%generalst%zs, pstru%generalst%zs_actual) /= 0) then
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The crest level for '''//trim(pstru%id)//''' is (locally) changed from ', pstru%generalst%zs, ' into ', pstru%generalst%zs_actual
+            call SetMessage(level, msgbuf)
+         endif
+         if (comparereal(pstru%generalst%ws, pstru%generalst%ws_actual) /= 0) then
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The crest width for  '''//trim(pstru%id)//''' is changed from ', pstru%generalst%ws, ' into ', pstru%generalst%ws_actual
+            call SetMessage(level, msgbuf)
+         endif
+         if (comparereal(pstru%generalst%gateLowerEdgeLevel, pstru%generalst%gateLowerEdgeLevel_actual) /= 0) then
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The gate lower edge level for '//trim(pstru%id)//' is (locally) changed from ', pstru%generalst%gateLowerEdgeLevel, ' into ', pstru%generalst%gateLowerEdgeLevel_actual
+            call SetMessage(level, msgbuf)
+         endif
+         if (comparereal(pstru%generalst%gateopeningwidth, pstru%generalst%gateopeningwidth_actual) /= 0) then
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The gate opening width for '//trim(pstru%id)//' is changed from ', pstru%generalst%gateopeningwidth, ' into ', pstru%generalst%gateopeningwidth_actual
+            call SetMessage(level, msgbuf)
+         endif
+      end select
+         
+   end subroutine check_for_changes
+   
    
 end module m_1d_structures

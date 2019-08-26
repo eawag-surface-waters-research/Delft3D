@@ -55,13 +55,16 @@ module m_General_Structure
       double precision                 :: zu1                           !< z_u1
       double precision                 :: wu2                           !< w_u2
       double precision                 :: zu2                           !< z_u2
-      double precision                 :: ws                            !< crest width
-      double precision                 :: zs                            !< crest level
+      double precision                 :: ws                            !< crest width (as defined in input/RTC)
+      double precision                 :: ws_actual                     !< actual crest width (possibly limited by total width of flow links and must be > 0)
+      double precision                 :: zs                            !< crest level (as defined in input/RTC)
+      double precision                 :: zs_actual                     !< crest level (possibly adapted to BOB level, in case of multiple links the lowest point is taken).
       double precision                 :: wd1                           !< w_d1
       double precision                 :: zd1                           !< z_d1
       double precision                 :: wd2                           !< w_d2
       double precision                 :: zd2                           !< z_d2
-      double precision                 :: gateLowerEdgeLevel            !< gate lower edge level
+      double precision                 :: gateLowerEdgeLevel            !< gate lower edge level (as defined in input/RTC)
+      double precision                 :: gateLowerEdgeLevel_actual     !< gate lower edge level (possibly adapted to crest level, in case of multiple links the lowest point is taken) 
       double precision                 :: cgf_pos                       !< Positive free gate flow function 
       double precision                 :: cgd_pos                       !< Positive drowned gate flow function 
       double precision                 :: cwf_pos                       !< Positive free weir flow function 
@@ -74,7 +77,8 @@ module m_General_Structure
       double precision                 :: mugf_neg                      !< Negative flow contraction coefficient function 
       double precision                 :: extraresistance               !< Extra resistance
       double precision                 :: gatedoorheight                !< height of the doors
-      double precision                 :: gateopeningwidth              !< width between the doors
+      double precision                 :: gateopeningwidth              !< width between the doors (as defined in input/RTC)
+      double precision                 :: gateopeningwidth_actual       !< width between the doors (possibly adapted to crest width and always > 0) 
       double precision                 :: crestlength                   !< length of the crest for computing the extra resistance using bedfriction over the crest of the weir
       double precision, pointer        :: widthcenteronlink(:)          !< For each crossed flow link the the center width portion of this genstr. (sum(widthcenteronlink(1:numlink)) should equal widthcenter)
       double precision, pointer        :: gateclosedfractiononlink(:)   !< part of the link width that is closed by the gate
@@ -101,19 +105,20 @@ module m_General_Structure
 contains
 
    !> compute FU, RU and AU for a single flow link in a general structure.
-   subroutine computeGeneralStructure(genstr, direction, L0, maxWidth, fuL, ruL, auL, as1, as2, dadsL, kfuL, s1m1, s1m2, &
+   subroutine computeGeneralStructure(genstr, direction, L0, maxWidth, bob0, fuL, ruL, auL, as1, as2, structwidth, kfuL, s1m1, s1m2, &
                                       qtotal, Cz, dxL, dt, jarea)
       ! modules
 
       ! Global variables
       type(t_GeneralStructure), pointer, intent(inout):: genstr     !< Derived type containing general structure information.
       double precision, intent(in)                 :: maxWidth      !< Maximal width of the structure. Normally the the width of the flow link.
+      double precision, intent(in)                 :: bob0(2)       !< bed level of channel upstream and downstream of the structure.
       double precision, intent(out)                :: fuL           !< fu component of momentum equation.
       double precision, intent(out)                :: ruL           !< Right hand side component of momentum equation.
       double precision, intent(inout)              :: auL           !< Flow area of structure opening.
       double precision, intent(in)                 :: as1           !< (geometrical) upstream flow area.
       double precision, intent(in)                 :: as2           !< (geometrical) downstream flow area.
-      double precision, intent(out)                :: dadsL         !< flow width of structure.
+      double precision, intent(out)                :: structwidth         !< flow width of structure.
       integer, intent(in)                          :: direction     !< Orientation of flow link w.r.t. the structure. (1d0 for same direction, -1d0 for reverse.)
       integer, intent(in)                          :: L0            !< Local link index.
       integer, intent(out)                         :: kfuL          !< Flag indicating whether the structure link is wet (=1) or not (=0).
@@ -163,6 +168,7 @@ contains
       double precision               :: zs
       double precision               :: zgate
       double precision               :: gatefraction
+      double precision               :: gle
       double precision               :: dx_struc  
       double precision               :: dsL
       double precision               :: u1L           
@@ -174,13 +180,23 @@ contains
       !! executable statements -------------------------------------------------------
       !
 
+      genstr%zs_actual = genstr%zs
+      genstr%gateLowerEdgeLevel_actual = genstr%gateLowerEdgeLevel
+      
+      crest   = max(bob0(1), bob0(2), genstr%zs)
+      gle = max(crest, genstr%gateLowerEdgeLevel)
+      if (gle > genstr%gateLowerEdgeLevel_actual) then
+         ! Take the largest change as actual value. 
+         ! Note: the adaptation of crest level at the different links depend on the BOB of this link
+         !       as a result the change of the GLE might be different for the different links as well
+         genstr%gateLowerEdgeLevel_actual = gle
+      endif
       alm  = as1
       arm  = as2
       s1ml = s1m1
       s1mr = s1m2
       dsL   = s1m2 - s1m1 
-       
-      crest = genstr%zs
+
       dx_struc = genstr%crestlength
       
       velheight = genstr%velheight
@@ -191,7 +207,7 @@ contains
       ! apply orientation of the flow link to the direction dependend parameters
       flowDir = direction*flowDir
       
-      call flgtar(genstr, L0, maxWidth, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf, cgd,   &
+      call flgtar(genstr, L0, maxWidth, bob0, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf, cgd,   &
                   cwf, cwd, mugf, lambda)
       !
       rhoast = rhoright/rholeft
@@ -205,23 +221,23 @@ contains
       au = genstr%au(:,L0) 
       if (gatefraction > gatefrac_eps) then
          ! calculate flow under gate
-         dg = genstr%gateLowerEdgeLevel - zs
+         dg = gle - zs
 
          u1L = ru(1) - fu(1)*dsL 
          qL = Au(1)*u1L
 
-         call flqhgs(fu(1), ru(1), u1L, dxL, dt, dadsL, kfuL, au(1), qL, flowDir, &
+         call flqhgs(fu(1), ru(1), u1L, dxL, dt, structwidth, kfuL, au(1), qL, flowDir, &
                      hu, hd, uu, zs, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
          
          !calculate flow over gate
          dg = huge(1d0)
-         zgate = genstr%gateLowerEdgeLevel+genstr%gatedoorheight
+         zgate = gle+genstr%gatedoorheight
          u1L = ru(2) - fu(2)*dsL 
          qL = Au(2)*u1L
 
-         call flqhgs(fu(2), ru(2), u1L, dxL, dt, dadsL, kfuL, au(2), qL, flowDir, &
+         call flqhgs(fu(2), ru(2), u1L, dxL, dt, structwidth, kfuL, au(2), qL, flowDir, &
                      hu, hd, uu, zgate, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(L0))
       endif
@@ -232,7 +248,7 @@ contains
          u1L = ru(3) - fu(3)*dsL 
          qL = Au(3)*u1L
          
-         call flqhgs(fu(3), ru(3), u1L, dxL, dt, dadsL, kfuL, au(3), qL, flowDir, &
+         call flqhgs(fu(3), ru(3), u1L, dxL, dt, structwidth, kfuL, au(3), qL, flowDir, &
                      hu, hd, uu, zs, (1d0-gatefraction)*wstr, (1d0-gatefraction)*w2, (1d0-gatefraction)*wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
@@ -252,7 +268,7 @@ contains
    end subroutine computeGeneralStructure
 
    !> Compute coefficients for structure equation                                   
-   subroutine flgtar(genstr, L0, maxWidth, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf,  &
+   subroutine flgtar(genstr, L0, maxWidth, bob0, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf,  &
                      cgd, cwf, cwd, mugf, lambda)
    !!--description-----------------------------------------------------------------
    ! NONE
@@ -260,6 +276,7 @@ contains
    ! NONE
    !!--declarations----------------------------------------------------------------
        use m_GlobalParameters
+       
        implicit none
       !
       ! Global variables
@@ -267,6 +284,7 @@ contains
       type(t_GeneralStructure), pointer, intent(in):: genstr    !< Derived type containing general structure information
       integer,          intent(in   )  :: L0                    !< Internal link number
       double precision, intent(in   )  :: maxWidth              !<  Maximal width of the structure. Normally the the width of the flowlink
+      double precision, intent(in)     :: bob0(2)               !< bed level of channel upstream and downstream of the structure.
       double precision, intent(  out)  :: cgd                   !< Contraction coefficient for drowned gate flow
       double precision, intent(  out)  :: cgf                   !< Contraction coefficient for gate flow
       double precision, intent(  out)  :: cwd                   !< Contraction coefficient for drowned weir flow.
@@ -300,11 +318,14 @@ contains
       wstr = min(maxWidth, genstr%widthcenteronlink(L0))
       
       if (genstr%numlinks == 1) then
-         w1   = min(maxWidth, genstr%wu1   )
-         wsdl = min(maxWidth, genstr%wu2 )
-         wstr = min(maxWidth, genstr%ws   )
-         wsdr = min(maxWidth, genstr%wd1)
-         w2   = min(maxWidth, genstr%wd2  )
+         ! ws_actual is determined in update_widths (including restrictions 0 < ws < maxwidth)
+         wstr =genstr%ws_actual
+
+         ! all other width parameters must always be <= maxWidth, but >= ws
+         w1   = max(min(maxWidth, genstr%wu1), genstr%ws_actual)
+         wsdl = max(min(maxWidth, genstr%wu2), genstr%ws_actual)
+         wsdr = max(min(maxWidth, genstr%wd1), genstr%ws_actual)
+         w2   = max(min(maxWidth, genstr%wd2), genstr%ws_actual)
       else  ! Structure crosses more than one link: nonsensible to use single width left/right etc. 
             ! same for all links. Use center linkwidth instead (i.e., typically wu(Lf))
          w1   = wstr
@@ -314,11 +335,21 @@ contains
          w2   = wstr
       endif
       
-      zs = genstr%zs
-      zb1 = genstr%zu1
-      zbsl = genstr%zu2
-      zbsr = genstr%zd1
-      zb2 = genstr%zd2
+      ! zs always above bed level up and downstream (bob(:))
+      zs   = max(bob0(1), bob0(2), genstr%zs)
+      if (zs > genstr%zs_actual) then
+         ! Note: the adaptation of the crest level at the different links depend on the BOB of this link
+         ! The highest value is taken as the actual crest level
+         genstr%zs_actual = zs
+      endif
+      
+      
+      ! other levels above bed level up and downstream (bob(:)) but below the zs
+      zb1  = min(max(bob0(1), genstr%zu1), zs)
+      zbsl = min(max(bob0(1), genstr%zu2), zs)
+      zbsr = min(max(bob0(2), genstr%zd1), zs)
+      zb2  = min(max(bob0(2), genstr%zd2), zs)
+      
       lambda = genstr%extraresistance
       !
       !     Determine cgf, cgd, cwf, cwd, mugf
@@ -358,7 +389,7 @@ contains
    end subroutine flgtar
 
    !> FLow QH relation for General Structure
-   subroutine flqhgs(fuL, ruL, u1L, dxL, dt, dadsm, kfuL, auL, qL, flowDir, &
+   subroutine flqhgs(fuL, ruL, u1L, dxL, dt, structwidth, kfuL, auL, qL, flowDir, &
                   hu, hd, uu, zs, wstr, w2, wsd, zb2, ds1, ds2,   &
                   dg, rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc,  &
                   jarea, ds, state)
@@ -376,7 +407,7 @@ contains
       double precision, intent(inout) :: qL        !< Discharge through structure
       double precision, intent(in)    :: dxL       !< Length of flow link
       double precision, intent(in)    :: dt        !< Time step 
-      double precision, intent(out)  :: dadsm      !< Flow width
+      double precision, intent(out)  :: structwidth      !< Flow width
       double precision, intent(in)   :: cgd        !< Contraction coefficient for drowned gate flow
       double precision, intent(in)   :: cgf        !< Contraction coefficient for gate flow
       double precision, intent(in)   :: cwd        !< Contraction coefficient for drowned weir flow.
@@ -552,7 +583,7 @@ contains
          call flgsarea(state, kfuL, auL, hu, velhght, zs, ds, dg, wstr)
       !
       else
-         call flgsfuru(fuL, ruL, u1L, auL, qL, dxL, dt, dadsm, kfuL, state, &
+         call flgsfuru(fuL, ruL, u1L, auL, qL, dxL, dt, structwidth, kfuL, state, &
                        flowDir, hu, hd, velhght, zs, ds, dg, dc, wstr,   &
                        cwfa, cwd, mugfa, cgfa, cgda, dx_struc, lambda, Cz)
       endif
@@ -858,7 +889,7 @@ contains
    !! The linearization coefficients FU and RU are
    !! calculated for the general structure.\n
    !! The stage of the flow was already determined.
-   subroutine flgsfuru(fuL, ruL, u1L, auL, qL, dxL, dt, dadsm, kfuL, state, &
+   subroutine flgsfuru(fuL, ruL, u1L, auL, qL, dxL, dt, structwidth, kfuL, state, &
                        flowDir, hu, hd, velhght, zs, ds, dg, dc, wstr,&
                        cwfa, cwd, mugfa, cgfa, cgda, dx_struc, lambda, Cz)
       use m_GlobalParameters
@@ -883,7 +914,7 @@ contains
       double precision, intent(inout):: u1L        !< Flow velocity at current time step
       double precision, intent(inout):: qL         !< Discharge through structure
       double precision, intent(inout):: auL        !< flow area 
-      double precision, intent(out)  :: dadsm      !< Flow width
+      double precision, intent(out)  :: structwidth      !< Flow width
       double precision, intent(in)   :: dxL        !< Length of flow link
       double precision, intent(in)   :: dt         !< Time step
       double precision, intent(in)   :: cgda       !< Contraction coefficient for drowned gate flow (adapted)
@@ -972,7 +1003,7 @@ contains
          rhsc = cu*(hd + velhght - (ds + zs))*flowDir
       endif
       
-      dadsm = wstr
+      structwidth = wstr
       !
       if (flowDir>0) then
           su = hu
@@ -984,6 +1015,7 @@ contains
       
       call furu_iter(fuL, ruL, su, sd, u1L, qL, auL, ustru, cu, rhsc, dxdt, dx_struc, hu, lambda, Cz)
 
+      qL = auL*u1L
       qL = auL*u1L
    end subroutine flgsfuru
 
@@ -1048,10 +1080,20 @@ contains
          return ! Only upon invalid input (see warnings in log about missing structure params)
       end if
 
+      do L0=1,numlinks
+         Lf = iabs(links(L0))
+         genstru%widthcenteronlink(L0) = wu(Lf)
+         totalWidth = totalWidth + wu(Lf)
+      end do
+
+      genstru%ws_actual = max(0d0, min(totalWidth, genstru%ws))
+      genstru%gateopeningwidth_actual = max(0d0, min(genstru%ws_actual, genstru%gateopeningwidth))
+
       genstru%numlinks= numlinks
       if (numlinks==1) then
-         genstru%widthcenteronlink(1) = genstru%ws
-         genstru%gateclosedfractiononlink(1) = 1d0 - genstru%gateopeningwidth/genstru%ws
+         genstru%widthcenteronlink(1) = genstru%ws_actual
+         ! gateclosedfraction will always be between 0 (= fully opened) and 1 (= fully closed)
+         genstru%gateclosedfractiononlink(1) = genstru%gateopeningwidth_actual/genstru%ws_actual
       else
          do L0=1,numlinks
             Lf = iabs(links(L0))
@@ -1062,16 +1104,19 @@ contains
          ! 2a: the desired crest width for this overall structure (hereafter, the open links for this genstru should add up to this width)
          !     Also: only for gates, the desired door opening width for this overall structure
          !           (should be smaller than crestwidth, and for this portion the open gate door is emulated by dummy very high lower edge level)
-         crestwidth = min(totalWidth, genstru%ws)
+         
+         crestwidth = genstru%ws_actual
+         closedWidth = max(0d0, totalWidth - crestwidth)/2d0 ! Intentionally symmetric: if crest/sill_width < totalwidth. Only gate door motion may have a direction, was already handled above.
+   
          if (genstru%openingDirection == GEN_FROMLEFT) then
-            closedGateWidthL = max(0d0, totalWidth - genstru%gateopeningwidth)
-            closedGateWidthR = 0d0
+            closedGateWidthL = closedWidth + max(0d0, crestwidth - genstru%gateopeningwidth)
+            closedGateWidthR = closedwidth
          else if (genstru%openingDirection == GEN_FROMRIGHT) then
-            closedGateWidthL = 0d0
-            closedGateWidthR = max(0d0, totalWidth - genstru%gateopeningwidth)
+            closedGateWidthL = closedWidth
+            closedGateWidthR = closedWidth + max(0d0, crestwidth - genstru%gateopeningwidth)
          else ! GEN_SYMMETRIC
-            closedGateWidthL = max(0d0, .5d0*(totalWidth - genstru%gateopeningwidth))
-            closedGateWidthR = max(0d0, .5d0*(totalWidth - genstru%gateopeningwidth))
+            closedGateWidthL = closedWidth + max(0d0, .5d0*(crestwidth - genstru%gateopeningwidth))
+            closedGateWidthR = closedWidth + max(0d0, .5d0*(crestwidth - genstru%gateopeningwidth))
          end if
 
          ! 2b: Determine the width that needs to be fully closed on 'left' side
@@ -1079,8 +1124,6 @@ contains
          ! NOTE: closed means: fully closed because sill_width (crest_width) is smaller that totalwidth.
          !       NOT because of gate door closing: that is handled by closedGateWidthL/R and may still
          !       have flow underneath doors if they are up high enough.
-         closedWidth = max(0d0, totalWidth - crestwidth)/2d0 ! Intentionally symmetric: if crest/sill_width < totalwidth. Only gate door motion may have a direction, was already handled above.
-   
          genstru%gateclosedfractiononlink = 0d0
    
          do L0=1,numlinks

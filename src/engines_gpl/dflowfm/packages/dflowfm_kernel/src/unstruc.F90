@@ -15448,7 +15448,7 @@ subroutine adjust_bobs_on_dambreak_breach(width, crl, startingLink, L1, L2, stru
 
    !input
    double precision, intent(in) :: width, crl
-   integer,          intent(in) :: startingLink, L1, L2
+   integer, intent(in)          :: startingLink, L1, L2
    character(len=*), intent(in) :: strucid
    !local variables
    integer                      :: k, Lf
@@ -18391,12 +18391,12 @@ subroutine unc_write_his(tim)            ! wrihis
          if (ngenstru > 0) then
             do i=1,ngenstru
                !igen = genstru2cgen(i)
-               ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i),  (/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_crestl, valgenstru(9,i),  (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_edgel , valgenstru(14,i), (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_openw , valgenstru(13,i), (/ i, it_his /)) ! changed
-               ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i), (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i),  (/ i, it_his /))
                if (network%sts%numGeneralStructures > 0) then
                   ierr = nf90_put_var(ihisfile, id_genstru_head,          valgenstru(5,i),  (/ i, it_his /))
                   ierr = nf90_put_var(ihisfile, id_genstru_au,            valgenstru(6,i),  (/ i, it_his /))
@@ -18435,19 +18435,19 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
          do i=1,network%sts%numOrifices
-            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),   (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_orifgen_crestl,        valorifgen(9,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_stat,     int(valorifgen(11,i)), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_stat,      int(valorifgen(11,i)), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i),  (/ i, it_his /))
          enddo
       end if
       
@@ -18516,10 +18516,10 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valweirgen(9,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(10,i),(/ i, it_his /))
             if (network%sts%numWeirs > 0) then ! write extra files for new weirs
-               ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i), (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i), (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i), (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i),  (/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_weir_stat, int(valweirgen(11,i)),(/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valweirgen(12,i),(/i, it_his /))
             end if       
@@ -23245,7 +23245,7 @@ end do
               zmx  = sini
            else
               if (jaorgFloorlevtoplaydef == 1) then
-              zmx  = Floorlevtoplay
+                 zmx  = Floorlevtoplay
               else
                  if (dztop == dmiss) then
                     zmx  = Floorlevtoplay
@@ -23253,7 +23253,7 @@ end do
                     zmx  = Floorlevtoplay + dztop
            endif
         endif
-           endif
+        endif
         endif
 
         if (dztopuniabovez == dmiss) then
@@ -34275,7 +34275,7 @@ end subroutine setbobs_fixedweirs
  double precision :: bui, cu, du, du0, gdxi, ds, riep, as, gdxids
  double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
  double precision :: qk0, qk1, dzb, hdzb, z00  !
- double precision :: as1, as2, qtotal, width, st2, cmustr, wetdown, dpt
+ double precision :: as1, as2, qtotal, width1, width, st2, cmustr, wetdown, dpt
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
  double precision :: hminlwi,fsqrtt
  double precision :: perimeter, conv, czdum
@@ -34491,44 +34491,45 @@ end subroutine setbobs_fixedweirs
                       call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L) 
                       call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
                           au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
-                case (ST_DAMBREAK)
-                   continue
-                case (ST_CULVERT)
-                   if (s1(k1) > s1(k2)) then
-                      mdown = k2
-                   else
-                      mdown = k1
-                   endif
-                   dpt = s1(mdown) - bl(mdown)
+                   case (ST_DAMBREAK)
+                      continue
+                   case (ST_CULVERT)
+                      if (s1(k1) > s1(k2)) then
+                         mdown = k2
+                      else
+                         mdown = k1
+                      endif
+                      dpt = s1(mdown) - bl(mdown)
 
-                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
+                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
 
-                   wetdown = max(wetdown, 0.0001d0)
-                   call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, .true.)
-                case (ST_UNI_WEIR)
-                   call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                       q1(L), q1(L), u1(L), u0(L), dx(L), dts)
-                case (ST_BRIDGE)
-                   dpt = max(epshu, s1(k1) - bob0(1,L))
-                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
-                   wu(L) = as1/dpt
-                   dpt = max(epshu, s1(k2) - bob0(2,L))
-                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
+                      wetdown = max(wetdown, 0.0001d0)
+                      call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
+                          q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, .true.)
+                   case (ST_UNI_WEIR)
+                      call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                          q1(L), q1(L), u1(L), u0(L), dx(L), dts)
+                   case (ST_BRIDGE)
+                      dpt = max(epshu, s1(k1) - bob0(1,L))
+                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
+                      wu(L) = as1/dpt
+                      dpt = max(epshu, s1(k2) - bob0(2,L))
+                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
                    ! WU(L) is the average width at the bridge (max of up/downstream side). 
-                   wu(L) = max(wu(L), as2/dpt)
-                   call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
-                            as1, as2, bob(:,L))
-                case default
-                   write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
-                   call err_flush()
-             end select
+                      wu(L) = max(wu(L), as2/dpt)
+                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
+                               as1, as2, bob(:,L))
+                   case default
+                      write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
+                      call err_flush()
+                end select
              
-             ! store computed fu, ru and au in structure object. In case this structure
-             ! is a part of a compound structure this data will be used in computeCompound
-             call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
-          endif
-       enddo
+                ! store computed fu, ru and au in structure object. In case this structure
+                ! is a part of a compound structure this data will be used in computeCompound
+                call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
+                call check_for_changes(LEVEL_WARN, pstru)
+             endif
+          enddo
        endif
 
     enddo
@@ -36755,24 +36756,24 @@ if (jahisbal > 0) then
          valdambreak(1:NUMVALS_DAMBREAK-1,n) = 0d0
          istru = dambreaks(n)
          if (network%sts%struct(istru)%dambreak%width > 0d0) then
-            do L = L1dambreaksg(n),L2dambreaksg(n)
+         do L = L1dambreaksg(n),L2dambreaksg(n)
                if (activeDambreakLinks(L) == 1) then
-                  Lf = kdambreak(3,L)
-                  La = abs( Lf )
-                  if( jampi > 0 ) then
-                     call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-                     if ( jaghost.eq.1 ) cycle
-                  endif
-                  dir = 1d0
-                  if( Ln(1,La) /= kdambreak(1,L) ) then
-                     dir = -1d0
-                  end if
+            Lf = kdambreak(3,L)
+            La = abs( Lf )
+            if( jampi > 0 ) then
+               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+               if ( jaghost.eq.1 ) cycle
+            endif
+            dir = 1d0
+            if( Ln(1,La) /= kdambreak(1,L) ) then
+               dir = -1d0
+            end if
                   valdambreak(1,n) = valdambreak(1,n) + wu(La)
                   valdambreak(2,n) = valdambreak(2,n) + q1(La)*dir
                   valdambreak(6,n) = valdambreak(6,n) + au(La) ! flow area
                   valdambreak(9,n) = valdambreak(9,n) + wu(La)  
                end if
-            enddo
+         enddo
             if (valdambreak(1,n) == 0d0) then
                La = abs(kdambreak(3,LStartBreach(n)))
                call fill_valdambreak_no_breach(La, n)
@@ -45138,7 +45139,7 @@ end subroutine makethindamadmin
       DATA AU( 2,1)/  1.00/,AU( 2,2)/134.00/,AU( 2,3)/ .8097E+02/, &
            AU( 2,4)/-.7955E+02/,AU( 2,5)/ .2958E+02/
       DATA AU( 3,1)/  2.00/,AU( 3,2)/165.00/,AU( 3,3)/ .1062E+02/, &
-           AU( 3,4)/ .9203E+01/,AU( 3,5)/-.4821E+01/
+            AU( 3,4)/ .9203E+01/,AU( 3,5)/-.4821E+01/
       DATA AU( 4,1)/  3.00/,AU( 4,2)/180.00/,AU( 4,3)/ .1456E+02/, &
            AU( 4,4)/-.5261E+01/,AU( 4,5)/ .1450E+01/
       DATA AU( 5,1)/  4.00/,AU( 5,2)/190.75/,AU( 5,3)/ .8390E+01/, &
