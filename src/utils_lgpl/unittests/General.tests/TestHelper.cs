@@ -29,15 +29,15 @@ namespace General.tests
 
         public static string TestFilesDirectoryPath()
         {
-            FileInfo fileInfo = new FileInfo(AppDomain.CurrentDomain.BaseDirectory);
-            string path = fileInfo.Directory.Parent.Parent.Parent.Parent.FullName + @"\test_data";
+            DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            string path = dirInfo.Parent.Parent.Parent.Parent.Parent.FullName + @"\test_data";
             return path;
         }
 
         public static string GetLibraryPath(string libName)
         {
-            FileInfo fileInfo = new FileInfo(AppDomain.CurrentDomain.BaseDirectory);
-            string path = fileInfo.Directory.Parent.Parent.Parent.Parent.Parent.Parent.FullName;
+            DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            string path = dirInfo.Parent.Parent.Parent.Parent.Parent.Parent.Parent.FullName;
             bool is64bit = Environment.Is64BitProcess;
             string prefix = @"\";
             // If 64-bit process, load 64-bit DLL otherwise load the 32 bit dll 
@@ -59,8 +59,9 @@ namespace General.tests
         //this function sets the path in case the dll depends on other dlls. It is costumized for io_netcdf (e.g. @"\ifort12")
         public static void SetSharedPath(string libName)
         {
-            FileInfo fileInfo = new FileInfo(AppDomain.CurrentDomain.BaseDirectory);
-            string path = fileInfo.Directory.Parent.Parent.Parent.Parent.Parent.Parent.Parent.FullName;
+            DirectoryInfo dirInfo = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            string path = dirInfo.Parent.Parent.Parent.Parent.Parent.Parent.Parent.Parent.FullName;
+
             bool is64bit = Environment.Is64BitProcess;
             // If 64-bit process, load 64-bit DLL otherwise load the 32 bit dll 
             if (is64bit)
