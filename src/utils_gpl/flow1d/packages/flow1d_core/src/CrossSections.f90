@@ -526,9 +526,9 @@ integer function AddTabCrossSectionDefinition(CSDefinitions , id, numLevels, lev
       CSDefinitions%CS(i)%totalWidth(j) = max(totalWidth(j), flowWidth(j))
    enddo
    if (closed) then
-      CSDefinitions%CS(i)%height(numLevels+1) = CSDefinitions%CS(i)%height(numLevels)+1d-7
-      CSDefinitions%CS(i)%flowWidth(numLevels+1)  = 0d0
-      CSDefinitions%CS(i)%totalWidth(numLevels+1) = 0d0
+      CSDefinitions%CS(i)%height(numLevels+1) = CSDefinitions%CS(i)%height(numLevels)+1d-5
+      CSDefinitions%CS(i)%flowWidth(numLevels+1) = 1d-5
+      CSDefinitions%CS(i)%totalWidth(numLevels+1) = 1d-5
    endif
    CSDefinitions%CS(i)%closed = closed
    
@@ -1904,8 +1904,8 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       do ilev = istart, levelsCount-1
          d1 = heights(ilev) - heights(1)
          d2 = heights(ilev + 1) - heights(1)
-         e1 = min(widths(ilev)-widthplains(isec), widthplains(isec+1)-widthplains(isec))
-         e2 = min(widths(ilev + 1)-widthplains(isec), widthplains(isec+1)-widthplains(isec))
+         e1 = min(max(sl, widths(ilev)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
+         e2 = min(max(sl, widths(ilev + 1)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
          if (dpt > d2) then
             af_sub(isec)    = af_sub(isec) + 0.5d0 * (d2 - d1) * (e1 + e2)
             perim_sub(isec) = perim_sub(isec) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
@@ -1933,7 +1933,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       dTop = heights(levelsCount) - heights(1)
       if (dpt > dTop) then
       
-         eTop = min(widths(levelsCount)-widthplains(isec), widthplains(isec+1)-widthplains(isec))
+         eTop = min(max(sl, widths(levelsCount)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
    
          af_sub(isec) = af_sub(isec) + (dpt - dTop) * eTop
          area_min = area_min + (dpt - dTop) * width_min
@@ -1969,15 +1969,9 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    
 
    select case (calculationOption)
-   case(CS_TYPE_NORMAL)
-      area = area  
-      width = width
    case(CS_TYPE_PLUS)
-      area  = area  + area_min  + dpt*sl
-      width = width + width_min + sl
-   case(CS_TYPE_PREISMAN)
-      area = area    + sl*dpt
-      width = width  + sl
+      area  = area  + area_min
+      width = width + width_min
    case(CS_TYPE_MIN)
       area  = area_min
       width = width_min
@@ -2346,7 +2340,7 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
       area = area    + sl*dpt
       width = width  + sl
    case(CS_TYPE_PLUS)
-      area      = area_plus  + dpt*sl
+      area      = area_plus + dpt*sl
       width     = width_plus + sl
    case(CS_TYPE_MIN)
       area      = area_plus - area
@@ -2430,7 +2424,7 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter, calculationOption)
       area = area    + sl*dpt
       width = width  + sl
    case(CS_TYPE_PLUS)
-      area      = area_plus  + dpt*sl
+      area      = area_plus + dpt*sl
       width     = width_plus + sl
    case(CS_TYPE_MIN)
       area      = area_plus - area
