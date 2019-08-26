@@ -34467,20 +34467,25 @@ end subroutine setbobs_fixedweirs
              k1 = ln(1,L)
              k2 = ln(2,L)
 
-            select case(network%sts%struct(istru)%type)
-                case (ST_WEIR)
-                   call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                                    q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
-                case (ST_ORIFICE)
-                   call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
-                    & u1(L), u0(L), dx(L), dts, state)
-                case (ST_GENERAL_ST)
-                   firstiter = .true.
-                   jarea = .false.
-                   as1 = wu(L)*(s1(k1)-bob0(1,L))
-                   as2 = wu(L)*(s1(k2)-bob0(2,L))
-                   call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L) 
-                   call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), fu(L), ru(L), &
+               select case(network%sts%struct(istru)%type)
+                   case (ST_WEIR)
+                      call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
+                   case (ST_ORIFICE)
+                      call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
+                       & u1(L), u0(L), dx(L), dts, state)
+                   case (ST_GENERAL_ST)
+                      firstiter = .true.
+                      jarea = .false.
+                      dpt = max(epshu, s1(k1) - bob0(1,L))
+                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
+                      dpt = max(epshu, s1(k2) - bob0(2,L))
+                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width1)
+                      width = max(width, width1)
+                      wu(L) = width
+   
+                      call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L) 
+                      call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
                           au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
                 case (ST_DAMBREAK)
                    continue
