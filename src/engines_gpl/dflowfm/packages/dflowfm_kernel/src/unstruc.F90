@@ -18391,12 +18391,12 @@ subroutine unc_write_his(tim)            ! wrihis
          if (ngenstru > 0) then
             do i=1,ngenstru
                !igen = genstru2cgen(i)
-               ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_dis   , valgenstru(2,i), (/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_genstru_crestl, valgenstru(9,i),  (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_edgel , valgenstru(14,i), (/ i, it_his /)) ! changed
                ierr = nf90_put_var(ihisfile, id_genstru_openw , valgenstru(13,i), (/ i, it_his /)) ! changed
-               ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_s1up  , valgenstru(3,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_genstru_s1dn  , valgenstru(4,i), (/ i, it_his /))
                if (network%sts%numGeneralStructures > 0) then
                   ierr = nf90_put_var(ihisfile, id_genstru_head,          valgenstru(5,i),  (/ i, it_his /))
                   ierr = nf90_put_var(ihisfile, id_genstru_au,            valgenstru(6,i),  (/ i, it_his /))
@@ -18435,19 +18435,19 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
          do i=1,network%sts%numOrifices
-            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),   (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_dis   ,        valorifgen(2,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1up  ,        valorifgen(3,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1dn  ,        valorifgen(4,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_head,          valorifgen(5,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_au,            valorifgen(6,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_vel,           valorifgen(7,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_s1crest,       valorifgen(8,i),  (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_orifgen_crestl,        valorifgen(9,i),   (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_stat,      int(valorifgen(11,i)), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_crestw,        valorifgen(10,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_stat,     int(valorifgen(11,i)), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_forcedif,      valorifgen(12,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_edgel ,        valorifgen(14,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_orifgen_openh,         valorifgen(15,i), (/ i, it_his /))
          enddo
       end if
       
@@ -18516,10 +18516,10 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_weirgen_crestl, valweirgen(9,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(10,i),(/ i, it_his /))
             if (network%sts%numWeirs > 0) then ! write extra files for new weirs
-               ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i),  (/ i, it_his /))
-               ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i),  (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_head  , valweirgen(5,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_au    , valweirgen(6,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_vel   , valweirgen(7,i), (/ i, it_his /))
+               ierr = nf90_put_var(ihisfile, id_weirgen_s1crest,valweirgen(8,i), (/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_weir_stat, int(valweirgen(11,i)),(/ i, it_his /))
                ierr = nf90_put_var(ihisfile, id_weirgen_forcedif,valweirgen(12,i),(/i, it_his /))
             end if       
@@ -20123,7 +20123,6 @@ end subroutine unc_write_shp
  end subroutine checkcellfile
 
  subroutine flow_geominit(iphase)                          ! initialise flow geometry
- use m_globalparameters
  use m_netw
  use m_flowgeom
  use m_GlobalParameters, only: INDTP_2D
@@ -20154,8 +20153,6 @@ end subroutine unc_write_shp
  use gridoperations
  use m_flow, only : numlimdt, numlimdt_baorg, a1ini
  use m_oned_functions
- use m_CrossSections
- use m_storage
  use unstruc_channel_flow, only : network
 
  implicit none
@@ -20191,13 +20188,10 @@ end subroutine unc_write_shp
  integer                 :: icn                      ! corner stuff
  integer                 :: kk1,kk2,kk3 , mout       ! banf stuff
  double precision        :: dlength, dlenmx
- double precision        :: area
  double precision        :: dxx, dyy, rrr, cs, sn, dis, c11, c22, c12, xn, yn, xt, yt, rl, sf, hdx, alfa, dxlim, dxlink
  double precision        :: atpf_org, circumormasscenter_org, phase, zkk
  double precision        :: xref, yref
  integer                 :: itatp_org, jaend ! , jarerun=0
- integer                 :: nstor, i
- type(t_storage), dimension(:), pointer :: stors
 
  double precision, allocatable :: banh(:) , rr(:)       ! temp
  integer         , allocatable :: nbanh(:,:) , nr(:)    ! temp
@@ -20884,11 +20878,7 @@ end subroutine unc_write_shp
        else if (kcu(L) == 3) then                         ! 1D2D internal link 3  flows over side of attached 1D channel
           call getdxofconnectedkcu1(L,wu(L))              !  dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4) )  ! set 2D link width
        else
-          if (network%loaded) then
-             ! Calculate maximal total area by using a water depth of 1000 m.
-             call GetCSParsTotal(network%adm%line2cross(LL), network%crs%cross, 1d3, area, wu(L), CS_TYPE_NORMAL)
-             wu(L) = max(wu(L), sl)
-          else if ( prof1D(1,LL) > 0) THEN
+          IF ( prof1D(1,LL) > 0) THEN
              wu(L) = prof1d(1,LL)                         ! todo, wu1DUNI from max width of profile interpolations
           ELSE
              KA    = -PROF1D(1,LL); KB = -PROF1D(2,LL); ALFA  = PROF1D(3,LL)
@@ -20905,16 +20895,6 @@ end subroutine unc_write_shp
     endif
  enddo
 
- nstor = network%stors%count
- if (nstor > 0) then
-    stors => network%stors%stor
-    do i = 1, nstor
-       k1 = stors(i)%gridPoint
-       ! Add storage area to BA by using a water depth of 1000 m 
-       ba(k1)   = ba(k1)   + getSurface(stors(i), bl(k1) + 1d3)
-    enddo
- endif
- 
  do L = lnxi+1,Lnx
     k1 = ln(1,L) ; k2 = ln(2,L)
     ba(k1) = ba(k2)                                        ! set bnd ba to that of inside point
@@ -23265,7 +23245,7 @@ end do
               zmx  = sini
            else
               if (jaorgFloorlevtoplaydef == 1) then
-                 zmx  = Floorlevtoplay
+              zmx  = Floorlevtoplay
               else
                  if (dztop == dmiss) then
                     zmx  = Floorlevtoplay
@@ -23273,7 +23253,7 @@ end do
                     zmx  = Floorlevtoplay + dztop
            endif
         endif
-        endif
+           endif
         endif
 
         if (dztopuniabovez == dmiss) then
@@ -34480,66 +34460,66 @@ end subroutine setbobs_fixedweirs
        if (pstru%type == ST_PUMP) then
           call computePump_all_links(pstru)
        else
-          do L0 = 1, pstru%numlinks
-             L = iabs(pstru%linknumbers(L0))
-             direction = sign(1, L)
-             if (hu(l) > 0) then
-                k1 = ln(1,L)
-                k2 = ln(2,L)
+       do L0 = 1, pstru%numlinks
+          L = iabs(pstru%linknumbers(L0))
+          direction = sign(1, L)
+          if (hu(l) > 0) then
+             k1 = ln(1,L)
+             k2 = ln(2,L)
 
-               select case(network%sts%struct(istru)%type)
-                   case (ST_WEIR)
-                      call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
-                   case (ST_ORIFICE)
-                      call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
-                       & u1(L), u0(L), dx(L), dts, state)
-                   case (ST_GENERAL_ST)
-                      firstiter = .true.
-                      jarea = .false.
+            select case(network%sts%struct(istru)%type)
+                case (ST_WEIR)
+                   call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                                    q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
+                case (ST_ORIFICE)
+                   call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
+                    & u1(L), u0(L), dx(L), dts, state)
+                case (ST_GENERAL_ST)
+                   firstiter = .true.
+                   jarea = .false.
                    as1 = wu(L)*(s1(k1)-bob0(1,L))
                    as2 = wu(L)*(s1(k2)-bob0(2,L))
                    call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L) 
                    call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), fu(L), ru(L), &
-                             au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
-                   case (ST_DAMBREAK)
-                      continue
-                   case (ST_CULVERT)
-                      if (s1(k1) > s1(k2)) then
-                         mdown = k2
-                      else
-                         mdown = k1
-                      endif
-                      dpt = s1(mdown) - bl(mdown)
+                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
+                case (ST_DAMBREAK)
+                   continue
+                case (ST_CULVERT)
+                   if (s1(k1) > s1(k2)) then
+                      mdown = k2
+                   else
+                      mdown = k1
+                   endif
+                   dpt = s1(mdown) - bl(mdown)
 
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
+                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
 
-                      wetdown = max(wetdown, 0.0001d0)
-                      call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                          q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, .true.)
-                   case (ST_UNI_WEIR)
-                      call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                          q1(L), q1(L), u1(L), u0(L), dx(L), dts)
-                   case (ST_BRIDGE)
-                      dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
-                      wu(L) = as1/dpt
-                      dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
+                   wetdown = max(wetdown, 0.0001d0)
+                   call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, .true.)
+                case (ST_UNI_WEIR)
+                   call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts)
+                case (ST_BRIDGE)
+                   dpt = max(epshu, s1(k1) - bob0(1,L))
+                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
+                   wu(L) = as1/dpt
+                   dpt = max(epshu, s1(k2) - bob0(2,L))
+                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
                    ! WU(L) is the average width at the bridge (max of up/downstream side). 
-                      wu(L) = max(wu(L), as2/dpt)
-                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
-                               as1, as2, bob(:,L))
-                   case default
-                      write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
-                      call err_flush()
-                end select
+                   wu(L) = max(wu(L), as2/dpt)
+                   call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
+                            as1, as2, bob(:,L))
+                case default
+                   write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
+                   call err_flush()
+             end select
              
-                ! store computed fu, ru and au in structure object. In case this structure
-                ! is a part of a compound structure this data will be used in computeCompound
-                call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
-             endif
-          enddo
+             ! store computed fu, ru and au in structure object. In case this structure
+             ! is a part of a compound structure this data will be used in computeCompound
+             call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
+          endif
+       enddo
        endif
 
     enddo
@@ -45149,7 +45129,7 @@ end subroutine makethindamadmin
       DATA AU( 2,1)/  1.00/,AU( 2,2)/134.00/,AU( 2,3)/ .8097E+02/, &
            AU( 2,4)/-.7955E+02/,AU( 2,5)/ .2958E+02/
       DATA AU( 3,1)/  2.00/,AU( 3,2)/165.00/,AU( 3,3)/ .1062E+02/, &
-            AU( 3,4)/ .9203E+01/,AU( 3,5)/-.4821E+01/
+           AU( 3,4)/ .9203E+01/,AU( 3,5)/-.4821E+01/
       DATA AU( 4,1)/  3.00/,AU( 4,2)/180.00/,AU( 4,3)/ .1456E+02/, &
            AU( 4,4)/-.5261E+01/,AU( 4,5)/ .1450E+01/
       DATA AU( 5,1)/  4.00/,AU( 5,2)/190.75/,AU( 5,3)/ .8390E+01/, &
