@@ -3197,9 +3197,14 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
    ierr = nf90_get_att(ncid, iv, 'mesh', str)
    if (ierr /= nf90_noerr) then
       ! No UGRID :mesh attribute, discard this var.
-      ug_messagestr = 'ug_inc_varid: candidate variable for name '''//trim(varname)//''' has no :mesh attribute.'
-      ierr = UG_INVALID_MESHNAME
-      goto 999
+      !ug_messagestr = 'ug_inc_varid: candidate variable for name '''//trim(varname)//''' has no :mesh attribute.'
+      !ierr = UG_INVALID_MESHNAME
+      !goto 999
+      !
+      ! NOTE: not all variables have a :mesh attribute anymore (e.g., <prefix>_node_id),
+      ! so don't fail on htis check here. Continue with given meshname.
+      !
+      str = meshname
    end if
       
    if (.not.strcmpi(str,meshname)) then
