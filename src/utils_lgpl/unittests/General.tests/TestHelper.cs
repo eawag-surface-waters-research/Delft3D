@@ -75,7 +75,7 @@ namespace General.tests
             var envpath = Environment.GetEnvironmentVariable("PATH");
             if (envpath != null && envpath.Contains(path)) return;
 
-            envpath = envpath + ";" + path;
+            envpath = path + ";" + envpath;
             Environment.SetEnvironmentVariable("PATH", envpath, EnvironmentVariableTarget.Process);
         }
     }
