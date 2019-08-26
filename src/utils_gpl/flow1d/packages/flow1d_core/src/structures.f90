@@ -1178,11 +1178,16 @@ end subroutine
             call SetMessage(level, msgbuf)
          endif
          if (comparereal(pstru%generalst%gateLowerEdgeLevel, pstru%generalst%gateLowerEdgeLevel_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The gate lower edge level for '//trim(pstru%id)//' is (locally) changed from ', pstru%generalst%gateLowerEdgeLevel, ' into ', pstru%generalst%gateLowerEdgeLevel_actual
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The gate lower edge level for '''//trim(pstru%id)//''' is (locally) changed from ', pstru%generalst%gateLowerEdgeLevel, ' into ', pstru%generalst%gateLowerEdgeLevel_actual
             call SetMessage(level, msgbuf)
          endif
          if (comparereal(pstru%generalst%gateopeningwidth, pstru%generalst%gateopeningwidth_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The gate opening width for '//trim(pstru%id)//' is changed from ', pstru%generalst%gateopeningwidth, ' into ', pstru%generalst%gateopeningwidth_actual
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The gate opening width for '//trim(pstru%id)//''' is changed from ', pstru%generalst%gateopeningwidth, ' into ', pstru%generalst%gateopeningwidth_actual
+            call SetMessage(level, msgbuf)
+         endif
+      case(ST_BRIDGE)
+         if (comparereal(pstru%bridge%bedLevel, pstru%bridge%bedLevel_actual) /= 0) then
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The bed level for '''//trim(pstru%id)//''' is changed from ', pstru%bridge%bedLevel, ' into ', pstru%bridge%bedLevel_actual
             call SetMessage(level, msgbuf)
          endif
       end select

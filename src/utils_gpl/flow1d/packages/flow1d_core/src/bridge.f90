@@ -40,6 +40,7 @@ module m_Bridge
 
    type, public :: t_bridge
       double precision              :: bedLevel
+      double precision              :: bedLevel_actual
       double precision              :: pillarwidth
       double precision              :: formfactor
       integer                       :: allowedflowdir  ! 0 all directions
@@ -126,6 +127,7 @@ contains
       fr           = 0.0d0
       bu           = 0.0d0
       du           = 0.0d0
+      bridge%bedLevel_actual = bridge%bedLevel
 
       ! Initialize with flow
       kfum = 1
@@ -195,7 +197,8 @@ contains
          
          gl_thickness = getGroundLayer(bridge%pcross)
       
-         crestLevel = bridge%bedlevel
+         crestLevel = max(bob(1), bob(2), bridge%bedlevel)
+         bridge%bedLevel_actual = crestLevel
 
          if ((smax - crestLevel - gl_thickness) < thresholdDry) then
             kfum = 0
