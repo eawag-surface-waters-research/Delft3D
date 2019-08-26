@@ -39,22 +39,22 @@ module m_Bridge
    public ComputeBridge
 
    type, public :: t_bridge
-      double precision              :: bedLevel
-      double precision              :: bedLevel_actual
-      double precision              :: pillarwidth
-      double precision              :: formfactor
-      integer                       :: allowedflowdir  ! 0 all directions
-                                                       ! 1 only positive flow
-                                                       ! 2 only negative flow
-                                                       ! 3 no flow allowed
-      logical                       :: useOwnCrossSection
-      type(t_crosssection), pointer :: pcross => null()              
-      integer                       :: crosssectionnr
-      integer                       :: bedFrictionType
-      double precision              :: bedFriction
-      double precision              :: length
-      double precision              :: inletlosscoeff
-      double precision              :: outletlosscoeff
+      double precision              :: bedLevel             !< bedlevel of the standard bridge
+      double precision              :: bedLevel_actual      !< used bedlevel of the bridge
+      double precision              :: pillarwidth          !< pillar width
+      double precision              :: formfactor          
+      integer                       :: allowedflowdir       !< 0 all directions
+                                                            !< 1 only positive flow
+                                                            !< 2 only negative flow
+                                                            !< 3 no flow allowed
+      logical                       :: useOwnCrossSection 
+      type(t_crosssection), pointer :: pcross => null()     
+      integer                       :: crosssectionnr     
+      integer                       :: bedFrictionType    
+      double precision              :: bedFriction        
+      double precision              :: length             
+      double precision              :: inletlosscoeff     
+      double precision              :: outletlosscoeff    
    end type
 
    private
