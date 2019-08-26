@@ -325,5 +325,7 @@
          write(lunhyd,'(a)') key(57)
       endif
 
+      call dlwqfile_close(hyd%file_hyd)
+
       return
       end subroutine write_hyd
