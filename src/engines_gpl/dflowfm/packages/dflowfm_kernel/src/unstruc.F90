@@ -2537,7 +2537,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
            blmx     = max(bl(k1), bl(k2))
            bob(1,L) = max(zcdamn,blmx)
            bob(2,L) = max(zcdamn,blmx)
-           iadv(L) = 0
+           iadv(L) = 22
            call switchiadvnearlink(L)
         enddo
         
