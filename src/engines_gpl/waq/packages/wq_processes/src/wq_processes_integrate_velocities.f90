@@ -71,37 +71,33 @@
       real     ( 4) vto         ! to volume
       real     ( 4) q           ! flow for this exchange
       real     ( 4) dq          ! total flux from and to
+      real     ( 4) dt          ! time step as real
 
       integer(4), save :: ithndl = 0
       if (timon) call timstrt( "wq_processes_integrate_velocities", ithndl )
 
-      !     loop accross the number of exchanges
+      dt = real(idt)
 
+      !     loop accross the number of exchanges
       do iq = 1 , noq
           ifrom = ipoint(1,iq)
           ito   = ipoint(2,iq)
           if ( ifrom .le. 0 .or. ito .le. 0 ) cycle
           a = area(iq)
-          if(ifrom.gt.0) then
-              vfrom = volume(ifrom)
-          endif
-          if(ito.gt.0) then
-              vto = volume(ito)
-          endif
+          vfrom = volume(ifrom)
+          vto = volume(ito)
+          if ( vfrom .le. 0.0 .or. vto .le. 0.0 ) cycle
           do isys = 1, nosys
               if ( ivpnt(isys) .gt. 0 ) then
                   q = velo  ( ivpnt(isys), iq ) * a
-                  if ( q .gt. 0.0 ) then
-                      dq = q*conc(isys,ifrom)
+                  if (q .eq. 0.0) cycle
+                  if (q .gt. 0.0 ) then
+                      dq = min(q*conc(isys,ifrom), conc(isys,ifrom)*vfrom/dt)
                   else
-                      dq = q*conc(isys,ito  )
+                      dq = max(q*conc(isys,ito), -conc(isys,ito)*vto/dt)
                   endif
-                  if(ifrom.gt.0.and.vfrom.gt.0.0) then
-                      deriv(ifrom,isys) = deriv(ifrom,isys) - dq/vfrom
-                  endif
-                  if(ito.gt.0.and.vto.gt.0.0) then
-                      deriv(ito,isys) = deriv(ito,isys) + dq/vto
-                  endif
+                  deriv(ifrom,isys) = deriv(ifrom,isys) - dq/vfrom
+                  deriv(ito,isys) = deriv(ito,isys) + dq/vto
               endif
           enddo
       enddo
