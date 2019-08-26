@@ -1437,15 +1437,15 @@ module m_readstructures
       generalst%mugf_pos = 1d0
       if (success) call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos)
 
+      ! all levels are set to -1d-10. In the time loop these parameters will be set to the bed level.
+      generalst%zu1                = -1d10
+      generalst%zu2                = -1d10
+      generalst%zd1                = -1d10
+      generalst%zd2                = -1d10
       generalst%wu1                = generalst%ws
-      generalst%zu1                = generalst%zs
       generalst%wu2                = generalst%ws
-      generalst%zu2                = generalst%zs
-      generalst%zs                 = generalst%zs
       generalst%wd1                = generalst%ws
-      generalst%zd1                = generalst%zs
       generalst%wd2                = generalst%ws
-      generalst%zd2                = generalst%zs
       generalst%gateLowerEdgeLevel = 1d10
       generalst%cgf_pos            = 1d0
       generalst%cgd_pos            = 1d0
@@ -1498,14 +1498,15 @@ module m_readstructures
       success = success .and. check_input_result(success1, st_id, 'gateLowerEdgeLevel')
 
       ! Set default/standard values for orifice
+      ! all levels are set to -1d-10. In the time loop these parameters will be set to the bed level.
+      generalst%zu1                = -1d10
+      generalst%zu2                = -1d10
+      generalst%zd1                = -1d10
+      generalst%zd2                = -1d10
       generalst%wu1                = generalst%ws
-      generalst%zu1                = generalst%zs
       generalst%wu2                = generalst%ws
-      generalst%zu2                = generalst%zs
       generalst%wd1                = generalst%ws
-      generalst%zd1                = generalst%zs
       generalst%wd2                = generalst%ws
-      generalst%zd2                = generalst%zs
       generalst%cgf_pos            = 1d0
       generalst%cgd_pos            = 1d0
       generalst%cwf_pos            = 1d0
