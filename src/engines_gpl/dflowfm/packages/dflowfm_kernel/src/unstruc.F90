@@ -34460,12 +34460,16 @@ end subroutine setbobs_fixedweirs
        if (pstru%type == ST_PUMP) then
           call computePump_all_links(pstru)
        else
-       do L0 = 1, pstru%numlinks
-          L = iabs(pstru%linknumbers(L0))
-          direction = sign(1, L)
-          if (hu(l) > 0) then
-             k1 = ln(1,L)
-             k2 = ln(2,L)
+          if (network%sts%struct(istru)%type == ST_GENERAL_ST )then
+             call update_widths(pstru%generalst, pstru%numlinks, pstru%linknumbers, wu)
+          endif
+          
+          do L0 = 1, pstru%numlinks
+             L = iabs(pstru%linknumbers(L0))
+             direction = sign(1, L)
+             if (hu(l) > 0) then
+                k1 = ln(1,L)
+                k2 = ln(2,L)
 
                select case(network%sts%struct(istru)%type)
                    case (ST_WEIR)
