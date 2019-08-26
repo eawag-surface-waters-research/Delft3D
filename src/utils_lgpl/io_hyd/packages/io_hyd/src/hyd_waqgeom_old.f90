@@ -858,7 +858,7 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
       end do
       deallocate( xcrd, ycrd )
       
-      call reallocP(edge_type, nr_edges)
+      call reallocP(edge_type, nr_edges, keepExisting=.false., fill=0)
       do i = 1, nr_edges
          edge_type(i) = 0 ! TODO
       end do
