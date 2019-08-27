@@ -708,7 +708,7 @@ subroutine get_dtmaxeps()
             dtmaxeps(L) = min(dtmaxeps(L), 2d0/(-diag + offdiag))
          else
 !           error
-            goto 1234
+!            goto 1234
          end if
       end do
    end if
@@ -915,28 +915,31 @@ subroutine get_filter_coeff()
                
                volu  = acL(LL)*vol1(k1) + (1d0-acL(LL))*vol1(k2)
             
-!              get 3D link number (sigma only)
-               L1 = Lb1+klay-1
-               
-!              get outward positive flux
-               Q = q1(L1)*dsign
-               
-!              outflowing only
-               if ( Q.le.0d0 ) then
-                  cycle
-               else
-                  continue
-               end if
-               
-!              compute weight of this link (L1) in advection of link L
-               w = (wcx*csu(LL)+wcy*snu(LL)) * alpha / volu
-               
-               w = w*Q
-               
-               if ( ALvec(i).ne.0d0 ) then
-                  eps1(klay) = max(eps1(klay), w/ALvec(i))
-               else
-                  continue
+               if ( volu.gt.0d0 ) then
+   
+!                 get 3D link number (sigma only)
+                  L1 = Lb1+klay-1
+                  
+!                 get outward positive flux
+                  Q = q1(L1)*dsign
+                  
+!                 outflowing only
+                  if ( Q.le.0d0 ) then
+                     cycle
+                  else
+                     continue
+                  end if
+                  
+!                 compute weight of this link (L1) in advection of link L
+                  w = (wcx*csu(LL)+wcy*snu(LL)) * alpha / volu
+                  
+                  w = w*Q
+                  
+                  if ( abs(ALvec(i)).gt.1d-10 ) then
+                     eps1(klay) = max(eps1(klay), w/ALvec(i))
+                  else
+                     continue
+                  end if
                end if
                
             end do
