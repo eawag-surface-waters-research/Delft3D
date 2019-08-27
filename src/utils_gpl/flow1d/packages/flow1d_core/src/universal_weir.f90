@@ -41,17 +41,18 @@ module m_Universal_Weir
    public ComputeUniversalWeir
 
    type, public :: t_uni_weir
-      integer                                      :: yzcount                 !< Number of yz combinations for this structure
-      double precision, allocatable, dimension(:)  :: y                       !< Y-coordinates of the profile
+      integer                                      :: yzcount                 !< Number of yz combinations for this structure.
+      double precision, allocatable, dimension(:)  :: y                       !< Y-coordinates of the profile.
       double precision, allocatable, dimension(:)  :: z                       !< Z-coordinates of the profile, with respect to the crestlevel. 
-                                                                              !< The lowest value of Z is equal to 0
-      double precision                             :: crestlevel              !< Crest level
-      double precision                             :: dischargecoeff          !< Discharge loss coefficient
-      integer                                      :: allowedflowdir          !< allowed flow direction
-                                                                              !< 0 all directions
-                                                                              !< 1 only positive flow
-                                                                              !< 2 only negative flow
-                                                                              !< 3 no flow allowed
+                                                                              !< The lowest value of Z is equal to 0.
+      double precision                             :: crestlevel              !< Crest level.
+      double precision                             :: crestlevel_actual       !< Actual crest level.
+      double precision                             :: dischargecoeff          !< Discharge loss coefficient.
+      integer                                      :: allowedflowdir          !< allowed flow direction.
+                                                                              !< 0 all directions.
+                                                                              !< 1 only positive flow.
+                                                                              !< 2 only negative flow.
+                                                                              !< 3 no flow allowed.
    end type
 
    interface dealloc
@@ -85,26 +86,27 @@ module m_Universal_Weir
    end subroutine deallocUniWeir
    
    !> Compute the coefficients FU, RU and AU for this universal weir.
-   subroutine ComputeUniversalWeir(uniweir, fum, rum, aum, dadsm, kfum, s1m1, s1m2, &
+   subroutine ComputeUniversalWeir(uniweir, fum, rum, aum, dadsm, bob0, kfum, s1m1, s1m2, &
                                    qm, q0m, u1m, u0m, dxm, dt)
       implicit none
       !
       ! Global variables
       !
-      type(t_uni_weir), pointer, intent(in)          :: uniweir  !< Universal weir object.
-      double precision, intent(out)                  :: fum      !< FU.
-      double precision, intent(out)                  :: rum      !< RU.
-      double precision, intent(out)                  :: aum      !< Computed flow area at structure.
-      double precision, intent(out)                  :: dadsm    !< Computed flow width at structure.
-      integer,          intent(out)                  :: kfum     !< Flag for drying and flooding.
-      double precision, intent(in)                   :: s1m2     !< Water level at left side of universal weir.
-      double precision, intent(in)                   :: s1m1     !< Water level at right side of universal weir.
-      double precision, intent(out)                  :: qm       !< Computed discharge at structure.
-      double precision, intent(inout)                :: q0m      !< Discharge at previous timestep.
-      double precision, intent(inout)                :: u1m      !< Computed flow velocity.
-      double precision, intent(in)                   :: u0m      !< Flow velocity at previous time step.
-      double precision, intent(in)                   :: dxm      !< Length of flow link.
-      double precision, intent(in)                   :: dt       !< Time step in seconds.
+      type(t_uni_weir), pointer, intent(in)       :: uniweir  !< Universal weir object.
+      double precision, intent(  out)             :: fum      !< FU.
+      double precision, intent(  out)             :: rum      !< RU.
+      double precision, intent(  out)             :: aum      !< Computed flow area at structure.
+      double precision, intent(  out)             :: dadsm    !< Computed flow width at structure.
+      double precision, intent(in   )             :: bob0(2)  !< BOB's of the channel
+      integer,          intent(  out)             :: kfum     !< Flag for drying and flooding.
+      double precision, intent(in   )             :: s1m2     !< Water level at left side of universal weir.
+      double precision, intent(in   )             :: s1m1     !< Water level at right side of universal weir.
+      double precision, intent(  out)             :: qm       !< Computed discharge at structure.
+      double precision, intent(inout)             :: q0m      !< Discharge at previous timestep.
+      double precision, intent(inout)             :: u1m      !< Computed flow velocity.
+      double precision, intent(in   )             :: u0m      !< Flow velocity at previous time step.
+      double precision, intent(in   )             :: dxm      !< Length of flow link.
+      double precision, intent(in   )             :: dt       !< Time step in seconds.
       !
       !
       ! Local variables
@@ -153,12 +155,12 @@ module m_Universal_Weir
          q0m  = 0.0d0
          return
       endif
-      
+      uniweir%crestlevel_actual = max(bob0(1), bob0(2), uniweir%crestlevel)
       !
       !     Check on flooding or drying with treshold
-      if ((smax - uniweir%crestlevel) < thresholdDry) then
+      if ((smax - uniweir%crestlevel_actual) < thresholdDry) then
          kfum = 0
-      elseif ((smax - uniweir%crestlevel) > thresholdFlood) then
+      elseif ((smax - uniweir%crestlevel_actual) > thresholdFlood) then
          kfum = 1
       else
       endif
@@ -252,7 +254,7 @@ module m_Universal_Weir
       dwddavg = 0.0
       qflow   = 0.0
 
-      lowestcrestlevel = uniweir%crestlevel
+      lowestcrestlevel = uniweir%crestlevel_actual
       cmuoriginal      = uniweir%dischargecoeff
 
       cmuoriginal=1d0 ! jira 19171

@@ -86,7 +86,7 @@ module m_1d_structures
    public GetPumpReductionFactor
    public initialize_structure_links
    public set_fu_ru
-   public check_for_changes
+   public check_for_changes_on_structures
 
    public printData
 
@@ -1161,7 +1161,7 @@ end subroutine
    end subroutine set_fu_ru
    
    !> check for differences between input parameters and actual parameters
-   subroutine check_for_changes(level, pstru)
+   subroutine check_for_changes_on_structures(level, pstru)
       use messagehandling
       use precision_basics
       type (t_structure), pointer, intent(in) :: pstru
@@ -1190,9 +1190,14 @@ end subroutine
             write(msgbuf,'(a,f8.2,a,f8.2)') 'The bed level for '''//trim(pstru%id)//''' is changed from ', pstru%bridge%bedLevel, ' into ', pstru%bridge%bedLevel_actual
             call SetMessage(level, msgbuf)
          endif
+      case(ST_UNI_WEIR)
+         if (comparereal(pstru%uniweir%crestlevel, pstru%uniweir%crestlevel_actual) /= 0) then
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The crest level for '''//trim(pstru%id)//''' is changed from ', pstru%uniweir%crestlevel, ' into ', pstru%uniweir%crestlevel_actual
+            call SetMessage(level, msgbuf)
+         endif
       end select
          
-   end subroutine check_for_changes
+   end subroutine check_for_changes_on_structures
    
    
 end module m_1d_structures

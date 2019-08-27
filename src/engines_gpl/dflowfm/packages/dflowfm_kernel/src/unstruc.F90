@@ -34508,7 +34508,7 @@ end subroutine setbobs_fixedweirs
                       call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
                           q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, .true.)
                    case (ST_UNI_WEIR)
-                      call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                      call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, bob0(:,L), kfu, s1(k1), s1(k2), &
                           q1(L), q1(L), u1(L), u0(L), dx(L), dts)
                    case (ST_BRIDGE)
                       dpt = max(epshu, s1(k1) - bob0(1,L))
@@ -34519,7 +34519,7 @@ end subroutine setbobs_fixedweirs
                    ! WU(L) is the average width at the bridge (max of up/downstream side). 
                       wu(L) = max(wu(L), as2/dpt)
                       call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
-                               as1, as2, bob(:,L))
+                               as1, as2, bob0(:,L))
                    case default
                       write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
                       call err_flush()
@@ -34528,7 +34528,7 @@ end subroutine setbobs_fixedweirs
                 ! store computed fu, ru and au in structure object. In case this structure
                 ! is a part of a compound structure this data will be used in computeCompound
                 call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
-                call check_for_changes(LEVEL_WARN, pstru)
+                call check_for_changes_on_structures(LEVEL_WARN, pstru)
              endif
           enddo
        endif
