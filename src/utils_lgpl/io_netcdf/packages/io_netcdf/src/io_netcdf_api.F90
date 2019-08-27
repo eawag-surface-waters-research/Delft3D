@@ -1105,14 +1105,14 @@ function ionc_get_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx,
   !The names of the variables are hard-coded
   varnameids        = 'node_id'
   ierr              = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
-  if (ierr /= UG_NOERR) then
+  if (ierr /= IONC_NOERR) then
      ! Backwards compatible read of Deltares-0.9 plural-names.
      varnameids     = 'node_ids'
      ierr           = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
   end if
   varnamelongnames  = 'node_long_name'
   ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
-  if (ierr /= UG_NOERR) then
+  if (ierr /= IONC_NOERR) then
      ! Backwards compatible read of Deltares-0.9 plural-names.
      varnamelongnames  = 'node_long_names'
      ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
@@ -1149,14 +1149,14 @@ function ionc_get_1d_mesh_discretisation_points_v1_dll(ioncid, meshid, c_branchi
   !The names of the variables are hard-coded
   varnameids        = 'node_id'
   ierr              = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
-  if (ierr /= UG_NOERR) then
+  if (ierr /= IONC_NOERR) then
      ! Backwards compatible read of Deltares-0.9 plural-names.
      varnameids     = 'node_ids'
      ierr           = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
   end if
   varnamelongnames  = 'node_long_name'
   ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
-  if (ierr /= UG_NOERR) then
+  if (ierr /= IONC_NOERR) then
      ! Backwards compatible read of Deltares-0.9 plural-names.
      varnamelongnames  = 'node_long_names'
      ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
