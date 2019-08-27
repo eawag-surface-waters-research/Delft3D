@@ -94,7 +94,7 @@ module m_readStorageNodes
       double precision                              :: streetStorageArea
       integer                                       :: numLevels
       character(len=IdLen)                          :: sInterpolate
-      integer                                       :: interpolate
+      integer                                       :: interpol
       
       logical                                       :: useStreetStorage
       double precision, allocatable, dimension(:)   :: storagelevels
@@ -209,7 +209,7 @@ module m_readStorageNodes
             ! read data
             if (.not. useTable1) then
                sInterpolate = 'block'
-               call interpolateStringToInteger(sInterpolate, interpolate)
+               call interpolateStringToInteger(sInterpolate, interpol)
                ! read bedLevel
                call prop_get_double(node_ptr, '', 'bedLevel', storageLevels(1), success1)
                success = success .and. check_input(success1, storgNodeId, 'bedLevel')
@@ -263,7 +263,7 @@ module m_readStorageNodes
                   call err_flush()
                end if
                success = success .and. success1
-               call interpolateStringToInteger(sInterpolate, interpolate)
+               call interpolateStringToInteger(sInterpolate, interpol)
             end if
             
             if (storageAreas(1) <= 0d0) then
@@ -300,11 +300,11 @@ module m_readStorageNodes
             
             
             ! setTable
-            call setTable(pSto%storageArea, interpolate, storageLevels, storageAreas, numLevels)
+            call setTable(pSto%storageArea, interpol, storageLevels, storageAreas, numLevels)
             if (.not. useTable1) then
                pSto%storageType = storageType
                if (useStreetStorage) then
-                  call setTable(pSto%streetArea, interpolate, storageLevels, storageAreas, numLevels)
+                  call setTable(pSto%streetArea, interpol, storageLevels, storageAreas, numLevels)
                end if
             end if               
          endif
