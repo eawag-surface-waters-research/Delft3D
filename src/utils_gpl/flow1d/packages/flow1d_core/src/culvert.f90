@@ -70,6 +70,7 @@ module m_Culvert
                                                                !< 4 = Drowned Gate Flow
                                                                !< 5 = Free Flow for Culvert and Siphons
                                                                !< 6 = Drowned Flow for Culvert and Siphons
+      double precision, dimension(2) :: bob_orig               !< original bob0 values before the actual bobs are lowered
    end type
 
 contains
@@ -97,7 +98,7 @@ contains
                               
    !> 
    subroutine ComputeCulvert(culvert, fum, rum, aum, dadsm, kfum, cmustr, s1m1, s1m2, qm,  &
-                             q0m, u1m, u0m, dxm, dt, bobgrm1, bobgrm2, wetdown, infuru)
+                             q0m, u1m, u0m, dxm, dt, bob0, wetdown, infuru)
       use m_Roughness
       
       implicit none
@@ -119,8 +120,7 @@ contains
       double precision, intent(in)                 :: s1m1         !< right waterlevel s(m+1)       sright
       double precision, intent(in)                 :: dxm
       double precision, intent(in)                 :: dt
-      double precision, intent(in)                 :: bobgrm1
-      double precision, intent(in)                 :: bobgrm2
+      double precision, intent(inout)              :: bob0(2)
       double precision, intent(in)                 :: wetdown
       logical, intent(in)                          :: infuru
          
@@ -137,7 +137,6 @@ contains
       double precision               :: smin             !< zeta_2 (downstream water level)
       logical                        :: firstafterdry
       logical                        :: isfreeflow
-      logical                        :: belowBottom
       double precision               :: bu
       double precision               :: cmus
       double precision               :: cu
@@ -175,6 +174,13 @@ contains
       IsCulvert        = .true.
       IsSiphon         = .false.
       IsInvertedSiphon = .false.
+      
+      ! Check bobs
+      culvert%bob_orig(1) = bob0(1)
+      culvert%bob_orig(2) = bob0(2)
+      
+      bob0(1) = min(bob0(1), Culvert%leftlevel)
+      bob0(2) = min(bob0(2), Culvert%rightlevel)
 
       ! Find the flow direction
       if (s1m1 > s1m2) then
@@ -229,30 +235,9 @@ contains
 
       if (IsCulvert) then
       
-         ! Check if structure is lower than bottom
-         belowBottom = .false.
-         if ((bobgrm1 > Culvert%leftlevel + gl_thickness) .or.      &
-             (bobgrm2 > Culvert%rightlevel + gl_thickness)) then
-            belowBottom = .true.
-         endif
-         
-         if (((smax - culvertCrest - gl_thickness) < thresholdDry) .or.               &
-             (belowBottom .and. (dir == 1) .and. ((s1m1 - bobgrm1) < thresholdDry))   &
-             .or.                                                                     &
-             (belowBottom .and. (dir == -1) .and. ((s1m2 - bobgrm2) < thresholdDry))) then
+         if ((smax - culvertCrest - gl_thickness) < thresholdDry) then
             kfum = 0
-         elseif (((smax - culvertCrest - gl_thickness) > thresholdFlood) .and.               &
-                 ((belowBottom .and. (dir == 1) .and. ((s1m1 - bobgrm1) > thresholdFlood))   &
-                 .or.                                                                        &
-                 (belowbottom .and. (dir == -1) .and. ((s1m2 - bobgrm2) > thresholdFlood)))) then
-            if (kfum == 0) then
-               firstafterdry = .true.
-            endif
-            kfum = 1
-         elseif (((smax - culvertCrest - gl_thickness) > thresholdFlood) .and. (.not. belowBottom)) then
-            if (kfum == 0) then
-               firstafterdry = .true.
-            endif
+         else
             kfum = 1
          endif
 
@@ -271,12 +256,12 @@ contains
       else
       
          if ( ((smax - culvertCrest - gl_thickness) < thresholdDry) .or.                             &
-              (IsInvertedSiphon .and. (dir == 1)  .and. ((s1m1 - bobgrm1) < thresholdDry)) .or.     &
-              (IsInvertedSiphon .and. (dir == -1) .and. ((s1m2 - bobgrm2) < thresholdDry))) then
+              (IsInvertedSiphon .and. (dir == 1)  .and. ((s1m1 - bob0(1)) < thresholdDry)) .or.     &
+              (IsInvertedSiphon .and. (dir == -1) .and. ((s1m2 - bob0(2)) < thresholdDry))) then
             kfum = 0
          elseif ( ((smax - culvertCrest - gl_thickness) > thresholdFlood) .and.                            &
-                  ((IsInvertedSiphon .and. (dir == 1)  .and. ((s1m1 - bobgrm1) > thresholdFlood)) .or.    &
-                   (IsInvertedSiphon .and. (dir == -1) .and. ((s1m2 - bobgrm2) > thresholdFlood)))) then
+                  ((IsInvertedSiphon .and. (dir == 1)  .and. ((s1m1 - bob0(1)) > thresholdFlood)) .or.    &
+                   (IsInvertedSiphon .and. (dir == -1) .and. ((s1m2 - bob0(2)) > thresholdFlood)))) then
             if (kfum == 0) then
                firstafterdry = .true.
             endif

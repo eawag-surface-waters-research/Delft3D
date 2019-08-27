@@ -34497,16 +34497,17 @@ end subroutine setbobs_fixedweirs
                    case (ST_CULVERT)
                       if (s1(k1) > s1(k2)) then
                          mdown = k2
+                         dpt = s1(k2) - bob0(2,L)
                       else
                          mdown = k1
+                         dpt = s1(k1) - bob0(1,L)
                       endif
-                      dpt = s1(mdown) - bl(mdown)
 
                       call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
 
                       wetdown = max(wetdown, 0.0001d0)
                       call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                          q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, .true.)
+                          q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob0(:,L), wetdown, .true.)
                    case (ST_UNI_WEIR)
                       call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, bob0(:,L), kfu, s1(k1), s1(k2), &
                           q1(L), q1(L), u1(L), u0(L), dx(L), dts)
@@ -34528,7 +34529,7 @@ end subroutine setbobs_fixedweirs
                 ! store computed fu, ru and au in structure object. In case this structure
                 ! is a part of a compound structure this data will be used in computeCompound
                 call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
-                call check_for_changes_on_structures(LEVEL_WARN, pstru)
+                call check_for_changes_on_structures(LEVEL_WARN, pstru, bob0(:,L))
              endif
           enddo
        endif

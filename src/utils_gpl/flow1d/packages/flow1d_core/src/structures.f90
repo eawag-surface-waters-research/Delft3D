@@ -1161,11 +1161,12 @@ end subroutine
    end subroutine set_fu_ru
    
    !> check for differences between input parameters and actual parameters
-   subroutine check_for_changes_on_structures(level, pstru)
+   subroutine check_for_changes_on_structures(level, pstru, bob0)
       use messagehandling
       use precision_basics
       type (t_structure), pointer, intent(in) :: pstru
       integer,                     intent(in) :: level
+      double precision,            intent(in) :: bob0(2)
       
       select case(pstru%type)
       case (ST_GENERAL_ST)
@@ -1193,6 +1194,15 @@ end subroutine
       case(ST_UNI_WEIR)
          if (comparereal(pstru%uniweir%crestlevel, pstru%uniweir%crestlevel_actual) /= 0) then
             write(msgbuf,'(a,f8.2,a,f8.2)') 'The crest level for '''//trim(pstru%id)//''' is changed from ', pstru%uniweir%crestlevel, ' into ', pstru%uniweir%crestlevel_actual
+            call SetMessage(level, msgbuf)
+         endif
+      case(ST_CULVERT)
+         if (comparereal(pstru%culvert%bob_orig(1), bob0(1)) /= 0) then
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The bed level of the channel at the left side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(1), ' into ', bob0(1)
+            call SetMessage(level, msgbuf)
+         endif
+         if (comparereal(pstru%culvert%bob_orig(2), bob0(2)) /= 0) then
+            write(msgbuf,'(a,f8.2,a,f8.2)') 'The bed level of the channel at the right side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(2), ' into ', bob0(2)
             call SetMessage(level, msgbuf)
          endif
       end select
