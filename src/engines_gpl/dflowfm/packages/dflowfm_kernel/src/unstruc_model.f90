@@ -748,7 +748,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
     call prop_get_string ( md_ptr, 'geometry', 'StorageNodeFile',  md_1dfiles%storage_nodes,             success)
     call prop_get_string ( md_ptr, 'geometry', 'frictFile',        md_1dfiles%roughness,                 success)
-    call prop_get_string ( md_ptr, 'geometry', 'StructureFile',    md_1dfiles%structures,                 success)       ! pending code merge, structure file either applies to v2.00 structure file, or the old one, so store in both
+    call prop_get_string ( md_ptr, 'geometry', 'StructureFile',    md_1dfiles%structures,                success)       ! pending code merge, structure file either applies to v2.00 structure file, or the old one, so store in both
     md_1dfiles%roughnessdir = ' ' 
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'GridEnclosureFile',md_encfile,      success)
