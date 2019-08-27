@@ -3785,7 +3785,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    type(t_CSType), pointer, dimension(:)         :: pCSs
    integer                                       :: jmax, ndx1d
    double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
-   
+
+   double precision :: sumwclx, sumwcly
+
    pCSs => network%CSDefinitions%CS
    ndx1d = ndxi - ndx2d
 
@@ -5553,13 +5555,27 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       windx = 0.0d0
       windy = 0.0d0
       do n = 1,ndxndxi
+         sumwclx = 0d0
+         sumwcly = 0d0
          do LL=1,nd(n)%lnx
             LLL = iabs(nd(n)%ln(LL))
             k1 = ln(1,LLL) ; k2 = ln(2,LLL)
             k3 = 1 ; if( nd(n)%ln(LL) > 0 ) k3 = 2
-            windx(n) = windx(n) + wdsu(LLL) * wcL(k3,LLL) * csu(LLL) * rhomean
-            windy(n) = windy(n) + wdsu(LLL) * wcL(k3,LLL) * snu(LLL) * rhomean
+            windx(n) = windx(n) + wdsu(LLL) * wcL(k3,LLL) * csu(LLL)
+            sumwclx  = sumwclx          + abs(wcL(k3,LLL) * csu(LLL))
+            windy(n) = windy(n) + wdsu(LLL) * wcL(k3,LLL) * snu(LLL)
+            sumwcly  = sumwcly          + abs(wcL(k3,LLL) * snu(LLL))
          end do
+         if (abs(sumwclx) > 1d-99) then
+            windx(n) = rhomean * windx(n) / sumwclx
+         else
+            windx(n) = rhomean * windx(n)
+         endif
+         if (abs(sumwcly) > 1d-99) then
+            windy(n) = rhomean * windy(n) / sumwcly
+         else
+            windy(n) = rhomean * windy(n)
+         endif
       end do
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressx, UNC_LOC_S, windx)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_windstressy, UNC_LOC_S, windy)
