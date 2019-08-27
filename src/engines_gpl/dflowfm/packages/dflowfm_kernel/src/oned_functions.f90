@@ -207,7 +207,7 @@ module m_oned_functions
          
          ! find flow nodes
          jakdtree = 1
-         call find_flownode(nxy, x_tmp(1:nxy), y_tmp(1:nxy), name_tmp(1:nxy), k_tmp(1:nxy), jakdtree, 0, INDTP_ALL)
+         call find_flownode(nxy, x_tmp(1:nxy), y_tmp(1:nxy), name_tmp(1:nxy), k_tmp(1:nxy), jakdtree, 0, INDTP_1D)
          do i = 1, nxy
             if (k_tmp(i) > 0) then
                pstor => network%storS%stor(ixy2stor(i))
