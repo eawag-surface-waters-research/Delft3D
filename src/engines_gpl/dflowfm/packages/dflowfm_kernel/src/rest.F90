@@ -528,6 +528,7 @@ end subroutine read_land_boundary_netcdf
       integer :: nkol
       integer :: nrow
       integer :: nmiss
+      integer :: ierr
       double precision :: xx, yy, zz, dz1, dz2
       double precision :: zcrest,sillup, silldown, crestl,taludl, taludr, veg
       character(len=1) :: weirtype
@@ -551,7 +552,8 @@ end subroutine read_land_boundary_netcdf
       READ(MPOL,'(A)',END=999,ERR=888) MATR
       IF (MATR(1:1) .EQ. '*' .or. len_trim(matr) == 0) GOTO 10
       READ(MPOL,'(A)',END = 999) REC
-      READ(REC,*,ERR=888) NROW, NKOL
+      READ(REC,*,iostat=ierr) NROW, NKOL
+      if (ierr /= 0) goto 888
       jaKol45 = 0 
       if (nkol < 2) then
         CALL QNERROR('File should contain at least 2 or 3 columns, but got:', ' ', ' ') ! nkol)
@@ -592,19 +594,25 @@ end subroutine read_land_boundary_netcdf
                 READ(MPOL,'(A)',END = 999) REC
                 ZZ = DMISS ; dz1 = dmiss; dz2 = dmiss
                 if (nkol == 10) then 
-                    READ(REC,*,ERR=777) XX,YY,zcrest, sillup, silldown, crestl, taludl, taludr, veg, weirtype  ! read weir data from Baseline format plus weirtype 
+                    READ(REC,*,iostat=ierr) XX,YY,zcrest, sillup, silldown, crestl, taludl, taludr, veg, weirtype  ! read weir data from Baseline format plus weirtype 
+                    if (ierr /= 0) goto 777
                     ZZ = zcrest ! dummy value for zz to guarantee that ZPL will be filled
                 else if (nkol == 9) then 
-                    READ(REC,*,ERR=777) XX,YY,zcrest, sillup, silldown, crestl, taludl, taludr, veg  ! read weir data from Baseline format 
+                    READ(REC,*,iostat=ierr) XX,YY,zcrest, sillup, silldown, crestl, taludl, taludr, veg  ! read weir data from Baseline format 
+                    if (ierr /= 0) goto 777
                     ZZ = zcrest ! dummy value for zz to guarantee that ZPL will be filled
                 else if (nkol == 5) then 
-                    READ(REC,*,ERR=777) XX,YY,ZZ,dz1,dz2
+                    READ(REC,*,iostat=ierr) XX,YY,ZZ,dz1,dz2
+                    if (ierr /= 0) goto 777
                 else if (nkol == 4) then 
-                    READ(REC,*,ERR=777) XX,YY,ZZ,dz1 
+                    READ(REC,*,iostat=ierr) XX,YY,ZZ,dz1 
+                    if (ierr /= 0) goto 777
                 else if (nkol == 3) then
-                    READ(REC,*,ERR=777) XX,YY,ZZ
+                    READ(REC,*,iostat=ierr) XX,YY,ZZ
+                    if (ierr /= 0) goto 777
                 else
-                    READ(REC,*,ERR=777) XX,YY
+                    READ(REC,*,iostat=ierr) XX,YY
+                    if (ierr /= 0) goto 777
                 end if
                 IF (XX .NE. dmiss .AND. XX .NE. 999.999d0) exit
                 nmiss = nmiss + 1
