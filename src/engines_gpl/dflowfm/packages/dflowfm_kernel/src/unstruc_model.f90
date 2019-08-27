@@ -1016,10 +1016,12 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'jasfer3D', jasfer3D); if ( jasfer3D.eq.1 ) jalimnor = 1
 
     call prop_get_integer(md_ptr, 'numerics', 'BarrierAdvection', jabarrieradvection);
-
+    
+    call prop_get_integer(md_ptr, 'numerics', 'HorizontalMomentumFilter', jafilter)
     call prop_get_integer(md_ptr, 'numerics', 'filter'          , jafilter)
     call prop_get_integer(md_ptr, 'numerics', 'filterorder'     , filterorder)
     call prop_get_integer(md_ptr, 'numerics', 'checkerboardmonitor', jacheckmonitor)
+    
 
     call prop_get_double (md_ptr, 'numerics', 'LocSaltLev'      , locsaltlev)
     call prop_get_double (md_ptr, 'numerics', 'LocSaltMin'      , locsaltmin)
@@ -2521,7 +2523,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     if (writeall .or. jafilter.ne.0 ) then
-       call prop_set(prop_ptr, 'numerics', 'filter',           jafilter,       'apply horizontal filter (1:explicit, 2,3:implicit) or not (0)')
+       call prop_set(prop_ptr, 'numerics', 'HorizontalMomentumFilter',           jafilter, 'apply horizontal filter (1:explicit, 2,3:implicit) or not (0)')
        call prop_set(prop_ptr, 'numerics', 'filterorder',      filterorder,    'order of filter (1, 2 or 3)')
     end if
     
