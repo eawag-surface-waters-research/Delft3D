@@ -51,7 +51,8 @@ module m_readStorageNodes
    
    ! History storage nodes file versions:
 
-   ! 2.00 (2019-08-08): ???? zhao
+   ! 2.00 (2019-08-27): renamed to storage nodes, added x/y as possible location, added storage table option.
+   ! 1.00 (2018-08-13): initial "urban" version of storage nodes ('retentions').
 
    contains
 
