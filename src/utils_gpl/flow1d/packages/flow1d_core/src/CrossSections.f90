@@ -3024,6 +3024,7 @@ double precision function GetCriticalDepth(q, cross)
    double precision               :: step
    double precision               :: wArea 
    logical                        :: first
+   double precision, parameter    :: eps = 0.0001d0
 
    !! executable statements -------------------------------------------------------
    !
@@ -3041,16 +3042,24 @@ double precision function GetCriticalDepth(q, cross)
    !------------------------------------------------------------------------------------------
    ! Iterations, finds dtpc 
    !------------------------------------------------------------------------------------------
+   groundLayer = getGroundLayer(cross)
+   if (abs(q) < eps) then 
+      depth = 0d0
+      GetCriticalDepth = depth - groundLayer
+      return
+   endif
+   
    depth  = cross%charHeight * 0.5d0
    step  = depth
    first = .true.
 
-   do while (first .or. step > 0.0001d0)
+   do while (first .or. step > eps)
    
       first = .false.
       
       call GetCSParsFlow(cross, depth, wArea, dummy, wWidth)        
-   
+      wwidth = warea/depth
+      
       step = 0.5d0 * step
       
       if ((q * q * wWidth) - (wArea * wArea * wArea * gravity) > 0.0d0) then 
@@ -3061,7 +3070,6 @@ double precision function GetCriticalDepth(q, cross)
    
    enddo
 
-   groundLayer = getGroundLayer(cross)
    GetCriticalDepth = depth - groundLayer
     
 end function GetCriticalDepth
