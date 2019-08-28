@@ -131,7 +131,8 @@ type dredtype
                                                                ! 3 = proportional to capacity
     integer                                 :: outletlink      ! link number of outlet (sediment removed from model)
     integer       , dimension(:)  , pointer :: inm             ! (npnt)   index 1 to npnt into nm array
-    integer       , dimension(:)  , pointer :: nm              ! (npnt)   nm points
+    integer       , dimension(:)  , pointer :: nm              ! (npnt)   local nm index
+    integer       , dimension(:)  , pointer :: nmglob          ! (npnt)   global nm index
     integer                                 :: npnt            ! number of points in dredging area
     !
     logical                                 :: active          ! T: dredge this time step
@@ -165,7 +166,8 @@ type dumptype
                                                                ! 3 = depth relative to maximum of reference plane and water level
                                                                ! 4 = depth relative to minimum of reference plane and water level
     integer       , dimension(:)  , pointer :: inm             ! (npnt)   index 1 to npnt into nm array
-    integer       , dimension(:)  , pointer :: nm              ! nm points
+    integer       , dimension(:)  , pointer :: nm              ! (npnt)   local nm index
+    integer       , dimension(:)  , pointer :: nmglob          ! (npnt)   global nm index
     integer                                 :: npnt            ! number of nm points
     integer                                 :: dumpdistr       ! 1 = dump sediment uniformly (default)
                                                                ! 2 = dump in lowest locations first

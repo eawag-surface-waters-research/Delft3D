@@ -123,11 +123,16 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     integer                         :: jnm
     integer                         :: lsed
     integer                         :: nm
+    integer                         :: nm_abs
     integer                         :: np
     integer                         :: in_ndomains
-    integer                         :: globalnpnt
+    integer                         :: npnt
+    integer                         :: npnt_global
+    integer                         :: npnt_halo
     integer                         :: localoffset
     integer ,dimension(4)           :: paract
+    integer, dimension(:), pointer  :: tmp_nmglob
+    integer, dimension(:), pointer  :: tmp_nm
     real(fp)                        :: areatim
     real(fp)                        :: availvolume ! volume available for dredging
     real(fp)                        :: avg_alphadune
@@ -164,6 +169,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     real(fp)                        :: zmin
     real(fp)                        :: zmax
     real(fp), dimension(:), pointer :: numpoints
+    real(fp), dimension(:), pointer :: nmglobf
     real(fp), dimension(:), pointer :: dz_dredge
     real(fp), dimension(:), pointer :: area
     real(fp), dimension(:), pointer :: hdune
@@ -246,7 +252,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           ! Due to the way dredgecommunicate is implemented we need to
           ! communicate via floating point array.
           !
-          allocate(numpoints(dredge_ndomains), stat = istat)
+          allocate(numpoints(dredge_ndomains*2), stat = istat)
           !
           ! For each dredge area count the global number of points
           !
@@ -254,55 +260,86 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              pdredge => dredge_prop(ia)
              !
              numpoints = 0.0_fp
-             numpoints(dredge_domainnr) = real(pdredge%npnt,fp)
+             numpoints(                dredge_domainnr) = real(pdredge%npnt,fp)
+             numpoints(dredge_ndomains+dredge_domainnr) = real(size(pdredge%nm,1),fp)
              !
              call dredgecommunicate(numpoints, dredge_ndomains, error, msgstr)
              if (error) goto 999
              !
              in_ndomains = 0
-             globalnpnt = 0
+             npnt_global = 0
              localoffset = 0
              do id = 1,  dredge_ndomains
                 np = nint(numpoints(id))
+                if (numpoints(dredge_ndomains+id)>0.0_fp) in_ndomains = in_ndomains + 1
                 if (np>0) then
-                   in_ndomains = in_ndomains + 1
-                   globalnpnt = globalnpnt + np
+                   npnt_global = npnt_global + np
                    if (id<dredge_domainnr) localoffset = localoffset + np
                 endif
              enddo
              if (in_ndomains <= 1) then
                 pdredge%in1domain = .true.
              else
-                pdredge%npnt = globalnpnt
+                npnt         = pdredge%npnt
+                pdredge%npnt = npnt_global
                 !
                 ! Reallocate and shift
                 !
                 istat = 0
-                call reallocP(pdredge%area         ,globalnpnt,fill=0.0_fp,shift=localoffset,stat=istat)
-                call dredgecommunicate(pdredge%area, pdredge%npnt, error, msgstr)
+                call reallocP(pdredge%area         ,npnt_global,fill=0.0_fp,shift=localoffset,stat=istat)
+                call dredgecommunicate(pdredge%area, npnt_global, error, msgstr)
                 if (error) goto 999
                 !
-                call reallocP(pdredge%hdune        ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%dz_dredge    ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%reflevel     ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%dunetoplevel ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%triggerlevel ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%bedlevel     ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%troughlevel  ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%sedimentdepth,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%sortvar      ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdredge%inm          ,globalnpnt       ,shift=localoffset,stat=istat)
+                npnt_halo = size(pdredge%nmglob,1) - npnt
+                allocate(tmp_nmglob(npnt+npnt_halo), tmp_nm(npnt+npnt_halo), stat=istat)
+                if (istat==0) then
+                   tmp_nmglob = pdredge%nmglob
+                   tmp_nm     = pdredge%nm
+                   call reallocP(pdredge%nmglob       ,npnt_global,fill=0,keepExisting=.false.,stat=istat)
+                   call reallocP(pdredge%nm           ,npnt_global,fill=0,keepExisting=.false.,stat=istat)
+                   allocate(nmglobf(npnt_global), stat=istat)
+                endif
+                if (istat/=0) then
+                    msgstr = 'Dredge: memory realloc error'
+                    goto 999
+                endif
+                nmglobf = 0.0_fp
+                do i = 1, npnt
+                    nmglobf(localoffset+i)    = real(tmp_nmglob(i),fp)
+                    pdredge%nm(localoffset+i) = tmp_nm(i)
+                enddo
+                call dredgecommunicate(nmglobf, npnt_global, error, msgstr)
+                if (error) goto 999
+                pdredge%nmglob = nint(nmglobf)
+                do i = npnt+1, npnt+npnt_halo
+                   do j = 1, npnt_global
+                       if (tmp_nmglob(i) == pdredge%nmglob(j)) then
+                           pdredge%nm(j) = tmp_nm(i)
+                       endif
+                   enddo
+                enddo
+                deallocate(nmglobf, tmp_nm, tmp_nmglob)
+                !
+                call reallocP(pdredge%hdune        ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%dz_dredge    ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%reflevel     ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%dunetoplevel ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%triggerlevel ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%bedlevel     ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%troughlevel  ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%sedimentdepth,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%sortvar      ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%inm          ,npnt_global      ,shift=localoffset,stat=istat)
                 ! nm(i)=0 for points outside this domain is used in this subroutine
-                call reallocP(pdredge%nm           ,globalnpnt,fill=0,shift=localoffset,stat=istat)
-                call reallocP(pdredge%triggered    ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%triggered    ,npnt_global      ,shift=localoffset,stat=istat)
                 !
                 if (istat/=0) then
-                   call prterr(lundia, 'U021', 'Dredge: memory realloc error')
-                   call d3stop(1, gdp)
+                   msgstr = 'Dredge: memory realloc error'
+                   goto 999
                 endif
                 !
                 globalareadred(ia) = 0.0_fp
-                do i = 1,globalnpnt
+                do i = 1,npnt_global
                    pdredge%inm(i) = i
                    globalareadred(ia) = globalareadred(ia) + pdredge%area(i)
                 enddo
@@ -315,49 +352,80 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              pdump => dump_prop(ib)
              !
              numpoints = 0.0_fp
-             numpoints(dredge_domainnr) = real(pdump%npnt,fp)
+             numpoints(                dredge_domainnr) = real(pdump%npnt,fp)
+             numpoints(dredge_ndomains+dredge_domainnr) = real(size(pdump%nm,1),fp)
              !
              call dredgecommunicate(numpoints, dredge_ndomains, error, msgstr)
              if (error) goto 999
              !
              in_ndomains = 0
-             globalnpnt = 0
+             npnt_global = 0
              localoffset = 0
              do id = 1,  dredge_ndomains
                 np = nint(numpoints(id))
+                if (numpoints(dredge_ndomains+id)>0.0_fp) in_ndomains = in_ndomains + 1
                 if (np>0) then
-                   in_ndomains = in_ndomains + 1
-                   globalnpnt = globalnpnt + np
+                   npnt_global = npnt_global + np
                    if (id<dredge_domainnr) localoffset = localoffset + np
                 endif
              enddo
              if (in_ndomains <= 1) then
                 pdump%in1domain = .true.
              else
-                pdump%npnt = globalnpnt
+                pdump%npnt = npnt_global
                 !
                 ! Reallocate and shift
                 !
                 istat = 0
-                call reallocP(pdump%area    ,globalnpnt,fill=0.0_fp,shift=localoffset,stat=istat)
-                call dredgecommunicate(pdump%area, pdump%npnt, error, msgstr)
+                call reallocP(pdump%area    ,npnt_global,fill=0.0_fp,shift=localoffset,stat=istat)
+                call dredgecommunicate(pdump%area, npnt_global, error, msgstr)
                 if (error) goto 999
                 !
-                call reallocP(pdump%hdune   ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdump%reflevel,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdump%bedlevel,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdump%dz_dump ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdump%sortvar ,globalnpnt       ,shift=localoffset,stat=istat)
-                call reallocP(pdump%inm     ,globalnpnt       ,shift=localoffset,stat=istat)
+                npnt_halo = size(pdump%nmglob,1) - npnt
+                allocate(tmp_nmglob(npnt+npnt_halo), tmp_nm(npnt+npnt_halo), stat=istat)
+                if (istat==0) then
+                   tmp_nmglob = pdump%nmglob
+                   tmp_nm     = pdump%nm
+                   call reallocP(pdump%nmglob       ,npnt_global,fill=0,keepExisting=.false.,stat=istat)
+                   call reallocP(pdump%nm           ,npnt_global,fill=0,keepExisting=.false.,stat=istat)
+                   allocate(nmglobf(npnt_global), stat=istat)
+                endif
+                if (istat/=0) then
+                    msgstr = 'Dredge: memory realloc error'
+                    goto 999
+                endif
+                nmglobf = 0.0_fp
+                do i = 1, npnt
+                    nmglobf(localoffset+i)  = real(tmp_nmglob(i),fp)
+                    pdump%nm(localoffset+i) = tmp_nm(i)
+                enddo
+                call dredgecommunicate(nmglobf, npnt_global, error, msgstr)
+                if (error) goto 999
+                pdump%nmglob = nint(nmglobf)
+                do i = npnt+1, npnt+npnt_halo
+                   do j = 1, npnt_global
+                       if (tmp_nmglob(i) == pdump%nmglob(j)) then
+                           pdump%nm(j) = tmp_nm(i)
+                       endif
+                   enddo
+                enddo
+                deallocate(nmglobf, tmp_nm, tmp_nmglob)
+                !
+                call reallocP(pdump%hdune   ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdump%reflevel,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdump%bedlevel,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdump%dz_dump ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdump%sortvar ,npnt_global      ,shift=localoffset,stat=istat)
+                call reallocP(pdump%inm     ,npnt_global      ,shift=localoffset,stat=istat)
                 ! nm(i)=0 for points outside this domain is used in this subroutine
-                call reallocP(pdump%nm      ,globalnpnt,fill=0,shift=localoffset,stat=istat)
+                call reallocP(pdump%nm      ,npnt_global      ,fill=0,shift=localoffset,stat=istat)
                 !
                 if (istat/=0) then
-                   call prterr(lundia, 'U021', 'Dredge: memory realloc error')
-                   call d3stop(1, gdp)
+                   msgstr = 'Dredge: memory realloc error'
+                   goto 999
                 endif
                 !
-                do i = 1,globalnpnt
+                do i = 1,npnt_global
                    pdump%inm(i) = i
                 enddo
              endif
@@ -546,7 +614,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        !
        do i = 1, pdredge%npnt
           nm = pdredge%nm(i)
-          if (nm==0) cycle
+          if (nm <= 0) cycle ! get data only for internal points
           !
           bedlevel(i) = -real(dps(nm),fp)
           !
@@ -1270,8 +1338,8 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        endif
        !
        do i = 1,pdredge%npnt
-          nm = pdredge%nm(i)
-          if (nm==0) cycle
+          nm = abs(pdredge%nm(i)) ! update both internal and halo points
+          if (nm == 0) cycle
           !
           dzdred(nm) = dz_dredge(i)
           if (pdredge%use_dunes) duneheight(nm) = hdune(i)
@@ -1292,22 +1360,24 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        ! Use dbodsd to calculate voldred, and update dps
        !
        do i = 1, pdredge%npnt
-          nm = pdredge%nm(i)
-          if (nm==0) cycle
+          nm     = pdredge%nm(i)
+          nm_abs = abs(nm)
+          if (nm == 0) cycle
           !
+          ! get sediment (voldred) only from internal points but update both internal and halo points
           dz = 0.0_fp
           do lsed = 1, lsedtot
-             dzl               = dbodsd(lsed, nm) / cdryb(lsed)
-             voldred(ia,lsed)  = voldred(ia,lsed) + dzl * area(i)
+             dzl               = dbodsd(lsed, nm_abs) / cdryb(lsed)
+             if (nm > 0) voldred(ia,lsed)  = voldred(ia,lsed) + dzl * area(i)
              dz                = dz + dzl
           enddo
           if (pdredge%obey_cmp) then
-             dps(nm)               = dps(nm) + dz
+             dps(nm_abs)       = dps(nm_abs) + dz
           else
-             dps(nm)               = dps(nm) + dz_dredge(i)
-             voldred(ia,lsedtot+1) = voldred(ia,lsedtot+1) + (dz_dredge(i)-dz) * area(i)
+             dps(nm_abs)       = dps(nm_abs) + dz_dredge(i)
+             if (nm > 0) voldred(ia,lsedtot+1) = voldred(ia,lsedtot+1) + (dz_dredge(i)-dz) * area(i)
           endif
-          dzdred(nm)        = 0.0_fp
+          dzdred(nm_abs)     = 0.0_fp
        enddo
     enddo
     !
@@ -1490,7 +1560,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        local_cap = .false.
        do i = 1, pdump%npnt
           nm = pdump%nm(i)
-          if (nm==0) cycle
+          if (nm <= 0) cycle ! get data only for internal points
           !
           bedlevel(i) = -real(dps(nm),fp)
           if (pdump%use_dunes) hdune(i) = duneheight(nm)
@@ -1688,8 +1758,8 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        ! Now dump the sediments locally
        !
        do i = 1, pdump%npnt
-          nm = pdump%nm(i)
-          if (nm==0) cycle
+          nm = abs(pdump%nm(i)) ! update both internal and halo points
+          if (nm == 0) cycle
           !
           dz = dz_dump(i)
           do lsed = 1, lsedtot

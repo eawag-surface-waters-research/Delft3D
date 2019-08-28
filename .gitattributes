@@ -1537,6 +1537,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/general/n_and_m_to_nm.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/newlun.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/nm_to_diag.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/nm_to_n_and_m.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/general/nm_to_nmglob.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/nuliar.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/open_datdef.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/pldep.F90 -text

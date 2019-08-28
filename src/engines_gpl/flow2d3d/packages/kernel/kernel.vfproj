@@ -262,6 +262,7 @@
 		<File RelativePath="src\general\newlun.f90"/>
 		<File RelativePath="src\general\nm_to_diag.f90"/>
 		<File RelativePath="src\general\nm_to_n_and_m.f90"/>
+		<File RelativePath=".\src\general\nm_to_nmglob.f90"/>
 		<File RelativePath="src\general\nuliar.f90"/>
 		<File RelativePath="src\general\open_datdef.f90"/>
 		<File RelativePath="src\general\pldep.F90">
