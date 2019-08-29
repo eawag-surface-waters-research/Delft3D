@@ -427,13 +427,13 @@ end subroutine add_rowelem
 !>  (I-Delta t F) u^* = u^n
 subroutine comp_filter_predictor()
    use m_filter
-   use m_flowgeom, only: Lnx, Dx
+   use m_flowgeom, only: Lnx, Dx, Ln
    use m_flow, only: layertype, kmx, fu, ru, u0, hu, plotlin, adve
    use m_flowtimes, only: Dts
    use m_physcoef, only: ag
    use unstruc_messages
    use m_saad, only: jasafe   ! for amux
-   use m_partitioninfo, only: jampi, update_ghosts, ITYPE_U, reduce_int1_max
+   use m_partitioninfo, only: jampi, update_ghosts, ITYPE_U, reduce_int1_max, my_rank
    use m_timer
    implicit none
    
@@ -508,7 +508,7 @@ subroutine comp_filter_predictor()
          if ( dt.lt.dts ) then
 !           get number of sub time steps
             Nt = 1 + floor(dts/dt)
-!            write(6,"(I4, ':', I4)") klay, Nt
+!            write(6,"('(', I4, ') ', I4, ':', I4)") my_rank, klay, Nt
             dt = dts/Nt
          else
             dt = dts
@@ -822,7 +822,7 @@ end subroutine comp_checkmonitor
 !> get filter coefficient (sigma only)
 subroutine get_filter_coeff()
    use m_flowgeom, only: Lnx, ln, nd, acL, wcx1, wcx2, wcy1, wcy2, csu, snu, Dx, ba
-   use m_flow, only: q1, vol1, kmx, vicLu
+   use m_flow, only: qa, vol1, kmx, vicLu, hu
    use m_filter, only: iLvec, jLvec, ALvec, jadebug, eps, order, Deltax
    
    double precision, dimension(kmx) :: eps1   ! first-order filter coefficient
@@ -876,6 +876,11 @@ subroutine get_filter_coeff()
             if ( LL1.eq.LL ) then
                cycle
             end if
+            
+!           check if link is dry
+            if ( hu(LL1).eq.0 ) then
+               cycle
+            end if
 !            
 !           safety            
             if ( abs(csu(LL)*csu(LL1)+snu(LL)*snu(LL1)) .lt. dtol ) then
@@ -920,8 +925,13 @@ subroutine get_filter_coeff()
 !                 get 3D link number (sigma only)
                   L1 = Lb1+klay-1
                   
+!                 check if link is active                  
+                  if ( L1.gt.Lt1 ) then
+                     exit
+                  end if
+                  
 !                 get outward positive flux
-                  Q = q1(L1)*dsign
+                  Q = qa(L1)*dsign
                   
 !                 outflowing only
                   if ( Q.le.0d0 ) then
