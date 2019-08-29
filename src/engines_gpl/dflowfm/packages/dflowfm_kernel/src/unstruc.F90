@@ -204,7 +204,9 @@ end subroutine flow_usertimestep
 subroutine flow_init_usertimestep(iresult)
    use m_flowtimes
    use dfm_error
+   use MessageHandling
    use m_flowparameters, only: janudge
+   use m_partitioninfo, only: jampi, abort_all
 
    implicit none
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
@@ -225,6 +227,18 @@ subroutine flow_init_usertimestep(iresult)
    return ! Return with success.
 
 888 continue
+
+ if (iresult /= DFM_NOERR) then
+    write (msgbuf,*) ' Error found in EC-module ' ; call err_flush()
+    if (jampi == 1) then
+       write(msgbuf,*) 'Error occurs on one or more processes when setting external forcings on boundaries at time=', tim1bnd;
+       call err_flush()
+       ! Terminate all MPI processes
+       call abort_all()
+    endif
+    goto 888
+ end if
+
 end subroutine flow_init_usertimestep
 
 
