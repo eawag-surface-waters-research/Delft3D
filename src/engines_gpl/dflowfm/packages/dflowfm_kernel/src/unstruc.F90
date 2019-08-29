@@ -37895,6 +37895,8 @@ end function is_1d_boundary_candidate
  use dfm_error
  use m_sobekdfm
  use m_partitioninfo
+ use m_storage
+ use m_crosssections
  use m_ec_spatial_extrapolation, only : init_spatial_extrapolation
  use m_sferic, only: jsferic
  use m_trachy, only: trachy_resistance
@@ -37945,7 +37947,11 @@ end function is_1d_boundary_candidate
  integer                       :: ifun
  character(len=20)             :: wqinput
  character(len=20)             :: wqbotunit
-
+ logical                       :: hyst_dummy(2)
+ double precision              :: area, width, hdx
+ type(t_storage), pointer      :: stors(:)
+ integer                       :: i, nstor
+ 
  iresult = DFM_NOERR
 
  success = .true.    ! default if no valid providers are present in *.ext file (m_flowexternalforcings::success)
@@ -40140,7 +40146,40 @@ end if
  else
     if (allocated (bare) ) deallocate(bare)
     allocate ( bare(ndxi)  , stat=ierr ) ! base area for rainfall / evaporation
-    call aerr('bare(ndxi)' , ierr, ndx ) ; bare(1:ndxi) = ba(1:ndxi)
+    call aerr('bare(ndxi)' , ierr, ndx ) ; 
+    bare(1:ndxi) = ba(1:ndxi)
+
+    if (network%loaded) then
+       bare(ndx2D+1:ndxi) = 0d0
+       do L = 1,lnx1D                                             ! for all links, set link width
+          k1    = ln(1,L)
+          k2    = ln(2,L)
+          if (kcu(L) == 1) then
+                ! Calculate maximal total area by using a water depth of 1000 m.
+                hyst_dummy = .false.
+                call GetCSParsTotal(network%adm%line2cross(L), network%crs%cross, 1d3, area, width, CS_TYPE_NORMAL,hyst_dummy)
+               
+                hdx = 0.5d0*dx(L)
+                if (k1 > ndx2d) bare(k1) = bare(k1) + hdx*width
+                if (k2 > ndx2d) bare(k2) = bare(k2) + hdx*width
+             else
+                bare(k1) = ba(k1)
+                bare(k2) = ba(k2)
+             endif
+       enddo
+    endif
+
+    nstor = network%stors%count
+    if (nstor > 0) then
+       stors => network%stors%stor
+       do i = 1, nstor
+          k1 = stors(i)%gridPoint
+          ! Add storage area to BA by using a water depth of 1000 m 
+          bare(k1)   = bare(k1)   + getSurface(stors(i), bl(k1) + 1d3)
+       enddo
+    endif
+ 
+    
     do n = ndx2D+1, ndxi
        if (kcs(n) == 1) then
           call IN2Dflowcell(Xz(n),Yz(n),ja)
