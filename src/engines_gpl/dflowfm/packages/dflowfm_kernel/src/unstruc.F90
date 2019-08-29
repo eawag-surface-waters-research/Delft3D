@@ -10319,6 +10319,7 @@ end subroutine cosphiunetcheck
  integer           :: k, mout, i
  double precision  :: frac, tot, dtav
  double precision  :: dum, f
+ double precision  :: tstop
 
  if (ndx == 0) then
     write(msgbuf,'(a)')    'Empty model, no flow cells found. No statistics to report.'; call msg_flush()
@@ -10329,10 +10330,16 @@ end subroutine cosphiunetcheck
  call klok(cpuall(3))
  tot  = ( cpuall(3) - cpuall(2) )/ max(1d0, ndx*(dnt-1) )
  dtav = (tstop_user - tstart_user)/max(1d0, dnt-1)
-
+ 
  do k = 1,3
     msgbuf = ' ' ; call msg_flush()
  enddo
+
+! use current time instead of tstop_user in statistics
+ tstop = time1
+ if ( tstop.ne.tstop_user ) then
+   write(msgbuf,'(a,I25)')    'Simulation did not reach stop time'                       ; call msg_flush()
+ end if
 
  write(msgbuf,'(a,I25)')    'nr of netnodes         ( )  :' , numk                       ; call msg_flush()
  write(msgbuf,'(a,I25)')    'nr of netlinks         ( )  :' , numl                       ; call msg_flush()
@@ -10353,7 +10360,7 @@ end subroutine cosphiunetcheck
  msgbuf = ' ' ; call msg_flush()
 
  f = 24d0*3600d0
- write(msgbuf,'(a,F25.10)') 'simulation period      (d)  :' , (tstop_user - tstart_user)/f  ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'simulation period      (d)  :' , (tstop - tstart_user)/f  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'total computation time (d)  :' , (cpuall(3) - cpuall(1))/f  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time modelinit         (d)  :' , (cpuall(2) - cpuall(1))/f  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (d)  :' , (cpuall(3) - cpuall(2))/f  ; call msg_flush()
@@ -10361,14 +10368,14 @@ end subroutine cosphiunetcheck
  msgbuf = ' ' ; call msg_flush()
 
  f = 3600d0
- write(msgbuf,'(a,F25.10)') 'simulation period      (h)  :' , (tstop_user - tstart_user)/f  ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'simulation period      (h)  :' , (tstop - tstart_user)/f  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'total computation time (h)  :' , (cpuall(3) - cpuall(1))/f  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time modelinit         (h)  :' , (cpuall(2) - cpuall(1))/f  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (h)  :' , (cpuall(3) - cpuall(2))/f  ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
 
- write(msgbuf,'(a,F25.10)') 'simulation period      (s)  :' , tstop_user - tstart_user   ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'simulation period      (s)  :' , tstop - tstart_user   ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'total computation time (s)  :' , cpuall(3) - cpuall(1)      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , cpuall(2) - cpuall(1)      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , cpuall(3) - cpuall(2)      ; call msg_flush()
@@ -10426,7 +10433,7 @@ end subroutine cosphiunetcheck
  write(msgbuf,'(a,a)') 'Computation finished at: '         , rundat0                  ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
 
- write(msgbuf,'(a,F25.10)') 'simulation period      (h)  :' , (tstop_user - tstart_user)/3600d0 ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'simulation period      (h)  :' , (tstop - tstart_user)/3600d0 ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'total time in timeloop (h)  :' , (cpuall(3) - cpuall(2)   )/3600d0 ; call msg_flush()
 
 
