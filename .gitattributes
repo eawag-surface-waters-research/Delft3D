@@ -3015,6 +3015,7 @@ src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_iniField_1dField.f
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_observ_Cross_Sections.f90 -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_observations.f90 -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_roughness.f90 -text
+src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_storage_nodes.f90 -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/IniField1dField/Flow1D.mdu -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/IniField1dField/Flow1D_net.nc -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/IniField1dField/IniCondition.ini -text
@@ -3070,6 +3071,9 @@ src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/observations_snappe
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/observations_snapped/ObservationPoints.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/roughness/roughness-globals.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/roughness/roughness_main.ini -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/storageNodes_nodeId_useTable/Flow1D_net.nc -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/storageNodes_nodeId_useTable/Flow1D_table.mdu -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/storageNodes_nodeId_useTable/storageNodes_table.ini -text
 src/test/engines_gpl/waq/Makefile.am -text
 src/test/engines_gpl/waq/packages/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/Makefile.am -text

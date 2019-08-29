@@ -29,6 +29,7 @@ program test_dflowfm_kernel
     use test_obserCrossSections
     use test_ini_Field_1dField
     use test_MDU_File_Version
+    use test_storage_nodes
     
     implicit none
     
@@ -44,6 +45,7 @@ program test_dflowfm_kernel
     call tests_observCrossSections
     call tests_iniField_1dField
     call tests_MDU_fileversion
+    call tests_storageNodes
     !
     ! Done - properly finalize
     !
