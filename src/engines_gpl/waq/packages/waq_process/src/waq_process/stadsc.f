@@ -176,6 +176,7 @@
 !        Always do the final processing whether the segment is active at this moment or not
 !
          IF ( IACTION .EQ. 3 ) THEN
+            TCOUNT    = PMSA(IP6)
             IF ( TCOUNT .GT. 0.0 ) THEN
                 PMSA(IP9)  = PMSA(IP9) / TCOUNT
             ELSE
