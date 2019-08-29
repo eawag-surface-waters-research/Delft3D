@@ -178,7 +178,7 @@ end subroutine
                cycle
             endif
             do L0 = 1, numlinks
-               if (cmps%compound(i)%linknumbers(L0) /= sts%struct(j)%linknumbers(L0)) then
+               if (cmps%compound(i)%linknumbers(L0) /= sts%struct(istru)%linknumbers(L0)) then
                   msgbuf = 'Error in compound ''' // trim(cmps%compound(i)%id) //''' the link numbers in structure element ''' // &
                      trim(sts%struct(istru)%id) //''' is inconsistent with the first structure element.'
                   call err_flush()
