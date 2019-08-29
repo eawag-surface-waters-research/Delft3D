@@ -968,6 +968,10 @@ logical function initboundaryblocksforcings(filename)
     node_ptr => bnd_ptr%child_nodes(i)%node_ptr
     groupname = tree_get_name(node_ptr)
     select case (str_tolower(trim(groupname)))
+    case ('general')
+       ! General block, was already read.
+       cycle
+
     case ('boundary')
 
        ! First check for required input:
@@ -1177,15 +1181,18 @@ logical function initboundaryblocksforcings(filename)
        ! Flow = 1.23 | test.tim | REALTIME
        kx = 1
        rec = ' '
-       call prop_get(node_ptr, '', 'Flow', rec, success)
+       call prop_get(node_ptr, '', 'discharge', rec, success)
+       if (.not. success .and. major <= 1) then ! Old pre-2.00 keyword 'flow'
+          call prop_get(node_ptr, '', 'flow', rec, success)
+       end if
        if (.not. success .or. len_trim(rec) == 0) then
-          write(msgbuf, '(a,a,a)') 'Required field ''Flow'' missing in lateral ''', trim(locid), '''.'
+          write(msgbuf, '(a,a,a)') 'Required field ''discharge'' missing in lateral ''', trim(locid), '''.'
           call warn_flush()
           cycle
        end if
 
-       qid = 'lateraldischarge'
-       success = adduniformtimerelation_objects(qid, '', 'lateral', locid, 'flow', trim(rec), numlatsg, kx, qplat)
+       qid = 'lateral_discharge' ! New quantity name in .bc files
+       success = adduniformtimerelation_objects(qid, '', 'lateral', locid, 'discharge', trim(rec), numlatsg, kx, qplat)
 
        if (success) then
           jaqin = 1
@@ -1354,7 +1361,7 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
    !use m_flowexternalforcings, no1=>qid, no2=>filetype, no3=>operand, no4 => success
    use m_meteo, no5=>qid, no6=>filetype, no7=>operand, no8 => success
    use string_module, only: strcmpi
-   use timespace_parameters, only: uniform, spaceandtime
+   use timespace_parameters, only: uniform, bcascii, spaceandtime
    use unstruc_messages
    
    implicit none
@@ -1363,7 +1370,7 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
    character(len=*), intent(in)    :: locationfile   !< Name of location file (*.pli or *.pol) for current quantity (leave empty when valuestring contains value or filename).
    character(len=*), intent(in)    :: objtype        !< Type name of the object for which this relation is set (e.g., 'lateral', for prettyprinting only).
    character(len=*), intent(in)    :: objid          !< Id of the object for which this relation is set (for prettyprinting only).
-   character(len=*), intent(in)    :: paramname      !< Name of the parameter that is set in this relation (e.g., 'flow', for prettyprinting only).
+   character(len=*), intent(in)    :: paramname      !< Name of the parameter that is set in this relation (e.g., 'discharge', for prettyprinting only).
    character(len=*), intent(in)    :: paramvalue     !< String containing the parameter value (either a scalar double, or 'REALTIME', or a filename)
    integer,          intent(in)    :: targetindex    !< Target index in target value array (typically, the current count of this object type, e.g. numlatsg).
    integer,          intent(in)    :: vectormax      !< The number of values per object ('kx'), typically 1.
@@ -1406,6 +1413,9 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
          if (index(trim(fnam)//'|','.tim|')>0) then 
             ! uniform=single time series vectormax = 1
             success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, fnam, filetype=uniform, method=spaceandtime, operand='O', targetIndex=targetindex)
+         elseif (index(trim(fnam)//'|','.bc|')>0) then 
+            ! uniform=single time series vectormax = 1
+            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, objid, filetype=bcascii, method=spaceandtime, operand='O', targetIndex=targetindex, forcingfile=fnam)
          endif 
          ! TODO: AvD: support .bc
       end if
