@@ -1777,7 +1777,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        if (npdu(i) /= 0) then
           ia = ipdu(i)
           do nm = 1, nmmax
-             if (gsqs(nm) > 0.0_fp .and. abs(kcs(nm)==1)) then
+             if (gsqs(nm) > 0.0_fp .and. abs(kcs(nm))==1) then
                 select case (dump_prop(i)%ichkloc)
                 case (CHKLOC_ALLCORNER)
                    nmcor = nm
