@@ -1152,7 +1152,20 @@ module m_meteo
             sourceItemName = 'uniform_item'
          case ('pump','generalstructure','damlevel', 'valve1D','gateloweredgelevel','lateraldischarge','dambreakLevelsAndWidths')
             if (checkFileType(ec_filetype, provFile_uniform, target_name)) then
+               !
+               ! *.tim file
+               !
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               if (sourceItemId==ec_undef_int) then 
+                  ! Add something to the EC message stack about missing source item 
+                  return 
+               endif 
+               if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)) return 
+            else if (checkFileType(ec_filetype, provFile_bc, target_name)) then
+               !
+               ! *.bc file
+               !
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, target_name)
                if (sourceItemId==ec_undef_int) then 
                   ! Add something to the EC message stack about missing source item 
                   return 
