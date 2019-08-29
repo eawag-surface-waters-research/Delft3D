@@ -776,7 +776,7 @@ module m_meteo
       use m_flowtimes, only: refdate_mjd
       use string_module, only: str_upper
 
-      character(len=*),                         intent(inout) :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
+      character(len=*),                         intent(in)    :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
       real(hp), dimension(:),                   intent(in)    :: x            !< Array of x-coordinates for the target ElementSet.
       real(hp), dimension(:),                   intent(in)    :: y            !< Array of y-coordinates for the target ElementSet.
       integer,                                  intent(in)    :: vectormax    !< Vector max (length of data values at each element location).

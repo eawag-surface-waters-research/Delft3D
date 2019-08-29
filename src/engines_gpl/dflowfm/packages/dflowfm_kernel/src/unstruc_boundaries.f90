@@ -1359,7 +1359,7 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
    
    implicit none
 
-   character(len=*), intent(inout) :: qid            !< Identifier of current quantity (i.e., 'waterlevelbnd')
+   character(len=*), intent(in)    :: qid            !< Identifier of current quantity (i.e., 'waterlevelbnd')
    character(len=*), intent(in)    :: locationfile   !< Name of location file (*.pli or *.pol) for current quantity (leave empty when valuestring contains value or filename).
    character(len=*), intent(in)    :: objtype        !< Type name of the object for which this relation is set (e.g., 'lateral', for prettyprinting only).
    character(len=*), intent(in)    :: objid          !< Id of the object for which this relation is set (for prettyprinting only).
