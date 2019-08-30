@@ -216,7 +216,7 @@ contains
          else
            pump%is_active = .true.
            qp = pump%reduction_factor * pump%capacity(pump%actual_stage)
-           pump%current_capacity = qp
+           pump%current_capacity = pump%capacity(pump%actual_stage)
          endif
 
       endif
