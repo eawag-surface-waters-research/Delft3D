@@ -98,7 +98,7 @@ module m_oned_functions
       
       if (.not. network%initialized) then
          call set_linknumbers_in_branches()
-         call set_node_numbers_for_xy_storage_nodes()
+         call set_node_numbers_for_storage_nodes()
          call set_structure_grid_numbers()
       
          if (jased > 0 .and. stm_included) then
@@ -159,8 +159,8 @@ module m_oned_functions
       enddo
    end subroutine set_linknumbers_in_branches
 
-   !> Set the node numbers from flowgeom for the storage nodes that are defined by x-, y-coordinates
-   subroutine set_node_numbers_for_xy_storage_nodes()
+   !> Set the node numbers from flowgeom for the storage nodes
+   subroutine set_node_numbers_for_storage_nodes()
    
       use unstruc_channel_flow
       use m_flowgeom
@@ -185,7 +185,7 @@ module m_oned_functions
       character(len=IdLen), allocatable       :: name_tmp(:)
       integer                                 :: nxy, countxy, jakdtree
 
-      ! snap the storage nodes that are defined by x-, y-coordinates
+      
       countxy = network%storS%Count_xy
       if (countxy > 0) then
          call realloc(ixy2stor,    countxy, keepExisting=.false.)
@@ -193,31 +193,34 @@ module m_oned_functions
          call realloc(x_tmp,       countxy, keepExisting=.false.)
          call realloc(y_tmp,       countxy, keepExisting=.false.)
          call realloc(name_tmp,    countxy, keepExisting=.false.)
-         nxy = 0
-         do i = 1, network%storS%count
-            pstor => network%storS%stor(i)
-            if (pstor%gridPoint < 0) then
-               nxy = nxy + 1
-               ixy2stor(nxy) = i
-               x_tmp(nxy)    = pstor%x
-               y_tmp(nxy)    = pstor%y
-               name_tmp(nxy) = pstor%id
-            end if
-         end do
-         
-         ! find flow nodes
+      end if
+      
+      nxy = 0
+      do i = 1, network%storS%count
+         pstor => network%storS%stor(i)
+         if (pstor%node_index < 0) then
+            nxy = nxy + 1
+            ixy2stor(nxy) = i
+            x_tmp(nxy)    = pstor%x
+            y_tmp(nxy)    = pstor%y
+            name_tmp(nxy) = pstor%id
+         else
+            pStor%gridPoint = network%nds%node(pstor%node_index)%gridNumber
+         end if
+      end do
+      
+      if (nxy > 0) then ! find flow nodes for storage nodes that are defined by x-, y-coordinates
          jakdtree = 1
          call find_flownode(nxy, x_tmp(1:nxy), y_tmp(1:nxy), name_tmp(1:nxy), k_tmp(1:nxy), jakdtree, 0, INDTP_1D)
          do i = 1, nxy
             if (k_tmp(i) > 0) then
                pstor => network%storS%stor(ixy2stor(i))
                pstor%gridPoint = k_tmp(i)
-               network%storS%mapping(k_tmp(i)) = network%storS%Count
             else
                call SetMessage(LEVEL_ERROR, 'Error when snapping storage node '''//trim(name_tmp(i))//''' to a flow node.')
             end if
          end do
-         
+      
          if (allocated(k_tmp))    deallocate(k_tmp)
          if (allocated(x_tmp))    deallocate(x_tmp)
          if (allocated(y_tmp))    deallocate(y_tmp)
@@ -225,7 +228,8 @@ module m_oned_functions
          if (allocated(name_tmp)) deallocate(name_tmp)
       end if
       
-   end subroutine set_node_numbers_for_xy_storage_nodes
+      
+   end subroutine set_node_numbers_for_storage_nodes
    
    subroutine set_structure_grid_numbers()
       use unstruc_channel_flow

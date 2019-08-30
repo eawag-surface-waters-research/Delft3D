@@ -101,7 +101,7 @@ module m_readStorageNodes
       double precision, allocatable, dimension(:)   :: storagelevels
       double precision, allocatable, dimension(:)   :: storageAreas
       integer                                       :: major, minor
-      integer                                       :: jaxy, jagerenal  
+      integer                                       :: jaxy, jageneral  
 
       call tree_create(trim(storgNodesFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(storgNodesFile),md_ptr, istat)
@@ -121,7 +121,7 @@ module m_readStorageNodes
          numstr = size(md_ptr%child_nodes)
       end if
 
-      jagerenal = 0
+      jageneral = 0
       success = .true.
       ! Read each block
       do i = 1, numstr
@@ -129,7 +129,7 @@ module m_readStorageNodes
          blockname = tree_get_name(node_ptr)
          
          if (strcmpi(blockname, 'general')) then  ! Read [General] block
-            if (jagerenal > 0) then
+            if (jageneral > 0) then
                write(msgbuf, '(3a)') 'Found more than one [General] blocks in file ''', trim(storgNodesFile), '''. Only the first [General] block is read, others are ignored.'
                call warn_flush()
                cycle
@@ -150,14 +150,18 @@ module m_readStorageNodes
                write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(storgNodesFile), ''': [', trim(blockname), ']. Field ''useStreetStorage'' is missing. Use default value useStreetStorage = true.'
                call warn_flush()
             endif
-            jagerenal = 1
+            jageneral = 1
             cycle
          else if (strcmpi(blockname,'StorageNode')) then   ! Read [StorageNode] block
             success = .true.
             jaxy    = 0
             ! read id
             call prop_get_string(node_ptr, '', 'id', storgNodeId, success1)
-            success = success .and. check_input(success1, '?', 'id')
+            if (.not. success1) then
+               write (msgbuf, '(a,i0,a)') 'Error Reading storage node #', network%storS%Count + 1, ', id is missing.'
+               call err_flush()
+               success = .false.
+            end if
             
             ! read name
             call prop_get_string(node_ptr, '', 'name', storgNodeName, success1)
@@ -184,7 +188,6 @@ module m_readStorageNodes
                   call SetMessage(LEVEL_ERROR, 'Error Reading Storage Node '''//trim(storgNodeID)//''': node: '''//trim(nodeID)//''' not Found.')
                   exit
                endif
-               gridPoint = network%nds%node(nodeIdx)%index
             end if
             
             ! read useTable
@@ -233,8 +236,6 @@ module m_readStorageNodes
                call prop_get_string(node_ptr, '', 'storageType', sStorageType, success1)
                if (.not. success1) then 
                   sStorageType = 'reservoir'
-                  write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(storgNodesFile), ''': [', trim(blockname), ']. Field ''storageType'' is missing. Use default value storageType = reservoir.'
-                  call warn_flush()
                end if
                if ((.not. strcmpi(sStorageType, 'reservoir')) .and. (.not. strcmpi(sStorageType, 'closed'))) then
                   write(msgbuf, '(5a)') 'Wrong block in file ''', trim(storgNodesFile), ''': [', trim(blockname), ']. Field ''storageType'' is not correct. Supported values are "reservoir" and "closed".'
@@ -288,13 +289,12 @@ module m_readStorageNodes
             pSto%name      = storgNodeName
             if (jaxy == 0) then
                pSto%nodeId    = nodeId
-               pSto%gridPoint = gridPoint
-               network%storS%mapping(gridPoint) = network%storS%Count
+               pSto%node_index= nodeIdx
             else
                network%storS%Count_xy = network%storS%Count_xy + 1
                pSto%x         = x
                pSto%y         = y
-               pSto%gridPoint = -1 ! gridPoint will be computed later when calling subroutine set_node_numbers_for_xy_storage_nodes 
+               pSto%node_index = -1 ! node_index will be computed later when calling subroutine set_node_numbers_for_xy_storage_nodes 
             end if
             pSto%useStreetStorage = useStreetStorage
             pSto%useTable         = useTable1

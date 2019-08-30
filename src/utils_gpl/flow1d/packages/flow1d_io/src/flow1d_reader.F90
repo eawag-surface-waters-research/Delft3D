@@ -302,11 +302,6 @@ module m_flow1d_reader
      call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')
      call timstop(timerReadCsLocs)
   
-     ! Create Storage Mapping to Grid Points
-     if (.not. allocated(network%storS%mapping)) then
-        call create(network%storS, network%nds%count, network%brs%gridpointsCount)
-     endif
-
      call timstrt('ReadStorageNodes', timerReadStorgNodes)
      call SetMessage(LEVEL_INFO, 'Reading Storage Nodes ...')
 
@@ -599,11 +594,6 @@ module m_flow1d_reader
          if (success .and. len_trim(inputfile) > 0) then
             call readObservationPoints(network, inputfile)
          endif
-      endif
-      
-      ! Create Storage Mapping to Grid Points
-      if (.not. allocated(network%storS%mapping)) then
-         call create(network%storS, network%nds%count, network%brs%gridpointsCount)
       endif
 
       call SetMessage(LEVEL_INFO, 'Reading Observation Points Done')
