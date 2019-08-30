@@ -582,26 +582,4 @@ double precision function get_discharge_over_gate_uppedge(genstr, L0, s1m1, s1m2
 
 end function get_discharge_over_gate_uppedge
 
-!> Fills in array valdambreak when there is no breach 
-subroutine fill_valdambreak_no_breach(L, n)
-   use m_missing, only: dmiss
-   use m_flowgeom, only:bob
-   use m_flowexternalforcings
-   implicit none
-   integer, intent(in) :: L   !< index of link where the breach starts
-   integer, intent(in) :: n   !< index of dambreak
-   
-   valdambreak(1:NUMVALS_DAMBREAK-1,n) = dmiss
-   valdambreak(2,n)  = 0d0
-   valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
-   valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
-   valdambreak(5,n)  = valdambreak(3,n)- valdambreak(4,n)
-   valdambreak(6,n)  = 0d0
-   valdambreak(7,n)  = 0d0
-   valdambreak(8,n)  = bob(1,L)
-   valdambreak(9,n)  = 0d0
-   valdambreak(10,n) = waterLevelJumpDambreak(n)
-   valdambreak(11,n) = breachWidthDerivativeDambreak(n)
-   
-end subroutine fill_valdambreak_no_breach
 end module m_structures

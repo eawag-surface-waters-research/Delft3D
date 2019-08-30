@@ -3147,7 +3147,6 @@ if (ndambreak > 0) then
                              dmiss)
       
       LStartBreach(n) = L1dambreaksg(n) -  1  + Lstart 
-      activeDambreakLinks(LStartBreach(n)) = 1
       
       ! compute the normal projections of the start and endpoints of the flow links
       do k = L1dambreaksg(n), L2dambreaksg(n)

@@ -15352,6 +15352,7 @@ subroutine adjust_bobs_on_dambreak_breach(width, crl, startingLink, L1, L2, stru
    Lf = iabs(kdambreak(3,startingLink))
    bob(1,Lf) = crl
    bob(2,Lf) = crl
+   activeDambreakLinks(startingLink) = 1
    if ((width - dambreakLinksEffectiveLength(startingLink))<= 0) then
       wu(Lf) = width
       return
@@ -36413,7 +36414,7 @@ if (jahisbal > 0) then
 ! =================================================================================================
 ! =================================================================================================
    subroutine structure_parameters
-      use m_flowgeom , only : ln, wu
+      use m_flowgeom , only : ln, wu, bob
       use m_flow
       use m_structures
       use m_flowexternalforcings, only: ngenstru
@@ -36778,9 +36779,11 @@ if (jahisbal > 0) then
          ! valdambreak(NUMVALS_DAMBREAK,n) is the cumulative over time, we do not reset it to 0
          valdambreak(1:NUMVALS_DAMBREAK-1,n) = 0d0
          istru = dambreaks(n)
-         if (network%sts%struct(istru)%dambreak%width > 0d0) then
          do L = L1dambreaksg(n),L2dambreaksg(n)
-               if (activeDambreakLinks(L) == 1) then
+            if (activeDambreakLinks(L) /= 1) then
+               cycle
+            end if
+
             Lf = kdambreak(3,L)
             La = abs( Lf )
             if( jampi > 0 ) then
@@ -36791,30 +36794,24 @@ if (jahisbal > 0) then
             if( Ln(1,La) /= kdambreak(1,L) ) then
                dir = -1d0
             end if
-                  valdambreak(1,n) = valdambreak(1,n) + wu(La)
-                  valdambreak(2,n) = valdambreak(2,n) + q1(La)*dir
-                  valdambreak(6,n) = valdambreak(6,n) + au(La) ! flow area
-                  valdambreak(9,n) = valdambreak(9,n) + wu(La)  
-               end if
+            valdambreak(1,n) = valdambreak(1,n) + wu(La)
+            valdambreak(2,n) = valdambreak(2,n) + q1(La)*dir
+            valdambreak(6,n) = valdambreak(6,n) + au(La) ! flow area
+            valdambreak(9,n) = valdambreak(9,n) + wu(La)
          enddo
-            if (valdambreak(1,n) == 0d0) then
-               La = abs(kdambreak(3,LStartBreach(n)))
-               call fill_valdambreak_no_breach(La, n)
-               cycle
-            end if
-            valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
-            valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
-            valdambreak(5,n)  = valdambreak(3,n)- valdambreak(4,n)
-            valdambreak(7,n)  = normalVelocityDambreak(n)
-            valdambreak(8,n)  = network%sts%struct(istru)%dambreak%crl ! crest level
-            valdambreak(9,n)  = min(valdambreak(9,n), network%sts%struct(istru)%dambreak%width) ! In case breach depth is still at original fxw crest.
-            valdambreak(10,n) = waterLevelJumpDambreak(n)
-            valdambreak(11,n) = breachWidthDerivativeDambreak(n)
-            valdambreak(12,n) = valdambreak(12,n) + valdambreak(2,n) * timstep ! cumulative discharge
+         valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
+         valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
+         valdambreak(5,n)  = valdambreak(3,n) - valdambreak(4,n)
+         valdambreak(7,n)  = normalVelocityDambreak(n)
+         if (network%sts%struct(istru)%dambreak%width > 0d0) then
+            valdambreak(8,n) = network%sts%struct(istru)%dambreak%crl ! crest level
          else
             La = abs(kdambreak(3,LStartBreach(n)))
-            call fill_valdambreak_no_breach(La, n)
+            valdambreak(8,n) = bob(1,La)                              ! No breach started yet, use bob as 'crest'.
          end if
+         valdambreak(10,n) = waterLevelJumpDambreak(n)
+         valdambreak(11,n) = breachWidthDerivativeDambreak(n)
+         valdambreak(12,n) = valdambreak(12,n) + valdambreak(2,n) * timstep ! cumulative discharge
       enddo
       !
       ! === General structures (from new ext file)
