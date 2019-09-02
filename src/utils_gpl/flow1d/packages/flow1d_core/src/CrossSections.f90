@@ -737,7 +737,7 @@ integer function  AddCrossSectionByVariables(crs, CSDef, branchid, chainage, ire
    integer, intent(in)              :: groundFrictionType !< Groundlayer fricton type
    double precision, intent(in)     :: groundFriction     !< Groundlayer friction value
 
-   integer                          :: i
+   integer                          :: i, j
 
    crs%count = crs%count+1
    !! THREEDI-278
@@ -758,8 +758,25 @@ integer function  AddCrossSectionByVariables(crs, CSDef, branchid, chainage, ire
    crs%cross(i)%bedLevel            = bedLevel
    crs%cross(i)%shift               = bedlevel
    crs%cross(i)%frictionSectionsCount = 1
+   crs%cross(i)%crossType = CSDef%CS(iref)%crossType
    allocate(crs%cross(i)%frictionTypePos(1), crs%cross(i)%frictionTypeNeg(1), crs%cross(i)%frictionValuePos(1), crs%cross(i)%frictionValueNeg(1))
+   allocate(crs%cross(i)%frictionSectionFrom(1), crs%cross(i)%frictionSectionTo(1))
    
+   if (crs%cross(i)%crossType == CS_TABULATED) then
+      crs%cross(i)%frictionSectionFrom(1) = 0d0
+      crs%cross(i)%frictionSectionTo(1) = CSDef%CS(iref)%totalWidth(1)
+      do j = 2, CSDef%CS(iref)%levelsCount
+         crs%cross(i)%frictionSectionTo(1) = max(crs%cross(i)%frictionSectionTo(1),CSDef%CS(iref)%totalWidth(j))
+      enddo
+   elseif (crs%cross(i)%crossType == CS_YZ_PROF) then
+      crs%cross(i)%frictionSectionFrom(1) = CSDef%CS(iref)%y(1)
+      crs%cross(i)%frictionSectionTo(1) = CSDef%CS(iref)%y(1)
+      do j = 2, CSDef%CS(iref)%levelsCount
+         crs%cross(i)%frictionSectionfrom(1) = min(crs%cross(i)%frictionSectionFrom(1),CSDef%CS(iref)%y(j))
+         crs%cross(i)%frictionSectionTo(1) = max(crs%cross(i)%frictionSectionTo(1),CSDef%CS(iref)%y(j))
+      enddo
+   endif
+      
    crs%cross(i)%frictionTypePos(1)  = bedFrictionType
    crs%cross(i)%frictionTypeNeg(1)  = bedFrictionType
    crs%cross(i)%frictionValuePos(1) = bedFriction

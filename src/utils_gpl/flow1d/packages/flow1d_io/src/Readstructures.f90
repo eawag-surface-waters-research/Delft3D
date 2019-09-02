@@ -1098,6 +1098,10 @@ module m_readstructures
             bridge%useOwnCrossSection = .true.
             bridge%pcross             => network%crs%cross(icross)
             bridge%crosssectionnr     = icross
+            if (network%crs%cross(icross)%crossType == cs_YZ_Prof) then
+               call CalcConveyance(network%crs%cross(icross))
+            endif
+
          endif
          
          call prop_get_double(md_ptr, '', 'bedLevel', bridge%bedLevel, success1)
