@@ -1016,7 +1016,6 @@ contains
       call furu_iter(fuL, ruL, su, sd, u1L, qL, auL, ustru, cu, rhsc, dxdt, dx_struc, hu, lambda, Cz)
 
       qL = auL*u1L
-      qL = auL*u1L
    end subroutine flgsfuru
 
 
