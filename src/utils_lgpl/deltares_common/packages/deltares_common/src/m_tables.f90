@@ -470,16 +470,16 @@ contains
        !     For discrete interpolation add small number to find proper
        !     table point if xs=table%x(i)
        !
-       Integrate = 0
+       Integrate = 0d0
        if ( xs <= table%x(1) ) then
-          Integrate = 0
+          Integrate = 0d0
           return
        endif
        itel = 1
        if (mod(table%interpoltype,10)==0) then
           ! interpolate values
           do while (itel < length .and. xs > table%x(min(itel+1, length)) )
-             Integrate = Integrate + 0.5*(table%y(itel)+table%y(itel+1)) * (table%x(itel+1)-table%x(itel))
+             Integrate = Integrate + 0.5d0*(table%y(itel)+table%y(itel+1)) * (table%x(itel+1)-table%x(itel))
              itel = itel+1
           enddo
           if (itel ==length) then
@@ -487,7 +487,7 @@ contains
           else
              fak = (xs - table%x(itel))/(table%x (itel+1)-table%x(itel))
              ys = table%y(itel) + fak*(table%y(itel+1)-table%y(itel))
-             Integrate = Integrate + 0.5*(table%y(itel)+ys)*(xs - table%x(itel))
+             Integrate = Integrate + 0.5d0*(table%y(itel)+ys)*(xs - table%x(itel))
           endif
        else
           ! use block function

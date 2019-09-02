@@ -43,6 +43,7 @@ module m_Storage
    integer, public, parameter :: nt_Reservoir   = 2
    integer, public, parameter :: nt_Closed      = 3
    integer, public, parameter :: nt_Loss        = 4
+   double precision, public, parameter:: slot_area = 1d-2 ! value to be used for storageStreetArea when storageType is "closed"
    
    public realloc
    public dealloc
@@ -232,7 +233,7 @@ contains
       type(t_storage), intent(in)            :: storage
       double precision, intent(in)           :: level
 
-      if (storage%useStreetStorage ) then
+      if (storage%useStreetStorage .and. (.not. storage%useTable)) then
          ! check if water level is above street level
          if (level >= storage%streetArea%x(1) ) then
             getSurfaceByStorNode = interpolate(storage%streetArea, level)
@@ -266,7 +267,7 @@ contains
       if (storage%storagetype/=nt_none) then
          level2 = level
          getVolumeByStorNode = 0d0
-         if (storage%useStreetStorage ) then
+         if (storage%useStreetStorage .and. (.not. storage%useTable)) then
             ! check if water level is above street level
             if (level > storage%streetArea%x(1)) then
                getVolumeByStorNode= integrate(storage%streetArea, level)

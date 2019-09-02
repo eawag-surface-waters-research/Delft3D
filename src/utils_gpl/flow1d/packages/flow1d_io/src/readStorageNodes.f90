@@ -91,8 +91,8 @@ module m_readStorageNodes
       
       double precision                              :: bedLevel
       double precision                              :: area
-      double precision                              :: streetLevel
-      double precision                              :: streetStorageArea
+      double precision, allocatable, dimension(:)   :: streetLevel
+      double precision, allocatable, dimension(:)   :: streetStorageArea
       integer                                       :: numLevels
       character(len=IdLen)                          :: sInterpolate
       integer                                       :: interpol
@@ -101,7 +101,7 @@ module m_readStorageNodes
       double precision, allocatable, dimension(:)   :: storagelevels
       double precision, allocatable, dimension(:)   :: storageAreas
       integer                                       :: major, minor
-      integer                                       :: jaxy, jageneral  
+      integer                                       :: jaxy, jageneral
 
       call tree_create(trim(storgNodesFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(storgNodesFile),md_ptr, istat)
@@ -212,6 +212,13 @@ module m_readStorageNodes
             
             ! read data
             if (.not. useTable1) then
+               call realloc(streetLevel, numLevels, stat=istat)
+               if (istat == 0) then
+                  call realloc(streetStorageArea, numLevels, stat=istat, fill = 0d0)
+               else
+                  call SetMessage(LEVEL_FATAL, 'Reading storage nodes: Error Allocating Arrays')
+               endif
+            
                sInterpolate = 'block'
                call interpolateStringToInteger(sInterpolate, interpol)
                ! read bedLevel
@@ -223,14 +230,8 @@ module m_readStorageNodes
                success = success .and. check_input(success1, storgNodeId, 'area')   
                
                ! read streetLevel
-               call prop_get_double(node_ptr, '', 'streetLevel', streetLevel, success1)
+               call prop_get_double(node_ptr, '', 'streetLevel', streetLevel(1), success1)
                success = success .and. check_input(success1, storgNodeId, 'streetLevel')
-               
-               ! read streetStorageArea
-               if (useStreetStorage) then
-                  call prop_get_double(node_ptr, '', 'streetStorageArea', streetStorageArea, success1)
-                  success = success .and. check_input(success1, storgNodeId, 'streetStorageArea')
-               end if
                
                ! read storageType
                call prop_get_string(node_ptr, '', 'storageType', sStorageType, success1)
@@ -242,7 +243,16 @@ module m_readStorageNodes
                   call err_flush()
                end if
                call storageTypeStringToInteger(sStorageType, StorageType)
-                
+               
+               ! read streetStorageArea
+               if (useStreetStorage) then
+                  if (strcmpi(sStorageType, 'reservoir')) then
+                     call prop_get_double(node_ptr, '', 'streetStorageArea', streetStorageArea(1), success1)
+                     success = success .and. check_input(success1, storgNodeId, 'streetStorageArea')
+                  else if (strcmpi(sStorageType, 'closed')) then
+                     streetStorageArea(1) = slot_area
+                  end if
+               end if
             else
                ! read levels
                call prop_get_doubles(node_ptr, '', 'levels', storageLevels, numLevels, success1)
@@ -305,7 +315,7 @@ module m_readStorageNodes
             if (.not. useTable1) then
                pSto%storageType = storageType
                if (useStreetStorage) then
-                  call setTable(pSto%streetArea, interpol, storageLevels, storageAreas, numLevels)
+                  call setTable(pSto%streetArea, interpol, streetLevel, streetStorageArea, numLevels)
                end if
             end if               
          endif
