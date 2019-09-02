@@ -1473,7 +1473,8 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    type(c_ptr),            intent(inout) :: x            !< Pointer (by reference) to requested value data, NULL if not available.
 
    integer :: item_index
-  
+   logical :: is_in_network
+
    integer :: iconst
    integer :: itrac
 
@@ -1486,12 +1487,11 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    item_name  = char_array_to_string(c_item_name)
    field_name = char_array_to_string(c_field_name)
 
-
    select case(var_name)
    ! PUMPS
    case("pumps")
-      call getStructureIndex('pumps', item_name, item_index)
-      if (item_index == 0) then
+      call getStructureIndex('pumps', item_name, item_index, is_in_network)
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1502,35 +1502,26 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
 
    ! WEIRS
    case("weirs")
-      call getStructureIndex('weirs', item_name, item_index)
-      if (item_index == 0) then
+      call getStructureIndex('weirs', item_name, item_index, is_in_network)
+      if (item_index <= 0) then
          return
       endif
-      if (item_index <= ncgensg) then 
-         ! DFlowFM type structures
-         select case(field_name)
-         case("crest_level", "CrestLevel")
-               x = c_loc(zcgen((item_index-1)*3+1))
-               return
-         case("lat_contr_coeff")
-               ! TODO: RTC: AvD: get this from weir params
-               return
-         end select
-      else
-         ! DFlowFM1D type structures
-         item_index = item_index - ncgensg
-         select case(field_name)
-         case("crest_level", "CrestLevel")
-               x = get_crest_level_c_loc(network%sts%struct(item_index))  
-               return
-         case("lat_contr_coeff")
-               ! TODO: RTC: AvD: get this from weir params (also for 1d?) 
-               return
-         end select
-      endif 
+
+      select case(field_name)
+      case("crest_level", "CrestLevel", "crestLevel")
+         if (is_in_network) then
+            x = get_crest_level_c_loc(network%sts%struct(item_index))  
+         else
+            x = c_loc(zcgen((item_index-1)*3+1))
+         end if
+         return
+      case("lat_contr_coeff")
+            ! TODO: RTC: AvD: get this from weir params
+            return
+      end select
    ! GATES
    case("gates")
-      call getStructureIndex('gates', item_name, item_index)
+      call getStructureIndex('gates', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif
@@ -1554,7 +1545,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
 
    ! GENERALSTRUCTURES
    case("generalstructures")
-      call getStructureIndex('generalstructures', item_name, item_index)
+      call getStructureIndex('generalstructures', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif
@@ -1578,7 +1569,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
 
    ! SOURCE-SINKS
    case("sourcesinks")
-      call getStructureIndex('sourcesinks', item_name, item_index)
+      call getStructureIndex('sourcesinks', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif
@@ -1595,7 +1586,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
       end select
    ! Dambreak
    case("dambreak")
-      call getStructureIndex('dambreak', item_name, item_index)
+      call getStructureIndex('dambreak', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif
@@ -1723,7 +1714,9 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    use iso_c_utils
    use unstruc_messages
    use m_strucs
+   use m_1d_structures , only: get_crest_level_c_loc
    use m_wind
+   use unstruc_channel_flow, only: network
 
    character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
    character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1731,8 +1724,11 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    type(c_ptr), value,     intent(in) :: xptr            !< Pointer (by value) to the C-compatible value data to be set.
 
    real(c_double), pointer :: x_0d_double_ptr
+   type(c_ptr) :: fieldptr  ! c_ptr to the structure's parameter
 
    integer :: item_index
+   logical :: is_in_network
+
    integer :: iostat
 
    ! The fortran name of the attribute name
@@ -1751,7 +1747,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    select case(var_name)
    ! PUMPS
    case("pumps")
-      call getStructureIndex('pumps', item_name, item_index)
+      call getStructureIndex('pumps', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif
@@ -1764,14 +1760,19 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
 
    ! WEIRS
    case("weirs")
-      call getStructureIndex('weirs', item_name, item_index)
+      call getStructureIndex('weirs', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif
       select case(field_name)
       case("crest_level", "CrestLevel")
-         call c_f_pointer(xptr, x_0d_double_ptr)
-         zcgen((item_index-1)*3+1) = x_0d_double_ptr
+         if (is_in_network) then
+            fieldptr = get_crest_level_c_loc(network%sts%struct(item_index))
+            fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
+         else
+            call c_f_pointer(xptr, x_0d_double_ptr)
+            zcgen((item_index-1)*3+1) = x_0d_double_ptr
+         end if
          return
       case("lat_contr_coeff")
          ! TODO: RTC: AvD: set this in weir params
@@ -1781,7 +1782,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
 
    ! GATES
    case("gates")
-      call getStructureIndex('gates', item_name, item_index)
+      call getStructureIndex('gates', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif
@@ -1810,7 +1811,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
 
    ! GENERAL STRUCTURES
    case("generalstructures")
-      call getStructureIndex('generalstructures', item_name, item_index)
+      call getStructureIndex('generalstructures', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif
@@ -1839,7 +1840,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
 
    ! SOURCE-SINKS
    case("sourcesinks")
-      call getStructureIndex('sourcesinks', item_name, item_index)
+      call getStructureIndex('sourcesinks', item_name, item_index, is_in_network)
       if (item_index == 0) then
          return
       endif

@@ -3200,7 +3200,7 @@ end function flow_init_structurecontrol
 !> Returns the index of a structure in the controllable value arrays.
 !! Structure is identified by strtypename, e.g. 'pumps', and structure name, e.g., 'Pump01'.
 !! Returned index can be used to directly address variables like, m_flowexternalforcings::qpump, zgate, etc.
-subroutine getStructureIndex(strtypename, strname, index)
+subroutine getStructureIndex(strtypename, strname, index, is_in_network)
 ! NOTE: this will only return the GUI-used structures (i.e., the new gates and weirs via general structure, not the old ext-based damlevel and gateloweredgelevel).
 ! TODO: longer-term all structure sets run via channel_flow and t_structureset, cleanup this function then.
    use m_flowexternalforcings
@@ -3208,13 +3208,28 @@ subroutine getStructureIndex(strtypename, strname, index)
    use unstruc_channel_flow, only: network
    
    implicit none
-   character(len=*), intent(in)  :: strtypename !< the type of the structure: 'pumps', 'weirs', 'gates', ...
-   character(len=*), intent(in)  :: strname     !< Id/name of the requested structure, e.g. 'Pump01'
-   integer,          intent(out) :: index       !< Returned index of the found structure in its controllable value arrays.
+   character(len=*), intent(in   ) :: strtypename   !< the type of the structure: 'pumps', 'weirs', 'gates', ...
+   character(len=*), intent(in   ) :: strname       !< Id/name of the requested structure, e.g. 'Pump01'
+   integer,          intent(  out) :: index         !< Returned index of the found structure in its controllable value arrays. -1 when not found.
+   logical,          intent(  out) :: is_in_network !< Whether or not the found structure is inside the network%sts set, or in FM global structure set. No meaning when structure not found.
  
    integer :: i, nstr, icgen
    integer, pointer :: cgen_mapping(:)
-   index = 0
+   index = -1
+   is_in_network = .false.
+
+   if (network%sts%count > 0) then
+      ! TODO: when we allow non-unique ids between different structure types, select proper hashlist.
+      index = hashsearch(network%sts%hashlist_structure, trim(strname))
+      if (index > 0) then
+         is_in_network = .true.
+      end if
+      return
+   else
+      ! Retry on the 2D structures in code below
+      continue
+   end if
+
 
    if (trim(strtypename) == 'pumps') then
       do i=1,npumpsg
@@ -3268,17 +3283,6 @@ subroutine getStructureIndex(strtypename, strname, index)
             end if
          end if
       end do
-      
-      if (nstr == 0) then 
-          ! 'No DFlowFM structures found, looking for DFlowFM-1D structures ...'
-          select case(strtypename)
-          case('weirs')
-             index = ncgensg + hashsearch(network%sts%hashlist_weir, strname)  ! add shift of ncgensg for all weirs defined in FM
-          case default
-             index = 0
-      end select          
-          
-      endif 
    end if
 
 end subroutine getStructureIndex
