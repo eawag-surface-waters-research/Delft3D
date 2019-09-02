@@ -13732,9 +13732,21 @@ end if
  jawelrestart = jawel
  if (jawel) jarestart = 1                                       ! in the module
 
- call flow_setstarttime()                                       ! the flow time0 and time1 are managed bij flow
+ call flow_setstarttime()                                       ! the flow time0 and time1 are managed by flow
                                                                 ! this is the only function that a user can use to influence the flow times
                                                                 ! TSTART MAY BE OVERWRITTEN IN REARST
+ 
+ if (jased > 0 .and. stm_included) then
+    if (stmpar%morpar%morft < eps10) then
+        !
+        ! if the morphological start time is not set to some positive value due
+        ! to restart from trim-file, then make sure that the morphological start
+        ! time corresponds to the hydrodynamic start time. This includes TStart!
+        !
+        stmpar%morpar%morft  = tstart_user/86400d0
+        stmpar%morpar%morft0 = stmpar%morpar%morft
+    endif
+ endif
 
  call setkbotktop(1)                                            ! set sigmabnds for ec
 
@@ -13745,8 +13757,8 @@ end if
  ! one call to derive stokes drift etc needed at start
   if (jawave==3) then
     if( kmx == 0 ) then
-       !hs = s1-bl
-       !hs = max(hs, 0d0)
+       hs = s1-bl                                   ! safety
+       hs = max(hs, 0d0)
        call wave_comp_stokes_velocities()
        call wave_uorbrlabda()                       ! hwav gets depth-limited here
        call tauwave()

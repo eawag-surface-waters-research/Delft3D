@@ -2435,7 +2435,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_flowelemxzw, id_flowelemyzw, id_flowlinkxu, id_flowlinkyu,&
         id_flowelemxbnd, id_flowelemybnd, id_bl, id_s0bnd, id_s1bnd, id_blbnd, &
         id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_squ, id_sqi, &
-        id_jmax, id_flowelemcrsz, id_flowelemcrsn, id_ndx1d
+        id_jmax, id_flowelemcrsz, id_flowelemcrsn, id_ndx1d, id_morft
     
     integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
@@ -2901,6 +2901,11 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
       ierr = nf90_put_att(irstfile, id_morbl,   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')                          ! not CF
       ierr = nf90_put_att(irstfile, id_morbl,   'long_name'    , 'Time-varying bottom level in flow cell center')          
       ierr = nf90_put_att(irstfile, id_morbl,   'units'        , 'm')
+      !
+      ierr = nf90_def_var(irstfile, 'morft', nf90_double, id_timedim,  id_morft)
+      ierr = nf90_put_att(irstfile, id_morft,  'units'        , 'morphological days since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00')
+      ierr = nf90_put_att(irstfile, id_morft,  'standard_name', 'morphological time')
+      ierr = nf90_put_att(irstfile, id_morbl,   'units'       , 'days')      
       !
       if (jamd1dfile > 0) then
          pCSs => network%CSDefinitions%CS
@@ -3520,6 +3525,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        end if
        ! morbl
        ierr = nf90_put_var(irstfile, id_morbl, bl, (/1 , itim/),(/ndxi, 1/))
+       ierr = nf90_put_var(irstfile, id_morft, stmpar%morpar%morft, (/ itim /))
        
        select case (stmpar%morlyr%settings%iunderlyr)
        case (1)
@@ -5256,8 +5262,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    ! Time averaged transports, could probably be more concise...
    !morstarthyd = tstart_user + stmpar%morpar%tmor*tfac        ! seconds
    dmorft      = stmpar%morpar%morft - stmpar%morpar%morft0    ! days since morstart
-   dmorfs      = dmorft*86400.0d0                             ! seconds
-   mortime     = stmpar%morpar%morft*86400d0                  ! seconds*morfac since tstart_user
+   dmorfs      = dmorft*86400.0d0                              ! seconds
+   mortime     = stmpar%morpar%morft*86400d0                   ! seconds*morfac since tstart_user
    if (stmpar%morpar%hydrt > stmpar%morpar%hydrt0) then
       moravg = dmorft/(stmpar%morpar%hydrt - stmpar%morpar%hydrt0)
    else
@@ -10257,7 +10263,8 @@ subroutine unc_read_map(filename, tim, ierr)
                id_bodsed,                       &
                id_xzw, id_yzw, id_xu, id_yu,    &
                id_bl, id_blbnd, id_s0bnd, id_s1bnd, id_xbnd, id_ybnd, &
-               id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_flowlink
+               id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_flowlink, &
+               id_morft
 
 
     double precision, allocatable :: xmc(:), ymc(:), xuu(:), yuu(:), xbnd_read(:), ybnd_read(:)
@@ -11294,7 +11301,7 @@ subroutine unc_read_map(filename, tim, ierr)
 
        ierr = nf90_inquire_dimension(imapfile, id_sedtotdim, len=sedtot_read)
        if (ierr /= nf90_noerr) then
-          sedtot_read = 0    ! Set the total sediment fraction to zero if it is not found in the _rst.nc file
+          sedtot_read = 0    ! Set the total number of sediment fractions to zero if it is not found in the _rst.nc file
           if (stmpar%lsedtot > 0) then
              write (msgbuf, '(a)') 'Restart file '''//trim(filename)//''' contains no sediment fractions, but model does. Continuing anyway.'
              call msg_flush()
@@ -11342,7 +11349,7 @@ subroutine unc_read_map(filename, tim, ierr)
              call replace_char(tmpstr,32,95) 
              call replace_char(tmpstr,47,95) 
              ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_sf1(i))
-             if(kmx > 0) then
+             if (kmx > 0) then
                 ierr = nf90_get_var(imapfile, id_sf1(i), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), count=(/ kmx, ndxi_own, 1 /))
                 do kk = 1, ndxi_own
                    if (jamergedmap == 1) then
@@ -11352,7 +11359,8 @@ subroutine unc_read_map(filename, tim, ierr)
                    end if
                    call getkbotktop(kloc, kb, kt)
                    ! TODO: UNST-976, incorrect for Z-layers:
-                   constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
+                   !constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
+                   sed(i,kb:kt) = tmpvar(1:kt-kb+1,kk)
                 enddo
              else
                 ierr = nf90_get_var(imapfile, id_sf1(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
@@ -11362,7 +11370,8 @@ subroutine unc_read_map(filename, tim, ierr)
                    else
                       kloc = kk
                    end if
-                   constituents(iconst, kloc) = tmpvar(1,kk)
+                   !constituents(iconst, kloc) = tmpvar(1,kk)
+                   sed(i, kloc) = tmpvar(1,kk)
                 end do
              endif
              call check_error(ierr, const_names(iconst))
@@ -11372,6 +11381,11 @@ subroutine unc_read_map(filename, tim, ierr)
        ! morbl
        ierr = get_var_and_shift(imapfile, 'mor_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, it_read, jamergedmap, &
                                 inode_own, inode_merge)
+       
+       ! morphological time
+       ierr = nf90_inq_varid(imapfile, 'morft', id_morft)
+       ierr = nf90_get_var(imapfile, id_morft,  stmpar%morpar%morft0, start = (/it_read/)) 
+       stmpar%morpar%morft = stmpar%morpar%morft0
        
        ! mfluff
        if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0 .and. sedsus_read == stmpar%lsedsus) then
@@ -11686,7 +11700,8 @@ subroutine unc_read_map(filename, tim, ierr)
          !if (jatem > 0) then
          !   call update_ghosts(ITYPE_Sall3D, 1, Ndkx, tem1, ierr)
          !endif
-         if (ITRA1 > 0 .or. jatem > 0) then
+         !if (ITRA1 > 0 .or. jatem > 0) then
+         if (ITRA1 > 0 .or. jatem > 0 .or. ISED1 > 0) then
             ! NOTE: This update sends too much (sa1/tem), but ok.
             ! Sed concentrations automagically included
             call update_ghosts(ITYPE_Sall3D, NUMCONST, Ndkx, constituents, ierr)
