@@ -84,11 +84,12 @@ module m_readstructures
 
    contains
 
-   !> Read the structure.ini file
+   !> Read structure.ini file(s).
    subroutine readStructures(network, structureFiles)
-   
-      type(t_network),  intent(inout)    :: network
-      character(len=*), intent(in   )    :: structurefiles
+      use string_module, only: str_token
+
+      type(t_network),  intent(inout)    :: network        !< The network data structure into whose Structure Set the file(s) will be read.
+      character(len=*), intent(in   )    :: structurefiles !< File name(s) to be read. Separate multiple files by semicolon: "file with spaces 1.ini;file2.ini;file 3.ini".
    
       integer  :: isemi, ispace
       character(len=CharLn) :: file
@@ -96,18 +97,8 @@ module m_readstructures
       
       inputFiles = structurefiles
       do while (len_trim(inputfiles) > 0) 
-         isemi = scan(inputfiles, ';')
-         if (isemi == 0) isemi = len_trim(inputfiles)+1
-         ispace = scan(inputfiles, ' ')
-         isemi = min(isemi, ispace)
-         if (isemi ==0) then
-            isemi = len_trim(inputfiles)+1
-         endif
-         
-         file = inputfiles(1:isemi-1)
-         inputfiles = inputfiles(isemi+1:)
-         call remove_leading_spaces(trim(file))
-         call readStructureFile(network, file)
+         call str_token(inputfiles, file, DELIMS=';')
+         call readStructureFile(network, adjustl(trim(file)))
       enddo
       ! fill the hashtable for searching on Id's
       
