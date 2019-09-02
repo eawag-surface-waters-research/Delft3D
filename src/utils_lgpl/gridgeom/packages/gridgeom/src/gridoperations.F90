@@ -2648,6 +2648,16 @@
             endif
          endif 
       endif
+      
+      ! for 1D channels: do not connect endnodes to 2D, they should remain boundary candidates
+      if (k3 == 1) then
+          if (nmk(k1) == 1) then
+              kc(k1) = 2
+          endif
+          if (nmk(k2) == 1) then
+              kc(k2) = 2
+          endif
+      endif
    enddo
 
    if (jadelnetlinktyp .ne. 0) then
