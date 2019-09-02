@@ -1800,7 +1800,8 @@ subroutine readMDUFile(filename, istat)
    ! First, try to read from a single StructureFile.
    md_structurefile = ' '
    call prop_get_string(md_ptr, 'geometry', 'StructureFile', md_structurefile, success)
-   if (len_trim(md_structurefile) > 0) then
+   if (len_trim(md_structurefile) > 0 &
+      .and. index(md_structurefile, ';') == 0) then ! UNST-2854: workaround, as long as we don't support ;-separator in MDU, skip it here and leave it all to readStructures().
       call strsplit(md_structurefile,1,fnames,1)
       do ifil=1,size(fnames)
          ! TODO: UNST-2452: support multiple structurefile basedirs
