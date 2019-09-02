@@ -32069,7 +32069,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     end if
 
     ! Trick: loop across the 2 supported file types (*.ext and *.ini), most inner do-loop code is the same for both.
-    do ibathyfiletype=1,2
+bft:do ibathyfiletype=1,2
     if (ibathyfiletype == 1) then
        call split_filename(md_extfile,      basedir, fnam) ! Remember base dir of *.ext file, to resolve all refenced files below w.r.t. that base dir.
        if (ja1 .eq. 1) then
@@ -32105,7 +32105,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
           if (index(qid,'bedlevel') > 0 .and. ibathyfiletype == 1 .and. len_trim(md_inifieldfile) > 0) then
              ! Don't support bedlevel in *.ext file when there is ALSO a *.ini file.
              call mess(LEVEL_WARN, 'Bed level info should be defined in file '''//trim(md_inifieldfile)//'''. Quantity '//trim(qid)//' ignored in external forcing file '''//trim(md_extfile)//'''.')
-             return
+             cycle bft ! Try ini field file next
           end if
           if (strcmpi(qid, 'bedlevel1D') .or. (strcmpi(qid, 'bedlevel') .and. ibathyfiletype == 2 .and. iLocType == ILATTP_1D)) then
              call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting 1D bedlevel from file '''//trim(filename)//'''.')
@@ -32131,7 +32131,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
        endif
 
     end do ! ja==1 provider loop
-    end do ! ibathyfiletype=1,2
+    end do bft ! ibathyfiletype=1,2
 
     ! Clean up *.ext file
     rewind (mext)
