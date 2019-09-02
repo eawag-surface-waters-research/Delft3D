@@ -8860,7 +8860,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call xbeach_wave_input()  ! will set swave and lwave
  endif
 
- if (jaCreateLinks1D2D) then
+ if (jaCreateLinks1D2D == 1) then
     ierr = make1D2Dinternalnetlinks()
      if (ierr /= DFM_NOERR) then
       call mess(LEVEL_WARN,'Error, failed to create 1D2D links.')
