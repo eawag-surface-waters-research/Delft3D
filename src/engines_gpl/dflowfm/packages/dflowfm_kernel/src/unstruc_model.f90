@@ -1775,9 +1775,15 @@ subroutine readMDUFile(filename, istat)
        call readClasses('WaterdepthClasses', map_classes_hs)
 
        call readClasses('VelocityMagnitudeClasses', map_classes_ucmag)
+       call prop_get_double(md_ptr, 'output', 'VelocityDirectionClassesInterval', map_classes_ucdirstep, success)
+       if (success) then
+          call createDirectionClasses(map_classes_ucdir, map_classes_ucdirstep)
+       else
+          allocate(map_classes_ucdir(0))
+       endif
 
-       if (size(map_classes_s1) == 0 .and. size(map_classes_hs) == 0 .and. size(map_classes_ucmag) == 0) then
-          call mess(LEVEL_ERROR, 'ClassMapInterval given, but none of WaterlevelClasses, WaterdepthClasses, VelocityMagnitudeClasses is defined.')
+       if (size(map_classes_s1) == 0 .and. size(map_classes_hs) == 0 .and. size(map_classes_ucmag) == 0 .and. map_classes_ucdirstep < 0d0) then
+          call mess(LEVEL_ERROR, 'ClassMapInterval given, but none of WaterlevelClasses, WaterdepthClasses, VelocityMagnitudeClasses, VelocityDirectionClassesInterval is defined.')
        endif
 
     endif
@@ -1960,6 +1966,36 @@ subroutine readClasses(className, incr_classes)
     endif
     deallocate(reals)
 end subroutine readClasses
+
+!> helper routine to convert step size to the class boundaries
+!! give error if step size is not valid (e.g. negative, > 360, number of steps is not an integer)
+subroutine createDirectionClasses(map_classes_ucdir, map_classes_ucdirstep)
+   use MessageHandling, only : mess, LEVEL_FATAL
+   use m_alloc, only : aerr
+   double precision, allocatable, intent(inout) :: map_classes_ucdir(:)   !< the constructed classes
+   double precision,              intent(in)    :: map_classes_ucdirstep  !< the input step size
+
+   double precision, parameter :: wholeCircle = 360d0
+   integer :: n  !< number of classes
+   integer :: i, ierr
+
+   if (map_classes_ucdirstep <= 0d0 .or. map_classes_ucdirstep > wholeCircle) then
+      call mess(LEVEL_FATAL, 'Step size for classes out of range; must be > 0 and <= 360; found: ', map_classes_ucdirstep)
+   end if
+
+   n = nint(wholeCircle / map_classes_ucdirstep)
+   if (comparereal(wholeCircle, n * map_classes_ucdirstep) /= 0) then
+      call mess(LEVEL_FATAL, 'Step size for classes must meet: 360 / step size gives an integer')
+   else if (n > 127) then
+      call mess(LEVEL_FATAL, 'Step size too small. To many classes to fit in a signed byte')
+   end if
+
+   allocate(map_classes_ucdir(n - 1), stat = ierr)
+   if (ierr /= 0) call aerr( 'map_classes_ucdir', ierr, n+1)
+   do i = 1, n - 1
+      map_classes_ucdir(i) = dble(i) * map_classes_ucdirstep
+   enddo
+end subroutine createDirectionClasses
 
 !> Present a list of all MDU entries (tree struct) that were not read from unstruc or read more than once.
 !> Present a list of all MDU entries (tree struct) ignored by unstruc or read more than once.
@@ -2933,6 +2969,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'output', 'VelocityMagnitudeClasses', map_classes_ucmag, 'Class map''s list of class values for velocity magnitudes')
     else if (writeall) then
        call prop_set(prop_ptr, 'output', 'VelocityMagnitudeClasses', '', 'Class map''s list of class values for velocity magnitudes')
+    end if
+    if (map_classes_ucdirstep > 0d0) then
+       call prop_set(prop_ptr, 'output', 'VelocityDirectionClassesInterval', map_classes_ucdirstep, 'Class map''s step size of class values for velocity direction')
+    else if (writeall) then
+       call prop_set(prop_ptr, 'output', 'VelocityDirectionClassesInterval', '', 'Class map''s step size of class values for velocity direction')
     end if
 
     call prop_set(prop_ptr, 'output', 'StatsInterval', ti_stat,        'Screen step output interval in seconds simulation time, if negative in seconds wall clock time')

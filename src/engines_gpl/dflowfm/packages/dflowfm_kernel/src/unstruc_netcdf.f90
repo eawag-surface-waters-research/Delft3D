@@ -188,6 +188,7 @@ type t_unc_mapids
    integer :: id_ucy(4)    = -1 !< Variable ID for 
    integer :: id_ucz(4)    = -1 !< Variable ID for 
    integer :: id_ucmag(4)  = -1 !< Variable ID for 
+   integer :: id_ucdir(4)  = -1 !< Variable ID for 
    integer :: id_ucxa(4)   = -1 !< Variable ID for 
    integer :: id_ucya(4)   = -1 !< Variable ID for 
    integer :: id_ucmaga(4) = -1 !< Variable ID for 

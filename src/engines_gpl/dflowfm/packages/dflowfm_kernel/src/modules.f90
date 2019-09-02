@@ -4172,6 +4172,8 @@ end subroutine reset_flowgeom
  double precision, allocatable, target :: map_classes_s1(:)  !< classes for water level
  double precision, allocatable, target :: map_classes_hs(:)  !< classes for water depth
  double precision, allocatable, target :: map_classes_ucmag(:)  !< classes for the magnitude of the velocity
+ double precision, allocatable, target :: map_classes_ucdir(:)  !< classes for the direction of the velocity
+ double precision                  :: map_classes_ucdirstep     !< step size of classes for the direction of the velocity
  double precision                  :: ti_stat     !< Interval between simulation statistics output (s).
  double precision                  :: ti_timings  !< (parallel) timings output interval
  double precision                  :: ti_split    !< Time interval for time splitting: time after which new his/map file will be created (e.g. montly), see also the unit below.
@@ -4284,6 +4286,10 @@ subroutine default_flowtimes()
     ti_timings  = 0d0               !< timings output interval
     ti_split    = 0d0               !< Time interval for time splitting of output files.
     ti_split_unit= 's'              !< Unit for time partitioning interval
+
+    ti_classmap           = -999d0  !< default no class map
+    map_classes_ucdirstep = -999d0  !< default no step size given for classes of flow direction
+    if (allocated(map_classes_ucdir)) deallocate(map_classes_ucdir)
 
     tmini       = -1d9              !< initial time for updating the 4 above
 
