@@ -238,11 +238,12 @@ module m_readStorageNodes
                if (.not. success1) then 
                   sStorageType = 'reservoir'
                end if
-               if ((.not. strcmpi(sStorageType, 'reservoir')) .and. (.not. strcmpi(sStorageType, 'closed'))) then
+               
+               call storageTypeStringToInteger(sStorageType, StorageType)
+               if (StorageType /= nt_Reservoir .and. StorageType /= nt_Closed) then
                   write(msgbuf, '(5a)') 'Wrong block in file ''', trim(storgNodesFile), ''': [', trim(blockname), ']. Field ''storageType'' is not correct. Supported values are "reservoir" and "closed".'
                   call err_flush()
                end if
-               call storageTypeStringToInteger(sStorageType, StorageType)
                
                ! read streetStorageArea
                if (useStreetStorage) then
