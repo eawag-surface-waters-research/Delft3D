@@ -1765,7 +1765,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          return
       endif
       select case(field_name)
-      case("crest_level", "CrestLevel")
+      case("crest_level", "CrestLevel", "crestLevel")
          if (is_in_network) then
             fieldptr = get_crest_level_c_loc(network%sts%struct(item_index))
             fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
