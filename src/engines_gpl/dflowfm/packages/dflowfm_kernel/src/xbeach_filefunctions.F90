@@ -1346,7 +1346,7 @@ subroutine start_logfiles(error)
    read(fid,*,iostat=iost)(((dat(i,j,k),i=1,d1),j=1,d2),k=1,d3)
    if (iost .ne. 0) then
       call writelog('esl','Error processing file ''',trim(fname),'''. File may be too short or contains invalid values.', & 
-      ' Terminating simulation')
+                          ' Terminating simulation')
       call xbeach_errorhandler()
    endif
    close(fid)
@@ -1354,7 +1354,7 @@ subroutine start_logfiles(error)
 
    end subroutine check_file_length_3D
 
-   subroutine checkbcfilelength(tstop,instat,filename,filetype,nonh)
+   subroutine checkbcfilelength(tstop,instat,filename,nspectrumloc,filetype,nonh)
 
    use m_xbeach_errorhandling
 
@@ -1364,14 +1364,15 @@ subroutine start_logfiles(error)
       integer          :: nlines
    end type
 
-   real*8, intent(in) :: tstop
-   character(slen), intent(in):: instat
-   character(slen)     :: filename,dummy
-   character(slen)     :: testc
-   character(len=1)    :: ch
-   integer           :: i,ier=0,nlines,filetype,fid,nlocs,ifid,fid2
-   real*8            :: t,dt,total,d1,d2,d3,d4,d5
+   real*8, intent(in)          :: tstop
+   character(slen), intent(in) :: instat
+   character(slen)             :: filename,dummy
+   character(slen)             :: testc
+   character(len=1)            :: ch
+   integer                     :: i,ier=0,nlines,filetype,fid,nlocs,ifid,fid2
+   real*8                      :: t,dt,total,d1,d2,d3,d4,d5
    type(fileinfo),dimension(:),allocatable :: bcfiles
+   integer, intent(in)         :: nspectrumloc
    logical,intent(in),optional :: nonh
    logical                     :: lnonh
 
@@ -1399,6 +1400,10 @@ subroutine start_logfiles(error)
       call report_file_read_error(filename)
    endif
    if (trim(testc)=='LOCLIST') then
+      if (nspectrumloc<2) then
+         call writelog('sle',' ','Error: LOCLIST found in file, but nspectrumloc<2. Change value in surfbeat input file, or change bc specification.')
+         call xbeach_errorhandler()
+      endif
       nlocs = nlines-1
       allocate(bcfiles(nlocs))
       do ifid = 1,nlocs

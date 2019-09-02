@@ -116,41 +116,41 @@ subroutine xbeach_all_input()
    !             function =   file         key      default  n allowed  n old allowed  allowed names  old allowed names
    instat  = readkey_str(md_surfbeatfile, 'instat', 'bichrom', 11, 11, allowednames, oldnames, required=(swave==1))
    deallocate(allowednames,oldnames)
-   if (  trim(instat)=='jons' .or. &
-      trim(instat)=='swan' .or. &
-      trim(instat)=='vardens'.or. &
-      trim(instat)=='stat_table' .or. &
-      trim(instat)=='jons_table' &
-      )then
-   bcfile = readkey_name(md_surfbeatfile,'bcfile')
-   call check_file_exist(bcfile)
-   call checkbcfilelength(tstop_user-tstart_user,instat,bcfile,filetype)
-   !filetype = 0
-   elseif (trim(instat)=='reuse') then
-      ! TO DO: check file length is done after recomputation of tstop due to morfacopt
-      ! at the end of this subroutine.
-      ! JRE: TO DO: implement reuse bc
-      inquire(file='ebcflist.bcf',exist=fe1)
-      inquire(file='qbcflist.bcf',exist=fe2)
-
-
-      if (.not. (fe1 .and. fe2)) then
-         call writelog('lswe','', &
-            'If ''instat=reuse'' the model directory may not contain sufficient boundary definition files.')
-         if (.not. fe1) then
-            call writelog('lswe','','Model currently missing ebcflist.bcf')
-         elseif (.not. fe2) then
-            call writelog('lswe','','Model currently missing qbcflist.bcf')
-         endif
-         call xbeach_errorhandler()
-      else
-         call writelog('lswe','','If ''instat=reuse'' the model directory must contain boundary definition files.')
-         call writelog('lswe','','Use ebcflist.bcf and qbcflist.bcf')
-         call xbeach_errorhandler()
-      endif
-   else
-      filetype=-1
-   endif
+   !if (  trim(instat)=='jons' .or. &
+   !   trim(instat)=='swan' .or. &
+   !   trim(instat)=='vardens'.or. &
+   !   trim(instat)=='stat_table' .or. &
+   !   trim(instat)=='jons_table' &
+   !   )then
+   !bcfile = readkey_name(md_surfbeatfile,'bcfile')
+   !call check_file_exist(bcfile)
+   !call checkbcfilelength(tstop_user-tstart_user,instat,bcfile, nspectrumloc, filetype)
+   !!filetype = 0
+   !elseif (trim(instat)=='reuse') then
+   !   ! TO DO: check file length is done after recomputation of tstop due to morfacopt
+   !   ! at the end of this subroutine.
+   !   ! JRE: TO DO: implement reuse bc
+   !   inquire(file='ebcflist.bcf',exist=fe1)
+   !   inquire(file='qbcflist.bcf',exist=fe2)
+   !
+   !
+   !   if (.not. (fe1 .and. fe2)) then
+   !      call writelog('lswe','', &
+   !         'If ''instat=reuse'' the model directory may not contain sufficient boundary definition files.')
+   !      if (.not. fe1) then
+   !         call writelog('lswe','','Model currently missing ebcflist.bcf')
+   !      elseif (.not. fe2) then
+   !         call writelog('lswe','','Model currently missing qbcflist.bcf')
+   !      endif
+   !      call xbeach_errorhandler()
+   !   else
+   !      call writelog('lswe','','If ''instat=reuse'' the model directory must contain boundary definition files.')
+   !      call writelog('lswe','','Use ebcflist.bcf and qbcflist.bcf')
+   !      call xbeach_errorhandler()
+   !   endif
+   !else
+   !   filetype=-1
+   !endif
    taper    = readkey_dbl (md_surfbeatfile,'taper',   100.d0,      0.0d0, 1000.d0)
    nwavmax     = readkey_dbl (md_surfbeatfile,'nmax',    0.8d0,       0.5d0, 1.d0)
    if (trim(instat) == 'stat') then
@@ -194,6 +194,45 @@ subroutine xbeach_all_input()
    Tm01switch      = readkey_int (md_surfbeatfile,'Tm01switch',   0,          0,          1       )
    swkhmin         = readkey_dbl (md_surfbeatfile,'swkhmin',      -0.01d0,   -0.01d0,     0.35d0  )
 
+   nspectrumloc    = readkey_int (md_surfbeatfile,'nspectrumloc',   1,          1,       10000 )
+
+   endif
+   !
+   if (  trim(instat)=='jons' .or. &
+      trim(instat)=='swan' .or. &
+      trim(instat)=='vardens'.or. &
+      trim(instat)=='stat_table' .or. &
+      trim(instat)=='jons_table' &
+      )then
+   bcfile = readkey_name(md_surfbeatfile,'bcfile')
+   call check_file_exist(bcfile)
+   call checkbcfilelength(tstop_user-tstart_user,instat,bcfile, nspectrumloc, filetype)
+   !filetype = 0
+   elseif (trim(instat)=='reuse') then
+      ! TO DO: check file length is done after recomputation of tstop due to morfacopt
+      ! at the end of this subroutine.
+      ! JRE: TO DO: implement reuse bc
+      inquire(file='ebcflist.bcf',exist=fe1)
+      inquire(file='qbcflist.bcf',exist=fe2)
+
+      if (.not. (fe1 .and. fe2)) then
+         call writelog('lswe','', &
+            'If ''instat=reuse'' the model directory may not contain sufficient boundary definition files.')
+         if (.not. fe1) then
+            call writelog('lswe','','Model currently missing ebcflist.bcf')
+         elseif (.not. fe2) then
+            call writelog('lswe','','Model currently missing qbcflist.bcf')
+         endif
+         call xbeach_errorhandler()
+      else
+         call writelog('lswe','','If ''instat=reuse'' the model directory must contain boundary definition files.')
+         call writelog('lswe','','Use ebcflist.bcf and qbcflist.bcf')
+         call xbeach_errorhandler()
+      endif
+   else
+      filetype=-1
+   endif
+   !
    if (filetype==0) then
       rt          = readkey_dbl(md_surfbeatfile,'rt',   min(3600.d0,tstop_user),    1200.d0,    7200.d0 ) !! to do
       dtbc        = readkey_dbl(md_surfbeatfile,'dtbc',          1.0d0,      0.1d0,      2.0d0   )
@@ -201,10 +240,6 @@ subroutine xbeach_all_input()
 
    if (trim(instat)=='swan') then
       dthetaS_XB  = readkey_dbl (md_surfbeatfile,'dthetaS_XB',   0.0d0,      -360.d0,    360.0d0 )
-   endif
-
-   nspectrumloc    = readkey_int (md_surfbeatfile,'nspectrumloc',   1,          1,       10000 )
-
    endif
    !
    !
@@ -1574,26 +1609,28 @@ subroutine xbeach_instationary()
    end do
 
    if (ntheta > 1) then
-      do k = 1, ndx
-         do itheta=1,ntheta
-            ! compute refraction velocity
-            if (windmodel.eq.1) then
+      ! compute refraction velocity
+      if (windmodel.eq.1) then
+         do k = 1, ndx
+            do itheta=1,ntheta
                ctheta(itheta, k) =                                           &
-                   sigt(itheta,k)/max(sinh(min(2d0*kwavt(itheta,k)*hh(k),10.0d0)),1d-10)*(dhsdx(k)*snx(itheta)-dhsdy(k)*csx(itheta))! + &
-               ctheta=sign(1.d0,ctheta)*min(abs(ctheta), .25d0 * sigt)                
-            else
-                
+                  sigt(itheta,k)/max(sinh(min(2d0*kwavt(itheta,k)*hh(k),10.0d0)),1d-10)*(dhsdx(k)*snx(itheta)-dhsdy(k)*csx(itheta))! + &
+            enddo
+         enddo
+         ctheta=sign(1.d0,ctheta)*min(abs(ctheta), .25d0 * sigt)
+      else
+         do k = 1, ndx
+            do itheta=1,ntheta
                ctheta(itheta, k) =                                           &
                   sigmwav(k)/max(sinh2kh(k),1d-10)*(dhsdx(k)*snx(itheta)-dhsdy(k)*csx(itheta))! + &
                   !dble(wci)*( csx(itheta) * (snx(itheta)*xbducxdx(k)-csx(itheta)*xbducxdy(k))          + &
                   !snx(itheta) * (snx(itheta)*xbducydx(k)-csx(itheta)*xbducydy(k)) )
-               ctheta=sign(1.d0,ctheta)*min(abs(ctheta),.5*pi/Trep)
-            endif
-            
+                  !ctheta=sign(1.d0,ctheta)*min(abs(ctheta),.5*pi/Trep)
+             enddo
          enddo
-      enddo
-!      ctheta=sign(1.d0,ctheta)*min(abs(ctheta),.5*pi/Trep)
-!      ctheta=sign(1.d0,ctheta)*min(abs(ctheta), .25d0 * sigt)
+         ctheta=sign(1.d0,ctheta)*min(abs(ctheta),.5*pi/Trep)
+      endif
+
       do itheta=1, ntheta
          where (hs<waveps)
             ctheta(itheta,:) = 0d0
@@ -2676,12 +2713,13 @@ subroutine xbeach_spectral_wave_init()
    double precision                          :: mindistr
    double precision, dimension(nwbnd)        :: hboundary
    double precision                          :: fac
-   double precision                          :: xa, ya, xb, yb, xx, yy
+   double precision                          :: xa, ya, xb, yb, xt, yt
    double precision                          :: disall, dis, xn, yn, rL, darc
    double precision                          :: dum1, dum2
    
    double precision, dimension(:), allocatable :: dist
    integer,          dimension(:), allocatable :: ibndspec
+   double precision, dimension(:), allocatable :: xx,yy
 
    integer                                   :: ibnd, minp, ip, ja
    integer                                   :: k, L, j, k2, LL
@@ -2731,8 +2769,12 @@ subroutine xbeach_spectral_wave_init()
 !  determine which boundary belongs to a spectrum
    allocate(dist(nspectrumloc))
    allocate(ibndspec(nspectrumloc))
+   allocate(xx(nspectrumloc))
+   allocate(yy(nspectrumloc))
    dist = 1d99
    ibndspec = 0
+   xx = dmiss
+   yy = dmiss
    
    fid = 31415926
    
@@ -2740,30 +2782,38 @@ subroutine xbeach_spectral_wave_init()
    ! check for LOCLIST
    read(fid,*)testline
    if (trim(testline)=='LOCLIST') then
+      !
       do i=1,nspectrumloc
-!        read x, y
-         read(fid,*,IOSTAT=err) xx,yy,dum
+         !        read x, y once
+         read(fid,*,IOSTAT=err) xt,yt,dum
          if (err /= 0) then
             ! something has gone wrong during the read of this file
             call writelog('lswe','a,i0,a,a)','error reading line ',i+1,' of file ',bcfile)
             call writelog('lswe','','check file for format errors and ensure the number of  ',&
-                                    'lines is equal to nspectrumloc')
+               'lines is equal to nspectrumloc')
             call xbeach_errorhandler()
          endif
+         xx(i) = xt
+         yy(i) = yt
+      enddo
+      !
+      do ibnd=1,nwbnd
+         !           read boundary polyline
+         call oldfil(minp, fnamwbnd(ibnd))
+         call delpol()
+         call reapol(minp,0)
          
-         do ibnd=1,nwbnd
-!           read boundary polyline         
-            call oldfil(minp, fnamwbnd(ibnd))
-            call delpol()
-            call reapol(minp,0)
-!           determine distance to boundary polyline
+         do i=1,nspectrumloc
+            !           determine distance to boundary polyline
             do ip=1,NPL-1
+               xt = xx(i)
+               yt = yy(i)
                xa = XPL(ip)
                ya = YPL(ip)
                xb = XPL(ip+1)
                yb = YPL(ip+1)
                if ( xa.ne.dmiss .and. xb.ne.dmiss ) then
-                  call dlinedis3(xx,yy,xa,ya,xb,yb,ja,dis,xn,yn,rL)
+                  call dlinedis3(xt,yt,xa,ya,xb,yb,ja,dis,xn,yn,rL)
                   if ( abs(dis).lt.abs(dist(i)) ) then ! new closest boundary polygon found for this spectrum
                      dist(i) = abs(dis)
                      ibndspec(i) = ibnd
@@ -2826,7 +2876,7 @@ subroutine xbeach_spectral_wave_init()
          ! Initialise lastwaveheight to zero
          ! Stored and defined in wave_boundary_main_module
          allocate(waveSpectrumAdministration(ibnd)%lastwaveelevation(waveBoundaryParameters(ibnd)%np,&
-            waveBoundaryParameters(ibnd)%ntheta))
+                  waveBoundaryParameters(ibnd)%ntheta))
 
 
          if (nspectrumloc<1) then
@@ -2912,10 +2962,10 @@ subroutine xbeach_spectral_wave_init()
                   ya = YPL(ip)
                   xb = XPL(ip+1)
                   yb = YPL(ip+1)
-                  xx = wavespectrumadministration(ibnd)%xspec(i)
-                  yy = wavespectrumadministration(ibnd)%yspec(i)
+                  xt = wavespectrumadministration(ibnd)%xspec(i)
+                  yt = wavespectrumadministration(ibnd)%yspec(i)
                   if ( xa.ne.dmiss .and. xb.ne.dmiss ) then
-                     call dlinedis3(xx,yy,xa,ya,xb,yb,ja,dis,xn,yn,rL)
+                     call dlinedis3(xt,yt,xa,ya,xb,yb,ja,dis,xn,yn,rL)
                      if ( dis.lt.disall ) then
                         disall = dis
                         drL(i) = darc + dbdistance(xa,ya,xn,yn, jsferic, jasfer3D, dmiss)
