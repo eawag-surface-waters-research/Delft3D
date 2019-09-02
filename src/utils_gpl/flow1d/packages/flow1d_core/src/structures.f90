@@ -1171,38 +1171,38 @@ end subroutine
       select case(pstru%type)
       case (ST_GENERAL_ST)
          if (comparereal(pstru%generalst%zs, pstru%generalst%zs_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The crest level for '''//trim(pstru%id)//''' is (locally) changed from ', pstru%generalst%zs, ' into ', pstru%generalst%zs_actual
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The crest level for '''//trim(pstru%id)//''' is (locally) changed from ', pstru%generalst%zs, ' into ', pstru%generalst%zs_actual, '.'
             call SetMessage(level, msgbuf)
          endif
          if (comparereal(pstru%generalst%ws, pstru%generalst%ws_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The crest width for  '''//trim(pstru%id)//''' is changed from ', pstru%generalst%ws, ' into ', pstru%generalst%ws_actual
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The crest width for  '''//trim(pstru%id)//''' is changed from ', pstru%generalst%ws, ' into ', pstru%generalst%ws_actual, '.'
             call SetMessage(level, msgbuf)
          endif
          if (comparereal(pstru%generalst%gateLowerEdgeLevel, pstru%generalst%gateLowerEdgeLevel_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The gate lower edge level for '''//trim(pstru%id)//''' is (locally) changed from ', pstru%generalst%gateLowerEdgeLevel, ' into ', pstru%generalst%gateLowerEdgeLevel_actual
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The gate lower edge level for '''//trim(pstru%id)//''' is (locally) changed from ', pstru%generalst%gateLowerEdgeLevel, ' into ', pstru%generalst%gateLowerEdgeLevel_actual, '.'
             call SetMessage(level, msgbuf)
          endif
          if (comparereal(pstru%generalst%gateopeningwidth, pstru%generalst%gateopeningwidth_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The gate opening width for '//trim(pstru%id)//''' is changed from ', pstru%generalst%gateopeningwidth, ' into ', pstru%generalst%gateopeningwidth_actual
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The gate opening width for '''//trim(pstru%id)//''' is changed from ', pstru%generalst%gateopeningwidth, ' into ', pstru%generalst%gateopeningwidth_actual, '.'
             call SetMessage(level, msgbuf)
          endif
       case(ST_BRIDGE)
          if (comparereal(pstru%bridge%bedLevel, pstru%bridge%bedLevel_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The bed level for '''//trim(pstru%id)//''' is changed from ', pstru%bridge%bedLevel, ' into ', pstru%bridge%bedLevel_actual
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bed level for '''//trim(pstru%id)//''' is changed from ', pstru%bridge%bedLevel, ' into ', pstru%bridge%bedLevel_actual, '.'
             call SetMessage(level, msgbuf)
          endif
       case(ST_UNI_WEIR)
          if (comparereal(pstru%uniweir%crestlevel, pstru%uniweir%crestlevel_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The crest level for '''//trim(pstru%id)//''' is changed from ', pstru%uniweir%crestlevel, ' into ', pstru%uniweir%crestlevel_actual
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The crest level for '''//trim(pstru%id)//''' is changed from ', pstru%uniweir%crestlevel, ' into ', pstru%uniweir%crestlevel_actual, '.'
             call SetMessage(level, msgbuf)
          endif
       case(ST_CULVERT)
          if (comparereal(pstru%culvert%bob_orig(1), bob0(1)) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The bed level of the channel at the left side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(1), ' into ', bob0(1)
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bed level of the channel at the left side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(1), ' into ', bob0(1), '.'
             call SetMessage(level, msgbuf)
          endif
          if (comparereal(pstru%culvert%bob_orig(2), bob0(2)) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2)') 'The bed level of the channel at the right side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(2), ' into ', bob0(2)
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bed level of the channel at the right side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(2), ' into ', bob0(2), '.'
             call SetMessage(level, msgbuf)
          endif
       end select
