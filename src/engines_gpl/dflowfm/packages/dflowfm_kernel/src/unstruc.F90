@@ -8780,11 +8780,12 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  !> Initializes the entire current model (geometry, boundaries, initial state)
  !! @return Error status: error (/=0) or not (0)
  integer function flow_modelinit() result(iresult)                     ! initialise flowmodel
- use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx, kfs, kfst0
+ use m_flowgeom,    only: jaFlowNetChanged, jaCreateLinks1D2D, ndx, lnx, kfs, kfst0
  use waq,           only: reset_waq
  use m_flow,        only: zws, zws0, kmx, jasecflow, lnkx
  use m_flowtimes
  use network_data,  only: netstat, NETSTAT_CELLS_DIRTY
+ use gridoperations, only: make1D2Dinternalnetlinks
  use m_partitioninfo
  use m_timer
  use m_flowtimes
@@ -8859,6 +8860,14 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call xbeach_wave_input()  ! will set swave and lwave
  endif
 
+ if (jaCreateLinks1D2D) then
+    ierr = make1D2Dinternalnetlinks()
+     if (ierr /= DFM_NOERR) then
+      call mess(LEVEL_WARN,'Error, failed to create 1D2D links.')
+      goto 1234
+    end if
+ end if
+ 
  ! TODO: unc_wri_map_header
 
  call mess(LEVEL_INFO,'Initializing flow model geometry...')

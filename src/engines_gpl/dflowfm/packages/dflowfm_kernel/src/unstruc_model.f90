@@ -889,6 +889,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double ( md_ptr, 'geometry', 'Bamin'   ,  Bamin )
     call prop_get_double ( md_ptr, 'geometry', 'OpenBoundaryTolerance',  rrtol)
     call prop_get_integer( md_ptr, 'geometry', 'AllowBndAtBifurcation',  jaAllowBndAtBifurcation)
+    call prop_get_integer( md_ptr, 'geometry', 'CreateLinks1D2D',  jaCreateLinks1D2D)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
 
 ! Numerics
@@ -2280,6 +2281,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or.  jaAllowBndAtBifurcation > 0) then
        call prop_set(prop_ptr, 'geometry', 'AllowBndAtBifurcation',  jaAllowBndAtBifurcation, 'Allow 1d boundary node when connecting branch leads to bifurcation (1: yes, 0: no)')
+    endif
+    if (writeall .or.  jaCreateLinks1D2D > 0) then
+       call prop_set(prop_ptr, 'geometry', 'CreateLinks1D2D',  jaCreateLinks1D2D, 'Ruecksichtslos create links between 1D nodes and 2D cells when initializing model (1: yes, 0: no)')
     endif
     if (writeall) then !
        call prop_set (prop_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber, 'Renumber the flow nodes (1: yes, 0: no)') ! hidden option for testing renumbering
