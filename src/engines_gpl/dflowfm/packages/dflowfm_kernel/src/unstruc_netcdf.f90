@@ -9156,7 +9156,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
                                     meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                     meshgeom1d%nbranchorder, &
-                                    nodeids = nodeids, nodelongnames = nodelongnames, nodebranchidx = meshgeom1d%nodebranchidx, nodeoffsets = meshgeom1d%nodeoffsets)
+                                    nodeids = nodeids, nodelongnames = nodelongnames, nodebranchidx = meshgeom1d%nodebranchidx, nodeoffsets = meshgeom1d%nodeoffsets, edgebranchidx = meshgeom1d%edgebranchidx, edgeoffsets = meshgeom1d%edgeoffsets)
          else
                call mess(LEVEL_ERROR, 'Could not put header in net geometry file.')
                return
@@ -12152,7 +12152,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                        meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                        meshgeom1d%nbranchorder, &
-                                       nodeids, nodelongnames, meshgeom1d%nodebranchidx, meshgeom1d%nodeoffsets,&
+                                       nodeids, nodelongnames, meshgeom1d%nodebranchidx, meshgeom1d%nodeoffsets, meshgeom1d%edgebranchidx, meshgeom1d%edgeoffsets,&
                                        writeopts=unc_writeopts)
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &

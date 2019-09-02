@@ -1737,7 +1737,7 @@ function ionc_create_1d_mesh_ugrid_v1(ioncid, networkname, meshid, meshname, nme
    ! set the meshname
    datasets(ioncid)%ug_file%meshnames(meshid) = meshname
    ! create mesh
-   ierr = ug_create_1d_mesh_v2(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, writexy, datasets(ioncid)%crs)
+   ierr = ug_create_1d_mesh_v2(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, 0, writexy, datasets(ioncid)%crs)
   
 end function ionc_create_1d_mesh_ugrid_v1
 

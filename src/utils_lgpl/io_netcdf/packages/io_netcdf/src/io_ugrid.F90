@@ -1099,7 +1099,7 @@ function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids
                                meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, & 
                                meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%ngeometry, &
                                meshgeom%nbranchorder, &
-                               nodeids, nodelongnames, meshgeom%nodebranchidx, meshgeom%nodeoffsets)
+                               nodeids, nodelongnames, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%edgebranchidx, meshgeom%edgeoffsets)
    
 end function ug_write_mesh_struct
 
@@ -1114,7 +1114,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                               sourceNodeId, targetNodeId, nbranchids, nbranchlongnames, nbranchlengths, nbranchgeometrynodes, nbranches, &
                               ngeopointx, ngeopointy, ngeometry, &
                               nbranchorder, &
-                              nodeids, nodelongnames, nodebranchidx, nodeoffsets, &
+                              nodeids, nodelongnames, nodebranchidx, nodeoffsets, edgebranchidx, edgeoffsets, &
                               writeopts) result(ierr)
    use m_alloc
    use string_module
@@ -1157,6 +1157,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Optional mesh1d variables for 1d UGrid
    integer, optional, pointer,intent(in)                     :: nodebranchidx(:) !< Branch indexes for each mesh1d node.
    double precision, optional, pointer,intent(in)            :: nodeoffsets(:)   !< Offset along branch on which each mesh1d node lies.
+   integer,          optional, pointer,intent(in)            :: edgebranchidx(:) !< Branch indexes for each mesh1d edge.
+   double precision, optional, pointer,intent(in)            :: edgeoffsets(:)   !< Offset along branch on which each mesh1d edge lies.
    integer,                           optional, intent(in)   :: writeopts !< integer option, currently only: UG_WRITE_LATLON
    
    integer                                               :: ierr !< Result status (UG_NOERR==NF90_NOERR) if successful.
@@ -1278,10 +1280,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
             ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
         endif
         if (numNode.gt.0) then
-             if ((numEdge.gt. 0).and. meshids%varids(mid_edgenodes) == -1) then 
-                 ierr  = nf90_def_dim(ncid, prefix//'_nEdges', numEdge, meshids%dimids(mdim_edge))
-             endif
-             ierr = ug_create_1d_mesh_v1(ncid, network1dname, meshids, meshname, numNode, 1)
+             ierr = ug_create_1d_mesh_v2(ncid, network1dname, meshids, meshname, numNode, numEdge, 1, crs) ! Creates node and edge variables
              ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
         endif
       endif
@@ -1294,8 +1293,11 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       ! edge x,y-coordinates.
-      ierr = ug_addcoordvars(ncid, meshids%varids(mid_edgex), meshids%varids(mid_edgey), (/ meshids%dimids(mdim_edge) /), prefix//'_edge_x', prefix//'_edge_y', &
-                             'characteristic x-coordinate of the mesh edge (e.g. midpoint)', 'characteristic y-coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge', crs)
+      if (meshids%varids(mid_edgex) == -1) then
+         ierr = ug_addcoordvars(ncid, meshids%varids(mid_edgex), meshids%varids(mid_edgey), (/ meshids%dimids(mdim_edge) /), prefix//'_edge_x', prefix//'_edge_y', &
+                                'characteristic x-coordinate of the mesh edge (e.g. midpoint)', 'characteristic y-coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge', crs)
+      end if
+
       ! Add bounds.
       ! UNST-2791: until further notice we will not write edge bounds anymore (at least not until we have a full polygon bounds shape for each edge, that is, with at least four points).
       !ierr = nf90_put_att(ncid, meshids%varids(mid_edgex), 'bounds',    prefix//'_edge_x_bnd')
@@ -1491,6 +1493,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
         if (present(nodelongnames).and.allocated(nodelongnames)) then
             ierr = nf90_put_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
         endif
+        if (present(edgebranchidx) .and. associated(edgebranchidx)) then
+           ierr = ug_put_1d_mesh_edges(ncid, meshids, edgebranchidx, edgeoffsets, start_index, xe, ye)
+        end if
       endif
       ! always write edge nodes
       if (meshids%varids(mid_edgenodes).ne.-1) then
@@ -3885,15 +3890,16 @@ function ug_create_1d_mesh_v1(ncid, networkname, meshids, meshname, nmeshpoints,
    crs%epsg_code = 0
    
    ierr = -1
-   ierr = ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints, writexy, crs)
+   ierr = ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints, 0, writexy, crs)
 end function ug_create_1d_mesh_v1
 
 !> This function creates a 1d mesh accordingly to the new 1d format.
 !> Including correct names for x and y-coordinates.
-function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints, writexy, crs) result(ierr)
+function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints, nmeshedges, writexy, crs) result(ierr)
    
    integer         , intent(in)    :: ncid
    integer         , intent(in)    :: nmeshpoints
+   integer         , intent(in)    :: nmeshedges
    type(t_ug_mesh) , intent(inout) :: meshids   
    character(len=*), intent(in)    :: networkname
    character(len=*), intent(in)    :: meshname
@@ -3925,8 +3931,13 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    if ( ierr /= UG_NOERR) then 
          ierr  = nf90_def_dim(ncid, prefix//'_nNodes', nmeshpoints, meshids%dimids(mdim_node))
    endif
-   ierr = nf90_inq_dimid(ncid, prefix//'_nEdges',    meshids%dimids(mdim_edge))  
-   
+   if (nmeshedges > 0) then
+      ierr = nf90_inq_dimid(ncid, prefix//'_nEdges',    meshids%dimids(mdim_edge))  
+      if ( ierr /= UG_NOERR) then 
+            ierr  = nf90_def_dim(ncid, prefix//'_nEdges', nmeshedges, meshids%dimids(mdim_edge))
+      endif
+   end if
+
    !define mesh1d accordingly to the UGRID format
    ierr = nf90_def_var(ncid, prefix, nf90_int, meshids%varids(mid_meshtopo))
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'cf_role','mesh_topology')
@@ -3938,12 +3949,16 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension',prefix//'_nNodes')
    if (writexy == 1) then
        ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_node_branch '//prefix//'_node_offset '//prefix//'_node_x '//prefix//'_node_y')
-       ! TODO: UNST-2763: do we need to add edge coordinates here as well for writing? Same below.
+       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_coordinates', prefix//'_edge_branch '//prefix//'_edge_offset '//prefix//'_edge_x '//prefix//'_edge_y')
    endif
    if (writexy == 0) then
        ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_node_branch '//prefix//'_node_offset')
+       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_coordinates', prefix//'_edge_branch '//prefix//'_edge_offset')
    endif
-   
+
+   !
+   ! Nodes
+   !
    ! 1. mesh1D :assign the branch number to each node
    ierr = nf90_def_var(ncid, prefix//'_node_branch', nf90_int, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dnodebranch))
    ierr = nf90_put_att(ncid, meshids%varids(mid_1dnodebranch), 'long_name', 'Index of branch on which mesh nodes are located')
@@ -3964,6 +3979,31 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
        ierr = nf90_put_att(ncid, meshids%varids(mid_nodey), 'long_name', 'y-coordinate of mesh nodes')
    endif
    
+   !
+   ! Edges
+   !
+   if (nmeshedges > 0) then
+      ! 1. mesh1D :assign the branch number to each edge
+      ierr = nf90_def_var(ncid, prefix//'_edge_branch', nf90_int, (/ meshids%dimids(mdim_edge) /) , meshids%varids(mid_1dedgebranch))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_1dedgebranch), 'long_name', 'Index of branch on which mesh edges are located')
+      ! NOTE: currently the only write/put command is in ug_put_1d_mesh_discretisation_points_v1, which states hardcoded start_index=0
+      ! Quote: we have not defined the start_index, so when we put the variable it must be zero based
+      ierr = nf90_put_att(ncid, meshids%varids(mid_1dedgebranch), 'start_index', 0)
+
+      ! 2. mesh1D :assign the the offset along the branch for each edge
+      ierr = nf90_def_var(ncid, prefix//'_edge_offset', nf90_double, (/ meshids%dimids(mdim_edge) /) , meshids%varids(mid_1dedgeoffset))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_1dedgeoffset), 'long_name', 'Offset along branch of mesh edges')   
+      ierr = nf90_put_att(ncid, meshids%varids(mid_1dedgeoffset), 'units', 'm')   
+   
+      if (writexy == 1) then
+          ierr = nf90_def_var(ncid, prefix//'_edge_x', nf90_double, (/ meshids%dimids(mdim_edge) /), meshids%varids(mid_edgex))
+          ierr = nf90_def_var(ncid, prefix//'_edge_y', nf90_double, (/ meshids%dimids(mdim_edge) /), meshids%varids(mid_edgey))
+          ierr = ug_addcoordatts(ncid, meshids%varids(mid_edgex), meshids%varids(mid_edgey), crs)
+          ierr = nf90_put_att(ncid, meshids%varids(mid_edgex), 'long_name', 'Characteristic x-coordinate of the mesh edge (e.g. midpoint)')
+          ierr = nf90_put_att(ncid, meshids%varids(mid_edgey), 'long_name', 'Characteristic y-coordinate of the mesh edge (e.g. midpoint)')
+      endif
+   end if
+
    if (wasInDefine==0) then
       ierr = nf90_enddef(ncid)
    endif
@@ -4358,6 +4398,61 @@ function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, n
    endif
 
 end function ug_put_1d_mesh_discretisation_points_v1
+
+!> Write the mesh1d edge coordinates.
+!! The edge coordinates are representative coordinates for quantities defined on the edge,
+!! typically the middle of each edge. Default form for a 1d mesh is by branch index+offset,
+!! but x/y may be given as well.
+function ug_put_1d_mesh_edges(ncid, meshids, edgebranchidx, edgeoffset, startIndex, coordx, coordy) result(ierr)
+   use array_module
+   integer,                    intent(in   ) :: ncid             !< NetCDF dataset id, should be already open and ready for writing.
+   type(t_ug_mesh),            intent(in   ) :: meshids          !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,                    intent(in   ) :: edgebranchidx(:) !< Branch index for each mesh1d edge.
+   double precision,           intent(in   ) :: edgeoffset(:)    !< Offset along branch for each mesh1d edge.
+   integer,                    intent(in   ) :: startIndex       !< Start index convention used in input edge branch indexes (0 or 1).
+   double precision, optional, intent(in   ) :: coordx(:)        !< (Optional) representative x-coordinate of each mesh1d edge.
+   double precision, optional, intent(in   ) :: coordy(:)        !< (Optional) representative y-coordinate of each mesh1d edge.
+   integer                                   :: ierr             !< Result status (UG_NOERR if successful).
+
+   integer, allocatable :: shiftededgebranchidx(:)
+   integer              :: nmeshedges
+   integer :: jaInData
+
+   ierr = UG_SOMEERR
+
+   ! Put dataset in data mode (possibly it is already) to write variables.
+   jaInData = 0
+   ierr = nf90_enddef(ncid)
+   if (ierr == nf90_enotindefine) jaInData = 1 ! Was already in data mode.
+
+   ierr = nf90_inquire_dimension(ncid, meshids%dimids(mdim_edge), len=nmeshedges)
+   if (ierr /= UG_NOERR) then
+       Call SetMessage(Level_Fatal, 'could not read the mesh1d edge dimension')
+   end if
+   
+   !we have not defined the start_index, so when we put the variable it must be zero based
+   allocate(shiftededgebranchidx(size(edgebranchidx)))
+   shiftededgebranchidx = edgebranchidx
+   if (startIndex.ne.-1) then
+       ierr = convert_start_index(shiftededgebranchidx, imiss, startIndex, 0)
+   endif
+
+   ierr = nf90_put_var(ncid, meshids%varids(mid_1dedgebranch), shiftededgebranchidx)
+   ierr = nf90_put_var(ncid, meshids%varids(mid_1dedgeoffset), edgeoffset)
+   
+   if( present(coordx) .and. present(coordy) ) then
+      ierr = nf90_put_var(ncid, meshids%varids(mid_edgex), coordx)
+      ierr = nf90_put_var(ncid, meshids%varids(mid_edgey), coordy)
+   endif
+
+   ! Leave the dataset in the mode we got it in.
+   if (jaInData == 0) then
+      ierr = nf90_redef(ncid)
+   end if
+
+
+end function ug_put_1d_mesh_edges
+
 
 !> This function gets the number of network nodes
 function ug_get_1d_network_nodes_count(ncid,netids, nNodes) result(ierr)
