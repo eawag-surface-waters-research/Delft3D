@@ -844,6 +844,7 @@ module m_meteo
       integer                   :: row0, row1, col0, col1, ncols, nrows, issparse, Ndatasize
       character(len=128)        :: txt1, txt2, txt3
 
+      call clearECMessage()
       ec_addtimespacerelation = .false.
       if (present(quiet)) then
          quiet_ = quiet
@@ -895,11 +896,16 @@ module m_meteo
       if (ec_filetype == provFile_bc) then
          if (.not.ecCreateInitializeBCFileReader(ecInstancePtr, forcingfile, location, qidname, &
                                                  refdate_mjd, tzone, ec_second, fileReaderId)) then
-            goto 1234
+             
+            if (.not. quiet_) then
+               message = dumpECMessageStack(LEVEL_WARN, callback_msg)
+            end if
+            message = 'Boundary '''//trim(qidname)//''', location='''//trim(location)//''', file='''//trim(forcingfile)//''' failed!' 
+            call mess(LEVEL_ERROR, message)
          end if
       else
                !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
-              ! success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
+               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
       ! ============================================================
       ! For the remaining types, construct the fileReader and source Items here.
       ! ============================================================
@@ -1634,7 +1640,6 @@ module m_meteo
          ! TODO: RL: the message below is from m_meteo::message, whereas timespace::getmeteoerror() returns timespace::errormessage. So now this message here is lost/never printed at call site.
          message = dumpECMessageStack(LEVEL_WARN, callback_msg)
          ! Leave this concluding message for the caller to print or not. (via getmeteoerror())
-         call setECMessage(message)
       end if
       message = 'm_meteo::ec_addtimespacerelation: Error while initializing '''//trim(name)//''' from file: '''//trim(filename)//''''
       if (present(forcingfile)) then
