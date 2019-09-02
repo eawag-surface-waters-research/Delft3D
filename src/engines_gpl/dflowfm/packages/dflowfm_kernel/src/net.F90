@@ -34365,6 +34365,9 @@ function read_commandline() result(istat)
             write (*,'(a)') trim(msgbuf)
             call get_unstruc_source(msgbuf)
             write (*,'(a)') 'Source: '//trim(msgbuf)
+#ifdef __INTEL_COMPILER
+            write  (*, '(a,f5.2)') "Compiled with Intel ifort, version ", (0.01*__INTEL_COMPILER)
+#endif
             write (*,'(a)') 'Compiled with support for:'
             if (jaGUI == 1) then
                write (*,'(a)') 'IntGUI   : yes'
