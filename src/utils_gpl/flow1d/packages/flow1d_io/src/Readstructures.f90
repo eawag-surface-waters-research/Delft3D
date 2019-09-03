@@ -431,21 +431,27 @@ module m_readstructures
          case (ST_WEIR)
             nweir = nweir+1
             sts%weirIndices(nweir) = istru
-            ! From now on this is a general structure
-            sts%struct(istru)%type = ST_GENERAL_ST
+            if (sts%currentFileVersion >= 2) then
+               ! From now on this is a general structure
+               sts%struct(istru)%type = ST_GENERAL_ST
+            endif
          case (ST_CULVERT)
             nculvert = nculvert + 1
             sts%culvertIndices(nculvert) = istru
          case (ST_ORIFICE)
             norifice = norifice + 1
             sts%orificeIndices(norifice) = istru
-            ! From now on this is a general structure
-            sts%struct(istru)%type = ST_GENERAL_ST
+            if (sts%currentFileVersion >= 2) then
+               ! From now on this is a general structure
+               sts%struct(istru)%type = ST_GENERAL_ST
+            endif
          case (ST_GATE)
             ngate = ngate + 1
             sts%gateIndices(ngate) = istru
-            ! From now on this is a general structure
-            sts%struct(istru)%type = ST_GENERAL_ST
+            if (sts%currentFileVersion >= 2) then
+               ! From now on this is a general structure
+               sts%struct(istru)%type = ST_GENERAL_ST
+            endif
          case (ST_BRIDGE)
             nbridge = nbridge + 1
             sts%bridgeIndices(nbridge) = istru
