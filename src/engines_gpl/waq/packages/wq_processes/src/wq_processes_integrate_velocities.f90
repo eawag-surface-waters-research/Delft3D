@@ -70,6 +70,8 @@
       real     ( 4) vfrom       ! from volume
       real     ( 4) vto         ! to volume
       real     ( 4) q           ! flow for this exchange
+      real     ( 4) cfrom       ! from concentration
+      real     ( 4) cto         ! to concentration
       real     ( 4) dq          ! total flux from and to
       real     ( 4) dt          ! time step as real
 
@@ -92,9 +94,13 @@
                   q = velo  ( ivpnt(isys), iq ) * a
                   if (q .eq. 0.0) cycle
                   if (q .gt. 0.0 ) then
-                      dq = min(q*conc(isys,ifrom), conc(isys,ifrom)*vfrom/dt)
+                      cfrom = conc(isys,ifrom)
+                      if (cfrom.le.0.0) cycle
+                      dq = min(q*cfrom, (cfrom * vfrom)/dt)
                   else
-                      dq = max(q*conc(isys,ito), -conc(isys,ito)*vto/dt)
+                      cto = conc(isys,ito)
+                      if (cto.le.0.0) cycle
+                      dq = max(q*cto, -(cto * vto)/dt)
                   endif
                   deriv(ifrom,isys) = deriv(ifrom,isys) - dq/vfrom
                   deriv(ito,isys) = deriv(ito,isys) + dq/vto
