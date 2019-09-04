@@ -536,7 +536,7 @@ module m_meteo
             itemPtr1 => item_pump
             !dataPtr1      => qpump
          case ('pump_discharge') ! flow1d pump
-            itemPtr1 => item_pump_dis
+            !itemPtr1 => item_pump_dis
             !dataPtr1      => qpump ! TODO: UNST-2724: needs more thinking, see issue comments.
          case ('valve1D')
             itemPtr1 => item_valve1D
