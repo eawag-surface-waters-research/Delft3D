@@ -77,6 +77,9 @@
       logical lsolu
       real(8), parameter :: solmin=100.0
 
+      numuni = 0
+      numun = 0
+
 !  Calculate maximum primary production and respiration rates.
       call maxprd(t)
 
