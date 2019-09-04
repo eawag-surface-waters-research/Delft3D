@@ -129,13 +129,8 @@ contains
       integer                        :: allowedflowdir
       integer                        :: dir
 
-      logical                        :: IsCulvert
-      logical                        :: IsSiphon
-      logical                        :: IsInvertedSiphon
-
       double precision               :: smax             !< zeta_1 (upstream water level)
       double precision               :: smin             !< zeta_2 (downstream water level)
-      logical                        :: firstafterdry
       logical                        :: isfreeflow
       double precision               :: bu
       double precision               :: cmus
@@ -171,9 +166,6 @@ contains
       double precision               :: totalLoss
 
       ! Culvert Type
-      IsCulvert        = .true.
-      IsSiphon         = .false.
-      IsInvertedSiphon = .false.
       
       ! Check bobs
       culvert%bob_orig(1) = bob0(1)
@@ -230,102 +222,37 @@ contains
          return
       endif
 
-      ! Check on flooding or drying with treshold
-      firstafterdry = .false.
-
-      if (IsCulvert) then
-      
-         if ((smax - culvertCrest - gl_thickness) < thresholdDry) then
-            kfum = 0
-         else
-            kfum = 1
-         endif
-
-         if (kfum==0) then 
-            kfum  = 0
-            fum   = 0.0d0
-            rum   = 0.0d0
-            u1m   = 0.0d0
-            u0m   = 0.0d0
-            qm    = 0.0d0
-            q0m   = 0.0d0
-            culvert%state = 0
-            return
-         endif
-      
+      if ((smax - culvertCrest - gl_thickness) < thresholdDry) then
+         kfum = 0
       else
-      
-         if ( ((smax - culvertCrest - gl_thickness) < thresholdDry) .or.                             &
-              (IsInvertedSiphon .and. (dir == 1)  .and. ((s1m1 - bob0(1)) < thresholdDry)) .or.     &
-              (IsInvertedSiphon .and. (dir == -1) .and. ((s1m2 - bob0(2)) < thresholdDry))) then
-            kfum = 0
-         elseif ( ((smax - culvertCrest - gl_thickness) > thresholdFlood) .and.                            &
-                  ((IsInvertedSiphon .and. (dir == 1)  .and. ((s1m1 - bob0(1)) > thresholdFlood)) .or.    &
-                   (IsInvertedSiphon .and. (dir == -1) .and. ((s1m2 - bob0(2)) > thresholdFlood)))) then
-            if (kfum == 0) then
-               firstafterdry = .true.
-            endif
-            kfum = 1
-         endif
-
-         if (IsInvertedSiphon .and. kfum == 0) then
-            fum   = 0.0d0
-            rum   = 0.0d0
-            u1m   = 0.0d0
-            u0m   = 0.0d0
-            qm    = 0.0d0
-            q0m   = 0.0d0
-            culvert%state = 0
-            return
-         endif
-
+         kfum = 1
       endif
 
+      if (kfum==0) then 
+         kfum  = 0
+         fum   = 0.0d0
+         rum   = 0.0d0
+         u1m   = 0.0d0
+         u0m   = 0.0d0
+         qm    = 0.0d0
+         q0m   = 0.0d0
+         culvert%state = 0
+         return
+      endif
+      
       !     First find out the critical depth that can be used in free flow equations
       !     pjo, 13-04-2000, ars 4952, when flow direction changes, critical
       !     depth is taken as zero.
-      ! if (firstafterdry .or. (dble(dir) * qm <= 0.0d0)) then Simplification does not give same result
-      if (firstafterdry .or.                       &
-          ((dir == -1) .and. (qm > 0.0d0)) .or.    &
-          ((dir == 1)  .and. (qm < 0.0d0))) then
+      if ( ( (dir == -1) .and. (qm > 0.0d0) ) .or.    &
+           ( (dir == 1)  .and. (qm < 0.0d0) ) ) then
          dc = 0.0d0 
       else
          dc = GetCriticalDepth(qm, CrossSection)
       endif
 
-      if (IsSiphon) then
-      
-         ! Siphon
-         ! Now find out whether the upstream water level is greater than the
-         ! crest level + characteristic height of siphon
-         ! and check on the flow direction of the siphon -> can be only positive
-         if ( (smax - (inflowCrest + CrossSection%charHeight) < -ThresholdSiphon * CrossSection%charHeight) .or. &
-              (s1m1 < s1m2)) then
-            kfum = 0
-         elseif ((smax - (inflowCrest + CrossSection%charHeight)) > thresholdFlood) then
-            kfum = 1
-         else
-         endif
-      
-         if (kfum == 0) then
-            fum = 0.0d0
-            rum = 0.0d0
-            u1m = 0.0d0
-            qm  = 0.0d0
-            q0m = 0.0d0
-            return
-         endif
-
-         ! Check if siphon is in operation
-      endif
 
       ! Calculate cross-section values in culvert
-      if (IsCulvert) then
-         dpt = smax - inflowCrest
-      else
-         ! Siphon always runs full
-         dpt = CrossSection%charHeight
-      endif
+      dpt = smax - inflowCrest
       
       call GetCSParsFlow(CrossSection, dpt, wArea, wPerimiter, wWidth)     
       chezyCulvert = getchezy(CrossSection%frictionTypePos(1), CrossSection%frictionValuePos(1), warea/wPerimiter, dpt, 1d0)
@@ -383,59 +310,34 @@ contains
       aum    = culvertArea
       dadsm  = wWidth
 
-      if (infuru) then
-      
-         if (isCulvert) then
-         
-            uest = u1m
+      uest = u1m
 
+      if (isfreeflow) then
+         
+         if (dir==1) then
+            d11 = s1m1 - outflowCrest - gl_thickness - dc
          else
-
-            if (abs(u1m) < 1.0d-8)then
-
-               ! Estimate velocity through siphon
-               ! Because the velocity is used explicitly an estimation of u is necessary to prevent 
-               ! overshoot situations.
-
-               if (isfreeflow) then
-                  uest = cmus * sqrt(2 * gravity * (smax - outflowCrest - gl_thickness - dc))
-               else
-                  uest = cmus * sqrt(2  *gravity * (smax - smin))
-               endif
-            else
-               uest = u1m        
-            endif   
-         
+            d11 = s1m2 - outflowCrest - gl_thickness - dc
          endif
-
-         if (isfreeflow) then
-         
-            if (dir==1) then
-               d11 = s1m1 - outflowCrest - gl_thickness - dc
-            else
-               d11 = s1m2 - outflowCrest - gl_thickness - dc
-            endif
             
-            d00 = max(1.0d-10, smax - smin)
+         d00 = max(1.0d-10, smax - smin)
             
-            cu = cmus * cmus * 2.0d0 * gravity * d11 / (dxm * d00)
+         cu = cmus * cmus * 2.0d0 * gravity * d11 / (dxm * d00)
             
-         else
+      else
          
-            cu = cmus * cmus * 2.0d0 * gravity / dxm
+         cu = cmus * cmus * 2.0d0 * gravity / dxm
             
-         endif
-         
-         fr = abs(uest) / dxm
-         
-         bu = 1.0d0 / dt + fr
-         du = u0m / dt
-         
-         fum = cu / bu
-         rum = du / bu
-         
       endif
-      
+         
+      fr = abs(uest) / dxm
+         
+      bu = 1.0d0 / dt + fr
+      du = u0m / dt
+         
+      fum = cu / bu
+      rum = du / bu
+         
       if (isfreeflow) then
          culvert%state = 5
       else
