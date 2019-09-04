@@ -185,12 +185,7 @@ contains
       
       crest   = max(bob0(1), bob0(2), genstr%zs)
       gle = max(crest, genstr%gateLowerEdgeLevel)
-      if (gle > genstr%gateLowerEdgeLevel_actual) then
-         ! Take the largest change as actual value. 
-         ! Note: the adaptation of crest level at the different links depend on the BOB of this link
-         !       as a result the change of the GLE might be different for the different links as well
-         genstr%gateLowerEdgeLevel_actual = gle
-      endif
+      genstr%gateLowerEdgeLevel_actual = gle
       alm  = as1
       arm  = as2
       s1ml = s1m1
@@ -1092,7 +1087,7 @@ contains
       if (numlinks==1) then
          genstru%widthcenteronlink(1) = genstru%ws_actual
          ! gateclosedfraction will always be between 0 (= fully opened) and 1 (= fully closed)
-         genstru%gateclosedfractiononlink(1) = genstru%gateopeningwidth_actual/genstru%ws_actual
+         genstru%gateclosedfractiononlink(1) = 1d0 - genstru%gateopeningwidth_actual/genstru%ws_actual
       else
          do L0=1,numlinks
             Lf = iabs(links(L0))

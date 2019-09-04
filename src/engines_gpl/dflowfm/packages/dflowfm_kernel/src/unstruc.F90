@@ -34420,6 +34420,12 @@ end subroutine setbobs_fixedweirs
                       wetdown = max(wetdown, 0.0001d0)
                       call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
                           q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob0(:,L), wetdown, .true.)
+                      bl(k1) = min(bl(k1), bob0(1,L))
+                      !if (comparereal(pstru%culvert%bob_orig(2), bob0(2)) /= 0) then
+                      !   write(msgbuf,'(a,f8.2,a,f8.2)') 'The bed level of the channel at the right side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(2), ' into ', bob0(2)
+                      !   call SetMessage(level, msgbuf)
+                      !endif
+                      
                    case (ST_UNI_WEIR)
                       call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, bob0(:,L), kfu, s1(k1), s1(k2), &
                           q1(L), q1(L), u1(L), u0(L), dx(L), dts)
