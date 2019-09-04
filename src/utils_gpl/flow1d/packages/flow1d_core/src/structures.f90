@@ -82,6 +82,7 @@ module m_1d_structures
    public set_valve_opening
    public incStructureCount
    public GetPumpCapacity
+   public get_pump_capacity_c_loc
    public GetPumpStage
    public GetPumpReductionFactor
    public initialize_structure_links
@@ -1078,7 +1079,24 @@ end subroutine
       end if
 
    end function GetPumpCapacity
-   
+
+
+   !> Gets a c_ptr to the pump capacity field.
+   !! Use this function when it is needed to later adjust the pump capacity via the c_ptr.
+   !! When read-only getting is sufficient, use getPumpCapacity instead.
+   type(c_ptr) function get_pump_capacity_c_loc(struc)
+      type(t_structure), intent(in) :: struc !< The structure object containing the pump.
+      
+      select case (struc%type)
+      case (ST_PUMP)
+         get_pump_capacity_c_loc = c_loc(struc%pump%capacity(1))
+      case default
+         get_pump_capacity_c_loc = C_NULL_PTR
+       end select
+
+   end function get_pump_capacity_c_loc   
+
+
    !> Gets pump actual stage.
    double precision function GetPumpStage(stru)
       implicit none   

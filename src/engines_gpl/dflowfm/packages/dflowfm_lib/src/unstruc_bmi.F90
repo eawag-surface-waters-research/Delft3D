@@ -1461,7 +1461,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    use m_monitoring_crosssections
    use m_strucs
    use m_structures , only: valdambreak
-   use m_1d_structures , only: get_crest_level_c_loc
+   use m_1d_structures
    use m_wind
    use unstruc_channel_flow, only: network
    use unstruc_messages
@@ -1496,7 +1496,11 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
       endif
       select case(field_name)
       case("capacity")
-         x = c_loc(qpump(item_index))
+         if (is_in_network) then
+            x = get_pump_capacity_c_loc(network%sts%struct(item_index))
+         else
+            x = c_loc(qpump(item_index))
+         end if
          return
       end select
 
@@ -1714,7 +1718,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    use iso_c_utils
    use unstruc_messages
    use m_strucs
-   use m_1d_structures , only: get_crest_level_c_loc
+   use m_1d_structures
    use m_wind
    use unstruc_channel_flow, only: network
 
@@ -1753,8 +1757,13 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
       endif
       select case(field_name)
       case("capacity")
-         call c_f_pointer(xptr, x_0d_double_ptr)
-         qpump(item_index) = x_0d_double_ptr
+         if (is_in_network) then
+            fieldptr = get_pump_capacity_c_loc(network%sts%struct(item_index))
+            fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
+         else
+            call c_f_pointer(xptr, x_0d_double_ptr)
+            qpump(item_index) = x_0d_double_ptr
+         end if
          return
       end select
 
