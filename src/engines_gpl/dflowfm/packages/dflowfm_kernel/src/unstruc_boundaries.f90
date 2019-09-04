@@ -1869,7 +1869,7 @@ use m_alloc
 use m_flowgeom
 use m_netw
 use unstruc_messages
-use unstruc_boundaries, only : checkCombinationOldNewKeywordsGeneralStructure
+use unstruc_boundaries, only : checkCombinationOldNewKeywordsGeneralStructure, adduniformtimerelation_objects
 use unstruc_channel_flow
 use m_structures ! Jan's channel_flow for Sobek's generalstructure (TODO)
 use m_strucs     ! Herman's generalstructure
@@ -1886,8 +1886,9 @@ use geometry_module
 USE gridoperations, only: incells
 use unstruc_model, only: md_structurefile_dir
 use unstruc_files, only: resolvePath
-use string_module, only: str_lower
- 
+use string_module, only: str_lower, strcmpi
+use iso_c_binding
+
 implicit none
 logical                       :: status
 character(len=256)            :: plifile
@@ -1909,6 +1910,7 @@ character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in Mess
                                     ! TODO: in readstruc* change incoming ids to len=*
 character(len=idLen)          :: branchid
 type(t_structure), pointer    :: pstru
+type(t_forcing), pointer      :: pfrc
 logical                       :: successloc
 
 integer :: istrtmp
@@ -1924,9 +1926,37 @@ double precision, allocatable :: xl(:,:), yl(:,:)
 integer                       :: branchIndex   
 integer                       :: istat
 double precision              :: chainage
+double precision, pointer :: tgtarr(:)
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
 status = .False.
+
+!
+! Some structures may have already been read by flow1d's readStructures into network.
+!
+do i=1,network%forcinglist%Count
+   pfrc => network%forcinglist%forcing(i)
+
+   call GetStrucType_from_int(pfrc%st_type, strtype) ! e.g., 'pump'
+   qid = trim(strtype)//'_'//trim(pfrc%param_name) ! e.g., qid = 'pump_capacity'
+
+   fnam = trim(pfrc%filename)
+   if (.not. strcmpi(fnam, 'REALTIME')) then
+      call resolvePath(fnam, md_structurefile_dir, fnam)
+   end if
+
+   ! Time-interpolated value will be placed in structure's appropriate member field, available in %targetptr, when calling ec_gettimespacevalue.
+   call c_f_pointer( c_loc( pfrc%targetptr ), tgtarr, [1] )
+   ! NOTE: UNST-2724: code below is still disabled, because scalar target relations are currently not possible via a single ecItem.
+   ! See issue comments for details. Do not remove this code.
+   !success = adduniformtimerelation_objects(qid, '', strtype, trim(pfrc%st_id), trim(pfrc%param_name), trim(fnam), 1, 1, tgtarr)
+
+end do
+
+
+!
+! Hereafter, conventional dflowfm structures.
+!
 istat = 0
 ngs = 0 ! Local counter for all crossed flow liks by *all* general structures.
 nstr = tree_num_nodes(strs_ptr) ! TODO: minor issue: will count *all* children in structure file.
