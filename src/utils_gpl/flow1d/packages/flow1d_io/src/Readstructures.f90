@@ -107,7 +107,10 @@ module m_readstructures
          network%sts%restartData = missingValue
       endif
       ! Fill indirection tables and set indices for compoundss
-      call finishReading(network%sts, network%cmps)
+      if (network%sts%currentFileVersion >= 2) then
+         call finishReading(network%sts, network%cmps)
+      endif
+      
    end subroutine readStructures
 
    !> read a single ini file and add the structures to the structure sets
@@ -431,27 +434,21 @@ module m_readstructures
          case (ST_WEIR)
             nweir = nweir+1
             sts%weirIndices(nweir) = istru
-            if (sts%currentFileVersion >= 2) then
-               ! From now on this is a general structure
-               sts%struct(istru)%type = ST_GENERAL_ST
-            endif
+            ! From now on this is a general structure
+            sts%struct(istru)%type = ST_GENERAL_ST
          case (ST_CULVERT)
             nculvert = nculvert + 1
             sts%culvertIndices(nculvert) = istru
          case (ST_ORIFICE)
             norifice = norifice + 1
             sts%orificeIndices(norifice) = istru
-            if (sts%currentFileVersion >= 2) then
-               ! From now on this is a general structure
-               sts%struct(istru)%type = ST_GENERAL_ST
-            endif
+            ! From now on this is a general structure
+            sts%struct(istru)%type = ST_GENERAL_ST
          case (ST_GATE)
             ngate = ngate + 1
             sts%gateIndices(ngate) = istru
-            if (sts%currentFileVersion >= 2) then
-               ! From now on this is a general structure
-               sts%struct(istru)%type = ST_GENERAL_ST
-            endif
+            ! From now on this is a general structure
+            sts%struct(istru)%type = ST_GENERAL_ST
          case (ST_BRIDGE)
             nbridge = nbridge + 1
             sts%bridgeIndices(nbridge) = istru
