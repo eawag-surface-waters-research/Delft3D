@@ -808,7 +808,7 @@ end subroutine
           case (ST_WEIR)
              get_crest_level = struc%weir%crestlevel
           case (ST_UNI_WEIR)
-             get_crest_level = struc%uniweir%crestlevel
+             get_crest_level = struc%uniweir%crestlevel_actual
           case (ST_ORIFICE)
              get_crest_level = struc%orifice%crestlevel
           case (ST_CULVERT)
@@ -816,7 +816,7 @@ end subroutine
           case (ST_PUMP)
              get_crest_level = huge(1d0)
           case (ST_GENERAL_ST)
-             get_crest_level = struc%generalst%zs
+             get_crest_level = struc%generalst%zs_actual
           case default
              get_crest_level = huge(1d0)
        end select
@@ -834,7 +834,7 @@ end subroutine
           case (ST_ORIFICE)
              get_crest_level_c_loc = c_loc(struc%orifice%crestlevel)
           case (ST_GENERAL_ST)
-             get_crest_level_c_loc = c_loc(struc%generalst%zs)
+             get_crest_level_c_loc = c_loc(struc%generalst%zs_actual)
           case default
              get_crest_level_c_loc = C_NULL_PTR
        end select
@@ -848,7 +848,7 @@ end subroutine
           case (ST_WEIR)
              get_width = struc%weir%crestwidth
           case (ST_GENERAL_ST)
-             get_width = struc%generalst%ws
+             get_width = struc%generalst%ws_actual
           case (ST_ORIFICE)
              get_width = struc%orifice%crestwidth
           case default
@@ -882,7 +882,7 @@ end subroutine
       case (ST_ORIFICE)
          get_gle = struc%orifice%openlevel 
       case (ST_GENERAL_ST)
-         get_gle = struc%generalst%gateLowerEdgeLevel
+         get_gle = struc%generalst%gateLowerEdgeLevel_actual
       case (ST_CULVERT)
          get_gle = max(struc%culvert%leftlevel, struc%culvert%rightlevel) + struc%culvert%valveOpening
       case default
@@ -898,7 +898,7 @@ end subroutine
       case (ST_ORIFICE)
          get_opening_height = struc%orifice%openlevel - struc%orifice%crestlevel
       case (ST_GENERAL_ST)
-         get_opening_height = struc%generalst%gateLowerEdgeLevel - struc%generalst%zs
+         get_opening_height = struc%generalst%gateLowerEdgeLevel_actual - struc%generalst%zs_actual
       case (ST_CULVERT)
          get_opening_height = struc%culvert%valveOpening
      end select
