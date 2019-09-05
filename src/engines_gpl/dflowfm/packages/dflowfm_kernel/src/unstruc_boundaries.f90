@@ -679,7 +679,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      ! kce   = 1 ! switch kce back on as points to be potentially flagged
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, keuxy(nbnduxy+1:nx), numuxy, usemask=.false., rrtolrel=rrtolrel)
-     WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(filename) , numuxy, 'nr of tangentialvelocity bndcells' ; call msg_flush()
+     WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(filename) , numuxy, 'nr of uxuyadvectionvelocity bndcells' ; call msg_flush()
 
      nbnduxy = nbnduxy + numuxy
 

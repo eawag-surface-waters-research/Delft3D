@@ -6560,7 +6560,8 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
     call getLbotLtop(LL,Lb,Lt)
     do L = Lb, Lt
        kbk  = ln(1,L)
-       uu   = u0(L) ; vv = zbndt(n) ! v(L)
+       kk   = kmxd*(n-1)+L-Lb+1
+       uu   = u0(L) ; vv = zbndt(kk) ! v(L)
        uucx = uu*cs - vv*sn
        uucy = uu*sn + vv*cs
        if (jasfer3D == 1) then
@@ -6587,14 +6588,15 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
     call getLbotLtop(LL,Lb,Lt)
     do L = Lb, Lt
        kbk = ln(1,L)
+       kk  = kmxd*(n-1)+L-Lb+1
        if (jasfer3D == 1) then
-          ucx(kbk) = lin2nodx(LL,1,zbnduxy(2*n-1),zbnduxy(2*n))
-          ucy(kbk) = lin2nody(LL,1,zbnduxy(2*n-1),zbnduxy(2*n))
+          ucx(kbk) = lin2nodx(LL,1,zbnduxy(2*kk-1),zbnduxy(2*kk))
+          ucy(kbk) = lin2nody(LL,1,zbnduxy(2*kk-1),zbnduxy(2*kk))
           ucxq(kbk) = ucx(kbk)
           ucyq(kbk) = ucy(kbk)
        else
-          ucx(kbk) = zbnduxy(2*n-1)
-          ucy(kbk) = zbnduxy(2*n)
+          ucx(kbk) = zbnduxy(2*kk-1)
+          ucy(kbk) = zbnduxy(2*kk)
           ucxq(kbk) = ucx(kbk)
           ucyq(kbk) = ucy(kbk)
        end if
@@ -6609,7 +6611,8 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
     call getLbotLtop(LL,Lb,Lt)
     do L = Lb, Lt
        kbk  = ln(1,L)
-       uu   = zbndn(n) ; vv = 0d0
+       kk   = kmxd*(n-1)+L-Lb+1
+       uu   = zbndn(kk) ; vv = 0d0
        uucx = uu*cs - vv*sn                   !
        uucy = uu*sn + vv*cs
        if (jasfer3D == 1) then
