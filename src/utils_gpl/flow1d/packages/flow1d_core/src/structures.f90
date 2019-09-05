@@ -1106,7 +1106,12 @@ end subroutine
          return
       end if
          
-      GetPumpStage = dble(stru%pump%actual_stage)
+      if (stru%pump%nrstages > 0) then
+         GetPumpStage = dble(stru%pump%actual_stage)
+      else
+         GetPumpStage = -1
+      end if
+
       
    end function GetPumpStage
    

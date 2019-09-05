@@ -17339,6 +17339,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_pump_stage, 'long_name', 'Actual stage of pump')
             ierr = nf90_put_att(ihisfile, id_pump_stage, 'units', '-')
             ierr = nf90_put_att(ihisfile, id_pump_stage, 'coordinates', 'pump_id')
+            ierr = nf90_put_att(ihisfile, id_pump_stage, '_FillValue', int(dmiss))
             
             ierr = nf90_def_var(ihisfile, 'pump_head', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_head)
             ierr = nf90_put_att(ihisfile, id_pump_head, 'long_name', 'Head difference in pumping direction')
@@ -36520,6 +36521,9 @@ if (jahisbal > 0) then
          pstru => network%sts%struct(istru)
          valpump(6,n) = GetPumpCapacity(pstru)
          valpump(7,n) = GetPumpStage(pstru)
+         if (valpump(7,n) < 0d0) then
+            valpump(7,n) = dmiss ! Set to fill value if stage is irrelevant.
+         end if
          if (pstru%pump%direction >= 0) then
             valpump(10,n) = valpump(4,n) ! Delivery side = downstream side
             valpump(11,n) = valpump(3,n) ! Suction  side = upstream side
