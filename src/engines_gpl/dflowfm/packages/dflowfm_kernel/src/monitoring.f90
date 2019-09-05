@@ -93,6 +93,8 @@ implicit none
     integer                           :: IVAL_UCX         ! 3D, layer centered after 2D
     integer                           :: IVAL_UCY
     integer                           :: IVAL_UCZ
+    integer                           :: IVAL_UCXQ
+    integer                           :: IVAL_UCYQ
     integer                           :: IVAL_SA1
     integer                           :: IVAL_TEM1
     integer                           :: IVAL_TRA1
@@ -162,6 +164,8 @@ implicit none
     integer                           :: IPNT_UCX
     integer                           :: IPNT_UCY
     integer                           :: IPNT_UCZ
+    integer                           :: IPNT_UCXQ
+    integer                           :: IPNT_UCYQ
     integer                           :: IPNT_SA1
     integer                           :: IPNT_TEM1
     integer                           :: IPNT_TRA1
@@ -289,6 +293,8 @@ subroutine init_valobs_pointers()
    IVAL_UCX        = 0
    IVAL_UCY        = 0
    IVAL_UCZ        = 0
+   IVAL_UCXQ       = 0
+   IVAL_UCYQ       = 0
    IVAL_SA1        = 0
    IVAL_TEM1       = 0
    IVAL_TRA1       = 0
@@ -419,6 +425,8 @@ subroutine init_valobs_pointers()
    i=i+1;               IVAL_UCY        = i
    if ( kmx.gt.0 ) then
       i=i+1;            IVAL_UCZ        = i
+      i=i+1;            IVAL_UCXQ       = i
+      i=i+1;            IVAL_UCYQ       = i
    end if
    if ( jasal.gt.0 ) then
       i=i+1;            IVAL_SA1        = i
@@ -481,6 +489,8 @@ subroutine init_valobs_pointers()
    IPNT_UCX   = ivalpoint(IVAL_UCX,   kmx)
    IPNT_UCY   = ivalpoint(IVAL_UCY,   kmx)
    IPNT_UCZ   = ivalpoint(IVAL_UCZ,   kmx)   
+   IPNT_UCXQ  = ivalpoint(IVAL_UCXQ,  kmx)   
+   IPNT_UCYQ  = ivalpoint(IVAL_UCYQ,  kmx)   
    IPNT_SA1   = ivalpoint(IVAL_SA1,   kmx)
    IPNT_TEM1  = ivalpoint(IVAL_TEM1,  kmx)
    IPNT_TRA1  = ivalpoint(IVAL_TRA1,  kmx)

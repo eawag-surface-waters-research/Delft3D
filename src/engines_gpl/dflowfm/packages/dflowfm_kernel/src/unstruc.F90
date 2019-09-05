@@ -16362,7 +16362,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_dambreakdim, id_dambreak_id, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
                      id_dambreak_au, id_dambreak_head, id_dambreak_cresth, id_dambreak_crestw, &
                      id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
-                     id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy
+                     id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
+                     id_varucxq, id_varucyq
                      
 
     integer, allocatable, save :: id_tra(:)
@@ -16513,6 +16514,19 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_varucz, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
                   ierr = nf90_put_att(ihisfile, id_varucz, '_FillValue', dmiss)
                   jawrizc = 1
+                  ierr = nf90_def_var(ihisfile, 'depth-averaged_x_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucxq)
+                  ierr = nf90_put_att(ihisfile, id_varucxq, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_put_att(ihisfile, id_varucxq, 'standard_name', 'sea_water_depth-averaged_x_velocity')
+                  ierr = nf90_put_att(ihisfile, id_varucxq, 'long_name', 'flow element depth-averaged center velocity vector, x-component')
+                  ierr = nf90_put_att(ihisfile, id_varucxq, 'units', 'm s-1')
+                  ierr = nf90_put_att(ihisfile, id_varucxq, '_FillValue', dmiss)
+                
+                  ierr = nf90_def_var(ihisfile, 'depth-averaged_y_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucyq)
+                  ierr = nf90_put_att(ihisfile, id_varucyq, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')                  
+                  ierr = nf90_put_att(ihisfile, id_varucyq, 'standard_name', 'sea_water_depth-averaged_y_velocity')
+                  ierr = nf90_put_att(ihisfile, id_varucyq, 'long_name', 'flow element depth-averaged center velocity vector, y-component')
+                  ierr = nf90_put_att(ihisfile, id_varucyq, 'units', 'm s-1')
+                  ierr = nf90_put_att(ihisfile, id_varucyq, '_FillValue', dmiss)                  
                else
                   ierr = nf90_def_var(ihisfile, 'x_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucx)
                   ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
@@ -18077,6 +18091,9 @@ subroutine unc_write_his(tim)            ! wrihis
     if (numobs+nummovobs > 0) then
       if ( kmx>0 ) then
 !      3D
+       ierr = nf90_put_var(ihisfile,    id_varucxq, valobsT(:,IPNT_UCXQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /)) ! depth-averaged velocity
+       ierr = nf90_put_var(ihisfile,    id_varucyq, valobsT(:,IPNT_UCYQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       !
        do kk = 1,kmx
           ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
@@ -18917,6 +18934,11 @@ subroutine fill_valobs()
                valobs(IPNT_WQB1+ii-1,i) = wqbot(ii,k)
             end do
          end if
+         
+         if (kmx>0) then
+            valobs(IPNT_UCXQ,i) = ucxq(k)
+            valobs(IPNT_UCYQ,i) = ucyq(k)
+         endif
 
          do kk=kb,kt
             klay = kk-kb+1
@@ -18932,7 +18954,7 @@ subroutine fill_valobs()
                valobs(IPNT_UCY+klay-1,i) = worky(kk)
             endif
             if ( kmx>0 ) then
-               valobs(IPNT_UCZ+klay-1,i) = ucz(kk)
+               valobs(IPNT_UCZ+klay-1,i)  = ucz(kk)
             end if
             if ( jasal.gt.0 ) then
                valobs(IPNT_SA1+klay-1,i) = sa1(kk)
