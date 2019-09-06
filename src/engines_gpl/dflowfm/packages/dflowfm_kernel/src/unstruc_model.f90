@@ -1085,6 +1085,13 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'physics', 'Temperature'       , jatem)
     call prop_get_double (md_ptr, 'physics', 'InitialTemperature', temini)
     call prop_get_double (md_ptr, 'physics', 'Secchidepth'       , Secchidepth)
+    call prop_get_double (md_ptr, 'physics', 'Secchidepth2'      , Secchidepth2)
+    call prop_get_double (md_ptr, 'physics', 'Secchidepth2fraction'  , Secchidepth2fraction)
+    zab(1) = Secchidepth / 1.7d0 ; sfr (1) = 1d0
+    if (Secchidepth2 > 0) then 
+       zab(2) = Secchidepth2 / 1.7d0 ; sfr(2) = Secchidepth2fraction ; sfr(1) = 1d0 - sfr(2)
+    endif
+
     call prop_get_double (md_ptr, 'physics', 'Stanton'           , Stanton)
     call prop_get_double (md_ptr, 'physics', 'Dalton'            , Dalton)
     call prop_get_double (md_ptr, 'physics', 'Tempmax'           , Tempmax)
@@ -2661,6 +2668,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. (jatem > 0)) then
        call prop_set(prop_ptr, 'physics', 'InitialTemperature', temini, 'Uniform initial water temperature (degC)')
        call prop_set(prop_ptr, 'physics', 'Secchidepth', Secchidepth, 'Water clarity parameter (m)')
+       if (Secchidepth2 > 0) then 
+       call prop_set(prop_ptr, 'physics', 'Secchidepth2', Secchidepth2, 'Water clarity parameter 2 (m), only used if > 0')
+       call prop_set(prop_ptr, 'physics', 'Secchidepth2fraction', Secchidepth2fraction, 'Fraction of total absorbed by profile 2')
+       endif       
+
        call prop_set(prop_ptr, 'physics', 'Stanton', Stanton, 'Coefficient for convective heat flux, if negative, Ccon = abs(Stanton)*Cdwind')
        call prop_set(prop_ptr, 'physics', 'Dalton',  Dalton , 'Coefficient for evaporative heat flux, if negative, Ceva = abs(Dalton)*Cdwind')
 

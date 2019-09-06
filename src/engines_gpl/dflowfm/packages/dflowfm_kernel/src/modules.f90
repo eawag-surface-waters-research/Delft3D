@@ -111,6 +111,9 @@
  double precision                  :: backgroundcloudiness       !< (%) cloudiness        for non-specified points
  double precision                  :: backgroundhumidity         !< (%) relative humidity for non-specified points
  double precision                  :: secchidepth                !< (m) secchidepth
+ double precision                  :: secchidepth2               !< (m) secchidepth2
+ double precision                  :: secchidepth2fraction       !< (m) fraction of total absorbed by profile 2
+ double precision                  :: zab(2), sfr(2)             !< help variables
 
  double precision                  :: cp0                        !< eckart density parameters
  double precision                  :: clam                       !< eckart density parameters
@@ -175,6 +178,8 @@ backgroundsalinity          = 30d0          ! background salinity (ppt), in eq o
 backgroundcloudiness        = 50d0          ! (%) cloudiness        for non-specified points
 backgroundhumidity          = 50d0          !<(%) relative humidity for non-specified points
 secchidepth                 = 1d0           !< (m) secchidepth
+secchidepth2                = 0d0           !< (m) secchidepth2
+secchidepth2fraction        = 0d0           !< (m) fraction of total absorbed by profile 2
 
                                             ! Molecular diffusivity coefficients:
 viskin                      = 1.D-6         ! kinematic  viscosity water in keps model

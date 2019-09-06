@@ -43717,7 +43717,7 @@ implicit none
 double precision, intent (in) :: timhr, qsno
 integer         , intent (in) :: n
 
-integer          :: i, k, kb, kt, k2, L, LL, ncols, lunadh = 0 , jafree = 0 ! D3D
+integer          :: i, k, kb, kt, k2, L, LL, j, j2, ncols, lunadh = 0 , jafree = 0 ! D3D
 double precision :: rlon, rlat, sc, qsn, qsu, qsnom, presn, tairn, twatn, twatK, rhumn, cloun, windn
 double precision :: ce, ch, qwmx, qahu, tl, Qcon, Qeva, Qlong, sg, pvtamx, pvtwmx, pvtahu, delvap
 double precision :: zabs, zlo, zup, explo, expup, ratio, rcpiba, qheat, atot
@@ -43811,23 +43811,30 @@ else if (jatem == 5) then
    if (qsn > 0d0 ) then
 
       if (kmx > 0) then     ! distribute incoming radiation over water column
-         ! zabs  = (min(0.5d0*hs(n) ,Secchidepth)) / 1.7d0
+         ! zab  = (min(0.5d0*hs(n) ,Secchidepth)) / 1.7d0
 
-         zabs  = Secchidepth / 1.7d0
-         zlo   = 0d0
-         explo = 1d0
+         if (Secchidepth2 > 0d0) then 
+            j2 = 2  
+         else 
+            j2 = 1  
+         endif  
+      
+         do j=1,j2
+            zlo   = 0d0
+            explo = 1d0
 
-         do k  = kt,kb,-1
-            zup     = zlo ; expup   = explo
-            zlo     = zws(kt) - zws(k-1)
-            ratio   = zlo/zabs
-            if (ratio > 4d0) then !  .or. k.eq.kb) then
-               explo   = 0.0
-            else
-               explo   = exp(-ratio)
-            endif
-            heatsrc0(k) = heatsrc0(k) + qsn*(expup-explo)
-         enddo
+            do k  = kt,kb,-1
+               zup     = zlo ; expup   = explo
+               zlo     = zws(kt) - zws(k-1)
+               ratio   = zlo/zab(j)
+               if (ratio > 4d0) then !  .or. k.eq.kb) then
+                  explo   = 0.0
+               else
+                  explo   = exp(-ratio)
+               endif
+               heatsrc0(k) = heatsrc0(k) + sfr(j)*qsn*(expup-explo)
+            enddo
+         enddo 
 
       else
          heatsrc0(n) = heatsrc0(n) + qsn
