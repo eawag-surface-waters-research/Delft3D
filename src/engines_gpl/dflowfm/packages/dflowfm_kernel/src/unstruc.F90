@@ -16364,7 +16364,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_sedtotdim, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
                      id_dambreakdim, id_dambreak_id, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
                      id_dambreak_au, id_dambreak_head, id_dambreak_cresth, id_dambreak_crestw, &
-                     id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
+                     id_dambreak_breach_width_time_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq
                      
@@ -17770,10 +17770,10 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_dambreak_cumulative_discharge, 'units', 'm3') !link_sum
             ierr = nf90_put_att(ihisfile, id_dambreak_cumulative_discharge, 'coordinates', 'dambreak_id')
 
-            ierr = nf90_def_var(ihisfile, 'dambreak_breach_width_derivative', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_breach_width_derivative)
-            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_derivative, 'long_name', 'Breach width time derivative of dambreak')
-            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_derivative, 'units', 'm s-1')
-            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_derivative, 'coordinates', 'dambreak_id')
+            ierr = nf90_def_var(ihisfile, 'dambreak_breach_width_time_derivative', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_breach_width_time_derivative)
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_time_derivative, 'long_name', 'Breach width time derivative of dambreak')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_time_derivative, 'units', 'm s-1')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_time_derivative, 'coordinates', 'dambreak_id')
 
             ierr = nf90_def_var(ihisfile, 'dambreak_water_level_jump', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_water_level_jump)
             ierr = nf90_put_att(ihisfile, id_dambreak_water_level_jump, 'long_name', 'Breach water level jump of dambreak')
@@ -18463,17 +18463,17 @@ subroutine unc_write_his(tim)            ! wrihis
 
       if (jahisdambreak > 0 .and. ndambreak > 0) then
          do i = 1,ndambreaksg
-            ierr = nf90_put_var(ihisfile, id_dambreak_discharge,               valdambreak(2,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_s1up,                    valdambreak(3,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_s1dn,                    valdambreak(4,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_head,                    valdambreak(5,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_au,                      valdambreak(6,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity,         valdambreak(7,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_cresth,                  valdambreak(8,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_crestw,                  valdambreak(9,i),  (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_water_level_jump,        valdambreak(10,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_breach_width_derivative, valdambreak(11,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_cumulative_discharge,    valdambreak(12,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_discharge,                    valdambreak(2,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_s1up,                         valdambreak(3,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_s1dn,                         valdambreak(4,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_head,                         valdambreak(5,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_au,                           valdambreak(6,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity,              valdambreak(7,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_cresth,                       valdambreak(8,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_crestw,                       valdambreak(9,i),  (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_water_level_jump,             valdambreak(10,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_breach_width_time_derivative, valdambreak(11,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_cumulative_discharge,         valdambreak(12,i), (/ i, it_his /))
          end do
       end if
       !
