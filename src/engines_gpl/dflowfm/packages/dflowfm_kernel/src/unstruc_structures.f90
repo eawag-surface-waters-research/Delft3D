@@ -478,8 +478,8 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
       if (nlinks > 0) then ! If it is a new general structure, and there are links
          genstr => network%sts%struct(istru)%generalst
          valstruct(13) = genstr%gateopeningwidth_actual           ! gate opening width
-         valstruct(14) = genstr%gateLowerEdgeLevel_actual         ! gate lower edge level
-         valstruct(15) = valstruct(14) - genstr%zs_actual         ! gate opening height
+         valstruct(14) = get_gle(pstru)                           ! gate lower edge level
+         valstruct(15) = get_opening_height(pstru)                ! gate opening height
          valstruct(16) = valstruct(14) + genstr%gatedoorheight    ! gate upper edge level
          valstruct(icount) = 1
       end if
