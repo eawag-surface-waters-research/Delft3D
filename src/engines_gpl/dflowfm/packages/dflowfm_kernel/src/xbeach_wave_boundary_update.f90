@@ -183,9 +183,11 @@ contains
          
           ! Read input file 
           waveSpectrumFileName%fname = waveSpectrumAdministration(ibnd)%bcfiles(iloc)%fname
-          waveSpectrumFileName%listline=0
+          waveSpectrumFileName%listline=wavespectrumadministration(ibnd)%bcfiles(iloc)%listline
 
           call read_spectrum_input(ibnd, wp,waveSpectrumFileName,specin(iloc))
+          
+          wavespectrumadministration(ibnd)%bcfiles(iloc)%listline=waveSpectrumFileName%listline
 
           write(6,*) 'Spectrum read from: ',trim(waveSpectrumAdministration(ibnd)%bcfiles(iloc)%fname)
 
