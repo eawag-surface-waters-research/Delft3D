@@ -15444,6 +15444,12 @@ end subroutine adjust_bobs_on_dambreak_breach
     do L = 1, lnx
        wdsu(L) = ( wx(L)*csu(L) + wy(L)*snu(L) ) / rhomean
     enddo
+    if (jamapwindstress > 0) then
+       do L = 1, lnx
+          wdsu_x(L) = wx(L) / rhomean
+          wdsu_y(L) = wy(L) / rhomean
+       enddo
+    endif
     if (jatem == 5) then
        do L = 1, lnx
           cdwcof(L) = wdsu(L)
@@ -15482,6 +15488,10 @@ end subroutine adjust_bobs_on_dambreak_breach
           windxav = windxav + wxL
           windyav = windyav + wyL
           numwav  = numwav  + 1
+          if (jamapwindstress > 0) then
+             wdsu_x(L) = tuwi*wxL
+             wdsu_y(L) = tuwi*wyL
+          endif
        endif
     enddo
     if (numwav > 0) then
@@ -23781,6 +23791,8 @@ endif
  if (allocated(frcu))     deallocate(frcu)
  if (allocated(ifrcutp))  deallocate(ifrcutp)
  if (allocated(wdsu))     deallocate(wdsu)
+ if (allocated(wdsu_x))   deallocate(wdsu_x)
+ if (allocated(wdsu_y))   deallocate(wdsu_y)
  if (allocated(u0))       deallocate(u0)
  if (allocated(u1))       deallocate(u1)
  if (allocated(q1))       deallocate(q1)
@@ -23814,6 +23826,12 @@ endif
  call aerr('ifrcutp(lnx)', ierr,   lnx) ; ifrcutp = abs(ifrctypuni)
  allocate ( wdsu  (lnx)  , stat=ierr  )
  call aerr('wdsu  (lnx)' , ierr, lnx  ) ; wdsu     = 0
+ if (jamapwindstress) then
+    allocate ( wdsu_x(lnx)  , stat=ierr  )
+    call aerr('wdsu_x(lnx)' , ierr, lnx  ) ; wdsu_x  = 0
+    allocate ( wdsu_y(lnx)  , stat=ierr  )
+    call aerr('wdsu_y(lnx)' , ierr, lnx  ) ; wdsu_y  = 0
+ endif
  allocate ( u0   (lnkx)  , stat = ierr)
  call aerr('u0   (lnkx)' , ierr , lnkx )  ; u0    = 0
  allocate ( u1   (lnkx)  , stat = ierr)

@@ -3464,7 +3464,8 @@ end module m_vegetation
  double precision, allocatable     :: wavfu (:)   !< wave force u point
  double precision, allocatable     :: wavfv (:)   !< wave force u point
  real            , allocatable     :: wdsu  (:)   !< windstress u point  (m2/s2)
-
+ real            , allocatable     :: wdsu_x(:)   !< windstress u point  (m2/s2) x-component
+ real            , allocatable     :: wdsu_y(:)   !< windstress u point  (m2/s2) y-component
  double precision, allocatable     :: wavmubnd (:)   !< wave-induced mass flux (on open boundaries)
  real            , allocatable     :: vicLu   (:) !< horizontal eddy viscosity coefficient at u point (m2/s)  (limited only if ja_timestep_auto_visc==0)
  real            , allocatable     :: viu   (:)   !< horizontal eddy viscosity coefficient at u point (m2/s), modeled part of viscosity = vicLu - viusp
