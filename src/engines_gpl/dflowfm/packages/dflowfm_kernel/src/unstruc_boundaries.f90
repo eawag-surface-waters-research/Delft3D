@@ -1915,6 +1915,7 @@ logical                       :: successloc
 
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
+type(c_ptr) :: cptr
 
 ! dambreak
 double precision              :: x_breach, y_breach, distemp
@@ -1946,7 +1947,8 @@ do i=1,network%forcinglist%Count
    end if
 
    ! Time-interpolated value will be placed in structure's appropriate member field, available in %targetptr, when calling ec_gettimespacevalue.
-   call c_f_pointer( c_loc( pfrc%targetptr ), tgtarr, [1] )
+   cptr = c_loc( pfrc%targetptr )
+   call c_f_pointer( cptr, tgtarr, [1] )
    ! NOTE: UNST-2724: code below is still disabled, because scalar target relations are currently not possible via a single ecItem.
    ! See issue comments for details. Do not remove this code.
    !success = adduniformtimerelation_objects(qid, '', strtype, trim(pfrc%st_id), trim(pfrc%param_name), trim(fnam), 1, 1, tgtarr)
