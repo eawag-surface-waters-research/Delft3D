@@ -36523,7 +36523,12 @@ if (jahisbal > 0) then
       do n = 1,npumpsg
          valpump(1:5,n) = 0d0
          valpump(6:NUMVALS_PUMP,n) = dmiss
-         istru = pumpsWithLevels(n)
+         if (allocated(pumpsWithLevels)) then
+            istru = pumpsWithLevels(n)
+         else
+            istru = -1
+         end if
+
          do L = L1pumpsg(n),L2pumpsg(n)
             Lf = kpump(3,L)
             La = abs( Lf )
