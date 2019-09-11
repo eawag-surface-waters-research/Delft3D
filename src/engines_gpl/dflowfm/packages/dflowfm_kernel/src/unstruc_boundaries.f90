@@ -1374,14 +1374,18 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
    character(len=*), intent(in)    :: paramvalue     !< String containing the parameter value (either a scalar double, or 'REALTIME', or a filename)
    integer,          intent(in)    :: targetindex    !< Target index in target value array (typically, the current count of this object type, e.g. numlatsg).
    integer,          intent(in)    :: vectormax      !< The number of values per object ('kx'), typically 1.
-   double precision, intent(inout) :: targetarray(:) !< The target array in which the value(s) will be stored. Either now with scalar, or later via ec_gettimespacevalue() calls.
    logical                         :: success        !< Return value. Whether relation was added successfully.
+   double precision, intent(inout), target :: targetarray(:) !< The target array in which the value(s) will be stored. Either now with scalar, or later via ec_gettimespacevalue() calls.
 
    character(len=256) :: valuestring, fnam
    double precision   :: valuedble
    double precision   :: xdum(1), ydum(1)
    integer            :: kdum(1)
    integer            :: ierr, L
+   double precision, pointer  :: targetarrayptr(:)
+   double precision, pointer  :: dbleptr(:)
+   integer            :: tgtitem
+   integer, pointer   :: intptr, multuniptr, tgtitemptr
 
 
    success = .true.   ! initialization
@@ -1401,6 +1405,9 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
 
    ! Now check the valuestring for either scalar/REALTIME/.tim filename
    read(valuestring, *, iostat = ierr) valuedble
+   targetarrayptr => targetarray
+   tgtitem = ec_undef_int
+
    if (ierr /= 0) then ! No number, so check for timeseries filename
       if (strcmpi(trim(valuestring), 'REALTIME')) then
          success = .true.
@@ -1408,16 +1415,40 @@ function adduniformtimerelation_objects(qid, locationfile, objtype, objid, param
          write(msgbuf, '(a,a,a,a,a)') 'Control for ', trim(objtype), '''' // trim(objid) // ''', ', paramname, ' set to REALTIME.'
          call dbg_flush()
       else
+         if (fm_ext_force_name_to_ec_item('','','', qid,multuniptr,intptr,intptr,intptr,dbleptr,dbleptr,dbleptr,dbleptr)) then
+            success = .true.     
+         else
+            success = .false.     
+            write(msgbuf, '(a)') 'Unknown quantity '''//trim(qid)//'''.'
+            call warn_flush()
+            return
+         end if
+               
          fnam = trim(valuestring)
          ! Time-interpolated value will be placed in target array (e.g., qplat(n)) when calling ec_gettimespacevalue.
          if (index(trim(fnam)//'|','.tim|')>0) then 
             ! uniform=single time series vectormax = 1
-            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, fnam, filetype=uniform, method=spaceandtime, operand='O', targetIndex=targetindex)
+            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, fnam,    &
+                                               filetype    = uniform,                     &
+                                               method      = spaceandtime,                & 
+                                               operand     = 'O',                         &
+                                               tgt_data1   = targetarrayptr,              &         
+                                               tgt_item1   = tgtitem,                     &
+                                               multuni1    = multuniptr,                  &
+                                               targetIndex = targetindex)
          elseif (index(trim(fnam)//'|','.bc|')>0) then 
             ! uniform=single time series vectormax = 1
-            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, objid, filetype=bcascii, method=spaceandtime, operand='O', targetIndex=targetindex, forcingfile=fnam)
+             
+            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, objid,   &
+                                               filetype    = bcascii,                     &
+                                               method      = spaceandtime,                & 
+                                               operand     = 'O',                         &
+                                               tgt_data1   = targetarrayptr,              &         
+                                               tgt_item1   = tgtitem,                     &
+                                               multuni1    = multuniptr,                  &
+                                               targetIndex = targetindex,                 &
+                                               forcingfile = fnam)                                            
          endif 
-         ! TODO: AvD: support .bc
       end if
    else
       targetarray(targetindex) = valuedble ! Constant value for always, set it now already.
@@ -1949,9 +1980,7 @@ do i=1,network%forcinglist%Count
    ! Time-interpolated value will be placed in structure's appropriate member field, available in %targetptr, when calling ec_gettimespacevalue.
    cptr = c_loc( pfrc%targetptr )
    call c_f_pointer( cptr, tgtarr, [1] )
-   ! NOTE: UNST-2724: code below is still disabled, because scalar target relations are currently not possible via a single ecItem.
-   ! See issue comments for details. Do not remove this code.
-   !success = adduniformtimerelation_objects(qid, '', strtype, trim(pfrc%st_id), trim(pfrc%param_name), trim(fnam), 1, 1, tgtarr)
+   success = adduniformtimerelation_objects(qid, '', strtype, trim(pfrc%st_id), trim(pfrc%param_name), trim(fnam), 1, 1, tgtarr)
 
 end do
 

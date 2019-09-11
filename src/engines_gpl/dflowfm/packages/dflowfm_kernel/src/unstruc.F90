@@ -15015,7 +15015,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    if (npumpsg > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_pump, irefdate, tzone, tunit, tim, qpump)
    endif
-   ! success = success .and. ec_gettimespacevalue(ecInstancePtr, 'pump_capacity', tim) ! TODO: UNST-2724: needs more thinking, see issue comments.
+   if (network%sts%numPumps > 0) then
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_pump_capacity, irefdate, tzone, tunit, tim)
+   endif   
 
 !   !$OMP SECTION
 

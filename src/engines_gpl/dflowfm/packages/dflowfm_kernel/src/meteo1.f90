@@ -139,8 +139,9 @@ module m_meteo
    integer, target :: item_qhbnd                                             !< Unique Item id of the ext-file's 'qhbnd' quantity
    integer, target :: item_shiptxy                                           !< Unique Item id of the ext-file's 'shiptxy' quantity
    integer, target :: item_movingstationtxy                                  !< Unique Item id of the ext-file's 'movingstationtxy' quantity
-   integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantity
-   integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantity
+   integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantityxy' quantity
+   integer, target :: item_pump_capacity                                     !< Unique Item id of the ext-file's 'pump capacity' quantity
+   integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantxy' quantity
    integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
    integer, target :: item_gateloweredgelevel                                !< Unique Item id of the ext-file's 'gateloweredgelevel' quantity
    integer, target :: item_generalstructure                                  !< Unique Item id of the ext-file's 'generalstructure' quantity
@@ -232,6 +233,7 @@ module m_meteo
       item_shiptxy                               = ec_undef_int
       item_movingstationtxy                      = ec_undef_int
       item_pump                                  = ec_undef_int
+      item_pump_capacity                         = ec_undef_int
       item_valve1D                               = ec_undef_int    
       item_lateraldischarge                      = ec_undef_int
       item_damlevel                              = ec_undef_int
@@ -438,8 +440,7 @@ module m_meteo
                                          itemPtr1, itemPtr2, itemPtr3, itemPtr4, &
                                          dataPtr1, dataPtr2, dataPtr3, dataPtr4  ) result(success)
       logical                               :: success
-      character(len=NAMTRACLEN), intent(in) :: trname, sfname
-      character(len=20)                     :: waqinput
+      character(len=*), intent(in)          :: trname, sfname, waqinput
 
       character(len=NAMTRACLEN), intent(in) :: qidname
       integer,                   pointer    :: itemPtr1, itemPtr2, itemPtr3, itemPtr4
@@ -535,9 +536,9 @@ module m_meteo
          case ('pump')
             itemPtr1 => item_pump
             !dataPtr1      => qpump
-         case ('pump_discharge') ! flow1d pump
-            !itemPtr1 => item_pump_dis
-            !dataPtr1      => qpump ! TODO: UNST-2724: needs more thinking, see issue comments.
+         case ('pump_capacity') ! flow1d pump
+            itemPtr1 => item_pump_capacity
+            dataPtr1  => qpump ! TODO: UNST-2724: needs more thinking, see issue comments.
          case ('valve1D')
             itemPtr1 => item_valve1D
          case ('damlevel')
@@ -770,7 +771,11 @@ module m_meteo
    ! ==========================================================================
    !> Replacement function for FM's meteo1 'addtimespacerelation' function.
    logical function ec_addtimespacerelation(name, x, y, mask, vectormax, filename, filetype, method, operand, &
-                                            xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, dtnodal, quiet, varname, maxSearchRadius)
+                                            xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, &
+                                            dtnodal, quiet, varname, maxSearchRadius, &
+                                            tgt_data1, tgt_data2, tgt_data3, tgt_data4,  &
+                                            tgt_item1, tgt_item2, tgt_item3, tgt_item4,  &
+                                            multuni1,  multuni2,  multuni3,  multuni4)
       use m_ec_module, only: ecFindFileReader, ec_filetype_to_conv_type ! TODO: Refactor this private data access (UNST-703).
       use m_ec_filereader_read, only: ecParseARCinfoMask
       use m_flow, only: kmx, kbot, ktop
@@ -779,30 +784,42 @@ module m_meteo
       use m_flowtimes, only: refdate_mjd
       use string_module, only: str_upper
 
-      character(len=*),                         intent(in)    :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
-      real(hp), dimension(:),                   intent(in)    :: x            !< Array of x-coordinates for the target ElementSet.
-      real(hp), dimension(:),                   intent(in)    :: y            !< Array of y-coordinates for the target ElementSet.
-      integer,                                  intent(in)    :: vectormax    !< Vector max (length of data values at each element location).
-      integer,  dimension(:),                   intent(in)    :: mask         !< Array of masking values for the target ElementSet.
-      character(len=*),                         intent(in)    :: filename     !< File name of meteo data file.
-      integer,                                  intent(in)    :: filetype     !< FM's filetype enumeration.
-      integer,                                  intent(in)    :: method       !< FM's method enumeration.
-      character(len=1),                         intent(in)    :: operand      !< FM's operand enumeration.
-      real(hp),               optional,         intent(in)    :: xyen(:,:)    !< FM's distance tolerance / cellsize of ElementSet.
-      real(hp), dimension(:), optional, target, intent(in)    :: z            !< FM's array of z/sigma coordinates
-      real(hp), dimension(:), optional, pointer               :: pzmin         !< FM's array of minimal z coordinate
-      real(hp), dimension(:), optional, pointer               :: pzmax         !< FM's array of maximum z coordinate
-      integer, dimension(:), optional, pointer                :: pkbot  
-      integer, dimension(:), optional, pointer                :: pktop  
-      integer,                optional,         intent(in)    :: targetIndex     !< target position or rank of (complete!) vector in target array
-      character(len=*),       optional,         intent(in)    :: forcingfile     !< file containing the forcing data for pli-file 'filename'
-      character(len=*),       optional,         intent(in)    :: srcmaskfile     !< file containing mask applicable to the arcinfo source data 
-      real(hp),               optional,         intent(in)    :: dtnodal         !< update interval for nodal factors
-      logical,                optional,         intent(in)    :: quiet           !< When .true., in case of errors, do not write the errors to screen/dia at the end of the routine.
-      character(len=*),       optional,         intent(in)    :: varname         !< variable name within filename
-      real(hp),               optional,         intent(in)    :: maxSearchRadius !< max search radius in case method==11
+      character(len=*),                 intent(in)            :: name            !< Name for the target Quantity, possibly compounded with a tracer name.
+      real(hp), dimension(:),           intent(in)            :: x               !< Array of x-coordinates for the target ElementSet.
+      real(hp), dimension(:),           intent(in)            :: y               !< Array of y-coordinates for the target ElementSet.
+      integer,                          intent(in)            :: vectormax       !< Vector max (length of data values at each element location).
+      integer,  dimension(:),           intent(in)            :: mask            !< Array of masking values for the target ElementSet.
+      character(len=*),                 intent(in)            :: filename        !< File name of meteo data file.
+      integer,                          intent(in)            :: filetype        !< FM's filetype enumeration.
+      integer,                          intent(in)            :: method          !< FM's method enumeration.
+      character(len=1),                 intent(in)            :: operand         !< FM's operand enumeration.
+      real(hp),               optional, intent(in)            :: xyen(:,:)       !< FM's distance tolerance / cellsize of ElementSet.
+      real(hp), dimension(:), optional, intent(in),    target :: z               !< FM's array of z/sigma coordinates
+      real(hp), dimension(:), optional, pointer               :: pzmin           !< FM's array of minimal z coordinate
+      real(hp), dimension(:), optional, pointer               :: pzmax           !< FM's array of maximum z coordinate
+      integer,  dimension(:), optional, pointer               :: pkbot  
+      integer,  dimension(:), optional, pointer               :: pktop  
+      integer,                optional, intent(in)            :: targetIndex     !< target position or rank of (complete!) vector in target array
+      character(len=*),       optional, intent(in)            :: forcingfile     !< file containing the forcing data for pli-file 'filename'
+      character(len=*),       optional, intent(in)            :: srcmaskfile     !< file containing mask applicable to the arcinfo source data 
+      real(hp),               optional, intent(in)            :: dtnodal         !< update interval for nodal factors
+      logical,                optional, intent(in)            :: quiet           !< When .true., in case of errors, do not write the errors to screen/dia at the end of the routine.
+      character(len=*),       optional, intent(in)            :: varname         !< variable name within filename
+      real(hp),               optional, intent(in)            :: maxSearchRadius !< max search radius in case method==11
+      real(hp), dimension(:), optional, pointer               :: tgt_data1       !< optional pointer to the storage location for target data 1 field
+      real(hp), dimension(:), optional, pointer               :: tgt_data2       !< optional pointer to the storage location for target data 2 field
+      real(hp), dimension(:), optional, pointer               :: tgt_data3       !< optional pointer to the storage location for target data 3 field
+      real(hp), dimension(:), optional, pointer               :: tgt_data4       !< optional pointer to the storage location for target data 4 field
+      integer,                optional, intent(inout), target :: tgt_item1       !< optional target item ID 1
+      integer,                optional, intent(inout), target :: tgt_item2       !< optional target item ID 2
+      integer,                optional, intent(inout), target :: tgt_item3       !< optional target item ID 3
+      integer,                optional, intent(inout), target :: tgt_item4       !< optional target item ID 4
+      integer,                optional, intent(inout), target :: multuni1        !< multiple uni item ID 1
+      integer,                optional, intent(inout), target :: multuni2        !< multiple uni item ID 2
+      integer,                optional, intent(inout), target :: multuni3        !< item ID 3
+      integer,                optional, intent(inout), target :: multuni4        !< item ID 4
       !
-      integer :: ec_filetype !< EC-module's   enumeration.
+      integer :: ec_filetype !< EC-module's enumeration.
       integer :: ec_convtype !< EC-module's convType_ enumeration.
       integer :: ec_method   !< EC-module's interpolate_ enumeration.
       integer :: ec_operand  !< EC-module's operand_ enumeration.
@@ -1030,13 +1047,35 @@ module m_meteo
                                              dataPtr1      , dataPtr2      , dataPtr3      , dataPtr4        )) then
          return
       end if
+      continue
+      
+      ! Overrule hard-coded pointers to target data by optional pointers passed in the call     
+      if (present(tgt_data1)) dataPtr1 => tgt_data1
+      if (present(tgt_data2)) dataPtr2 => tgt_data2
+      if (present(tgt_data3)) dataPtr3 => tgt_data3
+      if (present(tgt_data4)) dataPtr4 => tgt_data4
+                                             
+      ! Overrule hard-coded pointers to target items by optional pointers passed in the call     
+      if (present(tgt_item1)) targetItemPtr1 => tgt_item1
+      if (present(tgt_item2)) targetItemPtr2 => tgt_item2
+      if (present(tgt_item3)) targetItemPtr3 => tgt_item3
+      if (present(tgt_item4)) targetItemPtr4 => tgt_item4
 
       ! Create the field and the target item, and if needed additional ones.
       fieldId = ecCreateField(ecInstancePtr)
-      
       success = ecSetField1dArray(ecInstancePtr, fieldId, dataPtr1)
       if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId, dmiss)
       if (success) success = createItem(ecInstancePtr, targetItemPtr1, quantityId, elementSetId, fieldId)
+      if (present(multuni1)) then                      ! if multiple-uni item(s) specified:
+         if (multuni1<0) then
+            multuni1=ecInstanceCreateItem(ecInstancePtr)
+            if (.not.ecSetItemRole(ecInstancePtr, multuni1, itemType_target)) return
+         end if
+         connectionId = ecCreateConnection(ecInstancePtr)
+         if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr1)) return        ! connecting source to new converter
+         if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni1)) return              ! connecting multuni1 as target item to the new converter
+         if (.not.ecAddItemConnection(ecInstancePtr, multuni1, connectionId)) return                    ! adding the new converter to multuni1
+      end if
       if (associated(targetItemPtr2)) then
          ! second field (e.g. for 'windxy')
          fieldId_2 = ecCreateField(ecInstancePtr)
@@ -1059,6 +1098,7 @@ module m_meteo
          if (success) success = createItem(ecInstancePtr, targetItemPtr4, quantityId, elementSetId, fieldId_4)
       end if
       
+
       if (.not. success) then
          goto 1234
       end if
@@ -1591,7 +1631,33 @@ module m_meteo
             ! the file reader will have created an item called 'polytim_item'
             sourceItemName = 'uniform_item'
          case default
-            call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported quantity specified in ext-file (connect source and target): '//trim(target_name)//'.')
+            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId)
+            if (fileReaderPtr%nitems>=1) then 
+               sourceItemId = fileReaderPtr%items(1)%ptr%id
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)
+               if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)
+               if (fileReaderPtr%nitems>=2) then
+                  sourceItemId_2 = fileReaderPtr%items(2)%ptr%id
+                  if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+                  if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr2)
+                  if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr2, connectionId)
+                  if (fileReaderPtr%nitems>=3) then
+                     sourceItemId_3 = fileReaderPtr%items(3)%ptr%id
+                     if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+                     if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr3)
+                     if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr3, connectionId)
+                     if (fileReaderPtr%nitems>=4) then
+                        sourceItemId_4 = fileReaderPtr%items(4)%ptr%id
+                        if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+                        if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr4)
+                        if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr4, connectionId)
+                     endif                     
+                  endif                     
+               endif                     
+            else                     
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported quantity specified in ext-file (connect source and target): '//trim(target_name)//'.')
+            endif                     
             return
       end select
 
