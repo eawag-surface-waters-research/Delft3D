@@ -714,6 +714,7 @@ src/engines_gpl/dimr/packages/dimr_lib/include/stringutils.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/version_number.ini -text
 src/engines_gpl/dimr/packages/dimr_lib/include/xmltree.h -text
 src/engines_gpl/dimr/packages/dimr_lib/src/Makefile.am -text
+src/engines_gpl/dimr/packages/dimr_lib/src/bmi.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/clock.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/component.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/coredump.cpp -text
