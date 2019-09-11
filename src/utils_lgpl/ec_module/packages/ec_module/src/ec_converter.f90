@@ -967,6 +967,10 @@ module m_ec_converter
          !
          success = .false.
          !
+         if (.not.associated(connection%converterPtr)) then
+            success = .true.
+            return
+         endif
          select case(connection%converterPtr%ofType)
             case (convType_uniform)
                success = ecConverterUniform(connection, timesteps%mjd())

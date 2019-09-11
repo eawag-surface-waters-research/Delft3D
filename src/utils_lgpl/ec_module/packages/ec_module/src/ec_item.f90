@@ -394,26 +394,34 @@ module m_ec_item
                      success = .false.
                      return
                   endif
-                  if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps, &
-                             item%connectionsPtr(i)%ptr%converterPtr%interpolationType))) then
-                     ! If updating source item failed .....
-                     ! No interpolation in time possible. => skipWeights(i) is allowed to stay true
-                     if(source_item%quantityPtr%timeint == timeint_bfrom) then
-                        ! We came beyond the last line in a non-periodic block function
-                        ! Adjust the value in T0 field (the converter will only use the T0-field)s
-                        source_item%sourceT0FieldPtr%arr1d = source_item%sourceT1FieldPtr%arr1d
-                     endif
-                     ! Check whether extrapolation is allowed
-                     if (item%connectionsPtr(i)%ptr%converterPtr%interpolationType /= interpolate_time_extrapolation_ok) then
-                        write(message,'(a,i5.5)') "Updating source failed, quantity='" &
-                                 &       //trim(item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%quantityPtr%name)   &
-                                 &       //"', item=",item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%id
-                        call setECMessage(trim(message))
-                        success = .false.
-                        exit UpdateSrc
+                  if (associated(item%connectionsPtr(i)%ptr%converterPtr)) then
+                     if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps, &
+                                item%connectionsPtr(i)%ptr%converterPtr%interpolationType))) then
+                        ! If updating source item failed .....
+                        ! No interpolation in time possible. => skipWeights(i) is allowed to stay true
+                        if(source_item%quantityPtr%timeint == timeint_bfrom) then
+                           ! We came beyond the last line in a non-periodic block function
+                           ! Adjust the value in T0 field (the converter will only use the T0-field)s
+                           source_item%sourceT0FieldPtr%arr1d = source_item%sourceT1FieldPtr%arr1d
+                        endif
+                        ! Check whether extrapolation is allowed
+                        if (item%connectionsPtr(i)%ptr%converterPtr%interpolationType /= interpolate_time_extrapolation_ok) then
+                           write(message,'(a,i5.5)') "Updating source failed, quantity='" &
+                                    &       //trim(item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%quantityPtr%name)   &
+                                    &       //"', item=",item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%id
+                           call setECMessage(trim(message))
+                           success = .false.
+                           exit UpdateSrc
+                        end if
+                     else
+                        skipWeights(i) = .false.
                      end if
                   else
-                     skipWeights(i) = .false.
+                     if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr,  &
+                                                       timesteps, interpolate_time_extrapolation_ok))) then 
+                        success = .false.
+                        return
+                     end if
                   end if
                end do
             end do UpdateSrc

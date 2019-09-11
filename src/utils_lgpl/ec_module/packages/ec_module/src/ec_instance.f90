@@ -531,17 +531,27 @@ module m_ec_instance
             ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
             targetItemPtr => instancePtr%ecItemsPtr(ii)%ptr
             if (targetItemPtr%role == itemType_target) then
-               write(line,'(a,i5.5,a,i1,a)') 'Target Item ', targetItemPtr%id, ' (name='//trim(targetItemPtr%quantityPtr%name)//', vectormax=',targetItemPtr%quantityPtr%vectormax,')'
+               if (associated(targetItemPtr%quantityPtr)) then
+                  write(line,'(a,i5.5,a,i1,a)') 'Target Item ', targetItemPtr%id, ' (name='//trim(targetItemPtr%quantityPtr%name)//', vectormax=',targetItemPtr%quantityPtr%vectormax,')'
+               else
+                  write(line,'(a,i5.5,a,i1,a)') 'Target Item ', targetItemPtr%id
+               endif
                call messenger(lvl, line)
-               write(line,'(a,i5.5,a,i1,a)') 'Element Set ', targetItemPtr%elementSetPtr%id
-               call messenger(lvl, line)
+               if (associated(targetItemPtr%elementSetPtr)) then
+                  write(line,'(a,i5.5,a,i1,a)') 'Element Set ', targetItemPtr%elementSetPtr%id
+                  call messenger(lvl, line)
+               end if
                if (targetItemPtr%nConnections==0) then
                   write(line,'(a,i5.5,a)') '   TARGET ITEM ',targetItemPtr%id,' HAS NO CONNECTIONS !!!'
                   call messenger(lvl, line)
                end if
                do ic=1, targetItemPtr%nConnections
                   connectionPtr => targetItemPtr%connectionsPtr(ic)%ptr
-                  write(line,'(a,i5.5,a,i5.5,a,i3.3)') '   Connection ',connectionPtr%id,', Converter ',connectionPtr%converterPtr%id,', targetIndex ',connectionPtr%converterPtr%targetIndex  
+                  if (associated(connectionPtr%converterPtr)) then
+                     write(line,'(a,i5.5,a,i5.5,a,i3.3)') '   Connection ',connectionPtr%id,', Converter ',connectionPtr%converterPtr%id,', targetIndex ',connectionPtr%converterPtr%targetIndex  
+                  else
+                     write(line,'(a,i5.5,a,i5.5,a,i3.3)') '   Connection ',connectionPtr%id,', Converter NONE !'
+                  end if
                   call messenger(lvl, line)
                   if (connectionPtr%nSourceItems==0) then
                      write(line,'(a)') '   CONNECTION HAS NO SOURCE ITEMS !!!'
