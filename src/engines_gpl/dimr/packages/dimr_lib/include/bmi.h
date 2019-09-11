@@ -11,10 +11,10 @@
 #if defined _WIN32
 #define BMI_API __declspec(dllexport)
 /* Calling convention, stdcall in windows, cdecl in the rest of the world */
-#define CALLCONV __stdcall
+#define BMI_CALLCONV __stdcall
 #else
 #define BMI_API
-#define CALLCONV
+#define BMI_CALLCONV
 #endif
 
 
@@ -73,10 +73,10 @@ extern "C" {
     BMI_API void set_var_slice(const char *name, const int *start, const int *count, const void *ptr);
 
     /* logger to be set from outside so we can log messages */
-    typedef void (CALLCONV *Logger)(Level level, const char *msg);
+    typedef void (BMI_CALLCONV *BMILogger)(Level level, const char *msg);
 
     /* set logger by setting a pointer to the log function */
-    BMI_API void set_logger(Logger logger);
+    BMI_API void set_logger(BMILogger logger);
 
 #ifdef __cplusplus
 }

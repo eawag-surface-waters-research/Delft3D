@@ -23,30 +23,29 @@
     <RootNamespace>dimr</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>dimr_lib_tests</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -122,7 +121,7 @@
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include;src;src/dd;src/dd/iterators;src/dd/mapper;../../../../third_party_open/mpich2/include;../../../../third_party_open/netcdf/netCDF 4.6.1/include;../../../../third_party_open/pthreads/include/x64;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include\windows;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat_x64\x64\release;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl\deltares_common\packages\deltares_common_c\include\;../../../../utils_lgpl/delftonline/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;src;src/dd;src/dd/iterators;src/dd/mapper;../../../../third_party_open/mpich2/include;../../../../third_party_open/netcdf/netCDF 4.6.1/include;../../../../third_party_open/pthreads/include/x64;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include\windows;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat_x64\x64\release;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl\deltares_common\packages\deltares_common_c\include\;../../../../utils_lgpl/delftonline/include;../../dimr_lib/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DIMR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>

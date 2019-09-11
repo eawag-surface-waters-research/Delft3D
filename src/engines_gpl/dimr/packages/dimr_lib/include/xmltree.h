@@ -37,156 +37,139 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <expat.h>
-#include <string.h>
 #include <string>
-#include <cstdlib>
+#include "IXmlTree.h"
 
 
 using namespace std;
-#include <list>
 #include <vector>
 
-#include "exception.h"
-struct keyValueLL{
-	char * key;
-	char * val;
-	keyValueLL * nextkv;
-};
 
-struct keyValue{
-	char * key;
-	char * val;
-};
+class XmlTree : public IXmlTree {
+	public:
+	XmlTree(
+		FILE * input
+	);
 
-typedef std::list<keyValue>	keyValueList;
+	XmlTree(
+		XmlTree * parent,
+		const char * name
+	);
 
-class XmlTree {
-    public:
-        XmlTree (
-            FILE * input
-            );
+	~XmlTree();
 
-        XmlTree (
-            XmlTree * parent,
-            const char * name
-            );
+	void
+		AddAttrib(
+			const char * name,
+			const char * value
+		) override;
 
-        ~XmlTree ();
+	void
+		AddChild(
+			IXmlTree * child
+		) override;
 
-        void
-        AddAttrib (
-            const char * name,
-            const char * value
-            );
+	void
+		ExpandEnvironmentVariables(
+		) override;
 
-        void
-        AddChild (
-            XmlTree * child
-            );
+	void
+		ExpandEnvironmentVariables(
+			int instance
+		) override;
 
-		void
-		ExpandEnvironmentVariables (
+	bool
+		GetBoolAttrib(
+			const char * name
+		) override;
+
+	long int
+		GetIntegerAttrib(
+			const char * name
+		) override;
+
+	double
+		GetFloatAttrib(
+			const char * name
 		);
 
-		void
-		ExpandEnvironmentVariables (
-		   int instance
+	XmlTree *
+		Lookup(
+			const char * pathname
+		) override;
+
+	XmlTree *
+		Lookup(
+			const char * pathname,
+			int instance
+		) override;
+
+	int
+		Lookup(
+			const char * pathname,
+			int instance,
+			keyValueLL * &kvlist 					// key-value pairs linked list
+		) override;
+
+	const char *
+		GetAttrib(
+			const char * name
+		) override;
+
+	const char *
+		GetElement(
+			const char * name
+		) override;
+
+	bool
+		GetBoolElement(
+			const char * name,
+			bool defaultValue
+		) override;
+
+	void
+		Print(
+			void
+		) override;
+
+private:
+	void
+		init(
+			void
 		);
 
-        bool
-        GetBoolAttrib (
-            const char * name
-            );
+	void
+		print(
+			int level
+		);
 
-        long int
-        GetIntegerAttrib (
-            const char * name
-            );
+	string
+		SubstEnvVar(
+			string instr
+		);
 
-        double
-        GetFloatAttrib (
-            const char * name
-            );
+	static string
+		EnvSubst(
+			std::string instr
+		);
 
-        XmlTree *
-        Lookup (
-            const char * pathname
-            );
+public:
+	static const int maxCharData = 1000000;  // maximum size of an XML character data block
+	static const int maxPathname = 2560;     // maximum length of a full path name
 
-        XmlTree *
-        Lookup (
-            const char * pathname,
-            int instance
-            );
+	XmlTree *   parent;
+	char *      name;
+	char *      pathname;
 
-        int
-        Lookup (
-            const char * pathname,
-            int instance,
-	        keyValueLL * &kvlist 					// key-value pairs linked list
-            );
+	vector<char *>   attribNames;
+	vector<char *>   attribValues;
 
-        const char *
-        GetAttrib (
-            const char * name
-            );
+	vector<XmlTree *>   children;
 
-        const char *
-        GetElement (
-            const char * name
-            );
+	char *      charData;
+	int         charDataLen;
 
-        bool
-        GetBoolElement (
-            const char * name,
-            bool defaultValue
-            );
-
-        void
-        Print (
-            void
-            );
-
-    private:
-        void
-        init (
-            void
-            );
-
-        void
-        print (
-            int level
-            );
-
-        string 
-        SubstEnvVar(
-            string instr 
-        );
-
-		static string
-        EnvSubst(
-	       std::string instr
-	    );
-
-    public:
-        static const int maxCharData = 1000000;  // maximum size of an XML character data block
-        static const int maxPathname = 2560;     // maximum length of a full path name
-
-        XmlTree *   parent;
-        char *      name;
-        char *      pathname;
-
-        vector<char *>   attribNames;
-        vector<char *>   attribValues;
-
-        vector<XmlTree *>   children;
-
-        char *      charData;
-        int         charDataLen;
-
-    private:
-    };
+private:
+};
 
 

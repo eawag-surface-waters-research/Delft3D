@@ -270,10 +270,11 @@ XmlTree::AddAttrib (
 
 void
 XmlTree::AddChild (
-    XmlTree * child
+    IXmlTree * child
     ) 
    {
-    this->children.push_back( child);
+	
+    this->children.push_back(static_cast<XmlTree*>(child));
    }
 
 

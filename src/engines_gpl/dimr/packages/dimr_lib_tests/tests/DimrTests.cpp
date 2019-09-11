@@ -1,6 +1,27 @@
 #include "DimrTests.h"
-#include "dimr.h"
 #include <direct.h>
+#include "../../dimr_lib/include/dimr_unit.h"
+#include "../../dimr_lib/include/dimr.h"
+
+class MyXmlTree : public IXmlTree
+{
+public:
+	MyXmlTree() {  };
+	void AddAttrib(const char* name, const char* value) override {};
+	void AddChild(IXmlTree* child) override{}
+	void ExpandEnvironmentVariables() override{}
+	void ExpandEnvironmentVariables(int instance) override{}
+	const char* GetAttrib(const char* name) override { return "\0"; }
+	bool GetBoolAttrib(const char* name) override { return true; }
+	long GetIntegerAttrib(const char* name) override { return 0; }
+	double GetFloatAttrib(const char* name) override { return 0.0; }
+	IXmlTree* Lookup(const char* pathname) override { return NULL; }
+	IXmlTree* Lookup(const char* pathname, int instance) override{ return NULL; }
+	int Lookup(const char* pathname, int instance, keyValueLL*& kvlist) override { return 0; }
+	const char* GetElement(const char* name) override{ return "\0"; }
+	bool GetBoolElement(const char* name, bool defaultValue) override{ return true; }
+	void Print() override{}
+};
 
 TEST_CLASS(DimrGlobalTests)
 {
@@ -30,9 +51,10 @@ TEST_CLASS(DimrTests)
 {
 
 public:
+	
 	TEST_METHOD(ConstructDimr)
 	{
-		Dimr * dimr = new Dimr();
+		Dimr * dimr = &Dimr::GetInstance();
         //thisDimr = dimr;
 		Assert::AreEqual((int)WARNING, (int)dimr->logLevel);
 		Assert::AreEqual((int)INFO,(int)dimr->feedbackLevel);
@@ -55,13 +77,13 @@ public:
         //Assert::ExpectException<std::exception>(func2);
 	}
 
-
+	
     TEST_METHOD(scanConfigIsEmptyTest)
     {
-        Dimr* dimr = new Dimr();
-
+        Dimr* dimr = &Dimr::GetInstance();
+		dimr->config = new MyXmlTree();
         //thisDimr = dimr;
-        //dimr->config = new XmlTree();
+        
         auto func1 = [dimr] {dimr->scanConfigFile(); };
         Assert::ExpectException<Exception>(func1);
         //Can not delete, destructor refers to the static global dimr instance, which is only assigned in dimr initialize
@@ -71,7 +93,7 @@ public:
     
     TEST_METHOD(scanConfigIsNotEmptyButFileVersionIsNullTest)
     {
-        Dimr* dimr = new Dimr();
+        Dimr* dimr = &Dimr::GetInstance();
         //dimr->config = new XmlTree();
         auto func1= [dimr] {dimr->scanConfigFile(); };
         Assert::ExpectException<Exception>(func1);
@@ -83,7 +105,7 @@ public:
     TEST_METHOD(WhenInvalidLibIsUsedIn_ConnectLibsThrowsAnException)
     {
         // Set up
-        Dimr* dimr = new Dimr();
+        Dimr* dimr = &Dimr::GetInstance();
         dimr_component component;
         component.onThisRank = true;
         component.library = "invalidLib";
@@ -103,7 +125,7 @@ public:
     TEST_METHOD(WhenInvalidLibPathIsUsedIn_ConnectLibsThrowsAnException)
     {
         // Set up
-	    Dimr* dimr = new Dimr();
+	    Dimr* dimr = &Dimr::GetInstance();
         dimr_component component;
         component.onThisRank = true;
         component.library = "\dimr_testcomponent.dll";
@@ -127,7 +149,7 @@ public:
     TEST_METHOD(WhenRunParallelInitIsUsedWithValidMasterComponent_EverythingIsFine)
     {
         // Set up
-        Dimr* dimr = new Dimr();
+        Dimr* dimr = &Dimr::GetInstance();
         Clock clock;
         dimr->clock = &clock;
         dimr_control_block cb;
@@ -163,7 +185,7 @@ public:
 
     TEST_METHOD(WhenRunParallelFinishIsUsedWithValidMasterComponent_EverythingIsFine)
     {
-        Dimr* dimr = new Dimr();
+        Dimr* dimr = &Dimr::GetInstance();
         Clock clock;
         dimr->clock = &clock;
 
@@ -198,7 +220,7 @@ public:
 
     TEST_METHOD(WhenTimersInitIsCalled_TimersAreSetToZero)
     {
-        Dimr* dimr = new Dimr();
+        Dimr* dimr = &Dimr::GetInstance();
         Clock clock;
         dimr->clock = &clock;
         
@@ -215,7 +237,7 @@ public:
 
     TEST_METHOD(WhenTimerStartIsCalled_timerStartIsSet)
     {
-        Dimr* dimr = new Dimr();
+        Dimr* dimr = &Dimr::GetInstance();
         Clock clock;
         dimr->clock = &clock;
 
@@ -229,7 +251,7 @@ public:
 
     TEST_METHOD(WhenTimerEndIsCalled_timerEndIsSet)
     {
-        Dimr* dimr = new Dimr();
+        Dimr* dimr = &Dimr::GetInstance();
         Clock clock;
         dimr->clock = &clock;
 
