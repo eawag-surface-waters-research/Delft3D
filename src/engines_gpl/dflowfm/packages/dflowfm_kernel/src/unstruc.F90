@@ -32860,12 +32860,12 @@ end subroutine setbobs_fixedweirs
 
  kfs = 0
 
- !! open all grid points with positive lateral inflow
- !do ndn = 1, ndx
- !  if (qin(ndn)>1d-12) then
- !    kfs(ndn) = 1
- !  endif
- !enddo
+ ! open all grid points with positive lateral inflow
+ do ndn = 1, ndx
+   if (qin(ndn)>1d-12) then
+     kfs(ndn) = 1
+   endif
+ enddo
 
  if (ivariableteta<=1) then                          ! fully implicit and teta=constant
 
@@ -34356,7 +34356,7 @@ end subroutine setbobs_fixedweirs
           else if ((jaBaptist >= 2) .or. trachy_resistance) then
               frL = ( cfuhi(L) + alfav(L) )*sqrt(u1L*u1L + v2)      ! g / (H.C.C) = (g.K.K) / (A.A) travels in cfu
           else
-              frL = cfuhi(L)*max(sqrt(u1L*u1L + v2), 1d-2)      ! g / (H.C.C) = (g.K.K) / (A.A) travels in cfu
+              frL = cfuhi(L)*sqrt(u1L*u1L + v2)      ! g / (H.C.C) = (g.K.K) / (A.A) travels in cfu
           endif
 
           bui   = 1d0 / ( dti + advi(L) + frL )
@@ -34844,20 +34844,14 @@ end function ispumpon
 
     do k = 1,ndxi
        if (qin(k) > 0d0) then
-          if (kfs(k) > 0) then
-             dd(k)  = qin(k)
-          else
-             ds  = dts*qin(k)/ba(k)                            ! altijd minder dan daling bij niet-lin volumes
-             s1(k) = s0(k) + ds
-          end if          
-
+              dd(k)  = qin(k)
        else if (qin(k) < 0d0) then
 
           hsk = s0(k) - bl(k)
           if (a1(k) > 0.0) then
              ds  = -dts*qin(k)/a1(k)                            ! altijd minder dan daling bij niet-lin volumes
           else
-             ds  = -dts*qin(k)/ba(k)                            ! altijd minder dan daling bij niet-lin volumes
+          ds  = -dts*qin(k)/ba(k)                            ! altijd minder dan daling bij niet-lin volumes
           endif
           if (kfs(k) == 0) then                              ! niet in matrix
              if (ds  < hsk) then                             ! er is genoeg
