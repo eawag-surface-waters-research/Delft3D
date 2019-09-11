@@ -23826,7 +23826,7 @@ endif
  call aerr('ifrcutp(lnx)', ierr,   lnx) ; ifrcutp = abs(ifrctypuni)
  allocate ( wdsu  (lnx)  , stat=ierr  )
  call aerr('wdsu  (lnx)' , ierr, lnx  ) ; wdsu     = 0
- if (jamapwindstress) then
+ if (jamapwindstress > 0) then
     allocate ( wdsu_x(lnx)  , stat=ierr  )
     call aerr('wdsu_x(lnx)' , ierr, lnx  ) ; wdsu_x  = 0
     allocate ( wdsu_y(lnx)  , stat=ierr  )
