@@ -1838,8 +1838,10 @@ subroutine readMDUFile(filename, istat)
          end select
       end do
       ! [debug]
-      call mess(LEVEL_DEBUG, 'This is the list of structures that will be processed:')
-      call tree_traverse(strs_ptr, print_tree, dummychar, dummylog)
+      if (loglevel_StdOut <= LEVEL_DEBUG) then
+         call mess(LEVEL_DEBUG, 'This is the list of structures that will be processed:')
+         call tree_traverse(strs_ptr, print_tree, dummychar, dummylog)
+      end if
    end if
 
 !  particles
