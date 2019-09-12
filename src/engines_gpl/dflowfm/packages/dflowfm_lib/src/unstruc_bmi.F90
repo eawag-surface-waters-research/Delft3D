@@ -874,7 +874,7 @@ subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
       shape(2) = 1
       return
    case("weirs")
-      shape(1) = nweirgen
+      shape(1) = nweirgen + network%sts%numWeirs
       shape(2) = 2
       return
    case("orifices")
@@ -1964,7 +1964,7 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
    case("weirs")
       select case(field_index)
       case(1)
-         field_name = "CrestLevel"
+         field_name = "crestLevel"
       case(2)
          field_name = "lat_contr_coeff"
       end select
