@@ -8,7 +8,7 @@
 #include "dimr_lib_version.h"
 
 // static added to prevent name conflicts on Linux.
-static Dimr * thisDimr = &Dimr::GetInstance();     // global pointer to single object instance
+static Dimr * thisDimr = Dimr::GetInstance();     // global pointer to single object instance
 
 extern "C" {
 	//------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ extern "C" {
 	{
 		if (thisDimr == NULL)
 		{
-			thisDimr = &Dimr::GetInstance();
+			thisDimr = Dimr::GetInstance();
 		}
 		thisDimr->log->SetWriteCallBack(writeCallBack);
 	}
@@ -26,7 +26,7 @@ extern "C" {
 	{
 		if (thisDimr == NULL)
 		{
-			thisDimr = &Dimr::GetInstance();
+			thisDimr = Dimr::GetInstance();
 		}
 		thisDimr->log = loggerFromDimrExe;
 	}
@@ -35,7 +35,7 @@ extern "C" {
 	{
 		if (thisDimr == NULL)
 		{
-			thisDimr = &Dimr::GetInstance();
+			thisDimr = Dimr::GetInstance();
 		}
 
 		thisDimr->log->SetExternalLogger(logger);
@@ -60,7 +60,7 @@ extern "C" {
 			int nSettingsSet, nParamsSet;
 			if (thisDimr == NULL)
 			{
-				thisDimr = &Dimr::GetInstance();
+				thisDimr = Dimr::GetInstance();
 			}
 
 			if (thisDimr->redirectFile != NULL)
@@ -392,7 +392,7 @@ extern "C" {
 
 		// thisDimr->log is not initialized when set_var is called before initialize
 		if (thisDimr == NULL) {
-			thisDimr = &Dimr::GetInstance();
+			thisDimr = Dimr::GetInstance();
 		}
 		thisDimr->log->Write(DEBUG, thisDimr->my_rank, "dimr_lib:set_var");
 		// Catch special keywords for Dimr_dll itself

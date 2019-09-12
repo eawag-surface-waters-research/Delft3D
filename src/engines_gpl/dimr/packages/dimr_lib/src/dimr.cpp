@@ -87,6 +87,8 @@ using namespace std;
 #  include <unistd.h>
 #endif
 
+Dimr* Dimr::instance = nullptr;
+
 Dimr::Dimr(void) {
     FILE * logFile               = stdout;
     ready                        = false;
@@ -1771,6 +1773,6 @@ void Dimr::char_to_ints(char * line, int ** iarr, int * count) {
 }
 //------------------------------------------------------------------------------
 void Dimr::_log(Level level, const char * msg) {
-	Dimr* thisDimr = &GetInstance();
+	Dimr* thisDimr = GetInstance();
 	thisDimr->log->Write(level, thisDimr->my_rank, msg);
 }
