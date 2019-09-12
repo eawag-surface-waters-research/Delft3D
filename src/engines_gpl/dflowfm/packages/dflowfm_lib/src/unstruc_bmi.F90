@@ -1105,7 +1105,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    call str_token(tmp_var_name, varset_name, DELIMS='/')
    ! Check for valid group/set name (e.g. 'observations')
    select case(varset_name)
-   case ("pumps", "weirs", "gates", "generalstructures", "sourcesinks", "observations", "crosssections", "laterals")
+   case ("pumps", "weirs", "gates", "generalstructures", "sourcesinks", "observations", "crosssections", "laterals", "orifices")
       ! A valid group name, now parse the location id first...
       call str_token(tmp_var_name, item_name, DELIMS='/')
       if (len_trim(item_name) > 0) then
@@ -1523,6 +1523,22 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
             ! TODO: RTC: AvD: get this from weir params
             return
       end select
+
+   ! ORIFICES
+   case("orifices")
+      call getStructureIndex('orifices', item_name, item_index, is_in_network)
+      if (item_index <= 0) then
+         return
+      endif
+
+      select case(field_name)
+      case("gate_lower_edge_level", "GateLowerEdgeLevel", "gateLowerEdgeLevel")
+         if (is_in_network) then
+            x = get_gate_lower_edge_level_c_loc(network%sts%struct(item_index))  
+         end if
+         return
+      end select
+
    ! GATES
    case("gates")
       call getStructureIndex('gates', item_name, item_index, is_in_network)
@@ -1721,6 +1737,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    use m_1d_structures
    use m_wind
    use unstruc_channel_flow, only: network
+   use m_General_Structure, only: update_widths
 
    character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
    character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1788,6 +1805,22 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          return
       end select
       call update_zcgen_widths_and_heights()
+
+   ! ORIFICES
+   case("orifices")
+      call getStructureIndex('orifices', item_name, item_index, is_in_network)
+      if (item_index == 0) then
+         return
+      endif
+      select case(field_name)
+      case("gate_lower_edge_level", "GateLowerEdgeLevel", "gateLowerEdgeLevel")
+         if (is_in_network) then
+            fieldptr = get_gate_lower_edge_level_c_loc(network%sts%struct(item_index))
+            fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
+         end if
+         return
+      end select
+      call update_widths(network%sts%struct(item_index)%generalst, network%sts%struct(item_index)%numlinks, network%sts%struct(item_index)%linknumbers, wu)
 
    ! GATES
    case("gates")

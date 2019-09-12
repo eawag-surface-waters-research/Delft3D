@@ -68,6 +68,7 @@ module m_1d_structures
    public GetStrucType_from_int
    public get_crest_level
    public get_crest_level_c_loc
+   public get_gate_lower_edge_level_c_loc
    public get_width
    public get_watershed_threshold
    public get_gle
@@ -840,6 +841,20 @@ end subroutine
        end select
 
    end function get_crest_level_c_loc   
+   
+   !> Gets the pointer of the gate lower edge level for a given structure.
+   !! If the type of the given structure is not general structure, then it gets a null pointer
+   type(c_ptr) function get_gate_lower_edge_level_c_loc(struc)
+      type(t_structure), intent(in) :: struc
+      
+       select case (struc%type)
+          case (ST_GENERAL_ST)
+             get_gate_lower_edge_level_c_loc = c_loc(struc%generalst%gateLowerEdgeLevel)
+          case default
+             get_gate_lower_edge_level_c_loc = C_NULL_PTR
+       end select
+
+   end function get_gate_lower_edge_level_c_loc   
    
    double precision function get_width(struc)
       type(t_structure), intent(in) :: struc
