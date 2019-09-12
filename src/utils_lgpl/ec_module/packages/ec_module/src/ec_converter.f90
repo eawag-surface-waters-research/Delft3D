@@ -1639,7 +1639,7 @@ module m_ec_converter
                                        case default
                                           call setECMessage("ERROR: ec_converter::ecConverterPolytim: Unsupported vertical interpolation type requested.")
                                           return
-                                    end select
+                                       end select
                                     !
                                     if ((connection%converterPtr%operandType == operand_replace) .or. (connection%converterPtr%operandType == operand_replace_element)) then
                                        connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr((k-1)*vectormax+1:k*vectormax) = val(1:vectormax)
@@ -1720,7 +1720,8 @@ module m_ec_converter
          else                                          ! save to use both idxL1 AND idxL2
             ww = (sigma(kkL+1)-sigmak) / (sigma(kkL+1)-sigma(kkL))
             idx1 = maxdimlay_src*(kLR-1) + kkL
-            idx2 = maxlay_src*(kLR-1) + kkL + 1
+!           idx2 = maxlay_src*(kLR-1) + kkL + 1
+            idx2 = idx1 + 1
          endif
       end subroutine findVerticalIndexWeight
       ! =======================================================================
