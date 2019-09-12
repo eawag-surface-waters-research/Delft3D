@@ -38843,6 +38843,17 @@ if (mext > 0) then
             iCdtyp  = 1 ! only 1 coeff
             success = timespaceinitialfield(xu, yu, Cdwusp, lnx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
 
+        else if (qid == 'secchidepth') then
+
+            if (jaSecchisp == 0) then
+               if (allocated (Secchisp) ) deallocate(Secchisp)
+               allocate ( Secchisp(ndx) , stat=ierr )
+               call aerr('Secchisp(ndx)', ierr, lnx ) ; Secchisp = dmiss
+               jaSecchisp = 1
+            endif
+
+            success = timespaceinitialfield(xz, yz, Secchisp, ndx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
+
         else if (qid == 'advectiontype') then
 
             success = timespaceinitialfield_int(xu, yu, iadv, lnx, filename, filetype, method, operand, transformcoef) ! zie meteo module
@@ -40072,6 +40083,14 @@ end if
      do L = 1,lnx
         if (diusp(L) == dmiss) then
             diusp(L) = dicouv
+        endif
+     enddo
+ endif
+
+ if (jaSecchisp > 0) then
+     do n = 1,ndx
+        if (Secchisp(n) == dmiss) then
+            Secchisp(n) = Secchidepth
         endif
      enddo
  endif
@@ -43745,7 +43764,7 @@ integer         , intent (in) :: n
 integer          :: i, k, kb, kt, k2, L, LL, j, j2, ncols, lunadh = 0 , jafree = 0 ! D3D
 double precision :: rlon, rlat, sc, qsn, qsu, qsnom, presn, tairn, twatn, twatK, rhumn, cloun, windn
 double precision :: ce, ch, qwmx, qahu, tl, Qcon, Qeva, Qlong, sg, pvtamx, pvtwmx, pvtahu, delvap
-double precision :: zabs, zlo, zup, explo, expup, ratio, rcpiba, qheat, atot
+double precision :: dexp, zlo, zup, explo, expup, ratio, rcpiba, qheat, atot
 
 double precision :: w(20), Qtot, Qfree, b, gred, wfree, Qfrcon, Qfreva, rhoa0, rhoa10
 
@@ -43844,7 +43863,12 @@ else if (jatem == 5) then
             j2 = 1  
          endif  
       
-         do j=1,j2
+         do j=j2,1,-1
+ 
+            if (j==1 .and. jaSecchisp > 0) then 
+               zab(1) = Secchisp(n) / 1.7d0
+            endif  
+ 
             zlo   = 0d0
             explo = 1d0
 
@@ -43852,12 +43876,17 @@ else if (jatem == 5) then
                zup     = zlo ; expup   = explo
                zlo     = zws(kt) - zws(k-1)
                ratio   = zlo/zab(j)
-               if (ratio > 4d0) then !  .or. k.eq.kb) then
-                  explo   = 0.0
+               if (ratio   > 4d0) then !  .or. k.eq.kb) then
+                  explo    = 0.0
                else
-                  explo   = exp(-ratio)
+                  explo    = exp(-ratio)
                endif
-               heatsrc0(k) = heatsrc0(k) + sfr(j)*qsn*(expup-explo)
+               dexp        = expup-explo   
+               if (dexp > 0d0) then 
+                  heatsrc0(k) = heatsrc0(k) + sfr(j)*qsn*dexp
+               else 
+                  exit
+               endif
             enddo
          enddo 
 

@@ -1245,6 +1245,7 @@ end module m_wind
 
  integer                           :: jamapheatflux   !< write heatfluxes to map
  integer                           :: jaRichardsononoutput !< write Richardson nr to his
+ integer                           :: jaSecchisp           !< Spatial Secchi 0,1
 
  double precision, allocatable     :: Qsunmap(:)
  double precision, allocatable     :: Qevamap(:)
@@ -1255,6 +1256,7 @@ end module m_wind
  double precision, allocatable     :: Qtotmap(:)
 
  double precision, allocatable     :: Rich(:)
+ double precision, allocatable     :: Secchisp(:) 
 contains
 
 subroutine default_heatfluxes()
