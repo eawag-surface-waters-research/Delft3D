@@ -87,7 +87,7 @@ using namespace std;
 #  include <unistd.h>
 #endif
 
-Dimr* Dimr::instance = nullptr;
+Dimr* Dimr::instance = NULL;
 
 Dimr::Dimr(void) {
     FILE * logFile               = stdout;

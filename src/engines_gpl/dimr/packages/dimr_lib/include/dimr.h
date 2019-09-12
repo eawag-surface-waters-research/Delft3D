@@ -97,9 +97,10 @@ typedef int  (CDECLOPT *BMI_DIMR_SET_LOGGER)(Log *);
 
 class Dimr {
     public:
-		static Dimr& GetInstance()
+		static Dimr* GetInstance()
 		{
-			static Dimr    instance; 
+			if (instance == NULL)
+				instance = new Dimr();
 			return instance;
 
 		}
@@ -128,7 +129,7 @@ class Dimr {
         char *               exeName;        // short name of executable
         Clock *              clock;          // timing facility
         Log *                log;            // logging facility
-        IXmlTree *           config;         // top of entire XML configuration tree
+        XmlTree *            config;         // top of entire XML configuration tree
         char *               mainArgs;       // reassembled command-line arguments (argv[1...])
         char *               slaveArg;       // command-line argument for slave mode
         dimr_control_block * control;        // structure containing all information from the control block in the config.xml file
@@ -150,7 +151,8 @@ class Dimr {
       // String constants; initialized below, outside class definition
     private:
 		//static Dimr *m_pInstance;
-	
+		static Dimr*    instance;
+
 		Dimr();
 		~Dimr();
 		Dimr(Dimr const&) = delete;         // Don't Implement.
