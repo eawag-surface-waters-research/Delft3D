@@ -38,7 +38,7 @@
 #pragma once
 
 #include <string>
-#include "IXmlTree.h"
+#include "ixmltree.h"
 
 
 using namespace std;
