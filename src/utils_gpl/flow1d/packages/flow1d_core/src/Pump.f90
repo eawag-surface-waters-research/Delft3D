@@ -138,6 +138,12 @@ contains
 
       ! Get Reduction Factor from Table
       pump%pump_head = ds_level - ss_level
+      if (nstages == 0 .and. pump%capacity(1) < 0) then
+         ! Only non-staged pumps may have a negative capacity, which means that
+         ! the role of suction side and delivery side is flipped. Flip the head first.
+         pump%pump_head  = -pump%pump_head 
+      end if
+
       pump%reduction_factor = interpolate(pump%reducfact, pump%pump_head)
 
       if (nstages == 0) then
