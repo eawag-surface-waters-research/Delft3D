@@ -39764,12 +39764,22 @@ if (mext > 0) then
     allocate ( qplat(numlatsg)  , stat=ierr    )
     call aerr('qplat(numlatsg)' , ierr, numlatsg ); qplat = 0d0
     do k = 1,ndx
+       if (jampi == 1) then 
+           if (idomain(k) /= my_rank) then 
+               nnlat(k) = 0
+           endif 
+       endif
        n = nnlat(k)
        if (n > 0) then
           balat(n) = balat(n) + ba(k)
        endif
     enddo
 
+    if (jampi == 1) then 
+       call reduce_double_sum(numlatsg, balat, qplat )  ! qplat is sum of balat over domains
+       balat = qplat 
+       qplat = 0d0
+    endif
     ja = 1 ; rewind (mext); kx = 1 ; numlatsg = 0
 
     do while (ja .eq. 1)                             ! for cdams again postponed read *.ext file
