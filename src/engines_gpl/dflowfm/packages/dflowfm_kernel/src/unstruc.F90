@@ -15041,7 +15041,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 !   !$OMP SECTION
 
    if (numlatsg > 0) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_lateraldischarge, irefdate, tzone, tunit, tim, qplat) ! 'lateral(_)discharge'
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_lateraldischarge, irefdate, tzone, tunit, tim) ! 'lateral(_)discharge'
    endif
 
 !   !$OMP END PARALLEL SECTIONS
@@ -39775,8 +39775,7 @@ if (mext > 0) then
           numlatsg = numlatsg + 1
 
           L = index(filename,'.', back=.true.) - 1
-
-          success = adduniformtimerelation_objects('lateral_discharge', filename, 'lateral', filename(1:L), 'discharge', '', numlatsg, kx, qplat)
+          success = adduniformtimerelation_objects('lateral_discharge', filename, 'lateral', filename(1:L), 'discharge', '', 1, kx, qplat(numlatsg:numlatsg))
           if (success) then
              ! assign id derived from pol file
              lat_ids(numlatsg) = filename(1:L)

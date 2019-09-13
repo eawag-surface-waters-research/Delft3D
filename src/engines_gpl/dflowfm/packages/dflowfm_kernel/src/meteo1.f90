@@ -442,7 +442,7 @@ module m_meteo
       logical                               :: success
       character(len=*), intent(in)          :: trname, sfname, waqinput
 
-      character(len=NAMTRACLEN), intent(in) :: qidname
+      character(len=*), intent(in) :: qidname
       integer,                   pointer    :: itemPtr1, itemPtr2, itemPtr3, itemPtr4
       real(hp), dimension(:),    pointer    :: dataPtr1, dataPtr2, dataPtr3, dataPtr4
       
