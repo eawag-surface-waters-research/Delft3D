@@ -4796,7 +4796,7 @@ end module m_kml_parameters
 module m_timer
 implicit none
    integer, parameter                      :: jatimer = 1  !< time parallel solver (1) or not (0)
-   integer, parameter                      :: NUMT=28      !< number of timings
+   integer, parameter                      :: NUMT=29      !< number of timings
    double precision,  dimension(3,NUMT)    :: t            !< wall-clock timings, (1,:): start, (2,:): end, (3,:): sum
    double precision,  dimension(3,NUMT)    :: tcpu         !< CPU        timings, (1,:): start, (2,:): end, (3,:): sum
    integer,           dimension(NUMT)      :: itstat       !< timer status, 0: not timing (stopped), 1: timing (started)
@@ -4832,6 +4832,8 @@ implicit none
    integer, parameter                      :: IFILT_MAT  = 26
    integer, parameter                      :: IFILT_COPYBACK = 27
    integer, parameter                      :: IFILT_OTHER = 28
+   integer, parameter                      :: IEROSED    = 29
+
 
    character(len=10), dimension(numt), parameter :: tnams= [character(len=10) :: &
                                                                'reduce',      &
@@ -4861,7 +4863,8 @@ implicit none
                                                                'filter',      &
                                                                'filter_mat',  &
                                                                'filter_cpb',  &
-                                                               'filter_oth']
+                                                               'filter_oth',  &
+                                                               'erosed' ]
    contains
 
 !> initialize timers

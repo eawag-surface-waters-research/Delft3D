@@ -1226,8 +1226,10 @@ if(q /= 0) then
  end if
 
  if (jased > 0 .and. stm_included) then
+    if ( jatimer.eq.1 ) call starttimer(IEROSED)
     call fm_fallve()                   ! update fall velocities
     call fm_erosed()                   ! source/sink, bedload/total load
+    if ( jatimer.eq.1 ) call stoptimer(IEROSED)
  end if
 
  ! secondary flow
@@ -10432,6 +10434,8 @@ end subroutine cosphiunetcheck
  write(msgbuf,'(a,F25.10)') 'av nr of cont. it s1it ( )  :' , dnums1it/max(dnt,1d-8)     ; call msg_flush()
 
  if ( jatimer.eq.1 ) then
+    write(msgbuf,'(a,F25.10)') 'time erosed    [s]         :' , gettimer(1,IEROSED)
+    call msg_flush()
     write(msgbuf,'(a,F25.10)') 'time transport [s]         :' , gettimer(1,ITRANSPORT)
     call msg_flush()
     if (ti_waqproc > 0) then
