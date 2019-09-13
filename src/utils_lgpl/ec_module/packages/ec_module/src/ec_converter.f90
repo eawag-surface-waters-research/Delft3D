@@ -968,6 +968,7 @@ module m_ec_converter
          success = .false.
          !
          if (.not.associated(connection%converterPtr)) then
+            ! There is no converter needed here (it's optional), so return directly.
             success = .true.
             return
          endif

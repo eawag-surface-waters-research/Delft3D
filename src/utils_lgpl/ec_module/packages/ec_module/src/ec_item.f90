@@ -419,6 +419,8 @@ module m_ec_item
                   else
                      if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr,  &
                                                        timesteps, interpolate_time_extrapolation_ok))) then 
+                        ! Note: time interp. does not apply here, so we use the most forgiving type
+                        ! 'interpolate_time_extrapolation_ok' to avoid duplicate time exceeded errors.
                         success = .false.
                         return
                      end if
