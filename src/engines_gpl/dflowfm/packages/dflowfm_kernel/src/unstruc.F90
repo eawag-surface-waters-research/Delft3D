@@ -632,6 +632,8 @@ end subroutine flow_finalize_single_timestep
  use m_flowgeom
  use unstruc_model, only: md_ident, md_restartfile
  use m_xbeach_data, only: swave, Lwave, uin, vin, cgwav
+ use unstruc_channel_flow
+ use m_1d_structures, only: initialize_structures_actual_params
  use dfm_error
  use MessageHandling
  use m_partitioninfo
@@ -716,6 +718,8 @@ end subroutine flow_finalize_single_timestep
  if (kmx == 0 .and. javeg > 0) then                  ! overwrite cfuhi in 2D with veg in plant area's
     call setbaptist()
  endif
+
+ call initialize_structures_actual_params(network%sts)
 
  if (japillar == 1 .or. japillar == 3) then
     call pillar_upd()
@@ -8807,6 +8811,8 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_bedform
  use m_fm_update_crosssections, only: fm_update_mor_width_area
  use m_globalparameters, only: updateTabulatedProfiles
+ use unstruc_channel_flow
+ use m_1d_structures, only: initialize_structures_actual_params
  use unstruc_netcdf_map_class
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
@@ -9064,7 +9070,8 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)
 
- call structure_parameters                           !  initialize structure values
+ call initialize_structures_actual_params(network%sts)
+ call structure_parameters()                         !  initialize structure values
 
  if (jatrt == 1) then
     call flow_trachyupdate()                         ! Perform a trachy update step to correctly set initial field quantities

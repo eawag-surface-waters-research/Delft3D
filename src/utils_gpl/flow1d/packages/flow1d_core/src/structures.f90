@@ -89,6 +89,7 @@ module m_1d_structures
    public initialize_structure_links
    public set_fu_ru
    public check_for_changes_on_structures
+   public initialize_structures_actual_params
 
    public printData
 
@@ -1207,7 +1208,39 @@ end subroutine
       struct%ru(L0) = ru
       struct%au(L0) = au
    end subroutine set_fu_ru
-   
+
+
+   !> Initialize the %*_actual parameters for all network structure to the
+   !! currently set direct parameters (e.g., %zs_actual = %zs).
+   !! This routine is intended to maintain up-to-date actual parameter values
+   !! for output purposes, even when the structure was dry (then the sanity
+   !! checks were not applied).
+   subroutine initialize_structures_actual_params(sts)
+      use messagehandling
+      use precision_basics
+      type(t_StructureSet), intent(in) :: sts !< Structure set that must be initialized.
+
+      type (t_structure), pointer :: pstru
+      integer :: istru
+      
+      do istru=1,sts%Count
+         pstru => sts%struct(istru)
+         select case(pstru%type)
+         case (ST_GENERAL_ST)
+            pstru%generalst%zs_actual                 = pstru%generalst%zs
+            pstru%generalst%ws_actual                 = pstru%generalst%ws
+            pstru%generalst%gateLowerEdgeLevel_actual = pstru%generalst%gateLowerEdgeLevel
+            pstru%generalst%gateopeningwidth_actual   = pstru%generalst%gateopeningwidth
+         case(ST_BRIDGE)
+            pstru%bridge%bedLevel_actual              = pstru%bridge%bedLevel
+         case(ST_UNI_WEIR)
+            pstru%uniweir%crestlevel_actual           = pstru%uniweir%crestlevel
+         end select
+      end do
+
+   end subroutine initialize_structures_actual_params
+
+
    !> check for differences between input parameters and actual parameters
    subroutine check_for_changes_on_structures(level, pstru, bob0)
       use messagehandling
