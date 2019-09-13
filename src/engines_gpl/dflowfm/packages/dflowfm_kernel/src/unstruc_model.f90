@@ -1839,7 +1839,7 @@ subroutine readMDUFile(filename, istat)
       end do
       ! [debug]
       if (loglevel_StdOut <= LEVEL_DEBUG) then
-         call mess(LEVEL_DEBUG, 'This is the list of structures that will be processed:')
+         write (*,*) '** DEBUG  : This is the list of structures that will be processed:' ! no MessageHandling, because tree_traverse does not (yet) support it.
          call tree_traverse(strs_ptr, print_tree, dummychar, dummylog)
       end if
    end if
