@@ -802,6 +802,10 @@ end subroutine
 
    end function getStructureById
 
+   !> Gets the current value of the crest level for a given structure.
+   !! If the type of the given structure does not have a crest, then it gets a dummy high value 1d10.
+   !! The value is the actual value, e.g., %zs_actual, so it may differ from %zs
+   !! if sanity  checks have been applied (see also: check_for_changes_on_structure()).
    double precision function get_crest_level(struc)
       type(t_structure), intent(in) :: struc
       
@@ -824,6 +828,10 @@ end subroutine
 
    end function get_crest_level
 
+   !> Gets the pointer of the crest level for a given structure.
+   !! If the type of the given structure does not have a crest, then it gets a null pointer
+   !! This pointer points directly to, e.g., the %zs (i.e., *not* to %zs_actual),
+   !! so it is suitable for adjusting the %zs.
    type(c_ptr) function get_crest_level_c_loc(struc)
       type(t_structure), intent(in) :: struc
       
@@ -835,7 +843,7 @@ end subroutine
           case (ST_ORIFICE)
              get_crest_level_c_loc = c_loc(struc%orifice%crestlevel)
           case (ST_GENERAL_ST)
-             get_crest_level_c_loc = c_loc(struc%generalst%zs_actual)
+             get_crest_level_c_loc = c_loc(struc%generalst%zs)
           case default
              get_crest_level_c_loc = C_NULL_PTR
        end select
@@ -844,6 +852,8 @@ end subroutine
    
    !> Gets the pointer of the gate lower edge level for a given structure.
    !! If the type of the given structure is not general structure, then it gets a null pointer
+   !! This pointer points directly to the %gateLowerEdgeLevel (i.e., *not* to %gateLowerEdgeLevel_actual),
+   !! so it is suitable for adjusting the %gateLowerEdgeLevel.
    type(c_ptr) function get_gate_lower_edge_level_c_loc(struc)
       type(t_structure), intent(in) :: struc
       
