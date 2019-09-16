@@ -2704,6 +2704,8 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
         endif
     endif
 
+    ! TODO: while documenting 1D2D code, we discovered the following undesirable bup:
+    ! it should by default be the max(bob1/2), if conveyance2D < 1. Not yet changed.
     bup = bob(iup,L)
 
     if (L <= lnx1D) then      ! 1D
