@@ -5170,6 +5170,7 @@ module m_fm_wq_processes
 
    real(hp), allocatable, dimension(:,:)     :: amass                       !< mass array to be updated
    logical , allocatable, dimension(:)       :: wetdry                      !< wet/dry indicator (wet=true/dry=false)
+   logical , allocatable, dimension(:)       :: doproc                      !< do processes indicator (do processes=true/no processes=false)
    integer , allocatable, dimension(:)       :: iknmrk                      !< segment characteristics.
                                                                             !< 1st digit from the right indicates wet/dry (1/0),
                                                                             !< 2nd digit indicates top/middle/bottom/top&bottom in water column (1/2/3/0).

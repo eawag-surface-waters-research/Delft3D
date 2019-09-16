@@ -91,6 +91,7 @@
       integer( 4)              :: iastat
 
       character*10,parameter   :: cbloom = 'd40blo'
+      character*20,parameter   :: doprocesses = 'DoProcesses'
 
       integer :: janew, itrac, iex
       integer :: kk, k, kb, kt, ktmax, kdum
@@ -233,7 +234,8 @@
       end if
 
 !    allocate array that indicates is dflowfm cells are wet or dry
-     call realloc(wetdry, ktx, keepExisting=.false.)
+     call realloc(wetdry, ktx, keepExisting=.false., fill=.true.)
+     call realloc(doproc, ktx, keepExisting=.false., fill=.true.)
    
 ! ======================
 ! Start initialising WAQ
@@ -540,6 +542,16 @@
           call zoekns(outputs%names(j),novar,varnam,20,ivar)
           outvar(j) = ivar
       enddo  
+
+! If there is a parameter 'doprocesses', mask the area where processes are active by setting doproc to .true./.false. (default=.true.)
+      call zoekns(doprocesses,nopa,paname,20,ipar)
+      if (ipar>0) then
+         call mess(LEVEL_INFO, 'Found parameter ''DoProcesses''. Water quality processes are only calculated for segments where DoProcesses = 1.')
+         ip = arrpoi(iiparm)
+         do k=kbx,ktx
+            doproc(k) = painp(ipar,k)==1.0
+         end do
+      endif
 
       ierror = 0
       if ( timon ) call timstop ( ithndl )
@@ -1138,7 +1150,7 @@
                iknmrk_dry = int(iknmrk(kwaq)/10) * 10
                iknmrk_wet = iknmrk_dry + 1
                
-               if (wetdry(k)) then
+               if (wetdry(k).and.doproc(k)) then
                   iknmrk(kwaq) = iknmrk_wet
                else
                   iknmrk(kwaq) = iknmrk_dry
@@ -1155,7 +1167,7 @@
          end do
       else
          do k=1,Ndxi
-            if (wetdry(k)) then
+            if (wetdry(k).and.doproc(k)) then
                iknmrk(k) = 1101
             else
                iknmrk(k) = 1100
