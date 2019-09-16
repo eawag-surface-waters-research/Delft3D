@@ -36816,7 +36816,6 @@ if (jahisbal > 0) then
             endif
             dir = sign(1d0,dble(Lf))
             call fill_valstruct_perlink(valbridge(:,n), La, dir, ST_BRIDGE, istru, L)
-            valbridge(6,n) = valbridge(6, n) + au(La)
          enddo
          call average_valstruct(valbridge(:,n), ST_BRIDGE, istru, nlinks, NUMVALS_BRIDGE) ! TODO: UNST-2720: move code below/above to valustruc* routines
          if (valbridge(1,n) == 0) then
@@ -36846,7 +36845,6 @@ if (jahisbal > 0) then
             endif
             dir = sign(1d0,dble(Lf))
             call fill_valstruct_perlink(valculvert(:,n), La, dir, ST_CULVERT, istru, L)
-            valculvert(6,n) = valculvert(6, n) + au(La)
          enddo
          call average_valstruct(valculvert(:,n), ST_CULVERT, istru, nlinks, NUMVALS_CULVERT) ! TODO: UNST-2719: move code aboe/below to valstruc* routines
          if (valculvert(1,n) == 0) then

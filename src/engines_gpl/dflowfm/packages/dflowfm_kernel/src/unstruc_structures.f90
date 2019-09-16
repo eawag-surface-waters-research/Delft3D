@@ -347,11 +347,13 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    valstruct(4) = valstruct(4) + s1(kd)*wu(L)
    valstruct(5) = valstruct(5) + (s1(ku) - s1(kd))*wu(L)
 
+   if (istrtypein /= ST_PUMP) then
+      valstruct(6)  = valstruct(6) + au(L)
+   end if
    ! 2. More specific valus that apply to certain structure types only
 
    ! General structure-based structures with a crest.
    if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE, ST_UNI_WEIR
-      valstruct(6)  = valstruct(6) + au(L)
       valstruct(8)  = valstruct(8) + network%sts%struct(istru)%generalst%sOnCrest(L0)*wu(L)
       valstruct(12) = valstruct(12) + get_force_difference(istru, L0)*wu(L)
    end if
