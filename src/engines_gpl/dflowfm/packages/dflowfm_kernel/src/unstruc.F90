@@ -16387,6 +16387,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_sedtotdim, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
                      id_dambreakdim, id_dambreak_id, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
                      id_dambreak_au, id_dambreak_head, id_dambreak_cresth, id_dambreak_crestw, &
+                     id_uniweirdim, id_uniweir_id, id_uniweir_dis, id_uniweir_s1up,  id_uniweir_s1dn, id_uniweir_crestl, &
+                     id_uniweir_vel, id_uniweir_au, id_uniweir_head, &
                      id_dambreak_breach_width_time_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq
@@ -17829,6 +17831,51 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_dambreak_crestw, 'coordinates', 'dambreak_id')
         endif
 
+        ! Universal weir
+        if(jahisuniweir > 0 .and. network%sts%numuniweirs > 0) then
+            ierr = nf90_def_dim(ihisfile, 'universalWeirs', network%sts%numuniweirs, id_uniweirdim)
+            ierr = nf90_def_var(ihisfile, 'uniweir_id',  nf90_char,   (/ id_strlendim, id_uniweirdim /), id_uniweir_id)
+            ierr = nf90_put_att(ihisfile, id_uniweir_id,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_uniweir_id,  'long_name', 'Id of universal weir'    )
+
+            ierr = nf90_def_var(ihisfile, 'uniweir_discharge',     nf90_double, (/ id_uniweirdim, id_timedim /), id_uniweir_dis)
+            ierr = nf90_put_att(ihisfile, id_uniweir_dis, 'long_name', 'Discharge through universal weir')
+            ierr = nf90_put_att(ihisfile, id_uniweir_dis, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_uniweir_dis, 'coordinates', 'uniweir_id')
+
+            ierr = nf90_def_var(ihisfile, 'uniweir_crest_level', nf90_double, (/ id_uniweirdim, id_timedim /), id_uniweir_crestl)
+            ierr = nf90_put_att(ihisfile, id_uniweir_crestl, 'long_name', 'Crest level of universal weir')
+            ierr = nf90_put_att(ihisfile, id_uniweir_crestl, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_uniweir_crestl, 'coordinates', 'uniweir_id')
+
+            ierr = nf90_def_var(ihisfile, 'uniweir_s1up',     nf90_double, (/ id_uniweirdim, id_timedim /), id_uniweir_s1up)
+            ierr = nf90_put_att(ihisfile, id_uniweir_s1up, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_uniweir_s1up, 'long_name', 'Water level upstream of universal weir')
+            ierr = nf90_put_att(ihisfile, id_uniweir_s1up, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_uniweir_s1up, 'coordinates', 'uniweir_id')
+
+            ierr = nf90_def_var(ihisfile, 'uniweir_s1dn',     nf90_double, (/ id_uniweirdim, id_timedim /), id_uniweir_s1dn)
+            ierr = nf90_put_att(ihisfile, id_uniweir_s1dn, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_uniweir_s1dn, 'long_name', 'Water level downstream of universal weir')
+            ierr = nf90_put_att(ihisfile, id_uniweir_s1dn, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_uniweir_s1dn, 'coordinates', 'uniweir_id')
+            
+            ierr = nf90_def_var(ihisfile, 'uniweir_head', nf90_double, (/ id_uniweirdim, id_timedim /), id_uniweir_head)
+            ierr = nf90_put_att(ihisfile, id_uniweir_head, 'long_name', 'Head difference across universal weir')
+            ierr = nf90_put_att(ihisfile, id_uniweir_head, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_uniweir_head, 'coordinates', 'uniweir_id')
+            
+            ierr = nf90_def_var(ihisfile, 'uniweir_flow_area ', nf90_double, (/ id_uniweirdim, id_timedim /), id_uniweir_au)
+            ierr = nf90_put_att(ihisfile, id_uniweir_au, 'long_name', 'Flow area in universal weir')
+            ierr = nf90_put_att(ihisfile, id_uniweir_au, 'units', 'm2')
+            ierr = nf90_put_att(ihisfile, id_uniweir_au, 'coordinates', 'uniweir_id')
+            
+            ierr = nf90_def_var(ihisfile, 'uniweir_velocity ', nf90_double, (/ id_uniweirdim, id_timedim /), id_uniweir_vel)
+            ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'long_name', 'Velocity through universal weir')
+            ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'units', 'm s-1')
+            ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'coordinates', 'uniweir_id')
+        endif
+        
         if(dad_included) then  ! Output for dredging and dumping
             ierr = nf90_def_dim(ihisfile, 'ndredlink', dadpar%nalink, id_dredlinkdim)
             ierr = nf90_def_dim(ihisfile, 'ndred', dadpar%nadred+dadpar%nasupl, id_dreddim)
@@ -17947,6 +17994,13 @@ subroutine unc_write_his(tim)            ! wrihis
            do i = 1, network%sts%numCulverts
               istru = network%sts%culvertIndices(i)
               ierr = nf90_put_var(ihisfile, id_culvert_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
+           end do
+        end if
+        
+        if (jahisuniweir > 0 .and. network%sts%numuniweirs > 0) then
+           do i = 1, network%sts%numuniweirs
+              istru = network%sts%uniweirIndices(i)
+              ierr = nf90_put_var(ihisfile, id_uniweir_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
         
@@ -18432,6 +18486,18 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_culvert_stat,  int(valculvert(9,i)),  (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_culvert_edgel , valculvert(10,i),     (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_culvert_openh,  valculvert(11,i),     (/ i, it_his /))
+         enddo
+      end if
+      
+      if (jahisuniweir > 0 .and. network%sts%numuniweirs > 0) then
+         do i=1,network%sts%numuniweirs
+            ierr = nf90_put_var(ihisfile, id_uniweir_dis,    valuniweir(2,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_s1up,   valuniweir(3,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_s1dn,   valuniweir(4,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_head,   valuniweir(5,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_au,     valuniweir(6,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_vel,    valuniweir(7,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_uniweir_crestl, valuniweir(8,i),      (/ i, it_his /))
          enddo
       end if
       
@@ -36860,6 +36926,35 @@ if (jahisbal > 0) then
          end if   
       enddo
       
+      !
+      ! === Universal weir
+      !      
+      do n = 1, network%sts%numuniweirs
+         valuniweir(1:NUMVALS_UNIWEIR,n) = 0d0
+         istru = network%sts%uniweirIndices(n)
+         pstru => network%sts%struct(istru)
+         nlinks = pstru%numlinks
+         do L = 1, nlinks
+            Lf = pstru%linknumbers(L)
+            La = abs( Lf )
+            if( jampi > 0 ) then
+               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+               if ( jaghost.eq.1 ) cycle
+            endif
+            dir = sign(1d0,dble(Lf))
+            call fill_valstruct_perlink(valuniweir(:,n), La, dir, ST_UNI_WEIR, istru, L)
+         enddo
+         call average_valstruct(valuniweir(:,n), ST_UNI_WEIR, istru, nlinks, NUMVALS_UNIWEIR)
+         if (valuniweir(1,n) == 0) then
+            valuniweir(6:NUMVALS_UNIWEIR,n) = dmiss
+         else
+            if (valuniweir(6,n) > 0) then
+               valuniweir(7,n) = valuniweir(2,n) / valuniweir(6,n)
+            end if
+            valuniweir(8,n) = get_crest_level(pstru)
+         end if   
+      enddo
+
       !
       ! == dambreak
       !

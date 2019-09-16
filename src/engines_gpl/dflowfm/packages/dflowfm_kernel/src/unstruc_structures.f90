@@ -149,6 +149,14 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (9,:) culvert state (0: closed, 1: free weir, 2: drowned/submerged weir)
                                                               !<                      (10,:) culvert gate lower edge level
                                                               !<                      (11,:) culvert gate opening height
+ double precision, dimension(:,:), allocatable :: valuniweir  !< Array for universal weir; (1,:) flow link width, used for averaging.
+                                                              !<                      (2,:) discharge through universal weir
+                                                              !<                      (3,:) universal weir water level up
+                                                              !<                      (4,:) universal weir water level down
+                                                              !<                      (5,:) universal weir head
+                                                              !<                      (6,:) universal weir flow area
+                                                              !<                      (7,:) universal weir velocity
+                                                              !<                      (8,:) universal weir crest level
  integer                           :: NUMVALS_PUMP = 11       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
@@ -160,6 +168,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_ORIFGEN = 23    !< Number of variables for orific
  integer                           :: NUMVALS_BRIDGE  = 7     !< Number of variables for bridge
  integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
+ integer                           :: NUMVALS_UNIWEIR = 8     !< Number of variables for univeral weir
  
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
  integer                           :: jahispump               !< Write pump      parameters to his file, 0: n0, 1: yes
@@ -170,6 +179,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: jahisorif               !< Write orifice   parameters to his file, 0: no, 1: yes
  integer                           :: jahisbridge             !< Write bridge    parameters to his file, 0: no, 1: yes
  integer                           :: jahisculv               !< Write culvert   parameters to his file, 0: no, 1: yes
+ integer                           :: jahisuniweir            !< Write univeral weir parameters to his file, 0: no, 1: yes
  
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
@@ -207,6 +217,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       jahisculv = 1
       jahisbridge   = 1
       jahisdambreak = 1
+      jahisuniweir = 1
 
       if( jahispump > 0 .and. npumpsg > 0) then
          if( allocated( valpump ) ) deallocate( valpump )
@@ -263,6 +274,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       if( jahisculv > 0 .and. network%sts%numCulverts > 0) then
          if( allocated( valculvert) ) deallocate( valculvert )
          allocate( valculvert(NUMVALS_CULVERT,network%sts%numCulverts) ) ; valculvert = 0d0
+      endif
+      if( jahisuniweir > 0 .and. network%sts%numUniWeirs > 0) then
+         if( allocated( valuniweir ) ) deallocate( valuniweir )
+         allocate( valuniweir(NUMVALS_UNIWEIR,network%sts%numUniWeirs) ) ; valuniweir = 0d0
       endif
 
 ! TIDAL TURBINES: Insert init_turbines here
@@ -353,7 +368,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    ! 2. More specific valus that apply to certain structure types only
 
    ! General structure-based structures with a crest.
-   if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE, ST_UNI_WEIR
+   if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE
       valstruct(8)  = valstruct(8) + network%sts%struct(istru)%generalst%sOnCrest(L0)*wu(L)
       valstruct(12) = valstruct(12) + get_force_difference(istru, L0)*wu(L)
    end if
@@ -427,7 +442,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
          valstruct(3) = dmiss  ! s1up
          valstruct(4) = dmiss  ! s1down
          valstruct(5) = dmiss  ! head
-         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE, ST_UNI_WEIR
+         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE
             valstruct(6) = dmiss ! flow area
             valstruct(7) = dmiss ! velocity
             valstruct(8) = dmiss ! water level on crest
@@ -443,7 +458,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
          valstruct(4) = valstruct(4) / valstruct(1)        ! s1down
          valstruct(5) = valstruct(5) / valstruct(1)        ! head
          
-         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE, ST_UNI_WEIR
+         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE
             pstru => network%sts%struct(istru)
             if (valstruct(6) > 0d0) then ! non-zero flow area
                valstruct(7) = valstruct(2) / valstruct(6)  ! velocity
@@ -460,7 +475,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
    ! 2. More specific valus that apply to certain structure types only
 
    ! General structure-based structures with a crest.
-   if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /)) & ! TODO: ST_GATE, ST_UNI_WEIR
+   if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /)) & ! TODO: ST_GATE
        .and. nlinks > 0) then ! If it is a new general structure, and there are links
       valstruct(icount) = 1                     ! count the current partition
       valstruct(9) = get_crest_level(pstru)     ! crest level

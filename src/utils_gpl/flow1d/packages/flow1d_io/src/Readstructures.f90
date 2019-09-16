@@ -396,6 +396,7 @@ module m_readstructures
       integer :: nbridge
       integer :: ngate
       integer :: ngenstru
+      integer :: nuniweir
       integer,          dimension(:), pointer :: indices
       character(len=IdLen), dimension(:), pointer :: ids
       
@@ -407,6 +408,7 @@ module m_readstructures
       sts%numBridges  = 0
       sts%numGates    = 0
       sts%numGeneralStructures = 0
+      sts%numUniWeirs = 0
       sts%numweirs    = sts%countByType(ST_WEIR)
       sts%numculverts = sts%countByType(ST_CULVERT)
       sts%numPumps    = sts%countByType(ST_PUMP)
@@ -414,6 +416,7 @@ module m_readstructures
       sts%numBridges  = sts%countByType(ST_BRIDGE)
       sts%numGates    = sts%countByType(ST_GATE)
       sts%numGeneralStructures = sts%countByType(ST_GENERAL_ST)
+      sts%numUniWeirs = sts%countByType(ST_UNI_WEIR)
       allocate(sts%weirIndices(sts%numweirs))
       allocate(sts%culvertIndices(sts%numCulverts))
       allocate(sts%pumpIndices(sts%numPumps))
@@ -421,7 +424,8 @@ module m_readstructures
       allocate(sts%gateIndices(sts%numGates))
       allocate(sts%bridgeIndices(sts%numBridges))
       allocate(sts%generalStructureIndices(sts%numGeneralStructures))
-      
+      allocate(sts%uniWeirIndices(sts%numUniWeirs))
+
       !set structure indices for different structure types
       nweir = 0
       nculvert = 0
@@ -429,6 +433,7 @@ module m_readstructures
       ngenstru = 0
       nbridge = 0
       ngate = 0
+      nuniweir = 0
       do istru = 1, sts%Count
          select case (sts%struct(istru)%type)
          case (ST_WEIR)
@@ -455,6 +460,9 @@ module m_readstructures
          case (ST_GENERAL_ST)
             ngenstru = ngenstru + 1
             sts%generalStructureIndices(ngenstru) = istru
+         case (ST_UNI_WEIR)
+            nuniweir = nuniweir + 1
+            sts%uniWeirIndices(nuniweir) = istru
          end select
       enddo
       
