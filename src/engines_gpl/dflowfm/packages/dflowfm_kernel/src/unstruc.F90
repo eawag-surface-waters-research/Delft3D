@@ -9090,8 +9090,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
 
- call writesomeinitialoutput()
-
+ 
  jaFlowNetChanged = 0
 
 
@@ -9117,8 +9116,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     end if
  end if
 
-
-
+call writesomeinitialoutput()
 
  iresult = DFM_NOERR
  return
@@ -10319,21 +10317,128 @@ subroutine cosphiunetcheck(jausererror)
 
 end subroutine cosphiunetcheck
 
+subroutine dbdistancehk(xa,ya,xb,yb,dist) ! easy way to get a distance in one line of code, without need for specifying 3 modules : 
+use m_sferic, only: jsferic, jasfer3D 
+use geometry_module, only: dbdistance  
+USE M_MISSING
+double precision :: xa,ya,xb,yb,dist
+dist = DBDISTANCE(xa,ya,xb,yb,jasferic, jasfer3D, dmiss) 
+end subroutine dbdistancehk
+
  subroutine writesomeinitialoutput()
  use m_sferic
  use m_flow
+ use m_netw
  use m_flowgeom
  use m_flowtimes
  use unstruc_messages
+ use m_partitioninfo
+ use m_samples
+ use unstruc_model, only: md_ident
+ use geometry_module, only: dbdistance
 
  implicit none
+ integer          :: k, mbalat,mwrong,L,msam, n, nf
+ double precision :: batotown(1), batot(1), voltotown(1), volto(1), dist, dismin
+
+ batotown = 0 ; voltotown = 0
 
  call klok  (cpuall(2))
  call datum (rundat0)
+
  write(msgbuf,'(a,a)') 'Modelinit finished   at: '         , rundat0                  ; call msg_flush()
 
- end subroutine writesomeinitialoutput
+ msgbuf = ' ' ; call msg_flush()
+ msgbuf = ' ' ; call msg_flush()
 
+ write(msgbuf,'(a,I25)')    'nr of netnodes         ( )  :' , numk                       ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of netlinks         ( )  :' , numl                       ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of flownodes        ( )  :' , ndx                        ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of openbnd cells    ( )  :' , ndx - ndxi                 ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of 1D-flownodes     ( )  :' , ndxi - ndx2d               ; call msg_flush()
+ write(msgbuf,'(a,I25)')    'nr of flowlinks        ( )  :' , lnx                        ; call msg_flush() 
+ write(msgbuf,'(a,I25)')    'nr of internal links   ( )  :' , lnxi                       ; call msg_flush() 
+ write(msgbuf,'(a,I25)')    'nr of 1D links         ( )  :' , lnx1D                      ; call msg_flush() 
+ write(msgbuf,'(a,I25)')    'nr of closed walls     ( )  :' , mxwalls                    ; call msg_flush() 
+
+ if (kmx > 0) then 
+ write(msgbuf,'(a,I25)')    'max nr of layers       ( )  :' , kmx                        ; call msg_flush() 
+ write(msgbuf,'(a,I25)')    'nr of 3D cells         ( )  :' , ndkx-2*ndx                 ; call msg_flush() 
+ write(msgbuf,'(a,I25)')    'nr of 3D links         ( )  :' , Lnkx-2*lnx                 ; call msg_flush() 
+ endif
+ 
+ msgbuf = ' ' ; call msg_flush()
+ msgbuf = ' ' ; call msg_flush()
+
+ if (nproflocs > 0 .and. jaqin > 0) then  
+    if (jampi == 1) then 
+       L = index(md_ident,'_0') - 1
+       call oldfil(msam, 'ba_'//trim(md_ident(1:L))//'.xyz') 
+       call reasam(msam, 0)
+       call newfil(mwrong, 'bawrong_'//trim(md_ident)//'.xyz')  
+   endif 
+    call newfil(mbalat, 'ba_'//trim(md_ident)//'.xyz')  
+ endif
+
+ DO K = 1,NDXI
+    if (jampi == 1) then
+       if (idomain(k) == my_rank) then 
+          batotown(1)  = batotown(1)  +   ba(k)
+          voltotown(1) = voltotown(1) + vol1(k) 
+          if (nproflocs > 0 .and. jaqin > 0) then 
+              write(mbalat,*) xz(k), yz(k), ba(k) 
+              if (ns > 0) then 
+                 dismin = 1d9 ; nf = 0
+                 do n = 1,ns
+                    call dbdistancehk(xz(k), yz(k), xs(n), ys(n), dist) 
+                    if (dist  < dismin) then 
+                       dismin = dist
+                       nf     = n
+                    endif
+                 enddo 
+                 if (nf > 0 .and. dismin < 1d0) then 
+                    if ( abs( ba(k) - zs(nf) ) > 1d-4 ) then 
+                        write(mwrong,'(4F20.5)') xz(k), yz(k), ba(k), zs(nf) 
+                    endif 
+                 endif
+              endif
+           endif 
+       endif
+    else 
+       batotown(1)  = batotown(1)  +   ba(k)
+       voltotown(1) = voltotown(1) + vol1(k) 
+       if (nproflocs > 0 .and. jaqin > 0) then 
+          write(mbalat,*) xz(k), yz(k), ba(k) 
+       endif
+    endif
+ enddo
+
+ if (nproflocs > 0 .and. jaqin > 0) then
+    call doclose(mbalat)
+    if (jampi == 1) then 
+       call doclose(mwrong) 
+    endif
+ endif
+ 
+ write(msgbuf,'(a,E25.10)') 'my model area          (m2) :' , batotown                   ; call msg_flush()
+ if (jampi == 1) then 
+ k = 1
+ call reduce_double_sum(k, batotown, batot )  
+ write(msgbuf,'(a,E25.10)') 'total model area       (m2) :' , batot                      ; call msg_flush()
+ endif 
+
+ write(msgbuf,'(a,E25.10)') 'my model volume        (m3) :' , voltotown                  ; call msg_flush()
+ if (jampi == 1) then 
+ k = 1
+ call reduce_double_sum(k, voltotown, volto ) 
+ write(msgbuf,'(a,E25.10)') 'total model volume     (m3) :' , volto                     ; call msg_flush()
+ endif 
+ 
+ msgbuf = ' ' ; call msg_flush()
+ msgbuf = ' ' ; call msg_flush()
+
+ 
+ end subroutine writesomeinitialoutput
 
  subroutine writesomefinaloutput()
  use m_sferic
@@ -10367,7 +10472,7 @@ end subroutine cosphiunetcheck
  call klok(cpuall(3))
  tot  = ( cpuall(3) - cpuall(2) )/ max(1d0, ndx*(dnt-1) )
  dtav = (tstop_user - tstart_user)/max(1d0, dnt-1)
- 
+
  do k = 1,3
     msgbuf = ' ' ; call msg_flush()
  enddo
@@ -10377,15 +10482,6 @@ end subroutine cosphiunetcheck
  if ( tstop.ne.tstop_user ) then
    write(msgbuf,'(a,I25)')    'Simulation did not reach stop time'                       ; call msg_flush()
  end if
-
- write(msgbuf,'(a,I25)')    'nr of netnodes         ( )  :' , numk                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of netlinks         ( )  :' , numl                       ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of flownodes        ( )  :' , ndx                        ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of openbnd cells    ( )  :' , ndx - ndxi                 ; call msg_flush()
- write(msgbuf,'(a,I25)')    'nr of 1D-flownodes     ( )  :' , ndxi - ndx2d               ; call msg_flush()
- write(msgbuf,'(a,E25.10)') 'model area             (m2) :' , sum(ba(1:ndxi))            ; call msg_flush()
- write(msgbuf,'(a,E25.10)') 'model volume           (m3) :' , sum(vol1(1:ndxi))          ; call msg_flush()
-
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
@@ -10436,8 +10532,6 @@ end subroutine cosphiunetcheck
  write(msgbuf,'(a,F25.10)') 'av nr of cont. it s1it ( )  :' , dnums1it/max(dnt,1d-8)     ; call msg_flush()
 
  if ( jatimer.eq.1 ) then
-    write(msgbuf,'(a,F25.10)') 'time erosed    [s]         :' , gettimer(1,IEROSED)
-    call msg_flush()
     write(msgbuf,'(a,F25.10)') 'time transport [s]         :' , gettimer(1,ITRANSPORT)
     call msg_flush()
     if (ti_waqproc > 0) then
@@ -10447,20 +10541,18 @@ end subroutine cosphiunetcheck
     write(msgbuf,'(a,F25.10)') 'time debug     [s]         :' , gettimer(1,IDEBUG)
     call msg_flush()
     
-    if ( jatimer.eq.1 ) then
-       write(msgbuf,'(a,F25.10)') 'time filter coeff.      [s]:' , gettimer(1,IFILT_COEF)
-       call msg_flush()                                   
-       write(msgbuf,'(a,F25.10)') 'time filter solve       [s]:' , gettimer(1,IFILT_SOLV)
-       call msg_flush()
-       write(msgbuf,'(a,F25.10)') 'time filter cnstr. mat. [s]:' , gettimer(1,IFILT_MAT)
-       call msg_flush()
-       write(msgbuf,'(a,F25.10)') 'time filter copy back   [s]:' , gettimer(1,IFILT_COPYBACK)
-       call msg_flush()
-       write(msgbuf,'(a,F25.10)') 'time filter other       [s]:' , gettimer(1,IFILT_OTHER)
-       call msg_flush()
-       write(msgbuf,'(a,F25.10)') 'time filter             [s]:' , gettimer(1,IFILT)
-       call msg_flush()
-    end if
+    write(msgbuf,'(a,F25.10)') 'time filter coeff.      [s]:' , gettimer(1,IFILT_COEF)
+    call msg_flush()                                   
+    write(msgbuf,'(a,F25.10)') 'time filter solve       [s]:' , gettimer(1,IFILT_SOLV)
+    call msg_flush()
+    write(msgbuf,'(a,F25.10)') 'time filter cnstr. mat. [s]:' , gettimer(1,IFILT_MAT)
+    call msg_flush()
+    write(msgbuf,'(a,F25.10)') 'time filter copy back   [s]:' , gettimer(1,IFILT_COPYBACK)
+    call msg_flush()
+    write(msgbuf,'(a,F25.10)') 'time filter other       [s]:' , gettimer(1,IFILT_OTHER)
+    call msg_flush()
+    write(msgbuf,'(a,F25.10)') 'time filter             [s]:' , gettimer(1,IFILT)
+    call msg_flush()
  end if
 
  do k = 1,3
