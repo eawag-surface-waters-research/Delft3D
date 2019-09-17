@@ -14294,8 +14294,12 @@ endif
 
  if ( janudge.eq.1 ) then
     call set_nudgerate()
-    if ( jainiwithnudge.eq.1 ) then
-      call set_saltem_nudge()
+    if ( jainiwithnudge > 0 ) then
+       call set_saltem_nudge()
+       if (jainiwithnudge == 2) then 
+           janudge = 0
+           deallocate (nudge_tem, nudge_sal, nudge_rate , nudge_time) 
+       endif
     end if
  end if
 
@@ -15202,7 +15206,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    endif
 
    ! Update nudging temperature (and salinity)
-   if (item_nudge_tem /= ec_undef_int ) then ! .and. .not.l_initphase) then
+   if (item_nudge_tem /= ec_undef_int .and. janudge > 0 ) then ! .and. .not.l_initphase) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_nudge_tem, irefdate, tzone, tunit, tim)
 !      tmpstr = dumpECMessageStack(LEVEL_INFO, callback_msg)
    endif
