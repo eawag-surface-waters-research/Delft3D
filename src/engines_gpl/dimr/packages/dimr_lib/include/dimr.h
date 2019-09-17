@@ -185,8 +185,3 @@ class Dimr {
 		static void		   _log				  (Level, const char*); /* BMILogger function */
 
     };
-
-extern "C" {
-	DllExport void set_dimr_logger(Log *);
-	DllExport void set_logger_callback(WriteCallback);
-}
