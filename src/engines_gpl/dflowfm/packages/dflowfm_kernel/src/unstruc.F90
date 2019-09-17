@@ -36977,15 +36977,7 @@ if (jahisbal > 0) then
             dir = sign(1d0,dble(Lf))
             call fill_valstruct_perlink(valbridge(:,n), La, dir, ST_BRIDGE, istru, L)
          enddo
-         call average_valstruct(valbridge(:,n), ST_BRIDGE, istru, nlinks, NUMVALS_BRIDGE) ! TODO: UNST-2720: move code below/above to valustruc* routines
-         if (valbridge(1,n) == 0) then
-            valbridge(6,n) = dmiss
-            valbridge(7,n) = dmiss
-         else
-            if (valbridge(6,n) > 0) then
-               valbridge(7,n) = valbridge(2,n) / valbridge(6,n)
-            end if
-         end if   
+         call average_valstruct(valbridge(:,n), ST_BRIDGE, istru, nlinks, NUMVALS_BRIDGE)
       enddo
       
       !
@@ -37008,11 +37000,8 @@ if (jahisbal > 0) then
          enddo
          call average_valstruct(valculvert(:,n), ST_CULVERT, istru, nlinks, NUMVALS_CULVERT) ! TODO: UNST-2719: move code aboe/below to valstruc* routines
          if (valculvert(1,n) == 0) then
-            valculvert(6:NUMVALS_CULVERT,n) = dmiss
+            valculvert(8:NUMVALS_CULVERT,n) = dmiss
          else
-            if (valculvert(6,n) > 0) then
-               valculvert(7,n) = valculvert(2,n) / valculvert(6,n)
-            end if
             valculvert(8,n) = get_crest_level(pstru)
             valculvert(9,n) = dble(get_culvert_state(pstru))
             valculvert(10,n) = get_gle(pstru)
@@ -37040,7 +37029,7 @@ if (jahisbal > 0) then
          enddo
          call average_valstruct(valuniweir(:,n), ST_UNI_WEIR, istru, nlinks, NUMVALS_UNIWEIR)
          if (valuniweir(1,n) == 0) then
-            valuniweir(6:NUMVALS_UNIWEIR,n) = dmiss
+            valuniweir(8:NUMVALS_UNIWEIR,n) = dmiss
          else
             valuniweir(8,n) = get_crest_level(pstru)
          end if   
