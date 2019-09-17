@@ -885,6 +885,9 @@ subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
       shape(1) = ngategen
       shape(2) = 5
       return
+   case("generalstructures")
+      shape(1) = ngenstru
+      shape(2) = 5
    case("sourcesinks")
       shape(1) = numsrc
       shape(2) = 3
@@ -1577,23 +1580,36 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    ! GENERALSTRUCTURES
    case("generalstructures")
       call getStructureIndex('generalstructures', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
+      
       select case(field_name)
-      case("levelcenter", "CrestLevel")
-         x = c_loc(zcgen((item_index-1)*3+1))
+      case("crestLevel")
+         if (is_in_network) then
+            x = get_crest_level_c_loc(network%sts%struct(item_index))
+         else
+            x = c_loc(zcgen((item_index-1)*3+1))
+         end if
          return
-      case("gatedoorheight", "GateHeight")
+      case("gateHeight")
          x = c_loc(generalstruc(item_index)%gatedoorheight)
          return
-      case("gateheight", "GateLowerEdgeLevel")
-         x = c_loc(zcgen((item_index-1)*3+2))
+      case("gateLowerEdgeLevel")
+         if (is_in_network) then
+            x = get_gate_lower_edge_level_c_loc(network%sts%struct(item_index))
+         else
+            x = c_loc(zcgen((item_index-1)*3+2))
+         end if
          return
-      case("door_opening_width", "GateOpeningWidth")
-         x = c_loc(zcgen((item_index-1)*3+3))
+      case("gateOpeningWidth")
+         if (is_in_network) then
+            x = get_gate_opening_width_c_loc(network%sts%struct(item_index))
+         else
+            x = c_loc(zcgen((item_index-1)*3+3))
+         end if
          return
-      case("horizontal_opening_direction", "GateOpeningHorizontalDirection")
+      case("GateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
       end select
@@ -1868,24 +1884,40 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
       if (item_index == 0) then
          return
       endif
+      
       select case(field_name)
-      case("levelcenter", "CrestLevel")
-         call c_f_pointer(xptr, x_0d_double_ptr)
-         zcgen((item_index-1)*3+1) = x_0d_double_ptr
+      case("crestLevel")
+         if (is_in_network) then
+            fieldptr = get_crest_level_c_loc(network%sts%struct(item_index))
+            fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
+         else
+            call c_f_pointer(xptr, x_0d_double_ptr)
+            zcgen((item_index-1)*3+1) = x_0d_double_ptr
+         end if
          return
-      case("gatedoorheight", "GateHeight")
+      case("GateHeight")
          call c_f_pointer(xptr, x_0d_double_ptr)
          generalstruc(item_index)%gatedoorheight = x_0d_double_ptr ! Not time-controlled, set directly in generalstruc.
          return
-      case("gateheight", "GateLowerEdgeLevel")
-         call c_f_pointer(xptr, x_0d_double_ptr)
-         zcgen((item_index-1)*3+2) = x_0d_double_ptr
+      case("gateLowerEdgeLevel")
+         if (is_in_network) then
+            fieldptr = get_gate_lower_edge_level_c_loc(network%sts%struct(item_index))
+            fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
+         else
+            call c_f_pointer(xptr, x_0d_double_ptr)
+            zcgen((item_index-1)*3+2) = x_0d_double_ptr
+         end if
          return
-      case("door_opening_width", "GateOpeningWidth" )
-         call c_f_pointer(xptr, x_0d_double_ptr)
-         zcgen((item_index-1)*3+3) = x_0d_double_ptr
+      case("gateOpeningWidth")
+         if (is_in_network) then
+            fieldptr = get_gate_opening_width_c_loc(network%sts%struct(item_index))
+            fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
+         else
+            call c_f_pointer(xptr, x_0d_double_ptr)
+            zcgen((item_index-1)*3+3) = x_0d_double_ptr
+         end if
          return
-      case("horizontal_opening_direction", "GateOpeningHorizontalDirection")
+      case("GateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
       end select
@@ -1993,15 +2025,15 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
    case("generalstructures")
       select case(field_index)
       case(1)
-         field_name = "CrestLevel"
+         field_name = "crestLevel"
       case(2)
-         field_name = "GateHeight"
+         field_name = "gateHeight"
       case(3)
-         field_name = "GateLowerEdgeLevel"
+         field_name = "gateLowerEdgeLevel"
       case(4)
-         field_name = "GateOpeningWidth"
+         field_name = "gateOpeningWidth"
       case(5)
-         field_name = "GateOpeningHorizontalDirection"
+         field_name = "gateOpeningHorizontalDirection"
       end select
 
    ! SOURCE-SINKS
