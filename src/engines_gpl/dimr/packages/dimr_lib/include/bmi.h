@@ -21,8 +21,6 @@
 #define MAXSTRINGLEN 1024
 #define MAXDIMS 6
 #include <stddef.h>
-#include "dimr_constants.h"
-#include "log.h"
 
 typedef enum {
     ALL,
@@ -86,7 +84,3 @@ extern "C" {
 
 #endif
 
-extern "C" {
-	DllExport void set_dimr_logger(Log *);
-	DllExport void set_logger_callback(WriteCallback);
-}
