@@ -442,9 +442,12 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
          valstruct(3) = dmiss  ! s1up
          valstruct(4) = dmiss  ! s1down
          valstruct(5) = dmiss  ! head
-         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE
+         if (strtypein /= ST_PUMP) then
             valstruct(6) = dmiss ! flow area
             valstruct(7) = dmiss ! velocity
+         end if
+
+         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE
             valstruct(8) = dmiss ! water level on crest
             valstruct(9) = dmiss ! crest level
             valstruct(10)= dmiss ! crest width
@@ -457,14 +460,17 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
          valstruct(3) = valstruct(3) / valstruct(1)        ! s1up
          valstruct(4) = valstruct(4) / valstruct(1)        ! s1down
          valstruct(5) = valstruct(5) / valstruct(1)        ! head
-         
-         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE
-            pstru => network%sts%struct(istru)
+
+         if (istrtypein /= ST_PUMP) then
             if (valstruct(6) > 0d0) then ! non-zero flow area
                valstruct(7) = valstruct(2) / valstruct(6)  ! velocity
             else
                valstruct(7) = 0d0
             end if
+         end if
+
+         if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE
+            pstru => network%sts%struct(istru)
             valstruct(8) = valstruct(8) / valstruct(1)     ! water level on crest
             valstruct(12)= valstruct(12)/ valstruct(1)     ! force difference per unit width
             

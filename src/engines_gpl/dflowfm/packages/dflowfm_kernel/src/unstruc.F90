@@ -37042,9 +37042,6 @@ if (jahisbal > 0) then
          if (valuniweir(1,n) == 0) then
             valuniweir(6:NUMVALS_UNIWEIR,n) = dmiss
          else
-            if (valuniweir(6,n) > 0) then
-               valuniweir(7,n) = valuniweir(2,n) / valuniweir(6,n)
-            end if
             valuniweir(8,n) = get_crest_level(pstru)
          end if   
       enddo
