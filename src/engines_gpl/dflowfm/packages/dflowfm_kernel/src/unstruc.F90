@@ -15591,6 +15591,10 @@ end subroutine adjust_bobs_on_dambreak_breach
           if (jatem == 5) then
              cdwcof(L) = cdw
           endif
+          if (jaroro == 1) then
+             k = ln(2,L)
+             roro = roair(k) / rho(ktop(k))
+          endif 
           tuwi    = roro*cdw*uwi
           if (kmx > 0) then
               ustw(L) = sqrt(roro*cdw)*uwi
@@ -24178,6 +24182,12 @@ endif
        if (allocated (cdwcof) ) deallocate(cdwcof)
        allocate ( cdwcof(lnx) , stat = ierr)
        call aerr('cdwcof(lnx)', ierr ,  lnx) ; cdwcof = 0d0
+
+       if (jaroro == 1) then ! save rhoair for windstress 
+          if (allocated (roair) ) deallocate(roair)
+          allocate ( roair(ndx) , stat = ierr)
+          call aerr('roair(ndx)', ierr ,  ndx) ; roair = rhoair 
+       endif
 
        if (jamapheatflux > 0 .or. jahisheatflux > 0) then ! his or map output
           if (allocated(qsunmap)) deallocate (Qsunmap, Qevamap, Qconmap, Qlongmap, Qfrevamap, Qfrconmap)
@@ -44146,6 +44156,9 @@ else if (jatem == 5) then
    Qfree  = 0d0 ; Qfrcon = 0d0 ; Qfreva = 0d0                     ! Contribution by free convection:
    rhoa0  = ((presn-pvtwmx)/rdry + pvtwmx/rvap) / (Twatn + Tkelvn)
    rhoa10 = ((presn-pvtahu)/rdry + pvtahu/rvap) / (Tairn + Tkelvn)
+   if (jaroro == 1) then 
+      roair(n) = rhoa0
+   endif
    gred   = 2d0*ag*(rhoa10-rhoa0)/(rhoa0+rhoa10)
    if (gred > 0d0) then                                           ! Ri= (gred/DZ)/ (du/dz)2, Ri>0.25 stable
        wfree  =  gred*xnuair/pr2

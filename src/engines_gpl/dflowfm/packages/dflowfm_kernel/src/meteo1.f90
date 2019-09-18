@@ -443,6 +443,7 @@ module m_meteo
       character(len=*), intent(in)          :: trname, sfname, waqinput
 
       character(len=*), intent(in) :: qidname
+     
       integer,                   pointer    :: itemPtr1, itemPtr2, itemPtr3, itemPtr4
       real(hp), dimension(:),    pointer    :: dataPtr1, dataPtr2, dataPtr3, dataPtr4
       
@@ -460,7 +461,7 @@ module m_meteo
       dataPtr2 => null()
       dataPtr3 => null()
       dataPtr4 => null()
-      select case (qidname)
+      select case (trim(qidname))
          case ('windx')
             itemPtr1 => item_windx
             dataPtr1 => wx

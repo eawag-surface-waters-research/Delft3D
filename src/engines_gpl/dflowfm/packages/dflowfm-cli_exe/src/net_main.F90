@@ -122,10 +122,12 @@
    ! From calling C/C++ side, construct an MPI communicator, and call
    ! MPI_Fint MPI_Comm_c2f(MPI_Comm comm) to convert the C comm handle
    ! to a FORTRAN comm handle.
-   call mpi_init(ierr)
-   call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,ierr)
-   call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,ierr)
+   call mpi_init(ierr)                                ; write(*,*) 'init', ierr 
+   call mpi_comm_rank(DFM_COMM_DFMWORLD,my_rank,ierr) ; write(*,*) 'DFM_COMM_DFMWORLD_my_rank' ,  my_rank, ierr
+   call mpi_comm_size(DFM_COMM_DFMWORLD,numranks,ierr); write(*,*) 'DFM_COMM_DFMWORLD_numranks', numranks, ierr
    ja_mpi_init_by_fm = 1
+
+  ! call pressakey()
 
    if ( numranks.le.1 ) then
       jampi = 0

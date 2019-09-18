@@ -1099,6 +1099,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'physics', 'Salimax'           , Salimax)
     call prop_get_double (md_ptr, 'physics', 'Salimin'           , Salimin)
     call prop_get_double (md_ptr, 'physics', 'Surftempsmofac'    , Surftempsmofac)
+    call prop_get_integer(md_ptr, 'physics', 'RhoairRhowater'    , jaroro)
     call prop_get_integer(md_ptr, 'physics', 'Heat_eachstep'     , jaheat_eachstep)
     call prop_get_double (md_ptr, 'physics', 'Soiltempthick'     , Soiltempthick)
     if (soiltempthick > 0d0) then
@@ -2658,11 +2659,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     if (writeall .or. (jasal == 0 .and. (jatem > 0 .or. jased>0 )) ) then
-       call prop_set(prop_ptr, 'physics', 'Backgroundsalinity', Backgroundsalinity, 'Background salinity for eqn. of state (ppt)')
+       call prop_set(prop_ptr, 'physics', 'Backgroundsalinity', Backgroundsalinity, 'Background salinity for eqn. of state (psu) if salinity not computed')
     endif
 
     if (writeall .or. (jatem == 0 .and. (jasal > 0 .or. jased>0 )) ) then
-       call prop_set(prop_ptr, 'physics', 'Backgroundwatertemperature', Backgroundwatertemperature, 'Background water temperature for eqn. of state (deg C)')
+       call prop_set(prop_ptr, 'physics', 'Backgroundwatertemperature', Backgroundwatertemperature, 'Background water temperature for eqn. of state (deg C) if temperature not computed')
     endif
 
     ! call prop_set(prop_ptr, 'physics', 'Jadelvappos'     , Jadelvappos, 'Only positive forced evaporation fluxes')           ! RL666
@@ -2691,6 +2692,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        endif
        if (jaheat_eachstep > 0) then
           call prop_set(prop_ptr, 'physics', 'Heat_eachstep' , jaheat_eachstep,  '1=heat each timestep, 0=heat each usertimestep')
+       endif
+       if (jaroro > 0) then
+          call prop_set(prop_ptr, 'physics', 'RhoairRhowater' , jaroro        ,  '1=use arrays rhoair/rhowater in windstress compuation if model 5 is used,0=use backgroundvalues')
        endif
 
        if ( janudge > 0 ) then

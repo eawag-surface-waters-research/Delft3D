@@ -1246,6 +1246,7 @@ end module m_wind
  integer                           :: jamapheatflux   !< write heatfluxes to map
  integer                           :: jaRichardsononoutput !< write Richardson nr to his
  integer                           :: jaSecchisp           !< Spatial Secchi 0,1
+ integer                           :: jaRoro               !< Use roair(n)/rho(ntop) in windstress 0,1
 
  double precision, allocatable     :: Qsunmap(:)
  double precision, allocatable     :: Qevamap(:)
@@ -1257,6 +1258,8 @@ end module m_wind
 
  double precision, allocatable     :: Rich(:)
  double precision, allocatable     :: Secchisp(:) 
+ double precision, allocatable     :: Roair(:) 
+
 contains
 
 subroutine default_heatfluxes()
@@ -1276,6 +1279,7 @@ tkelvn  = 273.15d0                    !< Absolute 0
 
 jamapheatflux = 0
 jaRichardsononoutput = 0
+jaroro = 0
 
 end subroutine default_heatfluxes
 
@@ -3798,7 +3802,7 @@ module m_profiles
  integer                          :: nprofdefs       !< nr of unique  profile definitions
  type(tprof), allocatable         :: profiles1D(:)   !< these are the profiles
 
- integer                          :: nproflocs       !< nr of profile locations, always <= nprofdefs
+ integer                          :: nproflocs = 0      !< nr of profile locations, always <= nprofdefs
  integer                          :: maxproflocnr       !< highest referred profnr in profloc.xyz
  integer                          :: minproflocnr       !< lowest  referred profnr in profloc.xyz
  double precision, allocatable    :: xpr(:), ypr(:), zpr(:) !< profile locations, x,y,z

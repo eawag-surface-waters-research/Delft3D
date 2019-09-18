@@ -5005,7 +5005,7 @@ end subroutine partition_make_globalnumbers
       call MPI_barrier(DFM_COMM_DFMWORLD,ierr)
 
       if ( my_rank.eq.0 ) then
-         write(6,*) "press a key..."
+         write(6,*) "press a key from rank 0..."
          read(5,*)
       end if
 
