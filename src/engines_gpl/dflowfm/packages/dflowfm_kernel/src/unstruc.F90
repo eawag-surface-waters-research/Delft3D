@@ -36727,7 +36727,7 @@ if (jahisbal > 0) then
          if (valpump(7,n) < 0d0) then
             valpump(7,n) = dmiss ! Set to fill value if stage is irrelevant.
          end if
-         if (pstru%pump%direction >= 0) then
+         if (valpump(6,n) >= 0d0) then
             valpump(10,n) = valpump(4,n) ! Delivery side = downstream side
             valpump(11,n) = valpump(3,n) ! Suction  side = upstream side
          else
