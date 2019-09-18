@@ -27,6 +27,8 @@
 #define MAXDIMS 6
 
 #ifdef __cplusplus
+class Log;
+
 extern "C" {
 #endif
 
@@ -78,3 +80,7 @@ extern "C" {
 
 #endif
 
+extern "C" {
+	DllExport void set_dimr_logger(Log *);
+	DllExport void set_logger_callback(WriteCallback);
+}

@@ -94,7 +94,3 @@ public:
 	char *        redirectFile;
 };
 
-extern "C" {
-	BMI_API void set_dimr_logger(Log *);
-	BMI_API void set_logger_callback(WriteCallback);
-}
