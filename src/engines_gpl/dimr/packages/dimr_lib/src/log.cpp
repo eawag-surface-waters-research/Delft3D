@@ -36,7 +36,7 @@
 
 #include "log.h"
 #include <errno.h>
-#include <stdlib.h>
+#include <algorithm>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
