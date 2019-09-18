@@ -1,9 +1,14 @@
 /* -*- c-file-style: "stroustrup" -*- */
 /* Please use the stroustrup coding standard: */
 
+#pragma once
+// The following definition is needed since VisualStudio2015 before including <pthread.h>:
 
 #ifndef BMI_API_H
 #define BMI_API_H
+
+#define HAVE_STRUCT_TIMESPEC
+#include "dimr_constants.h"
 
 #define BMI_API_VERSION_MAJOR 1
 #define BMI_API_VERSION_MINOR 0
@@ -20,17 +25,6 @@
 
 #define MAXSTRINGLEN 1024
 #define MAXDIMS 6
-#include <stddef.h>
-
-typedef enum {
-    ALL,
-    DEBUG,
-    INFO,
-    WARNING,
-    ERRORS,
-    FATAL,
-    NONE
-} Level;
 
 #ifdef __cplusplus
 extern "C" {

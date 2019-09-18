@@ -1,8 +1,8 @@
 
 #include <cstddef>
 #include <cstring>
-#include <bmi.h>
-#include <dimr.h>
+#include "bmi.h" 
+#include "dimr.h"
 #include <Strsafe.h>
 #include <direct.h>
 #include "dimr_lib_version.h"
@@ -12,7 +12,7 @@ static Dimr * thisDimr = Dimr::GetInstance();     // global pointer to single ob
 
 extern "C" {
 	//------------------------------------------------------------------------------
-	DllExport void set_logger_callback(WriteCallback writeCallBack)
+	BMI_API void set_logger_callback(WriteCallback writeCallBack)
 	{
 		if (thisDimr == NULL)
 		{
@@ -22,7 +22,7 @@ extern "C" {
 	}
 
 	//------------------------------------------------------------------------------
-	DllExport void set_dimr_logger(Log * loggerFromDimrExe)
+	BMI_API void set_dimr_logger(Log * loggerFromDimrExe)
 	{
 		if (thisDimr == NULL)
 		{

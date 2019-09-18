@@ -33,20 +33,14 @@
 //  30 oct 11
 //------------------------------------------------------------------------------
 
-
 #pragma once
-#ifdef WIN32
-#include "Windows.h"
-#define STDCALL __stdcall
-#else
-#define STDCALL
-#endif
-
-extern "C" {
-	typedef void(STDCALL * WriteCallback)(char* time, char* message, unsigned int level);
-}
-#include "dimr.h"
+// The following definition is needed since VisualStudio2015 before including <pthread.h>:
+#define HAVE_STRUCT_TIMESPEC
 #include "bmi.h"
+#include "clock.h"
+#include "dimr_constants.h"
+#include <cstdio>
+#include <pthread.h>
 
 class Log {
 
@@ -94,3 +88,8 @@ private:
 public:
 	char *        redirectFile;
 };
+
+extern "C" {
+	BMI_API void set_dimr_logger(Log *);
+	BMI_API void set_logger_callback(WriteCallback);
+}

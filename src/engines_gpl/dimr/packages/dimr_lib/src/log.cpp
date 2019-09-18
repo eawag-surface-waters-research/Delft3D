@@ -39,6 +39,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include "exception.h"
 
 
 #if defined (WIN32)

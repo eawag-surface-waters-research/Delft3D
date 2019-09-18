@@ -1,6 +1,7 @@
 #pragma once
 #include "xmltree.h"
 #include "bmi.h"
+#include "log.h"
 #include "clock.h"
 #include <mpi.h>
 #if HAVE_CONFIG_H
@@ -19,6 +20,7 @@
 /* logger to be set from outside so we can log messages */
 //typedef int  (CDECLOPT *BMI_SET_LOGGER)		(void(*)(int, char *));
 typedef int  (CDECLOPT *BMI_SET_LOGGER)		(BMILogger);
+typedef int  (CDECLOPT *BMI_DIMR_SET_LOGGER)(Log *);
 
 typedef int  (CDECLOPT *BMI_INITIALIZE)     (const char *);
 typedef void (CDECLOPT *BMI_UPDATE)         (double);

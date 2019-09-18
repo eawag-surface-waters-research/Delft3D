@@ -31,6 +31,16 @@ enum {
 	MAXSTRING = 1000    // max string length in bytes
 };
 
+typedef enum {
+	ALL,
+	DEBUG,
+	INFO,
+	WARNING,
+	ERRORS,
+	FATAL,
+	NONE
+} Level;
+
 #ifdef WIN32
 #   define DllExport   __declspec( dllexport )
 #  define strdup _strdup
@@ -53,3 +63,14 @@ const char BmiSetVarEntryPoint[] = "set_var";
 const char BmiSetLogger[] = "set_logger";
 const char BmiSetLogger2[] = "set_logger_c_callback";
 const char BmiGetAttributeEntryPoint[] = "get_attribute";
+
+#ifdef WIN32
+#include "Windows.h"
+#define STDCALL __stdcall
+#else
+#define STDCALL
+#endif
+
+extern "C" {
+	typedef void(STDCALL * WriteCallback)(char* time, char* message, unsigned int level);
+}
