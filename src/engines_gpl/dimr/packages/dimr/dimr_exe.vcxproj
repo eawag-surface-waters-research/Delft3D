@@ -149,6 +149,8 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_versio
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <StackReserveSize>20000000</StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <ProjectReference />
     <PostBuildEvent>
@@ -218,6 +220,8 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_versio
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <StackReserveSize>20000000</StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project dimr" &gt; .\include\dimr_exe_version.h
