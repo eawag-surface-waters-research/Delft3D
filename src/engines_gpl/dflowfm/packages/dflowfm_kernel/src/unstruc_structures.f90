@@ -442,7 +442,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
          valstruct(3) = dmiss  ! s1up
          valstruct(4) = dmiss  ! s1down
          valstruct(5) = dmiss  ! head
-         if (strtypein /= ST_PUMP) then
+         if (istrtypein /= ST_PUMP) then
             valstruct(6) = dmiss ! flow area
             valstruct(7) = dmiss ! velocity
          end if
