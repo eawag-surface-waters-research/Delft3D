@@ -41,13 +41,23 @@
 #   include "config.h"
 #endif
 
-#include "bmi.h"
+#include "bmi.h" //For enum Level
 #include "clock.h"
-#include "dimr_constants.h"
 #include <cstdio>
 #include <pthread.h>
+#ifdef WIN32
+#include "Windows.h"
+#define STDCALL __stdcall
+#else
+#define STDCALL
+#endif
+
+extern "C" {
+	typedef void(STDCALL * WriteCallback)(char* time, char* message, unsigned int level);
+}
 
 class Log {
+	
 
 public:
 	Log( FILE * output, Clock * clock, Level level = FATAL, Level feedbackLevel = FATAL );
@@ -94,3 +104,14 @@ public:
 	char *        redirectFile;
 };
 
+#ifdef WIN32
+#   define DllExport   __declspec( dllexport )
+#  define strdup _strdup
+#else
+#   define DllExport
+#endif
+
+extern "C" {
+	DllExport void set_dimr_logger(Log *);
+	DllExport void set_logger_callback(WriteCallback);
+}

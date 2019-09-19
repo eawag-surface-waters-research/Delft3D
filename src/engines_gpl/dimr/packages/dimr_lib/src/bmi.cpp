@@ -1,11 +1,33 @@
-
-#include <cstddef>
-#include <cstring>
+#pragma once 
 #include "bmi.h" 
 #include "dimr.h"
-#include <Strsafe.h>
-#include <direct.h>
 #include "dimr_lib_version.h"
+
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#include <dlfcn.h>
+#include <libgen.h>
+#endif
+#include <limits.h>
+
+#if defined (MEMCHECK)
+#include <mcheck.h>
+#endif
+
+
+#if defined (WIN32)
+#  include <Strsafe.h>
+#  include <windows.h>
+#  include <direct.h>
+#  define strdup _strdup
+#  define chdir _chdir
+#  define getcwd _getcwd
+#  define dup2 _dup2
+#else
+#  include <unistd.h>
+#endif
+
+#include <cstring>
 
 // static added to prevent name conflicts on Linux.
 static Dimr * thisDimr = Dimr::GetInstance();     // global pointer to single object instance

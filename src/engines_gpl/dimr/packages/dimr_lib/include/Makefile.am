@@ -13,15 +13,29 @@ include $(top_srcdir)/common.am
 #-------------------------------------------------------------------------------
 #Includes
 dist_noinst_HEADERS = \
+	bmi.h \
 	clock.h \
-        component.h \
-        dimr.h \
-        exception.h \
-        getopt.h \
-        log.h \
-        stringutils.h \
-        dimr_lib_version.h \
-        xmltree.h
+	component.h \
+	dimr.h \
+	dimr_component.h \
+	dimr_components.h \
+	dimr_constants.h \
+	dimr_control_block.h \
+	dimr_coupler.h \
+	dimr_couplers.h \
+	dimr_couple_item.h \
+	dimr_lib_version.h \
+	dimr_logger.h \
+	dimr_unit.h \
+	exception.h \
+	getopt.h \
+	ixmltree.h \
+	keyvaluell.h \
+	log.h \
+	netcdf_references.h \
+	resource.h \
+	stringutils.h \
+	xmltree.h
 
 REGENERATE_VN=yes
 

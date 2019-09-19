@@ -27,6 +27,7 @@ libdimr_la_SOURCES = \
     coredump.cpp \
     clock.cpp \
     component.cpp \
+    bmi.cpp \
     dimr.cpp \
     dimr_lib_version.cpp \
     exception.cpp \
