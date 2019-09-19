@@ -3,7 +3,7 @@ using System;
 
 namespace DimrTesting
 {
-    interface IBasicModelInterface
+    public interface IBasicModelInterface
     {
         DateTime StartTime { get; }
 
@@ -30,7 +30,7 @@ namespace DimrTesting
         /// <returns></returns>
         int Initialize(string path);
 
-        void Update(double dt = -1);
+        int Update(double dt = -1);
 
         int Finish();
 

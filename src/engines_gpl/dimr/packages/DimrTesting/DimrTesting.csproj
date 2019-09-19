@@ -14,6 +14,8 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -36,7 +38,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
+    <OutputPath>..\..\bin\x64\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -58,6 +60,12 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BasicModelInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5db7ba4b6cb956c8, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\BasicModelInterface.1.0.0.10\lib\net40\BasicModelInterface.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
@@ -73,8 +81,12 @@
   <ItemGroup>
     <Compile Include="DimrApiTests.cs" />
     <Compile Include="DimrDllNative.cs" />
+    <Compile Include="DimrExe.cs" />
+    <Compile Include="DimrExeTests.cs" />
     <Compile Include="DimrTestComponentBMITests.cs" />
+    <Compile Include="DimrValidationTests.cs" />
     <Compile Include="IBasicModelInterface.cs" />
+    <Compile Include="IDimrApi.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -91,6 +103,50 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>set testdatafolder=$(TargetDir)test-data\
+echo "%25testdatafolder%25"
+
+set projecttestdatafolder=%25testdatafolder%25$(TargetName)\
+echo "%25projecttestdatafolder%25"
+
+if not exist "%25testdatafolder%25" mkdir "%25testdatafolder%25"
+
+set srctestdatafolder=$(ProjectDir)validation_tests
+echo "%25srctestdatafolder%25"
+echo mklink /D "%25projecttestdatafolder%25" "%25srctestdatafolder%25"
+if not exist "%25projecttestdatafolder%25" mklink /D "%25projecttestdatafolder%25" "%25srctestdatafolder%25"
+
+set scriptfolder=$(TargetDir)scripts\
+echo "%25scriptfolder%25"
+
+set srcscriptfolder=$(ProjectDir)validation_scripts
+echo mklink /D "%25scriptfolder%25" "%25srcscriptfolder%25"
+if not exist "%25scriptfolder%25" mklink /D "%25scriptfolder%25" "%25srcscriptfolder%25"
+
+set localconfigs=%25scriptfolder%25local_configs
+set srclocalconfigs=$(ProjectDir)validation_local_configs
+if not exist "%25localconfigs%25" mklink /D "%25localconfigs%25" "%25srclocalconfigs%25"
+
+set reffolder=$(TargetDir)references\
+set srcreffolder=$(ProjectDir)validation_references
+
+if not exist "%25reffolder%25" mklink /D "%25reffolder%25" "%25srcreffolder%25"
+set enginestocompare=$(TargetDir)engines_to_compare\
+if not exist  "%25enginestocompare%25" mkdir "%25enginestocompare%25"
+set kernelfolder=%25enginestocompare%25teamcity_artifacts\
+set srckernelfolder=$(TargetDir)kernels
+
+if not exist "%25kernelfolder%25" mklink /D "%25kernelfolder%25" "%25srckernelfolder%25"
+</PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="..\..\..\..\packages\Dimr.Libs.2.0.0.63515\build\net40\Dimr.Libs.targets" Condition="Exists('..\..\..\..\packages\Dimr.Libs.2.0.0.63515\build\net40\Dimr.Libs.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\..\..\packages\Dimr.Libs.2.0.0.63515\build\net40\Dimr.Libs.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\packages\Dimr.Libs.2.0.0.63515\build\net40\Dimr.Libs.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
