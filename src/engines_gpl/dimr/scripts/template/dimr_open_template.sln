@@ -15,6 +15,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dimr", "engines_gpl\dimr\pa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DimrTesting", "engines_gpl\dimr\packages\DimrTesting\DimrTesting.csproj", "{0EFCBB94-8ECD-4298-8CEA-DD75E478FA6E}"
 	ProjectSection(ProjectDependencies) = postProject
+		{B9D5FB4A-803E-414D-AA15-BE75F06DAB60} = {B9D5FB4A-803E-414D-AA15-BE75F06DAB60}
 		{40244765-8DC2-4247-B167-9B3A8D1EB30A} = {40244765-8DC2-4247-B167-9B3A8D1EB30A}
 		{0E2296C2-E881-483B-A09E-591191DB943B} = {0E2296C2-E881-483B-A09E-591191DB943B}
 	EndProjectSection
@@ -35,6 +36,9 @@ EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dimr_lib_tests", "engines_gpl\dimr\packages\dimr_lib_tests\dimr_lib_tests.vcxproj", "{B2FBFF25-0BFB-46B5-BE31-7286D021CC0D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0E2296C2-E881-483B-A09E-591191DB943B} = {0E2296C2-E881-483B-A09E-591191DB943B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
