@@ -1466,7 +1466,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       intfillv = dble(intmiss)
       if ((var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1  .and. var_wdimpos(iv) == -1) & ! 1D array with no layers and no vectormax (possibly time-dep)
-           .or. (nvardims == 1 .and. (var_laydimpos(ivarcandidate) > 0 .or. var_wdimpos(ivarcandidate) > 0)) )then ! 1D array of vertical coordinates
+           .or. (var_ndims(iv) == 1 .and. (var_laydimpos(iv) > 0 .or. var_wdimpos(iv) > 0)) )then ! 1D array of vertical coordinates
          ! Already allocated at max(lnx, ndx, numk, numl), no risk of stack overflow
          if (var_types(iv) == nf90_double) then
             tmpvarptr(1:1,1:1,1:maxitems)  =>  tmpvar1D(:)
@@ -1520,7 +1520,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
       
       !! 1D array of vertical coordinates are COPIED from file "ifile" to the merged file
-      if (nvardims == 1 .and. (var_laydimpos(ivarcandidate) > 0 .or. var_wdimpos(ivarcandidate) > 0)) then 
+      if (var_ndims(iv) == 1 .and. (var_laydimpos(iv) > 0 .or. var_wdimpos(iv) > 0)) then 
          nlen = count_read(ie)
          if (var_types(iv) == nf90_double) then
             ierr = nf90_get_var(ncids(ifile), varids(ifile,iv), tmpvar1D(1:nlen), count=count_read(is:ie))
