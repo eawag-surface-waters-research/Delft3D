@@ -856,29 +856,45 @@ end subroutine ecInstanceListSourceItems
       !> Extracts time unit and reference date from a standard time string.
       !! ASCII example: "TIME = 0 hours since 2006-01-01 00:00:00 +00:00"
       !! NetCDF example: "minutes since 1970-01-01 00:00:00.0 +0000"
-      function ecSupportTimestringToUnitAndRefdate(string, unit, ref_date, tzone, tzone_default) result(success)
+      function ecSupportTimestringToUnitAndRefdate(rec, unit, ref_date, tzone, tzone_default) result(success)
          use netcdf
          use time_module
          !
-         logical                           :: success       !< function status
-         character(len=*),   intent(inout) :: string        !< units string (at out in lowercase)
-         integer,  optional, intent(out)   :: unit          !< time unit enumeration
-         real(hp), optional, intent(out)   :: ref_date      !< reference date formatted as Modified Julian Date
-         real(hp), optional, intent(out)   :: tzone         !< time zone
-         real(hp), optional, intent(in)    :: tzone_default !< default for time zone
+         logical                                :: success       !< function status
+         character(len=*),   intent(inout)      :: rec           !< units string (at out in lowercase)
+         integer,  optional, intent(out)        :: unit          !< time unit enumeration
+         real(kind=hp), optional, intent(out)   :: ref_date      !< reference date formatted as Modified Julian Date
+         real(kind=hp), optional, intent(out)   :: tzone         !< time zone
+         real(kind=hp), optional, intent(in)    :: tzone_default !< default for time zone
          !
-         integer :: i        !< helper index for location of 'since'
-         integer :: j        !< helper index for location of '+/-' in time zone
-         integer :: jplus    !< helper index for location of '+' in time zone
-         integer :: jmin     !< helper index for location of '-' in time zone
-         integer :: minsize  !< helper index for time zone
-         real(hp):: temp     !< helper variable
-         logical :: ok       !< check of refdate is found
-         character(len=20) :: date, time  !< parts of string for date and time
+         integer                       :: i        !< helper index for location of 'since'
+         integer                       :: j        !< helper index for location of '+/-' in time zone
+         integer                       :: jplus    !< helper index for location of '+' in time zone
+         integer                       :: jmin     !< helper index for location of '-' in time zone
+         integer                       :: jcomment !< helper index for location of '#'
+         integer                       :: minsize  !< helper index for time zone
+         real(kind=hp)                 :: temp     !< helper variable
+         logical                       :: ok       !< check of refdate is found
+         character(len=20)             :: date     !< parts of string for date
+         character(len=20)             :: time     !< parts of string for time
+         character(len=:), allocatable :: string   !< unit string without comments and in lowercase
          !
          success = .false.
          !
-         call str_lower(string)
+         call str_lower(rec)
+         !
+         ! copy only relevant part of rec into string:
+         ! TODO: do str_lower on string and make rec intent(in)
+         jcomment = index(rec, '#')
+         if (jcomment == 1) then
+            call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: only found comments.")
+            return
+         else if (jcomment > 1) then
+            string = trim(rec(:jcomment - 1))
+         else
+            string = trim(rec)
+         endif
+
          ! Determine the time unit.
          if (present(unit)) then
             if (index(string, 'seconds') /= 0) then
