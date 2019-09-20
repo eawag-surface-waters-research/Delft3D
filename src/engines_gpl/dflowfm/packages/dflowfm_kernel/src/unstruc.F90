@@ -15546,7 +15546,7 @@ end subroutine adjust_bobs_on_dambreak_breach
  use m_flow
  implicit none
  double precision :: uwi, cdw, tuwi, roro, wxL, wyL, uL, vL, uxL, uyL
- integer          :: L, numwav   ! windstuff
+ integer          :: L, numwav, k   ! windstuff
 
  windxav = 0d0
  windyav = 0d0
@@ -15591,9 +15591,13 @@ end subroutine adjust_bobs_on_dambreak_breach
           if (jatem == 5) then
              cdwcof(L) = cdw
           endif
-          if (jaroro == 1) then
+          if (jaroro > 0) then
              k = ln(2,L)
-             roro = roair(k) / rho(ktop(k))
+             if (jaroro == 1) then 
+                roro = backgroundairtemperature / rho(ktop(k))
+             else  
+                roro = roair(k) / rho(ktop(k))
+             endif
           endif 
           tuwi    = roro*cdw*uwi
           if (kmx > 0) then
@@ -24183,7 +24187,7 @@ endif
        allocate ( cdwcof(lnx) , stat = ierr)
        call aerr('cdwcof(lnx)', ierr ,  lnx) ; cdwcof = 0d0
 
-       if (jaroro == 1) then ! save rhoair for windstress 
+       if (jaroro > 1) then ! save rhoair for windstress 
           if (allocated (roair) ) deallocate(roair)
           allocate ( roair(ndx) , stat = ierr)
           call aerr('roair(ndx)', ierr ,  ndx) ; roair = rhoair 
@@ -44156,8 +44160,14 @@ else if (jatem == 5) then
    Qfree  = 0d0 ; Qfrcon = 0d0 ; Qfreva = 0d0                     ! Contribution by free convection:
    rhoa0  = ((presn-pvtwmx)/rdry + pvtwmx/rvap) / (Twatn + Tkelvn)
    rhoa10 = ((presn-pvtahu)/rdry + pvtahu/rvap) / (Tairn + Tkelvn)
-   if (jaroro == 1) then 
-      roair(n) = rhoa0
+   if (jaroro > 0) then 
+      if (jaroro == 2) then 
+         roair(n) = rhoa0
+      else if (jaroro == 3) then 
+         roair(n) = rhoa10
+      else if (jaroro == 4) then 
+         roair(n) = 0.5d0*(rhoa10+rhoa0)
+      endif
    endif
    gred   = 2d0*ag*(rhoa10-rhoa0)/(rhoa0+rhoa10)
    if (gred > 0d0) then                                           ! Ri= (gred/DZ)/ (du/dz)2, Ri>0.25 stable

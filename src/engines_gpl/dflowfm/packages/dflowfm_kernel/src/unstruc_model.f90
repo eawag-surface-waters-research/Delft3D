@@ -2694,7 +2694,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'physics', 'Heat_eachstep' , jaheat_eachstep,  '1=heat each timestep, 0=heat each usertimestep')
        endif
        if (jaroro > 0) then
-          call prop_set(prop_ptr, 'physics', 'RhoairRhowater' , jaroro        ,  '1=use arrays rhoair/rhowater in windstress compuation if model 5 is used,0=use backgroundvalues')
+          call prop_set(prop_ptr, 'physics', 'RhoairRhowater' , jaroro        ,  'windstress rhoa/rhow: 0=Rhoair/Rhomean, 1=Rhoair/rhow(), 2=rhoa0()/rhow(), 3=rhoa10()/Rhow()')
        endif
 
        if ( janudge > 0 ) then
