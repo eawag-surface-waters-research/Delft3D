@@ -1593,7 +1593,12 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          end if
          return
       case("gateHeight")
-         x = c_loc(generalstruc(item_index)%gatedoorheight)
+         if (is_in_network) then
+            x = get_gate_door_height_c_loc(network%sts%struct(item_index))
+         else
+            x = c_loc(generalstruc(item_index)%gatedoorheight)
+         end if
+
          return
       case("gateLowerEdgeLevel")
          if (is_in_network) then
@@ -1609,7 +1614,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
             x = c_loc(zcgen((item_index-1)*3+3))
          end if
          return
-      case("GateOpeningHorizontalDirection")
+      case("gateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
       end select
@@ -1895,9 +1900,15 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
             zcgen((item_index-1)*3+1) = x_0d_double_ptr
          end if
          return
-      case("GateHeight")
-         call c_f_pointer(xptr, x_0d_double_ptr)
-         generalstruc(item_index)%gatedoorheight = x_0d_double_ptr ! Not time-controlled, set directly in generalstruc.
+      case("gateHeight")
+         if (is_in_network) then
+            fieldptr = get_gate_door_height_c_loc(network%sts%struct(item_index))
+            fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
+         else
+            call c_f_pointer(xptr, x_0d_double_ptr)
+            generalstruc(item_index)%gatedoorheight = x_0d_double_ptr ! Not time-controlled, set directly in generalstruc.
+         end if
+
          return
       case("gateLowerEdgeLevel")
          if (is_in_network) then
@@ -1917,7 +1928,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
             zcgen((item_index-1)*3+3) = x_0d_double_ptr
          end if
          return
-      case("GateOpeningHorizontalDirection")
+      case("gateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
       end select

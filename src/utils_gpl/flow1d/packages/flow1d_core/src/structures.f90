@@ -70,6 +70,7 @@ module m_1d_structures
    public get_crest_level_c_loc
    public get_gate_lower_edge_level_c_loc
    public get_gate_opening_width_c_loc
+   public get_gate_door_height_c_loc
    public get_width
    public get_watershed_threshold
    public get_gle
@@ -859,7 +860,7 @@ end subroutine
              get_crest_level_c_loc = C_NULL_PTR
        end select
 
-   end function get_crest_level_c_loc   
+   end function get_crest_level_c_loc
    
    !> Gets the pointer of the gate lower edge level for a given structure.
    !! If the type of the given structure is not general structure, then it gets a null pointer
@@ -875,7 +876,7 @@ end subroutine
              get_gate_lower_edge_level_c_loc = C_NULL_PTR
        end select
 
-   end function get_gate_lower_edge_level_c_loc   
+   end function get_gate_lower_edge_level_c_loc
    
    !> Gets the pointer of the gate opening width for a given structure.
    !! If the type of the given structure is not general structure, then it gets a null pointer
@@ -891,8 +892,25 @@ end subroutine
              get_gate_opening_width_c_loc = C_NULL_PTR
        end select
 
-   end function get_gate_opening_width_c_loc  
-   
+   end function get_gate_opening_width_c_loc
+
+
+   !> Gets the pointer of the gate door height for a given structure.
+   !! If the type of the given structure is not general structure, then it gets a null pointer
+   !! This pointer points directly to the %gatedoorheight.
+   type(c_ptr) function get_gate_door_height_c_loc(struc)
+      type(t_structure), intent(in) :: struc
+      
+       select case (struc%type)
+          case (ST_GENERAL_ST)
+             get_gate_door_height_c_loc = c_loc(struc%generalst%gatedoorheight)
+          case default
+             get_gate_door_height_c_loc = C_NULL_PTR
+       end select
+
+   end function get_gate_door_height_c_loc   
+
+
    double precision function get_width(struc)
       type(t_structure), intent(in) :: struc
       
