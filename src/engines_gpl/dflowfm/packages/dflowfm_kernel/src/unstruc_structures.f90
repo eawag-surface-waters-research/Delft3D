@@ -41,7 +41,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
 
  ! Structure Parameters
  double precision, dimension(:,:), allocatable :: valpump     !< Array for pump;      (1,:) flow link width, used for averaging.
-                                                              !<                      (2,:) pump discharge
+                                                              !<                      (2,:) pump discharge w.r.t. structure orientation
                                                               !<                      (3,:) pump structure water level up
                                                               !<                      (4,:) pump structure water level down
                                                               !<                      (5,:) pump structure head
@@ -50,7 +50,9 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (8,:) pump head
                                                               !<                      (9,:) pump reduction factor
                                                               !<                      (10,:) pump water level at delivery side
-                                                              !<                      (11,:) pump water level at suction side                                                             !<                      (2,:) capacity
+                                                              !<                      (11,:) pump water level at suction side
+                                                              !<                      (12,:) pump discharge w.r.t. pumping orientation (same sign as capacity)
+
  double precision, dimension(:,:), allocatable :: valgate     !< Array for gate;      (1,:) discharge through gate
  double precision, dimension(:,:), allocatable :: valcdam     !< Array for cdam;      (1,:) discharge through controlable dam
                                                               !<                      (2,:) Upstream average water levels
@@ -157,7 +159,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (6,:) universal weir flow area
                                                               !<                      (7,:) universal weir velocity
                                                               !<                      (8,:) universal weir crest level
- integer                           :: NUMVALS_PUMP = 11       !< Number of variables for pump
+ integer                           :: NUMVALS_PUMP = 12       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
  integer                           :: NUMVALS_CGEN = 4        !< Number of variables for general structure (old ext file)

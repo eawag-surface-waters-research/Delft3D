@@ -16471,7 +16471,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
                      id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, &
                      id_pumpdim,    id_pump_id,     id_pump_dis,     id_pump_cap,      id_pump_s1up,      id_pump_s1dn,     id_pump_head,      &
-                     id_pump_xmid,  id_pump_ymid,   id_pump_struhead,id_pump_stage,    id_pump_redufact,  id_pump_s1del,    id_pump_s1suc,     &
+                     id_pump_xmid,  id_pump_ymid,   id_pump_struhead,id_pump_stage,    id_pump_redufact,  id_pump_s1del,    id_pump_s1suc,     id_pump_disdir, &
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
                      id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_crestl,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
                      id_weirgendim, id_weirgen_id, id_weirgen_dis, id_weirgen_crestl, id_weirgen_crestw, id_weirgen_s1up,  id_weirgen_s1dn,  &        ! id_weirgen_head,
@@ -17451,6 +17451,11 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_pump_cap, 'long_name', 'Capacity of pump')
             ierr = nf90_put_att(ihisfile, id_pump_cap, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_pump_cap, 'coordinates', 'pump_id')
+
+            ierr = nf90_def_var(ihisfile, 'pump_discharge_dir', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_disdir)
+            ierr = nf90_put_att(ihisfile, id_pump_disdir, 'long_name', 'Discharge of pump w.r.t. pump orientation')
+            ierr = nf90_put_att(ihisfile, id_pump_disdir, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_pump_disdir, 'coordinates', 'pump_id')
 
             ierr = nf90_def_var(ihisfile, 'pump_s1up',     nf90_double, (/ id_pumpdim, id_timedim /), id_pump_s1up)    ! Nabi
             ierr = nf90_put_att(ihisfile, id_pump_s1up, 'standard_name', 'sea_surface_height')
@@ -18543,6 +18548,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_pump_s1dn,    valpump(4,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_pump_struhead,valpump(5,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_pump_cap,     valpump(6,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_pump_disdir,  valpump(12,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_pump_stage,int(valpump(7,i)),(/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_pump_head,    valpump(8,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_pump_redufact,valpump(9,i), (/ i, it_his /))
@@ -36737,17 +36743,13 @@ if (jahisbal > 0) then
          if (istru > 0) then ! TODO: UNST-2587: once all pump code is done, remove this temp IF.
          pstru => network%sts%struct(istru)
          valpump(6,n) = GetPumpCapacity(pstru)
+         valpump(12,n) = sign(1,pstru%pump%direction) * valpump(2,n) ! Discharge w.r.t. pump direction (same sign as capacity)
          valpump(7,n) = GetPumpStage(pstru)
          if (valpump(7,n) < 0d0) then
             valpump(7,n) = dmiss ! Set to fill value if stage is irrelevant.
          end if
-         if (valpump(6,n) >= 0d0) then
-            valpump(10,n) = valpump(4,n) ! Delivery side = downstream side
-            valpump(11,n) = valpump(3,n) ! Suction  side = upstream side
-         else
-            valpump(10,n) = valpump(3,n)
-            valpump(11,n) = valpump(4,n)
-         end if
+         valpump(10,n) = getPumpDsLevel(pstru)
+         valpump(11,n) = getPumpSsLevel(pstru)
          valpump(8,n) = valpump(10,n) - valpump(11,n) ! Pump head
          valpump(9,n) = GetPumpReductionFactor(pstru)
          end if

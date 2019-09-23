@@ -60,14 +60,18 @@ module m_Pump
       type(t_table), pointer                  :: reducfact   => null()
 
       ! Output Parameters for Pump History File
-      double precision                        :: ss_level
-      double precision                        :: ds_level
-      double precision                        :: pump_head
+      ! Terminology:
+      ! * Geometric orientation: handled by calling kernel, orientation of pump w.r.t. branch direction/polyline.
+      ! * Pump orientation: orientation of capacity w.r.t. structure's geometric orientation.
+      ! * Pumping direction: combined direction of pump orientation and sign of the capacity.
+      double precision                        :: ss_level         !< Suction side water level w.r.t. pumping direction.
+      double precision                        :: ds_level         !< Delivery side water level w.r.t. pumping direction.
+      double precision                        :: pump_head        !< Head difference in pumping direction.
       integer                                 :: actual_stage
       logical                                 :: is_active
-      double precision                        :: current_capacity
+      double precision                        :: current_capacity !< Current capacity, w.r.t. pump orientation.
       double precision                        :: reduction_factor
-      double precision                        :: discharge
+      double precision                        :: discharge        !< Current discharge, w.r.t. structure's geometric orientation.
 
    end type
 
@@ -116,12 +120,15 @@ contains
    !> The discharge through a pump with different capacities
    !! and possible control on suction and pressure side is calculated.
    !! Result is stored in pump%discharge, for later use in some computePump.
-   subroutine PrepareComputePump(pump, ss_level, ds_level)
+   !! Input and result are w.r.t. the *spatial* orientation of the pump,
+   !! i.e., the caller does not have to account for the *pumping* direction,
+   !! that is done by this subroutine.
+   subroutine PrepareComputePump(pump, s1m1, s1m2)
       implicit none
 
-      type(t_pump), pointer          :: pump     !< Object containing pump specific data
-      double precision, intent(in)   :: ss_level !< Suction Side level
-      double precision, intent(in)   :: ds_level !< Delivery Side Level
+      type(t_pump), pointer          :: pump     !< Object containing pump specific data.
+      double precision, intent(in)   :: s1m1     !< 'Left side' water level, w.r.t. pump spatial orientation.
+      double precision, intent(in)   :: s1m2     !< 'Right side' water level, w.r.t. pump spatial orientation.
       !
       !
       ! Local variables
@@ -134,16 +141,23 @@ contains
       logical                        :: ds_switch_on
       logical                        :: ds_switch_off
 
+      double precision               :: ss_level !< Suction Side level, w.r.t. pumping direction.
+      double precision               :: ds_level !< Delivery Side Level, w.r.t. pump spatial orientation.
+
+      ! Direction (==orientation) may be positive or negative,
+      ! and additionally, non-staged pumps may have negative capacity.
+      if (pump%direction * pump%capacity(1) > 0) then
+         ss_level = s1m1
+         ds_level = s1m2
+      else
+         ss_level = s1m2
+         ds_level = s1m1
+      end if
+
       nstages = pump%nrstages
 
       ! Get Reduction Factor from Table
       pump%pump_head = ds_level - ss_level
-      if (nstages == 0 .and. pump%capacity(1) < 0) then
-         ! Only non-staged pumps may have a negative capacity, which means that
-         ! the role of suction side and delivery side is flipped. Flip the head first.
-         pump%pump_head  = -pump%pump_head 
-      end if
-
       pump%reduction_factor = interpolate(pump%reducfact, pump%pump_head)
 
       if (nstages == 0) then
@@ -218,7 +232,8 @@ contains
          ! Calculate Capacity
          if (pump%actual_stage == 0) then
            pump%is_active = .false.
-           qp = 0.
+           qp = 0d0
+           pump%current_capacity = 0d0
          else
            pump%is_active = .true.
            qp = pump%reduction_factor * pump%capacity(pump%actual_stage)
@@ -229,11 +244,15 @@ contains
          
       pump%ss_level = ss_level
       pump%ds_level = ds_level
+
+      ! Translate computed discharge (not the current_capacity) back to
+      ! the caller's orientation, that is: *spatial* orientation of
+      ! the pump
       if (pump%direction > 0) then
          pump%discharge = qp
       else
          pump%discharge = -qp
-         pump%current_capacity = -pump%current_capacity
+         !pump%current_capacity = -pump%current_capacity
       endif
 
    end subroutine PrepareComputePump

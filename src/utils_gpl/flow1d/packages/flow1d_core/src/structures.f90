@@ -87,6 +87,8 @@ module m_1d_structures
    public get_pump_capacity_c_loc
    public GetPumpStage
    public GetPumpReductionFactor
+   public getPumpSsLevel
+   public getPumpDsLevel
    public initialize_structure_links
    public set_fu_ru
    public check_for_changes_on_structures
@@ -1176,6 +1178,32 @@ end subroutine
 
       GetPumpReductionFactor = stru%pump%reduction_factor
    end function GetPumpReductionFactor
+
+
+   !> Gets pump suction side level that was used in latest prepareComputePump call.
+   double precision function getPumpSsLevel(stru)
+      implicit none   
+      type(t_structure), intent(in)   :: stru !< Structure
+         
+      if (stru%type /= ST_PUMP) then
+         return
+      end if
+
+      getPumpSsLevel = stru%pump%ss_level
+   end function getPumpSsLevel
+
+
+   !> Gets pump delivery side level that was used in latest prepareComputePump call.
+   double precision function getPumpDsLevel(stru)
+      implicit none   
+      type(t_structure), intent(in)   :: stru !< Structure
+         
+      if (stru%type /= ST_PUMP) then
+         return
+      end if
+
+      getPumpDsLevel = stru%pump%ds_level
+   end function getPumpDsLevel
 
 
    !> Initializes the flow link administration for a single structure.

@@ -562,7 +562,7 @@ module m_oned_functions
       double precision     :: s1k2
       double precision     :: qp
       double precision     :: ap
-      double precision     :: vp
+      double precision     :: vp1, vp2, vp
       integer              :: L   
       integer              :: L0   
       integer              :: k1   
@@ -574,14 +574,16 @@ module m_oned_functions
       s1k1 = 0d0
       s1k2 = 0d0
       ap = 0d0
+      vp1 = 0d0
+      vp2 = 0d0
       vp = 0d0
       qp = 0d0
       do L0 = 1, struct%numlinks
          L = struct%linknumbers(L0)
          ! Note: Link L may have negative sign if flow link is opposite pump's orientation
-         ! (pump orientation is polyline+righthand rule, or network branch direction)
-         ! Pump *direction* may be negative to indicate that pump is pumping opposite its *orientation*.
-         dir = sign(1, L * struct%pump%direction)
+         ! (pump spatial orientation is polyline+righthand rule, or network branch direction).
+         ! Note 2: do not account for pumping direction here, that is done in prepareComputePump.
+         dir = sign(1, L) ! only includes flow link w.r.t. structure spatial orientation.
          L = iabs(L)
          if ( dir > 0) then         
             k1 = ln(1,L)
@@ -595,7 +597,8 @@ module m_oned_functions
             ! NOTE: pump area-weighting across links is uniform for all links (au=1).
             au(L) = 1d0
             ap    = ap + au(L)
-            vp    = vp + vol1(k1)
+            vp1    = vp1 + vol1(k1)
+            vp2    = vp2 + vol1(k2)
             s1k1 = s1k1 + au(L)*s1(k1)
             s1k2 = s1k2 + au(L)*s1(k2)
          endif
@@ -606,7 +609,14 @@ module m_oned_functions
          s1k1 = s1k1/ap
          s1k2 = s1k2/ap
          call PrepareComputePump(struct%pump, s1k1, s1k2)
-         qp    = struct%pump%discharge
+         qp    = struct%pump%discharge ! Already in our local structure spatial orientation.
+         
+         ! Choose available volume on suction side.
+         if (qp > 0d0) then
+            vp = vp1
+         else
+            vp = vp2
+         end if
       endif          
 
       ! Finally, redistribute the requested pump discharge across all flow links.
@@ -624,7 +634,7 @@ module m_oned_functions
          
          do L0  = 1, struct%numlinks
             L = struct%linknumbers(L0)
-            dir = sign(1, L * struct%pump%direction)
+            dir = int(sign(1d0, L*qp)) ! Includes both pumping direction and flow link w.r.t. structure spatial orientation.
             L = iabs(L)
             if ( dir > 0) then         
                k1 = ln(1,L)
