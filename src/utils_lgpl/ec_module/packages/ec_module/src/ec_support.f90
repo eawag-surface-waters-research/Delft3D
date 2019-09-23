@@ -220,7 +220,6 @@ module m_ec_support
          character(len=*), intent(in)    :: filename !< relative path
          !
          integer :: ierror         !< netcdf helper variable
-         integer :: i              !< loop counter
          logical :: unitused       !< IO unit number already in use
          integer :: istat          !< status of file open operation
          integer :: chunkSizeHint  !< chunk size for NetCDF
@@ -381,7 +380,6 @@ module m_ec_support
          type(tEcNetCDF), pointer            :: netCDFPtr   !< Quantity corresponding to quantityId
          type(tEcInstance), pointer          :: instancePtr !< intent(in)
          character(len=*),  intent(in)       :: ncfilename  !< netCDF filename
-         integer                             :: netCDFId
          !
          integer :: i !< loop counter
          !
@@ -856,16 +854,13 @@ end subroutine ecInstanceListSourceItems
       !> Extracts time unit and reference date from a standard time string.
       !! ASCII example: "TIME = 0 hours since 2006-01-01 00:00:00 +00:00"
       !! NetCDF example: "minutes since 1970-01-01 00:00:00.0 +0000"
-      function ecSupportTimestringToUnitAndRefdate(rec, unit, ref_date, tzone, tzone_default) result(success)
-         use netcdf
-         use time_module
+      function ecSupportTimestringToUnitAndRefdate(rec, unit, ref_date, tzone) result(success)
          !
          logical                                :: success       !< function status
-         character(len=*),   intent(inout)      :: rec           !< units string (at out in lowercase)
-         integer,  optional, intent(out)        :: unit          !< time unit enumeration
-         real(kind=hp), optional, intent(out)   :: ref_date      !< reference date formatted as Modified Julian Date
+         character(len=*),        intent(in)    :: rec           !< units string (at out in lowercase)
+         integer,                 intent(out)   :: unit          !< time unit enumeration
+         real(kind=hp),           intent(out)   :: ref_date      !< reference date formatted as Modified Julian Date
          real(kind=hp), optional, intent(out)   :: tzone         !< time zone
-         real(kind=hp), optional, intent(in)    :: tzone_default !< default for time zone
          !
          integer                       :: i        !< helper index for location of 'since'
          integer                       :: j        !< helper index for location of '+/-' in time zone
@@ -881,10 +876,7 @@ end subroutine ecInstanceListSourceItems
          !
          success = .false.
          !
-         call str_lower(rec)
-         !
          ! copy only relevant part of rec into string:
-         ! TODO: do str_lower on string and make rec intent(in)
          jcomment = index(rec, '#')
          if (jcomment == 1) then
             call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: only found comments.")
@@ -895,50 +887,48 @@ end subroutine ecInstanceListSourceItems
             string = trim(rec)
          endif
 
+         call str_lower(string)
+
          ! Determine the time unit.
-         if (present(unit)) then
-            if (index(string, 'seconds') /= 0) then
-               unit = ec_second
-            else if (index(string, 'minutes') /= 0) then
-               unit = ec_minute
-            else if (index(string, 'hours') /= 0 .or. index( string, 'hrs') /= 0) then
-               unit = ec_hour
-            else if (index(string, 'days') /= 0) then
-               unit = ec_day
-            else
-               call setECMessage("unitstring = '"//trim(string)//"'.")
-               call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify the time unit.")
-               return
-            end if
+         if (index(string, 'seconds') /= 0) then
+            unit = ec_second
+         else if (index(string, 'minutes') /= 0) then
+            unit = ec_minute
+         else if (index(string, 'hours') /= 0 .or. index( string, 'hrs') /= 0) then
+            unit = ec_hour
+         else if (index(string, 'days') /= 0) then
+            unit = ec_day
+         else
+            call setECMessage("unitstring = '"//trim(string)//"'.")
+            call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify the time unit.")
+            return
          end if
          ! Determine the reference date.
          i = index(string, 'since') + 6
          call split_date_time(string(i:), date, time)
-         if (present(ref_date)) then
-            if (i /= 6) then
-               ! Date
-               if (ymd2reduced_jul(date, ref_date)) then
-                  ! Time
-                  if(len_trim(time)>=8) then
-                     read(time(1 : 2), *) temp
-                     ref_date = ref_date + dble(temp) / 24.0_hp
-                     read(time(4 : 5), *) temp
-                     ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp
-                     read(time(7 : 8), *) temp
-                     ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp / 60.0_hp
-                  end if
-                  ok = .true.
-               else
-                  ref_date = -999.0_hp
-                  ok = .false.
-               endif
+         if (i /= 6) then
+            ! Date
+            if (ymd2reduced_jul(date, ref_date)) then
+               ! Time
+               if(len_trim(time)>=8) then
+                  read(time(1 : 2), *) temp
+                  ref_date = ref_date + temp / 24.0_hp
+                  read(time(4 : 5), *) temp
+                  ref_date = ref_date + temp / 24.0_hp / 60.0_hp
+                  read(time(7 : 8), *) temp
+                  ref_date = ref_date + temp / 24.0_hp / 60.0_hp / 60.0_hp
+               end if
+               ok = .true.
             else
-               ok = ecSupportTimestringArcInfo(string, ref_date)
+               ref_date = -999.0_hp
+               ok = .false.
             endif
-            if (.not. ok) then
-               call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since.")
-               return
-            end if
+         else
+            ok = ecSupportTimestringArcInfo(string, ref_date)
+         endif
+         if (.not. ok) then
+            call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since.")
+            return
          end if
 
          ! Determine the timezone
@@ -948,17 +938,9 @@ end subroutine ecInstanceListSourceItems
              jmin  = index(string, '-', back=.true.)
              j     = max(jplus, jmin)
              if (j > minsize) then
-                 if (present(tzone_default)) then
-                     success = parseTimezone(string(j:), tzone, tzone_default)
-                 else
-                     success = parseTimezone(string(j:), tzone)
-                 endif
+                 success = parseTimezone(string(j:), tzone)
              else
-                 if (present(tzone_default)) then
-                     tzone = tzone_default
-                 else
-                     tzone = 0.0_hp
-                 endif
+                 tzone = 0.0_hp
                  success = .true.
              endif
          else
@@ -1037,26 +1019,21 @@ end subroutine ecInstanceListSourceItems
 
       !> Extracts time zone from a standard time string.
       !! examples: "+01:00", "+0200", "-01:00", "-0200", "+5:30"
-      function parseTimezone(string, tzone, tzone_default) result(success)
-         logical                           :: success         !< function status
-         character(len=*),   intent(in)    :: string          !< units string
-         real(hp),           intent(out)   :: tzone           !< time zone
-         real(hp), optional, intent(in)    :: tzone_default   !< default value for time zone
+      function parseTimezone(string, tzone) result(success)
+         logical                              :: success         !< function status
+         character(len=*),        intent(in)  :: string          !< units string
+         real(kind=hp),           intent(out) :: tzone           !< time zone
 
          integer          :: ierr        !< error code
          integer          :: jcolon      !< helper index for location of ':' in timezone
          integer          :: jend        !< helper index
          integer          :: posNulChar  !< position of null char; end of string if from C
-         real(hp)         :: min         !< minutes part of time zone, as double
-         real(hp)         :: hour        !< hours part of time zone, as double
+         real(kind=hp)    :: min         !< minutes part of time zone, as double
+         real(kind=hp)    :: hour        !< hours part of time zone, as double
          character(len=2) :: cmin        !< minutes part of time zone, as character string
          character(len=3) :: chour       !< hours part of time zone, as character string
 
-         if (present(tzone_default)) then
-            tzone = tzone_default
-         else
-            tzone = 0.0_hp
-         endif
+         tzone = 0.0_hp
 
          jcolon = index(string, ':')
 
@@ -1135,9 +1112,6 @@ end subroutine ecInstanceListSourceItems
          real(hp)                       :: time_mjd  !< seconds since k_refdate representing time to be found
          type(tEcTimeFrame), intent(in) :: tframe    !< TimeFrame containing input data for conversion
          integer                        :: ndx       !< function result, largest index with a time less than timesteps
-         !
-         real(hp):: srctime
-         integer :: i
          !
          time_mjd = ecSupportThisTimeToMJD(tframe, tframe%times(ndx))
       end function ecSupportTimeIndexToMJD
