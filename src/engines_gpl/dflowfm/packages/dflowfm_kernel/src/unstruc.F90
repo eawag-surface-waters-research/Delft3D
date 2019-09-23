@@ -10325,7 +10325,7 @@ double precision :: xa,ya,xb,yb,dist
 dist = DBDISTANCE(xa,ya,xb,yb,jasferic, jasfer3D, dmiss) 
 end subroutine dbdistancehk
 
- subroutine writesomeinitialoutput()
+subroutine writesomeinitialoutput()
  use m_sferic
  use m_flow
  use m_netw
@@ -10338,7 +10338,7 @@ end subroutine dbdistancehk
  use geometry_module, only: dbdistance
 
  implicit none
- integer          :: k, mbalat,mwrong,L,msam, n, nf
+ integer          :: k, mbalat,mwrong,L,msam, n, nf, jacheckba = 0
  double precision :: batotown(1), batot(1), voltotown(1), volto(1), dist, dismin
 
  batotown = 0 ; voltotown = 0
@@ -10370,14 +10370,14 @@ end subroutine dbdistancehk
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
 
- if (nproflocs > 0 .and. jaqin > 0) then  
+ if (jacheckba == 1)  then  
     if (jampi == 1) then 
        L = index(md_ident,'_0') - 1
        call oldfil(msam, 'ba_'//trim(md_ident(1:L))//'.xyz') 
        call reasam(msam, 0)
        call newfil(mwrong, 'bawrong_'//trim(md_ident)//'.xyz')  
    endif 
-    call newfil(mbalat, 'ba_'//trim(md_ident)//'.xyz')  
+   call newfil(mbalat, 'ba_'//trim(md_ident)//'.xyz')  
  endif
 
  DO K = 1,NDXI
@@ -10385,7 +10385,7 @@ end subroutine dbdistancehk
        if (idomain(k) == my_rank) then 
           batotown(1)  = batotown(1)  +   ba(k)
           voltotown(1) = voltotown(1) + vol1(k) 
-          if (nproflocs > 0 .and. jaqin > 0) then 
+          if (jacheckba == 1) then 
               write(mbalat,*) xz(k), yz(k), ba(k) 
               if (ns > 0) then 
                  dismin = 1d9 ; nf = 0
@@ -10407,13 +10407,13 @@ end subroutine dbdistancehk
     else 
        batotown(1)  = batotown(1)  +   ba(k)
        voltotown(1) = voltotown(1) + vol1(k) 
-       if (nproflocs > 0 .and. jaqin > 0) then 
+       if (jacheckba == 1) then
           write(mbalat,*) xz(k), yz(k), ba(k) 
        endif
     endif
  enddo
 
- if (nproflocs > 0 .and. jaqin > 0) then
+ if (jacheckba == 1) then
     call doclose(mbalat)
     if (jampi == 1) then 
        call doclose(mwrong) 
