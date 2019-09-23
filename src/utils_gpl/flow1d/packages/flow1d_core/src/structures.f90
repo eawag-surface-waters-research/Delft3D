@@ -69,6 +69,7 @@ module m_1d_structures
    public get_crest_level
    public get_crest_level_c_loc
    public get_gate_lower_edge_level_c_loc
+   public get_valve_opening_height_c_loc
    public get_gate_opening_width_c_loc
    public get_gate_door_height_c_loc
    public get_width
@@ -870,13 +871,28 @@ end subroutine
       type(t_structure), intent(in) :: struc
       
        select case (struc%type)
-          case (ST_GENERAL_ST)
-             get_gate_lower_edge_level_c_loc = c_loc(struc%generalst%gateLowerEdgeLevel)
+          case (ST_CULVERT)
+             get_gate_lower_edge_level_c_loc = c_loc(struc%culvert%valveOpening)
           case default
              get_gate_lower_edge_level_c_loc = C_NULL_PTR
        end select
 
    end function get_gate_lower_edge_level_c_loc
+   
+   !> Gets the pointer of the valve opening height for a given culvert structure.
+   !! If the type of the given structure is not culvert, then it gets a null pointer
+   !! This pointer points directly to the %culvert%valveOpening.
+   type(c_ptr) function get_valve_opening_height_c_loc(struc)
+      type(t_structure), intent(in) :: struc
+      
+       select case (struc%type)
+          case (ST_CULVERT)
+             get_valve_opening_height_c_loc = c_loc(struc%culvert%valveOpening)
+          case default
+             get_valve_opening_height_c_loc = C_NULL_PTR
+       end select
+
+   end function get_valve_opening_height_c_loc
    
    !> Gets the pointer of the gate opening width for a given structure.
    !! If the type of the given structure is not general structure, then it gets a null pointer
