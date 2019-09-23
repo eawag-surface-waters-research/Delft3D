@@ -150,7 +150,6 @@ contains
       double precision               :: openingfac
       double precision               :: valveOpening
       double precision               :: chezyCulvert
-      double precision               :: culvertChezy
       double precision               :: chezyValve
       double precision               :: wArea               !< upstream wet area (no valve)
       double precision               :: wPerimiter          !< upstream wet perimeter  (no valve)
@@ -262,6 +261,7 @@ contains
          valveOpening = culvert%valveOpening
          chezyValve = 0.0d0
          call GetCSParsFlow(CrossSection, valveOpening, valveArea, valvePerimiter, valveWidth)     
+         chezyCulvert = getchezy(CrossSection%frictionTypePos(1), CrossSection%frictionValuePos(1), valveArea/valvePerimiter, valveOpening, 1d0)
          openingfac = (valveOpening - gl_thickness) / (CrossSection%charHeight - gl_thickness)
       else
          openingfac = 2.0d0     ! >> 1, so not influenced by valve
@@ -270,17 +270,15 @@ contains
       if (openingfac >= 1.0d0) then
          hydrRadius  = wArea / wPerimiter
          culvertArea  = wArea
-         culvertChezy = chezyCulvert
          valveloss = 0.0d0
       else
          valveloss = interpolate(culvert%lossCoeff, openingfac)
          hydrRadius  = valveArea / (valvePerimiter + valveWidth)
          culvertArea  = valveArea
-         culvertChezy = chezyValve
       endif
       
       !Friction Loss
-      frictloss = 2.0d0 * gravity * culvert%length / (culvertChezy * culvertChezy * hydrRadius)            ! culvert friction established
+      frictloss = 2.0d0 * gravity * culvert%length / (chezyCulvert * chezyCulvert * hydrRadius)            ! culvert friction established
       
       ! Check if flow is free flow or submerged
       if (smin >= (outflowCrest + gl_thickness + dc)) then  
