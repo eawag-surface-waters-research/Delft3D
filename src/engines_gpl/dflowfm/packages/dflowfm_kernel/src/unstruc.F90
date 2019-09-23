@@ -34621,7 +34621,7 @@ end subroutine setbobs_fixedweirs
           
           do L0 = 1, pstru%numlinks
              L = iabs(pstru%linknumbers(L0))
-             direction = sign(1, L)
+             direction = sign(1, pstru%linknumbers(L0))
              if (hu(l) > 0) then
                 k1 = ln(1,L)
                 k2 = ln(2,L)

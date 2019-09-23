@@ -140,6 +140,7 @@ contains
       double precision :: s1ml
       double precision :: s1mr
       double precision :: qL
+      double precision :: bobstru(2)             !< same as BOB0, but with respect to the structure orientation
 
       logical                        :: velheight
       double precision               :: cgd
@@ -200,9 +201,18 @@ contains
                                      rholeft, rhoright, crest, hu, hd,uu, ud, flowDir)
       !
       ! apply orientation of the flow link to the direction dependend parameters
+      
+      if (direction > 0) then
+         bobstru(1) = bob0(1)
+         bobstru(2) = bob0(2)
+      else
+         bobstru(1) = bob0(2)
+         bobstru(2) = bob0(1)
+      endif
+      
       flowDir = direction*flowDir
       
-      call flgtar(genstr, L0, maxWidth, bob0, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf, cgd,   &
+      call flgtar(genstr, L0, maxWidth, bobstru, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf, cgd,   &
                   cwf, cwd, mugf, lambda)
       !
       rhoast = rhoright/rholeft
@@ -263,7 +273,7 @@ contains
    end subroutine computeGeneralStructure
 
    !> Compute coefficients for structure equation                                   
-   subroutine flgtar(genstr, L0, maxWidth, bob0, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf,  &
+   subroutine flgtar(genstr, L0, maxWidth, bobstru, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf,  &
                      cgd, cwf, cwd, mugf, lambda)
    !!--description-----------------------------------------------------------------
    ! NONE
@@ -279,7 +289,7 @@ contains
       type(t_GeneralStructure), pointer, intent(in):: genstr    !< Derived type containing general structure information
       integer,          intent(in   )  :: L0                    !< Internal link number
       double precision, intent(in   )  :: maxWidth              !<  Maximal width of the structure. Normally the the width of the flowlink
-      double precision, intent(in)     :: bob0(2)               !< bed level of channel upstream and downstream of the structure.
+      double precision, intent(in   )  :: bobstru(2)            !< bed level of channel left and right of the structure (w.r.t. structure orientation)
       double precision, intent(  out)  :: cgd                   !< Contraction coefficient for drowned gate flow
       double precision, intent(  out)  :: cgf                   !< Contraction coefficient for gate flow
       double precision, intent(  out)  :: cwd                   !< Contraction coefficient for drowned weir flow.
@@ -331,7 +341,7 @@ contains
       endif
       
       ! zs always above bed level up and downstream (bob(:))
-      zs   = max(bob0(1), bob0(2), genstr%zs)
+      zs   = max(bobstru(1), bobstru(2), genstr%zs)
       if (zs > genstr%zs_actual) then
          ! Note: the adaptation of the crest level at the different links depend on the BOB of this link
          ! The highest value is taken as the actual crest level
@@ -340,10 +350,10 @@ contains
       
       
       ! other levels above bed level up and downstream (bob(:)) but below the zs
-      zb1  = min(max(bob0(1), genstr%zu1), zs)
-      zbsl = min(max(bob0(1), genstr%zu2), zs)
-      zbsr = min(max(bob0(2), genstr%zd1), zs)
-      zb2  = min(max(bob0(2), genstr%zd2), zs)
+      zb1  = min(max(bobstru(1), genstr%zu1), zs)
+      zbsl = min(max(bobstru(1), genstr%zu2), zs)
+      zbsr = min(max(bobstru(2), genstr%zd1), zs)
+      zb2  = min(max(bobstru(2), genstr%zd2), zs)
       
       lambda = genstr%extraresistance
       !
