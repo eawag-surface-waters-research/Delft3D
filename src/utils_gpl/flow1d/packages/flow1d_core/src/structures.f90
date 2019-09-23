@@ -133,6 +133,8 @@ module m_1d_structures
    integer, public, parameter :: CFiValveOpening       = 22
    integer, public, parameter :: CFiSetpoint           = 29
    integer, public, parameter :: CFiHighestParameter   = 31
+    integer,         parameter :: MaxWarnings = 50
+   integer                    :: numberOfWarnings = 0
 
     !---------------------------------------------------------
    type, public :: t_structure
@@ -402,6 +404,7 @@ subroutine deallocstructure(sts)
    sts%countByType   = 0
    sts%compoundcount = 0
    sts%hasExtraResistance = .false.
+   numberOfWarnings = 0
 
 end subroutine deallocstructure
 !
@@ -826,6 +829,8 @@ end subroutine
              get_crest_level = huge(1d0)
           case (ST_GENERAL_ST)
              get_crest_level = struc%generalst%zs_actual
+          case (ST_BRIDGE)
+             get_crest_level = struc%bridge%bedLevel
           case default
              get_crest_level = huge(1d0)
        end select
@@ -1270,44 +1275,42 @@ end subroutine
       
       select case(pstru%type)
       case (ST_GENERAL_ST)
-         if (comparereal(pstru%generalst%zs, pstru%generalst%zs_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The crest level for '''//trim(pstru%id)//''' is (locally) changed from ', pstru%generalst%zs, ' into ', pstru%generalst%zs_actual, '.'
-            call SetMessage(level, msgbuf)
-         endif
-         if (comparereal(pstru%generalst%ws, pstru%generalst%ws_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The crest width for  '''//trim(pstru%id)//''' is changed from ', pstru%generalst%ws, ' into ', pstru%generalst%ws_actual, '.'
-            call SetMessage(level, msgbuf)
-         endif
-         if (comparereal(pstru%generalst%gateLowerEdgeLevel, pstru%generalst%gateLowerEdgeLevel_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The gate lower edge level for '''//trim(pstru%id)//''' is (locally) changed from ', pstru%generalst%gateLowerEdgeLevel, ' into ', pstru%generalst%gateLowerEdgeLevel_actual, '.'
-            call SetMessage(level, msgbuf)
-         endif
-         if (comparereal(pstru%generalst%gateopeningwidth, pstru%generalst%gateopeningwidth_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The gate opening width for '''//trim(pstru%id)//''' is changed from ', pstru%generalst%gateopeningwidth, ' into ', pstru%generalst%gateopeningwidth_actual, '.'
-            call SetMessage(level, msgbuf)
-         endif
+         call compare_and_warn(level, pstru%generalst%zs, pstru%generalst%zs_actual, 'crest level', pstru%id)
+         call compare_and_warn(level, pstru%generalst%ws, pstru%generalst%ws_actual, 'crest width', pstru%id)
+         call compare_and_warn(level, pstru%generalst%gateLowerEdgeLevel, pstru%generalst%gateLowerEdgeLevel_actual, 'gate lower edge level', pstru%id)
+         call compare_and_warn(level, pstru%generalst%gateopeningwidth, pstru%generalst%gateopeningwidth_actual, 'gate opening width', pstru%id)
       case(ST_BRIDGE)
-         if (comparereal(pstru%bridge%bedLevel, pstru%bridge%bedLevel_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bed level for '''//trim(pstru%id)//''' is changed from ', pstru%bridge%bedLevel, ' into ', pstru%bridge%bedLevel_actual, '.'
-            call SetMessage(level, msgbuf)
-         endif
+         call compare_and_warn(level, pstru%bridge%bedLevel, pstru%bridge%bedLevel_actual, 'bed level', pstru%id)
       case(ST_UNI_WEIR)
-         if (comparereal(pstru%uniweir%crestlevel, pstru%uniweir%crestlevel_actual) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The crest level for '''//trim(pstru%id)//''' is changed from ', pstru%uniweir%crestlevel, ' into ', pstru%uniweir%crestlevel_actual, '.'
-            call SetMessage(level, msgbuf)
-         endif
+         call compare_and_warn(level, pstru%uniweir%crestlevel, pstru%uniweir%crestlevel_actual, 'crest level', pstru%id)
       case(ST_CULVERT)
-         if (comparereal(pstru%culvert%bob_orig(1), bob0(1)) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bed level of the channel at the left side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(1), ' into ', bob0(1), '.'
-            call SetMessage(level, msgbuf)
-         endif
-         if (comparereal(pstru%culvert%bob_orig(2), bob0(2)) /= 0) then
-            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The bed level of the channel at the right side of '''//trim(pstru%id)//''' is changed from ', pstru%culvert%bob_orig(2), ' into ', bob0(2), '.'
-            call SetMessage(level, msgbuf)
-         endif
+         call compare_and_warn(level, pstru%culvert%bob_orig(1), bob0(1), 'bed level of the channel at the left side', pstru%id)
+         call compare_and_warn(level, pstru%culvert%bob_orig(2), bob0(2), 'bed level of the channel at the right side', pstru%id)
       end select
          
    end subroutine check_for_changes_on_structures
    
-   
+   subroutine compare_and_warn(level, val_org, val_new, par, id)
+      use precision
+      integer         ,  intent(in) :: level
+      double precision,  intent(in) :: val_org
+      double precision,  intent(in) :: val_new
+      character (len=*), intent(in) :: par
+      character (len=*), intent(in) :: id
+      
+      if (numberOfWarnings == Maxwarnings+1) then
+         numberOfWarnings = numberOfWarnings+1
+         write (msgbuf, '(a,i0,a)') 'The number of warnings for changed structure parameters exceeds ', &
+                     Maxwarnings, ', subsequent warnings are supppressed'
+         call setmessage(LEVEL_INFO,msgbuf)
+      else if (numberOfWarnings <= Maxwarnings) then
+         if (comparereal(val_org, val_new) /= 0) then
+            numberOfWarnings = numberOfWarnings+1
+            write(msgbuf,'(a,f8.2,a,f8.2,a)') 'The '// trim(par)//' for '''//trim(id)//''' is changed from ', val_org, ' into ', val_new, '.'
+            call SetMessage(level, msgbuf)
+         endif
+      endif
+      
+      
+   end subroutine compare_and_warn
 end module m_1d_structures
