@@ -14839,18 +14839,18 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    double precision, intent(in)    :: tim !< Time in seconds
    type(c_time)                    :: ecTime !< Time in EC-module
-   logical                         :: l_initPhase
+   logical                         :: l_initPhase, first_time_wind
    integer,          intent(out)   :: iresult !< Integer error status: DFM_NOERR==0 if succesful.
 
    double precision :: timmin
    double precision :: ntrtsteps            !< variable to determine if trachytopes should be updated
    double precision :: tem_dif
-   integer          :: k, L, i, k1, k2
+   integer          :: k, L, i, k1, k2, iFirst, iLast
    logical          :: l_set_frcu_mor = .false.
 
    logical, external :: flow_initwaveforcings_runtime
    character(len=255) :: tmpstr
-
+   type(tEcItem), pointer :: itemPtr !< Item under consideration, for right order of wind items
 
    ! variables for processing the pump with levels, SOBEK style
    integer                               :: n, ierr, istru, structInd
@@ -14870,7 +14870,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       patm = PavBnd
    end if
 
-   if (jawind == 1) then   ! setwind
+   if (jawind == 1 .or. japatm > 0) then   ! setwind
       if (allocated(wx)) then
         wx = 0.d0
       end if
@@ -14884,50 +14884,60 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
         ec_pwxwy_y = 0.d0
       end if
 
-      ! Retrieve wind's x- and y-component for ext-file quantity 'windxy'.
-      if (item_windxy_x /= ec_undef_int .and. item_windxy_y /= ec_undef_int) then
-         success = ec_gettimespacevalue(ecInstancePtr, item_windxy_x, irefdate, tzone, tunit, tim)
-         !success = ec_gettimespacevalue(ecInstancePtr, item_windxy_y, tim) ! Due to removal of up-to-date check in ec_item.f90::ecItemGetValues.
-         if (.not. success) then
-            goto 888
-         end if
-      end if
-
-      ! Retrieve wind's p-, x- and y-component for ext-file quantity 'airpressure_windx_windy'.
-      if (item_apwxwy_p /= ec_undef_int .and. item_apwxwy_x /= ec_undef_int .and. item_apwxwy_y /= ec_undef_int) then
-         if (item_apwxwy_c /= ec_undef_int) then
-            success = ec_gettimespacevalue(ecInstancePtr, 'airpressure_windx_windy_charnock', tim)
-         else
-            success = ec_gettimespacevalue(ecInstancePtr, 'airpressure_windx_windy', tim)
-         endif
-         if (.not. success) then
-            goto 888
-         end if
-         ! FM performs an additional spatial interpolation:
-         do L  = 1,lnx ! i
-            k1 = ln(1,L) ; k2 = ln(2,L)
-            wx(L) = 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
-            wy(L) = 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
-            if (allocated(ec_pwxwy_c)) then
-               wcharnock(L) = 0.5d0*( ec_pwxwy_c(k1) + ec_pwxwy_c(k2) )
-            endif
-         enddo
-      end if
-
-      ! Retrieve wind's x-component for ext-file quantity 'windx'.
-      if (item_windx /= ec_undef_int) then
-         success = ec_gettimespacevalue(ecInstancePtr, item_windx, irefdate, tzone, tunit, tim)
-         if (.not. success) then
-            goto 888
-         endif
+      first_time_wind = (id_last_wind < 0)
+      if (first_time_wind) then
+         iFirst = 1
+         iLast = ecInstancePtr%nItems
+      else
+         iFirst = id_first_wind
+         iLast = id_last_wind
       endif
-
-      ! Retrieve wind's y-component for ext-file quantity 'windy'.
-      if (item_windy /= ec_undef_int) then
-         success = ec_gettimespacevalue(ecInstancePtr, item_windy, irefdate, tzone, tunit, tim)
-         if (.not. success) then
-            goto 888
+      do i=iFirst, iLast
+         itemPtr => ecInstancePtr%ecItemsPtr(i)%ptr
+         ! Retrieve wind's x- and y-component for ext-file quantity 'windxy'.
+         if (itemPtr%id == item_windxy_x .and. item_windxy_y /= ec_undef_int) then
+            success = ec_gettimespacevalue(ecInstancePtr, item_windxy_x, irefdate, tzone, tunit, tim)
+         ! Retrieve wind's p-, x- and y-component for ext-file quantity 'airpressure_windx_windy'.
+         else if (itemPtr%id == item_apwxwy_p .and. item_apwxwy_x /= ec_undef_int .and. item_apwxwy_y /= ec_undef_int) then
+            if (item_apwxwy_c /= ec_undef_int) then
+               success = ec_gettimespacevalue(ecInstancePtr, 'airpressure_windx_windy_charnock', tim)
+            else
+               success = ec_gettimespacevalue(ecInstancePtr, 'airpressure_windx_windy', tim)
+            endif
+            if (success) then
+               ! FM performs an additional spatial interpolation:
+               do L  = 1,lnx ! i
+                  k1 = ln(1,L) ; k2 = ln(2,L)
+                  wx(L) = 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
+                  wy(L) = 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
+                  if (allocated(ec_pwxwy_c)) then
+                     wcharnock(L) = 0.5d0*( ec_pwxwy_c(k1) + ec_pwxwy_c(k2) )
+                  endif
+               enddo
+            end if
+         ! Retrieve wind's x-component for ext-file quantity 'windx'.
+         else if (itemPtr%id == item_windx) then
+            success = ec_gettimespacevalue(ecInstancePtr, item_windx, irefdate, tzone, tunit, tim)
+         ! Retrieve wind's y-component for ext-file quantity 'windy'.
+         else if (itemPtr%id == item_windy) then
+            success = ec_gettimespacevalue(ecInstancePtr, item_windy, irefdate, tzone, tunit, tim)
+         ! Retrieve wind's p-component for ext-file quantity 'atmosphericpressure'.
+         else if (itemPtr%id == item_atmosphericpressure) then
+            success = ec_gettimespacevalue(ecInstancePtr, item_atmosphericpressure, irefdate, tzone, tunit, tim)
+         else
+            cycle  ! avoid updating id_first_wind and id_last_wind
          endif
+         if (.not. success) goto 888
+         if (first_time_wind) then
+            id_first_wind = min(i, id_first_wind)
+            id_last_wind  = max(i, id_last_wind)
+         endif
+      enddo
+
+      if (item_atmosphericpressure /= ec_undef_int) then
+         do k = 1,ndx
+            if (patm(k) == dmiss) patm(k) = 101325d0
+         enddo
       endif
 
       if (jawave == 1 .or. jawave == 2) then
@@ -15085,14 +15095,6 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    endif
 
 !   !$OMP SECTION
-
-   ! Retrieve wind's p-component for ext-file quantity 'atmosphericpressure'.
-   if (japatm > 0  .and. item_atmosphericpressure /= ec_undef_int) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_atmosphericpressure, irefdate, tzone, tunit, tim)
-      do k = 1,ndx
-         if (patm(k) == dmiss) patm(k) = 101325d0
-      enddo
-   endif
 
 !   !$OMP SECTION
 
@@ -38305,6 +38307,8 @@ end function is_1d_boundary_candidate
  if (allocated(kbndz))        deallocate(xbndz,ybndz,xy2bndz,zbndz,kbndz,zbndz0)
  if (allocated(zkbndz))       deallocate(zkbndz)
  if(allocated(lnxbnd))        deallocate(lnxbnd)
+ id_first_wind =  huge(id_first_wind)
+ id_last_wind  = -huge(id_last_wind)
 
  allocate(lnxbnd(lnx-lnxi))
 
@@ -39571,8 +39575,9 @@ if (mext > 0) then
         else if (qid == 'airpressure' .or. qid == 'atmosphericpressure') then
 
            if (.not. allocated(patm) ) then
-              allocate ( patm(ndx) , stat=ierr)  ; patm = 0d0
+              allocate ( patm(ndx) , stat=ierr)
               call aerr('patm(ndx)', ierr, ndx)
+              patm = 0d0
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then
@@ -39582,8 +39587,9 @@ if (mext > 0) then
         else if (qid == 'airtemperature') then
 
            if (.not. allocated(tair) ) then
-              allocate ( tair(ndx) , stat=ierr)  ; tair = 0d0
+              allocate ( tair(ndx) , stat=ierr)
               call aerr('tair(ndx)', ierr, ndx)
+              tair = 0d0
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then

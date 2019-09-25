@@ -1097,6 +1097,7 @@ double precision, allocatable, target :: patm(:)     !< atmospheric pressure use
                                                       !! so that it can be merged with tidep later and difpatm/dx = m/s2, saves 1 array , using mode = 'add'
 double precision, allocatable, target :: rain(:)     !< [mm/day] rain at xz,yz {"location": "face", "shape": ["ndx"]}
 double precision, allocatable, target :: evap(:)     !< [m/s] evaporation at xz,yz {"location": "face", "shape": ["ndx"]}
+integer :: id_first_wind, id_last_wind  !< counters to avoid looping over all ec_etims when only interessed in wind
 
 !!
 !! Laterals
