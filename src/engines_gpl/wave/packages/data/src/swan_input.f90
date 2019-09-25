@@ -5020,7 +5020,7 @@ subroutine write_swan_inp (wavedata, calccount, &
           line(j:j)  = ''''''
           k          = k + 1
           if (sferic) then
-             write (line(21:48), '(2(F10.6,4X))') xpcu(k), ypcu(k)
+             write (line(21:48), '(2(F14.6,4X))') xpcu(k), ypcu(k)
           else
              write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
           endif
@@ -5033,7 +5033,7 @@ subroutine write_swan_inp (wavedata, calccount, &
              line       = ' '
              write (line(11:15), '(I5)') nclin(k)
              if (sferic) then
-                write (line(21:48), '(2(F10.6,4X))') xpcu(k), ypcu(k)
+                write (line(21:48), '(2(F14.6,4X))') xpcu(k), ypcu(k)
              else
                 write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
              endif
@@ -5423,7 +5423,7 @@ subroutine outputCurvesFromFile()
           ! call transfer with a real(sp) constant as second parameter
           !
           inputvals = transfer( data_ptr, 0., 2 )
-          write(line,'(18x,2(f10.6,4x))') inputvals(1), inputvals(2)   ! needed in case of spherical output, was f10.2
+          write(line,'(18x,2(f14.6,4x))') inputvals(1), inputvals(2)   ! needed in case of spherical output, was f10.2
           if (j /= 1) then
              line(14:14) = '1'
           endif
