@@ -13250,6 +13250,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
              XB = Xk(K2)
              YB = Yk(K2)
              CALL dLINEDIS(XP1,YP1,XA,YA,XB,YB,JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
+             !IF (JA .EQ. 1 .AND. DIS < 0.5D0*DBDISTANCE(XA,YA,XB,YB,jsferic, jasfer3D, dmiss)) THEN
              IF (JA .EQ. 1) THEN
                 IF (DIS .LT. DISMIN) THEN
                    N1     = L

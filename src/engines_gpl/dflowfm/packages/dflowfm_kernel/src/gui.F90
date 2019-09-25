@@ -2620,7 +2620,12 @@
       endif
       OPTION(46)= 'Layer Thickness at u             (m    )'
       OPTION(47)= 'Linear friction coefficient      (m/s  )'
-      numopt = 47
+      OPTION(48)= '                                        '
+      OPTION(49)= 'Number of active layers          (     )'
+      OPTION(50)= 'Maximum nr of layers             (     )'
+      OPTION(51)= 'Lbot                             (     )'
+      OPTION(52)= 'Ttop                             (     )'
+      numopt = 52
       if ( stm_included ) then
          numopt = numopt+1
          numoptsed = numopt
@@ -5312,6 +5317,17 @@ subroutine getktoplot(kk,k)
  endif   
  end subroutine getktoplot 
 
+subroutine getLtoplot(kk,k)
+ use m_flowgeom
+ use m_flow
+ if (kplotfrombedorsurface == 1) then  
+     k = Lbot(kk) - 1 + min( kplot, kmxL(kk) )
+     k = min(k, Ltop(kk) )
+ else
+     k = Lbot(kk) + kmxL(kk) - kplot
+     k = max(k, Lbot(kk) )
+ endif   
+ end subroutine getLtoplot 
 
      SUBROUTINE KPLOTPLUSMIN(IPM)
       USE M_FLOWGEOM
@@ -17970,7 +17986,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFORMPUTINTEGER (2* 6 ,JARHOXU          )        
    CALL IFORMPUTINTEGER (2* 7 ,JAVASAL          )          
    CALL IFORMPUTINTEGER (2* 8 ,ifixedweirscheme )          
-   CALL IFORMPUTdouble  (2* 9 ,Tsigma           , '(F7.1)' )          
+   CALL IFORMPUTdouble  (2* 9 ,Tsigma           , '(F7.3)' )          
    CALL IFORMPUTINTEGER (2*10 ,JALTS            )            
    CALL IFORMPUTdouble  (2*11 ,Cffacver         , '(F7.3)' )          
    CALL IFORMPUTINTEGER (2*12 ,JAVATEM          )    
@@ -22685,7 +22701,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
  else
     call getlink1(nn,LL) 
     WRITE (TEX,'( A,i8,  A,I8,  A,I4,  A, F8.5, A, F8.5,  A,I4, A, I2.0, I1, I1, I1, I1, A, A, A14)')    &
-    '#ndx: ' , ndx, ' #lnx: ', lnx, ' #kmx : ', kmx, ' ustB ', ustb(LL), ' ustW ', ustw(LL),    &
+    '#ndx: ' , ndx, ' #lnx: ', lnx, ' #kmx : ', kmx, ' ustB ', min(ustb(LL),1d2), ' ustW ', ustw(LL),    &
     ' #s1it: ', min(9999,nums1it), ' iad: ', iadvec, limtypmom, limtypsa, javasal, javau,  ' runid: '//trim(md_ident), ' ', c_lts
  endif
  

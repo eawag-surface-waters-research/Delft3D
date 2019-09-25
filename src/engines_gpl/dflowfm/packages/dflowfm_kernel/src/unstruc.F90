@@ -12550,14 +12550,17 @@ else if (nodval == 27) then
  integer             :: L, L2,linval, ifrctyp, k1, k2, n1, n2, lll, ka, kb
  double precision    :: cosphiu, frcn, omega1, omega2, zb1, zb2, dum, alfa
 
+ zlin = dmiss
+ if ( LL.lt.1 ) then
+    return
+ end if
+
  L  = LL
- if (kmx > 0 .and. kplot.ne.0) then
-    L2 = min(LL,lnx)
-    L  = Lbot(L2) - 1  + min (kplot, Ltop(L2) - Lbot(L2) + 1 )
+ if (kmx > 0) then
+    call getLtoplot(LL,L)
  endif
 
  linval = ndraw(29)
- zlin   = -999d0
  if (       linval == 2) then
     zlin = abs(u1(L))
  else if (  linval == 3) then
@@ -12743,6 +12746,14 @@ else if (nodval == 27) then
           end do
           zlin = dum
     end select
+ else if ( linval == 49) then
+    zlin = Ltop(LL) - Lbot(LL) + 1 ; zlin=max(zlin,0d0)
+ else if ( linval == 50) then
+    zlin = kmxL(LL)
+ else if ( linval == 51) then
+    zlin = Lbot(LL)
+ else if ( linval == 52) then
+    zlin = Ltop(LL)
  else
     zlin = -999
  endif
