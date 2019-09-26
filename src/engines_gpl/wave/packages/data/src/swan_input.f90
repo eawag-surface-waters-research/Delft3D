@@ -5019,12 +5019,8 @@ subroutine write_swan_inp (wavedata, calccount, &
           j          = 16
           line(j:j)  = ''''''
           k          = k + 1
-          if (sferic) then
-             write (line(21:48), '(2(F14.6,4X))') xpcu(k), ypcu(k)
-          else
-             write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
-          endif
-          line(49:49) = '_'
+          write (line(21:56), '(2(F14.6,4X))') xpcu(k), ypcu(k)
+          line(57:57) = '_'
           write (luninp, '(1X,A)') line
           line        = ' '
           jendcrv     = nclin(k)
@@ -5032,13 +5028,9 @@ subroutine write_swan_inp (wavedata, calccount, &
              k = k + 1
              line       = ' '
              write (line(11:15), '(I5)') nclin(k)
-             if (sferic) then
-                write (line(21:48), '(2(F14.6,4X))') xpcu(k), ypcu(k)
-             else
-                write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
-             endif
+             write (line(21:56), '(2(F14.6,4X))') xpcu(k), ypcu(k)
              !              Modification
-             if (j/=jendcrv) line(50:50) = '_'
+             if (j/=jendcrv) line(57:57) = '_'
              write (luninp, '(1X,A)') line
              line       = ' '
           enddo
