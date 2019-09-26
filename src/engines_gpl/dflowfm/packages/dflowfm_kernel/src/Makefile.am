@@ -26,7 +26,7 @@ EXTRA_DIST = \
 	$(builddir)/../include/RF.inc \
 	$(builddir)/../include/blasfm.inc
 
-EXTRA_DIST += $(builddir)/../../dflowfm_lib/templates 
+EXTRA_DIST += $(builddir)/../../dflowfm_lib/templates
 
 # default to empty so we can conditionally expand it
 include_HEADERS=
@@ -108,7 +108,8 @@ libdflowfm_la_SOURCES=\
         gui.F90 \
         saadf.F \
         saadf90.F90 \
-        calibration.f90
+        calibration.f90 \
+        caching.f90
 # Ok now we can't include $(PETSOURCES) here, the reason why is hard to explain......
 # http://www.gnu.org/software/automake/manual/html_node/Conditional-Sources.html
 
@@ -160,7 +161,7 @@ unstruc_version.F90: unstruc_version.F90.svn .FORCE
 unstruc_version.F90:
  endif
 
-.FORCE: 
+.FORCE:
 
 .PHONY: .FORCE
 
@@ -188,6 +189,7 @@ FMODULES += \
     -I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
     -I$(top_builddir)/third_party_open/libsigwatch \
+    -I$(top_builddir)/third_party_open/mdf5\mdf5file \
     -I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src \
     -I$(top_builddir)/engines_gpl/waq/include \
     -I$(top_builddir)/engines_gpl/waq/packages/wq_processes/src \
@@ -307,6 +309,8 @@ EXTRALIBS+=\
         $(top_builddir)/third_party_open/kdtree2/src-f90/libkdtree2f.la \
         $(top_builddir)/third_party_open/polypack/src/libpolypack.la \
         $(top_builddir)/third_party_open/libsigwatch/libsigwatch.la \
+        $(top_builddir)/third_party_open/md5/md5file/libmdf5file.la \
+        $(top_builddir)/third_party_open/md5/md5digest/libmdf5digest.la \
         $(CCLIBS) -luuid
 
 # dflowfm_LDADD = \
