@@ -1,3 +1,3 @@
 SUBDIRS = \
-	mdf5digest \
-	mdf5file
+	md5digest \
+	md5file
