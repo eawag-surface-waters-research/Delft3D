@@ -3886,6 +3886,7 @@ src/third_party_open/md5/md5digest/md5digest.vcxproj.filters -text
 src/third_party_open/md5/md5file/Makefile.am -text
 src/third_party_open/md5/md5file/md5file.f90 -text
 src/third_party_open/md5/md5file/md5file.vfproj -text
+src/third_party_open/md5/readme.txt -text
 src/third_party_open/metis/LICENSE.txt -text
 src/third_party_open/metis/README.txt -text
 src/third_party_open/metis/metis-5.1.0/BUILD-Windows.txt -text
