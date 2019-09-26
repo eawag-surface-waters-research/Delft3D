@@ -8818,6 +8818,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use unstruc_channel_flow
  use m_1d_structures, only: initialize_structures_actual_params
  use unstruc_netcdf_map_class
+ use unstruc_caching
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -9115,6 +9116,10 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
        call unc_write_net_flowgeom(trim(md_flowgeomfile)) ! CFOLD
     end if
  end if
+
+ ! store the grid-based information in the cache file
+ write(*,*) md_netfile
+ call storeCachingFile(filename = md_ident)
 
 call writesomeinitialoutput()
 
