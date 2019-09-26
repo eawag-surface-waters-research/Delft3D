@@ -3877,6 +3877,12 @@ src/third_party_open/lnxredist/libnetcdff.so.6 -text
 src/third_party_open/lnxredist/librt.so.1 -text
 src/third_party_open/lnxredist/libstdc++.so.6 -text
 src/third_party_open/lnxredist/libsvml.so -text
+src/third_party_open/md5/md5digest/md5.c -text
+src/third_party_open/md5/md5digest/md5.h -text
+src/third_party_open/md5/md5digest/md5digest.vcxproj -text
+src/third_party_open/md5/md5digest/md5digest.vcxproj.filters -text
+src/third_party_open/md5/md5file/md5file.f90 -text
+src/third_party_open/md5/md5file/md5file.vfproj -text
 src/third_party_open/metis/LICENSE.txt -text
 src/third_party_open/metis/README.txt -text
 src/third_party_open/metis/metis-5.1.0/BUILD-Windows.txt -text
