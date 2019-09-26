@@ -17876,9 +17876,9 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'long_name', 'Flow state in culvert')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'units', '-')
             ierr = nf90_put_att(ihisfile, id_culvert_stat, 'coordinates', 'culvert_id')
-            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'flag_values', (/ 0, 1, 2, 3, 4 /))
-            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'flag_meanings', 'no_flow weir_free weir_submerged gate_free gate_submerged')
-            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'valid_range', (/ 0, 4 /))
+            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'flag_values', (/ 0, 1, 2/))
+            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'flag_meanings', 'no_flow culvert_free culvert_submerged')
+            ierr = nf90_put_att(ihisfile, id_culvert_stat, 'valid_range', (/ 0, 2 /))
             ierr = nf90_put_att(ihisfile, id_culvert_stat, '_FillValue', int(dmiss))
             
             ierr = nf90_def_var(ihisfile, 'culvert_velocity ', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_vel)

@@ -433,7 +433,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
    integer,                        intent(in   ) :: icount      !< Index of the counter element in valstruct array,
                                                                 !! it is the last element of the array.
    
-   integer:: i
+   integer:: i, tmp, jadif
    type(t_structure), pointer :: pstru
    type(t_GeneralStructure), pointer :: genstr
    
@@ -489,13 +489,19 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
       valstruct(9) = get_crest_level(pstru)     ! crest level
       valstruct(10)= get_width(pstru)           ! crest width
       ! determine state
-      valstruct(11) = dble(pstru%generalst%state(1))
+      tmp = maxval(pstru%generalst%state(1:3,1))
+      jadif = 0
       do i = 2, nlinks
-         if (valstruct(11) /= dble(pstru%generalst%state(i))) then
-            valstruct(11) = dmiss
+         if (tmp /= maxval(pstru%generalst%state(1:3,i))) then
+            jadif = 1
             exit
          end if
       end do
+      if (jadif == 0) then
+         valstruct(11) = dble(tmp)
+      else
+         valstruct(11) = dmiss
+      end if
    end if
 
    ! General structure-based structures with a (gate) door.

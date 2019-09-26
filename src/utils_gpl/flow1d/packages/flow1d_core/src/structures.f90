@@ -1259,9 +1259,9 @@ end subroutine
       
       select case(struct%type)
       case (ST_GENERAL_ST) ! REMARK: for version 2 files weirs, orifices and gates are implemented as general structures
-         allocate(struct%generalst%widthcenteronlink(numlinks), struct%generalst%gateclosedfractiononlink(numlinks), struct%generalst%sOnCrest(numlinks), struct%generalst%state(numlinks))
+         allocate(struct%generalst%widthcenteronlink(numlinks), struct%generalst%gateclosedfractiononlink(numlinks), struct%generalst%sOnCrest(numlinks), struct%generalst%state(3,numlinks))
          struct%generalst%sOnCrest(1:numlinks) = 0d0
-         struct%generalst%state(1:numlinks) = 0
+         struct%generalst%state = 0
          allocate(struct%generalst%fu(3,numlinks), struct%generalst%ru(3,numlinks), struct%generalst%au(3,numlinks))
          struct%generalst%fu = 0d0
          struct%generalst%ru = 0d0

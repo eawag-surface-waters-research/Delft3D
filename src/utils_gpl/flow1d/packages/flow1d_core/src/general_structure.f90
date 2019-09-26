@@ -89,14 +89,13 @@ module m_General_Structure
       logical                          :: velheight                     !< Flag indicates the use of the velocity height or not
       integer                          :: openingDirection              !< possible values GEN_SYMMETRIC, GEN_FROMLEFT, GEN_FROMRIGHT
       double precision, pointer        :: sOnCrest(:)                   !< water level on crest per link (length = numlinks)
-      integer,          pointer        :: state(:)                      !< State of the Structure for General Structure, Weir, Orifice and Culvert/Siphon
+      integer,          pointer        :: state(:,:)                    !< state(1:3,L0) contains flow state on the L0th link of the structure for General Structure, Weir and Orifice
+                                                                        !< 1: state of under gate flow, 2: state of between gate flow, 3: state of over gate flow
                                                                         !< 0 = No Flow
                                                                         !< 1 = Free Weir Flow
                                                                         !< 2 = Drowned Weir Flow
                                                                         !< 3 = Free Gate Flow
                                                                         !< 4 = Drowned Gate Flow
-                                                                        !< 5 = Free Flow for Culvert and Siphons
-                                                                        !< 6 = Drowned Flow for Culvert and Siphons
    end type
 
 
@@ -233,7 +232,7 @@ contains
 
          call flqhgs(fu(1), ru(1), u1L, dxL, dt, structwidth, kfuL, au(1), qL, flowDir, &
                      hu, hd, uu, zs, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(1,L0))
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
          
          !calculate flow over gate
@@ -244,7 +243,7 @@ contains
 
          call flqhgs(fu(2), ru(2), u1L, dxL, dt, structwidth, kfuL, au(2), qL, flowDir, &
                      hu, hd, uu, zgate, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(L0))
+                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(3,L0))
       endif
       
       if (gatefraction< 1d0 - gatefrac_eps) then
@@ -255,7 +254,7 @@ contains
          
          call flqhgs(fu(3), ru(3), u1L, dxL, dt, structwidth, kfuL, au(3), qL, flowDir, &
                      hu, hd, uu, zs, (1d0-gatefraction)*wstr, (1d0-gatefraction)*w2, (1d0-gatefraction)*wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(L0))
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(2,L0))
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
 
       endif

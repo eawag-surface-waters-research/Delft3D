@@ -64,12 +64,8 @@ module m_Culvert
       type(t_table), pointer          :: losscoeff => null()   !< table containing loss coefficients as a function of the relative opening
       integer                         :: state                 !< State of Culvert/Siphon
                                                                !< 0 = No Flow
-                                                               !< 1 = Free Weir Flow
-                                                               !< 2 = Drowned Weir Flow
-                                                               !< 3 = Free Gate Flow
-                                                               !< 4 = Drowned Gate Flow
-                                                               !< 5 = Free Flow for Culvert and Siphons
-                                                               !< 6 = Drowned Flow for Culvert and Siphons
+                                                               !< 1 = Free Culvert Flow 
+                                                               !< 2 = Submerged Culvert Flow 
       double precision, dimension(2) :: bob_orig               !< original bob0 values before the actual bobs are lowered
    end type
 
@@ -337,9 +333,9 @@ contains
       rum = du / bu
          
       if (isfreeflow) then
-         culvert%state = 5
+         culvert%state = 1
       else
-         culvert%state = 6
+         culvert%state = 2
       endif
     
    end subroutine ComputeCulvert
