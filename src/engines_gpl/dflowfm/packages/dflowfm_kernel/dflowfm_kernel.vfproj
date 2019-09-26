@@ -49,7 +49,6 @@
 		<File RelativePath="src\advec.f90"/>
 		<File RelativePath="src\bedform_data.f90"/>
 		<File RelativePath="src\bedform_io.f90"/>
-		<File RelativePath=".\src\caching.f90"/>
 		<File RelativePath="src\calibration.f90"/>
 		<File RelativePath="src\d3ddimens.f90"/>
 		<File RelativePath="src\d_flooding.f90"/>
@@ -240,7 +239,7 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\unstruc_startup.f90"/>
-		<File RelativePath="src\unstruc_structures.f90"/>
+      <File RelativePath="src\unstruc_structures.f90"/>
 		<File RelativePath="src\unstruc_version.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>

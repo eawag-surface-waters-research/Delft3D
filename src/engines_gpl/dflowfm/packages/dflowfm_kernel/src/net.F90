@@ -14887,14 +14887,12 @@ subroutine obs_on_flowgeom(iobstype)
     use unstruc_messages
     use m_partitioninfo
     use m_flowgeom, only : xz,yz,ndx2D,ndxi
-    use unstruc_caching
 
     implicit none
 
     integer, intent(in) :: iobstype !< Which obs stations to update: 0=normal, 1=moving, 2=both
     integer :: i, k, n, n1, n2, k1b, iobs
     double precision           :: d1, d2
-    logical                    :: cache_success 
     
     integer                    :: jakdtree
     jakdtree = 1  ! use kdtree (1) or not (other)
@@ -14913,14 +14911,7 @@ subroutine obs_on_flowgeom(iobstype)
         n2 = numobs
     end if 
     
-    if ( cacheRetrieved() ) then
-        call copyCachedObservations( cache_success )
-    else
-        cache_success = .false.
-    endif
-    if ( .not. cache_success ) then 
-        call find_flownode_for_obs(n1, n2)    
-    endif
+    call find_flownode_for_obs(n1, n2)   
     
     if (loglevel_StdOut == LEVEL_DEBUG) then 
        do iobs = n1,n2
