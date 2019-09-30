@@ -102,13 +102,13 @@ contains
     integer,                    intent(out)   :: iostat
     character(len=*), optional, intent(in)    :: funtype
 
-    character*(1000)              ::  rec
+    character(len=2000)           ::  rec
     character(len=:), allocatable ::  keyvaluestr ! all key-value pairs in one header; allocated on assign
     integer                       ::  posfs
     integer                       ::  nfld
     integer                       ::  nq
     logical                       ::  jaheader, jafound
-    integer(kind=8)               ::  currentpos    
+    integer(kind=8)               ::  currentpos
 
     integer (kind=8)              ::  savepos
     type(tEcBlockList), pointer   ::  blocklistPtr
@@ -122,12 +122,12 @@ contains
     iostat = EC_UNKNOWN_ERROR
     savepos = 0
 
-    ! TODO: Check if we have a matching postion in the adminstration,
+    ! TODO: Check if we have a matching position in the administration,
     ! If so:
     !    create a new filehandler
     !    set the metadata correctly by process-header 
     ! If not:
-    !    find the last read position for this file, that is: the last recorded start position of  a data-block
+    !    find the last read position for this file, that is: the last recorded start position of a data-block
     !    start searching from there 
     
     bcFilePtr => bc%bcptr
@@ -188,7 +188,7 @@ contains
                          keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' //(trim(adjustl(rec(posfs+1:))))//''','
                       else                                                    ! switch to datamode
                          ! TODO: Store the location information somewhere to be able to return to it later 
-                         call str_upper(keyvaluestr,len(trim(keyvaluestr)))   ! case insensitive format
+                         call str_upper(keyvaluestr, len_trim(keyvaluestr))   ! case insensitive format
       
                          allocate(blocklistPtr)                                   ! Add information for this block to the administration
                          blocklistPtr%position = savepos
@@ -679,7 +679,7 @@ contains
     type(tEcBCBlock),           pointer                     :: bcPtr
     integer        :: n_col      !< number of columns in the file, inferred from the number of quantity blocks in the header
     integer        :: n_col_time !< position of the dedicated time-column in the line, deduced from the header
-    character(1000):: rec        !< content of a line
+    character(2000):: rec        !< content of a line
     character(30)  :: ncolstr
     integer        :: istat      !< status of read operation
     integer        :: i, j       !< loop counters
