@@ -97,7 +97,6 @@
 
       integer                   :: lunblm          ! unit number bloom file
       integer                   :: lunfrm          ! unit number bloom frm file
-      integer                   :: lund09          ! unit number bloom d09 file
 
       integer                   :: isys            ! index variable
       integer                   :: igrp            ! index variable
@@ -606,15 +605,6 @@
          call blmeff (lunlsp , lunblm, verspe, lunfrm, grpnam, nogrp , typnam, noalg)
          close(lunblm)
          close(lunfrm)
-
-         filnam = trim(runnam)//'.d09'
-         inquire (file = filnam, exist = ex)
-         if(.not.ex) then
-            lund09 = 89
-            open ( newunit=lund09, file=filnam )
-            call blmd09 (lunlsp , lund09)
-            close(lund09)
-         endif
       endif
 
       ! calculate new totals
