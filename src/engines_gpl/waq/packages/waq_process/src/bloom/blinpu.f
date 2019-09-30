@@ -222,7 +222,7 @@
 
 ! Switch for solar irr. total rad(0) or PAR(1)
       if(swblsolint==0) then
-         solaco=0.45d0
+         solaco=0.449999988079071d0
       else
          solaco=1.0d0
       endif
@@ -303,6 +303,7 @@
 ! Minimum temperature for growth
       temlim=real(bltemlim,8) 
       basmor=real(blbasmor,8)
+      basmor=1.000000000000000D-002
       write (outdbg,'(1X,"Minimum Pmax and mortality rate of ",F6.3," for temperatures less or equal to ",F4.1)') basmor, temlim
 
 ! Switch to use extra constraints on growth rates
