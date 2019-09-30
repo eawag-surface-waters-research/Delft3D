@@ -3368,7 +3368,7 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
   integer, parameter                          :: NUMKDTREEMIN = 100   ! minimum number of nodes required for kdtree
   integer, parameter                          :: jakdtree = 1         ! use kdtree (1) or not (0)
 
-  integer                                     :: i, kkother, kother, nummerged, jadone, ierror, nrl1d
+  integer                                     :: itp, i, kkother, kother, nummerged, jadone, ierror, nrl1d
 
   double precision, dimension(:), allocatable :: xx, yy  ! coordinates of nodes in polygon
 
@@ -3392,15 +3392,28 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
   KC = 0
   in = -1
   node:DO K = 1,NUMK
-     DO kk=1,nmk(K)
-        LL = abs(nod(k)%lin(kk))
-        if (kn(3,LL) /= 1 .and. kn(3,LL) /= 2) then
-           ! Don't merge net nodes that are part of special 1D2D connections.
-           cycle node
-        end if
-     end do
      CALL DBPINPOL( XK(K), YK(K), in, dmiss, JINS, NPL, xpl, ypl, zpl)
-     if ( in.gt.0 ) kc(k) = 1
+     if ( in.gt.0 ) then
+        kc(k) = 0  ! Initialize for link loop below
+        DO kk=1,nmk(K)
+           LL = abs(nod(k)%lin(kk))
+
+           ! KC(1D NODES) = 1 , KC(2D NODES) = 2
+
+           if (kn(3,LL) == 1 .or. kn(3,LL) == 6) then
+              itp = 1 ! "1D" netnode type
+           else if (kn(3,LL) == 3 .or. kn(3,LL) == 4 .or. kn(3,LL) == 5 .or. kn(3,LL) == 7) then
+              itp = kn(3,LL) ! 1d2d connections 
+           else if (kn(3,LL) == 2) then
+              itp = 2 ! "2D" netnode type
+           else
+              itp = 0
+           end if
+
+           kc(k) = max(kc(k), itp)
+
+        end do
+     end if
   ENDDO node
 
   if ( jsferic.eq.1 ) then
@@ -3432,7 +3445,7 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
 
         numk_inpoly = 0
         do k=1,numk
-           if ( kc(k).eq.1 .and. xk(k).ne.DMISS .and. yk(k).ne.DMISS ) then
+           if ( kc(k) >= 1 .and. xk(k).ne.DMISS .and. yk(k).ne.DMISS ) then
               numk_inpoly=numk_inpoly+1
               
               if ( janeedfix.eq.1 ) then
@@ -3495,12 +3508,22 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
                      kother  = iperm(kkother)
 !                    exclude own node and nodes already merged
                      if ( kother.ne.k .and. kother.gt.0 ) then
-                        Lmerge = .true.
-                        if ( janeedfix.eq.1 ) then
+                     
+                        Lmerge = .false.
+                        if (kc(k) == 1 .and. (kc(kother) == 1 .or. kc(kother) >= 3)) then
+                           Lmerge = .true.
+                        else if (kc(k) == 2 .and. kc(kother) == 2) then
+                           Lmerge = .true.
+                        else if (kc(k) >= 3 .and. nmk(k) > 1) then ! Only 1d2d links if they are not endpoints that should connect inside a 2D cell.
+                           Lmerge = .true.
+                        end if
+
+                        if ( Lmerge .and. janeedfix.eq.1 ) then
 !                          because of random perturbations<=tolerance added to kdtree: check real distance
                            Lmerge = ( dbdistance(xk(k),yk(k),xk(kother),yk(kother), jsferic, jasfer3D, dmiss).lt.tooclose )
                         end if
                         if ( Lmerge ) then
+                           kc(k) = max(kc(k), kc(kother)) ! merged node gets maximum of the two node types
                            call mergenodes(kother,k,ja)
                            if ( ja.eq.1 ) then
                               iperm(kkother) = 0
@@ -3538,7 +3561,7 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
                     IF (dbdistance( XK(K), yk(k), XK(KK), yk(kk), jsferic, jasfer3D, dmiss ) < TOOCLOSE ) THEN
                        CALL MERGENODES(K,KK,JA)
                        IF (JA .EQ. 1) THEN
-                          KC(K)  = -1
+                          KC(K)  = -ABS(KC(K))
                        ENDIF
                     ENDIF
                  ENDIF
