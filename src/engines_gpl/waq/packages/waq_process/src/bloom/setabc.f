@@ -25,7 +25,7 @@
 !  *          SUBROUTINE TO SET MATRIX A AND B                         *
 !  *********************************************************************
 
-      subroutine setabc(xinit,extb,exttot,csol,dsol,t,dep,id,nset)
+      subroutine setabc(xinit,extb,exttot,csol,dsol,t,dep,nset)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -33,18 +33,15 @@
       use bloom_data_matrix   
       use bloom_data_io  
       use bloom_data_phyt  
-      use bloom_data_caldynam
-      use bloom_data_putin
 
       implicit none
 
       save
 
       real(8)  :: xinit(*),pmax20(mt),tcorr(mt),sdmixn(mt)
-      real(8)  :: csol, dsol, dep, expmul, extb, exttot, t
-      integer  :: k, j, nset, id, idrem,  idprev,  imprev
+      real(8)  :: csol, dsol, dep, extb, exttot, t
+      integer  :: k, j, nset, idrem, idprev,  imprev
       
-!      INTEGER SWBLSA
 !
 !  If this is the first time through the subroutine,
 !  then initiate A, B and C
@@ -82,16 +79,10 @@
 
 !  Initiate multiplier for exponential term at zero:
 !  start with steady state solution for the dead algal pool
-         expmul=0.0
-         if (idrem .eq. 1) then
-            write (iou(10), 99996) (dabs(sdmix(k)), k = 1, nuspec)
-            write (iou(10), 99995) (sdmixn(k), k = 1, nuspec)
+         if (idrem .ne. 0) then
+            write (outdbg, 99996) (dabs(sdmix(k)), k = 1, nuspec)
+            write (outdbg, 99995) (sdmixn(k), k = 1, nuspec)
          end if
-
-!  Print warning message if a non-zero value is specified for the
-!  sedimentation or flushing rate
-         if ( sedrat .ge. 1.0d-6) write (iou(10),99999) sedrat
-         if ( flush .ge. 1.0d-6) write (iou(10),99998) flush
       end if
       
 !  Convert CSOL from:
@@ -99,22 +90,6 @@
 !  Determine temperature correction, assuming that the nominal
 !  efficiency curves are all for temperatures of TEFCUR deg. centigrade.
       dsol=1428.57*csol
-
-!  Determine the base level for the growth constraints (optionally).
-!  If there is a discontinuity in the period numbers, EXTTOT and XINIT
-!  are reinitialized.
-      if (nrun .le. 1) go to 90
-      if (imu .eq. 1) go to 90
-      idprev = id - mi
-      if (idprev .ge. nper(imu,1)) go to 90
-      imprev = imu - 1
-      if (idprev .ge. nper(imprev,1) .and. idprev .le. nper(imprev,2)) go to 90
-      exttot = extb
-      if (lgroch .ne. 1) go to 90
-      do j=1,nuecog
-         xinit(j)=1.d+6
-      end do
-   90 continue
 
 !  Compute equivalent radiation level.
 !  Multiply by the light reduction of overlying water columns. Usually
@@ -126,7 +101,7 @@
       do k=1,nuspec
          surf(k)= tcorr(k) * dsol * dexp (- exttot * sdmixn(k) * dep)
       end do
-      if (idump .eq. 1) write (iou(6),99997) (tcorr(k),k=1,nuspec)
+      if (idump .eq. 1) write (outdbg,99997) (tcorr(k),k=1,nuspec)
 
 !  Set "B" values for nutrients by substracting the amount in
 !  zooplankton from the input values and correcting for deviations
@@ -134,24 +109,10 @@
   170 do k=1,nunuco
         b(k)=concen(k)    
       end do
-      if (ldydea .eq. 0) return
-      expmul=1.0
 
 !  Formats for this subroutine
-99999 format (//,1X,'* WARNING *   A sedimentation rate of',2X,F6.3,2X,
-     1        'has been specified.',/,1X,'In order to keep the total',
-     2        ' amount of nutrients constant, the program assumes',/,
-     3        1X,'the amount of sedimented nutrients to be replaced',/,
-     4        ' by dissolved nutrients from the bottom.',//)
-99998 format (//,1X,'* WARNING *  A flushing rate of',2X,F6.3,2X,
-     1        'has been specified.',/,1X,'In order to keep the total',
-     2        ' amount of nutrients constant, the program assumes',/,
-     3        1X,'the amount of nutrients flushed from the dead algal',
-     4        ' pool',/,' to be replaced by dissolved nutrients',
-     5        ' from the intake water.',//)
 99997 format ('  Tcorr(j):  ',30(F5.2,1X))
-99996 format (//,1X,'Computation with inhomogeneous mixing.',/,
-     1        '  SDMIX(J):   ',30(F5.2,1X))
+99996 format (//,1X,'Computation with inhomogeneous mixing.',/,'  SDMIX(J):   ',30(F5.2,1X))
 99995 format ('  SDMIXN(J):  ',30(F5.2,1X))
       return
       end

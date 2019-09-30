@@ -88,13 +88,6 @@
       real(8)      :: xdefk
       real(8)      :: xi
 
-! Determine output unit for error messages.
-      if (ioflag .eq. 0) then
-         nout = iou(6)
-      else
-         nout = iou(10)
-      end if
-
 ! Set flag for non-unique solutions (LST) to 0.
       lst = 0
 
@@ -169,7 +162,7 @@
          irerun = 2
          errind = '*'
          extrem = extb
-         if (lprint .eq. 2) write (nout,90) cdate
+         if (idump .eq. 1) write (nout,90) cdate
    90    format (/,' ',' *** Warning message for time ',A8,'.')
          do k = 1,nuecog
             b(k + nuexro) = bgro(k)
@@ -178,17 +171,17 @@
 
          if (swblsa .eq. 1) then
             b(irs(3)) = 0.0
-            if (lprint .eq. 2) write (nout,110) grname (index)
+            if (idump .eq. 1) write (nout,110) grname (index)
   110          format (' Mortality constraint of species ',A8,' is violated.',/,' This constraint is dropped.')
          else
             do k = it2(index,1), it2(index,2)
                if (aroot(2*k) .lt. extrem) then
                    aroot(2*k) = extrem
-                   if (lprint .eq. 2) write (nout, 120) grname(index)
+                   if (idump .eq. 1) write (nout, 120) grname(index)
   120              format (' Mortality constraint of species ',A8,'is violated.',/,' KMAX NOW set above mortality constaint.')
                else
                    b(irs(3)) = 0.0
-                   if (lprint .eq. 2) write (nout, 110) grname(index)
+                   if (idump .eq. 1) write (nout, 110) grname(index)
                end if
             end do
          end if
@@ -200,7 +193,7 @@
 ! the mortality. This solution has been optained elsewhere; the result
 ! must have been stored in the X-vector. It is computed as:
 !
-!     XDEFJ = X(NUROWS + J) * DEXP(-MI * TSTEP * RMORT(J))
+!     xdefj = x(nurows + j) * dexp(-tstep * rmort(j))
 !
 ! Note: the total extinction will be computed in subroutine BLOOM no
 ! matter wheter the solution was feasible.
@@ -242,45 +235,47 @@
 !     no extinction intervals exist,
 !  3. Release the mortality constraints and re-run the problem if
 !     valid extinction intervals do exist.
-      do 220 i = 1,nunuco
-      xi = b(i) - sumnut(i)
-      if (xi .lt. 0.0) then
-         if (swblsa .ne. 1) then
-            if (lprint .eq. 2) then
-               write (nout,50) cdate
-               write (nout,180) cstra(i)
-  180          format (' One of the mortality constraints violates the ',A8,' constraint.',/,' Problem is infeasible.')
-               errind = '!'
-            end if
-            go to 10
-         else
-            if (ni .eq. 0) then
-               xi = 0.0
-               if (lprint .eq. 2) then
-                   write (nout,90) cdate
-                   write (nout,190) cstra(i)
-  190              format (' One of the mortality constraints violates the ',A8,' constraint.',/,' Negative concentrations ',
-     &                     'are tolerated.',/,' All species set to their mortality constraints.')
-                   errind = '*'
-            end if
+      do i = 1,nunuco
+         xi = b(i) - sumnut(i)
+         if (xi .lt. 0.0) then
+            if (swblsa .ne. 1) then
+               if (idump .eq. 1) then
+                  write (nout,50) cdate
+                  write (nout,180) cstra(i)
+  180             format (' One of the mortality constraints violates the ',A8,' constraint.',/,' Problem is infeasible.')
+                  errind = '!'
+               end if
+               go to 10
             else
-              if (lprint .eq. 2) then
-                 write (nout,90) cdate
-                 write (nout,200) cstra(i)
-  200            format (' One of the mortality constraints violates the ',A8,' constraint.',/,
-     &                   ' All mortality constaints will be released.')
-                 errind = '*'
-              end if
-              do k = 1,nuecog
-                 b(k + nuexro + nuecog) = 0.0
-                 b(k + nuexro) = bgro(k)
-              end do
-              irerun = 3
-              return
+               if (ni .eq. 0) then
+                  xi = 0.0
+                  if (idump .eq. 1) then
+                      write (nout,90) cdate
+                      write (nout,190) cstra(i)
+  190                 format (' One of the mortality constraints violates the ',A8,' constraint.',/,' Negative concentrations ',
+     &                        'are tolerated.',/,' All species set to their mortality constraints.')
+                      errind = '*'
+               end if
+               else
+                 if (idump .eq. 1) then
+                    write (nout,90) cdate
+                    write (nout,200) cstra(i)
+  200               format (' One of the mortality constraints violates the ',A8,' constraint.',/,
+     &                      ' All mortality constaints will be released.')
+                    errind = '*'
+                 end if
+                 do k = 1,nuecog
+                    b(k + nuexro + nuecog) = 0.0
+                    b(k + nuexro) = bgro(k)
+                 end do
+                 irerun = 3
+                 return
+               end if
             end if
          end if
-      end if
-  220 x(i) = xi
+         x(i) = xi
+      end do
+
       if (inhib .eq. 1) then
          x(nufili)=0.0d0
       else

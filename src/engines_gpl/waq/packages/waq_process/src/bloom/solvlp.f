@@ -194,7 +194,7 @@
       end do
 
 ! If a dump is requested, print the objective function.
-      if (idump .eq. 1 .and. inow .eq. 1) write (iou(6),125) (c(j),j=1,nuspec)
+      if (idump .eq. 1 .and. inow .eq. 1) write (outdbg,125) (c(j),j=1,nuspec)
  125  format (' Objective function of types:',/,2X,20(F5.2,2X))
 
 !  Call subroutine "QSLP" to solve the linear program by the ordinary

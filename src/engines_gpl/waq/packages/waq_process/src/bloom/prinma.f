@@ -36,30 +36,30 @@
       real(8)   :: x(mx), biopos, bio2, total
       integer   :: int, j, k, k2, l1, l2, ni, nin
 
-!  Print maximum solution on unit iou(6)
-      write (iou(6),10)
+!  Print maximum solution on unit outdbg
+      write (outdbg,10)
    10 format (12X,'******* MAXIMUM SOLUTION *******')
-      write(iou(6),20)
+      write(outdbg,20)
    20 format (2X,'Species',34X,'Types',/,26X,'1',13X,'2',13X,'3',13X,'4')
       do j=1,nuecog
          l1=it2(j,1)
          l2=it2(j,2)
-         write (iou(6),50) grname(j), (x(k+nurows),k=l1,l2)
+         write (outdbg,50) grname(j), (x(k+nurows),k=l1,l2)
    50    format (2x,a8,11x,4(f11.4,3x))
       end do
       biopos = bio2
       if (biopos .lt. 0.0) biopos = 0.0
-      write (iou(6),70) biopos
+      write (outdbg,70) biopos
    70 format (2X,'Total biomass',6X,F11.4,3X,'g/m3')
-      write (iou(6),90) total
+      write (outdbg,90) total
    90 format (2X,'Chlorophyll',8X,F11.4,3X,'mg/m3',/)
 
 !  Print nutrient concentrations
-      write (iou(6),100)
+      write (outdbg,100)
   100 format (2X,'Nutrient',14X,'Total',9X,'Slacks')
-      write (iou(6),110) (cstra(k),concen(k),x(k),k=1,nunuco)
+      write (outdbg,110) (cstra(k),concen(k),x(k),k=1,nunuco)
   110 format (6(2X,A8,11X,F11.4,3X,F11.4,/))
-      write(iou(6),120) ni,nin,int
+      write(outdbg,120) ni,nin,int
   120 format ('  Number of intervals:',I3,2X,'Infeasible:',I3,2X,'Maximum interval:',I3,//)
       return
       end

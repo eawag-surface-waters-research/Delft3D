@@ -28,37 +28,22 @@ libbloom_la_SOURCES = \
        bloutc.f \
        blprim.f \
        bvect.f \
-       change.f \
-       chhelp.f \
        constr.f \
-       cspgro.f \
-       cspsto.f \
-       cvrblm.f \
-       dayeu.f \
        dynrun.f \
        ebcalc.f \
        exclud.f \
        fixinf.f \
-       hdrblm.f \
-       headin.f \
        iblbal.f \
-       inptdt.f \
-       inptnm.f \
-       input2.f \
-       lenst.f \
+       readfrm.f \
        maxgro.f \
        maxprd.f \
        natmor.f \
-       nutfea.f \
-       option.f \
        prinma.f \
        prinsu.f \
        print6.f \
        qslp.f \
        setabc.f \
-       setuni.f \
        solvlp.f \
-       spcsd.f \
-       spindi.f 
+       spcsd.f  
 #-------------------------------------------------------------------------------
 # Libraries

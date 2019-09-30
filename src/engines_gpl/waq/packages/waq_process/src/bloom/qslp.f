@@ -31,14 +31,14 @@
 !
 ! Program written by Hans Los.
 !-----------------------------------------------------------------------
-      subroutine qslp(a,ia,nr,nc,b,lsc,c,iopt,irs,lib,d,id,x,p,ier)
+      subroutine qslp(a,ia,nr,nc,b,lsc,c,iopt,irs,lib,d,mt,x,p,ier)
 
       implicit none
 
-      real(8)   :: a(1:ia,1:id),b(*),c(*),d(*),x(*),p(*)
+      real(8)   :: a(1:ia,1:mt),b(*),c(*),d(*),x(*),p(*)
       real(8)   :: xopt, bpivot, bmin, cpivot, apivot, aipj, cj, aijp, bi, ap, cjpap
       integer   :: lib(*),ier,lsc(*),iopt(*),irs(*), nqslp
-      integer   :: i, j, k, l, ia, id, ip, jp, jpneg
+      integer   :: i, j, k, l, ia, mt, ip, jp, jpneg
       integer   :: ineg, iter, itflag, ihelp1, ihelp2
       integer   :: nr, nc, method
 
@@ -48,7 +48,7 @@
 ! checks.
       nqslp = nqslp + 1
       if (nqslp .gt. 1) go to 10
-      if (nr .ge. ia .or. nc .ge. id) then
+      if (nr .ge. ia .or. nc .ge. mt) then
          ier = 1000
          go to 340
       end if
@@ -273,15 +273,15 @@
 ! errors becoming to large.
       if (itflag .ge. iopt(2)) then
          itflag = 0
-         do 220 i = 1, nr
+         do i = 1, nr
             if (dabs(b(i)) .lt. 1.0d-12) b(i) = 0.0d0
-            do 210 j = i, nc
+            do j = i, nc
                if (dabs(a(i,j)) .lt. 1.0d-12) a(i,j) = 0.0d0
-  210       continue
-  220    continue
-         do 230 j = i, nc
+            end do
+         end do
+         do j = i, nc
             if (dabs(c(j)) .lt. 1.0d-12) c(j) = 0.0d0
-  230    continue
+         end do
       end if
 !
 ! Modify pivot and pivot row.

@@ -115,7 +115,6 @@
       real(8)    rad8             ! ..
       real(8)    depth8           ! ..
       real(8)    dayl8            ! ..
-      real(8)    chlor8           ! ..
       real(8)    extlim           ! ??
       real(8)    deat             ! ??
       real(8)    totchl           ! Real*8 version of output parameter
@@ -198,8 +197,12 @@
 ! Negative biomass after mortality? Message!
             if (x(j) .lt. -1.0d-2) then
                ierror = ierror + 1
-               write (iou(61), 1050) ierror,j,biomas(j), iseg, x(j)
-               if (ierror .eq. merror) goto 901
+               write (outdbg, 1050) ierror,j,biomas(j), iseg, x(j)
+               if (ierror .eq. merror) then
+                  write (outdbg,*) 'Fatal ERROR in Bloom module: time step too big'
+                  write (*,*) 'Fatal ERROR in Bloom module: time step too big'
+                  call srstop(1)
+               end if
             end if
  1050    format ( ' Integration error number ',I3,/,
      &            ' Current biomass of type ',I3,' = ',E15.5,/,
@@ -260,13 +263,10 @@
       rad8   = dble(rad)
       depth8 = dble(depth)
       dayl8  = dble(dayl)
-      chlor8 = -1d0
       extlim = 0d0
       deat   = dble(deat4)
 
-      call dynrun (extot8, exbac8, temp8 , rad8  , depth8, dayl8 ,
-     j             chlor8, id    , iseg  , nset  , extlim,
-     j             deat  , totchl, totdry, totcar, swblsa)
+      call dynrun(extot8, exbac8, temp8, rad8, depth8, dayl8, id, iseg, nset, extlim, deat, totchl, totdry, totcar, swblsa)
 
 ! Store total carbon and chlorophyll concentration
       totnut(1) = sngl(totcar)
@@ -381,8 +381,6 @@
 
       return
 
-  901 write (*,*) 'Fatal ERROR in Bloom module: time step too big'
-      call srstop(1)
  1001 format (A,1X,99E15.5)
  1002 format (A,1X,i5,1x,99E15.5)
 

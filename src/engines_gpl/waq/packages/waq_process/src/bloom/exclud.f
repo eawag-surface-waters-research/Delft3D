@@ -67,8 +67,7 @@
          do k=1,nuspec
             a(nuexro,k)=aco(inow,k)
          end do
-         go to 90
-      end if
+      else
 
 ! Use ACO (INOW,K) if the Kmax of SOME type of species I is not yet
 ! exceeded, or if the mortality constraint is 0.0: nothing to conserve.
@@ -78,29 +77,29 @@
 ! all types premitted in any interval. This information is used to
 ! determine, whether or not simplex should be called AFTER infeasible
 ! intervals have been detected.
-      do i = 1,nuecog
-         notprs = 0
-         do k = it2(i,1),it2(i,2)
-            if (aco(inow,k) .gt. 0.0) notprs = notprs + 1
+         do i = 1,nuecog
+            notprs = 0
+            do k = it2(i,1),it2(i,2)
+               if (aco(inow,k) .gt. 0.0) notprs = notprs + 1
+            end do
+            if (notprs .lt. ntypes(i) .or. b(nuexro+nuecog+i) .lt. 1.d-6) then
+               do k = it2(i,1),it2(i,2)
+                  a(nuexro,k) = aco(inow,k)
+               end do
+            else
+               do k = it2(i,1),it2(i,2)
+                  aco(inow,k) = 0.0
+                  a(nuexro,k)=0.0
+               end do
+               b(nuexro + i) = b(nuexro + nuecog + i)
+            end if
          end do
-         if (notprs .lt. ntypes(i) .or. b(nuexro+nuecog+i) .lt. 1.d-6) then
-            do k = it2(i,1),it2(i,2)
-               a(nuexro,k) = aco(inow,k)
-            end do
-         else
-            do k = it2(i,1),it2(i,2)
-               aco(inow,k) = 0.0
-               a(nuexro,k)=0.0
-            end do
-            b(nuexro + i) = b(nuexro + nuecog + i)
-         end if
-      end do
+      end if
 
 !  Exit if the previous interval was feasible (IRS(2) = 0)).
 !  Exit if the previous interval was infeasible due to a mortality
 !  contstraint: call simplex for the next interval, it might be
 !  feasible.
-   90 continue
       if (irs(2) .eq. 0) return
       if (lmorch .eq. 1 .and. irs(3) .gt. nuexro + nuecog) then
          linf = 0

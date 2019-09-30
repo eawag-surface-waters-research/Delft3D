@@ -21,31 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine bloutc (histor,lprino,ldumpo)
+      subroutine bloutc (dump)
       
-      use bloom_data_dim 
       use bloom_data_phyt    
-      use bloom_data_sumou   
       
       implicit none
 
-      logical histor    !  Flag to activate output
-      integer lprino    !  Saves original value of LPRINT
-      integer ldumpo    !  Saves original value of IDUMP
+      integer dump
 
-!     LPRINT and IDUMP are output control flags of Bloom
-!     They have been read from the input and their value has been
-!     saved in LPRINO and LDUMPU
-!     Here we set them to their original values, ONLY if HISTOR is
-!     true, that is for history elements at history times.
-!     This is to avoid excessively sized output files of Bloom
-
-      lprint = 0
-      idump  = 0
-      if (histor) then
-          lprint = lprino
-          idump  = ldumpo
-      endif
+      idump  = dump
 
       return
       end

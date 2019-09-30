@@ -23,13 +23,13 @@
 
 !    Module to read BLOOM input files
 !
-      subroutine blinpu (ntyp_m, ntyp_a, ngro_a, algtyp, lmixo, lfixn, lcarb, nunucom, nutcon, flxcon, con2out)
+      subroutine blinpu (ntyp_m, ntyp_a, ngro_a, algtyp, lmixo, lfixn, lcarb, nunucom, nutcon, flxcon, con2out,
+     &                   swblsolint, swblobject, bltemlim, blbasmor, swblgrochk, blbiobas, swblmorchk, bltoplev)
       
       use bloom_data_dim
       use bloom_data_size 
       use bloom_data_arran   
       use bloom_data_mass_balance  
-      use bloom_data_caldynam
       use bloom_data_io  
       use bloom_data_matrix  
       use bloom_data_phyt    
@@ -50,14 +50,31 @@
       integer      nutcon(nunucom)      ! Nutrients involved in active nutrient constraints
       integer      flxcon(nunucom)      ! Uptake fluxes involved in active nutrient constraints
       integer      con2out(nunucom)     ! Mapping of actual nutrient constraints to DELWAQ output
+      
+!     Former D09 input      
+      integer      swblsolint           ! Switch for solar irradiation as total radiation (0) or PAR (1)
+      integer      swblobject           ! Switch for objective growth (1) or biomass (0)
+      real         bltemlim             ! Minimum temperature for growth
+      real         blbasmor             ! Base mortality when temperature is below minimum temperature for growth
+      integer      swblgrochk           ! Switch to use extra constraints on growth rates 
+      real         blbiobas             ! Base biomass level per group
+      integer      swblmorchk           ! Switch to use extra mortality constraints
+      real         bltoplev             ! Top level of mortality constraints
 
 !     Local variables
-      integer      lparam, i
-      real         autofr
+      character(120) idstr
+      integer        lparam, i, i1, i2
+      real           autofr
+      character(8)   cpmax
 
-!  Read title lines of BLOOM II input file.
-      read (inuni, '(I4,1X,9A8)') iyear, (case (i), i = 1,9)
-      read (inuni, '(9A8,8X)') com
+!  From now on BLOOM won't read the D09-file any more. Some settings will be made available through the inp-file later on
+      call getidentification(idstr)
+      write(outdbg,'(1x,a/)') trim(idstr)
+      write(outdbg, '(a/)') ' BLOOM debug file'
+
+      write(outdbg, '(a)')  ' From now on, BLOOM will not read the bloominp.D09 file any more. Some'
+      write(outdbg, '(a)')  ' of the options that were available trough this file are now accessible'
+      write(outdbg, '(a/)') ' through parameters settings. Consult the manual for details.'
 
 !  Determine nuspec and nuecog
       is = 0
@@ -138,11 +155,15 @@
       con2out(1) = 1
       con2out(2) = 2
       con2out(3) = 3
+      cstra(1) = 'NITROGEN'
+      cstra(2) = 'PHOSPHOR'
+      cstra(3) = 'SILICON '
       nunuco = 3
       if (lcarb) then
          nutcon (nunuco+1) = 4
          flxcon (nunuco+1) = 1  ! C uptake
          con2out(nunuco+1) = 4
+         cstra(4) = 'CARBON  '
          nunuco = 4
       endif
       if (lmixo) then
@@ -173,61 +194,159 @@
         con2out(nunuco+1) = 7
         nunuco = nunuco + 1
       endif
-      if (nunuco.gt.nunucom) goto 901
+      cstra(nunuco+1) = 'KMIN    '
+      cstra(nunuco+2) = 'KMAX    '
+      if (nunuco.gt.nunucom) then
+         write(outdbg,*) 'ERROR: Number of contraints if greater than the maximum number of constraints in BLOOM'
+         write(*,*) 'ERROR: Number of contraints if greater than the maximum number of constraints in BLOOM'
+         call srstop(1)
+      end if
+      
+!  Establish various column and row indicators for A-matrix and output
+!  output vector X (or XDEF).
+!  It is assumed there are 2 energy constraints.
+!
+!       NUFILI--number of first light constaint.
+!       NUABCO--number of abiotic constaints (total).
+!       NUEXRO--number of the exclusion row in A-matrix.
+!       NUROWS--number of rows in A-matrix.
+!       NUCOLS--number of elements in X-vector.
+!       NUSPE1--position of first type in X-vector.
 
-!  Call subroutine INPUT2 to read BLOOM specific data for
-!  species, constraints, stochiometry etc.
-      call input2 (inuni,iou(12),1)
+      nufili=nunuco+1
+      nuabco=nunuco+2
+      nuexro=nuabco+1
+      nurows=nuexro
+      nuspe1=nurows+1
+      nucols=nurows+nuspec
 
-!  Close the efficiency file.
-      close (iou(12))
+! Switch for solar irr. total rad(0) or PAR(1)
+      if(swblsolint==0) then
+         solaco=0.45d0
+      else
+         solaco=1.0d0
+      endif
+
+!  Record names of limiting factors.
+      do i = 1,nunuco
+         limnam (i) = cstra (i) (1:3)
+      end do
+      limnam(nunuco+1) = 'E  '
+      limnam(nunuco+2) = 'Gro'
+      limnam(nunuco+3) = 'Mor'
+
+!  Call subroutine readfrm to read species/groups names and the integrated efficiency curves
+      call readfrm 
+
+!  Abiotic constraints
+      cnames = ' '
+      do i = 1, nuabco
+         cnames (i) = cstra (i)
+      end do
+
+!  Growth and mortality constraints: name + group name.
+      i1 = nuexro
+      i2 = nuexro + nuecog
+      do i = 1, nuecog
+         i1 = i1 + 1
+         i2 = i2 + 1
+         write(cnames (i1), 30) 'Growth', grname(i)
+         write(cnames (i2), 30) 'Mortal', grname(i)
+      end do
+   30 format (a6,'-',a8)
 
 !  Set various counters used in several routines of BLOOM II.
 !  NREP   = counter for number of calls to all main BLOOM II routines.
-!  NPRINT = counter for print routines.
 !  NPRODU = counter for BLOOM II production routines (which are NOT
 !           used here).
 !  LPRINT = flag indicating whether normal BLOOM II output routines
 !           are called (LPRINT = 1) or not (LPRINT = 0).
-!  MI     = number of time periods considered in one computation step of
-!           BLOOM II.
       nrep   = 0
-      nprint = 0
       nprodu = 0
       lprint = 1
-      mi     = nper (1,3)
-      imu    = 1
 
-!  Call subroutine "OPTION" to read options for program control.
-!  If "RUN" was not specified or if the program has detected
-!  an error, it will terminate.
-      call option (0,lparam)
-      if (lparam. eq. 1) call change(1)
-      close (iou(9))
-      if (nuspec .gt. mt) goto 901
-      if (nunuco .gt. mn) goto 901
-      if (lrun .eq. 0) then
-         write (ouuni,40)
-   40    format (1X,'No "RUN" command or a fatal error was detected; ',
-     1           'execution terminates',/)
-         goto 902
+! Print nutrient fraction becoming detritus
+      write (outdbg,'(a)') ' Nutrient fraction becoming detritus (non-autolyse fraction):'
+      write (outdbg,'(a)') ' Species   (1.0-FrAutAlg)'
+      do i=1,nuspec
+         write(outdbg,'(1X,A10,F6.3)') spname(i),availn(i)
+      end do
+
+!  Print present growth characteristics.
+      write (outdbg,'(a)') ' Present species growth coefficients:'
+      write (outdbg,'(a)') ' Species    PPMax   TCPMx TFPMx     Mort0   TCMrt   MResp   TCRSsp  SDMix'
+      do i=1,nuspec
+         if (lpmax(i) .eq. 1) then
+            cpmax = 'LINEAR  '
+         else
+            cpmax = 'EXPONENT'
+         endif
+         write(outdbg,'(1X,A10,F6.3,1X,F7.3,1X,A8,6(F7.3,1X))') spname(i),pmax1(i),pmax2(i),cpmax,rmort1(i),rmort2(i),
+     &                                                          res1(i),res2(i),sdmix(i)
+      end do
+
+      write (outdbg,'(a)') ' Present species stochiometry:'
+      write (outdbg,'(a)') ' Species      EetVLAlg     NCRAlg    PCRAlg    SCRAlg   ChlAAlg    DMCAlg'
+      do i=1,nuspec
+         write(outdbg,'(1X,A10,2X,D10.3,3F10.5,F10.4,4F10.5)') spname(i),ekx(i),(aa(k,i),k=1,nunuco),chltoc(i),ctodry(i)
+      end do
+      
+! Switch for objective growth (1) or biomass (0)
+      if (swblobject == 0) then
+         lobfun = 0
+         write (outdbg,'(a)') ' Ojective function: maximize total biomass.'
+      else
+         lobfun = 1
+         write (outdbg,'(a)') ' Ojective function: maximize net growth rates.'
       endif
+      
+! Minimum temperature for growth
+      temlim=real(bltemlim,8) 
+      basmor=real(blbasmor,8)
+      write (outdbg,'(1X,"Minimum Pmax and mortality rate of ",F6.3," for temperatures less or equal to ",F4.1)') basmor, temlim
+
+! Switch to use extra constraints on growth rates
+      biobas=real(blbiobas,8)
+      if (swblgrochk == 0) then
+         lgroch=0
+      else
+         lgroch=1
+         write (outdbg,"(' Computation with extra growth rates constraints using a constant base level of ',F8.2,' ug/L'/)") biobas
+!        Change array indices for extra constraints.
+         nurows=nurows+nuecog
+         nuspe1=nuspe1+nuecog
+         nucols=nucols+nuecog
+      endif
+
+! Switch to use extra mortality constraints     
+      toplev=real(bltoplev,8)
+      if(swblmorchk == 0) then
+         lmorch=0
+      else
+         lmorch=1
+         write (outdbg,"(' Computation with extra mortality constraints using a top level of ',F8.2,' gDW/m3'/)") toplev
+!        Change array indices for extra constraints.
+         nurows=nurows+nuecog
+         nuspe1=nuspe1+nuecog
+         nucols=nucols+nuecog
+      endif
+
+      if (nuspec .gt. mt)  then
+         write(outdbg,*) 'ERROR: Number of types if greater than the maximum number of types in BLOOM'
+         write(*,*) 'ERROR: Number of types if greater than the maximum number of types in BLOOM'
+         call srstop(1)
+      end if
+
+      if (nunuco .gt. mn)  then
+         write(outdbg,*) 'ERROR: Number of nutrients if greater than the maximum number of nutrients in BLOOM'
+         write(*,*) 'ERROR: Number of nutrients if greater than the maximum number of nutrients in BLOOM'
+         call srstop(1)
+      end if
 
 !     Pass actual number of groups and species to main program
 
       ntyp_a = nuspec
       ngro_a = nuecog
 
-   50 continue
       return
-
-!     Maximum number permitted species exceeded
-!     Present program version can only handle MT phytoplankton species.
-  901 write(*,*) 'Fatal error 901 in BLINPU'
-      call srstop(1)
-
-!     No "RUN" command or a fatal error was detected,
-!     execution terminates
-  902 write(*,*) 'Fatal error 902 in BLINPU'
-      call srstop(1)
       end

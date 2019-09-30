@@ -23,7 +23,7 @@
 
       subroutine blmeff (lunrep, lunblm, verspe, lunfrm, grname, nuecog, typnam, noalg)
 !
-      use timers       !   performance timers
+      use timers        !   performance timers
 
       implicit none
       integer       lunrep, lunblm
@@ -38,11 +38,9 @@
       integer, parameter :: maxtok=8
       integer, parameter :: maxnz=51
       integer ifnd (maxspe)
-      real*8 power(51), effic(51,maxspe), fun(51,maxspe), der(51,maxspe), zvec(51),
-     &       daymul(24,maxspe), dl(24)
-      character*8 token,                  spnam2 (maxspe)
-      integer gets, posit, match, uprcas, stos, lenstr, wipe
-      integer numtyp, lentok, irc, i, j, lenspe, nfnd, npoint, nz
+      real*8 power(51), effic(51,maxspe), fun(51,maxspe), der(51,maxspe), zvec(51),daymul(24,maxspe), dl(24)
+      character*8 spnam2 (maxspe)
+      integer numtyp, i, j, nfnd, npoint, nz
       real    tefcur
       character*1000 line
       integer(4) :: ithndl = 0
@@ -57,15 +55,15 @@
 ! but this is not checked!
 !
    20    format (a1000)
-         read (lunblm, 20, end=360) line
-         posit = 1
+         read (lunblm, 20) line
          numtyp = 0
-  260    continue
-         if (gets (line, posit, maxlin, maxtok, token, lentok) .ne. 0)
-     &       go to 270
-         numtyp = numtyp + 1
-         irc = uprcas (token, spnam2(numtyp), lentok)
-         go to 260
+         spnam2 = ' '
+         read (line, *, err=100, end=100) spnam2(1:maxspe)
+  100    continue
+         do i = 1, maxspe
+            if (spnam2(i)(1:1).eq.' ') exit
+            numtyp = numtyp + 1
+         end do
 !
 ! Match the selected group names (GRNAME) with those stored in the date
 ! base (SPNAM2). If a match is found, store the matching number in IFND.
@@ -76,12 +74,15 @@
          read (lunblm,*) (spnam2(i), i = 1, numtyp)
       end if
       
-  270 continue
-      do 280 i = 1, nuecog
-         lenspe = lenstr(grname(i), 8)
-         if (match(spnam2,maxspe,maxtok,grname(i),lenspe,0,nfnd) .ge. 1)
-     &      ifnd (i) = nfnd
-  280 continue
+      do i = 1, nuecog
+         call zoekns(grname(i),numtyp,spnam2,8,nfnd)
+         if (nfnd .ge. 1) then
+            ifnd (i) = nfnd
+         else
+            write(lunrep,'(3A)') 'ERROR: Could not find species ', trim(grname(i)), ' in the efficicy tables of the bloom.spe file'
+            call srstop(1)
+         end if
+      end do
 !
 ! Sort the record pointers to get them in the apprpriate order for the
 ! output! This is necessary as the user may use a random input order
@@ -101,10 +102,10 @@
   300    format (10(d15.8,3x))
   301    format (30(d15.8,3x))
          read (lunblm,290) nz
-         do 310 i=1,nz
+         do i=1,nz
             read (lunblm,301) (fun(i,j),j=1,numtyp)
             read (lunblm,301) (der(i,j),j=1,numtyp)
-  310    continue
+         end do
       else
 !
 !  Let bleffpro read the lightcurves, and calculate the efficiency database from that
@@ -112,9 +113,9 @@
          call bleffpro(lunrep, lunblm, numtyp, npoint, power, effic, nz, zvec, fun, der) 
       end if
 
-      do 320 i=1,24
+      do i=1,24
          read (lunblm,*) dl(i),(daymul(i,j),j=1,numtyp)
-  320 continue
+      end do
   330 format (31f5.2)
 !
 ! Write names of those groups and types that were selected.
@@ -134,9 +135,9 @@
 !
       if (verspe.ge.2.0) then
           write (lunfrm,291) npoint, tefcur, 'lightintensity_efficiency_curves'
-          do 335 i=1,npoint
+          do i=1,npoint
              write (lunfrm,301) power(i), (effic(i,ifnd(j)),j=1,nuecog)
-  335     continue
+          end do
       end if
 !
 ! Write the efficiency data for those species that were selected.
@@ -154,15 +155,14 @@
           write (lunfrm,290) nz,tefcur
           write (lunfrm,300) (zvec(i),i=1,nz)
           write (lunfrm,290) nz
-          do 340 i=1,nz
+          do i=1,nz
              write (lunfrm,301) (fun(i,ifnd(j)),j=1,nuecog)
              write (lunfrm,301) (der(i,ifnd(j)),j=1,nuecog)
-  340     continue
+          end do
       endif 
-      do 350 i=1,24
+      do i=1,24
          write (lunfrm,330) dl(i),(daymul(i,ifnd(j)),j=1,nuecog)
-  350 continue
-  360 continue
+      end do
       if (timon) call timstop( ithndl )
       return
       end

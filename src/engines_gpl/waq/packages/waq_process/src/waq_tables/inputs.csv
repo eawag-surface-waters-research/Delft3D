@@ -830,7 +830,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM_P   ","PON1      ",  18,"Y","x",1
 "BLOOM_P   ","POP1      ",  19,"Y","x",1
 "BLOOM_P   ","DELT      ",  20,"N","x",1
-"BLOOM_P   ","SWBloomOut",  21,"Y","x",1
+"BLOOM_P   ","SWBlOutput",  21,"Y","x",1
 "BLOOM_P   ","SWOxyProd ",  22,"Y","x",1
 "BLOOM_P   ","Cl        ",  23,"Y","x",1
 "BLOOM_P   ","Volume    ",  24,"N","x",1
@@ -843,32 +843,40 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM_P   ","TotNBLSA  ",  31,"Y"," ",1
 "BLOOM_P   ","TotPBLSA  ",  32,"Y"," ",1
 "BLOOM_P   ","TotSiBLSA ",  33,"Y"," ",1
-"BLOOM_P   ","BLOOMALG  ",  34,"N","x",1
-"BLOOM_P   ","FrAutAlg  ",  35,"Y","x",1
-"BLOOM_P   ","FrDetAlg  ",  36,"Y","x",1
-"BLOOM_P   ","ExtVlAlg  ",  37,"Y","x",1
-"BLOOM_P   ","DMCFALG   ",  38,"Y","x",1
-"BLOOM_P   ","NCRAlg    ",  39,"Y","x",1
-"BLOOM_P   ","PCRAlg    ",  40,"Y","x",1
-"BLOOM_P   ","SCRAlg    ",  41,"Y","x",1
-"BLOOM_P   ","XNCRAlg   ",  42,"Y","x",1
-"BLOOM_P   ","XPCRAlg   ",  43,"Y","x",1
-"BLOOM_P   ","FNCRAlg   ",  44,"Y","x",1
-"BLOOM_P   ","ChlaCAlg  ",  45,"Y","x",1
-"BLOOM_P   ","PPMaxAlg  ",  46,"Y","x",1
-"BLOOM_P   ","TcPMxAlg  ",  47,"Y","x",1
-"BLOOM_P   ","TFPMxAlg  ",  48,"Y","x",1
-"BLOOM_P   ","Mort0Alg  ",  49,"Y","x",1
-"BLOOM_P   ","TcMrtAlg  ",  50,"Y","x",1
-"BLOOM_P   ","MRespAlg  ",  51,"Y","x",1
-"BLOOM_P   ","TcRspAlg  ",  52,"Y","x",1
-"BLOOM_P   ","SDMixAlg  ",  53,"Y","x",1
-"BLOOM_P   ","MrtExAlg  ",  54,"Y","x",1
-"BLOOM_P   ","Mort2Alg  ",  55,"Y","x",1
-"BLOOM_P   ","MrtB1Alg  ",  56,"Y","x",1
-"BLOOM_P   ","MrtB2Alg  ",  57,"Y","x",1
-"BLOOM_P   ","FixAlg    ",  58,"Y","x",1
-"BLOOM_P   ","EffiAlg   ",  59,"Y"," ",1
+"BLOOM_P   ","SWBlSolInt",  34,"Y","x",1
+"BLOOM_P   ","SWBlObject",  35,"Y","x",1
+"BLOOM_P   ","BlTemLim  ",  36,"Y","x",1
+"BLOOM_P   ","BlBasMor  ",  37,"Y","x",1
+"BLOOM_P   ","SWBlGroChk",  38,"Y","x",1
+"BLOOM_P   ","BlBioBas  ",  39,"Y","x",1
+"BLOOM_P   ","SWBlMorChk",  40,"Y","x",1
+"BLOOM_P   ","BlTopLev  ",  41,"Y","x",1
+"BLOOM_P   ","BLOOMALG  ",  42,"N","x",1
+"BLOOM_P   ","FrAutAlg  ",  43,"Y","x",1
+"BLOOM_P   ","FrDetAlg  ",  44,"Y","x",1
+"BLOOM_P   ","ExtVlAlg  ",  45,"Y","x",1
+"BLOOM_P   ","DMCFALG   ",  46,"Y","x",1
+"BLOOM_P   ","NCRAlg    ",  47,"Y","x",1
+"BLOOM_P   ","PCRAlg    ",  48,"Y","x",1
+"BLOOM_P   ","SCRAlg    ",  49,"Y","x",1
+"BLOOM_P   ","XNCRAlg   ",  50,"Y","x",1
+"BLOOM_P   ","XPCRAlg   ",  51,"Y","x",1
+"BLOOM_P   ","FNCRAlg   ",  52,"Y","x",1
+"BLOOM_P   ","ChlaCAlg  ",  53,"Y","x",1
+"BLOOM_P   ","PPMaxAlg  ",  54,"Y","x",1
+"BLOOM_P   ","TcPMxAlg  ",  55,"Y","x",1
+"BLOOM_P   ","TFPMxAlg  ",  56,"Y","x",1
+"BLOOM_P   ","Mort0Alg  ",  57,"Y","x",1
+"BLOOM_P   ","TcMrtAlg  ",  58,"Y","x",1
+"BLOOM_P   ","MRespAlg  ",  59,"Y","x",1
+"BLOOM_P   ","TcRspAlg  ",  60,"Y","x",1
+"BLOOM_P   ","SDMixAlg  ",  61,"Y","x",1
+"BLOOM_P   ","MrtExAlg  ",  62,"Y","x",1
+"BLOOM_P   ","Mort2Alg  ",  63,"Y","x",1
+"BLOOM_P   ","MrtB1Alg  ",  64,"Y","x",1
+"BLOOM_P   ","MrtB2Alg  ",  65,"Y","x",1
+"BLOOM_P   ","FixAlg    ",  66,"Y","x",1
+"BLOOM_P   ","EffiAlg   ",  67,"O"," ",1
 "BLOOM     ","TimMultBl ",   1,"Y","x",1
 "BLOOM     ","ExtVl     ",   2,"N","x",1
 "BLOOM     ","ExtVlPhyt ",   3,"N","x",1
@@ -888,7 +896,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM     ","PON1      ",  17,"Y","x",1
 "BLOOM     ","POP1      ",  18,"Y","x",1
 "BLOOM     ","DELT      ",  19,"N","x",1
-"BLOOM     ","SWBloomOut",  20,"Y","x",1
+"BLOOM     ","SWBlOutput",  20,"Y","x",1
 "BLOOM     ","SWOxyProd ",  21,"Y","x",1
 "BLOOM     ","Cl        ",  22,"Y","x",1
 "BLOOM     ","Volume    ",  23,"N","x",1
@@ -901,816 +909,824 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM     ","TotNBLSA  ",  30,"Y"," ",1
 "BLOOM     ","TotPBLSA  ",  31,"Y"," ",1
 "BLOOM     ","TotSiBLSA ",  32,"Y"," ",1
-"BLOOM     ","BLOOMALG01",  33,"N","x",1
-"BLOOM     ","BLOOMALG02",  34,"B","x",1
-"BLOOM     ","BLOOMALG03",  35,"B","x",1
-"BLOOM     ","BLOOMALG04",  36,"B","x",1
-"BLOOM     ","BLOOMALG05",  37,"B","x",1
-"BLOOM     ","BLOOMALG06",  38,"B","x",1
-"BLOOM     ","BLOOMALG07",  39,"B","x",1
-"BLOOM     ","BLOOMALG08",  40,"B","x",1
-"BLOOM     ","BLOOMALG09",  41,"B","x",1
-"BLOOM     ","BLOOMALG10",  42,"B","x",1
-"BLOOM     ","BLOOMALG11",  43,"B","x",1
-"BLOOM     ","BLOOMALG12",  44,"B","x",1
-"BLOOM     ","BLOOMALG13",  45,"B","x",1
-"BLOOM     ","BLOOMALG14",  46,"B","x",1
-"BLOOM     ","BLOOMALG15",  47,"B","x",1
-"BLOOM     ","BLOOMALG16",  48,"B","x",1
-"BLOOM     ","BLOOMALG17",  49,"B","x",1
-"BLOOM     ","BLOOMALG18",  50,"B","x",1
-"BLOOM     ","BLOOMALG19",  51,"B","x",1
-"BLOOM     ","BLOOMALG20",  52,"B","x",1
-"BLOOM     ","BLOOMALG21",  53,"B","x",1
-"BLOOM     ","BLOOMALG22",  54,"B","x",1
-"BLOOM     ","BLOOMALG23",  55,"B","x",1
-"BLOOM     ","BLOOMALG24",  56,"B","x",1
-"BLOOM     ","BLOOMALG25",  57,"B","x",1
-"BLOOM     ","BLOOMALG26",  58,"B","x",1
-"BLOOM     ","BLOOMALG27",  59,"B","x",1
-"BLOOM     ","BLOOMALG28",  60,"B","x",1
-"BLOOM     ","BLOOMALG29",  61,"B","x",1
-"BLOOM     ","BLOOMALG30",  62,"B","x",1
-"BLOOM     ","SpecAlg01 ",  63,"Y","x",1
-"BLOOM     ","SpecAlg02 ",  64,"Y","x",1
-"BLOOM     ","SpecAlg03 ",  65,"Y","x",1
-"BLOOM     ","SpecAlg04 ",  66,"Y","x",1
-"BLOOM     ","SpecAlg05 ",  67,"Y","x",1
-"BLOOM     ","SpecAlg06 ",  68,"Y","x",1
-"BLOOM     ","SpecAlg07 ",  69,"Y","x",1
-"BLOOM     ","SpecAlg08 ",  70,"Y","x",1
-"BLOOM     ","SpecAlg09 ",  71,"Y","x",1
-"BLOOM     ","SpecAlg10 ",  72,"Y","x",1
-"BLOOM     ","SpecAlg11 ",  73,"Y","x",1
-"BLOOM     ","SpecAlg12 ",  74,"Y","x",1
-"BLOOM     ","SpecAlg13 ",  75,"Y","x",1
-"BLOOM     ","SpecAlg14 ",  76,"Y","x",1
-"BLOOM     ","SpecAlg15 ",  77,"Y","x",1
-"BLOOM     ","SpecAlg16 ",  78,"Y","x",1
-"BLOOM     ","SpecAlg17 ",  79,"Y","x",1
-"BLOOM     ","SpecAlg18 ",  80,"Y","x",1
-"BLOOM     ","SpecAlg19 ",  81,"Y","x",1
-"BLOOM     ","SpecAlg20 ",  82,"Y","x",1
-"BLOOM     ","SpecAlg21 ",  83,"Y","x",1
-"BLOOM     ","SpecAlg22 ",  84,"Y","x",1
-"BLOOM     ","SpecAlg23 ",  85,"Y","x",1
-"BLOOM     ","SpecAlg24 ",  86,"Y","x",1
-"BLOOM     ","SpecAlg25 ",  87,"Y","x",1
-"BLOOM     ","SpecAlg26 ",  88,"Y","x",1
-"BLOOM     ","SpecAlg27 ",  89,"Y","x",1
-"BLOOM     ","SpecAlg28 ",  90,"Y","x",1
-"BLOOM     ","SpecAlg29 ",  91,"Y","x",1
-"BLOOM     ","SpecAlg30 ",  92,"Y","x",1
-"BLOOM     ","FrAutAlg01",  93,"Y","x",1
-"BLOOM     ","FrAutAlg02",  94,"Y","x",1
-"BLOOM     ","FrAutAlg03",  95,"Y","x",1
-"BLOOM     ","FrAutAlg04",  96,"Y","x",1
-"BLOOM     ","FrAutAlg05",  97,"Y","x",1
-"BLOOM     ","FrAutAlg06",  98,"Y","x",1
-"BLOOM     ","FrAutAlg07",  99,"Y","x",1
-"BLOOM     ","FrAutAlg08", 100,"Y","x",1
-"BLOOM     ","FrAutAlg09", 101,"Y","x",1
-"BLOOM     ","FrAutAlg10", 102,"Y","x",1
-"BLOOM     ","FrAutAlg11", 103,"Y","x",1
-"BLOOM     ","FrAutAlg12", 104,"Y","x",1
-"BLOOM     ","FrAutAlg13", 105,"Y","x",1
-"BLOOM     ","FrAutAlg14", 106,"Y","x",1
-"BLOOM     ","FrAutAlg15", 107,"Y","x",1
-"BLOOM     ","FrAutAlg16", 108,"Y","x",1
-"BLOOM     ","FrAutAlg17", 109,"Y","x",1
-"BLOOM     ","FrAutAlg18", 110,"Y","x",1
-"BLOOM     ","FrAutAlg19", 111,"Y","x",1
-"BLOOM     ","FrAutAlg20", 112,"Y","x",1
-"BLOOM     ","FrAutAlg21", 113,"Y","x",1
-"BLOOM     ","FrAutAlg22", 114,"Y","x",1
-"BLOOM     ","FrAutAlg23", 115,"Y","x",1
-"BLOOM     ","FrAutAlg24", 116,"Y","x",1
-"BLOOM     ","FrAutAlg25", 117,"Y","x",1
-"BLOOM     ","FrAutAlg26", 118,"Y","x",1
-"BLOOM     ","FrAutAlg27", 119,"Y","x",1
-"BLOOM     ","FrAutAlg28", 120,"Y","x",1
-"BLOOM     ","FrAutAlg29", 121,"Y","x",1
-"BLOOM     ","FrAutAlg30", 122,"Y","x",1
-"BLOOM     ","FrDetAlg01", 123,"Y","x",1
-"BLOOM     ","FrDetAlg02", 124,"Y","x",1
-"BLOOM     ","FrDetAlg03", 125,"Y","x",1
-"BLOOM     ","FrDetAlg04", 126,"Y","x",1
-"BLOOM     ","FrDetAlg05", 127,"Y","x",1
-"BLOOM     ","FrDetAlg06", 128,"Y","x",1
-"BLOOM     ","FrDetAlg07", 129,"Y","x",1
-"BLOOM     ","FrDetAlg08", 130,"Y","x",1
-"BLOOM     ","FrDetAlg09", 131,"Y","x",1
-"BLOOM     ","FrDetAlg10", 132,"Y","x",1
-"BLOOM     ","FrDetAlg11", 133,"Y","x",1
-"BLOOM     ","FrDetAlg12", 134,"Y","x",1
-"BLOOM     ","FrDetAlg13", 135,"Y","x",1
-"BLOOM     ","FrDetAlg14", 136,"Y","x",1
-"BLOOM     ","FrDetAlg15", 137,"Y","x",1
-"BLOOM     ","FrDetAlg16", 138,"Y","x",1
-"BLOOM     ","FrDetAlg17", 139,"Y","x",1
-"BLOOM     ","FrDetAlg18", 140,"Y","x",1
-"BLOOM     ","FrDetAlg19", 141,"Y","x",1
-"BLOOM     ","FrDetAlg20", 142,"Y","x",1
-"BLOOM     ","FrDetAlg21", 143,"Y","x",1
-"BLOOM     ","FrDetAlg22", 144,"Y","x",1
-"BLOOM     ","FrDetAlg23", 145,"Y","x",1
-"BLOOM     ","FrDetAlg24", 146,"Y","x",1
-"BLOOM     ","FrDetAlg25", 147,"Y","x",1
-"BLOOM     ","FrDetAlg26", 148,"Y","x",1
-"BLOOM     ","FrDetAlg27", 149,"Y","x",1
-"BLOOM     ","FrDetAlg28", 150,"Y","x",1
-"BLOOM     ","FrDetAlg29", 151,"Y","x",1
-"BLOOM     ","FrDetAlg30", 152,"Y","x",1
-"BLOOM     ","ExtVlAlg01", 153,"Y","x",1
-"BLOOM     ","ExtVlAlg02", 154,"Y","x",1
-"BLOOM     ","ExtVlAlg03", 155,"Y","x",1
-"BLOOM     ","ExtVlAlg04", 156,"Y","x",1
-"BLOOM     ","ExtVlAlg05", 157,"Y","x",1
-"BLOOM     ","ExtVlAlg06", 158,"Y","x",1
-"BLOOM     ","ExtVlAlg07", 159,"Y","x",1
-"BLOOM     ","ExtVlAlg08", 160,"Y","x",1
-"BLOOM     ","ExtVlAlg09", 161,"Y","x",1
-"BLOOM     ","ExtVlAlg10", 162,"Y","x",1
-"BLOOM     ","ExtVlAlg11", 163,"Y","x",1
-"BLOOM     ","ExtVlAlg12", 164,"Y","x",1
-"BLOOM     ","ExtVlAlg13", 165,"Y","x",1
-"BLOOM     ","ExtVlAlg14", 166,"Y","x",1
-"BLOOM     ","ExtVlAlg15", 167,"Y","x",1
-"BLOOM     ","ExtVlAlg16", 168,"Y","x",1
-"BLOOM     ","ExtVlAlg17", 169,"Y","x",1
-"BLOOM     ","ExtVlAlg18", 170,"Y","x",1
-"BLOOM     ","ExtVlAlg19", 171,"Y","x",1
-"BLOOM     ","ExtVlAlg20", 172,"Y","x",1
-"BLOOM     ","ExtVlAlg21", 173,"Y","x",1
-"BLOOM     ","ExtVlAlg22", 174,"Y","x",1
-"BLOOM     ","ExtVlAlg23", 175,"Y","x",1
-"BLOOM     ","ExtVlAlg24", 176,"Y","x",1
-"BLOOM     ","ExtVlAlg25", 177,"Y","x",1
-"BLOOM     ","ExtVlAlg26", 178,"Y","x",1
-"BLOOM     ","ExtVlAlg27", 179,"Y","x",1
-"BLOOM     ","ExtVlAlg28", 180,"Y","x",1
-"BLOOM     ","ExtVlAlg29", 181,"Y","x",1
-"BLOOM     ","ExtVlAlg30", 182,"Y","x",1
-"BLOOM     ","DMCFAlg01 ", 183,"Y","x",1
-"BLOOM     ","DMCFAlg02 ", 184,"Y","x",1
-"BLOOM     ","DMCFAlg03 ", 185,"Y","x",1
-"BLOOM     ","DMCFAlg04 ", 186,"Y","x",1
-"BLOOM     ","DMCFAlg05 ", 187,"Y","x",1
-"BLOOM     ","DMCFAlg06 ", 188,"Y","x",1
-"BLOOM     ","DMCFAlg07 ", 189,"Y","x",1
-"BLOOM     ","DMCFAlg08 ", 190,"Y","x",1
-"BLOOM     ","DMCFAlg09 ", 191,"Y","x",1
-"BLOOM     ","DMCFAlg10 ", 192,"Y","x",1
-"BLOOM     ","DMCFAlg11 ", 193,"Y","x",1
-"BLOOM     ","DMCFAlg12 ", 194,"Y","x",1
-"BLOOM     ","DMCFAlg13 ", 195,"Y","x",1
-"BLOOM     ","DMCFAlg14 ", 196,"Y","x",1
-"BLOOM     ","DMCFAlg15 ", 197,"Y","x",1
-"BLOOM     ","DMCFAlg16 ", 198,"Y","x",1
-"BLOOM     ","DMCFAlg17 ", 199,"Y","x",1
-"BLOOM     ","DMCFAlg18 ", 200,"Y","x",1
-"BLOOM     ","DMCFAlg19 ", 201,"Y","x",1
-"BLOOM     ","DMCFAlg20 ", 202,"Y","x",1
-"BLOOM     ","DMCFAlg21 ", 203,"Y","x",1
-"BLOOM     ","DMCFAlg22 ", 204,"Y","x",1
-"BLOOM     ","DMCFAlg23 ", 205,"Y","x",1
-"BLOOM     ","DMCFAlg24 ", 206,"Y","x",1
-"BLOOM     ","DMCFAlg25 ", 207,"Y","x",1
-"BLOOM     ","DMCFAlg26 ", 208,"Y","x",1
-"BLOOM     ","DMCFAlg27 ", 209,"Y","x",1
-"BLOOM     ","DMCFAlg28 ", 210,"Y","x",1
-"BLOOM     ","DMCFAlg29 ", 211,"Y","x",1
-"BLOOM     ","DMCFAlg30 ", 212,"Y","x",1
-"BLOOM     ","NCRAlg01  ", 213,"Y","x",1
-"BLOOM     ","NCRAlg02  ", 214,"Y","x",1
-"BLOOM     ","NCRAlg03  ", 215,"Y","x",1
-"BLOOM     ","NCRAlg04  ", 216,"Y","x",1
-"BLOOM     ","NCRAlg05  ", 217,"Y","x",1
-"BLOOM     ","NCRAlg06  ", 218,"Y","x",1
-"BLOOM     ","NCRAlg07  ", 219,"Y","x",1
-"BLOOM     ","NCRAlg08  ", 220,"Y","x",1
-"BLOOM     ","NCRAlg09  ", 221,"Y","x",1
-"BLOOM     ","NCRAlg10  ", 222,"Y","x",1
-"BLOOM     ","NCRAlg11  ", 223,"Y","x",1
-"BLOOM     ","NCRAlg12  ", 224,"Y","x",1
-"BLOOM     ","NCRAlg13  ", 225,"Y","x",1
-"BLOOM     ","NCRAlg14  ", 226,"Y","x",1
-"BLOOM     ","NCRAlg15  ", 227,"Y","x",1
-"BLOOM     ","NCRAlg16  ", 228,"Y","x",1
-"BLOOM     ","NCRAlg17  ", 229,"Y","x",1
-"BLOOM     ","NCRAlg18  ", 230,"Y","x",1
-"BLOOM     ","NCRAlg19  ", 231,"Y","x",1
-"BLOOM     ","NCRAlg20  ", 232,"Y","x",1
-"BLOOM     ","NCRAlg21  ", 233,"Y","x",1
-"BLOOM     ","NCRAlg22  ", 234,"Y","x",1
-"BLOOM     ","NCRAlg23  ", 235,"Y","x",1
-"BLOOM     ","NCRAlg24  ", 236,"Y","x",1
-"BLOOM     ","NCRAlg25  ", 237,"Y","x",1
-"BLOOM     ","NCRAlg26  ", 238,"Y","x",1
-"BLOOM     ","NCRAlg27  ", 239,"Y","x",1
-"BLOOM     ","NCRAlg28  ", 240,"Y","x",1
-"BLOOM     ","NCRAlg29  ", 241,"Y","x",1
-"BLOOM     ","NCRAlg30  ", 242,"Y","x",1
-"BLOOM     ","PCRAlg01  ", 243,"Y","x",1
-"BLOOM     ","PCRAlg02  ", 244,"Y","x",1
-"BLOOM     ","PCRAlg03  ", 245,"Y","x",1
-"BLOOM     ","PCRAlg04  ", 246,"Y","x",1
-"BLOOM     ","PCRAlg05  ", 247,"Y","x",1
-"BLOOM     ","PCRAlg06  ", 248,"Y","x",1
-"BLOOM     ","PCRAlg07  ", 249,"Y","x",1
-"BLOOM     ","PCRAlg08  ", 250,"Y","x",1
-"BLOOM     ","PCRAlg09  ", 251,"Y","x",1
-"BLOOM     ","PCRAlg10  ", 252,"Y","x",1
-"BLOOM     ","PCRAlg11  ", 253,"Y","x",1
-"BLOOM     ","PCRAlg12  ", 254,"Y","x",1
-"BLOOM     ","PCRAlg13  ", 255,"Y","x",1
-"BLOOM     ","PCRAlg14  ", 256,"Y","x",1
-"BLOOM     ","PCRAlg15  ", 257,"Y","x",1
-"BLOOM     ","PCRAlg16  ", 258,"Y","x",1
-"BLOOM     ","PCRAlg17  ", 259,"Y","x",1
-"BLOOM     ","PCRAlg18  ", 260,"Y","x",1
-"BLOOM     ","PCRAlg19  ", 261,"Y","x",1
-"BLOOM     ","PCRAlg20  ", 262,"Y","x",1
-"BLOOM     ","PCRAlg21  ", 263,"Y","x",1
-"BLOOM     ","PCRAlg22  ", 264,"Y","x",1
-"BLOOM     ","PCRAlg23  ", 265,"Y","x",1
-"BLOOM     ","PCRAlg24  ", 266,"Y","x",1
-"BLOOM     ","PCRAlg25  ", 267,"Y","x",1
-"BLOOM     ","PCRAlg26  ", 268,"Y","x",1
-"BLOOM     ","PCRAlg27  ", 269,"Y","x",1
-"BLOOM     ","PCRAlg28  ", 270,"Y","x",1
-"BLOOM     ","PCRAlg29  ", 271,"Y","x",1
-"BLOOM     ","PCRAlg30  ", 272,"Y","x",1
-"BLOOM     ","SCRAlg01  ", 273,"Y","x",1
-"BLOOM     ","SCRAlg02  ", 274,"Y","x",1
-"BLOOM     ","SCRAlg03  ", 275,"Y","x",1
-"BLOOM     ","SCRAlg04  ", 276,"Y","x",1
-"BLOOM     ","SCRAlg05  ", 277,"Y","x",1
-"BLOOM     ","SCRAlg06  ", 278,"Y","x",1
-"BLOOM     ","SCRAlg07  ", 279,"Y","x",1
-"BLOOM     ","SCRAlg08  ", 280,"Y","x",1
-"BLOOM     ","SCRAlg09  ", 281,"Y","x",1
-"BLOOM     ","SCRAlg10  ", 282,"Y","x",1
-"BLOOM     ","SCRAlg11  ", 283,"Y","x",1
-"BLOOM     ","SCRAlg12  ", 284,"Y","x",1
-"BLOOM     ","SCRAlg13  ", 285,"Y","x",1
-"BLOOM     ","SCRAlg14  ", 286,"Y","x",1
-"BLOOM     ","SCRAlg15  ", 287,"Y","x",1
-"BLOOM     ","SCRAlg16  ", 288,"Y","x",1
-"BLOOM     ","SCRAlg17  ", 289,"Y","x",1
-"BLOOM     ","SCRAlg18  ", 290,"Y","x",1
-"BLOOM     ","SCRAlg19  ", 291,"Y","x",1
-"BLOOM     ","SCRAlg20  ", 292,"Y","x",1
-"BLOOM     ","SCRAlg21  ", 293,"Y","x",1
-"BLOOM     ","SCRAlg22  ", 294,"Y","x",1
-"BLOOM     ","SCRAlg23  ", 295,"Y","x",1
-"BLOOM     ","SCRAlg24  ", 296,"Y","x",1
-"BLOOM     ","SCRAlg25  ", 297,"Y","x",1
-"BLOOM     ","SCRAlg26  ", 298,"Y","x",1
-"BLOOM     ","SCRAlg27  ", 299,"Y","x",1
-"BLOOM     ","SCRAlg28  ", 300,"Y","x",1
-"BLOOM     ","SCRAlg29  ", 301,"Y","x",1
-"BLOOM     ","SCRAlg30  ", 302,"Y","x",1
-"BLOOM     ","XNCRAlg01 ", 303,"O","x",1
-"BLOOM     ","XNCRAlg02 ", 304,"O","x",1
-"BLOOM     ","XNCRAlg03 ", 305,"O","x",1
-"BLOOM     ","XNCRAlg04 ", 306,"O","x",1
-"BLOOM     ","XNCRAlg05 ", 307,"O","x",1
-"BLOOM     ","XNCRAlg06 ", 308,"O","x",1
-"BLOOM     ","XNCRAlg07 ", 309,"O","x",1
-"BLOOM     ","XNCRAlg08 ", 310,"O","x",1
-"BLOOM     ","XNCRAlg09 ", 311,"O","x",1
-"BLOOM     ","XNCRAlg10 ", 312,"O","x",1
-"BLOOM     ","XNCRAlg11 ", 313,"O","x",1
-"BLOOM     ","XNCRAlg12 ", 314,"O","x",1
-"BLOOM     ","XNCRAlg13 ", 315,"O","x",1
-"BLOOM     ","XNCRAlg14 ", 316,"O","x",1
-"BLOOM     ","XNCRAlg15 ", 317,"O","x",1
-"BLOOM     ","XNCRAlg16 ", 318,"O","x",1
-"BLOOM     ","XNCRAlg17 ", 319,"O","x",1
-"BLOOM     ","XNCRAlg18 ", 320,"O","x",1
-"BLOOM     ","XNCRAlg19 ", 321,"O","x",1
-"BLOOM     ","XNCRAlg20 ", 322,"O","x",1
-"BLOOM     ","XNCRAlg21 ", 323,"O","x",1
-"BLOOM     ","XNCRAlg22 ", 324,"O","x",1
-"BLOOM     ","XNCRAlg23 ", 325,"O","x",1
-"BLOOM     ","XNCRAlg24 ", 326,"O","x",1
-"BLOOM     ","XNCRAlg25 ", 327,"O","x",1
-"BLOOM     ","XNCRAlg26 ", 328,"O","x",1
-"BLOOM     ","XNCRAlg27 ", 329,"O","x",1
-"BLOOM     ","XNCRAlg28 ", 330,"O","x",1
-"BLOOM     ","XNCRAlg29 ", 331,"O","x",1
-"BLOOM     ","XNCRAlg30 ", 332,"O","x",1
-"BLOOM     ","XPCRAlg01 ", 333,"O","x",1
-"BLOOM     ","XPCRAlg02 ", 334,"O","x",1
-"BLOOM     ","XPCRAlg03 ", 335,"O","x",1
-"BLOOM     ","XPCRAlg04 ", 336,"O","x",1
-"BLOOM     ","XPCRAlg05 ", 337,"O","x",1
-"BLOOM     ","XPCRAlg06 ", 338,"O","x",1
-"BLOOM     ","XPCRAlg07 ", 339,"O","x",1
-"BLOOM     ","XPCRAlg08 ", 340,"O","x",1
-"BLOOM     ","XPCRAlg09 ", 341,"O","x",1
-"BLOOM     ","XPCRAlg10 ", 342,"O","x",1
-"BLOOM     ","XPCRAlg11 ", 343,"O","x",1
-"BLOOM     ","XPCRAlg12 ", 344,"O","x",1
-"BLOOM     ","XPCRAlg13 ", 345,"O","x",1
-"BLOOM     ","XPCRAlg14 ", 346,"O","x",1
-"BLOOM     ","XPCRAlg15 ", 347,"O","x",1
-"BLOOM     ","XPCRAlg16 ", 348,"O","x",1
-"BLOOM     ","XPCRAlg17 ", 349,"O","x",1
-"BLOOM     ","XPCRAlg18 ", 350,"O","x",1
-"BLOOM     ","XPCRAlg19 ", 351,"O","x",1
-"BLOOM     ","XPCRAlg20 ", 352,"O","x",1
-"BLOOM     ","XPCRAlg21 ", 353,"O","x",1
-"BLOOM     ","XPCRAlg22 ", 354,"O","x",1
-"BLOOM     ","XPCRAlg23 ", 355,"O","x",1
-"BLOOM     ","XPCRAlg24 ", 356,"O","x",1
-"BLOOM     ","XPCRAlg25 ", 357,"O","x",1
-"BLOOM     ","XPCRAlg26 ", 358,"O","x",1
-"BLOOM     ","XPCRAlg27 ", 359,"O","x",1
-"BLOOM     ","XPCRAlg28 ", 360,"O","x",1
-"BLOOM     ","XPCRAlg29 ", 361,"O","x",1
-"BLOOM     ","XPCRAlg30 ", 362,"O","x",1
-"BLOOM     ","FNCRAlg01 ", 363,"O","x",1
-"BLOOM     ","FNCRAlg02 ", 364,"O","x",1
-"BLOOM     ","FNCRAlg03 ", 365,"O","x",1
-"BLOOM     ","FNCRAlg04 ", 366,"O","x",1
-"BLOOM     ","FNCRAlg05 ", 367,"O","x",1
-"BLOOM     ","FNCRAlg06 ", 368,"O","x",1
-"BLOOM     ","FNCRAlg07 ", 369,"O","x",1
-"BLOOM     ","FNCRAlg08 ", 370,"O","x",1
-"BLOOM     ","FNCRAlg09 ", 371,"O","x",1
-"BLOOM     ","FNCRAlg10 ", 372,"O","x",1
-"BLOOM     ","FNCRAlg11 ", 373,"O","x",1
-"BLOOM     ","FNCRAlg12 ", 374,"O","x",1
-"BLOOM     ","FNCRAlg13 ", 375,"O","x",1
-"BLOOM     ","FNCRAlg14 ", 376,"O","x",1
-"BLOOM     ","FNCRAlg15 ", 377,"O","x",1
-"BLOOM     ","FNCRAlg16 ", 378,"O","x",1
-"BLOOM     ","FNCRAlg17 ", 379,"O","x",1
-"BLOOM     ","FNCRAlg18 ", 380,"O","x",1
-"BLOOM     ","FNCRAlg19 ", 381,"O","x",1
-"BLOOM     ","FNCRAlg20 ", 382,"O","x",1
-"BLOOM     ","FNCRAlg21 ", 383,"O","x",1
-"BLOOM     ","FNCRAlg22 ", 384,"O","x",1
-"BLOOM     ","FNCRAlg23 ", 385,"O","x",1
-"BLOOM     ","FNCRAlg24 ", 386,"O","x",1
-"BLOOM     ","FNCRAlg25 ", 387,"O","x",1
-"BLOOM     ","FNCRAlg26 ", 388,"O","x",1
-"BLOOM     ","FNCRAlg27 ", 389,"O","x",1
-"BLOOM     ","FNCRAlg28 ", 390,"O","x",1
-"BLOOM     ","FNCRAlg29 ", 391,"O","x",1
-"BLOOM     ","FNCRAlg30 ", 392,"O","x",1
-"BLOOM     ","ChlaCAlg01", 393,"Y","x",1
-"BLOOM     ","ChlaCAlg02", 394,"Y","x",1
-"BLOOM     ","ChlaCAlg03", 395,"Y","x",1
-"BLOOM     ","ChlaCAlg04", 396,"Y","x",1
-"BLOOM     ","ChlaCAlg05", 397,"Y","x",1
-"BLOOM     ","ChlaCAlg06", 398,"Y","x",1
-"BLOOM     ","ChlaCAlg07", 399,"Y","x",1
-"BLOOM     ","ChlaCAlg08", 400,"Y","x",1
-"BLOOM     ","ChlaCAlg09", 401,"Y","x",1
-"BLOOM     ","ChlaCAlg10", 402,"Y","x",1
-"BLOOM     ","ChlaCAlg11", 403,"Y","x",1
-"BLOOM     ","ChlaCAlg12", 404,"Y","x",1
-"BLOOM     ","ChlaCAlg13", 405,"Y","x",1
-"BLOOM     ","ChlaCAlg14", 406,"Y","x",1
-"BLOOM     ","ChlaCAlg15", 407,"Y","x",1
-"BLOOM     ","ChlaCAlg16", 408,"Y","x",1
-"BLOOM     ","ChlaCAlg17", 409,"Y","x",1
-"BLOOM     ","ChlaCAlg18", 410,"Y","x",1
-"BLOOM     ","ChlaCAlg19", 411,"Y","x",1
-"BLOOM     ","ChlaCAlg20", 412,"Y","x",1
-"BLOOM     ","ChlaCAlg21", 413,"Y","x",1
-"BLOOM     ","ChlaCAlg22", 414,"Y","x",1
-"BLOOM     ","ChlaCAlg23", 415,"Y","x",1
-"BLOOM     ","ChlaCAlg24", 416,"Y","x",1
-"BLOOM     ","ChlaCAlg25", 417,"Y","x",1
-"BLOOM     ","ChlaCAlg26", 418,"Y","x",1
-"BLOOM     ","ChlaCAlg27", 419,"Y","x",1
-"BLOOM     ","ChlaCAlg28", 420,"Y","x",1
-"BLOOM     ","ChlaCAlg29", 421,"Y","x",1
-"BLOOM     ","ChlaCAlg30", 422,"Y","x",1
-"BLOOM     ","PPMaxAlg01", 423,"Y","x",1
-"BLOOM     ","PPMaxAlg02", 424,"Y","x",1
-"BLOOM     ","PPMaxAlg03", 425,"Y","x",1
-"BLOOM     ","PPMaxAlg04", 426,"Y","x",1
-"BLOOM     ","PPMaxAlg05", 427,"Y","x",1
-"BLOOM     ","PPMaxAlg06", 428,"Y","x",1
-"BLOOM     ","PPMaxAlg07", 429,"Y","x",1
-"BLOOM     ","PPMaxAlg08", 430,"Y","x",1
-"BLOOM     ","PPMaxAlg09", 431,"Y","x",1
-"BLOOM     ","PPMaxAlg10", 432,"Y","x",1
-"BLOOM     ","PPMaxAlg11", 433,"Y","x",1
-"BLOOM     ","PPMaxAlg12", 434,"Y","x",1
-"BLOOM     ","PPMaxAlg13", 435,"Y","x",1
-"BLOOM     ","PPMaxAlg14", 436,"Y","x",1
-"BLOOM     ","PPMaxAlg15", 437,"Y","x",1
-"BLOOM     ","PPMaxAlg16", 438,"Y","x",1
-"BLOOM     ","PPMaxAlg17", 439,"Y","x",1
-"BLOOM     ","PPMaxAlg18", 440,"Y","x",1
-"BLOOM     ","PPMaxAlg19", 441,"Y","x",1
-"BLOOM     ","PPMaxAlg20", 442,"Y","x",1
-"BLOOM     ","PPMaxAlg21", 443,"Y","x",1
-"BLOOM     ","PPMaxAlg22", 444,"Y","x",1
-"BLOOM     ","PPMaxAlg23", 445,"Y","x",1
-"BLOOM     ","PPMaxAlg24", 446,"Y","x",1
-"BLOOM     ","PPMaxAlg25", 447,"Y","x",1
-"BLOOM     ","PPMaxAlg26", 448,"Y","x",1
-"BLOOM     ","PPMaxAlg27", 449,"Y","x",1
-"BLOOM     ","PPMaxAlg28", 450,"Y","x",1
-"BLOOM     ","PPMaxAlg29", 451,"Y","x",1
-"BLOOM     ","PPMaxAlg30", 452,"Y","x",1
-"BLOOM     ","TcPMxAlg01", 453,"Y","x",1
-"BLOOM     ","TcPMxAlg02", 454,"Y","x",1
-"BLOOM     ","TcPMxAlg03", 455,"Y","x",1
-"BLOOM     ","TcPMxAlg04", 456,"Y","x",1
-"BLOOM     ","TcPMxAlg05", 457,"Y","x",1
-"BLOOM     ","TcPMxAlg06", 458,"Y","x",1
-"BLOOM     ","TcPMxAlg07", 459,"Y","x",1
-"BLOOM     ","TcPMxAlg08", 460,"Y","x",1
-"BLOOM     ","TcPMxAlg09", 461,"Y","x",1
-"BLOOM     ","TcPMxAlg10", 462,"Y","x",1
-"BLOOM     ","TcPMxAlg11", 463,"Y","x",1
-"BLOOM     ","TcPMxAlg12", 464,"Y","x",1
-"BLOOM     ","TcPMxAlg13", 465,"Y","x",1
-"BLOOM     ","TcPMxAlg14", 466,"Y","x",1
-"BLOOM     ","TcPMxAlg15", 467,"Y","x",1
-"BLOOM     ","TcPMxAlg16", 468,"Y","x",1
-"BLOOM     ","TcPMxAlg17", 469,"Y","x",1
-"BLOOM     ","TcPMxAlg18", 470,"Y","x",1
-"BLOOM     ","TcPMxAlg19", 471,"Y","x",1
-"BLOOM     ","TcPMxAlg20", 472,"Y","x",1
-"BLOOM     ","TcPMxAlg21", 473,"Y","x",1
-"BLOOM     ","TcPMxAlg22", 474,"Y","x",1
-"BLOOM     ","TcPMxAlg23", 475,"Y","x",1
-"BLOOM     ","TcPMxAlg24", 476,"Y","x",1
-"BLOOM     ","TcPMxAlg25", 477,"Y","x",1
-"BLOOM     ","TcPMxAlg26", 478,"Y","x",1
-"BLOOM     ","TcPMxAlg27", 479,"Y","x",1
-"BLOOM     ","TcPMxAlg28", 480,"Y","x",1
-"BLOOM     ","TcPMxAlg29", 481,"Y","x",1
-"BLOOM     ","TcPMxAlg30", 482,"Y","x",1
-"BLOOM     ","TFPMxAlg01", 483,"Y","x",1
-"BLOOM     ","TFPMxAlg02", 484,"Y","x",1
-"BLOOM     ","TFPMxAlg03", 485,"Y","x",1
-"BLOOM     ","TFPMxAlg04", 486,"Y","x",1
-"BLOOM     ","TFPMxAlg05", 487,"Y","x",1
-"BLOOM     ","TFPMxAlg06", 488,"Y","x",1
-"BLOOM     ","TFPMxAlg07", 489,"Y","x",1
-"BLOOM     ","TFPMxAlg08", 490,"Y","x",1
-"BLOOM     ","TFPMxAlg09", 491,"Y","x",1
-"BLOOM     ","TFPMxAlg10", 492,"Y","x",1
-"BLOOM     ","TFPMxAlg11", 493,"Y","x",1
-"BLOOM     ","TFPMxAlg12", 494,"Y","x",1
-"BLOOM     ","TFPMxAlg13", 495,"Y","x",1
-"BLOOM     ","TFPMxAlg14", 496,"Y","x",1
-"BLOOM     ","TFPMxAlg15", 497,"Y","x",1
-"BLOOM     ","TFPMxAlg16", 498,"Y","x",1
-"BLOOM     ","TFPMxAlg17", 499,"Y","x",1
-"BLOOM     ","TFPMxAlg18", 500,"Y","x",1
-"BLOOM     ","TFPMxAlg19", 501,"Y","x",1
-"BLOOM     ","TFPMxAlg20", 502,"Y","x",1
-"BLOOM     ","TFPMxAlg21", 503,"Y","x",1
-"BLOOM     ","TFPMxAlg22", 504,"Y","x",1
-"BLOOM     ","TFPMxAlg23", 505,"Y","x",1
-"BLOOM     ","TFPMxAlg24", 506,"Y","x",1
-"BLOOM     ","TFPMxAlg25", 507,"Y","x",1
-"BLOOM     ","TFPMxAlg26", 508,"Y","x",1
-"BLOOM     ","TFPMxAlg27", 509,"Y","x",1
-"BLOOM     ","TFPMxAlg28", 510,"Y","x",1
-"BLOOM     ","TFPMxAlg29", 511,"Y","x",1
-"BLOOM     ","TFPMxAlg30", 512,"Y","x",1
-"BLOOM     ","Mort0Alg01", 513,"Y","x",1
-"BLOOM     ","Mort0Alg02", 514,"Y","x",1
-"BLOOM     ","Mort0Alg03", 515,"Y","x",1
-"BLOOM     ","Mort0Alg04", 516,"Y","x",1
-"BLOOM     ","Mort0Alg05", 517,"Y","x",1
-"BLOOM     ","Mort0Alg06", 518,"Y","x",1
-"BLOOM     ","Mort0Alg07", 519,"Y","x",1
-"BLOOM     ","Mort0Alg08", 520,"Y","x",1
-"BLOOM     ","Mort0Alg09", 521,"Y","x",1
-"BLOOM     ","Mort0Alg10", 522,"Y","x",1
-"BLOOM     ","Mort0Alg11", 523,"Y","x",1
-"BLOOM     ","Mort0Alg12", 524,"Y","x",1
-"BLOOM     ","Mort0Alg13", 525,"Y","x",1
-"BLOOM     ","Mort0Alg14", 526,"Y","x",1
-"BLOOM     ","Mort0Alg15", 527,"Y","x",1
-"BLOOM     ","Mort0Alg16", 528,"Y","x",1
-"BLOOM     ","Mort0Alg17", 529,"Y","x",1
-"BLOOM     ","Mort0Alg18", 530,"Y","x",1
-"BLOOM     ","Mort0Alg19", 531,"Y","x",1
-"BLOOM     ","Mort0Alg20", 532,"Y","x",1
-"BLOOM     ","Mort0Alg21", 533,"Y","x",1
-"BLOOM     ","Mort0Alg22", 534,"Y","x",1
-"BLOOM     ","Mort0Alg23", 535,"Y","x",1
-"BLOOM     ","Mort0Alg24", 536,"Y","x",1
-"BLOOM     ","Mort0Alg25", 537,"Y","x",1
-"BLOOM     ","Mort0Alg26", 538,"Y","x",1
-"BLOOM     ","Mort0Alg27", 539,"Y","x",1
-"BLOOM     ","Mort0Alg28", 540,"Y","x",1
-"BLOOM     ","Mort0Alg29", 541,"Y","x",1
-"BLOOM     ","Mort0Alg30", 542,"Y","x",1
-"BLOOM     ","TcMrtAlg01", 543,"Y","x",1
-"BLOOM     ","TcMrtAlg02", 544,"Y","x",1
-"BLOOM     ","TcMrtAlg03", 545,"Y","x",1
-"BLOOM     ","TcMrtAlg04", 546,"Y","x",1
-"BLOOM     ","TcMrtAlg05", 547,"Y","x",1
-"BLOOM     ","TcMrtAlg06", 548,"Y","x",1
-"BLOOM     ","TcMrtAlg07", 549,"Y","x",1
-"BLOOM     ","TcMrtAlg08", 550,"Y","x",1
-"BLOOM     ","TcMrtAlg09", 551,"Y","x",1
-"BLOOM     ","TcMrtAlg10", 552,"Y","x",1
-"BLOOM     ","TcMrtAlg11", 553,"Y","x",1
-"BLOOM     ","TcMrtAlg12", 554,"Y","x",1
-"BLOOM     ","TcMrtAlg13", 555,"Y","x",1
-"BLOOM     ","TcMrtAlg14", 556,"Y","x",1
-"BLOOM     ","TcMrtAlg15", 557,"Y","x",1
-"BLOOM     ","TcMrtAlg16", 558,"Y","x",1
-"BLOOM     ","TcMrtAlg17", 559,"Y","x",1
-"BLOOM     ","TcMrtAlg18", 560,"Y","x",1
-"BLOOM     ","TcMrtAlg19", 561,"Y","x",1
-"BLOOM     ","TcMrtAlg20", 562,"Y","x",1
-"BLOOM     ","TcMrtAlg21", 563,"Y","x",1
-"BLOOM     ","TcMrtAlg22", 564,"Y","x",1
-"BLOOM     ","TcMrtAlg23", 565,"Y","x",1
-"BLOOM     ","TcMrtAlg24", 566,"Y","x",1
-"BLOOM     ","TcMrtAlg25", 567,"Y","x",1
-"BLOOM     ","TcMrtAlg26", 568,"Y","x",1
-"BLOOM     ","TcMrtAlg27", 569,"Y","x",1
-"BLOOM     ","TcMrtAlg28", 570,"Y","x",1
-"BLOOM     ","TcMrtAlg29", 571,"Y","x",1
-"BLOOM     ","TcMrtAlg30", 572,"Y","x",1
-"BLOOM     ","MRespAlg01", 573,"Y","x",1
-"BLOOM     ","MRespAlg02", 574,"Y","x",1
-"BLOOM     ","MRespAlg03", 575,"Y","x",1
-"BLOOM     ","MRespAlg04", 576,"Y","x",1
-"BLOOM     ","MRespAlg05", 577,"Y","x",1
-"BLOOM     ","MRespAlg06", 578,"Y","x",1
-"BLOOM     ","MRespAlg07", 579,"Y","x",1
-"BLOOM     ","MRespAlg08", 580,"Y","x",1
-"BLOOM     ","MRespAlg09", 581,"Y","x",1
-"BLOOM     ","MRespAlg10", 582,"Y","x",1
-"BLOOM     ","MRespAlg11", 583,"Y","x",1
-"BLOOM     ","MRespAlg12", 584,"Y","x",1
-"BLOOM     ","MRespAlg13", 585,"Y","x",1
-"BLOOM     ","MRespAlg14", 586,"Y","x",1
-"BLOOM     ","MRespAlg15", 587,"Y","x",1
-"BLOOM     ","MRespAlg16", 588,"Y","x",1
-"BLOOM     ","MRespAlg17", 589,"Y","x",1
-"BLOOM     ","MRespAlg18", 590,"Y","x",1
-"BLOOM     ","MRespAlg19", 591,"Y","x",1
-"BLOOM     ","MRespAlg20", 592,"Y","x",1
-"BLOOM     ","MRespAlg21", 593,"Y","x",1
-"BLOOM     ","MRespAlg22", 594,"Y","x",1
-"BLOOM     ","MRespAlg23", 595,"Y","x",1
-"BLOOM     ","MRespAlg24", 596,"Y","x",1
-"BLOOM     ","MRespAlg25", 597,"Y","x",1
-"BLOOM     ","MRespAlg26", 598,"Y","x",1
-"BLOOM     ","MRespAlg27", 599,"Y","x",1
-"BLOOM     ","MRespAlg28", 600,"Y","x",1
-"BLOOM     ","MRespAlg29", 601,"Y","x",1
-"BLOOM     ","MRespAlg30", 602,"Y","x",1
-"BLOOM     ","TcRspAlg01", 603,"Y","x",1
-"BLOOM     ","TcRspAlg02", 604,"Y","x",1
-"BLOOM     ","TcRspAlg03", 605,"Y","x",1
-"BLOOM     ","TcRspAlg04", 606,"Y","x",1
-"BLOOM     ","TcRspAlg05", 607,"Y","x",1
-"BLOOM     ","TcRspAlg06", 608,"Y","x",1
-"BLOOM     ","TcRspAlg07", 609,"Y","x",1
-"BLOOM     ","TcRspAlg08", 610,"Y","x",1
-"BLOOM     ","TcRspAlg09", 611,"Y","x",1
-"BLOOM     ","TcRspAlg10", 612,"Y","x",1
-"BLOOM     ","TcRspAlg11", 613,"Y","x",1
-"BLOOM     ","TcRspAlg12", 614,"Y","x",1
-"BLOOM     ","TcRspAlg13", 615,"Y","x",1
-"BLOOM     ","TcRspAlg14", 616,"Y","x",1
-"BLOOM     ","TcRspAlg15", 617,"Y","x",1
-"BLOOM     ","TcRspAlg16", 618,"Y","x",1
-"BLOOM     ","TcRspAlg17", 619,"Y","x",1
-"BLOOM     ","TcRspAlg18", 620,"Y","x",1
-"BLOOM     ","TcRspAlg19", 621,"Y","x",1
-"BLOOM     ","TcRspAlg20", 622,"Y","x",1
-"BLOOM     ","TcRspAlg21", 623,"Y","x",1
-"BLOOM     ","TcRspAlg22", 624,"Y","x",1
-"BLOOM     ","TcRspAlg23", 625,"Y","x",1
-"BLOOM     ","TcRspAlg24", 626,"Y","x",1
-"BLOOM     ","TcRspAlg25", 627,"Y","x",1
-"BLOOM     ","TcRspAlg26", 628,"Y","x",1
-"BLOOM     ","TcRspAlg27", 629,"Y","x",1
-"BLOOM     ","TcRspAlg28", 630,"Y","x",1
-"BLOOM     ","TcRspAlg29", 631,"Y","x",1
-"BLOOM     ","TcRspAlg30", 632,"Y","x",1
-"BLOOM     ","SDMixAlg01", 633,"Y","x",1
-"BLOOM     ","SDMixAlg02", 634,"Y","x",1
-"BLOOM     ","SDMixAlg03", 635,"Y","x",1
-"BLOOM     ","SDMixAlg04", 636,"Y","x",1
-"BLOOM     ","SDMixAlg05", 637,"Y","x",1
-"BLOOM     ","SDMixAlg06", 638,"Y","x",1
-"BLOOM     ","SDMixAlg07", 639,"Y","x",1
-"BLOOM     ","SDMixAlg08", 640,"Y","x",1
-"BLOOM     ","SDMixAlg09", 641,"Y","x",1
-"BLOOM     ","SDMixAlg10", 642,"Y","x",1
-"BLOOM     ","SDMixAlg11", 643,"Y","x",1
-"BLOOM     ","SDMixAlg12", 644,"Y","x",1
-"BLOOM     ","SDMixAlg13", 645,"Y","x",1
-"BLOOM     ","SDMixAlg14", 646,"Y","x",1
-"BLOOM     ","SDMixAlg15", 647,"Y","x",1
-"BLOOM     ","SDMixAlg16", 648,"Y","x",1
-"BLOOM     ","SDMixAlg17", 649,"Y","x",1
-"BLOOM     ","SDMixAlg18", 650,"Y","x",1
-"BLOOM     ","SDMixAlg19", 651,"Y","x",1
-"BLOOM     ","SDMixAlg20", 652,"Y","x",1
-"BLOOM     ","SDMixAlg21", 653,"Y","x",1
-"BLOOM     ","SDMixAlg22", 654,"Y","x",1
-"BLOOM     ","SDMixAlg23", 655,"Y","x",1
-"BLOOM     ","SDMixAlg24", 656,"Y","x",1
-"BLOOM     ","SDMixAlg25", 657,"Y","x",1
-"BLOOM     ","SDMixAlg26", 658,"Y","x",1
-"BLOOM     ","SDMixAlg27", 659,"Y","x",1
-"BLOOM     ","SDMixAlg28", 660,"Y","x",1
-"BLOOM     ","SDMixAlg29", 661,"Y","x",1
-"BLOOM     ","SDMixAlg30", 662,"Y","x",1
-"BLOOM     ","MrtExAlg01", 663,"Y","x",1
-"BLOOM     ","MrtExAlg02", 664,"Y","x",1
-"BLOOM     ","MrtExAlg03", 665,"Y","x",1
-"BLOOM     ","MrtExAlg04", 666,"Y","x",1
-"BLOOM     ","MrtExAlg05", 667,"Y","x",1
-"BLOOM     ","MrtExAlg06", 668,"Y","x",1
-"BLOOM     ","MrtExAlg07", 669,"Y","x",1
-"BLOOM     ","MrtExAlg08", 670,"Y","x",1
-"BLOOM     ","MrtExAlg09", 671,"Y","x",1
-"BLOOM     ","MrtExAlg10", 672,"Y","x",1
-"BLOOM     ","MrtExAlg11", 673,"Y","x",1
-"BLOOM     ","MrtExAlg12", 674,"Y","x",1
-"BLOOM     ","MrtExAlg13", 675,"Y","x",1
-"BLOOM     ","MrtExAlg14", 676,"Y","x",1
-"BLOOM     ","MrtExAlg15", 677,"Y","x",1
-"BLOOM     ","MrtExAlg16", 678,"Y","x",1
-"BLOOM     ","MrtExAlg17", 679,"Y","x",1
-"BLOOM     ","MrtExAlg18", 680,"Y","x",1
-"BLOOM     ","MrtExAlg19", 681,"Y","x",1
-"BLOOM     ","MrtExAlg20", 682,"Y","x",1
-"BLOOM     ","MrtExAlg21", 683,"Y","x",1
-"BLOOM     ","MrtExAlg22", 684,"Y","x",1
-"BLOOM     ","MrtExAlg23", 685,"Y","x",1
-"BLOOM     ","MrtExAlg24", 686,"Y","x",1
-"BLOOM     ","MrtExAlg25", 687,"Y","x",1
-"BLOOM     ","MrtExAlg26", 688,"Y","x",1
-"BLOOM     ","MrtExAlg27", 689,"Y","x",1
-"BLOOM     ","MrtExAlg28", 690,"Y","x",1
-"BLOOM     ","MrtExAlg29", 691,"Y","x",1
-"BLOOM     ","MrtExAlg30", 692,"Y","x",1
-"BLOOM     ","Mort2Alg01", 693,"Y","x",1
-"BLOOM     ","Mort2Alg02", 694,"Y","x",1
-"BLOOM     ","Mort2Alg03", 695,"Y","x",1
-"BLOOM     ","Mort2Alg04", 696,"Y","x",1
-"BLOOM     ","Mort2Alg05", 697,"Y","x",1
-"BLOOM     ","Mort2Alg06", 698,"Y","x",1
-"BLOOM     ","Mort2Alg07", 699,"Y","x",1
-"BLOOM     ","Mort2Alg08", 700,"Y","x",1
-"BLOOM     ","Mort2Alg09", 701,"Y","x",1
-"BLOOM     ","Mort2Alg10", 702,"Y","x",1
-"BLOOM     ","Mort2Alg11", 703,"Y","x",1
-"BLOOM     ","Mort2Alg12", 704,"Y","x",1
-"BLOOM     ","Mort2Alg13", 705,"Y","x",1
-"BLOOM     ","Mort2Alg14", 706,"Y","x",1
-"BLOOM     ","Mort2Alg15", 707,"Y","x",1
-"BLOOM     ","Mort2Alg16", 708,"Y","x",1
-"BLOOM     ","Mort2Alg17", 709,"Y","x",1
-"BLOOM     ","Mort2Alg18", 710,"Y","x",1
-"BLOOM     ","Mort2Alg19", 711,"Y","x",1
-"BLOOM     ","Mort2Alg20", 712,"Y","x",1
-"BLOOM     ","Mort2Alg21", 713,"Y","x",1
-"BLOOM     ","Mort2Alg22", 714,"Y","x",1
-"BLOOM     ","Mort2Alg23", 715,"Y","x",1
-"BLOOM     ","Mort2Alg24", 716,"Y","x",1
-"BLOOM     ","Mort2Alg25", 717,"Y","x",1
-"BLOOM     ","Mort2Alg26", 718,"Y","x",1
-"BLOOM     ","Mort2Alg27", 719,"Y","x",1
-"BLOOM     ","Mort2Alg28", 720,"Y","x",1
-"BLOOM     ","Mort2Alg29", 721,"Y","x",1
-"BLOOM     ","Mort2Alg30", 722,"Y","x",1
-"BLOOM     ","MrtB1Alg01", 723,"Y","x",1
-"BLOOM     ","MrtB1Alg02", 724,"Y","x",1
-"BLOOM     ","MrtB1Alg03", 725,"Y","x",1
-"BLOOM     ","MrtB1Alg04", 726,"Y","x",1
-"BLOOM     ","MrtB1Alg05", 727,"Y","x",1
-"BLOOM     ","MrtB1Alg06", 728,"Y","x",1
-"BLOOM     ","MrtB1Alg07", 729,"Y","x",1
-"BLOOM     ","MrtB1Alg08", 730,"Y","x",1
-"BLOOM     ","MrtB1Alg09", 731,"Y","x",1
-"BLOOM     ","MrtB1Alg10", 732,"Y","x",1
-"BLOOM     ","MrtB1Alg11", 733,"Y","x",1
-"BLOOM     ","MrtB1Alg12", 734,"Y","x",1
-"BLOOM     ","MrtB1Alg13", 735,"Y","x",1
-"BLOOM     ","MrtB1Alg14", 736,"Y","x",1
-"BLOOM     ","MrtB1Alg15", 737,"Y","x",1
-"BLOOM     ","MrtB1Alg16", 738,"Y","x",1
-"BLOOM     ","MrtB1Alg17", 739,"Y","x",1
-"BLOOM     ","MrtB1Alg18", 740,"Y","x",1
-"BLOOM     ","MrtB1Alg19", 741,"Y","x",1
-"BLOOM     ","MrtB1Alg20", 742,"Y","x",1
-"BLOOM     ","MrtB1Alg21", 743,"Y","x",1
-"BLOOM     ","MrtB1Alg22", 744,"Y","x",1
-"BLOOM     ","MrtB1Alg23", 745,"Y","x",1
-"BLOOM     ","MrtB1Alg24", 746,"Y","x",1
-"BLOOM     ","MrtB1Alg25", 747,"Y","x",1
-"BLOOM     ","MrtB1Alg26", 748,"Y","x",1
-"BLOOM     ","MrtB1Alg27", 749,"Y","x",1
-"BLOOM     ","MrtB1Alg28", 750,"Y","x",1
-"BLOOM     ","MrtB1Alg29", 751,"Y","x",1
-"BLOOM     ","MrtB1Alg30", 752,"Y","x",1
-"BLOOM     ","MrtB2Alg01", 753,"Y","x",1
-"BLOOM     ","MrtB2Alg02", 754,"Y","x",1
-"BLOOM     ","MrtB2Alg03", 755,"Y","x",1
-"BLOOM     ","MrtB2Alg04", 756,"Y","x",1
-"BLOOM     ","MrtB2Alg05", 757,"Y","x",1
-"BLOOM     ","MrtB2Alg06", 758,"Y","x",1
-"BLOOM     ","MrtB2Alg07", 759,"Y","x",1
-"BLOOM     ","MrtB2Alg08", 760,"Y","x",1
-"BLOOM     ","MrtB2Alg09", 761,"Y","x",1
-"BLOOM     ","MrtB2Alg10", 762,"Y","x",1
-"BLOOM     ","MrtB2Alg11", 763,"Y","x",1
-"BLOOM     ","MrtB2Alg12", 764,"Y","x",1
-"BLOOM     ","MrtB2Alg13", 765,"Y","x",1
-"BLOOM     ","MrtB2Alg14", 766,"Y","x",1
-"BLOOM     ","MrtB2Alg15", 767,"Y","x",1
-"BLOOM     ","MrtB2Alg16", 768,"Y","x",1
-"BLOOM     ","MrtB2Alg17", 769,"Y","x",1
-"BLOOM     ","MrtB2Alg18", 770,"Y","x",1
-"BLOOM     ","MrtB2Alg19", 771,"Y","x",1
-"BLOOM     ","MrtB2Alg20", 772,"Y","x",1
-"BLOOM     ","MrtB2Alg21", 773,"Y","x",1
-"BLOOM     ","MrtB2Alg22", 774,"Y","x",1
-"BLOOM     ","MrtB2Alg23", 775,"Y","x",1
-"BLOOM     ","MrtB2Alg24", 776,"Y","x",1
-"BLOOM     ","MrtB2Alg25", 777,"Y","x",1
-"BLOOM     ","MrtB2Alg26", 778,"Y","x",1
-"BLOOM     ","MrtB2Alg27", 779,"Y","x",1
-"BLOOM     ","MrtB2Alg28", 780,"Y","x",1
-"BLOOM     ","MrtB2Alg29", 781,"Y","x",1
-"BLOOM     ","MrtB2Alg30", 782,"Y","x",1
-"BLOOM     ","FixAlg01  ", 783,"Y","x",1
-"BLOOM     ","FixAlg02  ", 784,"Y","x",1
-"BLOOM     ","FixAlg03  ", 785,"Y","x",1
-"BLOOM     ","FixAlg04  ", 786,"Y","x",1
-"BLOOM     ","FixAlg05  ", 787,"Y","x",1
-"BLOOM     ","FixAlg06  ", 788,"Y","x",1
-"BLOOM     ","FixAlg07  ", 789,"Y","x",1
-"BLOOM     ","FixAlg08  ", 790,"Y","x",1
-"BLOOM     ","FixAlg09  ", 791,"Y","x",1
-"BLOOM     ","FixAlg10  ", 792,"Y","x",1
-"BLOOM     ","FixAlg11  ", 793,"Y","x",1
-"BLOOM     ","FixAlg12  ", 794,"Y","x",1
-"BLOOM     ","FixAlg13  ", 795,"Y","x",1
-"BLOOM     ","FixAlg14  ", 796,"Y","x",1
-"BLOOM     ","FixAlg15  ", 797,"Y","x",1
-"BLOOM     ","FixAlg16  ", 798,"Y","x",1
-"BLOOM     ","FixAlg17  ", 799,"Y","x",1
-"BLOOM     ","FixAlg18  ", 800,"Y","x",1
-"BLOOM     ","FixAlg19  ", 801,"Y","x",1
-"BLOOM     ","FixAlg20  ", 802,"Y","x",1
-"BLOOM     ","FixAlg21  ", 803,"Y","x",1
-"BLOOM     ","FixAlg22  ", 804,"Y","x",1
-"BLOOM     ","FixAlg23  ", 805,"Y","x",1
-"BLOOM     ","FixAlg24  ", 806,"Y","x",1
-"BLOOM     ","FixAlg25  ", 807,"Y","x",1
-"BLOOM     ","FixAlg26  ", 808,"Y","x",1
-"BLOOM     ","FixAlg27  ", 809,"Y","x",1
-"BLOOM     ","FixAlg28  ", 810,"Y","x",1
-"BLOOM     ","FixAlg29  ", 811,"Y","x",1
-"BLOOM     ","FixAlg30  ", 812,"Y","x",1
-"BLOOM     ","EffiALG01 ", 813,"O"," ",1
-"BLOOM     ","EffiALG02 ", 814,"O"," ",1
-"BLOOM     ","EffiALG03 ", 815,"O"," ",1
-"BLOOM     ","EffiALG04 ", 816,"O"," ",1
-"BLOOM     ","EffiALG05 ", 817,"O"," ",1
-"BLOOM     ","EffiALG06 ", 818,"O"," ",1
-"BLOOM     ","EffiALG07 ", 819,"O"," ",1
-"BLOOM     ","EffiALG08 ", 820,"O"," ",1
-"BLOOM     ","EffiALG09 ", 821,"O"," ",1
-"BLOOM     ","EffiALG10 ", 822,"O"," ",1
-"BLOOM     ","EffiALG11 ", 823,"O"," ",1
-"BLOOM     ","EffiALG12 ", 824,"O"," ",1
-"BLOOM     ","EffiALG13 ", 825,"O"," ",1
-"BLOOM     ","EffiALG14 ", 826,"O"," ",1
-"BLOOM     ","EffiALG15 ", 827,"O"," ",1
-"BLOOM     ","EffiALG16 ", 828,"O"," ",1
-"BLOOM     ","EffiALG17 ", 829,"O"," ",1
-"BLOOM     ","EffiALG18 ", 830,"O"," ",1
-"BLOOM     ","EffiALG19 ", 831,"O"," ",1
-"BLOOM     ","EffiALG20 ", 832,"O"," ",1
-"BLOOM     ","EffiALG21 ", 833,"O"," ",1
-"BLOOM     ","EffiALG22 ", 834,"O"," ",1
-"BLOOM     ","EffiALG23 ", 835,"O"," ",1
-"BLOOM     ","EffiALG24 ", 836,"O"," ",1
-"BLOOM     ","EffiALG25 ", 837,"O"," ",1
-"BLOOM     ","EffiALG26 ", 838,"O"," ",1
-"BLOOM     ","EffiALG27 ", 839,"O"," ",1
-"BLOOM     ","EffiALG28 ", 840,"O"," ",1
-"BLOOM     ","EffiALG29 ", 841,"O"," ",1
-"BLOOM     ","EffiALG30 ", 842,"O"," ",1
+"BLOOM     ","SWBlSolInt",  33,"Y","x",1
+"BLOOM     ","SWBlObject",  34,"Y","x",1
+"BLOOM     ","BlTemLim  ",  35,"Y","x",1
+"BLOOM     ","BlBasMor  ",  36,"Y","x",1
+"BLOOM     ","SWBlGroChk",  37,"Y","x",1
+"BLOOM     ","BlBioBas  ",  38,"Y","x",1
+"BLOOM     ","SWBlMorChk",  39,"Y","x",1
+"BLOOM     ","BlTopLev  ",  40,"Y","x",1
+"BLOOM     ","BLOOMALG01",  41,"N","x",1
+"BLOOM     ","BLOOMALG02",  42,"B","x",1
+"BLOOM     ","BLOOMALG03",  43,"B","x",1
+"BLOOM     ","BLOOMALG04",  44,"B","x",1
+"BLOOM     ","BLOOMALG05",  45,"B","x",1
+"BLOOM     ","BLOOMALG06",  46,"B","x",1
+"BLOOM     ","BLOOMALG07",  47,"B","x",1
+"BLOOM     ","BLOOMALG08",  48,"B","x",1
+"BLOOM     ","BLOOMALG09",  49,"B","x",1
+"BLOOM     ","BLOOMALG10",  50,"B","x",1
+"BLOOM     ","BLOOMALG11",  51,"B","x",1
+"BLOOM     ","BLOOMALG12",  52,"B","x",1
+"BLOOM     ","BLOOMALG13",  53,"B","x",1
+"BLOOM     ","BLOOMALG14",  54,"B","x",1
+"BLOOM     ","BLOOMALG15",  55,"B","x",1
+"BLOOM     ","BLOOMALG16",  56,"B","x",1
+"BLOOM     ","BLOOMALG17",  57,"B","x",1
+"BLOOM     ","BLOOMALG18",  58,"B","x",1
+"BLOOM     ","BLOOMALG19",  59,"B","x",1
+"BLOOM     ","BLOOMALG20",  60,"B","x",1
+"BLOOM     ","BLOOMALG21",  61,"B","x",1
+"BLOOM     ","BLOOMALG22",  62,"B","x",1
+"BLOOM     ","BLOOMALG23",  63,"B","x",1
+"BLOOM     ","BLOOMALG24",  64,"B","x",1
+"BLOOM     ","BLOOMALG25",  65,"B","x",1
+"BLOOM     ","BLOOMALG26",  66,"B","x",1
+"BLOOM     ","BLOOMALG27",  67,"B","x",1
+"BLOOM     ","BLOOMALG28",  68,"B","x",1
+"BLOOM     ","BLOOMALG29",  69,"B","x",1
+"BLOOM     ","BLOOMALG30",  70,"B","x",1
+"BLOOM     ","SpecAlg01 ",  71,"Y","x",1
+"BLOOM     ","SpecAlg02 ",  72,"Y","x",1
+"BLOOM     ","SpecAlg03 ",  73,"Y","x",1
+"BLOOM     ","SpecAlg04 ",  74,"Y","x",1
+"BLOOM     ","SpecAlg05 ",  75,"Y","x",1
+"BLOOM     ","SpecAlg06 ",  76,"Y","x",1
+"BLOOM     ","SpecAlg07 ",  77,"Y","x",1
+"BLOOM     ","SpecAlg08 ",  78,"Y","x",1
+"BLOOM     ","SpecAlg09 ",  79,"Y","x",1
+"BLOOM     ","SpecAlg10 ",  80,"Y","x",1
+"BLOOM     ","SpecAlg11 ",  81,"Y","x",1
+"BLOOM     ","SpecAlg12 ",  82,"Y","x",1
+"BLOOM     ","SpecAlg13 ",  83,"Y","x",1
+"BLOOM     ","SpecAlg14 ",  84,"Y","x",1
+"BLOOM     ","SpecAlg15 ",  85,"Y","x",1
+"BLOOM     ","SpecAlg16 ",  86,"Y","x",1
+"BLOOM     ","SpecAlg17 ",  87,"Y","x",1
+"BLOOM     ","SpecAlg18 ",  88,"Y","x",1
+"BLOOM     ","SpecAlg19 ",  89,"Y","x",1
+"BLOOM     ","SpecAlg20 ",  90,"Y","x",1
+"BLOOM     ","SpecAlg21 ",  91,"Y","x",1
+"BLOOM     ","SpecAlg22 ",  92,"Y","x",1
+"BLOOM     ","SpecAlg23 ",  93,"Y","x",1
+"BLOOM     ","SpecAlg24 ",  94,"Y","x",1
+"BLOOM     ","SpecAlg25 ",  95,"Y","x",1
+"BLOOM     ","SpecAlg26 ",  96,"Y","x",1
+"BLOOM     ","SpecAlg27 ",  97,"Y","x",1
+"BLOOM     ","SpecAlg28 ",  98,"Y","x",1
+"BLOOM     ","SpecAlg29 ",  99,"Y","x",1
+"BLOOM     ","SpecAlg30 ", 100,"Y","x",1
+"BLOOM     ","FrAutAlg01", 101,"Y","x",1
+"BLOOM     ","FrAutAlg02", 102,"Y","x",1
+"BLOOM     ","FrAutAlg03", 103,"Y","x",1
+"BLOOM     ","FrAutAlg04", 104,"Y","x",1
+"BLOOM     ","FrAutAlg05", 105,"Y","x",1
+"BLOOM     ","FrAutAlg06", 106,"Y","x",1
+"BLOOM     ","FrAutAlg07", 107,"Y","x",1
+"BLOOM     ","FrAutAlg08", 108,"Y","x",1
+"BLOOM     ","FrAutAlg09", 109,"Y","x",1
+"BLOOM     ","FrAutAlg10", 110,"Y","x",1
+"BLOOM     ","FrAutAlg11", 111,"Y","x",1
+"BLOOM     ","FrAutAlg12", 112,"Y","x",1
+"BLOOM     ","FrAutAlg13", 113,"Y","x",1
+"BLOOM     ","FrAutAlg14", 114,"Y","x",1
+"BLOOM     ","FrAutAlg15", 115,"Y","x",1
+"BLOOM     ","FrAutAlg16", 116,"Y","x",1
+"BLOOM     ","FrAutAlg17", 117,"Y","x",1
+"BLOOM     ","FrAutAlg18", 118,"Y","x",1
+"BLOOM     ","FrAutAlg19", 119,"Y","x",1
+"BLOOM     ","FrAutAlg20", 120,"Y","x",1
+"BLOOM     ","FrAutAlg21", 121,"Y","x",1
+"BLOOM     ","FrAutAlg22", 122,"Y","x",1
+"BLOOM     ","FrAutAlg23", 123,"Y","x",1
+"BLOOM     ","FrAutAlg24", 124,"Y","x",1
+"BLOOM     ","FrAutAlg25", 125,"Y","x",1
+"BLOOM     ","FrAutAlg26", 126,"Y","x",1
+"BLOOM     ","FrAutAlg27", 127,"Y","x",1
+"BLOOM     ","FrAutAlg28", 128,"Y","x",1
+"BLOOM     ","FrAutAlg29", 129,"Y","x",1
+"BLOOM     ","FrAutAlg30", 130,"Y","x",1
+"BLOOM     ","FrDetAlg01", 131,"Y","x",1
+"BLOOM     ","FrDetAlg02", 132,"Y","x",1
+"BLOOM     ","FrDetAlg03", 133,"Y","x",1
+"BLOOM     ","FrDetAlg04", 134,"Y","x",1
+"BLOOM     ","FrDetAlg05", 135,"Y","x",1
+"BLOOM     ","FrDetAlg06", 136,"Y","x",1
+"BLOOM     ","FrDetAlg07", 137,"Y","x",1
+"BLOOM     ","FrDetAlg08", 138,"Y","x",1
+"BLOOM     ","FrDetAlg09", 139,"Y","x",1
+"BLOOM     ","FrDetAlg10", 140,"Y","x",1
+"BLOOM     ","FrDetAlg11", 141,"Y","x",1
+"BLOOM     ","FrDetAlg12", 142,"Y","x",1
+"BLOOM     ","FrDetAlg13", 143,"Y","x",1
+"BLOOM     ","FrDetAlg14", 144,"Y","x",1
+"BLOOM     ","FrDetAlg15", 145,"Y","x",1
+"BLOOM     ","FrDetAlg16", 146,"Y","x",1
+"BLOOM     ","FrDetAlg17", 147,"Y","x",1
+"BLOOM     ","FrDetAlg18", 148,"Y","x",1
+"BLOOM     ","FrDetAlg19", 149,"Y","x",1
+"BLOOM     ","FrDetAlg20", 150,"Y","x",1
+"BLOOM     ","FrDetAlg21", 151,"Y","x",1
+"BLOOM     ","FrDetAlg22", 152,"Y","x",1
+"BLOOM     ","FrDetAlg23", 153,"Y","x",1
+"BLOOM     ","FrDetAlg24", 154,"Y","x",1
+"BLOOM     ","FrDetAlg25", 155,"Y","x",1
+"BLOOM     ","FrDetAlg26", 156,"Y","x",1
+"BLOOM     ","FrDetAlg27", 157,"Y","x",1
+"BLOOM     ","FrDetAlg28", 158,"Y","x",1
+"BLOOM     ","FrDetAlg29", 159,"Y","x",1
+"BLOOM     ","FrDetAlg30", 160,"Y","x",1
+"BLOOM     ","ExtVlAlg01", 161,"Y","x",1
+"BLOOM     ","ExtVlAlg02", 162,"Y","x",1
+"BLOOM     ","ExtVlAlg03", 163,"Y","x",1
+"BLOOM     ","ExtVlAlg04", 164,"Y","x",1
+"BLOOM     ","ExtVlAlg05", 165,"Y","x",1
+"BLOOM     ","ExtVlAlg06", 166,"Y","x",1
+"BLOOM     ","ExtVlAlg07", 167,"Y","x",1
+"BLOOM     ","ExtVlAlg08", 168,"Y","x",1
+"BLOOM     ","ExtVlAlg09", 169,"Y","x",1
+"BLOOM     ","ExtVlAlg10", 170,"Y","x",1
+"BLOOM     ","ExtVlAlg11", 171,"Y","x",1
+"BLOOM     ","ExtVlAlg12", 172,"Y","x",1
+"BLOOM     ","ExtVlAlg13", 173,"Y","x",1
+"BLOOM     ","ExtVlAlg14", 174,"Y","x",1
+"BLOOM     ","ExtVlAlg15", 175,"Y","x",1
+"BLOOM     ","ExtVlAlg16", 176,"Y","x",1
+"BLOOM     ","ExtVlAlg17", 177,"Y","x",1
+"BLOOM     ","ExtVlAlg18", 178,"Y","x",1
+"BLOOM     ","ExtVlAlg19", 179,"Y","x",1
+"BLOOM     ","ExtVlAlg20", 180,"Y","x",1
+"BLOOM     ","ExtVlAlg21", 181,"Y","x",1
+"BLOOM     ","ExtVlAlg22", 182,"Y","x",1
+"BLOOM     ","ExtVlAlg23", 183,"Y","x",1
+"BLOOM     ","ExtVlAlg24", 184,"Y","x",1
+"BLOOM     ","ExtVlAlg25", 185,"Y","x",1
+"BLOOM     ","ExtVlAlg26", 186,"Y","x",1
+"BLOOM     ","ExtVlAlg27", 187,"Y","x",1
+"BLOOM     ","ExtVlAlg28", 188,"Y","x",1
+"BLOOM     ","ExtVlAlg29", 189,"Y","x",1
+"BLOOM     ","ExtVlAlg30", 190,"Y","x",1
+"BLOOM     ","DMCFAlg01 ", 191,"Y","x",1
+"BLOOM     ","DMCFAlg02 ", 192,"Y","x",1
+"BLOOM     ","DMCFAlg03 ", 193,"Y","x",1
+"BLOOM     ","DMCFAlg04 ", 194,"Y","x",1
+"BLOOM     ","DMCFAlg05 ", 195,"Y","x",1
+"BLOOM     ","DMCFAlg06 ", 196,"Y","x",1
+"BLOOM     ","DMCFAlg07 ", 197,"Y","x",1
+"BLOOM     ","DMCFAlg08 ", 198,"Y","x",1
+"BLOOM     ","DMCFAlg09 ", 199,"Y","x",1
+"BLOOM     ","DMCFAlg10 ", 200,"Y","x",1
+"BLOOM     ","DMCFAlg11 ", 201,"Y","x",1
+"BLOOM     ","DMCFAlg12 ", 202,"Y","x",1
+"BLOOM     ","DMCFAlg13 ", 203,"Y","x",1
+"BLOOM     ","DMCFAlg14 ", 204,"Y","x",1
+"BLOOM     ","DMCFAlg15 ", 205,"Y","x",1
+"BLOOM     ","DMCFAlg16 ", 206,"Y","x",1
+"BLOOM     ","DMCFAlg17 ", 207,"Y","x",1
+"BLOOM     ","DMCFAlg18 ", 208,"Y","x",1
+"BLOOM     ","DMCFAlg19 ", 209,"Y","x",1
+"BLOOM     ","DMCFAlg20 ", 210,"Y","x",1
+"BLOOM     ","DMCFAlg21 ", 211,"Y","x",1
+"BLOOM     ","DMCFAlg22 ", 212,"Y","x",1
+"BLOOM     ","DMCFAlg23 ", 213,"Y","x",1
+"BLOOM     ","DMCFAlg24 ", 214,"Y","x",1
+"BLOOM     ","DMCFAlg25 ", 215,"Y","x",1
+"BLOOM     ","DMCFAlg26 ", 216,"Y","x",1
+"BLOOM     ","DMCFAlg27 ", 217,"Y","x",1
+"BLOOM     ","DMCFAlg28 ", 218,"Y","x",1
+"BLOOM     ","DMCFAlg29 ", 219,"Y","x",1
+"BLOOM     ","DMCFAlg30 ", 220,"Y","x",1
+"BLOOM     ","NCRAlg01  ", 221,"Y","x",1
+"BLOOM     ","NCRAlg02  ", 222,"Y","x",1
+"BLOOM     ","NCRAlg03  ", 223,"Y","x",1
+"BLOOM     ","NCRAlg04  ", 224,"Y","x",1
+"BLOOM     ","NCRAlg05  ", 225,"Y","x",1
+"BLOOM     ","NCRAlg06  ", 226,"Y","x",1
+"BLOOM     ","NCRAlg07  ", 227,"Y","x",1
+"BLOOM     ","NCRAlg08  ", 228,"Y","x",1
+"BLOOM     ","NCRAlg09  ", 229,"Y","x",1
+"BLOOM     ","NCRAlg10  ", 230,"Y","x",1
+"BLOOM     ","NCRAlg11  ", 231,"Y","x",1
+"BLOOM     ","NCRAlg12  ", 232,"Y","x",1
+"BLOOM     ","NCRAlg13  ", 233,"Y","x",1
+"BLOOM     ","NCRAlg14  ", 234,"Y","x",1
+"BLOOM     ","NCRAlg15  ", 235,"Y","x",1
+"BLOOM     ","NCRAlg16  ", 236,"Y","x",1
+"BLOOM     ","NCRAlg17  ", 237,"Y","x",1
+"BLOOM     ","NCRAlg18  ", 238,"Y","x",1
+"BLOOM     ","NCRAlg19  ", 239,"Y","x",1
+"BLOOM     ","NCRAlg20  ", 240,"Y","x",1
+"BLOOM     ","NCRAlg21  ", 241,"Y","x",1
+"BLOOM     ","NCRAlg22  ", 242,"Y","x",1
+"BLOOM     ","NCRAlg23  ", 243,"Y","x",1
+"BLOOM     ","NCRAlg24  ", 244,"Y","x",1
+"BLOOM     ","NCRAlg25  ", 245,"Y","x",1
+"BLOOM     ","NCRAlg26  ", 246,"Y","x",1
+"BLOOM     ","NCRAlg27  ", 247,"Y","x",1
+"BLOOM     ","NCRAlg28  ", 248,"Y","x",1
+"BLOOM     ","NCRAlg29  ", 249,"Y","x",1
+"BLOOM     ","NCRAlg30  ", 250,"Y","x",1
+"BLOOM     ","PCRAlg01  ", 251,"Y","x",1
+"BLOOM     ","PCRAlg02  ", 252,"Y","x",1
+"BLOOM     ","PCRAlg03  ", 253,"Y","x",1
+"BLOOM     ","PCRAlg04  ", 254,"Y","x",1
+"BLOOM     ","PCRAlg05  ", 255,"Y","x",1
+"BLOOM     ","PCRAlg06  ", 256,"Y","x",1
+"BLOOM     ","PCRAlg07  ", 257,"Y","x",1
+"BLOOM     ","PCRAlg08  ", 258,"Y","x",1
+"BLOOM     ","PCRAlg09  ", 259,"Y","x",1
+"BLOOM     ","PCRAlg10  ", 260,"Y","x",1
+"BLOOM     ","PCRAlg11  ", 261,"Y","x",1
+"BLOOM     ","PCRAlg12  ", 262,"Y","x",1
+"BLOOM     ","PCRAlg13  ", 263,"Y","x",1
+"BLOOM     ","PCRAlg14  ", 264,"Y","x",1
+"BLOOM     ","PCRAlg15  ", 265,"Y","x",1
+"BLOOM     ","PCRAlg16  ", 266,"Y","x",1
+"BLOOM     ","PCRAlg17  ", 267,"Y","x",1
+"BLOOM     ","PCRAlg18  ", 268,"Y","x",1
+"BLOOM     ","PCRAlg19  ", 269,"Y","x",1
+"BLOOM     ","PCRAlg20  ", 270,"Y","x",1
+"BLOOM     ","PCRAlg21  ", 271,"Y","x",1
+"BLOOM     ","PCRAlg22  ", 272,"Y","x",1
+"BLOOM     ","PCRAlg23  ", 273,"Y","x",1
+"BLOOM     ","PCRAlg24  ", 274,"Y","x",1
+"BLOOM     ","PCRAlg25  ", 275,"Y","x",1
+"BLOOM     ","PCRAlg26  ", 276,"Y","x",1
+"BLOOM     ","PCRAlg27  ", 277,"Y","x",1
+"BLOOM     ","PCRAlg28  ", 278,"Y","x",1
+"BLOOM     ","PCRAlg29  ", 279,"Y","x",1
+"BLOOM     ","PCRAlg30  ", 280,"Y","x",1
+"BLOOM     ","SCRAlg01  ", 281,"Y","x",1
+"BLOOM     ","SCRAlg02  ", 282,"Y","x",1
+"BLOOM     ","SCRAlg03  ", 283,"Y","x",1
+"BLOOM     ","SCRAlg04  ", 284,"Y","x",1
+"BLOOM     ","SCRAlg05  ", 285,"Y","x",1
+"BLOOM     ","SCRAlg06  ", 286,"Y","x",1
+"BLOOM     ","SCRAlg07  ", 287,"Y","x",1
+"BLOOM     ","SCRAlg08  ", 288,"Y","x",1
+"BLOOM     ","SCRAlg09  ", 289,"Y","x",1
+"BLOOM     ","SCRAlg10  ", 290,"Y","x",1
+"BLOOM     ","SCRAlg11  ", 291,"Y","x",1
+"BLOOM     ","SCRAlg12  ", 292,"Y","x",1
+"BLOOM     ","SCRAlg13  ", 293,"Y","x",1
+"BLOOM     ","SCRAlg14  ", 294,"Y","x",1
+"BLOOM     ","SCRAlg15  ", 295,"Y","x",1
+"BLOOM     ","SCRAlg16  ", 296,"Y","x",1
+"BLOOM     ","SCRAlg17  ", 297,"Y","x",1
+"BLOOM     ","SCRAlg18  ", 298,"Y","x",1
+"BLOOM     ","SCRAlg19  ", 299,"Y","x",1
+"BLOOM     ","SCRAlg20  ", 300,"Y","x",1
+"BLOOM     ","SCRAlg21  ", 301,"Y","x",1
+"BLOOM     ","SCRAlg22  ", 302,"Y","x",1
+"BLOOM     ","SCRAlg23  ", 303,"Y","x",1
+"BLOOM     ","SCRAlg24  ", 304,"Y","x",1
+"BLOOM     ","SCRAlg25  ", 305,"Y","x",1
+"BLOOM     ","SCRAlg26  ", 306,"Y","x",1
+"BLOOM     ","SCRAlg27  ", 307,"Y","x",1
+"BLOOM     ","SCRAlg28  ", 308,"Y","x",1
+"BLOOM     ","SCRAlg29  ", 309,"Y","x",1
+"BLOOM     ","SCRAlg30  ", 310,"Y","x",1
+"BLOOM     ","XNCRAlg01 ", 311,"O","x",1
+"BLOOM     ","XNCRAlg02 ", 312,"O","x",1
+"BLOOM     ","XNCRAlg03 ", 313,"O","x",1
+"BLOOM     ","XNCRAlg04 ", 314,"O","x",1
+"BLOOM     ","XNCRAlg05 ", 315,"O","x",1
+"BLOOM     ","XNCRAlg06 ", 316,"O","x",1
+"BLOOM     ","XNCRAlg07 ", 317,"O","x",1
+"BLOOM     ","XNCRAlg08 ", 318,"O","x",1
+"BLOOM     ","XNCRAlg09 ", 319,"O","x",1
+"BLOOM     ","XNCRAlg10 ", 320,"O","x",1
+"BLOOM     ","XNCRAlg11 ", 321,"O","x",1
+"BLOOM     ","XNCRAlg12 ", 322,"O","x",1
+"BLOOM     ","XNCRAlg13 ", 323,"O","x",1
+"BLOOM     ","XNCRAlg14 ", 324,"O","x",1
+"BLOOM     ","XNCRAlg15 ", 325,"O","x",1
+"BLOOM     ","XNCRAlg16 ", 326,"O","x",1
+"BLOOM     ","XNCRAlg17 ", 327,"O","x",1
+"BLOOM     ","XNCRAlg18 ", 328,"O","x",1
+"BLOOM     ","XNCRAlg19 ", 329,"O","x",1
+"BLOOM     ","XNCRAlg20 ", 330,"O","x",1
+"BLOOM     ","XNCRAlg21 ", 331,"O","x",1
+"BLOOM     ","XNCRAlg22 ", 332,"O","x",1
+"BLOOM     ","XNCRAlg23 ", 333,"O","x",1
+"BLOOM     ","XNCRAlg24 ", 334,"O","x",1
+"BLOOM     ","XNCRAlg25 ", 335,"O","x",1
+"BLOOM     ","XNCRAlg26 ", 336,"O","x",1
+"BLOOM     ","XNCRAlg27 ", 337,"O","x",1
+"BLOOM     ","XNCRAlg28 ", 338,"O","x",1
+"BLOOM     ","XNCRAlg29 ", 339,"O","x",1
+"BLOOM     ","XNCRAlg30 ", 340,"O","x",1
+"BLOOM     ","XPCRAlg01 ", 341,"O","x",1
+"BLOOM     ","XPCRAlg02 ", 342,"O","x",1
+"BLOOM     ","XPCRAlg03 ", 343,"O","x",1
+"BLOOM     ","XPCRAlg04 ", 344,"O","x",1
+"BLOOM     ","XPCRAlg05 ", 345,"O","x",1
+"BLOOM     ","XPCRAlg06 ", 346,"O","x",1
+"BLOOM     ","XPCRAlg07 ", 347,"O","x",1
+"BLOOM     ","XPCRAlg08 ", 348,"O","x",1
+"BLOOM     ","XPCRAlg09 ", 349,"O","x",1
+"BLOOM     ","XPCRAlg10 ", 350,"O","x",1
+"BLOOM     ","XPCRAlg11 ", 351,"O","x",1
+"BLOOM     ","XPCRAlg12 ", 352,"O","x",1
+"BLOOM     ","XPCRAlg13 ", 353,"O","x",1
+"BLOOM     ","XPCRAlg14 ", 354,"O","x",1
+"BLOOM     ","XPCRAlg15 ", 355,"O","x",1
+"BLOOM     ","XPCRAlg16 ", 356,"O","x",1
+"BLOOM     ","XPCRAlg17 ", 357,"O","x",1
+"BLOOM     ","XPCRAlg18 ", 358,"O","x",1
+"BLOOM     ","XPCRAlg19 ", 359,"O","x",1
+"BLOOM     ","XPCRAlg20 ", 360,"O","x",1
+"BLOOM     ","XPCRAlg21 ", 361,"O","x",1
+"BLOOM     ","XPCRAlg22 ", 362,"O","x",1
+"BLOOM     ","XPCRAlg23 ", 363,"O","x",1
+"BLOOM     ","XPCRAlg24 ", 364,"O","x",1
+"BLOOM     ","XPCRAlg25 ", 365,"O","x",1
+"BLOOM     ","XPCRAlg26 ", 366,"O","x",1
+"BLOOM     ","XPCRAlg27 ", 367,"O","x",1
+"BLOOM     ","XPCRAlg28 ", 368,"O","x",1
+"BLOOM     ","XPCRAlg29 ", 369,"O","x",1
+"BLOOM     ","XPCRAlg30 ", 370,"O","x",1
+"BLOOM     ","FNCRAlg01 ", 371,"O","x",1
+"BLOOM     ","FNCRAlg02 ", 372,"O","x",1
+"BLOOM     ","FNCRAlg03 ", 373,"O","x",1
+"BLOOM     ","FNCRAlg04 ", 374,"O","x",1
+"BLOOM     ","FNCRAlg05 ", 375,"O","x",1
+"BLOOM     ","FNCRAlg06 ", 376,"O","x",1
+"BLOOM     ","FNCRAlg07 ", 377,"O","x",1
+"BLOOM     ","FNCRAlg08 ", 378,"O","x",1
+"BLOOM     ","FNCRAlg09 ", 379,"O","x",1
+"BLOOM     ","FNCRAlg10 ", 380,"O","x",1
+"BLOOM     ","FNCRAlg11 ", 381,"O","x",1
+"BLOOM     ","FNCRAlg12 ", 382,"O","x",1
+"BLOOM     ","FNCRAlg13 ", 383,"O","x",1
+"BLOOM     ","FNCRAlg14 ", 384,"O","x",1
+"BLOOM     ","FNCRAlg15 ", 385,"O","x",1
+"BLOOM     ","FNCRAlg16 ", 386,"O","x",1
+"BLOOM     ","FNCRAlg17 ", 387,"O","x",1
+"BLOOM     ","FNCRAlg18 ", 388,"O","x",1
+"BLOOM     ","FNCRAlg19 ", 389,"O","x",1
+"BLOOM     ","FNCRAlg20 ", 390,"O","x",1
+"BLOOM     ","FNCRAlg21 ", 391,"O","x",1
+"BLOOM     ","FNCRAlg22 ", 392,"O","x",1
+"BLOOM     ","FNCRAlg23 ", 393,"O","x",1
+"BLOOM     ","FNCRAlg24 ", 394,"O","x",1
+"BLOOM     ","FNCRAlg25 ", 395,"O","x",1
+"BLOOM     ","FNCRAlg26 ", 396,"O","x",1
+"BLOOM     ","FNCRAlg27 ", 397,"O","x",1
+"BLOOM     ","FNCRAlg28 ", 398,"O","x",1
+"BLOOM     ","FNCRAlg29 ", 399,"O","x",1
+"BLOOM     ","FNCRAlg30 ", 400,"O","x",1
+"BLOOM     ","ChlaCAlg01", 401,"Y","x",1
+"BLOOM     ","ChlaCAlg02", 402,"Y","x",1
+"BLOOM     ","ChlaCAlg03", 403,"Y","x",1
+"BLOOM     ","ChlaCAlg04", 404,"Y","x",1
+"BLOOM     ","ChlaCAlg05", 405,"Y","x",1
+"BLOOM     ","ChlaCAlg06", 406,"Y","x",1
+"BLOOM     ","ChlaCAlg07", 407,"Y","x",1
+"BLOOM     ","ChlaCAlg08", 408,"Y","x",1
+"BLOOM     ","ChlaCAlg09", 409,"Y","x",1
+"BLOOM     ","ChlaCAlg10", 410,"Y","x",1
+"BLOOM     ","ChlaCAlg11", 411,"Y","x",1
+"BLOOM     ","ChlaCAlg12", 412,"Y","x",1
+"BLOOM     ","ChlaCAlg13", 413,"Y","x",1
+"BLOOM     ","ChlaCAlg14", 414,"Y","x",1
+"BLOOM     ","ChlaCAlg15", 415,"Y","x",1
+"BLOOM     ","ChlaCAlg16", 416,"Y","x",1
+"BLOOM     ","ChlaCAlg17", 417,"Y","x",1
+"BLOOM     ","ChlaCAlg18", 418,"Y","x",1
+"BLOOM     ","ChlaCAlg19", 419,"Y","x",1
+"BLOOM     ","ChlaCAlg20", 420,"Y","x",1
+"BLOOM     ","ChlaCAlg21", 421,"Y","x",1
+"BLOOM     ","ChlaCAlg22", 422,"Y","x",1
+"BLOOM     ","ChlaCAlg23", 423,"Y","x",1
+"BLOOM     ","ChlaCAlg24", 424,"Y","x",1
+"BLOOM     ","ChlaCAlg25", 425,"Y","x",1
+"BLOOM     ","ChlaCAlg26", 426,"Y","x",1
+"BLOOM     ","ChlaCAlg27", 427,"Y","x",1
+"BLOOM     ","ChlaCAlg28", 428,"Y","x",1
+"BLOOM     ","ChlaCAlg29", 429,"Y","x",1
+"BLOOM     ","ChlaCAlg30", 430,"Y","x",1
+"BLOOM     ","PPMaxAlg01", 431,"Y","x",1
+"BLOOM     ","PPMaxAlg02", 432,"Y","x",1
+"BLOOM     ","PPMaxAlg03", 433,"Y","x",1
+"BLOOM     ","PPMaxAlg04", 434,"Y","x",1
+"BLOOM     ","PPMaxAlg05", 435,"Y","x",1
+"BLOOM     ","PPMaxAlg06", 436,"Y","x",1
+"BLOOM     ","PPMaxAlg07", 437,"Y","x",1
+"BLOOM     ","PPMaxAlg08", 438,"Y","x",1
+"BLOOM     ","PPMaxAlg09", 439,"Y","x",1
+"BLOOM     ","PPMaxAlg10", 440,"Y","x",1
+"BLOOM     ","PPMaxAlg11", 441,"Y","x",1
+"BLOOM     ","PPMaxAlg12", 442,"Y","x",1
+"BLOOM     ","PPMaxAlg13", 443,"Y","x",1
+"BLOOM     ","PPMaxAlg14", 444,"Y","x",1
+"BLOOM     ","PPMaxAlg15", 445,"Y","x",1
+"BLOOM     ","PPMaxAlg16", 446,"Y","x",1
+"BLOOM     ","PPMaxAlg17", 447,"Y","x",1
+"BLOOM     ","PPMaxAlg18", 448,"Y","x",1
+"BLOOM     ","PPMaxAlg19", 449,"Y","x",1
+"BLOOM     ","PPMaxAlg20", 450,"Y","x",1
+"BLOOM     ","PPMaxAlg21", 451,"Y","x",1
+"BLOOM     ","PPMaxAlg22", 452,"Y","x",1
+"BLOOM     ","PPMaxAlg23", 453,"Y","x",1
+"BLOOM     ","PPMaxAlg24", 454,"Y","x",1
+"BLOOM     ","PPMaxAlg25", 455,"Y","x",1
+"BLOOM     ","PPMaxAlg26", 456,"Y","x",1
+"BLOOM     ","PPMaxAlg27", 457,"Y","x",1
+"BLOOM     ","PPMaxAlg28", 458,"Y","x",1
+"BLOOM     ","PPMaxAlg29", 459,"Y","x",1
+"BLOOM     ","PPMaxAlg30", 460,"Y","x",1
+"BLOOM     ","TcPMxAlg01", 461,"Y","x",1
+"BLOOM     ","TcPMxAlg02", 462,"Y","x",1
+"BLOOM     ","TcPMxAlg03", 463,"Y","x",1
+"BLOOM     ","TcPMxAlg04", 464,"Y","x",1
+"BLOOM     ","TcPMxAlg05", 465,"Y","x",1
+"BLOOM     ","TcPMxAlg06", 466,"Y","x",1
+"BLOOM     ","TcPMxAlg07", 467,"Y","x",1
+"BLOOM     ","TcPMxAlg08", 468,"Y","x",1
+"BLOOM     ","TcPMxAlg09", 469,"Y","x",1
+"BLOOM     ","TcPMxAlg10", 470,"Y","x",1
+"BLOOM     ","TcPMxAlg11", 471,"Y","x",1
+"BLOOM     ","TcPMxAlg12", 472,"Y","x",1
+"BLOOM     ","TcPMxAlg13", 473,"Y","x",1
+"BLOOM     ","TcPMxAlg14", 474,"Y","x",1
+"BLOOM     ","TcPMxAlg15", 475,"Y","x",1
+"BLOOM     ","TcPMxAlg16", 476,"Y","x",1
+"BLOOM     ","TcPMxAlg17", 477,"Y","x",1
+"BLOOM     ","TcPMxAlg18", 478,"Y","x",1
+"BLOOM     ","TcPMxAlg19", 479,"Y","x",1
+"BLOOM     ","TcPMxAlg20", 480,"Y","x",1
+"BLOOM     ","TcPMxAlg21", 481,"Y","x",1
+"BLOOM     ","TcPMxAlg22", 482,"Y","x",1
+"BLOOM     ","TcPMxAlg23", 483,"Y","x",1
+"BLOOM     ","TcPMxAlg24", 484,"Y","x",1
+"BLOOM     ","TcPMxAlg25", 485,"Y","x",1
+"BLOOM     ","TcPMxAlg26", 486,"Y","x",1
+"BLOOM     ","TcPMxAlg27", 487,"Y","x",1
+"BLOOM     ","TcPMxAlg28", 488,"Y","x",1
+"BLOOM     ","TcPMxAlg29", 489,"Y","x",1
+"BLOOM     ","TcPMxAlg30", 490,"Y","x",1
+"BLOOM     ","TFPMxAlg01", 491,"Y","x",1
+"BLOOM     ","TFPMxAlg02", 492,"Y","x",1
+"BLOOM     ","TFPMxAlg03", 493,"Y","x",1
+"BLOOM     ","TFPMxAlg04", 494,"Y","x",1
+"BLOOM     ","TFPMxAlg05", 495,"Y","x",1
+"BLOOM     ","TFPMxAlg06", 496,"Y","x",1
+"BLOOM     ","TFPMxAlg07", 497,"Y","x",1
+"BLOOM     ","TFPMxAlg08", 498,"Y","x",1
+"BLOOM     ","TFPMxAlg09", 499,"Y","x",1
+"BLOOM     ","TFPMxAlg10", 500,"Y","x",1
+"BLOOM     ","TFPMxAlg11", 501,"Y","x",1
+"BLOOM     ","TFPMxAlg12", 502,"Y","x",1
+"BLOOM     ","TFPMxAlg13", 503,"Y","x",1
+"BLOOM     ","TFPMxAlg14", 504,"Y","x",1
+"BLOOM     ","TFPMxAlg15", 505,"Y","x",1
+"BLOOM     ","TFPMxAlg16", 506,"Y","x",1
+"BLOOM     ","TFPMxAlg17", 507,"Y","x",1
+"BLOOM     ","TFPMxAlg18", 508,"Y","x",1
+"BLOOM     ","TFPMxAlg19", 509,"Y","x",1
+"BLOOM     ","TFPMxAlg20", 510,"Y","x",1
+"BLOOM     ","TFPMxAlg21", 511,"Y","x",1
+"BLOOM     ","TFPMxAlg22", 512,"Y","x",1
+"BLOOM     ","TFPMxAlg23", 513,"Y","x",1
+"BLOOM     ","TFPMxAlg24", 514,"Y","x",1
+"BLOOM     ","TFPMxAlg25", 515,"Y","x",1
+"BLOOM     ","TFPMxAlg26", 516,"Y","x",1
+"BLOOM     ","TFPMxAlg27", 517,"Y","x",1
+"BLOOM     ","TFPMxAlg28", 518,"Y","x",1
+"BLOOM     ","TFPMxAlg29", 519,"Y","x",1
+"BLOOM     ","TFPMxAlg30", 520,"Y","x",1
+"BLOOM     ","Mort0Alg01", 521,"Y","x",1
+"BLOOM     ","Mort0Alg02", 522,"Y","x",1
+"BLOOM     ","Mort0Alg03", 523,"Y","x",1
+"BLOOM     ","Mort0Alg04", 524,"Y","x",1
+"BLOOM     ","Mort0Alg05", 525,"Y","x",1
+"BLOOM     ","Mort0Alg06", 526,"Y","x",1
+"BLOOM     ","Mort0Alg07", 527,"Y","x",1
+"BLOOM     ","Mort0Alg08", 528,"Y","x",1
+"BLOOM     ","Mort0Alg09", 529,"Y","x",1
+"BLOOM     ","Mort0Alg10", 530,"Y","x",1
+"BLOOM     ","Mort0Alg11", 531,"Y","x",1
+"BLOOM     ","Mort0Alg12", 532,"Y","x",1
+"BLOOM     ","Mort0Alg13", 533,"Y","x",1
+"BLOOM     ","Mort0Alg14", 534,"Y","x",1
+"BLOOM     ","Mort0Alg15", 535,"Y","x",1
+"BLOOM     ","Mort0Alg16", 536,"Y","x",1
+"BLOOM     ","Mort0Alg17", 537,"Y","x",1
+"BLOOM     ","Mort0Alg18", 538,"Y","x",1
+"BLOOM     ","Mort0Alg19", 539,"Y","x",1
+"BLOOM     ","Mort0Alg20", 540,"Y","x",1
+"BLOOM     ","Mort0Alg21", 541,"Y","x",1
+"BLOOM     ","Mort0Alg22", 542,"Y","x",1
+"BLOOM     ","Mort0Alg23", 543,"Y","x",1
+"BLOOM     ","Mort0Alg24", 544,"Y","x",1
+"BLOOM     ","Mort0Alg25", 545,"Y","x",1
+"BLOOM     ","Mort0Alg26", 546,"Y","x",1
+"BLOOM     ","Mort0Alg27", 547,"Y","x",1
+"BLOOM     ","Mort0Alg28", 548,"Y","x",1
+"BLOOM     ","Mort0Alg29", 549,"Y","x",1
+"BLOOM     ","Mort0Alg30", 550,"Y","x",1
+"BLOOM     ","TcMrtAlg01", 551,"Y","x",1
+"BLOOM     ","TcMrtAlg02", 552,"Y","x",1
+"BLOOM     ","TcMrtAlg03", 553,"Y","x",1
+"BLOOM     ","TcMrtAlg04", 554,"Y","x",1
+"BLOOM     ","TcMrtAlg05", 555,"Y","x",1
+"BLOOM     ","TcMrtAlg06", 556,"Y","x",1
+"BLOOM     ","TcMrtAlg07", 557,"Y","x",1
+"BLOOM     ","TcMrtAlg08", 558,"Y","x",1
+"BLOOM     ","TcMrtAlg09", 559,"Y","x",1
+"BLOOM     ","TcMrtAlg10", 560,"Y","x",1
+"BLOOM     ","TcMrtAlg11", 561,"Y","x",1
+"BLOOM     ","TcMrtAlg12", 562,"Y","x",1
+"BLOOM     ","TcMrtAlg13", 563,"Y","x",1
+"BLOOM     ","TcMrtAlg14", 564,"Y","x",1
+"BLOOM     ","TcMrtAlg15", 565,"Y","x",1
+"BLOOM     ","TcMrtAlg16", 566,"Y","x",1
+"BLOOM     ","TcMrtAlg17", 567,"Y","x",1
+"BLOOM     ","TcMrtAlg18", 568,"Y","x",1
+"BLOOM     ","TcMrtAlg19", 569,"Y","x",1
+"BLOOM     ","TcMrtAlg20", 570,"Y","x",1
+"BLOOM     ","TcMrtAlg21", 571,"Y","x",1
+"BLOOM     ","TcMrtAlg22", 572,"Y","x",1
+"BLOOM     ","TcMrtAlg23", 573,"Y","x",1
+"BLOOM     ","TcMrtAlg24", 574,"Y","x",1
+"BLOOM     ","TcMrtAlg25", 575,"Y","x",1
+"BLOOM     ","TcMrtAlg26", 576,"Y","x",1
+"BLOOM     ","TcMrtAlg27", 577,"Y","x",1
+"BLOOM     ","TcMrtAlg28", 578,"Y","x",1
+"BLOOM     ","TcMrtAlg29", 579,"Y","x",1
+"BLOOM     ","TcMrtAlg30", 580,"Y","x",1
+"BLOOM     ","MRespAlg01", 581,"Y","x",1
+"BLOOM     ","MRespAlg02", 582,"Y","x",1
+"BLOOM     ","MRespAlg03", 583,"Y","x",1
+"BLOOM     ","MRespAlg04", 584,"Y","x",1
+"BLOOM     ","MRespAlg05", 585,"Y","x",1
+"BLOOM     ","MRespAlg06", 586,"Y","x",1
+"BLOOM     ","MRespAlg07", 587,"Y","x",1
+"BLOOM     ","MRespAlg08", 588,"Y","x",1
+"BLOOM     ","MRespAlg09", 589,"Y","x",1
+"BLOOM     ","MRespAlg10", 590,"Y","x",1
+"BLOOM     ","MRespAlg11", 591,"Y","x",1
+"BLOOM     ","MRespAlg12", 592,"Y","x",1
+"BLOOM     ","MRespAlg13", 593,"Y","x",1
+"BLOOM     ","MRespAlg14", 594,"Y","x",1
+"BLOOM     ","MRespAlg15", 595,"Y","x",1
+"BLOOM     ","MRespAlg16", 596,"Y","x",1
+"BLOOM     ","MRespAlg17", 597,"Y","x",1
+"BLOOM     ","MRespAlg18", 598,"Y","x",1
+"BLOOM     ","MRespAlg19", 599,"Y","x",1
+"BLOOM     ","MRespAlg20", 600,"Y","x",1
+"BLOOM     ","MRespAlg21", 601,"Y","x",1
+"BLOOM     ","MRespAlg22", 602,"Y","x",1
+"BLOOM     ","MRespAlg23", 603,"Y","x",1
+"BLOOM     ","MRespAlg24", 604,"Y","x",1
+"BLOOM     ","MRespAlg25", 605,"Y","x",1
+"BLOOM     ","MRespAlg26", 606,"Y","x",1
+"BLOOM     ","MRespAlg27", 607,"Y","x",1
+"BLOOM     ","MRespAlg28", 608,"Y","x",1
+"BLOOM     ","MRespAlg29", 609,"Y","x",1
+"BLOOM     ","MRespAlg30", 610,"Y","x",1
+"BLOOM     ","TcRspAlg01", 611,"Y","x",1
+"BLOOM     ","TcRspAlg02", 612,"Y","x",1
+"BLOOM     ","TcRspAlg03", 613,"Y","x",1
+"BLOOM     ","TcRspAlg04", 614,"Y","x",1
+"BLOOM     ","TcRspAlg05", 615,"Y","x",1
+"BLOOM     ","TcRspAlg06", 616,"Y","x",1
+"BLOOM     ","TcRspAlg07", 617,"Y","x",1
+"BLOOM     ","TcRspAlg08", 618,"Y","x",1
+"BLOOM     ","TcRspAlg09", 619,"Y","x",1
+"BLOOM     ","TcRspAlg10", 620,"Y","x",1
+"BLOOM     ","TcRspAlg11", 621,"Y","x",1
+"BLOOM     ","TcRspAlg12", 622,"Y","x",1
+"BLOOM     ","TcRspAlg13", 623,"Y","x",1
+"BLOOM     ","TcRspAlg14", 624,"Y","x",1
+"BLOOM     ","TcRspAlg15", 625,"Y","x",1
+"BLOOM     ","TcRspAlg16", 626,"Y","x",1
+"BLOOM     ","TcRspAlg17", 627,"Y","x",1
+"BLOOM     ","TcRspAlg18", 628,"Y","x",1
+"BLOOM     ","TcRspAlg19", 629,"Y","x",1
+"BLOOM     ","TcRspAlg20", 630,"Y","x",1
+"BLOOM     ","TcRspAlg21", 631,"Y","x",1
+"BLOOM     ","TcRspAlg22", 632,"Y","x",1
+"BLOOM     ","TcRspAlg23", 633,"Y","x",1
+"BLOOM     ","TcRspAlg24", 634,"Y","x",1
+"BLOOM     ","TcRspAlg25", 635,"Y","x",1
+"BLOOM     ","TcRspAlg26", 636,"Y","x",1
+"BLOOM     ","TcRspAlg27", 637,"Y","x",1
+"BLOOM     ","TcRspAlg28", 638,"Y","x",1
+"BLOOM     ","TcRspAlg29", 639,"Y","x",1
+"BLOOM     ","TcRspAlg30", 640,"Y","x",1
+"BLOOM     ","SDMixAlg01", 641,"Y","x",1
+"BLOOM     ","SDMixAlg02", 642,"Y","x",1
+"BLOOM     ","SDMixAlg03", 643,"Y","x",1
+"BLOOM     ","SDMixAlg04", 644,"Y","x",1
+"BLOOM     ","SDMixAlg05", 645,"Y","x",1
+"BLOOM     ","SDMixAlg06", 646,"Y","x",1
+"BLOOM     ","SDMixAlg07", 647,"Y","x",1
+"BLOOM     ","SDMixAlg08", 648,"Y","x",1
+"BLOOM     ","SDMixAlg09", 649,"Y","x",1
+"BLOOM     ","SDMixAlg10", 650,"Y","x",1
+"BLOOM     ","SDMixAlg11", 651,"Y","x",1
+"BLOOM     ","SDMixAlg12", 652,"Y","x",1
+"BLOOM     ","SDMixAlg13", 653,"Y","x",1
+"BLOOM     ","SDMixAlg14", 654,"Y","x",1
+"BLOOM     ","SDMixAlg15", 655,"Y","x",1
+"BLOOM     ","SDMixAlg16", 656,"Y","x",1
+"BLOOM     ","SDMixAlg17", 657,"Y","x",1
+"BLOOM     ","SDMixAlg18", 658,"Y","x",1
+"BLOOM     ","SDMixAlg19", 659,"Y","x",1
+"BLOOM     ","SDMixAlg20", 660,"Y","x",1
+"BLOOM     ","SDMixAlg21", 661,"Y","x",1
+"BLOOM     ","SDMixAlg22", 662,"Y","x",1
+"BLOOM     ","SDMixAlg23", 663,"Y","x",1
+"BLOOM     ","SDMixAlg24", 664,"Y","x",1
+"BLOOM     ","SDMixAlg25", 665,"Y","x",1
+"BLOOM     ","SDMixAlg26", 666,"Y","x",1
+"BLOOM     ","SDMixAlg27", 667,"Y","x",1
+"BLOOM     ","SDMixAlg28", 668,"Y","x",1
+"BLOOM     ","SDMixAlg29", 669,"Y","x",1
+"BLOOM     ","SDMixAlg30", 670,"Y","x",1
+"BLOOM     ","MrtExAlg01", 671,"Y","x",1
+"BLOOM     ","MrtExAlg02", 672,"Y","x",1
+"BLOOM     ","MrtExAlg03", 673,"Y","x",1
+"BLOOM     ","MrtExAlg04", 674,"Y","x",1
+"BLOOM     ","MrtExAlg05", 675,"Y","x",1
+"BLOOM     ","MrtExAlg06", 676,"Y","x",1
+"BLOOM     ","MrtExAlg07", 677,"Y","x",1
+"BLOOM     ","MrtExAlg08", 678,"Y","x",1
+"BLOOM     ","MrtExAlg09", 679,"Y","x",1
+"BLOOM     ","MrtExAlg10", 680,"Y","x",1
+"BLOOM     ","MrtExAlg11", 681,"Y","x",1
+"BLOOM     ","MrtExAlg12", 682,"Y","x",1
+"BLOOM     ","MrtExAlg13", 683,"Y","x",1
+"BLOOM     ","MrtExAlg14", 684,"Y","x",1
+"BLOOM     ","MrtExAlg15", 685,"Y","x",1
+"BLOOM     ","MrtExAlg16", 686,"Y","x",1
+"BLOOM     ","MrtExAlg17", 687,"Y","x",1
+"BLOOM     ","MrtExAlg18", 688,"Y","x",1
+"BLOOM     ","MrtExAlg19", 689,"Y","x",1
+"BLOOM     ","MrtExAlg20", 690,"Y","x",1
+"BLOOM     ","MrtExAlg21", 691,"Y","x",1
+"BLOOM     ","MrtExAlg22", 692,"Y","x",1
+"BLOOM     ","MrtExAlg23", 693,"Y","x",1
+"BLOOM     ","MrtExAlg24", 694,"Y","x",1
+"BLOOM     ","MrtExAlg25", 695,"Y","x",1
+"BLOOM     ","MrtExAlg26", 696,"Y","x",1
+"BLOOM     ","MrtExAlg27", 697,"Y","x",1
+"BLOOM     ","MrtExAlg28", 698,"Y","x",1
+"BLOOM     ","MrtExAlg29", 699,"Y","x",1
+"BLOOM     ","MrtExAlg30", 700,"Y","x",1
+"BLOOM     ","Mort2Alg01", 701,"Y","x",1
+"BLOOM     ","Mort2Alg02", 702,"Y","x",1
+"BLOOM     ","Mort2Alg03", 703,"Y","x",1
+"BLOOM     ","Mort2Alg04", 704,"Y","x",1
+"BLOOM     ","Mort2Alg05", 705,"Y","x",1
+"BLOOM     ","Mort2Alg06", 706,"Y","x",1
+"BLOOM     ","Mort2Alg07", 707,"Y","x",1
+"BLOOM     ","Mort2Alg08", 708,"Y","x",1
+"BLOOM     ","Mort2Alg09", 709,"Y","x",1
+"BLOOM     ","Mort2Alg10", 710,"Y","x",1
+"BLOOM     ","Mort2Alg11", 711,"Y","x",1
+"BLOOM     ","Mort2Alg12", 712,"Y","x",1
+"BLOOM     ","Mort2Alg13", 713,"Y","x",1
+"BLOOM     ","Mort2Alg14", 714,"Y","x",1
+"BLOOM     ","Mort2Alg15", 715,"Y","x",1
+"BLOOM     ","Mort2Alg16", 716,"Y","x",1
+"BLOOM     ","Mort2Alg17", 717,"Y","x",1
+"BLOOM     ","Mort2Alg18", 718,"Y","x",1
+"BLOOM     ","Mort2Alg19", 719,"Y","x",1
+"BLOOM     ","Mort2Alg20", 720,"Y","x",1
+"BLOOM     ","Mort2Alg21", 721,"Y","x",1
+"BLOOM     ","Mort2Alg22", 722,"Y","x",1
+"BLOOM     ","Mort2Alg23", 723,"Y","x",1
+"BLOOM     ","Mort2Alg24", 724,"Y","x",1
+"BLOOM     ","Mort2Alg25", 725,"Y","x",1
+"BLOOM     ","Mort2Alg26", 726,"Y","x",1
+"BLOOM     ","Mort2Alg27", 727,"Y","x",1
+"BLOOM     ","Mort2Alg28", 728,"Y","x",1
+"BLOOM     ","Mort2Alg29", 729,"Y","x",1
+"BLOOM     ","Mort2Alg30", 730,"Y","x",1
+"BLOOM     ","MrtB1Alg01", 731,"Y","x",1
+"BLOOM     ","MrtB1Alg02", 732,"Y","x",1
+"BLOOM     ","MrtB1Alg03", 733,"Y","x",1
+"BLOOM     ","MrtB1Alg04", 734,"Y","x",1
+"BLOOM     ","MrtB1Alg05", 735,"Y","x",1
+"BLOOM     ","MrtB1Alg06", 736,"Y","x",1
+"BLOOM     ","MrtB1Alg07", 737,"Y","x",1
+"BLOOM     ","MrtB1Alg08", 738,"Y","x",1
+"BLOOM     ","MrtB1Alg09", 739,"Y","x",1
+"BLOOM     ","MrtB1Alg10", 740,"Y","x",1
+"BLOOM     ","MrtB1Alg11", 741,"Y","x",1
+"BLOOM     ","MrtB1Alg12", 742,"Y","x",1
+"BLOOM     ","MrtB1Alg13", 743,"Y","x",1
+"BLOOM     ","MrtB1Alg14", 744,"Y","x",1
+"BLOOM     ","MrtB1Alg15", 745,"Y","x",1
+"BLOOM     ","MrtB1Alg16", 746,"Y","x",1
+"BLOOM     ","MrtB1Alg17", 747,"Y","x",1
+"BLOOM     ","MrtB1Alg18", 748,"Y","x",1
+"BLOOM     ","MrtB1Alg19", 749,"Y","x",1
+"BLOOM     ","MrtB1Alg20", 750,"Y","x",1
+"BLOOM     ","MrtB1Alg21", 751,"Y","x",1
+"BLOOM     ","MrtB1Alg22", 752,"Y","x",1
+"BLOOM     ","MrtB1Alg23", 753,"Y","x",1
+"BLOOM     ","MrtB1Alg24", 754,"Y","x",1
+"BLOOM     ","MrtB1Alg25", 755,"Y","x",1
+"BLOOM     ","MrtB1Alg26", 756,"Y","x",1
+"BLOOM     ","MrtB1Alg27", 757,"Y","x",1
+"BLOOM     ","MrtB1Alg28", 758,"Y","x",1
+"BLOOM     ","MrtB1Alg29", 759,"Y","x",1
+"BLOOM     ","MrtB1Alg30", 760,"Y","x",1
+"BLOOM     ","MrtB2Alg01", 761,"Y","x",1
+"BLOOM     ","MrtB2Alg02", 762,"Y","x",1
+"BLOOM     ","MrtB2Alg03", 763,"Y","x",1
+"BLOOM     ","MrtB2Alg04", 764,"Y","x",1
+"BLOOM     ","MrtB2Alg05", 765,"Y","x",1
+"BLOOM     ","MrtB2Alg06", 766,"Y","x",1
+"BLOOM     ","MrtB2Alg07", 767,"Y","x",1
+"BLOOM     ","MrtB2Alg08", 768,"Y","x",1
+"BLOOM     ","MrtB2Alg09", 769,"Y","x",1
+"BLOOM     ","MrtB2Alg10", 770,"Y","x",1
+"BLOOM     ","MrtB2Alg11", 771,"Y","x",1
+"BLOOM     ","MrtB2Alg12", 772,"Y","x",1
+"BLOOM     ","MrtB2Alg13", 773,"Y","x",1
+"BLOOM     ","MrtB2Alg14", 774,"Y","x",1
+"BLOOM     ","MrtB2Alg15", 775,"Y","x",1
+"BLOOM     ","MrtB2Alg16", 776,"Y","x",1
+"BLOOM     ","MrtB2Alg17", 777,"Y","x",1
+"BLOOM     ","MrtB2Alg18", 778,"Y","x",1
+"BLOOM     ","MrtB2Alg19", 779,"Y","x",1
+"BLOOM     ","MrtB2Alg20", 780,"Y","x",1
+"BLOOM     ","MrtB2Alg21", 781,"Y","x",1
+"BLOOM     ","MrtB2Alg22", 782,"Y","x",1
+"BLOOM     ","MrtB2Alg23", 783,"Y","x",1
+"BLOOM     ","MrtB2Alg24", 784,"Y","x",1
+"BLOOM     ","MrtB2Alg25", 785,"Y","x",1
+"BLOOM     ","MrtB2Alg26", 786,"Y","x",1
+"BLOOM     ","MrtB2Alg27", 787,"Y","x",1
+"BLOOM     ","MrtB2Alg28", 788,"Y","x",1
+"BLOOM     ","MrtB2Alg29", 789,"Y","x",1
+"BLOOM     ","MrtB2Alg30", 790,"Y","x",1
+"BLOOM     ","FixAlg01  ", 791,"Y","x",1
+"BLOOM     ","FixAlg02  ", 792,"Y","x",1
+"BLOOM     ","FixAlg03  ", 793,"Y","x",1
+"BLOOM     ","FixAlg04  ", 794,"Y","x",1
+"BLOOM     ","FixAlg05  ", 795,"Y","x",1
+"BLOOM     ","FixAlg06  ", 796,"Y","x",1
+"BLOOM     ","FixAlg07  ", 797,"Y","x",1
+"BLOOM     ","FixAlg08  ", 798,"Y","x",1
+"BLOOM     ","FixAlg09  ", 799,"Y","x",1
+"BLOOM     ","FixAlg10  ", 800,"Y","x",1
+"BLOOM     ","FixAlg11  ", 801,"Y","x",1
+"BLOOM     ","FixAlg12  ", 802,"Y","x",1
+"BLOOM     ","FixAlg13  ", 803,"Y","x",1
+"BLOOM     ","FixAlg14  ", 804,"Y","x",1
+"BLOOM     ","FixAlg15  ", 805,"Y","x",1
+"BLOOM     ","FixAlg16  ", 806,"Y","x",1
+"BLOOM     ","FixAlg17  ", 807,"Y","x",1
+"BLOOM     ","FixAlg18  ", 808,"Y","x",1
+"BLOOM     ","FixAlg19  ", 809,"Y","x",1
+"BLOOM     ","FixAlg20  ", 810,"Y","x",1
+"BLOOM     ","FixAlg21  ", 811,"Y","x",1
+"BLOOM     ","FixAlg22  ", 812,"Y","x",1
+"BLOOM     ","FixAlg23  ", 813,"Y","x",1
+"BLOOM     ","FixAlg24  ", 814,"Y","x",1
+"BLOOM     ","FixAlg25  ", 815,"Y","x",1
+"BLOOM     ","FixAlg26  ", 816,"Y","x",1
+"BLOOM     ","FixAlg27  ", 817,"Y","x",1
+"BLOOM     ","FixAlg28  ", 818,"Y","x",1
+"BLOOM     ","FixAlg29  ", 819,"Y","x",1
+"BLOOM     ","FixAlg30  ", 820,"Y","x",1
+"BLOOM     ","EffiALG01 ", 821,"O"," ",1
+"BLOOM     ","EffiALG02 ", 822,"O"," ",1
+"BLOOM     ","EffiALG03 ", 823,"O"," ",1
+"BLOOM     ","EffiALG04 ", 824,"O"," ",1
+"BLOOM     ","EffiALG05 ", 825,"O"," ",1
+"BLOOM     ","EffiALG06 ", 826,"O"," ",1
+"BLOOM     ","EffiALG07 ", 827,"O"," ",1
+"BLOOM     ","EffiALG08 ", 828,"O"," ",1
+"BLOOM     ","EffiALG09 ", 829,"O"," ",1
+"BLOOM     ","EffiALG10 ", 830,"O"," ",1
+"BLOOM     ","EffiALG11 ", 831,"O"," ",1
+"BLOOM     ","EffiALG12 ", 832,"O"," ",1
+"BLOOM     ","EffiALG13 ", 833,"O"," ",1
+"BLOOM     ","EffiALG14 ", 834,"O"," ",1
+"BLOOM     ","EffiALG15 ", 835,"O"," ",1
+"BLOOM     ","EffiALG16 ", 836,"O"," ",1
+"BLOOM     ","EffiALG17 ", 837,"O"," ",1
+"BLOOM     ","EffiALG18 ", 838,"O"," ",1
+"BLOOM     ","EffiALG19 ", 839,"O"," ",1
+"BLOOM     ","EffiALG20 ", 840,"O"," ",1
+"BLOOM     ","EffiALG21 ", 841,"O"," ",1
+"BLOOM     ","EffiALG22 ", 842,"O"," ",1
+"BLOOM     ","EffiALG23 ", 843,"O"," ",1
+"BLOOM     ","EffiALG24 ", 844,"O"," ",1
+"BLOOM     ","EffiALG25 ", 845,"O"," ",1
+"BLOOM     ","EffiALG26 ", 846,"O"," ",1
+"BLOOM     ","EffiALG27 ", 847,"O"," ",1
+"BLOOM     ","EffiALG28 ", 848,"O"," ",1
+"BLOOM     ","EffiALG29 ", 849,"O"," ",1
+"BLOOM     ","EffiALG30 ", 850,"O"," ",1
 "Phy_Blo_P ","NAlgBloom ",   1,"Y"," ",1
 "Phy_Blo_P ","Depth     ",   2,"N","x",1
 "Phy_Blo_P ","BLOOMALG  ",   3,"N","x",1

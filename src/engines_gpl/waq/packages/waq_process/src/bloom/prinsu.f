@@ -25,7 +25,7 @@
 !  *         SUBROUTINE TO PRINT SUMMARIZED SOLUTIONS                  *
 !  *********************************************************************
 !
-      subroutine prinsu(x,xeco,bio2,total,cout,out,ntstot,itnum,ntape)
+      subroutine prinsu(x,xeco,bio2,total,ntstot,itnum,ntape)
 
       use bloom_data_dim
       use bloom_data_size 
@@ -36,48 +36,13 @@
 
       implicit none
 
-      integer  :: i, i1, i2, j, k, k1, k2
+      integer  :: i, j, k, k1, k2
       integer  :: itnum, ntape, ntstot, numlim, ncon
       real (8) :: bio2, xbio, total, tot2
       
-      real*8 x(*),out(*),xeco(*)
+      real*8 x(*),xeco(*)
       character*8 words(14)
-      character*4 cout(*)
       logical lcon
-      data words  /'Date    ','Limiting','Factors ','Iter    ',
-     1             'Zood    ','Total   ','CHL-pred','        ',
-     2             'Plank.  ','Diss.   ','CHL-obs ','Tot Ext.',
-     3             'Growth  ','Mortalit'/
-
-!  Call subroutines to print headings for output on tape 10,14 and ntape
-!  if this is the first time through the subroutine.
-!  Set print array indices.
-      if (lprint .eq. 2) nprint=nprint+1
-      if (nprint .gt. 1) go to 40
-      call headin (ntape,words)
-      ntstot=nts14+1
-
-!  Abiotic constraints
-      do i = 1, nuabco
-         cnames (i) = cstra (i)
-      end do
-
-!  Blank for exclusion row
-      cnames (nuexro) = words (8)
-
-!  Growth and mortality constraints: name + group name.
-      i1 = nuexro
-      i2 = nuexro + nuecog
-      do i = 1, nuecog
-         i1 = i1 + 1
-         i2 = i2 + 1
-         write(cnames (i1), 30) words (13), grname(i)
-         write(cnames (i2), 30) words (14), grname(i)
-      end do
-   30 format (a6,'-',a8)
-
-!  Start writing the output into print-arrays.
-   40 continue
 
 !  Calculate totals for species, the total chlorophyll concentration
 !  and record in OUT.
@@ -91,19 +56,12 @@
             total=total+xbio/chlr(j)
          end do
          xeco(k)=tot2
-         out(k+nts7)=tot2
       end do         
-      out(nts14)=bio2
-      if (bio2 .lt. 0.0) out(nts14) = 0.0
-      out(ntstot)=total
 
 !  Determine limiting factors and record their names in COUT.
 !  Record in LIMIT in 1,0 notation.
       write (limit,70) ('0',k=1,nuabco+1)
    70 format (9(1x,a1))
-      do k=2,nts6
-         cout(k) = words(8) (1:4)
-      end do
 
 !  Initiate ISPLIM at 0
       do i = 1, nuspec
@@ -120,7 +78,6 @@
          k1=k1+1
          numlim = numlim + 1
          isplim (numlim) = ncon
-         cout(k1) = cstra(k) (1:4)
          limit (2*k:2*k) = '1'
       end do
 
@@ -132,7 +89,6 @@
          numlim = numlim + 1
          isplim (numlim) = ncon
          k1=k1+1
-         cout(k1) = cstra(k) (1:4)
          limit (k2:k2) = '1'
       end do
 
@@ -156,7 +112,6 @@
          isplim (numlim) = ncon
          if ( .not. lcon) then
             k1=k1+1
-            cout(k1) = words(13) (1:4)
             limit (k2:k2) = '1'
             lcon = .true.
          end if
@@ -176,13 +131,11 @@
          isplim (numlim) = ncon
          if ( .not. lcon) then
             k1=k1+1
-            cout(k1) = words(14) (1:4)
             limit (k2:k2) = '1'
             lcon = .true.
          end if
       end do
   150 continue
-      out(nts7) = 0.
 
       return
       end

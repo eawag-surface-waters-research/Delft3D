@@ -453,8 +453,7 @@
          ! read the bloom-species database.
 
       if ( l_eco ) then
-         lunblm = 88
-         open ( lunblm    , file=blmfil )
+         open ( newunit=lunblm, file=blmfil )
          read ( lunblm    , '(a)' ) line
          verspe = 1.0
          ioff =  index(line, 'BLOOMSPE_VERSION_')
@@ -694,19 +693,10 @@
 
          ! write the bloom efficiency file
 
-         lunfrm = 89
-         open ( lunfrm    , file='bloominp.frm' )
+         open ( newunit=lunfrm, file='bloominp.frm' )
          call blmeff (lurep , lunblm, verspe, lunfrm, grpnam, nogrp , typnam, noalg)
          close(lunblm)
          close(lunfrm)
-
-         inquire (file = 'bloominp.d09', exist = ex)
-         if(.not.ex) then
-            lund09 = 89
-            open ( lund09    , file='bloominp.d09' )
-            call blmd09 (lurep , lund09)
-            close(lund09)
-         endif
       endif
 
       ! calculate new totals

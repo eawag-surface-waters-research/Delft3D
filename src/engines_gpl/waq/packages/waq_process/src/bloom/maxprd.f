@@ -49,7 +49,6 @@
 !  If, however, NREP is 1, the temperature limitation option is ignored
 !  because otherwise the model does not have an intial solution for the
 !  first time step.
-      if (ltlim .eq. 0) go to 20
       if (t .ge. temlim) go to 20
       if (nrep .eq. 1) go to 20
          do i = 1,nuspec
@@ -74,13 +73,13 @@
 
 !  If option "dump" was turned on, print pmax, resp and rmort.
       if (idump .ne. 0) then
-         write (iou(6),50) (pmax(k),k=1,nuspec)
+         write (outdbg,50) (pmax(k),k=1,nuspec)
    50    format ('  Pmax(T,j): ',30(F5.2,1X))
-         write (iou(6),60) (resp(k),k=1,nuspec)
+         write (outdbg,60) (resp(k),k=1,nuspec)
    60    format ('  Resp(T,j): ',30(F5.2,1X))
-         write (iou(6),70) (rmort (k),k=1,nuspec)
+         write (outdbg,70) (rmort (k),k=1,nuspec)
    70    format ('  Rmort(T,j):',30(F5.2,1X))
-         write (iou(6),80) (sdmix (k),k=1,nuspec)
+         write (outdbg,80) (sdmix (k),k=1,nuspec)
    80    format ('  Sdmix(j):  ',30(F5.2,1X))
       end if
       return

@@ -25,7 +25,6 @@
 
       subroutine blclst(mrtm1, mrtm2, mrtb1, mrtb2, ntyp_a, cl)
 
-      use bloom_data_dim
       use bloom_data_size 
 
       implicit none
@@ -55,7 +54,6 @@
       
       subroutine blclrs(mrtm1, ntyp_a)
 
-      use bloom_data_dim
       use bloom_data_size 
 
       implicit none
@@ -76,7 +74,6 @@
       
       subroutine blsppm(ialg, ppmax)
 
-      use bloom_data_dim
       use bloom_data_size 
       
       implicit none
@@ -92,7 +89,6 @@
       
       subroutine blssdm (ialg  , sdmixn )
 
-      use bloom_data_dim
       use bloom_data_size 
       
       implicit none
@@ -108,7 +104,6 @@
       
       subroutine blsaef(igroup  , effin )
 
-      use bloom_data_dim
       use bloom_data_size 
       use bloom_data_phyt
       

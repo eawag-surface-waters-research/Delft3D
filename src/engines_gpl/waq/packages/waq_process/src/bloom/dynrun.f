@@ -39,11 +39,10 @@
 !  expressed in various units, which are not returned in the stand-alone
 !  version of BLOOM II.
 
-      subroutine dynrun(exttot,extb,tmp,sol,dep,dayl,chlor,id,iseg,nset,extlim,deat,totchl,totdry,totcar,swblsa)
+      subroutine dynrun(exttot,extb,tmp,sol,dep,dayl,id,iseg,nset,extlim,deat,totchl,totdry,totcar,swblsa)
 
       use bloom_data_dim
       use bloom_data_size 
-      use bloom_data_caldynam
       use bloom_data_io  
       use bloom_data_phyt    
       use bloom_data_putin   
@@ -59,7 +58,6 @@
       real(8)     :: sol
       real(8)     :: dep
       real(8)     :: tmp
-      real(8)     :: chlor
       real(8)     :: extb
       real(8)     :: dayl
       real(8)     :: deat
@@ -69,18 +67,6 @@
       real(8)     :: totdry
       real(8)     :: totcar
       
-!  Check whether a selective dump for periods and/or segments is requested for this period.
-      idump = 0
-      if (isdump .eq. 1) then
-         if ((id .ge. isdper(1) .and. id .le. isdper(2)) .and. (igdump .eq. 0 .or. igdump .eq. iseg)) then
-            idump = 1
-         end if
-      else
-         if  (igdump .eq. iseg) then
-            idump = 1
-         end if
-      end if
-
 !  Calculate solarradion level for week; correct for total radiadion.
       sol=solaco * sol
 
@@ -90,12 +76,12 @@
       end do
 
 !  Construct date indicator.
-!  Print heading for output on unit IOU(6) if "DUMP" is specified.
+!  Print heading for output on unit outdbg if "DUMP" is specified.
       write (cdate, 115) iseg, id
 115   format (i5,1x,i2)
       if ( idump .ne. 0) then
-         write (iou(6),99960) iseg, id
-         write (iou(6),99950) tmp, sol, dep
+         write (outdbg,99960) iseg, id
+         write (outdbg,99950) tmp, sol, dep
       end if
 
 !  Call subroutine BLOOM to set up and solve the linear programs
@@ -103,9 +89,7 @@
 !  to solve the problem.
 !  **** Update for ECOLUMN version:
 !       TOTDRY (total dry weight) passed in position NUCOLS+2 of XDEF.
-      call bloom(cdate,id,mi,tmp,sol,chlor,extb,dayl,deat,
-     1           dep,xinit,xdef,xeco,totchl,exttot,extlim,nset,infeas,
-     2           nonun,numun,swblsa)
+      call bloom(cdate,tmp,sol,extb,dayl,deat,dep,xinit,xdef,xeco,totchl,exttot,extlim,nset,infeas,nonun,numun,swblsa)
       totdry = xdef(nucols+2)
       totcar = 0.0
       do i = 1, nuspec

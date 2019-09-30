@@ -62,24 +62,24 @@
 !  Initialize XOPT if this is the first interval for a time period.
 !  If DUMP is specified, then print solution for interval JNOW.
       if (inow .eq. 1) xopt = 0.0d0
-      if (idump .eq. 0) go to 40
-      if (inow .eq. 1 .or. npause .ge. 20) then
-         npause = 0
+      if (idump .eq. 1) then
+         if (inow .eq. 1 .or. npause .ge. 20) then
+            npause = 0
+         end if
+         write (outdbg,10) jnow,(b(ii),ii=nufili,nuabco)
+   10    format (30X,'Interval ',I2,/,2X,'Extinction limits',3X,2(3X,F8.4))
+         klx=0
+         do jjj=1,nuspec
+            jt(jjj)=0
+            if (a(nuexro,jjj) .gt. 1.0 - 1.0d-6) cycle
+            klx=klx+1
+            jt(klx)=jjj
+         end do
+         write (outdbg,30) (jt(jjj),jjj=1,klx)
+   30    format(2X,'Types permitted',4X,20I4)
+         write (outdbg,31) (spname(jt(jjj)),jjj=1,klx)
+   31    format(2X,'Types permitted',4X,30(A8,1X))
       end if
-      write (iou(6),10) jnow,(b(ii),ii=nufili,nuabco)
-   10 format (30X,'Interval ',I2,/,2X,'Extinction limits',3X,2(3X,F8.4))
-      klx=0
-      do jjj=1,nuspec
-         jt(jjj)=0
-         if (a(nuexro,jjj) .gt. 1.0 - 1.0d-6) cycle
-         klx=klx+1
-         jt(klx)=jjj
-      end do
-      write (iou(6),30) (jt(jjj),jjj=1,klx)
-   30 format(2X,'Types permitted',4X,20I4)
-      write (iou(6),31) (spname(jt(jjj)),jjj=1,klx)
-   31 format(2X,'Types permitted',4X,30(A8,1X))
-   40 continue
 
 !  Check for feasibility of interval JNOW.
 !  if LINF ne 0, exit after increasing NIN with 1
@@ -87,22 +87,22 @@
       if (inow .eq. 1 .and. lmorch .eq. 0) go to 50
       if (idump .eq. 0) go to 170
    50 npause = npause + 5
-      write (iou(6),60) jnow
+      write (outdbg,60) jnow
    60 format ('  Error message issued for interval ',I2,':')
       go to ( 70, 90, 110, 130, 150), irs(2)
-   70 write (iou(6),80)
+   70 write (outdbg,80)
    80 format('  Solution is feasible, but not yet optimal')
       go to 170
-   90 write (iou(6),100)
+   90 write (outdbg,100)
   100 format('  A feasible solution in not yet obtained')
       go to 170
-  110 write (iou(6),120)
+  110 write (outdbg,120)
   120 format('  A finite solution does not exist, solution is unbounded')
       go to 170
-  130 write (iou(6),140) cnames(irs(3))
+  130 write (outdbg,140) cnames(irs(3))
   140 format('  A feasible solution does not exist due to constraint ',A16)
       go to 170
-  150 write (iou(6),160)
+  150 write (outdbg,160)
   160 format('  A finite solution can not be found',/,'  all elements of a prospective pivot column are zero')
   170 nin = nin + 1
       return
@@ -115,9 +115,9 @@
 !  Print solution for interval JNOW, if DUMP was specified.
       if (idump .eq. 0) go to 290
       npause = npause + 10
-      write (iou(6),190) (x(ii),ii=1,nunuco)
+      write (outdbg,190) (x(ii),ii=1,nunuco)
   190 format (2X,'Nutrient Slacks',2X,6(F8.2,2X))
-      write (iou(6),200) (x(ii),ii=nufili,nuabco)
+      write (outdbg,200) (x(ii),ii=nufili,nuabco)
   200 format (4X,'Energy Slacks',2X,2(F8.2,2X))
 
 !  Print slacks for (optional) growth constraints.
@@ -128,7 +128,7 @@
   210 ii1 = ii1 + 5
       ii2 = ii2 + 5
       ii2 = min0(ii2,ii2max)
-      write (iou(6),220) (x(ii),ii=ii1,ii2)
+      write (outdbg,220) (x(ii),ii=ii1,ii2)
   220 format (4X,'Growth slacks',2X,10(F8.2,2X))
       if (ii2 .lt. ii2max) go to 210
 
@@ -140,7 +140,7 @@
   230 ii1 = ii1 + 5
       ii2 = ii2 + 5
       ii2 = min0(ii2,ii2max)
-      write (iou(6),240) (x(ii),ii=ii1,ii2)
+      write (outdbg,240) (x(ii),ii=ii1,ii2)
   240 format (3x,'Mortal. slacks',2x,10(f8.2,2x))
       if (ii2 .lt. ii2max) go to 230
 
@@ -151,10 +151,10 @@
   260 ii1 = ii1 + 5
       ii2 = ii2 + 5
       ii2 = min0(ii2,nucols)
-      write (iou(6),270) (x(ii),ii=ii1,ii2)
+      write (outdbg,270) (x(ii),ii=ii1,ii2)
   270 format (2x,'Types   ',5(f8.2,2x))
       if (ii2 .lt. nucols) go to 260
-      write (iou(6),280) biomax,x(nucols+1)
+      write (outdbg,280) biomax,x(nucols+1)
   280 format (2x,'Total biomass',2x,f8.2,2x,'Optimum',2x,f8.2)
   290 continue
 
@@ -189,8 +189,9 @@
       xopt = x(nucols+1)
       xdef(nucols+2) = bio(2)
       int=jnow
-      do 320 k=1,nucols+1
-  320 xdef(k)=x(k)
+      do k=1,nucols+1
+         xdef(k)=x(k)
+      end do
 
 ! Update 1.2: removed storage limiting factors in ISPLIM.
 ! Implemented new agorithm in PRINT6

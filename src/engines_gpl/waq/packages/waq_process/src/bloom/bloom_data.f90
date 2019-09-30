@@ -79,13 +79,11 @@ module bloom_data_size
    integer            :: nprodu                   ! Counter for BLOOM II production routines
    integer            :: lprodu                   ! Obsolete, to be deleted
    integer            :: loxout                   ! Switch to write oxygen production
-   integer            :: ldydea                   ! Test for (in)feasibility of the nutrient constraints in a run with a dynamic detritus computation
    integer            :: ldyext                   ! Obsolete, to be deleted
    integer            :: lgroch                   ! Computation with extra constraints on growth rates (must be switched on in dynamic mode!)
    integer            :: lmorch                   ! Computation with extra mortality constraints (must be switched on in dynamic mode!)
    integer            :: lpmort                   ! Switch PMAX+MOR to add the mortality rate constant of each species to the net gross rate in order to compute the gross growth rate.
                                                   ! This option is included to maintain compatibility with older program versions. (remove?)
-   integer            :: ltlim                    ! Switch TEMPLIM to set a lower temperature limit for the growth and mortality rates of all types.
    integer            :: lobfun                   ! Object function is either BIOMASS or GROWTH (default)
 end module bloom_data_size
 
@@ -103,7 +101,6 @@ module bloom_data_arran
    integer            :: nz                       ! Actual size of zvec/fun/der
    integer            :: npoint                   ! Actual size of power/effic
    real(8)            :: aroot(2*mt)              ! KMIN and KMAX roots of types
-   integer            :: ldayeu                   ! Switch to put on to compute the euphotic depth and assume that the actual day length observed by the phytoplankton cells equals the time spend in the euphotic zone.
    real(8)            :: euligh                   ! Eutrophic light
 end module bloom_data_arran
 
@@ -117,8 +114,6 @@ end module bloom_data_mass_balance
 
 module bloom_data_caldynam
    use bloom_data_dim
-   real(8)            :: decon                    ! Degradation flux for detritus N gN/m3/day
-   real(8)            :: flush                    ! Flush rate (obsolete?)
    real(8)            :: tstep                    ! Time step
 end module bloom_data_caldynam
 
@@ -128,14 +123,8 @@ module bloom_data_io
    character(1)       :: string(48)               ! String help variable
    character(8)       :: line(10)                 ! Line of maximum of 10 keywords of 8 character length
    character(16)      :: cnames(ia)               ! Constraint names 
-   integer            :: iou(99)                  ! Logical file units
-   integer            :: posit                    ! Position
-   integer            :: inuni                    ! Logical unit number input
-   integer            :: ouuni                    ! Logical unit number output
-   integer            :: ioflag                   ! Initialize mode indicator IOFLAG to 0: default mode of program is batch (should be removed later, only = 0)
-   integer            :: ipl1                     ! Logical unit plot 1
-   integer            :: ipl2                     ! Logical unit plot 2
-   integer            :: lenstr                   ! String length
+   integer            :: infrm                    ! Logical unit number frm-file input file
+   integer            :: outdbg                   ! Logical unit number dbg-file output file
 end module bloom_data_io
 
 module bloom_data_matrix
@@ -154,11 +143,8 @@ module bloom_data_phyt
    real(8)            :: ekx(mt)                  ! Specific extinctions per species, converted
    real(8)            :: dmix(mt)                 ! Mixing depth per species
    real(8)            :: chlr(mt)                 ! Chlorophyll per species
-   real(8)            :: rnut(2,mn)               ! Remineralisation rate
    real(8)            :: concen(mn)               ! Available nutrients
    real(8)            :: availn(mt)               ! Non-autolyse fraction of nutrients (1.0 - FrAutAlg)
-   real(8)            :: sedrat                   ! Sedimentation rate of dead algae
-   real(8)            :: remior                   ! Mineralization rate detritus
    character(10)      :: grname(ms)               ! Group name
    character(10)      :: spname(mt)               ! Species type name
    character(10)      :: cstra(mn+2)              ! Constrain names
@@ -178,29 +164,7 @@ end module bloom_data_phyt
 
 module bloom_data_putin
    use bloom_data_dim
-   real(8)            :: phyt(52)                 ! Algae concentration [gC/m3]
-   real(8)            :: bnut(mn)                 ! Nutrient multiplier
-   real(8)            :: dnut(mn)                 ! Nutrient increment
-   real(8)            :: backmu                   ! Background extinction multiplier
-   real(8)            :: backad                   ! Background extinction increment
-   real(8)            :: tempmu                   ! Temperature multiplier
-   real(8)            :: tempad                   ! Temperature increment
-   real(8)            :: solamu                   ! Solar intensity multiplier
    real(8)            :: solaco                   ! Solar intensity coefficient (is input VL or RAD)
-   real(8)            :: solaad                   ! Solar intensity increment
-   real(8)            :: deptmu                   ! Mixing depth multiplier
-   real(8)            :: deptad                   ! Mixing depth incerement
-   real(8)            :: dlgtmu                   ! Day length multiplier
-   real(8)            :: dlgtad                   ! Day length increment
-   integer            :: nper(10,3)               ! NPER(J,1)--number of first week; NPER(J,2)--number of last week; NPER(J,3)--interval step size between first and last week (obsolete)
-   integer            :: nrun                     ! Number of runs (obsolete)
-   integer            :: imu                      ! Current run (obsolete)
-   integer            :: mi                       ! Number of time periods considered in one computation step of BLOOM II.
-   integer            :: lrun                     ! Check for RUN command (must be made obsolete)
-   integer            :: iyear                    ! Run year (from D09, not accurate!)
-   character(8)       :: com(18)                  ! Run comment lines
-   character(8)       :: case(13)                 ! Case name
-   character(8)       :: contro(20)               ! Copy of CWORDS
 end module bloom_data_putin
 
 module bloom_data_sumou
@@ -209,17 +173,12 @@ module bloom_data_sumou
    real(8)            :: biost                    ! Maximum of bio
    character(18)      :: limit                    ! Limiting factors
    character(3)       :: limnam(mn+3)             ! Limiting factor names
-   integer            :: nts6                     ! Print-array indices
    integer            :: nts7                     ! Print-array indices
    integer            :: nts14                    ! Print-array indices
    integer            :: intst                    ! Interval number
    integer            :: lst                      ! Flag for non-unique solutions
-   integer            :: nprint                   ! Counter for print routines
    integer            :: lgbase                   ! Switch: 0=fractional baselevel, 1=constant baselevel
    integer            :: lprint                   ! Flag indicating whether normal BLOOM II output routines are called (1) or not (0).
-   integer            :: isdper(2)                ! First and last week selective dump
-   integer            :: isdump                   ! Flag indicating time is in the selective dump period
-   integer            :: igdump                   ! Debug only a specific segment when > 0 (0=all segments)
 end module bloom_data_sumou
 
 module bloom_data_xvect

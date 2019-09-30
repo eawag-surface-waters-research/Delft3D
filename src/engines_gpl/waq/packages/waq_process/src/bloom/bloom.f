@@ -25,15 +25,12 @@
 !  *    SUBROUTINE FOR SETTING UP AND SOLVING BLOOM MODEL PROBLEM      *
 !  *********************************************************************
 
-      subroutine bloom(cdate,id,mi,t,csol,phyt,extb,day,death,
-     1           dep,xinit,xdef,xeco,total,exttot,extlim,nset,infeas,
-     2           nonun,numun,swblsa)
+      subroutine bloom(cdate,t,csol,extb,day,death,dep,xinit,xdef,xeco,total,exttot,extlim,nset,infeas,nonun,numun,swblsa)
 
       use bloom_data_3dl
       use bloom_data_dim
       use bloom_data_size
       use bloom_data_arran
-      use bloom_data_caldynam
       use bloom_data_io
       use bloom_data_matrix
       use bloom_data_phyt
@@ -41,14 +38,12 @@
       
       implicit none
 
-      integer irs3, i, id, ier, index1, index2, infeas, inow, int, inhib, ismax, iskmax, irerun
+      integer irs3, i, ier, index1, index2, infeas, inow, int, inhib, ismax, iskmax, irerun
       integer j, k, l1, l2, linf, ni, nin, nset, numuni, numun, swblsa
-      integer ntstot, itnum, ntsst, k1, mi
+      integer ntstot, itnum, ntsst, k1
       integer nonuni(mt),nonun(mt),irs(3),lib(mx),jkmax(ms)
       save    irs, irs3
-      real(8) :: x(mx),xinit(*),xdef(*),bio(2),groot(2),
-     1           oroot(2*mt),root(2),emin(mt),
-     2           out15(20+mg),outst(20+mg),xeco(*),xecost(ms),zood(0:mg)
+      real(8) :: x(mx),xinit(*),xdef(*),bio(2),groot(2),oroot(2*mt),root(2),emin(mt),xeco(*),xecost(ms),zood(0:mg)
       real(8) :: t
       real(8) :: usol
       real(8) :: csol
@@ -57,8 +52,6 @@
       real(8) :: dsol
       real(8) :: dep
       real(8) :: day
-      real(8) :: dayeuf
-      real(8) :: depeuf
       real(8) :: daym
       real(8) :: effi
       real(8) :: extlim
@@ -67,12 +60,10 @@
       real(8) :: totst
       real(8) :: exlive
       real(8) :: ekxi
-      real(8) :: phyt
       real(8) :: zmax
       real(8) :: death
       
       character*8 cdate
-      character*4 cout(mn+5),coutst(mn+5)
       character*1 errind
       logical lsolu
       real(8), parameter :: solmin=100.0
@@ -88,29 +79,7 @@
 !  this value to replicate the boundary conditions.
 !  Update 28 oct 92: added DEP to argument list.
       usol = csol
-      call setabc(xinit,extb,exttot,csol,dsol,t,dep,id,nset)
-
-!   Test for (in)feasibility of the nutrient constraints in
-!   a run with a dynamic detritus computation.
-      if (ldydea .ne. 0) then
-         call nutfea (infeas)
-         if (infeas .eq. 1) then
-            irerun = 3
-            go to 270
-         end if
-      end if
-
-! Compute the euphotic depth and the euphotic day lenght if option
-! "DAYEUPHO" is on.
-      if (ldayeu .eq. 1) then
-         call dayeu (day,dayeuf,exttot,dep,depeuf,dsol,euligh,idump)
-         do i = 1,nuspec
-            dmix(i) = dabs(sdmix(i)) * depeuf
-         end do
-      else
-         dayeuf = day
-         depeuf = dep
-      end if
+      call setabc(xinit,extb,exttot,csol,dsol,t,dep,nset)
 
 ! If the light intensity is very low, declare the problem 'infeasible',
 ! don't rerun, only write output. But do not do this for 3DL approach the
@@ -124,15 +93,15 @@
 
 ! Determine indices for interpolation of day length correction factors.
       do index2 = 1,24
-         if (dl(index2) .ge. dayeuf) exit
+         if (dl(index2) .ge. day) exit
       end do
       index1 = index2 - 1
 
 !  Compute minimum efficiency requirements of species.
       do j=1,nuecog
-         daym = daymul(index1,j) + (daymul(index2,j) - daymul(index1,j)) * (dayeuf - dl(index1)) / (dl(index2) - dl(index1))
+         daym = daymul(index1,j) + (daymul(index2,j) - daymul(index1,j)) * (day - dl(index1)) / (dl(index2) - dl(index1))
          do k=it2(j,1),it2(j,2)
-            emin(k)=(resp(k)+rmort(k)+flush) / (pmax(k)*daym)
+            emin(k)=(resp(k)+rmort(k)) / (pmax(k)*daym)
          end do
       end do
 
@@ -151,7 +120,7 @@
          do  k=l1,l2
             if ( .not. active_3dl ) then
                if ( .not. active_efft ) then
-                  call constr(surf(k),depeuf,emin(k),root,j)
+                  call constr(surf(k),dep,emin(k),root,j)
                else
                   effi = aveffi(k)
                   root(1) = 0.0
@@ -199,10 +168,10 @@
       end do
 
 ! Print KMIN and KMAX roots of types if option "DUMP" is on.
-      if (idump .eq. 1) then
-         write (iou(6),180) (aroot(i),i=1,2*nuspec,2)
+      if (idump .ne. 0) then
+         write (outdbg,180) (aroot(i),i=1,2*nuspec,2)
   180    format (' KMIN: ',20(f7.2,1x))
-         write (iou(6),190) (aroot(i),i=2,2*nuspec,2)
+         write (outdbg,190) (aroot(i),i=2,2*nuspec,2)
   190    format (' KMAX: ',20(f7.2,1x))
       end if
 
@@ -219,7 +188,7 @@
       int=0
       lsolu = .false.
       if (ni .ne. 0) go to 220
-      if (idump .eq. 1) write (iou(6),210)
+      if (idump .ne. 0) write (outdbg,210)
   210 format (5x,'No species permitted in any interval')
       infeas=1
       inhib = 0
@@ -252,7 +221,7 @@
       if (linf .eq. 1) go to 240
 
 !  LINF = 2: photo inhibition.
-      if (idump .eq. 1) write (iou(6),225) j
+      if (idump .ne. 0) write (outdbg,225) j
   225 format(5x,'no species in interval ',i2,' due to photo inhibition')
       nin = nin + 1
       inhib = 1
@@ -271,7 +240,7 @@
       infeas=0
       if (lsolu) go to 280
       infeas=1
-      if (idump .eq. 1) write (iou(6),260)
+      if (idump .ne. 0) write (outdbg,260)
   260 format (5x,'no solution--all intervals are infeasible')
 
 !  Infeasible solution. Call FIXINF to deal with this problem.
@@ -298,13 +267,13 @@
 !  on unit 15.
 
   280 continue
-      call prinsu(xdef,xeco,bio(2),total,cout,out15,ntstot,itnum,15)
+      call prinsu(xdef,xeco,bio(2),total,ntstot,itnum,15)
       if (idump .ne. 0) call prinma(xdef,bio(2),total,ni,nin,int)
 
 !  If two intervals have the same maximum biomass, print both of them
 !  in the complete and summarized output.
       if (lst .eq. 1) then
-        call prinsu(xst,xecost,biost,totst,coutst,outst,ntstot,itnum,15)
+        call prinsu(xst,xecost,biost,totst,ntstot,itnum,15)
         ntsst = ntstot
         if (idump .ne. 0) call prinma(xst,biost,totst,ni,nin,intst)
       end if
@@ -327,7 +296,7 @@
 !  Print a warning message if potential non-unique solutions have been
 !  determined by subroutine SOLVLP.
       if (idump. eq. 0 .or. numun .eq. 0 .or.bio(2) .le. 0.0) go to 460
-      write (iou(6),450) (nonun(i),i=1,numun)
+      write (outdbg,450) (nonun(i),i=1,numun)
   450 format ('  The following species have minimum reduced cost = 0.0 and might replace',/
      2        '  one of the species in the bloom:',1x,20i3)
   460 continue

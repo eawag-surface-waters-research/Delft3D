@@ -29,14 +29,11 @@
       subroutine maxgro(xinit,root,exttot,eadj,j,iskmax,dep)
 
       use bloom_data_3dl
-      use bloom_data_dim
       use bloom_data_size 
-      use bloom_data_arran   
       use bloom_data_caldynam
       use bloom_data_io  
       use bloom_data_matrix  
       use bloom_data_phyt    
-      use bloom_data_putin   
 
       implicit none
 
@@ -100,16 +97,16 @@
          end if
       else
 ! Compute value BT for the growth constraint.
-         bt=dexp( ( (pmax(iskmax)-lpmort*rmort(iskmax))*effi - flush - resp(iskmax) ) *tstep*mi)
+         bt=dexp( ( (pmax(iskmax)-lpmort*rmort(iskmax))*effi - resp(iskmax) ) *tstep)
          bt = bt*xinit(j)
 ! Set the growth constraint to 0.0 when BT is negative.
          if (bt .lt. 0.0) then
-            write(iou(6), 99995) bt, grname(j)
+            write(outdbg, 99995) bt, grname(j)
             bt = 0.0d0
          end if
-!  Store growth constraint value in B-vector. Optionally print results to unit IOU(6).
+!  Store growth constraint value in B-vector. Optionally print results to unit outdbg.
          b(j+nuexro)=bt
-         if (idump .eq. 1) write (iou(6),99990) grname(j),effi,effi*pmax(iskmax),b(j+nuexro)
+         if (idump .ne. 0) write (outdbg,99990) grname(j),effi,effi*pmax(iskmax),b(j+nuexro)
       end if
 
 ! Store the nett growth rate of each phytoplankton type in the row

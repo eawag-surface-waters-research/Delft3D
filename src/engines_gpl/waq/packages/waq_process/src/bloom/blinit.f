@@ -21,23 +21,36 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine blinit (lprino,ldumpo)
+      subroutine blinit
 
       use bloom_data_dim
       use bloom_data_matrix  
       use bloom_data_phyt    
       use bloom_data_sumou   
+      use bloom_data_size 
 
       implicit none
-
-      integer lprino              ! Saves original value of LPRINT
-      integer ldumpo              ! Saves original value of IDUMP
 
 !     Local variables
       integer i, j                ! indexes
 
 !     Convert BLOOM II specific units to DLWQWQ specific units
-      call cvrblm
+!
+! Assuming that concentration units in the calling program are g/m3,
+! where as BLOOM II uses mg/m3, it is necessary to convert
+! 1.  the specific extinction coefficients
+! 2.  the carbon to chlorophyll ratio (and hence the dry weight to
+!     chlorophyll ratio)
+! of all phytoplankton types.
+! The specific extinction coefficient of detritus.
+! The base and top levels of the growth and mortality constraints.
+      do i = 1, nuspec
+         chltoc(i) = chltoc(i) * 1.0d-3
+         chlr(i)   = chltoc(i) * ctodry(i)
+         ekx(i)    = ekx(i)    * 1000.0d0
+      enddo
+      biobas = biobas * 1.0d-3
+      toplev = toplev * 1.0d-3
 
 ! Set A-matrix. Copy nutrient rows from AA (stochiometry matrix).
 ! Copy the extinction rows.
@@ -55,12 +68,7 @@
          enddo
       enddo 
 
-!  Call subroutine HDRBLM to write the headers for a number of output files.
-      if (lprint .gt. 1) call hdrblm
-
-!  Save originals of print flags for later use in BLOUTC
-      lprino = lprint
-      ldumpo = idump
+      idump = 0
 
       return
       end

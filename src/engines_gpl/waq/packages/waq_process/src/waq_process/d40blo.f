@@ -45,11 +45,10 @@
       use      bloom_data_vtrans
 ! END3DL
 
-      IMPLICIT NONE
+      implicit none
 
-      REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
-     +         IEXPNT(4,*) , IKNMRK(*) , IQ, IFROM, ITO, NOQ1, NOQ2, NOQ3, NOQ4
+      real     pmsa  ( * ) , fl    (*)
+      integer  ipoint( * ) , increm(*) , noseg , noflux, iexpnt(4,*) , iknmrk(*) , iq, ifrom, ito, noq1, noq2, noq3, noq4
 !
 !     Local (species groups arrays are now dimensioned as species/types arrays)
 !
@@ -84,14 +83,11 @@
 !                                 (CO2, NH4, NO3, PO4, SiOx)  (g/m3/d)
 !     FRAMMO  R     1             Fraction of NH4 in N-Uptake (-)
 !     FBOD5   R     1             BOD5/BODinf in algae (-)
-!     HISTOR  L     1             Indicates call for history element at
 !                                 an history output timestep
 !     ID      I     1             Week number (-)
 !     IFIX    I     NTYP          Flag indicating fixed (attached, immobile algae)
 !     ISWVTR  I     1             Switch if 3DL is to be used
 !     LIMFAC  R     6             Limiting factors (-)
-!     LPRINO  I     1             Saves original value of LPRINT
-!     LDUMPO  I     1             Saves original value of IDUMP
 !     MRTM1   I     NTYP          Mortality parameter
 !     MRTM2   I     NTYP          Mortality parameter
 !     MRTB1   I     NTYP          Mortality parameter
@@ -118,76 +114,107 @@
 !     TotNin  R     1             Total nitrogen for BLOOM stand alone        (g/m3)
 !     TotPin  R     1             Total phosphorous for BLOOM stand alone     (g/m3)
 !     TotSIin R     1             Total silicium for BLOOM stand alone        (g/m3)       
-      INTEGER  NTYP_M, NIPFIX, NIPVAR, NOUTLIM, NUNUCOM, NOPFIX
-      PARAMETER ( NTYP_M = 30 )
+      integer  ntyp_m, nipfix, nipvar, noutlim, nunucom, nopfix
+      parameter ( ntyp_m = 30 )
 !     NIPFIX      Nr of input items independent of BLOOM types, preceding BLOOM types input
 !     NIPVAR      Nr of input items for BLOOM types
-      PARAMETER ( NIPFIX = 32 , NIPVAR= 27 )
-      PARAMETER ( NOPFIX = 29 )
-      PARAMETER (NUNUCOM = 8)
-      PARAMETER (NOUTLIM = NUNUCOM + 2 + 2*NTYP_M)
-      REAL     BIOMAS(NTYP_M), FAUT  (NTYP_M), FDET  (NTYP_M),
-     1         ALGTYP(0:20,NTYP_M), MRTM1(NTYP_M), MRTM2(NTYP_M),
-     2         MRTB1(NTYP_M), MRTB2(NTYP_M), CGROUP(NTYP_M)
-      INTEGER  IFIX(NTYP_M)
-      REAL     RATGRO(NTYP_M), RATMOR(NTYP_M)
-      LOGICAL  HISTOR, THIS, LMIXO,LFIXN,LCARB
-      INTEGER  NTYP_A, NGRO_A,
-     J         NSET  , LPRINO, LDUMPO, ID
-      REAL     TIMMUL, TEMPER, RADIAT, DEPTHW, DEPTH,  DAYLEN,
-     J         AMMONI, NITRAT, PHOSPH, SILICA, DELTAT, BLSTEP,
-     J         EXTTOT, DEAT4 , NUPTAK, FRAMMO, FBOD5 , EXTALG,
-     J         CHLORO, TOTNUT(4)     ,                 ALGDM ,
-     J         THRNH4, THRNO3, THRPO4, THRSI , RCRESP, TCRESP,
-     M         BLDEP , CL    , TIC   , CO2   , CO2LIM, EFFIN,
-     j         PPMCO2, DETN  , DETP  , RDCNT , SDMIXN, VOLUME
-      REAL  :: LIMFAC(6)
-      INTEGER  IP1 , IP2 , IP3 , IP4 , IP5 , IP6 , IP7 , IP8 , IP9 ,
-     J         IP10, IP11, IP12, IP13, IP14, IP15, IP16, IP17, IP18,
-     J         IP19, IP20, IP21, IP22, IP23, IP24, IP25, IP26, IP27,
-     J         IP28, IP29, IP30, IP31, IP32
-      INTEGER  IO(NOPFIX)
-      INTEGER  NOSEGW, NOLAY, NOSEGL, IKMRK1, IKMRK2
+      parameter ( nipfix = 40 , nipvar= 27 )
+      parameter ( nopfix = 29 )
+      parameter (nunucom = 8)
+      parameter (noutlim = nunucom + 2 + 2*ntyp_m)
+      real     biomas(ntyp_m), faut  (ntyp_m), fdet  (ntyp_m),
+     1         algtyp(0:20,ntyp_m), mrtm1(ntyp_m), mrtm2(ntyp_m),
+     2         mrtb1(ntyp_m), mrtb2(ntyp_m), cgroup(ntyp_m)
+      integer  ifix(ntyp_m)
+      real     ratgro(ntyp_m), ratmor(ntyp_m)
+      logical  lmixo,lfixn,lcarb
+      integer  ntyp_a, ngro_a,
+     j         nset  , id
+      real     timmul, temper, radiat, depthw, depth,  daylen,
+     j         ammoni, nitrat, phosph, silica, deltat, blstep,
+     j         exttot, deat4 , nuptak, frammo, fbod5 , extalg,
+     j         chloro, totnut(4)     ,                 algdm ,
+     j         thrnh4, thrno3, thrpo4, thrsi , rcresp, tcresp,
+     m         bldep , cl    , tic   , co2   , co2lim, effin,
+     j         ppmco2, detn  , detp  , rdcnt , sdmixn, volume
+      real  :: limfac(6)
+      integer  ip1 , ip2 , ip3 , ip4 , ip5 , ip6 , ip7 , ip8 , ip9 ,
+     j         ip10, ip11, ip12, ip13, ip14, ip15, ip16, ip17, ip18,
+     j         ip19, ip20, ip21, ip22, ip23, ip24, ip25, ip26, ip27,
+     j         ip28, ip29, ip30, ip31, ip32
+      integer  io(nopfix)
+      integer  nosegw, nolay, nosegl, ikmrk1, ikmrk2
       integer  ipo17, ipo18, ipo19
       integer  ino17, ino18, ino19
-      INTEGER  INIT , IFLUX, ISEG, IALG, IOFF, IP, IGRO
-      INTEGER  IFAUTO, IFDETR, IFOOXP, IFUPTA, IFPROD, IFMORT
-      INTEGER  ISWVTR
-      INTEGER  SWBLOOMOUT
-      INTEGER  SWCLIM
-      INTEGER  LUNREP
-      CHARACTER CDUMMY
-      REAL*8 ORG_AVAILN(NTYP_M)
-      INTEGER NUTCON(NUNUCOM), FLXCON(NUNUCOM), CON2OUT(NUNUCOM)
-      REAL    OUTLIM(NOUTLIM)
-      REAL    TotNin, TotPin, TotSIin
-      INTEGER SWBLSA
-!
+      integer  init , iflux, iseg, ialg, ioff, ip, igro
+      integer  ifauto, ifdetr, ifooxp, ifupta, ifprod, ifmort
+      integer  iswvtr
+      integer  swbloomout
+      integer  swclim
+      integer  lunrep
+      character cdummy
+      real*8 org_availn(ntyp_m)
+      integer nutcon(nunucom), flxcon(nunucom), con2out(nunucom)
+      real    outlim(noutlim)
+      real    TotNin, TotPin, TotSIin
+      integer swblsa
+
+!     Former D09 input      
+      integer      SWBlSolInt           ! Switch for solar irradiation as total radiation (0) or PAR (1)
+      integer      SWBlObject           ! Switch for objective growth (1) or biomass (0)
+      real         BlTemLim             ! Minimum temperature for growth
+      real         BlBasMor             ! Base mortality when temperature is below minimum temperature for growth
+      integer      SWBlGroChk           ! Switch to use extra constraints on growth rates 
+      real         BlBioBas             ! Base biomass level per group
+      integer      SWBlMorChk           ! Switch to use extra mortality constraints
+      real         BlTopLev             ! Top level of mortality constraints
+      integer      SWBlOutput           ! Switch to BLOOM debug output (possible to set this on (1) or off(0) per segment and in time)
+
 !     JVB much more variables needs to be saved, for the time being all
 !
 !     SAVE     INIT,RDCNT,ID
-      SAVE
+      save
 !
-      DATA     INIT   / 1 /
-      DATA     NSET   / 0 /
+      data     init   / 1 /
+      data     nset   / 0 /
 !
-      IF ( INIT .EQ. 1 ) THEN
-         INIT = 0
-         TIMMUL = PMSA(IPOINT(1))
-         DELTAT = PMSA(IPOINT(19))
-         BLSTEP = TIMMUL * DELTAT
-         RDCNT  = - BLSTEP
-         ID = 0
-         SWCLIM = NINT(PMSA(IPOINT(28)))
-         IF (INCREM(28).NE.0) CALL BLSTOP('SWCLIM',ID)
-         LCARB = .FALSE.
-         IF (SWCLIM.GT.0) LCARB = .TRUE.
-         SWBLSA = PMSA(IPOINT(29))
+      if ( init .eq. 1 ) then
+         init = 0
 
-!     Set logical numbers and open autonomous I/O files Bloom
-         CALL GETMLU(LUNREP)
-         CALL BLFILE(LUNREP)
+!        Open autonomous I/O files Bloom
+         call getmlu(lunrep)
+         call blfile(lunrep)
 
+         timmul = pmsa(ipoint(1))
+         deltat = pmsa(ipoint(19))
+         blstep = timmul * deltat
+         rdcnt  = - blstep
+         id = 0
+         swclim = nint(pmsa(ipoint(28)))
+         if (increm(28).ne.0) call blstopinit(lunrep, 'SWCLim')
+         lcarb = .false.
+         if (swclim.gt.0) lcarb = .true.
+         swblsa = pmsa(ipoint(29))
+         if (increm(29).ne.0) call blstopinit(lunrep, 'SWBlSA')
+
+!        Former D09 input      
+         SWBlSolInt = nint(pmsa(ipoint(33)))
+         if (increm(33).ne.0) call blstopinit(lunrep, 'SWBlSolInt')
+         SWBlObject = nint(pmsa(ipoint(34)))
+         if (increm(34).ne.0) call blstopinit(lunrep, 'SWBlObject')
+         BlTemLim   = pmsa(ipoint(35))
+         if (increm(35).ne.0) call blstopinit(lunrep, 'BlTemLim')
+         BlBasMor   = pmsa(ipoint(36))
+         if (increm(36).ne.0) call blstopinit(lunrep, 'BlBasMor')
+         SWBlGroChk = nint(pmsa(ipoint(37)))
+         if (increm(37).ne.0) call blstopinit(lunrep, 'SWBlGroChk')
+         BlBioBas   = pmsa(ipoint(38))
+         if (increm(38).ne.0) call blstopinit(lunrep, 'BlBioBas')
+         SWBlMorChk = nint(pmsa(ipoint(39)))
+         if (increm(39).ne.0) call blstopinit(lunrep, 'SWBlMorChk')
+         BlTopLev   = pmsa(ipoint(40))
+         if (increm(40).ne.0) call blstopinit(lunrep, 'BlTopLev')
+         
 !        Copy algae type properties for input
          DO 40 IALG=1,NTYP_M
 !          BLOOMALG
@@ -309,8 +336,8 @@
 !     Read BLOOM-input and set some parameters
 !     JvG 11102013 set NUNUCO dependent of LCARB
 
-         CALL BLINPU (NTYP_M, NTYP_A, NGRO_A, ALGTYP, LMIXO , LFIXN ,
-     J                LCARB , NUNUCOM, NUTCON, FLXCON, CON2OUT)
+         call blinpu (ntyp_m, ntyp_a, ngro_a, algtyp, lmixo , lfixn ,lcarb , nunucom, nutcon, flxcon, con2out,
+     &                swblsolint, swblobject, bltemlim, blbasmor, swblgrochk, blbiobas, swblmorchk, bltoplev)
          IF (NTYP_A.GT.NTYP_M) GOTO 901
 
 !     set common CBLBAL communication with balance routines
@@ -319,7 +346,7 @@
 
 !     Initialize BLOOM (Unit conversions and filling of A-matrix)
 
-         CALL BLINIT (LPRINO,LDUMPO)
+         CALL BLINIT
 !     Check on availability of efficiency tracer
          IOFF = NIPFIX + 26*NTYP_M
          IP = IPOINT(IOFF+1) + (ISEG-1)*INCREM(IOFF+1)
@@ -426,14 +453,11 @@
       BLSTEP = TIMMUL * DELTAT
       RDCNT  = RDCNT + BLSTEP
       IF ((AINT(RDCNT / 7.) + 1).NE.ID) THEN
-        THIS   = .TRUE.
         ID = AINT(RDCNT / 7.) + 1
         IF (ID.GT.52) THEN
           ID = ID - 52
           RDCNT = RDCNT - 52. * 7.
         ENDIF
-      ELSE
-        THIS   = .FALSE.
       ENDIF
 
 !     First segment loop set efficiencies
@@ -594,11 +618,7 @@
       DETP   = PMSA(IP18)
       DELTAT = PMSA(IP19)
       SWBLOOMOUT = NINT(PMSA(IP20))
-      IF ((SWBLOOMOUT.NE.0).AND.(THIS)) THEN
-        HISTOR = .TRUE.
-      ELSE
-        HISTOR = .FALSE.
-      ENDIF
+      CALL BLOUTC(SWBLOOMOUT)
       CL     = PMSA(IP22)
       VOLUME = PMSA(IP23)
       TIC      = MAX(0.0,PMSA(IP25))
@@ -676,17 +696,6 @@
       IFUPTA = IFLUX + 13
       IFPROD = IFLUX + 23
       IFMORT = IFLUX + 23 + NTYP_M
-!
-!     Set output control variables
-!     $ How can we couple this to the DELWAQ history flag?
-!     HISTOR should be true for history elements at history times
-!     Present .true. gives independent output of Bloom
-!     .false. prohibits independent output of Bloom
-
-
-!JVB  tijdelijk altijd om de weekcyclus te negeren
-!jvb  HISTOR = .TRUE.
-      CALL BLOUTC (HISTOR,LPRINO,LDUMPO)
 
 !     Salinity dependend mortality
 !     Adapt mortality rates
@@ -895,6 +904,20 @@
       call srstop (1)
       end subroutine d40blo
 
+      subroutine blstopinit(lunrep, inputname)
+
+      character*10 inputname
+
+      write(lunrep,*) 'ERROR in bloom: ',inputname,' must be a constant!'
+      write(*,*) 'ERROR in bloom: ',inputname,' must be a constant!'
+
+      call srstop(1)
+
+      return
+
+      end subroutine blstopinit
+
+      
       subroutine blstop(mes,i)
 
       character*12 mes

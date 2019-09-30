@@ -32,29 +32,18 @@
       character(256) filnam       ! File name with extention
       integer        iost         ! I/O-status
 
-!  Call subroutine SETUNI to set I/O unit numbers for BLOOM II.
-      call setuni
-
 !  Open statement for BLOOM II input files.
       filnam = trim(runnam)//'.frm'
-      open (iou(12),file=filnam,iostat = iost)
+      open (newunit=infrm,file=filnam,iostat = iost)
       if (iost .ne. 0) then
          write (*,*) 'blfile: error opening .frm file'
          write (lunrep,*) 'blfile: error opening .frm file'
          call srstop(1)
       endif
 
-      filnam = trim(runnam)//'.d09'
-      open (iou( 9),file=filnam,iostat = iost)
-      if (iost .ne. 0) then
-         write (*,*) 'blfile: error opening .d09 file'
-         write (lunrep,*) 'blfile: error opening .d09 file'
-         call srstop(1)
-      endif
-
 ! Open statement for BLOOM II debug file.
       filnam = trim(runnam)//'.dbg'
-      open (iou(10),file=filnam,iostat = iost)
+      open (outdbg,file=filnam,iostat = iost)
       if (iost .ne. 0) then
          write (*,*) 'blfile: error opening .dbg file'
          write (lunrep,*) 'blfile: error opening .dbg file'
