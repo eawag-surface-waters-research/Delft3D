@@ -1570,49 +1570,40 @@ module m_readstructures
       allocate(generalst)
 
       generalst%velheight = .true.
+
+      generalst%wu1                = 10d0
       call prop_get_double(md_ptr, '', 'upstream1Width', generalst%wu1, success1)
-      success = success .and. check_input_result(success1, st_id, 'upstream1Width')
-      
+      generalst%wu2                = 10d0
       call prop_get_double(md_ptr, '', 'upstream2Width',  generalst%wu2, success1)
-      success = success .and. check_input_result(success1, st_id, 'upstream2Width')
-      
+      generalst%ws                 = 10d0
       call get_value_or_addto_forcinglist(md_ptr, 'crestWidth', generalst%ws, st_id, ST_GENERAL_ST, forcinglist)
-      
+      generalst%wd1                = 10d0
       call prop_get_double(md_ptr, '', 'downstream1Width', generalst%wd1, success1)
-      success = success .and. check_input_result(success1, st_id, 'downstream1Width')
-      
+      generalst%wd2                = 10d0
       call prop_get_double(md_ptr, '', 'downstream2Width',   generalst%wd2, success1)
-      success = success .and. check_input_result(success1, st_id, 'downstream2Width')
-                                                                  
+
+      generalst%zu1                = 0d0
       call prop_get_double(md_ptr, '', 'upstream1Level',   generalst%zu1, success1)
-      success = success .and. check_input_result(success1, st_id, 'upstream1Level')
-      
+      generalst%zu2                = 0d0
       call prop_get_double(md_ptr, '', 'upstream2Level',  generalst%zu2, success1)
-      success = success .and. check_input_result(success1, st_id, 'upstream2Level')
-      
+      generalst%zs                 = 0d0
       call get_value_or_addto_forcinglist(md_ptr, 'crestLevel',    generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success1)
-      success = success .and. check_input_result(success1, st_id, 'crestLevel')
-      
+      generalst%zd1                = 0d0
       call prop_get_double(md_ptr, '', 'downstream1Level', generalst%zd1, success1)
-      success = success .and. check_input_result(success1, st_id, 'downstream1Level')
-      
+      generalst%zd2                = 0d0
       call prop_get_double(md_ptr, '', 'downstream2Level',  generalst%zd2, success1)
-      success = success .and. check_input_result(success1, st_id, 'downstream2Level')
 
+      generalst%gateLowerEdgeLevel = 11d0
       call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, forcinglist, success1)
-      success = success .and. check_input_result(success1, st_id, 'gateLowerEdgeLevel')
-
       generalst%crestlength        = 0d0
       call prop_get_double(md_ptr, '', 'crestLength',   generalst%crestlength)
-      
+      generalst%gatedoorheight     = 1d10
       call prop_get_double(md_ptr, '', 'gateHeight',   generalst%gatedoorheight, success1)
-      success = success .and. check_input_result(success1, st_id, 'gateHeight')
-      
+      generalst%gateopeningwidth   = 0d0
       call get_value_or_addto_forcinglist(md_ptr, 'gateOpeningWidth', generalst%gateopeningwidth, st_id, ST_GENERAL_ST, forcinglist, success1)
-      success = success .and. check_input_result(success1, st_id, 'gateOpeningWidth')
 
       dirString = 'symmetric'
-      call prop_get_string(md_ptr, '', 'gateOpeningHorizontalDirection',   dirString)
+      call prop_get_string(md_ptr, '', 'Direction',   dirString)
       generalst%openingDirection = openingDirectionToInt(dirString)
       
 

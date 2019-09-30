@@ -9038,6 +9038,8 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (1st call required for call to flow_trachy_update)
 
+ call initialize_structures_actual_params(network%sts)
+ 
  iresult = flow_flowinit()                           ! initialise flow arrays and time dependent params for a given user time
  if (iresult /= DFM_NOERR) then
     goto 1234
@@ -9074,7 +9076,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)
 
- call initialize_structures_actual_params(network%sts)
  call structure_parameters()                         !  initialize structure values
 
  if (jatrt == 1) then
