@@ -1823,6 +1823,11 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
       if (item_index == 0) then
          return
       endif
+      
+      if (network%sts%struct(item_index)%pump%nrstages > 0) then
+         call mess(LEVEL_ERROR, 'set_compound_filed: a staged pump cannot be controlled by RTC.')
+      end if
+         
       select case(field_name)
       case("capacity")
          if (is_in_network) then

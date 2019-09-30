@@ -1244,8 +1244,13 @@ module m_readstructures
          success = success .and. check_input_result(success1, st_id, 'capacity')
       else
          ! Stages with control: only support table with double precision values.
+         pump%capacity = -1d0
          call prop_get_doubles(md_ptr, '', 'capacity', pump%capacity, pump%nrstages, success1)
          success = success .and. check_input_result(success1, st_id, 'capacity')
+         if (any(pump%capacity < 0)) then
+            call setMessage(LEVEL_ERROR, 'Error Reading Pump '''//trim(st_id)//''': a staged pump (numStages > 0) must have non-negative capacity, and cannot be combined with time series or controlled by RTC.')
+            success = .false.
+         end if
 
          txt = '' ! No default controlSide
          call prop_get_string(md_ptr, '', 'controlSide', txt, success1)
