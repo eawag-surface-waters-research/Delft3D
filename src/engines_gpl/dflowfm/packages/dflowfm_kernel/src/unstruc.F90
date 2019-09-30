@@ -20732,7 +20732,7 @@ end subroutine unc_write_shp
           endif
           if (jaend == 1 .and. n1a > ndx2d .and. n2a <= ndx2d .or. &
               jaend == 1 .and. n2a > ndx2d .and. n1a <= ndx2d ) then
-             kcu(Lf) = 4                                   ! 1D2D lateral link
+             kcu(Lf) = 4                                   ! 1D2D longitudinal link
              nc2 = n2a
              if (n1a <= ndx2d) then
                 nc2 = n1a
@@ -20759,6 +20759,9 @@ end subroutine unc_write_shp
                  write (msgbuf, '(a,i0,a)') '(netlink L=', L, ')'
                  call qnerror('1d2d link kn3 = 3 or 5 or 7 not connected between kcs=21 and kcs=1 ',trim(msgbuf),' ')
              endif
+          else
+             write (msgbuf, '(a,i0,a)') '(netlink L=', L, ')'
+             call qnerror('1d2d link kn3 = 3 or 7 not connected between 1D node and 2D cell ',trim(msgbuf),' ')
           endif
        else if (kn(3,L) == 5) then
           if (n1a > ndx2d .and. n2a <= ndx2d .or. &
@@ -20771,6 +20774,9 @@ end subroutine unc_write_shp
              if (n2a <= ndx2d) then
                 kcs(n2a) = 21
              endif
+          else
+             write (msgbuf, '(a,i0,a)') '(netlink L=', L, ')'
+             call qnerror('1d2d link kn3 = 5 not connected to 2D cell ',trim(msgbuf),' ')
           endif
        else if (kn(3,L) == 2) then                         ! 2D link
           kcu(Lf) = 2
