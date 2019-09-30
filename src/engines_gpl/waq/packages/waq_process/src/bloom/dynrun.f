@@ -56,6 +56,7 @@
       integer     :: i, id, iseg, k, nset, numun
       integer     :: swblsa, infeas
       real(8)     :: sol
+      real(8)     :: solpar
       real(8)     :: dep
       real(8)     :: tmp
       real(8)     :: extb
@@ -68,7 +69,7 @@
       real(8)     :: totcar
       
 !  Calculate solarradion level for week; correct for total radiadion.
-      sol=solaco * sol
+      solpar=solaco * sol
 
 !  Calculate mixing depths of species.
       do k=1,nuspec
@@ -81,7 +82,7 @@
 115   format (i5,1x,i2)
       if ( idump .ne. 0) then
          write (outdbg,99960) iseg, id
-         write (outdbg,99950) tmp, sol, dep
+         write (outdbg,99950) tmp, solpar, dep
       end if
 
 !  Call subroutine BLOOM to set up and solve the linear programs
@@ -89,7 +90,7 @@
 !  to solve the problem.
 !  **** Update for ECOLUMN version:
 !       TOTDRY (total dry weight) passed in position NUCOLS+2 of XDEF.
-      call bloom(cdate,tmp,sol,extb,dayl,deat,dep,xinit,xdef,xeco,totchl,exttot,extlim,nset,infeas,nonun,numun,swblsa)
+      call bloom(cdate,tmp,solpar,extb,dayl,deat,dep,xinit,xdef,xeco,totchl,exttot,extlim,nset,infeas,nonun,numun,swblsa)
       totdry = xdef(nucols+2)
       totcar = 0.0
       do i = 1, nuspec
