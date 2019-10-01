@@ -1610,7 +1610,7 @@ module m_readstructures
       call get_value_or_addto_forcinglist(md_ptr, 'gateOpeningWidth', generalst%gateopeningwidth, st_id, ST_GENERAL_ST, forcinglist, success1)
 
       dirString = 'symmetric'
-      call prop_get_string(md_ptr, '', 'Direction',   dirString)
+      call prop_get_string(md_ptr, '', 'gateOpeningHorizontalDirection',   dirString)
       generalst%openingDirection = openingDirectionToInt(dirString)
       
 
