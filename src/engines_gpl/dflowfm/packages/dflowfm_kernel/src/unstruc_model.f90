@@ -439,7 +439,7 @@ subroutine loadModel(filename)
     end if
 
     ! load the caching file - if there is any
-    call loadCachingFile(filename, md_netfile)
+    call loadCachingFile(md_ident, md_netfile)
 
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)

@@ -119,6 +119,7 @@ subroutine loadCachingFile( filename, netfile )
     call md5file( netfile, md5current, success )
 
     if ( md5checksum /= md5current .or. .not. success ) then
+        close( lun ) 
         return
     endif
 
@@ -163,7 +164,7 @@ subroutine storeCachingFile( filename )
 
     cache_success = .false.
 
-    open( newunit = lun, file = trim(filename) // ".cache", access = "stream", status = "old", iostat = ierr )
+    open( newunit = lun, file = trim(filename) // ".cache", access = "stream", status = "old", action = 'read',  iostat = ierr )
     if ( ierr == 0 ) then
         close( lun, status = "delete" )
     endif
