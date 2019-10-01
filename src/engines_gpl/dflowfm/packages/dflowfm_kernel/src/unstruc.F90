@@ -9038,7 +9038,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (1st call required for call to flow_trachy_update)
 
- call initialize_structures_actual_params(network%sts)
+ call initialize_structures_actual_params(network%sts) ! Prior to flow_flowinit, so that adjust_bobs can use proper crest levels.
 
  iresult = flow_flowinit()                           ! initialise flow arrays and time dependent params for a given user time
  if (iresult /= DFM_NOERR) then
@@ -9076,7 +9076,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)
 
- call structure_parameters()                         !  initialize structure values
+ call structure_parameters()                         ! initialize structure values, after flow_flowinit() so that initial water levels and discharges are already set.
 
  if (jatrt == 1) then
     call flow_trachyupdate()                         ! Perform a trachy update step to correctly set initial field quantities
