@@ -479,6 +479,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/advec.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/bedform_data.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/bedform_io.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/caching.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/calibration.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/d3ddimens.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/d_flooding.f90 -text

@@ -72,6 +72,7 @@ libdflowfm_la_SOURCES=\
         shaec.f \
         shsec.f \
         sphcom.f \
+        caching.f90 \
         unstruc_model.f90 \
         meteo1.f90 \
         fourier_analysis.f90 \
@@ -188,6 +189,7 @@ FMODULES += \
     -I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
     -I$(top_builddir)/third_party_open/libsigwatch \
+    -I$(top_builddir)/third_party_open/md5/md5file \
     -I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src \
     -I$(top_builddir)/engines_gpl/waq/include \
     -I$(top_builddir)/engines_gpl/waq/packages/wq_processes/src \
@@ -306,6 +308,8 @@ EXTRALIBS+=\
         $(top_builddir)/third_party_open/kdtree2/src-f90/libkdtree2f.la \
         $(top_builddir)/third_party_open/polypack/src/libpolypack.la \
         $(top_builddir)/third_party_open/libsigwatch/libsigwatch.la \
+        $(top_builddir)/third_party_open/md5/md5file/libmd5file.la \
+        $(top_builddir)/third_party_open/md5/md5digest/libmd5digest.la \
         $(CCLIBS) -luuid
 
 # dflowfm_LDADD = \
