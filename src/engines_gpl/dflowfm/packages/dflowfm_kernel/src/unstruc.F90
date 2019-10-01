@@ -3358,10 +3358,10 @@ end subroutine sethu
        zb = zb - ( patm(kb) - PavBnd )/(ag*rhomean)
     endif
 
-    if (jasteric > 0) then
-       zcor = barocpsteric(kb)/(ag*rhomean)
-       zb   = zb - zcor
-    endif
+    !if (jasteric > 0) then
+    !   zcor = barocpsteric(kb)/(ag*rhomean)
+    !   zb   = zb - zcor
+    !endif
 
 !    zb = max( zb, bl(kb) + 1d-3 )
 
@@ -5708,16 +5708,7 @@ if (jawind > 0) then
     cs = csu(LL)  ; sn = snu(LL) ; v(LL) = 0d0
     do L = Lb,Lt
        k1 = ln(1,L) ; k2 = ln(2,L)
-
-       ! set u tangential
-       if ( jasfer3D == 1 ) then
-           vcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1))) +  &
-                  (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))
-       else
-           vcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) ) + &     ! continuity weighted best sofar plus depth limiting
-                  (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )
-       endif
-
+ 
        if ( jasfer3D == 1 ) then
           v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
                  (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
@@ -5730,6 +5721,19 @@ if (jawind > 0) then
        endif
 
        if (icorio > 0) then
+          ! set u tangential
+          if (icorio == 4) then 
+                 vcor = v(L) 
+          else 
+             if ( jasfer3D == 1 ) then
+                 vcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1))) +  &
+                        (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))
+             else
+                 vcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) ) + &     ! continuity weighted best sofar plus depth limiting
+                        (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )
+             endif
+          endif 
+
           if (jsferic == 1) then
              fcor = fcori(LL)
           else
@@ -26752,9 +26756,9 @@ subroutine transport()                           ! transport for now, advect sal
           else
               sa1(kb) = sa1(ki)                   ! outflow
           endif
-          if (jasteric > 0) then
-             steric(1,kb) = zbnds(kk)
-          endif
+          !if (jasteric > 0) then
+          !   steric(1,kb) = zbnds(kk)
+          !endif
        enddo
 
        if ( kb.gt.0 ) then
@@ -26801,9 +26805,9 @@ subroutine transport()                           ! transport for now, advect sal
               constituents(itemp, kb)  = constituents(itemp, ki)     ! outflow
           endif
 
-          if (jasteric > 0) then
-             steric(2,kb) = zbndTM(kk)
-          endif
+          !if (jasteric > 0) then
+          !   steric(2,kb) = zbndTM(kk)
+          !endif
 
        enddo
 
