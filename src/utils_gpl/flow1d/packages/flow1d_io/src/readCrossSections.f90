@@ -163,9 +163,9 @@ module m_readCrossSections
                cycle
             endif
          else
-               call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection '''//trim(pCrs%csid)//''' on branch '''//trim(branchid)// &
-                     '''. No definitionId was given.')
-               cycle
+            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection '''//trim(pCrs%csid)//''' on branch '''//trim(branchid)// &
+                  '''. No definitionId was given.')
+            cycle
          end if
 
          pCrs%bedLevel = 0.0d0
