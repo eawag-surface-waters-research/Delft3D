@@ -397,6 +397,7 @@ subroutine loadModel(filename)
     use m_flow1d_reader
     use m_flowexternalforcings, only: pillar
     use m_sferic
+    use unstruc_caching
 
     interface
        subroutine realan(mlan, antot)
@@ -436,6 +437,9 @@ subroutine loadModel(filename)
     if (len_trim(md_extfile) > 0) then
        ! DEBUG: call convert_externalforcings_file(md_extfile)
     end if
+
+    ! load the caching file - if there is any
+    call loadCachingFile(filename, md_netfile)
 
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
