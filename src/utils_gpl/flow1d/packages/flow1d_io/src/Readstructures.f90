@@ -81,6 +81,8 @@ module m_readstructures
    !                    * pumps: nrStages -> numStages, reductionFactorLevels -> numReductionLevels
    !                    * culverts: lossCoeffCount -> numLossCoeff
    !                    * universal weir: levelsCount -> numLevels
+   ! 2.00 (2019-07-22): Consistent renaming,
+   
 
    contains
 
@@ -1248,7 +1250,7 @@ module m_readstructures
          call prop_get_doubles(md_ptr, '', 'capacity', pump%capacity, pump%nrstages, success1)
          success = success .and. check_input_result(success1, st_id, 'capacity')
          if (any(pump%capacity < 0)) then
-            call setMessage(LEVEL_ERROR, 'Error Reading Pump '''//trim(st_id)//''': a staged pump (numStages > 0) must have non-negative capacity, and cannot be combined with time series or controlled by RTC.')
+            call setMessage(LEVEL_ERROR, 'Error Reading Pump '''//trim(st_id)//''': a staged pump (numStages > 0) must have nonnegative capacity, and cannot be combined with time series or realtime setting.')
             success = .false.
          end if
 

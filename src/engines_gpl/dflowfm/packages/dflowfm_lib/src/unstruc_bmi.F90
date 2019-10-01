@@ -1825,7 +1825,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
       endif
       
       if (network%sts%struct(item_index)%pump%nrstages > 0) then
-         call mess(LEVEL_ERROR, 'set_compound_filed: a staged pump cannot be controlled by RTC.')
+         call mess(LEVEL_ERROR, 'set_compound_field for '''//trim(var_name)//'/'//trim(item_name)//'/'//trim(field_name)//''' : a staged pump cannot be controlled by RTC.')
       end if
          
       select case(field_name)
