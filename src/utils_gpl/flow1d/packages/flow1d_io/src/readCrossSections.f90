@@ -155,12 +155,19 @@ module m_readCrossSections
          endif
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'definitionId', defid, success)
          if (.not. success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'definition', defid, success) ! Backwards compatibility
-         iref = hashsearch(network%CSDefinitions%hashlist, defid)
-         if (iref < 1) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection on branch '//trim(branchid)// &
-                  '. No definitionId was given.')
-            cycle
-         endif
+         if (success) then
+            iref = hashsearch(network%CSDefinitions%hashlist, defid)
+            if (iref < 1) then
+               call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection '''//trim(pCrs%csid)//''' on branch '''//trim(branchid)// &
+                     '''. Specified definitionId '''//trim(defid)//''' was not found in definitions.')
+               cycle
+            endif
+         else
+               call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection '''//trim(pCrs%csid)//''' on branch '''//trim(branchid)// &
+                     '''. No definitionId was given.')
+               cycle
+         end if
+
          pCrs%bedLevel = 0.0d0
          call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'shift', pCrs%shift, success)
          if (.not. success) pCrs%shift = 0.0d0
