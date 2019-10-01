@@ -37,7 +37,7 @@ module m_ec_bccollect
     integer,                           intent(out)     :: iostat
 
     integer (kind=8)    ::  fhandle
-    character*(255)     ::  rec          
+    character(:), allocatable ::  rec
     integer             ::  reclen 
     integer             ::  commentpos
     character*(1000)    ::  keyvaluestr                                    ! all key-value pairs in one header 
@@ -149,7 +149,7 @@ module m_ec_bccollect
     real(kind=hp),          optional,  intent(in)      :: dtnodal         !< Nodal factors update interval
 
     integer (kind=8)    ::  fhandle
-    character*(255)     ::  rec          
+    character(:), allocatable :: rec
     integer             ::  reclen 
     integer             ::  commentpos
     character*(1000)    ::  keyvaluestr                                    ! all key-value pairs in one header 

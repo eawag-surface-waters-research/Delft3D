@@ -102,7 +102,7 @@ contains
     integer,                    intent(out)   :: iostat
     character(len=*), optional, intent(in)    :: funtype
 
-    character(len=2000)           ::  rec
+    character(len=:), allocatable ::  rec
     character(len=:), allocatable ::  keyvaluestr ! all key-value pairs in one header; allocated on assign
     integer                       ::  posfs
     integer                       ::  nfld
@@ -153,7 +153,8 @@ contains
              iostat = EC_EOF
              return
           endif
-          call mf_read(fhandle,rec,savepos)
+          call mf_read(fhandle, rec, savepos)
+          if (len(rec) == 0) cycle
           if (index('!#%*',rec(1:1))>0) cycle
  
           if (len_trim(rec)>0) then                                  ! skip empty lines
@@ -589,7 +590,7 @@ contains
   !! if in range 0.0 - 100.0 convert percentages into fractions
   function checkAndFixLayers(vp, name) result(success)
      implicit none
-     real(hp),         intent(inout) :: vp(:)      !< vertical positions
+     real(kind=hp),    intent(inout) :: vp(:)      !< vertical positions
      character(len=*), intent(in)    :: name       !< quantity name, used in error messages
      logical                         :: success    !< function result
 
@@ -676,16 +677,16 @@ contains
     logical, optional,                        intent(out)   :: eof           !< reading failed, but only because eof
 
     !
-    type(tEcBCBlock),           pointer                     :: bcPtr
-    integer        :: n_col      !< number of columns in the file, inferred from the number of quantity blocks in the header
-    integer        :: n_col_time !< position of the dedicated time-column in the line, deduced from the header
-    character(2000):: rec        !< content of a line
-    character(30)  :: ncolstr
-    integer        :: istat      !< status of read operation
-    integer        :: i, j       !< loop counters
-    integer(kind=8):: savepos    !< saved position in file, for mf_read to enabled rewinding
+    type(tEcBCBlock), pointer      :: bcPtr
+    integer                        :: n_col      !< number of columns in the file, inferred from the number of quantity blocks in the header
+    integer                        :: n_col_time !< position of the dedicated time-column in the line, deduced from the header
+    character(len=:), allocatable  :: rec        !< content of a line
+    character(len=30)              :: ncolstr
+    integer                        :: istat      !< status of read operation
+    integer                        :: i, j       !< loop counters
+    integer(kind=8)                :: savepos    !< saved position in file, for mf_read to enabled rewinding
     real(kind=hp), dimension(1:1)  :: ec_timesteps ! to read in source time from file block
-    real(kind=hp)  :: amplitude
+    real(kind=hp)                  :: amplitude
 
     bcPtr => fileReaderPtr%bc
 
@@ -717,6 +718,7 @@ contains
           endif
 
           call mf_read(bcPtr%fhandle,rec,savepos)
+          if (len(rec) == 0) cycle
           if (rec(1:1)=='#') cycle
           if (index(rec,'[')>0 .and. index(rec,']')>0) then ! lines with [ and ] are assumed as block headings
              select case (BCPtr%func)
