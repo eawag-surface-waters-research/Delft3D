@@ -83,6 +83,7 @@ module TREE_STRUCTURES
    !
    public  :: TREE_DATA
    public  :: tree_create, tree_create_node, tree_add_node, tree_get_node_by_name, tree_num_nodes, &
+              tree_count_nodes_byname,                                                             &
               tree_get_data_ptr, tree_put_data, tree_get_name, tree_get_data,                      &
               tree_get_datatype, tree_get_data_string,                                             &
               tree_traverse, tree_traverse_level, print_tree,                                      &
@@ -237,6 +238,35 @@ function tree_num_nodes(tree) result(num_nodes)
       end if
    end if
 end function tree_num_nodes
+
+
+!> Counts the number of toplevel tree nodes whose name
+!! are equal to the given name (case insensitive).
+function tree_count_nodes_byname(tree, name) result(count_nodes)
+   type(TREE_DATA), pointer               :: tree !< Tree pointer for which to count the number of matching child nodes.
+   character(len=*),        intent(in   ) :: name !< The name to search for.
+   integer                                :: count_nodes !< The counted number of child nodes with matching name.
+
+   integer :: i, num_nodes
+   character(len=len_trim(name)) :: namei
+   character(len=80)             :: node_name   
+
+   count_nodes = 0
+
+   namei = name
+   call lowercase(namei, len(namei)) ! input name to lowercase
+
+   num_nodes = tree_num_nodes(tree)
+   do i=1,num_nodes
+      node_name = tree_get_name(tree%child_nodes(i)%node_ptr)
+      call lowercase(node_name, len(node_name))
+
+      if (node_name == namei) then
+         count_nodes = count_nodes + 1
+      end if
+   end do
+
+end function tree_count_nodes_byname
 
 
 ! tree_get_name --
