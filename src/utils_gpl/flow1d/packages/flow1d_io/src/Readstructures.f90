@@ -103,6 +103,7 @@ module m_readstructures
          call readStructureFile(network, adjustl(trim(file)))
       enddo
       ! fill the hashtable for searching on Id's
+      call fill_hashtable(network%sts)
       
       if (.not. allocated(network%sts%restartData) .and. (network%sts%count > 0)) then
          allocate(network%sts%restartData(network%sts%count, CFiHighestParameter))
