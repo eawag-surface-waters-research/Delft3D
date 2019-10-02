@@ -716,7 +716,7 @@ end module m_fm_update_crosssections
    use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature,dicoww, rhomean
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
    use m_flowgeom, only: ndxi, bl, kfs, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, xz, yz, xu, yu, wu, wu_mor
-   use m_flow, only: s0, s1, u1, u0, v, ucx, ucy, kbot, ktop, kmx, kmxn, plotlin, sa1, tem1, zws, hs, ucxq, ucyq, layertype, &
+   use m_flow, only: s0, s1, u1, u0, v, ucx, ucy, kbot, ktop, kmx, kmxn, plotlin, sa1, tem1, zws, hs, layertype, &
       iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, q1, frcu_mor
    use m_flowtimes, only: julrefdat, dts, time1
    use unstruc_files, only: mdia
@@ -949,8 +949,8 @@ end module m_fm_update_crosssections
       !
    end if
    !   Calculate cell centre velocities ucxq, ucyq
-   call setucxucyucxuucyu()
-   call setucxqucyq()
+   ! call setucxucyucxuucyu()
+   call setucxqucyq_mor()
    !
    if (.not. (jawave==4 .or. jawave==3)) then
       ktb=0d0     ! no roller turbulence
@@ -1093,8 +1093,8 @@ end module m_fm_update_crosssections
             endif
          enddo
 
-         uuu(kk)   = ucxq(kmxvel)                  ! discharge based cell centre velocities
-         vvv(kk)   = ucyq(kmxvel)
+         uuu(kk)   = ucxq_mor(kmxvel)                  ! discharge based cell centre velocities
+         vvv(kk)   = ucyq_mor(kmxvel)
          umod(kk)  = sqrt(uuu(kk)*uuu(kk) + vvv(kk)*vvv(kk))
          zumod(kk) = cc-bl(kk)
       end do
@@ -1325,12 +1325,12 @@ end module m_fm_update_crosssections
       !
       ! Compute depth-averaged velocity components at cell centre, discharge based cc velocities
       !
-      umean = ucxq(nm)      ! ok, calculated in getucxucyandsoon
-      vmean = ucyq(nm)
+      umean = ucxq_mor(nm)      ! ok, calculated in getucxucyandsoon
+      vmean = ucyq_mor(nm)
       velm = sqrt(umean**2+vmean**2)
       !
-      ubed = ucxq(kbed)
-      vbed = ucyq(kbed)
+      ubed = ucxq_mor(kbed)
+      vbed = ucyq_mor(kbed)
       velb = sqrt(ubed**2 + vbed**2)
       if (kmaxlc>1) then               ! 3D only
          zvelb = 0.5_fp*thicklc(kmaxlc)*h1
@@ -3218,7 +3218,7 @@ end module m_fm_update_crosssections
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol
    use m_flowtimes, only: time1
    use m_flowgeom, only: ndx, ln, kfs,bl
-   use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1 !kmx, layertype, kbot, ktop, ndkx, hu, zws, hs, ucxq, ucyq
+   use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,sa1,tem1,ucx,ucy,ucz,ndkx,s1 !kmx, layertype, kbot, ktop, ndkx, hu, zws, hs, ucxq, ucyq
    use m_flowparameters, only: jasal, jatem, jawave, epshs
    use m_transport, only: constituents, ised1
    use m_turbulence, only:turkinepsws, rho
@@ -3331,7 +3331,7 @@ end module m_fm_update_crosssections
    end do
 
    ! calculate mean velocity in nodes
-   call setucxucyucxuucyu()
+   call setucxqucyq_mor()
 
    if (kmx>0) then                       ! 3D
       um = 0d0; vm = 0d0
@@ -3340,13 +3340,13 @@ end module m_fm_update_crosssections
          call getkbotktop(k, kb, kt)
          do kk = kb, kt
             thick = zws(kk) - zws(kk-1)
-            um(k) = um(k) + thick/h0*ucxq(kk)     
-            vm(k) = vm(k) + thick/h0*ucyq(kk)
+            um(k) = um(k) + thick/h0*ucxq_mor(kk)     
+            vm(k) = vm(k) + thick/h0*ucyq_mor(kk)
          end do
       end do
    else
-      um   = ucxq                       ! discharge based velocities
-      vm   = ucyq
+      um   = ucxq_mor                       ! discharge based velocities
+      vm   = ucyq_mor
    end if
 
 
@@ -4429,10 +4429,10 @@ end module m_fm_update_crosssections
 
    ! =================================================================================================
    ! =================================================================================================
-   subroutine setucxqucyq()
+   subroutine setucxqucyq_mor()
    use m_fm_erosed, only: ucxq_mor, ucyq_mor, hs_mor
    use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl
-   use m_flow, only: hs, hu, u1, ucxq, ucyq
+   use m_flow, only: hs, hu, u1
    use m_flowparameters ,only: jacstbnd, epshs
    use m_sediment, only: stmpar
 
@@ -4445,14 +4445,14 @@ end module m_fm_update_crosssections
 
    ucxq_mor = 0d0 ; ucyq_mor = 0d0
 
-   if( .not. maximumwaterdepth ) then
-      do k = 1,ndx
-         ucxq_mor(k) = ucxq(k)
-         ucyq_mor(k) = ucyq(k)
-         hs_mor(k)   = hs(k)
-      enddo
-      return
-   endif
+  ! if( .not. maximumwaterdepth ) then
+  !    do k = 1,ndx
+  !       ucxq_mor(k) = ucxq(k)
+  !       ucyq_mor(k) = ucyq(k)
+  !       hs_mor(k)   = hs(k)
+  !    enddo
+  !    return
+  ! endif
 
    do L = 1,lnx
       if (u1(L) == 0d0) cycle
@@ -4483,10 +4483,12 @@ end module m_fm_update_crosssections
 
    do k = 1,ndx
       hs_mor(k) = hs(k)
-      do L = 1,nd(k)%lnx
-         LL = abs( nd(k)%ln(L) )
-         hs_mor(k) = max( hs_mor(k), hu(LL) )
-      enddo
+      if( maximumwaterdepth ) then
+         do L = 1,nd(k)%lnx
+            LL = abs( nd(k)%ln(L) )
+            hs_mor(k) = max( hs_mor(k), hu(LL) )
+         enddo
+      endif
    enddo
 
    do k = 1,ndx
@@ -4499,7 +4501,7 @@ end module m_fm_update_crosssections
       endif
    enddo
 
-   end subroutine setucxqucyq
+   end subroutine setucxqucyq_mor
      
   ! =================================================================================================
   ! =================================================================================================
