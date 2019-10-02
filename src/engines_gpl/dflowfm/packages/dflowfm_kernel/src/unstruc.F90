@@ -21162,7 +21162,8 @@ end subroutine unc_write_shp
     if (wu(L) > 0) then
        wui(L) = 1d0/wu(L)
     else
-       call qnerror ('wu=0',' ',' ')
+       write (msgbuf, '(a,i0,a)') 'flow_geominit(): wu(', L, ') = 0'
+       call qnerror (trim(msgbuf),' ',' ')
     endif
  enddo
 
