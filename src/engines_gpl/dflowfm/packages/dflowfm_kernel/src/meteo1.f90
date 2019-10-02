@@ -442,7 +442,7 @@ module m_meteo
       logical                               :: success
       character(len=*), intent(in)          :: trname, sfname, waqinput
 
-      character(len=*), intent(in) :: qidname
+      character(len=*), intent(in)          :: qidname
      
       integer,                   pointer    :: itemPtr1, itemPtr2, itemPtr3, itemPtr4
       real(hp), dimension(:),    pointer    :: dataPtr1, dataPtr2, dataPtr3, dataPtr4
@@ -548,8 +548,8 @@ module m_meteo
             itemPtr1 => item_dambreakLevelsAndWidthsFromTable
             dataPtr1 => dambreakLevelsAndWidthsFromTable
          case ('lateral_discharge')
-            itemPtr1 => item_lateraldischarge 
-            !dataPtr1      => zcdam
+            itemPtr1 => item_lateraldischarge
+            !dataPtr1 => qplat ! Don't set this here, done in adduniformtimerelation_objects().
          case ('gateloweredgelevel')
             itemPtr1 => item_gateloweredgelevel
             dataPtr1 => zgate

@@ -40015,7 +40015,7 @@ if (mext > 0) then
           numlatsg = numlatsg + 1
 
           L = index(filename,'.', back=.true.) - 1
-          success = adduniformtimerelation_objects('lateral_discharge', filename, 'lateral', filename(1:L), 'discharge', '', 1, kx, qplat(numlatsg:numlatsg))
+          success = adduniformtimerelation_objects('lateral_discharge', filename, 'lateral', filename(1:L), 'discharge', '', numlatsg, kx, qplat)
           if (success) then
              ! assign id derived from pol file
              lat_ids(numlatsg) = filename(1:L)

@@ -925,6 +925,7 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex 
  integer                      :: ib
+ integer                      :: maxlatsg
  integer                      :: major, minor
  integer                      :: loc_spec_type
  integer                      :: numcoordinates
@@ -957,10 +958,14 @@ logical function initboundaryblocksforcings(filename)
 
  call split_filename(filename, basedir, fnam) ! Remember base dir of input file, to resolve all refenced files below w.r.t. that base dir.
 
- num_items_in_file = 0
- if (associated(bnd_ptr%child_nodes)) then
-     num_items_in_file = size(bnd_ptr%child_nodes)
- endif
+ num_items_in_file = tree_num_nodes(bnd_ptr)
+
+ ! Allocate lateral provider array now, just once, because otherwise realloc's in the loop would destroy target arrays in ecInstance.
+ maxlatsg = tree_count_nodes_byname(bnd_ptr, 'lateral')
+ if (maxlatsg > 0) then
+    call realloc(qplat, maxlatsg, keepExisting = .false.)
+    call realloc(lat_ids, maxlatsg, keepExisting = .false.)
+ end if
 
  ib = 0
  do i=1,num_items_in_file
@@ -1172,8 +1177,6 @@ logical function initboundaryblocksforcings(filename)
        call selectelset_internal_nodes(xz, yz, kclat, ndxi, numlatsg, nnLat, &
                                        loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage)
 
-       call realloc(qplat, numlatsg, keepExisting = .true.)
-       call realloc(lat_ids, numlatsg, keepExisting = .true.)
        if (allocated(xcoordinates)) deallocate(xcoordinates, stat=ierr)
        if (allocated(ycoordinates)) deallocate(ycoordinates, stat=ierr)
      
@@ -1192,8 +1195,7 @@ logical function initboundaryblocksforcings(filename)
        end if
 
        qid = 'lateral_discharge' ! New quantity name in .bc files
-       success = adduniformtimerelation_objects(qid, '', 'lateral', locid, 'discharge', trim(rec), numlatsg, kx, qplat)
-
+       success = adduniformtimerelation_objects(qid, '', 'lateral', trim(locid), 'discharge', trim(rec), numlatsg, kx, qplat)
        if (success) then
           jaqin = 1
           lat_ids(numlatsg) = locid
