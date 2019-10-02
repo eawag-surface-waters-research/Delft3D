@@ -13890,27 +13890,6 @@ end if
  if ( janudge.eq.1 ) call setzcs()
  call flow_setexternalforcings(tstart_user, .true., iresult)             ! set field oriented external forcings, flag that the call is from the initialization phase
 
- ! For SWAN: code to update derived quantities moved to step reduce from setextforcing, so
- ! one call to derive stokes drift etc needed at start
-  if (jawave==3) then
-    if( kmx == 0 ) then
-       hs = s1-bl                                   ! safety
-       hs = max(hs, 0d0)
-       call wave_comp_stokes_velocities()
-       call wave_uorbrlabda()                       ! hwav gets depth-limited here
-       call tauwave()
-       call setwavfu()
-       call setwavmubnd()
-    end if
- end if
-
- ! DEBUG
- !if (jawave==5) then
- !   call wave_uorbrlabda()
- !   call tauwave()
- !endif
-
-
  if (iresult /= DFM_NOERR) then
     goto 888
  end if
@@ -14160,6 +14139,18 @@ endif
        call getLbotLtop(L,Lb,Lt)
        u1(Lb:Lt) = u1(L)
     end do
+ end if
+ 
+  if (jawave==3) then
+    if( kmx == 0 ) then
+       hs = s1-bl                                   ! safety
+       hs = max(hs, 0d0)
+       call wave_comp_stokes_velocities()
+       call wave_uorbrlabda()                       ! hwav gets depth-limited here
+       call tauwave()
+       call setwavfu()
+       call setwavmubnd()
+    end if
  end if
 
  if (jasal > 0 .and. kmx > 0 .and. inisal2D > 0 .and. jarestart.eq.0 ) then
