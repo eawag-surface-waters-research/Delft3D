@@ -102,9 +102,7 @@ module m_readstructures
          call str_token(inputfiles, file, DELIMS=';')
          call readStructureFile(network, adjustl(trim(file)))
       enddo
-      ! fill the hashtable for searching on Id's
-      call fill_hashtable(network%sts)
-      
+
       if (.not. allocated(network%sts%restartData) .and. (network%sts%count > 0)) then
          allocate(network%sts%restartData(network%sts%count, CFiHighestParameter))
          network%sts%restartData = missingValue
@@ -112,6 +110,9 @@ module m_readstructures
       ! Fill indirection tables and set indices for compoundss
       if (network%sts%currentFileVersion >= 2) then
          call finishReading(network%sts, network%cmps)
+      else
+         ! fill the hashtable for searching on Id's
+         call fill_hashtable(network%sts)
       endif
       
    end subroutine readStructures
