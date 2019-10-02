@@ -183,7 +183,7 @@
       write(lunhyd,'(a,'' '',i10)') key(16), hyd%mmax
       write(lunhyd,'(a,'' '',i10)') key(17), hyd%nmax
       write(lunhyd,'(a,'' '',i10)') key(18), hyd%kmax
-      write(lunhyd,'(a,'' '',i10)') key(70), hyd%noq1
+      write(lunhyd,'(a,'' '',i10)') key(70), hyd%noq1 + hyd%noq2
       write(lunhyd,'(a,'' '',i10)') key(71), hyd%noq3
       write(lunhyd,'(a,'' '',i10)') key(72), hyd%nosegl
       write(lunhyd,'(a,'' '',i10)') key(19), hyd%nolay
