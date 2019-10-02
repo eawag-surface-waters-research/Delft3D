@@ -32200,7 +32200,7 @@ subroutine setbedlevelfromnetfile()
                cycle
             end if
 
-            do k = 1,ndx
+            do k = 1,nflownode
                 if (zs(k) == bl_fillvalue) then
                     zs(k) = dmiss
                 endif
