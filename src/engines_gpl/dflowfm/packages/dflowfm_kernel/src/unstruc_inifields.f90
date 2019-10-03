@@ -339,20 +339,38 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
          call prop_get_double(node_ptr,'','averagingRelSize', transformcoef(5), retVal)
          if (.not. retVal) then
             transformcoef(5) = RCEL_DEFAULT
+         else
+            if (transformcoef(5) <= 0d0) then
+               write(msgbuf, '(5a,f10.3,a,f10.3,a)') 'Wrong block in file ''', trim(inifilename), ''': [', trim(groupname), '] for quantity='//trim(quantity)//'. Field ''averagingRelSize'' has invalid value ', transformcoef(5), '. Setting to default: ', RCEL_DEFAULT, '.'
+               call warn_flush()
+               transformcoef(5) = RCEL_DEFAULT
+            end if
          end if
             
          ! read averagingNumMin
          call prop_get_integer(node_ptr,'','averagingNumMin', averagingNumMin, retVal)
          if (.not. retVal) then
-            transformcoef(8) = 0d0
+            transformcoef(8) = 1d0
          else
-            transformcoef(8) = dble(averagingNumMin)
+            if (averagingNumMin <= 0) then
+               write(msgbuf, '(5a,i0,a)') 'Wrong block in file ''', trim(inifilename), ''': [', trim(groupname), '] for quantity='//trim(quantity)//'. Field ''averagingNumMin'' has invalid value ', averagingNumMin, '. Setting to default: 1.'
+               call warn_flush()
+               transformcoef(8) = 1d0
+            else
+               transformcoef(8) = dble(averagingNumMin)
+            end if
          end if
             
          ! read averagingPercentile
          call prop_get_double(node_ptr,'','averagingPercentile', transformcoef(7), retVal)
          if (.not. retVal) then
             transformcoef(7) = 0d0
+         else
+            if (transformcoef(7) < 0d0) then
+               write(msgbuf, '(5a,f10.3,a)') 'Wrong block in file ''', trim(inifilename), ''': [', trim(groupname), '] for quantity='//trim(quantity)//'. Field ''averagingPercentile'' has invalid value ', transformcoef(7), '. Setting to default: 0.0.'  
+               call warn_flush()
+               transformcoef(7) = 0d0
+            end if
          end if
       end if
          
