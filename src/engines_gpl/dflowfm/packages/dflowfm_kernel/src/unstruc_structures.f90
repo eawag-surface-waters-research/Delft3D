@@ -362,11 +362,15 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    ! 1. Generic values that apply to all structure types
    valstruct(1) = valstruct(1) + wu(L)
    
-   if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
-      k1 = ln(1,L)
-      k2 = ln(2,L)
-      qcmp = get_discharge(network%sts%struct(istru), s1(k1), s1(k2))
-      valstruct(2) = valstruct(2) + qcmp*dir
+   if (istru > 0) then ! When it is not old weir and not old general structure
+      if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
+         k1 = ln(1,L)
+         k2 = ln(2,L)
+         qcmp = get_discharge(network%sts%struct(istru), s1(k1), s1(k2))
+         valstruct(2) = valstruct(2) + qcmp*dir
+      else
+         valstruct(2) = valstruct(2) + q1(L)*dir
+      end if
    else
       valstruct(2) = valstruct(2) + q1(L)*dir
    end if
