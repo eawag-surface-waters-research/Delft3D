@@ -314,6 +314,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    use m_missing, only: dmiss
    use m_flow, only: q1, s1, au
    use m_flowgeom, only: wu, ln
+   use m_1d_structures, only: get_discharge
    use m_General_Structure
    implicit none
    double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
@@ -348,6 +349,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
 
    integer :: ku, kd, k1, k2
    type(t_GeneralStructure), pointer :: genstr
+   double precision :: qcmp
 
    if (dir > 0) then
       ku = ln(1,L)
@@ -359,7 +361,16 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
 
    ! 1. Generic values that apply to all structure types
    valstruct(1) = valstruct(1) + wu(L)
-   valstruct(2) = valstruct(2) + q1(L)*dir
+   
+   if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
+      k1 = ln(1,L)
+      k2 = ln(2,L)
+      qcmp = get_discharge(network%sts%struct(istru), s1(k1), s1(k2))
+      valstruct(2) = valstruct(2) + qcmp*dir
+   else
+      valstruct(2) = valstruct(2) + q1(L)*dir
+   end if
+   
    valstruct(3) = valstruct(3) + s1(ku)*wu(L)
    valstruct(4) = valstruct(4) + s1(kd)*wu(L)
    valstruct(5) = valstruct(5) + (s1(ku) - s1(kd))*wu(L)

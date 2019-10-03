@@ -483,6 +483,7 @@ module m_readstructures
                         ''' was not found in the structure list'
                call err_flush()
             endif
+            sts%struct(indices(i))%compound = 1 ! mark the structure that belongs to a compound structure
             
          enddo
          
