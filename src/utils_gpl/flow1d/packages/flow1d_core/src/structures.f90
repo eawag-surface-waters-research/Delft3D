@@ -95,7 +95,7 @@ module m_1d_structures
    public set_fu_ru
    public check_for_changes_on_structures
    public initialize_structures_actual_params
-   public get_discharge
+   public get_discharge_under_compound_struc
 
    public printData
 
@@ -1377,18 +1377,16 @@ end subroutine
    end subroutine compare_and_warn
    
    !> Gets discharge of a structure that belongs to a compound structure
-   double precision function get_discharge(pstru, s1k1, s1k2)
-      type (t_structure),          intent(in) :: pstru       !< structure
-      double precision,            intent(in) :: s1k1, s1k2  !< water level on nodes k1 and k2
+   double precision function get_discharge_under_compound_struc(pstru, L0, s1k1, s1k2)
+      type (t_structure), intent(in) :: pstru       !< structure
+      integer,            intent(in) :: L0          !< local link index
+      double precision,   intent(in) :: s1k1, s1k2  !< water level on nodes k1 and k2
 
-      integer          :: L0
       double precision :: u1
       
-      get_discharge = 0d0
-      do L0 = 1, pstru%numlinks
-         u1 = pstru%ru(L0) - pstru%fu(L0)*( s1k2 - s1k1 )
-         get_discharge = get_discharge + pstru%au(L0)* u1
-      enddo
-   end function get_discharge
+      u1 = pstru%ru(L0) - pstru%fu(L0)*( s1k2 - s1k1 )
+      get_discharge_under_compound_struc =pstru%au(L0)* u1
+
+   end function get_discharge_under_compound_struc
 
 end module m_1d_structures

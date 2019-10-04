@@ -314,7 +314,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    use m_missing, only: dmiss
    use m_flow, only: q1, s1, au
    use m_flowgeom, only: wu, ln
-   use m_1d_structures, only: get_discharge
+   use m_1d_structures, only: get_discharge_under_compound_struc
    use m_General_Structure
    implicit none
    double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
@@ -366,7 +366,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
       if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
          k1 = ln(1,L)
          k2 = ln(2,L)
-         qcmp = get_discharge(network%sts%struct(istru), s1(k1), s1(k2))
+         qcmp = get_discharge_under_compound_struc(network%sts%struct(istru), L0, s1(k1), s1(k2))
          valstruct(2) = valstruct(2) + qcmp*dir
       else
          valstruct(2) = valstruct(2) + q1(L)*dir
