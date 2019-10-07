@@ -2479,9 +2479,15 @@ function ug_get_network_count(ncid, numNet) result(ierr)
 
    integer :: numVar, i
    logical :: is_net_topo
+   integer :: iworkaround1
 
-   ierr = nf90_inquire(ncid, nVariables = numVar)
-  
+   ! NOTE: AvD:
+   ! Just like in ug_is_network_topology(), we suffer from a same Heisenbug in netcdf lib:
+   ! Directly working with ncid does give correct numVar, but still numNet=0.
+   ! Using this iworkaround1 strangely fixes it again.
+   iworkaround1 = ncid
+   ierr = nf90_inquire(iworkaround1, nVariables = numVar)
+
    numNet = 0
    do i=1,numVar
       is_net_topo = ug_is_network_topology(ncid, i)
