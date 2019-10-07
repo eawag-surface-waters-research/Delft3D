@@ -394,9 +394,18 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    valstruct(4) = valstruct(4) + s1(kd)*wu(L)
    valstruct(5) = valstruct(5) + (s1(ku) - s1(kd))*wu(L)
 
-   if (istrtypein /= ST_PUMP) then
-      valstruct(6)  = valstruct(6) + au(L)
+   if (istrtypein /= ST_PUMP) then ! Compute flow are for structures except for pump
+      if (istru > 0) then ! When it is not old weir and not old general structure and not a compound structure
+         if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
+            valstruct(6) = valstruct(6) + network%sts%struct(istru)%au(L0)
+         else
+            valstruct(6) = valstruct(6) + au(L)
+         end if
+      else
+         valstruct(6) = valstruct(6) + au(L)
+      end if
    end if
+
    ! 2. More specific valus that apply to certain structure types only
 
    ! General structure-based structures with a crest.
