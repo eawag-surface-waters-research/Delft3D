@@ -159,6 +159,14 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (6,:) universal weir flow area
                                                               !<                      (7,:) universal weir velocity
                                                               !<                      (8,:) universal weir crest level
+ double precision, dimension(:,:), allocatable :: valcmpstru  !< Array for compound structure; (1,:) flow link width, used for averaging.
+                                                              !<                      (2,:) discharge through compound structure
+                                                              !<                      (3,:) compound structure water level up
+                                                              !<                      (4,:) compound structure water level down
+                                                              !<                      (5,:) compound structure head
+                                                              !<                      (6,:) compound structure flow area
+                                                              !<                      (7,:) compound structure velocity
+                                                              !<                      (8,:) compound structure cumulative discharge
  integer                           :: NUMVALS_PUMP = 12       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
@@ -171,6 +179,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_BRIDGE  = 7     !< Number of variables for bridge
  integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
  integer                           :: NUMVALS_UNIWEIR = 8     !< Number of variables for univeral weir
+ integer                           :: NUMVALS_CMPSTRU = 8     !< Number of variables for compound structure
  
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
  integer                           :: jahispump               !< Write pump      parameters to his file, 0: n0, 1: yes
@@ -182,6 +191,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: jahisbridge             !< Write bridge    parameters to his file, 0: no, 1: yes
  integer                           :: jahisculv               !< Write culvert   parameters to his file, 0: no, 1: yes
  integer                           :: jahisuniweir            !< Write univeral weir parameters to his file, 0: no, 1: yes
+ integer                           :: jahiscmpstru            !< Write compound structure parameters to his file, 0: no, 1: yes
  
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
@@ -220,6 +230,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       jahisbridge   = 1
       jahisdambreak = 1
       jahisuniweir = 1
+      jahiscmpstru = 1
 
       if( jahispump > 0 .and. npumpsg > 0) then
          if( allocated( valpump ) ) deallocate( valpump )
@@ -280,6 +291,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       if( jahisuniweir > 0 .and. network%sts%numUniWeirs > 0) then
          if( allocated( valuniweir ) ) deallocate( valuniweir )
          allocate( valuniweir(NUMVALS_UNIWEIR,network%sts%numUniWeirs) ) ; valuniweir = 0d0
+      endif
+      if( jahiscmpstru > 0 .and. network%cmps%count > 0) then
+         if( allocated( valcmpstru ) ) deallocate( valcmpstru )
+         allocate( valcmpstru(NUMVALS_CMPSTRU,network%cmps%count) ) ; valcmpstru = 0d0
       endif
 
 ! TIDAL TURBINES: Insert init_turbines here
@@ -362,7 +377,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    ! 1. Generic values that apply to all structure types
    valstruct(1) = valstruct(1) + wu(L)
    
-   if (istru > 0) then ! When it is not old weir and not old general structure
+   if (istru > 0) then ! When it is not old weir and not old general structure and not a compound structure
       if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
          k1 = ln(1,L)
          k2 = ln(2,L)

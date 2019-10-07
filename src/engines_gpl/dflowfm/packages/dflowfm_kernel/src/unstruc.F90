@@ -16509,6 +16509,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_uniweirdim, id_uniweir_id, id_uniweir_dis, id_uniweir_s1up,  id_uniweir_s1dn, id_uniweir_crestl, &
                      id_uniweir_vel, id_uniweir_au, id_uniweir_head, &
                      id_dambreak_breach_width_time_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
+                     id_cmpstrudim, id_cmpstru_id, id_cmpstru_dis, id_cmpstru_s1up,  id_cmpstru_s1dn, id_cmpstru_cumulative_dis, &
+                     id_cmpstru_vel, id_cmpstru_au, id_cmpstru_head, &
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq
 
@@ -17999,6 +18001,51 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'coordinates', 'uniweir_id')
         endif
+        
+        ! compound structure
+        if(jahiscmpstru > 0 .and. network%cmps%count > 0) then
+            ierr = nf90_def_dim(ihisfile, 'compoundStructures', network%cmps%count, id_cmpstrudim)
+            ierr = nf90_def_var(ihisfile, 'cmpstru_id',  nf90_char,   (/ id_strlendim, id_cmpstrudim /), id_cmpstru_id)
+            ierr = nf90_put_att(ihisfile, id_cmpstru_id,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_id,  'long_name', 'Id of compound structure')
+
+            ierr = nf90_def_var(ihisfile, 'cmpstru_discharge',     nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_dis)
+            ierr = nf90_put_att(ihisfile, id_cmpstru_dis, 'long_name', 'Discharge through compound structure')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_dis, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_dis, 'coordinates', 'cmpstru_id')
+
+            ierr = nf90_def_var(ihisfile, 'cmpstru_cumulative_discharge', nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_cumulative_dis)
+            ierr = nf90_put_att(ihisfile, id_cmpstru_cumulative_dis, 'long_name', 'Cumulative discharge through compound structure')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_cumulative_dis, 'units', 'm3')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_cumulative_dis, 'coordinates', 'cmpstru_id')
+
+            ierr = nf90_def_var(ihisfile, 'cmpstru_s1up',     nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_s1up)
+            ierr = nf90_put_att(ihisfile, id_cmpstru_s1up, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_s1up, 'long_name', 'Water level upstream of compound structure')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_s1up, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_s1up, 'coordinates', 'cmpstru_id')
+
+            ierr = nf90_def_var(ihisfile, 'cmpstru_s1dn',     nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_s1dn)
+            ierr = nf90_put_att(ihisfile, id_cmpstru_s1dn, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_s1dn, 'long_name', 'Water level downstream of compound structure')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_s1dn, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_s1dn, 'coordinates', 'cmpstru_id')
+
+            ierr = nf90_def_var(ihisfile, 'cmpstru_head', nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_head)
+            ierr = nf90_put_att(ihisfile, id_cmpstru_head, 'long_name', 'Head difference across compound structure')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_head, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_head, 'coordinates', 'cmpstru_id')
+
+            ierr = nf90_def_var(ihisfile, 'cmpstru_flow_area ', nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_au)
+            ierr = nf90_put_att(ihisfile, id_cmpstru_au, 'long_name', 'Flow area in compound structure')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_au, 'units', 'm2')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_au, 'coordinates', 'cmpstru_id')
+
+            ierr = nf90_def_var(ihisfile, 'cmpstru_velocity ', nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_vel)
+            ierr = nf90_put_att(ihisfile, id_cmpstru_vel, 'long_name', 'Velocity through compound structure')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_vel, 'units', 'm s-1')
+            ierr = nf90_put_att(ihisfile, id_cmpstru_vel, 'coordinates', 'cmpstru_id')
+        endif
 
         if(dad_included) then  ! Output for dredging and dumping
             ierr = nf90_def_dim(ihisfile, 'ndredlink', dadpar%nalink, id_dredlinkdim)
@@ -18125,6 +18172,12 @@ subroutine unc_write_his(tim)            ! wrihis
            do i = 1, network%sts%numuniweirs
               istru = network%sts%uniweirIndices(i)
               ierr = nf90_put_var(ihisfile, id_uniweir_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
+           end do
+        end if
+        
+        if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
+           do i = 1, network%cmps%count
+              ierr = nf90_put_var(ihisfile, id_cmpstru_id,  trim(network%cmps%compound(i)%id),  (/ 1, i /))
            end do
         end if
 
@@ -18623,6 +18676,18 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_uniweir_au,     valuniweir(6,i),      (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_uniweir_vel,    valuniweir(7,i),      (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_uniweir_crestl, valuniweir(8,i),      (/ i, it_his /))
+         enddo
+      end if
+      
+      if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
+         do i=1,network%cmps%count
+            ierr = nf90_put_var(ihisfile, id_cmpstru_dis,            valcmpstru(2,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_s1up,           valcmpstru(3,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_s1dn,           valcmpstru(4,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_head,           valcmpstru(5,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_au,             valcmpstru(6,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_vel,            valcmpstru(7,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_cmpstru_cumulative_dis, valcmpstru(8,i), (/ i, it_his /))
          enddo
       end if
 
@@ -36709,6 +36774,7 @@ if (jahisbal > 0) then
       use m_missing, only: dmiss
       use unstruc_channel_flow, only: network
       use m_1d_structures
+      use m_compound
       implicit none
       integer                       :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd, istru, nlinks
       double precision              :: dir
@@ -36716,6 +36782,7 @@ if (jahisbal > 0) then
       double precision, save        :: timprev = -1d0
       double precision              :: timstep
       type(t_structure), pointer    :: pstru
+      type(t_compound),  pointer    :: pcmp
 
       if (jampi > 0) then
          if( .not.allocated( reducebuf ) ) then
@@ -37162,6 +37229,30 @@ if (jahisbal > 0) then
                valgenstru(14,n) = zcgen(3*i-1)    ! id_genstru_edgel.
                valgenstru(9,n)  = zcgen(3*i-2)    ! id_genstru_cresth.
             end if
+         enddo
+      end if
+      
+      ! 
+      ! === compound structure
+      !
+      if (network%cmps%count > 0) then
+         do n = 1, network%cmps%count
+            ! valcmpstru(NUMVALS_CMPSTRU,n) is the cumulative over time, we do not reset it to 0
+            valcmpstru(1:NUMVALS_CMPSTRU-1,n) = 0d0
+            pcmp => network%cmps%compound(n)
+            nlinks = pcmp%numlinks
+            do L = 1, nlinks
+               Lf = pcmp%linknumbers(L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = sign(1d0,dble(Lf))
+               call fill_valstruct_perlink(valcmpstru(:,n), La, dir, ST_COMPOUND, 0, L)
+            enddo
+            call average_valstruct(valcmpstru(:,n), ST_COMPOUND, 0, nlinks, NUMVALS_CMPSTRU)
+            valcmpstru(NUMVALS_CMPSTRU,n) = valcmpstru(NUMVALS_CMPSTRU,n) + valcmpstru(2,n) * timstep ! cumulative discharge
          enddo
       end if
       !
