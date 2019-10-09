@@ -166,7 +166,6 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (5,:) compound structure head
                                                               !<                      (6,:) compound structure flow area
                                                               !<                      (7,:) compound structure velocity
-                                                              !<                      (8,:) compound structure cumulative discharge
  integer                           :: NUMVALS_PUMP = 12       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
@@ -179,7 +178,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_BRIDGE  = 7     !< Number of variables for bridge
  integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
  integer                           :: NUMVALS_UNIWEIR = 8     !< Number of variables for univeral weir
- integer                           :: NUMVALS_CMPSTRU = 8     !< Number of variables for compound structure
+ integer                           :: NUMVALS_CMPSTRU = 7     !< Number of variables for compound structure
  
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
  integer                           :: jahispump               !< Write pump      parameters to his file, 0: n0, 1: yes

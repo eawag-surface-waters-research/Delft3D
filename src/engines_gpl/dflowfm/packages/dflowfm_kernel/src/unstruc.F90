@@ -16509,7 +16509,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_uniweirdim, id_uniweir_id, id_uniweir_dis, id_uniweir_s1up,  id_uniweir_s1dn, id_uniweir_crestl, &
                      id_uniweir_vel, id_uniweir_au, id_uniweir_head, &
                      id_dambreak_breach_width_time_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
-                     id_cmpstrudim, id_cmpstru_id, id_cmpstru_dis, id_cmpstru_s1up,  id_cmpstru_s1dn, id_cmpstru_cumulative_dis, &
+                     id_cmpstrudim, id_cmpstru_id, id_cmpstru_dis, id_cmpstru_s1up,  id_cmpstru_s1dn, &
                      id_cmpstru_vel, id_cmpstru_au, id_cmpstru_head, &
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq
@@ -18014,10 +18014,6 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_cmpstru_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_cmpstru_dis, 'coordinates', 'cmpstru_id')
 
-            ierr = nf90_def_var(ihisfile, 'cmpstru_cumulative_discharge', nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_cumulative_dis)
-            ierr = nf90_put_att(ihisfile, id_cmpstru_cumulative_dis, 'long_name', 'Cumulative discharge through compound structure')
-            ierr = nf90_put_att(ihisfile, id_cmpstru_cumulative_dis, 'units', 'm3')
-            ierr = nf90_put_att(ihisfile, id_cmpstru_cumulative_dis, 'coordinates', 'cmpstru_id')
 
             ierr = nf90_def_var(ihisfile, 'cmpstru_s1up',     nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_s1up)
             ierr = nf90_put_att(ihisfile, id_cmpstru_s1up, 'standard_name', 'sea_surface_height')
@@ -18687,7 +18683,6 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_cmpstru_head,           valcmpstru(5,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_cmpstru_au,             valcmpstru(6,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_cmpstru_vel,            valcmpstru(7,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_cmpstru_cumulative_dis, valcmpstru(8,i), (/ i, it_his /))
          enddo
       end if
 
@@ -37237,8 +37232,7 @@ if (jahisbal > 0) then
       !
       if (network%cmps%count > 0) then
          do n = 1, network%cmps%count
-            ! valcmpstru(NUMVALS_CMPSTRU,n) is the cumulative over time, we do not reset it to 0
-            valcmpstru(1:NUMVALS_CMPSTRU-1,n) = 0d0
+            valcmpstru(1:NUMVALS_CMPSTRU,n) = 0d0
             pcmp => network%cmps%compound(n)
             nlinks = pcmp%numlinks
             do L = 1, nlinks
@@ -37252,7 +37246,6 @@ if (jahisbal > 0) then
                call fill_valstruct_perlink(valcmpstru(:,n), La, dir, ST_COMPOUND, 0, L)
             enddo
             call average_valstruct(valcmpstru(:,n), ST_COMPOUND, 0, nlinks, NUMVALS_CMPSTRU)
-            valcmpstru(NUMVALS_CMPSTRU,n) = valcmpstru(NUMVALS_CMPSTRU,n) + valcmpstru(2,n) * timstep ! cumulative discharge
          enddo
       end if
       !
