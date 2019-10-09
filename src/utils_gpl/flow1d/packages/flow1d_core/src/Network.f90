@@ -1048,6 +1048,7 @@ use m_tablematrices
     
 end function getFrictionValue
 
+!> Remove already removed links (administered in LC-array) from the branch administration
 subroutine update_flow1d_admin(network, lc)
    use m_branch
    use messageHandling
