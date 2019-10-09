@@ -1553,8 +1553,6 @@ end subroutine read_land_boundary_netcdf
 
       ierror = 1
 
-      open(6)
-
 !     compute subblock sizes
 !      istep = max(Mfile/Marray,1)
 !      jstep = max(Nfile/Narray,1)
@@ -1660,8 +1658,6 @@ end subroutine read_land_boundary_netcdf
 !     deallocate
       deallocate(dline)
       deallocate(num)
-
-      close(6)
 
       return
       end subroutine ReadLargeArcInfoBlock

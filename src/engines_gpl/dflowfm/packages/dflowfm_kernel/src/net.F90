@@ -31564,8 +31564,6 @@ subroutine make_orthocenters(dmaxnonortho,maxiter)
 !  allocate
    allocate(xc(nump), yc(nump))
 
-   open(6)
-
    call readyy(' ', -1d0)
    call readyy('Computing orthocenters (press right mouse button to cancel)', 0d0)
 
@@ -31650,8 +31648,6 @@ subroutine make_orthocenters(dmaxnonortho,maxiter)
 
 !  deallocate
    if ( allocated(xc)       ) deallocate(xc, yc)
-
-   close(6)
 
    return
 end subroutine make_orthocenters
