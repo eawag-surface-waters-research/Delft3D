@@ -455,6 +455,8 @@ subroutine loadModel(filename)
     
     network%sferic = jsferic==1
     
+    threshold_abort = LEVEL_FATAL
+
     if (jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
 
        iDumk = 0
@@ -501,6 +503,8 @@ subroutine loadModel(filename)
     if (istat == 0) then
        md_netfile = trim( md_netfile)
     endif
+
+    threshold_abort = LEVEL_ERROR
 
     ! Load land boundary from file.
     if (len_trim(md_ldbfile) > 0) then

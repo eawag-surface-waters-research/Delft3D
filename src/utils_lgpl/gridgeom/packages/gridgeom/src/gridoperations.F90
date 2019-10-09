@@ -33,7 +33,7 @@
    public :: CROSSED2d_BNDCELL
    public :: OTHERNODE
    public :: OTHERNODECHK
-   public :: SETNODADM
+   public :: SETNODADM_GRD_OP
    public :: INIALLOCnetcell
    public :: update_cell_circumcenters
    public :: FINDCELLS
@@ -609,7 +609,7 @@
    RETURN
    END SUBROUTINE OTHERNODECHK
 
-   SUBROUTINE SETNODADM(JACROSSCHECK_)
+   SUBROUTINE SETNODADM_GRD_OP(JACROSSCHECK_)
 
    use network_data
 
@@ -638,6 +638,7 @@
    double precision :: X(4), Y(4)
 
    double precision, dimension(:), allocatable :: Lperm_new
+   integer :: numremoved
 
    integer :: jacrosscheck ! remove 2D crossing netlinks (1) or not (0)
    integer :: japermout    ! output permutation array (1) or not (0)
@@ -723,11 +724,14 @@
 
    L2 = 0 ; L1 = 0
    jathindams = 0
+   lc = 0
+   numremoved = 0
    DO L=1,NUML                                                   ! LINKS AANSCHUIVEN, 1d EERST
       K1 = KN(1,L)  ; K2 = KN(2,L) ; K3 = KN(3,L)
       if (k3 == 0) then
          jathindams = 1
       end if
+      ja = 0
       IF (K1 .NE. 0 .AND. K2 .NE. 0 .AND. K1 .NE. K2 ) THEN
          JA = 1
          IF (XK(K1) == DMISS .OR. XK(K2) == DMISS) THEN          ! EXTRA CHECK: ONE MISSING
@@ -752,6 +756,11 @@
             KC(K1)   = 1  ; KC(K2)   = 1
          ENDIF
       ENDIF
+      if (ja == 0 .and. k3 == 1) then
+         ! save removed links, so the flow1d admin can be updated later on
+         numremoved = numremoved+1
+         LC(numremoved) = L
+      endif               
    ENDDO
 
    if ( japermout.eq.1 ) then
@@ -917,7 +926,7 @@
 
    !  netcell administration out of date
    netstat = NETSTAT_CELLS_DIRTY
-   END SUBROUTINE SETNODADM
+   END SUBROUTINE SETNODADM_GRD_OP
 
    SUBROUTINE INIALLOCnetcell()
    use network_data
@@ -1080,9 +1089,9 @@
 
    if ( jasetnodadm.eq.1 ) then
       if ( japermout.eq.1 ) then
-         CALL SETNODADM(10)
+         CALL SETNODADM_GRD_OP(10)
       else
-         CALL SETNODADM(0)
+         CALL SETNODADM_GRD_OP(0)
       end if
    end if
 

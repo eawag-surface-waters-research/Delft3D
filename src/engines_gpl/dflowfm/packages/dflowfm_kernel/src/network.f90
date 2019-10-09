@@ -111,6 +111,22 @@ end subroutine loadNetwork
 
 end module m_netw
 
+
+subroutine setnodadm(jacrosscheck_)
+   use gridoperations
+   use m_network
+   use network_data
+   use unstruc_channel_flow
+   
+   integer :: jacrosscheck_
+   
+   call setnodadm_grd_op(jacrosscheck_)
+   if (lc(1) /=0) then
+      call update_flow1d_admin(network, lc)
+   endif
+   
+end subroutine setnodadm
+
 module m_netstore
    use network_data
    implicit none

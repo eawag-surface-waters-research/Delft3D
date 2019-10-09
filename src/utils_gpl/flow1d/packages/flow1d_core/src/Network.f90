@@ -47,7 +47,8 @@ module m_network
    public admin_network
    public initialize_1dadmin
    public getFrictionValue
- 
+   public update_flow1d_admin
+   
    interface realloc
       module procedure realloc_1dadmin
    end interface realloc
@@ -1047,4 +1048,75 @@ use m_tablematrices
     
 end function getFrictionValue
 
+subroutine update_flow1d_admin(network, lc)
+   use m_branch
+   use messageHandling
+   
+   type(t_network),       intent(inout)         :: network      !< network data structure
+   integer, dimension(:), intent(in   )         :: lc           !< contains the links to be removed from branch administration
+   
+   integer                 :: numbranch
+   integer                 :: lnew
+   integer                 :: ibr
+   type(t_branch), pointer :: pbr
+   integer                 :: LL
+   integer                 :: LL_new
+   integer                 :: upointscount
+   integer                 :: Ltoberemoved_index
+   logical                 :: errorsfound
+   
+   numbranch = network%brs%Count
+   errorsfound = .false.
+   Lnew = 0
+   Ltoberemoved_index = 1
+   do ibr = 1, numbranch
+      pbr => network%brs%branch(ibr)
+      upointscount = pbr%uPointsCount
+      LL_new = 0
+      pbr%gridPointsChainages(1) = pbr%gridPointsChainages(1)
+      pbr%gridPointIDs(1)        = pbr%gridPointIDs(1)       
+      pbr%Xs(1)                  = pbr%Xs(1)                 
+      pbr%Ys(1)                  = pbr%Ys(1)                 
+      pbr%grd(1)                 = pbr%grd(1)                
+      pbr%grd_buf(1)             = pbr%grd_buf(1)            
+      do LL = 1, upointscount
+         if (pbr%lin(LL)==LC(Ltoberemoved_index) ) then
+            Ltoberemoved_index = Ltoberemoved_index + 1
+            
+            ! this link was removed
+            if (pbr%upointscount == 1) then
+               ! this link cannot be removed. 
+               msgbuf = 'All flow links on branch '''//trim(pbr%id)//''' are removed. Please check your input'
+               call warn_flush()
+               errorsfound = .true.
+            else
+               write(msgbuf, '(a, a, a, f10.2, a )')'Flow link on branch ''', trim(pbr%id), ''' at chainage ', pbr%uPointsChainages(LL), ' is removed.'
+               call msg_flush()
+               pbr%dx(LL+1) = pbr%dx(LL)+ pbr%dx(LL+1)
+               pbr%uPointsCount = pbr%uPointsCount -1
+               pbr%gridPointsCount = pbr%gridPointsCount - 1
+            endif
+         else
+            LL_new = LL_new + 1
+            Lnew   = Lnew + 1 
+            pbr%gridPointsChainages(LL_new+1) = pbr%gridPointsChainages(LL+1)
+            pbr%gridPointIDs(LL_new+1)        = pbr%gridPointIDs(LL+1)       
+            pbr%Xs(LL_new+1)                  = pbr%Xs(LL+1)                 
+            pbr%Ys(LL_new+1)                  = pbr%Ys(LL+1)                 
+            pbr%uPointsChainages(LL_new)      = pbr%uPointsChainages(LL)   
+            pbr%Xu(LL_new)                    = pbr%Xu(LL)                 
+            pbr%Yu(LL_new)                    = pbr%Yu(LL)                 
+            pbr%dx(LL_new)                    = pbr%dx(LL)                 
+            pbr%lin(LL_new)                   = Lnew               
+            pbr%grd(LL_new+1)                 = pbr%grd(LL+1)                
+            pbr%grd_buf(LL_new+1)             = pbr%grd_buf(LL+1)            
+            
+         endif
+      enddo
+   enddo
+   
+   msgbuf = 'Errors found, check previous warnings'
+   call err_flush()
+   
+end subroutine update_flow1d_admin
 end module m_network
