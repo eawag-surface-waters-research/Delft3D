@@ -1826,7 +1826,7 @@ end module m_fm_update_crosssections
             !
             ltur = 0
             !
-            call eqtran(sig2d          ,thck2d        ,kmax2d       ,ws2d      ,ltur      , &
+            call eqtran(sig2d   ,thck2d        ,kmax2d       ,ws2d      ,ltur      , &
                & frac(nm,l)     ,tsigmol       ,dcww2d       ,mdia      ,taucr(l)  , &
                & bfmpar%rksr(nm),2             ,jasecflow    ,spirintnm ,suspfrac  , &
                & tetacr(l)      ,concin2d      , &
@@ -1926,7 +1926,7 @@ end module m_fm_update_crosssections
    ! current-related bed load transport
    !
    if (bed > 0.0_fp) then
-      call fm_adjust_bedload(e_sbcn, e_sbct)
+      call fm_adjust_bedload(e_sbcn, e_sbct, .true.)
    endif
    !
    ! Determine incoming discharge and transport at nodes 
@@ -2094,14 +2094,14 @@ end module m_fm_update_crosssections
    ! wave-related bed load transport
    !
    if (bedw>0.0_fp .and. jawave > 0) then
-      call fm_adjust_bedload(e_sbwn, e_sbwt)
+      call fm_adjust_bedload(e_sbwn, e_sbwt,.false.)
    endif
    !
    ! Sediment availability effects for
    ! wave-related suspended load transport
    !
    if (susw>0.0_fp .and. jawave > 0) then
-      call fm_adjust_bedload(e_sswn, e_sswt)
+      call fm_adjust_bedload(e_sswn, e_sswt, .false.)
    endif
    !
    if (duneavalan) then
@@ -3659,7 +3659,7 @@ end module m_fm_update_crosssections
 
    integer :: j, kb, ki, L, ll, iconst, k, kk, Lb, Lt, LLL
 
-
+   ! New approach: default Neumann, unless time series available
    if (eqmbcsand) then
       ! Find sand fractions
       do ll=1,lsed    ! sediment-fraction index
@@ -3743,7 +3743,7 @@ end module m_fm_update_crosssections
    end if
    end subroutine apply_sediment_bc
 
-   subroutine fm_adjust_bedload(sbn, sbt)
+   subroutine fm_adjust_bedload(sbn, sbt, avalan)
    use m_physcoef, only: ag
    use m_sferic, only: pi
    use m_flowparameters, only: epshs, epshu
@@ -3760,6 +3760,7 @@ end module m_fm_update_crosssections
    !!
    !! Global variables
    !!
+   logical                               ,          intent(in)           :: avalan
    real(fp)  , dimension(1:lnx,1:lsedtot),          intent(inout)        :: sbn     !  sbcuu, sbwuu, or sswuu
    real(fp)  , dimension(1:lnx,1:lsedtot),          intent(inout)        :: sbt     !  sbcvv, sbwvv, or sswvv
    real(fp)  , dimension(:)  ,          allocatable                      :: sbncor    ! corrected values
@@ -3767,7 +3768,7 @@ end module m_fm_update_crosssections
    !!
    !! Local variables
    !!
-   logical                :: di50spatial, slopecor, avalan
+   logical                :: di50spatial
    integer                :: l, Lf, k1, k2, lbot, ltop
 
    double precision       :: di50, phi, tphi, sbedm, depth, dzdp, dzds, bagnol, alfas
@@ -3786,12 +3787,6 @@ end module m_fm_update_crosssections
    !
    phi  = 30d0 / 180d0 * pi
    tphi = tan(phi)
-   slopecor = .true.
-   if (wetslope<9.99_fp) then
-      avalan = .true.
-   else
-      avalan = .false.
-   end if
 
    do Lf = 1, Lnx
       if (hu(Lf) > 0d0) then
@@ -3939,20 +3934,19 @@ end module m_fm_update_crosssections
                      !
                      ! The wet slope should really be a function of sediment characteristics. This has not yet been implemented.
                      !
-                     dzmax = wetslope
                      slp = sqrt(e_dzdn(Lf)*e_dzdn(Lf) + e_dzdt(Lf)*e_dzdt(Lf))
-                     if (slp>dzmax) then
-                        k1 = ln(1, Lf); k2 = ln(2,Lf)
-                        avflux = ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * (bl(k2)-bl(k1) + dzmax*e_dzdn(Lf)/slp*Dx(Lf)) / avaltime !/ morfac   ! TO DO JRE: check with Maarten, Dano
-                        sbncor(Lf) = sbncor(Lf) + avflux*rhosol(l)/wu_mor(Lf)
-                     endif    ! slp
+
+                     if (slp>wetslope) then
+                        avflux = ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * (bl(k2)-bl(k1) + wetslope*e_dzdn(Lf)/slp*Dx(Lf)) / avaltime / morfac
+                        sbncor(Lf) = sbncor(Lf) - avflux*rhosol(l)/wu_mor(Lf)
+                     end if
                   endif       ! avalan
                   !
                   ! Apply upwind frac and fixfac.
                   !
                   ! At inflow (open, dd, and partition) boundaries the fixfac should not be taken upwind.
                   !
-                  if (Lf > lnxi .and. hu(Lf) > epshu) then    ! wet boundary link
+                  if (Lf > lnxi .and. hu(Lf) > epshu) then          ! wet boundary link
                      fixf = fixfac(k2, l)
                      frc  = frac(k2, l)
                   else                                              ! interior link
