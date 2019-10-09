@@ -1352,13 +1352,15 @@ end subroutine
          
    end subroutine check_for_changes_on_structures
    
+   !> Check for changes in "actual"  parameters and produce a message.
+   !! The number of messsages is limited to MAXWARNINGS
    subroutine compare_and_warn(level, val_org, val_new, par, id)
       use precision
-      integer         ,  intent(in) :: level
-      double precision,  intent(in) :: val_org
-      double precision,  intent(in) :: val_new
-      character (len=*), intent(in) :: par
-      character (len=*), intent(in) :: id
+      integer         ,  intent(in) :: level        !< Message level 
+      double precision,  intent(in) :: val_org      !< Original value
+      double precision,  intent(in) :: val_new      !< Adjusted value (_actual)
+      character (len=*), intent(in) :: par          !< Name of the parameter
+      character (len=*), intent(in) :: id           !< Id of the sturcture
       
       if (numberOfWarnings == Maxwarnings+1) then
          numberOfWarnings = numberOfWarnings+1
