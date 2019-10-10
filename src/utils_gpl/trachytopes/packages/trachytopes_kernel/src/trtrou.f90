@@ -127,7 +127,7 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
     !real(fp), dimension(nmlb:nmub)                                     , intent(in)  :: gdis_dp  !(not used) 
     real(fp), dimension(nmlb:nmub)                                     , intent(in)  :: gdis_zet
     real(fp), dimension(nmlb:nmub)                                                   :: huv       ! water depth at u or v point 
-    real(fp), dimension(nmlb:nmub)                                                   :: z0rou
+    real(fp), dimension(nmlbc:nmubc)                                                 :: z0rou
     real(fp), dimension(nmlb:nmub, 3)                                                :: cfrou
 !    real(fp), dimension(nmlb:nmub)              :: uvdir    (not used) 
 !    real(fp), dimension(nmlb:nmub), intent(in)  :: uvperp   (not used) 
@@ -143,17 +143,17 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
     real(fp)                                                            , intent(in) :: dryflc
     logical                                                                          :: assoc_dxx
     integer                                                                          :: nxx           ! cannot be optional
-    real(fp), dimension(nmlb:nmub, nxx) , optional                      , intent(in) :: dxx  
+    real(fp), dimension(nmlbc:nmubc, nxx) , optional                    , intent(in) :: dxx  
     integer                             , optional                                   :: i50
     integer                             , optional                                   :: i90
     integer                                                                          :: lsedtot       ! dito
     real(fp), dimension(lsedtot)        , optional                                   :: rhosol
     logical                                                                          :: spatial_bedform
-    real(fp), dimension(:)                                                           :: bedformD50
-    real(fp), dimension(:)                                                           :: bedformD90
-    real(fp), dimension(:)                                                           :: rksr
-    real(fp), dimension(:)                                                           :: rksmr
-    real(fp), dimension(:)                                                           :: rksd
+    real(fp), dimension(nmlbc:nmubc)                                                 :: bedformD50
+    real(fp), dimension(nmlbc:nmubc)                                                 :: bedformD90
+    real(fp), dimension(nmlbc:nmubc)                                                 :: rksr
+    real(fp), dimension(nmlbc:nmubc)                                                 :: rksmr
+    real(fp), dimension(nmlbc:nmubc)                                                 :: rksd
     logical                                                             ,intent(out) :: error
     !
     !for debugging
@@ -273,6 +273,7 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
     real(fp)                    :: vvv
     real(fp)                    :: vz0
     real(fp)                    :: zstemp
+    real(fp)                    :: z0rouL
     character(12), dimension(2) :: cnum
     character(132)              :: cmsg
     character(256)              :: errmsg
@@ -593,10 +594,11 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
           if (kmax==1) then
              u2dh = umag
           else
-             u2dh = (umag/depth*((depth + z0rou(nm))         &
-                  &              *log(1.0_fp + depth/max(z0rou(nm),1.0e-20_fp)) &
+             z0rouL = rttacLin(nm)*z0rou(nm1)  + (1d0-rttacLin(nm))*z0rou(nm2)
+             u2dh = (umag/depth*((depth + z0rouL)         &
+                  &              *log(1.0_fp + depth/max(z0rouL,1.0e-20_fp)) &
                   &              - depth)                         ) &
-                  & /log(1.0_fp + (1.0_fp + sig(kmax))*depth/max(z0rou(nm),1.0e-20_fp))
+                  & /log(1.0_fp + (1.0_fp + sig(kmax))*depth/max(z0rouL,1.0e-20_fp))
           endif
        endif
        !

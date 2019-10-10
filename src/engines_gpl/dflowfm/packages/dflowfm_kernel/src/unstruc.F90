@@ -9671,9 +9671,9 @@ subroutine flow_trachyinit()
     if (allocated(kcu_trt    )) deallocate(kcu_trt    )
 
     kmaxtrt = max(kmx, 1)
-    allocate(sig(kmaxtrt))
-    allocate(umag(ndx))
-    allocate(z0rou(ndx))
+    allocate(sig(kmaxtrt)) ; sig = 0d0
+    allocate(umag(ndx))    ; umag  = 0d0
+    allocate(z0rou(ndx))   ; z0rou = 0d0
     !
     ! Allocate arrays for moving data from flow links to net links
     !
