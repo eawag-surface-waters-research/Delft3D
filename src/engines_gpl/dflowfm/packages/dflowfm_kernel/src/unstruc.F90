@@ -15143,6 +15143,12 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
 !   !$OMP SECTION
 
+   if (network%sts%numWeirs > 0) then
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_weir_crestLevel, irefdate, tzone, tunit, tim)
+   endif
+
+   !   !$OMP SECTION
+
    if (nvalv > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_valve1D, irefdate, tzone, tunit,tim, valv)
    endif

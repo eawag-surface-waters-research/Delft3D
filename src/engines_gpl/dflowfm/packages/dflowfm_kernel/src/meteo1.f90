@@ -140,7 +140,8 @@ module m_meteo
    integer, target :: item_shiptxy                                           !< Unique Item id of the ext-file's 'shiptxy' quantity
    integer, target :: item_movingstationtxy                                  !< Unique Item id of the ext-file's 'movingstationtxy' quantity
    integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantityxy' quantity
-   integer, target :: item_pump_capacity                                     !< Unique Item id of the ext-file's 'pump capacity' quantity
+   integer, target :: item_pump_capacity                                     !< Unique Item id of the structure file's 'pump capacity' quantity
+   integer, target :: item_weir_crestLevel                                   !< Unique Item id of the structure file's 'weir crestLevel' quantity
    integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantxy' quantity
    integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
    integer, target :: item_gateloweredgelevel                                !< Unique Item id of the ext-file's 'gateloweredgelevel' quantity
@@ -234,6 +235,7 @@ module m_meteo
       item_movingstationtxy                      = ec_undef_int
       item_pump                                  = ec_undef_int
       item_pump_capacity                         = ec_undef_int
+      item_weir_crestLevel                       = ec_undef_int
       item_valve1D                               = ec_undef_int    
       item_lateraldischarge                      = ec_undef_int
       item_damlevel                              = ec_undef_int
@@ -540,6 +542,9 @@ module m_meteo
          case ('pump_capacity') ! flow1d pump
             itemPtr1 => item_pump_capacity
             dataPtr1  => qpump ! TODO: UNST-2724: needs more thinking, see issue comments.
+         case ('weir_crestLevel') ! flow1d weir
+            itemPtr1 => item_weir_crestLevel
+            ! dataPtr1
          case ('valve1D')
             itemPtr1 => item_valve1D
          case ('damlevel')
