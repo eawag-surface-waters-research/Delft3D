@@ -8819,8 +8819,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_bedform
  use m_fm_update_crosssections, only: fm_update_mor_width_area
  use m_globalparameters, only: updateTabulatedProfiles
- use unstruc_channel_flow
- use m_1d_structures, only: initialize_structures_actual_params
  use unstruc_netcdf_map_class
  use unstruc_caching
  !
@@ -9042,8 +9040,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call ini_part(1, md_partfile, md_partjatracer, md_partstarttime, md_parttimestep, md_part3Dtype)
 
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (1st call required for call to flow_trachy_update)
-
- call initialize_structures_actual_params(network%sts) ! Prior to flow_flowinit, so that adjust_bobs can use proper crest levels.
 
  iresult = flow_flowinit()                           ! initialise flow arrays and time dependent params for a given user time
  if (iresult /= DFM_NOERR) then
@@ -12807,6 +12803,8 @@ else if (nodval == 27) then
  use geometry_module ! , only: dbdistance, normalout, half
  use m_physcoef, only: backgroundwatertemperature
  use m_alloc
+ use unstruc_channel_flow, only: network
+ use m_1d_structures, only: initialize_structures_actual_params
  implicit none
 
  ! locals
@@ -13746,6 +13744,13 @@ end if
 ! check if at most one structure claims a flowlink
  call check_structures_and_fixed_weirs()
 
+ ! First call to setexternalforcingsonboundaries, here only for the structure timeseries (prior to adjust_bobs_for_dams_and_structs())
+ call setzminmax()                                 ! our side of preparation for 3D ec module
+ call setsigmabnds()
+ call flow_setexternalforcingsonboundaries(tstart_user, iresult)  ! set structure (and bnd) external forcings. Error handling later in 2nd call for bnds.
+ call initialize_structures_actual_params(network%sts)            ! After structure time series, and prior to adjust_bobs, to use proper crest levels.
+
+
  call adjust_bobs_for_dams_and_structs()
 
  ! Floodfill water levels based on sample file.
@@ -13894,8 +13899,7 @@ end if
     goto 888
  end if
 
- call setzminmax()                                 ! our side of preparation for 3D ec module
- call setsigmabnds()
+ ! Actual boundary forcing (now that initial water levels, etc. are also known):
  call flow_setexternalforcingsonboundaries(tstart_user, iresult)         ! set bnd   oriented external forcings
  if (jampi == 1) then
     ! globally reduce the error
