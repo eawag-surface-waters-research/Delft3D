@@ -7511,7 +7511,7 @@ contains
      
      if (present(branchindex) .and. present(chainage) ) then
         if (branchindex > 0) then
-           ierr = findlink(branchindex, chainage, L)
+           ierr = findlink(branchindex, chainage, L) ! NOTE: L is here assumed to be a net link number
            if (ierr==DFM_NOERR) then
               keg(1) = L
               numg = 1
