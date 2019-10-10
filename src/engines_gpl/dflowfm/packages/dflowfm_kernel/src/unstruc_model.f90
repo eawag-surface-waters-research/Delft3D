@@ -928,6 +928,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'   , javasal)
 
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtyptem'   , javatem)
+    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom', javau)
+    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd)
 
     call prop_get_double (md_ptr, 'numerics', 'Cffacver'        , Cffacver)
 
@@ -1017,8 +1019,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'SobekDFM_umin_method', sbkdfm_umin_method)
     call prop_get_double (md_ptr, 'numerics', 'SobekDFM_Minimal_1d2d_Embankment', minimal_1d2d_embankment)
     call prop_get_double (md_ptr, 'numerics', 'sobekDFM_relax', sbkdfm_relax)
-
-    call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypmom', javau)
 
     call prop_get_integer(md_ptr, 'numerics', 'jaupwindsrc', jaupwindsrc)
 
@@ -2414,7 +2414,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
     call prop_set(prop_ptr, 'numerics', 'Vertadvtyptem', Javatem,   'Vertical advection type for temperature (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
-
+    call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom', javau, 'Vertical advection type for u1: 0: No, 3: Upwind implicit, 4: Central implicit, 5: QUICKEST implicit., 6: centerbased upwind expl' )
+    if (writeall .or. javau3onbnd .ne. 0) then
+        call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom3onbnd', javau3onbnd, 'vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd' )
+    endif
     if (writeall .or. cffacver .ne. 0d0 ) then
       call prop_set(prop_ptr, 'numerics', 'Cffacver', Cffacver,   'Factor for including (1-CFL) in HO term vertical   (0d0: no, 1d0: yes)')
     endif
@@ -2571,9 +2574,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'sobekDFM_relax', sbkdfm_relax, 'Relaxation factor for SOBEK-DFM coupling algorithm.')
     endif
 
-    if (writeall .or. javau /= 3) then
-       call prop_set(prop_ptr, 'numerics', 'Vertadvtypmom', javau, 'vertical advection for u1: 0: No, 3: Upwind implicit, 4: Central implicit, 5: QUICKEST implicit., 6: centerbased upwind expl' )
-    end if
 
     call prop_set_integer(prop_ptr, 'numerics', 'jaupwindsrc', jaupwindsrc, '1st-order upwind advection at sources/sinks (1) or higher-order (0)')
 

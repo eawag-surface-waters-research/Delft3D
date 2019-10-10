@@ -663,8 +663,6 @@ end subroutine flow_finalize_single_timestep
 ! due to tolerance in poshcheck, hs may be smaller than 0 (but larger than -1e-10)
  hs = max(hs,0d0)
 
- call setzminmax()                                   ! our side of preparation for 3D ec module
- call setsigmabnds()                                 ! our side of preparation for 3D ec module
 
  if (nshiptxy > 0) then  ! quick fix only for ships
      call setdt()
@@ -15677,6 +15675,9 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 !!     restore zbndu
 !      zbndu = zbndu_store
 !   end if
+
+   call setzminmax()                                   ! our side of preparation for 3D ec module
+   call setsigmabnds()                                 ! our side of preparation for 3D ec module
 
    if (nzbnd > nqhbnd) then
       success = ec_gettimespacevalue(ecInstancePtr, item_waterlevelbnd, irefdate, tzone, tunit, tim)
@@ -42040,6 +42041,8 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  double precision   :: aa(kmxx),cc(kmxx) ! for five-diaginal matrix
                                          ! aa(i)*u(i-2)+a(i)*u(i-1)+b(i)*u(i)+c(i)*u(i+1)+cc(i)*u(i+2)=d(i)
 
+integer            :: jav3
+
  a(1:kxL) = 0d0 ; b(1:kxL) = dti ; c(1:kxL) = 0d0
 
  if ( jafilter.ne.0 ) then
@@ -42060,6 +42063,15 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
     dzv(k) = ac1*(zws(k1) - zws(k1-1)) + ac2*(zws(k2) - zws(k2-1))      ! volume weighted dzu , ok for pillar
  enddo
 
+ jav3 = 0
+ if (javau3onbnd == 1) then 
+    if (LL > lnxi)     jav3 = 1
+ else if (javau3onbnd == 2) then 
+    if (iadv(LL) == 6) jav3 = 1   
+ else if (javau == 3) then 
+                       jav3 = 1
+ endif 
+
  do L    = Lb, Lt - 1
     k        = L - Lb + 1
     dzLw     = 0.5d0 *  ( dzu(k+1) + dzu(k) )
@@ -42070,7 +42082,7 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
 
     ! vstress  = ( max(vicwwu(L), vicoww) + viskin ) / dzLw                 ! 23-12-14 : D3D like
 
-    if (javau == 3) then                                                ! vertical advection upwind implicit
+    if (jav3 == 1) then         ! vertical advection upwind implicit
        if (womegu(k) > 0d0) then
           if (jarhoxu > 0) then
              adv1 =  womegu(k)*rhou(L)/rhou(L+1)  ; adv  = 0d0
