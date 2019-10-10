@@ -1772,14 +1772,14 @@ end subroutine setfouunit
               namfun = 'wind speed'
            endif
            if (founam(ifou)(:2)=='ux') then
-              unc_loc = UNC_LOC_S
+              unc_loc = UNC_LOC_S3D
               ibluv = ibluv + 1
               blnm = 'UX??'
               write (blnm(3:4), '(i2.2)') ibluv
               namfun = 'U-component of cell-centre velocity'
            endif
            if (founam(ifou)(:2)=='uy') then
-              unc_loc = UNC_LOC_S
+              unc_loc = UNC_LOC_S3D
               ibluv = ibluv + 1
               blnm = 'UY??'
               write (blnm(3:4), '(i2.2)') ibluv
@@ -1800,14 +1800,14 @@ end subroutine setfouunit
               namfun = 'V-component velocity, column average'
            endif
            if (founam(ifou)(:2)=='uc') then
-              unc_loc = UNC_LOC_S
+              unc_loc = UNC_LOC_S3D
               ibluc = ibluc + 1
               blnm = 'UC??'
               write (blnm(3:4), '(i2.2)') ibluc
               namfun = 'velocity magnitude'
            endif
            if (founam(ifou)(:2)=='r1') then
-              unc_loc = UNC_LOC_S
+              unc_loc = UNC_LOC_S3D
               iblcn = iblcn + 1
               blnm = 'CO??'
               write (blnm(3:4), '(i2.2)') iblcn
@@ -1841,7 +1841,6 @@ end subroutine setfouunit
                           'Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)), fouvarunit(ivar),0)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)))
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'layer_number', flayno(ifou))
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', itdate)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
