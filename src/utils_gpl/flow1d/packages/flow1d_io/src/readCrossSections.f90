@@ -97,6 +97,7 @@ module m_readCrossSections
       logical                        :: file_exist
       integer                        :: pos, ibin
 
+
       pos = index(CrossSectionFile, '.', back = .true.)
       binfile = CrossSectionFile(1:pos)//'cache'
       inquire(file=binfile, exist=file_exist)
@@ -211,22 +212,6 @@ module m_readCrossSections
 
       call tree_destroy(md_ptr)
       
-      ! Clean up not used any more roughness data from definitions
-      do i = 1, network%CSDefinitions%Count
-      
-         pCrsDef => network%CSDefinitions%CS(i)
-         
-         if (pCrsDef%frictionSectionsCount > 0) then
-            if (allocated(pCrsDef%frictionSectionID))   deallocate(pCrsDef%frictionSectionID)
-            if (allocated(pCrsDef%frictionSectionFrom)) deallocate(pCrsDef%frictionSectionFrom)
-            if (allocated(pCrsDef%frictionSectionTo))   deallocate(pCrsDef%frictionSectionTo)
-            pCrsDef%frictionSectionsCount = 0
-         endif
-      
-      enddo
-      
-      !call dumpCross(network%crs, 'dumpCrossFileRead')
-      
    end subroutine readCrossSectionLocationFile
 
    !> Read the cross section definitions file, taking the file version into account.
@@ -234,7 +219,6 @@ module m_readCrossSections
 
       type(t_network), target, intent(inout) :: network                          !< network structure
       character(len=*), intent(in)           :: CrossSectionDefinitionFile       !< name of the cross section definition file
-      
       type(tree_data), pointer  :: md_ptr
       integer :: istat
       logical :: success
