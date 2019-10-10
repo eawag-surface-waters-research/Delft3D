@@ -58,9 +58,9 @@ module part14_mod
 !>           the time step instead of the present even spreading. Something for the future.
 !>         - Then location information for the wasteload is set as the location of the
 !>           released particles.
-!>         - This information is perturbed in the <find> routine to spread the particles
+!>         - This information is perturbed in the <findcircle> routine to spread the particles
 !>           along a circle. Because even mass per distance means lower concentrations at
-!>           the edge of the circle, the find routine compensates somewhat for that.
+!>           the edge of the circle, the findcircle routine compensates somewhat for that.
 !>         - This only was the horizontal. Particles are distributed over the layers
 !>           vertically and depending on the type of modelling randomly distributed vertically
 !>           in their layer
@@ -78,7 +78,7 @@ module part14_mod
 
 !     Logical unit numbers  : lun2 - output file to print statistics
 
-!     Subroutines called    : find - distributes particles over a circel
+!     Subroutines called    : findcircle - distributes particles over a circle
 
 !     functions   called    : rnd  - random number generator
 
@@ -336,8 +336,8 @@ module part14_mod
 
 !         spreads the particles over the circle
 
-            call find ( xpart(i), ypart(i), radiuh  , npart(i), mpart(i),   &
-                        lgrid   , dx      , dy      , lcircl  )
+            call findcircle ( xpart(i), ypart(i), radiuh  , npart(i), mpart(i),   &
+                              lgrid   , dx      , dy      , lcircl  )
 
 !         give the particles a layer number
 

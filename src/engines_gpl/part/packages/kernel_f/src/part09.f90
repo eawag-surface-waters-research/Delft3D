@@ -62,7 +62,7 @@ contains
 
 !     Logical unit numbers  : lun2 - output file to print statistics
 
-!     Subroutines called    : find - distributes particles over a circel
+!     Subroutines called    : findcircle - distributes particles over a circle
 
 !     functions   called    : rnd  - random number generator
 
@@ -201,7 +201,7 @@ contains
             mpart (i) = mwasth
             xpart (i) = xwasth
             ypart (i) = ywasth
-            call find ( xpart(i), ypart(i), radiuh  , npart(i), mpart(i),  &
+            call findcircle ( xpart(i), ypart(i), radiuh  , npart(i), mpart(i),  &
                         lgrid   , dx      , dy      , lcircl  )
 
 !     distribute the particles for this waste over the vertical

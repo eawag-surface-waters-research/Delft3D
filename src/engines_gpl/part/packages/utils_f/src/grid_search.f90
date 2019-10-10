@@ -25,7 +25,7 @@ module grid_search_mod
 !
 !  module procedure for grid searching routines, including
 !
-!  1. routine find
+!  1. routine findcircle
 !  2. routine findcell
 !  3. routine part07
 !
@@ -46,9 +46,9 @@ implicit none               ! force explicit typing
 !
 contains
 ! -------------------------------------------------------------------------------------
-!     Routine find
+!     Routine findcircle
 ! -------------------------------------------------------------------------------------
-      subroutine find   ( x    , y  , radius , np     , mp , &
+      subroutine findcircle   ( x    , y  , radius , np     , mp , &
                           lgrid, dx , dy     , lcircl )
 !
 !                        Deltares (former: Deltares)
@@ -131,7 +131,7 @@ contains
       external rnd
       integer(4) ithndl              ! handle to time this subroutine
       data       ithndl / 0 /
-      if ( timon ) call timstrt( "find", ithndl )
+      if ( timon ) call timstrt( "findcircle", ithndl )
 !
       if (radius  >=  0.1) then
 !
@@ -222,7 +222,7 @@ contains
       if ( timon ) call timstop ( ithndl )
       return
 !
-      end subroutine find
+      end subroutine findcircle
 
 
 ! -------------------------------------------------------------------------------------
