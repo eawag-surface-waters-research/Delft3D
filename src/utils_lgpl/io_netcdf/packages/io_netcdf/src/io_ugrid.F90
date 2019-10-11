@@ -4160,6 +4160,66 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    endif
    
 end function ug_def_mesh_contact
+!> Writes edge nodes 
+function ug_write_mesh_1d_edge_nodes (ncid, meshids, meshName, numEdge, mesh_1d_edge_nodes, start_index) result(ierr)
+   integer,          intent(in)         :: ncid                     !< NetCDF dataset id, should be already open and ready for writing.
+   type(t_ug_mesh), intent(inout)       :: meshids                  !< Set of NetCDF-ids for all mesh geometry arrays.
+   character(len=*), intent(in)         :: meshName                 !< Name for the mesh variable, also used as prefix for all related entities.
+   integer,          intent(in)         :: numEdge                  !< Number of edges in the mesh.
+   integer,          intent(in)         :: mesh_1d_edge_nodes(:,:)  !< Edge-to-node mapping array.
+   integer                              :: start_index              !< The base index of the provided arrays (0 if this function writes array from C/C++/C#, 1 for Fortran)
+   integer                              :: ierr                     !< Result status (UG_NOERR==NF90_NOERR) if successful.
+      
+   character(len=len_trim(meshName))    :: prefix
+   integer :: wasInDefine
+      
+   ierr = UG_SOMEERR
+   wasInDefine = 0
+
+   ierr = nf90_redef(ncid)
+   if (ierr == nf90_eindefine) wasInDefine = 1 ! Was still in define mod
+   
+   prefix=trim(meshName)
+
+   ! Edges
+   ierr = nf90_inq_dimid(ncid, prefix//'_edge_nodes',    meshids%dimids(mdim_1dedgenodes))  
+   if ( ierr /= UG_NOERR) then 
+        ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mdim_1dedgenodes))
+        ierr = nf90_put_att(ncid, meshids%varids(mdim_1dedgenodes), 'cf_role',   'edge_node_connectivity')
+        ierr = nf90_put_att(ncid, meshids%varids(mdim_1dedgenodes), 'long_name',  'Start and end nodes of mesh edges')
+        if (start_index.ne.-1) then
+           ierr = nf90_put_att(ncid, meshids%varids(mdim_1dedgenodes), 'start_index',  start_index)
+        endif
+   endif
+   
+   ierr = nf90_enddef(ncid)
+
+! -- end of header --
+      
+   ! Write the actual data
+   
+   ! Edges:
+  ! always write edge nodes
+  if (meshids%varids(mid_edgenodes).ne.-1) then
+	 ierr = nf90_put_var(ncid, meshids%varids(mdim_1dedgenodes), mesh_1d_edge_nodes, count=(/ 2, numEdge /))
+  endif
+
+  ! Check for any remaining native NetCDF errors
+  if (ierr /= nf90_noerr) then
+     goto 801
+  end if
+
+  ! Leave the dataset in the same mode as we got it.
+  if (wasInDefine == 1) then
+     ierr = nf90_redef(ncid)
+  end if
+
+  ierr = UG_NOERR
+  return ! Return with success
+
+801 continue
+
+end function ug_write_mesh_1d_edge_nodes                              
 
 ! Gets the number of contacts
 function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)

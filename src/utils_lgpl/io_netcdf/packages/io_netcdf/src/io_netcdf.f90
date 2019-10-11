@@ -130,6 +130,7 @@ public :: ionc_get_1d_mesh_discretisation_points_count_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_ugrid_v1
 public :: ionc_put_1d_mesh_edges
+public :: ionc_write_mesh_1d_edge_nodes
 public :: ionc_create_1d_mesh_ugrid_v1
 public :: ionc_put_network
 !links functions
@@ -1839,6 +1840,38 @@ function ionc_def_mesh_contact_ugrid(ioncid, contactsmesh, contactmeshname, ncon
   ierr = ug_def_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), contactmeshname, ncontacts, datasets(ioncid)%ug_file%meshids(idmesh1), datasets(ioncid)%ug_file%meshids(idmesh2), locationType1Id, locationType2Id)
    
 end function ionc_def_mesh_contact_ugrid
+
+!>Write the mesh 1d node edge array
+function ionc_write_mesh_1d_edge_nodes (ioncid, meshid, numEdge, mesh_1d_edge_nodes, start_index) result(ierr)
+   integer,          intent(in)         :: ioncid, meshid, numEdge
+   integer,          intent(in)         :: mesh_1d_edge_nodes(:,:)  !< Edge-to-node mapping array.
+   integer                              :: start_index              !< The base index of the provided arrays (0 if this function writes array from C/C++/C#, 1 for Fortran)
+   integer                              :: ierr                     !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   
+   character(len=nf90_max_name)         :: meshName     
+   
+   !get the mesh name
+   ierr = ug_get_mesh_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshname = meshName)
+   
+   ! Check for any remaining native NetCDF errors
+   if (ierr /= nf90_noerr) then
+      goto 801
+   end if
+   
+   !write the 1d mesh edge node array
+   ierr = ug_write_mesh_1d_edge_nodes (datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshName, numEdge, mesh_1d_edge_nodes, start_index)
+   
+   ! Check for any remaining native NetCDF errors
+   if (ierr /= nf90_noerr) then
+      goto 801
+   end if
+   
+   ierr = UG_NOERR
+   return ! Return with success
+
+801 continue
+    
+end function ionc_write_mesh_1d_edge_nodes
 
 function ionc_get_contacts_count_ugrid(ioncid, contactsmesh, ncontacts) result(ierr) 
 

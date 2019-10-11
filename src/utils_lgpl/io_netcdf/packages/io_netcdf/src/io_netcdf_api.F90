@@ -1390,6 +1390,19 @@ function ionc_put_mesh_contact_v1_dll(ioncid, contactsmesh, c_mesh1indexes, c_me
    
 end function ionc_put_mesh_contact_v1_dll
 
+function ionc_write_mesh_1d_edge_nodes_dll(ioncid, meshid, numEdge, c_mesh_1d_edge_nodes, start_index) result(ierr) bind(C, name="ionc_write_mesh_1d_edge_nodes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_mesh_1d_edge_nodes_dll
+   integer, intent(in)                                         :: ioncid, meshid, numEdge, start_index
+   type(c_ptr), intent(in)                                     :: c_mesh_1d_edge_nodes
+   integer,pointer                                             :: mesh_1d_edge_nodes(:,:)
+   integer                                                     :: ierr
+   
+   call c_f_pointer(c_mesh_1d_edge_nodes, mesh_1d_edge_nodes, (/ numEdge /))
+
+   ierr = ionc_write_mesh_1d_edge_nodes (ioncid, meshid, numEdge, mesh_1d_edge_nodes, start_index)
+   
+end function ionc_write_mesh_1d_edge_nodes_dll
+
 function ionc_get_mesh_contact_dll(ioncid, contactsmesh, c_mesh1indexes, c_mesh2indexes, c_contacttype, contactsinfo, ncontacts, startIndex) result(ierr) bind(C, name="ionc_get_mesh_contact")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_mesh_contact_dll
    integer, intent(in)                   :: ioncid, contactsmesh, ncontacts, startIndex
