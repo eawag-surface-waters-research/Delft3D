@@ -633,7 +633,7 @@ end subroutine flow_finalize_single_timestep
  use unstruc_model, only: md_ident, md_restartfile
  use m_xbeach_data, only: swave, Lwave, uin, vin, cgwav
  use unstruc_channel_flow
- use m_1d_structures, only: initialize_structures_actual_params
+ use m_1d_structures, only: initialize_structures_actual_params, setu0structures
  use dfm_error
  use MessageHandling
  use m_partitioninfo
@@ -700,7 +700,11 @@ end subroutine flow_finalize_single_timestep
     call xbeach_flow_bc()
  end if
 
- if (jazws0.eq.0)  u0 = u1                           ! progress velocities
+ if (jazws0.eq.0) then
+    u0 = u1                           ! progress velocities
+    call setu0structures(network%sts)
+ endif
+ 
 
  advi = 0d0
  adve = 0d0

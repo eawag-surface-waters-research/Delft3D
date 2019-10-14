@@ -96,6 +96,7 @@ module m_1d_structures
    public check_for_changes_on_structures
    public initialize_structures_actual_params
    public get_discharge_under_compound_struc
+   public setu0structures
 
    public printData
 
@@ -157,6 +158,8 @@ module m_1d_structures
       double precision, pointer, dimension(:)   :: fu    !< fu coefficient for momentum equation
       double precision, pointer, dimension(:)   :: ru    !< ru coefficient for momentum equation
       double precision, pointer, dimension(:)   :: au    !< flow area
+      double precision, pointer, dimension(:)   :: u1    !< flow velocity at current time step
+      double precision, pointer, dimension(:)   :: u0    !< flow velocity at previous time step
     
       integer                          :: compound
       type(t_weir), pointer            :: weir => null()
@@ -375,6 +378,8 @@ subroutine deallocstructure(sts)
          if (associated(sts%struct(i)%fu))           deallocate(sts%struct(i)%fu)
          if (associated(sts%struct(i)%ru))           deallocate(sts%struct(i)%ru)
          if (associated(sts%struct(i)%au))           deallocate(sts%struct(i)%au)
+         if (associated(sts%struct(i)%u0))           deallocate(sts%struct(i)%u0)
+         if (associated(sts%struct(i)%u1))           deallocate(sts%struct(i)%u1)
          
          sts%struct(i)%weir         => null()
          sts%struct(i)%orifice      => null()
@@ -390,6 +395,8 @@ subroutine deallocstructure(sts)
          sts%struct(i)%fu           => null()
          sts%struct(i)%ru           => null()
          sts%struct(i)%au           => null()
+         sts%struct(i)%u0           => null()
+         sts%struct(i)%u1           => null()
       enddo
       deallocate(sts%struct)
    endif
@@ -1251,12 +1258,14 @@ end subroutine
       integer                                        :: istat    !< Result status (0 if successful).
 
       istat = 0
-      allocate(struct%linknumbers(numlinks), struct%fu(numlinks), struct%ru(numlinks), struct%au(numlinks))
+      allocate(struct%linknumbers(numlinks), struct%fu(numlinks), struct%ru(numlinks), struct%au(numlinks), struct%u0(numlinks), struct%u1(numlinks))
       struct%numlinks = numlinks
       struct%linknumbers = links(1:numlinks)
       struct%fu = 0d0
       struct%ru = 0d0
       struct%au = 0d0
+      struct%u0 = 0d0
+      struct%u1 = 0d0
       
       select case(struct%type)
       case (ST_GENERAL_ST) ! REMARK: for version 2 files weirs, orifices and gates are implemented as general structures
@@ -1379,16 +1388,33 @@ end subroutine
    end subroutine compare_and_warn
    
    !> Gets discharge of a structure that belongs to a compound structure
-   double precision function get_discharge_under_compound_struc(pstru, L0, s1k1, s1k2)
-      type (t_structure), intent(in) :: pstru       !< structure
-      integer,            intent(in) :: L0          !< local link index
-      double precision,   intent(in) :: s1k1, s1k2  !< water level on nodes k1 and k2
+   double precision function get_discharge_under_compound_struc(pstru, L0, s1k1, s1k2, teta)
+      type (t_structure), intent(inout) :: pstru       !< structure
+      integer,            intent(in)    :: L0          !< local link index
+      double precision,   intent(in)    :: s1k1, s1k2  !< water level on nodes k1 and k2
+      double precision,   intent(in)    :: teta  !< water level on nodes k1 and k2
 
       double precision :: u1
       
-      u1 = pstru%ru(L0) - pstru%fu(L0)*( s1k2 - s1k1 )
-      get_discharge_under_compound_struc =pstru%au(L0)* u1
+      pstru%u1(L0) = pstru%ru(L0) - pstru%fu(L0)*( s1k2 - s1k1 )
+      get_discharge_under_compound_struc =pstru%au(L0)* (teta * pstru%u1(L0) + (1d0-teta) * pstru%u0(L0))
 
    end function get_discharge_under_compound_struc
+
+   !> Sets u0 (flow velocity at previous timestep).
+   subroutine setu0structures(sts)
+      
+      type(t_structureset), intent(inout) :: sts       !< dataset containing structure information
+      
+      integer LL, istru, count, numlinks
+      type(t_structure), pointer :: pstru
+      
+      count = sts%Count
+      do istru = 1, count
+         pstru => sts%struct(istru)
+         pstru%u0 = pstru%u1
+      enddo
+      
+   end subroutine setu0structures
 
 end module m_1d_structures
