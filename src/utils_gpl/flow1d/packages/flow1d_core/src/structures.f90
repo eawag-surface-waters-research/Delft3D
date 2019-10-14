@@ -92,11 +92,12 @@ module m_1d_structures
    public getPumpSsLevel
    public getPumpDsLevel
    public initialize_structure_links
-   public set_fu_ru
+   public set_fu_ru_structure
    public check_for_changes_on_structures
    public initialize_structures_actual_params
    public get_discharge_under_compound_struc
-   public setu0structures
+   public set_u0isu1_structures
+   public set_u1q1_structure
 
    public printData
 
@@ -158,8 +159,8 @@ module m_1d_structures
       double precision, pointer, dimension(:)   :: fu    !< fu coefficient for momentum equation
       double precision, pointer, dimension(:)   :: ru    !< ru coefficient for momentum equation
       double precision, pointer, dimension(:)   :: au    !< flow area
-      double precision, pointer, dimension(:)   :: u1    !< flow velocity at current time step
       double precision, pointer, dimension(:)   :: u0    !< flow velocity at previous time step
+      double precision, pointer, dimension(:)   :: u1    !< flow velocity at current time step
     
       integer                          :: compound
       type(t_weir), pointer            :: weir => null()
@@ -1292,7 +1293,7 @@ end subroutine
    !> Set fu, ru and au in a structure. This subroutine is essential for compound
    !! structures. Since the compound structure relies on the fact that FU, RU and 
    !! AU are set for all of its underlying structures.
-   subroutine set_fu_ru(struct, L0, fu, ru, au)
+   subroutine set_fu_ru_structure(struct, L0, fu, ru, au)
       type (t_structure) , intent(inout)  :: struct    !< Structure object.
       integer,             intent(in   )  :: L0        !< Internal link index.
       double precision,    intent(in   )  :: fu        !< FU coefficient.
@@ -1302,7 +1303,7 @@ end subroutine
       struct%fu(L0) = fu
       struct%ru(L0) = ru
       struct%au(L0) = au
-   end subroutine set_fu_ru
+   end subroutine set_fu_ru_structure
 
 
    !> Initialize the %*_actual parameters for all network structure to the
@@ -1386,35 +1387,55 @@ end subroutine
       
       
    end subroutine compare_and_warn
-   
-   !> Gets discharge of a structure that belongs to a compound structure
+
+
+   !> Gets discharge of a structure that belongs to a compound structure.
    double precision function get_discharge_under_compound_struc(pstru, L0, s1k1, s1k2, teta)
       type (t_structure), intent(inout) :: pstru       !< structure
       integer,            intent(in)    :: L0          !< local link index
       double precision,   intent(in)    :: s1k1, s1k2  !< water level on nodes k1 and k2
-      double precision,   intent(in)    :: teta  !< water level on nodes k1 and k2
+      double precision,   intent(in)    :: teta        !< Theta-value of theta-time-integration for this flow link.
 
       double precision :: u1
       
-      pstru%u1(L0) = pstru%ru(L0) - pstru%fu(L0)*( s1k2 - s1k1 )
-      get_discharge_under_compound_struc =pstru%au(L0)* (teta * pstru%u1(L0) + (1d0-teta) * pstru%u0(L0))
+      ! NOTE: pstru%u1 must have been calculated before in set_u1q1_structure()
+      get_discharge_under_compound_struc = pstru%au(L0)* (teta * pstru%u1(L0) + (1d0-teta) * pstru%u0(L0))
 
    end function get_discharge_under_compound_struc
 
-   !> Sets u0 (flow velocity at previous timestep).
-   subroutine setu0structures(sts)
-      
-      type(t_structureset), intent(inout) :: sts       !< dataset containing structure information
-      
-      integer LL, istru, count, numlinks
+
+   !> Sets u0 (flow velocity at previous timestep) to u1 for a structure's flow links.
+   !! These are the structure's own velocities, not the flow link's velocities,
+   !! this is relevant under compound structures.
+   !! This routine typically should be called once (at the start of) every timestep.
+   subroutine set_u0isu1_structures(sts)
+      type(t_structureset), intent(inout) :: sts       !< Dataset containing structure information.
+
+      integer :: istru, count
       type(t_structure), pointer :: pstru
       
       count = sts%Count
       do istru = 1, count
          pstru => sts%struct(istru)
-         pstru%u0 = pstru%u1
+         pstru%u0(:) = pstru%u1(:)
       enddo
       
-   end subroutine setu0structures
+   end subroutine set_u0isu1_structures
+
+
+   !> Sets u1 for each structure's flow links.
+   !! These are the structure's own velocities, not the flow link's velocities,
+   !! this is relevant under compound structures.
+   !! This routine typically should be called once (at the end of) every timestep.
+   subroutine set_u1q1_structure(pstru, L0, s1k1, s1k2, teta)
+      type (t_structure), intent(inout) :: pstru       !< structure
+      integer,            intent(in)    :: L0          !< local link index
+      double precision,   intent(in)    :: s1k1, s1k2  !< water level on nodes k1 and k2
+      double precision,   intent(in)    :: teta        !< Theta-value of theta-time-integration for this flow link. (not used yet)
+
+      pstru%u1(L0) = pstru%ru(L0) - pstru%fu(L0)*( s1k2 - s1k1 )
+      ! NOTE: No q1 part here, since pstru%q1 does not exist.
+      
+   end subroutine set_u1q1_structure
 
 end module m_1d_structures

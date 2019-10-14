@@ -633,7 +633,7 @@ end subroutine flow_finalize_single_timestep
  use unstruc_model, only: md_ident, md_restartfile
  use m_xbeach_data, only: swave, Lwave, uin, vin, cgwav
  use unstruc_channel_flow
- use m_1d_structures, only: initialize_structures_actual_params, setu0structures
+ use m_1d_structures, only: initialize_structures_actual_params, set_u0isu1_structures
  use dfm_error
  use MessageHandling
  use m_partitioninfo
@@ -702,7 +702,7 @@ end subroutine flow_finalize_single_timestep
 
  if (jazws0.eq.0) then
     u0 = u1                           ! progress velocities
-    call setu0structures(network%sts)
+    call set_u0isu1_structures(network%sts)
  endif
  
 
@@ -34780,7 +34780,7 @@ end subroutine setbobs_fixedweirs
 
                 ! store computed fu, ru and au in structure object. In case this structure
                 ! is a part of a compound structure this data will be used in computeCompound
-                call set_fu_ru(pstru, L0, fu(L), ru(L), au(L))
+                call set_fu_ru_structure(pstru, L0, fu(L), ru(L), au(L))
                 call check_for_changes_on_structures(LEVEL_WARN, pstru, bob0(:,L))
              endif
           enddo
@@ -36161,14 +36161,16 @@ subroutine reallocsrc(n)
  use m_flowtimes
  use m_partitioninfo
  use m_timer
+ use unstruc_channel_flow
+ use m_1d_structures
 
  implicit none
 
- integer          :: L, k1, k2, k01, k02, LL, k, n, nn, km, n1, n2, Ld, kb, kt, ks, Lb, Lt, kmxLL, ng
+ integer          :: L0, L, k1, k2, k01, k02, LL, k, n, nn, km, n1, n2, Ld, kb, kt, ks, Lb, Lt, kmxLL, ng, istru
  double precision :: qt, zws0k
  double precision :: accur = 1e-30, wb, ac1, ac2, dsL, sqiuh, qwb, qsigma
  double precision :: qwave
-
+ type(t_structure), pointer :: pstru
  integer          :: ierror
 
  squ = 0d0 ; sqi = 0d0 ; qinbnd = 0d0 ; qoutbnd = 0d0
@@ -36527,6 +36529,17 @@ subroutine reallocsrc(n)
  endif
 
  sq = sqi-squ                                        ! arrays, later put in loop anyway
+
+ ! u1q1 for flow1d structures on links
+ do istru=1,network%sts%count
+    pstru => network%sts%struct(istru)
+    do L0=1,pstru%numlinks
+       L = pstru%linknumbers(L0)
+       k1 = ln(1,L)
+       k2 = ln(2,L)
+       call set_u1q1_structure(pstru, L0, s1(k1), s1(k2), teta(L))
+    end do
+ end do
 
  end subroutine u1q1
 
