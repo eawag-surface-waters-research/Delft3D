@@ -1417,7 +1417,10 @@ end subroutine
       count = sts%Count
       do istru = 1, count
          pstru => sts%struct(istru)
-         pstru%u0(:) = pstru%u1(:)
+         if (pstru%numlinks/=0 ) then
+            pstru%u0(:) = pstru%u1(:)
+         endif
+         
       enddo
       
    end subroutine set_u0isu1_structures
