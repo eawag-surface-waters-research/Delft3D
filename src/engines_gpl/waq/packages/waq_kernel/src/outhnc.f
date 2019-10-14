@@ -92,9 +92,11 @@
       character(len=nf90_max_name) :: mesh_name
       character(len=nf90_max_name) :: dimname
 
-      integer :: i, j, id
+      integer :: i, j, id, cnt
       integer :: type_ugrid
+      logical :: success
       real, dimension(:), allocatable :: dlwq_values
+      character(len=nf90_max_name) :: altname
 
       integer :: station_names_id, station_x_id, station_y_id, station_z_id
 
@@ -281,8 +283,25 @@
             inc_error = nf90_def_var( ncidhis, trim(adjustl(synam1(iout))), nf90_float,
      &                      [nostations_id, ntimeid], wqid1(iout,1) )
             if ( inc_error /= nf90_noerr ) then
-                write( lunut , 2582)
-                goto 800
+                if ( inc_error /= nf90_enameinuse ) then
+                    write( lunut , 2582)
+                    goto 800
+                else
+                    success = .false.
+                    do cnt = 2,100
+                        write( altname, '(i0,2a)' ) cnt, '-', adjustl(synam1(iout))
+                        inc_error = nf90_def_var( ncidhis, trim(altname), nf90_float,
+     &                                  [nostations_id, ntimeid], wqid1(iout,1) )
+                        if ( inc_error == nf90_noerr ) then
+                            success = .true.
+                            exit
+                        endif
+                    enddo
+                    if ( .not. success ) then
+                        write( lunut , 2582)
+                        goto 800
+                    endif
+                endif
             endif
 
             inc_error =
@@ -309,8 +328,25 @@
             inc_error = nf90_def_var( ncidhis, trim(adjustl(synam2(iout))), nf90_float,
      &                      [nostations_id, ntimeid], wqid2(iout,1) )
             if ( inc_error /= nf90_noerr ) then
-                write( lunut , 2582)
-                goto 800
+                if ( inc_error /= nf90_enameinuse ) then
+                    write( lunut , 2582)
+                    goto 800
+                else
+                    success = .false.
+                    do cnt = 2,100
+                        write( altname, '(i0,2a)' ) cnt, '-', adjustl(synam2(iout))
+                        inc_error = nf90_def_var( ncidhis, trim(altname), nf90_float,
+     &                                  [nostations_id, ntimeid], wqid2(iout,1) )
+                        if ( inc_error == nf90_noerr ) then
+                            success = .true.
+                            exit
+                        endif
+                    enddo
+                    if ( .not. success ) then
+                        write( lunut , 2582)
+                        goto 800
+                    endif
+                endif
             endif
 
             inc_error =

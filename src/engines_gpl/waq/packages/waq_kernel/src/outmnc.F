@@ -239,8 +239,7 @@
                 ! Use the number of faces
                 inc_error = nf90_get_att( ncid, meshid, 'face_dimension', dimname )
                 if ( inc_error /= nf90_noerr ) then
-                    write ( lunut , 2593 )
-                    goto 800
+                    dimname = 'nNetElem' ! Fallback option
                 endif
                 inc_error = nf90_inq_dimid( ncid, dimname, noseglid )
                 if ( inc_error /= nf90_noerr ) then
