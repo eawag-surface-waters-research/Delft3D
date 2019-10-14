@@ -2822,6 +2822,8 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
                  vben   = qunit / max (0.000001d0,wsben - bl(kd))
                  vhei   =  0.5d0*vben*vben / ag
                  ewben  =  max (0.000001d0, wsben + hkruin) + vhei
+                 ! limit downstream energy height EWBEN by upstream enegy height EWEIR
+                 ewben = min(ewben, eweir)
 
                  ! Qunit  = abs(q1(L)) / wu(L)
 
