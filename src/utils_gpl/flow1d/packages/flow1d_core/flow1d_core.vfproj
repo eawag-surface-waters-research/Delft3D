@@ -64,6 +64,7 @@
 		<File RelativePath=".\src\flow1d_core.F90"/>
 		<File RelativePath=".\src\general_structure.f90"/>
 		<File RelativePath=".\src\GlobalParameters.f90"/>
+		<File RelativePath=".\src\initialize_1d.F90"/>
 		<File RelativePath=".\src\Laterals.F90"/>
 		<File RelativePath=".\src\ModelGlobalData.f90"/>
 		<File RelativePath=".\src\ModelParameters.f90"/>

@@ -1515,7 +1515,7 @@ if (network%loaded .and. kcu(LL) == 1) then
    if (branchindex >= 1 .and. branchindex <= network%brs%Count) then
       call Write2Scr(linec, 'Branch id', network%brs%branch(branchindex)%id(1:21))
 
-      ilocallin = network%adm%lin2local(LL)
+      ilocallin = network%adm%lin2point(LL)
       if (ilocallin >= 1 .and. ilocallin <= network%brs%branch(branchindex)%uPointsCount) then
          call Write2Scr(linec, 'Chainage', network%brs%branch(branchindex)%uPointsChainages(ilocallin), 'm')
       else

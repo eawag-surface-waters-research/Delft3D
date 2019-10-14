@@ -92,7 +92,7 @@ contains
       integer :: ibr, ll
       
       ibr = network%adm%lin2ibr(ilink)
-      ll  = network%adm%lin2local(ilink)
+      ll  = network%adm%lin2point(ilink)
       getdeltax = network%brs%branch(ibr)%dx(ll)
    end function getdeltax
 ! =================================================================================================
