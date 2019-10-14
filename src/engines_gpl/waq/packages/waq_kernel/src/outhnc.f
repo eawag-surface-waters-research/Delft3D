@@ -53,7 +53,7 @@
       character(*),  intent(in   ) :: duname(nodump)       ! names of monitoring points and areas
       integer   (4), intent(in   ) :: nodump               ! number of monitoring points and areas
       integer   (4), intent(in   ) :: notot1               ! number of variables in conc1
-      real      (4), intent(in   ) :: conc1 (notot1,nodump)! values
+      real      (4), intent(in   ) :: conc1 (notot1,*)     ! values
       character(20), intent(in   ) :: synam1(notot1)       ! names of variables in conc1
       character(100), intent(in   ) :: sysnm1(notot1)       ! standard names of variables in conc1
       character(40), intent(in   ) :: syuni1(notot1)       ! units of variables in conc1

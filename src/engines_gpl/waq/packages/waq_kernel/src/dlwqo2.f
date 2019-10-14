@@ -422,6 +422,7 @@
             elseif ( igrdou .eq. igsub ) then
                if (isrtou .eq. imo3 .or.
      +             isrtou .eq. ihi3 .or.
+     +             isrtou .eq. ihnc3 .or.
      +             isrtou .eq. ihn3     ) then
                   ncout = notot
                else
