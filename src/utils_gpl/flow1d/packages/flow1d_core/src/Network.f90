@@ -1093,14 +1093,17 @@ subroutine update_flow1d_admin(network, lc)
             else
                write(msgbuf, '(a, a, a, f10.2, a )')'Flow link on branch ''', trim(pbr%id), ''' at chainage ', pbr%uPointsChainages(LL), ' is removed.'
                call msg_flush()
-               pbr%dx(LL+1) = pbr%dx(LL)+ pbr%dx(LL+1)
+               if (LL < upointscount) then
+                  pbr%dx(LL+1) = pbr%dx(LL)+ pbr%dx(LL+1)
+               endif
+               
                pbr%uPointsCount = pbr%uPointsCount -1
                pbr%gridPointsCount = pbr%gridPointsCount - 1
             endif
          else
             LL_new = LL_new + 1
             Lnew   = Lnew + 1 
-            pbr%gridPointsChainages(LL_new+1) = pbr%gridPointsChainages(LL+1)
+            pbr%gridPointsChainages(LL_new) = pbr%gridPointsChainages(LL)
             pbr%gridPointIDs(LL_new+1)        = pbr%gridPointIDs(LL+1)       
             pbr%Xs(LL_new+1)                  = pbr%Xs(LL+1)                 
             pbr%Ys(LL_new+1)                  = pbr%Ys(LL+1)                 
@@ -1115,9 +1118,10 @@ subroutine update_flow1d_admin(network, lc)
          endif
       enddo
    enddo
-   
-   msgbuf = 'Errors found, check previous warnings'
-   call err_flush()
+   if (errorsfound) then
+      msgbuf = 'Errors found, check previous warnings'
+      call err_flush()
+   endif
    
 end subroutine update_flow1d_admin
 end module m_network

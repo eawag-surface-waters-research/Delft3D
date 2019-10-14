@@ -756,7 +756,7 @@
             KC(K1)   = 1  ; KC(K2)   = 1
          ENDIF
       ENDIF
-      if (ja == 0 .and. k3 == 1) then
+      if (ja == 0) then
          ! save removed links, so the flow1d admin can be updated later on
          numremoved = numremoved+1
          LC(numremoved) = L
