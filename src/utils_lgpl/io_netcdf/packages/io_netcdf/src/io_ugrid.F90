@@ -4200,7 +4200,7 @@ function ug_write_mesh_1d_edge_nodes (ncid, meshids, meshName, numEdge, mesh_1d_
    
    ! Edges:
   ! always write edge nodes
-  if (meshids%varids(mid_edgenodes).ne.-1) then
+  if (meshids%varids(mdim_1dedgenodes).ne.-1) then
 	 ierr = nf90_put_var(ncid, meshids%varids(mdim_1dedgenodes), mesh_1d_edge_nodes, count=(/ 2, numEdge /))
   endif
 

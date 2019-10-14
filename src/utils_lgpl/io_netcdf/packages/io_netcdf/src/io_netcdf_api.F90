@@ -1021,9 +1021,9 @@ function ionc_create_1d_mesh_dll(ioncid, c_networkname, meshid, c_meshname, nmes
   
 end function ionc_create_1d_mesh_dll
 
-function ionc_create_1d_mesh_v1_dll(ioncid, c_networkname, meshid, c_meshname, nmeshpoints, writexy) result(ierr) bind(C, name="ionc_create_1d_mesh_v1")
+function ionc_create_1d_mesh_v1_dll(ioncid, c_networkname, meshid, c_meshname, nmeshpoints, nmeshedges, writexy) result(ierr) bind(C, name="ionc_create_1d_mesh_v1")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_create_1d_mesh_v1_dll
-  integer(kind=c_int),    intent(in)  :: ioncid, nmeshpoints, writexy
+  integer(kind=c_int),    intent(in)  :: ioncid, nmeshpoints, nmeshedges, writexy
   integer(kind=c_int),    intent(out) :: meshid
   character(kind=c_char), intent(in)  :: c_networkname(MAXSTRLEN), c_meshname(MAXSTRLEN)
   integer                             :: ierr
@@ -1033,7 +1033,7 @@ function ionc_create_1d_mesh_v1_dll(ioncid, c_networkname, meshid, c_meshname, n
   meshname = char_array_to_string(c_meshName, strlen(c_meshname))
   networkname = char_array_to_string(c_networkname, strlen(c_networkname))
    
-  ierr = ionc_create_1d_mesh_ugrid_v1(ioncid, networkname, meshid, meshname, nmeshpoints,writexy) 
+  ierr = ionc_create_1d_mesh_ugrid_v1(ioncid, networkname, meshid, meshname, nmeshpoints, nmeshedges, writexy) 
   
   ! Define attributes and variables to store the mesh ids, UG_LOC_NODE = 1
   ierr = ionc_def_mesh_ids_ugrid(ioncid, meshid, 1) 

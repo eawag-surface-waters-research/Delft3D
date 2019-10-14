@@ -1726,9 +1726,9 @@ function ionc_create_1d_mesh_ugrid(ioncid, networkname, meshid, meshname, nmeshp
 end function ionc_create_1d_mesh_ugrid
 
 
-function ionc_create_1d_mesh_ugrid_v1(ioncid, networkname, meshid, meshname, nmeshpoints, writexy) result(ierr)
+function ionc_create_1d_mesh_ugrid_v1(ioncid, networkname, meshid, meshname, nmeshpoints, nmeshedges, writexy) result(ierr)
 
-   integer, intent(in)         :: ioncid, nmeshpoints
+   integer, intent(in)         :: ioncid, nmeshpoints, nmeshedges   
    integer, intent (inout)     :: meshid
    integer, intent(in)         :: writexy
    character(len=*),intent(in) :: meshname, networkname 
@@ -1739,7 +1739,7 @@ function ionc_create_1d_mesh_ugrid_v1(ioncid, networkname, meshid, meshname, nme
    ! set the meshname
    datasets(ioncid)%ug_file%meshnames(meshid) = meshname
    ! create mesh
-   ierr = ug_create_1d_mesh_v2(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, 0, writexy, datasets(ioncid)%crs)
+   ierr = ug_create_1d_mesh_v2(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, nmeshedges, writexy, datasets(ioncid)%crs)
   
 end function ionc_create_1d_mesh_ugrid_v1
 
