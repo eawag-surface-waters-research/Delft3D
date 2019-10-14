@@ -34644,7 +34644,7 @@ endif
    write (*,*) '  -q, --quiet'
    write (*,*) '      Minimal output: Only (fatal) errors are shown.'
    write (*,*) ' '
-   write (*,*) '  --verbose:[level_stdout[:level_dia]], e.g., --verbose:INFO:DEBUG'
+   write (*,*) '  --verbose[:level_stdout[:level_dia]], e.g., --verbose:INFO:DEBUG'
    write (*,*) '      Set verbosity level of output on standard out and in diagnostics file.'
    write (*,*) '      where level is in: {DEBUG|INFO|WARNING|ERROR|FATAL}'
    write (*,*) '      Levels are optional, default is INFO on screen, DEBUG in dia file.'
