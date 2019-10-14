@@ -230,6 +230,19 @@
        goto 1234
     end if
 
+    if ( jaCreateLinks1D2D .eq. 1 ) then
+       ! Make 1D2D links for already loaded net file.
+       imake1d2dtype = I1D2DTP_1TON_EMB
+       ierr = make1D2Dinternalnetlinks()
+       if (ierr /= DFM_NOERR) then
+          write (msgbuf, '(a,a,a,i0,a)') 'Error, failed to create 1D2D links for file ''', trim(md_netfile), '''. Error code: ', ierr, '.'
+          call warn_flush()
+          goto 1234
+       end if
+       call unc_write_net(md_netfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
+       goto 1234
+    end if
+
     if (jabatch == 1) then 
        call dobatch()
     endif 

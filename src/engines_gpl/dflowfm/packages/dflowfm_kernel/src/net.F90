@@ -34502,6 +34502,9 @@ function read_commandline() result(istat)
          case ('convertnetcells')
             md_convnetcells = 1
             
+         case ('make1d2dlinks')
+            jaCreateLinks1D2D = 1
+
          case ('savenet')
             md_jasavenet = 1
             
@@ -34636,6 +34639,10 @@ endif
    write (*,*) '          directional=[01]'
    write (*,*) '          outsidecell=[01]'
    write (*,*) '          drypointsfile=<filename (*.pol, or cutcellpolygons.lst)>'
+   write (*,*) ' '
+   write (*,*) '  --make1d2dlinks[:OPTS] NETFILE'
+   write (*,*) '      Make 1d2d links for the given NETFILE and re-save it under the same name.'
+   write (*,*) '      OPTS is reserved for future kn3-type setting.'
    write (*,*) ' '
    write (*,*) ' --cutcells NETFILE'
    write (*,*) '      Cut the unstructured grid in NETFILE with the polygons specified'
