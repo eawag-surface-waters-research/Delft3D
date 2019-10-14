@@ -443,6 +443,7 @@
 !           For the raaien
 !
                if ((isrtou .eq. ihi3 .or.
+     +              isrtou .eq. ihnc3 .or.
      +              isrtou .eq. ihn3     ) .and.
      +              noraai .gt. 0               ) then
                   nrvar3 = notot + nrvar2
