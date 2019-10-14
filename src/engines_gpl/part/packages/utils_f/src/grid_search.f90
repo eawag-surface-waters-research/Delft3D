@@ -226,6 +226,86 @@ contains
 
 
 ! -------------------------------------------------------------------------------------
+!     Routine findpoly
+! -------------------------------------------------------------------------------------
+!     function              : finds a suitable place for a particle in a polygon
+
+      subroutine findpoly   (nmax    , mmax    , lgrid   , lgrid2  , xcor    ,     &
+                             ycor    , nrowsmax, xpol    , ypol    , xpart   ,     &
+                             ypart   , npart   , mpart)
+
+      use precision_part ! single/double precision
+      use pinpok_mod
+      use timers
+
+      integer  ( ip), intent(in   ) :: nmax                    !< first dimension matrix
+      integer  ( ip), intent(in   ) :: mmax                    !< second dimension matrix
+      integer  ( ip), intent(in   ) :: lgrid (nmax,mmax)       !< active grid matrix
+      integer  ( ip), intent(in   ) :: lgrid2(nmax,mmax)       !< total grid matrix
+      real     ( rp), intent(in   ) :: xcor  (nmax*mmax)
+      real     ( rp), intent(in   ) :: ycor  (nmax*mmax)
+      integer  ( ip), intent(in   ) :: nrowsmax                !< dimension of polygons
+      real     ( rp), intent(in   ) :: xpol  (nrowsmax)        !< xvalues polygons
+      real     ( rp), intent(in   ) :: ypol  (nrowsmax)        !< yvalues polygons
+      real     ( rp), intent(  out) :: xpart                   !< x of the particle
+      real     ( rp), intent(  out) :: ypart                   !< y of the particle
+      integer  ( ip), intent(  out) :: npart                   !< n of the particle
+      integer  ( ip), intent(  out) :: mpart                   !< m of the particle
+
+      real   (sp), external         :: rnd
+      real   (dp), save             :: rseed = 0.5d0
+
+      real   (sp)                   :: xmin,xmax,ymin,ymax,xx,yy
+      integer(ip)                   :: nnpart, mmpart
+      real   (sp)                   :: xxcel, yycel
+      integer(ip)                   :: i, ier, try, inside
+
+      integer(4) ithndl              ! handle to time this subroutine
+      data       ithndl / 0 /
+      if ( timon ) call timstrt( "findpoly", ithndl )
+
+      xmin = minval(xpol)
+      xmax = maxval(xpol)
+      ymin = minval(ypol)
+      ymax = maxval(ypol)
+
+      try = 0
+      inside = 0
+      do while (inside == 0 .and. try .lt. 1000)
+         xx = rnd(rseed)*(xmax-xmin) + xmin
+         yy = rnd(rseed)*(ymax-ymin) + ymin
+         call pinpok(xx, yy, nrowsmax, xpol, ypol , inside )
+         if (inside == 1) then
+         
+!        transform world coordinates (xx,yy) into cell-coordinates(xxcel,yycel)
+            call part07 (lgrid  , lgrid2 , nmax   , mmax   , xcor  ,       &
+                         ycor   , xx     , yy     , nnpart , mmpart,       &
+                         xxcel  , yycel  , ier )
+         
+            if ( ier == 0 ) then
+               xpart = xxcel
+               ypart = yycel
+               npart = nnpart
+               mpart = mmpart
+            else
+               inside = 0
+               try = try + 1
+            end if
+         else
+            try = try + 1
+         endif
+      enddo
+      
+      if (try.eq.1000) then
+         continue
+         ! something went wrong
+      end if
+      
+      if ( timon ) call timstop ( ithndl )
+      end subroutine findpoly
+
+
+! -------------------------------------------------------------------------------------
 !     Routine findcell
 ! -------------------------------------------------------------------------------------
 

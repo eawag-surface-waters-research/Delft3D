@@ -27,7 +27,9 @@ contains
       subroutine part09 ( lun2   , itime  , nodye  , nwaste , mwaste ,  &
                           xwaste , ywaste , iwtime , amassd , aconc  ,  &
                           npart  , mpart  , xpart  , ypart  , zpart  ,  &
-                          wpart  , iptime , nopart , radius , lgrid  ,  &
+                          wpart  , iptime , nopart , radius , nrowswaste, &
+                          xpolwaste       , ypolwaste       , lgrid  ,  &
+                          lgrid2 , nmax   , mmax   , xp     , yp     ,  &
                           dx     , dy     , ndprt  , nosubs , kpart  ,  &
                           layt   , tcktot , nplay  , kwaste , nolay  ,  &
                           modtyp , zwaste , track  , nmdyer , substi ,  &
@@ -98,7 +100,15 @@ contains
       integer  ( ip), intent(  out) :: iptime (*)            !< particle age
       integer  ( ip), intent(inout) :: nopart                !< number of active particles
       real     ( rp), intent(in   ) :: radius (nodye)        !< help var. radius (speed)
+      real     ( sp), pointer       :: xpolwaste(:,:)        !< x-coordinates of waste polygon
+      real     ( sp), pointer       :: ypolwaste(:,:)        !< y-coordinates of waste polygon
+      integer  ( ip), pointer       :: nrowswaste(:)         !< length of waste polygon
       integer  ( ip), pointer       :: lgrid  (:,:)          !< grid numbering active
+      integer  ( ip), pointer       :: lgrid2(:,:)           !< total grid layout of the area
+      integer  ( ip), intent(in   ) :: nmax                  !< first dimension of the grid
+      integer  ( ip), intent(in   ) :: mmax                  !< second dimension of the grid
+      real     ( rp), pointer       :: xp     (:)            !< x of upper right corner grid point
+      real     ( rp), pointer       :: yp     (:)            !< y of upper right corner grid point
       real     ( rp), pointer       :: dx     (:)            !< dx of the grid cells
       real     ( rp), pointer       :: dy     (:)            !< dy of the grid cells
       integer  ( ip), intent(in   ) :: modtyp                !< for model type 2 temperature
@@ -201,9 +211,18 @@ contains
             mpart (i) = mwasth
             xpart (i) = xwasth
             ypart (i) = ywasth
-            call findcircle ( xpart(i), ypart(i), radiuh  , npart(i), mpart(i),  &
-                        lgrid   , dx      , dy      , lcircl  )
 
+            if (radiuh.ne.-999.0) then
+!              spread the particles over a circle
+               call findcircle ( xpart(i), ypart(i), radiuh  , npart(i), mpart(i),  &
+                                 lgrid   , dx      , dy      , lcircl  )
+            else
+!              spread the particles over a polygon
+               call findpoly   (nmax, mmax, lgrid, lgrid2, xp, yp, nrowswaste(id), &
+                                xpolwaste(1:nrowswaste(id), id), ypolwaste(1:nrowswaste(id), id), &
+                                xpart(i), ypart(i), npart(i), mpart(i))
+            end if
+            
 !     distribute the particles for this waste over the vertical
 
    10       ipart = ipart + 1

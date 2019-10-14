@@ -69,6 +69,7 @@
       character( 32)                 filvers         ! to read the file version number
       character( 32)                 cwork           ! small character workstring
       character(256)                 cbuffer         ! character buffer
+      integer  ( ip)                 ibuffer         ! integer buffer
       integer  ( ip)                 i, k            ! loop variables
       integer  ( ip)                 ios             ! help variable io-status
       integer  ( ip)                 nodac           ! help variable nodye + nocont
@@ -1291,10 +1292,12 @@
       call alloc ( "zwaste ", zwaste , i )
       call alloc ( "ioptrad", ioptrad, i )
       call alloc ( "radius ", radius , i )
+      call alloc ( "fidye  ", fidye  , i )
       call alloc ( "wparm  ", wparm  , i )
       call alloc ( "ndprt  ", ndprt  , i )
       call alloc ( "amassd ", amassd , nosubs, i )
       if ( nodye .gt. 0 ) write ( lun2, 2250 )
+      nrowsmax = 0
 
       do 10 i = 1 , nodye
 
@@ -1342,7 +1345,20 @@
 
          if ( gettoken( ioptrad(i), ierr2 ) .ne. 0 ) goto 4043
          if ( ioptrad(i) .eq. 0 ) then
-            if ( gettoken( radius(i), ierr2 ) .ne. 0 ) goto 4043
+            ! read all tokens
+            if ( gettoken( fidye(i), ibuffer, radius(i), itype, ierr2 ) .ne. 0 ) goto 4043
+            if (itype.eq.2) then
+               radius(i) = real(ibuffer)
+               fidye(i) = ' '
+            elseif (itype.eq.3) then
+               fidye(i) = ' '
+            else               
+               radius(i) = -999.0
+               open ( 50, file=fidye(i), status='old', iostat=ierr2 )
+               if ( ierr2 .ne. 0 ) go to 1702
+               call getdim_dis ( 50, fidye(i), nrowsmax, lun2 )
+               close (50)
+            endif
          else
             radius(i) = 0
          endif
@@ -1354,10 +1370,13 @@
 
          if ( nolayp .eq. 1 ) then
             write ( lun2, 2280 ) xwaste(i), ywaste(i), zwaste(i)
-            write ( lun2, 2282 ) radius(i), wparm(i)
          else
             write ( lun2, 2281 ) xwaste(i), ywaste(i), kwaste(i)
+         endif
+         if ( radius(i) .ge. 0.0 ) then
             write ( lun2, 2282 ) radius(i), wparm(i)
+         else
+            write ( lun2, 2283 ) trim(fidye(i)), wparm(i)
          endif
 
 !       mass of the instantaneous release
@@ -1392,6 +1411,10 @@
       call alloc ( "zwaste", zwaste, i )
       call alloc ( "kwaste", kwaste, i )
       call alloc ( "radius", radius, i )
+      call alloc ( "fiwaste",fiwaste, i )
+      do k = 1, nodye
+         fiwaste(k) = fidye(k)
+      enddo
       call alloc ( "wparm ", wparm , i )
       call alloc ( "ndprt ", ndprt , i )
       if ( nocont .gt. 0 ) then
@@ -1429,16 +1452,33 @@
 
 !       radius and scale (% of particles)
 
-         if ( gettoken( radius(i+nodye), ierr2 ) .ne. 0 ) goto 4043
+         ! read all tokens because it might be the name of a polygon
+         if ( gettoken( fiwaste(i+nodye), ibuffer, radius(i+nodye), itype, ierr2 ) .ne. 0 ) goto 4043
+         if (itype.eq.2) then
+            radius(i+nodye) = real(ibuffer)
+            fiwaste(i+nodye) = ' '
+         elseif (itype.eq.3) then
+            fiwaste(i+nodye) = ' '
+         else               
+            radius(i+nodye) = -999.0
+            open ( 50, file=fiwaste(i+nodye), status='old', iostat=ierr2 )
+            if ( ierr2 .ne. 0 ) go to 1703
+            call getdim_dis ( 50, fiwaste(i+nodye), nrowsmax, lun2 )
+            close (50)
+         endif
+         
          if ( gettoken( wparm (i+nodye), ierr2 ) .ne. 0 ) goto 4043
          ndprt(i+nodye) = int(wparm(i+nodye)*nopart/100.0 + 0.5)
 
          if ( nolayp .eq. 1 ) then
             write ( lun2, 2280 ) xwaste(i+nodye), ywaste(i+nodye), zwaste(i+nodye)
-            write ( lun2, 2282 ) radius(i+nodye), wparm (i+nodye)
          else
             write ( lun2, 2281 ) xwaste(i+nodye), ywaste(i+nodye), kwaste(i+nodye)
+         endif
+         if ( radius(i+nodye) .ge. 0.0 ) then
             write ( lun2, 2282 ) radius(i+nodye), wparm (i+nodye)
+         else
+            write ( lun2, 2283 ) trim(fiwaste(i+nodye)), wparm(i+nodye)
          endif
 
 !       scale factors (ascal) for each load
@@ -1514,6 +1554,28 @@
 
    20 continue
       if ( nocont .gt. 0 ) deallocate(ascal)
+
+! read actual waste polygons
+      if (nrowsmax.gt.0) then
+         allocate ( xpoltmp(nrowsmax) )
+         allocate ( ypoltmp(nrowsmax) )
+!        allocate memory for the waste polygons, and read them into memory
+         call alloc ( "xpolwaste", xpolwaste, nrowsmax, nodac )
+         call alloc ( "ypolwaste", ypolwaste, nrowsmax, nodac )
+         call alloc ( "nrowswaste", nrowswaste, nodac )
+         xpolwaste = 999.999
+         ypolwaste = 999.999
+         nrowswaste = 0
+
+         do i = 1 , nodac
+            if (radius(i).eq.-999.0) then
+               call polpart(fiwaste(i), nrowsmax, xpoltmp, ypoltmp, nrowstmp, lun2)
+               xpolwaste(1:nrowstmp, i) = xpoltmp(1:nrowstmp)
+               ypolwaste(1:nrowstmp, i) = ypoltmp(1:nrowstmp)
+               nrowswaste(i) = nrowstmp
+            endif
+         enddo
+      endif
 
 !       user defined releases
 
@@ -1949,6 +2011,8 @@
              12x,'Layer                   =  ',i11  )
  2282 format(12x,'Initial radius          =   ',f11.0, ' m.',/,      &
              12x,'Percentage of particles =   ',f11.0, ' %')
+ 2283 format(12x,'Release in polygon      =   ',A,' (The coordinates above are ignored)'/, &
+             12x,'Percentage of particles =   ',f11.0, ' %')
  2289 format(12x,'Released masses : ')
  2290 format(20x,'  Substance : ',a20,e13.4,'  kg/m3')
  2300 format(/'  Number of continuous release stations:', i2  /       )
@@ -2293,6 +2357,10 @@
 1700  write(*,*) ' Error: could not open dis-file ',fidisp(i)
       call stop_exit(1)
 1701  write(*,*) ' Error: could not open boom-file ',fiboom(i)
+      call stop_exit(1)
+1702  write(*,*) ' Error: could not open instantaneous waste polygon-file ',fidye(i)
+      call stop_exit(1)
+1703  write(*,*) ' Error: could not open continuous waste polygon-file ',fiwaste(i+nodye)
       call stop_exit(1)
 1710  write(*,*) ' Error: could not open ini-file ',ini_file
       call stop_exit(1)

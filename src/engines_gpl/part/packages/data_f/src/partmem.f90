@@ -201,6 +201,11 @@ module partmem
       integer  ( ip), pointer  :: kwaste (:)    ! layer nr of waste point
       integer  ( ip), pointer  :: ioptrad(:)    ! radius option of dye release
       real     ( rp), pointer  :: radius (:)    ! radius parameter of waste point
+      character( 256),pointer  :: fidye(:)      ! temporary array with names of dye polygon files
+      character( 256),pointer  :: fiwaste(:)    ! names of waste polygon files
+      real     ( sp), pointer  :: xpolwaste(:,:)! x-coordinates of waste polygon
+      real     ( sp), pointer  :: ypolwaste(:,:)! y-coordinates of waste polygon
+      integer  ( ip), pointer  :: nrowswaste(:) ! length of waste polygon
       real     ( rp), pointer  :: wparm  (:)    ! percentage of particles taken
       integer  ( ip), pointer  :: ndprt  (:)    ! number of particles per waste point
       real     ( rp), pointer  :: amassd(:,:)   ! mass of dye per substance
