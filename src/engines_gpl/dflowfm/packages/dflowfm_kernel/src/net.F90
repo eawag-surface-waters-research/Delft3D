@@ -3636,6 +3636,7 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
                     IF (KA .NE. K .AND. KC(K) == 1) THEN
                        JADUM = 1
                        IF (LC(L) == LC(NOD(K)%LIN(1)) ) THEN
+                          ! Known bug: do not only check %lin(1), but all links.
                           JADUM = 0
                           CYCLE  !  SKIP OWN BRANCH
                        ENDIF
