@@ -59,26 +59,18 @@ module m_network
    end interface dealloc
    
 
-   ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en lin2point uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
+   ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
    
    type, public :: t_administration_1d
       integer, allocatable          :: lin2str(:)                          !< indirection list, containing structure numbers for flowlinks.
                                                                            !< These structure numbers refer to the elements of network%sts%struct.
-      logical                       :: hasStructures = .false.             !< Flag, true if one or more structures in model
       integer, allocatable          :: lin2ibr(:)                          !< indirection list, containing branch number on which the flow link is positioned 
-      integer, allocatable          :: lin2point(:)                        !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
-                                                                           !> indirection list, containing local link index for 1d arrays.
-      integer, allocatable          :: lin2local(:)
+      integer, allocatable          :: lin2local(:)                        !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
+      
       integer, allocatable          :: lin2grid(:)
       type(t_chainage2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-chainage
       type(t_chainage2cross), pointer :: gpnt2cross(:) => null()             !< list containing cross section indices per gridpoint-chainage
       logical, allocatable          :: hysteresis_for_summerdike(:,:)      !< array indicating for hysteresis in summerdikes
-
-      double precision, allocatable :: au_1d(:)
-      double precision, allocatable :: conv_1d(:)
-      double precision, allocatable :: minwidth1d(:)
-   
-      double precision, allocatable :: minconv(:)                      ! minimal 1d conveyance in link: C*P*sqrt(A/P)
    end type
 
    type, public   :: t_network
@@ -96,12 +88,10 @@ module m_network
       type(t_CompoundSet)                       :: cmps                    !< Administration compound structures
       type(t_RoughnessSet)                      :: rgs                     !< set containing roughness sections
       type(t_ObservationPointSet)               :: obs                     !< set of observation points
-      type(t_lateralSet)                        :: lts                     !< set of lateral discharges
       type(t_storageSet)                        :: storS                   !< set containing storage in gridpoints
       type(t_trenchSet)                         :: trs                     !< set containing trenches (infiltration sewer tubes)
       type(t_CSDefinitionSet)                   :: CSDefinitions
       type(t_spatial_dataSet)                   :: spData
-      type(t_boundarySet)                       :: boundaries
       type(t_transportSet)                      :: trans
       type(t_ObservCrossSectionSet)             :: observcrs               !< set of observation Cross-Sections 
       type(t_forcingList)                       :: forcinglist             !< Work list of read-in (structure) forcing data, to be initialized by calling kernel later.
@@ -111,25 +101,20 @@ module m_network
    
 contains
 
-   subroutine realloc_1dadmin(adm, all_links_count, oned_links_count)
+   subroutine realloc_1dadmin(adm, links_count)
 
       type(t_administration_1d)  :: adm
-      integer, intent(in)        :: all_links_count
-      integer, intent(in)        :: oned_links_count
+      integer, intent(in)        ::  links_count
       
-      if (.not. allocated(adm%lin2str)) allocate(adm%lin2str(all_links_count))  
-      if (.not. allocated(adm%lin2ibr)) allocate(adm%lin2ibr(all_links_count))   
-      if (.not. allocated(adm%lin2point)) allocate(adm%lin2point(all_links_count)) 
-      if (.not. allocated(adm%lin2local)) allocate(adm%lin2local(all_links_count)) 
-      if (.not. allocated(adm%lin2grid)) allocate(adm%lin2grid(all_links_count)) 
-      if (.not. associated(adm%line2cross)) allocate(adm%line2cross(all_links_count))
-      if (.not. associated(adm%gpnt2cross)) allocate(adm%gpnt2cross(all_links_count))
+      if (.not. allocated(adm%lin2str))      allocate(adm%lin2str   (links_count))  
+      if (.not. allocated(adm%lin2ibr))      allocate(adm%lin2ibr   (links_count))   
+      if (.not. allocated(adm%lin2point))    allocate(adm%lin2point (links_count)) 
+      if (.not. allocated(adm%lin2local))    allocate(adm%lin2local (links_count)) 
+      if (.not. allocated(adm%lin2grid))     allocate(adm%lin2grid  (links_count)) 
+      if (.not. associated(adm%line2cross))  allocate(adm%line2cross(links_count))
+      if (.not. associated(adm%gpnt2cross))  allocate(adm%gpnt2cross(links_count))
       if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,all_links_count))
       adm%hysteresis_for_summerdike = .true.
-      if (.not. allocated(adm%au_1d)) allocate(adm%au_1d(oned_links_count))
-      if (.not. allocated(adm%conv_1d)) allocate(adm%conv_1d(oned_links_count))
-      if (.not. allocated(adm%minwidth1d)) allocate(adm%minwidth1d(oned_links_count))
-      if (.not. allocated(adm%minconv)) allocate(adm%minconv(oned_links_count))   
       
    end subroutine realloc_1dadmin
 
@@ -138,17 +123,11 @@ contains
 
       if (allocated(adm%lin2str))      deallocate(adm%lin2str)
       if (allocated(adm%lin2ibr))      deallocate(adm%lin2ibr)
-      if (allocated(adm%lin2point))    deallocate(adm%lin2point)
       if (allocated(adm%lin2local))    deallocate(adm%lin2local)
       if (associated(adm%line2cross))  deallocate(adm%line2cross)
-      if (allocated(adm%lin2grid))    deallocate(adm%lin2grid)
+      if (allocated(adm%lin2grid))     deallocate(adm%lin2grid)
       if (associated(adm%gpnt2cross))  deallocate(adm%gpnt2cross)
       if (allocated(adm%hysteresis_for_summerdike)) deallocate(adm%hysteresis_for_summerdike)
-      if (allocated(adm%au_1d))        deallocate(adm%au_1d)
-      if (allocated(adm%conv_1d))      deallocate(adm%conv_1d)
-      if (allocated(adm%minwidth1d))   deallocate(adm%minwidth1d)
-      if (allocated(adm%minconv))      deallocate(adm%minconv)
-
    end subroutine dealloc_1dadmin
 
 
@@ -171,12 +150,10 @@ contains
       call dealloc(network%cmps)
       call dealloc(network%rgs)
       call dealloc(network%obs)
-      call dealloc(network%lts)
       call dealloc(network%storS)
       call dealloc(network%trs)
       call dealloc(network%CSDefinitions)
       call dealloc(network%spData)
-      call dealloc(network%boundaries)
       call dealloc(network%trans)
       call dealloc(network%observcrs)
       network%loaded = .false.
@@ -206,107 +183,11 @@ contains
    
       call admin_nodes(network%nds, ngrid)
       call admin_branch(network%brs, ngrid, nlink)
-      call admin_transport(network%trans, network%brs)
       network%gridpointsCount = ngrid
       network%l1d    = nlink
       network%l1dall = nlink
 
       nnode = network%nds%count
-      allocate(itype(nnode), iboun(nnode))
-
-      itype = 0
-      iboun = 0
-      do ityp = 1, 2
-         do i = 1, network%boundaries%tp(ityp)%count
-            bd =>network%boundaries%tp(ityp)%bd(i)
-            itype(bd%node) = ityp
-            iboun(bd%node) = i
-         enddo
-      enddo
-   
-      do ibr = 1, network%brs%count
-         pbr => network%brs%branch(ibr)
-         if (pbr%FromNode%nodeType == nt_LevelBoun .or. &
-             pbr%FromNode%nodeType == nt_DischBoun) then
-            nod = pbr%FromNode%index
-            bd => network%boundaries%tp(itype(nod))%bd(iboun(nod))
-            bd%igrid = pbr%FromNode%gridNumber
-            bd%branch = ibr
-            bd%intern = pbr%grd(2)
-            bd%direction = 1
-            bd%linknumber = pbr%lin(1)
-
-            do icon = 1, transportPars%constituents_count
-               typ = transportPars%co_h(icon)%boundary_index
-               do ibnd = 1, network%boundaries%tp(typ)%Count
-                  bd_co => network%boundaries%tp(typ)%bd(ibnd)
-                  if (bd_co%node == nod) then
-                     bd_co%igrid      = bd%igrid     
-                     bd_co%intern     = bd%intern    
-                     bd_co%branch     = bd%branch    
-                     bd_co%direction  = bd%direction 
-                     bd_co%linknumber = bd%linknumber
-                     exit
-                  endif
-               enddo
-            enddo
-         endif
-             
-               
-          if (pbr%ToNode%nodeType == nt_LevelBoun .or. &
-             pbr%ToNode%nodeType == nt_DischBoun) then
-            nod = pbr%ToNode%index
-            bd => network%boundaries%tp(itype(nod))%bd(iboun(nod))
-            bd%igrid      = pbr%ToNode%gridNumber
-            bd%intern     = pbr%grd(pbr%gridPointsCount-1)
-            bd%branch     = ibr
-            bd%direction  = -1
-            bd%linknumber = pbr%lin(pbr%uPointsCount)
-
-            do icon = 1, transportPars%constituents_count
-               typ = transportPars%co_h(icon)%boundary_index
-               do ibnd = 1, network%boundaries%tp(typ)%Count
-                  bd_co => network%boundaries%tp(typ)%bd(ibnd)
-                  if (bd_co%node == nod) then
-                     bd_co%igrid      = bd%igrid     
-                     bd_co%intern     = bd%intern    
-                     bd_co%branch     = bd%branch    
-                     bd_co%direction  = bd%direction 
-                     bd_co%linknumber = bd%linknumber
-                     exit
-                  endif
-               enddo
-            enddo
-         endif   
-      
-         continue
-          
-      enddo
-   
-      !call initializeLaterals(network%brs, network%lts)
-
-      deallocate(itype, iboun)
-   
-      !do ityp = 1, 3
-      !   do i = 1, network%boundaries%tp(ityp)%count
-      !      bd =>network%boundaries%tp(ityp)%bd(i)
-      !      inod = network%boundaries%tp(ityp)%bd(i)%node
-      !      if (ityp==H_BOUN) node(1,inod) = nt_LevelBoun
-      !      if (ityp==Q_BOUN) node(1,inod) = nt_DischBoun
-      !      node(3,inod) = i
-      !      if (node(3,inod) == 0) then
-      !         node(4,inod) = 0
-      !      else
-      !         node(4,inod) = inod
-      !      endif
-      !   enddo
-      !enddo
-      !do i = 1, network%boundaries%tp(3)%count
-      !   inod = network%boundaries%tp(ityp)%bd(i)%node
-      !   node(4,inod) = i
-      !enddo
-
-
    end subroutine admin_network
 
 
@@ -353,19 +234,16 @@ contains
 
       character(20)                      :: chainageString
       
-      call realloc(network%adm, linall, network%gridpointsCount)
+      call realloc(network%adm, linall)
       
       adm = network%adm
       
       adm%lin2str = -huge(1)
-      if (network%sts%Count > 0) then
-         adm%hasStructures = .true.
-      else
-         adm%hasStructures = .false.
-      endif
+      do i = 1, network%sts%count
+         adm%lin2str(network%sts%struct(i)%linknumbers(1)) = i
+      enddo
 
       adm%lin2ibr   = -huge(1)
-      adm%lin2point = -huge(1)  
       adm%lin2local = -huge(1)
       adm%lin2grid  = -huge(1)
       
@@ -374,8 +252,6 @@ contains
          do m = 1, pbran%uPointsCount
             if (pbran%lin(m) > 0) then
                adm%lin2ibr(pbran%lin(m)) = ibran
-               adm%lin2point(pbran%lin(m)) = m
-               adm%lin2local(pbran%lin(m)) = m
                adm%lin2grid(pbran%lin(m))  = pbran%grd(m)
             endif
          enddo
@@ -396,8 +272,6 @@ contains
          enddo
          
          ! Cross-Section indices for links
-         adm%minconv    = 0.0d0
-         adm%minwidth1d = 0.0d0
          
          do ibran = 1, network%brs%Count
 
@@ -519,12 +393,6 @@ contains
                      adm%line2cross(ilnk)%f  = 1.0d0
                   endif
                   
-                  chezy = 0.0d0
-                  ll = adm%lin2local(ilnk)
-                  f = adm%line2cross(ilnk)%f
-                  dpu1 = -network%crs%cross(adm%line2cross(ilnk)%c1)%bedLevel
-                  dpu2 = -network%crs%cross(adm%line2cross(ilnk)%c2)%bedLevel
-                  call GetCSParsFlow(adm%line2cross(ilnk), network%crs%cross, thresholdDry, as, wetPerimeter, adm%minwidth1d(ll))
                endif
                   
             enddo
