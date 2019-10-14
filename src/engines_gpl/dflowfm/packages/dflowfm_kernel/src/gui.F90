@@ -7573,7 +7573,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   end if 
   
 ! refresh netcell administartion, based on module variable netstat
-  if ( netstat /= NETSTAT_OK ) then
+  if ( netstat /= NETSTAT_OK .and. (met == 4 .or. met == 5 .or. (met >= 7 .and. met <= 9) .or. met >= 12)) then
      call findcells(100)
      call find1dcells()
      netstat = NETSTAT_OK
