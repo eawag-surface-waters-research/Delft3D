@@ -1149,7 +1149,11 @@ subroutine prop_get_alloc_string(tree, chapterin ,keyin     ,value, success)
      !
      ! Handle chapters
      !
-     ignore = chapter(1:1)=='*' .or. len_trim(chapter) == 0
+     if (len(chapter) == 0) then
+        ignore = .true.
+     else
+        ignore = chapter(1:1)=='*' .or. len_trim(chapter) == 0
+     endif
      !
      ! Find the chapter first
      !
