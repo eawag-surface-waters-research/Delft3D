@@ -230,7 +230,7 @@
        goto 1234
     end if
 
-    if ( jaCreateLinks1D2D .eq. 1 ) then
+    if ( md_jamake1d2dlinks .eq. 1 ) then
        ! Make 1D2D links for already loaded net file.
        imake1d2dtype = I1D2DTP_1TON_EMB
        ierr = make1D2Dinternalnetlinks()
