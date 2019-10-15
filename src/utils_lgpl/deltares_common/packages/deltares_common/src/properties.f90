@@ -174,6 +174,7 @@ end subroutine prop_inifile
 
 subroutine prop_inifile_pointer(lu, tree)
     use tree_structures
+    use string_module
     !
     implicit none
     !
@@ -225,7 +226,7 @@ subroutine prop_inifile_pointer(lu, tree)
         multiple_lines = .false.
 
         do ! Check on line continuation
-            read (lu, '(a)', iostat = eof) lineconttemp
+            call GetLine(lu, lineconttemp, eof)
             linecont = adjustl(lineconttemp)
             lcend = len_trim(linecont)
             if (lcend == 0) then
@@ -1078,7 +1079,153 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
      if (present(success)) then
          success = success_
      end if
- end subroutine prop_get_string
+end subroutine prop_get_string
+
+!
+!
+! --------------------------------------------------------------------
+!   Subroutine: prop_get_alloc_string
+!   Author:     Arjen Markus / Edwin Spee
+!   Purpose:    Get the string value for a property
+!   Context:    Used by applications
+!   Summary:
+!               Go through the list of props to check the
+!               chapter. When the right chapter is found, check
+!               for the key.
+!               Only set the value if the key matches
+!   Arguments:
+!   chapter     Name of the chapter (case-insensitive) or "*" to get any key
+!   key         Name of the key (case-insensitive)
+!   value       Value of the key (not set if the key is not found,
+!               so you can set a default value)
+!   success     Whether successful or not (optional)
+!   Delimiters:
+!               If the value starts with the character "#", this character is removed.
+!               If a second character "#" is found , this character and everything behind
+!               this character is removed.
+!   Comments on this line:
+!               Use the delimiters "#". Example:
+!               StringIn = # AFileName # Comments are allowed behind the second "#"
+! --------------------------------------------------------------------
+!
+subroutine prop_get_alloc_string(tree, chapterin ,keyin     ,value, success)
+    implicit none
+    !
+    ! Parameters
+    !
+    type(tree_data), pointer        :: tree
+    character(*),intent(in)         :: chapterin
+    character(*),intent(in)         :: keyin
+    character(:), allocatable       :: value
+    logical, optional, intent (out) :: success
+    !
+    ! Local variables
+    !
+    logical                   :: ignore
+    logical                   :: success_
+    integer                   :: i          ! Childnode number with node_name = key
+                                            ! All following child nodes with node_name = " " are also added
+    integer                   :: k
+    character(len=80)             :: nodename
+    character(len=:), allocatable :: chapter
+    character(len=:), allocatable :: key
+    character(len=:), allocatable :: localvalue
+    character(len=:), allocatable :: localvaluetemp
+    type(tree_data), pointer  :: thechapter
+    type(tree_data), pointer  :: anode
+
+     allocate(character(maxlen)::localvalue)
+     allocate(character(maxlen)::localvaluetemp)
+     !
+     !! executable statements -------------------------------------------------------
+     !
+     success_ = .false.
+     chapter = chapterin
+     key     = keyin
+     call lowercase(chapter,999)
+     call lowercase(key,999)
+     localvalue(1:maxlen)=' '
+     localvaluetemp(1:maxlen)=' '
+     !
+     ! Handle chapters
+     !
+     ignore = chapter(1:1)=='*' .or. len_trim(chapter) == 0
+     !
+     ! Find the chapter first
+     !
+     thechapter => tree
+     if (.not.ignore) then
+        call tree_get_node_by_name( tree, trim(chapter), thechapter)
+        if ( .not. associated(thechapter) ) then
+           thechapter => tree
+        endif
+     endif
+     !
+     ! Find the key
+     ! To do:
+     !    Remove leading blanks
+     ! Note:
+     !    Work around an apparent problem with the SUN Fortran 90
+     !    compiler
+     !
+     call tree_get_node_by_name( thechapter, trim(key), anode, i)
+     if ( associated(anode) ) then
+         do
+            call tree_get_data_alloc_string( anode, localvaluetemp, success_ )
+            localvalue = localvaluetemp
+
+            ! tree_get_data_string only checks whether key exists (success_ = .true.)
+            ! but this prop_get_string is more strict: if value was empty, success_ = .false.
+            if (len_trim(localvalue) == 0) then
+               success_ = .false.
+            else
+               !
+               ! Remove possible delimiters #
+               !
+               if (localvalue(1:1)=='#') then
+                  localvalue = localvalue(2:)
+                  k = index(localvalue, '#')
+                  if (k>0) then
+                     localvalue = localvalue(1:k-1)
+                  endif
+                  localvalue = adjustl(localvalue)
+               endif
+               !
+               ! Write to parameter "value"
+               !
+               value = localvalue
+            end if ! empty(localvalue)
+            !
+            ! Check if the next child node has name " "
+            !
+            i = i + 1
+            if (associated(thechapter%child_nodes) .and. i<=size(thechapter%child_nodes)) then
+               nodename = "dummy value"
+               nodename = tree_get_name( thechapter%child_nodes(i)%node_ptr )
+               if (nodename == " ") then
+                  ! Yes: add this data string to parameter "value" (in the next do-loop)
+                  anode => thechapter%child_nodes(i)%node_ptr
+               else
+                  ! No: exit do-loop
+                  exit
+               endif
+            else
+               exit
+            endif
+         enddo
+         if (size(anode%node_data)>0) then
+            anode%node_visit = anode%node_visit + 1  ! Count visits (request of the value)
+         endif
+     else
+         ! Key not found
+     endif
+
+     ! success var is not optional in tree_struct, so we used local placeholder first
+     if (present(success)) then
+         success = success_
+     end if
+ end subroutine prop_get_alloc_string
+
 subroutine visit_tree(tree,direction)
    implicit none
    type(TREE_DATA), pointer                    :: tree
@@ -1499,13 +1646,12 @@ subroutine prop_get_doubles(tree  ,chapter ,key ,value ,valuelength,success)
     character(len=:), allocatable :: prop_value
     logical         :: digitfound
 
-    allocate(character(maxlen)::prop_value)
 
     !
     !! executable statements -------------------------------------------------------
     !
-    prop_value(1:maxlen) = ' '
-    call prop_get_string(tree  ,chapter   ,key       ,prop_value,success)
+    call prop_get_alloc_string(tree  ,chapter   ,key       ,prop_value,success)
+    if (.not. allocated(prop_value)) prop_value = ' '
     !
     ! Extract the real part
     ! Using read(prop_value,*,iostat=io) (value(i),i=1,valuelength)
@@ -1748,34 +1894,32 @@ end subroutine prop_set_string
 !> Sets a double precision array property in the tree.
 !! The property value is stored as a string representation.
 subroutine prop_set_doubles(tree, chapter, key, value, anno, success)
-    type(tree_data),   pointer      :: tree      !< The property tree
-    character(*),      intent (in)  :: chapter   !< Name of the chapter under which to store the property ('' or '*' for global)
-    character(*),      intent (in)  :: key       !< Name of the property
-    real(kind=dp),     intent (in)  :: value(:)  !< Value of the property
-    character(len=*), optional, intent (in) :: anno       !< Optional annotation/comment
-    logical, optional, intent (out) :: success   !< Returns whether the operation was successful
+    type(tree_data),            pointer      :: tree      !< The property tree
+    character(*),               intent (in)  :: chapter   !< Name of the chapter under which to store the property ('' or '*' for global)
+    character(*),               intent (in)  :: key       !< Name of the property
+    real(kind=dp),              intent (in)  :: value(:)  !< Value of the property
+    character(len=*), optional, intent (in)  :: anno      !< Optional annotation/comment
+    logical, optional,          intent (out) :: success   !< Returns whether the operation was successful
 
-    logical :: success_
-    character(len=max_length) :: strvalue
-    character(len=24)         :: strscalar
-    integer :: i, is, iv, n
+    logical                       :: success_
+    character(len=:), allocatable :: strvalue
+    character(len=24)             :: strscalar
+    integer                       :: i, n
 
-    strvalue = ' '
     n = size(value)
-    if (n==0) goto 10
+    if (n==0) then
+       strvalue = ' '
+    else
+       ! Pretty print all doubles into strvalue, separated by single spaces
+       call pp_double(value(1), strscalar)
+       strvalue = trim(strscalar)
+       do i=2,n
+          call pp_double(value(i), strscalar)
+          strvalue = strvalue // ' ' // trim(strscalar)
+       end do
+    end if
 
-    ! Pretty print all doubles into strvalue, separated by single spaces
-    call pp_double(value(1), strvalue)
-    iv = len_trim(strvalue)
-    do i=2,n
-        call pp_double(value(i), strscalar)
-        is = len_trim(strscalar)
-        strvalue(iv+2:iv+is+1) = strscalar(1:is)
-        iv  = iv+is+1
-    end do
-
-
- 10 continue ! Put the string representation into the tree
+    ! Put the string representation into the tree
     if (present(anno)) then
         call prop_set_data(tree, chapter, key, transfer(trim(strvalue), node_value), 'STRING', anno = anno, success = success_)
     else

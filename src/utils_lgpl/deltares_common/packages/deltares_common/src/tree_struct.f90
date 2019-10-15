@@ -87,7 +87,7 @@ module TREE_STRUCTURES
               tree_get_data_ptr, tree_put_data, tree_get_name, tree_get_data,                      &
               tree_get_datatype, tree_get_data_string,                                             &
               tree_traverse, tree_traverse_level, print_tree,                                      &
-              tree_fold, tree_destroy
+              tree_fold, tree_destroy, tree_get_data_alloc_string
    ! nested function has to be public for gfortran
    public ::  dealloc_tree_data
 
@@ -729,22 +729,53 @@ subroutine tree_get_data_string( tree, string, success )
       if ( .not. associated(data_ptr) ) then
          return
       endif
-      if ( data_type .ne. 'STRING' ) then
+      if ( data_type /= 'STRING' ) then
          return
       endif
 
-      success               = .true.
-      length                = size(data_ptr)
-      string(1:len(string)) = ' '
-      if (length <= maxlen) then
-         length           = min(length,len(string))
-         do i=1,length
+      success = .true.
+      length  = size(data_ptr)
+      string  = ' '
+      if (length <= len(string)) then
+         length = min(length,len(string))
+         do i=1, length
             string(i:i) = data_ptr(i)
          end do
       endif
    endif
 
 end subroutine tree_get_data_string
+
+subroutine tree_get_data_alloc_string( tree, string, success )
+   type(TREE_DATA), pointer                   :: tree
+   character(len=:), allocatable, intent(out) :: string
+   logical, intent(out)                       :: success
+
+   character(len=1), dimension(:), pointer  :: data_ptr
+   character(len=40)                        :: data_type
+   integer                                  :: length
+   integer                                  :: i
+
+   success = .false.
+   if ( associated(tree) ) then
+      call tree_get_data_ptr( tree, data_ptr, data_type )
+
+      if ( .not. associated(data_ptr) ) then
+         return
+      endif
+      if ( data_type /= 'STRING' ) then
+         return
+      endif
+
+      success = .true.
+      length  = size(data_ptr)
+      allocate(character(len=length)::string)
+      do i=1, length
+         string(i:i) = data_ptr(i)
+      end do
+   endif
+
+end subroutine tree_get_data_alloc_string
 
 subroutine print_tree( tree, data, stop )
    type(TREE_DATA), pointer               :: tree
