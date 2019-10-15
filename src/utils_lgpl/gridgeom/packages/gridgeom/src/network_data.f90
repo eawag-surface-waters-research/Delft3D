@@ -180,7 +180,7 @@ module network_data
 
   double precision                 :: TOOCLOSE = 0.001d0                !< Network points closer than tooclose are merged
 
-  double precision                 :: CONNECT1DEND = 200d0              !< Merge 1D endpoint ti closest branch point
+  double precision                 :: CONNECT1DEND = 0d0                !< Merge 1D endpoint ti closest branch point
 
   double precision                 :: Unidx1D = 100d0                   !< Uniform 1D dx in copylandboundaryto1Dnetw
 
@@ -348,7 +348,7 @@ module network_data
    cosphiutrsh = 0.5d0               
    CORNERCOS   = 0.25d0             
    TOOCLOSE = 0.001d0                
-   CONNECT1DEND = 200d0              
+   CONNECT1DEND = 0d0              
    Unidx1D = 100d0                   
    makeorthocenters = 0             
    imake1d2dtype = I1D2DTP_1TO1 ! HK algorithm
