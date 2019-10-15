@@ -3920,7 +3920,7 @@ end module m_fm_update_crosssections
                   end select ! islope
 
                   !               !
-                  if (avalan .and. (.not. duneavalan)) then
+                  if (avalan .and. (.not. duneavalan) .and. wetslope<9.99d0) then
                      !
                      ! Avalanching (MvO, 2011-04-06)
                      !
