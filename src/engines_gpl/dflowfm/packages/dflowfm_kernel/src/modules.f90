@@ -4032,7 +4032,6 @@ double precision, allocatable      :: thindam(:,:)
  integer                           :: jarenumber       !< renumberFlowNodes
  integer                           :: jaFlowNetChanged !< To enforce various net(link)-related init routines after renumbering
  integer                           :: jaAllowBndAtBifurcation !< allow 1d boundary at endnode when connecting branch leads to bifurcation
- integer                           :: jaCreateLinks1D2D       !< force creation of netlinks between 1d nodes and 2d cells in model init
  
 ! JRE Stuff related to setting up wave directional grid
  integer                                     :: ntheta          !< Number of wave direction bins
@@ -4074,7 +4073,6 @@ subroutine default_flowgeom()
     ! useful parameters :
     rrtol      = 3d0 ! relative cellsize factor in search tolerance ()
     jaAllowBndAtBifurcation = 0
-    jaCreateLinks1D2D = 0
 
     
     jarenumber = 1

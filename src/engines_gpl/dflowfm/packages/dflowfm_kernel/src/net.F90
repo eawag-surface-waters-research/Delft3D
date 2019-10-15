@@ -34504,7 +34504,7 @@ function read_commandline() result(istat)
             md_convnetcells = 1
             
          case ('make1d2dlinks')
-            jaCreateLinks1D2D = 1
+            md_jamake1d2dlinks = 1
 
          case ('savenet')
             md_jasavenet = 1

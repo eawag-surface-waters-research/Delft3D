@@ -202,6 +202,7 @@ implicit none
     integer            :: md_jaopenGL        = 0   !< use openGL (1) or not (0)
     integer            :: md_jagridgen       = 0   !< Commandline-based simple grid generation.
     integer            :: md_jarefine        = 0   !< sample based mesh refinement or not
+    integer            :: md_jamake1d2dlinks = 0   !< Make 1D2D links from commandline (1) or not (0)
     integer            :: md_numthreads      = 0   !< sample based mesh refinement or not
     integer            :: md_jatest          = 0      !< only perform a (speed)test (1), or not (0)
     integer            :: md_M               = 1024   !< size of x in Axpy
@@ -897,7 +898,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double ( md_ptr, 'geometry', 'Bamin'   ,  Bamin )
     call prop_get_double ( md_ptr, 'geometry', 'OpenBoundaryTolerance',  rrtol)
     call prop_get_integer( md_ptr, 'geometry', 'AllowBndAtBifurcation',  jaAllowBndAtBifurcation)
-    call prop_get_integer( md_ptr, 'geometry', 'CreateLinks1D2D',  jaCreateLinks1D2D)
+    call prop_get_integer( md_ptr, 'geometry', 'CreateLinks1D2D',  md_jamake1d2dlinks)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
 
 ! Numerics
@@ -2339,8 +2340,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or.  jaAllowBndAtBifurcation > 0) then
        call prop_set(prop_ptr, 'geometry', 'AllowBndAtBifurcation',  jaAllowBndAtBifurcation, 'Allow 1d boundary node when connecting branch leads to bifurcation (1: yes, 0: no)')
     endif
-    if (writeall .or.  jaCreateLinks1D2D > 0) then
-       call prop_set(prop_ptr, 'geometry', 'CreateLinks1D2D',  jaCreateLinks1D2D, 'Ruecksichtslos create links between 1D nodes and 2D cells when initializing model (1: yes, 0: no)')
+    if (writeall .or.  md_jamake1d2dlinks > 0) then
+       call prop_set(prop_ptr, 'geometry', 'CreateLinks1D2D',  md_jamake1d2dlinks, 'Ruecksichtslos create links between 1D nodes and 2D cells when initializing model (1: yes, 0: no)')
     endif
     if (writeall) then !
        call prop_set (prop_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber, 'Renumber the flow nodes (1: yes, 0: no)') ! hidden option for testing renumbering
