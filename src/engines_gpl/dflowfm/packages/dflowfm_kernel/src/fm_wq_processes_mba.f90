@@ -1093,7 +1093,7 @@
                   /'=============================================================')
    1001 format (  /'Mass balance period start time: ',a                           &
                   /'Mass balance period end time  : ',a                           &
-                 //'Surface area (m2)             : ',ES15.7                      &
+                 //'Surface area (m2)             : ',ES15.6E3                    &
                  //'Water (m3)                              Begin            End '&
                   /'-------------------------------------------------------------')
    1002 format (  /'Average depth (m)                       Begin            End '&
@@ -1116,18 +1116,18 @@
    1013 format (  /'Substance ',A20,'Sources/Inflows Sinks/Outflows '             &
                   /'-------------------------------------------------------------')
 
-   2000 format (30X,2ES15.7)
-   2001 format (A30,2ES15.7)
-   2002 format (   'Taken from/added to storage   ',2ES15.7)
-   2003 format (   'Sum of all terms              ',2ES15.7)
-   2004 format (   'Process flux ',A10,7X,2ES15.7)
+   2000 format (30X,2ES15.6E3)
+   2001 format (A30,2ES15.6E3)
+   2002 format (   'Taken from/added to storage   ',2ES15.6E3)
+   2003 format (   'Sum of all terms              ',2ES15.6E3)
+   2004 format (   'Process flux ',A10,7X,2ES15.6E3)
    2005 format (45X,'no surface area')
 
-   2010 format (  /'Water balance error (m3)                     ',ES15.7)
+   2010 format (  /'Water balance error (m3)                     ',ES15.6E3)
    2011 format (   'Water balance error                          ',F15.6,'%')
    2012 format (   'Water balance error                                       - %')
  
-   2020 format (  /A20,' Mass balance error      ',ES15.7)
+   2020 format (  /A20,' Mass balance error      ',ES15.6E3)
    2021 format (   A20,' Mass balance error      ',F15.6,'%')
    2022 format (   A20,' Mass balance error                   - %')
 
