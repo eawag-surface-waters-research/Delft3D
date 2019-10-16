@@ -62,9 +62,11 @@ module m_oned_functions
       ! FRCU and FRCU_MOR should only be used after SETAU - VOL12D. 
       ! Therefore initialise these arrays with a negative value.
       if (network%loaded) then
-         frcu(1:lnx1d) = -10d0
-         ifrcutp(1:lnx1d) = 0
-         frcu_mor(1:lnx1d) = -10d0
+         where (kcu(1:lnx1d) == 1)
+            frcu(1:lnx1d) = -10d0
+            ifrcutp(1:lnx1d) = 0
+            frcu_mor(1:lnx1d) = -10d0
+         end where
       endif
 
    end subroutine set_1d_roughnesses
