@@ -309,22 +309,32 @@
       allocate(funame(nofun))
       call realloc(funame, nofun)
       
+      nosfun = 0
+      allocate(sfunname(nofun))
+      call realloc(sfunname, nofun)
+
       call dfm_waq_initexternalforcings(ierr)
       if (ierr.ne.0) then
          call mess(LEVEL_ERROR, 'Error reading water quality processes external forcings from ext-file')
       endif
+      nosfunext = nosfun
 
 !     Use segment functions to set 2D (or 0D variables) from DFM per column (e.g. salinity or temperature)
-      nosfun = 3
-      call realloc(sfname, nosfun)
-      sfname(1) = 'SURF                '
-      sfname(2) = 'tau                 '
-      sfname(3) = 'velocity            '
-      
-      i=3
+      nosfun = nosfun+1
+      call realloc(sfunname, nosfun, keepExisting=.true., fill='SURF')
+      isfsurf = nosfun
+
+      nosfun = nosfun+1
+      call realloc(sfunname, nosfun, keepExisting=.true., fill='tau')
+      isftau = nosfun
+
+      nosfun = nosfun+1
+      call realloc(sfunname, nosfun, keepExisting=.true., fill='velocity')
+      isfvel = nosfun
+
       if ( jasal.eq.1 ) then
         nosfun = nosfun+1
-        call realloc(sfname, nosfun, keepExisting=.true., fill='Salinity')
+        call realloc(sfunname, nosfun, keepExisting=.true., fill='Salinity')
         isfsal = nosfun
       else
         isfsal = 0
@@ -332,7 +342,7 @@
       
       if ( jatem.gt.0 ) then
         nosfun = nosfun+1
-        call realloc(sfname, nosfun, keepExisting=.true., fill='Temp')
+        call realloc(sfunname, nosfun, keepExisting=.true., fill='Temp')
         isftem = nosfun
       else
         isftem = 0
@@ -340,7 +350,7 @@
       
 !      if ( jawind.eq.1 ) then
 !        nosfun = nosfun+1
-!        call realloc(sfname, nosfun, keepExisting=.true., fill='VWind')
+!        call realloc(sfunname, nosfun, keepExisting=.true., fill='VWind')
 !        isfvwind = nosfun
 !      else
          isfvwind = 0
@@ -348,7 +358,7 @@
       
 !      if ( jawave.eq.1 .or. jawave.eq.2 ) then  ! copied from "flow_setexternalforcings", call to "tauwavefetch"
 !         nosfun = nosfun+1
-!         call realloc(sfname, nosfun, keepExisting=.true., fill='Fetch')
+!         call realloc(sfunname, nosfun, keepExisting=.true., fill='Fetch')
 !         isffetch = nosfun
 !      else
          isffetch = 0
@@ -356,7 +366,7 @@
       
 !      if ( jatem.gt.1 ) then  ! copied from "heatun"
 !         nosfun = nosfun+1
-!         call realloc(sfname, nosfun, keepExisting=.true., fill='RadSurf')
+!         call realloc(sfunname, nosfun, keepExisting=.true., fill='RadSurf')
 !         isfradsurf = nosfun
 !      else
          isfradsurf = 0
@@ -364,7 +374,7 @@
       
 !      if ( jarain.gt.0 ) then
 !         nosfun = nosfun+1
-!         call realloc(sfname, nosfun, keepExisting=.true., fill='Rain')
+!         call realloc(sfunname, nosfun, keepExisting=.true., fill='Rain')
 !         isfrain = nosfun
 !      else
          isfrain = 0
@@ -390,7 +400,7 @@
          if (ifun>0) then
             call mess(LEVEL_INFO, 'Water quality constant replaced by temporal function: ', coname_sub(i))
          endif
-         call zoekns(coname_sub(i),nosfun,sfname,20,isfun)
+         call zoekns(coname_sub(i),nosfun,sfunname,20,isfun)
          if (isfun>0) then
             call mess(LEVEL_INFO, 'Water quality constant replaced by segment function: ', coname_sub(i))
          endif
@@ -582,7 +592,7 @@
    integer, intent (out)         :: iresult
 
    character(len=256)            :: filename, sourcemask
-   integer                       :: kb, k, ja, method, kk, kt, lenqidnam, ipa, ifun, imba, imna
+   integer                       :: kb, k, ja, method, kk, kt, lenqidnam, ipa, ifun, isfun, imba, imna
    character (len=NAMTRACLEN)    :: qidnam
    character (len=20)            :: waqinput
    integer                       :: minp0, npli, inside, filetype0, iad, needextramba, needextrambar
@@ -661,12 +671,22 @@
       
                if ( ifun.eq.0 ) then
                   nofun = nofun + 1
-                  ifun = ifun
                   call realloc(funame, nofun, keepExisting=.true., fill=waqinput)
                   call reallocP(funinp, [nofun, 1], keepExisting=.true., fill=0.0d0)
                end if
                success = .true.
       
+            else if (qid(1:18) == 'waqsegmentfunction') then
+      
+               isfun = findname(nosfun, sfunname, waqinput)
+      
+               if ( isfun.eq.0 ) then
+                  nosfun = nosfun + 1
+                  call realloc(sfunname, nosfun, keepExisting=.true., fill=waqinput)
+                  call reallocP(sfuninp, [nosfun, Ndkx], keepExisting=.true., fill=0.0d0)
+               end if
+               success = .true.
+
             else if (qid(1:18) == 'waqmassbalancearea') then
                imba = findname(nomba, mbaname, waqinput)
       
@@ -814,6 +834,11 @@
          if ( len_trim(qidloc).gt.11 ) then
             inputname = trim(qidloc(12:))
          end if
+      else if ( qidloc(1:18).eq.'waqsegmentfunction' ) then
+         qidname = qidloc(1:18)
+         if ( len_trim(qidloc).gt.18 ) then
+            inputname = trim(qidloc(19:))
+         end if
       else if (qidloc(1:12).eq.'waqparameter' ) then
          qidname = qidloc(1:12)
          if ( len_trim(qidloc).gt.12 ) then
@@ -924,7 +949,7 @@
       ipoivol  = arrpoi(iivol)
       ipoivelx = arrpoi(iivelx)
       ipoidefa = arrpoi(iidefa)
-      ipoisurf = arrpoi(iisfun)
+      ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg
       ipoiarea = arrpoi(iiarea)
       
       idt   = int(dt)
@@ -976,7 +1001,7 @@
       integer          :: ipoisurf, ipoitau, ipoivel
       integer          :: ipoivol, ipoiconc, ipoisal, ipoitem
       integer          :: ipoivwind, ipoifetch, ipoiradsurf, ipoirain
-      integer          :: i, iex, ip, ifun
+      integer          :: i, iex, ip, ifun, isfun
       integer          :: kk, k, kb, kt, ktmax, kwaq
       integer          :: L, nw1, nw2
                        
@@ -987,7 +1012,7 @@
          do ifun=1,nofun
             success = ec_gettimespacevalue(ecInstancePtr, item_waqfun(ifun), irefdate, tzone, tunit, time)
             if (.not.success) then
-               call mess(LEVEL_ERROR, 'Error reading data for segment function: ', trim(funame(ifun)))
+               call mess(LEVEL_ERROR, 'Error reading data for function: ', trim(funame(ifun)))
             endif
          end do
          ip = arrpoi(iifunc)
@@ -996,12 +1021,29 @@
          end do
       end if
 
-      ipoisurf = arrpoi(iisfun)           ! surface is first segment function
-      ipoitau  = ipoisurf + noseg
-      ipoivel  = ipoitau  + noseg
-      
+      if (nosfunext>0) then
+         do isfun=1,nosfunext
+            success = ec_gettimespacevalue(ecInstancePtr, item_waqsfun(isfun), irefdate, tzone, tunit, time)
+            if (.not.success) then
+               call mess(LEVEL_ERROR, 'Error reading data for segment function: ', trim(sfunname(ifun)))
+            endif
+         end do
+         do isfun=1,nosfunext
+!            pmsa(ip+ifun-1) = funinp(ifun,1)
+            ip = arrpoi(iisfun) + (isfun-1)*noseg
+            do kk=1,Ndxi
+               call getkbotktop(kk,kb,kt)
+               do k=kb,kt
+                  pmsa(ip + k-kbx) = sfuninp(isfun, kk)
+               end do
+            end do
+         end do
+      end if
+
+      ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg 
+      ipoitau  = arrpoi(iisfun) + (isftau-1)*noseg 
+      ipoivel  = arrpoi(iisfun) + (isfvel-1)*noseg 
       ipoivol  = arrpoi(iivol)
-      
       ipoiconc = arrpoi(iiconc)
       
       do kk=1,Ndxi

@@ -29,6 +29,7 @@
       integer  ( 4)              :: nopa            !< Number of parameters
       integer  ( 4)              :: nofun           !< Number of functions ( user )
       integer  ( 4)              :: nosfun          !< Number of segment functions
+      integer  ( 4)              :: nosfunext       !< Number of segment functions from the ext file
       integer  ( 4)              :: nodisp          !< Number of dispersion arrays
       integer  ( 4)              :: novelo          !< Number of velocity arrays
       integer  ( 4)              :: noout_map       !< Total number of map outputs
@@ -44,7 +45,8 @@
       real     ( 4),allocatable  :: painp(:,:)      !< parameter input
       character(20),allocatable  :: funame(:)       !< function names
       real     ( 8),pointer      :: funinp(:,:)     !< function input
-      character(20),allocatable  :: sfname(:)       !< segm.func. names
+      character(20),allocatable  :: sfunname(:)     !< segm.func. names
+      real     ( 8),pointer      :: sfuninp(:,:)    !< segment function input
       character(20),allocatable  :: diname(:)       !< dispersion names
       character(20),allocatable  :: vename(:)       !< velocity names
       character(20),allocatable  :: dename(:)       !< default array names

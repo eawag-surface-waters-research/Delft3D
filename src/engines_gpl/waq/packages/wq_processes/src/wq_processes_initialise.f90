@@ -414,7 +414,7 @@
       nocon2 = nocons
       call set_old_items( lunlsp , old_items, notot , nopa  , nofun    , &
                           nosfun , nodisp   , novelo, syname, paname   , &
-                          funame , sfname   , diname, vename, constants)
+                          funame , sfunname , diname, vename, constants)
 
       ! replace proto with actual processes
 
@@ -535,7 +535,7 @@
 
       call prsort ( lunlsp , procesdef, notot , nopa     , nosfun, &
                     syname, nocons   , nofun , constants, paname,  &
-                    funame, sfname   , nowarn)
+                    funame, sfunname , nowarn)
 
       ! handle output from statistical processes
 
@@ -620,7 +620,7 @@
 
       call makbar ( procesdef, notot , syname, nocons, constants, &
                     nopa     , paname, nofun , funame, nosfun,    &
-                    sfname   , nodisp, diname, novelo, vename,    &
+                    sfunname , nodisp, diname, novelo, vename,    &
                     noqtt    , laswi , no_act, actlst, noinfo,    &
                     nowarn   , ierr2  )
       if ( ierr2 .ne. 0 ) ierr = ierr + 1
@@ -667,13 +667,13 @@
 
       call getinv ( procesdef, notot , syname, nocons, constants, &
                     nopa     , paname, nofun , funame, nosfun,    &
-                    sfname   , nodisp, diname, novelo, vename,    &
+                    sfunname , nodisp, diname, novelo, vename,    &
                     nmis     , defaul, noloc , nodef , dename, outputs,   &
                     ndspx    , nvelx , nlocx , locnam   )
 
       ! report on the use of the delwaq input
 
-      call repuse ( procesdef, nocons, coname, nopa  , paname, nofun    , funame, nosfun, sfname, noinfo)
+      call repuse ( procesdef, nocons, coname, nopa  , paname, nofun    , funame, nosfun, sfunname, noinfo)
 
       ! set output pointers to process arrays parloc and defaul
 
@@ -752,7 +752,7 @@
                     noloc , ndspx , nvelx , nlocx , nflux , &
                     nopred, novar , vararr, varidx, vartda, &
                     vardag, vartag, varagg, nogrid, coname, &
-                    paname, funame, sfname, dename, syname, &
+                    paname, funame, sfunname, dename, syname, &
                     locnam, varnam)
 
       ! determine stochi

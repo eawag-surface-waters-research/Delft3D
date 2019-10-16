@@ -360,11 +360,15 @@ module m_ec_provider
                      case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my","dissurf","diswcap","ubot") 
                         success = ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case default
-                        call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
-                           //trim(quantityname)//"', file='"//trim(fileReaderPtr%filename)//"'.")
-                        return
-                        ! TODO: user defined quantity name
-                        !success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
+                        if (quantityname(1:18)=="waqsegmentfunction") then
+                           success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
+                        else
+                           call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
+                              //trim(quantityname)//"', file='"//trim(fileReaderPtr%filename)//"'.")
+                           return
+                           ! TODO: user defined quantity name
+                           !success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
+                        endif
                   end select
                else
                   call setECMessage("ERROR: ec_provider::ecProviderCreateItems: NetCDF requires a quantity name.")
@@ -2558,11 +2562,16 @@ module m_ec_provider
             ncvarnames(2) = 'so'                             ! salinity
             ncstdnames(2) = 'sea_water_salinity'
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
-            ! we have faulty 
-            call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
-            !TODO: user defined quantity name
-            !ncvarnames(1) = varname
-            !ncstdnames(1) = varname
+            if (quantityName(1:18)=='waqsegmentfunction') then
+               ncvarnames(1) = quantityName
+               ncstdnames(1) = quantityName
+            else
+               ! we have faulty 
+               call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
+               !TODO: user defined quantity name
+               !ncvarnames(1) = varname
+               !ncstdnames(1) = varname
+            endif
          end select 
 
          ! ------------------------------------------------------------------------------------------------

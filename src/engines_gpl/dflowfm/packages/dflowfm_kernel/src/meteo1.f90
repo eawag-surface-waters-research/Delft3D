@@ -101,7 +101,7 @@ module m_meteo
    use m_waves
    use m_ship
    use m_flowexternalforcings
-   use processes_input, only: nofun, funame, funinp
+   use processes_input, only: nofun, funame, funinp, nosfunext, sfunname, sfuninp
    use unstruc_messages
    use time_module
    use m_observations
@@ -116,6 +116,7 @@ module m_meteo
    integer, dimension(:), allocatable, target :: item_tracerbnd              !< dim(numtracers)
    integer, dimension(:), allocatable, target :: item_sedfracbnd             !< dim(numfracs)   ! JRE DEBUG sedfrac
    integer, dimension(:), allocatable, target :: item_waqfun                 !< dim(nofun)  
+   integer, dimension(:), allocatable, target :: item_waqsfun                !< dim(nosfunext)
 
    integer, target :: item_windx                                             !< Unique Item id of the ext-file's 'windx' quantity's x-component.
    integer, target :: item_windy                                             !< Unique Item id of the ext-file's 'windy' quantity's y-component.
@@ -293,6 +294,10 @@ module m_meteo
       allocate(item_waqfun(nofun))
       item_waqfun = ec_undef_int
       
+      if ( allocated(item_waqsfun) ) deallocate(item_waqsfun)
+      allocate(item_waqsfun(nosfunext))
+      item_waqsfun = ec_undef_int
+
       !\ DEBUG sedfrac
    end subroutine init_variables
 
@@ -450,7 +455,7 @@ module m_meteo
       real(hp), dimension(:),    pointer    :: dataPtr1, dataPtr2, dataPtr3, dataPtr4
       
       ! for tracers:      
-      integer           :: itrac, isf, ifun
+      integer           :: itrac, isf, ifun, isfun
       integer, external :: findname
       
       success = .true.
@@ -664,7 +669,11 @@ module m_meteo
             ifun = findname(nofun, funame, waqinput)
             itemPtr1 => item_waqfun(ifun)
             dataPtr1 => funinp(ifun,:)
-            
+         case ('waqsegmentfunction') 
+            ! get sediment fraction (boundary) number
+            isfun = findname(nosfunext, sfunname, waqinput)
+            itemPtr1 => item_waqsfun(isfun)
+            dataPtr1 => sfuninp(isfun,:)
          case default
             call mess(LEVEL_FATAL, 'm_meteo::fm_ext_force_name_to_ec_item: Unsupported quantity specified in ext-file (construct target field): '//qidname)
             success = .false.
@@ -1636,6 +1645,14 @@ module m_meteo
             end if
             ! the file reader will have created an item called 'polytim_item'
             sourceItemName = 'uniform_item'
+         case ('waqsegmentfunction')
+            ! the name of the source item depends on the file reader
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemName = name
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '''//trim(name)//'''')
+               return
+            end if
          case default
             fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId)
             if (fileReaderPtr%nitems>=1) then 

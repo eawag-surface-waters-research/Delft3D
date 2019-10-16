@@ -39911,6 +39911,9 @@ if (mext > 0) then
         else if (qid(1:11) == 'waqfunction') then
            success = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename, filetype, method, operand)
 
+        else if (qid(1:18) == 'waqsegmentfunction') then
+           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
+
         else if (trim(qid) == "spiderweb") then
            call qnerror(' ', 'Quantity SPIDERWEB must be renamed to airpressure_windx_windy in the ext-file.', ' ')
            success = .false.
