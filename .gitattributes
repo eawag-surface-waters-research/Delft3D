@@ -14263,6 +14263,8 @@ src/utils_lgpl/io_hyd/packages/io_hyd/src/write_waqgeom.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/wrwaqgeomcl.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/wstmod.f90 -text
 src/utils_lgpl/io_netcdf/Makefile.am -text
+src/utils_lgpl/io_netcdf/nuget/UGrid.IO_NetCDF.nuspec -text
+src/utils_lgpl/io_netcdf/nuget/UGrid.IO_NetCDF.targets -text
 src/utils_lgpl/io_netcdf/packages/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/include/io_netcdf.h -text
