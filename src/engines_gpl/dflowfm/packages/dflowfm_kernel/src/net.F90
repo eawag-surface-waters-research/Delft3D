@@ -8166,7 +8166,7 @@ end subroutine checknetwork
 !              ENDIF
 !           ENDDO
         else if (N12 >= 3) then                ! 3, 4 and 5
-           CALL CUTCELWU(n12, jamasks, ipol_stored)
+           CALL CUTCELWU(n12, jamasks, ipol_stored) ! calls SAVEPOL via split_pol
         endif
         
         call klok(t1)
@@ -8260,7 +8260,8 @@ end subroutine checknetwork
      if ( allocated(cellmask) ) deallocate(cellmask)
   end if
   
-  call restorepol()
+  ! call restorepol() ! initial SAVEPOL no longer valid due to CUTCELWU call
+  CALL DELPOL() ! don't keep the cutcell polygons since they will clip the bed levels
   
   if ( jaalltogether.ne.1 ) then
      call dealloc_tpoly(pli)
