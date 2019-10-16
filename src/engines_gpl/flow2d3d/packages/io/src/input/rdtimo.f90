@@ -446,13 +446,14 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        call prop_get_logical(gdp%mdfile_ptr, '*', 'AdvFlx', flwoutput%difuflux)
        call prop_get_logical(gdp%mdfile_ptr, '*', 'CumAFl', flwoutput%cumdifuflux)
     endif
-    call prop_get_logical(gdp%mdfile_ptr, '*', 'MomTrm', flwoutput%momentum)
-    call prop_get_logical(gdp%mdfile_ptr, '*', 'Chezy' , flwoutput%chezy)
-    call prop_get_logical(gdp%mdfile_ptr, '*', 'Rough' , flwoutput%roughness)
-    call prop_get_logical(gdp%mdfile_ptr, '*', 'Vortic' , flwoutput%vortic)
-    call prop_get_logical(gdp%mdfile_ptr, '*', 'Z0Cur' , flwoutput%z0cur)
-    call prop_get_logical(gdp%mdfile_ptr, '*', 'Z0Rou' , flwoutput%z0rou)
-    call prop_get_logical(gdp%mdfile_ptr, '*', 'KfMnMx', flwoutput%kf_minmax)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'MomTrm'   , flwoutput%momentum)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'Chezy'    , flwoutput%chezy)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'DredgeMap', flwoutput%dredge_map)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'Rough'    , flwoutput%roughness)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'Vortic'   , flwoutput%vortic)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'Z0Cur'    , flwoutput%z0cur)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'Z0Rou'    , flwoutput%z0rou)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'KfMnMx'   , flwoutput%kf_minmax)
     if (flwoutput%cumdifuflux) flwoutput%difuflux = .true.
     !
     ! Old flag: WindUV

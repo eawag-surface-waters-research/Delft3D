@@ -159,6 +159,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     real(fp)                             , pointer :: dt
     real(fp)                             , pointer :: tunit
     real(fp)                             , pointer :: tzone
+    logical                              , pointer :: dredge
     logical                              , pointer :: lfbedfrm
     logical                              , pointer :: roller
     logical                              , pointer :: sferic
@@ -346,6 +347,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     dt                  => gdp%gdexttim%dt
     tunit               => gdp%gdexttim%tunit
     tzone               => gdp%gdexttim%tzone
+    dredge              => gdp%gdprocs%dredge
     lfbedfrm            => gdp%gdbedformpar%lfbedfrm
     roller              => gdp%gdprocs%roller
     sferic              => gdp%gdtricom%sferic
@@ -560,6 +562,13 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
                     & nf        ,nl        ,nostatto  ,nostatgl  ,order_sta , &
                     & ntruvto   ,ntruvgl   ,order_tra ,ipartition,gdp       )
           if (error) goto 9999
+          !
+          if (dredge .and. gdp%gdflwpar%flwoutput%dredge_map) then
+             call wrimapdad(lundia    ,error     ,filename  ,irequest  , &
+                          & fds       ,iarrc     ,mf        ,ml        , &
+                          & nf        ,nl        ,gdp       )
+             if (error) goto 9999
+          endif
        endif
        !
        ! data per time step

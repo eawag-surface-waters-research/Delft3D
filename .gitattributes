@@ -1230,6 +1230,7 @@ src/engines_gpl/flow2d3d/packages/io/src/output/wrihisbal.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrihisdad.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrihisdis.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrimap.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/output/wrimapdad.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrirst.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrkenc.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrkent.f90 -text

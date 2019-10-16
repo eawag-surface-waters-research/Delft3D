@@ -95,6 +95,7 @@ libIOOutput_la_SOURCES = \
          wrihisbal.f90 \
          wrihisdad.f90 \
          wrihisdis.f90 \
+         wrimapdad.f90 \
          wrimap.f90 \
          wrirst.f90 \
          wrkenc.f90 \

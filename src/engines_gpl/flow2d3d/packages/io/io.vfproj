@@ -230,6 +230,7 @@
 		<File RelativePath="src\output\wrihisdad.f90"/>
 		<File RelativePath="src\output\wrihisdis.f90"/>
 		<File RelativePath="src\output\wrimap.f90"/>
+		<File RelativePath="src\output\wrimapdad.f90"/>
 		<File RelativePath="src\output\wrirst.f90"/>
 		<File RelativePath="src\output\wrkenc.f90"/>
 		<File RelativePath="src\output\wrkent.f90"/>

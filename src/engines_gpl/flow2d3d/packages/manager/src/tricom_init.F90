@@ -1206,6 +1206,8 @@ subroutine tricom_init(olv_handle, gdp)
     nhystp = nxtstp(d3dflow_init, gdp)
     call timer_stop(timer_d3dflowinit, gdp)
     !
+    if (dredge) call dredge_initialize(gdp) ! Initialize dredging data across partitions
+    !
     ! related vseminit is in tricom.f90, at label 9997
     !
     call pseminit
