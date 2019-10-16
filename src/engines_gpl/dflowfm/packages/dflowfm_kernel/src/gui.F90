@@ -51,6 +51,7 @@
    use m_partitioninfo
    use m_ec_interpolationsettings
    use gridoperations
+   use m_oned_functions, only: convert_cross_to_prof
 
    implicit none
    integer :: ja, L, n12, ikey, mnx
@@ -394,6 +395,8 @@
          call del_badortholinks()
       ELSE iF (NWHAT .EQ.34) THEN   
          call shift1Dnetnodestoduikers()
+      ELSE iF (NWHAT .EQ.35) THEN   
+         call convert_cross_to_prof(md_ident)
       ENDIF
       NUM  = 0
       KEY  = 3
@@ -653,7 +656,8 @@
       OPTION(32)= 'Delete netnodes with ZK > ZKuni         '
       OPTION(33)= 'Delete netlinks to improve orthogonality'
       OPTION(34)= 'Shift 1D netnodes to duikers.pliz (5col)'
-      MAXOPT    =  34
+      OPTION(35)= 'Convert crsdef/loc to profdef/loc files '
+      MAXOPT    =  35
    ELSE IF (NUM .EQ. 6) THEN
       EXP(1)     = 'MENU 6                                  '
       EXP(2)     = 'VARIOUS                                 '

@@ -41,6 +41,7 @@ module m_oned_functions
    public setbobs_1d
    public gridpoint2cross
    public computePump_all_links
+   public convert_cross_to_prof
 
    type, public :: t_gridp2cs
       integer :: num_cross_sections
@@ -664,4 +665,93 @@ module m_oned_functions
       enddo
 
    end subroutine computePump_all_links
+
+
+   !> Converts the currently active cross sections in network%crs to
+   !! old-format profloc/profdef input.
+   subroutine convert_cross_to_prof(basename)
+   use unstruc_channel_flow
+   use m_inquire_flowgeom
+   use m_samples
+   use m_polygon
+   use m_missing
+   use m_flowgeom
+   
+   character(len=*), intent(in) :: basename !< Basename for the profdef/loc output files.
+
+   integer :: ic, it, nprof, LF, ierr, mloc, mdef, mxyz, nyz, numxyztype
+   integer, allocatable :: cs2prof(:)
+   type(t_CrossSection), pointer :: pcrs
+   type(t_CSType), pointer :: pcs
+   character(len=255) :: proflocfile, profdeffile, profdefxyzfile
+
+   call savesam()
+   call savepol()
+
+   proflocfile = trim(basename)//'_profloc.xyz'
+   profdeffile = trim(basename)//'_profdef.txt'
+   profdefxyzfile = trim(basename)//'_profdefxyz.pliz'
+
+   !defs%CS(pcross%iTabDef)
+   call newfil(mdef, profdeffile)
+   call newfil(mxyz, profdefxyzfile)
+
+   allocate(cs2prof(network%CSDefinitions%Count))
+
+   nprof = 0
+   npl = 0
+   numxyztype = 0
+   call realloc(nampli, network%CSDefinitions%Count, fill=' ')
+   do it=1,network%CSDefinitions%Count
+      pcs => network%CSDefinitions%CS(it)
+      select case (pcs%crossType)
+      case(CS_YZ_PROF)
+         nprof = nprof+1
+         cs2prof(it) = nprof
+
+         numxyztype = numxyztype+1
+         ! First write definition one-liner
+         write (mdef, '(a,i0,a)') 'PROFNR=', nprof, '     TYPE=201' ! FRCTP=1 FRCCF=.035
+
+         ! Then write xyz definition pliz
+         write (nampli(numxyztype), '(a,i0)') 'PROFNR=', nprof
+         nyz = pcs%levelsCount
+         xpl(npl+1:npl+nyz) = 0d0
+         ypl(npl+1:npl+nyz) = pcs%y(1:nyz)
+         zpl(npl+1:npl+nyz) = pcs%z(1:nyz)
+         npl = npl+nyz+1
+         xpl(npl) = dmiss; ypl(npl) = dmiss; zpl(npl) = dmiss ! Separator between pli/csdef
+      case default
+         call QNERROR('Error in convert_cross_to_prof(), profile type not supported:',CSTypeName(pcs%crossType),'')
+      end select
+   end do
+
+   call wripol(mxyz)
+
+
+   call doclose(mxyz)
+   call doclose(mdef)
+
+   call increasesam(network%crs%Count)
+   NS = 0
+   do ic=1,network%crs%Count
+      pcrs => network%crs%cross(ic)
+      
+      ierr = findlink(pcrs%branchid, pcrs%chainage, Lf)
+      if (Lf > 0) then
+         NS = NS+1
+         XS(NS) = xu(Lf)
+         YS(NS) = yu(Lf)
+         ZS(NS) = cs2prof(pcrs%iTabDef)
+      end if
+   end do
+   
+   call newfil(mloc, proflocfile)
+   call wrisam(mloc)
+   call doclose(mloc)
+   
+   !call restoresam()
+   !call restorepol()
+   
+   end subroutine convert_cross_to_prof
 end module m_oned_functions
