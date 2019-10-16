@@ -63,6 +63,7 @@ end module
 
 module TREE_STRUCTURES
    use TREE_DATA_TYPES
+   use string_module
    implicit none
 
    private
@@ -253,13 +254,11 @@ function tree_count_nodes_byname(tree, name) result(count_nodes)
 
    count_nodes = 0
 
-   namei = name
-   call lowercase(namei, len(namei)) ! input name to lowercase
+   namei = str_tolower(name) ! input name to lowercase
 
    num_nodes = tree_num_nodes(tree)
    do i=1,num_nodes
-      node_name = tree_get_name(tree%child_nodes(i)%node_ptr)
-      call lowercase(node_name, len(node_name))
+      node_name = str_tolower(tree_get_name(tree%child_nodes(i)%node_ptr))
 
       if (node_name == namei) then
          count_nodes = count_nodes + 1
@@ -355,8 +354,7 @@ subroutine tree_get_node_by_name( tree, name, node, i_return )
 
    if (present(i_return)) i_return = 0
    nullify( node )
-   low_name = name
-   call lowercase(low_name,999)
+   low_name = str_tolower(name)
 
    node_name = tree_get_name( tree )
 
@@ -364,8 +362,7 @@ subroutine tree_get_node_by_name( tree, name, node, i_return )
       node => tree
    elseif ( associated(tree%child_nodes) ) then
       do i = 1,size(tree%child_nodes)
-         node_name = tree_get_name( tree%child_nodes(i)%node_ptr )
-         call lowercase(node_name,999)
+         node_name = str_tolower(tree_get_name( tree%child_nodes(i)%node_ptr ))
 
          if ( node_name .eq. low_name ) then
             node => tree%child_nodes(i)%node_ptr
@@ -815,47 +812,6 @@ subroutine print_tree( tree, data, stop )
                  trim(type_string), ' -- ', success
    end select
 end subroutine print_tree
-!
-!
-! --------------------------------------------------------------------
-!   Subroutine: lowercase
-!   Author:     Cor van der Schelde
-!   Purpose:    Convert upper case characters to lower case
-!   Context:    This is a copy of subroutine small in Delft3D-FLOW
-!               Used inside properties module
-!   Summary:
-!               Scan string for upper case characters and
-!               convert them.
-!   Arguments:
-!   string      String to be converted
-!   lenstr      Length of string to be converted
-! --------------------------------------------------------------------
-!
-subroutine lowercase(string    ,lenstr    )
-    implicit none
-    !
-    ! Global variables
-    !
-    integer     , intent(in) :: lenstr
-    character(*)             :: string
-    !
-    ! Local variables
-    !
-    integer :: i
-    integer :: j
-    integer :: newlen
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    newlen = min(lenstr, len(string))
-    do i = 1, newlen
-       j = ichar(string(i:i))
-       if ((j>64) .and. (j<91)) then
-          j = j + 32
-          string(i:i) = char(j)
-       endif
-    enddo
-end subroutine lowercase
 
 end module TREE_STRUCTURES
 

@@ -133,7 +133,7 @@ module m_readModelParameters
       
       dens_comp = 'eckart_modified'
       call prop_get_string(md_ptr, 'TransportComputation', 'Density', dens_comp, success)
-      call lowercase(dens_comp, 999)
+      call str_lower(dens_comp, 999)
       select case (trim(dens_comp))
       case ('eckart_modified', 'eckhart_modified')
          transportPars%density = DENS_ECKART_MODIFIED
@@ -156,7 +156,7 @@ module m_readModelParameters
          
       heat_model = 'transport'
       call prop_get_string(md_ptr, 'TransportComputation', 'HeatTransferModel', heat_model, success)
-      call lowercase(heat_model, 999)
+      call str_lower(heat_model, 999)
       select case (trim(heat_model))
       case ('transport')
          tempPars%heat_model = HEAT_TRANSPORT

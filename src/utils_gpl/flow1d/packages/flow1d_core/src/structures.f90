@@ -744,11 +744,11 @@ end subroutine
    end subroutine SetRestartDataForStructures
 
    integer function GetStrucType_from_string(string)
-      use properties
-      
+      use string_module
+
       character(len=*) :: string
 
-      call lowercase(string, 999)
+      call str_lower(string, 999)
       select case(trim(string))
       case ('pump')
          GetStrucType_from_string = ST_PUMP

@@ -33,6 +33,7 @@ module properties
 ! NONE
 !!--declarations----------------------------------------------------------------
     use tree_structures
+    use string_module, only : str_tolower, str_lower
     !
     implicit none
     !
@@ -92,9 +93,8 @@ subroutine prop_file(filetype, filename , tree, error)
     !
     character(10) :: ftype
 
-    ftype = filetype
+    ftype = str_tolower(filetype)
     error = 0
-    call lowercase(ftype,999)
     select case (trim(ftype))
     case ('ini')
        call prop_inifile(filename, tree, error)
@@ -309,7 +309,7 @@ subroutine prop_inifile_pointer(lu, tree)
              cycle
           endif
           !
-          call lowercase(line(2:k-1),k-2)
+          call str_lower(line(2:k-1),k-2)
           call tree_create_node( tree, line(2:k-1), achapter)
        else
           !
@@ -328,8 +328,7 @@ subroutine prop_inifile_pointer(lu, tree)
              call tree_put_data( anode, transfer(trim(adjustl(line)),node_value), "STRING")
              cycle
           endif
-          key = adjustl(line(1:eqpos-1))
-          call lowercase(key,999)
+          key = str_tolower(adjustl(line(1:eqpos-1)))
 
           ! Strip off comments that start with #
           ! To allow lines like: FileName = somefile.ext # Comment text
@@ -465,11 +464,10 @@ subroutine prop_tekalfile_pointer(lu, tree)
        !
        ! Remove leading spaces
        !
-       line = adjustl(linetemp)
+       line = str_tolower(adjustl(linetemp))
        !
        ! Assumption: this line contains the name of a tekal block
        !
-       call lowercase(line,999)
        call tree_create_node( tree, trim(line), atekalblock)
        !
        ! Assumption: nest line contains the dimensions of the tekal block
@@ -947,7 +945,7 @@ end subroutine print_initree
 !               StringIn = # AFileName # Comments are allowed behind the second "#"
 ! --------------------------------------------------------------------
 !
-subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
+subroutine prop_get_string(tree, chapterin ,keyin, value, success)
     implicit none
     !
     ! Parameters
@@ -960,125 +958,23 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
     !
     ! Local variables
     !
-    logical                   :: ignore
-    logical                   :: success_
-    integer                   :: free_space ! Length of parameter "value" that is not written yet
-    integer                   :: i          ! Childnode number with node_name = key
-                                            ! All following child nodes with node_name = " " are also added
-    integer                   :: k
-    character(80)             :: nodename
-    character(255)            :: chapter
-    character(255)            :: key
     character(len=:), allocatable :: localvalue
-    character(len=:), allocatable :: localvaluetemp
-    type(tree_data), pointer  :: thechapter
-    type(tree_data), pointer  :: anode
+    logical                       :: success_
 
-     allocate(character(maxlen)::localvalue)
-     allocate(character(maxlen)::localvaluetemp)
-     !
-     !! executable statements -------------------------------------------------------
-     !
-     success_ = .false.
-     chapter = chapterin
-     key     = keyin
-     call lowercase(chapter,999)
-     call lowercase(key,999)
-     localvalue(1:maxlen)=' '
-     localvaluetemp(1:maxlen)=' '
-     !
-     ! Handle chapters
-     !
-     ignore = chapter(1:1)=='*' .or. len_trim(chapter) == 0
-     !
-     ! Find the chapter first
-     !
-     thechapter => tree
-     if (.not.ignore) then
-        call tree_get_node_by_name( tree, trim(chapter), thechapter)
-        if ( .not. associated(thechapter) ) then
-           thechapter => tree
-        endif
-     endif
-     !
-     ! Find the key
-     ! To do:
-     !    Remove leading blanks
-     ! Note:
-     !    Work around an apparent problem with the SUN Fortran 90
-     !    compiler
-     !
-     call tree_get_node_by_name( thechapter, trim(key), anode, i)
-     if ( associated(anode) ) then
-         free_space = len(value)
-         do
-            call tree_get_data_string( anode, localvaluetemp, success_ )
-            localvalue = localvaluetemp
+    call prop_get_alloc_string(tree, chapterin, keyin, localvalue, success_)
 
-            ! tree_get_data_string only checks whether key exists (success_ = .true.)
-            ! but this prop_get_string is more strict: if value was empty, success_ = .false.
-            if (len_trim(localvalue) == 0) then
-               success_ = .false.
-            else
-               !
-               ! Remove possible delimiters #
-               !
-               if (localvalue(1:1)=='#') then
-                  localvalue = localvalue(2:)
-                  k = index(localvalue, '#')
-                  if (k>0) then
-                     localvalue = localvalue(1:k-1)
-                  endif
-                  localvalue = adjustl(localvalue)
-               endif
-               !
-               ! Write to parameter "value"
-               !
-               if (free_space == len(value)) then
-                  ! First write to "value": Write as much as possible
-                  value = ' '
-                  value = localvalue(:min(free_space,len_trim(localvalue)))
-               else
-                  ! Follow up write to "value": Only add when there is enough free space
-                  ! This is to avoid "half values" being added
-                  if (len_trim(localvalue) > free_space - 1) then
-                     ! Not enough free space in parameter "value" anymore. Exit this do-loop.
-                     exit
-                  endif
-                  ! Add a space between the values
-                  value = trim(value) // ' ' // localvalue(:len_trim(localvalue))
-               endif
-               free_space = len(value) - len_trim(value)
-            end if ! empty(localvalue)
-            !
-            ! Check if the next child node has name " "
-            !
-            i = i + 1
-            if (associated(thechapter%child_nodes) .and. i<=size(thechapter%child_nodes)) then
-               nodename = "dummy value"
-               nodename = tree_get_name( thechapter%child_nodes(i)%node_ptr )
-               if (nodename == " ") then
-                  ! Yes: add this data string to parameter "value" (in the next do-loop)
-                  anode => thechapter%child_nodes(i)%node_ptr
-               else
-                  ! No: exit do-loop
-                  exit
-               endif
-            else
-               exit
-            endif
-         enddo
-         if (size(anode%node_data)>0) then
-            anode%node_visit = anode%node_visit + 1  ! Count visits (request of the value)
-         endif
-     else
-         ! Key not found
-     endif
+    if (success_) then
+       if (len(value) >= len(localvalue)) then
+          value = localvalue
+       else
+          success_ = .false.
+       endif
+    endif
 
-     ! success var is not optional in tree_struct, so we used local placeholder first
-     if (present(success)) then
-         success = success_
-     end if
+    if (present(success)) then
+       success = success_
+    endif
+
 end subroutine prop_get_string
 
 !
@@ -1108,7 +1004,7 @@ end subroutine prop_get_string
 !               StringIn = # AFileName # Comments are allowed behind the second "#"
 ! --------------------------------------------------------------------
 !
-subroutine prop_get_alloc_string(tree, chapterin ,keyin     ,value, success)
+subroutine prop_get_alloc_string(tree, chapterin ,keyin, value, success)
     implicit none
     !
     ! Parameters
@@ -1134,18 +1030,12 @@ subroutine prop_get_alloc_string(tree, chapterin ,keyin     ,value, success)
     type(tree_data), pointer  :: thechapter
     type(tree_data), pointer  :: anode
 
-     allocate(character(maxlen)::localvalue)
-     allocate(character(maxlen)::localvaluetemp)
      !
      !! executable statements -------------------------------------------------------
      !
      success_ = .false.
-     chapter = chapterin
-     key     = keyin
-     call lowercase(chapter,999)
-     call lowercase(key,999)
-     localvalue(1:maxlen)=' '
-     localvaluetemp(1:maxlen)=' '
+     chapter  = str_tolower(chapterin)
+     key      = str_tolower(keyin)
      !
      ! Handle chapters
      !
@@ -1169,8 +1059,7 @@ subroutine prop_get_alloc_string(tree, chapterin ,keyin     ,value, success)
      ! To do:
      !    Remove leading blanks
      ! Note:
-     !    Work around an apparent problem with the SUN Fortran 90
-     !    compiler
+     !    Work around an apparent problem with the SUN Fortran 90 compiler
      !
      call tree_get_node_by_name( thechapter, trim(key), anode, i)
      if ( associated(anode) ) then
@@ -2099,47 +1988,6 @@ subroutine pp_double(value, strvalue)
 
     strvalue = adjustl(trim(strtmp))
 end subroutine pp_double
-!
-!
-! --------------------------------------------------------------------
-!   Subroutine: lowercase
-!   Author:     Cor van der Schelde
-!   Purpose:    Convert upper case characters to lower case
-!   Context:    This is a copy of subroutine small in Delft3D-FLOW
-!               Used inside properties module
-!   Summary:
-!               Scan string for upper case characters and
-!               convert them.
-!   Arguments:
-!   string      String to be converted
-!   lenstr      Length of string to be converted
-! --------------------------------------------------------------------
-!
-subroutine lowercase(string    ,lenstr    )
-    implicit none
-    !
-    ! Global variables
-    !
-    integer     , intent(in) :: lenstr
-    character(*)             :: string
-    !
-    ! Local variables
-    !
-    integer :: i
-    integer :: j
-    integer :: newlen
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    newlen = min(lenstr, len(string))
-    do i = 1, newlen
-       j = ichar(string(i:i))
-       if ((j>64) .and. (j<91)) then
-          j = j + 32
-          string(i:i) = char(j)
-       endif
-    enddo
-end subroutine lowercase
 
 subroutine count_occurrences(input_ptr, group, keyword, npars)
     implicit none
@@ -2219,10 +2067,8 @@ end subroutine count_occurrences
     !! executable statements -------------------------------------------------------
     !
     success_ = .false.
-    chapter = chapterin
-    key     = keyin
-    call lowercase(chapter,999)
-    call lowercase(key,999)
+    chapter  = str_tolower(chapterin)
+    key      = str_tolower(keyin)
     localvalue(1:maxlen) = ' '
 
     ! Determine separation character

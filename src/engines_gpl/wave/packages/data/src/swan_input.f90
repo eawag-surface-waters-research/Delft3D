@@ -1278,7 +1278,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     parname = ''
     call prop_get_string (mdw_ptr, 'General', 'DirConvention', parname)
-    call lowercase(parname, len(parname))
+    call str_lower(parname, len(parname))
     select case (parname)
     case ('nautical')
       sr%nautconv = .true.
@@ -1477,7 +1477,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     parname = ''
     call prop_get_string (mdw_ptr, 'General', 'DirSpace', parname)
-    call lowercase(parname, len(parname))
+    call str_lower(parname, len(parname))
     def_dirspace = -999
     select case (parname)
     case ('circle')
@@ -1636,7 +1636,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     parname = ''
     call prop_get_string (mdw_ptr, 'Processes', 'BedFriction', parname)
-    call lowercase(parname,len(parname))
+    call str_lower(parname,len(parname))
     select case (parname)
     case ('none', ' ')
       sr%frictype = 0
@@ -1680,7 +1680,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     endif
     parname = ''
     call prop_get_string (mdw_ptr, 'Processes', 'WhiteCapping', parname)
-    call lowercase(parname, len(parname))
+    call str_lower(parname, len(parname))
     select case (parname)
     case ('off')
       sr%whitecap = WC_OFF
@@ -1703,7 +1703,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     parname = ''
     call prop_get_string (mdw_ptr, 'Processes', 'WaveForces', parname)
-    call lowercase(parname, len(parname))
+    call str_lower(parname, len(parname))
     select case (parname)
     case ('radiation stresses <2013')
       sr%swdis = 1
@@ -1948,7 +1948,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        call prop_get_integer(mdw_ptr, 'General', 'FlowWind'      , sr%dom(1)%qextnd(q_wind))
        parname = ''
        call prop_get_string (mdw_ptr, 'General', 'FlowVelocityType', parname)
-       call lowercase(parname, len(parname))
+       call str_lower(parname, len(parname))
        select case (parname)
        case ('depth-averaged')
           sr%dom(1)%flowVelocityType = FVT_DEPTH_AVERAGED
@@ -2072,7 +2072,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        endif
        parname = ''
        call prop_get_string(tmp_ptr, '*', 'DirSpace', parname)
-       call lowercase(parname, len(parname))
+       call str_lower(parname, len(parname))
        select case (parname)
        case ('circle')
           dom%dirspace = 1
@@ -2127,7 +2127,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        if (sr%swuvt) then
           parname = ''
           call prop_get_string (tmp_ptr, '*', 'FlowVelocityType', parname)
-          call lowercase(parname, len(parname))
+          call str_lower(parname, len(parname))
           select case (parname)
           case ('depth-averaged')
              dom%flowVelocityType = FVT_DEPTH_AVERAGED
@@ -2373,14 +2373,14 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        !
        parname = ''
        call prop_get_string(bnd_ptr, '*', 'Definition', parname)
-       call lowercase(parname,len(parname))
+       call str_lower(parname,len(parname))
        select case (parname)
        case ('orientation')
           bnd%bndtyp = 1
           !
           parname = ''
           call prop_get_string(bnd_ptr, '*', 'Orientation' , parname)
-          call lowercase(parname,len(parname))
+          call str_lower(parname,len(parname))
           select case (parname)
           case ('n','north')
              bnd%orient = 1
@@ -2406,7 +2406,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
           parname = ''
           call prop_get_string(bnd_ptr, '*', 'DistanceDir'   , parname)
-          call lowercase(parname,len(parname))
+          call str_lower(parname,len(parname))
           select case (parname)
           case ('clockwise')
              bnd%turn = 0
@@ -2454,7 +2454,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        !
        parname = ''
        call prop_get_string(bnd_ptr, '*', 'SpectrumSpec'   , parname)
-       call lowercase(parname,len(parname))
+       call str_lower(parname,len(parname))
        select case (parname)
        case ('from file')
           bnd%parread = 1
@@ -2467,7 +2467,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
           parname = ''
           call prop_get_string(bnd_ptr, '*', 'SpShapeType'   , parname)
-          call lowercase(parname,len(parname))
+          call str_lower(parname,len(parname))
           select case (parname)
           case ('jonswap')
             bnd%sshape = 1
@@ -2484,7 +2484,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
           parname = ''
           call prop_get_string(bnd_ptr, '*', 'PeriodType'   , parname)
-          call lowercase(parname,len(parname))
+          call str_lower(parname,len(parname))
           select case (parname)
           case ('peak')
             bnd%periodtype = 1
@@ -2497,7 +2497,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
           parname = ''
           call prop_get_string(bnd_ptr, '*', 'DirSpreadType'   , parname)
-          call lowercase(parname,len(parname))
+          call str_lower(parname,len(parname))
           select case (parname)
           case ('power')
             bnd%dsprtype = 1
@@ -2725,7 +2725,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
           parname = ''
           call prop_get_string (tmp_ptr, '*', 'Type' , parname)
-          call lowercase(parname,len(parname))
+          call str_lower(parname,len(parname))
           select case (parname)
           case ('sheet')
              call prop_get_real(tmp_ptr, '*', 'TransmCoef'   , sr%trane(obstnr))
@@ -2738,7 +2738,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           !
           parname = ''
           call prop_get_string (tmp_ptr, '*', 'Reflections' , parname)
-          call lowercase(parname,len(parname))
+          call str_lower(parname,len(parname))
           select case (parname)
           case ('no')
              sr%reflection(obstnr) = 0

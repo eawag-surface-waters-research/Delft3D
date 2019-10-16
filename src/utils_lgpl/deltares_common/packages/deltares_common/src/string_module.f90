@@ -46,6 +46,7 @@ module string_module
    public :: str_token
    public :: str_tolower
    public :: str_lower
+   public :: str_toupper
    public :: str_upper
    public :: strcmpi
    public :: remove_leading_spaces
@@ -194,6 +195,16 @@ module string_module
           end if
       end subroutine str_token
 
+      !> Return copy of input string with all lowercase characters changed
+      !! into uppercase.
+      !! This is the function version of subroutine str_upper()
+      function str_toupper(string) result(stringout)
+          character(len=*), intent(in) :: string !< String to be converted.
+          character(len=len(string))   :: stringout
+
+          stringout = string
+          call str_upper(stringout)
+      end function str_toupper
 
       !> Return copy of input string with all uppercase characters changed
       !! into lowercase.
@@ -201,7 +212,7 @@ module string_module
       function str_tolower(string) result(stringout)
           character(len=*), intent(in) :: string !< String to be converted.
           character(len=len(string))   :: stringout
-          
+
           stringout = string
           call str_lower(stringout)
       end function str_tolower
