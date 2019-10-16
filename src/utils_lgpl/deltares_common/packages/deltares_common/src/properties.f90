@@ -964,11 +964,8 @@ subroutine prop_get_string(tree, chapterin ,keyin, value, success)
     call prop_get_alloc_string(tree, chapterin, keyin, localvalue, success_)
 
     if (success_) then
-       if (len(value) >= len(localvalue)) then
-          value = localvalue
-       else
-          success_ = .false.
-       endif
+       value = localvalue
+       success_ = (len(value) >= len(localvalue))
     endif
 
     if (present(success)) then
