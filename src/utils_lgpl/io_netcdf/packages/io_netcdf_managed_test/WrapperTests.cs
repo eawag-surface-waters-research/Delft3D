@@ -66,6 +66,12 @@ namespace Deltares.IONetCDF.Managed.Tests
         private double[] discretisationPointsX = { 0.0, 10.0, 20.0, 30.0, 40.0, 51.5, 3.0, 0.0, 1.5, 3.0 };
         private double[] discretisationPointsY = { 0.0, 10.0, 20.0, 30.0, 40.0, 51.5, 3.0, 0.0, 1.5, 3.0 };
 
+        private int[] edgeBranchidx = { 0, 1, 2};
+        private double[] edgeOffset = { 0.0, 2.0, 3.0 };
+        private double[] edgePointsX = { 5.0, 15.0, 25.0};
+        private double[] edgePointsY = { 5.0, 15.0, 25.0};
+        private int[,] mesh_node_edges = { { 1, 2 }, { 3, 2 }, { 2, 4 } };
+
         //netcdf file specifications 
         private int iconvtype = 2;
 
@@ -388,17 +394,23 @@ namespace Deltares.IONetCDF.Managed.Tests
             IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmesh1dPoints);
             IntPtr c_discretisationPointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmesh1dPoints);
             IntPtr c_discretisationPointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmesh1dPoints);
-
+            
             IntPtr c_edgenodes = Marshal.AllocCoTaskMem(2 * Marshal.SizeOf(typeof(int)) * nedges);
             IntPtr c_source_edge_nodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nedges);
             IntPtr c_target_edge_nodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nedges);
             IntPtr c_network_sourcetargetnodeids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nedges);
-            IntPtr c_meh1d_sourcetargetnodeids = Marshal.AllocCoTaskMem(2 * Marshal.SizeOf(typeof(int)) * nedges);
+            IntPtr c_mesh1d_sourcetargetnodeids = Marshal.AllocCoTaskMem(2 * Marshal.SizeOf(typeof(int)) * nedges);
+            
+            IntPtr c_edgeBranchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nedges);
+            IntPtr c_edgeOffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nedges);
+            IntPtr c_edgePointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nedges);
+            IntPtr c_edgePointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nedges);
 
-            IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmesh1dPoints);
             //IntPtr c_branchlength = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nBranches);
 
             //Network variables
+            IntPtr c_branchId = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nBranches);
+            IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nBranches);
             IntPtr c_nodesX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
             IntPtr c_nodesY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
             IntPtr c_branchlengths_from_gridgeom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nBranches);
@@ -418,26 +430,24 @@ namespace Deltares.IONetCDF.Managed.Tests
                 int ierr = wrapper.Create1DMesh(fileId, IONetCDFConstants.DataSetNames.NETWORK, ref mesh1DId, IONetCDFConstants.DataSetNames.MESH_1D, nmesh1dPoints, nedges);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                //2. Create the edge nodes (the algorithm is in gridgeom.dll, not in ionetcdf.dll)
+                //2a. Create the edges
+                
+
+                Marshal.Copy(edgeBranchidx, 0, c_edgeBranchidx, nedges);
+                Marshal.Copy(edgeOffset, 0, c_edgeOffset, nedges);
+                Marshal.Copy(edgePointsX, 0, c_edgePointsX, nedges);
+                Marshal.Copy(edgePointsY, 0, c_edgePointsY, nedges);
+                ierr = wrapper.Write1dMeshEdges(fileId, mesh1DId, ref c_edgeBranchidx, c_edgeOffset, nedges, startIndex, c_edgePointsX, c_edgePointsY );
+                Assert.That(ierr, Is.EqualTo(0));
+
+                //2b. Create the edge nodes connections
                 int nedgenodes = 2 * nedges;
                 var marshal_network_sourcetargetnodesid = new int[2 * nedges];
-                Buffer.BlockCopy(network_edges, 0, marshal_network_sourcetargetnodesid, 0, nedgenodes);
-
-                Marshal.Copy(branchidx, 0, c_branchidx, nmesh1dPoints);
-                Marshal.Copy(sourcenodeid, 0, c_source_edge_nodeid, nBranches);
-                Marshal.Copy(targetnodeid, 0, c_target_edge_nodeid, nBranches);
+                Buffer.BlockCopy(mesh_node_edges, 0, marshal_network_sourcetargetnodesid, 0, nedgenodes);
                 Marshal.Copy(marshal_network_sourcetargetnodesid, 0, c_network_sourcetargetnodeids, nedgenodes);
-                Marshal.Copy(offset, 0, c_branchoffset, nmesh1dPoints);
-                Marshal.Copy(branchlengths, 0, c_branchlengths_from_gridgeom, nBranches);
-
-                /*
-                 * TODO.... tja wat eigenlijk?
-                var gridwrapper = new GridGeomWrapper();
-                var nReturnEdges = -1;
-                ierr = gridwrapper.CreateEdgeNodes(ref c_branchoffset, ref c_branchlengths_from_gridgeom, ref c_branchidx, ref c_network_sourcetargetnodeids, ref c_meh1d_sourcetargetnodeids, ref nBranches, ref nmesh1dPoints, ref nReturnEdges, ref startIndex);
+                ierr = wrapper.Write1dMeshEdgeNodes(fileId, mesh1DId, nedges, c_network_sourcetargetnodeids, startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
-                Assert.That(nReturnEdges, Is.GreaterThan(0));
-                */
+
                 //3. Create the node branchidx, offsets, meshnodeidsinfo
                 Marshal.Copy(offset, 0, c_offset, nmesh1dPoints);
                 Marshal.Copy(discretisationPointsX, 0, c_discretisationPointsX, nmesh1dPoints);
@@ -520,7 +530,7 @@ namespace Deltares.IONetCDF.Managed.Tests
                 FreeMe(c_edgenodes);
                 FreeMe(c_source_edge_nodeid);
                 FreeMe(c_target_edge_nodeid);
-                FreeMe(c_meh1d_sourcetargetnodeids);
+                FreeMe(c_mesh1d_sourcetargetnodeids);
                 FreeMe(c_branchoffset);
                 FreeMe(c_discretisationPointsX);
                 FreeMe(c_discretisationPointsY);
@@ -733,7 +743,7 @@ namespace Deltares.IONetCDF.Managed.Tests
         }
 
         ////// read the netcdf file created in the test above
-        [Test]
+        [Test, NUnit.Framework.Ignore, Microsoft.VisualStudio.TestTools.UnitTesting.Ignore]
         public void Read1dUGRIDNetcdf()
         {
             //1. Open a netcdf file 
@@ -907,7 +917,7 @@ namespace Deltares.IONetCDF.Managed.Tests
             Assert.That(ierr, Is.EqualTo(0));
         }
 
-        [Test]
+        [Test, NUnit.Framework.Ignore, Microsoft.VisualStudio.TestTools.UnitTesting.Ignore]
         public void SaveAndLoad1D2DlinksTest()
         {
             var wrapper = new Wrapper();

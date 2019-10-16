@@ -905,7 +905,7 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="pointerToArrayOfMesh1DEdgeNodesConnection">The array of the nodes where edges connect to (in).</param>
         /// <param name="startIndex">Array start index (in).</param>
         /// <returns>Result status (IONC_NOERR if successful).</returns>
-        public int Write1dMeshEdgeNodes(ref int ioNetCdfDataSetId, ref int meshId, ref int numberOfEdges, ref IntPtr pointerToArrayOfMesh1DEdgeNodesConnection, int startIndex)
+        public int Write1dMeshEdgeNodes(int ioNetCdfDataSetId, int meshId, int numberOfEdges, IntPtr pointerToArrayOfMesh1DEdgeNodesConnection, int startIndex)
         {
             return ionc_write_mesh_1d_edge_nodes_dll(ref ioNetCdfDataSetId, ref meshId, ref numberOfEdges, ref pointerToArrayOfMesh1DEdgeNodesConnection, ref startIndex);
         }
@@ -922,7 +922,7 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="pointerToArrayOfXCoordinatesOfEdge">Pointer to an array containing the x-coordinates of the edges (in).</param>
         /// <param name="pointerToArrayOfYCoordinatesOfEdge">Pointer to an array containing the y-coordinates of the edges (in).</param>
         /// <returns>Result status (IONC_NOERR if successful).</returns>
-        public int Write1dMeshEdges(ref int ioNetCdfDataSetId, ref int meshId, ref IntPtr pointerToArrayOfBranchIndexesWhereTheEdgesAreOn, ref IntPtr pointerToArrayOfBranchOffsetWhereTheEdgesAreOn, ref int numberOfEdges, int startIndex, ref IntPtr pointerToArrayOfXCoordinatesOfEdge, ref IntPtr pointerToArrayOfYCoordinatesOfEdge)
+        public int Write1dMeshEdges(int ioNetCdfDataSetId, int meshId, ref IntPtr pointerToArrayOfBranchIndexesWhereTheEdgesAreOn, IntPtr pointerToArrayOfBranchOffsetWhereTheEdgesAreOn, int numberOfEdges, int startIndex, IntPtr pointerToArrayOfXCoordinatesOfEdge, IntPtr pointerToArrayOfYCoordinatesOfEdge)
         {
             return ionc_put_1d_mesh_edges_dll(ref ioNetCdfDataSetId, ref meshId, ref pointerToArrayOfBranchIndexesWhereTheEdgesAreOn, ref pointerToArrayOfBranchOffsetWhereTheEdgesAreOn, ref numberOfEdges, ref startIndex, ref pointerToArrayOfXCoordinatesOfEdge, ref pointerToArrayOfYCoordinatesOfEdge);
         }
