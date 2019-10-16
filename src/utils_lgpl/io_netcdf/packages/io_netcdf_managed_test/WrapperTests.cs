@@ -415,7 +415,7 @@ namespace Deltares.IONetCDF.Managed.Tests
                 #region Write1DMesh
 
                 //1. Create: the assumption here is that nedgenodes is known (we could move this calculation inside ionc_create_1d_mesh)
-                int ierr = wrapper.Create1DMesh(fileId, IONetCDFConstants.DataSetNames.NETWORK, ref mesh1DId, IONetCDFConstants.DataSetNames.MESH_1D, nmesh1dPoints);
+                int ierr = wrapper.Create1DMesh(fileId, IONetCDFConstants.DataSetNames.NETWORK, ref mesh1DId, IONetCDFConstants.DataSetNames.MESH_1D, nmesh1dPoints, nedges);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //2. Create the edge nodes (the algorithm is in gridgeom.dll, not in ionetcdf.dll)

@@ -259,6 +259,12 @@ namespace Deltares.IONetCDF.Managed
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_meshgeom", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_put_meshgeom_dll([In] ref int ioncid, [In, Out] ref int meshid, [In, Out] ref int networkid, [In] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim, [In] string c_meshname, [In] string c_networkName, [In] ref int start_index);
 
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_write_mesh_1d_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_write_mesh_1d_edge_nodes_dll([In] ref int ioncid, [In, Out] ref int meshid, [In, Out] ref int numEdge, [In] ref IntPtr c_mesh_1d_edge_nodes, [In] ref int start_index);
+
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_1d_mesh_edges", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_put_1d_mesh_edges_dll([In] ref int ioncid, [In, Out] ref int meshid, [In] ref IntPtr c_edgebranchidx, [In] ref IntPtr c_edgeoffset, [In, Out] ref int numEdge, [In] ref int start_index, [In] ref IntPtr c_coordx, [In] ref IntPtr c_coordy);
+
         #region meshgeom
 
         [StructLayout(LayoutKind.Sequential)]
@@ -382,11 +388,26 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="networkid">The network id (in).</param>
         /// <param name="c_nodesX">The x coordinates of the network nodes (in).</param>
         /// <param name="c_nodesY">The y coordinates of the network nodes (in).</param>
-        /// <param name="nodesinfo">The network infos (in).</param>
+        /// <param name="ids">The network node ids (in).</param>
+        /// <param name="longNames">The network node name (in).</param>
         /// <param name="nNodes">The number of network nodes (in).</param>
         /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_write_1d_network_nodes", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_write_1d_network_nodes_dll([In] ref int ioncid, [In] ref int networkid, [In] ref IntPtr c_nodesX, [In] ref IntPtr c_nodesY, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In] ref int nNodes);
+
+        /// <summary>
+        /// Write the coordinates of the network nodes.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id (in).</param>
+        /// <param name="networkid">The network id (in).</param>
+        /// <param name="c_nodesX">The x coordinates of the network nodes (in).</param>
+        /// <param name="c_nodesY">The y coordinates of the network nodes (in).</param>
+        /// <param name="ids">The network node ids (in).</param>
+        /// <param name="longNames">The network node name (in).</param>
+        /// <param name="nNodes">The number of network nodes (in).</param>
+        /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_write_1d_network_nodes_v1", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_write_1d_network_nodes_v1_dll([In] ref int ioncid, [In] ref int networkid, [In] ref IntPtr c_nodesX, [In] ref IntPtr c_nodesY, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In] ref int nNodes);
 
         /// <summary>
         /// Write the coordinates of the network branches.
@@ -395,7 +416,8 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="networkid">The network id (in).</param>
         /// <param name="c_sourcenodeid">The source node id (in).</param>
         /// <param name="c_targetnodeid">The target node id (in).</param>
-        /// <param name="branchinfo">The branch info (in).</param>
+        /// <param name="ids">The network branch ids (in).</param>
+        /// <param name="longNames">The network branch name (in).</param>
         /// <param name="c_branchlengths">The branch lengths (in).</param>
         /// <param name="c_nbranchgeometrypoints">The number of geometry points in each branch (in).</param>
         /// <param name="nBranches">The number of branches (in).</param>
@@ -403,6 +425,23 @@ namespace Deltares.IONetCDF.Managed
         /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_1d_network_branches", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_put_1d_network_branches_dll([In] ref int ioncid, [In] ref int networkid, [In] ref IntPtr c_sourcenodeid, [In] ref IntPtr c_targetnodeid, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In] ref IntPtr c_branchlengths, [In] ref IntPtr c_nbranchgeometrypoints, [In] ref int nBranches, [In] ref int startIndex);
+
+        /// <summary>
+        /// Write the coordinates of the network branches.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id (in).</param>
+        /// <param name="networkid">The network id (in).</param>
+        /// <param name="c_sourcenodeid">The source node id (in).</param>
+        /// <param name="c_targetnodeid">The target node id (in).</param>
+        /// <param name="ids">The network branch ids (in).</param>
+        /// <param name="longNames">The network branch name (in).</param>
+        /// <param name="c_branchlengths">The branch lengths (in).</param>
+        /// <param name="c_nbranchgeometrypoints">The number of geometry points in each branch (in).</param>
+        /// <param name="nBranches">The number of branches (in).</param>
+        /// <param name="startIndex">TODO</param>
+        /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_1d_network_branches_v1", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_put_1d_network_branches_v1_dll([In] ref int ioncid, [In] ref int networkid, [In] ref IntPtr c_sourcenodeid, [In] ref IntPtr c_targetnodeid, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In] ref IntPtr c_branchlengths, [In] ref IntPtr c_nbranchgeometrypoints, [In] ref int nBranches, [In] ref int startIndex);
 
         /// <summary>
         /// Writes the branch geometry (the geometry points).
@@ -436,10 +475,11 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="meshId">The mesh id in the specified data set (out).</param>
         /// <param name="meshname">The mesh name (in).</param>
         /// <param name="nmeshpoints">The number of mesh points (in).</param>
+        /// <param name="nmeshedges">The number of edges (in).</param>
         /// <param name="writexy">TODO</param>
         /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_create_1d_mesh_v1", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_create_1d_mesh_v1_dll([In] ref int ioncid, [In] string networkname, [In, Out] ref int meshId, [In] string meshname, [In] ref int nmeshpoints, [In, Out] ref int writexy);
+        private static extern int ionc_create_1d_mesh_v1_dll([In] ref int ioncid, [In] string networkname, [In, Out] ref int meshId, [In] string meshname, [In] ref int nmeshpoints, [In] ref int nmeshedges, [In, Out] ref int writexy);
 
         /// <summary>
         /// Writes the mesh coordinates points.
@@ -448,7 +488,8 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="meshid">The mesh id in the specified data set.</param>
         /// <param name="c_branchidx">The branch id for each mesh point (in).</param>
         /// <param name="c_offset">The offset along the branch from the starting point (in).</param>
-        /// <param name="nodeinfo">The node info (in).</param>
+        /// <param name="ids">The mesh node ids (in).</param>
+        /// <param name="longNames">The mesh node names (in).</param>
         /// <param name="nmeshpoints">The number of mesh points (in).</param>
         /// <param name="startIndex">array start index.</param>
         /// <returns>TODO</returns>
@@ -462,7 +503,8 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="meshid">The mesh id in the specified data set.</param>
         /// <param name="c_branchidx">The branch id for each mesh point (in).</param>
         /// <param name="c_offset">The offset along the branch from the starting point (in).</param>
-        /// <param name="nodeinfo">The node info (in).</param>
+        /// <param name="ids">The mesh node ids (in).</param>
+        /// <param name="longNames">The mesh node names (in).</param>
         /// <param name="nmeshpoints">The number of mesh points (in).</param>
         /// <param name="startIndex">Array start index.</param>
         /// <param name="c_coordx">TODO</param>
@@ -470,6 +512,36 @@ namespace Deltares.IONetCDF.Managed
         /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_1d_mesh_discretisation_points_v1", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_put_1d_mesh_discretisation_points_v1_dll([In] ref int ioncid, [In] ref int meshid, [In] ref IntPtr c_branchidx, [In] ref IntPtr c_offset, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In] ref int nmeshpoints, [In] ref int startIndex, [In] ref IntPtr c_coordx, [In] ref IntPtr c_coordy);
+
+        /// <summary>
+        /// Writes the mesh coordinates points.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id (in).</param>
+        /// <param name="meshid">The mesh id in the specified data set.</param>
+        /// <param name="c_branchidx">The branch id for each mesh point (in).</param>
+        /// <param name="c_offset">The offset along the branch from the starting point (in).</param>
+        /// <param name="ids">The mesh node ids (in).</param>
+        /// <param name="longNames">The mesh node names (in).</param>
+        /// <param name="nmeshpoints">The number of mesh points (in).</param>
+        /// <param name="startIndex">Array start index.</param>
+        /// <param name="c_coordx">TODO</param>
+        /// <param name="c_coordy">TODO</param>
+        /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_1d_mesh_discretisation_points_v2", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_put_1d_mesh_discretisation_points_v2_dll([In] ref int ioncid, [In] ref int meshid, [In] ref IntPtr c_branchidx, [In] ref IntPtr c_offset, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In] ref int nmeshpoints, [In] ref int startIndex, [In] ref IntPtr c_coordx, [In] ref IntPtr c_coordy);
+
+        /// <summary>
+        /// Writes the mesh edges.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id (in).</param>
+        /// <param name="meshid">The mesh id in the specified data set.</param>
+        /// <param name="c_edgebranchidx">The branch id for each mesh edge (in).</param>
+        /// <param name="c_edgeoffset">The offset along the branch from the starting point of the edge (in).</param>
+        /// <param name="nmeshedges">The number of mesh points (in).</param>
+        /// <param name="startIndex">Array start index.</param>
+        /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_1d_mesh_edges", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_put_1d_mesh_edges_dll([In] ref int ioncid, [In] ref int meshid, [In] ref IntPtr c_edgebranchidx, [In] ref IntPtr c_edgeoffset, [In] ref int nmeshedges, [In] ref int startIndex);
 
         /// <summary>
         /// Get the number of network nodes.
@@ -508,11 +580,26 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="networkid">The network id (in).</param>
         /// <param name="c_nodesX">The x coordinates of the network nodes (out).</param>
         /// <param name="c_nodesY">The y coordinates of the network nodes (out).</param>
-        /// <param name="nodesinfo">The network infos (out).</param>
+        /// <param name="ids">The node ids (in).</param>
+        /// <param name="longNames">The node names (in).</param>
         /// <param name="nNodes">The number of network nodes (in).</param>
         /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_read_1d_network_nodes", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_read_1d_network_nodes_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref IntPtr c_nodesX, [In, Out] ref IntPtr c_nodesY, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In] ref int nNodes);
+
+        /// <summary>
+        /// Read the node coordinates and the charinfo.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id.</param>
+        /// <param name="networkid">The network id (in).</param>
+        /// <param name="c_nodesX">The x coordinates of the network nodes (out).</param>
+        /// <param name="c_nodesY">The y coordinates of the network nodes (out).</param>
+        /// <param name="ids">The node ids (in).</param>
+        /// <param name="longNames">The node names (in).</param>
+        /// <param name="nNodes">The number of network nodes (in).</param>
+        /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_read_1d_network_nodes_v1", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_read_1d_network_nodes_v1_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref IntPtr c_nodesX, [In, Out] ref IntPtr c_nodesY, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In] ref int nNodes);
 
         /// <summary>
         /// Read the coordinates of the network branches.
@@ -522,13 +609,31 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="c_sourcenodeid">The source node id (out).</param>
         /// <param name="c_targetnodeid">The target node id (out).</param>
         /// <param name="c_branchlengths">The branch lengths (out).</param>
-        /// <param name="branchinfo">The branch info (out).</param>
+        /// <param name="ids">The branch ids (in).</param>
+        /// <param name="longNames">The branch names (in).</param>
         /// <param name="c_nbranchgeometrypoints">The number of geometry points in each branch (out).</param>
         /// <param name="nBranches">The number of branches (in).</param>
         /// <param name="startIndex">TODO</param>
         /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_get_1d_network_branches", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_get_1d_network_branches_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref IntPtr c_sourcenodeid, [In, Out] ref IntPtr c_targetnodeid, [In, Out] ref IntPtr c_branchlengths, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In, Out] ref IntPtr c_nbranchgeometrypoints, [In] ref int nBranches, [In] ref int startIndex);
+
+        /// <summary>
+        /// Read the coordinates of the network branches.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id.</param>
+        /// <param name="networkid">The network id (in).</param>
+        /// <param name="c_sourcenodeid">The source node id (out).</param>
+        /// <param name="c_targetnodeid">The target node id (out).</param>
+        /// <param name="c_branchlengths">The branch lengths (out).</param>
+        /// <param name="ids">The branch ids (in).</param>
+        /// <param name="longNames">The branch names (in).</param>
+        /// <param name="c_nbranchgeometrypoints">The number of geometry points in each branch (out).</param>
+        /// <param name="nBranches">The number of branches (in).</param>
+        /// <param name="startIndex">TODO</param>
+        /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_get_1d_network_branches_v1", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_1d_network_branches_v1_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref IntPtr c_sourcenodeid, [In, Out] ref IntPtr c_targetnodeid, [In, Out] ref IntPtr c_branchlengths, [In] ref IntPtr ids, [In] ref IntPtr longNames, [In, Out] ref IntPtr c_nbranchgeometrypoints, [In] ref int nBranches, [In] ref int startIndex);
 
         /// <summary>
         /// Reads the branch geometry.
@@ -577,6 +682,21 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="c_coordx">TODO</param>
         /// <param name="c_coordy">TODO</param>
         /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_get_1d_mesh_discretisation_points_v2", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_1d_mesh_discretisation_points_v2_dll([In] ref int ioncid, [In] ref int meshId, [In, Out] ref IntPtr c_branchidx, [In, Out] ref IntPtr c_offset, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int nmeshpoints, [In] ref int startIndex, [In, Out] ref IntPtr c_coordx, [In, Out] ref IntPtr c_coordy);
+
+        /// <summary>
+        /// Read the coordinates of the mesh points.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id (in).</param>
+        /// <param name="meshId">The mesh id in the specified data set (in).</param>
+        /// <param name="c_branchidx">The branch id for each mesh point (out).</param>
+        /// <param name="c_offset">The offset along the branch from the starting point (out).</param>
+        /// <param name="nmeshpoints">The number of mesh points (in).</param>
+        /// <param name="startIndex">TODO</param>
+        /// <param name="c_coordx">TODO</param>
+        /// <param name="c_coordy">TODO</param>
+        /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_get_1d_mesh_discretisation_points_v1", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_get_1d_mesh_discretisation_points_v1_dll([In] ref int ioncid, [In] ref int meshId, [In, Out] ref IntPtr c_branchidx, [In, Out] ref IntPtr c_offset, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int nmeshpoints, [In] ref int startIndex, [In, Out] ref IntPtr c_coordx, [In, Out] ref IntPtr c_coordy);
 
@@ -599,16 +719,33 @@ namespace Deltares.IONetCDF.Managed
         /// Puts the contacts structure.
         /// </summary>
         /// <param name="ioncid">The NetCDF file id (in).</param>
-        /// <param name="linkmesh">The id of the linkmesh (in).</param>
+        /// <param name="contactsmesh">The id of the link mesh (in).</param>
         /// <param name="c_mesh1indexes">The mesh1 indexes (in).</param>
         /// <param name="c_mesh2indexes">The mesh2 indexes (in).</param>
         /// <param name="c_contacttype">type of link.</param>
-        /// <param name="contactsinfo">The contacts info containing the ids and long names (in)</param>
+        /// <param name="ids">The contact / link ids (in).</param>
+        /// <param name="longNames">The contact / link names (in).</param>
         /// <param name="ncontacts">The number of contacts (in).</param>
         /// <param name="startIndex">TODO</param>
         /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_mesh_contact", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_put_mesh_contact_dll([In] ref int ioncid, [In] ref int contactsmesh, [In] ref IntPtr c_mesh1indexes, [In] ref IntPtr c_mesh2indexes, [In] ref IntPtr c_contacttype, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int ncontacts, [In] ref int startIndex);
+
+        /// <summary>
+        /// Puts the contacts structure.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id (in).</param>
+        /// <param name="contactsmesh">The id of the link mesh (in).</param>
+        /// <param name="c_mesh1indexes">The mesh1 indexes (in).</param>
+        /// <param name="c_mesh2indexes">The mesh2 indexes (in).</param>
+        /// <param name="c_contacttype">type of link.</param>
+        /// <param name="ids">The contact / link ids (in).</param>
+        /// <param name="longNames">The contact / link names (in).</param>
+        /// <param name="ncontacts">The number of contacts (in).</param>
+        /// <param name="startIndex">TODO</param>
+        /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_put_mesh_contact_v1", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_put_mesh_contact_v1_dll([In] ref int ioncid, [In] ref int contactsmesh, [In] ref IntPtr c_mesh1indexes, [In] ref IntPtr c_mesh2indexes, [In] ref IntPtr c_contacttype, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int ncontacts, [In] ref int startIndex);
 
         /// <summary>
         /// Get the number of contacts from a specific linkmesh.
@@ -624,16 +761,33 @@ namespace Deltares.IONetCDF.Managed
         /// Get the the mesh contacts ids from a specific linkmesh.
         /// </summary>
         /// <param name="ioncid">The NetCDF file id (in).</param>
-        /// <param name="linkmesh">The id of the linkmesh (in).</param>
+        /// <param name="contactsmesh">The id of the linkmesh (in).</param>
         /// <param name="c_mesh1indexes">The mesh1 indexes (out).</param>
         /// <param name="c_mesh2indexes">The mesh2 indexes (out).</param>
         /// <param name="c_contacttype">Link type.</param>
-        /// <param name="contactsinfo">The contacts info containing the ids and long names (out).</param>
-        /// <param name="nlinks">The number of contacts (in).</param>
+        /// <param name="ids">The contact / link ids (in).</param>
+        /// <param name="longNames">The contact / link names (in).</param>
+        /// <param name="ncontacts">The number of contacts (in).</param>
         /// <param name="startIndex">TODO</param>
         /// <returns>TODO</returns>
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_get_mesh_contact", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_get_mesh_contact_dll([In] ref int ioncid, [In] ref int contactsmesh, [In, Out] ref IntPtr c_mesh1indexes, [In, Out] ref IntPtr c_mesh2indexes, [In, Out] ref IntPtr c_contacttype, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int ncontacts, [In] ref int startIndex);
+
+        /// <summary>
+        /// Get the the mesh contacts ids from a specific linkmesh.
+        /// </summary>
+        /// <param name="ioncid">The NetCDF file id (in).</param>
+        /// <param name="contactsmesh">The id of the linkmesh (in).</param>
+        /// <param name="c_mesh1indexes">The mesh1 indexes (out).</param>
+        /// <param name="c_mesh2indexes">The mesh2 indexes (out).</param>
+        /// <param name="c_contacttype">Link type.</param>
+        /// <param name="ids">The contact / link ids (in).</param>
+        /// <param name="longNames">The contact / link names (in).</param>
+        /// <param name="ncontacts">The number of contacts (in).</param>
+        /// <param name="startIndex">TODO</param>
+        /// <returns>TODO</returns>
+        [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_get_mesh_contact_v1", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_mesh_contact_v1_dll([In] ref int ioncid, [In] ref int contactsmesh, [In, Out] ref IntPtr c_mesh1indexes, [In, Out] ref IntPtr c_mesh2indexes, [In, Out] ref IntPtr c_contacttype, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int ncontacts, [In] ref int startIndex);
 
         /// <summary>
         /// Clone the definitions specific mesh from one NetCDF file to another NetCDF. 

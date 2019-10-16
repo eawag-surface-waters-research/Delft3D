@@ -470,7 +470,7 @@ namespace Deltares.IONetCDF.Managed
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         public int Write1DNetworkNodes(int ioNetCdfDataSetId, int networkId, IntPtr pointerToArrayOfXNodes, IntPtr pointerToArrayOfYNodes, IntPtr pointerToArrayOfIds, IntPtr pointerToArrayOfLongNames, int numberOfNodes)
         {
-            return ionc_write_1d_network_nodes_dll(ref ioNetCdfDataSetId, ref networkId, ref pointerToArrayOfXNodes, ref pointerToArrayOfYNodes, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfNodes);
+            return ionc_write_1d_network_nodes_v1_dll(ref ioNetCdfDataSetId, ref networkId, ref pointerToArrayOfXNodes, ref pointerToArrayOfYNodes, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfNodes);
         }
 
         /// <summary>
@@ -489,7 +489,7 @@ namespace Deltares.IONetCDF.Managed
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         public int Write1DNetworkBranches(int ioNetCdfDataSetId, int networkId, IntPtr pointerToArrayOfSourceNodeIds, IntPtr pointerToArrayOfTargetNodeIds, IntPtr pointerToArrayOfIds, IntPtr pointerToArrayOfLongNames, IntPtr pointerToArrayOfBranchLengths, IntPtr pointerToArrayOfNumberOfBranchGeometryPoints, int numberOfBranches, int startIndex = 0)
         {
-            return ionc_put_1d_network_branches_dll(ref ioNetCdfDataSetId, ref networkId, ref pointerToArrayOfSourceNodeIds, ref pointerToArrayOfTargetNodeIds, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref pointerToArrayOfBranchLengths, ref pointerToArrayOfNumberOfBranchGeometryPoints, ref numberOfBranches, ref startIndex);
+            return ionc_put_1d_network_branches_v1_dll(ref ioNetCdfDataSetId, ref networkId, ref pointerToArrayOfSourceNodeIds, ref pointerToArrayOfTargetNodeIds, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref pointerToArrayOfBranchLengths, ref pointerToArrayOfNumberOfBranchGeometryPoints, ref numberOfBranches, ref startIndex);
         }
 
         /// <summary>
@@ -519,10 +519,10 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="meshName">The mesh name (in).</param>
         /// <param name="numberOfMeshPoints">The number of mesh points (in).</param>
         /// <returns>Result status (IONC_NOERR if successful).</returns>
-        public int Create1DMesh(int ioNetCdfDataSetId, string networkName, ref int meshId, string meshName, int numberOfMeshPoints)
+        public int Create1DMesh(int ioNetCdfDataSetId, string networkName, ref int meshId, string meshName, int numberOfMeshPoints, int numberOfMeshEdges)
         {
             var writeXAndY = 1;
-            return ionc_create_1d_mesh_v1_dll(ref ioNetCdfDataSetId, networkName, ref meshId, meshName, ref numberOfMeshPoints, ref writeXAndY);
+            return ionc_create_1d_mesh_v1_dll(ref ioNetCdfDataSetId, networkName, ref meshId, meshName, ref numberOfMeshPoints, ref numberOfMeshEdges, ref writeXAndY);
         }
 
         /// <summary>
@@ -541,7 +541,7 @@ namespace Deltares.IONetCDF.Managed
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         public int Write1DMeshDiscretisationPoints(int ioNetCdfDataSetId, int meshId, IntPtr pointerToArrayOfBranchIndexValues, IntPtr pointerToArrayOfOffsets, IntPtr pointerToArrayOfDiscretisationPointsXValues, IntPtr pointerToArrayOfDiscretisationPointsYValues, IntPtr pointerToArrayOfIds, IntPtr pointerToArrayOfLongNames, int numberOfMeshPoints, int startIndex)
         {
-            return ionc_put_1d_mesh_discretisation_points_v1_dll(ref ioNetCdfDataSetId, ref meshId, ref pointerToArrayOfBranchIndexValues, ref pointerToArrayOfOffsets, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfMeshPoints, ref startIndex, ref pointerToArrayOfDiscretisationPointsXValues, ref pointerToArrayOfDiscretisationPointsYValues);
+            return ionc_put_1d_mesh_discretisation_points_v2_dll(ref ioNetCdfDataSetId, ref meshId, ref pointerToArrayOfBranchIndexValues, ref pointerToArrayOfOffsets, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfMeshPoints, ref startIndex, ref pointerToArrayOfDiscretisationPointsXValues, ref pointerToArrayOfDiscretisationPointsYValues);
         }
 
         /// <summary>
@@ -593,7 +593,7 @@ namespace Deltares.IONetCDF.Managed
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         public int Read1DNetworkNodes(int ioNetCdfDataSetId, int networkId, ref IntPtr pointerToArrayOfXNodes, ref IntPtr pointerToArrayOfYNodes, ref IntPtr pointerToArrayOfIds, ref IntPtr pointerToArrayOfLongNames, int numberOfNodes)
         {
-            return ionc_read_1d_network_nodes_dll(ref ioNetCdfDataSetId, ref networkId, ref pointerToArrayOfXNodes, ref pointerToArrayOfYNodes, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfNodes);
+            return ionc_read_1d_network_nodes_v1_dll(ref ioNetCdfDataSetId, ref networkId, ref pointerToArrayOfXNodes, ref pointerToArrayOfYNodes, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfNodes);
         }
 
         /// <summary>
@@ -612,7 +612,7 @@ namespace Deltares.IONetCDF.Managed
         public int Read1DNetworkBranches(int ioNetCdfDataSetId, int networkId, ref IntPtr pointerToArrayOfSourceNodeIds, ref IntPtr pointerToArrayOfTargetNodeIds, ref IntPtr pointerToArrayOfBranchLengths, ref IntPtr pointerToArrayOfIds, ref IntPtr pointerToArrayOfLongNames, ref IntPtr pointerToArrayOfNumberOfBranchGeometryPoints, int numberOfBranches)
         {
             var startIndex = 0;
-            return ionc_get_1d_network_branches_dll(ref ioNetCdfDataSetId, ref networkId, ref pointerToArrayOfSourceNodeIds,ref pointerToArrayOfTargetNodeIds, ref pointerToArrayOfBranchLengths, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref pointerToArrayOfNumberOfBranchGeometryPoints, ref numberOfBranches, ref startIndex);
+            return ionc_get_1d_network_branches_v1_dll(ref ioNetCdfDataSetId, ref networkId, ref pointerToArrayOfSourceNodeIds,ref pointerToArrayOfTargetNodeIds, ref pointerToArrayOfBranchLengths, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref pointerToArrayOfNumberOfBranchGeometryPoints, ref numberOfBranches, ref startIndex);
         }
 
         /// <summary>
@@ -657,7 +657,7 @@ namespace Deltares.IONetCDF.Managed
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         public int Read1DMeshDiscretisationPoints(int ioNetCdfDataSetId, int meshId, ref IntPtr pointerToArrayOfBranchIndexValues, ref IntPtr pointerToArrayOfOffsets, ref IntPtr pointerToArrayOfDiscretisationPointsXValues, ref IntPtr pointerToArrayOfDiscretisationPointsYValues, ref IntPtr pointerToArrayOfIds, ref IntPtr pointerToArrayOfLongNames, int numberOfMeshPoints, int startIndex)
         {
-            return ionc_get_1d_mesh_discretisation_points_v1_dll(ref ioNetCdfDataSetId, ref meshId, ref pointerToArrayOfBranchIndexValues, ref pointerToArrayOfOffsets, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfMeshPoints, ref startIndex, ref pointerToArrayOfDiscretisationPointsXValues, ref pointerToArrayOfDiscretisationPointsYValues);
+            return ionc_get_1d_mesh_discretisation_points_v2_dll(ref ioNetCdfDataSetId, ref meshId, ref pointerToArrayOfBranchIndexValues, ref pointerToArrayOfOffsets, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfMeshPoints, ref startIndex, ref pointerToArrayOfDiscretisationPointsXValues, ref pointerToArrayOfDiscretisationPointsYValues);
         }
 
         /// <summary>
@@ -692,7 +692,7 @@ namespace Deltares.IONetCDF.Managed
         public int Write1D2DLinks(int ioNetCdfDataSetId, int contactsMeshId, IntPtr pointerToArrayOfFirstMeshIndexValues, IntPtr pointerToArrayOfSecondMeshIndexValues, IntPtr pointerToArrayOfContactTypes, IntPtr pointerToArrayOfIds, IntPtr pointerToArrayOfLongNames, int numberOfContacts)
         {
             var startIndex = 0;
-            return ionc_put_mesh_contact_dll(ref ioNetCdfDataSetId, ref contactsMeshId, ref pointerToArrayOfFirstMeshIndexValues, ref pointerToArrayOfSecondMeshIndexValues, ref pointerToArrayOfContactTypes, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfContacts, ref startIndex);
+            return ionc_put_mesh_contact_v1_dll(ref ioNetCdfDataSetId, ref contactsMeshId, ref pointerToArrayOfFirstMeshIndexValues, ref pointerToArrayOfSecondMeshIndexValues, ref pointerToArrayOfContactTypes, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfContacts, ref startIndex);
         }
 
         /// <summary>
@@ -722,7 +722,7 @@ namespace Deltares.IONetCDF.Managed
         public int Read1D2DLinks(int ioNetCdfDataSetId, int contactsMeshId, ref IntPtr pointerToArrayOfFirstMeshIndexValues, ref IntPtr pointerToArrayOfSecondMeshIndexValues, ref IntPtr pointerToArrayOfContactTypes, ref IntPtr pointerToArrayOfIds, ref IntPtr pointerToArrayOfLongNames, ref int numberOfContacts)
         {
             var startIndex = 0;
-            return ionc_get_mesh_contact_dll(ref ioNetCdfDataSetId, ref contactsMeshId, ref pointerToArrayOfFirstMeshIndexValues, ref pointerToArrayOfSecondMeshIndexValues, ref pointerToArrayOfContactTypes, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfContacts, ref startIndex);
+            return ionc_get_mesh_contact_v1_dll(ref ioNetCdfDataSetId, ref contactsMeshId, ref pointerToArrayOfFirstMeshIndexValues, ref pointerToArrayOfSecondMeshIndexValues, ref pointerToArrayOfContactTypes, ref pointerToArrayOfIds, ref pointerToArrayOfLongNames, ref numberOfContacts, ref startIndex);
         }
 
         /// <summary>
@@ -895,6 +895,36 @@ namespace Deltares.IONetCDF.Managed
         public int Create2DMesh(int ioNetCdfDataSetId, ref int meshId, ref int networkId, ref meshgeom meshGeom, ref meshgeomdim meshGeomDimensions, string meshName, string networkName, ref int startIndex)
         {
             return ionc_put_meshgeom_dll(ref ioNetCdfDataSetId, ref meshId, ref networkId, ref meshGeom, ref meshGeomDimensions, meshName, networkName, ref startIndex);
+        }
+        /// <summary>
+        /// Write the two 1d mesh nodes of an edge in a list from where an edge comes from to which 1d mesh node it connects to
+        /// </summary>
+        /// <param name="ioNetCdfDataSetId">The IONetCDF data set id (in).</param>
+        /// <param name="meshId">The mesh id in the specified data set (in).</param>
+        /// <param name="numberOfEdges">The number of edges (in).</param>
+        /// <param name="pointerToArrayOfMesh1DEdgeNodesConnection">The array of the nodes where edges connect to (in).</param>
+        /// <param name="startIndex">Array start index (in).</param>
+        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        public int Write1dMeshEdgeNodes(ref int ioNetCdfDataSetId, ref int meshId, ref int numberOfEdges, ref IntPtr pointerToArrayOfMesh1DEdgeNodesConnection, int startIndex)
+        {
+            return ionc_write_mesh_1d_edge_nodes_dll(ref ioNetCdfDataSetId, ref meshId, ref numberOfEdges, ref pointerToArrayOfMesh1DEdgeNodesConnection, ref startIndex);
+        }
+
+        /// <summary>
+        /// Write the edges of a 1d mesh
+        /// </summary>
+        /// <param name="ioNetCdfDataSetId">The IONetCDF data set id (in).</param>
+        /// <param name="meshId">The mesh id in the specified data set (in).</param>
+        /// <param name="pointerToArrayOfBranchIndexesWhereTheEdgesAreOn">Pointer to an array containing the branch index of where the edges is on (in).</param>
+        /// <param name="pointerToArrayOfBranchOffsetWhereTheEdgesAreOn">Pointer to an array containing the offset along the branch (from the starting point) of the points (in).</param>
+        /// <param name="numberOfEdges">The number of edges (in).</param>
+        /// <param name="startIndex">Array start index (in).</param>
+        /// <param name="pointerToArrayOfXCoordinatesOfEdge">Pointer to an array containing the x-coordinates of the edges (in).</param>
+        /// <param name="pointerToArrayOfYCoordinatesOfEdge">Pointer to an array containing the y-coordinates of the edges (in).</param>
+        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        public int Write1dMeshEdges(ref int ioNetCdfDataSetId, ref int meshId, ref IntPtr pointerToArrayOfBranchIndexesWhereTheEdgesAreOn, ref IntPtr pointerToArrayOfBranchOffsetWhereTheEdgesAreOn, ref int numberOfEdges, int startIndex, ref IntPtr pointerToArrayOfXCoordinatesOfEdge, ref IntPtr pointerToArrayOfYCoordinatesOfEdge)
+        {
+            return ionc_put_1d_mesh_edges_dll(ref ioNetCdfDataSetId, ref meshId, ref pointerToArrayOfBranchIndexesWhereTheEdgesAreOn, ref pointerToArrayOfBranchOffsetWhereTheEdgesAreOn, ref numberOfEdges, ref startIndex, ref pointerToArrayOfXCoordinatesOfEdge, ref pointerToArrayOfYCoordinatesOfEdge);
         }
     }
 }
