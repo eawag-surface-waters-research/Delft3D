@@ -4472,13 +4472,15 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_sybwav      , nf90_double, UNC_LOC_S, 'sybwav', 'sea_surface_y_wave_force_bottom' , 'Bottom layer wave forcing term, y-component'    , 'N m-2') ! not CF    
       end if
       
-      if (jawave .gt. 2) then
+      if (jawave .gt. 0) then
          if (jamapsigwav==0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hwav        , nf90_double, UNC_LOC_S, 'hwav'         , 'sea_surface_wave_rms_height'          , 'RMS wave height'          , 'm'    ) ! not CF
          else
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hwav        , nf90_double, UNC_LOC_S, 'hwav'         , 'sea_surface_wave_significant_wave_height'          , 'Significant wave height'          , 'm'    )
          endif
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_uorb     , nf90_double, UNC_LOC_S, 'uorb'            , 'sea_surface_wave_orbital_velocity'    , 'Wave orbital velocity'    , 'm s-1') ! not CF
+      endif
+      if (jawave .gt. 2) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ustokes      , nf90_double, UNC_LOC_S, 'ust_cc'     , 'sea_surface_x_stokes_drift'        , 'Stokes drift, x-component'   , 'm s-1') ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vstokes      , nf90_double, UNC_LOC_S, 'vst_cc'     , 'sea_surface_y_stokes_drift'       , 'Stokes drift, y-component'    , 'm s-1') ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fx       , nf90_double, UNC_LOC_S, 'Fx'              , 'sea_surface_x_wave_force'          , 'Wave force, x-component'     , 'N') ! not CF
@@ -4493,7 +4495,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          !\debug
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_thetamean, nf90_double, UNC_LOC_S, 'thetamean'       , 'sea_surface_wave_from_direction'      , 'Wave from direction'      , 'deg from N') ! not CF
       end if
-      
+ 
       end if
       !
       ! Trachytope roughnesses on NET links
@@ -5635,7 +5637,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_sybwav     , UNC_LOC_S, sbywav)
    end if
    
-   if (jawave .gt. 2) then
+   if (jawave .gt. 0) then
       if (jamapsigwav==0) then
          wavfac = 1d0
       else
@@ -5646,6 +5648,9 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       wa = wavfac*hwav
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hwav        , UNC_LOC_S, wa)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_uorb        , UNC_LOC_S, uorb, 0d0)
+   endif
+
+   if (jawave .gt. 2) then
            
       wa = modulo(270d0 - phiwav, 360d0)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_thetamean, UNC_LOC_S, wa) 

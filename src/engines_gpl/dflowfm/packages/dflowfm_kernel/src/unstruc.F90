@@ -29760,16 +29760,16 @@ mainloop:do n  = 1, nwf
  do LL = 1, lnx
    if (hu(L)>epswav) then
        k1 = ln(1,LL); k2 = ln(2,LL)
-       dir = atan2(wy(LL), wx(LL))
-       sind = sin(dir); cosd = cos(dir)
+       dir   = atan2(wy(LL), wx(LL))
+       sind  = sin(dir); cosd = cos(dir)
        ustx1 = ustk(k1)*cosd
        ustx2 = ustk(k2)*cosd
        usty1 = ustk(k1)*sind
        usty2 = ustk(k2)*sind
-       ustokes(LL) =      acL(LL) *(csu(LL)*ustx1 + snu(LL)*usty1) + &
-                     (1d0-acL(LL))*(csu(LL)*ustx2 + snu(LL)*usty2)
-       vstokes(LL) = acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
-                     (1d0-acL(LL))*(-snu(L)*ustx2 + csu(L)*usty2)
+       ustokes(LL) =      acL(LL) *( csu(LL)*ustx1 + snu(LL)*usty1) + &
+                     (1d0-acL(LL))*( csu(LL)*ustx2 + snu(LL)*usty2)
+       vstokes(LL) =      acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
+                     (1d0-acL(LL))*(-snu(LL)*ustx2 + csu(LL)*usty2)
     else
        ustokes(LL) = 0d0
        vstokes(LL) = 0d0
