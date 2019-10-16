@@ -403,7 +403,7 @@ namespace General.tests
         private static extern int ionc_create_1d_mesh_dll([In] ref int ioncid, [In] string networkname, [In, Out] ref int meshid, string meshname, [In] ref int nmeshpoints);
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_create_1d_mesh_v1", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_create_1d_mesh_v1_dll([In] ref int ioncid, [In] string networkname, [In, Out] ref int meshid, string meshname, [In] ref int nmeshpoints, [In] ref int writexy);
+        private static extern int ionc_create_1d_mesh_v1_dll([In] ref int ioncid, [In] string networkname, [In, Out] ref int meshid, string meshname, [In] ref int nmeshpoints,[In] ref int nedges, [In] ref int writexy);
 
         /// <summary>
         /// Writes the mesh coordinates points 
@@ -887,9 +887,9 @@ namespace General.tests
             return ionc_create_1d_mesh_dll(ref ioncid, networkname, ref meshid, meshname, ref nmeshpoints);
         }
 
-        public int ionc_create_1d_mesh_v1(ref int ioncid, string networkname, ref int meshid, string meshname, ref int nmeshpoints, ref int writexy)
+        public int ionc_create_1d_mesh_v1(ref int ioncid, string networkname, ref int meshid, string meshname, ref int nmeshpoints, ref int nedges, ref int writexy)
         {
-            return ionc_create_1d_mesh_v1_dll(ref ioncid, networkname, ref meshid, meshname, ref nmeshpoints, ref writexy);
+            return ionc_create_1d_mesh_v1_dll(ref ioncid, networkname, ref meshid, meshname, ref nmeshpoints, ref nedges, ref writexy);
         }
 
         public int ionc_put_1d_mesh_discretisation_points(ref int ioncid, ref int networkid, ref IntPtr c_branchidx,

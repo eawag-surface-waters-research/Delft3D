@@ -64,6 +64,7 @@ namespace UGrid.tests
 
         //mesh dimension
         private int nmeshpoints = 8;
+        private int nedges = 7;
         private int nedgenodes  = 7; // nmeshpoints - 1 
 
         //mesh geometry
@@ -374,6 +375,7 @@ namespace UGrid.tests
             ref IoNetcdfLibWrapper wrapper,
             ref IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo,
             int l_nmeshpoints,
+            int l_nedges,
             int l_nedgenodes,
             int l_nBranches,
             int l_nlinks,
@@ -405,7 +407,7 @@ namespace UGrid.tests
                 int writexy = 1;
 
                 //1. Create: the assumption here is that l_nedgenodes is known (we could move this calculation inside ionc_create_1d_mesh)
-                int ierr = wrapper.ionc_create_1d_mesh_v1(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints, ref writexy);
+                int ierr = wrapper.ionc_create_1d_mesh_v1(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints, ref l_nedges, ref writexy);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //2. Create the edge nodes (the algorithm is in gridgeom.dll, not in ionetcdf.dll)
@@ -442,6 +444,7 @@ namespace UGrid.tests
             ref IntPtr nodeids,
             ref IntPtr nodelongnames,
             int l_nmeshpoints,
+            int l_nedges,
             int l_nedgenodes,
             int l_nBranches,
             int l_nlinks,
@@ -473,7 +476,7 @@ namespace UGrid.tests
                 int writexy = 1;
 
                 //1. Create: the assumption here is that l_nedgenodes is known (we could move this calculation inside ionc_create_1d_mesh)
-                int ierr = wrapper.ionc_create_1d_mesh_v1(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints, ref writexy);
+                int ierr = wrapper.ionc_create_1d_mesh_v1(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints, ref l_nedges, ref writexy);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //2. Create the edge nodes (the algorithm is in gridgeom.dll, not in ionetcdf.dll)
@@ -820,6 +823,7 @@ namespace UGrid.tests
 
             StringBuilder l_meshname = new StringBuilder(meshName);
             int l_nmeshpoints = nmeshpoints;
+            int l_nedges = nedges;
             int l_nedgenodes = nedgenodes;
             int l_nBranches = numNetworkBranches;
             int l_nlinks = nlinks;
@@ -869,6 +873,7 @@ namespace UGrid.tests
                 ref wrapper,
                 ref meshnodeidsinfo,
                 l_nmeshpoints,
+                l_nedges,
                 l_nedgenodes,
                 l_nBranches,
                 l_nlinks,
@@ -1112,6 +1117,7 @@ namespace UGrid.tests
             StringBuilder l_meshname = new StringBuilder(meshName);
             StringBuilder l_linkmeshname = new StringBuilder(linkmeshname);
             int l_nmeshpoints = nmeshpoints;
+            int l_nedges = nedges;
             int l_nedgenodes = nedgenodes;
             int l_nBranches = numNetworkBranches;
             int l_nlinks = nlinks;
@@ -1162,6 +1168,7 @@ namespace UGrid.tests
                 ref wrapper,
                 ref meshnodeidsinfo,
                 l_nmeshpoints,
+                l_nedges,
                 l_nedgenodes,
                 l_nBranches,
                 l_nlinks,
@@ -1894,6 +1901,7 @@ namespace UGrid.tests
             StringBuilder l_networkName = new StringBuilder(networkName);
             StringBuilder l_meshname = new StringBuilder(meshName);
             int l_nmeshpoints = 25;
+            int l_nedges = 24;
             int l_nedgenodes = 24;
             int l_nlinks = 10;
             double[] l_branchoffset =
@@ -1995,6 +2003,7 @@ namespace UGrid.tests
                 ref wrapperNetcdf,
                 ref meshnodeidsinfo,
                 l_nmeshpoints,
+                l_nedges,
                 l_nedgenodes,
                 l_nbranches,
                 l_nlinks,
@@ -2418,6 +2427,7 @@ namespace UGrid.tests
 
             StringBuilder l_meshname = new StringBuilder(meshName);
             int l_nmeshpoints = nmeshpoints;
+            int l_nedges = nedges;
             int l_nedgenodes = nedgenodes;
             int l_nBranches = numNetworkBranches;
             int l_nlinks = nlinks;
@@ -2486,6 +2496,7 @@ namespace UGrid.tests
                 ref idsCharArrayPinned,
                 ref longNamesArrayPinned,
                 l_nmeshpoints,
+                l_nedges,
                 l_nedgenodes,
                 l_nBranches,
                 l_nlinks,
