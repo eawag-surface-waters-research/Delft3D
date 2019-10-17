@@ -123,9 +123,9 @@
 
       if (atlone) then
          write (*,'(/,'' Type of profile:'')')
-         write (*,'(  ''  1) Uniform (2Dh)'')')
-         write (*,'(  ''  2) Linear       '')')
-         write (*,'(  ''  3) 3D          :'',$)')
+         write (*,'(  ''  1) Uniform (2DH) '')')
+         write (*,'(  ''  2) Linear        '')')
+         write (*,'(  ''  3) 3D          : '',$)')
          read  (*,*) itypc
       endif
 

@@ -61,7 +61,7 @@
       character*3  cdum
       character*17 layer
       character*20 nambnd (nobnd )
-      character*20 namcon (lstci )
+      character*20 namcon (lstci + 2 )
       character*40 cntain
       integer ifmt, ibnd, ic, itim, itypc, k
 
