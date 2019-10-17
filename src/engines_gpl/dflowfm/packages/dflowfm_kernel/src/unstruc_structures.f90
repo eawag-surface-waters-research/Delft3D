@@ -140,6 +140,9 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (5,:) bridge head
                                                               !<                      (6,:) bridge flow area
                                                               !<                      (7,:) bridge velocity
+                                                              !<                      (8,:) bridge bed level up
+                                                              !<                      (9,:) bridge bed level down
+                                                              !<                      (10,:) bridge actual bed level
  double precision, dimension(:,:), allocatable :: valculvert  !< Array for culvert;   (1,:) flow link width, used for averaging.
                                                               !<                      (2,:) discharge through culvert
                                                               !<                      (3,:) culvert water level up
@@ -175,7 +178,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_GENSTRU = 23    !< Number of variables for general structure( new exe file)
  integer                           :: NUMVALS_DAMBREAK = 12   !< Number of variables for dambreak
  integer                           :: NUMVALS_ORIFGEN = 23    !< Number of variables for orific
- integer                           :: NUMVALS_BRIDGE  = 7     !< Number of variables for bridge
+ integer                           :: NUMVALS_BRIDGE  = 10    !< Number of variables for bridge
  integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
  integer                           :: NUMVALS_UNIWEIR = 8     !< Number of variables for univeral weir
  integer                           :: NUMVALS_CMPSTRU = 7     !< Number of variables for compound structure
@@ -327,7 +330,7 @@ end subroutine reset_structures
 subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    use m_missing, only: dmiss
    use m_flow, only: q1, s1, au
-   use m_flowgeom, only: wu, ln, teta
+   use m_flowgeom, only: wu, ln, teta, bl
    use m_1d_structures, only: get_discharge_under_compound_struc
    use m_General_Structure
    implicit none
@@ -424,7 +427,14 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
       
       valstruct(19) = valstruct(19) + genstr%au(3,L0)
       valstruct(20) = valstruct(20) + genstr%au(2,L0)
-  end if
+   end if
+   
+   ! 3. More specific values that apply to bridge
+   if (istrtypein == ST_BRIDGE) then
+      valstruct(8)  = valstruct(8) + bl(ku)*wu(L)
+      valstruct(9)  = valstruct(9) + bl(kd)*wu(L)
+      valstruct(10) = valstruct(10) + network%sts%struct(istru)%bridge%bedLevel_actual*wu(L)
+   end if
 
 end subroutine fill_valstruct_perlink
 
@@ -565,6 +575,21 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
             end if
          end if
       end if 
+   end if
+   
+   ! 3. More specific values that apply to bridge
+   if (istrtypein == ST_BRIDGE) then
+      if (jampi == 0) then
+         if (valstruct(1) == 0d0 ) then ! zero width
+            valstruct(8) = dmiss
+            valstruct(9) = dmiss
+            valstruct(10)= dmiss
+         else
+            valstruct(8)  = valstruct(8) / valstruct(1)
+            valstruct(9)  = valstruct(9) / valstruct(1)
+            valstruct(10) = valstruct(10)/ valstruct(1)
+         end if
+      end if
    end if
 
 end subroutine average_valstruct
