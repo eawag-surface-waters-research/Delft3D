@@ -174,11 +174,6 @@ program waves_main
       write(*,'(a)') '*** ERROR: Reference date not set'
       write(*,'(a)') '           Use Delft3D-WAVE-GUI version 4.90.00 or higher to create the mdw-file.'
       call wavestop(1, '*** ERROR: Reference date not set')
-   else
-      if (wavedata%time%refdate < 19000000 .or. wavedata%time%refdate > 22000000) then
-         write(*,'(a,i8)') '*** ERROR: Unrealistic reference date ',wavedata%time%refdate
-         call wavestop(1, '*** ERROR: Unrealistic reference date ')
-      endif
    endif
    !
    ! Read wave grids and flow grids; make grid-maps
