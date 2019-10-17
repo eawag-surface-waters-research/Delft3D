@@ -1590,14 +1590,14 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
       endif
       
       select case(field_name)
-      case("crestLevel")
+      case("CrestLevel", "crestLevel")
          if (is_in_network) then
             x = get_crest_level_c_loc(network%sts%struct(item_index))
          else
             x = c_loc(zcgen((item_index-1)*3+1))
          end if
          return
-      case("gateHeight")
+      case("GateHeight", "gateHeight")
          if (is_in_network) then
             x = get_gate_door_height_c_loc(network%sts%struct(item_index))
          else
@@ -1605,21 +1605,21 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          end if
 
          return
-      case("gateLowerEdgeLevel")
+      case("GateLowerEdgeLevel", "gateLowerEdgeLevel")
          if (is_in_network) then
             x = get_gate_lower_edge_level_c_loc(network%sts%struct(item_index))
          else
             x = c_loc(zcgen((item_index-1)*3+2))
          end if
          return
-      case("gateOpeningWidth")
+      case("GateOpeningWidth", "gateOpeningWidth")
          if (is_in_network) then
             x = get_gate_opening_width_c_loc(network%sts%struct(item_index))
          else
             x = c_loc(zcgen((item_index-1)*3+3))
          end if
          return
-      case("gateOpeningHorizontalDirection")
+      case("GateOpeningHorizontalDirection", "gateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
       end select
@@ -1915,7 +1915,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
       endif
       
       select case(field_name)
-      case("crestLevel")
+      case("CrestLevel", "crestLevel")
          if (is_in_network) then
             fieldptr = get_crest_level_c_loc(network%sts%struct(item_index))
             fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
@@ -1924,7 +1924,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
             zcgen((item_index-1)*3+1) = x_0d_double_ptr
          end if
          return
-      case("gateHeight")
+      case("GateHeight", "gateHeight")
          if (is_in_network) then
             fieldptr = get_gate_door_height_c_loc(network%sts%struct(item_index))
             fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
@@ -1934,7 +1934,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          end if
 
          return
-      case("gateLowerEdgeLevel")
+      case("GateLowerEdgeLevel", "gateLowerEdgeLevel")
          if (is_in_network) then
             fieldptr = get_gate_lower_edge_level_c_loc(network%sts%struct(item_index))
             fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
@@ -1943,7 +1943,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
             zcgen((item_index-1)*3+2) = x_0d_double_ptr
          end if
          return
-      case("gateOpeningWidth")
+      case("GateOpeningWidth", "gateOpeningWidth")
          if (is_in_network) then
             fieldptr = get_gate_opening_width_c_loc(network%sts%struct(item_index))
             fieldptr = xptr ! Set the scalar value of the structure's field pointed being to.
@@ -1952,7 +1952,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
             zcgen((item_index-1)*3+3) = x_0d_double_ptr
          end if
          return
-      case("gateOpeningHorizontalDirection")
+      case("GateOpeningHorizontalDirection", "gateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
       end select
