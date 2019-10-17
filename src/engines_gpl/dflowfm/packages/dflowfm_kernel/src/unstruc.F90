@@ -16515,7 +16515,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_orifgendim, id_orifgen_id, id_orifgen_dis, id_orifgen_crestl, id_orifgen_crestw, id_orifgen_edgel, id_orifgen_stat,  &
                      id_orifgen_s1dn, id_orifgen_openh, id_orifgen_vel, id_orifgen_au, id_orifgen_s1up, id_orifgen_head, id_orifgen_s1crest, id_orifgen_forcedif,&
                      id_bridgedim, id_bridge_id, id_bridge_dis, id_bridge_s1up,  id_bridge_s1dn, id_bridge_vel, id_bridge_au,  id_bridge_head, &
-                     id_bridge_blup, id_bridge_bldn, id_bridge_bl_ac, &
+                     id_bridge_blup, id_bridge_bldn, id_bridge_bl_act, &
                      id_culvertdim, id_culvert_id, id_culvert_dis, id_culvert_s1up,  id_culvert_s1dn, id_culvert_crestl, id_culvert_openh, &
                      id_culvert_edgel, id_culvert_vel, id_culvert_stat, id_culvert_au,  id_culvert_head, &
                      id_sedbtrans, id_sedstrans,&
@@ -17843,22 +17843,22 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'coordinates', 'bridge_id')
             
             ierr = nf90_def_var(ihisfile, 'bridge_blup',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_blup)
-            ierr = nf90_put_att(ihisfile, id_bridge_blup, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_bridge_blup, 'standard_name', 'altitude')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'long_name', 'Bed level at upstream of bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'coordinates', 'bridge_id')
             
             ierr = nf90_def_var(ihisfile, 'bridge_bldn',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_bldn)
-            ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'standard_name', 'altitude')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'long_name', 'Bed level at downstream of bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'coordinates', 'bridge_id')
             
-            ierr = nf90_def_var(ihisfile, 'bridge_bl_actual',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_bl_ac)
-            ierr = nf90_put_att(ihisfile, id_bridge_bl_ac, 'standard_name', 'sea_surface_height')
-            ierr = nf90_put_att(ihisfile, id_bridge_bl_ac, 'long_name', 'Actual bed level of bridge')
-            ierr = nf90_put_att(ihisfile, id_bridge_bl_ac, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_bridge_bl_ac, 'coordinates', 'bridge_id')
+            ierr = nf90_def_var(ihisfile, 'bridge_bl_actual',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_bl_act)
+            ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'standard_name', 'altitude')
+            ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'long_name', 'Actual bed level of bridge (crest)')
+            ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'coordinates', 'bridge_id')
         endif
 
         ! Culvert
@@ -18683,7 +18683,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_bridge_vel,   valbridge(7,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_bridge_blup,  valbridge(8,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_bridge_bldn,  valbridge(9,i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_bridge_bl_ac, valbridge(10,i),(/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_bridge_bl_act,valbridge(10,i),(/ i, it_his /))
          enddo
       end if
 

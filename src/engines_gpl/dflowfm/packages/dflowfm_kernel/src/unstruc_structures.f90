@@ -142,7 +142,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (7,:) bridge velocity
                                                               !<                      (8,:) bridge bed level up
                                                               !<                      (9,:) bridge bed level down
-                                                              !<                      (10,:) bridge actual bed level
+                                                              !<                      (10,:) bridge actual bed level (crest)
  double precision, dimension(:,:), allocatable :: valculvert  !< Array for culvert;   (1,:) flow link width, used for averaging.
                                                               !<                      (2,:) discharge through culvert
                                                               !<                      (3,:) culvert water level up
