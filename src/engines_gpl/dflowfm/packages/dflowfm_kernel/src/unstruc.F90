@@ -37389,7 +37389,7 @@ if (jahisbal > 0) then
                   valweirgen(4,n) = valweirgen(4,n) / valweirgen(1,n)
                   valweirgen(10,n) = valweirgen(10,n) / valweirgen(NUMVALS_WEIRGEN,n)    ! id_weirgen_crestw
                   valweirgen(9,n) = valweirgen(9,n) / valweirgen(NUMVALS_WEIRGEN,n)      ! id_weirgen_crestl
-                  valgenstru(11,n) = valgenstru(11,n) / valgenstru(NUMVALS_WEIRGEN,n)    ! id_weirgen_stat
+                  valweirgen(11,n) = valweirgen(11,n) / valweirgen(NUMVALS_WEIRGEN,n)    ! id_weirgen_stat
                   if (network%sts%numWeirs > 0) then ! new weir
                      valweirgen(5,n) = valweirgen(5,n) / valweirgen(1,n)
                      if (valweirgen(6,n) > 0d0) then
