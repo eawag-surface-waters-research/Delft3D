@@ -41,9 +41,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "d_hydro", "d_hydro", "{69232C4D-43DF-40CF-AB26-5CDB4E555E61}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "esmfsm_c", "utils_lgpl\esmfsm\packages\esmfsm_c\esmfsm_c.vcxproj", "{5D050FBC-7AFA-4D3C-8AE8-D8C138F15596}"
-	ProjectSection(ProjectDependencies) = postProject
-		{73054CB6-9CC1-45D0-91A9-EDF50CF361A4} = {73054CB6-9CC1-45D0-91A9-EDF50CF361A4}
-	EndProjectSection
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "datsel_f", "tools_gpl\datsel\packages\datsel_f\datsel_f.vfproj", "{03B0B2AB-125F-49E6-9C53-ED7E5FC7718D}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -100,10 +97,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "datsel_version_number", "tools_gpl\datsel\packages\datsel_version_number\datsel_version_number.vcxproj", "{9FB4A6D1-4EC2-4341-AA6D-878AE2BF65BC}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
-	ProjectSection(ProjectDependencies) = postProject
-		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
-		{1ED7D7C9-ACA9-4A50-8217-0901E12B1D70} = {1ED7D7C9-ACA9-4A50-8217-0901E12B1D70}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "deltares_common_c", "utils_lgpl\deltares_common\packages\deltares_common_c\deltares_common_c.vcxproj", "{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
 EndProject
