@@ -139,7 +139,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
     <PostBuildEvent>
       <Command>

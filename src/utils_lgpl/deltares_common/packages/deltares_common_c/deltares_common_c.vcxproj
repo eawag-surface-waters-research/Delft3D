@@ -142,7 +142,7 @@
       </Command>
     </PostBuildEvent>
     <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
