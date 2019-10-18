@@ -204,9 +204,18 @@ subroutine storeCachingFile( filename )
     integer :: lun
     integer :: ierr
 
+    write(*,*) '>> CACHE - entered'
+
+    write(*,*) '>> CACHE: ', filename
+
     cache_success = .false.
 
+    write(*,*) '>> CACHE: ', filename
+
     open( newunit = lun, file = trim(filename) // ".cache", access = "stream", status = "old", action = 'read',  iostat = ierr )
+
+    write(*,*) '>> CACHE: ', filename
+
     if ( ierr == 0 ) then
         close( lun, status = "delete" )
     endif
