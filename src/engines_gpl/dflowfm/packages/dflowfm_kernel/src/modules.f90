@@ -1258,8 +1258,8 @@ end module m_wind
  double precision, allocatable     :: Qtotmap(:)
 
  double precision, allocatable     :: Rich(:)
- double precision, allocatable     :: Secchisp(:) 
- double precision, allocatable     :: Roair(:) 
+ double precision, allocatable     :: Secchisp(:)
+ double precision, allocatable     :: Roair(:)
 
 contains
 
@@ -2828,7 +2828,7 @@ subroutine default_flowparameters()
 
     jaselfal  = 0     ! use self attraction and loading yes no
     jaSELFALcorrectWLwithIni = 0   !< correct water level with initial atmospheric pressure in SAL
- 
+
     ! DOODSONSTART = 55.565D0 ; DOODSONSTOP = 375.575D0 ; Doodsoneps = .00D0    ! standaard triwaq alle 484 cmp
       DOODSONSTART = 55.565D0 ; DOODSONSTOP = 375.575D0 ; Doodsoneps = .03D0    ! standaard triwaq       60 cmp
     ! DOODSONSTART = 57.555D0 ; DOODSONSTOP = 275.555D0 ; Doodsoneps = .03D0    ! Delft3d
@@ -2844,7 +2844,7 @@ subroutine default_flowparameters()
     jacreep  = 0      ! Include anti-creep calculation, (0=no, 1=yes)
 
     jasal    = 0      ! Include salinity (autoset by flow_initexternalforcings())
-    
+
     jatem    = 0      ! Temperature model
 
     janudge  = 0      ! temperature and salinity nudging
@@ -3247,7 +3247,7 @@ end module m_vegetation
  double precision                  :: dztopuniabovez  = -999d0     !< bottom level of lowest uniform layer == blmin if not specified
  double precision                  :: Floorlevtoplay  = -999d0     !< floor  level of top zlayer, == sini if not specified
  double precision                  :: dztop = -999d0     !< if specified, dz of top layer, kmx = computed, if not, dz = (ztop-zbot)/kmx
- integer                           :: jaorgFloorlevtoplaydef=0 !< 0=correct floorlevtoplay, 1 = org wrong floorlevtoplay  
+ integer                           :: jaorgFloorlevtoplaydef=0 !< 0=correct floorlevtoplay, 1 = org wrong floorlevtoplay
  double precision                  :: zlaybot = -999d0  !< if specified, first zlayer starts from zlaybot, if not, it starts from the lowest bed point
  double precision                  :: zlaytop = -999d0  !< if specified, highest zlayer ends at zlaytop, if not, it ends at the initial water level
  double precision, allocatable     :: aak (:)           !< coefficient vertical mom exchange of kmx layers
@@ -4032,7 +4032,7 @@ double precision, allocatable      :: thindam(:,:)
  integer                           :: jarenumber       !< renumberFlowNodes
  integer                           :: jaFlowNetChanged !< To enforce various net(link)-related init routines after renumbering
  integer                           :: jaAllowBndAtBifurcation !< allow 1d boundary at endnode when connecting branch leads to bifurcation
- 
+
 ! JRE Stuff related to setting up wave directional grid
  integer                                     :: ntheta          !< Number of wave direction bins
  double precision                            :: thetamax        !< upper limit wave directional sector
@@ -4074,7 +4074,7 @@ subroutine default_flowgeom()
     rrtol      = 3d0 ! relative cellsize factor in search tolerance ()
     jaAllowBndAtBifurcation = 0
 
-    
+
     jarenumber = 1
     ! Remaining of variables is handled in reset_flowgeom()
     call reset_flowgeom()
@@ -4238,6 +4238,7 @@ end subroutine reset_flowgeom
  double precision                  :: cpuiniext (3) !< cputime init externalforcings (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuext    (3) !< cputime externalforcings      (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuextbnd (3) !< cputime externalforcingsonbnd (1)=start,(2)=stop,(3)=total
+ double precision                  :: cpu_extra(3,40) !< cputime, extra timers (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuwri      !< cputime writing (s)
  double precision                  :: dsetb       !< number of setbacks ()
  double precision                  :: walltime0   !< wall time at start of timeloop (s)

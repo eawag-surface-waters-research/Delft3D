@@ -704,7 +704,7 @@ end subroutine flow_finalize_single_timestep
     u0 = u1                           ! progress velocities
     call set_u0isu1_structures(network%sts)
  endif
- 
+
 
  advi = 0d0
  adve = 0d0
@@ -5712,7 +5712,7 @@ if (jawind > 0) then
     cs = csu(LL)  ; sn = snu(LL) ; v(LL) = 0d0
     do L = Lb,Lt
        k1 = ln(1,L) ; k2 = ln(2,L)
- 
+
        if ( jasfer3D == 1 ) then
           v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
                  (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
@@ -5726,9 +5726,9 @@ if (jawind > 0) then
 
        if (icorio > 0) then
           ! set u tangential
-          if (icorio == 4) then 
-                 vcor = v(L) 
-          else 
+          if (icorio == 4) then
+                 vcor = v(L)
+          else
              if ( jasfer3D == 1 ) then
                  vcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1))) +  &
                         (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))
@@ -5736,7 +5736,7 @@ if (jawind > 0) then
                  vcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) ) + &     ! continuity weighted best sofar plus depth limiting
                         (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )
              endif
-          endif 
+          endif
 
           if (jsferic == 1) then
              fcor = fcori(LL)
@@ -8856,6 +8856,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call makedir(getoutputdir('waq'))  ! No problem if it exists already.
  end if
 
+ call klok(cpu_extra(1,1)) ! Basic steps
 
  md_snapshotdir =  trim(getoutputdir())                  ! plot output to outputdir
  ! Make sure output dir for plot files exists
@@ -8875,11 +8876,17 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call reset_waq()
 
+ call klok(cpu_extra(2,1)) ! End basic steps
+
 ! JRE
+ call klok(cpu_extra(1,2)) ! Wave input
  if (jawave == 4) then
     call xbeach_wave_input()  ! will set swave and lwave
  endif
+ call klok(cpu_extra(2,2)) ! End wave input
 
+
+ call klok(cpu_extra(1,3)) ! Internal links
  if (md_jamake1d2dlinks == 1) then
     ierr = make1D2Dinternalnetlinks()
      if (ierr /= DFM_NOERR) then
@@ -8887,9 +8894,11 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
       goto 1234
     end if
  end if
+ call klok(cpu_extra(2,3)) ! End internal links
 
  ! TODO: unc_wri_map_header
 
+ call klok(cpu_extra(1,4)) ! Flow geometry
  call mess(LEVEL_INFO,'Initializing flow model geometry...')
  if ( jampi.eq.0 ) then
     call flow_geominit(0)                                ! initialise flow geometry based upon present network, time independent
@@ -8933,6 +8942,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
        goto 1234
     end if
  end if
+ call klok(cpu_extra(2,4)) ! End flow geometry
 
 
  if( kmx > 0 .and. jasecflow > 0) then         ! An error announcement (or warning, with correction to jasecflow to 0)
@@ -8941,7 +8951,9 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call mess(LEVEL_WARN,'         Secondary flow is turned off')
  endif
 
+ call klok(cpu_extra(1,5)) ! bobsongullies
  call setbobsongullies()
+ call klok(cpu_extra(2,5)) ! End bobsongullies
 
  if (javeg > 0) then
     ! NOTE: AvD: hardcoded for now: if vegetation is on, maintain max shear stresses for Peter and Jasper.
@@ -8949,35 +8961,50 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  end if
 
  ! 3D: flow_allocflow will set kmxn, kmxL and kmxc arrays
+ call klok(cpu_extra(1,37)) ! alloc flow
  call flow_allocflow()                               ! allocate   flow arrays
+ call klok(cpu_extra(2,37)) ! end alloc flow
  !
+ call klok(cpu_extra(1,6)) ! Wave init
  if (jawave > 0 .or. (jased > 0 .and. stm_included)) call flow_waveinit()
+ call klok(cpu_extra(2,6)) ! End wave init
  ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopen
+ call klok(cpu_extra(1,7)) ! Flow griddim
  if ( len_trim(md_foufile) > 0 .or. len_trim(md_sedfile) > 0 .or. jatrt == 1) then
     call D3Dflow_dimensioninit()
  endif
+ call klok(cpu_extra(2,7)) ! End flow griddim
 
+ call klok(cpu_extra(1,8)) ! Bed forms
  if ((jased > 0 .and. stm_included) .or. bfm_included .or. jatrt > 0 ) then
     call flow_bedforminit(1)        ! bedforms stage 1: datastructure init
  endif
+ call klok(cpu_extra(2,8)) ! End bed forms
 
  !! flow1d -> dflowfm initialization
+ call klok(cpu_extra(1,9)) ! 1d roughness
  call set_1d_roughnesses()
+ call klok(cpu_extra(2,9)) ! End 1d roughness
 
  ! need number of fractions for allocation of sed array
+ call klok(cpu_extra(1,10)) ! sedmor
  if ( len_trim(md_sedfile) > 0 ) then
       call flow_sedmorinit ()
  endif
+ call klok(cpu_extra(2,10)) ! End sedmor
 
+ call klok(cpu_extra(1,11)) ! bedform
  if ((jased > 0 .and. stm_included) .or. bfm_included ) then
     call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
  endif
+ call klok(cpu_extra(2,11)) ! End bedform
 
  !! Initialise Fourier Analysis
  !if (len_trim(md_foufile)>0) then
  !   call flow_fourierinit()
  !endif
  !
+ call klok(cpu_extra(1,12)) ! vertical administration
  if (jampi == 1) then
 !   update vertical administration
     call update_vertadmin()
@@ -9009,60 +9036,89 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     end if
 #endif
  end if
+ call klok(cpu_extra(2,12)) ! vertical administration
 
+ call klok(cpu_extra(1,13)) ! netlink tree 0
  if ((jatrt == 1) .or. (jacali == 1)) then
      call netlink_tree(0)
  endif
+ call klok(cpu_extra(2,13)) ! end netlink tree
 
+ call klok(cpu_extra(1,14)) ! flow trachy init
  if (jatrt == 1) then
     call flow_trachyinit ()                          ! initialise the trachytopes module
  end if
+ call klok(cpu_extra(2,14)) ! end flow trachy init
 
+ call klok(cpu_extra(1,15)) ! calibration init
  if (jacali == 1) then
      call calibration_init()                          ! initialise the calibration memory structures and read .cld and .cll files
  end if
+ call klok(cpu_extra(2,15)) ! end calibration init
 
+ call klok(cpu_extra(1,16)) ! netlink tree 1
  if ((jatrt == 1) .or. (jacali == 1)) then
      call netlink_tree(1)
  endif
+ call klok(cpu_extra(2,16)) ! netlink tree 1
 
  !! flow1d -> dflowfm update
+ call klok(cpu_extra(1,17)) ! save 1d
  if (stm_included) then
     call save_1d_nrd_vars_in_stm()
  end if
+ call klok(cpu_extra(2,17)) ! end save 1d
 
 ! initialize waq and add to tracer administration
+ call klok(cpu_extra(1,18)) ! waq processes init
  if ( len_trim(md_subfile) > 0 ) then
     call fm_wq_processes_ini()
  end if
+ call klok(cpu_extra(2,18)) ! end waq processes init
 
+ call klok(cpu_extra(1,19)) ! transport module
  if ( jatransportmodule.ne.0 ) then
     call ini_transport()
  end if
+ call klok(cpu_extra(2,19)) ! end transport module
 
 ! initialize part
+ call klok(cpu_extra(1,20)) ! part init
  call ini_part(1, md_partfile, md_partjatracer, md_partstarttime, md_parttimestep, md_part3Dtype)
+ call klok(cpu_extra(2,20)) ! end part init
 
+ call klok(cpu_extra(1,21)) ! observations init
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (1st call required for call to flow_trachy_update)
+ call klok(cpu_extra(2,21)) ! end observations init
 
+ cpu_extra(:,22) = 0.0d0    ! call removed
+ call klok(cpu_extra(1,23)) ! flow init
  iresult = flow_flowinit()                           ! initialise flow arrays and time dependent params for a given user time
  if (iresult /= DFM_NOERR) then
     goto 1234
  end if
+ call klok(cpu_extra(2,23)) ! end flow init
 
+ call klok(cpu_extra(1,24)) ! MBA init
  if (ti_waqbal > 0) then
     call mba_init()
  endif
+ call klok(cpu_extra(2,24)) ! end MBA init
 
+ call klok(cpu_extra(1,25)) ! update MOR width
  updateTabulatedProfiles = .true.
  if (stm_included) then
      call fm_update_mor_width_area()
  endif
+ call klok(cpu_extra(2,25)) ! end update MOR width
 
+ call klok(cpu_extra(1,26)) ! dredging init
  if ( len_trim(md_dredgefile) > 0 .and. stm_included) then
     call flow_dredgeinit()          ! dredging and dumping. Moved here because julrefdate needed
  endif
+ call klok(cpu_extra(2,26)) ! end dredging init
 
+ call klok(cpu_extra(1,27)) ! Xbeach init
  if (jawave .eq. 4) then
     call xbeach_wave_init()
 
@@ -9078,42 +9134,58 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
        endif
     end if
  end if
+ call klok(cpu_extra(2,27)) ! end Xbeach init
 
+ call klok(cpu_extra(1,28)) ! observations init 2
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)
+ call klok(cpu_extra(2,28)) ! end observations init 2
 
+ call klok(cpu_extra(1,29)) ! structure parameters
  call structure_parameters()                         ! initialize structure values, after flow_flowinit() so that initial water levels and discharges are already set.
+ call klok(cpu_extra(2,29)) ! end structure parameters
 
+ call klok(cpu_extra(1,30)) ! trachy update
  if (jatrt == 1) then
     call flow_trachyupdate()                         ! Perform a trachy update step to correctly set initial field quantities
  endif                                               ! Generally flow_trachyupdate() is called from flow_setexternalforcings()
+ call klok(cpu_extra(2,30)) ! end trachy update
 
+ call klok(cpu_extra(1,31)) ! set fcru mor
  if ((jased>0) .and. stm_included) then
     if (jamd1dfile == 0) then
        call set_frcu_mor(1)        !otherwise frcu_mor is set in getprof_1d()
     endif
     call set_frcu_mor(2)
  endif
+ call klok(cpu_extra(2,31)) ! end set fcru mor
 
+ call klok(cpu_extra(1,32)) ! flow ini timestep
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
+ call klok(cpu_extra(2,32)) ! end flow ini timestep
 
 
  jaFlowNetChanged = 0
 
 
  ! Initialise Fourier Analysis
+ call klok(cpu_extra(1,33)) ! Fourier init
  if (len_trim(md_foufile)>0) then
     kfst0 = kfs                                      ! Preserve the wet/dry-state on zero time
     call flow_fourierinit()
  endif
+ call klok(cpu_extra(2,33)) ! end Fourier init
 
 
 
+ call klok(cpu_extra(1,34)) ! Fourier init
  call mess(LEVEL_INFO, '** Model initialization was successful **')
  call mess(LEVEL_INFO, '* Active Model definition:')! Print model settings in diagnostics file.
  call writeMDUFilepointer(mdia, .true., istat)
 
  call mess(LEVEL_INFO, '**')
+ call klok(cpu_extra(2,34)) ! end Fourier init
 
+ call klok(cpu_extra(1,35)) ! write flowgeom ugrid
  if (len_trim(md_flowgeomfile) > 0) then             ! Save initial flow geometry to file.
     if (md_unc_conv == UNC_CONV_UGRID) then
        call unc_write_net_flowgeom_ugrid(trim(md_flowgeomfile)) ! UGRID
@@ -9121,12 +9193,15 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
        call unc_write_net_flowgeom(trim(md_flowgeomfile)) ! CFOLD
     end if
  end if
+ call klok(cpu_extra(2,35)) ! end write flowgeom ugrid
 
  ! store the grid-based information in the cache file
+ call klok(cpu_extra(1,36)) ! remainder
  call storeCachingFile(filename = md_ident)
 
 call writesomeinitialoutput()
 
+ call klok(cpu_extra(2,36)) ! End remainder
  iresult = DFM_NOERR
  return
 1234 continue
@@ -9134,6 +9209,7 @@ call writesomeinitialoutput()
    !call dum_makesal()
    !call dum_makeflowfield()
 !  END DEBUG
+
 
 end function flow_modelinit
 
@@ -10472,6 +10548,8 @@ subroutine writesomeinitialoutput()
  double precision  :: dum, f
  double precision  :: tstop
 
+ character(len=20), dimension(size(cpu_extra,2)) :: cpu_extra_label
+
  if (ndx == 0) then
     write(msgbuf,'(a)')    'Empty model, no flow cells found. No statistics to report.'; call msg_flush()
     return
@@ -10521,6 +10599,26 @@ subroutine writesomeinitialoutput()
  write(msgbuf,'(a,F25.10)') 'total computation time (s)  :' , cpuall(3) - cpuall(1)      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , cpuall(2) - cpuall(1)      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , cpuall(3) - cpuall(2)      ; call msg_flush()
+ cpu_extra_label       = ' '
+ cpu_extra_label(1:37) = [ 'Basic steps         ', 'Wave input          ', 'Internal links      ', &
+                           'Flow geometry       ', 'Bobsongullies       ', 'Wave initialisation ', &
+                           'Flow grid           ', 'Bed forms init (1)  ', '1D rougnhess        ', &
+                           'Sed/mor             ', 'Bed forms init (2)  ', 'Adm. vertical       ', &
+                           'Net link tree 0     ', 'Flow trachy init    ', 'Calibration init    ', &
+                           'Net link tree 1     ', 'Save 1d             ', 'WAQ processes init  ', &
+                           'Transport init      ', 'Part init           ', 'Observations init   ', &
+                           'Structures init     ', 'Flow init           ', 'MBA init            ', &
+                           'Update MOR width    ', 'Dredging init       ', 'Xbeach init         ', &
+                           'Observations init 2 ', 'Structure parameters', 'Trachy update       ', &
+                           'Set fcru MOR        ', 'Flow init           ', 'Fourier init        ', &
+                           'MDU file pointer    ', 'Flowgeom            ', &
+                           'Remainder           ', 'Flow alloc          ']
+
+ do i = 1,size(cpu_extra,2)
+     if ( cpu_extra_label(i) /=  ' ' ) then
+         write(msgbuf,'(a,a,F25.10)') 'extra timer:' , cpu_extra_label(i), cpu_extra(2,i) - cpu_extra(1,i)      ; call msg_flush()
+     endif
+ enddo
 
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
@@ -14148,7 +14246,7 @@ endif
        u1(Lb:Lt) = u1(L)
     end do
  end if
- 
+
   if (jawave==3) then
     if( kmx == 0 ) then
        hs = s1-bl                                   ! safety
@@ -17841,19 +17939,19 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'long_name', 'Velocity through bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'coordinates', 'bridge_id')
-            
+
             ierr = nf90_def_var(ihisfile, 'bridge_blup',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_blup)
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'standard_name', 'altitude')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'long_name', 'Bed level at upstream of bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'coordinates', 'bridge_id')
-            
+
             ierr = nf90_def_var(ihisfile, 'bridge_bldn',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_bldn)
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'standard_name', 'altitude')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'long_name', 'Bed level at downstream of bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'coordinates', 'bridge_id')
-            
+
             ierr = nf90_def_var(ihisfile, 'bridge_bl_actual',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_bl_act)
             ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'standard_name', 'altitude')
             ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'long_name', 'Actual bed level of bridge (crest)')
@@ -18037,7 +18135,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'coordinates', 'uniweir_id')
         endif
-        
+
         ! compound structure
         if(jahiscmpstru > 0 .and. network%cmps%count > 0) then
             ierr = nf90_def_dim(ihisfile, 'compoundStructures', network%cmps%count, id_cmpstrudim)
@@ -18206,7 +18304,7 @@ subroutine unc_write_his(tim)            ! wrihis
               ierr = nf90_put_var(ihisfile, id_uniweir_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
-        
+
         if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
            do i = 1, network%cmps%count
               ierr = nf90_put_var(ihisfile, id_cmpstru_id,  trim(network%cmps%compound(i)%id),  (/ 1, i /))
@@ -18713,7 +18811,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_uniweir_crestl, valuniweir(8,i),      (/ i, it_his /))
          enddo
       end if
-      
+
       if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
          do i=1,network%cmps%count
             ierr = nf90_put_var(ihisfile, id_cmpstru_dis,            valcmpstru(2,i), (/ i, it_his /))
@@ -29782,15 +29880,15 @@ mainloop:do n  = 1, nwf
  do LL = 1, lnx
    if (hu(L)>epswav) then
        k1 = ln(1,LL); k2 = ln(2,LL)
-       dir   = atan2(wy(LL), wx(LL))
-       sind  = sin(dir); cosd = cos(dir)
+       dir = atan2(wy(LL), wx(LL))
+       sind = sin(dir); cosd = cos(dir)
        ustx1 = ustk(k1)*cosd
        ustx2 = ustk(k2)*cosd
        usty1 = ustk(k1)*sind
        usty2 = ustk(k2)*sind
-       ustokes(LL) =      acL(LL) *( csu(LL)*ustx1 + snu(LL)*usty1) + &
-                     (1d0-acL(LL))*( csu(LL)*ustx2 + snu(LL)*usty2)
-       vstokes(LL) =      acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
+       ustokes(LL) =      acL(LL) *(csu(LL)*ustx1 + snu(LL)*usty1) + &
+                     (1d0-acL(LL))*(csu(LL)*ustx2 + snu(LL)*usty2)
+       vstokes(LL) = acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
                      (1d0-acL(LL))*(-snu(LL)*ustx2 + csu(LL)*usty2)
     else
        ustokes(LL) = 0d0
@@ -37278,8 +37376,8 @@ if (jahisbal > 0) then
             end if
          enddo
       end if
-      
-      ! 
+
+      !
       ! === compound structure
       !
       if (network%cmps%count > 0) then
@@ -42108,13 +42206,13 @@ integer            :: jav3
  enddo
 
  jav3 = 0
- if (javau3onbnd == 1) then 
+ if (javau3onbnd == 1) then
     if (LL > lnxi)     jav3 = 1
- else if (javau3onbnd == 2) then 
-    if (iadv(LL) == 6) jav3 = 1   
- else if (javau == 3) then 
+ else if (javau3onbnd == 2) then
+    if (iadv(LL) == 6) jav3 = 1
+ else if (javau == 3) then
                        jav3 = 1
- endif 
+ endif
 
  do L    = Lb, Lt - 1
     k        = L - Lb + 1
@@ -43066,6 +43164,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  use m_partitioninfo
  use string_module, only: strsplit
  use geometry_module, only: dbdistance, CROSSinbox, dcosphi, duitpl, normalout
+ use unstruc_caching
 
  implicit none
 
@@ -43091,7 +43190,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  character(len=1), external                  :: get_dirsep
  character(len=200), dimension(:), allocatable       :: fnames
  integer                                     :: jadoorladen, ifil
- double precision                            :: t0, t1
+ double precision                            :: t0, t1, t_extra(2,10)
  character(len=128)                          :: mesg
 
 
@@ -43127,6 +43226,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  allocate (ifirstweir(lnx)) ; ifirstweir = 1                       ! added to check whether fixed weir data is set for the first time at a net link (1=true, 0=false)
 
  call klok(t0)
+ t_extra(1,1) = t0
 
  ! Load fixed weirs polygons from file.
  ! --------------------------------------------------------------------
@@ -43159,18 +43259,33 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        call reapol(minp, jadoorladen)
        jadoorladen = 1
     enddo
+    call klok(t_extra(2,1))
+    call klok(t_extra(1,2))
     call pol_to_flowlinks(xpl, ypl, zpl, npl, nfxw, fxw)
+    call klok(t_extra(2,2))
     deallocate(fnames)
  end if
 
  kint = max(lnxi/1000,1)
 
+ call klok(t_extra(1,3))
  allocate (iLink(Lnx))
  allocate (iLcr(Lnx))     ; Ilcr = 0
  allocate (ipol(Lnx))
  allocate (dSL(Lnx))
- call find_crossed_links_kdtree2(treeglob,NPL,XPL,YPL,2,Lnx,1,numcrossedLinks, iLink, iPol, dSL, ierror)
+ if ( cacheRetrieved() ) then
+    ierror = 0
+    call copyCachedFixedWeirs( npl, xpl, ypl, numcrossedLinks, iLink, iPol, dSL, success )
+ else
+    success = .false.
+ endif
+ if ( .not. success ) then
+    call find_crossed_links_kdtree2(treeglob,NPL,XPL,YPL,2,Lnx,1,numcrossedLinks, iLink, iPol, dSL, ierror)
+    call cacheFixedWeirs( npl, xpl, ypl, numcrossedLinks, iLink, iPol, dSL )
+ endif
+ call klok(t_extra(2,3))
 
+ call klok(t_extra(1,4))
  if ( ierror == 0) then
     do iL = 1,numcrossedlinks
        L  = iLink(il)
@@ -43223,9 +43338,18 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     enddo
     numcrossedlinks = n
  endif
+ call klok(t_extra(2,4))
 
  call klok(t1)
  write(mesg,"('fixed weirs with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
+ call mess(LEVEL_INFO, trim(mesg))
+ write(mesg,"('fixed weirs: read files,  elapsed time: ', G15.5, 's.')") t_extra(2,1)-t_extra(1,1)
+ call mess(LEVEL_INFO, trim(mesg))
+ write(mesg,"('fixed weirs: pol_to_flowlinks, elapsed time: ', G15.5, 's.')") t_extra(2,2)-t_extra(1,2)
+ call mess(LEVEL_INFO, trim(mesg))
+ write(mesg,"('fixed weirs: find_crossed_links, elapsed time: ', G15.5, 's.')") t_extra(2,3)-t_extra(1,3)
+ call mess(LEVEL_INFO, trim(mesg))
+ write(mesg,"('fixed weirs: attributes,  elapsed time: ', G15.5, 's.')") t_extra(2,4)-t_extra(1,4)
  call mess(LEVEL_INFO, trim(mesg))
 
  nh = 0

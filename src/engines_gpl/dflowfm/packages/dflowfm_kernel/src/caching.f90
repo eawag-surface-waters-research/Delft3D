@@ -46,7 +46,7 @@ module unstruc_caching
     logical, private :: cache_success
 
     character(len=20), dimension(10), private :: section = ['OBSERVATIONS        ', &
-                                                            '12345678901234567890', &
+                                                            'FIXED WEIRS         ', &
                                                             '12345678901234567890', &
                                                             '12345678901234567890', &
                                                             '12345678901234567890', &
@@ -56,28 +56,35 @@ module unstruc_caching
                                                             '12345678901234567890', &
                                                             '12345678901234567890']
     integer, parameter, private :: key_obs = 1
+    integer, parameter, private :: key_fixed_weirs = 2
 
     double precision, dimension(:), allocatable, private :: cache_xobs
     double precision, dimension(:), allocatable, private :: cache_yobs
+    double precision, dimension(:), allocatable, private :: cache_xpl_fixed
+    double precision, dimension(:), allocatable, private :: cache_ypl_fixed
+    double precision, dimension(:), allocatable, private :: cache_dsl_fixed
     integer, dimension(:), allocatable, private          :: cache_locTpObs
     integer, dimension(:), allocatable, private          :: cache_kobs
+    integer, dimension(:), allocatable, private          :: cache_ilink_fixed
+    integer, dimension(:), allocatable, private          :: cache_ipol_fixed
 
     character(len=30), private :: version_string = "D-Flow FM, cache file, 1.0"
     character(len=14), private :: md5current
 
 contains
+!> Check that the caching file contained compatible information
 logical function cacheRetrieved()
     cacheRetrieved = cache_success
 end function cacheRetrieved
 
 !> Load the information from the caching file - if any
 subroutine loadCachingFile( filename, netfile )
-    character(len=*), intent(in) :: filename
-    character(len=*), intent(in) :: netfile
+    character(len=*), intent(in) :: filename      !< Name of MDU file (used to construct the name of the caching file)
+    character(len=*), intent(in) :: netfile       !< Full name of the network file
 
     integer :: lun
     integer :: ierr
-    integer :: number
+    integer :: number, number_links
     character(len=30) :: version_file
     character(len=20) :: key
     character(len=14) :: md5checksum
@@ -85,6 +92,13 @@ subroutine loadCachingFile( filename, netfile )
     logical :: success
 
     cache_success = .false.
+    return
+
+    !
+    ! Allocate the arrays to zero length
+    !
+    allocate( cache_xobs(0), cache_yobs(0), cache_xpl_fixed(0), cache_ypl_fixed(0), cache_dsl_fixed(0), &
+              cache_locTpObs(0), cache_kobs(0), cache_ilink_fixed(0), cache_ipol_fixed(0) )
 
     open( newunit = lun, file = trim(filename) // ".cache", status = "old", access = "stream", iostat = ierr )
 
@@ -119,10 +133,9 @@ subroutine loadCachingFile( filename, netfile )
     call md5file( netfile, md5current, success )
 
     if ( md5checksum /= md5current .or. .not. success ) then
-        close( lun ) 
+        close( lun )
         return
     endif
-
 
     !
     ! Load the observation points:
@@ -135,12 +148,41 @@ subroutine loadCachingFile( filename, netfile )
         return
     endif
 
+    deallocate( cache_xobs, cache_yobs, cache_locTpObs, cache_kobs )
+
     allocate( cache_xobs(number), cache_yobs(number), cache_kobs(number), cache_locTpObs(number) )
 
     read( lun, iostat = ierr ) cache_xobs      ; okay = ierr == 0
     read( lun, iostat = ierr ) cache_yobs      ; okay = okay .and. ierr == 0
     read( lun, iostat = ierr ) cache_locTpObs  ; okay = okay .and. ierr == 0
     read( lun, iostat = ierr ) cache_kobs      ; okay = okay .and. ierr == 0
+
+    if ( .not. okay ) then
+        close( lun )
+        return
+    endif
+
+    !
+    ! Load the information on the fixed weirs:
+    ! Copy the node numbers when successful
+    !
+    read( lun, iostat = ierr ) key, number, number_links
+
+    if ( ierr /= 0 .or. key /= section(key_fixed_weirs) ) then
+        close( lun )
+        return
+    endif
+
+    deallocate( cache_xpl_fixed, cache_ypl_fixed, cache_ilink_fixed, cache_ipol_fixed, cache_dsl_fixed )
+
+    allocate( cache_xpl_fixed(number), cache_ypl_fixed(number) )
+    allocate( cache_ilink_fixed(number_links), cache_ipol_fixed(number_links), cache_dsl_fixed(number_links) )
+
+    read( lun, iostat = ierr ) cache_xpl_fixed   ; okay = ierr == 0
+    read( lun, iostat = ierr ) cache_ypl_fixed   ; okay = okay .and. ierr == 0
+    read( lun, iostat = ierr ) cache_ilink_fixed ; okay = okay .and. ierr == 0
+    read( lun, iostat = ierr ) cache_ipol_fixed  ; okay = okay .and. ierr == 0
+    read( lun, iostat = ierr ) cache_dsl_fixed   ; okay = okay .and. ierr == 0
 
     if ( .not. okay ) then
         close( lun )
@@ -157,7 +199,7 @@ end subroutine loadCachingFile
 
 !> Store the grid-based information in the caching file
 subroutine storeCachingFile( filename )
-    character(len=*) :: filename
+    character(len=*) :: filename            !< Name of the MDU file (to construct the name of the caching file)
 
     integer :: lun
     integer :: ierr
@@ -179,7 +221,18 @@ subroutine storeCachingFile( filename )
     ! Store the observation points
     !
     write( lun ) section(key_obs), numobs
-    write( lun ) xobs, yobs, locTpObs, kobs
+    if ( numobs > 0 ) then
+        write( lun ) xobs, yobs, locTpObs, kobs
+    endif
+
+    !
+    ! Store the fixed weirs data
+    !
+    write( lun ) section(key_fixed_weirs), size(cache_xpl_fixed), size(cache_ilink_fixed)
+
+    if ( size(cache_xpl_fixed) > 0 ) then
+        write( lun ) cache_xpl_fixed, cache_ypl_fixed, cache_ilink_fixed, cache_ipol_fixed, cache_dsl_fixed
+    endif
 
     !
     ! We are done, so close the file
@@ -188,8 +241,9 @@ subroutine storeCachingFile( filename )
 
 end subroutine storeCachingFile
 
+!> Copy the cached network information for observation points
 subroutine copyCachedObservations( success )
-    logical, intent(out) :: success
+    logical, intent(out) :: success             !< The cached information was compatible if true
 
     success = .false.
     if ( cache_success ) then
@@ -208,5 +262,58 @@ subroutine copyCachedObservations( success )
         endif
     endif
 end subroutine copyCachedObservations
+
+!> Copy the cached information on fixed weirs
+subroutine copyCachedFixedWeirs( npl, xpl, ypl, number_links, iLink, iPol, dSL, success )
+    integer, intent(in)                         :: npl                !< Number of vertices in the polygons making up the weirs
+    double precision, dimension(:), intent(in)  :: xpl                !< X-coordinates of the vertices for the weirs
+    double precision, dimension(:), intent(in)  :: ypl                !< Y-coordinates of the vertices for the weirs
+
+    integer, intent(out)                        :: number_links       !< Number of links that was cached
+    double precision, dimension(:), intent(out) :: dSL                !< Distances along the links that were cached
+    integer, dimension(:), intent(out)          :: iLink              !< Cached lInkage information
+    integer, dimension(:), intent(out)          :: iPol               !< Cached polygon information
+    logical, intent(out)                        :: success            !< The cached information was compatible if true
+
+    success = .false.
+    if ( cache_success ) then
+        !
+        ! Check the number of coordinate pairs
+        !
+        if ( npl /= size(cache_xpl_fixed) ) then
+            return
+        endif
+        !
+        ! Check that the coordinates are identical to the cached values
+        !
+        if ( all( cache_xpl_fixed == xpl(1:npl) ) .and. all( cache_ypl_fixed == ypl(1:npl) ) ) then
+            success      = .true.
+            number_links = size(cache_iLink_fixed)
+            iLink(1:number_links) = cache_iLink_fixed
+            iPol(1:number_links)  = cache_iPol_fixed
+            dSL(1:number_links)   = cache_dSL_fixed
+        endif
+    endif
+end subroutine copyCachedFixedWeirs
+
+!> cacheFixedWeirs:
+!>     The arrays for fixed weirs are partly local - they do not reside in a
+!>     module, so explicitly store them when we have the actual data
+!
+subroutine cacheFixedWeirs( npl, xpl, ypl, number_links, iLink, iPol, dSL )
+    integer, intent(in)                        :: npl             !< Number of vertices in the polygons making up the weirs
+    integer, intent(in)                        :: number_links    !< Number of links that is to be cached
+    double precision, dimension(:), intent(in) :: xpl             !< X-coordinates of the vertices for the weirs
+    double precision, dimension(:), intent(in) :: ypl             !< Y-coordinates of the vertices for the weirs
+    double precision, dimension(:), intent(in) :: dSL             !< Distances along the links that are to be cached
+    integer, dimension(:), intent(in)          :: iLink           !< LInkage information to be cached
+    integer, dimension(:), intent(in)          :: iPol            !< Polygon information to be cached
+
+    cache_xpl_fixed   = xpl(1:npl)
+    cache_ypl_fixed   = ypl(1:npl)
+    cache_iLink_fixed = iLink(1:number_links)
+    cache_iPol_fixed  = iPol(1:number_links)
+    cache_dSL_fixed   = dSL(1:number_links)
+end subroutine cacheFixedWeirs
 
 end module unstruc_caching
