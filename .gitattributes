@@ -12771,6 +12771,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_gridviewhelper.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_icon.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_interface.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_interface_update_options.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_layer.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_netcdf_get.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_option.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot.m -text
