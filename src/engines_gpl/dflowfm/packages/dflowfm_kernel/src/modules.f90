@@ -2189,13 +2189,14 @@ module unstruc_channel_flow
 use m_network
 implicit none
 type(t_network)              :: network
+integer                      :: CSCalculationOption  !< calculation option for total area computation in 1d
 contains
 
 
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, only call reset_*() instead.
 subroutine default_channel_flow()
-
+    CSCalculationOption = CS_TYPE_PREISMAN     !< calculation option for total area computation in 1d
 !call dealloc(network)
 end subroutine default_channel_flow
 
@@ -3230,7 +3231,6 @@ end module m_vegetation
  integer                           :: kplotordepthaveraged  = 1 !< 1 = kplot, 2 = averaged
  integer                           :: layertype         !< 1= all sigma, 2 = all z, 3 = left sigma, 4 = left z
  integer                           :: numtopsig = 0     !< number of top layers in sigma
- integer                           :: CSCalculationOption = 2     !< calculation option for total area computation in 1d
  double precision                  :: Tsigma = 100      !< relaxation period density controlled sigma
  integer, parameter                :: LAYTP_SIGMA     = 1
  integer, parameter                :: LAYTP_Z         = 2
