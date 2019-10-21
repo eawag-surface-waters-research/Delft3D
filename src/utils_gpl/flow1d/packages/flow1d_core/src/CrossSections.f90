@@ -469,6 +469,7 @@ integer function AddTabCrossSectionDefinition(CSDefinitions , id, numLevels, lev
                                             & groundlayerUsed, groundlayer)
    ! Modules
    use m_alloc
+   use m_GlobalParameters, only : ThresholdForPreismannLock
    implicit none
 
    ! Input/output parameters
@@ -523,12 +524,12 @@ integer function AddTabCrossSectionDefinition(CSDefinitions , id, numLevels, lev
    do j = 1, numlevels
       CSDefinitions%CS(i)%height(j)  = level(j)
       CSDefinitions%CS(i)%flowWidth(j)   = flowWidth(j)
-      CSDefinitions%CS(i)%totalWidth(j) = max(totalWidth(j), flowWidth(j))
+      CSDefinitions%CS(i)%totalWidth(j) = max(ThresholdForPreismannLock, totalWidth(j), flowWidth(j))
    enddo
    if (closed) then
-      CSDefinitions%CS(i)%height(numLevels+1) = CSDefinitions%CS(i)%height(numLevels)+1d-5
-      CSDefinitions%CS(i)%flowWidth(numLevels+1) = 1d-5
-      CSDefinitions%CS(i)%totalWidth(numLevels+1) = 1d-5
+      CSDefinitions%CS(i)%height(numLevels+1) = CSDefinitions%CS(i)%height(numLevels)+1d-7
+      CSDefinitions%CS(i)%flowWidth(numLevels+1)  = 0d0
+      CSDefinitions%CS(i)%totalWidth(numLevels+1) = ThresholdForPreismannLock
    endif
    CSDefinitions%CS(i)%closed = closed
    
@@ -1328,7 +1329,7 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, af_
    logical                           :: hysteresis =.true.   ! hysteresis is a dummy variable at this location, since this variable is only used for total areas
   
    perim_sub_local = 0d0
-   if (dpt <= 0.0d0) then
+   if (dpt < 0.0d0) then
       flowArea     = 0.0
       wetPerimeter = 0.0
       flowWidth    = sl
@@ -1355,7 +1356,6 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, af_
       call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
 
-   flowWidth = max(flowWidth,sl)
    if (cross%crosstype /= CS_TABULATED ) then
       af_sub_local = 0d0
       af_sub_local(1) = flowArea
@@ -1488,7 +1488,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
    double precision                  :: wlev            !< water level at cross section
    logical                           :: getSummerDikes
    double precision                  :: af_sub(3), perim_sub(3)
-   if (dpt <= 0.0d0) then
+   if (dpt < 0.0d0) then
       totalArea = 0.0d0
       totalWidth = sl
       return
@@ -1512,6 +1512,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_YZ_PROF)
          call YZProfile(dpt, cross%convtab, 1, totalArea, totalWidth, wetPerimeter)
+         totalWidth= max(totalWidth, sl)
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
       end select
@@ -1838,7 +1839,10 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
    
 end subroutine GetTabSizesFromTables
 
-!> Get area, width and perimeter from cross section definition
+!> Get area, width and perimeter from cross section definition.\n
+!! This subroutine is called for either flow or total widths and areas (see logical DOFLOW).\n
+!! For total areas the width is always larger than the Preisman slot width. Which is set in AddTabulatedCrossSection.\n
+!! For flow area calculation the Preisman slot is not used. 
 subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
 
    use m_GlobalParameters
@@ -1921,8 +1925,8 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       do ilev = istart, levelsCount-1
          d1 = heights(ilev) - heights(1)
          d2 = heights(ilev + 1) - heights(1)
-         e1 = min(max(sl, widths(ilev)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
-         e2 = min(max(sl, widths(ilev + 1)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
+         e1 = min(widths(ilev)-widthplains(isec), widthplains(isec+1)-widthplains(isec))
+         e2 = min(widths(ilev + 1)-widthplains(isec), widthplains(isec+1)-widthplains(isec))
          if (dpt > d2) then
             af_sub(isec)    = af_sub(isec) + 0.5d0 * (d2 - d1) * (e1 + e2)
             perim_sub(isec) = perim_sub(isec) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
@@ -1930,7 +1934,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
             ! calculate decreasing area 
             area_min = area_min + (width_min + 0.5d0*max(e1-e2,0d0))*(d2-d1)
             width_min = width_min + max(e1-e2,0d0)
-         elseif (dpt > d1) then
+         elseif (dpt >= d1) then
             call trapez(dpt, d1, d2, e1, e2, areal, w_section(isec), wll)
             af_sub(isec) = af_sub(isec) + areal
             perim_sub(isec) = perim_sub(isec) + wll
@@ -1950,7 +1954,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       dTop = heights(levelsCount) - heights(1)
       if (dpt > dTop) then
       
-         eTop = min(max(sl, widths(levelsCount)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
+         eTop = min(widths(levelsCount)-widthplains(isec), widthplains(isec+1)-widthplains(isec))
    
          af_sub(isec) = af_sub(isec) + (dpt - dTop) * eTop
          area_min = area_min + (dpt - dTop) * width_min
@@ -2288,7 +2292,13 @@ subroutine trapez(dpt, d1, d2, w1, w2, area, width, perimeter)
    
 end subroutine trapez
 
-!> Calculate area, width and perimeter for a circle type cross section 
+!> Calculate area, width and perimeter for a circle type cross section.\n
+!! CALCULATIONOPTION determines the type of calculation, possibilities are:\n
+!! * CS_TYPE_NORMAL   : the (flow) area and (flow) width is calculated. In this case the Preisman slot is not taken into account.\n
+!! * CS_TYPE_PREISMAN : The (total) area and (flow) width is calculated, including a Preisman slot at the top, the bottomwidth is also set to the Preisman slot width.
+!!   The latter is to assure A1 > 0.
+!! * CS_TYPE_PLUS     : See CS_TYPE_PREISMAN, with non-decreasing width
+!! * CS_TYPE_MIN      : non-increasing width
 subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOption)
    use m_GlobalParameters
 
@@ -2354,12 +2364,16 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
       area = area 
       width = width 
    case(CS_TYPE_PREISMAN)
-      area = area    + sl*dpt
-      width = width  + sl
+      area = area    + sl*max(dpt-diameter, 0d0)
+      width = max(width, sl)
    case(CS_TYPE_PLUS)
-      area      = area_plus + dpt*sl
-      width     = width_plus + sl
+      area      = area_plus
+      width     = max(width_plus, sl)
    case(CS_TYPE_MIN)
+      area      = area    + sl*max(dpt-diameter, 0d0)
+      width = max(width, sl)
+      width_plus = max(width_plus, sl)
+      
       area      = area_plus - area
       width     = width_plus - width
    end select
