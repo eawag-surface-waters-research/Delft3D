@@ -17,5 +17,5 @@ set path=%dflowfmexedir%;%libdir%;%path%
     rem
     rem Run
     rem
-"%dflowfmexedir%\dflowfm-cli.exe" --nodisplay --autostartstop %1 %2 %3 %4 %5 %6 %7 %8  --processlibrary %procdefbloomspedir%\proc_def.dat --bloomspecies %procdefbloomspedir%\bloom.spe
+"%dflowfmexedir%\dflowfm-cli.exe" --nodisplay --autostartstop %1 %2 %3 %4 %5 %6 %7 %8  --processlibrary "%procdefbloomspedir%\proc_def.dat" --bloomspecies "%procdefbloomspedir%\bloom.spe"
 
