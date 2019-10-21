@@ -18148,7 +18148,6 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_cmpstru_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_cmpstru_dis, 'coordinates', 'cmpstru_id')
 
-
             ierr = nf90_def_var(ihisfile, 'cmpstru_s1up',     nf90_double, (/ id_cmpstrudim, id_timedim /), id_cmpstru_s1up)
             ierr = nf90_put_att(ihisfile, id_cmpstru_s1up, 'standard_name', 'sea_surface_height')
             ierr = nf90_put_att(ihisfile, id_cmpstru_s1up, 'long_name', 'Water level upstream of compound structure')
