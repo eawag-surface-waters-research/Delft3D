@@ -18,7 +18,7 @@ function print_usage_info {
     echo "Options:"
     echo "-c, --corespernode <M>"
     echo "       number of cores per node, default $corespernodedefault"
-    echo "-d, --debuglevel <D>"
+    echo "-d, --debug <D>"
     echo "       0:ALL, 6:SILENT"
     echo "-h, --help"
     echo "       print this help message and exit"
