@@ -34788,7 +34788,10 @@ end subroutine setbobs_fixedweirs
     !$OMP END PARALLEL DO   ! todo check difference
 
     do np = 1,npumpsg  ! loop over pump signals, sethu
-       qp    = qpump(np)
+       qp = 0d0
+       if (L2pumpsg(np) >= L1pumpsg(np)) then
+         qp = qpump(np)
+       endif
        ap    = 0d0
        vp    = 0d0
        do n  = L1pumpsg(np), L2pumpsg(np)
