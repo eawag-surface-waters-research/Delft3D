@@ -113,20 +113,20 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
 !
 ! Global variables
 !
-    integer                                                            , intent(in)  :: jdir      !  Flag for direction, 1=U, 2=V
+    integer                                                            , intent(in)  :: jdir          !< Flag for direction, 1=U, 2=V
     integer                                                            , intent(in)  :: kmax
     integer                                                                          :: lundia
     integer                                                            , intent(in)  :: nmmax
-    integer                                                            , intent(in)  :: nmlb      ! start space index (of edges)
-    integer                                                            , intent(in)  :: nmub      ! end space index   (of edges)
-    integer                                                            , intent(in)  :: nmlbc     ! start space index (flow nodes)
-    integer                                                            , intent(in)  :: nmubc     ! end space index   (flow nodes)
+    integer                                                            , intent(in)  :: nmlb          !< start space index (of edges)
+    integer                                                            , intent(in)  :: nmub          !< end space index   (of edges)
+    integer                                                            , intent(in)  :: nmlbc         !< start space index (flow nodes)
+    integer                                                            , intent(in)  :: nmubc         !< end space index   (flow nodes)
     integer, dimension(nmlb:nmub)                                                    :: kcuv
     logical                                                            , intent(in)  :: linit
     real(fp), dimension(kmax)                                          , intent(in)  :: sig
     !real(fp), dimension(nmlb:nmub)                                     , intent(in)  :: gdis_dp  !(not used) 
     real(fp), dimension(nmlb:nmub)                                     , intent(in)  :: gdis_zet
-    real(fp), dimension(nmlb:nmub)                                                   :: huv       ! water depth at u or v point 
+    real(fp), dimension(nmlb:nmub)                                                   :: huv           !< water depth at u or v point 
     real(fp), dimension(nmlbc:nmubc)                                                 :: z0rou
     real(fp), dimension(nmlb:nmub, 3)                                                :: cfrou
 !    real(fp), dimension(nmlb:nmub)              :: uvdir    (not used) 
@@ -143,17 +143,17 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
     real(fp)                                                            , intent(in) :: dryflc
     logical                                                                          :: assoc_dxx
     integer                                                                          :: nxx           ! cannot be optional
-    real(fp), dimension(nmlbc:nmubc, nxx) , optional                    , intent(in) :: dxx  
+    real(fp), dimension(nmlbc:nmubc, nxx) , optional                    , intent(in) :: dxx           !< sediment diameter corresponding to percentile xx (mud excluded)
     integer                             , optional                                   :: i50
     integer                             , optional                                   :: i90
     integer                                                                          :: lsedtot       ! dito
     real(fp), dimension(lsedtot)        , optional                                   :: rhosol
     logical                                                                          :: spatial_bedform
-    real(fp), dimension(nmlbc:nmubc)                                                 :: bedformD50
-    real(fp), dimension(nmlbc:nmubc)                                                 :: bedformD90
-    real(fp), dimension(nmlbc:nmubc)                                                 :: rksr
-    real(fp), dimension(nmlbc:nmubc)                                                 :: rksmr
-    real(fp), dimension(nmlbc:nmubc)                                                 :: rksd
+    real(fp), dimension(nmlbc:nmubc)                                                 :: bedformD50    !< 50-percentile of sediment diameters
+    real(fp), dimension(nmlbc:nmubc)                                                 :: bedformD90    !< 90-percentile of sediment diameters
+    real(fp), dimension(nmlbc:nmubc)                                                 :: rksr          !< Ripple roughness height in zeta point
+    real(fp), dimension(nmlbc:nmubc)                                                 :: rksmr         !< Mega-ripple roughness height in zeta point
+    real(fp), dimension(nmlbc:nmubc)                                                 :: rksd          !< Dune roughness height in zeta point
     logical                                                             ,intent(out) :: error
     !
     !for debugging
