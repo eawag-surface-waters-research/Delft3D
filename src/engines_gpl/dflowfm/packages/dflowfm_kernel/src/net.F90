@@ -34202,7 +34202,7 @@ function read_commandline() result(istat)
    use unstruc_model
    use unstruc_display, only: jaGUI
    use unstruc_messages
-   use string_module, only: str_lower
+   use string_module, only: str_lower, str_tolower
    use m_samples_refine
    USE m_partitioninfo
    use unstruc_version_module
@@ -34210,7 +34210,8 @@ function read_commandline() result(istat)
    use unstruc_api
    use m_makenet
    use m_sferic, only: jsferic, jasfer3D
-   use network_data, only: NUMITCOURANT
+   use network_data, only: NUMITCOURANT, CONNECT1DEND, imake1d2dtype, I1D2DTP_1TO1, I1D2DTP_1TON_EMB, I1D2DTP_1TON_LAT, I1D2DTP_LONG
+   use m_missing, only: jadelnetlinktyp
    use m_flowparameters, only: jalimnor
    implicit none
 
@@ -34506,6 +34507,29 @@ function read_commandline() result(istat)
             
          case ('make1d2dlinks')
             md_jamake1d2dlinks = 1
+!           key-value pairs
+            do ikey=1,Nkeys
+               if (trim(Skeys(ikey)) == 'connect1dend') then
+                  read (Svals(ikey), *) connect1Dend
+               else if (trim(Skeys(ikey)) == 'method') then
+                  select case (str_tolower(trim(Svals(ikey))))
+                  case ('1to1')
+                     imake1d2dtype = I1D2DTP_1TO1
+                  case ('1ton_emb')
+                     imake1d2dtype = I1D2DTP_1TON_EMB 
+                  case ('1ton_lat')
+                     imake1d2dtype = I1D2DTP_1TON_LAT 
+                  case ('long')
+                     imake1d2dtype = I1D2DTP_LONG     
+                  end select
+               else if (trim(Skeys(ikey)) == 'linktype') then
+                  if (imake1d2dtype == I1D2DTP_1TO1) then
+                     jadelnetlinktyp = ivals(ikey)
+                  else
+                     write (*,*) 'Warning: link type can only be selected for method=''1to1''. Ignoring.'
+                  end if
+               end if
+            end do
 
          case ('savenet')
             md_jasavenet = 1
@@ -34644,7 +34668,11 @@ endif
    write (*,*) ' '
    write (*,*) '  --make1d2dlinks[:OPTS] NETFILE'
    write (*,*) '      Make 1d2d links for the given NETFILE and re-save it under the same name.'
-   write (*,*) '      OPTS is reserved for future kn3-type setting.'
+   write (*,*) '      OPTS is a colon-separated list opt1=val1:opt2=val2:...'
+   write (*,*) '        method       = (1to1 | 1ton_emb | 1ton_lat | long)  Coupling method.'
+   write (*,*) '        linktype     = N    The link type (kn3) that will be used for all links'
+   write (*,*) '                            (only for method=1to1).'
+   write (*,*) '        connect1dend = VAL  The search distance for coupling 1D endpoints.'
    write (*,*) ' '
    write (*,*) ' --cutcells NETFILE'
    write (*,*) '      Cut the unstructured grid in NETFILE with the polygons specified'
