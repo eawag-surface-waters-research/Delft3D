@@ -1031,7 +1031,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'filter'          , jafilter)
     call prop_get_integer(md_ptr, 'numerics', 'filterorder'     , filterorder)
     call prop_get_integer(md_ptr, 'numerics', 'checkerboardmonitor', jacheckmonitor)
-    
+    if (Layertype == 2 .and. jafilter /= 0) then
+      call mess(LEVEL_ERROR, 'The checkerboard-filter has not been implemented for Z-models yet', '.')
+    endif
 
     call prop_get_double (md_ptr, 'numerics', 'LocSaltLev'      , locsaltlev)
     call prop_get_double (md_ptr, 'numerics', 'LocSaltMin'      , locsaltmin)
