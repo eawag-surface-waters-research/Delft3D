@@ -34787,46 +34787,45 @@ end subroutine setbobs_fixedweirs
     enddo
     !$OMP END PARALLEL DO   ! todo check difference
 
-    do np = 1,npumpsg  ! loop over pump signals, sethu
-       qp = 0d0
-       if (L2pumpsg(np) >= L1pumpsg(np)) then
-         qp = qpump(np)
-       endif
-       ap    = 0d0
-       vp    = 0d0
-       do n  = L1pumpsg(np), L2pumpsg(np)
-          k1 = kpump(1,n)
-          L1 = kpump(3,n)
-          L  = iabs(L1)
-          hu(L) = 0d0; au(L) = 0d0
-          fu(L) = 0d0; ru(L) = 0d0
-          if (hs(k1) > 1d-2 .and. ispumpon(np,s1(k1)) == 1) then
-             hu(L) = 1d0
-             au(L) = 1d0
-             ap    = ap + au(L)
-             vp    = vp + vol1(k1)
-          endif
-       enddo
-       if (qp > 0.5d0*vp/dts) then
-           qp = 0.5d0*vp/dts
-       endif
-
-       if (ap > 0d0) then
+    if (npump > 0) then ! model has at least one pump link
+       do np = 1,npumpsg  ! loop over pump signals, sethu
+          qp = qpump(np)
+          ap    = 0d0
+          vp    = 0d0
           do n  = L1pumpsg(np), L2pumpsg(np)
              k1 = kpump(1,n)
-             if (hs(k1) > 1d-2) then
-                L1 = kpump(3,n)
-                L  = iabs(L1)
-                fu(L) = 0d0
-                if (L1 > 0) then
-                    ru(L) =  qp/ap
-                else
-                    ru(L) = -qp/ap
-                endif
+             L1 = kpump(3,n)
+             L  = iabs(L1)
+             hu(L) = 0d0; au(L) = 0d0
+             fu(L) = 0d0; ru(L) = 0d0
+             if (hs(k1) > 1d-2 .and. ispumpon(np,s1(k1)) == 1) then
+                hu(L) = 1d0
+                au(L) = 1d0
+                ap    = ap + au(L)
+                vp    = vp + vol1(k1)
              endif
           enddo
-       endif
-    enddo
+          if (qp > 0.5d0*vp/dts) then
+              qp = 0.5d0*vp/dts
+          endif
+
+          if (ap > 0d0) then
+             do n  = L1pumpsg(np), L2pumpsg(np)
+                k1 = kpump(1,n)
+                if (hs(k1) > 1d-2) then
+                   L1 = kpump(3,n)
+                   L  = iabs(L1)
+                   fu(L) = 0d0
+                   if (L1 > 0) then
+                       ru(L) =  qp/ap
+                   else
+                       ru(L) = -qp/ap
+                   endif
+                endif
+             enddo
+          endif
+       enddo
+    end if
 
     nstrucsg = network%sts%count
     do istru = 1, nstrucsg
