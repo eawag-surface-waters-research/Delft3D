@@ -1028,8 +1028,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'BarrierAdvection', jabarrieradvection);
     
     call prop_get_integer(md_ptr, 'numerics', 'HorizontalMomentumFilter', jafilter)
-    call prop_get_integer(md_ptr, 'numerics', 'filter'          , jafilter)
-    call prop_get_integer(md_ptr, 'numerics', 'filterorder'     , filterorder)
+    !call prop_get_integer(md_ptr, 'numerics', 'filter'          , jafilter)
+    !call prop_get_integer(md_ptr, 'numerics', 'filterorder'     , filterorder)
     call prop_get_integer(md_ptr, 'numerics', 'checkerboardmonitor', jacheckmonitor)
     if (Layertype == 2 .and. jafilter /= 0) then
       call mess(LEVEL_ERROR, 'The checkerboard-filter has not been implemented for Z-models yet', '.')
@@ -2588,7 +2588,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. jafilter.ne.0 ) then
        call prop_set(prop_ptr, 'numerics', 'HorizontalMomentumFilter',           jafilter, 'apply horizontal filter (1:explicit, 2,3:implicit) or not (0)')
-       call prop_set(prop_ptr, 'numerics', 'filterorder',      filterorder,    'order of filter (1, 2 or 3)')
+       !call prop_set(prop_ptr, 'numerics', 'filterorder',      filterorder,    'order of filter (1, 2 or 3)')
     end if
     
     if (writeall .or. jacheckmonitor.eq.1 ) then
