@@ -122,7 +122,7 @@ module m_CrossSections
    integer, public, parameter :: CS_RECTANGLE      =    4 !< Rectangular type cross section definition
    integer, public, parameter :: CS_TRAPEZIUM      =    5 !< Trapezium type cross section definition
    integer, public, parameter :: CS_YZ_PROF        =   10 !< YZ type cross section definition
-   integer, public, parameter :: CS_TYPE_NORMAL    =    1 !< Ordinary total area computation, with possible Preisman lock on top
+   integer, public, parameter :: CS_TYPE_NORMAL    =    1 !< Ordinary flow area computation
    integer, public, parameter :: CS_TYPE_PREISMAN  =    2 !< Ordinary total area computation, with possible Preisman lock on top
    integer, public, parameter :: CS_TYPE_PLUS      =    3 !< Total area for only the expanding part of the cross section (Nested Newton method)
    integer, public, parameter :: CS_TYPE_MIN       =    4 !< Total area for only the narrowing part of the cross section (Nested Newton method)
@@ -1987,8 +1987,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       width     = width     + w_section(isec)
       perimeter = perimeter + perim_sub(isec)
    enddo
-   
-
+ 
    select case (calculationOption)
    case(CS_TYPE_PLUS)
       area  = area  + area_min
@@ -1996,6 +1995,9 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    case(CS_TYPE_MIN)
       area  = area_min
       width = width_min
+   case default
+      ! CS_TYPE_NORMAL and CS_TYPE_PREISMAN need no special treatment: Preissmann slot already handled in AddTabulatedCrossSection()
+      continue   
    end select
    
    
