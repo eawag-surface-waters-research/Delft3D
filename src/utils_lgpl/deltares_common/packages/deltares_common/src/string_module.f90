@@ -853,7 +853,7 @@ module string_module
       !!
       !! @param[out]    iomsg             Error message - only defined if iostat is non-zero.
       !!
-      !! found in: https://software.intel.com/en-us/forums/intel-visual-fortran-compiler-for-windows/topic/385790
+      !! found in: https://software.intel.com/en-us/comment/1730972
       !!
       use, intrinsic :: iso_fortran_env, only: iostat_eor
       !---------------------------------------------------------------------------
