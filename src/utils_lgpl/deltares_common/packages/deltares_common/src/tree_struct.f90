@@ -694,25 +694,16 @@ recursive subroutine tree_fold( tree, tree_handler, leaf_handler, data, stop )
 end subroutine tree_fold
 
 
-! tree_get_data_string --
-!    Return data as a simple string
-!
-! Arguments:
-!    tree        The tree or node from which to get the data
-!    string      String to be filled
-!    success     Whether successful or not
-! Result:
+!> Return data as a simple string
 !    The string is filled with the data stored in the node
 !    not associated. The routine is successful if:
 !    - there is data associated with the node/tree
 !    - the data type is "STRING"
-!    If the routine is not successful, the string is
-!    not changed.
-!
+!    If the routine is not successful, the string is not changed.
 subroutine tree_get_data_string( tree, string, success )
-   type(TREE_DATA), pointer                 :: tree
-   character(len=*), intent(out)            :: string
-   logical, intent(out)                     :: success
+   type(TREE_DATA), pointer                 :: tree    !< The tree or node from which to get the data
+   character(len=*), intent(out)            :: string  !< String to be filled
+   logical, intent(out)                     :: success !< Whether successful or not
 
    character(len=1), dimension(:), pointer  :: data_ptr
    character(len=40)                        :: data_type
@@ -743,10 +734,16 @@ subroutine tree_get_data_string( tree, string, success )
 
 end subroutine tree_get_data_string
 
+!> Return data as a (allocatable) string
+!    The string is filled with the data stored in the node
+!    not associated. The routine is successful if:
+!    - there is data associated with the node/tree
+!    - the data type is "STRING"
+!    If the routine is not successful, the string is not changed.
 subroutine tree_get_data_alloc_string( tree, string, success )
-   type(TREE_DATA), pointer                   :: tree
-   character(len=:), allocatable, intent(out) :: string
-   logical, intent(out)                       :: success
+   type(TREE_DATA), pointer                   :: tree    !< The tree or node from which to get the data
+   character(len=:), allocatable, intent(out) :: string  !< String to be filled
+   logical, intent(out)                       :: success !< Whether successful or not
 
    character(len=1), dimension(:), pointer  :: data_ptr
    character(len=40)                        :: data_type
