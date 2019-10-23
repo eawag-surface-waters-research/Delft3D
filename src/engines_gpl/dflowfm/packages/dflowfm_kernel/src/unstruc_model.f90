@@ -1627,7 +1627,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'output', 'WaqHorAggr', md_waqhoraggr, success)
     call prop_get_string(md_ptr, 'output', 'WaqVertAggr', md_waqvertaggr, success)
 
-    if (jawave > 0 .and. ti_waq > 0) then
+    if (jawave > 0) then
        jawaveSwartDelwaq = 1
        call prop_get_integer(md_ptr, 'waves', 'waveSwartDelwaq' , jawaveSwartDelwaq, success)
     endif
