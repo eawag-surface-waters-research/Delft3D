@@ -74,6 +74,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     real(fp)                 :: temp
     real(fp)                 :: thunlyr
     integer                  :: i
+    integer                  :: it
     integer                  :: istat
     integer                  :: j
     integer                  :: l
@@ -493,7 +494,9 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
                 error = .true.
                 return
              endif
-             thtrlyr(:) = thtrlyr(1)
+             do it=1,size(thtrlyr)
+                thtrlyr(it) = thtrlyr(1)
+             enddo
              !
              write(lundia,'(2a,e20.4)') txtput1, ':', thtrlyr(1)
           endif
@@ -574,7 +577,9 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
                    error = .true.
                    return
                 endif
-                thexlyr(:) = thexlyr(1)
+                do it=1,size(thexlyr)
+                   thexlyr(it) = thexlyr(1)
+                enddo   
                 !
                 write(lundia,'(2a,e20.4)') txtput1, ':', thexlyr(1)
              endif
