@@ -132,9 +132,9 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(PlatformName)\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(PlatformName)\$(ConfigurationName)\static\d_hydro_lib.lib;deltares_common.lib;deltares_common_c.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)d_hydro.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -198,9 +198,9 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(PlatformName)\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(PlatformName)\$(ConfigurationName)\static\d_hydro_lib.lib;deltares_common.lib;deltares_common_c.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)d_hydro.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>

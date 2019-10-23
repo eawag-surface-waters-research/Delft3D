@@ -123,7 +123,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalDependencies>..\datsel_f\$(PlatformName)\$(ConfigurationName)\datsel_f.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\datsel_f\$(PlatformName)\$(ConfigurationName)\datsel_f.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common_c.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win64\oss-install_debug_x64.cmd datsel bin</Command>
@@ -168,12 +168,15 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalDependencies>..\datsel_f\$(PlatformName)\$(ConfigurationName)\datsel_f.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\datsel_f\$(PlatformName)\$(ConfigurationName)\datsel_f.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common_c.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd datsel bin</Command>
     </PostBuildEvent>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />

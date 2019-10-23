@@ -25,7 +25,7 @@
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd waq_plugin_wasteload bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)\" Traceback="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)\" Traceback="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 				<Tool Name="VFLinkerTool" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(UniversalCRTSdkDir)Lib\10.0.10240.0\ucrt\x64" GenerateManifest="false" GenerateDebugInformation="true" SubSystem="subSystemWindows" LinkDLL="true"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -35,7 +35,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)\" Traceback="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)\" Traceback="true" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLinkerTool" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(UniversalCRTSdkDir)Lib\10.0.10240.0\ucrt\x64" GenerateManifest="false" SubSystem="subSystemWindows" LinkDLL="true"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>

@@ -143,7 +143,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_versio
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\..\bin\$(PlatformName)\$(ConfigurationName)\dimr_dll.lib;..\..\..\..\utils_lgpl\deltares_common\packages\deltares_common_c\bin\$(PlatformName)\$(ConfigurationName)\deltares_common_c.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;mpi.lib;..\..\..\..\third_party_open\netcdf\netCDF 4.6.1\lib\netcdf.lib;</AdditionalDependencies>
+      <AdditionalDependencies>..\..\bin\$(PlatformName)\$(ConfigurationName)\dimr_dll.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common_c.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;mpi.lib;..\..\..\..\third_party_open\netcdf\netCDF 4.6.1\lib\netcdf.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)dimr.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\third_party_open\mpich2\x64\lib;..\..\..\..\utils_lgpl\dimr_lib\lib\x64\Release\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -212,7 +212,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_versio
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\..\bin\$(PlatformName)\$(ConfigurationName)\dimr_dll.lib;..\..\..\..\utils_lgpl\deltares_common\packages\deltares_common_c\bin\$(PlatformName)\$(ConfigurationName)\deltares_common_c.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;mpi.lib;..\..\..\..\third_party_open\netcdf\netCDF 4.6.1\lib\netcdf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\bin\$(PlatformName)\$(ConfigurationName)\dimr_dll.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common_c.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;mpi.lib;..\..\..\..\third_party_open\netcdf\netCDF 4.6.1\lib\netcdf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)dimr.exe</OutputFile>
       <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\third_party_open\mpich2\x64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>

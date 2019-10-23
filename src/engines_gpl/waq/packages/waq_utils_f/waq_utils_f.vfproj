@@ -24,7 +24,7 @@
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory=".\lib\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include;src\mod_couplib;..\..\..\..\third_party_open\mpich2\x64\include;..\..\..\..\third_party_open\netcdf\x64\$(ConfigurationName)" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)" Traceback="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include;src\mod_couplib;..\..\..\..\third_party_open\mpich2\x64\include;..\..\..\..\third_party_open\netcdf\x64\$(ConfigurationName)" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)" Traceback="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -34,7 +34,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory=".\lib\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" AdditionalIncludeDirectories="..\..\include;src\mod_couplib;..\..\..\..\third_party_open\mpich2\x64\include;..\..\..\..\third_party_open\netcdf\x64\$(ConfigurationName)" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)" Traceback="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" AdditionalIncludeDirectories="..\..\include;src\mod_couplib;..\..\..\..\third_party_open\mpich2\x64\include;..\..\..\..\third_party_open\netcdf\x64\$(ConfigurationName)" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)" Traceback="true" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>

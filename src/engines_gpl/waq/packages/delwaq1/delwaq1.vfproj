@@ -25,7 +25,7 @@
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd delwaq1  bin &quot;$(IFORT_COMPILER16)redist\ia32\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include" FixedFormLineLength="fixedLength132" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)\" Traceback="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include" FixedFormLineLength="fixedLength132" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)\" Traceback="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 				<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE:MULTIPLE" ShowProgress="linkProgressAll" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64" GenerateManifest="false" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -35,7 +35,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" HeapArrays="100000" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include" FixedFormLineLength="fixedLength132" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)\" Traceback="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" HeapArrays="100000" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include" FixedFormLineLength="fixedLength132" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)\" Traceback="true" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLinkerTool" AdditionalOptions="/stack:0x400000 /LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64" GenerateManifest="false" SubSystem="subSystemConsole"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
