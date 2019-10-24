@@ -802,8 +802,11 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double ( md_ptr, 'geometry', 'Uniformheight1roofgutterpipe'  , hh1Duni7          , success)
     call prop_get_integer( md_ptr, 'geometry', 'Uniformtyp1Dstreetgutterpipe'  , iproftypuni7      , success)
 
-    call prop_get_double ( md_ptr, 'geometry', 'Dxmin1D '       , Dxmin1D)
+    call prop_get_double ( md_ptr, 'geometry', 'Dxmin1D'       , Dxmin1D)
+    call prop_get_double ( md_ptr, 'geometry', 'Dxwuimin2D'    , Dxwuimin2D)
+
     call prop_get_integer( md_ptr, 'geometry', '1D2Dinternallinktype' , ja1D2Dinternallinktype)
+
 
     call prop_get_string ( md_ptr, 'geometry', 'ManholeFile' ,     md_manholefile , success)
     call prop_get_string ( md_ptr, 'geometry', 'PipeFile'    ,     md_pipefile    , success)
@@ -2238,11 +2241,15 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (dxmin1D .ne. 1d-3) then
     call prop_set(prop_ptr, 'geometry', 'Dxmin1D',          Dxmin1D,                'Minimum 1D link length, (except for duikers) ')
     endif
+    if (Dxwuimin2D .ne. 0.1d0) then 
+    call prop_set( prop_ptr, 'geometry', 'Dxwuimin2D'    , Dxwuimin2D,             'Smallest fraction dx/wu , set dx > Dxwuimin2D*wu, Default = 0.1' )
+    endif  
+
     if (removesmalllinkstrsh .ne. 1d-1) then
-       call prop_set(prop_ptr, 'geometry', 'Removesmalllinkstrsh',   removesmalllinkstrsh,  '0-1, 0= no removes')
+    call prop_set(prop_ptr, 'geometry', 'Removesmalllinkstrsh',   removesmalllinkstrsh,  '0-1, 0= no removes')
     endif
     if (cosphiutrsh .ne. 5d-1) then
-       call prop_set(prop_ptr, 'geometry', 'Cosphiutrsh',   cosphiutrsh,  '0-1, 1= no bad orthos')
+    call prop_set(prop_ptr, 'geometry', 'Cosphiutrsh',   cosphiutrsh,  '0-1, 1= no bad orthos')
     endif
 
     if (ja1D2Dinternallinktype .ne. 1) then
@@ -2430,8 +2437,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. (jahazlayer .ne. 0 .and. layertype .ne. 1)) then
       call prop_set(prop_ptr, 'numerics', 'Horadvtypzlayer', Jahazlayer, 'Horizontal advection treatment of z-layers (1: default, 2: sigma-like)')
     endif
-    if (jaZerozbndinflowadvection == 1) then
-       call prop_set(prop_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection, 'On waterlevel boundaries set incoming advection velocity to zero on inflow (0=no, 1=yes)')
+    if (jaZerozbndinflowadvection > 0) then
+       call prop_set(prop_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection, 'On waterlevel boundaries set incoming advection velocity to zero (0=no, 1=on inflow, 2=also on outflow)')
     endif
     if (jaZlayercenterbedvel == 1) then
        call prop_set(prop_ptr, 'numerics', 'Zlayercenterbedvel', JaZlayercenterbedvel, 'reconstruction of center velocity at half closed bedcells (0=no, 1: copy bed link velocities)')

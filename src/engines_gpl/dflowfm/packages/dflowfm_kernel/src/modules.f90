@@ -2817,11 +2817,12 @@ subroutine default_flowparameters()
                       ! 6 : as 5, also for Coriolis
 
     icorio = 5        ! Coriolis weigthing
-                      ! 1 : v = tang. comp of total velocity at u-point
-                      ! 2 : v = idem, depth weighted
-                      ! 3 : v = idem, depumin weighted
-                      ! 4 : v = idem, continuity weighted ucnxq, ucnyq = default so far
-                      ! 5 : 4, scaling down coriolis force below trshcorio
+                      ! (Tx, Ty) = tang unit vector at u-point
+                      ! 4 : v = alfa LR (Tx, Ty) . (ucx , ucy )             ucx, ucy  =   Perotsum (u)
+                      ! 5 : v = alfa LR (Tx, Ty) . (ucxq, ucyq)             ucxq,ucyq = ( Perotsum (u*hu) ) / hs
+                      ! 6 : v = alfa LR (Tx, Ty) . (ucxq, ucyq)             ucxq,ucyq = ( Perotsum (u*hu) ) / hsu, hsu = areaweighted hu
+                      ! 7 : v = alfa LR (Tx, Ty) . (ucx*hs , ucy*hs ) / hu
+                      ! 8 : v = alfa LR (Tx, Ty) . (ucx*hs , ucy*hs ) / (alfa LR hs) 
 
     trshcorio = 1.0   ! below this depth coriolis force scaled down linearly to 0
 
@@ -3843,6 +3844,8 @@ end module m_profiles
  double precision                  :: dxmin=1d-3     !< minimum link length 1D (m)
  double precision                  :: dxmin1D        !< minimum link length 1D (m)
  double precision                  :: dxmin2D        !< minimum link length 2D (m)
+ double precision                  :: dxwuimin2D     !< smallest fraction dx/wu , may increase dx if > 0  
+
 
  double precision                  :: wu1DUNI        !< uniform 1D profile width
  double precision                  :: hh1DUNI        !< uniform 1D profile height
@@ -4055,10 +4058,11 @@ contains
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, call reset_flowgeom() instead.
 subroutine default_flowgeom()
-    bamin    = 1d-6   ! 1d0    ! minimum 2D cell area
-    bamin1D  = 0d-2   ! minimum cell area 1d nodes
-    dxmin1D  = 1D-3   ! minimum link length 1D (m)
-    dxmin2D  = 1D-3   ! minimum link length 2D (m)
+    bamin    = 1d-6     ! 1d0    ! minimum 2D cell area
+    bamin1D  = 0d-2     ! minimum cell area 1d nodes
+    dxmin1D  = 1D-3     ! minimum link length 1D (m)
+    dxmin2D  = 1D-3     ! minimum link length 2D (m)
+    dxwuimin2D = 0.0d0  ! smallest fraction dx/wu , may increase dx if > 0  
 
     wu1DUNI  =  2d0   ! Uniform 1D profile width
     hh1DUNI  =  3d0   ! Uniform 1D profile height

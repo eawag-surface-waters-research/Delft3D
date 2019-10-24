@@ -12416,7 +12416,19 @@ else if (nodval == 27) then
     endif
 
  else if (nodval == numoptwav .and. jawave > 0) then
-    select case (waveparopt)
+    if (jawave == 1 .or. jawave == 2) then
+      select case (waveparopt)
+        case(1) 
+                znod = Hwav(kk)
+        case(2) 
+                znod = Twav(kk)
+        case(3) 
+                znod = Taus(kk)
+        case(4) 
+                znod = Uorb(kk)
+      end select
+    else 
+     select case (waveparopt)
        case (1)
           if (jawave.ne.4) then
              znod = Hwav(kk) ! fwx%hrms(kk)
@@ -12607,7 +12619,9 @@ else if (nodval == 27) then
            endif
 
 
-    end select
+     end select
+
+    endif
 
  else if (nodval == numoptsf .and. jasecflow > 0) then
     select case (ispirparopt)
@@ -16965,7 +16979,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_vartem, '_FillValue', dmiss)
                ierr = nf90_put_att(ihisfile, id_vartem, 'standard_name', 'sea_water_temperature')
 
-               if (jahisheatflux > 0) then ! here less verbose
+               if (jatem > 1 .and. jahisheatflux > 0) then ! here less verbose
                   idims(1) = id_statdim
                   idims(2) = id_timedim
                   call definencvar(ihisfile,id_wind   ,nf90_double,idims,2, 'wind'  , 'windspeed', 'm s-1', 'station_x_coordinate station_y_coordinate station_name')
@@ -18573,7 +18587,7 @@ subroutine unc_write_his(tim)            ! wrihis
      endif
     endif
 
-    if (jatem > 0 .and. jahisheatflux > 0) then
+    if (jatem > 1 .and. jahisheatflux > 0) then
        ierr = nf90_put_var(ihisfile,    id_Wind   , valobsT(:,IPNT_WIND),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
 
        if ( jatem.gt.1 ) then   ! also heat modelling involved
@@ -20538,7 +20552,7 @@ end subroutine unc_write_shp
  integer                 :: nw, L1, L2, LLA , nw11   ! wall stuff
  integer                 :: icn                      ! corner stuff
  integer                 :: kk1,kk2,kk3 , mout       ! banf stuff
- double precision        :: dlength, dlenmx
+ double precision        :: dlength, dlenmx, dxorgL
  double precision        :: dxx, dyy, rrr, cs, sn, dis, c11, c22, c12, xn, yn, xt, yt, rl, sf, hdx, alfa, dxlim, dxlink
  double precision        :: atpf_org, circumormasscenter_org, phase, zkk
  double precision        :: xref, yref
@@ -21778,6 +21792,16 @@ end subroutine unc_write_shp
 
  blmin = minval(bl)
 
+ if (dxwuimin2D > 0d0) then 
+    do L = lnx1D+1, lnxi
+       if ( dx(L)  < dxwuimin2D*wu(L) ) then 
+            dxorgL = dx(L) 
+            dx(L)  = dxwuimin2D*wu(L)
+            dxi(L) = 1d0/dx(L)  
+            call mess(LEVEL_INFO, 'Circumcentre distance dx(L)  < dxwuimin2D*wu(L) : xu, yu, old dx, new dx: ', xu(L), yu(L), dxorgL, dx(L) )
+       endif   
+    enddo
+ endif
 
  end subroutine flow_geominit
 
@@ -46240,7 +46264,7 @@ end subroutine alloc_jacobi
    !> fill initial salinity and temperature with nudge variables
    subroutine set_saltem_nudge()
       use m_flowgeom
-      use m_flow, only: sa1
+      use m_flow, only: sa1, kmxn
       use m_transport
       use m_nudge
       use m_missing
@@ -46260,6 +46284,13 @@ end subroutine alloc_jacobi
                sa1(k) = constituents(ISALT,k)
             end if
          end do
+
+         do k = kt+1, kb + kmxn(kk) - 1 
+            if ( ITEMP.gt.0) constituents(ITEMP,k) = constituents(ITEMP,kt)
+            if ( ISALT.gt.0) constituents(ISALT,k) = constituents(ISALT,kt)
+            if ( ISALT.gt.0) sa1(k)                = constituents(ISALT,kt)
+         enddo
+
       end do
 
    end subroutine set_saltem_nudge
