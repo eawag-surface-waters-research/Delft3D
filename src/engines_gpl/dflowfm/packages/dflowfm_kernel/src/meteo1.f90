@@ -735,7 +735,7 @@ module m_meteo
    ! ==========================================================================
    
    !> Helper function for initializing a Converter.
-   function initializeConverter(instancePtr, converterId, convtype, operand, method, srcmask, inputptr) result(success)
+   function initializeConverter(instancePtr, converterId, convtype, operand, method, srcmask) result(success)
       logical                    :: success      !< function status
       type(tEcInstance), pointer :: instancePtr  !< 
       integer                    :: converterId  !< 
@@ -743,7 +743,6 @@ module m_meteo
       integer                    :: operand      !< 
       integer                    :: method       !< 
       type (tEcMask), optional   :: srcmask      !< 
-      real(hp), pointer, optional:: inputptr
       !
       success              = ecSetConverterType(instancePtr, converterId, convtype)
       if (success) success = ecSetConverterOperand(instancePtr, converterId, operand)
@@ -751,10 +750,6 @@ module m_meteo
       if (present(srcmask)) then
          if (success) success = ecSetConverterMask(instancePtr, converterId, srcmask)
       end if
-      if (present(inputptr)) then
-         if (success) success = ecSetConverterInputPointer(instancePtr, converterId, inputptr)
-      end if
-
    end function initializeConverter
    
    ! ==========================================================================
@@ -883,7 +878,6 @@ module m_meteo
       double precision          :: relrow, relcol
       integer                   :: row0, row1, col0, col1, ncols, nrows, issparse, Ndatasize
       character(len=128)        :: txt1, txt2, txt3
-      real(hp), pointer         :: inputptr => null()
 
       call clearECMessage()
       ec_addtimespacerelation = .false.
@@ -1148,9 +1142,13 @@ module m_meteo
       case ('qhbnd')
          ! count qh boundaries
          n_qhbnd = n_qhbnd + 1
-         inputptr => atqh_all(n_qhbnd)
-         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, interpolate_passthrough, inputptr=inputptr)
-         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
+         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, interpolate_passthrough)
+         if (present(targetIndex)) then
+            ndx = targetIndex
+         else
+            ndx = n_qhbnd
+         end if
+         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, ndx)
          ! Each qhbnd polytim file replaces exactly one element in the target data array.
          ! Converter will put qh value in target_array(n_qhbnd)
       case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &

@@ -15774,6 +15774,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    use m_timer
    use m_partitioninfo
    use m_meteo
+   use m_ec_magic_number
    use m_ec_parameters
    use dfm_error
    use m_sobekdfm
@@ -15833,6 +15834,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
          if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
       end if
 
+      magic_array = atqh_all ! TODO: Eliminate the need for this magic array.
       success = ec_gettimespacevalue(ecInstancePtr, item_qhbnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888

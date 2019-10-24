@@ -52,6 +52,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  use unstruc_messages
  use m_ship
  use properties
+ use m_ec_magic_number
  use m_transport
  use m_sobekdfm
  use m_sediment
@@ -451,6 +452,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use unstruc_messages
  use m_ship
  use properties
+ use m_ec_magic_number
  use m_transport
  use m_sediment, only: stm_included, stmpar, sedtot2sedsus
  use sediment_basics_module, only: SEDTYP_NONCOHESIVE_SUSPENDED, SEDTYP_COHESIVE
@@ -509,6 +511,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
          call realloc(atqh_all,nqhbnd);  atqh_all(nqhbnd) = 0d0
          call realloc(atqh_sum,nqhbnd);  atqh_sum(nqhbnd) = 0d0
          call realloc(qhbndz,nqhbnd)  ;  qhbndz(nqhbnd) = 0d0
+         call realloc(magic_array,nqhbnd)  ;  magic_array(nqhbnd) = 0d0
      end if    
      itpez(nbndz+1:nbndz+numz) =  itpbn
      
