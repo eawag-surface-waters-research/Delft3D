@@ -210,7 +210,7 @@ module m_readstructures
       endif
 
       do i = 1, numstr
-         
+         success = .true.
          if (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Structure')) then
             
             if (network%sts%count+1 > network%sts%Size) then
@@ -340,7 +340,7 @@ module m_readstructures
       
       type(t_compoundSet),                intent(inout) :: cmps         !< compound data set
       type(tree_data), pointer,           intent(in   ) :: md_ptr       !< ini tree pointer with user input.
-      logical,                            intent(inout) :: success 
+      logical,                            intent(  out) :: success 
 
       type(t_compound), pointer           :: pcompound
       integer                             :: i
@@ -351,6 +351,7 @@ module m_readstructures
          call realloc(cmps)
       endif
 
+      success = .true.
       pcompound => cmps%compound(cmps%count+1)
       call prop_get(md_ptr, '', 'id', st_id, success1)
       if (.not. success1) then
@@ -482,9 +483,9 @@ module m_readstructures
                msgbuf = 'Error in compound '''//trim(cmps%compound(istru)%id)//''' structure element with id '''//trim(ids(i))//&
                         ''' was not found in the structure list'
                call err_flush()
+            else
+               sts%struct(indices(i))%compound = 1 ! mark the structure that belongs to a compound structure
             endif
-            sts%struct(indices(i))%compound = 1 ! mark the structure that belongs to a compound structure
-            
          enddo
          
       enddo
