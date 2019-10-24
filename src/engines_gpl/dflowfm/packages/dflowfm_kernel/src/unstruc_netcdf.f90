@@ -4486,8 +4486,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fx       , nf90_double, UNC_LOC_S, 'Fx'              , 'sea_surface_x_wave_force'          , 'Wave force, x-component'     , 'N') ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fy       , nf90_double, UNC_LOC_S, 'Fy'              , 'sea_surface_y_wave_force'         , 'Wave force, y-component'      , 'N') ! not CF 
          !debug
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fxlink, nf90_double, iLocU, 'wavfu', '', 'Wave force at velocity point, n-component', 'N')! not CF 
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fylink, nf90_double, iLocU, 'wavfv', '', 'Wave force at velocity point, t-component', 'N')! not CF
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fxlink, nf90_double, UNC_LOC_U, 'wavfu', '', 'Wave force at velocity point, n-component', 'N')! not CF 
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fylink, nf90_double, UNC_LOC_U, 'wavfv', '', 'Wave force at velocity point, t-component', 'N')! not CF
          
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ustokeslink      , nf90_double, iLocU, 'ustokes'     , ''        , 'Stokes drift, n-component'   , 'm s-1') ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vstokeslink      , nf90_double, iLocU, 'vstokes'     , ''        , 'Stokes drift, t-component'   , 'm s-1') ! not CF
@@ -5700,8 +5700,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          end do
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fx       , UNC_LOC_S, ust_x, 0d0)
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fy       , UNC_LOC_S, ust_y, 0d0)
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fxlink, iLocU, wavout)
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fylink, iLocU, wavout2)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fxlink, UNC_LOC_U, wavout)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fylink, UNC_LOC_U, wavout2)
          deallocate(ust_x, ust_y, wavout, wavout2)
       end if
       if (jawave == 4) then ! cell centre values available
