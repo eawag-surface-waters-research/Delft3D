@@ -30,6 +30,30 @@
    ! $Id$
    ! $HeadURL$
 
+   subroutine alloc8basicwavearrays()
+   use m_flow
+   use m_flowgeom
+   use m_waves 
+   implicit none
+   integer      :: ierr
+   call realloc( hwav,    ndx,  stat=ierr, keepExisting = .false., fill = hwavuni)
+   call aerr   ('hwav    (ndx)',     ierr, ndx)
+   call realloc( twav,    ndx,  stat=ierr, keepExisting = .false., fill = twavuni)
+   call aerr   ('twav    (ndx)',     ierr, ndx)
+   call realloc( phiwav,  ndx,  stat=ierr, keepExisting = .false., fill = phiwavuni)
+   call aerr   ('phiwav  (ndx)',     ierr, ndx)
+   call realloc( rlabda,  ndx,  stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr   ('rlabda  (ndx)',     ierr, ndx)
+   call realloc( uorb,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr   ('uorb    (ndx)',     ierr, ndx)
+   call realloc( taus,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)     
+   call aerr   ('taus    (ndx)',     ierr, ndx)
+   call realloc( ustokes, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr   ('ustokes(lnkx)',     ierr, lnkx)
+   call realloc( vstokes, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
+   call aerr   ('vstokes(lnkx)',     ierr, lnkx) 
+   end subroutine alloc8basicwavearrays
+
    subroutine flow_waveinit
    use m_flow
    use m_flowgeom
@@ -55,7 +79,7 @@
    integer      :: minp0, jdla, nm, ibnd, kb, ki
 
    ierr = DFM_NOERR
-
+ 
    call realloc(uin, nbndw, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr('uin  (nbndw)', ierr, nbndw)
    call realloc(vin, nbndw, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -71,8 +95,6 @@
    call aerr('cfhi_vanrijn(lnx)', ierr, lnx)
    call realloc(taubxu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)   ! Always needs to be allocated, even if jawave == 0, used in gettau()
    call aerr('taubxu(lnx)', ierr, lnx)
-   call realloc(taus, ndx, stat=ierr, keepExisting = .false., fill = 0d0)     ! in subroutine gettaus for jawave <= 2 ..
-   call aerr('taus  (ndx)', ierr, ndx)
    call realloc(ktb, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr('ktb  (ndx)', ierr, ndx)
    call realloc(taux_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -83,10 +105,6 @@
    call aerr('ust_mag  (ndx)', ierr, ndx)
    call realloc(fwav_mag, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr('fwav_mag  (ndx)', ierr, ndx)
-   call realloc(ustokes, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('ustokes(lnkx)', ierr, lnkx)
-   call realloc(vstokes, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
-   call aerr('vstokes(lnkx)', ierr, lnkx) 
    call realloc(wblt, lnx, stat=ierr, keepExisting = .false., fill = 0d0  )
    call aerr('wblt(lnx)', ierr, lnx)
 
@@ -124,19 +142,9 @@
 
    end if
    if  (jawave > 0) then
-      call realloc(rlabda, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('rlabda(ndx)', ierr, ndx)
-      call realloc( hwav,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
-      call aerr   ('hwav   (ndx)', ierr, ndx)
-      call realloc( hwavcom,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
+       call realloc( hwavcom,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
       call aerr   ('hwavcom   (ndx)', ierr, ndx)
-      call realloc( twav,   ndx, stat=ierr, keepExisting = .false., fill = twavuni)
-      call aerr   ('twav   (ndx)', ierr, ndx)
-      call realloc( phiwav, ndx, stat=ierr, keepExisting = .false., fill = phiwavuni)
-      call aerr   ('phiwav (ndx)', ierr, ndx)
-      call realloc(uorb, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('uorb  (ndx)', ierr, ndx)
-   endif
+    endif
 
    if (jawave .eq. 4) then
       call realloc(ee0, (/ntheta,ndx/), stat=ierr, keepExisting = .false., fill = 0d0)

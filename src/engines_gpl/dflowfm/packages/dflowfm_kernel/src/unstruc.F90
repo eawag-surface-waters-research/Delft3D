@@ -704,7 +704,7 @@ end subroutine flow_finalize_single_timestep
     u0 = u1                           ! progress velocities
     call set_u0isu1_structures(network%sts)
  endif
-
+ 
 
  advi = 0d0
  adve = 0d0
@@ -5712,7 +5712,7 @@ if (jawind > 0) then
     cs = csu(LL)  ; sn = snu(LL) ; v(LL) = 0d0
     do L = Lb,Lt
        k1 = ln(1,L) ; k2 = ln(2,L)
-
+ 
        if ( jasfer3D == 1 ) then
           v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
                  (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
@@ -5726,9 +5726,9 @@ if (jawind > 0) then
 
        if (icorio > 0) then
           ! set u tangential
-          if (icorio == 4) then
-                 vcor = v(L)
-          else
+          if (icorio == 4) then 
+                 vcor = v(L) 
+          else 
              if ( jasfer3D == 1 ) then
                  vcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1))) +  &
                         (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))
@@ -5736,7 +5736,7 @@ if (jawind > 0) then
                  vcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) ) + &     ! continuity weighted best sofar plus depth limiting
                         (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )
              endif
-          endif
+          endif 
 
           if (jsferic == 1) then
              fcor = fcori(LL)
@@ -8965,9 +8965,12 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call flow_allocflow()                               ! allocate   flow arrays
  call klok(cpu_extra(2,37)) ! end alloc flow
  !
- call klok(cpu_extra(1,6)) ! Wave init
- if (jawave > 0 .or. (jased > 0 .and. stm_included)) call flow_waveinit()
- call klok(cpu_extra(2,6)) ! End wave init
+ if (jawave > 0) then 
+    call alloc8basicwavearrays()
+ endif
+ if (jawave > 2 .or. jased > 0 .and. stm_included) then 
+    call flow_waveinit()
+ endif
  ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopen
  call klok(cpu_extra(1,7)) ! Flow griddim
  if ( len_trim(md_foufile) > 0 .or. len_trim(md_sedfile) > 0 .or. jatrt == 1) then
@@ -14246,7 +14249,7 @@ endif
        u1(Lb:Lt) = u1(L)
     end do
  end if
-
+ 
   if (jawave==3) then
     if( kmx == 0 ) then
        hs = s1-bl                                   ! safety
@@ -18133,7 +18136,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'coordinates', 'uniweir_id')
         endif
-
+        
         ! compound structure
         if(jahiscmpstru > 0 .and. network%cmps%count > 0) then
             ierr = nf90_def_dim(ihisfile, 'compoundStructures', network%cmps%count, id_cmpstrudim)
@@ -18301,7 +18304,7 @@ subroutine unc_write_his(tim)            ! wrihis
               ierr = nf90_put_var(ihisfile, id_uniweir_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
-
+        
         if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
            do i = 1, network%cmps%count
               ierr = nf90_put_var(ihisfile, id_cmpstru_id,  trim(network%cmps%compound(i)%id),  (/ 1, i /))
@@ -18808,7 +18811,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_uniweir_crestl, valuniweir(8,i),      (/ i, it_his /))
          enddo
       end if
-
+      
       if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
          do i=1,network%cmps%count
             ierr = nf90_put_var(ihisfile, id_cmpstru_dis,            valcmpstru(2,i), (/ i, it_his /))
@@ -29877,15 +29880,15 @@ mainloop:do n  = 1, nwf
  do LL = 1, lnx
    if (hu(L)>epswav) then
        k1 = ln(1,LL); k2 = ln(2,LL)
-       dir = atan2(wy(LL), wx(LL))
-       sind = sin(dir); cosd = cos(dir)
+       dir   = atan2(wy(LL), wx(LL))
+       sind  = sin(dir); cosd = cos(dir)
        ustx1 = ustk(k1)*cosd
        ustx2 = ustk(k2)*cosd
        usty1 = ustk(k1)*sind
        usty2 = ustk(k2)*sind
-       ustokes(LL) =      acL(LL) *(csu(LL)*ustx1 + snu(LL)*usty1) + &
-                     (1d0-acL(LL))*(csu(LL)*ustx2 + snu(LL)*usty2)
-       vstokes(LL) = acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
+       ustokes(LL) =      acL(LL) *( csu(LL)*ustx1 + snu(LL)*usty1) + &
+                     (1d0-acL(LL))*( csu(LL)*ustx2 + snu(LL)*usty2)
+       vstokes(LL) =      acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
                      (1d0-acL(LL))*(-snu(LL)*ustx2 + csu(LL)*usty2)
     else
        ustokes(LL) = 0d0
@@ -34786,43 +34789,43 @@ end subroutine setbobs_fixedweirs
     !$OMP END PARALLEL DO   ! todo check difference
 
     if (npump > 0) then ! model has at least one pump link
-       do np = 1,npumpsg  ! loop over pump signals, sethu
-          qp = qpump(np)
-          ap    = 0d0
-          vp    = 0d0
-          do n  = L1pumpsg(np), L2pumpsg(np)
-             k1 = kpump(1,n)
-             L1 = kpump(3,n)
-             L  = iabs(L1)
-             hu(L) = 0d0; au(L) = 0d0
-             fu(L) = 0d0; ru(L) = 0d0
-             if (hs(k1) > 1d-2 .and. ispumpon(np,s1(k1)) == 1) then
-                hu(L) = 1d0
-                au(L) = 1d0
-                ap    = ap + au(L)
-                vp    = vp + vol1(k1)
-             endif
-          enddo
-          if (qp > 0.5d0*vp/dts) then
-              qp = 0.5d0*vp/dts
-          endif
-
-          if (ap > 0d0) then
-             do n  = L1pumpsg(np), L2pumpsg(np)
-                k1 = kpump(1,n)
-                if (hs(k1) > 1d-2) then
-                   L1 = kpump(3,n)
-                   L  = iabs(L1)
-                   fu(L) = 0d0
-                   if (L1 > 0) then
-                       ru(L) =  qp/ap
-                   else
-                       ru(L) = -qp/ap
-                   endif
-                endif
-             enddo
+    do np = 1,npumpsg  ! loop over pump signals, sethu
+       qp    = qpump(np)
+       ap    = 0d0
+       vp    = 0d0
+       do n  = L1pumpsg(np), L2pumpsg(np)
+          k1 = kpump(1,n)
+          L1 = kpump(3,n)
+          L  = iabs(L1)
+          hu(L) = 0d0; au(L) = 0d0
+          fu(L) = 0d0; ru(L) = 0d0
+          if (hs(k1) > 1d-2 .and. ispumpon(np,s1(k1)) == 1) then
+             hu(L) = 1d0
+             au(L) = 1d0
+             ap    = ap + au(L)
+             vp    = vp + vol1(k1)
           endif
        enddo
+       if (qp > 0.5d0*vp/dts) then
+           qp = 0.5d0*vp/dts
+       endif
+
+       if (ap > 0d0) then
+          do n  = L1pumpsg(np), L2pumpsg(np)
+             k1 = kpump(1,n)
+             if (hs(k1) > 1d-2) then
+                L1 = kpump(3,n)
+                L  = iabs(L1)
+                fu(L) = 0d0
+                if (L1 > 0) then
+                    ru(L) =  qp/ap
+                else
+                    ru(L) = -qp/ap
+                endif
+             endif
+          enddo
+       endif
+    enddo
     end if
 
     nstrucsg = network%sts%count
@@ -37375,8 +37378,8 @@ if (jahisbal > 0) then
             end if
          enddo
       end if
-
-      !
+      
+      ! 
       ! === compound structure
       !
       if (network%cmps%count > 0) then
@@ -42205,13 +42208,13 @@ integer            :: jav3
  enddo
 
  jav3 = 0
- if (javau3onbnd == 1) then
+ if (javau3onbnd == 1) then 
     if (LL > lnxi)     jav3 = 1
- else if (javau3onbnd == 2) then
-    if (iadv(LL) == 6) jav3 = 1
- else if (javau == 3) then
+ else if (javau3onbnd == 2) then 
+    if (iadv(LL) == 6) jav3 = 1   
+ else if (javau == 3) then 
                        jav3 = 1
- endif
+ endif 
 
  do L    = Lb, Lt - 1
     k        = L - Lb + 1
@@ -43279,7 +43282,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     success = .false.
  endif
  if ( .not. success ) then
-    call find_crossed_links_kdtree2(treeglob,NPL,XPL,YPL,2,Lnx,1,numcrossedLinks, iLink, iPol, dSL, ierror)
+ call find_crossed_links_kdtree2(treeglob,NPL,XPL,YPL,2,Lnx,1,numcrossedLinks, iLink, iPol, dSL, ierror)
     call cacheFixedWeirs( npl, xpl, ypl, numcrossedLinks, iLink, iPol, dSL )
  endif
  call klok(t_extra(2,3))
