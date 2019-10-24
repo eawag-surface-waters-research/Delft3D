@@ -4481,8 +4481,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_uorb     , nf90_double, UNC_LOC_S, 'uorb'            , 'sea_surface_wave_orbital_velocity'    , 'Wave orbital velocity'    , 'm s-1') ! not CF
       endif
       if (jawave .gt. 2) then
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ustokes      , nf90_double, UNC_LOC_S, 'ust_cc'     , 'sea_surface_x_stokes_drift'        , 'Stokes drift, x-component'   , 'm s-1') ! not CF
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vstokes      , nf90_double, UNC_LOC_S, 'vst_cc'     , 'sea_surface_y_stokes_drift'       , 'Stokes drift, y-component'    , 'm s-1') ! not CF
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ustokes      , nf90_double, iLocS, 'ust_cc'     , 'sea_surface_x_stokes_drift'        , 'Stokes drift, x-component'   , 'm s-1') ! not CF
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vstokes      , nf90_double, iLocS, 'vst_cc'     , 'sea_surface_y_stokes_drift'       , 'Stokes drift, y-component'    , 'm s-1') ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fx       , nf90_double, UNC_LOC_S, 'Fx'              , 'sea_surface_x_wave_force'          , 'Wave force, x-component'     , 'N') ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_Fy       , nf90_double, UNC_LOC_S, 'Fy'              , 'sea_surface_y_wave_force'         , 'Wave force, y-component'      , 'N') ! not CF 
          !debug
