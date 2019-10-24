@@ -20557,6 +20557,7 @@ end subroutine unc_write_shp
  double precision        :: atpf_org, circumormasscenter_org, phase, zkk
  double precision        :: xref, yref
  integer                 :: itatp_org, jaend ! , jarerun=0
+ character(len=128)      :: errorMessage
 
  double precision, allocatable :: banh(:) , rr(:)       ! temp
  integer         , allocatable :: nbanh(:,:) , nr(:)    ! temp
@@ -21798,7 +21799,8 @@ end subroutine unc_write_shp
             dxorgL = dx(L) 
             dx(L)  = dxwuimin2D*wu(L)
             dxi(L) = 1d0/dx(L)  
-            call mess(LEVEL_INFO, 'Circumcentre distance dx(L)  < dxwuimin2D*wu(L) : xu, yu, old dx, new dx: ', xu(L), yu(L), dxorgL, dx(L) )
+            write(errorMessage,*) 'Circumcentre distance dx(L)  < dxwuimin2D*wu(L) : xu, yu, old dx, new dx: ', xu(L), yu(L), dxorgL, dx(L)
+            call mess(LEVEL_INFO, errorMessage )
        endif   
     enddo
  endif
