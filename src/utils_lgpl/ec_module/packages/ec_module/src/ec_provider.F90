@@ -1730,7 +1730,6 @@ module m_ec_provider
       !> Create subproviders, which create source Items and their contained types.
       !! meteo1.f90: read1polylin
       function ecProviderCreatePolyTimItemsBC(instancePtr, fileReaderPtr, bctfilename, quantityname) result(success)
-         use m_ec_magic_number
          logical                         :: success       !< function status
          type(tEcInstance),   pointer    :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer    :: fileReaderPtr !< intent(inout)
@@ -1949,7 +1948,7 @@ module m_ec_provider
                if (.not. ecConnectionAddTargetItem(instancePtr, connectionId, itemId)) return
                if (.not. ecItemAddConnection(instancePtr, itemId, connectionId)) return
                n_signals = 1
-               n_points = size(magic_array)
+               n_points = 1
             end if
          endif
 

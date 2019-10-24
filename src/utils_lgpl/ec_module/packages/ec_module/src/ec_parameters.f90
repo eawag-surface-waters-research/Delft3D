@@ -211,9 +211,3 @@ module m_ec_parameters
     !------------------------ BC-header related parameters ----------------------------------
 
 end module m_ec_parameters
-
-module m_ec_magic_number
-   use precision
-   implicit none
-   real(hp), dimension(:), allocatable :: magic_array
-end module m_ec_magic_number
