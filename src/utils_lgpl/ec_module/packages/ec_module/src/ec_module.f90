@@ -308,10 +308,6 @@ module m_ec_module
       module procedure ecConverterSetOperand
    end interface ecSetConverterOperand
 
-   interface ecSetConverterInputPointer
-      module procedure ecConverterSetInputPointer
-   end interface ecSetConverterInputPointer
-
    interface ecSetConverterMask
       module procedure ecConverterSetMask
    end interface ecSetConverterMask

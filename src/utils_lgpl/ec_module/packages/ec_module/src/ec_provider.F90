@@ -360,15 +360,11 @@ module m_ec_provider
                      case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my","dissurf","diswcap","ubot") 
                         success = ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case default
-                        if (quantityname(1:18)=="waqsegmentfunction") then
-                           success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
-                        else
-                           call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
-                              //trim(quantityname)//"', file='"//trim(fileReaderPtr%filename)//"'.")
-                           return
-                           ! TODO: user defined quantity name
-                           !success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
-                        endif
+                        call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
+                           //trim(quantityname)//"', file='"//trim(fileReaderPtr%filename)//"'.")
+                        return
+                        ! TODO: user defined quantity name
+                        !success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
                   end select
                else
                   call setECMessage("ERROR: ec_provider::ecProviderCreateItems: NetCDF requires a quantity name.")
@@ -1730,6 +1726,7 @@ module m_ec_provider
       !> Create subproviders, which create source Items and their contained types.
       !! meteo1.f90: read1polylin
       function ecProviderCreatePolyTimItemsBC(instancePtr, fileReaderPtr, bctfilename, quantityname) result(success)
+         use m_ec_magic_number
          logical                         :: success       !< function status
          type(tEcInstance),   pointer    :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer    :: fileReaderPtr !< intent(inout)
@@ -1948,7 +1945,7 @@ module m_ec_provider
                if (.not. ecConnectionAddTargetItem(instancePtr, connectionId, itemId)) return
                if (.not. ecItemAddConnection(instancePtr, itemId, connectionId)) return
                n_signals = 1
-               n_points = 1
+               n_points = size(magic_array)
             end if
          endif
 
@@ -2561,16 +2558,11 @@ module m_ec_provider
             ncvarnames(2) = 'so'                             ! salinity
             ncstdnames(2) = 'sea_water_salinity'
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
-            if (quantityName(1:18)=='waqsegmentfunction') then
-               ncvarnames(1) = quantityName
-               ncstdnames(1) = quantityName
-            else
-               ! we have faulty 
-               call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
-               !TODO: user defined quantity name
-               !ncvarnames(1) = varname
-               !ncstdnames(1) = varname
-            endif
+            ! we have faulty 
+            call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
+            !TODO: user defined quantity name
+            !ncvarnames(1) = varname
+            !ncstdnames(1) = varname
          end select 
 
          ! ------------------------------------------------------------------------------------------------
