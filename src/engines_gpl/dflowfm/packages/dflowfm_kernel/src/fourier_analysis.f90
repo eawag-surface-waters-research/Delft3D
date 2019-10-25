@@ -971,8 +971,7 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
 end subroutine setfouunit
                    
 
-   subroutine fouana( ifou      ,kfs       ,kfst0     ,nst      , rarray    , &
-                   &   bl       ,gdfourier ,gddimens  ,umean, vmean)
+   subroutine fouana( ifou, nst, rarray, bl, gdfourier, gddimens, umean, vmean)
    !-------------------------------------------------------------------------------
    !  $Id$
    !  $HeadURL$
@@ -1013,8 +1012,6 @@ end subroutine setfouunit
    ! Global variables
    !
        integer                                                 , intent(in)  :: ifou   !!  Counter
-       integer   , dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in)  :: kfs    !  State of cell (0=dry,1=wet)
-       integer   , dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in)  :: kfst0  !  State of cell at zero time (0=dry,1=wet)
        integer                                                , intent(in)  :: nst    !!  Time step number
        real(fp)  , dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in)  :: rarray !  Array for fourier analysis
        real(fp)  , dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in), optional  :: umean  !  Description and declaration in esm_alloc_real.f90
@@ -1077,39 +1074,19 @@ end subroutine setfouunit
              !
              if (founam(ifou) == 's1') then
                 
-                if (foumask(ifou) == 0) then
-                   do n = 1, nmaxus
-                      do m = 1, mmax
-                         if (kfs(n,m) == 1) then
-                            !
-                            ! Waterlevel (fousma) and waterdepth (fousmb),
-                            ! only for wet points
-                            !
-                            fousma(n,m,ifou) = max(fousma(n,m,ifou), rarray(n,m))
-                            fousmb(n,m,ifou) = max(fousmb(n,m,ifou), rarray(n,m) - real(bl(n,m),fp))               ! NOTE: bl is a HEIGHT (as bl in fm) and NOT a DEPTH (delft3d)
-                         endif
-                      enddo
+                do n = 1, nmaxus
+                   do m = 1, mmax
+                      !
+                      ! Waterlevel (fousma) and waterdepth (fousmb),
+                      !
+                      fousma(n,m,ifou) = max(fousma(n,m,ifou), rarray(n,m))
+                      fousmb(n,m,ifou) = max(fousmb(n,m,ifou), rarray(n,m) - real(bl(n,m),fp))               ! NOTE: bl is a HEIGHT (as bl in fm) and NOT a DEPTH (delft3d)
                    enddo
-                elseif (foumask(ifou) == 1) then
-                   do n = 1, nmaxus
-                      do m = 1, mmax
-                         if (kfs(n,m)==1 .and. kfst0(n,m)==0) then
-                            !
-                            ! Waterlevel (fousma) and waterdepth (fousmb),
-                            ! only for wet points, only for initially dry points
-                            !
-                            fousma(n,m,ifou) = max(fousma(n,m,ifou), rarray(n,m))
-                            fousmb(n,m,ifou) = max(fousmb(n,m,ifou), rarray(n,m) - real(bl(n,m),fp))
-                         endif
-                      enddo
-                   enddo
-                endif
+                enddo
              else
                 do n = 1, nmaxus
                    do m = 1, mmax
-                      if (kfs(n,m) == 1) then
-                         fousma(n, m, ifou) = max(fousma(n,m,ifou), rarray(n,m))
-                      endif
+                        fousma(n, m, ifou) = max(fousma(n,m,ifou), rarray(n,m))
                    enddo
                 enddo
              endif
@@ -1118,53 +1095,31 @@ end subroutine setfouunit
              ! Calculate MAX Energy head value
              !
              if (present(umean) .and. present(vmean)) then 
-                if (foumask(ifou) == 0) then
-                   do n = 1, nmaxus
-                      do m = 1, mmax
-                         if (kfs(n,m) == 1) then
-                            !
-                            ! Energy head, based on cell-centre velocities, only for wet cells
-                            !
-                            uuu   = umean(n,m)                 ! cell-centre u for a wet cell 
-                            vvv   = vmean(n,m)                 ! cell-centre v for a wet cell 
-                            utot2 = uuu*uuu + vvv*vvv
-                            fousma(n,m,ifou) = max(fousma(n,m,ifou), 0.5_hp*utot2/ag_fouana + rarray(n,m))
-                         endif
-                      enddo
+                do n = 1, nmaxus
+                   do m = 1, mmax
+                      !
+                      ! Energy head, based on cell-centre velocities
+                      !
+                      uuu   = umean(n,m)                 ! cell-centre u
+                      vvv   = vmean(n,m)                 ! cell-centre v
+                      utot2 = uuu*uuu + vvv*vvv
+                      fousma(n,m,ifou) = max(fousma(n,m,ifou), 0.5_hp*utot2/ag_fouana + rarray(n,m))
                    enddo
-                elseif (foumask(ifou) == 1) then
-                   do n = 1, nmaxus
-                      do m = 1, mmax
-                         if (kfs(n,m)==1 .and. kfst0(n,m)==0) then
-                            !
-                            ! Energy head, only for wet points, only for initially dry points
-                            !
-                            uuu   = umean(n,m)                 ! cell-centre u for a wet cell 
-                            vvv   = vmean(n,m)                 ! cell-centre v for a wet cell 
-                            utot2 = uuu*uuu + vvv*vvv
-                            fousma(n,m,ifou) = max(fousma(n,m,ifou), 0.5_hp*utot2/ag_fouana + rarray(n,m))
-                         endif
-                      enddo
-                   enddo
-                endif
-             endif 
+                enddo
+             endif
           elseif (fouelp(ifou) == 'i') then
              !
              ! Calculate MIN value
              !
              do n = 1, nmaxus
                 do m = 1, mmax
-                   if (kfs(n,m) == 1) then
-                      fousma(n,m,ifou) = min(fousma(n,m,ifou), rarray(n,m))
-                   endif
+                     fousma(n,m,ifou) = min(fousma(n,m,ifou), rarray(n,m))
                 enddo
              enddo
              if (founam(ifou) == 's1') then
                 do n = 1, nmaxus
                    do m = 1, mmax
-                      if (kfs(n,m) == 1) then
-                         fousmb(n,m,ifou) = min(fousmb(n,m,ifou), rarray(n,m) - real(bl(n,m),fp))
-                      endif
+                        fousmb(n,m,ifou) = min(fousmb(n,m,ifou), rarray(n,m) - real(bl(n,m),fp))
                    enddo
                 enddo
              endif
@@ -1174,10 +1129,8 @@ end subroutine setfouunit
              !
              do n = 1, nmaxus
                 do m = 1, mmax
-                   if (kfs(n,m) == 1) then
-                      fousma(n,m,ifou) = fousma(n,m,ifou) + rarray(n,m)
-                      fousmb(n,m,ifou) = fousmb(n,m,ifou) + 1.
-                   endif
+                   fousma(n,m,ifou) = fousma(n,m,ifou) + rarray(n,m)
+                   fousmb(n,m,ifou) = fousmb(n,m,ifou) + 1.
                 enddo
              enddo
           !
@@ -1187,10 +1140,8 @@ end subroutine setfouunit
              angl = real(nst - ftmstr(ifou),fp)*foufas(ifou)
              do n = 1, nmaxus
                 do m = 1, mmax
-                   if (kfs(n,m) == 1) then
-                      fousma(n,m,ifou) = fousma(n,m,ifou) + rarray(n,m)*cos(angl)
-                      fousmb(n,m,ifou) = fousmb(n,m,ifou) + rarray(n,m)*sin(angl)
-                   endif
+                   fousma(n,m,ifou) = fousma(n,m,ifou) + rarray(n,m)*cos(angl)
+                   fousmb(n,m,ifou) = fousmb(n,m,ifou) + rarray(n,m)*sin(angl)
                 enddo
              enddo
           endif
@@ -1547,7 +1498,7 @@ end subroutine setfouunit
              case default 
                 continue         ! Unknown FourierVariable exception 
              end select
-             call fouana(ifou ,kfs_ptr ,kfst0_ptr ,nst ,fieldptr1 ,bl_ptr ,gdfourier ,gddimens_ptr)
+             call fouana(ifou, nst, fieldptr1, bl_ptr, gdfourier, gddimens_ptr)
              ifou = ifou + 1
           else 
              !
@@ -1675,6 +1626,7 @@ end subroutine setfouunit
         character(30)            :: namfunlong   ! Local name for fourier function, including reference to the line in the fourier input file 
         integer                  :: imissval = -1
         integer                  :: unc_loc
+        integer, allocatable     :: all_unc_loc(:)
 
         integer, parameter       :: REQUESTTYPE_DEFINE =  1
         integer, parameter       :: REQUESTTYPE_WRITE  =  2
@@ -1728,6 +1680,7 @@ end subroutine setfouunit
         ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm) 
         call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
 
+        allocate(all_unc_loc(nofou))
         !
         ifou  = 1
         iblwl = 0
@@ -1834,6 +1787,7 @@ end subroutine setfouunit
               write (blnm(3:4), '(i2.2)') iblbs
               namfun = 'bed stress'
            endif
+           all_unc_loc(ifou) = unc_loc
            write(namfunlong,'(i3.3,2a)') fouref(ifou,1), ": ", trim(namfun)
            !
            idvar(:,ivar) = imissval 
@@ -1882,14 +1836,7 @@ end subroutine setfouunit
            do 
               if (ifou > nofou) exit
               !
-              select case (trim(founam(ifou)))
-              case ('s1','ux','uy','uxa','uya','uc','r1','ta')
-                 unc_loc = UNC_LOC_S
-              case ('u1','ws','qx')
-                 unc_loc = UNC_LOC_U
-              case default
-                 unc_loc = -1
-              end select
+              unc_loc = all_unc_loc(ifou)
               !
               if (foutyp(ifou)=='s') then
                  call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids   ,unc_loc)
