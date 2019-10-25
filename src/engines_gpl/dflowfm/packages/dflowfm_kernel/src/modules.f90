@@ -4980,6 +4980,7 @@ implicit none
    integer, parameter                             :: maxnumfiles = 10   !< maximum number of files
    integer                                        :: numfiles           !< number of files to be loaded
    character(len=lenfile), dimension(maxnumfiles) :: inputfiles         !< files to be loaded
+   character(len=lenfile)                         :: iarg_outfile = ' ' !< Output filename for several commandline/batch-mode operations (not related to model runs).
    integer                                        :: iarg_autostart     !< autostart/autstartstop or not set (-1)
 
 contains

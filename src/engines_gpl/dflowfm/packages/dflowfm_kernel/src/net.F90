@@ -34531,6 +34531,16 @@ function read_commandline() result(istat)
                end if
             end do
 
+         case ('o') ! '-o OUTPUTFILE
+            k = k+1
+            inarg0 = inarg
+            call get_command_argument(k, inarg, status=iastat)
+            if (iastat == 0) then
+               iarg_outfile = inarg
+            else
+               write (*,*) 'Error in commandline option: '''//trim(inarg0)//''', missing output filename.'
+            end if
+
          case ('savenet')
             md_jasavenet = 1
             
@@ -34666,13 +34676,15 @@ endif
    write (*,*) '          outsidecell=[01]'
    write (*,*) '          drypointsfile=<filename (*.pol, or cutcellpolygons.lst)>'
    write (*,*) ' '
-   write (*,*) '  --make1d2dlinks[:OPTS] NETFILE'
-   write (*,*) '      Make 1d2d links for the given NETFILE and re-save it under the same name.'
+   write (*,*) '  --make1d2dlinks[:OPTS] NETFILE [-o OUTPUTFILE]'
+   write (*,*) '      Make 1d2d links for the given NETFILE and save the resulting net.'
    write (*,*) '      OPTS is a colon-separated list opt1=val1:opt2=val2:...'
    write (*,*) '        method       = (1to1 | 1ton_emb | 1ton_lat | long)  Coupling method.'
    write (*,*) '        linktype     = N    The link type (kn3) that will be used for all links'
    write (*,*) '                            (only for method=1to1).'
    write (*,*) '        connect1dend = VAL  The search distance for coupling 1D endpoints.'
+   write (*,*) '      OUTPUTFILE is the name under which the file will be saved.'
+   write (*,*) '        When not specified, the original NETFILE will be overwritten.'
    write (*,*) ' '
    write (*,*) ' --cutcells NETFILE'
    write (*,*) '      Cut the unstructured grid in NETFILE with the polygons specified'

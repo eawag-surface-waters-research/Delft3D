@@ -70,6 +70,7 @@
    use unstruc_api
    use dfm_error
    use gridoperations
+   use m_commandline_option
    
    use m_partitioninfo
 #ifdef HAVE_MPI
@@ -239,7 +240,10 @@
           call warn_flush()
           goto 1234
        end if
-       call unc_write_net(md_netfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
+       if (len_trim(iarg_outfile) == 0) then
+          iarg_outfile = md_netfile ! Overwrite existing file.
+       end if
+       call unc_write_net(iarg_outfile, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = UNC_CONV_UGRID)
        goto 1234
     end if
 
