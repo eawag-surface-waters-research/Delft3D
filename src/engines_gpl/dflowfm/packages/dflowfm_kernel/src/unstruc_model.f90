@@ -468,7 +468,7 @@ subroutine loadModel(filename)
          call read_1d_attributes(md_1dfiles, network)
        endif
 
-       call initialize_1dadmin(network, network%gridpointsCount)
+       call initialize_1dadmin(network, network%numl, network%numk)
 
        ! Set grd back to dflowfm-values
        do i = 1, network%brs%count

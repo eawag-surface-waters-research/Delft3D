@@ -36,8 +36,6 @@ libflow1d_io_la_SOURCES = \
          1d_networkreader.f90 \
          read_table.f90 \
 		 readObservCrossSections.f90 \
-         readBoundaries.f90 \
-         readLaterals.f90 \
          Readstructures.f90 \
          readObservationPoints.f90 \
          readStorageNodes.f90 \

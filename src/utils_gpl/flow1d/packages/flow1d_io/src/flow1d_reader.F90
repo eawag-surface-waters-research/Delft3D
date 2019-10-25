@@ -58,8 +58,6 @@ module m_flow1d_reader
       use m_readSalinityParameters
       use m_1d_networkreader
       use m_readstructures
-      use m_readBoundaries
-      use m_readLaterals
       use m_readObservationPoints
       use m_readStorageNodes
       use properties
@@ -179,8 +177,6 @@ module m_flow1d_reader
       use m_readSalinityParameters
       use m_1d_networkreader
       use m_readstructures
-      use m_readBoundaries
-      use m_readLaterals
       use m_readObservationPoints
       use m_readStorageNodes
       use properties
@@ -361,8 +357,6 @@ module m_flow1d_reader
       use m_readSalinityParameters
       use m_1d_networkreader
       use m_readstructures
-      use m_readBoundaries
-      use m_readLaterals
       use m_readObservationPoints
       use m_readStorageNodes
       use properties
@@ -549,32 +543,6 @@ module m_flow1d_reader
       call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')
       call timstop(timerReadCsLocs)
 
-      call timstrt('ReadBoundLocs', timerReadBoundLocs)
-      call SetMessage(LEVEL_INFO, 'Reading Boundary Locations ...')
-
-      ! Read boundary location file
-      inputfile=''
-      call prop_get_string(md_ptr, 'files', 'boundLocFile', inputfile, success)
-      inputfile = md_flow1d_file(1:posslash)//inputfile
-      if (success .and. len_trim(inputfile) > 0) then
-         call readBoundaryLocations(network, inputfile)
-      endif
-      
-      call SetMessage(LEVEL_INFO, 'Reading Boundary Locations Done')
-      call timstop(timerReadBoundLocs)
-      call timstrt('ReadLatLocs', timerReadLatLocs)
-      call SetMessage(LEVEL_INFO, 'Reading Lateral Locations ...')
-
-      ! Read lateral location file
-      inputfile=''
-      call prop_get_string(md_ptr, 'files', 'latDischargeLocFile', inputfile, success)
-      inputfile = md_flow1d_file(1:posslash)//inputfile
-      if (success .and. len_trim(inputfile) > 0) then
-         call readLateralLocations(network, inputfile)
-      endif
-      
-      call SetMessage(LEVEL_INFO, 'Reading Lateral Locations Done')
-      call timstop(timerReadLatLocs)
       call timstrt('ReadObsPoints', timerReadObsPoints)
       call SetMessage(LEVEL_INFO, 'Reading Observation Points ...')
 
@@ -752,20 +720,6 @@ module m_flow1d_reader
       
       call SetMessage(LEVEL_INFO, 'Reading Initial Data Done')
       call timstop(timerReadInitial)
-      call timstrt('ReadBoundData', timerReadBoundData)
-      call SetMessage(LEVEL_INFO, 'Reading Boundary/Lateral Data ...')
-
-      ! Read boundary conditions
-      inputfile=''
-      call prop_get_string(md_ptr, 'files', 'boundCondFile', inputfile, success)
-      inputfile = md_flow1d_file(1:posslash)//inputfile
-      if (len_trim(inputfile) > 0) then
-         call readBoundaryConditions(network, inputfile)
-      end if
-
-      
-      call SetMessage(LEVEL_INFO, 'Reading Boundary/Lateral Done')
-      call timstop(timerReadBoundData)
 
       ! log timings
       call timstop(timerRead)

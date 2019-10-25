@@ -59,26 +59,19 @@ module m_network
    end interface dealloc
    
 
-   ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en lin2point uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
+   ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
    
    type, public :: t_administration_1d
       integer, allocatable          :: lin2str(:)                          !< indirection list, containing structure numbers for flowlinks.
                                                                            !< These structure numbers refer to the elements of network%sts%struct.
-      logical                       :: hasStructures = .false.             !< Flag, true if one or more structures in model
       integer, allocatable          :: lin2ibr(:)                          !< indirection list, containing branch number on which the flow link is positioned 
-      integer, allocatable          :: lin2point(:)                        !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
-                                                                           !> indirection list, containing local link index for 1d arrays.
-      integer, allocatable          :: lin2local(:)
+      integer, allocatable          :: lin2local(:)                        !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
+      
       integer, allocatable          :: lin2grid(:)
       type(t_chainage2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-chainage
       type(t_chainage2cross), pointer :: gpnt2cross(:) => null()             !< list containing cross section indices per gridpoint-chainage
       logical, allocatable          :: hysteresis_for_summerdike(:,:)      !< array indicating for hysteresis in summerdikes
 
-      double precision, allocatable :: au_1d(:)
-      double precision, allocatable :: conv_1d(:)
-      double precision, allocatable :: minwidth1d(:)
-   
-      double precision, allocatable :: minconv(:)                      ! minimal 1d conveyance in link: C*P*sqrt(A/P)
    end type
 
    type, public   :: t_network
@@ -96,12 +89,10 @@ module m_network
       type(t_CompoundSet)                       :: cmps                    !< Administration compound structures
       type(t_RoughnessSet)                      :: rgs                     !< set containing roughness sections
       type(t_ObservationPointSet)               :: obs                     !< set of observation points
-      type(t_lateralSet)                        :: lts                     !< set of lateral discharges
       type(t_storageSet)                        :: storS                   !< set containing storage in gridpoints
       type(t_trenchSet)                         :: trs                     !< set containing trenches (infiltration sewer tubes)
       type(t_CSDefinitionSet)                   :: CSDefinitions
       type(t_spatial_dataSet)                   :: spData
-      type(t_boundarySet)                       :: boundaries
       type(t_transportSet)                      :: trans
       type(t_ObservCrossSectionSet)             :: observcrs               !< set of observation Cross-Sections 
       type(t_forcingList)                       :: forcinglist             !< Work list of read-in (structure) forcing data, to be initialized by calling kernel later.
@@ -111,25 +102,20 @@ module m_network
    
 contains
 
-   subroutine realloc_1dadmin(adm, all_links_count, oned_links_count)
+   subroutine realloc_1dadmin(adm, links_count, gridpoints_count)
 
       type(t_administration_1d)  :: adm
-      integer, intent(in)        :: all_links_count
-      integer, intent(in)        :: oned_links_count
+      integer, intent(in)        ::  links_count
+      integer, intent(in)        ::  gridpoints_count
       
-      if (.not. allocated(adm%lin2str)) allocate(adm%lin2str(all_links_count))  
-      if (.not. allocated(adm%lin2ibr)) allocate(adm%lin2ibr(all_links_count))   
-      if (.not. allocated(adm%lin2point)) allocate(adm%lin2point(all_links_count)) 
-      if (.not. allocated(adm%lin2local)) allocate(adm%lin2local(all_links_count)) 
-      if (.not. allocated(adm%lin2grid)) allocate(adm%lin2grid(all_links_count)) 
-      if (.not. associated(adm%line2cross)) allocate(adm%line2cross(all_links_count))
-      if (.not. associated(adm%gpnt2cross)) allocate(adm%gpnt2cross(all_links_count))
-      if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,all_links_count))
+      if (.not. allocated(adm%lin2str))      allocate(adm%lin2str   (links_count))  
+      if (.not. allocated(adm%lin2ibr))      allocate(adm%lin2ibr   (links_count))   
+      if (.not. allocated(adm%lin2local))    allocate(adm%lin2local (links_count)) 
+      if (.not. allocated(adm%lin2grid))     allocate(adm%lin2grid  (links_count)) 
+      if (.not. associated(adm%line2cross))  allocate(adm%line2cross(links_count))
+      if (.not. associated(adm%gpnt2cross))  allocate(adm%gpnt2cross(gridpoints_count))
+      if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,links_count))
       adm%hysteresis_for_summerdike = .true.
-      if (.not. allocated(adm%au_1d)) allocate(adm%au_1d(oned_links_count))
-      if (.not. allocated(adm%conv_1d)) allocate(adm%conv_1d(oned_links_count))
-      if (.not. allocated(adm%minwidth1d)) allocate(adm%minwidth1d(oned_links_count))
-      if (.not. allocated(adm%minconv)) allocate(adm%minconv(oned_links_count))   
       
    end subroutine realloc_1dadmin
 
@@ -138,16 +124,11 @@ contains
 
       if (allocated(adm%lin2str))      deallocate(adm%lin2str)
       if (allocated(adm%lin2ibr))      deallocate(adm%lin2ibr)
-      if (allocated(adm%lin2point))    deallocate(adm%lin2point)
       if (allocated(adm%lin2local))    deallocate(adm%lin2local)
       if (associated(adm%line2cross))  deallocate(adm%line2cross)
       if (allocated(adm%lin2grid))    deallocate(adm%lin2grid)
       if (associated(adm%gpnt2cross))  deallocate(adm%gpnt2cross)
       if (allocated(adm%hysteresis_for_summerdike)) deallocate(adm%hysteresis_for_summerdike)
-      if (allocated(adm%au_1d))        deallocate(adm%au_1d)
-      if (allocated(adm%conv_1d))      deallocate(adm%conv_1d)
-      if (allocated(adm%minwidth1d))   deallocate(adm%minwidth1d)
-      if (allocated(adm%minconv))      deallocate(adm%minconv)
 
    end subroutine dealloc_1dadmin
 
@@ -171,12 +152,10 @@ contains
       call dealloc(network%cmps)
       call dealloc(network%rgs)
       call dealloc(network%obs)
-      call dealloc(network%lts)
       call dealloc(network%storS)
       call dealloc(network%trs)
       call dealloc(network%CSDefinitions)
       call dealloc(network%spData)
-      call dealloc(network%boundaries)
       call dealloc(network%trans)
       call dealloc(network%observcrs)
       network%loaded = .false.
@@ -186,7 +165,6 @@ contains
    subroutine admin_network(network, ngrid, nlink)
       use m_node
       use m_branch
-      use m_boundaryConditions
    
       type(t_network), intent(inout) :: network
       integer, intent(inout) :: ngrid
@@ -200,7 +178,6 @@ contains
       integer nod
       integer, allocatable, dimension(:) :: itype
       integer, allocatable, dimension(:) :: iboun
-      type(t_boundary), pointer :: bd, bd_co
    
       type(t_branch), pointer :: pbr
    
@@ -211,112 +188,19 @@ contains
       network%l1d    = nlink
       network%l1dall = nlink
 
-      nnode = network%nds%count
-      allocate(itype(nnode), iboun(nnode))
-
-      itype = 0
-      iboun = 0
-      do ityp = 1, 2
-         do i = 1, network%boundaries%tp(ityp)%count
-            bd =>network%boundaries%tp(ityp)%bd(i)
-            itype(bd%node) = ityp
-            iboun(bd%node) = i
-         enddo
-      enddo
-   
-      do ibr = 1, network%brs%count
-         pbr => network%brs%branch(ibr)
-         if (pbr%FromNode%nodeType == nt_LevelBoun .or. &
-             pbr%FromNode%nodeType == nt_DischBoun) then
-            nod = pbr%FromNode%index
-            bd => network%boundaries%tp(itype(nod))%bd(iboun(nod))
-            bd%igrid = pbr%FromNode%gridNumber
-            bd%branch = ibr
-            bd%intern = pbr%grd(2)
-            bd%direction = 1
-            bd%linknumber = pbr%lin(1)
-
-            do icon = 1, transportPars%constituents_count
-               typ = transportPars%co_h(icon)%boundary_index
-               do ibnd = 1, network%boundaries%tp(typ)%Count
-                  bd_co => network%boundaries%tp(typ)%bd(ibnd)
-                  if (bd_co%node == nod) then
-                     bd_co%igrid      = bd%igrid     
-                     bd_co%intern     = bd%intern    
-                     bd_co%branch     = bd%branch    
-                     bd_co%direction  = bd%direction 
-                     bd_co%linknumber = bd%linknumber
-                     exit
-                  endif
-               enddo
-            enddo
-         endif
-             
-               
-          if (pbr%ToNode%nodeType == nt_LevelBoun .or. &
-             pbr%ToNode%nodeType == nt_DischBoun) then
-            nod = pbr%ToNode%index
-            bd => network%boundaries%tp(itype(nod))%bd(iboun(nod))
-            bd%igrid      = pbr%ToNode%gridNumber
-            bd%intern     = pbr%grd(pbr%gridPointsCount-1)
-            bd%branch     = ibr
-            bd%direction  = -1
-            bd%linknumber = pbr%lin(pbr%uPointsCount)
-
-            do icon = 1, transportPars%constituents_count
-               typ = transportPars%co_h(icon)%boundary_index
-               do ibnd = 1, network%boundaries%tp(typ)%Count
-                  bd_co => network%boundaries%tp(typ)%bd(ibnd)
-                  if (bd_co%node == nod) then
-                     bd_co%igrid      = bd%igrid     
-                     bd_co%intern     = bd%intern    
-                     bd_co%branch     = bd%branch    
-                     bd_co%direction  = bd%direction 
-                     bd_co%linknumber = bd%linknumber
-                     exit
-                  endif
-               enddo
-            enddo
-         endif   
-      
-         continue
-          
-      enddo
-   
-      !call initializeLaterals(network%brs, network%lts)
-
-      deallocate(itype, iboun)
-   
-      !do ityp = 1, 3
-      !   do i = 1, network%boundaries%tp(ityp)%count
-      !      bd =>network%boundaries%tp(ityp)%bd(i)
-      !      inod = network%boundaries%tp(ityp)%bd(i)%node
-      !      if (ityp==H_BOUN) node(1,inod) = nt_LevelBoun
-      !      if (ityp==Q_BOUN) node(1,inod) = nt_DischBoun
-      !      node(3,inod) = i
-      !      if (node(3,inod) == 0) then
-      !         node(4,inod) = 0
-      !      else
-      !         node(4,inod) = inod
-      !      endif
-      !   enddo
-      !enddo
-      !do i = 1, network%boundaries%tp(3)%count
-      !   inod = network%boundaries%tp(ityp)%bd(i)%node
-      !   node(4,inod) = i
-      !enddo
 
 
    end subroutine admin_network
 
 
-   subroutine initialize_1dadmin(network, linall)
+   subroutine initialize_1dadmin(network, linall, gridpointscount)
    
       use m_CrossSections
       use m_GlobalParameters
       
-      type(t_network), intent(inout) :: network
+      type(t_network), intent(inout), target :: network
       integer, intent(in)            :: linall
+      integer, intent(in)            :: gridpointscount
       
       integer :: ilnk
       integer :: igpt
@@ -337,7 +221,7 @@ contains
       double precision                   :: chezy
       double precision                   :: as
       double precision                   :: wetperimeter
-      type(t_administration_1d)          :: adm
+      type(t_administration_1d), pointer          :: adm
       type(t_branch), pointer            :: pbran
       type(t_structure), pointer         :: pstru
 
@@ -353,19 +237,12 @@ contains
 
       character(20)                      :: chainageString
       
-      call realloc(network%adm, linall, network%gridpointsCount)
+      call realloc(network%adm, linall, linall + network%brs%Count)
       
-      adm = network%adm
+      adm => network%adm
       
       adm%lin2str = -huge(1)
-      if (network%sts%Count > 0) then
-         adm%hasStructures = .true.
-      else
-         adm%hasStructures = .false.
-      endif
-
       adm%lin2ibr   = -huge(1)
-      adm%lin2point = -huge(1)  
       adm%lin2local = -huge(1)
       adm%lin2grid  = -huge(1)
       
@@ -374,7 +251,6 @@ contains
          do m = 1, pbran%uPointsCount
             if (pbran%lin(m) > 0) then
                adm%lin2ibr(pbran%lin(m)) = ibran
-               adm%lin2point(pbran%lin(m)) = m
                adm%lin2local(pbran%lin(m)) = m
                adm%lin2grid(pbran%lin(m))  = pbran%grd(m)
             endif
@@ -396,8 +272,6 @@ contains
          enddo
          
          ! Cross-Section indices for links
-         adm%minconv    = 0.0d0
-         adm%minwidth1d = 0.0d0
          
          do ibran = 1, network%brs%Count
 
@@ -522,9 +396,6 @@ contains
                   chezy = 0.0d0
                   ll = adm%lin2local(ilnk)
                   f = adm%line2cross(ilnk)%f
-                  dpu1 = -network%crs%cross(adm%line2cross(ilnk)%c1)%bedLevel
-                  dpu2 = -network%crs%cross(adm%line2cross(ilnk)%c2)%bedLevel
-                  call GetCSParsFlow(adm%line2cross(ilnk), network%crs%cross, thresholdDry, as, wetPerimeter, adm%minwidth1d(ll))
                endif
                   
             enddo
@@ -656,7 +527,6 @@ contains
       
       endif
       
-      network%adm = adm
       
       if (initError) then 
           call setmessage(LEVEL_FATAL, 'Error initialising network')
@@ -1047,6 +917,170 @@ use m_tablematrices
     
     
 end function getFrictionValue
+
+!> Get friction paramter value for a specific point in the network
+!> This function is moved from Roughness.f90 to Network.f90 to avoid circular references
+double precision function getFrictionCparValue(rgs, spdata, cross, ibranch, section, igrid, h, q, u, r, d, chainage)
+
+use m_tables
+use m_tablematrices
+!!--description-----------------------------------------------------------------
+! NONE
+!!--pseudo code and references--------------------------------------------------
+! NONE
+!!--declarations----------------------------------------------------------------
+    !=======================================================================
+    !                       Deltares
+    !                One-Two Dimensional Modelling System
+    !                           S O B E K
+    !
+    ! Subsystem:          Flow Module
+    !
+    ! Programmer:
+    !
+    ! Function:           getFrictionValue, replacement of old FLCHZT (FLow CHeZy Friction coeff)
+    !
+    ! Module description: Chezy coefficient is computed for a certain gridpoint
+    !
+    !
+    !
+    !     update information
+    !     person                    date
+    !     Kuipers                   5-9-2001
+    !     Van Putten                11-8-2011
+    !
+    !     Use stored table counters
+    !
+    !
+    !
+    !
+    !     Declaration of Parameters:
+    !
+
+    implicit none
+!
+! Global variables
+!
+    type t_parr
+       type(t_CSType), pointer        :: cross
+    end type
+    
+
+    type(t_RoughnessSet), intent(in)        :: rgs         !< Roughness data
+    type(t_spatial_dataSet), intent(in)     :: spData      !< spatial data
+    type(t_CSType), pointer, intent(in)     :: cross
+    integer, intent(in)                     :: igrid       !< gridpoint index
+    integer, intent(in)                     :: ibranch     !< branch index
+    integer, intent(in)                     :: section     !< section index (0=main, 1=Flood plane 1, 2=Flood plane 2)
+    double precision, intent(in)            :: d           !< water depth
+    double precision, intent(in)            :: h           !< water level
+    double precision, intent(in)            :: q           !< discharge
+    double precision, intent(in)            :: r           !< hydraulic radius
+    double precision, intent(in)            :: u           !< velocity
+    double precision, intent(in)            :: chainage    !< chainage (location on branch)
+    
+!
+!
+! Local variables
+!
+    integer                         :: isec, i
+    double precision                :: cpar
+    double precision                :: cz
+    double precision                :: dep
+    double precision                :: ys
+    double precision                :: rad
+    type(t_Roughness), pointer      :: rgh 
+    type(t_spatial_data), pointer   :: values
+    integer, dimension(:), pointer  :: rgh_type
+    integer, dimension(:), pointer  :: fun_type
+
+    !     Explanation:
+    !     -----------
+    !
+    !     1. Each Chezy formula, apart from Engelund bed friction, is defined
+    !        by 1 constant parameter. This constant is stored in bfricp.
+    !        An exception is the Engelund bed friction defined by 10 parameters.
+    !     2. For the Engelund bed friction the specific parameters are stored
+    !        in the array engpar.
+    !
+    !
+    !     Prevention against zero hydraulic radius and depth
+    !
+    rad = max(r, 1.d-6)
+    dep = max(d, 1.d-6)
+    !
+    if (associated(cross)) then
+       ! section refers to the roughness section *within* the cross section. Actual friction section index then comes from lookup.
+       if (cross%frictionSectionsCount > 0) then
+         isec = cross%frictionsectionIndex(min(cross%frictionSectionsCount, section))
+       else
+          isec = section
+       endif
+    else
+       ! No cross section definition: section directly refers to a friction section index.
+       isec = section
+    endif
+    
+    if (rgs%version == 1) then
+      rgh => rgs%rough(isec)
+      if (q >= 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
+          values    => spData%quant(rgh%spd_pos_idx)
+          rgh_type  => rgh%rgh_type_pos 
+          fun_type  => rgh%fun_type_pos 
+       else 
+          values    => spData%quant(rgh%spd_neg_idx)
+          rgh_type  => rgh%rgh_type_neg 
+          fun_type  => rgh%fun_type_neg 
+       endif   
+       if (fun_type(ibranch) == R_FunctionDischarge) then
+          cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  dabs(q))
+       !
+       !        Roughness function of water level depending on flow direction
+       !
+       elseif (fun_type(ibranch) == R_FunctionLevel) then
+          cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  h)
+       !
+       !        Roughness constant depending on flow direction
+       !
+       else
+          cpar = values%values(igrid)
+       endif
+    !     Formulation = .not. Engelund
+    !
+    else ! Version 2 roughness
+       do i = 1, 2
+          if (isec < 0) then
+             ! Current cross section does *not* refer to a friction section index, but has defined direct roughness type+coefficient.
+             cz = GetChezy(cross%frictionType(section), cross%frictionValue(section), rad, dep, u)
+          else
+             rgh => rgs%rough(isec)
+             if (rgh%useGlobalFriction)then
+                cz = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+             else
+                ! For now, direction independent, always *_pos values.
+                rgh_type  => rgh%rgh_type_pos 
+                fun_type  => rgh%fun_type_pos 
+                if (rgh_type(ibranch) == -1)  then ! This branch has no own roughness definition, use global.
+                   cz = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+                else
+                   if (fun_type(ibranch) == R_FunctionDischarge) then
+                      ys = abs(q)
+                   elseif (fun_type(ibranch) == R_FunctionLevel) then
+                      ys = h
+                   else
+                      ys = 0d0
+                   endif
+       
+                   cpar = interpolate(rgh%table(ibranch), chainage, ys)
+                endif
+             endif
+          endif
+       enddo
+    endif
+    
+    getFrictionCparValue = cpar
+    
+end function getFrictionCparValue
 
 !> Remove already removed links (administered in LC-array) from the branch administration
 subroutine update_flow1d_admin(network, lc)

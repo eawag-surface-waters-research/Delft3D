@@ -48,7 +48,6 @@
 		<File RelativePath="..\..\include\update_structures.inc"/></Filter>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\BoundaryConditions.f90"/>
 		<File RelativePath=".\src\branches.f90"/>
 		<File RelativePath=".\src\bridge.f90"/>
 		<File RelativePath=".\src\c_structures.f90"/>
@@ -65,7 +64,6 @@
 		<File RelativePath=".\src\general_structure.f90"/>
 		<File RelativePath=".\src\GlobalParameters.f90"/>
 		<File RelativePath=".\src\initialize_1d.F90"/>
-		<File RelativePath=".\src\Laterals.F90"/>
 		<File RelativePath=".\src\ModelGlobalData.f90"/>
 		<File RelativePath=".\src\ModelParameters.f90"/>
 		<File RelativePath=".\src\ModelTypes.f90"/>

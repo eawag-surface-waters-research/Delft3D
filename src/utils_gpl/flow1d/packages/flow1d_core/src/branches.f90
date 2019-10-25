@@ -98,9 +98,9 @@ module m_branch
       integer                        :: Points(2)               !< Calculation Points at Start and End of Branch
       integer                        :: uPoints(2)              !< Velocity Points at Start and End of Branch
 
-      integer, allocatable           :: lin(:)                  !< link numbers for links in this channel, allocated and filled by admin_network
-      integer, allocatable           :: grd(:)                  !< gridpoint numbers for links in this channel, allocated and filled by admin_network
-      integer, allocatable           :: grd_buf(:)              !< dflowfm gridpoint numbers for links in this channel, allocated and filled by admin_network
+      integer, allocatable           :: lin(:)                  !< link numbers for links in this channel
+      integer, allocatable           :: grd(:)                  !< gridpoint numbers for links in this channel
+      integer, allocatable           :: grd_buf(:)              !< dflowfm gridpoint numbers for links in this channel
                                                                 !< used to keep dflowfm grd-values
    
    end type t_branch
@@ -377,6 +377,24 @@ module m_branch
       weight = 0d0
    end subroutine get2Points
 
+  
+   subroutine fill_hashtable_brs(brs)
+   
+      type (t_branchSet), intent(inout), target :: brs
+      
+      integer ibr
+      character(len=idlen), dimension(:), pointer :: ids
+      
+      allocate(brs%hashlist%id_list(brs%Count))
+      brs%hashlist%id_count = brs%Count
+      ids => brs%hashlist%id_list
+      
+      do ibr= 1, brs%count
+         ids(ibr) = brs%branch(ibr)%id
+      enddo
+      
+      call hashfill(brs%hashlist)
+   end subroutine fill_hashtable_brs
    subroutine admin_branch(brs, ngrid, nlink)
    
       type (t_branchSet), intent(inout), target :: brs
@@ -414,23 +432,5 @@ module m_branch
       enddo
       
    end subroutine admin_branch
-   
-   subroutine fill_hashtable_brs(brs)
-   
-      type (t_branchSet), intent(inout), target :: brs
-      
-      integer ibr
-      character(len=idlen), dimension(:), pointer :: ids
-      
-      allocate(brs%hashlist%id_list(brs%Count))
-      brs%hashlist%id_count = brs%Count
-      ids => brs%hashlist%id_list
-      
-      do ibr= 1, brs%count
-         ids(ibr) = brs%branch(ibr)%id
-      enddo
-      
-      call hashfill(brs%hashlist)
-   end subroutine fill_hashtable_brs
    
 end module m_branch

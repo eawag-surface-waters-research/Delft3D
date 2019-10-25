@@ -35,9 +35,7 @@ module networkTypes
    use m_CrossSections
    use m_1d_structures
    use m_spatial_data
-   use m_boundaryConditions
    use m_ObservationPoints
-   use m_laterals
    use m_storage
    
    implicit none
