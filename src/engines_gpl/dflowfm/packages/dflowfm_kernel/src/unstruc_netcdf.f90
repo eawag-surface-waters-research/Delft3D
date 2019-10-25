@@ -13567,6 +13567,7 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
    ierr = 0
    if (.not. network%loaded) then
       dflowfm_1d = .true.
+!      call read_1d_ugrid(network, ioncid, dflowfm_1d, nodesOnBranchVertices = 1)
       call read_1d_ugrid(network, ioncid, dflowfm_1d)
       if (network%loaded) then
          call admin_network(network, numk, numl)
