@@ -704,7 +704,7 @@ end subroutine flow_finalize_single_timestep
     u0 = u1                           ! progress velocities
     call set_u0isu1_structures(network%sts)
  endif
- 
+
 
  advi = 0d0
  adve = 0d0
@@ -5712,7 +5712,7 @@ if (jawind > 0) then
     cs = csu(LL)  ; sn = snu(LL) ; v(LL) = 0d0
     do L = Lb,Lt
        k1 = ln(1,L) ; k2 = ln(2,L)
- 
+
        if ( jasfer3D == 1 ) then
           v(L) =      acL(LL) *(-sn*nod2linx(LL,1,ucx(k1),ucy(k1)) + cs*nod2liny(LL,1,ucx(k1),ucy(k1))) +  &
                  (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucx(k2),ucy(k2)) + cs*nod2liny(LL,2,ucx(k2),ucy(k2)))
@@ -5726,9 +5726,9 @@ if (jawind > 0) then
 
        if (icorio > 0) then
           ! set u tangential
-          if (icorio == 4) then 
-                 vcor = v(L) 
-          else 
+          if (icorio == 4) then
+                 vcor = v(L)
+          else
              if ( jasfer3D == 1 ) then
                  vcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1))) +  &
                         (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))
@@ -5736,7 +5736,7 @@ if (jawind > 0) then
                  vcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) ) + &     ! continuity weighted best sofar plus depth limiting
                         (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )
              endif
-          endif 
+          endif
 
           if (jsferic == 1) then
              fcor = fcori(LL)
@@ -8965,10 +8965,10 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call flow_allocflow()                               ! allocate   flow arrays
  call klok(cpu_extra(2,37)) ! end alloc flow
  !
- if (jawave > 0) then 
+ if (jawave > 0) then
     call alloc8basicwavearrays()
  endif
- if (jawave > 2 .or. jased > 0 .and. stm_included) then 
+ if (jawave > 2 .or. jased > 0 .and. stm_included) then
     call flow_waveinit()
  endif
  ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopen
@@ -12418,16 +12418,16 @@ else if (nodval == 27) then
  else if (nodval == numoptwav .and. jawave > 0) then
     if (jawave == 1 .or. jawave == 2) then
       select case (waveparopt)
-        case(1) 
+        case(1)
                 znod = Hwav(kk)
-        case(2) 
+        case(2)
                 znod = Twav(kk)
-        case(3) 
+        case(3)
                 znod = Taus(kk)
-        case(4) 
+        case(4)
                 znod = Uorb(kk)
       end select
-    else 
+    else
      select case (waveparopt)
        case (1)
           if (jawave.ne.4) then
@@ -14263,7 +14263,7 @@ endif
        u1(Lb:Lt) = u1(L)
     end do
  end if
- 
+
   if (jawave==3) then
     if( kmx == 0 ) then
        hs = s1-bl                                   ! safety
@@ -18152,7 +18152,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_uniweir_vel, 'coordinates', 'uniweir_id')
         endif
-        
+
         ! compound structure
         if(jahiscmpstru > 0 .and. network%cmps%count > 0) then
             ierr = nf90_def_dim(ihisfile, 'compoundStructures', network%cmps%count, id_cmpstrudim)
@@ -18320,7 +18320,7 @@ subroutine unc_write_his(tim)            ! wrihis
               ierr = nf90_put_var(ihisfile, id_uniweir_id,  trim(network%sts%struct(istru)%id),  (/ 1, i /))
            end do
         end if
-        
+
         if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
            do i = 1, network%cmps%count
               ierr = nf90_put_var(ihisfile, id_cmpstru_id,  trim(network%cmps%compound(i)%id),  (/ 1, i /))
@@ -18827,7 +18827,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_uniweir_crestl, valuniweir(8,i),      (/ i, it_his /))
          enddo
       end if
-      
+
       if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
          do i=1,network%cmps%count
             ierr = nf90_put_var(ihisfile, id_cmpstru_dis,            valcmpstru(2,i), (/ i, it_his /))
@@ -21795,15 +21795,15 @@ end subroutine unc_write_shp
 
  blmin = minval(bl)
 
- if (dxwuimin2D > 0d0) then 
+ if (dxwuimin2D > 0d0) then
     do L = lnx1D+1, lnxi
-       if ( dx(L)  < dxwuimin2D*wu(L) ) then 
-            dxorgL = dx(L) 
+       if ( dx(L)  < dxwuimin2D*wu(L) ) then
+            dxorgL = dx(L)
             dx(L)  = dxwuimin2D*wu(L)
-            dxi(L) = 1d0/dx(L)  
+            dxi(L) = 1d0/dx(L)
             write(errorMessage,*) 'Circumcentre distance dx(L)  < dxwuimin2D*wu(L) : xu, yu, old dx, new dx: ', xu(L), yu(L), dxorgL, dx(L)
             call mess(LEVEL_INFO, errorMessage )
-       endif   
+       endif
     enddo
  endif
 
@@ -29647,7 +29647,7 @@ end function densfm
  double precision :: SL,SM,XCR,YCR,CRP, alfa1, alfa2, wdep,  xzk, yzk, dist, distmin, celsiz
  double precision :: sind, cosd, ustx1, ustx2, usty1, usty2
  integer          :: k, L, kk, kkk, k1, k2, kup, n, ndone, ierr, nup, nupf, jacros, nw1, nw2, nodenum, LL, knw = 5
- INTEGER          :: NDIR, NWND, NSTAT, MOUT, ndoneprevcycle, kkmin, ndoner, k12, ks, ke, ki, msam = 0
+ INTEGER          :: NDIR, NWND, NSTAT, MOUT, ndoneprevcycle, kkmin, ndoner, k12, ks, ke, ki, msam = 0, jaopen
  double precision, allocatable :: ustk(:)
 
  integer :: ndraw
@@ -29721,6 +29721,14 @@ mainloop:do n  = 1, nwf
             enddo
             if (jsferic == 1) celsiz=celsiz*rd2dg/ra
 
+            jaopen = 0
+            do kk = 1,nd(k)%lnx
+               L  = iabs( nd(k)%ln(kk) )
+               if (ln(1,L) > ndxi) then
+                  jaopen = 1
+               endif
+            enddo
+
             do kk = 1,netcell(k)%n
                L  = netcell(k)%lin(kk)
                k1 = netcell(k)%nod(kk)
@@ -29731,7 +29739,7 @@ mainloop:do n  = 1, nwf
                endif
 
                wdep   = s1(k) - min(zk(k1),zk(k2))
-               if (lnn(L) == 1 .or.  wdep < 0.5d0 .or. kn(3,L) == 0) then    ! link shallow or closed => start fetch here
+               if (lnn(L) == 1 .or.  wdep < 0.5d0 .or. kn(3,L) == 0 .or. jaopen == 1) then    ! link shallow or closed => start fetch here
                   call normalout(xk(k1), yk(k1), xk(k2), yk(k2), xn, yn, jsferic, jasfer3D, dmiss, dxymis)
                   prin = uwin*xn + vwin*yn
                   if ( prin < 0d0 ) then                   ! if upwind
@@ -29753,7 +29761,11 @@ mainloop:do n  = 1, nwf
                endif
             enddo
             if (kkmin > 0) then
-                fetch(n,k) = min(distmin, celsiz)
+                if (jaopen == 1) then
+                   fetch(n,k) = 1d5
+                else
+                   fetch(n,k) = min(distmin, celsiz)
+                endif
                 fetdp(n,k) = max( hs(k), .1d0)
                 if (jagui > 0) then
                    CALL rCIRc(Xz(k),Yz(k) ) !, fetch(n,k))
@@ -37406,8 +37418,8 @@ if (jahisbal > 0) then
             end if
          enddo
       end if
-      
-      ! 
+
+      !
       ! === compound structure
       !
       if (network%cmps%count > 0) then
@@ -42236,13 +42248,13 @@ integer            :: jav3
  enddo
 
  jav3 = 0
- if (javau3onbnd == 1) then 
+ if (javau3onbnd == 1) then
     if (LL > lnxi)     jav3 = 1
- else if (javau3onbnd == 2) then 
-    if (iadv(LL) == 6) jav3 = 1   
- else if (javau == 3) then 
+ else if (javau3onbnd == 2) then
+    if (iadv(LL) == 6) jav3 = 1
+ else if (javau == 3) then
                        jav3 = 1
- endif 
+ endif
 
  do L    = Lb, Lt - 1
     k        = L - Lb + 1
@@ -46289,7 +46301,7 @@ end subroutine alloc_jacobi
             end if
          end do
 
-         do k = kt+1, kb + kmxn(kk) - 1 
+         do k = kt+1, kb + kmxn(kk) - 1
             if ( ITEMP.gt.0) constituents(ITEMP,k) = constituents(ITEMP,kt)
             if ( ISALT.gt.0) constituents(ISALT,k) = constituents(ISALT,kt)
             if ( ISALT.gt.0) sa1(k)                = constituents(ISALT,kt)
