@@ -454,7 +454,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
 
    call read_1d_attributes(filenames, network)
    
-   call initialize_1dadmin(network, network%gridpointsCount)
+   call initialize_1dadmin(network, network%numl, network%numk)
 
    numk = 0
    numl = 0
