@@ -9023,13 +9023,13 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
    
    
    integer :: nn
-   integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:)
+   integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:), contacts(:,:) 
    integer :: layer_count, layer_type
    real(kind=dp), dimension(:), pointer :: layer_zs=>null(), interface_zs =>null()
 !   type(t_crs) :: pj
 
    integer :: ierr
-   integer :: i, k, k1, k2, numContPts, n, numl2d, numk1d, numk2d, L, Lnew, nv, n1, ja, kt
+   integer :: i, k, k1, k2, numContPts, n, numl2d, numk1d, numk2d, L, Lnew, nv, n1, n2, ja, kt
    double precision :: xzn,yzn,x3, y3, x4, y4,DIS,XP,YP,rl,xperp,yperp
    double precision, allocatable :: xtt(:,:), ytt(:,:)
    integer :: id_flowelemcontourptsdim, id_flowelemcontourx, id_flowelemcontoury, &
@@ -9041,11 +9041,14 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
    double precision, dimension(:), allocatable :: zz
    double precision, allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:)
    double precision, allocatable :: work2(:,:)
-   
-   
-   
+
+   integer                       :: n1dedges, n1d2dcontacts, start_index
+   integer,allocatable           :: contacttype(:) 
+
    jaInDefine = 0
-    
+   n1d2dcontacts = 0
+   start_index   = 1
+
    if (present(janetcell)) then
       janetcell_   = janetcell
    else
@@ -9057,6 +9060,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
    !    if (size(lnn) < numl .or. netstat == NETSTAT_CELLS_DIRTY ) then
           call setnodadm(0)
           call findcells(0)
+          call find1dcells()
    !    end if
    endif
 
@@ -9080,68 +9084,143 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
 
    ! 1D network geometry
    if (numl1d > 0) then
-      ! Allocate edges
-      call realloc(edge_nodes, (/ 2, numl1d /), fill = -999)
-      call realloc(edge_type, numl1d, fill = -999, keepExisting = .false.)
-      call realloc(xe, numl1d, fill = dmiss, keepExisting = .false.)
-      call realloc(ye, numl1d, fill = dmiss, keepExisting = .false.)
-         
-      ! All 1D net links + add special nodes (from 1D2D)
-      ! Count first:
+
+      ! count 1d mesh nodes, edges and 1d2d contacts 
+      n1dedges = 0 
+      n1d2dcontacts = 0
       KC(:) = 0
       NUMK1D = 0
-      do L=1,NUML1D
-         K1 = KN(1,L)
-         K2 = KN(2,L)
-         if (KC(K1) == 0) then
-            NUMK1D = NUMK1D+1
-            KC(K1) = 1
-         end if
-         if (KC(K2) == 0) then
-            NUMK1D = NUMK1D+1
-            KC(K2) = 1
+      do L=1,numl1d
+         if (janetcell_ == 0 .or. (kn(3,L) == 1 .or. kn(3,L) == 6)) then
+            ! Regular 1D net link, or: when no cells, all 1D2D-type net links will also be included with both start and end node.
+            n1dedges = n1dedges + 1
+
+            K1 = KN(1,L)
+            K2 = KN(2,L)
+            if (KC(K1) == 0) then
+               NUMK1D = NUMK1D+1
+               KC(K1) = 1
+            end if
+            if (KC(K2) == 0) then
+               NUMK1D = NUMK1D+1
+               KC(K2) = 1
+            end if
+         else
+            ! 1D2D-type net links, with cell info available.
+            n1d2dcontacts = n1d2dcontacts + 1
+
+            N1 = abs(lne(1,L))
+            N2 = abs(lne(2,L))
+            if (N1 > nump) then  ! First point of 1D link is 1D cell
+               K1 = netcell(N1)%nod(1)
+               if (KC(K1) == 0) then
+                  NUMK1D = NUMK1D+1
+                  KC(K1) = 1
+               end if
+            end if
+            if (N2 > nump) then  ! Second point of 1D link is 1D cell
+               K2 = netcell(N2)%nod(1)
+               if (KC(K2) == 0) then
+                  NUMK1D = NUMK1D+1
+                  KC(K2) = 1
+               end if
+            end if
          end if
       enddo
-      
-      ! Nodes Allocate 
+
+      ! Allocate  nodes
       call realloc(xn, NUMK1D)
       call realloc(yn, NUMK1D)
       call realloc(zn, NUMK1D)
 
-      k = 0
+      ! Allocate edges
+      call realloc(edge_nodes, (/ 2, n1dedges /), fill = -999)
+      call realloc(edge_type, n1dedges, fill = -999, keepExisting = .false.)
+      call realloc(xe, n1dedges, fill = dmiss, keepExisting = .false.)
+      call realloc(ye, n1dedges, fill = dmiss, keepExisting = .false.)
+
+      ! Allocate contacts
+      call realloc(contacts, (/ 2, n1d2dcontacts /), fill = -999) 
+      call realloc(contacttype, n1d2dcontacts, keepExisting = .false., fill = 0)
+
+      ! Assign values to 1D mesh nodes and edges, and 1d2d contacts 
+      n1dedges = 0 
+      n1d2dcontacts = 0
+      NUMK1D = 0
       KC(:) = 0
-      do L = 1, NUML1D
-         Lnew = L
-         K1 = KN(1,L)
-         K2 = KN(2,L)
-         if (KC(K1) == 0) then
-            k = k+1
-            xn(k) = xk(K1)
-            yn(k) = yk(K1)
-            zn(k) = zk(K1)
-            KC(K1) = -k ! Remember new node number
-         end if
-         if (KC(K2) == 0) then
-            k = k+1
-            xn(k) = xk(K2)
-            yn(k) = yk(K2)
-            zn(k) = zk(K2)
-            KC(K2) = -k ! Remember new node number
-         end if
+      do L=1,NUML1D
+         if (janetcell_ == 0 .or. (kn(3,L) == 1 .or. kn(3,L) == 6)) then
+            n1dedges = n1dedges + 1
 
-         edge_nodes(1,Lnew) = abs(KC(KN(1,L)))
-         edge_nodes(2,Lnew) = abs(KC(KN(2,L)))
-         edge_type(Lnew)    = KN(3,L)
+            K1 = KN(1,L)
+            K2 = KN(2,L)
+            if (KC(K1) == 0) then
+               NUMK1D = NUMK1D+1
+               xn(NUMK1D) = xk(K1)
+               yn(NUMK1D) = yk(K1)
+               zn(NUMK1D) = zk(K1)
+               KC(K1) = -NUMK1D ! Remember new node number
+            end if
+            if (KC(K2) == 0) then
+               NUMK1D = NUMK1D+1
+               xn(NUMK1D) = xk(K2)
+               yn(NUMK1D) = yk(K2)
+               zn(NUMK1D) = zk(K2)
+               KC(K2) = -NUMK1D ! Remember new node number
+            end if
 
-         xe(Lnew) = .5d0*(xk(K1) + xk(K2)) ! TODO: AvD: make this sferic+3D-safe
-         ye(Lnew) = .5d0*(yk(K1) + yk(K2)) ! TODO: AvD: make this sferic+3D-safe
+            edge_nodes(1,n1dedges) = abs(KC(KN(1,L)))
+            edge_nodes(2,n1dedges) = abs(KC(KN(2,L)))
+            edge_type(n1dedges)    = KN(3,L)
+
+            xe(n1dedges) = .5d0*(xk(K1) + xk(K2)) ! TODO: AvD: make this sferic+3D-safe
+            ye(n1dedges) = .5d0*(yk(K1) + yk(K2)) ! TODO: AvD: make this sferic+3D-safe
+
+         else if (kn(3,L) == 3 .or. kn(3,L) == 4 .or. kn(3,L) == 5 .or. kn(3,L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
+            ! 1D2D-type net links, with cell info available.
+            n1d2dcontacts = n1d2dcontacts + 1
+
+            N1 = abs(lne(1,L))
+            N2 = abs(lne(2,L))
+
+            if (N1 > nump) then  ! First point of 1D link is 1D cell
+               K1 = netcell(N1)%nod(1)
+               if (KC(K1) == 0) then
+                  NUMK1D = NUMK1D+1
+                  xn(NUMK1D) = xk(K1)
+                  yn(NUMK1D) = yk(K1)
+                  zn(NUMK1D) = zk(K1)
+                  KC(K1) = -NUMK1D ! Remember new node number
+               end if
+               
+               contacts(1,n1d2dcontacts) = abs(KC(netcell(N1)%nod(1))) ! cell -> orig node -> new node
+               contacts(2,n1d2dcontacts) = N2   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
+            end if
+
+            if (N2 > nump) then  ! First point of 1D link is 1D cell
+               K2 = netcell(N2)%nod(1)
+               if (KC(K2) == 0) then
+                  NUMK1D = NUMK1D+1
+                  xn(NUMK1D) = xk(K2)
+                  yn(NUMK1D) = yk(K2)
+                  zn(NUMK1D) = zk(K2)
+                  KC(K2) = -NUMK1D ! Remember new node number
+               end if
+               contacts(1,n1d2dcontacts) = abs(KC(netcell(N2)%nod(1))) ! cell -> orig node -> new node
+               contacts(2,n1d2dcontacts) = N1   ! 2D cell number in network_data is the same in UGRID mesh2d numbering (see below).
+            end if
+
+            contacttype(n1d2dcontacts) = kn(3,L)
+         endif
       enddo
+
+
 
       if (associated(meshgeom1d%ngeopointx)) then
          if (meshgeom1d%numnode .ge. 0) then ! TODO: LC:  check the number of mesh nodes has not changed 
-         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, numl1d, 0, 0, &
+         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
                                     edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:1), yzw(1:1), &
-                                    crs, -999, dmiss, 1, -999, -999, null(), null(), & ! Indexing is 1 based
+                                    crs, -999, dmiss, start_index, -999, -999, null(), null(), & ! Indexing is 1 based
                                     id_tsp%network1d, network1dname, meshgeom1d%nnodex, meshgeom1d%nnodey, nnodeids, nnodelongnames, &
                                     meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
@@ -9152,9 +9231,9 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
                return
          endif
       else
-         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, numl1d, 0, 0, &
+         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
                                     edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:1), yzw(1:1), &
-                                    crs, -999, dmiss, 1)
+                                    crs, -999, dmiss, start_index)
       endif
 
       !! TODO: AvD: hier verder
@@ -9301,7 +9380,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
       ! TODO: AvD: lnx1d+1:lnx includes open bnd links, which may *also* be 1D boundaries (don't want that in mesh2d)
       ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids2d, mesh2dname, 2, UG_LOC_EDGE + UG_LOC_FACE, numk2d, numl2d, nump, nv, &
                                     edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:nump), yzw(1:nump), &
-                                    crs, -999, dmiss, 1)
+                                    crs, -999, dmiss, start_index)
   
       ! Add edge type variable (edge-flowlink relation)
       call write_edge_type_variable(ncid, id_tsp%meshids2d, mesh2dname, edge_type)  
@@ -9312,6 +9391,16 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
          ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2), zn)
          ierr = nf90_redef(ncid) ! TODO: AvD: I know that all this redef is slow. Split definition and writing soon.
       end if
+
+      !define 1d2dcontacts only after mesh2d is completly defined  
+      if (n1d2dcontacts > 0) then
+         ierr = ug_def_mesh_contact(ncid, id_tsp%meshcontacts, trim(contactname), n1d2dcontacts, id_tsp%meshids2d, id_tsp%meshids1d, UG_LOC_NODE, UG_LOC_FACE, start_index)
+         ierr = nf90_enddef(ncid)
+         ! Put the contacts
+         ierr = ug_put_mesh_contact(ncid, id_tsp%meshcontacts, contacts(1,:), contacts(2,:), contacttype) 
+         ierr = nf90_redef(ncid) ! TODO: AvD: I know that all this redef is slow. Split definition and writing soon.
+      endif
+
 
       if (janetcell_ /= 0 .and. nump > 0) then
          !ierr = nf90_def_dim(mapids%ncid, 'nmesh2d_NetElemMaxNode', nv,     id_netelemmaxnodedim)
