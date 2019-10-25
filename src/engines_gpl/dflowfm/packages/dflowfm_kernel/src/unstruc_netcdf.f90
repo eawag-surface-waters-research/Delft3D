@@ -9747,10 +9747,10 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       kn3(:) = meshgeom%dim ! was 2, Needs to be read from file at some point
 
       ! Backwards compatibility
-      ierr = nf90_inq_varid(ncid, 'NetLinkType', id_netlinktype)
-      if (ierr == nf90_noerr) then
-         ierr = nf90_get_var(ncid, id_netlinktype, kn3, count = (/ meshgeom%numedge /))
-      end if
+      !ierr = nf90_inq_varid(ncid, 'NetLinkType', id_netlinktype)
+      !if (ierr == nf90_noerr) then
+      !   ierr = nf90_get_var(ncid, id_netlinktype, kn3, count = (/ meshgeom%numedge /))
+      !end if
 
       ! ierr = ionc_inq_varid(ioncid, im, 'kn3', iv)
       !ierr = ionc_inq_varid(ioncid, im, 'kn3', iv)
