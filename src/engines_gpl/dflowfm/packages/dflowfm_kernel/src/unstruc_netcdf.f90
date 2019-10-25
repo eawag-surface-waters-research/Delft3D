@@ -9533,6 +9533,16 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       goto 999
    end if
    
+   if (numk_keep == 0 .and. numl_keep == 0) then
+      ! This is to allow more than one call to loadNetwork/unc_read_net_ugrid. Remove any previously read network state.
+      call default_save_ugrid_state()
+      call dealloc(network)
+      network%loaded = .false.
+      network%initialized = .false.
+   else
+      continue ! TODO: I don't think we support reading and appending a new 1D ugrid network to the currently loaded one.
+   end if
+
    ! Old convention, with overlapping points
    if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
    if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
