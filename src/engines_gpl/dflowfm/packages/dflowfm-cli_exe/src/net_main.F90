@@ -232,8 +232,8 @@
 
     if ( md_jamake1d2dlinks .eq. 1 ) then
        ! Make 1D2D links for already loaded net file.
-       imake1d2dtype = I1D2DTP_1TON_EMB
-       ierr = make1D2Dinternalnetlinks()
+       imake1d2dtype = I1D2DTP_1TO1
+       ierr = make1D2Dinternalnetlinks() ! TODO: replace this by call to make1D2Dconnections, but check FILEMENU in batchmode.
        if (ierr /= DFM_NOERR) then
           write (msgbuf, '(a,a,a,i0,a)') 'Error, failed to create 1D2D links for file ''', trim(md_netfile), '''. Error code: ', ierr, '.'
           call warn_flush()
