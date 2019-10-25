@@ -9571,6 +9571,9 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    ! Construct network with with old files (nodesOnBranchVertices). In this function 1d edge nodes (kn array) are also set
    if (nodesOnBranchVertices==1) then
       ierr = read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_last, numl_last)
+      ! TODO: AvD: do we need the two lines below here?
+      numk_read = numk_last
+      numl_read = numl_last
    endif
 
    ierr = ionc_get_coordinate_reference_system(ioncid, crs)
