@@ -36146,10 +36146,10 @@ end function ispumpon
  do n  = 1,numsrc
     if (jamess(n) == 1) then
         write(msgbuf, *) 'Extraction flux larger than cell volume at point 1 of : ', trim( srcname(n) )
-        call mess(LEVEL_INFO, msgbuf)
+        call mess(LEVEL_WARN, msgbuf)
      else if (jamess(n) == 2) then
         write(msgbuf, *) 'Extraction flux larger than cell volume at point 2 of : ', trim( srcname(n) )
-        call mess(LEVEL_INFO, msgbuf)
+        call mess(LEVEL_WARN, msgbuf)
     endif
  enddo
 
