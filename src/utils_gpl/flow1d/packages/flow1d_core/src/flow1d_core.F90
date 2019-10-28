@@ -29,7 +29,6 @@ module flow1d_core
 !  $HeadURL$
 !-------------------------------------------------------------------------------
    
-    use ModelGlobalData
     
     implicit none
     
