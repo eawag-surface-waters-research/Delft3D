@@ -2978,6 +2978,7 @@ src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/IniField1dField_wat
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/IniField1dField_waterlevel/sobek3_to_dflowfm.log -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/MDUversion/new_general.mdu -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/MDUversion/old_model.mdu -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/cross_sections/cross[!!-~]sections.xlsx -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/cross_sections/crsdef.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_compare_version_output.py -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_version_lnx.log -text
@@ -13020,7 +13021,6 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/culvert.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/df1d_transport.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/flow1d_core.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/general_structure.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_core/src/initialize_1d.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/nodes.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/quantity_statistics.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/spatial_data.f90 -text

@@ -44,10 +44,10 @@ module m_branch
    public getCalcPoints
    public getCalcPoint
    public get2CalcPoints
-   public admin_branch
    public fill_hashtable
    public getLinkIndex
    public getGridPointNumber
+   public admin_branch
 
    public BR_EMBEDDED, BR_CONNECTED, BR_ISOLATED, BR_BOUNDARY
    
@@ -100,8 +100,6 @@ module m_branch
 
       integer, allocatable           :: lin(:)                  !< link numbers for links in this channel
       integer, allocatable           :: grd(:)                  !< gridpoint numbers for links in this channel
-      integer, allocatable           :: grd_buf(:)              !< dflowfm gridpoint numbers for links in this channel
-                                                                !< used to keep dflowfm grd-values
    
    end type t_branch
 
@@ -149,7 +147,6 @@ module m_branch
             if (allocated(brs%branch(i)%yu))                deallocate(brs%branch(i)%yu)
             if (allocated(brs%branch(i)%lin))               deallocate(brs%branch(i)%lin)
             if (allocated(brs%branch(i)%grd))               deallocate(brs%branch(i)%grd)
-            if (allocated(brs%branch(i)%grd_buf))           deallocate(brs%branch(i)%grd_buf)
          enddo   
          deallocate(brs%branch)
       endif
@@ -395,13 +392,13 @@ module m_branch
       
       call hashfill(brs%hashlist)
    end subroutine fill_hashtable_brs
-   subroutine admin_branch(brs, ngrid, nlink)
+
+   subroutine admin_branch(brs, nlink)
    
       type (t_branchSet), intent(inout), target :: brs
-      integer, intent(inout) :: ngrid
       integer, intent(inout) :: nlink
       
-      integer ibr, i
+      integer ibr, i, ngrid
       type(t_branch), pointer :: pbr
       
       do ibr= 1, brs%count
@@ -413,11 +410,8 @@ module m_branch
             pbr%lin(i) = nlink
          enddo
          
-         !TODO: change this part in order to remove double gridpoint counting:
          if (allocated(pbr%grd)) deallocate(pbr%grd) 
-         if (allocated(pbr%grd_buf)) deallocate(pbr%grd_buf) 
          allocate(pbr%grd(pbr%gridPointsCount))
-         allocate(pbr%grd_buf(pbr%gridPointsCount))
          ngrid = pbr%Points(1) - 1
          if (pbr%FromNode%gridNumber == -1) then
             pbr%FromNode%gridNumber = ngrid + 1

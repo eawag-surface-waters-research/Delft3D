@@ -145,18 +145,20 @@ module m_oned_functions
       nbr = network%brs%count
       do ibr = 1, nbr
          pbr => network%brs%branch(ibr)
+         call realloc(pbr%lin, pbr%uPointsCount)
+         call realloc(pbr%grd, pbr%gridPointsCount)
          lin => pbr%lin
          grd => pbr%grd
          L = lin(1)
-         k1  =  ln(1,L)
+         k1  =  iabs(ln(1,L))
          pbr%FromNode%gridNumber = k1
          upointscount = pbr%uPointsCount
          do i = 1, uPointsCount
             L = lin(i)
-            k1 = ln(1,L)
+            k1 = iabs(ln(1,L))
             grd(i) = k1
          enddo
-         k2 = ln(2,lin(upointscount))
+         k2 = ln(2,iabs(lin(upointscount)))
          pbr%tonode%gridnumber = k2
          grd(upointscount+1) = k2
       enddo

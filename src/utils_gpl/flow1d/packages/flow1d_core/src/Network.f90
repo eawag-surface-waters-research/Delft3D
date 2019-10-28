@@ -102,18 +102,18 @@ module m_network
    
 contains
 
-   subroutine realloc_1dadmin(adm, links_count, gridpoints_count)
+   subroutine realloc_1dadmin(adm, links_count, gridp_count)
 
       type(t_administration_1d)  :: adm
       integer, intent(in)        ::  links_count
-      integer, intent(in)        ::  gridpoints_count
+      integer, intent(in)        ::  gridp_count
       
       if (.not. allocated(adm%lin2str))      allocate(adm%lin2str   (links_count))  
       if (.not. allocated(adm%lin2ibr))      allocate(adm%lin2ibr   (links_count))   
       if (.not. allocated(adm%lin2local))    allocate(adm%lin2local (links_count)) 
       if (.not. allocated(adm%lin2grid))     allocate(adm%lin2grid  (links_count)) 
       if (.not. associated(adm%line2cross))  allocate(adm%line2cross(links_count))
-      if (.not. associated(adm%gpnt2cross))  allocate(adm%gpnt2cross(gridpoints_count))
+      if (.not. associated(adm%gpnt2cross))  allocate(adm%gpnt2cross(gridp_count))
       if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,links_count))
       adm%hysteresis_for_summerdike = .true.
       
@@ -181,9 +181,7 @@ contains
    
       type(t_branch), pointer :: pbr
    
-      call admin_nodes(network%nds, ngrid)
-      call admin_branch(network%brs, ngrid, nlink)
-      call admin_transport(network%trans, network%brs)
+      call admin_branch(network%brs, nlink)
       network%gridpointsCount = ngrid
       network%l1d    = nlink
       network%l1dall = nlink
@@ -242,6 +240,10 @@ contains
       adm => network%adm
       
       adm%lin2str = -huge(1)
+      do i = 1, network%sts%count
+         adm%lin2str(network%sts%struct(i)%linknumbers(1)) = i
+      enddo
+
       adm%lin2ibr   = -huge(1)
       adm%lin2local = -huge(1)
       adm%lin2grid  = -huge(1)
@@ -393,9 +395,6 @@ contains
                      adm%line2cross(ilnk)%f  = 1.0d0
                   endif
                   
-                  chezy = 0.0d0
-                  ll = adm%lin2local(ilnk)
-                  f = adm%line2cross(ilnk)%f
                endif
                   
             enddo
@@ -1113,7 +1112,6 @@ subroutine update_flow1d_admin(network, lc)
       pbr%Xs(1)                  = pbr%Xs(1)                 
       pbr%Ys(1)                  = pbr%Ys(1)                 
       pbr%grd(1)                 = pbr%grd(1)                
-      pbr%grd_buf(1)             = pbr%grd_buf(1)            
       do LL = 1, upointscount
          if (pbr%lin(LL)==LC(Ltoberemoved_index) ) then
             Ltoberemoved_index = Ltoberemoved_index + 1
@@ -1147,8 +1145,6 @@ subroutine update_flow1d_admin(network, lc)
             pbr%dx(LL_new)                    = pbr%dx(LL)                 
             pbr%lin(LL_new)                   = Lnew               
             pbr%grd(LL_new+1)                 = pbr%grd(LL+1)                
-            pbr%grd_buf(LL_new+1)             = pbr%grd_buf(LL+1)            
-            
          endif
       enddo
    enddo

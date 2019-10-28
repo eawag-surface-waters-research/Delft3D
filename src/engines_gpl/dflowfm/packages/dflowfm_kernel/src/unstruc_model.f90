@@ -464,16 +464,10 @@ subroutine loadModel(filename)
        iDuml = 0
        call admin_network(network, iDumk, iDuml)
 
-       if (network%L1D > 0) then
-         call read_1d_attributes(md_1dfiles, network)
-       endif
+       call read_1d_attributes(md_1dfiles, network)
 
+       ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
        call initialize_1dadmin(network, network%numl, network%numk)
-
-       ! Set grd back to dflowfm-values
-       do i = 1, network%brs%count
-          network%brs%branch(i)%grd = network%brs%branch(i)%grd_buf
-       enddo
 
        ! fill bed levels from values based on links
        do L = 1, network%numl

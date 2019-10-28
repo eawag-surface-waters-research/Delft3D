@@ -9743,9 +9743,6 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          network%numk = meshgeom%numnode
          ! construct network and administrate
          ierr = construct_network_from_meshgeom(network, meshgeom, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname, nodesOnBranchVertices)
-         if (network%loaded) then
-            call admin_network(network, numk, numl)
-         endif
          ! get the edge nodes, usually not available (needs to be generated)
          if (meshgeom%numedge.eq.-1) then
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)
@@ -13721,9 +13718,6 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
                kn(2,numl) = pbr%grd(k+1)
                kn(3,numl) = 1
             enddo
-
-            ! Store dflowfm grd-values into buffer for later re-use.
-            pbr%grd_buf = pbr%grd
 
          enddo
 
