@@ -1099,7 +1099,7 @@ function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids
                                meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, & 
                                meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%ngeometry, &
                                meshgeom%nbranchorder, &
-                               nodeids, nodelongnames, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%edgebranchidx, meshgeom%edgeoffsets)
+                               nodeids, nodelongnames, meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%edgebranchidx, meshgeom%edgeoffsets, zn = meshgeom%nodez)
    
 end function ug_write_mesh_struct
 
@@ -1115,7 +1115,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                               ngeopointx, ngeopointy, ngeometry, &
                               nbranchorder, &
                               nodeids, nodelongnames, nodebranchidx, nodeoffsets, edgebranchidx, edgeoffsets, &
-                              writeopts) result(ierr)
+                              writeopts, zn) result(ierr)
    use m_alloc
    use string_module
 
@@ -1146,6 +1146,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer, optional,        intent(in) :: layerType !< Type of vertical layering in the mesh. One of LAYERTYPE_* parameters. Optional, only used if numLayer >= 1.
    real(kind=dp), optional, pointer, intent(in) :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma). Optional, only used if numLayer >= 1.
    real(kind=dp), optional, pointer, intent(in) :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma). Optional, only used if numLayer >= 1.
+   real(kind=dp), optional, pointer, intent(in) :: zn(:)           !< z-coordinates of the mesh nodes.
    
    ! Optional network1d variables for 1d UGrid                            
    type(t_ug_network), optional, intent(inout)               :: networkids
@@ -1319,11 +1320,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 #endif
    end if
 
-   !ierr = ug_def_var(ncid, meshName, prefix//'_u1', nf90_double, UG_LOC_EDGE, 'mean', (/ id_nodedim /), mid_nodez)
-   !ierr = nf90_put_att(ncid, mid_nodez, 'units',          'm')
-   !ierr = nf90_put_att(ncid, mid_nodez, 'standard_name',  'altitude')
-   !ierr = nf90_put_att(ncid, mid_nodez, 'long_name',      'z-coordinate of mesh nodes')
-
    !ierr = nf90_def_var(inetfile, 'NetLinkType', nf90_int, id_netlinkdim, id_netlinktype)
    !ierr = nf90_put_att(inetfile, id_netlinktype, 'long_name',    'type of netlink')
    !ierr = nf90_put_att(inetfile, id_netlinktype, 'valid_range',   (/ 0, 4 /))
@@ -1460,7 +1456,11 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Nodes:
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodex),    xn(1:numNode))
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodey),    yn(1:numNode))
-!   ierr = nf90_put_var(ncid, meshidsvec(mid_nodez,    zn(1:numNode))
+   if (present(zn)) then
+      if (associated(zn)) then
+         ierr = nf90_put_var(ncid, meshids%varids(mid_nodez),    zn(1:numNode))
+      end if
+   endif
 #ifdef HAVE_PROJ
    if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
       call realloc(lonn, size(xn), fill=dmiss, keepExisting=.false.)
