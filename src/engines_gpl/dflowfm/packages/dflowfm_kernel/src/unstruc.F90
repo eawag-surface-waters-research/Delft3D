@@ -29766,7 +29766,7 @@ mainloop:do n  = 1, nwf
                 else
                    fetch(n,k) = min(distmin, celsiz)
                 endif
-                fetdp(n,k) = max( hs(k), .1d0)
+                fetdp(n,k) = max( s1(k) - bl(k), .1d0)
                 if (jagui > 0) then
                    CALL rCIRc(Xz(k),Yz(k) ) !, fetch(n,k))
                    !call adddot(Xz(k),Yz(k),1d0)
