@@ -34920,13 +34920,13 @@ end subroutine setbobs_fixedweirs
 
                       wetdown = max(wetdown, 0.0001d0)
                       call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                          q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob0(:,L), wetdown, .true.)
+                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, bob0(:,L), wetdown, .true.)
                       bl(k1) = min(bl(k1), bob0(1,L))
                       bl(k2) = min(bl(k2), bob0(2,L))
 
                    case (ST_UNI_WEIR)
                       call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, bob0(:,L), kfu, s1(k1), s1(k2), &
-                          q1(L), q1(L), u1(L), u0(L), dx(L), dts)
+                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts)
                    case (ST_BRIDGE)
                       dpt = max(epshu, s1(k1) - bob0(1,L))
                       call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
@@ -34935,7 +34935,7 @@ end subroutine setbobs_fixedweirs
                       call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
                    ! WU(L) is the average width at the bridge (max of up/downstream side).
                       wu(L) = max(wu(L), as2/dpt)
-                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), u1(L), dx(L), dts,                            &
+                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), pstru%u1(L0), dx(L), dts,                            &
                                as1, as2, bob0(:,L))
                    case default
                       write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
