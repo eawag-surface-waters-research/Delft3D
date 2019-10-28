@@ -39,7 +39,6 @@ libflow1d_core_la_SOURCES = \
          bridge.f90 \
          structures.f90 \
          compound.f90 \
-         ModelGlobalData.f90 \
          ModelParameters.f90 \
          Storage.f90 \
          ObservationPoints.f90 \

@@ -32,7 +32,6 @@ module m_readCrossSections
    use M_newcross
    use m_CrossSections
    use MessageHandling
-   use modelGlobalData
    use properties
    use m_network
    use m_GlobalParameters

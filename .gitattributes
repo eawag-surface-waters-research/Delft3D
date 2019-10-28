@@ -12997,7 +12997,6 @@ src/utils_gpl/flow1d/packages/flow1d_core/src/Dambreak.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/ExtraResistance.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/GlobalParameters.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/Makefile.am -text
-src/utils_gpl/flow1d/packages/flow1d_core/src/ModelGlobalData.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/ModelParameters.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/ModelTypes.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_core/src/Network.f90 -text

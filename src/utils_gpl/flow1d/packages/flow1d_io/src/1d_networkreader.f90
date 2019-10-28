@@ -30,7 +30,6 @@ module m_1d_networkreader
 !-------------------------------------------------------------------------------
    
    use MessageHandling
-   use modelGlobalData
    use properties
    use m_hash_search
    use m_hash_list
