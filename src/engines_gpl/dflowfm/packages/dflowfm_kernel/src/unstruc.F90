@@ -16579,7 +16579,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_missing
     use netcdf
     use unstruc_files, only: defaultFilename
-    use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial
+    use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -16736,6 +16736,7 @@ subroutine unc_write_his(tim)            ! wrihis
         end if
 
         if (numobs+nummovobs > 0) then
+            call unc_write_flowgeom_filepointer(ihisfile, 1)
             ierr = nf90_def_dim(ihisfile, 'stations', numobs+nummovobs, id_statdim)
 
             if (nummovobs > 0) then
