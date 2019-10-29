@@ -40,7 +40,7 @@ else
 fi
 
 
-scripts_lgpl/linux/oss-install.sh $prefix $dest_main $project
+scripts_lgpl/linux/oss-install.sh $prefix $dest_main $project 2>>oss-install_stderr.log
 
 cd $curdir
 
