@@ -34940,13 +34940,17 @@ end subroutine setbobs_fixedweirs
                    case default
                       write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
                       call err_flush()
-                end select
+                   end select
 
                 ! store computed fu, ru and au in structure object. In case this structure
                 ! is a part of a compound structure this data will be used in computeCompound
-                call set_fu_ru_structure(pstru, L0, fu(L), ru(L), au(L))
-                call check_for_changes_on_structures(LEVEL_WARN, pstru, bob0(:,L))
+             else
+                fu(L) = 0d0
+                ru(L) = 0d0
+                au(L) = 0d0
              endif
+             call set_fu_ru_structure(pstru, L0, fu(L), ru(L), au(L))
+             call check_for_changes_on_structures(LEVEL_WARN, pstru, bob0(:,L))
           enddo
        endif
 
