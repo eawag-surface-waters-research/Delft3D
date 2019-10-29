@@ -329,7 +329,7 @@ end subroutine reset_structures
 !! Note: old-style structures may call this with istrtypein = ST_UNSET.
 subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    use m_missing, only: dmiss
-   use m_flow, only: q1, s1, au
+   use m_flow, only: q1, s1, au, hu
    use m_flowgeom, only: wu, ln, teta, bl
    use m_1d_structures, only: get_discharge_under_compound_struc
    use m_General_Structure
@@ -383,7 +383,11 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
       if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
          k1 = ln(1,L)
          k2 = ln(2,L)
-         qcmp = get_discharge_under_compound_struc(network%sts%struct(istru), L0, s1(k1), s1(k2), teta(L))
+         if (hu(L) > 0) then
+            qcmp = get_discharge_under_compound_struc(network%sts%struct(istru), L0, s1(k1), s1(k2), teta(L))
+         else
+            qcmp = 0d0
+         end if
          valstruct(2) = valstruct(2) + qcmp*dir
       else
          valstruct(2) = valstruct(2) + q1(L)*dir
@@ -396,7 +400,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    valstruct(4) = valstruct(4) + s1(kd)*wu(L)
    valstruct(5) = valstruct(5) + (s1(ku) - s1(kd))*wu(L)
 
-   if (istrtypein /= ST_PUMP) then ! Compute flow are for structures except for pump
+   if (istrtypein /= ST_PUMP) then ! Compute flow area for structures except for pump
       if (istru > 0) then ! When it is not old weir and not old general structure and not a compound structure
          if (network%sts%struct(istru)%compound > 0) then ! for a structure that belongs to a compound structure
             valstruct(6) = valstruct(6) + network%sts%struct(istru)%au(L0)

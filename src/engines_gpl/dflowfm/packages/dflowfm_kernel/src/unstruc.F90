@@ -34958,7 +34958,9 @@ end subroutine setbobs_fixedweirs
        pcompound => network%cmps%compound(i)
        do L0 = 1, pcompound%numlinks
           L = pcompound%linknumbers(L0)
-          call computeCompound(pcompound, network%sts%struct, L0, fu(L), ru(L), au(L))
+          if (hu(l) > 0) then
+             call computeCompound(pcompound, network%sts%struct, L0, fu(L), ru(L), au(L))
+          end if
        enddo
     enddo
 
@@ -36701,7 +36703,11 @@ subroutine reallocsrc(n)
        L = pstru%linknumbers(L0)
        k1 = ln(1,L)
        k2 = ln(2,L)
-       call set_u1q1_structure(pstru, L0, s1(k1), s1(k2), teta(L))
+       if (hu(L) > 0) then
+          call set_u1q1_structure(pstru, L0, s1(k1), s1(k2), teta(L))
+       else
+          pstru%u1(L0) = 0d0
+       end if
     end do
  end do
 
