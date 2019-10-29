@@ -232,7 +232,7 @@ contains
 
          call flqhgs(fu(1), ru(1), u1L, dxL, dt, structwidth, kfuL, au(1), qL, flowDir, &
                      hu, hd, uu, zs, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(1,L0))
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(1,L0), velheight)
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
          
          !calculate flow over gate
@@ -243,7 +243,7 @@ contains
 
          call flqhgs(fu(2), ru(2), u1L, dxL, dt, structwidth, kfuL, au(2), qL, flowDir, &
                      hu, hd, uu, zgate, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(3,L0))
+                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(3,L0), velheight)
       endif
       
       if (gatefraction< 1d0 - gatefrac_eps) then
@@ -254,7 +254,7 @@ contains
          
          call flqhgs(fu(3), ru(3), u1L, dxL, dt, structwidth, kfuL, au(3), qL, flowDir, &
                      hu, hd, uu, zs, (1d0-gatefraction)*wstr, (1d0-gatefraction)*w2, (1d0-gatefraction)*wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(2,L0))
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(2,L0), velheight)
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
 
       endif
@@ -396,7 +396,7 @@ contains
    subroutine flqhgs(fuL, ruL, u1L, dxL, dt, structwidth, kfuL, auL, qL, flowDir, &
                   hu, hd, uu, zs, wstr, w2, wsd, zb2, ds1, ds2,   &
                   dg, rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc,  &
-                  jarea, ds, state)
+                  jarea, ds, state, velheight)
        use m_GlobalParameters
        implicit none
       !
@@ -435,6 +435,7 @@ contains
       double precision, intent(in)   :: zs         !< Bed level at centre of structure.
       integer, intent(out)           :: state      !< Flow state of the structure
       double precision, intent(in)   :: dx_struc   !< length of structure
+      logical, intent(in)            :: velheight  !< logical indicates whether the momentum equation has to be taken into account
       
       !
       !
@@ -470,32 +471,39 @@ contains
          !        Compute critical water depth at the
          !        sill, dc and water depth at the sill,ds
          !
-         dlim = hs1*(wstr/w2*2./3.*sqrt(2./3.))**(2.0/3.0)
-         hd1 = max(hd, zb2 + dlim*0.9D0)
-         !
-         dc = 2.0D0/3.0D0*hs1
-         !
-         !        Calculate ds by solving third order algebraic equation
-         !
-         call flgsd3(wsd, wstr, zs, w2, zb2, ds1, ds2, elu, hd1, rhoast, cwd, ds, &
-                   & lambda)
-         !
-          if (ds>=dc) then
-            if (dg>=ds) then
-               !
-               !              - drowned weir -
-               !
-               state = 2
-            else
-               !
-               !              - gate flow -
-               !
-               state = 3
-               !
-               !              adapt coefficients on basis of Ds & Cwd
-               !
-               call flccgs(dg, ds, cgd, cgf, cwd, mugf, cgda, cgfa, mugfa)
-            endif
+           if (.not. velheight) then
+              ds = hd-zs
+           else
+              
+              dlim = hs1*(wstr/w2*2./3.*sqrt(2./3.))**(2.0/3.0)
+              hd1 = max(hd, zb2 + dlim*0.9D0)
+              !
+              !
+              !        Calculate ds by solving third order algebraic equation
+              !
+              call flgsd3(wsd, wstr, zs, w2, zb2, ds1, ds2, elu, hd1, rhoast, cwd, ds, &
+                        & lambda)
+           endif
+              
+           dc = 2.0D0/3.0D0*hs1
+           
+          !
+           if (ds>=dc) then
+             if (dg>=ds) then
+                !
+                !              - drowned weir -
+                !
+                state = 2
+             else
+                !
+                !              - gate flow -
+                !
+                state = 3
+                !
+                !              adapt coefficients on basis of Ds & Cwd
+                !
+                call flccgs(dg, ds, cgd, cgf, cwd, mugf, cgda, cgfa, mugfa)
+             endif
          else
             !
             !           Adapt Cwf coefficient
@@ -540,8 +548,13 @@ contains
             !
             cgd2 = cgda*mugfa
             !
-            call flgsd2(wsd, wstr, zs, w2, zb2, dg, ds1, ds2, elu, hd1, rhoast,   &
-                      & cgd2, imag, ds, lambda)
+            if (velheight) then
+               call flgsd2(wsd, wstr, zs, w2, zb2, dg, ds1, ds2, elu, hd1, rhoast,   &
+                         & cgd2, imag, ds, lambda)
+            else 
+               ds = hd-zs
+               imag = .false.
+            endif
             !
             if (imag) then
                !

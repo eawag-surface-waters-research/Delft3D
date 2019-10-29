@@ -1444,7 +1444,6 @@ module m_readstructures
       
       allocate(generalst)
 
-      generalst%velheight = .true.
       generalst%ws = 1d10
       call prop_get_double(md_ptr, '', 'crestWidth', generalst%ws)
 
@@ -1454,6 +1453,9 @@ module m_readstructures
       generalst%mugf_pos = 1d0
       if (success) call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos)
 
+      generalst%velheight = .true.
+      call prop_get(md_ptr, '', 'useVelocityHeight',  generalst%velheight)
+      
       ! all levels are set to -1d-10. In the time loop these parameters will be set to the bed level.
       generalst%zu1                = -1d10
       generalst%zu2                = -1d10
@@ -1477,7 +1479,6 @@ module m_readstructures
       generalst%gatedoorheight     = 1d10
       generalst%gateopeningwidth   = generalst%ws
       generalst%crestlength        = 0d0
-      generalst%velheight          = .true.
       generalst%openingDirection   = GEN_SYMMETRIC
 
    end subroutine readWeirAsGenStru
@@ -1499,8 +1500,6 @@ module m_readstructures
       success = .true.
       allocate(generalst)
 
-      generalst%velheight = .true.
-      
       call get_value_or_addto_forcinglist(md_ptr, 'crestLevel', generalst%zs, st_id, ST_GENERAL_ST, forcinglist, success1)
       success = success .and. check_input_result(success1, st_id, 'crestLevel')
 
@@ -1513,6 +1512,9 @@ module m_readstructures
       call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, &
                                                        forcinglist, success1)
       success = success .and. check_input_result(success1, st_id, 'gateLowerEdgeLevel')
+
+      generalst%velheight = .true.
+      call prop_get(md_ptr, '', 'useVelocityHeight',  generalst%velheight)
 
       ! Set default/standard values for orifice
       ! all levels are set to -1d-10. In the time loop these parameters will be set to the bed level.
@@ -1537,7 +1539,6 @@ module m_readstructures
       generalst%gatedoorheight     = 1d10
       generalst%gateopeningwidth   = 0d0
       generalst%crestlength        = 0d0
-      generalst%velheight          = .true.
       generalst%openingDirection   = GEN_SYMMETRIC ! TODO: once 2D structures are being read by this reader, also support fromleft and fromright
 
    end subroutine readOrificeAsGenStru
@@ -1579,8 +1580,6 @@ module m_readstructures
 
       success = .true.
       allocate(generalst)
-
-      generalst%velheight = .true.
 
       generalst%wu1                = 10d0
       call prop_get_double(md_ptr, '', 'upstream1Width', generalst%wu1, success1)
@@ -1643,6 +1642,9 @@ module m_readstructures
       generalst%extraresistance    = 0d0
       call prop_get_double(md_ptr, '', 'extraResistance', generalst%extraresistance)
       
+      generalst%velheight = .true.
+      call prop_get(md_ptr, '', 'useVelocityHeight',  generalst%velheight)
+
    end subroutine readGeneralStructure
 
 
