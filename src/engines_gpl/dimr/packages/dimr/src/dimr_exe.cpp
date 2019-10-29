@@ -126,7 +126,11 @@ int main (int     argc,
 
         doFinalize = true;
 
-        DHE->lib_update();
+        int state = DHE->lib_update();
+        if (state != 0)
+        {
+            throw Exception(true, (Exception::ErrorCode)state, "dimr_exe lib_update failed");
+        }
         
         doFinalize = false;
 
@@ -230,7 +234,7 @@ void DimrExe::lib_initialize(void)
 }
 
 //------------------------------------------------------------------------------
-void DimrExe::lib_update(void)
+int DimrExe::lib_update(void)
 {
     double tStart;
     double tEnd;
@@ -239,7 +243,8 @@ void DimrExe::lib_update(void)
     (this->dllGetStartTime) (&tStart);
     (this->dllGetEndTime) (&tEnd);
     tStep = tEnd - tStart;
-    (this->dllUpdate) (tStep);
+    int state = (this->dllUpdate) (tStep);
+    return state;
 }
 
 //------------------------------------------------------------------------------

@@ -28,6 +28,8 @@
 #endif
 
 #include <cstring>
+#include <string>
+#include <sstream>
 
 // static added to prevent name conflicts on Linux.
 static Dimr * thisDimr = Dimr::GetInstance();     // global pointer to single object instance
@@ -234,7 +236,17 @@ extern "C" {
 				chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
 				thisDimr->log->Write(FATAL, thisDimr->my_rank, "%s.Update(%6.1f)", thisDimr->control->subBlocks[0].unit.component->name, tStep);
 				thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
-				(thisDimr->control->subBlocks[0].unit.component->dllUpdate) (tStep);
+				int state = (thisDimr->control->subBlocks[0].unit.component->dllUpdate) (tStep);
+                if (state != 0)
+                {
+                    stringstream ss;
+                    ss << state;
+                    std::string componentName = thisDimr->control->subBlocks[0].unit.component->name;
+                    std::string message = "#### ERROR: dimr update ABORT,: " + componentName + " update failed, with return value " + ss.str() + " \n";
+                    printf(message.c_str());
+                    thisDimr->log->Write(INFO, thisDimr->my_rank, message.c_str(), thisDimr->configfile);
+                    return state;
+                }
 				thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
 				(thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
 			}

@@ -736,9 +736,18 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             chdir(thisComponent->workingDir);
                             log->Write (FATAL, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
                             timerStart(thisComponent);
-                            (thisComponent->dllUpdate) (tUpdate);
+                            int state = (thisComponent->dllUpdate) (tUpdate);
+                            if (state != 0)
+                            {
+                                stringstream ss;
+                                ss << *currentTime;
+                                string message = "Could not update the component " + std::string(thisComponent->name) + " at time " + ss.str() + "\n";
+                                throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+                            }
                             timerEnd(thisComponent);
-                        } else {
+                        } 
+                        else 
+                        {
                             // Coupler
                             dimr_coupler * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
                             double * transferValuePtr;
