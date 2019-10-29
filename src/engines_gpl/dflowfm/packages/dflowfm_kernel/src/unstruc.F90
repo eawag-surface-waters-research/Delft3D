@@ -34886,10 +34886,12 @@ end subroutine setbobs_fixedweirs
                 k2 = ln(2,L)
 
                select case(network%sts%struct(istru)%type)
-                   case (ST_WEIR)
+               case (ST_WEIR)
+                     ! Note: computeweir is not suitable for use in a compound structure
                       call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
                                        q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
                    case (ST_ORIFICE)
+                     ! Note: ComputeOrifice is not suitable for use in a compound structure
                       call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
                        & u1(L), u0(L), dx(L), dts, state)
                    case (ST_GENERAL_ST)
