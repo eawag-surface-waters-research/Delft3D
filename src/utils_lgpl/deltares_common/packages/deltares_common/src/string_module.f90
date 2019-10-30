@@ -870,6 +870,7 @@ module string_module
       !***************************************************************************
       isFirstBuffer = .true.
       do
+        buffer = ''
         if (present(iomsg)) then
             read (unit, "(A)", ADVANCE='NO', IOSTAT=stat, IOMSG=iomsg, SIZE=size)  buffer
         else

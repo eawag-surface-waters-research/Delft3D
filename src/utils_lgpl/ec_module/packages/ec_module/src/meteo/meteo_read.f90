@@ -91,9 +91,9 @@ function readtime(minp, meteoitem, flow_itdate, flow_tzone, tread) result(succes
       return
    endif
    !
-   rec             = ' '
    time_definition = ' '
    do
+      rec             = ' '
       call GetLine(minp, rec, ierr)
       if (ierr /= 0) then
          meteomessage = 'Meteo input: Premature end of file; expecting data at additional time'
