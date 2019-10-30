@@ -282,7 +282,7 @@ subroutine read_cldfile(md_cldfile, clddata, phase)
            call mess(LEVEL_INFO,'    Number of other definitions               = ', ncldnrm )
            call mess(LEVEL_INFO,'    ____________________________________________________________')
            call mess(LEVEL_INFO,'    Total number of definitions               = ', ncld )
-           call mess(LEVEL_INFO,'*** Succesfully read calibration defintition input ')
+           call mess(LEVEL_INFO,'*** Succesfully read calibration definition input ')
        endif 
     
        close (luntmp)
