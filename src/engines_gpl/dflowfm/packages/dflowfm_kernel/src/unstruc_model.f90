@@ -336,7 +336,7 @@ use unstruc_channel_flow
 
     md_ncformat     = 3               !< NetCDF format (3: classic, 4: NetCDF4+HDF5)
 
-    md_fou_step     = 1               !< default: fourier analysis is updated every computational timestep 
+    md_fou_step     = 0               !< default: fourier analysis is updated on a user-timestep basis
 
     md_jaAutoStart     = MD_NOAUTOSTART !< Autostart simulation after loading or not.
 
