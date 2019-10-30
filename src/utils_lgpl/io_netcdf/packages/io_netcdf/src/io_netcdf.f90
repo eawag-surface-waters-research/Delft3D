@@ -1288,8 +1288,12 @@ function ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom, network1d
 
    allocate(nodeids(meshgeom%numnode))
    allocate(nodelongnames(meshgeom%numnode))
-   nodeids       = meshgeom%nodeids
-   nodelongnames = meshgeom%nodelongnames
+   if(associated(meshgeom%nodeids)) then
+     nodeids       = meshgeom%nodeids
+   end if
+   if(associated(meshgeom%nodelongnames)) then
+     nodelongnames = meshgeom%nodelongnames
+   endif
    
    ierr = ug_write_mesh_struct( ncid = datasets(ioncid)%ncid, meshids = meshids, networkids = networkids, crs = datasets(ioncid)%crs, meshgeom = meshgeom, nodeids=nodeids, nodelongnames=nodelongnames, network1dname = network1dname)
    
