@@ -21802,8 +21802,7 @@ end subroutine unc_write_shp
             dxorgL = dx(L)
             dx(L)  = dxwuimin2D*wu(L)
             dxi(L) = 1d0/dx(L)
-            write(errorMessage,*) 'Circumcentre distance dx(L)  < dxwuimin2D*wu(L) : xu, yu, old dx, new dx: ', xu(L), yu(L), dxorgL, dx(L)
-            call mess(LEVEL_INFO, errorMessage )
+            write(Msgbuf,'(A,4F15.6)') 'Circumcentre distance dx(L)  < dxwuimin2D*wu(L) : xu, yu, old dx, new dx: ', xu(L), yu(L), dxorgL, dx(L) ; call msg_flush()
        endif
     enddo
  endif
