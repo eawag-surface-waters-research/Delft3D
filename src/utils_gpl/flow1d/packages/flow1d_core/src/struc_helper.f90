@@ -50,18 +50,20 @@ module m_struc_helper
       !
       ! Global variables
       !
-      logical, intent(in)             :: velheight     !< Indicates whether the velocity height is taken into account or if the water level is used.
-      double precision, intent(in)    :: s1ml          !< Water level at flow link's left side.
-      double precision, intent(in)    :: s1mr          !< Water level at flow link's right side.
-      double precision, intent(in)    :: alm           !< Flow area at flow link's left side.
-      double precision, intent(in)    :: arm           !< Flow area at flow link's right side.
-      double precision, intent(in)    :: qtotal        !< Total discharge through flow link (in case of compound structures this might be larger than the
+      double precision, intent(in   ) :: s1ml          !< Water level at flow link's left side.
+      double precision, intent(in   ) :: s1mr          !< Water level at flow link's right side.
+      double precision, intent(in   ) :: alm           !< Flow area at flow link's left side.
+      double precision, intent(in   ) :: arm           !< Flow area at flow link's right side.
+      double precision, intent(in   ) :: qtotal        !< Total discharge through flow link (in case of compound structures this might be larger than the
                                                        !< discharge through the actual structure).
-      double precision, intent(in)    :: crest         !< Crest level.
-      double precision, intent(  out) :: hd            !< Downstream water level.
-      double precision, intent(  out) :: hu            !< Upstream water level.
+      logical,          intent(in   ) :: velheight     !< Indicates whether the velocity height is taken into account or if the water level is used.
       double precision, intent(  out) :: rholeft       !< Water density at flow link's  left side of structure (unimplemented).
       double precision, intent(  out) :: rhoright      !< Water density at flow link's right side of structure (unimplemented).
+      double precision, intent(   in) :: crest         !< Crest level.
+      double precision, intent(  out) :: hu            !< Upstream water level.
+      double precision, intent(  out) :: hd            !< Downstream water level.
+      double precision, intent(  out) :: uu            !< Upstream velocity.
+      double precision, intent(  out) :: ud            !< Downstream velocity.
       double precision, intent(  out) :: flowdir       !< Flow direction 1 positive direction, -1 negative direction.
       double precision, intent(  out) :: ud            !< Downstream velocity.
       double precision, intent(  out) :: uu            !< Upstream velocity.
