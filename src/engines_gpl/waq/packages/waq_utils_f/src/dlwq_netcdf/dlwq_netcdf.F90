@@ -235,7 +235,7 @@ integer function dlwqnc_copy_mesh( ncidin, ncidout, meshidin, mesh_name, type_ug
 
     integer                           :: meshidout, varidin, varidout
     integer                           :: ierror
-    integer, dimension(7)             :: ierrorn
+    integer, dimension(10)            :: ierrorn
     integer                           :: meshvalue
     integer                           :: i, k
     integer                           :: xtype, length, attnum, crs_value
@@ -324,6 +324,8 @@ integer function dlwqnc_copy_mesh( ncidin, ncidout, meshidin, mesh_name, type_ug
             ierrorn(6) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_edge_connectivity", dimsizes )
             ierrorn(7) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, &
                         trim(mesh_name)//"_edge_bc", dimsizes, use_attrib = .false. )
+            ierrorn(8) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "projected_coordinate_system", &
+                        dimsizes, use_attrib = .false. )
         case ( type_ugrid_node_crds )
             warning_message = .true.
             ierrorn(1) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_coordinates", dimsizes )
@@ -331,6 +333,8 @@ integer function dlwqnc_copy_mesh( ncidin, ncidout, meshidin, mesh_name, type_ug
             ierrorn(3) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_node_connectivity", dimsizes )
             ierrorn(4) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_face_connectivity", dimsizes )
             ierrorn(5) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_node_connectivity", dimsizes )
+            ierrorn(6) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "projected_coordinate_system", &
+                        dimsizes, use_attrib = .false. )
             warning_message = .false.
     end select
 
