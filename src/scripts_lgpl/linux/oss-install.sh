@@ -584,15 +584,18 @@ function gatherESMF () {
 function gatherDependencies () {
     echo "Gathering dependent libraries . . ."
 
+    readelf -d $prefix/lib/libmpicxx.so.12 | grep -i rpath
     echo "Gathering libraries for lib/* ..."
     cp -u `$gatherScript $prefix/lib/* | eval grep -v $gatherExcludeFilter` $prefix/lib
     cp -u `$gatherScript $prefix/lib/* | eval grep $gatherIncludeFilter` $prefix/lib
 
 
+    readelf -d $prefix/lib/libmpicxx.so.12 | grep -i rpath
     echo "Gathering libraries for bin/* ..."
     cp -u `$gatherScript $prefix/bin/* | eval grep -v $gatherExcludeFilter` $prefix/lib
     cp -u `$gatherScript $prefix/bin/* | eval grep $gatherIncludeFilter` $prefix/lib
 
+    readelf -d $prefix/lib/libmpicxx.so.12 | grep -i rpath
     return
 }
 
