@@ -192,12 +192,14 @@ end subroutine
    end function initialize_compounds
   
    !> Compute FU, RU and AU for compound at internal linknumber L0
-   subroutine computeCompound(compound, struct, L0, fu, ru, au)
+   subroutine computeCompound(compound, struct, L0, u0, teta, fu, ru, au)
       use m_1d_structures
       
       type(t_compound),                intent(in   )  :: compound  !< Compound structure object.
       type(t_structure), dimension(:), intent(in   )  :: struct    !< Array containing structures.
       integer,                         intent(in   )  :: L0        !< Internal link number.
+      double precision,                intent(in   )  :: u0        !< Flow velocity at previous time step.
+      double precision,                intent(in   )  :: teta      !< Teta at flow link.
       double precision,                intent(  out)  :: fu        !< FU coefficient.
       double precision,                intent(  out)  :: ru        !< RU coefficient.
       double precision,                intent(  out)  :: au        !< Flow area.
@@ -208,15 +210,28 @@ end subroutine
       ru = 0d0 
       au = 0d0
       
+      ! The system of equations must be identical when the compound structure is taken as one structure or when the individual structures
+      ! are computed
+      ! In S1INI the matrix elements are set for the momentum equation.
+      !
+      ! * AU = sum_for_all_structures_in_compound(au_stru)
+      !
+      ! * FU: for the compound structure bb = bb + teta * Au * fu
+      !       for individual structures  bb = bb + teta * sum_for_all_structures_in_compound(au_stru*fu_stru)   
+      !   FU =  sum_for_all_structures_in_compound(au_stru*fu_stru)/AU
+      !
+      ! * RU: for the compound structure dd = dd + teta * Au * ru + (1-teta)*au*u0
+      !       for individual structures  dd = dd + sum_for_all_structures_in_compound(teta * Au_stru * ru_stru + (1-teta)*au_stru*u0_stru)
+      !   RU = sum_for_all_structures_in_compound(teta * Au_stru * ru_stru + (1-teta)*au_stru*u0_stru)/AU - (1-teta)*u0 /
       do i = 1, compound%numstructs
          istru = compound%structure_indices(i)
          fu = fu + struct(istru)%fu(L0)*struct(istru)%au(L0) 
-         ru = ru + struct(istru)%ru(L0)*struct(istru)%au(L0) 
+         ru = ru + struct(istru)%au(L0) * (teta*struct(istru)%ru(L0)+ (1d0-teta)*struct(istru)%u0(L0))
          au = au + struct(istru)%au(L0) 
       enddo
       if (au > 0d0) then
          fu = fu/au
-         ru = ru/au
+         ru = ru/(au*teta) - (1d0-teta)*u0/teta
       endif
       
    end subroutine computeCompound

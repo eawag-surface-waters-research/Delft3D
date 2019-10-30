@@ -34965,7 +34965,7 @@ end subroutine setbobs_fixedweirs
        do L0 = 1, pcompound%numlinks
           L = pcompound%linknumbers(L0)
           if (hu(l) > 0) then
-             call computeCompound(pcompound, network%sts%struct, L0, fu(L), ru(L), au(L))
+             call computeCompound(pcompound, network%sts%struct, L0, u0(L), teta(L), fu(L), ru(L), au(L))
           end if
        enddo
     enddo
