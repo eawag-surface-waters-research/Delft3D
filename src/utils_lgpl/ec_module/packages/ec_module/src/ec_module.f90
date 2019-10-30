@@ -308,6 +308,10 @@ module m_ec_module
       module procedure ecConverterSetOperand
    end interface ecSetConverterOperand
 
+   interface ecSetConverterInputPointer
+      module procedure ecConverterSetInputPointer
+   end interface ecSetConverterInputPointer
+
    interface ecSetConverterMask
       module procedure ecConverterSetMask
    end interface ecSetConverterMask
@@ -730,7 +734,9 @@ module m_ec_module
          convtype = convType_polytim
       case (provFile_netcdf)
          convtype = convType_netcdf
-         case default
+      case (provFile_qhtable)
+         convtype = convType_qhtable
+      case default
          convtype = convType_undefined
       end select
       end function ec_filetype_to_conv_type

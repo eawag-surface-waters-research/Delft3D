@@ -37,7 +37,6 @@ module m_ec_converter
    use mathconsts
    use m_ec_support
    use m_ec_alloc
-   use m_ec_magic_number
    use m_ec_parameters
    use m_ec_spatial_extrapolation
    use time_class
@@ -51,6 +50,7 @@ module m_ec_converter
    public :: ecConverterFree1dArray
    public :: ecConverterSetType
    public :: ecConverterSetOperand
+   public :: ecConverterSetInputPointer
    public :: ecConverterUpdateWeightFactors
    public :: ecConverterPerformConversions
    public :: ecConverterSetElement
@@ -232,6 +232,29 @@ module m_ec_converter
             call setECMessage("ERROR: ec_converter::ecConverterSetOperand: Cannot find a Converter with the supplied id.")
          end if
       end function ecConverterSetOperand
+      
+      ! =======================================================================
+      
+      !> Change the pointer to an input argument for the converter
+      function ecConverterSetInputPointer(instancePtr, converterId, inputptr) result(success)
+         logical                               :: success     !< function status
+         type(tEcInstance), pointer            :: instancePtr !< intent(in)
+         integer,                   intent(in) :: converterId !< unique Converter id
+         real(hp), pointer                     :: inputptr    !< pointer to an input arg for the converter
+         !
+         type(tEcConverter), pointer :: converterPtr !< Converter corresponding to converterId
+         !
+         success = .false.
+         converterPtr => null()
+         !
+         converterPtr => ecSupportFindConverter(instancePtr, converterId)
+         if (associated(converterPtr)) then
+            converterPtr%inputptr => inputptr
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_converter::ecConverterSetInputPointer: Cannot find a Converter with the supplied id.")
+         end if
+      end function ecConverterSetInputPointer
       
       ! =======================================================================
       
@@ -992,7 +1015,7 @@ module m_ec_converter
             case(convType_netcdf)
                success = ecConverterNetcdf(connection, timesteps%mjd())
             case(convType_qhtable)
-               success = ecConverterQhtable(connection, timesteps%mjd())
+               success = ecConverterQhtable(connection)
             case(convType_samples)
                success = ecConverterSamples(connection, timesteps%mjd())
             case default
@@ -2015,14 +2038,14 @@ module m_ec_converter
       !> Perform the configured conversion, if supported, for a qhtable FileReader.
       !! No interpolation is supported. Data is constant over time.
       !! Supports overwriting an array element of the target Field's data array.
-      function ecConverterQhtable(connection, timesteps) result (success)
+      function ecConverterQhtable(connection) result (success)
          logical                            :: success    !< function status
          type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
-         real(hp),            intent(in)    :: timesteps  !< convert to this number of timesteps past the kernel's reference date
+         real(hp),            pointer       :: input      !< input value to the lookup table (referenced by pointer
          !
-         integer :: i, j !< loop counters
+         integer :: j
          integer :: start_j
-         integer :: nx
+         integer :: nx, tgtndx
          !
          success = .false.
          !
@@ -2030,26 +2053,23 @@ module m_ec_converter
             case (interpolate_passthrough)
                select case(connection%converterPtr%operandType)
                   case(operand_replace_element)
-                     ! Calculate for whole magic_array, as the proper index is not known here. Polytim converter will select the correct answer. 
-                     do i=1, size(magic_array)
-                        if (magic_array(i) < connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(1)) then
-                           connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(i) = connection%sourceItemsPtr(2)%ptr%sourceT0FieldPtr%arr1dPtr(1) ! waterlevel(i)
-                           cycle
-                        end if 
-                        nx = connection%sourceItemsPtr(1)%ptr%elementSetPtr%nCoordinates
-                        if (magic_array(i) > connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(nx)) then
-                           connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(i) = connection%sourceItemsPtr(2)%ptr%sourceT0FieldPtr%arr1dPtr(nx) ! waterlevel(nx)
-                           cycle
-                        end if 
+                     tgtndx = connection%converterPtr%targetIndex
+                     nx = connection%sourceItemsPtr(1)%ptr%elementSetPtr%nCoordinates
+                     input => connection%converterPtr%inputptr
+                     if (input < connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(1)) then
+                        connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(tgtndx) = connection%sourceItemsPtr(2)%ptr%sourceT0FieldPtr%arr1dPtr(1) ! waterlevel(i)
+                     else if (input > connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(nx)) then
+                        connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(tgtndx) = connection%sourceItemsPtr(2)%ptr%sourceT0FieldPtr%arr1dPtr(nx) ! waterlevel(nx)
+                     else
                         do j=2, nx
-                           if (magic_array(i) < connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(j)) then ! discharge(j)
+                           if (input < connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(j)) then ! discharge(j)
                               start_j = j
                               exit
                            end if
                         end do
-                        connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(i) = connection%sourceItemsPtr(3)%ptr%sourceT0FieldPtr%arr1dPtr(start_j-1) * magic_array(i) &
-                                                                                    + connection%sourceItemsPtr(4)%ptr%sourceT0FieldPtr%arr1dPtr(start_j-1)
-                     end do
+                        connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(tgtndx) = connection%sourceItemsPtr(3)%ptr%sourceT0FieldPtr%arr1dPtr(start_j-1) * input &
+                                                                                         + connection%sourceItemsPtr(4)%ptr%sourceT0FieldPtr%arr1dPtr(start_j-1)
+                     endif                                                                                      
                   case default
                      call setECMessage("ERROR: ec_converter::ecConverterQhtable: Unsupported operand type requested.")
                      return
@@ -2058,9 +2078,10 @@ module m_ec_converter
                call setECMessage("ERROR: ec_converter::ecConverterQhtable: Unsupported interpolation type requested.")
                return
          end select
+         write(666,*) input, connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(tgtndx)    
          success = .true.   
+
       end function ecConverterQhtable
-      
       ! =======================================================================
       
       !> Perform the configured conversion, if supported, for a unimagdir FileReader.

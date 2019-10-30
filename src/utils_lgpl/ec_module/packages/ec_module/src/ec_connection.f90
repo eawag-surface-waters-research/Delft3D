@@ -246,7 +246,11 @@ module m_ec_connection
          !
          connectionPtr => ecSupportFindConnection(instancePtr, connectionId)
          if ( associated(connectionPtr) ) then
-            success = ecConverterUpdateWeightFactors(instancePtr, connectionPtr)
+            if ( associated(connectionPtr%sourceItemsPtr(1)%ptr%elementSetPtr ) ) then 
+               success = ecConverterUpdateWeightFactors(instancePtr, connectionPtr)
+            else
+               success = .True. 
+            end if
          end if
       end function ecConnectionSetIndexWeights
       

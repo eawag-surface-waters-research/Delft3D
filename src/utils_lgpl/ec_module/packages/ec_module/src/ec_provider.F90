@@ -360,11 +360,15 @@ module m_ec_provider
                      case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my","dissurf","diswcap","ubot") 
                         success = ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case default
-                        call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
-                           //trim(quantityname)//"', file='"//trim(fileReaderPtr%filename)//"'.")
-                        return
-                        ! TODO: user defined quantity name
-                        !success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
+                        if (index(quantityName,'waqsegmentfunction')==1) then
+                           success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
+                        else
+                           call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
+                              //trim(quantityname)//"', file='"//trim(fileReaderPtr%filename)//"'.")
+                           return
+                           ! TODO: user defined quantity name
+                           !success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
+                        endif
                   end select
                else
                   call setECMessage("ERROR: ec_provider::ecProviderCreateItems: NetCDF requires a quantity name.")
@@ -1483,14 +1487,14 @@ module m_ec_provider
          logical                             :: exists   !< helper boolian, indicating file existence
          integer                             :: id       !< dummy, catches ids which are not used
          integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId
-         integer                             :: discharge, waterlevel, slope, crossing, maxLay
+         integer                             :: maxLay
          type(tEcItem), pointer              :: itemPT
          type(tEcItem), pointer              :: itemt3D
          type(tEcItem), pointer              :: sourceItem
          integer,  dimension(:), allocatable :: itemIDList
          integer                             :: vectormax
 
-         logical                             :: is_tim, is_cmp, is_tim3d, is_qh
+         logical                             :: is_tim, is_cmp, is_tim3d
          logical                             :: has_label
          integer                             :: lblstart
          type(tEcFileReader), pointer        :: fileReaderPtr2
@@ -1584,127 +1588,75 @@ module m_ec_provider
 
          itemPT => ecSupportFindItem(instancePtr, itemId)
 
-         ! Init BCBlock for (global) qh-bound 
-         is_qh = .false. 
          ! Determine the end of the base of the fileName.
          L = index(fileReaderPtr%fileName, '.', back = .true.) - 1
          ! Create providers at each support point, depending on the availability of specific files.
-         ! Exceptional case: A single qh-table supplies all support points of the pli-file.
-         filename = fileReaderPtr%fileName(1:L)//'.qh'
-         inquire (file = trim(filename), exist = exists)
-         if (exists) then
-            ! Process a *.qh file.
-            ! Construct a new FileReader
-            id = ecInstanceCreateFileReader(instancePtr)
-            if (id == ec_undef_int) then
-               return
-            end if
-
-            ! Initialize the new FileReader.
-            if (.not. ecProviderInitializeFileReader(instancePtr, id, provFile_qhtable, filename, fileReaderPtr%tframe%k_refdate, &
-                           fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit)) return 
-            ! All fine:
-            is_qh = .true.
-         endif
-
          n_signals = 0 ! Record whether at least one child provider is created for this polytim.
 
-         if (is_qh) then
-            ! Construct a new Converter.
-            subconverterId = ecInstanceCreateConverter(instancePtr)
-            ! Determine the source Items.
-            discharge = ecFileReaderFindItem(instancePtr, id, 'discharge')
-            waterlevel = ecFileReaderFindItem(instancePtr, id, 'waterlevel')
-            slope = ecFileReaderFindItem(instancePtr, id, 'slope')
-            crossing = ecFileReaderFindItem(instancePtr, id, 'crossing')
-            if (discharge /= ec_undef_int .and. waterlevel /= ec_undef_int .and. &
-               slope /= ec_undef_int .and. crossing /= ec_undef_int) then
-               !do i=1, n_points ! commented: only one value per polyline
-               ! Initialize the new Converter.
-               if (.not. (ecConverterSetType(instancePtr, subconverterId, convType_qhtable) .and. &
-                          ecConverterSetOperand(instancePtr, subconverterId, operand_replace_element) .and. &
-                          ecConverterSetInterpolation(instancePtr, subconverterId, interpolate_passthrough) .and. &
-                          ecConverterSetElement(instancePtr, subconverterId, 1))) return ! set to 1 from i: only one value per polyline
-               ! Construct a new Connection.
-               connectionId = ecInstanceCreateConnection(instancePtr)
-               if (.not. ecConnectionSetConverter(instancePtr, connectionId, subconverterId)) return
-               ! Initialize the new Connection.
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, discharge)) return
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, waterlevel)) return
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, slope)) return
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, crossing)) return
-               if (.not. ecConnectionAddTargetItem(instancePtr, connectionId, itemId)) return
-               if (.not. ecItemAddConnection(instancePtr, itemId, connectionId)) return
-               n_signals = 1
-               !end do
-            end if
-         else                            ! .not.is_qh
-            n_signals = 0
-            do i=1, n_points
-               is_tim = .false.
-               is_cmp = .false.
-               is_tim3d = .false.
-               ! plipoint labels read from the third column in the pli-file. Currently this goes wrong if in the test third-column labels are not unique 
-               if (len_trim(plipointlbls(i))==0) then 
-                  write(plipointlbl,'(a,i4.4)') fileReaderPtr%fileName(1:L)//'_',i
-                  has_label = .False.
-               else
-                  plipointlbl = trim(plipointlbls(i))
-                  has_label = .True.
-               endif
+         do i=1, n_points
+            is_tim = .false.
+            is_cmp = .false.
+            is_tim3d = .false.
+            ! plipoint labels read from the third column in the pli-file. Currently this goes wrong if in the test third-column labels are not unique 
+            if (len_trim(plipointlbls(i))==0) then 
+               write(plipointlbl,'(a,i4.4)') fileReaderPtr%fileName(1:L)//'_',i
+               has_label = .False.
+            else
+               plipointlbl = trim(plipointlbls(i))
+               has_label = .True.
+            endif
 
-               filename = trim(plipointlbl)//'.tim'
+            filename = trim(plipointlbl)//'.tim'
+            inquire (file = trim(filename), exist = exists)
+            if (exists) then
+               id = ecInstanceCreateFileReader(instancePtr)
+               if (id == ec_undef_int) return
+               fileReaderPtr2=>ecSupportFindFileReader(instancePtr, id)
+               fileReaderPtr2%vectormax = fileReaderPtr%vectormax ! TODO copy timeframe
+               if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_uniform, filename, fileReaderPtr%tframe%k_refdate,       &
+                                     fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit))) return
+               is_tim = .true.
+            else 
+               filename = trim(plipointlbl)//'.cmp'
                inquire (file = trim(filename), exist = exists)
                if (exists) then
                   id = ecInstanceCreateFileReader(instancePtr)
                   if (id == ec_undef_int) return
                   fileReaderPtr2=>ecSupportFindFileReader(instancePtr, id)
-                  fileReaderPtr2%vectormax = fileReaderPtr%vectormax ! TODO copy timeframe
-                  if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_uniform, filename, fileReaderPtr%tframe%k_refdate,       &
-                                        fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit))) return
-                  is_tim = .true.
+                  fileReaderPtr2%vectormax = fileReaderPtr%vectormax
+                  if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_fourier, filename, fileReaderPtr%tframe%k_refdate,       &
+                                     fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit, dtnodal=fileReaderPtr%tframe%dtnodal))) return
+
+                  is_cmp = .true.
                else 
-                  filename = trim(plipointlbl)//'.cmp'
+                  filename = trim(plipointlbl)//'.t3d'
                   inquire (file = trim(filename), exist = exists)
-                  if (exists) then
+                  if (exists) then 
                      id = ecInstanceCreateFileReader(instancePtr)
                      if (id == ec_undef_int) return
                      fileReaderPtr2=>ecSupportFindFileReader(instancePtr, id)
                      fileReaderPtr2%vectormax = fileReaderPtr%vectormax
-                     if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_fourier, filename, fileReaderPtr%tframe%k_refdate,       &
-                                        fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit, dtnodal=fileReaderPtr%tframe%dtnodal))) return
+                     if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_t3D, filename, fileReaderPtr%tframe%k_refdate,       &
+                                     fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit))) return
 
-                     is_cmp = .true.
-                  else 
-                     filename = trim(plipointlbl)//'.t3d'
-                     inquire (file = trim(filename), exist = exists)
-                     if (exists) then 
-                        id = ecInstanceCreateFileReader(instancePtr)
-                        if (id == ec_undef_int) return
-                        fileReaderPtr2=>ecSupportFindFileReader(instancePtr, id)
-                        fileReaderPtr2%vectormax = fileReaderPtr%vectormax
-                        if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_t3D, filename, fileReaderPtr%tframe%k_refdate,       &
-                                        fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit))) return
-
-                        is_tim3d = .true.
-                     else                           ! No file with data for this point 
-                        if (has_label) then    ! Report explicitly labelled point without data 
-                           call setECMessage("No .tim, .cmp or .t3d file found for labelled point '" &
-                                          //  trim(plipointlbl)//"' (required).")
-                           return
-                        endif ! labelled point ? 
-                     endif    ! tim3d-file ? 
-                  endif       ! cmp file ? 
-               endif          ! tim-file ?
-               !if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, 'uniform_item',      &
-               !                                                id, itemId, i, n_signals, maxlay, itemIDList)) then
-               if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, id, itemId, i,            &
-                                                           n_signals, maxlay, itemIDList)) then
-                  ! No sub-FileReader made.
-                  mask(i) = 0
-               endif
-            end do               ! loop over support points
-         endif                   ! switch between qh/cmp/tim
+                     is_tim3d = .true.
+                  else                           ! No file with data for this point 
+                     if (has_label) then    ! Report explicitly labelled point without data 
+                        call setECMessage("No .tim, .cmp or .t3d file found for labelled point '" &
+                                       //  trim(plipointlbl)//"' (required).")
+                        return
+                     endif ! labelled point ? 
+                  endif    ! tim3d-file ? 
+               endif       ! cmp file ? 
+            endif          ! tim-file ?
+            !if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, 'uniform_item',      &
+            !                                                id, itemId, i, n_signals, maxlay, itemIDList)) then
+            if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, id, itemId, i,            &
+                                                        n_signals, maxlay, itemIDList)) then
+               ! No sub-FileReader made.
+               mask(i) = 0
+            endif
+         end do               ! loop over support points
          if (n_signals <= 0) then
             call setECMessage("ERROR: ec_provider::ecProviderPolyTimItems: No forcing signals (.tim/.cmp/.t3d/.qh) could be attached for polyline file '"//trim(fileReaderPtr%filename)//"'.")
             return
@@ -1726,7 +1678,6 @@ module m_ec_provider
       !> Create subproviders, which create source Items and their contained types.
       !! meteo1.f90: read1polylin
       function ecProviderCreatePolyTimItemsBC(instancePtr, fileReaderPtr, bctfilename, quantityname) result(success)
-         use m_ec_magic_number
          logical                         :: success       !< function status
          type(tEcInstance),   pointer    :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer    :: fileReaderPtr !< intent(inout)
@@ -1747,13 +1698,13 @@ module m_ec_provider
          character(len=4)                    :: cnum     !< temp integer converted to a string
          integer                             :: id       !< dummy, catches ids which are not used
          integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId, BCBlockID
-         integer                             :: discharge, waterlevel, slope, crossing, maxLay
+         integer                             :: maxLay
          type(tEcItem), pointer              :: itemPT
          type(tEcItem), pointer              :: itemt3D
          type(tEcItem), pointer              :: sourceItem
          integer,  dimension(:), allocatable :: itemIDList
          integer                             :: vectormax
-         logical                             :: is_tim, is_cmp, is_tim3d, is_qh
+         logical                             :: is_tim, is_cmp, is_tim3d
          type(tEcBCBlock), pointer           :: bcBlockPtr
          logical                             :: all_points_are_corr
          logical                             :: has_label
@@ -1840,68 +1791,61 @@ module m_ec_provider
 
          all_points_are_corr       = .true.
          ! Init BCBlock for (global) qh-bound 
-         is_qh = .false. 
          n_signals = 0                                   ! Record whether at least one child provider is created for this polytim.
          bcBlockId = ecInstanceCreateBCBlock(InstancePtr)
          bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
          plipointlbl = polyline_name
          call str_upper(quantityname)
-         if (ecProviderInitializeBCBlock(InstancePtr, bcBlockId, fileReaderPtr%tframe%k_refdate, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
-                                    id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal, funtype = 'QHTABLE')) then
-            n_signals = 1
-            is_qh = .True.
-         else
-            n_signals = 0
-            do i=1, n_points
-               is_tim = .false.
-               is_cmp = .false.
-               is_tim3d = .false.
-               ! Process a *.tim file.
-               bcBlockId = ecInstanceCreateBCBlock(InstancePtr) 
-               bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
-               ! id van de filereader
+         n_signals = 0
+         do i=1, n_points
+            is_tim = .false.
+            is_cmp = .false.
+            is_tim3d = .false.
+            ! Process a *.tim file.
+            bcBlockId = ecInstanceCreateBCBlock(InstancePtr) 
+            bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
+            ! id van de filereader
 
-               ! plipoint labels read from the third column in the pli-file. Currently this goes wrong if in the test third-column labels are not unique 
-               if ( .not. allocated(plipointlbls(i)%s)) then
-                  write(cnum,'(i4.4)') i
-                  plipointlbl =  polyline_name // '_' // cnum     ! using polyline_name from tekal-block
-                  has_label = .False.
-               else
-                  plipointlbl = trim(plipointlbls(i)%s)
-                  has_label = .True.
-               endif
-               
-               if (.not. ecProviderInitializeBCBlock(InstancePtr, bcBlockId, fileReaderPtr%tframe%k_refdate, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
-                                     id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal)) then
-                  !call setECMessage("WARNING: ec_provider::ecProviderPolyTimItems: Error initializing EC Block.")
-                  mask(i) = 0
-                  mask(i) = 0
-                  if (has_label) then               ! for explicitly labelled pli-points, require data 
-                     call setECMessage("BC-File "//trim(bctfilename)//" contains no data for labelled point '" &
-                                                 //trim(plipointlbl)//"' and quantity '"//trim(quantityname)//"' (required).")
-                     return
-                  endif 
-                  cycle
-               endif
-               if (bcBlockPtr%func == BC_FUNC_HARMOCORR .or. bcBlockPtr%func == BC_FUNC_ASTROCORR) then
-                  ecAtLeastOnePointIsCorrection = .true. ! TODO: Refactor this shortcut (UNST-180).
+            ! plipoint labels read from the third column in the pli-file. Currently this goes wrong if in the test third-column labels are not unique 
+            if ( .not. allocated(plipointlbls(i)%s)) then
+               write(cnum,'(i4.4)') i
+               plipointlbl =  polyline_name // '_' // cnum     ! using polyline_name from tekal-block
+               has_label = .False.
+            else
+               plipointlbl = trim(plipointlbls(i)%s)
+               has_label = .True.
+            endif
+            
+            if (.not. ecProviderInitializeBCBlock(InstancePtr, bcBlockId, fileReaderPtr%tframe%k_refdate, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
+                                  id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal)) then
+               !call setECMessage("WARNING: ec_provider::ecProviderPolyTimItems: Error initializing EC Block.")
+               mask(i) = 0
+               mask(i) = 0
+               if (has_label) then               ! for explicitly labelled pli-points, require data 
+                  call setECMessage("BC-File "//trim(bctfilename)//" contains no data for labelled point '" &
+                                              //trim(plipointlbl)//"' and quantity '"//trim(quantityname)//"' (required).")
+                  return
+               endif 
+               cycle
+            endif
+            if (bcBlockPtr%func == BC_FUNC_HARMOCORR .or. bcBlockPtr%func == BC_FUNC_ASTROCORR) then
+               ecAtLeastOnePointIsCorrection = .true. ! TODO: Refactor this shortcut (UNST-180).
 !                 n_signals = n_signals + 1 
-                  cycle
-               else
-                  all_points_are_corr = .false.
-               endif
-               is_tim = (bcBlockPtr%func == BC_FUNC_TSERIES) .or. (bcBlockPtr%func == BC_FUNC_CONSTANT)
-               is_cmp = ((bcBlockPtr%func == BC_FUNC_HARMONIC) .or. (bcBlockPtr%func == BC_FUNC_ASTRO))
-               is_tim3d = (bcBlockPtr%func == BC_FUNC_TIM3D)
+               cycle
+            else
+               all_points_are_corr = .false.
+            endif
+            is_tim = (bcBlockPtr%func == BC_FUNC_TSERIES) .or. (bcBlockPtr%func == BC_FUNC_CONSTANT)
+            is_cmp = ((bcBlockPtr%func == BC_FUNC_HARMONIC) .or. (bcBlockPtr%func == BC_FUNC_ASTRO))
+            is_tim3d = (bcBlockPtr%func == BC_FUNC_TIM3D)
 
-               if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, id, itemId, i,        &
-                                                        n_signals, maxlay, itemIDList, qname=quantityname)) then
-                  !
-                  ! No sub-FileReader made.
-                  mask(i) = 0
-               endif
-            end do               ! loop over support points
-         endif                   ! switch between qh/cmp/tim
+            if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, id, itemId, i,        &
+                                                     n_signals, maxlay, itemIDList, qname=quantityname)) then
+               !
+               ! No sub-FileReader made.
+               mask(i) = 0
+            endif
+         end do               ! loop over support points
 
          if (ecAtLeastOnePointIsCorrection) then  ! TODO: Refactor this shortcut (UNST-180).
              if (all_points_are_corr) then
@@ -1918,36 +1862,6 @@ module m_ec_provider
             success = .false.
             return
          end if
-
-         if (is_qh) then
-            ! Construct a new Converter.
-            subconverterId = ecInstanceCreateConverter(instancePtr)
-            ! Determine the source Items.
-            discharge = ecFileReaderFindItem(instancePtr, id, 'discharge')
-            waterlevel = ecFileReaderFindItem(instancePtr, id, 'waterlevel')
-            slope = ecFileReaderFindItem(instancePtr, id, 'slope')
-            crossing = ecFileReaderFindItem(instancePtr, id, 'crossing')
-            if (discharge /= ec_undef_int .and. waterlevel /= ec_undef_int .and. &
-               slope /= ec_undef_int .and. crossing /= ec_undef_int) then
-               ! Initialize the new Converter.
-               if (.not. (ecConverterSetType(instancePtr, subconverterId, convType_qhtable) .and. &
-                          ecConverterSetOperand(instancePtr, subconverterId, operand_replace_element) .and. &
-                          ecConverterSetInterpolation(instancePtr, subconverterId, interpolate_passthrough) .and. &
-                          ecConverterSetElement(instancePtr, subconverterId, 1))) return ! set to 1 from i: only one value per polyline
-               ! Construct a new Connection.
-               connectionId = ecInstanceCreateConnection(instancePtr)
-               if (.not. ecConnectionSetConverter(instancePtr, connectionId, subconverterId)) return
-               ! Initialize the new Connection.
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, discharge)) return
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, waterlevel)) return
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, slope)) return
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, crossing)) return
-               if (.not. ecConnectionAddTargetItem(instancePtr, connectionId, itemId)) return
-               if (.not. ecItemAddConnection(instancePtr, itemId, connectionId)) return
-               n_signals = 1
-               n_points = size(magic_array)
-            end if
-         endif
 
          ! itemID refers to the source item (providing to the polytim item) for the last support point we came across in the above loop.
          if (.not. ecProvider3DVectmax(instancePtr, itemPT, mask ,maxlay, n_points, itemIDList)) return 
@@ -2558,11 +2472,16 @@ module m_ec_provider
             ncvarnames(2) = 'so'                             ! salinity
             ncstdnames(2) = 'sea_water_salinity'
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
-            ! we have faulty 
-            call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
-            !TODO: user defined quantity name
-            !ncvarnames(1) = varname
-            !ncstdnames(1) = varname
+            if (index(quantityName,'waqsegmentfunction')==1) then
+               ncvarnames(1) = quantityName
+               ncstdnames(1) = quantityName
+            else
+               ! we have faulty 
+               call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
+               !TODO: user defined quantity name
+               !ncvarnames(1) = varname
+               !ncstdnames(1) = varname
+            endif
          end select 
 
          ! ------------------------------------------------------------------------------------------------
