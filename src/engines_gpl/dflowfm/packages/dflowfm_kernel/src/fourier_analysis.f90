@@ -67,7 +67,6 @@ module m_fourier_analysis
     integer :: iblws
     integer :: ibleh
     integer :: iblcn
-    integer :: idfile        ! Id of the NetCDF file
     !
     ! pointers
     !
@@ -107,7 +106,6 @@ module m_fourier_analysis
     
     type(gd_fourier), target  :: gdfourier
     type(gd_fourier), pointer :: gdfourier_ptr => null()
-    character(maxMessageLen)  :: FouMessage     = ' '
     character(len=:), allocatable   :: FouOutputFile
 
     private
@@ -115,20 +113,18 @@ module m_fourier_analysis
     integer                   :: nofou  ! Number of fourier components to be analyzed
     type(t_unc_mapids)        :: fileids!< Set of file and variable ids for this file.
 
-    real(fp)                  :: ag_fouana = 9.81d0  
-    real(fp)                  :: time_unit_factor
+    real(kind=fp)             :: ag_fouana = 9.81d0  
+    real(kind=fp)             :: time_unit_factor
 
     public fouini
     public alloc_fourier_analysis_arrays
     public count_fourier_variables
     public reafou
     public postpr_fourier
-    public fouana
 
     public gdfourier
     public gdfourier_ptr
     public nofou
-    public ag_fouana
     public FouOutputFile
     contains
 
@@ -977,8 +973,7 @@ end subroutine setfouunit
    !  $HeadURL$
    !!--description-----------------------------------------------------------------
    !
-   !    Function: - performs fourier analysis i.e. computes suma
-   !                and sumb
+   !    Function: - performs fourier analysis i.e. computes suma and sumb
    !              - calculates MAX or MIN value
    !
    !!--pseudo code and references--------------------------------------------------
@@ -1165,8 +1160,6 @@ end subroutine setfouunit
        use unstruc_messages
        !
        implicit none
-       !
-   !   type(gd_fourier),target :: gdfourier
        !
        ! The following list of pointer parameters is used to point inside the gdp structure
        !
@@ -1361,7 +1354,7 @@ end subroutine setfouunit
    end subroutine fouini
 
 
-    subroutine postpr_fourier(nst, trifil, dtsec, versio, refdat, hdt, tzone, gdfourier)
+    subroutine postpr_fourier(nst, trifil, dtsec, refdat, hdt, tzone, gdfourier)
     use m_d3ddimens
     use m_transport
     use m_flowgeom
@@ -1375,7 +1368,6 @@ end subroutine setfouunit
        real(fp)          , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
        integer           , intent(in) :: nst                !< timestep number 
        character(len=*)  , intent(in) :: trifil             !< output filename 
-       character(len=*)  , intent(in) :: versio             !  Version nr. of the current package
        character(len=*), intent(in)   :: refdat 
 
     ! NOTE: In DELFT3D depth is used, but bl is passed (positive bottomlevel). Defined direction is different  
@@ -1512,16 +1504,14 @@ end subroutine setfouunit
        !
        if (nst==fouwrt) then
           if (fileids%ncid == 0) then
-             call wrfou(trifil ,dtsec ,versio ,const_names ,itdate ,hdt ,tzone ,gdfourier ,gddimens_ptr)
+             call wrfou(trifil, dtsec, const_names, itdate, hdt ,tzone, gdfourier, gddimens_ptr)
           endif
        endif
     endif   
     end subroutine postpr_fourier
 
 
-    
-    subroutine wrfou(trifil    ,dtsec     ,versio    ,namcon    , &
-                   & itdate    ,hdt       ,tzone     ,gdfourier ,gddimens)
+    subroutine wrfou(trifil, dtsec, namcon, itdate, hdt, tzone, gdfourier, gddimens)
 
     !----- GPL ---------------------------------------------------------------------
     !  Stichting Deltares. All rights reserved.                                     
@@ -1532,8 +1522,7 @@ end subroutine setfouunit
     !!--description-----------------------------------------------------------------
     !
     !    Function: - open fourier analysis output file
-    !              - writes results of fourier analysis to output
-    !                file
+    !              - writes results of fourier analysis to output file
     !              - closes fourier analysis output file
     !
     !!--pseudo code and references--------------------------------------------------
@@ -1575,7 +1564,6 @@ end subroutine setfouunit
         integer                        , pointer :: iblqf
         integer                        , pointer :: iblbs
         integer                        , pointer :: iblep
-        integer                        , pointer :: idfile
         integer        , dimension(:,:), pointer :: idvar
         integer                        , pointer :: nmaxgl
         integer                        , pointer :: mmaxgl
@@ -1589,42 +1577,26 @@ end subroutine setfouunit
     !
     ! Global variables
     !
-        integer                                                            , intent(in)  :: itdate  !< Reference time in yyyymmdd as an integer
-        real(fp)                                                           , intent(in)  :: dtsec   !< Integration time step [in seconds]
-        character(len=*) , dimension(:)                                    , intent(in)  :: namcon  !< Description and declaration in esm_alloc_char.f90
-        character(5)                                                       , intent(in)  :: versio  !< Version nr. of the current package
-        character(*)                                                       , intent(in)  :: trifil  !< File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
-        real(fp)                                                           , intent(in)  :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-        real(fp)                                                           , intent(in)  :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
+        integer                        , intent(in)  :: itdate  !< Reference time in yyyymmdd as an integer
+        real(fp)                       , intent(in)  :: dtsec   !< Integration time step [in seconds]
+        character(len=*) , dimension(:), intent(in)  :: namcon  !< Description and declaration in esm_alloc_char.f90
+        character(*)                   , intent(in)  :: trifil  !< File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
+        real(fp)                       , intent(in)  :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
+        real(fp)                       , intent(in)  :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
 
-        !double precision , intent(in), pointer :: xs(:,:)             !< s-point x-coordinate 
-        !double precision , intent(in), pointer :: ys(:,:)             !< s-point y-coordinate 
-        !double precision , intent(in), pointer :: xu(:,:)             !< u-point x-coordinate 
-        !double precision , intent(in), pointer :: yu(:,:)             !< u-point y-coordinate 
-
-        !double precision , intent(in) :: xs(:)             !< s-point x-coordinate 
-        !double precision , intent(in) :: ys(:)             !< s-point y-coordinate 
-        !double precision , intent(in) :: xu(:)             !< u-point x-coordinate 
-        !double precision , intent(in) :: yu(:)             !< u-point y-coordinate 
     !
     ! Local variables
     !
-        integer                  :: iddim_nflowelem
-        integer                  :: iddim_nflowlink
-        integer                  :: iddim 
         integer                  :: ierr 
         integer                  :: ifou         ! Local teller for fourier functions 
         integer                  :: ivar         ! Local teller for fourier functions 
-        integer       , external :: newlun
-        integer       , external :: nc_def_var
         real(fp)                 :: freqnt       ! Frequency in degrees per hour 
         real(fp)                 :: tfasto       ! Stop time in minutes 
         real(fp)                 :: tfastr       ! Start time in minutes 
         character(4)             :: blnm
-        character(16)            :: fougrp
         character(20)            :: namfun       ! Local name for fourier function 
         character(30)            :: namfunlong   ! Local name for fourier function, including reference to the line in the fourier input file 
-        integer                  :: imissval = -1
+        integer, parameter       :: imissval = -1
         integer                  :: unc_loc
         integer, allocatable     :: all_unc_loc(:)
 
@@ -1658,7 +1630,6 @@ end subroutine setfouunit
         iblqf         => gdfourier%iblqf
         iblbs         => gdfourier%iblbs
         iblep         => gdfourier%iblep
-        idfile        => gdfourier%idfile
         idvar         => gdfourier%idvar
         mmax          => gddimens%mmax
         nmax          => gddimens%nmax
@@ -1667,16 +1638,12 @@ end subroutine setfouunit
         lnkx          => gddimens%lnkx
         ndkx          => gddimens%ndkx 
         nmaxus        => gddimens%nmaxus
-                                                             ! lundia        => gdp%gdinout%lundia
+
         mmaxgl        => mmax                                ! => gdp%gdparall%mmaxgl         ! RL TODO: Hier een  aparte parameter voor nodig ? 
         nmaxgl        => nmax                                ! => gdp%gdparall%nmaxgl
 
         !
-        fougrp = 'fou-fields'
-        !
         ierr = unc_create(trim(trifil), 0, fileids%ncid)
-        FouMessage = ''
-        if (ierr/=0) FouMessage = nf90_strerror(ierr)
         ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm) 
         call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
 
@@ -1828,144 +1795,37 @@ end subroutine setfouunit
         ierr =  nf90_enddef(fileids%ncid)
 
         ! START DATA MODE  
+        !
+        ifou = 1
+        !
+        ! Write requested fourier function output for scalar quantity
+        !
+        do 
+           if (ifou > nofou) exit
            !
-           ifou = 1
+           unc_loc = all_unc_loc(ifou)
            !
-           ! Write requested fourier function output for scalar quantity
-           !
-           do 
-              if (ifou > nofou) exit
+           if (foutyp(ifou)=='s') then
+              call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids   ,unc_loc)
+              ifou = ifou + 1
+           else
+!             call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
+!             call wrfous(ifou+1 ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
+              ! call wrfouv(ifou   ,dtsec   ,hdt  ,tzone  ,gdfourier  ,gddimens   ,fileids   ,UNC_LOC_S)
+              
+              ! Vectors are not supported at the moment.
+              ! The intention is to write vector components as separate scalar variables, like it is done in the map-file for ucx, ucy
+              ! Todo: implement writing vectors by adding a variable
+              ! Todo: Add the additional vector stuff, such as elliptic results etc. 
               !
-              unc_loc = all_unc_loc(ifou)
-              !
-              if (foutyp(ifou)=='s') then
-                 call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids   ,unc_loc)
-                 ifou = ifou + 1
-              else
-!                call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
-!                call wrfous(ifou+1 ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
-                 ! call wrfouv(ifou   ,dtsec   ,hdt  ,tzone  ,gdfourier  ,gddimens   ,fileids   ,UNC_LOC_S)
-                 
-                 ! Vectors are not supported at the moment.
-                 ! The intention is to write vector components as separate scalar variables, like it is done in the map-file for ucx, ucy
-                 ! Todo: implement writing vectors by adding a variable
-                 ! Todo: Add the additional vector stuff, such as elliptic results etc. 
-                 !
-                 ifou = ifou + 2
-              endif
-           enddo
-        !endif
+              ifou = ifou + 2
+           endif
+        enddo
         !
         ! Close fourier output file
         !
         ierr = nf90_close(fileids%ncid)         ! ncid NOT set to zero, to avoid writing the fourier output file again.
     end subroutine wrfou
-
-    
-    
-
-
-    subroutine fouvecmax(mmax       ,nmaxus      ,nofou     , &
-                       & ifou       ,nst         ,gdfourier  ,gddimens      )
-    !-------------------------------------------------------------------------------
-    !  $Id$
-    !  $HeadURL$
-    !!--description-----------------------------------------------------------------
-    !
-    !    Function: - Determines the maximum of the different vector parameters
-    !                1) Velocity         (u and v)           [m/s]
-    !                2) (Unit) Discharge (qxk and qyk)       [m3/m]
-    !                3) Bed shear stress (taubpu and taubpv) [N/m2]
-    !
-    !!--pseudo code and references--------------------------------------------------
-    ! NONE
-    !!--declarations----------------------------------------------------------------
-        use precision
-        use m_d3ddimens
-        !
-        implicit none
-        !
-        type(gd_fourier),target, intent(in) :: gdfourier
-        type(gd_dimens), target, intent(in) :: gddimens
-
-        !
-        ! The following list of pointer parameters is used to point inside the gdp structure
-        !
-        integer        , dimension(:)        , pointer :: ftmsto
-        integer        , dimension(:)        , pointer :: ftmstr
-        real(fp)       , dimension(:,:,:)    , pointer :: foucomp
-        real(fp)       , dimension(:,:,:)    , pointer :: fouvec
-        character(1)   , dimension(:)        , pointer :: fouelp
-    !
-    ! Global variables
-    !
-        integer                                                                        , intent(in) :: ifou      !!  Counter
-        integer                                                                        , intent(in) :: mmax      !  Description and declaration in esm_alloc_int.f90
-        integer                                                                        , intent(in) :: nmaxus    !  Description and declaration in esm_alloc_int.f90
-        integer                                                                        , intent(in) :: nofou     !  Description and declaration in dimens.igs
-        integer                                                                        , intent(in) :: nst       !!  Time step number
-    !
-    ! Local variables
-    !
-        integer         :: m         ! Loop counter over MMAX 
-        integer         :: n         ! Loop counter over NMAXUS
-        real(fp)        :: vecmagn   ! Magnitude of vector ( =sqrt(xcomp^2 + ycomp^2) )
-    !
-    !! executable statements -------------------------------------------------------
-    !
-        ftmsto    => gdfourier%ftmsto
-        ftmstr    => gdfourier%ftmstr
-        foucomp   => gdfourier%foucomp
-        fouvec    => gdfourier%fouvec
-        fouelp    => gdfourier%fouelp
-        !
-        vecmagn  = 0.0_fp
-        !
-        ! Initialize for MAX = -1.E+30 / MIN = 1.E+30
-        !
-        if (nst==ftmstr(ifou)) then
-           if (fouelp(ifou)=='x') then
-              do n = 1, nmaxus
-                 do m = 1, mmax
-                    fouvec(n, m, ifou) = -1.0E+30
-                 enddo
-              enddo
-           elseif (fouelp(ifou)=='i') then
-              do n = 1, nmaxus
-                 do m = 1, mmax
-                    fouvec(n, m, ifou) = 1.0E+30
-                 enddo
-              enddo
-           else
-           endif
-        endif
-        !
-        ! For every time step between FTMSTART and FTMSTOP
-        !
-        if (nst>=ftmstr(ifou) .and. nst<ftmsto(ifou)) then
-           !
-           ! Calculate MAX value
-           !
-           if (fouelp(ifou)=='x') then
-              do n = 1, nmaxus
-                 do m = 1, mmax
-                    vecmagn = sqrt( foucomp(n, m, ifou)*foucomp(n, m, ifou) + foucomp(n, m, ifou+1)*foucomp(n, m, ifou+1) )
-                    fouvec(n, m, ifou) = max( fouvec(n, m, ifou), vecmagn )
-                 enddo
-              enddo
-           !
-           ! Calculate MIN value
-           !
-           elseif (fouelp(ifou)=='i') then
-              do n = 1, nmaxus
-                 do m = 1, mmax
-                    vecmagn = sqrt( foucomp(n, m, ifou)*foucomp(n, m, ifou) + foucomp(n, m, ifou+1)*foucomp(n, m, ifou+1) )
-                    fouvec(n, m, ifou) = min( fouvec(n, m, ifou), vecmagn )
-                 enddo
-              enddo
-           endif
-        endif
-     end subroutine fouvecmax
 
 
    subroutine wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids, iloc   )
@@ -2016,8 +1876,7 @@ end subroutine setfouunit
        character(50)  , dimension(:)        , pointer :: fouvarnam
        integer                              , pointer :: nofouvar
        integer        , dimension(:,:)      , pointer :: fouref
-       integer                              , pointer :: idfile
-       integer                              , pointer :: mmax   
+       integer                              , pointer :: mmax
        integer                              , pointer :: nmax
        integer                              , pointer :: nmaxus
        integer                              , pointer :: ndx
@@ -2028,32 +1887,32 @@ end subroutine setfouunit
    !
    ! Global variables
    !
-       integer                                                              , intent(in) :: ifou   !< Fourier counter
-       real(fp)                                                             , intent(in) :: dtsec  !< Integration time step [in seconds]
-       character(20) , dimension(:)                                         , intent(in) :: namcon !< Description and declaration in esm_alloc_char.f90
-       real(fp)                                                             , intent(in) :: tzone  !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-       real(fp)                                                             , intent(in) :: hdt    !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
-       type(t_unc_mapids)                                                   , intent(in) :: fileids!< Set of file and variable ids for this file.
-       integer                                                              , intent(in) :: iloc
-       type(gd_fourier)                                                     , pointer    :: gdfourier
-       type(gd_dimens)                                                      , pointer    :: gddimens
+       integer                     , intent(in) :: ifou   !< Fourier counter
+       real(fp)                    , intent(in) :: dtsec  !< Integration time step [in seconds]
+       character(20) , dimension(:), intent(in) :: namcon !< Description and declaration in esm_alloc_char.f90
+       real(fp)                    , intent(in) :: tzone  !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
+       real(fp)                    , intent(in) :: hdt    !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
+       type(t_unc_mapids)          , intent(in) :: fileids!< Set of file and variable ids for this file.
+       integer                     , intent(in) :: iloc
+       type(gd_fourier)            , pointer    :: gdfourier
+       type(gd_dimens)             , pointer    :: gddimens
 
    !
    ! Local variables
    !
        integer                   :: ierror
        integer                   :: fouvar
-       integer                   :: m            ! Loop counter over MMAX 
-       integer                   :: n            ! Loop counter over NMAXUS 
-       logical                   :: ltest        ! Help variable for atan2 function test 
-       real(fp)                  :: amp          ! Fourier amplitude 
-       real(fp)                  :: fas          ! Fourier phase 
-       real(fp)                  :: freqnt       ! Frequency in degrees per hour 
-       real(fp)                  :: shift        ! Phase shift 
-       real(fp)                  :: tfasto       ! Stop time in minutes 
-       real(fp)                  :: tfastr       ! Start time in minutes 
-       real(sp)                  :: defaul       ! Default value 
-       character(20)             :: namfun       ! Local name for fourier function 
+       integer                   :: m                  ! Loop counter over MMAX 
+       integer                   :: n                  ! Loop counter over NMAXUS 
+       logical                   :: ltest              ! Help variable for atan2 function test 
+       real(fp)                  :: amp                ! Fourier amplitude 
+       real(fp)                  :: fas                ! Fourier phase 
+       real(fp)                  :: freqnt             ! Frequency in degrees per hour 
+       real(fp)                  :: shift              ! Phase shift 
+       real(fp)                  :: tfasto             ! Stop time in minutes 
+       real(fp)                  :: tfastr             ! Start time in minutes 
+       real(sp), parameter       :: defaul = -999.0_sp ! Default value 
+       character(20)             :: namfun             ! Local name for fourier function 
        character(4)              :: blnm
 
    real(sp), dimension(:,:,:),   allocatable, save :: glbarr3
@@ -2084,7 +1943,6 @@ end subroutine setfouunit
        fouvarnam     => gdfourier%fouvarnam
        nofouvar      => gdfourier%nofouvar
        fouref        => gdfourier%fouref
-       idfile        => gdfourier%idfile
 
        mmax          => gddimens%mmax
        nmax          => gddimens%nmax
@@ -2099,8 +1957,6 @@ end subroutine setfouunit
 
        !
        ! Initialize local variables
-       !
-       defaul = -999.0_sp
        !
        ! Frequention := 360 degree / period
        ! where period = [ (FTMSTO - FMTSTR) * DTSEC ] / [ FNUMCY * 3600 ]
@@ -2296,8 +2152,3 @@ end subroutine setfouunit
    end subroutine wrfous
 
 end module m_fourier_analysis
-
-                   
-                   
-                   
-                
