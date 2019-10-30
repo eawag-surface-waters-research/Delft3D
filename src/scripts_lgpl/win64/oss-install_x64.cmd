@@ -74,8 +74,42 @@ if [%4] EQU [] (
 rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
 cd %~dp0\..\..
 
+    rem =================
+    rem === LOCKFILE
+    rem === Problems may occur when this install script is being executed more than once at the same time.
+    rem === Workaround:
+    rem === 1. Unique id for each instance
+    rem ===    %RANDOM% is not good enough, so the seconds and milliseconds are summed to %RANDOM% to get a (more) unique id
+    rem === 2. Unique name for a lockfile
+    rem ===    using the unique id
+    rem === 3. getlock
+    rem ===    Count the number of lockfiles: 0: create my unique lockfile
+    rem ===                                  >1: wait 3 seconds and try again
+    rem ===    Wait a second
+    rem ===    Count the number of lockfiles: 1: yes, we have locked it, continue
+    rem ===                                  >1: multiple instances tried the same, remove my lockfile and try again
+    rem ===    Continue without lock after 10 trials
+    rem === 4. Do install actions
+    rem === 5. Remove my lockfile
+    rem ====================
+
+set myid=%TIME%
+set /A myid=(1%myid:~6,2%-100)*100 + (1%myid:~9,2%-100)
+set /A myid=%myid%+%RANDOM%
+
+    rem This echo is necessary, otherwise different instances started at the same time may have the same id
+echo oss-install id:"%myid%"
+    rem The directory containing the lockfiles must be present, also the 1 second wait is necessary
+call :makeDir !dest_main!
+call :waitfunction 2
+set lockfile=!dest_main!\oss-install_lockfile_!myid!.txt
+    rem echo lockfile:!lockfile!
+call :getlock
+
 call :generic
 call :!project!
+
+call :releaselock
 
 goto end
 
@@ -853,6 +887,85 @@ rem =====================
 
     call :copyFile "utils_lgpl\gridgeom\packages\gridgeom\dll\x64\Release\gridgeom.dll"                  !dest_bin!
 goto :endproc
+
+
+
+
+rem =======================
+rem === GET LOCK ==========
+rem =======================
+:getlock
+    rem echo "getlock start"
+    set counter=0
+    :getlockloop
+        set filecount=0
+        for %%x in (!dest_main!\oss-install_lockfile_*.txt) do set /a filecount+=1
+        rem echo filecount: !filecount!
+        if !filecount! GTR 0 (
+            set /A counter=%counter%+1
+            rem echo getlock waits for !counter! time
+            call :waitfunction 5
+        ) else (
+            rem echo Creating lockfile named !lockfile!
+            echo This file is created by oss-install_x64.cmd in directory %~dp0 >!lockfile!
+            call :waitfunction 2
+        )
+        if !counter! GTR 10 (
+            goto getlockfinishedwaiting
+        )
+        set filecount=0
+        for %%x in (!dest_main!\oss-install_lockfile_*.txt) do set /a filecount+=1
+        rem echo filecount: !filecount!
+        if !filecount! EQU 1 (
+            rem echo !myid!: yes I have a lock
+            goto getlockfinishedwaiting
+        ) else (
+            rem echo !myid!: too many lock trials, removing mine and try again
+            del /f "!lockfile!" > del_!myid!.log 2>&1
+            del /f del_!myid!.log
+        )
+    goto :getlockloop
+    :getlockfinishedwaiting
+        if !counter! GTR 10 (
+            rem echo Unable to lock destination directory, continueing without lock
+        )
+    rem echo "getlock end"
+goto :endproc
+
+
+
+
+
+rem =======================
+rem === RELEASE LOCK ======
+rem =======================
+:releaselock
+    rem echo "releaselock start"
+    if exist !lockfile! (
+        rem echo Deleting !lockfile!
+        del /f "!lockfile!" > del_!myid!.log 2>&1
+        del /f del_!myid!.log
+    ) else (
+        rem echo !lockfile! does not exist
+    )
+    rem echo "releaselock end"
+goto :endproc
+
+
+
+rem =======================
+rem === WAITFUNCTION ======
+rem =======================
+:waitfunction
+    rem See https://www.robvanderwoude.com/wait.php
+    rem "timeout" is not allowed by VisualStudio: ERROR: Input redirection is not supported, exiting the process immediately.
+
+    rem echo waiting %~1 pings
+    PING localhost -n %~1 >NUL
+goto :endproc
+
+
+
 
 :end
 if NOT %globalErrorLevel% EQU 0 (
