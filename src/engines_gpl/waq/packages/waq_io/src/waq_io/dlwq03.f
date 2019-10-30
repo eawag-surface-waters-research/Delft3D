@@ -588,6 +588,9 @@
      &              dtflg1 , disper , volume   , iwidth   , lchar  ,
      &              filtype, dtflg3 , vrsion   , ioutpt   , ierr2  ,
      &              iwar2  , has_hydfile       )
+
+      call check_volume_time( lunut, lchar(7), noseg, ierr2 )
+
       if ( .not. alone ) then
          if ( lchar(7) .ne. fnamep(6) ) then
             write ( lunut , 2395 ) fnamep(6)
@@ -687,4 +690,85 @@
 
  2590 format ( / ' ERROR, closing NetCDF file. Filename: ',A )
  2599 format ( / ' NetCDF error message: ', A )
+
+      contains
+
+      !
+      ! Check the contents of the volumes file: id the time step compatible?
+      !
+      subroutine check_volume_time( lunut, filvol, noseg, ierr2 )
+
+      integer, intent(in)          :: lunut      !< LU-number of the report file
+      character(len=*), intent(in) :: filvol     !< Name of the volumes file to be checked
+      integer, intent(in)          :: noseg      !< Number of segments
+      integer, intent(out)         :: ierr2      !< Whether an error was found or not
+
+      include 'sysi.inc'        !     common  /  sysi  /    Timer characteristics
+
+      integer                      :: i, ierr
+      integer                      :: luvol
+      integer                      :: time1, time2, time3
+      real                         :: dummy
+
+      open( newunit = luvol, file = filvol, access = 'stream',
+     &      status = 'old', iostat = ierr )
+
+      !
+      ! The existence has already been checked, if the file does
+      ! not exist, skip the check
+      !
+      if ( ierr /= 0 ) then
+          return
+      endif
+
+      read( luvol, iostat = ierr ) time1, (dummy, i = 1,noseg )
+      if ( ierr /= 0 ) then
+          ierr2 = ierr2 + 1
+          write ( lunut , 110 )
+          return
+      endif
+      read( luvol, iostat = ierr ) time2, (dummy, i = 1,noseg )
+      if ( ierr /= 0 ) then
+          write ( lunut , 120 )
+          return
+      endif
+      read( luvol, iostat = ierr ) time3, (dummy, i = 1,noseg )
+      if ( ierr /= 0 ) then
+          write ( lunut , 130 )
+          return
+      endif
+
+      !
+      ! The times must be increasing and the intervals must be the same
+      !
+      if ( time1 >= time2 .or. time2 >= time3 ) then
+          ierr2 = ierr2 + 1
+          write ( lunut , 140 ) time1, time2, time3
+          return
+      endif
+      if ( (time2 - time1) /= (time3 - time2) ) then
+          ierr2 = ierr2 + 1
+          write ( lunut , 150 ) time1, time2, time3
+          return
+      endif
+      if ( mod( (time2 - time1), idt ) /= 0 ) then
+          ierr2 = ierr2 + 1
+          write ( lunut , 160 ) time1, time2, time3, idt
+          return
+      endif
+
+  110 format( ' ERROR: the volumes file is too small')
+  120 format( ' NOTE: the volumes file appears to hold one record only')
+  130 format( ' NOTE: the volumes file appears to hold two records only'
+     &)
+  140 format( ' ERROR: the times in the volumes file are not monotonely
+     &increasing',/,' Successive times: ',3i10)
+  150 format( ' ERROR: the times in the volumes file are not equidistant
+     &',/,' Successive times: ',3i10)
+  160 format( ' ERROR: the time step does not divide the time interval i
+     &n the volumes file',
+     &/,' Successive times in the volumes file: ',3i10,
+     &/,'Time step for water quality: ',i10)
+
+      end subroutine check_volume_time
       end
