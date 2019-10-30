@@ -735,7 +735,7 @@ module m_meteo
    ! ==========================================================================
    
    !> Helper function for initializing a Converter.
-   function initializeConverter(instancePtr, converterId, convtype, operand, method, srcmask) result(success)
+   function initializeConverter(instancePtr, converterId, convtype, operand, method, srcmask, inputptr) result(success)
       logical                    :: success      !< function status
       type(tEcInstance), pointer :: instancePtr  !< 
       integer                    :: converterId  !< 
@@ -743,6 +743,7 @@ module m_meteo
       integer                    :: operand      !< 
       integer                    :: method       !< 
       type (tEcMask), optional   :: srcmask      !< 
+      real(hp), pointer, optional:: inputptr
       !
       success              = ecSetConverterType(instancePtr, converterId, convtype)
       if (success) success = ecSetConverterOperand(instancePtr, converterId, operand)
@@ -750,6 +751,10 @@ module m_meteo
       if (present(srcmask)) then
          if (success) success = ecSetConverterMask(instancePtr, converterId, srcmask)
       end if
+      if (present(inputptr)) then
+         if (success) success = ecSetConverterInputPointer(instancePtr, converterId, inputptr)
+      end if
+
    end function initializeConverter
    
    ! ==========================================================================
@@ -878,6 +883,7 @@ module m_meteo
       double precision          :: relrow, relcol
       integer                   :: row0, row1, col0, col1, ncols, nrows, issparse, Ndatasize
       character(len=128)        :: txt1, txt2, txt3
+      real(hp), pointer         :: inputptr => null()
 
       call clearECMessage()
       ec_addtimespacerelation = .false.
@@ -938,6 +944,8 @@ module m_meteo
             message = 'Boundary '''//trim(qidname)//''', location='''//trim(location)//''', file='''//trim(forcingfile)//''' failed!' 
             call mess(LEVEL_ERROR, message)
          end if
+!     elseif (ec_filetype == provFile_qh) then
+          
       else
                !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
                !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
@@ -977,22 +985,27 @@ module m_meteo
                end if
             else
                !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
-               if (present(dtnodal)) then
-                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal/86400.d0, varname=varname)
-               else
-                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
-               end if
-               if (.not. success) then
-                  ! message = ecGetMessage()
-                  ! message = dumpECMessageStack(LEVEL_WARN,callback_msg)
-                  ! NOTE: do all error dumping (if any) at the end of this routine at label 1234
-      
-                  ! NOTE: in relation to WAVE: all calling WAVE-related routines now pass quiet=.true. to this addtimespace routine.
-                  ! When running online with WAVE and the first WAVE calculation is after the first DFlowFM calculation,
-                  ! this message will be generated. This must be a warning: notify the user that DFlowFM is going to do
-                  ! a calculation with zero wave values. This message should be written every time step, until proper
-                  ! wave data is available. The user has to check whether this behaviour is as expected.
-                  goto 1234
+               if (name=='qhbnd') then
+                   ec_filetype = provFile_qhtable
+                   success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename(1:index(filename,'.'))//'qh', refdate_mjd, tzone, ec_second, name)
+               else    
+                  if (present(dtnodal)) then
+                     success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal/86400.d0, varname=varname)
+                  else
+                     success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
+                  end if
+                  if (.not. success) then
+                     ! message = ecGetMessage()
+                     ! message = dumpECMessageStack(LEVEL_WARN,callback_msg)
+                     ! NOTE: do all error dumping (if any) at the end of this routine at label 1234
+         
+                     ! NOTE: in relation to WAVE: all calling WAVE-related routines now pass quiet=.true. to this addtimespace routine.
+                     ! When running online with WAVE and the first WAVE calculation is after the first DFlowFM calculation,
+                     ! this message will be generated. This must be a warning: notify the user that DFlowFM is going to do
+                     ! a calculation with zero wave values. This message should be written every time step, until proper
+                     ! wave data is available. The user has to check whether this behaviour is as expected.
+                     goto 1234
+                  end if
                end if
             end if
          end if
@@ -1142,13 +1155,9 @@ module m_meteo
       case ('qhbnd')
          ! count qh boundaries
          n_qhbnd = n_qhbnd + 1
-         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, interpolate_passthrough)
-         if (present(targetIndex)) then
-            ndx = targetIndex
-         else
-            ndx = n_qhbnd
-         end if
-         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, ndx)
+         inputptr => atqh_all(n_qhbnd)
+         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, interpolate_passthrough, inputptr=inputptr)
+         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
          ! Each qhbnd polytim file replaces exactly one element in the target data array.
          ! Converter will put qh value in target_array(n_qhbnd)
       case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
@@ -1257,12 +1266,13 @@ module m_meteo
             if (.not.ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)) return 
          case ('qhbnd')
             if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
-                 (.not. checkFileType(ec_filetype, provFile_bc, target_name))  ) then
+                 (.not. checkFileType(ec_filetype, provFile_qhtable, target_name))  .and.            &
+                 (.not. checkFileType(ec_filetype, provFile_bc, target_name)) ) then
                return
             end if
             if (ec_filetype == provFile_poly_tim) then
                sourceItemName = 'polytim_item'
-            else if (ec_filetype == provFile_bc) then
+            else if (ec_filetype == provFile_bc .or. ec_filetype == provFile_qhtable) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'discharge')
                sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'waterlevel')
                sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'slope')
@@ -2290,12 +2300,13 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine read1polylin(minp,xs,ys,ns)
+   subroutine read1polylin(minp,xs,ys,ns,pliname)
       use m_alloc
       integer          :: minp
       double precision, allocatable :: xs(:)
       double precision, allocatable :: ys(:)
-      integer                      :: ns
+      integer                       :: ns
+      character(len=:),allocatable,optional :: pliname
    
       character (len=maxnamelen)   :: rec
       integer                      :: k
@@ -2304,7 +2315,10 @@ contains
    
    10 read(minp,'(a)',end = 999) rec
       if  (rec(1:1) == '*' ) goto 10
-   
+      if (present(pliname)) then
+         pliname = trim(rec)
+      end if  
+         
       read(minp,'(a)',end = 999) rec
       read(rec ,*    ,err = 888) ns
       
@@ -7355,7 +7369,7 @@ contains
    !! All points have an allowable 'search range', defined by a line from x,y
    !! to xyen(1,) to xyen(2,). Generally, the points in xyen are endpoints of
    !! rrtol times a perpendicular vector to edge links.
-   subroutine selectelset( filename, filetype, x, y, xyen, kc, mnx, ki, num, usemask, rrtolrel)
+   subroutine selectelset( filename, filetype, x, y, xyen, kc, mnx, ki, num, usemask, rrtolrel, pliname)
      
      use MessageHandling
      use m_inquire_flowgeom
@@ -7380,6 +7394,7 @@ contains
      integer     , intent(in)        :: filetype   ! spw, arcinfo, uniuvp etc
      logical,      intent(in)        :: usemask    !< Whether to use the mask array kc, or not (allows you to keep kc, but disable it for certain quantities, for example salinitybnd).
      double precision, intent(in), optional :: rrtolrel !< Optional, a more strict rrtolerance value than the global rrtol. selectelset will succeed if cross SL value <= rrtolrel
+     character(len=:),allocatable,optional :: pliname
      
      ! locals
      double precision, allocatable   :: xs (:)     ! temporary array to hold polygon
@@ -7398,7 +7413,7 @@ contains
      if (filetype == poly_tim) then
 
         call oldfil(minp, filename)
-        call read1polylin(minp,xs,ys,ns)
+        call read1polylin(minp,xs,ys,ns,pliname)
    
         if (.not. allocated(kcs)) then
           allocate(kcs(ns))

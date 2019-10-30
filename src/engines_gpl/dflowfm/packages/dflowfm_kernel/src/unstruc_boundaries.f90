@@ -52,7 +52,6 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  use unstruc_messages
  use m_ship
  use properties
- use m_ec_magic_number
  use m_transport
  use m_sobekdfm
  use m_sediment
@@ -452,7 +451,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use unstruc_messages
  use m_ship
  use properties
- use m_ec_magic_number
  use m_transport
  use m_sediment, only: stm_included, stmpar, sedtot2sedsus
  use sediment_basics_module, only: SEDTYP_NONCOHESIVE_SUSPENDED, SEDTYP_COHESIVE
@@ -483,12 +481,15 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  integer                               :: itrac, isf
  integer, external                     :: findname
  integer                               :: janew
+ character(len=:),allocatable          :: pliname
 
 ! call bndname_to_fm(qid,qidfm)
   qidfm = qid
   if (qidfm == 'waterlevelbnd'    .or. qidfm == 'neumannbnd'  .or. qidfm == 'riemannbnd' .or. qidfm == 'outflowbnd' .or. qidfm == 'qhbnd') then
 
-     call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kez(nbndz+1:nx), numz, usemask=.true.) !numz=number cells found
+
+     if (allocated(pliname)) deallocate(pliname)
+     call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kez(nbndz+1:nx), numz, usemask=.true., pliname=pliname) !numz=number cells found, plname=pliname
      WRITE(msgbuf,'(3a,i8,a)') trim (qid), ' ', trim( filename), numz, ' nr of open bndcells' ; call msg_flush()
      nzbnd = nzbnd + 1
 
@@ -506,12 +507,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
          itpbn = 7
          nqhbnd = nqhbnd + 1
          numqh  = numz
+         call realloc(qhpliname,nqhbnd)  ; qhpliname(nqhbnd) = pliname
          call realloc(L1qhbnd,nqhbnd) ; L1qhbnd(nqhbnd) = nbndz + 1
          call realloc(L2qhbnd,nqhbnd) ; L2qhbnd(nqhbnd) = nbndz + numz
-         call realloc(atqh_all,nqhbnd);  atqh_all(nqhbnd) = 0d0
-         call realloc(atqh_sum,nqhbnd);  atqh_sum(nqhbnd) = 0d0
-         call realloc(qhbndz,nqhbnd)  ;  qhbndz(nqhbnd) = 0d0
-         call realloc(magic_array,nqhbnd)  ;  magic_array(nqhbnd) = 0d0
+         call realloc(atqh_all,nqhbnd); atqh_all(nqhbnd) = 0d0
+         call realloc(atqh_sum,nqhbnd); atqh_sum(nqhbnd) = 0d0
+         call realloc(qhbndz,nqhbnd)  ; qhbndz(nqhbnd)   = 0d0
      end if    
      itpez(nbndz+1:nbndz+numz) =  itpbn
      
@@ -924,7 +925,7 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: file_type
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex 
- integer                      :: ib
+ integer                      :: ib, ibqh
  integer                      :: maxlatsg
  integer                      :: major, minor
  integer                      :: loc_spec_type
@@ -968,6 +969,7 @@ logical function initboundaryblocksforcings(filename)
  end if
 
  ib = 0
+ ibqh = 0
  do i=1,num_items_in_file
 
     node_ptr => bnd_ptr%child_nodes(i)%node_ptr
@@ -1044,20 +1046,27 @@ logical function initboundaryblocksforcings(filename)
                    oper = '+'
                 endif
                 call register_quantity_pli_combination(quantity, locationfile)
-                if (file_type == node_id) then
+                if (file_type == node_id .or. quantity == 'qhbnd') then
                    select case(quantity)
-                   case ('waterlevelbnd', 'qhbnd')
+                   case ('waterlevelbnd')
                       targetindex = maxloc(itpenz(1:nbndz),itpenz(1:nbndz)==ib)   
+                   case ('qhbnd')
+                      ibqh = ibqh + 1
+                      targetindex = (/ibqh/)
+                      if (filetype/=node_id) then
+                          locationfile = qhpliname(ibqh)
+                      end if
                    case ('dischargebnd')
                       targetindex = maxloc(itpenu(1:nbndu),itpenu(1:nbndu)==ib)   
                    case default
                       targetindex = (/-1/)
                    end select
+
                    if (forcingfile == '-') then
-                      retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=file_type, method=fmmethod, operand=oper, &
+                      retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=node_id, method=fmmethod, operand=oper, &
                                                                targetindex=targetindex(1))
                    else
-                      retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=file_type, method=fmmethod, operand=oper, forcingfile = forcingfile, &
+                      retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=node_id, method=fmmethod, operand=oper, forcingfile = forcingfile, &
                                                                targetindex=targetindex(1))
                    endif
                 else

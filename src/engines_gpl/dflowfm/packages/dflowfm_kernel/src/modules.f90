@@ -2093,10 +2093,11 @@ end module m_crspath
                                                         !!                        6 = waterlevel outflow
                                                         !!                        7 = q-h boundary
  integer                           :: nqhbnd            !< number of qh boundaries
+ character(len=255), allocatable   :: qhpliname(:)      !< name of the location extracted from the pli-file
  integer         , allocatable     :: L1qhbnd(:)        !< first  nbndz point in discharge bnd nqbnd
  integer         , allocatable     :: L2qhbnd(:)        !< second nbndz point in discharge bnd nqbnd
  double precision, allocatable, target :: qhbndz(:)     !< temporary array for storing boundary values per qh boundary segment
- double precision, allocatable     :: atqh_all(:)       !< temporary array for computing discharge through qh boundary per domain
+ double precision, allocatable, target :: atqh_all(:)       !< temporary array for computing discharge through qh boundary per domain
  double precision, allocatable     :: atqh_sum(:)       !< temporary array for computing total discharge through qh boundary
  double precision                  :: qhrelax = 1d-2    !< relaxation factor for h signal
 
