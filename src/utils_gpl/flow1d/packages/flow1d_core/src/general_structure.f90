@@ -427,7 +427,7 @@ contains
       double precision, intent(in)   :: mugf       !< Vertical contraction coefficient for free gate flow.
       double precision, intent(in)   :: rhoast     !< Ratio of density right and left of structure
       double precision, intent(in)   :: flowDir    !< Flow direction (+1/-1).
-      double precision, intent(in)   :: uu         !< Upstream velocity.
+      double precision, intent(in)   :: uu         !< Upstream velocity (with velheight setting already accounted for).
       double precision, intent(in)   :: w2         !< Width at right side of structure.
       double precision, intent(in)   :: wsd        !< Width structure right or left side.
       double precision, intent(in)   :: wstr       !< Width at centre of structure.
