@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.645
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dimr_lib", "engines_gpl\dimr\packages\dimr_lib\dimr_lib.vcxproj", "{40244765-8DC2-4247-B167-9B3A8D1EB30A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -13,18 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dimr", "engines_gpl\dimr\pa
 		{40244765-8DC2-4247-B167-9B3A8D1EB30A} = {40244765-8DC2-4247-B167-9B3A8D1EB30A}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DimrTesting", "engines_gpl\dimr\packages\DimrTesting\DimrTesting.csproj", "{0EFCBB94-8ECD-4298-8CEA-DD75E478FA6E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B9D5FB4A-803E-414D-AA15-BE75F06DAB60} = {B9D5FB4A-803E-414D-AA15-BE75F06DAB60}
-		{40244765-8DC2-4247-B167-9B3A8D1EB30A} = {40244765-8DC2-4247-B167-9B3A8D1EB30A}
-		{0E2296C2-E881-483B-A09E-591191DB943B} = {0E2296C2-E881-483B-A09E-591191DB943B}
-	EndProjectSection
-EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "dimr_testcomponent", "engines_gpl\dimr\packages\dimr_testcomponent\dimr_testcomponent.vfproj", "{0E2296C2-E881-483B-A09E-591191DB943B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "deltares_common_c", "utils_lgpl\deltares_common\packages\deltares_common_c\deltares_common_c.vcxproj", "{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utils_lgpl", "utils_lgpl", "{6F70C73F-2368-4398-BA4D-60453E0A5339}"
@@ -34,11 +22,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{583163E9-9943-4AA7-802E-D5E2D85DD31A}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dimr_lib_tests", "engines_gpl\dimr\packages\dimr_lib_tests\dimr_lib_tests.vcxproj", "{B2FBFF25-0BFB-46B5-BE31-7286D021CC0D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{0E2296C2-E881-483B-A09E-591191DB943B} = {0E2296C2-E881-483B-A09E-591191DB943B}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,13 +37,6 @@ Global
 		{B9D5FB4A-803E-414D-AA15-BE75F06DAB60}.Debug|x64.Build.0 = Debug|x64
 		{B9D5FB4A-803E-414D-AA15-BE75F06DAB60}.Release|x64.ActiveCfg = Release|x64
 		{B9D5FB4A-803E-414D-AA15-BE75F06DAB60}.Release|x64.Build.0 = Release|x64
-		{0EFCBB94-8ECD-4298-8CEA-DD75E478FA6E}.Debug|x64.ActiveCfg = Debug|x64
-		{0EFCBB94-8ECD-4298-8CEA-DD75E478FA6E}.Debug|x64.Build.0 = Debug|x64
-		{0EFCBB94-8ECD-4298-8CEA-DD75E478FA6E}.Release|x64.ActiveCfg = Release|x64
-		{0EFCBB94-8ECD-4298-8CEA-DD75E478FA6E}.Release|x64.Build.0 = Release|x64
-		{0E2296C2-E881-483B-A09E-591191DB943B}.Debug|x64.ActiveCfg = Debug|x64
-		{0E2296C2-E881-483B-A09E-591191DB943B}.Debug|x64.Build.0 = Debug|x64
-		{0E2296C2-E881-483B-A09E-591191DB943B}.Release|x64.ActiveCfg = Release|x64
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B}.Debug|x64.ActiveCfg = Debug|x64
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B}.Debug|x64.Build.0 = Debug|x64
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B}.Release|x64.ActiveCfg = Release|x64
@@ -69,10 +45,6 @@ Global
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}.Debug|x64.Build.0 = Debug|x64
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}.Release|x64.ActiveCfg = Release|x64
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}.Release|x64.Build.0 = Release|x64
-		{B2FBFF25-0BFB-46B5-BE31-7286D021CC0D}.Debug|x64.ActiveCfg = Debug|x64
-		{B2FBFF25-0BFB-46B5-BE31-7286D021CC0D}.Debug|x64.Build.0 = Debug|x64
-		{B2FBFF25-0BFB-46B5-BE31-7286D021CC0D}.Release|x64.ActiveCfg = Release|x64
-		{B2FBFF25-0BFB-46B5-BE31-7286D021CC0D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,10 +52,10 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{40244765-8DC2-4247-B167-9B3A8D1EB30A} = {E50ADB72-1ACF-4FE5-9AED-884C1F5DFCDE}
 		{B9D5FB4A-803E-414D-AA15-BE75F06DAB60} = {E50ADB72-1ACF-4FE5-9AED-884C1F5DFCDE}
-		{0EFCBB94-8ECD-4298-8CEA-DD75E478FA6E} = {583163E9-9943-4AA7-802E-D5E2D85DD31A}
-		{0E2296C2-E881-483B-A09E-591191DB943B} = {583163E9-9943-4AA7-802E-D5E2D85DD31A}
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {6F70C73F-2368-4398-BA4D-60453E0A5339}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {6F70C73F-2368-4398-BA4D-60453E0A5339}
-		{B2FBFF25-0BFB-46B5-BE31-7286D021CC0D} = {583163E9-9943-4AA7-802E-D5E2D85DD31A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B544B5D2-0151-43D9-ADCB-958C28BF9883}
 	EndGlobalSection
 EndGlobal
