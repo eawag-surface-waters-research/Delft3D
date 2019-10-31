@@ -922,7 +922,6 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: iostat, ierr
  integer                      :: ilattype
  integer                      :: k, n
- integer                      :: file_type
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex 
  integer                      :: ib, ibqh
@@ -993,10 +992,10 @@ logical function initboundaryblocksforcings(filename)
 
        call prop_get_string(node_ptr, '', 'nodeId', locationfile, retVal)
        if (retVal) then
-          file_type = node_id
+          filetype = node_id
           fmmethod  = spaceandtime
        else
-          file_type = poly_tim
+          filetype = poly_tim
           fmmethod  = weightfactors
           call prop_get_string(node_ptr, '', 'locationfile', locationfile, retVal)
        endif
@@ -1046,7 +1045,7 @@ logical function initboundaryblocksforcings(filename)
                    oper = '+'
                 endif
                 call register_quantity_pli_combination(quantity, locationfile)
-                if (file_type == node_id .or. quantity == 'qhbnd') then
+                if (filetype == node_id .or. quantity == 'qhbnd') then
                    select case(quantity)
                    case ('waterlevelbnd')
                       targetindex = maxloc(itpenz(1:nbndz),itpenz(1:nbndz)==ib)   
@@ -1071,9 +1070,9 @@ logical function initboundaryblocksforcings(filename)
                    endif
                 else
                    if (forcingfile == '-') then
-                      retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=file_type, method=fmmethod, operand=oper)
+                      retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=filetype, method=fmmethod, operand=oper)
                    else
-                      retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=file_type, method=fmmethod, operand=oper, forcingfile = forcingfile)
+                      retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=filetype, method=fmmethod, operand=oper, forcingfile = forcingfile)
                    endif
                 endif
                 initboundaryblocksforcings = initboundaryblocksforcings .and. retVal ! Remember any previous errors.
