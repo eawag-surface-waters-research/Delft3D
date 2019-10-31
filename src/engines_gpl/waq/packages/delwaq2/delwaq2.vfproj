@@ -6,7 +6,7 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="..\..\bin\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" LocalVariableStorage="localStorageAutomatic" FloatingPointExceptionHandling="fpe0" ModulePath="$(OutDir)\" Traceback="true" NullPointerCheck="true" UninitializedVariablesCheck="true"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE:MULTIPLE" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);$(UniversalCRTSdkDir)Lib\10.0.10586.0\ucrt\x86" GenerateManifest="false" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="67108864" LargeAddressAware="addrAwareLarge"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE:MULTIPLE" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86" GenerateManifest="false" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="67108864" LargeAddressAware="addrAwareLarge"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -16,7 +16,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="..\..\bin\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ModulePath="$(OutDir)\" Traceback="true"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);$(UniversalCRTSdkDir)Lib\10.0.10586.0\ucrt\x86" GenerateManifest="false" GenerateMapFile="true" SubSystem="subSystemConsole" StackReserveSize="100108864" LargeAddressAware="addrAwareLarge"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86" GenerateManifest="false" GenerateMapFile="true" SubSystem="subSystemConsole" StackReserveSize="100108864" LargeAddressAware="addrAwareLarge"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -26,7 +26,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" LocalVariableStorage="localStorageAutomatic" FloatingPointExceptionHandling="fpe0" ModulePath="$(OutDir)\" Traceback="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE:MULTIPLE" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);$(UniversalCRTSdkDir)Lib\10.0.10586.0\ucrt\x64" GenerateManifest="false" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE:MULTIPLE" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64" GenerateManifest="false" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -36,7 +36,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)\" Traceback="true" RuntimeLibrary="rtMultiThreadedDLL"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);$(UniversalCRTSdkDir)Lib\10.0.10586.0\ucrt\x64" GenerateManifest="false" GenerateMapFile="true" SubSystem="subSystemConsole" StackReserveSize="100108864"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64" GenerateManifest="false" GenerateMapFile="true" SubSystem="subSystemConsole" StackReserveSize="100108864"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>

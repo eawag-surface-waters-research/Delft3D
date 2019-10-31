@@ -65,6 +65,8 @@ module m_struc_helper
       double precision, intent(  out) :: uu            !< Upstream velocity.
       double precision, intent(  out) :: ud            !< Downstream velocity.
       double precision, intent(  out) :: flowdir       !< Flow direction 1 positive direction, -1 negative direction.
+      double precision, intent(  out) :: ud            !< Downstream velocity.
+      double precision, intent(  out) :: uu            !< Upstream velocity.
       !
       !
       ! Local variables

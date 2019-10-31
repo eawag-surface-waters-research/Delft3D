@@ -47,7 +47,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -189,7 +189,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_versio
     </Link>
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project dimr" &gt; .\include\dimr_exe_version.h
-..\..\..\..\scripts_lgpl\win32\oss-install.cmd dimr bin "$(IFORT_COMPILER19)redist\ia32\compiler\"
+..\..\..\..\scripts_lgpl\win32\oss-install.cmd dimr bin "$(IFORT_COMPILER18)redist\ia32\compiler\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -225,7 +225,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_versio
     </Link>
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project dimr" &gt; .\include\dimr_exe_version.h
-..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd dimr bin "$(IFORT_COMPILER19)redist\intel64\compiler\"
+..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd dimr bin "$(IFORT_COMPILER18)redist\intel64\compiler\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

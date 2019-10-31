@@ -6,7 +6,7 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)\dflowfm\bin" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)third_party_open\netcdf\netCDF 4.6.1-32\lib;$(UniversalCRTSdkDir)Lib\10.0.10586.0\ucrt\x86" IgnoreDefaultLibraryNames="LIBCMTD.lib;libifcoremt.lib;LIBCMT.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="netcdf.lib"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)third_party_open\netcdf\netCDF 4.6.1-32\lib;$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86" IgnoreDefaultLibraryNames="LIBCMTD.lib;libifcoremt.lib;LIBCMT.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="netcdf.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -16,7 +16,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\dflowfm\bin" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" RuntimeLibrary="rtMultiThreadedDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)third_party_open\netcdf\netCDF 4.6.1-32\lib;$(UniversalCRTSdkDir)Lib\10.0.10586.0\ucrt\x86" IgnoreDefaultLibraryNames="LIBCMT.lib;libifcoremt.lib" SubSystem="subSystemConsole" AdditionalDependencies="netcdf.lib"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)third_party_open\netcdf\netCDF 4.6.1-32\lib;$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86" IgnoreDefaultLibraryNames="LIBCMT.lib;libifcoremt.lib" SubSystem="subSystemConsole" AdditionalDependencies="netcdf.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -26,7 +26,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)\dflowfm\bin">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="&quot;$(SolutionDir)third_party_open\netcdf\netCDF 4.6.1\lib&quot;$(UniversalCRTSdkDir)Lib\10.0.10586.0\ucrt\x64" IgnoreDefaultLibraryNames="LIBCMTD.lib;libifcoremt.lib;LIBCMT.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="netcdf.lib"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="&quot;$(SolutionDir)third_party_open\netcdf\netCDF 4.6.1\lib&quot;$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64" IgnoreDefaultLibraryNames="LIBCMTD.lib;libifcoremt.lib;LIBCMT.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="netcdf.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -36,7 +36,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\dflowfm\bin">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" RuntimeLibrary="rtMultiThreadedDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="&quot;$(SolutionDir)third_party_open\netcdf\netCDF 4.6.1\lib&quot;$(UniversalCRTSdkDir)Lib\10.0.10586.0\ucrt\x64" IgnoreDefaultLibraryNames="LIBCMT.lib;libifcoremt.lib" SubSystem="subSystemConsole" AdditionalDependencies="netcdf.lib"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="&quot;$(SolutionDir)third_party_open\netcdf\netCDF 4.6.1\lib&quot;$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64" IgnoreDefaultLibraryNames="LIBCMT.lib;libifcoremt.lib" SubSystem="subSystemConsole" AdditionalDependencies="netcdf.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
