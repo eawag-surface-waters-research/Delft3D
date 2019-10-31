@@ -49,6 +49,7 @@ module m_fourier_analysis
     use precision 
     use string_module, only: str_lower
     use unstruc_netcdf
+    use m_flow, only : kmx
     implicit none
 
     type gd_fourier
@@ -1693,14 +1694,14 @@ end subroutine setfouunit
               namfun = 'wind speed'
            endif
            if (founam(ifou)(:2)=='ux') then
-              unc_loc = UNC_LOC_S3D
+              unc_loc = merge(UNC_LOC_S3D, UNC_LOC_S, kmx > 0)
               ibluv = ibluv + 1
               blnm = 'UX??'
               write (blnm(3:4), '(i2.2)') ibluv
               namfun = 'U-component of cell-centre velocity'
            endif
            if (founam(ifou)(:2)=='uy') then
-              unc_loc = UNC_LOC_S3D
+              unc_loc = merge(UNC_LOC_S3D, UNC_LOC_S, kmx > 0)
               ibluv = ibluv + 1
               blnm = 'UY??'
               write (blnm(3:4), '(i2.2)') ibluv
@@ -1721,14 +1722,14 @@ end subroutine setfouunit
               namfun = 'V-component velocity, column average'
            endif
            if (founam(ifou)(:2)=='uc') then
-              unc_loc = UNC_LOC_S3D
+              unc_loc = merge(UNC_LOC_S3D, UNC_LOC_S, kmx > 0)
               ibluc = ibluc + 1
               blnm = 'UC??'
               write (blnm(3:4), '(i2.2)') ibluc
               namfun = 'velocity magnitude'
            endif
            if (founam(ifou)(:2)=='r1') then
-              unc_loc = UNC_LOC_S3D
+              unc_loc = merge(UNC_LOC_S3D, UNC_LOC_S, kmx > 0)
               iblcn = iblcn + 1
               blnm = 'CO??'
               write (blnm(3:4), '(i2.2)') iblcn
