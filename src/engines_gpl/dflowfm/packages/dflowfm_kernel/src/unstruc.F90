@@ -8966,7 +8966,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call klok(cpu_extra(2,37)) ! end alloc flow
  !
  if (jawave > 0) then
-    call alloc8basicwavearrays()
+    call alloc9basicwavearrays()
  endif
  if (jawave > 2 .or. jased > 0 .and. stm_included) then
     call flow_waveinit()
@@ -12214,7 +12214,7 @@ end subroutine land_change_callback
  integer          :: ndraw
 
  integer          :: kk, k, nodval,N,L, k2
- double precision :: uu, seq(mxgr), wse(mxgr),hsk, dum, czc
+double precision :: uu, seq(mxgr), wse(mxgr),hsk, dum, czc, taucurc,ustw2,U10,FetchL,FetchD
  real(fp)       , dimension(:,:)   , pointer :: bedtmp
  integer :: istat
 
@@ -12255,7 +12255,7 @@ end subroutine land_change_callback
  else if (nodval == 9) then
     znod = ucx(k)
  else if (nodval == 10) then
-    znod = ucy(k)
+   znod = ucxq(k)
  else if (nodval == 11) then
     if (jasal > 0) znod = sa1(k)
  else if (nodval == 12) then
@@ -12421,12 +12421,30 @@ else if (nodval == 27) then
         case(1)
                 znod = Hwav(kk)
         case(2)
+                znod = Rlabda(kk)
+        case(3) 
                 znod = Twav(kk)
-        case(3)
-                znod = Taus(kk)
-        case(4)
+        case(4) 
                 znod = Uorb(kk)
+        case(5) 
+                call gettau2(kk,taucurc,czc,ustw2)
+                znod = sqrt(ustw2)            !ustw
+        case(6) 
+                call gettau2(kk,taucurc,czc,ustw2)
+                znod = sqrt(taucurc/rhomean)  !ustw+c
+        case(7) 
+                call gettau2(kk,taucurc,czc,ustw2)
+                znod = taucurc                ! taus to Delwaq
+        case(8) 
+                znod = ustk(kk)               ! Ustokes 
+        case(9) 
+                call getfetch(kk,U10,FetchL,FetchD)
+                znod = FetchL              
+        case(10) 
+                call getfetch(kk,U10,FetchL,FetchD)
+                znod = FetchD              
       end select
+
     else
      select case (waveparopt)
        case (1)
@@ -12726,7 +12744,7 @@ else if (nodval == 27) then
  else if ( linval == 16) then
     zlin = u1(L)
  else if ( linval == 17) then
-    zlin =  adve(L)*csu(LL)
+    zlin =  adve(L) !*csu(LL)
  else if ( linval == 18) then
     zlin =  advi(L)
  else if ( linval == 19) then
@@ -15273,7 +15291,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    !   !$OMP SECTION
 
    if (nvalv > 0) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_valve1D, irefdate, tzone, tunit,tim, valv)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_valve1D, irefdate, tzone, tunit,tim)
    endif
 
 !   !$OMP SECTION
@@ -20558,8 +20576,7 @@ end subroutine unc_write_shp
  double precision        :: atpf_org, circumormasscenter_org, phase, zkk
  double precision        :: xref, yref
  integer                 :: itatp_org, jaend ! , jarerun=0
- character(len=128)      :: errorMessage
-
+ 
  double precision, allocatable :: banh(:) , rr(:)       ! temp
  integer         , allocatable :: nbanh(:,:) , nr(:)    ! temp
 
@@ -29162,7 +29179,7 @@ end function densfm
  double precision :: qsseq,garciaeinstein, effic, bav, caver, botsu, qsseqcheck, eincheck, eincheck2
  double precision :: qssevr84 ,vr84rel, deltaa, seqbed
  double precision :: blmax, hpr,dzz,wu2,wid,ar,hyr, zbu
- double precision :: erodable, sumlay, hseqb, aa , dmorfacL, dh, ustar2swart, astar, fw, qeng, cf
+ double precision :: erodable, sumlay, hseqb, aa , dmorfacL, dh, ustar2swart, ustw2, astar, fw, qeng, cf
  integer          :: j, kj, n, k, kg, nn, n1, L,  jabanhydrad = 0, kb
 
  integer :: ndraw
@@ -29265,8 +29282,8 @@ end function densfm
        Ueff  = Ucur   +    0.4d0*uwave                             ! (m/s) SvR 2007
 
        if (MxgrKrone > 0) then
-          call Swart(Twave, uwave, z0wav, fw)
-          ustar2swart = ustar2swart + 0.5d0*fw*uwave*uwave         ! Swart
+          call Swart(Twave, uwave, z0wav, fw, ustw2)
+          ustar2swart = ustar2swart + ustw2                        ! Swart
        endif
 
     endif
@@ -29621,7 +29638,7 @@ end function densfm
 
 
 
- subroutine tauwavefetch(tim)               ! fetchlength and fetchdepth based significant wave height and period
+subroutine tauwavefetch(tim)               ! fetchlength and fetchdepth based significant wave height and period
  use m_sediment                             ! based on Hurdle, Stive formulae
  use m_netw                                 ! tauwave based on Swart
  use m_flowgeom                             ! taus = taubmx = taucur + tauwave, as in Delwaq
@@ -29646,14 +29663,10 @@ end function densfm
  double precision :: sind, cosd, ustx1, ustx2, usty1, usty2
  integer          :: k, L, kk, kkk, k1, k2, kup, n, ndone, ierr, nup, nupf, jacros, nw1, nw2, nodenum, LL, knw = 5
  INTEGER          :: NDIR, NWND, NSTAT, MOUT, ndoneprevcycle, kkmin, ndoner, k12, ks, ke, ki, msam = 0, jaopen
- double precision, allocatable :: ustk(:)
 
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
-
- allocate ( ustk(ndx) , stat = ierr)
- call aerr('ustk(ndx)', ierr ,  ndx); ustk=0d0
-
+ 
  if ( .not. allocated (fetch) .or. size (fetch,2) .ne. ndx) then
       nwf = 13
 
@@ -29722,9 +29735,9 @@ mainloop:do n  = 1, nwf
             jaopen = 0
             do kk = 1,nd(k)%lnx
                L  = iabs( nd(k)%ln(kk) )
-               if (ln(1,L) > ndxi) then
-                  jaopen = 1
-               endif
+               if (ln(1,L) > ndxi) then 
+                  jaopen = 1 
+               endif  
             enddo
 
             do kk = 1,netcell(k)%n
@@ -29759,14 +29772,14 @@ mainloop:do n  = 1, nwf
                endif
             enddo
             if (kkmin > 0) then
-                if (jaopen == 1) then
-                   fetch(n,k) = 1d5
-                else
+                if (jaopen == 1) then  
+                   fetch(n,k) = 1d5 
+                else 
                    fetch(n,k) = min(distmin, celsiz)
-                endif
+                endif   
                 fetdp(n,k) = max( s1(k) - bl(k), .1d0)
                 if (jagui > 0) then
-                   CALL rCIRc(Xz(k),Yz(k) ) !, fetch(n,k))
+                   !CALL rCIRc(Xz(k),Yz(k) ) !, fetch(n,k))
                    !call adddot(Xz(k),Yz(k),1d0)
                 endif
                 ndone      = ndone + 1
@@ -29799,9 +29812,15 @@ mainloop:do n  = 1, nwf
                      L  = iabs( nd(k)%ln(kk) )
                      k2 = ln(1,L) ; if (k2 == k) k2 = ln(2,L)
                      if ( kcs(k2) == 2 ) then  ! internal
-                        prin = uwin*getdx(xz(k2),yz(k2),xz(k),yz(k), jsferic) + vwin*getdy( xz(k2),yz(k2),xz(k),yz(k), jsferic)
-                        dsk2 = dbdistance(xz(k2),yz(k2),xz(k),yz(k), jsferic, jasfer3D, dmiss)
-                        cs   = min(max(prin/dsk2,-1d0),1d0)
+                        !prin = uwin*getdx(xz(k2),yz(k2),xz(k),yz(k), jsferic) + vwin*getdy( xz(k2),yz(k2),xz(k),yz(k), jsferic)
+                        !dsk2 = dbdistance(xz(k2),yz(k2),xz(k),yz(k), jsferic, jasfer3D, dmiss)
+                        !cs   = min(max(prin/dsk2,-1d0),1d0)                        
+
+                        cs   = uwin*csu(L) + vwin*snu(L) 
+                        if (L .ne. nd(k)%ln(kk) ) cs = -1d0*cs
+                        dsk2 = dx(L) 
+                        prin = dsk2*cs
+
                         if (cs > 0) then ! internal upwind points
                            nup = nup + 1
                            if (fetch(n,k2) .ne. dmiss) then ! do not look at open boundaries
@@ -29821,8 +29840,9 @@ mainloop:do n  = 1, nwf
                      fetdp(n,k) = fetd/ ( sumw*fetch(n,k) )
                      ndone      = ndone + 1
                      if (jagui > 0) then
-                        CALL rCIRc(Xz(k),Yz(k) )
+                        !CALL rCIRc(Xz(k),Yz(k) )
                         !call adddot(Xz(k),Yz(k),2d0)
+                         call KCIR(Xz(k),Yz(k),1d0)
                      end if
                   endif
                else
@@ -29854,25 +29874,12 @@ mainloop:do n  = 1, nwf
     Twav(k)   = 0d0
     Uorb(k)   = 0d0
     rlabda(k) = 0d0
+    ustk(k)   = 0d0
+
     if ( hs(k) > 0.01d0 ) then
-
-       call getlink1(k,L) ! het is maar voor wind
-       U10 = SQRT( WX(L)*WX(L) + WY(L)*WY(L) )
-       IF (U10 .LT. 1) cycle
-       DIR   = ATAN2(WY(L), WX(L))
-       IF (DIR < 0D0) DIR = DIR + TWOPI
-
-       dir   = dir/twopi
-       if (dir >= 1d0) dir = 0d0
-
-       NW1    = DIR*(nwf-1) + 1
-       NW2    = NW1 + 1
-       alfa2  = (nwf-1)*( dir - dble(nw1-1) / dble(nwf-1) )
-       alfa1  = 1d0 - alfa2
-
-       if (fetch(nw1,k) > 0d0 .or. fetch(nw2,k) > 0d0 ) then
-          fetchL = alfa1*fetch(nw1,k) + alfa2*fetch(nw2,k)
-          fetchD = alfa1*fetdp(nw1,k) + alfa2*fetdp(nw2,k)
+   
+       call getfetch(k,U10,FetchL,FetchD)
+       if (FetchL > 0) then  
 
           if (jawave == 1) then
 
@@ -29886,15 +29893,7 @@ mainloop:do n  = 1, nwf
 
           Hwav(k) = Hsig / sqrt2          ! Hwav === hrms
           Twav(k) = Tsig
-          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rk, ust)      ! basically now just a dispersion function with 2DH stokes drift
-          rlabda(k) = twopi / rk
-          ustk(k) = ust
-       else
-          Hwav(k) = 0d0
-          Twav(k) = 0d0
-          Uorb(k) = 0d0
-          rlabda(k) = 0d0
-          ustk(k) = 0d0
+          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rlabda(k), ustk(k))      ! basically now just a dispersion function with 2DH stokes drift
        endif
     endif
 
@@ -29916,7 +29915,7 @@ mainloop:do n  = 1, nwf
 
  ! need something for 2D ustokes
  do LL = 1, lnx
-   if (hu(L)>epswav) then
+   if (hu(LL)>epswav) then
        k1 = ln(1,LL); k2 = ln(2,LL)
        dir   = atan2(wy(LL), wx(LL))
        sind  = sin(dir); cosd = cos(dir)
@@ -29936,6 +29935,43 @@ mainloop:do n  = 1, nwf
 
 end subroutine tauwavefetch
 
+subroutine getfetch(k,U10,FetchL,FetchD) !and windspeed
+use m_flow,  only:  Hs, Wx, Wy
+use m_waves, only:  fetch, nwf, fetdp
+use m_sferic
+implicit none 
+
+integer          :: k
+double precision :: U10,FetchL,FetchD
+
+integer          :: L,nw1,nw2
+double precision :: alfa1, alfa2, dir
+
+
+FetchL = 0d0 ; FetchD = 0d0
+
+if (Hs(k) > 0d0) then  
+   call getlink1(k,L) ! het is maar voor wind
+   U10 = sqrt ( WX(L)*WX(L) + WY(L)*WY(L) )
+   IF (U10 .LT. 1d0) return 
+
+   DIR   = ATAN2(WY(L), WX(L))
+   IF (DIR < 0D0) DIR = DIR + TWOPI
+
+   dir = dir/twopi
+   if (dir >= 1d0) dir = 0d0
+   NW1 = DIR*(nwf-1) + 1
+   NW2 = NW1 + 1
+   
+   if (fetch(nw1,k) > 0d0 .or. fetch(nw2,k) > 0d0 ) then
+      alfa2  = (nwf-1)*( dir - dble(nw1-1) / dble(nwf-1) )
+      alfa1  = 1d0 - alfa2
+      fetchL = alfa1*fetch(nw1,k) + alfa2*fetch(nw2,k)
+      fetchD = alfa1*fetdp(nw1,k) + alfa2*fetdp(nw2,k)
+   endif
+endif
+end subroutine getfetch
+       
 
 subroutine reducefett(n)
 use m_waves
@@ -30009,9 +30045,8 @@ asg    = 0.5d0*Hrms                              ! Wave amplitude = 0.5*Hrms
 shs    = sinhsafei(rk*hu(LL))
 if (shs > 0d0) then
    uorbu  = omeg*asg*shs                         ! Orbital velocity
-   call  Swart(Tsig, uorbu, z00, fw)
-   fw     = fw*ftauw
-   ustw2  = 0.5d0*fw*uorbu**2                    ! ustar wave squared
+   call  Swart(Tsig, uorbu, z00, fw, ustw2)
+   ustw2  = ftauw*ustw2                          ! ustar wave squared times calibrationcoeff
 
    dks    = 30d0*z00                             ! should be 30 for consistency with getustb
    aks    = asg*shs/dks                          ! uorbu/(omega*ks), uorbu/omega = particle excursion length
@@ -30034,7 +30069,7 @@ endif
 !deltau(nm) = alfaw*max(ee*z0ucur(nm)/hu(nm) , deltau(nm))
 !deltau(nm) = min(0.5_fp, deltau(nm))*hu(nm)
 
-costu  = csw*csu(LL) + snw*snu(LL)            ! and compute stokes drift
+costu  =  csw*csu(LL) + snw*snu(LL)            ! and compute stokes drift
 sintu  = -csw*snu(LL) + snw*csu(LL)
 
 if (jawaveStokes == 1) then
@@ -30065,12 +30100,88 @@ endif
 
 end subroutine getustwav
 
-subroutine Swart(Tsig, uorbu, z00, fw)
+subroutine gettau2(n,taucurc,czc,ustw2)
+use m_flowgeom
+use m_flow
+use m_waves
+
+ 
+implicit none
+integer, intent(in)   :: n               !< Flow node number
+double precision, intent(out) :: taucurc !< Bed shear stress from current or current plus wave 
+double precision, intent(out) :: czc     !< Chezy at flow node (taucurrent)
+double precision, intent(out) :: ustw2   !< Ustarwave Swart (if Jawaveswartdelwaq == 1)
+
+
+!
+!           Local variables
+!
+integer :: LL, nn                            !< Local link counters
+double precision ::  cf, cfn, cz, frcn, ar,  wa, ust, ust2, fw    !< Local intermediate variables
+
+taucurc = 0d0 ; ustw2 = 0d0
+czc = 0d0
+cfn = 0d0
+wa  = 0d0
+ust = 0d0
+
+do nn = 1,nd(n)%lnx 
+   LL = abs( nd(n)%ln(nn) )
+   frcn = frcu(LL) 
+   if (frcn > 0 .and. hu(LL) > 0) then 
+      call getcz(hu(LL), frcn, ifrcutp(LL), cz,LL)
+      cf  = ag/(cz*cz)
+      ar  = au(LL)*dx(LL)
+      wa  = wa + ar       ! area  weigthed
+      cfn = cfn + cf*ar
+      if (kmx > 0) then
+         if (jawaveswartdelwaq <= 1) then 
+            ust = ust + ustb(LL)*ar
+         else
+            ust = ust + taubxu(LL)*ar
+         endif   
+      endif
+   endif 
+enddo
+if (wa > 0) then 
+   cfn = cfn / wa 
+   ust = ust / wa 
+endif
+if (cfn > 0) then 
+   czc = sqrt(ag/cfn)
+endif
+
+ust2 = 0d0
+if (kmx == 0) then
+    ust2 = cfn*(ucx(n)*ucx(n) + ucy(n)*ucy(n))
+else  
+    ust2 = ust*ust
+endif
+
+if (jawaveswartdelwaq == 0) then 
+   taucurc = rhomean*ust2
+else if (jawaveSwartDelwaq == 1) then 
+   if (twav(n) > 1d-2) then 
+      call Swart(Twav(n), uorb(n), z0wav, fw, ustw2)
+      ust2  = ust2 + ustw2                    ! Swart          
+   endif
+   taucurc = rhomean*ust2          
+else if (jawaveSwartDelwaq == 2) then 
+   taucurc = ust                              ! area averaged taubxu
+endif
+
+end subroutine gettau2
+
+subroutine Swart(Tsig, uorbu, z00, fw, ustw2)
 use m_flow,  only : rhomean
 
 implicit none
-double precision :: Tsig, uorbu, z00, fw
+double precision :: Tsig, uorbu, z00, fw, ustw2
 double precision :: astar
+
+if (uorbu == 0d0) then
+   fw = 0d0 ; ustw2 = 0d0 ; return
+endif
 
 astar = Tsig*uorbu/z00
 if (astar > 296.088d0)  then                       ! 30pipi
@@ -30078,11 +30189,12 @@ if (astar > 296.088d0)  then                       ! 30pipi
 else
     fw = 0.3d0
 endif
+ustw2 = 0.5d0*fw*uorbu*uorbu
 
 end subroutine Swart
 
 
- subroutine tauwavehk(Hrms, Tsig, Depth, Uorbi, rk, ust)
+ subroutine tauwavehk(Hrms, Tsig, Depth, Uorbi, rlabd, ust)
  use m_flow, only: plotlin, rhog, rhomean, jased
  use m_sferic
  use m_waves, only : gammax
@@ -30091,7 +30203,7 @@ end subroutine Swart
  double precision           :: Hrms, Tsig, Depth, uorbi, Tauw, hrm, ust
  integer                    :: k, jatauw = 2
  double precision           :: hk, sh2hk,hksh2,rn,asg,ew,sxx,syy,sxy,syx,dtau,shs, h2k, cp, cg, omeg
- double precision           :: dsk2, rk, rkx, rky, astar, fw, cgcp, rk2cgcp,  cgcp5
+ double precision           :: dsk2, rk, rkx, rky, astar, fw, cgcp, rk2cgcp,  cgcp5, arms, rlabd
 
  double precision, external :: tanhsafe, sinhsafe, sinhsafei
  integer :: ndraw
@@ -30099,11 +30211,12 @@ end subroutine Swart
 
  call getwavenr(depth,tsig,rk)
  hrm    = min( Hrms,gammax*depth )
- shs    = sinhsafei(rk*depth)
- uorbi  = pi*hrm*shs/tsig                       !omeg*(0.5*hsig)
+ arms   = 0.5d0*hrms
  omeg   = twopi/tsig
- asg    = 0.5d0*hrms
- ust    = 0.5d0*omeg*asg*asg/depth
+ shs    = sinhsafei(rk*depth)
+ uorbi  = omeg*arms*shs                        !omeg*(0.5*hsig)
+ ust    = 0.5d0*omeg*arms*arms/depth
+ rlabd  = twopi/rk
  return
 
  if (ndraw(28) > 40) then
@@ -40048,8 +40161,6 @@ if (mext > 0) then
            nvalv = nvalv + numvalv
            call realloc(Lvalv,nvalv) ; Lvalv = kevalv(1:nvalv) ; call realloc(valv,nvalv)
 
-           L = index(filename,'.', back=.true.) - 1
-           success = adduniformtimerelation_objects(qid, filename, 'valve1D', filename(1:L), 'flow', '', nvalv, 1, valv)
 
         else if (qid == 'discharge_salinity_temperature_sorsin') then
 
@@ -40261,6 +40372,21 @@ if (mext > 0) then
        endif
     enddo
 
+ endif
+
+ if (nvalv > 0) then
+    ja = 1 ; rewind (mext); kx = 1 ; nvalv = 0
+
+    do while (ja .eq. 1)                             ! for cdams again postponed read *.ext file
+       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
+       if (ja == 1 .and. qid(1:7) == 'valve1D') then
+          call resolvePath(filename, md_extfile_dir, filename)
+          nvalv = nvalv + 1
+
+          L = index(filename,'.', back=.true.) - 1
+          success = adduniformtimerelation_objects(qid, filename, 'valve1D', filename(1:L), 'flow', '', nvalv, 1, valv)
+       endif 
+    enddo
  endif
 
  if (numlatsg > 0) then ! Allow laterals from old ext, even when new structures file is present.
@@ -41538,7 +41664,7 @@ subroutine update_verticalprofiles()
 
         else if (iturbulencemodel == 4) then !                                               k-tau
 
-           ! buoancy term, we have in RHS :~ -Bruva*c3t
+           ! buoyancy term, we have in RHS :~ -Bruva*c3t
            ! c1e = 1.44
            ! bruva<0, instable, c3e=c1e c3t=1-c3e=-0.44 => -Bruva*c3t < 0 increase diag
            ! bruva>0    stable, c3e=0   c3t=1-c3e= 1.00 => -Bruva*c3t < 0 increase diag

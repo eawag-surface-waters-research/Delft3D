@@ -7438,7 +7438,7 @@ contains
                  end if
 
                  if (usemask .and. kc(m) .eq. -1 ) then
-                    write(errormessage,'(a,i6.6,a,f12.4,a,f12.4,a)') 'Boundary link ',m,' already claimed [',(x(m)+xyen(1,m))/2.,',',(y(m)+xyen(2,m))/2.,']'
+                   write(errormessage,'(a,i8.8,a,f12.4,a,f12.4,a)') 'Boundary link ',m,' already claimed [',(x(m)+xyen(1,m))/2.,',',(y(m)+xyen(2,m))/2.,']'
                     call mess(LEVEL_WARN, errormessage)
                     cycle
                  else

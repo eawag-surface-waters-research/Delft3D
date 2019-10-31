@@ -3036,6 +3036,21 @@
    ELSE IF (NWHAT.EQ.42) THEN          ! wave stuff     
       EXP(1)     = 'MENU                                    '
       EXP(2)     = 'SHOW WAVEPARS YES/NO                    '
+  
+
+      if (jawave == 1 .or. jawave == 2) then 
+      OPTION(1)  = 'RMS wave height  (~ 0.7*Hsig)        (m)'
+      OPTION(2)  = 'Wave length                          (m)'
+      OPTION(3)  = 'Peak wave period                     (s)'
+      OPTION(4)  = 'Orbital velocity at bed            (m/s)'
+      OPTION(5)  = 'Ustar(w)                           (m/s)'
+      OPTION(6)  = 'Ustar(w+c)                         (m/s)'
+      OPTION(7)  = 'Taus(w+c)                         (N/m2)'
+      OPTION(8)  = 'Ustokes                            (m/s)'
+      OPTION(9)  = 'Fetchlength                          (m)'
+      OPTION(10) = 'Fetchdepth                           (m)'
+      MAXOPT     = 10
+      else
       OPTION(1)  = 'RMS wave height                      (m)'
       OPTION(2)  = 'Peak waveperiod                      (s)'
       OPTION(3)  = 'Total shear stress (c+w)          (N/m2)'
@@ -3063,18 +3078,16 @@
       OPTION(25) = 'Wind source term             (J/rad/m/s)'
       OPTION(26) = 'Wave frequency                   (rad/s)'
       OPTION(27) = 'Wave group speed            (m/s in bin)'
-      if (jawave == 1 .or. jawave == 2) then
-         OPTION(28)= 'Fetch lenght dir1                    (m)'
-      else
-         OPTION(28)= ''
-      end if
+      OPTION(28)= ''
       OPTION(29) = 'egradcg                       (J/m/s) '
       OPTION(30) = 'SwT                             (s/s) '
       OPTION(31) = 'SwE                          (J/m2/s) '
       OPTION(32) = 'horadvec                              '      
       OPTION(33) = 'horadvec2                             '
-      OPTION(34) = 'ma                                    '      
+      OPTION(34) = 'ma                                    ' 
       MAXOPT     = 34
+      endif     
+ 
       NWHAT2     = NDRAW(28)
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       NDRAW(28) = NWHAT2
@@ -21415,6 +21428,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
              zn = znod(k)
              if ( zn.eq.DMISS ) cycle
              if (nodemode .eq. 2) then
+                call isocol(zn,ncol)
                 call dhtext( zn, xz(k), yz(k), bl(k) )
              else if (nodemode == 3   .or. nodemode == 3 + 3) then    ! isolines within cell
                 if (k <= ndx2d) then

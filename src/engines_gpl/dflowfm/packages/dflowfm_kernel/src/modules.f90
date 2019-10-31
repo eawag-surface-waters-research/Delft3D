@@ -255,9 +255,11 @@ module m_waves
  double precision, allocatable, target      :: twav(:)              !< [s] wave period {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target      :: phiwav(:)            !< [degree] mean wave direction (degrees) from external source
  double precision, allocatable, target      :: Uorb(:)              !< [m/s] orbital velocity {"location": "face", "shape": ["ndx"]}
- double precision, allocatable, target      :: ustokes(:)           !< wave induced velocity, link-based and link-oriented
- double precision, allocatable, target      :: vstokes(:)           !< wave induced velocity, link-based and link-oriented
- double precision, allocatable              :: rlabda(:)
+ double precision, allocatable, target      :: ustokes(:)           !< [m/s] wave induced velocity, link-based and link-oriented
+ double precision, allocatable, target      :: vstokes(:)           !< [m/s] wave induced velocity, link-based and link-oriented
+ double precision, allocatable              :: rlabda(:)            !< [m] wave length  
+ double precision, allocatable              :: ustk(:)              !< [m/s] Ustokes depth averaged cell centres 
+
 
  double precision, allocatable, target      :: dsurf(:)             !< [w/m2] wave energy dissipation rate due to breaking at the free surface, "DISSURF" in WAVE
  double precision, allocatable, target      :: dwcap(:)             !< [w/m2] wave energy dissipation rate due to white capping

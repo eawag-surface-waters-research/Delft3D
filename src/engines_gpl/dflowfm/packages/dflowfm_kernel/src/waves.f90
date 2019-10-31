@@ -30,7 +30,7 @@
    ! $Id$
    ! $HeadURL$
 
-   subroutine alloc8basicwavearrays()
+   subroutine alloc9basicwavearrays()  
    use m_flow
    use m_flowgeom
    use m_waves 
@@ -48,11 +48,13 @@
    call aerr   ('uorb    (ndx)',     ierr, ndx)
    call realloc( taus,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)     
    call aerr   ('taus    (ndx)',     ierr, ndx)
+   call realloc( ustk,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)     
+   call aerr   ('ustk    (ndx)',     ierr, ndx)
    call realloc( ustokes, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr   ('ustokes(lnkx)',     ierr, lnkx)
    call realloc( vstokes, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr   ('vstokes(lnkx)',     ierr, lnkx) 
-   end subroutine alloc8basicwavearrays
+   end subroutine alloc9basicwavearrays
 
    subroutine flow_waveinit
    use m_flow
@@ -613,7 +615,7 @@
    double precision           :: dsk2, rk, astar, fw, hss, per, astarc, tauwav, taucur, tauwci, cdrag, z0, uorbu, tpu
    double precision           :: cz, frcn, uuu, vvv, umod, umodsq, cvalue, costu, sintu, abscos, uorbhs, waveps, u2dh
    double precision           :: xpar, ymxpar, lfc, cj, coeffb, coeffp, coeffq, ci,coeffa, coeffm, coeffn, yparL
-   double precision           :: hpr, wu2, b21, ai, BL1, BL2, hus, ust, ac1, ac2
+   double precision           :: hpr, wu2, b21, ai, BL1, BL2, ust, ac1, ac2
    double precision           :: ar, alfaw, wbl, rz, cf, cwall
    double precision           :: a, ks, phivr
    double precision           :: hrmsu, rlabdau, rr,umax,t1,u11,a11,raih,rmax, uon, uoff, uwbih
