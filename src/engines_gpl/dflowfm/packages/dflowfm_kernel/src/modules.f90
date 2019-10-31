@@ -4983,6 +4983,7 @@ implicit none
    character(len=lenfile), dimension(maxnumfiles) :: inputfiles         !< files to be loaded
    character(len=lenfile)                         :: iarg_outfile = ' ' !< Output filename for several commandline/batch-mode operations (not related to model runs).
    integer                                        :: iarg_autostart     !< autostart/autstartstop or not set (-1)
+   integer                                        :: iarg_usecaching    !< use cache file or not or not set (-1)
 
 contains
 !> read, from a string, command line option with key-value pair(s) of the form

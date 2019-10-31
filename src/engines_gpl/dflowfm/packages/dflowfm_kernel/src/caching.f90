@@ -78,9 +78,10 @@ logical function cacheRetrieved()
 end function cacheRetrieved
 
 !> Load the information from the caching file - if any
-subroutine loadCachingFile( filename, netfile )
-    character(len=*), intent(in) :: filename      !< Name of MDU file (used to construct the name of the caching file)
-    character(len=*), intent(in) :: netfile       !< Full name of the network file
+subroutine loadCachingFile( filename, netfile, usecaching )
+    character(len=*), intent(in   ) :: filename      !< Name of MDU file (used to construct the name of the caching file)
+    character(len=*), intent(in   ) :: netfile       !< Full name of the network file
+    integer,          intent(in   ) :: usecaching    !< Use the cache file if possible (1) or not (0)
 
     integer :: lun
     integer :: ierr
@@ -92,7 +93,10 @@ subroutine loadCachingFile( filename, netfile )
     logical :: success
 
     cache_success = .false.
-    return
+
+    if ( usecaching /= 1 ) then
+        return
+    endif
 
     !
     ! Allocate the arrays to zero length
@@ -104,8 +108,10 @@ subroutine loadCachingFile( filename, netfile )
 
     !
     ! Apparently there is no caching file, so return without further processing
+    ! But for writing the caching file later, determine the checksum now
     !
     if ( ierr /= 0 ) then
+        call md5file( netfile, md5current, success )
         return
     endif
 
@@ -199,22 +205,14 @@ end subroutine loadCachingFile
 
 !> Store the grid-based information in the caching file
 subroutine storeCachingFile( filename )
-    character(len=*) :: filename            !< Name of the MDU file (to construct the name of the caching file)
+    character(len=*), intent(in   ) :: filename            !< Name of the MDU file (to construct the name of the caching file)
 
     integer :: lun
     integer :: ierr
 
-    write(*,*) '>> CACHE - entered'
-
-    write(*,*) '>> CACHE: ', filename
-
     cache_success = .false.
 
-    write(*,*) '>> CACHE: ', filename
-
     open( newunit = lun, file = trim(filename) // ".cache", access = "stream", status = "old", action = 'read',  iostat = ierr )
-
-    write(*,*) '>> CACHE: ', filename
 
     if ( ierr == 0 ) then
         close( lun, status = "delete" )
@@ -231,7 +229,7 @@ subroutine storeCachingFile( filename )
     !
     write( lun ) section(key_obs), numobs
     if ( numobs > 0 ) then
-        write( lun ) xobs, yobs, locTpObs, kobs
+        write( lun ) xobs(1:numobs), yobs(1:numobs), locTpObs(1:numobs), kobs(1:numobs)
     endif
 
     !
@@ -252,7 +250,7 @@ end subroutine storeCachingFile
 
 !> Copy the cached network information for observation points
 subroutine copyCachedObservations( success )
-    logical, intent(out) :: success             !< The cached information was compatible if true
+    logical, intent(  out) :: success             !< The cached information was compatible if true
 
     success = .false.
     if ( cache_success ) then
@@ -265,24 +263,25 @@ subroutine copyCachedObservations( success )
         !
         ! Check that the coordinates and the type are identical to the cached values
         !
-        if ( all( cache_xobs == xobs ) .and. all( cache_yobs == yobs ) .and. all( cache_locTpObs == locTpObs ) ) then
-            success = .true.
-            kobs    = cache_kobs
+        if ( all( cache_xobs == xobs(1:numobs) ) .and. all( cache_yobs == yobs(1:numobs) ) .and. &
+             all( cache_locTpObs == locTpObs(1:numobs) ) ) then
+            success        = .true.
+            kobs(1:numobs) = cache_kobs
         endif
     endif
 end subroutine copyCachedObservations
 
 !> Copy the cached information on fixed weirs
 subroutine copyCachedFixedWeirs( npl, xpl, ypl, number_links, iLink, iPol, dSL, success )
-    integer, intent(in)                         :: npl                !< Number of vertices in the polygons making up the weirs
-    double precision, dimension(:), intent(in)  :: xpl                !< X-coordinates of the vertices for the weirs
-    double precision, dimension(:), intent(in)  :: ypl                !< Y-coordinates of the vertices for the weirs
+    integer, intent(in   )                         :: npl                !< Number of vertices in the polygons making up the weirs
+    double precision, dimension(:), intent(in   )  :: xpl                !< X-coordinates of the vertices for the weirs
+    double precision, dimension(:), intent(in   )  :: ypl                !< Y-coordinates of the vertices for the weirs
 
-    integer, intent(out)                        :: number_links       !< Number of links that was cached
-    double precision, dimension(:), intent(out) :: dSL                !< Distances along the links that were cached
-    integer, dimension(:), intent(out)          :: iLink              !< Cached lInkage information
-    integer, dimension(:), intent(out)          :: iPol               !< Cached polygon information
-    logical, intent(out)                        :: success            !< The cached information was compatible if true
+    integer, intent(  out)                         :: number_links       !< Number of links that was cached
+    double precision, dimension(:), intent(  out)  :: dSL                !< Distances along the links that were cached
+    integer, dimension(:), intent(  out)           :: iLink              !< Cached lInkage information
+    integer, dimension(:), intent(  out)           :: iPol               !< Cached polygon information
+    logical, intent(  out)                         :: success            !< The cached information was compatible if true
 
     success = .false.
     if ( cache_success ) then
@@ -310,13 +309,13 @@ end subroutine copyCachedFixedWeirs
 !>     module, so explicitly store them when we have the actual data
 !
 subroutine cacheFixedWeirs( npl, xpl, ypl, number_links, iLink, iPol, dSL )
-    integer, intent(in)                        :: npl             !< Number of vertices in the polygons making up the weirs
-    integer, intent(in)                        :: number_links    !< Number of links that is to be cached
-    double precision, dimension(:), intent(in) :: xpl             !< X-coordinates of the vertices for the weirs
-    double precision, dimension(:), intent(in) :: ypl             !< Y-coordinates of the vertices for the weirs
-    double precision, dimension(:), intent(in) :: dSL             !< Distances along the links that are to be cached
-    integer, dimension(:), intent(in)          :: iLink           !< LInkage information to be cached
-    integer, dimension(:), intent(in)          :: iPol            !< Polygon information to be cached
+    integer, intent(in   )                        :: npl             !< Number of vertices in the polygons making up the weirs
+    integer, intent(in   )                        :: number_links    !< Number of links that is to be cached
+    double precision, dimension(:), intent(in   ) :: xpl             !< X-coordinates of the vertices for the weirs
+    double precision, dimension(:), intent(in   ) :: ypl             !< Y-coordinates of the vertices for the weirs
+    double precision, dimension(:), intent(in   ) :: dSL             !< Distances along the links that are to be cached
+    integer, dimension(:), intent(in   )          :: iLink           !< LInkage information to be cached
+    integer, dimension(:), intent(in   )          :: iPol            !< Polygon information to be cached
 
     cache_xpl_fixed   = xpl(1:npl)
     cache_ypl_fixed   = ypl(1:npl)
