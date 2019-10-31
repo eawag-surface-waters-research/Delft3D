@@ -2078,7 +2078,6 @@ module m_ec_converter
                call setECMessage("ERROR: ec_converter::ecConverterQhtable: Unsupported interpolation type requested.")
                return
          end select
-         write(666,*) input, connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(tgtndx)    
          success = .true.   
 
       end function ecConverterQhtable
