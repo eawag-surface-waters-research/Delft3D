@@ -1587,21 +1587,22 @@ end subroutine setfouunit
     !
     ! Local variables
     !
-        integer                  :: ierr 
-        integer                  :: ifou         ! Local teller for fourier functions 
-        integer                  :: ivar         ! Local teller for fourier functions 
-        real(fp)                 :: freqnt       ! Frequency in degrees per hour 
-        real(fp)                 :: tfasto       ! Stop time in minutes 
-        real(fp)                 :: tfastr       ! Start time in minutes 
-        character(4)             :: blnm
-        character(20)            :: namfun       ! Local name for fourier function 
-        character(30)            :: namfunlong   ! Local name for fourier function, including reference to the line in the fourier input file 
-        integer, parameter       :: imissval = -1
-        integer                  :: unc_loc
-        integer, allocatable     :: all_unc_loc(:)
+        integer                       :: ierr 
+        integer                       :: ifou         ! Local teller for fourier functions 
+        integer                       :: ivar         ! Local teller for fourier functions 
+        real(fp)                      :: freqnt       ! Frequency in degrees per hour 
+        real(fp)                      :: tfasto       ! Stop time in minutes 
+        real(fp)                      :: tfastr       ! Start time in minutes 
+        character(len=4)              :: blnm
+        character(len=:), allocatable :: namfun       ! Local name for fourier function 
+        character(len=:), allocatable :: namfunlong   ! Local name for fourier function, including reference to the line in the fourier input file 
+        character(len=3)              :: cnumber      ! temp string for int2str conversion
+        integer, parameter            :: imissval = -1
+        integer                       :: unc_loc
+        integer, allocatable          :: all_unc_loc(:)
 
-        integer, parameter       :: REQUESTTYPE_DEFINE =  1
-        integer, parameter       :: REQUESTTYPE_WRITE  =  2
+        integer, parameter            :: REQUESTTYPE_DEFINE =  1
+        integer, parameter            :: REQUESTTYPE_WRITE  =  2
 
     !
     !! executable statements -------------------------------------------------------
@@ -1755,12 +1756,13 @@ end subroutine setfouunit
               namfun = 'bed stress'
            endif
            all_unc_loc(ifou) = unc_loc
-           write(namfunlong,'(i3.3,2a)') fouref(ifou,1), ": ", trim(namfun)
+           write(cnumber,'(i3.3)') fouref(ifou,1)
+           namfunlong = cnumber // ": " // namfun
            !
-           idvar(:,ivar) = imissval 
+           idvar(:,ivar) = imissval
            ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnam(ivar)), &
-                          'Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)), fouvarunit(ivar),0)
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)))
+                          'Fourier analysis ' // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), 0)
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '// namfunlong // ', ' // trim(fouvarnamlong(ivar)))
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', itdate)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
@@ -1806,7 +1808,7 @@ end subroutine setfouunit
            unc_loc = all_unc_loc(ifou)
            !
            if (foutyp(ifou)=='s') then
-              call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids   ,unc_loc)
+              call wrfous(ifou, dtsec, hdt, tzone, gdfourier, gddimens, fileids, unc_loc)
               ifou = ifou + 1
            else
 !             call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
@@ -1828,7 +1830,7 @@ end subroutine setfouunit
     end subroutine wrfou
 
 
-   subroutine wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids, iloc   )
+   subroutine wrfous(ifou, dtsec, hdt, tzone, gdfourier, gddimens, fileids, iloc)
    !----- GPL ---------------------------------------------------------------------
    !  Copyright (C)  Stichting Deltares, 2011-2019.                                
    !-------------------------------------------------------------------------------
@@ -1889,7 +1891,6 @@ end subroutine setfouunit
    !
        integer                     , intent(in) :: ifou   !< Fourier counter
        real(fp)                    , intent(in) :: dtsec  !< Integration time step [in seconds]
-       character(20) , dimension(:), intent(in) :: namcon !< Description and declaration in esm_alloc_char.f90
        real(fp)                    , intent(in) :: tzone  !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
        real(fp)                    , intent(in) :: hdt    !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
        type(t_unc_mapids)          , intent(in) :: fileids!< Set of file and variable ids for this file.
@@ -1912,7 +1913,6 @@ end subroutine setfouunit
        real(fp)                  :: tfasto             ! Stop time in minutes 
        real(fp)                  :: tfastr             ! Start time in minutes 
        real(sp), parameter       :: defaul = -999.0_sp ! Default value 
-       character(20)             :: namfun             ! Local name for fourier function 
        character(4)              :: blnm
 
    real(sp), dimension(:,:,:),   allocatable, save :: glbarr3
@@ -1969,7 +1969,6 @@ end subroutine setfouunit
        tfastr = real(ftmstr(ifou),fp)*dtsec/60.0_fp
        tfasto = real(ftmsto(ifou),fp)*dtsec/60.0_fp
        !
-       namfun = founam(ifou)
        select case (founam(ifou))
        case('s1')
             nmaxus = ndx
@@ -1994,35 +1993,29 @@ end subroutine setfouunit
              ibleh = ibleh + 1
              blnm = 'EH??'
              write (blnm(3:4), '(i2.2)') ibleh
-             namfun = 'energy head'
           else
              iblwl = iblwl + 1
              blnm = 'WL??'
              write (blnm(3:4), '(i2.2)') iblwl
-             namfun = 'water level'
           endif
        endif
        if (founam(ifou)(:2)=='ws') then
           iblws = iblws + 1
           blnm = 'WS??'
           write (blnm(3:4), '(i2.2)') iblws
-          namfun = 'wind speed'
        endif
        if (founam(ifou)(:2)=='r1') then
           iblcn = iblcn + 1
           blnm = 'CO??'
           write (blnm(3:4), '(i2.2)') iblcn
-          namfun = namcon(fconno(ifou))
        endif
        if (founam(ifou)(:2)=='uy' .or. founam(ifou)(:2)=='ux') then
           ibluv = ibluv + 1
           write (blnm(3:4), '(i2.2)') ibluv
           if (founam(ifou)(:3)=='ux') then
              blnm = 'UX??'
-             namfun = 'horizontal velocity'
           else
              blnm = 'UY??'
-             namfun = 'vertical velocity'
           endif
        endif
        if (founam(ifou)(:3)=='uya' .or. founam(ifou)(:3)=='uxa') then
@@ -2030,23 +2023,19 @@ end subroutine setfouunit
           write (blnm(3:4), '(i2.2)') ibluva
           if (founam(ifou)(:3)=='uxa') then
              blnm = 'UX??'
-             namfun = 'horizontal velocity'
           else
              blnm = 'UY??'
-             namfun = 'vertical velocity'
           endif
        endif
        if (founam(ifou)(:2)=='uc') then
           ibluc = ibluc + 1
           blnm = 'UC??'
           write (blnm(3:4), '(i2.2)') ibluc
-          namfun = 'velocity magnitude'
        endif
        if (founam(ifou)(:2)=='ta') then
           iblbs = iblbs + 1
           blnm = 'BS??'
           write (blnm(3:4), '(i2.2)') iblbs
-          namfun = 'bed shear stress'
        endif
 
        !
