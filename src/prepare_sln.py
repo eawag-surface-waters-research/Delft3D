@@ -557,6 +557,12 @@ def getUCRTVersionNumber():
             ucrtdir = "c:\\Program Files (x86)\\Windows Kits\\10\\Lib\\"
         else:
             ucrtdir = result[19:]
+            # result may be:
+            # ****\nbladibla\n****\nUniversalCRTSdkDir=<value>
+            # Get the value
+            ucrtpos = ucrtdir.rfind("UniversalCRTSdkDir=")
+            if ucrtpos > -1:
+                ucrtdir = ucrtdir[ucrtpos+19:]
             # Remove the trailing slash and the newline-character behind it
             lastslash = ucrtdir.rfind("\\")
             if lastslash != -1:
