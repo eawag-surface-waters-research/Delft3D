@@ -105,8 +105,7 @@ module m_fourier_analysis
     end type gd_fourier
 !-------------------------------------------------------------------------------------------------------
     
-    type(gd_fourier), target  :: gdfourier
-    type(gd_fourier), pointer :: gdfourier_ptr => null()
+    type(gd_fourier), target :: gdfourier
     character(len=:), allocatable   :: FouOutputFile
 
     private
@@ -123,12 +122,28 @@ module m_fourier_analysis
     public reafou
     public postpr_fourier
 
-    public gdfourier
-    public gdfourier_ptr
+    public fourierIsActive, fourierWithUc, fourierWithWindspeed
     public nofou
     public FouOutputFile
     contains
 
+    logical function fourierIsActive()
+       fourierIsActive = (nofou > 0)
+    end function fourierIsActive
+
+    logical function fourierWithUc()
+       fourierWithUc = (gdfourier%ibluc>0)
+    end function fourierWithUc
+
+    logical function fourierWithWindspeed()
+       integer :: ifou
+       fourierWithWindspeed = .false.
+       do ifou = 1,nofou                         ! scan for windspeed in the list of fourier requests to see whether or not to allocate wmag
+          if (gdfourier%founam(ifou)=='ws') then
+             fourierWithWindspeed = .true.
+          endif
+       enddo
+    end function fourierWithWindspeed
 
     subroutine count_fourier_variables
        implicit none
@@ -192,7 +207,7 @@ module m_fourier_analysis
     end subroutine reset_fouana
     
 
-   subroutine alloc_fourier_analysis_arrays(gdfourier,gddimens,nofou)
+   subroutine alloc_fourier_analysis_arrays(gddimens,nofou)
    !-------------------------------------------------------------------------------
    !  $Id$
    !  $HeadURL$
@@ -205,7 +220,6 @@ module m_fourier_analysis
        !
        implicit none
        !
-       type(gd_fourier), intent(inout), target    :: gdfourier
        type(gd_dimens), intent(inout)     :: gddimens
        integer, intent(in)                :: nofou
 
@@ -275,7 +289,6 @@ module m_fourier_analysis
        if (istat /= 0) then
           ! Exception handling for allocation of fourier arrays 
        endif
-       gdfourier_ptr => gdfourier 
    end subroutine alloc_fourier_analysis_arrays
 
    subroutine reafou(lunfou   ,filfou    ,kmax     ,&
@@ -931,7 +944,6 @@ module m_fourier_analysis
        write (msgbuf, '(a)') 'Switching off fourier analysis......'
        call warn_flush()
        nofou = 0
-       gdfourier_ptr => null()
    end subroutine reafou
 
 
@@ -968,7 +980,7 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
 end subroutine setfouunit
                    
 
-   subroutine fouana( ifou, nst, rarray, bl, gdfourier, gddimens, umean, vmean)
+   subroutine fouana( ifou, nst, rarray, bl, gddimens, umean, vmean)
    !-------------------------------------------------------------------------------
    !  $Id$
    !  $HeadURL$
@@ -985,7 +997,6 @@ end subroutine setfouunit
        !
        implicit none
        !
-       type(gd_fourier) , pointer :: gdfourier
        type(gd_dimens)  , pointer :: gddimens
        !
        ! The following list of pointer parameters is used to point inside the gdp structure
@@ -1355,17 +1366,16 @@ end subroutine setfouunit
    end subroutine fouini
 
 
-    subroutine postpr_fourier(nst, trifil, dtsec, refdat, hdt, tzone, gdfourier)
+    subroutine postpr_fourier(nst, trifil, dtsec, refdat, hdt, tzone)
     use m_d3ddimens
     use m_transport
     use m_flowgeom
     use m_wind
     use m_flow
     implicit none
-       type(gd_fourier)  , pointer    :: gdfourier           !< Fourier Analysis structure 
 
        real(fp)          , intent(in) :: dtsec   !<  Integration time step [in seconds]
-       real(fp)          , intent(in) :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
+       real(fp)          , intent(in) :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt
        real(fp)          , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
        integer           , intent(in) :: nst                !< timestep number 
        character(len=*)  , intent(in) :: trifil             !< output filename 
@@ -1491,7 +1501,7 @@ end subroutine setfouunit
              case default 
                 continue         ! Unknown FourierVariable exception 
              end select
-             call fouana(ifou, nst, fieldptr1, bl_ptr, gdfourier, gddimens_ptr)
+             call fouana(ifou, nst, fieldptr1, bl_ptr, gddimens_ptr)
              ifou = ifou + 1
           else 
              !
@@ -1505,14 +1515,15 @@ end subroutine setfouunit
        !
        if (nst==fouwrt) then
           if (fileids%ncid == 0) then
-             call wrfou(trifil, dtsec, const_names, itdate, hdt ,tzone, gdfourier, gddimens_ptr)
+             call wrfou(trifil, dtsec, const_names, itdate, hdt ,tzone, gddimens_ptr)
+             nofou = 0  ! this stops calling postpr_fourier; todo: cleanup
           endif
        endif
-    endif   
+    endif
     end subroutine postpr_fourier
 
 
-    subroutine wrfou(trifil, dtsec, namcon, itdate, hdt, tzone, gdfourier, gddimens)
+    subroutine wrfou(trifil, dtsec, namcon, itdate, hdt, tzone, gddimens)
 
     !----- GPL ---------------------------------------------------------------------
     !  Stichting Deltares. All rights reserved.                                     
@@ -1538,7 +1549,6 @@ end subroutine setfouunit
         !
         implicit none
         ! 
-        type(gd_fourier) , pointer :: gdfourier           !< Fourier Analysis structure 
         type(gd_dimens)  , pointer :: gddimens            !< Model geometry/grid structure 
         !
         integer                        , pointer :: nofouvar
@@ -1809,7 +1819,7 @@ end subroutine setfouunit
            unc_loc = all_unc_loc(ifou)
            !
            if (foutyp(ifou)=='s') then
-              call wrfous(ifou, dtsec, hdt, tzone, gdfourier, gddimens, fileids, unc_loc)
+              call wrfous(ifou, dtsec, hdt, tzone, gddimens, fileids, unc_loc)
               ifou = ifou + 1
            else
 !             call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
@@ -1831,7 +1841,7 @@ end subroutine setfouunit
     end subroutine wrfou
 
 
-   subroutine wrfous(ifou, dtsec, hdt, tzone, gdfourier, gddimens, fileids, iloc)
+   subroutine wrfous(ifou, dtsec, hdt, tzone, gddimens, fileids, iloc)
    !----- GPL ---------------------------------------------------------------------
    !  Copyright (C)  Stichting Deltares, 2011-2019.                                
    !-------------------------------------------------------------------------------
@@ -1896,7 +1906,6 @@ end subroutine setfouunit
        real(fp)                    , intent(in) :: hdt    !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
        type(t_unc_mapids)          , intent(in) :: fileids!< Set of file and variable ids for this file.
        integer                     , intent(in) :: iloc
-       type(gd_fourier)            , pointer    :: gdfourier
        type(gd_dimens)             , pointer    :: gddimens
 
    !

@@ -347,12 +347,12 @@ subroutine flow_finalize_usertimestep(iresult)
 
    endif
 
-   if (associated(gdfourier_ptr)) then
+   if (fourierIsActive()) then
       if (md_fou_step == 0) then
-         if (gdfourier%ibluc>0) then
+         if (fourierWithUc()) then
             call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
          endif
-         call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, 0.5d0*dt_user, Tzone, gdfourier_ptr)
+         call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, 0.5d0*dt_user, Tzone)
       endif
    endif
 
@@ -570,12 +570,12 @@ character(len=255)   :: filename_fou_out
 
 888 continue
 
-   if (associated(gdfourier_ptr)) then
+   if (fourierIsActive()) then
       if (md_fou_step == 1) then
-         if (gdfourier%ibluc>0) then
+         if (fourierWithUc()) then
             call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
          endif
-         call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, 0.5d0*dt_user, Tzone, gdfourier_ptr)
+         call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, 0.5d0*dt_user, Tzone)
       endif
    endif
 end subroutine flow_finalize_single_timestep
@@ -9180,13 +9180,13 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
 
 
- call klok(cpu_extra(1,34)) ! Fourier init
+ call klok(cpu_extra(1,34)) ! writeMDUFilepointer
  call mess(LEVEL_INFO, '** Model initialization was successful **')
  call mess(LEVEL_INFO, '* Active Model definition:')! Print model settings in diagnostics file.
  call writeMDUFilepointer(mdia, .true., istat)
 
  call mess(LEVEL_INFO, '**')
- call klok(cpu_extra(2,34)) ! end Fourier init
+ call klok(cpu_extra(2,34)) ! end writeMDUFilepointer
 
  call klok(cpu_extra(1,35)) ! write flowgeom ugrid
  if (len_trim(md_flowgeomfile) > 0) then             ! Save initial flow geometry to file.
@@ -14514,36 +14514,25 @@ use m_flowtimes, only: tstart_user, tstop_user, dt_user
 use m_partitioninfo
 
 implicit none
-integer  :: minp, ifou
+integer  :: minp
 logical  :: success
 call oldfil(minp, md_foufile)
 call fouini(minp, success, ag, md_tunit,'S')
-FouOutputFile = trim(getoutputdir())//defaultFilename('fou')
-if (jampi>0) then
-   FouOutputFile = FouOutputFile(1:index(FouOutputFile,'_',back=.true.))//sdmn   &
-                 //FouOutputFile(index(FouOutputFile,'_',back=.true.):len_trim(FouOutputFile))
-end if
+FouOutputFile = trim(getoutputdir()) // defaultFilename('fou')
 
-call alloc_fourier_analysis_arrays(gdfourier,gddimens,nofou)
-call reafou(minp   ,md_foufile    ,kmxd      ,&
-                   & NUMCONST     ,ISALT    ,ITEMP    ,&
-                   & tstart_user   ,tstop_user   ,dt_user     ,success)
+call alloc_fourier_analysis_arrays(gddimens,nofou)
+call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, dt_user, success)
 call doclose(minp)
 
-if (.not.success) then
-! TODO: deal with failed attempts to connect a fou-file
-endif
-do ifou = 1,nofou                         ! scan for windspeed in the list of fourier requests to see whether or not to allocate wmag
-   if (gdfourier%founam(ifou)=='ws') then
+if (success) then
+   if (fourierWithWindspeed()) then ! scan for windspeed in the list of fourier requests to see whether or not to allocate wmag
       allocate(wmag(lnx))
       wmag = 0.d0
-      exit
    endif
-enddo
+   
+   call count_fourier_variables
+endif
 
-call count_fourier_variables
-
-! TODO: do some stuff with the file contents
 end subroutine flow_fourierinit
 
 
