@@ -988,6 +988,7 @@ end subroutine interpolateWidths
 !! As a result the interpolation can be restricted to a branch
 subroutine useBranchOrdersCrs(crs, brs)
    ! modules
+   use messageHandling
 
    implicit none
    ! variables
@@ -1056,6 +1057,14 @@ subroutine useBranchOrdersCrs(crs, brs)
       cross = crs%cross(ics)
       crs%cross(ics) = crs%cross(minindex)
       crs%cross(minindex) = cross
+      ! Check for multiple cross sections at one location.
+      if (ics > 1) then
+         if ( (crs%cross(ics-1)%branchid == crs%cross(ics)%branchid) .and. (crs%cross(ics-1)%chainage == crs%cross(ics)%chainage) ) then
+            msgbuf = "Cross section """ // trim(crs%cross(ics-1)%csid) // """ and """ // trim(crs%cross(ics)%csid) // """ are exactly at the same location."
+            call err_flush()
+         endif
+      endif
+      
       if (orderNumber(orderNumberCount,1) /= minOrderNumber) then
          orderNumberCount = orderNumberCount + 1
          orderNumber(orderNumberCount, 1) = minOrderNumber
