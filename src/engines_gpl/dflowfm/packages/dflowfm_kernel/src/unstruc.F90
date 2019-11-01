@@ -347,13 +347,11 @@ subroutine flow_finalize_usertimestep(iresult)
 
    endif
 
-   if (fourierIsActive()) then
-      if (md_fou_step == 0) then
-         if (fourierWithUc()) then
-            call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
-         endif
-         call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, 0.5d0*dt_user, Tzone)
+   if (fourierIsActive() .and. md_fou_step == 0) then
+      if (fourierWithUc()) then
+         call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
+      call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, 0.5d0*dt_user, Tzone)
    endif
 
  iresult = DFM_NOERR
@@ -570,13 +568,11 @@ character(len=255)   :: filename_fou_out
 
 888 continue
 
-   if (fourierIsActive()) then
-      if (md_fou_step == 1) then
-         if (fourierWithUc()) then
-            call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
-         endif
-         call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, 0.5d0*dt_user, Tzone)
+   if (fourierIsActive() .and. md_fou_step == 1) then
+      if (fourierWithUc()) then
+         call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
+      call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, 0.5d0*dt_user, Tzone)
    endif
 end subroutine flow_finalize_single_timestep
 
@@ -14520,7 +14516,7 @@ call oldfil(minp, md_foufile)
 call fouini(minp, success, ag, md_tunit,'S')
 FouOutputFile = trim(getoutputdir()) // defaultFilename('fou')
 
-call alloc_fourier_analysis_arrays(gddimens,nofou)
+call alloc_fourier_analysis_arrays(gddimens)
 call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, dt_user, success)
 call doclose(minp)
 
