@@ -40069,7 +40069,7 @@ if (mext > 0) then
 
            numlatsg = numlatsg + 1
            call selectelset_internal_nodes(xz, yz, kclat, ndxi, numlatsg, nnLat, &
-                                           POLYGON_FILE, filename)
+                                           LOCTP_POLYGON_FILE, filename)
 
            jaqin = 1 ; success = .true.  ! geen gezeik, iedereen reik
 

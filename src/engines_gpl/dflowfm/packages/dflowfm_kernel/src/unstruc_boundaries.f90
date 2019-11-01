@@ -911,6 +911,7 @@ logical function initboundaryblocksforcings(filename)
  character(len=1)             :: oper                !
  character (len=300)          :: rec
 
+ character(len=ini_value_len) :: nodeid
  character(len=ini_value_len) :: branchid
 
  character(len=ini_value_len) :: locid
@@ -1129,37 +1130,46 @@ logical function initboundaryblocksforcings(filename)
        end select
 
        ! [lateral]
-       ! fileVersion >= 2: branchId+chainage       => location_specifier = BRANCH_CHAINAGE
-       !                   numcoor+xcoors+ycoors   => location_specifier = XY_POLYGON
-       ! fileVersion <= 1: LocationFile = test.pol => location_specifier = POLYGON_FILE
+       ! fileVersion >= 2: nodeId                  => location_specifier = LOCTP_NODEID
+       !                   branchId+chainage       => location_specifier = LOCTP_BRANCH_CHAINAGE
+       !                   numcoor+xcoors+ycoors   => location_specifier = LOCTP_XY_POLYGON
+       ! fileVersion <= 1: LocationFile = test.pol => location_specifier = LOCTP_POLYGON_FILE
        loc_spec_type      = imiss
+       nodeId             = ' '
        branchid           = ' '
        chainage           = dmiss
        numcoordinates     = imiss
        !
        if (major >= 2) then
-          call prop_get(node_ptr, '', 'branchId',         branchid, success)
+          call prop_get_string(node_ptr, '', 'nodeId', nodeId, success)
           if (success) then
-             call prop_get(node_ptr, '', 'chainage',         chainage, success)
-          end if
-          if (success) then
-             if (len_trim(branchid)>0 .and. chainage /= dmiss .and. chainage >= 0.0d0) then
-                loc_spec_type = BRANCHID_CHAINAGE
-             end if
+             loc_spec_type = LOCTP_NODEID
+             ilattype = ILATTP_1D
           else
-             call prop_get(node_ptr, '', 'numCoordinates',   numcoordinates, success)
-             if (success .and. numcoordinates > 0) then
-                allocate(xcoordinates(numcoordinates), stat=ierr)
-                allocate(ycoordinates(numcoordinates), stat=ierr)
-                call prop_get_doubles(node_ptr, '', 'xCoordinates',     xcoordinates, numcoordinates, success)
-                call prop_get_doubles(node_ptr, '', 'yCoordinates',     ycoordinates, numcoordinates, success)
-                if (success) then
-                   loc_spec_type = POLYGON_XY
+             call prop_get(node_ptr, '', 'branchId',         branchid, success)
+             if (success) then
+                call prop_get(node_ptr, '', 'chainage',         chainage, success)
+             end if
+             if (success) then
+                if (len_trim(branchid)>0 .and. chainage /= dmiss .and. chainage >= 0.0d0) then
+                   loc_spec_type = LOCTP_BRANCHID_CHAINAGE
+                   ilattype = ILATTP_1D
+                end if
+             else
+                call prop_get(node_ptr, '', 'numCoordinates',   numcoordinates, success)
+                if (success .and. numcoordinates > 0) then
+                   allocate(xcoordinates(numcoordinates), stat=ierr)
+                   allocate(ycoordinates(numcoordinates), stat=ierr)
+                   call prop_get_doubles(node_ptr, '', 'xCoordinates',     xcoordinates, numcoordinates, success)
+                   call prop_get_doubles(node_ptr, '', 'yCoordinates',     ycoordinates, numcoordinates, success)
+                   if (success) then
+                      loc_spec_type = LOCTP_POLYGON_XY
+                   end if
                 end if
              end if
           end if
        else ! fileVersion <= 1
-          loc_spec_type = POLYGON_FILE
+          loc_spec_type = LOCTP_POLYGON_FILE
           !
           locationfile = ''
           call prop_get(node_ptr, '', 'LocationFile', locationfile, success)
@@ -1183,7 +1193,7 @@ logical function initboundaryblocksforcings(filename)
 
        numlatsg = numlatsg + 1
        call selectelset_internal_nodes(xz, yz, kclat, ndxi, numlatsg, nnLat, &
-                                       loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage)
+                                       loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage, nodeId)
 
        if (allocated(xcoordinates)) deallocate(xcoordinates, stat=ierr)
        if (allocated(ycoordinates)) deallocate(ycoordinates, stat=ierr)

@@ -69,9 +69,10 @@ module timespace_parameters
   !
 
   ! Enumeration for location specification types (used in selectelset_internal_nodes).
-  integer, parameter :: POLYGON_FILE                   = 10 !< A polygon input file used for inside-polygon check.
-  integer, parameter :: POLYGON_XY                     = 11 !< x/y arrays containing a polygon used for inside-polygon check.
-  integer, parameter :: BRANCHID_CHAINAGE              = 12 !< branchid+chainage combination to select the nearest 1D network point.
+  integer, parameter :: LOCTP_POLYGON_FILE             = 10 !< A polygon input file used for inside-polygon check.
+  integer, parameter :: LOCTP_POLYGON_XY               = 11 !< x/y arrays containing a polygon used for inside-polygon check.
+  integer, parameter :: LOCTP_BRANCHID_CHAINAGE        = 12 !< branchid+chainage combination to select the 1D grid point closest to that network branch location.
+  integer, parameter :: LOCTP_NODEID                   = 13 !< nodeid to select the 1D grid point closest to the network point with that nodeId.
 
   integer            :: mdia                           =  0 !  -1  ! -1 = write dia, 0 = do not write dia
 
@@ -7605,7 +7606,7 @@ contains
    !! that were selected, such that the call site can know which input file
    !! is affecting which flow nodes.
    subroutine selectelset_internal_nodes(xz, yz, kc, nx, numprov, kp, &
-                                       & loc_spec_type, loc_file, numcoord, xpin, ypin, branchid, chainage)
+                                       & loc_spec_type, loc_file, numcoord, xpin, ypin, branchid, chainage, nodeId)
    use m_inquire_flowgeom
    use m_polygon
    use m_alloc
@@ -7620,31 +7621,36 @@ contains
    integer,                    intent(in   ) :: numprov    !< Provider nr from call site, to be used in setting output kp array.
    integer,                    intent(inout) :: kp(nx)     !< Output array, same size as flow nod input arrays. On index of every flow node that was selected: set to value numprov.
                                                            !< Note that this kp array is used in a fundamentally different way from the keg array in selectelset_internal_links().
-   integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: POLYGON_FILE, POLYGON_XY or BRANCH_CHAINAGE.
-   character(len=*), optional, intent(in   ) :: loc_file   !< File name of a polygon file (when loc_spec_type==POLYGON_FILE).
-   integer,          optional, intent(in   ) :: numcoord   !< Number of coordinates in input arrays (when loc_spec_type==POLYGON_XY).
-   double precision, optional, intent(in   ) :: xpin(:)    !< Polygon x-coordinates (when loc_spec_type==POLYGON_XY).
-   double precision, optional, intent(in   ) :: ypin(:)    !< Polygon y-coordinates (when loc_spec_type==POLYGON_XY).
-   character(len=*), optional, intent(in   ) :: branchId   !< Branch id (when loc_spec_type==BRANCHID_CHAINAGE).
-   double precision, optional, intent(in   ) :: chainage   !< Chainage along branch (when loc_spec_type==BRANCHID_CHAINAGE).
+   integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: LOCTP_POLYGON_FILE, LOCTP_POLYGON_XY or LOCTP_BRANCHID_CHAINAGE or LOCTP_NODEID.
+   character(len=*), optional, intent(in   ) :: loc_file   !< File name of a polygon file (when loc_spec_type==LOCTP_POLYGON_FILE).
+   integer,          optional, intent(in   ) :: numcoord   !< Number of coordinates in input arrays (when loc_spec_type==LOCTP_POLYGON_XY).
+   double precision, optional, intent(in   ) :: xpin(:)    !< Polygon x-coordinates (when loc_spec_type==LOCTP_POLYGON_XY).
+   double precision, optional, intent(in   ) :: ypin(:)    !< Polygon y-coordinates (when loc_spec_type==LOCTP_POLYGON_XY).
+   character(len=*), optional, intent(in   ) :: branchId   !< Branch id (when loc_spec_type==LOCTP_BRANCHID_CHAINAGE).
+   double precision, optional, intent(in   ) :: chainage   !< Chainage along branch (when loc_spec_type==LOCTP_BRANCHID_CHAINAGE).
+   character(len=*), optional, intent(in   ) :: nodeId     !< Node id (network node id) (when loc_spec_type==LOCTP_NODEID).
    !
    ! locals
    integer   :: minp, inp, n, ierr
    !
    ! body
    select case(loc_spec_type)
-   case (POLYGON_FILE)
+   case (LOCTP_POLYGON_FILE)
       ! Fill npl, xpl, ypl from file
       call oldfil(minp, loc_file)
       call reapol (minp, 0)
-   case (POLYGON_XY)
+   case (LOCTP_POLYGON_XY)
       ! Fill npl, xpl, ypl from input arrays
       call increasepol(numcoord, 0)
       xpl(1:numcoord) = xpin(1:numcoord)
       ypl(1:numcoord) = ypin(1:numcoord)
       npl = numcoord
-   case (BRANCHID_CHAINAGE)
+   case (LOCTP_BRANCHID_CHAINAGE)
       ierr = findnode(branchId, chainage, n)
+      if (ierr /= 0) return
+      kp(n) = numprov
+   case (LOCTP_NODEID)
+      ierr = findnode(nodeId, n)
       if (ierr /= 0) return
       kp(n) = numprov
    case default
@@ -7652,7 +7658,7 @@ contains
 
    end select
 
-   if (loc_spec_type == POLYGON_FILE .or. loc_spec_type == POLYGON_XY) then
+   if (loc_spec_type == LOCTP_POLYGON_FILE .or. loc_spec_type == LOCTP_POLYGON_XY) then
       ! Check which points are inside polygon npl-xpl-ypl
       inp  = -1 
       do n = 1,nx
