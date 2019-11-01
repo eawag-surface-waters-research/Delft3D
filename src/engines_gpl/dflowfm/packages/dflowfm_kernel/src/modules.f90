@@ -257,8 +257,8 @@ module m_waves
  double precision, allocatable, target      :: Uorb(:)              !< [m/s] orbital velocity {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target      :: ustokes(:)           !< [m/s] wave induced velocity, link-based and link-oriented
  double precision, allocatable, target      :: vstokes(:)           !< [m/s] wave induced velocity, link-based and link-oriented
- double precision, allocatable              :: rlabda(:)            !< [m] wave length  
- double precision, allocatable              :: ustk(:)              !< [m/s] Ustokes depth averaged cell centres 
+ double precision, allocatable              :: rlabda(:)            !< [m] wave length
+ double precision, allocatable              :: ustk(:)              !< [m/s] Ustokes depth averaged cell centres
 
 
  double precision, allocatable, target      :: dsurf(:)             !< [w/m2] wave energy dissipation rate due to breaking at the free surface, "DISSURF" in WAVE
@@ -1193,7 +1193,7 @@ use m_physcoef, only : rhomean
     icdtyp  = 2
     jarelativewind = 0    !< wind relative
     jawindhuorzwsbased   = 0    !< default: HU-based both in 2D and 3D (and not zws-based)
-    jawindpartialdry     = 0    !< default: partially dry cells switched off
+    jawindpartialdry     = 1    !< default: partially dry cells switched off
 
     windxav = 0d0
     windyav = 0d0
@@ -2825,7 +2825,7 @@ subroutine default_flowparameters()
                       ! 5 : v = alfa LR (Tx, Ty) . (ucxq, ucyq)             ucxq,ucyq = ( Perotsum (u*hu) ) / hs
                       ! 6 : v = alfa LR (Tx, Ty) . (ucxq, ucyq)             ucxq,ucyq = ( Perotsum (u*hu) ) / hsu, hsu = areaweighted hu
                       ! 7 : v = alfa LR (Tx, Ty) . (ucx*hs , ucy*hs ) / hu
-                      ! 8 : v = alfa LR (Tx, Ty) . (ucx*hs , ucy*hs ) / (alfa LR hs) 
+                      ! 8 : v = alfa LR (Tx, Ty) . (ucx*hs , ucy*hs ) / (alfa LR hs)
 
     trshcorio = 1.0   ! below this depth coriolis force scaled down linearly to 0
 
@@ -3847,7 +3847,7 @@ end module m_profiles
  double precision                  :: dxmin=1d-3     !< minimum link length 1D (m)
  double precision                  :: dxmin1D        !< minimum link length 1D (m)
  double precision                  :: dxmin2D        !< minimum link length 2D (m)
- double precision                  :: dxwuimin2D     !< smallest fraction dx/wu , may increase dx if > 0  
+ double precision                  :: dxwuimin2D     !< smallest fraction dx/wu , may increase dx if > 0
 
 
  double precision                  :: wu1DUNI        !< uniform 1D profile width
@@ -4065,7 +4065,7 @@ subroutine default_flowgeom()
     bamin1D  = 0d-2     ! minimum cell area 1d nodes
     dxmin1D  = 1D-3     ! minimum link length 1D (m)
     dxmin2D  = 1D-3     ! minimum link length 2D (m)
-    dxwuimin2D = 0.0d0  ! smallest fraction dx/wu , may increase dx if > 0  
+    dxwuimin2D = 0.0d0  ! smallest fraction dx/wu , may increase dx if > 0
 
     wu1DUNI  =  2d0   ! Uniform 1D profile width
     hh1DUNI  =  3d0   ! Uniform 1D profile height
