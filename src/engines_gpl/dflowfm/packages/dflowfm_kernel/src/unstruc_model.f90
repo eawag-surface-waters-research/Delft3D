@@ -502,6 +502,11 @@ subroutine loadModel(filename)
        md_netfile = trim( md_netfile)
     endif
 
+    if (getMaxErrorLevel() >= LEVEL_ERROR) then
+       msgbuf = 'Errors were found, please check the diagnostics file'
+       call fatal_flush()
+    endif
+    
     threshold_abort = LEVEL_ERROR
 
     ! Load land boundary from file.
