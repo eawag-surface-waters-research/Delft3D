@@ -447,6 +447,7 @@ contains
             if (success .and. numlocations > 1) then
                call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'chainage', locations, numlocations, success)
             else 
+               numlocations = 1
                locations(1) = 0d0
             endif
             
