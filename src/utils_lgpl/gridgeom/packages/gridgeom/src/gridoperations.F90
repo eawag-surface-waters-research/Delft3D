@@ -2747,6 +2747,9 @@
 
    ENDDO
 
+   ! set network status
+   netstat = NETSTAT_CELLS_DIRTY
+
    end function make1D2Dinternalnetlinks
    
    subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, unMergedOneDmask)      !
