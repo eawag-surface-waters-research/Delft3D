@@ -497,7 +497,7 @@ subroutine loadModel(filename)
     endif
 
     if (getMaxErrorLevel() >= LEVEL_ERROR) then
-       msgbuf = 'Errors were found, please check the diagnostics file'
+       msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
        call fatal_flush()
     endif
     
