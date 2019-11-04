@@ -393,8 +393,8 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
             do mropar = 1, nropars
                 gdtrachy%gen%rttdef(ntrt_qzs, mropar) = gdtrachy%gen%rttdef_q(idx_start, mropar)
             end do     
-        elseif (gdtrachy%gen%crs(itrtcrs)%val > gdtrachy%gen%table_q(idx_end)) then 
-            ! value through cross-section is larger than last value in table, 
+        elseif (gdtrachy%gen%crs(itrtcrs)%val .ge. gdtrachy%gen%table_q(idx_end)) then 
+            ! value through cross-section is larger than or equal to last value in table, 
             ! so take last set of values from the table 
             do mropar = 1, nropars
                 gdtrachy%gen%rttdef(ntrt_qzs, mropar) = gdtrachy%gen%rttdef_q(idx_end, mropar)
@@ -435,8 +435,8 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
             do mropar = 1, nropars
                 gdtrachy%gen%rttdef(ntrt_qzs, mropar) = gdtrachy%gen%rttdef_zs(idx_start, mropar)
             end do     
-        elseif (gdtrachy%gen%obs(itrtobs)%val > gdtrachy%gen%table_zs(idx_end)) then 
-            ! value through cross-section is larger than last value in table, 
+        elseif (gdtrachy%gen%obs(itrtobs)%val .ge. gdtrachy%gen%table_zs(idx_end)) then 
+            ! value through cross-section is larger than or equal to last value in table, 
             ! so take last set of values from the table 
             do mropar = 1, nropars
                 gdtrachy%gen%rttdef(ntrt_qzs, mropar) = gdtrachy%gen%rttdef_zs(idx_end, mropar)
