@@ -87,8 +87,8 @@
       character(1)                   cchar_save      ! save value from Delwaq
       integer  ( ip)                 lunut_save      ! save value from Delwaq
       integer  ( ip)                 npos_save       ! save value from Delwaq
-      real     ( sp), allocatable :: xpoltmp(:)      ! temp x-coordinates polygon
-      real     ( sp), allocatable :: ypoltmp(:)      ! temp y-coordinates polygon
+      real     ( sp), pointer     :: xpoltmp(:)      ! temp x-coordinates polygon
+      real     ( sp), pointer     :: ypoltmp(:)      ! temp y-coordinates polygon
       integer  ( ip)                 nrowstmp        ! temp length polygon
       integer  ( ip)                 npmargin        ! allocation margin in number of particles
       
@@ -949,7 +949,6 @@
 !     oil_opt = 0xx : no boom introductions
 !             = 1xx : boom introductions with direct chance per day to pass the oilboom
 !
-         nrowsmax  = 0
          ndisapp = 0
          nboomint = 0
          if ( gettoken( oil_opt, ierr2 ) .ne. 0 ) goto 6001
@@ -1100,8 +1099,8 @@
             endif
          endif
 
-         allocate ( xpoltmp(nrowsmax) )
-         allocate ( ypoltmp(nrowsmax) )
+         call alloc ( "xpoltmp", xpoltmp, nrowsmax )
+         call alloc ( "ypoltmp", xpoltmp, nrowsmax )
          if ( ndisapp .gt. 0 ) then
 !     allocate memory for the dispersant polygons, and read them into memory
             call alloc ( "xpoldis", xpoldis, nrowsmax, ndisapp )
@@ -1297,7 +1296,6 @@
       call alloc ( "ndprt  ", ndprt  , i )
       call alloc ( "amassd ", amassd , nosubs, i )
       if ( nodye .gt. 0 ) write ( lun2, 2250 )
-      nrowsmax = 0
 
       do 10 i = 1 , nodye
 
@@ -1557,8 +1555,8 @@
 
 ! read actual waste polygons
       if (nrowsmax.gt.0) then
-         allocate ( xpoltmp(nrowsmax) )
-         allocate ( ypoltmp(nrowsmax) )
+         call alloc ( "xpoltmp", xpoltmp, nrowsmax )
+         call alloc ( "ypoltmp", xpoltmp, nrowsmax )
 !        allocate memory for the waste polygons, and read them into memory
          call alloc ( "xpolwaste", xpolwaste, nrowsmax, nodac )
          call alloc ( "ypolwaste", ypolwaste, nrowsmax, nodac )
