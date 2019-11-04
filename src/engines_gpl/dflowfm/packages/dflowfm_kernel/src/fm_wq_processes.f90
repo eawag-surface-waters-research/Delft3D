@@ -87,9 +87,10 @@
       integer( 4)              :: noout_sub
       integer( 4)              :: nosys_eho,notot_eho,nocons_eho
       integer( 4)              :: noout_eho
-      integer( 4)              :: i, j, ip, ipar, ifun, isfun, ivar
+      integer( 4)              :: i, j, ip, icon, ipar, ifun, isfun, ivar
       integer( 4)              :: iastat
 
+      character*20,parameter   :: ctauflow = 'tauflow'
       character*10,parameter   :: cbloom = 'd40blo'
       character*20,parameter   :: doprocesses = 'DoProcesses'
 
@@ -325,7 +326,12 @@
       isfsurf = nosfun
 
       nosfun = nosfun+1
-      call realloc(sfunname, nosfun, keepExisting=.true., fill='tau')
+      call zoekns(ctauflow,nocons,coname_sub,20,icon)
+      if (icon>0) then
+         call realloc(sfunname, nosfun, keepExisting=.true., fill='tauflow')
+      else
+         call realloc(sfunname, nosfun, keepExisting=.true., fill='tau')
+      end if
       isftau = nosfun
 
       nosfun = nosfun+1
