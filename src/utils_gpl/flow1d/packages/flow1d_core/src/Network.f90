@@ -233,8 +233,6 @@ contains
       logical                            :: interpolDone
       logical                            :: initError = .false.
 
-      character(20)                      :: chainageString
-      
       call realloc(network%adm, linall, linall + network%brs%Count)
       
       adm => network%adm
@@ -499,8 +497,8 @@ contains
                            f = 1.0d0
                         else    
                            if (chainage1 == chainage2) then 
-                               write(chainageString, '(F10.3)') chainage1 
-                               call setmessage(LEVEL_ERROR, 'Mulitple cross sections defined at same chainage ('// trim(chainageString) //') on branch '//trim(pbran%id))
+                               write(msgbuf, '(A,F10.3,A)') 'Multiple cross sections defined at same chainage (', chainage1, ') on branch '//trim(pbran%id)//'.'
+                               call err_flush()
                                initError = .true.
                            endif
                            f = (chainageg - chainage1) / (chainage2 - chainage1)
