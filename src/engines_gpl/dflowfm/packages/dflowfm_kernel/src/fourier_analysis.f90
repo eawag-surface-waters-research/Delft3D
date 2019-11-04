@@ -1,46 +1,46 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2019.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2019.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
 ! $HeadURL$
 !-------------------------------------------------------------------------------------------------------
-!  Origin: 
+!  Origin:
 !     URL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/data/include/fourier.igs
 !     Revision: 5108
 
 module m_fourier_analysis
 
 ! TODO:
-!     * finalizing 
-!     * ucx en ucy on (1:#nods) is altijd de diepte gemiddelde, ook in 2d (dan is het de enige snelheid) 
+!     * finalizing
+!     * ucx en ucy on (1:#nods) is altijd de diepte gemiddelde, ook in 2d (dan is het de enige snelheid)
 
-    use precision 
+    use precision
     use string_module, only: str_lower
     use unstruc_netcdf
     use m_flow, only : kmx
@@ -84,18 +84,18 @@ module m_fourier_analysis
                                                                      !  For velocity (u,v), discharge (qxk, qyk) and bed shear stress (taubpu,taubpv)
                                                                      !  NB: For discharges the analysis is actually performed on the unit discharges qxk/guu and qyk/gvv
        real(kind=fp)    , dimension(:)    , pointer :: fv0pu         ! Fourier phase correction
-       !    
+       !
        character(len=1) , dimension(:)    , pointer :: fouelp        !  Y/N: Yes/No requesting elliptic parameters
                                                                      !  X/I: Max/Min values  requested instead of fourier analysis
                                                                      !  E  : Max Energy head requested instead of fourier analysis
-       character(len=16), dimension(:)    , pointer :: founam        ! Names of variables for fourier analysis 
-       character(len=50), dimension(:)    , pointer :: fouvarnam     ! Names of variables for fourier analysis as written to NetCDF file 
-       character(len=50), dimension(:)    , pointer :: fouvarnamlong ! Part of the long names of variables for fourier analysis as written to NetCDF file 
-       character(len=50), dimension(:)    , pointer :: fouvarunit    ! Unit of variables for fourier analysis as written to NetCDF file 
+       character(len=16), dimension(:)    , pointer :: founam        ! Names of variables for fourier analysis
+       character(len=50), dimension(:)    , pointer :: fouvarnam     ! Names of variables for fourier analysis as written to NetCDF file
+       character(len=50), dimension(:)    , pointer :: fouvarnamlong ! Part of the long names of variables for fourier analysis as written to NetCDF file
+       character(len=50), dimension(:)    , pointer :: fouvarunit    ! Unit of variables for fourier analysis as written to NetCDF file
        character(len=1) , dimension(:)    , pointer :: foutyp        ! Character indicating whether parameter is a scalar (s) or vector (v) quantity
     end type gd_fourier
 !-------------------------------------------------------------------------------------------------------
-    
+
     type(gd_fourier), target :: gdfourier
     character(len=:), allocatable   :: FouOutputFile
 
@@ -104,7 +104,7 @@ module m_fourier_analysis
     integer                   :: nofou  !< Number of fourier components to be analyzed
     type(t_unc_mapids)        :: fileids!< Set of file and variable ids for this file.
 
-    real(kind=fp)             :: ag_fouana = 9.81d0  
+    real(kind=fp)             :: ag_fouana = 9.81d0
     real(kind=fp)             :: time_unit_factor
 
     public fouini
@@ -218,7 +218,7 @@ module m_fourier_analysis
        !
        if (istat == 0) allocate (gdfourier%fknfac (                          1:nofou), STAT = istat)
        if (istat == 0) allocate (gdfourier%foucomp(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub, 1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%foufas (                          1:nofou), STAT = istat)                                         
+       if (istat == 0) allocate (gdfourier%foufas (                          1:nofou), STAT = istat)
        if (istat == 0) allocate (gdfourier%fousma (gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub, 1:nofou), STAT = istat)
        if (istat == 0) allocate (gdfourier%fousmb (gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub, 1:nofou), STAT = istat)
        if (istat == 0) allocate (gdfourier%fouvec (gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub, 1:nofou), STAT = istat)
@@ -232,7 +232,7 @@ module m_fourier_analysis
        if (istat == 0) allocate (gdfourier%foutyp (1:nofou), STAT = istat)
 
        if (istat /= 0) then
-          ! Exception handling for allocation of fourier arrays 
+          ! Exception handling for allocation of fourier arrays
           msgbuf = 'Allocation error in alloc_fourier_analysis_arrays; Fourier disabled.'
           call warn_flush()
           nofou = 0
@@ -283,56 +283,53 @@ module m_fourier_analysis
        integer                         , intent(in) :: ltem    !< Description and declaration in dimens.igs
        integer                         , intent(in) :: lunfou  !< Unit number fourier input file
        character(*)                    , intent(in) :: filfou  !< File name for fourier analysis input
-       integer                         , intent(in) :: kmax    !< number of vertical layers 
-       real(fp)                        , intent(in) :: tstart  !< simulation start time 
-       real(fp)                        , intent(in) :: tstop   !< simulation stop time 
-       real(fp)                        , intent(in) :: dt      !< timestep 
+       integer                         , intent(in) :: kmax    !< number of vertical layers
+       real(fp)                        , intent(in) :: tstart  !< simulation start time
+       real(fp)                        , intent(in) :: tstop   !< simulation stop time
+       real(fp)                        , intent(in) :: dt      !< timestep
        logical                         , intent(out):: success !< function result
    !
    ! Local variables
    !
-       integer        , dimension(:)   , pointer :: fconno
-       integer        , dimension(:)   , pointer :: flayno
-       integer        , dimension(:)   , pointer :: fnumcy
-       integer        , dimension(:)   , pointer :: foumask
-       integer        , dimension(:,:) , pointer :: idvar
-       integer        , dimension(:,:) , pointer :: fouref
-       integer                         , pointer :: fouwrt
-       integer                         , pointer :: nofouvar
-       integer        , dimension(:)   , pointer :: ftmsto
-       integer        , dimension(:)   , pointer :: ftmstr
-       real(fp)       , dimension(:)   , pointer :: fknfac
-       real(fp)       , dimension(:)   , pointer :: foufas
-       real(fp)       , dimension(:,:,:) , pointer :: fousma
-       real(fp)       , dimension(:,:,:) , pointer :: fousmb
-       real(fp)       , dimension(:)   , pointer :: fv0pu
-       character(1)   , dimension(:)   , pointer :: fouelp
-       character(16)  , dimension(:)   , pointer :: founam
-       character(50)  , dimension(:)   , pointer :: fouvarnam
-       character(50)  , dimension(:)   , pointer :: fouvarnamlong
-       character(50)  , dimension(:)   , pointer :: fouvarunit
-       character(1)   , dimension(:)   , pointer :: foutyp
-       integer, parameter :: maxvld = 40     ! Maximum number of fields/columns that can be read from a record 
+       integer          , dimension(:)     , pointer :: fconno
+       integer          , dimension(:)     , pointer :: flayno
+       integer          , dimension(:)     , pointer :: fnumcy
+       integer          , dimension(:)     , pointer :: foumask
+       integer          , dimension(:,:)   , pointer :: idvar
+       integer          , dimension(:,:)   , pointer :: fouref
+       integer                             , pointer :: fouwrt
+       integer                             , pointer :: nofouvar
+       integer          , dimension(:)     , pointer :: ftmsto
+       integer          , dimension(:)     , pointer :: ftmstr
+       real(kind=fp)    , dimension(:)     , pointer :: fknfac
+       real(kind=fp)    , dimension(:)     , pointer :: foufas
+       real(kind=fp)    , dimension(:,:,:) , pointer :: fousma
+       real(kind=fp)    , dimension(:,:,:) , pointer :: fousmb
+       real(kind=fp)    , dimension(:)     , pointer :: fv0pu
+       character(len=1) , dimension(:)     , pointer :: fouelp
+       character(len=16), dimension(:)     , pointer :: founam
+       character(len=50), dimension(:)     , pointer :: fouvarnam
+       character(len=50), dimension(:)     , pointer :: fouvarnamlong
+       character(len=50), dimension(:)     , pointer :: fouvarunit
+       character(len=1) , dimension(:)     , pointer :: foutyp
 
-       integer                             :: fouid      ! Counter linenumber-commentlines
-       integer                             :: i          ! Counter 
-       integer                             :: ifou       ! Counter 
-       integer                             :: ivar       ! Counter 
-       integer                             :: irelp
-       integer                             :: lfile      ! Length of file name 
-       integer                             :: linenumber ! Line number in Fourier input file
-       integer                             :: nopos      ! Used for format free reading 
-       integer                             :: nveld      ! actual number of fields encountered in a record  
-       integer                             :: iveld      ! loop counter over fields in a record 
-       real(fp)                            :: rstart     ! Start time for fourier analysis 
-       real(fp)                            :: rstop      ! Stop  time for fourier analysis 
-       character(4)                        :: cdummy     ! Help string to read FOUELP 
-                                                         ! The message depends on the error. 
-       character(7)                        :: fmt        ! Used for format free reading 
-       character(300)                      :: message
-       character(132)                      :: record     ! Used for format free reading 
-       character(30)  , dimension(maxvld)  :: columns    ! each record is split into separate fields (columns)
-       integer                             :: iostat
+       integer                               :: fouid      ! Counter linenumber-commentlines
+       integer                               :: i          ! Counter
+       integer                               :: ifou       ! Counter
+       integer                               :: ivar       ! Counter
+       integer                               :: irelp
+       integer                               :: lfile      ! Length of file name
+       integer                               :: linenumber ! Line number in Fourier input file
+       integer                               :: nveld      ! actual number of fields encountered in a record
+       integer                               :: iveld      ! loop counter over fields in a record
+       real(kind=fp)                         :: rstart     ! Start time for fourier analysis
+       real(kind=fp)                         :: rstop      ! Stop  time for fourier analysis
+       character(len=4)                      :: cdummy     ! Help string to read FOUELP
+                                                           ! The message depends on the error.
+       character(len=300)                    :: message
+       character(len=132)                    :: record     ! Used for format free reading
+       character(len=30), allocatable        :: columns(:) ! each record is split into separate fields (columns)
+       integer                               :: iostat
    !
    !! executable statements -------------------------------------------------------
    !
@@ -390,41 +387,37 @@ module m_fourier_analysis
        ! -->
       20 continue
        read (lunfou, '(a)',iostat=iostat) record
-       if (iostat/=0) then 
+       if (iostat/=0) then
           write (msgbuf, '(a)') 'Error reading record from .fou file.'
           call warn_flush()
           goto 6666
-       endif 
+       endif
        !
        linenumber = linenumber + 1
+       if (record(1:1)=='*') goto 20
        fouid      = fouid      + 1
        !
        call str_lower(record, 132)
-       columns = ''
-       read(record,*,iostat=iostat) (columns(iveld),iveld=1,maxvld)          ! TODO: cover for read errors 
-       do nveld = maxvld,1,-1
-          if (len_trim(columns(nveld))>0) then 
-             exit
-          endif 
-       enddo 
+       if (allocated(columns)) deallocate(columns)
+       call strsplit(record, 1, columns, 1)
+       nveld = size(columns)
        !
-       if (columns(1)(1:1)=='*' .or. nveld==0) then
+       if (nveld==0) then
           fouid = fouid - 1
           goto 20
        endif
        ! <--
        !
-       ! determine array names and type (scalar or vectorial) for
-       !       fourier analysis
+       ! determine array names and type (scalar or vectorial) for fourier analysis
        !
-       founam(ifou) = trim(columns(1))
+       founam(ifou) = columns(1)
        !
        if (founam(ifou)=='wl') then
-          founam(ifou)   = 's1              '
+          founam(ifou)   = 's1'
           foutyp(ifou)   = 's'
           fouref(ifou,1) = fouid
-       elseif (founam(ifou)=='ws') then             ! absolute wind-speed 
-          founam(ifou)   = 'ws              '
+       elseif (founam(ifou)=='ws') then             ! absolute wind-speed
+          founam(ifou)   = 'ws'
           foutyp(ifou)   = 's'
           fouref(ifou,1) = fouid
        elseif (founam(ifou)=='ux' .or. founam(ifou)=='uxa') then
@@ -438,47 +431,47 @@ module m_fourier_analysis
           ! founam must be s1 to pass through s1 to fouana
           ! use fouelp to flag energy head
           !
-          founam(ifou)   = 's1              '               ! waterlevel 
+          founam(ifou)   = 's1'               ! waterlevel
           foutyp(ifou)   = 's'
           fouref(ifou,1) = fouid
           fouelp(ifou)   = 'e'
-       elseif (founam(ifou)=='uc') then                     ! absolute cell-centre velocity magnitude
-          founam(ifou)   = 'uc              '
+       elseif (founam(ifou)=='uc') then        ! absolute cell-centre velocity magnitude
+          founam(ifou)   = 'uc'
           foutyp(ifou)   = 's'
           fouref(ifou,1) = fouid
-       elseif (founam(ifou)=='qf') then                     ! interpolated cell-centre velocities (vector)
-          founam(ifou)     = 'qxk             '             ! ucx 
+       elseif (founam(ifou)=='qf') then        ! interpolated cell-centre velocities (vector)
+          founam(ifou)     = 'qxk'             ! ucx
           foutyp(ifou)     = 's'
           fouref(ifou,1)   = fouid
        elseif (founam(ifou)=='bs') then
-          founam(ifou)     = 'ta              '
+          founam(ifou)     = 'ta'
           foutyp(ifou)     = 's'
           fouref(ifou,1)   = fouid
-       elseif (founam(ifou)=='ct') then                     ! constituent: temperature (scalar)
+       elseif (founam(ifou)=='ct') then        ! constituent: temperature (scalar)
           if (ltem/=0) then
-             founam(ifou)   = 'r1              '
+             founam(ifou)   = 'r1'
              foutyp(ifou)   = 's'
              fconno(ifou)   = ltem
              fouref(ifou,1) = fouid
           else
-             ! Exception: no temperature 
+             ! Exception: no temperature
              write (msgbuf, '(a)') 'Temperature specified in .fou file, but no temperature available. '
              call warn_flush()
              goto 6666
           endif
        elseif (founam(ifou)=='cs') then                     ! constituent: salinity (scalar)
           if (lsal/=0) then
-             founam(ifou)   = 'r1              '
+             founam(ifou)   = 'r1'
              foutyp(ifou)   = 's'
              fconno(ifou)   = lsal
              fouref(ifou,1) = fouid
           else
-             ! Exception: no salt 
+             ! Exception: no salt
              write (msgbuf, '(a)') 'Salinity specified in .fou file, but no salinity available.'
              call warn_flush()
              goto 6666
           endif
-       else                                                 ! constituent, anything else 
+       else                                                 ! constituent, anything else
           read (founam(ifou)(2:2), '(i1)', iostat=iostat) fconno(ifou)
           if (iostat /= 0) then
              write (msgbuf, '(a)') 'Unable to initialize fourier analysis for '''//trim(founam(ifou))//'''.'
@@ -491,7 +484,7 @@ module m_fourier_analysis
              call warn_flush()
              goto 6666
           endif
-          founam(ifou)   = 'r1             '
+          founam(ifou)   = 'r1'
           foutyp(ifou)   = 's'
           fouref(ifou,1) = fouid
        endif
@@ -499,26 +492,13 @@ module m_fourier_analysis
        ! read start time, stop time, number of cycles
        !       determine corresponding integer time step numbers and frequency
        !
-       fmt = '(f    )'
-       !
-       nopos = len_trim(columns(2))
-       !
-       if (nopos<10) then
-          write (fmt(3:3), '(i1)') nopos
-          write (fmt(4:5), '(a2)') '.0'
-       else
-          write (fmt(3:4), '(i2)') nopos
-          write (fmt(5:6), '(a2)') '.0'
-       endif
-       !
-       read (columns(2), fmt) rstart
+       read (columns(2), *, err=6666) rstart
        rstart = rstart * time_unit_factor           ! convert to kernel time unit
        !
        ftmstr(ifou) = nint(rstart/dt)
        !
        ! original code translates as : 'if abs(real(nint(rstart/dt)*dt-rstart) > (0.1_fp*dt)'         ! RL666
-       if ( mod(real(rstart,fp),real(dt,fp)) > 0.1_fp*dt) then 
-          ! call prterr(lundia, 'U044', errmsg)
+       if ( mod(real(rstart,fp),real(dt,fp)) > 0.1_fp*dt) then
           write (msgbuf,*) 'Fourier sample interval start not at an integer number of user timesteps DtUser.'
           call warn_flush()
           goto 6666
@@ -526,29 +506,17 @@ module m_fourier_analysis
        !
        !
        if (rstart<tstart) then
-          ! call prterr(lundia, 'F005', ' ')
           write (msgbuf,*) 'Fourier sample interval start preceeds simulation start TStart.'
           call warn_flush()
           goto 6666
        endif
        !
-       nopos = len_trim(columns(3))
-       !
-       if (nopos<10) then
-          write (fmt(3:3), '(i1)') nopos
-          write (fmt(4:5), '(a2)') '.0'
-       else
-          write (fmt(3:4), '(i2)') nopos
-          write (fmt(5:6), '(a2)') '.0'
-       endif
-       !
-       read (columns(3), fmt) rstop
+       read (columns(3), *, err=6666) rstop
        rstop = rstop * time_unit_factor           ! convert to kernel time unit
        !
        ftmsto(ifou) = nint(rstop/dt)
        ! original code translates as : 'if abs(real(nint(rstop/dt)*dt-rstart) > (0.1_fp*dt)'         ! RL666
-       if ( mod(real(rstop,fp),real(dt,fp)) > 0.1_fp*dt) then 
-          ! call prterr(lundia, 'U044', errmsg)
+       if ( mod(real(rstop,fp),real(dt,fp)) > 0.1_fp*dt) then
           write (msgbuf,*) 'Fourier sample interval stop not at an integer number of user timesteps DtUser.'
           call warn_flush()
           goto 6666
@@ -556,7 +524,6 @@ module m_fourier_analysis
        !
        !
        if (rstop>tstop) then
-          ! call prterr(lundia, 'F006', ' ')
           write (msgbuf,*) 'Fourier sample interval stop exceeds simulation end TStop.'
           call warn_flush()
           goto 6666
@@ -566,54 +533,22 @@ module m_fourier_analysis
        !
        fouwrt = max(fouwrt,(ftmsto(ifou)-1))
        !
-       fmt = '(i    )'
-       nopos = len_trim(columns(4))
-       !
-       if (nopos<10) then
-          write (fmt(3:3), '(i1)') nopos
-       else
-          write (fmt(3:4), '(i2)') nopos
-       endif
-       !
-       read (columns(4), fmt) fnumcy(ifou)
+       read (columns(4), *, err=6666) fnumcy(ifou)
        !
        if (fnumcy(ifou)==0) then
-          foufas(ifou) = 0.
+          foufas(ifou) = 0.0_fp
        else
-          foufas(ifou) = 2.*pi*real(fnumcy(ifou),fp)/real(ftmsto(ifou) - ftmstr(ifou),fp)
+          foufas(ifou) = twopi * real(fnumcy(ifou),fp)/real(ftmsto(ifou) - ftmstr(ifou),fp)
        endif
        !
        ! read nodal amplifications and phase shifts for comparison
        !       with cotidal maps
        !
-       fmt = '(f    )'
-       nopos = len_trim(columns(5))
-
+       read (columns(5), *, err=6666) fknfac(ifou)
        !
-       if (nopos<10) then
-          write (fmt(3:3), '(i1)') nopos
-          write (fmt(4:5), '(a2)') '.0'
-       else
-          write (fmt(3:4), '(i2)') nopos
-          write (fmt(4:5), '(a2)') '.0'
-       endif
+       read (columns(6), *, err=6666) fv0pu(ifou)
        !
-       read (columns(5), fmt) fknfac(ifou)
-       !
-       fmt = '(f    )'
-       nopos = len_trim(columns(6))
-       !
-       if (nopos<10) then
-          write (fmt(3:3), '(i1)') nopos
-          write (fmt(4:5), '(a2)') '.0'
-       else
-          write (fmt(3:4), '(i2)') nopos
-          write (fmt(4:5), '(a2)') '.0'
-       endif
-       !
-       read (columns(6), fmt) fv0pu(ifou)
-       !
-       if (fv0pu(ifou)<0.) fv0pu(ifou) = fv0pu(ifou) + 360.
+       if (fv0pu(ifou)<0.0_fp) fv0pu(ifou) = fv0pu(ifou) + 360.0_fp
        fv0pu(ifou) = mod(fv0pu(ifou), 360.0_fp)
        !
        irelp = 7
@@ -623,18 +558,13 @@ module m_fourier_analysis
             founam(ifou)(1:3)/='uxa' .and. &
             founam(ifou)(1:3)/='uya' .and. &
             founam(ifou)(1:2)/='ws') then
-          fmt = '(i    )'
-          nopos = len_trim(columns(7))
           !
-          if (nopos<10) then
-             write (fmt(3:3), '(i1)') nopos
-          else
-             write (fmt(3:4), '(i2)') nopos
-          endif
-          !
-          read (columns(7), fmt) flayno(ifou)
-          if (flayno(ifou)>kmax) then
-             ! call prterr(lundia, 'F007', ' ')
+          read (columns(7), *, iostat=iostat) flayno(ifou)
+          if (iostat /= 0) then
+             write (msgbuf, '(a,i0,2a)') 'Could not read layer number in line ', linenumber, ' and column 7 of file ', trim(filfou)
+             call warn_flush()
+             goto 6666
+          else if (flayno(ifou)>kmax) then
              write (msgbuf, '(a,i0,a,i0,a)') 'Requested layer exceeds,',flayno(ifou),' exceeds max layer, ',kmax,'.'
              call warn_flush()
              goto 6666
@@ -653,14 +583,12 @@ module m_fourier_analysis
              if (fnumcy(ifou)>0) then
                 fnumcy(ifou) = 0
                 foufas(ifou) = 0.
-                ! call prterr(lundia, 'F008', 'min')
              endif
              if (fouelp(ifou)=='e') then
                 select case (cdummy)
                    case ('min')
                       write (msgbuf, '(3a,i0,a)') 'in file ', trim(filfou), ' line ', linenumber, &
                             & ': energy head in combination with "min" is not supported'
-                      ! call prterr(lundia, 'P004', trim(message))
                       call warn_flush()
                       goto 6666
                 end select
@@ -703,7 +631,6 @@ module m_fourier_analysis
              foumask(ifou) = 1
              write (message,'(3a,i0,a)') 'in file ', trim(filfou), ' line ', linenumber, &
                    & ': Fourier analysis only for initially dry points'
-             ! call prterr(lundia, 'G051', trim(message))
           endif
        endif
        if (foutyp(ifou)=='v') then                 ! for the second vector component
@@ -727,10 +654,7 @@ module m_fourier_analysis
        if (ifou<=nofou) goto 20
        ! <--
        !
-       success = .True. 
-       if (iostat>0) then 
-          ! ToDo: some exception handling....apparently something wring with the file
-       endif
+       success = .True.
        !
        ! Define all variable names to be written
        ! Add the (start-)index ivar to fouref(..,2)
@@ -840,7 +764,7 @@ module m_fourier_analysis
               else
                  ivar = ivar + 1
                  write(fouvarnam(ivar),'(a,i3.3,2a)') "fourier", fouref(ifou,1), "_amp_", trim(founam(ifou))
-                 write(fouvarnamlong(ivar),'(2a)') "Fourier amplitude component ", trim(founam(ifou))                ! RL666 Wat is fouref 
+                 write(fouvarnamlong(ivar),'(2a)') "Fourier amplitude component ", trim(founam(ifou))                ! RL666 Wat is fouref
                  call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
                  ivar = ivar + 1
                  write(fouvarnam(ivar),'(a,i3.3,2a)') "fourier", fouref(ifou,1), "_phs_", trim(founam(ifou))
@@ -924,7 +848,7 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
        endif
     case default
        fouvarunit = ''
-    end select 
+    end select
 end subroutine setfouunit
 
 !> performs fourier analysis i.e. computes suma and sumb
@@ -967,7 +891,7 @@ end subroutine setfouunit
    ! Local variables
    !
        integer         :: m       ! Loop counter over MMAX
-       integer         :: n       ! Loop counter over NMAXUS 
+       integer         :: n       ! Loop counter over NMAXUS
        real(fp)        :: angl
        real(fp)        :: uuu     ! umean in zeta point
        real(fp)        :: vvv     ! vmean in zeta point
@@ -1012,14 +936,14 @@ end subroutine setfouunit
        case('r1')
             nmaxus = ndkx
        end select
-       
+
        if (nst>=ftmstr(ifou) .and. nst<ftmsto(ifou)) then
           if (fouelp(ifou) == 'x') then
              !
              ! Calculate MAX value
              !
              if (founam(ifou) == 's1') then
-                
+
                 do n = 1, nmaxus
                    do m = 1, mmax
                       !
@@ -1040,7 +964,7 @@ end subroutine setfouunit
              !
              ! Calculate MAX Energy head value
              !
-             if (present(umean) .and. present(vmean)) then 
+             if (present(umean) .and. present(vmean)) then
                 do n = 1, nmaxus
                    do m = 1, mmax
                       !
@@ -1106,17 +1030,16 @@ end subroutine setfouunit
    ! Global variables
    !
        integer , intent(in)            :: lunfou   !!  Unit number for fourier input file
-       real(fp), intent(in)            :: ag       !!  override gravitational constant 
+       real(kind=fp), intent(in)       :: ag       !!  override gravitational constant
        character(len=*), intent(in)    :: time_unit_user, time_unit_kernel
        logical                         :: success  !!  Flag=True if no error is encountered
 
    !
    ! Local variables
    !
-       integer, parameter                 :: maxvld = 40
-       integer                            :: nveld  ! Used for format free reading 
-       character(300)                     :: record ! Used for format free reading 300 = 256 + a bit (field, =, ##, etc.) 
-       character(30)  ,dimension(maxvld)  :: columns! each record is split into separate fields (columns)
+       integer                            :: nveld  ! Used for format free reading
+       character(len=300)                 :: record ! Used for format free reading 300 = 256 + a bit (field, =, ##, etc.)
+       character(len=30), allocatable     :: columns(:)! each record is split into separate fields (columns)
        integer                            :: iostat
        integer                            :: iveld
        integer, pointer                   :: nofouvar
@@ -1126,13 +1049,13 @@ end subroutine setfouunit
        time_unit_factor=1.0
        select case (time_unit_user)
        case('D')
-          time_unit_factor=3600.*24. 
+          time_unit_factor=3600.*24.
        case('H')
-          time_unit_factor=3600. 
+          time_unit_factor=3600.
        case('M')
-          time_unit_factor=60. 
+          time_unit_factor=60.
        case('S')
-          time_unit_factor=1. 
+          time_unit_factor=1.
        end select
 
        select case (time_unit_kernel)
@@ -1146,7 +1069,7 @@ end subroutine setfouunit
 
        ! The user specified times in the .fou files need to be multiplied by the time_unit_factor, to correspond with the kernel times
 
-       ag_fouana = ag 
+       ag_fouana = ag
        nofouvar => gdfourier%nofouvar
        ! initialisation
        !
@@ -1159,17 +1082,15 @@ end subroutine setfouunit
        !
       10 continue
        read (lunfou, '(a)', end = 999) record
+       if (record(1:1) == '*') goto 10
        !
        ! reset record in smaller case characters and define contents
        !
        call str_lower(record, 300)
-       columns = ''
-       read(record,*,iostat=iostat) (columns(iveld),iveld=1,maxvld)          ! TODO: cover for read errors 
-       !
-       do nveld = maxvld,1,-1
-          if (len_trim(columns(nveld))>0) exit
-       enddo 
-       if (columns(1)(1:1)=='*' .or. nveld==0) goto 10
+       if (allocated(columns)) deallocate(columns)
+       call strsplit(record, 1, columns, 1)
+       nveld = size(columns)
+       if (nveld==0) goto 10
        !
        ! test for continuation record
        !
@@ -1179,7 +1100,7 @@ end subroutine setfouunit
           nofou = nofou + 1
           if (index(record,'avg')>0) then
              nofouvar = nofouvar + 1
-          else 
+          else
              !
              ! max and min: also write max depth
              !
@@ -1258,7 +1179,7 @@ end subroutine setfouunit
        !
        ! requested fourier analysis constituent
        !
-       elseif ((columns(1)(1:1)=='c') .and. (index('12345',columns(1)(2:2))>0)) then 
+       elseif ((columns(1)(1:1)=='c') .and. (index('12345',columns(1)(2:2))>0)) then
           nofou = nofou + 1
           if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
              nofouvar = nofouvar + 1
@@ -1269,7 +1190,7 @@ end subroutine setfouunit
           !
           ! requested fourier analysis undefined
           !
-          write(msgbuf,'(a)') 'Fourier analysis: variable keyword '''//trim(columns(1))//''' not recognized, ignored' 
+          write(msgbuf,'(a)') 'Fourier analysis: variable keyword '''//trim(columns(1))//''' not recognized, ignored'
           call msg_flush()
           continue
           ! TODO: Issue a warning that we ignored a line in the fou file
@@ -1282,7 +1203,7 @@ end subroutine setfouunit
        !
    999 continue
        fileids%ncid = 0
-       success = .True. 
+       success = .True.
      rewind(lunfou)
    end subroutine fouini
 
@@ -1299,16 +1220,16 @@ end subroutine setfouunit
        real(fp)          , intent(in) :: dtsec   !<  Integration time step [in seconds]
        real(fp)          , intent(in) :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt
        real(fp)          , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-       integer           , intent(in) :: nst     !< timestep number 
-       character(len=*)  , intent(in) :: trifil  !< output filename 
+       integer           , intent(in) :: nst     !< timestep number
+       character(len=*)  , intent(in) :: trifil  !< output filename
        character(len=*)  , intent(in) :: refdat  !< reference date
 
-    ! NOTE: In DELFT3D depth is used, but bl is passed (positive bottomlevel). Defined direction is different  
-       
+    ! NOTE: In DELFT3D depth is used, but bl is passed (positive bottomlevel). Defined direction is different
+
     !
     ! Perform analysis and write to Fourier file
     !
-    integer                                        :: ifou 
+    integer                                        :: ifou
     integer          , dimension(:)      , pointer :: fconno
     integer          , dimension(:)      , pointer :: flayno
     integer          , dimension(:)      , pointer :: fnumcy
@@ -1338,11 +1259,11 @@ end subroutine setfouunit
     double precision, pointer        :: bl_ptr(:,:)
     integer         , pointer        :: kfs_ptr(:,:), kfst0_ptr(:,:)
 
-    integer    :: itdate   !<  Reference time in yyyymmdd as an integer 
+    integer    :: itdate   !<  Reference time in yyyymmdd as an integer
     double precision, allocatable, target :: constit(:)
-    
-    read(refdat,*) itdate 
-    
+
+    read(refdat,*) itdate
+
     fconno              => gdfourier%fconno
     flayno              => gdfourier%flayno
     fnumcy              => gdfourier%fnumcy
@@ -1359,7 +1280,7 @@ end subroutine setfouunit
     fouelp              => gdfourier%fouelp
     founam              => gdfourier%founam
     foutyp              => gdfourier%foutyp
-    
+
     nmax                => gddimens%nmax
     mmax                => gddimens%mmax
     nlb                 => gddimens%nlb
@@ -1368,11 +1289,11 @@ end subroutine setfouunit
     mub                 => gddimens%mub
     nmaxus              => gddimens%nmaxus
     kmax                => gddimens%kmax
-    
+
     bl_ptr(1:gddimens%ndx,1:1) => bl
     kfs_ptr(1:gddimens%ndx,1:1) => kfs
     kfst0_ptr(1:gddimens%ndx,1:1) => kfst0
-    
+
     if (.not. allocated(constit)) then
       allocate (constit(1:gddimens%ndkx))
     endif
@@ -1380,23 +1301,23 @@ end subroutine setfouunit
     if (allocated(wmag) .and. allocated(wx) .and. allocated(wy)) then
        wmag = sqrt(wx*wx + wy*wy)
     endif
-    
+
     if (nofou > 0) then
        ifou = 1
-       do 
+       do
           if (ifou > nofou) exit
           !
           ! Perform fourier analysis, every timestep as long as NST value
           ! lies in requested time interval FTMSTR and FTMSTO
           !
-          if (foutyp(ifou) == 's') then                  ! scalar 
+          if (foutyp(ifou) == 's') then                  ! scalar
              !
              ! Scalar type Fourier component
              !
              ! Get Fourier component pointer
              !
              select case (founam(ifou))
-             case ('s1')                        ! waterlevels 
+             case ('s1')                        ! waterlevels
                 fieldptr1(1:gddimens%ndx,1:1) => s1
              case ('ws')                        ! absolute wind magnitude
                 fieldptr1(1:gddimens%ndx,1:1) => wmag
@@ -1416,14 +1337,14 @@ end subroutine setfouunit
              case ('ta')
                 call gettaus(1)
                 fieldptr1(1:gddimens%ndx,1:1) => taus
-             case default 
-                continue         ! Unknown FourierVariable exception 
+             case default
+                continue         ! Unknown FourierVariable exception
              end select
              call fouana(ifou, nst, fieldptr1, bl_ptr, gddimens_ptr)
              ifou = ifou + 1
-          else 
+          else
              !
-             ! Incorrect Fourier type found, issue a warning 
+             ! Incorrect Fourier type found, issue a warning
              !
           endif
        enddo
@@ -1453,7 +1374,7 @@ end subroutine setfouunit
         use m_d3ddimens
         !
         implicit none
-        ! 
+        !
     !
     ! Global variables
     !
@@ -1462,8 +1383,8 @@ end subroutine setfouunit
         character(len=*) , dimension(:), intent(in)  :: namcon  !< Description and declaration in esm_alloc_char.f90
         character(*)                   , intent(in)  :: trifil  !< File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
         real(fp)                       , intent(in)  :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-        real(fp)                       , intent(in)  :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
-        type(gd_dimens)  , pointer :: gddimens            !< Model geometry/grid structure 
+        real(fp)                       , intent(in)  :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt
+        type(gd_dimens)  , pointer :: gddimens            !< Model geometry/grid structure
 
         !
         integer                        , pointer :: nofouvar
@@ -1493,8 +1414,8 @@ end subroutine setfouunit
         integer        , dimension(:,:), pointer :: idvar
         integer                        , pointer :: nmaxgl
         integer                        , pointer :: mmaxgl
-        integer                        , pointer :: mmax 
-        integer                        , pointer :: nmax 
+        integer                        , pointer :: mmax
+        integer                        , pointer :: nmax
         integer                        , pointer :: ndx
         integer                        , pointer :: lnx
         integer                        , pointer :: ndkx
@@ -1503,15 +1424,15 @@ end subroutine setfouunit
     !
     ! Local variables
     !
-        integer                       :: ierr 
-        integer                       :: ifou         ! Local teller for fourier functions 
-        integer                       :: ivar         ! Local teller for fourier functions 
-        real(fp)                      :: freqnt       ! Frequency in degrees per hour 
-        real(fp)                      :: tfasto       ! Stop time in minutes 
-        real(fp)                      :: tfastr       ! Start time in minutes 
+        integer                       :: ierr
+        integer                       :: ifou         ! Local teller for fourier functions
+        integer                       :: ivar         ! Local teller for fourier functions
+        real(fp)                      :: freqnt       ! Frequency in degrees per hour
+        real(fp)                      :: tfasto       ! Stop time in minutes
+        real(fp)                      :: tfastr       ! Start time in minutes
         character(len=4)              :: blnm
-        character(len=:), allocatable :: namfun       ! Local name for fourier function 
-        character(len=:), allocatable :: namfunlong   ! Local name for fourier function, including reference to the line in the fourier input file 
+        character(len=:), allocatable :: namfun       ! Local name for fourier function
+        character(len=:), allocatable :: namfunlong   ! Local name for fourier function, including reference to the line in the fourier input file
         character(len=3)              :: cnumber      ! temp string for int2str conversion
         integer, parameter            :: imissval = -1
         integer                       :: unc_loc
@@ -1551,17 +1472,17 @@ end subroutine setfouunit
         mmax          => gddimens%mmax
         nmax          => gddimens%nmax
         lnx           => gddimens%lnx
-        ndx           => gddimens%ndx 
+        ndx           => gddimens%ndx
         lnkx          => gddimens%lnkx
-        ndkx          => gddimens%ndkx 
+        ndkx          => gddimens%ndkx
         nmaxus        => gddimens%nmaxus
 
-        mmaxgl        => mmax                                ! => gdp%gdparall%mmaxgl         ! RL TODO: Hier een  aparte parameter voor nodig ? 
+        mmaxgl        => mmax                                ! => gdp%gdparall%mmaxgl         ! RL TODO: Hier een  aparte parameter voor nodig ?
         nmaxgl        => nmax                                ! => gdp%gdparall%nmaxgl
 
         !
         ierr = unc_create(trim(trifil), 0, fileids%ncid)
-        ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm) 
+        ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm)
         call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
 
         allocate(all_unc_loc(nofou))
@@ -1683,7 +1604,7 @@ end subroutine setfouunit
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', itdate)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
-           
+
            ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
            select case (founam(ifou))
            case('s1','r1','u1','ux','uy','uxa','uya','uc','ta')
@@ -1709,16 +1630,16 @@ end subroutine setfouunit
         iblbs = 0
         iblep = 0
 
-        ! END DEFINITION MODE 
+        ! END DEFINITION MODE
         ierr =  nf90_enddef(fileids%ncid)
 
-        ! START DATA MODE  
+        ! START DATA MODE
         !
         ifou = 1
         !
         ! Write requested fourier function output for scalar quantity
         !
-        do 
+        do
            if (ifou > nofou) exit
            !
            unc_loc = all_unc_loc(ifou)
@@ -1730,11 +1651,11 @@ end subroutine setfouunit
 !             call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
 !             call wrfous(ifou+1 ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
               ! call wrfouv(ifou   ,dtsec   ,hdt  ,tzone  ,gdfourier  ,gddimens   ,fileids   ,UNC_LOC_S)
-              
+
               ! Vectors are not supported at the moment.
               ! The intention is to write vector components as separate scalar variables, like it is done in the map-file for ucx, ucy
               ! Todo: implement writing vectors by adding a variable
-              ! Todo: Add the additional vector stuff, such as elliptic results etc. 
+              ! Todo: Add the additional vector stuff, such as elliptic results etc.
               !
               ifou = ifou + 2
            endif
@@ -1805,16 +1726,16 @@ end subroutine setfouunit
 
        integer                   :: ierror
        integer                   :: fouvar
-       integer                   :: m                  ! Loop counter over MMAX 
-       integer                   :: n                  ! Loop counter over NMAXUS 
-       logical                   :: ltest              ! Help variable for atan2 function test 
-       real(fp)                  :: amp                ! Fourier amplitude 
-       real(fp)                  :: fas                ! Fourier phase 
-       real(fp)                  :: freqnt             ! Frequency in degrees per hour 
-       real(fp)                  :: shift              ! Phase shift 
-       real(fp)                  :: tfasto             ! Stop time in minutes 
-       real(fp)                  :: tfastr             ! Start time in minutes 
-       real(sp), parameter       :: defaul = -999.0_sp ! Default value 
+       integer                   :: m                  ! Loop counter over MMAX
+       integer                   :: n                  ! Loop counter over NMAXUS
+       logical                   :: ltest              ! Help variable for atan2 function test
+       real(fp)                  :: amp                ! Fourier amplitude
+       real(fp)                  :: fas                ! Fourier phase
+       real(fp)                  :: freqnt             ! Frequency in degrees per hour
+       real(fp)                  :: shift              ! Phase shift
+       real(fp)                  :: tfasto             ! Stop time in minutes
+       real(fp)                  :: tfastr             ! Start time in minutes
+       real(sp), parameter       :: defaul = -999.0_sp ! Default value
        character(4)              :: blnm
 
    real(sp), dimension(:,:,:),   allocatable, save :: glbarr3
@@ -1854,7 +1775,7 @@ end subroutine setfouunit
        ndkx          => gddimens%ndkx
        lnkx          => gddimens%lnkx
 
-       mmaxgl        => mmax                                ! => gdp%gdparall%mmaxgl         ! RL TODO: Hier een  aparte parameter voor nodig ? 
+       mmaxgl        => mmax                                ! => gdp%gdparall%mmaxgl         ! RL TODO: Hier een  aparte parameter voor nodig ?
        nmaxgl        => nmax                                ! => gdp%gdparall%nmaxgl
 
        !
@@ -2032,8 +1953,8 @@ end subroutine setfouunit
                    ! defaul instead of xz/yz needed for GPP
                    ! '0' instead of kcs, because TEKAL does not accept '2'
                    !
-                   glbarr3(n,m,1) = defaul               ! amplitudes 
-                   glbarr3(n,m,2) = defaul               ! phases 
+                   glbarr3(n,m,1) = defaul               ! amplitudes
+                   glbarr3(n,m,2) = defaul               ! phases
                 endif
              enddo
           enddo
