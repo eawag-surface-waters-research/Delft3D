@@ -45,6 +45,8 @@ subroutine loadNetwork(filename, istat, jadoorladen)
     use unstruc_messages
     use m_missing
     use gridoperations
+    use m_network, only: admin_network
+    use unstruc_channel_flow, only: network
     
     implicit none
 
@@ -54,6 +56,8 @@ subroutine loadNetwork(filename, istat, jadoorladen)
     integer,      intent(in)  :: jadoorladen
     character(len=255) :: data_file_1d
 
+    integer      :: iDumk
+    integer      :: iDuml
 
     ! double precision, allocatable, save :: zkold(:)
 
@@ -82,6 +86,10 @@ subroutine loadNetwork(filename, istat, jadoorladen)
 
     ! New NetCDF net file
     call unc_read_net(filename, K0, L0, NUMKN, NUMLN, istat)
+
+    iDumk = 0
+    iDuml = 0
+    call admin_network(network, iDumk, iDuml)
 
     if (istat == 0) then
         NUMK = K0 + NUMKN

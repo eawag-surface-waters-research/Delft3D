@@ -425,9 +425,6 @@ subroutine loadModel(filename)
     integer :: L, k1, k2, tok
     integer :: ntot_lb
 
-    integer      :: iDumk
-    integer      :: iDuml
-
     call resetModel()
 
     call setmd_ident(filename)
@@ -463,9 +460,6 @@ subroutine loadModel(filename)
 
     if (jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
 
-       iDumk = 0
-       iDuml = 0
-       call admin_network(network, iDumk, iDuml)
 
        call read_1d_attributes(md_1dfiles, network)
 
