@@ -734,7 +734,7 @@
           return
       endif
 
-      rewind( luvol )
+      read( luvol, iostat = ierr, pos = 1 )
 
       !
       ! Regular volume files
