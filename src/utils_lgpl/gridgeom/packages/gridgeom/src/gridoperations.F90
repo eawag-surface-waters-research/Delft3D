@@ -78,28 +78,32 @@
    SUBROUTINE RESTORE()
    use network_data
    implicit none
-   integer :: k, ls, ls0, NODSIZ, IERR
+   integer :: k, KX, LS, LS0, LX, NODSIZ, IERR
 
-   IF ( NUMK0.EQ.0 ) RETURN
+   !IF ( NUMK0.EQ.0 ) RETURN
 
-   XK (1:NUMK0)  = XK0 (1:NUMK0)
-   YK (1:NUMK0)  = YK0 (1:NUMK0)
-   ZK (1:NUMK0)  = ZK0 (1:NUMK0)
+   KX = size(XK0) ! restore everything present (in case numk/numk0 has not yet been increased)
 
-   NMK(1:NUMK0)  = NMK0(1:NUMK0)
-   KC (1:NUMK0)  = KC0 (1:NUMK0)
+   XK (1:KX)  = XK0 (1:KX)
+   YK (1:KX)  = YK0 (1:KX)
+   ZK (1:KX)  = ZK0 (1:KX)
 
-   KN(:,1:NUML0) = KN0(:,1:NUML0)
-   LC(  1:NUML0) = LC0(  1:NUML0)
+   NMK(1:KX)  = NMK0(1:KX)
+   KC (1:KX)  = KC0 (1:KX)
+
+   LX = size(LC0) ! restore everything present (in case numl/numl0 has not yet been increased)
+
+   KN(:,1:LX) = KN0(:,1:LX)
+   LC(  1:LX) = LC0(  1:LX)
 
    ! Only restore optional dxe when it is there already
    if (allocated(dxe)) then
-      dxe(1:NUML0) = dxe0(1:NUML0)
+      dxe(1:LX) = dxe0(1:LX)
    end if
 
    NODSIZ = SIZE(NOD)
 
-   DO K = 1,NUMK0
+   DO K = 1,KX
       LS0 = SIZE(NOD0(K)%LIN )  ! LS0 = NMK0(K)
       IF (LS0 .GE. 1) THEN
          ! IF (.NOT. ASSOCIATED(NOD(K)%LIN) ) THEN
@@ -131,9 +135,9 @@
    integer :: ierr
    integer :: k, KX, LS, LS0, LX, NN
 
-   if (numk == 0) return
+   !if (numk == 0) return
 
-   KX = NUMK
+   KX = KMAX ! backup everything present (in case numk has not yet been increased) ! KX = NUMK
    IF (ALLOCATED(nod0)) THEN
       DO K= 1, SIZE(NOD0)
          if ( allocated(nod0(k)%lin) ) DEALLOCATE(NOD0(K)%LIN)
@@ -153,28 +157,28 @@
    if (allocated (nmk0) ) deallocate ( NMK0 )
    ALLOCATE( NMK0(KX), STAT=IERR)
 
-   XK0 (1:NUMK) = XK (1:NUMK)
-   YK0 (1:NUMK) = YK (1:NUMK)
-   ZK0 (1:NUMK) = ZK (1:NUMK)
-   KC0( 1:NUMK) = KC (1:NUMK)
-   NMK0(1:NUMK) = NMK(1:NUMK)
+   XK0 (1:KX) = XK (1:kx)
+   YK0 (1:KX) = YK (1:kx)
+   ZK0 (1:KX) = ZK (1:kx)
+   KC0( 1:KX) = KC (1:kx)
+   NMK0(1:KX) = NMK(1:kx)
 
    IF (ALLOCATED(LC0)) DEALLOCATE(KN0 ,LC0)
-   LX = NUML
+   LX = LMAX ! backup everything present (in case numl has not yet been increased) ! LX = NUML
    ALLOCATE (KN0(3,LX), LC0(LX), STAT=IERR)
 
-   KN0(:,1:NUML) = KN(:,1:NUML)
-   LC0(  1:NUML) = LC(  1:NUML)
+   KN0(:,1:LX) = KN(:,1:LX)
+   LC0(  1:LX) = LC(  1:LX)
 
    ! Only save optional dxe when it is there already
    if (allocated(dxe)) then
       if (allocated(dxe0)) deallocate(dxe0)
       allocate(dxe0(LX), STAT=IERR)
-      dxe0(1:NUML) = dxe(1:NUML)
+      dxe0(1:LX) = dxe(1:LX)
    end if
 
 
-   DO K   = 1,NUMK
+   DO K   = 1,KX
       LS  = NMK(K) ! SIZE(NOD (K)%LIN )
       IF (LS .GE. 1) THEN
          !       IF (.NOT. ASSOCIATED(NOD0(K)%LIN) ) THEN
