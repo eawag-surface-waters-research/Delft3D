@@ -425,26 +425,27 @@ contains
                cycle
             endif
             
-            numlevels = 1
+            numlevels = 0
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'numLevels', numlevels, success)
-            numlocations = 1
+            numlocations = 0
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'numLocations', numlocations, success)
             success = .true.
 
-            maxlevels    = max(maxlevels,    numlevels)
-            maxlocations = max(maxlocations, numlocations)
+            maxlevels    = max(1, maxlevels,    numlevels)
+            maxlocations = max(1, maxlocations, numlocations)
 
             call realloc(levels,    maxlevels,              keepExisting=.false.)
             call realloc(locations, maxlocations,           keepExisting=.false.)
             call realloc(values,    maxlevels*maxlocations, keepExisting=.false.)
 
-            if (numlevels > 1) then
+            if (numlevels > 0) then
                call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'levels', levels, numlevels, success)
             else
+               numlevels = 1
                levels(1) = 0d0
             endif
             
-            if (success .and. numlocations > 1) then
+            if (success .and. numlocations > 0) then
                call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'chainage', locations, numlocations, success)
             else 
                numlocations = 1
