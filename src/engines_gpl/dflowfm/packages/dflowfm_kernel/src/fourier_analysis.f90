@@ -107,15 +107,15 @@ module m_fourier_analysis
     real(kind=fp)             :: ag_fouana = 9.81d0
     real(kind=fp)             :: time_unit_factor
 
-    public fouini
-    public alloc_fourier_analysis_arrays
-    public count_fourier_variables
-    public reafou
-    public postpr_fourier
+    public :: fouini
+    public :: alloc_fourier_analysis_arrays
+    public :: count_fourier_variables
+    public :: reafou
+    public :: postpr_fourier
 
-    public fourierIsActive, fourierWithUc, fourierWithWindspeed
-    public nofou
-    public FouOutputFile
+    public :: fourierIsActive, fourierWithUc, fourierWithWindspeed
+    public :: nofou
+    public :: FouOutputFile
 
     contains
 
@@ -124,7 +124,7 @@ module m_fourier_analysis
        fourierIsActive = (nofou > 0)
     end function fourierIsActive
 
-!> do fourier with flow magnitue or not
+!> do fourier with flow magnitude or not
     logical function fourierWithUc()
        fourierWithUc = (gdfourier%ibluc>0)
     end function fourierWithUc
@@ -284,9 +284,9 @@ module m_fourier_analysis
        integer                         , intent(in) :: lunfou  !< Unit number fourier input file
        character(*)                    , intent(in) :: filfou  !< File name for fourier analysis input
        integer                         , intent(in) :: kmax    !< number of vertical layers
-       real(fp)                        , intent(in) :: tstart  !< simulation start time
-       real(fp)                        , intent(in) :: tstop   !< simulation stop time
-       real(fp)                        , intent(in) :: dt      !< timestep
+       real(kind=fp)                   , intent(in) :: tstart  !< simulation start time
+       real(kind=fp)                   , intent(in) :: tstop   !< simulation stop time
+       real(kind=fp)                   , intent(in) :: dt      !< timestep
        logical                         , intent(out):: success !< function result
    !
    ! Local variables
@@ -394,19 +394,13 @@ module m_fourier_analysis
        endif
        !
        linenumber = linenumber + 1
-       if (record(1:1)=='*') goto 20
+       if (record(1:1)=='*' .or. record == ' ') goto 20
        fouid      = fouid      + 1
        !
        call str_lower(record, 132)
        if (allocated(columns)) deallocate(columns)
        call strsplit(record, 1, columns, 1)
        nveld = size(columns)
-       !
-       if (nveld==0) then
-          fouid = fouid - 1
-          goto 20
-       endif
-       ! <--
        !
        ! determine array names and type (scalar or vectorial) for fourier analysis
        !
@@ -1082,7 +1076,7 @@ end subroutine setfouunit
        !
       10 continue
        read (lunfou, '(a)', end = 999) record
-       if (record(1:1) == '*') goto 10
+       if (record(1:1) == '*' .or. record == ' ') goto 10
        !
        ! reset record in smaller case characters and define contents
        !
@@ -1090,7 +1084,6 @@ end subroutine setfouunit
        if (allocated(columns)) deallocate(columns)
        call strsplit(record, 1, columns, 1)
        nveld = size(columns)
-       if (nveld==0) goto 10
        !
        ! test for continuation record
        !
