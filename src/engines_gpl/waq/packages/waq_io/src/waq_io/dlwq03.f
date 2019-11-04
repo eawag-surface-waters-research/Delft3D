@@ -709,6 +709,7 @@
       integer                      :: luvol
       integer                      :: time1, time2, time3
       real                         :: dummy
+      character(len=14)            :: string
 
       open( newunit = luvol, file = filvol, access = 'stream',
      &      status = 'old', iostat = ierr )
@@ -721,6 +722,23 @@
           return
       endif
 
+      !
+      ! For "steering files", we need an extra check
+      ! - skip the check on the times though
+      !
+      ! Ignore the error condition - it might occur with
+      ! very small models (one or two segments, for instance)
+      !
+      read( luvol, iostat = ierr ) string
+      if ( string == 'Steering file ' ) then
+          return
+      endif
+
+      rewind( luvol )
+
+      !
+      ! Regular volume files
+      !
       read( luvol, iostat = ierr ) time1, (dummy, i = 1,noseg )
       if ( ierr /= 0 ) then
           ierr2 = ierr2 + 1
@@ -761,14 +779,14 @@
   120 format( ' NOTE: the volumes file appears to hold one record only')
   130 format( ' NOTE: the volumes file appears to hold two records only'
      &)
-  140 format( ' ERROR: the times in the volumes file are not monotonely
-     &increasing',/,' Successive times: ',3i10)
+  140 format( ' ERROR: the times in the volumes file are not monotonical
+     &ly increasing',/,' Successive times: ',3i12)
   150 format( ' ERROR: the times in the volumes file are not equidistant
-     &',/,' Successive times: ',3i10)
+     &',/,' Successive times: ',3i12)
   160 format( ' ERROR: the time step does not divide the time interval i
      &n the volumes file',
-     &/,' Successive times in the volumes file: ',3i10,
-     &/,'Time step for water quality: ',i10)
+     &/,' Successive times in the volumes file: ',3i12,
+     &/,'Time step for water quality: ',i12)
 
       end subroutine check_volume_time
       end
