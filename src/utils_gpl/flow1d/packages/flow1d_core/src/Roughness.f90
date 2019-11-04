@@ -301,7 +301,7 @@ end function frictiontype_v1_to_new
             ifuncType = R_FunctionConstant
          case ('absdischarge')
             ifuncType = R_FunctionDischarge
-         case ('waterlevel ')
+         case ('waterlevel')
             ifuncType = R_FunctionLevel
          case default
             ifuncType = -1
