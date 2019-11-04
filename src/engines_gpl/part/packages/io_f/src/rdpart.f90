@@ -1099,10 +1099,10 @@
             endif
          endif
 
-         call alloc ( "xpoltmp", xpoltmp, nrowsmax )
-         call alloc ( "ypoltmp", xpoltmp, nrowsmax )
-         if ( ndisapp .gt. 0 ) then
+         if ( ndisapp .gt. 0 .and. nrowsmax .gt. 0) then
 !     allocate memory for the dispersant polygons, and read them into memory
+            call alloc ( "xpoltmp", xpoltmp, nrowsmax )
+            call alloc ( "ypoltmp", ypoltmp, nrowsmax )
             call alloc ( "xpoldis", xpoldis, nrowsmax, ndisapp )
             call alloc ( "ypoldis", ypoldis, nrowsmax, ndisapp )
             call alloc ( "nrowsdis", nrowsdis, ndisapp )
@@ -1554,9 +1554,9 @@
       if ( nocont .gt. 0 ) deallocate(ascal)
 
 ! read actual waste polygons
-      if (nrowsmax.gt.0) then
+      if (nodac .gt. 0 .and. nrowsmax .gt. 0) then
          call alloc ( "xpoltmp", xpoltmp, nrowsmax )
-         call alloc ( "ypoltmp", xpoltmp, nrowsmax )
+         call alloc ( "ypoltmp", ypoltmp, nrowsmax )
 !        allocate memory for the waste polygons, and read them into memory
          call alloc ( "xpolwaste", xpolwaste, nrowsmax, nodac )
          call alloc ( "ypolwaste", ypolwaste, nrowsmax, nodac )
