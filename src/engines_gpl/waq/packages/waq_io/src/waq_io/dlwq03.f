@@ -734,15 +734,13 @@
           return
       endif
 
-      read( luvol, iostat = ierr, pos = 1 )
-
       !
       ! Regular volume files
       !
-      read( luvol, iostat = ierr ) time1, (dummy, i = 1,noseg )
+      read( luvol, iostat = ierr, pos = 1 ) time1, (dummy, i = 1,noseg )
       if ( ierr /= 0 ) then
           ierr2 = ierr2 + 1
-          write ( lunut , 110 )
+          write ( lunut , 110 ) ierr
           return
       endif
       read( luvol, iostat = ierr ) time2, (dummy, i = 1,noseg )
@@ -775,7 +773,8 @@
           return
       endif
 
-  110 format( ' ERROR: the volumes file is too small')
+  110 format( ' ERROR: the volumes file seems to be too small'
+     &      /,'        Error code: ', i0)
   120 format( ' NOTE: the volumes file appears to hold one record only')
   130 format( ' NOTE: the volumes file appears to hold two records only'
      &)
