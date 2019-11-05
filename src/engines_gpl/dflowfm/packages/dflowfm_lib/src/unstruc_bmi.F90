@@ -226,7 +226,7 @@ integer(c_int) function initialize(c_config_file) result(c_iresult) bind(C, name
    !call start()
    !call resetFullFlowModel()
    !call loadmodel(config_file)
-   call init_core()
+   !call init_core() ! All done in inidat()
 
    CALL INIDAT()
    call api_loadmodel(config_file)
