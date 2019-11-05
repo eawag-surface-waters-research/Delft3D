@@ -1561,7 +1561,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    ! GATES
    case("gates")
       call getStructureIndex('gates', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1641,7 +1641,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    ! SOURCE-SINKS
    case("sourcesinks")
       call getStructureIndex('sourcesinks', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1658,7 +1658,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    ! Dambreak
    case("dambreak")
       call getStructureIndex('dambreak', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1685,7 +1685,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    ! OBSERVATION STATIONS
    case("observations")
       call getObservationIndex(item_name, item_index)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       end if
 
@@ -1726,7 +1726,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    ! MONITORING CROSSSECTIONS
    case("crosssections")
       call getCrosssectionIndex(item_name, item_index)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       end if
 
@@ -1755,7 +1755,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
    ! LATERAL DISCHARGES
    case("laterals")   
       call getLateralIndex(item_name, item_index)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       end if
  
@@ -1820,7 +1820,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    ! PUMPS
    case("pumps")
       call getStructureIndex('pumps', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       
@@ -1843,7 +1843,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    ! WEIRS
    case("weirs")
       call getStructureIndex('weirs', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1865,7 +1865,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    ! ORIFICES
    case("orifices")
       call getStructureIndex('orifices', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1881,7 +1881,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    ! GATES
    case("gates")
       call getStructureIndex('gates', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1910,7 +1910,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    ! GENERAL STRUCTURES
    case("generalstructures")
       call getStructureIndex('generalstructures', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       
@@ -1961,7 +1961,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    ! CULVERTS
    case("culverts")
       call getStructureIndex('culverts', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1976,7 +1976,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    ! SOURCE-SINKS
    case("sourcesinks")
       call getStructureIndex('sourcesinks', item_name, item_index, is_in_network)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
@@ -1997,7 +1997,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
    ! LATERAL DISCHARGES
    case("laterals")
       call getLateralIndex(item_name, item_index)
-      if (item_index == 0) then
+      if (item_index <= 0) then
          return
       endif
       select case(field_name)
