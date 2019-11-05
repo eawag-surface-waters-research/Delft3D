@@ -3284,9 +3284,9 @@ end module m_fm_update_crosssections
    !!
    !!! executable statements -------------------------------------------------------
    !!
-   call realloc(ctot, ndkx)
-   call realloc(um, ndx)
-   call realloc(vm, ndx)
+   call realloc(ctot, ndkx, keepExisting=.false., fill=0d0)
+   call realloc(um  , ndx , keepExisting=.false., fill=0d0)
+   call realloc(vm  , ndx , keepExisting=.false., fill=0d0)
 
    csoil               => stmpar%sedpar%csoil
    rhosol              => stmpar%sedpar%rhosol
