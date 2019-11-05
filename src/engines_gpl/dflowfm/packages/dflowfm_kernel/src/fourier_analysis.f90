@@ -1036,6 +1036,7 @@ end subroutine setfouunit
        character(len=30), allocatable     :: columns(:)! each record is split into separate fields (columns)
        integer                            :: iostat
        integer                            :: iveld
+       integer                            :: numcyc
        integer, pointer                   :: nofouvar
    !
    !! executable statements -------------------------------------------------------
@@ -1089,14 +1090,17 @@ end subroutine setfouunit
        !
        ! requested fourier analysis water-level
        !
+       read(columns(4),*,err=999) numcyc
        if (columns(1)(1:2)=='wl') then
           nofou = nofou + 1
-          if (index(record,'avg')>0) then
-             nofouvar = nofouvar + 1
-          else
+          if (index(record,'max')>0 .or. index(record,'min')>0 ) then
              !
              ! max and min: also write max depth
              !
+             nofouvar = nofouvar + 2
+          else if (numcyc == 0) then
+             nofouvar = nofouvar + 1
+          else
              nofouvar = nofouvar + 2
           endif
        !
@@ -1104,7 +1108,7 @@ end subroutine setfouunit
        !
        elseif (columns(1)(1:3)=='uva') then
           nofou = nofou + 2
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (numcyc == 0) then
              nofouvar = nofouvar + 2
           else
              nofouvar = nofouvar + 4
@@ -1114,7 +1118,7 @@ end subroutine setfouunit
        !
        elseif (columns(1)(1:2)=='ws') then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
              nofouvar = nofouvar + 2
@@ -1124,7 +1128,7 @@ end subroutine setfouunit
        !
        elseif (columns(1)(1:2)=='ct') then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
              nofouvar = nofouvar + 2
@@ -1134,7 +1138,7 @@ end subroutine setfouunit
        !
        elseif (columns(1)(1:2)=='ux' .or. columns(1)(1:2)=='uy') then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
              nofouvar = nofouvar + 2
@@ -1144,7 +1148,7 @@ end subroutine setfouunit
        !
        elseif (columns(1)(1:2)=='uc') then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
              nofouvar = nofouvar + 2
@@ -1154,7 +1158,7 @@ end subroutine setfouunit
        !
        elseif (columns(1)(1:2)=='cs') then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
              nofouvar = nofouvar + 2
@@ -1164,7 +1168,7 @@ end subroutine setfouunit
        !
        elseif (columns(1)(1:2)=='bs') then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
              nofouvar = nofouvar + 2
@@ -1174,7 +1178,7 @@ end subroutine setfouunit
        !
        elseif ((columns(1)(1:1)=='c') .and. (index('12345',columns(1)(2:2))>0)) then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (numcyc == 0) then
              nofouvar = nofouvar + 1
           else
              nofouvar = nofouvar + 2
@@ -1245,7 +1249,7 @@ end subroutine setfouunit
     integer                              , pointer :: nub
     integer                              , pointer :: mlb
     integer                              , pointer :: mub
-    integer                              , pointer :: nmaxus
+    integer                                        :: nmaxus
     integer                              , pointer :: kmax
 
     double precision, pointer        :: fieldptr1(:,:)
@@ -1280,7 +1284,7 @@ end subroutine setfouunit
     nub                 => gddimens%nub
     mlb                 => gddimens%mlb
     mub                 => gddimens%mub
-    nmaxus              => gddimens%nmaxus
+    nmaxus              =  gddimens%nmaxus
     kmax                => gddimens%kmax
 
     bl_ptr(1:gddimens%ndx,1:1) => bl
@@ -1413,7 +1417,7 @@ end subroutine setfouunit
         integer                        , pointer :: lnx
         integer                        , pointer :: ndkx
         integer                        , pointer :: lnkx
-        integer                        , pointer :: nmaxus
+        integer                                  :: nmaxus
     !
     ! Local variables
     !
@@ -1468,7 +1472,7 @@ end subroutine setfouunit
         ndx           => gddimens%ndx
         lnkx          => gddimens%lnkx
         ndkx          => gddimens%ndkx
-        nmaxus        => gddimens%nmaxus
+        nmaxus        =  gddimens%nmaxus
 
         mmaxgl        => mmax                                ! => gdp%gdparall%mmaxgl         ! RL TODO: Hier een  aparte parameter voor nodig ?
         nmaxgl        => nmax                                ! => gdp%gdparall%nmaxgl
@@ -1711,7 +1715,7 @@ end subroutine setfouunit
        integer        , dimension(:,:)      , pointer :: fouref
        integer                              , pointer :: mmax
        integer                              , pointer :: nmax
-       integer                              , pointer :: nmaxus
+       integer                                        :: nmaxus
        integer                              , pointer :: ndx
        integer                              , pointer :: lnx
        integer                              , pointer :: ndkx
@@ -1719,7 +1723,6 @@ end subroutine setfouunit
 
        integer                   :: ierror
        integer                   :: fouvar
-       integer                   :: m                  ! Loop counter over MMAX
        integer                   :: n                  ! Loop counter over NMAXUS
        logical                   :: ltest              ! Help variable for atan2 function test
        real(fp)                  :: amp                ! Fourier amplitude
@@ -1730,8 +1733,8 @@ end subroutine setfouunit
        real(fp)                  :: tfastr             ! Start time in minutes
        real(sp), parameter       :: defaul = -999.0_sp ! Default value
        character(4)              :: blnm
+       real(sp), dimension(:,:),  allocatable :: glbarr3
 
-   real(sp), dimension(:,:,:),   allocatable, save :: glbarr3
    !
    !! executable statements -------------------------------------------------------
    !
@@ -1762,7 +1765,7 @@ end subroutine setfouunit
 
        mmax          => gddimens%mmax
        nmax          => gddimens%nmax
-       nmaxus        => gddimens%nmaxus
+       nmaxus        =  gddimens%nmaxus
        ndx           => gddimens%ndx
        lnx           => gddimens%lnx
        ndkx          => gddimens%ndkx
@@ -1858,102 +1861,93 @@ end subroutine setfouunit
        ! Write data for user defined dimensions, hence NMAXUS and MMAX
        ! First for Maximum or Minimum
        !
-       if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
-       allocate(glbarr3(nmaxgl,mmaxgl,2), stat = ierror)
+       allocate(glbarr3(nmaxus,2), stat = ierror)
        glbarr3 = defaul
 
        if (fouelp(ifou)=='x' .or. fouelp(ifou)=='i' .or. fouelp(ifou)=='a' .or. fouelp(ifou)=='e') then
           do n = 1, nmaxus
-             do m = 1, mmax
-                !
-                ! Only write values unequal to initial min/max values (-/+1.0e+30)
-                !
-                if (comparereal(abs(fousma(n,m,ifou)),1.0e29_fp)==-1) then
-                   select case (fouelp(ifou))
-                   case ('x','i','e')
-                       glbarr3(n,m,1) = real(fousma(n,m,ifou),sp)
-                   case ('a')
-                      if( fousmb(n,m,ifou) > 0d0 ) then
-                         glbarr3(n,m,1) = real(fousma(n,m,ifou),sp)/ fousmb(n,m,ifou)
-                      endif
-                   end select
-                endif
-             enddo
+             !
+             ! Only write values unequal to initial min/max values (-/+1.0e+30)
+             !
+             if (comparereal(abs(fousma(n,1,ifou)),1.0e29_fp)==-1) then
+                select case (fouelp(ifou))
+                case ('x','i','e')
+                    glbarr3(n,1) = real(fousma(n,1,ifou),sp)
+                case ('a')
+                   if( fousmb(n,1,ifou) > 0d0 ) then
+                      glbarr3(n,1) = real(fousma(n,1,ifou),sp)/ fousmb(n,1,ifou)
+                   endif
+                end select
+             endif
           enddo
           fouvar = fouref(ifou,2)
-          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(1:nmaxus,1,1))          ! write amplitudes
+          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(:,1))          ! write amplitudes
           if ((fouelp(ifou)=='i' .or. fouelp(ifou)=='x') .and. founam(ifou)=='s1') then
              !
              ! Write min or max waterdepth too
              !
              do n = 1, nmaxus
-                do m = 1, mmax
-                   !
-                   ! Only write values unequal to initial min/max values (-/+1.0e+30)
-                   !
-                   if (comparereal(abs(fousmb(n,m,ifou)),1.0e29_fp)==-1) then
-                      glbarr3(n,m,2) = real(fousmb(n,m,ifou),sp)
-                   endif
-                enddo
+                !
+                ! Only write values unequal to initial min/max values (-/+1.0e+30)
+                !
+                if (comparereal(abs(fousmb(n,1,ifou)),1.0e29_fp)==-1) then
+                   glbarr3(n,2) = real(fousmb(n,1,ifou),sp)
+                endif
              enddo
-             ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(1:nmaxus,1,2))          ! write phase
+             ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(:,2))          ! write phase
           endif
        else
-          if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
-          allocate(glbarr3(nmaxgl,mmaxgl,2), stat = ierror)
-          glbarr3 = defaul
           !
           ! Write data for user defined dimensions, hence NMAXUS and MMAX
           !
           fouvar = fouref(ifou,2)
           do n = 1, nmaxus
-             do m = 1, mmax
-                ltest = (fousma(n, m, ifou)==0.0_fp .and. fousmb(n, m, ifou)==0.0_fp)
-                !
-                ! Test for active point and non-zero values
-                ! when KCS (N,M) = 1 N > 1 and M > 1 per definition
-                !
-                if (.not.ltest) then
-                   fousma(n, m, ifou) = fousma(n, m, ifou)                         &
-                                      & *2.0_fp/(real(ftmsto(ifou) - ftmstr(ifou),fp))
-                   fousmb(n, m, ifou) = fousmb(n, m, ifou)                         &
-                                      & *2.0_fp/(real(ftmsto(ifou) - ftmstr(ifou),fp))
-                   amp = sqrt(fousma(n, m, ifou)*fousma(n, m, ifou)                &
-                       & + fousmb(n, m, ifou)*fousmb(n, m, ifou))
-                   fas = atan2(fousmb(n, m, ifou), fousma(n, m, ifou)) + shift
-                   if (fnumcy(ifou)==0) then
-                      amp = 0.5_fp*amp*cos(fas)
-                      fas = 0.0_fp
-                   endif
-                   !
-                   ! Timezone correction added timezone*phase [degrees/hr].
-                   ! foufas       is in [rad/timestep]
-                   ! halftimestep is in [sec/timestep]
-                   ! => timezonecorr = tzone [-] * foufas [rad/timestep] * raddeg [deg/rad] * [sec/hr] / (2 * halftimestep [sec/timestep])
-                   !
-                   fas = fas*raddeg + fv0pu(ifou) - tzone*foufas(ifou)*raddeg*1800.0_fp/hdt
-                   !
-                   ! To define FAS between 0 and 360. add 720. to the MOD of
-                   ! FAS and re-use the MOD function
-                   !
-                   fas = mod(mod(fas, 360.0_fp) + 720.0_fp, 360.0_fp)
-                   amp = amp/fknfac(ifou)
-                   glbarr3(n,m,1) = real(amp,sp)
-                   glbarr3(n,m,2) = real(fas,sp)
-                else
-                   !
-                   ! Inactive point (not inside grid, can be open boundary)
-                   ! defaul instead of xz/yz needed for GPP
-                   ! '0' instead of kcs, because TEKAL does not accept '2'
-                   !
-                   glbarr3(n,m,1) = defaul               ! amplitudes
-                   glbarr3(n,m,2) = defaul               ! phases
+             ltest = (fousma(n, 1, ifou)==0.0_fp .and. fousmb(n, 1, ifou)==0.0_fp)
+             !
+             ! Test for active point and non-zero values
+             ! when KCS (N,M) = 1 N > 1 and M > 1 per definition
+             !
+             if (.not.ltest) then
+                fousma(n, 1, ifou) = fousma(n, 1, ifou)                         &
+                                   & *2.0_fp/(real(ftmsto(ifou) - ftmstr(ifou),fp))
+                fousmb(n, 1, ifou) = fousmb(n, 1, ifou)                         &
+                                   & *2.0_fp/(real(ftmsto(ifou) - ftmstr(ifou),fp))
+                amp = sqrt(fousma(n, 1, ifou)*fousma(n, 1, ifou)                &
+                    & + fousmb(n, 1, ifou)*fousmb(n, 1, ifou))
+                fas = atan2(fousmb(n, 1, ifou), fousma(n, 1, ifou)) + shift
+                if (fnumcy(ifou)==0) then
+                   amp = 0.5_fp*amp*cos(fas)
+                   fas = 0.0_fp
                 endif
-             enddo
+                !
+                ! Timezone correction added timezone*phase [degrees/hr].
+                ! foufas       is in [rad/timestep]
+                ! halftimestep is in [sec/timestep]
+                ! => timezonecorr = tzone [-] * foufas [rad/timestep] * raddeg [deg/rad] * [sec/hr] / (2 * halftimestep [sec/timestep])
+                !
+                fas = fas*raddeg + fv0pu(ifou) - tzone*foufas(ifou)*raddeg*1800.0_fp/hdt
+                !
+                ! To define FAS between 0 and 360. add 720. to the MOD of
+                ! FAS and re-use the MOD function
+                !
+                fas = mod(mod(fas, 360.0_fp) + 720.0_fp, 360.0_fp)
+                amp = amp/fknfac(ifou)
+                glbarr3(n,1) = real(amp,sp)
+                glbarr3(n,2) = real(fas,sp)
+             else
+                !
+                ! Inactive point (not inside grid, can be open boundary)
+                ! defaul instead of xz/yz needed for GPP
+                ! '0' instead of kcs, because TEKAL does not accept '2'
+                !
+                glbarr3(n,1) = defaul               ! amplitudes
+                glbarr3(n,2) = defaul               ! phases
+             endif
           enddo
-          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(1:nmaxus,1,1))          ! write amplitudes
-          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(1:nmaxus,1,2))          ! write phase
+          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(:,1))          ! write amplitudes
+          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(:,2))          ! write phase
        endif
+       if (allocated(glbarr3)) deallocate(glbarr3)
    end subroutine wrfous
 
 end module m_fourier_analysis
