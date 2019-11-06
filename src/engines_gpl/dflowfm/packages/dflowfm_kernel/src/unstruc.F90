@@ -594,17 +594,17 @@ end subroutine flow_finalize_single_timestep
 
  squ = 0d0 ; sqi = 0d0
  if ( kmx.eq.0 ) then
- do L = 1,lnx
-   if (q1(L) > 0) then
-       k1 = ln(1,L) ; k2 = ln(2,L)
-       squ(k1) = squ(k1) + q1(L)
-       sqi(k2) = sqi(k2) + q1(L)
-    else if (q1(L) < 0) then
-       k1 = ln(1,L) ; k2 = ln(2,L)
-       squ(k2) = squ(k2) - q1(L)
-       sqi(k1) = sqi(k1) - q1(L)
-    endif
- enddo
+    do L = 1,lnx
+      if (q1(L) > 0) then
+          k1 = ln(1,L) ; k2 = ln(2,L)
+          squ(k1) = squ(k1) + q1(L)
+          sqi(k2) = sqi(k2) + q1(L)
+       else if (q1(L) < 0) then
+          k1 = ln(1,L) ; k2 = ln(2,L)
+          squ(k2) = squ(k2) - q1(L)
+          sqi(k1) = sqi(k1) - q1(L)
+       endif
+    enddo
  else
     do LL = 1,lnx
        do L=Lbot(LL),Ltop(LL)
@@ -902,7 +902,7 @@ if (dtminbreak > 0) then  ! smallest allowed timestep (in s), checked on a slidi
    ! at least done dnt > NUMDTWINDOWSIZE time steps, to prevent the initial
    ! spin-up period to cause unwanted simulation breaks.
    if (dnt >= dble(NUMDTWINDOWSIZE) .and. dtavgwindow < dtminbreak) then
-      write (msgbuf, '(a,e11.4,a,e11.4,a)') 'Comp. time step average below treshold: ', dtavgwindow, ' < ', dtminbreak, '.'
+      write (msgbuf, '(a,e11.4,a,e11.4,a)') 'Comp. time step average below threshold: ', dtavgwindow, ' < ', dtminbreak, '.'
       call warn_flush() ! PENDING UNST-725, make this a warning instead of an error, because stopping will take place elsewhere in a clean way.
       q = 1
     end if
@@ -996,17 +996,18 @@ if(q /= 0) then
  use MessageHandling
  use m_sobekdfm
  use unstruc_display
+ use m_waves, only: hwav, twav, phiwav, rlabda, ustokes, uorb
 
  implicit none
 
  integer :: ndraw
  COMMON /DRAWTHIS/  ndraw(50)
 
- integer            :: key, LL
+ integer            :: key, LL, L, k1,k2
  integer            :: ja, k, ierror, n, kt, num, js1, noddifmaxlevm, nsiz
  character (len=40) :: tex
  double precision   :: wave_tnow, wave_tstop, t0, t1, dif, difmaxlevm
-
+ double precision   :: hw,tw, uorbi,rkw,ustt,hh,cs,sn
 
  character(len=128) :: msg
 
@@ -1030,7 +1031,7 @@ if(q /= 0) then
 
 
 !-----------------------------------------------------------------------------------------------
-
+ hs = max(hs,0d0)
  call furu()                                            ! staat in s0
 
  if ( itstep.ne.4 ) then                                ! implicit time-step
@@ -1223,6 +1224,24 @@ if(q /= 0) then
     call xbeach_mombalance()
  end if
 
+  if (jawave==5) then
+    if (kmx==0) then
+       do L=1,lnx
+          k1=ln(1,L); k2=ln(2,L)
+          hh = hu(L); hw=0.5d0*(hwav(k1)+hwav(k2));tw=.5d0*(twav(k1)+twav(k2))
+          cs = 0.5*(cos(phiwav(k1)*dg2rd)+cos(phiwav(k2)*dg2rd))
+          sn = 0.5*(sin(phiwav(k1)*dg2rd)+sin(phiwav(k2)*dg2rd))
+          call tauwavehk(hw, tw, hh, uorbi, rkw, ustt)
+          ustokes(L) = ustt*(csu(L)*cs + snu(L)*sn)
+       enddo
+       do k=1,ndx
+          call tauwavehk(hwav(k), twav(k), hs(k), uorbi, rkw, ustt)
+          rlabda(k) = rkw; uorb(k) = uorbi
+       enddo
+       call tauwave()
+    endif
+ endif
+
  if (jased > 0 .and. stm_included) then
     if ( jatimer.eq.1 ) call starttimer(IEROSED)
     call fm_fallve()                   ! update fall velocities
@@ -1250,10 +1269,10 @@ if(q /= 0) then
  if (jased > 0 .and. stm_included) then
     call fm_bott3d() ! bottom update
     call setbobs()   ! adjust administration - This option only works for ibedlevtyp = 1, otherwise original bed level [bl] is overwritten to original value
-    !vol1 = (s1-bl)*ba ! for mass conservation, assumes tiles. a1 does not change
-                      ! Could be potentially a volsur call. Has same effect with tiles.
-                      ! To check Jan Noort: is this okay for 1D as well
-    call volsur()
+    call volsur()                     ! update volumes 2d
+    if (kmx>0) then
+       call setkbotktop(0)            ! and 3D for cell volumes
+    endif
  end if
 
  ! Moved to flow_finalize_single_timestep: call flow_f0isf1()                                  ! mass balance and vol0 = vol1
@@ -3405,7 +3424,7 @@ subroutine setdt()
    use m_flow,           only: kkcflmx
    use m_timer
    use unstruc_display,  only: jaGUI
-   use m_sediment,       only: jased, stm_included
+   use m_sediment,       only: jased, stm_included, stmpar, jamorcfl
    implicit none
 
    double precision :: dtsc_loc
@@ -3425,7 +3444,24 @@ subroutine setdt()
       call reduce_double_min(dts)
       if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
    end if
-
+   
+   ! morphological timestep reduction
+   if (stm_included  .and. jamorcfl>0) then
+      if (time1 > tstart_user + stmpar%morpar%tmor * tfac) then
+         call fm_mor_maxtimestep()
+      endif
+   endif
+   
+   if ( jawave.eq.4 .and. swave.eq.1 ) then
+      call xbeach_absgen_maxtimestep()
+      call xbeach_wave_maxtimestep()
+   end if
+   
+   if (jased .eq. 4 .and. stm_included) then
+     call setdtmaxavalan(dts)
+   end if
+   
+   dti = 1d0/dts
    dtsc = dts
 
 !  account for user time step
@@ -3464,7 +3500,7 @@ subroutine setdt()
       dtsc = 0d0    ! SPvdP: safety, was undefined but could be used later
       kkcflmx = 0   ! SPvdP: safety, was undefined but could be used later
    endif
-
+   
    call timestepanalysis(dtsc_loc)
 
    if ( jaGUI.eq.1 ) then
@@ -3472,17 +3508,6 @@ subroutine setdt()
    endif
 
 
-
-   if ( jawave.eq.4 .and. swave.eq.1 ) then
-      call xbeach_absgen_maxtimestep()
-      call xbeach_wave_maxtimestep()
-   end if
-
-   if (jased .eq. 4 .and. stm_included) then
-     call setdtmaxavalan(dts)
-   end if
-
-   dti = 1d0/dts
 
 end subroutine setdt
 
@@ -8964,7 +8989,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  if (jawave > 0) then
     call alloc9basicwavearrays()
  endif
- if (jawave > 2 .or. jased > 0 .and. stm_included) then
+ if (jawave > 2 .or. (jased > 0 .and. stm_included)) then
     call flow_waveinit()
  endif
  ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopen
@@ -9276,10 +9301,10 @@ subroutine flow_sedmorinit()
     character(40)                             :: errstr
    !type(griddimtype) :: griddim
     type (bedbndtype)     , dimension(:) , pointer :: morbnd
-    integer           :: kk, k, kbot, ktop, i, j, isus, ifrac, isusmud, isussand, isf, ised, Lf, npnt, j0, ierr
-    integer           :: ibr, nbr, pointscount, k1
-    integer           :: npnterror=0   !< number of grid points without cross-section definition
-    type(t_branch), pointer                 :: pbr
+    integer                                   :: kk, k, kbot, ktop, i, j, isus, ifrac, isusmud, isussand, isf, ised, Lf, npnt, j0, ierr
+    integer                                   :: ibr, nbr, pointscount, k1
+    integer                                   :: npnterror=0   !< number of grid points without cross-section definition
+    type(t_branch), pointer                   :: pbr
 
 
 !! executable statements -------------------------------------------------------
@@ -9338,7 +9363,7 @@ subroutine flow_sedmorinit()
     end if
     !
     call nullsedtra(sedtra)
-    call allocsedtra(sedtra, stmpar%morpar%moroutput, kmx+1, stmpar%lsedsus, stmpar%lsedtot, 1, ndx, 1, lnx, stmpar%morpar%nxx, stmpar%morpar%moroutput%nstatqnt)
+    call allocsedtra(sedtra, stmpar%morpar%moroutput, max(kmx,1), stmpar%lsedsus, stmpar%lsedtot, 1, ndx, 1, lnx, stmpar%morpar%nxx, stmpar%morpar%moroutput%nstatqnt)
 
     morbnd              => stmpar%morpar%morbnd
     do k = 1,nopenbndsect
@@ -9427,7 +9452,7 @@ subroutine flow_sedmorinit()
     if (kmx .eq. 0) then
        mtd%rhowat   = rhomean
     else
-       mtd%rhowat   = rho
+       mtd%rhowat   = rho        ! TO DO JRE: update every timestep when 3D and jasal>0 or jatem>0
     end if
     mtd%seddif      = 0.0_fp
     mtd%sed         = 0.0_fp
@@ -12964,6 +12989,7 @@ else if (nodval == 27) then
  double precision  :: xm, ym
  double precision  :: trshcorioi
  double precision  :: Ds
+ double precision  :: hw,tw,csw,snw, uorbi,rkw,ustt,hh
 
  iresult = DFM_GENERICERROR
 
@@ -13707,7 +13733,7 @@ end if
 
     call setkbotktop(1)
     do LL = 1,Lnx
-       Ltop(LL) = lbot(LL) + kmx - 1
+       Ltop(LL) = lbot(LL) + max(kmx,1) - 1
        hu(LL)   = 5d0 ; frcu(LL) = frcuni
        call getczz0(hu(LL), frcu(LL), ifrcutp(LL), cz, z00)
        ustb(LL) = sqrt(ag*5d0*5d-5)
@@ -14289,6 +14315,24 @@ endif
        call setwavmubnd()
     end if
  end if
+
+ if (jawave==5) then
+    if (kmx==0) then
+       do L=1,lnx
+          k1=ln(1,L); k2=ln(2,L)
+          hh = hu(L); hw=0.5d0*(hwav(k1)+hwav(k2));tw=.5d0*(twav(k1)+twav(k2))
+          csw = 0.5*(cos(phiwav(k1)*dg2rd)+cos(phiwav(k2)*dg2rd))
+          snw = 0.5*(sin(phiwav(k1)*dg2rd)+sin(phiwav(k2)*dg2rd))
+          call tauwavehk(hw, tw, hh, uorbi, rkw, ustt)
+          ustokes(L) = ustt*(csu(L)*csw + snu(L)*snw)
+       enddo
+       do k=1,ndx
+          call tauwavehk(hwav(k), twav(k), hs(k), uorbi, rkw, ustt)
+          rlabda(k) = rkw; uorb(k) = uorbi
+       enddo
+       call tauwave()
+    endif
+ endif
 
  if (jasal > 0 .and. kmx > 0 .and. inisal2D > 0 .and. jarestart.eq.0 ) then
     do kk = 1,ndx
@@ -15792,12 +15836,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    character(maxMessageLen) :: message123
 
    iresult = DFM_EXTFORCERROR
- call klok(cpuextbnd(1))
-
-!   if ( jawave.eq.4 .and. allocated(zbndu)) then
-!!     restore zbndu
-!      zbndu = zbndu_store
-!   end if
+   call klok(cpuextbnd(1))
 
    call setzminmax()                                   ! our side of preparation for 3D ec module
    call setsigmabnds()                                 ! our side of preparation for 3D ec module
@@ -15855,8 +15894,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
           goto 888
        end if
    end if
-
-   ! TODO: [TRUNKMERGE] JR: waveenergybnd was already partially missing in sedmor branch. Remove all, or reinstate?
 
    if (nbnds > 0) then
       success = ec_gettimespacevalue(ecInstancePtr, item_salinitybnd, irefdate, tzone, tunit, tim)
@@ -16646,18 +16683,16 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_cmpstrudim, id_cmpstru_id, id_cmpstru_dis, id_cmpstru_s1up,  id_cmpstru_s1dn, &
                      id_cmpstru_vel, id_cmpstru_au, id_cmpstru_head, &
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
-                     id_varucxq, id_varucyq
+                     id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim
 
 
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
     integer, allocatable, save :: id_hwqb(:)
-    integer, allocatable, save :: id_sf(:), id_ws(:), id_seddif(:)            ! sediment fractions
     integer, allocatable, save :: id_const(:), id_const_cum(:), id_voltot(:)
     double precision, allocatable, save :: valobsT(:,:)
 
     integer                      :: IP, num, ntmp, n
-
 
     double precision, save       :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
     integer                      :: ntot, mobs, k, i, j, jj, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4
@@ -16704,10 +16739,6 @@ subroutine unc_write_his(tim)            ! wrihis
     if (ihisfile == 0) then
 
         call realloc(id_tra, ITRAN-ITRA1+1, keepExisting = .false.)
-        call realloc(id_sf, ISEDN-ISED1+1, keepExisting = .false.)
-        call realloc(id_ws, ISEDN-ISED1+1, keepExisting = .false.)
-        call realloc(id_seddif, ISEDN-ISED1+1, keepExisting = .false.)
-
         call realloc(id_const, NUMCONST_MDU, keepExisting = .false.)
         call realloc(id_const_cum, NUMCONST_MDU, keepExisting = .false.)
 
@@ -16874,12 +16905,12 @@ subroutine unc_write_his(tim)            ! wrihis
             end if
 
             if (jaeulervel==0) then
-               ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'flow element center velocity vector, x-component') ! sorry for inland water people
-               ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'flow element center velocity vector, y-component') ! sorry for inland water people  !Vertical == onhandige woordkeuze als 3d wordt gerekend
+               ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'flow element center velocity vector, x-component') 
+               ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'flow element center velocity vector, y-component') 
 
             else
-               ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'flow element center Eulerian velocity vector, x-component') ! sorry for inland water people
-               ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'flow element center Eulerian velocity vector, y-component') ! sorry for inland water people  !Vertical == onhandige woordkeuze als 3d wordt gerekend
+               ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'flow element center Eulerian velocity vector, x-component') 
+               ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'flow element center Eulerian velocity vector, y-component') 
             endif
             ierr = nf90_put_att(ihisfile, id_varucx, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_varucy, 'units', 'm s-1')
@@ -17130,60 +17161,42 @@ subroutine unc_write_his(tim)            ! wrihis
             endif
 
             if (stm_included .and. ISED1 > 0 .and. jahissed > 0) then
-               do j=ISED1, ISEDN
-                  i = j-ISED1+1
-                  tmpstr  = 'concentration '//const_names(j)
-                  tmpstr2 = 'fall velocity fraction '//const_names(j)
-                  tmpstr3 = 'vertical diffusion fraction '//const_names(j)
-                  unit1 = 'kg m-3'; unit2 = 'm s-1'; unit3 = 'm2 s-1'
-                  ! Forbidden chars in NetCDF names: space, /, and more.
-                  call replace_char(tmpstr,32,95)
-                  call replace_char(tmpstr,47,95)
-                  call replace_char(tmpstr2,32,95)
-                  call replace_char(tmpstr2,47,95)
-                  call replace_char(tmpstr3,32,95)
-                  call replace_char(tmpstr3,47,95)
-                  if ( kmx > 0 ) then
-                      ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_sf(i))
-                      ierr = nf90_def_var(ihisfile, trim(tmpstr2), nf90_double, (/ id_laydimw, id_statdim, id_timedim /), id_ws(i))
-                      ierr = nf90_def_var(ihisfile, trim(tmpstr3), nf90_double, (/ id_laydimw, id_statdim, id_timedim /), id_seddif(i))
-                   else
-                      ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_sf(i))
-                      ierr = nf90_def_var(ihisfile, trim(tmpstr2), nf90_double, (/ id_statdim, id_timedim /), id_ws(i))
-                      ierr = nf90_def_var(ihisfile, trim(tmpstr3), nf90_double, (/ id_statdim, id_timedim /), id_seddif(i))
-                   end if
-                   ierr = nf90_put_att(ihisfile, id_sf(i), 'units', unit1)
-                   ierr = nf90_put_att(ihisfile, id_ws(i), 'units', unit2)
-                   ierr = nf90_put_att(ihisfile, id_seddif(i), 'units', unit3)
-
-                   ierr = nf90_put_att(ihisfile, id_sf(i), '_FillValue', dmiss)
-                   ierr = nf90_put_att(ihisfile, id_ws(i), '_FillValue', dmiss)
-                   ierr = nf90_put_att(ihisfile, id_seddif(i), '_FillValue', dmiss)
-
-                   ierr = nf90_put_att(ihisfile, id_sf(i), 'standard_name', const_names(j))
-                   ierr = nf90_put_att(ihisfile, id_ws(i), 'standard_name', 'ws_'//const_names(j))
-                   ierr = nf90_put_att(ihisfile, id_seddif(i), 'standard_name', 'seddif_'//const_names(j))
-
-                   if ( kmx > 0 ) then
-                      ierr = nf90_put_att(ihisfile, id_sf(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
-                      ierr = nf90_put_att(ihisfile, id_ws(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
-                      ierr = nf90_put_att(ihisfile, id_seddif(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
-                   else
-                      ierr = nf90_put_att(ihisfile, id_sf(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                      ierr = nf90_put_att(ihisfile, id_ws(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                      ierr = nf90_put_att(ihisfile, id_seddif(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                   end if
-                   jawrizc = 1
-               enddo
+               ! New implementation, sedsus fraction is additional dimension
+               ierr = nf90_def_dim(ihisfile, 'nSedTot', stmpar%lsedtot, id_sedtotdim)
+               ierr = nf90_def_dim(ihisfile, 'nSedSus', stmpar%lsedsus, id_sedsusdim)
+               !
+               ierr = nf90_def_var(ihisfile, 'sedfrac_name', nf90_char, (/ id_strlendim, id_sedtotdim /), id_frac_name)
+               ierr = nf90_put_att(ihisfile, id_frac_name,'long_name', 'sediment fraction identifier')
+               !
+               if (kmx>0) then
+                  ierr = nf90_def_var(ihisfile, 'Sediment concentration', nf90_double, (/  id_laydim, id_statdim, id_sedsusdim, id_timedim /), id_sf)
+                  ierr = nf90_def_var(ihisfile, 'Sediment settling velocity', nf90_double, (/  id_laydimw, id_statdim, id_sedsusdim, id_timedim /), id_ws)
+                  ierr = nf90_def_var(ihisfile, 'Sediment vertical diffusivity', nf90_double, (/  id_laydimw, id_statdim, id_sedsusdim, id_timedim /), id_seddif)
+                  ierr = nf90_put_att(ihisfile, id_seddif, 'long_name', 'Sediment vertical diffusion')
+                  ierr = nf90_put_att(ihisfile, id_seddif, 'units', 'm2 s-1')
+                  ierr = nf90_put_att(ihisfile, id_seddif, '_FillValue', dmiss)
+                  ierr = nf90_put_att(ihisfile, id_seddif, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  !
+                  jawrizc = 1
+                  jawrizw = 1
+               else
+                  ierr = nf90_def_var(ihisfile, 'Sediment concentration', nf90_double, (/  id_statdim, id_sedsusdim, id_timedim /), id_sf)
+                  ierr = nf90_def_var(ihisfile, 'Sediment settling velocity', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_ws)
+               endif
+               !
+               ierr = nf90_put_att(ihisfile, id_sf, 'long_name', 'Sediment mass concentration')
+               ierr = nf90_put_att(ihisfile, id_sf, 'units', 'kg m-3')
+               ierr = nf90_put_att(ihisfile, id_sf, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               !
+               ierr = nf90_put_att(ihisfile, id_ws, 'long_name', 'Sediment settling velocity')
+               ierr = nf90_put_att(ihisfile, id_ws, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_ws, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               !            
             endif
             !
             ! Sediment transports
             !
             if (jased > 0 .and. stm_included .and. jahissed > 0) then
-               ierr = nf90_def_dim(ihisfile, 'nSedTot', stmpar%lsedtot, id_sedtotdim)
-               !
-               ierr = nf90_def_var(ihisfile, 'sedfrac_name', nf90_char, (/ id_strlendim, id_sedtotdim /), id_frac_name)
-               ierr = nf90_put_att(ihisfile, id_frac_name,'long_name', 'sediment fraction identifier')
                !
                select case(stmpar%morpar%moroutput%transptype)
                   case (0)
@@ -17233,6 +17246,20 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_sscy, 'long_name', 'Current related suspended transport, y-component')
                   ierr = nf90_put_att(ihisfile, id_sscy, 'units', transpunit)
                   ierr = nf90_put_att(ihisfile, id_sscy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               endif
+               !
+               ! Source and sink terms
+               ! 
+               if (stmpar%morpar%moroutput%sourcesink) then
+                  ierr = nf90_def_var(ihisfile, 'Source term suspended sediment transport', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_sour)
+                  ierr = nf90_put_att(ihisfile, id_sour, 'long_name', 'Source term suspended sediment transport')
+                  ierr = nf90_put_att(ihisfile, id_sour, 'units', 'kg m-3 s-1')
+                  ierr = nf90_put_att(ihisfile, id_sour, 'coordinates', 'station_x_coordinate station_y_coordinate station_name') 
+                  
+                  ierr = nf90_def_var(ihisfile, 'Sink term suspended sediment transport', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_sink)
+                  ierr = nf90_put_att(ihisfile, id_sink, 'long_name', 'Sink term suspended sediment transport')
+                  ierr = nf90_put_att(ihisfile, id_sink, 'units', 's-1')
+                  ierr = nf90_put_att(ihisfile, id_sink, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
                endif
             endif
             !
@@ -18199,16 +18226,12 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_dim(ihisfile, 'ndredlink', dadpar%nalink, id_dredlinkdim)
             ierr = nf90_def_dim(ihisfile, 'ndred', dadpar%nadred+dadpar%nasupl, id_dreddim)
             ierr = nf90_def_dim(ihisfile, 'ndump', dadpar%nadump, id_dumpdim)
-            !ierr = nf90_def_dim(ihisfile, 'nfrac', stmpar%lsedtot, id_sedtotdim)
 
             ierr = nf90_def_var(ihisfile, 'dredge_area_name',         nf90_char,   (/ id_strlendim, id_dreddim /), id_dred_name)
             ierr = nf90_put_att(ihisfile, id_dred_name,  'long_name'    , 'dredge area identifier')
 
             ierr = nf90_def_var(ihisfile, 'dump_area_name',         nf90_char,   (/ id_strlendim, id_dumpdim /), id_dump_name)
             ierr = nf90_put_att(ihisfile, id_dump_name,  'long_name'    , 'dump area identifier')
-
-            !ierr = nf90_def_var(ihisfile, 'sedfrac_name',         nf90_char,   (/ id_strlendim, id_sedtotdim /), id_frac_name)
-            !ierr = nf90_put_att(ihisfile, id_frac_name,  'long_name'    , 'sediment fraction identifier')
 
             ierr = nf90_def_var(ihisfile, 'dred_link_discharge',     nf90_double, (/ id_dredlinkdim, id_sedtotdim, id_timedim /), id_dredlink_dis)
             ierr = nf90_put_att(ihisfile, id_dredlink_dis, 'long_name', 'Cumulative dredged material transported via links per fraction')
@@ -18533,12 +18556,13 @@ subroutine unc_write_his(tim)            ! wrihis
              enddo
           end if
           if (IVAL_SF1 > 0) then
+             call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
              do j = IVAL_SF1,IVAL_SFN
                i = j - IVAL_SF1 + 1
-               ierr = nf90_put_var(ihisfile, id_sf(i), valobsT(:,IPNT_SF1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+               toutputx(:,i) = valobsT(:,IPNT_SF1 + (i-1)*(kmx+1)+kk-1)
              enddo
+             ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
           end if
-
        enddo
      else
 !      2D
@@ -18566,15 +18590,19 @@ subroutine unc_write_his(tim)            ! wrihis
           end do
        end if
        if (IVAL_SF1 > 0) then
-          do j = IVAL_SF1,IVAL_SFN   ! enumerators of sedfracs in valobs array (not the pointer)
+          call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
+          do j = IVAL_SF1,IVAL_SFN  
             i = j - IVAL_SF1 + 1
-            ierr = nf90_put_var(ihisfile, id_sf(i), valobsT(:,IPNT_SF1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+            toutputx(:,i) = valobsT(:,IPNT_SF1 + i-1)
           end do
+          ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1/))
        end if
        if (IVAL_WS1 > 0) then
+          call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
           do j = IVAL_WS1,IVAL_WSN
             i = j - IVAL_WS1 + 1
-            ierr = nf90_put_var(ihisfile, id_ws(i), valobsT(:,IPNT_WS1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+            toutputx(:,i) = valobsT(:,IPNT_WS1 + i-1)
+            ierr = nf90_put_var(ihisfile, id_ws, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1/))
           enddo
        end if
        if (jased > 0 .and. .not. stm_included) then
@@ -18633,23 +18661,28 @@ subroutine unc_write_his(tim)            ! wrihis
           if (idensform > 0 .and. jaRichardsononoutput > 0) then
              ierr = nf90_put_var(ihisfile, id_rich,   valobsT(:,IPNT_RICH +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
           endif
-
+          !
           if (IVAL_WS1 > 0) then
+             call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
              do j = IVAL_WS1,IVAL_WSN
                i = j - IVAL_WS1 + 1
-               ierr = nf90_put_var(ihisfile, id_ws(i), valobsT(:,IPNT_WS1 + (i-1)*(kmx+1)+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+               toutputx(:,i) = valobsT(:,IPNT_WS1 + (i-1)*(kmx+1)+kk-1)
              enddo
+             ierr = nf90_put_var(ihisfile, id_ws, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
           end if
+          !
           if (IVAL_SEDDIF1 > 0) then
+             call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
              do j = IVAL_SEDDIF1,IVAL_SEDDIFN
                i = j - IVAL_SEDDIF1 + 1
-               ierr = nf90_put_var(ihisfile, id_seddif(i), valobsT(:,IPNT_SEDDIF1 + (i-1)*(kmx+1)+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+               toutputx(:,i) = valobsT(:,IPNT_SEDDIF1 + (i-1)*(kmx+1)+kk-1)
              enddo
+             ierr = nf90_put_var(ihisfile, id_seddif, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
           end if
-
+          !
        enddo
     endif
-
+    !
     ! Cross sections
     if (ncrs > 0) then
        do i=1,ncrs
@@ -18908,8 +18941,8 @@ subroutine unc_write_his(tim)            ! wrihis
       !
       if (jased>0 .and. stm_included .and. jahissed>0 .and. stmpar%lsedtot>0) then
          if (stmpar%morpar%moroutput%sbcuv) then
-            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
-            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
+            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
             do l = 1, stmpar%lsedtot
                select case(stmpar%morpar%moroutput%transptype)
                case (0)
@@ -18927,8 +18960,8 @@ subroutine unc_write_his(tim)            ! wrihis
          endif
          !
          if (stmpar%morpar%moroutput%sscuv) then
-            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
-            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
+            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
             do l = 1, stmpar%lsedtot
                select case(stmpar%morpar%moroutput%transptype)
                case (0)
@@ -18946,8 +18979,8 @@ subroutine unc_write_his(tim)            ! wrihis
          endif
          !
          if (stmpar%morpar%moroutput%sbwuv .and. jawave>0) then
-            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
-            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
+            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
             do l = 1, stmpar%lsedtot
                select case(stmpar%morpar%moroutput%transptype)
                case (0)
@@ -18965,8 +18998,8 @@ subroutine unc_write_his(tim)            ! wrihis
          endif
          !
          if (stmpar%morpar%moroutput%sswuv .and. jawave>0) then
-            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
-            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
+            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
             do l = 1, stmpar%lsedtot
                select case(stmpar%morpar%moroutput%transptype)
                case (0)
@@ -18981,6 +19014,18 @@ subroutine unc_write_his(tim)            ! wrihis
             end do
             ierr = nf90_put_var(ihisfile, id_sswx, toutputx  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
             ierr = nf90_put_var(ihisfile, id_sswy, toutputy  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+         endif
+         !
+         !
+         if (stmpar%morpar%moroutput%sourcesink .and. IVAL_SOUR1>0) then
+            call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
+            call realloc(toutputy, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
+            do l = 1, stmpar%lsedsus
+               toutputx(:,l) = valobsT(:,IPNT_SOUR1+l-1)
+               toutputy(:,l) = valobsT(:,IPNT_SINK1+l-1)
+            end do
+            ierr = nf90_put_var(ihisfile, id_sour, toutputx  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1 /))
+            ierr = nf90_put_var(ihisfile, id_sink, toutputy  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1 /))
          endif
       endif
 
@@ -19359,6 +19404,14 @@ subroutine fill_valobs()
                   valobs(IPNT_SSWY1+ii-1,i)=sedtra%sswy(k,ii)
                enddo
             endif
+            do j = IVAL_SOUR1, IVAL_SOURN
+               ii = j-IVAL_SOUR1+1
+               valobs(IPNT_SOUR1+ii-1,i)=sedtra%sourse(k,ii)
+            enddo
+            do j = IVAL_SINK1, IVAL_SINKN
+               ii = j-IVAL_SINK1+1
+               valobs(IPNT_SINK1+ii-1,i)=sedtra%sinkse(k,ii)
+            enddo
          endif
 
          if ( IVAL_WQB1.gt.0 ) then
@@ -19478,14 +19531,14 @@ subroutine fill_valobs()
                if ( IVAL_WS1.gt.0 ) then
                   do j=IVAL_WS1,IVAL_WSN
                      ii = j-IVAL_WS1+1
-                     valobs(IPNT_WS1+(ii-1)*(kmx+1)+klay-1,i) =mtd%ws(kb+klay-1, ii)
+                     valobs(IPNT_WS1+(ii-1)*(kmx+1)+klay-1,i) =mtd%ws(kb+klay-2, ii)
                   end do
                end if
 
                if ( IVAL_SEDDIF1.gt.0 ) then
                   do j=IVAL_SEDDIF1,IVAL_SEDDIFN
                      ii = j-IVAL_SEDDIF1+1
-                     valobs(IPNT_SEDDIF1+(ii-1)*(kmx+1)+klay-1,i) =mtd%seddif(ii, kb+klay-1)
+                     valobs(IPNT_SEDDIF1+(ii-1)*(kmx+1)+klay-1,i) =mtd%seddif(ii, kb+klay-2)
                   end do
                end if
             enddo
@@ -25124,9 +25177,11 @@ endif
     use m_netw
     use m_flowgeom
     use m_flow
+    use m_flowparameters
+    use m_sediment, only: stm_included 
     implicit none
 
-    integer          :: i, k, ki, kb, kt, itrac
+    integer          :: i, k, ki, kb, kt, itrac, isf
 
     if ( kmx>0 ) then   ! 2D, set dummy values
        do i  = 1, nbnds
@@ -25167,6 +25222,17 @@ endif
              zminmaxsd(i) = zws(kb-1)
              zminmaxsd(i+nbndsd) = zws(kt)
        end do
+       
+       if (jased==4 .and. stm_included) then
+          do isf=1,numfracs
+             do i=1,nbndsf(isf)
+                ki = bndsf(isf)%k(2,i)
+                call getkbotktop(ki,kb,kt)
+                bndsf(isf)%zminmax(i) = zws(kb-1)
+                bndsf(isf)%zminmax(i+nbndsf(isf)) = zws(kt)
+             end do
+          end do
+       end if
     endif
  end subroutine setzminmax
 
@@ -25278,7 +25344,7 @@ endif
                 bndtr(itrac)%sigma(kmx*(i-1)+k-kb+1) = 1d0
              end do
           end do
-       end do
+       end do 
 
        do i  = 1, nbndsd
           ki = kbndsd(2,i)
@@ -25299,6 +25365,10 @@ endif
                 call getkbotktop(ki,kb,kt)
                 do k=kb,kt
                    bndsf(isf)%sigma(kmx*(i-1)+k-kb+1) = (0.5d0*(zws(k-1)+zws(k))-zws(kb-1)) / max(epshs, (zws(kt)-zws(kb-1)) )
+                end do
+                !            SPvdP: fill remainder
+                do k=kt+1,kb+kmx-1
+                   bndsf(isf)%sigma(kmx*(i-1)+k-kb+1) = 1d0
                 end do
              end do
           end do
@@ -38622,6 +38692,7 @@ end function is_1d_boundary_candidate
  integer, allocatable          :: ihu(:)             ! temp
  integer, allocatable          :: lnxbnd(:)          ! temp
  double precision, allocatable :: viuh(:)            ! temp
+ double precision, allocatable :: tt(:)
  logical :: exist
  integer                       :: numz, numu, numq, numg, numd, numgen, npum, numklep, numvalv, jaifrcutp
  integer                       :: numnos, numnot, numnon ! < Nr. of unassociated flow links (not opened due to missing z- or u-boundary)
@@ -38983,7 +39054,7 @@ end function is_1d_boundary_candidate
 
 ! JRE ================================================================
  if (nbndw > 0 .and. .not. (jawave .eq. 4)) then
-    call qnerror('Wave energy boundary defined without setting Xbeach wavemodelnr. Wavemodelnr=4 required.',' ',' ')
+    call qnerror('Wave energy boundary defined without setting correct wavemodelnr. Wavemodelnr=4 required.',' ',' ')
     iresult = DFM_WRONGINPUT
  end if
  if (nbndw > 0) then
@@ -39662,14 +39733,15 @@ if (mext > 0) then
            end if
            if (iconst>0) then
               if ( allocated(viuh) ) deallocate(viuh)     ! dummy array
-              allocate(viuh(Ndx))
+              allocate(viuh(Ndkx))
 
               !          copy existing values (if they existed) in temp array
               !          this assumes uniform vertical distribution
               do kk=1,Ndx
+                 viuh(kk) = constituents(iconst,kk)
                  call getkbotktop(kk,kb,kt)
                  do k=kb,kb+kmxn(kk)-1
-                    viuh(kk) = constituents(iconst,k)
+                    viuh(k) = constituents(iconst,k)
                  end do
               end do
 
@@ -39678,11 +39750,10 @@ if (mext > 0) then
               if (success) then
                  do kk = 1,Ndx
                     if (viuh(kk) .ne. dmiss) then
+                       sed(iconst-ISED1+1,kk) = viuh(kk)
                        call getkbotktop(kk,kb,kt)
                        do k=kb,kb+kmxn(kk)-1
-                          fff = constituents(iconst,k)
-                          call operate(fff, viuh(kk) , operand)
-                          sed(iconst-ISED1+1,k) = fff
+                          sed(iconst-ISED1+1,k) = sed(iconst-ISED1+1,kk)     ! fill array with vertically uniform values
                        end do
                     endif
                  enddo
@@ -39692,6 +39763,34 @@ if (mext > 0) then
               call mess(LEVEL_WARN, 'Reading *.ext forcings file '''//trim(md_extfile)//''', getting unknown sediment fraction '''//trim(sfnam)//''' from QUANTITY '''//trim(qid)//'''.')
               call qnerror('Reading *.ext forcings file '''//trim(md_extfile)//''', getting unknown sediment fraction '''//trim(sfnam)//''' from QUANTITY '''//trim(qid)//'''.',' ',' ')
            end if
+           
+        else if (stm_included .and. qid(1:29) == 'initialverticalsedfracprofile' .and. kmx > 0) then
+           call get_sedfracname(qid, sfnam, qidnam)
+           iconst = 0
+           if ( ISED1.gt.0 .and. trim(sfnam).ne.'') then
+              iconst = findname(NUMCONST, const_names, sfnam)
+           end if
+           if (iconst>0) then
+              allocate(tt(1:ndkx))
+              tt = dmiss
+              call setinitialverticalprofile(tt, ndkx, filename) ; success = .true.
+              sed(iconst-ISED1+1,:)=tt
+              deallocate(tt)
+           endif
+           
+        else if (stm_included .and. qid(1:34) == 'initialverticalsigmasedfracprofile' .and. kmx > 0) then
+           call get_sedfracname(qid, sfnam, qidnam)
+           iconst = 0
+           if ( ISED1.gt.0 .and. trim(sfnam).ne.'') then
+              iconst = findname(NUMCONST, const_names, sfnam)
+           end if
+           if (iconst>0) then
+              allocate(tt(1:ndkx))
+              tt = dmiss
+              call setinitialverticalprofilesigma(tt, ndkx, filename) ; success = .true.
+              sed(iconst-ISED1+1,:)=tt
+              deallocate(tt)
+           endif
 
         else if (qid(1:13) == 'initialtracer') then
            call get_tracername(qid, tracnam, qidnam)
@@ -40986,6 +41085,44 @@ end if
  call restorepol()
 
  end subroutine setinitialverticalprofile
+ 
+subroutine setinitialverticalprofilesigma(yy,ny,filename) ! polyfil
+ use m_flowgeom
+ use m_flow
+ use m_polygon
+ implicit none
+ integer                   :: ny
+ double precision          :: xx(kmxx),xxx(kmxx)
+ double precision          :: yy(ny)
+ character(*),  intent(in) :: filename              ! file name for polygonfile
+
+ integer                   :: minp0, n, k, kb, kt, ktx 
+
+ call oldfil(minp0, filename)
+ call savepol()
+ call reapol(minp0, 0)
+
+ do n=1,ndxi
+    call getkbotktop(n,kb,kt)
+    do k = kb, kt
+       xx(k-kb+1) = zws(k)-zws(k-1)  
+    enddo
+    xx(1) = xx(1)/(s1(n)-bl(n))  ! upper layer face values
+    do k = kb+1,kt
+       xx(k-kb+1) = xx(k-kb+1)/(s1(n)-bl(n)) + xx(k-kb)  
+    enddo
+    xxx(1) = 0.5d0*xx(1)   ! cell centre coordinate values
+    do k = kb+1,kt
+       xxx(k-kb+1) = 0.5d0*(xx(k-kb+1)+xx(k-kb))
+    enddo
+    
+    ktx = kt-kb + 1
+    call lineinterp(xxx, yy(kb:), ktx, xpl, ypl, npl)
+ enddo
+
+ call restorepol()
+
+ end subroutine setinitialverticalprofilesigma
 
  subroutine lineinterp(xx, yy, ktx, x,y,n)
  implicit none
@@ -42085,7 +42222,12 @@ subroutine update_verticalprofiles()
     cfuhi3D   = cfuhiLL*umod                                  ! cfuhi3D = frc. contr. to diagonal
     !advi(Lb) = advi(Lb) +  cfuhiLL*umod
 
-    if (jawaveStokes >= 1) then                               ! Ustokes correction at bed
+    if (jawave==0) then
+       z0ucur(LL) = z00
+       z0urou(LL) = z00
+    endif
+
+    if (jawave>0 .and. jawaveStokes >= 1) then                               ! Ustokes correction at bed
        adve(Lb)  = adve(Lb) - cfuhi3D*ustokes(Lb)
     endif
 

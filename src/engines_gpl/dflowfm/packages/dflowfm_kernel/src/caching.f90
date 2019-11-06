@@ -101,8 +101,10 @@ subroutine loadCachingFile( filename, netfile, usecaching )
     !
     ! Allocate the arrays to zero length
     !
-    allocate( cache_xobs(0), cache_yobs(0), cache_xpl_fixed(0), cache_ypl_fixed(0), cache_dsl_fixed(0), &
-              cache_locTpObs(0), cache_kobs(0), cache_ilink_fixed(0), cache_ipol_fixed(0) )
+    if (.not. allocated(cache_xobs)) then
+       allocate( cache_xobs(0), cache_yobs(0), cache_xpl_fixed(0), cache_ypl_fixed(0), cache_dsl_fixed(0), &
+                 cache_locTpObs(0), cache_kobs(0), cache_ilink_fixed(0), cache_ipol_fixed(0) )
+    endif
 
     open( newunit = lun, file = trim(filename) // ".cache", status = "old", access = "stream", iostat = ierr )
 

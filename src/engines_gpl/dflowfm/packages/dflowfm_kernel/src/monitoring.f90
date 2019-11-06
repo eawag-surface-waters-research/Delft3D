@@ -144,6 +144,10 @@ implicit none
     integer                           :: IVAL_SSWXN
     integer                           :: IVAL_SSWY1  
     integer                           :: IVAL_SSWYN
+    integer                           :: IVAL_SOUR1    
+    integer                           :: IVAL_SOURN    
+    integer                           :: IVAL_SINK1    
+    integer                           :: IVAL_SINKN    
     
     integer                           :: IPNT_S1            ! pointers in valobs work array
     integer                           :: IPNT_HS
@@ -217,6 +221,10 @@ implicit none
     integer                           :: IPNT_SSWXN
     integer                           :: IPNT_SSWY1    
     integer                           :: IPNT_SSWYN    
+    integer                           :: IPNT_SOUR1    
+    integer                           :: IPNT_SOURN    
+    integer                           :: IPNT_SINK1    
+    integer                           :: IPNT_SINKN    
 contains
 
 !> (re)initialize valobs and set pointers for observation stations
@@ -345,7 +353,10 @@ subroutine init_valobs_pointers()
    IVAL_SSWXN      = 0
    IVAL_SSWY1      = 0   
    IVAL_SSWYN      = 0
-   
+   IVAL_SOUR1      = 0
+   IVAL_SOURN      = 0
+   IVAL_SINK1      = 0
+   IVAL_SINKN      = 0   
 !  2D
    i=0
    i0=i;
@@ -416,6 +427,11 @@ subroutine init_valobs_pointers()
          i=i+1;          IVAL_SSWY1      = i   
          i=i+numfracs-1; IVAL_SSWYN      = i
       end if
+      numfracs = stmpar%lsedsus
+      i=i+1;          IVAL_SOUR1      = i
+      i=i+numfracs-1; IVAL_SOURN      = i
+      i=i+1;          IVAL_SINK1      = i
+      i=i+numfracs-1; IVAL_SINKN      = i      
    end if
    MAXNUMVALOBS2D                       = i-i0
    
@@ -530,6 +546,10 @@ subroutine init_valobs_pointers()
    IPNT_SSCXN = ivalpoint(IVAL_SSCXN,   kmx)
    IPNT_SSCY1 = ivalpoint(IVAL_SSCY1,   kmx)
    IPNT_SSCYN = ivalpoint(IVAL_SSCYN,   kmx)
+   IPNT_SOUR1 = ivalpoint(IVAL_SOUR1,   kmx)
+   IPNT_SOURN = ivalpoint(IVAL_SOURN,   kmx)
+   IPNT_SINK1 = ivalpoint(IVAL_SINK1,   kmx)
+   IPNT_SINKN = ivalpoint(IVAL_SINKN,   kmx)
    if (jawave>0) then
       IPNT_SBWX1 = ivalpoint(IVAL_SBWX1,   kmx)
       IPNT_SBWXN = ivalpoint(IVAL_SBWXN,   kmx)

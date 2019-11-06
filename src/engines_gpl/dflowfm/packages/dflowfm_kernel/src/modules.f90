@@ -825,6 +825,8 @@ module m_sediment
  integer                           :: jaBndTreatment
  integer                           :: jasedtranspveldebug
  integer                           :: jaupdates1
+ integer                           :: jamorcfl
+ double precision                  :: dzbdtmax
  !
  !-------------------------------------------------- old sediment transport and morphology
  integer                           :: mxgrKrone     !< mx grainsize index nr that followsKrone. Rest follows v.Rijn
@@ -886,15 +888,17 @@ module m_sediment
  wavenikuradse = 0.01d0
  z0wav         = wavenikuradse / 30d0
 
- sedmax        = 30d0
- dmorfac       = 1d0
- tmorfspinup   = 0d0
- alfabed       = 1d0
- alfasus       = 1d0
- jamorf        = 0
- jaBndTreatment=0
- jasedtranspveldebug=0
- jaupdates1=0
+ sedmax              = 30d0
+ dmorfac             = 1d0
+ tmorfspinup         = 0d0
+ alfabed             = 1d0
+ alfasus             = 1d0
+ jamorf              = 0
+ jaBndTreatment      = 0
+ jasedtranspveldebug = 0
+ jaupdates1          = 0
+ jamorcfl            = 1
+ dzbdtmax            = 0.1d0
  end subroutine default_sediment
 
  subroutine allocgrains() ! for all fractions:
@@ -2614,7 +2618,7 @@ end subroutine default_turbulence
 
  integer                           :: javau             !< vert. adv. u1   : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL
 
-integer                           :: javau3onbnd = 0   !< vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd
+integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd UpwimpL: 0=follow javau , 1 = on bnd, 2= on and near bnd
 
  integer                           :: javakeps          !< vert. adv. keps : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL
 
@@ -5063,12 +5067,12 @@ contains
 
 end module
 
-!> transport of many (scalar) consituents is performed with the transport module
-!!   -constituents are stored in the consituents array
+!> transport of many (scalar) constituents is performed with the transport module
+!!   -constituents are stored in the constituents array
 !!   -salt and temperature are filled from and copied to the sa1 and tem1 arrays, respectively
 !!   -salt and temperature boundary and initial conditions are applied to sa1 and tem1, not to the constituents directly
 !! tracers:
-!!   -tracers intial and boundary conditions are directly applied to the consituents
+!!   -tracers intial and boundary conditions are directly applied to the constituents
 !!   -the tracers always appear at the end of the whole constituents array
 !!   -the constituents numbers of the tracers are from "ITRA1" to "ITRAN", where ITRAN=0 (no tracers) or ITRAN=NUMCONST (tracers come last)
 !!   -tracers with boundary conditions (not necessarily all tracers) have their own numbering
@@ -5094,7 +5098,7 @@ module m_transport
 
    character(len=NAMLEN), dimension(:), allocatable :: const_names    ! constituent names
    character(len=NAMLEN), dimension(:), allocatable :: const_units    ! constituent names
-   character(len=NAMLEN), parameter              :: DEFTRACER = 'default_tracer'
+   character(len=NAMLEN), parameter                 :: DEFTRACER = 'default_tracer'
 
    integer,          dimension(:,:), allocatable :: id_const   ! consituent id's in map-file
 

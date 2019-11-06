@@ -64,7 +64,7 @@ subroutine update_constituents(jarhoonly)
    double precision                                      :: dvoli
    double precision                                      :: dt, dts_store
 
-   integer                                               :: k, LL, L, j, numconst_store,kk,lll
+   integer                                               :: k, LL, L, j, numconst_store,kk,lll,Lb,Lt
    integer                                               :: istep
    integer                                               :: numstepssync
    
@@ -146,20 +146,20 @@ subroutine update_constituents(jarhoonly)
          if ( jatranspvel.eq.0 .or. jatranspvel.eq.1 ) then       ! Lagrangian approach
             ! only add velocity asymmetry
             do LL=1,Lnx
-               do L=Lbot(LL),Ltop(LL)
-                  u1sed(L) = u1(L)+mtd%uau(L)  
-                  q1sed(L) = q1(L)+mtd%uau(L)*Au(L)
+               call getLbotLtop(LL,Lb,Lt)                         ! prefer this, as Ltop gets messed around with in hk specials
+               do L=Lb,Lt
+                  u1sed(L) = u1(L)!+mtd%uau(L)                    ! JRE to do, discuss with Dano
+                  q1sed(L) = q1(L)!+mtd%uau(L)*Au(L)
                end do
             end do
          else if (jatranspvel .eq. 2) then                        ! Eulerian approach
 !           stokes+asymmetry
             do LL=1,Lnx
-               do L=Lbot(LL),Ltop(LL)
+               call getLbotLtop(LL,Lb,Lt)
+               do L=Lb,Lt
                   u1sed(L) = u1(L)-ustokes(L)  
                   q1sed(L) = q1(L)-ustokes(L)*Au(L)
                end do
-               u1sed(Lbot(LL)) = u1sed(Lbot(LL))+mtd%uau(LL)               ! TO DO: 3D for velocity asymmetry
-               q1sed(Lbot(LL)) = q1sed(Lbot(LL))+mtd%uau(LL)*Au(Lbot(LL))  ! VR2004 already has this effect
             end do
          end if
          call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1sed, q1sed, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, noupdateconst, fluxhor, dsedx, dsedy, jalimitdiff, dxiAu)         
@@ -600,8 +600,8 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    use m_transport, only : ISED1, ISEDN   ! preferably in argument list
    use m_sediment,  only: mtd
    use unstruc_messages
-   use m_sediment, only : jased, ws
-   use m_transport, only: Ised1, isedn
+   use m_sediment, only : jased, ws, sedtra, stmpar, stm_included
+   use sediment_basics_module
    implicit none
 
    integer,                                    intent(in)    :: NUMCONST     !< number of transported quantities
@@ -628,7 +628,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    double precision                                          :: qw_loc
                                                             
    integer                                                   :: kk, k, kb, kt, kL, kR, kLL, kRR
-   integer                                                   :: j
+   integer                                                   :: j, ll
                                                             
    double precision, external                                :: dlimiter
                                                             
@@ -678,8 +678,13 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
             qw_loc = qw(k)
             if (jased < 4) then
                qw_loc = qw(k) - wsf(j)*ba(kk)
-            else  if ( j.ge.ISED1 .and. j.le.ISEDN ) then 
-               qw_loc = qw(k) - mtd%ws(k,ISED1+j-1)*ba(kk) 
+            else  if ( stm_included .and. j.ge.ISED1 .and. j.le.ISEDN ) then
+               ll = j-ISED1+1
+               if (k<sedtra%kmxsed(kk,ll)) then
+                  qw_loc = qw(k)     ! settling flux zero below kmxsed layer
+               else
+                  qw_loc = qw(k) - mtd%ws(k,ISED1+j-1)*ba(kk)
+               endif
             endif
                
             cf = cffacver*dt_loc*abs(qw_loc)/(ba(kk)*dz(k-kb+2))
@@ -944,7 +949,8 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
    use m_flowgeom,  only: Ndxi, Ndx, Lnx, Ln, ba, kfs, bl  ! static mesh information
    use m_flowtimes, only: dts
    use m_flow,      only: epshsdif, s1, kmxn, xlozmidov, rhomean, rho, ag, a1, wsf  ! do not use m_flow, please put this in the argument list
-   use m_sediment,  only: mtd, jased, ws
+   use m_sediment,  only: mtd, jased, ws, sedtra, stmpar
+   use sediment_basics_module
    
    implicit none
 
@@ -1039,7 +1045,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
 
       ! if ( s1(kk)-bl(kk) > epshsdif ) then
       ! if ( s1(kk)-zws(kb-1) > epshsdif ) then
-     
+    
       do k=kb,kt-1   ! assume zero-fluxes at boundary and top
          n = k-kb+1  ! layer number
          dvol1i  = 1d0/max(vol1(k),dtol)                            ! dtol: safety
@@ -1057,9 +1063,11 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
          endif     
          
          do j=1,NUMCONST
+            
 !           ! diffusion  
             if (jased > 3 .and. j >= ISED1 .and. j <= ISEDN) then  ! sediment d3d
                fluxfac = (mtd%seddif(j-ISED1+1,k))*dtbazi
+               ! D3D: vicmol/sigmol(l) + ozmid + seddif(nm, k, ls)/sigdif(l)
             else                     
                fluxfac = (sigdifi(j)*vicwws(k) + difsed(j) + ozmid)*dtbazi
             end if
@@ -1097,10 +1105,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
             
          end do
       end do
-     
-      !endif   
-
-
+      
 !     solve system(s)
       do j=1,NUMCONST
 !         if ( kk.eq.2 .and. j.eq.1 ) then
@@ -1455,8 +1460,8 @@ subroutine alloc_transport(Keepexisting)
    call realloc(fluxver, (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
    
    call realloc(fluxhortot, (/ NUMCONST, Lnkx /), keepExisting=KeepExisting, fill=0d0)
-   call realloc(sinksetot,    (/ NUMCONST, Ndx /), keepExisting=KeepExisting, fill=0d0)
-   call realloc(sinkftot,    (/ NUMCONST, Ndx /), keepExisting=KeepExisting, fill=0d0)
+   call realloc(sinksetot,  (/ NUMCONST, Ndx /),  keepExisting=KeepExisting, fill=0d0)
+   call realloc(sinkftot,   (/ NUMCONST, Ndx /),  keepExisting=KeepExisting, fill=0d0)
    
    call realloc(difsedu, NUMCONST, keepExisting=KeepExisting, fill=0d0)
    call realloc(difsedw, NUMCONST, keepExisting=KeepExisting, fill=0d0)
@@ -1564,7 +1569,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    double precision            :: spir_ce, spir_be, spir_e, alength_a, time_a, alpha, fcoriocof, qsrck, qsrckk, dzss
    
    double precision            :: Trefi
-   
+      
    const_sour = 0d0
    const_sink = 0d0
    
@@ -2936,8 +2941,7 @@ subroutine comp_sinktot()
 
    if (.not. stm_included) return
    if (mxgr == 0) return
-
-
+   
    if (kmx<1) then    ! 2D
       do k=1,ndx
          do j=ISED1,ISEDN
@@ -2949,13 +2953,13 @@ subroutine comp_sinktot()
          enddo
       enddo
    else               ! 3D
-      do k=1,ndkx
+      do k=1,ndx
          call getkbotktop(k,kb,kt)
          do j=ISED1,ISEDN
             ll = j-ISED1+1
-            sinksetot(j,k) = sinksetot(j,k) + vol1(k)*sedtra%sinkse(k,ll)               *constituents(j,kb)*dts
+            sinksetot(j,k) = sinksetot(j,k) + vol1(sedtra%kmxsed(k,ll))*sedtra%sinkse(k,ll) *constituents(j,sedtra%kmxsed(k,ll))*dts
             if (stmpar%morpar%flufflyr%iflufflyr > 0) then
-               sinkftot(j,k)  = sinkftot(j,k) +  vol1(k)*stmpar%morpar%flufflyr%sinkf(ll,k)*constituents(j,kb)*dts
+               sinkftot(j,k)  = sinkftot(j,k) +  vol1(sedtra%kmxsed(k,ll))*stmpar%morpar%flufflyr%sinkf(ll,k)*constituents(j,sedtra%kmxsed(k,ll))*dts
             endif
          enddo
       enddo

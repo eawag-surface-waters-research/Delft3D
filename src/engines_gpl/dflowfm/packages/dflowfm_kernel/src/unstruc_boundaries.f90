@@ -835,7 +835,10 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
             if ( kmx.eq.0 ) then
                success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, forcingfile=forcingfile, targetindex=targetindex)
             else
-               success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, bndsf(isf)%sigma, forcingfile=forcingfile, targetindex=targetindex)
+               pzmin => bndsf(isf)%zminmax(1:nbndsf(isf))
+               pzmax => bndsf(isf)%zminmax(nbndsf(isf)+1:2*nbndsf(isf))
+               success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2,    & 
+                                                 z=bndsf(isf)%sigma, forcingfile=forcingfile, pzmin=pzmin, pzmax=pzmax, targetindex=targetindex)
             end if
          else
             success = .true.
