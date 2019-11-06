@@ -135,7 +135,7 @@
    integer :: ierr
    integer :: k, KX, LS, LS0, LX, NN
 
-   !if (numk == 0) return
+   if (.not. allocated(xk) .or. .not. allocated(kn) .or. .not. allocated(nod)) return
 
    KX = KMAX ! backup everything present (in case numk has not yet been increased) ! KX = NUMK
    IF (ALLOCATED(nod0)) THEN
