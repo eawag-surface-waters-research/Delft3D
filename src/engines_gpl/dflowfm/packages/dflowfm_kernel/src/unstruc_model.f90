@@ -2161,11 +2161,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Put settings for .mdu file into a property tree first
     call tree_create(trim(md_ident), prop_ptr)
-    call prop_set(prop_ptr, 'General', 'Program',   unstruc_program)
-    call prop_set(prop_ptr, 'General', 'Version',   unstruc_version)
+    call prop_set(prop_ptr, 'General', 'Program',   unstruc_program,     'Program')
+    call prop_set(prop_ptr, 'General', 'Version',   unstruc_version,     'Version number of computational kernel')
+    call prop_set(prop_ptr, 'General', 'fileType',  'modelDef',          'File type. Do not edit this.')
     tmpstr = ''
     write(tmpstr, '(i0,".",i2.2)') MDUFormatMajorVersion, MDUFormatMinorVersion
-    call prop_set(prop_ptr, 'General', 'FileVersion', trim(tmpstr), 'File format version (do not edit this)')
+    call prop_set(prop_ptr, 'General', 'fileVersion', trim(tmpstr),      'File format version (do not edit this)')
     call prop_set(prop_ptr, 'General', 'AutoStart', md_jaAutoStart,      'Autostart simulation after loading MDU (0: no, 1: autostart, 2: autostartstop)')
     call prop_set(prop_ptr, 'General', 'ModelSpecific',  md_specific,    'Optional ''model specific ID'', to enable certain custom runtime function calls (instead of via MDU name).')
     call prop_set(prop_ptr, 'General', 'PathsRelativeToParent',  md_paths_relto_parent, 'Default: 0. Whether or not (1/0) to resolve file names (e.g. inside the *.ext file) relative to their direct parent, instead of to the toplevel MDU working dir.')
