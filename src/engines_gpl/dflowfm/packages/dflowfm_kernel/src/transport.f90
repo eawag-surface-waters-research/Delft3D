@@ -1547,6 +1547,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    use m_flow
    use m_sediment
    use m_fm_wq_processes
+   use m_partitioninfo
    use m_sferic, only: jsferic, fcorio
    use m_flowtimes , only : dnt, dts
    use unstruc_messages
@@ -1558,7 +1559,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    
    double precision            :: dvoli
    integer, intent(in)         :: jas 
-   integer                     :: i, iconst, j, kk, kkk, k, kb, kt, n, kk2, L, s
+   integer                     :: i, iconst, j, kk, kkk, k, kb, kt, n, kk2, L, s, jamba_src
    double precision, parameter :: dtol=1d-8   
    double precision            :: spir_ce, spir_be, spir_e, alength_a, time_a, alpha, fcoriocof, qsrck, qsrckk, dzss
    
@@ -1744,7 +1745,20 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       qsrckk = qsrc(n) 
       qsrck  = qsrckk  
       
-      if (jamba > 0) then
+      jamba_src = jamba
+      if (jampi.eq.1) then
+         if(kk > 0) then
+            if ( idomain(kk) /= my_rank ) jamba_src = 0
+         else
+            if(kk2 > 0) then
+               if ( idomain(kk2) /= my_rank ) jamba_src = 0
+            else
+               jamba_src = 0
+            endif
+         endif
+      endif
+
+      if (jamba_src > 0) then
          if (qsrck > 0) then
             mbaflowsorsin(2,n) = mbaflowsorsin(2,n) + qsrck*dts
          else if (qsrck < 0) then
@@ -1766,7 +1780,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             if (qsrck > 0) then              ! FROM k to k2
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) - qsrck*constituents(L,k)*dvoli
-                  if (jamba > 0) then
+                  if (jamba_src > 0) then
                      s = iconst2sys(L)
                      if (s > 0 .and. s <= nosys) then
                        mbafluxsorsin(2,1,s,n) = mbafluxsorsin(2,1,s,n) + qsrck*constituents(L,k)*dts
@@ -1776,7 +1790,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             else if  (qsrck  < 0) then       ! FROM k2 to k
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) - qsrck*ccsrc(L,n)*dvoli
-                  if (jamba > 0) then
+                  if (jamba_src > 0) then
                      s = iconst2sys(L)
                      if (s > 0 .and. s <= nosys) then
                         mbafluxsorsin(1,1,s,n) = mbafluxsorsin(1,1,s,n) - qsrck*ccsrc(L,n)*dts
@@ -1801,7 +1815,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             if (qsrck > 0) then
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) + qsrck*ccsrc(L,n)*dvoli
-                  if (jamba > 0) then
+                  if (jamba_src > 0) then
                      s = iconst2sys(L)
                      if (s > 0 .and. s <= nosys) then
                         mbafluxsorsin(2,2,s,n) = mbafluxsorsin(2,2,s,n) + qsrck*ccsrc(L,n)*dts
@@ -1811,7 +1825,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             else if  (qsrck  < 0) then  
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) + qsrck*constituents(L,k)*dvoli
-                  if (jamba > 0) then
+                  if (jamba_src > 0) then
                      s = iconst2sys(L)
                      if (s > 0 .and. s <= nosys) then
                         mbafluxsorsin(1,2,s,n) = mbafluxsorsin(1,2,s,n) -  qsrck*constituents(L,k)*dts
