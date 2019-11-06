@@ -143,9 +143,9 @@
          if ( allocated(nod0(k)%lin) ) DEALLOCATE(NOD0(K)%LIN)
       ENDDO
       DEALLOCATE(NOD0)
-      ALLOCATE ( NOD0(KX) , stat = ierr )
-      !CALL AERR('NOD0(KX)', IERR, KX)
    ENDIF
+   ALLOCATE ( NOD0(KX) , stat = ierr )
+   !CALL AERR('NOD0(KX)', IERR, KX)
 
    if (allocated(xk0)) deallocate(xk0,yk0,zk0)
    allocate ( XK0(KX), YK0(KX), ZK0(KX) , STAT=IERR)
