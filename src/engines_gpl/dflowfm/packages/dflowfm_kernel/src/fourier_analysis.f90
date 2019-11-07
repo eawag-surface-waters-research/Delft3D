@@ -267,7 +267,7 @@ module m_fourier_analysis
 
 !> - Read fourier input file and stores the
 !! variables necessary for the analysis in arrays.
-   subroutine reafou(lunfou, filfou, kmax, lstsc, lsal, ltem, tstart, tstop, dt, success)
+   subroutine reafou(lunfou, filfou, kmax, lstsc, lsal, ltem, tstart, tstop, dt, md_fou_step, success)
    !!--declarations----------------------------------------------------------------
        use precision
        use mathconsts
@@ -278,16 +278,17 @@ module m_fourier_analysis
    !
    ! Global variables
    !
-       integer                         , intent(in) :: lsal    !< Description and declaration in dimens.igs
-       integer                         , intent(in) :: lstsc   !< Description and declaration in dimens.igs
-       integer                         , intent(in) :: ltem    !< Description and declaration in dimens.igs
-       integer                         , intent(in) :: lunfou  !< Unit number fourier input file
-       character(*)                    , intent(in) :: filfou  !< File name for fourier analysis input
-       integer                         , intent(in) :: kmax    !< number of vertical layers
-       real(kind=fp)                   , intent(in) :: tstart  !< simulation start time
-       real(kind=fp)                   , intent(in) :: tstop   !< simulation stop time
-       real(kind=fp)                   , intent(in) :: dt      !< timestep
-       logical                         , intent(out):: success !< function result
+       integer      , intent(in   ) :: lsal        !< Description and declaration in dimens.igs
+       integer      , intent(in   ) :: lstsc       !< Description and declaration in dimens.igs
+       integer      , intent(in   ) :: ltem        !< Description and declaration in dimens.igs
+       integer      , intent(in   ) :: lunfou      !< Unit number fourier input file
+       character(*) , intent(in   ) :: filfou      !< File name for fourier analysis input
+       integer      , intent(in   ) :: kmax        !< number of vertical layers
+       real(kind=fp), intent(in   ) :: tstart      !< simulation start time
+       real(kind=fp), intent(in   ) :: tstop       !< simulation stop time
+       real(kind=fp), intent(in   ) :: dt          !< timestep
+       integer      , intent(in   ) :: md_fou_step !< determines if fourier analysis is updated at the end of the user time step or comp. time step
+       logical      , intent(  out) :: success     !< function result
    !
    ! Local variables
    !
@@ -313,23 +314,24 @@ module m_fourier_analysis
        character(len=50), dimension(:)     , pointer :: fouvarunit
        character(len=1) , dimension(:)     , pointer :: foutyp
 
-       integer                               :: fouid      ! Counter linenumber-commentlines
-       integer                               :: i          ! Counter
-       integer                               :: ifou       ! Counter
-       integer                               :: ivar       ! Counter
+       integer                               :: fouid               ! Counter linenumber-commentlines
+       integer                               :: i                   ! Counter
+       integer                               :: ifou                ! Counter
+       integer                               :: ivar                ! Counter
        integer                               :: irelp
-       integer                               :: lfile      ! Length of file name
-       integer                               :: linenumber ! Line number in Fourier input file
-       integer                               :: nveld      ! actual number of fields encountered in a record
-       integer                               :: iveld      ! loop counter over fields in a record
-       real(kind=fp)                         :: rstart     ! Start time for fourier analysis
-       real(kind=fp)                         :: rstop      ! Stop  time for fourier analysis
-       character(len=4)                      :: cdummy     ! Help string to read FOUELP
-                                                           ! The message depends on the error.
+       integer                               :: lfile               ! Length of file name
+       integer                               :: linenumber          ! Line number in Fourier input file
+       integer                               :: nveld               ! actual number of fields encountered in a record
+       integer                               :: iveld               ! loop counter over fields in a record
+       real(kind=fp)                         :: rstart              ! Start time for fourier analysis
+       real(kind=fp)                         :: rstop               ! Stop  time for fourier analysis
+       character(len=4)                      :: cdummy              ! Help string to read FOUELP
+                                                                    ! The message depends on the error.
        character(len=300)                    :: message
-       character(len=132)                    :: record     ! Used for format free reading
-       character(len=30), allocatable        :: columns(:) ! each record is split into separate fields (columns)
-       integer                               :: iostat
+       character(len=132)                    :: record              ! Used for format free reading
+       character(len=30), allocatable        :: columns(:)          ! each record is split into separate fields (columns)
+       integer                               :: iostat              ! error code
+       logical                               :: with_fourier_or_avg ! one of the fourier options is avg or fourier
    !
    !! executable statements -------------------------------------------------------
    !
@@ -654,6 +656,7 @@ module m_fourier_analysis
        ! Add the (start-)index ivar to fouref(..,2)
        !
        ivar = 0
+       with_fourier_or_avg = .false.
        do ifou = 1, nofou
           fouref(ifou,2)   = ivar + 1
           if (foutyp(ifou) == 's') then
@@ -701,6 +704,7 @@ module m_fourier_analysis
                  write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_avg"
                  fouvarnamlong(ivar) = "average value"
                  call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+                 with_fourier_or_avg = .true.
               else
                  if (fnumcy(ifou)==0) then          ! zero fourier mode without further notice means 'MEAN'
                     ivar = ivar + 1
@@ -717,6 +721,7 @@ module m_fourier_analysis
                     fouvarnamlong(ivar) = "Fourier phase"
                     fouvarunit(ivar)    = "degree"
                  endif
+                 with_fourier_or_avg = .true.
               endif
           else
               !
@@ -755,6 +760,7 @@ module m_fourier_analysis
                     fouvarnamlong(ivar) = "average value magnitude"
                     call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
                  endif
+                 with_fourier_or_avg = .true.
               else
                  ivar = ivar + 1
                  write(fouvarnam(ivar),'(a,i3.3,2a)') "fourier", fouref(ifou,1), "_amp_", trim(founam(ifou))
@@ -764,6 +770,7 @@ module m_fourier_analysis
                  write(fouvarnam(ivar),'(a,i3.3,2a)') "fourier", fouref(ifou,1), "_phs_", trim(founam(ifou))
                  write(fouvarnamlong(ivar),'(2a)') "Fourier phase component ", trim(founam(ifou))
                  fouvarunit(ivar)    = "degree"
+                 with_fourier_or_avg = .true.
               endif
               if (index(founam(ifou),'v')>0 .and. fouelp(ifou)=='y') then
                  ivar = ivar + 1
@@ -785,6 +792,11 @@ module m_fourier_analysis
               endif
           endif
        enddo
+
+       if (with_fourier_or_avg .and. md_fou_step == 1) then
+          msgbuf = 'FouUpdateStep = 1 may only be used for min/max computations. Now using it for avg and/or fourier.'
+          call err_flush()
+       endif
 
        ! init fourier arrays
        do ifou = 1,nofou

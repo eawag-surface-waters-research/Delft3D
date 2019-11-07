@@ -14539,7 +14539,7 @@ endif
 subroutine flow_fourierinit()
 use m_fourier_analysis
 use m_transport, only: NUMCONST, ISALT, ITEMP
-use unstruc_model, only: md_foufile, md_tunit, getoutputdir
+use unstruc_model, only: md_foufile, md_tunit, md_fou_step, getoutputdir
 use unstruc_files
 use m_flow, only: kmxd
 use m_wind, only: wmag, jawind
@@ -14556,7 +14556,7 @@ call fouini(minp, success, ag, md_tunit,'S')
 FouOutputFile = trim(getoutputdir()) // defaultFilename('fou')
 
 call alloc_fourier_analysis_arrays(gddimens)
-call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, dt_user, success)
+call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, dt_user, md_fou_step, success)
 call doclose(minp)
 
 if (success) then
