@@ -44,6 +44,7 @@ module m_fourier_analysis
     use string_module, only: str_lower
     use unstruc_netcdf
     use m_flow, only : kmx
+    use m_alloc
     implicit none
 
     type gd_fourier
@@ -65,34 +66,34 @@ module m_fourier_analysis
        !
        ! pointers
        !
-       integer          , dimension(:)    , pointer :: fconno        ! Constituent number for Fourier analysis
-       integer          , dimension(:)    , pointer :: flayno        ! Layer number for fourier analysis
-       integer          , dimension(:)    , pointer :: fnumcy        ! Number of cycles for fourier analysis
-       integer          , dimension(:)    , pointer :: ftmsto        ! Integer time step counter stop time for fourier analysis
-       integer          , dimension(:)    , pointer :: ftmstr        ! Integer time step counter start time for fourier analysis
-       integer          , dimension(:)    , pointer :: foumask       ! 0: no additional mask, 1: initial dry points only
-       integer          , dimension(:,:)  , pointer :: idvar         ! Ids of the variables in UGRID format
-       integer          , dimension(:,:)  , pointer :: fouref        ! Reference table: (ifou,1): fouid (line in input file)
-                                                                     !                  (ifou,2): fouvarstart (first index in fouvarnam/idvar to be used by this ifou
+       integer      , dimension(:)    , pointer :: fconno  => null() !< Constituent number for Fourier analysis
+       integer      , dimension(:)    , pointer :: flayno  => null() !< Layer number for fourier analysis
+       integer      , dimension(:)    , pointer :: fnumcy  => null() !< Number of cycles for fourier analysis
+       integer      , dimension(:)    , pointer :: ftmsto  => null() !< Integer time step counter stop time for fourier analysis
+       integer      , dimension(:)    , pointer :: ftmstr  => null() !< Integer time step counter start time for fourier analysis
+       integer      , dimension(:)    , pointer :: foumask => null() !< 0: no additional mask, 1: initial dry points only
+       integer      , dimension(:,:)  , pointer :: idvar   => null() !< Ids of the variables in UGRID format
+       integer      , dimension(:,:)  , pointer :: fouref  => null() !< Reference table: (ifou,1): fouid (line in input file)
+                                                                     !!                  (ifou,2): fouvarstart (first index in fouvarnam/idvar to be used by this ifou
        !
-       real(kind=fp)    , dimension(:)    , pointer :: fknfac        ! Fourier amplitude correction factor
-       real(kind=fp)    , dimension(:,:,:), pointer :: foucomp       ! Component in Fourier Analysis
-       real(kind=fp)    , dimension(:)    , pointer :: foufas        ! Frequency for fourier analysis
-       real(kind=fp)    , dimension(:,:,:), pointer :: fousma        ! Suma of fourier analysis
-       real(kind=fp)    , dimension(:,:,:), pointer :: fousmb        ! Sumb of fourier analysis
-       real(kind=fp)    , dimension(:,:,:), pointer :: fouvec        !  Maximum of vector magnitude for fourier analysis
-                                                                     !  For velocity (u,v), discharge (qxk, qyk) and bed shear stress (taubpu,taubpv)
-                                                                     !  NB: For discharges the analysis is actually performed on the unit discharges qxk/guu and qyk/gvv
-       real(kind=fp)    , dimension(:)    , pointer :: fv0pu         ! Fourier phase correction
+       real(kind=fp), dimension(:)    , pointer :: fknfac  => null() !< Fourier amplitude correction factor
+       real(kind=fp), dimension(:,:,:), pointer :: foucomp => null() !< Component in Fourier Analysis
+       real(kind=fp), dimension(:)    , pointer :: foufas  => null() !< Frequency for fourier analysis
+       real(kind=fp), dimension(:,:,:), pointer :: fousma  => null() !< Suma of fourier analysis
+       real(kind=fp), dimension(:,:,:), pointer :: fousmb  => null() !< Sumb of fourier analysis
+       real(kind=fp), dimension(:,:,:), pointer :: fouvec  => null() !< Maximum of vector magnitude for fourier analysis
+                                                                     !! For velocity (u,v), discharge (qxk, qyk) and bed shear stress (taubpu,taubpv)
+                                                                     !! NB: For discharges the analysis is actually performed on the unit discharges qxk/guu and qyk/gvv
+       real(kind=fp), dimension(:)    , pointer :: fv0pu   => null() !< Fourier phase correction
        !
-       character(len=1) , dimension(:)    , pointer :: fouelp        !  Y/N: Yes/No requesting elliptic parameters
-                                                                     !  X/I: Max/Min values  requested instead of fourier analysis
-                                                                     !  E  : Max Energy head requested instead of fourier analysis
-       character(len=16), dimension(:)    , pointer :: founam        ! Names of variables for fourier analysis
-       character(len=50), dimension(:)    , pointer :: fouvarnam     ! Names of variables for fourier analysis as written to NetCDF file
-       character(len=50), dimension(:)    , pointer :: fouvarnamlong ! Part of the long names of variables for fourier analysis as written to NetCDF file
-       character(len=50), dimension(:)    , pointer :: fouvarunit    ! Unit of variables for fourier analysis as written to NetCDF file
-       character(len=1) , dimension(:)    , pointer :: foutyp        ! Character indicating whether parameter is a scalar (s) or vector (v) quantity
+       character(len=1) , dimension(:)    , pointer :: fouelp        => null() !< Y/N: Yes/No requesting elliptic parameters
+                                                                               !! X/I: Max/Min values  requested instead of fourier analysis
+                                                                               !! E  : Max Energy head requested instead of fourier analysis
+       character(len=16), dimension(:)    , pointer :: founam        => null() !< Names of variables for fourier analysis
+       character(len=50), dimension(:)    , pointer :: fouvarnam     => null() !< Names of variables for fourier analysis as written to NetCDF file
+       character(len=50), dimension(:)    , pointer :: fouvarnamlong => null() !< Part of the long names of variables for fourier analysis as written to NetCDF file
+       character(len=50), dimension(:)    , pointer :: fouvarunit    => null() !< Unit of variables for fourier analysis as written to NetCDF file
+       character(len=1) , dimension(:)    , pointer :: foutyp        => null() !< Character indicating whether parameter is a scalar (s) or vector (v) quantity
     end type gd_fourier
 !-------------------------------------------------------------------------------------------------------
 
@@ -207,29 +208,29 @@ module m_fourier_analysis
        !
        ! Arrays for Fourier analysis (fourier.igs)
        !
-       if (istat == 0) allocate (gdfourier%fconno  (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%flayno  (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fnumcy  (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%ftmsto  (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%ftmstr  (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%foumask (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%idvar   (3,1:gdfourier%nofouvar), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fouref  (1:nofou,2), STAT = istat)
+       if (istat == 0) call reallocp (gdfourier%fconno, nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%flayno ,nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fnumcy ,nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%ftmsto ,nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%ftmstr ,nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%foumask,nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%idvar, [3, gdfourier%nofouvar], stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fouref, [nofou, 2], stat = istat, keepExisting = .false.)
        !
-       if (istat == 0) allocate (gdfourier%fknfac (                          1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%foucomp(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub, 1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%foufas (                          1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fousma (gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub, 1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fousmb (gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub, 1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fouvec (gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub, 1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fv0pu  (                          1:nofou), STAT = istat)
+       if (istat == 0) call reallocp (gdfourier%fknfac , nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%foucomp, [gddimens%nub, 1, nofou], stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%foufas , nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fousma , [gddimens%nub, 1, nofou], stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fousmb , [gddimens%nub, 1, nofou], stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fouvec , [gddimens%nub, 1, nofou], stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fv0pu  , nofou, stat = istat, keepExisting = .false.)
        !
-       if (istat == 0) allocate (gdfourier%fouelp (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%founam (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fouvarnam     (1:gdfourier%nofouvar), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fouvarnamlong (1:gdfourier%nofouvar), STAT = istat)
-       if (istat == 0) allocate (gdfourier%fouvarunit    (1:gdfourier%nofouvar), STAT = istat)
-       if (istat == 0) allocate (gdfourier%foutyp (1:nofou), STAT = istat)
+       if (istat == 0) call reallocp (gdfourier%fouelp, nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%founam, nofou, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fouvarnam     , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fouvarnamlong , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fouvarunit    , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%foutyp, nofou, stat = istat, keepExisting = .false.)
 
        if (istat /= 0) then
           ! Exception handling for allocation of fourier arrays
