@@ -565,8 +565,11 @@ module m_readCrossSections
             
       pCS%plains = 0.0d0
       
-      maxFlowWidth = width(numlevels)
-
+      maxFlowWidth = width(1)
+      do i = 2, numlevels
+         maxFlowWidth = max( maxFlowWidth, width(i))
+      enddo
+      
       call prop_get_double(node_ptr, '', 'mainWidth', Main, success)
       if (.not. success)  Main = maxFlowWidth
       call prop_get_double(node_ptr, '', 'fp1Width', FP1, success)
