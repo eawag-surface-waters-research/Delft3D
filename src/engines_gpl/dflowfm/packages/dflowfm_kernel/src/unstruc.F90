@@ -10752,19 +10752,14 @@ subroutine writesomeinitialoutput()
 
 
  subroutine wrinumlimdt()
- use m_flowgeom
- use m_flow
- use m_partitioninfo
+ use m_flowgeom, only : ndx, xz, yz
+ use m_flow, only : numlimdt
  use unstruc_model, only : md_ident, getoutputdir
  implicit none
  integer :: mlim, k
 
- if ( jampi.eq.0 ) then
-    call newfil(mlim, trim(getoutputdir())//trim(md_ident)//'_numlimdt.xyz')
- else
-    call newfil(mlim, trim(getoutputdir())//trim(md_ident)//'_'//trim(sdmn)//'_numlimdt.xyz')
- end if
- do k = 1,ndx
+ call newfil(mlim, trim(getoutputdir()) // trim(md_ident) // '_numlimdt.xyz')
+ do k = 1, ndx
     if (numlimdt(k) > 0) then
        write(mlim, *) xz(k), yz(k), numlimdt(k)
     endif
