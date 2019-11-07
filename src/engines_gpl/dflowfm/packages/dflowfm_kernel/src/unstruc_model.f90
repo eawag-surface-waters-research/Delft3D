@@ -947,8 +947,7 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Jarhoxu' , Jarhoxu)
     if (Jarhoxu > 0) then
-        Jarhoxu = 0
-        call mess(LEVEL_INFO, 'Jarhoxu is reset to 0 because other values are not allowed anymore', '.')
+        call mess(LEVEL_INFO, 'WARNING: Jarhoxu=0 is strongly advised and other values are discouraged', '.')
     end if
 
     call prop_get_integer(md_ptr, 'numerics', 'Icgsolver'       , Icgsolver)
