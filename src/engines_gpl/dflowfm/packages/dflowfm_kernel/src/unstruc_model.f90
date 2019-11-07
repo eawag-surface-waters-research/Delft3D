@@ -946,6 +946,10 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Zlayeratubybob' , jaZlayeratubybob)
 
     call prop_get_integer(md_ptr, 'numerics', 'Jarhoxu' , Jarhoxu)
+    if (Jarhoxu > 0) then
+        Jarhoxu = 0
+        call mess(LEVEL_INFO, 'Jarhoxu is reset to 0 because other values are not allowed anymore', '.')
+    end if
 
     call prop_get_integer(md_ptr, 'numerics', 'Icgsolver'       , Icgsolver)
     call prop_get_integer(md_ptr, 'numerics', 'Maxdegree'       , Maxdge)
