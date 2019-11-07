@@ -35093,8 +35093,11 @@ end subroutine setbobs_fixedweirs
                       bl(k2) = min(bl(k2), bob0(2,L))
 
                    case (ST_UNI_WEIR)
+                      fu(L) = pstru%fu(L0)
+                      ru(L) = pstru%ru(L0)
+                      au(L) = pstru%au(L0)
                       call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, bob0(:,L), kfu, s1(k1), s1(k2), &
-                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts)
+                          q1(L), pstru%u1(L0), dx(L), dts)
                    case (ST_BRIDGE)
                       dpt = max(epshu, s1(k1) - bob0(1,L))
                       call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)

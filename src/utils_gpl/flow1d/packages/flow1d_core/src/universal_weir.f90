@@ -87,7 +87,7 @@ module m_Universal_Weir
    
    !> Compute the coefficients FU, RU and AU for this universal weir.
    subroutine ComputeUniversalWeir(uniweir, fum, rum, aum, dadsm, bob0, kfum, s1m1, s1m2, &
-                                   qm, q0m, u1m, u0m, dxm, dt)
+                                   qm, u1m, dxm, dt)
       implicit none
       !
       ! Global variables
@@ -102,9 +102,7 @@ module m_Universal_Weir
       double precision, intent(in   )             :: s1m2     !< Water level at left side of universal weir.
       double precision, intent(in   )             :: s1m1     !< Water level at right side of universal weir.
       double precision, intent(  out)             :: qm       !< Computed discharge at structure.
-      double precision, intent(inout)             :: q0m      !< Discharge at previous timestep.
       double precision, intent(inout)             :: u1m      !< Computed flow velocity.
-      double precision, intent(in   )             :: u0m      !< Flow velocity at previous time step.
       double precision, intent(in   )             :: dxm      !< Length of flow link.
       double precision, intent(in   )             :: dt       !< Time step in seconds.
       !
@@ -132,6 +130,8 @@ module m_Universal_Weir
       !! executable statements -------------------------------------------------------
       !
       !
+      u1m =  rum - fum*( s1m2 - s1m1 )
+      qm = aum * u1m
       !
       !     Find the flow direction
       if (s1m1  > s1m2) then
@@ -152,9 +152,9 @@ module m_Universal_Weir
          rum  = 0.0d0
          u1m  = 0.0d0
          qm   = 0.0d0
-         q0m  = 0.0d0
          return
       endif
+      
       uniweir%crestlevel_actual = max(bob0(1), bob0(2), uniweir%crestlevel)
       !
       !     Check on flooding or drying with treshold
@@ -170,7 +170,6 @@ module m_Universal_Weir
          !        same as weir
          u1m = 0.0
          qm = 0.0
-         q0m = 0.0
          return
       endif
       !
@@ -207,7 +206,7 @@ module m_Universal_Weir
          qflow = -qflow
       endif
       !
-      call uniweir_furu(s1m1, s1m2, qflow, dqdh1, dqdh2, dxm, dt, aum, fum, rum, u1m, u0m, q0m, qm)
+      call uniweir_furu(s1m1, s1m2, qflow, dqdh1, dqdh2, dxm, dt, aum, fum, rum, u1m, qm)
                           
    end subroutine ComputeUniversalWeir
 
@@ -339,7 +338,7 @@ module m_Universal_Weir
    end subroutine linearizeweiruni
 
    !> Calculate FU and RU
-   subroutine uniweir_furu(s1m1, s1m2, qstru, qdh1, qdh2, dxm, dt, aum, fum, rum, u1m, u0m, q0m, qm)
+   subroutine uniweir_furu(s1m1, s1m2, qstru, qdh1, qdh2, dxm, dt, aum, fum, rum, u1m, qm)
    
       use  m_struc_helper
    
@@ -362,8 +361,6 @@ module m_Universal_Weir
       double precision, intent(inout) :: fum      !< FU at link
       double precision, intent(inout) :: rum      !< RU at link
       double precision, intent(inout) :: u1m      !< Flow velocity at current time step
-      double precision, intent(in   ) :: u0m      !< Flow velocity at previous time step
-      double precision, intent(in   ) :: q0m      !< Discharge
       double precision, intent(  out) :: qm       !< Discharge
       !
       !
@@ -389,7 +386,7 @@ module m_Universal_Weir
       fr = cu / fuast
       rhsc = -rhsc + fr * ustru
       
-      call furu_iter(fum, rum, s1m2, s1m1, u1m, q0m, aum, fr, cu, rhsc, dxdt, 0d0, 0d0, 0d0, 0d0)
+      call furu_iter(fum, rum, s1m2, s1m1, u1m, qm, aum, fr, cu, rhsc, dxdt, 0d0, 0d0, 0d0, 0d0)
 
       qm = aum * u1m
       
