@@ -11,7 +11,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir)engines_gpl\dflowfm\ $(SolutionDir)engines_gpl\dflowfm\res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 ..\..\..\..\engines_gpl\dflowfm\ ..\..\..\..\engines_gpl\dflowfm\res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm" ConfigurationType="typeStaticLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" UseMkl="mklParallel"/>
@@ -20,7 +20,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir)engines_gpl\dflowfm\ $(SolutionDir)engines_gpl\dflowfm\res\version_number.ini" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 ..\..\..\..\engines_gpl\dflowfm\ ..\..\..\..\engines_gpl\dflowfm\res\version_number.ini" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Debug|x64" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm" ConfigurationType="typeStaticLibrary">
 				<Tool Name="VFFortranCompilerTool" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\$(PlatformName)\include;$(SolutionDir)\third_party_open\Tecplot\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_TECPLOT;HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" WarnDeclarations="true" WarnInterfaces="true" FloatingPointExceptionHandling="fpe0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" UninitializedVariablesCheck="true" DescriptorDataTypeCheck="true" DescriptorDataSizeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklParallel"/>
@@ -29,7 +29,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir)engines_gpl\dflowfm\ $(SolutionDir)engines_gpl\dflowfm\res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 ..\..\..\..\engines_gpl\dflowfm\ ..\..\..\..\engines_gpl\dflowfm\res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Release|x64" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm" ConfigurationType="typeStaticLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\$(PlatformName)\include;$(SolutionDir)\third_party_open\Tecplot\include;$(SolutionDir)third_party_open\petsc\petsc-3.10.2\include" PreprocessorDefinitions="HAVE_PETSC;WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_TECPLOT;HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" UseMkl="mklParallel"/>
@@ -38,7 +38,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir)engines_gpl\dflowfm\ $(SolutionDir)engines_gpl\dflowfm\res\version_number.ini" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 ..\..\..\..\engines_gpl\dflowfm\ ..\..\..\..\engines_gpl\dflowfm\res\version_number.ini" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd">

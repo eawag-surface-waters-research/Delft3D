@@ -11,7 +11,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\wq_processes_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\wq_processes_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory=".\lib\$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
@@ -21,7 +21,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\delwaq_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
@@ -31,7 +31,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\wq_processes_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\wq_processes_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
@@ -41,7 +41,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\wq_processes_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\wq_processes_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
