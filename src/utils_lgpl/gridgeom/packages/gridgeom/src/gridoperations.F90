@@ -81,6 +81,7 @@
    integer :: k, KX, LS, LS0, LX, NODSIZ, IERR
 
    !IF ( NUMK0.EQ.0 ) RETURN
+   if (.not. allocated(xk0) .or. .not. allocated(kn0) .or. .not. allocated(nod0)) return
 
    KX = size(XK0) ! restore everything present (in case numk/numk0 has not yet been increased)
 
