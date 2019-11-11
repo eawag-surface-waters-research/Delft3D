@@ -14555,7 +14555,7 @@ call oldfil(minp, md_foufile)
 call fouini(minp, success, ag, md_tunit,'S')
 FouOutputFile = trim(getoutputdir()) // defaultFilename('fou')
 
-call alloc_fourier_analysis_arrays(gddimens)
+call alloc_fourier_analysis_arrays()
 call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, dt_user, md_fou_step, success)
 call doclose(minp)
 
