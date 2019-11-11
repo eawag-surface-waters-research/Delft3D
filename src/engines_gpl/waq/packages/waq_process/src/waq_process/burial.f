@@ -71,6 +71,8 @@
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+
+      INTEGER  LUNREP
 !
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
@@ -213,6 +215,9 @@
 
 !     Unknown option SwSediment
       ELSE
+        CALL GETMLU(LUNREP)
+        WRITE(LUNREP,*) 'BURIAL: SwSediment should equal 0 or 1! Not',
+     &   ISW
         WRITE(*,*) 'BURIAL: SwSediment should equal 0 or 1! Not', ISW
         CALL SRSTOP(1)
 

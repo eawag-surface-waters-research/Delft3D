@@ -44,6 +44,8 @@
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
+      INTEGER  LUNREP
+
       INTEGER  IP1 , IP2 , IP3 , IP4 , IP5 , IP6 , IP7 , IP8 , IP9 ,
      J         IP10, IP11, IP12, I, IFLUX, ISEG
       REAL     TIMSIM, DELTAT, TIMNUL, T1MXPP, T2MXPP, DAYLEN, FPPTOT,
@@ -78,6 +80,9 @@
      J     (INCREM(5) .GT. 0) .OR.
      J     (INCREM(6) .GT. 0) ) THEN
 
+          CALL GETMLU(LUNREP)
+          WRITE (LUNREP,*)
+     J    ' VAROXY: Time parameters function(x) not ALLOWED'
           WRITE (*,*)
      J    ' VAROXY: Time parameters function(x) not ALLOWED'
           CALL SRSTOP(1)
@@ -101,7 +106,7 @@
 !         Initialize light variation curve for present cycle
 !         ONLY if fluxes have changed
 
-          IF ( (ISEG .EQ. 1) .OR. 
+          IF ( (ISEG .EQ. 1) .OR.
      J             (ABS(DAYLEN-DAYLLAST) .GT. 1E-3) .OR.
      J             (ABS(FPPTOT-PPLAST) .GT. 1E-3) .OR.
      J             (ABS(FRESPI-RELAST) .GT. 1E-3) ) THEN

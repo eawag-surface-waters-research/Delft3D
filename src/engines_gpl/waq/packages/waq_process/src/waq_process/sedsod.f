@@ -58,6 +58,7 @@
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+      INTEGER  LUNREP
 
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
@@ -115,6 +116,8 @@
         FSEDOD = DBOD5 + DBOD52 + DBOD53 + DBODU + DBODU2 + DNBOD5 +
      1           DNBODU + DCODCR + DCODMN
       ELSE
+        CALL GETMLU(LUNREP)
+        WRITE (LUNREP,*) 'SEDSOD: Invalid option for SwOXYDem!'
         WRITE (*,*) 'SEDSOD: Invalid option for SwOXYDem!'
         CALL SRSTOP(1)
       ENDIF

@@ -23,6 +23,11 @@
 
       SUBROUTINE ZEROME ( NAME )
       CHARACTER*(*) NAME
+      INTEGER LUNREP
+
+      CALL GETMLU(LUNREP)
+      WRITE (LUNREP,*) ' Coefficient ',NAME,' = 0'
+      WRITE (LUNREP,*) ' Please supply value not equal to zero'
       WRITE (*,*) ' Coefficient ',NAME,' = 0'
       WRITE (*,*) ' Please supply value not equal to zero'
       CALL SRSTOP(1)

@@ -65,6 +65,7 @@
 !
 !     Local declarations
 !
+      INTEGER  LUNREP
       INTEGER  IFREAR, IKMRK1, IKMRK2, ISEG, IFLUX
       INTEGER  IP1 , IP2 , IP3 , IP4 , IP5 , IP6 , IP7 , IP8, IP9, IP10,
      +         IP11, IP12, IP13, IP14, IP15, IP16, IP17, IP18,IP19,IP20,
@@ -276,6 +277,9 @@
 !
 !         8. Thackston - Krenkel [1966]
 !
+          CALL GETMLU(LUNREP)
+          WRITE (LUNREP,*)
+     &      ' Reaeration formula 8 has not been implemented'
           WRITE (*,*) ' Reaeration formula 8 has not been implemented'
           CALL SRSTOP(1)
 
@@ -347,7 +351,9 @@
           REARTC = 1.0
 !
       ELSE
-          WRITE (*,*) ' Illegal option for reaeration formula'
+          CALL GETMLU(LUNREP)
+          WRITE (LUNREP,*) ' Invalid option for reaeration formula'
+          WRITE (*,*) ' Invalid option for reaeration formula'
           CALL SRSTOP(1)
       ENDIF
 

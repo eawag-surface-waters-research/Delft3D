@@ -72,6 +72,7 @@
       INTEGER  IPOINT(*)       , INCREM(*),
      +         IEXPNT(4,*)     , IKNMRK(*)
 !
+      INTEGER  LUNREP
       INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, IP9, IP10,
      +         IP11, IP12, IP13, IP14
       INTEGER  IN1, IN2, IN3, IN4, IN5, IN6, IN7, IN8, IN9, IN10,
@@ -130,14 +131,20 @@
 !           Check if RC's are non zero
 
             IF (RCBOD1 .LT. 1E-10) THEN
+               CALL GETMLU(LUNREP)
+               WRITE (LUNREP,*) 'RCBOD: Invalid value (zero)!'
                WRITE (*,*) 'RCBOD: Invalid value (zero)!'
                CALL SRSTOP(1)
             ENDIF
             IF (RCBOD2 .LT. 1E-10) THEN
+               CALL GETMLU(LUNREP)
+               WRITE (LUNREP,*) 'RCBOD_2: Invalid value (zero)!'
                WRITE (*,*) 'RCBOD_2: Invalid value (zero)!'
                CALL SRSTOP(1)
             ENDIF
             IF (RCBOD3 .LT. 1E-10) THEN
+               CALL GETMLU(LUNREP)
+               WRITE (LUNREP,*) 'RCBOD_3: Invalid value (zero)!'
                WRITE (*,*) 'RCBOD_3: Invalid value (zero)!'
                CALL SRSTOP(1)
             ENDIF

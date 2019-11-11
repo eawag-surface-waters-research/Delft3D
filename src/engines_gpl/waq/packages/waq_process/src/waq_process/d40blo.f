@@ -49,6 +49,7 @@
 
       real     pmsa  ( * ) , fl    (*)
       integer  ipoint( * ) , increm(*) , noseg , noflux, iexpnt(4,*) , iknmrk(*) , iq, ifrom, ito, noq1, noq2, noq3, noq4
+
 !
 !     Local (species groups arrays are now dimensioned as species/types arrays)
 !
@@ -113,7 +114,7 @@
 !     SWBLSA  I     1             Switch for BLOOM stand alone (0=no, 1=yes)     (-)
 !     TotNin  R     1             Total nitrogen for BLOOM stand alone        (g/m3)
 !     TotPin  R     1             Total phosphorous for BLOOM stand alone     (g/m3)
-!     TotSIin R     1             Total silicium for BLOOM stand alone        (g/m3)       
+!     TotSIin R     1             Total silicium for BLOOM stand alone        (g/m3)
       integer  ntyp_m, nipfix, nipvar, noutlim, nunucom, nopfix
       parameter ( ntyp_m = 30 )
 !     NIPFIX      Nr of input items independent of BLOOM types, preceding BLOOM types input
@@ -159,12 +160,12 @@
       real    TotNin, TotPin, TotSIin
       integer swblsa
 
-!     Former D09 input      
+!     Former D09 input
       integer      SWBlSolInt           ! Switch for solar irradiation as total radiation (0) or PAR (1)
       integer      SWBlObject           ! Switch for objective growth (1) or biomass (0)
       real         BlTemLim             ! Minimum temperature for growth
       real         BlBasMor             ! Base mortality when temperature is below minimum temperature for growth
-      integer      SWBlGroChk           ! Switch to use extra constraints on growth rates 
+      integer      SWBlGroChk           ! Switch to use extra constraints on growth rates
       real         BlBioBas             ! Base biomass level per group
       integer      SWBlMorChk           ! Switch to use extra mortality constraints
       real         BlTopLev             ! Top level of mortality constraints
@@ -197,7 +198,7 @@
          swblsa = pmsa(ipoint(29))
          if (increm(29).ne.0) call blstopinit(lunrep, 'SWBlSA')
 
-!        Former D09 input      
+!        Former D09 input
          SWBlSolInt = nint(pmsa(ipoint(33)))
          if (increm(33).ne.0) call blstopinit(lunrep, 'SWBlSolInt')
          SWBlObject = nint(pmsa(ipoint(34)))
@@ -214,7 +215,7 @@
          if (increm(39).ne.0) call blstopinit(lunrep, 'SWBlMorChk')
          BlTopLev   = pmsa(ipoint(40))
          if (increm(40).ne.0) call blstopinit(lunrep, 'BlTopLev')
-         
+
 !        Copy algae type properties for input
          DO 40 IALG=1,NTYP_M
 !          BLOOMALG
@@ -485,20 +486,20 @@
                DEPTHW = DEPTH
                IF (BLDEP.GT.0.) DEPTHW = BLDEP
                CL     = PMSA(IP22)
-         
+
                DO IALG = 1,NTYP_A
-         
+
 !jvb              set SDMIX for all types, time/space dependent
 !                 SDMIXALG
                   IOFF = NIPFIX + 20*NTYP_M + IALG
                   IP = IPOINT(IOFF) + (ISEG-1)*INCREM(IOFF)
                   SDMIXN = PMSA(IP)
                   CALL BLSSDM(IALG,SDMIXN)
-!jvb     
+!jvb
                   IF (IFIX(IALG).LT.0) THEN
-!        
+!
 !                    No PP for fixed ulva in non bottom segment, unless sdmix is set positive for this segment
-!        
+!
                      IF ( SDMIXN .LT. -1.E-10 ) THEN
                         IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
                            CALL BLSPPM(IALG,0.0)
@@ -507,7 +508,7 @@
                         CALL BLSPPM(IALG,0.0)
                      ENDIF
                   ENDIF
-         
+
                   IOFF = NIPFIX + NTYP_M*22
                   IP = IPOINT(IOFF+IALG) + (ISEG-1)*INCREM(IOFF+IALG)
                   MRTM2 (IALG) = PMSA(IP)
@@ -519,10 +520,10 @@
                   MRTB2 (IALG) = PMSA(IP)
                ENDDO
                CALL BLCLST (MRTM1,MRTM2,MRTB1,MRTB2,NTYP_A,CL)
-         
+
                CALL SET_EFFI( TEMPER, RADIAT, EXTTOT, DEPTHW, DAYLEN,
      +                        ID    )
-         
+
                IF ( IKMRK1 .EQ. 3 ) THEN
                   CALL BL_RESTORE_AUTOLYSE(ORG_AVAILN) ! WAQ-G restore autolyse
                ENDIF
@@ -550,7 +551,7 @@
          ENDDO
       ENDIF
 ! END3DL
-               
+
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
       IP4  = IPOINT( 4)
@@ -714,7 +715,7 @@
 
       CALL BLPRIM ( BIOMAS        , AMMONI        , NITRAT        ,
      J              PHOSPH        , SILICA        , DETN          ,
-     M              DETP          ,                 CO2           , 
+     M              DETP          ,                 CO2           ,
      J              TIC           , FL(IFMORT)    ,
      J              FL(IFDETR)    , BLSTEP        , EXTTOT        ,
      J              EXTALG        , TEMPER        , RADIAT        ,
@@ -725,8 +726,8 @@
      J              FRAMMO        , FBOD5         , RATGRO        ,
      J              RATMOR        , ALGDM         , ISEG          ,
      J              CGROUP        , LMIXO         , LFIXN         ,
-     J              LCARB         , NUTCON        , FLXCON        , 
-     J              NOUTLIM       , OUTLIM        , NUNUCOM       , 
+     J              LCARB         , NUTCON        , FLXCON        ,
+     J              NOUTLIM       , OUTLIM        , NUNUCOM       ,
      J              NTYP_M        , CON2OUT       , SWBLSA        ,
      J              TotNin        , TotPin        , TotSIin       )
 
@@ -772,12 +773,12 @@
       DO IGRO = 1,NTYP_A
           RCRESP = ALGTYP(13,IGRO)
           TCRESP = ALGTYP(14,IGRO)
-          PMSA(IO(18)) = PMSA(IO(18)) 
+          PMSA(IO(18)) = PMSA(IO(18))
      J                 + RCRESP*TCRESP**TEMPER*BIOMAS(IGRO)
       ENDDO
       PMSA(IO(18)) = PMSA(IO(18))*DEPTHW
       PMSA(IO(19)) = FL(IFUPTA+7)*DEPTHW
-      
+
 !     New limitation factors (nutrients + light)
       DO IP = 1,NUNUCOM+2
           PMSA(IO(19+IP)) = OUTLIM(IP)
@@ -796,7 +797,7 @@
           IP = IPOINT(IOFF+IGRO) + (ISEG-1)*INCREM(IOFF+IGRO)
           PMSA(IP) = RATMOR(IGRO)
       ENDDO
-      
+
 !     Biomass of all groups
       IOFF = NIPFIX + NIPVAR*NTYP_M + NOPFIX + 2*NTYP_M
       DO IGRO = 1,NTYP_A
@@ -917,10 +918,15 @@
 
       end subroutine blstopinit
 
-      
+
       subroutine blstop(mes,i)
 
       character*12 mes
+      integer      lunrep
+
+      call getmlu(lunrep)
+      write(lunrep,*) 'ERROR in bloom: '
+      write(lunrep,*) 'Characteristic ',mes,' for algae type ',i,' must be a constant!'
 
       write(*,*) 'ERROR in bloom: '
       write(*,*) 'Characteristic ',mes,' for algae type ',i,' must be a constant!'
@@ -931,14 +937,14 @@
 
       end subroutine blstop
 
-      
+
       subroutine bl_no_autolyse(org_availn)
 
       use bloom_data_dim
-      use bloom_data_phyt    
+      use bloom_data_phyt
 
       implicit none
-      
+
       real*8 org_availn(mt)
 
       org_availn(1:mt) = availn(1:mt)
@@ -946,11 +952,11 @@
 
       end subroutine bl_no_autolyse
 
-      
+
       subroutine bl_restore_autolyse(org_availn)
 
       use bloom_data_dim
-      use bloom_data_phyt    
+      use bloom_data_phyt
 
       implicit none
 

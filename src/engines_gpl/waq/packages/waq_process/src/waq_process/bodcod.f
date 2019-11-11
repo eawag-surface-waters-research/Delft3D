@@ -101,6 +101,8 @@
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
+      INTEGER  LUNREP
+
       LOGICAL  TFACT,AFACT
       REAL     RAT5N , BODN  , BDNPHY, AMCCF , BDNPOC
 
@@ -279,11 +281,14 @@
 
 !     CHECK IF RC'S ARE NON ZERO
       IF (RCBOD .LT. 1E-10) THEN
+        CALL GETMLU( LUNREP )
+        WRITE (LUNREP,*) 'RCBOD: Invalid value (zero)!'
         WRITE (*,*) 'RCBOD: Invalid value (zero)!'
         CALL SRSTOP(1)
       ENDIF
       IF (RCBOD2 .LT. 1E-10) THEN
-        WRITE (*,*) 'RCBOD-2: Invalid value (zero)!'
+        CALL GETMLU( LUNREP )
+        WRITE (LUNREP,*) 'RCBOD-2: Invalid value (zero)!'
         CALL SRSTOP(1)
       ENDIF
 
@@ -383,6 +388,8 @@
         OXYDEM = DBOD5 + DBOD52 + DBODU + DBODU2 + DNBOD5 + DNBODU +
      1           DCODCR + DCODMN
       ELSE
+        CALL GETMLU(LUNREP)
+        WRITE (LUNREP,*) 'BODCOD: Invalid option for SwOXYDem!'
         WRITE (*,*) 'BODCOD: Invalid option for SwOXYDem!'
         CALL SRSTOP(1)
       ENDIF

@@ -105,6 +105,7 @@
      J         DISS  , DISHS , LKSOL , LKMES , LKMEHS, FSULF ,
      J         FDIS2 , CDISM , QUAL  , KDALL , VOLUME, IAP   ,
      J         FAC6C
+      INTEGER  LUNREP
       INTEGER  IFLUX , ISEG  , ISWOX , IGROUP
       LOGICAL  SEDIME
 !
@@ -315,19 +316,31 @@
 
       IF (TWOFRC) THEN
         IF (IN2.EQ.0) THEN
+          CALL GETMLU(LUNREP)
+          WRITE(LUNREP,*)
+     &      'PARTMP: No value for MPDIS in dis/par modelling'
           WRITE(*,*) 'PARTMP: No value for MPDIS in dis/par modelling'
           CALL SRSTOP(1)
         ENDIF
         IF (IN3.EQ.0) THEN
+          CALL GETMLU(LUNREP)
+          WRITE(LUNREP,*)
+     &      'PARTMP: No value for MPPAR in dis/par modelling'
           WRITE(*,*) 'PARTMP: No value for MPPAR in dis/par modelling'
           CALL SRSTOP(1)
         ENDIF
       ELSE
         IF (IN2.GT.0) THEN
+          CALL GETMLU(LUNREP)
+          WRITE(LUNREP,*)
+     &      'PARTMP: Values for MPDIS and MP!'
           WRITE(*,*) 'PARTMP: Values for MPDIS and MP!'
           CALL SRSTOP(1)
         ENDIF
         IF (IN3.GT.0) THEN
+          CALL GETMLU(LUNREP)
+          WRITE(LUNREP,*)
+     &      'PARTMP: Values for MPPAR and MP!'
           WRITE(*,*) 'PARTMP: Values for MPPAR and MP!'
           CALL SRSTOP(1)
         ENDIF
@@ -385,6 +398,10 @@
 
       IF (TWOFRC) THEN
           IF (IGROUP.EQ.2) THEN
+              CALL GETMLU(LUNREP)
+              WRITE(LUNREP,*)
+     1               'PARTMP: Kinetic sorption for Chromium not ',
+     1               'implemented!'
               WRITE(*,*) 'PARTMP: Kinetic sorption for Chromium not ',
      1               'implemented!'
               CALL SRSTOP(1)
@@ -505,6 +522,14 @@
         ENDIF
         IF ( HVTADS .GT. 1E-20 .OR. HVTDES .GT. 1E-20 ) THEN
             IF (.NOT.TWOFRC) THEN
+              CALL GETMLU(LUNREP)
+              WRITE(LUNREP,*)
+     1                   'PARTMP: Kinetic sorption one MP fraction ',
+     1                   'not possible!'
+              WRITE(LUNREP,*)
+     1                   'Create MP-Dis & MP-Part for kinetic sorption'
+              WRITE(LUNREP,*)
+     1                   'or set HLTAdsMP and HLTDesMP to zero'
               WRITE(*,*) 'PARTMP: Kinetic sorption one MP fraction ',
      1                   'not possible!'
               WRITE(*,*) 'Create MP-Dis & MP-Part for kinetic sorption'
@@ -756,6 +781,12 @@
         PMSA(IP41) = CDIS
 
       ELSE
+        CALL GETMLU(LUNREP)
+
+        WRITE(LUNREP,*) 'Invalid option for partitioning!'
+        WRITE(LUNREP,*) 'SwOXIC= ',ISWOX,' 1- oxic, 0 - anoxic'
+        WRITE(LUNREP,*)
+     &    'Group = ',IGROUP,' 1- General, 2-Cr, 3-As/Va, 4-OMP'
 
         WRITE(*,*) 'Invalid option for partitioning!'
         WRITE(*,*) 'SwOXIC= ',ISWOX,' 1- oxic, 0 - anoxic'

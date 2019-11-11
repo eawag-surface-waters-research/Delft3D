@@ -41,6 +41,8 @@
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
+      INTEGER  LUNREP
+
       INTEGER  IP1 , IP2 , IP3 , IP4 , IP5 , IP6
       REAL     DEPTH , ADEPTH
       INTEGER  TELLER, NAVERA, NSWITS, ISEG
@@ -63,6 +65,9 @@
           FIRST = .FALSE.
           IF ( (INCREM(1) .GT. 0) .OR.
      J         (INCREM(2) .GT. 0) ) THEN
+              CALL GETMLU(LUNREP)
+              WRITE (LUNREP,*)
+     J        ' DEPAVE: INPUT parameters function(x) not ALLOWED'
               WRITE (*,*)
      J        ' DEPAVE: INPUT parameters function(x) not ALLOWED'
               CALL SRSTOP(1)

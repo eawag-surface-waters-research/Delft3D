@@ -2442,6 +2442,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/diggin.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/dissi.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/dlalg.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/dmvol.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/dradio.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/dredge.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/dsptra.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/dsurf.f -text

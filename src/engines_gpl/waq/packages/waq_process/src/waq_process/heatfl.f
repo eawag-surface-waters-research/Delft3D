@@ -103,6 +103,7 @@
      j         HTVap, Fwind, Ql, Beta, Qsg, Qt, Qrb, Tref,
      j         dTemp, cp, DEPTH, RelHum, Psvap, Hm, Ha, Vevap, Fwind2,
      j         VWinda, DeltaT, HtVRef, RhoRef, Rho0, MODTEMP, mindeptht
+      INTEGER  LUNREP
 
       IP1   = IPOINT( 1)
       IP2   = IPOINT( 2)
@@ -242,6 +243,8 @@
      j                 (1.0 + 0.17 * cloud ** 2.0)
 !
             ELSE
+               CALL GETMLU(LUNREP)
+               WRITE (LUNREP,*) ' Illegal option for emissivity formula'
                WRITE (*,*) ' Illegal option for emissivity formula'
                CALL SRSTOP(1)
             ENDIF

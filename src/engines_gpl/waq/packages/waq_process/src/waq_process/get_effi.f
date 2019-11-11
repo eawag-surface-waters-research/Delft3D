@@ -26,13 +26,13 @@
 !>       calculate and store efficiency for all species
 
       use bloom_data_dim
-      use bloom_data_size 
-      use bloom_data_arran   
-      use bloom_data_phyt    
+      use bloom_data_size
+      use bloom_data_arran
+      use bloom_data_phyt
       use bloom_data_putin
 
       implicit none
-      
+
 !     arguments
 
       integer  SWEff      ! input , Switch to use classic(1) or direct(2) BLOOM Efficiency calculation
@@ -45,6 +45,8 @@
       real     effi(30)   ! output, calculated efficiencies per species
 
 !     local decalarations
+
+      integer  lunrep
 
       real*8   temp       ! temperature
       real*8   csol       ! radiation
@@ -86,7 +88,7 @@
       nspe   = nuecog
       ntyp   = maxval(it2)
       effi = 0.0d0
-      
+
       call maxprd ( tefcur )
       do itype = 1,ntyp
          pmax20(itype) = pmax(itype)
@@ -165,7 +167,7 @@
                effi(igroup) = max(effi(igroup), (effitop+effimid+effimid+effibot)/4.0)
             enddo
          enddo
-      elseif (SWEff < 0) then 
+      elseif (SWEff < 0) then
          ! direct effi lookup in light curve at top and abs(sweff) number of layers and take average (SWEff < 0)
          neffilay = abs (SWEff)
          do igroup = 1 , nuecog
@@ -196,21 +198,28 @@
       end subroutine get_effi
 
       subroutine lookupeffi(rad,effi,numgr)
-      
+
       use bloom_data_dim
       use bloom_data_arran
-      
+
       implicit none
 
       real*8  rad
       real*8  effi
       integer numgr, i
+      integer lunrep
       real*8  interpol
       logical, save :: first = .true.
 
       if (first) then
          if (power(npoint).eq.0.0) then
-            write(*,*) 'ERROR: the highest power in the light curve is 0.0. Check if your bloom.spe file contains light curves!'
+            call getmlu(lunrep)
+            write(lunrep,*)
+     &         'ERROR: the highest power in the light curve is 0.0.',
+     &         'Check if your bloom.spe file contains light curves!'
+            write(*,*)
+     &         'ERROR: the highest power in the light curve is 0.0.',
+     &         'Check if your bloom.spe file contains light curves!'
             call srstop(1)
          endif
          first=.false.
@@ -238,7 +247,7 @@
       subroutine get_nspe( nspe )
 
       use bloom_data_phyt
-      
+
       implicit none
 
       integer  nspe       ! input , number of bloom algea types
