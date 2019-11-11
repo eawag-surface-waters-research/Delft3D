@@ -5512,10 +5512,11 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
             j = max(j,pCSs(i)%levelscount)
          enddo
          jmax = j
-         if (.not.allocated(work1d_z)) then
-            allocate( work1d_z(jmax,ndx1d), work1d_n(jmax,ndx1d) )
-            work1d_z = dmiss
-            work1d_n = dmiss
+         call realloc(work1d_z, [jmax, ndx1d], fill = dmiss, stat=ierr)
+         if (ierr == 0) call realloc(work1d_n, [jmax, ndx1d], fill = dmiss, stat=ierr)
+         if (ierr /= 0) then
+            call mess(LEVEL_ERROR, 'Allocation error in unc_write_map_filepointer_ugrid.')
+            return
          endif
          do i = 1,ndx1d
             k = ndx2d + i
@@ -5531,8 +5532,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
                endif
             endif
          enddo
-         ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsz(1), work1d_z(1:jmax,1:ndx1d), start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, ndx1d, 1 /) )
-         ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), work1d_n(1:jmax,1:ndx1d), start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, ndx1d, 1 /) )
+         ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsz(1), work1d_z, start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, ndx1d, 1 /) )
+         ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), work1d_n, start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, ndx1d, 1 /) )
       endif
    endif
    !
