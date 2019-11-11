@@ -35066,6 +35066,7 @@ end subroutine setbobs_fixedweirs
                       wu(L) = width
 
                       call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
+                      au(L) = pstru%au(L0)
                       call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
                           au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
                    case (ST_DAMBREAK)

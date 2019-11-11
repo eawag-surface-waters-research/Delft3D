@@ -186,8 +186,10 @@ contains
       crest   = max(bob0(1), bob0(2), genstr%zs)
       gle = max(crest, genstr%gateLowerEdgeLevel)
       genstr%gateLowerEdgeLevel_actual = gle
-      alm  = as1
-      arm  = as2
+      ! upstream flow area should always be larger or equal to the flow area at the crest
+      alm  = min(as1, auL)
+      arm  = min(as2, auL)
+      
       s1ml = s1m1
       s1mr = s1m2
       dsL   = s1m2 - s1m1 
