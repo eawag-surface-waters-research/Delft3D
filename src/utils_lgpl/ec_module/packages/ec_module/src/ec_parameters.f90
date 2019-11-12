@@ -39,7 +39,7 @@ module m_ec_parameters
    integer,  parameter :: maxNameLen           = 256
    integer,  parameter :: maxFileNameLen       = 256
    integer,  parameter :: maxFileReaderFiles   = 3
-   integer             :: maxFileUnits         = 2000   !< may be lowered if too high for current OS
+   integer             :: maxFileUnits         = 8000   !< maximum on Windows 10 (8000 < 8192)
    integer,  parameter :: numberOfTargetItems  = 4
 
    integer,  parameter :: EC_MISSING_VALUE = -999
