@@ -662,6 +662,8 @@
       write_restart_file = .false.
       max_restart_age = -1
       pldebug = .false.
+      screens = .false.
+      nrowsscreens = 0
 
 
       if ( gettoken( cbuffer, id, itype, ierr2 ) .ne. 0 ) then
@@ -770,6 +772,30 @@
                   write ( lun2, '(/a)' ) '  Found keyword "pldebug": will write plastics debug info (e.g. sizes).'
                   write ( *   , '(/a)' ) ' Found keyword "pldebug": will write plastics debug info (e.g. sizes).'
                   pldebug = .true.
+               case ('screens')
+                  write ( lun2, '(/a)' ) '  Found keyword "screens".'
+                  write ( *   , '(/a)' ) ' Found keyword "screens".'
+                  screens = .true.
+                  if ( gettoken( permealeft  , ierr2 ) .ne. 0 ) goto 9201   ! leftside permeability of screeens 
+                  if ( gettoken( permearight , ierr2 ) .ne. 0 ) goto 9202   ! rightside permeability of screeens
+                  if ( gettoken( fiscreens   , ierr2 ) .ne. 0 ) goto 9203   ! screens polygon
+
+                  open ( 50, file=fiscreens, status='old', iostat=ierr2 )
+                  if ( ierr2 .ne. 0 ) go to 9204
+                  call getdim_dis ( 50, fiscreens, nrowsscreens, lun2 )
+                  close (50)
+                  if ( nrowsscreens .gt. 0) then
+!     allocate memory for the dispersant polygons, and read them into memory
+                     call alloc ( "xpoltmp", xpolscreens, nrowsscreens )
+                     call alloc ( "ypoltmp", ypolscreens, nrowsscreens )
+                     xpolscreens = 999.999
+                     ypolscreens = 999.999
+                     call polpart(fiscreens, nrowsscreens, xpolscreens, ypolscreens, nrowstmp, lun2)
+                  else
+                     write ( lun2, '(/a)' ) '  Screens polygon doesn''t contain any coordinates'
+                     write ( *   , '(/a)' ) ' Screens polygon doesn''t contain any coordinates'
+                     screens = .false.
+                  endif
                case default
                   write ( lun2, '(/a,a)' ) '  Unrecognised keyword: ', trim(cbuffer)
                   write ( *   , '(/a,a)' ) ' Unrecognised keyword: ', trim(cbuffer)
@@ -2390,6 +2416,17 @@
       call stop_exit(1)
 9107  write(lun2,'(/A,I3,A)') '  Error: ', plmissing, ' plastic(s) is/are not parametrised! '
       write(*   ,'(/A,I3,A)')  ' Error: ', plmissing, ' plastic(s) is/are not parametrised! '
+      call stop_exit(1)
+9201  write(lun2,*) ' Error: expected leftside permeability of screeens!'
+      write(*   ,*) ' Error: expected leftside permeability of screeens!'
+      call stop_exit(1)
+9202  write(lun2,*) ' Error: expected rightside permeability of screeens!'
+      write(*   ,*) ' Error: expected rightside permeability of screeens!'
+      call stop_exit(1)
+9203  write(lun2,*) ' Error: expected screeens polygon file name!'
+      write(*   ,*) ' Error: expected screeens polygon file name!'
+9204  write(lun2,*) ' Error: could not open screens polygon-file: '//trim(fiscreens)
+      write(*,*) ' Error: could not open screens polygon-file: '//trim(fiscreens)
       call stop_exit(1)
 
       end
