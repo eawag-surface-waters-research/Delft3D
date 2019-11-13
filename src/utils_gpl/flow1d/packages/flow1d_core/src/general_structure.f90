@@ -187,9 +187,8 @@ contains
       gle = max(crest, genstr%gateLowerEdgeLevel)
       genstr%gateLowerEdgeLevel_actual = gle
       ! upstream flow area should always be larger or equal to the flow area at the crest
-      alm  = min(as1, auL)
-      arm  = min(as2, auL)
-      
+      alm  = max(as1, auL)
+      arm  = max(as2, auL)
       s1ml = s1m1
       s1mr = s1m2
       dsL   = s1m2 - s1m1 
@@ -265,6 +264,9 @@ contains
       if (auL > 0d0) then
          fuL = (fu(1)*au(1) + fu(2)*au(2) + fu(3)*au(3))/auL
          ruL = (ru(1)*au(1) + ru(2)*au(2) + ru(3)*au(3))/auL
+      else
+         fuL = 0d0
+         ruL = 0d0
       endif
       genstr%fu(:,L0) = fu
       genstr%ru(:,L0) = ru
@@ -1081,13 +1083,14 @@ contains
    !! flow across the sill. \n
    !! NOTE: The implementation for gates coming in from left or right is not corrrect. 
    !! The total crest width becomes incorrect, when the gatedooropening is less than half the totalwidth.
-   subroutine update_widths(genstru, numlinks, links, wu)
+   subroutine update_widths(genstru, numlinks, links, wu, hu)
       implicit none
 
       type(t_generalStructure), intent(inout)          :: genstru      !< general structure data
       integer,                  intent(in   )          :: numlinks     !< number of links
       integer, dimension(:),    intent(in   )          :: links        !< array containing linknumbers
       double precision, dimension(:),    intent(in   ) :: wu           !< flow widths
+      double precision, dimension(:),    intent(in   ) :: hu           !< upstream water level
       
       double precision :: crestwidth, totalWidth, closedWidth, closedGateWidthL, closedGateWidthR, help
       integer :: ng, L, L0, Lf
@@ -1104,6 +1107,7 @@ contains
          totalWidth = totalWidth + wu(Lf)
       end do
 
+      
       genstru%ws_actual = max(0d0, min(totalWidth, genstru%ws))
       genstru%gateopeningwidth_actual = max(0d0, min(genstru%ws_actual, genstru%gateopeningwidth))
 
