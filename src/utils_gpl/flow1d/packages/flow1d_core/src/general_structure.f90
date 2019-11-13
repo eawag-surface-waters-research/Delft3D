@@ -1083,14 +1083,13 @@ contains
    !! flow across the sill. \n
    !! NOTE: The implementation for gates coming in from left or right is not corrrect. 
    !! The total crest width becomes incorrect, when the gatedooropening is less than half the totalwidth.
-   subroutine update_widths(genstru, numlinks, links, wu, hu)
+   subroutine update_widths(genstru, numlinks, links, wu)
       implicit none
 
       type(t_generalStructure), intent(inout)          :: genstru      !< general structure data
       integer,                  intent(in   )          :: numlinks     !< number of links
       integer, dimension(:),    intent(in   )          :: links        !< array containing linknumbers
       double precision, dimension(:),    intent(in   ) :: wu           !< flow widths
-      double precision, dimension(:),    intent(in   ) :: hu           !< upstream water level
       
       double precision :: crestwidth, totalWidth, closedWidth, closedGateWidthL, closedGateWidthR, help
       integer :: ng, L, L0, Lf
