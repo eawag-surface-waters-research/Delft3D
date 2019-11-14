@@ -1093,7 +1093,6 @@ implicit none
 
 double precision, allocatable, target :: wx(:)    !< [m/s] wind x velocity   (m/s) at u point {"location": "edge", "shape": ["lnx"]}
 double precision, allocatable, target :: wy(:)    !< [m/s] wind y velocity   (m/s) at u point {"location": "edge", "shape": ["lnx"]}
-double precision, allocatable, target :: wmag(:)  !< [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
 double precision, allocatable, target :: ec_pwxwy_x(:)  !< Temporary array, for comparing EC-module to Meteo1.
 double precision, allocatable, target :: ec_pwxwy_y(:)  !< Temporary array, for comparing EC-module to Meteo1.
 double precision, allocatable, target :: ec_pwxwy_c(:)  !< Temporary array, for comparing EC-module to Meteo1.

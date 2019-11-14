@@ -87,51 +87,51 @@
   case(28)
      var_name = "wy"
   case(29)
-     var_name = "wmag"
-  case(30)
      var_name = "rain"
-  case(31)
+  case(30)
      var_name = "evap"
-  case(32)
+  case(31)
      var_name = "numlatsg"
-  case(33)
+  case(32)
      var_name = "qplat"
-  case(34)
+  case(33)
      var_name = "qqlat"
-  case(35)
+  case(34)
      var_name = "balat"
-  case(36)
+  case(35)
      var_name = "nnlat"
-  case(37)
+  case(36)
      var_name = "qinext"
-  case(38)
+  case(37)
      var_name = "qinextreal"
-  case(39)
+  case(38)
      var_name = "vincum"
-  case(40)
+  case(39)
      var_name = "zbndz"
-  case(41)
+  case(40)
      var_name = "zbndu"
-  case(42)
+  case(41)
      var_name = "zbndq"
-  case(43)
+  case(42)
      var_name = "turkin1"
-  case(44)
+  case(43)
      var_name = "vicwws"
-  case(45)
+  case(44)
      var_name = "rnveg"
-  case(46)
+  case(45)
      var_name = "diaveg"
-  case(47)
+  case(46)
      var_name = "cfuveg"
-  case(48)
+  case(47)
      var_name = "alfaveg"
-  case(49)
+  case(48)
      var_name = "stemdens"
-  case(50)
+  case(49)
      var_name = "stemdiam"
-  case(51)
+  case(50)
      var_name = "stemheight"
+  case(51)
+     var_name = "Cdvegsp"
   case(52)
      var_name = "zws"
   case(53)
@@ -288,9 +288,5 @@
      var_name = "yz"
   case(129)
      var_name = "ba"
-  case(130)
-     var_name = "md_pdffile"
-  case(131)
-     var_name = "md_blmfile"
   end select
 

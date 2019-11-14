@@ -86,8 +86,6 @@
      rank = 1
   case("wy")
      rank = 1
-  case("wmag")
-     rank = 1
   case("rain")
      rank = 1
   case("evap")
@@ -131,6 +129,8 @@
   case("stemdiam")
      rank = 1
   case("stemheight")
+     rank = 1
+  case("Cdvegsp")
      rank = 1
   case("zws")
      rank = 1
@@ -288,10 +288,6 @@
      rank = 1
   case("ba")
      rank = 1
-  case("md_pdffile")
-     rank = 0
-  case("md_blmfile")
-     rank = 0
   case default
      rank = 0
   end select

@@ -110,11 +110,10 @@ module m_fourier_analysis
 
     public :: fouini
     public :: alloc_fourier_analysis_arrays
-    public :: count_fourier_variables
     public :: reafou
     public :: postpr_fourier
 
-    public :: fourierIsActive, fourierWithUc, fourierWithWindspeed
+    public :: fourierIsActive, fourierWithUc
     public :: nofou
     public :: FouOutputFile
 
@@ -129,17 +128,6 @@ module m_fourier_analysis
     logical function fourierWithUc()
        fourierWithUc = (gdfourier%ibluc>0)
     end function fourierWithUc
-
-!> do fourier with wind speed or not
-    logical function fourierWithWindspeed()
-       integer :: ifou
-       fourierWithWindspeed = .false.
-       do ifou = 1, nofou                         ! scan for windspeed in the list of fourier requests to see whether or not to allocate wmag
-          if (gdfourier%founam(ifou)=='ws') then
-             fourierWithWindspeed = .true.
-          endif
-       enddo
-    end function fourierWithWindspeed
 
 !> count the number of fourier/min/max quantities
     subroutine count_fourier_variables
@@ -812,6 +800,9 @@ module m_fourier_analysis
           msgbuf = 'allocation error in reafou'
           call err_flush()
        endif
+
+       call count_fourier_variables()
+
        return
 6666   continue   ! abort fourier analysis, something went wrong
        write (msgbuf, '(a)') 'Invalid input for Fourier analysis, record='''//trim(record)//''''
@@ -827,15 +818,19 @@ subroutine getsizes(ifou, sizea, sizeb)
    integer, intent(out) :: sizea    !< size of suma
    integer, intent(out) :: sizeb    !< size of sumb
 
-   integer :: ivar
+   sizea = name_dependent_size(trim(gdfourier%founam(ifou)))
 
-   sizea = name_dependent_size(gdfourier%founam(ifou))
-   ivar = gdfourier%fouref(ifou,2)
-   if (index(gdfourier%fouvarnam(ivar), 'avg') > 0) then
-      sizeb = 1
-   else
-      sizeb = sizea
-   endif
+   select case (gdfourier%fouelp(ifou))
+      case('a', 'e')
+         ! avg and max energy: sumb is not used (in avg only for time, so 1 element)
+         sizeb = 1
+      case('x', 'i')
+         ! min and min: sumb is only used for waterdepth
+         sizeb = merge(sizea, 1, gdfourier%founam(ifou) == 's1')
+      case default
+         ! real fourier analyse: sumb has the same size as suma
+         sizeb = sizea
+   end select
 end subroutine getsizes
 
 !> helper routine to get the size of suma arrays
@@ -1232,6 +1227,7 @@ end subroutine setfouunit
     ! Perform analysis and write to Fourier file
     !
     integer                                        :: ifou
+    integer                                        :: ierr
     integer          , dimension(:)      , pointer :: fconno
     integer          , dimension(:)      , pointer :: flayno
     integer          , dimension(:)      , pointer :: fnumcy
@@ -1248,12 +1244,12 @@ end subroutine setfouunit
     integer                                        :: nmaxus
     integer                              , pointer :: kmax
 
-    double precision, pointer        :: fieldptr1(:)
-    double precision, pointer        :: bl_ptr(:)
-    integer         , pointer        :: kfs_ptr(:), kfst0_ptr(:)
+    double precision, pointer             :: fieldptr1(:)
+    double precision, pointer             :: bl_ptr(:)
+    integer         , pointer             :: kfs_ptr(:), kfst0_ptr(:)
+    double precision, allocatable, target :: wmag(:)  !< [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
 
     integer    :: itdate   !<  Reference time in yyyymmdd as an integer
-    double precision, allocatable, target :: constit(:)
 
     read(refdat,*) itdate
 
@@ -1278,12 +1274,15 @@ end subroutine setfouunit
     kfs_ptr => kfs
     kfst0_ptr => kfst0
 
-    if (.not. allocated(constit)) then
-      allocate (constit(1:gddimens%ndkx))
-    endif
-
-    if (allocated(wmag) .and. allocated(wx) .and. allocated(wy)) then
-       wmag = sqrt(wx*wx + wy*wy)
+    if (gdfourier%iblws > 0) then
+       allocate(wmag(lnx), stat=ierr)
+       if (ierr /= 0) then
+          msgbuf = 'Allocation error in postpr_fourier; Fourier disabled.'
+          call warn_flush()
+          nofou = 0
+       else
+          wmag = sqrt(wx*wx + wy*wy)
+       endif
     endif
 
     if (nofou > 0) then
@@ -1316,8 +1315,7 @@ end subroutine setfouunit
              case ('uc')                        ! ucmag, velocity magnitude
                 fieldptr1 => ucmag
              case ('r1')
-                constit = constituents(fconno(ifou),:)
-                fieldptr1 => constit
+                fieldptr1 => constituents(fconno(ifou),:)
              case ('ta')
                 call gettaus(1)
                 fieldptr1 => taus
@@ -1332,6 +1330,7 @@ end subroutine setfouunit
              !
           endif
        enddo
+       if (allocated(wmag)) deallocate(wmag)
        !
        ! Write results of fourier analysis to data file
        ! only once when all fourier periods are complete
@@ -1550,7 +1549,7 @@ end subroutine setfouunit
               iblcn = iblcn + 1
               blnm = 'CO??'
               write (blnm(3:4), '(i2.2)') iblcn
-              namfun = namcon(fconno(ifou))
+              namfun = trim(namcon(fconno(ifou)))
            endif
            if (founam(ifou)(:2)=='u1') then
               unc_loc = UNC_LOC_U
@@ -1648,7 +1647,6 @@ end subroutine setfouunit
     end subroutine wrfou
 
 !> - writes results of fourier analysis to output
-!! file lunfou for scalair quantities
    subroutine wrfous(ifou, dtsec, hdt, tzone, gddimens, fileids, iloc)
    !!--declarations----------------------------------------------------------------
        use precision

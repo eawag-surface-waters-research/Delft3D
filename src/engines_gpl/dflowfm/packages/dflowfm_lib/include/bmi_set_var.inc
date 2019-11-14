@@ -115,9 +115,6 @@
   case("wy")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(wy))
      wy(:) = x_1d_double_ptr
-  case("wmag")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(wmag))
-     wmag(:) = x_1d_double_ptr
   case("rain")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(rain))
      rain(:) = x_1d_double_ptr
@@ -184,6 +181,9 @@
   case("stemheight")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(stemheight))
      stemheight(:) = x_1d_double_ptr
+  case("Cdvegsp")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(Cdvegsp))
+     Cdvegsp(:) = x_1d_double_ptr
   case("zws")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(zws))
      zws(:) = x_1d_double_ptr
@@ -418,12 +418,4 @@
   case("ba")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(ba))
      ba(:) = x_1d_double_ptr
-  case("md_pdffile")
-     md_pdffile = ''
-	 call c_f_pointer(xptr, x_0d_char_ptr, [MAXSTRLEN])
-	 md_pdffile = char_array_to_string(x_0d_char_ptr, strlen(x_0d_char_ptr))
-  case("md_blmfile")
-     md_blmfile = ''
-	 call c_f_pointer(xptr, x_0d_char_ptr, [MAXSTRLEN])
-	 md_blmfile = char_array_to_string(x_0d_char_ptr, strlen(x_0d_char_ptr))
   end select

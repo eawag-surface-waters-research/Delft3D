@@ -86,8 +86,6 @@ select case(var_name)
     type_name = "double"
   case("wy")
     type_name = "double"
-  case("wmag")
-    type_name = "double"
   case("rain")
     type_name = "double"
   case("evap")
@@ -131,6 +129,8 @@ select case(var_name)
   case("stemdiam")
     type_name = "double"
   case("stemheight")
+    type_name = "double"
+  case("Cdvegsp")
     type_name = "double"
   case("zws")
     type_name = "double"
@@ -288,10 +288,6 @@ select case(var_name)
     type_name = "double"
   case("ba")
     type_name = "double"
-  case("md_pdffile")
-    type_name = "char"
-  case("md_blmfile")
-    type_name = "char"
   case default
     type_name = ""
 end select

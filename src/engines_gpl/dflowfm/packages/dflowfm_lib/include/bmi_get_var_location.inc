@@ -86,8 +86,6 @@ select case(var_name)
     location_name = "edge"
   case("wy")
     location_name = "edge"
-  case("wmag")
-    location_name = "edge"
   case("rain")
     location_name = "face"
   case("evap")
@@ -131,6 +129,8 @@ select case(var_name)
   case("stemdiam")
     location_name = "face"
   case("stemheight")
+    location_name = "face"
+  case("Cdvegsp")
     location_name = "face"
   case("zws")
     location_name = ""
@@ -288,10 +288,6 @@ select case(var_name)
     location_name = "face"
   case("ba")
     location_name = "face"
-  case("md_pdffile")
-    location_name = ""
-  case("md_blmfile")
-    location_name = ""
   case default
     location_name = ""
 end select

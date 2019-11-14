@@ -86,8 +86,6 @@
      x = c_loc(wx)
   case("wy") !<  [m/s] wind y velocity   (m/s) at u point {"location": "edge", "shape": ["lnx"]}
      x = c_loc(wy)
-  case("wmag") !<  [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
-     x = c_loc(wmag)
   case("rain") !<  [mm/day] rain at xz,yz {"location": "face", "shape": ["ndx"]}
      x = c_loc(rain)
   case("evap") !<  [m/s] evaporation at xz,yz {"location": "face", "shape": ["ndx"]}
@@ -116,7 +114,7 @@
      x = c_loc(zbndq)
   case("turkin1") !<  [m2/s2] turbulent kinectic energy at layer interface u {"location": "edge", "shape": ["lnkx"]}
      x = c_loc(turkin1)
-  case("vicwws") !<  [m2/s] vertical eddy viscosity at layer interface at s point u {"location": "face", "shape": ["ndkx"]}
+  case("vicwws") !<  [m2/s] vertical eddy viscosity at layer interface at s point {"location": "face", "shape": ["ndkx"]}
      x = c_loc(vicwws)
   case("rnveg") !<  [1/m2] 3D plant density , 2D part is basis input (1/m2) {"location": "face", "shape": ["ndkx"]}
      x = c_loc(rnveg)
@@ -132,6 +130,8 @@
      x = c_loc(stemdiam)
   case("stemheight") !<  [m] 2D plant heights (m) {"location": "face", "shape": ["ndx"]}
      x = c_loc(stemheight)
+  case("Cdvegsp") !<  [m] spatial plant Cdveg () {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(Cdvegsp)
   case("zws") !<  [m] z levels  (m) of interfaces (w-points) at cell centres (s-points) (m)    (1:ndkx) {"shape": ["ndkx"]}
      x = c_loc(zws)
   case("kbot") !<  [-] layer-compressed bottom layer cell number: for each of ndx horizontal cells, we have indices to bot and top ndxk cells {"location": "face", "shape": ["ndx"]}
@@ -288,9 +288,5 @@
      x = c_loc(yz)
   case("ba") !<  [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
      x = c_loc(ba)
-  case("md_pdffile") !<  [-] process library file {"rank": 0}
-     x = c_loc(md_pdffile)
-  case("md_blmfile") !<  [-] BLOOM aglae species definition file {"rank": 0}
-     x = c_loc(md_blmfile)
   end select
 

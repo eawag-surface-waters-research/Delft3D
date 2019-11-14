@@ -88,8 +88,6 @@
        shape(1) = lnx
     case("wy")
        shape(1) = lnx
-    case("wmag")
-       shape(1) = lnx
     case("rain")
        shape(1) = ndx
     case("evap")
@@ -134,6 +132,8 @@
        shape(1) = ndx
     case("stemheight")
        shape(1) = ndx
+    case("Cdvegsp")
+       shape(1) = ndkx
     case("zws")
        shape(1) = ndkx
     case("kbot")
@@ -298,8 +298,4 @@
        shape(1) = ndx
     case("ba")
        shape(1) = ndx
-    case("md_pdffile")
-       shape(1) = 0
-    case("md_blmfile")
-       shape(1) = 0
   end select

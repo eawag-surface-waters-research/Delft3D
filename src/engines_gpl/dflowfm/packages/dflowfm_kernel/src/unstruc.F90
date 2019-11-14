@@ -14540,16 +14540,15 @@ subroutine flow_fourierinit()
 use m_fourier_analysis
 use m_transport, only: NUMCONST, ISALT, ITEMP
 use unstruc_model, only: md_foufile, md_tunit, md_fou_step, getoutputdir
-use unstruc_files
+use unstruc_files, only : defaultFilename
 use m_flow, only: kmxd
-use m_wind, only: wmag, jawind
 use m_physcoef, only: ag
 use m_flowgeom, only: gddimens, lnx
 use m_flowtimes, only: tstart_user, tstop_user, dt_user
-use m_partitioninfo
+use m_alloc, only: aerr
 
 implicit none
-integer  :: minp
+integer  :: minp, ierr
 logical  :: success
 call oldfil(minp, md_foufile)
 call fouini(minp, success, ag, md_tunit,'S')
@@ -14558,15 +14557,6 @@ FouOutputFile = trim(getoutputdir()) // defaultFilename('fou')
 call alloc_fourier_analysis_arrays()
 call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, dt_user, md_fou_step, success)
 call doclose(minp)
-
-if (success) then
-   if (fourierWithWindspeed()) then ! scan for windspeed in the list of fourier requests to see whether or not to allocate wmag
-      allocate(wmag(lnx))
-      wmag = 0.d0
-   endif
-   
-   call count_fourier_variables
-endif
 
 end subroutine flow_fourierinit
 
@@ -38771,7 +38761,6 @@ end function is_1d_boundary_candidate
  if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
  !if (allocated(wx))           deallocate(wx,wy)              ! wind arrays are not deallocated here for use with bmi
- if (allocated(wmag))         deallocate(wmag)
  if (allocated(ec_pwxwy_x))   deallocate(ec_pwxwy_x)
  if (allocated(ec_pwxwy_y))   deallocate(ec_pwxwy_y)
  if (allocated(kcw))          deallocate(kcw)
