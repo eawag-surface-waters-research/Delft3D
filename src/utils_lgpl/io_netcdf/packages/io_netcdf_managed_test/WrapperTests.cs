@@ -776,6 +776,7 @@ namespace Deltares.IONetCDF.Managed.Tests
         // Deltashell creates a new file to write the 1d geometry and mesh as in the first test create1dUGRIDNetcdf
         // and clones the 2d mesh data read from a file produced by RGFgrid. 
         [Test]
+        [NUnit.Framework.Ignore]
         public void DeltaShellClones2dMesh()
         {
             var wrapper = new Wrapper();
