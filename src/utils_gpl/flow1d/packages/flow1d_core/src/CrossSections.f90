@@ -59,6 +59,7 @@ module m_CrossSections
    public useBranchOrders
    public write_crosssection_data
    public getYZConveyance
+   public getHighest1dLevel
    double precision, public :: default_width
 
    interface fill_hashtable

@@ -42,6 +42,9 @@ module m_oned_functions
    public gridpoint2cross
    public computePump_all_links
    public convert_cross_to_prof
+   public set_ground_level_for_1d_nodes
+   public updateFreeBoard
+   public updateTimeWetOnGround
 
    type, public :: t_gridp2cs
       integer :: num_cross_sections
@@ -756,4 +759,71 @@ module m_oned_functions
    !call restorepol()
    
    end subroutine convert_cross_to_prof
+   
+   !> Set ground level for 1d nodes
+   subroutine set_ground_level_for_1d_nodes(network)
+   use m_flowgeom
+   use m_Storage
+   use m_CrossSections
+   use m_missing
+   use m_network
+   implicit none
+   type(t_network), intent(inout), target :: network
+   type(t_storage), pointer               :: pSto
+   type(t_administration_1d), pointer     :: adm
+   integer                                :: i, cc1, cc2
+   
+   if (ndxi-ndx2d>0) then
+      ! set for storage nodes that have prescribed street level
+      do i = 1, network%storS%Count
+         pSto => network%storS%stor(i)
+         if (.not. pSto%useTable) then
+            groundLevel(pSto%gridPoint) = pSto%streetArea%x(1)
+         end if
+      end do
+      ! set for other nodes, the ground level equals to the highest cross section "embankment" value
+      do i = 1, ndxi-ndx2d
+         if (groundLevel(i) == dmiss) then
+            adm => network%adm
+            cc1 = adm%gpnt2cross(i)%c1
+            cc2 = adm%gpnt2cross(i)%c2
+            groundLevel(i) = getHighest1dLevel(network%crs%cross(cc1), network%crs%cross(cc2), adm%gpnt2cross(i)%f)
+         end if
+      end do
+   else
+      return
+   end if
+   end subroutine set_ground_level_for_1d_nodes
+   
+   !> update freeBoard for each 1d node
+   subroutine updateFreeBoard()
+   use m_flow, only: freeBoard, s1
+   use m_flowgeom, only: ndxi, ndx2d, groundLevel
+   implicit none
+   
+   integer :: i
+   do i = 1, ndxi-ndx2d
+      freeBoard(i) = groundLevel(i) - s1(ndx2d+i)
+   end do
+   
+   end subroutine updateFreeBoard
+   
+   !> Compute the cumulative time when water is above ground level
+   subroutine updateTimeWetOnGround(dts)
+   use m_flowparameters, only: epshs
+   use m_flowtimes, only: time_wetground
+   use m_flow, only: freeBoard
+   use m_flowgeom,only: ndxi, ndx2d
+   implicit none
+   double precision, intent(in) :: dts !< computational time step
+   integer                      :: i
+   
+   do i = 1, ndxi-ndx2d
+      if (-1*freeBoard(i) >= epshs) then
+         time_wetground(ndx2d+i) = time_wetground(ndx2d+i) + dts
+      end if
+   end do
+   
+   end subroutine updateTimeWetOnGround
+
 end module m_oned_functions

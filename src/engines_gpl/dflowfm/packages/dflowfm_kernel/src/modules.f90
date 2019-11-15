@@ -2745,7 +2745,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamapIntTidesDiss         !< internal tides dissipation to map file, 0: no, 1: yes
  integer                           :: jamapNudge                !< output nudging to map file, 0: no, 1: yes
  integer                           :: jamapwav                  !< output waves to map file, 0: no, 1: yes
-  integer                           :: jamapdtcell              !< output time steps per cell based on CFL
+ integer                           :: jamapdtcell               !< output time steps per cell based on CFL
+ integer                           :: jamapTimeWetOnGround      !< output to map file the cumulative time when water is above ground level, 0: no, 1: yes
  integer                           :: jatekcd                   !< tek output with wind cd coefficients, 0=no (default), 1=yes
  integer                           :: jafullgridoutput          !< 0:compact, 1:full time-varying grid data
  integer                           :: jaeulervel                !< 0:GLM, 1:Euler velocities
@@ -3106,6 +3107,7 @@ subroutine default_flowparameters()
     jamapNudge = 1
     jamapwav = 1
     jamapdtcell = 0
+    jamapTimeWetOnGround = 0
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     japartdomain = 1
@@ -3372,6 +3374,9 @@ end module m_vegetation
 
  double precision, allocatable         :: dsadx   (:)   !< cell center sa gradient, (ppt/m)
  double precision, allocatable         :: dsady   (:)   !< cell center sa gradient, (ppt/m)
+
+! node related, for 1D only, dim = ndxi-ndx2d
+ double precision, allocatable         :: freeboard(:)  !< [m] freeboard at cell center
 
 !    Secondary Flow
  double precision, allocatable         :: ducxdx   (:)   !< cell center gradient of x-velocity in x-dir,    (1/s)
@@ -3902,6 +3907,7 @@ end module m_profiles
                                                      !< convflat is flat-bottom conveyance
  double precision, allocatable     :: aifu(:)        !< bed skewness at u point (Lnx)
  double precision, allocatable     :: bz(:)          !< averaged bed level at cell center (Ndx)
+ double precision, allocatable     :: groundLevel(:) !< ground level of node (ndxi-ndx2d), only for 1D
 
  ! link (u) related : dim = lnx
  ! Flow link numbering:
@@ -4156,6 +4162,7 @@ end subroutine reset_flowgeom
  double precision                  :: tim1fld     !< last time field    signals were given
  integer                           :: jatimestepanalysis = 0
  double precision, allocatable     :: dtcell(:)   !< time step per cell based on CFL (s), size:ndkx
+ double precision, allocatable     :: time_wetground(:) !< Cumulative time when water is above ground level, size: ndxi (now only for 1d, later also for 2d)
 
  !TODO: use in the trachytopes this variable and fully remove reading from rdtrt
  double precision                  :: dt_trach    !< DtTrt Trachytope roughness update time interval (s)

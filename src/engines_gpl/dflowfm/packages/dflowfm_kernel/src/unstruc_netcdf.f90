@@ -377,6 +377,8 @@ type t_unc_mapids
    integer :: id_frac_name    = -1
    integer :: id_sedfrac(4)   = -1
    integer :: id_kmxsed(4)    = -1
+   ! for urban, only for 1d nodes now
+   integer :: id_timewetground(4) = -1 !< Variable ID for cumulative time when water is above ground level
    !
    ! Other
    !
@@ -609,6 +611,9 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
                            trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
+         if (var_name == 'time_water_on_ground') then ! only define time_water_on_ground for 1d
+            goto 888
+         end if
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (ndx2d > 0) then
@@ -1000,6 +1005,9 @@ double precision, allocatable :: mappedValues(:)
          !else
             ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
          !end if
+         if (id_var(2) == -1) then ! id_var(2) for variable time_water_on_ground is still -1, and only write for 1d, so skip
+            goto 888
+         end if
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (ndx2d > 0) then
@@ -4590,6 +4598,12 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_depth_averaged_particle_concentration, nf90_double, UNC_LOC_S, 'depth_averaged_particle_concentration', 'depth_averaged_particle_concentration', 'depth-averaged particle concentration', 'm-3')
       end if
 
+      ! for 1D only, urban
+      if (ndxi-ndx2d>0) then
+         if (jamapTimeWetOnGround > 0) then ! cumulative time when water is above ground level
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, nf90_double, UNC_LOC_S, 'time_water_on_ground', '', 'Cumulative time water above ground level', 's')
+         end if
+      end if
       ierr = nf90_enddef(mapids%ncid)
       
       if ( janudge.gt.0 .and. jamapnudge.gt.0 ) then
@@ -5808,6 +5822,11 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_depth_averaged_particle_concentration, UNC_LOC_S, workx)
    end if
   
+   if (ndxi-ndx2d>0) then
+      if (jamapTimeWetOnGround == 1) then ! Cumulative time water above ground level
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, UNC_LOC_S, time_wetground) 
+      end if
+   end if
 end subroutine unc_write_map_filepointer_ugrid
 
 

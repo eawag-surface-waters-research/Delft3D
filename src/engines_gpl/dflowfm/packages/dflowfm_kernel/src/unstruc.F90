@@ -515,6 +515,7 @@ use dfm_signals
 use m_partitioninfo, only: jampi, sdmn, my_rank
 use m_integralstats
 use m_fourier_analysis
+use m_oned_functions, only: updateFreeBoard, updateTimeWetOnGround
 implicit none
 integer, intent(out) :: iresult
 character(len=255)   :: filename_fou_out
@@ -546,6 +547,13 @@ character(len=255)   :: filename_fou_out
     endif
  endif
 
+ ! for 1D only
+ if (ndxi-ndx2d > 0) then
+    call updateFreeBoard()
+    if (jamapTimeWetOnGround > 0) then
+       call updateTimeWetOnGround(dts)
+    end if
+ end if
  ! note updateValuesOnObervationStations() in flow_usertimestep
 
  ! Time-integral statistics on all flow nodes.
@@ -20766,6 +20774,16 @@ end subroutine unc_write_shp
  bl = dmiss
  ba_mor = 0d0
 
+ ! for 1D only
+ if (ndxi-ndx2d > 0) then
+    if (allocated(groundLevel)) then
+       deallocate(groundLevel)
+    end if
+    allocate(groundLevel(ndxi-ndx2d), stat = ierr)
+    call aerr('groundLevel(ndxi-ndx2d)', ierr, ndxi-ndx2d)
+    groundLevel = dmiss
+ end if
+ 
  if ( allocated (kfs) ) deallocate(kfs)
  allocate(kfs(ndx))   ;  kfs   = 0
 
@@ -21480,6 +21498,10 @@ end subroutine unc_write_shp
  endif
 
  call set_1d_indices_in_network()
+ ! set ground level for 1d nodes
+ if (network%loaded) then
+    call set_ground_level_for_1d_nodes(network)
+ end if
 
  call setbobs()
  call setbobsonroofs()
@@ -24011,6 +24033,23 @@ end do
  allocate( dtcell(ndkx), stat = ierr)
  call aerr('dtcell(ndkx)', ierr, ndkx) ; dtcell = 0d0
 
+ ! for 1D only
+ if (ndxi-ndx2d > 0) then
+    if (allocated(time_wetground)) then
+       deallocate(time_wetground)
+    end if
+    allocate(time_wetground(ndxi), stat = ierr)
+    call aerr('time_wetground(ndxi)', ierr, ndxi)
+    time_wetground = 0d0
+    
+    if (allocated(freeboard)) then
+       deallocate(freeboard)
+    end if
+    allocate(freeboard(ndxi-ndx2d), stat = ierr)
+    call aerr('freeboard(ndxi-ndx2d)', ierr, ndxi-ndx2d)
+    freeboard = dmiss
+ end if
+ 
  if (kmx > 0 .and. (ja_timestep_auto == 3 .or. ja_timestep_auto == 4) ) then
     if (allocated (squ2D)) deallocate (squ2d)
     allocate ( squ2D(ndkx) , stat=ierr )
