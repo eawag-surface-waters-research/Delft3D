@@ -43,7 +43,7 @@ module m_oned_functions
    public computePump_all_links
    public convert_cross_to_prof
    public set_ground_level_for_1d_nodes
-   public updateFreeBoard
+   public updateFreeboard
    public updateTimeWetOnGround
 
    type, public :: t_gridp2cs
@@ -795,32 +795,34 @@ module m_oned_functions
    end if
    end subroutine set_ground_level_for_1d_nodes
    
-   !> update freeBoard for each 1d node
-   subroutine updateFreeBoard()
-   use m_flow, only: freeBoard, s1
+   !> update freeboard for each 1d node
+   subroutine updateFreeboard()
+   use m_flow, only: freeboard, s1
    use m_flowgeom, only: ndxi, ndx2d, groundLevel
    implicit none
    
-   integer :: i
+   integer :: i, ii
    do i = 1, ndxi-ndx2d
-      freeBoard(i) = groundLevel(i) - s1(ndx2d+i)
+      ii = ndx2d+i
+      freeBoard(ii) = groundLevel(i) - s1(ii)
    end do
    
-   end subroutine updateFreeBoard
+   end subroutine updateFreeboard
    
    !> Compute the cumulative time when water is above ground level
    subroutine updateTimeWetOnGround(dts)
    use m_flowparameters, only: epshs
    use m_flowtimes, only: time_wetground
-   use m_flow, only: freeBoard
+   use m_flow, only: freeboard
    use m_flowgeom,only: ndxi, ndx2d
    implicit none
    double precision, intent(in) :: dts !< computational time step
-   integer                      :: i
+   integer                      :: i, ii
    
    do i = 1, ndxi-ndx2d
-      if (-1*freeBoard(i) >= epshs) then
-         time_wetground(ndx2d+i) = time_wetground(ndx2d+i) + dts
+      ii = ndx2d+i
+      if (-1*freeboard(ii) >= epshs) then
+         time_wetground(ii) = time_wetground(ii) + dts
       end if
    end do
    

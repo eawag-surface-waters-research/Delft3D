@@ -515,7 +515,7 @@ use dfm_signals
 use m_partitioninfo, only: jampi, sdmn, my_rank
 use m_integralstats
 use m_fourier_analysis
-use m_oned_functions, only: updateFreeBoard, updateTimeWetOnGround
+use m_oned_functions, only: updateFreeboard, updateTimeWetOnGround
 implicit none
 integer, intent(out) :: iresult
 character(len=255)   :: filename_fou_out
@@ -549,7 +549,7 @@ character(len=255)   :: filename_fou_out
 
  ! for 1D only
  if (ndxi-ndx2d > 0) then
-    call updateFreeBoard()
+    call updateFreeboard()
     if (jamapTimeWetOnGround > 0) then
        call updateTimeWetOnGround(dts)
     end if
@@ -12966,6 +12966,7 @@ else if (nodval == 27) then
  use m_alloc
  use unstruc_channel_flow, only: network
  use m_1d_structures, only: initialize_structures_actual_params
+ use m_oned_functions, only: updateFreeboard
  implicit none
 
  ! locals
@@ -14527,6 +14528,11 @@ endif
  if (japillar > 0) then
     call setpillars()
  endif
+
+ ! for 1D only
+ if (ndxi-ndx2d > 0) then
+    call updateFreeboard()
+ end if
 
  iresult = DFM_NOERR
  return
@@ -24045,8 +24051,8 @@ end do
     if (allocated(freeboard)) then
        deallocate(freeboard)
     end if
-    allocate(freeboard(ndxi-ndx2d), stat = ierr)
-    call aerr('freeboard(ndxi-ndx2d)', ierr, ndxi-ndx2d)
+    allocate(freeboard(ndxi), stat = ierr)
+    call aerr('freeboard(ndxi)', ierr, ndxi)
     freeboard = dmiss
  end if
  

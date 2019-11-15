@@ -379,6 +379,7 @@ type t_unc_mapids
    integer :: id_kmxsed(4)    = -1
    ! for urban, only for 1d nodes now
    integer :: id_timewetground(4) = -1 !< Variable ID for cumulative time when water is above ground level
+   integer :: id_freeboard(4)     = -1 !< Variable ID for freeboard
    !
    ! Other
    !
@@ -611,7 +612,7 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
                            trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
-         if (var_name == 'time_water_on_ground') then ! only define time_water_on_ground for 1d
+         if (var_name == 'time_water_on_ground' .or. var_name == 'freeboard') then ! only define time_water_on_ground, freeboard for 1d
             goto 888
          end if
       end if
@@ -1005,7 +1006,7 @@ double precision, allocatable :: mappedValues(:)
          !else
             ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
          !end if
-         if (id_var(2) == -1) then ! id_var(2) for variable time_water_on_ground is still -1, and only write for 1d, so skip
+         if (id_var(2) == -1) then ! id_var(2) for variables time_water_on_ground and freeboard is still -1, and only write for 1d, so skip
             goto 888
          end if
       end if
@@ -4603,6 +4604,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          if (jamapTimeWetOnGround > 0) then ! cumulative time when water is above ground level
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, nf90_double, UNC_LOC_S, 'time_water_on_ground', '', 'Cumulative time water above ground level', 's')
          end if
+         if (jamapFreeboard > 0) then ! freeboard
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_freeboard, nf90_double, UNC_LOC_S, 'freeboard', '', 'freeboard', 's')
+         end if
       end if
       ierr = nf90_enddef(mapids%ncid)
       
@@ -5823,8 +5827,11 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    end if
   
    if (ndxi-ndx2d>0) then
-      if (jamapTimeWetOnGround == 1) then ! Cumulative time water above ground level
+      if (jamapTimeWetOnGround > 0) then ! Cumulative time water above ground level
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, UNC_LOC_S, time_wetground) 
+      end if
+      if (jamapFreeboard > 0) then ! freeboard
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_freeboard, UNC_LOC_S, freeboard) 
       end if
    end if
 end subroutine unc_write_map_filepointer_ugrid

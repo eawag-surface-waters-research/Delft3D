@@ -2747,6 +2747,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamapwav                  !< output waves to map file, 0: no, 1: yes
  integer                           :: jamapdtcell               !< output time steps per cell based on CFL
  integer                           :: jamapTimeWetOnGround      !< output to map file the cumulative time when water is above ground level, 0: no, 1: yes
+ integer                           :: jamapFreeboard            !< output freeboard to map file, 0: no, 1: yes
  integer                           :: jatekcd                   !< tek output with wind cd coefficients, 0=no (default), 1=yes
  integer                           :: jafullgridoutput          !< 0:compact, 1:full time-varying grid data
  integer                           :: jaeulervel                !< 0:GLM, 1:Euler velocities
@@ -3108,6 +3109,7 @@ subroutine default_flowparameters()
     jamapwav = 1
     jamapdtcell = 0
     jamapTimeWetOnGround = 0
+    jamapFreeboard = 0
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     japartdomain = 1
@@ -3375,7 +3377,7 @@ end module m_vegetation
  double precision, allocatable         :: dsadx   (:)   !< cell center sa gradient, (ppt/m)
  double precision, allocatable         :: dsady   (:)   !< cell center sa gradient, (ppt/m)
 
-! node related, for 1D only, dim = ndxi-ndx2d
+! node related, dim = ndxi
  double precision, allocatable         :: freeboard(:)  !< [m] freeboard at cell center
 
 !    Secondary Flow
