@@ -13985,7 +13985,7 @@ end if
  ! so that reading rst file won't influence it. This is used for restart a model with Riemann boundary conditions.
  do n=1,nbndz
     k2 = kbndz(2,n)
-    zbndz0(n) = s1(k2)
+    zbndz0(n) = max(bl(k2), s1(k2)) ! NOTE: the s1=max(bl, s1) step can only be done later, so do it here as well.
  end do
 
  ! Load restart file (*_map.nc) assigned in the *.mdu file OR read a *.rst file
