@@ -139,6 +139,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     real(fp) :: avgcu
     real(fp) :: avgu
     real(fp) :: bakdif
+    real(fp) :: betam
     real(fp) :: delm
     real(fp) :: deltas
     real(fp) :: delw
@@ -218,6 +219,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     epspar = par(15)>0.0_fp
     gamtcr = par(16)
     salmax = par(17)
+    betam  = par(18)
     !
     drho  = (rhosol-rhowat) / rhowat
     !
@@ -243,7 +245,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
                  & delm      ,fc1       ,fw1       ,phicur    ,rksrs     , &
                  & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
                  & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
-                 & ag        ,wave      ,tauadd    ,gamtcr    ) 
+                 & ag        ,wave      ,tauadd    ,gamtcr    ,betam     ) 
     realpar(RP_DSS)   = real(dss    ,hp)
     !
     ! Find bottom cell for SAND sediment calculations and store for use

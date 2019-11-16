@@ -5,7 +5,7 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
                    & tauc      ,taubcw    ,taurat    ,ta        ,caks      , &
                    & dss       ,mudfrac   ,eps       ,aksfac    ,rwave     , &
                    & camax     ,rdc       ,rdw       ,iopkcw    ,iopsus    , &
-                   & vonkar    ,wave      ,tauadd    )
+                   & vonkar    ,wave      ,tauadd    ,betam     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -50,6 +50,7 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
 ! Call variables
 !
     real(fp), intent(out) :: aks    !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: betam
     real(fp), intent(out) :: caks
     real(fp), intent(in)  :: d50
     real(fp), intent(in)  :: d90
@@ -255,7 +256,7 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
     ! Note: this ignores bed-slope effects on initiation of motion
     !
     taubcw = muc*tauc + muw*tauwav
-    taucr1 = taucr*(1.0_fp + mudfrac)**3
+    taucr1 = taucr*(1.0_fp + mudfrac)**betam
     taurat = taubcw/taucr1
     !
     ! Calculate Van Rijn's Dimensionless bed-shear stress for reference

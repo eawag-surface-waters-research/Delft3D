@@ -9,7 +9,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
                    & delm      ,fc1       ,fw1       ,phicur    ,kscr      , &
                    & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
                    & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
-                   & ag        ,wave      ,tauadd    ,gamtcr    ) 
+                   & ag        ,wave      ,tauadd    ,gamtcr    ,betam     ) 
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -56,6 +56,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
 !
     integer, intent(in)   :: i2d3d
     real(fp)              :: aks    !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: betam
     real(fp)              :: caks
     real(fp)              :: d10
     real(fp)              :: d50
@@ -337,7 +338,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
        cmax  = min(max((d50/dsand)*cmaxs , 0.05_fp) , cmaxs)
        fpack = min(cmax/cmaxs , 1.0_fp)
     else
-       fclay = min((1.0_fp+mudfrac)**3, 2.0_fp)
+       fclay = min((1.0_fp+mudfrac)**betam, 2.0_fp)
     endif
     taucr1 = fpack * fch1 * fclay * taucr0
     taurat  = taubcw / taucr1
