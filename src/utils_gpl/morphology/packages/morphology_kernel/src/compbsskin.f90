@@ -147,7 +147,79 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     !
     ! Determine flow regime
     !
-    if (umod > 1.0e-6_fp .and. uorb < 1.0e-6_fp) then
+    if (wave .and. uorb >= 1.0-6_fp) then
+       if (umod >= 1.0e-6_fp) then
+          !
+          ! Combined flow and waves
+          !
+          reccr = 2000.0_fp + (5.92e5_fp * rew)**0.35_fp
+          if (rec <= reccr .and. rew <= rewcr) then
+             !
+             ! laminar flow
+             !
+             taum   = 3.0_fp * rhowat * vicmol * umod / depth
+             tauw   = rhowat * uorbm * uorbm / sqrt(rew)
+             taumax = sqrt((taum +  tauw*abs(cos(phiwr)))**2 &
+                          &      + (tauw*abs(sin(phiwr)))**2 )
+          else
+             !
+             ! turbulent flow
+             !
+             ! 1) compute shear stresses belonging with rough bed
+             !
+             t1      = max(12.0_fp , ar * sqrt(fwr/2.0_fp) * (aorb/z0silt))
+             t2      = depth / (t1 * z0silt)
+             t3      = (cdr*cdr + (fwr/2.0_fp)**2 * (uorbm/umod)**4)**0.25_fp
+             !
+             a1      = t3 * (log(t2) - 1.0_fp) / (2.0_fp*log(t1))
+             a2      = 0.40_fp * t3 / log(t1)
+             cdm     = (sqrt(a1*a1 + a2) - a1)**2
+             cdmax   = sqrt((cdm +  t3*(uorbm/umod)*sqrt(fwr/2.0_fp)*abs(cos(phiwr)))**2 &
+                            &    + (t3*(uorbm/umod)*sqrt(fwr/2.0_fp)*abs(sin(phiwr)))**2 )
+             taumr   = rhowat * cdm   * umod * umod
+             taumaxr = rhowat * cdmax * umod * umod
+             !
+             ! 2) compute shear stresses belonging with smooth bed
+             !
+             t1      = 9.0_fp * as * rew * sqrt(fws/2.0_fp) &
+                     & * (cds*cds*(umod/uorbm)**4 + (fws/2.0_fp)**2)**0.25_fp
+             t2      = ( (rec/rew)*(uorbm/umod)*sqrt(2.0_fp/fws) ) / as
+             t3      = (cds*cds + (fws/2.0_fp)**2 * (uorbm/umod)**4)**0.25_fp
+             !
+             a1      = t3 * (log(t2) - 1.0_fp) / (2.0_fp*log(t1))
+             a2      = 0.40_fp * t3 / log(t1)
+             cdm     = (sqrt(a1*a1 + a2) - a1)**2
+             cdmax   = sqrt((cdm +  t3*(uorbm/umod)*sqrt(fws/2.0_fp)*abs(cos(phiwr)))**2 &
+                            &    + (t3*(uorbm/umod)*sqrt(fws/2.0_fp)*abs(sin(phiwr)))**2)
+             taums   = rhowat * cdm   * umod * umod
+             taumaxs = rhowat * cdmax * umod * umod
+             !
+             ! 3) determine shear stresses
+             !
+             if (taumaxs > taumaxr) then
+                taum   = taums
+                taumax = taumaxs
+             else
+                taum   = taumr
+                taumax = taumaxr
+             endif
+          endif
+       else
+          !
+          ! Waves only
+          !
+          taum = 0.0_fp
+          if (rew <= rewcr) then
+             taumax = rhowat * uorbm * uorbm / sqrt(rew)
+          else
+             if (fwr >= fws) then
+                taumax = 0.5_fp * rhowat * fwr * uorbm * uorbm
+             else
+                taumax = 0.5_fp * rhowat * fws * uorbm * uorbm
+             endif
+          endif
+       endif
+    elseif (umod >= 1.0e-6_fp) then
        !
        ! Flow only
        !
@@ -161,76 +233,6 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
              taum = rhowat * cds * umod * umod
           endif
           taumax = taum
-       endif
-    elseif (umod < 1.0e-6_fp .and. uorb >= 1.0e-6_fp) then
-       !
-       ! Waves only
-       !
-       taum = 0.0_fp
-       if (rew <= rewcr) then
-          taumax = rhowat * uorbm * uorbm / sqrt(rew)
-       else
-          if (fwr >= fws) then
-             taumax = 0.5_fp * rhowat * fwr * uorbm * uorbm
-          else
-             taumax = 0.5_fp * rhowat * fws * uorbm * uorbm
-          endif
-       endif
-    elseif (umod >= 1.0e-6_fp .and. uorb >= 1.0e-6_fp) then
-       !
-       ! Combined flow and waves
-       !
-       reccr = 2000.0_fp + (5.92e5_fp * rew)**0.35_fp
-       if (rec <= reccr .and. rew <= rewcr) then
-          !
-          ! laminar flow
-          !
-          taum   = 3.0_fp * rhowat * vicmol * umod / depth
-          tauw   = rhowat * uorbm * uorbm / sqrt(rew)
-          taumax = sqrt((taum +  tauw*abs(cos(phiwr)))**2 &
-                       &      + (tauw*abs(sin(phiwr)))**2 )
-       else
-          !
-          ! turbulent flow
-          !
-          ! 1) compute shear stresses belonging with rough bed
-          !
-          t1      = max(12.0_fp , ar * sqrt(fwr/2.0_fp) * (aorb/z0silt))
-          t2      = depth / (t1 * z0silt)
-          t3      = (cdr*cdr + (fwr/2.0_fp)**2 * (uorbm/umod)**4)**0.25_fp
-          !
-          a1      = t3 * (log(t2) - 1.0_fp) / (2.0_fp*log(t1))
-          a2      = 0.40_fp * t3 / log(t1)
-          cdm     = (sqrt(a1*a1 + a2) - a1)**2
-          cdmax   = sqrt((cdm +  t3*(uorbm/umod)*sqrt(fwr/2.0_fp)*abs(cos(phiwr)))**2 &
-                         &    + (t3*(uorbm/umod)*sqrt(fwr/2.0_fp)*abs(sin(phiwr)))**2 )
-          taumr   = rhowat * cdm   * umod * umod
-          taumaxr = rhowat * cdmax * umod * umod
-          !
-          ! 2) compute shear stresses belonging with smooth bed
-          !
-          t1      = 9.0_fp * as * rew * sqrt(fws/2.0_fp) &
-                  & * (cds*cds*(umod/uorbm)**4 + (fws/2.0_fp)**2)**0.25_fp
-          t2      = ( (rec/rew)*(uorbm/umod)*sqrt(2.0_fp/fws) ) / as
-          t3      = (cds*cds + (fws/2.0_fp)**2 * (uorbm/umod)**4)**0.25_fp
-          !
-          a1      = t3 * (log(t2) - 1.0_fp) / (2.0_fp*log(t1))
-          a2      = 0.40_fp * t3 / log(t1)
-          cdm     = (sqrt(a1*a1 + a2) - a1)**2
-          cdmax   = sqrt((cdm +  t3*(uorbm/umod)*sqrt(fws/2.0_fp)*abs(cos(phiwr)))**2 &
-                         &    + (t3*(uorbm/umod)*sqrt(fws/2.0_fp)*abs(sin(phiwr)))**2)
-          taums   = rhowat * cdm   * umod * umod
-          taumaxs = rhowat * cdmax * umod * umod
-          !
-          ! 3) determine shear stresses
-          !
-          if (taumaxs > taumaxr) then
-             taum   = taums
-             taumax = taumaxs
-          else
-             taum   = taumr
-             taumax = taumaxr
-          endif
        endif
     else
        !
