@@ -777,7 +777,7 @@ module m_oned_functions
       ! set for storage nodes that have prescribed street level
       do i = 1, network%storS%Count
          pSto => network%storS%stor(i)
-         if (.not. pSto%useTable) then
+         if (pSto%useStreetStorage .and. (.not. pSto%useTable)) then
             groundLevel(pSto%gridPoint) = pSto%streetArea%x(1)
          end if
       end do
@@ -787,7 +787,11 @@ module m_oned_functions
             adm => network%adm
             cc1 = adm%gpnt2cross(i)%c1
             cc2 = adm%gpnt2cross(i)%c2
-            groundLevel(i) = getHighest1dLevel(network%crs%cross(cc1), network%crs%cross(cc2), adm%gpnt2cross(i)%f)
+            if (cc1 > 0 .and. cc2 > 0) then
+               groundLevel(i) = getHighest1dLevel(network%crs%cross(cc1), network%crs%cross(cc2), adm%gpnt2cross(i)%f)
+            else ! If there is no cross section, then let ground level equals to bed level
+               groundLevel(i) = bl(ndx2d+i)
+            end if
          end if
       end do
    else
