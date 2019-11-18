@@ -814,15 +814,15 @@ module m_oned_functions
    implicit none
    
    integer :: i, ii
-   do i = 1, ndxi-ndx2d
-      ii = ndx2d+i
-      freeBoard(ii) = groundLevel(i) - s1(ii)
+   do i = ndx2d+1, ndxi
+      ii = ndx2d-i
+      freeBoard(i) = groundLevel(ii) - s1(i)
    end do
    
    end subroutine updateFreeboard
 
 
-   !> Compute the cumulative time when water is above ground level
+   !> Compute the cumulative time when water is above ground level.
    subroutine updateTimeWetOnGround(dts)
    use m_flowparameters, only: epshs
    use m_flowtimes, only: time_wetground
@@ -830,12 +830,11 @@ module m_oned_functions
    use m_flowgeom,only: ndxi, ndx2d
    implicit none
    double precision, intent(in) :: dts !< computational time step
-   integer                      :: i, ii
+   integer                      :: i
    
-   do i = 1, ndxi-ndx2d
-      ii = ndx2d+i
-      if (-1*freeboard(ii) >= epshs) then
-         time_wetground(ii) = time_wetground(ii) + dts
+   do i = ndx2d+1, ndxi
+      if (-1*freeboard(i) >= epshs) then
+         time_wetground(i) = time_wetground(i) + dts
       end if
    end do
    
