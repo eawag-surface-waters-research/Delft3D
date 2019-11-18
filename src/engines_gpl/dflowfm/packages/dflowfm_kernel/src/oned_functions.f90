@@ -760,7 +760,11 @@ module m_oned_functions
    
    end subroutine convert_cross_to_prof
    
-   !> Set ground level for 1d nodes
+   !> Set ground level for 1d nodes.
+   !! Ground level should not be confused with bed level.
+   !! It is defined as:
+   !! * street level for storage nodes that have street storage.
+   !! * the highest nearby cross section level ("embankment") for other nodes.
    subroutine set_ground_level_for_1d_nodes(network)
    use m_flowgeom
    use m_Storage
@@ -772,7 +776,9 @@ module m_oned_functions
    type(t_storage), pointer               :: pSto
    type(t_administration_1d), pointer     :: adm
    integer                                :: i, cc1, cc2
-   
+
+   groundlevel(:) = dmiss
+
    if (ndxi-ndx2d>0) then
       ! set for storage nodes that have prescribed street level
       do i = 1, network%storS%Count
@@ -789,7 +795,7 @@ module m_oned_functions
             cc2 = adm%gpnt2cross(i)%c2
             if (cc1 > 0 .and. cc2 > 0) then
                groundLevel(i) = getHighest1dLevel(network%crs%cross(cc1), network%crs%cross(cc2), adm%gpnt2cross(i)%f)
-            else ! If there is no cross section, then let ground level equals to bed level
+            else ! If there is no cross section, then set ground level equal to bed level
                groundLevel(i) = bl(ndx2d+i)
             end if
          end if
@@ -798,8 +804,10 @@ module m_oned_functions
       return
    end if
    end subroutine set_ground_level_for_1d_nodes
-   
-   !> update freeboard for each 1d node
+
+
+   !> Update freeboard for each 1d node.
+   !! Freeboard is the vertical distance between the ground level, i.e., not bed level, and the water surface.
    subroutine updateFreeboard()
    use m_flow, only: freeboard, s1
    use m_flowgeom, only: ndxi, ndx2d, groundLevel
@@ -812,7 +820,8 @@ module m_oned_functions
    end do
    
    end subroutine updateFreeboard
-   
+
+
    !> Compute the cumulative time when water is above ground level
    subroutine updateTimeWetOnGround(dts)
    use m_flowparameters, only: epshs
