@@ -3244,11 +3244,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'output', 'Wrimap_DTcell', jamapdtcell, 'Write time step per cell based on CFL (1: yes, 0: no)')
     endif
 
-    if (writeall .or. jamapTimeWetOnGround /= 1) then
+    if (writeall .or. jamapTimeWetOnGround /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_time_water_on_ground', jamapTimeWetOnGround, 'Write cumulative time when water is above ground level to map file (1: yes, 0: no)')
     endif
 
-    if (jatidep > 0 .and. jamapFreeboard /= 1) then
+    if (writeall .or. jamapFreeboard /= 0) then
        call prop_set(prop_ptr, 'output', 'Wrimap_freeboard', jamapFreeboard, 'Write freeboard to map file (1: yes, 0: no)')
     end if
 

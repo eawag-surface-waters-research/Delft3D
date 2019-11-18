@@ -470,7 +470,8 @@ end function unc_def_var_nonspatial
 !> Defines a NetCDF variable inside a map file, taking care of proper attributes and coordinate references.
 !! Produces a UGRID-compliant map file.
 !! Typical call: unc_def_var(mapids, mapids%id_s1(:), nf90_double, UNC_LOC_S, 's1', 'sea_surface_height', 'water level', 'm')
-function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids, cell_method) result(ierr)
+!! Space-dependent variables will be multiply defined: on mesh1d and mesh2d-based variables (unless specified otherwise via which_meshdim argument).
+function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids, cell_method, which_meshdim) result(ierr)
 use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname 
 use m_flowgeom
 use m_flowparameters, only: jamapvol1, jamapau, jamaps1, jamaphu, jamapanc
@@ -481,7 +482,7 @@ use string_module, only: strcmpi
 implicit none
 integer,            intent(in)  :: ncid
 type(t_unc_timespace_id), intent(in)  :: id_tsp        !< Map file and other NetCDF ids.
-integer,            intent(out) :: id_var(:)     !< Resulting variable ids, one for each submesh (1d/2d/3d if applicable)
+integer,            intent(out) :: id_var(:)     !< Resulting variable ids, one for each submesh (1d/2d/3d/1d2d-contact if applicable)
 integer,            intent(in)  :: itype         !< NetCDF data type (e.g. nf90_double).
 integer,            intent(in)  :: iloc          !< Stagger location for this variable (one of UNC_LOC_CN, UNC_LOC_S, UNC_LOC_U, UNC_LOC_L, UNC_LOC_S3D, UNC_LOC_U3D, UNC_LOC_W, UNC_LOC_WU).
 character(len=*),   intent(in)  :: var_name      !< Variable name for in NetCDF variable, will be prefixed with mesh name.
@@ -492,6 +493,7 @@ integer, optional,  intent(in)  :: is_timedep    !< (Optional) Whether or not (1
 integer, optional,  intent(in)  :: dimids(:)     !< (Optional) Array with dimension ids, replaces default dimension ordering. Default: ( layerdim, spatialdim, timedim ).
                                                  !! This array may contain special dummy values: -1 will be replaced by time dim, -2 by spatial dim, -3 by layer dim. Example: (/ -2, id_seddim, -1 /).
 character(len=*), optional, intent(in) :: cell_method   !< cell_method for this variable (one of 'mean', 'point', see CF for details). Default: mean
+integer, optional,  intent(in)  :: which_meshdim !< Selects which (horizontal) mesh dimension(s) need to be defined and written (1: 1D, 2: 2D, 4: 1D2D contacts, 7: all) Default: 7: all.
 
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 ! TODO: AvD: inject vectormax dim here AND timedim!!
@@ -508,6 +510,7 @@ integer :: idx_fastdim    !< Will point to the first used position in idims (i.e
 integer :: is_timedep_
 integer :: is_layerdep_
 integer :: ndims, i
+integer :: which_meshdim_
 
    ierr = DFM_NOERR
 
@@ -517,6 +520,12 @@ integer :: ndims, i
       is_timedep_ = is_timedep
    else
       is_timedep_ = 1
+   end if
+
+   if (present(which_meshdim)) then
+      which_meshdim_ = which_meshdim
+   else
+      which_meshdim_ = 1+2+4 ! 1D and 2D and 1d2d contacts (if applicable)
    end if
 
    if (iloc == UNC_LOC_S3D .or. iloc == UNC_LOC_U3D .or. iloc == UNC_LOC_W .or. iloc == UNC_LOC_WU) then
@@ -592,12 +601,12 @@ integer :: ndims, i
    case(UNC_LOC_CN) ! Corner point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
+      if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! Not implemented corner location for 1D grids yet
          goto 888
       end if
       ! Internal 2d netnodes. Horizontal position: nodes in 2d mesh.
-      if (ndx2d > 0) then ! If there are 2d flownodes, then there are 2d netnodes.
+      if (iand(which_meshdim_, 2) > 0 .and. ndx2d > 0) then ! If there are 2d flownodes, then there are 2d netnodes.
          cell_method_ = 'point' ! NOTE: for now don't allow user-defined cell_method for corners, always point.
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_node)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
@@ -607,17 +616,14 @@ integer :: ndims, i
    case(UNC_LOC_S) ! Pressure point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then
+      if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then
          cell_measures = 'area: '//trim(mesh1dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
                            trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
-         if (var_name == 'time_water_on_ground' .or. var_name == 'freeboard') then ! only define time_water_on_ground, freeboard for 1d
-            goto 888
-         end if
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
-      if (ndx2d > 0) then
+      if (iand(which_meshdim_, 2) > 0 .and. ndx2d > 0) then
          cell_measures = 'area: '//trim(mesh2dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_face)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
@@ -629,7 +635,7 @@ integer :: ndims, i
 
    case(UNC_LOC_U, UNC_LOC_L) ! Horizontal velocity point location, or horizontal net link. Note: defvar for netlinks and flowlinks is the same, putvar not.
       ! Internal 1d flowlinks. Horizontal position: edges in 1d mesh.
-      if (numl1d > 0) then
+      if (iand(which_meshdim_, 1) > 0 .and. numl1d > 0) then
          !1d mesh
          if(size(id_tsp%edgetoln,1).gt.0) then
             !cell_measures = 'area: '//trim(mesh1dname)//'_au' ! TODO: AvD: UNST-1100: au is not yet in map file at all.
@@ -637,6 +643,8 @@ integer :: ndims, i
             ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
                               trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
          end if
+      end if
+      if (iand(which_meshdim_, 4) > 0 .and. numl1d > 0) then
          !1d2d contacts
          if(size(id_tsp%contactstoln,1).gt.0) then  
             idims(idx_spacedim) = id_tsp%meshcontacts%dimids(cdim_ncontacts)
@@ -646,7 +654,7 @@ integer :: ndims, i
       end if
       numl2d = numl - numl1d
       ! Internal 2d flowlinks. Horizontal position: edges in 2d mesh.
-      if (numl2d > 0) then
+      if (iand(which_meshdim_, 2) > 0 .and. numl2d > 0) then
          !cell_measures = 'area: '//trim(mesh2dname)//'_au' ! TODO: AvD: UNST-1100: au is not yet in map file at all.
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
@@ -660,7 +668,7 @@ integer :: ndims, i
    case(UNC_LOC_S3D) ! Pressure point location in all layers.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
-      if (ndx1d > 0) then
+      if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then
          if (jamapvol1 > 0) then
             cell_measures = 'volume: '//trim(mesh1dname)//'_vol1'
          end if
@@ -671,7 +679,7 @@ integer :: ndims, i
                            trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
       end if
       ! Internal 3d flownodes. Horizontal position: faces in 2d mesh. Vertical position: layer centers.
-      if (ndx2d > 0) then
+      if (iand(which_meshdim_, 2) > 0 .and. ndx2d > 0) then
          if (jamapvol1 > 0) then
             cell_measures = 'volume: '//trim(mesh2dname)//'_vol1'
          end if
@@ -688,7 +696,7 @@ integer :: ndims, i
 
    case(UNC_LOC_U3D) ! Horizontal velocity point location in all layers.
       ! Internal 2dv horizontal flowlinks. Horizontal position: edges in 1d mesh. Vertical position: layer centers.
-      if (numl1d > 0) then
+      if (iand(which_meshdim_, 1) > 0 .and. numl1d > 0) then
          if (jamapau > 0) then
             cell_measures = 'area: '//trim(mesh1dname)//'_au'
          end if
@@ -697,9 +705,11 @@ integer :: ndims, i
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
                            trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
       end if
+      ! TODO: AvD: 1d2d links as mesh contacts in layered 3D are not handled here yet.
+
       numl2d = numl - numl1d
       ! Internal 3d horizontal flowlinks. Horizontal position: edges in 2d mesh. Vertical position: layer centers.
-      if (numl2d > 0) then
+      if (iand(which_meshdim_, 2) > 0 .and. numl2d > 0) then
          if (jamapau > 0) then
             cell_measures = 'area: '//trim(mesh2dname)//'_au'
          end if
@@ -716,7 +726,7 @@ integer :: ndims, i
    case(UNC_LOC_W) ! Vertical velocity point location on all layer interfaces.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
-      if (ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
+      if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
          cell_measures = 'area: '//trim(mesh1dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer ! TODO: AvD: UNST-1100: or do we need to use a1 here??
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_interface)
@@ -724,7 +734,7 @@ integer :: ndims, i
                            trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
       ! Internal 3d vertical flowlinks. Horizontal position: faces in 2d mesh. Vertical position: layer interfaces.
-      if (ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
+      if (iand(which_meshdim_, 2) > 0 .and. ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
          cell_measures = 'area: '//trim(mesh2dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer ! TODO: AvD: UNST-1100: or do we need to use a1 here??
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_face)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_interface)
@@ -734,15 +744,17 @@ integer :: ndims, i
 
    case(UNC_LOC_WU) ! Vertical viscosity point location on all layer interfaces.
       ! Internal 2dv vertical viscosity points. Horizontal position: edges in 1d mesh. Vertical position: layer interfaces.
-      if (numl1d > 0) then
+      if (iand(which_meshdim_, 1) > 0 .and. numl1d > 0) then
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
                            trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method_, cell_measures, crs, ifill=-999, dfill=dmiss, writeopts=unc_writeopts)
       end if
+      ! TODO: AvD: 1d2d links as mesh contacts in layered 3D are not handled here yet.
+
       numl2d = numl - numl1d
       ! Internal 3d vertical viscosity points. Horizontal position: edges in 2d mesh. Vertical position: layer interfaces.
-      if (numl2d > 0) then
+      if (iand(which_meshdim_, 2) > 0 .and. numl2d > 0) then
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
@@ -981,19 +993,19 @@ double precision, allocatable :: mappedValues(:)
    case(UNC_LOC_CN) ! Corner point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
+      if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! TODO: AvD putting data on 1D corners not implemented yet.
          goto 888
       end if
       ! Internal 2d netnodes. Horizontal position: nodes in 2d mesh.
-      if (ndx2d > 0) then ! If there are 2d flownodes, then there are 2d netnodes.
+      if (id_var(2) > 0 .and. ndx2d > 0) then ! If there are 2d flownodes, then there are 2d netnodes.
          ierr = nf90_put_var(ncid, id_var(2), values(1:numk), start = (/ 1, id_tsp%idx_curtime /))
       end if
 
    case(UNC_LOC_S) ! Pressure point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then
+      if (id_var(1) > 0 .and. ndx1d > 0) then
          ! temporary UGRID fix
          !if(numMesh1dBeforeMerging>0) then
          !   if(allocated(mappedValues)) deallocate(mappedValues)
@@ -1006,22 +1018,22 @@ double precision, allocatable :: mappedValues(:)
          !else
             ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
          !end if
-         if (id_var(2) == -1) then ! id_var(2) for variables time_water_on_ground and freeboard is still -1, and only write for 1d, so skip
-            goto 888
-         end if
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
-      if (ndx2d > 0) then
+      if (id_var(2) > 0 .and. ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), values(1:ndx2d), start = (/ 1, id_tsp%idx_curtime /))
       end if
 
    case(UNC_LOC_U) ! Horizontal velocity point location
       ! Internal 1d flowlinks. Horizontal position: edges in 1d mesh.
-      if (lnx1d > 0) then
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          ! 1d mesh
          if(size(id_tsp%edgetoln,1).gt.0) then
             ierr = nf90_put_var(ncid, id_var(1), values(id_tsp%edgetoln(:)), start = (/ 1, id_tsp%idx_curtime /))
          endif
+      end if
+
+      if (id_var(4) > 0 .and. lnx1d > 0) then
          ! 1d2d contacts
          if(size(id_tsp%contactstoln,1).gt.0) then
             ierr = nf90_put_var(ncid, id_var(4), values(id_tsp%contactstoln(:)), start = (/ 1, id_tsp%idx_curtime /))
@@ -1030,12 +1042,12 @@ double precision, allocatable :: mappedValues(:)
       
       lnx2d = lnxi - lnx1d
       ! Internal 2d flowlinks. Horizontal position: edges in 2d mesh.
-      if (lnx2d > 0) then
+      if (id_var(2) > 0 .and. lnx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), values(lnx1d+1:lnxi), start = (/ 1, id_tsp%idx_curtime /))
       end if
       ! External 2d flowlinks. Horizontal position: edges in 2d mesh.
       lnx2db = lnx - lnx1db
-      if (lnx2db > 0) then
+      if (id_var(2) > 0 .and. lnx2db > 0) then
          ierr = nf90_put_var(ncid, id_var(2), values(lnx1db+1:lnx), start = (/ lnx2d+1, id_tsp%idx_curtime /))
       end if
       ! Default value is different from a fill value, use for example for zero velocities on closed edges.
@@ -1043,7 +1055,7 @@ double precision, allocatable :: mappedValues(:)
          ! Number of netlinks can be > number of flowlinks, if there are closed edges.
          numl2d = numl - numl1d
          ! Write default_value on all closed edges.
-         if (numl2d - lnx2d - lnx2db > 0) then
+         if (id_var(2) > 0 .and. numl2d - lnx2d - lnx2db > 0) then
             ierr = nf90_put_var(ncid, id_var(2), (/ default_value /), start = (/ lnx2d+lnx2db+1, id_tsp%idx_curtime /), count = (/ numl2d - lnx2d - lnx2db, 1 /), map = (/ 0 /)) ! Use map = 0 to write a single value on multiple edges in file.
          end if
       end if
@@ -1061,7 +1073,7 @@ double precision, allocatable :: mappedValues(:)
       end do
 
       ! 1D: write all values on 1D flow links. ! TODO: AvD: for 1D I now assume that all net links are also a flow link. This is not always true (thin dams), so make code below equal to 2D code hereafter.
-      if (lnx1d > 0) then ! TODO: AvD: along with previous TODO, this should become numl1d
+      if (id_var(1) > 0 .and. lnx1d > 0) then ! TODO: AvD: along with previous TODO, this should become numl1d
          ierr = nf90_put_var(ncid, id_var(1), workL(1:lnx1d), start = (/ 1, id_tsp%idx_curtime /))
       end if
 
@@ -1084,7 +1096,7 @@ double precision, allocatable :: mappedValues(:)
             workL(i) = values(L)
          end if
       end do
-      if (numl - numl1d > 0) then
+      if (id_var(2) > 0 .and. numl - numl1d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), workL(1:(numl-numl1d)), start = (/ 1, id_tsp%idx_curtime /))
       end if
 
@@ -1110,11 +1122,11 @@ double precision, allocatable :: mappedValues(:)
       ! Write work array.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
-      if (ndx1d > 0) then
+      if (id_var(1) > 0 .and. ndx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), workS3D(1:kmx, ndx2d+1:ndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, ndx1d, 1 /))
       end if
       ! Internal 3d flownodes. Horizontal position: faces in 2d mesh. Vertical position: layer centers.
-      if (ndx2d > 0) then
+      if (id_var(2) > 0 .and. ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), workS3D(1:kmx, 1:ndx2d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, ndx2d, 1 /))
       end if
 
@@ -1140,16 +1152,16 @@ double precision, allocatable :: mappedValues(:)
 
       ! Write work array.
       ! Internal 2dv horizontal flowlinks. Horizontal position: edges in 1d mesh. Vertical position: layer centers.
-      if (lnx1d > 0) then
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), workU3D(1:kmx, 1:lnx1d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, lnx1d, 1 /))
       end if
       lnx2d = lnx - lnx1d ! TODO: AvD: now also includes 1D bnds, dont want that.
       ! Internal and external 3d horizontal flowlinks (and 2dv external flowlinks). Horizontal position: edges in 2d mesh. Vertical position: layer centers.
-      if (lnx2d > 0) then
+      if (id_var(2) > 0 .and. lnx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), workU3D(1:kmx, lnx1d+1:lnx), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, lnx2d, 1 /))
       end if
       ! Default value is different from a fill value, use for example for zero velocities on closed edges.
-      if (present(default_value)) then
+      if (id_var(2) > 0 .and. present(default_value)) then
          ! Number of netlinks can be > number of flowlinks, if there are closed edges.
          numl2d = numl - numl1d
          ! Write default_value on all remaining edges in 2d mesh (i.e. closed edges).
@@ -1178,11 +1190,11 @@ double precision, allocatable :: mappedValues(:)
       ! Write work array.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
-      if (ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
+      if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
          ierr = nf90_put_var(ncid, id_var(1), workW(0:kmx, ndx2d+1:ndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, ndx1d, 1 /))
       end if
       ! Internal 3d vertical flowlinks. Horizontal position: faces in 2d mesh. Vertical position: layer interfaces.
-      if (ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
+      if (id_var(2) > 0 .and. ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
          ierr = nf90_put_var(ncid, id_var(2), workW(0:kmx, 1:ndx2d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, ndx2d, 1 /))
       end if
 
@@ -1207,16 +1219,16 @@ double precision, allocatable :: mappedValues(:)
 
       ! Write work array.
       ! Internal 2dv vertical viscosity points. Horizontal position: edges in 1d mesh. Vertical position: layer interfaces.
-      if (lnx1d > 0) then
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), workWU(0:kmx, 1:lnx1d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, lnx1d, 1 /))
       end if
       lnx2d = lnx - lnx1d ! TODO: AvD: now also includes 1D bnds, dont want that.
       ! Internal and external 3d vertical viscosity points (and 2dv external viscosity points). Horizontal position: edges in 2d mesh. Vertical position: layer interfaces.
-      if (lnx2d > 0) then
+      if (id_var(2) > 0 .and. lnx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), workWU(0:kmx, lnx1d+1:lnx), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, lnx2d, 1 /))
       end if
       ! Default value is different from a fill value, use for example for zero values on closed edges.
-      if (present(default_value)) then
+      if (id_var(2) > 0 .and. present(default_value)) then
          ! Number of netlinks can be > number of flowlinks, if there are closed edges.
          numl2d = numl - numl1d
          ! Write default_value on all remaining edges in 2d mesh (i.e. closed edges).
@@ -1264,33 +1276,36 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
    case(UNC_LOC_CN) ! Corner point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
+      if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! TODO: AvD putting data on 1D corners not implemented yet.
          goto 888
       end if
       ! Internal 2d netnodes. Horizontal position: nodes in 2d mesh.
-      if (ndx2d > 0) then ! If there are 2d flownodes, then there are 2d netnodes.
+      if (id_var(2) > 0 .and. ndx2d > 0) then ! If there are 2d flownodes, then there are 2d netnodes.
          ierr = nf90_put_var(ncid, id_var(2), values(1:numk), start = (/ 1, id_tsp%idx_curtime /))
       end if
 
    case(UNC_LOC_S) ! Pressure point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then
+      if (id_var(1) > 0 .and. ndx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
-      if (ndx2d > 0) then
+      if (id_var(2) > 0 .and. ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), values(1:ndx2d), start = (/ 1, id_tsp%idx_curtime /))
       end if
 
    case(UNC_LOC_U) ! Horizontal velocity point location
       ! Internal 1d flowlinks. Horizontal position: edges in 1d mesh.
-      if (lnx1d > 0) then
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          ! 1d mesh
          if(size(id_tsp%edgetoln,1).gt.0) then
             ierr = nf90_put_var(ncid, id_var(1), values(id_tsp%edgetoln(:)), start = (/ 1, id_tsp%idx_curtime /))
          endif
+      end if
+
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          ! 1d2d contacts
          if(size(id_tsp%contactstoln,1).gt.0) then
             ierr = nf90_put_var(ncid, id_var(4), values(id_tsp%contactstoln(:)), start = (/ 1, id_tsp%idx_curtime /))
@@ -1299,12 +1314,12 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
 
       lnx2d = lnxi - lnx1d
       ! Internal 2d flowlinks. Horizontal position: edges in 2d mesh.
-      if (lnx2d > 0) then
+      if (id_var(2) > 0 .and. lnx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), values(lnx1d+1:lnxi), start = (/ 1, id_tsp%idx_curtime /))
       end if
       ! External 2d flowlinks. Horizontal position: edges in 2d mesh.
       lnx2db = lnx - lnx1db
-      if (lnx2db > 0) then
+      if (id_var(2) > 0 .and. lnx2db > 0) then
          ierr = nf90_put_var(ncid, id_var(2), values(lnx1db+1:lnx), start = (/ lnx2d+1, id_tsp%idx_curtime /))
       end if
       ! Default value is different from a fill value, use for example for zero velocities on closed edges.
@@ -1312,7 +1327,7 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
          ! Number of netlinks can be > number of flowlinks, if there are closed edges.
          numl2d = numl - numl1d
          ! Write default_value on all closed edges.
-         if (numl2d - lnx2d - lnx2db > 0) then
+         if (id_var(2) > 0 .and. numl2d - lnx2d - lnx2db > 0) then
             ierr = nf90_put_var(ncid, id_var(2), (/ default_value /), start = (/ lnx2d+lnx2db+1, id_tsp%idx_curtime /), count = (/ numl2d - lnx2d - lnx2db, 1 /), map = (/ 0 /)) ! Use map = 0 to write a single value on multiple edges in file.
          end if
       end if
@@ -1330,7 +1345,7 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       end do
 
       ! 1D: write all values on 1D flow links. ! TODO: AvD: for 1D I now assume that all net links are also a flow link. This is not always true (thin dams), so make code below equal to 2D code hereafter.
-      if (lnx1d > 0) then ! TODO: AvD: along with previous TODO, this should become numl1d
+      if (id_var(1) > 0 .and. lnx1d > 0) then ! TODO: AvD: along with previous TODO, this should become numl1d
          ierr = nf90_put_var(ncid, id_var(1), workL(1:lnx1d), start = (/ 1, id_tsp%idx_curtime /))
       end if
 
@@ -1353,7 +1368,7 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
             workL(i) = values(L)
          end if
       end do
-      if (numl - numl1d > 0) then
+      if (id_var(2) > 0 .and. numl - numl1d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), workL(1:(numl-numl1d)), start = (/ 1, id_tsp%idx_curtime /))
       end if
 
@@ -1379,11 +1394,11 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       ! Write work array.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
-      if (ndx1d > 0) then
+      if (id_var(1) > 0 .and. ndx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), workS3D(1:kmx, ndx2d+1:ndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, ndx1d, 1 /))
       end if
       ! Internal 3d flownodes. Horizontal position: faces in 2d mesh. Vertical position: layer centers.
-      if (ndx2d > 0) then
+      if (id_var(2) > 0 .and. ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), workS3D(1:kmx, 1:ndx2d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, ndx2d, 1 /))
       end if
 
@@ -1409,16 +1424,16 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
 
       ! Write work array.
       ! Internal 2dv horizontal flowlinks. Horizontal position: edges in 1d mesh. Vertical position: layer centers.
-      if (lnx1d > 0) then
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), workU3D(1:kmx, 1:lnx1d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, lnx1d, 1 /))
       end if
       lnx2d = lnx - lnx1d ! TODO: AvD: now also includes 1D bnds, dont want that.
       ! Internal and external 3d horizontal flowlinks (and 2dv external flowlinks). Horizontal position: edges in 2d mesh. Vertical position: layer centers.
-      if (lnx2d > 0) then
+      if (id_var(2) > 0 .and. lnx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), workU3D(1:kmx, lnx1d+1:lnx), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, lnx2d, 1 /))
       end if
       ! Default value is different from a fill value, use for example for zero velocities on closed edges.
-      if (present(default_value)) then
+      if (id_var(2) > 0 .and. present(default_value)) then
          ! Number of netlinks can be > number of flowlinks, if there are closed edges.
          numl2d = numl - numl1d
          ! Write default_value on all remaining edges in 2d mesh (i.e. closed edges).
@@ -1447,11 +1462,11 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       ! Write work array.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
-      if (ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
+      if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
          ierr = nf90_put_var(ncid, id_var(1), workW(0:kmx, ndx2d+1:ndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, ndx1d, 1 /))
       end if
       ! Internal 3d vertical flowlinks. Horizontal position: faces in 2d mesh. Vertical position: layer interfaces.
-      if (ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
+      if (id_var(2) > 0 .and. ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
          ierr = nf90_put_var(ncid, id_var(2), workW(0:kmx, 1:ndx2d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, ndx2d, 1 /))
       end if
 
@@ -1476,16 +1491,16 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
 
       ! Write work array.
       ! Internal 2dv vertical viscosity points. Horizontal position: edges in 1d mesh. Vertical position: layer interfaces.
-      if (lnx1d > 0) then
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), workWU(0:kmx, 1:lnx1d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, lnx1d, 1 /))
       end if
       lnx2d = lnx - lnx1d ! TODO: AvD: now also includes 1D bnds, dont want that.
       ! Internal and external 3d vertical viscosity points (and 2dv external viscosity points). Horizontal position: edges in 2d mesh. Vertical position: layer interfaces.
-      if (lnx2d > 0) then
+      if (id_var(2) > 0 .and. lnx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), workWU(0:kmx, lnx1d+1:lnx), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, lnx2d, 1 /))
       end if
       ! Default value is different from a fill value, use for example for zero values on closed edges.
-      if (present(default_value)) then
+      if (id_var(2) > 0 .and. present(default_value)) then
          ! Number of netlinks can be > number of flowlinks, if there are closed edges.
          numl2d = numl - numl1d
          ! Write default_value on all remaining edges in 2d mesh (i.e. closed edges).
@@ -1534,11 +1549,11 @@ integer                         :: ndx1d         !< number of 1d node links
       ndx1d = ndxi - ndx2d
       tstart = id_tsp%idx_curtime - tl + t1
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then
+      if (id_var(1) > 0 .and. ndx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi, t1:tl), start = (/ 1, tstart /))
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
-      if (ndx2d > 0) then
+      if (id_var(2) > 0 .and. ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_var(2), values(1:ndx2d, t1: tl), start = (/ 1, tstart /))
       end if
 
@@ -1588,7 +1603,7 @@ double precision, allocatable :: work(:,:)
    case(UNC_LOC_S) ! Pressure point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then
+      if (id_var(1) > 0 .and. ndx1d > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(ndxi-ndx2d,size(values,2)))
@@ -1603,7 +1618,7 @@ double precision, allocatable :: work(:,:)
          end select
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
-      if (ndx2d > 0) then
+      if (id_var(2) > 0 .and. ndx2d > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(ndx2d,size(values,2)))
@@ -1620,7 +1635,7 @@ double precision, allocatable :: work(:,:)
 
    case(UNC_LOC_U) ! Horizontal velocity point location
       ! Internal 1d flowlinks. Horizontal position: edges in 1d mesh.
-      if (lnx1d > 0) then
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(lnx1d,size(values,2)))
@@ -1636,7 +1651,7 @@ double precision, allocatable :: work(:,:)
       end if
       lnx2d = lnxi - lnx1d
       ! Internal 2d flowlinks. Horizontal position: edges in 2d mesh.
-      if (lnx2d > 0) then
+      if (id_var(2) > 0 .and. lnx2d > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(lnxi-lnx1d,size(values,2)))
@@ -1652,7 +1667,7 @@ double precision, allocatable :: work(:,:)
       end if
       ! External 2d flowlinks. Horizontal position: edges in 2d mesh.
       lnx2db = lnx - lnx1db
-      if (lnx2db > 0) then
+      if (id_var(2) > 0 .and. lnx2db > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(lnx-lnx1db,size(values,2)))
@@ -1667,7 +1682,7 @@ double precision, allocatable :: work(:,:)
          end select
       end if
       ! Default value is different from a fill value, use for example for zero velocities on closed edges.
-      if (present(default_value)) then
+      if (id_var(2) > 0 .and. present(default_value)) then
          ! Number of netlinks can be > number of flowlinks, if there are closed edges.
          numl2d = numl - numl1d
          ! Write default_value on all closed edges.
@@ -1731,7 +1746,7 @@ double precision, allocatable :: work(:,:,:)
    case(UNC_LOC_S) ! Pressure point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (ndx1d > 0) then
+      if (id_var(1) > 0 .and. ndx1d > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(ndxi-ndx2d,size(values,2),size(values,3)))
@@ -1751,7 +1766,7 @@ double precision, allocatable :: work(:,:,:)
          end select
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
-      if (ndx2d > 0) then
+      if (id_var(2) > 0 .and. ndx2d > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(ndx2d,size(values,2),size(values,3)))
@@ -1773,7 +1788,7 @@ double precision, allocatable :: work(:,:,:)
 
    case(UNC_LOC_U) ! Horizontal velocity point location
       ! Internal 1d flowlinks. Horizontal position: edges in 1d mesh.
-      if (lnx1d > 0) then
+      if (id_var(1) > 0 .and. lnx1d > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(lnx1d,size(values,2),size(values,3)))
@@ -1794,7 +1809,7 @@ double precision, allocatable :: work(:,:,:)
       end if
       lnx2d = lnxi - lnx1d
       ! Internal 2d flowlinks. Horizontal position: edges in 2d mesh.
-      if (lnx2d > 0) then
+      if (id_var(2) > 0 .and. lnx2d > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(lnxi-lnx1d,size(values,2),size(values,3)))
@@ -1815,7 +1830,7 @@ double precision, allocatable :: work(:,:,:)
       end if
       ! External 2d flowlinks. Horizontal position: edges in 2d mesh.
       lnx2db = lnx - lnx1db
-      if (lnx2db > 0) then
+      if (id_var(2) > 0 .and. lnx2db > 0) then
          select case (ilocdim)
          case(1)
             allocate(work(lnx-lnx1db,size(values,2),size(values,3)))
@@ -1839,7 +1854,7 @@ double precision, allocatable :: work(:,:,:)
          ! Number of netlinks can be > number of flowlinks, if there are closed edges.
          numl2d = numl - numl1d
          ! Write default_value on all closed edges.
-         if (numl2d - lnx2d - lnx2db > 0) then
+         if (id_var(2) > 0 .and. numl2d - lnx2d - lnx2db > 0) then
             ierr = nf90_inquire_variable(ncid, id_var(2), dimids = dimids_var)
             ! Use map = 0 to write a single value on multiple edges in file.
             select case (ilocdim)
@@ -4602,10 +4617,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ! for 1D only, urban
       if (ndxi-ndx2d>0) then
          if (jamapTimeWetOnGround > 0) then ! cumulative time when water is above ground level
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, nf90_double, UNC_LOC_S, 'time_water_on_ground', '', 'Cumulative time water above ground level', 's')
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_timewetground, nf90_double, UNC_LOC_S, 'time_water_on_ground', '', 'Cumulative time water above ground level', 's', which_meshdim = 1)
          end if
          if (jamapFreeboard > 0) then ! freeboard
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_freeboard, nf90_double, UNC_LOC_S, 'freeboard', '', 'freeboard', 's')
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_freeboard, nf90_double, UNC_LOC_S, 'freeboard', '', 'Freeboard', 'm', which_meshdim = 1)
          end if
       end if
       ierr = nf90_enddef(mapids%ncid)
