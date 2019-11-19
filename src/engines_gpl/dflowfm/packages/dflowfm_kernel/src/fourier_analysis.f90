@@ -49,6 +49,7 @@ module m_fourier_analysis
     !> struct to enable different sizes of suma and sumb
     type fdata
        real(kind=fp), allocatable :: rdata(:)  !< actual data for suma and sumb of fourier analysis
+       real(kind=sp), allocatable :: sdata(:)  !< actual data for min/max calculations
     end type
 
     type gd_fourier
@@ -793,8 +794,13 @@ module m_fourier_analysis
              case default
                 fillValue =  0.0_fp
           end select
-          if (ierr == 0) call realloc(fousma(ifou)%rdata, sizea, stat=ierr, fill=fillValue)
-          if (ierr == 0) call realloc(fousmb(ifou)%rdata, sizeb, stat=ierr, fill=fillValue)
+          if (fouelp(ifou) == 'x' .or. fouelp(ifou) == 'i') then
+             if (ierr == 0) call realloc(fousma(ifou)%sdata, sizea, stat=ierr, fill=real(fillValue,sp))
+             if (ierr == 0) call realloc(fousmb(ifou)%sdata, sizeb, stat=ierr, fill=real(fillValue,sp))
+          else
+             if (ierr == 0) call realloc(fousma(ifou)%rdata, sizea, stat=ierr, fill=fillValue)
+             if (ierr == 0) call realloc(fousmb(ifou)%rdata, sizeb, stat=ierr, fill=fillValue)
+          endif
        enddo
        if (ierr /= 0) then
           msgbuf = 'allocation error in reafou'
@@ -920,6 +926,8 @@ end subroutine setfouunit
        real(kind=fp)    , dimension(:)      , pointer :: foufas
        real(kind=fp)    , dimension(:)      , pointer :: fousma
        real(kind=fp)    , dimension(:)      , pointer :: fousmb
+       real(kind=sp)    , dimension(:)      , pointer :: fousmas
+       real(kind=sp)    , dimension(:)      , pointer :: fousmbs
        character(len=1) , dimension(:)      , pointer :: fouelp
        character(len=16), dimension(:)      , pointer :: founam
        integer                                        :: nmaxus
@@ -939,6 +947,8 @@ end subroutine setfouunit
        foufas    => gdfourier%foufas
        fousma    => gdfourier%fousma(ifou)%rdata
        fousmb    => gdfourier%fousmb(ifou)%rdata
+       fousmas   => gdfourier%fousma(ifou)%sdata
+       fousmbs   => gdfourier%fousmb(ifou)%sdata
        fouelp    => gdfourier%fouelp
        founam    => gdfourier%founam
 
@@ -958,12 +968,12 @@ end subroutine setfouunit
                    !
                    ! Waterlevel (fousma) and waterdepth (fousmb),
                    !
-                   fousma(n) = max(fousma(n), rarray(n))
-                   fousmb(n) = max(fousmb(n), rarray(n) - real(bl(n),fp))               ! NOTE: bl is a HEIGHT (as bl in fm) and NOT a DEPTH (delft3d)
+                   fousmas(n) = max(fousmas(n), rarray(n))
+                   fousmbs(n) = max(fousmbs(n), rarray(n) - real(bl(n),sp))               ! NOTE: bl is a HEIGHT (as bl in fm) and NOT a DEPTH (delft3d)
                 enddo
              else
                 do n = 1, nmaxus
-                     fousma(n) = max(fousma(n), rarray(n))
+                     fousmas(n) = max(fousmas(n), rarray(n))
                 enddo
              endif
           elseif (fouelp(ifou) == 'e') then
@@ -986,11 +996,11 @@ end subroutine setfouunit
              ! Calculate MIN value
              !
              do n = 1, nmaxus
-                  fousma(n) = min(fousma(n), rarray(n))
+                  fousmas(n) = min(fousmas(n), rarray(n))
              enddo
              if (founam(ifou) == 's1') then
                 do n = 1, nmaxus
-                   fousmb(n) = min(fousmb(n), rarray(n) - real(bl(n),fp))
+                   fousmbs(n) = min(fousmbs(n), rarray(n) - real(bl(n),sp))
                 enddo
              endif
           elseif (fouelp(ifou) == 'a') then
@@ -1342,7 +1352,10 @@ end subroutine setfouunit
              ! clean up large fourier arrays
              !
              do ifou = 1, nofou
-                deallocate(gdfourier%fousma(ifou)%rdata, gdfourier%fousmb(ifou)%rdata)
+                if (allocated(gdfourier%fousma(ifou)%rdata)) deallocate(gdfourier%fousma(ifou)%rdata)
+                if (allocated(gdfourier%fousmb(ifou)%rdata)) deallocate(gdfourier%fousmb(ifou)%rdata)
+                if (allocated(gdfourier%fousma(ifou)%sdata)) deallocate(gdfourier%fousma(ifou)%sdata)
+                if (allocated(gdfourier%fousmb(ifou)%sdata)) deallocate(gdfourier%fousmb(ifou)%sdata)
              enddo
              deallocate(gdfourier%fousma, gdfourier%fousmb)
              nullify(gdfourier%fousma)
@@ -1688,6 +1701,8 @@ end subroutine setfouunit
        real(fp)       , dimension(:)        , pointer :: foufas
        real(fp)       , dimension(:)        , pointer :: fousma
        real(fp)       , dimension(:)        , pointer :: fousmb
+       real(sp)       , dimension(:)        , pointer :: fousmas
+       real(sp)       , dimension(:)        , pointer :: fousmbs
        real(fp)       , dimension(:)        , pointer :: fv0pu
        character(1)   , dimension(:)        , pointer :: fouelp
        character(16)  , dimension(:)        , pointer :: founam
@@ -1733,6 +1748,8 @@ end subroutine setfouunit
        foufas        => gdfourier%foufas
        fousma        => gdfourier%fousma(ifou)%rdata
        fousmb        => gdfourier%fousmb(ifou)%rdata
+       fousmas       => gdfourier%fousma(ifou)%sdata
+       fousmbs       => gdfourier%fousmb(ifou)%sdata
        fv0pu         => gdfourier%fv0pu
        fouelp        => gdfourier%fouelp
        founam        => gdfourier%founam
@@ -1823,16 +1840,22 @@ end subroutine setfouunit
              !
              ! Only write values unequal to initial min/max values (-/+1.0e+30)
              !
-             if (comparereal(abs(fousma(n)),1.0e29_fp)==-1) then
-                select case (fouelp(ifou))
-                case ('x','i','e')
+             select case (fouelp(ifou))
+             case ('x','i')
+                if (comparereal(abs(fousmas(n)),1.0e29)==-1) then
+                    glbarr3(n,1) = real(fousmas(n),sp)
+                endif
+             case ('e')
+                if (comparereal(abs(fousma(n)),1.0e29_fp)==-1) then
                     glbarr3(n,1) = real(fousma(n),sp)
-                case ('a')
+                endif
+             case ('a')
+                if (comparereal(abs(fousma(n)),1.0e29_fp)==-1) then
                    if( fousmb(1) > 0d0 ) then
                       glbarr3(n,1) = real(fousma(n),sp)/ fousmb(1)
                    endif
-                end select
-             endif
+                endif
+             end select
           enddo
           fouvar = fouref(ifou,2)
           ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(:,1))          ! write amplitudes
@@ -1844,8 +1867,8 @@ end subroutine setfouunit
                 !
                 ! Only write values unequal to initial min/max values (-/+1.0e+30)
                 !
-                if (comparereal(abs(fousmb(n)),1.0e29_fp)==-1) then
-                   glbarr3(n,2) = real(fousmb(n),sp)
+                if (comparereal(abs(fousmbs(n)),1.0e29)==-1) then
+                   glbarr3(n,2) = real(fousmbs(n),sp)
                 endif
              enddo
              ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(:,2))          ! write phase
