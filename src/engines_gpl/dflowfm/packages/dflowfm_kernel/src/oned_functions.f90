@@ -815,7 +815,7 @@ module m_oned_functions
    
    integer :: i, ii
    do i = ndx2d+1, ndxi
-      ii = ndx2d-i
+      ii = i- ndx2d
       freeBoard(i) = groundLevel(ii) - s1(i)
    end do
    
