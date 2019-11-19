@@ -95,23 +95,6 @@ subroutine loadNetwork(filename, istat, jadoorladen)
         NUMK = K0 + NUMKN
         NUML = L0 + NUMLN
         CALL SETNODADM (0)
-    else
-        ! Retry: Original .net files (new and old format)
-        CALL OLDFIL (MINP, filename)
-        CALL REAnet (MINP, istat, jadoorladen)
-        if (istat > 0) then ! reanet yields >0 on success! [AvD]
-            istat = 0
-        else
-            istat = 1
-        endif
-        if (istat == 0) then
-            ! Autosave NetCDF form of the network just read.
-            L = index(filename, '.', back=.true.)
-            call unc_write_net(filename(1:L-1)//'_net.nc')
-            call mess(LEVEL_INFO, 'Autosaved NetCDF form of net to ', filename(1:L-1)//'_net.nc')
-        endif
-
-        call doclose(minp)
     endif
     CALL CLOSEWORLD() ! STITCH 0-360 FOR 0-360 GLOBE MODELS
     netstat = NETSTAT_CELLS_DIRTY
