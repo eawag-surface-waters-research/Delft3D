@@ -13982,7 +13982,7 @@ end if
 
  if (iuvfield > 0) call setvelocityfield()           ! only when testing
 
- ! remember initial waterlevels at the water-level boundaries
+ ! remember initial water levels at the water level boundaries
  ! so that reading rst file won't influence it. This is used for restart a model with Riemann boundary conditions.
  do n=1,nbndz
     k2 = kbndz(2,n)
@@ -14077,11 +14077,6 @@ end if
  tim1bnd = tstart_user
  tim1fld = tstart_user
 
-!! remember initial waterlevels at the water-level boundaries
-! do n=1,nbndz
-!    k2 = kbndz(2,n)
-!    zbndz0(n) = s1(k2)
-! end do
 if (.not. jawelrestart) then ! If one restarts a simulation, then s0 and s1 are read from the restart file (new version), no need to set them.
    call sets01zbnd(1)
 else if (jaoldrstfile==1) then ! If the restart file is of old version (which does not have waterlevel etc info on boundaries), then need to set.
