@@ -9952,6 +9952,21 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
             end if
             n1 = meshgeom%edge_nodes(1,L)
             n2 = meshgeom%edge_nodes(2,L)
+            if (n1 <= 0 .or. n1 > meshgeom%numnode) then
+               write (msgbuf, '(a,a,a,a,a,i0,a,i0,a)') 'Error while reading ''', trim(filename), ''', mesh ''', trim(meshgeom%meshname), &
+                  ''' : edge_node table for edge #', L, ' contains invalid node nr ', n1, '.'
+               call warn_flush()
+               ierr = DFM_WRONGINPUT
+               goto 999
+            end if
+            if (n2 <= 0 .or. n2 > meshgeom%numnode) then
+               write (msgbuf, '(a,a,a,a,a,i0,a,i0,a)') 'Error while reading ''', trim(filename), ''', mesh ''', trim(meshgeom%meshname), &
+                  ''' : edge_node table for edge #', L, ' contains invalid node nr ', n2, '.'
+               call warn_flush()
+               ierr = DFM_WRONGINPUT
+               goto 999
+            end if
+
             ibr_n1 = meshgeom%nodebranchidx(n1)
             ibr_n2 = meshgeom%nodebranchidx(n2)
             if (ibr_n1 /= ibr .and. ibr_n2 /= ibr) then

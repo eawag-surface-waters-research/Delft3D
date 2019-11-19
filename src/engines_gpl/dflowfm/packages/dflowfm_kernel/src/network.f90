@@ -95,6 +95,8 @@ subroutine loadNetwork(filename, istat, jadoorladen)
         NUMK = K0 + NUMKN
         NUML = L0 + NUMLN
         CALL SETNODADM (0)
+    else
+       call qnerror('Error while loading network from '''//trim(filename)//''', please inspect the preceding diagnostic output.', ' ',  ' ')
     endif
     CALL CLOSEWORLD() ! STITCH 0-360 FOR 0-360 GLOBE MODELS
     netstat = NETSTAT_CELLS_DIRTY

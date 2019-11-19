@@ -458,7 +458,7 @@ subroutine loadModel(filename)
 
     threshold_abort = LEVEL_FATAL
 
-    if (jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
+    if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
 
 
        call read_1d_attributes(md_1dfiles, network)
@@ -490,10 +490,6 @@ subroutine loadModel(filename)
        call SetMessage(LEVEL_INFO, 'Reading Structures ...')
        call readStructures(network, md_1dfiles%structures)
        call SetMessage(LEVEL_INFO, 'Reading Structures Done')
-    endif
-
-    if (istat == 0) then
-       md_netfile = trim( md_netfile)
     endif
 
     if (getMaxErrorLevel() >= LEVEL_ERROR) then
