@@ -1268,10 +1268,15 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'waves', 'Gammax'         , gammax)
     call prop_get_double (md_ptr, 'waves', 'hminlw'         , hminlw)
     call prop_get_integer(md_ptr, 'waves', 'uorbfac'        , jauorb)    ! 0=delft3d4, sqrt(pi)/2 included in uorb calculation; >0: FM, factor not included; default: 0
-    call prop_get_integer(md_ptr, 'waves', 'jahissigwav'       , jahissigwav)  ! 1: sign wave height on his output; 0: hrms wave height on his output. Default=1
-    call prop_get_integer(md_ptr, 'waves', 'jamapsigwav'       , jamapsigwav)  ! 1: sign wave height on map output; 0: hrms wave height on map output. Default=0 (legacy)
-    call prop_get_integer(md_ptr, 'waves', 'jauorbfromswan'       , jauorbfromswan)  ! 1: use orbital velocities from com file; 0=internal uorb calculation
-
+    ! backward compatibility for hk in tauwavehk:
+    if (jawave<3) then
+       jauorb=1
+    endif
+    call prop_get_integer(md_ptr, 'waves', 'jahissigwav'         , jahissigwav)     ! 1: sign wave height on his output; 0: hrms wave height on his output. Default=1
+    call prop_get_integer(md_ptr, 'waves', 'jamapsigwav'         , jamapsigwav)     ! 1: sign wave height on map output; 0: hrms wave height on map output. Default=0 (legacy)
+    call prop_get_integer(md_ptr, 'waves', 'jauorbfromswan'      , jauorbfromswan)  ! 1: use orbital velocities from com file; 0=internal uorb calculation
+    call prop_get_double (md_ptr, 'waves', 'ftauw'               , ftauw)           ! factor for adjusting wave-related bed shear stress, default 1.0
+    
     call prop_get_integer(md_ptr, 'grw'  , 'groundwater'        , jagrw)
 
     call prop_get_integer(md_ptr, 'grw'  , 'Infiltrationmodel'  , Infiltrationmodel) ; if (Infiltrationmodel == 1 .or. infiltrationmodel == 3) jagrw = 1
@@ -1537,6 +1542,12 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u1', jamapu1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u0', jamapu0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_vector', jamapucvec, success)
+    if (jawave==3 .and. jamapucvec==0) then
+       jamapucvec = 1
+       write (msgbuf, '(a, i0, a)') 'MDU setting "Wavemodelnr = ', jawave, '" requires ' &
+          //'"Wrimap_velocity_vector = 1". Has been enabled now.'
+       call warn_flush()
+    endif
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_magnitude', jamapucmag, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_vectorq', jamapucqvec, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_upward_velocity_component', jamapww1, success)
@@ -1737,12 +1748,17 @@ subroutine readMDUFile(filename, istat)
     endif
 
     call prop_get_integer( md_ptr, 'output', 'FullGridOutput', jafullgridoutput)
+    if (jawave==3 .and. kmx>0) then
+       jafullgridoutput=1
+       call mess(LEVEL_WARN, 'D-WAVES coupling enabled and kmx>0, so layer interface coordinates are needed on com-file. FullGridOutput set to 1.')
+       call warn_flush()
+    endif
     call prop_get_integer( md_ptr, 'output', 'EulerVelocities', jaeulervel)
     if ((jawave /= 3 .and. jawave /= 4) .and. jaeulervel == 1 ) then    ! also for surfbeat
        call mess(LEVEL_WARN, '''EulerVelocities'' is not compatible with the selected Wavemodelnr. ''EulerVelocities'' is set to zero.')
        jaeulervel = 0
     endif
-
+    !
     if (jawave .eq. 4) then    ! not for Delta Shell
        call prop_get_integer(md_ptr, 'output', 'AvgWaveQuantities'    , jaavgwavquant)
        call prop_get_string(md_ptr,  'output', 'AvgWaveQuantitiesFile', md_avgwavquantfile, success)
