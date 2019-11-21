@@ -6127,8 +6127,9 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                 endif
 
                 if(jamapucvec > 0) then    
-                    ierr = nf90_def_var(imapfile, 'ucx'  , nf90_double, (/ id_laydim(iid), id_flowelemdim(iid), id_timedim (iid)/) , id_ucx(iid)  )
-                    ierr = nf90_def_var(imapfile, 'ucy'  , nf90_double, (/ id_laydim(iid), id_flowelemdim(iid), id_timedim (iid)/) , id_ucy(iid)  )
+                   ! JRE Velocity vector needs to be written, irrespective of kmx, also for com file. Statements moved down outside if-clause
+                   !    ierr = nf90_def_var(imapfile, 'ucx'   , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucx(iid)  )
+                   !    ierr = nf90_def_var(imapfile, 'ucy'   , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucy(iid)  )
                     ierr = nf90_def_var(imapfile, 'ucz'  , nf90_double, (/ id_laydim(iid), id_flowelemdim(iid), id_timedim (iid)/) , id_ucz(iid)  )
 
                     ! Depth-averaged cell-center velocities in 3D:
@@ -6184,73 +6185,81 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                   ierr = nf90_put_att(imapfile, id_rho(iid),  'units'        , 'kg m-3')
                   ierr = nf90_put_att(imapfile, id_rho(iid),  '_FillValue'   , dmiss)
                 endif
-           endif
-        endif ! jaseparate_ /= 2
-       
-        if (kmx == 0) then
-           if(jamapu1 > 0) then
-               ierr = nf90_def_var(imapfile, 'unorm' , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_unorm(iid))
-           endif
-           if(jamapu0 > 0) then
-               ierr = nf90_def_var(imapfile, 'u0'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_u0(iid)   )
-           endif
-           if(jamapq1 > 0) then    
-               ierr = nf90_def_var(imapfile, 'q1'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_q1(iid)   )
-           endif
-           if(jamapq1main > 0) then    
-               ierr = nf90_def_var(imapfile, 'q1main', nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_q1main(iid)   )
-           endif
-           if(jamapviu > 0) then
-               ierr = nf90_def_var(imapfile, 'viu'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_viu(iid)   )
-           endif
-           if(jamapdiu > 0) then
-               ierr = nf90_def_var(imapfile, 'diu'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_diu(iid)   )
-           endif
+            endif  ! kmx>0
+
+            if (kmx == 0) then
+               if(jamapu1 > 0) then
+                  ierr = nf90_def_var(imapfile, 'unorm' , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_unorm(iid))
+               endif
+               if(jamapu0 > 0) then
+                  ierr = nf90_def_var(imapfile, 'u0'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_u0(iid)   )
+               endif
+               if(jamapq1 > 0) then
+                  ierr = nf90_def_var(imapfile, 'q1'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_q1(iid)   )
+               endif
+               if(jamapq1main > 0) then
+                  ierr = nf90_def_var(imapfile, 'q1main', nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_q1main(iid)   )
+               endif
+               if(jamapviu > 0) then
+                  ierr = nf90_def_var(imapfile, 'viu'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_viu(iid)   )
+               endif
+               if(jamapdiu > 0) then
+                  ierr = nf90_def_var(imapfile, 'diu'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_diu(iid)   )
+               endif
+            endif
+
+            if(jamapu1 > 0) then
+               ierr = nf90_put_att(imapfile, id_unorm(iid),'coordinates'  , 'FlowLink_xu FlowLink_yu')
+               ierr = nf90_put_att(imapfile, id_unorm(iid),'long_name', 'normal component of sea_water_speed')
+               ierr = nf90_put_att(imapfile, id_unorm(iid),'units'        , 'm s-1')
+               ierr = nf90_put_att(imapfile, id_unorm(iid),'_FillValue'   , dmiss)
+            endif
+
+            if(jamapu0 > 0) then
+               ierr = nf90_put_att(imapfile, id_u0(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
+               ierr = nf90_put_att(imapfile, id_u0(iid)   ,'long_name',     'normal component of sea_water_speed at previous timestep')
+               ierr = nf90_put_att(imapfile, id_u0(iid)   ,'units'        , 'm s-1')
+               ierr = nf90_put_att(imapfile, id_u0(iid)   ,'_FillValue'   , dmiss)
+            endif
+            if(jamapq1 > 0) then
+               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
+               !ierr = nf90_put_att(imapfile, id_q1(iid)   ,'standard_name', 'discharge') ! not CF
+               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'long_name'    , 'flow flux')
+               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'units'        , 'm3 s-1')
+               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'_FillValue'   , dmiss)
+            endif
+            if(jamapq1main > 0) then
+               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
+               !ierr = nf90_put_att(imapfile, id_q1(iid)   ,'standard_name', 'discharge') ! not CF
+               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'long_name'    , 'flow flux in main channel')
+               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'units'        , 'm3 s-1')
+               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'_FillValue'   , dmiss)
+            endif
+
+            if(jamapviu > 0) then
+               ierr = nf90_put_att(imapfile, id_viu(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
+               ierr = nf90_put_att(imapfile, id_viu(iid)   ,'long_name',     'horizontal viscosity')
+               ierr = nf90_put_att(imapfile, id_viu(iid)   ,'units'        , 'm2 s-1')
+               ierr = nf90_put_att(imapfile, id_viu(iid)   ,'_FillValue'   , dmiss)
+            endif
+            if(jamapdiu > 0) then
+               ierr = nf90_put_att(imapfile, id_diu(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
+               ierr = nf90_put_att(imapfile, id_diu(iid)   ,'long_name',     'horizontal diffusivity')
+               ierr = nf90_put_att(imapfile, id_diu(iid)   ,'units'        , 'm2 s-1')
+               ierr = nf90_put_att(imapfile, id_diu(iid)   ,'_FillValue'   , dmiss)
+            endif
+        endif   ! jaseparate =/ 2
+        !
+        if (kmx==0) then
            if(jamapucvec > 0) then
                ierr = nf90_def_var(imapfile, 'ucx'   , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucx(iid)  )
                ierr = nf90_def_var(imapfile, 'ucy'   , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucy(iid)  )
            endif
-        endif
-        
-        if(jamapu1 > 0) then
-            ierr = nf90_put_att(imapfile, id_unorm(iid),'coordinates'  , 'FlowLink_xu FlowLink_yu')
-            ierr = nf90_put_att(imapfile, id_unorm(iid),'long_name', 'normal component of sea_water_speed')
-            ierr = nf90_put_att(imapfile, id_unorm(iid),'units'        , 'm s-1')
-            ierr = nf90_put_att(imapfile, id_unorm(iid),'_FillValue'   , dmiss)
-        endif
-        
-        if(jamapu0 > 0) then
-            ierr = nf90_put_att(imapfile, id_u0(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')   
-            ierr = nf90_put_att(imapfile, id_u0(iid)   ,'long_name',     'normal component of sea_water_speed at previous timestep')
-            ierr = nf90_put_att(imapfile, id_u0(iid)   ,'units'        , 'm s-1')
-            ierr = nf90_put_att(imapfile, id_u0(iid)   ,'_FillValue'   , dmiss)
-        endif
-        if(jamapq1 > 0) then      
-            ierr = nf90_put_att(imapfile, id_q1(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')   
-            !ierr = nf90_put_att(imapfile, id_q1(iid)   ,'standard_name', 'discharge') ! not CF
-            ierr = nf90_put_att(imapfile, id_q1(iid)   ,'long_name'    , 'flow flux')
-            ierr = nf90_put_att(imapfile, id_q1(iid)   ,'units'        , 'm3 s-1')
-            ierr = nf90_put_att(imapfile, id_q1(iid)   ,'_FillValue'   , dmiss)
-        endif
-        if(jamapq1main > 0) then      
-            ierr = nf90_put_att(imapfile, id_q1(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')   
-            !ierr = nf90_put_att(imapfile, id_q1(iid)   ,'standard_name', 'discharge') ! not CF
-            ierr = nf90_put_att(imapfile, id_q1(iid)   ,'long_name'    , 'flow flux in main channel')
-            ierr = nf90_put_att(imapfile, id_q1(iid)   ,'units'        , 'm3 s-1')
-            ierr = nf90_put_att(imapfile, id_q1(iid)   ,'_FillValue'   , dmiss)
-        endif
-        
-        if(jamapviu > 0) then
-            ierr = nf90_put_att(imapfile, id_viu(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')   
-            ierr = nf90_put_att(imapfile, id_viu(iid)   ,'long_name',     'horizontal viscosity')
-            ierr = nf90_put_att(imapfile, id_viu(iid)   ,'units'        , 'm2 s-1')
-            ierr = nf90_put_att(imapfile, id_viu(iid)   ,'_FillValue'   , dmiss)
-        endif
-        if(jamapdiu > 0) then
-            ierr = nf90_put_att(imapfile, id_diu(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')   
-            ierr = nf90_put_att(imapfile, id_diu(iid)   ,'long_name',     'horizontal diffusivity')
-            ierr = nf90_put_att(imapfile, id_diu(iid)   ,'units'        , 'm2 s-1')
-            ierr = nf90_put_att(imapfile, id_diu(iid)   ,'_FillValue'   , dmiss)
+        else
+           if (jamapucvec > 0) then
+              ierr = nf90_def_var(imapfile, 'ucx'  , nf90_double, (/ id_laydim(iid), id_flowelemdim(iid), id_timedim (iid)/) , id_ucx(iid)  )
+              ierr = nf90_def_var(imapfile, 'ucy'  , nf90_double, (/ id_laydim(iid), id_flowelemdim(iid), id_timedim (iid)/) , id_ucy(iid)  )
+           endif
         endif
 
         if(jamapucvec > 0) then
@@ -7606,19 +7615,49 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     if (jaeulervel==1 .and. jaseparate_/=2 .and. jawave.gt.0) then
        jaeulerloc = 1
     endif
-
+    !
     call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulerloc, 0)
-
     !
     !  Hack to pass time varying bottom levels to SWAN
+    !  Also needed for morphostatic runs in 3D
     !
-    if (jaseparate_==2 .and. jased>0) then
-       ierr = nf90_inq_varid(imapfile, 'FlowElem_zcc', id_swanbl(iid))
+    if (jaseparate_==2) then
+       ! JRE: was _zcc, but this has laydim included as dimension, which does not work in 3D
+       ierr = nf90_inq_varid(imapfile, 'FlowElem_bl', id_swanbl(iid))     
        ierr = nf90_put_var(imapfile, id_swanbl(iid),  -bl,   (/ 1, itim /), (/ ndxndxi, 1 /))
     end if
     !    
     ! Water level
     ierr = nf90_put_var(imapfile, id_s1(iid),  s1,   (/ 1, itim /), (/ ndxndxi, 1 /))
+   
+    if ( kmx==0 ) then
+       ierr = nf90_put_var(imapfile, id_ucx  (iid), workx,  (/ 1, itim /), (/ ndxndxi, 1 /))
+       ierr = nf90_put_var(imapfile, id_ucy  (iid), worky,  (/ 1, itim /), (/ ndxndxi, 1 /))
+    endif
+    
+    if ( kmx>0 ) then
+       call unc_append_3dflowgeom_put(imapfile, jaseparate_, itim) ! needed for 3D wave coupling on comfile: Flowelem_zw
+
+       do kk=1,ndxndxi
+          work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+          call getkbotktop(kk,kb,kt)
+          call getlayerindices(kk, nlayb, nrlay)
+          do k = kb,kt
+             work1(k-kb+nlayb,kk) = workx(k)
+          enddo
+       enddo
+       ierr = nf90_put_var(imapfile, id_ucx(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
+
+       do kk=1,ndxndxi
+          work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+          call getkbotktop(kk,kb,kt)
+          call getlayerindices(kk, nlayb, nrlay)
+          do k = kb,kt
+             work1(k-kb+nlayb,kk) = worky(k)
+          enddo
+       enddo
+       ierr = nf90_put_var(imapfile, id_ucy(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
+    endif
    
     if (jaseparate_ /= 2) then
         ierr = nf90_put_var(imapfile, id_s0(iid),  s0,   (/ 1, itim /), (/ ndxndxi, 1 /))
@@ -7637,34 +7676,12 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        if (jamapchezy > 0) then
            ierr = nf90_put_var(imapfile, id_czs(iid), czs,  (/ 1, itim /), (/ ndxndxi, 1 /))
        endif
-    
+
        ! Velocities
        if ( kmx>0 ) then
 !         3D
           call reconstructucz(0)
-          call unc_append_3dflowgeom_put(imapfile, jaseparate_, itim) 
-
-
-          do kk=1,ndxndxi
-             work1(:, kk) = dmiss ! For proper fill values in z-model runs.
-             call getkbotktop(kk,kb,kt)
-             call getlayerindices(kk, nlayb, nrlay)
-             do k = kb,kt
-                work1(k-kb+nlayb,kk) = workx(k)
-             enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_ucx(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
-
-          do kk=1,ndxndxi
-             work1(:, kk) = dmiss ! For proper fill values in z-model runs.
-             call getkbotktop(kk,kb,kt)
-             call getlayerindices(kk, nlayb, nrlay)
-             do k = kb,kt
-                work1(k-kb+nlayb,kk) = worky(k)
-             enddo
-          enddo
-          ierr = nf90_put_var(imapfile, id_ucy(iid), work1(1:kmx,1:ndxndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxndxi, 1 /))
-
+          !
           do kk=1,ndxndxi
              work1(:, kk) = dmiss ! For proper fill values in z-model runs.
              call getkbotktop(kk,kb,kt)
@@ -7826,12 +7843,6 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        end if
 
     end if
-
-    if ( kmx == 0 ) then
-       ierr = nf90_put_var(imapfile, id_ucx  (iid), workx,  (/ 1, itim /), (/ ndxndxi, 1 /))
-       ierr = nf90_put_var(imapfile, id_ucy  (iid), worky,  (/ 1, itim /), (/ ndxndxi, 1 /))
-       !ierr = nf90_put_var(imapfile, id_rho  (iid), rho  ,  (/ 1, itim /), (/ ndxndxi, 1 /))
-   end if
     
     if (jaseparate_ /= 2) then
         
