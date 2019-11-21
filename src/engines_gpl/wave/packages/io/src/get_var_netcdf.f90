@@ -1,4 +1,5 @@
-subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basename)
+subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basename, &
+                        & kmax, flowVelocityType)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -44,6 +45,8 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
     integer                      , intent(in)  :: i_flow
     integer                      , intent(in)  :: mmax
     integer                      , intent(in)  :: nmax
+    integer, optional            , intent(in)  :: kmax
+    integer, optional            , intent(in)  :: flowVelocityType
     character(*)                 , intent(in)  :: varname
     real   , dimension(mmax,nmax), intent(out) :: vararr
     type(wave_time_type)                       :: wavetime
@@ -51,30 +54,64 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
 !
 ! Local variables
 !
-   integer                         :: i
-   integer                         :: itime
-   integer                         :: ind
-   integer                         :: ierror
-   integer                         :: idfile
-   integer                         :: iddim_mmax
-   integer                         :: iddim_nmax
-   integer                         :: iddim_time
-   integer                         :: idvar_dps
-   integer                         :: idvar_s1
-   integer                         :: idvar_u1
-   integer                         :: idvar_v1
-   integer                         :: idvar_windx
-   integer                         :: idvar_windy
-   integer                         :: idvar_time
-   integer                         :: mmax_from_file
-   integer                         :: ntimes
-   integer                         :: partitionlocation
-   real, dimension(:), allocatable :: times
-   character(NF90_MAX_NAME)        :: string
-   character(300)                  :: filename
+   integer                             :: i
+   integer                             :: itime
+   integer                             :: ind
+   integer                             :: ierror
+   integer                             :: idfile
+   integer                             :: iddim_mmax
+   integer                             :: iddim_nmax
+   integer                             :: iddim_time
+   integer                             :: idvar_dps
+   integer                             :: idvar_s1
+   integer                             :: idvar_u1
+   integer                             :: idvar_v1
+   integer                             :: idvar_zw
+   integer                             :: idvar_rlabda
+   integer                             :: idvar_windx
+   integer                             :: idvar_windy
+   integer                             :: idvar_time
+   integer                             :: mmax_from_file
+   integer                             :: nm
+   integer                             :: ntimes
+   integer                             :: kmax_
+   integer                             :: partitionlocation
+   integer                             :: veltyp
+   real                                :: depth
+   real                                :: cosharg
+   real                                :: dz
+   real                                :: eps
+   real                                :: pi
+   real                                :: waveku
+   real                                :: wght
+   real                                :: wghtsum
+   real, dimension(:),   allocatable   :: rlabda
+   real, dimension(:),   allocatable   :: times
+   real, dimension(:,:), allocatable   :: vararr3d
+   real, dimension(:,:), allocatable   :: flzw
+   character(NF90_MAX_NAME)            :: string
+   character(300)                      :: filename
 !
 !! executable statements -------------------------------------------------------
 !
+   pi    = 4.0*tanh(1.0)
+   eps   = 1.0e-6
+   kmax_ = 1
+   if (present(kmax)) then
+      kmax_ = kmax
+   endif
+   !
+   veltyp = FVT_DEPTH_AVERAGED
+   if (present(flowVelocityType)) then
+      veltyp = flowVelocityType
+   endif
+   !
+   if (kmax_>1) then
+      allocate(vararr3d(kmax_,mmax),stat=ierror); vararr3d = 0.0
+      allocate(flzw(kmax_+1,mmax)  ,stat=ierror); flzw     = 0.0
+      allocate(rlabda(mmax)        ,stat=ierror); rlabda   = 0.0
+   endif
+   !
    if (num_subdomains == 1) then
       filename = basename
    else
@@ -89,13 +126,19 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
    ierror = nf90_inquire_dimension(idfile, iddim_time, string, ntimes); call nc_check_err(ierror, "inq_dim time", filename)
    select case(varname)
       case('dps')
-         ierror = nf90_inq_varid(idfile, 'FlowElem_zcc', idvar_dps); call nc_check_err(ierror, "inq_varid FlowElem_zcc", filename)
+         ierror = nf90_inq_varid(idfile, 'FlowElem_bl', idvar_dps); call nc_check_err(ierror, "inq_varid FlowElem_bl", filename)  ! _zcc has laydim included, so useless in 3D
       case('s1')
-         ierror = nf90_inq_varid(idfile, 's1', idvar_s1); call nc_check_err(ierror, "inq_varid s1", filename)
+         ierror = nf90_inq_varid(idfile, 's1', idvar_s1); call nc_check_err(ierror, "inq_varid s1", filename)   
       case('u1')
          ierror = nf90_inq_varid(idfile, 'ucx', idvar_u1); call nc_check_err(ierror, "inq_varid ucx", filename)
+         if (kmax_>1) then
+            ierror = nf90_inq_varid(idfile, 'FlowElem_zw', idvar_zw); call nc_check_err(ierror, "inq_varid FlowElem_zw", filename)
+         endif
       case('v1')
          ierror = nf90_inq_varid(idfile, 'ucy', idvar_v1); call nc_check_err(ierror, "inq_varid ucy", filename)
+         if (kmax_>1) then
+            ierror = nf90_inq_varid(idfile, 'FlowElem_zw', idvar_zw); call nc_check_err(ierror, "inq_varid FlowElem_zw", filename)
+         endif         
       case('windx')
          ierror = nf90_inq_varid(idfile, 'windx', idvar_windx); call nc_check_err(ierror, "inq_varid windx", filename)
       case('windy')
@@ -154,13 +197,23 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
    !
    select case(varname)
       case('dps')
-         ierror = nf90_get_var(idfile, idvar_dps  , vararr, start=(/1,1/), count=(/mmax/)); call nc_check_err(ierror, "get_var dps", filename)
+         ierror = nf90_get_var(idfile, idvar_dps  , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var dps", filename)  ! to check
       case('s1')
          ierror = nf90_get_var(idfile, idvar_s1   , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var s1", filename)
       case('u1')
-         ierror = nf90_get_var(idfile, idvar_u1   , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var ucx", filename)
+         if (kmax_==1) then
+            ierror = nf90_get_var(idfile, idvar_u1   , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var ucx", filename)
+         else
+            ierror = nf90_get_var(idfile, idvar_u1   , vararr3d, start=(/1,1,itime/), count=(/kmax_,mmax,1/)); call nc_check_err(ierror, "get_var ucx", filename)
+            ierror = nf90_get_var(idfile, idvar_zw   , flzw,     start=(/1,1,itime/), count=(/kmax_+1,mmax,1/)); call nc_check_err(ierror, "get_var FlowElem_zw", filename)
+         endif
       case('v1')
-         ierror = nf90_get_var(idfile, idvar_v1   , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var ucy", filename)
+         if (kmax_==1) then
+            ierror = nf90_get_var(idfile, idvar_v1   , vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var ucy", filename)
+         else
+            ierror = nf90_get_var(idfile, idvar_v1   , vararr3d, start=(/1,1,itime/), count=(/kmax_,mmax,1/)); call nc_check_err(ierror, "get_var ucy", filename)
+            ierror = nf90_get_var(idfile, idvar_zw   , flzw,     start=(/1,1,itime/), count=(/kmax_+1,mmax,1/)); call nc_check_err(ierror, "get_var FlowElem_zw", filename)
+         endif
       case('windx')
          ierror = nf90_get_var(idfile, idvar_windx, vararr, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var windx", filename)
       case('windy')
@@ -169,6 +222,72 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
          write(*,'(3a)') "ERROR in get_var_netcdf: unknown parameter '", trim(varname), "'."
          call wavestop(1, "ERROR in get_var_netcdf: unknown parameter '"//trim(varname)//"'.")
    end select
+   !
+   ! Convert vararr3D velocity fields to quasi-2D vararr
+   ! Sigma layers are only option for FM (for now)
+   ! FM layer numbering is bottom to surface
+   if (varname == 'u1' .or. varname=='v1') then
+      if (kmax_>1) then
+         if (veltyp == FVT_SURFACE_LAYER) then
+            vararr(:,1) = vararr3d(kmax_,:)
+         endif
+         !
+         if (veltyp == FVT_DEPTH_AVERAGED) then
+            do nm=1,mmax
+               depth = flzw(kmax_,nm) - flzw(1,nm)
+               vararr(nm,1) = 0d0
+               do i=1,kmax_
+                  vararr(nm,1) = vararr(nm,1) + (flzw(i+1,nm)-flzw(i,nm))/depth*vararr3d(i,nm)
+               enddo   
+            enddo
+         endif
+         !
+         if (veltyp == FVT_WAVE_DEPENDENT) then
+            ! Retrieve wavelength from comfile
+            ierror = nf90_inq_varid(idfile, 'wlen', idvar_rlabda); call nc_check_err(ierror, "inq_varid wlen", filename)
+            ierror = nf90_get_var(idfile, idvar_rlabda  , rlabda, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var wlen", filename)
+            !
+            ! Calculate wavenumber k
+            do nm=1,mmax
+               vararr(nm,1) = 0.0
+               if (rlabda(nm) > 0.1) then
+                  waveku = 2.0 * pi / rlabda(nm)
+               else
+                  waveku = 99.0
+               endif
+               wghtsum = 0.0
+               do i = 1, kmax_
+                  dz = flzw(i+1,nm)-flzw(i,nm)
+                  !
+                  ! z is 0 at bed and depth at surface
+                  ! weight velocities according to Dingemans(1997)
+                  !
+                  cosharg = 2.0*waveku*(flzw(i,nm)-flzw(1,nm) + 0.5*dz) ! cell centre velocities in layers
+                  if (cosharg > 50.0) then
+                     !
+                     ! very "deep" water
+                     ! use surface velocity
+                     !
+                     vararr(nm,1) = vararr3d(kmax_,nm)
+                     wghtsum = 1.0
+                     exit
+                  endif
+                  wght = cosh(cosharg)
+                  wght = wght * dz
+                  vararr(nm,1) = vararr(nm,1) + vararr3d(i,nm)*wght
+                  wghtsum = wghtsum + wght
+               enddo
+               vararr(nm,1) = vararr(nm,1) / max(eps, wghtsum)
+            enddo
+         endif
+      endif
+   endif
    ierror = nf90_close(idfile); call nc_check_err(ierror, "closing file", filename)
+   !
    deallocate(times, stat=ierror)
+   if (allocated(vararr3d)) then
+      deallocate(vararr3d,stat=ierror)
+      deallocate(flzw    ,stat=ierror)
+      deallocate(rlabda  ,stat=ierror)
+   endif
 end subroutine get_var_netcdf

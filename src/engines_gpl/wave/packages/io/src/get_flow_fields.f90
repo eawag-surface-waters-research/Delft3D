@@ -61,22 +61,37 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
    character(256)     :: mudfilnam    = ' '
    type(input_fields) :: fif                    ! input fields defined on flow grid
 
-interface
-   subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g)
-    use swan_flow_grid_maps
-    integer                   , intent(in)  :: i1
-    integer                   , intent(in)  :: n1
-    integer                   , intent(in)  :: mmax
-    integer                   , intent(in)  :: nmax
-    real   , dimension(n1)    , intent(in)  :: f1
-    real   , dimension(mmax,nmax)           :: f2
-    type(grid_map)            , intent(in)  :: f2s
-    type(grid)                              :: f2g  ! f2 grid
-   end subroutine grmap_esmf
-end interface
-!
-!! executable statements -------------------------------------------------------
-!
+   interface
+      subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g)
+         use swan_flow_grid_maps
+         integer                   , intent(in)  :: i1
+         integer                   , intent(in)  :: n1
+         integer                   , intent(in)  :: mmax
+         integer                   , intent(in)  :: nmax
+         real   , dimension(n1)    , intent(in)  :: f1
+         real   , dimension(mmax,nmax)           :: f2
+         type(grid_map)            , intent(in)  :: f2s
+         type(grid)                              :: f2g  ! f2 grid
+      end subroutine grmap_esmf
+
+      subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basename, &
+                              & kmax, flowVelocityType)
+
+         use wave_data         
+         integer                      , intent(in)  :: i_flow
+         integer                      , intent(in)  :: mmax
+         integer                      , intent(in)  :: nmax
+         integer, optional            , intent(in)  :: kmax
+         integer, optional            , intent(in)  :: flowVelocityType
+         character(*)                 , intent(in)  :: varname
+         real   , dimension(mmax,nmax), intent(out) :: vararr
+         type(wave_time_type)                       :: wavetime
+         character(*)                               :: basename
+      end subroutine
+   end interface
+   !
+   !! executable statements -------------------------------------------------------
+   !
    ! Allocate memory swan input fields defined on flow grid
    !
    call alloc_input_fields(fg, fif, wavedata%mode)
@@ -178,16 +193,21 @@ end interface
          !
          ! Read velocity components from netcdf-file
          !
-         if (fg%kmax > 1) then
-            write(*,'(a)') "ERROR: trying to read 3 dim velocity components from NetCDF file. Not implemented yet."
-            call wavestop(1, "ERROR: trying to read 3 dim velocity components from NetCDF file. Not implemented yet.")
-         endif
-         call get_var_netcdf (i_flow, wavedata%time , 'u1', &
-                            & fif%u1, fif%mmax, fif%nmax, &
-                            & sr%flowgridfile)
-         call get_var_netcdf (i_flow, wavedata%time , 'v1', &
-                            & fif%v1, fif%mmax, fif%nmax, &
-                            & sr%flowgridfile)
+         if (fg%kmax == 1) then
+            call get_var_netcdf (i_flow, wavedata%time , 'u1', &
+                               & fif%u1, fif%mmax, fif%nmax, &
+                               & sr%flowgridfile)
+            call get_var_netcdf (i_flow, wavedata%time , 'v1', &
+                               & fif%v1, fif%mmax, fif%nmax, &
+                               & sr%flowgridfile)
+         else
+            call get_var_netcdf (i_flow, wavedata%time , 'u1', &
+                               & fif%u1, fif%mmax, fif%nmax, &
+                               & sr%flowgridfile, fg%kmax,flowVelocityType)
+            call get_var_netcdf (i_flow, wavedata%time , 'v1', &
+                               & fif%u1, fif%mmax, fif%nmax, &
+                               & sr%flowgridfile, fg%kmax,flowVelocityType)                               
+         endif                   
          !
          ! Map velocity components to SWAN grid, using ESMF_Regrid weights
          !
