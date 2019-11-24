@@ -1494,6 +1494,7 @@ if(q /= 0) then
     endif
     dsetb  = dsetb + 1                               ! total nr of setbacks
     s1     = s0
+    vol1 = vol0
     if (dts .lt. dtmin) then
         s1 = max(s1,bl)                              ! above bottom
         call okay(0)
