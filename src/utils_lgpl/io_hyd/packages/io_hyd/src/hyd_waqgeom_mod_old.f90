@@ -1421,7 +1421,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
    else
       ierr_missing = UG_INVALID_CRS
       epsg      = 28992
-      epsgstring = 'EPGS:28992'
+      epsgstring = 'EPSG:28992'
       ierr = nf90_put_att(ncid, id_crs, 'name',                        'Unknown projected' ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'epsg',                        epsg                ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',           'Unknown projected' ) ! CF
