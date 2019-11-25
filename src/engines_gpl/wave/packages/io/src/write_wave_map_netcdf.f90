@@ -173,13 +173,13 @@ subroutine write_wave_map_netcdf (sg, sof, n_swan_grids, wavedata, casl, singlep
        ierror = nf90_def_var(idfile, 'projected_coordinate_system', nf90_int, idvar_coordmap); call nc_check_err(ierror, "def_var coordinate mapping", filename)
        if (sg%sferic) then
           epsg       = 4326
-          epsgstring = 'EPGS:4326'
+          epsgstring = 'EPSG:4326'
           ierror = nf90_put_att(idfile, idvar_coordmap, 'name',                        'WGS84'             ); call nc_check_err(ierror, "coordinate mapping put_att", filename)
           ierror = nf90_put_att(idfile, idvar_coordmap, 'grid_mapping_name',           'latitude_longitude'); call nc_check_err(ierror, "coordinate mapping put_att", filename)
           string = 'deg'
        else
           epsg       = 28992
-          epsgstring = 'EPGS:28992'
+          epsgstring = 'EPSG:28992'
           ierror = nf90_put_att(idfile, idvar_coordmap, 'name',                        'Unknown projected' ); call nc_check_err(ierror, "coordinate mapping put_att", filename)
           ierror = nf90_put_att(idfile, idvar_coordmap, 'grid_mapping_name',           'Unknown projected' ); call nc_check_err(ierror, "coordinate mapping put_att", filename)
           string = 'm'
