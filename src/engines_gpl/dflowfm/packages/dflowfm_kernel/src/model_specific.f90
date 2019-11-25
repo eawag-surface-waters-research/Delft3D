@@ -125,8 +125,9 @@ subroutine textflowspecific()
 
         call equatorial(time1)
 
-    else if ( md_ident(1:6) == 'wetbed'    .or. md_ident(1:6) == 'drybed'  .or.  &
-              md_ident(1:9) == 'thacker1d' .or. md_ident(1:8) == 'belanger' ) THEN
+    else if ( md_ident(1:6) == 'wetbed'    .or. md_ident(1:6) == 'drybed'   .or.  &
+              md_ident(1:9) == 'thacker1d' .or. md_ident(1:8) == 'belanger' .or.  &
+              md_ident(1:12) == 'coriolistilt' .or. md_ident(1:14) == 'corioliskelvin') THEN
        
         jaanalytic = 1
 

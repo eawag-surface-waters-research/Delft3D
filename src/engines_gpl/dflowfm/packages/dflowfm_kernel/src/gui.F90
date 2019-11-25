@@ -1102,7 +1102,7 @@
             else
                JA = 1
             end if 
-            call setucxucyucxuucyu() ! reconstruct cell center velocities
+            call setucxucyucxuucyunew() ! reconstruct cell center velocities
          else 
             call rearst(MLAN,JA)
          endif   
@@ -3087,7 +3087,7 @@
       OPTION(34) = 'ma                                    ' 
       MAXOPT     = 34
       endif     
- 
+      
       NWHAT2     = NDRAW(28)
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       NDRAW(28) = NWHAT2
@@ -17630,7 +17630,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 20, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 21, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -17657,11 +17657,12 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(13) = 'Anti creep                          ( ) ' ; it(2*13) = 2
    OPTION(14) = '                                    ( ) ' ; it(2*14) = 6
    OPTION(15) = 'irov 0,1,2,3                        ( ) ' ; it(2*15) = 2
-   OPTION(16) = 'icorio, 0, 4, or 5                  ( ) ' ; it(2*16) = 2
+   OPTION(16) = 'icorio, 0, 4, 5, 6                  ( ) ' ; it(2*16) = 2
    OPTION(17) = 'jatidep tidal potential forcing 0/1 ( ) ' ; it(2*17) = 2
    OPTION(18) = 'EpsCG, CG solver stop criterion     ( ) ' ; it(2*18) = 6
    OPTION(19) = 'Epshu, flooding criterion           (m) ' ; it(2*19) = 6
    OPTION(20) = 'JaExplicitsinks                     ( ) ' ; it(2*20) = 2
+   OPTION(21) = 'Corioadamsbashfordfac               ( ) ' ; it(2*21) = 6
  
  
 !   123456789012345678901234567890123456789012345678901234567890
@@ -17682,11 +17683,12 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM (13) = '0=No, 1=Yes anticreep  only in sigma layers                 '
    HELPM (14) = 'default 1d-8                                                '
    HELPM (15) = '0=free slip, 1 =partial slip, 2=no slip, 3 =hydraul. smooth '
-   HELPM (16) = '0=no coriolois, 4=coriolis, 5 = 4 limited below 1 m         '
+   HELPM (16) = '0=no coriolois, 4=unweighted v, 5=hu/hs, 6 =hu/hus          '
    HELPM (17) = '0=no tidal potential, 1=yes tidal potential                 '
    HELPM (18) = 'Guus, if max(abs(r/rk) < epscg , or Saad L2norm < epscg     '
    HELPM (19) = 'hu > epshu: link flows                                      '
    HELPM (20) = '1=expl, 0 = impl                                            '
+   HELPM (21) = '>0 = Adams Bashford, standard= 0.5                          '
   
    
    CALL SAVEKEYS()
@@ -17776,6 +17778,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFormPutDouble  (2*18 ,epscg, '(e10.5)' )
    CALL IFormPutDouble  (2*19 ,epshu, '(e10.5)' )                                             
    CALL IFORMPUTinteger (2*20 ,jaexplicitsinks  )     
+   CALL IFormputDouble  (2*21 ,Corioadamsbashfordfac,'(e10.5)')        
+
 
    !  Display the form with numeric fields left justified
    !  and set the initial field to number 2
@@ -17834,6 +17838,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
           CALL IFormgetDouble  (2*18 ,epscg           )
           CALL IFormgetDouble  (2*19 ,epshu           )        
           CALL IFORMgeTinteger (2*20 ,jaexplicitsinks )        
+          CALL IFormgetDouble  (2*21 ,Corioadamsbashfordfac)        
 
           epshs    = 0.2d0*epshu  ! minimum waterdepth for setting cfu
           if (niadvec .ne. iadvec) then
@@ -19577,10 +19582,10 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
       SUBROUTINE CHANGEGRIDPARAMETERS()
       USE M_GRID
-
       USE M_GRIDSETTINGS
       use m_sferic
       use unstruc_display
+      use m_polygon
       use unstruc_version_module, only : unstruc_company, unstruc_program
       implicit none
 
@@ -19594,7 +19599,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
       external :: highlight_form_line
 !
       integer :: ip,ir, il, iw, ixp, iyp, ih, i, iuvfieldorg, ifexit, ifinit, key
-      integer :: nbut, imp, inp
+      integer :: nbut, imp, inp, k
+      double precision :: phi
 
       NLEVEL    = 3
       OPTION(1) = 'M-REFINEMENT FACTOR                     '
@@ -19792,6 +19798,19 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
               SPLFAC2=MAX(0d0, MIN(SPLFAC2,1d0) )
               FACMIR=MAX(0.1d0, MIN(FACMIR,10d0) )
               jsferic = max(0,min(jsferic,1)) 
+
+              if ( pil_rad < 0d0 ) then ! cre
+                 if (maxpol < mfac+1) then  
+                     call increasepol(mfac+1, 0)     
+                 endif
+                 pil_rad = abs(pil_rad)
+                 do k = 1,mfac+1
+                    phi = twopi* ( dble(k-1) / dble(mfac) )
+                    xpl(k) = pil_x + pil_rad*cos(phi)
+                    ypl(k) = pil_y + pil_rad*sin(phi)
+                 enddo
+                 npl = mfac+1 
+             endif  
           ENDIF
           CALL IWinClose(1)
           CALL IWinClose(1)
@@ -21946,7 +21965,11 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  else if (md_IDENT(1:6) == 'drybed') then
      call drybed(time1-tstart_user)
  else if (md_IDENT(1:6) == 'wetbed') then
-     call wetbed(time1-tstart_user)
+     call wetbed(time1-tstart_user)      
+ else if (md_IDENT(1:12) == 'coriolistilt') then
+     call coriolistilt(time1-tstart_user)
+ else if (md_IDENT(1:14) == 'corioliskelvin') then
+     call corioliskelvin(time1-tstart_user)
  else if (index(md_ident,'thacker1d') > 0) then
     call thacker1d(0,xz,yz,s1,bl,ndx,time1-tstart_user)
  else if (md_IDENT == 'equator1d') then

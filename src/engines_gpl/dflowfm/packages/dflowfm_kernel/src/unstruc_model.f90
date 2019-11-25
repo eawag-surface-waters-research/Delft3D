@@ -440,7 +440,7 @@ subroutine loadModel(filename)
     end if
 
     ! load the caching file - if there is any
-    call loadCachingFile(md_ident, md_netfile, md_usecaching)
+    ! call loadCachingFile(md_ident, md_netfile, md_usecaching)
 
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
@@ -916,6 +916,7 @@ subroutine readMDUFile(filename, istat)
     setHorizontalBobsFor1d2d = .false.
     call prop_get_logical(md_ptr, 'numerics', 'setHorizontalBobsFor1d2d', setHorizontalBobsFor1d2d)
     call prop_get_integer(md_ptr, 'numerics', 'Icoriolistype'   , icorio)
+    call prop_get_double (md_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac)
     call prop_get_integer(md_ptr, 'numerics', 'Limtyphu'        , limtyphu)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypmom'       , limtypmom)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypsa'        , limtypsa)
@@ -2430,6 +2431,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'numerics', 'AdvecType',    iadvec,     'Advection type (0: none, 1: Wenneker, 2: Wenneker q(uio-u), 3: Perot q(uio-u), 4: Perot q(ui-u), 5: Perot q(ui-u) without itself)')
     call prop_set(prop_ptr, 'numerics', 'TimeStepType', itstep,     'Time step handling (0: only transport, 1: transport + velocity update, 2: full implicit step-reduce, 3: step-Jacobi, 4: explicit)')
     call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 1=yes, if jsferic then spatially varying, if icoriolistype==6 then constant (anglat)')
+    if (Corioadamsbashfordfac .ne. 0) then 
+    call prop_set(prop_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac,    '0=No, 0.5d0=AdamsBashford)')
+    endif
+
 !   call prop_set_integer(prop_ptr, 'numerics', 'numoverlap', numoverlap, ' ')
 
     if (writeall .or. Limtyphu .ne. 0) then
@@ -2489,7 +2494,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Tlfsmo'            , Tlfsmo,             'Fourier smoothing time (s) on water level boundaries')
-    if (keepstbndonoutflow == 1) then
+    if (keepstbndonoutflow > 0) then 
        call prop_set(prop_ptr, 'numerics', 'Keepstbndonoutflow', keepstbndonoutflow, 'Keep sal and tem signals on bnd also at outflow, 1=yes, 0=no=default=copy inside value on outflow')
     endif
 
@@ -3256,6 +3261,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'output', 'Wrimap_DTcell', jamapdtcell, 'Write time step per cell based on CFL (1: yes, 0: no)')
     endif
 
+     
     if (writeall .or. jamapTimeWetOnGround /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_time_water_on_ground', jamapTimeWetOnGround, 'Write cumulative time when water is above ground level to map file (1: yes, 0: no)')
     endif
@@ -3263,6 +3269,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jamapFreeboard /= 0) then
        call prop_set(prop_ptr, 'output', 'Wrimap_freeboard', jamapFreeboard, 'Write freeboard to map file (1: yes, 0: no)')
     end if
+    
 
     if (jatidep > 0 .and. (writeall .or. jamaptidep /= 1)) then
        call prop_set(prop_ptr, 'output', 'Wrimap_tidal_potential', jamaptidep, 'Write tidal potential to map file (1: yes, 0: no)')

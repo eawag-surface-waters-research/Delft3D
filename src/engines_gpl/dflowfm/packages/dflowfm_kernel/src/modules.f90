@@ -2182,6 +2182,7 @@ subroutine default_flowexternalforcings()
     ndambreak = 0     ! nr of dambreak links
     ndambreaksg = 0   ! nr of dambreak signals
     nklep   = 0       ! nr of kleps
+    nvalv   = 0       ! nr of valves
     nqbnd   = 0       ! nr of q bnd's
     ! JRE
     nzbnd = 0
@@ -2397,11 +2398,12 @@ end subroutine default_turbulence
  integer                           :: jacomp = 1        !! same now for netnodes, 0 = default, 1 = use cs, sn in weighting, 2=regular scalar x,y interpolation based on banf
 
  integer                           :: icorio            !< Coriolis weigthing
-                                                        !! 1 : v = tang. comp of total velocity at u-point
-                                                        !! 2 : v = idem, depth weighted
-                                                        !! 3 : v = idem, depumin weighted
-                                                        !! 4 : v = idem, continuity weighted ucnxq, ucnyq = default so far
-                                                        !! 5 : 4, scaling down coriolis force below trshcorio
+ 
+ integer                           :: jacorioconstant=0 !< Coriolis constant in sferic models anyway if set to 1
+ 
+ double precision                  :: Corioadamsbashfordfac = 0d0  !< Coriolis Adams Bashford , 0d0 = explicit, 0.5 = AB 
+
+ double precision                  :: hhtrshcor         !< if > 0 safety for hu/hs in corio for now, ==0
 
  double precision                  :: trshcorio         !< below this depth coriolis force scaled down linearly to 0
 
@@ -2498,6 +2500,7 @@ end subroutine default_turbulence
  double precision                  :: blminabove        !<  : if not -999d0, above this level the cell centre bedlevel is the min of surrouding netnodes
  double precision                  :: blmin             !<  : lowest bedlevel point in model
  double precision                  :: upot0=-999d0      !<  : initial potential energy
+ double precision                  :: ukin0=-999d0      !<  : initial kinetic   energy
 
  integer                           :: jaupdbndbl        !< Update bl at boundary (1 = update, 0 = no update)
  integer                           :: jaupdbobbl1d     !< Update bl and bobs for 1d network (call to setbobs_1d only at initialization)
@@ -2825,12 +2828,42 @@ subroutine default_flowparameters()
                       ! 6 : as 5, also for Coriolis
 
     icorio = 5        ! Coriolis weigthing
-                      ! (Tx, Ty) = tang unit vector at u-point
-                      ! 4 : v = alfa LR (Tx, Ty) . (ucx , ucy )             ucx, ucy  =   Perotsum (u)
-                      ! 5 : v = alfa LR (Tx, Ty) . (ucxq, ucyq)             ucxq,ucyq = ( Perotsum (u*hu) ) / hs
-                      ! 6 : v = alfa LR (Tx, Ty) . (ucxq, ucyq)             ucxq,ucyq = ( Perotsum (u*hu) ) / hsu, hsu = areaweighted hu
-                      ! 7 : v = alfa LR (Tx, Ty) . (ucx*hs , ucy*hs ) / hu
-                      ! 8 : v = alfa LR (Tx, Ty) . (ucx*hs , ucy*hs ) / (alfa LR hs)
+                      ! (Tx,Ty) = tangential unit vector at u-point
+                      ! uk      = u1 at layer k, 
+                      ! hu      = hu(2D)                                     ; huk   = hu(L)   
+                      ! hs      = hs(2D)                                     ; hsk   = zws(k) - zws(k-1)                 
+                      ! ahu     = alfa(hs) = acL(LL)*hs1 + (1-acL(LL))*hs2   ; ahuk  = alfa(hsk) 
+                      ! hus     = areaweighted( hu) at s point               ; husk  = hus(k)  
+                      ! ahus    = areaweighted(ahu) at s point               ; ahusk = ahus(k)
+                      ! .       = dotp
+                      ! avolu   = alfa(vol1)                                 ; avoluk = alfa(vol1(k))
+      
+                      ! unweighted
+                      ! 3 : vk = alfa LR (Tx, Ty) . (ucxk , ucyk)              ucxk, ucyk  =   Perotsum (uk), (== ucx,ucy), f node based, fcori     
+                      ! 4 : vk = alfa LR (Tx, Ty) . (ucxk , ucyk)              ucxk, ucyk  =   Perotsum (uk), (== ucx,ucy), f link based, fcor
+                      
+                      ! Olga type weightings 
+                      ! 5 : vk = alfa LR (Tx, Ty) . (ucxqk, ucyqk)             ucxqk,ucyqk = ( Perotsum (uk*huk) )    / hsk Olga
+                      ! 6 : vk = alfa LR (Tx, Ty) . (ucxqk, ucyqk)             ucxqk,ucyqk = ( Perotsum (uk*hu)  )    / hs 
+                       
+                      ! 7 : vk = alfa LR (Tx, Ty) . (ucxqk, ucyqk)             ucxqk,ucyqk = ( Perotsum (uk*ahuk) )   / ahusk
+                      ! 8 : vk = alfa LR (Tx, Ty) . (ucxqk, ucyqk)             ucxqk,ucyqk = ( Perotsum (uk*ahu)  )   / ahus 
+     
+                      ! 9 : vk = alfa LR (Tx, Ty) . (ucxqk, ucyqk)             ucxqk,ucyqk = ( Perotsum (uk*avoluk) ) / volk
+                      !10 : vk = alfa LR (Tx, Ty) . (ucxqk, ucyqk)             ucxqk,ucyqk = ( Perotsum (uk*avolu)  ) / vol 
+     
+                 
+                      ! David type weightings 
+                      !25 : vk = alfa LR (Tx, Ty) . (ucxk*hsk   , ucyk*hsk )   / huk
+                      !26 : vk = alfa LR (Tx, Ty) . (ucxk*hs    , ucyk*hs  )   / hu 
+
+                      !27 : vk = alfa LR (Tx, Ty) . (ucxk*hsk   , ucyk*ahusk ) / ahuk 
+                      !28 : vk = alfa LR (Tx, Ty) . (ucxk*hs    , ucyk*ahus  ) / ahu 
+  
+                      !29 : vk = alfa LR (Tx, Ty) . (ucxk*vol1k , ucyk*vol1k ) / avoluk   identical to advec33 
+                      !30 : vk = alfa LR (Tx, Ty) . (ucxk*vol1  , ucyk*vol1  ) / avolu 
+
+    hhtrshcor = 0d0   ! 0=no safety on hu/hs in corio 
 
     trshcorio = 1.0   ! below this depth coriolis force scaled down linearly to 0
 
@@ -3368,6 +3401,7 @@ end module m_vegetation
  double precision, allocatable         :: sqi   (:)   !< cell center incoming flux (m3/s)
  double precision, allocatable         :: squ2D (:)   !< cell center outgoing 2D flux (m3/s)
  double precision, allocatable         :: sqwave(:)   !< cell center outgoing flux, including gravity wave velocity (m3/s) (for explicit time-step)
+ double precision, allocatable         :: hus   (:)   !< hu averaged at 3D cell 
  double precision, allocatable         :: workx (:)   !< Work array
  double precision, allocatable         :: worky (:)   !< Work array
  double precision, allocatable         :: work0 (:,:) !< Work array
@@ -3496,6 +3530,8 @@ end module m_vegetation
  double precision, allocatable, target    :: diusp(:)   !< [m2/s] user defined spatial eddy diffusivity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
                                                         !< so in transport, total diffusivity = viu*sigdifi + diusp
  real            , allocatable     :: fcori (:)   !< spatially variable fcorio coeff at u point (1/s)
+double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/s2)
+
  real            , allocatable     :: tidgs (:)   !< spatially variable earth tide potential at s point (m2/s2)
  double precision, allocatable     :: plotlin(:)  !< for plotting on u points
  integer         , allocatable     :: numlimdt(:) !< nr of times this point was the timestep limiting point
