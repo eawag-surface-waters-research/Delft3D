@@ -973,7 +973,7 @@ end subroutine setfouunit
                 enddo
              else
                 do n = 1, nmaxus
-                     fousmas(n) = max(fousmas(n), rarray(n))
+                   fousmas(n) = max(fousmas(n), rarray(n))
                 enddo
              endif
           elseif (fouelp(ifou) == 'e') then
@@ -1224,12 +1224,12 @@ end subroutine setfouunit
     use m_flow
     implicit none
 
-       real(kind=fp)     , intent(in) :: dtsec   !<  Integration time step [in seconds]
-       real(kind=fp)     , intent(in) :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt
-       real(kind=fp)     , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-       integer           , intent(in) :: nst     !< timestep number
-       character(len=*)  , intent(in) :: trifil  !< output filename
-       character(len=*)  , intent(in) :: refdat  !< reference date
+    real(kind=fp)     , intent(in) :: dtsec   !<  Integration time step [in seconds]
+    real(kind=fp)     , intent(in) :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt
+    real(kind=fp)     , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
+    integer           , intent(in) :: nst     !< timestep number
+    character(len=*)  , intent(in) :: trifil  !< output filename
+    character(len=*)  , intent(in) :: refdat  !< reference date
 
     ! NOTE: In DELFT3D depth is used, but bl is passed (positive bottomlevel). Defined direction is different
 
@@ -1250,9 +1250,6 @@ end subroutine setfouunit
     character(len=1) , dimension(:)      , pointer :: fouelp
     character(len=16), dimension(:)      , pointer :: founam
     character(len=1) , dimension(:)      , pointer :: foutyp
-    integer                              , pointer :: nmax
-    integer                                        :: nmaxus
-    integer                              , pointer :: kmax
 
     double precision, pointer             :: fieldptr1(:)
     double precision, pointer             :: bl_ptr(:)
@@ -1275,10 +1272,6 @@ end subroutine setfouunit
     fouelp              => gdfourier%fouelp
     founam              => gdfourier%founam
     foutyp              => gdfourier%foutyp
-
-    nmax                => gddimens%nmax
-    nmaxus              =  gddimens%nmaxus
-    kmax                => gddimens%kmax
 
     bl_ptr => bl
     kfs_ptr => kfs
@@ -1347,7 +1340,7 @@ end subroutine setfouunit
        !
        if (nst==fouwrt) then
           if (fileids%ncid == 0) then
-             call wrfou(trifil, dtsec, const_names, itdate, hdt, tzone, gddimens_ptr)
+             call wrfou(trifil, dtsec, const_names, itdate, hdt, tzone)
              !
              ! clean up large fourier arrays
              !
@@ -1369,7 +1362,7 @@ end subroutine setfouunit
 !> - open fourier analysis output file
 !! - writes results of fourier analysis to output file
 !! - closes fourier analysis output file
-    subroutine wrfou(trifil, dtsec, namcon, itdate, hdt, tzone, gddimens)
+    subroutine wrfou(trifil, dtsec, namcon, itdate, hdt, tzone)
     !!--declarations----------------------------------------------------------------
         use precision
         use mathconsts
@@ -1389,7 +1382,6 @@ end subroutine setfouunit
         character(*)                   , intent(in)  :: trifil  !< File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
         real(fp)                       , intent(in)  :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
         real(fp)                       , intent(in)  :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt
-        type(gd_dimens)  , pointer :: gddimens            !< Model geometry/grid structure
 
         !
         integer                        , pointer :: nofouvar
@@ -1417,9 +1409,6 @@ end subroutine setfouunit
         integer                        , pointer :: iblbs
         integer                        , pointer :: iblep
         integer        , dimension(:,:), pointer :: idvar
-        integer                        , pointer :: nmaxgl
-        integer                        , pointer :: nmax
-        integer                                  :: nmaxus
     !
     ! Local variables
     !
@@ -1468,10 +1457,6 @@ end subroutine setfouunit
         iblbs         => gdfourier%iblbs
         iblep         => gdfourier%iblep
         idvar         => gdfourier%idvar
-        nmax          => gddimens%nmax
-        nmaxus        =  gddimens%nmaxus
-
-        nmaxgl        => nmax                                ! => gdp%gdparall%nmaxgl
 
         !
         ierr = unc_create(trim(trifil), 0, fileids%ncid)
@@ -1638,7 +1623,7 @@ end subroutine setfouunit
            unc_loc = all_unc_loc(ifou)
            !
            if (foutyp(ifou)=='s') then
-              call wrfous(ifou, dtsec, hdt, tzone, gddimens, fileids, unc_loc)
+              call wrfous(ifou, dtsec, hdt, tzone, fileids, unc_loc)
               ifou = ifou + 1
            else
 !             call wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens   )
@@ -1660,7 +1645,7 @@ end subroutine setfouunit
     end subroutine wrfou
 
 !> - writes results of fourier analysis to output
-   subroutine wrfous(ifou, dtsec, hdt, tzone, gddimens, fileids, iloc)
+   subroutine wrfous(ifou, dtsec, hdt, tzone, fileids, iloc)
    !!--declarations----------------------------------------------------------------
        use precision
        use mathconsts
@@ -1673,16 +1658,14 @@ end subroutine setfouunit
    ! Global variables
    !
        integer                     , intent(in) :: ifou   !< Fourier counter
-       real(fp)                    , intent(in) :: dtsec  !< Integration time step [in seconds]
-       real(fp)                    , intent(in) :: tzone  !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-       real(fp)                    , intent(in) :: hdt    !< Half Integration time step [seconds] => gdp%gdnumeco%hdt
+       real(kind=fp)               , intent(in) :: dtsec  !< Integration time step [in seconds]
+       real(kind=fp)               , intent(in) :: tzone  !< Local (FLOW) time - GMT (in hours)
+       real(kind=fp)               , intent(in) :: hdt    !< Half Integration time step [seconds]
        type(t_unc_mapids)          , intent(in) :: fileids!< Set of file and variable ids for this file.
        integer                     , intent(in) :: iloc
-       type(gd_dimens)             , pointer    :: gddimens
    !
    ! Local variables
    !
-       integer                              , pointer :: nmaxgl
        integer        , dimension(:)        , pointer :: fconno
        integer        , dimension(:)        , pointer :: flayno
        integer        , dimension(:)        , pointer :: fnumcy
@@ -1697,35 +1680,35 @@ end subroutine setfouunit
        integer                              , pointer :: ibleh
        integer                              , pointer :: iblcn
        integer                              , pointer :: iblbs
-       real(fp)       , dimension(:)        , pointer :: fknfac
-       real(fp)       , dimension(:)        , pointer :: foufas
-       real(fp)       , dimension(:)        , pointer :: fousma
-       real(fp)       , dimension(:)        , pointer :: fousmb
-       real(sp)       , dimension(:)        , pointer :: fousmas
-       real(sp)       , dimension(:)        , pointer :: fousmbs
-       real(fp)       , dimension(:)        , pointer :: fv0pu
-       character(1)   , dimension(:)        , pointer :: fouelp
-       character(16)  , dimension(:)        , pointer :: founam
-       character(50)  , dimension(:)        , pointer :: fouvarnam
+       real(kind=fp), dimension(:)          , pointer :: fknfac
+       real(kind=fp), dimension(:)          , pointer :: foufas
+       real(kind=fp), dimension(:)          , pointer :: fousma
+       real(kind=fp), dimension(:)          , pointer :: fousmb
+       real(kind=sp), dimension(:)          , pointer :: fousmas
+       real(kind=sp), dimension(:)          , pointer :: fousmbs
+       real(kind=fp), dimension(:)          , pointer :: fv0pu
+       character(len=1) , dimension(:)      , pointer :: fouelp
+       character(len=16), dimension(:)      , pointer :: founam
+       character(len=50), dimension(:)      , pointer :: fouvarnam
        integer                              , pointer :: nofouvar
        integer        , dimension(:,:)      , pointer :: fouref
-       integer                              , pointer :: nmax
-       integer                                        :: nmaxus
 
-       integer                   :: ierror
-       integer                   :: fouvar
-       integer                   :: sizeb
-       integer                   :: n                  ! Loop counter over NMAXUS
-       logical                   :: ltest              ! Help variable for atan2 function test
-       real(fp)                  :: amp                ! Fourier amplitude
-       real(fp)                  :: fas                ! Fourier phase
-       real(fp)                  :: freqnt             ! Frequency in degrees per hour
-       real(fp)                  :: shift              ! Phase shift
-       real(fp)                  :: tfasto             ! Stop time in minutes
-       real(fp)                  :: tfastr             ! Start time in minutes
-       real(sp), parameter       :: defaul = -999.0_sp ! Default value
-       character(4)              :: blnm
-       real(sp), dimension(:,:),  allocatable :: glbarr3
+       integer                    :: nmaxus
+       integer                    :: ierror
+       integer                    :: fouvar
+       integer                    :: sizeb
+       integer                    :: n                    ! Loop counter over NMAXUS
+       logical                    :: ltest                ! Help variable for atan2 function test
+       real(kind=fp)              :: amp                  ! Fourier amplitude
+       real(kind=fp)              :: fas                  ! Fourier phase
+       real(kind=fp)              :: freqnt               ! Frequency in degrees per hour
+       real(kind=fp)              :: shift                ! Phase shift
+       real(kind=fp)              :: tfasto               ! Stop time in minutes
+       real(kind=fp)              :: tfastr               ! Start time in minutes
+       real(kind=fp), parameter   :: defaultd = -999.0_fp ! Default value for doubles
+       character(len=4)           :: blnm
+       real(kind=fp), allocatable :: amplitudes(:)
+       real(kind=fp), allocatable :: phases(:)
 
    !
    !! executable statements -------------------------------------------------------
@@ -1756,11 +1739,6 @@ end subroutine setfouunit
        fouvarnam     => gdfourier%fouvarnam
        nofouvar      => gdfourier%nofouvar
        fouref        => gdfourier%fouref
-
-       nmax          => gddimens%nmax
-       nmaxus        =  gddimens%nmaxus
-
-       nmaxgl        => nmax                                ! => gdp%gdparall%nmaxgl
 
        !
        ! Initialize local variables
@@ -1832,52 +1810,36 @@ end subroutine setfouunit
        ! Write data for user defined dimensions, hence NMAXUS
        ! First for Maximum or Minimum
        !
-       allocate(glbarr3(nmaxus,2), stat = ierror)
-       glbarr3 = defaul
-
+       fouvar = fouref(ifou,2)
        if (fouelp(ifou)=='x' .or. fouelp(ifou)=='i' .or. fouelp(ifou)=='a' .or. fouelp(ifou)=='e') then
-          do n = 1, nmaxus
-             !
-             ! Only write values unequal to initial min/max values (-/+1.0e+30)
-             !
-             select case (fouelp(ifou))
-             case ('x','i')
-                if (comparereal(abs(fousmas(n)),1.0e29)==-1) then
-                    glbarr3(n,1) = real(fousmas(n),sp)
-                endif
-             case ('e')
-                if (comparereal(abs(fousma(n)),1.0e29_fp)==-1) then
-                    glbarr3(n,1) = real(fousma(n),sp)
-                endif
-             case ('a')
-                if (comparereal(abs(fousma(n)),1.0e29_fp)==-1) then
-                   if( fousmb(1) > 0d0 ) then
-                      glbarr3(n,1) = real(fousma(n),sp)/ fousmb(1)
-                   endif
-                endif
-             end select
-          enddo
-          fouvar = fouref(ifou,2)
-          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(:,1))          ! write amplitudes
+          select case (fouelp(ifou))
+          case ('x','i')
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousmas)
+          case ('e')
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousma)
+          case ('a')
+             if( fousmb(1) > 0d0 ) then
+                do n = 1, nmaxus
+                   fousma(n) = fousma(n) / fousmb(1)
+                enddo 
+             else
+                fousma = defaultd
+             endif
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar), iloc, fousma)
+          end select
           if ((fouelp(ifou)=='i' .or. fouelp(ifou)=='x') .and. founam(ifou)=='s1') then
-             !
-             ! Write min or max waterdepth too
-             !
-             do n = 1, nmaxus
-                !
-                ! Only write values unequal to initial min/max values (-/+1.0e+30)
-                !
-                if (comparereal(abs(fousmbs(n)),1.0e29)==-1) then
-                   glbarr3(n,2) = real(fousmbs(n),sp)
-                endif
-             enddo
-             ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(:,2))          ! write phase
+             ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmbs)
           endif
        else
           !
           ! Write data for user defined dimensions, hence NMAXUS
           !
-          fouvar = fouref(ifou,2)
+          allocate(amplitudes(nmaxus), phases(nmaxus), stat = ierror)
+          if (ierror /= 0) then
+              msgbuf = 'Allocation error in wrfou; no Fourier output for ' // fouvarnam(fouvar)
+              call warn_flush()
+              return
+          endif
           do n = 1, nmaxus
              ltest = (fousma(n)==0.0_fp .and. fousmb(n)==0.0_fp)
              !
@@ -1905,22 +1867,22 @@ end subroutine setfouunit
                 !
                 fas = mod(mod(fas, 360.0_fp) + 720.0_fp, 360.0_fp)
                 amp = amp/fknfac(ifou)
-                glbarr3(n,1) = real(amp,sp)
-                glbarr3(n,2) = real(fas,sp)
+                amplitudes(n) = amp
+                phases(n)     = fas
              else
                 !
                 ! Inactive point (not inside grid, can be open boundary)
                 ! defaul instead of xz/yz needed for GPP
                 ! '0' instead of kcs, because TEKAL does not accept '2'
                 !
-                glbarr3(n,1) = defaul               ! amplitudes
-                glbarr3(n,2) = defaul               ! phases
+                amplitudes(n) = defaultd
+                phases(n)     = defaultd
              endif
           enddo
-          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(:,1))          ! write amplitudes
-          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(:,2))          ! write phase
+          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, amplitudes)
+          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, phases)
+          deallocate(amplitudes, phases)
        endif
-       if (allocated(glbarr3)) deallocate(glbarr3)
    end subroutine wrfous
 
 end module m_fourier_analysis
