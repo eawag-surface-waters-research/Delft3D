@@ -7666,7 +7666,7 @@ contains
          if (kc(n) > 0) then ! search allowed, (not allowed like closed pipes point etc) 
             if (npl == 1) then ! 1 point polygon: check whether point lies inside a grid cell
                nn = size(nd(n)%x)
-               call PINPOK (xpl(1), ypl(1), nn, nd(n)%x, nd(n)%y, inp)
+               call pinpok (xpl(1), ypl(1), nn, nd(n)%x, nd(n)%y, inp)
             else               ! real polygon, check whether grid cell lies inside polygon
                call inwhichpolygon(xz(n), yz(n), inp)
             end if
