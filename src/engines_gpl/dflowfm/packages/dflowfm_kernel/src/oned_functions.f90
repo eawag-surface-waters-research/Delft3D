@@ -775,9 +775,12 @@ module m_oned_functions
    type(t_network), intent(inout), target :: network
    type(t_storage), pointer               :: pSto
    type(t_administration_1d), pointer     :: adm
-   integer                                :: i, cc1, cc2
+   integer                                :: i, cc1, cc2, K1, LL, Lf
+   double precision :: f
 
    groundlevel(:) = dmiss
+
+   adm => network%adm
 
    if (ndxi-ndx2d>0) then
       ! set for storage nodes that have prescribed street level
@@ -790,14 +793,18 @@ module m_oned_functions
       ! set for other nodes, the ground level equals to the highest cross section "embankment" value
       do i = 1, ndxi-ndx2d
          if (groundLevel(i) == dmiss) then
-            adm => network%adm
-            cc1 = adm%gpnt2cross(i)%c1
-            cc2 = adm%gpnt2cross(i)%c2
-            if (cc1 > 0 .and. cc2 > 0) then
-               groundLevel(i) = getHighest1dLevel(network%crs%cross(cc1), network%crs%cross(cc2), adm%gpnt2cross(i)%f)
-            else ! If there is no cross section, then set ground level equal to bed level
-               groundLevel(i) = bl(ndx2d+i)
-            end if
+            k1 = ndx2d+i
+            do LL=1,nd(k1)%lnx
+               Lf = nd(k1)%ln(LL)
+               cc1 = adm%line2cross(Lf)%c1
+               cc2 = adm%line2cross(Lf)%c2
+               f   = adm%line2cross(Lf)%f
+               if (cc1 > 0 .and. cc2 > 0) then
+                  groundLevel(i) = max(groundLevel(i), getHighest1dLevel(network%crs%cross(cc1), network%crs%cross(cc2), f))
+               else ! If there is no cross section, then set ground level equal to bed level
+                  groundLevel(i) = max(groundLevel(i), bl(ndx2d+i))
+               end if
+            end do
          end if
       end do
    else
