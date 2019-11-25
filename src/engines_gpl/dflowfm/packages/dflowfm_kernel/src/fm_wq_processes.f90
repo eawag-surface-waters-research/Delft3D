@@ -28,14 +28,14 @@
 
 ! $Id$
 ! $HeadURL$
-   subroutine fm_wq_processes_ini()
+   subroutine fm_wq_processes_ini_sub()
       use m_fm_wq_processes
       use m_alloc
       use unstruc_messages
       use m_flow, only: kmx, Lnkx
       use m_flowgeom, only: Ndxi, ba, Lnx, Lnxi, ln, lne2ln
-      use m_flowparameters, only: jasal, jatem, jawave
       use m_flowexternalforcings
+      use m_transport
       use m_partitioninfo
       use unstruc_model
       use unstruc_files
@@ -45,61 +45,18 @@
       
       implicit none
       
-      character(20), allocatable :: syunit_sub(:)       !< substance unit from sub-file
-      character(20), allocatable :: coname_sub(:)       !< constant names from sub-file
-      real         , allocatable :: covalue_sub(:)      !< values for contants from sub-file
-      character(20), allocatable :: ouname_sub(:)       !< output names from sub-file
-      character(80), allocatable :: oudesc_sub(:)       !< output decriptions from sub-file
-
-      character(20), allocatable :: syname_eho(:)       !< substance names from sub-file
-      character(20), allocatable :: syunit_eho(:)       !< substance names from sub-file
-      character(20), allocatable :: coname_eho(:)       !< constant names from sub-file
-      real         , allocatable :: covalue_eho(:)      !< values for contants from sub-file
-      character(20), allocatable :: ouname_eho(:)       !< output names from sub-file
-      character(80), allocatable :: oudesc_eho(:)       !< output decriptions from sub-file
-
       integer                    :: ierr_sub            !< error status
       integer                    :: ierr_eho            !< error status
       character(256)             :: cerr                !< error message
 
-      !     for wq_processes_initialise
-      character(len=256)       :: substance_file        !< substance file
-      character(len=256)       :: his_output_file       !< extra history output file
-      character(len=256)       :: proc_log_file         !< processes log file
-      character(len=256)       :: proc_def_file         !< processes definition file
-      character(len=256)       :: bloom_file            !< BLOOM algae spiecies paramter file
-      character(len=256)       :: statistics_file       !< file with configuration for statistics
-      
-      type(procespropcoll)     :: statprocesdef   !< the statistical proces definition
-      integer  ( 4), parameter :: nomult = 0      !< number of multiple substances
-      integer  ( 4)            :: imultp(2,nomult)!< multiple substance administration
-      type(t_dlwq_item)        :: constants       !< delwaq constants list
-      integer                  :: rank            !< mpi rank (-1 is no mpi)
-      integer                  :: noinfo          !< count of informative message
-      integer                  :: nowarn          !< count of warnings
-      integer                  :: ierr            !< error count
-
 !     Other
-      integer( 4)              :: lunlsp
-      integer( 4)              :: ierr2, iresult
-      integer( 4)              :: nerror
-      integer( 4)              :: nrvarn
-      integer( 4)              :: noout_sub
-      integer( 4)              :: nosys_eho,notot_eho,nocons_eho
-      integer( 4)              :: noout_eho
-      integer( 4)              :: i, j, ip, icon, ipar, ifun, isfun, ivar
-      integer( 4)              :: iastat
+      integer( 4)              :: nosys_eho, notot_eho, nocons_eho
+      integer( 4)              :: i
 
-      character*20,parameter   :: ctauflow = 'tauflow'
-      character*10,parameter   :: cbloom = 'd40blo'
-      character*20,parameter   :: doprocesses = 'DoProcesses'
-
-      integer :: janew, itrac, iex
+      integer :: janew, iex, ierr
       integer :: kk, k, kb, kt, ktmax, kdum
       
-      integer :: ierror
-      
-      logical :: Lsub, Leho, Lstt, Lpdf, Lblm, opened, Lallocated, writebalance
+      logical :: Lsub, Leho, Lstt, Lpdf, Lblm, Lallocated
 
       integer(4), save         :: ithndl = 0
 
@@ -109,11 +66,8 @@
       timon = .true.
       call mess(LEVEL_INFO, 'Water quality timers switched on')
       if (timon) call timstrt( "fm_wq_processes", ithndlwq )
-      if (timon) call timstrt( "fm_wq_processes_ini", ithndl )
+      if (timon) call timstrt( "fm_wq_processes_ini_sub", ithndl )
       
-      ierror = 1
-      
-      jawaqproc = 1
       ibflag = 0
       
       substance_file = md_subfile
@@ -121,14 +75,6 @@
       proc_def_file = md_pdffile
       bloom_file = md_blmfile
       statistics_file = md_sttfile
-      proc_log_file = defaultfilename('wq_lsp')
-      
-!     try to open the lsp-file for logging output
-      open (newunit=lunlsp , file=proc_log_file, status='unknown', iostat=ierr)
-      if (ierr.ne.0) then
-         call mess(LEVEL_ERROR, 'Could not open processes log file: ', trim(proc_log_file))
-      end if
-      call setmlu(lunlsp)
       
 !     check if substance file exists
       inquire(file=substance_file,exist=Lsub)
@@ -244,9 +190,6 @@
 
 !     Read the substance file for the process defintion
 !     Reset number of messages
-      noinfo=0
-      nowarn=0
-      nerror=0
       ierr=0
       
       call mess(LEVEL_INFO, 'Opening substance file: ', trim(substance_file))
@@ -299,6 +242,17 @@
       
       call realloc(amass, [notot, noseg], keepExisting=.false., fill=0.0d0)       !< mass array to be updated
 
+!     add corresponding tracers and bottom substances, if not already defined by initial and/or boundary conditions
+      transformcoef = 0.0_hp
+      call realloc(isys2trac,notot,keepExisting=.false.,fill=0)
+      do i=1,nosys
+         call add_bndtracer(trim(syname_sub(i)), syunit(i), isys2trac(i), janew)
+      end do
+      call realloc(isys2wqbot,notot,keepExisting=.false.,fill=0)
+      do i=nosys+1,notot
+         call add_wqbot(trim(syname_sub(i)), syunit(i), isys2wqbot(i), janew)
+      end do
+
 !     Additional  data that comes from DFM should be added to the parameter/function/segment function list before the wq_processes_initialise call
 
 !     No spatial parameters for now, they should come from DFM
@@ -320,71 +274,250 @@
       endif
       nosfunext = nosfun
 
-!     Use segment functions to set 2D (or 0D variables) from DFM per column (e.g. salinity or temperature)
-      nosfun = nosfun+1
-      call realloc(sfunname, nosfun, keepExisting=.true., fill='SURF')
-      isfsurf = nosfun
+      jawaqproc = 1 ! substances succesfully initiated
 
+      if ( timon ) call timstop ( ithndl )
+   end subroutine fm_wq_processes_ini_sub
+   
+   subroutine fm_wq_processes_ini_proc()
+      use m_fm_wq_processes
+      use m_alloc
+      use unstruc_messages
+      use m_flow, only: kmx, Lnkx
+      use m_flowgeom, only: Ndxi, ba, Lnx, Lnxi, ln, lne2ln
+      use m_flowparameters, only: jasal, jatem, jawave, jawaveSwartDelwaq
+      use m_flowexternalforcings
+      use m_transport
+      use m_partitioninfo
+      use unstruc_model
+      use unstruc_files
+      use m_flowtimes
+      use timers
+      use m_wind, only: jawind, jarain
+      
+      implicit none
+
+      type(procespropcoll)     :: statprocesdef   !< the statistical proces definition
+      integer  ( 4), parameter :: nomult = 0      !< number of multiple substances
+      integer  ( 4)            :: imultp(2,nomult)!< multiple substance administration
+      type(t_dlwq_item)        :: constants       !< delwaq constants list
+      integer                  :: rank            !< mpi rank (-1 is no mpi)
+      integer                  :: noinfo          !< count of informative message
+      integer                  :: nowarn          !< count of warnings
+      integer                  :: ierr, ierr2     !< error count
+
+      integer( 4)              :: i, j, ip, isys, icon, ipar, ifun, isfun, ivar
+
+      integer :: iex
+      integer :: kk, k, kb, kt, ktmax
+      
+      integer :: lunlsp
+      
+      integer(4), save         :: ithndl = 0
+
+      character*20,parameter   :: ctauflow = 'tauflow'
+      character*20,parameter   :: ctau = 'tau'
+      character*20,parameter   :: cvelocity = 'velocity'
+      character*20,parameter   :: csalinity = 'salinity'
+      character*20,parameter   :: ctemperature = 'temp'
+      character*20,parameter   :: cwind = 'vwind'
+      character*20,parameter   :: cwinddir = 'winddir'
+      character*20,parameter   :: cfetchl = 'fetch'
+      character*20,parameter   :: cfetchd = 'initdepth'
+      character*20,parameter   :: cirradiation = 'radsurf'
+      character*20,parameter   :: crain = 'rain'
+      character*10,parameter   :: cbloom = 'd40blo'
+      character*20,parameter   :: doprocesses = 'DoProcesses'
+
+      if (timon) call timstrt( "fm_wq_processes_ini_proc", ithndl )
+
+!     try to open the lsp-file for logging output
+      proc_log_file = defaultfilename('wq_lsp')
+      open (newunit=lunlsp , file=proc_log_file, status='unknown', iostat=ierr)
+      if (ierr.ne.0) then
+         call mess(LEVEL_ERROR, 'Could not open processes log file: ', trim(proc_log_file))
+      end if
+      call setmlu(lunlsp)
+!     Reset number of messages
+      noinfo=0
+      nowarn=0
+      ierr = 0
+
+!     Use segment functions to set 3D (or 2D variables per column) from DFM (e.g. salinity or temperature)
+      call mess(LEVEL_INFO, '==========================================================================')
+      call mess(LEVEL_INFO, 'Data from hydrodynamics available for water quality')
+      call mess(LEVEL_INFO, '--------------------------------------------------------------------------')
       nosfun = nosfun+1
+      isfsurf = nosfun
+      call realloc(sfunname, nosfun, keepExisting=.true., fill='surf')
+      call mess(LEVEL_INFO, '''horizontal surface'' connected as ''surf'' (by default)')
+
       call zoekns(ctauflow,nocons,coname_sub,20,icon)
       if (icon>0) then
+         nosfun = nosfun+1
+         isftau = nosfun
          call realloc(sfunname, nosfun, keepExisting=.true., fill='tauflow')
+         call mess(LEVEL_INFO, '''bottom shear stress'' connected as ''tauflow''')
       else
-         call realloc(sfunname, nosfun, keepExisting=.true., fill='tau')
+         call zoekns(ctau,nocons,coname_sub,20,icon)
+         if (icon>0) then
+            nosfun = nosfun+1
+            isftau = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='tau')
+            call mess(LEVEL_INFO, '''bottom shear stress'' connected as ''tau''')
+         else
+            call mess(LEVEL_INFO, '''bottom shear stress'' not connected, because ''tauflow'' or ''tau'' are not in the sub-file.')
+            isftau = 0
+         endif
       end if
-      isftau = nosfun
+      if (isftau.gt.0) then
+         if (jawaveSwartDelwaq == 0) then
+            call mess(LEVEL_INFO, 'jawaveSwartDelwaq == 0 so tau/tauflow = taucur')
+         else if (jawaveSwartDelwaq == 1) then
+            call mess(LEVEL_INFO, 'jawaveSwartDelwaq == 1 so tau/tauflow = taucur + tauwave')
+         else if (jawaveSwartDelwaq == 2) then
+            call mess(LEVEL_INFO, 'jawaveSwartDelwaq == 2 so tau/tauflow = taubxu')
+         endif
+      endif
 
-      nosfun = nosfun+1
-      call realloc(sfunname, nosfun, keepExisting=.true., fill='velocity')
-      isfvel = nosfun
+      call zoekns(cvelocity,nocons,coname_sub,20,icon)
+      if (icon>0) then
+         nosfun = nosfun+1
+         isfvel = nosfun
+         call realloc(sfunname, nosfun, keepExisting=.true., fill='velocity')
+         call mess(LEVEL_INFO, '''flow element center velocity'' connected as ''velocity''')
+      else
+         call mess(LEVEL_INFO, '''flow element center velocity'' not connected, because ''velocity'' is not in the sub-file.')
+         isfvel = 0
+      end if
 
+      call zoekns(csalinity,nocons,coname_sub,20,icon)
+      isfsal = 0
       if ( jasal.eq.1 ) then
-        nosfun = nosfun+1
-        call realloc(sfunname, nosfun, keepExisting=.true., fill='Salinity')
-        isfsal = nosfun
+         if (icon>0) then
+            nosfun = nosfun+1
+            isfsal = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='salinity')
+            call mess(LEVEL_INFO, '''salinity'' connected as ''salinity''')
+         else
+            call mess(LEVEL_INFO, '''salinity'' not connected, because ''salinity'' is not in the sub-file.')
+         end if
       else
-        isfsal = 0
+         if (icon>0) then
+            call mess(LEVEL_INFO, '''salinity'' is the sub-file but ''salinity'' is not in the hydrodynamic model.')
+         endif
       end if
       
-      if ( jatem.gt.0 ) then
-        nosfun = nosfun+1
-        call realloc(sfunname, nosfun, keepExisting=.true., fill='Temp')
-        isftem = nosfun
+      call zoekns(ctemperature,nocons,coname_sub,20,icon)
+      isftem = 0
+      if ( jatem.eq.1 ) then
+         if (icon>0) then
+            nosfun = nosfun+1
+            isftem = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='temp')
+            call mess(LEVEL_INFO, '''temperature'' connected as ''temp''')
+         else
+            call mess(LEVEL_INFO, '''temperature'' not connected, because ''temp'' is not in the sub-file.')
+         end if
       else
-        isftem = 0
+         if (icon>0) then
+            call mess(LEVEL_INFO, '''temp'' is the sub-file but ''temperature'' is not in the hydrodynamic model.')
+         endif
+      end if
+
+      call zoekns(cwind,nocons,coname_sub,20,icon)
+      isfvwind = 0
+      if ( jawind.ge.1 ) then
+         if (icon>0) then
+            nosfun = nosfun+1
+            isfvwind = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='vwind')
+            call mess(LEVEL_INFO, '''wind velocity magnitude'' connected as ''vwind''')
+         else
+            call mess(LEVEL_INFO, '''wind velocity magnitude'' not connected, because ''vwind'' is not in the sub-file.')
+         end if
+      else
+         if (icon>0) then
+            call mess(LEVEL_INFO, '''vwind'' is the sub-file but ''wind velocity'' is not in the hydrodynamic model.')
+         endif
       end if
       
-!      if ( jawind.eq.1 ) then
-!        nosfun = nosfun+1
-!        call realloc(sfunname, nosfun, keepExisting=.true., fill='VWind')
-!        isfvwind = nosfun
-!      else
-         isfvwind = 0
-!      end if
+      call zoekns(cwinddir,nocons,coname_sub,20,icon)
+      isfwinddir = 0
+      if ( jawind.ge.1 ) then
+         if (icon>0) then
+            nosfun = nosfun+1
+            isfwinddir = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='winddir')
+            call mess(LEVEL_INFO, '''wind direction'' connected as ''winddir''')
+         else
+            call mess(LEVEL_INFO, '''wind direction'' not connected, because ''winddir'' is not in the sub-file.')
+         end if
+      else
+         if (icon>0) then
+            call mess(LEVEL_INFO, '''winddir'' is the sub-file but ''wind direction'' is not in the hydrodynamic model.')
+         endif
+      end if
+
+      call zoekns(cfetchl,nocons,coname_sub,20,icon)
+      if (icon==0) then
+         call zoekns(cfetchd,nocons,coname_sub,20,icon)
+      end if
+      isffetchl = 0
+      isffetchd = 0
+      if ( jawave.eq.1 .or. jawave.eq.2 ) then  ! copied from "flow_setexternalforcings", call to "tauwavefetch"
+         if (icon>0) then
+            nosfun = nosfun+1
+            isffetchl = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='fetch')
+            call mess(LEVEL_INFO, '''fetch length'' connected as ''fetch''')
+            nosfun = nosfun+1
+            isffetchd = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='initdepth')
+            call mess(LEVEL_INFO, '''fetch depth'' connected as ''initdepth''')
+         else
+            call mess(LEVEL_INFO, '''fetch length'' and ''fetch depth'' not connected, because neither ''fetch'' or ''initdepth'' is in the sub-file.')
+         end if
+      else
+         if (icon>0) then
+            call mess(LEVEL_INFO, '''fetch'' or ''initdepth'' is the sub-file but ''fetch length''/''fetch depth'' are not in the hydrodynamic model.')
+         endif
+      end if
       
-!      if ( jawave.eq.1 .or. jawave.eq.2 ) then  ! copied from "flow_setexternalforcings", call to "tauwavefetch"
-!         nosfun = nosfun+1
-!         call realloc(sfunname, nosfun, keepExisting=.true., fill='Fetch')
-!         isffetch = nosfun
-!      else
-         isffetch = 0
-!      end if
+      call zoekns(cirradiation,nocons,coname_sub,20,icon)
+      isfradsurf = 0
+      if ( jasol.eq.1 ) then
+         if (icon>0) then
+            nosfun = nosfun+1
+            isfradsurf = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='radsurf')
+            call mess(LEVEL_INFO, '''solar radiation'' connected as ''radsurf''')
+         else
+            call mess(LEVEL_INFO, '''solar radiation'' not connected, because ''radsurf'' is not in the sub-file.')
+         end if
+      else
+         if (icon>0) then
+            call mess(LEVEL_INFO, '''radsurf'' is the sub-file but ''solar radiation'' is not in the hydrodynamic model.')
+         endif
+      end if
       
-!      if ( jatem.gt.1 ) then  ! copied from "heatun"
-!         nosfun = nosfun+1
-!         call realloc(sfunname, nosfun, keepExisting=.true., fill='RadSurf')
-!         isfradsurf = nosfun
-!      else
-         isfradsurf = 0
-!      end if
-      
-!      if ( jarain.gt.0 ) then
-!         nosfun = nosfun+1
-!         call realloc(sfunname, nosfun, keepExisting=.true., fill='Rain')
-!         isfrain = nosfun
-!      else
-         isfrain = 0
-!      end if
+      call zoekns(crain,nocons,coname_sub,20,icon)
+      isfrain = 0
+      if ( jarain.eq.1 ) then
+         if (icon>0) then
+            nosfun = nosfun+1
+            isfrain = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='rain')
+            call mess(LEVEL_INFO, '''rain'' (mm/day) connected as ''rain'' (mm/h)')
+         else
+            call mess(LEVEL_INFO, '''rain'' not connected, because ''rain'' is not in the sub-file.')
+         end if
+      else
+         if (icon>0) then
+            call mess(LEVEL_INFO, '''rain'' is the sub-file but ''rain'' is not in the hydrodynamic model.')
+         endif
+      end if
+      call mess(LEVEL_INFO, '--------------------------------------------------------------------------')
 
       noconm = nocons + 1000
       call realloc(coname, noconm)
@@ -396,7 +529,7 @@
       constants%name(j) = 'itime'
       constants%constant(j) = 0.0
 
-!     Skip constants from the sub-file that are will be added by DFM
+!     Skip constants from the sub-file that will be added by DFM as parameter/function/segment function
       do i = 1, nocons
          call zoekns(coname_sub(i),nopa,paname,20,ipar)
          if (ipar>0) then
@@ -469,10 +602,13 @@
 
       call wq_processes_initialise ( lunlsp, proc_def_file, bloom_file, statistics_file, statprocesdef, outputs, &
                                      nomult, imultp, constants, rank, noinfo, nowarn, ierr)
+      call mess(LEVEL_INFO, 'Number of warnings during initialisation of the processes : ', nowarn)
+      call mess(LEVEL_INFO, 'Number of errors during initialisation of the processes   : ', ierr)
       if (ierr .ne. 0) then
          call mess(LEVEL_ERROR, 'Something went wrong during initialisation of the processes. Check the lsp-file: ', trim(proc_log_file))
       endif
-
+      call mess(LEVEL_INFO, 'Water quality processes initialisation was successful')
+      call mess(LEVEL_INFO, '==========================================================================')
 
 !     proces fractional step multiplier is 1 for all
       prondt = 1
@@ -541,17 +677,6 @@
           ioffbl = 0
       endif
 
-!     add corresponding tracers and bottom substances, if not already defined by initial and/or boundary conditions
-      transformcoef = 0.0_hp
-      call realloc(isys2trac,notot,keepExisting=.false.,fill=0)
-      do i=1,nosys
-         call add_bndtracer(trim(syname_sub(i)), syunit(i), isys2trac(i), janew)
-      end do
-      call realloc(isys2wqbot,notot,keepExisting=.false.,fill=0)
-      do i=nosys+1,notot
-         call add_wqbot(trim(syname_sub(i)), syunit(i), isys2wqbot(i), janew)
-      end do
-      
       call realloc(waqoutputs, [noout, noseg], keepExisting=.false., fill = 0.0d0)
       call realloc(outvar,noout,keepExisting=.false.,fill=0)
       do j=1,noout
@@ -569,10 +694,11 @@
          end do
       endif
 
-      ierror = 0
+      jawaqproc = 2 ! processes succesfully initiated
+
       if ( timon ) call timstop ( ithndl )
       return
-   end subroutine fm_wq_processes_ini
+   end subroutine fm_wq_processes_ini_proc
 
  !! @return Integer result status (0 if successful)
    subroutine dfm_waq_initexternalforcings(iresult)
@@ -921,15 +1047,11 @@
       double precision, intent(in) :: time !< time     for waq in seconds
       
       integer                      :: ipoiconc
-      integer                      :: i, j, ip
+      integer                      :: i, j
                                    
       integer                      :: ipoivol, ipoisurf, ipoiarea
       integer                      :: ipoivelx, ipoidefa
       
-      integer                      :: ivar, iarr, iv_idx
-      integer                      :: iarknd, ip_arr, idim1, idim2
-      integer                      :: incr
-
       integer                      :: idt, itime
                                    
       integer                      :: ierr
@@ -943,7 +1065,12 @@
       integer(4), save :: ithand2 = 0
       if ( timon ) call timstrt ( "fm_wq_processes_step", ithand0 )
       
-      if ( jawaqproc.ne.1 ) return
+      if ( jawaqproc .eq. 0 ) then
+         return
+      else if ( jawaqproc .eq. 1 ) then
+         call fm_wq_processes_ini_proc()
+         jawaqproc = 2
+      endif
       flux_int = md_flux_int
       
 !     copy data from D-FlowFM to WAQ 
@@ -988,7 +1115,7 @@
       use m_flowtimes,      only: irefdate, tunit
       use m_fm_wq_processes           
       use m_transport,      only: itrac2const, constituents
-      use m_sferic,         only: twopi
+      use m_sferic,         only: twopi, rd2dg
       use m_wind  
       use m_meteo
       use processes_input
@@ -999,15 +1126,13 @@
       double precision, intent(in) :: time !< time     for waq in seconds
 
       double precision :: taucurc, czc
-      double precision :: u10, dir
-      double precision :: alfa1, alfa2
-      double precision :: qsu
+      double precision :: u10, dir, wdir, FetchL, FetchD
       
       integer          :: isys, iconst, iwqbot
       integer          :: ipoisurf, ipoitau, ipoivel
       integer          :: ipoivol, ipoiconc, ipoisal, ipoitem
-      integer          :: ipoivwind, ipoifetch, ipoiradsurf, ipoirain
-      integer          :: i, iex, ip, ifun, isfun
+      integer          :: ipoivwind, ipoiwinddir, ipoifetchl, ipoifetchd, ipoiradsurf, ipoirain
+      integer          :: i, ip, ifun, isfun
       integer          :: kk, k, kb, kt, ktmax, kwaq
       integer          :: L, nw1, nw2
                        
@@ -1047,26 +1172,37 @@
       end if
 
       ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg 
-      ipoitau  = arrpoi(iisfun) + (isftau-1)*noseg 
-      ipoivel  = arrpoi(iisfun) + (isfvel-1)*noseg 
-      ipoivol  = arrpoi(iivol)
-      ipoiconc = arrpoi(iiconc)
-      
       do kk=1,Ndxi
          call getkbotktop(kk,kb,kt)
          do k=kb,kt
             pmsa(ipoisurf + k-kbx) = ba(kk)
-            pmsa(ipoivel  + k-kbx) = sqrt(ucx(k)**2 + ucy(k)**2)
          end do
-         
-         call gettau(kk,taucurc,czc)
-         pmsa(ipoitau+kb-kbx) = taucurc
       end do
       
+      ipoivol = arrpoi(iivol)
       do k=0,ktx-kbx
          pmsa(ipoivol + k) = vol1(k+kbx)
       end do
       
+      if (isftau.gt.0) then
+         ipoitau  = arrpoi(iisfun) + (isftau-1)*noseg 
+         do kk=1,Ndxi
+            call getkbotktop(kk,kb,kt)
+            call gettau(kk,taucurc,czc)
+            pmsa(ipoitau+kb-kbx) = taucurc
+         end do
+      end if         
+         
+      if (isfvel.gt.0) then
+         ipoivel  = arrpoi(iisfun) + (isfvel-1)*noseg 
+         do kk=1,Ndxi
+            call getkbotktop(kk,kb,kt)
+            do k=kb,kt
+               pmsa(ipoivel  + k-kbx) = sqrt(ucx(k)**2 + ucy(k)**2)
+            end do
+         end do
+      endif
+
       if ( isfsal.gt.0 ) then
          ipoisal = arrpoi(iisfun) + (isfsal-1)*noseg
          do k=0,ktx-kbx
@@ -1084,67 +1220,68 @@
 !     copy 2D arrays for wind velocity magnitude, fetch length, solar radiation and rain to 3D waq arrays, fill over whole column (safety)
       if ( isfvwind.gt.0 ) then
          ipoivwind = arrpoi(iisfun) + (isfvwind-1)*noseg
+         if(jawind.eq.1) then
+            do kk=1,Ndxi
+               call getkbotktop(kk,kb,kt)
+               ! apparently wind is available at edges only, so just take the 1st edge
+               call getlink1(kk,L)
+               u10 = sqrt( wx(L)*wx(L) + wy(L)*wy(L) )
+               pmsa(ipoivwind + kb-kbx : ipoivwind + kt-kbx) = u10
+            end do
+         else
+            do k=0,ktx-kbx
+               pmsa(ipoivwind + k) = windsp
+            end do
+         end if         
       end if
       
-      if ( isffetch.gt.0 ) then   ! note: no fetch without wind
-         ipoifetch = arrpoi(iisfun) + (isffetch-1)*noseg
+      if ( isfwinddir.gt.0 ) then
+         ipoiwinddir = arrpoi(iisfun) + (isfwinddir-1)*noseg
+         if(jawind.eq.1) then
+            do kk=1,Ndxi
+               call getkbotktop(kk,kb,kt)
+               ! apparently wind is available at edges only, so just take the 1st edge
+               call getlink1(kk,L)
+               dir = atan2(wy(L), wx(L))
+               if (dir < 0d0) dir = dir + twopi
+               wdir = 90d0 - dir*rd2dg ! from rad to degree
+               pmsa(ipoiwinddir + kb-kbx : isfwinddir + kt-kbx) = wdir
+            end do
+         else
+            do k=0,ktx-kbx
+               pmsa(ipoiwinddir + k) = winddir
+            end do
+         end if         
+      end if
+
+      if ( isffetchl.gt.0 ) then   ! note: no fetch without wind
+         ipoifetchl = arrpoi(iisfun) + (isffetchl-1)*noseg
+         ipoifetchd = arrpoi(iisfun) + (isffetchd-1)*noseg
+         do kk=1,Ndxi
+            call getkbotktop(kk,kb,kt)
+            ! apparently wind is available at edges only, so just take the 1st edge
+            call getfetch(k,U10,FetchL,FetchD)
+            pmsa(ipoifetchl + kb-kbx : ipoifetchl + kt-kbx) = FetchL
+            pmsa(ipoifetchd + kb-kbx : ipoifetchd + kt-kbx) = FetchD
+         end do
       end if
       
       if ( isfradsurf.gt.0 ) then
          ipoiradsurf = arrpoi(iisfun) + (isfradsurf-1)*noseg
+         do kk=1,Ndxi
+            call getkbotktop(kk,kb,kt)
+            pmsa(ipoiradsurf + kb-kbx : ipoiradsurf + kt-kbx) = qrad(kk)
+         end do
       end if
       
       if ( isfrain.gt.0 ) then
          ipoirain = arrpoi(iisfun) + (isfrain-1)*noseg
+         do kk=1,Ndxi
+            call getkbotktop(kk,kb,kt)
+            pmsa(ipoirain + kb-kbx : ipoirain + kt-kbx) = rain(kk)/24.0d0 ! rain: mm/day => mm/h
+         end do
       end if
          
-         
-         
-      do kk=1,Ndxi
-         call getkbotktop(kk,kb,kt)
-         
-         if ( isfvwind.gt.0 ) then
-!           copied from "tauwavefetch"
-            call getlink1(k,L)   ! see comment in "tauwavefetch"
-            u10 = sqrt( wx(L)*wx(L) + wy(L)*wy(L) )
-         
-            pmsa(ipoivwind + kb-kbx : ipoivwind + kt-kbx) = u10
-         end if
-         
-         if ( isffetch.gt.0 ) then
-!           copied from "tauwavefetch"
-            if (u10.lt.1)  then
-               dir = atan2(wy(L),wx(L))
-               if ( dir.lt.0d0 ) dir = dir + twopi
-               dir = dir/twopi
-               if ( dir>=1d0 ) dir = 0d0
-               
-               nw1    = dir*(nwf-1) + 1
-               nw2    = nw1 + 1
-               alfa2  = (nwf-1)*( dir - dble(nw1-1) / dble(nwf-1) )
-               alfa1  = 1d0 - alfa2
-               
-               pmsa(ipoifetch + kb-kbx : ipoifetch + kt-kbx) = alfa1*fetch(nw1,kk) + alfa2*fetch(nw2,kk)
-            else
-               pmsa(ipoifetch + kb-kbx : ipoifetch + kt-kbx) = 0d0
-            end if
-         end if
-         
-         if ( isfradsurf.gt.0 ) then
-            qsu = 0d0
-            
-!           TODO: check and copy from "heatun"
-            
-!            pmsa(ipoiradsurf + kb-kbx : ipoiradsurf + kt-kbx) = qsu
-         end if
-         
-         if ( isfrain.gt.0 ) then
-            
-!           rain: mm/day            
-!            pmsa(ipoirain + kb-kbx : ipoirain + kt-kbx ) = rain(kk)
-         end if
-      end do
-      
 !     determine dry/wet cells 
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
@@ -1154,6 +1291,7 @@
       enddo
       
 !     fill concentrations   
+      ipoiconc = arrpoi(iiconc)
       do k=kbx,ktx
          do isys=1,nosys !notot
             iconst = isys2const(isys)
@@ -1238,13 +1376,9 @@
       use m_wind            
       use m_waves,          only: fetch, nwf
       use unstruc_messages
+
       implicit none
-      
-      double precision :: taucurc, czc
-      double precision :: u10, dir
-      double precision :: alfa1, alfa2
-      double precision :: qsu
-      
+
       integer          :: isys, iconst, iwqbot
       integer          :: ipoiconc
       integer          :: ivar, iarr, iv_idx

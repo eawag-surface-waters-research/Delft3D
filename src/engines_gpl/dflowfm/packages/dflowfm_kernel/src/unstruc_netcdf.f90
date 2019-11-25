@@ -4052,7 +4052,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       endif
 
       ! WAQ extra outputs
-      if (jawaqproc>0) then
+      if (jawaqproc > 0) then
          if (noout_map > 0) then
             call realloc(mapids%id_waq, (/ 3, noout_map /), keepExisting=.false., fill = 0)
             do j=1,noout_map
@@ -6365,7 +6365,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            endif
 
 !          waq output
-           if(jawaqproc .eq. 1) then
+           if(jawaqproc > 0) then
               if (noout_map > 0) then
                  call realloc(id_waq, (/ 3, noout_map /), keepExisting=.false., fill = 0)
                  do j=1,noout_map

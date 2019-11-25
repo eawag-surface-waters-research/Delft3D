@@ -1148,7 +1148,7 @@ integer                           :: jaevap              !< use evap yes or no
 integer                           :: jatair              !< use air temperature   yes or no
 integer                           :: jarhum              !< use relative humidity yes or no
 integer                           :: jaclou              !< use cloudiness        yes or no
-integer                           :: jasol               !< use 1 = use solrad, 2 = use cloudiness
+integer                           :: jasol = 0           !< use 1 = use solrad, 2 = use cloudiness
 integer                           :: jaheat_eachstep = 0 !< if 1, do it each step, else in externalforcings (default)
 integer                           :: jaQinext            !< use Qin externally provided yes or no
 integer                           :: jaqin               !< use qin , sum of all in fluxes
@@ -5141,7 +5141,7 @@ module m_transport
    double precision, dimension(:,:), allocatable, target :: constituents    ! constituents, dim(NUMCONST,Ndkx)
 
    character(len=NAMLEN), dimension(:), allocatable :: const_names    ! constituent names
-   character(len=NAMLEN), dimension(:), allocatable :: const_units    ! constituent names
+   character(len=NAMLEN), dimension(:), allocatable :: const_units    ! constituent units
    character(len=NAMLEN), parameter                 :: DEFTRACER = 'default_tracer'
 
    integer,          dimension(:,:), allocatable :: id_const   ! consituent id's in map-file
@@ -5215,9 +5215,31 @@ module m_fm_wq_processes
    use processet
    use output
 
+   character(20), allocatable                :: syunit_sub(:)               !< substance unit from substance file
+   character(20), allocatable                :: coname_sub(:)               !< constant names from substance file
+   real         , allocatable                :: covalue_sub(:)              !< values for contants from substance file
+   character(20), allocatable                :: ouname_sub(:)               !< output names from substance file
+   character(80), allocatable                :: oudesc_sub(:)               !< output decriptions from substance file
+   integer( 4)                               :: noout_sub                   !< number of outputs requested in substance file
+
+   character(20), allocatable                :: syname_eho(:)               !< substance names from extra history output file
+   character(20), allocatable                :: syunit_eho(:)               !< substance names from extra history output file
+   character(20), allocatable                :: coname_eho(:)               !< constant names from extra history output file
+   real         , allocatable                :: covalue_eho(:)              !< values for contants from extra history output file
+   character(20), allocatable                :: ouname_eho(:)               !< output names from extra history output file
+   character(80), allocatable                :: oudesc_eho(:)               !< output decriptions from extra history output file
+   integer( 4)                               :: noout_eho                   !< number of outputs requested in extra history output file
+
+   character(len=256)                        :: substance_file              !< substance file
+   character(len=256)                        :: his_output_file             !< extra history output file
+   character(len=256)                        :: proc_log_file               !< processes log file
+   character(len=256)                        :: proc_def_file               !< processes definition file
+   character(len=256)                        :: bloom_file                  !< BLOOM algae spiecies paramter file
+   character(len=256)                        :: statistics_file             !< file with configuration for statistics
+
    integer, parameter                        :: NAMWAQLEN = 128
    integer                                   :: ithndlwq = 0                !< overall timer for water quality processes
-   integer                                   :: jawaqproc                   !< switch for water quality processes
+   integer                                   :: jawaqproc                   !< switch for water quality processes (1 = substances initiated, 2 = processes activated too)
    real(hp)                                  :: waq_vol_dry_thr = 1.0d-3    !< minimum volume for processes to be active
    real(hp)                                  :: waq_dep_dry_thr = 1.0d-3    !< minimum depth for processes to be active
    integer                                   :: flux_int                    !< flux integration by WAQ (1) or by FM (2, not implemented)
@@ -5268,7 +5290,9 @@ module m_fm_wq_processes
    integer                                   :: isfsal                      !< pointer to Salinity        segment function
    integer                                   :: isftem                      !< pointer to Temperature     segment function
    integer                                   :: isfvwind                    !< pointer to wind vel. magn. segment function
-   integer                                   :: isffetch                    !< pointer to fetch length    segment function
+   integer                                   :: isfwinddir                  !< pointer to wind direction  segment function
+   integer                                   :: isffetchl                   !< pointer to fetch length    segment function
+   integer                                   :: isffetchd                   !< pointer to fetch depth     segment function
    integer                                   :: isfradsurf                  !< pointer to solar radiation segment function
    integer                                   :: isfrain                     !< pointer to rain            segment function
 !

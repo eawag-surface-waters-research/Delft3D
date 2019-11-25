@@ -1401,7 +1401,7 @@ subroutine ini_transport()
       enddo
    endif
 
-   if ( jawaqproc.eq.1 ) then
+   if ( jawaqproc > 0 ) then
 !     fill administration for WAQ substances with fall velocities, and thetavert
       do isys=1,nosys
          i = itrac2const(isys2trac(isys))
@@ -1536,7 +1536,7 @@ subroutine alloc_transport(Keepexisting)
    call realloc(qcsrc, (/   NUMCONST, numsrc /), keepExisting=.false., fill=0d0)
    call realloc(vcsrc, (/ 2*NUMCONST, numsrc /), keepExisting=.false., fill=0d0)
    
-   if ( jawaqproc.eq.1 ) then
+   if ( jawaqproc > 0 ) then
 !     WAQ
       call realloc(isys2const,  notot, keepExisting=.true., fill=0)
       call realloc(iconst2sys,  NUMCONST, keepExisting=.true., fill=0)

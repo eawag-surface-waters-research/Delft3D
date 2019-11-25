@@ -10073,7 +10073,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 ! initialize waq and add to tracer administration
  call klok(cpu_extra(1,18)) ! waq processes init
  if ( len_trim(md_subfile) > 0 ) then
-    call fm_wq_processes_ini()
+    call fm_wq_processes_ini_sub()
  end if
  call klok(cpu_extra(2,18)) ! end waq processes init
 
@@ -18128,7 +18128,7 @@ subroutine unc_write_his(tim)            ! wrihis
             endif
 
 !          waq output
-             if(jawaqproc .eq. 1) then
+             if(jawaqproc > 0) then
                if (noout_user > 0) then
                   call realloc(id_hwq, noout_user, keepExisting = .false.)
                   do j=1,noout_user
