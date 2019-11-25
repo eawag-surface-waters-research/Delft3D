@@ -7608,6 +7608,7 @@ contains
    subroutine selectelset_internal_nodes(xz, yz, kc, nx, numprov, kp, &
                                        & loc_spec_type, loc_file, numcoord, xpin, ypin, branchid, chainage, nodeId)
    use m_inquire_flowgeom
+   use m_flowgeom, only: nd
    use m_polygon
    use m_alloc
    use m_missing
@@ -7631,7 +7632,7 @@ contains
    character(len=*), optional, intent(in   ) :: nodeId     !< Node id (network node id) (when loc_spec_type==LOCTP_NODEID).
    !
    ! locals
-   integer   :: minp, inp, n, ierr
+   integer   :: minp, inp, n, nn, ierr
    !
    ! body
    select case(loc_spec_type)
@@ -7663,7 +7664,13 @@ contains
       inp  = -1 
       do n = 1,nx
          if (kc(n) > 0) then ! search allowed, (not allowed like closed pipes point etc) 
-            call inwhichpolygon(xz(n), yz(n), inp)
+            if (npl == 1) then ! 1 point polygon: check whether point lies inside a grid cell
+               nn = size(nd(n)%x)
+               call PINPOK (xpl(1), ypl(1), nn, nd(n)%x, nd(n)%y, inp)
+            else               ! real polygon, check whether grid cell lies inside polygon
+               call inwhichpolygon(xz(n), yz(n), inp)
+            end if
+
             if (inp > 0) then
                kp(n) = numprov 
             endif   
