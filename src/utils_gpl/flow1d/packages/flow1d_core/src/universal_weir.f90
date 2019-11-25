@@ -361,7 +361,7 @@ module m_Universal_Weir
       double precision, intent(inout) :: fum      !< FU at link
       double precision, intent(inout) :: rum      !< RU at link
       double precision, intent(inout) :: u1m      !< Flow velocity at current time step
-      double precision, intent(  out) :: qm       !< Discharge
+      double precision, intent(inout) :: qm       !< Discharge
       !
       !
       ! Local variables
