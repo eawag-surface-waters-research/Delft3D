@@ -84,7 +84,7 @@ namespace Deltares.IONetCDF.Managed
         /// <param name="ioNetCdfDataSetId">The IONetCDF data set id (in).</param>
         /// <param name="meshId">The mesh id in the specified data set (in).</param>
         /// <param name="varId">The id of the NetCDF variable to define.</param>
-        /// <param name="type">The variable type expressed in one of the basic nf90_* types (in).</param>
+        /// <param name="type">The variable type expressed in one of the basic nf90_* types (in). Should match with double fillValue (i.e., nf90_double).</param>
         /// <param name="locationType">Specifies at which unique mesh location data will be specified (in).</param>
         /// <param name="variableName">The name of the new variable (in).</param>
         /// <param name="standardName">Standard name (CF-compliant) for 'standard_name' attribute in this variable (in).</param>
@@ -94,8 +94,60 @@ namespace Deltares.IONetCDF.Managed
         /// <returns>Result status (UG_NOERR==NF90_NOERR if successful).</returns>
         public int DefineVariable(int ioNetCdfDataSetId, int meshId, int varId, int type, IONetCDFConstants.LocationType locationType, string variableName, string standardName, string longName, string unit, double fillValue)
         {
+            int networkId = 0;       // dummy
+            int fillValueInt = -999; // dummy
             var locType = (int) locationType;
-            return ionc_def_var_dll(ref ioNetCdfDataSetId, ref meshId, ref varId, ref type, ref locType, variableName, standardName, longName, unit, ref fillValue);
+            return ionc_def_var_dll(ref ioNetCdfDataSetId, ref meshId, ref networkId, ref varId, ref type, ref locType, variableName, standardName, longName, unit, ref fillValueInt, ref fillValue);
+        }
+
+        /// <summary>
+        /// Defines a new double variable on a 1D network in an existing IONetCDF data set and sets up proper meta-attributes.
+        /// </summary>
+        /// <remarks>
+        /// File should still be in define mode. Does not write the actual data yet.
+        /// </remarks>
+        /// <param name="ioNetCdfDataSetId">The IONetCDF data set id (in).</param>
+        /// <param name="networkId">The network id in the specified data set (in).</param>
+        /// <param name="varId">The id of the NetCDF variable to define.</param>
+        /// <param name="type">The variable type expressed in one of the basic nf90_* types (in). Should match with double fillValue (i.e., nf90_double).</param>
+        /// <param name="locationType">Specifies at which unique mesh location data will be specified (in).</param>
+        /// <param name="variableName">The name of the new variable (in).</param>
+        /// <param name="standardName">Standard name (CF-compliant) for 'standard_name' attribute in this variable (in).</param>
+        /// <param name="longName">Long name for 'long_name' attribute in this variable (use empty string if not applicable) (in).</param>
+        /// <param name="unit">Unit of this variable (CF-compliant) (use empty string for dimensionless quantities) (in).</param>
+        /// <param name="fillValue">Double precision fill value (in).</param>
+        /// <returns>Result status (UG_NOERR==NF90_NOERR if successful).</returns>
+        public int DefineNetworkVariable(int ioNetCdfDataSetId, int networkId, int varId, int type, IONetCDFConstants.LocationType locationType, string variableName, string standardName, string longName, string unit, double fillValue)
+        {
+            int meshId = 0;          // dummy
+            int fillValueInt = -999; // dummy
+            var locType = (int) locationType;
+            return ionc_def_var_dll(ref ioNetCdfDataSetId, ref meshId, ref networkId, ref varId, ref type, ref locType, variableName, standardName, longName, unit, ref fillValueInt, ref fillValue);
+        }
+
+        /// <summary>
+        /// Defines a new int variable on a 1D network in an existing IONetCDF data set and sets up proper meta-attributes.
+        /// </summary>
+        /// <remarks>
+        /// File should still be in define mode. Does not write the actual data yet.
+        /// </remarks>
+        /// <param name="ioNetCdfDataSetId">The IONetCDF data set id (in).</param>
+        /// <param name="networkId">The network id in the specified data set (in).</param>
+        /// <param name="varId">The id of the NetCDF variable to define.</param>
+        /// <param name="type">The variable type expressed in one of the basic nf90_* types (in). Should match with int fillValueInt (i.e., nf90_integer).</param>
+        /// <param name="locationType">Specifies at which unique mesh location data will be specified (in).</param>
+        /// <param name="variableName">The name of the new variable (in).</param>
+        /// <param name="standardName">Standard name (CF-compliant) for 'standard_name' attribute in this variable (in).</param>
+        /// <param name="longName">Long name for 'long_name' attribute in this variable (use empty string if not applicable) (in).</param>
+        /// <param name="unit">Unit of this variable (CF-compliant) (use empty string for dimensionless quantities) (in).</param>
+        /// <param name="fillValueInt">Int precision fill value (in).</param>
+        /// <returns>Result status (UG_NOERR==NF90_NOERR if successful).</returns>
+        public int DefineNetworkVariable(int ioNetCdfDataSetId, int networkId, int varId, int type, IONetCDFConstants.LocationType locationType, string variableName, string standardName, string longName, string unit, int fillValueInt)
+        {
+            int meshId = 0;            // dummy
+            double fillValue = -999.0; // dummy
+            var locType = (int) locationType;
+            return ionc_def_var_dll(ref ioNetCdfDataSetId, ref meshId, ref networkId, ref varId, ref type, ref locType, variableName, standardName, longName, unit, ref fillValueInt, ref fillValue);
         }
 
         /// <summary>

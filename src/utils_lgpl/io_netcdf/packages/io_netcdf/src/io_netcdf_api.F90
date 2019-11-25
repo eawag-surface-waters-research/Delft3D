@@ -489,13 +489,15 @@ end function ionc_inq_varid_by_standard_name_dll
 
 
 !> Defines a new variable in an existing IONC dataset and sets up proper meta-attributes.
+!! The variable can be defined either on a UGRID mesh, or on a UGRID network (via meshid or networkid, respectively).
 !! NOTE: File should still be in define mode.
 !! Does not write the actual data yet.
-function ionc_def_var_dll(ioncid, meshid, id_var, itype, iloctype, c_var_name, c_standard_name, c_long_name, & ! id_dims, 
-                    c_unit, dfill) result(ierr) bind(C, name="ionc_def_var")  ! , cell_method, cell_measures, crs, ifill
+function ionc_def_var_dll(ioncid, meshid, networkid, id_var, itype, iloctype, c_var_name, c_standard_name, c_long_name, & ! id_dims, 
+                    c_unit, ifill, dfill) result(ierr) bind(C, name="ionc_def_var")  ! , cell_method, cell_measures, crs
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_def_var_dll
    integer(kind=c_int),              intent(in)    :: ioncid    !< The IONC data set id.
-   integer(kind=c_int),              intent(in)    :: meshid    !< The mesh id in the specified data set.
+   integer(kind=c_int),              intent(in)    :: meshid    !< The mesh id in the specified data set (use 0 when instead a networkid is specified).
+   integer(kind=c_int),              intent(in)    :: networkid !< The network id in the specified data set (use 0 when instead a meshid is specified).
    integer(kind=c_int),              intent(  out) :: id_var        !< Created NetCDF variable id.
 !   integer, dimension(:),      intent(in)    :: id_dims       !< NetCDF dimension ids for this variable. Example: (/ id_edgedim /) for scalar data on edges, or (/ id_twodim, id_facedim /) for vector data on faces.
    integer(kind=c_int),              intent(in)    :: itype         !< The variable type expressed in one of the basic nf90_* types, e.g., nf90_double.
@@ -507,8 +509,8 @@ function ionc_def_var_dll(ioncid, meshid, id_var, itype, iloctype, c_var_name, c
 !   character(len=*),           intent(in)    :: cell_method   !< Cell method for the spatial dimension (i.e., for edge/face/volume), value should be one of 'point', 'mean', etc. (See CF) (empty string if not relevant).
 !   character(len=*),           intent(in)    :: cell_measures !< Cell measures attribute, for example: 'area: mesh2d_cellarea', etc. (See CF) (empty string if not relevant).
 !   type(t_crs),      optional, intent(in)    :: crs           !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
-!   integer,          optional, intent(in)    :: ifill         !< (Optional) Integer fill value.
-   real(c_double),                   intent(in)    :: dfill         !< (Optional) Double precision fill value.
+   integer(kind=c_int),              intent(in)    :: ifill         !< Integer fill value (only applicable when itype==nf90_int).
+   real(kind=c_double),              intent(in)    :: dfill         !< Double precision fill value (only applicable when itype==nf90_double).
    integer(kind=c_int)                             :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    character(len=MAXSTRLEN) :: var_name, standard_name, long_name, unit
@@ -519,8 +521,8 @@ function ionc_def_var_dll(ioncid, meshid, id_var, itype, iloctype, c_var_name, c
    long_name     = char_array_to_string(c_long_name,     strlen(c_long_name))
    unit          = char_array_to_string(c_unit,          strlen(c_unit))
 
-   ierr = ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standard_name, long_name, &
-                    unit, "", "", dfill = dfill)
+   ierr = ionc_def_var(ioncid, meshid, networkid, id_var, itype, iloctype, var_name, standard_name, long_name, &
+                    unit, "", "", ifill = ifill, dfill = dfill)
 end function ionc_def_var_dll
 
 

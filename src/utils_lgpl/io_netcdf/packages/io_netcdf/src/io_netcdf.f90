@@ -1230,12 +1230,14 @@ end function ionc_add_global_attributes
 
 
 !> Defines a new variable in an existing IONC dataset and sets up proper meta-attributes.
+!! The variable can be defined either on a UGRID mesh, or on a UGRID network (via meshid or networkid, respectively).
 !! NOTE: File should still be in define mode.
 !! Does not write the actual data yet.
-function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standard_name, long_name, & ! id_dims, 
+function ionc_def_var(ioncid, meshid, networkid, id_var, itype, iloctype, var_name, standard_name, long_name, & ! id_dims, 
                     unit, cell_method, cell_measures, crs, ifill, dfill) result(ierr)
    integer,                    intent(in)    :: ioncid    !< The IONC data set id.
-   integer,                    intent(in)    :: meshid    !< The mesh id in the specified data set.
+   integer,                    intent(in)    :: meshid    !< The mesh id in the specified data set (use 0 when instead a networkid is specified).
+   integer,                    intent(in)    :: networkid !< The network id in the specified data set (use 0 when instead a meshid is specified).
    integer,                    intent(  out) :: id_var        !< Created NetCDF variable id.
 !   integer, dimension(:),      intent(in)    :: id_dims       !< NetCDF dimension ids for this variable. Example: (/ id_edgedim /) for scalar data on edges, or (/ id_twodim, id_facedim /) for vector data on faces.
    integer,                    intent(in)    :: itype         !< The variable type expressed in one of the basic nf90_* types, e.g., nf90_double.
@@ -1249,26 +1251,50 @@ function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standar
    type(t_crs),      optional, intent(in)    :: crs           !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
    integer,          optional, intent(in)    :: ifill         !< (Optional) Integer fill value.
    double precision, optional, intent(in)    :: dfill         !< (Optional) Double precision fill value.
-   integer                                :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   integer                                   :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    integer :: id_dims(1)
+   character(len=256) :: meshornetname
 
    ! TODO: UNST-1548: AvD: refactor some of dflowfm's unc_def_var_map functionality into io_ugrid.
    ! For now, auto-insert some commonly used spatial dimension ids, such that caller ONLY needs to specify iloctype.
    ! NOTE: this only supports rank-1 arrays for now then.
-   if      (iloctype == UG_LOC_NODE) then
-      id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_node)
-   else if (iloctype == UG_LOC_EDGE) then
-      id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_edge)
-   else if (iloctype == UG_LOC_FACE) then
-      id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_face)
+   if (meshid > 0) then
+      meshornetname = datasets(ioncid)%ug_file%meshnames(meshid)
+      if      (iloctype == UG_LOC_NODE) then
+         id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_node)
+      else if (iloctype == UG_LOC_EDGE) then
+         id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_edge)
+      else if (iloctype == UG_LOC_FACE) then
+         id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_face)
+      else
+         ! loc type error is caught in ug_def_var below
+         continue
+      end if
+   else if (networkid > 0) then
+      meshornetname = datasets(ioncid)%ug_file%networksnames(networkid)
+      if      (iloctype == UG_LOC_NODE) then
+         id_dims(1) = datasets(ioncid)%ug_file%netids(networkid)%dimids(ntdim_1dnodes)
+      else if (iloctype == UG_LOC_EDGE) then
+         id_dims(1) = datasets(ioncid)%ug_file%netids(networkid)%dimids(ntdim_1dedges)
+      else
+         ! face location does not apply to 1d networks
+         ierr = UG_INVALID_DATALOCATION
+         goto 888
+      end if
    else
-      ! loc type error is caught in ug_def_var below
-      continue
+      ! Error: No meshid, nor networkid.
+      ierr = UG_ENOTVAR
+      goto 888
    end if
 
-   ierr = ug_def_var(datasets(ioncid)%ncid, id_var, id_dims, itype, iloctype, datasets(ioncid)%ug_file%meshnames(meshid), var_name, standard_name, long_name, &
+   ierr = ug_def_var(datasets(ioncid)%ncid, id_var, id_dims, itype, iloctype, meshornetname, var_name, standard_name, long_name, &
                     unit, cell_method, cell_measures, crs, ifill, dfill)
+
+   return
+
+888 continue
+    ! Some error occurred
 end function ionc_def_var
 
 

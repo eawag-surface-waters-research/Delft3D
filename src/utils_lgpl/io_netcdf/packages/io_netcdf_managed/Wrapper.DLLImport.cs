@@ -53,7 +53,7 @@ namespace Deltares.IONetCDF.Managed
         #region UGRID specifics
 
         [DllImport(Helpers.IONetCDFConstants.IO_NETCDF_DLL_NAME, EntryPoint = "ionc_def_var", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_def_var_dll(ref int ioncid, ref int meshId, ref int varId, ref int type, ref int locType, string varName, string standardName, string longName, string unit, ref double fillValue);
+        private static extern int ionc_def_var_dll(ref int ioncid, ref int meshId, ref int networkId, ref int varId, ref int type, ref int locType, string varName, string standardName, string longName, string unit, ref int fillValueInt, ref double fillValue);
 
         /// <summary>
         /// Get the id of the geometry network.
