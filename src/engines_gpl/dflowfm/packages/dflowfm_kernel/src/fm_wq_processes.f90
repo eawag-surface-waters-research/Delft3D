@@ -1244,8 +1244,9 @@
                call getlink1(kk,L)
                dir = atan2(wy(L), wx(L))
                if (dir < 0d0) dir = dir + twopi
-               wdir = 90d0 - dir*rd2dg ! from rad to degree
-               pmsa(ipoiwinddir + kb-kbx : isfwinddir + kt-kbx) = wdir
+               wdir = 270.0d0 - dir*rd2dg ! from rad to degree
+               if (wdir < 0d0) wdir = wdir + 360.0d0
+               pmsa(ipoiwinddir + kb-kbx : ipoiwinddir + kt-kbx) = wdir
             end do
          else
             do k=0,ktx-kbx
