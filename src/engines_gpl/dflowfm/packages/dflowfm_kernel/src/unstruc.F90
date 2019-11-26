@@ -17741,7 +17741,8 @@ subroutine unc_write_his(tim)            ! wrihis
     integer                      :: jawrizw = 0
     double precision             :: w1, pumplensum, pumplenmid, pumpxmid, pumpymid
     double precision             :: rhol
-    double precision, allocatable::toutputx(:,:), toutputy(:,:)
+    double precision, allocatable:: toutputx(:,:), toutputy(:,:)
+    double precision, allocatable:: toutput_cum, toutput_cur
 
     if (jahiszcor > 0) then
        jawrizc = 1
@@ -18413,19 +18414,37 @@ subroutine unc_write_his(tim)            ! wrihis
 
                   ierr = nf90_def_var(ihisfile, 'cross_section_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const(num))
                   ierr = nf90_put_att(ihisfile, id_const(num), 'long_name', 'flux (based on upwind flow element) for '//trim(tmpstr)//'.')
-
-                  if (const_units(num) /= ' ') then
-                     tmpstr = trim(const_units(num)) // ' m3'
+                  
+                  if (num >= ISED1 .and. num <= ISEDN) then    ! if the constituent is sediment
+                     select case(stmpar%morpar%moroutput%transptype)
+                     case (0)
+                        tmpstr = 'kg'
+                     case (1, 2)
+                        tmpstr = 'm3'
+                     end select
                   else
-                     tmpstr = '-'
+                     if (const_units(num) /= ' ') then
+                        tmpstr = trim(const_units(num)) // ' m3'
+                     else
+                        tmpstr = '-'
+                     endif
                   endif
                   ierr = nf90_put_att(ihisfile, id_const_cum(num), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_const_cum(num), 'coordinates', 'cross_section_name')
 
-                  if (const_units(num) /= ' ') then
-                     tmpstr = trim(const_units(num)) // ' m3/s'
+                  if (num >= ISED1 .and. num <= ISEDN) then    ! if the constituent is sediment
+                     select case(stmpar%morpar%moroutput%transptype)
+                     case (0)
+                        tmpstr = 'kg/s'
+                     case (1, 2)
+                        tmpstr = 'm3/s'
+                     end select
                   else
-                     tmpstr = '-'
+                     if (const_units(num) /= ' ') then
+                        tmpstr = trim(const_units(num)) // ' m3/s'
+                     else
+                        tmpstr = '-'
+                     endif
                   endif
                   ierr = nf90_put_att(ihisfile, id_const(num), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_const(num), 'coordinates', 'cross_section_name')
@@ -18650,7 +18669,6 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = unc_addcoordatts(ihisfile, id_pump_xmid, id_pump_ymid, jsferic)
             ierr = nf90_put_att(ihisfile, id_pump_xmid, 'long_name', 'x-coordinate of representative mid point of pump location (snapped polyline)')
             ierr = nf90_put_att(ihisfile, id_pump_ymid, 'long_name', 'y-coordinate of representative mid point of pump location (snapped polyline)')
-
 
             ierr = nf90_def_var(ihisfile, 'pump_structure_discharge', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_dis)
             ierr = nf90_put_att(ihisfile, id_pump_dis, 'long_name', 'Discharge through pump')
@@ -19105,12 +19123,10 @@ subroutine unc_write_his(tim)            ! wrihis
 
         ! Dambreak
         if (jahisdambreak > 0 .and. ndambreaksg > 0 ) then
-
             ierr = nf90_def_dim(ihisfile, 'dambreaks', ndambreaksg, id_dambreakdim)
             ierr = nf90_def_var(ihisfile, 'dambreak_id',  nf90_char,   (/ id_strlendim, id_dambreakdim /), id_dambreak_id)
             ierr = nf90_put_att(ihisfile, id_dambreak_id,  'cf_role',   'timeseries_id')
             ierr = nf90_put_att(ihisfile, id_dambreak_id,  'long_name', 'Id of dambreak')
-
 
             ierr = nf90_def_var(ihisfile, 'dambreak_s1up', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_s1up)
             ierr = nf90_put_att(ihisfile, id_dambreak_s1up, 'standard_name', 'sea_surface_height')
@@ -19736,8 +19752,24 @@ subroutine unc_write_his(tim)            ! wrihis
              IP = IPNT_HUA
              do num = 1,NUMCONST_MDU
                 IP = IP + 1
-                ierr = nf90_put_var(ihisfile, id_const_cum(num), crs(i)%sumvalcum(IP), (/ i, it_his /))
-                ierr = nf90_put_var(ihisfile, id_const(num),     crs(i)%sumvalcur(IP), (/ i, it_his /))
+                if (num >= ISED1 .and. num <= ISEDN) then
+                   l = sedtot2sedsus(num-ISED1+1)
+                   select case(stmpar%morpar%moroutput%transptype)
+                   case (0)
+                      rhol = 1d0
+                   case (1)
+                      rhol = stmpar%sedpar%cdryb(l)
+                   case (2)
+                      rhol = stmpar%sedpar%rhosol(l)
+                   end select
+                   toutput_cum = crs(i)%sumvalcum(IP)/rhol
+                   toutput_cur = crs(i)%sumvalcur(IP)/rhol
+                else
+                  toutput_cum = crs(i)%sumvalcum(IP)
+                  toutput_cur = crs(i)%sumvalcur(IP)
+                endif
+                ierr = nf90_put_var(ihisfile, id_const_cum(num), toutput_cum, (/ i, it_his /))
+                ierr = nf90_put_var(ihisfile, id_const(num),     toutput_cur, (/ i, it_his /))
              end do
           endif
 
