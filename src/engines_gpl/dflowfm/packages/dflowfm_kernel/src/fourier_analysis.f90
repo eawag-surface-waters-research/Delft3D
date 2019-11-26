@@ -1707,8 +1707,6 @@ end subroutine setfouunit
        real(kind=fp)              :: tfastr               ! Start time in minutes
        real(kind=fp), parameter   :: defaultd = -999.0_fp ! Default value for doubles
        character(len=4)           :: blnm
-       real(kind=fp), allocatable :: amplitudes(:)
-       real(kind=fp), allocatable :: phases(:)
 
    !
    !! executable statements -------------------------------------------------------
@@ -1834,12 +1832,6 @@ end subroutine setfouunit
           !
           ! Write data for user defined dimensions, hence NMAXUS
           !
-          allocate(amplitudes(nmaxus), phases(nmaxus), stat = ierror)
-          if (ierror /= 0) then
-              msgbuf = 'Allocation error in wrfou; no Fourier output for ' // fouvarnam(fouvar)
-              call warn_flush()
-              return
-          endif
           do n = 1, nmaxus
              ltest = (fousma(n)==0.0_fp .and. fousmb(n)==0.0_fp)
              !
@@ -1867,21 +1859,18 @@ end subroutine setfouunit
                 !
                 fas = mod(mod(fas, 360.0_fp) + 720.0_fp, 360.0_fp)
                 amp = amp/fknfac(ifou)
-                amplitudes(n) = amp
-                phases(n)     = fas
+                fousma(n) = amp
+                fousmb(n) = fas
              else
                 !
                 ! Inactive point (not inside grid, can be open boundary)
-                ! defaul instead of xz/yz needed for GPP
-                ! '0' instead of kcs, because TEKAL does not accept '2'
                 !
-                amplitudes(n) = defaultd
-                phases(n)     = defaultd
+                fousma(n) = defaultd
+                fousmb(n) = defaultd
              endif
           enddo
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, amplitudes)
-          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, phases)
-          deallocate(amplitudes, phases)
+          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, fousma)
+          ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmb)
        endif
    end subroutine wrfous
 
