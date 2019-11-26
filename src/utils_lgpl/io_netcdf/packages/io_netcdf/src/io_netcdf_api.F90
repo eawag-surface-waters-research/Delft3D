@@ -1123,18 +1123,12 @@ function ionc_put_1d_mesh_discretisation_points_v2_dll(ioncid, meshid, c_branchi
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_1d_mesh_discretisation_points_v2_dll
   integer(kind=c_int), intent(in)     :: ioncid, meshid, nmeshpoints, startIndex  
   type(c_ptr), intent(in)             :: c_branchidx, c_offset, c_coordx, c_coordy
-  !type(t_ug_charinfo),  intent(in)    :: nodesinfo(nmeshpoints)
-  type(c_ptr), intent(in)      :: c_ids, c_longnames
-  
-  !character(len=ug_idsLen), intent(in) :: c_ids(:)
-  !character(len=ug_idsLongNamesLen), intent(in) :: c_longnames(:)
-  
+  type(c_ptr), intent(in)             :: c_ids, c_longnames    
   integer,pointer                     :: branchidx(:)
+  
   double precision,pointer            :: offset(:)
   double precision,pointer            :: coordx(:)
   double precision,pointer            :: coordy(:)
-  character(len=ug_idsLen)            :: nodeids(nmeshpoints)
-  character(len=ug_idsLongNamesLen)   :: nodelongnames(nmeshpoints)
   character(len=8)                    :: varnameids
   character(len=15)                   :: varnamelongnames
   integer                             :: ierr,i
@@ -1151,17 +1145,12 @@ function ionc_put_1d_mesh_discretisation_points_v2_dll(ioncid, meshid, c_branchi
 
   call c_f_pointer(c_ids, ids, (/ nmeshpoints /))
   call c_f_pointer(c_longnames, longnames, (/ nmeshpoints /))
-   
-  do i= 1, nmeshpoints   
-    nodeids(i) = ids(i)
-    nodelongnames(i) = longnames(i)
-  end do
-    
+      
   !these are hard-coded variable names for node ids of the network
   varnameids        = 'node_id'
-  ierr              = ionc_put_var_chars(ioncid, meshid, varnameids, nodeids)
+  ierr              = ionc_put_var_chars(ioncid, meshid, varnameids, ids)
   varnamelongnames  = 'node_long_name'
-  ierr              = ionc_put_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
+  ierr              = ionc_put_var_chars(ioncid, meshid, varnamelongnames, longnames)
   
 end function ionc_put_1d_mesh_discretisation_points_v2_dll
 
@@ -1370,8 +1359,6 @@ function ionc_put_mesh_contact_v1_dll(ioncid, contactsmesh, c_mesh1indexes, c_me
    type(c_ptr), intent(in)                                     :: c_mesh1indexes, c_mesh2indexes, c_contacttype
    type(c_ptr),  intent(in)                                    :: c_ids, c_longnames
    integer,pointer                                             :: mesh1indexes(:), mesh2indexes(:), contacttype(:)
-   character(len=ug_idsLen)                                    :: contactsids(ncontacts)
-   character(len=ug_idsLongNamesLen)                           :: contactslongnames(ncontacts)
    integer                                                     :: ierr,i
    character(kind=c_char, len=ug_idsLen),pointer               :: ids(:)
    character(kind=c_char, len=ug_idsLongNamesLen),pointer      :: longnames(:)
@@ -1382,13 +1369,8 @@ function ionc_put_mesh_contact_v1_dll(ioncid, contactsmesh, c_mesh1indexes, c_me
    
    call c_f_pointer(c_ids, ids, (/ ncontacts /))
    call c_f_pointer(c_longnames, longnames, (/ ncontacts /))
-
-   do i=1, ncontacts
-      contactsids(i) = ids(i)        
-      contactslongnames(i) = longnames(i)
-   end do
    
-   ierr = ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) 
+   ierr = ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, ids, longnames, contacttype, startIndex) 
    
 end function ionc_put_mesh_contact_v1_dll
 
