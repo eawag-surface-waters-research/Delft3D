@@ -229,7 +229,11 @@ module m_ec_item
               ! else
                   success = ecItemUpdateTargetItem(instancePtr, itemPtr, timesteps)
                   if (.not.success) then
-                     call setECMessage("Updating target failed, quantity='"//trim(itemPtr%QUANTITYPTR%NAME)//"', item=",itemId)
+                     ! This function is called recursively (for sources and targets)
+                     ! The quantity may not be defined for all targets. Then simply skip the message generation below.
+                     if (associated(itemPtr%QUANTITYPTR)) then
+                        call setECMessage("Updating target failed, quantity='"//trim(itemPtr%QUANTITYPTR%NAME)//"', item=",itemId)
+                     endif
                   endif 
               ! end if
                exit
