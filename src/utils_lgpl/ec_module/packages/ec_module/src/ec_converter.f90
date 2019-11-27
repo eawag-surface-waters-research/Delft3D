@@ -307,6 +307,7 @@ module m_ec_converter
       !> Update the weight factors of a Converter.
       function ecConverterUpdateWeightFactors(instancePtr, connection) result (success)
       use kdtree2Factory
+      use m_ec_basic_interpolation
       use m_alloc
       implicit none
          logical                            :: success     !< function status
@@ -366,7 +367,6 @@ module m_ec_converter
             success = .true.
             return
          end if
-         !
          ! Check whether there is anything to be done.
          if (connection%converterPtr%interpolationType == interpolate_spacetimeSaveWeightFactors .or. &
              connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
@@ -382,6 +382,29 @@ module m_ec_converter
             connection%converterPtr%indexWeight => weight
          else
             weight => connection%converterPtr%indexWeight
+         end if
+         !
+         if (sourceElementSet%ofType == elmSetType_samples) then
+            n_points = targetElementSet%nCoordinates
+            do i = 1, connection%nSourceItems
+               connection%sourceItemsPtr(i)%ptr%sourceT0fieldPtr%bbox = (/1,1,sourceElementSet%n_cols,1/)
+               connection%sourceItemsPtr(i)%ptr%sourceT1fieldPtr%bbox = (/1,1,sourceElementSet%n_cols,1/)
+               if (associated(weight%indices)) deallocate(weight%indices)
+               allocate(weight%indices(1, n_points))
+               connection%converterPtr%indexWeight => weight
+               weight%indices = ec_undef_int
+               select case (instancePtr%coordsystem)
+               case (EC_COORDS_SFERIC)
+                  jsferic = 1
+               case (EC_COORDS_CARTHESIAN)
+                  jsferic = 0
+               end select
+               call nearest_neighbour(n_points, targetElementSet%x, targetElementSet%y,  &
+                    weight%indices(1,:), ec_undef_hp, &
+                    sourceElementSet%x, sourceElementSet%y, sourceElementSet%n_cols, jsferic, jsferic)
+            end do
+            success = .true.
+            return
          end if
          !
          ! Calculate and update the Converter's weights.
@@ -2502,7 +2525,7 @@ module m_ec_converter
          type(tEcElementSet), pointer :: targetElementSet !< target ElementSet
          type(tEcItem), pointer :: sourceItem !< source Item
          type(tEcItem), pointer :: targetItem !< target item 
-         integer :: n_layers, n_cols, n_rows, mp, np, kp, dkp, k_inc, n_points
+         integer :: n_layers, n_cols, n_rows, n_points, mp, np, kp, dkp, k_inc
          type(tEcItem), pointer  :: windxPtr ! pointer to item for windx     
          type(tEcItem), pointer  :: windyPtr ! pointer to item for windy
          logical :: has_x_wind, has_y_wind
@@ -2598,278 +2621,305 @@ module m_ec_converter
                   targetMissing = targetField%MISSINGVALUE
                   targetElementSet => targetItem%elementSetPtr
 
-                  col0 = sourceItem%sourceT0FieldPtr%bbox(1)
-                  row0 = sourceItem%sourceT0FieldPtr%bbox(2)
-                  col1 = sourceItem%sourceT0FieldPtr%bbox(3)
-                  row1 = sourceItem%sourceT0FieldPtr%bbox(4)
-                  
-!                 note: it is assumed that the sparsity pattern of the T1field is the same as of the T0field
-                  issparse = sourceItem%sourceT0FieldPtr%issparse
-                  ia => sourceItem%sourceT0FieldPtr%ia
-                  ja => sourceItem%sourceT0FieldPtr%ja
 
-                  n_points = targetElementSet%nCoordinates
-                  if ( issparse.eq.1 ) then
+                  if (sourceElementSet%ofType == elmSetType_samples) then
+                     ! call interpolation based on nearest neighbours
+                     n_points = targetElementSet%nCoordinates
                      n_cols = sourceElementSet%n_cols
-                     n_rows = sourceElementSet%n_rows
-                  else
-                     n_rows = row1 - row0 + 1
-                     n_cols = col1 - col0 + 1
-                  end if
-                  n_layers = sourceElementSet%n_layers
-                  t0 = sourceT0Field%timesteps
-                  t1 = sourceT1Field%timesteps
-
-                  call time_weight_factors(a0, a1, timesteps, t0, t1, timeint=time_interpolation)
-                  
-                  if (n_layers>0 .and. associated(targetElementSet%z) .and. associated(sourceElementSet%z)) then 
-                     allocate(zsrc(n_layers))
-                     if ( issparse.eq.1 ) then
-                        Ndatasize = ia(n_rows+1)-1
-                        s2D_T0(1:Ndatasize,1:n_layers) => sourceT0Field%arr1d
-                        s2D_T1(1:Ndatasize,1:n_layers) => sourceT1Field%arr1d
-                     else
-                        s3D_T0(1:n_cols,1:n_rows,1:n_layers) => sourceT0Field%arr1d
-                        s3D_T1(1:n_cols,1:n_rows,1:n_layers) => sourceT1Field%arr1d
-                     end if
-                     do j=1, n_points
-                        kbot = targetElementSet%kbot(j)
-                        ktop = targetElementSet%ktop(j)
-                        np = indexWeight%indices(1,j)
-                        mp = indexWeight%indices(2,j)
-                        if (mp > 0 .and. np > 0) then
-                           if (connection%converterPtr%operandType==operand_replace) then
-                              targetValues(kbot:ktop) = 0.0_hp
-                           end if
-                           ! The save horizontal weigths are used. The vertical weights are recalculated because z changes.
-                           ! transformation coefficients for the z-array, target side:
-                           select case (targetElementSet%vptyp)
-                           case (BC_VPTYP_ZDATUM)
-                              a_t = 1.0_hp
-                              b_t = 0.0_hp
-                           case (BC_VPTYP_ZDATUM_DOWN)   
-                              a_t = -1.0_hp
-                              b_t = 0.0_hp
-                           case (BC_VPTYP_PERCBED)   
-                              a_t = (targetElementSet%zmax(j)-targetElementSet%zmin(j))
-                              b_t = targetElementSet%zmin(j)
-                           case (BC_VPTYP_PERCSURF)   
-                              a_t = (targetElementSet%zmin(j)-targetElementSet%zmax(j))
-                              b_t = targetElementSet%zmax(j)
-                           end select 
-
-                           ! transformation coefficients for the z-array, source side:
-                           select case (sourceElementSet%vptyp)
-                           case (BC_VPTYP_ZDATUM)
-                              a_s = 1.0_hp
-                              b_s = 0.0_hp
-                           case (BC_VPTYP_ZDATUM_DOWN)   
-                              a_s = -1.0_hp
-                              b_s = 0.0_hp
-                           end select 
-
-                           ! scale source coordinates with factors of target
-                           zsrc = (a_s*sourceElementSet%z + b_s - b_t)/a_t 
-                           
-                           ! initialize upper layer kp                           
-                           kp = 2
-                           
-                           ! dkp: increase direction of (scaled) source z-coordinate zsrc, i.e. zrsc(kp) > zsrc(kp-dkp)
-                           if (zsrc(2)-zsrc(1)>0) then
-                              dkp = 1
-                           else
-                              dkp = -1
-                           end if      ! write source vertical coordinate in terms of target system
-                           
-                           if ( issparse.eq.1 ) then
-                             idx = (/ np, mp /) ! (bottom-left, upper-left) indices
-                           end if
-                           
-                           do k = kbot, ktop
-                              ztgt = targetElementSet%z(k)
-                              
-                              ! get search direction in zsrc
-                              if (dkp*(ztgt-zsrc(kp))>0) then
-                                 k_inc = 1
-                              else 
-                                 k_inc = -1
-                              end if
-                              
-                              ! get new upper layer kp               
-                              do while ((zsrc(kp-dkp)>ztgt) .or. (zsrc(kp)<=ztgt))
-                                 kp = kp + k_inc
-                                 if (kp > n_layers .or. kp < 1) exit
-                                 if (kp-dkp > n_layers .or. kp-dkp < 1) exit
-                              enddo
-                              if (dkp>0) then
-                                 kp = min(max(kp,2),n_layers)
-                              else 
-                                 kp = min(max(kp,1),n_layers-1)
-                              end if
-                              
-                              ! fill source values
-                              if ( issparse.eq.1 ) then
-                                 do kk=0,1
-                                    do jj=0,1
-                                       do ii=0,1
-                                          sourcevals(1+ii,1+jj,1+kk,1) = s2D_T0(idx(1+jj)+ii, kp+dkp*(kk-1))
-                                          sourcevals(1+ii,1+jj,1+kk,2) = s2D_T1(idx(1+jj)+ii, kp+dkp*(kk-1))
-                                       end do
-                                    end do
-                                 end do
-                              else
-                                 do kk=0,1
-                                    do jj=0,1
-                                       do ii=0,1
-                                          sourcevals(1+ii,1+jj,1+kk,1) = s3D_T0(mp+ii, np+jj, kp+dkp*(kk-1) )
-                                          sourcevals(1+ii,1+jj,1+kk,2) = s3D_T1(mp+ii, np+jj, kp+dkp*(kk-1) )
-                                       end do
-                                    end do
-                                 end do
-                              end if
-                              
-                              call extrapolate_missing(sourcevals, sourceMissing, jamissing)
-                              
-                              if ( jamissing>0 ) then
-                                 targetValues(k) = targetMissing
-                              else
-                              
-                                 ! horizontal interpolation 
-                                 val = 0d0   ! (down-up,old-new)
-                                 do ll=1,2
-                                    do kk=1,2
-                                       val(kk,ll) = val(kk,ll) + sourcevals(1, 1, kk, ll) * indexWeight%weightFactors(1,j)    !   4      3
-                                       val(kk,ll) = val(kk,ll) + sourcevals(2, 1, kk, ll) * indexWeight%weightFactors(2,j)
-                                       val(kk,ll) = val(kk,ll) + sourcevals(2, 2, kk, ll) * indexWeight%weightFactors(3,j)
-                                       val(kk,ll) = val(kk,ll) + sourcevals(1, 2, kk, ll) * indexWeight%weightFactors(4,j)    !   1      2
-                                    end do
-                                 end do                                 
-                                 ! get weights for vertical interpolation
-                                 wb = (zsrc(kp) - ztgt)/(zsrc(kp)-zsrc(kp-dkp))
-                                 wb = min(max(wb,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates
-                                 wt = (1.0_hp - wb)
-                                 
-                                 ! interpolating between times and between vertical layers
-                                 targetValues(k) = targetValues(k) + a0*(wb*val(1,1) + wt*val(2,1)) + a1*(wb*val(1,2) + wt*val(2,2))
-                              end if
-                           end do
-                           
-                           ! fill missing values
-                           lastvalue = targetMissing
-                           do k=ktop,kbot,-1
-                              if ( targetValues(k).ne.targetMissing ) then
-                                 lastvalue = targetValues(k)
-                              else if ( lastvalue.ne.targetMissing ) then
-                                 targetValues(k) = lastvalue
-                              end if
-                           end do
-                           
-                           lastvalue = targetMissing
-                           do k=kbot,ktop
-                              if ( targetValues(k).ne.targetMissing ) then
-                                 lastvalue = targetValues(k)
-                              else if ( lastvalue.ne.targetMissing ) then
-                                 targetValues(k) = lastvalue
-                              end if
-                           end do
-                        end if
-                     end do
-                     if (allocated(zsrc)) deallocate(zsrc)
-                  else
-                     if ( issparse.eq.1 ) then
-                        Ndatasize = ia(n_rows+1)-1
-                        S1D_T0(1:Ndatasize) => sourceT0Field%arr1d
-                        S1D_T1(1:Ndatasize) => sourceT1Field%arr1d
-                     else
-                        s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
-                        s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
-                     end if
-                     
-                     if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
-                        allocate(x_extrapolate(n_points))
-                        x_extrapolate = targetElementSet%x
-                     endif
-                     allocate(missing(n_points))
-                     missing = .False.
-                     do j=1, n_points
-                        np = indexWeight%indices(1,j)
-                        mp = indexWeight%indices(2,j)
-                        jamissing = 0
-                        if (mp > 0 .and. np > 0) then ! if mp and np both valid, this is an interior point of the meteo domain, else ignore
-                                                      ! check missing values for points with valid mp and np
-                        
-                           if ( issparse.eq.1 ) then
-                             idx = (/ np, mp /) ! (bottom-left, upper-left) indices
-                           end if
-                           
-                           ! fill source values
-                           kk = 0   ! 2D only
-                           if ( issparse.eq.1 ) then
-                              do jj=0,1
-                                 do ii=0,1
-                                    sourcevals(1+ii,1+jj,1+kk,1) = s1D_T0(idx(1+jj)+ii)
-                                    sourcevals(1+ii,1+jj,1+kk,2) = s1D_T1(idx(1+jj)+ii)
-                                 end do
-                              end do
-                           else
-                              do jj=0,1
-                                 do ii=0,1
-                                    sourcevals(1+ii,1+jj,1+kk,1) = s2D_T0(mp+ii, np+jj)
-                                    sourcevals(1+ii,1+jj,1+kk,2) = s2D_T1(mp+ii, np+jj)
-                                 end do
-                              end do
-                           end if
-                        
+                     n_layers = sourceElementSet%n_layers
+                     t0 = sourceT0Field%timesteps
+                     t1 = sourceT1Field%timesteps
+   
+                     call time_weight_factors(a0, a1, timesteps, t0, t1, timeint=time_interpolation)
+                     if (n_layers==0) then
+                        do j=1,n_points
                            if (connection%converterPtr%operandType==operand_replace) then ! Dit hoort in de loop beneden per target gridpunt!
                               targetValues(j) = 0.0_hp
                            end if
-                  kloop2D: do jj=0,1
-                              do ii=0,1
-                                 if ( comparereal(sourcevals(1+ii, 1+jj, 1, 1), sourceMissing)==0 .or.   &
-                                      comparereal(sourcevals(1+ii, 1+jj, 1, 2), sourceMissing)==0 ) then
-                                    jamissing = jamissing + 1
-                                    exit kloop2D
+                           mp = indexWeight%indices(1,j)
+                           if (mp>0 .and. mp<=n_cols) then
+                              targetValues(j) = targetValues(j) + a0 * sourceItem%sourceT0FieldPtr%arr1d(mp) &
+                                                                + a1 * sourceItem%sourceT1FieldPtr%arr1d(mp)
+                           end if
+                        end do
+                     else
+                        call setECMessage("ERROR: ec_converter::ecConverterNetcdf: Multiple layers sources not yet supported for meteo from stations.")
+                        return
+                     end if
+                  else
+                     col0 = sourceItem%sourceT0FieldPtr%bbox(1)
+                     row0 = sourceItem%sourceT0FieldPtr%bbox(2)
+                     col1 = sourceItem%sourceT0FieldPtr%bbox(3)
+                     row1 = sourceItem%sourceT0FieldPtr%bbox(4)
+                     
+   !                 note: it is assumed that the sparsity pattern of the T1field is the same as of the T0field
+                     issparse = sourceItem%sourceT0FieldPtr%issparse
+                     ia => sourceItem%sourceT0FieldPtr%ia
+                     ja => sourceItem%sourceT0FieldPtr%ja
+
+                     n_points = targetElementSet%nCoordinates
+                     if ( issparse.eq.1 ) then
+                        n_cols = sourceElementSet%n_cols
+                        n_rows = sourceElementSet%n_rows
+                     else
+                        n_rows = row1 - row0 + 1
+                        n_cols = col1 - col0 + 1
+                     end if
+                     n_layers = sourceElementSet%n_layers
+                     t0 = sourceT0Field%timesteps
+                     t1 = sourceT1Field%timesteps
+
+                     call time_weight_factors(a0, a1, timesteps, t0, t1, timeint=time_interpolation)
+                     
+                     if (n_layers>0 .and. associated(targetElementSet%z) .and. associated(sourceElementSet%z)) then 
+                        allocate(zsrc(n_layers))
+                        if ( issparse.eq.1 ) then
+                           Ndatasize = ia(n_rows+1)-1
+                           s2D_T0(1:Ndatasize,1:n_layers) => sourceT0Field%arr1d
+                           s2D_T1(1:Ndatasize,1:n_layers) => sourceT1Field%arr1d
+                        else
+                           s3D_T0(1:n_cols,1:n_rows,1:n_layers) => sourceT0Field%arr1d
+                           s3D_T1(1:n_cols,1:n_rows,1:n_layers) => sourceT1Field%arr1d
+                        end if
+                        do j=1, n_points
+                           kbot = targetElementSet%kbot(j)
+                           ktop = targetElementSet%ktop(j)
+                           np = indexWeight%indices(1,j)
+                           mp = indexWeight%indices(2,j)
+                           if (mp > 0 .and. np > 0) then
+                              if (connection%converterPtr%operandType==operand_replace) then
+                                 targetValues(kbot:ktop) = 0.0_hp
+                              end if
+                              ! The save horizontal weigths are used. The vertical weights are recalculated because z changes.
+                              ! transformation coefficients for the z-array, target side:
+                              select case (targetElementSet%vptyp)
+                              case (BC_VPTYP_ZDATUM)
+                                 a_t = 1.0_hp
+                                 b_t = 0.0_hp
+                              case (BC_VPTYP_ZDATUM_DOWN)   
+                                 a_t = -1.0_hp
+                                 b_t = 0.0_hp
+                              case (BC_VPTYP_PERCBED)   
+                                 a_t = (targetElementSet%zmax(j)-targetElementSet%zmin(j))
+                                 b_t = targetElementSet%zmin(j)
+                              case (BC_VPTYP_PERCSURF)   
+                                 a_t = (targetElementSet%zmin(j)-targetElementSet%zmax(j))
+                                 b_t = targetElementSet%zmax(j)
+                              end select 
+
+                              ! transformation coefficients for the z-array, source side:
+                              select case (sourceElementSet%vptyp)
+                              case (BC_VPTYP_ZDATUM)
+                                 a_s = 1.0_hp
+                                 b_s = 0.0_hp
+                              case (BC_VPTYP_ZDATUM_DOWN)   
+                                 a_s = -1.0_hp
+                                 b_s = 0.0_hp
+                              end select 
+
+                              ! scale source coordinates with factors of target
+                              zsrc = (a_s*sourceElementSet%z + b_s - b_t)/a_t 
+                              
+                              ! initialize upper layer kp                           
+                              kp = 2
+                              
+                              ! dkp: increase direction of (scaled) source z-coordinate zsrc, i.e. zrsc(kp) > zsrc(kp-dkp)
+                              if (zsrc(2)-zsrc(1)>0) then
+                                 dkp = 1
+                              else
+                                 dkp = -1
+                              end if      ! write source vertical coordinate in terms of target system
+                              
+                              if ( issparse.eq.1 ) then
+                                idx = (/ np, mp /) ! (bottom-left, upper-left) indices
+                              end if
+                              
+                              do k = kbot, ktop
+                                 ztgt = targetElementSet%z(k)
+                                 
+                                 ! get search direction in zsrc
+                                 if (dkp*(ztgt-zsrc(kp))>0) then
+                                    k_inc = 1
+                                 else 
+                                    k_inc = -1
+                                 end if
+                                 
+                                 ! get new upper layer kp               
+                                 do while ((zsrc(kp-dkp)>ztgt) .or. (zsrc(kp)<=ztgt))
+                                    kp = kp + k_inc
+                                    if (kp > n_layers .or. kp < 1) exit
+                                    if (kp-dkp > n_layers .or. kp-dkp < 1) exit
+                                 enddo
+                                 if (dkp>0) then
+                                    kp = min(max(kp,2),n_layers)
+                                 else 
+                                    kp = min(max(kp,1),n_layers-1)
+                                 end if
+                                 
+                                 ! fill source values
+                                 if ( issparse.eq.1 ) then
+                                    do kk=0,1
+                                       do jj=0,1
+                                          do ii=0,1
+                                             sourcevals(1+ii,1+jj,1+kk,1) = s2D_T0(idx(1+jj)+ii, kp+dkp*(kk-1))
+                                             sourcevals(1+ii,1+jj,1+kk,2) = s2D_T1(idx(1+jj)+ii, kp+dkp*(kk-1))
+                                          end do
+                                       end do
+                                    end do
+                                 else
+                                    do kk=0,1
+                                       do jj=0,1
+                                          do ii=0,1
+                                             sourcevals(1+ii,1+jj,1+kk,1) = s3D_T0(mp+ii, np+jj, kp+dkp*(kk-1) )
+                                             sourcevals(1+ii,1+jj,1+kk,2) = s3D_T1(mp+ii, np+jj, kp+dkp*(kk-1) )
+                                          end do
+                                       end do
+                                    end do
+                                 end if
+                                 
+                                 call extrapolate_missing(sourcevals, sourceMissing, jamissing)
+                                 
+                                 if ( jamissing>0 ) then
+                                    targetValues(k) = targetMissing
+                                 else
+                                 
+                                    ! horizontal interpolation 
+                                    val = 0d0   ! (down-up,old-new)
+                                    do ll=1,2
+                                       do kk=1,2
+                                          val(kk,ll) = val(kk,ll) + sourcevals(1, 1, kk, ll) * indexWeight%weightFactors(1,j)    !   4      3
+                                          val(kk,ll) = val(kk,ll) + sourcevals(2, 1, kk, ll) * indexWeight%weightFactors(2,j)
+                                          val(kk,ll) = val(kk,ll) + sourcevals(2, 2, kk, ll) * indexWeight%weightFactors(3,j)
+                                          val(kk,ll) = val(kk,ll) + sourcevals(1, 2, kk, ll) * indexWeight%weightFactors(4,j)    !   1      2
+                                       end do
+                                    end do                                 
+                                    ! get weights for vertical interpolation
+                                    wb = (zsrc(kp) - ztgt)/(zsrc(kp)-zsrc(kp-dkp))
+                                    wb = min(max(wb,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates
+                                    wt = (1.0_hp - wb)
+                                    
+                                    ! interpolating between times and between vertical layers
+                                    targetValues(k) = targetValues(k) + a0*(wb*val(1,1) + wt*val(2,1)) + a1*(wb*val(1,2) + wt*val(2,2))
                                  end if
                               end do
-                           end do kloop2D
-                           if (jamissing>0) then                                                                        ! if insufficient data for bi-linear interpolation
-                              missing(j) = .True.    ! Mark missings in the target grid in a temporary logical array  
-                              if (allocated(x_extrapolate)) x_extrapolate(j)=ec_undef_hp                                ! no-data -> unelectable for kdtree later
-                           else
-                              targetValues(j) = targetValues(j) + a0 * sourcevals(1, 1, 1, 1) * indexWeight%weightFactors(1,j)        !  4                 3
-                              targetValues(j) = targetValues(j) + a1 * sourcevals(1, 1, 1, 2) * indexWeight%weightFactors(1,j)
-                              targetValues(j) = targetValues(j) + a0 * sourcevals(2, 1, 1, 1) * indexWeight%weightFactors(2,j)
-                              targetValues(j) = targetValues(j) + a1 * sourcevals(2, 1, 1, 2) * indexWeight%weightFactors(2,j)
-                              targetValues(j) = targetValues(j) + a0 * sourcevals(2, 2, 1, 1) * indexWeight%weightFactors(3,j)
-                              targetValues(j) = targetValues(j) + a1 * sourcevals(2, 2, 1, 2) * indexWeight%weightFactors(3,j)
-                              targetValues(j) = targetValues(j) + a0 * sourcevals(1, 2, 1, 1) * indexWeight%weightFactors(4,j)
-                              targetValues(j) = targetValues(j) + a1 * sourcevals(1, 2, 1, 2) * indexWeight%weightFactors(4,j)        !  1                 2
-                              if (allocated(x_extrapolate)) x_extrapolate(j)=targetElementSet%x(j)                      ! x_extrapolate is a copy of the x with missing points marked by ec_undef_hp
-                           end if
+                              
+                              ! fill missing values
+                              lastvalue = targetMissing
+                              do k=ktop,kbot,-1
+                                 if ( targetValues(k).ne.targetMissing ) then
+                                    lastvalue = targetValues(k)
+                                 else if ( lastvalue.ne.targetMissing ) then
+                                    targetValues(k) = lastvalue
+                                 end if
+                              end do
+                              
+                              lastvalue = targetMissing
+                              do k=kbot,ktop
+                                 if ( targetValues(k).ne.targetMissing ) then
+                                    lastvalue = targetValues(k)
+                                 else if ( lastvalue.ne.targetMissing ) then
+                                    targetValues(k) = lastvalue
+                                 end if
+                              end do   ! loop over vertical
+                           end if   ! valid mp and np
+                        end do   ! loop over the target elementset
+                        if (allocated(zsrc)) deallocate(zsrc)
+                     else
+                        if ( issparse.eq.1 ) then
+                           Ndatasize = ia(n_rows+1)-1
+                           S1D_T0(1:Ndatasize) => sourceT0Field%arr1d
+                           S1D_T1(1:Ndatasize) => sourceT1Field%arr1d
+                        else
+                           s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
+                           s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
                         end if
-                     end do      ! points j
-                     if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then      ! if extrapolation permitted ... 
-                        do j=1, n_points                                                                                ! Loop over the grid for missing in the target grid  
-                           if (missing(j)) then                                                                         ! Can only be an interior point with ORIGINALLY valid mp and np
-                              if (indexWeight%substndx(j)==0) then                                                      ! if we had not yet searched for a replacement value in the target grid, do so.
-                                 if (treeinst%itreestat /= ITREE_OK) then
-!                                   jsferic = merge(1,0,targetElementSet%ofType == elmSetType_spheric)                  ! adopt the global jsferic setting of the EC-module instance
-                                    jsferic = 0                                                                         ! in EC-converter treat all coordinates as carthesian
-                                                                                                                        ! Now kdtree over target locations which do NOT yet have a value ('missing')
-                                    call build_kdtree(treeinst, n_points, x_extrapolate, targetElementSet%y, ierr, jsferic, ec_undef_hp)
+                        
+                        if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
+                           allocate(x_extrapolate(n_points))
+                           x_extrapolate = targetElementSet%x
+                        endif
+                        allocate(missing(n_points))
+                        missing = .False.
+                        do j=1, n_points
+                           np = indexWeight%indices(1,j)
+                           mp = indexWeight%indices(2,j)
+                           jamissing = 0
+                           if (mp > 0 .and. np > 0) then ! if mp and np both valid, this is an interior point of the meteo domain, else ignore
+                                                         ! check missing values for points with valid mp and np
+                        
+                              if ( issparse.eq.1 ) then
+                                idx = (/ np, mp /) ! (bottom-left, upper-left) indices
+                              end if
+                              
+                              ! fill source values
+                              kk = 0   ! 2D only
+                              if ( issparse.eq.1 ) then
+                                 do jj=0,1
+                                    do ii=0,1
+                                       sourcevals(1+ii,1+jj,1+kk,1) = s1D_T0(idx(1+jj)+ii)
+                                       sourcevals(1+ii,1+jj,1+kk,2) = s1D_T1(idx(1+jj)+ii)
+                                    end do
+                                 end do
+                              else
+                                 do jj=0,1
+                                    do ii=0,1
+                                       sourcevals(1+ii,1+jj,1+kk,1) = s2D_T0(mp+ii, np+jj)
+                                       sourcevals(1+ii,1+jj,1+kk,2) = s2D_T1(mp+ii, np+jj)
+                                    end do
+                                 end do
+                              end if
+                           
+                              if (connection%converterPtr%operandType==operand_replace) then
+                                 targetValues(j) = 0.0_hp
+                              end if
+                     kloop2D: do jj=0,1
+                                 do ii=0,1
+                                    if ( comparereal(sourcevals(1+ii, 1+jj, 1, 1), sourceMissing)==0 .or.   &
+                                         comparereal(sourcevals(1+ii, 1+jj, 1, 2), sourceMissing)==0 ) then
+                                       jamissing = jamissing + 1
+                                       exit kloop2D
+                                    end if
+                                 end do
+                              end do kloop2D
+                              if (jamissing>0) then                                                                        ! if insufficient data for bi-linear interpolation
+                                 missing(j) = .True.    ! Mark missings in the target grid in a temporary logical array  
+                                 if (allocated(x_extrapolate)) x_extrapolate(j)=ec_undef_hp                                ! no-data -> unelectable for kdtree later
+                              else
+                                 targetValues(j) = targetValues(j) + a0 * sourcevals(1, 1, 1, 1) * indexWeight%weightFactors(1,j)        !  4                 3
+                                 targetValues(j) = targetValues(j) + a1 * sourcevals(1, 1, 1, 2) * indexWeight%weightFactors(1,j)
+                                 targetValues(j) = targetValues(j) + a0 * sourcevals(2, 1, 1, 1) * indexWeight%weightFactors(2,j)
+                                 targetValues(j) = targetValues(j) + a1 * sourcevals(2, 1, 1, 2) * indexWeight%weightFactors(2,j)
+                                 targetValues(j) = targetValues(j) + a0 * sourcevals(2, 2, 1, 1) * indexWeight%weightFactors(3,j)
+                                 targetValues(j) = targetValues(j) + a1 * sourcevals(2, 2, 1, 2) * indexWeight%weightFactors(3,j)
+                                 targetValues(j) = targetValues(j) + a0 * sourcevals(1, 2, 1, 1) * indexWeight%weightFactors(4,j)
+                                 targetValues(j) = targetValues(j) + a1 * sourcevals(1, 2, 1, 2) * indexWeight%weightFactors(4,j)        !  1                 2
+                                 if (allocated(x_extrapolate)) x_extrapolate(j)=targetElementSet%x(j)                      ! x_extrapolate is a copy of the x with missing points marked by ec_undef_hp
+                              end if
+                           end if   ! 2D or 3D sources
+                        end do      ! points j
+                        if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then      ! if extrapolation permitted ... 
+                           do j=1, n_points                                                                                ! Loop over the grid for missing in the target grid  
+                              if (missing(j)) then                                                                         ! Can only be an interior point with ORIGINALLY valid mp and np
+                                 if (indexWeight%substndx(j)==0) then                                                      ! if we had not yet searched for a replacement value in the target grid, do so.
+                                    if (treeinst%itreestat /= ITREE_OK) then
+   !                                   jsferic = merge(1,0,targetElementSet%ofType == elmSetType_spheric)                  ! adopt the global jsferic setting of the EC-module instance
+                                       jsferic = 0                                                                         ! in EC-converter treat all coordinates as carthesian
+                                                                                                                           ! Now kdtree over target locations which do NOT yet have a value ('missing')
+                                       call build_kdtree(treeinst, n_points, x_extrapolate, targetElementSet%y, ierr, jsferic, ec_undef_hp)
+                                    endif
+                                    call make_queryvector_kdtree(treeinst, targetElementSet%x(j), targetElementSet%y(j), jsferic)
+                                    call kdtree2_n_nearest(treeinst%tree, treeinst%qv, 1, treeinst%results)                ! use the first nearest neighbour
+                                    indexWeight%substndx(j) = treeinst%results(1)%idx                                      ! store its index for for later use (in an array that is init to zero)
                                  endif
-                                 call make_queryvector_kdtree(treeinst, targetElementSet%x(j), targetElementSet%y(j), jsferic)
-                                 call kdtree2_n_nearest(treeinst%tree, treeinst%qv, 1, treeinst%results)                ! use the first nearest neighbour
-                                 indexWeight%substndx(j) = treeinst%results(1)%idx                                      ! store its index for for later use (in an array that is init to zero)
+                                 targetValues(j) = targetValues(indexWeight%substndx(j))                                   ! and copy its value as a target value for the target point with missing data.
                               endif
-                              targetValues(j) = targetValues(indexWeight%substndx(j))                                   ! and copy its value as a target value for the target point with missing data.
-                           endif
-                        end do   ! points j
-                     endif   
-                     if (allocated(missing)) deallocate(missing)
-                     if (allocated(x_extrapolate)) deallocate(x_extrapolate)
-                     call delete_kdtree2(treeinst)
-                  end if         ! 2d or 3d
+                           end do   ! points j
+                        endif   
+                        if (allocated(missing)) deallocate(missing)
+                        if (allocated(x_extrapolate)) deallocate(x_extrapolate)
+                        call delete_kdtree2(treeinst)
+                     end if         ! 2d or 3d
+                  end if   ! if the elementset type was not samples 
                   connection%targetItemsPtr(i)%ptr%targetFieldPtr%timesteps = timesteps
                end do   ! target items i
                if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then

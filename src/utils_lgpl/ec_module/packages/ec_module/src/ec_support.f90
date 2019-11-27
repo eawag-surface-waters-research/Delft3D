@@ -1148,11 +1148,12 @@ end subroutine ecInstanceListSourceItems
       ! =======================================================================
 
       !> Find the CF-compliant longitude and latitude dimensions and associated variables
-      function ecSupportNCFindCFCoordinates(ncid, lon_varid, lon_dimid, lat_varid, lat_dimid,      &
-                                             grid_lon_varid, grid_lat_varid,                       &
-                                                    x_varid,   x_dimid,   y_varid,   y_dimid,      &
-                                                    z_varid,   z_dimid,                            &
-                                                  tim_varid, tim_dimid) result(success)
+      function ecSupportNCFindCFCoordinates(ncid, lon_varid, lon_dimid, lat_varid, lat_dimid,    &
+                                             grid_lon_varid, grid_lat_varid,                     &
+                                                    x_varid, x_dimid,   y_varid,   y_dimid,      &
+                                                    z_varid, z_dimid,                            &
+                                                  tim_varid, tim_dimid,                          &
+                                               series_varid, series_dimid) result(success)
       use netcdf
       logical              :: success
       integer, intent(in)  :: ncid           !< NetCDF file ID
@@ -1164,15 +1165,17 @@ end subroutine ecInstanceListSourceItems
       integer, intent(out) ::   y_varid      !< One dimensional coordinate variable recognized as Y
       integer, intent(out) ::   z_varid      !< One dimensional coordinate variable recognized as Z
       integer, intent(out) :: tim_varid      !< One dimensional coordinate variable recognized as time
+      integer, intent(out) :: series_varid   !< Series variable dimensions
       integer, intent(out) :: lon_dimid      !< Longitude dimension
       integer, intent(out) :: lat_dimid      !< Latitude dimension
       integer, intent(out) ::   x_dimid      !< X dimension
       integer, intent(out) ::   y_dimid      !< Y dimension
       integer, intent(out) ::   z_dimid      !< Z dimension
       integer, intent(out) :: tim_dimid      !< Time dimension
+      integer, intent(out) :: series_dimid   !< Series dimension
       integer :: ndim, nvar, ivar, nglobatts, unlimdimid, ierr
-      integer :: dimids(1)
-      character(len=NF90_MAX_NAME)  :: units, axis, varname, stdname
+      integer :: dimids(2)
+      character(len=NF90_MAX_NAME)  :: units, axis, varname, stdname, cf_role
 
       success = .False.
       lon_varid = -1
@@ -1181,19 +1184,29 @@ end subroutine ecInstanceListSourceItems
       y_varid = -1
       z_varid = -1
       tim_varid = -1
+      series_varid = -1
+
       lon_dimid = -1
       lat_dimid = -1
       x_dimid = -1
       y_dimid = -1
       z_dimid = -1
       tim_dimid = -1
+      series_dimid = -1
+
       ierr = nf90_inquire(ncid, ndim, nvar, nglobatts, unlimdimid)
       do ivar=1,nvar
-         ierr = nf90_inquire_variable(ncid, ivar, ndims=ndim)                      ! number of variables
+         ierr = nf90_inquire_variable(ncid, ivar, ndims=ndim)                   ! number of variables
+         ierr = nf90_inquire_variable(ncid, ivar, dimids=dimids)                ! number of variables
+         cf_role=''
+         ierr = nf90_get_att(ncid, ivar, 'cf_role', cf_role)
+         if (strcmpi(cf_role,'timeseries_id')) then 
+            series_varid = ivar                                                 ! store last timeseries_id variable
+            series_dimid = dimids(ndim)
+         end if
          units=''
          ierr = nf90_get_att(ncid, ivar, 'units', units)
          if (ndim==1) then
-            ierr = nf90_inquire_variable(ncid, ivar, dimids=dimids)                ! number of variables
             select case (trim(units))
                case ('degrees_east','degree_east','degree_E','degrees_E','degreeE','degreesE')
                   lon_varid = ivar

@@ -170,7 +170,7 @@ module m_ec_parameters
    integer, parameter :: EC_EOF                = 14 !< EOF reached/file ended prematurely.
 
    ! COORDINATE SYSTEM that applies to all elementsets in this instance
-   integer, parameter :: EC_COORDS_CARTESIAN  = 1  !< Cartesian coordinates (x,y)
+   integer, parameter :: EC_COORDS_CARTHESIAN  = 1  !< Cartesian coordinates (x,y)
    integer, parameter :: EC_COORDS_SFERIC      = 2  !< Sferic coordinates (Lon,Lat) WGS84
 
     !------------------------ BC-header related parameters ----------------------------------

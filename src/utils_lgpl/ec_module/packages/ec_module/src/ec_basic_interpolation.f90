@@ -124,6 +124,7 @@
    private
 
    public   ::  bilin_interp
+   public   ::  nearest_neighbour
    public   ::  TRIINTfast
    public   ::  AVERAGING2
    public   ::  dlaun
@@ -1197,6 +1198,38 @@
       end if
 
    end subroutine linear3D
+
+   !---------------------------------------------------------------------------!
+   !   nearest_neighbour
+   !---------------------------------------------------------------------------!
+
+   !> return the index of the nearest neighbouring source point for each of the target grid points
+   subroutine nearest_neighbour(Nc, xc, yc, Mn, dmiss, XS, YS, MSAM, jsferic, jasfer3D)
+   implicit none
+
+   integer,                         intent(in)  :: Nc       !< number of points to be interpolated
+   real(kind=hp)   , dimension(Nc), intent(in)  :: xc, yc   !< point coordinates
+   integer         , dimension(Nc), intent(out) :: Mn       !< source index for each target point
+   real(kind=hp)   , intent(in)                 :: dmiss
+   real(kind=hp)   , intent(in)                 :: XS(:), YS(:)
+   integer, intent(in)                          :: MSAM, jsferic, jasfer3D
+   integer :: k,m
+   real(kind=hp) :: dist, mindist
+
+   Mn = -1
+   do k=1,Nc
+      mindist = Huge(1.d0)
+      do m=1,MSAM
+         dist = dbdistance(xc(k),yc(k),xs(m),ys(m),jsferic,jasfer3D,dmiss)
+         if (dist<mindist) then
+            mindist = dist
+            Mn(k) = m
+         end if
+      end do
+   end do
+   end subroutine nearest_neighbour
+
+
 
    !---------------------------------------------------------------------------!
    !   bilin_interp
