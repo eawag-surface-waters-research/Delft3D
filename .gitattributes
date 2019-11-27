@@ -1,4 +1,5 @@
 * text=auto !eol
+/agpl-3.0.txt -text
 doc/readme_building_netcdf.txt -text
 examples/01_standard/config_d_hydro.xml -text
 examples/01_standard/f34.bca -text
