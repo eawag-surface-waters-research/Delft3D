@@ -1603,7 +1603,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%cfbr1         = 1.0
     sr%cfbr2         = 0.73
     sr%triads        = .false.
-    sr%cftriad1      = 0.1
+    sr%cftriad1      = 0.8
     sr%cftriad2      = 2.2
     sr%frictype      = 1
     sr%frcof         = 0.067
@@ -4388,7 +4388,11 @@ subroutine write_swan_inp (wavedata, calccount, &
           write (line(11:20), '(F10.2)') wvel
           line(21:25) = ' DIR='
           write (line(26:35), '(F10.2)') wdir
-          line(36:)   = ' '
+          !line(36:37)   = ' '
+          
+          line(36:) = ' DRAG WU'
+          
+          
           write (luninp, '(1X,A)') line
        else
        endif
@@ -4466,7 +4470,7 @@ subroutine write_swan_inp (wavedata, calccount, &
             ind = index(sr%specfile, ' ') - 1
             line(13:13 + ind) = sr%specfile
             line(13+ind:13+ind) = ''''''
-            line(13+ind+1:13+ind+5) = ' OPEN'
+            line(13+ind+1:13+ind+10) = ' FREE OPEN'
             write(luninp, '(1X,A)') line
             cycle
           endif
@@ -4729,6 +4733,9 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(1:10)  = 'OFF WCAP  '
        line(11:)   = ' '
        write (luninp, '(1X,A)') line
+    else if (sr%whitecap==1) then
+      line(1:20)  = 'WCAP KOMEN delta=0  '
+      write (luninp, '(1X,A)') line
     !else
     !   line(1:20)  = 'WCAP   CSM   4   2  '
     !   write (luninp, '(1X,A)') line
@@ -4737,12 +4744,6 @@ subroutine write_swan_inp (wavedata, calccount, &
     line(1:10)  = 'LIM  10 1 '
     write (luninp, '(1X,A)') line
     line        = ' '
-    if (.not.sr%refraction) then
-       line(1:10)  = 'OFF REFRAC'
-       line(11:)   = ' '
-       write (luninp, '(1X,A)') line
-       line        = ' '
-    endif
     if (.not.sr%fshift) then
        line(1:10)  = 'OFF FSHIFT'
        line(11:)   = ' '
@@ -4766,6 +4767,13 @@ subroutine write_swan_inp (wavedata, calccount, &
     write (line(32:37), '(F6.2)') css
     line(48:)   = ' '
     write (luninp, '(1X,A)') trim(line)
+    line        = ' '
+    if (.not.sr%refraction) then
+       line(1:10)  = 'OFF REFRAC'
+       line(11:)   = ' '
+       write (luninp, '(1X,A)') line
+       line        = ' '
+    endif
     line        = ' '
     line(1:2)   = '$ '
     write (luninp, '(1X,A)') line

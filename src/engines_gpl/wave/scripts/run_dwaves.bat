@@ -39,7 +39,6 @@ rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set sharedir=%D3D_HOME%\%ARCH%\share\bin
-set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
 set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
@@ -49,7 +48,7 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
     rem
 
     rem Run
-set PATH=%swanbatdir%;%swanexedir%;%sharedir%;%waveexedir%
+set PATH=%waveexedir%;%swanbatdir%;%sharedir%
 echo executing in this window: "%waveexedir%\wave.exe" %argfile% 0
 "%waveexedir%\wave.exe" %argfile% 0
 

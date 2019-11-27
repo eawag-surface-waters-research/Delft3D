@@ -70,21 +70,9 @@ D3D_HOME=$scriptdir/..
 MACHINE_TYPE=`uname -m`
  
 if [ $mpirun -eq 1 ]; then
-  if [ ${MACHINE_TYPE} = 'x86_64' ]; then
-    SWANEXEC=${D3D_HOME}/bin/swan_4072ABCDE_del_l64_i11_mpi.exe
-  elif [ ${MACHINE_TYPE} = 'i686' ]; then
-    SWANEXEC=${D3D_HOME}/bin/swan_4072ABCDE_del_l32_i11_mpi.exe
-  else
-    echo "Error \"uname -m\" does not return x86_64 or i686" >>swan_sh.log
-  fi
+    SWANEXEC=${D3D_HOME}/bin/swan_mpi.exe
 else
-  if [ ${MACHINE_TYPE} = 'x86_64' ]; then
-    SWANEXEC=${D3D_HOME}/bin/swan_4072ABCDE_del_l64_i11_omp.exe
-  elif [ ${MACHINE_TYPE} = 'i686' ]; then
-    SWANEXEC=${D3D_HOME}/bin/swan_4072ABCDE_del_l32_i11_omp.exe
-  else
-    echo "Error \"uname -m\" does not return x86_64 or i686" >>swan_sh.log
-  fi
+    SWANEXEC=${D3D_HOME}/bin/swan_omp.exe
   #
   # swan40.72AB and newer runs parallel using OpenMP, using the total number of cores on the machine by default
   # Two ways to force the number of parallel processes:
