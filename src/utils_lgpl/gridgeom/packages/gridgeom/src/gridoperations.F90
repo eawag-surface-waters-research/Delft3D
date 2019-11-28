@@ -2602,7 +2602,7 @@
    !-----------------------------------------------------------------!
    ! Library public functions
    !-----------------------------------------------------------------!
-   function make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, unMergedOneDmask) result(ierr)
+   function make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, oneDMask, inNet ) result(ierr)
 
    use m_cell_geometry, only: xz, yz
    use network_data
@@ -2615,19 +2615,14 @@
 
    !input 
    double precision, optional, intent(in) :: xplLinks(:), yplLinks(:), zplLinks(:) ! optional polygons to reduce the area where the 1D2Dlinks are generated
-   integer, optional, intent(in)          :: unMergedOneDmask(:)
+   integer, optional, intent(in)          :: oneDMask(:), inNet                    !< Masking array for 1d mesh points
    
    !locals
    integer                                :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML, LL
    integer                                :: i, ierr, k, kcell
    double precision                       :: XN, YN, XK2, YK2, WWU
-   integer                                :: insidePolygons, Lfound
-   integer, allocatable                   :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
-   
-   !ap unMergedOneDmask to merged
-   !if (present(unMergedOneDmask)) then
-   !   ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
-   !endif 
+   integer                                :: insidePolygons, Lfound  
+
    i = size(xk) ; deallocate(kc) ; allocate(kc(i))
    ierr = 0
    call savenet()
@@ -2652,12 +2647,12 @@
                endif   
             enddo   
          endif
-         !Account for mergedOneDmask if present. Assumption is that oneDmask contains 1/0 values
-         if (allocated(mergedOneDmask)) then
-            if (mergedOneDmask(k1).ne.1) then
+         !Account for oneDMask if present. Assumption is that oneDmask contains 1/0 values
+         if (present(oneDMask)) then
+            if (oneDMask(k1).ne.1) then
                 kc(k1) = 2
             endif
-            if (mergedOneDmask(k2).ne.1) then
+            if (oneDMask(k2).ne.1) then
                 kc(k2) = 2
             endif
          endif 
@@ -2687,6 +2682,15 @@
 !                                                                                         ! TODO: If oneDmask, calls comes from Delta Shell, remove when this information can be retrived from an extra argument  
 
       if (kc(k) == 1) then  
+     
+         ! Option for considering only 1d nodes inside 2d net (inNet flag)
+         if(present(inNet)) then
+            if(inNet .eq. 1) then
+               nc1 = 0
+               call incells(xk(k), yk(k), nc1)
+               if (nc1 .eq. 0) cycle
+            endif
+         endif
 
          IF (allocated(KC) ) then 
             if ( KC(K) == 1) THEN
@@ -3202,6 +3206,8 @@
    if (.not. allocated(xk)) then
       allocate( xk (1), yk (1), zk (1) , NOD (1) , KC (1) , NMK (1) , KN(3,1), LC(1), RNOD(1), RLIN(1))
       allocate(nod(1)%lin(1))
+      KMAX = 1
+      LMAX = 1
       NMK = 0
    endif
    if (.not. allocated(xk0)) then
@@ -3210,8 +3216,7 @@
       nmk0 = 0
    endif
 
-   KMAX = 1
-   LMAX = 1
+
    CALL INCREASENETW(KMAX, LMAX)
    
    end function ggeo_initialize
