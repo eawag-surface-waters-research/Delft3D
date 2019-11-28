@@ -2303,7 +2303,8 @@ module m_ec_provider
          character(len=*), optional, intent(in) :: varname        !< name of variabele (ignored if = ' ')
 
          integer                                                 :: ierror                !< return value of NetCDF function calls
-         integer                                                 :: idvar
+         integer                                                 :: idvar                 !< variable id of the forcing variable
+         integer                                                 :: varid                 !< dummy variable id of coordinate variable
          integer                                                 :: ndims                 !< number of dimensions within NetCDF or for the current variable
          integer                                                 :: idims                 !< helper variables
          integer                                                 :: ifgd, isgd            !< helper variables
@@ -2540,7 +2541,7 @@ module m_ec_provider
                coordids(idims) = fileReaderPtr%dim_varids(dimids(idims))
             enddo
 
-            if (instancePtr%coordsystem == EC_COORDS_CARTHESIAN) then 
+            if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
                if (nod_dimid>0) then  
                   grid_type = elmSetType_samples
                else
@@ -2611,32 +2612,23 @@ module m_ec_provider
                allocate(coord_names(ndims))
                coord_names = ''
                read(coord_name, *,iostat=istat) ( coord_names(j), j=1,ndims )
-               ierror = nf90_inq_varid(fileReaderPtr%fileHandle, trim(coord_names(1)), fgd_id)
-               if (ierror/=0) then
-                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename) &
-                                    //' coordinates variable '//trim(coord_names(2))//' (not found)')
-                  return
-               end if
-               if (ndims>1) then
-                  if (len_trim(coord_names(2))>0) then
-                     ierror = nf90_inq_varid(fileReaderPtr%fileHandle, trim(coord_names(2)), sgd_id)
-                     if (ierror/=0) then
-                        call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename) &
-                                          //' coordinates variable '//trim(coord_names(2))//' (not found)')
-                        return
-                     end if
+               do j=1,ndims 
+                  ierror = nf90_inq_varid(fileReaderPtr%fileHandle, trim(coord_names(1)), varid)
+                  if (ierror/=0) then
+                     call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename) &
+                                       //' coordinates variable '//trim(coord_names(2))//' referenced but not found')
+                     return
                   end if
-                  if (ndims>2) then
-                     if (len_trim(coord_names(3))>0) then
-                        ierror = nf90_inq_varid(fileReaderPtr%fileHandle, trim(coord_names(3)), tgd_id)
-                        if (ierror/=0) then
-                           call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename) &
-                                             //' coordinates variable '//trim(coord_names(3))//' (not found)')
-                           return
-                        end if
-                     end if
+                  if (strcmpi(fileReaderPtr%standard_names(varid),'projected_x_coordinate')) then
+                      fgd_id = varid
+                  else if (strcmpi(fileReaderPtr%standard_names(varid),'projected_y_coordinate')) then
+                      sgd_id = varid
+                  else if (strcmpi(fileReaderPtr%standard_names(varid),'longitude')) then
+                      fgd_id = varid
+                  else if (strcmpi(fileReaderPtr%standard_names(varid),'latitude')) then
+                      sgd_id = varid
                   end if
-               end if
+               end do
             end if    ! has non-empty coordinates attribute
 
             ! =========================================

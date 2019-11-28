@@ -396,7 +396,7 @@ module m_ec_converter
                select case (instancePtr%coordsystem)
                case (EC_COORDS_SFERIC)
                   jsferic = 1
-               case (EC_COORDS_CARTHESIAN)
+               case (EC_COORDS_CARTESIAN)
                   jsferic = 0
                end select
                call nearest_neighbour(n_points, targetElementSet%x, targetElementSet%y,  &
@@ -495,7 +495,7 @@ module m_ec_converter
                         !else
                         !    jsferic = 0
                         !endif
-                        jsferic = 0                             ! For now, EC-converter consistently regards all coordinates as carthesian
+                        jsferic = 0                             ! For now, EC-converter consistently regards all coordinates as cartesian
                         call build_kdtree(treeinst, n_points, targetElementSet%x, targetElementSet%y, ierr, jsferic, ec_undef_hp)
                         n_cols = sourceElementSet%n_cols
                         n_rows = sourceElementSet%n_rows

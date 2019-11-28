@@ -66,7 +66,7 @@ module m_ec_parameters
    integer, parameter :: elmSetType_polytim               = 10
    integer, parameter :: elmSetType_samples               = 11
    integer, parameter :: elmSetType_spheric_ortho         = 12! A spherical element set the lat, lon of which are one dimension (no cross-product array)
-   integer, parameter :: elmSetType_Cartesian_ortho       = 13! A carthesian element set the lat, lon of which are one dimension (no cross-product array)
+   integer, parameter :: elmSetType_Cartesian_ortho       = 13! A cartesian element set the lat, lon of which are one dimension (no cross-product array)
 
    !> Enumeration for tEcItem role
    integer, parameter :: itemType_undefined = 0
@@ -170,7 +170,7 @@ module m_ec_parameters
    integer, parameter :: EC_EOF                = 14 !< EOF reached/file ended prematurely.
 
    ! COORDINATE SYSTEM that applies to all elementsets in this instance
-   integer, parameter :: EC_COORDS_CARTHESIAN  = 1  !< Cartesian coordinates (x,y)
+   integer, parameter :: EC_COORDS_CARTESIAN   = 1  !< Cartesian coordinates (x,y)
    integer, parameter :: EC_COORDS_SFERIC      = 2  !< Sferic coordinates (Lon,Lat) WGS84
 
     !------------------------ BC-header related parameters ----------------------------------
