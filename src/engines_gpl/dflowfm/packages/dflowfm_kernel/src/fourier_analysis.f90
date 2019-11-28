@@ -162,7 +162,7 @@ module m_fourier_analysis
        if (istat == 0) call reallocp (gdfourier%ftmsto ,nofou, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%ftmstr ,nofou, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%foumask,nofou, stat = istat, keepExisting = .false.)
-       if (istat == 0) call reallocp (gdfourier%idvar, [3, gdfourier%nofouvar], stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%idvar, [4, gdfourier%nofouvar], stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%fouref, [nofou, 2], stat = istat, keepExisting = .false.)
        !
        if (istat == 0) call reallocp (gdfourier%fknfac , nofou, stat = istat, keepExisting = .false.)
