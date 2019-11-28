@@ -410,7 +410,7 @@
       
       call zoekns(ctemperature,nocons,coname_sub,20,icon)
       isftem = 0
-      if ( jatem.eq.1 ) then
+      if ( jatem.ge.1 ) then
          if (icon>0) then
             nosfun = nosfun+1
             isftem = nosfun
