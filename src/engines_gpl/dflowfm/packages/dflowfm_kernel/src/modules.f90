@@ -2399,6 +2399,8 @@ end subroutine default_turbulence
 
  integer                           :: icorio            !< Coriolis weigthing
  
+ integer                           :: newcorio = 0      !< 0=up to 27-11-2019 , 1 = after 
+ 
  integer                           :: jacorioconstant=0 !< Coriolis constant in sferic models anyway if set to 1
  
  double precision                  :: Corioadamsbashfordfac = 0d0  !< Coriolis Adams Bashford , 0d0 = explicit, 0.5 = AB 

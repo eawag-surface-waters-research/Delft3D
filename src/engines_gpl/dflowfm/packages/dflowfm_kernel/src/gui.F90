@@ -17630,7 +17630,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 21, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 22, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -17657,12 +17657,13 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(13) = 'Anti creep                          ( ) ' ; it(2*13) = 2
    OPTION(14) = '                                    ( ) ' ; it(2*14) = 6
    OPTION(15) = 'irov 0,1,2,3                        ( ) ' ; it(2*15) = 2
-   OPTION(16) = 'icorio, 0, 4, 5, 6                  ( ) ' ; it(2*16) = 2
+   OPTION(16) = 'icorio, 0, 5=org def., even=2D weigh( ) ' ; it(2*16) = 2
    OPTION(17) = 'jatidep tidal potential forcing 0/1 ( ) ' ; it(2*17) = 2
    OPTION(18) = 'EpsCG, CG solver stop criterion     ( ) ' ; it(2*18) = 6
    OPTION(19) = 'Epshu, flooding criterion           (m) ' ; it(2*19) = 6
    OPTION(20) = 'JaExplicitsinks                     ( ) ' ; it(2*20) = 2
    OPTION(21) = 'Corioadamsbashfordfac               ( ) ' ; it(2*21) = 6
+   OPTION(22) = 'Newcorio                            ( ) ' ; it(2*22) = 2
  
  
 !   123456789012345678901234567890123456789012345678901234567890
@@ -17683,13 +17684,14 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM (13) = '0=No, 1=Yes anticreep  only in sigma layers                 '
    HELPM (14) = 'default 1d-8                                                '
    HELPM (15) = '0=free slip, 1 =partial slip, 2=no slip, 3 =hydraul. smooth '
-   HELPM (16) = '0=no coriolois, 4=unweighted v, 5=hu/hs, 6 =hu/hus          '
+   HELPM (16) = '0=no 5=default, 3,4 no weights, 5-10 Olga, 25-30 Ham        '
    HELPM (17) = '0=no tidal potential, 1=yes tidal potential                 '
    HELPM (18) = 'Guus, if max(abs(r/rk) < epscg , or Saad L2norm < epscg     '
    HELPM (19) = 'hu > epshu: link flows                                      '
    HELPM (20) = '1=expl, 0 = impl                                            '
-   HELPM (21) = '>0 = Adams Bashford, standard= 0.5                          '
-  
+   HELPM (21) = '>0 = Adams Bashford, standard= 0.5, only for Newcorio=1     '
+   HELPM (22) = '0=prior to 27-11-2019, 1=no normal forcing on open bnds, 12#'
+   
    
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
@@ -17779,6 +17781,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFormPutDouble  (2*19 ,epshu, '(e10.5)' )                                             
    CALL IFORMPUTinteger (2*20 ,jaexplicitsinks  )     
    CALL IFormputDouble  (2*21 ,Corioadamsbashfordfac,'(e10.5)')        
+   CALL IFormputinteger (2*22 ,Newcorio)        
 
 
    !  Display the form with numeric fields left justified

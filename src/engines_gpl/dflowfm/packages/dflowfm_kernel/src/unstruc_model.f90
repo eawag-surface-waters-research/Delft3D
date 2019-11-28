@@ -916,6 +916,7 @@ subroutine readMDUFile(filename, istat)
     setHorizontalBobsFor1d2d = .false.
     call prop_get_logical(md_ptr, 'numerics', 'setHorizontalBobsFor1d2d', setHorizontalBobsFor1d2d)
     call prop_get_integer(md_ptr, 'numerics', 'Icoriolistype'   , icorio)
+    call prop_get_integer(md_ptr, 'numerics', 'Newcorio'        , newcorio)
     call prop_get_double (md_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac)
     call prop_get_integer(md_ptr, 'numerics', 'Limtyphu'        , limtyphu)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypmom'       , limtypmom)
@@ -2430,9 +2431,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     call prop_set(prop_ptr, 'numerics', 'AdvecType',    iadvec,     'Advection type (0: none, 1: Wenneker, 2: Wenneker q(uio-u), 3: Perot q(uio-u), 4: Perot q(ui-u), 5: Perot q(ui-u) without itself)')
     call prop_set(prop_ptr, 'numerics', 'TimeStepType', itstep,     'Time step handling (0: only transport, 1: transport + velocity update, 2: full implicit step-reduce, 3: step-Jacobi, 4: explicit)')
-    call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 1=yes, if jsferic then spatially varying, if icoriolistype==6 then constant (anglat)')
+    call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 5=default, 3,4 no weights, 5-10 Kleptsova hu/hs, 25-30 Ham hs/hu, odd: 2D hs/hu, even: hsk/huk ')
+    call prop_set(prop_ptr, 'numerics', 'Newcorio',      newcorio,  '0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants )')
     if (Corioadamsbashfordfac .ne. 0) then 
-    call prop_set(prop_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac,    '0=No, 0.5d0=AdamsBashford)')
+    call prop_set(prop_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac,    '0=No, 0.5d0=AdamsBashford, only for Newcorio=1)')
     endif
 
 !   call prop_set_integer(prop_ptr, 'numerics', 'numoverlap', numoverlap, ' ')
