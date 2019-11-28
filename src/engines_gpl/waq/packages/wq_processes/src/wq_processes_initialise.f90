@@ -768,7 +768,7 @@
 
       nflx = 0
       totfluxsys = 0
-      do iproc = 1 , nproc
+      do iproc = 1 , procesdef%cursize
          proc => procesdef%procesprops(iproc)
          if ( proc%active ) then
             do istochi = 1, proc%no_fluxstochi
