@@ -486,7 +486,7 @@
       
       call zoekns(cirradiation,nocons,coname_sub,20,icon)
       isfradsurf = 0
-      if ( jasol.eq.1 ) then
+      if ( jasol.eq.1 .and. jatem.gt.1 ) then
          if (icon>0) then
             nosfun = nosfun+1
             isfradsurf = nosfun
@@ -600,6 +600,7 @@
          rank = my_rank
       endif
 
+      call mess(LEVEL_INFO, 'Initialising water quality processes.')
       call wq_processes_initialise ( lunlsp, proc_def_file, bloom_file, statistics_file, statprocesdef, outputs, &
                                      nomult, imultp, constants, rank, noinfo, nowarn, ierr)
       call mess(LEVEL_INFO, 'Number of warnings during initialisation of the processes : ', nowarn)
@@ -677,7 +678,7 @@
           ioffbl = 0
       endif
 
-      call realloc(waqoutputs, [noout, noseg], keepExisting=.false., fill = 0.0d0)
+      call realloc(waqoutputs, [noout, noseg], keepExisting=.false., fill = -999.0d0)
       call realloc(outvar,noout,keepExisting=.false.,fill=0)
       do j=1,noout
           call zoekns(outputs%names(j),novar,varnam,20,ivar)
