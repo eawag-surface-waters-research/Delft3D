@@ -1261,8 +1261,7 @@
          ipoifetchd = arrpoi(iisfun) + (isffetchd-1)*noseg
          do kk=1,Ndxi
             call getkbotktop(kk,kb,kt)
-            ! apparently wind is available at edges only, so just take the 1st edge
-            call getfetch(k,U10,FetchL,FetchD)
+            call getfetch(kk,U10,FetchL,FetchD)
             pmsa(ipoifetchl + kb-kbx : ipoifetchl + kt-kbx) = FetchL
             pmsa(ipoifetchd + kb-kbx : ipoifetchd + kt-kbx) = FetchD
          end do
