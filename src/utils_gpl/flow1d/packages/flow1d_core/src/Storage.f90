@@ -104,6 +104,7 @@ module m_Storage
       integer                                               :: growsBy = 2000
       integer                                               :: Count= 0
       integer                                               :: Count_xy = 0 ! Number of storage nodes that are defined by x-, y-coordinates
+      integer                                               :: Count_closed = 0 ! Number of storage nodes with storageType "closed"
       type(t_storage), pointer, dimension(:)                :: stor
       type(t_hashlist)                                      :: hashlist
    end type t_storageSet

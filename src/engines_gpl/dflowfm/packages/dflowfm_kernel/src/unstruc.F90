@@ -515,7 +515,8 @@ use dfm_signals
 use m_partitioninfo, only: jampi, sdmn, my_rank
 use m_integralstats
 use m_fourier_analysis
-use m_oned_functions, only: updateFreeboard, updateTimeWetOnGround
+use m_oned_functions, only: updateFreeboard, updateTimeWetOnGround, updateDepthOnGround, updateVolOnGround
+use unstruc_channel_flow, only : network
 implicit none
 integer, intent(out) :: iresult
 character(len=255)   :: filename_fou_out
@@ -549,8 +550,16 @@ character(len=255)   :: filename_fou_out
 
  ! for 1D only
  if (ndxi-ndx2d > 0) then
-    call updateFreeboard()
-    if (jamapTimeWetOnGround > 0) then
+    if (jamapFreeboard > 0) then
+       call updateFreeboard(network)
+    end if
+    if (jamapDepthOnGround > 0 .or. jamapTimeWetOnGround > 0) then
+       call updateDepthOnGround(network)
+    end if
+    if (jamapVolOnGround > 0) then
+       call updateVolOnGround(network)
+    end if
+    if (jamapTimeWetOnGround > 0) then ! need to call updateDepthOnGround before 
        call updateTimeWetOnGround(dts)
     end if
  end if
@@ -14551,7 +14560,7 @@ else if (nodval == 27) then
  use m_alloc
  use unstruc_channel_flow, only: network
  use m_1d_structures, only: initialize_structures_actual_params
- use m_oned_functions, only: updateFreeboard
+ use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround
  implicit none
 
  ! locals
@@ -16072,7 +16081,16 @@ endif
 
  ! for 1D only
  if (ndxi-ndx2d > 0) then
-    call updateFreeboard()
+    if (jamapFreeboard > 0) then
+       call updateFreeboard(network)
+    end if
+    if (jamapDepthOnGround > 0  .or. jamapTimeWetOnGround > 0) then
+       call updateDepthOnGround(network)
+    end if
+    if (jamapVolOnGround > 0) then 
+       call set_max_volume_for_1d_nodes() ! set maximal volume
+       call updateVolOnGround(network)
+    end if
  end if
 
  iresult = DFM_NOERR
@@ -22470,6 +22488,13 @@ end subroutine unc_write_shp
     allocate(groundLevel(ndxi-ndx2d), stat = ierr)
     call aerr('groundLevel(ndxi-ndx2d)', ierr, ndxi-ndx2d)
     groundLevel = dmiss
+
+    if (allocated(volMax)) then
+       deallocate(volMax)
+    end if
+    allocate(volMax(ndxi-ndx2d), stat = ierr)
+    call aerr('volMax(ndxi-ndx2d)', ierr, ndxi-ndx2d)
+    volMax = dmiss
  end if
  
  if ( allocated (kfs) ) deallocate(kfs)
@@ -23186,9 +23211,9 @@ end subroutine unc_write_shp
  endif
 
  call set_1d_indices_in_network()
- ! set ground level for 1d nodes
- if (network%loaded) then
-    call set_ground_level_for_1d_nodes(network)
+ 
+ if (network%loaded .and. ndxi-ndx2d > 0 .and. (jamapTimeWetOnGround > 0 .or. jamapFreeboard > 0 .or. jamapDepthOnGround > 0 .or. jamapVolOnGround > 0)) then
+    call set_ground_level_for_1d_nodes(network) ! set ground level for 1d nodes
  end if
 
  call setbobs()
@@ -25736,6 +25761,20 @@ end do
     allocate(freeboard(ndxi), stat = ierr)
     call aerr('freeboard(ndxi)', ierr, ndxi)
     freeboard = dmiss
+
+    if (allocated(hsOnGround)) then
+       deallocate(hsOnGround)
+    end if
+    allocate(hsOnGround(ndxi), stat = ierr)
+    call aerr('hsOnGround(ndxi)', ierr, ndxi)
+    hsOnGround = dmiss
+
+    if (allocated(volOnGround)) then
+       deallocate(volOnGround)
+    end if
+    allocate(volOnGround(ndxi), stat = ierr)
+    call aerr('volOnGround(ndxi)', ierr, ndxi)
+    volOnGround = dmiss
  end if
  
  if (kmx > 0 .and. (ja_timestep_auto == 3 .or. ja_timestep_auto == 4) ) then

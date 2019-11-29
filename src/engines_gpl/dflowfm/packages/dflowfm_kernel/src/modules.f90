@@ -2753,6 +2753,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamapdtcell               !< output time steps per cell based on CFL
  integer                           :: jamapTimeWetOnGround      !< output to map file the cumulative time when water is above ground level, 0: no, 1: yes
  integer                           :: jamapFreeboard            !< output freeboard to map file, 0: no, 1: yes
+ integer                           :: jamapDepthOnGround        !< output waterdepth above ground, 0: no, 1: yes
+ integer                           :: jamapVolOnGround          !< output volume above ground, 0: no, 1: yes
  integer                           :: jatekcd                   !< tek output with wind cd coefficients, 0=no (default), 1=yes
  integer                           :: jafullgridoutput          !< 0:compact, 1:full time-varying grid data
  integer                           :: jaeulervel                !< 0:GLM, 1:Euler velocities
@@ -3145,6 +3147,8 @@ subroutine default_flowparameters()
     jamapdtcell = 0
     jamapTimeWetOnGround = 0
     jamapFreeboard = 0
+    jamapDepthOnGround = 0
+    jamapVolOnGround = 0
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     japartdomain = 1
@@ -3415,6 +3419,8 @@ end module m_vegetation
 
 ! node related, dim = ndxi
  double precision, allocatable         :: freeboard(:)  !< [m] freeboard at cell center
+ double precision, allocatable         :: hsOnGround(:) !< [m] waterdepth above ground level
+ double precision, allocatable         :: volOnGround(:)!< [m3] volume above ground level
 
 !    Secondary Flow
  double precision, allocatable         :: ducxdx   (:)   !< cell center gradient of x-velocity in x-dir,    (1/s)
@@ -3948,7 +3954,7 @@ end module m_profiles
  double precision, allocatable     :: aifu(:)        !< bed skewness at u point (Lnx)
  double precision, allocatable     :: bz(:)          !< averaged bed level at cell center (Ndx)
  double precision, allocatable     :: groundLevel(:) !< ground level of node (ndxi-ndx2d), only for 1D
-
+ double precision, allocatable     :: volMax(:)      !< maximal volume of node, under ground level (ndxi-ndx2d), only for 1D
  ! link (u) related : dim = lnx
  ! Flow link numbering:
  ! 1:lnx1d, lnx1d+1:lnxi, lnxi+1:lnx1Db, lnx1Db+1:lnx

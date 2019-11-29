@@ -1594,6 +1594,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_DTcell',jamapdtcell, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_time_water_on_ground', jamapTimeWetOnGround, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_freeboard', jamapFreeboard, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_waterdepth_above_ground', jamapDepthOnGround, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_volume_above_ground', jamapVolOnGround, success)
     call prop_get_integer(md_ptr, 'output', 'Writek_CdWind', jatekcd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrirst_bnd', jarstbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Writepart_domain', japartdomain, success)
@@ -3276,6 +3278,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'output', 'Wrimap_freeboard', jamapFreeboard, 'Write freeboard to map file (1: yes, 0: no)')
     end if
     
+    if (writeall .or. jamapDepthOnGround /= 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_waterdepth_above_ground', jamapDepthOnGround, 'Write waterdepth that is above ground to map file (1: yes, 0: no)')
+    endif
+    
+    if (writeall .or. jamapVolOnGround /= 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_volume_above_ground', jamapVolOnGround, 'Write volume that is above ground to map file (1: yes, 0: no)')
+    endif
 
     if (jatidep > 0 .and. (writeall .or. jamaptidep /= 1)) then
        call prop_set(prop_ptr, 'output', 'Wrimap_tidal_potential', jamaptidep, 'Write tidal potential to map file (1: yes, 0: no)')

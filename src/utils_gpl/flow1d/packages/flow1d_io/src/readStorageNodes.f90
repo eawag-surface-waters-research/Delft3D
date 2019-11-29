@@ -315,6 +315,9 @@ module m_readStorageNodes
             call setTable(pSto%storageArea, interpol, storageLevels, storageAreas, numLevels)
             if (.not. useTable1) then
                pSto%storageType = storageType
+               if (storageType == nt_Closed) then
+                  network%storS%Count_closed = network%storS%Count_closed + 1
+               end if
                if (useStreetStorage) then
                   call setTable(pSto%streetArea, interpol, streetLevel, streetStorageArea, numLevels)
                end if

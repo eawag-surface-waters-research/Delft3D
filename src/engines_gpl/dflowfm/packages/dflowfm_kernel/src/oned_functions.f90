@@ -31,7 +31,7 @@
 ! $HeadURL$
 
 module m_oned_functions
-
+   use m_missing, only: dmiss
    implicit none
    private
 
@@ -43,8 +43,11 @@ module m_oned_functions
    public computePump_all_links
    public convert_cross_to_prof
    public set_ground_level_for_1d_nodes
+   public set_max_volume_for_1d_nodes
    public updateFreeboard
    public updateTimeWetOnGround
+   public updateDepthOnGround
+   public updateVolOnGround
 
    type, public :: t_gridp2cs
       integer :: num_cross_sections
@@ -763,13 +766,13 @@ module m_oned_functions
    !> Set ground level for 1d nodes.
    !! Ground level should not be confused with bed level.
    !! It is defined as:
-   !! * street level for storage nodes that have street storage.
-   !! * the highest nearby cross section level ("embankment") for other nodes.
+   !! * street level for storage nodes that have street storage (storageType is reservior or closed),
+   !! * the highest nearby cross section level ("embankment") for other nodes,
+   !! * dmiss, i.e. not applicable, if no cross section is defined at the node.
    subroutine set_ground_level_for_1d_nodes(network)
-   use m_flowgeom
+   use m_flowgeom, only: groundLevel, ndxi, ndx2d
    use m_Storage
    use m_CrossSections
-   use m_missing
    use m_network
    implicit none
    type(t_network), intent(inout), target :: network
@@ -779,65 +782,245 @@ module m_oned_functions
 
    groundlevel(:) = dmiss
 
-   if (ndxi-ndx2d>0) then
-      ! set for storage nodes that have prescribed street level
-      do i = 1, network%storS%Count
-         pSto => network%storS%stor(i)
-         if (pSto%useStreetStorage .and. (.not. pSto%useTable)) then
-            groundLevel(pSto%gridPoint) = pSto%streetArea%x(1)
-         end if
-      end do
-      ! set for other nodes, the ground level equals to the highest cross section "embankment" value
-      do i = 1, ndxi-ndx2d
-         if (groundLevel(i) == dmiss) then
-            adm => network%adm
-            cc1 = adm%gpnt2cross(i)%c1
-            cc2 = adm%gpnt2cross(i)%c2
-            if (cc1 > 0 .and. cc2 > 0) then
-               groundLevel(i) = getHighest1dLevel(network%crs%cross(cc1), network%crs%cross(cc2), adm%gpnt2cross(i)%f)
-            else ! If there is no cross section, then set ground level equal to bed level
-               groundLevel(i) = bl(ndx2d+i)
-            end if
-         end if
-      end do
-   else
-      return
-   end if
+   ! set for all 1D nodes, the ground level equals to the highest cross section "embankment" value
+   do i = 1, ndxi-ndx2d
+      adm => network%adm
+      cc1 = adm%gpnt2cross(i)%c1
+      cc2 = adm%gpnt2cross(i)%c2
+      if (cc1 > 0 .and. cc2 > 0) then ! if there are defined cross sections
+         groundLevel(i) = getHighest1dLevel(network%crs%cross(cc1), network%crs%cross(cc2), adm%gpnt2cross(i)%f)
+      end if
+   end do
+
+   ! set for storage nodes that have prescribed street level, i.e. storageType is reservior and closed
+   do i = 1, network%storS%Count
+      pSto => network%storS%stor(i)
+      if (pSto%useStreetStorage .and. (.not. pSto%useTable)) then
+         groundLevel(pSto%gridPoint) = pSto%streetArea%x(1)
+      end if
+   end do
+
    end subroutine set_ground_level_for_1d_nodes
+   
+   !> Set maximal volume for 1d nodes
+   subroutine set_max_volume_for_1d_nodes()
+   use m_flowgeom, only: groundLevel, volMax, ndx, ndxi, ndx2d
+   use m_flow,     only: s1, vol1, a1, vol1_f, a1m
+   implicit none
+   double precision, allocatable :: s1_tmp(:), vol1_tmp(:), a1_tmp(:), vol1_ftmp(:), a1m_tmp(:)
+   integer                       :: ndx1d
+   
+   ! 1. copy curernt s1, vol1, vol1_f, a1 and a1m to a temporary array
+   if (allocated(s1_tmp)) then
+      deallocate(s1_tmp)
+   end if
+   allocate(s1_tmp(ndx))
+   s1_tmp = s1
+   
+   if (allocated(vol1_tmp)) then
+      deallocate(vol1_tmp)
+   end if
+   allocate(vol1_tmp(ndx))
+   vol1_tmp = vol1
+   
+   if (allocated(vol1_ftmp)) then
+      deallocate(vol1_ftmp)
+   end if
+   allocate(vol1_ftmp(ndx))
+   vol1_ftmp = vol1_f
+   
+   if (allocated(a1_tmp)) then
+      deallocate(a1_tmp)
+   end if
+   allocate(a1_tmp(ndx))
+   a1_tmp = a1
+   
+   if (allocated(a1m_tmp)) then
+     deallocate(a1m_tmp)
+   end if
+   allocate(a1m_tmp(ndx))
+   a1m_tmp = a1
+
+   ! 2. set s1 to be the ground level
+   ndx1d = ndxi-ndx2d
+   s1(ndx2d+1:ndxi) = groundLevel(1:ndx1d)
+   vol1   = 0d0
+   vol1_f = 0d0
+   a1     = 0d0
+   a1m    = 0d0
+   
+
+   ! 3. compute the maximal volume
+   call vol12d(0)
+   volMax(1:ndx1d) = vol1(ndx2d+1:ndxi)
+
+   ! 4. set s1, vol1, vol1_f, a1, a1m back
+   s1 = s1_tmp
+   vol1 = vol1_tmp
+   vol1_f = vol1_ftmp
+   a1 = a1_tmp
+   a1m = a1m_tmp
+   
+   if (allocated(s1_tmp))   deallocate(s1_tmp)
+   if (allocated(vol1_tmp)) deallocate(vol1_tmp)
+   if (allocated(a1_tmp))   deallocate(a1_tmp)
+   if (allocated(vol1_ftmp))deallocate(vol1_ftmp)
+   if (allocated(a1m_tmp))  deallocate(a1m_tmp)
+   end subroutine set_max_volume_for_1d_nodes
 
 
    !> Update freeboard for each 1d node.
    !! Freeboard is the vertical distance between the ground level, i.e., not bed level, and the water surface.
-   subroutine updateFreeboard()
+   !! It can be negative value if the water level is above the ground level
+   !! It has maximal value 0d0 if it has storageType "closed", or if the relevant cross sections are closed.
+   subroutine updateFreeboard(network)
    use m_flow, only: freeboard, s1
    use m_flowgeom, only: ndxi, ndx2d, groundLevel
+   use m_network
    implicit none
-   
-   integer :: i, ii
+   type(t_network), intent(inout), target :: network
+   type(t_administration_1d), pointer     :: adm
+   integer :: i, ii, cc1, cc2
+
    do i = ndx2d+1, ndxi
       ii = i- ndx2d
-      freeBoard(i) = groundLevel(ii) - s1(i)
+      if (groundLevel(ii) .ne. dmiss) then ! if ground level is applicable
+         adm => network%adm
+         cc1 = adm%gpnt2cross(ii)%c1
+         cc2 = adm%gpnt2cross(ii)%c2
+         if (network%crs%cross(cc1)%closed .and. network%crs%cross(cc2)%closed) then
+            freeboard(i) = max(0d0, groundLevel(ii) - s1(i))
+         else
+            freeboard(i) = groundLevel(ii) - s1(i)
+         end if
+      end if
    end do
    
+   ! if the storage node has storageType "closed", then freeboard's maximal value is 0d0
+   if (network%storS%Count_closed > 0) then
+      call updateValueForClosedNodes(ndxi, freeboard, 0d0, network, 1)
+   end if
+
    end subroutine updateFreeboard
 
 
    !> Compute the cumulative time when water is above ground level.
+   !! hsOnGround has to be updated before calling this subroutine
    subroutine updateTimeWetOnGround(dts)
    use m_flowparameters, only: epshs
    use m_flowtimes, only: time_wetground
-   use m_flow, only: freeboard
+   use m_flow, only: hsOnGround
    use m_flowgeom,only: ndxi, ndx2d
    implicit none
    double precision, intent(in) :: dts !< computational time step
    integer                      :: i
    
    do i = ndx2d+1, ndxi
-      if (-1*freeboard(i) >= epshs) then
+      if (hsOnGround(i) .ne. dmiss .and. hsOnGround(i) >= epshs) then
          time_wetground(i) = time_wetground(i) + dts
       end if
    end do
-   
+
    end subroutine updateTimeWetOnGround
+
+
+   !> Update waterdepth above ground level for each 1d node.
+   !! This is the vertical distance between the water surface and the ground level, i.e. waterLevel minus groundLevel.
+   !! It has minimal value 0d0
+   !! It equals to dmiss if the node has storageType closed, or if the relavent cross sections are closed, or no cross section is defined.
+   subroutine updateDepthOnGround(network)
+   use m_flow, only: hsOnGround, s1
+   use m_network
+   use m_flowgeom, only: ndxi, ndx2d, groundLevel
+   implicit none
+   type(t_network), intent(inout), target :: network
+   type(t_administration_1d), pointer     :: adm
+   integer                                :: i, ii, cc1, cc2
+   
+   hsOnGround = dmiss
+   do i = ndx2d+1, ndxi
+      ii = i-ndx2d
+      adm => network%adm
+      cc1 = adm%gpnt2cross(ii)%c1
+      cc2 = adm%gpnt2cross(ii)%c2
+      if (network%crs%cross(cc1)%closed .and. network%crs%cross(cc2)%closed) then
+         cycle
+      else
+         if (groundLevel(ii) .ne. dmiss) then ! if groudLevel is applicable
+            hsOnGround(i) = max(0d0, s1(i) - groundLevel(ii))
+         end if
+      end if
+   end do
+
+   ! if the storage node has storageType "closed", then hsOnGround equals to dmiss
+   if (network%storS%Count_closed > 0) then
+      call updateValueForClosedNodes(ndxi, hsOnGround, dmiss, network, 0)
+   end if
+   
+   end subroutine updateDepthOnGround
+
+
+   !> Update volume above ground level for each 1d node.
+   !! It has minimal value 0d0
+   !! It equals to dmiss if the node has storageType closed, or if the relavent cross sections are closed, or no cross section is defined.
+   subroutine updateVolOnGround(network)
+   use m_flow,     only: vol1, volOnGround
+   use m_flowgeom, only: volMax, ndxi, ndx2d, groundLevel
+   use m_network
+   implicit none
+   type(t_network), intent(inout), target :: network
+   type(t_administration_1d), pointer     :: adm
+   integer:: i, ii, cc1, cc2
+   
+   volOnGround = dmiss
+   do i = ndx2d+1, ndxi
+      ii = i-ndx2d
+      adm => network%adm
+      cc1 = adm%gpnt2cross(ii)%c1
+      cc2 = adm%gpnt2cross(ii)%c2
+      if (network%crs%cross(cc1)%closed .and. network%crs%cross(cc2)%closed) then
+         cycle
+      else
+         if (groundLevel(ii) .ne. dmiss) then ! if ground level is applicable
+            volOnGround(i) = max(0d0, vol1(i) - volMax(ii))
+         end if
+      end if
+   end do
+   
+   ! if the storage node has storageType "closed", then volOnGround equals to dmiss
+   if (network%storS%Count_closed > 0) then
+      call updateValueForClosedNodes(ndxi, volOnGround, dmiss, network, 0)
+   end if
+
+   end subroutine updateVolOnGround
+
+
+   !< Update the given array on storage nodes of sotrageType "closed", given the value that is to be set on these nodes 
+   !! If updates freeboard array, then set as the maximal value among the given value and the existing value
+   subroutine updateValueForClosedNodes(n, array, value, network, jaFreeboard)
+   use m_network
+   use m_storage
+   implicit none
+   integer,                        intent(in   ) :: n
+   double precision, dimension(n), intent(inout) :: array
+   double precision,               intent(in   ) :: value
+   type(t_network),                intent(inout) :: network
+   integer,                        intent(in   ) :: jaFreeboard
+   type(t_storage), pointer                      :: pSto
+   integer                                       :: i, ii
+   
+   do i = 1, network%storS%Count
+      pSto => network%storS%stor(i)
+      if (pSto%useStreetStorage .and. (.not. pSto%useTable) .and. pSto%storageType == nt_Closed) then
+         ii = pSto%gridPoint
+         if (jaFreeboard == 0) then
+            array(ii) = value
+         else
+            array(ii) = max(value, array(ii))
+         end if
+      end if
+   end do
+
+   end subroutine updateValueForClosedNodes
 
 end module m_oned_functions

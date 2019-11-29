@@ -380,6 +380,8 @@ type t_unc_mapids
    ! for urban, only for 1d nodes now
    integer :: id_timewetground(4) = -1 !< Variable ID for cumulative time when water is above ground level
    integer :: id_freeboard(4)     = -1 !< Variable ID for freeboard
+   integer :: id_hs_on_ground(4)  = -1 !< Variable ID for waterdepth when water is above ground level
+   integer :: id_vol_on_ground(4) = -1 !< Variable ID for volume when water is above ground level
    !
    ! Other
    !
@@ -4622,6 +4624,12 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          if (jamapFreeboard > 0) then ! freeboard
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_freeboard, nf90_double, UNC_LOC_S, 'freeboard', '', 'Freeboard', 'm', which_meshdim = 1)
          end if
+         if (jamapDepthOnGround > 0) then ! waterdpth that is above ground level
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs_on_ground, nf90_double, UNC_LOC_S, 'waterdepth_above_ground', '', 'Waterdepth above ground level', 'm', which_meshdim = 1)
+         end if
+         if (jamapVolOnGround > 0) then ! volume that is above ground level
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, nf90_double, UNC_LOC_S, 'volume_above_ground', '', 'Volume above ground level', 'm', which_meshdim = 1)
+         end if
       end if
       ierr = nf90_enddef(mapids%ncid)
       
@@ -5847,6 +5855,12 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       end if
       if (jamapFreeboard > 0) then ! freeboard
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_freeboard, UNC_LOC_S, freeboard) 
+      end if
+      if (jamapDepthOnGround > 0) then ! waterdepth that is above ground level
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs_on_ground, UNC_LOC_S, hsOnGround)
+      end if
+      if (jamapVolOnGround > 0) then ! volume that is above ground level
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, UNC_LOC_S, volOnGround)
       end if
    end if
 end subroutine unc_write_map_filepointer_ugrid
