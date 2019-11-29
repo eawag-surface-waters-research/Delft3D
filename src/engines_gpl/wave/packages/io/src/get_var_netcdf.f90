@@ -244,41 +244,64 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
          !
          if (veltyp == FVT_WAVE_DEPENDENT) then
             ! Retrieve wavelength from comfile
-            ierror = nf90_inq_varid(idfile, 'wlen', idvar_rlabda); call nc_check_err(ierror, "inq_varid wlen", filename)
-            ierror = nf90_get_var(idfile, idvar_rlabda  , rlabda, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var wlen", filename)
-            !
-            ! Calculate wavenumber k
-            do nm=1,mmax
-               vararr(nm,1) = 0.0
-               if (rlabda(nm) > 0.1) then
-                  waveku = 2.0 * pi / rlabda(nm)
-               else
-                  waveku = 99.0
-               endif
-               wghtsum = 0.0
-               do i = 1, kmax_
-                  dz = flzw(i+1,nm)-flzw(i,nm)
-                  !
-                  ! z is 0 at bed and depth at surface
-                  ! weight velocities according to Dingemans(1997)
-                  !
-                  cosharg = 2.0*waveku*(flzw(i,nm)-flzw(1,nm) + 0.5*dz) ! cell centre velocities in layers
-                  if (cosharg > 50.0) then
-                     !
-                     ! very "deep" water
-                     ! use surface velocity
-                     !
-                     vararr(nm,1) = vararr3d(kmax_,nm)
-                     wghtsum = 1.0
-                     exit
-                  endif
-                  wght = cosh(cosharg)
-                  wght = wght * dz
-                  vararr(nm,1) = vararr(nm,1) + vararr3d(i,nm)*wght
-                  wghtsum = wghtsum + wght
+            ierror = nf90_inq_varid(idfile, 'wlen', idvar_rlabda)
+            if (ierror /= nf90_noerr .and. itime==1) then
+               write(*,'(2a)') '*** WARNING: Unable to read wavelength field from file ',trim(filename)
+               write(*,'(a)')  '             This is normal at first WAVE calculation'
+               write(*,'(a)')  '             Using depth-averaged FLOW velocity in this iteration'
+               do nm=1,mmax
+                  depth = flzw(kmax_,nm) - flzw(1,nm)
+                  vararr(nm,1) = 0d0
+                  do i=1,kmax_
+                     vararr(nm,1) = vararr(nm,1) + (flzw(i+1,nm)-flzw(i,nm))/depth*vararr3d(i,nm)
+                  enddo   
                enddo
-               vararr(nm,1) = vararr(nm,1) / max(eps, wghtsum)
-            enddo
+            endif
+            !
+            ! No wavelength on comfile after first iteration. Velocity field set to 0d0. As WAVE writes wlen, this should never happen.
+            if (ierror /= nf90_noerr .and. itime/=1) then
+               write(*,'(a)') '*** WARNING: Unable to read wavelength field from file. Velocity field set to 0d0. This should never happen.'
+               call nc_check_err(ierror, "inq_varid wlen", filename)
+               vararr = 0d0
+            endif
+            !
+            ! No issues, just do what was asked
+            if (ierror == nf90_noerr) then
+               ierror = nf90_get_var(idfile, idvar_rlabda  , rlabda, start=(/1,itime/), count=(/mmax/)); call nc_check_err(ierror, "get_var wlen", filename)
+               !
+               ! Calculate wavenumber k
+               do nm=1,mmax
+                  vararr(nm,1) = 0.0
+                  if (rlabda(nm) > 0.1) then
+                     waveku = 2.0 * pi / rlabda(nm)
+                  else
+                     waveku = 99.0
+                  endif
+                  wghtsum = 0.0
+                  do i = 1, kmax_
+                     dz = flzw(i+1,nm)-flzw(i,nm)
+                     !
+                     ! z is 0 at bed and depth at surface
+                     ! weight velocities according to Dingemans(1997)
+                     !
+                     cosharg = 2.0*waveku*(flzw(i,nm)-flzw(1,nm) + 0.5*dz) ! cell centre velocities in layers
+                     if (cosharg > 50.0) then
+                        !
+                        ! very "deep" water
+                        ! use surface velocity
+                        !
+                        vararr(nm,1) = vararr3d(kmax_,nm)
+                        wghtsum = 1.0
+                        exit
+                     endif
+                     wght = cosh(cosharg)
+                     wght = wght * dz
+                     vararr(nm,1) = vararr(nm,1) + vararr3d(i,nm)*wght
+                     wghtsum = wghtsum + wght
+                  enddo
+                  vararr(nm,1) = vararr(nm,1) / max(eps, wghtsum)
+               enddo
+            endif
          endif
       endif
    endif
