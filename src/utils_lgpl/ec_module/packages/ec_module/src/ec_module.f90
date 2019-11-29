@@ -261,6 +261,10 @@ module m_ec_module
    interface ecSetItemProperty
       module procedure ecItemSetProperty
    end interface ecSetItemProperty
+
+   interface ecCopyItemProperty
+      module procedure ecItemCopyProperty
+   end interface ecCopyItemProperty
    
    interface ecSetItemRole
       module procedure ecItemSetRole

@@ -1103,6 +1103,7 @@ module m_meteo
          connectionId = ecCreateConnection(ecInstancePtr)
          if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr1)) return        ! connecting source to new converter
          if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni1)) return              ! connecting multuni1 as target item to the new converter
+         if (.not.ecCopyItemProperty(ecInstancePtr, multuni1, targetItemPtr1, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
          if (.not.ecAddItemConnection(ecInstancePtr, multuni1, connectionId)) return                    ! adding the new converter to multuni1
       end if
       if (associated(targetItemPtr2)) then
@@ -1111,6 +1112,17 @@ module m_meteo
          if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_2, dataPtr2)
          if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_2, dmiss)
          if (success) success = createItem(ecInstancePtr, targetItemPtr2, quantityId, elementSetId, fieldId_2)
+         if (present(multuni1)) then                      ! if multiple-uni item(s) specified:
+            if (multuni2<0) then
+               multuni2=ecInstanceCreateItem(ecInstancePtr)
+               if (.not.ecSetItemRole(ecInstancePtr, multuni2, itemType_target)) return
+            end if
+            connectionId = ecCreateConnection(ecInstancePtr)
+            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr2)) return        ! connecting source to new converter
+            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni2)) return              ! connecting multuni1 as target item to the new converter
+            if (.not.ecCopyItemProperty(ecInstancePtr, multuni2, targetItemPtr2, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
+            if (.not.ecAddItemConnection(ecInstancePtr, multuni2, connectionId)) return                    ! adding the new converter to multuni1
+         end if
       end if
       if (associated(targetItemPtr3)) then
          ! third field (e.g. for 'airpressure_windx_windy'
@@ -1118,6 +1130,17 @@ module m_meteo
          if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_3, dataPtr3)
          if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_3, dmiss)
          if (success) success = createItem(ecInstancePtr, targetItemPtr3, quantityId, elementSetId, fieldId_3)
+         if (present(multuni3)) then                      ! if multiple-uni item(s) specified:
+            if (multuni3<0) then
+               multuni3=ecInstanceCreateItem(ecInstancePtr)
+               if (.not.ecSetItemRole(ecInstancePtr, multuni3, itemType_target)) return
+            end if
+            connectionId = ecCreateConnection(ecInstancePtr)
+            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr3)) return        ! connecting source to new converter
+            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni3)) return              ! connecting multuni1 as target item to the new converter
+            if (.not.ecCopyItemProperty(ecInstancePtr, multuni3, targetItemPtr3, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
+            if (.not.ecAddItemConnection(ecInstancePtr, multuni3, connectionId)) return                    ! adding the new converter to multuni1
+         end if
       end if
       if (associated(targetItemPtr4)) then
          ! third field (e.g. for 'humidity_airtemperatur_cloudiness_solarradiation'
@@ -1125,6 +1148,17 @@ module m_meteo
          if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_4, dataPtr4)
          if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_4, dmiss)
          if (success) success = createItem(ecInstancePtr, targetItemPtr4, quantityId, elementSetId, fieldId_4)
+         if (present(multuni4)) then                      ! if multiple-uni item(s) specified:
+            if (multuni4<0) then
+               multuni4=ecInstanceCreateItem(ecInstancePtr)
+               if (.not.ecSetItemRole(ecInstancePtr, multuni4, itemType_target)) return
+            end if
+            connectionId = ecCreateConnection(ecInstancePtr)
+            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr4)) return        ! connecting source to new converter
+            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni4)) return              ! connecting multuni1 as target item to the new converter
+            if (.not.ecCopyItemProperty(ecInstancePtr, multuni4, targetItemPtr4, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
+            if (.not.ecAddItemConnection(ecInstancePtr, multuni4, connectionId)) return                    ! adding the new converter to multuni1
+         end if
       end if
       
 
