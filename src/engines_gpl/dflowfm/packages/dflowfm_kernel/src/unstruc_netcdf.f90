@@ -4625,10 +4625,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_freeboard, nf90_double, UNC_LOC_S, 'freeboard', '', 'Freeboard', 'm', which_meshdim = 1)
          end if
          if (jamapDepthOnGround > 0) then ! waterdpth that is above ground level
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs_on_ground, nf90_double, UNC_LOC_S, 'waterdepth_above_ground', '', 'Waterdepth above ground level', 'm', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs_on_ground, nf90_double, UNC_LOC_S, 'waterdepth_on_ground', '', 'Waterdepth above ground level', 'm', which_meshdim = 1)
          end if
          if (jamapVolOnGround > 0) then ! volume that is above ground level
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, nf90_double, UNC_LOC_S, 'volume_above_ground', '', 'Volume above ground level', 'm', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, nf90_double, UNC_LOC_S, 'volume_on_ground', '', 'Volume above ground level', 'm', which_meshdim = 1)
          end if
       end if
       ierr = nf90_enddef(mapids%ncid)

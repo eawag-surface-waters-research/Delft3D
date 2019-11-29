@@ -872,7 +872,8 @@ module m_oned_functions
    !> Update freeboard for each 1d node.
    !! Freeboard is the vertical distance between the ground level, i.e., not bed level, and the water surface.
    !! It can be negative value if the water level is above the ground level
-   !! It has maximal value 0d0 if it has storageType "closed", or if the relevant cross sections are closed.
+   !! It has minimal value 0d0 if it has storageType "closed", or if the relevant cross sections are closed.
+   !! If the relevant cross sections are closed, freeboard is the vertical distance between the highest nearby cross section level ("embankment") and the water level.
    subroutine updateFreeboard(network)
    use m_flow, only: freeboard, s1
    use m_flowgeom, only: ndxi, ndx2d, groundLevel
@@ -927,7 +928,7 @@ module m_oned_functions
    !> Update waterdepth above ground level for each 1d node.
    !! This is the vertical distance between the water surface and the ground level, i.e. waterLevel minus groundLevel.
    !! It has minimal value 0d0
-   !! It equals to dmiss if the node has storageType closed, or if the relavent cross sections are closed, or no cross section is defined.
+   !! It equals to dmiss if the node has storageType closed, or if the relevant cross sections are closed, or no cross section is defined.
    subroutine updateDepthOnGround(network)
    use m_flow, only: hsOnGround, s1
    use m_network
@@ -962,7 +963,7 @@ module m_oned_functions
 
    !> Update volume above ground level for each 1d node.
    !! It has minimal value 0d0
-   !! It equals to dmiss if the node has storageType closed, or if the relavent cross sections are closed, or no cross section is defined.
+   !! It equals to dmiss if the node has storageType closed, or if the relevant cross sections are closed, or no cross section is defined.
    subroutine updateVolOnGround(network)
    use m_flow,     only: vol1, volOnGround
    use m_flowgeom, only: volMax, ndxi, ndx2d, groundLevel
