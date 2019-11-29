@@ -549,7 +549,7 @@ character(len=255)   :: filename_fou_out
  endif
 
  ! for 1D only
- if (ndxi-ndx2d > 0) then
+ if (network%loaded .and. ndxi-ndx2d > 0) then
     if (jamapFreeboard > 0) then
        call updateFreeboard(network)
     end if
@@ -16080,7 +16080,7 @@ endif
  endif
 
  ! for 1D only
- if (ndxi-ndx2d > 0) then
+ if (network%loaded .and. ndxi-ndx2d > 0) then
     if (jamapFreeboard > 0) then
        call updateFreeboard(network)
     end if
