@@ -49,7 +49,7 @@ endif
 libECModule_la_SOURCES = \
          transform_shiftedpole.f90 \
          ec_module_version.F90 \
-         ec_parameters.f90 \
+         ec_parameters.F90 \
          ec_typedefs.f90 \
          ec_message.f90 \
          ec_alloc.f90 \

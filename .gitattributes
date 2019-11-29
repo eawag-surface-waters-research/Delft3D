@@ -13858,7 +13858,7 @@ src/utils_lgpl/ec_module/packages/ec_module/src/ec_module.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_module_api.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_module_version.F90.svn -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_netcdf_timeseries.f90 -text
-src/utils_lgpl/ec_module/packages/ec_module/src/ec_parameters.f90 -text
+src/utils_lgpl/ec_module/packages/ec_module/src/ec_parameters.F90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_provider.F90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_quantity.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_spatial_extrapolation.f90 -text

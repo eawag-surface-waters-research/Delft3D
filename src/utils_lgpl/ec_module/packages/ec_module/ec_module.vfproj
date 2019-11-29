@@ -110,6 +110,7 @@
 				<Tool Name="VFFortranCompilerTool" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File></Filter>
+		<File RelativePath=".\src\ec_alloc.f90"/>
 		<File RelativePath=".\src\ec_astro.f90"/>
 		<File RelativePath=".\src\ec_basic_interpolation.f90"/>
 		<File RelativePath=".\src\ec_bccollect.f90"/>
@@ -125,7 +126,11 @@
 		<File RelativePath="src\ec_message.f90"/>
 		<File RelativePath="src\ec_module.f90"/>
 		<File RelativePath=".\src\ec_netcdf_timeseries.f90"/>
-		<File RelativePath="src\ec_parameters.f90"/>
+		<File RelativePath="src\ec_parameters.f90">
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\ec_provider.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
@@ -137,7 +142,6 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\ec_quantity.f90"/>
 		<File RelativePath=".\src\ec_spatial_extrapolation.f90"/>
-		<File RelativePath=".\src\ec_alloc.f90"/>
 		<File RelativePath=".\src\ec_support.f90"/>
 		<File RelativePath="src\ec_typedefs.f90"/>
 		<File RelativePath=".\src\transform_shiftedpole.f90"/></Filter></Files>
