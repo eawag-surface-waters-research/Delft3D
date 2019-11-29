@@ -703,7 +703,7 @@ module m_meteo
       if (jsferic == 1) then 
          ecInstancePtr%coordsystem = EC_COORDS_SFERIC
       else
-         ecInstancePtr%coordsystem = EC_COORDS_CARTHESIAN
+         ecInstancePtr%coordsystem = EC_COORDS_CARTESIAN
       endif
 
    end subroutine initialize_ec_module
