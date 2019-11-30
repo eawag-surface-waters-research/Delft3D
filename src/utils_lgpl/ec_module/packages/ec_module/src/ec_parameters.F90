@@ -39,10 +39,10 @@ module m_ec_parameters
    integer,  parameter :: maxNameLen           = 256
    integer,  parameter :: maxFileNameLen       = 256
    integer,  parameter :: maxFileReaderFiles   = 3
-#ifdef LINUX
-   integer             :: maxFileUnits         = 2000
-#else
+#ifdef _WIN64
    integer             :: maxFileUnits         = 8000   !< maximum on Windows 10 (8000 < 8192)
+#else
+   integer             :: maxFileUnits         = 2000
 #endif
    integer,  parameter :: numberOfTargetItems  = 4
 
