@@ -87,6 +87,8 @@ integer, parameter :: UNC_LOC_U3D = 5  !< Data location: horizontal velocity poi
 integer, parameter :: UNC_LOC_W   = 6  !< Data location: vertical velocity point on all layer interfaces.
 integer, parameter :: UNC_LOC_WU  = 16 !< Data location: vertical viscosity point on all layer interfaces.
 
+integer, parameter :: MAX_ID_VAR = 4   !< Maximum dimension for id_var arrays
+
 type(t_ug_meta) :: ug_meta_fm  !< Meta information on file.
 
 ! This type collects the time and space administration relevant for repeat writes to
@@ -116,18 +118,18 @@ type t_unc_timespace_id
    integer, allocatable :: edgetoln(:)      
    integer, allocatable :: contactstoln(:)
    ! geometry fieldss
-   integer :: id_flowelemba(4)     = -1 !< Variable ID for flow node bottom area (on 1D, 2D, 3D, 1D2D grid parts resp.).
-   integer :: id_flowelembl(4)     = -1 !< Variable ID for flow node bed level (on 1D, 2D, 3D, 1D2D grid parts resp.).
-   integer :: id_flowelemcrsz(4)   = -1 !< Variable ID for cross-section point levels passing through flow node (on 1D).
-   integer :: id_flowelemcrsn(4)   = -1 !< Variable ID for cross-section point widths passing through flow node (on 1D).
-   integer :: id_jmax              = -1
-   integer :: id_netnodez(4)       = -1 !< Variable ID for net node bed level. TODO: AvD: UNST-1318: consider removing here.
+   integer :: id_flowelemba(MAX_ID_VAR)     = -1 !< Variable ID for flow node bottom area (on 1D, 2D, 3D, 1D2D grid parts resp.).
+   integer :: id_flowelembl(MAX_ID_VAR)     = -1 !< Variable ID for flow node bed level (on 1D, 2D, 3D, 1D2D grid parts resp.).
+   integer :: id_flowelemcrsz(MAX_ID_VAR)   = -1 !< Variable ID for cross-section point levels passing through flow node (on 1D).
+   integer :: id_flowelemcrsn(MAX_ID_VAR)   = -1 !< Variable ID for cross-section point widths passing through flow node (on 1D).
+   integer :: id_jmax                       = -1
+   integer :: id_netnodez(MAX_ID_VAR)       = -1 !< Variable ID for net node bed level. TODO: AvD: UNST-1318: consider removing here.
    
    integer :: id_nlyrdim    = -1 !< Dimension ID for number of bed layers in bed stratigraphy
    integer :: id_ntheta     = -1 !< Dimension ID for number of wave directional bins in surfbeat model   
    
-   integer :: id_flowelemdomain(4) = -1 ! domain number of flow elem (face)
-   integer :: id_flowelemglobalnr(4) = -1 ! global flow element numbering
+   integer :: id_flowelemdomain(MAX_ID_VAR) = -1 ! domain number of flow elem (face)
+   integer :: id_flowelemglobalnr(MAX_ID_VAR) = -1 ! global flow element numbering
    
    integer :: idx_curtime  = 0  !< Index of current time (typically of latest snapshot being written).
    
@@ -171,217 +173,217 @@ type t_unc_mapids
    !
    ! Data variables
    !
-   !integer :: id_flowelemba(4)     = -1 !< Variable ID for flow node bottom area (on 1D, 2D, 3D, 1D2D grid parts resp.).
-   !integer :: id_flowelembl(4)     = -1 !< Variable ID for flow node bed level (on 1D, 2D, 3D, 1D2D grid parts resp.).
-   !integer :: id_flowelemcrsz(4)   = -1 !< Variable ID for cross-section point levels passing through flow node (on 1D).
-   !integer :: id_flowelemcrsn(4)   = -1 !< Variable ID for cross-section point widths passing through flow node (on 1D).
+   !integer :: id_flowelemba(MAX_ID_VAR)     = -1 !< Variable ID for flow node bottom area (on 1D, 2D, 3D, 1D2D grid parts resp.).
+   !integer :: id_flowelembl(MAX_ID_VAR)     = -1 !< Variable ID for flow node bed level (on 1D, 2D, 3D, 1D2D grid parts resp.).
+   !integer :: id_flowelemcrsz(MAX_ID_VAR)   = -1 !< Variable ID for cross-section point levels passing through flow node (on 1D).
+   !integer :: id_flowelemcrsn(MAX_ID_VAR)   = -1 !< Variable ID for cross-section point widths passing through flow node (on 1D).
    !integer :: id_jmax
-   !integer :: id_netnodez(4)       = -1 !< Variable ID for net node bed level. TODO: AvD: UNST-1318: consider removing here.
-   integer :: id_time      = -1 !< Variable ID for 
-   integer :: id_timestep  = -1 !< Variable ID for 
-   integer :: id_numlimdt(4) = -1 !< Variable ID for 
-   integer :: id_s1(4)     = -1 !< Variable ID for water level (on 1D, 2D, 3D grid parts resp.)
-   integer :: id_s0(4)     = -1 !< Variable ID for 
-   integer :: id_hs(4)     = -1 !< Variable ID for 
-   integer :: id_vol1(4)   = -1 !< Variable ID for volume
-   integer :: id_au(4)     = -1 !< Variable ID for flow area
-   integer :: id_taus(4)   = -1 !< Variable ID for 
-   integer :: id_ucx(4)    = -1 !< Variable ID for 
-   integer :: id_ucy(4)    = -1 !< Variable ID for 
-   integer :: id_ucz(4)    = -1 !< Variable ID for 
-   integer :: id_ucmag(4)  = -1 !< Variable ID for 
-   integer :: id_ucdir(4)  = -1 !< Variable ID for 
-   integer :: id_ucxa(4)   = -1 !< Variable ID for 
-   integer :: id_ucya(4)   = -1 !< Variable ID for 
-   integer :: id_ucmaga(4) = -1 !< Variable ID for 
-   integer :: id_ucxq(4)   = -1 !< Variable ID for 
-   integer :: id_ucyq(4)   = -1 !< Variable ID for
-   integer :: id_hu(4)     = -1 !< Variable ID for 
-   integer :: id_q1(4)     = -1 !< Variable ID for 
-   integer :: id_q1main(4) = -1 !< Variable ID for main channel discharge (1D quantity)
-   integer :: id_u1(4)     = -1 !< Variable ID for 
-   integer :: id_u0(4)     = -1 !< Variable ID for 
-   integer :: id_viu(4)    = -1 !< Variable ID for horizontal eddy viscosity
-   integer :: id_diu(4)    = -1 !< Variable ID for horizontal eddy diffusivity
-   integer :: id_ww1(4)    = -1 !< Variable ID for 
-   integer :: id_rho(4)    = -1 !< Variable ID for 
-   integer :: id_sa1(4)    = -1 !< Variable ID for 
-   integer :: id_tem1(4)   = -1 !< Variable ID for 
+   !integer :: id_netnodez(MAX_ID_VAR)       = -1 !< Variable ID for net node bed level. TODO: AvD: UNST-1318: consider removing here.
+   integer :: id_time                 = -1 !< Variable ID for 
+   integer :: id_timestep             = -1 !< Variable ID for 
+   integer :: id_numlimdt(MAX_ID_VAR) = -1 !< Variable ID for 
+   integer :: id_s1(MAX_ID_VAR)       = -1 !< Variable ID for water level (on 1D, 2D, 3D grid parts resp.)
+   integer :: id_s0(MAX_ID_VAR)       = -1 !< Variable ID for 
+   integer :: id_hs(MAX_ID_VAR)       = -1 !< Variable ID for 
+   integer :: id_vol1(MAX_ID_VAR)     = -1 !< Variable ID for volume
+   integer :: id_au(MAX_ID_VAR)       = -1 !< Variable ID for flow area
+   integer :: id_taus(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_ucx(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_ucy(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_ucz(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_ucmag(MAX_ID_VAR)    = -1 !< Variable ID for 
+   integer :: id_ucdir(MAX_ID_VAR)    = -1 !< Variable ID for 
+   integer :: id_ucxa(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_ucya(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_ucmaga(MAX_ID_VAR)   = -1 !< Variable ID for 
+   integer :: id_ucxq(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_ucyq(MAX_ID_VAR)     = -1 !< Variable ID for
+   integer :: id_hu(MAX_ID_VAR)       = -1 !< Variable ID for 
+   integer :: id_q1(MAX_ID_VAR)       = -1 !< Variable ID for 
+   integer :: id_q1main(MAX_ID_VAR)   = -1 !< Variable ID for main channel discharge (1D quantity)
+   integer :: id_u1(MAX_ID_VAR)       = -1 !< Variable ID for 
+   integer :: id_u0(MAX_ID_VAR)       = -1 !< Variable ID for 
+   integer :: id_viu(MAX_ID_VAR)      = -1 !< Variable ID for horizontal eddy viscosity
+   integer :: id_diu(MAX_ID_VAR)      = -1 !< Variable ID for horizontal eddy diffusivity
+   integer :: id_ww1(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_rho(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_sa1(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_tem1(MAX_ID_VAR)     = -1 !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_const !< Variable ID for (3, NUM_CONST) constituents (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_wqb !< Variable ID for (3, numwqbots) water quality bottom variables output (on 2D grid only)
    integer, dimension(:,:), allocatable :: id_waq !< Variable ID for (3, noout) waq output (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_wqst !< Variable ID for (3, noout) waq time stat output (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_wqse !< Variable ID for (3, noout) waq end stat output (on 1D, 2D, 3D grid parts resp.)
-   integer :: id_mba(4)    = -1 !< Variable ID for mass balance areas 
+   integer :: id_mba(MAX_ID_VAR)    = -1 !< Variable ID for mass balance areas 
    integer, dimension(:,:), allocatable :: id_sed !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_ero !< Variable ID for 
-   integer :: id_cfcl(4)   = -1 !< Variable ID for netlink data of calibration factor for friction 
-   integer :: id_cftrt(4)  = -1 !< Variable ID for netlink data of friction from trachytopes
-   integer :: id_czs(4)    = -1 !< Variable ID for flow node data of chezy roughness 
-   integer :: id_qsun(4)   = -1 !< Variable ID for 
-   integer :: id_qeva(4)   = -1 !< Variable ID for 
-   integer :: id_qcon(4)   = -1 !< Variable ID for 
-   integer :: id_qlong(4)  = -1 !< Variable ID for 
-   integer :: id_qfreva(4) = -1 !< Variable ID for 
-   integer :: id_qfrcon(4) = -1 !< Variable ID for 
-   integer :: id_qtot(4)   = -1 !< Variable ID for 
-   integer :: id_wind(4)   = -1 !< Variable ID for 
-   integer :: id_patm(4)   = -1 !< Variable ID for 
-   integer :: id_tair(4)   = -1 !< Variable ID for 
-   integer :: id_rhum(4)   = -1 !< Variable ID for 
-   integer :: id_clou(4)   = -1 !< Variable ID for 
-   integer :: id_E(4)      = -1 !< Variable ID for 
-   integer :: id_R(4)      = -1 !< Variable ID for 
-   integer :: id_hwav(4)      = -1 !< Variable ID for 
-   integer :: id_D(4)      = -1 !< Variable ID for 
-   integer :: id_DR(4)     = -1 !< Variable ID for 
-   integer :: id_Df(4)     = -1 !< Variable ID for 
-   integer :: id_uorb(4)   = -1 !< Variable ID for 
-   integer :: id_thetamean(4) = -1 !< Variable ID for 
-   integer :: id_cwav(4)     = -1 !< Variable ID for 
-   integer :: id_cgwav(4)    = -1 !< Variable ID for 
-   integer :: id_kwav(4)     = -1 !< Variable ID for
-   integer :: id_nwav(4)     = -1
-   integer :: id_l1(4)     = -1
-   integer :: id_ctheta(4)   = -1
-   integer :: id_sigmwav(4)  = -1 !< Variable ID for
-   integer :: id_SwE(4)      = -1 !< Variable ID for wind source term on E
-   integer :: id_SwT(4)      = -1 !< Variable ID for wind source term on T   
-   integer :: id_ustokes(4)      = -1 !< Variable ID for 
-   integer :: id_vstokes(4)      = -1 !< Variable ID for 
-   integer :: id_Fx(4)       = -1 !< Variable ID for 
-   integer :: id_Fy(4)       = -1 !< Variable ID for
-   integer :: id_Fxlink(4)    = -1 !< Variable ID for
-   integer :: id_Fylink(4)    = -1 !< Variable ID for
-   integer :: id_ustokeslink(4)      = -1
-   integer :: id_vstokeslink(4)      = -1
-   integer :: id_Sxx(4)      = -1
-   integer :: id_Syy(4)      = -1
-   integer :: id_Sxy(4)      = -1
-   integer :: id_dsdx(4)     = -1
-   integer :: id_dsdy(4)     = -1
-   integer :: id_ducxdx(4)   = -1
-   integer :: id_ducxdy(4)   = -1
-   integer :: id_ducydx(4)   = -1
-   integer :: id_ducydy(4)   = -1
-   integer :: id_windx(4)    = -1 !< Variable ID for wind on cell center, x-component
-   integer :: id_windy(4)    = -1 !< Variable ID for wind on cell center, y-component
-   integer :: id_windxu(4)   = -1 !< Variable ID for wind on flow links, x-component
-   integer :: id_windyu(4)   = -1 !< Variable ID for wind on flow links, y-component
-   integer :: id_windstressx(4) = -1  !< Variable ID for wind stress, on cell center, x-component
-   integer :: id_windstressy(4) = -1  !< Variable ID for wind stress, on cell center, y-component
-   integer :: id_turkin1(4)  = -1 !< Variable ID for 
-   integer :: id_vicwwu(4)   = -1 !< Variable ID for 
-   integer :: id_tureps1(4)  = -1 !< Variable ID for 
-   integer :: id_sbcx(4)     = -1 !< Variable ID for current related bedload sediment transport at cell centre before upwinding, secondary flow and bed slope effect (x-component)
-   integer :: id_sbcy(4)     = -1 !< Variable ID for current related bedload sediment transport at cell centre before upwinding, secondary flow and bed slope effect (y-component)
-   integer :: id_sbcx_reconstructed(4)     = -1 !< Variable ID for reconstructed bedload sediment transport at cell centre after upwinding, secondary flow and bed slope effect (x-component)
-   integer :: id_sbcy_reconstructed(4)     = -1 !< Variable ID for reconstructed bedload sediment transport at cell centre after upwinding, secondary flow and bed slope effect (y-component)
-   integer :: id_sbwx(4)     = -1 !< Variable ID for wave related bedload sediment transport at cell centre before upwinding and bed slope effect (x-component)
-   integer :: id_sbwy(4)     = -1 !< Variable ID for wave related bedload sediment transport at cell centre before upwinding and bed slope effect (y-component) 
-   integer :: id_sbwx_reconstructed(4)     = -1 !< Variable ID for wave related bedload sediment transport at cell centre after upwinding and bed slope effect (x-component)
-   integer :: id_sbwy_reconstructed(4)     = -1 !< Variable ID for wave related bedload sediment transport at cell centre after upwinding and bed slope effect (y-component) 
-   integer :: id_sswx(4)     = -1 !< Variable ID for wave related suspended sediment transport at cell centre before upwinding and bed slope effect (x-component)
-   integer :: id_sswy(4)     = -1 !< Variable ID for wave related suspended sediment transport at cell centre before upwinding and bed slope effect (y-component) 
-   integer :: id_sswx_reconstructed(4)     = -1 !< Variable ID for wave related suspended sediment transport at cell centre after upwinding and bed slope effect (x-component)
-   integer :: id_sswy_reconstructed(4)     = -1 !< Variable ID for wave related suspended sediment transport at cell centre after upwinding and bed slope effect (y-component) 
-   integer :: id_sscx(4)     = -1 !< Variable ID for current related suspended sediment transport at cell centre before upwinding and bed slope effect (x-component)
-   integer :: id_sscy(4)     = -1 !< Variable ID for current related suspended sediment transport at cell centre before upwinding and bed slope effect (y-component) 
-   integer :: id_sscx_reconstructed(4)     = -1 !< Variable ID for current related suspended sediment transport at cell centre after upwinding and bed slope effect (x-component)
-   integer :: id_sscy_reconstructed(4)     = -1 !< Variable ID for current related suspended sediment transport at cell centre after upwinding and bed slope effect (y-component) 
-   integer :: id_sbxcum(4) = -1 !< Variable ID's for time-averaged cell centre transports
-   integer :: id_sbycum(4) = -1
-   integer :: id_ssxcum(4) = -1
-   integer :: id_ssycum(4) = -1
-   integer :: id_sbn(4)    = -1 !< Variable ID for 
-   integer :: id_sbt(4)    = -1 !< Variable ID for 
-   integer :: id_sst(4)    = -1 !< Variable ID for 
-   integer :: id_ssn(4)    = -1 !< Variable ID for 
-   integer :: id_sourse(4) = -1 !< Variable ID for 
-   integer :: id_sinkse(4) = -1
-   integer :: id_scrn(4)   = -1
-   integer :: id_zk(4)     = -1 ! TODO: AvD: HK's timedep zk
-   integer :: id_bl(4)     = -1 ! TODO: AvD: HK's timedep bl  
+   integer :: id_cfcl(MAX_ID_VAR)        = -1 !< Variable ID for netlink data of calibration factor for friction 
+   integer :: id_cftrt(MAX_ID_VAR)       = -1 !< Variable ID for netlink data of friction from trachytopes
+   integer :: id_czs(MAX_ID_VAR)         = -1 !< Variable ID for flow node data of chezy roughness 
+   integer :: id_qsun(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_qeva(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_qcon(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_qlong(MAX_ID_VAR)       = -1 !< Variable ID for 
+   integer :: id_qfreva(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_qfrcon(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_qtot(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_wind(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_patm(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_tair(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_rhum(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_clou(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_E(MAX_ID_VAR)           = -1 !< Variable ID for 
+   integer :: id_R(MAX_ID_VAR)           = -1 !< Variable ID for 
+   integer :: id_hwav(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_D(MAX_ID_VAR)           = -1 !< Variable ID for 
+   integer :: id_DR(MAX_ID_VAR)          = -1 !< Variable ID for 
+   integer :: id_Df(MAX_ID_VAR)          = -1 !< Variable ID for 
+   integer :: id_uorb(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_thetamean(MAX_ID_VAR)   = -1 !< Variable ID for 
+   integer :: id_cwav(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_cgwav(MAX_ID_VAR)       = -1 !< Variable ID for 
+   integer :: id_kwav(MAX_ID_VAR)        = -1 !< Variable ID for
+   integer :: id_nwav(MAX_ID_VAR)        = -1
+   integer :: id_l1(MAX_ID_VAR)          = -1
+   integer :: id_ctheta(MAX_ID_VAR)      = -1
+   integer :: id_sigmwav(MAX_ID_VAR)     = -1 !< Variable ID for
+   integer :: id_SwE(MAX_ID_VAR)         = -1 !< Variable ID for wind source term on E
+   integer :: id_SwT(MAX_ID_VAR)         = -1 !< Variable ID for wind source term on T   
+   integer :: id_ustokes(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_vstokes(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_Fx(MAX_ID_VAR)          = -1 !< Variable ID for 
+   integer :: id_Fy(MAX_ID_VAR)          = -1 !< Variable ID for
+   integer :: id_Fxlink(MAX_ID_VAR)      = -1 !< Variable ID for
+   integer :: id_Fylink(MAX_ID_VAR)      = -1 !< Variable ID for
+   integer :: id_ustokeslink(MAX_ID_VAR) = -1
+   integer :: id_vstokeslink(MAX_ID_VAR) = -1
+   integer :: id_Sxx(MAX_ID_VAR)         = -1
+   integer :: id_Syy(MAX_ID_VAR)         = -1
+   integer :: id_Sxy(MAX_ID_VAR)         = -1
+   integer :: id_dsdx(MAX_ID_VAR)        = -1
+   integer :: id_dsdy(MAX_ID_VAR)        = -1
+   integer :: id_ducxdx(MAX_ID_VAR)      = -1
+   integer :: id_ducxdy(MAX_ID_VAR)      = -1
+   integer :: id_ducydx(MAX_ID_VAR)      = -1
+   integer :: id_ducydy(MAX_ID_VAR)      = -1
+   integer :: id_windx(MAX_ID_VAR)       = -1 !< Variable ID for wind on cell center, x-component
+   integer :: id_windy(MAX_ID_VAR)       = -1 !< Variable ID for wind on cell center, y-component
+   integer :: id_windxu(MAX_ID_VAR)      = -1 !< Variable ID for wind on flow links, x-component
+   integer :: id_windyu(MAX_ID_VAR)      = -1 !< Variable ID for wind on flow links, y-component
+   integer :: id_windstressx(MAX_ID_VAR) = -1  !< Variable ID for wind stress, on cell center, x-component
+   integer :: id_windstressy(MAX_ID_VAR) = -1  !< Variable ID for wind stress, on cell center, y-component
+   integer :: id_turkin1(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_vicwwu(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_tureps1(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_sbcx(MAX_ID_VAR)        = -1 !< Variable ID for current related bedload sediment transport at cell centre before upwinding, secondary flow and bed slope effect (x-component)
+   integer :: id_sbcy(MAX_ID_VAR)        = -1 !< Variable ID for current related bedload sediment transport at cell centre before upwinding, secondary flow and bed slope effect (y-component)
+   integer :: id_sbcx_reconstructed(MAX_ID_VAR)     = -1 !< Variable ID for reconstructed bedload sediment transport at cell centre after upwinding, secondary flow and bed slope effect (x-component)
+   integer :: id_sbcy_reconstructed(MAX_ID_VAR)     = -1 !< Variable ID for reconstructed bedload sediment transport at cell centre after upwinding, secondary flow and bed slope effect (y-component)
+   integer :: id_sbwx(MAX_ID_VAR)        = -1 !< Variable ID for wave related bedload sediment transport at cell centre before upwinding and bed slope effect (x-component)
+   integer :: id_sbwy(MAX_ID_VAR)        = -1 !< Variable ID for wave related bedload sediment transport at cell centre before upwinding and bed slope effect (y-component) 
+   integer :: id_sbwx_reconstructed(MAX_ID_VAR)     = -1 !< Variable ID for wave related bedload sediment transport at cell centre after upwinding and bed slope effect (x-component)
+   integer :: id_sbwy_reconstructed(MAX_ID_VAR)     = -1 !< Variable ID for wave related bedload sediment transport at cell centre after upwinding and bed slope effect (y-component) 
+   integer :: id_sswx(MAX_ID_VAR)        = -1 !< Variable ID for wave related suspended sediment transport at cell centre before upwinding and bed slope effect (x-component)
+   integer :: id_sswy(MAX_ID_VAR)        = -1 !< Variable ID for wave related suspended sediment transport at cell centre before upwinding and bed slope effect (y-component) 
+   integer :: id_sswx_reconstructed(MAX_ID_VAR)     = -1 !< Variable ID for wave related suspended sediment transport at cell centre after upwinding and bed slope effect (x-component)
+   integer :: id_sswy_reconstructed(MAX_ID_VAR)     = -1 !< Variable ID for wave related suspended sediment transport at cell centre after upwinding and bed slope effect (y-component) 
+   integer :: id_sscx(MAX_ID_VAR)        = -1 !< Variable ID for current related suspended sediment transport at cell centre before upwinding and bed slope effect (x-component)
+   integer :: id_sscy(MAX_ID_VAR)        = -1 !< Variable ID for current related suspended sediment transport at cell centre before upwinding and bed slope effect (y-component) 
+   integer :: id_sscx_reconstructed(MAX_ID_VAR)     = -1 !< Variable ID for current related suspended sediment transport at cell centre after upwinding and bed slope effect (x-component)
+   integer :: id_sscy_reconstructed(MAX_ID_VAR)     = -1 !< Variable ID for current related suspended sediment transport at cell centre after upwinding and bed slope effect (y-component) 
+   integer :: id_sbxcum(MAX_ID_VAR)      = -1 !< Variable ID's for time-averaged cell centre transports
+   integer :: id_sbycum(MAX_ID_VAR)      = -1
+   integer :: id_ssxcum(MAX_ID_VAR)      = -1
+   integer :: id_ssycum(MAX_ID_VAR)      = -1
+   integer :: id_sbn(MAX_ID_VAR)         = -1 !< Variable ID for 
+   integer :: id_sbt(MAX_ID_VAR)         = -1 !< Variable ID for 
+   integer :: id_sst(MAX_ID_VAR)         = -1 !< Variable ID for 
+   integer :: id_ssn(MAX_ID_VAR)         = -1 !< Variable ID for 
+   integer :: id_sourse(MAX_ID_VAR)      = -1 !< Variable ID for 
+   integer :: id_sinkse(MAX_ID_VAR)      = -1
+   integer :: id_scrn(MAX_ID_VAR)        = -1
+   integer :: id_zk(MAX_ID_VAR)          = -1 ! TODO: AvD: HK's timedep zk
+   integer :: id_bl(MAX_ID_VAR)          = -1 ! TODO: AvD: HK's timedep bl  
 ! nudging
-   integer :: id_nudge_time(4) = -1 ! nudging time
-   integer :: id_nudge_sal(4) = -1  ! nudging salinity
-   integer :: id_nudge_tem(4) = -1  ! nudging temperature
-   integer :: id_nudge_Dsal(4) = -1 ! difference of nudging salinity with salinity
-   integer :: id_nudge_Dtem(4) = -1 ! difference of nudging temperature with temperature
+   integer :: id_nudge_time(MAX_ID_VAR)  = -1 ! nudging time
+   integer :: id_nudge_sal(MAX_ID_VAR)   = -1  ! nudging salinity
+   integer :: id_nudge_tem(MAX_ID_VAR)   = -1  ! nudging temperature
+   integer :: id_nudge_Dsal(MAX_ID_VAR)  = -1 ! difference of nudging salinity with salinity
+   integer :: id_nudge_Dtem(MAX_ID_VAR)  = -1 ! difference of nudging temperature with temperature
 ! particles
-   integer :: id_depth_averaged_particle_concentration(4) = -1  ! depth-averaged particle concentration
+   integer :: id_depth_averaged_particle_concentration(MAX_ID_VAR) = -1  ! depth-averaged particle concentration
 ! for parallel
-   !integer :: id_flowelemdomain(4) = -1 ! domain number of flow elem (face)
-   !integer :: id_flowelemglobalnr(4) = -1 ! global flow element numbering
+   !integer :: id_flowelemdomain(MAX_ID_VAR) = -1 ! domain number of flow elem (face)
+   !integer :: id_flowelemglobalnr(MAX_ID_VAR) = -1 ! global flow element numbering
    
-   integer :: id_zb(4)     = -1 !< Variable ID for bed elevation
-   integer :: id_u1s(4)    = -1 !< sediment advection velocities in trsnaport module; DEBUG
-   integer :: id_q1s(4)    = -1
-   integer :: id_ucxs(4)   = -1 !< cell centre advection vel
-   integer :: id_ucys(4)   = -1
-   integer :: id_qcxs(4)   = -1 !< cell centre adv discharge
-   integer :: id_qcys(4)   = -1
+   integer :: id_zb(MAX_ID_VAR)     = -1 !< Variable ID for bed elevation
+   integer :: id_u1s(MAX_ID_VAR)    = -1 !< sediment advection velocities in trsnaport module; DEBUG
+   integer :: id_q1s(MAX_ID_VAR)    = -1
+   integer :: id_ucxs(MAX_ID_VAR)   = -1 !< cell centre advection vel
+   integer :: id_ucys(MAX_ID_VAR)   = -1
+   integer :: id_qcxs(MAX_ID_VAR)   = -1 !< cell centre adv discharge
+   integer :: id_qcys(MAX_ID_VAR)   = -1
    integer, dimension(:,:), allocatable :: id_xsedflux
    integer, dimension(:,:), allocatable :: id_ysedflux
    !
-   integer :: id_spircrv(4)= -1 !< Variable ID for flow streamline curvature
-   integer :: id_spirint(4)= -1 !< Variable ID for spiral intensity
+   integer :: id_spircrv(MAX_ID_VAR)    = -1 !< Variable ID for flow streamline curvature
+   integer :: id_spirint(MAX_ID_VAR)    = -1 !< Variable ID for spiral intensity
    !
-   integer :: id_ws(4)       = -1 ! fall velocity
-   integer :: id_rsedeq(4)   = -1 ! 
-   integer :: id_aks(4)      = -1 ! 
-   integer :: id_rca(4)      = -1 ! 
-   integer :: id_e_dzdn(4)   = -1 ! 
-   integer :: id_e_dzdt(4)   = -1 ! 
-   integer :: id_umod(4)     = -1 ! 
-   integer :: id_zumod(4)    = -1 ! 
-   integer :: id_uuu(4)    = -1 ! 
-   integer :: id_vvv(4)    = -1 ! 
-   integer :: id_ustar(4)    = -1 ! 
-   integer :: id_sxtot(4)    = -1 ! 
-   integer :: id_sytot(4)    = -1 ! 
-   integer :: id_mor_bl(4)    = -1 ! 
-   integer :: id_bodsed(4)   = -1 ! 
-   integer :: id_dpsed(4)    = -1 ! 
-   integer :: id_msed(4)     = -1 ! 
-   integer :: id_lyrfrac(4)  = -1 ! 
-   integer :: id_thlyr(4)    = -1 ! 
-   integer :: id_poros(4)    = -1 ! 
-   integer :: id_duneheight(4)= -1 ! 
-   integer :: id_dunelength(4)= -1 ! 
-   integer :: id_ksr(4)        = -1 ! 
-   integer :: id_ksmr(4)       = -1 ! 
-   integer :: id_ksd(4)        = -1 ! 
-   integer :: id_ks(4)         = -1 ! 
-   integer :: id_taurat(4)         = -1 ! 
-   integer :: id_dm(4)         = -1 ! 
-   integer :: id_dg(4)         = -1 ! 
-   integer :: id_dgsd(4)         = -1 ! 
+   integer :: id_ws(MAX_ID_VAR)         = -1 ! fall velocity
+   integer :: id_rsedeq(MAX_ID_VAR)     = -1 ! 
+   integer :: id_aks(MAX_ID_VAR)        = -1 ! 
+   integer :: id_rca(MAX_ID_VAR)        = -1 ! 
+   integer :: id_e_dzdn(MAX_ID_VAR)     = -1 ! 
+   integer :: id_e_dzdt(MAX_ID_VAR)     = -1 ! 
+   integer :: id_umod(MAX_ID_VAR)       = -1 ! 
+   integer :: id_zumod(MAX_ID_VAR)      = -1 ! 
+   integer :: id_uuu(MAX_ID_VAR)        = -1 ! 
+   integer :: id_vvv(MAX_ID_VAR)        = -1 ! 
+   integer :: id_ustar(MAX_ID_VAR)      = -1 ! 
+   integer :: id_sxtot(MAX_ID_VAR)      = -1 ! 
+   integer :: id_sytot(MAX_ID_VAR)      = -1 ! 
+   integer :: id_mor_bl(MAX_ID_VAR)     = -1 ! 
+   integer :: id_bodsed(MAX_ID_VAR)     = -1 ! 
+   integer :: id_dpsed(MAX_ID_VAR)      = -1 ! 
+   integer :: id_msed(MAX_ID_VAR)       = -1 ! 
+   integer :: id_lyrfrac(MAX_ID_VAR)    = -1 ! 
+   integer :: id_thlyr(MAX_ID_VAR)      = -1 ! 
+   integer :: id_poros(MAX_ID_VAR)      = -1 ! 
+   integer :: id_duneheight(MAX_ID_VAR) = -1 ! 
+   integer :: id_dunelength(MAX_ID_VAR) = -1 ! 
+   integer :: id_ksr(MAX_ID_VAR)        = -1 ! 
+   integer :: id_ksmr(MAX_ID_VAR)       = -1 ! 
+   integer :: id_ksd(MAX_ID_VAR)        = -1 ! 
+   integer :: id_ks(MAX_ID_VAR)         = -1 ! 
+   integer :: id_taurat(MAX_ID_VAR)     = -1 ! 
+   integer :: id_dm(MAX_ID_VAR)         = -1 ! 
+   integer :: id_dg(MAX_ID_VAR)         = -1 ! 
+   integer :: id_dgsd(MAX_ID_VAR)       = -1 ! 
    integer, allocatable, dimension(:,:) :: id_dxx
-   integer :: id_frac(4)        = -1
-   integer :: id_mudfrac(4)     = -1
-   integer :: id_sandfrac(4)    = -1
-   integer :: id_fixfac(4)    = -1
-   integer :: id_hidexp(4)    = -1
-   integer :: id_mfluff(4)    = -1
-   integer :: id_sxwav  (4)   = -1
-   integer :: id_sywav  (4)   = -1
-   integer :: id_sxbwav (4)   = -1
-   integer :: id_sybwav (4)   = -1
-   integer :: id_z0c(4)       = -1
-   integer :: id_z0r(4)       = -1
-   integer :: id_dtcell (4)   = -1
-   integer :: id_morft        = -1
-   integer :: id_morfac       = -1
-   integer :: id_sedavgtim    = -1
-   integer :: id_frac_name    = -1
-   integer :: id_sedfrac(4)   = -1
-   integer :: id_kmxsed(4)    = -1
+   integer :: id_frac(MAX_ID_VAR)       = -1
+   integer :: id_mudfrac(MAX_ID_VAR)    = -1
+   integer :: id_sandfrac(MAX_ID_VAR)   = -1
+   integer :: id_fixfac(MAX_ID_VAR)     = -1
+   integer :: id_hidexp(MAX_ID_VAR)     = -1
+   integer :: id_mfluff(MAX_ID_VAR)     = -1
+   integer :: id_sxwav  (MAX_ID_VAR)    = -1
+   integer :: id_sywav  (MAX_ID_VAR)    = -1
+   integer :: id_sxbwav (MAX_ID_VAR)    = -1
+   integer :: id_sybwav (MAX_ID_VAR)    = -1
+   integer :: id_z0c(MAX_ID_VAR)        = -1
+   integer :: id_z0r(MAX_ID_VAR)        = -1
+   integer :: id_dtcell (MAX_ID_VAR)    = -1
+   integer :: id_morft                  = -1
+   integer :: id_morfac                 = -1
+   integer :: id_sedavgtim              = -1
+   integer :: id_frac_name              = -1
+   integer :: id_sedfrac(MAX_ID_VAR)    = -1
+   integer :: id_kmxsed(MAX_ID_VAR)     = -1
    ! for urban, only for 1d nodes now
-   integer :: id_timewetground(4) = -1 !< Variable ID for cumulative time when water is above ground level
-   integer :: id_freeboard(4)     = -1 !< Variable ID for freeboard
-   integer :: id_hs_on_ground(4)  = -1 !< Variable ID for waterdepth when water is above ground level
-   integer :: id_vol_on_ground(4) = -1 !< Variable ID for volume when water is above ground level
+   integer :: id_timewetground(MAX_ID_VAR) = -1 !< Variable ID for cumulative time when water is above ground level
+   integer :: id_freeboard(MAX_ID_VAR)     = -1 !< Variable ID for freeboard
+   integer :: id_hs_on_ground(MAX_ID_VAR)  = -1 !< Variable ID for waterdepth when water is above ground level
+   integer :: id_vol_on_ground(MAX_ID_VAR) = -1 !< Variable ID for volume when water is above ground level
    !
    ! Other
    !
@@ -1722,7 +1724,7 @@ use m_alloc
 use m_missing
 implicit none
 integer, intent(in)                     :: ncid
-type(t_unc_timespace_id),         intent(in)  :: id_tsp        !< Map file and other NetCDF ids.
+type(t_unc_timespace_id),   intent(in)  :: id_tsp        !< Map file and other NetCDF ids.
 integer,                    intent(in)  :: id_var(:)     !< Ids of variable to write values into, one for each submesh (1d/2d/3d if applicable).
 integer,                    intent(in)  :: iloc          !< Stagger location for this variable (one of UNC_LOC_CN, UNC_LOC_S, UNC_LOC_U, UNC_LOC_L, UNC_LOC_S3D, UNC_LOC_U3D, UNC_LOC_W).
 double precision,           intent(in)  :: values(:,:,:) !< The data values to be written. Should in standard FM order (1d/2d/3d node/link conventions, @see m_flow).
@@ -3857,12 +3859,12 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    end if
 
 
-   call realloc(mapids%id_const, (/ 4, NUMCONST/), keepExisting=.false.)
+   call realloc(mapids%id_const, (/ MAX_ID_VAR, NUMCONST/), keepExisting=.false.)
    
    ! DEBUG
    if (jasedtranspveldebug>0) then
-      call realloc(mapids%id_xsedflux, (/ 4, NUMCONST/), keepExisting=.false., fill = -1)
-      call realloc(mapids%id_ysedflux, (/ 4, NUMCONST/), keepExisting=.false., fill = -1)
+      call realloc(mapids%id_xsedflux, (/ MAX_ID_VAR, NUMCONST/), keepExisting=.false., fill = -1)
+      call realloc(mapids%id_ysedflux, (/ MAX_ID_VAR, NUMCONST/), keepExisting=.false., fill = -1)
    end if
    !\ DEBUG
    
@@ -4026,7 +4028,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       ! Tracers
       if (jamapconst > 0 .and. ITRA1 > 0) then
-         call realloc(mapids%id_const, (/ 4, NUMCONST /), keepExisting=.false., fill = 0)
+         call realloc(mapids%id_const, (/ MAX_ID_VAR, NUMCONST /), keepExisting=.false., fill = 0)
          do j=ITRA1,ITRAN
             tmpstr = const_names(j)
             ! Forbidden chars in NetCDF names: space, /, and more.
@@ -4440,7 +4442,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       if (jamapsed > 0 .and. jased > 0 .and. .not. stm_included) then
          ierr = nf90_def_dim(mapids%ncid, 'nFrac', mxgr, mapids%id_tsp%id_maxfracdim)
          if( .not. allocated(mapids%id_sed) ) then
-            allocate( mapids%id_sed(4,mxgr), mapids%id_ero(4,mxgr) )
+            allocate( mapids%id_sed(MAX_ID_VAR,mxgr), mapids%id_ero(MAX_ID_VAR,mxgr) )
             mapids%id_sed = -1
             mapids%id_ero = -1
          endif

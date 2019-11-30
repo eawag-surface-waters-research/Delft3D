@@ -38,7 +38,7 @@ use m_flowgeom, only : ndx, ndxi
 use m_cell_geometry, only : ndx2d
 use unstruc_model, only : md_classmap_file
 use unstruc_files
-use unstruc_netcdf, only : check_error, t_unc_mapids, unc_close, unc_create, ug_meta_fm, unc_def_var_nonspatial, &
+use unstruc_netcdf, only : check_error, t_unc_mapids, unc_close, unc_create, ug_meta_fm, unc_def_var_nonspatial, MAX_ID_VAR, &
        UNC_LOC_S, unc_def_var_map, unc_write_flowgeom_filepointer_ugrid, unc_put_var_map_byte, unc_put_var_map_byte_timebuffer
 use io_ugrid, only : ug_addglobalatts
 use netcdf
@@ -99,7 +99,7 @@ end subroutine reset_unstruc_netcdf_map_class
 
    integer :: ierr, ndim, i
    integer, parameter :: jabndnd_ = 0 !< Whether to include boundary nodes (1) or not (0). Default: no.
-   integer :: id_class_s1, id_class_hs, id_class_ucmag, id_class_ucdir, tl, var_ids(4)
+   integer :: id_class_s1, id_class_hs, id_class_ucmag, id_class_ucdir, tl, var_ids(MAX_ID_VAR)
    character(len=:), allocatable :: errmsg, tmpstr
    logical :: isLast, need_flush
    double precision, allocatable :: ucdir(:)
@@ -319,7 +319,7 @@ function def_var_classmap_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, inc
    integer,          intent(out)     :: var_id_jumps       !< variable Id for the jumps (only for type 1)
    integer                           :: ierr               !< function result. 0=ok
 
-   integer :: id_class, actual_chunksize, ids(4), ndims(2), i
+   integer :: id_class, actual_chunksize, ids(MAX_ID_VAR), ndims(2), i
    double precision, pointer :: map_classes(:)
    character(len=:), allocatable :: unit
 
@@ -402,7 +402,7 @@ function write_initial_classes(incids, classes, buffer, field, varid_jumps) resu
    type(t_unc_mapids), intent(inout) :: incids       !< class file and other NetCDF ids.
    integer                           :: ierr         !< function result. 0=OK.
 
-   integer :: var_ids(4)
+   integer :: var_ids(MAX_ID_VAR)
 
    ierr = nf90_noerr
 
@@ -431,7 +431,7 @@ function write_changed_classes_update_previous(incids, previous, current, buffer
    type(t_unc_mapids),          intent(inout) :: incids       !< class file and other NetCDF ids.
    integer                                    :: ierr         !< function result. 0=OK.
 
-   integer :: i, cnt, dim, var_ids(4), ti
+   integer :: i, cnt, dim, var_ids(MAX_ID_VAR), ti
    integer(kind=int8), allocatable :: diff(:)
 
    dim = size(previous)
@@ -535,9 +535,9 @@ end function put_flag_attributes
 
 !> helper function to get the variable ids based on its name
 function get_varids(name, incids) result(var_ids)
-   character(len=*),   intent(in) :: name        !< variable name
-   type(t_unc_mapids), intent(in) :: incids      !< class file and other NetCDF ids.
-   integer                        :: var_ids(4)  !< function result: the found variable ids
+   character(len=*),   intent(in) :: name                 !< variable name
+   type(t_unc_mapids), intent(in) :: incids               !< class file and other NetCDF ids.
+   integer                        :: var_ids(MAX_ID_VAR)  !< function result: the found variable ids
 
    if (name == 's1') then
       var_ids = incids%id_s1
