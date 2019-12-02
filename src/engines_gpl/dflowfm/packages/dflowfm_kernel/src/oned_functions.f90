@@ -766,7 +766,7 @@ module m_oned_functions
    !> Set groundLevel and groundStoarge arrays for 1d nodes.
    !! Ground level should not be confused with bed level.
    !! It is defined as:
-   !! * street level for storage nodes that have street storage (storageType is reservoir or closed),
+   !! * street level for storage nodes that have no storage table (and storageType is either reservoir or closed),
    !! * the highest nearby cross section level ("embankment") for other nodes,
    !! * dmiss, i.e. not applicable, if no cross section is defined at the node.
    subroutine set_ground_level_for_1d_nodes(network)
@@ -804,7 +804,7 @@ module m_oned_functions
    ! set for storage nodes that have prescribed street level, i.e. storageType is reservoir or closed
    do i = 1, network%storS%Count
       pSto => network%storS%stor(i)
-      if (pSto%useStreetStorage .and. (.not. pSto%useTable)) then
+      if (.not. pSto%useTable) then
          groundLevel(pSto%gridPoint) = pSto%streetArea%x(1)
          if (pSto%storageType == nt_Closed) then
             groundStorage(i) = 0
