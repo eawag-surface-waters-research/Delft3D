@@ -22482,21 +22482,16 @@ end subroutine unc_write_shp
 
  ! for 1D only
  if (network%loaded .and. ndxi-ndx2d > 0) then
-    if (allocated(groundLevel)) then
-       deallocate(groundLevel)
-    end if
-    allocate(groundLevel(ndxi-ndx2d), stat = ierr)
+    call realloc(groundLevel, ndxi-ndx2d, keepExisting = .false., fill = dmiss, stat = ierr)
     call aerr('groundLevel(ndxi-ndx2d)', ierr, ndxi-ndx2d)
-    groundLevel = dmiss
 
-    if (allocated(volMax)) then
-       deallocate(volMax)
-    end if
-    allocate(volMax(ndxi-ndx2d), stat = ierr)
-    call aerr('volMax(ndxi-ndx2d)', ierr, ndxi-ndx2d)
-    volMax = dmiss
+    call realloc(groundStorage, ndxi-ndx2d, keepExisting = .false., fill = 0, stat = ierr)
+    call aerr('groundStorage(ndxi-ndx2d)', ierr, ndxi-ndx2d)
+
+    call realloc(volMaxUnderground, ndxi-ndx2d, keepExisting = .false., fill = dmiss, stat = ierr)
+    call aerr('volMaxUnderground(ndxi-ndx2d)', ierr, ndxi-ndx2d)
  end if
- 
+
  if ( allocated (kfs) ) deallocate(kfs)
  allocate(kfs(ndx))   ;  kfs   = 0
 
@@ -25748,33 +25743,17 @@ end do
 
  ! for 1D only
  if (network%loaded .and. ndxi-ndx2d > 0) then
-    if (allocated(time_wetground)) then
-       deallocate(time_wetground)
-    end if
-    allocate(time_wetground(ndxi), stat = ierr)
-    call aerr('time_wetground(ndxi)', ierr, ndxi)
-    time_wetground = 0d0
+    call realloc(time_wetground, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('time_wetground(ndx)', ierr, ndx)
     
-    if (allocated(freeboard)) then
-       deallocate(freeboard)
-    end if
-    allocate(freeboard(ndxi), stat = ierr)
-    call aerr('freeboard(ndxi)', ierr, ndxi)
-    freeboard = dmiss
+    call realloc(freeboard, ndx, keepExisting = .false., fill = dmiss, stat = ierr)
+    call aerr('freeboard(ndx)', ierr, ndx)
 
-    if (allocated(hsOnGround)) then
-       deallocate(hsOnGround)
-    end if
-    allocate(hsOnGround(ndxi), stat = ierr)
-    call aerr('hsOnGround(ndxi)', ierr, ndxi)
-    hsOnGround = dmiss
+    call realloc(hsOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('hsOnGround(ndx)', ierr, ndx)
 
-    if (allocated(volOnGround)) then
-       deallocate(volOnGround)
-    end if
-    allocate(volOnGround(ndxi), stat = ierr)
-    call aerr('volOnGround(ndxi)', ierr, ndxi)
-    volOnGround = dmiss
+    call realloc(volOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('volOnGround(ndx)', ierr, ndx)
  end if
  
  if (kmx > 0 .and. (ja_timestep_auto == 3 .or. ja_timestep_auto == 4) ) then

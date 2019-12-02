@@ -3279,11 +3279,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     
     if (writeall .or. jamapDepthOnGround /= 0) then
-        call prop_set(prop_ptr, 'output', 'Wrimap_waterdepth_on_ground', jamapDepthOnGround, 'Write waterdepth that is above ground to map file, only for 1D nodes (1: yes, 0: no)')
+        call prop_set(prop_ptr, 'output', 'Wrimap_waterdepth_on_ground', jamapDepthOnGround, 'Write waterdepth that is above ground level to map file, only for 1D nodes (1: yes, 0: no)')
     endif
     
     if (writeall .or. jamapVolOnGround /= 0) then
-        call prop_set(prop_ptr, 'output', 'Wrimap_volume_on_ground', jamapVolOnGround, 'Write volume that is above ground to map file, only for 1D nodes (1: yes, 0: no)')
+        call prop_set(prop_ptr, 'output', 'Wrimap_volume_on_ground', jamapVolOnGround, 'Write volume that is above ground level to map file, only for 1D nodes (1: yes, 0: no)')
     endif
 
     if (jatidep > 0 .and. (writeall .or. jamaptidep /= 1)) then
