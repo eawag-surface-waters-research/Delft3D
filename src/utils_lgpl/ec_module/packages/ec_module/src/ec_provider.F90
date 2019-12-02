@@ -2516,8 +2516,7 @@ module m_ec_provider
          endif
 
          do i = 1, expectedLength
-            call ecProviderSearchStdOrVarnames(fileReaderPtr, ncstdnames, ncvarnames, i, idvar, uservarnames = nccustomnames)
-            
+            call ecProviderSearchStdOrVarnames(fileReaderPtr, i, idvar, ncstdnames, ncvarnames, uservarnames = nccustomnames)
             if (idvar <= 0) then                              ! Variable not found among standard names and variable names either
                if (allocated(nccustomnames)) then
                   nameVar = trim(nccustomnames(i))
@@ -2613,21 +2612,23 @@ module m_ec_provider
                coord_names = ''
                read(coord_name, *,iostat=istat) ( coord_names(j), j=1,ndims )
                do j=1,ndims 
-                  ierror = nf90_inq_varid(fileReaderPtr%fileHandle, trim(coord_names(1)), varid)
-                  if (ierror/=0) then
-                     call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename) &
-                                       //' coordinates variable '//trim(coord_names(2))//' referenced but not found')
-                     return
-                  end if
-                  if (strcmpi(fileReaderPtr%standard_names(varid),'projected_x_coordinate')) then
-                      fgd_id = varid
-                  else if (strcmpi(fileReaderPtr%standard_names(varid),'projected_y_coordinate')) then
-                      sgd_id = varid
-                  else if (strcmpi(fileReaderPtr%standard_names(varid),'longitude')) then
-                      fgd_id = varid
-                  else if (strcmpi(fileReaderPtr%standard_names(varid),'latitude')) then
-                      sgd_id = varid
-                  end if
+                  if (len_trim(coord_names(j))>0) then
+                     call ecProviderSearchStdOrVarnames(fileReaderPtr, j, varid, ncvarnames = coord_names, ignore_case = .True.)
+                     if (varid<0) then
+                        call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename) &
+                                          //' coordinates variable '//trim(coord_names(2))//' referenced but not found')
+                        return
+                     end if
+                     if (strcmpi(fileReaderPtr%standard_names(varid),'projected_x_coordinate')) then
+                         fgd_id = varid
+                     else if (strcmpi(fileReaderPtr%standard_names(varid),'projected_y_coordinate')) then
+                         sgd_id = varid
+                     else if (strcmpi(fileReaderPtr%standard_names(varid),'longitude')) then
+                         fgd_id = varid
+                     else if (strcmpi(fileReaderPtr%standard_names(varid),'latitude')) then
+                         sgd_id = varid
+                     end if
+                   end if
                end do
             end if    ! has non-empty coordinates attribute
 
@@ -2885,44 +2886,72 @@ module m_ec_provider
 
 
       !> search variabele index in standard name or variabele name
-      subroutine ecProviderSearchStdOrVarnames(fileReaderPtr, ncstdnames, ncvarnames, ncIndex, id, uservarnames)
+      subroutine ecProviderSearchStdOrVarnames(fileReaderPtr, ncIndex, id, ncstdnames, ncvarnames, uservarnames, ignore_case)
          type(tEcFileReader), intent(in)                :: fileReaderPtr  !< used for input standard and variable names
-         character(len=*)   , intent(in)                :: ncstdnames(:)  !< list with standard names to compare with
-         character(len=*)   , intent(in)                :: ncvarnames(:)  !< list with variable names to compare with
-         character(len=*)   , intent(in), allocatable   :: uservarnames(:)!< list with user-specified variable names to compare with
          integer            , intent(in)                :: ncIndex        !< index in list
          integer            , intent(out)               :: id             !< found index in list
+         character(len=*)   , intent(in), optional                :: ncstdnames(:)  !< list with standard names to compare with
+         character(len=*)   , intent(in), optional                :: ncvarnames(:)  !< list with variable names to compare with
+         character(len=*)   , intent(in), optional, allocatable   :: uservarnames(:)!< list with user-specified variable names to compare with
+         logical            , intent(in), optional                :: ignore_case    !< optionally perform a case INsensitive lookup
 
+         logical  ::  ic 
          integer  ::  idvar    ! loop counter
          integer  ::  nvar     ! number/loopvariable of varids in this netcdf file 
 
          id = -999
+         ic = .false.
+         if (present(ignore_case)) then
+            ic = ignore_case
+         end if
+               
 
          nvar = size(fileReaderPtr%standard_names, dim=1)
 
          ! Match substituted variable names:
-         if (allocated(uservarnames)) then
+         if (present(uservarnames)) then
+            if (allocated(uservarnames)) then
+               do idvar = 1, nvar
+                  if (match_strings(uservarnames(ncIndex),fileReaderPtr%variable_names(idvar),ic)) then
+                     id = idvar
+                     return
+                  endif
+               enddo
+            endif
+         endif
+         ! Match standard names:
+         if (present(ncstdnames)) then
             do idvar = 1, nvar
-               if (uservarnames(ncIndex) == fileReaderPtr%variable_names(idvar)) then
+               if (match_strings(ncstdnames(ncIndex),fileReaderPtr%standard_names(idvar),ic)) then
                   id = idvar
                   return
                endif
             enddo
          endif
-         ! Match standard names:
-         do idvar = 1, nvar
-            if (ncstdnames(ncIndex) == fileReaderPtr%standard_names(idvar)) then
-               id = idvar
-               return
-            endif
-        enddo
          ! Match variable names:
-         do idvar = 1, nvar
-            if (ncvarnames(ncIndex) == fileReaderPtr%variable_names(idvar)) then
-               id = idvar
-               return
-            endif
-         enddo
+         if (present(ncvarnames)) then
+            do idvar = 1, nvar
+               if (match_strings(ncvarnames(ncIndex),fileReaderPtr%variable_names(idvar),ic)) then
+                  id = idvar
+                  return
+               endif
+            enddo
+         endif
+
+         contains
+
+         function match_strings(s1,s2,ic) result (match)
+         implicit none
+         logical                      :: match 
+         character(len=*), intent(in) :: s1, s2
+         logical, intent(in)          :: ic
+         if (ic) then
+            match = strcmpi(trim(s1),trim(s2))
+         else
+            match = (s1 == s2)
+         endif
+         end function
+
       end subroutine ecProviderSearchStdOrVarnames
 
       ! =======================================================================
