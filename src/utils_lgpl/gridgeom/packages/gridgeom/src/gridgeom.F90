@@ -80,8 +80,8 @@ function ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, oneDmask, i
    
    integer :: ierr
    double precision, intent(in) :: xplLinks(:), yplLinks(:), zplLinks(:)
-   integer, intent(in)          :: inNet
    integer, intent(in)          :: oneDmask(:)
+   integer, intent(in)          :: inNet
    integer, intent(in)          :: c_jsferic
    integer, intent(in)          :: c_jasfer3D
    integer, intent(in)          :: c_jglobe

@@ -2615,16 +2615,25 @@
 
    !input 
    double precision, optional, intent(in) :: xplLinks(:), yplLinks(:), zplLinks(:) ! optional polygons to reduce the area where the 1D2Dlinks are generated
-   integer, optional, intent(in)          :: oneDMask(:), inNet                    !< Masking array for 1d mesh points
+   integer, optional,          intent(in) :: oneDMask(:)                           !< Masking array for 1d mesh points.
+   integer, optional,          intent(in) :: inNet                                 !< Whether or not (1/0) to generate links only for 1D points that lie inside of 2D grid cells. Default: off, 0.
    
    !locals
    integer                                :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML, LL
    integer                                :: i, ierr, k, kcell
    double precision                       :: XN, YN, XK2, YK2, WWU
    integer                                :: insidePolygons, Lfound  
+   integer                                :: inNet_
+
+   ierr = 0
+
+   if (present(inNet)) then
+      inNet_ = inNet
+   else
+      inNet_ = 0
+   end if
 
    i = size(xk) ; deallocate(kc) ; allocate(kc(i))
-   ierr = 0
    call savenet()
    call findcells(0)
 
@@ -2684,12 +2693,10 @@
       if (kc(k) == 1) then  
      
          ! Option for considering only 1d nodes inside 2d net (inNet flag)
-         if(present(inNet)) then
-            if(inNet .eq. 1) then
-               nc1 = 0
-               call incells(xk(k), yk(k), nc1)
-               if (nc1 .eq. 0) cycle
-            endif
+         if (inNet_ == 1) then
+            nc1 = 0
+            call incells(xk(k), yk(k), nc1)
+            if (nc1 .eq. 0) cycle
          endif
 
          IF (allocated(KC) ) then 
