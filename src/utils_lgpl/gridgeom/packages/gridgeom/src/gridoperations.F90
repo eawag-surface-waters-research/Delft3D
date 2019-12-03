@@ -2894,41 +2894,6 @@
 
    end subroutine make1D2Dstreetinletpipes
 
-   function ggeo_unMergedArrayToMergedArray(unMergedOneDmask, merged) result(ierr)
-
-   !inputs
-   integer, intent(in)               :: unMergedOneDmask(:)
-   integer, allocatable, intent(out) :: merged(:)
-   !locals
-   integer                           :: numUnMergedNodes, i, k, maskSize, ierr
-
-   ierr = 0
-   !noting to do
-   if (size(unMergedOneDmask)<=0) then
-      return
-   endif
-
-   !there is no merging to do
-   !numUnMergedNodes = size(mesh1dUnMergedToMergedGridGeom)
-   !if (numUnMergedNodes<=0) then
-   !   maskSize = size(unMergedOneDmask)
-   !   allocate(merged(maskSize))
-   !   do i=1,maskSize
-   !      merged(i) = unMergedOneDmask(i)
-   !   enddo
-   !   return
-   !endif
-   !
-   !allocate(merged(numUnMergedNodes))
-   !do i  = 1,numUnMergedNodes
-   !   k = mesh1dUnMergedToMergedGridGeom(i)
-   !   if(k>0) then
-   !      merged(k) = unMergedOneDmask(i)
-   !   endif
-   !enddo
-
-   end function ggeo_unMergedArrayToMergedArray
-
    !> make dual cell polygon around netnode k
    subroutine make_dual_cell(k, N, rcel, xx, yy, num, Wu1Duni)
       
@@ -3584,7 +3549,7 @@
    !! and potentially more than one 1d2d link per 1d mesh node is created.
    !! 2D cells are connected if they are intersected by a 1D edge. They are
    !! connected to the nearest of the two endpoints of each 1D edge.
-   function ggeo_make1D2Dembeddedlinks(jsferic, jasfer3D, unMergedOneDmask)  result(ierr)
+   function ggeo_make1D2Dembeddedlinks(jsferic, jasfer3D, oneDmask)  result(ierr)
 
    use network_data
    use m_missing,       only: dmiss
@@ -3595,7 +3560,7 @@
    implicit none
    
    integer, intent(in)           :: jsferic, jasfer3D 
-   integer, optional, intent(in) :: unMergedOneDmask(:)
+   integer, optional, intent(in) :: oneDmask(:)
    
    !output
    integer                       :: ierr !< Error status, 0 if success, nonzero in case of error.
@@ -3605,13 +3570,8 @@
    integer                       :: l, cellNetLink, cellId, kn3ty, numnetcells
    double precision              :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
    integer, allocatable          :: isInCell(:)
-   integer, allocatable          :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
    type(kdtree_instance)         :: treeinst
    
-   if (present(unMergedOneDmask)) then
-      ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
-   endif
-
    ierr = 0
    !LC: is this the right type?
    kn3ty = 3
@@ -3684,8 +3644,8 @@
                ldistance = dbdistance(xk(k1), yk(k1), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)
                rdistance = dbdistance(xk(k2), yk(k2), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)     
                if (ldistance<=rdistance .and. isInCell(k1).ge.1) then
-                  if (allocated(mergedOneDmask)) then !again, Fortran does not have logical and two nested if statement are needed
-                     if(mergedOneDmask(k1)==1) then
+                  if (present(oneDmask)) then !again, Fortran does not have logical and two nested if statement are needed
+                     if(oneDmask(k1)==1) then
                         call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k1, newLinkIndex)
                      endif
@@ -3694,8 +3654,8 @@
                      call connectdbn(newPointIndex, k1, newLinkIndex)
                   endif
                else if (ldistance > rdistance .and. isInCell(k2).ge.1) then
-                  if (allocated(mergedOneDmask)) then !again, Fortran does not have logical and two nested if statement are needed
-                     if(mergedOneDmask(k2)==1) then
+                  if (present(oneDmask)) then !again, Fortran does not have logical and two nested if statement are needed
+                     if(oneDmask(k2)==1) then
                         call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k2, newLinkIndex)
                      endif
