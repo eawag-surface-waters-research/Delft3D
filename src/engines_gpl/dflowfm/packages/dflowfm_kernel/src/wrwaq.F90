@@ -2120,6 +2120,7 @@ subroutine waq_prepare_src()
     enddo
     call realloc (waqpar%ifrmtosrc, (/ 2,waqpar%numsrcwaq /), keepexisting=.true., fill=0 )
     call realloc (qsrcwaq, waqpar%numsrcwaq , keepexisting=.true., fill=0.0D0 )
+    call realloc (qsrcwaq0, waqpar%numsrcwaq , keepexisting=.true., fill=0.0D0 )
     nbnd = ndx - ndxi + waqpar%numsrcbnd   ! total number of boudaries
     ibnd = ndx - ndxi                      ! starting number for sink source boundaries
 
