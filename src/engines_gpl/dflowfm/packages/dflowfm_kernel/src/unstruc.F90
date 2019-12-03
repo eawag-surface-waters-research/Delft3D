@@ -36831,7 +36831,6 @@ end subroutine setbobs_fixedweirs
              if (hu(l) > 0) then
                 k1 = ln(1,L)
                 k2 = ln(2,L)
-                teta(L) = 1d0
 
                select case(network%sts%struct(istru)%type)
                case (ST_WEIR)
@@ -36874,7 +36873,6 @@ end subroutine setbobs_fixedweirs
                           q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, bob0(:,L), wetdown, .true.)
                       bl(k1) = min(bl(k1), bob0(1,L))
                       bl(k2) = min(bl(k2), bob0(2,L))
-                      teta(L) = 1d0
 
                    case (ST_UNI_WEIR)
                       fu(L) = pstru%fu(L0)
