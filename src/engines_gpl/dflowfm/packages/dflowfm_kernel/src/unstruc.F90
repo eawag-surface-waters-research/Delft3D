@@ -14561,6 +14561,7 @@ else if (nodval == 27) then
  use unstruc_channel_flow, only: network
  use m_1d_structures, only: initialize_structures_actual_params
  use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround
+ use m_1d_structures
  implicit none
 
  ! locals
@@ -14580,7 +14581,8 @@ else if (nodval == 27) then
  character(len=255) :: rstfile
  character(len=4)   :: EXT
  logical :: jawel, jawelrestart
-
+ integer :: nstrucsg, L0, istru
+ type(t_structure), pointer :: pstru
  integer, external :: flow_initexternalforcings
  double precision, external :: setrho
 
@@ -15726,6 +15728,17 @@ endif
 
  endif
 
+! Set teta for all structure links to 1.0
+ nstrucsg = network%sts%count
+ do istru = 1, nstrucsg
+    pstru => network%sts%struct(istru)
+    do L0 = 1, pstru%numlinks
+       L = iabs(pstru%linknumbers(L0))
+       teta(L) = 1d0
+    enddo
+ enddo
+ 
+          
 
  if (.not. jawelrestart) then
     if (japatm > 0 .and. PavIni > 0) then
@@ -36800,6 +36813,7 @@ end subroutine setbobs_fixedweirs
              if (hu(l) > 0) then
                 k1 = ln(1,L)
                 k2 = ln(2,L)
+                teta(L) = 1d0
 
                select case(network%sts%struct(istru)%type)
                case (ST_WEIR)
@@ -36820,7 +36834,6 @@ end subroutine setbobs_fixedweirs
                       width = min(width, width1)
                       wu(L) = width
 
-                      call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
                       au(L) = pstru%au(L0)
                       call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
                           au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
@@ -36842,6 +36855,7 @@ end subroutine setbobs_fixedweirs
                           q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, bob0(:,L), wetdown, .true.)
                       bl(k1) = min(bl(k1), bob0(1,L))
                       bl(k2) = min(bl(k2), bob0(2,L))
+                      teta(L) = 1d0
 
                    case (ST_UNI_WEIR)
                       fu(L) = pstru%fu(L0)
@@ -36862,7 +36876,6 @@ end subroutine setbobs_fixedweirs
                    case default
                       write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
                       call err_flush()
-                   end select
 
                 ! store computed fu, ru and au in structure object. In case this structure
                 ! is a part of a compound structure this data will be used in computeCompound
