@@ -329,7 +329,6 @@ contains
          
       bu = 1.0d0 / dt + fr
       du = u0m / dt
-      !du = uest*(sign(1d0, smax - smin)) / dt
          
       fum = cu / bu
       rum = du / bu
