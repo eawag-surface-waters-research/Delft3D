@@ -454,8 +454,8 @@ namespace gridgeom.Tests
 
 
             //links
-            int[] arrayfrom = { 2, 8, 7 };
-            int[] arrayto   = { 2, 3, 4 };
+            int[] arrayfrom = { 2, 8 };
+            int[] arrayto   = { 2, 3};
 
             //1. open the file with the 2d mesh
             string c_path = TestHelper.TestFilesDirectoryPath() + @"\2d_ugrid_net.nc";
@@ -564,7 +564,7 @@ namespace gridgeom.Tests
             IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //1d node
             ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
-
+            Assert.That(n1d2dlinks, Is.EqualTo(arrayfrom.Length));
 
             int[] rc_arrayfrom = new int[n1d2dlinks];
             int[] rc_arrayto = new int[n1d2dlinks];

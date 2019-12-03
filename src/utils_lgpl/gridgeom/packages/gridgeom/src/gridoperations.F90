@@ -2768,7 +2768,7 @@
 
    end function make1D2Dinternalnetlinks
    
-   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, unMergedOneDmask)      !
+   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, OneDMask)      !
 
    use m_missing
    use m_polygon
@@ -2781,7 +2781,7 @@
 
    !dfm might have already allocated xpl, ypl, zpl
    double precision, optional, intent(in)  :: xplRoofs(:), yplRoofs(:), zplRoofs(:)
-   integer, optional, intent(in)           :: unMergedOneDmask(:)                !< Masking array for 1d mesh points, unmerged nodes
+   integer, optional, intent(in)           :: OneDMask(:)                !< Masking array for 1d mesh points, unmerged nodes
 
    integer                                 :: inp, n, n1, ip, i, k1, k2, L, k, numUnMergedNodes
    double precision                        :: XN1, YN1, DIST
@@ -2791,7 +2791,6 @@
    character(len=1), external              :: get_dirsep
    integer                                 :: ierr
    integer                                 :: nInputPolygon
-   integer, allocatable                    :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
 
    call findcells(0)
 
@@ -2820,18 +2819,13 @@
       zpl(iiend(i)) = zpl(iistart(i))
    enddo
 
-   !map unMergedOneDmask to merged
-   if (present(unMergedOneDmask)) then
-      ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
-   endif
-   
    allocate( dismin(npoly), nodroof(npoly), nod1D(npoly) )
    dismin = 9d9 ; nodroof = 0 ; nod1D = 0
    do n  = 1,nump
       if (kc(n) > 0) then
          ip = kc(n)
-         if ( present(unMergedOneDmask).and. ierr==0 ) then
-            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, mergedOneDmask)
+         if ( present(OneDMask).and. ierr==0 ) then
+            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, OneDMask)
          else
             call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST)
          endif
@@ -2855,7 +2849,7 @@
 
    end subroutine make1D2Droofgutterpipes
 
-   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, unMergedOneDmask)
+   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, OneDMask)
 
    use m_missing
    use m_polygon
@@ -2870,10 +2864,9 @@
    !allocate and assign samples if input arrays are present
    !when called from DFM xs, ys are already allocated in m_samples
    double precision, optional, intent(in)  :: xsStreetInletPipes(:), ysStreetInletPipes(:)
-   integer, optional, intent(in)           :: unMergedOneDmask(:)           !< Masking array for 1d mesh points, unmerged nodes
+   integer, optional, intent(in)           :: OneDMask(:)           !< Masking array for 1d mesh points, unmerged nodes
    integer                                 :: n,k,n1,k1,l, ierr
    double precision                        :: dist
-   integer, allocatable                    :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
 
    call findcells(0)
    if (present(xsStreetInletPipes)) then
@@ -2883,16 +2876,11 @@
       Ys(1:ns) = ysStreetInletPipes
    endif
 
-   !map unMergedOneDmask to merged
-   if (present(unMergedOneDmask)) then
-      ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
-   endif
-
    do n  = 1,ns
       call incells(Xs(n),Ys(n),K)
       if (k > 0) then
-         if(allocated(mergedOneDmask).and.ierr == 0) then
-            call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist, mergedOneDmask)
+         if(present(OneDMask).and.ierr == 0) then
+            call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist, OneDMask)
          else
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist)
          endif
@@ -3239,13 +3227,14 @@
    implicit none
    type(t_ug_meshgeom), intent(in)      :: meshgeom
    integer, intent(in)                  :: start_index   
-   integer                              :: numk_last, numl_last, ierr, numk_read, l, incrementIndex
+   integer                              :: numk_last, numl_last, ierr, numk_read, l, incrementIndex, numl1d_last
 
    incrementIndex = 0
    ierr = 0
 
    numk_last = LNUMK
    numl_last = LNUML
+   numl1d_last = NUML1D
    numk_read = meshgeom%numnode
    
    if (start_index == 0) incrementIndex = 1;
@@ -3266,9 +3255,11 @@
    !Increase the number of links
    if (meshgeom%numedge>0) NUML = numl_last + meshgeom%numedge
    if (meshgeom%numnode>0) NUMK = numk_last + meshgeom%numnode
+   if (meshgeom%dim==1) numl1d_last = numl1d_last + meshgeom%numedge
 
    LNUMK = NUMK
    LNUML = NUML
+   NUML1D = numl1d_last
 
    end function ggeo_convert
 
@@ -3732,7 +3723,7 @@
    !! and potentially more than one 1d2d link per 1d mesh node is created.
    !! 2D cells are connected if they are at the boundary of the domain and inside the search radius.
    !! They are connected to the nearest 1d point.
-   function ggeo_make1D2DRiverLinks(jsferic, jasfer3D, searchRadius, unMergedOneDmask) result(ierr)
+   function ggeo_make1D2DRiverLinks(jsferic, jasfer3D, searchRadius, oneDMask) result(ierr)
 
    use network_data
    use m_missing,       only: dmiss
@@ -3745,7 +3736,7 @@
    !input
    integer, intent(in)              :: jsferic, jasfer3D
    double precision, intent(in)     :: searchRadius
-   integer, optional, intent(in)    :: unMergedOneDmask(:)
+   integer, optional, intent(in)    :: oneDMask(:)
 
 
    !locals
@@ -3755,18 +3746,13 @@
    integer                       :: l, cellNetLink, cellId, kn3localType, numnetcells
    double precision              :: searchRadiusSquared, maxdistance, prevDistance, currDistance, ldistance, rdistance
    logical                       :: isBoundaryCell
-   integer, allocatable          :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
    type(kdtree_instance)         :: treeinst
 
    ierr = 0
    if (numl1d<=0) then
       return
    endif
-   !map unMergedOneDmask to merged
-   if (present(unMergedOneDmask)) then
-      ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
-   endif
-   
+
    !LC: is this the right type for rivers
    kn3localType = 3 
    call savenet()
@@ -3860,8 +3846,8 @@
       if (kc(cellId).gt.0) then
          newLinkIndex = -1
          !check presence of oneDMask
-         if (allocated(mergedOneDmask)) then !again, Fortran does not have logical and two nested if statement are needed
-            if (mergedOneDmask(kc(cellId))==1) then
+         if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
+            if (oneDMask(kc(cellId))==1) then
                call setnewpoint(xz(cellId), yz(cellId), zk(cellId), newPointIndex)
                call connectdbn(newPointIndex, kc(cellId), newLinkIndex)
             endif
