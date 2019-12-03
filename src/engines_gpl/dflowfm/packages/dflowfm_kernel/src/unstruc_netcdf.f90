@@ -384,6 +384,8 @@ type t_unc_mapids
    integer :: id_freeboard(MAX_ID_VAR)     = -1 !< Variable ID for freeboard
    integer :: id_hs_on_ground(MAX_ID_VAR)  = -1 !< Variable ID for waterdepth when water is above ground level
    integer :: id_vol_on_ground(MAX_ID_VAR) = -1 !< Variable ID for volume when water is above ground level
+   integer :: id_tot_inflow_1d2d(4)        = -1 !< Variable ID for total 1d2d inflow
+   integer :: id_tot_inflow_lat(4)         = -1 !< Variable ID for total lateral inflow
    !
    ! Other
    !
@@ -4630,7 +4632,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs_on_ground, nf90_double, UNC_LOC_S, 'waterdepth_on_ground', '', 'Waterdepth above ground level', 'm', which_meshdim = 1)
          end if
          if (jamapVolOnGround > 0) then ! volume that is above ground level
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, nf90_double, UNC_LOC_S, 'volume_on_ground', '', 'Volume above ground level', 'm', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, nf90_double, UNC_LOC_S, 'volume_on_ground', '', 'Volume above ground level', 'm3', which_meshdim = 1)
+         end if
+         if (jamapTotalInflow1d2d > 0) then ! total 1d2d inflow
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tot_inflow_1d2d, nf90_double, UNC_LOC_S, 'total_inflow_1d2d', '', 'total inflow of all connected 1d2d links at each node', 'm3', which_meshdim = 1)
+         end if
+         if (jamapTotalInflowLat > 0) then ! total lateral inflow
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tot_inflow_lat, nf90_double, UNC_LOC_S, 'total_inflow_lateral', '', 'total inflow of all laterals at each node', 'm3', which_meshdim = 1)
          end if
       end if
       ierr = nf90_enddef(mapids%ncid)
@@ -5863,6 +5871,12 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       end if
       if (jamapVolOnGround > 0) then ! volume that is above ground level
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, UNC_LOC_S, volOnGround)
+      end if
+      if (jamapTotalInflow1d2d > 0) then ! total 1d2d inflow
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tot_inflow_1d2d, UNC_LOC_S, vTot1d2d)
+      end if
+      if (jamapTotalInflowLat > 0) then ! total lateral inflow
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tot_inflow_lat, UNC_LOC_S, vTotLat)
       end if
    end if
 end subroutine unc_write_map_filepointer_ugrid

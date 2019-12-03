@@ -48,6 +48,8 @@ module m_oned_functions
    public updateTimeWetOnGround
    public updateDepthOnGround
    public updateVolOnGround
+   public updateTotalInflow1d2d
+   public updateTotalInflowLat
 
    type, public :: t_gridp2cs
       integer :: num_cross_sections
@@ -962,4 +964,45 @@ module m_oned_functions
    end subroutine updateVolOnGround
 
 
+   !> Update total inflow of all connected 1d2d links for each 1d node with given computational time step
+   subroutine updateTotalInflow1d2d(dts)
+   use m_flow, only: vTot1d2d, q1
+   use m_flowgeom, only: ndx2d, lnx1d, kcu, ln
+   implicit none
+   double precision, intent(in) :: dts ! current computational time step
+   integer                      :: Lf, n
+
+   vTot1d2d = 0d0
+   do Lf = 1, lnx1d
+      if (kcu(Lf) == 3 .or. kcu(Lf) == 4 .or. kcu(Lf) == 5 .or. kcu(Lf) == 7) then
+         n = ln(1, Lf)
+         if (n < ndx2d) then
+            n = ln(2, Lf)
+         end if
+         ! n is now a 1d node
+         vTot1d2d(n) = vTot1d2d(n) + dts*q1(Lf) ! deliberate:respect sign of q1.
+      end if
+   end do
+
+   end subroutine updateTotalInflow1d2d
+   
+   !> Update total inflow of all laterals for each 1d node with given computational time step
+   subroutine updateTotalInflowLat(dts)
+   use m_flow, only: vTotLat
+   use m_flowgeom, only: ndx2d, ndxi
+   use m_wind, only: qqlat
+   implicit none
+   double precision, intent(in) :: dts ! current computational time step
+   integer                      :: n
+
+   vTotLat = 0d0
+   if (allocated(qqlat)) then
+      do n = ndx2d+1, ndxi ! all 1d nodes
+         vTotLat(n) = vTotLat(n) + dts*qqlat(n)
+      end do
+   else
+      return
+   end if
+
+   end subroutine updateTotalInflowLat
 end module m_oned_functions

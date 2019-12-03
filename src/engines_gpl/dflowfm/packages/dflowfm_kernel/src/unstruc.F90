@@ -515,7 +515,7 @@ use dfm_signals
 use m_partitioninfo, only: jampi, sdmn, my_rank
 use m_integralstats
 use m_fourier_analysis
-use m_oned_functions, only: updateFreeboard, updateTimeWetOnGround, updateDepthOnGround, updateVolOnGround
+use m_oned_functions, only: updateFreeboard, updateTimeWetOnGround, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
 use unstruc_channel_flow, only : network
 implicit none
 integer, intent(out) :: iresult
@@ -561,6 +561,12 @@ character(len=255)   :: filename_fou_out
     end if
     if (jamapTimeWetOnGround > 0) then ! need to call updateDepthOnGround before 
        call updateTimeWetOnGround(dts)
+    end if
+    if (jamapTotalInflow1d2d > 0) then
+       call updateTotalInflow1d2d(dts)
+    end if
+    if (jamapTotalInflowLat > 0) then
+       call updateTotalInflowLat(dts)
     end if
  end if
  ! note updateValuesOnObervationStations() in flow_usertimestep
@@ -14560,7 +14566,7 @@ else if (nodval == 27) then
  use m_alloc
  use unstruc_channel_flow, only: network
  use m_1d_structures, only: initialize_structures_actual_params
- use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround
+ use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
  use m_1d_structures
  implicit none
 
@@ -16103,6 +16109,12 @@ endif
     if (jamapVolOnGround > 0) then 
        call set_max_volume_for_1d_nodes() ! set maximal volume
        call updateVolOnGround(network)
+    end if
+    if (jamapTotalInflow1d2d > 0) then
+       call updateTotalInflow1d2d(dts)
+    end if
+    if (jamapTotalInflowLat > 0) then
+       call updateTotalInflowLat(dts)
     end if
  end if
 
@@ -25767,6 +25779,12 @@ end do
 
     call realloc(volOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
     call aerr('volOnGround(ndx)', ierr, ndx)
+    
+    call realloc(vTot1d2d, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('vTot1d2d(ndx)', ierr, ndx)
+    
+    call realloc(vTotLat, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('vTotLat(ndx)', ierr, ndx)
  end if
  
  if (kmx > 0 .and. (ja_timestep_auto == 3 .or. ja_timestep_auto == 4) ) then
