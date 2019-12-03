@@ -899,21 +899,21 @@ module m_oned_functions
 
 
    !> Compute the cumulative time when water is above ground level.
-   !! hsOnGround has to be updated before calling this subroutine
    subroutine updateTimeWetOnGround(dts)
    use m_flowparameters, only: epshs
    use m_flowtimes, only: time_wetground
-   use m_flow, only: hsOnGround
-   use m_flowgeom,only: ndxi, ndx2d
+   use m_flow, only: s1
+   use m_flowgeom,only: ndxi, ndx2d, groundLevel, groundStorage
    implicit none
    double precision, intent(in) :: dts !< computational time step
-   integer                      :: i
+   integer                      :: i, ii
    
    do i = ndx2d+1, ndxi
-      if (hsOnGround(i) .ne. dmiss .and. hsOnGround(i) >= epshs) then
+      ii = i - ndx2d
+      if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1 .and. s1(i) - groundLevel(ii) >= epshs) then
          time_wetground(i) = time_wetground(i) + dts
       end if
-   end do
+   end do 
 
    end subroutine updateTimeWetOnGround
 

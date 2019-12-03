@@ -550,23 +550,8 @@ character(len=255)   :: filename_fou_out
 
  ! for 1D only
  if (network%loaded .and. ndxi-ndx2d > 0) then
-    if (jamapFreeboard > 0) then
-       call updateFreeboard(network)
-    end if
-    if (jamapDepthOnGround > 0 .or. jamapTimeWetOnGround > 0) then
-       call updateDepthOnGround(network)
-    end if
-    if (jamapVolOnGround > 0) then
-       call updateVolOnGround(network)
-    end if
-    if (jamapTimeWetOnGround > 0) then ! need to call updateDepthOnGround before 
+    if (jamapTimeWetOnGround > 0) then
        call updateTimeWetOnGround(dts)
-    end if
-    if (jamapTotalInflow1d2d > 0) then
-       call updateTotalInflow1d2d(dts)
-    end if
-    if (jamapTotalInflowLat > 0) then
-       call updateTotalInflowLat(dts)
     end if
  end if
  ! note updateValuesOnObervationStations() in flow_usertimestep
@@ -16100,21 +16085,8 @@ endif
 
  ! for 1D only
  if (network%loaded .and. ndxi-ndx2d > 0) then
-    if (jamapFreeboard > 0) then
-       call updateFreeboard(network)
-    end if
-    if (jamapDepthOnGround > 0  .or. jamapTimeWetOnGround > 0) then
-       call updateDepthOnGround(network)
-    end if
     if (jamapVolOnGround > 0) then 
-       call set_max_volume_for_1d_nodes() ! set maximal volume
-       call updateVolOnGround(network)
-    end if
-    if (jamapTotalInflow1d2d > 0) then
-       call updateTotalInflow1d2d(dts)
-    end if
-    if (jamapTotalInflowLat > 0) then
-       call updateTotalInflowLat(dts)
+       call set_max_volume_for_1d_nodes() ! set maximal volume, it will be used to update the volume on ground level for the output
     end if
  end if
 
@@ -18014,6 +17986,9 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
  use m_reduce,        only : nocgiter
  use m_partitioninfo, only : ndomains, jampi, my_rank
  use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src
+ use m_flowgeom, only: ndx2d, ndxi
+ use unstruc_channel_flow, only : network
+ use m_oned_functions, only: updateFreeboard, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
 
 #ifdef _OPENMP
  use omp_lib
@@ -18055,6 +18030,25 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
    if (ti_map > 0 .or. ti_mpt(1) > 0) then
      if (comparereal(tim, time_map, eps10) >= 0) then
+        ! update for output, only for 1D
+        if (network%loaded .and. ndxi-ndx2d > 0) then
+           if (jamapFreeboard > 0) then
+              call updateFreeboard(network)
+           end if
+           if (jamapDepthOnGround > 0) then
+              call updateDepthOnGround(network)
+           end if
+           if (jamapVolOnGround > 0) then
+              call updateVolOnGround(network)
+           end if
+           if (jamapTotalInflow1d2d > 0) then
+              call updateTotalInflow1d2d(dts)
+           end if
+           if (jamapTotalInflowLat > 0) then
+              call updateTotalInflowLat(dts)
+           end if
+        end if
+
           call wrimap(tim)
 !         if ( jatidep > 0 ) then
 !            call writidep(tim)
