@@ -105,6 +105,11 @@ end subroutine loadNetwork
 end module m_netw
 
 
+!> Toplevel setnodadm routine wraps:
+!! * original setnodadm(), for network_data administration.
+!! * update_flow1d_admin(), to remove any net links from
+!!   the flow1d::network administration, if they were also
+!!   removed from network_data in the first step.
 subroutine setnodadm(jacrosscheck_)
    use gridoperations
    use m_network
@@ -447,7 +452,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
 
    call read_1d_attributes(filenames, network)
    
-   call initialize_1dadmin(network, network%l1d, max(network%l1d, network%l1d+network%brs%count))
+   call initialize_1dadmin(network, network%l1d, network%l1d+network%brs%count)
 
    numk = 0
    numl = 0

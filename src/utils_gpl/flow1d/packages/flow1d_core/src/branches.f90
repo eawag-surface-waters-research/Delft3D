@@ -264,10 +264,13 @@ module m_branch
       call hashfill(brs%hashlist)
    end subroutine fill_hashtable_brs
 
+   !> Sets up the administration for all branches:
+   !! * from/to topology and %grd and %lin discretization points.
    subroutine admin_branch(brs, nlink)
    
-      type (t_branchSet), intent(inout), target :: brs
-      integer, intent(inout) :: nlink
+      type (t_branchSet), target, intent(inout) :: brs   !< Branch set from the network.
+      integer,                    intent(inout) :: nlink !< Total number of links. (Upon input, any existing links from the call site.
+                                                         !< Upon output: total number of links after administering all branches.)
       
       integer ibr, i, ngrid
       type(t_branch), pointer :: pbr

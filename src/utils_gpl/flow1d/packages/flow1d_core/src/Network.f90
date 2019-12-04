@@ -59,7 +59,7 @@ module m_network
    end interface dealloc
    
 
-   ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
+   ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en lin2local uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
    
    type, public :: t_administration_1d
       integer, allocatable          :: lin2str(:)                          !< indirection list, containing structure numbers for flowlinks.
@@ -197,8 +197,8 @@ contains
       use m_GlobalParameters
       
       type(t_network), intent(inout), target :: network
-      integer, intent(in)            :: linall
-      integer, intent(in)            :: gridpointscount
+      integer, intent(in)            :: linall          !< Maximum number of links, used for (re)allocation.
+      integer, intent(in)            :: gridpointscount !< Maximum number of grid points, used for (re)allocation. TODO: not used.
       
       integer :: ilnk
       integer :: igpt
