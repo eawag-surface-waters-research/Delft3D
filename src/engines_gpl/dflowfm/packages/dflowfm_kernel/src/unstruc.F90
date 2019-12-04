@@ -553,6 +553,12 @@ character(len=255)   :: filename_fou_out
     if (jamapTimeWetOnGround > 0) then
        call updateTimeWetOnGround(dts)
     end if
+    if (jamapTotalInflow1d2d > 0) then
+       call updateTotalInflow1d2d(dts)
+    end if
+    if (jamapTotalInflowLat > 0) then
+       call updateTotalInflowLat(dts)
+    end if
  end if
  ! note updateValuesOnObervationStations() in flow_usertimestep
 
@@ -18047,12 +18053,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
            if (jamapVolOnGround > 0) then
               call updateVolOnGround(network)
            end if
-           if (jamapTotalInflow1d2d > 0) then
-              call updateTotalInflow1d2d(dts)
-           end if
-           if (jamapTotalInflowLat > 0) then
-              call updateTotalInflowLat(dts)
-           end if
+           ! NOTE: updateTotalInflow1d2d, updateTotalInflowLat done in flow_finalizesingletimestep().
         end if
 
           call wrimap(tim)
@@ -22516,7 +22517,7 @@ end subroutine unc_write_shp
     call realloc(volMaxUnderground, ndxi-ndx2d, keepExisting = .false., fill = dmiss, stat = ierr)
     call aerr('volMaxUnderground(ndxi-ndx2d)', ierr, ndxi-ndx2d)
  end if
-
+ 
  if ( allocated (kfs) ) deallocate(kfs)
  allocate(kfs(ndx))   ;  kfs   = 0
 
@@ -25779,13 +25780,19 @@ end do
 
     call realloc(volOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
     call aerr('volOnGround(ndx)', ierr, ndx)
-    
+
+    call realloc(qCur1d2d, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('qCur1d2d(ndx)', ierr, ndx)
+
     call realloc(vTot1d2d, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
     call aerr('vTot1d2d(ndx)', ierr, ndx)
-    
+
+    call realloc(qCurLat, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('qCurLat(ndx)', ierr, ndx)
+
     call realloc(vTotLat, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
     call aerr('vTotLat(ndx)', ierr, ndx)
- end if
+end if
  
  if (kmx > 0 .and. (ja_timestep_auto == 3 .or. ja_timestep_auto == 4) ) then
     if (allocated (squ2D)) deallocate (squ2d)

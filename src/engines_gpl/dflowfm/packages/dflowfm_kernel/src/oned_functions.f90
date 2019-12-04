@@ -965,8 +965,9 @@ module m_oned_functions
 
 
    !> Update total net inflow through all connected 1d2d links for each 1d node with given computational time step.
+   !! Value in vTot1d2d is cumulative in time since TStart.
    subroutine updateTotalInflow1d2d(dts)
-   use m_flow, only: vTot1d2d, q1
+   use m_flow, only: vTot1d2d, qCur1d2d, q1
    use m_flowgeom, only: ndx2d, lnx1d, kcu, ln
    implicit none
    double precision, intent(in) :: dts ! current computational time step
@@ -974,7 +975,8 @@ module m_oned_functions
    integer          :: Lf, n
    double precision :: flowdir
 
-   vTot1d2d = 0d0
+   qCur1d2d = 0d0
+   ! Don't reset vTot1d2d
    do Lf = 1, lnx1d
       if (kcu(Lf) == 3 .or. kcu(Lf) == 4 .or. kcu(Lf) == 5 .or. kcu(Lf) == 7) then
          n = ln(1, Lf)
@@ -985,7 +987,8 @@ module m_oned_functions
             flowdir = -1d0 ! Flow link orientation *away from* 1D n
          end if
          ! n is now a 1d node
-         vTot1d2d(n) = vTot1d2d(n) + flowdir*dts*q1(Lf) ! deliberate:respect sign of q1.
+         qCur1d2d(n) = qCur1d2d(n) + flowdir*q1(Lf)
+         vTot1d2d(n) = vTot1d2d(n) + flowdir*q1(Lf)*dts
       end if
    end do
 
@@ -994,17 +997,19 @@ module m_oned_functions
    
    !> Update total inflow of all laterals for each 1d node with given computational time step.
    subroutine updateTotalInflowLat(dts)
-   use m_flow, only: vTotLat
+   use m_flow, only: vTotLat, qCurLat
    use m_flowgeom, only: ndx2d, ndxi
    use m_wind, only: qqlat
    implicit none
    double precision, intent(in) :: dts ! current computational time step
    integer                      :: n
 
-   vTotLat = 0d0
+   qCurLat = 0d0
+   ! Don't reset vTotLat
    if (allocated(qqlat)) then
       do n = ndx2d+1, ndxi ! all 1d nodes
-         vTotLat(n) = vTotLat(n) + dts*qqlat(n)
+         qCurLat(n) = qCurLat(n) + qqlat(n)
+         vTotLat(n) = vTotLat(n) + qqlat(n)*dts
       end do
    else
       return

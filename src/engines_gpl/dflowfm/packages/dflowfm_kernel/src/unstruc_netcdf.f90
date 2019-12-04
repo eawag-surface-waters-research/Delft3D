@@ -384,8 +384,10 @@ type t_unc_mapids
    integer :: id_freeboard(MAX_ID_VAR)     = -1 !< Variable ID for freeboard
    integer :: id_hs_on_ground(MAX_ID_VAR)  = -1 !< Variable ID for waterdepth when water is above ground level
    integer :: id_vol_on_ground(MAX_ID_VAR) = -1 !< Variable ID for volume when water is above ground level
-   integer :: id_tot_inflow_1d2d(MAX_ID_VAR) = -1 !< Variable ID for total 1d2d inflow
-   integer :: id_tot_inflow_lat(MAX_ID_VAR)  = -1 !< Variable ID for total lateral inflow
+   integer :: id_qCur1d2d(MAX_ID_VAR) = -1 !< Variable ID for current total 1d2d inflow (discharge)
+   integer :: id_vTot1d2d(MAX_ID_VAR) = -1 !< Variable ID for cumulative total 1d2d inflow (volume)
+   integer :: id_qCurLat(MAX_ID_VAR)  = -1 !< Variable ID for current total lateral inflow (discharge)
+   integer :: id_vTotLat(MAX_ID_VAR)  = -1 !< Variable ID for cumulative total lateral inflow (volume)
    !
    ! Other
    !
@@ -4635,10 +4637,12 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, nf90_double, UNC_LOC_S, 'volume_on_ground', '', 'Volume above ground level', 'm3', which_meshdim = 1)
          end if
          if (jamapTotalInflow1d2d > 0) then ! total 1d2d inflow
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tot_inflow_1d2d, nf90_double, UNC_LOC_S, 'total_inflow_1d2d', '', 'Total inflow via all connected 1d2d links at each 1D node', 'm3', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCur1d2d, nf90_double, UNC_LOC_S, 'current_total_inflow_1d2d', '', 'Current total inflow via all connected 1d2d links at each 1D node', 'm3 s-1', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTot1d2d, nf90_double, UNC_LOC_S, 'cumulative_total_inflow_1d2d', '', 'Cumulative total inflow via all connected 1d2d links at each 1D node', 'm3', which_meshdim = 1)
          end if
          if (jamapTotalInflowLat > 0) then ! total lateral inflow
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tot_inflow_lat, nf90_double, UNC_LOC_S, 'total_inflow_lateral', '', 'Total inflow via all laterals at each 1D node', 'm3', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCurLat, nf90_double, UNC_LOC_S, 'current_total_inflow_lateral', '', 'Current total inflow via all laterals at each 1D node', 'm3 s-1', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTotLat, nf90_double, UNC_LOC_S, 'cumulative_total_inflow_lateral', '', 'Cumulative total inflow via all laterals at each 1D node', 'm3', which_meshdim = 1)
          end if
       end if
       ierr = nf90_enddef(mapids%ncid)
@@ -5873,10 +5877,12 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, UNC_LOC_S, volOnGround)
       end if
       if (jamapTotalInflow1d2d > 0) then ! total 1d2d inflow
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tot_inflow_1d2d, UNC_LOC_S, vTot1d2d)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCur1d2d, UNC_LOC_S, qCur1d2d)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTot1d2d, UNC_LOC_S, vTot1d2d)
       end if
       if (jamapTotalInflowLat > 0) then ! total lateral inflow
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tot_inflow_lat, UNC_LOC_S, vTotLat)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCurLat, UNC_LOC_S, qCurLat)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTotLat, UNC_LOC_S, vTotLat)
       end if
    end if
 end subroutine unc_write_map_filepointer_ugrid
