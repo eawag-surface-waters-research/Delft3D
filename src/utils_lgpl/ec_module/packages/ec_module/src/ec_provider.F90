@@ -2823,7 +2823,6 @@ module m_ec_provider
                   endif 
                end if
             end if
-            continue ! kan weg
 
             ! -------------------------------------------------------------------------------------------------
 
@@ -2885,14 +2884,14 @@ module m_ec_provider
       end function ecProviderCreateNetcdfItems
 
 
-      !> search variabele index in standard name or variabele name
+      !> Search for a single variabele index in a (NetCDF) dataset, using standard_name values, hardcoded values, or user-defined values.
       subroutine ecProviderSearchStdOrVarnames(fileReaderPtr, ncIndex, id, ncstdnames, ncvarnames, uservarnames, ignore_case)
          type(tEcFileReader), intent(in)                :: fileReaderPtr  !< used for input standard and variable names
-         integer            , intent(in)                :: ncIndex        !< index in list
-         integer            , intent(out)               :: id             !< found index in list
-         character(len=*)   , intent(in), optional                :: ncstdnames(:)  !< list with standard names to compare with
-         character(len=*)   , intent(in), optional                :: ncvarnames(:)  !< list with variable names to compare with
-         character(len=*)   , intent(in), optional, allocatable   :: uservarnames(:)!< list with user-specified variable names to compare with
+         integer            , intent(in)                :: ncIndex        !< index in list(s) ncstdnames, ncvarnames, uservarnames
+         integer            , intent(out)               :: id             !< found index in data set variable list.
+         character(len=*)   , intent(in), optional                :: ncstdnames(:)  !< list with standard names to compare with. Gets last priority.
+         character(len=*)   , intent(in), optional                :: ncvarnames(:)  !< list with predefined variable names to compare with. Gets second priority.
+         character(len=*)   , intent(in), optional, allocatable   :: uservarnames(:)!< list with user-specified variable names to compare with. Gets first priority.
          logical            , intent(in), optional                :: ignore_case    !< optionally perform a case INsensitive lookup
 
          logical  ::  ic 
@@ -2940,11 +2939,12 @@ module m_ec_provider
 
          contains
 
+         !> Determines whether two strings are equal, optionally case-INsensitive.
          function match_strings(s1,s2,ic) result (match)
          implicit none
          logical                      :: match 
-         character(len=*), intent(in) :: s1, s2
-         logical, intent(in)          :: ic
+         character(len=*), intent(in) :: s1, s2 !< Input strings to be compared.
+         logical, intent(in)          :: ic     !< Whether or not case-INsensitive comparison should be cone.
          if (ic) then
             match = strcmpi(trim(s1),trim(s2))
          else

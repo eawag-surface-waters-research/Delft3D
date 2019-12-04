@@ -1174,7 +1174,7 @@ end subroutine ecInstanceListSourceItems
       integer, intent(out) :: tim_dimid      !< Time dimension
       integer, intent(out) :: series_dimid   !< Series dimension
       integer :: ndim, nvar, ivar, nglobatts, unlimdimid, ierr
-      integer :: dimids(2)
+      integer, allocatable :: dimids(:)
       character(len=NF90_MAX_NAME)  :: units, axis, varname, stdname, cf_role
 
       success = .False.
@@ -1194,10 +1194,12 @@ end subroutine ecInstanceListSourceItems
       tim_dimid = -1
       series_dimid = -1
 
+      allocate(dimids(NF90_MAX_VAR_DIMS))
+
       ierr = nf90_inquire(ncid, ndim, nvar, nglobatts, unlimdimid)
       do ivar=1,nvar
-         ierr = nf90_inquire_variable(ncid, ivar, ndims=ndim)                   ! number of variables
-         ierr = nf90_inquire_variable(ncid, ivar, dimids=dimids)                ! number of variables
+         ierr = nf90_inquire_variable(ncid, ivar, ndims=ndim)                   ! number of dimensions of this variable
+         ierr = nf90_inquire_variable(ncid, ivar, dimids=dimids)
          cf_role=''
          ierr = nf90_get_att(ncid, ivar, 'cf_role', cf_role)
          if (strcmpi(cf_role,'timeseries_id')) then 

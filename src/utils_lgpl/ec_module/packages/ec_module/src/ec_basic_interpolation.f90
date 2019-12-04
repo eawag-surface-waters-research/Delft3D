@@ -1207,12 +1207,14 @@
    subroutine nearest_neighbour(Nc, xc, yc, Mn, dmiss, XS, YS, MSAM, jsferic, jasfer3D)
    implicit none
 
-   integer,                         intent(in)  :: Nc       !< number of points to be interpolated
-   real(kind=hp)   , dimension(Nc), intent(in)  :: xc, yc   !< point coordinates
-   integer         , dimension(Nc), intent(out) :: Mn       !< source index for each target point
-   real(kind=hp)   , intent(in)                 :: dmiss
-   real(kind=hp)   , intent(in)                 :: XS(:), YS(:)
-   integer, intent(in)                          :: MSAM, jsferic, jasfer3D
+   integer,                      intent(in   ) :: Nc       !< number of points to be interpolated
+   real(kind=hp), dimension(Nc), intent(in   ) :: xc, yc   !< point coordinates of target grid points
+   integer,       dimension(Nc), intent(  out) :: Mn       !< source index for each target point
+   real(kind=hp),                intent(in   ) :: dmiss    !< Missing value inside xc, yx (if any).
+   real(kind=hp),                intent(in   ) :: XS(:), YS(:) !< point coordinates of source data points
+   integer,                      intent(in   ) :: MSAM     !< Number of points in source data point set.
+   integer,                      intent(in   ) :: jsferic  !< Whether or not (1/0) input coordinates are spherical or not.
+   integer,                      intent(in   ) :: jasfer3D !< Whether or not 3D distance calculation must be done, across the globe surface.
    integer :: k,m
    real(kind=hp) :: dist, mindist
 

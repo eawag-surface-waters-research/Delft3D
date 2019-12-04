@@ -937,7 +937,6 @@ logical function initboundaryblocksforcings(filename)
  double precision, allocatable :: xcoordinates(:), ycoordinates(:)
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
- integer                      :: ftype 
 
  if (allocated(xdum  )) deallocate(xdum, ydum, kdum) !, xy2dum)
  allocate ( xdum(1), ydum(1), kdum(1)) !, xy2dum(2,1) , stat=ierr)
@@ -1234,16 +1233,16 @@ logical function initboundaryblocksforcings(filename)
           cycle
        end if
 
-       call prop_get_string(node_ptr, '', 'forcingfiletype', forcingfiletype, retVal)
+       call prop_get_string(node_ptr, '', 'forcingFileType', forcingfiletype, retVal)
        if (.not. retVal) then
-          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingfiletype'' is missing.'
+          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingFileType'' is missing.'
           call warn_flush()
           cycle
        end if
 
-       call prop_get_string(node_ptr, '', 'forcingfile', forcingfile , retVal)
+       call prop_get_string(node_ptr, '', 'forcingFile', forcingfile , retVal)
        if (.not. retVal) then
-          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingfile'' is missing.'
+          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingFile'' is missing.'
           call warn_flush()
           cycle
        else
@@ -1271,14 +1270,15 @@ logical function initboundaryblocksforcings(filename)
        select case (trim(str_tolower(forcingfiletype)))
        case ('bcascii')
           filetype = bcascii
-          fmmethod=spaceandtime
+          fmmethod = spaceandtime
+          ! NOTE: Currently, we only support name=global meteo in.bc files, later maybe station time series as well.
           success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx,  'global', filetype=filetype, forcingfile=forcingfile, method=fmmethod, operand='O')
        case ('netcdf')
           filetype = ncgrid
           fmmethod = weightfactors
           success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
        case default
-          write(msgbuf, '(a)') 'Unknown forcingfiletype '''// trim(forcingfiletype) //' in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'
+          write(msgbuf, '(a)') 'Unknown forcingFileType '''// trim(forcingfiletype) //' in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'
           call warn_flush()
           cycle
        end select

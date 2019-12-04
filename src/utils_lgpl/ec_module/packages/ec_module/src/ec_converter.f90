@@ -401,7 +401,7 @@ module m_ec_converter
                end select
                call nearest_neighbour(n_points, targetElementSet%x, targetElementSet%y,  &
                     weight%indices(1,:), ec_undef_hp, &
-                    sourceElementSet%x, sourceElementSet%y, sourceElementSet%n_cols, jsferic, jsferic)
+                    sourceElementSet%x, sourceElementSet%y, sourceElementSet%n_cols, jsferic, 0)
             end do
             success = .true.
             return
