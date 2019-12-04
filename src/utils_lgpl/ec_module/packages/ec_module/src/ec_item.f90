@@ -618,11 +618,10 @@ module m_ec_item
       !> Place holder for setting several properties of an item in one go,
       !> all specified as optional arguments, which should be passed with names 
       !> (RL: Now only used for the vectormax, but easily extensible)
-      function ecItemSetProperty(instancePtr, itemId, quantityPtr, vectorMax) result(success)
+      function ecItemSetProperty(instancePtr, itemId, vectorMax) result(success)
          logical                                 :: success     !< function status
          type(tEcInstance), pointer              :: instancePtr !< intent(in)
          integer,           intent(in)           :: itemId      !< unique Item id
-         type(tEcQuantity), pointer   , optional :: quantityPtr !< quantity pointer
          integer,           intent(in), optional :: vectorMax   !< number of dimensions, in case of multi-dimensional data 
          !
          type(tEcItem), pointer :: itemPtr                      !< Item corresponding to itemId
@@ -632,9 +631,6 @@ module m_ec_item
          !
          itemPtr => ecSupportFindItem(instancePtr, itemId)
          if (associated(itemPtr)) then
-            if (present(quantityPtr)) then 
-               itemPtr%quantityPtr => quantityPtr
-            endif 
             if (present(vectorMax)) then 
                itemPtr%quantityPtr%vectorMax = vectorMax
             endif 
