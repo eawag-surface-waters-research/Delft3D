@@ -515,7 +515,7 @@ use dfm_signals
 use m_partitioninfo, only: jampi, sdmn, my_rank
 use m_integralstats
 use m_fourier_analysis
-use m_oned_functions, only: updateFreeboard, updateTimeWetOnGround, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
+use m_oned_functions, only: updateTimeWetOnGround, updateTotalInflow1d2d, updateTotalInflowLat
 use unstruc_channel_flow, only : network
 implicit none
 integer, intent(out) :: iresult
