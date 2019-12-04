@@ -880,8 +880,10 @@ end subroutine
       type(t_structure), intent(in) :: struc
       
        select case (struc%type)
-          case (ST_CULVERT)
-             get_gate_lower_edge_level_c_loc = c_loc(struc%culvert%valveOpening)
+          case (ST_ORIFICE)
+             get_gate_lower_edge_level_c_loc = c_loc(struc%orifice%openlevel)
+          case (ST_GENERAL_ST)
+             get_gate_lower_edge_level_c_loc = c_loc(struc%generalst%gateLowerEdgeLevel)
           case default
              get_gate_lower_edge_level_c_loc = C_NULL_PTR
        end select
