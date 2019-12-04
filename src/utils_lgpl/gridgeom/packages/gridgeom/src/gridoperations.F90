@@ -2792,6 +2792,8 @@
    integer                                 :: ierr
    integer                                 :: nInputPolygon
 
+   ierr = -1
+      
    call findcells(0)
 
    !allocate and assign polygon if input arrays are present
@@ -2824,7 +2826,7 @@
    do n  = 1,nump
       if (kc(n) > 0) then
          ip = kc(n)
-         if ( present(OneDMask).and. ierr==0 ) then
+         if ( present(OneDMask) ) then
             call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, OneDMask)
          else
             call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST)
@@ -2846,6 +2848,8 @@
    enddo
 
    deallocate( dismin, nodroof, nod1D )
+   
+   ierr = 0
 
    end subroutine make1D2Droofgutterpipes
 
