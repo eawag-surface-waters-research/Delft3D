@@ -1015,12 +1015,12 @@ logical function initboundaryblocksforcings(filename)
           cycle
        end if
 
-       call prop_get_string(node_ptr, '', 'forcingfile ', forcingfile , retVal)
+       call prop_get_string(node_ptr, '', 'forcingFile ', forcingfile , retVal)
        if (retVal) then
           call resolvePath(forcingfile, basedir, forcingfile)
        else
           initboundaryblocksforcings = .false.
-          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingfile'' is missing.'
+          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingFile'' is missing.'
           call warn_flush()
           cycle
        end if
