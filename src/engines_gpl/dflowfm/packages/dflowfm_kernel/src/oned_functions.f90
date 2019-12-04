@@ -970,7 +970,9 @@ module m_oned_functions
    use m_flowgeom, only: ndx2d, lnx1d, kcu, ln
    implicit none
    double precision, intent(in) :: dts ! current computational time step
-   integer                      :: Lf, n
+
+   integer          :: Lf, n
+   double precision :: flowdir
 
    vTot1d2d = 0d0
    do Lf = 1, lnx1d
@@ -978,9 +980,12 @@ module m_oned_functions
          n = ln(1, Lf)
          if (n < ndx2d) then
             n = ln(2, Lf)
+            flowdir = 1d0  ! Flow link orientation *towards* 1D n
+         else
+            flowdir = -1d0 ! Flow link orientation *away from* 1D n
          end if
          ! n is now a 1d node
-         vTot1d2d(n) = vTot1d2d(n) + dts*q1(Lf) ! deliberate:respect sign of q1.
+         vTot1d2d(n) = vTot1d2d(n) + flowdir*dts*q1(Lf) ! deliberate:respect sign of q1.
       end if
    end do
 
