@@ -2868,6 +2868,8 @@
    integer                                 :: n,k,n1,k1,l, ierr
    double precision                        :: dist
 
+   ierr = -1
+   
    call findcells(0)
    if (present(xsStreetInletPipes)) then
       ns = size(xsStreetInletPipes)
@@ -2879,7 +2881,7 @@
    do n  = 1,ns
       call incells(Xs(n),Ys(n),K)
       if (k > 0) then
-         if(present(OneDMask).and.ierr == 0) then
+         if(present(OneDMask)) then
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist, OneDMask)
          else
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist)
@@ -2891,7 +2893,9 @@
          endif
       endif
    enddo
-
+   
+   ierr = 0
+   
    end subroutine make1D2Dstreetinletpipes
 
    !> make dual cell polygon around netnode k
