@@ -1032,7 +1032,7 @@ if(q /= 0) then
 
 !-----------------------------------------------------------------------------------------------
  numnodneg = 0
- if (wrwaqon.and.numsrc.gt.0) then
+ if (wrwaqon.and.allocated(qsrcwaq)) then
     qsrcwaq0 = qsrcwaq ! store current cumulative qsrc for waq at the beginning of this time step
  end if
 
@@ -1097,7 +1097,7 @@ if(q /= 0) then
     if (key == 1) then
        return                                           ! go to user control, timestep too small
     else if (key == 2 ) then
-       if (wrwaqon.and.numsrc.gt.0) then
+       if (wrwaqon.and.allocated(qsrcwaq)) then
           qsrcwaq = qsrcwaq0                            ! restore cumulative qsrc for waq from start of this time step to avoid
        end if                                           ! double accumulation and use of incorrect dts in case of time step reduction
        call setkfs()
