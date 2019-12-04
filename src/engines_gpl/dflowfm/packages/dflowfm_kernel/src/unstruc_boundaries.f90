@@ -890,6 +890,7 @@ logical function initboundaryblocksforcings(filename)
  use unstruc_files, only: resolvePath
  use unstruc_model, only: ExtfileNewMajorVersion, ExtfileNewMinorVersion
  use m_missing
+ use m_ec_parameters, only: provFile_uniform
 
  implicit none
 
@@ -922,6 +923,7 @@ logical function initboundaryblocksforcings(filename)
  character(len=ini_value_len) :: itemtype
  character(len=256)           :: fnam
  character(len=256)           :: basedir
+ character(len=256)           :: sourcemask
  double precision             :: chainage
  double precision             :: tmpval
  integer                      :: iostat, ierr
@@ -1277,6 +1279,27 @@ logical function initboundaryblocksforcings(filename)
           filetype = ncgrid
           fmmethod = weightfactors
           success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
+       case ('uniform')
+          filetype = provFile_uniform
+          fmmethod = spaceandtime
+          !
+          ! For rainfall on roofs:
+          ! targetmaskfile (optional): file with polygons to include/exclude regions for rainfall
+          ! targetmaskselect (optional): 'inside' : rain falls inside polygons (default)
+          !                              'outside': rain falls outside polygons
+          !                              first character is passed through
+          !
+          sourcemask = ' '
+          call prop_get_string(node_ptr, '', 'targetmaskfile', sourcemask , retVal)
+          rec = 'inside'
+          call prop_get_string(node_ptr, '', 'targetmaskselect', rec , retVal)
+          rec = str_tolower(rec)
+          if (len_trim(sourcemask)>0)  then
+             success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O', &
+                                             & srcmaskfile=sourcemask, targetMaskSelect=rec(1:1))
+          else
+             success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
+          endif
        case default
           write(msgbuf, '(a)') 'Unknown forcingFileType '''// trim(forcingfiletype) //' in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'
           call warn_flush()

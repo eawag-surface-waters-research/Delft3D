@@ -174,6 +174,7 @@ module m_ec_converter
          type(tEcMask),             intent(in) :: srcmask     !< new type of the Converter
          !
          type(tEcConverter), pointer :: converterPtr !< Converter corresponding to converterId
+         integer                     :: istat
          !
          success = .false.
          converterPtr => null()
@@ -181,6 +182,9 @@ module m_ec_converter
          converterPtr => ecSupportFindConverter(instancePtr, converterId)
          if (associated(converterPtr)) then
             converterPtr%srcmask = srcmask
+            if (allocated(converterPtr%srcmask%msk)) deallocate (converterPtr%srcmask%msk, stat=istat)
+            allocate(converterPtr%srcmask%msk(size(srcmask%msk)), stat=istat)
+            converterPtr%srcmask%msk = srcmask%msk
             success = .true.
          else
             call setECMessage("ERROR: ec_converter::ecConverterSetMask: Cannot find a Converter with the supplied id.")
@@ -1230,8 +1234,12 @@ module m_ec_converter
                         targetField => connection%targetItemsPtr(1)%ptr%targetFieldPtr
                         do j=jmin, jmax
                            from = (j-1)*(maxlay*n_data)+1
-                           thru = (j  )*(maxlay*n_data) 
-                           targetField%arr1dPtr(from:thru) = valuesT
+                           thru = (j  )*(maxlay*n_data)
+                           if (allocated(connection%converterPtr%srcmask%msk)) then
+                              targetField%arr1dPtr(from:thru) = valuesT * real(connection%converterPtr%srcmask%msk(from:thru),hp)
+                           else
+                              targetField%arr1dPtr(from:thru) = valuesT
+                           endif
                         end do
                         targetField%timesteps = timesteps
                      else if (connection%nTargetItems == maxlay*n_data) then              ! Separate target items   

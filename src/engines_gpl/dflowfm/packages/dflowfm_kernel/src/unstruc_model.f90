@@ -70,7 +70,7 @@ implicit none
     ! 1.00 (2014-09-22): first version of new permissive checking procedure. All (older) unversioned input remains accepted.
 
     integer, parameter :: ExtfileNewMajorVersion = 2
-    integer, parameter :: ExtfileNewMinorVersion = 0
+    integer, parameter :: ExtfileNewMinorVersion = 1
     ! History ExtfileNewVersion:
     ! 2.00 (2019-08-06): enabled specifying "nodeId" in a 1D network node.
 

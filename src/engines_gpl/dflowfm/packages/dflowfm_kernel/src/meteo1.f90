@@ -88,1841 +88,13 @@ module timespace_parameters
                                                              ! keep 2 pointer- and weight sets in memory
 
 end module timespace_parameters
-!> Module which constructs and connects the target Items for FM.
-!! This is the wrapper between FM and the EC-module.
-module m_meteo
-   use m_ec_module
-   use m_ec_provider
-   use MessageHandling
-   use m_itdate, only: itdate
-   use m_flowtimes, only : tzone
-   use m_wind
-   use m_nudge
-   use m_flow
-   use m_waves
-   use m_ship
-   use m_flowexternalforcings
-   use processes_input, only: nofun, funame, funinp, nosfunext, sfunname, sfuninp
-   use unstruc_messages
-   use time_module
-   use m_observations
-   use string_module
-   use m_sediment, only: stm_included, stmpar
-   
-   implicit none
-   
-   type(tEcInstance), pointer, save :: ecInstancePtr !< FM's instance of the EC-module.
-   character(maxMessageLen) :: message !< EC's message, to be passed to FM's log.
-   !
-   integer, dimension(:), allocatable, target :: item_tracerbnd              !< dim(numtracers)
-   integer, dimension(:), allocatable, target :: item_sedfracbnd             !< dim(numfracs)   ! JRE DEBUG sedfrac
-   integer, dimension(:), allocatable, target :: item_waqfun                 !< dim(nofun)  
-   integer, dimension(:), allocatable, target :: item_waqsfun                !< dim(nosfunext)
-
-   integer, target :: item_windx                                             !< Unique Item id of the ext-file's 'windx' quantity's x-component.
-   integer, target :: item_windy                                             !< Unique Item id of the ext-file's 'windy' quantity's y-component.
-   integer, target :: item_windxy_x                                          !< Unique Item id of the ext-file's 'windxy' quantity's x-component.
-   integer, target :: item_windxy_y                                          !< Unique Item id of the ext-file's 'windxy' quantity's y-component.
-   integer, target :: item_apwxwy_p                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'p'.
-   integer, target :: item_apwxwy_x                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'x'.
-   integer, target :: item_apwxwy_y                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'y'.
-   integer, target :: item_apwxwy_c                                          !< Unique Item id of the ext-file's 'space var Charnock' quantity 'C'.
-   integer, target :: item_waterlevelbnd                                     !< Unique Item id of the ext-file's 'waterlevelbnd' quantity's ...-component.
-   integer, target :: item_atmosphericpressure                               !< Unique Item id of the ext-file's 'atmosphericpressure' quantity
-   integer, target :: item_velocitybnd                                       !< Unique Item id of the ext-file's 'velocitybnd' quantity
-   integer, target :: item_salinitybnd                                       !< Unique Item id of the ext-file's 'salinitybnd' quantity
-   integer, target :: item_temperaturebnd                                    !< Unique Item id of the ext-file's 'temperaturebnd' quantity
-   integer, target :: item_sedimentbnd                                       !< Unique Item id of the ext-file's 'sedimentbnd' quantity
-   integer, target :: item_tangentialvelocitybnd                             !< Unique Item id of the ext-file's 'tangentialvelocitybnd' quantity
-   integer, target :: item_uxuyadvectionvelocitybnd                          !< Unique Item id of the ext-file's 'uxuyadvectionvelocitybnd'
-   integer, target :: item_normalvelocitybnd                                 !< Unique Item id of the ext-file's 'normalvelocitybnd' quantity
-   integer, target :: item_rainfall                                          !< Unique Item id of the ext-file's 'rainfall' quantity
-   integer, target :: item_rainfall_rate                                     !< Unique Item id of the ext-file's 'rainfall_rate' quantity
-   integer, target :: item_qhbnd                                             !< Unique Item id of the ext-file's 'qhbnd' quantity
-   integer, target :: item_shiptxy                                           !< Unique Item id of the ext-file's 'shiptxy' quantity
-   integer, target :: item_movingstationtxy                                  !< Unique Item id of the ext-file's 'movingstationtxy' quantity
-   integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantityxy' quantity
-   integer, target :: item_pump_capacity                                     !< Unique Item id of the structure file's 'pump capacity' quantity
-   integer, target :: item_weir_crestLevel                                   !< Unique Item id of the structure file's 'weir crestLevel' quantity
-   integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantxy' quantity
-   integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
-   integer, target :: item_gateloweredgelevel                                !< Unique Item id of the ext-file's 'gateloweredgelevel' quantity
-   integer, target :: item_generalstructure                                  !< Unique Item id of the ext-file's 'generalstructure' quantity
-   integer, target :: item_lateraldischarge                                  !< Unique Item id of the ext-file's 'generalstructure' quantity
-   
-   integer, target :: item_dacs_dewpoint                                     !< Unique Item id of the ext-file's 'dewpoint' quantity
-   integer, target :: item_dacs_airtemperature                               !< Unique Item id of the ext-file's 'airtemperature' quantity
-   integer, target :: item_dacs_cloudiness                                   !< Unique Item id of the ext-file's 'cloudiness' quantity
-   integer, target :: item_dacs_solarradiation                               !< Unique Item id of the ext-file's 'solarradiation' quantity
-
-   integer, target :: item_dac_dewpoint                                      !< Unique Item id of the ext-file's 'dewpoint' quantity
-   integer, target :: item_dac_airtemperature                                !< Unique Item id of the ext-file's 'airtemperature' quantity
-   integer, target :: item_dac_cloudiness                                    !< Unique Item id of the ext-file's 'cloudiness' quantity
-
-   integer, target :: item_hacs_humidity                                     !< Unique Item id of the ext-file's 'humidity' quantity
-   integer, target :: item_hacs_airtemperature                               !< Unique Item id of the ext-file's 'airtemperature' quantity
-   integer, target :: item_hacs_cloudiness                                   !< Unique Item id of the ext-file's 'cloudiness' quantity
-   integer, target :: item_hacs_solarradiation                               !< Unique Item id of the ext-file's 'solarradiation' quantity
-
-   integer, target :: item_hac_humidity                                      !< Unique Item id of the ext-file's 'humidity' quantity
-   integer, target :: item_hac_airtemperature                                !< Unique Item id of the ext-file's 'airtemperature' quantity
-   integer, target :: item_hac_cloudiness                                    !< Unique Item id of the ext-file's 'cloudiness' quantity
-
-   integer, target :: item_humidity                                          !< 'humidity' quantity
-   integer, target :: item_airtemperature                                    !< 'airtemperature' quantity
-   integer, target :: item_cloudiness                                        !< 'cloudiness' quantity
-   integer, target :: item_solarradiation                                    !< 'solarradiation' quantity
-   
-   integer, target :: item_discharge_salinity_temperature_sorsin             !< Unique Item id of the ext-file's 'discharge_salinity_temperature_sorsin' quantity
-   integer, target :: item_hrms                                              !< Unique Item id of the ext-file's 'item_hrms' quantity
-   integer, target :: item_tp                                                !< Unique Item id of the ext-file's 'item_tp' quantity
-   integer, target :: item_dir                                               !< Unique Item id of the ext-file's 'item_dir' quantity
-   integer, target :: item_fx                                                !< Unique Item id of the ext-file's 'item_fx' quantity
-   integer, target :: item_fy                                                !< Unique Item id of the ext-file's 'item_fy' quantity
-   integer, target :: item_wsbu                                              !< Unique Item id of the ext-file's 'item_wsbu' quantity
-   integer, target :: item_wsbv                                              !< Unique Item id of the ext-file's 'item_wsbv' quantity
-   integer, target :: item_mx                                                !< Unique Item id of the ext-file's 'item_mx' quantity
-   integer, target :: item_my                                                !< Unique Item id of the ext-file's 'item_my' quantity
-   integer, target :: item_dissurf                                           !< Unique Item id of the ext-file's 'item_dissurf' quantity
-   integer, target :: item_diswcap                                           !< Unique Item id of the ext-file's 'item_diswcap' quantity
-   integer, target :: item_ubot                                              !< Unique Item id of the ext-file's 'item_ubot' quantity
-
-   integer, target :: item_nudge_tem                                         !< 3D temperature for nudging
-   integer, target :: item_nudge_sal                                         !< 3D salinity for nudging
-   integer, target :: item_dambreakLevelsAndWidthsFromTable                  !< Dambreak heights and widths
-
-   integer, allocatable, dimension(:) :: countbndpoints(:) 
-   !
-   integer :: n_qhbnd !< Number of already connected qh-boundaries.
-   
-   interface ec_gettimespacevalue
-      module procedure ec_gettimespacevalue_by_itemID
-      module procedure ec_gettimespacevalue_by_name
-   end interface ec_gettimespacevalue
-   
-   interface ec_gettimeseries
-      module procedure ec_gettimeseries_by_itemID
-   end interface ec_gettimeseries
-
-   public ec_gettimeseries
-
-   contains
-   
-   !> Initialize the module variables.
-   subroutine init_variables()
-      ecInstancePtr => null()
-      message = ' '
-      !
-      item_windx                                 = ec_undef_int
-      item_windy                                 = ec_undef_int
-      item_windxy_x                              = ec_undef_int
-      item_windxy_y                              = ec_undef_int
-      item_apwxwy_p                              = ec_undef_int
-      item_apwxwy_x                              = ec_undef_int
-      item_apwxwy_y                              = ec_undef_int
-      item_apwxwy_c                              = ec_undef_int
-      item_waterlevelbnd                         = ec_undef_int
-      item_atmosphericpressure                   = ec_undef_int
-      item_velocitybnd                           = ec_undef_int
-      item_salinitybnd                           = ec_undef_int
-      item_temperaturebnd                        = ec_undef_int
-      item_sedimentbnd                           = ec_undef_int
-      item_tangentialvelocitybnd                 = ec_undef_int
-      item_uxuyadvectionvelocitybnd              = ec_undef_int
-      item_normalvelocitybnd                     = ec_undef_int
-      item_rainfall                              = ec_undef_int
-      item_rainfall_rate                         = ec_undef_int
-      item_qhbnd                                 = ec_undef_int
-      item_shiptxy                               = ec_undef_int
-      item_movingstationtxy                      = ec_undef_int
-      item_pump                                  = ec_undef_int
-      item_pump_capacity                         = ec_undef_int
-      item_weir_crestLevel                       = ec_undef_int
-      item_valve1D                               = ec_undef_int    
-      item_lateraldischarge                      = ec_undef_int
-      item_damlevel                              = ec_undef_int
-      item_gateloweredgelevel                    = ec_undef_int
-      item_generalstructure                      = ec_undef_int
-      item_dacs_dewpoint                         = ec_undef_int
-      item_dacs_airtemperature                   = ec_undef_int
-      item_dac_cloudiness                        = ec_undef_int
-      item_dac_dewpoint                          = ec_undef_int
-      item_dac_airtemperature                    = ec_undef_int
-      item_dac_cloudiness                        = ec_undef_int
-      item_dacs_solarradiation                   = ec_undef_int
-      item_hacs_humidity                         = ec_undef_int
-      item_hacs_airtemperature                   = ec_undef_int
-      item_hacs_cloudiness                       = ec_undef_int
-      item_hacs_solarradiation                   = ec_undef_int
-      item_humidity                              = ec_undef_int
-      item_airtemperature                        = ec_undef_int
-      item_cloudiness                            = ec_undef_int
-      item_solarradiation                        = ec_undef_int
-      item_hac_humidity                          = ec_undef_int
-      item_hac_airtemperature                    = ec_undef_int
-      item_hac_cloudiness                        = ec_undef_int
-      item_nudge_tem                             = ec_undef_int
-      item_nudge_sal                             = ec_undef_int
-      item_discharge_salinity_temperature_sorsin = ec_undef_int
-      item_hrms                                  = ec_undef_int
-      item_tp                                    = ec_undef_int
-      item_dir                                   = ec_undef_int
-      item_fx                                    = ec_undef_int
-      item_fy                                    = ec_undef_int
-      item_wsbu                                  = ec_undef_int
-      item_wsbv                                  = ec_undef_int
-      item_mx                                    = ec_undef_int
-      item_my                                    = ec_undef_int
-      item_dissurf                               = ec_undef_int
-      item_diswcap                               = ec_undef_int
-      item_ubot                                  = ec_undef_int
-      item_dambreakLevelsAndWidthsFromTable      = ec_undef_int                    
-      !
-      n_qhbnd = 0
-      !
-      ! tracers
-      if ( allocated(item_tracerbnd) ) deallocate(item_tracerbnd)
-      allocate(item_tracerbnd(numtracers))
-      item_tracerbnd = ec_undef_int
-      !
-      ! JRE DEBUG sedfrac bnd
-      if ( allocated(item_sedfracbnd) ) deallocate(item_sedfracbnd)
-      allocate(item_sedfracbnd(numfracs))
-      item_sedfracbnd = ec_undef_int
-      ! TO ADD: initial concentration field?
-      
-      if ( allocated(item_waqfun) ) deallocate(item_waqfun)
-      allocate(item_waqfun(nofun))
-      item_waqfun = ec_undef_int
-      
-      if ( allocated(item_waqsfun) ) deallocate(item_waqsfun)
-      allocate(item_waqsfun(nosfunext))
-      item_waqsfun = ec_undef_int
-
-      !\ DEBUG sedfrac
-   end subroutine init_variables
-
-   ! ==========================================================================
-   
-   !> Translate FM's meteo1 'filetype' enum to EC's 'provFile' enum.
-   subroutine filetype_fm_to_ec(filetype, ec_filetype)
-   use timespace_parameters
-   implicit none
-      integer, intent(in)  :: filetype
-      integer, intent(out) :: ec_filetype
-      !
-      select case (filetype)
-         case (uniform)             ! 1
-            ec_filetype = provFile_uniform
-         case (unimagdir)           ! 2
-            ec_filetype = provFile_unimagdir
-         case (svwp)                ! 3
-            ec_filetype = provFile_svwp
-         case (arcinfo)             ! 4
-            ec_filetype = provFile_arcinfo
-         case (spiderweb)           ! 5
-            ec_filetype = provFile_spiderweb
-         case (curvi)               ! 6
-            ec_filetype = provFile_curvi
-         case (triangulation)       ! 7
-            ec_filetype = provFile_samples
-         case (triangulationmagdir) ! 8
-            ec_filetype = provFile_triangulationmagdir
-         case (poly_tim)            ! 9
-            ec_filetype = provFile_poly_tim
-         case (ncgrid, ncwave)      ! 11, 14
-            ec_filetype = provFile_netcdf
-         case (ncflow)              ! 12
-            ec_filetype = provFile_undefined ! only used for timespaceinitialfield, no EC yet.
-         case (bcascii)             ! 17
-            ec_filetype = provFile_bc
-         case (node_id)             ! -1
-            ec_filetype = provFile_bc
-         case (fourier)             ! 101
-            ec_filetype = provFile_fourier
-         case default
-            ec_filetype = provFile_undefined
-      end select
-   end subroutine filetype_fm_to_ec
-   
-   ! ==========================================================================
-   
-   !> Translate FM's meteo1 'method' enum to EC's 'interpolate' enum.
-   subroutine method_fm_to_ec(method, ec_method)
-      integer, intent(in)  :: method
-      integer, intent(out) :: ec_method
-
-      integer :: interpMethod, exterpMethod
-
-      interpMethod = mod(method, 100)
-      exterpMethod = method / 100
-      !
-      select case (interpMethod)
-         case (0)
-            ec_method = interpolate_passthrough
-         case (1)
-            ec_method = interpolate_timespace
-         case (2)
-            ec_method = interpolate_spacetime
-         case (3)
-            if (exterpMethod == 0) then
-               ec_method = interpolate_spacetimeSaveWeightFactors
-            else
-               ec_method = extrapolate_spacetimeSaveWeightFactors
-            endif
-         case (4) ! TODO: EB: FM's 4 is inside_polygon method, does EC handle this correctly if FM filetype=10?
-            ec_method = interpolate_space     ! only spatial, inside polygon
-
-         ! TODO: EB: FM does note have an interpolate_time equivalent in its method, only via filetype=uniform
-         !case (5)
-         !   ec_method = interpolate_time
-
-         case (5)
-            ec_method = interpolate_triangle  ! only spatial, triangulation
-         case (6)
-            ec_method = interpolate_unknown   ! Not yet supported: only spatial, averaging
-         !case (7) ! TODO: EB+AvD: index triangulation (for spatial sedmor fields) may be needed later,
-                   ! but now overlaps with interpolate_time_extrapolation_ok (for wave coupling) below.
-         !   ec_method = interpolate_unknown   ! Not yet supported: only spatial, index triangulation
-         case (8)
-            ec_method = interpolate_unknown   ! Not yet supported: only spatial, smoothing
-         case (9)
-            ec_method = interpolate_unknown   ! Not yet supported: only spatial, internal diffusion
-         case (10)
-            ec_method = interpolate_unknown   ! Not yet supported: only initial vertical profiles
-         case (7) ! TODO: EB: FM method 7, where does this come from? ! see hrms method 7
-            ec_method = interpolate_time_extrapolation_ok
-         case default
-            ec_method = interpolate_unknown
-      end select
-   end subroutine method_fm_to_ec
-   
-   ! ==========================================================================
-   
-   !> Translate FM's meteo1 'operand' enum to EC's 'operand' enum.
-   subroutine operand_fm_to_ec(operand, ec_operand)
-      character, intent(in)  :: operand
-      integer,   intent(out) :: ec_operand
-      !
-      select case (operand)
-         case ('O')
-            ec_operand = operand_replace
-         case ('+')
-            ec_operand = operand_add
-         case default
-            ec_operand = operand_undefined
-      end select
-   end subroutine operand_fm_to_ec
-   
-   
-   
-   !> Convert quantity names as given in user input (ext file)
-   !! to accepted Unstruc names (as used in Fortran code)
-   !! Note: for old-style ext quantities, fm_name==input_name, e.g. waterlevelbnd.
-   !subroutine bndname_to_fm(input_name, fm_name)
-   !   character(len=*), intent(in)  :: input_name !< given by the user
-   !   character(len=*), intent(out) :: fm_name    !< known within FM
-   !
-   !   character(len=256) :: tempname
-   !
-   !   fm_name  = input_name
-   !   tempname = input_name 
-   !   call str_upper(tempname)
-   !   call remove_substr(tempname,'_')
-   !   call remove_substr(tempname,'-')
-   !   call remove_substr(tempname,' ')
-   !
-   !   select case (trim(tempname))
-   !   case ('WATERLEVEL','VELOCITY','SALINITY','TEMPERATURE','SEDIMENT','TANGENTIALVELOCITY','NORMALVELOCITY','QH','TRACER') 
-   !      ! These are new-ext-style quantities: FM needs additional 'bnd' behind quantityid
-   !      fm_name = trim(tempname)//'bnd'
-   !      call str_lower(fm_name)
-   !   end select
-   !end subroutine bndname_to_fm
-
-   ! ==========================================================================
-   
-   !> Translate EC's ext.force-file's item name to the integer EC item handle and to
-   !> the data pointer(s), i.e. the array that will contain the values of the target item
-   function fm_ext_force_name_to_ec_item(trname, sfname, waqinput, qidname,                        &
-                                         itemPtr1, itemPtr2, itemPtr3, itemPtr4, &
-                                         dataPtr1, dataPtr2, dataPtr3, dataPtr4  ) result(success)
-      logical                               :: success
-      character(len=*), intent(in)          :: trname, sfname, waqinput
-
-      character(len=*), intent(in)          :: qidname
-     
-      integer,                   pointer    :: itemPtr1, itemPtr2, itemPtr3, itemPtr4
-      real(hp), dimension(:),    pointer    :: dataPtr1, dataPtr2, dataPtr3, dataPtr4
-      
-      ! for tracers:      
-      integer           :: itrac, isf, ifun, isfun
-      integer, external :: findname
-      
-      success = .true.
-      
-      itemPtr1 => null()
-      itemPtr2 => null()
-      itemPtr3 => null()
-      itemPtr4 => null()
-      dataPtr1 => null()
-      dataPtr2 => null()
-      dataPtr3 => null()
-      dataPtr4 => null()
-      select case (trim(qidname))
-         case ('windx')
-            itemPtr1 => item_windx
-            dataPtr1 => wx
-         case ('windy')
-            itemPtr1 => item_windy
-            dataPtr1 => wy
-         case ('windxy', 'stressxy')
-            itemPtr1 => item_windxy_x
-            dataPtr1 => wx
-            itemPtr2 => item_windxy_y
-            dataPtr2 => wy
-         case ('airpressure_windx_windy', 'airpressure_stressx_stressy')
-            itemPtr1 => item_apwxwy_p
-            dataPtr1 => patm
-            itemPtr2 => item_apwxwy_x
-            dataPtr2 => ec_pwxwy_x
-            itemPtr3 => item_apwxwy_y
-            dataPtr3 => ec_pwxwy_y
-         case ('airpressure_windx_windy_charnock')
-            itemPtr1 => item_apwxwy_p
-            dataPtr1 => patm
-            itemPtr2 => item_apwxwy_x
-            dataPtr2 => ec_pwxwy_x
-            itemPtr3 => item_apwxwy_y
-            dataPtr3 => ec_pwxwy_y
-            itemPtr4 => item_apwxwy_c
-            dataPtr4 => ec_pwxwy_c
-         case ('waterlevelbnd', 'neumannbnd', 'riemannbnd', 'outflowbnd')
-            itemPtr1 => item_waterlevelbnd
-            dataPtr1 => zbndz
-         case ('velocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'absgenbnd')
-            itemPtr1 => item_velocitybnd
-            dataPtr1 => zbndu
-         case ('dischargebnd')
-            itemPtr1 => item_velocitybnd
-            dataPtr1 => zbndq
-         case ('salinitybnd')
-            itemPtr1 => item_salinitybnd
-            dataPtr1 => zbnds
-         case ('temperaturebnd')
-            itemPtr1 => item_temperaturebnd
-            dataPtr1 => zbndTM
-         case ('sedimentbnd')
-            itemPtr1 => item_sedimentbnd
-            dataPtr1 => zbndsd
-         case ('tangentialvelocitybnd')
-            itemPtr1 => item_tangentialvelocitybnd
-            dataPtr1 => zbndt
-        case ('uxuyadvectionvelocitybnd')
-            itemPtr1 => item_uxuyadvectionvelocitybnd
-            dataPtr1 => zbnduxy
-        case ('normalvelocitybnd')
-            itemPtr1 => item_normalvelocitybnd
-            dataPtr1 => zbndn
-         case ('airpressure','atmosphericpressure')
-            itemPtr1 => item_atmosphericpressure
-            dataPtr1 => patm
-         case ('rainfall')
-            itemPtr1 => item_rainfall
-            dataPtr1 => rain
-         case ('rainfall_rate')
-            itemPtr1 => item_rainfall_rate
-            dataPtr1 => rain
-         case ('qhbnd')
-            itemPtr1 => item_qhbnd
-            dataPtr1 => qhbndz
-         case ('shiptxy')
-            itemPtr1 => item_shiptxy
-            dataPtr1 => xyship
-         case ('movingstationtxy')
-            itemPtr1 => item_movingstationtxy
-            dataPtr1 => xyobs
-         case ('pump')
-            itemPtr1 => item_pump
-            !dataPtr1      => qpump
-         case ('pump_capacity') ! flow1d pump
-            itemPtr1 => item_pump_capacity
-            dataPtr1  => qpump ! TODO: UNST-2724: needs more thinking, see issue comments.
-         case ('weir_crestLevel') ! flow1d weir
-            itemPtr1 => item_weir_crestLevel
-            ! dataPtr1
-         case ('valve1D')
-            itemPtr1 => item_valve1D
-         case ('damlevel')
-            itemPtr1 => item_damlevel
-         case ('dambreakLevelsAndWidths')      
-            itemPtr1 => item_dambreakLevelsAndWidthsFromTable
-            dataPtr1 => dambreakLevelsAndWidthsFromTable
-         case ('lateral_discharge')
-            itemPtr1 => item_lateraldischarge
-            !dataPtr1 => qplat ! Don't set this here, done in adduniformtimerelation_objects().
-         case ('gateloweredgelevel')
-            itemPtr1 => item_gateloweredgelevel
-            dataPtr1 => zgate
-         case ('generalstructure')
-            itemPtr1 => item_generalstructure
-            dataPtr1 => zcgen
-         case ('humidity_airtemperature_cloudiness')
-            itemPtr1 => item_hac_humidity
-            dataPtr1 => rhum
-            itemPtr2 => item_hac_airtemperature
-            dataPtr2 => tair
-            itemPtr3 => item_hac_cloudiness
-            dataPtr3 => clou
-         case ('humidity_airtemperature_cloudiness_solarradiation')
-            itemPtr1 => item_hacs_humidity
-            dataPtr1 => rhum
-            itemPtr2 => item_hacs_airtemperature
-            dataPtr2 => tair
-            itemPtr3 => item_hacs_cloudiness
-            dataPtr3 => clou
-            itemPtr4 => item_hacs_solarradiation 
-            dataPtr4 => qrad
-         case ('dewpoint_airtemperature_cloudiness')
-            itemPtr1 => item_dac_dewpoint
-            dataPtr1 => rhum                 ! Relative humidity array used to store dewpoints
-            itemPtr2 => item_dac_airtemperature
-            dataPtr2 => tair
-            itemPtr3 => item_dac_cloudiness
-            dataPtr3 => clou
-         case ('dewpoint_airtemperature_cloudiness_solarradiation')
-            itemPtr1 => item_dacs_dewpoint
-            dataPtr1 => rhum                 ! Relative humidity array used to store dewpoints
-            itemPtr2 => item_dacs_airtemperature
-            dataPtr2 => tair
-            itemPtr3 => item_dacs_cloudiness
-            dataPtr3 => clou
-            itemPtr4 => item_dacs_solarradiation 
-            dataPtr4 => qrad
-         case ('humidity')
-            itemPtr1 => item_humidity
-            dataPtr1 => rhum                 ! Relative humidity 
-         case ('airtemperature')
-            itemPtr1 => item_airtemperature
-            dataPtr1 => tair                
-         case ('cloudiness')
-            itemPtr1 => item_cloudiness
-            dataPtr1 => clou                 
-         case ('solarradiation')
-            itemPtr1 => item_solarradiation
-            dataPtr1 => qrad                
-         case ('nudge_salinity_temperature')
-            itemPtr2 => item_nudge_sal
-            dataPtr2 => nudge_sal 
-            itemPtr1 => item_nudge_tem
-            dataPtr1 => nudge_tem            ! Relative humidity array used to store dewpoints
-         case ('discharge_salinity_temperature_sorsin')
-            itemPtr1 => item_discharge_salinity_temperature_sorsin
-            dataPtr1 => qstss
-         case ('hrms')
-            itemPtr1 => item_hrms
-            dataPtr1 => hwavcom
-         case ('tp', 'tps', 'rtp')
-            itemPtr1 => item_tp
-            dataPtr1 => twav
-         case ('dir')
-            itemPtr1 => item_dir
-            dataPtr1 => phiwav
-         case ('fx')
-            itemPtr1 => item_fx
-            dataPtr1 => sxwav
-         case ('fy')
-            itemPtr1 => item_fy
-            dataPtr1 => sywav
-         case ('wsbu')
-            itemPtr1 => item_wsbu
-            dataPtr1 => sbxwav
-         case ('wsbv')
-            itemPtr1 => item_wsbv
-            dataPtr1 => sbywav
-         case ('mx')
-            itemPtr1 => item_mx
-            dataPtr1 => mxwav
-         case ('my')
-            itemPtr1 => item_my
-            dataPtr1 => mywav
-         case ('dissurf')
-            itemPtr1 => item_dissurf
-            dataPtr1 => dsurf
-         case ('diswcap')
-            itemPtr1 => item_diswcap
-            dataPtr1 => dwcap
-         case ('ubot')
-            itemPtr1 => item_ubot
-            dataPtr1 => uorbwav            
-         case ('tracerbnd')
-            ! get tracer (boundary) number
-            itrac = findname(numtracers, trnames, trname)
-            itemPtr1 => item_tracerbnd(itrac)
-            dataPtr1 => bndtr(itrac)%z
-         case ('sedfracbnd') 
-            ! get sediment fraction (boundary) number
-            isf = findname(numfracs, sfnames, sfname)
-            itemPtr1 => item_sedfracbnd(isf)
-            dataPtr1 => bndsf(isf)%z
-         case ('waqfunction') 
-            ! get sediment fraction (boundary) number
-            ifun = findname(nofun, funame, waqinput)
-            itemPtr1 => item_waqfun(ifun)
-            dataPtr1 => funinp(ifun,:)
-         case ('waqsegmentfunction') 
-            ! get sediment fraction (boundary) number
-            isfun = findname(nosfunext, sfunname, waqinput)
-            itemPtr1 => item_waqsfun(isfun)
-            dataPtr1 => sfuninp(isfun,:)
-         case default
-            call mess(LEVEL_FATAL, 'm_meteo::fm_ext_force_name_to_ec_item: Unsupported quantity specified in ext-file (construct target field): '//qidname)
-            success = .false.
-      end select
-   end function fm_ext_force_name_to_ec_item
-   
-   ! ==========================================================================
-   
-   !> Construct and initialize a new Instance of the EC-module.
-   subroutine initialize_ec_module()
-   use m_sferic
-   implicit none
-      ! FM re-initialize call: First destroy the EC-module instance.
-      if (associated(ecInstancePtr)) then
-         if (.not. ecFreeInstance(ecInstancePtr)) then
-            message = dumpECMessageStack(LEVEL_WARN,callback_msg)
-         end if
-      end if
-      ! FM initialize call or second phase of re-initialize call.
-      if (.not. associated(ecInstancePtr)) then
-         call init_variables()
-         if (.not. ecCreateInstance(ecInstancePtr)) then
-            message = dumpECMessageStack(LEVEL_WARN,callback_msg)
-         end if
-      end if
-      if (jsferic == 1) then 
-         ecInstancePtr%coordsystem = EC_COORDS_SFERIC
-      else
-         ecInstancePtr%coordsystem = EC_COORDS_CARTESIAN
-      endif
-
-   end subroutine initialize_ec_module
-   
-   ! ==========================================================================
-   
-   !> Helper function for creating and initializing a target Item.
-   function createItem(instancePtr, itemId, quantityId, elementSetId, fieldId) result(success)
-      logical                          :: success      !< function status
-      type(tEcInstance), pointer       :: instancePtr  !< 
-      integer,           intent(inout) :: itemId       !< Unique Item id.
-      integer,           intent(inout) :: quantityId   !< Unique Quantity id.
-      integer,           intent(inout) :: elementSetId !< Unique ElementSet id.
-      integer,           intent(inout) :: fieldId      !< Unique Field id.
-      !
-      success = .true.
-      if (itemId == ec_undef_int) then                ! if Target Item already exists, do NOT create a new one ... 
-         itemId = ecCreateItem(ecInstancePtr)
-         success              = ecSetItemRole(instancePtr, itemId, itemType_target)
-         if (success) success = ecSetItemQuantity(instancePtr, itemId, quantityId)
-      end if
-      ! ... but we would like to use the newest targetFIELD for this item, since old targetFIELDs can refer to the 
-      ! wrong data location (Arr1DPtr). This happens in the case that the demand-side arrays are reallocated while 
-      ! building the targets! Same is done for the elementset, so we are sure to always connect the latest 
-      ! elementset to this target.
-      if (success) success = ecSetItemElementSet(instancePtr, itemId, elementSetId)
-      if (success) success = ecSetItemTargetField(instancePtr, itemId, fieldId)    
-   end function createItem
-   
-   ! ==========================================================================
-   
-   !> Helper function for initializing a Converter.
-   function initializeConverter(instancePtr, converterId, convtype, operand, method, srcmask, inputptr) result(success)
-      logical                    :: success      !< function status
-      type(tEcInstance), pointer :: instancePtr  !< 
-      integer                    :: converterId  !< 
-      integer                    :: convtype     !< 
-      integer                    :: operand      !< 
-      integer                    :: method       !< 
-      type (tEcMask), optional   :: srcmask      !< 
-      real(hp), pointer, optional:: inputptr
-      !
-      success              = ecSetConverterType(instancePtr, converterId, convtype)
-      if (success) success = ecSetConverterOperand(instancePtr, converterId, operand)
-      if (success) success = ecSetConverterInterpolation(instancePtr, converterId, method)
-      if (present(srcmask)) then
-         if (success) success = ecSetConverterMask(instancePtr, converterId, srcmask)
-      end if
-      if (present(inputptr)) then
-         if (success) success = ecSetConverterInputPointer(instancePtr, converterId, inputptr)
-      end if
-
-   end function initializeConverter
-   
-   ! ==========================================================================
-   
-   !> Helper function for initializing a Connection.
-   function initializeConnection(instancePtr, connectionId, sourceItemId, targetItemId) result(success)
-      logical                          :: success      !< function status
-      type(tEcInstance), pointer       :: instancePtr  !< 
-      integer,           intent(inout) :: connectionId !< 
-      integer,           intent(inout) :: sourceItemId !< 
-      integer,           intent(inout) :: targetItemId !< 
-      !
-      success              = ecAddConnectionSourceItem(instancePtr, connectionId, sourceItemId)
-      if (success) success = ecAddConnectionTargetItem(instancePtr, connectionId, targetItemId)
-      if (success) success = ecAddItemConnection(instancePtr, targetItemId, connectionId)
-   end function initializeConnection
-   
-   ! ==========================================================================
-   
-   !> Helper function for Connection initialization.
-   function checkFileType(actualfiletype, requiredfiletype, name) result(success)
-      logical                  :: success          !< function status
-      integer,      intent(in) :: actualfiletype   !< EC-module's filetype enumeration.
-      integer,      intent(in) :: requiredfiletype !< EC-module's filetype enumeration.
-      character(*), intent(in) :: name             !< Name for the target Quantity.
-      !
-      success = .true.
-      if (.not. actualfiletype == requiredfiletype) then
-         message = 'm_meteo::checkFileType: Unsupported filetype for quantity '//name//'.'
-         success = .false.
-      end if
-   end function checkFileType
-   
-   ! ==========================================================================
-   !> Replacement function for FM's meteo1 'addtimespacerelation' function.
-   logical function ec_addtimespacerelation(name, x, y, mask, vectormax, filename, filetype, method, operand, &
-                                            xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, &
-                                            dtnodal, quiet, varname, maxSearchRadius, &
-                                            tgt_data1, tgt_data2, tgt_data3, tgt_data4,  &
-                                            tgt_item1, tgt_item2, tgt_item3, tgt_item4,  &
-                                            multuni1,  multuni2,  multuni3,  multuni4)
-      use m_ec_module, only: ecFindFileReader, ec_filetype_to_conv_type ! TODO: Refactor this private data access (UNST-703).
-      use m_ec_filereader_read, only: ecParseARCinfoMask
-      use m_flow, only: kmx, kbot, ktop
-      use m_sferic, only: jsferic
-      use m_missing, only: dmiss
-      use m_flowtimes, only: refdate_mjd
-      use string_module, only: str_upper
-
-      character(len=*),                 intent(in)            :: name            !< Name for the target Quantity, possibly compounded with a tracer name.
-      real(hp), dimension(:),           intent(in)            :: x               !< Array of x-coordinates for the target ElementSet.
-      real(hp), dimension(:),           intent(in)            :: y               !< Array of y-coordinates for the target ElementSet.
-      integer,                          intent(in)            :: vectormax       !< Vector max (length of data values at each element location).
-      integer,  dimension(:),           intent(in)            :: mask            !< Array of masking values for the target ElementSet.
-      character(len=*),                 intent(in)            :: filename        !< File name of meteo data file.
-      integer,                          intent(in)            :: filetype        !< FM's filetype enumeration.
-      integer,                          intent(in)            :: method          !< FM's method enumeration.
-      character(len=1),                 intent(in)            :: operand         !< FM's operand enumeration.
-      real(hp),               optional, intent(in)            :: xyen(:,:)       !< FM's distance tolerance / cellsize of ElementSet.
-      real(hp), dimension(:), optional, intent(in),    target :: z               !< FM's array of z/sigma coordinates
-      real(hp), dimension(:), optional, pointer               :: pzmin           !< FM's array of minimal z coordinate
-      real(hp), dimension(:), optional, pointer               :: pzmax           !< FM's array of maximum z coordinate
-      integer,  dimension(:), optional, pointer               :: pkbot  
-      integer,  dimension(:), optional, pointer               :: pktop  
-      integer,                optional, intent(in)            :: targetIndex     !< target position or rank of (complete!) vector in target array
-      character(len=*),       optional, intent(in)            :: forcingfile     !< file containing the forcing data for pli-file 'filename'
-      character(len=*),       optional, intent(in)            :: srcmaskfile     !< file containing mask applicable to the arcinfo source data 
-      real(hp),               optional, intent(in)            :: dtnodal         !< update interval for nodal factors
-      logical,                optional, intent(in)            :: quiet           !< When .true., in case of errors, do not write the errors to screen/dia at the end of the routine.
-      character(len=*),       optional, intent(in)            :: varname         !< variable name within filename
-      real(hp),               optional, intent(in)            :: maxSearchRadius !< max search radius in case method==11
-      real(hp), dimension(:), optional, pointer               :: tgt_data1       !< optional pointer to the storage location for target data 1 field
-      real(hp), dimension(:), optional, pointer               :: tgt_data2       !< optional pointer to the storage location for target data 2 field
-      real(hp), dimension(:), optional, pointer               :: tgt_data3       !< optional pointer to the storage location for target data 3 field
-      real(hp), dimension(:), optional, pointer               :: tgt_data4       !< optional pointer to the storage location for target data 4 field
-      integer,                optional, intent(inout), target :: tgt_item1       !< optional target item ID 1
-      integer,                optional, intent(inout), target :: tgt_item2       !< optional target item ID 2
-      integer,                optional, intent(inout), target :: tgt_item3       !< optional target item ID 3
-      integer,                optional, intent(inout), target :: tgt_item4       !< optional target item ID 4
-      integer,                optional, intent(inout), target :: multuni1        !< multiple uni item ID 1
-      integer,                optional, intent(inout), target :: multuni2        !< multiple uni item ID 2
-      integer,                optional, intent(inout), target :: multuni3        !< item ID 3
-      integer,                optional, intent(inout), target :: multuni4        !< item ID 4
-      !
-      integer :: ec_filetype !< EC-module's enumeration.
-      integer :: ec_convtype !< EC-module's convType_ enumeration.
-      integer :: ec_method   !< EC-module's interpolate_ enumeration.
-      integer :: ec_operand  !< EC-module's operand_ enumeration.
-      !
-      integer :: fileReaderId   !< Unique FileReader id.
-      integer :: quantityId     !< Unique Quantity id.
-      integer :: elementSetId   !< Unique ElementSet id.
-      integer :: fieldId        !< Unique Field id.
-      integer :: fieldId_2      !< Unique Field id.
-      integer :: fieldId_3      !< Unique Field id.
-      integer :: fieldId_4      !< Unique Field id.
-      integer :: converterId    !< Unique Converter id.
-      integer :: connectionId   !< Unique Connection id.
-      integer :: sourceItemId   !< Unique source item id.
-      integer :: sourceItemId_2 !< Unique additional source item id.
-      integer :: sourceItemId_3 !< Unique additional third source item id.
-      integer :: sourceItemId_4 !< Unique additional fourth source item id.
-      integer :: ndx
-      !
-      character(len=maxnamelen)       :: sourceItemName           !< name of source item (as created by provider)
-      character(len=maxnamelen)       :: target_name              !< Unstruc target name derived from user-specified name 
-      character(len=maxnamelen)       :: location                 !< location (name) as specified in the LOCATION field of the new EXT-file
-      integer,                pointer :: targetItemPtr1 => null() !< pointer to the target item id
-      integer,                pointer :: targetItemPtr2 => null() !< pointer to optional second target item id (e.g. in case of windxy)
-      integer,                pointer :: targetItemPtr3 => null() !< pointer to optional third target item id (e.g. in case of spiderweb)
-      integer,                pointer :: targetItemPtr4 => null() !< pointer to optional fourth target item id (e.g. in case of hacs)
-      real(hp), dimension(:), pointer :: dataPtr1       => null() !< Pointer to FM's 1D data arrays.
-      real(hp), dimension(:), pointer :: dataPtr2       => null() !< Pointer to FM's optional extra 1D data array (e.g. in case of windxy)
-      real(hp), dimension(:), pointer :: dataPtr3       => null() !< Pointer to FM's optional third 1D data array (e.g. in case of spiderweb)
-      real(hp), dimension(:), pointer :: dataPtr4       => null() !< Pointer to FM's optional fourth 1D data array (e.g. in case of hacs)
-      type(tEcFileReader)   , pointer :: fileReaderPtr  => null() !< 
-      
-      logical                   :: success
-      logical                   :: quiet_
-      character(len=NAMTRACLEN) :: trname, sfname, qidname
-      character (len=20)        :: waqinput
-      integer, external         :: findname
-      type (tEcMask)            :: srcmask
-      logical                   :: exist, opened, withCharnock, withStress
-      
-      double precision          :: relrow, relcol
-      integer                   :: row0, row1, col0, col1, ncols, nrows, issparse, Ndatasize
-      character(len=128)        :: txt1, txt2, txt3
-      real(hp), pointer         :: inputptr => null()
-
-      call clearECMessage()
-      ec_addtimespacerelation = .false.
-      if (present(quiet)) then
-         quiet_ = quiet
-      else
-         quiet_ = .false. ! Default: print errors at the end of routine, if no success
-      end if
-      
-      ! ========================================================
-      ! Translate FM's enumerations to EC-module's enumerations.
-      ! ========================================================
-      call filetype_fm_to_ec(filetype, ec_filetype)
-      if (ec_filetype == provFile_undefined) then
-         write (msgbuf, '(a,i0,a)') 'm_meteo::ec_addtimespacerelation: Unsupported filetype ''', filetype, &
-                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
-         call err_flush()
-         return
-      end if
-      call method_fm_to_ec(method, ec_method)
-      if (ec_method == interpolate_unknown) then
-         write (msgbuf, '(a,i0,a)') 'm_meteo::ec_addtimespacerelation: Unsupported method ''', method, &
-                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
-         call err_flush()
-         return
-      end if
-      call operand_fm_to_ec(operand, ec_operand)
-      if (ec_operand == operand_undefined) then
-         write (msgbuf, '(a,a,a)') 'm_meteo::ec_addtimespacerelation: Unsupported operand ''', operand, &
-                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
-         call err_flush()
-         return
-      end if
-      
-      ! =================================================
-      ! Convert ext file names to accepted Unstruc names.
-      ! =================================================
-      ! Name conversion: (targetname=qidname==name for all names, except name=tracerbndfoo --> qidname=tracerbnd)
-      qidname = name
-      call get_tracername(name, trname, qidname)
-      call get_sedfracname(name, sfname, qidname)
-      call get_waqinputname(name, waqinput, qidname)
-      target_name = qidname
-
-      call clearECMessage()
-      
-      ! ============================================================
-      ! If BC-Type file, create filereader and source items here
-      ! ============================================================
-      location = filename
-      if (ec_filetype == provFile_bc) then
-         if (.not.ecCreateInitializeBCFileReader(ecInstancePtr, forcingfile, location, qidname, &
-                                                 refdate_mjd, tzone, ec_second, fileReaderId)) then
-             
-            if (.not. quiet_) then
-               message = dumpECMessageStack(LEVEL_WARN, callback_msg)
-            end if
-            message = 'Boundary '''//trim(qidname)//''', location='''//trim(location)//''', file='''//trim(forcingfile)//''' failed!' 
-            call mess(LEVEL_ERROR, message)
-         end if
-!     elseif (ec_filetype == provFile_qh) then
-          
-      else
-               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
-               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
-      ! ============================================================
-      ! For the remaining types, construct the fileReader and source Items here.
-      ! ============================================================
-         ! first see if the file has already been opened
-         inquire(file=trim(fileName), exist = exist, opened = opened)
-         if (opened .and. ec_fileType==provFile_spiderweb) then                    ! double file access not allowed when using the Gnu compiler 
-            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileName)
-            if (.not.associated(fileReaderPtr)) then
-               continue
-            end if
-            fileReaderId = fileReaderPtr%id 
-         else
-               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
-            fileReaderId = ecCreateFileReader(ecInstancePtr)
-            
-            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId) ! TODO: Refactor this private data access (UNST-703).
-      
-            fileReaderPtr%vectormax = vectormax
-      
-            if (present(forcingfile)) then
-               if (present(dtnodal)) then
-                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal/86400.d0)
-               else
-                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
-               end if
-               !message = dumpECMessageStack(LEVEL_WARN,callback_msg)
-               if (.not. success) then
-                  goto 1234
-               end if
-               if (ecAtLeastOnePointIsCorrection) then       ! TODO: Refactor this shortcut (UNST-180).
-                     ecAtLeastOnePointIsCorrection = .false. ! TODO: Refactor this shortcut (UNST-180).
-                     ec_addtimespacerelation = .true.
-                     return
-               end if
-            else
-               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
-               if (name=='qhbnd') then
-                   ec_filetype = provFile_qhtable
-                   success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename(1:index(filename,'.'))//'qh', refdate_mjd, tzone, ec_second, name)
-               else    
-                  if (present(dtnodal)) then
-                     success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal/86400.d0, varname=varname)
-                  else
-                     success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
-                  end if
-                  if (.not. success) then
-                     ! message = ecGetMessage()
-                     ! message = dumpECMessageStack(LEVEL_WARN,callback_msg)
-                     ! NOTE: do all error dumping (if any) at the end of this routine at label 1234
-         
-                     ! NOTE: in relation to WAVE: all calling WAVE-related routines now pass quiet=.true. to this addtimespace routine.
-                     ! When running online with WAVE and the first WAVE calculation is after the first DFlowFM calculation,
-                     ! this message will be generated. This must be a warning: notify the user that DFlowFM is going to do
-                     ! a calculation with zero wave values. This message should be written every time step, until proper
-                     ! wave data is available. The user has to check whether this behaviour is as expected.
-                     goto 1234
-                  end if
-               end if
-            end if
-         end if
-      end if
-
-      ! ==============================
-      ! Construct the target Quantity.
-      ! ==============================
-      quantityId = ecCreateQuantity(ecInstancePtr)
-      if (.not. ecSetQuantity(ecInstancePtr, quantityId, name=target_name, units=' ', vectormax=vectormax)) then
-         goto 1234
-      end if
-
-      ! ================================
-      ! Construct the target ElementSet.
-      ! ================================
-      elementSetId = ecCreateElementSet(ecInstancePtr)
-
-      if (ec_filetype == provFile_poly_tim) then
-            success              = ecSetElementSetType(ecInstancePtr, elementSetId, elmSetType_polytim)
-      else
-         if (jsferic==0) then
-            success              = ecSetElementSetType(ecInstancePtr, elementSetId, elmSetType_cartesian)
-         else
-            success              = ecSetElementSetType(ecInstancePtr, elementSetId, elmSetType_spheric)
-         end if
-      end if
-
-      if (success) success = ecSetElementSetXArray(ecInstancePtr, elementSetId, x)
-      if (success) success = ecSetElementSetYArray(ecInstancePtr, elementSetId, y)
-      if (success) success = ecSetElementSetMaskArray(ecInstancePtr, elementSetId, mask)
-      if (success) success = ecSetElementSetNumberOfCoordinates(ecInstancePtr, elementSetId, size(x))
-      if (present(xyen)) then
-         if (success) success = ecSetElementSetXyen(ecInstancePtr, elementSetId, xyen)
-      end if
-      
-      if (present(z)) then ! 3D
-         if (present(pzmin) .and. present(pzmax)) then       ! implicitly means: target elt z-type == SIGMA
-            if (success) success = ecSetElementSetZArray(ecInstancePtr, elementSetId, z, pzmin=pzmin, pzmax=pzmax, Lpointer_=.true.)
-            if (success) success = ecSetElementSetvptyp(ecInstancePtr, elementSetID, BC_VPTYP_PERCBED) ! sigma layers
-         else if (present(pkbot) .and. present(pktop))  then ! implicitly means: target elt z-type == Z WITH sparse kbot/ktop storage
-            if (success) success = ecSetElementSetZArray(ecInstancePtr, elementSetId, z, Lpointer_=.true.)
-            if (success) success = ecSetElementSetKbotKtop(ecInstancePtr, elementSetId, pkbot, pktop, Lpointer_=.true.)
-            if (success) success = ecSetElementSetvptyp(ecInstancePtr, elementSetID, BC_VPTYP_ZDATUM) ! z-layers
-         else
-            ! ERROR .. TODO: LR
-         end if
-
-         ! add 3D settings if needed
-         if (ec_filetype == provFile_poly_tim .and. (target_name == 'salinitybnd' .or. target_name == 'temperaturebnd' .or. target_name == 'tracerbnd')) then   ! TODO JRE sediment    
-            if (success) success = ecSetElementSetMaskArray(ecInstancePtr, elementSetId, mask)
-            if (success) success = ecSetElementSetNumberOfCoordinates(ecInstancePtr, elementSetId, size(x))
-         end if
-      end if
-      
-      if (.not. success) then
-         goto 1234
-      end if
-      
-      ! ==============================================
-      ! Construct the target field and the target item
-      ! ==============================================
-      ! determine which target item (id) will be created, and which FM data array has to be used
-      ! JRE DEBUG sedfrac
-      if (.not. fm_ext_force_name_to_ec_item(trname, sfname, waqinput, qidname,                                                &
-                                             targetItemPtr1, targetItemPtr2, targetItemPtr3, targetItemPtr4, &
-                                             dataPtr1      , dataPtr2      , dataPtr3      , dataPtr4        )) then
-         return
-      end if
-      continue
-      
-      ! Overrule hard-coded pointers to target data by optional pointers passed in the call     
-      if (present(tgt_data1)) dataPtr1 => tgt_data1
-      if (present(tgt_data2)) dataPtr2 => tgt_data2
-      if (present(tgt_data3)) dataPtr3 => tgt_data3
-      if (present(tgt_data4)) dataPtr4 => tgt_data4
-                                             
-      ! Overrule hard-coded pointers to target items by optional pointers passed in the call     
-      if (present(tgt_item1)) targetItemPtr1 => tgt_item1
-      if (present(tgt_item2)) targetItemPtr2 => tgt_item2
-      if (present(tgt_item3)) targetItemPtr3 => tgt_item3
-      if (present(tgt_item4)) targetItemPtr4 => tgt_item4
-
-      ! Create the field and the target item, and if needed additional ones.
-      fieldId = ecCreateField(ecInstancePtr)
-      success = ecSetField1dArray(ecInstancePtr, fieldId, dataPtr1)
-      if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId, dmiss)
-      if (success) success = createItem(ecInstancePtr, targetItemPtr1, quantityId, elementSetId, fieldId)
-      if (present(multuni1)) then                      ! if multiple-uni item(s) specified:
-         if (multuni1<0) then
-            multuni1=ecInstanceCreateItem(ecInstancePtr)
-            if (.not.ecSetItemRole(ecInstancePtr, multuni1, itemType_target)) return
-         end if
-         connectionId = ecCreateConnection(ecInstancePtr)
-         if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr1)) return        ! connecting source to new converter
-         if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni1)) return              ! connecting multuni1 as target item to the new converter
-         if (.not.ecCopyItemProperty(ecInstancePtr, multuni1, targetItemPtr1, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
-         if (.not.ecAddItemConnection(ecInstancePtr, multuni1, connectionId)) return                    ! adding the new converter to multuni1
-      end if
-      if (associated(targetItemPtr2)) then
-         ! second field (e.g. for 'windxy')
-         fieldId_2 = ecCreateField(ecInstancePtr)
-         if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_2, dataPtr2)
-         if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_2, dmiss)
-         if (success) success = createItem(ecInstancePtr, targetItemPtr2, quantityId, elementSetId, fieldId_2)
-         if (present(multuni2)) then                      ! if multiple-uni item(s) specified:
-            if (multuni2<0) then
-               multuni2=ecInstanceCreateItem(ecInstancePtr)
-               if (.not.ecSetItemRole(ecInstancePtr, multuni2, itemType_target)) return
-            end if
-            connectionId = ecCreateConnection(ecInstancePtr)
-            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr2)) return        ! connecting source to new converter
-            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni2)) return              ! connecting multuni1 as target item to the new converter
-            if (.not.ecCopyItemProperty(ecInstancePtr, multuni2, targetItemPtr2, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
-            if (.not.ecAddItemConnection(ecInstancePtr, multuni2, connectionId)) return                    ! adding the new converter to multuni1
-         end if
-      end if
-      if (associated(targetItemPtr3)) then
-         ! third field (e.g. for 'airpressure_windx_windy'
-         fieldId_3 = ecCreateField(ecInstancePtr)
-         if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_3, dataPtr3)
-         if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_3, dmiss)
-         if (success) success = createItem(ecInstancePtr, targetItemPtr3, quantityId, elementSetId, fieldId_3)
-         if (present(multuni3)) then                      ! if multiple-uni item(s) specified:
-            if (multuni3<0) then
-               multuni3=ecInstanceCreateItem(ecInstancePtr)
-               if (.not.ecSetItemRole(ecInstancePtr, multuni3, itemType_target)) return
-            end if
-            connectionId = ecCreateConnection(ecInstancePtr)
-            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr3)) return        ! connecting source to new converter
-            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni3)) return              ! connecting multuni1 as target item to the new converter
-            if (.not.ecCopyItemProperty(ecInstancePtr, multuni3, targetItemPtr3, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
-            if (.not.ecAddItemConnection(ecInstancePtr, multuni3, connectionId)) return                    ! adding the new converter to multuni1
-         end if
-      end if
-      if (associated(targetItemPtr4)) then
-         ! third field (e.g. for 'humidity_airtemperatur_cloudiness_solarradiation'
-         fieldId_4 = ecCreateField(ecInstancePtr)
-         if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_4, dataPtr4)
-         if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_4, dmiss)
-         if (success) success = createItem(ecInstancePtr, targetItemPtr4, quantityId, elementSetId, fieldId_4)
-         if (present(multuni4)) then                      ! if multiple-uni item(s) specified:
-            if (multuni4<0) then
-               multuni4=ecInstanceCreateItem(ecInstancePtr)
-               if (.not.ecSetItemRole(ecInstancePtr, multuni4, itemType_target)) return
-            end if
-            connectionId = ecCreateConnection(ecInstancePtr)
-            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr4)) return        ! connecting source to new converter
-            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni4)) return              ! connecting multuni1 as target item to the new converter
-            if (.not.ecCopyItemProperty(ecInstancePtr, multuni4, targetItemPtr4, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
-            if (.not.ecAddItemConnection(ecInstancePtr, multuni4, connectionId)) return                    ! adding the new converter to multuni1
-         end if
-      end if
-      
-
-      if (.not. success) then
-         goto 1234
-      end if
-      
-      ! ==========================
-      ! Construct a new Converter.
-      ! ==========================
-      ec_convtype = ec_filetype_to_conv_type(ec_filetype, name)
-      if (ec_convtype == convType_undefined) then
-         call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported converter.')
-         return
-      end if
-      
-      converterId = ecCreateConverter(ecInstancePtr)
-      
-      select case(target_name)
-      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'valve1D', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'lateral_discharge','dambreakLevelsAndWidths')
-         ! for the FM 'target' arrays, the index is provided by the caller
-         if (.not. present(targetIndex)) then
-            message = 'Internal program error: missing targetIndex for quantity '''//trim(target_name)
-            call mess(LEVEL_ERROR, message)
-            return
-         end if
-         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, ec_method)
-         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, targetIndex)
-      case ('qhbnd')
-         ! count qh boundaries
-         n_qhbnd = n_qhbnd + 1
-         inputptr => atqh_all(n_qhbnd)
-         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, interpolate_passthrough, inputptr=inputptr)
-         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
-         ! Each qhbnd polytim file replaces exactly one element in the target data array.
-         ! Converter will put qh value in target_array(n_qhbnd)
-      case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
-            'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy','humidity','airtemperature','cloudiness','solarradiation' )
-         if (present(srcmaskfile)) then 
-            if (ec_filetype == provFile_arcinfo .or. ec_filetype == provFile_curvi) then
-               if (.not.ecParseARCinfoMask(srcmaskfile, srcmask, fileReaderPtr)) then
-                  write (msgbuf, '(3a)') 'Error while reading mask file ''', trim(srcmaskfile),'''.'
-                  call err_flush()
-                  return
-               endif 
-               if (.not.initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method, srcmask=srcmask)) then 
-                  write (msgbuf, '(5a)') 'Error while setting mask to converter (file=''', trim(srcmaskfile), ''', associated with meteo file ''', trim(filename), '''.'
-                  call err_flush()
-                  return
-               end if 
-            end if
-         else
-            if (ec_filetype == provFile_bc .and. target_name=='windxy') then
-                ec_convtype = convType_unimagdir
-            end if    
-            success = initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method)
-         end if
-      case default
-         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method)
-         if (present(targetindex)) then
-            success = ecSetConverterElement(ecInstancePtr, converterId, targetindex)
-         end if
-      end select
-      
-      if (.not. success) then
-         goto 1234
-      end if      
-         
-      ! ================================================================
-      ! Construct a new Connection, and connect source and target Items.
-      ! ================================================================
-      connectionId = ecCreateConnection(ecInstancePtr)
-      
-      if (.not. ecSetConnectionConverter(ecInstancePtr, connectionId, converterId)) then
-         goto 1234
-      end if
-
-      ! determine the source item's name
-      ! note 1: this can be determined (and be improved) when creating the file reader
-      ! note 2: the source item's name is set in the select case switch below. In some cases
-      !         of this switch ('special cases') the source-target connections is established
-      !         immediatly, and sourceItemName is NOT set.
-      !         So the generic 'connect source and target' statements after the switch are
-      !         only executed if sourceItemName IS set.
-      !
-      sourceItemName = ' '
-
-      sourceItemId    = 0
-      sourceItemId_2  = 0
-      sourceItemId_3  = 0
-      sourceItemId_4  = 0
-
-      select case (target_name)
-         case ('shiptxy' , 'movingstationtxy', 'discharge_salinity_temperature_sorsin')
-            if (.not. checkFileType(ec_filetype, provFile_uniform, target_name)) then
-               return
-            end if
-            ! the file reader will have created an item called 'uniform_item'
-            sourceItemName = 'uniform_item'
-         case ('pump','generalstructure','damlevel', 'valve1D','gateloweredgelevel','lateral_discharge','dambreakLevelsAndWidths')
-            if (checkFileType(ec_filetype, provFile_uniform, target_name)) then
-               !
-               ! *.tim file
-               !
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
-               if (sourceItemId==ec_undef_int) then 
-                  ! Add something to the EC message stack about missing source item 
-                  return 
-               endif 
-               if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)) return 
-            else if (checkFileType(ec_filetype, provFile_bc, target_name)) then
-               !
-               ! *.bc file
-               !
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, target_name)
-               if (sourceItemId==ec_undef_int) then 
-                  ! Add something to the EC message stack about missing source item 
-                  return 
-               endif 
-               if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)) return 
-            else if (checkFileType(ec_filetype, provFile_fourier, target_name)) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'period')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'magnitude')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'phase')
-               if ((sourceItemId==ec_undef_int) .or. (sourceItemId_2==ec_undef_int) .or. (sourceItemId_3==ec_undef_int)) then 
-                  ! Add something to the EC message stack about missing source item 
-                  return
-               else 
-                  if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)) return 
-                  if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)) return 
-                  if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)) return 
-               endif 
-            else if (checkFileType(ec_filetype, provFile_poly_tim, target_name)) then
-               sourceItemName = 'polytim_item'
-            else 
-               ! Add something to the EC message stack about mismatching filetype bla bla 
-               return 
-            endif 
-            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)) return 
-            if (.not.ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)) return 
-         case ('qhbnd')
-            if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
-                 (.not. checkFileType(ec_filetype, provFile_qhtable, target_name))  .and.            &
-                 (.not. checkFileType(ec_filetype, provFile_bc, target_name)) ) then
-               return
-            end if
-            if (ec_filetype == provFile_poly_tim) then
-               sourceItemName = 'polytim_item'
-            else if (ec_filetype == provFile_bc .or. ec_filetype == provFile_qhtable) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'discharge')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'waterlevel')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'slope')
-               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'crossing')
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)
-               if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)
-               if (.not. success) then
-                  goto 1234
-               end if
-            end if
-         case ('velocitybnd', 'dischargebnd', 'waterlevelbnd', 'salinitybnd', 'tracerbnd',           &
-               'neumannbnd', 'riemannbnd', 'absgenbnd', 'outflowbnd',                      &
-               'temperaturebnd', 'sedimentbnd', 'tangentialvelocitybnd', 'uxuyadvectionvelocitybnd', & 
-               'normalvelocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    !JRE DEBUG sedfrac
-            if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
-                 (.not. checkFileType(ec_filetype, provFile_bc, target_name))  ) then
-               return
-            end if
-            if (ec_filetype == provFile_poly_tim) then
-               sourceItemName = 'polytim_item'
-            else if (ec_filetype == provFile_bc) then
-               sourceItemName = name
-               call str_upper(sourceItemName)
-            end if
-         case ('rainfall')
-            ! the name of the source item depends on the file reader
-            if (ec_filetype == provFile_uniform) then
-               sourceItemName = 'uniform_item'
-            else if (ec_filetype == provFile_bc) then
-               sourceItemName = 'RAINFALL'
-            else if (ec_filetype == provFile_netcdf) then
-               sourceItemName = 'precipitation_amount'
-            else if (ec_filetype == provFile_curvi) then
-               sourceItemName = 'curvi_source_item_1'
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity rainfall.')
-               return
-            end if
-         case ('rainfall_rate')
-            ! the name of the source item depends on the file reader
-            if (ec_filetype == provFile_uniform) then
-               sourceItemName = 'uniform_item'
-            else if (ec_filetype == provFile_bc) then
-               sourceItemName = 'RAINFALL_RATE'
-            else if (ec_filetype == provFile_netcdf) then
-               sourceItemName = 'rainfall_rate'
-            else if (ec_filetype == provFile_curvi) then
-               sourceItemName = 'curvi_source_item_1'
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity rainfall_rate.')
-               return
-            end if
-         case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')
-            ! the name of the source item created by the file reader will be the same as the ext.force. quant name
-            sourceItemName = target_name
-         case ('airpressure', 'atmosphericpressure')
-            if (ec_filetype == provFile_arcinfo) then
-               sourceItemName = 'wind_p'
-            else if (ec_filetype == provFile_curvi) then
-               sourceItemName = 'curvi_source_item_1'
-            else if (ec_filetype == provFile_uniform) then
-               sourceItemName = 'uniform_item'
-            else if (ec_filetype == provFile_spiderweb) then
-               sourceItemName = 'p_drop'
-            else if (ec_filetype == provFile_netcdf) then
-               ! the arc-info file contains 'air_pressure', which is also the standard_name 
-               sourceItemName  = 'air_pressure'
-            else 
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity wind_p.')
-               return
-            end if
-         case ('windx')
-            ! the name of the source item depends on the file reader
-            if (ec_filetype == provFile_arcinfo) then
-               sourceItemName  = 'wind_u'
-            else if (ec_filetype == provFile_curvi) then
-               sourceItemName = 'curvi_source_item_1'
-            else if (ec_filetype == provFile_uniform) then
-               sourceItemName = 'uniform_item'
-            else if (ec_filetype == provFile_netcdf) then
-               sourceItemName = 'eastward_wind'
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity windx.')
-               return
-            end if
-         case ('windy')
-            ! the name of the source item depends on the file reader
-            if (ec_filetype == provFile_arcinfo) then
-               sourceItemName  = 'wind_v'
-            else if (ec_filetype == provFile_curvi) then
-               sourceItemName = 'curvi_source_item_1'
-            else if (ec_filetype == provFile_uniform) then
-               sourceItemName = 'uniform_item'
-            else if (ec_filetype == provFile_netcdf) then
-               sourceItemName = 'northward_wind'
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity windy.')
-               return
-            end if
-         case ('stressxy')
-            if (ec_filetype == provFile_netcdf) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_eastward_stress')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_northward_stress')
-               if (sourceItemId == ec_undef_int .or. sourceItemId_2 == ec_undef_int) then
-                  goto 1234
-               end if
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: stressxy only implemented for NetCDF.')
-               return
-            end if
-            success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_x)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_y)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_x, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_y, connectionId)
-         case ('windxy')
-            ! special case: m:n converter, (for now) handle here in case switch
-            if (ec_filetype == provFile_unimagdir) then
-               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
-               success = (sourceItemId /= ec_undef_int)
-               if (.not. success) then
-                  goto 1234
-               end if
-            else if (ec_filetype == provFile_uniform) then
-               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
-               success = (sourceItemId /= ec_undef_int)
-               if (.not. success) then
-                  goto 1234
-               end if
-            else if (ec_filetype == provFile_bc) then
-               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'WINDXY')
-               success = (sourceItemId /= ec_undef_int)
-               if (.not. success) then
-                  goto 1234
-               end if
-            else if (ec_filetype == provFile_netcdf) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'eastward_wind')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'northward_wind')
-               success = (sourceItemId /= ec_undef_int .and. sourceItemId_2 /= ec_undef_int)
-               if (.not. success) then
-                  goto 1234
-               end if
-            else if (ec_filetype == provFile_spiderweb) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'windspeed')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'winddirection')
-               success = (sourceItemId /= ec_undef_int .and. sourceItemId_2 /= ec_undef_int)
-               if (.not. success) then
-                  goto 1234
-               end if
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity windxy.')
-               return
-            end if
-            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-            if (sourceItemId_2>0) then
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-            end if
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_x)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_y)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_x, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_y, connectionId)
-         case ('airpressure_windx_windy', 'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy')
-            withCharnock = (target_name == 'airpressure_windx_windy_charnock')
-            withStress = (target_name == 'airpressure_stressx_stressy')
-            ! special case: m:n converter, (for now) handle seperately
-            if (ec_filetype == provFile_curvi) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_1')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_2')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_3')
-            else if (ec_filetype == provFile_spiderweb) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'windspeed')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'winddirection')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'p_drop')
-            else if (ec_filetype == provFile_netcdf) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_pressure')
-               if ( .not. withStress) then
-                  sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'eastward_wind')
-                  sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'northward_wind')
-               else
-                  sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_eastward_stress')
-                  sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_northward_stress')
-               endif
-               if (withCharnock) then
-                  sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'charnock')
-                  if (sourceItemId_4 == ec_undef_int) goto 1234
-               endif
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity ' // trim(target_name) // '.')
-               return
-            end if
-            if (sourceItemId == ec_undef_int .or. sourceItemId_2 == ec_undef_int .or. sourceItemId_3 == ec_undef_int) then
-               goto 1234
-            end if
-            success              = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
-            if (success .and. withCharnock) then
-                         success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
-            endif
-            if (ec_filetype == provFile_curvi .or. ec_filetype == provFile_netcdf) then
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_p)
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_x)
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_y)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_p, connectionId)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_x, connectionId)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_y, connectionId)
-               if (withCharnock) then
-                  if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_c)
-                  if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_c, connectionId)
-               endif
-            else if (ec_filetype == provFile_spiderweb) then
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_x)
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_y)
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_p)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_x, connectionId)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_y, connectionId)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_p, connectionId)
-            end if
-            if (.not. success) then
-               goto 1234
-            end if
-         case ('humidity_airtemperature_cloudiness')
-            ! special case: m:n converter, (for now) handle seperately
-            if (ec_filetype == provFile_curvi .or. ec_filetype == provFile_uniform) then
-               if (ec_filetype == provFile_curvi) then
-                  sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_1')
-                  sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_2')
-                  sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_3')
-                  if (sourceItemId == ec_undef_int .or. sourceItemId_2 == ec_undef_int .or. sourceItemId_3 == ec_undef_int) then
-                     goto 1234
-                  end if
-                  success              = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-                  if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-                  if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
-               else if (ec_filetype == provFile_uniform) then
-                  sourceItemId = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
-                  if (sourceItemId == ec_undef_int) then
-                     goto 1234
-                  end if
-                  success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-               end if
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hac_humidity)
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hac_airtemperature)
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hac_cloudiness)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_hac_humidity, connectionId)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_hac_airtemperature, connectionId)
-               if (success) success = ecAddItemConnection(ecInstancePtr, item_hac_cloudiness, connectionId)
-               if (.not. success) then
-                  goto 1234
-               end if
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity humidity_airtemperature_cloudiness.')
-               return
-            end if
-         case ('humidity_airtemperature_cloudiness_solarradiation')
-            ! special case: m:n converter, (for now) handle seperately
-            if (ec_filetype == provFile_curvi) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_1')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_2')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_3')
-               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_4')
-               if (sourceItemId   == ec_undef_int .or. sourceItemId_2 == ec_undef_int .or. &
-                   sourceItemId_3 == ec_undef_int .or. sourceItemId_4 == ec_undef_int      ) then
-                  goto 1234
-               end if
-               success              = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
-            else if (ec_filetype == provFile_uniform) then
-               sourceItemId = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
-               if (sourceItemId == ec_undef_int) then
-                  goto 1234
-               end if
-               success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-            else if (ec_filetype == provFile_netcdf) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'humidity')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_temperature')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'cloud_area_fraction')
-               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_net_downward_shortwave_flux')
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
-               return
-            end if
-
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hacs_humidity)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hacs_airtemperature)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hacs_cloudiness)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hacs_solarradiation)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_hacs_humidity, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_hacs_airtemperature, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_hacs_cloudiness, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_hacs_solarradiation, connectionId)
-            if (.not. success) then
-               goto 1234
-            end if
-         case ('dewpoint_airtemperature_cloudiness')
-            if (ec_filetype == provFile_netcdf) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'dew_point_temperature')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_temperature')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'cloud_area_fraction')
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
-               if (.not. success) goto 1234
-            else if (ec_filetype == provFile_uniform) then
-               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
-               success = (sourceItemId /= ec_undef_int)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
-               return
-            end if
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dac_dewpoint)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dac_airtemperature)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dac_cloudiness)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_dac_dewpoint, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_dac_airtemperature, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_dac_cloudiness, connectionId)
-         case ('dewpoint_airtemperature_cloudiness_solarradiation')
-            if (ec_filetype == provFile_netcdf) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'dew_point_temperature')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_temperature')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'cloud_area_fraction')
-               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_net_downward_shortwave_flux')
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
-            else if (ec_filetype == provFile_uniform) then
-               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
-               success = (sourceItemId /= ec_undef_int)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
-               return
-            end if
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dacs_dewpoint)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dacs_airtemperature)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dacs_cloudiness)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dacs_solarradiation)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_dewpoint, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_airtemperature, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_cloudiness, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_solarradiation, connectionId)
-         case ('humidity')
-            sourceItemName = 'relative_humidity'
-         case ('airtemperature')
-            sourceItemName = 'air_temperature'
-         case ('cloudiness')
-            sourceItemName = 'cloudfraction'
-         case ('solarradiation')
-            sourceItemName = 'sw_radiation_flux'
-         case ('nudge_salinity_temperature')
-            if (ec_filetype == provFile_netcdf) then
-               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_potential_temperature')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_salinity')
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
-               return
-            end if
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_nudge_tem)
-            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_nudge_sal)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_nudge_tem, connectionId)
-            if (success) success = ecAddItemConnection(ecInstancePtr, item_nudge_sal, connectionId)
-         case ('waqfunction') 
-            if (.not. checkFileType(ec_filetype, provFile_uniform, target_name)) then
-               return
-            end if
-            ! the file reader will have created an item called 'polytim_item'
-            sourceItemName = 'uniform_item'
-         case ('waqsegmentfunction')
-            ! the name of the source item depends on the file reader
-            if (ec_filetype == provFile_netcdf) then
-               sourceItemName = name
-            else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '''//trim(name)//'''')
-               return
-            end if
-         case default
-            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId)
-            if (fileReaderPtr%nitems>=1) then 
-               sourceItemId = fileReaderPtr%items(1)%ptr%id
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
-               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)
-               if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)
-               if (fileReaderPtr%nitems>=2) then
-                  sourceItemId_2 = fileReaderPtr%items(2)%ptr%id
-                  if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-                  if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr2)
-                  if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr2, connectionId)
-                  if (fileReaderPtr%nitems>=3) then
-                     sourceItemId_3 = fileReaderPtr%items(3)%ptr%id
-                     if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
-                     if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr3)
-                     if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr3, connectionId)
-                     if (fileReaderPtr%nitems>=4) then
-                        sourceItemId_4 = fileReaderPtr%items(4)%ptr%id
-                        if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
-                        if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr4)
-                        if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr4, connectionId)
-                     endif                     
-                  endif                     
-               endif                     
-            else                     
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported quantity specified in ext-file (connect source and target): '//trim(target_name)//'.')
-            endif                     
-            return
-      end select
-
-      if (sourceItemName /= ' ') then
-         ! not a special case, connect source and target
-         sourceItemId = ecFindItemInFileReader(ecInstancePtr, fileReaderId, sourceItemName)
-         if (sourceItemId == ec_undef_int) then
-            goto 1234
-         end if
-         if (.not. initializeConnection(ecInstancePtr, connectionId, sourceItemId , targetItemPtr1)) then
-            goto 1234
-         end if
-         if (present(targetIndex)) then
-            if (.not. checkVectorMax(ecInstancePtr, sourceItemId , targetItemPtr1)) then
-               goto 1234
-            endif
-         endif
-      end if
-      
-      success = ecSetConnectionIndexWeights(ecInstancePtr, connectionId)
-            
-      if ( target_name=='nudge_salinity_temperature' ) then
-         call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows, issparse, Ndatasize)
-         relcol = dble(col1-col0+1)/dble(ncols)
-         relrow = dble(row1-row0+1)/dble(nrows)
-         write(txt1,"('nudge_salinity_temperature: bounding box')")
-         write(txt2,"('col0-col1 X row0-row1 = ', I0, '-', I0, ' X ', I0, '-', I0, ', ncols X nrows = ', I0, ' X ', I0)") col0, col1, row0, row1, ncols, nrows
-         write(txt3,"('relcol X relrow = ', F4.2, ' X ', F4.2, ' = ', F4.2)") relcol, relrow, relcol*relrow
-         call mess(LEVEL_INFO, trim(txt1) // ' ' // trim(txt2) // ', ' // trim(txt3))
-         
-         if ( issparse.eq.1 ) then
-            write(txt1,"('sparse: data size = ', I0, ', ncols X nrows = ', I0, ' X ', I0, ' = ', I0)") Ndatasize, ncols, nrows, ncols*nrows
-            write(txt2,"('factor = ', F4.2)") dble(Ndatasize)/dble(Ncols*Nrows)
-            call mess(LEVEL_INFO, trim(txt1) // ' ' // trim(txt2))
-         end if
-      end if
-
-      ec_addtimespacerelation = .true.
-      return
-      
-      ! Error handling.
-1234  continue
-      ec_addtimespacerelation = .false.
-!     message = ecGetMessage()
-
-      if (.not. quiet_) then
-         ! TODO: AvD: I'd rather have a full message stack that will combine EC + meteo + dflowfm, and any caller may print any pending messages.
-         ! For now: Print the EC message stack here, and leave the rest to the caller.
-         ! TODO: RL: the message below is from m_meteo::message, whereas timespace::getmeteoerror() returns timespace::errormessage. So now this message here is lost/never printed at call site.
-         message = dumpECMessageStack(LEVEL_WARN, callback_msg)
-         ! Leave this concluding message for the caller to print or not. (via getmeteoerror())
-      end if
-      message = 'm_meteo::ec_addtimespacerelation: Error while initializing '''//trim(name)//''' from file: '''//trim(filename)//''''
-      if (present(forcingfile)) then
-         message = trim(message)//' ('''//trim(forcingfile)//''')'
-      endif
-     
-   end function ec_addtimespacerelation
-   
-   ! ==========================================================================
-   function checkVectorMax(ecInstancePtr, sourceItemId , targetItemId) result (success)
-      logical                       :: success       !< function result
-      type(tEcInstance), pointer    :: ecInstancePtr !< the instance pointer
-      integer,           intent(in) :: sourceItemId  !< the source item ID
-      integer,           intent(in) :: targetItemId  !< the target item ID
-
-      type(tEcItem),       pointer :: itemPtrSrc     !< Item corresponding to sourceItemId
-      type(tEcItem),       pointer :: itemPtrTgt     !< Item corresponding to targetItemId
-      integer                      :: vectorMaxSrc   !< vectorMax for source item
-      integer                      :: vectorMaxTgt   !< vectorMax for target item
-      character(len=1024)          :: msg
-      success = .true.
-      itemPtrSrc => ecSupportFindItem(ecInstancePtr, sourceItemId)
-      itemPtrTgt => ecSupportFindItem(ecInstancePtr, targetItemId)
-      vectorMaxSrc = itemPtrSrc%quantityPtr%vectorMax
-      vectorMaxTgt = itemPtrTgt%quantityPtr%vectorMax
-      if (vectorMaxSrc /= vectorMaxTgt) then
-         success = .false.
-         select case (itemPtrTgt%quantityPtr%name)   
-         case ('discharge_salinity_temperature_sorsin')
-            write(msg,'(a,i0,a,i0,a)') 'Wrong number of data columns in a discharge_salinity_temperature_sorsin time series: ', vectorMaxTgt, ' requested, ',vectorMaxSrc,' provided.'
-            call mess(LEVEL_ERROR,  trim(msg)) 
-         case default
-            call mess(LEVEL_WARN, "There was a problem with a source of type " // trim(itemPtrSrc%quantityPtr%name) &
-                    // " with source file '" // trim(itemPtrSrc%elementsetPtr%name) // "'")
-            call mess(LEVEL_ERROR, "Vector max differs for " // trim(itemPtrTgt%quantityPtr%name) &
-                    // " values (resp. source, target): ", vectorMaxSrc, vectorMaxTgt)
-         end select
-      endif
-   end function checkVectorMax
-   
-   ! ==========================================================================
-   function ec_gettimeseries_by_itemID(instancePtr, itemId, t0, t1, dt, target_array) result(success)
-      use m_flowtimes
-      logical                                                 :: success      !< function status
-      type(tEcInstance),                        pointer       :: instancePtr  !< intent(in)
-      integer,                                  intent(in)    :: itemID       !< unique Item id
-      real(hp),                                 intent(in)    :: t0,t1,dt     !< get data corresponding to this number of timesteps since FM's refdate
-      real(hp), dimension(:), allocatable,      intent(inout) :: target_array !< kernel's data array for the requested values
-      real(hp), dimension(:), pointer     :: arr1dPtr => null() 
 
 
-      real(hp) :: tt
-      integer  :: it, nt, blksize
-      tt = t0
-      it = 0
-      
-      nt = ceiling((t1-t0)/dt)+1
-      if (allocated(target_array)) deallocate(target_array)
-      allocate(target_array(nt*blksize)) 
-      arr1dPtr => ecItemGetArr1DPtr(instancePtr, itemId, 2)
-      blksize = size(arr1dPtr)  
 
-      call clearECMessage()
-      do while (t0+it*dt<t1)
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, itemId, irefdate, tzone, tunit, t0+it*dt,  &
-                                     target_array(it*blksize+1:(it+1)*blksize))) then
-            return         ! Message stack was already dumped by gettimespacevalue
-         end if
-         it = it + 1
-      end do
-   end function ec_gettimeseries_by_itemID
-   
-   
-   ! ==========================================================================
-   
-   !> Convenience wrapper around ec_gettimespacevalue_by_itemID.
-   function ec_gettimespacevalue_by_name(instancePtr, group_name, timesteps) result(success)
-      use m_flowtimes
-      logical                       :: success     !< function status
-      type(tEcInstance), pointer    :: instancePtr !< intent(in)
-      character(len=*),  intent(in) :: group_name  !< unique group name
-      real(hp),          intent(in) :: timesteps   !< get data corresponding to this number of timesteps since FM's refdate
-      double precision, dimension(:), pointer :: ptm, prh, ptd
-      !
-      success = .false.
-      !
-      if (trim(group_name) == 'rainfall') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall, irefdate, tzone, tunit, timesteps)) return
-         ! rain = rain * 86400.0                  ! EC delivers rainfall intensity in mm/s, convert to mm/day
-         ! Hi Robert, if you change some input definition in 2017, than please repair code from 2009 till now
-         ! foreseeing problems like this, I first called this quantity rainfall_mmperday.
-         ! Then someone changed the name in 2015 
-         ! Now you change the unit in 2017. 
-         ! I give a course this Thursday, please no surprises 
-         end if
-      if (trim(group_name) == 'rainfall_rate') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall_rate, irefdate, tzone, tunit, timesteps)) return
-      end if
-      if (trim(group_name) == 'humidity_airtemperature_cloudiness') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hac_humidity, irefdate, tzone, tunit, timesteps)) return
-      end if
-      if (trim(group_name) == 'humidity_airtemperature_cloudiness_solarradiation') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hacs_humidity, irefdate, tzone, tunit, timesteps)) return
-      end if
-      if (trim(group_name) == 'dewpoint_airtemperature_cloudiness') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_dac_dewpoint, irefdate, tzone, tunit, timesteps)) return
-      end if
-      if (trim(group_name) == 'dewpoint_airtemperature_cloudiness_solarradiation') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_dacs_dewpoint, irefdate, tzone, tunit, timesteps)) return
-      end if
-      
-      if ((trim(group_name) == 'dewpoint_airtemperature_cloudiness' .and. item_dac_dewpoint/=ec_undef_int)    &
-          .or.       & 
-          (trim(group_name) == 'dewpoint_airtemperature_cloudiness_solarradiation' .and. item_dacs_dewpoint/=ec_undef_int)) then
-          ! Conversion of dewpoint to relative humidity
-          ptd => rhum
-          prh => rhum
-          ptm => tair
-          call dewpt2rhum(ptd,ptm,prh)        ! convert dewpoint temperatures to relative humidity (percentage)
-      end if
-      if (index(group_name, 'airpressure_windx_windy') == 1) then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_apwxwy_p, irefdate, tzone, tunit, timesteps)) return
-      end if
-      success = .true.
-   end function ec_gettimespacevalue_by_name
+    
+    
+    
 
-   subroutine dewpt2rhum(td,tm,rh)
-   ! in-place conversion of dewpoint temperature to relative humidity, given the air temperature 
-   ! $$RH(T,T_d) = \exp\left[\frac{BT}{C+T} - \frac{BT_d}{C+T_d}\right] \times 100$$ 
-   implicit none
-   double precision, dimension(:), pointer   :: td    !< dewpoint temperature
-   double precision, dimension(:), pointer   :: tm    !< air temperature
-   double precision, dimension(:), pointer   :: rh    !< relative humidity
-
-   double precision, parameter               :: B =   17.502 ! exactly as in 
-   double precision, parameter               :: C =   -32.19
-   double precision, parameter               :: T_0 = 273.16
-   integer                                   :: i, n
-   td => rh                                  ! Dewpoint temperature was stored in the array where relative humidity will be stored 
-   n = size(td)
-   do i=1,n
-      rh(i) = exp(B*td(i)/(C+td(i)+T_0) - B*tm(i)/(C+tm(i)+T_0)) * 100.d0
-   end do
-   end subroutine dewpt2rhum
-
-end module m_meteo
 
 ! ==========================================================================
 
@@ -2335,13 +507,14 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine read1polylin(minp,xs,ys,ns,pliname)
+   subroutine read1polylin(minp,xs,ys,ns,pliname, skipeoferror)
       use m_alloc
       integer          :: minp
       double precision, allocatable :: xs(:)
       double precision, allocatable :: ys(:)
       integer                       :: ns
       character(len=:),allocatable,optional :: pliname
+      logical, optional             :: skipeoferror
    
       character (len=maxnamelen)   :: rec
       integer                      :: k
@@ -2374,11 +547,16 @@ contains
          read(rec ,*    ,err = 777) xs(k), ys(k)
       enddo
    
-      call doclose(minp)
    
       return
    
-   999   call eoferror(minp)
+   999   continue
+      if (present(skipeoferror)) then
+         if (.not.skipeoferror) then
+            call eoferror(minp)
+         end if  
+      end if  
+
       return
    
    888   call readerror('reading nrows but getting ', rec, minp)
@@ -7449,6 +5627,7 @@ contains
 
         call oldfil(minp, filename)
         call read1polylin(minp,xs,ys,ns,pliname)
+        call doclose(minp)
    
         if (.not. allocated(kcs)) then
           allocate(kcs(ns))
@@ -7575,6 +5754,7 @@ contains
     
         call oldfil(minp, filename)
         call read1polylin(minp,xp,yp,np)
+        call doclose(minp)
      else if (filetype ==LINK_ID .and. present(xpin) .and. present(ypin) .and. present(nump) .and. nump > 0) then
         xp = xpin
         yp = ypin
@@ -8071,22 +6251,1913 @@ contains
       if (filetype == inside_polygon) then       ! polyfil 
          allocate(xpli(maxpli), ypli(maxpli))
          
-         call read1polylin(minp0,xpli,ypli,npli)
-         do k=1,nx
-            call pinpok(xz(k), yz(k), npli, xpli, ypli, inside)
-            if (inside == 1) then
-               if (operand == '+') then
-                  zz(k)  = zz(k) + transformcoef(1)
-               else
-                  zz(k)  = transformcoef(1)
-               end if   
-            end if
+         do 
+            call read1polylin(minp0,xpli,ypli,npli, skipeoferror = .true.)
+            if (npli == 0) exit
+            do k=1,nx
+               call pinpok(xz(k), yz(k), npli, xpli, ypli, inside)
+               if (inside == 1) then
+                  if (operand == '+') then
+                     zz(k)  = zz(k) + transformcoef(1)
+                  else
+                     zz(k)  = transformcoef(1)
+                  end if   
+               end if
+            enddo
          enddo
          deallocate(xpli, ypli)
       else if (filetype == arcinfo) then  ! arcinfo bilinear todo
       else if (filetype == triangulation) then  ! triangulation    todo
       end if
+      call doclose(minp0)
       success = .true. 
    end function timespaceinitialfield_int 
    
 end module timespace
+
+
+
+
+
+ 
+!> Module which constructs and connects the target Items for FM.
+!! This is the wrapper between FM and the EC-module.
+module m_meteo
+   use m_ec_module
+   use m_ec_provider
+   use MessageHandling
+   use m_itdate, only: itdate
+   use m_flowtimes, only : tzone
+   use m_wind
+   use m_nudge
+   use m_flow
+   use m_waves
+   use m_ship
+   use m_flowexternalforcings
+   use processes_input, only: nofun, funame, funinp, nosfunext, sfunname, sfuninp
+   use unstruc_messages
+   use time_module
+   use m_observations
+   use string_module
+   use m_sediment, only: stm_included, stmpar
+   
+   implicit none
+   
+   type(tEcInstance), pointer, save :: ecInstancePtr !< FM's instance of the EC-module.
+   character(maxMessageLen) :: message !< EC's message, to be passed to FM's log.
+   !
+   integer, dimension(:), allocatable, target :: item_tracerbnd              !< dim(numtracers)
+   integer, dimension(:), allocatable, target :: item_sedfracbnd             !< dim(numfracs)   ! JRE DEBUG sedfrac
+   integer, dimension(:), allocatable, target :: item_waqfun                 !< dim(nofun)  
+   integer, dimension(:), allocatable, target :: item_waqsfun                !< dim(nosfunext)
+
+   integer, target :: item_windx                                             !< Unique Item id of the ext-file's 'windx' quantity's x-component.
+   integer, target :: item_windy                                             !< Unique Item id of the ext-file's 'windy' quantity's y-component.
+   integer, target :: item_windxy_x                                          !< Unique Item id of the ext-file's 'windxy' quantity's x-component.
+   integer, target :: item_windxy_y                                          !< Unique Item id of the ext-file's 'windxy' quantity's y-component.
+   integer, target :: item_apwxwy_p                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'p'.
+   integer, target :: item_apwxwy_x                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'x'.
+   integer, target :: item_apwxwy_y                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'y'.
+   integer, target :: item_apwxwy_c                                          !< Unique Item id of the ext-file's 'space var Charnock' quantity 'C'.
+   integer, target :: item_waterlevelbnd                                     !< Unique Item id of the ext-file's 'waterlevelbnd' quantity's ...-component.
+   integer, target :: item_atmosphericpressure                               !< Unique Item id of the ext-file's 'atmosphericpressure' quantity
+   integer, target :: item_velocitybnd                                       !< Unique Item id of the ext-file's 'velocitybnd' quantity
+   integer, target :: item_salinitybnd                                       !< Unique Item id of the ext-file's 'salinitybnd' quantity
+   integer, target :: item_temperaturebnd                                    !< Unique Item id of the ext-file's 'temperaturebnd' quantity
+   integer, target :: item_sedimentbnd                                       !< Unique Item id of the ext-file's 'sedimentbnd' quantity
+   integer, target :: item_tangentialvelocitybnd                             !< Unique Item id of the ext-file's 'tangentialvelocitybnd' quantity
+   integer, target :: item_uxuyadvectionvelocitybnd                          !< Unique Item id of the ext-file's 'uxuyadvectionvelocitybnd'
+   integer, target :: item_normalvelocitybnd                                 !< Unique Item id of the ext-file's 'normalvelocitybnd' quantity
+   integer, target :: item_rainfall                                          !< Unique Item id of the ext-file's 'rainfall' quantity
+   integer, target :: item_rainfall_rate                                     !< Unique Item id of the ext-file's 'rainfall_rate' quantity
+   integer, target :: item_qhbnd                                             !< Unique Item id of the ext-file's 'qhbnd' quantity
+   integer, target :: item_shiptxy                                           !< Unique Item id of the ext-file's 'shiptxy' quantity
+   integer, target :: item_movingstationtxy                                  !< Unique Item id of the ext-file's 'movingstationtxy' quantity
+   integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantityxy' quantity
+   integer, target :: item_pump_capacity                                     !< Unique Item id of the structure file's 'pump capacity' quantity
+   integer, target :: item_weir_crestLevel                                   !< Unique Item id of the structure file's 'weir crestLevel' quantity
+   integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantxy' quantity
+   integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
+   integer, target :: item_gateloweredgelevel                                !< Unique Item id of the ext-file's 'gateloweredgelevel' quantity
+   integer, target :: item_generalstructure                                  !< Unique Item id of the ext-file's 'generalstructure' quantity
+   integer, target :: item_lateraldischarge                                  !< Unique Item id of the ext-file's 'generalstructure' quantity
+   
+   integer, target :: item_dacs_dewpoint                                     !< Unique Item id of the ext-file's 'dewpoint' quantity
+   integer, target :: item_dacs_airtemperature                               !< Unique Item id of the ext-file's 'airtemperature' quantity
+   integer, target :: item_dacs_cloudiness                                   !< Unique Item id of the ext-file's 'cloudiness' quantity
+   integer, target :: item_dacs_solarradiation                               !< Unique Item id of the ext-file's 'solarradiation' quantity
+
+   integer, target :: item_dac_dewpoint                                      !< Unique Item id of the ext-file's 'dewpoint' quantity
+   integer, target :: item_dac_airtemperature                                !< Unique Item id of the ext-file's 'airtemperature' quantity
+   integer, target :: item_dac_cloudiness                                    !< Unique Item id of the ext-file's 'cloudiness' quantity
+
+   integer, target :: item_hacs_humidity                                     !< Unique Item id of the ext-file's 'humidity' quantity
+   integer, target :: item_hacs_airtemperature                               !< Unique Item id of the ext-file's 'airtemperature' quantity
+   integer, target :: item_hacs_cloudiness                                   !< Unique Item id of the ext-file's 'cloudiness' quantity
+   integer, target :: item_hacs_solarradiation                               !< Unique Item id of the ext-file's 'solarradiation' quantity
+
+   integer, target :: item_hac_humidity                                      !< Unique Item id of the ext-file's 'humidity' quantity
+   integer, target :: item_hac_airtemperature                                !< Unique Item id of the ext-file's 'airtemperature' quantity
+   integer, target :: item_hac_cloudiness                                    !< Unique Item id of the ext-file's 'cloudiness' quantity
+
+   integer, target :: item_humidity                                          !< 'humidity' quantity
+   integer, target :: item_airtemperature                                    !< 'airtemperature' quantity
+   integer, target :: item_cloudiness                                        !< 'cloudiness' quantity
+   integer, target :: item_solarradiation                                    !< 'solarradiation' quantity
+   
+   integer, target :: item_discharge_salinity_temperature_sorsin             !< Unique Item id of the ext-file's 'discharge_salinity_temperature_sorsin' quantity
+   integer, target :: item_hrms                                              !< Unique Item id of the ext-file's 'item_hrms' quantity
+   integer, target :: item_tp                                                !< Unique Item id of the ext-file's 'item_tp' quantity
+   integer, target :: item_dir                                               !< Unique Item id of the ext-file's 'item_dir' quantity
+   integer, target :: item_fx                                                !< Unique Item id of the ext-file's 'item_fx' quantity
+   integer, target :: item_fy                                                !< Unique Item id of the ext-file's 'item_fy' quantity
+   integer, target :: item_wsbu                                              !< Unique Item id of the ext-file's 'item_wsbu' quantity
+   integer, target :: item_wsbv                                              !< Unique Item id of the ext-file's 'item_wsbv' quantity
+   integer, target :: item_mx                                                !< Unique Item id of the ext-file's 'item_mx' quantity
+   integer, target :: item_my                                                !< Unique Item id of the ext-file's 'item_my' quantity
+   integer, target :: item_dissurf                                           !< Unique Item id of the ext-file's 'item_dissurf' quantity
+   integer, target :: item_diswcap                                           !< Unique Item id of the ext-file's 'item_diswcap' quantity
+   integer, target :: item_ubot                                              !< Unique Item id of the ext-file's 'item_ubot' quantity
+
+   integer, target :: item_nudge_tem                                         !< 3D temperature for nudging
+   integer, target :: item_nudge_sal                                         !< 3D salinity for nudging
+   integer, target :: item_dambreakLevelsAndWidthsFromTable                  !< Dambreak heights and widths
+
+   integer, allocatable, dimension(:) :: countbndpoints(:) 
+   !
+   integer :: n_qhbnd !< Number of already connected qh-boundaries.
+   
+   interface ec_gettimespacevalue
+      module procedure ec_gettimespacevalue_by_itemID
+      module procedure ec_gettimespacevalue_by_name
+   end interface ec_gettimespacevalue
+   
+   interface ec_gettimeseries
+      module procedure ec_gettimeseries_by_itemID
+   end interface ec_gettimeseries
+
+   public ec_gettimeseries
+
+   contains
+   
+   !> Initialize the module variables.
+   subroutine init_variables()
+      ecInstancePtr => null()
+      message = ' '
+      !
+      item_windx                                 = ec_undef_int
+      item_windy                                 = ec_undef_int
+      item_windxy_x                              = ec_undef_int
+      item_windxy_y                              = ec_undef_int
+      item_apwxwy_p                              = ec_undef_int
+      item_apwxwy_x                              = ec_undef_int
+      item_apwxwy_y                              = ec_undef_int
+      item_apwxwy_c                              = ec_undef_int
+      item_waterlevelbnd                         = ec_undef_int
+      item_atmosphericpressure                   = ec_undef_int
+      item_velocitybnd                           = ec_undef_int
+      item_salinitybnd                           = ec_undef_int
+      item_temperaturebnd                        = ec_undef_int
+      item_sedimentbnd                           = ec_undef_int
+      item_tangentialvelocitybnd                 = ec_undef_int
+      item_uxuyadvectionvelocitybnd              = ec_undef_int
+      item_normalvelocitybnd                     = ec_undef_int
+      item_rainfall                              = ec_undef_int
+      item_rainfall_rate                         = ec_undef_int
+      item_qhbnd                                 = ec_undef_int
+      item_shiptxy                               = ec_undef_int
+      item_movingstationtxy                      = ec_undef_int
+      item_pump                                  = ec_undef_int
+      item_pump_capacity                         = ec_undef_int
+      item_weir_crestLevel                       = ec_undef_int
+      item_valve1D                               = ec_undef_int    
+      item_lateraldischarge                      = ec_undef_int
+      item_damlevel                              = ec_undef_int
+      item_gateloweredgelevel                    = ec_undef_int
+      item_generalstructure                      = ec_undef_int
+      item_dacs_dewpoint                         = ec_undef_int
+      item_dacs_airtemperature                   = ec_undef_int
+      item_dac_cloudiness                        = ec_undef_int
+      item_dac_dewpoint                          = ec_undef_int
+      item_dac_airtemperature                    = ec_undef_int
+      item_dac_cloudiness                        = ec_undef_int
+      item_dacs_solarradiation                   = ec_undef_int
+      item_hacs_humidity                         = ec_undef_int
+      item_hacs_airtemperature                   = ec_undef_int
+      item_hacs_cloudiness                       = ec_undef_int
+      item_hacs_solarradiation                   = ec_undef_int
+      item_humidity                              = ec_undef_int
+      item_airtemperature                        = ec_undef_int
+      item_cloudiness                            = ec_undef_int
+      item_solarradiation                        = ec_undef_int
+      item_hac_humidity                          = ec_undef_int
+      item_hac_airtemperature                    = ec_undef_int
+      item_hac_cloudiness                        = ec_undef_int
+      item_nudge_tem                             = ec_undef_int
+      item_nudge_sal                             = ec_undef_int
+      item_discharge_salinity_temperature_sorsin = ec_undef_int
+      item_hrms                                  = ec_undef_int
+      item_tp                                    = ec_undef_int
+      item_dir                                   = ec_undef_int
+      item_fx                                    = ec_undef_int
+      item_fy                                    = ec_undef_int
+      item_wsbu                                  = ec_undef_int
+      item_wsbv                                  = ec_undef_int
+      item_mx                                    = ec_undef_int
+      item_my                                    = ec_undef_int
+      item_dissurf                               = ec_undef_int
+      item_diswcap                               = ec_undef_int
+      item_ubot                                  = ec_undef_int
+      item_dambreakLevelsAndWidthsFromTable      = ec_undef_int                    
+      !
+      n_qhbnd = 0
+      !
+      ! tracers
+      if ( allocated(item_tracerbnd) ) deallocate(item_tracerbnd)
+      allocate(item_tracerbnd(numtracers))
+      item_tracerbnd = ec_undef_int
+      !
+      ! JRE DEBUG sedfrac bnd
+      if ( allocated(item_sedfracbnd) ) deallocate(item_sedfracbnd)
+      allocate(item_sedfracbnd(numfracs))
+      item_sedfracbnd = ec_undef_int
+      ! TO ADD: initial concentration field?
+      
+      if ( allocated(item_waqfun) ) deallocate(item_waqfun)
+      allocate(item_waqfun(nofun))
+      item_waqfun = ec_undef_int
+      
+      if ( allocated(item_waqsfun) ) deallocate(item_waqsfun)
+      allocate(item_waqsfun(nosfunext))
+      item_waqsfun = ec_undef_int
+
+      !\ DEBUG sedfrac
+   end subroutine init_variables
+
+   ! ==========================================================================
+   
+   !> Translate FM's meteo1 'filetype' enum to EC's 'provFile' enum.
+   subroutine filetype_fm_to_ec(filetype, ec_filetype)
+   use timespace_parameters
+   implicit none
+      integer, intent(in)  :: filetype
+      integer, intent(out) :: ec_filetype
+      !
+      select case (filetype)
+         case (uniform)             ! 1
+            ec_filetype = provFile_uniform
+         case (unimagdir)           ! 2
+            ec_filetype = provFile_unimagdir
+         case (svwp)                ! 3
+            ec_filetype = provFile_svwp
+         case (arcinfo)             ! 4
+            ec_filetype = provFile_arcinfo
+         case (spiderweb)           ! 5
+            ec_filetype = provFile_spiderweb
+         case (curvi)               ! 6
+            ec_filetype = provFile_curvi
+         case (triangulation)       ! 7
+            ec_filetype = provFile_samples
+         case (triangulationmagdir) ! 8
+            ec_filetype = provFile_triangulationmagdir
+         case (poly_tim)            ! 9
+            ec_filetype = provFile_poly_tim
+         case (ncgrid, ncwave)      ! 11, 14
+            ec_filetype = provFile_netcdf
+         case (ncflow)              ! 12
+            ec_filetype = provFile_undefined ! only used for timespaceinitialfield, no EC yet.
+         case (bcascii)             ! 17
+            ec_filetype = provFile_bc
+         case (node_id)             ! -1
+            ec_filetype = provFile_bc
+         case (fourier)             ! 101
+            ec_filetype = provFile_fourier
+         case default
+            ec_filetype = provFile_undefined
+      end select
+   end subroutine filetype_fm_to_ec
+   
+   ! ==========================================================================
+   
+   !> Translate FM's meteo1 'method' enum to EC's 'interpolate' enum.
+   subroutine method_fm_to_ec(method, ec_method)
+      integer, intent(in)  :: method
+      integer, intent(out) :: ec_method
+
+      integer :: interpMethod, exterpMethod
+
+      interpMethod = mod(method, 100)
+      exterpMethod = method / 100
+      !
+      select case (interpMethod)
+         case (0)
+            ec_method = interpolate_passthrough
+         case (1)
+            ec_method = interpolate_timespace
+         case (2)
+            ec_method = interpolate_spacetime
+         case (3)
+            if (exterpMethod == 0) then
+               ec_method = interpolate_spacetimeSaveWeightFactors
+            else
+               ec_method = extrapolate_spacetimeSaveWeightFactors
+            endif
+         case (4) ! TODO: EB: FM's 4 is inside_polygon method, does EC handle this correctly if FM filetype=10?
+            ec_method = interpolate_space     ! only spatial, inside polygon
+
+         ! TODO: EB: FM does note have an interpolate_time equivalent in its method, only via filetype=uniform
+         !case (5)
+         !   ec_method = interpolate_time
+
+         case (5)
+            ec_method = interpolate_triangle  ! only spatial, triangulation
+         case (6)
+            ec_method = interpolate_unknown   ! Not yet supported: only spatial, averaging
+         !case (7) ! TODO: EB+AvD: index triangulation (for spatial sedmor fields) may be needed later,
+                   ! but now overlaps with interpolate_time_extrapolation_ok (for wave coupling) below.
+         !   ec_method = interpolate_unknown   ! Not yet supported: only spatial, index triangulation
+         case (8)
+            ec_method = interpolate_unknown   ! Not yet supported: only spatial, smoothing
+         case (9)
+            ec_method = interpolate_unknown   ! Not yet supported: only spatial, internal diffusion
+         case (10)
+            ec_method = interpolate_unknown   ! Not yet supported: only initial vertical profiles
+         case (7) ! TODO: EB: FM method 7, where does this come from? ! see hrms method 7
+            ec_method = interpolate_time_extrapolation_ok
+         case default
+            ec_method = interpolate_unknown
+      end select
+   end subroutine method_fm_to_ec
+   
+   ! ==========================================================================
+   
+   !> Translate FM's meteo1 'operand' enum to EC's 'operand' enum.
+   subroutine operand_fm_to_ec(operand, ec_operand)
+      character, intent(in)  :: operand
+      integer,   intent(out) :: ec_operand
+      !
+      select case (operand)
+         case ('O')
+            ec_operand = operand_replace
+         case ('+')
+            ec_operand = operand_add
+         case default
+            ec_operand = operand_undefined
+      end select
+   end subroutine operand_fm_to_ec
+   
+   
+   
+   !> Convert quantity names as given in user input (ext file)
+   !! to accepted Unstruc names (as used in Fortran code)
+   !! Note: for old-style ext quantities, fm_name==input_name, e.g. waterlevelbnd.
+   !subroutine bndname_to_fm(input_name, fm_name)
+   !   character(len=*), intent(in)  :: input_name !< given by the user
+   !   character(len=*), intent(out) :: fm_name    !< known within FM
+   !
+   !   character(len=256) :: tempname
+   !
+   !   fm_name  = input_name
+   !   tempname = input_name 
+   !   call str_upper(tempname)
+   !   call remove_substr(tempname,'_')
+   !   call remove_substr(tempname,'-')
+   !   call remove_substr(tempname,' ')
+   !
+   !   select case (trim(tempname))
+   !   case ('WATERLEVEL','VELOCITY','SALINITY','TEMPERATURE','SEDIMENT','TANGENTIALVELOCITY','NORMALVELOCITY','QH','TRACER') 
+   !      ! These are new-ext-style quantities: FM needs additional 'bnd' behind quantityid
+   !      fm_name = trim(tempname)//'bnd'
+   !      call str_lower(fm_name)
+   !   end select
+   !end subroutine bndname_to_fm
+
+   ! ==========================================================================
+   
+   !> Translate EC's ext.force-file's item name to the integer EC item handle and to
+   !> the data pointer(s), i.e. the array that will contain the values of the target item
+   function fm_ext_force_name_to_ec_item(trname, sfname, waqinput, qidname,                        &
+                                         itemPtr1, itemPtr2, itemPtr3, itemPtr4, &
+                                         dataPtr1, dataPtr2, dataPtr3, dataPtr4  ) result(success)
+      logical                               :: success
+      character(len=*), intent(in)          :: trname, sfname, waqinput
+
+      character(len=*), intent(in)          :: qidname
+     
+      integer,                   pointer    :: itemPtr1, itemPtr2, itemPtr3, itemPtr4
+      real(hp), dimension(:),    pointer    :: dataPtr1, dataPtr2, dataPtr3, dataPtr4
+      
+      ! for tracers:      
+      integer           :: itrac, isf, ifun, isfun
+      integer, external :: findname
+      
+      success = .true.
+      
+      itemPtr1 => null()
+      itemPtr2 => null()
+      itemPtr3 => null()
+      itemPtr4 => null()
+      dataPtr1 => null()
+      dataPtr2 => null()
+      dataPtr3 => null()
+      dataPtr4 => null()
+      select case (trim(qidname))
+         case ('windx')
+            itemPtr1 => item_windx
+            dataPtr1 => wx
+         case ('windy')
+            itemPtr1 => item_windy
+            dataPtr1 => wy
+         case ('windxy', 'stressxy')
+            itemPtr1 => item_windxy_x
+            dataPtr1 => wx
+            itemPtr2 => item_windxy_y
+            dataPtr2 => wy
+         case ('airpressure_windx_windy', 'airpressure_stressx_stressy')
+            itemPtr1 => item_apwxwy_p
+            dataPtr1 => patm
+            itemPtr2 => item_apwxwy_x
+            dataPtr2 => ec_pwxwy_x
+            itemPtr3 => item_apwxwy_y
+            dataPtr3 => ec_pwxwy_y
+         case ('airpressure_windx_windy_charnock')
+            itemPtr1 => item_apwxwy_p
+            dataPtr1 => patm
+            itemPtr2 => item_apwxwy_x
+            dataPtr2 => ec_pwxwy_x
+            itemPtr3 => item_apwxwy_y
+            dataPtr3 => ec_pwxwy_y
+            itemPtr4 => item_apwxwy_c
+            dataPtr4 => ec_pwxwy_c
+         case ('waterlevelbnd', 'neumannbnd', 'riemannbnd', 'outflowbnd')
+            itemPtr1 => item_waterlevelbnd
+            dataPtr1 => zbndz
+         case ('velocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'absgenbnd')
+            itemPtr1 => item_velocitybnd
+            dataPtr1 => zbndu
+         case ('dischargebnd')
+            itemPtr1 => item_velocitybnd
+            dataPtr1 => zbndq
+         case ('salinitybnd')
+            itemPtr1 => item_salinitybnd
+            dataPtr1 => zbnds
+         case ('temperaturebnd')
+            itemPtr1 => item_temperaturebnd
+            dataPtr1 => zbndTM
+         case ('sedimentbnd')
+            itemPtr1 => item_sedimentbnd
+            dataPtr1 => zbndsd
+         case ('tangentialvelocitybnd')
+            itemPtr1 => item_tangentialvelocitybnd
+            dataPtr1 => zbndt
+        case ('uxuyadvectionvelocitybnd')
+            itemPtr1 => item_uxuyadvectionvelocitybnd
+            dataPtr1 => zbnduxy
+        case ('normalvelocitybnd')
+            itemPtr1 => item_normalvelocitybnd
+            dataPtr1 => zbndn
+         case ('airpressure','atmosphericpressure')
+            itemPtr1 => item_atmosphericpressure
+            dataPtr1 => patm
+         case ('rainfall')
+            itemPtr1 => item_rainfall
+            dataPtr1 => rain
+         case ('rainfall_rate')
+            itemPtr1 => item_rainfall_rate
+            dataPtr1 => rain
+         case ('qhbnd')
+            itemPtr1 => item_qhbnd
+            dataPtr1 => qhbndz
+         case ('shiptxy')
+            itemPtr1 => item_shiptxy
+            dataPtr1 => xyship
+         case ('movingstationtxy')
+            itemPtr1 => item_movingstationtxy
+            dataPtr1 => xyobs
+         case ('pump')
+            itemPtr1 => item_pump
+            !dataPtr1      => qpump
+         case ('pump_capacity') ! flow1d pump
+            itemPtr1 => item_pump_capacity
+            dataPtr1  => qpump ! TODO: UNST-2724: needs more thinking, see issue comments.
+         case ('weir_crestLevel') ! flow1d weir
+            itemPtr1 => item_weir_crestLevel
+            ! dataPtr1
+         case ('valve1D')
+            itemPtr1 => item_valve1D
+         case ('damlevel')
+            itemPtr1 => item_damlevel
+         case ('dambreakLevelsAndWidths')      
+            itemPtr1 => item_dambreakLevelsAndWidthsFromTable
+            dataPtr1 => dambreakLevelsAndWidthsFromTable
+         case ('lateral_discharge')
+            itemPtr1 => item_lateraldischarge
+            !dataPtr1 => qplat ! Don't set this here, done in adduniformtimerelation_objects().
+         case ('gateloweredgelevel')
+            itemPtr1 => item_gateloweredgelevel
+            dataPtr1 => zgate
+         case ('generalstructure')
+            itemPtr1 => item_generalstructure
+            dataPtr1 => zcgen
+         case ('humidity_airtemperature_cloudiness')
+            itemPtr1 => item_hac_humidity
+            dataPtr1 => rhum
+            itemPtr2 => item_hac_airtemperature
+            dataPtr2 => tair
+            itemPtr3 => item_hac_cloudiness
+            dataPtr3 => clou
+         case ('humidity_airtemperature_cloudiness_solarradiation')
+            itemPtr1 => item_hacs_humidity
+            dataPtr1 => rhum
+            itemPtr2 => item_hacs_airtemperature
+            dataPtr2 => tair
+            itemPtr3 => item_hacs_cloudiness
+            dataPtr3 => clou
+            itemPtr4 => item_hacs_solarradiation 
+            dataPtr4 => qrad
+         case ('dewpoint_airtemperature_cloudiness')
+            itemPtr1 => item_dac_dewpoint
+            dataPtr1 => rhum                 ! Relative humidity array used to store dewpoints
+            itemPtr2 => item_dac_airtemperature
+            dataPtr2 => tair
+            itemPtr3 => item_dac_cloudiness
+            dataPtr3 => clou
+         case ('dewpoint_airtemperature_cloudiness_solarradiation')
+            itemPtr1 => item_dacs_dewpoint
+            dataPtr1 => rhum                 ! Relative humidity array used to store dewpoints
+            itemPtr2 => item_dacs_airtemperature
+            dataPtr2 => tair
+            itemPtr3 => item_dacs_cloudiness
+            dataPtr3 => clou
+            itemPtr4 => item_dacs_solarradiation 
+            dataPtr4 => qrad
+         case ('humidity')
+            itemPtr1 => item_humidity
+            dataPtr1 => rhum                 ! Relative humidity 
+         case ('airtemperature')
+            itemPtr1 => item_airtemperature
+            dataPtr1 => tair                
+         case ('cloudiness')
+            itemPtr1 => item_cloudiness
+            dataPtr1 => clou                 
+         case ('solarradiation')
+            itemPtr1 => item_solarradiation
+            dataPtr1 => qrad                
+         case ('nudge_salinity_temperature')
+            itemPtr2 => item_nudge_sal
+            dataPtr2 => nudge_sal 
+            itemPtr1 => item_nudge_tem
+            dataPtr1 => nudge_tem            ! Relative humidity array used to store dewpoints
+         case ('discharge_salinity_temperature_sorsin')
+            itemPtr1 => item_discharge_salinity_temperature_sorsin
+            dataPtr1 => qstss
+         case ('hrms')
+            itemPtr1 => item_hrms
+            dataPtr1 => hwavcom
+         case ('tp', 'tps', 'rtp')
+            itemPtr1 => item_tp
+            dataPtr1 => twav
+         case ('dir')
+            itemPtr1 => item_dir
+            dataPtr1 => phiwav
+         case ('fx')
+            itemPtr1 => item_fx
+            dataPtr1 => sxwav
+         case ('fy')
+            itemPtr1 => item_fy
+            dataPtr1 => sywav
+         case ('wsbu')
+            itemPtr1 => item_wsbu
+            dataPtr1 => sbxwav
+         case ('wsbv')
+            itemPtr1 => item_wsbv
+            dataPtr1 => sbywav
+         case ('mx')
+            itemPtr1 => item_mx
+            dataPtr1 => mxwav
+         case ('my')
+            itemPtr1 => item_my
+            dataPtr1 => mywav
+         case ('dissurf')
+            itemPtr1 => item_dissurf
+            dataPtr1 => dsurf
+         case ('diswcap')
+            itemPtr1 => item_diswcap
+            dataPtr1 => dwcap
+         case ('ubot')
+            itemPtr1 => item_ubot
+            dataPtr1 => uorbwav            
+         case ('tracerbnd')
+            ! get tracer (boundary) number
+            itrac = findname(numtracers, trnames, trname)
+            itemPtr1 => item_tracerbnd(itrac)
+            dataPtr1 => bndtr(itrac)%z
+         case ('sedfracbnd') 
+            ! get sediment fraction (boundary) number
+            isf = findname(numfracs, sfnames, sfname)
+            itemPtr1 => item_sedfracbnd(isf)
+            dataPtr1 => bndsf(isf)%z
+         case ('waqfunction') 
+            ! get sediment fraction (boundary) number
+            ifun = findname(nofun, funame, waqinput)
+            itemPtr1 => item_waqfun(ifun)
+            dataPtr1 => funinp(ifun,:)
+         case ('waqsegmentfunction') 
+            ! get sediment fraction (boundary) number
+            isfun = findname(nosfunext, sfunname, waqinput)
+            itemPtr1 => item_waqsfun(isfun)
+            dataPtr1 => sfuninp(isfun,:)
+         case default
+            call mess(LEVEL_FATAL, 'm_meteo::fm_ext_force_name_to_ec_item: Unsupported quantity specified in ext-file (construct target field): '//qidname)
+            success = .false.
+      end select
+   end function fm_ext_force_name_to_ec_item
+   
+   ! ==========================================================================
+   
+   !> Construct and initialize a new Instance of the EC-module.
+   subroutine initialize_ec_module()
+   use m_sferic
+   implicit none
+      ! FM re-initialize call: First destroy the EC-module instance.
+      if (associated(ecInstancePtr)) then
+         if (.not. ecFreeInstance(ecInstancePtr)) then
+            message = dumpECMessageStack(LEVEL_WARN,callback_msg)
+         end if
+      end if
+      ! FM initialize call or second phase of re-initialize call.
+      if (.not. associated(ecInstancePtr)) then
+         call init_variables()
+         if (.not. ecCreateInstance(ecInstancePtr)) then
+            message = dumpECMessageStack(LEVEL_WARN,callback_msg)
+         end if
+      end if
+      if (jsferic == 1) then 
+         ecInstancePtr%coordsystem = EC_COORDS_SFERIC
+      else
+         ecInstancePtr%coordsystem = EC_COORDS_CARTESIAN
+      endif
+
+   end subroutine initialize_ec_module
+   
+   ! ==========================================================================
+   
+   !> Helper function for creating and initializing a target Item.
+   function createItem(instancePtr, itemId, quantityId, elementSetId, fieldId) result(success)
+      logical                          :: success      !< function status
+      type(tEcInstance), pointer       :: instancePtr  !< 
+      integer,           intent(inout) :: itemId       !< Unique Item id.
+      integer,           intent(inout) :: quantityId   !< Unique Quantity id.
+      integer,           intent(inout) :: elementSetId !< Unique ElementSet id.
+      integer,           intent(inout) :: fieldId      !< Unique Field id.
+      !
+      success = .true.
+      if (itemId == ec_undef_int) then                ! if Target Item already exists, do NOT create a new one ... 
+         itemId = ecCreateItem(ecInstancePtr)
+         success              = ecSetItemRole(instancePtr, itemId, itemType_target)
+         if (success) success = ecSetItemQuantity(instancePtr, itemId, quantityId)
+      end if
+      ! ... but we would like to use the newest targetFIELD for this item, since old targetFIELDs can refer to the 
+      ! wrong data location (Arr1DPtr). This happens in the case that the demand-side arrays are reallocated while 
+      ! building the targets! Same is done for the elementset, so we are sure to always connect the latest 
+      ! elementset to this target.
+      if (success) success = ecSetItemElementSet(instancePtr, itemId, elementSetId)
+      if (success) success = ecSetItemTargetField(instancePtr, itemId, fieldId)    
+   end function createItem
+   
+   ! ==========================================================================
+   
+   !> Helper function for initializing a Converter.
+   function initializeConverter(instancePtr, converterId, convtype, operand, method, srcmask, inputptr) result(success)
+      logical                    :: success      !< function status
+      type(tEcInstance), pointer :: instancePtr  !< 
+      integer                    :: converterId  !< 
+      integer                    :: convtype     !< 
+      integer                    :: operand      !< 
+      integer                    :: method       !< 
+      type (tEcMask), optional   :: srcmask      !< 
+      real(hp), pointer, optional:: inputptr
+      !
+      success              = ecSetConverterType(instancePtr, converterId, convtype)
+      if (success) success = ecSetConverterOperand(instancePtr, converterId, operand)
+      if (success) success = ecSetConverterInterpolation(instancePtr, converterId, method)
+      if (present(srcmask)) then
+         if (success) success = ecSetConverterMask(instancePtr, converterId, srcmask)
+      end if
+      if (present(inputptr)) then
+         if (success) success = ecSetConverterInputPointer(instancePtr, converterId, inputptr)
+      end if
+
+   end function initializeConverter
+   
+   ! ==========================================================================
+   
+   !> Helper function for initializing a Connection.
+   function initializeConnection(instancePtr, connectionId, sourceItemId, targetItemId) result(success)
+      logical                          :: success      !< function status
+      type(tEcInstance), pointer       :: instancePtr  !< 
+      integer,           intent(inout) :: connectionId !< 
+      integer,           intent(inout) :: sourceItemId !< 
+      integer,           intent(inout) :: targetItemId !< 
+      !
+      success              = ecAddConnectionSourceItem(instancePtr, connectionId, sourceItemId)
+      if (success) success = ecAddConnectionTargetItem(instancePtr, connectionId, targetItemId)
+      if (success) success = ecAddItemConnection(instancePtr, targetItemId, connectionId)
+   end function initializeConnection
+   
+   ! ==========================================================================
+   
+   !> Helper function for Connection initialization.
+   function checkFileType(actualfiletype, requiredfiletype, name) result(success)
+      logical                  :: success          !< function status
+      integer,      intent(in) :: actualfiletype   !< EC-module's filetype enumeration.
+      integer,      intent(in) :: requiredfiletype !< EC-module's filetype enumeration.
+      character(*), intent(in) :: name             !< Name for the target Quantity.
+      !
+      success = .true.
+      if (.not. actualfiletype == requiredfiletype) then
+         message = 'm_meteo::checkFileType: Unsupported filetype for quantity '//name//'.'
+         success = .false.
+      end if
+   end function checkFileType
+   
+   ! ==========================================================================
+   !> Replacement function for FM's meteo1 'addtimespacerelation' function.
+   logical function ec_addtimespacerelation(name, x, y, mask, vectormax, filename, filetype, method, operand, &
+                                            xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, &
+                                            dtnodal, quiet, varname, maxSearchRadius, targetMaskSelect, &
+                                            tgt_data1, tgt_data2, tgt_data3, tgt_data4,  &
+                                            tgt_item1, tgt_item2, tgt_item3, tgt_item4,  &
+                                            multuni1,  multuni2,  multuni3,  multuni4)
+      use m_ec_module, only: ecFindFileReader, ec_filetype_to_conv_type ! TODO: Refactor this private data access (UNST-703).
+      use m_ec_filereader_read, only: ecParseARCinfoMask
+      use m_flow, only: kmx, kbot, ktop
+      use m_sferic, only: jsferic
+      use m_missing, only: dmiss
+      use m_flowtimes, only: refdate_mjd
+      use string_module, only: str_upper
+      use timespace_parameters
+      use timespace
+
+      character(len=*),                 intent(in)            :: name            !< Name for the target Quantity, possibly compounded with a tracer name.
+      real(hp), dimension(:),           intent(in)            :: x               !< Array of x-coordinates for the target ElementSet.
+      real(hp), dimension(:),           intent(in)            :: y               !< Array of y-coordinates for the target ElementSet.
+      integer,                          intent(in)            :: vectormax       !< Vector max (length of data values at each element location).
+      integer,  dimension(:),           intent(in)            :: mask            !< Array of masking values for the target ElementSet.
+      character(len=*),                 intent(in)            :: filename        !< File name of meteo data file.
+      integer,                          intent(in)            :: filetype        !< FM's filetype enumeration.
+      integer,                          intent(in)            :: method          !< FM's method enumeration.
+      character(len=1),                 intent(in)            :: operand         !< FM's operand enumeration.
+      real(hp),               optional, intent(in)            :: xyen(:,:)       !< FM's distance tolerance / cellsize of ElementSet.
+      real(hp), dimension(:), optional, intent(in),    target :: z               !< FM's array of z/sigma coordinates
+      real(hp), dimension(:), optional, pointer               :: pzmin           !< FM's array of minimal z coordinate
+      real(hp), dimension(:), optional, pointer               :: pzmax           !< FM's array of maximum z coordinate
+      integer,  dimension(:), optional, pointer               :: pkbot  
+      integer,  dimension(:), optional, pointer               :: pktop  
+      integer,                optional, intent(in)            :: targetIndex     !< target position or rank of (complete!) vector in target array
+      character(len=*),       optional, intent(in)            :: forcingfile     !< file containing the forcing data for pli-file 'filename'
+      character(len=*),       optional, intent(in)            :: srcmaskfile     !< file containing mask applicable to the arcinfo source data 
+      real(hp),               optional, intent(in)            :: dtnodal         !< update interval for nodal factors
+      logical,                optional, intent(in)            :: quiet           !< When .true., in case of errors, do not write the errors to screen/dia at the end of the routine.
+      character(len=*),       optional, intent(in)            :: varname         !< variable name within filename
+      real(hp),               optional, intent(in)            :: maxSearchRadius !< max search radius in case method==11
+      character(len=1),       optional, intent(in)            :: targetMaskSelect !< 'i'nside (default) or 'o'utside mask polygons
+      real(hp), dimension(:), optional, pointer               :: tgt_data1       !< optional pointer to the storage location for target data 1 field
+      real(hp), dimension(:), optional, pointer               :: tgt_data2       !< optional pointer to the storage location for target data 2 field
+      real(hp), dimension(:), optional, pointer               :: tgt_data3       !< optional pointer to the storage location for target data 3 field
+      real(hp), dimension(:), optional, pointer               :: tgt_data4       !< optional pointer to the storage location for target data 4 field
+      integer,                optional, intent(inout), target :: tgt_item1       !< optional target item ID 1
+      integer,                optional, intent(inout), target :: tgt_item2       !< optional target item ID 2
+      integer,                optional, intent(inout), target :: tgt_item3       !< optional target item ID 3
+      integer,                optional, intent(inout), target :: tgt_item4       !< optional target item ID 4
+      integer,                optional, intent(inout), target :: multuni1        !< multiple uni item ID 1
+      integer,                optional, intent(inout), target :: multuni2        !< multiple uni item ID 2
+      integer,                optional, intent(inout), target :: multuni3        !< item ID 3
+      integer,                optional, intent(inout), target :: multuni4        !< item ID 4
+      !
+      integer :: ec_filetype !< EC-module's enumeration.
+      integer :: ec_convtype !< EC-module's convType_ enumeration.
+      integer :: ec_method   !< EC-module's interpolate_ enumeration.
+      integer :: ec_operand  !< EC-module's operand_ enumeration.
+      !
+      integer :: fileReaderId   !< Unique FileReader id.
+      integer :: quantityId     !< Unique Quantity id.
+      integer :: elementSetId   !< Unique ElementSet id.
+      integer :: fieldId        !< Unique Field id.
+      integer :: fieldId_2      !< Unique Field id.
+      integer :: fieldId_3      !< Unique Field id.
+      integer :: fieldId_4      !< Unique Field id.
+      integer :: converterId    !< Unique Converter id.
+      integer :: connectionId   !< Unique Connection id.
+      integer :: sourceItemId   !< Unique source item id.
+      integer :: sourceItemId_2 !< Unique additional source item id.
+      integer :: sourceItemId_3 !< Unique additional third source item id.
+      integer :: sourceItemId_4 !< Unique additional fourth source item id.
+      integer :: ndx
+      !
+      character(len=maxnamelen)       :: sourceItemName           !< name of source item (as created by provider)
+      character(len=maxnamelen)       :: target_name              !< Unstruc target name derived from user-specified name 
+      character(len=maxnamelen)       :: location                 !< location (name) as specified in the LOCATION field of the new EXT-file
+      integer,                pointer :: targetItemPtr1 => null() !< pointer to the target item id
+      integer,                pointer :: targetItemPtr2 => null() !< pointer to optional second target item id (e.g. in case of windxy)
+      integer,                pointer :: targetItemPtr3 => null() !< pointer to optional third target item id (e.g. in case of spiderweb)
+      integer,                pointer :: targetItemPtr4 => null() !< pointer to optional fourth target item id (e.g. in case of hacs)
+      real(hp), dimension(:), pointer :: dataPtr1       => null() !< Pointer to FM's 1D data arrays.
+      real(hp), dimension(:), pointer :: dataPtr2       => null() !< Pointer to FM's optional extra 1D data array (e.g. in case of windxy)
+      real(hp), dimension(:), pointer :: dataPtr3       => null() !< Pointer to FM's optional third 1D data array (e.g. in case of spiderweb)
+      real(hp), dimension(:), pointer :: dataPtr4       => null() !< Pointer to FM's optional fourth 1D data array (e.g. in case of hacs)
+      type(tEcFileReader)   , pointer :: fileReaderPtr  => null() !< 
+      
+      logical                       :: success
+      logical                       :: quiet_
+      character(len=NAMTRACLEN)     :: trname, sfname, qidname
+      character (len=20)            :: waqinput
+      integer, external             :: findname
+      type (tEcMask)                :: srcmask
+      integer                       :: itargetMaskSelect    !< 1:targetMaskSelect='i' or absent, 0:targetMaskSelect='o'
+      logical                       :: exist, opened, withCharnock, withStress
+      
+      double precision              :: relrow, relcol
+      double precision, allocatable :: transformcoef(:)
+      integer                       :: row0, row1, col0, col1, ncols, nrows, issparse, Ndatasize
+      character(len=128)            :: txt1, txt2, txt3
+      real(hp), pointer             :: inputptr => null()
+
+      call clearECMessage()
+      ec_addtimespacerelation = .false.
+      if (present(quiet)) then
+         quiet_ = quiet
+      else
+         quiet_ = .false. ! Default: print errors at the end of routine, if no success
+      end if
+      
+      ndx = size(x)
+      
+      ! ========================================================
+      ! Translate FM's enumerations to EC-module's enumerations.
+      ! ========================================================
+      call filetype_fm_to_ec(filetype, ec_filetype)
+      if (ec_filetype == provFile_undefined) then
+         write (msgbuf, '(a,i0,a)') 'm_meteo::ec_addtimespacerelation: Unsupported filetype ''', filetype, &
+                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
+         call err_flush()
+         return
+      end if
+      call method_fm_to_ec(method, ec_method)
+      if (ec_method == interpolate_unknown) then
+         write (msgbuf, '(a,i0,a)') 'm_meteo::ec_addtimespacerelation: Unsupported method ''', method, &
+                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
+         call err_flush()
+         return
+      end if
+      call operand_fm_to_ec(operand, ec_operand)
+      if (ec_operand == operand_undefined) then
+         write (msgbuf, '(a,a,a)') 'm_meteo::ec_addtimespacerelation: Unsupported operand ''', operand, &
+                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
+         call err_flush()
+         return
+      end if
+      
+      ! =================================================
+      ! Convert ext file names to accepted Unstruc names.
+      ! =================================================
+      ! Name conversion: (targetname=qidname==name for all names, except name=tracerbndfoo --> qidname=tracerbnd)
+      qidname = name
+      call get_tracername(name, trname, qidname)
+      call get_sedfracname(name, sfname, qidname)
+      call get_waqinputname(name, waqinput, qidname)
+      target_name = qidname
+
+      call clearECMessage()
+      
+      ! ============================================================
+      ! If BC-Type file, create filereader and source items here
+      ! ============================================================
+      location = filename
+      if (ec_filetype == provFile_bc) then
+         if (.not.ecCreateInitializeBCFileReader(ecInstancePtr, forcingfile, location, qidname, &
+                                                 refdate_mjd, tzone, ec_second, fileReaderId)) then
+             
+            if (.not. quiet_) then
+               message = dumpECMessageStack(LEVEL_WARN, callback_msg)
+            end if
+            message = 'Boundary '''//trim(qidname)//''', location='''//trim(location)//''', file='''//trim(forcingfile)//''' failed!' 
+            call mess(LEVEL_ERROR, message)
+         end if
+!     elseif (ec_filetype == provFile_qh) then
+          
+      else
+               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
+               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
+      ! ============================================================
+      ! For the remaining types, construct the fileReader and source Items here.
+      ! ============================================================
+         ! first see if the file has already been opened
+         inquire(file=trim(fileName), exist = exist, opened = opened)
+         if (opened .and. ec_fileType==provFile_spiderweb) then                    ! double file access not allowed when using the Gnu compiler 
+            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileName)
+            if (.not.associated(fileReaderPtr)) then
+               continue
+            end if
+            fileReaderId = fileReaderPtr%id 
+         else
+               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
+            fileReaderId = ecCreateFileReader(ecInstancePtr)
+            
+            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId) ! TODO: Refactor this private data access (UNST-703).
+      
+            fileReaderPtr%vectormax = vectormax
+      
+            if (present(forcingfile)) then
+               if (present(dtnodal)) then
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal/86400.d0)
+               else
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
+               end if
+               !message = dumpECMessageStack(LEVEL_WARN,callback_msg)
+               if (.not. success) then
+                  goto 1234
+               end if
+               if (ecAtLeastOnePointIsCorrection) then       ! TODO: Refactor this shortcut (UNST-180).
+                     ecAtLeastOnePointIsCorrection = .false. ! TODO: Refactor this shortcut (UNST-180).
+                     ec_addtimespacerelation = .true.
+                     return
+               end if
+            else
+               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
+               if (name=='qhbnd') then
+                   ec_filetype = provFile_qhtable
+                   success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename(1:index(filename,'.'))//'qh', refdate_mjd, tzone, ec_second, name)
+               else    
+                  if (present(dtnodal)) then
+                     success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal/86400.d0, varname=varname)
+                  else
+                     success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
+                  end if
+                  if (.not. success) then
+                     ! message = ecGetMessage()
+                     ! message = dumpECMessageStack(LEVEL_WARN,callback_msg)
+                     ! NOTE: do all error dumping (if any) at the end of this routine at label 1234
+         
+                     ! NOTE: in relation to WAVE: all calling WAVE-related routines now pass quiet=.true. to this addtimespace routine.
+                     ! When running online with WAVE and the first WAVE calculation is after the first DFlowFM calculation,
+                     ! this message will be generated. This must be a warning: notify the user that DFlowFM is going to do
+                     ! a calculation with zero wave values. This message should be written every time step, until proper
+                     ! wave data is available. The user has to check whether this behaviour is as expected.
+                     goto 1234
+                  end if
+               end if
+            end if
+         end if
+      end if
+
+      ! ==============================
+      ! Construct the target Quantity.
+      ! ==============================
+      quantityId = ecCreateQuantity(ecInstancePtr)
+      if (.not. ecSetQuantity(ecInstancePtr, quantityId, name=target_name, units=' ', vectormax=vectormax)) then
+         goto 1234
+      end if
+
+      ! ================================
+      ! Construct the target ElementSet.
+      ! ================================
+      elementSetId = ecCreateElementSet(ecInstancePtr)
+
+      if (ec_filetype == provFile_poly_tim) then
+            success              = ecSetElementSetType(ecInstancePtr, elementSetId, elmSetType_polytim)
+      else
+         if (jsferic==0) then
+            success              = ecSetElementSetType(ecInstancePtr, elementSetId, elmSetType_cartesian)
+         else
+            success              = ecSetElementSetType(ecInstancePtr, elementSetId, elmSetType_spheric)
+         end if
+      end if
+
+      if (success) success = ecSetElementSetXArray(ecInstancePtr, elementSetId, x)
+      if (success) success = ecSetElementSetYArray(ecInstancePtr, elementSetId, y)
+      if (success) success = ecSetElementSetMaskArray(ecInstancePtr, elementSetId, mask)
+      if (success) success = ecSetElementSetNumberOfCoordinates(ecInstancePtr, elementSetId, size(x))
+      if (present(xyen)) then
+         if (success) success = ecSetElementSetXyen(ecInstancePtr, elementSetId, xyen)
+      end if
+      
+      if (present(z)) then ! 3D
+         if (present(pzmin) .and. present(pzmax)) then       ! implicitly means: target elt z-type == SIGMA
+            if (success) success = ecSetElementSetZArray(ecInstancePtr, elementSetId, z, pzmin=pzmin, pzmax=pzmax, Lpointer_=.true.)
+            if (success) success = ecSetElementSetvptyp(ecInstancePtr, elementSetID, BC_VPTYP_PERCBED) ! sigma layers
+         else if (present(pkbot) .and. present(pktop))  then ! implicitly means: target elt z-type == Z WITH sparse kbot/ktop storage
+            if (success) success = ecSetElementSetZArray(ecInstancePtr, elementSetId, z, Lpointer_=.true.)
+            if (success) success = ecSetElementSetKbotKtop(ecInstancePtr, elementSetId, pkbot, pktop, Lpointer_=.true.)
+            if (success) success = ecSetElementSetvptyp(ecInstancePtr, elementSetID, BC_VPTYP_ZDATUM) ! z-layers
+         else
+            ! ERROR .. TODO: LR
+         end if
+
+         ! add 3D settings if needed
+         if (ec_filetype == provFile_poly_tim .and. (target_name == 'salinitybnd' .or. target_name == 'temperaturebnd' .or. target_name == 'tracerbnd')) then   ! TODO JRE sediment    
+            if (success) success = ecSetElementSetMaskArray(ecInstancePtr, elementSetId, mask)
+            if (success) success = ecSetElementSetNumberOfCoordinates(ecInstancePtr, elementSetId, size(x))
+         end if
+      end if
+      
+      if (.not. success) then
+         goto 1234
+      end if
+      
+      ! ==============================================
+      ! Construct the target field and the target item
+      ! ==============================================
+      ! determine which target item (id) will be created, and which FM data array has to be used
+      ! JRE DEBUG sedfrac
+      if (.not. fm_ext_force_name_to_ec_item(trname, sfname, waqinput, qidname,                                                &
+                                             targetItemPtr1, targetItemPtr2, targetItemPtr3, targetItemPtr4, &
+                                             dataPtr1      , dataPtr2      , dataPtr3      , dataPtr4        )) then
+         return
+      end if
+      continue
+      
+      ! Overrule hard-coded pointers to target data by optional pointers passed in the call     
+      if (present(tgt_data1)) dataPtr1 => tgt_data1
+      if (present(tgt_data2)) dataPtr2 => tgt_data2
+      if (present(tgt_data3)) dataPtr3 => tgt_data3
+      if (present(tgt_data4)) dataPtr4 => tgt_data4
+                                             
+      ! Overrule hard-coded pointers to target items by optional pointers passed in the call     
+      if (present(tgt_item1)) targetItemPtr1 => tgt_item1
+      if (present(tgt_item2)) targetItemPtr2 => tgt_item2
+      if (present(tgt_item3)) targetItemPtr3 => tgt_item3
+      if (present(tgt_item4)) targetItemPtr4 => tgt_item4
+
+      ! Create the field and the target item, and if needed additional ones.
+      fieldId = ecCreateField(ecInstancePtr)
+      success = ecSetField1dArray(ecInstancePtr, fieldId, dataPtr1)
+      if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId, dmiss)
+      if (success) success = createItem(ecInstancePtr, targetItemPtr1, quantityId, elementSetId, fieldId)
+      if (present(multuni1)) then                      ! if multiple-uni item(s) specified:
+         if (multuni1<0) then
+            multuni1=ecInstanceCreateItem(ecInstancePtr)
+            if (.not.ecSetItemRole(ecInstancePtr, multuni1, itemType_target)) return
+         end if
+         connectionId = ecCreateConnection(ecInstancePtr)
+         if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr1)) return        ! connecting source to new converter
+         if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni1)) return              ! connecting multuni1 as target item to the new converter
+         if (.not.ecCopyItemProperty(ecInstancePtr, multuni1, targetItemPtr1, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
+         if (.not.ecAddItemConnection(ecInstancePtr, multuni1, connectionId)) return                    ! adding the new converter to multuni1
+      end if
+      if (associated(targetItemPtr2)) then
+         ! second field (e.g. for 'windxy')
+         fieldId_2 = ecCreateField(ecInstancePtr)
+         if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_2, dataPtr2)
+         if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_2, dmiss)
+         if (success) success = createItem(ecInstancePtr, targetItemPtr2, quantityId, elementSetId, fieldId_2)
+         if (present(multuni2)) then                      ! if multiple-uni item(s) specified:
+            if (multuni2<0) then
+               multuni2=ecInstanceCreateItem(ecInstancePtr)
+               if (.not.ecSetItemRole(ecInstancePtr, multuni2, itemType_target)) return
+            end if
+            connectionId = ecCreateConnection(ecInstancePtr)
+            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr2)) return        ! connecting source to new converter
+            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni2)) return              ! connecting multuni1 as target item to the new converter
+            if (.not.ecCopyItemProperty(ecInstancePtr, multuni2, targetItemPtr2, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
+            if (.not.ecAddItemConnection(ecInstancePtr, multuni2, connectionId)) return                    ! adding the new converter to multuni1
+         end if
+      end if
+      if (associated(targetItemPtr3)) then
+         ! third field (e.g. for 'airpressure_windx_windy'
+         fieldId_3 = ecCreateField(ecInstancePtr)
+         if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_3, dataPtr3)
+         if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_3, dmiss)
+         if (success) success = createItem(ecInstancePtr, targetItemPtr3, quantityId, elementSetId, fieldId_3)
+         if (present(multuni3)) then                      ! if multiple-uni item(s) specified:
+            if (multuni3<0) then
+               multuni3=ecInstanceCreateItem(ecInstancePtr)
+               if (.not.ecSetItemRole(ecInstancePtr, multuni3, itemType_target)) return
+            end if
+            connectionId = ecCreateConnection(ecInstancePtr)
+            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr3)) return        ! connecting source to new converter
+            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni3)) return              ! connecting multuni1 as target item to the new converter
+            if (.not.ecCopyItemProperty(ecInstancePtr, multuni3, targetItemPtr3, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
+            if (.not.ecAddItemConnection(ecInstancePtr, multuni3, connectionId)) return                    ! adding the new converter to multuni1
+         end if
+      end if
+      if (associated(targetItemPtr4)) then
+         ! third field (e.g. for 'humidity_airtemperatur_cloudiness_solarradiation'
+         fieldId_4 = ecCreateField(ecInstancePtr)
+         if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_4, dataPtr4)
+         if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_4, dmiss)
+         if (success) success = createItem(ecInstancePtr, targetItemPtr4, quantityId, elementSetId, fieldId_4)
+         if (present(multuni4)) then                      ! if multiple-uni item(s) specified:
+            if (multuni4<0) then
+               multuni4=ecInstanceCreateItem(ecInstancePtr)
+               if (.not.ecSetItemRole(ecInstancePtr, multuni4, itemType_target)) return
+            end if
+            connectionId = ecCreateConnection(ecInstancePtr)
+            if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, targetItemPtr4)) return        ! connecting source to new converter
+            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, multuni4)) return              ! connecting multuni1 as target item to the new converter
+            if (.not.ecCopyItemProperty(ecInstancePtr, multuni4, targetItemPtr4, 'quantityPtr')) return    ! copying the quantity pointer to the multi uni item
+            if (.not.ecAddItemConnection(ecInstancePtr, multuni4, connectionId)) return                    ! adding the new converter to multuni1
+         end if
+      end if
+      
+
+      if (.not. success) then
+         goto 1234
+      end if
+      
+      ! ==========================
+      ! Construct a new Converter.
+      ! ==========================
+      ec_convtype = ec_filetype_to_conv_type(ec_filetype, name)
+      if (ec_convtype == convType_undefined) then
+         call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported converter.')
+         return
+      end if
+      
+      converterId = ecCreateConverter(ecInstancePtr)
+      
+      select case(target_name)
+      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'valve1D', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'lateral_discharge','dambreakLevelsAndWidths')
+         ! for the FM 'target' arrays, the index is provided by the caller
+         if (.not. present(targetIndex)) then
+            message = 'Internal program error: missing targetIndex for quantity '''//trim(target_name)
+            call mess(LEVEL_ERROR, message)
+            return
+         end if
+         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, ec_method)
+         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, targetIndex)
+      case ('qhbnd')
+         ! count qh boundaries
+         n_qhbnd = n_qhbnd + 1
+         inputptr => atqh_all(n_qhbnd)
+         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, operand_replace_element, interpolate_passthrough, inputptr=inputptr)
+         if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
+         ! Each qhbnd polytim file replaces exactly one element in the target data array.
+         ! Converter will put qh value in target_array(n_qhbnd)
+      case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
+            'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy','humidity','airtemperature','cloudiness','solarradiation' )
+         if (present(srcmaskfile)) then 
+            if (ec_filetype == provFile_arcinfo .or. ec_filetype == provFile_curvi) then
+               if (.not.ecParseARCinfoMask(srcmaskfile, srcmask, fileReaderPtr)) then
+                  write (msgbuf, '(3a)') 'Error while reading mask file ''', trim(srcmaskfile),'''.'
+                  call err_flush()
+                  return
+               endif 
+               if (.not.initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method, srcmask=srcmask)) then 
+                  write (msgbuf, '(5a)') 'Error while setting mask to converter (file=''', trim(srcmaskfile), ''', associated with meteo file ''', trim(filename), '''.'
+                  call err_flush()
+                  return
+               end if 
+            end if
+         else
+            if (ec_filetype == provFile_bc .and. target_name=='windxy') then
+                ec_convtype = convType_unimagdir
+            end if    
+            success = initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method)
+         end if
+      case ('rainfall')
+         if (present(srcmaskfile)) then
+            if (allocated(srcmask%msk)) deallocate (srcmask%msk)
+            allocate(srcmask%msk(ndx))
+            if (allocated(transformcoef)) deallocate (transformcoef)
+            allocate(transformcoef(1))
+            if (present(targetMaskSelect)) then
+               if (targetMaskSelect == 'i') then
+                  itargetMaskSelect = 1
+               else
+                  itargetMaskSelect = 0
+               end if
+            else
+               itargetMaskSelect = 1
+            end if
+            if (itargetMaskSelect == 1) then
+               transformcoef = 1.0d0
+               srcmask%msk = 0
+            else
+               transformcoef = 0.0d0
+               srcmask%msk = 1
+            end if
+            
+            success = timespaceinitialfield_int(x, y, srcmask%msk, ndx, srcmaskfile, inside_polygon, ec_method, operand, transformcoef) ! zie meteo module
+            if (.not.success) then
+               write (msgbuf, '(3a)') 'Error while reading mask file ''', trim(srcmaskfile),'''.'
+               call err_flush()
+               return
+            endif 
+            if (.not.initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method, srcmask=srcmask)) then 
+               write (msgbuf, '(5a)') 'Error while setting mask to converter (file=''', trim(srcmaskfile), ''', associated with meteo file ''', trim(filename), '''.'
+               call err_flush()
+               return
+            end if 
+            if (allocated(srcmask%msk)) deallocate (srcmask%msk)
+            if (allocated(transformcoef)) deallocate (transformcoef)
+         else
+            success = initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method)
+         end if
+      case default
+         success = initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method)
+         if (present(targetindex)) then
+            success = ecSetConverterElement(ecInstancePtr, converterId, targetindex)
+         end if
+      end select
+      
+      if (.not. success) then
+         goto 1234
+      end if      
+         
+      ! ================================================================
+      ! Construct a new Connection, and connect source and target Items.
+      ! ================================================================
+      connectionId = ecCreateConnection(ecInstancePtr)
+      
+      if (.not. ecSetConnectionConverter(ecInstancePtr, connectionId, converterId)) then
+         goto 1234
+      end if
+
+      ! determine the source item's name
+      ! note 1: this can be determined (and be improved) when creating the file reader
+      ! note 2: the source item's name is set in the select case switch below. In some cases
+      !         of this switch ('special cases') the source-target connections is established
+      !         immediatly, and sourceItemName is NOT set.
+      !         So the generic 'connect source and target' statements after the switch are
+      !         only executed if sourceItemName IS set.
+      !
+      sourceItemName = ' '
+
+      sourceItemId    = 0
+      sourceItemId_2  = 0
+      sourceItemId_3  = 0
+      sourceItemId_4  = 0
+
+      select case (target_name)
+         case ('shiptxy' , 'movingstationtxy', 'discharge_salinity_temperature_sorsin')
+            if (.not. checkFileType(ec_filetype, provFile_uniform, target_name)) then
+               return
+            end if
+            ! the file reader will have created an item called 'uniform_item'
+            sourceItemName = 'uniform_item'
+         case ('pump','generalstructure','damlevel', 'valve1D','gateloweredgelevel','lateral_discharge','dambreakLevelsAndWidths')
+            if (checkFileType(ec_filetype, provFile_uniform, target_name)) then
+               !
+               ! *.tim file
+               !
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               if (sourceItemId==ec_undef_int) then 
+                  ! Add something to the EC message stack about missing source item 
+                  return 
+               endif 
+               if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)) return 
+            else if (checkFileType(ec_filetype, provFile_bc, target_name)) then
+               !
+               ! *.bc file
+               !
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, target_name)
+               if (sourceItemId==ec_undef_int) then 
+                  ! Add something to the EC message stack about missing source item 
+                  return 
+               endif 
+               if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)) return 
+            else if (checkFileType(ec_filetype, provFile_fourier, target_name)) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'period')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'magnitude')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'phase')
+               if ((sourceItemId==ec_undef_int) .or. (sourceItemId_2==ec_undef_int) .or. (sourceItemId_3==ec_undef_int)) then 
+                  ! Add something to the EC message stack about missing source item 
+                  return
+               else 
+                  if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)) return 
+                  if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)) return 
+                  if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)) return 
+               endif 
+            else if (checkFileType(ec_filetype, provFile_poly_tim, target_name)) then
+               sourceItemName = 'polytim_item'
+            else 
+               ! Add something to the EC message stack about mismatching filetype bla bla 
+               return 
+            endif 
+            if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)) return 
+            if (.not.ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)) return 
+         case ('qhbnd')
+            if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
+                 (.not. checkFileType(ec_filetype, provFile_qhtable, target_name))  .and.            &
+                 (.not. checkFileType(ec_filetype, provFile_bc, target_name)) ) then
+               return
+            end if
+            if (ec_filetype == provFile_poly_tim) then
+               sourceItemName = 'polytim_item'
+            else if (ec_filetype == provFile_bc .or. ec_filetype == provFile_qhtable) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'discharge')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'waterlevel')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'slope')
+               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'crossing')
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)
+               if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)
+               if (.not. success) then
+                  goto 1234
+               end if
+            end if
+         case ('velocitybnd', 'dischargebnd', 'waterlevelbnd', 'salinitybnd', 'tracerbnd',           &
+               'neumannbnd', 'riemannbnd', 'absgenbnd', 'outflowbnd',                      &
+               'temperaturebnd', 'sedimentbnd', 'tangentialvelocitybnd', 'uxuyadvectionvelocitybnd', & 
+               'normalvelocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    !JRE DEBUG sedfrac
+            if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
+                 (.not. checkFileType(ec_filetype, provFile_bc, target_name))  ) then
+               return
+            end if
+            if (ec_filetype == provFile_poly_tim) then
+               sourceItemName = 'polytim_item'
+            else if (ec_filetype == provFile_bc) then
+               sourceItemName = name
+               call str_upper(sourceItemName)
+            end if
+         case ('rainfall')
+            ! the name of the source item depends on the file reader
+            if (ec_filetype == provFile_uniform) then
+               sourceItemName = 'uniform_item'
+            else if (ec_filetype == provFile_bc) then
+               sourceItemName = 'RAINFALL'
+            else if (ec_filetype == provFile_netcdf) then
+               sourceItemName = 'precipitation_amount'
+            else if (ec_filetype == provFile_curvi) then
+               sourceItemName = 'curvi_source_item_1'
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity rainfall.')
+               return
+            end if
+         case ('rainfall_rate')
+            ! the name of the source item depends on the file reader
+            if (ec_filetype == provFile_uniform) then
+               sourceItemName = 'uniform_item'
+            else if (ec_filetype == provFile_bc) then
+               sourceItemName = 'RAINFALL_RATE'
+            else if (ec_filetype == provFile_netcdf) then
+               sourceItemName = 'rainfall_rate'
+            else if (ec_filetype == provFile_curvi) then
+               sourceItemName = 'curvi_source_item_1'
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity rainfall_rate.')
+               return
+            end if
+         case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')
+            ! the name of the source item created by the file reader will be the same as the ext.force. quant name
+            sourceItemName = target_name
+         case ('airpressure', 'atmosphericpressure')
+            if (ec_filetype == provFile_arcinfo) then
+               sourceItemName = 'wind_p'
+            else if (ec_filetype == provFile_curvi) then
+               sourceItemName = 'curvi_source_item_1'
+            else if (ec_filetype == provFile_uniform) then
+               sourceItemName = 'uniform_item'
+            else if (ec_filetype == provFile_spiderweb) then
+               sourceItemName = 'p_drop'
+            else if (ec_filetype == provFile_netcdf) then
+               ! the arc-info file contains 'air_pressure', which is also the standard_name 
+               sourceItemName  = 'air_pressure'
+            else 
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity wind_p.')
+               return
+            end if
+         case ('windx')
+            ! the name of the source item depends on the file reader
+            if (ec_filetype == provFile_arcinfo) then
+               sourceItemName  = 'wind_u'
+            else if (ec_filetype == provFile_curvi) then
+               sourceItemName = 'curvi_source_item_1'
+            else if (ec_filetype == provFile_uniform) then
+               sourceItemName = 'uniform_item'
+            else if (ec_filetype == provFile_netcdf) then
+               sourceItemName = 'eastward_wind'
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity windx.')
+               return
+            end if
+         case ('windy')
+            ! the name of the source item depends on the file reader
+            if (ec_filetype == provFile_arcinfo) then
+               sourceItemName  = 'wind_v'
+            else if (ec_filetype == provFile_curvi) then
+               sourceItemName = 'curvi_source_item_1'
+            else if (ec_filetype == provFile_uniform) then
+               sourceItemName = 'uniform_item'
+            else if (ec_filetype == provFile_netcdf) then
+               sourceItemName = 'northward_wind'
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity windy.')
+               return
+            end if
+         case ('stressxy')
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_eastward_stress')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_northward_stress')
+               if (sourceItemId == ec_undef_int .or. sourceItemId_2 == ec_undef_int) then
+                  goto 1234
+               end if
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: stressxy only implemented for NetCDF.')
+               return
+            end if
+            success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_x)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_y)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_x, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_y, connectionId)
+         case ('windxy')
+            ! special case: m:n converter, (for now) handle here in case switch
+            if (ec_filetype == provFile_unimagdir) then
+               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               success = (sourceItemId /= ec_undef_int)
+               if (.not. success) then
+                  goto 1234
+               end if
+            else if (ec_filetype == provFile_uniform) then
+               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               success = (sourceItemId /= ec_undef_int)
+               if (.not. success) then
+                  goto 1234
+               end if
+            else if (ec_filetype == provFile_bc) then
+               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'WINDXY')
+               success = (sourceItemId /= ec_undef_int)
+               if (.not. success) then
+                  goto 1234
+               end if
+            else if (ec_filetype == provFile_netcdf) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'eastward_wind')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'northward_wind')
+               success = (sourceItemId /= ec_undef_int .and. sourceItemId_2 /= ec_undef_int)
+               if (.not. success) then
+                  goto 1234
+               end if
+            else if (ec_filetype == provFile_spiderweb) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'windspeed')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'winddirection')
+               success = (sourceItemId /= ec_undef_int .and. sourceItemId_2 /= ec_undef_int)
+               if (.not. success) then
+                  goto 1234
+               end if
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity windxy.')
+               return
+            end if
+            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+            if (sourceItemId_2>0) then
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+            end if
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_x)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_y)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_x, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_y, connectionId)
+         case ('airpressure_windx_windy', 'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy')
+            withCharnock = (target_name == 'airpressure_windx_windy_charnock')
+            withStress = (target_name == 'airpressure_stressx_stressy')
+            ! special case: m:n converter, (for now) handle seperately
+            if (ec_filetype == provFile_curvi) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_1')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_2')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_3')
+            else if (ec_filetype == provFile_spiderweb) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'windspeed')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'winddirection')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'p_drop')
+            else if (ec_filetype == provFile_netcdf) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_pressure')
+               if ( .not. withStress) then
+                  sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'eastward_wind')
+                  sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'northward_wind')
+               else
+                  sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_eastward_stress')
+                  sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_northward_stress')
+               endif
+               if (withCharnock) then
+                  sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'charnock')
+                  if (sourceItemId_4 == ec_undef_int) goto 1234
+               endif
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity ' // trim(target_name) // '.')
+               return
+            end if
+            if (sourceItemId == ec_undef_int .or. sourceItemId_2 == ec_undef_int .or. sourceItemId_3 == ec_undef_int) then
+               goto 1234
+            end if
+            success              = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+            if (success .and. withCharnock) then
+                         success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+            endif
+            if (ec_filetype == provFile_curvi .or. ec_filetype == provFile_netcdf) then
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_p)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_x)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_y)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_p, connectionId)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_x, connectionId)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_y, connectionId)
+               if (withCharnock) then
+                  if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_c)
+                  if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_c, connectionId)
+               endif
+            else if (ec_filetype == provFile_spiderweb) then
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_x)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_y)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_p)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_x, connectionId)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_y, connectionId)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_p, connectionId)
+            end if
+            if (.not. success) then
+               goto 1234
+            end if
+         case ('humidity_airtemperature_cloudiness')
+            ! special case: m:n converter, (for now) handle seperately
+            if (ec_filetype == provFile_curvi .or. ec_filetype == provFile_uniform) then
+               if (ec_filetype == provFile_curvi) then
+                  sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_1')
+                  sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_2')
+                  sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_3')
+                  if (sourceItemId == ec_undef_int .or. sourceItemId_2 == ec_undef_int .or. sourceItemId_3 == ec_undef_int) then
+                     goto 1234
+                  end if
+                  success              = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+                  if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+                  if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+               else if (ec_filetype == provFile_uniform) then
+                  sourceItemId = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+                  if (sourceItemId == ec_undef_int) then
+                     goto 1234
+                  end if
+                  success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               end if
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hac_humidity)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hac_airtemperature)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hac_cloudiness)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_hac_humidity, connectionId)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_hac_airtemperature, connectionId)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_hac_cloudiness, connectionId)
+               if (.not. success) then
+                  goto 1234
+               end if
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity humidity_airtemperature_cloudiness.')
+               return
+            end if
+         case ('humidity_airtemperature_cloudiness_solarradiation')
+            ! special case: m:n converter, (for now) handle seperately
+            if (ec_filetype == provFile_curvi) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_1')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_2')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_3')
+               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_4')
+               if (sourceItemId   == ec_undef_int .or. sourceItemId_2 == ec_undef_int .or. &
+                   sourceItemId_3 == ec_undef_int .or. sourceItemId_4 == ec_undef_int      ) then
+                  goto 1234
+               end if
+               success              = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+            else if (ec_filetype == provFile_uniform) then
+               sourceItemId = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               if (sourceItemId == ec_undef_int) then
+                  goto 1234
+               end if
+               success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+            else if (ec_filetype == provFile_netcdf) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'humidity')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_temperature')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'cloud_area_fraction')
+               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_net_downward_shortwave_flux')
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
+               return
+            end if
+
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hacs_humidity)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hacs_airtemperature)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hacs_cloudiness)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_hacs_solarradiation)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_hacs_humidity, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_hacs_airtemperature, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_hacs_cloudiness, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_hacs_solarradiation, connectionId)
+            if (.not. success) then
+               goto 1234
+            end if
+         case ('dewpoint_airtemperature_cloudiness')
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'dew_point_temperature')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_temperature')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'cloud_area_fraction')
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+               if (.not. success) goto 1234
+            else if (ec_filetype == provFile_uniform) then
+               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               success = (sourceItemId /= ec_undef_int)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
+               return
+            end if
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dac_dewpoint)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dac_airtemperature)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dac_cloudiness)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_dac_dewpoint, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_dac_airtemperature, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_dac_cloudiness, connectionId)
+         case ('dewpoint_airtemperature_cloudiness_solarradiation')
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'dew_point_temperature')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_temperature')
+               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'cloud_area_fraction')
+               sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_net_downward_shortwave_flux')
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+            else if (ec_filetype == provFile_uniform) then
+               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               success = (sourceItemId /= ec_undef_int)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
+               return
+            end if
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dacs_dewpoint)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dacs_airtemperature)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dacs_cloudiness)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_dacs_solarradiation)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_dewpoint, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_airtemperature, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_cloudiness, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_solarradiation, connectionId)
+         case ('humidity')
+            sourceItemName = 'relative_humidity'
+         case ('airtemperature')
+            sourceItemName = 'air_temperature'
+         case ('cloudiness')
+            sourceItemName = 'cloudfraction'
+         case ('solarradiation')
+            sourceItemName = 'sw_radiation_flux'
+         case ('nudge_salinity_temperature')
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_potential_temperature')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_salinity')
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
+               return
+            end if
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_nudge_tem)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_nudge_sal)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_nudge_tem, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_nudge_sal, connectionId)
+         case ('waqfunction') 
+            if (.not. checkFileType(ec_filetype, provFile_uniform, target_name)) then
+               return
+            end if
+            ! the file reader will have created an item called 'polytim_item'
+            sourceItemName = 'uniform_item'
+         case ('waqsegmentfunction')
+            ! the name of the source item depends on the file reader
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemName = name
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '''//trim(name)//'''')
+               return
+            end if
+         case default
+            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId)
+            if (fileReaderPtr%nitems>=1) then 
+               sourceItemId = fileReaderPtr%items(1)%ptr%id
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)
+               if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)
+               if (fileReaderPtr%nitems>=2) then
+                  sourceItemId_2 = fileReaderPtr%items(2)%ptr%id
+                  if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+                  if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr2)
+                  if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr2, connectionId)
+                  if (fileReaderPtr%nitems>=3) then
+                     sourceItemId_3 = fileReaderPtr%items(3)%ptr%id
+                     if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+                     if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr3)
+                     if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr3, connectionId)
+                     if (fileReaderPtr%nitems>=4) then
+                        sourceItemId_4 = fileReaderPtr%items(4)%ptr%id
+                        if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+                        if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr4)
+                        if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr4, connectionId)
+                     endif                     
+                  endif                     
+               endif                     
+            else                     
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported quantity specified in ext-file (connect source and target): '//trim(target_name)//'.')
+            endif                     
+            return
+      end select
+
+      if (sourceItemName /= ' ') then
+         ! not a special case, connect source and target
+         sourceItemId = ecFindItemInFileReader(ecInstancePtr, fileReaderId, sourceItemName)
+         if (sourceItemId == ec_undef_int) then
+            goto 1234
+         end if
+         if (.not. initializeConnection(ecInstancePtr, connectionId, sourceItemId , targetItemPtr1)) then
+            goto 1234
+         end if
+         if (present(targetIndex)) then
+            if (.not. checkVectorMax(ecInstancePtr, sourceItemId , targetItemPtr1)) then
+               goto 1234
+            endif
+         endif
+      end if
+      
+      success = ecSetConnectionIndexWeights(ecInstancePtr, connectionId)
+            
+      if ( target_name=='nudge_salinity_temperature' ) then
+         call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows, issparse, Ndatasize)
+         relcol = dble(col1-col0+1)/dble(ncols)
+         relrow = dble(row1-row0+1)/dble(nrows)
+         write(txt1,"('nudge_salinity_temperature: bounding box')")
+         write(txt2,"('col0-col1 X row0-row1 = ', I0, '-', I0, ' X ', I0, '-', I0, ', ncols X nrows = ', I0, ' X ', I0)") col0, col1, row0, row1, ncols, nrows
+         write(txt3,"('relcol X relrow = ', F4.2, ' X ', F4.2, ' = ', F4.2)") relcol, relrow, relcol*relrow
+         call mess(LEVEL_INFO, trim(txt1) // ' ' // trim(txt2) // ', ' // trim(txt3))
+         
+         if ( issparse.eq.1 ) then
+            write(txt1,"('sparse: data size = ', I0, ', ncols X nrows = ', I0, ' X ', I0, ' = ', I0)") Ndatasize, ncols, nrows, ncols*nrows
+            write(txt2,"('factor = ', F4.2)") dble(Ndatasize)/dble(Ncols*Nrows)
+            call mess(LEVEL_INFO, trim(txt1) // ' ' // trim(txt2))
+         end if
+      end if
+
+      ec_addtimespacerelation = .true.
+      return
+      
+      ! Error handling.
+1234  continue
+      ec_addtimespacerelation = .false.
+!     message = ecGetMessage()
+
+      if (.not. quiet_) then
+         ! TODO: AvD: I'd rather have a full message stack that will combine EC + meteo + dflowfm, and any caller may print any pending messages.
+         ! For now: Print the EC message stack here, and leave the rest to the caller.
+         ! TODO: RL: the message below is from m_meteo::message, whereas timespace::getmeteoerror() returns timespace::errormessage. So now this message here is lost/never printed at call site.
+         message = dumpECMessageStack(LEVEL_WARN, callback_msg)
+         ! Leave this concluding message for the caller to print or not. (via getmeteoerror())
+      end if
+      message = 'm_meteo::ec_addtimespacerelation: Error while initializing '''//trim(name)//''' from file: '''//trim(filename)//''''
+      if (present(forcingfile)) then
+         message = trim(message)//' ('''//trim(forcingfile)//''')'
+      endif
+     
+   end function ec_addtimespacerelation
+   
+   ! ==========================================================================
+   function checkVectorMax(ecInstancePtr, sourceItemId , targetItemId) result (success)
+      logical                       :: success       !< function result
+      type(tEcInstance), pointer    :: ecInstancePtr !< the instance pointer
+      integer,           intent(in) :: sourceItemId  !< the source item ID
+      integer,           intent(in) :: targetItemId  !< the target item ID
+
+      type(tEcItem),       pointer :: itemPtrSrc     !< Item corresponding to sourceItemId
+      type(tEcItem),       pointer :: itemPtrTgt     !< Item corresponding to targetItemId
+      integer                      :: vectorMaxSrc   !< vectorMax for source item
+      integer                      :: vectorMaxTgt   !< vectorMax for target item
+      character(len=1024)          :: msg
+      success = .true.
+      itemPtrSrc => ecSupportFindItem(ecInstancePtr, sourceItemId)
+      itemPtrTgt => ecSupportFindItem(ecInstancePtr, targetItemId)
+      vectorMaxSrc = itemPtrSrc%quantityPtr%vectorMax
+      vectorMaxTgt = itemPtrTgt%quantityPtr%vectorMax
+      if (vectorMaxSrc /= vectorMaxTgt) then
+         success = .false.
+         select case (itemPtrTgt%quantityPtr%name)   
+         case ('discharge_salinity_temperature_sorsin')
+            write(msg,'(a,i0,a,i0,a)') 'Wrong number of data columns in a discharge_salinity_temperature_sorsin time series: ', vectorMaxTgt, ' requested, ',vectorMaxSrc,' provided.'
+            call mess(LEVEL_ERROR,  trim(msg)) 
+         case default
+            call mess(LEVEL_WARN, "There was a problem with a source of type " // trim(itemPtrSrc%quantityPtr%name) &
+                    // " with source file '" // trim(itemPtrSrc%elementsetPtr%name) // "'")
+            call mess(LEVEL_ERROR, "Vector max differs for " // trim(itemPtrTgt%quantityPtr%name) &
+                    // " values (resp. source, target): ", vectorMaxSrc, vectorMaxTgt)
+         end select
+      endif
+   end function checkVectorMax
+   
+   ! ==========================================================================
+   function ec_gettimeseries_by_itemID(instancePtr, itemId, t0, t1, dt, target_array) result(success)
+      use m_flowtimes
+      logical                                                 :: success      !< function status
+      type(tEcInstance),                        pointer       :: instancePtr  !< intent(in)
+      integer,                                  intent(in)    :: itemID       !< unique Item id
+      real(hp),                                 intent(in)    :: t0,t1,dt     !< get data corresponding to this number of timesteps since FM's refdate
+      real(hp), dimension(:), allocatable,      intent(inout) :: target_array !< kernel's data array for the requested values
+      real(hp), dimension(:), pointer     :: arr1dPtr => null() 
+
+
+      real(hp) :: tt
+      integer  :: it, nt, blksize
+      tt = t0
+      it = 0
+      
+      nt = ceiling((t1-t0)/dt)+1
+      if (allocated(target_array)) deallocate(target_array)
+      allocate(target_array(nt*blksize)) 
+      arr1dPtr => ecItemGetArr1DPtr(instancePtr, itemId, 2)
+      blksize = size(arr1dPtr)  
+
+      call clearECMessage()
+      do while (t0+it*dt<t1)
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, itemId, irefdate, tzone, tunit, t0+it*dt,  &
+                                     target_array(it*blksize+1:(it+1)*blksize))) then
+            return         ! Message stack was already dumped by gettimespacevalue
+         end if
+         it = it + 1
+      end do
+   end function ec_gettimeseries_by_itemID
+   
+   
+   ! ==========================================================================
+   
+   !> Convenience wrapper around ec_gettimespacevalue_by_itemID.
+   function ec_gettimespacevalue_by_name(instancePtr, group_name, timesteps) result(success)
+      use m_flowtimes
+      logical                       :: success     !< function status
+      type(tEcInstance), pointer    :: instancePtr !< intent(in)
+      character(len=*),  intent(in) :: group_name  !< unique group name
+      real(hp),          intent(in) :: timesteps   !< get data corresponding to this number of timesteps since FM's refdate
+      double precision, dimension(:), pointer :: ptm, prh, ptd
+      !
+      success = .false.
+      !
+      if (trim(group_name) == 'rainfall') then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall, irefdate, tzone, tunit, timesteps)) return
+         ! rain = rain * 86400.0                  ! EC delivers rainfall intensity in mm/s, convert to mm/day
+         ! Hi Robert, if you change some input definition in 2017, than please repair code from 2009 till now
+         ! foreseeing problems like this, I first called this quantity rainfall_mmperday.
+         ! Then someone changed the name in 2015 
+         ! Now you change the unit in 2017. 
+         ! I give a course this Thursday, please no surprises 
+         end if
+      if (trim(group_name) == 'rainfall_rate') then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall_rate, irefdate, tzone, tunit, timesteps)) return
+      end if
+      if (trim(group_name) == 'humidity_airtemperature_cloudiness') then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hac_humidity, irefdate, tzone, tunit, timesteps)) return
+      end if
+      if (trim(group_name) == 'humidity_airtemperature_cloudiness_solarradiation') then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hacs_humidity, irefdate, tzone, tunit, timesteps)) return
+      end if
+      if (trim(group_name) == 'dewpoint_airtemperature_cloudiness') then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_dac_dewpoint, irefdate, tzone, tunit, timesteps)) return
+      end if
+      if (trim(group_name) == 'dewpoint_airtemperature_cloudiness_solarradiation') then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_dacs_dewpoint, irefdate, tzone, tunit, timesteps)) return
+      end if
+      
+      if ((trim(group_name) == 'dewpoint_airtemperature_cloudiness' .and. item_dac_dewpoint/=ec_undef_int)    &
+          .or.       & 
+          (trim(group_name) == 'dewpoint_airtemperature_cloudiness_solarradiation' .and. item_dacs_dewpoint/=ec_undef_int)) then
+          ! Conversion of dewpoint to relative humidity
+          ptd => rhum
+          prh => rhum
+          ptm => tair
+          call dewpt2rhum(ptd,ptm,prh)        ! convert dewpoint temperatures to relative humidity (percentage)
+      end if
+      if (index(group_name, 'airpressure_windx_windy') == 1) then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_apwxwy_p, irefdate, tzone, tunit, timesteps)) return
+      end if
+      success = .true.
+   end function ec_gettimespacevalue_by_name
+
+   subroutine dewpt2rhum(td,tm,rh)
+   ! in-place conversion of dewpoint temperature to relative humidity, given the air temperature 
+   ! $$RH(T,T_d) = \exp\left[\frac{BT}{C+T} - \frac{BT_d}{C+T_d}\right] \times 100$$ 
+   implicit none
+   double precision, dimension(:), pointer   :: td    !< dewpoint temperature
+   double precision, dimension(:), pointer   :: tm    !< air temperature
+   double precision, dimension(:), pointer   :: rh    !< relative humidity
+
+   double precision, parameter               :: B =   17.502 ! exactly as in 
+   double precision, parameter               :: C =   -32.19
+   double precision, parameter               :: T_0 = 273.16
+   integer                                   :: i, n
+   td => rh                                  ! Dewpoint temperature was stored in the array where relative humidity will be stored 
+   n = size(td)
+   do i=1,n
+      rh(i) = exp(B*td(i)/(C+td(i)+T_0) - B*tm(i)/(C+tm(i)+T_0)) * 100.d0
+   end do
+   end subroutine dewpt2rhum
+
+end module m_meteo
