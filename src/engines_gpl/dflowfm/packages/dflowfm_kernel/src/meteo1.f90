@@ -1112,7 +1112,7 @@ module m_meteo
          if (success) success = ecSetField1dArray(ecInstancePtr, fieldId_2, dataPtr2)
          if (success) success = ecSetFieldMissingValue(ecInstancePtr, fieldId_2, dmiss)
          if (success) success = createItem(ecInstancePtr, targetItemPtr2, quantityId, elementSetId, fieldId_2)
-         if (present(multuni1)) then                      ! if multiple-uni item(s) specified:
+         if (present(multuni2)) then                      ! if multiple-uni item(s) specified:
             if (multuni2<0) then
                multuni2=ecInstanceCreateItem(ecInstancePtr)
                if (.not.ecSetItemRole(ecInstancePtr, multuni2, itemType_target)) return
