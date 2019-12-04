@@ -647,15 +647,17 @@ module m_ec_item
       ! =======================================================================
       ! Copy methods
       ! =======================================================================
-      !> Place holder for setting several properties of an item in one go, copieed from another item
-      !> all specified as optional arguments, which should be passed with names 
-      !> (RL: Now only used for the vectormax, but easily extensible)
+      !> Copies known properties from one EC item to the other.
+      !!
+      !! Example use is when a parent provider's item should reflect the same
+      !! properties as its child providers item(s).
       function ecItemCopyProperty(instancePtr, itemId_tgt, itemId_src, proplist) result(success)
          logical                                 :: success     !< function status
          type(tEcInstance), pointer              :: instancePtr !< intent(in)
          integer,           intent(in)           :: itemId_src  !< unique Item id source
          integer,           intent(in)           :: itemId_tgt  !< unique Item id target
-         character(len=*),  intent(in)           :: proplist    !< name of properties to be copied
+         character(len=*),  intent(in)           :: proplist    !< name of properties to be copied. Currently supported: "vectorMax", "quantityPtr".
+
          type(tEcItem), pointer :: itemPtr_src                  !< Item corresponding to itemId, source side
          type(tEcItem), pointer :: itemPtr_tgt                  !< Item corresponding to itemId, target side
          !
