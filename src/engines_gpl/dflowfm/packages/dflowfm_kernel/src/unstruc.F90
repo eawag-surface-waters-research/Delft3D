@@ -15725,7 +15725,7 @@ endif
 
  endif
 
-! Set teta for all structure links to 1.0
+! Set teta for all structure links to 1.0 (implicit)
  nstrucsg = network%sts%count
  do istru = 1, nstrucsg
     pstru => network%sts%struct(istru)
