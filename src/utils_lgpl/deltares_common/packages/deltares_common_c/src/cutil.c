@@ -405,6 +405,15 @@ CUTIL_MF_READ (
     }
 
 int STDCALL
+CUTIL_MF_GETPOS (
+    long long int*  ifh,
+	long long int* currentpos
+    ) {
+	*currentpos = ftell((FILE*)*ifh); /*---- save current pos in the file */ 
+        return(0);
+    }
+
+int STDCALL
 CUTIL_MF_CLOSE (
     long long int* ifh
     ) {
