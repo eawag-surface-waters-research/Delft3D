@@ -507,7 +507,7 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine read1polylin(minp,xs,ys,ns,pliname, skipeoferror)
+   subroutine read1polylin(minp,xs,ys,ns,pliname)
       use m_alloc
       integer          :: minp
       double precision, allocatable :: xs(:)
@@ -547,15 +547,11 @@ contains
          read(rec ,*    ,err = 777) xs(k), ys(k)
       enddo
    
+      call doclose(minp)
    
       return
    
-   999   continue
-      if (present(skipeoferror)) then
-         if (.not.skipeoferror) then
-            call eoferror(minp)
-         end if  
-      end if  
+   999   call eoferror(minp)
 
       return
    
@@ -5627,7 +5623,6 @@ contains
 
         call oldfil(minp, filename)
         call read1polylin(minp,xs,ys,ns,pliname)
-        call doclose(minp)
    
         if (.not. allocated(kcs)) then
           allocate(kcs(ns))
@@ -5754,7 +5749,6 @@ contains
     
         call oldfil(minp, filename)
         call read1polylin(minp,xp,yp,np)
-        call doclose(minp)
      else if (filetype ==LINK_ID .and. present(xpin) .and. present(ypin) .and. present(nump) .and. nump > 0) then
         xp = xpin
         yp = ypin
@@ -6227,6 +6221,8 @@ contains
    ! ==========================================================================
    !> 
    function timespaceinitialfield_int(xz, yz, zz, nx, filename, filetype, method, operand, transformcoef)  result(success) ! deze subroutine moet veralgemeniseerd en naar meteo module 
+      use m_missing
+      use m_polygon
       implicit none
    
       logical :: success
@@ -6269,7 +6265,6 @@ contains
       else if (filetype == arcinfo) then  ! arcinfo bilinear todo
       else if (filetype == triangulation) then  ! triangulation    todo
       end if
-      call doclose(minp0)
       success = .true. 
    end function timespaceinitialfield_int 
    
