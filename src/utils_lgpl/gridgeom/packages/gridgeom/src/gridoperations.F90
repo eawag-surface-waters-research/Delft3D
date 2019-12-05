@@ -3,10 +3,6 @@
 
    use MessageHandling, only: msgbox, mess, LEVEL_ERROR
    implicit none
-   
-   !unfortunatly we do not have much other options if we do not want to modify api calls 
-   integer, allocatable, dimension(:) :: mesh1dMergedToUnMergedGridGeom(:) 
-   integer, allocatable, dimension(:) :: mesh1dUnMergedToMergedGridGeom(:) 
 
    !new functions
    public :: make1D2Dinternalnetlinks
@@ -2446,6 +2442,15 @@
    double precision :: dismin
    integer          :: ja, k, k1, k2, L
    double precision :: dis,dis1,dis2
+   logical                       :: validOneDMask
+   
+   validOneDMask = .false.
+   if(present(oneDMask)) then
+      if(size(oneDMask,1).gt.0) then
+         validOneDMask = .true.
+      endif
+   endif
+   
 
    N1 = 0
    DISMIN = 9E+33
@@ -2453,7 +2458,7 @@
       IF (kn(3,L) == 1 .or. kn(3,L) == 6) then !  .or. kn(3,L) == 4) THEN
          K1 = kn(1,L) ; K2 = kn(2,L)         
          ! If mask is present we check that the 1d nodes are the nodes I want to connect
-         if (present(oneDMask)) then
+         if (validOneDMask) then
             if (oneDMask(k1).eq.0) then !! Fortran does not support logical and
                dis1 = DISMIN 
             endif
@@ -2624,6 +2629,14 @@
    double precision                       :: XN, YN, XK2, YK2, WWU
    integer                                :: insidePolygons, Lfound  
    integer                                :: inNet_
+   logical                                :: validOneDMask
+   
+   validOneDMask = .false.
+   if(present(oneDMask)) then
+      if(size(oneDMask,1).gt.0) then
+         validOneDMask = .true.
+      endif
+   endif
 
    ierr = 0
 
@@ -2656,8 +2669,8 @@
                endif   
             enddo   
          endif
-         !Account for oneDMask if present. Assumption is that oneDmask contains 1/0 values
-         if (present(oneDMask)) then
+         !Account for oneDMask if present. Assumption is that oneDmask contains 1/0 values.
+         if (validOneDMask) then
             if (oneDMask(k1).ne.1) then
                 kc(k1) = 2
             endif
@@ -2768,7 +2781,7 @@
 
    end function make1D2Dinternalnetlinks
    
-   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, OneDMask)      !
+   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, oneDMask)      !
 
    use m_missing
    use m_polygon
@@ -2781,7 +2794,7 @@
 
    !dfm might have already allocated xpl, ypl, zpl
    double precision, optional, intent(in)  :: xplRoofs(:), yplRoofs(:), zplRoofs(:)
-   integer, optional, intent(in)           :: OneDMask(:)                !< Masking array for 1d mesh points, unmerged nodes
+   integer, optional, intent(in)           :: oneDMask(:)                !< Masking array for 1d mesh points, unmerged nodes
 
    integer                                 :: inp, n, n1, ip, i, k1, k2, L, k, numUnMergedNodes
    double precision                        :: XN1, YN1, DIST
@@ -2791,6 +2804,14 @@
    character(len=1), external              :: get_dirsep
    integer                                 :: ierr
    integer                                 :: nInputPolygon
+   logical                                 :: validOneDMask
+   
+   validOneDMask = .false.
+   if(present(oneDMask)) then
+      if(size(oneDMask,1).gt.0) then
+         validOneDMask = .true.
+      endif
+   endif
 
    ierr = -1
       
@@ -2826,8 +2847,8 @@
    do n  = 1,nump
       if (kc(n) > 0) then
          ip = kc(n)
-         if ( present(OneDMask) ) then
-            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, OneDMask)
+         if (validOneDMask) then
+            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, oneDMask)
          else
             call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST)
          endif
@@ -2853,7 +2874,7 @@
 
    end subroutine make1D2Droofgutterpipes
 
-   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, OneDMask)
+   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, oneDMask)
 
    use m_missing
    use m_polygon
@@ -2868,9 +2889,17 @@
    !allocate and assign samples if input arrays are present
    !when called from DFM xs, ys are already allocated in m_samples
    double precision, optional, intent(in)  :: xsStreetInletPipes(:), ysStreetInletPipes(:)
-   integer, optional, intent(in)           :: OneDMask(:)           !< Masking array for 1d mesh points, unmerged nodes
+   integer, optional, intent(in)           :: oneDMask(:)           !< Masking array for 1d mesh points, unmerged nodes
    integer                                 :: n,k,n1,k1,l, ierr
    double precision                        :: dist
+   logical                                 :: validOneDMask
+   
+   validOneDMask = .false.
+   if(present(oneDMask)) then
+      if(size(oneDMask,1).gt.0) then
+         validOneDMask = .true.
+      endif
+   endif
 
    ierr = -1
    
@@ -2885,8 +2914,8 @@
    do n  = 1,ns
       call incells(Xs(n),Ys(n),K)
       if (k > 0) then
-         if(present(OneDMask)) then
-            call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist, OneDMask)
+         if(validOneDMask) then
+            call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist, oneDMask)
          else
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist)
          endif
@@ -3275,15 +3304,11 @@
 
    integer, intent(inout)  :: arrayfrom(:), arrayto(:)
    integer, intent(in)     :: start_index
-   integer                 :: ierr, nlinks, l, nc, n1dmergedNodes
+   integer                 :: ierr, nlinks, l, nc
    integer                 :: linkType
 
    ierr     = 0
    nlinks   = 0
-   n1dmergedNodes = 0
-   if(allocated(mesh1dMergedToUnMergedGridGeom)) then
-      n1dmergedNodes = size(mesh1dMergedToUnMergedGridGeom)
-   endif
    
    do l=1,numl1d + numl
       if(kn(3,l).eq.linkType) then
@@ -3297,11 +3322,7 @@
          !2d cell
          arrayfrom(nlinks) = nc          
          !1dpoint
-         if(n1dmergedNodes>0) then
-            if(kn(2,l)<=n1dmergedNodes) arrayto(nlinks)   = mesh1dMergedToUnMergedGridGeom(kn(2,l))  
-         else
-            arrayto(nlinks)   = kn(2,l)  !1dpoint
-         endif
+         arrayto(nlinks)   = kn(2,l)
       end if
    end do
 
@@ -3345,17 +3366,6 @@
    allocate(correctedNodeBranchidx(numkUnMerged))
    allocate(meshnodemapping(2,nbranches)); meshnodemapping = -1
 
-   !check if mesh1dMergedToUnMergedGridGeom is already allocated
-   if(allocated(mesh1dMergedToUnMergedGridGeom)) then
-      deallocate(mesh1dMergedToUnMergedGridGeom)
-   endif
-   allocate(mesh1dMergedToUnMergedGridGeom(numkUnMerged))
-
-   !check if mesh1dUnMergedToMergedGridGeom is already allocated
-   if(allocated(mesh1dUnMergedToMergedGridGeom)) then
-      deallocate(mesh1dUnMergedToMergedGridGeom)
-   endif
-   allocate(mesh1dUnMergedToMergedGridGeom(numkUnMerged))
    
    !map the mesh nodes
    correctedNodeBranchidx = nodebranchidx + firstvalidarraypos
@@ -3379,12 +3389,9 @@
             networkNodesUnmerged(stn)    = numk
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = numk
-            mesh1dMergedToUnMergedGridGeom(numk) = st
-            mesh1dUnMergedToMergedGridGeom(st)   = numk
          else
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = networkNodesUnmerged(stn)
-            mesh1dUnMergedToMergedGridGeom(st)   = networkNodesUnmerged(stn)
          endif
       endif
       !internals
@@ -3394,8 +3401,6 @@
          yk(numk)                        = nodey(k)
          numINodes                       = numINodes + 1
          nodeids(numINodes)              = numk
-         mesh1dMergedToUnMergedGridGeom(numk)    = k
-         mesh1dUnMergedToMergedGridGeom(k)       = numk
       enddo
       !end
       if (enn > 0) then
@@ -3406,12 +3411,9 @@
             networkNodesUnmerged(enn)    = numk
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = numk
-            mesh1dMergedToUnMergedGridGeom(numk) = en
-            mesh1dUnMergedToMergedGridGeom(en)   = numk
          else
             numINodes = numINodes + 1
             nodeids(numINodes)           = networkNodesUnmerged(enn)
-            mesh1dUnMergedToMergedGridGeom(en)   = networkNodesUnmerged(enn)
          endif
       endif
       !create edge node table
@@ -3579,6 +3581,14 @@
    double precision              :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
    integer, allocatable          :: isInCell(:)
    type(kdtree_instance)         :: treeinst
+   logical                       :: validOneDMask
+   
+   validOneDMask = .false.
+   if(present(oneDMask)) then
+      if(size(oneDMask,1).gt.0) then
+         validOneDMask = .true.
+      endif
+   endif
    
    ierr = 0
    !LC: is this the right type?
@@ -3652,7 +3662,7 @@
                ldistance = dbdistance(xk(k1), yk(k1), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)
                rdistance = dbdistance(xk(k2), yk(k2), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)     
                if (ldistance<=rdistance .and. isInCell(k1).ge.1) then
-                  if (present(oneDmask)) then !again, Fortran does not have logical and two nested if statement are needed
+                  if (validOneDMask) then !again, Fortran does not have logical and two nested if statement are needed
                      if(oneDmask(k1)==1) then
                         call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k1, newLinkIndex)
@@ -3662,7 +3672,7 @@
                      call connectdbn(newPointIndex, k1, newLinkIndex)
                   endif
                else if (ldistance > rdistance .and. isInCell(k2).ge.1) then
-                  if (present(oneDmask)) then !again, Fortran does not have logical and two nested if statement are needed
+                  if (validOneDMask) then !again, Fortran does not have logical and two nested if statement are needed
                      if(oneDmask(k2)==1) then
                         call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k2, newLinkIndex)
@@ -3715,6 +3725,14 @@
    double precision              :: searchRadiusSquared, maxdistance, prevDistance, currDistance, ldistance, rdistance
    logical                       :: isBoundaryCell
    type(kdtree_instance)         :: treeinst
+   logical                       :: validOneDMask
+   
+   validOneDMask = .false.
+   if(present(oneDMask)) then
+      if(size(oneDMask,1).gt.0) then
+         validOneDMask = .true.
+      endif
+   endif
 
    ierr = 0
    if (numl1d<=0) then
@@ -3734,6 +3752,7 @@
    endif
 
    kc = 0
+   searchRadiusSquared = searchRadius**2
    do l = 1, numl1d + 1
       !only check the left point
       if( l .eq. numl1d + 1) then
@@ -3751,7 +3770,7 @@
       if (cellId.ne.0) cycle
       !get the left 1d mesh point
       call make_queryvector_kdtree(treeinst, xk(k1), yk(k1), jsferic)
-      !the search radius
+      !compute the search radius if not provided
       if (searchRadius.eq.0.0d0) then
          ldistance = 0.0d0
          rdistance = 0.0d0
@@ -3763,15 +3782,12 @@
             k2 = kn(2,l)
             rdistance = dbdistance(xk(k1),yk(k1),xk(k2),yk(k2), jsferic, jasfer3D, dmiss)
          endif
-         searchRadiusSquared = max(ldistance, rdistance)
-         searchRadiusSquared = searchRadiusSquared**2
-      else
-      searchRadiusSquared = searchRadius**2
+         searchRadiusSquared = max(ldistance, rdistance) ** 2
       endif
       !count number of cells in the search area
       nCellsInSearchRadius = kdtree2_r_count(treeinst%tree,treeinst%qv,searchRadiusSquared)
       !no cells found
-      if ( nCellsInSearchRadius.eq.0 ) cycle
+      if ( nCellsInSearchRadius < 1 ) cycle
       !reallocate if necessary
       call realloc_results_kdtree(treeinst, nCellsInSearchRadius)
       !find nearest cells
@@ -3814,7 +3830,7 @@
       if (kc(cellId).gt.0) then
          newLinkIndex = -1
          !check presence of oneDMask
-         if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
+         if (validOneDMask) then !again, Fortran does not have logical and two nested if statement are needed
             if (oneDMask(kc(cellId))==1) then
                call setnewpoint(xz(cellId), yz(cellId), zk(cellId), newPointIndex)
                call connectdbn(newPointIndex, kc(cellId), newLinkIndex)
