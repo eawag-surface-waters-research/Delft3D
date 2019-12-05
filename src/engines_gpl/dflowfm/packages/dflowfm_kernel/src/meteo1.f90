@@ -6249,23 +6249,23 @@ contains
                   
       call oldfil(minp0, filename)
       if (filetype == inside_polygon) then       ! polyfil 
-         allocate(xpli(maxpli), ypli(maxpli))
-         
-         do 
-            call read1polylin(minp0,xpli,ypli,npli, skipeoferror = .true.)
-            if (npli == 0) exit
-            do k=1,nx
-               call pinpok(xz(k), yz(k), npli, xpli, ypli, inside)
-               if (inside == 1) then
-                  if (operand == '+') then
-                     zz(k)  = zz(k) + transformcoef(1)
-                  else
-                     zz(k)  = transformcoef(1)
-                  end if   
-               end if
-            enddo
+
+         call savepol()
+         call reapol(minp0, 0)
+         inside = -1
+         do k=1,nx
+            call dbpinpol(xz(k), yz(k), inside, &
+                          dmiss, JINS, NPL, xpl, ypl, zpl)  
+            if (inside == 1) then
+               if (operand == '+' .and. zz(k) /= imiss) then
+                  zz(k)  = zz(k) + transformcoef(1)
+               else
+                  zz(k)  = transformcoef(1)
+               end if  
+            end if
          enddo
-         deallocate(xpli, ypli)
+         call restorepol()
+
       else if (filetype == arcinfo) then  ! arcinfo bilinear todo
       else if (filetype == triangulation) then  ! triangulation    todo
       end if
