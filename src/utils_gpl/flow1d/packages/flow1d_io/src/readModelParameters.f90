@@ -82,7 +82,6 @@ module m_readModelParameters
          transportPars%salt_index = 1
          transportPars%constituents_count = 1
          call AddOrReplaceParameter('Salinity', 'SaltComputation', 'true', .true.)
-         !transportPars%co_h(transportPars%salt_index)%boundary_index = S_BOUN
       else
          transportPars%do_salt = .false.
          transportPars%salt_index = -1
@@ -97,7 +96,6 @@ module m_readModelParameters
          call AddOrReplaceParameter('TransportComputation', 'Temperature', 'true', .true.)
          transportPars%constituents_count = transportPars%constituents_count + 1
          transportPars%temp_index = transportPars%constituents_count 
-         !transportPars%co_h(transportPars%temp_index)%boundary_index = T_BOUN
          call default_heatfluxes()
          value = 15d0
          call prop_get_double(md_ptr, 'Temperature', 'BackgroundTemperature', value, success)

@@ -452,7 +452,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
 
    call read_1d_attributes(filenames, network)
    
-   call initialize_1dadmin(network, network%l1d, network%l1d+network%brs%count)
+   call initialize_1dadmin(network, network%l1d)
 
    numk = 0
    numl = 0

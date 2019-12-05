@@ -466,7 +466,7 @@ subroutine loadModel(filename)
        call read_1d_attributes(md_1dfiles, network)
 
        ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
-       call initialize_1dadmin(network, network%numl, network%numk)
+       call initialize_1dadmin(network, network%numl)
 
        ! fill bed levels from values based on links
        do L = 1, network%numl

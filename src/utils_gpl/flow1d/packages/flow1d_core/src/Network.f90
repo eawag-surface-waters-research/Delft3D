@@ -191,14 +191,13 @@ contains
    end subroutine admin_network
 
 
-   subroutine initialize_1dadmin(network, linall, gridpointscount)
+   subroutine initialize_1dadmin(network, linall)
    
       use m_CrossSections
       use m_GlobalParameters
       
       type(t_network), intent(inout), target :: network
       integer, intent(in)            :: linall          !< Maximum number of links, used for (re)allocation.
-      integer, intent(in)            :: gridpointscount !< Maximum number of grid points, used for (re)allocation. TODO: not used.
       
       integer :: ilnk
       integer :: igpt
@@ -239,7 +238,7 @@ contains
       
       adm%lin2str = -huge(1)
       do i = 1, network%sts%count
-         adm%lin2str(network%sts%struct(i)%linknumbers(1)) = i
+         adm%lin2str(network%sts%struct(i)%linknumbers(1:pstru%numlinks)) = i
       enddo
 
       adm%lin2ibr   = -huge(1)
