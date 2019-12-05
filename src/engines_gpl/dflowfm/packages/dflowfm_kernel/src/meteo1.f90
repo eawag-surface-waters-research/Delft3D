@@ -514,7 +514,6 @@ contains
       double precision, allocatable :: ys(:)
       integer                       :: ns
       character(len=:),allocatable,optional :: pliname
-      logical, optional             :: skipeoferror
    
       character (len=maxnamelen)   :: rec
       integer                      :: k
@@ -6223,6 +6222,7 @@ contains
    function timespaceinitialfield_int(xz, yz, zz, nx, filename, filetype, method, operand, transformcoef)  result(success) ! deze subroutine moet veralgemeniseerd en naar meteo module 
       use m_missing
       use m_polygon
+      use geometry_module, only: dbpinpol
       implicit none
    
       logical :: success
