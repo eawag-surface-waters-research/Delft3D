@@ -109,6 +109,7 @@ implicit none
     character(len=255) :: md_profdeffile   = ' ' !< Profile definition of these nrs   (e.g., *_profdef.txt)
     character(len=255) :: md_profdefxyzfile= ' ' !< XYZ profile definition in pliz of these nrs ic yz-def (e.g., *_xyzprof.pliz)
     character(len=255) :: md_manholefile   = ' ' !< File containing manholes          (e.g., *.ini)
+    character(len=255) :: md_1d2dlinkfile  = ' ' !< File containing custom parameters for 1D2D links (e.g., *.ini)
     character(len=255) :: md_pipefile      = ' ' !< File containing pipe-based 'culverts' (e.g., *.pliz)
     character(len=255) :: md_shipdeffile   = ' ' !< File containing shipdefinition    (e.g., *.shd)
     character(len=255) :: md_inifieldfile  = ' ' !< File of initial fields            (e.g., *.ini)
@@ -294,6 +295,7 @@ use unstruc_channel_flow
     md_profdeffile = ' '
     md_profdefxyzfile = ' '
     md_manholefile = ' '
+    md_1d2dlinkfile = ' '
     md_shipdeffile = ' '
     md_restartfile = ' '
     md_extfile = ' '
@@ -799,6 +801,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double ( md_ptr, 'geometry', 'Uniformwidth1Droofgutterpipe'  , wu1Duni7          , success)
     call prop_get_double ( md_ptr, 'geometry', 'Uniformheight1roofgutterpipe'  , hh1Duni7          , success)
     call prop_get_integer( md_ptr, 'geometry', 'Uniformtyp1Dstreetgutterpipe'  , iproftypuni7      , success)
+    call prop_get_string ( md_ptr, 'geometry', '1D2DLinkFile' ,     md_1d2dlinkfile , success)
 
     call prop_get_double ( md_ptr, 'geometry', 'Dxmin1D'       , Dxmin1D)
     call prop_get_double ( md_ptr, 'geometry', 'Dxwuimin2D'    , Dxwuimin2D)
@@ -2264,6 +2267,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (abs(iproftypuni7) .ne. -2) then
     call prop_set(prop_ptr, 'geometry', 'Uniformtyp1Droofgutterpipes',  iproftypuni7, 'Uniform type roof gutter pipes')
+    endif
+    if (writeall .or. len_trim(md_1d2dlinkfile) > 0) then
+       call prop_set(prop_ptr, 'geometry', '1D2DLinkFile', trim(md_1d2dlinkfile), 'File *.ini containing custom parameters for 1D2D links'  )
     endif
 
 

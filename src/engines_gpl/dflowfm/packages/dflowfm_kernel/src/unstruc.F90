@@ -23001,6 +23001,11 @@ end subroutine unc_write_shp
     endif
  enddo
 
+ ! Custom parameters for 1D2D links
+ if (len_trim(md_1d2dlinkfile) > 0) then
+    call load1D2DLinkFile(md_1d2dlinkfile)
+ end if
+    
  IF (ALLOCATED (Lbnd1D) ) deallocate( Lbnd1D)
  allocate  ( Lbnd1D(lnxi+1:lnx) , stat= ierr) ;  Lbnd1D = 0
  call aerr ('Lbnd1D(lnxi+1:lnx)', ierr, lnx-lnxi+1)
