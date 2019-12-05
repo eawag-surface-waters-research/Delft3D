@@ -543,16 +543,6 @@ namespace gridgeom.Tests
             ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask, ref c_oneDmask);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //10. check if we can call ggeo_get_links_count two times: we  need to (1) deallocate the memory stored in network_ggeo_data and (2) reload the 1d and 2d arrays in memory
-            //ierr = wrapperGridgeom.ggeo_deallocate();
-            //Assert.That(ierr, Is.EqualTo(0));
-            //ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
-            //Assert.That(ierr, Is.EqualTo(0));
-            //ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
-            //Assert.That(ierr, Is.EqualTo(0));
-            //ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
-            //Assert.That(ierr, Is.EqualTo(0));
-
             //10. get the number of links
             int n1d2dlinks = 0;
             int linkType = 3;
@@ -983,90 +973,17 @@ namespace gridgeom.Tests
             int[] rc_arrayto = new int[n1d2dlinks];
             Marshal.Copy(c_arrayfrom, rc_arrayfrom, 0, n1d2dlinks);
             Marshal.Copy(c_arrayto, rc_arrayto, 0, n1d2dlinks);
-            var arrayfrom = new int[]
-            { 1,   
-              11,  
-              12,  
-              22,  
-              23,  
-              33,  
-              34,  
-              44,  
-              44,  
-              44,  
-              44,  
-              43,  
-              44,  
-              45, 
-              45,  
-              45,  
-              53,  
-              35,  
-              55,  
-              53,  
-              36,  
-              53,  
-              56,  
-              66,  
-              67,  
-              77,  
-              45,  
-              45,  
-              46,  
-              78,  
-              46,  
-              44,  
-              54,  
-              54,  
-              54,  
-              79,  
-              89};
 
-            var arrayto   = new int[]
-            { 1,
-              2,
-              2,
-              2,
-              2,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              3,
-              4,
-              4,
-              4,
-              4,
-              4,
-              4,
-              4,
-              6,
-              4,
-              4,
-              4,
-              4,
-              4,
-              6,
-              6 };
+            var arrayfrom = new [] {1, 11, 12, 22, 23, 33, 34, 44, 45, 55, 56, 66, 67, 77, 78, 79, 89};
+            var arrayto   = new [] { 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5};
+
             for (int i = 0; i < n1d2dlinks; i++)
             {
                 // Console.Write("i:{0} rc_arrayfrom:{1} arrayfrom:{2} rc_arrayto:{3} arrayto:{4}\n", i.ToString("D"), rc_arrayfrom[i].ToString("D"), arrayfrom[i].ToString("D"), rc_arrayto[i].ToString("D"), arrayto[i].ToString("D"));
                 Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
                 Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
-            }
-           // 7.deallocate memory of gridgeom
+            } 
+            // 7.deallocate memory of gridgeom
             ierr = wrapperGridgeom.ggeo_deallocate();
             Assert.That(ierr, Is.EqualTo(0));
         }
