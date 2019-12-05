@@ -1041,7 +1041,7 @@ module m_oned_functions
       use string_module, only: strcmpi
       use properties
       use unstruc_messages
-      use timespace_parameters
+      !use timespace_parameters
       implicit none
 
       character(len=*), intent(in)    :: filename !< Name of *.ini file containing 1D2D link parameters.
@@ -1122,7 +1122,7 @@ module m_oned_functions
                         call prop_get_doubles(node_ptr, '', 'yCoordinates',     ycoordinates, numcoordinates, success)
                      end if
                      if (success) then
-                        loc_spec_type = LOCTP_POLYGON_XY
+                        loc_spec_type = 11 ! LOCTP_POLYGON_XY
                      end if
                   end if
 
