@@ -2551,14 +2551,16 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     use m_fixedweirs
     use unstruc_channel_flow
     use m_1d_structures
+    use m_compound
 
     implicit none
 
     double precision :: zcdamn, blmx
     type(t_structure), pointer :: pstru
+    type(t_compound),  pointer :: pcompound
 
     integer :: L0
-    integer          :: ng, k1, k2, L, n, istru
+    integer          :: ng, k1, k2, L, n, istru, icompound, i
 
     do ng = 1,ncdamsg                                   ! loop over cdam signals, sethu
        zcdamn = zcdam(ng)
@@ -2597,15 +2599,40 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
            L  = iabs(pstru%linknumbers(L0))
            k1 = ln(1,L)
            k2 = ln(2,L)
-           blmx     = max(bl(k1), bl(k2))
-           bob(1,L) = max(zcdamn,blmx)
-           bob(2,L) = max(zcdamn,blmx)
+           bob(1,L) = max(zcdamn, bob0(1, L))
+           bob(2,L) = max(zcdamn, bob0(2, L))
            iadv(L) = 22
            call switchiadvnearlink(L)
         enddo
 
     enddo
 
+    ! correct BOBS for compound structures
+    do icompound = 1, network%cmps%Count
+       pcompound => network%cmps%compound(icompound)
+       zcdamn = huge(1d0)
+       do i = 1, pcompound%numstructs
+          istru = pcompound%structure_indices(i)
+          if (get_crest_level(network%sts%struct(istru)) == huge(1d0)) then
+             ! Obviously this is a pump. So do not adust the bob
+             zcdamn = huge(1d0)
+             exit
+          endif
+          
+          zcdamn = min(zcdamn, get_crest_level(network%sts%struct(istru)))
+       enddo
+       if (zcdamn < huge(1d0)) then
+          do L0 = 1, pcompound%numlinks
+             L  = iabs(pcompound%linknumbers(L0))
+             k1 = ln(1,L)
+             k2 = ln(2,L)
+             bob(1,L) = max(zcdamn, bob0(1, L))
+             bob(2,L) = max(zcdamn, bob0(2, L))
+          enddo
+       endif
+    enddo
+    
+       
    !Adjust bobs for dambreak
    do n = 1, ndambreaksg
       istru = dambreaks(n)
