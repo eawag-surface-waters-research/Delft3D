@@ -1204,11 +1204,12 @@
    !---------------------------------------------------------------------------!
 
    !> return the index of the nearest neighbouring source point for each of the target grid points
-   subroutine nearest_neighbour(Nc, xc, yc, Mn, dmiss, XS, YS, MSAM, jsferic, jasfer3D)
+   subroutine nearest_neighbour(Nc, xc, yc, kc, Mn, dmiss, XS, YS, MSAM, jsferic, jasfer3D)
    implicit none
 
    integer,                      intent(in   ) :: Nc       !< number of points to be interpolated
    real(kind=hp), dimension(Nc), intent(in   ) :: xc, yc   !< point coordinates of target grid points
+   integer,       pointer      , intent(in   ) :: kc(:)    !< Target mask array-pointer, whether or not (1/0) target points should be included. Pass null() when no masking is wanted.
    integer,       dimension(Nc), intent(  out) :: Mn       !< source index for each target point
    real(kind=hp),                intent(in   ) :: dmiss    !< Missing value inside xc, yx (if any).
    real(kind=hp),                intent(in   ) :: XS(:), YS(:) !< point coordinates of source data points
@@ -1220,6 +1221,12 @@
 
    Mn = -1
    do k=1,Nc ! Target points
+      if (associated(kc)) then
+         if (KC(K) == 0) then
+            cycle
+         end if
+      end if
+
       mindist = Huge(1.d0)
       do m=1,MSAM ! Source points
          dist = dbdistance(xc(k),yc(k),xs(m),ys(m),jsferic,jasfer3D,dmiss)

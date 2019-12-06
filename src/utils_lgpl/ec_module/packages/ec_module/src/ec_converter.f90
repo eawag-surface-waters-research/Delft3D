@@ -403,7 +403,7 @@ module m_ec_converter
                case (EC_COORDS_CARTESIAN)
                   jsferic = 0
                end select
-               call nearest_neighbour(n_points, targetElementSet%x, targetElementSet%y,  &
+               call nearest_neighbour(n_points, targetElementSet%x, targetElementSet%y,  targetElementSet%mask, &
                     weight%indices(1,:), ec_undef_hp, &
                     sourceElementSet%x, sourceElementSet%y, sourceElementSet%n_cols, jsferic, 0)
             end do
@@ -687,7 +687,15 @@ module m_ec_converter
                         connection%sourceItemsPtr(i)%ptr%sourceT1fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
                      end do
                   end if
-                  
+                  ! Final step for gridded providers: when not masked, reset indices to undefined.
+                  if (associated(targetElementSet%mask)) then
+                     do i = 1, n_points
+                        if (targetElementSet%mask(i) == 0) then
+                           weight%indices(:,i) = ec_undef_int
+                        end if
+                     end do
+                  end if
+
                success = .true.
             case(convType_polytim)
                sourceElementSet => connection%sourceItemsPtr(1)%ptr%elementSetPtr
