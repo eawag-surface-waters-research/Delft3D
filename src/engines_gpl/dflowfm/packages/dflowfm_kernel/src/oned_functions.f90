@@ -1013,7 +1013,7 @@ module m_oned_functions
    end subroutine updateTotalInflow1d2d
 
    
-   !> Update total inflow of all laterals for each 1d node with given computational time step.
+   !> Update total net inflow of all laterals for each 1d node with given computational time step.
    subroutine updateTotalInflowLat(dts)
    use m_flow, only: vTotLat, qCurLat
    use m_flowgeom, only: ndx2d, ndxi

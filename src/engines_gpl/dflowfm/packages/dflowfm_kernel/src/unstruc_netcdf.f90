@@ -4636,13 +4636,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          if (jamapVolOnGround > 0) then ! volume that is above ground level
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol_on_ground, nf90_double, UNC_LOC_S, 'volume_on_ground', '', 'Volume above ground level', 'm3', which_meshdim = 1)
          end if
-         if (jamapTotalInflow1d2d > 0) then ! total 1d2d inflow
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCur1d2d, nf90_double, UNC_LOC_S, 'current_total_inflow_1d2d', '', 'Current total inflow via all connected 1d2d links at each 1D node', 'm3 s-1', which_meshdim = 1)
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTot1d2d, nf90_double, UNC_LOC_S, 'cumulative_total_inflow_1d2d', '', 'Cumulative total inflow via all connected 1d2d links at each 1D node', 'm3', which_meshdim = 1)
+         if (jamapTotalInflow1d2d > 0) then ! total 1d2d net inflow
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCur1d2d, nf90_double, UNC_LOC_S, 'current_total_net_inflow_1d2d', '', 'Current total net inflow via all connected 1d2d links at each 1D node', 'm3 s-1', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTot1d2d, nf90_double, UNC_LOC_S, 'cumulative_total_net_inflow_1d2d', '', 'Cumulative total net inflow via all connected 1d2d links at each 1D node', 'm3', which_meshdim = 1)
          end if
-         if (jamapTotalInflowLat > 0) then ! total lateral inflow
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCurLat, nf90_double, UNC_LOC_S, 'current_total_inflow_lateral', '', 'Current total inflow via all laterals at each 1D node', 'm3 s-1', which_meshdim = 1)
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTotLat, nf90_double, UNC_LOC_S, 'cumulative_total_inflow_lateral', '', 'Cumulative total inflow via all laterals at each 1D node', 'm3', which_meshdim = 1)
+         if (jamapTotalInflowLat > 0) then ! total lateral net inflow
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCurLat, nf90_double, UNC_LOC_S, 'current_total_net_inflow_lateral', '', 'Current total net inflow via all laterals at each 1D node', 'm3 s-1', which_meshdim = 1)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTotLat, nf90_double, UNC_LOC_S, 'cumulative_total_net_inflow_lateral', '', 'Cumulative total net inflow via all laterals at each 1D node', 'm3', which_meshdim = 1)
          end if
       end if
       ierr = nf90_enddef(mapids%ncid)

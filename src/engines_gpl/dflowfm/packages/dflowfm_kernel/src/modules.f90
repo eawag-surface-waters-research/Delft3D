@@ -3426,10 +3426,10 @@ end module m_vegetation
  double precision, allocatable         :: freeboard(:)  !< [m] For output purposes: freeboard at cell center
  double precision, allocatable         :: hsOnGround(:) !< [m] For output purposes: waterdepth above ground level
  double precision, allocatable         :: volOnGround(:)!< [m3] For output purposes: volume above ground level
- double precision, allocatable         :: qCur1d2d(:)   !< [m3] total 1d2d inflow, current discharge
- double precision, allocatable         :: vTot1d2d(:)   !< [m3] total 1d2d inflow, cumulative volume
- double precision, allocatable         :: qCurLat(:)    !< [m3] total lateral inflow, current discharge
- double precision, allocatable         :: vTotLat(:)    !< [m3] total lateral inflow, cumulative volume
+ double precision, allocatable         :: qCur1d2d(:)   !< [m3/s] total 1d2d net inflow, current discharge
+ double precision, allocatable         :: vTot1d2d(:)   !< [m3] total 1d2d net inflow, cumulative volume
+ double precision, allocatable         :: qCurLat(:)    !< [m3/s] total lateral net inflow, current discharge
+ double precision, allocatable         :: vTotLat(:)    !< [m3] total lateral net inflow, cumulative volume
 
 !    Secondary Flow
  double precision, allocatable         :: ducxdx   (:)   !< cell center gradient of x-velocity in x-dir,    (1/s)

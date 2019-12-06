@@ -1599,8 +1599,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_freeboard', jamapFreeboard, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterdepth_on_ground', jamapDepthOnGround, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_volume_on_ground', jamapVolOnGround, success)
-    call prop_get_integer(md_ptr, 'output', 'Wrimap_total_inflow_1d2d', jamapTotalInflow1d2d, success)
-    call prop_get_integer(md_ptr, 'output', 'Wrimap_total_inflow_lateral', jamapTotalInflowLat, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_total_net_inflow_1d2d', jamapTotalInflow1d2d, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_total_net_inflow_lateral', jamapTotalInflowLat, success)
     call prop_get_integer(md_ptr, 'output', 'Writek_CdWind', jatekcd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrirst_bnd', jarstbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Writepart_domain', japartdomain, success)
@@ -3295,11 +3295,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     
     if (writeall .or. jamapTotalInflow1d2d /= 0) then
-        call prop_set(prop_ptr, 'output', 'Wrimap_total_inflow_1d2d', jamapTotalInflow1d2d, 'Write total 1d2d inflow to map file, only for 1D nodes (1: yes, 0: no)')
+        call prop_set(prop_ptr, 'output', 'Wrimap_total_net_inflow_1d2d', jamapTotalInflow1d2d, 'Write current total 1d2d net inflow (discharge) and cumulative total 1d2d net inflow (volume) to map file, only for 1D nodes (1: yes, 0: no)')
     endif
     
     if (writeall .or. jamapTotalInflowLat /= 0) then
-        call prop_set(prop_ptr, 'output', 'Wrimap_total_inflow_lateral', jamapTotalInflowLat, 'Write total lateral inflow to map file, only for 1D nodes (1: yes, 0: no)')
+        call prop_set(prop_ptr, 'output', 'Wrimap_total_net_inflow_lateral', jamapTotalInflowLat, 'Write current total lateral net inflow (discharge) and cumulative total net lateral inflow (volume) to map file, only for 1D nodes (1: yes, 0: no)')
     endif
 
     if (jatidep > 0 .and. (writeall .or. jamaptidep /= 1)) then
