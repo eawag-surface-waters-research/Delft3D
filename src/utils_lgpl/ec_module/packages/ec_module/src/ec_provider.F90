@@ -2729,8 +2729,14 @@ module m_ec_provider
                   nlay = crd_dimlen(1,3)
                else 
                   ncol = fileReaderPtr%dim_length(dimids(1))
-                  nrow = fileReaderPtr%dim_length(dimids(2))
-                  nlay = crd_dimlen(1,3)
+                  nrow = 1
+                  nlay = 0
+                  if (size(dimids) > 2) then
+                     nrow = fileReaderPtr%dim_length(dimids(2))
+                     if (size(dimids) > 3) then
+                        nlay = fileReaderPtr%dim_length(dimids(3))
+                     endif
+                  endif
                end if
                if (.not.ecElementSetSetRowsColsLayers(instancePtr, elementSetId, nrow, ncol, nlay)) then
                   return
@@ -2795,7 +2801,7 @@ module m_ec_provider
                if (nlay>0) then
                   if (allocated(tgd_data_1d)) deallocate(tgd_data_1d)
                   allocate(tgd_data_1d(nlay))
-                  ierror = nf90_get_var(fileReaderPtr%fileHandle, tgd_id, tgd_data_1d, start=(/1/), count=(/crd_dimlen(1,3)/))
+                  ierror = nf90_get_var(fileReaderPtr%fileHandle, tgd_id, tgd_data_1d, start=(/1/), count=(/nlay/))
                   z_positive = ''
                   ierror = nf90_get_att(fileReaderPtr%fileHandle, tgd_id, "positive", z_positive)
                   z_standardname=fileReaderPtr%standard_names(z_varid)
