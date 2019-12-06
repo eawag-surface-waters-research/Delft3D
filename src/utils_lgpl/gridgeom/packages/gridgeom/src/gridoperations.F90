@@ -3719,24 +3719,26 @@
 
    !locals
    integer                       :: ierr !< Error status, 0 if success, nonzero in case of error.
-   integer                       :: k, kk, k1, k2, k3, k4, ncellsinSearchRadius, numberCellNetlinks, prevConnectedNetNode, newPointIndex
+   integer                       :: k, kk, k1, k2, k3, k4, ncellsinSearchRadius, numberCellNetlinks, prevConnectedOneDNetNode, newPointIndex
    integer                       :: newLinkIndex
    integer                       :: l, cellNetLink, cellId, kn3localType, numnetcells
    double precision              :: searchRadiusSquared, maxdistance, prevDistance, currDistance, ldistance, rdistance
    logical                       :: isBoundaryCell
    type(kdtree_instance)         :: treeinst
    logical                       :: validOneDMask
+   integer                       :: numGeneratedLinks
+   integer, allocatable          :: cellTo1DNode(:)
+   
+   ierr = 0
+   if (numl1d<=0) then
+      return
+   endif
    
    validOneDMask = .false.
    if(present(oneDMask)) then
       if(size(oneDMask,1).gt.0) then
          validOneDMask = .true.
       endif
-   endif
-
-   ierr = 0
-   if (numl1d<=0) then
-      return
    endif
 
    !LC: is this the right type for rivers
@@ -3751,13 +3753,14 @@
       return
    endif
 
-   kc = 0
+   allocate(cellTo1DNode(numl))
+   cellTo1DNode = 0
    searchRadiusSquared = searchRadius**2
    do l = 1, numl1d + 1
       !only check the left point
       if( l .eq. numl1d + 1) then
          k1  =  kn(2,l-1)
-         k3 = kn(3,l-1)
+         k3  =  kn(3,l-1)
       else
          k1  = kn(1,l) 
          k3 = kn(3,l)
@@ -3771,7 +3774,7 @@
       !get the left 1d mesh point
       call make_queryvector_kdtree(treeinst, xk(k1), yk(k1), jsferic)
       !compute the search radius if not provided
-      if (searchRadius.eq.0.0d0) then
+      if (searchRadius <= 0.0d0) then
          ldistance = 0.0d0
          rdistance = 0.0d0
          if (l>=2) then
@@ -3792,14 +3795,16 @@
       call realloc_results_kdtree(treeinst, nCellsInSearchRadius)
       !find nearest cells
       call kdtree2_n_nearest(treeinst%tree,treeinst%qv,nCellsInSearchRadius,treeinst%results)
+      
       !connection loop
       do k = 1, nCellsInSearchRadius
-         !get the current cell id and the previously connected net node
+         ! get the current cell id and the previously connected net node
          cellId= treeinst%results(k)%idx
-         prevConnectedNetNode = kc(cellId)
-         !already not a boundary net node
-         if (prevConnectedNetNode.eq.-1) cycle
-         !check if it is a boundary cell
+         prevConnectedOneDNetNode = cellTo1DNode(cellId)
+         ! already not a boundary net node
+         if (prevConnectedOneDNetNode.eq.-1) cycle
+         
+         ! check if it is a boundary cell
          isBoundaryCell = .false.
          do kk =1, size(netcell(cellId)%lin)
             cellNetLink =  netcell(cellId)%lin(kk)
@@ -3808,36 +3813,37 @@
                exit
             endif
          enddo
-         !not a boundary cell
+         ! not a boundary cell
          if (.not.isBoundaryCell) then
-            kc(cellId) = - 1
+            cellTo1DNode(cellId) = - 1
             cycle
-         !a candidate connection already exist
-         else if(prevConnectedNetNode.ne.0) then
-            prevDistance = dbdistance(xk(prevConnectedNetNode),yk(prevConnectedNetNode),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
-            currDistance = dbdistance(xk(k1),yk(k1),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
-            if (currDistance<prevDistance) then
-               kc(cellId) = k1
+         endif
+         ! a candidate connection already exist
+         if (prevConnectedOneDNetNode.eq.0) then
+            cellTo1DNode(cellId) = k1
+         else if(prevConnectedOneDNetNode > 0) then
+            prevDistance = dbdistance(xk(prevConnectedOneDNetNode), yk(prevConnectedOneDNetNode),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
+            currDistance = dbdistance(xk(k1), yk(k1), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)
+            if (currDistance < prevDistance) then
+               cellTo1DNode(cellId) = k1
             endif
-         else if(prevConnectedNetNode.eq.0) then
-            kc(cellId) = k1
          endif
       enddo
    enddo
 
    !make the connections
    do cellId = 1, nump
-      if (kc(cellId).gt.0) then
+      if (cellTo1DNode(cellId).gt.0) then
          newLinkIndex = -1
          !check presence of oneDMask
-         if (validOneDMask) then !again, Fortran does not have logical and two nested if statement are needed
-            if (oneDMask(kc(cellId))==1) then
+         if (validOneDMask) then
+            if (oneDMask(cellTo1DNode(cellId))==1) then
                call setnewpoint(xz(cellId), yz(cellId), zk(cellId), newPointIndex)
-               call connectdbn(newPointIndex, kc(cellId), newLinkIndex)
+               call connectdbn(newPointIndex, cellTo1DNode(cellId), newLinkIndex)
             endif
          else
             call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
-            call connectdbn(newPointIndex, kc(cellId), newLinkIndex)
+            call connectdbn(newPointIndex, cellTo1DNode(cellId), newLinkIndex)
          endif
          if (newLinkIndex.ne.-1) then
             !cell is connected, set kn
