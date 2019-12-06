@@ -2555,7 +2555,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
     implicit none
 
-    double precision :: zcdamn, blmx
+    double precision :: zcdamn, minzcdamn, blmx
     type(t_structure), pointer :: pstru
     type(t_compound),  pointer :: pcompound
 
@@ -2610,24 +2610,26 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     ! correct BOBS for compound structures
     do icompound = 1, network%cmps%Count
        pcompound => network%cmps%compound(icompound)
-       zcdamn = huge(1d0)
+       minzcdamn = huge(1d0)
        do i = 1, pcompound%numstructs
           istru = pcompound%structure_indices(i)
-          if (get_crest_level(network%sts%struct(istru)) == huge(1d0)) then
+          pstru => network%sts%struct(istru)
+          zcdamn = get_crest_level(pstru)
+          if (zcdamn == huge(1d0)) then
              ! Obviously this is a pump. So do not adust the bob
-             zcdamn = huge(1d0)
+             minzcdamn = huge(1d0)
              exit
           endif
           
-          zcdamn = min(zcdamn, get_crest_level(network%sts%struct(istru)))
+          minzcdamn = min(minzcdamn, zcdamn)
        enddo
-       if (zcdamn < huge(1d0)) then
+       if (minzcdamn < huge(1d0)) then
           do L0 = 1, pcompound%numlinks
              L  = iabs(pcompound%linknumbers(L0))
              k1 = ln(1,L)
              k2 = ln(2,L)
-             bob(1,L) = max(zcdamn, bob0(1, L))
-             bob(2,L) = max(zcdamn, bob0(2, L))
+             bob(1,L) = max(minzcdamn, bob0(1, L))
+             bob(2,L) = max(minzcdamn, bob0(2, L))
           enddo
        endif
     enddo
