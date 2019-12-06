@@ -131,12 +131,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          branchSegmentLengths(i)= sqrt(deltaX(i)**2+deltaY(i)**2+deltaZ(i)**2)
          totalLength = totalLength + branchSegmentLengths(i)
       enddo
-      !correct for total segment length
-      if (totalLength > 1.0d-6) then
-         afac = branchlengths(br)/totalLength
-         branchSegmentLengths(startGeometryNode: endGeometryNode - 1) = branchSegmentLengths(startGeometryNode: endGeometryNode - 1) * afac
-      end if
-   
+
       !calculate the increments
       do i = startGeometryNode, endGeometryNode - 1
          if (branchSegmentLengths(i) > 1.0d-6) then
@@ -148,7 +143,14 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
             yincrement(i)  = 0.d0   
             zincrement(i)  = 0.d0   
          endif
-      enddo
+      enddo      
+      
+      !correct for total segment length
+      if (totalLength > 1.0d-6) then
+         afac = branchlengths(br)/totalLength
+         branchSegmentLengths(startGeometryNode: endGeometryNode - 1) = branchSegmentLengths(startGeometryNode: endGeometryNode - 1) * afac
+      end if
+   
       !now loop over the mesh points
       ! The loop below assumes that the points to be placed (from branchids/offsets) are sorted by increasing chainage per branch.
       call indexx(endMeshNode-startMeshNode+1, branchoffsets(startMeshNode:endMeshNode), ibranchsort(startMeshNode:endMeshNode))
@@ -161,7 +163,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          totalLength = previousLength
          do k = ind, endGeometryNode - 1
             totalLength = totalLength + branchSegmentLengths(k)
-            if (totalLength > branchoffsets(iin)) then
+            if (totalLength >= branchoffsets(iin)) then
                   previousLength = totalLength - branchSegmentLengths(k)
                   ind = k
                exit
