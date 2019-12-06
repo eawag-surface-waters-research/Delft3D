@@ -1133,6 +1133,7 @@ module m_ec_converter
          integer                             :: from, thru    !< contiguous range of indices in the target array 
          integer                             :: jmin, jmax    !< from target position jmin through target position jmax is filled
          !
+         integer, dimension(:), pointer :: targetMask
          success = .false.
          valuesT0 => null()
          valuesT1 => null()
@@ -1227,12 +1228,20 @@ module m_ec_converter
                   jmin = 1
                   jmax = connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates
                end if
+
                select case(connection%converterPtr%operandType)
                   case(operand_replace)
                      ! Write all values to one target Item or each value to its own target Item.
                      if (connection%nTargetItems == 1) then                               ! All in one target item
                         targetField => connection%targetItemsPtr(1)%ptr%targetFieldPtr
+                        targetMask => connection%targetItemsPtr(1)%ptr%elementSetPtr%mask
                         do j=jmin, jmax
+                           if (associated(targetmask)) then
+                              if (targetmask(j) == 0) then
+                                 cycle
+                              end if
+                           end if
+
                            from = (j-1)*(maxlay*n_data)+1
                            thru = (j  )*(maxlay*n_data)
                            if (allocated(connection%converterPtr%srcmask%msk)) then
@@ -1245,7 +1254,13 @@ module m_ec_converter
                      else if (connection%nTargetItems == maxlay*n_data) then              ! Separate target items   
                         do i=1, connection%nTargetItems
                            targetField => connection%targetItemsPtr(i)%ptr%targetFieldPtr
+                           targetMask => connection%targetItemsPtr(i)%ptr%elementSetPtr%mask
                            do j=jmin, jmax
+                              if (associated(targetmask)) then
+                                 if (targetmask(j) == 0) then
+                                    cycle
+                                 end if
+                              end if
                               targetField%arr1dPtr(j) = valuesT(i)
                            end do
                            targetField%timesteps = timesteps
@@ -1263,13 +1278,20 @@ module m_ec_converter
                      j = connection%converterPtr%targetIndex
                      from = (j-1)*(maxlay*n_data)+1
                      thru = (j  )*(maxlay*n_data) 
+                     ! NOTE: No targetMask is checked here
                      targetField%arr1dPtr(from:thru) = valuesT
                      targetField%timesteps = timesteps
                   case(operand_add) ! TODO: AvD/EB: it seems that operand_add does not support targetIndex (offset). Should we not make this available?
                      ! Add all values to one target Item or each value to its own target Item.
                      if (connection%nTargetItems == 1) then                               ! All in one target item
                         targetField => connection%targetItemsPtr(1)%ptr%targetFieldPtr
+                        targetMask => connection%targetItemsPtr(1)%ptr%elementSetPtr%mask
                         do j=1, connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates
+                           if (associated(targetmask)) then
+                              if (targetmask(j) == 0) then
+                                 cycle
+                              end if
+                           end if
                            from = (j-1)*(maxlay*n_data)+1
                            thru = (j  )*(maxlay*n_data) 
                            targetField%arr1dPtr(from:thru) = targetField%arr1dPtr(from:thru) + valuesT
@@ -1278,7 +1300,13 @@ module m_ec_converter
                      else if (connection%nTargetItems == maxlay*n_data) then              ! Separate target items   
                         do i=1, connection%nTargetItems
                            targetField => connection%targetItemsPtr(i)%ptr%targetFieldPtr
+                           targetMask => connection%targetItemsPtr(i)%ptr%elementSetPtr%mask
                            do j=1, connection%targetItemsPtr(i)%ptr%elementSetPtr%nCoordinates
+                              if (associated(targetmask)) then
+                                 if (targetmask(j) == 0) then
+                                    cycle
+                                 end if
+                              end if
                               targetField%arr1dPtr(j) = targetField%arr1dPtr(j) + valuesT(i)
                            end do
                            targetField%timesteps = timesteps
@@ -1296,6 +1324,7 @@ module m_ec_converter
                      j = connection%converterPtr%targetIndex
                      from = (j-1)*(maxlay*n_data)+1
                      thru = (j  )*(maxlay*n_data) 
+                     ! NOTE: No targetMask is checked here
                      targetField%arr1dPtr(from:thru) = targetField%arr1dPtr(from:thru) + valuesT
                      targetField%timesteps = timesteps
                   case default
@@ -1313,6 +1342,7 @@ module m_ec_converter
                      targetField => connection%targetItemsPtr(1)%ptr%targetFieldPtr
                      from = (connection%converterPtr%targetIndex-1)*(maxlay*n_data)+1
                      thru =  connection%converterPtr%targetIndex   *(maxlay*n_data) 
+                     ! NOTE: No target mask is checked here
                      targetField%arr1dPtr(from:thru) = valuesT
 
                      ! NOTE: AvD: call site now should account for n_data in the offset already, and I changed the above line to that as well.

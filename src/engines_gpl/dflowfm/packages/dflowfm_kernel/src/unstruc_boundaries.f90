@@ -909,10 +909,12 @@ logical function initboundaryblocksforcings(filename)
  character(len=ini_value_len) :: locationtype        !
  character(len=ini_value_len) :: forcingfile         !
  character(len=ini_value_len) :: forcingfiletype     !
+ character(len=ini_value_len) :: targetmaskfile      !
  integer                      :: i,j                 !
  integer                      :: num_items_in_file   !
  integer                      :: num_items_in_block
  logical                      :: retVal
+ logical                      :: invertMask
  character(len=1)             :: oper                !
  character (len=300)          :: rec
 
@@ -1250,7 +1252,27 @@ logical function initboundaryblocksforcings(filename)
        else
           call resolvePath(forcingfile, basedir, forcingfile)
        end if
-       
+
+       targetmaskfile = ''
+       call prop_get_string(node_ptr, '', 'targetMaskFile', targetmaskfile, retVal)
+       invertMask = .false.
+       call prop_get_logical(node_ptr, '', 'targetMaskInvert', invertMask , retVal)
+
+       call realloc(kcsini, ndx, keepExisting=.false., fill = 0)
+       if (len_trim(targetMaskFile) > 0) then
+          ! Mask flow nodes based on inside polygon(s), or outside.
+          ! in: kcs, all flow nodes, out: kcsini: all masked flow nodes.
+          call selectelset_internal_nodes(xz, yz, kcs, ndx, 1, kcsini, &
+                                       LOCTP_POLYGON_FILE, targetmaskfile)
+          if (invertMask) then
+             kcsini = ieor(kcsini, 1)
+          end if
+
+       else
+          ! 100% masking: accept all flow nodes that were already active in kcs.
+          where(kcs /= 0) kcsini = 1
+       end if
+
        select case (quantity)
           case ('rainfall','rainfall_rate')
              if (.not. allocated(rain) ) then
@@ -1274,32 +1296,15 @@ logical function initboundaryblocksforcings(filename)
           filetype = bcascii
           fmmethod = spaceandtime
           ! NOTE: Currently, we only support name=global meteo in.bc files, later maybe station time series as well.
-          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx,  'global', filetype=filetype, forcingfile=forcingfile, method=fmmethod, operand='O')
+          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx,  'global', filetype=filetype, forcingfile=forcingfile, method=fmmethod, operand='O')
        case ('netcdf')
           filetype = ncgrid
           fmmethod = weightfactors
-          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
+          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
        case ('uniform')
           filetype = provFile_uniform
           fmmethod = spaceandtime
-          !
-          ! For rainfall on roofs:
-          ! targetmaskfile (optional): file with polygons to include/exclude regions for rainfall
-          ! targetmaskselect (optional): 'inside' : rain falls inside polygons (default)
-          !                              'outside': rain falls outside polygons
-          !                              first character is passed through
-          !
-          sourcemask = ' '
-          call prop_get_string(node_ptr, '', 'targetmaskfile', sourcemask , retVal)
-          rec = 'inside'
-          call prop_get_string(node_ptr, '', 'targetmaskselect', rec , retVal)
-          rec = str_tolower(rec)
-          if (len_trim(sourcemask)>0)  then
-             success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O', &
-                                             & srcmaskfile=sourcemask, targetMaskSelect=rec(1:1))
-          else
-             success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
-          endif
+          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
        case default
           write(msgbuf, '(a)') 'Unknown forcingFileType '''// trim(forcingfiletype) //' in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'
           call warn_flush()

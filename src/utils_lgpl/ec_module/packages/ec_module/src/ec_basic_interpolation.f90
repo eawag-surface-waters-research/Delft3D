@@ -1219,9 +1219,9 @@
    real(kind=hp) :: dist, mindist
 
    Mn = -1
-   do k=1,Nc
+   do k=1,Nc ! Target points
       mindist = Huge(1.d0)
-      do m=1,MSAM
+      do m=1,MSAM ! Source points
          dist = dbdistance(xc(k),yc(k),xs(m),ys(m),jsferic,jasfer3D,dmiss)
          if (dist<mindist) then
             mindist = dist
