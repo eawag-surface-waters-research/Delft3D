@@ -23015,11 +23015,11 @@ end subroutine unc_write_shp
  allocate  ( prof1D(3,lnx1D) , stat= ierr)
  call aerr ('prof1D(3,lnx1D)', ierr, 2*lnx1D)
  do L = 1,lnx1D
-    if (kn(3,L) == 5) then             !  restricting dimensions of streetinlet
+    if (kcu(L) == 5) then             !  restricting dimensions of streetinlet
        prof1D(1,L) = wu1Duni5          !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
        prof1D(2,L) = hh1Duni5          !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
        prof1D(3,L) = iproftypuni5      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
-    else if (kn(3,L) == 7) then        !  restricting dimensions of roofgutterpipe
+    else if (kcu(L) == 7) then        !  restricting dimensions of roofgutterpipe
        prof1D(1,L) = wu1Duni7          !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
        prof1D(2,L) = hh1Duni7          !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
        prof1D(3,L) = iproftypuni7      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
