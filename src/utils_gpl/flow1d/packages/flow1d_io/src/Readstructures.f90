@@ -109,7 +109,7 @@ module m_readstructures
       endif
       ! Fill indirection tables and set indices for compoundss
       if (network%sts%currentFileVersion >= 2) then
-         call finishReading(network%sts, network%cmps)
+         call finishReading(network%sts, network%cmps, network%crs)
       else
          ! fill the hashtable for searching on Id's
          call fill_hashtable(network%sts)
@@ -389,11 +389,13 @@ module m_readstructures
    
    !> At the end of the reading of all structure files, fill the indices arrays for the different
    !! structure types. And find the integer indices for all compound structures
-   subroutine finishReading(sts, cmps)
+   subroutine finishReading(sts, cmps, crs)
       type(t_structureSet),               intent(inout) :: sts    !< structure data set
       type(t_compoundSet),                intent(inout) :: cmps   !< compound data set
+      type(t_CrossSectionSet),            intent(inout) :: crs    !< cross section set
    
       integer :: i
+      integer :: icross
       integer :: istru
       integer :: nweir
       integer :: nculvert
@@ -449,6 +451,12 @@ module m_readstructures
          case (ST_CULVERT)
             nculvert = nculvert + 1
             sts%culvertIndices(nculvert) = istru
+
+            ! Extra step for culvert: re-pointer to the cross section (as the network%crs may have been reallocted during reading).
+            icross = sts%struct(istru)%culvert%crosssectionnr
+            if (icross > 0) then
+               sts%struct(istru)%culvert%pcross => crs%cross(icross)
+            end if
          case (ST_ORIFICE)
             norifice = norifice + 1
             sts%orificeIndices(norifice) = istru
@@ -462,6 +470,12 @@ module m_readstructures
          case (ST_BRIDGE)
             nbridge = nbridge + 1
             sts%bridgeIndices(nbridge) = istru
+
+            ! Extra step for bridge: re-pointer to the cross section (as the network%crs may have been reallocted during reading).
+            icross = sts%struct(istru)%bridge%crosssectionnr
+            if (icross > 0) then
+               sts%struct(istru)%bridge%pcross => crs%cross(icross)
+            end if
          case (ST_GENERAL_ST)
             ngenstru = ngenstru + 1
             sts%generalStructureIndices(ngenstru) = istru

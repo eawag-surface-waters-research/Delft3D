@@ -746,6 +746,7 @@ integer function  AddCrossSectionByVariables(crs, CSDef, branchid, chainage, ire
    !! NOTE: below is a dangerous realloc, see THREEDI-278
    !! By reallocating here, all pointers that used to point to input crs set (e.g. pcross in t_culvert),
    !! will afterwards point to undefined memory, since it was reallocated elsewhere.
+   !! Update Dec 9, 2019: this problem is fixed for structures in finishReading().
    if (crs%count > crs%size) then
       call realloc(crs)
    endif
