@@ -3726,7 +3726,6 @@
    logical                       :: isBoundaryCell
    type(kdtree_instance)         :: treeinst
    logical                       :: validOneDMask
-   integer                       :: numGeneratedLinks
    integer, allocatable          :: cellTo1DNode(:)
    
    ierr = 0

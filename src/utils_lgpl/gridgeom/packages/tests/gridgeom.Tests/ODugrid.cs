@@ -974,7 +974,7 @@ namespace gridgeom.Tests
             Marshal.Copy(c_arrayfrom, rc_arrayfrom, 0, n1d2dlinks);
             Marshal.Copy(c_arrayto, rc_arrayto, 0, n1d2dlinks);
 
-            var arrayfrom = new [] {1, 11, 12, 22, 23, 33, 34, 44, 45, 55, 56, 66, 67, 77, 78, 79, 89};
+            var arrayfrom = new [] { 1, 11, 12, 22, 23, 33, 34, 44, 45, 55, 56, 66, 67, 77, 78, 79, 89};
             var arrayto   = new [] { 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5};
 
             for (int i = 0; i < n1d2dlinks; i++)
