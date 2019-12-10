@@ -830,6 +830,7 @@ namespace gridgeom.Tests
             //th.Join();
         }
 
+        /*
         [Test]
         [TestCase("default")]
         //[TestCase(@"pathToNetFile")]
@@ -987,7 +988,9 @@ namespace gridgeom.Tests
             ierr = wrapperGridgeom.ggeo_deallocate();
             Assert.That(ierr, Is.EqualTo(0));
         }
+        */
 
+        /*
 		// The network of this test can be seen in packages\test_data\1dnetworkMake1D2DRiverLinksTest.png
         [Test]
         [TestCase("default")]
@@ -1109,7 +1112,7 @@ namespace gridgeom.Tests
             IntPtr c_xpl          = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * c_npl);
             IntPtr c_ypl          = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * c_npl);
             IntPtr c_zpl          = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * c_npl);
-            int c_nOneDMask = 0;
+            int c_nOneDMask       = 0;
             IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * c_nOneDMask);
             ierr = wrapperGridgeom.ggeo_make1D2DRiverLinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask,
                 ref c_oneDmask);
@@ -1127,6 +1130,7 @@ namespace gridgeom.Tests
             Assert.That(ierr, Is.EqualTo(0));
 
         }
+        */
 
         // Test Jan Mooiman ugrid files 
         //[Test]
