@@ -1411,6 +1411,8 @@ if(q /= 0) then
  use m_partitioninfo
  use m_timer
  use unstruc_display, only: jaGUI
+ use unstruc_channel_flow
+ 
  implicit none
 
  integer :: key
@@ -1455,6 +1457,7 @@ if(q /= 0) then
                  do LL  = 1, nd(n)%lnx
                     L   = iabs(nd(n)%ln(LL))
                     hu(L) = 0d0
+                    call reset_fu_ru_for_structure_link(L, network%adm%lin2str, network%sts%struct)
                  enddo
 
               else if (jposhchk == 4 .or. jposhchk == 5) then    ! reduce links au
@@ -36942,6 +36945,11 @@ end subroutine setbobs_fixedweirs
                 fu(L) = 0d0
                 ru(L) = 0d0
                 au(L) = 0d0
+                if (pstru%type == ST_GENERAL_ST) then
+                   pstru%generalst%fu(:,L0) = 0d0
+                   pstru%generalst%ru(:,L0) = 0d0
+                   pstru%generalst%au(:,L0) = 0d0
+                endif
              endif
              call set_fu_ru_structure(pstru, L0, fu(L), ru(L), au(L))
              call check_for_changes_on_structures(LEVEL_WARN, pstru, bob0(:,L))
