@@ -128,13 +128,19 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          deltaX(i) = cartGeopointsX(i+1) - cartGeopointsX(i)
          deltaY(i) = cartGeopointsY(i+1) - cartGeopointsY(i)
          deltaZ(i) = cartGeopointsZ(i+1) - cartGeopointsZ(i)
-         branchSegmentLengths(i)= sqrt(deltaX(i)**2+deltaY(i)**2+deltaZ(i)**2)
-         totalLength = totalLength + branchSegmentLengths(i)
+         branchSegmentLengths(i)= sqrt(deltaX(i)**2+deltaY(i)**2+deltaZ(i)**2)  ! geometric length
+         totalLength = totalLength + branchSegmentLengths(i)                    ! total geometric length 
       enddo
-
+      !correct for total "real world" segment length
+      if (totalLength > 1.0d-6) then
+         afac = branchlengths(br)/totalLength
+         branchSegmentLengths(startGeometryNode: endGeometryNode - 1) = branchSegmentLengths(startGeometryNode: endGeometryNode - 1) * afac
+      end if
+   
       !calculate the increments
       do i = startGeometryNode, endGeometryNode - 1
          if (branchSegmentLengths(i) > 1.0d-6) then
+            ! xincrement, etc... now contain a ratio between the geometric increase per "real world" length
             xincrement(i)  = deltaX(i)/branchSegmentLengths(i)
             yincrement(i)  = deltaY(i)/branchSegmentLengths(i)
             zincrement(i)  = deltaZ(i)/branchSegmentLengths(i)
@@ -143,14 +149,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
             yincrement(i)  = 0.d0   
             zincrement(i)  = 0.d0   
          endif
-      enddo      
-      
-      !correct for total segment length
-      if (totalLength > 1.0d-6) then
-         afac = branchlengths(br)/totalLength
-         branchSegmentLengths(startGeometryNode: endGeometryNode - 1) = branchSegmentLengths(startGeometryNode: endGeometryNode - 1) * afac
-      end if
-   
+      enddo
       !now loop over the mesh points
       ! The loop below assumes that the points to be placed (from branchids/offsets) are sorted by increasing chainage per branch.
       call indexx(endMeshNode-startMeshNode+1, branchoffsets(startMeshNode:endMeshNode), ibranchsort(startMeshNode:endMeshNode))
@@ -169,7 +168,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
                exit
             endif
          enddo
-         fractionbranchlength =  branchoffsets(iin) - previousLength
+         fractionbranchlength =  branchoffsets(iin) - previousLength                           ! "real world" length
          cartMeshXCoords(iin) = cartGeopointsX(ind) + fractionbranchlength * xincrement(ind)
          cartMeshYCoords(iin) = cartGeopointsY(ind) + fractionbranchlength * yincrement(ind)
          !TODO: this function should also return meshZCoords (it is relevant if coordinates are spheric) 
