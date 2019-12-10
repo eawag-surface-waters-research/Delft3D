@@ -298,14 +298,16 @@ module m_flow1d_reader
      call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')
      call timstop(timerReadCsLocs)
   
-     call timstrt('ReadStorageNodes', timerReadStorgNodes)
-     call SetMessage(LEVEL_INFO, 'Reading Storage Nodes ...')
-
-     ! Read storage nodes file
-     call readStorageNodes(network, filenames%storage_nodes)
-      
-     call SetMessage(LEVEL_INFO, 'Reading Storage Nodes Done')
-     call timstop(timerReadStorgNodes)
+     if (len_trim(filenames%storage_nodes) > 0) then ! if a storage node file is specified
+        call timstrt('ReadStorageNodes', timerReadStorgNodes)
+        call SetMessage(LEVEL_INFO, 'Reading Storage Nodes ...')
+        
+        ! Read storage nodes file
+        call readStorageNodes(network, filenames%storage_nodes)
+         
+        call SetMessage(LEVEL_INFO, 'Reading Storage Nodes Done')
+        call timstop(timerReadStorgNodes)
+     end if
 
      if (len_trim(md1d_flow1d_file) > 0) then
 
