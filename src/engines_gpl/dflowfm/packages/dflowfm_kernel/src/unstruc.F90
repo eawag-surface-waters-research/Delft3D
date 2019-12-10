@@ -18387,9 +18387,9 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_gategendim, id_gategenname, id_gategen_dis, id_gategen_sillh,  id_gategen_sillw,  id_gategen_edgel, id_gategen_openw, &           ! id_gategen_head,
                      id_gategen_flowh, id_gategen_s1up, id_gategen_s1dn,                                                                      &
                      id_genstrudim, id_genstru_id, id_genstru_dis, id_genstru_crestl, id_genstru_crestw, id_genstru_edgel, id_genstru_openw, &           ! id_genstru_head,
-                     id_genstru_s1up, id_genstru_s1dn, id_genstru_dis_gate_open, id_genstru_dis_gate_upp, id_genstru_openh, id_genstru_uppl,  &
-                     id_genstru_vel, id_genstru_au, id_genstru_au_open, id_genstru_au_upp, id_genstru_stat, id_genstru_head,  id_genstru_velgateopen, &
-                     id_genstru_velgateupp, id_genstru_s1crest, id_genstru_forcedif, &
+                     id_genstru_s1up, id_genstru_s1dn, id_genstru_dis_gate_open, id_genstru_dis_gate_over, id_genstru_dis_gate_under, id_genstru_openh, id_genstru_uppl,  &
+                     id_genstru_vel, id_genstru_au, id_genstru_au_open, id_genstru_au_over, id_genstru_au_under, id_genstru_stat, id_genstru_head,  id_genstru_velgateopen, &
+                     id_genstru_velgateover, id_genstru_velgateunder, id_genstru_s1crest, id_genstru_forcedif, &
                      id_orifgendim, id_orifgen_id, id_orifgen_dis, id_orifgen_crestl, id_orifgen_crestw, id_orifgen_edgel, id_orifgen_stat,  &
                      id_orifgen_s1dn, id_orifgen_openh, id_orifgen_vel, id_orifgen_au, id_orifgen_s1up, id_orifgen_head, id_orifgen_s1crest, id_orifgen_forcedif,&
                      id_bridgedim, id_bridge_id, id_bridge_dis, id_bridge_s1up,  id_bridge_s1dn, id_bridge_vel, id_bridge_au,  id_bridge_head, &
@@ -19234,7 +19234,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ierr = nf90_def_var(ihisfile, 'general_structure_discharge',     nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis)
             !ierr = nf90_put_att(ihisfile, id_genstru_dis, 'standard_name', 'integral_of_discharge_wrt_time') ! TODO: introduce time windows in nc
-            ierr = nf90_put_att(ihisfile, id_genstru_dis, 'long_name', 'Discharge through general structure')
+            ierr = nf90_put_att(ihisfile, id_genstru_dis, 'long_name', 'Total discharge through general structure')
             ierr = nf90_put_att(ihisfile, id_genstru_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_genstru_dis, 'coordinates', 'general_structure_id')
 
@@ -19293,10 +19293,15 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'units', 'm3 s-1')
                ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_open, 'coordinates', 'general_structure_id')
 
-               ierr = nf90_def_var(ihisfile, 'general_structure_discharge_over_gate_upper_edge_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis_gate_upp)
-               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'long_name', 'Discharge over gate upper edge level of general structure')
-               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'units', 'm3 s-1')
-               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_upp, 'coordinates', 'general_structure_id')
+               ierr = nf90_def_var(ihisfile, 'general_structure_discharge_over_gate', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis_gate_over)
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_over, 'long_name', 'Discharge over gate of general structure')
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_over, 'units', 'm3 s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_over, 'coordinates', 'general_structure_id')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_discharge_under_gate', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis_gate_under)
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_under, 'long_name', 'Discharge under gate of general structure')
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_under, 'units', 'm3 s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_dis_gate_under, 'coordinates', 'general_structure_id')
 
                ierr = nf90_def_var(ihisfile, 'general_structure_gate_opening_height', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_openh)
                ierr = nf90_put_att(ihisfile, id_genstru_openh, 'long_name', 'Gate opening height of general structure')
@@ -19313,20 +19318,30 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_genstru_velgateopen, 'units', 'm s-1')
                ierr = nf90_put_att(ihisfile, id_genstru_velgateopen, 'coordinates', 'general_structure_id')
 
-               ierr = nf90_def_var(ihisfile, 'general_structure_velocity_over_gate_upper_edge_level ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_velgateupp)
-               ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'long_name', 'Velocity over gate upper edge level of general structure')
-               ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'units', 'm s-1')
-               ierr = nf90_put_att(ihisfile, id_genstru_velgateupp, 'coordinates', 'general_structure_id')
+               ierr = nf90_def_var(ihisfile, 'general_structure_velocity_over_gate ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_velgateover)
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateover, 'long_name', 'Velocity over gate of general structure')
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateover, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateover, 'coordinates', 'general_structure_id')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_velocity_under_gate ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_velgateunder)
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateunder, 'long_name', 'Velocity under gate of general structure')
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateunder, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_genstru_velgateunder, 'coordinates', 'general_structure_id')
 
                ierr = nf90_def_var(ihisfile, 'general_structure_flow_area_in_gate_opening ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au_open)
                ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'long_name', 'Flow area in gate opening of general structure')
                ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'units', 'm2')
                ierr = nf90_put_att(ihisfile, id_genstru_au_open, 'coordinates', 'general_structure_id')
 
-               ierr = nf90_def_var(ihisfile, 'general_structure_flow_area_above_upper_edge_level ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au_upp)
-               ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'long_name', 'Flow area above upper edge level of general structure')
-               ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'units', 'm2')
-               ierr = nf90_put_att(ihisfile, id_genstru_au_upp, 'coordinates', 'general_structure_id')
+               ierr = nf90_def_var(ihisfile, 'general_structure_flow_area_over_gate ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au_over)
+               ierr = nf90_put_att(ihisfile, id_genstru_au_over, 'long_name', 'Flow area over gate of general structure')
+               ierr = nf90_put_att(ihisfile, id_genstru_au_over, 'units', 'm2')
+               ierr = nf90_put_att(ihisfile, id_genstru_au_over, 'coordinates', 'general_structure_id')
+               
+               ierr = nf90_def_var(ihisfile, 'general_structure_flow_area_under_gate ', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_au_under)
+               ierr = nf90_put_att(ihisfile, id_genstru_au_under, 'long_name', 'Flow area under gate of general structure')
+               ierr = nf90_put_att(ihisfile, id_genstru_au_under, 'units', 'm2')
+               ierr = nf90_put_att(ihisfile, id_genstru_au_under, 'coordinates', 'general_structure_id')
 
                ierr = nf90_def_var(ihisfile, 'general_structure_state ', nf90_int, (/ id_genstrudim, id_timedim /), id_genstru_stat)
                ierr = nf90_put_att(ihisfile, id_genstru_stat, 'long_name', 'Flow state at general structure')
@@ -20535,11 +20550,14 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_var(ihisfile, id_genstru_openh,         valgenstru(15,i), (/ i, it_his /))
                   ierr = nf90_put_var(ihisfile, id_genstru_uppl,          valgenstru(16,i), (/ i, it_his /))
                   ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_open, valgenstru(17,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_upp,  valgenstru(18,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_au_open,       valgenstru(19,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_au_upp,        valgenstru(20,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valgenstru(21,i), (/ i, it_his /))
-                  ierr = nf90_put_var(ihisfile, id_genstru_velgateupp,    valgenstru(22,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_over, valgenstru(18,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_dis_gate_under,valgenstru(19,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_au_open,       valgenstru(20,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_au_over,        valgenstru(21,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_au_under,      valgenstru(22,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_velgateopen,   valgenstru(23,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_velgateover,   valgenstru(24,i), (/ i, it_his /))
+                  ierr = nf90_put_var(ihisfile, id_genstru_velgateunder,  valgenstru(25,i), (/ i, it_his /))
                end if
             enddo
          endif

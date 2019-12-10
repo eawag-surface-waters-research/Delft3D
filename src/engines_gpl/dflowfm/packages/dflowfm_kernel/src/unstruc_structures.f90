@@ -92,12 +92,15 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (15,:) general structure gate opening height
                                                               !<                      (16,:) general structure gate upper edge level
                                                               !<                      (17,:) general structure discharge through gate opening
-                                                              !<                      (18,:) general structure discharge over gate upper edge level
-                                                              !<                      (19,:) general structure flow area in gate opening
-                                                              !<                      (20,:) general structure flow area above upper edge level
-                                                              !<                      (21,:) general structure velocity through gate opening
-                                                              !<                      (22,:) general structure velocity over gate upper edge level
-                                                              !<                      (23,:) general structure counters of partitions for parallel
+                                                              !<                      (18,:) general structure discharge over gate
+                                                              !<                      (19,:) general structure discharge under gate
+                                                              !<                      (20,:) general structure flow area in gate opening
+                                                              !<                      (21,:) general structure flow area over gate
+                                                              !<                      (22,:) general structure flow area under gate
+                                                              !<                      (23,:) general structure velocity through gate opening
+                                                              !<                      (24,:) general structure velocity over gate
+                                                              !<                      (25,:) general structure velocity under gate
+                                                              !<                      (26,:) general structure counters of partitions for parallel
  double precision, dimension(:,:), allocatable, target :: valdambreak !< Array for dambreak, (1,:)  flow link width
                                                               !<                      (2,:) instantanuous discharge
                                                               !<                      (3,:) dambreak water level up
@@ -125,14 +128,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (13,:) orifice gate opening width (not applicable)
                                                               !<                      (14,:) orifice gate lower edge level
                                                               !<                      (15,:) orifice gate opening height
-                                                              !<                      (16,:) orifice gate upper edge level (not applicable)
-                                                              !<                      (17,:) orifice discharge through gate opening (not applicable)
-                                                              !<                      (18,:) orifice discharge over gate upper edge level (not applicable)
-                                                              !<                      (19,:) orifice flow area in gate opening (not applicable)
-                                                              !<                      (20,:) orifice flow area above upper edge level (not applicable)
-                                                              !<                      (21,:) orifice velocity through gate opening (not applicable)
-                                                              !<                      (22,:) orifice velocity over gate upper edge level (not applicable)
-                                                              !<                      (23,:) orifice counters of partitions for parallel
+                                                              !<                      (16,:) orifice counters of partitions for parallel
  double precision, dimension(:,:), allocatable :: valbridge   !< Array for bridge;    (1,:) flow link width, used for averaging.
                                                               !<                      (2,:) discharge through bridge
                                                               !<                      (3,:) bridge water level up
@@ -175,9 +171,9 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_CGEN = 4        !< Number of variables for general structure (old ext file)
  integer                           :: NUMVALS_GATEGEN = 9     !< Number of variables for gate (new)
  integer                           :: NUMVALS_WEIRGEN = 13    !< Number of variables for weir
- integer                           :: NUMVALS_GENSTRU = 23    !< Number of variables for general structure( new exe file)
+ integer                           :: NUMVALS_GENSTRU = 26    !< Number of variables for general structure( new exe file)
  integer                           :: NUMVALS_DAMBREAK = 12   !< Number of variables for dambreak
- integer                           :: NUMVALS_ORIFGEN = 23    !< Number of variables for orific
+ integer                           :: NUMVALS_ORIFGEN = 16    !< Number of variables for orific
  integer                           :: NUMVALS_BRIDGE  = 10    !< Number of variables for bridge
  integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
  integer                           :: NUMVALS_UNIWEIR = 8     !< Number of variables for univeral weir
@@ -352,11 +348,14 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
                                                                 !< (15) gate opening height
                                                                 !< (16) gate upper edge level
                                                                 !< (17) discharge through gate opening
-                                                                !< (18) discharge over gate upper edge level
-                                                                !< (19) flow area in gate opening
-                                                                !< (20) flow area above upper edge level
-                                                                !< (21) velocity through gate opening
-                                                                !< (22) velocity over gate upper edge level
+                                                                !< (18) discharge over gate
+                                                                !< (19) discharge under gate
+                                                                !< (20) flow area in gate opening
+                                                                !< (21) flow area over gate
+                                                                !< (22) flow area under gate
+                                                                !< (23) velocity through gate opening
+                                                                !< (24) velocity over gate
+                                                                !< (25) velocity under gate
    integer,                        intent(in   ) :: L           !< Flow link number.
    double precision,               intent(in   ) :: dir         !< Direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
    integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
@@ -421,16 +420,18 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    end if
    
    ! General structure-based structures with a (gate) door.
-   if (any(istrtypein == (/ ST_GENERAL_ST, ST_ORIFICE /))) then ! TODO: ST_GATE
+   if (any(istrtypein == (/ ST_GENERAL_ST /))) then ! TODO: ST_GATE
       k1 = ln(1,L)
       k2 = ln(2,L)
 
       genstr => network%sts%struct(istru)%generalst
       valstruct(17) = valstruct(17) + get_discharge_through_gate_opening(genstr, L0, s1(k1), s1(k2))*dir
-      valstruct(18) = valstruct(18) + get_discharge_over_gate_uppedge(genstr, L0, s1(k1), s1(k2))*dir
+      valstruct(18) = valstruct(18) + get_discharge_over_gate(genstr, L0, s1(k1), s1(k2))*dir
+      valstruct(19) = valstruct(19) + get_discharge_under_gate(genstr, L0, s1(k1), s1(k2))*dir
       
-      valstruct(19) = valstruct(19) + genstr%au(3,L0)
-      valstruct(20) = valstruct(20) + genstr%au(2,L0)
+      valstruct(20) = valstruct(20) + genstr%au(3,L0) ! flow area through gate opening
+      valstruct(21) = valstruct(21) + genstr%au(2,L0) ! flow area over gate
+      valstruct(22) = valstruct(22) + genstr%au(1,L0) ! flow area under gate
    end if
    
    ! 3. More specific values that apply to bridge
@@ -472,11 +473,14 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
                                                                 !< (15) gate opening height
                                                                 !< (16) gate upper edge level
                                                                 !< (17) discharge through gate opening
-                                                                !< (18) discharge over gate upper edge level
-                                                                !< (19) flow area in gate opening
-                                                                !< (20) flow area above upper edge level
-                                                                !< (21) velocity through gate opening
-                                                                !< (22) velocity over gate upper edge level
+                                                                !< (18) discharge over gate
+                                                                !< (19) discharge under gate
+                                                                !< (20) flow area in gate opening
+                                                                !< (21) flow area over gate
+                                                                !< (22) flow area under gate
+                                                                !< (23) velocity through gate opening
+                                                                !< (24) velocity over gate
+                                                                !< (25) velocity under gate
                                                                 !< (icount) counters of partitions for parallel
    integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                                                 !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
@@ -571,11 +575,17 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
          if (valstruct(1) == 0d0) then ! zero width
             valstruct(13:) = dmiss
          else
-            if (valstruct(19) > 0) then ! flow area in gate opening
-               valstruct(21) = valstruct(21) / valstruct(19) ! velocity through gate opening
-            end if
-            if (valstruct(20) > 0) then ! flow area above gate upper edge level
-               valstruct(22) = valstruct(22) / valstruct(20) ! velocity over gate upper edge level
+            ! only for general structure
+            if (istrtypein == ST_GENERAL_ST) then 
+               if (valstruct(20) > 0) then ! flow area in gate opening
+                  valstruct(23) = valstruct(17) / valstruct(20) ! velocity through gate opening
+               end if
+               if (valstruct(21) > 0) then ! flow area over gate
+                  valstruct(24) = valstruct(18) / valstruct(21) ! velocity over gate
+               end if
+               if (valstruct(22) > 0) then ! flow area under gate
+                  valstruct(25) = valstruct(19) / valstruct(22) ! velocity under gate
+               end if
             end if
          end if
       end if 
@@ -657,8 +667,8 @@ double precision function get_discharge_through_gate_opening(genstr, L0, s1m1, s
 
 end function get_discharge_through_gate_opening
 
-!> Gets discharge through gate opening per link.
-double precision function get_discharge_over_gate_uppedge(genstr, L0, s1m1, s1m2)
+!> Gets discharge over gate opening per link.
+double precision function get_discharge_over_gate(genstr, L0, s1m1, s1m2)
    use m_missing
    use m_General_Structure
    implicit none   
@@ -673,11 +683,34 @@ double precision function get_discharge_over_gate_uppedge(genstr, L0, s1m1, s1m2
    
    if (gatefraction > gatefrac_eps) then
       u1L = genstr%ru(2,L0) - genstr%fu(2,L0)*dsL
-      get_discharge_over_gate_uppedge = genstr%au(2,L0) * u1L
+      get_discharge_over_gate = genstr%au(2,L0) * u1L
    else
-      get_discharge_over_gate_uppedge = 0d0
+      get_discharge_over_gate = 0d0
    end if
 
-end function get_discharge_over_gate_uppedge
+end function get_discharge_over_gate
+
+!> Gets discharge under gate per link.
+double precision function get_discharge_under_gate(genstr, L0, s1m1, s1m2)
+   use m_missing
+   use m_General_Structure
+   implicit none   
+   type(t_GeneralStructure), pointer, intent(in   ) :: genstr !< Derived type containing general structure information
+   integer,                           intent(in   ) :: L0     !< Local link index in genstr%..(:) link-based arrays.
+   double precision,                  intent(in   ) :: s1m1   !< (geometrical) upstream water level.
+   double precision,                  intent(in   ) :: s1m2   !< (geometrical) downstream water level.
+   double precision  :: u1L, dsL, gatefraction
+   
+   dsL = s1m2 - s1m1
+   gatefraction = genstr%gateclosedfractiononlink(L0)
+   
+   if (gatefraction > gatefrac_eps) then
+      u1L = genstr%ru(1,L0) - genstr%fu(1,L0)*dsL
+      get_discharge_under_gate = genstr%au(1,L0) * u1L
+   else
+      get_discharge_under_gate = 0d0
+   end if
+
+end function get_discharge_under_gate
 
 end module m_structures

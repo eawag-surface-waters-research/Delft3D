@@ -244,7 +244,7 @@ contains
 
          call flqhgs(fu(2), ru(2), u1L, dxL, dt, structwidth, kfuL, au(2), qL, flowDir, &
                      hu, hd, uu, zgate, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(3,L0), velheight)
+                     rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, jarea, ds, genstr%state(2,L0), velheight)
       endif
       
       if (gatefraction< 1d0 - gatefrac_eps) then
@@ -255,7 +255,7 @@ contains
          
          call flqhgs(fu(3), ru(3), u1L, dxL, dt, structwidth, kfuL, au(3), qL, flowDir, &
                      hu, hd, uu, zs, (1d0-gatefraction)*wstr, (1d0-gatefraction)*w2, (1d0-gatefraction)*wsd, zb2, ds1, ds2, dg,                &
-                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(2,L0), velheight)
+                     rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, jarea, ds, genstr%state(3,L0), velheight)
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
 
       endif
