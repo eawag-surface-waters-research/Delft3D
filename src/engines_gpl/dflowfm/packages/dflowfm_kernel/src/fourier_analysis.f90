@@ -626,7 +626,7 @@ module m_fourier_analysis
 
        if (with_fourier_or_avg .and. md_fou_step == 1) then
           msgbuf = 'FouUpdateStep = 1 may only be used for min/max computations. Now using it for avg and/or fourier.'
-          call err_flush()
+          call warn_flush()
        endif
 
        ! init fourier arrays
@@ -747,7 +747,7 @@ end subroutine setfouunit
 
 !> performs fourier analysis i.e. computes suma and sumb
 !! - calculates MAX or MIN value
-   subroutine fouana( ifou, nst, rarray, bl, umean, vmean)
+   subroutine fouana( ifou, nst, rarray, bl, dtw)
    !!--declarations----------------------------------------------------------------
        use precision
        use m_d3ddimens
@@ -757,11 +757,10 @@ end subroutine setfouunit
    !
    ! Global variables
    !
-       integer                      , intent(in)            :: ifou   !!  Counter
-       integer                      , intent(in)            :: nst    !!  Time step number
-       real(kind=fp)  , dimension(:), intent(in)            :: rarray !  Array for fourier analysis
-       real(kind=fp)  , dimension(:), intent(in), optional  :: umean  !  Description and declaration in esm_alloc_real.f90
-       real(kind=fp)  , dimension(:), intent(in), optional  :: vmean  !  Description and declaration in esm_alloc_real.f90
+       integer                      , intent(in)            :: ifou   !<  Counter
+       integer                      , intent(in)            :: nst    !<  Time step number
+       real(kind=fp)  , dimension(:), intent(in)            :: rarray !<  Array for fourier analysis
+       real(kind=fp)                , intent(in)            :: dtw    !<  weight for time step
        real(kind=prec), dimension(:), intent(in)            :: bl
        !
        ! The following list of pointer parameters is used to point inside the gdp structure
@@ -779,8 +778,7 @@ end subroutine setfouunit
    ! Local variables
    !
        integer         :: n       ! Loop counter over NMAXUS
-       real(kind=fp)   :: angl, cosangl, sinangl
-       real(kind=fp)   :: utot2   ! |U|**2 = uuu**2 + vvv**2
+       real(kind=fp)   :: angl, cosangl_dtw, sinangl_dtw
    !
    !! executable statements -------------------------------------------------------
    !
@@ -818,20 +816,6 @@ end subroutine setfouunit
                    fousmas(n) = max(fousmas(n), rarray(n))
                 enddo
              endif
-          case ('e')
-             !
-             ! Calculate MAX Energy head value
-             !
-             if (present(umean) .and. present(vmean)) then
-                ! TODO: unreachable code
-                do n = 1, nmaxus
-                   !
-                   ! Energy head, based on cell-centre velocities
-                   !
-                   utot2 = hypot(umean(n), vmean(n))
-                   fousma(n) = max(fousma(n), 0.5_hp*utot2/ag_fouana + rarray(n))
-                enddo
-             endif
           case ('i')
              !
              ! Calculate MIN value
@@ -849,19 +833,19 @@ end subroutine setfouunit
              ! Calculate AVG value
              !
              do n = 1, nmaxus
-                fousma(n) = fousma(n) + rarray(n)
+                fousma(n) = fousma(n) + dtw * rarray(n)
              enddo
-             fousmb(1) = fousmb(1) + 1.0_fp
-          !
-          ! Calculate total for fourier analyse
-          !
+             fousmb(1) = fousmb(1) + dtw
           case default
-             angl = real(nst - ftmstr,fp)*foufas
-             cosangl = cos(angl)
-             sinangl = sin(angl)
+             !
+             ! Calculate total for fourier analyse
+             !
+             angl = real(nst - ftmstr,fp) * foufas
+             cosangl_dtw = cos(angl) * dtw
+             sinangl_dtw = sin(angl) * dtw
              do n = 1, nmaxus
-                fousma(n) = fousma(n) + rarray(n)*cosangl
-                fousmb(n) = fousmb(n) + rarray(n)*sinangl
+                fousma(n) = fousma(n) + rarray(n) * cosangl_dtw
+                fousmb(n) = fousmb(n) + rarray(n) * sinangl_dtw
              enddo
           end select
        endif
@@ -1059,7 +1043,7 @@ end subroutine setfouunit
 
 !> do the actual fourier and min/max update
 !! write to file after last update
-    subroutine postpr_fourier(nst, trifil, dtsec, refdat, hdt, tzone)
+    subroutine postpr_fourier(nst, trifil, dtsec, refdat, dts, tzone)
     use m_d3ddimens
     use m_transport
     use m_flowgeom
@@ -1067,8 +1051,8 @@ end subroutine setfouunit
     use m_flow
     implicit none
 
-    real(kind=fp)     , intent(in) :: dtsec   !<  Integration time step [in seconds]
-    real(kind=fp)     , intent(in) :: hdt     !< Half Integration time step [seconds]
+    real(kind=fp)     , intent(in) :: dtsec   !< User time step [in seconds]
+    real(kind=fp)     , intent(in) :: dts     !< Internal time step [seconds]
     real(kind=fp)     , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)
     integer           , intent(in) :: nst     !< timestep number
     character(len=*)  , intent(in) :: trifil  !< output filename
@@ -1079,19 +1063,20 @@ end subroutine setfouunit
     !
     ! Perform analysis and write to Fourier file
     !
-    integer                                        :: ifou
-    integer                                        :: ierr
-    integer                                        :: n
-    integer                              , pointer :: fouwrt
-    character(len=16), dimension(:)      , pointer :: founam
-
-    double precision, pointer             :: fieldptr1(:)
-    double precision, allocatable, target :: wmag(:)  !< [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
+    integer                                  :: ifou
+    integer                                  :: ierr
+    integer                                  :: n
+    integer                        , pointer :: fouwrt
+    character(len=16), dimension(:), pointer :: founam
+    double precision, pointer                :: fieldptr1(:)
+    double precision, allocatable, target    :: wmag(:)  !< [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
+    real(kind=fp)                            :: dtw
 
     integer    :: itdate   !<  Reference time in yyyymmdd as an integer
 
-    fouwrt              => gdfourier%fouwrt
-    founam              => gdfourier%founam
+    fouwrt     => gdfourier%fouwrt
+    founam     => gdfourier%founam
+    dtw        =  dts / dtsec
 
     if (gdfourier%iblws > 0) then
        allocate(wmag(lnx), stat=ierr)
@@ -1141,7 +1126,7 @@ end subroutine setfouunit
           case default
              continue         ! Unknown FourierVariable exception
           end select
-          call fouana(ifou, nst, fieldptr1, bl)
+          call fouana(ifou, nst, fieldptr1, bl, dtw)
           ifou = ifou + 1
        enddo
        if (allocated(wmag)) deallocate(wmag)
@@ -1152,7 +1137,7 @@ end subroutine setfouunit
        if (nst == fouwrt) then
           if (fileids%ncid == 0) then
              read(refdat,*) itdate
-             call wrfou(trifil, dtsec, const_names, itdate, hdt, tzone)
+             call wrfou(trifil, dtsec, const_names, itdate, tzone)
              !
              ! clean up large fourier arrays
              !
@@ -1174,7 +1159,7 @@ end subroutine setfouunit
 !> - open fourier analysis output file
 !! - writes results of fourier analysis to output file
 !! - closes fourier analysis output file
-    subroutine wrfou(trifil, dtsec, namcon, itdate, hdt, tzone)
+    subroutine wrfou(trifil, dtsec, namcon, itdate, tzone)
     !!--declarations----------------------------------------------------------------
         use precision
         use mathconsts
@@ -1193,7 +1178,6 @@ end subroutine setfouunit
         character(len=*) , dimension(:), intent(in)  :: namcon  !< Description and declaration in esm_alloc_char.f90
         character(*)                   , intent(in)  :: trifil  !< File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
         real(fp)                       , intent(in)  :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-        real(fp)                       , intent(in)  :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt
 
         !
         integer                                    :: nofouvar
@@ -1333,7 +1317,7 @@ end subroutine setfouunit
            !
            unc_loc = all_unc_loc(ifou)
            !
-           call wrfous(ifou, dtsec, hdt, tzone, fileids, unc_loc)
+           call wrfous(ifou, dtsec, tzone, fileids, unc_loc)
         enddo
         !
         ! Close fourier output file
@@ -1342,7 +1326,7 @@ end subroutine setfouunit
     end subroutine wrfou
 
 !> - writes results of fourier analysis to output
-   subroutine wrfous(ifou, dtsec, hdt, tzone, fileids, iloc)
+   subroutine wrfous(ifou, dtsec, tzone, fileids, iloc)
    !!--declarations----------------------------------------------------------------
        use precision
        use m_d3ddimens
@@ -1356,7 +1340,6 @@ end subroutine setfouunit
        integer                     , intent(in) :: ifou   !< Fourier counter
        real(kind=fp)               , intent(in) :: dtsec  !< Integration time step [in seconds]
        real(kind=fp)               , intent(in) :: tzone  !< Local (FLOW) time - GMT (in hours)
-       real(kind=fp)               , intent(in) :: hdt    !< Half Integration time step [seconds]
        type(t_unc_mapids)          , intent(in) :: fileids!< Set of file and variable ids for this file.
        integer                     , intent(in) :: iloc
    !
@@ -1413,20 +1396,20 @@ end subroutine setfouunit
        case default
           ! Fourier
           !
-          call fourier_final(ifou, dtsec,tzone, hdt, nmaxus)
+          call fourier_final(ifou, dtsec,tzone, nmaxus)
           ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, fousma)
           ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmb)
        end select
    end subroutine wrfous
 
    !> final update of fousma and fousmb
-   subroutine fourier_final(ifou, dtsec, tzone, hdt, nmaxus)
+   subroutine fourier_final(ifou, dtsec, tzone, nmaxus)
        use mathconsts
        integer      , intent(in) :: ifou     !< Fourier counter
        real(kind=fp), intent(in) :: dtsec    !< Integration time step [in seconds]
        real(kind=fp), intent(in) :: tzone    !< Local (FLOW) time - GMT (in hours)
-       real(kind=fp), intent(in) :: hdt      !< Half Integration time step [seconds]
-       integer      , intent(in) :: nmaxus   !< dimension of current quentity
+       integer      , intent(in) :: nmaxus   !< dimension of current quantity
+       real(kind=fp)             :: hdt      !< Half Integration time step [seconds]
        real(kind=fp)             :: freqnt   ! Frequency in degrees per hour
        real(kind=fp)             :: shift    ! Phase shift
        integer                   :: n        ! loop counter
@@ -1446,6 +1429,7 @@ end subroutine setfouunit
    !
    !! executable statements -------------------------------------------------------
    !
+       hdt    =  0.5_fp * dtsec
        fnumcy =  gdfourier%fnumcy(ifou)
        ftmsto =  gdfourier%ftmsto(ifou)
        ftmstr =  gdfourier%ftmstr(ifou)
