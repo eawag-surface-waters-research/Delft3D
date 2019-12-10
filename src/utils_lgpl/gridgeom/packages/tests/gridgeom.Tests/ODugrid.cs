@@ -1106,10 +1106,14 @@ namespace gridgeom.Tests
 
             //5. make the links
             int c_npl             = 0;
-            int c_nOneDMask       = 0;
-            double c_searchRadius = 100.0;
-            IntPtr c_oneDmask     = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0);
-            ierr                  = wrapperGridgeom.ggeo_make1D2DRiverLinks(ref c_nOneDMask, ref c_oneDmask, ref c_searchRadius);
+            IntPtr c_xpl          = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * c_npl);
+            IntPtr c_ypl          = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * c_npl);
+            IntPtr c_zpl          = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * c_npl);
+            int c_nOneDMask = 0;
+            IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * c_nOneDMask);
+            ierr = wrapperGridgeom.ggeo_make1D2DRiverLinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask,
+                ref c_oneDmask);
+
             Assert.That(ierr, Is.EqualTo(0));
 
             //6. get the number of links

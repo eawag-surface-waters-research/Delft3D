@@ -3701,11 +3701,11 @@
    !! and potentially more than one 1d2d link per 1d mesh node is created.
    !! 2D cells are connected if they are at the boundary of the domain and inside the search radius.
    !! They are connected to the nearest 1d point.
-   function ggeo_make1D2DRiverLinks(jsferic, jasfer3D, searchRadius, oneDMask) result(ierr)
+   function ggeo_make1D2DRiverLinks(jsferic, jasfer3D, searchRadius, xplRiverLinks, yplRiverLinks, zplRiverLinks, oneDMask) result(ierr)
 
    use network_data
-   use m_missing,       only: dmiss
-   use geometry_module, only: dbdistance, crossinbox
+   use m_missing,       only: dmiss, jins
+   use geometry_module, only: dbdistance, crossinbox, dbpinpol
    use kdtree2Factory
    use m_cell_geometry
 
@@ -3714,33 +3714,37 @@
    !input
    integer, intent(in)              :: jsferic, jasfer3D
    double precision, intent(in)     :: searchRadius
+   double precision, optional       :: xplRiverLinks(:), yplRiverLinks(:), zplRiverLinks(:) !polygon to include only selected boundary 2d cells
    integer, optional, intent(in)    :: oneDMask(:)
 
-
    !locals
-   integer                       :: ierr !< Error status, 0 if success, nonzero in case of error.
-   integer                       :: k, kk, k1, k2, k3, k4, ncellsinSearchRadius, numberCellNetlinks, prevConnectedOneDNetNode, newPointIndex
-   integer                       :: newLinkIndex
-   integer                       :: l, cellNetLink, cellId, kn3localType, numnetcells
-   double precision              :: searchRadiusSquared, maxdistance, prevDistance, currDistance, ldistance, rdistance
-   logical                       :: isBoundaryCell
-   type(kdtree_instance)         :: treeinst
-   logical                       :: validOneDMask
-   integer, allocatable          :: cellTo1DNode(:)
+   integer                          :: ierr !< Error status, 0 if success, nonzero in case of error.
+   integer                          :: k, kk, k1, k2, k3, k4, ncellsinSearchRadius
+   integer                          :: numberCellNetlinks, prevConnected1DNode, newPointIndex, newLinkIndex
+   integer                          :: l, cellNetLink, cellId, kn3localType, numnetcells, insidePolygons
+   double precision                 :: searchRadiusSquared, maxdistance, prevDistance, currDistance, ldistance, rdistance
+   logical                          :: boundaryCell
+   type(kdtree_instance)            :: treeinst
+   logical                          :: validOneDMask, isPolygonPresent
+   integer, allocatable             :: cellTo1DNode(:)
+   logical, allocatable             :: isValidCell(:)
    
    ierr = 0
    if (numl1d<=0) then
       return
    endif
    
+   ! presence of a valid oneDMask
    validOneDMask = .false.
    if(present(oneDMask)) then
       if(size(oneDMask,1).gt.0) then
          validOneDMask = .true.
       endif
    endif
+   
+   ! presence of valid polygons 
+   isPolygonPresent = present(xplRiverLinks)
 
-   !LC: is this the right type for rivers
    kn3localType = 3 
    call savenet()
    call findcells(0)
@@ -3752,8 +3756,12 @@
       return
    endif
 
-   allocate(cellTo1DNode(numl))
+   allocate(cellTo1DNode(nump))
+   allocate(isValidCell(nump))
    cellTo1DNode = 0
+   isValidCell = .true.
+   kc = 0
+   
    searchRadiusSquared = searchRadius**2
    do l = 1, numl1d + 1
       !only check the left point
@@ -3799,29 +3807,41 @@
       do k = 1, nCellsInSearchRadius
          ! get the current cell id and the previously connected net node
          cellId= treeinst%results(k)%idx
-         prevConnectedOneDNetNode = cellTo1DNode(cellId)
-         ! already not a boundary net node
-         if (prevConnectedOneDNetNode.eq.-1) cycle
-         
+         ! not a boundary cell
+         if (.not.(isValidCell(cellId))) then
+            cycle
+         endif
+	 
          ! check if it is a boundary cell
-         isBoundaryCell = .false.
+         boundaryCell = .false.
          do kk =1, size(netcell(cellId)%lin)
             cellNetLink =  netcell(cellId)%lin(kk)
             if(lnn(cellNetLink).eq.1) then
-               isBoundaryCell=.true.
+               boundaryCell=.true.
                exit
             endif
          enddo
-         ! not a boundary cell
-         if (.not.isBoundaryCell) then
-            cellTo1DNode(cellId) = - 1
+         if (.not.boundaryCell) then
+            isValidCell(cellId) = .false.
             cycle
          endif
-         ! a candidate connection already exist
-         if (prevConnectedOneDNetNode.eq.0) then
+         
+         ! check if is a valid 2d cell to connect
+         if ( isPolygonPresent ) then
+            insidePolygons = - 1 
+            call dbpinpol(xz(cellId), yz(cellId), insidePolygons, dmiss, jins, size(xplRiverLinks), xplRiverLinks, yplRiverLinks, zplRiverLinks)    
+               if (insidePolygons.ne.1) then 
+                  isValidCell(cellId) = .false.
+                  cycle
+               endif
+         endif
+
+		 ! a candidate connection already exist
+         prevConnected1DNode = cellTo1DNode(cellId)
+         if (prevConnected1DNode.eq.0) then
             cellTo1DNode(cellId) = k1
-         else if(prevConnectedOneDNetNode > 0) then
-            prevDistance = dbdistance(xk(prevConnectedOneDNetNode), yk(prevConnectedOneDNetNode),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
+         else if(prevConnected1DNode > 0) then
+            prevDistance = dbdistance(xk(prevConnected1DNode), yk(prevConnected1DNode),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
             currDistance = dbdistance(xk(k1), yk(k1), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)
             if (currDistance < prevDistance) then
                cellTo1DNode(cellId) = k1
@@ -3831,8 +3851,9 @@
    enddo
 
    !make the connections
+   kc = 0
    do cellId = 1, nump
-      if (cellTo1DNode(cellId).gt.0) then
+      if (cellTo1DNode(cellId) > 0 .and. isValidCell(cellId)) then
          newLinkIndex = -1
          !check presence of oneDMask
          if (validOneDMask) then

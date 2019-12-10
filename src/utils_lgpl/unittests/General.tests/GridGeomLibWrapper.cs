@@ -86,17 +86,25 @@ namespace General.tests
         public static extern int ggeo_make1D2Dembeddedlinks_dll(ref int c_jsferic, ref int c_jasfer3D, [In] ref int c_nOneDMask, [In] ref IntPtr c_oneDmask);
 
 
-
         /// <summary>
-        /// Make 1D2D embedded river links
-        /// </summary>
-        /// <param name="c_jsferic"></param>
+        /// Makes lateral 1d2d links. 1d-2d river connections connections.With this function multiple 2d boundary cells can be connected to 1d mesh points. 
+        ///Please note that the gridgeom library has to be initialized before this function can be called.
+        /// </summeray>
+        /// <param name="c_npl">The number of polygon nodes.</param>
+        /// <param name="c_xpl">The x coordinates of the polygon nodes.</param>
+        /// <param name="c_ypl">The y coordinates of the polygon nodes.</param>
+        /// <param name="c_zpl">The z coordinates of the polygon nodes.</param>
+        /// <param name="c_nOneDMask">The size of the 1d mask, should be equal to the number of 1d computational nodes</param>
+        /// <param name="c_oneDmask">The size of the 1d mask.</param>
+        /// <param name="c_jsferic">Cartisian (0) or spheric (1)</param>
         /// <param name="c_jasfer3D"></param>
-        /// <param name="c_nOneDMask"></param>
-        /// <param name="c_oneDmask"></param>
+        /// <param name="c_searchRadius">The radius where to search for boundary cells from the 1d poind</param>
         /// <returns></returns>
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2DRiverLinks", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_make1D2DRiverLinks_dll(ref int c_jsferic, ref int c_jasfer3D, ref double c_searchRadius, [In] ref int c_nOneDMask, [In] ref IntPtr c_oneDmask);
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2DRiverLinks",
+            CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_make1D2DRiverLinks_dll(ref int c_npl, [In] ref IntPtr c_xpl, [In] ref IntPtr c_ypl, [In] ref IntPtr c_zpl, ref int c_nOneDmask, [In] ref IntPtr c_OneDmask,
+            ref int c_jsferic, ref int c_jasfer3D, ref double c_searchRadius);
+
 
         /// <summary>
         /// Use 1d array to fill kn matrix
@@ -273,12 +281,14 @@ namespace General.tests
         }
 
 
-        public int ggeo_make1D2DRiverLinks(ref int c_nOneDMask, ref IntPtr c_oneDmask, ref double c_searchRadius)
+        public int ggeo_make1D2DRiverLinks(ref int c_nin, ref IntPtr c_xpl, ref IntPtr c_ypl, ref IntPtr c_zpl, ref int c_nOneDMask, ref IntPtr c_oneDmask)
         {
             // the following three variables might become part of the function api
             int c_jsferic = 0;
             int c_jasfer3D = 0;
-            int ierr = ggeo_make1D2DRiverLinks_dll(ref c_jsferic, ref c_jasfer3D, ref c_searchRadius, ref c_nOneDMask, ref c_oneDmask);
+            double c_searchRadius = 5000.0;
+            int ierr = ggeo_make1D2DRiverLinks_dll(ref c_nin, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask, ref c_oneDmask, ref c_jsferic, ref c_jasfer3D, ref c_searchRadius);
+
             return ierr;
         }
 

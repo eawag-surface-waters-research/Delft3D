@@ -218,28 +218,49 @@ end function ggeo_make1D2Dembeddedlinks_dll
 !> Make 1d-2d river connections connections. With this function multiple 2d boundary cells can be connected to 1d mesh points. 
 !> Please note that the gridgeom library has to be initialized before this function can be called.
 !!
-!! c_jsferic      :: 2d sferic flag (1 = spheric / 0 = cartesian)
-!! c_jasfer3D     :: 3d sferic flag (1 = advanced spheric algorithm, 0 = default spheric algorithm )
-!! c_searchRadius :: the search radius for making links
-!! c_nOneDMask    :: size of the 1d mask for mesh points
-!! c_oneDmask     :: mask for 1d mesh points (1 = potential connection, 0 = do not connect) 
-function ggeo_make1D2DRiverLinks_dll(c_jsferic, c_jasfer3D, c_searchRadius, c_nOneDMask, c_oneDMask) result(ierr) bind(C, name="ggeo_make1D2DRiverLinks")
+!! c_npl       :: size of the array containing the polygon's coordinates
+!! c_xpl       :: x coordinate of the polygon's points  
+!! c_ypl       :: y coordinate of the polygon's points
+!! c_zpl       :: z coordinate of the polygon's points
+!! c_nOneDMask :: size of the 1d mask for mesh 1d
+!! c_oneDmask  :: mask for 1d mesh points (1 = potential connection, 0 = do not connect) 
+!! c_jsferic   :: 2d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jasfer3D  :: 3d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jglobe    :: to be detailed
+function ggeo_make1D2DRiverLinks_dll(c_npl, c_xpl, c_ypl, c_zpl, c_nOneDMask, c_oneDmask, c_jsferic, c_jasfer3D, c_searchRadius) result(ierr) bind(C, name="ggeo_make1D2DRiverLinks")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2DRiverLinks_dll
 
    use gridgeom
    use gridoperations
-   
+
+   integer, intent(in)           :: c_npl, c_nOneDMask
+   type(c_ptr), intent(in)       :: c_xpl
+   type(c_ptr), intent(in)       :: c_ypl
+   type(c_ptr), intent(in)       :: c_zpl
+   type(c_ptr), intent(in)       :: c_oneDmask
    integer, intent(in)           :: c_jsferic
    integer, intent(in)           :: c_jasfer3D
    double precision, intent(in)  :: c_searchRadius
-   integer, intent(in)           :: c_nOneDMask   
-   type(c_ptr), intent(in)       :: c_oneDmask  
+   
+   double precision, pointer     :: xpl(:), ypl(:), zpl(:)   
    integer, pointer              :: oneDmask(:) 
    integer                       :: ierr  
    
-   call c_f_pointer(c_oneDmask, oneDmask, (/c_nOneDMask/))
+   if(c_npl > 0) then
+      call c_f_pointer(c_xpl, xpl, (/c_npl/))
+      call c_f_pointer(c_ypl, ypl, (/c_npl/))
+      call c_f_pointer(c_zpl, zpl, (/c_npl/))
+   endif
    
-   ierr = ggeo_make1D2DRiverLinks(c_jsferic, c_jasfer3D, c_searchRadius, oneDMask)
+   if (c_nOneDMask > 0) then
+      call c_f_pointer(c_oneDmask, oneDmask, (/c_nOneDMask/))
+   endif
+   
+   if (associated(xpl).and.associated(oneDMask)) then
+      ierr = ggeo_make1D2DRiverLinks(c_jsferic, c_jasfer3D, c_searchRadius, xpl, ypl, zpl, oneDMask)
+   else
+      ierr = ggeo_make1D2DRiverLinks(c_jsferic, c_jasfer3D, c_searchRadius)
+   endif
    
 end function ggeo_make1D2DRiverLinks_dll
 
