@@ -69,6 +69,7 @@ module timespace_parameters
   !
 
   ! Enumeration for location specification types (used in selectelset_internal_nodes).
+  integer, parameter :: LOCTP_UNKNOWN                  = -1 !< Undefined location specification type.
   integer, parameter :: LOCTP_POLYGON_FILE             = 10 !< A polygon input file used for inside-polygon check.
   integer, parameter :: LOCTP_POLYGON_XY               = 11 !< x/y arrays containing a polygon used for inside-polygon check.
   integer, parameter :: LOCTP_BRANCHID_CHAINAGE        = 12 !< branchid+chainage combination to select the 1D grid point closest to that network branch location.
@@ -5693,8 +5694,9 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol, sortLinks, linktype, &
-                                          branchindex, chainage, xpin, ypin, nump) ! find links cut by polyline filetype 9  
+   subroutine selectelset_internal_links( xz, yz, nx, ln, lnx, keg, numg, &
+                                          loc_spec_type, loc_file, nump, xpin, ypin, branchindex, chainage, linktype, &
+                                          xps, yps, nps, lftopol, sortLinks)
      use m_inquire_flowgeom
      use dfm_error
      use messageHandling
@@ -5703,27 +5705,28 @@ contains
      implicit none
      
      !inputs
-     character(len=*), intent(in)              :: filename   ! file name for meteo data file
-     integer     ,     intent(in)              :: filetype   ! spw, arcinfo, uniuvp etc
-     double precision, intent(in)              :: xz (:)
-     double precision, intent(in)              :: yz (:)
-     integer         , intent(in)              :: ln (:,:)
-     integer         , intent(in)              :: lnx    
-     integer         , intent(in), optional    :: branchindex
-     double precision, intent(in), optional    :: chainage
-     double precision, intent(in), optional    :: xpin(:)
-     double precision, intent(in), optional    :: ypin(:)
-     integer         , intent(in), optional    :: nump
-     integer         , intent(  out)           :: keg(:)      !< Output array containing the flow link numbers that were selected.
+     double precision,           intent(in   ) :: xz(:)       !< Flow nodes center x-coordinates. (Currently unused).
+     double precision,           intent(in   ) :: yz(:)       !< Flow nodes center y-coordinates. (Currently unused).
+     integer,                    intent(in   ) :: nx          !< Number of flow nodes in input. (Currently unused).
+     integer                   , intent(in   ) :: ln (:,:)    !< Flow link table. (Currently unused).
+     integer                   , intent(in   ) :: lnx         !< Number of flow links in input. (Currently unused).
+     integer                   , intent(  out) :: keg(:)      !< Output array containing the flow link numbers that were selected.
                                                               !< Size of array is responsability of call site, and filling starts at index 1 upon each call.
-     integer         , intent(  out)           :: numg
+     integer                   , intent(  out) :: numg        !< Number of flow links that were selected (i.e., keg(1:numg) will be filled).
+     integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: LOCTP_POLYGON_FILE, LOCTP_POLYGON_XY or LOCTP_BRANCHID_CHAINAGE.
+     character(len=*), optional, intent(in   ) :: loc_file    !< (Optional) File name of a polyline file (when loc_spec_type==LOCTP_POLYGON_FILE).
+     integer         , optional, intent(in   ) :: nump        !< (Optional) Number of points in polyline coordinate arrays xpin and ypin (when loc_spec_type==LOCTP_POLYGON_XY).
+     double precision, optional, intent(in   ) :: xpin(:)     !< (Optional) Array with x-coordinates of a polyline, used instead of a polyline file (when loc_spec_type==LOCTP_POLYGON_XY).
+     double precision, optional, intent(in   ) :: ypin(:)     !< (Optional) Array with y-coordinates of a polyline, used instead of a polyline file (when loc_spec_type==LOCTP_POLYGON_XY).
+     integer         , optional, intent(in   ) :: branchindex !< (Optional) Branch index on which flow link is searched for (when loc_spec_type==LOCTP_BRANCHID_CHAINAGE).
+     double precision, optional, intent(in   ) :: chainage    !< (Optional) Offset along specified branch (when loc_spec_type==LOCTP_BRANCHID_CHAINAGE).
+     integer,          optional, intent(in   ) :: linktype    !< (Optional) Limit search to specific link types: only 1D flow links (linktype==IFLTP_1D), 2D (linktype==IFLTP_2D), or both (linktype==IFLTP_ALL).
+     double precision, allocatable, optional, intent(inout) :: xps(:), yps(:) !< (Optional) Arrays in which the read in polyline x,y-points can be stored (only relevant when loc_spec_type==LOCTP_POLYGON_FILE).
+     integer,          optional, intent(inout) :: nps         !< (Optional) Number of polyline points that have been read in (only relevant when loc_spec_type==LOCTP_POLYGON_FILE).
+     integer,          optional, intent(inout) :: lftopol(:)  !< (Optional) Mapping array from flow links to the polyline index that intersected that flow link (only relevant when loc_spec_type==LOCTP_POLYGON_FILE or LOCTP_POLYGON_XY).
+     integer,          optional, intent(in   ) :: sortLinks   !< (Optional) Whether or not to sort the found flow links along the polyline path. (only relevant when loc_spec_type==LOCTP_POLYGON_FILE or LOCTP_POLYGON_XY).
 
      !optional inputs/outputs
-     double precision, allocatable, optional, intent(inout) :: xps(:), yps(:) !< (Optional) Arrays in which the read in polyline x,y-points can be stored.
-     integer,                       optional, intent(inout) :: nps            !< (Optional) Number of polyline points that have been read in.
-     integer,                       optional, intent(inout) :: lftopol(:)     !< (Optional) Mapping array from flow links to the polyline index that intersected that flow link.
-     integer,                       optional, intent(in   ) :: sortLinks      !< (Optional) Whether or not to sort the found flow links along the polyline path.
-     integer,                       optional, intent(in   ) :: linktype       !< (Optional) Limit search to specific link types: only 1D flow links (linktype==IFLTP_1D), 2D (linktype==IFLTP_2D), or both (linktype==IFLTP_ALL).
 
      !locals 
      integer :: minp, L, k1, k2, ja, np, opts, ierr
@@ -5743,18 +5746,18 @@ contains
      np = 0
      call realloc(xp,100000)
      call realloc(yp,100000)
-     if (filetype == poly_tim) then
+     if (loc_spec_type == LOCTP_POLYGON_FILE) then
    
     
-        call oldfil(minp, filename)
+        call oldfil(minp, loc_file)
         call read1polylin(minp,xp,yp,np)
-     else if (filetype ==LINK_ID .and. present(xpin) .and. present(ypin) .and. present(nump) .and. nump > 0) then
-        xp = xpin
-        yp = ypin
-        np = nump
-     end if
-     
-     if (present(branchindex) .and. present(chainage) ) then
+     else if (loc_spec_type==LOCTP_POLYGON_XY .and. present(xpin) .and. present(ypin) .and. present(nump)) then
+        if (nump > 0) then
+           xp = xpin
+           yp = ypin
+           np = nump
+        end if
+     else if (loc_spec_type==LOCTP_BRANCHID_CHAINAGE .and. present(branchindex) .and. present(chainage) ) then
         if (branchindex > 0) then
            ierr = findlink(branchindex, chainage, L) ! NOTE: L is here assumed to be a net link number
            if (ierr==DFM_NOERR) then
@@ -5789,7 +5792,7 @@ contains
      endif            
      
      if (ierr /= 0) then
-        call setmessage( LEVEL_WARN, 'Internal error while reading '//trim(filename)//'. The number of found links exceeds the available positions.')
+        call setmessage( LEVEL_WARN, 'Internal error while reading '//trim(loc_file)//'. The number of found links exceeds the available positions.')
         call setmessage( -LEVEL_WARN, 'The contents of this polygon is ignored.')
         numg = 0
      endif

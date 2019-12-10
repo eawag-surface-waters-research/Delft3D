@@ -41999,7 +41999,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'gateloweredgelevel' ) then
 
-           call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg(ngate+1:numl), numg )
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx, keg(ngate+1:numl), numg, LOCTP_POLYGON_FILE, filename)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numg, ' nr of gate links' ; call msg_flush()
 
@@ -42012,7 +42012,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'damlevel' ) then
 
-           call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, ked(ncdam+1:numl), numd )
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx, ked(ncdam+1:numl), numd, LOCTP_POLYGON_FILE, filename)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numd, ' nr of dam level cells' ; call msg_flush()
 
@@ -42025,7 +42025,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'generalstructure' ) then
 
-           call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, kegen(ncgen+1:numl), numgen, sortLinks = 1)
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx, kegen(ncgen+1:numl), numgen, LOCTP_POLYGON_FILE, filename, sortLinks = 1)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numgen, ' nr of general structure cells' ; call msg_flush()
 
@@ -42038,9 +42038,9 @@ if (mext > 0) then
         else if (jaoldstr > 0 .and. (qid == 'pump1D' .or. qid == 'pump') ) then
 
            if (qid == 'pump1D') then
-               call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx1D, kep(npump+1:numl), npum, linktype = IFLTP_1D )
+              call selectelset_internal_links(xz, yz, ndx, ln, lnx1D, kep(npump+1:numl), npum, LOCTP_POLYGON_FILE, filename, linktype = IFLTP_1D, sortLinks = 1)
            else
-               call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, kep(npump+1:numl), npum, linktype = IFLTP_ALL )
+              call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYGON_FILE, filename, linktype = IFLTP_ALL, sortLinks = 1)
            endif
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , npum, ' nr of pump links' ; call msg_flush()
@@ -42054,7 +42054,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'checkvalve' ) then
 
-           call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keklep(nklep+1:numl), numklep )
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx, keklep(nklep+1:numl), numklep, LOCTP_POLYGON_FILE, filename)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numklep, ' nr of checkvalves ' ; call msg_flush()
 
@@ -42063,7 +42063,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'valve1D' ) then
 
-           call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx1D, kevalv(nvalv+1:numl), numvalv, linktype = IFLTP_1D )
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx1D, kevalv(nvalv+1:numl), numvalv, LOCTP_POLYGON_FILE, filename, linktype = IFLTP_1D )
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numvalv, ' nr of valves ' ; call msg_flush()
 
