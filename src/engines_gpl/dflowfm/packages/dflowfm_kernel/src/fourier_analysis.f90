@@ -44,6 +44,7 @@ module m_fourier_analysis
     use unstruc_netcdf
     use m_flow, only : kmx
     use m_alloc
+    use m_flowtimes, only : dt_user, irefdate, Tzone
     implicit none
 
     !> struct to enable different sizes of suma and sumb
@@ -180,7 +181,7 @@ module m_fourier_analysis
        if (istat /= 0) then
           ! Exception handling for allocation of fourier arrays
           msgbuf = 'Allocation error in alloc_fourier_analysis_arrays; Fourier disabled.'
-          call warn_flush()
+          call err_flush()
           nofou = 0
        else
           ! Initialise arrays for Fourier analysis
@@ -207,7 +208,7 @@ module m_fourier_analysis
 
 !> - Read fourier input file and stores the
 !! variables necessary for the analysis in arrays.
-   subroutine reafou(lunfou, filfou, kmax, lstsc, lsal, ltem, tstart, tstop, dt, md_fou_step, success)
+   subroutine reafou(lunfou, filfou, kmax, lstsc, lsal, ltem, tstart, tstop, success)
    !!--declarations----------------------------------------------------------------
        use precision
        use mathconsts
@@ -226,8 +227,6 @@ module m_fourier_analysis
        integer      , intent(in   ) :: kmax        !< number of vertical layers
        real(kind=fp), intent(in   ) :: tstart      !< simulation start time
        real(kind=fp), intent(in   ) :: tstop       !< simulation stop time
-       real(kind=fp), intent(in   ) :: dt          !< timestep
-       integer      , intent(in   ) :: md_fou_step !< determines if fourier analysis is updated at the end of the user time step or comp. time step
        logical      , intent(  out) :: success     !< function result
    !
    ! Local variables
@@ -270,9 +269,9 @@ module m_fourier_analysis
        character(len=300)                    :: message
        character(len=132)                    :: record              ! Used for format free reading
        character(len=30), allocatable        :: columns(:)          ! each record is split into separate fields (columns)
+       character(len=3)                      :: cref                ! ref. number converted into a string
        integer                               :: iostat              ! error code file io
        integer                               :: ierr                ! error code allocate
-       logical                               :: with_fourier_or_avg ! one of the fourier options is avg or fourier
    !
    !! executable statements -------------------------------------------------------
    !
@@ -379,7 +378,7 @@ module m_fourier_analysis
              fouref(ifou,1) = fouid
           else
              ! Exception: no temperature
-             write (msgbuf, '(a)') 'Temperature specified in .fou file, but no temperature available. '
+             msgbuf = 'Temperature specified in .fou file, but no temperature available. '
              call warn_flush()
              goto 6666
           endif
@@ -390,20 +389,20 @@ module m_fourier_analysis
              fouref(ifou,1) = fouid
           else
              ! Exception: no salt
-             write (msgbuf, '(a)') 'Salinity specified in .fou file, but no salinity available.'
+             msgbuf = 'Salinity specified in .fou file, but no salinity available.'
              call warn_flush()
              goto 6666
           endif
        else                                                 ! constituent, anything else
           read (founam(ifou)(2:2), '(i1)', iostat=iostat) fconno(ifou)
           if (iostat /= 0) then
-             write (msgbuf, '(a)') 'Unable to initialize fourier analysis for '''//trim(founam(ifou))//'''.'
+             msgbuf = 'Unable to initialize fourier analysis for ''' // trim(founam(ifou)) // '''.'
              call warn_flush()
              goto 6666
           endif
           fconno(ifou) = fconno(ifou) + max(lsal, ltem)
           if (fconno(ifou)>lstsc) then
-             write (msgbuf, '(a)') 'Unable to initialize fourier analysis for constituent '''//trim(founam(ifou))//'''.'
+             msgbuf = 'Unable to initialize fourier analysis for constituent ''' // trim(founam(ifou)) // '''.'
              call warn_flush()
              goto 6666
           endif
@@ -417,18 +416,18 @@ module m_fourier_analysis
        read (columns(2), *, err=6666) rstart
        rstart = rstart * time_unit_factor           ! convert to kernel time unit
        !
-       ftmstr(ifou) = nint(rstart/dt)
+       ftmstr(ifou) = nint(rstart/dt_user)
        !
        ! original code translates as : 'if abs(real(nint(rstart/dt)*dt-rstart) > (0.1_fp*dt)'         ! RL666
-       if ( mod(real(rstart,fp),real(dt,fp)) > 0.1_fp*dt) then
-          write (msgbuf,*) 'Fourier sample interval start not at an integer number of user timesteps DtUser.'
+       if ( mod(real(rstart,fp),real(dt_user,fp)) > 0.1_fp*dt_user) then
+          msgbuf = 'Fourier sample interval start not at an integer number of user timesteps DtUser.'
           call warn_flush()
           goto 6666
        endif
        !
        !
        if (rstart<tstart) then
-          write (msgbuf,*) 'Fourier sample interval start preceeds simulation start TStart.'
+          msgbuf = 'Fourier sample interval start preceeds simulation start TStart.'
           call warn_flush()
           goto 6666
        endif
@@ -436,17 +435,17 @@ module m_fourier_analysis
        read (columns(3), *, err=6666) rstop
        rstop = rstop * time_unit_factor           ! convert to kernel time unit
        !
-       ftmsto(ifou) = nint(rstop/dt)
+       ftmsto(ifou) = nint(rstop/dt_user)
        ! original code translates as : 'if abs(real(nint(rstop/dt)*dt-rstart) > (0.1_fp*dt)'         ! RL666
-       if ( mod(real(rstop,fp),real(dt,fp)) > 0.1_fp*dt) then
-          write (msgbuf,*) 'Fourier sample interval stop not at an integer number of user timesteps DtUser.'
+       if ( mod(real(rstop,fp),real(dt_user,fp)) > 0.1_fp*dt_user) then
+          msgbuf = 'Fourier sample interval stop not at an integer number of user timesteps DtUser.'
           call warn_flush()
           goto 6666
        endif
        !
        !
        if (rstop>tstop) then
-          write (msgbuf,*) 'Fourier sample interval stop exceeds simulation end TStop.'
+          msgbuf = 'Fourier sample interval stop exceeds simulation end TStop.'
           call warn_flush()
           goto 6666
        endif
@@ -556,78 +555,67 @@ module m_fourier_analysis
        ! Add the (start-)index ivar to fouref(..,2)
        !
        ivar = 0
-       with_fourier_or_avg = .false.
        do ifou = 1, nofou
           fouref(ifou,2)   = ivar + 1
+          write(cref,'(i3.3)') fouref(ifou,1)
           if (fouelp(ifou)=='x') then
              ivar = ivar + 1
-             write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_max"
+             fouvarnam(ivar) = "fourier" // cref // "_max"
              fouvarnamlong(ivar) = "maximum value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
              if (founam(ifou) == 's1') then
                 ivar = ivar + 1
-                write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_max_depth"
+                fouvarnam(ivar) = "fourier" // cref // "_max_depth"
                 fouvarnamlong(ivar) = "maximum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
              endif
              if (foumask(ifou) == 1) then
-                write(fouvarnam    (ivar  ),'(2a)') trim(fouvarnam    (ivar  )), "_inidryonly"
-                write(fouvarnamlong(ivar  ),'(2a)') trim(fouvarnamlong(ivar  )), ", initially dry points only"
-                !if (founam(ifou) == 's1') then
-                !   write(fouvarnam    (ivar-1),'(2a)') trim(fouvarnam    (ivar-1)), "_inidryonly"
-                !   write(fouvarnamlong(ivar-1),'(2a)') trim(fouvarnamlong(ivar-1)), ", initially dry points only"
-                !endif
+                fouvarnam    (ivar) = trim(fouvarnam    (ivar)) // "_inidryonly"
+                fouvarnamlong(ivar) = trim(fouvarnamlong(ivar)) // ", initially dry points only"
              endif
           elseif (fouelp(ifou)=='e') then
              ivar = ivar + 1
-             write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_max"
+             fouvarnam(ivar) = "fourier" // cref // "_max"
              fouvarnamlong(ivar) = "maximum value"
              fouvarunit(ivar) = 'm'
              if (foumask(ifou) == 1) then
-                write(fouvarnam    (ivar  ),'(2a)') trim(fouvarnam    (ivar  )), "_inidryonly"
-                write(fouvarnamlong(ivar  ),'(2a)') trim(fouvarnamlong(ivar  )), ", initially dry points only"
+                fouvarnam    (ivar) = trim(fouvarnam    (ivar)) // "_inidryonly"
+                fouvarnamlong(ivar) = trim(fouvarnamlong(ivar)) // ", initially dry points only"
              endif
           elseif (fouelp(ifou)=='i') then
              ivar = ivar + 1
-             write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_min"
+             fouvarnam(ivar) = "fourier" // cref // "_min"
              fouvarnamlong(ivar) = "minimum value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
              if (founam(ifou) == 's1') then
                 ivar = ivar + 1
-                write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_min_depth"
+                fouvarnam(ivar) = "fourier" // cref // "_min_depth"
                 fouvarnamlong(ivar) = "minimum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
              endif
           elseif (fouelp(ifou)=='a') then
              ivar = ivar + 1
-             write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_avg"
+             fouvarnam(ivar) = "fourier" // cref // "_avg"
              fouvarnamlong(ivar) = "average value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
-             with_fourier_or_avg = .true.
           else
              if (fnumcy(ifou)==0) then          ! zero fourier mode without further notice means 'MEAN'
                 ivar = ivar + 1
-                write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_mean"
+                fouvarnam(ivar) = "fourier" // cref // "_mean"
                 fouvarnamlong(ivar) = "average value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
              else                               ! non-zero fourier mode
                 ivar = ivar + 1
-                write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_amp"
+                fouvarnam(ivar) = "fourier" // cref // "_amp"
                 fouvarnamlong(ivar) = "Fourier amplitude"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
                 ivar = ivar + 1
-                write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_phs"
+                fouvarnam(ivar) = "fourier" // cref // "_phs"
                 fouvarnamlong(ivar) = "Fourier phase"
                 fouvarunit(ivar)    = "degree"
              endif
-             with_fourier_or_avg = .true.
           endif
        enddo
-
-       if (with_fourier_or_avg .and. md_fou_step == 1) then
-          msgbuf = 'FouUpdateStep = 1 may only be used for min/max computations. Now using it for avg and/or fourier.'
-          call warn_flush()
-       endif
 
        ! init fourier arrays
        ierr = 0
@@ -658,10 +646,10 @@ module m_fourier_analysis
 
        return
 6666   continue   ! abort fourier analysis, something went wrong
-       write (msgbuf, '(a)') 'Invalid input for Fourier analysis, record='''//trim(record)//''''
+       msgbuf = 'Invalid input for Fourier analysis, record=''' // trim(record) // ''''
        call warn_flush()
-       write (msgbuf, '(a)') 'Switching off fourier analysis......'
-       call warn_flush()
+       msgbuf = 'Switching off fourier analysis......'
+       call err_flush()
        nofou = 0
    end subroutine reafou
 
@@ -1024,10 +1012,8 @@ end subroutine setfouunit
           !
           ! requested fourier analysis undefined
           !
-          write(msgbuf,'(a)') 'Fourier analysis: variable keyword '''//trim(columns(1))//''' not recognized, ignored'
+          msgbuf = 'Fourier analysis: variable keyword ''' // trim(columns(1)) // ''' not recognized, ignored'
           call msg_flush()
-          continue
-          ! TODO: Issue a warning that we ignored a line in the fou file
        endif
        !
        goto 10
@@ -1043,20 +1029,14 @@ end subroutine setfouunit
 
 !> do the actual fourier and min/max update
 !! write to file after last update
-    subroutine postpr_fourier(nst, trifil, dtsec, refdat, dts, tzone)
-    use m_d3ddimens
-    use m_transport
-    use m_flowgeom
-    use m_wind
+    subroutine postpr_fourier(nst, dts)
+    use m_transport, only : constituents
+    use m_flowgeom, only : bl, lnx
     use m_flow
     implicit none
 
-    real(kind=fp)     , intent(in) :: dtsec   !< User time step [in seconds]
-    real(kind=fp)     , intent(in) :: dts     !< Internal time step [seconds]
-    real(kind=fp)     , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)
-    integer           , intent(in) :: nst     !< timestep number
-    character(len=*)  , intent(in) :: trifil  !< output filename
-    character(len=*)  , intent(in) :: refdat  !< reference date
+    real(kind=fp)     , intent(in) :: dts       !< Internal time step [seconds]
+    integer           , intent(in) :: nst       !< timestep number
 
     ! NOTE: In DELFT3D depth is used, but bl is passed (positive bottomlevel). Defined direction is different
 
@@ -1072,17 +1052,15 @@ end subroutine setfouunit
     double precision, allocatable, target    :: wmag(:)  !< [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
     real(kind=fp)                            :: dtw
 
-    integer    :: itdate   !<  Reference time in yyyymmdd as an integer
-
     fouwrt     => gdfourier%fouwrt
     founam     => gdfourier%founam
-    dtw        =  dts / dtsec
+    dtw        =  dts / dt_user
 
     if (gdfourier%iblws > 0) then
        allocate(wmag(lnx), stat=ierr)
        if (ierr /= 0) then
           msgbuf = 'Allocation error in postpr_fourier; Fourier disabled.'
-          call warn_flush()
+          call err_flush()
           nofou = 0
        else
           do n = 1, lnx
@@ -1136,8 +1114,7 @@ end subroutine setfouunit
        !
        if (nst == fouwrt) then
           if (fileids%ncid == 0) then
-             read(refdat,*) itdate
-             call wrfou(trifil, dtsec, const_names, itdate, tzone)
+             call wrfou()
              !
              ! clean up large fourier arrays
              !
@@ -1159,26 +1136,16 @@ end subroutine setfouunit
 !> - open fourier analysis output file
 !! - writes results of fourier analysis to output file
 !! - closes fourier analysis output file
-    subroutine wrfou(trifil, dtsec, namcon, itdate, tzone)
+    subroutine wrfou()
     !!--declarations----------------------------------------------------------------
-        use precision
-        use mathconsts
+        use precision, only : fp
+        use mathconsts, only : raddeg
         use netcdf
         use unstruc_netcdf
         use m_sferic, only: jsferic
-        use m_d3ddimens
+        use m_transport, only : namcon => const_names
         !
         implicit none
-        !
-    !
-    ! Global variables
-    !
-        integer                        , intent(in)  :: itdate  !< Reference time in yyyymmdd as an integer
-        real(fp)                       , intent(in)  :: dtsec   !< Integration time step [in seconds]
-        character(len=*) , dimension(:), intent(in)  :: namcon  !< Description and declaration in esm_alloc_char.f90
-        character(*)                   , intent(in)  :: trifil  !< File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
-        real(fp)                       , intent(in)  :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-
         !
         integer                                    :: nofouvar
         character(len=1) , dimension(:)  , pointer :: fouelp
@@ -1224,7 +1191,7 @@ end subroutine setfouunit
         idvar         => gdfourier%idvar
 
         !
-        ierr = unc_create(trim(trifil), 0, fileids%ncid)
+        ierr = unc_create(trim(FouOutputFile), 0, fileids%ncid)
         ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm)
         call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
 
@@ -1237,9 +1204,9 @@ end subroutine setfouunit
                  ifou = ifou + 1
               endif
            endif
-           freqnt = foufas(ifou)*raddeg*3600.0_fp/dtsec
-           tfastr = real(gdfourier%ftmstr(ifou),fp)*dtsec/60.0_fp
-           tfasto = real(gdfourier%ftmsto(ifou),fp)*dtsec/60.0_fp
+           freqnt = foufas(ifou)*raddeg*3600.0_fp/dt_user
+           tfastr = real(gdfourier%ftmstr(ifou),fp)*dt_user/60.0_fp
+           tfasto = real(gdfourier%ftmsto(ifou),fp)*dt_user/60.0_fp
            !
            select case (founam(ifou))
            case ('s1')
@@ -1289,7 +1256,7 @@ end subroutine setfouunit
                           'Fourier analysis ' // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), 0)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '// namfunlong // ', ' // trim(fouvarnamlong(ivar)))
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', itdate)
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', irefdate)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
 
@@ -1317,7 +1284,7 @@ end subroutine setfouunit
            !
            unc_loc = all_unc_loc(ifou)
            !
-           call wrfous(ifou, dtsec, tzone, fileids, unc_loc)
+           call wrfous(ifou, fileids, unc_loc)
         enddo
         !
         ! Close fourier output file
@@ -1326,7 +1293,7 @@ end subroutine setfouunit
     end subroutine wrfou
 
 !> - writes results of fourier analysis to output
-   subroutine wrfous(ifou, dtsec, tzone, fileids, iloc)
+   subroutine wrfous(ifou, fileids, iloc)
    !!--declarations----------------------------------------------------------------
        use precision
        use m_d3ddimens
@@ -1338,8 +1305,6 @@ end subroutine setfouunit
    ! Global variables
    !
        integer                     , intent(in) :: ifou   !< Fourier counter
-       real(kind=fp)               , intent(in) :: dtsec  !< Integration time step [in seconds]
-       real(kind=fp)               , intent(in) :: tzone  !< Local (FLOW) time - GMT (in hours)
        type(t_unc_mapids)          , intent(in) :: fileids!< Set of file and variable ids for this file.
        integer                     , intent(in) :: iloc
    !
@@ -1396,18 +1361,16 @@ end subroutine setfouunit
        case default
           ! Fourier
           !
-          call fourier_final(ifou, dtsec,tzone, nmaxus)
+          call fourier_final(ifou, nmaxus)
           ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar),   iloc, fousma)
           ierror = unc_put_var_map(fileids%ncid, fileids%id_tsp, idvar(:,fouvar+1), iloc, fousmb)
        end select
    end subroutine wrfous
 
    !> final update of fousma and fousmb
-   subroutine fourier_final(ifou, dtsec, tzone, nmaxus)
-       use mathconsts
+   subroutine fourier_final(ifou, nmaxus)
+       use mathconsts, only : raddeg
        integer      , intent(in) :: ifou     !< Fourier counter
-       real(kind=fp), intent(in) :: dtsec    !< Integration time step [in seconds]
-       real(kind=fp), intent(in) :: tzone    !< Local (FLOW) time - GMT (in hours)
        integer      , intent(in) :: nmaxus   !< dimension of current quantity
        real(kind=fp)             :: hdt      !< Half Integration time step [seconds]
        real(kind=fp)             :: freqnt   ! Frequency in degrees per hour
@@ -1429,7 +1392,7 @@ end subroutine setfouunit
    !
    !! executable statements -------------------------------------------------------
    !
-       hdt    =  0.5_fp * dtsec
+       hdt    =  0.5_fp * dt_user
        fnumcy =  gdfourier%fnumcy(ifou)
        ftmsto =  gdfourier%ftmsto(ifou)
        ftmstr =  gdfourier%ftmstr(ifou)
@@ -1442,13 +1405,13 @@ end subroutine setfouunit
        ! Initialize local variables
        !
        ! Frequention := 360 degree / period
-       ! where period = [ (FTMSTO - FMTSTR) * DTSEC ] / [ FNUMCY * 3600 ]
+       ! where period = [ (FTMSTO - FMTSTR) * dt_user ] / [ FNUMCY * 3600 ]
        ! FOUFAS is defined in RDFOUR as
        ! FOUFAS =  2 * PI * FNUMCY / [(FTMSTO - FMTSTR) ]
-       ! so FREQNT = FOUFAS * RADDEG * 3600 / DTSEC is OK
+       ! so FREQNT = FOUFAS * RADDEG * 3600 / dt_user is OK
        !
        shift = real(ftmstr,fp) * foufas
-       freqnt = foufas * raddeg * 3600.0_fp / dtsec
+       freqnt = foufas * raddeg * 3600.0_fp / dt_user
        wdt = 2.0_fp/(real(ftmsto - ftmstr,fp))
        fas_term = fv0pu - tzone * foufas * raddeg * 1800.0_fp / hdt
        do n = 1, nmaxus

@@ -351,7 +351,7 @@ subroutine flow_finalize_usertimestep(iresult)
       if (fourierWithUc()) then
          call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
-      call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, dt_user, Tzone)
+      call postpr_fourier(nint(time0/dt_user), dt_user)
    endif
 
  iresult = DFM_NOERR
@@ -586,7 +586,7 @@ character(len=255)   :: filename_fou_out
       if (fourierWithUc()) then
          call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
-      call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, refdat, dts, Tzone)
+      call postpr_fourier(nint(time0/dt_user), dts)
    endif
 end subroutine flow_finalize_single_timestep
 
@@ -16153,13 +16153,11 @@ endif
 subroutine flow_fourierinit()
 use m_fourier_analysis
 use m_transport, only: NUMCONST, ISALT, ITEMP
-use unstruc_model, only: md_foufile, md_tunit, md_fou_step, getoutputdir
+use unstruc_model, only: md_foufile, md_tunit, getoutputdir
 use unstruc_files, only : defaultFilename
 use m_flow, only: kmxd
 use m_physcoef, only: ag
-use m_flowgeom, only: gddimens, lnx
-use m_flowtimes, only: tstart_user, tstop_user, dt_user
-use m_alloc, only: aerr
+use m_flowtimes, only: tstart_user, tstop_user
 
 implicit none
 integer  :: minp, ierr
@@ -16169,7 +16167,7 @@ call fouini(minp, success, ag, md_tunit,'S')
 FouOutputFile = trim(getoutputdir()) // defaultFilename('fou')
 
 call alloc_fourier_analysis_arrays()
-call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, dt_user, md_fou_step, success)
+call reafou(minp, md_foufile, kmxd, NUMCONST, ISALT, ITEMP, tstart_user, tstop_user, success)
 call doclose(minp)
 
 end subroutine flow_fourierinit
