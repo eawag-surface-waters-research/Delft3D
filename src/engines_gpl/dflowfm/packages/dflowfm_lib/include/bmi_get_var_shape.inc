@@ -204,8 +204,6 @@
        shape(1) = 0
     case("kfs")
        shape(1) = ndx
-    case("kfst0")
-       shape(1) = ndx
     case("bare")
        shape(1) = ndx
     case("ba_mor")

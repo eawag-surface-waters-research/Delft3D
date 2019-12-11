@@ -203,90 +203,88 @@
   case(86)
      var_name = "kfs"
   case(87)
-     var_name = "kfst0"
-  case(88)
      var_name = "bare"
-  case(89)
+  case(88)
      var_name = "ba_mor"
-  case(90)
+  case(89)
      var_name = "bl"
-  case(91)
+  case(90)
      var_name = "lnx1D"
-  case(92)
+  case(91)
      var_name = "lnxi"
-  case(93)
+  case(92)
      var_name = "lnx1Db"
-  case(94)
+  case(93)
      var_name = "lnx"
-  case(95)
+  case(94)
      var_name = "ln"
-  case(96)
+  case(95)
      var_name = "lncn"
-  case(97)
+  case(96)
      var_name = "iadv"
-  case(98)
+  case(97)
      var_name = "dx"
-  case(99)
+  case(98)
      var_name = "wu"
-  case(100)
+  case(99)
      var_name = "wu_mor"
-  case(101)
+  case(100)
      var_name = "bob"
-  case(102)
+  case(101)
      var_name = "bob0"
-  case(103)
+  case(102)
      var_name = "xu"
-  case(104)
+  case(103)
      var_name = "yu"
-  case(105)
+  case(104)
      var_name = "vort"
-  case(106)
+  case(105)
      var_name = "xzw"
-  case(107)
+  case(106)
      var_name = "yzw"
-  case(108)
+  case(107)
      var_name = "xk"
-  case(109)
+  case(108)
      var_name = "yk"
-  case(110)
+  case(109)
      var_name = "zk"
-  case(111)
+  case(110)
      var_name = "kn"
-  case(112)
+  case(111)
      var_name = "numk"
-  case(113)
+  case(112)
      var_name = "zbnd1d2d1"
-  case(114)
+  case(113)
      var_name = "zbnd1d2d0"
-  case(115)
+  case(114)
      var_name = "zcrest1d2d"
-  case(116)
+  case(115)
      var_name = "edgenumbers1d2d"
-  case(117)
+  case(116)
      var_name = "kbnd1d2d"
-  case(118)
+  case(117)
      var_name = "width_1d"
-  case(119)
+  case(118)
      var_name = "qzeta_1d2d"
-  case(120)
+  case(119)
      var_name = "qlat_1d2d"
-  case(121)
+  case(120)
      var_name = "qtotal_1d2d"
-  case(122)
+  case(121)
      var_name = "is_sumvalsnd"
-  case(123)
+  case(122)
      var_name = "is_maxvalsnd"
-  case(124)
+  case(123)
      var_name = "is_dtint"
-  case(125)
+  case(124)
      var_name = "ndx2d"
-  case(126)
+  case(125)
      var_name = "ndx"
-  case(127)
+  case(126)
      var_name = "xz"
-  case(128)
+  case(127)
      var_name = "yz"
-  case(129)
+  case(128)
      var_name = "ba"
   end select
 

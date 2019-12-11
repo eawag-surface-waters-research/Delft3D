@@ -3950,7 +3950,6 @@ end module m_profiles
  integer,          allocatable     :: kcs(:)         !< node code permanent
  integer,          allocatable     :: kcsini(:)      !< node code during initialization, e.g., for initialwaterlevel1d/2d
  integer,          allocatable, target :: kfs(:)     !< [-] node code flooding {"shape": ["ndx"]}
- integer,          allocatable, target :: kfst0(:)   !< [-] node code flooding {"shape": ["ndx"]}
 
  double precision, allocatable, target :: bare(:)         !< [m2] bottom area, for rain and evaporaton {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: bai(:)         !< inv bottom area (m2), if < 0 use table in node type

@@ -202,8 +202,6 @@ select case(var_name)
     location_name = ""
   case("kfs")
     location_name = ""
-  case("kfst0")
-    location_name = ""
   case("bare")
     location_name = "face"
   case("ba_mor")

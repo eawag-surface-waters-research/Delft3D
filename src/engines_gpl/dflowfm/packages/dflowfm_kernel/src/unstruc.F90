@@ -308,7 +308,7 @@ subroutine flow_finalize_usertimestep(iresult)
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
    double precision, pointer, dimension(:,:) :: s1_ptr, ws_ptr, ucx_ptr,  ucy_ptr,  taus_ptr,bl_ptr, u1_ptr
    double precision, pointer, dimension(:,:) :: xs_ptr, ys_ptr, ucxa_ptr, ucya_ptr, ucmag_ptr, xu_ptr, yu_ptr
-   integer, pointer, dimension(:,:)          :: kfs_ptr,kfst0_ptr
+   integer, pointer, dimension(:,:)          :: kfs_ptr
    double precision, pointer, dimension(:,:,:) :: const_ptr
    character(len=255) :: filename_fou_out
 
@@ -10457,7 +10457,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  !> Initializes the entire current model (geometry, boundaries, initial state)
  !! @return Error status: error (/=0) or not (0)
  integer function flow_modelinit() result(iresult)                     ! initialise flowmodel
- use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx, kfs, kfst0
+ use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx, kfs
  use waq,           only: reset_waq
  use m_flow,        only: zws, zws0, kmx, jasecflow, lnkx
  use m_flowtimes
@@ -10660,11 +10660,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  endif
  call klok(cpu_extra(2,11)) ! End bedform
 
- !! Initialise Fourier Analysis
- !if (len_trim(md_foufile)>0) then
- !   call flow_fourierinit()
- !endif
- !
  call klok(cpu_extra(1,12)) ! vertical administration
  if (jampi == 1) then
 !   update vertical administration
@@ -10831,7 +10826,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  ! Initialise Fourier Analysis
  call klok(cpu_extra(1,33)) ! Fourier init
  if (len_trim(md_foufile)>0) then
-    kfst0 = kfs                                      ! Preserve the wet/dry-state on zero time
     call flow_fourierinit()
  endif
  call klok(cpu_extra(2,33)) ! end Fourier init
@@ -22568,11 +22562,6 @@ end subroutine unc_write_shp
  
  if ( allocated (kfs) ) deallocate(kfs)
  allocate(kfs(ndx))   ;  kfs   = 0
-
- if (len_trim(md_foufile)>0) then                     ! this is only used in Fourier
-    if ( allocated (kfst0) ) deallocate(kfst0)
-    allocate(kfst0(ndx)) ;  kfst0 = 0                 ! to be overridden by the actual kfs in the first timestep of the fourier analysis window
- endif
 
  ! Reallocate circumcenters with extra space for 1D nodes, but keep existing 2D data.
  call realloc(xz , ndx)

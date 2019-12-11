@@ -289,9 +289,6 @@
   case("kfs")
      call c_f_pointer(xptr, x_1d_int_ptr, shape(kfs))
      kfs(:) = x_1d_int_ptr
-  case("kfst0")
-     call c_f_pointer(xptr, x_1d_int_ptr, shape(kfst0))
-     kfst0(:) = x_1d_int_ptr
   case("bare")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(bare))
      bare(:) = x_1d_double_ptr

@@ -372,10 +372,6 @@
 
      call c_f_pointer(xptr, x_1d_int_ptr, (/c_count(1)/))
      kfs(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_int_ptr
-  case("kfst0")
-
-     call c_f_pointer(xptr, x_1d_int_ptr, (/c_count(1)/))
-     kfst0(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_int_ptr
   case("bare")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))

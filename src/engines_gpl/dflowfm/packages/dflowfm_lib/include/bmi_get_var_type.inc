@@ -202,8 +202,6 @@ select case(var_name)
     type_name = "int"
   case("kfs")
     type_name = "int"
-  case("kfst0")
-    type_name = "int"
   case("bare")
     type_name = "double"
   case("ba_mor")

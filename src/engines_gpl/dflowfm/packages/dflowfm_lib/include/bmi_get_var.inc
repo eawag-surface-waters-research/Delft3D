@@ -202,8 +202,6 @@
      x = c_loc(ndx1db)
   case("kfs") !<  [-] node code flooding {"shape": ["ndx"]}
      x = c_loc(kfs)
-  case("kfst0") !<  [-] node code flooding {"shape": ["ndx"]}
-     x = c_loc(kfst0)
   case("bare") !<  [m2] bottom area, for rain and evaporaton {"location": "face", "shape": ["ndx"]}
      x = c_loc(bare)
   case("ba_mor") !<  [m2] morphologically active bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}

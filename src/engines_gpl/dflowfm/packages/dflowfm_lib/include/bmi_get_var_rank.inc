@@ -202,8 +202,6 @@
      rank = 0
   case("kfs")
      rank = 1
-  case("kfst0")
-     rank = 1
   case("bare")
      rank = 1
   case("ba_mor")
