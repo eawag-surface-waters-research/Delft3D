@@ -97,6 +97,8 @@
 !     calculate the temperature dependent coefficients
 !
       tmpold = temp
+      temp = min(100.0e0, max(0.0e0, tmpold))
+
       dens0  =   999.842594                       &
                 +  6.793952e-02 * temp            &
                 -  9.095290e-03 * temp**2         &
