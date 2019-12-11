@@ -82,15 +82,15 @@ module m_General_Structure
       double precision                 :: crestlength                   !< length of the crest for computing the extra resistance using bedfriction over the crest of the weir
       double precision, pointer        :: widthcenteronlink(:)          !< For each crossed flow link the the center width portion of this genstr. (sum(widthcenteronlink(1:numlink)) should equal widthcenter)
       double precision, pointer        :: gateclosedfractiononlink(:)   !< part of the link width that is closed by the gate
-      double precision, pointer        :: fu(:,:)                       !< fu(1:3,L0) contains the partial computational value for fu
-      double precision, pointer        :: ru(:,:)                       !< ru(1:3,L0) contains the partial computational value for ru
-      double precision, pointer        :: au(:,:)                       !< au(1:3,L0) contains the partial computational value for au
+      double precision, pointer        :: fu(:,:)                       !< fu(1:3,L0) contains the partial computational value for fu (under/over/between gate, respectively)
+      double precision, pointer        :: ru(:,:)                       !< ru(1:3,L0) contains the partial computational value for ru (under/over/between gate, respectively)
+      double precision, pointer        :: au(:,:)                       !< au(1:3,L0) contains the partial computational value for au (under/over/between gate, respectively)
       integer                          :: numlinks                      !< Nr of flow links that cross this generalstructure.
       logical                          :: velheight                     !< Flag indicates the use of the velocity height or not
       integer                          :: openingDirection              !< possible values GEN_SYMMETRIC, GEN_FROMLEFT, GEN_FROMRIGHT
       double precision, pointer        :: sOnCrest(:)                   !< water level on crest per link (length = numlinks)
       integer,          pointer        :: state(:,:)                    !< state(1:3,L0) contains flow state on the L0th link of the structure for General Structure, Weir and Orifice
-                                                                        !< 1: state of under gate flow, 2: state of between gate flow, 3: state of over gate flow
+                                                                        !< 1: state of under gate flow, 2: state of over gate flow, 3: state of between gate flow
                                                                         !< 0 = No Flow
                                                                         !< 1 = Free Weir Flow
                                                                         !< 2 = Drowned Weir Flow
