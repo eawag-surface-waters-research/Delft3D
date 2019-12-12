@@ -3942,7 +3942,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucy, nf90_double, iLocS, 'ucy', 'sea_water_y_velocity',      'Flow element center velocity vector, y-component', 'm s-1')
             else
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucx, nf90_double, iLocS, 'ucx', 'eastward_sea_water_velocity',      'Flow element center velocity vector, x-component', 'm s-1')
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucy, nf90_double, iLocS, 'ucy', 'northward_water_velocity',      'Flow element center velocity vector, y-component', 'm s-1')
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucy, nf90_double, iLocS, 'ucy', 'northward_sea_water_velocity',      'Flow element center velocity vector, y-component', 'm s-1')
             end if
          end if
          if (kmx > 0) then
