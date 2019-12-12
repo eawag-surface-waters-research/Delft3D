@@ -735,7 +735,7 @@ end subroutine setfouunit
 
 !> performs fourier analysis i.e. computes suma and sumb
 !! - calculates MAX or MIN value
-   subroutine fouana( ifou, nst, rarray, bl, dtw)
+   subroutine fouana( ifou, nst, rarray, bl, dtw, nfou)
    !!--declarations----------------------------------------------------------------
        use precision
        use m_d3ddimens
@@ -750,6 +750,7 @@ end subroutine setfouunit
        real(kind=fp)  , dimension(:), intent(in)            :: rarray !<  Array for fourier analysis
        real(kind=fp)                , intent(in)            :: dtw    !<  weight for time step
        real(kind=prec), dimension(:), intent(in)            :: bl
+       integer                      , intent(inout)         :: nfou   !< counter for update fou quantities
        !
        ! The following list of pointer parameters is used to point inside the gdp structure
        !
@@ -785,6 +786,7 @@ end subroutine setfouunit
        ! The name of the variable for Fourier analysis fully specified the number of elements for the fourier loop
        nmaxus = name_dependent_size(founam)
        if (nst >= ftmstr .and. nst < ftmsto) then
+          nfou = nfou + 1
           select case (gdfourier%fouelp(ifou))
           case ('x')
              !
@@ -1033,6 +1035,7 @@ end subroutine setfouunit
     use m_transport, only : constituents
     use m_flowgeom, only : bl, lnx
     use m_flow
+    use m_flowtimes, only : time0
     implicit none
 
     real(kind=fp)     , intent(in) :: dts       !< Internal time step [seconds]
@@ -1046,8 +1049,10 @@ end subroutine setfouunit
     integer                                  :: ifou
     integer                                  :: ierr
     integer                                  :: n
+    integer                                  :: nfou   !< counter for update fou quantities
     integer                        , pointer :: fouwrt
     character(len=16), dimension(:), pointer :: founam
+    character(len=20)                        :: cnum, cquant
     double precision, pointer                :: fieldptr1(:)
     double precision, allocatable, target    :: wmag(:)  !< [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
     real(kind=fp)                            :: dtw
@@ -1070,6 +1075,7 @@ end subroutine setfouunit
     endif
 
     if (nofou > 0) then
+       nfou = 0
        ifou = 1
        do
           if (ifou > nofou) exit
@@ -1104,10 +1110,18 @@ end subroutine setfouunit
           case default
              continue         ! Unknown FourierVariable exception
           end select
-          call fouana(ifou, nst, fieldptr1, bl, dtw)
+          call fouana(ifou, nst, fieldptr1, bl, dtw, nfou)
           ifou = ifou + 1
        enddo
+
        if (allocated(wmag)) deallocate(wmag)
+
+       if (nfou > 0) then
+          write(cnum,*) real(time0)
+          cquant = merge('quantities', 'quantity  ', nfou > 1)
+          write(msgbuf,'(a,i0,4a)') 'Updated ', nfou, ' Fourier ', trim(cquant), ' for t = ', adjustl(cnum)
+          call dbg_flush
+       endif
        !
        ! Write results of fourier analysis to data file
        ! only once when all fourier periods are complete
