@@ -319,6 +319,7 @@
       character*20,parameter   :: ctau = 'tau'
       character*20,parameter   :: cvelocity = 'velocity'
       character*20,parameter   :: csalinity = 'salinity'
+      character*20,parameter   :: ctemperatureflow = 'tempflow'
       character*20,parameter   :: ctemperature = 'temp'
       character*20,parameter   :: cwind = 'vwind'
       character*20,parameter   :: cwinddir = 'winddir'
@@ -408,18 +409,30 @@
          endif
       end if
       
-      call zoekns(ctemperature,nocons,coname_sub,20,icon)
+      call zoekns(ctemperatureflow,nocons,coname_sub,20,icon)
       isftem = 0
       if ( jatem.ge.1 ) then
          if (icon>0) then
             nosfun = nosfun+1
             isftem = nosfun
-            call realloc(sfunname, nosfun, keepExisting=.true., fill='temp')
-            call mess(LEVEL_INFO, '''temperature'' connected as ''temp''')
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='tempflow')
+            call mess(LEVEL_INFO, '''temperature'' connected as ''tempflow''')
          else
-            call mess(LEVEL_INFO, '''temperature'' not connected, because ''temp'' is not in the sub-file.')
+            call zoekns(ctemperature,nocons,coname_sub,20,icon)
+            if (icon>0) then
+               nosfun = nosfun+1
+               isftem = nosfun
+               call realloc(sfunname, nosfun, keepExisting=.true., fill='temp')
+               call mess(LEVEL_INFO, '''temperature'' connected as ''temp''')
+            else
+               call mess(LEVEL_INFO, '''temperature'' not connected, because ''tempflow'' or ''temp'' are not in the sub-file.')
+            endif
          end if
       else
+         if (icon>0) then
+            call mess(LEVEL_INFO, '''tempflow'' is the sub-file but ''temperature'' is not in the hydrodynamic model.')
+         endif
+         call zoekns(ctemperature,nocons,coname_sub,20,icon)
          if (icon>0) then
             call mess(LEVEL_INFO, '''temp'' is the sub-file but ''temperature'' is not in the hydrodynamic model.')
          endif
