@@ -2419,6 +2419,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/burial.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/calchz.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/calsed.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/caltau.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/caltem.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/calwav.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/cascad.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/clcrad.f -text

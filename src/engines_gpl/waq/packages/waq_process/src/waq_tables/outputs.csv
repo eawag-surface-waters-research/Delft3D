@@ -3943,3 +3943,4 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_G5 ","G5_DoSpawn",  22,"x",1
 "IM_Floceq ","SPMratioem",   1,"x",1
 "AttribOut ","Attribute ",   1,"x",1
+"CalTemp   ","Temp      ",   1,"x",1

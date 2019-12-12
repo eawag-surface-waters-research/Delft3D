@@ -687,3 +687,4 @@ procid,procco,procfo,procnm
 "Decay3    ",123,"DECTRA    ","Decay of decayable tracer 3                       "
 "Decay4    ",123,"DECTRA    ","Decay of decayable tracer 4                       "
 "Decay5    ",123,"DECTRA    ","Decay of decayable tracer 5                       "
+"CalTemp   ",123,"CALTEM    ","Calculation of temperature                        "
