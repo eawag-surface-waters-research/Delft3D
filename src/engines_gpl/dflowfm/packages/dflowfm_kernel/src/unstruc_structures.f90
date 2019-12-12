@@ -425,13 +425,15 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
       k2 = ln(2,L)
 
       genstr => network%sts%struct(istru)%generalst
-      valstruct(17) = valstruct(17) + get_discharge_through_gate_opening(genstr, L0, s1(k1), s1(k2))*dir
-      valstruct(18) = valstruct(18) + get_discharge_over_gate(genstr, L0, s1(k1), s1(k2))*dir
-      valstruct(19) = valstruct(19) + get_discharge_under_gate(genstr, L0, s1(k1), s1(k2))*dir
+      if (hu(L) > 0) then
+         valstruct(17) = valstruct(17) + get_discharge_through_gate_opening(genstr, L0, s1(k1), s1(k2))*dir
+         valstruct(18) = valstruct(18) + get_discharge_over_gate(genstr, L0, s1(k1), s1(k2))*dir
+         valstruct(19) = valstruct(19) + get_discharge_under_gate(genstr, L0, s1(k1), s1(k2))*dir
       
-      valstruct(20) = valstruct(20) + genstr%au(3,L0) ! flow area through gate opening
-      valstruct(21) = valstruct(21) + genstr%au(2,L0) ! flow area over gate
-      valstruct(22) = valstruct(22) + genstr%au(1,L0) ! flow area under gate
+         valstruct(20) = valstruct(20) + genstr%au(3,L0) ! flow area through gate opening
+         valstruct(21) = valstruct(21) + genstr%au(2,L0) ! flow area over gate
+         valstruct(22) = valstruct(22) + genstr%au(1,L0) ! flow area under gate
+      end if
    end if
    
    ! 3. More specific values that apply to bridge

@@ -1411,7 +1411,6 @@ if(q /= 0) then
  use m_partitioninfo
  use m_timer
  use unstruc_display, only: jaGUI
- use unstruc_channel_flow
  
  implicit none
 
@@ -1457,7 +1456,6 @@ if(q /= 0) then
                  do LL  = 1, nd(n)%lnx
                     L   = iabs(nd(n)%ln(LL))
                     hu(L) = 0d0
-                    call reset_fu_ru_for_structure_link(L, network%adm%lin2str, network%sts%struct)
                  enddo
 
               else if (jposhchk == 4 .or. jposhchk == 5) then    ! reduce links au
@@ -38365,6 +38363,7 @@ subroutine reallocsrc(n)
              q1(L) = au(L)*( teta(L)*u1(L) + (1d0-teta(L))*u0(L) )
              qa(L) = au(L)*u1(L)
           else
+             call reset_fu_ru_for_structure_link(L, network%adm%lin2str, network%sts%struct)
              u1(L) = 0d0
              q1(L) = 0d0
              qa(L) = 0d0
