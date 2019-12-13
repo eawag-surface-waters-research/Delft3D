@@ -539,12 +539,12 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         // write dimensions
 
                         nc_def_dim(ncid, "strlen", 256, &thisCoupler->logger->netcdfReferences->strlenDim);
-                        nc_def_dim(ncid, "time", NC_UNLIMITED, &thisCoupler->logger->netcdfReferences->timeDim);
+                        nc_def_dim(ncid, "time_offset", NC_UNLIMITED, &thisCoupler->logger->netcdfReferences->timeDim);
 
-                        nc_def_var(ncid, "time", NC_DOUBLE, 1, &thisCoupler->logger->netcdfReferences->timeDim, &thisCoupler->logger->netcdfReferences->timeVar);
-                        const char longnametime[] = "time";
+                        nc_def_var(ncid, "time_offset", NC_DOUBLE, 1, &thisCoupler->logger->netcdfReferences->timeDim, &thisCoupler->logger->netcdfReferences->timeVar);
+                        const char longnametime[] = "seconds since simulation reference date, T00:00:00";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "long_name", sizeof(longnametime), longnametime);
-                        const char units[] = "seconds since 1980-01-01T00:00:00"; // TODO: Get simulation reference time from one of the kernels
+                        const char units[] = "seconds";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "units", sizeof(units), units);
                         const char axis[] = "T";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "axis", sizeof(axis), axis);
@@ -754,7 +754,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             log->Write (DEBUG, my_rank, "%10.1f:    %s.communicate", *currentTime, thisCoupler->name);
 
                             // log netcdf time variable
-                            int timeIndexCounter = static_cast<int>(floor(*currentTime / tStep));
+                            int timeIndexCounter = static_cast<int>(floor((*currentTime - cb->subBlocks[cb->masterSubBlockId].tStart) / tStep));
                             if (thisCoupler->logger != NULL) {
                                 string fileName = thisCoupler->logger->GetLoggerFilename(dimrWorkingDirectory, dirSeparator); 
 
