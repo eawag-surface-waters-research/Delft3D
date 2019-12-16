@@ -124,6 +124,7 @@ contains
       if ( n <= 0) then
          ! no cross section defined on L
          conv = 45d0* flowarea_sub(1) * sqrt(flowarea_sub(1) / perim_sub(1))
+         cz = 45d0
          return
       else
          ! for YZ profiles CalcCSParsFlow computes the conveyance
