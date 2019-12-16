@@ -63,7 +63,7 @@
          if (sdmix(k) .lt. 0.0) then
             sdmixn(k) = 1.0d0 + sdmix(k)
             dmix(k) = dabs(sdmix(k)) * dep
-            idrem = 1
+            idrem = idump
          else
             sdmixn(k) = 0.0d0
          end if
