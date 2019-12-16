@@ -43054,9 +43054,6 @@ end if
                 hdx = 0.5d0*dx(L)
                 if (k1 > ndx2d) bare(k1) = bare(k1) + hdx*width
                 if (k2 > ndx2d) bare(k2) = bare(k2) + hdx*width
-             else
-                bare(k1) = ba(k1)
-                bare(k2) = ba(k2)
              endif
        enddo
     endif
@@ -43067,7 +43064,7 @@ end if
        do i = 1, nstor
           k1 = stors(i)%gridPoint
           ! Add storage area to BA by using a water depth of 1000 m
-          bare(k1)   = bare(k1)   + getSurface(stors(i), bl(k1) + 1d3)
+          bare(k1)   = bare(k1)   + getSurface(stors(i), bl(k1) + 1d3) ! TODO: needs change! Don't catch rain on storage area, only on manhole area.
        enddo
     endif
 
