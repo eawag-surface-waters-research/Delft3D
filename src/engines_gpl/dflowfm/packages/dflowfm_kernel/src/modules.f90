@@ -3983,6 +3983,8 @@ end module m_profiles
  double precision, allocatable, target :: wu(:)      !< [m] link initial width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable, target :: wu_mor(:)      !< [m] morphologically active width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: wui   (:)      !< inverse link initial width (m), if < 0 pointer to convtab
+ double precision, allocatable, target :: wu1D2D(:)      !< [m] Custom input for 1D2D link widths. {"location": "edge", "shape": ["lnx1D"]}
+ double precision, allocatable, target :: hh1D2D(:)      !< [m] Custom input for 1D2D link height. {"location": "edge", "shape": ["lnx1D"]}
  double precision, allocatable     :: prof1D (:,:)   !< dim = (3,lnx1D) 1= 1D prof width, 2=1D profile height, 3=proftyp, or: if 1,2< 0, pointers to prof 1,2, then 3=alfa1
  integer,          allocatable     :: jaduiktmp(:)  !< temparr
  double precision, allocatable, target     :: bob   (:,:)    !< [m] left and right inside lowerside tube (binnenkant onderkant buis) HEIGHT values (m) (positive upward), adjusted for structures {"location": "edge", "shape": [2, "lnx"]}
@@ -4095,7 +4097,7 @@ double precision, allocatable      :: thindam(:,:)
  integer         , allocatable     :: nban  (:,:)   !< base area pointers to banf, 1,* = netnode number, 2,* = flow node number, 3,* = link number
  integer                           :: mxban         !< max dim of ban
 
-
+ ! 1D2D link properties
  ! useful parameters :
  double precision                  :: rrtol            !< relative cellsize factor in search tolerance ()
  double precision, allocatable     :: xyen(:,:)        !< temp boundary opposite point (end of EdgeNormal) (replaces ebtol tolerance)

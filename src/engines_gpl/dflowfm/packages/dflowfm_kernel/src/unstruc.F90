@@ -22309,6 +22309,191 @@ end subroutine unc_write_shp
 
  end subroutine checkcellfile
 
+   
+   !> Reads custom parameters for 1D2D links from a *.ini file,
+   !! and assigns them to the correct flow links.
+   subroutine load1D2DLinkFile(filename)
+      use m_missing, only: dmiss
+      use string_module, only: strcmpi
+      use m_flowgeom, only: lnx1d, kcu, wu1D2D, hh1D2D, xz, yz, ndx, ln, lnx, lnx1D
+      use m_inquire_flowgeom
+      use properties
+      use unstruc_messages
+      use timespace
+      use unstruc_model, only: File1D2DLinkMajorVersion, File1D2DLinkMinorVersion      
+
+      implicit none
+
+      character(len=*), intent(in)    :: filename !< Name of *.ini file containing 1D2D link parameters.
+
+      integer, external :: linkTypeToInt
+
+      type(tree_data), pointer :: md_ptr 
+      type(tree_data), pointer :: node_ptr
+      integer                  :: istat
+      integer                  :: numblocks
+      integer                  :: i
+                            
+      character(len=IdLen)     :: contactId
+      character(len=IdLen)     :: contactType
+      integer                  :: icontactType
+                            
+      logical :: success       
+      integer                  :: major, minor, ierr
+      integer                  :: numcoordinates
+      double precision, allocatable :: xcoordinates(:), ycoordinates(:)
+      integer                  :: loc_spec_type
+
+      integer                  :: numcontactblocks, numok
+      character(len=IdLen)     :: buf
+      integer, allocatable     :: ke1d2dprops(:)
+      integer                  :: num1d2dprops
+      integer                  :: LL, Lf
+      double precision         :: wu1D2Dread, hh1D2Dread
+
+      call tree_create(trim(filename), md_ptr)
+      call prop_file('ini',trim(filename),md_ptr, istat)
+      
+      ! check FileVersion
+      ierr = 0
+      major = 0
+      minor = 0
+      call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
+      if (.not. success .or. major < File1D2DLinkMajorVersion) then
+         write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of 1D2DLinkFile detected in '''//trim(filename)//''': v', major, minor, '. Current format: v',File1D2DLinkMajorVersion,File1D2DLinkMinorVersion,'. Ignoring this file.'
+         call warn_flush()
+         ierr = 1
+      end if
+      
+      if (ierr /= 0) then
+         goto 999
+      end if
+
+      allocate(ke1d2dprops(lnx1D))
+
+      numblocks = 0
+      if (associated(md_ptr%child_nodes)) then
+         numblocks = size(md_ptr%child_nodes)
+      end if
+
+      numcontactblocks = 0
+      numok = 0
+      do i = 1, numblocks
+         node_ptr => md_ptr%child_nodes(i)%node_ptr
+
+         if (strcmpi(tree_get_name(node_ptr), 'MeshContactParams')) then
+            numcontactblocks = numcontactblocks + 1
+
+            ! Read Data
+            contactType = 'all'
+            call prop_get_string(node_ptr, '', 'contactType', contactType, success)
+            icontactType = linkTypeToInt(contactType)
+            if (icontactType == 0) then
+               write (msgbuf, '(a,i0,a)') 'Error reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
+                                             trim(filename)//'''. Invalid contactType '''//trim(contactType)//''' given.'
+               call err_flush()
+               success = .false.
+               cycle
+            end if
+
+            if (success) then
+               call prop_get_string(node_ptr, '', 'contactId', contactID, success)
+               if (success) then ! the contact is defined by contactId
+                  loc_spec_type = LOCTP_UNKNOWN ! TODO: AVD: LOCTP_CONTACT_ID
+               else ! the contact is defined by x, y coordinates and contactType
+                  call prop_get(node_ptr, '', 'numCoordinates',   numcoordinates, success)
+                  if (success .and. numcoordinates > 0) then
+                     allocate(xcoordinates(numcoordinates), stat=ierr)
+                     allocate(ycoordinates(numcoordinates), stat=ierr)
+                     call prop_get_doubles(node_ptr, '', 'xCoordinates',     xcoordinates, numcoordinates, success)
+                     if (success) then
+                        call prop_get_doubles(node_ptr, '', 'yCoordinates',     ycoordinates, numcoordinates, success)
+                     end if
+                     if (success) then
+                        loc_spec_type = LOCTP_POLYGON_XY
+                     end if
+                  end if
+
+               end if
+               num1d2dprops = 0
+               call selectelset_internal_links( xz, yz, ndx, ln, lnx, ke1d2dprops(1:lnx1D), num1d2dprops, &
+                                                loc_spec_type, nump = numcoordinates, xpin = xcoordinates, ypin = ycoordinates, &
+                                                linktype = icontactType)
+
+               
+               select case (icontactType)
+               case (IFLTP_1D2D_STREET)
+                  call prop_get(node_ptr, '', 'openingWidth',  wu1D2Dread, success)
+                  if (.not. success) then
+                     write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
+                                                 trim(filename)//'''. No openingWidth specified.'
+                     call err_flush()
+                     cycle
+                  end if
+
+                  call prop_get(node_ptr, '', 'openingHeight', hh1D2Dread, success)
+                  if (.not. success) then
+                     write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
+                                                 trim(filename)//'''. No openingHeight specified.'
+                     call err_flush()
+                     cycle
+                  end if
+               end select
+
+               do LL=1,num1d2dprops
+                  Lf = ke1d2dprops(LL)
+                  wu1D2D(Lf) = wu1D2Dread
+                  hh1D2D(Lf) = hh1D2Dread
+               end do
+
+               if (.not. success) then
+                  write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
+                                              trim(filename)//'''. No contactId or coordinates specified.'
+                  call err_flush()
+                  cycle
+               end if
+            end if
+            numok = numok + 1
+         endif
+      end do
+      
+      write(msgbuf,'(i0,a,i0,2a)') numok, ' of ', numcontactblocks, ' mesh contact parameter blocks have been read from file ', trim(filename)
+      call msg_flush()
+      
+   999   continue
+      call tree_destroy(md_ptr)
+
+   end subroutine load1D2DLinkFile
+
+
+   !> Parses a link type/mesh contact's type string into an integer
+   !! that can be used to compare agains kn(3,:) codes.
+   !!
+   !! Currently supported names: internal, lateral, embedded, longitudinal, streetInlet, roofGutterPipe, all.
+   function linkTypeToInt(linkTypeString) result (res)
+   use string_module, only: str_tolower
+   use m_inquire_flowgeom
+      character(len=*), intent(in) :: linkTypeString  !< Type value as given in input file.
+      integer                      :: res             !< The returned link type integer code. (3/4/5/7).
+
+      select case(str_tolower(trim(linkTypeString)))
+      case('internal', 'lateral', 'embedded')
+         res = IFLTP_1D2D_INT
+      case('longitudinal')
+         res = IFLTP_1D2D_LONG
+      case('streetinlet')
+         res = IFLTP_1D2D_STREET
+      case('roofgutterpipe')
+         res = IFLTP_1D2D_ROOF
+      case('all') ! Special type to support selecting any link type
+         res = IFLTP_ALL
+      case default
+         res = 0
+      end select
+      
+   end function linkTypeToInt
+
+
  subroutine flow_geominit(iphase)                          ! initialise flow geometry
  use m_netw
  use m_flowgeom
@@ -22719,6 +22904,10 @@ end subroutine unc_write_shp
  call aerr( 'wu_mor (  lnx)', ierr, lnx )
  allocate (  wui  (  lnx) , stat=ierr )
  call aerr( 'wui  (  lnx)', ierr, lnx )
+ allocate (  wu1D2D(lnx1D) , stat=ierr )
+ call aerr( 'wu1D2D(lnx1D)', ierr, lnx1D )
+ allocate (  hh1D2D(lnx1D) , stat=ierr )
+ call aerr( 'hh1D2D(lnx1D)', ierr, lnx1D )
  allocate (  kcu  (  lnx) , stat=ierr ); kcu = 0
  call aerr( 'kcu  (  lnx)', ierr, lnx )
  allocate (  csu  (  lnx) , stat=ierr )
@@ -23017,30 +23206,40 @@ end subroutine unc_write_shp
 
  call setbedlevelfromextfile()                     ! set bl bathymetry if specified through file, so ibedlevtype must be 1
 
- IF (ALLOCATED (prof1D) ) deallocate( prof1D)
- allocate  ( prof1D(3,lnx1D) , stat= ierr)
- call aerr ('prof1D(3,lnx1D)', ierr, 2*lnx1D)
+ ! Default parameters for 1D2D links
  do L = 1,lnx1D
-    if (kcu(L) == 5) then             !  restricting dimensions of streetinlet
-       prof1D(1,L) = wu1Duni5          !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
-       prof1D(2,L) = hh1Duni5          !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
-       prof1D(3,L) = iproftypuni5      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
-    else if (kcu(L) == 7) then        !  restricting dimensions of roofgutterpipe
-       prof1D(1,L) = wu1Duni7          !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
-       prof1D(2,L) = hh1Duni7          !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
-       prof1D(3,L) = iproftypuni7      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
+    if (kcu(L) == 5) then
+       wu1D2D(L) = wu1Duni5
+       hh1D2D(L) = hh1Duni5
+    else if (kcu(L) == 7) then
+       wu1D2D(L) = wu1Duni7
+       hh1D2D(L) = hh1Duni7
     else
-       prof1D(1,L) = wu1Duni           !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
-       prof1D(2,L) = hh1Duni           !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
-       prof1D(3,L) = iproftypuni       !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
+       wu1D2D(L) = wu1Duni
+       hh1D2D(L) = hh1Duni
     endif
- enddo
+ end do
 
  ! Custom parameters for 1D2D links
  if (len_trim(md_1d2dlinkfile) > 0) then
     call load1D2DLinkFile(md_1d2dlinkfile)
  end if
     
+ IF (ALLOCATED (prof1D) ) deallocate( prof1D)
+ allocate  ( prof1D(3,lnx1D) , stat= ierr)
+ call aerr ('prof1D(3,lnx1D)', ierr, 2*lnx1D)
+ do L = 1,lnx1D
+    prof1D(1,L) = wu1D2D(L)           !  prof1d(1,*) > 0 : width   or prof1d(1,*) < 0 : ka ref
+    prof1D(2,L) = hh1D2D(L)           !  prof1d(2,*) > 0 : height  or prof1d(2,*) < 0 : kb ref
+    if (kcu(L) == 5) then             !  restricting dimensions of streetinlet
+       prof1D(3,L) = iproftypuni5      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
+    else if (kcu(L) == 7) then        !  restricting dimensions of roofgutterpipe
+       prof1D(3,L) = iproftypuni7      !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
+    else
+       prof1D(3,L) = iproftypuni       !  prof1d(3,*) > 0 : ityp    or prof1d(3,*) < 0 : alfa tussen a en b .
+    endif
+ enddo
+
  IF (ALLOCATED (Lbnd1D) ) deallocate( Lbnd1D)
  allocate  ( Lbnd1D(lnxi+1:lnx) , stat= ierr) ;  Lbnd1D = 0
  call aerr ('Lbnd1D(lnxi+1:lnx)', ierr, lnx-lnxi+1)
@@ -42011,7 +42210,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'gateloweredgelevel' ) then
 
-           call selectelset_internal_links(xz, yz, ndx, ln, lnx, keg(ngate+1:numl), numg, LOCTP_POLYGON_FILE, filename)
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx, keg(ngate+1:numl), numg, LOCTP_POLYLINE_FILE, filename)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numg, ' nr of gate links' ; call msg_flush()
 
@@ -42024,7 +42223,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'damlevel' ) then
 
-           call selectelset_internal_links(xz, yz, ndx, ln, lnx, ked(ncdam+1:numl), numd, LOCTP_POLYGON_FILE, filename)
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx, ked(ncdam+1:numl), numd, LOCTP_POLYLINE_FILE, filename)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numd, ' nr of dam level cells' ; call msg_flush()
 
@@ -42037,7 +42236,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'generalstructure' ) then
 
-           call selectelset_internal_links(xz, yz, ndx, ln, lnx, kegen(ncgen+1:numl), numgen, LOCTP_POLYGON_FILE, filename, sortLinks = 1)
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx, kegen(ncgen+1:numl), numgen, LOCTP_POLYLINE_FILE, filename, sortLinks = 1)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numgen, ' nr of general structure cells' ; call msg_flush()
 
@@ -42050,9 +42249,9 @@ if (mext > 0) then
         else if (jaoldstr > 0 .and. (qid == 'pump1D' .or. qid == 'pump') ) then
 
            if (qid == 'pump1D') then
-              call selectelset_internal_links(xz, yz, ndx, ln, lnx1D, kep(npump+1:numl), npum, LOCTP_POLYGON_FILE, filename, linktype = IFLTP_1D, sortLinks = 1)
+              call selectelset_internal_links(xz, yz, ndx, ln, lnx1D, kep(npump+1:numl), npum, LOCTP_POLYLINE_FILE, filename, linktype = IFLTP_1D, sortLinks = 1)
            else
-              call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYGON_FILE, filename, linktype = IFLTP_ALL, sortLinks = 1)
+              call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYLINE_FILE, filename, linktype = IFLTP_ALL, sortLinks = 1)
            endif
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , npum, ' nr of pump links' ; call msg_flush()
@@ -42066,7 +42265,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'checkvalve' ) then
 
-           call selectelset_internal_links(xz, yz, ndx, ln, lnx, keklep(nklep+1:numl), numklep, LOCTP_POLYGON_FILE, filename)
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx, keklep(nklep+1:numl), numklep, LOCTP_POLYLINE_FILE, filename)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numklep, ' nr of checkvalves ' ; call msg_flush()
 
@@ -42075,7 +42274,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'valve1D' ) then
 
-           call selectelset_internal_links(xz, yz, ndx, ln, lnx1D, kevalv(nvalv+1:numl), numvalv, LOCTP_POLYGON_FILE, filename, linktype = IFLTP_1D )
+           call selectelset_internal_links(xz, yz, ndx, ln, lnx1D, kevalv(nvalv+1:numl), numvalv, LOCTP_POLYLINE_FILE, filename, linktype = IFLTP_1D )
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numvalv, ' nr of valves ' ; call msg_flush()
 

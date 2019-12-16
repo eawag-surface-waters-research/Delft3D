@@ -72,8 +72,10 @@ module timespace_parameters
   integer, parameter :: LOCTP_UNKNOWN                  = -1 !< Undefined location specification type.
   integer, parameter :: LOCTP_POLYGON_FILE             = 10 !< A polygon input file used for inside-polygon check.
   integer, parameter :: LOCTP_POLYGON_XY               = 11 !< x/y arrays containing a polygon used for inside-polygon check.
-  integer, parameter :: LOCTP_BRANCHID_CHAINAGE        = 12 !< branchid+chainage combination to select the 1D grid point closest to that network branch location.
-  integer, parameter :: LOCTP_NODEID                   = 13 !< nodeid to select the 1D grid point closest to the network point with that nodeId.
+  integer, parameter :: LOCTP_POLYLINE_FILE            = 12 !< A polyline input file used for link-crosses-polyline check.
+  integer, parameter :: LOCTP_POLYLINE_XY              = 13 !< x/y arrays containing a polyline used for link-crosses-polyline check.
+  integer, parameter :: LOCTP_BRANCHID_CHAINAGE        = 14 !< branchid+chainage combination to select the 1D grid point closest to that network branch location.
+  integer, parameter :: LOCTP_NODEID                   = 15 !< nodeid to select the 1D grid point closest to the network point with that nodeId.
 
   integer            :: mdia                           =  0 !  -1  ! -1 = write dia, 0 = do not write dia
 
@@ -5693,13 +5695,20 @@ contains
    !
    !
    ! ==========================================================================
-   !> 
+   !> Selects a subset of flow links that match certain geometrical input.
+   !! Possible geometrical inputs are:
+   !! * polylines: all flow links intersecting these polylines are selected.
+   !! * polygons:  all flow links whose center lies inside these polygons are selected.
+   !! * branchid+chainage: the one flow link on this location is selected.
+   !! Only one of these methods is tried, based on loc_spec_type input.
    subroutine selectelset_internal_links( xz, yz, nx, ln, lnx, keg, numg, &
                                           loc_spec_type, loc_file, nump, xpin, ypin, branchindex, chainage, linktype, &
                                           xps, yps, nps, lftopol, sortLinks)
      use m_inquire_flowgeom
+     use m_flowgeom, only: lnx1D, xu, yu, kcu
      use dfm_error
      use messageHandling
+     use m_polygon
      use sorting_algorithms, only: sort
      
      implicit none
@@ -5713,25 +5722,23 @@ contains
      integer                   , intent(  out) :: keg(:)      !< Output array containing the flow link numbers that were selected.
                                                               !< Size of array is responsability of call site, and filling starts at index 1 upon each call.
      integer                   , intent(  out) :: numg        !< Number of flow links that were selected (i.e., keg(1:numg) will be filled).
-     integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: LOCTP_POLYGON_FILE, LOCTP_POLYGON_XY or LOCTP_BRANCHID_CHAINAGE.
+     integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: LOCTP_POLYGON_FILE, LOCTP_POLYLINE_FILE, LOCTP_POLYGON_XY , LOCTP_POLYLINE_XY or LOCTP_BRANCHID_CHAINAGE.
      character(len=*), optional, intent(in   ) :: loc_file    !< (Optional) File name of a polyline file (when loc_spec_type==LOCTP_POLYGON_FILE).
-     integer         , optional, intent(in   ) :: nump        !< (Optional) Number of points in polyline coordinate arrays xpin and ypin (when loc_spec_type==LOCTP_POLYGON_XY).
-     double precision, optional, intent(in   ) :: xpin(:)     !< (Optional) Array with x-coordinates of a polyline, used instead of a polyline file (when loc_spec_type==LOCTP_POLYGON_XY).
-     double precision, optional, intent(in   ) :: ypin(:)     !< (Optional) Array with y-coordinates of a polyline, used instead of a polyline file (when loc_spec_type==LOCTP_POLYGON_XY).
+     integer         , optional, intent(in   ) :: nump        !< (Optional) Number of points in polyline coordinate arrays xpin and ypin (when loc_spec_type==LOCTP_POLYGON_XY/LOCTP_POLYLINE_XY).
+     double precision, optional, intent(in   ) :: xpin(:)     !< (Optional) Array with x-coordinates of a polygon/line, used instead of a polygon/line file (when loc_spec_type==LOCTP_POLYGON_XY/LOCTP_POLYLINE_XY).
+     double precision, optional, intent(in   ) :: ypin(:)     !< (Optional) Array with y-coordinates of a polygon/line, used instead of a polygon/line file (when loc_spec_type==LOCTP_POLYGON_XY/LOCTP_POLYLINE_XY).
      integer         , optional, intent(in   ) :: branchindex !< (Optional) Branch index on which flow link is searched for (when loc_spec_type==LOCTP_BRANCHID_CHAINAGE).
      double precision, optional, intent(in   ) :: chainage    !< (Optional) Offset along specified branch (when loc_spec_type==LOCTP_BRANCHID_CHAINAGE).
      integer,          optional, intent(in   ) :: linktype    !< (Optional) Limit search to specific link types: only 1D flow links (linktype==IFLTP_1D), 2D (linktype==IFLTP_2D), or both (linktype==IFLTP_ALL).
-     double precision, allocatable, optional, intent(inout) :: xps(:), yps(:) !< (Optional) Arrays in which the read in polyline x,y-points can be stored (only relevant when loc_spec_type==LOCTP_POLYGON_FILE).
-     integer,          optional, intent(inout) :: nps         !< (Optional) Number of polyline points that have been read in (only relevant when loc_spec_type==LOCTP_POLYGON_FILE).
-     integer,          optional, intent(inout) :: lftopol(:)  !< (Optional) Mapping array from flow links to the polyline index that intersected that flow link (only relevant when loc_spec_type==LOCTP_POLYGON_FILE or LOCTP_POLYGON_XY).
+     double precision, allocatable, optional, intent(inout) :: xps(:), yps(:) !< (Optional) Arrays in which the read in polyline x,y-points can be stored (only relevant when loc_spec_type==LOCTP_POLYGON_FILE/LOCTP_POLYLINE_FILE).
+     integer,          optional, intent(inout) :: nps         !< (Optional) Number of polyline points that have been read in (only relevant when loc_spec_type==LOCTP_POLYGON_FILE/LOCTP_POLYLINE_FILE).
+     integer,          optional, intent(inout) :: lftopol(:)  !< (Optional) Mapping array from flow links to the polyline index that intersected that flow link (only relevant when loc_spec_type==LOCTP_POLYLINE_FILE or LOCTP_POLYLINE_XY).
      integer,          optional, intent(in   ) :: sortLinks   !< (Optional) Whether or not to sort the found flow links along the polyline path. (only relevant when loc_spec_type==LOCTP_POLYGON_FILE or LOCTP_POLYGON_XY).
 
-     !optional inputs/outputs
-
      !locals 
-     integer :: minp, L, k1, k2, ja, np, opts, ierr
+     integer :: minp, L, Lstart, Lend, k1, k2, ja, np, opts, ierr, inp
      double precision :: xa, ya, xb, yb,xm, ym, CRPM, dist 
-     double precision, allocatable, dimension(:) :: xp, yp, distsStartPoly, sortedDistsStartPoly
+     double precision, allocatable, dimension(:) :: distsStartPoly, sortedDistsStartPoly
      integer, allocatable, dimension(:):: sortedIndexses, tempLinkArray !< the sorted indexes
 
      integer :: linktype_
@@ -5744,20 +5751,30 @@ contains
 
      numg = 0 
      np = 0
-     call realloc(xp,100000)
-     call realloc(yp,100000)
-     if (loc_spec_type == LOCTP_POLYGON_FILE) then
-   
-    
+     if (loc_spec_type /= LOCTP_BRANCHID_CHAINAGE) then
+        ! This routine uses global xpl, ypl, because of subroutine inwhichpolygon().
+        call savepol()
+     end if
+
+     if (loc_spec_type == LOCTP_POLYLINE_FILE) then
+        ! Single polyline only
         call oldfil(minp, loc_file)
-        call read1polylin(minp,xp,yp,np)
-     else if (loc_spec_type==LOCTP_POLYGON_XY .and. present(xpin) .and. present(ypin) .and. present(nump)) then
+        call read1polylin(minp,xpl,ypl,npl)
+     elseif (loc_spec_type == LOCTP_POLYGON_FILE) then
+        ! Multiple polygons allowed
+        call oldfil(minp, loc_file)
+        call reapol(minp, 0)
+     else if ((loc_spec_type==LOCTP_POLYGON_XY .or. loc_spec_type==LOCTP_POLYLINE_XY) .and. present(xpin) .and. present(ypin) .and. present(nump)) then
         if (nump > 0) then
-           xp = xpin
-           yp = ypin
-           np = nump
+           call increasepol(nump, 0)
+           xpl = xpin
+           ypl = ypin
+           npl = nump
         end if
      else if (loc_spec_type==LOCTP_BRANCHID_CHAINAGE .and. present(branchindex) .and. present(chainage) ) then
+        !
+        ! Match by branchid
+        !
         if (branchindex > 0) then
            ierr = findlink(branchindex, chainage, L) ! NOTE: L is here assumed to be a net link number
            if (ierr==DFM_NOERR) then
@@ -5769,7 +5786,10 @@ contains
         endif
      endif
      
-     if (numg ==0) then
+     if (loc_spec_type == LOCTP_POLYLINE_FILE .or. loc_spec_type == LOCTP_POLYLINE_XY) then
+        !
+        ! Match by polyline intersection
+        !
         opts = 0
         if (present(lftopol)) then
            opts = opts+1
@@ -5781,14 +5801,49 @@ contains
         numg = 0
         select case(opts)
         case (0)
-           ierr = findlink(np, xp, yp, keg, numg, linktype = linktype_)
+           ierr = findlink(npl, xpl, ypl, keg, numg, linktype = linktype_)
         case (1)
-           ierr = findlink(np, xp, yp, keg, numg, lftopol = lftopol, linktype = linktype_)
+           ierr = findlink(npl, xpl, ypl, keg, numg, lftopol = lftopol, linktype = linktype_)
         case (2)
-           ierr = findlink(np, xp, yp, keg, numg, sortlinks = sortlinks, linktype = linktype_)
+           ierr = findlink(npl, xpl, ypl, keg, numg, sortlinks = sortlinks, linktype = linktype_)
         case (3)
-           ierr = findlink(np, xp, yp, keg, numg, lftopol, sortlinks, linktype = linktype_)
+           ierr = findlink(npl, xpl, ypl, keg, numg, lftopol, sortlinks, linktype = linktype_)
         end select
+     else if (loc_spec_type == LOCTP_POLYGON_FILE .or. loc_spec_type == LOCTP_POLYGON_XY) then
+        !
+        ! Match by inside polygon check
+        !
+
+        ! select search range for flow links
+        select case(linktype_)
+        case (IFLTP_1D, IFLTP_1D2D_INT, IFLTP_1D2D_LONG, IFLTP_1D2D_STREET, IFLTP_1D2D_ROOF)
+           Lstart = 1
+           Lend   = lnx1D
+        case (IFLTP_2D)
+           Lstart = lnx1D + 1
+           Lend   = lnx
+        case (IFLTP_ALL)
+           Lstart = 1
+           Lend   = lnx
+        end select
+
+        inp  = -1 
+        ierr = 0
+        do L  = Lstart,Lend
+           if (linktype_ /= IFLTP_ALL .and. kcu(L) /= linktype_) then
+              cycle
+           end if
+
+           !if (kc(n) > 0) then ! no kc masking for links (yet?) ! search allowed, (not allowed like closed pipes point etc) 
+           call inwhichpolygon(xu(L), yu(L), inp)
+           !end if
+  
+           if (inp > 0) then
+              numg = numg+1
+              keg(numg) = L ! Store link number
+           endif   
+        enddo   
+        call restorepol()
      endif            
      
      if (ierr /= 0) then
@@ -5797,16 +5852,20 @@ contains
         numg = 0
      endif
      
-      if(present(xps)) then
-         if(allocated(xps)) deallocate(xps)
-         if(allocated(yps)) deallocate(yps)
-         call realloc(xps,100000)
-         call realloc(yps,100000)
-         xps = xp
-         yps = yp
-         nps = np
-      endif
-      deallocate(xp,yp)
+     if (np > 0 .and. present(xps)) then
+        if(allocated(xps)) deallocate(xps)
+        if(allocated(yps)) deallocate(yps)
+        call realloc(xps,100000)
+        call realloc(yps,100000)
+        xps = xpl ! doubles a bit with xpl for polygon file
+        yps = ypl
+        nps = npl
+     endif
+
+     if (loc_spec_type /= LOCTP_BRANCHID_CHAINAGE) then
+        call restorepol()
+     end if
+
    end subroutine selectelset_internal_links
    
                                           

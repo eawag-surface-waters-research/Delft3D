@@ -54,9 +54,13 @@ module m_inquire_flowgeom
       module procedure findnode_by_branchid     !< find the flow node number, using (branch id, chainage)
    end interface
    
-   integer, public, parameter :: IFLTP_1D  = 1  !< Type code for flow links that are 1D
-   integer, public, parameter :: IFLTP_2D  = 2  !< Type code for flow links that are 2D
-   integer, public, parameter :: IFLTP_ALL = 3  !< Type code for flow links that are 1D or 2D
+   integer, public, parameter :: IFLTP_1D          = 1  !< Type code for flow links that are 1D
+   integer, public, parameter :: IFLTP_2D          = 2  !< Type code for flow links that are 2D
+   integer, public, parameter :: IFLTP_1D2D_INT    = 3  !< Type code for 1D2D flow links of type 'internal'
+   integer, public, parameter :: IFLTP_1D2D_LONG   = 4  !< Type code for 1D2D flow links of type 'longitudinal'
+   integer, public, parameter :: IFLTP_1D2D_STREET = 5  !< Type code for 1D2D flow links of type 'gully/street inlet'
+   integer, public, parameter :: IFLTP_1D2D_ROOF   = 7  !< Type code for 1D2D flow links of type 'roof/gutter pipe'
+   integer, public, parameter :: IFLTP_ALL         = 10 !< Type code for flow links that are of any type
    
 
    contains

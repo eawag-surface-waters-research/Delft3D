@@ -50,7 +50,6 @@ module m_oned_functions
    public updateVolOnGround
    public updateTotalInflow1d2d
    public updateTotalInflowLat
-   public load1D2DLinkFile
 
    type, public :: t_gridp2cs
       integer :: num_cross_sections
@@ -58,23 +57,6 @@ module m_oned_functions
    end type
 
    type(t_gridp2cs), allocatable, dimension(:) :: gridpoint2cross
-
-   !> The version number of the 1D2DFile format: d.dd, [config_major].[config_minor], e.g., 1.03
-   !!
-   !! Note: read config_minor as a 2 digit-number, i.e., 1.1 > 1.02 (since .1 === .10 > .02).
-   !! Convention for format version changes:
-   !! * if a new format is backwards compatible with old 1D2D files, only
-   !!   the minor version number is incremented.
-   !! * if a new format is not backwards compatible (i.e., old 1D2D files
-   !!   need to be converted/updated by user), then the major version number
-   !!   is incremented.
-
-   ! File1D2DLinkMajorVersion = 1.00
-   integer, parameter       :: File1D2DLinkMajorVersion = 1
-   integer, parameter       :: File1D2DLinkMinorVersion = 0
-
-   ! History File1D2DLinkVersion:
-   ! 1.00 (2019-12-04): Initial version.
 
    contains
 
@@ -1034,144 +1016,5 @@ module m_oned_functions
    end if
 
    end subroutine updateTotalInflowLat
-
-   !> Reads custom parameters for 1D2D links from a *.ini file.
-   subroutine load1D2DLinkFile(filename)
-      use m_missing, only: dmiss
-      use string_module, only: strcmpi
-      use properties
-      use unstruc_messages
-      !use timespace_parameters
-      implicit none
-
-      character(len=*), intent(in)    :: filename !< Name of *.ini file containing 1D2D link parameters.
-
-      type(tree_data), pointer :: md_ptr 
-      type(tree_data), pointer :: node_ptr
-      integer                  :: istat
-      integer                  :: numblocks
-      integer                  :: i
-                            
-      character(len=IdLen)     :: contactId
-      character(len=IdLen)     :: contactType
-      integer                  :: icontactType
-                            
-      logical :: success       
-      integer                  :: major, minor, ierr
-      integer                  :: numcoordinates
-      double precision, allocatable :: xcoordinates(:), ycoordinates(:)
-      integer                  :: loc_spec_type
-
-      integer                  :: numcontactblocks, numok
-      character(len=IdLen)     :: buf
-
-      call tree_create(trim(filename), md_ptr)
-      call prop_file('ini',trim(filename),md_ptr, istat)
-      
-      ! check FileVersion
-      ierr = 0
-      major = 0
-      minor = 0
-      call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
-      if (.not. success .or. major < File1D2DLinkMajorVersion) then
-         write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of 1D2DLinkFile detected in '''//trim(filename)//''': v', major, minor, '. Current format: v',File1D2DLinkMajorVersion,File1D2DLinkMinorVersion,'. Ignoring this file.'
-         call warn_flush()
-         ierr = 1
-      end if
-      
-      if (ierr /= 0) then
-         goto 999
-      end if
-      
-      numblocks = 0
-      if (associated(md_ptr%child_nodes)) then
-         numblocks = size(md_ptr%child_nodes)
-      end if
-
-      numcontactblocks = 0
-      numok = 0
-      do i = 1, numblocks
-         node_ptr => md_ptr%child_nodes(i)%node_ptr
-
-         if (strcmpi(tree_get_name(node_ptr), 'MeshContactParams')) then
-            numcontactblocks = numcontactblocks + 1
-
-            ! Read Data
-            contactType = 'all'
-            call prop_get_string(node_ptr, '', 'contactType', contactType, success)
-            icontactType = linkTypeToInt(contactType)
-            if (icontactType == 0) then
-               write (msgbuf, '(a,i0,a)') 'Error reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
-                                             trim(filename)//'''. Invalid contactType '''//trim(contactType)//''' given.'
-               call err_flush()
-               success = .false.
-               cycle
-            end if
-
-            if (success) then
-               call prop_get_string(node_ptr, '', 'contactId', contactID, success)
-               if (success) then ! the contact is defined by contactId
-                  loc_spec_type = -1 ! TODO: AVD: LOCTP_CONTACT_ID
-               else ! the contact is defined by x, y coordinates and contactType
-                  call prop_get(node_ptr, '', 'numCoordinates',   numcoordinates, success)
-                  if (success .and. numcoordinates > 0) then
-                     allocate(xcoordinates(numcoordinates), stat=ierr)
-                     allocate(ycoordinates(numcoordinates), stat=ierr)
-                     call prop_get_doubles(node_ptr, '', 'xCoordinates',     xcoordinates, numcoordinates, success)
-                     if (success) then
-                        call prop_get_doubles(node_ptr, '', 'yCoordinates',     ycoordinates, numcoordinates, success)
-                     end if
-                     if (success) then
-                        loc_spec_type = 11 ! LOCTP_POLYGON_XY
-                     end if
-                  end if
-
-               end if
-               
-               if (.not. success) then
-                  write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
-                                              trim(filename)//'''. No contactId or coordinates specified.'
-                  call err_flush()
-                  cycle
-               end if
-            end if
-            numok = numok + 1
-         endif
-      end do
-      
-      write(msgbuf,'(i0,a,i0,2a)') numok, ' of ', numcontactblocks, ' mesh contact parameter blocks have been read from file ', trim(filename)
-      call msg_flush()
-      
-   999   continue
-      call tree_destroy(md_ptr)
-
-   end subroutine load1D2DLinkFile
-
-
-   !> Parses a link type/mesh contact's type string into an integer
-   !! that can be used to compare agains kn(3,:) codes.
-   !!
-   !! Currently supported names: internal, lateral, embedded, longitudinal, streetInlet, roofGutterPipe, all.
-   function linkTypeToInt(linkTypeString) result (res)
-   use string_module, only: str_tolower
-      character(len=*), intent(in) :: linkTypeString  !< Type value as given in input file.
-      integer                      :: res             !< The returned link type integer code. (3/4/5/7).
-
-      select case(str_tolower(trim(linkTypeString)))
-      case('internal', 'lateral', 'embedded')
-         res = 3
-      case('longitudinal')
-         res = 4
-      case('streetInlet')
-         res = 5
-      case('roofGutterPipe')
-         res = 7
-      case('all') ! Special type to support selecting any link type
-         res = -1
-      case default
-         res = 0
-      end select
-      
-   end function linkTypeToInt
 
 end module m_oned_functions

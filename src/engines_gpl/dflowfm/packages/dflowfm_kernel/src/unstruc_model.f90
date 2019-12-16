@@ -75,6 +75,24 @@ implicit none
     ! 2.00 (2019-08-06): enabled specifying "nodeId" in a 1D network node.
 
 
+    !> The version number of the 1D2DFile format: d.dd, [config_major].[config_minor], e.g., 1.03
+    !!
+    !! Note: read config_minor as a 2 digit-number, i.e., 1.1 > 1.02 (since .1 === .10 > .02).
+    !! Convention for format version changes:
+    !! * if a new format is backwards compatible with old 1D2D files, only
+    !!   the minor version number is incremented.
+    !! * if a new format is not backwards compatible (i.e., old 1D2D files
+    !!   need to be converted/updated by user), then the major version number
+    !!   is incremented.
+    
+    ! File1D2DLinkMajorVersion = 1.00
+    integer, parameter       :: File1D2DLinkMajorVersion = 1
+    integer, parameter       :: File1D2DLinkMinorVersion = 0
+    
+    ! History File1D2DLinkVersion:
+    ! 1.00 (2019-12-04): Initial version.
+
+   
     integer, parameter :: MD_NOAUTOSTART   = 0   !< Do not autostart (nor stop) this model.
     integer, parameter :: MD_AUTOSTART     = 1   !< Autostart this model and then idle.
     integer, parameter :: MD_AUTOSTARTSTOP = 2   !< Autostart this model and then exit (batchmode)

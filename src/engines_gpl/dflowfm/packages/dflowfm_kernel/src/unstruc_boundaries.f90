@@ -2209,7 +2209,7 @@ do i=1,nstr
    case ('gateloweredgelevel')  ! Old-style controllable gateloweredgelevel
         !else if (qid == 'gateloweredgelevel' ) then
 
-      call selectelset_internal_links(xz, yz, ndx, ln, lnx, keg(ngate+1:numl), numg, LOCTP_POLYGON_FILE, plifile)
+      call selectelset_internal_links(xz, yz, ndx, ln, lnx, keg(ngate+1:numl), numg, LOCTP_POLYLINE_FILE, plifile)
       success = .true.
       WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(plifile) , numg, ' nr of gateheight links' ; call msg_flush()
 
@@ -2224,7 +2224,7 @@ do i=1,nstr
    case ('damlevel') ! Old-style controllable damlevel
       ! else if (qid == 'damlevel' ) then
 
-      call selectelset_internal_links(xz, yz, ndx, ln, lnx, ked(ncdam+1:numl), numd, LOCTP_POLYGON_FILE, plifile)
+      call selectelset_internal_links(xz, yz, ndx, ln, lnx, ked(ncdam+1:numl), numd, LOCTP_POLYLINE_FILE, plifile)
       success = .true.
       WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(plifile) , numd, ' nr of dam level cells' ; call msg_flush()
 
@@ -2242,7 +2242,7 @@ do i=1,nstr
          npum = 1
          kep(npump+1) = getLinkIndex(network%brs%branch(branchIndex), chainage)
       else
-         call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYGON_FILE, plifile)
+         call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYLINE_FILE, plifile)
       endif
       
       !endif
@@ -2258,7 +2258,7 @@ do i=1,nstr
 
    case ('dambreak')
 
-      call selectelset_internal_links(xz, yz, ndx, ln, lnx, kedb(ndambreak+1:numl), ndambr, LOCTP_POLYGON_FILE, plifile, &
+      call selectelset_internal_links(xz, yz, ndx, ln, lnx, kedb(ndambreak+1:numl), ndambr, LOCTP_POLYLINE_FILE, plifile, &
                                       xps = dambreakPolygons(i)%xp, yps = dambreakPolygons(i)%yp, nps = dambreakPolygons(i)%np, &
                                       lftopol = lftopol(ndambreak+1:numl), sortLinks = 1)
       success = .true.
@@ -2273,7 +2273,7 @@ do i=1,nstr
 
 
    case ('gate', 'weir', 'generalstructure') !< The various generalstructure-based structures
-      call selectelset_internal_links(xz, yz, ndx, ln, lnx, kegen(ncgen+1:numl), numgen, LOCTP_POLYGON_FILE, plifile, sortLinks = 1)
+      call selectelset_internal_links(xz, yz, ndx, ln, lnx, kegen(ncgen+1:numl), numgen, LOCTP_POLYLINE_FILE, plifile, sortLinks = 1)
       success = .true.
       WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(plifile) , numgen, ' nr of '//trim(strtype)//' cells' ; call msg_flush()
 
