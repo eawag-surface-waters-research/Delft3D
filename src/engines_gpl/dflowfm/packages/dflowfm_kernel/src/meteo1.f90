@@ -5736,7 +5736,7 @@ contains
      integer,          optional, intent(in   ) :: sortLinks   !< (Optional) Whether or not to sort the found flow links along the polyline path. (only relevant when loc_spec_type==LOCTP_POLYGON_FILE or LOCTP_POLYGON_XY).
 
      !locals 
-     integer :: minp, L, Lstart, Lend, k1, k2, ja, np, opts, ierr, inp
+     integer :: minp, L, Lstart, Lend, k1, k2, ja, opts, ierr, inp
      double precision :: xa, ya, xb, yb,xm, ym, CRPM, dist 
      double precision, allocatable, dimension(:) :: distsStartPoly, sortedDistsStartPoly
      integer, allocatable, dimension(:):: sortedIndexses, tempLinkArray !< the sorted indexes
@@ -5750,7 +5750,6 @@ contains
      end if
 
      numg = 0 
-     np = 0
      if (loc_spec_type /= LOCTP_BRANCHID_CHAINAGE) then
         ! This routine uses global xpl, ypl, because of subroutine inwhichpolygon().
         call savepol()
@@ -5843,7 +5842,6 @@ contains
               keg(numg) = L ! Store link number
            endif   
         enddo   
-        call restorepol()
      endif            
      
      if (ierr /= 0) then
@@ -5852,7 +5850,7 @@ contains
         numg = 0
      endif
      
-     if (np > 0 .and. present(xps)) then
+     if (npl > 0 .and. present(xps)) then
         if(allocated(xps)) deallocate(xps)
         if(allocated(yps)) deallocate(yps)
         call realloc(xps,100000)
