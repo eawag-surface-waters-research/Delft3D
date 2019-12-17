@@ -57,17 +57,17 @@ module m_fourier_analysis
        !
        ! integers
        !
-       integer :: fouwrt       ! Time to write fourier file (TEKAL/map-NetCDF)
-       integer :: nofouvar = 0 ! Number of parameters to write to NetCDF file
-       integer :: ibluc
-       integer :: iblws
+       real(kind=fp) :: fouwrt       ! Time to write fourier file
+       integer       :: nofouvar = 0 ! Number of parameters to write to NetCDF file
+       integer       :: ibluc
+       integer       :: iblws
        !
        ! pointers
        !
        integer      , dimension(:)    , pointer :: fconno  => null() !< Constituent number for Fourier analysis
        integer      , dimension(:)    , pointer :: fnumcy  => null() !< Number of cycles for fourier analysis
-       integer      , dimension(:)    , pointer :: ftmsto  => null() !< Integer time step counter stop time for fourier analysis
-       integer      , dimension(:)    , pointer :: ftmstr  => null() !< Integer time step counter start time for fourier analysis
+       real(kind=fp), dimension(:)    , pointer :: ftmsto  => null() !< stop time for fourier analysis
+       real(kind=fp), dimension(:)    , pointer :: ftmstr  => null() !< start time for fourier analysis
        integer      , dimension(:)    , pointer :: foumask => null() !< 0: no additional mask, 1: initial dry points only
        integer      , dimension(:,:)  , pointer :: idvar   => null() !< Ids of the variables in UGRID format
        integer      , dimension(:,:)  , pointer :: fouref  => null() !< Reference table: (ifou,1): fouid (line in input file)
@@ -101,6 +101,7 @@ module m_fourier_analysis
     real(kind=fp)             :: time_unit_factor
 
     real(kind=fp), parameter   :: defaultd = -999.0_fp ! Default value for doubles
+    real(kind=fp), parameter   :: tol_time = 1d-9      ! tolerance for comparing times
 
     public :: fouini
     public :: alloc_fourier_analysis_arrays
@@ -187,12 +188,12 @@ module m_fourier_analysis
           ! Initialise arrays for Fourier analysis
           gdfourier%fconno   = imissval
           gdfourier%fnumcy   = imissval
-          gdfourier%ftmsto   = imissval
-          gdfourier%ftmstr   = imissval
           gdfourier%foumask  = imissval
           gdfourier%idvar    = imissval
           gdfourier%fouref   = imissval
           !
+          gdfourier%ftmsto   = rmissval
+          gdfourier%ftmstr   = rmissval
           gdfourier%fknfac   = rmissval
           gdfourier%foufas   = rmissval
           gdfourier%fv0pu    = rmissval
@@ -236,10 +237,10 @@ module m_fourier_analysis
        integer          , dimension(:)     , pointer :: foumask
        integer          , dimension(:,:)   , pointer :: idvar
        integer          , dimension(:,:)   , pointer :: fouref
-       integer                             , pointer :: fouwrt
+       real(kind=fp)                       , pointer :: fouwrt
        integer                             , pointer :: nofouvar
-       integer          , dimension(:)     , pointer :: ftmsto
-       integer          , dimension(:)     , pointer :: ftmstr
+       real(kind=fp)    , dimension(:)     , pointer :: ftmsto
+       real(kind=fp)    , dimension(:)     , pointer :: ftmstr
        real(kind=fp)    , dimension(:)     , pointer :: fknfac
        real(kind=fp)    , dimension(:)     , pointer :: foufas
        type(fdata)      , dimension(:)     , pointer :: fousma
@@ -416,15 +417,7 @@ module m_fourier_analysis
        read (columns(2), *, err=6666) rstart
        rstart = rstart * time_unit_factor           ! convert to kernel time unit
        !
-       ftmstr(ifou) = nint(rstart/dt_user)
-       !
-       ! original code translates as : 'if abs(real(nint(rstart/dt)*dt-rstart) > (0.1_fp*dt)'         ! RL666
-       if ( mod(real(rstart,fp),real(dt_user,fp)) > 0.1_fp*dt_user) then
-          msgbuf = 'Fourier sample interval start not at an integer number of user timesteps DtUser.'
-          call warn_flush()
-          goto 6666
-       endif
-       !
+       ftmstr(ifou) = rstart
        !
        if (rstart<tstart) then
           msgbuf = 'Fourier sample interval start preceeds simulation start TStart.'
@@ -435,14 +428,7 @@ module m_fourier_analysis
        read (columns(3), *, err=6666) rstop
        rstop = rstop * time_unit_factor           ! convert to kernel time unit
        !
-       ftmsto(ifou) = nint(rstop/dt_user)
-       ! original code translates as : 'if abs(real(nint(rstop/dt)*dt-rstart) > (0.1_fp*dt)'         ! RL666
-       if ( mod(real(rstop,fp),real(dt_user,fp)) > 0.1_fp*dt_user) then
-          msgbuf = 'Fourier sample interval stop not at an integer number of user timesteps DtUser.'
-          call warn_flush()
-          goto 6666
-       endif
-       !
+       ftmsto(ifou) = rstop
        !
        if (rstop>tstop) then
           msgbuf = 'Fourier sample interval stop exceeds simulation end TStop.'
@@ -452,15 +438,11 @@ module m_fourier_analysis
        !
        ! Fouwrt catches the end of all fourier analyses
        !
-       fouwrt = max(fouwrt,(ftmsto(ifou)-1))
+       fouwrt = max(fouwrt, ftmsto(ifou))
        !
        read (columns(4), *, err=6666) fnumcy(ifou)
        !
-       if (fnumcy(ifou)==0) then
-          foufas(ifou) = 0.0_fp
-       else
-          foufas(ifou) = twopi * real(fnumcy(ifou),fp)/real(ftmsto(ifou) - ftmstr(ifou),fp)
-       endif
+       foufas(ifou) = twopi * real(fnumcy(ifou),fp) / (ftmsto(ifou) - ftmstr(ifou))
        !
        ! read nodal amplifications and phase shifts for comparison
        !       with cotidal maps
@@ -503,7 +485,7 @@ module m_fourier_analysis
           if (cdummy=='max' .or. fouelp(ifou)=='e' .or. cdummy=='min' .or. cdummy=='avg') then
              if (fnumcy(ifou)>0) then
                 fnumcy(ifou) = 0
-                foufas(ifou) = 0.
+                foufas(ifou) = 0.0_fp
              endif
              if (fouelp(ifou)=='e') then
                 select case (cdummy)
@@ -735,7 +717,7 @@ end subroutine setfouunit
 
 !> performs fourier analysis i.e. computes suma and sumb
 !! - calculates MAX or MIN value
-   subroutine fouana( ifou, nst, rarray, bl, dtw, nfou)
+   subroutine fouana( ifou, time0, rarray, bl, dtw, nfou)
    !!--declarations----------------------------------------------------------------
        use precision
        use m_d3ddimens
@@ -746,7 +728,7 @@ end subroutine setfouunit
    ! Global variables
    !
        integer                      , intent(in)            :: ifou   !<  Counter
-       integer                      , intent(in)            :: nst    !<  Time step number
+       real(kind=fp)                , intent(in)            :: time0  !<  Current time
        real(kind=fp)  , dimension(:), intent(in)            :: rarray !<  Array for fourier analysis
        real(kind=fp)                , intent(in)            :: dtw    !<  weight for time step
        real(kind=prec), dimension(:), intent(in)            :: bl
@@ -754,8 +736,8 @@ end subroutine setfouunit
        !
        ! The following list of pointer parameters is used to point inside the gdp structure
        !
-       integer                    :: ftmsto
-       integer                    :: ftmstr
+       real(kind=fp)              :: ftmsto
+       real(kind=fp)              :: ftmstr
        real(kind=fp)              :: foufas
        real(kind=fp)    , pointer :: fousma(:)
        real(kind=fp)    , pointer :: fousmb(:)
@@ -785,7 +767,7 @@ end subroutine setfouunit
        !
        ! The name of the variable for Fourier analysis fully specified the number of elements for the fourier loop
        nmaxus = name_dependent_size(founam)
-       if (nst >= ftmstr .and. nst < ftmsto) then
+       if (comparereal(time0, ftmstr, tol_time) /= -1 .and. comparereal(time0, ftmsto, tol_time) /= 1) then
           nfou = nfou + 1
           select case (gdfourier%fouelp(ifou))
           case ('x')
@@ -830,7 +812,7 @@ end subroutine setfouunit
              !
              ! Calculate total for fourier analyse
              !
-             angl = real(nst - ftmstr,fp) * foufas
+             angl = (time0  - ftmstr) * foufas
              cosangl_dtw = cos(angl) * dtw
              sinangl_dtw = sin(angl) * dtw
              do n = 1, nmaxus
@@ -1031,15 +1013,14 @@ end subroutine setfouunit
 
 !> do the actual fourier and min/max update
 !! write to file after last update
-    subroutine postpr_fourier(nst, dts)
+    subroutine postpr_fourier(time0, dts)
     use m_transport, only : constituents
     use m_flowgeom, only : bl, lnx
     use m_flow
-    use m_flowtimes, only : time0
     implicit none
 
+    real(kind=fp)     , intent(in) :: time0     !< Current time [seconds]
     real(kind=fp)     , intent(in) :: dts       !< Internal time step [seconds]
-    integer           , intent(in) :: nst       !< timestep number
 
     ! NOTE: In DELFT3D depth is used, but bl is passed (positive bottomlevel). Defined direction is different
 
@@ -1049,12 +1030,13 @@ end subroutine setfouunit
     integer                                  :: ifou
     integer                                  :: ierr
     integer                                  :: n
-    integer                                  :: nfou   !< counter for update fou quantities
-    integer                        , pointer :: fouwrt
+    real(kind=fp)                  , pointer :: fouwrt
+    integer                                  :: nfou     ! counter for updated fou quantities
     character(len=16), dimension(:), pointer :: founam
-    character(len=20)                        :: cnum, cquant
+    character(len=20)                        :: cnum     ! string to hold a number
+    character(len=20)                        :: cquant   ! 'quantity' or 'quantities'
     double precision, pointer                :: fieldptr1(:)
-    double precision, allocatable, target    :: wmag(:)  !< [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
+    double precision, allocatable, target    :: wmag(:)  ! [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
     real(kind=fp)                            :: dtw
 
     fouwrt     => gdfourier%fouwrt
@@ -1080,8 +1062,7 @@ end subroutine setfouunit
        do
           if (ifou > nofou) exit
           !
-          ! Perform fourier analysis, every timestep as long as NST value
-          ! lies in requested time interval FTMSTR and FTMSTO
+          ! Perform Fourier analysis, as long TIME0 lies in requested time interval FTMSTR and FTMSTO
           !
           ! Scalar type Fourier component
           !
@@ -1110,7 +1091,7 @@ end subroutine setfouunit
           case default
              continue         ! Unknown FourierVariable exception
           end select
-          call fouana(ifou, nst, fieldptr1, bl, dtw, nfou)
+          call fouana(ifou, time0, fieldptr1, bl, dtw, nfou)
           ifou = ifou + 1
        enddo
 
@@ -1126,7 +1107,7 @@ end subroutine setfouunit
        ! Write results of fourier analysis to data file
        ! only once when all fourier periods are complete
        !
-       if (nst == fouwrt) then
+       if (comparereal(time0, fouwrt, tol_time) /= -1) then
           if (fileids%ncid == 0) then
              call wrfou()
              !
@@ -1209,7 +1190,7 @@ end subroutine setfouunit
         ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm)
         call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
 
-        allocate(all_unc_loc(nofou))
+        call realloc(all_unc_loc, nofou)
         !
         ifou  = 1
         do ivar=1, nofouvar
@@ -1218,9 +1199,9 @@ end subroutine setfouunit
                  ifou = ifou + 1
               endif
            endif
-           freqnt = foufas(ifou)*raddeg*3600.0_fp/dt_user
-           tfastr = real(gdfourier%ftmstr(ifou),fp)*dt_user/60.0_fp
-           tfasto = real(gdfourier%ftmsto(ifou),fp)*dt_user/60.0_fp
+           freqnt = foufas(ifou)*raddeg*3600.0_fp
+           tfastr = gdfourier%ftmstr(ifou) / 60.0_fp
+           tfasto = gdfourier%ftmsto(ifou) / 60.0_fp
            !
            select case (founam(ifou))
            case ('s1')
@@ -1386,7 +1367,7 @@ end subroutine setfouunit
        use mathconsts, only : raddeg
        integer      , intent(in) :: ifou     !< Fourier counter
        integer      , intent(in) :: nmaxus   !< dimension of current quantity
-       real(kind=fp)             :: hdt      !< Half Integration time step [seconds]
+       real(kind=fp)             :: hdt      ! Half Integration time step [seconds]
        real(kind=fp)             :: freqnt   ! Frequency in degrees per hour
        real(kind=fp)             :: shift    ! Phase shift
        integer                   :: n        ! loop counter
@@ -1396,8 +1377,8 @@ end subroutine setfouunit
        real(kind=fp)             :: wdt      ! weight factor for time interval
        real(kind=fp)             :: fas_term ! term to add to phase
        integer                   :: fnumcy
-       integer                   :: ftmsto
-       integer                   :: ftmstr
+       real(kind=fp)             :: ftmsto
+       real(kind=fp)             :: ftmstr
        real(kind=fp)             :: fknfac
        real(kind=fp)             :: foufas
        real(kind=fp), pointer    :: fousma(:)
@@ -1408,8 +1389,8 @@ end subroutine setfouunit
    !
        hdt    =  0.5_fp * dt_user
        fnumcy =  gdfourier%fnumcy(ifou)
-       ftmsto =  gdfourier%ftmsto(ifou)
-       ftmstr =  gdfourier%ftmstr(ifou)
+       ftmsto =  gdfourier%ftmsto(ifou) / dt_user
+       ftmstr =  gdfourier%ftmstr(ifou) / dt_user
        fknfac =  gdfourier%fknfac(ifou)
        foufas =  gdfourier%foufas(ifou)
        fousma => gdfourier%fousma(ifou)%rdata
@@ -1419,15 +1400,15 @@ end subroutine setfouunit
        ! Initialize local variables
        !
        ! Frequention := 360 degree / period
-       ! where period = [ (FTMSTO - FMTSTR) * dt_user ] / [ FNUMCY * 3600 ]
+       ! where period = [ (FTMSTO - FMTSTR) ] / [ FNUMCY * 3600 ]
        ! FOUFAS is defined in RDFOUR as
        ! FOUFAS =  2 * PI * FNUMCY / [(FTMSTO - FMTSTR) ]
-       ! so FREQNT = FOUFAS * RADDEG * 3600 / dt_user is OK
+       ! so FREQNT = FOUFAS * RADDEG * 3600 is OK
        !
-       shift = real(ftmstr,fp) * foufas
-       freqnt = foufas * raddeg * 3600.0_fp / dt_user
-       wdt = 2.0_fp/(real(ftmsto - ftmstr,fp))
-       fas_term = fv0pu - tzone * foufas * raddeg * 1800.0_fp / hdt
+       shift = ftmstr * foufas
+       freqnt = foufas * raddeg * 3600.0_fp
+       wdt = 2.0_fp/(ftmsto - ftmstr)
+       fas_term = fv0pu - tzone * freqnt
        do n = 1, nmaxus
           ltest = (fousma(n) == 0.0_fp .and. fousmb(n) == 0.0_fp)
           !
@@ -1446,7 +1427,7 @@ end subroutine setfouunit
              ! Timezone correction added timezone*phase [degrees/hr].
              ! foufas       is in [rad/timestep]
              ! halftimestep is in [sec/timestep]
-             ! => timezonecorr = tzone [-] * foufas [rad/timestep] * raddeg [deg/rad] * [sec/hr] / (2 * halftimestep [sec/timestep])
+             ! => timezonecorr = tzone [-] * foufas [rad] * raddeg [deg/rad] * [sec/hr]
              !
              fas = fas * raddeg + fas_term
              !

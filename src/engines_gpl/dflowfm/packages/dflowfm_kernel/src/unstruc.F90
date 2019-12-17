@@ -351,7 +351,7 @@ subroutine flow_finalize_usertimestep(iresult)
       if (fourierWithUc()) then
          call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
-      call postpr_fourier(nint(time0/dt_user), dt_user)
+      call postpr_fourier(time0, dt_user)
    endif
 
  iresult = DFM_NOERR
@@ -586,7 +586,7 @@ character(len=255)   :: filename_fou_out
       if (fourierWithUc()) then
          call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif
-      call postpr_fourier(nint(time0/dt_user), dts)
+      call postpr_fourier(time0, dts)
    endif
 end subroutine flow_finalize_single_timestep
 
