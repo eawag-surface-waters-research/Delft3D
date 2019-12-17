@@ -3414,6 +3414,7 @@ end module m_vegetation
  double precision, allocatable         :: sqi   (:)   !< cell center incoming flux (m3/s)
  double precision, allocatable         :: squ2D (:)   !< cell center outgoing 2D flux (m3/s)
  double precision, allocatable         :: sqwave(:)   !< cell center outgoing flux, including gravity wave velocity (m3/s) (for explicit time-step)
+ double precision, allocatable         :: squcor(:)    !< cell center outgoing flux with some corrections to exclude structure links (if enabled)
  double precision, allocatable         :: hus   (:)   !< hu averaged at 3D cell 
  double precision, allocatable         :: workx (:)   !< Work array
  double precision, allocatable         :: worky (:)   !< Work array
@@ -4199,6 +4200,7 @@ end subroutine reset_flowgeom
 
  integer                           :: ja_timestep_auto      !< Use CFL-based dt (with dt_max as upper bound)
  integer                           :: ja_timestep_auto_visc !< Use explicit time step restriction based on viscosity term
+ integer                           :: ja_timestep_nostruct  !< Exclude (structure) links without advection from the time step limitation
  double precision                  :: tstart_user !< User specified time start (s) w.r.t. refdat
  double precision                  :: tstop_user  !< User specified time stop  (s) w.r.t. refdat
  double precision                  :: time_user   !< Next time of external forcings update (steps increment by dt_user).
@@ -4350,6 +4352,7 @@ subroutine default_flowtimes()
     dtfacmax    = 1.1d0             !< default setting
     ja_timestep_auto = 1            !< Use CFL-based dt (with dt_max as upper bound)
     ja_timestep_auto_visc = 0       !< Use explicit time step restriction based on viscosity term
+    ja_timestep_nostruct = 0        !< Exclude (structure) links without advection from the time step limitation
     tstart_user = 0d0               !< User specified time start (s) w.r.t. refdat
     tstop_user  = 100*24*3600       !< User specified time stop  (s) w.r.t. refdat
     time_user   = tstart_user       !< Next time of external forcings update (steps increment by dt_user).

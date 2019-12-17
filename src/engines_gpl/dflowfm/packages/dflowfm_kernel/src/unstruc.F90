@@ -3616,6 +3616,7 @@ end subroutine setdt
  double precision              :: dxiAu                          !
  double precision              :: huv
  double precision              :: dtsc1, dtsc2
+ double precision              :: squloc
 
  INTEGER                       :: NDRAW
  COMMON /DRAWTHIS/ ndraw(50)
@@ -3638,14 +3639,37 @@ end subroutine setdt
           !   kkcflmx  = kk_dtmin
           !   jareduced = 1
           !else
+          if (ja_timestep_nostruct > 0) then  !< Exclude (structure) links without advection from the time step limitation
+             squcor(1:ndx) = squ(1:ndx) ! Start with already computed squ.
+             do L = 1,lnx1d
+                if (iadv(L) /= 0 .and. iadv(L) /= 22) then
+                   cycle ! Do NOT exclude this link
+                end if
+                k1 = ln(1,L) ; k2 = ln(2,L)
+                ! Undo some of the added q1 contributions in squ (as produced by u1q1()).
+                if (q1(L) > 0) then
+                   squcor(k1) = squcor(k1) - q1(L)
+                else if (q1(L) < 0) then
+                   squcor(k2) = squcor(k2) + q1(L)
+                endif
+             end do
+          end if
+
           do k = 1,ndxi
              if ( jampi.eq.1 ) then
 !               do not include ghost cells
                 if ( idomain(k).ne.my_rank ) cycle
              end if
-             if (squ(k) > eps10) then                   ! outflow only
-                if (hs(k) > epshu .and. vol1(k) > 0.0 .and. squ(k) > 0.0) then
-                   dtsc = cflmx*vol1(k)/squ(k)
+
+             if (ja_timestep_nostruct > 0) then  !< Exclude (structure) links without advection from the time step limitation
+                squloc = squcor(k)
+             else
+                squloc = squ(k)
+             end if
+
+             if (squloc > eps10) then                   ! outflow only
+                if (hs(k) > epshu .and. vol1(k) > 0.0 .and. squloc > 0.0) then
+                   dtsc = cflmx*vol1(k)/squloc
                    if (jamapdtcell > 0) then
                       dtcell(k) = dtsc
                    endif
@@ -26037,6 +26061,12 @@ end if
     allocate ( squ2D(ndkx) , stat=ierr )
     call aerr('squ2D(ndkx)', ierr, ndkx)            ; squ2D = 0
  endif
+
+if (ja_timestep_auto == 1 .and. ja_timestep_nostruct > 0) then
+   if (allocated (squcor)) deallocate (squcor)
+   allocate ( squcor(ndx) , stat=ierr )
+   call aerr('squcor(ndx)', ierr, ndx)            ; squcor = 0
+endif
 
 if (icorio == 7 .or. icorio == 8 .or. icorio == 27 .or. icorio == 28) then  
    if ( allocated(hus) ) deallocate(hus) 

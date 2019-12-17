@@ -1376,6 +1376,7 @@ subroutine readMDUFile(filename, istat)
     !   write(msgbuf, '(a,i0,a)') 'MDU [time] AutoTimestep=', ibuf, ' is deprecated, timestep always automatic. Use DtMax instead.'
     !   call warn_flush()
     ! endif
+    call prop_get_integer (md_ptr, 'time', 'AutoTimestepNoStruct' , ja_timestep_nostruct, success)
 
     call prop_get_double  (md_ptr, 'time', 'Dtfacmax',  dtfacmax)
 
@@ -2940,6 +2941,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .and. ja_timestep_auto_visc .ne. 1) then
         call prop_set(prop_ptr, 'time', 'Autotimestepvisc' , ja_timestep_auto_visc, '0 = no, 1 = yes (Time limitation based on explicit diffusive term)' )
+    endif
+
+    if (writeall .or. ja_timestep_nostruct .ne. 0) then
+        call prop_set(prop_ptr, 'time', 'AutoTimestepNoStruct' , ja_timestep_nostruct, '0 = no, 1 = yes (Exclude structure links (and neighbours) from time step limitation)' )
     endif
 
     call prop_set(prop_ptr, 'time', 'Tunit',                   md_tunit,        'Time unit for start/stop times (D, H, M or S)')
