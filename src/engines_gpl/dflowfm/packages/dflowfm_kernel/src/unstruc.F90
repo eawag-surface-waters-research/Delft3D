@@ -22388,7 +22388,7 @@ end subroutine unc_write_shp
             contactType = 'all'
             call prop_get_string(node_ptr, '', 'contactType', contactType, success)
             icontactType = linkTypeToInt(contactType)
-            if (icontactType == 0) then
+            if (icontactType < 0) then
                write (msgbuf, '(a,i0,a)') 'Error reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
                                              trim(filename)//'''. Invalid contactType '''//trim(contactType)//''' given.'
                call err_flush()
@@ -22396,25 +22396,30 @@ end subroutine unc_write_shp
                cycle
             end if
 
-            if (success) then
-               call prop_get_string(node_ptr, '', 'contactId', contactID, success)
-               if (success) then ! the contact is defined by contactId
-                  loc_spec_type = LOCTP_UNKNOWN ! TODO: AVD: LOCTP_CONTACT_ID
-               else ! the contact is defined by x, y coordinates and contactType
-                  call prop_get(node_ptr, '', 'numCoordinates',   numcoordinates, success)
-                  if (success .and. numcoordinates > 0) then
-                     allocate(xcoordinates(numcoordinates), stat=ierr)
-                     allocate(ycoordinates(numcoordinates), stat=ierr)
-                     call prop_get_doubles(node_ptr, '', 'xCoordinates',     xcoordinates, numcoordinates, success)
-                     if (success) then
-                        call prop_get_doubles(node_ptr, '', 'yCoordinates',     ycoordinates, numcoordinates, success)
-                     end if
-                     if (success) then
-                        loc_spec_type = LOCTP_POLYGON_XY
-                     end if
+            call prop_get_string(node_ptr, '', 'contactId', contactID, success)
+            if (success) then ! the contact is defined by contactId
+               loc_spec_type = LOCTP_UNKNOWN ! TODO: AVD: LOCTP_CONTACT_ID
+            else ! the contact is defined by x, y coordinates and contactType
+               call prop_get(node_ptr, '', 'numCoordinates',   numcoordinates, success)
+               if (success .and. numcoordinates > 0) then
+                  allocate(xcoordinates(numcoordinates), stat=ierr)
+                  allocate(ycoordinates(numcoordinates), stat=ierr)
+                  call prop_get_doubles(node_ptr, '', 'xCoordinates',     xcoordinates, numcoordinates, success)
+                  if (success) then
+                     call prop_get_doubles(node_ptr, '', 'yCoordinates',     ycoordinates, numcoordinates, success)
                   end if
-
+                  if (success) then
+                     loc_spec_type = LOCTP_POLYGON_XY
+                  end if
                end if
+
+               if (.not. success) then
+                  write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
+                                              trim(filename)//'''. No contactId or coordinates specified.'
+                  call err_flush()
+                  cycle
+               end if
+
                num1d2dprops = 0
                call selectelset_internal_links( xz, yz, ndx, ln, lnx, ke1d2dprops(1:lnx1D), num1d2dprops, &
                                                 loc_spec_type, nump = numcoordinates, xpin = xcoordinates, ypin = ycoordinates, &
@@ -22446,12 +22451,6 @@ end subroutine unc_write_shp
                   hh1D2D(Lf) = hh1D2Dread
                end do
 
-               if (.not. success) then
-                  write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
-                                              trim(filename)//'''. No contactId or coordinates specified.'
-                  call err_flush()
-                  cycle
-               end if
             end if
             numok = numok + 1
          endif
@@ -22474,7 +22473,7 @@ end subroutine unc_write_shp
    use string_module, only: str_tolower
    use m_inquire_flowgeom
       character(len=*), intent(in) :: linkTypeString  !< Type value as given in input file.
-      integer                      :: res             !< The returned link type integer code. (3/4/5/7).
+      integer                      :: res             !< The returned link type integer code. (3/4/5/7). -1 for unknown type.
 
       select case(str_tolower(trim(linkTypeString)))
       case('internal', 'lateral', 'embedded')
@@ -22488,7 +22487,7 @@ end subroutine unc_write_shp
       case('all') ! Special type to support selecting any link type
          res = IFLTP_ALL
       case default
-         res = 0
+         res = -1
       end select
       
    end function linkTypeToInt
