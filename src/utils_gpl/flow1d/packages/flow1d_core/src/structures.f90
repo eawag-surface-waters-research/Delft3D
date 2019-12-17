@@ -1356,6 +1356,7 @@ end subroutine
          call compare_and_warn(level, pstru%generalst%gateopeningwidth, pstru%generalst%gateopeningwidth_actual, 'gate opening width', pstru%id)
       case(ST_BRIDGE)
          call compare_and_warn(level, pstru%bridge%bedLevel, pstru%bridge%bedLevel_actual, 'bed level', pstru%id)
+         call compare_and_warn(level, pstru%bridge%flowArea, pstru%bridge%flowArea_actual, 'flow area', pstru%id)
       case(ST_UNI_WEIR)
          call compare_and_warn(level, pstru%uniweir%crestlevel, pstru%uniweir%crestlevel_actual, 'crest level', pstru%id)
       case(ST_CULVERT)

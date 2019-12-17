@@ -41,6 +41,8 @@ module m_Bridge
    type, public :: t_bridge
       double precision              :: bedLevel             !< bedlevel of the standard bridge
       double precision              :: bedLevel_actual      !< used bedlevel of the bridge
+      double precision              :: flowArea             !< flow area as defined in the cross section of the standard bridge
+      double precision              :: flowArea_actual      !< used flow area of the bridge
       double precision              :: pillarwidth          !< pillar width
       double precision              :: formfactor          
       integer                       :: allowedflowdir       !< 0 all directions
@@ -213,7 +215,10 @@ contains
 
          ! Initialize = bridge%pcross
          depth = smax - crestLevel
-         call GetCSParsFlow(bridge%pcross, depth, wArea, wPerimiter, wWidth)     
+         call GetCSParsFlow(bridge%pcross, depth, wArea, wPerimiter, wWidth)   
+         bridge%flowArea = wArea
+         wArea = min(wArea, wetup)
+         bridge%flowArea_actual = wArea
 
          ! Friction Loss
          hydrRadius = wArea / wPerimiter
