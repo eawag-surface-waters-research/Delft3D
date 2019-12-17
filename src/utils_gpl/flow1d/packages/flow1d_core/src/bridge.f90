@@ -216,7 +216,7 @@ contains
          ! Initialize = bridge%pcross
          depth = smax - crestLevel
          call GetCSParsFlow(bridge%pcross, depth, wArea, wPerimiter, wWidth)   
-         bridge%flowArea = wArea2
+         bridge%flowArea = wArea
          
          ! in case the flow area is limited by the upstream flow area, the hydraulic radius
          ! is still based on the cross section of the bridge
