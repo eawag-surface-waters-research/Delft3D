@@ -1604,6 +1604,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_turbulence', jamaptur, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_trachytopes', jamaptrachy, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_calibration', jamapcali, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_rain', jamaprain, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_wind', jamapwind, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_windstress', jamapwindstress, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_heat_fluxes', jamapheatflux, success)
@@ -3277,6 +3278,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if(jacali > 0 .and. (writeall .or. jamapcali /= 1)) then
         call prop_set(prop_ptr, 'output', 'Wrimap_calibration', jamapcali, 'Write roughness calibration factors to map file (1: yes, 0: no)')
+    endif
+    if(writeall .or. jamaprain /= 1) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_rain', jamaprain, 'Write rainfall rates to map file (1: yes, 0: no)')
     endif
     if(writeall .or. jamapwind /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_wind', jamapwind, 'Write wind velocities to map file (1: yes, 0: no)')
