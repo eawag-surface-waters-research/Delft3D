@@ -216,12 +216,18 @@ contains
          ! Initialize = bridge%pcross
          depth = smax - crestLevel
          call GetCSParsFlow(bridge%pcross, depth, wArea, wPerimiter, wWidth)   
-         bridge%flowArea = wArea
+         bridge%flowArea = wArea2
+         
+         ! in case the flow area is limited by the upstream flow area, the hydraulic radius
+         ! is still based on the cross section of the bridge
+         hydrRadius = wArea / wPerimiter
+         
+         ! Limit the flow area to the upstream flow area
          wArea = min(wArea, wetup)
          bridge%flowArea_actual = wArea
+         
 
          ! Friction Loss
-         hydrRadius = wArea / wPerimiter
          chezyBridge = getchezy(bridge%pcross%frictionTypePos(1), bridge%pcross%frictionValuePos(1), warea/wPerimiter, depth, 1d0)
          frictLoss = 2.0d0 * gravity * bridge%length / (chezyBridge * chezyBridge * hydrRadius)
 
