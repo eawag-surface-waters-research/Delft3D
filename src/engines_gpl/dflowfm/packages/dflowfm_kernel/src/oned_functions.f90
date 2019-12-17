@@ -50,6 +50,7 @@ module m_oned_functions
    public updateVolOnGround
    public updateTotalInflow1d2d
    public updateTotalInflowLat
+   public updateS1Gradient
 
    type, public :: t_gridp2cs
       integer :: num_cross_sections
@@ -1016,5 +1017,21 @@ module m_oned_functions
    end if
 
    end subroutine updateTotalInflowLat
+   
+   !> Update water level gradient
+   subroutine updateS1Gradient()
+   use m_flow, only: s1Gradient, s1
+   use m_flowgeom, only: lnx1d, ln, dx
+   implicit none
+   integer :: k1, k2, L
+   
+   s1Gradient = dmiss
+   do L=1, lnx1d
+      k1 = ln(1,L)
+      k2 = ln(2,L)
+      s1Gradient(L) = (s1(k1)-s1(k2))/dx(L)
+   end do
+   
+   end subroutine updateS1Gradient
 
 end module m_oned_functions

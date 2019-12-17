@@ -18044,9 +18044,9 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
  use m_reduce,        only : nocgiter
  use m_partitioninfo, only : ndomains, jampi, my_rank
  use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src
- use m_flowgeom, only: ndx2d, ndxi
+ use m_flowgeom, only: ndx2d, ndxi, lnx1d
  use unstruc_channel_flow, only : network
- use m_oned_functions, only: updateFreeboard, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
+ use m_oned_functions, only: updateFreeboard, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat, updateS1Gradient
 
 #ifdef _OPENMP
  use omp_lib
@@ -18089,17 +18089,24 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    if (ti_map > 0 .or. ti_mpt(1) > 0) then
      if (comparereal(tim, time_map, eps10) >= 0) then
         ! update for output, only for 1D
-        if (network%loaded .and. ndxi-ndx2d > 0) then
-           if (jamapFreeboard > 0) then
-              call updateFreeboard(network)
+        if (network%loaded) then
+           if (ndxi-ndx2d > 0) then
+              if (jamapFreeboard > 0) then
+                 call updateFreeboard(network)
+              end if
+              if (jamapDepthOnGround > 0) then
+                 call updateDepthOnGround(network)
+              end if
+              if (jamapVolOnGround > 0) then
+                 call updateVolOnGround(network)
+              end if
+              ! NOTE: updateTotalInflow1d2d, updateTotalInflowLat done in flow_finalizesingletimestep().
            end if
-           if (jamapDepthOnGround > 0) then
-              call updateDepthOnGround(network)
+           if (lnx1d > 0) then
+              if (jamapS1Gradient > 0) then
+                 call updateS1Gradient()
+              end if
            end if
-           if (jamapVolOnGround > 0) then
-              call updateVolOnGround(network)
-           end if
-           ! NOTE: updateTotalInflow1d2d, updateTotalInflowLat done in flow_finalizesingletimestep().
         end if
 
           call wrimap(tim)
@@ -26030,30 +26037,36 @@ end do
  call aerr('dtcell(ndkx)', ierr, ndkx) ; dtcell = 0d0
 
  ! for 1D only
- if (network%loaded .and. ndxi-ndx2d > 0) then
-    call realloc(time_wetground, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('time_wetground(ndx)', ierr, ndx)
-    
-    call realloc(freeboard, ndx, keepExisting = .false., fill = dmiss, stat = ierr)
-    call aerr('freeboard(ndx)', ierr, ndx)
-
-    call realloc(hsOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('hsOnGround(ndx)', ierr, ndx)
-
-    call realloc(volOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('volOnGround(ndx)', ierr, ndx)
-
-    call realloc(qCur1d2d, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('qCur1d2d(ndx)', ierr, ndx)
-
-    call realloc(vTot1d2d, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('vTot1d2d(ndx)', ierr, ndx)
-
-    call realloc(qCurLat, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('qCurLat(ndx)', ierr, ndx)
-
-    call realloc(vTotLat, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('vTotLat(ndx)', ierr, ndx)
+ if (network%loaded) then
+    if (ndxi-ndx2d > 0) then
+       call realloc(time_wetground, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('time_wetground(ndx)', ierr, ndx)
+       
+       call realloc(freeboard, ndx, keepExisting = .false., fill = dmiss, stat = ierr)
+       call aerr('freeboard(ndx)', ierr, ndx)
+       
+       call realloc(hsOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('hsOnGround(ndx)', ierr, ndx)
+       
+       call realloc(volOnGround, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('volOnGround(ndx)', ierr, ndx)
+       
+       call realloc(qCur1d2d, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('qCur1d2d(ndx)', ierr, ndx)
+       
+       call realloc(vTot1d2d, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('vTot1d2d(ndx)', ierr, ndx)
+       
+       call realloc(qCurLat, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('qCurLat(ndx)', ierr, ndx)
+       
+       call realloc(vTotLat, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+       call aerr('vTotLat(ndx)', ierr, ndx)
+    end if
+    if (lnx1d > 0) then
+       call realloc(s1Gradient, lnx, keepExisting = .false., fill = dmiss, stat = ierr)
+       call aerr('s1Gradient', ierr, lnx)
+    end if
 end if
  
  if (kmx > 0 .and. (ja_timestep_auto == 3 .or. ja_timestep_auto == 4) ) then

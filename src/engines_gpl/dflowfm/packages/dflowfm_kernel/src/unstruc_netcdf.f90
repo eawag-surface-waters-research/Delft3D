@@ -380,7 +380,7 @@ type t_unc_mapids
    integer :: id_frac_name              = -1
    integer :: id_sedfrac(MAX_ID_VAR)    = -1
    integer :: id_kmxsed(MAX_ID_VAR)     = -1
-   ! for urban, only for 1d nodes now
+   ! for urban, only for 1d now
    integer :: id_timewetground(MAX_ID_VAR) = -1 !< Variable ID for cumulative time when water is above ground level
    integer :: id_freeboard(MAX_ID_VAR)     = -1 !< Variable ID for freeboard
    integer :: id_hs_on_ground(MAX_ID_VAR)  = -1 !< Variable ID for waterdepth when water is above ground level
@@ -389,6 +389,7 @@ type t_unc_mapids
    integer :: id_vTot1d2d(MAX_ID_VAR) = -1 !< Variable ID for cumulative total 1d2d inflow (volume)
    integer :: id_qCurLat(MAX_ID_VAR)  = -1 !< Variable ID for current total lateral inflow (discharge)
    integer :: id_vTotLat(MAX_ID_VAR)  = -1 !< Variable ID for cumulative total lateral inflow (volume)
+   integer :: id_s1Gradient(MAX_ID_VAR) = -1 !< Variable ID for water level gradient
    !
    ! Other
    !
@@ -4649,6 +4650,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCurLat, nf90_double, UNC_LOC_S, 'current_total_net_inflow_lateral', '', 'Current total net inflow via all laterals at each 1D node', 'm3 s-1', which_meshdim = 1)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTotLat, nf90_double, UNC_LOC_S, 'cumulative_total_net_inflow_lateral', '', 'Cumulative total net inflow via all laterals at each 1D node', 'm3', which_meshdim = 1)
          end if
+         if (lnx1d> 0) then
+            if (jamapS1Gradient > 0) then ! water level gradient
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s1Gradient, nf90_double, UNC_LOC_U, 'water_level_gradient', '', 'Water level gradient at each 1D link', '-', which_meshdim = 1)
+            end if
+         end if
       end if
       ierr = nf90_enddef(mapids%ncid)
       
@@ -5896,6 +5902,11 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       if (jamapTotalInflowLat > 0) then ! total lateral inflow
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qCurLat, UNC_LOC_S, qCurLat)
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vTotLat, UNC_LOC_S, vTotLat)
+      end if
+   end if
+   if (lnx1d > 0) then
+      if (jamapS1Gradient > 0) then
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s1Gradient, UNC_LOC_U, s1Gradient)
       end if
    end if
 end subroutine unc_write_map_filepointer_ugrid

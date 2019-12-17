@@ -2759,6 +2759,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamapVolOnGround          !< output volume above ground level, 0: no, 1: yes
  integer                           :: jamapTotalInflow1d2d      !< output total 1d2d inflow to map file, 0: no, 1: yes
  integer                           :: jamapTotalInflowLat       !< output total lateral inflow to map file, 0: no, 1: yes
+ integer                           :: jamapS1Gradient           !< output water level gradient to map file, 0: no, 1: yes
  integer                           :: jatekcd                   !< tek output with wind cd coefficients, 0=no (default), 1=yes
  integer                           :: jafullgridoutput          !< 0:compact, 1:full time-varying grid data
  integer                           :: jaeulervel                !< 0:GLM, 1:Euler velocities
@@ -3156,6 +3157,7 @@ subroutine default_flowparameters()
     jamapVolOnGround = 0
     jamapTotalInflow1d2d = 0
     jamapTotalInflowLat = 0
+    jamapS1Gradient = 0
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     japartdomain = 1
@@ -3433,6 +3435,9 @@ end module m_vegetation
  double precision, allocatable         :: vTot1d2d(:)   !< [m3] total 1d2d net inflow, cumulative volume
  double precision, allocatable         :: qCurLat(:)    !< [m3/s] total lateral net inflow, current discharge
  double precision, allocatable         :: vTotLat(:)    !< [m3] total lateral net inflow, cumulative volume
+ 
+ ! link related, dim = lnx
+ double precision, allocatable         :: s1Gradient(:) !< [-] for output purposes: water level gradient on links
 
 !    Secondary Flow
  double precision, allocatable         :: ducxdx   (:)   !< cell center gradient of x-velocity in x-dir,    (1/s)
