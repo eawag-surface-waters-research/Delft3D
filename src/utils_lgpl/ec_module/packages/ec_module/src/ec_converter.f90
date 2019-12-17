@@ -3356,7 +3356,7 @@ module m_ec_converter
          character(len=128)                            :: mesg
          
          integer                                       :: idx
-         integer                                       :: i, j
+         integer                                       :: i, j, last
          integer                                       :: irow, idownup
          integer                                       :: mcol, nrow
          
@@ -3377,8 +3377,13 @@ module m_ec_converter
                irow = nrow + idownup-1
                
                idx = 0
-               do j=ia(irow),ia(irow+1)-1
-                  if ( ja(j).eq.mcol ) then
+               if (irow < size(ia)) then
+                  last = ia(irow+1)-1
+               else
+                  last = size(ja)
+               endif
+               do j=ia(irow),last
+                  if ( ja(j) == mcol ) then
                      idx = j
                      exit
                   end if
