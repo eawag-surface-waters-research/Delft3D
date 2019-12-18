@@ -5872,7 +5872,7 @@ contains
    !! The output array will be set to value numprov for the flow node numbers
    !! that were selected, such that the call site can know which input file
    !! is affecting which flow nodes.
-   subroutine selectelset_internal_nodes(xz, yz, kc, nx, numprov, kp, &
+   subroutine selectelset_internal_nodes(xz, yz, kc, nx, kp, numsel, &
                                        & loc_spec_type, loc_file, numcoord, xpin, ypin, branchid, chainage, nodeId)
    use m_inquire_flowgeom
    use m_flowgeom, only: nd
@@ -5882,13 +5882,13 @@ contains
    
    implicit none
    
-   double precision,           intent(in   ) :: xz(nx)     !< Flow nodes center x-coordinates.
-   double precision,           intent(in   ) :: yz(nx)     !< Flow nodes center y-coordinates.
-   integer,                    intent(in   ) :: kc(nx)     !< Mask for which flow nodes are allowed for selection (1/0 = yes/no).
+   double precision,           intent(in   ) :: xz(:)      !< Flow nodes center x-coordinates.
+   double precision,           intent(in   ) :: yz(:)      !< Flow nodes center y-coordinates.
+   integer,                    intent(in   ) :: kc(:)      !< Mask for which flow nodes are allowed for selection (1/0 = yes/no).
    integer,                    intent(in   ) :: nx         !< Number of flow nodes in input.
-   integer,                    intent(in   ) :: numprov    !< Provider nr from call site, to be used in setting output kp array.
-   integer,                    intent(inout) :: kp(nx)     !< Output array, same size as flow nod input arrays. On index of every flow node that was selected: set to value numprov.
-                                                           !< Note that this kp array is used in a fundamentally different way from the keg array in selectelset_internal_links().
+   integer                   , intent(  out) :: kp(:)      !< Output array containing the flow node numbers that were selected.
+                                                           !< Size of array is responsability of call site, and filling starts at index 1 upon each call.
+   integer                   , intent(  out) :: numsel     !< Number of flow nodes that were selected (i.e., kp(1:numsel) will be filled).
    integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: LOCTP_POLYGON_FILE, LOCTP_POLYGON_XY or LOCTP_BRANCHID_CHAINAGE or LOCTP_NODEID.
    character(len=*), optional, intent(in   ) :: loc_file   !< File name of a polygon file (when loc_spec_type==LOCTP_POLYGON_FILE).
    integer,          optional, intent(in   ) :: numcoord   !< Number of coordinates in input arrays (when loc_spec_type==LOCTP_POLYGON_XY).
@@ -5902,6 +5902,9 @@ contains
    integer   :: minp, inp, n, nn, ierr
    !
    ! body
+   
+   numsel = 0
+
    select case(loc_spec_type)
    case (LOCTP_POLYGON_FILE)
       ! Fill npl, xpl, ypl from file
@@ -5916,11 +5919,13 @@ contains
    case (LOCTP_BRANCHID_CHAINAGE)
       ierr = findnode(branchId, chainage, n)
       if (ierr /= 0) return
-      kp(n) = numprov
+      numsel     = 1
+      kp(numsel) = n
    case (LOCTP_NODEID)
       ierr = findnode(nodeId, n)
       if (ierr /= 0) return
-      kp(n) = numprov
+      numsel     = 1
+      kp(numsel) = n
    case default
       return
 
@@ -5939,7 +5944,8 @@ contains
             end if
 
             if (inp > 0) then
-               kp(n) = numprov 
+               numsel = numsel + 1
+               kp(numsel) = n
             endif   
          endif   
       enddo   

@@ -37510,9 +37510,20 @@ end function ispumpon
     end if
 
     if (numlatsg > 0) then
+
+       ! First accumulate all lateral discharges per grid cell
+       QQLat(1:ndx) = 0d0
+       do n = 1,numlatsg
+          do k1=n1latsg(n),n2latsg(n)
+             k = nnlat(k1)
+             if (k > 0) then 
+                QQLat(k) = QQLat(k) + QPlat(n)*ba(k)/baLat(n)
+             end if
+          end do
+       end do
+
+       ! Now, handle the total lateral discharge for each grid cell
        do k = 1,ndxi
-          if (nnlat(k) == 0) cycle
-          QQLat(k) = QPlat(nnlat(k))*ba(k)/baLat(nnlat(k))
           if (QQLat(k) > 0) then
              qinlat = qinlat + QQLat(k)                        ! Qlat can be pos or neg
           else if (hs(k) > epshu) then
@@ -40782,7 +40793,7 @@ end function is_1d_boundary_candidate
  double precision, allocatable :: viuh(:)            ! temp
  double precision, allocatable :: tt(:)
  logical :: exist
- integer                       :: numz, numu, numq, numg, numd, numgen, npum, numklep, numvalv, jaifrcutp
+ integer                       :: numz, numu, numq, numg, numd, numgen, npum, numklep, numvalv, nlat, jaifrcutp
  integer                       :: numnos, numnot, numnon ! < Nr. of unassociated flow links (not opened due to missing z- or u-boundary)
 
  double precision, allocatable :: xdum(:), ydum(:), xy2dum(:,:)
@@ -42254,8 +42265,13 @@ if (mext > 0) then
            call prepare_lateral_mask(kclat, ilattype)
 
            numlatsg = numlatsg + 1
-           call selectelset_internal_nodes(xz, yz, kclat, ndxi, numlatsg, nnLat, &
-                                           LOCTP_POLYGON_FILE, filename)
+           call realloc(nnlat, max(2*ndxi, nlatnd+ndxi), keepExisting = .true., fill = 0)
+           call selectelset_internal_nodes(xz, yz, kclat, ndxi, nnLat(nlatnd+1:), nlat, &
+                                          LOCTP_POLYGON_FILE, filename)
+           n1latsg(numlatsg) = nlatnd + 1
+           n2latsg(numlatsg) = nlatnd + nlat
+
+           nlatnd = nlatnd + nlat
 
            jaqin = 1 ; success = .true.  ! geen gezeik, iedereen reik
 
@@ -42561,26 +42577,28 @@ if (mext > 0) then
  endif
 
  if (numlatsg > 0) then ! Allow laterals from old ext, even when new structures file is present.
-    if (allocated(lat_ids)) deallocate(lat_ids)
-    allocate ( lat_ids(numlatsg), stat=ierr    )
-    call aerr('lat_ids(numlatsg)' , ierr, numlatsg ); lat_ids = ''
 
-    if (allocated (balat) ) deallocate(balat,qplat)
-    allocate ( balat(numlatsg)  , stat=ierr    )
-    call aerr('balat(numlatsg)' , ierr, numlatsg ); balat = 0d0
-    allocate ( qplat(numlatsg)  , stat=ierr    )
-    call aerr('qplat(numlatsg)' , ierr, numlatsg ); qplat = 0d0
-    do k = 1,ndx
-       if (jampi == 1) then
-           if (idomain(k) /= my_rank) then
-               nnlat(k) = 0
-           endif
-       endif
-       n = nnlat(k)
-       if (n > 0) then
-          balat(n) = balat(n) + ba(k)
-       endif
-    enddo
+    call realloc(balat, numlatsg, keepExisting = .false., fill = 0d0)
+    call realloc(qplat, numlatsg, keepExisting = .false., fill = 0d0)
+    call realloc(lat_ids, numlatsg, keepExisting = .false., fill = '')
+    call realloc(n1latsg, numlatsg, keepExisting = .false., fill = 0)
+    call realloc(n2latsg, numlatsg, keepExisting = .false., fill = 0)
+
+    do n = 1,numlatsg
+       balat(n) = 0d0
+       do k1=n1latsg(n),n2latsg(n)
+          k = nnlat(k1)
+          if (jampi == 1) then
+             if (idomain(k) /= my_rank) then
+                nnlat(k1) = 0
+             endif
+          endif
+          k = nnlat(k1)
+          if (k > 0) then
+             balat(n) = balat(n) + ba(k)
+          endif
+       end do
+    end do
 
     if (jampi == 1) then
        call reduce_double_sum(numlatsg, balat, qplat )  ! qplat is sum of balat over domains

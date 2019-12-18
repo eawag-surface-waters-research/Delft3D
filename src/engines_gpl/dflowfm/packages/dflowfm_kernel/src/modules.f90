@@ -1112,14 +1112,17 @@ integer, parameter :: ILATTP_1D  = 1 !< Type code for laterals that only apply t
 integer, parameter :: ILATTP_2D  = 2 !< Type code for laterals that only apply to 2D nodes.
 
 integer                      , target :: numlatsg    !< [-] nr of lateral discharge providers  {"rank": 0}
-double precision, allocatable, target :: qplat(:)    !< [m3/s] Lateral discharge of provider {"location": "face", "shape": ["numlatsg"]}
+double precision, allocatable, target :: qplat(:)    !< [m3/s] Lateral discharge of provider {"shape": ["numlatsg"]}
 double precision, allocatable, target :: qqlat(:)    !< [m3/s] Lateral discharge at xz,yz {"location": "face", "shape": ["ndx"]}
-double precision, allocatable, target :: balat(:)    !< [m2] total area of all cells in provider numlatsg  {"location": "face", "shape": ["numlatsg"]}
-character(len=128), allocatable       :: lat_ids(:)  !< id of laterals, size: numlatsg
+double precision, allocatable, target :: balat(:)    !< [m2] total area of all cells in provider numlatsg {"shape": ["numlatsg"]}
+character(len=128), allocatable       :: lat_ids(:)  !< id of laterals {"shape": ["numlatsg"]}
 
-!! Lateral lookup table: nnlat(n1) == ilat
-integer,          allocatable, target :: nnlat(:)    !< [-] for each cell pointer to qplat/balat {"location": "face", "shape": ["ndx"]}
-integer,          allocatable         :: kclat(:)    !< for each cell: 0 when not accepting lateral discharge (e.g. pipe)
+!! Lateral lookup tables: n1/n2latsg(ilat) = n1/n2, nnlat(n1:n2) = { flow node nrs affected by lateral ilat }
+integer                               :: nlatnd      !< lateral nodes dimension, counter of nnlat(:)
+integer         , allocatable         :: n1latsg(:)  !< [-] first  nlatnd point in lateral signal numlatsg {"shape": ["numlatsg"]}
+integer         , allocatable         :: n2latsg(:)  !< [-] second nlatnd point in lateral signal numlatsg {"shape": ["numlatsg"]}
+integer,          allocatable, target :: nnlat(:)    !< [-] for each lateral node, flow node number == pointer to qplat/balat {"shape": ["nlatnd"]}
+integer,          allocatable         :: kclat(:)    !< [-] for each cell: 0 when not accepting lateral discharge (e.g. pipe) {"location": "face", "shape": ["ndx"]}
 
 double precision, allocatable, target :: qinext(:)      !< [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
 double precision, allocatable, target :: qinextreal(:)  !< [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
@@ -1218,6 +1221,7 @@ use m_physcoef, only : rhomean
    subroutine reset_wind()
    japatm   = 0           !< use patm yes or no
    numlatsg = 0           !< [] nr of lateral discharge providers
+   nlatnd   = 0           !< lateral nodes dimension, counter of nnlat(:)
    jaspacevarcharn = 0   !< use space varying Charnock coefficients
    jawindstressgiven = 0 !< wind stress given in meteo file
    end subroutine reset_wind

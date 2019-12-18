@@ -929,8 +929,8 @@ logical function initboundaryblocksforcings(filename)
  double precision             :: chainage
  double precision             :: tmpval
  integer                      :: iostat, ierr
- integer                      :: ilattype
- integer                      :: k, n
+ integer                      :: ilattype, nlat
+ integer                      :: k, n, k1, nini
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex 
  integer                      :: ib, ibqh
@@ -972,8 +972,11 @@ logical function initboundaryblocksforcings(filename)
  ! Allocate lateral provider array now, just once, because otherwise realloc's in the loop would destroy target arrays in ecInstance.
  maxlatsg = tree_count_nodes_byname(bnd_ptr, 'lateral')
  if (maxlatsg > 0) then
-    call realloc(qplat, maxlatsg, keepExisting = .false.)
+    call realloc(balat, maxlatsg, keepExisting = .false., fill = 0d0)
+    call realloc(qplat, maxlatsg, keepExisting = .false., fill = 0d0)
     call realloc(lat_ids, maxlatsg, keepExisting = .false.)
+    call realloc(n1latsg, maxlatsg, keepExisting = .false., fill = 0)
+    call realloc(n2latsg, maxlatsg, keepExisting = .false., fill = 0)
  end if
 
  ib = 0
@@ -1200,8 +1203,13 @@ logical function initboundaryblocksforcings(filename)
        call prepare_lateral_mask(kclat, ilattype)
 
        numlatsg = numlatsg + 1
-       call selectelset_internal_nodes(xz, yz, kclat, ndxi, numlatsg, nnLat, &
+       call realloc(nnlat, max(2*ndxi, nlatnd+ndxi), keepExisting = .true., fill = 0)
+       call selectelset_internal_nodes(xz, yz, kclat, ndxi, nnLat(nlatnd+1:), nlat, &
                                        loc_spec_type, locationfile, numcoordinates, xcoordinates, ycoordinates, branchid, chainage, nodeId)
+       n1latsg(numlatsg) = nlatnd + 1
+       n2latsg(numlatsg) = nlatnd + nlat
+
+       nlatnd = nlatnd + nlat
 
        if (allocated(xcoordinates)) deallocate(xcoordinates, stat=ierr)
        if (allocated(ycoordinates)) deallocate(ycoordinates, stat=ierr)
@@ -1262,8 +1270,14 @@ logical function initboundaryblocksforcings(filename)
        if (len_trim(targetMaskFile) > 0) then
           ! Mask flow nodes based on inside polygon(s), or outside.
           ! in: kcs, all flow nodes, out: kcsini: all masked flow nodes.
-          call selectelset_internal_nodes(xz, yz, kcs, ndx, 1, kcsini, &
+          call realloc(kdum, ndx, keepExisting=.false., fill = 0)
+          call selectelset_internal_nodes(xz, yz, kcs, ndx, kdum, nini, &
                                        LOCTP_POLYGON_FILE, targetmaskfile)
+          ! Transfer kdum(1:nini) into a 0-1 mask kcsini(1:ndx)
+          do n=1,nini
+             kcsini(kdum(n)) = 1
+          end do
+
           if (invertMask) then
              kcsini = ieor(kcsini, 1)
           end if
@@ -1328,15 +1342,16 @@ logical function initboundaryblocksforcings(filename)
  end do
 
  if (numlatsg > 0) then
-    if (allocated (balat) ) deallocate(balat)
-    allocate ( balat(numlatsg)  , stat=ierr    )
-    call aerr('balat(numlatsg)' , ierr, numlatsg ); balat = 0d0
-    do k = 1,ndx
-       n = nnlat(k)
-       if (n > 0) then 
-          balat(n) = balat(n) + ba(k)
-       endif   
-    enddo
+    do n = 1,numlatsg
+       balat(n) = 0d0
+       do k1=n1latsg(n),n2latsg(n)
+          k = nnlat(k1)
+          ! TODO: MPI, as in old ext handling. if (jampi == 1) then
+          if (k > 0) then 
+             balat(n) = balat(n) + ba(k)
+          endif   
+       end do
+    end do
     if (allocated(kclat)) then
        deallocate(kclat)
     endif
@@ -1353,15 +1368,17 @@ end function initboundaryblocksforcings
 !> Initializes memory for laterals on flow nodes.
 subroutine ini_alloc_laterals()
    use m_wind
-   use m_flowgeom, only: ndx
+   use m_flowgeom, only: ndx2d, ndxi, ndx
    use m_alloc
    integer :: ierr
+   integer :: nlatndguess
 
    if (.not. allocated(QQlat) ) then                      ! just once
+      nlatndguess = ndx2d+2*(ndxi-ndx2d)  ! first guess: all 2D + twice all 1D, nnlat *might* be bigger.
       allocate ( QQLat(ndx) , stat=ierr) ; QQLat = 0d0
       call aerr('QQLAT(ndx)', ierr, ndx)
-      allocate ( nnLat(ndx) , stat=ierr) ; nnLat = 0  
-      call aerr('nnLat(ndx)', ierr, ndx)
+      allocate ( nnLat(nlatndguess) , stat=ierr) ; nnLat = 0
+      call aerr('nnLat(nlatndguess)', ierr, nlatndguess)
    endif
    if (.not. allocated(kcLat) ) then 
       allocate ( kcLat(ndx) , stat=ierr)                  ! only if needed  
