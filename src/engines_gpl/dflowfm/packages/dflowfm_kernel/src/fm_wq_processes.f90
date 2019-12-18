@@ -1177,8 +1177,8 @@
 !            pmsa(ip+ifun-1) = funinp(ifun,1)
             ip = arrpoi(iisfun) + (isfun-1)*noseg
             do kk=1,Ndxi
-               call getkbotktop(kk,kb,kt)
-               do k=kb,kt
+               call getkbotktopmax(kk,kb,kt,ktmax)
+               do k=kb,ktmax
                   pmsa(ip + k-kbx) = sfuninp(isfun, kk)
                end do
             end do
@@ -1187,8 +1187,8 @@
 
       ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg 
       do kk=1,Ndxi
-         call getkbotktop(kk,kb,kt)
-         do k=kb,kt
+         call getkbotktopmax(kk,kb,kt,ktmax)
+         do k=kb,ktmax
             pmsa(ipoisurf + k-kbx) = ba(kk)
          end do
       end do
@@ -1210,8 +1210,8 @@
       if (isfvel.gt.0) then
          ipoivel  = arrpoi(iisfun) + (isfvel-1)*noseg 
          do kk=1,Ndxi
-            call getkbotktop(kk,kb,kt)
-            do k=kb,kt
+            call getkbotktopmax(kk,kb,kt,ktmax)
+            do k=kb,ktmax
                pmsa(ipoivel  + k-kbx) = sqrt(ucx(k)**2 + ucy(k)**2)
             end do
          end do
@@ -1236,11 +1236,11 @@
          ipoivwind = arrpoi(iisfun) + (isfvwind-1)*noseg
          if(jawind.eq.1) then
             do kk=1,Ndxi
-               call getkbotktop(kk,kb,kt)
+               call getkbotktopmax(kk,kb,kt,ktmax)
                ! apparently wind is available at edges only, so just take the 1st edge
                call getlink1(kk,L)
                u10 = sqrt( wx(L)*wx(L) + wy(L)*wy(L) )
-               pmsa(ipoivwind + kb-kbx : ipoivwind + kt-kbx) = u10
+               pmsa(ipoivwind + kb-kbx : ipoivwind + ktmax-kbx) = u10
             end do
          else
             do k=0,ktx-kbx
@@ -1253,14 +1253,14 @@
          ipoiwinddir = arrpoi(iisfun) + (isfwinddir-1)*noseg
          if(jawind.eq.1) then
             do kk=1,Ndxi
-               call getkbotktop(kk,kb,kt)
+               call getkbotktopmax(kk,kb,kt,ktmax)
                ! apparently wind is available at edges only, so just take the 1st edge
                call getlink1(kk,L)
                dir = atan2(wy(L), wx(L))
                if (dir < 0d0) dir = dir + twopi
                wdir = 270.0d0 - dir*rd2dg ! from rad to degree
                if (wdir < 0d0) wdir = wdir + 360.0d0
-               pmsa(ipoiwinddir + kb-kbx : ipoiwinddir + kt-kbx) = wdir
+               pmsa(ipoiwinddir + kb-kbx : ipoiwinddir + ktmax-kbx) = wdir
             end do
          else
             do k=0,ktx-kbx
@@ -1273,33 +1273,34 @@
          ipoifetchl = arrpoi(iisfun) + (isffetchl-1)*noseg
          ipoifetchd = arrpoi(iisfun) + (isffetchd-1)*noseg
          do kk=1,Ndxi
-            call getkbotktop(kk,kb,kt)
+            call getkbotktopmax(kk,kb,kt,ktmax)
             call getfetch(kk,U10,FetchL,FetchD)
-            pmsa(ipoifetchl + kb-kbx : ipoifetchl + kt-kbx) = FetchL
-            pmsa(ipoifetchd + kb-kbx : ipoifetchd + kt-kbx) = FetchD
+            pmsa(ipoifetchl + kb-kbx : ipoifetchl + ktmax-kbx) = FetchL
+            pmsa(ipoifetchd + kb-kbx : ipoifetchd + ktmax-kbx) = FetchD
          end do
       end if
       
       if ( isfradsurf.gt.0 ) then
          ipoiradsurf = arrpoi(iisfun) + (isfradsurf-1)*noseg
          do kk=1,Ndxi
+            call getkbotktopmax(kk,kb,kt,ktmax)
             call getkbotktop(kk,kb,kt)
-            pmsa(ipoiradsurf + kb-kbx : ipoiradsurf + kt-kbx) = qrad(kk)
+            pmsa(ipoiradsurf + kb-kbx : ipoiradsurf + ktmax-kbx) = qrad(kk)
          end do
       end if
       
       if ( isfrain.gt.0 ) then
          ipoirain = arrpoi(iisfun) + (isfrain-1)*noseg
          do kk=1,Ndxi
-            call getkbotktop(kk,kb,kt)
-            pmsa(ipoirain + kb-kbx : ipoirain + kt-kbx) = rain(kk)/24.0d0 ! rain: mm/day => mm/h
+               call getkbotktopmax(kk,kb,kt,ktmax)
+            pmsa(ipoirain + kb-kbx : ipoirain + ktmax-kbx) = rain(kk)/24.0d0 ! rain: mm/day => mm/h
          end do
       end if
          
 !     determine dry/wet cells 
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
-         do k=kb,kt
+         do k=kb,ktmax
             wetdry(k) = vol1(k).gt.waq_vol_dry_thr .and. (vol1(k)/ba(kk)).gt.waq_dep_dry_thr
          enddo
       enddo
