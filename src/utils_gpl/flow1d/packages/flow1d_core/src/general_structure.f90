@@ -128,8 +128,8 @@ contains
       double precision, intent(in)                 :: Cz            !< Chezy value.
       double precision, intent(in)                 :: dxL           !< Length of the flow link.
       double precision, intent(in)                 :: dt            !< Time step (s).
-      logical, intent(in)                          :: SkipDimensionChecks         !< Flag indicating only the flow area is required or the full .
-      
+      logical, intent(in)                          :: SkipDimensionChecks  !< Flag indicating whether the dimensions of the structure is to be limited
+                                                                           !< by the cross sectional dimensions of the channel and correct, or not.
       !
       !
       ! Local variables
