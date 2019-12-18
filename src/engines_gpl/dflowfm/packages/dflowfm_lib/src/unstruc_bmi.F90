@@ -1876,7 +1876,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          end if
          return
       end select
-      call update_widths(network%sts%struct(item_index)%generalst, network%sts%struct(item_index)%numlinks, network%sts%struct(item_index)%linknumbers, wu)
+      call update_widths(network%sts%struct(item_index)%generalst, network%sts%struct(item_index)%numlinks, network%sts%struct(item_index)%linknumbers, wu, .true.)
 
    ! GATES
    case("gates")

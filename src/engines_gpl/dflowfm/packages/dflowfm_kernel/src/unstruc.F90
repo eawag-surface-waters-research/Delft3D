@@ -1174,7 +1174,7 @@ if(q /= 0) then
 
     ! beyond or past this point s1 is converged
 
-    if (nonlin == 2) then
+     if (nonlin == 2) then
        difmaxlevm = 0d0 ;  noddifmaxlevm = 0
        do k = 1,ndx
           dif = abs(s1m(k)-s1(k))
@@ -36926,7 +36926,7 @@ end subroutine setbobs_fixedweirs
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
  double precision :: hminlwi,fsqrtt
  double precision :: perimeter, conv, czdum
- logical          :: firstiter, jarea
+ logical          :: firstiter
  type(t_structure), pointer :: pstru
  type(t_compound), pointer :: pcompound
 
@@ -36937,6 +36937,7 @@ end subroutine setbobs_fixedweirs
 
  integer          :: ierr, jaustarintsave
  double precision :: sqcfi
+ logical          :: SkipDimensionChecks
  integer :: ispumpon
 
  hminlwi=1d0/hminlw
@@ -37110,7 +37111,16 @@ end subroutine setbobs_fixedweirs
           call computePump_all_links(pstru)
        else
           if (network%sts%struct(istru)%type == ST_GENERAL_ST )then
-             call update_widths(pstru%generalst, pstru%numlinks, pstru%linknumbers, wu)
+             SkipDimensionChecks = .false.
+             if (pstru%numlinks == 1) then
+                L = pstru%linknumbers(1)
+                if (L <= lnx1D) then
+                   if (network%adm%line2cross(L)%c1 < 0) then
+                      SkipDimensionChecks = .true.
+                   endif
+                endif
+             endif
+             call update_widths(pstru%generalst, pstru%numlinks, pstru%linknumbers, wu, SkipDimensionChecks)
           endif
 
           do L0 = 1, pstru%numlinks
@@ -37131,7 +37141,6 @@ end subroutine setbobs_fixedweirs
                        & u1(L), u0(L), dx(L), dts, state)
                    case (ST_GENERAL_ST)
                       firstiter = .true.
-                      jarea = .false.
                       dpt = max(epshu, s1(k1) - bob0(1,L))
                       call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
                       dpt = max(epshu, s1(k2) - bob0(2,L))
@@ -37142,7 +37151,7 @@ end subroutine setbobs_fixedweirs
                       call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
                       au(L) = pstru%au(L0)
                       call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
-                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, jarea)
+                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, SkipDimensionChecks)
                    case (ST_DAMBREAK)
                       continue
                    case (ST_CULVERT)
