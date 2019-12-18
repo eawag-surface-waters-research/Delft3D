@@ -18102,14 +18102,14 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
               end if
               ! NOTE: updateTotalInflow1d2d, updateTotalInflowLat done in flow_finalizesingletimestep().
            end if
-           if (lnx1d > 0) then
-              if (jamapS1Gradient > 0) then
-                 call updateS1Gradient()
-              end if
+        end if
+        if (lnx1d > 0) then
+           if (jamapS1Gradient > 0) then
+              call updateS1Gradient()
            end if
         end if
 
-          call wrimap(tim)
+        call wrimap(tim)
 !         if ( jatidep > 0 ) then
 !            call writidep(tim)
 !         end if

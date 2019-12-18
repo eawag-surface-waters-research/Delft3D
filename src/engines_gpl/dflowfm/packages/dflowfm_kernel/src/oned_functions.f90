@@ -1018,18 +1018,21 @@ module m_oned_functions
 
    end subroutine updateTotalInflowLat
    
-   !> Update water level gradient
+   !> Update water level gradient on 1D flow links.
+   !! Preparation for map output.
    subroutine updateS1Gradient()
-   use m_flow, only: s1Gradient, s1
+   use m_flow, only: s1Gradient, s1, hu, epshu
    use m_flowgeom, only: lnx1d, ln, dx
    implicit none
    integer :: k1, k2, L
    
    s1Gradient = dmiss
-   do L=1, lnx1d
-      k1 = ln(1,L)
-      k2 = ln(2,L)
-      s1Gradient(L) = (s1(k1)-s1(k2))/dx(L)
+   do L=1,lnx1d
+      if (hu(L) > epshu) then
+         k1 = ln(1,L)
+         k2 = ln(2,L)
+         s1Gradient(L) = (s1(k1) - s1(k2)) / dx(L)
+      end if
    end do
    
    end subroutine updateS1Gradient

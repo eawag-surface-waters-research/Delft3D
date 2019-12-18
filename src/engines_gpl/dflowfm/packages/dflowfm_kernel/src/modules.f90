@@ -3441,7 +3441,7 @@ end module m_vegetation
  double precision, allocatable         :: vTotLat(:)    !< [m3] total lateral net inflow, cumulative volume
  
  ! link related, dim = lnx
- double precision, allocatable         :: s1Gradient(:) !< [-] for output purposes: water level gradient on links
+ double precision, allocatable         :: s1Gradient(:) !< [1] For output purposes: water level gradient on flow links
 
 !    Secondary Flow
  double precision, allocatable         :: ducxdx   (:)   !< cell center gradient of x-velocity in x-dir,    (1/s)
