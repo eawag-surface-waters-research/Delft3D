@@ -141,7 +141,7 @@ module m_struc_helper
    end subroutine UpAndDownstreamParameters
    
    !> Calculate FU and RU
-   subroutine furu_iter(fuL, ruL, s1k2, s1k1, u1L, qL, auL, fr, cu, rhsc, dxdt, dx_struc, hu, lambda, Cz)
+   subroutine furu_iter(fuL, ruL, s1k2, s1k1, u1L, qL, auL, fr, cu, rhsc, dxdt, dx_struc, hs1w, lambda, Cz)
       !=======================================================================
       !                       Deltares
       !                One-Two Dimensional Modelling System
@@ -183,7 +183,7 @@ module m_struc_helper
       double precision, intent(in)              :: dxdt     !< dx/dt
       double precision, intent(in), optional    :: Cz       !< Chezy value, used for resistance on structure, see also ::dx_struc.
       double precision, intent(in), optional    :: lambda   !< Extra resistance.
-      double precision, intent(in), optional    :: hu       !< upstream water level.
+      double precision, intent(in), optional    :: hs1w     !< Upstream water depth (based on water level).
       double precision, intent(in), optional    :: dx_struc !< Crest length (in flow direction), used only when lambda is 0 or absent. For resistance on structure.
       !
       ! Local variables
@@ -197,9 +197,9 @@ module m_struc_helper
       !! executable statements -------------------------------------------------------
       !
       dxfrL = 0d0
-      if (present(dx_struc)) then
-         if (lambda ==0d0 .and. Cz > 0d0) then
-            dxfrl = dx_struc*gravity/(Cz*Cz*hu)
+      if (present(Cz) .and. present(lambda) .and. present(hs1w) .and. present(dx_struc)) then
+         if (lambda == 0d0 .and. Cz > 0d0 .and. hs1w > 0d0) then
+            dxfrl = dx_struc*gravity/(Cz*Cz*hs1w)
          endif
       endif
       

@@ -468,7 +468,12 @@ contains
       !! executable statements -------------------------------------------------------
       !
 
-      velhght = uu*uu/(2.0D0*gravity)
+      if (velheight) then
+         velhght = uu*uu/(2.0D0*gravity)
+      else
+         velhght = 0d0
+      end if
+
       elu = hu + velhght
       hs1 = elu - zs
       !
@@ -905,7 +910,8 @@ contains
       double precision               :: dh
       double precision               :: dsqrt
       double precision               :: dxdt
-      double precision               :: hs1
+      double precision               :: hs1  ! Water depth based on upstream energy level
+      double precision               :: hs1w ! Water depth based on upstream water level
       double precision               :: mu
       double precision               :: rhsc
       double precision               :: ustru
@@ -930,7 +936,8 @@ contains
       !
       !     Calculate upstream energy level w.r.t sill
       !
-      hs1 = hu + velhght - zs
+      hs1  = hu + velhght - zs
+      hs1w = hu - zs
       !
       dxdt = dxL/dt
 
@@ -976,7 +983,7 @@ contains
           su = hd
       endif
       
-      call furu_iter(fuL, ruL, su, sd, u1L, qL, auL, ustru, cu, rhsc, dxdt, dx_struc, hu, lambda, Cz)
+      call furu_iter(fuL, ruL, su, sd, u1L, qL, auL, ustru, cu, rhsc, dxdt, dx_struc, hs1w, lambda, Cz)
 
       qL = auL*u1L
    end subroutine flgsfuru
