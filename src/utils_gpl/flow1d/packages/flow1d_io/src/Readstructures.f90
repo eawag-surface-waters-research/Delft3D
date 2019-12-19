@@ -1465,7 +1465,7 @@ module m_readstructures
       success = success .and. check_input_result(success1, st_id, 'crestLevel')
 
       generalst%mugf_pos = 1d0
-      if (success) call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos)
+      if (success) call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%cgf_pos)
 
       generalst%velheight = .true.
       call prop_get(md_ptr, '', 'useVelocityHeight',  generalst%velheight)
@@ -1480,15 +1480,16 @@ module m_readstructures
       generalst%wd1                = generalst%ws
       generalst%wd2                = generalst%ws
       generalst%gateLowerEdgeLevel = 1d10
-      generalst%cgf_pos            = 1d0
-      generalst%cgd_pos            = 1d0
-      generalst%cwf_pos            = 1d0
-      generalst%cwd_pos            = 1d0
-      generalst%cgf_neg            = 1d0
-      generalst%cgd_neg            = 1d0
-      generalst%cwf_neg            = 1d0
-      generalst%cwd_neg            = 1d0
-      generalst%mugf_neg           = generalst%mugf_pos
+      generalst%cgf_pos            = generalst%cgf_pos
+      generalst%cgd_pos            = generalst%cgf_pos
+      generalst%cwf_pos            = generalst%cgf_pos
+      generalst%cwd_pos            = generalst%cgf_pos
+      generalst%cgf_neg            = generalst%cgf_pos
+      generalst%cgd_neg            = generalst%cgf_pos
+      generalst%cwf_neg            = generalst%cgf_pos
+      generalst%cwd_neg            = generalst%cgf_pos
+      generalst%mugf_neg           = 1d0
+      generalst%mugf_pos           = 1d0
       generalst%extraresistance    = 0d0
       generalst%gatedoorheight     = 1d10
       generalst%gateopeningwidth   = generalst%ws
@@ -1518,7 +1519,7 @@ module m_readstructures
       success = success .and. check_input_result(success1, st_id, 'crestLevel')
 
       generalst%mugf_pos = 1d0
-      call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%mugf_pos)
+      call prop_get_double(md_ptr, '', 'corrCoeff',  generalst%cgf_pos)
 
       generalst%ws = 1d10
       call prop_get_double(md_ptr, '', 'crestWidth',  generalst%ws)
@@ -1540,15 +1541,16 @@ module m_readstructures
       generalst%wu2                = generalst%ws
       generalst%wd1                = generalst%ws
       generalst%wd2                = generalst%ws
-      generalst%cgf_pos            = 1d0
-      generalst%cgd_pos            = 1d0
-      generalst%cwf_pos            = 1d0
-      generalst%cwd_pos            = 1d0
-      generalst%cgf_neg            = 1d0
-      generalst%cgd_neg            = 1d0
-      generalst%cwf_neg            = 1d0
-      generalst%cwd_neg            = 1d0
-      generalst%mugf_neg           = generalst%mugf_pos
+      generalst%cgf_pos            = generalst%cgf_pos
+      generalst%cgd_pos            = generalst%cgf_pos
+      generalst%cwf_pos            = generalst%cgf_pos
+      generalst%cwd_pos            = generalst%cgf_pos
+      generalst%cgf_neg            = generalst%cgf_pos
+      generalst%cgd_neg            = generalst%cgf_pos
+      generalst%cwf_neg            = generalst%cgf_pos
+      generalst%cwd_neg            = generalst%cgf_pos
+      generalst%mugf_neg           = 1d0
+      generalst%mugf_pos           = 1d0
       generalst%extraresistance    = 0d0
       generalst%gatedoorheight     = 1d10
       generalst%gateopeningwidth   = 0d0
