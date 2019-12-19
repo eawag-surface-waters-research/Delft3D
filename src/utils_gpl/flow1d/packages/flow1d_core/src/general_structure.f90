@@ -1056,7 +1056,7 @@ contains
          totalWidth = totalWidth + wu(Lf)
       end do
 
-      if (SkipDimensionChecks) then
+      if (SkipDimensionChecks .or. numlinks==1) then
          genstru%ws_actual = genstru%ws
       else
          genstru%ws_actual = max(0d0, min(totalWidth, genstru%ws))

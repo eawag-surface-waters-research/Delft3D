@@ -36936,7 +36936,8 @@ end subroutine setbobs_fixedweirs
  double precision :: bui, cu, du, du0, gdxi, ds, riep, as, gdxids
  double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
  double precision :: qk0, qk1, dzb, hdzb, z00  !
- double precision :: as1, as2, qtotal, width1, width, st2, cmustr, wetdown, dpt
+ double precision :: as1, as2, qtotal, width, st2, cmustr, wetdown, dpt
+ double precision :: maxwidth1, maxwidth2
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
  double precision :: hminlwi,fsqrtt
  double precision :: perimeter, conv, czdum
@@ -37156,10 +37157,10 @@ end subroutine setbobs_fixedweirs
                    case (ST_GENERAL_ST)
                       firstiter = .true.
                       dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
+                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
                       dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width1)
-                      width = min(width, width1)
+                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
+                      width = min(maxwidth1, maxwidth2)
                       wu(L) = width
 
                       call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
@@ -44954,7 +44955,7 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
       call GetCSParsTotal(network%adm%line2cross(LL), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       cz = 0d0
-      call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, area, perim, width, af_sub, perim_sub)
+      call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, area, perim, width, af_sub = af_sub, perim_sub = perim_sub)
 
       if (calcConv ==1) then
          u1L = u1(LL)

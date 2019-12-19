@@ -103,6 +103,7 @@ contains
       double precision                          :: wArea
       double precision                          :: wPerimiter
       double precision                          :: wWidth
+      double precision                          :: maxwidth
       double precision                          :: hydrRadius
       double precision                          :: dummy
       double precision                          :: frictloss
@@ -215,7 +216,7 @@ contains
 
          ! Initialize = bridge%pcross
          depth = smax - crestLevel
-         call GetCSParsFlow(bridge%pcross, depth, wArea, wPerimiter, wWidth)   
+         call GetCSParsFlow(bridge%pcross, depth, wArea, wPerimiter, wWidth, maxWidth)   
          bridge%flowArea = wArea
          
          ! in case the flow area is limited by the upstream flow area, the hydraulic radius
