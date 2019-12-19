@@ -2501,7 +2501,7 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter, calculationOption)
 end subroutine EggProfile
 
 !> Calculate area, width and perimeter for a circle type cross section 
-subroutine YZProfile(dpt, convtab, i012, area, width, perimeter, u1, cz, conv, frictionType, frictionValue)
+subroutine YZProfile(dpt, convtab, i012, area, width, maxwidth, perimeter, u1, cz, conv, frictionType, frictionValue)
    use m_GlobalParameters
    use m_Roughness
    implicit none
@@ -2510,6 +2510,7 @@ subroutine YZProfile(dpt, convtab, i012, area, width, perimeter, u1, cz, conv, f
    integer,          intent(in)              :: i012           !< 0: use u point, 1: use water level point 1, 2: use water level point 2
    type(t_crsu),     intent(inout)           :: convtab        !< Conveyance table
    double precision, intent(out)             :: width          !< Width at given water depth
+   double precision, intent(out)             :: maxwidth       !< Maximum width for wetted area
    double precision, intent(out)             :: area           !< Wet area
    double precision, intent(out)             :: perimeter      !< Wet perimeter
    double precision, intent(in)   , optional :: u1             !< Flow velocity
@@ -2526,7 +2527,7 @@ double precision   :: c_a, c_b !< variables related to extrapolation
 
 double precision   :: r3, ar1, ar2
 
-
+maxwidth = 0d0
 if (i012 .eq. 0) then                                ! look at u points, mom. eq.
 
    nr = convtab%nru                                    ! number of table entries
@@ -2541,6 +2542,10 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
    enddo
    convtab%iolu = i                                    ! and store last index found
 
+   do i1 = 1, i
+      maxwidth = max(maxwidth, convtab%wf(i1))
+   enddo
+   
    i1  = i                                            ! so i1, i2 always inside table
    i2  = i+1
    hu2 = convtab%hu(i2) ; dh2 = hu2 - dpt
@@ -2554,6 +2559,7 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
       !
       c1    = convtab%wf(i1) ; c2 = convtab%wf(i2)
       width = a1*c1 + a2*c2
+      maxwidth = max(maxwidth, width)
       !
       z1    = convtab%af(i1) ; z2 = convtab%af(i2)
       ar1   = 0.5d0*dh1*(c1 + width)                     ! area above i1
@@ -3375,6 +3381,7 @@ subroutine createTablesForTabulatedProfile(crossDef)
       double precision                      :: f              !< cross = (1-f)*cross1 + f*cross2
       double precision                      :: area 
       double precision                      :: width 
+      double precision                      :: maxwidth
       double precision                      :: perimeter 
       double precision                      :: cz1, cz2
       double precision                      :: conv1, conv2
@@ -3385,10 +3392,10 @@ subroutine createTablesForTabulatedProfile(crossDef)
       f = line2cross%f
       if(cross1%crossIndx == cross2%crossIndx) then
          ! Same Cross-Section, no interpolation needed 
-         call YZProfile(dpt, cross1%convTab, 0, area, width, perimeter, u1, cz, conv, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
+         call YZProfile(dpt, cross1%convTab, 0, area, width, maxwidth, perimeter, u1, cz, conv, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
       else
-         call YZProfile(dpt, cross1%convTab, 0, area, width, perimeter, u1, cz1, conv1, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
-         call YZProfile(dpt, cross2%convTab, 0, area, width, perimeter, u1, cz2, conv2, cross2%frictionTypePos(1), cross2%frictionValuePos(1))
+         call YZProfile(dpt, cross1%convTab, 0, area, width, maxwidth, perimeter, u1, cz1, conv1, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
+         call YZProfile(dpt, cross2%convTab, 0, area, width, maxwidth, perimeter, u1, cz2, conv2, cross2%frictionTypePos(1), cross2%frictionValuePos(1))
          cz   = (1.0d0 - f) * cz1   + f * cz2
          conv = (1.0d0 - f) * conv1 + f * conv2
       endif
