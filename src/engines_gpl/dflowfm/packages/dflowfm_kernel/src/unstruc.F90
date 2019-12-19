@@ -36975,7 +36975,7 @@ end subroutine setbobs_fixedweirs
                    endif
                 endif
              endif
-          else if (iadv(L) == 8) then            ! 1D2D droplosses, coding to avoid evaluating array iadv as long as possible
+          else if (slopedrop1d .or. iadv(L) == 8) then            ! 1d or 1D2D droplosses, coding to avoid evaluating array iadv as long as possible,
              hup = s0(k2) - ( max(bob(1,L), bob(2,L) ) + twot*hu(L) )
              if (hup < 0) then
                 slopec = hup
