@@ -2545,6 +2545,7 @@ end subroutine default_turbulence
  double precision                  :: bedwavelength=0d0     !< bed testcases
 
  double precision                  :: Slopedrop2D       !< Apply losses for 'rain from the roof', only if local bottom slope > Slopedrop2D, only for Slopedrop2D  > 0.0
+ logical                           :: Slopedrop1D       !< Apply losses for all 1d links,
  double precision                  :: drop3D            !< Apply losses in or 3D if downwind z below bob + 2/3 hu
  double precision                  :: zwsbtol = 0d0     !< zws(kb0) = bl - zwsbtol
  integer                           :: keepzlayeringatbed=1 !< only for z layers zws(kb0) = zslay instead of bl
@@ -2982,6 +2983,7 @@ subroutine default_flowparameters()
 
     bedslope    = 0d0    ! bottom inclination testcases
     Slopedrop2D = 0d0    ! Apply droplosses only if local bottom slope > Slopedrop2D, negative = no droplosses
+    SLopedrop1D = .false.
     drop3D      = 1d0    ! Apply droplosses in 3D yes or no 1 or 0
     jacstbnd    = 0
     jajre       = 0
