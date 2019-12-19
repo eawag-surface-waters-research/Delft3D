@@ -39288,7 +39288,7 @@ if (jahisbal > 0) then
             if( Ln(1,La) /= kpump(1,L) ) then
                dir = -1d0
             end if
-            call fill_valstruct_perlink(valpump(:,n), La, dir, ST_PUMP, istru, L)
+            call fill_valstruct_perlink(valpump(:,n), La, dir, ST_PUMP, istru, L-L1pumpsg(n)+1)
          enddo
          call average_valstruct(valpump(:,n), ST_UNSET, 0, 0, 0) ! TODO: UNST-2705: move code above and below to valstruct routines.
          if (istru > 0) then ! TODO: UNST-2587: once all pump code is done, remove this temp IF.
