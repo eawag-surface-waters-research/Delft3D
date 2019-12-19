@@ -4424,7 +4424,7 @@ subroutine reset_flowtimes()
 
     time_waq     = ti_waqs           !< next time for waq output, starting at the output start time
     time_waqset  = tstart_user       !< next time for reset the quantities for waq output
-    time_waqproc = tstart_user       !< next time for wq processes
+    time_waqproc = tstart_user+ti_waqproc !< next time for wq processes
     time_mba = tstart_user+ti_waqbal !< next time for balance update
     if ( ti_stat.gt.0d0 ) then
        time_stat    = tstart_user    !< next model time for simulation statistics output
@@ -5274,7 +5274,7 @@ module m_fm_wq_processes
 
    integer, parameter                        :: NAMWAQLEN = 128
    integer                                   :: ithndlwq = 0                !< overall timer for water quality processes
-   integer                                   :: jawaqproc                   !< switch for water quality processes (1 = substances initiated, 2 = processes activated too)
+   integer                                   :: jawaqproc = 0               !< switch for water quality processes (1 = substances initiated, 2 = processes activated too)
    real(hp)                                  :: waq_vol_dry_thr = 1.0d-3    !< minimum volume for processes to be active
    real(hp)                                  :: waq_dep_dry_thr = 1.0d-3    !< minimum depth for processes to be active
    integer                                   :: flux_int                    !< flux integration by WAQ (1) or by FM (2, not implemented)

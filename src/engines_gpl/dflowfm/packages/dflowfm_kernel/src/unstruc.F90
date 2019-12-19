@@ -310,10 +310,31 @@ subroutine flow_finalize_usertimestep(iresult)
    double precision, pointer, dimension(:,:) :: xs_ptr, ys_ptr, ucxa_ptr, ucya_ptr, ucmag_ptr, xu_ptr, yu_ptr
    integer, pointer, dimension(:,:)          :: kfs_ptr
    double precision, pointer, dimension(:,:,:) :: const_ptr
+   double precision :: tem_dif
    character(len=255) :: filename_fou_out
 
    iresult = DFM_GENERICERROR
 
+!   call fm_wq_processes_step(dt_user,time_user)
+   if (ti_waqproc > 0) then
+     if (comparereal(time_user, time_waqproc, eps10) == 0) then
+         if ( jatimer.eq.1 ) call starttimer(IFMWAQ)
+         call fm_wq_processes_step(ti_waqproc,time_user)
+         if ( jatimer.eq.1 ) call stoptimer (IFMWAQ)
+         tem_dif = time_user/ti_waqproc
+         time_waqproc = (floor(tem_dif + 0.001d0)+1)*ti_waqproc
+     endif
+   endif
+
+!   call mba_update(time_user)
+   if (ti_waqbal > 0) then
+     if (comparereal(time_user, time_mba, eps10) == 0) then
+         call mba_update(time0)
+         tem_dif = time_user/ti_waqbal
+         time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_waqbal, floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc)
+     endif
+   endif
+      
    if (comparereal(time1, time_user, eps10)>=0)  then
       if (comparereal(time1, time_user, eps10) <=0) then
          time1 = time_user
@@ -10494,6 +10515,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use MessageHandling
  use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, jamd1dfile
  use dfm_error
+ use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
  use m_integralstats
  use m_xbeach_data, only: instat, newstatbc
@@ -10518,6 +10540,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  integer              :: jw, istat, L, ierr
  integer, external    :: flow_flowinit
+ double precision     :: cpu_waqinit
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following 3 lines, See also statements below
@@ -10777,6 +10800,17 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  end if
  call klok(cpu_extra(2,23)) ! end flow init
 
+! initialize waq and add to tracer administration
+ cpu_waqinit = cpu_extra(2,18) - cpu_extra(1,18)
+ call klok(cpu_extra(1,18)) ! waq processes init
+ cpu_extra(1,18) = cpu_extra(1,18) - cpu_waqinit ! deduct first initialisation phase of waq processes
+ if (ti_waqproc > 0) then
+    if ( jawaqproc .eq. 1 ) then
+       call fm_wq_processes_step(ti_waqproc,time_user)
+    endif
+ endif
+ call klok(cpu_extra(2,18)) ! end waq processes init
+ 
  call klok(cpu_extra(1,24)) ! MBA init
  if (ti_waqbal > 0) then
     call mba_init()
@@ -17120,26 +17154,6 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    if (item_nudge_tem /= ec_undef_int .and. janudge > 0 ) then ! .and. .not.l_initphase) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_nudge_tem, irefdate, tzone, tunit, tim)
 !      tmpstr = dumpECMessageStack(LEVEL_INFO, callback_msg)
-   endif
-
-!   call fm_wq_processes_step(dt_user,time_user)
-   if (ti_waqproc > 0) then
-     if (comparereal(tim, time_waqproc, eps10) == 0) then
-         if ( jatimer.eq.1 ) call starttimer(IFMWAQ)
-         call fm_wq_processes_step(ti_waqproc,time_user)
-         if ( jatimer.eq.1 ) call stoptimer (IFMWAQ)
-         tem_dif = tim/ti_waqproc
-         time_waqproc = (floor(tem_dif + 0.001d0)+1)*ti_waqproc
-     endif
-   endif
-
-!   call mba_update(time_user)
-   if (ti_waqbal > 0) then
-     if (comparereal(tim, time_mba, eps10) == 0) then
-         call mba_update(time_user)
-         tem_dif = tim/ti_waqbal
-         time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_waqbal, floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc)
-     endif
    endif
 
    iresult = DFM_NOERR
