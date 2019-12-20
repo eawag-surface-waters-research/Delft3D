@@ -186,11 +186,7 @@ module m_fourier_analysis
           nofou = 0
        else
           ! Initialise arrays for Fourier analysis
-          gdfourier%fconno   = imissval
           gdfourier%fnumcy   = imissval
-          gdfourier%foumask  = imissval
-          gdfourier%idvar    = imissval
-          gdfourier%fouref   = imissval
           !
           gdfourier%ftmsto   = rmissval
           gdfourier%ftmstr   = rmissval
@@ -198,7 +194,6 @@ module m_fourier_analysis
           gdfourier%foufas   = rmissval
           gdfourier%fv0pu    = rmissval
           !
-          gdfourier%fouelp        = ' '
           gdfourier%founam        = ' '
           gdfourier%fouvarnam     = ' '
           gdfourier%fouvarnamlong = ' '
@@ -259,7 +254,6 @@ module m_fourier_analysis
        integer                               :: flayno              ! layer number (ignored)
        integer                               :: sizea, sizeb        ! size of the fourier arrays a and b
        integer                               :: irelp
-       integer                               :: lfile               ! Length of file name
        integer                               :: linenumber          ! Line number in Fourier input file
        integer                               :: nveld               ! actual number of fields encountered in a record
        real(kind=fp)                         :: rstart              ! Start time for fourier analysis
@@ -307,14 +301,7 @@ module m_fourier_analysis
        enddo
        do i = 1, nofouvar
           idvar(:,i)       = 0
-          fouvarnam(i)     = ' '
-          fouvarnamlong(i) = ' '
-          fouvarunit(i)    = ' '
        enddo
-       !
-       ! define length of file name
-       !
-       call remove_leading_spaces(filfou, lfile)
        !
        cdummy = ' '
        !
@@ -345,17 +332,18 @@ module m_fourier_analysis
        !
        founam(ifou) = columns(1)
        !
-       if (founam(ifou)=='wl') then
+       select case (founam(ifou))
+       case ('wl')
           founam(ifou)   = 's1'
           fouref(ifou,1) = fouid
-       elseif (founam(ifou)=='ws') then             ! absolute wind-speed
+       case ('ws')             ! absolute wind-speed
           founam(ifou)   = 'ws'
           fouref(ifou,1) = fouid
-       elseif (founam(ifou)=='ux' .or. founam(ifou)=='uxa') then
+       case ('ux', 'uxa')
           fouref(ifou,1) = fouid
-       elseif (founam(ifou)=='uy' .or. founam(ifou)=='uya') then
+       case ('uy', 'uya')
           fouref(ifou,1) = fouid
-       elseif (founam(ifou)=='eh') then
+       case ('eh')
           !
           ! founam must be s1 to pass through s1 to fouana
           ! use fouelp to flag energy head
@@ -363,16 +351,16 @@ module m_fourier_analysis
           founam(ifou)   = 's1'               ! waterlevel
           fouref(ifou,1) = fouid
           fouelp(ifou)   = 'e'
-       elseif (founam(ifou)=='uc') then        ! absolute cell-centre velocity magnitude
+       case ('uc')        ! absolute cell-centre velocity magnitude
           founam(ifou)   = 'uc'
           fouref(ifou,1) = fouid
-       elseif (founam(ifou)=='qf') then        ! interpolated cell-centre velocities (vector)
+       case ('qf')        ! interpolated cell-centre velocities (vector)
           founam(ifou)     = 'qxk'             ! ucx
           fouref(ifou,1)   = fouid
-       elseif (founam(ifou)=='bs') then
+       case ('bs')
           founam(ifou)     = 'ta'
           fouref(ifou,1)   = fouid
-       elseif (founam(ifou)=='ct') then        ! constituent: temperature (scalar)
+       case ('ct')        ! constituent: temperature (scalar)
           if (ltem/=0) then
              founam(ifou)   = 'r1'
              fconno(ifou)   = ltem
@@ -383,7 +371,7 @@ module m_fourier_analysis
              call warn_flush()
              goto 6666
           endif
-       elseif (founam(ifou)=='cs') then                     ! constituent: salinity (scalar)
+       case ('cs')                     ! constituent: salinity (scalar)
           if (lsal/=0) then
              founam(ifou)   = 'r1'
              fconno(ifou)   = lsal
@@ -394,7 +382,7 @@ module m_fourier_analysis
              call warn_flush()
              goto 6666
           endif
-       else                                                 ! constituent, anything else
+       case default                    ! constituent, anything else
           read (founam(ifou)(2:2), '(i1)', iostat=iostat) fconno(ifou)
           if (iostat /= 0) then
              msgbuf = 'Unable to initialize fourier analysis for ''' // trim(founam(ifou)) // '''.'
@@ -409,7 +397,7 @@ module m_fourier_analysis
           endif
           founam(ifou)   = 'r1'
           fouref(ifou,1) = fouid
-       endif
+       end select
        !
        ! read start time, stop time, number of cycles
        !       determine corresponding integer time step numbers and frequency
@@ -540,7 +528,8 @@ module m_fourier_analysis
        do ifou = 1, nofou
           fouref(ifou,2)   = ivar + 1
           write(cref,'(i3.3)') fouref(ifou,1)
-          if (fouelp(ifou)=='x') then
+          select case (fouelp(ifou))
+          case ('x')
              ivar = ivar + 1
              fouvarnam(ivar) = "fourier" // cref // "_max"
              fouvarnamlong(ivar) = "maximum value"
@@ -555,7 +544,7 @@ module m_fourier_analysis
                 fouvarnam    (ivar) = trim(fouvarnam    (ivar)) // "_inidryonly"
                 fouvarnamlong(ivar) = trim(fouvarnamlong(ivar)) // ", initially dry points only"
              endif
-          elseif (fouelp(ifou)=='e') then
+          case ('e')
              ivar = ivar + 1
              fouvarnam(ivar) = "fourier" // cref // "_max"
              fouvarnamlong(ivar) = "maximum value"
@@ -564,7 +553,7 @@ module m_fourier_analysis
                 fouvarnam    (ivar) = trim(fouvarnam    (ivar)) // "_inidryonly"
                 fouvarnamlong(ivar) = trim(fouvarnamlong(ivar)) // ", initially dry points only"
              endif
-          elseif (fouelp(ifou)=='i') then
+          case ('i')
              ivar = ivar + 1
              fouvarnam(ivar) = "fourier" // cref // "_min"
              fouvarnamlong(ivar) = "minimum value"
@@ -575,12 +564,12 @@ module m_fourier_analysis
                 fouvarnamlong(ivar) = "minimum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
              endif
-          elseif (fouelp(ifou)=='a') then
+          case ('a')
              ivar = ivar + 1
              fouvarnam(ivar) = "fourier" // cref // "_avg"
              fouvarnamlong(ivar) = "average value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
-          else
+          case default
              if (fnumcy(ifou)==0) then          ! zero fourier mode without further notice means 'MEAN'
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_mean"
@@ -596,7 +585,7 @@ module m_fourier_analysis
                 fouvarnamlong(ivar) = "Fourier phase"
                 fouvarunit(ivar)    = "degree"
              endif
-          endif
+          end select
        enddo
 
        ! init fourier arrays
@@ -913,16 +902,6 @@ end subroutine setfouunit
              nofouvar = nofouvar + 2
           endif
        !
-       ! requested fourier analysis cell-centre vertically average velocities
-       !
-       elseif (columns(1)(1:3)=='uva') then
-          nofou = nofou + 2
-          if (numcyc == 0) then
-             nofouvar = nofouvar + 2
-          else
-             nofouvar = nofouvar + 4
-          endif
-       !
        ! requested fourier analysis wind-speed
        !
        elseif (columns(1)(1:2)=='ws') then
@@ -1058,9 +1037,7 @@ end subroutine setfouunit
 
     if (nofou > 0) then
        nfou = 0
-       ifou = 1
-       do
-          if (ifou > nofou) exit
+       do ifou = 1, nofou
           !
           ! Perform Fourier analysis, as long TIME0 lies in requested time interval FTMSTR and FTMSTO
           !
@@ -1092,7 +1069,6 @@ end subroutine setfouunit
              continue         ! Unknown FourierVariable exception
           end select
           call fouana(ifou, time0, fieldptr1, bl, dtw, nfou)
-          ifou = ifou + 1
        enddo
 
        if (allocated(wmag)) deallocate(wmag)
