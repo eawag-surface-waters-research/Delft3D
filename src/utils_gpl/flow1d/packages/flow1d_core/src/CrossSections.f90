@@ -1342,6 +1342,7 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
 
    type(t_CSType), pointer           :: crossDef
    double precision                  :: widgr
+   double precision                  :: maxFlowWidth1
    logical                           :: getSummerDikes
    double precision                  :: af_sub_local(3)      
    double precision                  :: perim_sub_local(3)      
@@ -1364,14 +1365,14 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       else
          getSummerDikes = .true.
       endif
-      call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, maxFlowWidth, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL, hysteresis)
+      call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, maxFlowWidth1, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL, hysteresis)
    case (CS_CIRCLE)
-      call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, maxFlowWidth, wetPerimeter, CS_TYPE_NORMAL)
+      call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, maxFlowWidth1, wetPerimeter, CS_TYPE_NORMAL)
    case (CS_EGG)
       call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
-      maxFlowWidth = 0d0
+      maxFlowWidth1 = flowWidth
    case (CS_YZ_PROF)
-      call YZProfile(dpt, cross%convtab, 0, flowArea, flowWidth, maxFlowWidth, wetPerimeter)
+      call YZProfile(dpt, cross%convtab, 0, flowArea, flowWidth, maxFlowWidth1, wetPerimeter)
    case default
       call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
@@ -1400,6 +1401,9 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
    endif
    if (present(perim_sub)) then
       perim_sub = perim_sub_local
+   endif
+   if (present(maxFlowWidth)) then
+      maxFlowWidth = maxFlowWidth1
    endif
    
 end subroutine GetCSParsFlowCross
