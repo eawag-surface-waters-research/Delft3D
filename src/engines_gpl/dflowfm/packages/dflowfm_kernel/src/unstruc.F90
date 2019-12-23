@@ -7000,9 +7000,9 @@ end subroutine setucxucyucxuucyu
  double precision  :: uu,vv,uucx,uucy, ff, ds, hup, fcor, vcor, fcor1, fcor2, fvcor, fvcorab
  double precision  :: dundn, dutdn, dundt, dutdt, shearvar, delty, vksag6, Cz
  double precision  :: umodLL, volu, hul, dzz, adx, hdx, huv, qL, wcxu, wcyu
- double precision, allocatable:: u1_tmp(:)
+ double precision, allocatable:: u1_tmp(:), vluban(:)
 
- integer           :: nw, L1, L2, kbk, k2k, Ld, Lu, kt, Lb, Lt, Lb1, Lt1, Lb2, Lt2, kb1, kb2, ntmp
+ integer           :: nw, L1, L2, kbk, k2k, Ld, Lu, kt, Lb, Lt, Lb1, Lt1, Lb2, Lt2, kb1, kb2, ntmp, m
 
  double precision  :: depumin  ! external
  double precision  :: horvic   ! external
@@ -7010,7 +7010,7 @@ end subroutine setucxucyucxuucyu
 
  double precision  :: DRL, nuhroller
 
- double precision  :: dxiAu, vicc
+ double precision  :: dxiAu, vicc, vlban, fcLL
 
  integer :: ini = 0
 
@@ -7041,28 +7041,15 @@ end subroutine setucxucyucxuucyu
  else
     call setucxucyucxuucyunew()
  endif
-
- ! set friction velocities umod, tangential velocities v and velocity gradients and windstresses
-
- fcor1 = fcorio ; fcor2 = fcorio 
- !x$OMP PARALLEL DO                           &
- !x$OMP PRIVATE(L,LL,Lb,Lt,k1,k2,cs,sn,hs1,hs2,fcor,fcor1,fcor2,fvcor,vcor,volu,hmin)
- do LL   = lnx1D+1,lnx
+ 
+ !$OMP PARALLEL DO                                  &
+ !$OMP PRIVATE(LL,Lb,Lt,cs,sn,L,k1,k2)
+ do LL   = lnx1D+1,lnx             ! set tangential velocities v
     if (hu(LL) == 0) cycle 
-    n1 = ln(1,LL) ; n2 = ln(2,LL)     
-    hmin = min( hs(n1), hs(n2) )
-
+ 
     call getLbotLtop(LL,Lb,Lt)
     cs = csu(LL)  ; sn = snu(LL) ; v(LL) = 0d0
       
-    if (icorio > 0 .and. jsferic > 0) then 
-        if (icorio >= 4 .and. icorio <= 6) then 
-            fcor1 = fcori(LL) ; fcor2 = fcor1      ! defined at u-point 
-        else 
-            fcor1 = fcori(n1) ; fcor2 = fcori(n2)  ! defined at zeta-points 
-        endif
-    endif
-
     do L = Lb,Lt
        k1 = ln(1,L) ; k2 = ln(2,L)
  
@@ -7076,109 +7063,155 @@ end subroutine setucxucyucxuucyu
        if (kmx > 0) then
           v(LL) = v(LL) + v(L)*Au(L) ! hk: activate when needed
        endif
-
-       if (icorio > 0) then
-          fvcor = 0d0 
-          ! set u tangential
-          if (icorio <= 20) then ! Olga types
-             if ( jasfer3D == 1 ) then
-                 fvcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1)))*fcor1 +  &
-                         (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))*fcor2
-             else
-                 fvcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) )*fcor1 + &    
-                         (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )*fcor2
-             endif
-          else                   ! David types 
-             if (icorio <= 26) then                 ! hs/hu 
-                hs1 = hs(n1) ; hs2 = hs(n2) 
-                if (kmx > 0) then
-                   if ( mod(icorio,2) .ne. 0)  then ! odd nrs get local k-weighting 
-                      hs1 = zws(k1) - zws(k1-1) ; hs2 = zws(k2) - zws(k2-1)
-                   endif
-                endif
-                huv = hu(L)
-             else if (icorio <= 28) then               ! ahus/ahu 
-                hs1 = hus(n1)       ; hs2 = hus(n2) 
-                if (kmx > 0) then
-                   if ( mod(icorio,2) .ne. 0)  then ! odd nrs get local k-weighting 
-                      hs1 = hus(k1) ; hs2 = hus(k2) 
-                   endif
-                endif
-                huv = acl(LL)*hs1 + (1d0-acl(LL))*hs2  
-             else if (icorio <= 30) then               ! like advec33 
-                if ( mod(icorio,2) .ne. 0)  then    ! odd nrs get local k-weighting 
-                     hs1 = vol1(k1) ; hs2 = vol1(k2) 
-                else 
-                     hs1 = vol1(n1) ; hs2 = vol1(n2)  
-                endif
-                huv = acl(LL)*hs1 + (1d0-acl(LL))*hs2  
-             endif
-
-             if (huv > 0) then 
-                if ( jasfer3D == 1 ) then
-                    fvcor =     acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1)))*fcor1*hs1 +  &
-                           (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))*fcor2*hs2 
-                else
-                    fvcor =     acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) )*fcor1*hs1 + &    
-                          (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )*fcor2*hs2
-                endif
-                fvcor = fvcor/ huv 
-             endif 
-
-          endif 
-
-          if (trshcorio > 0) then
-             if ( hmin < trshcorio) then
-                 fvcor = fvcor*hmin/trshcorio
-             endif
-          endif
-          adve(L) = adve(L) - fvcor
-
-          if (Corioadamsbashfordfac > 0d0) then 
-             if (fvcoro(L) .ne. 0d0) then 
-                adve(L) = adve(L) - Corioadamsbashfordfac* (  fvcor - fvcoro(L)  )
-             endif  
-             fvcoro(L) = fvcor 
-          endif 
-       endif
-
     enddo
-
-    if (icorio > 0 .and. Corioadamsbashfordfac > 0d0) then 
-       fvcoro( Lt+1:Lb+kmxL(LL)-1 ) = 0d0  
-    endif
-
     if (kmx > 0) then
        if ( Au(LL) .gt. 0d0 ) then ! hk: activate if needed
            v(LL) = v(LL) / Au(LL)
        endif
     endif
+ enddo 
+ !$OMP END PARALLEL DO
 
- enddo
+ if (icorio > 0 .and. icorio < 40) then   
+    fcor1 = fcorio ; fcor2 = fcorio 
+    !x$OMP PARALLEL DO                           &
+    !x$OMP PRIVATE(L,LL,Lb,Lt,k1,k2,cs,sn,hs1,hs2,fcor,fcor1,fcor2,fvcor,vcor,volu,hmin)
+    do LL   = lnx1D+1,lnx
+       if (hu(LL) == 0) cycle 
+       n1 = ln(1,LL) ; n2 = ln(2,LL)     
+       hmin = min( hs(n1), hs(n2) )
+   
+       call getLbotLtop(LL,Lb,Lt)
+       cs = csu(LL)  ; sn = snu(LL) ; v(LL) = 0d0
+         
+       if (icorio > 0 .and. jsferic > 0) then 
+           if (icorio >= 4 .and. icorio <= 6) then 
+               fcor1 = fcori(LL) ; fcor2 = fcor1      ! defined at u-point 
+           else 
+               fcor1 = fcori(n1) ; fcor2 = fcori(n2)  ! defined at zeta-points 
+           endif
+       endif
+   
+       do L = Lb,Lt
+          k1 = ln(1,L) ; k2 = ln(2,L)
+   
+          if (icorio > 0) then
+             fvcor = 0d0 
+             ! set u tangential
+             if (icorio <= 20) then ! Olga types
+                if ( jasfer3D == 1 ) then
+                    fvcor =      acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1)))*fcor1 +  &
+                            (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))*fcor2
+                else
+                    fvcor =      acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) )*fcor1 + &    
+                            (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )*fcor2
+                endif
+             else                                      ! David types 
+                if (icorio <= 26) then                 ! hs/hu 
+                   hs1 = hs(n1) ; hs2 = hs(n2) 
+                   if (kmx > 0) then
+                      if ( mod(icorio,2) .ne. 0)  then ! odd nrs get local k-weighting 
+                         hs1 = zws(k1) - zws(k1-1) ; hs2 = zws(k2) - zws(k2-1)
+                      endif
+                   endif
+                   huv = hu(L)
+                else if (icorio <= 28) then               ! ahus/ahu 
+                   hs1 = hus(n1)       ; hs2 = hus(n2) 
+                   if (kmx > 0) then
+                      if ( mod(icorio,2) .ne. 0)  then ! odd nrs get local k-weighting 
+                         hs1 = hus(k1) ; hs2 = hus(k2) 
+                      endif
+                   endif
+                   huv = acl(LL)*hs1 + (1d0-acl(LL))*hs2  
+                else if (icorio <= 30) then               ! like advec33 
+                   if ( mod(icorio,2) .ne. 0)  then    ! odd nrs get local k-weighting 
+                        hs1 = vol1(k1) ; hs2 = vol1(k2) 
+                   else 
+                        hs1 = vol1(n1) ; hs2 = vol1(n2)  
+                   endif
+                   huv = acl(LL)*hs1 + (1d0-acl(LL))*hs2  
+                endif
+   
+                if (huv > 0) then 
+                   if ( jasfer3D == 1 ) then
+                       fvcor =     acL(LL) *(-sn*nod2linx(LL,1,ucxq(k1),ucyq(k1)) + cs*nod2liny(LL,1,ucxq(k1),ucyq(k1)))*fcor1*hs1 +  &
+                              (1d0-acL(LL))*(-sn*nod2linx(LL,2,ucxq(k2),ucyq(k2)) + cs*nod2liny(LL,2,ucxq(k2),ucyq(k2)))*fcor2*hs2 
+                   else
+                       fvcor =     acl(LL) *(-sn*ucxq(k1) + cs*ucyq(k1) )*fcor1*hs1 + &    
+                              (1d0-acl(LL))*(-sn*ucxq(k2) + cs*ucyq(k2) )*fcor2*hs2
+                   endif
+                   fvcor = fvcor/ huv 
+                endif 
+   
+             endif 
+   
+             if (trshcorio > 0) then
+                if ( hmin < trshcorio) then
+                    fvcor = fvcor*hmin/trshcorio
+                endif
+             endif
+             adve(L) = adve(L) - fvcor
+   
+             if (Corioadamsbashfordfac > 0d0) then 
+                if (fvcoro(L) .ne. 0d0) then 
+                   adve(L) = adve(L) - Corioadamsbashfordfac* (  fvcor - fvcoro(L)  )
+                endif  
+                fvcoro(L) = fvcor 
+             endif 
+          endif
+   
+       enddo
+   
+       if (icorio > 0 .and. Corioadamsbashfordfac > 0d0) then 
+          fvcoro( Lt+1:Lb+kmxL(LL)-1 ) = 0d0  
+       endif
+  
+    enddo
+ 
+ else if (icorio == 45) then  
 
- !x$OMP END PARALLEL DO
+    do n = 1, size(LLkkk,2)
+       L1  = LLkkk(1,n) 
+       L2  = LLkkk(2,n) 
+       k1  = LLkkk(3,n) 
+       k2  = LLkkk(4,n) 
+       k3  = LLkkk(5,n) 
+       fcLL =  fcorio*(-csu(L1)*snu(L2) + snu(L1)*csu(L2)) 
+       adve(L1) = adve(L1) + 0.25*fcLL   
+       adve(L2) = adve(L2) - 0.25*fcLL  
+    enddo 
 
-! JR: compute depth-averaged tangential velocity in 3D  ! hk: integrated in prev loop, is this necessay each step?
-! if ( kmx.gt.0 ) then
-! !$OMP PARALLEL DO                           &
-! !$OMP PRIVATE(L,LL,Lb,Lt)
-!    do LL=1,Lnx
-!       v(LL) = 0d0
-!
-!       call getLbotLtop(LL,Lb,Lt)
-!       do L = Lb,Lt
-!          v(LL) = v(LL) + v(L)*Au(L)
-!       end do
-!
-!       if ( Au(LL).gt.0d0 ) then
-!          v(LL) = v(LL) / Au(LL)
-!       end if
-!    end do
-!     !$OMP END PARALLEL DO
-! end if
+ else if (icorio >= 65) then  
 
+    if (.not. allocated(vluban) ) then 
+       allocate(vluban(Lnkx)) 
+    endif
 
- !updvertp
+    vluban = 0
+    do m   = 1, mxban                                     ! bz based on netnodes area
+       k   = nban(1,m)
+       n   = nban(2,m)
+       L1  = nban(3,m)
+       L2  = nban(4,m)
+       if (L1 > 0 .and. L2 > 0) then 
+          vlban       = banf(m)*hs(k)
+          if (icorio == 66) then 
+             hs1      = acl(L1)*hs(ln(1,L1)) + (1d0-acl(L1))*hs(ln(2,L1))   
+             hs2      = acl(L2)*hs(ln(1,L2)) + (1d0-acl(L2))*hs(ln(2,L2))   
+             vlban    = 0.5d0*(hs1+hs2) 
+          endif
+          fcLL        = vlban*fcorio*(-csu(L1)*snu(L2) + snu(L1)*csu(L2))  ! tangential L1 L2 
+          adve(L1)    = adve(L1) + u1(L2)*fcLL      
+          adve(L2)    = adve(L2) - u1(L1)*fcLL  
+          vluban(L1)  = vluban(L1)  + vlban     
+          vluban(L2)  = vluban(L2)  + vlban     
+       endif
+    enddo 
+    do L = 1,Lnx
+       adve(L) = adve(L) / vluban(L) 
+    enddo
+ endif
+
 
 ihorvic = 0
 if (vicouv > 0 .or. javiusp == 1 .or. Smagorinsky > 0 .or. Elder > 0 .or. kmx > 0) then
@@ -14688,7 +14721,7 @@ else if (nodval == 27) then
 
  cpusteps = 0; cpusol = 0                            ! timing to zero
  call inisferic()                                    ! also set coriolis :<
- if (icorio > 0 .and. jsferic == 1) then
+ if (icorio > 0) then
     call inifcori()
  endif
  if (Corioadamsbashfordfac > 0) then 
@@ -16709,40 +16742,83 @@ end subroutine flow_initfloodfill
  use m_flow
  use m_sferic
  implicit none
- integer :: ierr, L, k
+ integer :: ierr, L, k, i, LL, LLL, LLLL, k1, k2, k3, n, j
 
- if (allocated(fcori) ) then
-    deallocate(fcori)
- endif
-
- if (icorio <= 6) then 
-    allocate ( fcori(lnx), stat = ierr )
-    call aerr('fcori(lnx)', ierr, lnx  )
-    do L = 1,lnx
-       fcori(L) = 2d0*omega*sin(yu(L)*dg2rd)
-    enddo
- else 
-    allocate ( fcori(ndx), stat = ierr )
-    call aerr('fcori(ndx)', ierr, ndx  )
-    do k = 1,ndx
-       fcori(k) = 2d0*omega*sin(yz(k)*dg2rd)
-    enddo
- endif
-
- if (jacorioconstant == 1) then
-    fcori = 2d0*omega*sin(anglat*dg2rd)
- endif
-
- if ( jasecflow > 0 .and. kmx == 0 ) then
-
-   ! Corilios in flow node, added by Nabi
-    if (allocated(fcoris) ) then
-       deallocate(fcoris)
+ if (jsferic > 0) then 
+    if (allocated(fcori) ) then
+       deallocate(fcori)
     endif
-    allocate ( fcoris(ndx), stat = ierr )
-    call aerr('fcoris(ndx)', ierr, ndx  )
-    do k = 1,ndx
-       fcoris(k) = 2d0*omega*sin(yz(k)*dg2rd)
+   
+    if (icorio <= 6) then 
+       allocate ( fcori(lnx), stat = ierr )
+       call aerr('fcori(lnx)', ierr, lnx  )
+       do L = 1,lnx
+          fcori(L) = 2d0*omega*sin(yu(L)*dg2rd)
+       enddo
+    else 
+       allocate ( fcori(ndx), stat = ierr )
+       call aerr('fcori(ndx)', ierr, ndx  )
+       do k = 1,ndx
+          fcori(k) = 2d0*omega*sin(yz(k)*dg2rd)
+       enddo
+    endif
+   
+    if (jacorioconstant == 1) then
+       fcori = 2d0*omega*sin(anglat*dg2rd)
+    endif
+ 
+    if ( jasecflow > 0 .and. kmx == 0 ) then
+   
+      ! Corilios in flow node, added by Nabi
+       if (allocated(fcoris) ) then
+          deallocate(fcoris)
+       endif
+       allocate ( fcoris(ndx), stat = ierr )
+       call aerr('fcoris(ndx)', ierr, ndx  )
+       do k = 1,ndx
+          fcoris(k) = 2d0*omega*sin(yz(k)*dg2rd)
+       enddo
+    endif
+ endif 
+
+ if (icorio > 40) then 
+    if (allocated(LLkkk) ) then
+       deallocate(LLkkk)
+    endif
+    
+    n = 0 
+    do j = 1,2  ! 1=count, 2=allocate and use
+       if (j == 2) then 
+           allocate ( LLkkk(5,n) , stat = ierr ); LLkkk = 0
+       endif
+       n = 0
+       do L = 1,lnx
+          do i = 1,2
+             k = ln(i,L) 
+             do LL   = 1, nd(k)%lnx                            ! loop over all attached links  k1,L1,k2,L2,k3  
+                LLL  = nd(k)%ln(LL)                            !                              ( 3  1  4  2  5, L) 
+                LLLL = iabs(LLL)
+                if (L < LLLL) then 
+                   n = n + 1
+                   if (j == 2) then 
+                      if (i == 2) then 
+                          k1 = ln(1,L) 
+                          k2 = ln(2,L) 
+                      else 
+                          k1 = ln(2,L) 
+                          k2 = ln(1,L) 
+                      endif
+                      k3 = ln(1,LLLL) + ln(2,LLLL) - k2 
+                      LLkkk(1,n) = L
+                      LLkkk(2,n) = LLLL
+                      LLkkk(3,n) = k1
+                      LLkkk(4,n) = k2
+                      LLkkk(5,n) = k3
+                   endif
+                endif
+             enddo
+          enddo           
+       enddo
     enddo
  endif
 
@@ -24966,15 +25042,19 @@ subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefi
           ikp(nyz) = 1
           do n1  = 2, nyz-1
              n0  = n1-1 ; n2 = n1+1
-             y02 = yy(n2) - yy(n0)
-             y01 = yy(n2) - yy(n1)
-             a   = y01/y02 ; b = 1d0 - a
-             zn1 = a*zz(n0) + b*zz(n2)   ! fix for e02_f04_c104
-             dif = abs(zz(n1) - zn1)
-             if (dif > tolzprof) then
+             if ( (zz(n1)-zz(n0))*(zz(n2)-zz(n1)) < 0) then ! do not touch local maxima or minima
                 ikp(n1) = 1
-             else
-                ikp(n1) = 0
+             else 
+                y02 = yy(n2) - yy(n0)
+                y01 = yy(n1) - yy(n0)
+                b   = y01/y02 ; a = 1d0 - b
+                zn1 = a*zz(n0) + b*zz(n2)  
+                dif = abs(zz(n1) - zn1)
+                if (dif > tolzprof) then
+                   ikp(n1) = 1
+                else
+                   ikp(n1) = 0
+                endif
              endif
           enddo
           n = 0
