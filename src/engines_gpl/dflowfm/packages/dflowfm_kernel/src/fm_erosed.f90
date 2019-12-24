@@ -737,6 +737,7 @@
    use m_xbeach_paramsconst
    use m_tables, only: interpolate
    use m_partitioninfo
+   use compbsskin_module, only: compbsskin
    !
    implicit none
    !
@@ -1381,7 +1382,7 @@
          !
          call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
                           & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
-                          & rhowat(kbed), vismol, gdp%gdsedpar)
+                          & rhowat(kbed), vismol, stmpar%sedpar)
       else
          !
          ! use max bed shear stress, rather than mean

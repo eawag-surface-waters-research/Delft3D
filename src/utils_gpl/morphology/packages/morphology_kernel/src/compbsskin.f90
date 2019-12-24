@@ -1,6 +1,4 @@
-subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
-                     & teta  , thcmud, mudfrac, taumax, rhowat, vicmol, &
-                     & sedpar)
+module compbsskin_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -29,6 +27,13 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
+!-------------------------------------------------------------------------------
+
+contains
+
+subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
+                     & teta  , thcmud, mudfrac, taumax, rhowat, vicmol, &
+                     & sedpar)
 !!--description-----------------------------------------------------------------
 !
 ! Compute tau in case of muddy bed (skin fraction  only)
@@ -46,11 +51,6 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 !             at least 1 cm/s
 !          8) Mutiple mud fractions, each fraction own kssilt and kssand?????
 !
-!          03/10/2005: instead of mudcnt thcmud is used
-!                      thcmud  < 0.01 then use kssand!!!!
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
@@ -77,7 +77,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     logical          , intent(in)  :: wave    ! wave impacts included in flow comp. or not
     real(fp)         , intent(in)  :: rhowat  ! water density
     real(fp)         , intent(in)  :: vicmol  ! molecular viscosity
-    type(sedpar_type), pointer     :: sedpar
+    type(sedpar_type), target      :: sedpar
 !
 ! Local variables
 !
@@ -264,3 +264,5 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
        taumax = 0.0_fp
     endif
 end subroutine compbsskin
+
+end module compbsskin_module

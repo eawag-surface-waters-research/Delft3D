@@ -69,6 +69,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     use bedcomposition_module
     use morphology_data_module
     use sediment_basics_module
+    use compbsskin_module, only: compbsskin
     use globaldata
     use dfparall
     !
