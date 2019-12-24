@@ -199,8 +199,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     character(256)   , dimension(:)      , pointer :: dll_usrfil
     logical                              , pointer :: bsskin
     real(fp)         , dimension(:)      , pointer :: thcmud
-    real(fp)                             , pointer :: kssilt
-    real(fp)                             , pointer :: kssand
     logical                              , pointer :: oldmudfrac
     logical                              , pointer :: flmd2l
     real(prec)       , dimension(:,:)    , pointer :: bodsed 
@@ -520,8 +518,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     dll_usrfil          => gdp%gdtrapar%dll_usrfil
     bsskin              => gdp%gdsedpar%bsskin
     thcmud              => gdp%gdsedpar%thcmud
-    kssilt              => gdp%gdsedpar%kssilt
-    kssand              => gdp%gdsedpar%kssand
     oldmudfrac          => gdp%gdmorpar%oldmudfrac
     flmd2l              => gdp%gdprocs%flmd2l
     depfac              => gdp%gdmorpar%flufflyr%depfac

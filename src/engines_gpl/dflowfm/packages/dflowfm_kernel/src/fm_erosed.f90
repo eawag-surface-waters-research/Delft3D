@@ -79,8 +79,6 @@
    real(fp)         , dimension(:)      , pointer :: sedtrcfac
    logical                              , pointer :: bsskin
    real(fp)         , dimension(:)      , pointer :: thcmud
-   real(fp)                             , pointer :: kssilt
-   real(fp)                             , pointer :: kssand
    real(fp)         , dimension(:, :)   , pointer :: dss     !  Description and declaration in esm_alloc_real.f90
 
    ! morpar
@@ -534,8 +532,6 @@
    sedtrcfac           => stmpar%sedpar%sedtrcfac
    bsskin              => stmpar%sedpar%bsskin
    thcmud              => stmpar%sedpar%thcmud
-   kssilt              => stmpar%sedpar%kssilt
-   kssand              => stmpar%sedpar%kssand
    dss                 => stmpar%sedpar%dss
    ! morpar
    thresh              => stmpar%morpar%thresh
