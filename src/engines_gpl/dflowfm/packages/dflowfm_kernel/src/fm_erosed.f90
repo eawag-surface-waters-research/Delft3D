@@ -1379,10 +1379,9 @@
          !
          ! Compute bed stress resulting from skin friction
          !
-         call compbsskin   (umean   , vmean     , h1      , wave    , &
-                          & uorb(nm), twav  (nm)  , phiwav(nm), kssilt  , &
-                          & kssand  , thcmud(nm), taub(nm)    , rhowat(kbed), &
-                          & vismol  )
+         call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
+                          & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
+                          & rhowat(kbed), vismol, gdp%gdsedpar)
       else
          !
          ! use max bed shear stress, rather than mean

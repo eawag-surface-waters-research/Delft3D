@@ -189,6 +189,11 @@ integer,parameter, public  :: MOR_STAT_CUM = 16
 integer,parameter,public   :: MOR_STAT_TIME= 1
 integer,parameter,public   :: MOR_STAT_BODS= 2
 !
+! Soulsby & Clarke skin friction options
+!
+integer,parameter,public   :: SC_MUDTHC  = 1
+integer,parameter,public   :: SC_MUDFRAC = 2
+!
 ! collection of morphology output options
 !
 type moroutputtype
@@ -506,8 +511,10 @@ type sedpar_type
     real(fp) :: csoil     !  concentration at bed used in hindered settling formulation
     real(fp) :: mdcuni    !  mud content / mud fraction uniform value (non-zero only
                           !  if mud is not included simulation)
-    real(fp) :: kssilt    !  ks value for silt for Soulsby 2004 formulation
-    real(fp) :: kssand    !  ks value for sand
+    real(fp) :: kssilt    !  ks value for silt for Soulsby 2004 formulation (used below sc_cmf1)
+    real(fp) :: kssand    !  ks value for sand (used above sc_cmf2)
+    real(fp) :: sc_cmf1   !  lower critical mud factor for determining bed roughness length for Soulsby & Clarke (2005)
+    real(fp) :: sc_cmf2   !  upper critical mud factor for determining bed roughness length for Soulsby & Clarke (2005)
     real(fp) :: version   !  interpreter version
     !
     ! reals
@@ -516,6 +523,7 @@ type sedpar_type
     ! integers
     !
     integer  :: nmudfrac  !  number of simulated mud fractions
+    integer  :: sc_mudfac !  formulation used for determining bed roughness length for Soulsby & Clarke (2005): SC_MUDFRAC, or SC_MUDTHC
     !
     ! pointers
     !
@@ -1152,11 +1160,24 @@ subroutine nullsedpar(sedpar)
 !
 !! executable statements -------------------------------------------------------
 !
+    sedpar%csoil    = 1.0e4_fp
     sedpar%mdcuni   = 0.0_fp
+    sedpar%kssilt   = 0.0_fp
+    sedpar%kssand   = 0.0_fp
+    sedpar%sc_cmf1  = 0.01_fp
+    sedpar%sc_cmf2  = 0.01_fp
+    sedpar%kssand   = 0.0_fp
+    sedpar%version  = 2.0_fp
+    !
     sedpar%nmudfrac = 0
+    sedpar%sc_mudfac= SC_MUDTHC
+    !
+    sedpar%anymud   = .false.
+    sedpar%bsskin   = .false.
+    !
     sedpar%flsdia   = ' '
     sedpar%flsmdc   = ' '
-    sedpar%version  = 2.0_fp
+    sedpar%flspmc   = ' '
     !
     nullify(sedpar%sedblock)
     nullify(sedpar%rhosol)

@@ -70,7 +70,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)                           , pointer :: mdcuni
     real(fp)                           , pointer :: kssilt
     real(fp)                           , pointer :: kssand
+    real(fp)                           , pointer :: sc_cmf1
+    real(fp)                           , pointer :: sc_cmf2
     integer                            , pointer :: nmudfrac
+    integer                            , pointer :: sc_mudfac
     real(fp)         , dimension(:)    , pointer :: rhosol
     real(fp)         , dimension(:,:,:), pointer :: logseddia
     real(fp)         , dimension(:)    , pointer :: logsedsig
@@ -158,6 +161,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     character(256)              :: rec
     character(300)              :: message
     character(80)               :: parname
+    character(2)                :: sc_type
     character(20)               :: sedtype             ! Local variable for sediment type
     character(78)               :: string
     character(10)               :: versionstring
@@ -171,7 +175,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     mdcuni               => sedpar%mdcuni
     kssilt               => sedpar%kssilt
     kssand               => sedpar%kssand
+    sc_cmf1              => sedpar%sc_cmf1
+    sc_cmf2              => sedpar%sc_cmf2
     nmudfrac             => sedpar%nmudfrac
+    sc_mudfac            => sedpar%sc_mudfac
     rhosol               => sedpar%rhosol
     logseddia            => sedpar%logseddia
     logsedsig            => sedpar%logsedsig
@@ -437,6 +444,33 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           kssand = 0.0_fp
           call prop_get(sed_ptr, 'SedimentOverall', 'KsSilt', kssilt)
           call prop_get(sed_ptr, 'SedimentOverall', 'KsSand', kssand)
+          !
+          sc_type = 'thickness'
+          call prop_get(sed_ptr, 'SedimentOverall', 'SC_mudfactor', sc_type)
+          call str_lower(sc_type)
+          select case (sc_type)
+          case ('fraction')
+             sc_mudfac = SC_MUDFRAC
+          case ('thickness')
+             sc_mudfac = SC_MUDTHC
+          case default
+             errmsg = 'Unknown option for sc_mudfactor. Expecting ''fraction'' or ''thickness''.'
+             call write_error(errmsg, unit=lundia)
+             error = .true.
+             return
+          end select
+          !
+          sc_cmf1 = 0.01_fp
+          sc_cmf2 = 0.01_fp
+          call prop_get(sed_ptr, 'SedimentOverall', 'SC_cmf1', sc_cmf1)
+          call prop_get(sed_ptr, 'SedimentOverall', 'SC_cmf2', sc_cmf2)
+          if (sc_mudfac == SC_MUDFRAC) then
+             sc_cmf1 = max(0.0_fp , min(sc_cmf1, 1.0_fp))
+             sc_cmf2 = max(sc_cmf1, min(sc_cmf2, 1.0_fp))
+          else
+             sc_cmf1 = max(0.0_fp , sc_cmf1)
+             sc_cmf2 = max(sc_cmf1, sc_cmf2)
+          endif
        endif
        !
        do l = 1, lsedtot
@@ -950,6 +984,9 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     real(fp)                          , pointer :: mdcuni
     real(fp)                          , pointer :: kssilt
     real(fp)                          , pointer :: kssand
+    real(fp)                          , pointer :: sc_cmf1
+    real(fp)                          , pointer :: sc_cmf2
+    integer                           , pointer :: sc_mudfac
     real(fp)        , dimension(:)    , pointer :: rhosol
     real(fp)        , dimension(:,:,:), pointer :: logseddia
     real(fp)        , dimension(:)    , pointer :: logsedsig
@@ -1002,6 +1039,9 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     mdcuni               => sedpar%mdcuni
     kssilt               => sedpar%kssilt
     kssand               => sedpar%kssand
+    sc_cmf1              => sedpar%sc_cmf1
+    sc_cmf2              => sedpar%sc_cmf2
+    sc_mudfac            => sedpar%sc_mudfac
     rhosol               => sedpar%rhosol
     logseddia            => sedpar%logseddia
     logsedsig            => sedpar%logsedsig
@@ -1087,6 +1127,18 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     if (bsskin) then
        txtput1 = 'Skin friction Soulsby 2004'
        write (lundia, '(a)') txtput1
+       !
+       select case (sc_mudfac)
+       case (SC_MUDFRAC)
+          txtput2 = 'fraction'
+       case (SC_MUDTHC)
+          txtput2 = 'thickness'
+       end select
+       txtput1 = 'Lower crit mud '//txtput2
+       write (lundia, '(2a,f12.6)') txtput1,':', sc_cmf1
+       txtput1 = 'Upper crit mud '//txtput2
+       write (lundia, '(2a,f12.6)') txtput1,':', sc_cmf2
+       !
        txtput1 = 'Kssilt '
        write (lundia, '(2a,f12.6)') txtput1,':', kssilt
        txtput1 = 'Kssand '

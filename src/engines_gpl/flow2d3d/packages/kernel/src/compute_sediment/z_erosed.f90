@@ -846,10 +846,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           ! Compute bed stress resulting from skin friction
           !
-          call compbsskin   (umean   , vmean     , h1      , wave    , &
-                           & uorb(nm), tp  (nm)  , teta(nm), kssilt  , &
-                          & kssand  , thcmud(nm), taub    , rhowat(nm,kbed), &
-                           & vicmol  )
+          call compbsskin(umean, vmean, h1, wave, uorb(nm), tp(nm), &
+                           & teta(nm), thcmud(nm), mudfrac(nm), taub, &
+                           & rhowat(nm,kbed), vicmol, gdp%gdsedpar)
        else
           !
           ! use max bed shear stress, rather than mean

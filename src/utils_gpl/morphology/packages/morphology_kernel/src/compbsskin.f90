@@ -1,6 +1,6 @@
 subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
-                     & teta  , kssilt, kssand, thcmud, taumax, rhowat, &
-                     & vicmol)
+                     & teta  , thcmud, mudfrac, taumax, rhowat, vicmol, &
+                     & sedpar)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -54,6 +54,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
+    use morphology_data_module, only:sedpar_type, SC_MUDFRAC
     !
     implicit none
 !
@@ -63,41 +64,41 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 !
 ! Global variables
 !
-    real(fp), intent(in)  :: umean  ! depth averaged flow velocity in u-direction
-    real(fp), intent(in)  :: vmean  ! depth averaged flow velocity in v-direction
-    real(fp), intent(in)  :: depth  ! local water depth
-    real(fp), intent(in)  :: uorb   ! orbital velocity based upon Hrms
-    real(fp), intent(in)  :: tper   ! wave period
-    real(fp), intent(in)  :: teta   ! angle between wave direction and local
-                                    ! grid orientation
-    real(fp), intent(in)  :: kssilt ! roughness height silt
-    real(fp), intent(in)  :: kssand ! roughness height sand
-    real(fp), intent(in)  :: thcmud ! Total hickness of mud layers
-                                    !(to be replaced by mudcnt in future)
-    real(fp), intent(out) :: taumax ! resulting (maximum) bed shear stress muddy silt bed
-    logical , intent(in)  :: wave   ! wave impacts included in flow comp. or not
-    real(fp), intent(in)  :: rhowat ! water density
-    real(fp), intent(in)  :: vicmol ! molecular viscosity
+    real(fp)         , intent(in)  :: umean   ! depth averaged flow velocity in u-direction
+    real(fp)         , intent(in)  :: vmean   ! depth averaged flow velocity in v-direction
+    real(fp)         , intent(in)  :: depth   ! local water depth
+    real(fp)         , intent(in)  :: uorb    ! orbital velocity based upon Hrms
+    real(fp)         , intent(in)  :: tper    ! wave period
+    real(fp)         , intent(in)  :: teta    ! angle between wave direction and local
+                                              ! grid orientation
+    real(fp)         , intent(in)  :: thcmud  ! Total hickness of mud layers
+    real(fp)         , intent(in)  :: mudfrac ! Total mud fraction in top layer
+    real(fp)         , intent(out) :: taumax  ! resulting (maximum) bed shear stress muddy silt bed
+    logical          , intent(in)  :: wave    ! wave impacts included in flow comp. or not
+    real(fp)         , intent(in)  :: rhowat  ! water density
+    real(fp)         , intent(in)  :: vicmol  ! molecular viscosity
+    type(sedpar_type), pointer     :: sedpar
 !
 ! Local variables
 !
-    real(fp) :: ar      ! constant rough  bed turbulent flow
-    real(fp) :: as      ! constant smooth bed turbulent flow
-    real(fp) :: z0silt  ! roughness height
-    real(fp) :: umod    ! magnitude depth averaged flow velocity
-    real(fp) :: uorbm   ! maximum uorb and 1 cm/s
-    real(fp) :: phicur  ! angle beteen mean flow and local grid orientation
-    real(fp) :: phiwr   ! angle beteen flow and wave direction
-    real(fp) :: aorb    ! orbital displacement
-    real(fp) :: rec     ! Reynolds number flow
-    real(fp) :: rew     ! Reynolds number waves
+    real(fp) :: a1      ! Help variable
+    real(fp) :: a2      ! Help variable
+    real(fp) :: alpha   ! Help variable
+    real(fp) :: ar      ! Constant rough  bed turbulent flow
+    real(fp) :: as      ! Constant smooth bed turbulent flow
+    real(fp) :: aorb    ! Orbital displacement
     real(fp) :: cdr     ! Drag coefficient rough  turbulent flows
     real(fp) :: cdm     ! Mean drag coefficient (current)
     real(fp) :: cds     ! Drag coefficient smooth turbulent flows
     real(fp) :: cdmax   ! Drag coefficient (current + waves)
     real(fp) :: fws     ! Wave friction coeefficient smooth turbulent flows
     real(fp) :: fwr     ! Wave friction coeefficient rough  turbulent flows
+    real(fp) :: mudfac  ! Characteristic mud factor (fraction or thickness)
+    real(fp) :: phicur  ! Angle beteen mean flow and local grid orientation
+    real(fp) :: phiwr   ! Angle beteen flow and wave direction
+    real(fp) :: rec     ! Reynolds number flow
     real(fp) :: reccr   ! Critcal Reynolds number current
+    real(fp) :: rew     ! Reynolds number waves
     real(fp) :: rewcr   ! Critcal Reynolds number waves
     real(fp) :: taum    ! Mean shear stress
     real(fp) :: tauw    ! Shear stress (waves)
@@ -108,11 +109,23 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     real(fp) :: t1      ! Help variable
     real(fp) :: t2      ! Help variable
     real(fp) :: t3      ! Help variable
-    real(fp) :: a1      ! Help variable
-    real(fp) :: a2      ! Help variable
+    real(fp) :: umod    ! Magnitude depth averaged flow velocity
+    real(fp) :: uorbm   ! Maximum uorb and 1 cm/s
+    real(fp) :: z0silt  ! Roughness height
+    !
+    integer , pointer :: sc_mudfac  ! flag variable indicating mud factor
+    real(fp), pointer :: kssilt     ! roughness height silt
+    real(fp), pointer :: kssand     ! roughness height sand
+    real(fp), pointer :: sc_cmf1    ! critical mud factor
+    real(fp), pointer :: sc_cmf2    ! critical mud factor
 !
 !! executable statements -------------------------------------------------------
 !
+    sc_mudfac => sedpar%sc_mudfac
+    kssilt    => sedpar%kssilt
+    kssand    => sedpar%kssand
+    sc_cmf1   => sedpar%sc_cmf1
+    sc_cmf2   => sedpar%sc_cmf2
     !
     ! Set constants
     !
@@ -124,11 +137,20 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     !
     umod   = max( sqrt(umean*umean + vmean*vmean) , localeps )
     !
-    if (thcmud > 0.01_fp) then
-       z0silt = max( kssilt/30.0_fp , localeps )
+    if (sc_mudfac == SC_MUDFRAC) then
+       mudfac = mudfrac
     else
-       z0silt = max( kssand/30.0_fp , localeps )
+       mudfac = thcmud
     endif
+    if (mudfac > sc_cmf2) then
+       alpha = 1.0_fp
+    elseif (mudfac > sc_cmf1) then
+       alpha = (mudfac - sc_cmf1) / (sc_cmf2 - sc_cmf1)
+       alpha = 3.0_fp * alpha**2 - 2.0_fp * alpha**3
+    else
+       alpha = 0.0_fp
+    endif
+    z0silt = max( (alpha*kssilt+(1.0_fp-alpha)*kssand)/30.0_fp , localeps )
     !
     rec    = umod * depth / vicmol
     cds    = 1.615e-4_fp * exp(6.0_fp * rec**(-0.08_fp))
