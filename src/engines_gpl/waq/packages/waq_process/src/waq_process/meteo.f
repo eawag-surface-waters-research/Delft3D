@@ -52,7 +52,7 @@
 !
 !     aantal meteo stations
 !
-      PARAMETER (MAXSTA=5)
+      PARAMETER (MAXSTA=10)
 !
 !     aantal variabelen per station
 !
@@ -70,7 +70,7 @@
       DIMENSION IP((MAXSTA+1)* MAXVAR +  MAXSTA*2 + NP)
       DIMENSION DIST(MAXSTA), WFAC(MAXSTA)
 
-      DO 10 I=1,(MAXSTA+1)* MAXVAR +  MAXSTA*2 + NP
+      DO 10 I=1, (MAXSTA + 1)  * MAXVAR +  MAXSTA*2 + NP
         IP(I) = IPOINT(I)
    10 CONTINUE
 !
@@ -211,7 +211,7 @@
       ENDIF
 
 !
-      DO 60 I=1,(MAXSTA+1)* MAXVAR + MAXSTA*2 + NP
+      DO 60 I=1, (MAXSTA + 1) * MAXVAR + MAXSTA*2 + NP
           IP(I) = IP(I) + INCREM (I)
    60 CONTINUE
 

@@ -58,7 +58,9 @@
       REAL               :: REFDAY             ! 4  in  daynumber of reference day simulation          (d)
       REAL               :: AUXSYS             ! 5  in  ratio between days and system clock        (scu/d)
       REAL               :: DAYRADSURF         ! 6  out actual irradiance over the day              (W/m2)
-
+      DOUBLE PRECISION   :: RADDAY             ! 7  out actual irradiance                           (W/m2)
+      DOUBLE PRECISION   :: RADTIME            ! 8  out actual irradiance                           (W/m2)      
+      
 !     local decalrations
 
       DOUBLE PRECISION , PARAMETER :: SIN50M = -1.454389765D-2
@@ -77,13 +79,11 @@
       DOUBLE PRECISION             :: COS_DECLIN
       DOUBLE PRECISION             :: COS_LATITU
       DOUBLE PRECISION             :: COS_OMEGA
-      DOUBLE PRECISION             :: RADTIME
-      DOUBLE PRECISION             :: RADDAY
       LOGICAL                      :: VARFLG
       INTEGER                      :: ISEG
       INTEGER                      :: IKMRK1
-      INTEGER                      :: IP1,IP2,IP3,IP4,IP5,IP6
-      INTEGER                      :: IN1,IN2,IN3,IN4,IN5,IN6
+      INTEGER                      :: IP1,IP2,IP3,IP4,IP5,IP6, IP7, IP8
+      INTEGER                      :: IN1,IN2,IN3,IN4,IN5,IN6, IN7, IN8
 
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
@@ -91,14 +91,19 @@
       IN4  = INCREM( 4)
       IN5  = INCREM( 5)
       IN6  = INCREM( 6)
-
+      IN7  = INCREM( 7)
+      IN8  = INCREM( 8)      
+      
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
       IP4  = IPOINT( 4)
       IP5  = IPOINT( 5)
       IP6  = IPOINT( 6)
-!
+      IP7  = IPOINT( 7)
+      IP8  = IPOINT( 8)
+      
+      !
       VARFLG = .TRUE.
       IF ( IN2 .EQ. 0 .AND. IN3 .EQ. 0 .AND. IN4 .EQ. 0 .AND.
      +     IN5 .EQ. 0                                        ) THEN
@@ -137,7 +142,6 @@
          RADTIME = I0*RDIST*(SIN_DECLIN*SIN_LATITU+COS_DECLIN*COS_LATITU*COS_OMEGA)
          RADTIME = MAX(0.0D0,RADTIME)
          RADDAY  = I0/PI*RDIST*(OMEGA0*SIN_DECLIN*SIN_LATITU+COS_DECLIN*COS_LATITU*SIN_OMEGA0)
-!
       ENDIF
 !
       DO ISEG = 1 , NOSEG
@@ -181,12 +185,13 @@
                RADTIME = I0*RDIST*(SIN_DECLIN*SIN_LATITU+COS_DECLIN*COS_LATITU*COS_OMEGA)
                RADTIME = MAX(0.0D0,RADTIME)
                RADDAY  = I0/PI*RDIST*(OMEGA0*SIN_DECLIN*SIN_LATITU+COS_DECLIN*COS_LATITU*SIN_OMEGA0)
-
             ENDIF
 !
             DAYRADSURF = RADTIME * RADSURF / RADDAY
 
             PMSA (IP6) = DAYRADSURF
+            PMSA (IP7) = RADTIME
+            PMSA (IP8) = RADDAY            
 !
 !        ENDIF
 !
@@ -196,7 +201,9 @@
          IP4   = IP4   + IN4
          IP5   = IP5   + IN5
          IP6   = IP6   + IN6
-!
+         IP7   = IP7   + IN7
+         IP8   = IP8   + IN8
+         !
       ENDDO
 
       RETURN

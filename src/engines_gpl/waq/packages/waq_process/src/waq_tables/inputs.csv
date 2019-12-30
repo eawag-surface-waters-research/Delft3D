@@ -19,53 +19,98 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Meteo     ","RelHum_1  ",   4,"N","x",1
 "Meteo     ","AirTemp_1 ",   5,"N","x",1
 "Meteo     ","AirPres_1 ",   6,"N","x",1
-"Meteo     ","SQ_1      ",   7,"N","x",1
-"Meteo     ","Rad_2     ",   8,"N","x",1
-"Meteo     ","VWind_2   ",   9,"N","x",1
-"Meteo     ","WinDir_2  ",  10,"N","x",1
-"Meteo     ","RelHum_2  ",  11,"N","x",1
-"Meteo     ","AirTemp_2 ",  12,"N","x",1
-"Meteo     ","AirPres_2 ",  13,"N","x",1
-"Meteo     ","SQ_2      ",  14,"N","x",1
-"Meteo     ","Rad_3     ",  15,"N","x",1
-"Meteo     ","VWind_3   ",  16,"N","x",1
-"Meteo     ","WinDir_3  ",  17,"N","x",1
-"Meteo     ","RelHum_3  ",  18,"N","x",1
-"Meteo     ","AirTemp_3 ",  19,"N","x",1
-"Meteo     ","AirPres_3 ",  20,"N","x",1
-"Meteo     ","SQ_3      ",  21,"N","x",1
-"Meteo     ","Rad_4     ",  22,"N","x",1
-"Meteo     ","VWind_4   ",  23,"N","x",1
-"Meteo     ","WinDir_4  ",  24,"N","x",1
-"Meteo     ","RelHum_4  ",  25,"N","x",1
-"Meteo     ","AirTemp_4 ",  26,"N","x",1
-"Meteo     ","AirPres_4 ",  27,"N","x",1
-"Meteo     ","SQ_4      ",  28,"N","x",1
-"Meteo     ","Rad_5     ",  29,"N","x",1
-"Meteo     ","VWind_5   ",  30,"N","x",1
-"Meteo     ","WinDir_5  ",  31,"N","x",1
-"Meteo     ","RelHum_5  ",  32,"N","x",1
-"Meteo     ","AirTemp_5 ",  33,"N","x",1
-"Meteo     ","AirPres_5 ",  34,"N","x",1
-"Meteo     ","SQ_5      ",  35,"N","x",1
-"Meteo     ","XMeteo1   ",  36,"N","x",1
-"Meteo     ","YMeteo1   ",  37,"N","x",1
-"Meteo     ","XMeteo2   ",  38,"N","x",1
-"Meteo     ","YMeteo2   ",  39,"N","x",1
-"Meteo     ","XMeteo3   ",  40,"N","x",1
-"Meteo     ","YMeteo3   ",  41,"N","x",1
-"Meteo     ","XMeteo4   ",  42,"N","x",1
-"Meteo     ","YMeteo4   ",  43,"N","x",1
-"Meteo     ","XMeteo5   ",  44,"N","x",1
-"Meteo     ","YMeteo5   ",  45,"N","x",1
-"Meteo     ","XYScaleFac",  46,"Y","x",1
-"Meteo     ","NoMeteoSta",  47,"Y","x",1
-"Meteo     ","MeteoClcSW",  48,"Y","x",1
-"Meteo     ","XSeg      ",  49,"N","x",1
-"Meteo     ","YSeg      ",  50,"N","x",1
+"Meteo     ","Cloud_1   ",   7,"N","x",1
+"Meteo     ","Rad_2     ",   8,"Y","x",1
+"Meteo     ","VWind_2   ",   9,"Y","x",1
+"Meteo     ","WinDir_2  ",  10,"Y","x",1
+"Meteo     ","RelHum_2  ",  11,"Y","x",1
+"Meteo     ","AirTemp_2 ",  12,"Y","x",1
+"Meteo     ","AirPres_2 ",  13,"Y","x",1
+"Meteo     ","Cloud_2   ",  14,"Y","x",1
+"Meteo     ","Rad_3     ",  15,"Y","x",1
+"Meteo     ","VWind_3   ",  16,"Y","x",1
+"Meteo     ","WinDir_3  ",  17,"Y","x",1
+"Meteo     ","RelHum_3  ",  18,"Y","x",1
+"Meteo     ","AirTemp_3 ",  19,"Y","x",1
+"Meteo     ","AirPres_3 ",  20,"Y","x",1
+"Meteo     ","Cloud_3   ",  21,"Y","x",1
+"Meteo     ","Rad_4     ",  22,"Y","x",1
+"Meteo     ","VWind_4   ",  23,"Y","x",1
+"Meteo     ","WinDir_4  ",  24,"Y","x",1
+"Meteo     ","RelHum_4  ",  25,"Y","x",1
+"Meteo     ","AirTemp_4 ",  26,"Y","x",1
+"Meteo     ","AirPres_4 ",  27,"Y","x",1
+"Meteo     ","Cloud_4   ",  28,"Y","x",1
+"Meteo     ","Rad_5     ",  29,"Y","x",1
+"Meteo     ","VWind_5   ",  30,"Y","x",1
+"Meteo     ","WinDir_5  ",  31,"Y","x",1
+"Meteo     ","RelHum_5  ",  32,"Y","x",1
+"Meteo     ","AirTemp_5 ",  33,"Y","x",1
+"Meteo     ","AirPres_5 ",  34,"Y","x",1
+"Meteo     ","Cloud_5   ",  35,"Y","x",1
+"Meteo     ","Rad_6     ",  36,"Y","x",1
+"Meteo     ","VWind_6   ",  37,"Y","x",1
+"Meteo     ","WinDir_6  ",  38,"Y","x",1
+"Meteo     ","RelHum_6  ",  39,"Y","x",1
+"Meteo     ","AirTemp_6 ",  40,"Y","x",1
+"Meteo     ","AirPres_6 ",  41,"Y","x",1
+"Meteo     ","Cloud_6   ",  42,"Y","x",1
+"Meteo     ","Rad_7     ",  43,"Y","x",1
+"Meteo     ","VWind_7   ",  44,"Y","x",1
+"Meteo     ","WinDir_7  ",  45,"Y","x",1
+"Meteo     ","RelHum_7  ",  46,"Y","x",1
+"Meteo     ","AirTemp_7 ",  47,"Y","x",1
+"Meteo     ","AirPres_7 ",  48,"Y","x",1
+"Meteo     ","Cloud_7   ",  49,"Y","x",1
+"Meteo     ","Rad_8     ",  50,"Y","x",1
+"Meteo     ","VWind_8   ",  51,"Y","x",1
+"Meteo     ","WinDir_8  ",  52,"Y","x",1
+"Meteo     ","RelHum_8  ",  53,"Y","x",1
+"Meteo     ","AirTemp_8 ",  54,"Y","x",1
+"Meteo     ","AirPres_8 ",  55,"Y","x",1
+"Meteo     ","Cloud_8   ",  56,"Y","x",1
+"Meteo     ","Rad_9     ",  57,"Y","x",1
+"Meteo     ","VWind_9   ",  58,"Y","x",1
+"Meteo     ","WinDir_9  ",  59,"Y","x",1
+"Meteo     ","RelHum_9  ",  60,"Y","x",1
+"Meteo     ","AirTemp_9 ",  61,"Y","x",1
+"Meteo     ","AirPres_9 ",  62,"Y","x",1
+"Meteo     ","Cloud_9   ",  63,"Y","x",1
+"Meteo     ","Rad_10    ",  64,"Y","x",1
+"Meteo     ","VWind_10  ",  65,"Y","x",1
+"Meteo     ","WinDir_10 ",  66,"Y","x",1
+"Meteo     ","RelHum_10 ",  67,"Y","x",1
+"Meteo     ","AirTemp_10",  68,"Y","x",1
+"Meteo     ","AirPres_10",  69,"Y","x",1
+"Meteo     ","Cloud_10  ",  70,"Y","x",1
+"Meteo     ","XMeteo1   ",  71,"Y","x",1
+"Meteo     ","YMeteo1   ",  72,"Y","x",1
+"Meteo     ","XMeteo2   ",  73,"Y","x",1
+"Meteo     ","YMeteo2   ",  74,"Y","x",1
+"Meteo     ","XMeteo3   ",  75,"Y","x",1
+"Meteo     ","YMeteo3   ",  76,"Y","x",1
+"Meteo     ","XMeteo4   ",  77,"Y","x",1
+"Meteo     ","YMeteo4   ",  78,"Y","x",1
+"Meteo     ","XMeteo5   ",  79,"Y","x",1
+"Meteo     ","YMeteo5   ",  80,"Y","x",1
+"Meteo     ","XMeteo6   ",  81,"Y","x",1
+"Meteo     ","YMeteo6   ",  82,"Y","x",1
+"Meteo     ","XMeteo7   ",  83,"Y","x",1
+"Meteo     ","YMeteo7   ",  84,"Y","x",1
+"Meteo     ","XMeteo8   ",  85,"Y","x",1
+"Meteo     ","YMeteo8   ",  86,"Y","x",1
+"Meteo     ","XMeteo9   ",  87,"Y","x",1
+"Meteo     ","YMeteo9   ",  88,"Y","x",1
+"Meteo     ","XMeteo10  ",  89,"Y","x",1
+"Meteo     ","YMeteo10  ",  90,"Y","x",1
+"Meteo     ","XYScaleFac",  91,"Y","x",1
+"Meteo     ","NoMeteoSta",  92,"Y","x",1
+"Meteo     ","MeteoClcSW",  93,"Y","x",1
+"Meteo     ","XSeg      ",  94,"Y","x",1
+"Meteo     ","YSeg      ",  95,"Y","x",1
 "HeatBal   ","RadSW     ",   1,"Y","x",1
 "HeatBal   ","fReflSW   ",   2,"Y","x",1
-"HeatBal   ","SunFac    ",   3,"Y","x",1
+"HeatBal   ","Cloud     ",   3,"N","x",1
 "HeatBal   ","SWEmiss   ",   4,"Y","x",1
 "HeatBal   ","TempAir   ",   5,"Y","x",1
 "HeatBal   ","SBC       ",   6,"Y","x",1
@@ -90,6 +135,41 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "HeatBal   ","TempWref  ",  25,"Y","x",1
 "HeatBal   ","SwitchTemp",  26,"Y","x",1
 "HeatBal   ","MinDepthT ",  27,"Y","x",1
+"HeatBal2  ","RadSW     ",   1,"Y","x",1
+"HeatBal2  ","fReflSW   ",   2,"Y","x",1
+"HeatBal2  ","Cloud     ",   3,"N","x",1
+"HeatBal2  ","SWEmiss   ",   4,"Y","x",1
+"HeatBal2  ","TempAir   ",   5,"Y","x",1
+"HeatBal2  ","SBC       ",   6,"Y","x",1
+"HeatBal2  ","fReflA    ",   7,"Y","x",1
+"HeatBal2  ","EmissWat  ",   8,"Y","x",1
+"HeatBal2  ","NatTempp1 ",   9,"N","x",1
+"HeatBal2  ","RhoWat0   ",  10,"Y","x",1
+"HeatBal2  ","CwindA    ",  11,"Y","x",1
+"HeatBal2  ","CwindB    ",  12,"Y","x",1
+"HeatBal2  ","CwindC    ",  13,"Y","x",1
+"HeatBal2  ","VWind     ",  14,"Y","x",1
+"HeatBal2  ","Hwindm    ",  15,"Y","x",1
+"HeatBal2  ","Hwinda    ",  16,"Y","x",1
+"HeatBal2  ","Ctauwind  ",  17,"Y","x",1
+"HeatBal2  ","cpa       ",  18,"Y","x",1
+"HeatBal2  ","PAtm      ",  19,"Y","x",1
+"HeatBal2  ","RadRB     ",  20,"Y"," ",1
+"HeatBal2  ","CP        ",  21,"Y","x",1
+"HeatBal2  ","Depth     ",  22,"N","x",1
+"HeatBal2  ","RelHumAir ",  23,"Y","x",1
+"HeatBal2  ","CorrTemp1D",  24,"Y"," ",1
+"HeatBal2  ","TempWref  ",  25,"Y","x",1
+"HeatBal2  ","SwitchTemp",  26,"Y","x",1
+"HeatBal2  ","MinDepthT ",  27,"Y","x",1
+"SelfCool  ","SurTemp   ",   1,"N","x",1
+"SelfCool  ","HtTot     ",   2,"N","x",1
+"SelfCool  ","HtTot2    ",   3,"N","x",1
+"SelfCool  ","DELT      ",   4,"N"," ",1
+"SelfCool  ","CP        ",   5,"Y","x",1
+"SelfCool  ","RhoWat0   ",   6,"Y","x",1
+"SelfCool  ","Temp      ",   7,"Y","x",1
+"SelfCool  ","Depth     ",   8,"N","x",1
 "MaxMacro  ","nMacrophyt",   1,"Y"," ",1
 "MaxMacro  ","HSIEM01   ",   2,"Y","x",1
 "MaxMacro  ","PotEM01   ",   3,"Y","x",1
@@ -130,6 +210,9 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DAYRAD    ","Latitude  ",   3,"Y","x",1
 "DAYRAD    ","RefDay    ",   4,"Y","x",1
 "DAYRAD    ","AuxSys    ",   5,"Y"," ",1
+"TempMode  ","ModTemp   ",   1,"N","x",1
+"TempMode  ","NatTemp   ",   2,"Y","x",1
+"TempMode  ","SwitchTemp",   3,"Y","x",1
 "Temperatur","ModTemp   ",   1,"N","x",1
 "Temperatur","NatTemp   ",   2,"Y","x",1
 "Temperatur","Depth     ",   3,"N","x",1
@@ -14815,5 +14898,20 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Decay4    ","dDecdTR4  ",   2,"Y","x",1
 "Decay5    ","dTR5      ",   1,"N","x",1
 "Decay5    ","dDecdTR5  ",   2,"Y","x",1
-"CalTemp   ","TempFlow  ",   1,"N","x",1
-"CalTemp   ","AddTemp   ",   2,"Y","x",1
+"TEO       ","Temp      ",   1,"Y","x",1
+"TEO       ","SurTemp   ",   2,"N","x",1
+"TEO       ","Surf      ",   3,"N","x",1
+"TEO       ","Volume    ",   4,"N","x",1
+"TEO       ","RhoWat0   ",   5,"Y","x",1
+"TEO       ","CP        ",   6,"Y","x",1
+"TEO       ","Depth     ",   7,"N","x",1
+"TEO       ","Width     ",   8,"N","x",1
+"TEO       ","Velocity  ",   9,"N","x",1
+"TEO       ","SWCalcVelo",  10,"Y","x",1
+"TEO       ","FlowSeg   ",  11,"N","x",1
+"TEO       ","fSpeHeDis ",  12,"Y","x",1
+"TEO       ","Tmax      ",  13,"Y","x",1
+"TEO       ","TmaxDelt  ",  14,"Y","x",1
+"TEO       ","Tmin      ",  15,"Y","x",1
+"TEO       ","TmaxDeltWO",  16,"Y","x",1
+"TEO       ","TminDeltWO",  17,"Y","x",1

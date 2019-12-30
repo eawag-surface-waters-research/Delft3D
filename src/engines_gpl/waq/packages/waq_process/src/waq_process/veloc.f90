@@ -33,8 +33,8 @@
 !
       real(4) pmsa(*)     !I/O Process Manager System Array, window of routine to process library
       real(4) fl(*)       ! O  Array of fluxes made by this process in mass/volume/time
-      integer ipoint( 19) ! I  Array of pointers in pmsa to get and store the data
-      integer increm( 19) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
+      integer ipoint( 20) ! I  Array of pointers in pmsa to get and store the data
+      integer increm( 20) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
       integer noseg       ! I  Number of computational elements in the whole model schematisation
       integer noflux      ! I  Number of fluxes, increment in the fl array
       integer iexpnt(4,*) ! I  From, To, From-1 and To+1 segment numbers of the exchange surfaces
@@ -43,7 +43,7 @@
       integer noq2        ! I  Nr of exchanges in 2nd direction, noq1+noq2 gives hor. dir. reg. grid
       integer noq3        ! I  Nr of exchanges in 3rd direction, vertical direction, pos. downward
       integer noq4        ! I  Nr of exchanges in the bottom (bottom layers, specialist use only)
-      integer ipnt( 19)   ! L  Local work array for the pointering
+      integer ipnt( 20)   ! L  Local work array for the pointering
       integer i           ! L  Local general loop counter
       integer iseg        ! L  Local loop counter for computational element loop
       integer iq          ! L  Local loop counter for exchanges loop
@@ -78,7 +78,10 @@
       real(4) FlowDir     ! O  flow direction relative to North                   (degrees)
       real(4) Veloc1      ! O  horizontal flow velocity first direction           (m/s)
       real(4) Veloc2      ! O  horizontal flow velocity second direction          (m/s)
-!
+      real(4) FlowSeg     ! O  horizontal flow averaged over two directions       (m3/s)
+      real(4) FlowSeg1    ! O  horizontal flow first direction                    (m3/s)
+      real(4) FlowSeg2    ! O  horizontal flow second direction                   (m3/s)
+      !
 !*******************************************************************************
 !
       ipnt        = ipoint
@@ -111,7 +114,8 @@
       in10 = increm(10)
       in11 = increm(11)
 
-
+       FlowSeg1 = 0.
+       FlowSeg2 = 0. 
 !.....Berekening gemiddelde stroomsnelheid horizontale richting
       do 100 iq = 1, noq1+noq2
 
@@ -194,6 +198,11 @@
 
             Veloc1 = pmsa(ipnt(1)) / max( pmsa(ipnt(2)), 1.0 )
             Veloc2 = pmsa(ipnt(3)) / max( pmsa(ipnt(4)), 1.0 )
+            
+            if (icalsw .eq. 3) then
+                FlowSeg1 = pmsa(ipnt(1))
+                FlowSeg2 = pmsa(ipnt(3))           
+            endif    
 
 !           switch (1=Pythagoras, 2=Min, 3=Max)            (-)
 
@@ -223,13 +232,16 @@
                   else
 !                    orient1 negatif, assume perpendicular flowdir not defined
                      Velocity = sqrt ( Veloc1*Veloc1 + Veloc2*Veloc2 )
+                     FlowSeg = sqrt ( FlowSeg1*FlowSeg1 + FlowSeg2*FlowSeg2 )
                      FlowDir = -1.0
                   endif
                case ( 2 )
                   Velocity = max(abs(Veloc1),abs(Veloc2))
+                  FlowSeg = max(abs(FlowSeg1),abs(FlowSeg2))
                   FlowDir = -1.0
                case ( 3 )
                   Velocity = min(abs(Veloc1),abs(Veloc2))
+                  FlowSeg = min(abs(FlowSeg1),abs(FlowSeg2))                  
                   FlowDir = -1.0
                case default
             end select
@@ -241,9 +253,14 @@
             endif
 !
             pmsa( ipnt( 12)   ) = Velocity
-            pmsa( ipnt( 13)   ) = FlowDir
-            pmsa( ipnt( 14)   ) = Veloc1
-            pmsa( ipnt( 15)   ) = Veloc2
+             pmsa( ipnt( 13)   ) = FlowDir           
+            if (icalsw .eq. 3) then
+                pmsa( ipnt( 14)   ) = FlowSeg
+            else
+                pmsa( ipnt( 14)   ) = -999.9
+            endif
+            pmsa( ipnt( 15)   ) = Veloc1
+            pmsa( ipnt( 16)   ) = Veloc2
 
          endif
 !

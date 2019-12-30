@@ -3,6 +3,7 @@ stocfl,stocsu,stocsc
 "dDumphcarb","TIC       ",   0.00000
 "dDumEmersi","Continuity",   0.00000
 "dTempHtfl ","NatTemp   ",   1.00000
+"dTempHtfl2","NatTemp   ",   0.00000
 "dModTemp  ","ModTemp   ",   1.00000
 "dDumVarSal","FrCon     ",   0.00000
 "dDumVarSal","FrFlow    ",   0.00000

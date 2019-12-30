@@ -2,6 +2,8 @@ outfpr,outffl,outfnm,outfdo
 "pH_carb   ","dDumphcarb",   1,"x"
 "Emersion  ","dDumEmersi",   1,"x"
 "HeatBal   ","dTempHtfl ",   1,"x"
+"HeatBal2  ","dTempHtfl2",   1,"x"
+"SelfCool  ","dModtemp  ",   1,"x"
 "Temperatur","dModtemp  ",   1,"x"
 "VarSal    ","dDumVarSal",   1,"x"
 "ResTim    ","dDumResTim",   1,"x"

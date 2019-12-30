@@ -19,21 +19,34 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Meteo     ","RelHumAir ",   4,"x",1
 "Meteo     ","TempAir   ",   5,"x",1
 "Meteo     ","PAtm      ",   6,"x",1
-"Meteo     ","SunFac    ",   7,"x",1
+"Meteo     ","Cloud     ",   7,"x",1
 "HeatBal   ","RadSN     ",   1,"x",1
-"HeatBal   ","cloud     ",   2,"x",1
-"HeatBal   ","Psvap     ",   3,"x",1
-"HeatBal   ","EmissAtm  ",   4,"x",1
-"HeatBal   ","RadAN     ",   5,"x",1
-"HeatBal   ","RadBR     ",   6,"x",1
-"HeatBal   ","RadLat    ",   7,"x",1
-"HeatBal   ","HtCond    ",   8,"x",1
-"HeatBal   ","HtTot     ",   9,"x",1
-"HeatBal   ","PvapWa    ",  10,"x",1
-"HeatBal   ","VWinda    ",  11,"x",1
-"HeatBal   ","Vevap     ",  12,"x",1
-"HeatBal   ","RhoWater  ",  13,"x",1
-"HeatBal   ","ModTemp   ",  14,"x",1
+"HeatBal   ","Psvap     ",   2,"x",1
+"HeatBal   ","EmissAtm  ",   3,"x",1
+"HeatBal   ","RadAN     ",   4,"x",1
+"HeatBal   ","RadBR     ",   5,"x",1
+"HeatBal   ","RadLat    ",   6,"x",1
+"HeatBal   ","HtCond    ",   7,"x",1
+"HeatBal   ","HtTot     ",   8,"x",1
+"HeatBal   ","PvapWa    ",   9,"x",1
+"HeatBal   ","VWinda    ",  10,"x",1
+"HeatBal   ","Vevap     ",  11,"x",1
+"HeatBal   ","RhoWater  ",  12,"x",1
+"HeatBal   ","ModTemp   ",  13,"x",1
+"HeatBal2  ","RadSN     ",   1,"x",1
+"HeatBal2  ","Psvap     ",   2,"x",1
+"HeatBal2  ","EmissAtm  ",   3,"x",1
+"HeatBal2  ","RadAN     ",   4,"x",1
+"HeatBal2  ","RadBR     ",   5,"x",1
+"HeatBal2  ","RadLat    ",   6,"x",1
+"HeatBal2  ","HtCond    ",   7,"x",1
+"HeatBal2  ","HtTot2    ",   8,"x",1
+"HeatBal2  ","PvapWa    ",   9,"x",1
+"HeatBal2  ","VWinda    ",  10,"x",1
+"HeatBal2  ","Vevap     ",  11,"x",1
+"HeatBal2  ","RhoWater  ",  12,"x",1
+"HeatBal2  ","ModTemp   ",  13,"x",1
+"SelfCool  ","fSpeHeDis ",   1,"x",1
 "MaxMacro  ","MaxEM01   ",   1,"x",1
 "MaxMacro  ","MaxSM01   ",   2,"x",1
 "MaxMacro  ","MaxEM02   ",   3,"x",1
@@ -53,6 +66,11 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Coverage  ","IBotSeg   ",   7,"x",1
 "Coverage  ","RadSurf   ",   8,"x",1
 "DAYRAD    ","DayRadSurf",   1,"x",1
+"DAYRAD    ","RadMaxHour",   2,"x",1
+"DAYRAD    ","RadMaxDayA",   3,"x",1
+"TempMode  ","Temp      ",   1,"x",1
+"TempMode  ","SurTemp   ",   2,"x",1
+"TempMode  ","NatTempp1 ",   3,"x",1
 "Temperatur","RCHeat    ",   1,"x",1
 "Temperatur","Temp      ",   2,"x",1
 "Temperatur","SurTemp   ",   3,"x",1
@@ -63,12 +81,13 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Salinchlor","Cl        ",   3,"x",1
 "Veloc     ","Velocity  ",   1,"x",1
 "Veloc     ","FlowDir   ",   2,"x",1
-"Veloc     ","Veloc1    ",   3,"x",1
-"Veloc     ","Veloc2    ",   4,"x",1
-"Veloc     ","WSNoseg1  ",   5," ",1
-"Veloc     ","WSNoseg2  ",   6," ",1
-"Veloc     ","WSNoseg3  ",   7," ",1
-"Veloc     ","WSNoseg4  ",   8," ",1
+"Veloc     ","FlowSeg   ",   3,"x",1
+"Veloc     ","Veloc1    ",   4,"x",1
+"Veloc     ","Veloc2    ",   5,"x",1
+"Veloc     ","WSNoseg1  ",   6," ",1
+"Veloc     ","WSNoseg2  ",   7," ",1
+"Veloc     ","WSNoseg3  ",   8," ",1
+"Veloc     ","WSNoseg4  ",   9," ",1
 "ResTim    ","ResTim    ",   1,"x",1
 "ResTim    ","WSNoseg5  ",   2," ",1
 "VertDisp  ","VertDisp  ",   1,"x",0
@@ -3943,4 +3962,21 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_G5 ","G5_DoSpawn",  22,"x",1
 "IM_Floceq ","SPMratioem",   1,"x",1
 "AttribOut ","Attribute ",   1,"x",1
-"CalTemp   ","Temp      ",   1,"x",1
+"TEO       ","WLC_seg_Q ",   1,"x",1
+"TEO       ","WLC_seg_A ",   2,"x",1
+"TEO       ","WLCa_seg_Q",   3,"x",1
+"TEO       ","WLCa_seg_A",   4,"x",1
+"TEO       ","dTWLC     ",   5,"x",1
+"TEO       ","dTWLCa    ",   6,"x",1
+"TEO       ","WLC_seg   ",   7,"x",1
+"TEO       ","WLCa_seg  ",   8,"x",1
+"TEO       ","WOC_seg_Q ",   9,"x",1
+"TEO       ","WOC_seg_A ",  10,"x",1
+"TEO       ","WOCa_seg_Q",  11,"x",1
+"TEO       ","WOCa_seg_A",  12,"x",1
+"TEO       ","dTWOC     ",  13,"x",1
+"TEO       ","dTWOCa    ",  14,"x",1
+"TEO       ","WOC_seg   ",  15,"x",1
+"TEO       ","WOCa_seg  ",  16,"x",1
+"TEO       ","FlowSegVel",  17,"x",1
+"TEO       ","FlowSegAbs",  18,"x",1

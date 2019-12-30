@@ -95,7 +95,7 @@
      +         IP11, IP12, IP13, IP14, IP15, IP16, IP17, IP18, IP19,
      +         IP20, IP21, IP22, IP23, IP24, IP25, IP26, IP27, IP28,
      +         IP29, IP30, IP31, IP32, IP33, IP34, IP35, IP36, IP37,
-     +         IP38, IP39, IP40, IP41
+     +         IP38, IP39, IP40
       INTEGER  ISWTEMP, ISWEMIS
       REAL     Qsw, Fsw, SunFac, Pvap, TempAt, SBC, Fa, EWater,
      j         TempWa, RhoWat, CWindA, CWindB, CWindC, VWindm, K,
@@ -145,7 +145,7 @@
       IP38  = IPOINT(38)
       IP39  = IPOINT(39)
       IP40  = IPOINT(40)
-      IP41  = IPOINT(41)
+
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
@@ -163,7 +163,7 @@
 !
             Qsw     = PMSA(IP1 )
             Fsw     = PMSA(IP2 )
-            SunFac  = PMSA(IP3 )
+            Cloud   = PMSA(IP3 ) / 100.0
             ISWEmis = NINT(PMSA(IP4 ))
             TempAt  = PMSA(IP5 )
             SBC     = PMSA(IP6 )
@@ -196,7 +196,7 @@
 !
 !     ------Long wave atmospheric radiation------
 !
-            cloud = (100.0 - SunFac) / 100.0
+!           cloud = (100.0 - SunFac) / 100.0
 !
             Psvap = 6.131 + 0.467 * TempAt + 0.0089 *
      j               TempAt ** 2.0 + 0.000527 * TempAt ** 3.0
@@ -315,19 +315,18 @@
             ENDIF
 
             PMSA(IP28 ) = Qsn
-            PMSA(IP29 ) = cloud
-            PMSA(IP30 ) = Psvap
-            PMSA(IP31 ) = Emiss
-            PMSA(IP32 ) = Qan
-            PMSA(IP33 ) = Qbr
-            PMSA(IP34 ) = Ql
-            PMSA(IP35 ) = Qsg
-            PMSA(IP36 ) = Qt
-            PMSA(IP37 ) = PvapWa
-            PMSA(IP38 ) = VWinda
-            PMSA(IP39 ) = Vevap
-            PMSA(IP40 ) = RhoWat
-            PMSA(IP41 ) = MODTEMP
+            PMSA(IP29 ) = Psvap
+            PMSA(IP30 ) = Emiss
+            PMSA(IP31 ) = Qan
+            PMSA(IP32 ) = Qbr
+            PMSA(IP33 ) = Ql
+            PMSA(IP34 ) = Qsg
+            PMSA(IP35 ) = Qt
+            PMSA(IP36 ) = PvapWa
+            PMSA(IP37 ) = VWinda
+            PMSA(IP38 ) = Vevap
+            PMSA(IP39 ) = RhoWat
+            PMSA(IP40 ) = MODTEMP
 
             IF ( depth .lt. mindeptht ) THEN
 
@@ -390,7 +389,6 @@
       IP38  = IP38  + INCREM ( 38 )
       IP39  = IP39  + INCREM ( 39 )
       IP40  = IP40  + INCREM ( 40 )
-      IP41  = IP41  + INCREM ( 41 )
 !
  9000 CONTINUE
 !
