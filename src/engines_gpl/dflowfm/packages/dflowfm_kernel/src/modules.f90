@@ -3467,7 +3467,8 @@ end module m_vegetation
  double precision, dimension(:), allocatable :: ht_xy     !< array hT_xy, for calculation of spirfx and spirfy
  double precision, dimension(:), allocatable :: czusf       !< Chezy coefficient on flow link
  double precision, dimension(:), allocatable :: czssf       !< Chezy coefficient in flow node
- double precision, dimension(:), allocatable :: fcoris    !< Corliolis force in the flow node
+ double precision, dimension(:), allocatable :: fcoris    !< Coriolis force in the flow node
+ integer         , dimension(:,:), allocatable :: LLkkk   !< TODO
 
  double precision, dimension(:), allocatable :: spiratx   !< x component of normalised vector in direction of depth averaged velocity    (-)
  double precision, dimension(:), allocatable :: spiraty   !< y component of normalised vector in direction of depth averaged velocity    (-)
@@ -3477,7 +3478,7 @@ end module m_vegetation
  integer                                     :: numoptsf
 
 ! Anti-creep
- double precision, dimension(:),     allocatable :: dsalL   ! the flux of salinty    on flow linkes for anti-creep
+ double precision, dimension(:),     allocatable :: dsalL   ! the flux of salinity    on flow linkes for anti-creep
  double precision, dimension(:),     allocatable :: dtemL   ! the flux of temperature on flow nodes  for anti-creep
 
  double precision, allocatable, target     :: sa0(:)   !< [1e-3] salinity (ppt) at start of timestep {"location": "face", "shape": ["ndkx"]}
