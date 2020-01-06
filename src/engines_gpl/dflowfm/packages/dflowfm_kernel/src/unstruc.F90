@@ -2738,9 +2738,10 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
  do L = 1,lnx
 
+    hu(L) = 0d0
+
 !   for cut-cells
     if (wu(L).eq.0d0 ) then
-       hu(L) = 0d0
        cycle
     end if
 
@@ -2829,6 +2830,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
              if (iadv(L) >= 23 .and. iadv(L) <= 25) then                         ! undisturbed velocity as if no weir present, WAQUA like
                 hunoweir  = sup - blu(L) ! bob(1,L)                              ! 23 = Rajaratnam, 24 = Tabellenboek, 25 = Villemonte
+                if (hunoweir < epshu) cycle 
                 ucxku     = ucx(ku) ; ucyku = ucy(ku)
              else
                 call getucxucynoweirs(ku, ucxku, ucyku, ifixedweirscheme )
@@ -2969,8 +2971,6 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
        hu(L) = huL
 
-    else
-       hu(L) = 0d0
     endif
 
     if (kmx > 0) then
