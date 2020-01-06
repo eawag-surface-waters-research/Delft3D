@@ -1,6 +1,4 @@
-subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
-                & rough     ,defrou    ,rouflo      ,iarea_avg ,ch_sum_par, &
-                & ch_sum_ser,ch_pnt_ser,alf_area_ser)
+module m_calrou
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -31,13 +29,26 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
+!    module holding roughness related functions/subroutines
+!
+!!--pseudo code and references--------------------------------------------------
+! NONE
+!!--declarations----------------------------------------------------------------
+use precision
+implicit none
+private
+public :: calrou, white_coolebrook
+contains
+subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
+                & rough     ,defrou    ,rouflo      ,iarea_avg ,ch_sum_par, &
+                & ch_sum_ser,ch_pnt_ser,alf_area_ser)
+!!--description-----------------------------------------------------------------
+!
 !    Function: Finalize rougness calculation.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
-    implicit none
 !
 ! Global variables
 !
@@ -86,11 +97,11 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
        ! Transform default if not White-Colebrook
        !
        
-       if ( defrou.gt.0d0 ) then
+       if ( defrou > 0d0 ) then
        
           if (rouflo=='WHIT') then
              rkdef = defrou
-             chdef = 18.0_fp * log10(12.0_fp*depth/rkdef)
+             chdef = white_coolebrook(depth, rkdef, iarea_avg)
           elseif (rouflo=='CHEZ') then
              chdef = defrou
              rkdef = (12.0_fp*depth) / (10.0_fp**(chdef/18.0_fp))
@@ -99,7 +110,7 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
              rkdef = (12.0_fp*depth) / (10.0_fp**(chdef/18.0_fp))
           elseif (rouflo=='Z   ') then
              rkdef = defrou * 30.0_fp
-             chdef = 18.0_fp * log10(12.0_fp*depth/rkdef)
+             chdef = white_coolebrook(depth, rkdef, iarea_avg)
           else
           endif
           kn_sum     = kn_sum     + (1.0_fp - fracto)*rkdef
@@ -163,7 +174,7 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
        endif
     elseif (iarea_avg==2) then
     
-       if ( defrou.gt.0d0 ) then  ! default roughness > 0
+       if ( defrou > 0d0 ) then  ! default roughness > 0
           !
           ! Combine serial and parallel roughnesses
           !
@@ -205,3 +216,22 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
        end if
     endif
 end subroutine calrou
+
+!> White-Coolebrook formulation for roughness.
+!! If area averaging is type 2 (Chezy C based, parallel / serial), log10 must be save for ratios < 1.0
+function white_coolebrook(radius, roughness_length, iarea_avg)
+   real(kind=fp), intent(in) :: radius             !< hydraulic radius
+   real(kind=fp), intent(in) :: roughness_length   !< Nikuradse roughness length
+   integer,       intent(in) :: iarea_avg          !< area averaging method
+   real(kind=fp)             :: white_coolebrook   !< function result
+
+   real(kind=fp), parameter  :: cfix = 1.0010_fp   !< parameter to avoid negative roughness
+
+   if (iarea_avg == 1) then
+      white_coolebrook = 18.0_fp * log10(12.0_fp * radius / roughness_length)
+   else
+      white_coolebrook = 18.0_fp * log10(max(cfix, 12.0_fp * radius / roughness_length))
+   endif
+end function white_coolebrook
+
+end module m_calrou

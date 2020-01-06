@@ -63,6 +63,7 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
     use precision_basics, only: comparereal
     use mathconsts
     use trachytopes_data_module
+    use m_calrou
     use message_module
     !
     implicit none
@@ -1150,7 +1151,7 @@ subroutine trtrou(lundia    ,kmax      ,nmmax   , &
              if (rgh_type == ch_type) then
                 kn_icode = (12.0_fp*depth)/10.0_fp**(ch_icode/18.0_fp)
              elseif (rgh_type == kn_type) then
-                ch_icode = 18.0_fp*log10(12.0_fp*depth/kn_icode)
+                ch_icode = white_coolebrook(depth, kn_icode, iarea_avg)
              endif
              fracto     = fracto + fraccu
              kn_sum     = kn_sum + fraccu*kn_icode
