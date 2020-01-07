@@ -2485,6 +2485,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/partmp.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/phcarb.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/phcomb.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/phcomp.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/plastc.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/posoxy.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/pprlim.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/pripro.f -text
