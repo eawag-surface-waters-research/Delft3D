@@ -2732,8 +2732,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'physics', 'Doodsonstop',   Doodsonstop,  'TRIWAQ: 375.575, D3D: 275.555'     )
        call prop_set(prop_ptr, 'physics', 'Doodsoneps',    Doodsoneps,   'TRIWAQ = 0.0  400 cmps , D3D = 0.03   60 cmps')
     endif
-    call prop_set(prop_ptr, 'physics', 'VillemonteCD1', VillemonteCD1,   'Calibration coefficient for Villemonte. Default = 1.0.  NB. For Bloemberg data set 0.8 is recommended.')
-    call prop_set(prop_ptr, 'physics', 'VillemonteCD2', VillemonteCD2,   'Calibration coefficient for Villemonte. Default = 10.0. NB. For Bloemberg data set 0.8 is recommended.')
+    call prop_set(prop_ptr, 'physics', 'VillemonteCD1', VillemonteCD1,   'Calibration coefficient for Villemonte. Default = 1.0.')
+    call prop_set(prop_ptr, 'physics', 'VillemonteCD2', VillemonteCD2,   'Calibration coefficient for Villemonte. Default = 10.0.')
     call prop_set(prop_ptr,    'physics', 'Salinity',      jasal,        'Include salinity, (0=no, 1=yes)' )
     if (writeall .or. (jasal > 0)) then
        call prop_set(prop_ptr, 'physics','InitialSalinity',salini,       'Uniform initial salinity concentration (ppt)')
