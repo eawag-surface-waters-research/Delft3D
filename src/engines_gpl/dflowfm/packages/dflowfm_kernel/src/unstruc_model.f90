@@ -84,15 +84,15 @@ implicit none
     !! * if a new format is not backwards compatible (i.e., old 1D2D files
     !!   need to be converted/updated by user), then the major version number
     !!   is incremented.
-    
+
     ! File1D2DLinkMajorVersion = 1.00
     integer, parameter       :: File1D2DLinkMajorVersion = 1
     integer, parameter       :: File1D2DLinkMinorVersion = 0
-    
+
     ! History File1D2DLinkVersion:
     ! 1.00 (2019-12-04): Initial version.
 
-   
+
     integer, parameter :: MD_NOAUTOSTART   = 0   !< Do not autostart (nor stop) this model.
     integer, parameter :: MD_AUTOSTART     = 1   !< Autostart this model and then idle.
     integer, parameter :: MD_AUTOSTARTSTOP = 2   !< Autostart this model and then exit (batchmode)
@@ -240,7 +240,8 @@ implicit none
     integer            :: md_cutcells        = 0
     integer            :: npolf              = 0      !< nr of polygonplotfiles saved with n key in editpol
 
-    integer            :: md_usecaching      = 1      !< Use the caching file if it exists (1) or not (0)
+    integer            :: md_usecaching      = 0      !< Use the caching file if it exists (1) or not (0)
+                                                      !< NOTE: turned off by default for the moment!
 
 !   map file output format
     integer,            parameter             :: NUMFORMATS      = 4
@@ -460,7 +461,7 @@ subroutine loadModel(filename)
     end if
 
     ! load the caching file - if there is any
-    ! call loadCachingFile(md_ident, md_netfile, md_usecaching)
+    call loadCachingFile(md_ident, md_netfile, md_usecaching)
 
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
@@ -516,7 +517,7 @@ subroutine loadModel(filename)
        msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
        call fatal_flush()
     endif
-    
+
     threshold_abort = LEVEL_ERROR
 
     ! Load land boundary from file.
@@ -1183,10 +1184,10 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'sediment', 'BndTreatment',         jabndtreatment, success)           ! separate treatment boundary links in upwinding transports
     call prop_get_integer(md_ptr, 'sediment', 'TransVelOutput',       jasedtranspveldebug, success)      ! write sed adv velocities to output ugrid file
     call prop_get_integer(md_ptr, 'sediment', 'SourSink',             jasourcesink, success)             ! switch off source or sink terms for sed advection
-    call prop_get_integer(md_ptr, 'sediment', 'UpdateS1',             jaupdates1, success )              ! update s1 when updating bottom (1) or not (0, default) 
-    call prop_get_integer(md_ptr, 'sediment', 'MorCFL',               jamorcfl, success )                ! use morphological time step restriction (1, default) or not (0)     
+    call prop_get_integer(md_ptr, 'sediment', 'UpdateS1',             jaupdates1, success )              ! update s1 when updating bottom (1) or not (0, default)
+    call prop_get_integer(md_ptr, 'sediment', 'MorCFL',               jamorcfl, success )                ! use morphological time step restriction (1, default) or not (0)
     call prop_get_double (md_ptr, 'sediment', 'DzbDtMax',             dzbdtmax, success)                 ! Max bottom level change per timestep
-    
+
     call prop_get_integer(md_ptr, 'sediment', 'Nr_of_sedfractions' ,  Mxgr)
     call prop_get_integer(md_ptr, 'sediment', 'MxgrKrone'          ,  MxgrKrone)
     call prop_get_integer(md_ptr, 'sediment', 'Seddenscoupling'    ,  jaseddenscoupling)
@@ -1301,7 +1302,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'waves', 'jamapsigwav'         , jamapsigwav)     ! 1: sign wave height on map output; 0: hrms wave height on map output. Default=0 (legacy)
     call prop_get_integer(md_ptr, 'waves', 'jauorbfromswan'      , jauorbfromswan)  ! 1: use orbital velocities from com file; 0=internal uorb calculation
     call prop_get_double (md_ptr, 'waves', 'ftauw'               , ftauw)           ! factor for adjusting wave-related bed shear stress, default 1.0
-    
+
     call prop_get_integer(md_ptr, 'grw'  , 'groundwater'        , jagrw)
 
     call prop_get_integer(md_ptr, 'grw'  , 'Infiltrationmodel'  , Infiltrationmodel) ; if (Infiltrationmodel == 1 .or. infiltrationmodel == 3) jagrw = 1
@@ -2261,6 +2262,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', 'ProfdefFile',      trim(md_profdeffile),   'Channel profile definition file *_profdefinition.def with definition for all profile numbers'  )
     call prop_set(prop_ptr, 'geometry', 'ProfdefxyzFile',   trim(md_profdefxyzfile),'Channel profile definition file _profdefinition.def with definition for all profile numbers'  )
     call prop_set(prop_ptr, 'geometry', 'IniFieldFile',     trim(md_inifieldfile),  'Initial values and parameter fields file'  )
+    call prop_set(prop_ptr, 'geometry', 'UseCaching',       md_usecaching,          'Use caching for geometrical/network-related items (1) or not (0)'  )
 
 
     call prop_set(prop_ptr, 'geometry', 'Uniformwidth1D',   wu1Duni,                'Uniform width for channel profiles not specified by profloc')
@@ -2466,12 +2468,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'numerics', 'TimeStepType', itstep,     'Time step handling (0: only transport, 1: transport + velocity update, 2: full implicit step-reduce, 3: step-Jacobi, 4: explicit)')
     call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 5=default, 3,4 no weights, 5-10 Kleptsova hu/hs, 25-30 Ham hs/hu, odd: 2D hs/hu, even: hsk/huk ')
     call prop_set(prop_ptr, 'numerics', 'Newcorio',      newcorio,  '0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants )')
-    if (Corioadamsbashfordfac .ne. 0) then 
+    if (Corioadamsbashfordfac .ne. 0) then
     call prop_set(prop_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac,    '0=No, 0.5d0=AdamsBashford, only for Newcorio=1)')
     endif
-    if (hhtrshcor>0) then 
+    if (hhtrshcor>0) then
     call prop_set(prop_ptr, 'numerics', 'Coriohhtrsh', hhtrshcor,    '0=default=no safety in hu/hus weightings, only for Newcorio=1)')
-    endif ! change hhtrshcor to Coriohhtrsh 
+    endif ! change hhtrshcor to Coriohhtrsh
 
 !   call prop_set_integer(prop_ptr, 'numerics', 'numoverlap', numoverlap, ' ')
 
@@ -2532,7 +2534,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Tlfsmo'            , Tlfsmo,             'Fourier smoothing time (s) on water level boundaries')
-    if (keepstbndonoutflow > 0) then 
+    if (keepstbndonoutflow > 0) then
        call prop_set(prop_ptr, 'numerics', 'Keepstbndonoutflow', keepstbndonoutflow, 'Keep sal and tem signals on bnd also at outflow, 1=yes, 0=no=default=copy inside value on outflow')
     endif
 
@@ -3313,7 +3315,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'output', 'Wrimap_DTcell', jamapdtcell, 'Write time step per cell based on CFL (1: yes, 0: no)')
     endif
 
-     
+
     if (writeall .or. jamapTimeWetOnGround /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_time_water_on_ground', jamapTimeWetOnGround, 'Write cumulative time when water is above ground level to map file, only for 1D nodes (1: yes, 0: no)')
     endif
@@ -3321,19 +3323,19 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jamapFreeboard /= 0) then
        call prop_set(prop_ptr, 'output', 'Wrimap_freeboard', jamapFreeboard, 'Write freeboard to map file, only for 1D nodes (1: yes, 0: no)')
     end if
-    
+
     if (writeall .or. jamapDepthOnGround /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterdepth_on_ground', jamapDepthOnGround, 'Write waterdepth that is above ground level to map file, only for 1D nodes (1: yes, 0: no)')
     endif
-    
+
     if (writeall .or. jamapVolOnGround /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_volume_on_ground', jamapVolOnGround, 'Write volume that is above ground level to map file, only for 1D nodes (1: yes, 0: no)')
     endif
-    
+
     if (writeall .or. jamapTotalInflow1d2d /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_total_net_inflow_1d2d', jamapTotalInflow1d2d, 'Write current total 1d2d net inflow (discharge) and cumulative total 1d2d net inflow (volume) to map file, only for 1D nodes (1: yes, 0: no)')
     endif
-    
+
     if (writeall .or. jamapTotalInflowLat /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_total_net_inflow_lateral', jamapTotalInflowLat, 'Write current total lateral net inflow (discharge) and cumulative total net lateral inflow (volume) to map file, only for 1D nodes (1: yes, 0: no)')
     endif

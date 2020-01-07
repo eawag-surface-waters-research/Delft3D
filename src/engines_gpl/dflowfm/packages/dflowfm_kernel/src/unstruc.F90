@@ -10941,7 +10941,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  ! store the grid-based information in the cache file
  call klok(cpu_extra(1,36)) ! remainder
- call storeCachingFile(filename = md_ident)
+ call storeCachingFile(filename = md_ident, usecaching = md_usecaching)
 
 call writesomeinitialoutput()
 

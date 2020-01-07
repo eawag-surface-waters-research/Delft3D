@@ -39,6 +39,8 @@
 module unstruc_caching
     use precision
     use m_observations, only: numobs, xobs, yobs, locTpObs, kobs
+    use m_monitoring_crosssections, only: crs, tcrs
+    !use m_crspath, only: tcrspath
     use md5_checksum
 
     implicit none
@@ -47,7 +49,7 @@ module unstruc_caching
 
     character(len=20), dimension(10), private :: section = ['OBSERVATIONS        ', &
                                                             'FIXED WEIRS         ', &
-                                                            '12345678901234567890', &
+                                                            'CROSS_SECTIONS      ', &
                                                             '12345678901234567890', &
                                                             '12345678901234567890', &
                                                             '12345678901234567890', &
@@ -57,6 +59,7 @@ module unstruc_caching
                                                             '12345678901234567890']
     integer, parameter, private :: key_obs = 1
     integer, parameter, private :: key_fixed_weirs = 2
+    integer, parameter, private :: key_cross_sections = 3
 
     double precision, dimension(:), allocatable, private :: cache_xobs
     double precision, dimension(:), allocatable, private :: cache_yobs
@@ -68,8 +71,13 @@ module unstruc_caching
     integer, dimension(:), allocatable, private          :: cache_ilink_fixed
     integer, dimension(:), allocatable, private          :: cache_ipol_fixed
 
+    type(tcrs), dimension(:), allocatable               :: cache_cross_sections
+
+
     character(len=30), private :: version_string = "D-Flow FM, cache file, 1.0"
     character(len=14), private :: md5current
+
+
 
 contains
 !> Check that the caching file contained compatible information
@@ -85,7 +93,7 @@ subroutine loadCachingFile( filename, netfile, usecaching )
 
     integer :: lun
     integer :: ierr
-    integer :: number, number_links
+    integer :: number, number_links, number_sections
     character(len=30) :: version_file
     character(len=20) :: key
     character(len=14) :: md5checksum
@@ -149,6 +157,8 @@ subroutine loadCachingFile( filename, netfile, usecaching )
     ! Load the observation points:
     ! Copy the node numbers when successful
     !
+    okay = .true.
+
     read( lun, iostat = ierr ) key, number
 
     if ( ierr /= 0 .or. key /= section(key_obs) ) then
@@ -160,10 +170,12 @@ subroutine loadCachingFile( filename, netfile, usecaching )
 
     allocate( cache_xobs(number), cache_yobs(number), cache_kobs(number), cache_locTpObs(number) )
 
-    read( lun, iostat = ierr ) cache_xobs      ; okay = ierr == 0
-    read( lun, iostat = ierr ) cache_yobs      ; okay = okay .and. ierr == 0
-    read( lun, iostat = ierr ) cache_locTpObs  ; okay = okay .and. ierr == 0
-    read( lun, iostat = ierr ) cache_kobs      ; okay = okay .and. ierr == 0
+    if ( number > 0 ) then
+        read( lun, iostat = ierr ) cache_xobs      ; okay = ierr == 0
+        read( lun, iostat = ierr ) cache_yobs      ; okay = okay .and. ierr == 0
+        read( lun, iostat = ierr ) cache_locTpObs  ; okay = okay .and. ierr == 0
+        read( lun, iostat = ierr ) cache_kobs      ; okay = okay .and. ierr == 0
+    endif
 
     if ( .not. okay ) then
         close( lun )
@@ -186,16 +198,33 @@ subroutine loadCachingFile( filename, netfile, usecaching )
     allocate( cache_xpl_fixed(number), cache_ypl_fixed(number) )
     allocate( cache_ilink_fixed(number_links), cache_ipol_fixed(number_links), cache_dsl_fixed(number_links) )
 
-    read( lun, iostat = ierr ) cache_xpl_fixed   ; okay = ierr == 0
-    read( lun, iostat = ierr ) cache_ypl_fixed   ; okay = okay .and. ierr == 0
-    read( lun, iostat = ierr ) cache_ilink_fixed ; okay = okay .and. ierr == 0
-    read( lun, iostat = ierr ) cache_ipol_fixed  ; okay = okay .and. ierr == 0
-    read( lun, iostat = ierr ) cache_dsl_fixed   ; okay = okay .and. ierr == 0
+    if ( number > 0 ) then
+        read( lun, iostat = ierr ) cache_xpl_fixed   ; okay = ierr == 0
+        read( lun, iostat = ierr ) cache_ypl_fixed   ; okay = okay .and. ierr == 0
+        read( lun, iostat = ierr ) cache_ilink_fixed ; okay = okay .and. ierr == 0
+        read( lun, iostat = ierr ) cache_ipol_fixed  ; okay = okay .and. ierr == 0
+        read( lun, iostat = ierr ) cache_dsl_fixed   ; okay = okay .and. ierr == 0
+    endif
 
     if ( .not. okay ) then
         close( lun )
         return
     endif
+
+    !
+    ! Load the information on the cross-sections:
+    ! Copy all information when successful
+    !
+    read( lun, iostat = ierr ) key, number
+
+    if ( ierr /= 0 .or. key /= section(key_cross_sections) ) then
+        close( lun )
+        return
+    endif
+
+    allocate( cache_cross_sections(number) )
+    call loadCachedSections( lun, cache_cross_sections, ierr )
+
 
     !
     ! All cached values were loaded, so all is well
@@ -205,14 +234,58 @@ subroutine loadCachingFile( filename, netfile, usecaching )
 
 end subroutine loadCachingFile
 
+!> Load cached cross sections from a caching file
+subroutine loadCachedSections( lun, sections, ierr )
+    integer, intent(in)                   :: lun       !< LU-number of the caching file
+    type(tcrs), dimension(:), intent(out) :: sections  !< Array of cross-sections to be filled
+    integer, intent(out)                  :: ierr      !< Error code
+
+    integer                               :: i, np, nlink
+    logical                               :: okay
+
+    okay = .true.
+    do i = 1,size(sections)
+        read( lun, iostat = ierr ) np, nlink
+
+        sections(i)%path%np  = np
+        sections(i)%path%lnx = nlink
+        allocate( sections(i)%path%xp(np), sections(i)%path%yp(np),  &
+                  sections(i)%path%zp(np), sections(i)%path%wfp(np), &
+                  sections(i)%path%indexp(np), &
+                  sections(i)%path%xk(2,nlink), sections(i)%path%yk(2,nlink), &
+                  sections(i)%path%wfp(nlink), &
+                  sections(i)%path%iperm(nlink), sections(i)%path%wfk1k2(nlink), &
+                  sections(i)%path%sp(nlink), sections(i)%path%ln(nlink) )
+
+        read( lun, iostat = ierr ) sections(i)%path%xp, sections(i)%path%yp,  &
+                                   sections(i)%path%zp, sections(i)%path%wfp, &
+                                   sections(i)%path%indexp, &
+                                   sections(i)%path%xk, sections(i)%path%yk, &
+                                   sections(i)%path%wfp, &
+                                   sections(i)%path%iperm, sections(i)%path%wfk1k2, &
+                                   sections(i)%path%sp, sections(i)%path%ln
+        if ( ierr /= 0 ) then
+            exit
+        endif
+    enddo
+end subroutine loadCachedSections
+
 !> Store the grid-based information in the caching file
-subroutine storeCachingFile( filename )
+subroutine storeCachingFile( filename, usecaching )
     character(len=*), intent(in   ) :: filename            !< Name of the MDU file (to construct the name of the caching file)
+    integer,          intent(in   ) :: usecaching          !< Write the caching file (1) or not (0) - in accordance with the user setting
 
     integer :: lun
     integer :: ierr
 
     cache_success = .false.
+
+    !
+    ! If no caching should be used, dispense with writing the caching file
+    !
+    if ( usecaching /= 1 ) then
+        return
+    endif
 
     open( newunit = lun, file = trim(filename) // ".cache", access = "stream", status = "old", action = 'read',  iostat = ierr )
 
@@ -244,11 +317,37 @@ subroutine storeCachingFile( filename )
     endif
 
     !
+    ! Store the data for the cross-sections
+    !
+    write( lun ) section(key_cross_sections), size(crs)
+    call storeSections( lun, crs )
+
+    !
     ! We are done, so close the file
     !
     close( lun )
 
 end subroutine storeCachingFile
+
+!> Store cross sections to a caching file
+subroutine storeSections( lun, sections )
+    integer, intent(in)                  :: lun       !< LU-number of the caching file
+    type(tcrs), dimension(:), intent(in) :: sections  !< Array of cross-sections to be filled
+
+    integer                              :: i, np, nlink
+
+    do i = 1,size(sections)
+        write( lun ) sections(i)%path%np, sections(i)%path%lnx
+
+        write( lun ) sections(i)%path%xp, sections(i)%path%yp,  &
+                     sections(i)%path%zp, sections(i)%path%wfp, &
+                     sections(i)%path%indexp, &
+                     sections(i)%path%xk, sections(i)%path%yk, &
+                     sections(i)%path%wfp, &
+                     sections(i)%path%iperm, sections(i)%path%wfk1k2, &
+                     sections(i)%path%sp, sections(i)%path%ln
+    enddo
+end subroutine storeSections
 
 !> Copy the cached network information for observation points
 subroutine copyCachedObservations( success )
