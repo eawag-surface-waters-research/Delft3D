@@ -2519,6 +2519,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/sednut.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedomv.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedox.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sedsod.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/selfcool.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/set_effi.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/simph.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/solvesaphe/COPYING -text
@@ -2559,6 +2560,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/sulpho.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/sumfrc.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/swoxy.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/temper.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/tempermode.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/tfalg.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/totdep.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/trase2.f -text
@@ -2581,6 +2583,7 @@ src/engines_gpl/waq/packages/waq_process/src/waq_process/vivian.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/vtrans.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/watage.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/wkcomp.f -text
+src/engines_gpl/waq/packages/waq_process/src/waq_process/wlcwoc.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_process/zerome.f -text
 src/engines_gpl/waq/packages/waq_process/src/waq_tables/bloom.spe -text
 src/engines_gpl/waq/packages/waq_process/src/waq_tables/con_pro.csv -text
