@@ -1851,6 +1851,10 @@ function flow_initwaveforcings_runtime() result(retval)              ! This is t
  operand_l  = 'O' ! Override
  kx = 1           ! default vectormax = 1
  !
+call realloc(kcw, ndx, stat=ierr)
+call aerr('kcw(ndx)', ierr, ndx)
+kcw = 1
+
  qid_l = 'hrms'
  if (.not. allocated(hwavcom) ) then
     allocate ( hwavcom(ndx), stat=ierr)
