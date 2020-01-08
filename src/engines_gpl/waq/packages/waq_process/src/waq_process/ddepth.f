@@ -72,10 +72,11 @@
       ENDIF
 
 !***********************************************************************
-!**** Calculate DEPTH
+!**** Calculate DEPTH - minimum: 0.1 mm to avoid divisions by zero if
+!     the volume happens to be zero
 !***********************************************************************
 !
-      DEPTH = VOLUME / SURF
+      DEPTH = MAX( 0.0001, VOLUME / SURF )
 !
       PMSA (IP3 ) = DEPTH
 !
