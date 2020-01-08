@@ -544,7 +544,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         nc_def_var(ncid, "time_offset", NC_DOUBLE, 1, &thisCoupler->logger->netcdfReferences->timeDim, &thisCoupler->logger->netcdfReferences->timeVar);
                         const char longnametime[] = "seconds since simulation reference date, T00:00:00";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "long_name", sizeof(longnametime), longnametime);
-                        const char units[] = "seconds";
+                        const char units[] = "seconds since 1980-01-01T00:00:00"; // TODO: Get simulation reference time from one of the kernels
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "units", sizeof(units), units);
                         const char axis[] = "T";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "axis", sizeof(axis), axis);
