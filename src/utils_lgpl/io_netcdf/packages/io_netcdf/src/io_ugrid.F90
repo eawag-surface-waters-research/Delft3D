@@ -4148,8 +4148,8 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    ierr = nf90_def_var(ncid, prefix//'_contact_id', nf90_char, (/ contactids%dimids(cdim_idstring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactids))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contactids), 'long_name',' ID of mesh contacts')
    
-   !define the variable and attributes long names
-   ierr = nf90_def_var(ncid, prefix//'_long_name', nf90_char, (/ contactids%dimids(cdim_longnamestring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactlongnames))
+   !define the variable and attributes contact long name
+   ierr = nf90_def_var(ncid, prefix//'_contact_long_name', nf90_char, (/ contactids%dimids(cdim_longnamestring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactlongnames))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contactlongnames), 'long_name', 'Long name of mesh contacts')
    
    !define the variable and attributes long names
