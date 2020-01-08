@@ -41598,6 +41598,9 @@ end function is_1d_boundary_candidate
       call qnerror('Error occurred while running, please inspect your diagnostic output.',' ', ' ')
       goto 888
     end if
+    if (.false.) then ! DEBUG
+       call ecInstancePrintState(ecInstancePtr,callback_msg,LEVEL_DEBUG)
+    end if
  endif
 
  ! Finish with all remaining old-style ExtForceFile quantities.
