@@ -34268,7 +34268,7 @@ function read_commandline() result(istat)
             if ( iarg_autostart.eq.-1 ) then ! unset
                iarg_autostart = MD_AUTOSTARTSTOP
             end if
-         case ('disablecaching')
+         case ('no-geom-cache')
             iarg_usecaching = 0
          case ('findcells')
             md_findcells = 1
