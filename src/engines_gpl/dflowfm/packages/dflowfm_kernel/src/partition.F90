@@ -2402,7 +2402,8 @@ use m_tpoly
       
       integer, intent(out) :: ierror
       
-      integer              :: LL
+      integer              :: LL, L
+      integer, allocatable :: kmxL1(:)
       
       ierror = 0   ! so far, so good
       
@@ -2436,9 +2437,15 @@ use m_tpoly
       call partition_fill_ghostsendlist_3d(nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, Lnx, Lbot, kmxL, nghostlist_u_3d)
       call partition_fill_ghostsendlist_3d(nsendlist_u(ndomains-1),  isendlist_u,  nsendlist_u,  Lnx, Lbot, kmxL, nsendlist_u_3d)
       
-      call partition_fill_ghostsendlist_3d(nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, Lnx, Lbot, kmxL+1, nghostlist_u_3dw)
-      call partition_fill_ghostsendlist_3d(nsendlist_u(ndomains-1),  isendlist_u,  nsendlist_u,  Lnx, Lbot, kmxL+1, nsendlist_u_3dw)
-      
+      if (allocated(kmxL1)) deallocate(kmxL1)  
+      allocate(kmxL1(lnx))
+      do L = 1,lnx
+         kmxL1(L) =  kmxL(L) + 1
+      enddo
+      call partition_fill_ghostsendlist_3d(nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, Lnx, Lbot, kmxL1, nghostlist_u_3dw)
+      call partition_fill_ghostsendlist_3d(nsendlist_u(ndomains-1),  isendlist_u,  nsendlist_u,  Lnx, Lbot, kmxL1, nsendlist_u_3dw)
+      deallocate(kmxL1)      
+
       ierror = 0
  1234 continue
  
