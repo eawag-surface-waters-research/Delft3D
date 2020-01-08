@@ -701,7 +701,9 @@ end subroutine flow_finalize_single_timestep
 
  tim1bnd = max(time0+dts, tim1bnd)
 
+ call klok(cpu_extra(1,38)) ! Start bnd
  call flow_setexternalforcingsonboundaries(tim1bnd , iresult)  ! boundary forcings
+ call klok(cpu_extra(2,38)) ! End bnd
 
  if (iresult /= DFM_NOERR) then
     write (msgbuf,*) ' Error found in EC-module ' ; call err_flush()
@@ -731,33 +733,42 @@ end subroutine flow_finalize_single_timestep
     call xbeach_flow_bc()
  end if
 
+ call klok(cpu_extra(1,42)) ! Start u0u1
  if (jazws0.eq.0) then
     u0 = u1                           ! progress velocities
     call set_u0isu1_structures(network%sts)
  endif
+ call klok(cpu_extra(2,42)) ! End u0u1
 
 
  advi = 0d0
  adve = 0d0
 
+ call klok(cpu_extra(1,39)) ! Start huau
  call sethu(jazws0)
 
  call setau()                                        ! set au and cfuhi for conveyance after limited h upwind at u points
+ call klok(cpu_extra(2,39)) ! End huau
 
+ call klok(cpu_extra(1,43)) ! Start setumod
  if (newcorio == 1) then 
     call setumodnew(jazws0) 
  else
     call setumod(jazws0)                             ! set cell center velocities, should be here as prior to 2012 orso
  endif 
+ call klok(cpu_extra(2,43)) ! End setumod
 
-
+ call klok(cpu_extra(1,44)) ! Start cfuhi
  call setcfuhi()                                     ! set frictioncoefficient
+ call klok(cpu_extra(2,44)) ! End cfuhi
 
  if (kmx == 0 .and. javeg > 0) then                  ! overwrite cfuhi in 2D with veg in plant area's
     call setbaptist()
  endif
 
+ call klok(cpu_extra(1,45)) ! Start structactual
  call initialize_structures_actual_params(network%sts)
+ call klok(cpu_extra(2,45)) ! Start structactual
 
  if (japillar == 1 .or. japillar == 3) then
     call pillar_upd()
@@ -765,15 +776,19 @@ end subroutine flow_finalize_single_timestep
 
  ! TIDAL TURBINES: Insert equivalent calls to updturbine and applyturbines here
 
+ call klok(cpu_extra(1,40)) ! Start setdt
  if (jazws0.eq.0 .and. nshiptxy == 0)  then
     call setdt()                                     ! set computational timestep dt based on active hu's,
  end if
+ call klok(cpu_extra(2,40)) ! End setdt
 
  if (nshiptxy > 0) then
      call setship()                                  ! in initimestep
  endif
 
+ call klok(cpu_extra(1,41)) ! Start advec
  call advecdriver()                                  ! advec limiting for depths below chkadvdp, so should be called after all source terms such as spiralforce
+ call klok(cpu_extra(2,41)) ! End advec
 
  if (jazws0.eq.1)  then
     call makeq1qaAtStart()                           ! compute q1 and qa to ensure exact restart
@@ -2658,6 +2673,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     
        
    !Adjust bobs for dambreak
+   if (ndambreak > 0) then ! needed, because ndambreaksg may be > 0, but ndambreak==0, and then arrays are not available.
    do n = 1, ndambreaksg
       istru = dambreaks(n)
       if (istru.ne.0) then
@@ -2665,6 +2681,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
          call adjust_bobs_on_dambreak_breach(network%sts%struct(istru)%dambreak%width, network%sts%struct(istru)%dambreak%crl,  LStartBreach(n), L1dambreaksg(n), L2dambreaksg(n), network%sts%struct(istru)%id)
       endif
    enddo
+   end if
 
    return
    end subroutine adjust_bobs_for_dams_and_structs
@@ -12345,7 +12362,7 @@ subroutine writesomeinitialoutput()
  write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , cpuall(2) - cpuall(1)      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , cpuall(3) - cpuall(2)      ; call msg_flush()
  cpu_extra_label       = ' '
- cpu_extra_label(1:37) = [ 'Basic steps         ', 'Wave input          ', 'Internal links      ', &
+ cpu_extra_label(1:45) = [ 'Basic steps         ', 'Wave input          ', 'Internal links      ', &
                            'Flow geometry       ', 'Bobsongullies       ', 'Wave initialisation ', &
                            'Flow grid           ', 'Bed forms init (1)  ', '1D rougnhess        ', &
                            'Sed/mor             ', 'Bed forms init (2)  ', 'Adm. vertical       ', &
@@ -12356,8 +12373,10 @@ subroutine writesomeinitialoutput()
                            'Update MOR width    ', 'Dredging init       ', 'Xbeach init         ', &
                            'Observations init 2 ', 'Structure parameters', 'Trachy update       ', &
                            'Set fcru MOR        ', 'Flow init           ', 'Fourier init        ', &
-                           'MDU file pointer    ', 'Flowgeom            ', &
-                           'Remainder           ', 'Flow alloc          ']
+                           'MDU file pointer    ', 'Flowgeom            ', 'Remainder           ', &
+                           'Flow alloc          ', 'initime setbnd      ', 'initime sethuau     ', &
+                           'initime setdt       ', 'initime advec       ', 'initime u0u1        ', &
+                           'initime setumod     ', 'initime cfuhi       ', 'initime structactual']
 
  do i = 1,size(cpu_extra,2)
      if ( cpu_extra_label(i) /=  ' ' ) then

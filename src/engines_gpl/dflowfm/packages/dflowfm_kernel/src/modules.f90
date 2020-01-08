@@ -4328,7 +4328,7 @@ end subroutine reset_flowgeom
  double precision                  :: cpuiniext (3) !< cputime init externalforcings (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuext    (3) !< cputime externalforcings      (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuextbnd (3) !< cputime externalforcingsonbnd (1)=start,(2)=stop,(3)=total
- double precision                  :: cpu_extra(3,40) !< cputime, extra timers (1)=start,(2)=stop,(3)=total
+ double precision                  :: cpu_extra(3,45) !< cputime, extra timers (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuwri      !< cputime writing (s)
  double precision                  :: dsetb       !< number of setbacks ()
  double precision                  :: walltime0   !< wall time at start of timeloop (s)
