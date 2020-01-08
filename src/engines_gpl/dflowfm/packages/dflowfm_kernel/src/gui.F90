@@ -13260,10 +13260,10 @@ end subroutine plot_ridges
       CHARACTER TEX*8
       COMMON /COLNOW/ NCOLNOW
       IF (NCOLNOW .GE. 0) THEN
-         IF (IVAL < 100) THEN
-            WRITE(TEX,'(I2)') IVAL
-         ELSE IF (IVAL < 10000) THEN
-            WRITE(TEX,'(I4)') IVAL
+         IF (abs(IVAL) < 100) THEN
+            WRITE(TEX,'(I3)') IVAL
+         ELSE IF (abs(IVAL) < 10000) THEN
+            WRITE(TEX,'(I5)') IVAL
          ELSE
             WRITE(TEX,'(I8)') IVAL
          ENDIF
