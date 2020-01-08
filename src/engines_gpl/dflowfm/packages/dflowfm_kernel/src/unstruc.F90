@@ -2669,7 +2669,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
    return
    end subroutine adjust_bobs_for_dams_and_structs
 
- subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
+subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  use m_flowgeom                                      ! Todo: higher order + limiter, see transport
  use m_flow
  use m_flowtimes
@@ -2738,10 +2738,9 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
  do L = 1,lnx
 
-    hu(L) = 0d0
-
 !   for cut-cells
     if (wu(L).eq.0d0 ) then
+       hu(L) = 0d0
        cycle
     end if
 
@@ -2830,7 +2829,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
              if (iadv(L) >= 23 .and. iadv(L) <= 25) then                         ! undisturbed velocity as if no weir present, WAQUA like
                 hunoweir  = sup - blu(L) ! bob(1,L)                              ! 23 = Rajaratnam, 24 = Tabellenboek, 25 = Villemonte
-                if (hunoweir < epshu) cycle 
+                hunoweir  = max(hunoweir, huL) 
                 ucxku     = ucx(ku) ; ucyku = ucy(ku)
              else
                 call getucxucynoweirs(ku, ucxku, ucyku, ifixedweirscheme )
@@ -2956,7 +2955,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
                            uLL      = max(1d-4, abs(u1(LL)))
                            advi(LL) = advi(LL) + agwdxi/uLL
                         enddo
-                 endif
+                    endif
                  endif
                  huL = hunoweir
 
@@ -2971,6 +2970,8 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
        hu(L) = huL
 
+    else
+       hu(L) = 0d0
     endif
 
     if (kmx > 0) then
@@ -7170,16 +7171,16 @@ end subroutine setucxucyucxuucyu
  
  else if (icorio == 45) then  
 
-    do n = 1, size(LLkkk,2)
-       L1  = LLkkk(1,n) 
-       L2  = LLkkk(2,n) 
-       k1  = LLkkk(3,n) 
-       k2  = LLkkk(4,n) 
-       k3  = LLkkk(5,n) 
-       fcLL =  fcorio*(-csu(L1)*snu(L2) + snu(L1)*csu(L2)) 
-       adve(L1) = adve(L1) + 0.25*fcLL   
-       adve(L2) = adve(L2) - 0.25*fcLL  
-    enddo 
+    !do n = 1, size(LLkkk,2)
+    !   L1  = LLkkk(1,n) 
+    !   L2  = LLkkk(2,n) 
+    !   k1  = LLkkk(3,n) 
+    !   k2  = LLkkk(4,n) 
+    !   k3  = LLkkk(5,n) 
+    !   fcLL =  fcorio*(-csu(L1)*snu(L2) + snu(L1)*csu(L2)) 
+    !   adve(L1) = adve(L1) + 0.25*fcLL   
+    !   adve(L2) = adve(L2) - 0.25*fcLL  
+    !enddo 
 
  else if (icorio >= 65) then  
 
@@ -16781,9 +16782,9 @@ end subroutine flow_initfloodfill
  endif 
 
  if (icorio > 40) then 
-    if (allocated(LLkkk) ) then
-       deallocate(LLkkk)
-    endif
+    !if (allocated(LLkkk) ) then
+    !   deallocate(LLkkk)
+    !endif
     
     n = 0 
     do j = 1,2  ! 1=count, 2=allocate and use
