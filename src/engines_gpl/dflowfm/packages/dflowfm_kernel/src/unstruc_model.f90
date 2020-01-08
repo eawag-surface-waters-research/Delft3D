@@ -3046,18 +3046,18 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     ti_his_array(1) = ti_his
     ti_his_array(2) = ti_hiss
     ti_his_array(3) = ti_hise
-    call prop_set(prop_ptr, 'output', 'HisInterval', ti_his_array, 'History output times, given as "interval" "start period" "end period" (s)' )
-    call prop_set(prop_ptr, 'output', 'XLSInterval', ti_xls,           'Interval (s) between XLS history' )
+    call prop_set(prop_ptr, 'output', 'HisInterval', ti_his_array, 'History times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period')
+    call prop_set(prop_ptr, 'output', 'XLSInterval', ti_xls,           'Interval (s) XLS history' )
 
     ti_map_array(1) = ti_map
     ti_map_array(2) = ti_maps
     ti_map_array(3) = ti_mape
-    call prop_set(prop_ptr, 'output', 'MapInterval', ti_map_array, 'Map file output, given as "interval" "start period" "end period" (s)' )
+    call prop_set(prop_ptr, 'output', 'MapInterval', ti_map_array, 'Map times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period')
 
     ti_rst_array(1) = ti_rst
     ti_rst_array(2) = ti_rsts
     ti_rst_array(3) = ti_rste
-    call prop_set(prop_ptr, 'output', 'RstInterval', ti_rst_array, 'Restart file output times, given as "interval" "start period" "end period" (s)' )
+    call prop_set(prop_ptr, 'output', 'RstInterval', ti_rst_array, 'Restart times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period')
 
 !    call prop_set(prop_ptr, 'output', 'WaqFileBase', trim(md_waqfilebase), 'Basename (without extension) for all Delwaq files to be written.')
     call prop_set(prop_ptr, 'output', 'WaqOutputDir',   trim(md_waqoutputdir),    'Output directory of WAQ communication files (flowgeom, vol, flo, etc.), default: DFM_DELWAQ_<modelname>. Set to . for current dir.')
@@ -3070,7 +3070,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'output', 'WaqVertAggr', trim(md_waqvertaggr), 'DELWAQ output vertical aggregation file (*.vag)')
 
     ti_classmap_array = [ti_classmap, ti_classmaps, ti_classmape]
-    call prop_set(prop_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 'Class map output times, given as "interval" "start period" "end period" (s)')
+    call prop_set(prop_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 'Class map times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period')
     call prop_set(prop_ptr, 'output', 'ClassMapFile',     trim(md_classmapfile), 'ClassMapFile name *_clm.nc')
     if (allocated(map_classes_s1)) then
        call prop_set(prop_ptr, 'output', 'WaterlevelClasses', map_classes_s1, 'Class map''s list of class values for water levels')
