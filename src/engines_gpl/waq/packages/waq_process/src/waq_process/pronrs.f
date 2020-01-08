@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 152)
+      PARAMETER   ( NOMODU = 153)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -169,7 +169,6 @@
      +   'VBMRT',
      +   'VEG3DX',
      +   'VBUPT',
-     +   'VEG3DU',
      +   'SALCHL',
      +   'DECDET',
      +   'S12TRA',
@@ -206,9 +205,10 @@
      +   'EFFAVE',
      +   'DECTRA',
      +   'ESPACE',
+     +   'PLASTC',
      +   'WLCWOC',
      +   'HDISS' ,
-     +   'TMODE'      
+     +   'TMODE'
      +   /
 !
 !     Set module number

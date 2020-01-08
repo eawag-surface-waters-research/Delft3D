@@ -524,15 +524,18 @@
          case (149 ) ;  call ESPACE ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
-!        case (150 ) ;  call WLCWOC ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
-!    &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
-!    &                                 noq3   , noq4   )      
-!        case (151 ) ;  call HDISS  ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
-!    &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
-!    &                                 noq3   , noq4   ) 
-!        case (152 ) ;  call TMODE  ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
-!    &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
-!    &                                 noq3   , noq4   )             
+         case (150 ) ;  call PLASTC ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (151 ) ;  call WLCWOC ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (152 ) ;  call HDISS  ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (153 ) ;  call TMODE  ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
          case default
 
 !     assumed from dll

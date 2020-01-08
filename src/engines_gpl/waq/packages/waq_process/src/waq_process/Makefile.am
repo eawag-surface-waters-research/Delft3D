@@ -87,6 +87,7 @@ libwaq_process_la_SOURCES = \
        partmp.f \
        phcomp.f \
        phcomb.f \
+       plastc.f \
        posoxy.f \
        pprlim.f \
        pripro.f \
@@ -124,6 +125,7 @@ libwaq_process_la_SOURCES = \
        solvesaphe/mod_chemconst.f90 \
        solvesaphe/mod_acbw_phsolvers.F90 \
        phcarb.f \
+       selfcool.f \
        somsed.f \
        ssedph.f \
        staday.f \
@@ -139,6 +141,7 @@ libwaq_process_la_SOURCES = \
        sumfrc.f90 \
        swoxy.f \
        temper.f \
+       tempermode.f \
        tfalg.f \
        totdep.f \
        trase2.f \
@@ -156,6 +159,7 @@ libwaq_process_la_SOURCES = \
        vtrans.f \
        watage.f \
        wkcomp.f \
+       wlcwoc.f \
        zerome.f \
        ironox.f90 \
        ironre.f90 \
