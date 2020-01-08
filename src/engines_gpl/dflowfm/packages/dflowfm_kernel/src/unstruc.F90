@@ -24613,6 +24613,8 @@ end subroutine unc_write_shp
 
                 K1 = 0; K2 = 1
                 DO LL = 1, netbr(ibr)%NX
+                   ! NOTE: vulnerability: netbr(:)%ln(:) contains NETlinks (see SETBRANCH_LC()), but it is used below as FLOWlinks
+                   !       Not a problem as long as *no* netlinks are discarded during geominit. (Then: numl1d == lnx1d.)
                    LA = IABS( NETBR(IBR)%LN(LL) )
                    XL = XLLIN(LA)
                    DO WHILE (XL > XLHH(K2) .AND. K2 < NSBR(IBR) )
