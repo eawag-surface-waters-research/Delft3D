@@ -169,6 +169,7 @@
      +   'VBMRT',
      +   'VEG3DX',
      +   'VBUPT',
+     +   'VEG3DU',
      +   'SALCHL',
      +   'DECDET',
      +   'S12TRA',
