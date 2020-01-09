@@ -1,7 +1,7 @@
       subroutine PLASTC     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
-!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'PLASTC' :: PLASTC
+!XXXDEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'PLASTC' :: PLASTC
 !*******************************************************************************
 !
       IMPLICIT NONE
@@ -67,14 +67,14 @@
 
       ! pointers to concrete items in PROCES.ASC
       integer,parameter   :: ip_nosegl    = 1
-      integer,parameter   :: ip_delt      = 2 
+      integer,parameter   :: ip_delt      = 2
       integer,parameter   :: ip_totsurf   = 3
       integer,parameter   :: ip_fpaved    = 4
       integer,parameter   :: ip_funpaved  = 5
-      integer,parameter   :: ip_fwater    = 6 
-      integer,parameter   :: ip_ropaved   = 7 
-      integer,parameter   :: ip_rounpaved = 8 
-      integer,parameter   :: ip_itime     = 9 
+      integer,parameter   :: ip_fwater    = 6
+      integer,parameter   :: ip_ropaved   = 7
+      integer,parameter   :: ip_rounpaved = 8
+      integer,parameter   :: ip_itime     = 9
       integer,parameter   :: ip_kbur      = 10
       integer,parameter   :: ip_kdecpav   = 11
       integer,parameter   :: ip_kdecunp   = 12
@@ -116,19 +116,19 @@
       real*8,allocatable    :: totflxin(:,:) ! total losses per receptor and per substance in current SC/SWB
 
       ! files
-      integer,parameter :: lu_bin = 1961
-      integer,parameter :: lu_txt = 1962
+      integer,save      :: lu_bin
+      integer,save      :: lu_txt
       character*80,parameter :: filbin = 'plastc_em.bin'
       character*80,parameter :: filtxt = 'plastc_em.txt'
-    
+
       !     other
       logical first
       data first /.true./
-      
+
       save frac2rec, totflxin, emisw
       save first, npmsa, nosegl, delt, lins, louts, offset_vel
 
-            
+
 
 !
 !******************************************************************************* INITIAL PROCESSING
@@ -160,10 +160,10 @@
             allocate(frac2rec(nrec))
             allocate(totflxin(nsubs,nrec))
             allocate(emisw(nosegl))
-            
+
             ! prepare for output
-            open (lu_bin,file=filbin,form='binary')
-            open (lu_txt,file=filtxt)
+            open (newunit = lu_bin, file=filbin,access = 'stream')
+            open (newunit = lu_txt, file=filtxt)
             write (lu_txt,'(''Emission metadata'')')
             write (lu_txt,'(''Emissions in g/s'')')
             write (lu_txt,'(''Nr of segments:     '',i10)') nosegl
@@ -178,7 +178,7 @@
       do ipmsa = 1,npmsa
         ipnt(ipmsa) = ipoint(ipmsa)
       enddo
-      
+
       emisw = 0.0
       do isegl = 1 , nosegl
 
@@ -193,13 +193,13 @@
           fpaved   = max(pmsa(ipnt(ip_fpaved)),1e-10) ! to avoid division by zero for RO paved conversion to mm
           funpaved = max(pmsa(ipnt(ip_funpaved)),1e-10) ! to avoid division by zero for RO unpaved conversion to mm
           fwater   = pmsa(ipnt(ip_fwater))
-          mpw      = pmsa(ipnt(ip_mpw))     
-          mpw      = mpw*(totsurf/10000.)*1000.                    !kg/ha/d to g/d 
-          mpww     = pmsa(ipnt(ip_mpww))     
-          mpww     = mpww*(totsurf/10000.)*1000.                    !kg/ha/d to g/d 
-          mpws     = pmsa(ipnt(ip_mpws))     
-          mpws     = mpws*(totsurf/10000.)*1000.                    !kg/ha/d to g/d 
-          
+          mpw      = pmsa(ipnt(ip_mpw))
+          mpw      = mpw*(totsurf/10000.)*1000.                    !kg/ha/d to g/d
+          mpww     = pmsa(ipnt(ip_mpww))
+          mpww     = mpww*(totsurf/10000.)*1000.                    !kg/ha/d to g/d
+          mpws     = pmsa(ipnt(ip_mpws))
+          mpws     = mpws*(totsurf/10000.)*1000.                    !kg/ha/d to g/d
+
           ! Releases to paved surfaces
           totmpw = mpw*fpaved + mpws*fpaved/(fpaved+funpaved)
           irec = rec_pav
@@ -208,7 +208,7 @@
           flux = totmpw / 86400. ! /d to /s
           fl(iflux) = flux
           totflxin(nsubs,irec) = totflxin(nsubs,irec) + dble(flux)
-          
+
           ! Releases to unpaved surfaces
           totmpw = mpw*funpaved + mpws*funpaved/(fpaved+funpaved)
           irec = rec_unp
@@ -217,7 +217,7 @@
           flux = totmpw / 86400. ! /d to /s
           fl(iflux) = flux
           totflxin(nsubs,irec) = totflxin(nsubs,irec) + dble(flux)
-          
+
           ! Releases to water
           totmpw = mpw*fwater + mpww
           irec = rec_sfw
@@ -226,7 +226,7 @@
           flux = totmpw / 86400. ! /d to /s
           fl(iflux) = flux
           totflxin(nsubs,irec) = totflxin(nsubs,irec) + dble(flux)
-          
+
 
 !*******************************************************************************
 ! Now follows the ROUTING PART
@@ -277,7 +277,7 @@
           if (iatt1.gt.0) then
 
           ! rounpaved = max(pmsa(ipnt(ip_rounpaved)),0.0)  THIS IS THE RIGHT STATEMENT AFTER CORRECTION OF BIN FILE
-          rounpaved = max(  pmsa(ipoint(ip_rounpaved)+(iseg-1)*increm(ip_rounpaved))   ,0.0) ! TEMP fix 
+          rounpaved = max(  pmsa(ipoint(ip_rounpaved)+(iseg-1)*increm(ip_rounpaved))   ,0.0) ! TEMP fix
           lotunp = pmsa(ipnt(ip_lotunp))
           hitunp = pmsa(ipnt(ip_hitunp))
           ro_mmperday = rounpaved / (totsurf*funpaved) * 1000. * 86400.
@@ -333,14 +333,14 @@
           enddo
 
       enddo
-      
+
       ! write output
       itime =  nint(pmsa(ipoint(ip_itime)))
       write (lu_txt,'(''Output written for relative time: '',i20)') itime
       write (lu_bin) itime,emisw
-      
+
       first = .false.
-     
+
 
       return
       end
