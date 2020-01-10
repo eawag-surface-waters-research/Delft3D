@@ -170,11 +170,14 @@
 !........Berekende totale dieptes voor de onderste laag segmenten
 !        toekennen aan de bovenliggende segmenten
 
-         IF ( IFROM.GT.0 .AND. ITO.GT.0 )
+         IF ( IFROM.GT.0 .AND. ITO.GT.0 ) then
+            CALL DHKMRK(1,IKNMRK(ITO),IKMRK)
+            IF ( IKMRK == 1 ) THEN
 
-     +   PMSA ( IP3 + (IFROM-1) * IN3 ) =
-     +   PMSA ( IP3 + (ITO  -1) * IN3 )
-
+               PMSA ( IP3 + (IFROM-1) * IN3 ) =
+     +         PMSA ( IP3 + (ITO  -1) * IN3 )
+            ENDIF
+         ENDIF
  8000 CONTINUE
 
 !     loop over the sediment columns, set sediment depth
