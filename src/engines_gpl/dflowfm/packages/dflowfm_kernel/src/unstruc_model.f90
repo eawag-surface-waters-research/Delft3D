@@ -1064,6 +1064,10 @@ subroutine readMDUFile(filename, istat)
     if (Layertype == 2 .and. jafilter /= 0) then
       call mess(LEVEL_ERROR, 'The checkerboard-filter has not been implemented for Z-models yet', '.')
     endif
+    if (Layertype == 2 .and. jacheckmonitor /= 0) then
+      call mess(LEVEL_WARN, 'The checkerboardmonitor has not been implemented for Z-models yet, is automatically switched off now.')
+      jacheckmonitor = 0
+    end if
 
     call prop_get_double (md_ptr, 'numerics', 'LocSaltLev'      , locsaltlev)
     call prop_get_double (md_ptr, 'numerics', 'LocSaltMin'      , locsaltmin)
