@@ -1575,12 +1575,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, max
 
    crossDef => cross%tabDef
 
-   if (updateTabulatedProfiles) then
-      call GetTabulatedSizes(dpt, crossDef, doFlow, area, width, maxWidth, perimeter, af_sub, perim_sub, calculationOption)
-   else
-      call GetTabSizesFromTables(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
-      maxwidth = width
-   endif    
+   call GetTabulatedSizes(dpt, crossDef, doFlow, area, width, maxWidth, perimeter, af_sub, perim_sub, calculationOption)
    
    if (associated(crossDef%summerdike) .and. getSummerDikes .and. calculationOption /= CS_TYPE_MIN) then
    

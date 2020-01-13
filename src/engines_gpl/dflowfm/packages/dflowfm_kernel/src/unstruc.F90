@@ -10580,7 +10580,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_alloc
  use m_bedform
  use m_fm_update_crosssections, only: fm_update_mor_width_area
- use m_globalparameters, only: updateTabulatedProfiles
  use unstruc_netcdf_map_class
  use unstruc_caching
  !
@@ -10874,7 +10873,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call klok(cpu_extra(2,24)) ! end MBA init
 
  call klok(cpu_extra(1,25)) ! update MOR width
- updateTabulatedProfiles = .true.
  if (stm_included) then
      call fm_update_mor_width_area()
  endif
