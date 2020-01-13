@@ -93,7 +93,7 @@ end module m_petsc
      
       if ( icgsolver.eq.6 ) then
          call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
-         call PetscPopSignalHandler() ! Switch off signal catching in PETSC.
+         call PetscPopSignalHandler(ierr) ! Switch off signal catching in PETSC.
          call PetscLogDefaultBegin(ierr)
       end if
 #endif
