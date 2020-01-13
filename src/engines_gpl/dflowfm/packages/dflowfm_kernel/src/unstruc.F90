@@ -45911,7 +45911,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        ! As a result, only the first fixed weir under the bed level is used
        ifirstweir(L) = 0
 
-       bob(1,L) = zc ; bob(2,L) = zc
+       bob(1,L) = max(bob(1,L), zc) ; bob(2,L) = max(bob(2,L), zc)
 
        if (kcu(L) .ne. 2 .and. kcu(L) .ne. 1) then
           cycle  ! weirs only on regular links
