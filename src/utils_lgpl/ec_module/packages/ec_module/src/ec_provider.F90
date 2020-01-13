@@ -2353,6 +2353,7 @@ module m_ec_provider
          integer                                                 :: lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid
          integer                                                 :: grid_lon_varid, grid_lat_varid
          integer                                                 :: x_varid, x_dimid, y_varid, y_dimid, z_varid, z_dimid, nod_varid, nod_dimid
+         integer                                                 :: realization_varid, realization_dimid, dim_offset
 
          integer, dimension(:,:), allocatable                    :: crd_dimids, crd_dimlen
          integer                                                 :: timeint
@@ -2485,7 +2486,8 @@ module m_ec_provider
                                                                            x_varid,   x_dimid,   y_varid,   y_dimid,      &
                                                                            z_varid,   z_dimid,                            &
                                                                          tim_varid, tim_dimid,                            &
-                                                                         nod_varid, nod_dimid)) then
+                                                                         nod_varid, nod_dimid,                            &
+                                                                 realization_varid, realization_dimid)) then
             ! Exception: inquiry of id's of required coordinate variables failed 
              return
          end if
@@ -2723,6 +2725,7 @@ module m_ec_provider
                   return
                end if
 
+               dim_offset = merge(1, 0, realization_dimid > 0)
                if (grid_type == elmSetType_samples) then
                   ncol = fileReaderPtr%dim_length(dimids(1))
                   nrow = 1
@@ -2733,8 +2736,8 @@ module m_ec_provider
                   nlay = 0
                   if (size(dimids) > 2) then
                      nrow = fileReaderPtr%dim_length(dimids(2))
-                     if (size(dimids) > 3) then
-                        nlay = fileReaderPtr%dim_length(dimids(3))
+                     if (size(dimids) > 3+dim_offset) then
+                        nlay = fileReaderPtr%dim_length(dimids(3+dim_offset))
                      endif
                   endif
                end if

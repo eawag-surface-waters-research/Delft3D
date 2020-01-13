@@ -1153,7 +1153,8 @@ end subroutine ecInstanceListSourceItems
                                                     x_varid, x_dimid,   y_varid,   y_dimid,      &
                                                     z_varid, z_dimid,                            &
                                                   tim_varid, tim_dimid,                          &
-                                               series_varid, series_dimid) result(success)
+                                               series_varid, series_dimid,                       &
+                                          realization_varid, realization_dimid) result(success)
       use netcdf
       logical              :: success
       integer, intent(in)  :: ncid           !< NetCDF file ID
@@ -1173,9 +1174,11 @@ end subroutine ecInstanceListSourceItems
       integer, intent(out) ::   z_dimid      !< Z dimension
       integer, intent(out) :: tim_dimid      !< Time dimension
       integer, intent(out) :: series_dimid   !< Series dimension
+      integer, intent(out) :: realization_varid  !< realization varid
+      integer, intent(out) :: realization_dimid  !< realization dimension
       integer :: ndim, nvar, ivar, nglobatts, unlimdimid, ierr
       integer, allocatable :: dimids(:)
-      character(len=NF90_MAX_NAME)  :: units, axis, varname, stdname, cf_role
+      character(len=NF90_MAX_NAME)  :: units, axis, varname, stdname, cf_role, std_name
 
       success = .False.
       lon_varid = -1
@@ -1185,6 +1188,7 @@ end subroutine ecInstanceListSourceItems
       z_varid = -1
       tim_varid = -1
       series_varid = -1
+      realization_varid = -1
 
       lon_dimid = -1
       lat_dimid = -1
@@ -1193,6 +1197,7 @@ end subroutine ecInstanceListSourceItems
       z_dimid = -1
       tim_dimid = -1
       series_dimid = -1
+      realization_dimid = -1
 
       allocate(dimids(NF90_MAX_VAR_DIMS))
 
@@ -1205,6 +1210,12 @@ end subroutine ecInstanceListSourceItems
          if (strcmpi(cf_role,'timeseries_id')) then 
             series_varid = ivar                                                 ! store last timeseries_id variable
             series_dimid = dimids(ndim)
+         end if
+         ierr = nf90_get_att(ncid, ivar, 'standard_name', std_name)
+         if (strcmpi(std_name,'realization')) then
+            realization_varid = ivar                                                 ! store last timeseries_id variable
+            realization_dimid = dimids(ndim)
+            cycle
          end if
          units=''
          ierr = nf90_get_att(ncid, ivar, 'units', units)
