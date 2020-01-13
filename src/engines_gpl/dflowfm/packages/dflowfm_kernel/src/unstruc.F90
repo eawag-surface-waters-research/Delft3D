@@ -545,6 +545,11 @@ character(len=255)   :: filename_fou_out
    ! Timestep has been performed, now finalize it.
 
  call flow_f0isf1()                                  ! mass balance and vol0 = vol1
+    
+ ! update water depth at pressure points 
+ ! TODO investigate if this statement can be moved to step_reduce (see UNST-)
+ hs = s1 - bl
+
  call structure_parameters
 
  dnt    = dnt + 1
