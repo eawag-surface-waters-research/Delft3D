@@ -3102,7 +3102,6 @@ double precision function GetCriticalDepth(q, cross)
    !
    double precision               :: depth
    double precision               :: dummy
-   double precision               :: dummy2
    double precision               :: wWidth
    double precision               :: groundLayer
    double precision               :: step
@@ -3141,7 +3140,7 @@ double precision function GetCriticalDepth(q, cross)
    
       first = .false.
       
-      call GetCSParsFlow(cross, depth, wArea, dummy, wWidth, dummy2)        
+      call GetCSParsFlow(cross, depth, wArea, dummy, wWidth)        
       wwidth = warea/depth
       
       step = 0.5d0 * step
