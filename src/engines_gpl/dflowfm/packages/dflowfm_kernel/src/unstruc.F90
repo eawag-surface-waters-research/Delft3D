@@ -546,8 +546,8 @@ character(len=255)   :: filename_fou_out
 
  call flow_f0isf1()                                  ! mass balance and vol0 = vol1
     
- ! update water depth at pressure points 
- ! TODO investigate if this statement can be moved to step_reduce (see UNST-)
+ ! Update water depth at pressure points (for output).
+ ! TODO: UNST-3415: investigate if this statement can be moved to step_reduce.
  hs = s1 - bl
 
  call structure_parameters
