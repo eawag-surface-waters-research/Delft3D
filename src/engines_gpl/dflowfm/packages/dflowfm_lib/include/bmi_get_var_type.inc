@@ -98,13 +98,21 @@ select case(var_name)
     type_name = "double"
   case("balat")
     type_name = "double"
+  case("n1latsg")
+    type_name = "int"
+  case("n2latsg")
+    type_name = "int"
   case("nnlat")
+    type_name = "int"
+  case("kclat")
     type_name = "int"
   case("qinext")
     type_name = "double"
   case("qinextreal")
     type_name = "double"
   case("vincum")
+    type_name = "double"
+  case("rainuni")
     type_name = "double"
   case("zbndz")
     type_name = "double"
@@ -228,6 +236,10 @@ select case(var_name)
     type_name = "double"
   case("wu_mor")
     type_name = "double"
+  case("wu1D2D")
+    type_name = "double"
+  case("hh1D2D")
+    type_name = "double"
   case("bob")
     type_name = "double"
   case("bob0")
@@ -252,6 +264,16 @@ select case(var_name)
     type_name = "int"
   case("numk")
     type_name = "int"
+  case("ndx2d")
+    type_name = "int"
+  case("ndx")
+    type_name = "int"
+  case("xz")
+    type_name = "double"
+  case("yz")
+    type_name = "double"
+  case("ba")
+    type_name = "double"
   case("zbnd1d2d1")
     type_name = "double"
   case("zbnd1d2d0")
@@ -275,16 +297,6 @@ select case(var_name)
   case("is_maxvalsnd")
     type_name = "double"
   case("is_dtint")
-    type_name = "double"
-  case("ndx2d")
-    type_name = "int"
-  case("ndx")
-    type_name = "int"
-  case("xz")
-    type_name = "double"
-  case("yz")
-    type_name = "double"
-  case("ba")
     type_name = "double"
   case default
     type_name = ""

@@ -93,12 +93,18 @@ select case(var_name)
   case("numlatsg")
     location_name = ""
   case("qplat")
-    location_name = "face"
+    location_name = ""
   case("qqlat")
     location_name = "face"
   case("balat")
-    location_name = "face"
+    location_name = ""
+  case("n1latsg")
+    location_name = ""
+  case("n2latsg")
+    location_name = ""
   case("nnlat")
+    location_name = ""
+  case("kclat")
     location_name = "face"
   case("qinext")
     location_name = "face"
@@ -106,6 +112,8 @@ select case(var_name)
     location_name = "face"
   case("vincum")
     location_name = "face"
+  case("rainuni")
+    location_name = ""
   case("zbndz")
     location_name = "edge"
   case("zbndu")
@@ -228,6 +236,10 @@ select case(var_name)
     location_name = "edge"
   case("wu_mor")
     location_name = "edge"
+  case("wu1D2D")
+    location_name = "edge"
+  case("hh1D2D")
+    location_name = "edge"
   case("bob")
     location_name = "edge"
   case("bob0")
@@ -252,6 +264,16 @@ select case(var_name)
     location_name = ""
   case("numk")
     location_name = ""
+  case("ndx2d")
+    location_name = ""
+  case("ndx")
+    location_name = ""
+  case("xz")
+    location_name = "face"
+  case("yz")
+    location_name = "face"
+  case("ba")
+    location_name = "face"
   case("zbnd1d2d1")
     location_name = ""
   case("zbnd1d2d0")
@@ -276,16 +298,6 @@ select case(var_name)
     location_name = "face"
   case("is_dtint")
     location_name = ""
-  case("ndx2d")
-    location_name = ""
-  case("ndx")
-    location_name = ""
-  case("xz")
-    location_name = "face"
-  case("yz")
-    location_name = "face"
-  case("ba")
-    location_name = "face"
   case default
     location_name = ""
 end select

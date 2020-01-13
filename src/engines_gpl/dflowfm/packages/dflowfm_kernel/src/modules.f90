@@ -1160,7 +1160,7 @@ double precision                  :: windxav, windyav  !< average wind for plott
 
 double precision                  :: windsp
 double precision                  :: winddir         !< deg from north sailor
-double precision                  :: rainuni         !< uniform rain intensity, (mm/hr)
+double precision, target          :: rainuni         !< [mm/hr] uniform rain intensity. {"rank": 0}
 double precision                  :: wsx
 double precision                  :: wsy
 double precision                  :: rhoair          !< (kg/m3)

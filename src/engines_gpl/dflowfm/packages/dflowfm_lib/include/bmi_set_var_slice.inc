@@ -166,10 +166,22 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      balat(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("n1latsg")
+
+     call c_f_pointer(xptr, x_1d_int_ptr, (/c_count(1)/))
+     n1latsg(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_int_ptr
+  case("n2latsg")
+
+     call c_f_pointer(xptr, x_1d_int_ptr, (/c_count(1)/))
+     n2latsg(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_int_ptr
   case("nnlat")
 
      call c_f_pointer(xptr, x_1d_int_ptr, (/c_count(1)/))
      nnlat(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_int_ptr
+  case("kclat")
+
+     call c_f_pointer(xptr, x_1d_int_ptr, (/c_count(1)/))
+     kclat(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_int_ptr
   case("qinext")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -182,6 +194,9 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      vincum(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("rainuni")
+     ! Does not apply to scalar variables
+     continue
   case("zbndz")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -420,6 +435,14 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      wu_mor(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("wu1D2D")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     wu1D2D(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("hh1D2D")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     hh1D2D(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("bob")
 
      call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
@@ -467,6 +490,24 @@
   case("numk")
      ! Does not apply to scalar variables
      continue
+  case("ndx2d")
+     ! Does not apply to scalar variables
+     continue
+  case("ndx")
+     ! Does not apply to scalar variables
+     continue
+  case("xz")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     xz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("yz")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     yz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("ba")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     ba(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("zbnd1d2d1")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -514,22 +555,4 @@
   case("is_dtint")
      ! Does not apply to scalar variables
      continue
-  case("ndx2d")
-     ! Does not apply to scalar variables
-     continue
-  case("ndx")
-     ! Does not apply to scalar variables
-     continue
-  case("xz")
-
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     xz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("yz")
-
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     yz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("ba")
-
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     ba(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   end select
