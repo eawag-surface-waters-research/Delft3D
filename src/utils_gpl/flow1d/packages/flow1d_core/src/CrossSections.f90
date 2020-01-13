@@ -1948,7 +1948,16 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, maxwidth, perim
          cycle
       endif
       
+      ! ISTART starts at 1 and is set to levelscount at the end of this loop.
+      ! LEVELSCOUNT is the location, where the cross section intersects with a transition from main to floodplain1 or from floodplain1 to floodplain2
+      ! this transition is always present in the table
+      !
       do ilev = istart, levelsCount-1
+         ! D1 is the level at ILEV, D2 is the level at D+1
+         ! WIDTHS(ilev) and WIDTHS(ilev+1) are the corresponding widths at D1 and D2
+         ! E1 is the width for subsection isec at D1 (since ISTART is at the start of subsection ISEC, E1 is garanteed > 0)
+         ! E2 is the width for subsection isec at D2 (since ISTART is at the start of subsection ISEC, E2 is garanteed > 0)
+         
          d1 = heights(ilev) - heights(1)
          d2 = heights(ilev + 1) - heights(1)
          e1 = min(widths(ilev)-widthplains(isec), widthplains(isec+1)-widthplains(isec))
@@ -1964,6 +1973,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, maxwidth, perim
          elseif (dpt >= d1) then
             call trapez(dpt, d1, d2, e1, e2, areal, w_section(isec), wll)
             if (isec==1) then
+               ! Calculate the full width (not corrected for the subsections) 
                call trapez(dpt, d1, d2, widths(ilev), widths(ilev+1), areal, fullwidth, wll)
                maxwidth = max(maxwidth, fullWidth)
             endif
@@ -1982,7 +1992,8 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, maxwidth, perim
       enddo
    
       istart = levelsCount
-      ! Extend above table if necessary
+      ! Extend above table if necessary (for the subsections this is also the case for a local extension of a subsection.
+      ! To prevent double additions, exclude the wet perimeter. And add this part later
       dTop = heights(levelsCount) - heights(1)
       if (dpt > dTop) then
       
@@ -2007,7 +2018,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, maxwidth, perim
          else 
             isec = 1
          endif
-         perim_sub(isec) = perim_sub(isec) + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
+         perim_sub(isec) = perim_sub(isec) + 2.0d0 * (dpt - dTop)  ! Here we take the wet perimeter into account
       endif
    endif
 
