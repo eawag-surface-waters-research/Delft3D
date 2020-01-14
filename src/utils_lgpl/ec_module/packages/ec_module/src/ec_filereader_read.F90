@@ -771,7 +771,7 @@ module m_ec_filereader_read
             n_rows = item%elementSetPtr%n_rows
             issparse = 0
             
-            if ( fieldPtr%issparse.eq.1 ) then
+            if ( fieldPtr%issparse == 1 ) then
                ia => fieldPtr%ia
                ja => fieldPtr%ja
                issparse = fieldPtr%issparse

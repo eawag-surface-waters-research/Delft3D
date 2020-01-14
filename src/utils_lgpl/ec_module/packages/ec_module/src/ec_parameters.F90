@@ -81,7 +81,7 @@ module m_ec_parameters
    !> enumeration for tEcFileReader filetypes
    integer, parameter :: provFile_undefined           =  0
    integer, parameter :: provFile_uniform             =  1  !< kx values each timestep 1 dim arr       uni
-   integer, parameter :: provFile_unimagdir           =  2  !< 2 values each timestep; magnitide, direction
+   integer, parameter :: provFile_unimagdir           =  2  !< 2 values each timestep; magnitude, direction
    integer, parameter :: provFile_svwp                =  3  !< 3 fields each timestep 3 dim array      noint
    integer, parameter :: provFile_svwp_weight         =  4  !< 3 fields each timestep 3 dim array      noint
    integer, parameter :: provFile_arcinfo             =  5  !< 1 field each timestep 2 dim array        bilin/direct
