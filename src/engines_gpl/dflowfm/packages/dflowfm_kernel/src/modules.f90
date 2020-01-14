@@ -1119,10 +1119,10 @@ character(len=128), allocatable       :: lat_ids(:)  !< id of laterals {"shape":
 
 !! Lateral lookup tables: n1/n2latsg(ilat) = n1/n2, nnlat(n1:n2) = { flow node nrs affected by lateral ilat }
 integer                               :: nlatnd      !< lateral nodes dimension, counter of nnlat(:)
-integer         , allocatable         :: n1latsg(:)  !< [-] first  nlatnd point in lateral signal numlatsg {"shape": ["numlatsg"]}
-integer         , allocatable         :: n2latsg(:)  !< [-] second nlatnd point in lateral signal numlatsg {"shape": ["numlatsg"]}
+integer,          allocatable, target :: n1latsg(:)  !< [-] first  nlatnd point in lateral signal numlatsg {"shape": ["numlatsg"]}
+integer,          allocatable, target :: n2latsg(:)  !< [-] second nlatnd point in lateral signal numlatsg {"shape": ["numlatsg"]}
 integer,          allocatable, target :: nnlat(:)    !< [-] for each lateral node, flow node number == pointer to qplat/balat {"shape": ["nlatnd"]}
-integer,          allocatable         :: kclat(:)    !< [-] for each cell: 0 when not accepting lateral discharge (e.g. pipe) {"location": "face", "shape": ["ndx"]}
+integer,          allocatable, target :: kclat(:)    !< [-] for each cell: 0 when not accepting lateral discharge (e.g. pipe) {"location": "face", "shape": ["ndx"]}
 
 double precision, allocatable, target :: qinext(:)      !< [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
 double precision, allocatable, target :: qinextreal(:)  !< [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
