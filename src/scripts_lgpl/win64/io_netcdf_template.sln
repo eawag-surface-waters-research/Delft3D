@@ -67,7 +67,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "shapelib_test", "third_part
 		{9867C9D6-9122-494E-8D05-FEEB0E94CF75} = {9867C9D6-9122-494E-8D05-FEEB0E94CF75}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "io_netcdf_managed", "utils_lgpl\io_netcdf\packages\io_netcdf_managed\io_netcdf_managed.csproj", "{7F1399E8-FE58-4147-9341-B58A44230B84}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deltares.UGrid", "utils_lgpl\io_netcdf\packages\Deltares.UGrid\Deltares.UGrid.csproj", "{7F1399E8-FE58-4147-9341-B58A44230B84}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F8DB0933-F02C-49B3-8C4A-1C05688BC246} = {F8DB0933-F02C-49B3-8C4A-1C05688BC246}
 	EndProjectSection
