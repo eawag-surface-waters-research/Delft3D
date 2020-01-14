@@ -250,7 +250,7 @@ subroutine loadCachedSections( lun, sections, ierr )
         sections(i)%path%np  = np
         sections(i)%path%lnx = nlink
         allocate( sections(i)%path%xp(np), sections(i)%path%yp(np),  &
-                  sections(i)%path%zp(np), sections(i)%path%wfp(np), &
+                  sections(i)%path%zp(np),
                   sections(i)%path%indexp(np), &
                   sections(i)%path%xk(2,nlink), sections(i)%path%yk(2,nlink), &
                   sections(i)%path%wfp(nlink), &
@@ -258,7 +258,7 @@ subroutine loadCachedSections( lun, sections, ierr )
                   sections(i)%path%sp(nlink), sections(i)%path%ln(nlink) )
 
         read( lun, iostat = ierr ) sections(i)%path%xp, sections(i)%path%yp,  &
-                                   sections(i)%path%zp, sections(i)%path%wfp, &
+                                   sections(i)%path%zp,
                                    sections(i)%path%indexp, &
                                    sections(i)%path%xk, sections(i)%path%yk, &
                                    sections(i)%path%wfp, &
@@ -340,7 +340,7 @@ subroutine storeSections( lun, sections )
         write( lun ) sections(i)%path%np, sections(i)%path%lnx
 
         write( lun ) sections(i)%path%xp, sections(i)%path%yp,  &
-                     sections(i)%path%zp, sections(i)%path%wfp, &
+                     sections(i)%path%zp,
                      sections(i)%path%indexp, &
                      sections(i)%path%xk, sections(i)%path%yk, &
                      sections(i)%path%wfp, &
