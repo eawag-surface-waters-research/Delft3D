@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 153)
+      PARAMETER   ( NOMODU = 154)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -206,6 +206,7 @@
      +   'EFFAVE',
      +   'DECTRA',
      +   'ESPACE',
+     +   'CALTEM',
      +   'PLASTC',
      +   'WLCWOC',
      +   'HDISS' ,
