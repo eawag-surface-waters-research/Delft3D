@@ -22,7 +22,6 @@
     <ProjectGuid>{0125E83F-01B2-4D7B-8387-6FC54D7F3D7E}</ProjectGuid>
     <RootNamespace>waq_utils_c</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
