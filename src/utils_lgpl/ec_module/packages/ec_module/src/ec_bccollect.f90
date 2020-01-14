@@ -118,12 +118,12 @@ module m_ec_bccollect
                    if (.not.processhdr_all_quantities(bcBlockPtr,nfld,nq,keyvaluestr)) return   ! dumb translation of bc-object metadata  
                    if (.not.checkhdr(bcBlockPtr)) return                                        ! check on the contents of the bc-object 
                    bcBlockPtr%fname = fname 
-                   if (ecSupportOpenExistingFileGnu(bcBlockPtr%fhandle, fname)) then
-                      call mf_backspace(bcBlockPtr%fhandle, savepos)           ! set newly opened file to the appropriate position 
+                   if (ecSupportOpenExistingFileGnu(bcBlockPtr%bcFilePtr%fhandle, fname)) then
+                      call mf_backspace(bcBlockPtr%bcFilePtr%fhandle, savepos)           ! set newly opened file to the appropriate position 
                       count = count + 1 
                       iostat = EC_NOERR
                    else 
-                      call mf_close(bcBlockPtr%fhandle)
+                      call mf_close(bcBlockPtr%bcFilePtr%fhandle)
                       iostat = EC_DATA_NOTFOUND
                    end if
                 endif                                       ! Right label
@@ -139,6 +139,7 @@ module m_ec_bccollect
 ! Collectloop: Scan a bc-file
 !              For each bc-block, create a file reader, add it to the list of file readers in the instance
     integer function collectbc_all(instancePtr, fname, iostat, k_refdate, k_timezone, k_timestep_unit, dtnodal) result (count)
+    use m_ec_alloc
     implicit none            
     type (tEcInstance),     pointer,   intent(in)      :: instancePtr     !< EC Instance, overall structure for the EC-module 
     character(len=*),                  intent(in)      :: fname           !< file name (bc-format)
@@ -161,6 +162,7 @@ module m_ec_bccollect
     integer (kind=8)    ::  savepos 
     integer             ::  iostatloc
     type (tEcBCBlock),    pointer :: bcBlockPtr
+    type (tEcBCFile),     pointer :: bcFilePtr
     type (tEcFileReader), pointer :: fileReaderPtr
     integer             :: bcBlockId, fileReaderId
     integer             :: ifr 
@@ -178,6 +180,18 @@ module m_ec_bccollect
        iostat = EC_DATA_NOTFOUND
        return
     end if
+
+    if (instancePtr%nBCFiles == size(instancePtr%ecBCFilesPtr)) then
+       if (.not. ecArrayIncrease(instancePtr%ecBCFilesPtr, instancePtr%nBCFiles)) then
+          return
+       end if
+    end if
+    instancePtr%nBCFiles = instancePtr%nBCFiles + 1
+
+    allocate (bcFilePtr)
+    bcFilePtr%bcfilename = fname
+    bcFilePtr%fhandle = fhandle
+    instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcBlockPtr%bcFilePtr
 
     do while (.not.mf_eof(fhandle))
        call mf_read(fhandle,rec,savepos)
@@ -242,14 +256,7 @@ module m_ec_bccollect
                      return  ! dumb translation of bc-object metadata  
                    endif
 !                  if (.not.(checkhdr(bcBlockPtr))) return    ! skip check                       ! check on the contents of the bc-object       
-                   bcBlockPtr%fname = fname 
                    bcBlockPtr%ftype=BC_FTYPE_ASCII                                               ! set BC-Block filetype to ASCII
-
-                   !if (bcBlockPtr%func==BC_FUNC_TSERIES) then 
-                   !   if (.not.ecSupportTimestringToUnitAndRefdate(bcBlockPtr%timeunit, unit, ref_date)) then 
-                   !      return
-                   !   endif           ! Parsing the time string failed 
-                   !endif              ! Timeseries function 
 
                    if (present(k_refdate) .and. present(k_timezone) .and. present(k_timestep_unit)) then 
                       k_mjd = date2mjd(k_refdate)
@@ -261,17 +268,9 @@ module m_ec_bccollect
                    else
                       if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, -1.d0, 0.d0, ec_second)) return
                    endif
-
-                   if (ecSupportOpenExistingFileGnu(bcBlockPtr%fhandle, fname)) then
-                      call mf_backspace(bcBlockPtr%fhandle, savepos)           ! set newly opened file to the appropriate position 
-                      count = count + 1 
-                      iostat = EC_NOERR
-                   else 
-                      if (bcBlockPtr%fhandle /= 0) then
-                         call mf_close(bcBlockPtr%fhandle)
-                      endif
-                      iostat = EC_DATA_NOTFOUND
-                   end if
+                   bcBlockPtr%fposition = savepos
+                   bcBlockPtr%bcFilePtr => bcFilePtr 
+                   count = count + 1
                    jaheader = .false.
                 endif 
              endif          ! in header mode (data lines are ignored) 

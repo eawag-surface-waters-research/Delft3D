@@ -147,8 +147,8 @@ module m_ec_provider
              
          if (index(trim(fileName)//'|','.bc|')>0) then                               ! ASCII: bc-format  : detection is extension-based
 !           bcFilePtr => ecSupportFindBCFileByFilename(instancePtr, fileName)       ! was this BC-file already opened?
-            bcBlockPtr%bcptr => ecSupportFindBCFileByFilename(instancePtr, fileName)! was this BC-file already opened?
-            if (.not.associated(bcBlockPtr%bcptr)) then                                    ! if not, create anew
+            bcBlockPtr%bcFilePtr => ecSupportFindBCFileByFilename(instancePtr, fileName)! was this BC-file already opened?
+            if (.not.associated(bcBlockPtr%bcFilePtr)) then                                    ! if not, create anew
             ! ensure capacity
                if (instancePtr%nBCFiles == size(instancePtr%ecBCFilesPtr)) then
                   if (.not. ecArrayIncrease(instancePtr%ecBCFilesPtr, instancePtr%nBCFiles)) then
@@ -157,9 +157,9 @@ module m_ec_provider
                end if
                instancePtr%nBCFiles = instancePtr%nBCFiles + 1
 
-               allocate (bcBlockPtr%bcptr)
-               bcBlockPtr%bcptr%bcfilename = fileName
-               instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcBlockPtr%bcptr
+               allocate (bcBlockPtr%bcFilePtr)
+               bcBlockPtr%bcFilePtr%bcfilename = fileName
+               instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcBlockPtr%bcFilePtr
             endif
             bcBlockPtr%ftype=BC_FTYPE_ASCII
          else if (index(trim(fileName)//'|','.nc|')>0) then                          ! NETCDF: nc-format 

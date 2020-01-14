@@ -111,18 +111,20 @@ module m_ec_typedefs
         character(len=maxFileNameLen)              ::  bcname  = ''        !< Name (identifier) for this BC block (assumed to be uniq)
         character(len=maxFileNameLen)              ::  qname   = ''        !< Quantity name with which all found quantities must identify 
         character(len=maxFileNameLen)              ::  fname   = ''        !< Filename the data originates from 
-        integer(kind=8)                            ::  fhandle= -1         !< (C) filehandle to open file 
+!       integer(kind=8)                            ::  fhandle= -1         !< (C) filehandle to open file 
+        integer(kind=8)                            ::  fposition = -1      !< position of reading for fseek
         logical                                    ::  isLateral = .false. !< Lateral discharge? (otherwise: boundary condition)
         integer                                    ::  ftype  = -1         !< ASCII, NetCDF, ....
         type (tEcBCQuantity), pointer              ::  quantity => null()  !< Quantity object 
         type (tEcBCQuantity), allocatable          ::  quantities(:)       !< Array of quantity objects for each quantity with the same name  
         type (tEcNetCDF), pointer                  ::  ncptr => null()     !< pointer to a NetCDF instance, responsible for a connected NetCDF file 
-        type (tEcBCFile), pointer                  ::  bcptr => null()     !< pointer to a BCFile instance, responsible for a connected BC file 
+        type (tEcBCFile), pointer                  ::  bcFilePtr => null() !< pointer to a BCFile instance, responsible for a connected BC file 
         integer                                    ::  ncvarndx = -1       !< varid in the associated netcdf for the requested quantity 
         integer                                    ::  nclocndx = -1       !< index in the timeseries_id dimension for the requested location 
         integer                                    ::  nctimndx =  1       !< record number to be read 
         integer, dimension(:), allocatable         ::  ncdimvector         !< List of dimensions in NetCDF describing the chosen variable
         integer, allocatable, dimension(:)         ::  dimvector           !< dimension ID's indexing the variable of interest
+        logical                                    ::  feof = .False.      !< End-Of-File signal
         !
         integer                 ::  astro_component_column = -1  !< number of the column, containing astronomic components
         integer                 ::  astro_amplitude_column = -1  !< number of the column, containing astronomic amplitudes
@@ -155,6 +157,7 @@ module m_ec_typedefs
       integer                       :: id                  !< unique NCBlock number, set by ecInstanceCreateNCBlock
       character(len=:), allocatable :: bcfilename          !< file name of the BC-file 
       type (tEcBlocklist), pointer  :: blocklist => null() !< list of blocks (table of contents for this BC-file)
+      integer(kind=8)               :: fhandle = -1        !< file handle
       integer                       :: last_blocktype      !< type of the block (BT_GENERAL, BT_FORCING, ....) 
       integer                       :: last_position = 0   !< last position in the scan-process                   
       character(len=15)             :: FileVersion         !< File version stamp read from [General]::FileVersion in the bc-file
