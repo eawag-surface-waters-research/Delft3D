@@ -1,9 +1,10 @@
 using System;
 using System.Text;
-using Deltares.IONetCDF.Managed.Helpers;
+using Deltares.UGrid.Helpers;
+
 // ReSharper disable UnusedMember.Global
 
-namespace Deltares.IONetCDF.Managed
+namespace Deltares.UGrid
 {
     /// <summary>
     /// Managed wrapper for the native io_netcdf library.

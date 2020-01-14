@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Deltares.IONetCDF.Managed
+namespace Deltares.UGrid
 {
     public sealed partial class Wrapper
     {

@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Deltares.IONetCDF.Managed.Helpers
+namespace Deltares.UGrid.Helpers
 {
     public static class IONetCDFConstants
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace Deltares.IONetCDF.Managed.Interop
+namespace Deltares.UGrid.Interop
 {
     public sealed class IO_NetCDF_DLL
     {

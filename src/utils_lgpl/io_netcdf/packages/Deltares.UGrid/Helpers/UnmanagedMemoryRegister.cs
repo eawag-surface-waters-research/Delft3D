@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Deltares.IONetCDF.Managed.Helpers
+namespace Deltares.UGrid.Helpers
 {
     // Unmanaged memory book keeping
     public class UnmanagedMemoryRegister : IDisposable

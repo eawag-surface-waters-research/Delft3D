@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Deltares.IONetCDF.Managed.Helpers
+namespace Deltares.UGrid.Helpers
 {
     // String handling
     public static class StringBufferHandling

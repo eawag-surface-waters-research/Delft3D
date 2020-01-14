@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace Deltares.IONetCDF.Managed.Interop
+namespace Deltares.UGrid.Interop
 {
     public class NativeLibraryImplementation : NativeLibrary
     {

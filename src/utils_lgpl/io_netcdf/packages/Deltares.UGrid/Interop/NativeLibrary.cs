@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Deltares.IONetCDF.Managed.Interop
+namespace Deltares.UGrid.Interop
 {
     public abstract class NativeLibrary : IDisposable
     {
