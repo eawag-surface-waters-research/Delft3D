@@ -161,7 +161,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     character(256)              :: rec
     character(300)              :: message
     character(80)               :: parname
-    character(2)                :: sc_type
+    character(20)               :: sc_type
     character(20)               :: sedtype             ! Local variable for sediment type
     character(78)               :: string
     character(10)               :: versionstring
