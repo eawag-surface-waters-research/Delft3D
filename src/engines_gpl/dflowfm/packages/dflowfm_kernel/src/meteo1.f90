@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2019.                                
+!  Copyright (C)  Stichting Deltares, 2017-2020.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -4952,7 +4952,7 @@ contains
        b2 = yp - y(1)
        !
        det = a11*a22 - a12*a21
-       if (abs(det)<1E-12) then     ! Jan Mooiman 07-01-2015
+       if (abs(det)<1E-12) then
           return
        end if
        !

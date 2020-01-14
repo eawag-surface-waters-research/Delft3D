@@ -3,7 +3,7 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s1     ,disch_nf ,sour_nf , &
                     & kcs    ,flwang ,sign   ,gdp    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2019.                                
+!  Copyright (C)  Stichting Deltares, 2011-2020.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

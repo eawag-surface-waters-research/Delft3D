@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2019.
+!!  Copyright (C)  Stichting Deltares, 2012-2020.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -87,7 +87,7 @@
          cphyt = max(biomas(j) , 0.0)
 
 !  Compute total mortality for this species and store the flux
-!  JvG 16-8-2010 avoid undershoots leading to negative biomass
+!  avoid undershoots leading to negative biomass
          cmort = min(cphyt * sngl(rmort(j)) , cphyt / tstepi)
          flmora(j) = cmort
 

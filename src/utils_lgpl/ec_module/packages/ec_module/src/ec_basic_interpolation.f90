@@ -1,6 +1,6 @@
 !----- LGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2011-2018.
+!  Copyright (C)  Stichting Deltares, 2011-2020.
 !
 !  This library is free software; you can redistribute it and/or
 !  modify it under the terms of the GNU Lesser General Public
@@ -1089,7 +1089,7 @@
    B2  = getdy(x(1),y(1),xp  ,yp , jsferic)   ! YP   - Y(1)
 
    DET  =   A11 * A22 - A12 * A21
-   IF (ABS(DET)  <  1E-12) THEN    ! Jan Mooiman 07-01-2015
+   IF (ABS(DET)  <  1E-12) THEN
       RETURN
    ENDIF
 
