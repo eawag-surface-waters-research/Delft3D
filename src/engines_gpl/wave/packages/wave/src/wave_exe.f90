@@ -289,7 +289,7 @@ program waves_main
          ! Update wave and wind conditions
          !
          if (timtscale >= 0) then
-            call settimtscale(wavedata%time, timtscale, swan_run%modsim, swan_run%deltcom)
+            call settimtscale(wavedata%time, timtscale, swan_run%modsim, swan_run%nonstat_interval)
             !
             ! Run n_swan nested SWAN run
             !

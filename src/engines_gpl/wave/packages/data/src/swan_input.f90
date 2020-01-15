@@ -263,7 +263,8 @@ module swan_input
        real                                    :: cftriad2
        real                                    :: css
        real                                    :: deltc            ! used when modsim = 3: Time step in non-stat SWAN runs
-       real                                    :: deltcom          ! used when modsim = 3: Interval of communication FLOW-WAVE
+       real                                    :: nonstat_interval ! used when modsim = 3: Interval of non-stat SWAN computation
+       real                                    :: deltcom          ! Not used: COM write interval
        real                                    :: inthotf
        real                                    :: depmin
        real                                    :: dh_abs
@@ -1232,7 +1233,8 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_logical(mdw_ptr, 'General', 'OnlyInputVerify', flag)
     sr%compmode = .not. flag
     !
-    sr%deltc = -999.0
+    sr%deltc            = -999.0
+    sr%nonstat_interval = -999.0
     parname  = ''
     call prop_get_string (mdw_ptr, 'General', 'SimMode', parname)
     select case (parname)
@@ -1245,9 +1247,14 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        sr%modsim = 2
     case ('non-stationary')
        sr%modsim = 3
-       call prop_get_real   (mdw_ptr, 'General', 'TimeStep', sr%deltc)
+       call prop_get_real(mdw_ptr, 'General', 'TimeStep', sr%deltc)
        if (sr%deltc < 0.0) then
-          write(*,*) 'SWAN_INPUT: missing or invalid non-stationary time step'
+          write(*,*) '*** ERROR: Unable to read non-stationary parameter "TimeStep"'
+          goto 999
+       endif
+       call prop_get_real(mdw_ptr, 'General', 'TimeInterval', sr%nonstat_interval)
+       if (sr%nonstat_interval < 0.0) then
+          write(*,*) '*** ERROR: Unable to read non-stationary parameter "TimeInterval"'
           goto 999
        endif
     case default
@@ -5330,7 +5337,7 @@ subroutine write_swan_inp (wavedata, calccount, &
           !
           ! endtime
           !
-          tendc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec + sr%deltcom * 60.0)
+          tendc = datetime_to_string(wavedata%time%refdate, real(wavedata%time%calctimtscale)* wavedata%time%tscale)
           !
           ! built line
           !

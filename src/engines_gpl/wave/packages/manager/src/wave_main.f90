@@ -310,9 +310,9 @@ function wave_main_step(stepsize) result(retval)
          ! Update wave and wind conditions
          !
          if (swan_run%flowgridfile == ' ') then
-            call settimtscale(wavedata%time, timtscale, swan_run%modsim, swan_run%deltcom)
+            call settimtscale(wavedata%time, timtscale, swan_run%modsim, swan_run%nonstat_interval)
          else
-            call settimsec(wavedata%time, wavedata%time%timsec + real(stepsize,sp), swan_run%modsim, swan_run%deltcom)
+            call settimsec(wavedata%time, wavedata%time%timsec + real(stepsize,sp), swan_run%modsim, swan_run%nonstat_interval)
          endif
          !
          ! Run n_swan nested SWAN runs
@@ -376,7 +376,7 @@ function wave_main_step(stepsize) result(retval)
                ! Set the current time to "step_end_time" (to be sure it has the correct value)
                ! and exit the do-loop
                !
-               call settimmin(wavedata%time, real(tend,sp), swan_run%modsim, swan_run%deltcom)
+               call settimmin(wavedata%time, real(tend,sp), swan_run%modsim, swan_run%nonstat_interval)
                exit
             endif
          enddo

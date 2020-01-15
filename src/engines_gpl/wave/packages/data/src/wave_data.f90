@@ -57,8 +57,8 @@ type wave_time_type
    integer  :: refdate         ! [yyyymmdd] reference date, reference time is 0:00 h
    integer  :: timtscale       ! [tscale]   Current time of simulation since reference date (0:00h)
    integer  :: calctimtscale   ! [tscale]   Current time of SWAN calculation since reference date (0:00h)
-                               !            calctimtscale = timtscale                 when sr%modsim /= 3
-                               !            calctimtscale = timtscale+sr%deltcom*60.0 when sr%modsim == 3
+                               !            calctimtscale = timtscale                          when sr%modsim /= 3
+                               !            calctimtscale = timtscale+sr%nonstat_interval*60.0 when sr%modsim == 3
    integer  :: calctimtscale_prev ! calctimtscale from "previous" time point
                                   ! Only used when sr%modsim == 3 for output at the start of the simulation
    integer  :: calccount       ! [-]        Counts the number of calculations. Used for naming the sp2 output files
@@ -149,17 +149,17 @@ end subroutine setrefdate
 !
 !
 !===============================================================================
-subroutine settimtscale(wavetime, timtscale_in, modsim, deltcom)
+subroutine settimtscale(wavetime, timtscale_in, modsim, nonstat_interval)
    integer :: timtscale_in
    integer :: modsim                ! 1: stationary, 2: quasi-stationary, 3: non-stationary
-   real    :: deltcom               ! used when modsim = 3: Interval of communication FLOW-WAVE
+   real    :: nonstat_interval      ! used when modsim = 3: Interval of communication FLOW-WAVE
    type(wave_time_type) :: wavetime
 
    wavetime%timtscale = timtscale_in
    wavetime%timsec    = real(wavetime%timtscale) * wavetime%tscale
    wavetime%timmin    = wavetime%timsec / 60.0
    if (modsim == 3) then
-      wavetime%calctimtscale = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale = wavetime%timtscale + int(nonstat_interval*60.0/wavetime%tscale)
       wavetime%calctimtscale_prev = wavetime%timtscale
    else
       wavetime%calctimtscale = wavetime%timtscale
@@ -179,17 +179,17 @@ end subroutine settscale
 !
 !
 !===============================================================================
-subroutine settimsec(wavetime, timsec_in, modsim, deltcom)
+subroutine settimsec(wavetime, timsec_in, modsim, nonstat_interval)
    real :: timsec_in
    integer :: modsim                ! 1: stationary, 2: quasi-stationary, 3: non-stationary
-   real    :: deltcom               ! used when modsim = 3: Interval of communication FLOW-WAVE
+   real    :: nonstat_interval      ! used when modsim = 3: Interval of communication FLOW-WAVE
    type(wave_time_type) :: wavetime
 
    wavetime%timsec    = timsec_in
    wavetime%timmin    = wavetime%timsec / 60.0
    wavetime%timtscale = nint(wavetime%timsec / wavetime%tscale)
    if (modsim == 3) then
-      wavetime%calctimtscale = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale = wavetime%timtscale + int(nonstat_interval*60.0/wavetime%tscale)
       wavetime%calctimtscale_prev = wavetime%timtscale
    else
       wavetime%calctimtscale = wavetime%timtscale
@@ -198,17 +198,17 @@ end subroutine settimsec
 !
 !
 !===============================================================================
-subroutine settimmin(wavetime, timmin_in, modsim, deltcom)
+subroutine settimmin(wavetime, timmin_in, modsim, nonstat_interval)
    real :: timmin_in
    integer :: modsim                ! 1: stationary, 2: quasi-stationary, 3: non-stationary
-   real    :: deltcom               ! used when modsim = 3: Interval of communication FLOW-WAVE
+   real    :: nonstat_interval      ! used when modsim = 3: Interval of communication FLOW-WAVE
    type(wave_time_type) :: wavetime
 
    wavetime%timmin    = timmin_in
    wavetime%timsec    = wavetime%timmin * 60.0
    wavetime%timtscale = nint(wavetime%timsec / wavetime%tscale)
    if (modsim == 3) then
-      wavetime%calctimtscale = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale = wavetime%timtscale + int(nonstat_interval*60.0/wavetime%tscale)
       wavetime%calctimtscale_prev = wavetime%timtscale
    else
       wavetime%calctimtscale = wavetime%timtscale
