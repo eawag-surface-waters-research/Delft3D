@@ -3,46 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Deltares.UGrid.Entities;
-using ProtoBuf;
+//using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
-    [ProtoContract(AsReferenceDefault = true)]
+    //[ProtoContract(AsReferenceDefault = true)]
     public class Disposable2DMeshGeometry : IDisposable
     {
         private readonly List<GCHandle> objectGarbageCollectHandles = new List<GCHandle>();
 
-        [ProtoMember(1)]
+        //[ProtoMember(1)]
         public double[] xNodes;
 
-        [ProtoMember(2)]
+        //[ProtoMember(2)]
         public double[] yNodes;
 
-        [ProtoMember(3)]
+        //[ProtoMember(3)]
         public double[] zNodes;
 
-        [ProtoMember(4)]
+        //[ProtoMember(4)]
         public int[] edgeNodes;
 
-        [ProtoMember(5)]
+        //[ProtoMember(5)]
         public int[] faceNodes;
 
-        [ProtoMember(6)]
+        //[ProtoMember(6)]
         public double[] faceX;
 
-        [ProtoMember(7)]
+        //[ProtoMember(7)]
         public double[] faceY;
 
-        [ProtoMember(8)]
+        //[ProtoMember(8)]
         public int maxNumberOfFaceNodes;
 
-        [ProtoMember(9)]
+        //[ProtoMember(9)]
         public int numberOfFaces;
 
-        [ProtoMember(10)]
+        //[ProtoMember(10)]
         public int numberOfNodes;
 
-        [ProtoMember(11)]
+        //[ProtoMember(11)]
         public int numberOfEdges;
 
         public bool IsMemoryPinned
