@@ -1664,7 +1664,7 @@ if(q /= 0) then
        ! make sure A1 gets a value, by computing the profile data, using a water depth of epshu.
        hpr = s1(k1)-bob0(1,L)
        if (hpr <= epshu) then
-          hpr = hpr + epshu
+          hpr = epshu
        endif
 
        if (hpr > 0) then                             !
