@@ -328,7 +328,8 @@
       character*20,parameter   :: cirradiation = 'radsurf'
       character*20,parameter   :: crain = 'rain'
       character*10,parameter   :: cbloom = 'd40blo'
-      character*20,parameter   :: doprocesses = 'DoProcesses'
+      character*20,parameter   :: cdoprocesses = 'DoProcesses'
+      character*20,parameter   :: cprocessesinactive = 'ProcessesInactive'
 
       if (timon) call timstrt( "fm_wq_processes_ini_proc", ithndl )
 
@@ -699,12 +700,19 @@
       enddo  
 
 ! If there is a parameter 'doprocesses', mask the area where processes are active by setting doproc to .true./.false. (default=.true.)
-      call zoekns(doprocesses,nopa,paname,20,ipar)
+      call zoekns(cdoprocesses,nopa,paname,20,ipar)
       if (ipar>0) then
-         call mess(LEVEL_INFO, 'Found parameter ''DoProcesses''. Water quality processes are only calculated for segments where DoProcesses = 1.')
+         call mess(LEVEL_WARN, 'Found parameter ''DoProcesses'', but this is not used any more.')
+         call mess(LEVEL_WARN, 'Use ''ProcessesInactive'' with non-zero values to set processes to inactive instead')
+      endif
+
+! If there is a parameter 'ProcessesInactive', mask the area where processes are active by setting doproc to .true./.false. (default=.true.)
+      call zoekns(cprocessesinactive,nopa,paname,20,ipar)
+      if (ipar>0) then
+         call mess(LEVEL_INFO, 'Found parameter ''ProcessesInactive''. Water quality processes are switched off for segments where ProcessesInactive <> 0.0')
          ip = arrpoi(iiparm)
          do k=kbx,ktx
-            doproc(k) = painp(ipar,k)==1.0
+            doproc(k) = painp(ipar,k)==0.0
          end do
       endif
 
