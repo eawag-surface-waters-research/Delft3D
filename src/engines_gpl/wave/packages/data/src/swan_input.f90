@@ -1782,13 +1782,8 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        write(*,'(a)') "ERROR: No longer supported: stand alone WAVE computation using FLOW data in a com-file via keyword 'FlowGridForCom'"
        goto 999
     endif
-    if (sr%swwav) then
-       ! Parameter sr%flowgridfile is used to enter conversion related code
-       ! Do not fill it when swwav is false
-       !
-       call prop_get_string (mdw_ptr, 'Output', 'COMFile'         , sr%flowgridfile)
-       call prop_get_logical(mdw_ptr, 'Output', 'AppendCOM'       , sr%append_com)
-    endif
+    call prop_get_string (mdw_ptr, 'Output', 'COMFile'         , sr%flowgridfile)
+    call prop_get_logical(mdw_ptr, 'Output', 'AppendCOM'       , sr%append_com)
     call prop_get_logical(mdw_ptr, 'Output', 'MapWriteNetCDF'  , sr%swmapwritenetcdf)
     call prop_get_logical(mdw_ptr, 'Output', 'NetCDFSinglePrecision'  , sr%netcdf_sp)
     call prop_get_integer(mdw_ptr, 'Output', 'ncFormat'  , par)

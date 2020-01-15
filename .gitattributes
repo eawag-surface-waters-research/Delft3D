@@ -11967,10 +11967,6 @@ src/third_party_open/swan/bin/linux/libompstub.so -text
 src/third_party_open/swan/bin/linux/libsvml.so -text
 src/third_party_open/swan/bin/linux/swan_mpi.exe -text
 src/third_party_open/swan/bin/linux/swan_omp.exe -text
-src/third_party_open/swan/bin/w64_i11/libiomp5md.dll -text
-src/third_party_open/swan/bin/w64_i11/msvcp100.dll -text
-src/third_party_open/swan/bin/w64_i11/msvcr100.dll -text
-src/third_party_open/swan/bin/w64_i11/netcdf.dll -text
 src/third_party_open/swan/bin/w64_i11/swan_omp.exe -text
 src/third_party_open/swan/scripts/Makefile.am -text
 src/third_party_open/swan/scripts/swan.bat -text
