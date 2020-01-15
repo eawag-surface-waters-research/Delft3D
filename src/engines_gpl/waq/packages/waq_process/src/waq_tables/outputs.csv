@@ -3979,5 +3979,13 @@ outppr,outpit,outpnm,outpdo,outpsx
 "TEO       ","dTWOCa    ",  14,"x",1
 "TEO       ","WOC_seg   ",  15,"x",1
 "TEO       ","WOCa_seg  ",  16,"x",1
-"TEO       ","FlowSegVel",  17,"x",1
-"TEO       ","FlowSegAbs",  18,"x",1
+"TEO       ","KOC_seg_Q ",  17,"x",1
+"TEO       ","KOC_seg_A ",  18,"x",1
+"TEO       ","KOCa_seg_Q",  19,"x",1
+"TEO       ","KOCa_seg_A",  20,"x",1
+"TEO       ","dTKOC     ",  21,"x",1
+"TEO       ","dTKOCa    ",  22,"x",1
+"TEO       ","KOC_seg   ",  23,"x",1
+"TEO       ","KOCa_seg  ",  24,"x",1
+"TEO       ","FlowSegVel",  25,"x",1
+"TEO       ","FlowSegAbs",  26,"x",1

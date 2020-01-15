@@ -14912,8 +14912,12 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "TEO       ","SWCalcVelo",  10,"Y","x",1
 "TEO       ","FlowSeg   ",  11,"N","x",1
 "TEO       ","fSpeHeDis ",  12,"Y","x",1
-"TEO       ","Tmax      ",  13,"Y","x",1
-"TEO       ","TmaxDelt  ",  14,"Y","x",1
-"TEO       ","Tmin      ",  15,"Y","x",1
-"TEO       ","TmaxDeltWO",  16,"Y","x",1
-"TEO       ","TminDeltWO",  17,"Y","x",1
+"TEO       ","WL_Tmax   ",  13,"Y","x",1
+"TEO       ","WL_dTmax  ",  14,"Y","x",1
+"TEO       ","WO_Tbgn   ",  15,"Y","x",1
+"TEO       ","WO_Tend   ",  16,"Y","x",1
+"TEO       ","WO_dTmax  ",  17,"Y","x",1
+"TEO       ","KO_Tbgn   ",  18,"Y","x",1
+"TEO       ","KO_Tend   ",  19,"Y","x",1
+"TEO       ","KO_Tmin   ",  20,"Y","x",1
+"TEO       ","KO_dTmax  ",  21,"Y","x",1
