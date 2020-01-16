@@ -42,35 +42,6 @@
 #include <inttypes.h>
 #endif
 
-#if defined(_WIN32)
-#  define FILE_READ  _read
-#  define FILE_WRITE _write
-#  define FILE_SEEK  _fseeki64
-#  define FILE_TELL  _ftelli64
-#elif defined(HAVE_CONFIG_H)
-#  if defined(HAVE_FSEEK64)
-#    define FILE_SEEK fseek64
-#  elif defined(HAVE_FSEEK)
-#    define FILE_SEEK fseek
-#  else
-#    define FILE_SEEK FILE_SEEK_not_defined
-#  endif
-
-#  if defined(HAVE_FTELL64)
-#    define FILE_TELL ftell64
-#  elif defined(HAVE_FTELL)
-#    define FILE_TELL ftell
-#  else
-#    define FILE_TELL FILE_TELL_not_defined
-#  endif
-
-#  define FILE_READ  read
-#  define FILE_WRITE write
-#else
-#  define FILE_READ  FILE_READ_not_defined
-#  define FILE_WRITE FILE_WRITE_not_defined
-#  define FILE_SEEK  FILE_SEEK_not_defined
-#endif
 
 /*----- Function to determine with a path name is a directory or not.*/
 
@@ -401,7 +372,7 @@ CUTIL_MF_BACKSPACE (
     long long int* ifh,
 	long long int* prevpos
     ) {
-	FILE_SEEK((FILE*)*ifh, *prevpos, SEEK_SET);
+	fseek((FILE*)*ifh, *prevpos, SEEK_SET);
     return (0);
     }
 
@@ -428,7 +399,7 @@ CUTIL_MF_READ (
     char* resultstr,
 	long long int* currentpos
     ) {
-	*currentpos = FILE_TELL((FILE*)*ifh);							/*---- save current pos in the file b4 reading */ 
+	*currentpos = ftell((FILE*)*ifh);							/*---- save current pos in the file b4 reading */ 
     resultstr = fgets(resultstr,_MAX_LENGTH_,(FILE*)*ifh);		/*---- read a line from file */
     return(0);
     }
@@ -438,7 +409,7 @@ CUTIL_MF_GETPOS (
     long long int*  ifh,
 	long long int* currentpos
     ) {
-	*currentpos = FILE_TELL((FILE*)*ifh); /*---- save current pos in the file */ 
+	*currentpos = ftell((FILE*)*ifh); /*---- save current pos in the file */ 
         return(0);
     }
 
