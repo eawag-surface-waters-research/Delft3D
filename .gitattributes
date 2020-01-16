@@ -14335,6 +14335,7 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf_managed_test/Properties/AssemblyInfo
 src/utils_lgpl/io_netcdf/packages/io_netcdf_managed_test/Utils/FileUtils.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_managed_test/Utils/TestHelper.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_managed_test/WrapperTests.cs -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf_managed_test/io_netcdf_managed_test.csproj -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_managed_test/packages.config -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_managed_test/test-data/ugrid/Custom_Ugrid.nc -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_managed_test/test-data/ugrid/UGrid_1D2D.nc -text
