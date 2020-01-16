@@ -92,6 +92,7 @@
         character(len=maxRecLength) :: rec
 
         rec = ' '
+        savepos = 0                                     ! OUT-argument, but should be initialized
         if (present(savepos)) then 
            res = CUTIL_MF_READ(fptr,rec,savepos)        ! pass the starting position of read back to the caller
         else

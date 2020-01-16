@@ -172,6 +172,7 @@ module m_ec_parameters
    integer, parameter :: EC_METADATA_INVALID   = 12 !< Meta-data was mal-formatted or incomplete.
    integer, parameter :: EC_DATA_INVALID       = 13 !< Data was mal-formatted or incomplete.
    integer, parameter :: EC_EOF                = 14 !< EOF reached/file ended prematurely.
+   integer, parameter :: EC_IO_ERROR           = 15 !< Low-level I/O error from the multifile I/O routines.
 
    ! COORDINATE SYSTEM that applies to all elementsets in this instance
    integer, parameter :: EC_COORDS_CARTESIAN   = 1  !< Cartesian coordinates (x,y)

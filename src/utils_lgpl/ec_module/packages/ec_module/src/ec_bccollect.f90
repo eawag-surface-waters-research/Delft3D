@@ -160,7 +160,6 @@ module m_ec_bccollect
     logical             ::  jablock, jaheader
     integer             ::  lineno 
     integer (kind=8)    ::  savepos 
-    integer             ::  iostatloc
     type (tEcBCBlock),    pointer :: bcBlockPtr
     type (tEcBCFile),     pointer :: bcFilePtr
     type (tEcFileReader), pointer :: fileReaderPtr
@@ -191,32 +190,20 @@ module m_ec_bccollect
     allocate (bcFilePtr)
     bcFilePtr%bcfilename = fname
     bcFilePtr%fhandle = fhandle
-    instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcBlockPtr%bcFilePtr
+    instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcFilePtr
 
     do while (.not.mf_eof(fhandle))
        call mf_read(fhandle,rec,savepos)
-       iostatloc = 0 ! mf_read always ok?
-       if (iostatloc /= 0) then 
-          iostat = iostatloc
-          return ! beter break?
-       endif  
+       if (savepos<0) then
+          iostat = EC_IO_ERROR
+          return
+       end if
        lineno = lineno + 1 
-       if (index('!#%*',rec(1:1))>0) cycle                     ! deal with various begin-of-line delimiters
-       reclen = len_trim(rec)                                  ! deal with various comment delimiters 
-       commentpos = index(rec,'//')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,' %')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,' #')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,' *')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,' !')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       
-       if (reclen < 3) cycle
-
-       if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines 
+       if (index('!#%*',rec)==1) cycle                     ! if commentws out in the first position
+       reclen = len_trim(rec)                              ! deal with various comment delimiters 
+       if (reclen < 3) then
+          cycle
+       else
           if (index(rec,'[forcing]'         )>0 .or. &
               index(rec,'[Boundary]'        )>0 .or. &
               index(rec,'[LateralDischarge]')>0) then          ! new boundary chapter       
@@ -279,13 +266,9 @@ module m_ec_bccollect
     enddo                   ! read/scan loop, ended when we reached end-of-file
     ! Create the items 
     do ifr = instancePtr%nFileReaders-count+1,instancePtr%nFileReaders                   ! The latest set of filereaders = latest set of bcBlocks       
-       success = items_from_bc_quantities(instancePtr,instancePtr%ecFileReadersPtr(ifr)%ptr)
-       if (.not.success) then
-           iostat = EC_UNKNOWN_ERROR
-       endif
+       if (.not.items_from_bc_quantities(instancePtr,instancePtr%ecFileReadersPtr(ifr)%ptr)) return
     enddo
-
-    call mf_close(fhandle)
+    iostat = EC_NOERR
 
     end function collectbc_all
 !============================================================================================================================
