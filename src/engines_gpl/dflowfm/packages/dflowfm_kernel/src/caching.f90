@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2020.!
+!  Copyright (C)  Stichting Deltares, 2017-2019.!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -70,6 +70,8 @@ module unstruc_caching
     integer, dimension(:), allocatable, private          :: cache_kobs
     integer, dimension(:), allocatable, private          :: cache_ilink_fixed
     integer, dimension(:), allocatable, private          :: cache_ipol_fixed
+    integer, dimension(:), allocatable, private          :: cache_linklist
+    integer, dimension(:), allocatable, private          :: cache_ipol
 
     type(tcrs), dimension(:), allocatable               :: cache_cross_sections
 
@@ -215,7 +217,7 @@ subroutine loadCachingFile( filename, netfile, usecaching )
     ! Load the information on the cross-sections:
     ! Copy all information when successful
     !
-    read( lun, iostat = ierr ) key, number
+    read( lun, iostat = ierr ) key, number, number_links
 
     if ( ierr /= 0 .or. key /= section(key_cross_sections) ) then
         close( lun )
@@ -223,8 +225,13 @@ subroutine loadCachingFile( filename, netfile, usecaching )
     endif
 
     allocate( cache_cross_sections(number) )
-    call loadCachedSections( lun, cache_cross_sections, ierr )
-
+    allocate( cache_linklist(number_links) )
+    allocate( cache_ipol(number_links) )
+    call loadCachedSections( lun, cache_linklist, cache_ipol, cache_cross_sections, ierr )
+    if ( ierr /= 0 ) then
+        close( lun )
+        return
+    endif
 
     !
     ! All cached values were loaded, so all is well
@@ -235,40 +242,64 @@ subroutine loadCachingFile( filename, netfile, usecaching )
 end subroutine loadCachingFile
 
 !> Load cached cross sections from a caching file
-subroutine loadCachedSections( lun, sections, ierr )
-    integer, intent(in)                   :: lun       !< LU-number of the caching file
-    type(tcrs), dimension(:), intent(out) :: sections  !< Array of cross-sections to be filled
-    integer, intent(out)                  :: ierr      !< Error code
+subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
+    integer,                  intent(in   ) :: lun       !< LU-number of the caching file
+    integer, dimension(:),    intent(  out) :: linklist  !< Cached list of crossed flow links
+    integer, dimension(:),    intent(  out) :: ipol      !< Cached polygon administration
+    type(tcrs), dimension(:), intent(  out) :: sections  !< Array of cross-sections to be filled
+    integer,                  intent(  out) :: ierr      !< Error code
 
-    integer                               :: i, np, nlink
-    logical                               :: okay
+    integer                                 :: i, np, nlink
+    logical                                 :: okay
 
-    okay = .true.
+    read( lun, iostat = ierr ) linklist
+    if ( ierr /= 0 ) then
+        return
+    endif
+
+    read( lun, iostat = ierr ) ipol
+    if ( ierr /= 0 ) then
+        return
+    endif
+
     do i = 1,size(sections)
         read( lun, iostat = ierr ) np, nlink
 
         sections(i)%path%np  = np
         sections(i)%path%lnx = nlink
         allocate( sections(i)%path%xp(np), sections(i)%path%yp(np),  &
-                  sections(i)%path%zp(np), &
-                  sections(i)%path%indexp(np), &
+                  sections(i)%path%zp(np), sections(i)%path%indexp(nlink), &
                   sections(i)%path%xk(2,nlink), sections(i)%path%yk(2,nlink), &
                   sections(i)%path%wfp(nlink), &
                   sections(i)%path%iperm(nlink), sections(i)%path%wfk1k2(nlink), &
                   sections(i)%path%sp(nlink), sections(i)%path%ln(nlink) )
 
-        read( lun, iostat = ierr ) sections(i)%path%xp, sections(i)%path%yp,  &
-                                   sections(i)%path%zp, &
-                                   sections(i)%path%indexp, &
-                                   sections(i)%path%xk, sections(i)%path%yk, &
-                                   sections(i)%path%wfp, &
-                                   sections(i)%path%iperm, sections(i)%path%wfk1k2, &
-                                   sections(i)%path%sp, sections(i)%path%ln
+        if ( nlink > 0 ) then
+            read( lun, iostat = ierr ) sections(i)%path%xp, sections(i)%path%yp,  &
+                                       sections(i)%path%zp, sections(i)%path%indexp, &
+                                       sections(i)%path%xk, sections(i)%path%yk, &
+                                       sections(i)%path%wfp, &
+                                       sections(i)%path%iperm, sections(i)%path%wfk1k2, &
+                                       sections(i)%path%sp, sections(i)%path%ln
+        else
+            read( lun, iostat = ierr ) sections(i)%path%xp, sections(i)%path%yp,  &
+                                       sections(i)%path%zp
+        endif
         if ( ierr /= 0 ) then
             exit
         endif
     enddo
 end subroutine loadCachedSections
+
+!> Save the link list of crossed flow links for later storage in the caching file
+subroutine saveLinklist( length, linklist, ipol )
+    integer,                  intent(in   ) :: length    !< Length of the list of crossed flow links
+    integer, dimension(:),    intent(in   ) :: linklist  !< List of crossed flow links to be saved
+    integer, dimension(:),    intent(in   ) :: ipol      !< Polygon administration
+
+    cache_linklist = linklist(1:length)
+    cache_ipol     = ipol(1:length)
+end subroutine saveLinklist
 
 !> Store the grid-based information in the caching file
 subroutine storeCachingFile( filename, usecaching )
@@ -320,7 +351,7 @@ subroutine storeCachingFile( filename, usecaching )
     ! Store the data for the cross-sections
     !
     write( lun ) section(key_cross_sections), size(crs)
-    call storeSections( lun, crs )
+    call storeSections( lun, crs, cache_linklist, cache_ipol )
 
     !
     ! We are done, so close the file
@@ -330,22 +361,34 @@ subroutine storeCachingFile( filename, usecaching )
 end subroutine storeCachingFile
 
 !> Store cross sections to a caching file
-subroutine storeSections( lun, sections )
+subroutine storeSections( lun, sections, linklist, ipol )
     integer, intent(in)                  :: lun       !< LU-number of the caching file
     type(tcrs), dimension(:), intent(in) :: sections  !< Array of cross-sections to be filled
+    integer, dimension(:), intent(in)    :: linklist  !< List of crossed flow links
+    integer, dimension(:), intent(in)    :: ipol      !< Polygon administration
 
     integer                              :: i, np, nlink
 
+    write( lun ) size(linklist)
+    write( lun ) linklist
+    write( lun ) ipol
+
     do i = 1,size(sections)
+        np    = sections(i)%path%np
+        nlink = sections(i)%path%lnx
         write( lun ) sections(i)%path%np, sections(i)%path%lnx
 
-        write( lun ) sections(i)%path%xp, sections(i)%path%yp,  &
-                     sections(i)%path%zp, &
-                     sections(i)%path%indexp, &
-                     sections(i)%path%xk, sections(i)%path%yk, &
-                     sections(i)%path%wfp, &
-                     sections(i)%path%iperm, sections(i)%path%wfk1k2, &
-                     sections(i)%path%sp, sections(i)%path%ln
+        if ( nlink > 0 ) then
+            write( lun ) sections(i)%path%xp(1:np), sections(i)%path%yp(1:np),  &
+                         sections(i)%path%zp(1:np), sections(i)%path%indexp(1:nlink), &
+                         sections(i)%path%xk(:,1:nlink), sections(i)%path%yk(:,1:nlink), &
+                         sections(i)%path%wfp(1:nlink), &
+                         sections(i)%path%iperm(1:nlink), sections(i)%path%wfk1k2(1:nlink), &
+                         sections(i)%path%sp(1:nlink), sections(i)%path%ln(1:nlink)
+        else
+            write( lun ) sections(i)%path%xp(1:np), sections(i)%path%yp(1:np),  &
+                         sections(i)%path%zp(1:np)
+        endif
     enddo
 end subroutine storeSections
 
@@ -371,6 +414,58 @@ subroutine copyCachedObservations( success )
         endif
     endif
 end subroutine copyCachedObservations
+
+!> Copy the cached network information for cross-sections
+subroutine copyCachedCrossSections( linklist, ipol, success )
+    integer, dimension(:), allocatable, intent(  out) :: linklist            !< Cached list of crossed flow links
+    integer, dimension(:), allocatable, intent(  out) :: ipol                !< Polygon administration
+    logical,                            intent(  out) :: success             !< The cached information was compatible if true
+
+    integer                :: i
+
+    if ( cache_success ) then
+        !
+        ! Check the number of observations
+        !
+        if ( size(crs) /= size(cache_cross_sections) ) then
+            return
+        endif
+        !
+        ! Check that the coordinates and the type are identical to the cached values
+        ! Note: check on zp may be superfluous ...
+        !
+        success = .true.
+        do i = 1,size(cache_cross_sections)
+            if ( any( cache_cross_sections(i)%path%xp /= crs(i)%path%xp ) .or. &
+                 any( cache_cross_sections(i)%path%yp /= crs(i)%path%yp ) .or. &
+                 any( cache_cross_sections(i)%path%zp /= crs(i)%path%zp ) ) then
+                success        = .false.
+            endif
+        enddo
+
+        if ( success ) then
+            linklist = cache_linklist
+            ipol     = cache_ipol
+        endif
+
+        ! Not yet
+        return
+
+        if ( success ) then
+            do i = 1,size(cache_cross_sections)
+                ! Rely on automatic (re)allocation)
+                crs(i)%path%indexp = cache_cross_sections(i)%path%indexp
+                crs(i)%path%xk     = cache_cross_sections(i)%path%xk
+                crs(i)%path%yk     = cache_cross_sections(i)%path%yk
+                crs(i)%path%wfp    = cache_cross_sections(i)%path%wfp
+                crs(i)%path%iperm  = cache_cross_sections(i)%path%iperm
+                crs(i)%path%wfk1k2 = cache_cross_sections(i)%path%wfk1k2
+                crs(i)%path%sp     = cache_cross_sections(i)%path%sp
+                crs(i)%path%ln     = cache_cross_sections(i)%path%ln
+            enddo
+        endif
+    endif
+end subroutine copyCachedCrossSections
 
 !> Copy the cached information on fixed weirs
 subroutine copyCachedFixedWeirs( npl, xpl, ypl, number_links, iLink, iPol, dSL, success )

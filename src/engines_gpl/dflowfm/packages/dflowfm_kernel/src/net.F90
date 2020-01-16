@@ -14143,6 +14143,7 @@ subroutine crosssections_on_flowgeom()
     use dfm_error
     use unstruc_channel_flow
     use m_inquire_flowgeom
+    use unstruc_caching, only: copyCachedCrossSections, saveLinkList
     implicit none
 
     integer                                       :: ic, icmod
@@ -14161,6 +14162,7 @@ subroutine crosssections_on_flowgeom()
     character(len=128)                            :: mesg
     integer                                       :: linknr, ii, branchIdx
     type(t_observCrossSection), pointer           :: pCrs
+    logical                                       :: success
 
 
     if ( ncrs.lt.1 ) return
@@ -14175,43 +14177,53 @@ subroutine crosssections_on_flowgeom()
     idum = 0
 
     if ( jakdtree.eq.1 ) then
-      call klok(t0)
-        num = 0
-!       determine polyline size
-        do ic=1,ncrs
-           if (crs(ic)%loc2OC == 0) then  ! only for crs which are polyline-based
-              num = num+crs(ic)%path%np+1 ! add space for missing value
-              istartcrs(ic+1) = num+1
-           end if
-        end do
+        call klok(t0)
 
-!       allocate
-        allocate(xx(num), yy(num))
+        call copyCachedCrossSections( iLink, ipol, success )
 
-!       determine paths to single polyline map
-        num = 0
-        do ic=1,ncrs
-           if (crs(ic)%loc2OC == 0) then
-              do i=1,crs(ic)%path%np
-                 num = num+1
-                 xx(num) = crs(ic)%path%xp(i)
-                 yy(num) = crs(ic)%path%yp(i)
-              end do
-!          add missing value
-              num = num+1
-              xx(num) = DMISS
-              yy(num) = DMISS
-           end if
-        end do
+        if ( success ) then
+            numcrossedlinks = size(iLink)
+            ierror          = 0
+        else
+            num = 0
+!           determine polyline size
+            do ic=1,ncrs
+               if (crs(ic)%loc2OC == 0) then  ! only for crs which are polyline-based
+                  num = num+crs(ic)%path%np+1 ! add space for missing value
+                  istartcrs(ic+1) = num+1
+               end if
+            end do
 
-!       allocate
-        allocate(iLink(Lnx))
-        iLink = 0
-        allocate(ipol(Lnx))
-        ipol = 0
-        allocate(dSL(Lnx))
-        dSL = 0d0
-        call find_crossed_links_kdtree2(treeglob,num,xx,yy,2,Lnx,1,numcrossedlinks, iLink, ipol, dSL, ierror)
+!           allocate
+            allocate(xx(num), yy(num))
+
+!           determine paths to single polyline map
+            num = 0
+            do ic=1,ncrs
+               if (crs(ic)%loc2OC == 0) then
+                  do i=1,crs(ic)%path%np
+                     num = num+1
+                     xx(num) = crs(ic)%path%xp(i)
+                     yy(num) = crs(ic)%path%yp(i)
+                  end do
+!              add missing value
+                  num = num+1
+                  xx(num) = DMISS
+                  yy(num) = DMISS
+               end if
+            end do
+
+!           allocate
+            allocate(iLink(Lnx))
+            iLink = 0
+            allocate(ipol(Lnx))
+            ipol = 0
+            allocate(dSL(Lnx))
+            dSL = 0d0
+            call find_crossed_links_kdtree2(treeglob,num,xx,yy,2,Lnx,1,numcrossedlinks, iLink, ipol, dSL, ierror)
+
+            call saveLinklist( numcrossedlinks, iLink, ipol )
+        endif
 
         if ( ierror.eq.0 .and. numcrossedlinks.gt.0 ) then
 
@@ -14250,9 +14262,10 @@ subroutine crosssections_on_flowgeom()
 !       deallocate
         if ( allocated(istartcrs) ) deallocate(istartcrs)
         if ( allocated(xx)        ) deallocate(xx,yy)
-      call klok(t1)
-      write(mesg,"('cross sections with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
-      call mess(LEVEL_INFO, trim(mesg))
+
+        call klok(t1)
+        write(mesg,"('cross sections with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
+        call mess(LEVEL_INFO, trim(mesg))
     end if
 
     icMOD = MAX(1,ncrs/100)
@@ -14260,16 +14273,21 @@ subroutine crosssections_on_flowgeom()
     call realloc(numlist, ncrs, keepExisting = .true., fill = 0) ! In case pli-based cross sections have not allocated this yet.
     call realloc(linklist, (/ max(numcrossedlinks, 1), ncrs /), keepExisting = .true., fill = 0)  ! In addition to pli-based cross sections (if any), also support 1D branchid-based cross sections.
 
+!!  call copyCachedCrossSections( success )
+    success = .false.
+
     CALL READYY('Enabling cross sections on grid', 0d0)
     do ic=1,ncrs
         if (mod(ic,icMOD) == 0) then
             CALL READYY('Enabling cross sections on grid', dble(ic)/dble(ncrs))
         end if
         if (crs(ic)%loc2OC == 0) then
-          if ( jakdtree.eq.0 ) then
-             call crspath_on_flowgeom(crs(ic)%path,0,0,1,idum, 0)
-          else
-             call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 0)
+          if ( .not. success ) then
+             if ( jakdtree.eq.0 ) then
+                call crspath_on_flowgeom(crs(ic)%path,0,0,1,idum, 0)
+             else
+                call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 0)
+             end if
           end if
         else  ! snap to only 1d flow link
           ii = crs(ic)%loc2OC
