@@ -4151,7 +4151,7 @@ end subroutine setdt
        if (kkcflmx > 0) then
           if (kcflmx == 0) kcflmx = kkcflmx
           if (ja_timestep_auto == 3 .or. ja_timestep_auto == 4 ) then
-             write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx)
+             write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ2D(kkcflmx), squ(kcflmx), sqi(kcflmx)
           else
              write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ  (kcflmx), squ(kcflmx), sqi(kcflmx)
           endif
@@ -15898,9 +15898,10 @@ endif
        end do
     end if
 
-    s0 = s1 ; u0 = u1
+    u0 = u1
  endif
- s1  = max(bl, s1)
+ s1  = max(bl, s1) 
+ s00 = s1
 
  nonlin = max(nonlin1D, nonlin2D)
  if (nonlin == 2) then
@@ -15919,16 +15920,15 @@ endif
        endif
     endif
  endif
-
- s1  = max(bl, s1)
-
+ 
  call setkbotktop(1)
-
- s00 = s1
+ 
  if (.not. jawelrestart) then
+    s0 = s1 
     hs = s1 - bl
  else ! If one restarts a simulation, then use s0 to compute hs
-    hs = s0 -bl
+    s0 = max(s0,bl)    
+    hs = s0 - bl
  endif
 
  if ( jaselfal.gt.0 ) then
@@ -43440,7 +43440,7 @@ subroutine update_verticalprofiles()
 
  double precision :: gradk, gradt, grad, gradd, gradu, volki, arLL, qqq
 
- double precision :: wk,wke,vk,um,tauinv,tauinf,xlveg,rnv, diav,ap1,alf,c2esqcmukep
+ double precision :: wk,wke,vk,um,tauinv,tauinf,xlveg,rnv, diav,ap1,alf,c2esqcmukep,teps,tkin
 
  double precision :: cfuhi3D, vicwmax, tkewin, zint, z1, vicwww, alfaT, tke, eps, tttctot, c3t, c3e
 
@@ -43892,50 +43892,55 @@ subroutine update_verticalprofiles()
         rnv = 0.5d0*( rnveg(ln(1,LL)) + rnveg(ln(2,LL)) )
         if (rnv > 0d0) then       ! if plants are here
            do L = Lb, Lt
-              k = L - Lb + 1 ; k1 = ln(1,L) ; k2 = ln(2,L)
-              rnv = 0.5d0*( rnveg(k1) + rnveg(k2) )
-              if (rnv > 0) then  ! if in this layer
-                 if (diaveg(k1) > 0 .and. diaveg(k2) > 0) then
-                    diav = 0.5d0*( diaveg(k1) + diaveg(k2) )
-                 else
-                    diav = max( diaveg(k1), diaveg(k2) )
-                 endif
-                 um      = sqrt( u1(L)*u1(L) + v(L)*v(L) )                ! umod (m2/s2)
-                 if (jaCdvegsp == 1) then
-                    if (Cdvegsp(k1) > 0 .and. Cdvegsp(k2) > 0) then
-                       Cdveg = 0.5d0*( Cdvegsp(k1) + Cdvegsp(k2) )
+              um  = sqrt( u1(L)*u1(L) + v(L)*v(L) )                ! umod (m2/s2)
+              if (um > 0d0) then                                   ! and if there is flow,
+                 k = L - Lb + 1 ; k1 = ln(1,L) ; k2 = ln(2,L)
+                 rnv = 0.5d0*( rnveg(k1) + rnveg(k2) )
+                 if (rnv > 0) then  ! if in this layer
+                    if (diaveg(k1) > 0 .and. diaveg(k2) > 0) then
+                       diav = 0.5d0*( diaveg(k1) + diaveg(k2) )
                     else
-                       Cdveg = max (Cdvegsp(k1), Cdvegsp(k2) )
+                       diav = max( diaveg(k1), diaveg(k2) )
                     endif
-                 endif
-                 vk      = 0.5d0*Cdveg*rnv*diav*um                        ! (1/s)
-                 advi(L) = advi(L) + vk                                   ! add to diagonal of u1
-                 wk      = vk*um*um                                       ! work done by this layer m2/s3
-                 ap1     = 1.0 - diav*diav*rnv*pi*0.25                    ! Free area
-                 xlveg   = Clveg*sqrt( ap1 / rnv )                        ! typical length between plants
-                 tauinv  = c2esqcmukep*(wk/xlveg**2)**r3
-                 tauinf  = tauinv
-                 if (iturbulencemodel == 3) then
-                    tauinf = cmukep*tureps1(L) / turkin1(L)
-                 else if (iturbulencemodel == 4) then
-                    tauinf = cmukep/tureps1(L)  ! moet cmukep zijn ipv 1d0
-                 endif
-                 tauinv = max(tauinv, tauinf)
-                 if (iturbulencemodel == 3) then
-                    wke = wk*tauinv
-                 else if (iturbulencemodel == 4 ) then
-                    wke = wk*( 1d0 - tureps1(L)*tauinv) * tureps1(L) / turkin1(L)
-                 endif
-                 if (L < Lt) then
-                    alf      = 0.5d0*dzu(k)/dzw(k)
-                    dk(k)    = dk(k)   + alf*wk                           ! half is added to top interface to k
-                    dke(k)   = dke(k)  + alf*wke                          !                                to eps
-                 endif
-                 if (L > Lb) then
-                    alf      =  0.5d0*dzu(k)/dzw(k-1)
-                    dk(k-1)  = dk(k-1)  + alf*wk                          ! other half added to bed interface to k
-                    dke(k-1) = dke(k-1) + alf*wke                         !                                   to eps
-                 endif
+                    if (jaCdvegsp == 1) then
+                       if (Cdvegsp(k1) > 0 .and. Cdvegsp(k2) > 0) then
+                          Cdveg = 0.5d0*( Cdvegsp(k1) + Cdvegsp(k2) )
+                       else
+                          Cdveg = max (Cdvegsp(k1), Cdvegsp(k2) )
+                       endif
+                    endif
+                    vk      = 0.5d0*Cdveg*rnv*diav*um                        ! (1/s)
+                    advi(L) = advi(L) + vk                                   ! add to diagonal of u1
+                    wk      = vk*um*um                                       ! work done by this layer m2/s3
+                    ap1     = 1.0 - diav*diav*rnv*pi*0.25                    ! Free area
+                    xlveg   = Clveg*sqrt( ap1 / rnv )                        ! typical length between plants
+                    tauinv  = c2esqcmukep*(wk/xlveg**2)**r3
+                    teps    = 0.5d0*( tureps0(L) + tureps0(L) )
+                    tkin    = 0.5d0*( turkin0(L) + turkin0(L) ) 
+                    if (iturbulencemodel == 3) then
+                       tauinf = c2e*teps/tkin                  !   
+                    else if (iturbulencemodel == 4) then
+                       tauinf = c2e/teps  
+                    endif
+                    if (tauinf > tauinv) then ! turb damping not governed by plants => free flow damping only  
+                       tauinv = 0d0           ! tauinv = max(tauinv, tauinf)
+                    endif
+                    if (iturbulencemodel == 3) then
+                       wke = wk*tauinv
+                    else if (iturbulencemodel == 4 ) then
+                       wke = wk*( 1d0 - tureps1(L)*tauinv) * tureps1(L) / turkin1(L)
+                    endif
+                    if (L < Lt) then
+                       alf      = 0.5d0*dzu(k)/dzw(k)
+                       dk(k)    = dk(k)   + alf*wk                           ! half is added to top interface to k
+                       dke(k)   = dke(k)  + alf*wke                          !                                to eps
+                    endif
+                    if (L > Lb) then
+                       alf      =  0.5d0*dzu(k)/dzw(k-1)
+                       dk(k-1)  = dk(k-1)  + alf*wk                          ! other half added to bed interface to k
+                       dke(k-1) = dke(k-1) + alf*wke                         !                                   to eps
+                    endif
+                 endif 
               endif
            enddo
         endif
@@ -45912,6 +45917,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        ifirstweir(L) = 0
 
        bob(1,L) = max(bob(1,L), zc) ; bob(2,L) = max(bob(2,L), zc)
+
 
        if (kcu(L) .ne. 2 .and. kcu(L) .ne. 1) then
           cycle  ! weirs only on regular links
