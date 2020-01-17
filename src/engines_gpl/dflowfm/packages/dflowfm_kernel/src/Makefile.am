@@ -59,10 +59,10 @@ libdflowfm_la_SOURCES=\
         oned_functions.f90 \
         d_flooding.f90 \
         partition.F90 \
+        unstruc_structures.f90 \
         unstruc_netcdf.f90 \
         network.f90 \
         monitoring.f90 \
-        unstruc_structures.f90 \
         manholes.f90 \
         splines.f90 \
         step_to_screen.f90 \
