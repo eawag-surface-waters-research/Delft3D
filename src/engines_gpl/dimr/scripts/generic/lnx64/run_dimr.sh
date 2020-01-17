@@ -216,11 +216,16 @@ else
               mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg
     else
         #
-        # Parallel on Deltares cluster
-        export PATH=/opt/mpich2/1.4.1_intel14.0.3/bin:$PATH
+        if [ -z "$MPI_ROOT" ]
+        then
+           # Default: Parallel on Deltares cluster
+           export PATH=/opt/mpich2/1.4.1_intel14.0.3/bin:$PATH
+        else
+           export PATH=$MPI_ROOT/bin:$PATH
+        fi
         #
         # Create machinefile using $PE_HOSTFILE
-        if [ $NNODES -eq 1 ]; then
+        if [ "$NNODES" = 1 ]; then
             echo " ">$(pwd)/machinefile
         else
             if [ -n $corespernode ]; then
@@ -238,14 +243,14 @@ else
         cat $(pwd)/machinefile
         echo ----------------------------------------------------------------------
 
-        if [ $NNODES -ne 1 ]; then
+        if [ "$NNODES" != 1 ]; then
             echo "Starting mpd..."
             mpd &
             mpdboot -n $NSLOTS
         fi
 
         node_number=$NSLOTS
-        while [ $node_number -ge 1 ]; do
+        while [ "$node_number" >= 1 ]; do
            node_number=`expr $node_number - 1`
            ln -s /dev/null log$node_number.irlog
         done
