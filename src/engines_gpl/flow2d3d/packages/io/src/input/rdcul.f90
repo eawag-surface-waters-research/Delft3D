@@ -344,7 +344,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                             call prop_get(link_ptr, '*', 'CulvertLib', rec)
                             dll_name(isrc) = rec
                             if (rec /= ' ') then
-                               write(rec,'(3a)') SHARED_LIB_PREFIX, trim(rec), SHARED_LIB_EXTENSION
+                               write(rec,'(3a)') SHARED_LIB_PREFIX, trim(dll_name(isrc)), SHARED_LIB_EXTENSION
                                dll_name(isrc) = rec
                                istat_ptr = 0
                                istat_ptr = open_shared_library(dll_handle(isrc), dll_name(isrc))

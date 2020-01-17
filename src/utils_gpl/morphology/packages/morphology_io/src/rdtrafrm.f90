@@ -492,7 +492,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
              call prop_get_string(tran_ptr,'TransportFormula','Name',name(l))
              !
              iform(l) = 15
-             write(rec,'(3a)') SHARED_LIB_PREFIX, trim(rec), SHARED_LIB_EXTENSION
+             write(rec,'(3a)') SHARED_LIB_PREFIX, trim(dll_name(l)), SHARED_LIB_EXTENSION
              !
              ! Get handle to the DLL
              !

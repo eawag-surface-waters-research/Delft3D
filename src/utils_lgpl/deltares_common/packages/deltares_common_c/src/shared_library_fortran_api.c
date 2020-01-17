@@ -111,7 +111,7 @@ void RemoveTrailingBlanks_dll(char * String)
  * ============================================================================
  */
 #if defined(WIN32) || defined (HAVE_CONFIG_H)
-long STDCALL OPEN_SHARED_LIBRARY(int64_t * sharedDLLHandle, char * library, long length_lib)
+long STDCALL OPEN_SHARED_LIBRARY(long long int * sharedDLLHandle, char * library, long length_lib)
 #elif defined (salford32)
 extern "C" OPEN_SHARED_LIBRARY(int64_t * sharedDLLHandle, char * library, long length_lib)
 #endif
@@ -136,7 +136,7 @@ extern "C" OPEN_SHARED_LIBRARY(int64_t * sharedDLLHandle, char * library, long l
     if (tmpSharedDLL->dllHandle != NULL)
     {
         error = 0;
-        *sharedDLLHandle = (int64_t) tmpSharedDLL;
+        *sharedDLLHandle = (long long int) tmpSharedDLL;
     }
 
     free(lib_name); lib_name = NULL;

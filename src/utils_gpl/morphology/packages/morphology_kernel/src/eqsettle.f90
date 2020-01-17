@@ -41,6 +41,7 @@ subroutine eqsettle(dll_function, dll_handle, max_integers, max_reals, max_strin
     use sediment_basics_module, only: dgravel, dsand, SEDTYP_COHESIVE, SEDTYP_NONCOHESIVE_SUSPENDED
     use morphology_data_module
     use message_module, only: write_error
+    use iso_c_binding, only: c_char
     !
     implicit none
 !
@@ -69,32 +70,36 @@ subroutine eqsettle(dll_function, dll_handle, max_integers, max_reals, max_strin
     integer(pntrsize), external :: perf_function_fallve
     real(hp)                    :: ws_dll
     character(256)              :: errmsg
-    character(256)              :: message                 ! Contains message from shared library
-    integer :: l = 0
-    real(fp) :: rhoint
-    real(fp) :: rhosol
-    real(fp) :: temint
-    real(fp) :: salint
-    real(fp) :: dss
-    real(fp) :: ag
-    real(fp) :: d50
-    real(fp) :: ctot
-    real(fp) :: csoil
-    real(fp) :: s
-    real(fp) :: vcmol
-    real(fp) :: coefw
-    real(fp) :: ffloc
-    real(fp) :: cgel
-    real(fp) :: hinset
-    real(fp) :: fhulp
-    real(fp) :: efloc
-    real(fp) :: ffloc0
-    real(fp) :: a
-    real(fp) :: b
-    real(fp) :: ws0
-    real(fp) :: wsm
-    real(fp) :: salmax
-    real(fp) :: gamflc
+    character(256)              :: message        ! Contains message from shared library
+    character(kind=c_char)      :: message_c(257) ! C- version of "message", including C_NULL_CHAR
+                                                  ! Calling perf_function_eqtran with "message" caused problems
+                                                  ! Solved by using "message_c"
+    integer                     :: i
+    integer                     :: l = 0
+    real(fp)                    :: rhoint
+    real(fp)                    :: rhosol
+    real(fp)                    :: temint
+    real(fp)                    :: salint
+    real(fp)                    :: dss
+    real(fp)                    :: ag
+    real(fp)                    :: d50
+    real(fp)                    :: ctot
+    real(fp)                    :: csoil
+    real(fp)                    :: s
+    real(fp)                    :: vcmol
+    real(fp)                    :: coefw
+    real(fp)                    :: ffloc
+    real(fp)                    :: cgel
+    real(fp)                    :: hinset
+    real(fp)                    :: fhulp
+    real(fp)                    :: efloc
+    real(fp)                    :: ffloc0
+    real(fp)                    :: a
+    real(fp)                    :: b
+    real(fp)                    :: ws0
+    real(fp)                    :: wsm
+    real(fp)                    :: salmax
+    real(fp)                    :: gamflc
 !
 !! executable statements -------------------------------------------------------
 !
@@ -194,6 +199,10 @@ subroutine eqsettle(dll_function, dll_handle, max_integers, max_reals, max_strin
        !
        ws_dll    = 0.0_hp
        message     = ' '
+       do i=1,256
+          message_c(i) = message(i:i)
+       enddo
+       message_c(257) = C_NULL_CHAR
        !
        ! psem/vsem is used to be sure this works fine in DD calculations
        !
@@ -203,7 +212,8 @@ subroutine eqsettle(dll_function, dll_handle, max_integers, max_reals, max_strin
                                         dll_integers        , max_integers          , &
                                         dll_reals           , max_reals             , &
                                         dll_strings         , max_strings           , &
-                                        ws_dll              , message)
+                                        ws_dll              , message_c)
+       message = transfer(message_c(1:256), message)
        call vsemlun
        if (error_ptr /= 0) then
           write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function),'" in dynamic library.'

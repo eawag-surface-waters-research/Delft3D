@@ -30,7 +30,7 @@ subroutine settle(dll_integers, max_integers, &
                   dll_reals   , max_reals   , &
                   dll_strings , max_strings , &
                   ws          , &
-                  error_message   )
+                  error_message_c   )
 !DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'SETTLE' :: SETTLE
 !!--description-----------------------------------------------------------------
 !
@@ -39,6 +39,7 @@ subroutine settle(dll_integers, max_integers, &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+use iso_c_binding, only: c_char
 implicit none
 !
 ! Local constants
@@ -57,11 +58,12 @@ character(len=256), dimension(max_strings) , intent(in)  :: dll_strings
 !
 ! Subroutine arguments: output
 !
-real(hp)          , intent(out) :: ws            ! settling velocity [m/s]
-character(len=256), intent(out) :: error_message ! not empty: echo and stop run
+real(hp)          , intent(out) :: ws                     ! settling velocity [m/s]
+character(kind=c_char), intent(out) :: error_message_c(*) ! not empty: echo and stop run
 !
 ! Local variables for input parameters
 !
+integer            :: i
 integer            :: k
 integer            :: l
 integer            :: m
@@ -81,6 +83,7 @@ real(hp)           :: v, vicmol, vm
 real(hp)           :: w
 character(len=256) :: runid
 character(len=256) :: filenm
+character(len=256) :: error_message
 !
 ! Local variables
 !
@@ -93,6 +96,9 @@ real(hp)          :: ws0, ws1
 !
 if (max_integers < 5) then
    error_message = 'Insufficient integer values provided by delftflow'
+   do i=1,256
+      error_message_c(i) = error_message(i:i)
+   enddo
    return
 endif
 nm      = dll_integers( 1) ! nm index of the grid cell
@@ -103,6 +109,9 @@ l       = dll_integers( 5) ! number of the sediment fraction in the computation
 !
 if (max_reals < 21) then
    error_message = 'Insufficient real values provided by delftflow'
+   do i=1,256
+      error_message_c(i) = error_message(i:i)
+   enddo
    return
 endif
 timsec  = dll_reals( 1)    ! current time since reference time [s]
@@ -133,6 +142,9 @@ chezy   = dll_reals(21)    ! local Chézy value [m1/2/s]
 !
 if (max_strings < 2) then
    error_message = 'Insufficient strings provided by delftflow'
+   do i=1,256
+      error_message_c(i) = error_message(i:i)
+   enddo
    return
 endif
 runid   = dll_strings( 1)  ! user-specified run-identification
@@ -175,4 +187,8 @@ else
    f = 0.5_hp * (1 - cos(pi*sal/salmax))
 endif
 ws = ws0 + (ws1 - ws0) * f
+!
+do i=1,256
+   error_message_c(i) = error_message(i:i)
+enddo
 end subroutine settle

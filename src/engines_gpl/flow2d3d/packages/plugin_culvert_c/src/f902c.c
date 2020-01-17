@@ -79,7 +79,7 @@ void RemoveTrailingBlanks_dll(char * String);
  * ============================================================================
  */
 #if defined(WIN32)
-long STDCALL PERFORM_FUNCTION_CULVERT(long   * sharedDLLHandle    ,
+long STDCALL PERFORM_FUNCTION_CULVERT(long long int   * sharedDLLHandle    ,
                               char   * function           ,
                               long   * dll_integers       ,
                               long   * max_integers       ,
@@ -92,8 +92,8 @@ long STDCALL PERFORM_FUNCTION_CULVERT(long   * sharedDLLHandle    ,
                               double * zpos2              ,
                               char   * message            ,
                               long     length_function    ,
-                              long     length_dll_strings ,
-                              long     length_message     )
+                              long     length_dll_strings )
+	                          // message is a c-string: no length specification added
 #elif defined(salford32)
 extern "C" PERFORM_FUNCTION_CULVERT(  long   * sharedDLLHandle    ,
                               char   * function           ,
@@ -108,8 +108,8 @@ extern "C" PERFORM_FUNCTION_CULVERT(  long   * sharedDLLHandle    ,
                               double * zpos2              ,
                               char   * message            ,
                               long     length_function    ,
-                              long     length_dll_strings ,
-                              long     length_message     )
+                              long     length_dll_strings )
+	                          // message is a c-string: no length specification added
 #elif defined (HAVE_CONFIG_H)
 long STDCALL PERFORM_FUNCTION_CULVERT(long   * sharedDLLHandle    ,
                               char   * function           ,
@@ -124,8 +124,8 @@ long STDCALL PERFORM_FUNCTION_CULVERT(long   * sharedDLLHandle    ,
                               double * zpos2              ,
                               char   * message            ,
                               long     length_function    ,
-                              long     length_dll_strings ,
-                              long     length_message     )
+                              long     length_dll_strings )
+	                          // message is a c-string: no length specification added
 #endif
 {
 
@@ -136,13 +136,15 @@ long STDCALL PERFORM_FUNCTION_CULVERT(long   * sharedDLLHandle    ,
                                     double *, long   *,
                                     char   *, long   *,
                                     double *, double *, double *,
-                                    char   *, long    , long    );
+                                    char   *, long    );
+                                    // message is a c-string: no length specification added
 #elif defined (HAVE_CONFIG_H)
   typedef void * (STDCALL * MyProc)(long   *, long   *,
                                     double *, long   *,
                                     char   *, long   *,
                                     double *, double *, double *,
-                                    char   *, long    , long    );
+                                    char   *, long    );
+                                    // message is a c-string: no length specification added
 #endif
   MyProc proc;
   char * fun_name;
@@ -168,14 +170,16 @@ long STDCALL PERFORM_FUNCTION_CULVERT(long   * sharedDLLHandle    ,
                       dll_strings , max_strings ,
                       discharge   , zpos1       ,
                       zpos2       , message     ,
-                      length_dll_strings, length_message );
+                      length_dll_strings);
+	                  // message is a c-string: no length specification added
 #elif defined (HAVE_CONFIG_H)
      (void *) (*proc)(dll_integers, max_integers,
                       dll_reals   , max_reals   ,
                       dll_strings , max_strings ,
                       discharge   , zpos1       ,
                       zpos2       , message     ,
-                      length_dll_strings, length_message );
+                      length_dll_strings);
+	                  // message is a c-string: no length specification added
 #endif
   }
   free(fun_name); fun_name = NULL;
