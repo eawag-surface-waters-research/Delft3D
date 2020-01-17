@@ -1631,6 +1631,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Writek_CdWind', jatekcd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrirst_bnd', jarstbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Writepart_domain', japartdomain, success)
+    
+    call prop_get_integer(md_ptr, 'output', 'Wrirst_culvert', jarstculv, success)
 
     if (md_mapformat /= 4 .and. jamapwindstress /= 0) then
        call mess(LEVEL_ERROR, 'writing windstress to mapfile is only implemented for NetCDF - UGrid (mapformat=4)')
@@ -2197,7 +2199,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_fm_wq_processes
     use m_trachy
     use m_transport, only: ITRA1
-    use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir, jahisorif, jahisbridge, jahisculv, jahisdambreak, jahisuniweir, jahiscmpstru
+    use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir, jahisorif, jahisbridge, jahisculv, jahisdambreak, jahisuniweir, jahiscmpstru, jarstculv
     use m_sobekdfm,              only : sbkdfm_umin, sbkdfm_umin_method, minimal_1d2d_embankment, sbkdfm_relax
 
     integer, intent(in)  :: mout  !< File pointer where to write to.
@@ -3407,6 +3409,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'output', 'EulerVelocities', jaeulervel, 'Euler velocities output (0: GLM, 1: Euler velocities)')
     call prop_set(prop_ptr, 'output', 'Wrirst_bnd', jarstbnd, 'Write waterlevel, bedlevel and coordinates of boundaries to restart files')
 
+    if (writeall .or. jarstculv /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrirst_culvert', jarstculv, 'Write (selected) culvert info. to restart files (1: yes, 0: no)')
+    end if
 
     if ( get_japart() .or. writeall ) then
 !      particles

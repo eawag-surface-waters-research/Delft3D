@@ -2446,6 +2446,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_flowparameters, only: jamd1dfile
     use m_oned_functions, only: gridpoint2cross
     use m_save_ugrid_state, only: mesh1dname
+    use m_structures, only: jarstculv, valculvert
    
     integer,           intent(in) :: irstfile
     real(kind=hp),     intent(in) :: tim
@@ -2463,6 +2464,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_bndtemdim,         &
         id_bndseddim,         &
         id_bnddim,            &
+        id_culvertdim,        &
         id_time, id_timestep, &
         id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_unorm, id_q1, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, &
         id_q1main, &
@@ -2475,7 +2477,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_flowelemxzw, id_flowelemyzw, id_flowlinkxu, id_flowlinkyu,&
         id_flowelemxbnd, id_flowelemybnd, id_bl, id_s0bnd, id_s1bnd, id_blbnd, &
         id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_squ, id_sqi, &
-        id_jmax, id_flowelemcrsz, id_flowelemcrsn, id_ndx1d, id_morft
+        id_jmax, id_flowelemcrsz, id_flowelemcrsn, id_ndx1d, id_morft, &
+        id_culvert_openh
     
     integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
@@ -3192,6 +3195,13 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_put_att(irstfile, id_blbnd,   'units'        , 'm')
     endif
     
+    ! Write structure info.
+    if (jarstculv > 0 .and. network%sts%numCulverts > 0) then ! write culvert info.
+       ierr = nf90_def_dim(irstfile, 'nCulvert', network%sts%numculverts, id_culvertdim)
+       ierr = nf90_def_var(irstfile, 'culvert_valve_opening_height', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_openh)
+       ierr = nf90_put_att(irstfile, id_culvert_openh, 'long_name', 'Valve opening height of culvert')
+       ierr = nf90_put_att(irstfile, id_culvert_openh, 'units', 'm')
+    end if
     ierr = nf90_enddef(irstfile)
 
     ! Inquire var-id's
@@ -3243,6 +3253,10 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_inq_varid(irstfile, 'sed', id_sed)
        ierr = nf90_inq_varid(irstfile, 'ero', id_ero)
     endif
+    !
+    if (jarstculv > 0 .and. network%sts%numCulverts > 0) then
+       ierr = nf90_inq_varid(irstfile, 'culvert_valve_opening_height', id_culvert_openh)
+    end if
                 
     ! -- Start data writing (flow data) ------------------------
     itim = 1
@@ -3656,6 +3670,12 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_put_var(irstfile, id_flowlinkxu, xu(1:lnx))
        ierr = nf90_put_var(irstfile, id_flowlinkyu, yu(1:lnx))
     end if
+    
+    ! Wrtie structure info.
+    if(jarstculv > 0 .and. network%sts%numculverts > 0) then
+       ierr = nf90_put_var(irstfile, id_culvert_openh, valculvert(11, 1:network%sts%numculverts), (/1, itim/), (/network%sts%numculverts, 1/))
+    end if
+
 
     if ( jampi.eq.1 ) then  
        ! flow cell domain numbers    
@@ -10486,6 +10506,7 @@ subroutine unc_read_map(filename, tim, ierr)
     use m_timer
     use m_turbulence
     use m_samples
+    use unstruc_channel_flow, only: network
 
     character(len=*),  intent(in)       :: filename   !< Name of NetCDF file.
     real(kind=hp),     intent(in)       :: tim        !< Desired time (snapshot) to be read from map file.
@@ -10536,7 +10557,8 @@ subroutine unc_read_map(filename, tim, ierr)
                id_xzw, id_yzw, id_xu, id_yu,    &
                id_bl, id_blbnd, id_s0bnd, id_s1bnd, id_xbnd, id_ybnd, &
                id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_flowlink, &
-               id_morft
+               id_morft,                        &
+               id_culvertdim, id_culvert_openh
 
 
     double precision, allocatable :: xmc(:), ymc(:), xuu(:), yuu(:), xbnd_read(:), ybnd_read(:)
@@ -10551,7 +10573,7 @@ subroutine unc_read_map(filename, tim, ierr)
     integer :: kloc,kk, kb, kt, LL, Lb, Lt, laydim, wdim, itmp, i, iconst, iwqbot, nm, Lf, j, k, nlayb, nrlay
     integer :: iostat
     logical :: fname_has_date, mdu_has_date
-    integer :: titleLength, strlen
+    integer :: titleLength, strlen, nlen, istru, jaCulvDim
     integer, allocatable :: maptimes(:)
     logical :: file_exists
     double precision, allocatable        :: max_threttim(:)
@@ -10559,6 +10581,7 @@ subroutine unc_read_map(filename, tim, ierr)
     double precision, allocatable        :: tmpvar1(:)
     double precision, allocatable        :: tmpvar2(:,:,:)
     double precision, allocatable        :: tmp_s1(:), tmp_bl(:), tmp_s0(:), tmp_sa1(:), tmp_tem1(:)
+    double precision, allocatable        :: tmpvar_stru(:)
     double precision, allocatable        :: rst_bodsed(:,:), rst_mfluff(:,:), rst_thlyr(:,:)
     double precision, allocatable        :: rst_msed(:,:,:)
     real(fp)                             :: mfracsum, poros, sedthick
@@ -11065,6 +11088,26 @@ subroutine unc_read_map(filename, tim, ierr)
           nbnd_read = 0
           jaoldrstfile = 1
        endif
+       
+       ! Ask for dimension of structures
+       jaCulvDim = 0
+       if (network%sts%numCulverts > 0) then
+          ierr = nf90_inq_dimid(imapfile, 'nCulvert', id_culvertdim)
+          if (ierr /= 0) then
+             call mess(LEVEL_WARN, 'read_rst: cannot read a dimension of culvert in restart file '''//trim(filename)//'''. The simulation will continue but the results may not be reliable.')
+          else
+             ierr = nf90_inquire_dimension(imapfile, id_culvertdim, len = nlen)
+             call check_error(ierr, 'Culvert dimension')
+             if (nlen /= network%sts%numCulverts) then
+                call qnerror('Error reading '''//trim(filename)//''': Number of culverts read unequal to number of culverts in model',' ',' ')
+                ierr = DFM_GENERICERROR
+                call readyy('Reading map data',-1d0)
+                goto 999
+             else
+                jaCulvDim = 1 ! dimsion of culvert exists and equal to the number of culverts in model
+             end if
+          end if
+       end if
     end if
 
    ! check if restarting a model with Riemann boundary conditions
@@ -11922,6 +11965,24 @@ subroutine unc_read_map(filename, tim, ierr)
       endif
       call check_error(ierr, 'Thatcher-Harleman boundaries')
     endif
+    
+    ! Read structure info.
+    if (jaCulvDim > 0 .and. network%sts%numCulverts > 0) then
+       ierr = nf90_inq_varid(imapfile, 'culvert_valve_opening_height', id_culvert_openh)
+       if (ierr /= 0) then
+          call mess(LEVEL_WARN, 'read_rst: cannot read valve opening height of culverts in restart file'''//trim(filename)//'''. The simulation will continue but the results may not be reliable.')
+       else
+          call realloc(tmpvar_stru, network%sts%numCulverts, stat=ierr, keepExisting=.false.)
+          ierr = nf90_get_var(imapfile, id_culvert_openh, tmpvar_stru, start=(/1, it_read/), count=(/network%sts%numCulverts, 1/))
+          call check_error(ierr, 'culvert_valve_opening_height')
+          
+          do i = 1, network%sts%numCulverts
+             istru = network%sts%culvertIndices(i)
+             network%sts%struct(istru)%culvert%valveOpening = tmpvar_stru(i)
+          end do
+       end if
+    end if
+       
     call readyy('Reading map data',0.95d0)    
    
    ! Check if the orientation of each flowlink in the current model is the same with the link in the rst file
