@@ -1,7 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io_netcdf", "utils_lgpl\io_netcdf\packages\io_netcdf\io_netcdf.vfproj", "{3D34F0B9-2711-4C1B-B59E-5AF94894264B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C29AA190-5BE8-4674-AA8A-E858964D3C08} = {C29AA190-5BE8-4674-AA8A-E858964D3C08}
