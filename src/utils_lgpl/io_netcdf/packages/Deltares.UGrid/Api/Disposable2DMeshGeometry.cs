@@ -1,64 +1,69 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using Deltares.UGrid.Entities;
+﻿using Deltares.UGrid.Entities;
+
 //using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
     //[ProtoContract(AsReferenceDefault = true)]
-    public class Disposable2DMeshGeometry : IDisposable
+    public class Disposable2DMeshGeometry : DisposableMeshObject
     {
-        private readonly List<GCHandle> objectGarbageCollectHandles = new List<GCHandle>();
-
+        /// <summary>
+        /// X position of the nodes
+        /// </summary>
         //[ProtoMember(1)]
-        public double[] xNodes;
+        public double[] NodesX;
 
+        /// <summary>
+        /// Y position of the nodes
+        /// </summary>
         //[ProtoMember(2)]
-        public double[] yNodes;
+        public double[] NodesY;
 
+        /// <summary>
+        /// Z position of the nodes
+        /// </summary>
         //[ProtoMember(3)]
-        public double[] zNodes;
+        public double[] NodesZ;
 
+        /// <summary>
+        /// Edge node connections {[from, to], [from, to] ... }
+        /// </summary>
         //[ProtoMember(4)]
-        public int[] edgeNodes;
+        public int[] EdgeNodes;
 
+        /// <summary>
+        /// Nodes for each face (using <see cref="MaxNumberOfFaceNodes"/>)
+        /// </summary>
         //[ProtoMember(5)]
-        public int[] faceNodes;
+        public int[] FaceNodes;
 
+        /// <summary>
+        /// X position of face the center
+        /// </summary>
         //[ProtoMember(6)]
-        public double[] faceX;
+        public double[] FaceX;
 
+        /// <summary>
+        /// Y position of face the center
+        /// </summary>
         //[ProtoMember(7)]
-        public double[] faceY;
+        public double[] FaceY;
 
+        /// <summary>
+        /// Maximum number of nodes for a face (used in <see cref="FaceNodes"/>)
+        /// </summary>
         //[ProtoMember(8)]
-        public int maxNumberOfFaceNodes;
+        public int MaxNumberOfFaceNodes;
 
-        //[ProtoMember(9)]
-        public int numberOfFaces;
-
-        //[ProtoMember(10)]
-        public int numberOfNodes;
-
-        //[ProtoMember(11)]
-        public int numberOfEdges;
-
-        public bool IsMemoryPinned
+        internal Mesh2DGeometryDimensions CreateMeshDimensions()
         {
-            get { return objectGarbageCollectHandles.Count > 0; }
-        }
-
-        internal MeshGeometryDimensions CreateMeshDimensions()
-        {
-            return new MeshGeometryDimensions
+            return new Mesh2DGeometryDimensions
             {
                 dim = 2, //-> Type of grid 1d (=1)/2d (=2)
-                numnode = numberOfNodes,
-                numedge = numberOfEdges,
-                numface = numberOfFaces,
-                maxnumfacenodes = maxNumberOfFaceNodes,
+                numnode = NodesX?.Length ?? 0,
+                numedge = EdgeNodes?.Length /2 ?? 0,
+                numface = FaceX?.Length ?? 0,
+                maxnumfacenodes = MaxNumberOfFaceNodes,
                 numlayer = 1,
                 layertype = 1,
                 nnodes = 0,
@@ -67,71 +72,21 @@ namespace Deltares.UGrid.Api
             };
         }
 
-        internal MeshGeometry CreateMeshGeometry()
+        internal Mesh2DGeometry CreateMeshGeometry()
         {
-            if (!IsMemoryPinned)
+            return new Mesh2DGeometry
             {
-                PinMemory();
-            }
+                nodex = GetPinnedObjectPointer(NodesX),
+                nodey = GetPinnedObjectPointer(NodesY),
+                nodez = GetPinnedObjectPointer(NodesZ),
 
-            var lookup = objectGarbageCollectHandles.ToDictionary(h => h.Target, h => h);
+                edge_nodes = GetPinnedObjectPointer(EdgeNodes),
 
-            return new MeshGeometry
-            {
-                nodex = lookup[xNodes].AddrOfPinnedObject(),
-                nodey = lookup[yNodes].AddrOfPinnedObject(),
-                nodez = lookup[zNodes].AddrOfPinnedObject(),
+                facex = GetPinnedObjectPointer(FaceX),
+                facey = GetPinnedObjectPointer(FaceY),
+                face_nodes = GetPinnedObjectPointer(FaceNodes),
 
-                edge_nodes = lookup[edgeNodes].AddrOfPinnedObject(),
-
-                facex = lookup[faceX].AddrOfPinnedObject(),
-                facey = lookup[faceY].AddrOfPinnedObject(),
-                face_nodes = lookup[faceNodes].AddrOfPinnedObject(),
             };
-        }
-
-        public void UnPinMemory()
-        {
-            foreach (var handle in objectGarbageCollectHandles)
-            {
-                handle.Free();
-            }
-
-            objectGarbageCollectHandles.Clear();
-        }
-
-        public void Dispose()
-        {
-            UnPinMemory();
-        }
-
-        private void PinMemory()
-        {
-            // compensate for null arrays
-            xNodes = GetArray(xNodes);
-            yNodes = GetArray(yNodes);
-            zNodes = GetArray(zNodes);
-
-            edgeNodes = GetArray(edgeNodes);
-
-            faceNodes = GetArray(faceNodes);
-            faceX = GetArray(faceX);
-            faceY = GetArray(faceY);
-
-            objectGarbageCollectHandles.Add(GCHandle.Alloc(xNodes, GCHandleType.Pinned));
-            objectGarbageCollectHandles.Add(GCHandle.Alloc(yNodes, GCHandleType.Pinned));
-            objectGarbageCollectHandles.Add(GCHandle.Alloc(zNodes, GCHandleType.Pinned));
-
-            objectGarbageCollectHandles.Add(GCHandle.Alloc(edgeNodes, GCHandleType.Pinned));
-
-            objectGarbageCollectHandles.Add(GCHandle.Alloc(faceNodes, GCHandleType.Pinned));
-            objectGarbageCollectHandles.Add(GCHandle.Alloc(faceX, GCHandleType.Pinned));
-            objectGarbageCollectHandles.Add(GCHandle.Alloc(faceY, GCHandleType.Pinned));
-        }
-
-        private static T[] GetArray<T>(T[] array)
-        {
-            return array ?? new T[0];
         }
     }
 }

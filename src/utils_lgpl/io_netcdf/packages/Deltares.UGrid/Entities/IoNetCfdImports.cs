@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using Deltares.UGrid.Api;
 
 namespace Deltares.UGrid.Entities
 {
@@ -36,6 +35,7 @@ namespace Deltares.UGrid.Entities
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_close", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_close_dll([In] ref int ioncid);
 
+
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_write_geom_ugrid", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_write_geom_ugrid_dll(string filename);
 
@@ -43,7 +43,7 @@ namespace Deltares.UGrid.Entities
         public static extern int ionc_write_map_ugrid_dll(string filename);
 
         /// <summary>
-        /// 
+        /// Adds meta data about modelName, version etc.
         /// </summary>
         /// <param name="ioncid"></param>
         /// <param name="metadata"></param>
@@ -52,7 +52,7 @@ namespace Deltares.UGrid.Entities
         public static extern int ionc_add_global_attributes_dll([In] ref int ioncid, ref InteropMetadata metadata);
 
         /// <summary>
-        /// This function creates a new netCDF file
+        /// This function creates a new netCDF file for writing
         /// </summary>
         /// <param name="c_path">The path where the file will be created (in)</param>
         /// <param name="mode"> The netCDF opening mode (in)</param>
@@ -60,6 +60,8 @@ namespace Deltares.UGrid.Entities
         /// <returns></returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_create", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_create_dll([In] string c_path, [In] ref int mode, [In, Out] ref int ioncid);
+
+
 
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_initialize", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_initialize_dll(IO_NetCDF_Message_Callback c_message_callback, IO_NetCDF_Progress_Callback c_progress_callback);
@@ -93,6 +95,29 @@ namespace Deltares.UGrid.Entities
 
         #region Mesh
 
+        /// <summary>
+        /// Clone the definitions specific mesh from one netCDF file to another netCDF. 
+        /// Clones all related attributes of the mesh, but it can not clone mesh contacts yet!
+        /// </summary>
+        /// <param name="ncidin">The input netCDF file id containing the mesh to clone (in)</param>
+        /// <param name="ncidout">The output netCDF file id, can be empty/not empty (in)</param>
+        /// <param name="meshidin">The mesh id to copy (in)</param>
+        /// <param name="meshidout">The id of the cloned mesh in the output file (out)</param>
+        /// <returns></returns>
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_clone_mesh_definition", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_clone_mesh_definition_dll([In] ref int ncidin, [In] ref int ncidout, [In] ref int meshidin, [In, Out] ref int meshidout);
+
+        /// <summary>
+        /// Clone the data of a specific mesh from one netCDF file to another netCDF
+        /// </summary>
+        /// <param name="ncidin">The input netCDF file id containing the mesh to clone (in)</param>
+        /// <param name="ncidout">The output netCDF file id, can be empty/not empty (in)</param>
+        /// <param name="meshidin">The mesh id to copy (in)</param>
+        /// <param name="meshidout">The id of the cloned mesh in the output file (out)</param>
+        /// <returns></returns>
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_clone_mesh_data", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_clone_mesh_data_dll([In] ref int ncidin, [In] ref int ncidout, [In] ref int meshidin, [In] ref int meshidout);
+
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_def_mesh_ids", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_def_mesh_ids_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int iloctype);
 
@@ -103,7 +128,26 @@ namespace Deltares.UGrid.Entities
         public static extern int ionc_get_var_chars_dll([In] ref int ioncid, [In] ref int meshid, [MarshalAs(UnmanagedType.LPStr)][In, Out] StringBuilder varname, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int nvalues);
 
         /// <summary>
-        /// Gets the mesh ids
+        /// Gets the number of mesh from a data set.
+        /// </summary>
+        /// <param name="ioncid">The IONC data set id.</param>
+        /// <param name="nmesh">Number of meshes.</param>
+        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_mesh_count", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_mesh_count_dll([In, Out] ref int ioncid, [In, Out] ref int nmesh);
+
+        /// <summary>
+        /// Gets the number of meshes
+        /// </summary>
+        /// <param name="ioncid"></param>
+        /// <param name="meshType"> Mesh type: 0 = any type, 1 = 1D mesh, 2 = 2D mesh, 3 = 3D mesh </param>
+        /// <param name="numMeshes"></param>
+        /// <returns></returns>
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_number_of_meshes", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_number_of_meshes_dll([In] ref int ioncid, [In] ref int meshType, [In, Out] ref int numMeshes);
+
+        /// <summary>
+        /// Gets the mesh ids 
         /// </summary>
         /// <param name="ioncid"></param>
         /// <param name="meshType"></param>
@@ -114,16 +158,7 @@ namespace Deltares.UGrid.Entities
         public static extern int ionc_ug_get_mesh_ids_dll([In] ref int ioncid, [In] ref int meshType, [In, Out] ref IntPtr pointerToMeshIds, [In] ref int nnumNetworks);
 
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_coordinate_system", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_coordinate_system_dll([In] ref int ioncid, [In, Out] ref int nmesh);
-
-        /// <summary>
-        /// Gets the number of mesh from a data set.
-        /// </summary>
-        /// <param name="ioncid">The IONC data set id.</param>
-        /// <param name="nmesh">Number of meshes.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_mesh_count", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_mesh_count_dll([In, Out] ref int ioncid, [In, Out] ref int nmesh);
+        public static extern int ionc_get_coordinate_system_dll([In] ref int ioncid, [In, Out] ref int epsgcode);
 
         /// <summary>
         /// Gets the name of mesh from a data set.
@@ -452,16 +487,6 @@ namespace Deltares.UGrid.Entities
         #region Mesh1D
 
         /// <summary>
-        /// Gets the number of meshes
-        /// </summary>
-        /// <param name="ioncid"></param>
-        /// <param name="meshType"> Mesh type: 0 = any type, 1 = 1D mesh, 2 = 2D mesh, 3 = 3D mesh </param>
-        /// <param name="numMeshes"></param>
-        /// <returns></returns>
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_number_of_meshes", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_number_of_meshes_dll([In] ref int ioncid, [In] ref int meshType, [In, Out] ref int numMeshes);
-
-        /// <summary>
         /// Get the id of the 1d computational mesh
         /// </summary>
         /// <param name="ioncid">The IONC data set id.</param>
@@ -554,8 +579,6 @@ namespace Deltares.UGrid.Entities
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_1d_mesh_discretisation_points", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_1d_mesh_discretisation_points_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref IntPtr c_branchidx, [In, Out] ref IntPtr c_offset, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int nmeshpoints, [In] ref int startIndex);
 
-
-
         /// <summary>
         /// Read the coordinates of the mesh points  
         /// </summary>
@@ -574,6 +597,56 @@ namespace Deltares.UGrid.Entities
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_1d_mesh_discretisation_points_v2", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_1d_mesh_discretisation_points_v2_dll([In] ref int ioncid, [In] ref int meshId, [In, Out] ref IntPtr c_branchidx, [In, Out] ref IntPtr c_offset, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int nmeshpoints, [In] ref int startIndex, [In, Out] ref IntPtr c_coordx, [In, Out] ref IntPtr c_coordy);
 
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_write_mesh_1d_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_write_mesh_1d_edge_nodes_dll([In] ref int ioncid, [In, Out] ref int meshid, [In, Out] ref int numEdge, [In] ref IntPtr c_mesh_1d_edge_nodes, [In] ref int start_index);
+
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_put_1d_mesh_edges", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_put_1d_mesh_edges_dll([In] ref int ioncid, [In, Out] ref int meshid, [In] ref IntPtr c_edgebranchidx, [In] ref IntPtr c_edgeoffset, [In, Out] ref int numEdge, [In] ref int start_index, [In] ref IntPtr c_coordx, [In] ref IntPtr c_coordy);
+
+        #endregion
+
+        #endregion
+
+        #region Mesh2D
+
+        /// <summary>
+        /// Get the id of the 2d computational mesh
+        /// </summary>
+        /// <param name="ioncid">The IONC data set id.</param>
+        /// <param name="meshId">The 2d computational mesh id (out)</param>
+        /// <returns></returns>
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_2d_mesh_id", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_2d_mesh_id_dll([In] ref int ioncid, [In, Out] ref int meshId);
+
+        /// <summary>
+        /// Gets the 1d2d grid.
+        /// </summary>
+        /// <param name="ioncid"></param>
+        /// <param name="meshId"></param>
+        /// <param name="mesh2DGeometry"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="includeArrays"></param>
+        /// <returns></returns>
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_meshgeom", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_meshgeom_dll(ref int ioncid, ref int meshid, ref int networkId, [In, Out] ref Mesh2DGeometry mesh2DGeometry, ref int startIndex, ref bool includeArrays);
+
+        /// <summary>
+        /// Gets the dimension of the 1d2d grid.
+        /// </summary>
+        /// <param name="ioncid"></param>
+        /// <param name="meshId"></param>
+        /// <param name="mesh2DGeometryDimensions"></param>
+        /// <returns></returns>
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_meshgeom_dim", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_meshgeom_dim_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int networkId, [In, Out] ref Mesh2DGeometryDimensions mesh2DGeometryDimensions);
+
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_put_meshgeom", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_put_meshgeom_dll([In] ref int ioncid, [In, Out] ref int meshid, [In, Out] ref int networkid, [In] ref Mesh2DGeometry mesh2DGeometry, [In] ref Mesh2DGeometryDimensions mesh2DGeometryDimensions, [In] string c_meshname, [In] string c_networkName, [In] ref int start_index);
+
+
+        #endregion
+
+        #region Links1D2D
 
         /// <summary>
         /// Defines the contacts structure.
@@ -635,80 +708,7 @@ namespace Deltares.UGrid.Entities
 
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_mesh_contact_v1", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_mesh_contact_v1_dll([In] ref int ioncid, [In] ref int contactsmesh, [In, Out] ref IntPtr c_mesh1indexes, [In, Out] ref IntPtr c_mesh2indexes, [In, Out] ref IntPtr c_contacttype, [In, Out] ref IntPtr ids, [In, Out] ref IntPtr longNames, [In] ref int ncontacts, [In] ref int startIndex);
-
-        /// <summary>
-        /// Clone the definitions specific mesh from one netCDF file to another netCDF. 
-        /// Clones all related attributes of the mesh, but it can not clone mesh contacts yet!
-        /// </summary>
-        /// <param name="ncidin">The input netCDF file id containing the mesh to clone (in)</param>
-        /// <param name="ncidout">The output netCDF file id, can be empty/not empty (in)</param>
-        /// <param name="meshidin">The mesh id to copy (in)</param>
-        /// <param name="meshidout">The id of the cloned mesh in the output file (out)</param>
-        /// <returns></returns>
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_clone_mesh_definition", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_clone_mesh_definition_dll([In] ref int ncidin, [In] ref int ncidout, [In] ref int meshidin, [In, Out] ref int meshidout);
-
-        /// <summary>
-        /// Clone the data of a specific mesh from one netCDF file to another netCDF
-        /// </summary>
-        /// <param name="ncidin">The input netCDF file id containing the mesh to clone (in)</param>
-        /// <param name="ncidout">The output netCDF file id, can be empty/not empty (in)</param>
-        /// <param name="meshidin">The mesh id to copy (in)</param>
-        /// <param name="meshidout">The id of the cloned mesh in the output file (out)</param>
-        /// <returns></returns>
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_clone_mesh_data", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_clone_mesh_data_dll([In] ref int ncidin, [In] ref int ncidout, [In] ref int meshidin, [In] ref int meshidout);
-
-        #endregion
-
-        #endregion
-
-        #region 2D calls
-
-        /// <summary>
-        /// Get the id of the 2d computational mesh
-        /// </summary>
-        /// <param name="ioncid">The IONC data set id.</param>
-        /// <param name="meshId">The 2d computational mesh id (out)</param>
-        /// <returns></returns>
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_2d_mesh_id", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_2d_mesh_id_dll([In] ref int ioncid, [In, Out] ref int meshId);
-
-        #endregion
-
-        #region Links1D2D
-
-        /// <summary>
-        /// Gets the 1d2d grid.
-        /// </summary>
-        /// <param name="ioncid"></param>
-        /// <param name="meshId"></param>
-        /// <param name="meshGeometry"></param>
-        /// <param name="startIndex"></param>
-        /// <param name="includeArrays"></param>
-        /// <returns></returns>
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_meshgeom", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_meshgeom_dll(ref int ioncid, ref int meshid, ref int networkId, [In, Out] ref MeshGeometry meshGeometry, ref int startIndex, ref bool includeArrays);
-
-        /// <summary>
-        /// Gets the dimension of the 1d2d grid.
-        /// </summary>
-        /// <param name="ioncid"></param>
-        /// <param name="meshId"></param>
-        /// <param name="meshGeometryDimensions"></param>
-        /// <returns></returns>
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_meshgeom_dim", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_meshgeom_dim_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int networkId, [In, Out] ref MeshGeometryDimensions meshGeometryDimensions);
-
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_put_meshgeom", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_put_meshgeom_dll([In] ref int ioncid, [In, Out] ref int meshid, [In, Out] ref int networkid, [In] ref MeshGeometry meshGeometry, [In] ref MeshGeometryDimensions meshGeometryDimensions, [In] string c_meshname, [In] string c_networkName, [In] ref int start_index);
-
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_write_mesh_1d_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_write_mesh_1d_edge_nodes_dll([In] ref int ioncid, [In, Out] ref int meshid, [In, Out] ref int numEdge, [In] ref IntPtr c_mesh_1d_edge_nodes, [In] ref int start_index);
-
-        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_put_1d_mesh_edges", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_put_1d_mesh_edges_dll([In] ref int ioncid, [In, Out] ref int meshid, [In] ref IntPtr c_edgebranchidx, [In] ref IntPtr c_edgeoffset, [In, Out] ref int numEdge, [In] ref int start_index, [In] ref IntPtr c_coordx, [In] ref IntPtr c_coordy);
-
+        
         #endregion
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

@@ -1,6 +1,6 @@
 ﻿namespace Deltares.UGrid.Api
 {
-    public enum DataSetConventions
+    internal enum DataSetConventions
     {
         CONV_NULL = 0,//Dataset conventions not yet detected
         CONV_CF = 1,

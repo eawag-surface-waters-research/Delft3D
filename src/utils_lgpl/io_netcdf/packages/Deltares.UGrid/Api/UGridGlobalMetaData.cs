@@ -1,4 +1,6 @@
-﻿namespace Deltares.UGrid.Api
+﻿using Deltares.UGrid.Entities;
+
+namespace Deltares.UGrid.Api
 {
     public class UGridGlobalMetaData
     {
@@ -8,28 +10,35 @@
             Source = "Unknown Source";
             Version = "-";
         }
+
         public UGridGlobalMetaData(string modelName, string source, string version)
         {
             Modelname = modelName;
             Source = source;
             Version = version;
         }
-        public string Modelname { get; private set; }
 
-        public string Source { get; private set; }
+        public string Modelname { get; }
 
-        public string Version { get; private set; }
+        public string Source { get; }
 
-        public override bool Equals(object obj)
+        public string Version { get; }
+
+        internal InteropMetadata CreateMetaData()
         {
-            if (obj == null || GetType() != obj.GetType()) return false;
-            var gmd = (UGridGlobalMetaData)obj;
-            return Modelname == gmd.Modelname && Source == gmd.Source && Version == gmd.Version;
+            return new InteropMetadata
+            {
+                institution = ToCharArray("Deltares"),
+                modelname = ToCharArray(Modelname),
+                references = ToCharArray("https://github.com/ugrid-conventions/ugrid-conventions"),
+                source = ToCharArray(Source),
+                version = ToCharArray(Version)
+            };
         }
 
-        public override int GetHashCode()
+        private static char[] ToCharArray(string s)
         {
-            return Modelname.GetHashCode();
+            return s.PadRight(100, ' ').ToCharArray(0,100);
         }
     }
 }
