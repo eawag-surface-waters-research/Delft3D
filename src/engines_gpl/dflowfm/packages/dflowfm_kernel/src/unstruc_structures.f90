@@ -215,7 +215,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       !use m_structures, only: NUMVALS_PUMP, NUMVALS_GATE, NUMVALS_CDAM, NUMVALS_CGEN, &
       !                        NUMVALS_GATEGEN, NUMVALS_WEIRGEN, NUMVALS_GENSTRU
       use m_alloc
-
+      use m_flowtimes, only: ti_rst
       implicit none
 
       jahiscgen = 1
@@ -282,7 +282,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
          if( allocated( valbridge) ) deallocate( valbridge )
          allocate( valbridge(NUMVALS_BRIDGE,network%sts%numBridges) ) ; valbridge = 0d0
       endif
-      if( jahisculv > 0 .and. network%sts%numCulverts > 0) then
+      if( (ti_rst > 0 .or. jahisculv > 0) .and. network%sts%numCulverts > 0) then
          if( allocated( valculvert) ) deallocate( valculvert )
          allocate( valculvert(NUMVALS_CULVERT,network%sts%numCulverts) ) ; valculvert = 0d0
       endif
@@ -713,4 +713,20 @@ double precision function get_discharge_under_gate(genstr, L0, s1m1, s1m2)
 
 end function get_discharge_under_gate
 
+!> Updates structure parameters for the output to restart file
+!! Only computes the needed values, and
+!! only when they are not computed for history output
+subroutine structure_parameters_rst()
+   use m_1d_structures, only: get_opening_height
+   implicit none
+   integer :: n, istru
+
+   if (jahisculv == 0) then ! If culvert values are not computed for history output, then computes the needed values for restart file
+      do n = 1, network%sts%numCulverts
+         istru = network%sts%culvertIndices(n)
+         valculvert(11,n) = get_opening_height(network%sts%struct(istru))
+      end do
+   end if
+
+end subroutine structure_parameters_rst
 end module m_structures

@@ -18159,7 +18159,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
  use m_flowgeom, only: ndx2d, ndxi, lnx1d
  use unstruc_channel_flow, only : network
  use m_oned_functions, only: updateFreeboard, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat, updateS1Gradient
-
+ use m_structures, only: structure_parameters_rst
 #ifdef _OPENMP
  use omp_lib
 #endif
@@ -18277,6 +18277,8 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
    if (ti_rst > 0) then
       if (comparereal(tim, time_rst, eps10) == 0) then
+         ! Update structure parameters
+         call structure_parameters_rst()
          call wrirst(tim)
          if (comparereal(time_rst, ti_rste, eps10) == 0) then
             time_rst = tstop_user + 1
