@@ -218,18 +218,6 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       use m_flowtimes, only: ti_rst
       implicit none
 
-      jahiscgen = 1
-      jahispump = 1
-      jahisgate = 1
-      jahiscdam = 1
-      jahisweir = 1
-      jahisorif = 1
-      jahisculv = 1
-      jahisbridge   = 1
-      jahisdambreak = 1
-      jahisuniweir = 1
-      jahiscmpstru = 1
-
       if( jahispump > 0 .and. npumpsg > 0) then
          if( allocated( valpump ) ) deallocate( valpump )
          allocate( valpump(NUMVALS_PUMP,npumpsg) ) ; valpump = 0d0
@@ -308,6 +296,19 @@ call tree_destroy(strs_ptr)
 call reset_structures()
 
 ! TIDAL TURBINES: Insert calls to deallocate_turbines and init_turbines here
+
+   ! default settings for structure output to history file
+   jahiscgen = 1
+   jahispump = 1
+   jahisgate = 1
+   jahiscdam = 1
+   jahisweir = 1
+   jahisorif = 1
+   jahisculv = 1
+   jahisbridge   = 1
+   jahisdambreak = 1
+   jahisuniweir = 1
+   jahiscmpstru = 1
 
 end subroutine default_structures
 
