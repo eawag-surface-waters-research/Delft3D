@@ -191,8 +191,6 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: jahisuniweir            !< Write univeral weir parameters to his file, 0: no, 1: yes
  integer                           :: jahiscmpstru            !< Write compound structure parameters to his file, 0: no, 1: yes
  
- integer                           :: jarstculv               !< Write (selected) culvert parameters to rst file, 0: no, 1: yes
- 
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
  integer, parameter :: IOPENDIR_SYMMETRIC =  0 !< Gate door opens/closes symmetrically (from center).
@@ -301,15 +299,6 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
 
    end subroutine init_structure_hisvalues
 
- !> Initialize values of structure output in restart file.
- subroutine init_structure_rstvalues
-   implicit none
-   
-   jarstculv = 0
-   
- end subroutine init_structure_rstvalues
-
-
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, only call reset_structures() instead.
 subroutine default_structures()
@@ -319,8 +308,6 @@ call tree_destroy(strs_ptr)
 call reset_structures()
 
 ! TIDAL TURBINES: Insert calls to deallocate_turbines and init_turbines here
-
-call init_structure_rstvalues
 
 end subroutine default_structures
 

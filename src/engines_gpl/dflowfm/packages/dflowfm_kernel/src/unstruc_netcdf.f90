@@ -2446,7 +2446,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_flowparameters, only: jamd1dfile
     use m_oned_functions, only: gridpoint2cross
     use m_save_ugrid_state, only: mesh1dname
-    use m_structures, only: jarstculv, valculvert
+    use m_structures, only: valculvert
    
     integer,           intent(in) :: irstfile
     real(kind=hp),     intent(in) :: tim
@@ -3196,7 +3196,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     endif
     
     ! Write structure info.
-    if (jarstculv > 0 .and. network%sts%numCulverts > 0) then ! write culvert info.
+    if (network%sts%numCulverts > 0) then ! write culvert info.
        ierr = nf90_def_dim(irstfile, 'nCulvert', network%sts%numculverts, id_culvertdim)
        ierr = nf90_def_var(irstfile, 'culvert_valve_opening_height', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_openh)
        ierr = nf90_put_att(irstfile, id_culvert_openh, 'long_name', 'Valve opening height of culvert')
@@ -3254,7 +3254,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_inq_varid(irstfile, 'ero', id_ero)
     endif
     !
-    if (jarstculv > 0 .and. network%sts%numCulverts > 0) then
+    if (network%sts%numCulverts > 0) then
        ierr = nf90_inq_varid(irstfile, 'culvert_valve_opening_height', id_culvert_openh)
     end if
                 
@@ -3671,8 +3671,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_put_var(irstfile, id_flowlinkyu, yu(1:lnx))
     end if
     
-    ! Wrtie structure info.
-    if(jarstculv > 0 .and. network%sts%numculverts > 0) then
+    ! Write structure info.
+    if (network%sts%numculverts > 0) then
        ierr = nf90_put_var(irstfile, id_culvert_openh, valculvert(11, 1:network%sts%numculverts), (/1, itim/), (/network%sts%numculverts, 1/))
     end if
 
