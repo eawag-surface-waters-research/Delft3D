@@ -210,6 +210,8 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
    contains
 
 
+   !> Allocates and initializes all "valstruct"(:,:) arrays.
+   !! Used for history output and/or restart file output for hydraulic structures.
    subroutine init_structure_hisvalues()
       use m_flowexternalforcings , only: npumpsg, ncgensg, ngatesg, ncdamsg, ngategen, ngenstru, nweirgen, ndambreaksg
       !use m_structures, only: NUMVALS_PUMP, NUMVALS_GATE, NUMVALS_CDAM, NUMVALS_CGEN, &
@@ -714,20 +716,19 @@ double precision function get_discharge_under_gate(genstr, L0, s1m1, s1m2)
 
 end function get_discharge_under_gate
 
-!> Updates structure parameters for the output to restart file
+!> Updates structure parameters for the output to restart file.
 !! Only computes the needed values, and
-!! only when they are not computed for history output
+!! only when they are not computed for history output.
+!! Values are stored in the val*(:,:) arrays, shared with history output.
 subroutine structure_parameters_rst()
    use m_1d_structures, only: get_opening_height
    implicit none
    integer :: n, istru
 
-   if (jahisculv == 0) then ! If culvert values are not computed for history output, then computes the needed values for restart file
-      do n = 1, network%sts%numCulverts
-         istru = network%sts%culvertIndices(n)
-         valculvert(11,n) = get_opening_height(network%sts%struct(istru))
-      end do
-   end if
+   do n = 1, network%sts%numCulverts
+      istru = network%sts%culvertIndices(n)
+      valculvert(11,n) = get_opening_height(network%sts%struct(istru))
+   end do
 
 end subroutine structure_parameters_rst
 end module m_structures
