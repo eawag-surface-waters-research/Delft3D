@@ -50,9 +50,9 @@
 #elif defined(HAVE_CONFIG_H)
 #  define FILE_READ  read
 #  define FILE_WRITE write
-#  if defined(HAVE_FSEEKO)
-#    define FILE_SEEK fseeko
-#    define FILE_TELL ftello
+#  if defined(HAVE_FSEEKO64)
+#    define FILE_SEEK fseeko64
+#    define FILE_TELL ftello64
 #  else
 #    define FILE_SEEK FILE_SEEK_not_defined
 #    define FILE_TELL FILE_TELL_not_defined
