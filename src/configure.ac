@@ -72,6 +72,7 @@ fi
 AC_LANG_PUSH([C++])
 
 AC_CHECK_FUNCS([strdup vsnprintf lseek64 lseek])
+AC_CHECK_FUNCS([fseeko, ftello])
 AC_MSG_CHECKING([whether to enable dolcli])
 AC_ARG_ENABLE(dolcli,
 AS_HELP_STRING([--enable-dolcli],

@@ -42,7 +42,6 @@
 #include <inttypes.h>
 #endif
 
-/* THe define of LSEEK is used to switch the behaviour of FSEEK */
 #if defined(_WIN32)
 #  define FILE_READ  _read
 #  define FILE_WRITE _write
@@ -51,12 +50,9 @@
 #elif defined(HAVE_CONFIG_H)
 #  define FILE_READ  read
 #  define FILE_WRITE write
-#  if defined(HAVE_LSEEK64) 
-#    define FILE_SEEK fseek64
-#    define FILE_TELL ftell64
-#  elif defined(HAVE_LSEEK)
-#    define FILE_SEEK fseek
-#    define FILE_TELL ftell
+#  if defined(HAVE_FSEEKO)
+#    define FILE_SEEK fseeko
+#    define FILE_TELL ftello
 #  else
 #    define FILE_SEEK FILE_SEEK_not_defined
 #    define FILE_TELL FILE_TELL_not_defined
