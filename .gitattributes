@@ -14292,6 +14292,7 @@ src/utils_lgpl/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/nuget/Deltares.UGrid.nuspec -text
 src/utils_lgpl/io_netcdf/nuget/UGrid.IO_NetCDF.targets -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Api/DisposableNetworkGeometryTest.cs -text
+src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Api/UGridTest.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Deltares.UGrid.Tests.csproj -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Lib/nunit.framework.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Properties/AssemblyInfo.cs -text
@@ -14321,8 +14322,10 @@ src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Entities/Mesh2DGeometryDimensio
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Entities/MeshGeometry.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Entities/MeshGeometryDimensions.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Entities/Network1DGeometry.cs -text
+src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Entities/Network1DGeometryDimensions.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Helpers/IntPtrExtensions.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Helpers/NativeLibrary.cs -text
+src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Helpers/StringUtilityExtensions.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/hdf5.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/hdf5_hl.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/libifcoremd.dll -text

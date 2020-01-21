@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
+using Deltares.UGrid.Helpers;
 
 namespace Deltares.UGrid.Api
 {
@@ -15,7 +15,7 @@ namespace Deltares.UGrid.Api
         {
             get { return objectGarbageCollectHandles.Count > 0; }
         }
-
+        
         public void Dispose()
         {
             UnPinMemory();
@@ -52,7 +52,7 @@ namespace Deltares.UGrid.Api
                     var bufferSize = arrayField.GetCustomAttribute<StringBufferSizeAttribute>()?.BufferSize ?? 0;
                     if (bufferSize == 0) continue;
 
-                    var bytes = GetFlattenedAsciiCodedStringArray((string[]) objectToPin, bufferSize);
+                    var bytes = ((string[])objectToPin).GetFlattenedAsciiCodedStringArray(bufferSize);
                     AddObjectToPin(bytes, objectToPin);
                 }
                 else
@@ -70,16 +70,6 @@ namespace Deltares.UGrid.Api
             }
 
             objectGarbageCollectHandles.Clear();
-        }
-
-        private static byte[] GetFlattenedAsciiCodedStringArray(string[] strings, int bufferSize)
-        {
-            var flattenedAsciiCodedStringArray = string.Join("", strings.Select(s => s.Length > bufferSize
-                ? s.Substring(0, bufferSize)
-                : s.PadRight(bufferSize, ' ')));
-
-            return Encoding.Convert(Encoding.Unicode, Encoding.ASCII,
-                Encoding.Unicode.GetBytes(flattenedAsciiCodedStringArray));
         }
 
         private void AddObjectToPin(object objectToPin, object lookupObject = null)

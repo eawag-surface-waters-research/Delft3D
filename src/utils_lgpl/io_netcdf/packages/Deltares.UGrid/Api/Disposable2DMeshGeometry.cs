@@ -84,8 +84,7 @@ namespace Deltares.UGrid.Api
 
                 facex = GetPinnedObjectPointer(FaceX),
                 facey = GetPinnedObjectPointer(FaceY),
-                face_nodes = GetPinnedObjectPointer(FaceNodes),
-
+                face_nodes = GetPinnedObjectPointer(FaceNodes)
             };
         }
     }

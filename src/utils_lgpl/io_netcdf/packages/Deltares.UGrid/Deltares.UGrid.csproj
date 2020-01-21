@@ -77,8 +77,10 @@
     <Compile Include="Entities\Mesh2DGeometry.cs" />
     <Compile Include="Entities\Mesh2DGeometryDimensions.cs" />
     <Compile Include="Entities\Network1DGeometry.cs" />
+    <Compile Include="Entities\Network1DGeometryDimensions.cs" />
     <Compile Include="Helpers\IntPtrExtensions.cs" />
     <Compile Include="Helpers\NativeLibrary.cs" />
+    <Compile Include="Helpers\StringUtilityExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -88,9 +90,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Lib\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

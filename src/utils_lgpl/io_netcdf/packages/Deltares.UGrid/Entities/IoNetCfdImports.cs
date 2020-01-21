@@ -9,7 +9,7 @@ namespace Deltares.UGrid.Entities
     /// </summary>
     internal static class IoNetCfdImports
     {
-        private const string GRIDDLL_NAME = "io_netcdf.dll";
+        internal const string GRIDDLL_NAME = "io_netcdf.dll";
         
         #region Generic
 
@@ -25,7 +25,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="convversion"></param>
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_open", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_open_dll([In] string c_path, [In, Out] ref int mode, [In, Out] ref int ioncid, [In, Out] ref int iconvtype, ref double convversion);
+        public static extern int ionc_open_dll([In] string c_path, [In] ref int mode, [In, Out] ref int ioncid, [In, Out] ref int iconvtype, ref double convversion);
 
         /// <summary>
         /// Tries to close an open io_netcdf data set.
@@ -220,7 +220,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="nnode">The number of nodes in the mesh.</param>
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_node_coordinates", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_node_coordinates_dll([In, Out] ref int ioncid, [In, Out] ref int meshId, [In, Out] ref IntPtr c_xptr, [In, Out]ref IntPtr c_yptr, [In, Out] ref int nnode);
+        public static extern int ionc_get_node_coordinates_dll([In] ref int ioncid, [In, Out] ref int meshId, [In, Out] ref IntPtr c_xptr, [In, Out]ref IntPtr c_yptr, [In, Out] ref int nnode);
 
         /// <summary>
         /// Gets the edge-node connectvit table for all edges in the specified mesh.
@@ -326,6 +326,25 @@ namespace Deltares.UGrid.Entities
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_1d_network_name", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_network_name_dll([In] ref int ncidin, [In] ref int networkId, [MarshalAs(UnmanagedType.LPStr)][In, Out] StringBuilder networkName);
 
+        /// <summary>
+        /// Defines a new variable on a 1D network in an IONetCDF data set and sets up proper meta-attributes.
+        /// </summary>
+        /// <remarks>
+        /// File should still be in define mode. Does not write the actual data yet.
+        /// </remarks>
+        /// <param name="ioncid">The IONetCDF data set id (in).</param>
+        /// <param name="meshId">Id of the mesh</param>
+        /// <param name="networkId">The network id in the specified data set (in).</param>
+        /// <param name="varId">The id of the NetCDF variable to define.</param>
+        /// <param name="type">The variable type expressed in one of the basic nf90_* types (in). Should match with int fillValueInt (i.e., nf90_integer).</param>
+        /// <param name="locType">Specifies at which unique mesh location data will be specified (in).</param>
+        /// <param name="varName">The name of the new variable (in).</param>
+        /// <param name="standardName">Standard name (CF-compliant) for 'standard_name' attribute in this variable (in).</param>
+        /// <param name="longName">Long name for 'long_name' attribute in this variable (use empty string if not applicable) (in).</param>
+        /// <param name="unit">Unit of this variable (CF-compliant) (use empty string for dimensionless quantities) (in).</param>
+        /// <param name="fillValueInt">Int precision fill value (in).</param>
+        /// <param name="fillValue">Double precision fill value (in).</param>
+        /// <returns>Result status (UG_NOERR==NF90_NOERR if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_def_var", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_def_var_dll(ref int ioncid, ref int meshId, ref int networkId, ref int varId, ref int type, ref int locType, string varName, string standardName, string longName, string unit, ref int fillValueInt, ref double fillValue);
         
