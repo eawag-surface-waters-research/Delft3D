@@ -87,7 +87,7 @@ libwaq_process_la_SOURCES = \
        partmp.f \
        phcomp.f \
        phcomb.f \
-       plastc.f \
+       plastc.f90 \
        posoxy.f \
        pprlim.f \
        pripro.f \
