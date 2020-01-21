@@ -3598,11 +3598,15 @@ subroutine add_bndtracer(tracnam, tracunit, itrac, janew)
       call realloc(trnames, numtracers, keepExisting=.true., fill='')
       call realloc(trunits, numtracers, keepExisting=.true., fill='')
       call realloc(wstracers, numtracers, keepExisting=.true., fill=0d0)
+      call realloc(decaytimetracers, numtracers, keepExisting=.true., fill=0d0)
       if ( transformcoef(4).ne.DMISS ) then
          wstracers(numtracers) = transformcoef(4)
-      else
-         wstracers(numtracers) = 0.0d0
       endif
+      if ( transformcoef(5).ne.DMISS ) then
+          jadecaytracers = 1
+          decaytimetracers(numtracers) = transformcoef(5)
+      endif
+
       trnames(numtracers) = trim(tracnam)
       itrac = numtracers
    end if

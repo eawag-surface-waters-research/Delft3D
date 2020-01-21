@@ -1892,6 +1892,8 @@ end module m_crspath
  character(len=NAMTRACLEN), allocatable :: trunits(:)   !< tracer units
  type(bndtype),    allocatable, target  :: bndtr(:)
  double precision, allocatable          :: wstracers(:) !< tracer fall velocity pos is downward (m/s)
+ double precision, allocatable          :: decaytimetracers(:) !< tracer decaytimes (s)
+ integer                                :: jadecaytracers      !< 0 = no, 1 =yes 
 
  ! JRE sedfracbnds
  integer,          allocatable          :: nbndsf(:)         !< sedfrac   boundary points dimension
@@ -3468,7 +3470,6 @@ end module m_vegetation
  double precision, dimension(:), allocatable :: czusf       !< Chezy coefficient on flow link
  double precision, dimension(:), allocatable :: czssf       !< Chezy coefficient in flow node
  double precision, dimension(:), allocatable :: fcoris    !< Coriolis force in the flow node
- integer         , dimension(:,:), allocatable :: LLkkk   !< TODO
 
  double precision, dimension(:), allocatable :: spiratx   !< x component of normalised vector in direction of depth averaged velocity    (-)
  double precision, dimension(:), allocatable :: spiraty   !< y component of normalised vector in direction of depth averaged velocity    (-)
@@ -3988,6 +3989,7 @@ end module m_profiles
  integer, target                   :: lnx1Db         !< [-] nr of flow links including 1D bnds (internal, 1D+2D, boundary: only 1D. 2D bnd behind it). {"rank": 0}
  integer, target                   :: lnx            !< [-] nr of flow links (internal + boundary). First we have 1D links, next 2D links, next boundary links (first 1D, then 2D). {"rank": 0}
  integer,          allocatable, target   :: ln    (:,:)    !< [-] 1D link (2,*) node   administration, 1=nd1,  2=nd2   linker en rechter celnr {"shape": [2, "lnkx"]}
+ integer,          allocatable, target   :: LLkkk (:,:)    !< [-]    Link Link admin (5,*) , 1=lowL 2=hihL, 3=leftk, 4= midk, 5=rightk {"shape": [5, "lnx"]}
  integer,          allocatable, target   :: lncn  (:,:)    !< [-] 2D link (2,*) corner administration, 1=nod1, 2=nod2  linker en rechter netnr {"shape": [2, "lnkx"]}
  integer,          allocatable     :: kcu   (:)      !< link code, 1=1D link, 2=2D link, -1= bc 1D, -2=bc 2D, 3=2D parall wall, 4=1D2Dlink, 5=Pump, 7=1d2d internal link
  integer,          allocatable, target :: iadv(:)    !< [-] type of advection for this link {"location": "edge", "shape": ["lnx"]}

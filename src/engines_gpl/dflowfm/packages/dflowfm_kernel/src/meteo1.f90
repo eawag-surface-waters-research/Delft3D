@@ -392,6 +392,12 @@ contains
          read (rec,*) transformcoef(4)
      end if
 
+     keywrd = 'TRACERDECAYTIME'
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+         read (rec,*) transformcoef(5)
+     end if
+
      keywrd = 'RELATIVESEARCHCELLSIZE'
      call zoekopt(minp, rec, trim(keywrd), jaopt)
      if (jaopt == 1) then

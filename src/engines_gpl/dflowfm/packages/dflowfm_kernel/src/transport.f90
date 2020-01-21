@@ -41,7 +41,7 @@
 
 subroutine update_constituents(jarhoonly)
    use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd  ! static mesh information
-   use m_flow,       only: Ndkx, Lnkx, u1, q1, au, qw, zws, sq, sqi, vol1, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, jalts, wsf
+   use m_flow,       only: Ndkx, Lnkx, u1, q1, au, qw, zws, sq, sqi, vol1, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, jalts, wsf, jadecaytracers
    use m_flowtimes,  only: dts, ja_timestep_auto
    use m_turbulence, only: sigdifi
    use m_physcoef,   only: dicoww, vicouv, difmolsal
@@ -235,6 +235,9 @@ subroutine update_constituents(jarhoonly)
    if (jarhoonly == 1) then
       call extract_rho() ; numconst = numconst_store 
    else
+      if (jadecaytracers > 0) then ! because tracerdecay is normally not done in DFM we do it here so as not to cause overhead elsewhere   
+         call decaytracers() 
+      endif
       call extract_constituents()
    endif
 
@@ -246,6 +249,23 @@ subroutine update_constituents(jarhoonly)
 
    return
 end subroutine update_constituents
+
+subroutine decaytracers()
+use m_transport
+use m_flowgeom
+use m_flow
+use m_flowtimes
+double precision :: decaytime
+do k = 1,ndkx
+   do i=ITRA1,ITRAN
+      decaytime = decaytimetracers(i - itra1 + 1)
+      if (decaytime > 0) then 
+          constituents (i,k) = constituents(i,k) / (1d0 + dts/decaytime)
+      endif 
+   enddo  
+enddo
+end subroutine decaytracers 
+
 
 !> compute horizontal transport fluxes at flowlink
 subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop, kmxn, kmxL, sed, difsed, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, flux, dsedx, dsedy, jalimitdiff, dxiAu)
