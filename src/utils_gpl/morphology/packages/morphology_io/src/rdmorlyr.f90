@@ -494,7 +494,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
                 error = .true.
                 return
              endif
-             do it=1,size(thtrlyr)
+             do it = nmlb, nmub
                 thtrlyr(it) = thtrlyr(1)
              enddo
              !
@@ -577,7 +577,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
                    error = .true.
                    return
                 endif
-                do it=1,size(thexlyr)
+                do it = nmlb, nmub
                    thexlyr(it) = thexlyr(1)
                 enddo   
                 !
