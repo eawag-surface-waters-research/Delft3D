@@ -3,8 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace Deltares.UGrid.Entities
 {
-
-
     [StructLayout(LayoutKind.Sequential)]
     internal struct Mesh2DGeometry
     {
@@ -47,5 +45,4 @@ namespace Deltares.UGrid.Entities
         public IntPtr nnodelongnames;
         public int startIndex;
     }
-
 }

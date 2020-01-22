@@ -49,7 +49,7 @@ namespace Deltares.UGrid.Api
 
                 if (elementType == typeof(string))
                 {
-                    var bufferSize = arrayField.GetCustomAttribute<StringBufferSizeAttribute>()?.BufferSize ?? 0;
+                    var bufferSize = GetType().GetBufferSize(arrayField.Name);
                     if (bufferSize == 0) continue;
 
                     var bytes = ((string[])objectToPin).GetFlattenedAsciiCodedStringArray(bufferSize);

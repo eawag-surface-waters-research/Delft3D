@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using System.Reflection;
 using Deltares.UGrid.Api;
@@ -54,9 +55,9 @@ namespace Deltares.UGrid.Helpers
             return strings.Select(s => s.TrimEnd(FillChar)).ToArray();
         }
 
-        internal static int GetBufferSize<T>(this string fieldName)
+        internal static int GetBufferSize(this Type type, string fieldName)
         {
-            return typeof(T).GetField(fieldName)?.GetCustomAttribute<StringBufferSizeAttribute>()?.BufferSize ?? 0;
+            return type.GetField(fieldName)?.GetCustomAttribute<StringBufferSizeAttribute>()?.BufferSize ?? 0;
         }
     }
 }

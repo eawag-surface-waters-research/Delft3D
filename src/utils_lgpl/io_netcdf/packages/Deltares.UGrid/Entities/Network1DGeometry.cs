@@ -18,6 +18,7 @@ namespace Deltares.UGrid.Entities
         public IntPtr BranchIds;
         public IntPtr BranchLongNames;
         public IntPtr BranchOrder;
+        public IntPtr BranchTypes;
 
         public IntPtr BranchGeometryX;
         public IntPtr BranchGeometryY;

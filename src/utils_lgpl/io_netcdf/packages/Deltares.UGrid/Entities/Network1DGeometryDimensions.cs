@@ -11,7 +11,5 @@ namespace Deltares.UGrid.Entities
         public int NumberOfBranches;
 
         public int NumberOfBranchGeometryPoints;
-
-        public int StartIndex;
     }
 }

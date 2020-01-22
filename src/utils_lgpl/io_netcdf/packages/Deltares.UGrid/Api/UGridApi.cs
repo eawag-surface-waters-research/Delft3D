@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,6 +15,8 @@ namespace Deltares.UGrid.Api
         private DataSetConventions convention = DataSetConventions.CONV_NULL;
         private double versionNumber = Double.NaN;
         private string branchTypeVariableName = "branch_type";
+
+        private int startIndex = 0;
 
         private bool fileOpenForReading;
         private bool fileOpenForWriting;
@@ -158,46 +161,48 @@ namespace Deltares.UGrid.Api
 
         public DisposableNetworkGeometry GetNetworkGeometry(int networkId)
         {
-            var numberOfNodes = 0;
-            var numberOfBranches = 0;
-            var numberOfGeometryPoints = 0;
+            var geometryDimensions = new Network1DGeometryDimensions();
+            
+            IoNetCfdImports.ionc_get_1d_network_nodes_count_dll(ref fileId, ref networkId, ref geometryDimensions.NumberOfNodes);
+            IoNetCfdImports.ionc_get_1d_network_branches_count_dll(ref fileId, ref networkId, ref geometryDimensions.NumberOfBranches);
+            IoNetCfdImports.ionc_get_1d_network_branches_geometry_coordinate_count_dll(ref fileId, ref networkId, ref geometryDimensions.NumberOfBranchGeometryPoints);
 
-            IoNetCfdImports.ionc_get_1d_network_nodes_count_dll(ref fileId, ref networkId, ref numberOfNodes);
-            IoNetCfdImports.ionc_get_1d_network_branches_count_dll(ref fileId, ref networkId, ref numberOfBranches);
-            IoNetCfdImports.ionc_get_1d_network_branches_geometry_coordinate_count_dll(ref fileId, ref networkId, ref numberOfGeometryPoints);
+            var numberOfNodes = geometryDimensions.NumberOfNodes;
+            var numberOfBranches = geometryDimensions.NumberOfBranches;
+            var numberOfGeometryPoints = geometryDimensions.NumberOfBranchGeometryPoints;
 
             var disposableNetworkGeometry = new DisposableNetworkGeometry();
 
             // read name
-            var stringBuilder = new StringBuilder(GetStringBufferSize<DisposableNetworkGeometry>(nameof(DisposableNetworkGeometry.NetworkName)));
+            var type = typeof(DisposableNetworkGeometry);
+            var stringBuilder = new StringBuilder(type.GetBufferSize(nameof(DisposableNetworkGeometry.NetworkName)));
             IoNetCfdImports.ionc_get_network_name_dll(ref fileId, ref networkId, stringBuilder);
 
             // set with empty arrays for setting in io_netcdf
-            disposableNetworkGeometry.InitializeWithEmptyData(numberOfNodes, numberOfBranches, numberOfGeometryPoints);
+            disposableNetworkGeometry.InitializeWithEmptyData(geometryDimensions);
             
             // get object with pinned object pointers
             var geometry = disposableNetworkGeometry.CreateNetwork1DGeometry();
-            var geometryDimensions = disposableNetworkGeometry.CreateNetwork1DGeometryDimensions();
 
             // read nodes
-            IoNetCfdImports.ionc_read_1d_network_nodes_v1_dll(ref fileId, ref networkId, ref geometry.NodeX, ref geometry.NodeY, ref geometry.NodeIds, ref geometry.NodeLongNames, ref numberOfNodes);
+            IoNetCfdImports.ionc_read_1d_network_nodes_v1_dll(ref fileId, ref networkId, ref geometry.NodeX, ref geometry.NodeY, ref geometry.NodeIds, ref geometry.NodeLongNames, ref geometryDimensions.NumberOfNodes);
 
             disposableNetworkGeometry.NodesX = geometry.NodeX.CreateValueArray<double>(numberOfNodes);
             disposableNetworkGeometry.NodesY = geometry.NodeY.CreateValueArray<double>(numberOfNodes);
 
-            disposableNetworkGeometry.NodeIds = geometry.NodeIds.CreateValueArray<string>(numberOfNodes, GetStringBufferSize<DisposableNetworkGeometry>(nameof(DisposableNetworkGeometry.NodeIds)));
-            disposableNetworkGeometry.NodeLongNames = geometry.NodeLongNames.CreateValueArray<string>(numberOfNodes, GetStringBufferSize<DisposableNetworkGeometry>(nameof(DisposableNetworkGeometry.NodeLongNames)));
+            disposableNetworkGeometry.NodeIds = geometry.NodeIds.CreateValueArray<string>(numberOfNodes, type.GetBufferSize(nameof(DisposableNetworkGeometry.NodeIds)));
+            disposableNetworkGeometry.NodeLongNames = geometry.NodeLongNames.CreateValueArray<string>(numberOfNodes, type.GetBufferSize(nameof(DisposableNetworkGeometry.NodeLongNames)));
 
             // read branches
-            IoNetCfdImports.ionc_get_1d_network_branches_v1_dll(ref fileId, ref networkId, ref geometry.SourceNodes, ref geometry.TargetNodes, ref geometry.BranchLengths, ref geometry.BranchIds, ref geometry.BranchLongNames, ref geometry.BranchGeometryCount, ref geometryDimensions.NumberOfBranches, ref geometryDimensions.StartIndex);
+            IoNetCfdImports.ionc_get_1d_network_branches_v1_dll(ref fileId, ref networkId, ref geometry.SourceNodes, ref geometry.TargetNodes, ref geometry.BranchLengths, ref geometry.BranchIds, ref geometry.BranchLongNames, ref geometry.BranchGeometryCount, ref geometryDimensions.NumberOfBranches, ref startIndex);
 
             disposableNetworkGeometry.NodesFrom = geometry.SourceNodes.CreateValueArray<int>(numberOfBranches);
             disposableNetworkGeometry.NodesTo = geometry.TargetNodes.CreateValueArray<int>(numberOfBranches);
             disposableNetworkGeometry.BranchGeometryNodesCount = geometry.BranchGeometryCount.CreateValueArray<int>(numberOfBranches);
             disposableNetworkGeometry.BranchOrder = geometry.BranchOrder.CreateValueArray<int>(numberOfBranches);
-            disposableNetworkGeometry.Branchlengths = geometry.BranchLengths.CreateValueArray<double>(numberOfBranches);
-            disposableNetworkGeometry.BranchIds = geometry.BranchLengths.CreateValueArray<string>(numberOfBranches, GetStringBufferSize<DisposableNetworkGeometry>(nameof(DisposableNetworkGeometry.BranchIds)));
-            disposableNetworkGeometry.BranchLongNames = geometry.BranchLengths.CreateValueArray<string>(numberOfBranches, GetStringBufferSize<DisposableNetworkGeometry> (nameof(DisposableNetworkGeometry.BranchLongNames)));
+            disposableNetworkGeometry.BranchLengths = geometry.BranchLengths.CreateValueArray<double>(numberOfBranches);
+            disposableNetworkGeometry.BranchIds = geometry.BranchLengths.CreateValueArray<string>(numberOfBranches, type.GetBufferSize(nameof(DisposableNetworkGeometry.BranchIds)));
+            disposableNetworkGeometry.BranchLongNames = geometry.BranchLengths.CreateValueArray<string>(numberOfBranches, type.GetBufferSize(nameof(DisposableNetworkGeometry.BranchLongNames)));
 
             // read branch geometry
             IoNetCfdImports.ionc_read_1d_network_branches_geometry_dll(ref fileId, ref networkId, ref geometry.BranchGeometryX, ref geometry.BranchGeometryY, ref geometryDimensions.NumberOfBranchGeometryPoints);
@@ -211,7 +216,8 @@ namespace Deltares.UGrid.Api
         public int WriteNetworkGeometry(DisposableNetworkGeometry networkGeometry)
         {
             var networkId = -1;
-            var name = networkGeometry.NetworkName.ToFixedLengthString(GetStringBufferSize<DisposableNetworkGeometry>(nameof(DisposableNetworkGeometry.NetworkName)));
+            var type = typeof(DisposableNetworkGeometry);
+            var name = networkGeometry.NetworkName.ToFixedLengthString(type.GetBufferSize(nameof(DisposableNetworkGeometry.NetworkName)));
 
             var geometry = networkGeometry.CreateNetwork1DGeometry();
             var geometryDimensions = networkGeometry.CreateNetwork1DGeometryDimensions();
@@ -219,10 +225,10 @@ namespace Deltares.UGrid.Api
             // create network based on dimensions
             IoNetCfdImports.ionc_create_1d_network_dll(ref fileId, ref networkId, name, ref geometryDimensions.NumberOfNodes, ref geometryDimensions.NumberOfBranches, ref geometryDimensions.NumberOfBranchGeometryPoints);
 
-/*            IoNetCfdImports.ionc_write_1d_network_nodes_dll(ref fileId, ref networkId, ref geometry.NodeX, ref geometry.NodeY, ref geometry.NodeIds, ref geometry.NodeLongNames, ref geometryDimensions.NumberOfNodes);
+            IoNetCfdImports.ionc_write_1d_network_nodes_v1_dll(ref fileId, ref networkId, ref geometry.NodeX, ref geometry.NodeY, ref geometry.NodeIds, ref geometry.NodeLongNames, ref geometryDimensions.NumberOfNodes);
 
             IoNetCfdImports.ionc_put_1d_network_branches_v1_dll(ref fileId, ref networkId, ref geometry.SourceNodes, ref geometry.TargetNodes, ref geometry.BranchIds, ref geometry.BranchLongNames, 
-                ref geometry.BranchLengths, ref geometry.BranchGeometryCount, ref geometryDimensions.NumberOfBranches, ref geometryDimensions.StartIndex);
+                ref geometry.BranchLengths, ref geometry.BranchGeometryCount, ref geometryDimensions.NumberOfBranches, ref startIndex);
 
             IoNetCfdImports.ionc_write_1d_network_branches_geometry_dll(ref fileId, ref networkId, ref geometry.BranchGeometryX, ref geometry.BranchGeometryY, ref geometryDimensions.NumberOfBranchGeometryPoints);
             
@@ -231,11 +237,14 @@ namespace Deltares.UGrid.Api
             var fillValue = -999.0; // dummy
             var variableId = 0;
             var nf90Int = 4;
-            var defaultNoData = -999;
-            var ugLocEdge = (int) GridLocationType.UG_LOC_EDGE;
+            var fillValueInt = -999;
+            var locationType = (int) GridLocationType.UG_LOC_EDGE;
 
-            IoNetCfdImports.ionc_def_var_dll(ref fileId, ref meshId, ref networkId, ref variableId, ref nf90Int, ref ugLocEdge, branchTypeVariableName, "", "Water type in branch (network edge)",
-                "", ref defaultNoData, ref fillValue);*/
+            IoNetCfdImports.ionc_def_var_dll(ref fileId, ref meshId, ref networkId, ref variableId, ref nf90Int, ref locationType, branchTypeVariableName, "", "Water type in branch (network edge)",
+                "", ref fillValueInt, ref fillValue);
+
+            IoNetCfdImports.ionc_put_var_dll(ref fileId, ref meshId, ref networkId, branchTypeVariableName,
+                ref geometry.BranchTypes, ref geometryDimensions.NumberOfBranches);
 
             return networkId;
         }
@@ -249,32 +258,162 @@ namespace Deltares.UGrid.Api
 
         public Disposable1DMeshGeometry GetMesh1D(int meshId)
         {
-            throw new NotImplementedException();
+            // get dimensions
+            var mesh1dDimensions = new Mesh1DGeometryDimensions();
+            IoNetCfdImports.ionc_get_1d_mesh_discretisation_points_count_dll(ref fileId, ref meshId, ref mesh1dDimensions.NumberOfNodes);
+            
+            var disposable1DMeshGeometry = new Disposable1DMeshGeometry();
+            disposable1DMeshGeometry.InitializeWithEmptyData(mesh1dDimensions);
+
+            // pin in memory
+            var mesh1d = disposable1DMeshGeometry.CreateMesh1DGeometry();
+
+            IoNetCfdImports.ionc_get_1d_mesh_discretisation_points_v2_dll(ref fileId, ref meshId, ref mesh1d.BranchIds,
+                ref mesh1d.BranchOffsets, ref mesh1d.NodeIds, ref mesh1d.NodeLongNames, ref mesh1dDimensions.NumberOfNodes,
+                ref startIndex, ref mesh1d.NodeX, ref mesh1d.NodeY);
+
+            // todo : add missing ionc_get_1d_mesh_edges_dll call
+
+            var type = typeof(Disposable1DMeshGeometry);
+
+            var stringBuilder = new StringBuilder(type.GetBufferSize(nameof(disposable1DMeshGeometry.Name)));
+            IoNetCfdImports.ionc_get_mesh_name_dll(ref fileId, ref meshId, stringBuilder);
+            
+            disposable1DMeshGeometry.Name = stringBuilder.ToString();
+            disposable1DMeshGeometry.NodesX = mesh1d.NodeX.CreateValueArray<double>(mesh1dDimensions.NumberOfNodes);
+            disposable1DMeshGeometry.NodesY = mesh1d.NodeY.CreateValueArray<double>(mesh1dDimensions.NumberOfNodes);
+            disposable1DMeshGeometry.NodeIds = mesh1d.NodeIds.CreateValueArray<string>(mesh1dDimensions.NumberOfNodes, type.GetBufferSize(nameof(Disposable1DMeshGeometry.NodeIds)));
+            disposable1DMeshGeometry.NodeLongNames = mesh1d.NodeLongNames.CreateValueArray<string>(mesh1dDimensions.NumberOfNodes, type.GetBufferSize(nameof(Disposable1DMeshGeometry.NodeLongNames)));
+            
+            disposable1DMeshGeometry.BranchIDs = mesh1d.BranchIds.CreateValueArray<int>(mesh1dDimensions.NumberOfNodes);
+            disposable1DMeshGeometry.BranchOffsets = mesh1d.BranchOffsets.CreateValueArray<double>(mesh1dDimensions.NumberOfNodes);
+
+            return disposable1DMeshGeometry;
         }
 
-        public int WriteMesh1D(Disposable1DMeshGeometry geometry)
+        public int WriteMesh1D(Disposable1DMeshGeometry mesh, int networkId)
         {
-            throw new NotImplementedException();
+            int meshId = 0;
+
+            var mesh1d = mesh.CreateMesh1DGeometry();
+            var mesh1dDimensions = mesh.CreateMesh1DGeometryDimensions();
+            
+            var networkName = GetNetworkNameById(networkId);
+            var writeXy = 1;
+            
+            IoNetCfdImports.ionc_create_1d_mesh_v1_dll(ref fileId, networkName, ref meshId, mesh.Name,
+                ref mesh1dDimensions.NumberOfNodes, ref mesh1dDimensions.NumberOfEdges, ref writeXy);
+
+            IoNetCfdImports.ionc_put_1d_mesh_discretisation_points_v2_dll(ref fileId, ref meshId, ref mesh1d.BranchIds,
+                ref mesh1d.BranchOffsets, ref mesh1d.NodeIds, ref mesh1d.NodeLongNames, ref mesh1dDimensions.NumberOfNodes,
+                ref startIndex, ref mesh1d.NodeX, ref mesh1d.NodeY);
+
+            IoNetCfdImports.ionc_put_1d_mesh_edges_dll(ref fileId, ref meshId, ref mesh1d.EdgeBranchIds,
+                ref mesh1d.EdgeCenterPointOffset, ref mesh1dDimensions.NumberOfEdges, ref startIndex, ref mesh1d.EdgeCenterPointX, 
+                ref mesh1d.EdgeCenterPointY);
+
+            return meshId;
         }
 
-        public Disposable2DMeshGeometry GetMesh(int meshId)
+        public Disposable2DMeshGeometry GetMesh2D(int meshId)
         {
-            throw new NotImplementedException();
+            // get dimensions
+            var mesh2dDimensions = new Mesh2DGeometryDimensions();
+            
+            IoNetCfdImports.ionc_get_node_count_dll(ref fileId, ref meshId, ref mesh2dDimensions.numnode);
+            IoNetCfdImports.ionc_get_edge_count_dll(ref fileId, ref meshId, ref mesh2dDimensions.numedge);
+            IoNetCfdImports.ionc_get_face_count_dll(ref fileId, ref meshId, ref mesh2dDimensions.numface);
+            IoNetCfdImports.ionc_get_max_face_nodes_dll(ref fileId, ref meshId, ref mesh2dDimensions.maxnumfacenodes);
+            
+            var stringBuilder = new StringBuilder(255);
+            IoNetCfdImports.ionc_get_mesh_name_dll(ref fileId, ref meshId, stringBuilder);
+
+            var disposable2DMeshGeometry = new Disposable2DMeshGeometry
+            {
+                Name = stringBuilder.ToString(),
+                MaxNumberOfFaceNodes = mesh2dDimensions.maxnumfacenodes
+            };
+
+            disposable2DMeshGeometry.InitializeWithEmptyData(mesh2dDimensions);
+
+            var mesh2d = disposable2DMeshGeometry.CreateMeshGeometry();
+
+            var fillvalue = -999;
+
+            IoNetCfdImports.ionc_get_node_coordinates_dll(ref fileId, ref meshId, ref mesh2d.nodex, ref mesh2d.nodey, ref mesh2dDimensions.numnode);
+            IoNetCfdImports.ionc_get_edge_nodes_dll(ref fileId, ref meshId, ref mesh2d.edge_nodes, ref mesh2dDimensions.numedge, ref startIndex);
+            IoNetCfdImports.ionc_get_face_nodes_dll(ref fileId, ref meshId, ref mesh2d.face_nodes, ref mesh2dDimensions.numface, ref mesh2dDimensions.maxnumfacenodes, ref fillvalue, ref startIndex);
+
+            disposable2DMeshGeometry.NodesX = mesh2d.nodex.CreateValueArray<double>(mesh2dDimensions.numnode);
+            disposable2DMeshGeometry.NodesY = mesh2d.nodey.CreateValueArray<double>(mesh2dDimensions.numnode);
+
+            disposable2DMeshGeometry.EdgeNodes = mesh2d.edge_nodes.CreateValueArray<int>(mesh2dDimensions.numedge * 2);
+            disposable2DMeshGeometry.FaceNodes = mesh2d.face_nodes.CreateValueArray<int>(mesh2dDimensions.maxnumfacenodes * mesh2dDimensions.numface);
+            
+            return disposable2DMeshGeometry;
         }
 
-        public bool WriteMesh(Disposable2DMeshGeometry mesh)
+        public int WriteMesh2D(Disposable2DMeshGeometry mesh)
         {
-            throw new NotImplementedException();
+            int meshId = 0;
+            int networkId = -1;
+
+            var geometry = mesh.CreateMeshGeometry();
+            var geometryDimensions = mesh.CreateMeshDimensions();
+
+            IoNetCfdImports.ionc_put_meshgeom_dll(ref fileId, ref meshId, ref networkId, ref geometry, ref geometryDimensions, "mesh2d", "", ref startIndex);
+
+            return meshId;
+        }
+
+        public int GetLinksId()
+        {
+            var contactsId = 0;
+            IoNetCfdImports.ionc_get_contact_id_dll(ref fileId, ref contactsId);
+
+            return contactsId;
         }
 
         public DisposableLinksGeometry GetLinks(int linksId)
         {
-            throw new NotImplementedException();
+            var linkDimensions = new LinksGeometryDimensions();
+            
+            IoNetCfdImports.ionc_get_contacts_count_dll(ref fileId, ref linksId, ref linkDimensions.NumberOfLinks);
+
+            var disposableLinksGeometry = new DisposableLinksGeometry();
+
+            disposableLinksGeometry.InitializeWithEmptyData(linkDimensions);
+
+            var linkGeometry = disposableLinksGeometry.CreateLinksGeometry();
+
+            IoNetCfdImports.ionc_get_mesh_contact_v1_dll(ref fileId, ref linksId, ref linkGeometry.Mesh1DFrom,
+                ref linkGeometry.Mesh2DTo, ref linkGeometry.LinkType, ref linkGeometry.LinkId,
+                ref linkGeometry.LinkLongName, ref linkDimensions.NumberOfLinks, ref startIndex);
+            
+            return disposableLinksGeometry;
         }
 
         public int WriteLinks(DisposableLinksGeometry links)
         {
-            throw new NotImplementedException();
+            var geometry = links.CreateLinksGeometry();
+            var geometryDimensions = links.CreateLinksDimensions();
+
+            var contactId = 0;
+            var contactName = "links";
+            var firstMesh1dId = GetMeshIdsByMeshType(UGridMeshType.Mesh1D).FirstOrDefault();
+            var firstMesh2dId = GetMeshIdsByMeshType(UGridMeshType.Mesh2D).FirstOrDefault();
+            var location1D = (int) GridLocationType.UG_LOC_NODE;
+            var location2D = (int) GridLocationType.UG_LOC_FACE;
+
+            IoNetCfdImports.ionc_def_mesh_contact_dll(ref fileId, ref contactId, contactName,
+                ref geometryDimensions.NumberOfLinks, ref firstMesh1dId, ref firstMesh2dId, ref location1D,
+                ref location2D);
+
+            IoNetCfdImports.ionc_put_mesh_contact_v1_dll(ref fileId, ref contactId, ref geometry.Mesh1DFrom,
+                ref geometry.Mesh2DTo, ref geometry.LinkType, ref geometry.LinkId, ref geometry.LinkLongName,
+                ref geometryDimensions.NumberOfLinks, ref startIndex);
+
+            return contactId;
         }
 
         public void Dispose()
@@ -283,12 +422,6 @@ namespace Deltares.UGrid.Api
             {
                 Close();
             }
-        }
-
-        private static int GetStringBufferSize<T>(string propertyName)
-        {
-            return typeof(T).GetField(propertyName)
-                       ?.GetCustomAttribute<StringBufferSizeAttribute>()?.BufferSize ?? 0;
         }
 
         private static T[] GetArrayFromIoNetCdf<T>(Func<int> getSizeFunction, Action<IntPtr, int> setArrayFunction)
@@ -304,6 +437,16 @@ namespace Deltares.UGrid.Api
             handle.Free();
 
             return result;
+        }
+
+        private string GetNetworkNameById(int networkId)
+        {
+            var bufferSize = typeof(DisposableNetworkGeometry).GetBufferSize(nameof(DisposableNetworkGeometry.NetworkName));
+            
+            var stringBuilder = new StringBuilder(bufferSize);
+            IoNetCfdImports.ionc_get_network_name_dll(ref fileId, ref networkId, stringBuilder);
+            
+            return stringBuilder.ToString();
         }
     }
 };

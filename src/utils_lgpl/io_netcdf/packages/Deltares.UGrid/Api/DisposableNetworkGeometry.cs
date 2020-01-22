@@ -43,7 +43,7 @@ namespace Deltares.UGrid.Api
         /// Length for each branch
         /// </summary>
         //[ProtoMember(5)]
-        public double[] Branchlengths;
+        public double[] BranchLengths;
 
         /// <summary>
         /// End node id for each branch
@@ -78,6 +78,12 @@ namespace Deltares.UGrid.Api
         public string[] BranchLongNames;
 
         /// <summary>
+        /// Type for all the branches
+        /// </summary>
+        //[ProtoMember(8)]
+        public int[] BranchTypes;
+
+        /// <summary>
         /// Number of nodes(coordinates) for each branch geometry
         /// </summary>
         //[ProtoMember(6)]
@@ -95,14 +101,19 @@ namespace Deltares.UGrid.Api
         //[ProtoMember(8)]
         public double[] BranchGeometryY;
 
-        internal void InitializeWithEmptyData(int numberOfNodes, int numberOfBranches, int totalBranchGeometryPoints)
+        internal void InitializeWithEmptyData(Network1DGeometryDimensions dimensions)
         {
+            var numberOfNodes = dimensions.NumberOfNodes;
+            var numberOfBranches = dimensions.NumberOfBranches;
+            var totalBranchGeometryPoints = dimensions.NumberOfBranchGeometryPoints;
+
             NodesX = new double[numberOfNodes];
             NodesY = new double[numberOfNodes];
             NodeIds = new string[numberOfBranches].GetFixedLengthStringArray(40);
             NodeLongNames = new string[numberOfBranches].GetFixedLengthStringArray(80);
 
-            Branchlengths = new double[numberOfBranches];
+            BranchLengths = new double[numberOfBranches];
+            BranchTypes = new int[numberOfBranches];
             BranchGeometryNodesCount = new int[numberOfBranches];
             BranchOrder = new int[numberOfBranches];
             BranchIds = new string[numberOfBranches].GetFixedLengthStringArray(40);
@@ -119,7 +130,6 @@ namespace Deltares.UGrid.Api
         {
             return new Network1DGeometryDimensions
             {
-                StartIndex = 0,
                 NumberOfNodes = NodesX.Length, 
                 NumberOfBranches = BranchIds.Length,
                 NumberOfBranchGeometryPoints = BranchGeometryX.Length
@@ -141,8 +151,9 @@ namespace Deltares.UGrid.Api
                 NodeLongNames = GetPinnedObjectPointer(NodeLongNames),
 
                 BranchGeometryCount = GetPinnedObjectPointer(BranchGeometryNodesCount),
+                BranchTypes = GetPinnedObjectPointer(BranchTypes),
                 BranchOrder = GetPinnedObjectPointer(BranchOrder),
-                BranchLengths = GetPinnedObjectPointer(Branchlengths),
+                BranchLengths = GetPinnedObjectPointer(BranchLengths),
                 BranchIds = GetPinnedObjectPointer(BranchIds),
                 BranchLongNames = GetPinnedObjectPointer(BranchLongNames),
                 SourceNodes = GetPinnedObjectPointer(NodesFrom),

@@ -1,16 +1,19 @@
-﻿namespace Deltares.UGrid.Api
+﻿using Deltares.UGrid.Entities;
+using Deltares.UGrid.Helpers;
+
+namespace Deltares.UGrid.Api
 {
     //[ProtoContract(AsReferenceDefault = true)]
     public class DisposableLinksGeometry : DisposableMeshObject
     {
         //[ProtoMember(1)]
-        public int[] MeshFrom;
+        public int[] Mesh1DFrom;
 
         //[ProtoMember(2)]
-        public int[] MeshTo;
+        public int[] Mesh2DTo;
 
         //[ProtoMember(3)]
-        public double[] LinkType;
+        public int[] LinkType;
 
         //[ProtoMember(4)]
         [StringBufferSize(BufferSize = 40)]
@@ -20,22 +23,38 @@
         [StringBufferSize(BufferSize = 80)]
         public string[] LinkLongName;
 
-        //[ProtoMember(6)]
-        public double[] faceX;
+        internal LinksGeometryDimensions CreateLinksDimensions()
+        {
+            return new LinksGeometryDimensions
+            {
+                NumberOfLinks = LinkType?.Length ?? 0
+            };
+        }
 
-        //[ProtoMember(7)]
-        public double[] faceY;
+        internal LinksGeometry CreateLinksGeometry()
+        {
+            if (!IsMemoryPinned)
+            {
+                PinMemory();
+            }
 
-        //[ProtoMember(8)]
-        public int maxNumberOfFaceNodes;
+            return new LinksGeometry
+            {
+                Mesh1DFrom = GetPinnedObjectPointer(Mesh1DFrom),
+                Mesh2DTo = GetPinnedObjectPointer(Mesh2DTo),
+                LinkType = GetPinnedObjectPointer(LinkType),
+                LinkId = GetPinnedObjectPointer(LinkId),
+                LinkLongName = GetPinnedObjectPointer(LinkLongName)
+            };
+        }
 
-        //[ProtoMember(9)]
-        public int numberOfFaces;
-
-        //[ProtoMember(10)]
-        public int numberOfNodes;
-
-        //[ProtoMember(11)]
-        public int numberOfEdges;
+        internal void InitializeWithEmptyData(LinksGeometryDimensions mesh2dDimensions)
+        {
+            Mesh1DFrom = new int[mesh2dDimensions.NumberOfLinks];
+            Mesh2DTo = new int[mesh2dDimensions.NumberOfLinks];
+            LinkType = new int[mesh2dDimensions.NumberOfLinks];
+            LinkId = new string[mesh2dDimensions.NumberOfLinks].GetFixedLengthStringArray(GetType().GetBufferSize(nameof(LinkId)));
+            LinkLongName = new string[mesh2dDimensions.NumberOfLinks].GetFixedLengthStringArray(GetType().GetBufferSize(nameof(LinkLongName)));
+        }
     }
 }

@@ -120,24 +120,47 @@ namespace Deltares.UGrid.Api
         /// <summary>
         /// Writes a network geometry
         /// </summary>
-        /// <param name="geometry">Network geometry to write</param>
-        /// <returns>Network id</returns>
-        int WriteMesh1D(Disposable1DMeshGeometry geometry);
+        /// <param name="mesh">Network geometry to write</param>
+        /// <param name="networkId"></param>
+        /// <returns>Mesh id</returns>
+        int WriteMesh1D(Disposable1DMeshGeometry mesh, int networkId);
 
         #endregion
 
         #region Mesh 2D
 
-        Disposable2DMeshGeometry GetMesh(int meshId);
+        /// <summary>
+        /// Reads the 2d mesh for the specified <see cref="meshId"/>
+        /// </summary>
+        /// <param name="meshId">Id of the mesh to get</param>
+        Disposable2DMeshGeometry GetMesh2D(int meshId);
 
-        bool WriteMesh(Disposable2DMeshGeometry mesh);
+        /// <summary>
+        /// Writes the provided 2d mesh
+        /// </summary>
+        /// <param name="mesh">2d mesh to write</param>
+        /// <returns>Mesh id</returns>
+        int WriteMesh2D(Disposable2DMeshGeometry mesh);
 
         #endregion
 
         #region Links
 
+        /// <summary>
+        /// Gets the id of the links
+        /// </summary>
+        int GetLinksId();
+
+        /// <summary>
+        /// Gets the links for the specified <see cref="linksId"/> (see <seealso cref="GetLinksId"/>)
+        /// </summary>
+        /// <param name="linksId">Id of the links</param>
         DisposableLinksGeometry GetLinks(int linksId);
 
+        /// <summary>
+        /// Writes the links and returns the linksId
+        /// </summary>
+        /// <param name="links">Links to write</param>
         int WriteLinks(DisposableLinksGeometry links);
 
         #endregion

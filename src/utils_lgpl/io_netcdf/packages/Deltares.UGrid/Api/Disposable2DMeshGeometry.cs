@@ -8,6 +8,12 @@ namespace Deltares.UGrid.Api
     public class Disposable2DMeshGeometry : DisposableMeshObject
     {
         /// <summary>
+        /// Name of the mesh
+        /// </summary>
+        //[ProtoMember(1)]
+        public string Name { get; set; }
+
+        /// <summary>
         /// X position of the nodes
         /// </summary>
         //[ProtoMember(1)]
@@ -18,12 +24,6 @@ namespace Deltares.UGrid.Api
         /// </summary>
         //[ProtoMember(2)]
         public double[] NodesY;
-
-        /// <summary>
-        /// Z position of the nodes
-        /// </summary>
-        //[ProtoMember(3)]
-        public double[] NodesZ;
 
         /// <summary>
         /// Edge node connections {[from, to], [from, to] ... }
@@ -74,18 +74,40 @@ namespace Deltares.UGrid.Api
 
         internal Mesh2DGeometry CreateMeshGeometry()
         {
+            if (!IsMemoryPinned)
+            {
+                PinMemory();
+            }
+
             return new Mesh2DGeometry
             {
                 nodex = GetPinnedObjectPointer(NodesX),
                 nodey = GetPinnedObjectPointer(NodesY),
-                nodez = GetPinnedObjectPointer(NodesZ),
-
+                
                 edge_nodes = GetPinnedObjectPointer(EdgeNodes),
 
                 facex = GetPinnedObjectPointer(FaceX),
                 facey = GetPinnedObjectPointer(FaceY),
-                face_nodes = GetPinnedObjectPointer(FaceNodes)
+                face_nodes = GetPinnedObjectPointer(FaceNodes),
+
+                startIndex = 0
             };
+        }
+
+        internal void InitializeWithEmptyData(Mesh2DGeometryDimensions mesh2dDimensions)
+        {
+            var numberOfNodes = mesh2dDimensions.numnode;
+            var numberOfEdges = mesh2dDimensions.numedge;
+            var numberOfFaces = mesh2dDimensions.numface;
+
+            NodesX = new double[numberOfNodes];
+            NodesY = new double[numberOfNodes];
+            
+            EdgeNodes = new int[numberOfEdges * 2];
+            FaceNodes = new int[numberOfFaces * mesh2dDimensions.maxnumfacenodes];
+
+            FaceX = new double[numberOfFaces];
+            FaceY = new double[numberOfFaces];
         }
     }
 }
