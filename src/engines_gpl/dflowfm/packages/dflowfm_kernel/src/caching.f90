@@ -282,8 +282,10 @@ subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
                                        sections(i)%path%iperm, sections(i)%path%wfk1k2, &
                                        sections(i)%path%sp, sections(i)%path%ln
         else
-            read( lun, iostat = ierr ) sections(i)%path%xp, sections(i)%path%yp,  &
-                                       sections(i)%path%zp
+            if ( np > 0 ) then
+                read( lun, iostat = ierr ) sections(i)%path%xp, sections(i)%path%yp,  &
+                                           sections(i)%path%zp
+            endif
         endif
         if ( ierr /= 0 ) then
             exit
@@ -386,8 +388,10 @@ subroutine storeSections( lun, sections, linklist, ipol )
                          sections(i)%path%iperm(1:nlink), sections(i)%path%wfk1k2(1:nlink), &
                          sections(i)%path%sp(1:nlink), sections(i)%path%ln(1:nlink)
         else
-            write( lun ) sections(i)%path%xp(1:np), sections(i)%path%yp(1:np),  &
-                         sections(i)%path%zp(1:np)
+            if ( np > 0 ) then
+                write( lun ) sections(i)%path%xp(1:np), sections(i)%path%yp(1:np),  &
+                             sections(i)%path%zp(1:np)
+            endif
         endif
     enddo
 end subroutine storeSections
