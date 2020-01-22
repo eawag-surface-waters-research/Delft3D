@@ -1661,38 +1661,42 @@ if(q /= 0) then
 
     if (kcs(k1) == 1) then
        hpr = s1(k1)-bob0(1,L)
-       call getprof_1D(L, hpr, ar1, wid1, japerim, calcConv, perim)
-       vol1(k1) = vol1(k1) + dx1*ar1
-       if (hpr < epshu) then
-          ! make sure A1 gets a value, by computing the profile data, using a water depth of epshu.
-          call getprof_1D(L, epshu, ar1, wid1, japerim, calcConv, perim)
-       endif
-       a1(k1) =   a1(k1) + dx1*wid1
+       if (hpr >= 0d0) then
+          call getprof_1D(L, hpr, ar1, wid1, japerim, calcConv, perim)
+          vol1(k1) = vol1(k1) + dx1*ar1
+          if (hpr < epshu) then
+             ! make sure A1 gets a value, by computing the profile data, using a water depth of epshu.
+             call getprof_1D(L, epshu, ar1, wid1, japerim, calcConv, perim)
+          endif
+          a1(k1) =   a1(k1) + dx1*wid1
        
-       ! flow volume
-       if(network%loaded) then
-          call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
-          vol1_f(k1) = vol1_f(k1) + dx1*ar1
-       else
-          vol1_f(k1) = vol1(k1)
+          ! flow volume
+          if(network%loaded) then
+             call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
+             vol1_f(k1) = vol1_f(k1) + dx1*ar1
+          else
+             vol1_f(k1) = vol1(k1)
+          endif
        endif
     endif
 
     if (kcs(k2) == 1) then
        hpr = s1(k2)-bob0(2,L)
-       call getprof_1D(L, hpr, ar2, wid2, japerim, calcConv, perim)
-       vol1(k2) = vol1(k2) + dx2*ar2
-       if (hpr < epshu) then
-          ! make sure A1 gets a value, by computing the profile data, using a water depth of epshu.
-          call getprof_1D(L, epshu, ar2, wid2, japerim, calcConv, perim)
-       endif
-       a1(k2) =   a1(k2) + dx2*wid2
-       ! flow volume
-       if(network%loaded) then
-          call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
-          vol1_f(k2) = vol1_f(k2) + dx2*ar2
-       else
-          vol1_f(k2) = vol1(k2)
+       if (hpr >= 0d0) then
+          call getprof_1D(L, hpr, ar2, wid2, japerim, calcConv, perim)
+          vol1(k2) = vol1(k2) + dx2*ar2
+          if (hpr < epshu) then
+             ! make sure A1 gets a value, by computing the profile data, using a water depth of epshu.
+             call getprof_1D(L, epshu, ar2, wid2, japerim, calcConv, perim)
+          endif
+          a1(k2) =   a1(k2) + dx2*wid2
+          ! flow volume
+          if(network%loaded) then
+             call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
+             vol1_f(k2) = vol1_f(k2) + dx2*ar2
+          else
+             vol1_f(k2) = vol1(k2)
+          endif
        endif
     endif
 
