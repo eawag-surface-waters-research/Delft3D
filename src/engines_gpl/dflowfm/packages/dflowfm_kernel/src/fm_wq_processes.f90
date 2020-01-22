@@ -604,7 +604,11 @@
       isfact = 1
       itfact = 86400
       itstrt_process = nint(tstart_user)
-      itstop_process = floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc
+      if (ti_waqproc > 0) then
+         itstop_process = floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc
+      else
+         itstop_process = tstop_user
+      endif
       otime = dble(julrefdat)-0.5d0 !refdate_mjd
 
 !     Finally, evaluate the processes using the proces library

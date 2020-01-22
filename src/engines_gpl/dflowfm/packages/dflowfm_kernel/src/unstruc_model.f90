@@ -1936,30 +1936,29 @@ subroutine readMDUFile(filename, istat)
    call prop_get_double (md_ptr, 'processes', 'DepthDryThreshold', waq_dep_dry_thr)
 
    call prop_get_double (md_ptr, 'processes', 'DtProcesses', md_dt_waqproc, success)
-   if (md_dt_waqproc <= 0d0) then
-      ti_waqproc = dt_user
-   else
+   ti_waqproc = md_dt_waqproc
+   if (md_dt_waqproc > 0d0) then
       if(dt_user > 0d0 .and. md_dt_waqproc > 0d0) then
          if(md_dt_waqproc < dt_user .or. modulo(md_dt_waqproc, dt_user) /= 0d0) then
             ti_waqproc = max(1,floor(md_dt_waqproc/dt_user))*dt_user
             ! Processes timestep can only a multiple of dtuser...
             write(msgbuf, '(a,f9.3,a,f9.3,a)') 'DtProcesses should be a multiple of DtUser. It has been reset to: ', ti_waqproc, '(was: ',md_dt_waqproc,')'
             call msg_flush()
-         else
-            ti_waqproc = md_dt_waqproc
          end if
       end if
+   else if (md_dt_waqproc < 0d0) then
+      ! DtProcesses is negative
+      call mess(LEVEL_INFO, 'DtProcesses is negative. Water quality processes are calculated with every hydrodynamic time step.')
    end if
 
    call prop_get_double (md_ptr, 'processes', 'DtMassBalance', md_dt_waqbal, success)
+   ti_waqbal = md_dt_waqbal
    if(md_dt_waqbal > 0d0 .and. md_dt_waqproc > 0d0) then
       if(md_dt_waqbal < md_dt_waqproc .or. modulo(md_dt_waqbal, md_dt_waqproc) /= 0d0) then
          ti_waqbal = max(1,floor(md_dt_waqbal/md_dt_waqproc))*dt_user
          ! Processes timestep can only a multiple of dtprocesses...
          write(msgbuf, '(a,f9.3,a,f9.3,a)') 'DtMassBalance should be a multiple of DtProcesses. It has been reset to: ', ti_waqbal, '(was: ',md_dt_waqbal,')'
          call msg_flush()
-      else
-         ti_waqbal = md_dt_waqbal
       end if
    end if
 

@@ -331,7 +331,11 @@ subroutine flow_finalize_usertimestep(iresult)
      if (comparereal(time_user, time_mba, eps10) == 0) then
          call mba_update(time0)
          tem_dif = time_user/ti_waqbal
-         time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_waqbal, floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc)
+         if (ti_waqproc > 0d0) then
+            time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_waqbal, floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc)
+         else
+            time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_waqbal, tstop_user)
+         endif
      endif
    endif
       
@@ -543,6 +547,12 @@ integer, intent(out) :: iresult
 character(len=255)   :: filename_fou_out
 
    ! Timestep has been performed, now finalize it.
+
+   if (ti_waqproc < 0d0) then
+      if ( jatimer.eq.1 ) call starttimer(IFMWAQ)
+      call fm_wq_processes_step(dts,time1)
+      if ( jatimer.eq.1 ) call stoptimer (IFMWAQ)
+   endif
 
  call flow_f0isf1()                                  ! mass balance and vol0 = vol1
     
@@ -10856,7 +10866,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  cpu_waqinit = cpu_extra(2,18) - cpu_extra(1,18)
  call klok(cpu_extra(1,18)) ! waq processes init
  cpu_extra(1,18) = cpu_extra(1,18) - cpu_waqinit ! deduct first initialisation phase of waq processes
- if (ti_waqproc > 0) then
+ if (ti_waqproc /= 0d0) then
     if ( jawaqproc .eq. 1 ) then
        call fm_wq_processes_step(ti_waqproc,time_user)
     endif
@@ -12405,7 +12415,7 @@ subroutine writesomeinitialoutput()
  if ( jatimer.eq.1 ) then
     write(msgbuf,'(a,F25.10)') 'time transport [s]         :' , gettimer(1,ITRANSPORT)
     call msg_flush()
-    if (ti_waqproc > 0) then
+    if (ti_waqproc /= 0) then
        write(msgbuf,'(a,F25.10)') 'time processes [s]         :' , gettimer(1,IFMWAQ)
        call msg_flush()
     endif
