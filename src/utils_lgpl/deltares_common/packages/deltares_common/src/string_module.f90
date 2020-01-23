@@ -865,16 +865,47 @@ module string_module
       !---------------------------------------------------------------------------
       ! Local variables
       character(len=256) :: buffer         ! Buffer to read the line (or partial line).
+      integer            :: cnt
       integer            :: size           ! Number of characters read from the file.
+      integer            :: size_trim      ! Number of characters read from the file  (trimmed).
       logical            :: isFirstBuffer  ! flag to handle first read different from others
       !***************************************************************************
       isFirstBuffer = .true.
+      cnt = 0
       do
+        cnt = cnt + 1
         buffer = ''
         if (present(iomsg)) then
             read (unit, "(A)", ADVANCE='NO', IOSTAT=stat, IOMSG=iomsg, SIZE=size)  buffer
         else
             read (unit, "(A)", ADVANCE='NO', IOSTAT=stat, SIZE=size)  buffer
+        endif
+        !
+        ! The following correction (including the IF) is necessary since in multi-treading applications,
+        ! the read statement appears to not always be thread-safe. Sometimes a string is read in BUFFER correctly,
+        ! but the returned SIZE = 0.
+        !
+        if (size == 0) then
+           size      = len(buffer)
+           size_trim = len(trim(buffer))
+           if (size_trim < size .and. stat == 0) then
+              if (abs(size - size_trim) <= 10) then
+                 !
+                 ! Since size will always be 256, (almost) the full buffer was read
+                 ! We assume that no more than 10 spaces are used between entries in a file on one line
+                 ! If the difference between the line and the trimmed line is less than 10 (and the full buffer (256) was read
+                 ! probably the line is longer than what was read, so stat should remain zero and we store the untrimmed line
+                 ! This is done below. It was the default way, when no errors occur. The difference is that we have now explicitly set
+                 ! size = len(buffer)
+              else
+                 !
+                 ! Less than 246 chars were filled in the buffer
+                 ! We assume that we have read the whole line and explicitly set size to size_trim and stat = IOSTAT_EOR (end of record)
+                 !
+                 size = size_trim
+                 stat = IOSTAT_EOR
+              endif
+           endif
         endif
         if (stat > 0) then
             line = ''
@@ -884,7 +915,7 @@ module string_module
             size = max(1, size)
             line = buffer(:size)
             isFirstBuffer = .false.
-        else
+        else            
             line = line // buffer(:size)
         endif
         if (stat < 0) then
