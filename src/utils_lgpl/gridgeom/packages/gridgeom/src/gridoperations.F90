@@ -3343,11 +3343,13 @@
    double precision, intent(in)         :: nodex(:), nodey(:), nodeoffset(:), branchlength(:)
    integer, intent(in)                  :: nodebranchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
-   integer                              :: ierr, nbranches, branch, numkUnMerged, numk, numl, st, en, stn, enn, stnumk, ennumk, k, numNetworkNodes, firstvalidarraypos, numINodes
-   integer, allocatable                 :: networkNodesUnmerged(:), meshnodemapping(:,:), edge_nodes(:,:), correctedNodeBranchidx(:), nodeids(:)
+   integer                              :: ierr, nbranches, branch, numkUnMerged, numk, numl, st, en, stn, enn, stnumk, ennumk, k, numNetworkNodes, firstvalidarraypos, numLocalNodes
+   integer, allocatable                 :: meshnodemapping(:,:), edge_nodes(:,:), correctedNodeBranchidx(:), localNodeIndexses(:), meshnodeIndex(:), networkNodeIndex(:)
    double precision, allocatable        :: xk(:), yk(:)
+   double precision                     :: tolerance
 
    !initial size
+   tolerance = epsilon(nodeoffset(1))
    ierr         = 0
    firstvalidarraypos = 0
    if (startindex.eq.0) then
@@ -3360,8 +3362,12 @@
    ! allocate enough space for temp arrays
    allocate(xk(numkUnMerged))
    allocate(yk(numkUnMerged))
-   allocate(nodeids(numkUnMerged))
-   allocate(networkNodesUnmerged(numNetworkNodes)); networkNodesUnmerged = 0
+   
+   allocate(localNodeIndexses(numkUnMerged))
+   
+   allocate(meshnodeIndex(numkUnMerged)); meshnodeIndex = 0
+   allocate(networkNodeIndex(numNetworkNodes)); networkNodeIndex = 0
+   
    allocate(edge_nodes(2,numkUnMerged*3)) !rough estimate of the maximum number of edges given a certain amount of nodes
    allocate(correctedNodeBranchidx(numkUnMerged))
    allocate(meshnodemapping(2,nbranches)); meshnodemapping = -1
@@ -3375,53 +3381,100 @@
    numk = 0
    numl = 0
    do branch = 1, nbranches
+      
       st        = meshnodemapping(1,branch)
       en        = meshnodemapping(2,branch)
       stn       = sourcenodeid(branch) + firstvalidarraypos
       enn       = targetnodeid(branch) + firstvalidarraypos
-      numINodes = 0
-      !start
-      if (stn > 0) then
-         if(networkNodesUnmerged(stn)==0) then
-            numk                         = numk + 1
-            xk(numk)                     = nodex(st)
-            yk(numk)                     = nodey(st)
-            networkNodesUnmerged(stn)    = numk
-            numINodes                    = numINodes + 1
-            nodeids(numINodes)           = numk
-         else
-            numINodes                    = numINodes + 1
-            nodeids(numINodes)           = networkNodesUnmerged(stn)
-         endif
+      numLocalNodes = 0
+  
+      !invalid mesh points
+      if( st<=0 .or. en <= 0 .or. st> numkUnMerged .or. en > numkUnMerged) then
+        cycle
       endif
-      !internals
-      do k = st + 1, en - 1
-         numk                            = numk + 1
-         xk(numk)                        = nodex(k)
-         yk(numk)                        = nodey(k)
-         numINodes                       = numINodes + 1
-         nodeids(numINodes)              = numk
-      enddo
-      !end
-      if (enn > 0) then
-         if(networkNodesUnmerged(enn)==0) then
-            numk                         = numk + 1
-            xk(numk)                     = nodex(en)
-            yk(numk)                     = nodey(en)
-            networkNodesUnmerged(enn)    = numk
-            numINodes                    = numINodes + 1
-            nodeids(numINodes)           = numk
-         else
-            numINodes = numINodes + 1
-            nodeids(numINodes)           = networkNodesUnmerged(enn)
-         endif
+      
+    ! invalid branch index
+     if( stn<=0 .or. enn <= 0 .or. stn> numNetworkNodes .or. enn > numNetworkNodes) then
+        cycle
+     endif
+	 
+	 ! only one node, store x y value and connect later
+     if(st==en) then
+	    
+		if(nodeoffset(st) < tolerance .and. networkNodeIndex(stn)==0) then
+		      numk                             = numk + 1
+            networkNodeIndex(stn)            = numk  
+            xk(numk)                         = nodex(st)
+            yk(numk)                         = nodey(st)
+		endif
+		
+		if(abs(nodeoffset(en) -branchlength(branch)) < tolerance .and. networkNodeIndex(enn)==0) then
+		      numk                             = numk + 1
+            networkNodeIndex(enn)            = numk  
+            xk(numk)                         = nodex(en)
+            yk(numk)                         = nodey(en)
+		endif
+		
+      cycle
+     endif
+     
+    ! otherwise we have at least 2 nodes: the first is the start and the last at the end
+	 
+	 ! start node
+     numLocalNodes                        = numLocalNodes + 1
+     if(networkNodeIndex(stn)==0) then
+         numk                             = numk + 1
+         networkNodeIndex(stn)            = numk  
+         xk(numk)                         = nodex(st)
+         yk(numk)                         = nodey(st)
+     endif
+     localNodeIndexses(numLocalNodes)     = networkNodeIndex(stn)
+	  ! endif
+
+     !internal nodes 
+     do k = st + 1, en - 1
+       numLocalNodes                    = numLocalNodes + 1
+       if(meshnodeIndex(k)==0) then 
+          numk                          = numk + 1
+          meshnodeIndex(k)              = numk  
+          xk(numk)                      = nodex(k)
+          yk(numk)                      = nodey(k)
+       endif
+       localNodeIndexses(numLocalNodes) = meshnodeIndex(k)
+     enddo
+
+     !end node
+     numLocalNodes                    = numLocalNodes + 1
+     if(networkNodeIndex(enn)==0) then
+        numk                         = numk + 1
+        networkNodeIndex(enn)        = numk  
+        xk(numk)                     = nodex(en)
+        yk(numk)                     = nodey(en)
       endif
-      !create edge node table
-      do k = 1, numINodes - 1
+     localNodeIndexses(numLocalNodes) = networkNodeIndex(enn)
+
+     !create edge node table
+     do k = 1, numLocalNodes - 1
          numl = numl + 1
-         edge_nodes(1,numl) = nodeids(k)
-         edge_nodes(2,numl) = nodeids(k+1)
-      enddo
+         edge_nodes(1,numl) = localNodeIndexses(k)
+         edge_nodes(2,numl) = localNodeIndexses(k+1)
+     enddo
+      
+   enddo
+   
+   do branch = 1, nbranches
+   
+      st        = meshnodemapping(1,branch)
+      en        = meshnodemapping(2,branch)
+      stn       = sourcenodeid(branch) + firstvalidarraypos
+      enn       = targetnodeid(branch) + firstvalidarraypos
+
+     ! branches with only one mesh node(st == en) were not connected and branches with no mesh node (st == -1 .and. en == -1)
+     if ((st == en).or.(st == -1 .and. en == -1 ) ) then
+         numl = numl + 1
+         edge_nodes(1,numl) = networkNodeIndex(stn)
+         edge_nodes(2,numl) = networkNodeIndex(enn)
+     endif
    enddo
 
    ! assigned merged nodes
@@ -3442,8 +3495,7 @@
    !deallocate
    deallocate(xk)
    deallocate(yk)
-   deallocate(nodeids)
-   deallocate(networkNodesUnmerged)
+   deallocate(localNodeIndexses)
    deallocate(edge_nodes) !rough estimate of the maximum number of edges given a certain amount of nodes
    deallocate(correctedNodeBranchidx)
    deallocate(meshnodemapping)
