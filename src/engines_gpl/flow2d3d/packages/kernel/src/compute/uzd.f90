@@ -410,7 +410,7 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
        ff = 1.0
     endif
     !
-    !Initialise all arrays aak - cck for all (nm,k)
+    ! Initialise all arrays aak - cck for all (nm,k)
     !
     aak  = 0.0
     buux = 0.0

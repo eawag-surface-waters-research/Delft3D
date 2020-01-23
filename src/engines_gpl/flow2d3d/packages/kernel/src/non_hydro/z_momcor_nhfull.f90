@@ -255,6 +255,9 @@ subroutine z_momcor_nhfull(nmmax     ,kmax      ,icx       ,icy       ,s1       
           enddo
        endif
     enddo
+    !
+    ! Computation of the new fluxes in u- and v-points
+    !
     do nm = 1, nmmax
        if (kfu(nm) == 1) then
           do k = kfumin(nm), kfumx0(nm)

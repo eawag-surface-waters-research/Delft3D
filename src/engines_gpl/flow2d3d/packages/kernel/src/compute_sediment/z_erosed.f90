@@ -498,7 +498,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     epspar              => gdp%gdmorpar%epspar 
     vonkar              => gdp%gdphysco%vonkar
     vicmol              => gdp%gdphysco%vicmol
-    scour               => gdp%gdscour%scour
     timsec              => gdp%gdinttim%timsec
     timhr               => gdp%gdinttim%timhr
     julday              => gdp%gdinttim%julday
@@ -835,7 +834,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        chezy = sag * log( 1.0_fp + h1/max(1.0e-8_fp,ee*z0rou) ) / vonkar
        !
        ! bed shear stress as used in flow, or
-       ! skin fiction following Soulsby; "Bed shear stress under
+       ! skin friction following Soulsby; "Bed shear stress under
        ! combined waves and currents on rough and smoooth beds"
        ! Estproc report TR137, 2004
        !

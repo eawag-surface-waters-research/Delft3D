@@ -492,7 +492,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     epspar              => gdp%gdmorpar%epspar 
     vonkar              => gdp%gdphysco%vonkar
     vicmol              => gdp%gdphysco%vicmol
-    scour               => gdp%gdscour%scour
     timsec              => gdp%gdinttim%timsec
     timhr               => gdp%gdinttim%timhr
     julday              => gdp%gdinttim%julday

@@ -1176,7 +1176,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
        enddo
        if (scour) then
           !
-          ! -Check bottom slopes and apply an avalance effect if needed
+          ! -Check bottom slopes and apply an avalanche effect if needed
           ! -Depths at waterlevel points (dps) will be updated,
           !  to be used for dpu and dpv
           ! -Depth changes will be added to depchg,to be used for dp
