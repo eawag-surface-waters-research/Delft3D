@@ -1996,7 +1996,7 @@ subroutine readMDUFile(filename, istat)
    endif
 
    if (len_trim(md_thdfile) == 0 .and. jashp_thd > 0) then
-      write (msgbuf, '(a,I1,a)') 'MDU settings does not specify any structurs: ThinDamFile =  , but sets to write a ' &
+      write (msgbuf, '(a,I1,a)') 'MDU settings do not specify any structures: ThinDamFile =  , but sets to write a ' &
          //'shape file for thin dams: Wrishp_thindam = ', jashp_thd, '. In this situation, no such shape file is written.'
       call warn_flush()
       jashp_thd = 0
@@ -2008,6 +2008,15 @@ subroutine readMDUFile(filename, istat)
       call warn_flush()
       jashp_fxw = 0
    endif
+   
+   ! Switch on rst boundaries if jawave==3 and restartinterval>0
+   ! For now here, and temporarily commented
+   !if (jarstbnd==0 .and. jawave==3 .and. ti_rst>eps10) then
+   !   write (msgbuf, '(a)') 'MDU settings specify that writing restart files is requested, and switch off writing boundary data to the restart file. ' &
+   !      //'A coupling with SWAN is specified as well. To correctly restart a SWAN+FM model, boundary restart data are required. Switching Wrirst_bnd to 1.'
+   !   call warn_flush()
+   !   jarstbnd=1
+   !endif
 
    call list_ignored_md (md_ptr,LEVEL_WARN, ierror, prefix='readMDUFile')
 
@@ -3490,8 +3499,8 @@ integer,          external   :: numuni
     call makedir(getoutputdir()) ! No problem if it exists already.
 
 !   SPvdP : check status of file, mostly copied from inidia
-    mdia2 = numuni()
-    open (MDIA2, FILE = trim(getoutputdir())//trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
+    !mdia2 = numuni()
+    open (NEWUNIT=MDIA2, FILE = trim(getoutputdir())//trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
 
     if ( ierr.eq.0 ) then
 
