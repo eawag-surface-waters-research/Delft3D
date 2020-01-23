@@ -120,7 +120,7 @@ function readtime(minp, meteoitem, flow_itdate, flow_tzone, tread) result(succes
             ! Line contains entry other than a keyword or commentary
             ! NOT ALLOWED: ERROR
             !
-            meteomessage = 'Meteo input: wrong entry in meteofile '//trim(meteoitem%filename)//'; expecting keyword or commentary, but found: '//rec(1:40)
+            meteomessage = 'Meteo input: wrong entry in meteofile '//trim(meteoitem%filename)//'; expecting keyword or commentary, but found: '//trim(rec)
             success = .false.
             return
          endif
