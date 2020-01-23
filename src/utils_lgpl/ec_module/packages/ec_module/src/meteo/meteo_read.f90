@@ -85,6 +85,7 @@ function readtime(minp, meteoitem, flow_itdate, flow_tzone, tread) result(succes
    character(len=1)              :: sign_time_zone
    character(len=:), allocatable :: rec
    character(len=:), allocatable :: time_definition
+   character(len=256)            :: iomsg
    !
    if (meteoitem%filetype == uniuvp) then
       success = .true.
@@ -93,8 +94,8 @@ function readtime(minp, meteoitem, flow_itdate, flow_tzone, tread) result(succes
    !
    time_definition = ' '
    do
-      rec             = ' '
-      call GetLine(minp, rec, ierr)
+      rec = ' '
+      call GetLine(minp, rec, ierr, iomsg)
       if (ierr /= 0) then
          meteomessage = 'Meteo input: Premature end of file; expecting data at additional time'
          success = .false.
