@@ -14326,11 +14326,13 @@ src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Entities/Network1DGeometryDimen
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Helpers/IntPtrExtensions.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Helpers/NativeLibrary.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Helpers/StringUtilityExtensions.cs -text
+src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/ProtoBufRemote.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/hdf5.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/hdf5_hl.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/libifcoremd.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/libmmd.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/netcdf.dll -text
+src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/protobuf-net.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/ucrtbase.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/vcruntime140.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Lib/zlib1.dll -text

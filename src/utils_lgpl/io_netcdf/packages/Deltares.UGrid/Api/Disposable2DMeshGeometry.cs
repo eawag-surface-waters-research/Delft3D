@@ -1,58 +1,57 @@
 ﻿using Deltares.UGrid.Entities;
-
-//using ProtoBuf;
+using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
-    //[ProtoContract(AsReferenceDefault = true)]
+    [ProtoContract(AsReferenceDefault = true)]
     public class Disposable2DMeshGeometry : DisposableMeshObject
     {
         /// <summary>
         /// Name of the mesh
         /// </summary>
-        //[ProtoMember(1)]
+        [ProtoMember(1)]
         public string Name { get; set; }
 
         /// <summary>
         /// X position of the nodes
         /// </summary>
-        //[ProtoMember(1)]
+        [ProtoMember(2)]
         public double[] NodesX;
 
         /// <summary>
         /// Y position of the nodes
         /// </summary>
-        //[ProtoMember(2)]
+        [ProtoMember(3)]
         public double[] NodesY;
 
         /// <summary>
         /// Edge node connections {[from, to], [from, to] ... }
         /// </summary>
-        //[ProtoMember(4)]
+        [ProtoMember(4)]
         public int[] EdgeNodes;
 
         /// <summary>
         /// Nodes for each face (using <see cref="MaxNumberOfFaceNodes"/>)
         /// </summary>
-        //[ProtoMember(5)]
+        [ProtoMember(5)]
         public int[] FaceNodes;
 
         /// <summary>
         /// X position of face the center
         /// </summary>
-        //[ProtoMember(6)]
+        [ProtoMember(6)]
         public double[] FaceX;
 
         /// <summary>
         /// Y position of face the center
         /// </summary>
-        //[ProtoMember(7)]
+        [ProtoMember(7)]
         public double[] FaceY;
 
         /// <summary>
         /// Maximum number of nodes for a face (used in <see cref="FaceNodes"/>)
         /// </summary>
-        //[ProtoMember(8)]
+        [ProtoMember(8)]
         public int MaxNumberOfFaceNodes;
 
         internal Mesh2DGeometryDimensions CreateMeshDimensions()

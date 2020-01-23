@@ -1,63 +1,80 @@
 ﻿using System.Linq;
 using Deltares.UGrid.Entities;
 using Deltares.UGrid.Helpers;
+using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
-    //[ProtoContract(AsReferenceDefault = true)]
+    [ProtoContract(AsReferenceDefault = true)]
     public class Disposable1DMeshGeometry : DisposableMeshObject
     {
         /// <summary>
         /// The name of the 1D mesh (always 255 characters)
         /// </summary>
-        //[ProtoMember(1)]
+        [ProtoMember(1)]
         [StringBufferSize(BufferSize = 255)]
         public string Name;
 
         /// <summary>
         /// X values of the 1D mesh nodes
         /// </summary>
-        //[ProtoMember(1)]
+        [ProtoMember(2)]
         public double[] NodesX;
 
         /// <summary>
         /// Y values of the 1D mesh nodes
         /// </summary>
-        //[ProtoMember(2)]
+        [ProtoMember(3)]
         public double[] NodesY;
 
         /// <summary>
         /// Branch ids of the Nodes
         /// </summary>
-        //[ProtoMember(3)]
+        [ProtoMember(4)]
         public int[] BranchIDs;
 
         /// <summary>
         /// Branch offsets of the Nodes
         /// </summary>
-        //[ProtoMember(4)]
+        [ProtoMember(5)]
         public double[] BranchOffsets;
 
         /// <summary>
         /// Ids of the nodes
         /// </summary>
-        //[ProtoMember(10)]
+        [ProtoMember(6)]
         [StringBufferSize(BufferSize = 40)]
         public string[] NodeIds;
 
         /// <summary>
         /// Long names of the nodes
         /// </summary>
-        //[ProtoMember(11)]
+        [ProtoMember(7)]
         [StringBufferSize(BufferSize = 80)]
         public string[] NodeLongNames;
 
+        /// <summary>
+        /// Branch ids for each edge
+        /// </summary>
+        [ProtoMember(8)]
         public int[] EdgeBranchIds;
 
+        /// <summary>
+        /// Offset values of the center point of each edge
+        /// </summary>
+        [ProtoMember(9)]
         public double[] EdgeCenterPointOffset;
 
+        /// <summary>
+        /// X values of the center point of each edge
+        /// </summary>
+        [ProtoMember(10)]
         public double[] EdgeCenterPointX;
 
+        /// <summary>
+        /// Y values of the center point of each edge
+        /// </summary>
+        [ProtoMember(11)]
         public double[] EdgeCenterPointY;
 
         internal void InitializeWithEmptyData(Mesh1DGeometryDimensions dimensions)

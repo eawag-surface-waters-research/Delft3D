@@ -1,104 +1,105 @@
 ﻿using Deltares.UGrid.Entities;
 using Deltares.UGrid.Helpers;
+using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
-    //[ProtoContract(AsReferenceDefault = true)]
+    [ProtoContract(AsReferenceDefault = true)]
     public class DisposableNetworkGeometry : DisposableMeshObject
     {
         /// <summary>
         /// Name of the 1D network
         /// </summary>
-        //[ProtoMember(1)]
+        [ProtoMember(1)]
         [StringBufferSize(BufferSize = 255)]
         public string NetworkName = "network";
 
         /// <summary>
         /// X values of the 1D network nodes
         /// </summary>
-        //[ProtoMember(1)]
+        [ProtoMember(2)]
         public double[] NodesX;
 
         /// <summary>
         /// Y values of the 1D network nodes
         /// </summary>
-        //[ProtoMember(2)]
+        [ProtoMember(3)]
         public double[] NodesY;
 
         /// <summary>
         /// Ids for all the nodes
         /// </summary>
-        //[ProtoMember(8)]
+        [ProtoMember(4)]
         [StringBufferSize(BufferSize = 40)]
         public string[] NodeIds;
 
         /// <summary>
         /// Long name for all the nodes
         /// </summary>
-        //[ProtoMember(8)]
+        [ProtoMember(5)]
         [StringBufferSize(BufferSize = 80)]
         public string[] NodeLongNames;
 
         /// <summary>
         /// Length for each branch
         /// </summary>
-        //[ProtoMember(5)]
+        [ProtoMember(6)]
         public double[] BranchLengths;
 
         /// <summary>
         /// End node id for each branch
         /// </summary>
-        //[ProtoMember(6)]
+        [ProtoMember(7)]
         public int[] NodesTo;
 
         /// <summary>
         /// Begin node id for each branch
         /// </summary>
-        //[ProtoMember(6)]
+        [ProtoMember(8)]
         public int[] NodesFrom;
         
         /// <summary>
         /// Branch order for each branch
         /// </summary>
-        //[ProtoMember(8)]
+        [ProtoMember(9)]
         public int[] BranchOrder;
 
         /// <summary>
         /// Ids for all the branches
         /// </summary>
-        //[ProtoMember(8)]
+        [ProtoMember(10)]
         [StringBufferSize(BufferSize = 40)]
         public string[] BranchIds;
 
         /// <summary>
         /// Long name for all the branches
         /// </summary>
-        //[ProtoMember(8)]
+        [ProtoMember(11)]
         [StringBufferSize(BufferSize = 80)]
         public string[] BranchLongNames;
 
         /// <summary>
         /// Type for all the branches
         /// </summary>
-        //[ProtoMember(8)]
+        [ProtoMember(12)]
         public int[] BranchTypes;
 
         /// <summary>
         /// Number of nodes(coordinates) for each branch geometry
         /// </summary>
-        //[ProtoMember(6)]
+        [ProtoMember(13)]
         public int[] BranchGeometryNodesCount;
 
         /// <summary>
         /// All x values of all branch geometry points
         /// </summary>
-        //[ProtoMember(7)]
+        [ProtoMember(14)]
         public double[] BranchGeometryX;
 
         /// <summary>
         /// All y values of all branch geometry points
         /// </summary>
-        //[ProtoMember(8)]
+        [ProtoMember(15)]
         public double[] BranchGeometryY;
 
         internal void InitializeWithEmptyData(Network1DGeometryDimensions dimensions)

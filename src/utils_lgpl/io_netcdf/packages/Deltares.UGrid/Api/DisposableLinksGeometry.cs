@@ -1,25 +1,26 @@
 ﻿using Deltares.UGrid.Entities;
 using Deltares.UGrid.Helpers;
+using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
-    //[ProtoContract(AsReferenceDefault = true)]
+    [ProtoContract(AsReferenceDefault = true)]
     public class DisposableLinksGeometry : DisposableMeshObject
     {
-        //[ProtoMember(1)]
+        [ProtoMember(1)]
         public int[] Mesh1DFrom;
 
-        //[ProtoMember(2)]
+        [ProtoMember(2)]
         public int[] Mesh2DTo;
 
-        //[ProtoMember(3)]
+        [ProtoMember(3)]
         public int[] LinkType;
 
-        //[ProtoMember(4)]
+        [ProtoMember(4)]
         [StringBufferSize(BufferSize = 40)]
         public string[] LinkId;
 
-        //[ProtoMember(5)]
+        [ProtoMember(5)]
         [StringBufferSize(BufferSize = 80)]
         public string[] LinkLongName;
 
