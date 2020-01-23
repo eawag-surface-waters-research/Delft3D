@@ -865,15 +865,12 @@ module string_module
       !---------------------------------------------------------------------------
       ! Local variables
       character(len=256) :: buffer         ! Buffer to read the line (or partial line).
-      integer            :: cnt
       integer            :: size           ! Number of characters read from the file.
       integer            :: size_trim      ! Number of characters read from the file  (trimmed).
       logical            :: isFirstBuffer  ! flag to handle first read different from others
       !***************************************************************************
       isFirstBuffer = .true.
-      cnt = 0
       do
-        cnt = cnt + 1
         buffer = ''
         if (present(iomsg)) then
             read (unit, "(A)", ADVANCE='NO', IOSTAT=stat, IOMSG=iomsg, SIZE=size)  buffer
@@ -921,8 +918,8 @@ module string_module
         if (stat < 0) then
             if (stat == IOSTAT_EOR) stat = 0
             exit
-        end if
-      end do
+        endif
+      enddo
       end subroutine GetLine
 
 end module string_module
