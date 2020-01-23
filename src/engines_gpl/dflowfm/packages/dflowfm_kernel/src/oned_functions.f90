@@ -577,6 +577,7 @@ module m_oned_functions
       double precision     :: qp
       double precision     :: ap
       double precision     :: vp1, vp2, vp
+      double precision     :: waterdepth
       integer              :: L   
       integer              :: L0   
       integer              :: k1   
@@ -602,12 +603,15 @@ module m_oned_functions
          if ( dir > 0) then         
             k1 = ln(1,L)
             k2 = ln(2,L)
+            waterdepth = s1(k1)-bob0(1,L)
          else
             k1 = ln(2,L)
             k2 = ln(1,L)
+            waterdepth = s1(k1)-bob0(2,L) > 1d-2
          endif
          
-         if (hs(k1) > 1d-2) then
+         ! Check on water depth with respect to BOB.
+         if (waterdepth > 1d-2) then
             ! NOTE: pump area-weighting across links is uniform for all links (au=1).
             au(L) = 1d0
             ap    = ap + au(L)
