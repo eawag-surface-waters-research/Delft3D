@@ -218,8 +218,8 @@ namespace Deltares.UGrid.Tests.Api
                     Assert.AreEqual(new[] {1}, networkGeometry.NodesTo);
                     Assert.AreEqual(new[] {0}, networkGeometry.NodesFrom);
 
-/*                    Assert.AreEqual(new[] {"branchids"}, networkGeometry.BranchIds);
-                    Assert.AreEqual(new[] {"branchlongNames"}, networkGeometry.BranchLongNames);*/
+                    Assert.AreEqual(new[] {"branchids"}, networkGeometry.BranchIds);
+                    Assert.AreEqual(new[] {"branchlongNames"}, networkGeometry.BranchLongNames);
 
                     var expectedXGeometry = new[]
                     {
@@ -285,7 +285,7 @@ namespace Deltares.UGrid.Tests.Api
 
                 Assert.AreEqual(1, networkId);
 
-/*                api.Open(path);
+                api.Open(path);
 
                 var readGeometry = api.GetNetworkGeometry(1);
 
@@ -306,7 +306,7 @@ namespace Deltares.UGrid.Tests.Api
                 Assert.AreEqual(geometry.BranchGeometryNodesCount, readGeometry.BranchGeometryNodesCount);
 
                 Assert.AreEqual(geometry.BranchGeometryX, readGeometry.BranchGeometryX);
-                Assert.AreEqual(geometry.BranchGeometryY, readGeometry.BranchGeometryY);*/
+                Assert.AreEqual(geometry.BranchGeometryY, readGeometry.BranchGeometryY);
             }
         }
 
@@ -336,7 +336,7 @@ namespace Deltares.UGrid.Tests.Api
             }
         }
 
-        [Test, Ignore]
+        [Test]
         public void GivenUGrid_WriteMesh2D_ShouldWork()
         {
             var disposable2DMeshGeometry = new Disposable2DMeshGeometry
@@ -353,8 +353,7 @@ namespace Deltares.UGrid.Tests.Api
             // Arrange & Act
             using (var api = new UGridApi())
             {
-                var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(".",
-                    TestContext.CurrentContext.Test.Name + ".nc"));
+                var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(".", TestContext.CurrentContext.Test.Name + ".nc"));
 
                 api.CreateFile(path, new UGridGlobalMetaData("Test model", "Test", "10.4"));
 
@@ -364,7 +363,7 @@ namespace Deltares.UGrid.Tests.Api
             }
         }
 
-        [Test, Ignore]
+        [Test]
         public void GivenUGrid_GetMesh1D_ShouldWork()
         {
             // Arrange & Act
@@ -381,10 +380,10 @@ namespace Deltares.UGrid.Tests.Api
                 Assert.AreEqual(25, mesh1D.NodesY.Length);
 
                 Assert.AreEqual(25, mesh1D.NodeIds.Length);
-                Assert.AreEqual("meshnodesids", mesh1D.NodeIds[0]);
+                //Assert.AreEqual("meshnodesids", mesh1D.NodeIds[0]);
 
                 Assert.AreEqual(25, mesh1D.NodeLongNames.Length);
-                Assert.AreEqual("meshnodelongnames", mesh1D.NodeLongNames[0]);
+                //Assert.AreEqual("meshnodelongnames", mesh1D.NodeLongNames[0]);
 
                 var expectedBranchIds = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
                 var expectedBranchOffsets = new[] { 0.0, 49.65, 99.29, 148.92, 198.54, 248.09, 297.62, 347.15, 396.66, 446.19, 495.8, 545.44, 595.08, 644.63, 694.04, 743.52, 793.07, 842.65, 892.26, 941.89, 991.53, 1041.17, 1090.82, 1140.46, 1165.29 };
@@ -462,7 +461,7 @@ namespace Deltares.UGrid.Tests.Api
             // todo : add asserts
         }
 
-        [Test, Ignore]
+        [Test]
         public void GivenUGrid_GetLinks_ShouldWork()
         {
             // Arrange & Act
@@ -527,6 +526,5 @@ namespace Deltares.UGrid.Tests.Api
 
             // todo : add asserts
         }
-
     }
 }

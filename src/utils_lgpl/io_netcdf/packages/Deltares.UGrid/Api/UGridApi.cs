@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using Deltares.UGrid.Entities;
@@ -194,15 +193,18 @@ namespace Deltares.UGrid.Api
             disposableNetworkGeometry.NodeLongNames = geometry.NodeLongNames.CreateValueArray<string>(numberOfNodes, type.GetBufferSize(nameof(DisposableNetworkGeometry.NodeLongNames)));
 
             // read branches
-            IoNetCfdImports.ionc_get_1d_network_branches_v1_dll(ref fileId, ref networkId, ref geometry.SourceNodes, ref geometry.TargetNodes, ref geometry.BranchLengths, ref geometry.BranchIds, ref geometry.BranchLongNames, ref geometry.BranchGeometryCount, ref geometryDimensions.NumberOfBranches, ref startIndex);
+            IoNetCfdImports.ionc_get_1d_network_branches_v1_dll(ref fileId, ref networkId, ref geometry.SourceNodes,
+                ref geometry.TargetNodes, ref geometry.BranchLengths, ref geometry.BranchIds,
+                ref geometry.BranchLongNames, ref geometry.BranchGeometryCount, ref geometryDimensions.NumberOfBranches,
+                ref startIndex);
 
             disposableNetworkGeometry.NodesFrom = geometry.SourceNodes.CreateValueArray<int>(numberOfBranches);
             disposableNetworkGeometry.NodesTo = geometry.TargetNodes.CreateValueArray<int>(numberOfBranches);
             disposableNetworkGeometry.BranchGeometryNodesCount = geometry.BranchGeometryCount.CreateValueArray<int>(numberOfBranches);
             disposableNetworkGeometry.BranchOrder = geometry.BranchOrder.CreateValueArray<int>(numberOfBranches);
             disposableNetworkGeometry.BranchLengths = geometry.BranchLengths.CreateValueArray<double>(numberOfBranches);
-            disposableNetworkGeometry.BranchIds = geometry.BranchLengths.CreateValueArray<string>(numberOfBranches, type.GetBufferSize(nameof(DisposableNetworkGeometry.BranchIds)));
-            disposableNetworkGeometry.BranchLongNames = geometry.BranchLengths.CreateValueArray<string>(numberOfBranches, type.GetBufferSize(nameof(DisposableNetworkGeometry.BranchLongNames)));
+            disposableNetworkGeometry.BranchIds = geometry.BranchIds.CreateValueArray<string>(numberOfBranches, type.GetBufferSize(nameof(DisposableNetworkGeometry.BranchIds)));
+            disposableNetworkGeometry.BranchLongNames = geometry.BranchLongNames.CreateValueArray<string>(numberOfBranches, type.GetBufferSize(nameof(DisposableNetworkGeometry.BranchLongNames)));
 
             // read branch geometry
             IoNetCfdImports.ionc_read_1d_network_branches_geometry_dll(ref fileId, ref networkId, ref geometry.BranchGeometryX, ref geometry.BranchGeometryY, ref geometryDimensions.NumberOfBranchGeometryPoints);
@@ -361,7 +363,10 @@ namespace Deltares.UGrid.Api
             var geometry = mesh.CreateMeshGeometry();
             var geometryDimensions = mesh.CreateMeshDimensions();
 
-            IoNetCfdImports.ionc_put_meshgeom_dll(ref fileId, ref meshId, ref networkId, ref geometry, ref geometryDimensions, "mesh2d", "", ref startIndex);
+            var meshName = "mesh2d".ToFixedLengthString(255);
+            var networkName = "network".ToFixedLengthString(255);
+
+            IoNetCfdImports.ionc_put_meshgeom_dll(ref fileId, ref meshId, ref networkId, ref geometry, ref geometryDimensions, meshName, networkName, ref startIndex);
 
             return meshId;
         }
@@ -389,7 +394,15 @@ namespace Deltares.UGrid.Api
             IoNetCfdImports.ionc_get_mesh_contact_v1_dll(ref fileId, ref linksId, ref linkGeometry.Mesh1DFrom,
                 ref linkGeometry.Mesh2DTo, ref linkGeometry.LinkType, ref linkGeometry.LinkId,
                 ref linkGeometry.LinkLongName, ref linkDimensions.NumberOfLinks, ref startIndex);
-            
+
+            var type = typeof(DisposableLinksGeometry);
+
+            disposableLinksGeometry.Mesh2DTo = linkGeometry.Mesh2DTo.CreateValueArray<int>(linkDimensions.NumberOfLinks);
+            disposableLinksGeometry.Mesh1DFrom = linkGeometry.Mesh1DFrom.CreateValueArray<int>(linkDimensions.NumberOfLinks);
+            disposableLinksGeometry.LinkType = linkGeometry.LinkType.CreateValueArray<int>(linkDimensions.NumberOfLinks);
+            disposableLinksGeometry.LinkId = linkGeometry.LinkId.CreateValueArray<string>(linkDimensions.NumberOfLinks, type.GetBufferSize(nameof(DisposableLinksGeometry.LinkId)));
+            disposableLinksGeometry.LinkLongName = linkGeometry.LinkLongName.CreateValueArray<string>(linkDimensions.NumberOfLinks, type.GetBufferSize(nameof(DisposableLinksGeometry.LinkLongName)));
+
             return disposableLinksGeometry;
         }
 
