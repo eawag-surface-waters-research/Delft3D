@@ -9,12 +9,13 @@ namespace Deltares.UGrid.Api
     public abstract class DisposableMeshObject : IDisposable
     {
         private readonly Dictionary<object,GCHandle> objectGarbageCollectHandles = new Dictionary<object, GCHandle>();
-        
-        public bool IsMemoryPinned
+
+        protected bool IsMemoryPinned
         {
             get { return objectGarbageCollectHandles.Count > 0; }
         }
         
+        /// <inheritdoc/>
         public void Dispose()
         {
             UnPinMemory();

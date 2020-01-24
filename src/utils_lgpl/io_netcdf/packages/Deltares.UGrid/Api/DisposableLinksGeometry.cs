@@ -7,19 +7,34 @@ namespace Deltares.UGrid.Api
     [ProtoContract(AsReferenceDefault = true)]
     public class DisposableLinksGeometry : DisposableMeshObject
     {
+        /// <summary>
+        /// Mesh 1D node indices
+        /// </summary>
         [ProtoMember(1)]
         public int[] Mesh1DFrom;
 
+        /// <summary>
+        /// Mesh 2D cell center indices
+        /// </summary>
         [ProtoMember(2)]
         public int[] Mesh2DTo;
 
+        /// <summary>
+        /// Link types
+        /// </summary>
         [ProtoMember(3)]
         public int[] LinkType;
 
+        /// <summary>
+        /// Id of the links
+        /// </summary>
         [ProtoMember(4)]
         [StringBufferSize(BufferSize = 40)]
         public string[] LinkId;
 
+        /// <summary>
+        /// (Long) Name of the links
+        /// </summary>
         [ProtoMember(5)]
         [StringBufferSize(BufferSize = 80)]
         public string[] LinkLongName;

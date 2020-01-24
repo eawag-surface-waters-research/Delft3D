@@ -14291,7 +14291,6 @@ src/utils_lgpl/io_hyd/packages/io_hyd/src/wstmod.f90 -text
 src/utils_lgpl/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/nuget/Deltares.UGrid.nuspec -text
 src/utils_lgpl/io_netcdf/nuget/UGrid.IO_NetCDF.targets -text
-src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Api/DisposableNetworkGeometryTest.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Api/UGridTest.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Deltares.UGrid.Tests.csproj -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Lib/nunit.framework.dll -text
@@ -14302,12 +14301,12 @@ src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/Disposable2DMeshGeometry.cs
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/DisposableLinksGeometry.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/DisposableMeshObject.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/DisposableNetworkGeometry.cs -text
+src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/FileMetaData.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/GridLocationType.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/IUGridApi.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/NetcdfOpenMode.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/StringBufferSizeAttribute.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/UGridApi.cs -text
-src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/UGridGlobalMetaData.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/UGridMeshType.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Deltares.UGrid.csproj -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Deltares.UGrid.doxygen -text

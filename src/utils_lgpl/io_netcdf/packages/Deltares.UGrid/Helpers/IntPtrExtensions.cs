@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Deltares.UGrid.Helpers
 {
-    public static class IntPtrExtensions
+    internal static class IntPtrExtensions
     {
         public static T[] CreateValueArray<T>(this IntPtr pointer, int size, int stringSize = 0)
         {

@@ -277,7 +277,7 @@ namespace Deltares.UGrid.Tests.Api
             // Arrange & Act
             using (var api = new UGridApi())
             {
-                api.CreateFile(path, new UGridGlobalMetaData("Test model", "Test", "10.4"));
+                api.CreateFile(path, new FileMetaData("Test model", "Test", "10.4"));
 
                 var networkId = api.WriteNetworkGeometry(geometry);
                 
@@ -368,7 +368,7 @@ namespace Deltares.UGrid.Tests.Api
             {
                 var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(".", TestContext.CurrentContext.Test.Name + ".nc"));
 
-                api.CreateFile(path, new UGridGlobalMetaData("Test model", "Test", "10.4"));
+                api.CreateFile(path, new FileMetaData("Test model", "Test", "10.4"));
 
                 var meshId = api.WriteMesh2D(disposable2DMeshGeometry);
 
@@ -460,7 +460,7 @@ namespace Deltares.UGrid.Tests.Api
             // Arrange & Act
             using (var api = new UGridApi())
             {
-                api.CreateFile(path, new UGridGlobalMetaData("Test model", "Test", "10.4"));
+                api.CreateFile(path, new FileMetaData("Test model", "Test", "10.4"));
 
                 var networkId = api.WriteNetworkGeometry(geometry);
                 var meshId = api.WriteMesh1D(disposable1DMeshGeometry, networkId);
@@ -519,7 +519,7 @@ namespace Deltares.UGrid.Tests.Api
             // Arrange & Act
             using (var api = new UGridApi())
             {
-                api.CreateFile(path, new UGridGlobalMetaData("Test model", "Test", "10.4"));
+                api.CreateFile(path, new FileMetaData("Test model", "Test", "10.4"));
 
                 var disposableLinksGeometry = new DisposableLinksGeometry
                 {

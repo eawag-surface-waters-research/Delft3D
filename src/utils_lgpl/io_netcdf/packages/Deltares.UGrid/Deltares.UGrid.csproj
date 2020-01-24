@@ -74,7 +74,7 @@
     <Compile Include="Api\NetcdfOpenMode.cs" />
     <Compile Include="Api\StringBufferSizeAttribute.cs" />
     <Compile Include="Api\UGridApi.cs" />
-    <Compile Include="Api\UGridGlobalMetaData.cs" />
+    <Compile Include="Api\FileMetaData.cs" />
     <Compile Include="Api\UGridMeshType.cs" />
     <Compile Include="Entities\InteropMetadata.cs" />
     <Compile Include="Entities\IoNetCfdImports.cs" />

@@ -35,13 +35,13 @@ namespace Deltares.UGrid.Api
             return FileOpen && convention == DataSetConventions.CONV_UGRID;
         }
 
-        public bool CreateFile(string filePath, UGridGlobalMetaData uGridGlobalMetaData)
+        public bool CreateFile(string filePath, FileMetaData fileMetaData)
         {
             var mode = (int)NetcdfOpenMode.nf90_write;
             var errorCode = IoNetCfdImports.ionc_create_dll(filePath, ref mode, ref fileId);
             if (errorCode != 0) return false;
 
-            var metaData = uGridGlobalMetaData.CreateMetaData();
+            var metaData = fileMetaData.CreateMetaData();
             errorCode = IoNetCfdImports.ionc_add_global_attributes_dll(ref fileId, ref metaData);
             if (errorCode != 0) return false;
 

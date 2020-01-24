@@ -6,7 +6,7 @@ using Deltares.UGrid.Api;
 
 namespace Deltares.UGrid.Helpers
 {
-    public static class StringUtilityExtensions
+    internal static class StringUtilityExtensions
     {
         private const char FillChar = ' ';
 

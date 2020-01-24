@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Deltares.UGrid.Helpers
 {
-    public abstract class NativeLibrary : IDisposable
+    internal abstract class NativeLibrary : IDisposable
     {
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr LoadLibrary(string lpFileName);
