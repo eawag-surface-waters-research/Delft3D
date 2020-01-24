@@ -4659,6 +4659,9 @@ subroutine write_swan_inp (wavedata, calccount, &
           line  = 'INIT HOTS ''' // trim(fname) // ''''
           write (luninp, '(1X,A)') line
           write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
+       else
+          ! Set usehottime to 0.0 to flag that it isn't used
+          sr%usehottime    = '00000000.000000'
        endif
     endif
     !
@@ -5333,6 +5336,19 @@ subroutine write_swan_inp (wavedata, calccount, &
           ! endtime
           !
           tendc = datetime_to_string(wavedata%time%refdate, real(wavedata%time%calctimtscale)* wavedata%time%tscale)
+          !
+          if (sr%hotfile .and. sr%usehottime /= '00000000.000000') then
+             !
+             ! A hotfile is being used
+             ! SWAN will stop if usehottime is not equal to tbegc
+             !
+             if (sr%usehottime > tbegc) then
+               write(*,'(5a)') "*** ERROR: Time of hotfile to read (", sr%usehottime, ") is bigger than the simulation start time (", &
+                        & tbegc, ")"
+               write(*,'(a,f8.2,a)') "           The non-stationary TimeInterval (", sr%nonstat_interval, ") must be equal to or smaller than the FLOW simulation interval"
+               call wavestop(1, "While preparing SWAN input file")
+             endif
+          endif
           !
           ! built line
           !
