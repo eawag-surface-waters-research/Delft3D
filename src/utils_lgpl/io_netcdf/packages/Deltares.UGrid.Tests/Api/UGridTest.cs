@@ -12,7 +12,7 @@ namespace Deltares.UGrid.Tests.Api
         {
             get
             {
-                var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(@"..\..\..\", "test_data",
+                var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(@"..\..\..\..\", "test_data",
                     "river1_full_net.nc"));
 
                 if (!File.Exists(path))
