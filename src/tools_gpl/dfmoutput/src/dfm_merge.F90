@@ -67,7 +67,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, parameter :: int8 = 1     ! also local storage compact in 1 byte
    integer, parameter :: mapclass_time_buffer_size =   1
 
-   integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, &
+   integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, id_sedtotdim, id_sedsusdim, &
                                    id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim !< dim and var ids, maintained for all input files + 1 output file.
    double precision :: convversion
    integer :: jaugrid, iconvtype, formatCode, new_ndx
@@ -143,6 +143,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer,                      allocatable :: var_spacedimpos(:) !< Position in var_dimids(1:4,iv) of space dimension (-1 if not timedep)
    integer,                      allocatable :: var_laydimpos(:)   !< Position in var_dimids(1:4,iv) of layer dimension (-1 if not timedep)
    integer,                      allocatable :: var_kxdimpos(:)    !< Position in var_dimids(1:4,iv) of vectormax dimension (-1 if not timedep)
+   integer,                      allocatable :: var_seddimpos(:)   !< Position in var_dimids(1:4,iv) of sediment dimension (-1 if not timedep)
    integer,                      allocatable :: var_ndims(:)       !< Actual number of dimensions.
    integer,                      allocatable :: var_loctype(:)     !< Spatial location type for each var (face/node/etc.)
    integer,                      allocatable :: var_wdimpos(:)     !< Position in var_dimids(1:4,iv) of layer interface dimension (-1 if not timedep)
@@ -206,6 +207,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    id_laydim  = -1
    id_wdim    = -1
    id_bnddim  = -1
+   id_sedtotdim = -1
+   id_sedsusdim = -1
    ndx        =  0
    lnx        =  0
    kmx        =  0
@@ -416,6 +419,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   ! No special dimension, so probably just some vectormax-type dimension that
                   ! we may need later for some variables, so store it.
                   dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
+                  
+                  ! check if it is a dimension for sediment variables
+                  if (strcmpi(dimname, 'nSedTot')) then
+                     id_sedtotdim(ii) = id
+                  else if (strcmpi(dimname, 'nSedSus')) then
+                     id_sedsusdim(ii) = id
+                  end if
                endif
             endif
          enddo
@@ -492,6 +502,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             ! No special dimension, so probably just some vectormax-type dimension that
             ! we may need later for some variables, so store it.
             dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
+            
+            ! check if it is a dimension for sediment variables
+            if (strcmpi(dimname, 'nSedTot')) then
+               id_sedtotdim(ii) = id
+            else if (strcmpi(dimname, 'nSedSus')) then
+               id_sedsusdim(ii) = id
+            end if
          end if
       end do ! id
       end if
@@ -522,6 +539,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    allocate(var_laydimpos(nvars));   var_laydimpos   = -1
    allocate(var_kxdimpos(nvars));    var_kxdimpos    = -1
    allocate(var_wdimpos(nvars));     var_wdimpos     = -1
+   allocate(var_seddimpos(nvars));   var_seddimpos   = -1
    allocate(var_ndims(nvars));       var_ndims       =  0
    allocate(var_loctype(nvars));     var_loctype     =  0
    allocate(dimids_uses(nDims));     dimids_uses     =  0
@@ -596,6 +614,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                ! count how many times this dimension is used
                id_infile = tmpdimids(id)
                dimids_uses(id_infile) = dimids_uses(id_infile) + 1
+               if (tmpdimids(id) == id_sedtotdim(ifile) .or. tmpdimids(id) == id_sedsusdim(ifile)) then
+                  var_seddimpos(ivarcandidate) = ifirstdim
+               end if
             else
                if (verbose_mode) then
                   write (*,'(a)')           'Error: mapmerge: detected more than one vectormax dimension for `'//trim(varname)//''':'
@@ -1602,7 +1623,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         tmpvar2D(1:netfacemaxnodes(ii),nitemglob0+1:nitemglob0+count_read(ie)) = tmpvar2D_tmpmax(1:count_read(is),1:count_read(ie))
                         jaread_sep = 0
                      else
-                        ierr = nf90_get_var(ncids(ii), varids(ii,iv),  tmpvar2D(  :,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
+                        if (var_seddimpos(iv) /= -1) then 
+                           ! Reading a sediment variable needs to specify the "map" argument in nf90_get_var, because its dimensions are in a different order than other vectormax variables
+                           ierr = nf90_get_var(ncids(ii), varids(ii,iv),  tmpvar2D(  :,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie), map = (/ count_read (var_kxdimpos(iv)), 1, count_read (var_kxdimpos(iv))*item_counts(ii) /))
+                        else
+                           ierr = nf90_get_var(ncids(ii), varids(ii,iv),  tmpvar2D(  :,nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
+                        end if
                      end if
                   else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
                      if (jaread_sep == 1) then
@@ -1846,7 +1872,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                if (.not. verbose_mode) goto 888
             end if
             !! tmpvar is now filled with 1 var, 1 time, across all domains, without overlap, so write it now:
-            if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1 .and. var_wdimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
+            if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1 .and. var_wdimpos(iv) == -1 .and. var_seddimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
                if (var_types(iv) == nf90_double) then
                   ierr = nf90_put_var(ncids(noutfile), varids_out(iv), tmpvar1D, count = count_write(is:ie), start = start_idx(is:ie))
                else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
@@ -1858,7 +1884,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                end if
             else if (var_kxdimpos(iv) /= -1 .neqv. var_laydimpos(iv) /= -1) then ! Either a vectormax OR a laydim
                if (var_types(iv) == nf90_double) then
-                  ierr = nf90_put_var(ncids(noutfile), varids_out(iv), tmpvar2D, count = count_write(is:ie), start = start_idx(is:ie))
+                  if (var_seddimpos(iv) /= -1) then ! if it is a sediment variable
+                     ierr = nf90_put_var(ncids(noutfile), varids_out(iv), tmpvar2D, count = count_write(is:ie), start = start_idx(is:ie), map = (/ count_write (var_kxdimpos(iv)), 1, count_write (var_kxdimpos(iv))*item_counts(ii) /))
+                  else
+                     ierr = nf90_put_var(ncids(noutfile), varids_out(iv), tmpvar2D, count = count_write(is:ie), start = start_idx(is:ie))
+                  end if
                else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
                   ierr = nf90_put_var(ncids(noutfile), varids_out(iv), itmpvar2D, count = count_write(is:ie), start = start_idx(is:ie))
                end if
