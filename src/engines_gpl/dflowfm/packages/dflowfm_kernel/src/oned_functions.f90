@@ -600,16 +600,16 @@ module m_oned_functions
          ! Note 2: do not account for pumping direction here, that is done in prepareComputePump.
          dir = sign(1, L) ! only includes flow link w.r.t. structure spatial orientation.
          L = iabs(L)
-         if ( dir > 0) then         
+         if ( dir > 0) then
             k1 = ln(1,L)
             k2 = ln(2,L)
             waterdepth = s1(k1)-bob0(1,L)
          else
             k1 = ln(2,L)
             k2 = ln(1,L)
-            waterdepth = s1(k1)-bob0(2,L) > 1d-2
+            waterdepth = s1(k1)-bob0(2,L)
          endif
-         
+
          ! Check on water depth with respect to BOB.
          if (waterdepth > 1d-2) then
             ! NOTE: pump area-weighting across links is uniform for all links (au=1).
