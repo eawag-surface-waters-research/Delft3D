@@ -10,7 +10,7 @@ namespace Deltares.UGrid.Api
         /// Name of the mesh
         /// </summary>
         [ProtoMember(1)]
-        public string Name { get; set; }
+        public string Name;
 
         /// <summary>
         /// X position of the nodes

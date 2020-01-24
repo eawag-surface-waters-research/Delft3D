@@ -232,6 +232,8 @@ namespace Deltares.UGrid.Api
             IoNetCfdImports.ionc_put_1d_network_branches_v1_dll(ref fileId, ref networkId, ref geometry.SourceNodes, ref geometry.TargetNodes, ref geometry.BranchIds, ref geometry.BranchLongNames, 
                 ref geometry.BranchLengths, ref geometry.BranchGeometryCount, ref geometryDimensions.NumberOfBranches, ref startIndex);
 
+            IoNetCfdImports.ionc_put_1d_network_branchorder_dll(ref fileId, ref networkId, ref geometry.BranchOrder, ref geometryDimensions.NumberOfBranches);
+
             IoNetCfdImports.ionc_write_1d_network_branches_geometry_dll(ref fileId, ref networkId, ref geometry.BranchGeometryX, ref geometry.BranchGeometryY, ref geometryDimensions.NumberOfBranchGeometryPoints);
             
             // add branch type variable
@@ -321,11 +323,9 @@ namespace Deltares.UGrid.Api
         {
             // get dimensions
             var mesh2dDimensions = new Mesh2DGeometryDimensions();
-            
-            IoNetCfdImports.ionc_get_node_count_dll(ref fileId, ref meshId, ref mesh2dDimensions.numnode);
-            IoNetCfdImports.ionc_get_edge_count_dll(ref fileId, ref meshId, ref mesh2dDimensions.numedge);
-            IoNetCfdImports.ionc_get_face_count_dll(ref fileId, ref meshId, ref mesh2dDimensions.numface);
-            IoNetCfdImports.ionc_get_max_face_nodes_dll(ref fileId, ref meshId, ref mesh2dDimensions.maxnumfacenodes);
+
+            var networkId = 0;
+            IoNetCfdImports.ionc_get_meshgeom_dim_dll(ref fileId, ref meshId, ref networkId, ref mesh2dDimensions);
             
             var stringBuilder = new StringBuilder(255);
             IoNetCfdImports.ionc_get_mesh_name_dll(ref fileId, ref meshId, stringBuilder);
@@ -339,18 +339,16 @@ namespace Deltares.UGrid.Api
             disposable2DMeshGeometry.InitializeWithEmptyData(mesh2dDimensions);
 
             var mesh2d = disposable2DMeshGeometry.CreateMeshGeometry();
-
-            var fillvalue = -999;
-
-            IoNetCfdImports.ionc_get_node_coordinates_dll(ref fileId, ref meshId, ref mesh2d.nodex, ref mesh2d.nodey, ref mesh2dDimensions.numnode);
-            IoNetCfdImports.ionc_get_edge_nodes_dll(ref fileId, ref meshId, ref mesh2d.edge_nodes, ref mesh2dDimensions.numedge, ref startIndex);
-            IoNetCfdImports.ionc_get_face_nodes_dll(ref fileId, ref meshId, ref mesh2d.face_nodes, ref mesh2dDimensions.numface, ref mesh2dDimensions.maxnumfacenodes, ref fillvalue, ref startIndex);
+            
+            var includeArrays = true;
+            IoNetCfdImports.ionc_get_meshgeom_dll(ref fileId, ref meshId, ref networkId, ref mesh2d, ref startIndex, ref includeArrays);
 
             disposable2DMeshGeometry.NodesX = mesh2d.nodex.CreateValueArray<double>(mesh2dDimensions.numnode);
             disposable2DMeshGeometry.NodesY = mesh2d.nodey.CreateValueArray<double>(mesh2dDimensions.numnode);
 
             disposable2DMeshGeometry.EdgeNodes = mesh2d.edge_nodes.CreateValueArray<int>(mesh2dDimensions.numedge * 2);
             disposable2DMeshGeometry.FaceNodes = mesh2d.face_nodes.CreateValueArray<int>(mesh2dDimensions.maxnumfacenodes * mesh2dDimensions.numface);
+            disposable2DMeshGeometry.FaceX = mesh2d.facex.CreateValueArray<double>(mesh2dDimensions.numface);
             
             return disposable2DMeshGeometry;
         }

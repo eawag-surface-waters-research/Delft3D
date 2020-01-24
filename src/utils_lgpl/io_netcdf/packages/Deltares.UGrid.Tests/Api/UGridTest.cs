@@ -339,12 +339,25 @@ namespace Deltares.UGrid.Tests.Api
         [Test]
         public void GivenUGrid_WriteMesh2D_ShouldWork()
         {
+            //
+            //          7
+            //    6.----.----. 8
+            //     |    |    | 
+            //     |    |    | 
+            //    3.----.----. 5
+            //     |   4|    | 
+            //     |    |    | 
+            //     .----.----.
+            //     0    1    2
+            //
+            // 
             var disposable2DMeshGeometry = new Disposable2DMeshGeometry
             {
                 Name = "Mesh 2d",
                 NodesX = new double[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 },
                 NodesY = new double[] { 1, 1, 1, 2, 2, 2, 3, 3, 3 },
-                FaceNodes = new []{1,2,4,5,  2,3,5,6,  4,5,7,8  ,5,6,8,9},
+                EdgeNodes = new []{0,1,1,2,0,3,1,4,2,5,3,4,4,5,3,6,4,7,5,8,6,7,7,8},
+                FaceNodes = new []{0,1,3,4,  1,2,4,5,  3,4,6,7  ,4,5,7,8},
                 FaceX = new double[] { 1.5, 1.5, 2.5, 2.5 },
                 FaceY = new double[] { 1.5, 2.5, 1.5, 2.5 },
                 MaxNumberOfFaceNodes = 4
