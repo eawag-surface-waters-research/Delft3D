@@ -1276,9 +1276,10 @@ function ionc_get_1d_mesh_discretisation_points_v2_dll(ioncid, meshid, c_branchi
   type(c_ptr),  intent(inout)       :: c_ids, c_longNames
   double precision,pointer          :: offset(:)
   integer,pointer                   :: branchidx(:)
-  double precision,pointer          :: coordx(:), coordy(:)
-  character(len=8)                  :: varnameids
-  character(len=15)                 :: varnamelongnames
+  double precision,pointer          :: coordx(:), coordy(:)  
+  integer,parameter                 :: size_of_varname = 2
+  character(len=MAXSTRLEN)          :: varnameids(size_of_varname)
+  character(len=MAXSTRLEN)          :: varnamelongnames(size_of_varname)
   integer                           :: ierr,i
   character(kind=c_char, len=ug_idsLen),pointer               :: ids(:)
   character(kind=c_char, len=ug_idsLongNamesLen),pointer      :: longnames(:)
@@ -1293,10 +1294,26 @@ function ionc_get_1d_mesh_discretisation_points_v2_dll(ioncid, meshid, c_branchi
   ierr = ionc_get_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchidx, offset, startIndex, coordx, coordy )
   
   !The names of the variables are hard-coded
-  varnameids        = 'node_id'
-  ierr              = ionc_get_var_chars(ioncid, meshid, varnameids, ids)
-  varnamelongnames  = 'node_long_name'
-  ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, longnames)
+     
+  varnameids(1) = 'node_id'
+  varnameids(2) = 'node_ids'
+  
+  do i=1,size_of_varname
+     ierr = ionc_get_var_chars(ioncid, meshid, varnameids(i), ids)
+     if (ierr==0) then
+          exit
+     endif
+  enddo
+  
+  varnamelongnames(1) = 'node_long_name'
+  varnamelongnames(2) = 'node_long_names'
+
+  do i=1,size_of_varname
+     ierr = ionc_get_var_chars(ioncid, meshid, varnamelongnames(i), longnames)
+     if (ierr == 0) then
+          exit
+     endif
+  enddo
   
 end function ionc_get_1d_mesh_discretisation_points_v2_dll
 
