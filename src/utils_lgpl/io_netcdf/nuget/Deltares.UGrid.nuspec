@@ -9,6 +9,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>This is a package containing a managed dll wrapping around the native dll of io_netcdf. This native dll is a library containing functionality to read and write ugrid files.</description>
     <copyright>Deltares</copyright>
+    <dependencies>
+      <dependency id="ProtoBufRemote" version="1.0.8"/>
+    </dependencies>
     <tags>native</tags>
   </metadata>
   <files>
@@ -22,6 +25,6 @@
     <file src="..\packages\io_netcdf\dll\x64\Release\vcruntime140.dll" target="content\native\vcruntime140.dll" />
     <file src="..\packages\io_netcdf\dll\x64\Release\zlib1.dll" target="content\native\zlib1.dll" />
     <file src="..\packages\io_netcdf\dll\x64\Release\Deltares.UGrid.dll" target="lib\net40\Deltares.UGrid.dll" />
-	<file src="UGrid.IO_NetCDF.targets" target="build\net40\UGrid.IO_NetCDF.targets" />
+    <file src="UGrid.IO_NetCDF.targets" target="build\net40\UGrid.IO_NetCDF.targets" />
   </files>
 </package>
