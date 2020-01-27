@@ -1673,10 +1673,10 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Layers
    if (add_layers) then
       ! Write mesh layer distribution (mesh-global, not per face)
-      if ((meshids%varids(mid_layerzs).ne.-1).and.(numLayer.gt.0)) then
+      if (associated(layer_zs).and.(meshids%varids(mid_layerzs).ne.-1).and.(numLayer.gt.0)) then
          ierr = nf90_put_var(ncid, meshids%varids(mid_layerzs),     layer_zs(1:numLayer))
       endif
-      if ((meshids%varids(mid_interfacezs).ne.-1).and.(numLayer.gt.0)) then
+      if (associated(interface_zs).and.(meshids%varids(mid_interfacezs).ne.-1).and.(numLayer.gt.0)) then
          ierr = nf90_put_var(ncid, meshids%varids(mid_interfacezs), interface_zs(1:numLayer + 1))
       endif
    end if

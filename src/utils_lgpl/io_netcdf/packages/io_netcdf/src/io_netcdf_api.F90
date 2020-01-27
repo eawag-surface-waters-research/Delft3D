@@ -1235,8 +1235,9 @@ function ionc_get_1d_mesh_discretisation_points_v1_dll(ioncid, meshid, c_branchi
   double precision,pointer          :: offset(:)
   integer,pointer                   :: branchidx(:)
   double precision,pointer          :: coordx(:), coordy(:)
-  character(len=8)                  :: varnameids
-  character(len=15)                 :: varnamelongnames
+  integer,parameter                 :: size_of_varname = 2
+  character(len=MAXSTRLEN)          :: varnameids(size_of_varname)
+  character(len=MAXSTRLEN)          :: varnamelongnames(size_of_varname)
   integer                           :: ierr,i
   
   call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
@@ -1247,20 +1248,26 @@ function ionc_get_1d_mesh_discretisation_points_v1_dll(ioncid, meshid, c_branchi
   ierr = ionc_get_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchidx, offset, startIndex, coordx, coordy )
   
   !The names of the variables are hard-coded
-  varnameids        = 'node_id'
-  ierr              = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
-  if (ierr /= IONC_NOERR) then
-     ! Backwards compatible read of Deltares-0.9 plural-names.
-     varnameids     = 'node_ids'
-     ierr           = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
-  end if
-  varnamelongnames  = 'node_long_name'
-  ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
-  if (ierr /= IONC_NOERR) then
-     ! Backwards compatible read of Deltares-0.9 plural-names.
-     varnamelongnames  = 'node_long_names'
-     ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
-  end if
+  
+  varnameids(1) = 'node_id'
+  varnameids(2) = 'node_ids'
+  
+  do i=1,size_of_varname
+     ierr = ionc_get_var_chars(ioncid, meshid, varnameids(i), nodeids)
+     if (ierr==0) then
+          exit
+     endif
+  enddo
+  
+  varnamelongnames(1) = 'node_long_name'
+  varnamelongnames(2) = 'node_long_names'
+
+  do i=1,size_of_varname
+     ierr = ionc_get_var_chars(ioncid, meshid, varnamelongnames(i), nodelongnames)
+     if (ierr == 0) then
+          exit
+     endif
+  enddo
 
   do i=1,nmeshpoints
      nodesinfo(i)%ids       = nodeids(i) 

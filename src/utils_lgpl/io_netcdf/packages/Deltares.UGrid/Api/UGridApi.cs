@@ -361,8 +361,8 @@ namespace Deltares.UGrid.Api
             var geometry = mesh.CreateMeshGeometry();
             var geometryDimensions = mesh.CreateMeshDimensions();
 
-            var meshName = "mesh2d".ToFixedLengthString(255);
-            var networkName = "network".ToFixedLengthString(255);
+            var meshName ="mesh2d";
+            var networkName = "network";
 
             IoNetCfdImports.ionc_put_meshgeom_dll(ref fileId, ref meshId, ref networkId, ref geometry, ref geometryDimensions, meshName, networkName, ref startIndex);
 
