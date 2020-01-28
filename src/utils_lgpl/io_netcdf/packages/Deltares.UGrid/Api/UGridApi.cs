@@ -227,7 +227,6 @@ namespace Deltares.UGrid.Api
         public int WriteNetworkGeometry(DisposableNetworkGeometry networkGeometry)
         {
             var networkId = -1;
-            var type = typeof(DisposableNetworkGeometry);
             var name = networkGeometry.NetworkName;
             var geometry = networkGeometry.CreateNetwork1DGeometry();
             var geometryDimensions = networkGeometry.CreateNetwork1DGeometryDimensions();
@@ -245,20 +244,6 @@ namespace Deltares.UGrid.Api
             IoNetCfdImports.ionc_put_1d_network_branchtype_dll(ref dataSetId, ref networkId, ref geometry.BranchTypes, ref geometryDimensions.NumberOfBranches);
 
             IoNetCfdImports.ionc_write_1d_network_branches_geometry_dll(ref dataSetId, ref networkId, ref geometry.BranchGeometryX, ref geometry.BranchGeometryY, ref geometryDimensions.NumberOfBranchGeometryPoints);
-            
-            //// add branch type variable
-            //var meshId = 0;            // dummy
-            //var fillValue = -999.0; // dummy
-            //var variableId = 0;
-            //var nf90Int = 4;
-            //var fillValueInt = -999;
-            //var locationType = (int) GridLocationType.UG_LOC_EDGE;
-
-            //IoNetCfdImports.ionc_def_var_dll(ref dataSetId, ref meshId, ref networkId, ref variableId, ref nf90Int, ref locationType, branchTypeVariableName, "", "Water type in branch (network edge)",
-            //    "", ref fillValueInt, ref fillValue);
-
-            //IoNetCfdImports.ionc_put_var_dll(ref dataSetId, ref meshId, ref networkId, branchTypeVariableName,
-            //    ref geometry.BranchTypes, ref geometryDimensions.NumberOfBranches);
 
             return networkId;
         }
