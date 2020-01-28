@@ -828,6 +828,23 @@ function ionc_put_1d_network_branchorder_dll(ioncid, networkid, c_branchorder, n
     
 end function ionc_put_1d_network_branchorder_dll
 
+!< write the branch order array, it might be temporary function
+function ionc_put_1d_network_branchtype_dll(ioncid, networkid, c_branchtype, nbranches) result(ierr) bind(C, name="ionc_put_1d_network_branchtype")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_1d_network_branchtype_dll
+
+    integer, intent(in)                :: ioncid, nbranches   
+    integer, intent(in)                :: networkId
+    type(c_ptr), intent(in)            :: c_branchtype
+    integer, pointer                   :: branchtype(:)
+    integer                            :: ierr
+    
+    call c_f_pointer(c_branchtype, branchtype, (/ nbranches /))
+    
+    ierr =  ionc_put_1d_network_branchtype_ugrid(ioncid, networkid, branchtype)
+    
+end function ionc_put_1d_network_branchtype_dll
+
+
 function ionc_write_1d_network_branches_geometry_dll(ioncid, networkid, c_geopointsX, c_geopointsY, nGeometry) result(ierr) bind(C, name="ionc_write_1d_network_branches_geometry")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_network_branches_geometry_dll
   
@@ -988,6 +1005,22 @@ function ionc_get_1d_network_branchorder_dll(ioncid, networkid, c_branchorder, n
    ierr = ionc_get_1d_network_branchorder_ugrid(ioncid, networkid, branchorder)
 
 end function ionc_get_1d_network_branchorder_dll  
+
+!< get the branch order array, it might be temporary function
+function ionc_get_1d_network_branchtype_dll(ioncid, networkid, c_branchtype, nbranches) result(ierr) bind(C, name="ionc_get_1d_network_branchtype")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_network_branchtype_dll
+   
+   integer, intent(in)                :: ioncid, nbranches   
+   integer, intent(in)                :: networkid 
+   type(c_ptr), intent(inout)         :: c_branchtype
+   integer,pointer                    :: branchtype(:)
+   integer                            :: ierr
+   
+   call c_f_pointer(c_branchtype, branchtype, (/ nbranches /))
+   
+   ierr = ionc_get_1d_network_branchtype_ugrid(ioncid, networkid, branchtype)
+
+end function ionc_get_1d_network_branchtype_dll  
    
 
 function ionc_read_1d_network_branches_geometry_dll(ioncid, networkid, c_geopointsX, c_geopointsY, ngeometrypoints) result(ierr) bind(C, name="ionc_read_1d_network_branches_geometry")

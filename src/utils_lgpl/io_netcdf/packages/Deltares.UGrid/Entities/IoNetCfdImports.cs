@@ -497,9 +497,14 @@ namespace Deltares.UGrid.Entities
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_put_1d_network_branchorder", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_put_1d_network_branchorder_dll([In] ref int ioncId, [In] ref int networkId, [In] ref IntPtr pointerToBranchOrder, [In] ref int numberOfBranches);
 
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_put_1d_network_branchtype", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_put_1d_network_branchtype_dll([In] ref int ioncId, [In] ref int networkId, [In] ref IntPtr pointerTobranchtype, [In] ref int numberOfBranches);
 
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_1d_network_branchorder", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_1d_network_branchorder_dll([In] ref int ioncId, [In] ref int networkId, [In, Out] ref IntPtr pointerToBranchOrder, [In] ref int numberOfBranches);
+
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_1d_network_branchtype", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_1d_network_branchtype_dll([In] ref int ioncId, [In] ref int networkId, [In, Out] ref IntPtr pointerToBranchOrder, [In] ref int numberOfBranches);
 
         #endregion
 

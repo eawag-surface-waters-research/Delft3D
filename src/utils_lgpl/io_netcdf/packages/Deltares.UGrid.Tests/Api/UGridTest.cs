@@ -254,7 +254,7 @@ namespace Deltares.UGrid.Tests.Api
 
             var geometry = new DisposableNetworkGeometry
             {
-                NetworkName = "Test network",
+                NetworkName = "Test_network",
 
                 NodesY = new double[] { 4, 6 },
                 NodesX = new double[] { 1, 4 },
@@ -277,7 +277,7 @@ namespace Deltares.UGrid.Tests.Api
             // Arrange & Act
             using (var api = new UGridApi())
             {
-                api.CreateFile(path, new FileMetaData("Test model", "Test", "10.4"));
+                api.CreateFile(path, new FileMetaData("Test_model", "Test", "10.4"));
 
                 var networkId = api.WriteNetworkGeometry(geometry);
                 
@@ -287,6 +287,7 @@ namespace Deltares.UGrid.Tests.Api
 
                 api.Open(path);
 
+                var numberOfNetworks = api.GetNumberOfNetworks();
                 var readGeometry = api.GetNetworkGeometry(1);
 
                 Assert.AreEqual(geometry.NetworkName, readGeometry.NetworkName);
