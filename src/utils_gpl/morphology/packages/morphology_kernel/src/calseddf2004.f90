@@ -111,7 +111,7 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
 !
 !! executable statements -------------------------------------------------------
 !
-    if (tp>0.0_fp .and. wave) then
+    if (tp>0.1_fp .and. wave) then
        hs = hrms * sqrt(2.0_fp)
        if (hs/h1 > 0.4_fp) then
           gambr = 1.0_fp + sqrt((hs/h1)-0.4_fp)

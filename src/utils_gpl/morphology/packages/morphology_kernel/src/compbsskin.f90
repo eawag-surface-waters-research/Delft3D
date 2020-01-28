@@ -40,8 +40,8 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 ! Soulsby  (2004)
 !
 ! Remarks: 1) uorb based upon Hrms, Tper = peak period wave spectrum
-!          2) skin friction comuted and used everywhere in the model
-!             (not yet a distinction based upon md layer thickness or
+!          2) skin friction computed and used everywhere in the model
+!             (not yet a distinction based upon mud layer thickness or
 !              mudcontent)
 !          4) umean and vmean based upon u0eul, v0eul (inclding wave mass fluxes)
 !          5) ar = 0.26; as = 0.22 (original publication soulsby)
