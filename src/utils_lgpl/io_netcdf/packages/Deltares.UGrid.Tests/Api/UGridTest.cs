@@ -274,7 +274,7 @@ namespace Deltares.UGrid.Tests.Api
                 BranchGeometryY = new double[] { 5, 6, 7, 8 }
             };
 
-/*            // Arrange & Act
+            // Arrange & Act
             using (var api = new UGridApi())
             {
                 api.CreateFile(path, new FileMetaData("Test model", "Test", "10.4"));
@@ -307,7 +307,7 @@ namespace Deltares.UGrid.Tests.Api
 
                 Assert.AreEqual(geometry.BranchGeometryX, readGeometry.BranchGeometryX);
                 Assert.AreEqual(geometry.BranchGeometryY, readGeometry.BranchGeometryY);
-            }*/
+            }
         }
 
         [Test]
@@ -336,7 +336,7 @@ namespace Deltares.UGrid.Tests.Api
             }
         }
 
-        [Test, Ignore("Returns no mesh id")]
+        [Test]
         public void GivenUGrid_WriteMesh2D_ShouldWork()
         {
             //
@@ -393,10 +393,10 @@ namespace Deltares.UGrid.Tests.Api
                 Assert.AreEqual(25, mesh1D.NodesY.Length);
 
                 Assert.AreEqual(25, mesh1D.NodeIds.Length);
-                //Assert.AreEqual("meshnodesids", mesh1D.NodeIds[0]);
+                Assert.AreEqual("meshnodeids", mesh1D.NodeIds[0]);
 
                 Assert.AreEqual(25, mesh1D.NodeLongNames.Length);
-                //Assert.AreEqual("meshnodelongnames", mesh1D.NodeLongNames[0]);
+                Assert.AreEqual("meshnodelongnames", mesh1D.NodeLongNames[0]);
 
                 var expectedBranchIds = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
                 var expectedBranchOffsets = new[] { 0.0, 49.65, 99.29, 148.92, 198.54, 248.09, 297.62, 347.15, 396.66, 446.19, 495.8, 545.44, 595.08, 644.63, 694.04, 743.52, 793.07, 842.65, 892.26, 941.89, 991.53, 1041.17, 1090.82, 1140.46, 1165.29 };
