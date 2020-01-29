@@ -56,11 +56,18 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
-      IMPLICIT REAL (A-H,J-Z)
+      IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+
+      INTEGER  IFLUX, ISEG, IKMRK2
+      INTEGER  IN1, IN2, IN3, IN4, IN5, IN6, IN7, IN8, IN9, IN10
+      INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, IP9, IP10
+
+      REAL     TEMP, CRTEMP, MINRC, MINTC, TEMP20, TEMFAK
+      REAL     ZEMIN, ORG, VOLUME, DEPTH, SWITCH
 
       LOGICAL  TFACT
 
@@ -73,6 +80,7 @@
       IN7  = INCREM( 7)
       IN8  = INCREM( 8)
       IN9  = INCREM( 9)
+      IN10 = INCREM(10)
 !
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
@@ -83,6 +91,7 @@
       IP7  = IPOINT( 7)
       IP8  = IPOINT( 8)
       IP9  = IPOINT( 9)
+      IP10 = IPOINT(10)
 !
       IF ( IN3 .EQ. 0 .AND. IN4 .EQ. 0 .AND.
      *     IN5 .EQ. 0 .AND. IN6 .EQ. 0        ) THEN
@@ -138,6 +147,7 @@
 !
 !        Calculation of mineralisation flux ( M.L-3.t-1)
 !
+      PMSA(IP10)      = ZEMIN       + TEMFAK * ORG
       IF (ABS(SWITCH).LT.0.5) THEN
 !       NO SWITCH
         FL( 1 + IFLUX ) = ZEMIN/DEPTH + TEMFAK * ORG / DEPTH
@@ -161,6 +171,7 @@
       IP7   = IP7   + IN7
       IP8   = IP8   + IN8
       IP9   = IP9   + IN9
+      IP10  = IP10  + IN10
 !
  9000 CONTINUE
 !
