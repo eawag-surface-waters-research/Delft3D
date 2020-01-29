@@ -713,6 +713,24 @@ outppr,outpit,outpnm,outpdo,outpsx
 "RearOXY   ","RCREAR    ",   1,"x",1
 "RearOXY   ","SatPercOXY",   2,"x",1
 "VAROXY    ","ActualTime",   1,"x",1
+"BMS1_DetC ","fMinDetCS1",   1,"x",1
+"BMS2_DetC ","fMinDetCS2",   1,"x",1
+"BMS1_DetN ","fMinDetNS1",   1,"x",1
+"BMS2_DetN ","fMinDetNS2",   1,"x",1
+"BMS1_DetP ","fMinDetPS1",   1,"x",1
+"BMS2_DetP ","fMinDetPS2",   1,"x",1
+"BMS1_DetSi","fMinDetSS1",   1,"x",1
+"BMS2_DetSi","fMinDetSS2",   1,"x",1
+"BMS1_OOC  ","fMinOOCS1 ",   1,"x",1
+"BMS2_OOC  ","fMinOOCS2 ",   1,"x",1
+"BMS1_OON  ","fMinOONS1 ",   1,"x",1
+"BMS2_OON  ","fMinOONS2 ",   1,"x",1
+"BMS1_OOP  ","fMinOOPS1 ",   1,"x",1
+"BMS2_OOP  ","fMinOOPS2 ",   1,"x",1
+"BMS1_OOSi ","fMinOOSiS1",   1,"x",1
+"BMS2_OOSi ","fMinOOSiS2",   1,"x",1
+"Deso_AAPS1","fDesoAAPS1",   1,"x",1
+"Deso_AAPS2","fDesoAAPS2",   1,"x",1
 "BODCOD    ","O2FuncBOD ",   1,"x",1
 "BODCOD    ","AgeFun    ",   2,"x",1
 "BODCOD    ","BOD5      ",   3,"x",1
@@ -3962,7 +3980,6 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_G5 ","G5_DoSpawn",  22,"x",1
 "IM_Floceq ","SPMratioem",   1,"x",1
 "AttribOut ","Attribute ",   1,"x",1
-"CalTemp   ","Temp      ",   1,"x",1
 "TEO       ","WLC_seg_Q ",   1,"x",1
 "TEO       ","WLC_seg_A ",   2,"x",1
 "TEO       ","WLCa_seg_Q",   3,"x",1
