@@ -425,7 +425,7 @@ subroutine copyCachedCrossSections( linklist, ipol, success )
     integer, dimension(:), allocatable, intent(  out) :: ipol                !< Polygon administration
     logical,                            intent(  out) :: success             !< The cached information was compatible if true
 
-    integer                :: i
+    integer                :: i, np
 
     if ( cache_success ) then
         !
@@ -436,28 +436,30 @@ subroutine copyCachedCrossSections( linklist, ipol, success )
         endif
         !
         ! Check that the coordinates and the type are identical to the cached values
-        ! Note: check on zp may be superfluous ...
+        ! Note: no check on zp, it seems filled with arbitrary data (at least in 2D?)
         !
         success = .true.
         do i = 1,size(cache_cross_sections)
-            if ( any( cache_cross_sections(i)%path%xp /= crs(i)%path%xp ) .or. &
-                 any( cache_cross_sections(i)%path%yp /= crs(i)%path%yp ) .or. &
-                 any( cache_cross_sections(i)%path%zp /= crs(i)%path%zp ) ) then
+            np = cache_cross_sections(i)%path%np
+            if ( np /= crs(i)%path%np ) then
                 success        = .false.
+                exit
+            endif
+            if ( any( cache_cross_sections(i)%path%xp(1:np) /= crs(i)%path%xp(1:np) ) .or. &
+                 any( cache_cross_sections(i)%path%yp(1:np) /= crs(i)%path%yp(1:np) ) ) then
+                success        = .false.
+                exit
             endif
         enddo
 
         if ( success ) then
             linklist = cache_linklist
             ipol     = cache_ipol
-        endif
 
-        ! Not yet
-        return
-
-        if ( success ) then
             do i = 1,size(cache_cross_sections)
                 ! Rely on automatic (re)allocation)
+                crs(i)%path%np     = cache_cross_sections(i)%path%np
+                crs(i)%path%lnx    = cache_cross_sections(i)%path%lnx
                 crs(i)%path%indexp = cache_cross_sections(i)%path%indexp
                 crs(i)%path%xk     = cache_cross_sections(i)%path%xk
                 crs(i)%path%yk     = cache_cross_sections(i)%path%yk

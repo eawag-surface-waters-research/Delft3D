@@ -14273,8 +14273,7 @@ subroutine crosssections_on_flowgeom()
     call realloc(numlist, ncrs, keepExisting = .true., fill = 0) ! In case pli-based cross sections have not allocated this yet.
     call realloc(linklist, (/ max(numcrossedlinks, 1), ncrs /), keepExisting = .true., fill = 0)  ! In addition to pli-based cross sections (if any), also support 1D branchid-based cross sections.
 
-!!  call copyCachedCrossSections( success )
-    success = .false.
+    call copyCachedCrossSections( iLink, ipol, success )
 
     CALL READYY('Enabling cross sections on grid', 0d0)
     do ic=1,ncrs
@@ -36618,7 +36617,7 @@ ilp:do isplit=1,MAXSPLIT
    if (len_trim(md_dryptsfile) > 0 .or. len_trim(md_encfile) > 0) then
       call update_cell_circumcenters()
    end if
-   
+
    return
  end subroutine delete_dry_points_and_areas
 
