@@ -354,7 +354,7 @@ namespace Deltares.UGrid.Tests.Api
             // 
             var disposable2DMeshGeometry = new Disposable2DMeshGeometry
             {
-                Name = "Mesh 2d",
+                Name = "Mesh2d",
                 NodesX = new double[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 },
                 NodesY = new double[] { 1, 1, 1, 2, 2, 2, 3, 3, 3 },
                 EdgeNodes = new []{0,1,1,2,0,3,1,4,2,5,3,4,4,5,3,6,4,7,5,8,6,7,7,8},
@@ -374,6 +374,22 @@ namespace Deltares.UGrid.Tests.Api
                 var meshId = api.WriteMesh2D(disposable2DMeshGeometry);
 
                 Assert.AreEqual(1, meshId);
+
+                api.Close();
+
+                api.Open(path);
+
+                meshId = api.GetMeshIdsByMeshType(UGridMeshType.Mesh2D).First();
+                var readMesh2DGeometry = api.GetMesh2D(meshId);
+
+                Assert.AreEqual(disposable2DMeshGeometry.NodesX, readMesh2DGeometry.NodesX);
+                Assert.AreEqual(disposable2DMeshGeometry.NodesY, readMesh2DGeometry.NodesY);
+                Assert.AreEqual(disposable2DMeshGeometry.EdgeNodes, readMesh2DGeometry.EdgeNodes);
+                Assert.AreEqual(disposable2DMeshGeometry.FaceNodes, readMesh2DGeometry.FaceNodes);
+                Assert.AreEqual(disposable2DMeshGeometry.FaceX, readMesh2DGeometry.FaceX);
+                Assert.AreEqual(disposable2DMeshGeometry.FaceY, readMesh2DGeometry.FaceY);
+                Assert.AreEqual(disposable2DMeshGeometry.MaxNumberOfFaceNodes, readMesh2DGeometry.MaxNumberOfFaceNodes);
+                Assert.AreEqual(disposable2DMeshGeometry.Name, readMesh2DGeometry.Name);
             }
         }
 
@@ -451,7 +467,7 @@ namespace Deltares.UGrid.Tests.Api
                 BranchIDs = new int[] { 0, 0, 0 },
                 BranchOffsets = new double[] { 1, 2, 3 },
                 NodeLongNames = new string[] { "Long name 1", "Long name 2", "Long name 3" },
-                NodeIds = new string[] { "Node 1", "Node 2", "Node 3" },
+                NodeIds = new string[] { "Node1", "Node2", "Node3" },
                 EdgeBranchIds = new int[] {0, 0},
                 EdgeCenterPointOffset = new double[] {1.5, 2.5},
                 EdgeCenterPointX = new []{1.5,2.5},
@@ -470,9 +486,22 @@ namespace Deltares.UGrid.Tests.Api
                 Assert.AreEqual(1, meshId);
 
                 api.Close();
-            }
 
-            // todo : add asserts
+                meshId = api.GetMeshIdsByMeshType(UGridMeshType.Mesh1D).First();
+                var readMesh = api.GetMesh1D(meshId);
+
+                Assert.AreEqual(disposable1DMeshGeometry.Name, readMesh.Name);
+                Assert.AreEqual(disposable1DMeshGeometry.NodesX, readMesh.NodesX);
+                Assert.AreEqual(disposable1DMeshGeometry.NodesY, readMesh.NodesY);
+                Assert.AreEqual(disposable1DMeshGeometry.BranchIDs, readMesh.BranchIDs);
+                Assert.AreEqual(disposable1DMeshGeometry.BranchOffsets, readMesh.BranchOffsets);
+                Assert.AreEqual(disposable1DMeshGeometry.NodeLongNames, readMesh.NodeLongNames);
+                Assert.AreEqual(disposable1DMeshGeometry.NodeIds, readMesh.NodeIds);
+                Assert.AreEqual(disposable1DMeshGeometry.EdgeBranchIds, readMesh.EdgeBranchIds);
+                Assert.AreEqual(disposable1DMeshGeometry.EdgeCenterPointOffset, readMesh.EdgeCenterPointOffset);
+                Assert.AreEqual(disposable1DMeshGeometry.EdgeCenterPointX, readMesh.EdgeCenterPointX);
+                Assert.AreEqual(disposable1DMeshGeometry.EdgeCenterPointY, readMesh.EdgeCenterPointY);
+            }
         }
 
         [Test]
@@ -536,9 +565,16 @@ namespace Deltares.UGrid.Tests.Api
                 Assert.AreEqual(1, linksId);
 
                 api.Close();
-            }
 
-            // todo : add asserts
+                linksId = api.GetLinksId();
+                var readLinksGeometry = api.GetLinks(linksId);
+
+                Assert.AreEqual(disposableLinksGeometry.LinkId, readLinksGeometry.LinkId);
+                Assert.AreEqual(disposableLinksGeometry.LinkLongName, readLinksGeometry.LinkLongName);
+                Assert.AreEqual(disposableLinksGeometry.LinkType, readLinksGeometry.LinkType);
+                Assert.AreEqual(disposableLinksGeometry.Mesh1DFrom, readLinksGeometry.Mesh1DFrom);
+                Assert.AreEqual(disposableLinksGeometry.Mesh2DTo, readLinksGeometry.Mesh2DTo);
+            }
         }
     }
 }
