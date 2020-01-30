@@ -427,6 +427,8 @@ subroutine copyCachedCrossSections( linklist, ipol, success )
 
     integer                :: i, np
 
+    success = .false.
+
     if ( cache_success ) then
         !
         ! Check the number of observations
