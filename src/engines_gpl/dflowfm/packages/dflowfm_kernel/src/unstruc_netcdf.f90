@@ -2897,22 +2897,23 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
       ierr = nf90_def_var(irstfile, 'E',  nf90_double, (/ id_flowelemdim, id_timedim /) , id_E)
       ierr = nf90_put_att(irstfile, id_E,   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
       ierr = nf90_put_att(irstfile, id_E,   'standard_name', 'sea_surface_bulk_wave_energy')                          ! not CF
-      ierr = nf90_put_att(irstfile, id_E,   'long_name'    , 'wave energy per square meter')          
+      ierr = nf90_put_att(irstfile, id_E,   'long_name'    , 'wave energy per square meter')
       ierr = nf90_put_att(irstfile, id_E,   'units'        , 'J m-2')
 
       ierr = nf90_def_var(irstfile, 'thetamean',  nf90_double, (/ id_flowelemdim, id_timedim /) , id_thetamean)
       ierr = nf90_put_att(irstfile, id_thetamean,   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
       ierr = nf90_put_att(irstfile, id_thetamean,   'standard_name', 'sea_surface_wave_from_direction')                          ! not CF
-      ierr = nf90_put_att(irstfile, id_thetamean,   'long_name'    , 'mean wave angle')          
+      ierr = nf90_put_att(irstfile, id_thetamean,   'long_name'    , 'mean wave angle')
       ierr = nf90_put_att(irstfile, id_thetamean,   'units'        , 'rad')
 
       ierr = nf90_def_var(irstfile, 'sigmwav',  nf90_double, (/ id_flowelemdim, id_timedim /) , id_sigmwav)
       ierr = nf90_put_att(irstfile, id_sigmwav,   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
       ierr = nf90_put_att(irstfile, id_sigmwav,   'standard_name', 'sea_surface_wave_mean_frequency')                          ! not CF
-      ierr = nf90_put_att(irstfile, id_sigmwav,   'long_name'    , 'mean wave frequency')          
+      ierr = nf90_put_att(irstfile, id_sigmwav,   'long_name'    , 'mean wave frequency')
       ierr = nf90_put_att(irstfile, id_sigmwav,   'units'        , 'rad s-1')
     end if
-    
+
+    ndx1d = ndxi - ndx2d
     if (jased > 0 .and. stm_included) then
        ierr = nf90_def_dim(irstfile, 'nSedTot', stmpar%lsedtot, id_sedtotdim)
        ierr = nf90_def_dim(irstfile, 'nSedSus', stmpar%lsedsus, id_sedsusdim)
@@ -2950,7 +2951,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
       ierr = nf90_put_att(irstfile, id_morft,  'standard_name', 'morphological time')
       ierr = nf90_put_att(irstfile, id_morbl,   'units'       , 'days')      
       !
-      ndx1d = ndxi - ndx2d
       if (ndx1d > 0 .and. stm_included) then
          nCrs = 0
          do i = 1,size(network%crs%cross)
