@@ -321,6 +321,8 @@ module m_readStorageNodes
                if (useStreetStorage) then
                   call setTable(pSto%streetArea, interpol, streetLevel, streetStorageArea, numLevels)
                end if
+            else
+               pSto%storageType = nt_Reservoir
             end if               
          endif
       end do
