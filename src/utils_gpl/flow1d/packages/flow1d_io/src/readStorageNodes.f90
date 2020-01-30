@@ -267,7 +267,7 @@ module m_readStorageNodes
                call prop_get_string(node_ptr, '', 'interpolate', sInterpolate, success1)
                if (.not. success1) then
                   sInterpolate = 'linear'
-                  write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(storgNodesFile), ''': [', trim(blockname), ']. Field ''interpolate'' is missing. Use default value storageType = linear.'
+                  write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(storgNodesFile), ''': [', trim(blockname), ']. Field ''interpolate'' is missing. Use default value interpolate = linear.'
                   call warn_flush()
                end if
                if ((.not. strcmpi(sInterpolate, 'linear')) .and. (.not. strcmpi(sInterpolate, 'block'))) then
