@@ -331,7 +331,12 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        ! Recalculates the effective global number of open boundary conditions
        !
        call dfsync(gdp)
-       call dffind_duplicate(lundia, nto, nobcto, nobcgl,  gdp%gdbcdat%bct_order, gdp)
+       if (nto > 0) then
+          call dffind_duplicate(lundia, nto, nobcto, nobcgl,  gdp%gdbcdat%bct_order, gdp)
+       else
+          nobcto = nto
+          nobcgl = nto
+       endif
     else
        nobcto = nto
        nobcgl = nto
@@ -411,7 +416,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     ! accumulate information across MPI partitions
     !
-    if (parll) then
+    if (parll .and. nto>0) then
        call dfsync(gdp)
        allocate( qtfrct_global(nobcgl), stat=istat)
        if (istat /= 0) then
@@ -594,7 +599,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     ! Update the discharge for total discharge or QH boundaries for the overall domain by summing up among those
     !
-    if (parll) then
+    if (parll .and. nto>0) then
        call dfsync(gdp)
        allocate( qtfrct_global(nobcgl), stat=istat)
        if (istat /= 0) then
