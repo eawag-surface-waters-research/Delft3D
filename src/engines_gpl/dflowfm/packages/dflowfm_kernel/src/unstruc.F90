@@ -2512,7 +2512,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     do i = 1, nstor
        k1 = stors(i)%gridPoint
        vol1(k1) = vol1(k1) + getVolume(stors(i), s1(k1))
-       a1(k1)   = a1(k1)   + max(getSurface(stors(i), s1(k1)),0.1d0)
+       a1(k1)   = a1(k1)   + getSurface(stors(i), s1(k1))
     enddo
  endif
 
