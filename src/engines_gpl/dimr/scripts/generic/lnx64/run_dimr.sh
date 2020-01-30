@@ -225,7 +225,7 @@ else
         fi
         #
         # Create machinefile using $PE_HOSTFILE
-        if [ "$NNODES" = 1 ]; then
+        if [ $NNODES -eq 1 ]; then
             echo " ">$(pwd)/machinefile
         else
             if [ -n $corespernode ]; then
@@ -243,14 +243,14 @@ else
         cat $(pwd)/machinefile
         echo ----------------------------------------------------------------------
 
-        if [ "$NNODES" != 1 ]; then
+        if [ $NNODES -ne 1 ]; then
             echo "Starting mpd..."
             mpd &
             mpdboot -n $NSLOTS
         fi
 
         node_number=$NSLOTS
-        while [ "$node_number" >= 1 ]; do
+        while [ $node_number -ge 1 ]; do
            node_number=`expr $node_number - 1`
            ln -s /dev/null log$node_number.irlog
         done
