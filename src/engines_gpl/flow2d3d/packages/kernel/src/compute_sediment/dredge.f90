@@ -1682,7 +1682,11 @@ subroutine dredge_initialize(gdp)
           !
           numpoints = 0.0_fp
           numpoints(                dredge_domainnr) = real(pdredge%npnt,fp)
-          numpoints(dredge_ndomains+dredge_domainnr) = real(size(pdredge%nm,1),fp)
+          if (associated(pdredge%nm)) then
+             numpoints(dredge_ndomains+dredge_domainnr) = real(size(pdredge%nm,1),fp)
+          else
+             numpoints(dredge_ndomains+dredge_domainnr) = 0.0_fp
+          endif
           !
           call dredgecommunicate(numpoints, 2*dredge_ndomains, error, msgstr)
           if (error) goto 999
