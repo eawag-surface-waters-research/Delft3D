@@ -39406,225 +39406,128 @@ if (jahisbal > 0) then
       !
       ! === Pumps
       !
-      do n = 1,npumpsg
-         valpump(1:5,n) = 0d0
-         valpump(6:NUMVALS_PUMP,n) = dmiss
-         if (allocated(pumpsWithLevels)) then
-            istru = pumpsWithLevels(n)
-         else
-            istru = -1
-         end if
-
-         do L = L1pumpsg(n),L2pumpsg(n)
-            Lf = kpump(3,L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = 1d0
-            if( Ln(1,La) /= kpump(1,L) ) then
-               dir = -1d0
-            end if
-            call fill_valstruct_perlink(valpump(:,n), La, dir, ST_PUMP, istru, L-L1pumpsg(n)+1)
-         enddo
-         call average_valstruct(valpump(:,n), ST_UNSET, 0, 0, 0) ! TODO: UNST-2705: move code above and below to valstruct routines.
-         if (istru > 0) then ! TODO: UNST-2587: once all pump code is done, remove this temp IF.
-         pstru => network%sts%struct(istru)
-         valpump(6,n) = GetPumpCapacity(pstru)
-         valpump(12,n) = sign(1,pstru%pump%direction) * valpump(2,n) ! Discharge w.r.t. pump direction (same sign as capacity)
-         valpump(7,n) = GetPumpStage(pstru)
-         if (valpump(7,n) < 0d0) then
-            valpump(7,n) = dmiss ! Set to fill value if stage is irrelevant.
-         end if
-         valpump(10,n) = getPumpDsLevel(pstru)
-         valpump(11,n) = getPumpSsLevel(pstru)
-         valpump(8,n) = valpump(10,n) - valpump(11,n) ! Pump head
-         valpump(9,n) = GetPumpReductionFactor(pstru)
-         end if
-      enddo
-      !
-      ! === Gates
-      !
-      do n = 1,ngatesg
-         valgate(:,n) = 0d0
-         do L = L1gatesg(n), L2gatesg(n)
-            Lf = kgate(3,L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = 1d0
-            ku = ln(1,La)
-            kd = ln(2,La)
-            if( Ln(1,La) /= kgate(1,L) ) then
-               dir = -1d0
-               ku = ln(2,La)
-               kd = ln(1,La)
-            end if
-            valgate(1,n) = valgate(1,n) + wu(La)
-            valgate(2,n) = valgate(2,n) + q1(La) * dir
-            valgate(3,n) = valgate(3,n) + s1(ku) * wu(La)
-            valgate(4,n) = valgate(4,n) + s1(kd) * wu(La)
-         enddo
-         if( jampi == 0 ) then
-            if( valgate(1,n) == 0d0 ) then
-               valgate(2,n) = dmiss
-               valgate(3,n) = dmiss
-               valgate(4,n) = dmiss
+      if (allocated(valpump)) then
+         do n = 1,npumpsg
+            valpump(1:5,n) = 0d0
+            valpump(6:NUMVALS_PUMP,n) = dmiss
+            if (allocated(pumpsWithLevels)) then
+               istru = pumpsWithLevels(n)
             else
-               valgate(3,n) = valgate(3,n) / valgate(1,n)
-               valgate(4,n) = valgate(4,n) / valgate(1,n)
-            endif
-         endif
-      enddo
-      !
-      ! === Dams
-      !
-      do n = 1,ncdamsg
-         valcdam(:,n) = 0d0
-         do L = L1cdamsg(n), L2cdamsg(n)
-            Lf = kcdam(3,L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = 1d0
-            ku = ln(1,La)
-            kd = ln(2,La)
-            if( Ln(1,La) /= kcdam(1,L) ) then
-               dir = -1d0
-               ku = ln(2,La)
-               kd = ln(1,La)
+               istru = -1
             end if
-            valcdam(1,n) = valcdam(1,n) + wu(La)
-            valcdam(2,n) = valcdam(2,n) + q1(La) * dir
-            valcdam(3,n) = valcdam(3,n) + s1(ku) * wu(La)
-            valcdam(4,n) = valcdam(4,n) + s1(kd) * wu(La)
-         enddo
-         if( jampi == 0 ) then
-            if( valcdam(1,n) == 0d0 ) then
-               valcdam(2,n) = dmiss
-               valcdam(3,n) = dmiss
-               valcdam(4,n) = dmiss
-            else
-               valcdam(3,n) = valcdam(3,n) / valcdam(1,n)
-               valcdam(4,n) = valcdam(4,n) / valcdam(1,n)
-            endif
-         endif
-      enddo
-      !
-      ! === General structures (from old ext file)
-      !
-      do n = 1,ncgensg
-         i = n
-         valcgen(:,n) = 0d0
-         do L = L1cgensg(i),L2cgensg(i)
-            Lf = kcgen(3,L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = 1d0
-            ku = ln(1,La)
-            kd = ln(2,La)
-            if( Ln(1,La) /= kcgen(1,L) ) then
-               dir = -1d0
-               ku = ln(2,La)
-               kd = ln(1,La)
-            end if
-            valcgen(1,n) = valcgen(1,n) + wu(La)
-            valcgen(2,n) = valcgen(2,n) + q1(La) * dir
-            valcgen(3,n) = valcgen(3,n) + s1(ku) * wu(La)
-            valcgen(4,n) = valcgen(4,n) + s1(kd) * wu(La)
-         enddo
-         if( jampi == 0 ) then
-            if( valcgen(1,n) == 0d0 ) then
-               valcgen(2,n) = dmiss
-               valcgen(3,n) = dmiss
-               valcgen(4,n) = dmiss
-            else
-               valcgen(3,n) = valcgen(3,n) / valcgen(1,n)
-               valcgen(4,n) = valcgen(4,n) / valcgen(1,n)
-            endif
-         endif
-      enddo
-      !
-      ! === Gates (new)
-      !
-      do n = 1,ngategen
-         i = gate2cgen(n)
-         valgategen(:,n) = 0d0
-         do L = L1cgensg(i), L2cgensg(i)
-            Lf = kcgen(3,L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = 1d0
-            ku = ln(1,La)
-            kd = ln(2,La)
-            if( Ln(1,La) /= kcgen(1,L) ) then
-               dir = -1d0
-               ku = ln(2,La)
-               kd = ln(1,La)
-            end if
-            valgategen(1,n) = valgategen(1,n) + wu(La)
-            valgategen(2,n) = valgategen(2,n) + q1(La) * dir
-            valgategen(3,n) = valgategen(3,n) + s1(ku) * wu(La)
-            valgategen(4,n) = valgategen(4,n) + s1(kd) * wu(La)
-            k = kcgen(1,L) ; if( q1(La) < 0d0 ) k = kcgen(2,L)
-            valgategen(5,n) = valgategen(5,n) + s1(k) * wu(La)
-         enddo
-         if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
-            valgategen(6,n) = 1               ! rank contains the gate.
-            valgategen(7,n) = zcgen(3*i  )    ! id_gategen_openw.
-            valgategen(8,n) = zcgen(3*i-1)    ! id_gategen_edgel.
-            valgategen(9,n) = zcgen(3*i-2)    ! id_gategen_sillh.
-         end if
-         if( jampi == 0 ) then
-            if( valgategen(1,n) == 0d0 ) then
-               valgategen(2,n) = dmiss
-               valgategen(3,n) = dmiss
-               valgategen(4,n) = dmiss
-               valgategen(5,n) = dmiss
-            else
-               valgategen(3,n) = valgategen(3,n) / valgategen(1,n)
-               valgategen(4,n) = valgategen(4,n) / valgategen(1,n)
-               valgategen(5,n) = min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(5,n)/valgategen(1,n)-zcgen(3*i-2) )
-            endif
-         endif
-      enddo
-      !
-      ! === Weirs
-      !
-      if (network%sts%numWeirs > 0) then ! new weir
-         do n = 1, nweirgen
-            valweirgen(1:NUMVALS_WEIRGEN,n) = 0d0
-            istru = network%sts%weirIndices(n)
-            pstru => network%sts%struct(istru)
-            nlinks = pstru%numlinks
-            do L = 1, nlinks
-               Lf = pstru%linknumbers(L)
+         
+            do L = L1pumpsg(n),L2pumpsg(n)
+               Lf = kpump(3,L)
                La = abs( Lf )
                if( jampi > 0 ) then
                   call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
                   if ( jaghost.eq.1 ) cycle
                endif
-               dir = sign(1d0,dble(Lf))
-               call fill_valstruct_perlink(valweirgen(:,n), La, dir, ST_WEIR, istru, L)
+               dir = 1d0
+               if( Ln(1,La) /= kpump(1,L) ) then
+                  dir = -1d0
+               end if
+               call fill_valstruct_perlink(valpump(:,n), La, dir, ST_PUMP, istru, L-L1pumpsg(n)+1)
             enddo
-            call average_valstruct(valweirgen(:,n), ST_WEIR, istru, nlinks, NUMVALS_WEIRGEN)
+            call average_valstruct(valpump(:,n), ST_UNSET, 0, 0, 0) ! TODO: UNST-2705: move code above and below to valstruct routines.
+            if (istru > 0) then ! TODO: UNST-2587: once all pump code is done, remove this temp IF.
+            pstru => network%sts%struct(istru)
+            valpump(6,n) = GetPumpCapacity(pstru)
+            valpump(12,n) = sign(1,pstru%pump%direction) * valpump(2,n) ! Discharge w.r.t. pump direction (same sign as capacity)
+            valpump(7,n) = GetPumpStage(pstru)
+            if (valpump(7,n) < 0d0) then
+               valpump(7,n) = dmiss ! Set to fill value if stage is irrelevant.
+            end if
+            valpump(10,n) = getPumpDsLevel(pstru)
+            valpump(11,n) = getPumpSsLevel(pstru)
+            valpump(8,n) = valpump(10,n) - valpump(11,n) ! Pump head
+            valpump(9,n) = GetPumpReductionFactor(pstru)
+            end if
          enddo
-      else
-         ! old weir, do not compute the new extra fileds
-         do n = 1, nweirgen
-            i = weir2cgen(n)
-            valweirgen(1:NUMVALS_WEIRGEN,n) = 0d0
+      end if
+      !
+      ! === Gates
+      !
+      if (allocated(valgate)) then
+         do n = 1,ngatesg
+            valgate(:,n) = 0d0
+            do L = L1gatesg(n), L2gatesg(n)
+               Lf = kgate(3,L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = 1d0
+               ku = ln(1,La)
+               kd = ln(2,La)
+               if( Ln(1,La) /= kgate(1,L) ) then
+                  dir = -1d0
+                  ku = ln(2,La)
+                  kd = ln(1,La)
+               end if
+               valgate(1,n) = valgate(1,n) + wu(La)
+               valgate(2,n) = valgate(2,n) + q1(La) * dir
+               valgate(3,n) = valgate(3,n) + s1(ku) * wu(La)
+               valgate(4,n) = valgate(4,n) + s1(kd) * wu(La)
+            enddo
+            if( jampi == 0 ) then
+               if( valgate(1,n) == 0d0 ) then
+                  valgate(2,n) = dmiss
+                  valgate(3,n) = dmiss
+                  valgate(4,n) = dmiss
+               else
+                  valgate(3,n) = valgate(3,n) / valgate(1,n)
+                  valgate(4,n) = valgate(4,n) / valgate(1,n)
+               endif
+            endif
+         enddo
+      end if
+      !
+      ! === Dams
+      !
+      if (allocated(valcdam)) then
+         do n = 1,ncdamsg
+            valcdam(:,n) = 0d0
+            do L = L1cdamsg(n), L2cdamsg(n)
+               Lf = kcdam(3,L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = 1d0
+               ku = ln(1,La)
+               kd = ln(2,La)
+               if( Ln(1,La) /= kcdam(1,L) ) then
+                  dir = -1d0
+                  ku = ln(2,La)
+                  kd = ln(1,La)
+               end if
+               valcdam(1,n) = valcdam(1,n) + wu(La)
+               valcdam(2,n) = valcdam(2,n) + q1(La) * dir
+               valcdam(3,n) = valcdam(3,n) + s1(ku) * wu(La)
+               valcdam(4,n) = valcdam(4,n) + s1(kd) * wu(La)
+            enddo
+            if( jampi == 0 ) then
+               if( valcdam(1,n) == 0d0 ) then
+                  valcdam(2,n) = dmiss
+                  valcdam(3,n) = dmiss
+                  valcdam(4,n) = dmiss
+               else
+                  valcdam(3,n) = valcdam(3,n) / valcdam(1,n)
+                  valcdam(4,n) = valcdam(4,n) / valcdam(1,n)
+               endif
+            endif
+         enddo
+      end if
+      !
+      ! === General structures (from old ext file)
+      !
+      if (allocated(valcgen)) then
+         do n = 1,ncgensg
+            i = n
+            valcgen(:,n) = 0d0
             do L = L1cgensg(i),L2cgensg(i)
                Lf = kcgen(3,L)
                La = abs( Lf )
@@ -39633,165 +39536,136 @@ if (jahisbal > 0) then
                   if ( jaghost.eq.1 ) cycle
                endif
                dir = 1d0
+               ku = ln(1,La)
+               kd = ln(2,La)
                if( Ln(1,La) /= kcgen(1,L) ) then
                   dir = -1d0
+                  ku = ln(2,La)
+                  kd = ln(1,La)
                end if
-               call fill_valstruct_perlink(valweirgen(:,n), La, dir, ST_UNSET, 0, 0)
+               valcgen(1,n) = valcgen(1,n) + wu(La)
+               valcgen(2,n) = valcgen(2,n) + q1(La) * dir
+               valcgen(3,n) = valcgen(3,n) + s1(ku) * wu(La)
+               valcgen(4,n) = valcgen(4,n) + s1(kd) * wu(La)
             enddo
-            call average_valstruct(valweirgen(:,n), ST_UNSET, 0, 0, 0)
-            if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
-               valweirgen(NUMVALS_WEIRGEN,n) = 1  ! rank contains the weir.
-               valweirgen(10,n) = zcgen(3*i  )    ! id_weirgen_crestw.
-               valweirgen(9,n) = zcgen(3*i-2)     ! id_weirgen_cresth.
-            end if
+            if( jampi == 0 ) then
+               if( valcgen(1,n) == 0d0 ) then
+                  valcgen(2,n) = dmiss
+                  valcgen(3,n) = dmiss
+                  valcgen(4,n) = dmiss
+               else
+                  valcgen(3,n) = valcgen(3,n) / valcgen(1,n)
+                  valcgen(4,n) = valcgen(4,n) / valcgen(1,n)
+               endif
+            endif
          enddo
+      end if
+      !
+      ! === Gates (new)
+      !
+      if (allocated(valgategen)) then
+         do n = 1,ngategen
+            i = gate2cgen(n)
+            valgategen(:,n) = 0d0
+            do L = L1cgensg(i), L2cgensg(i)
+               Lf = kcgen(3,L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = 1d0
+               ku = ln(1,La)
+               kd = ln(2,La)
+               if( Ln(1,La) /= kcgen(1,L) ) then
+                  dir = -1d0
+                  ku = ln(2,La)
+                  kd = ln(1,La)
+               end if
+               valgategen(1,n) = valgategen(1,n) + wu(La)
+               valgategen(2,n) = valgategen(2,n) + q1(La) * dir
+               valgategen(3,n) = valgategen(3,n) + s1(ku) * wu(La)
+               valgategen(4,n) = valgategen(4,n) + s1(kd) * wu(La)
+               k = kcgen(1,L) ; if( q1(La) < 0d0 ) k = kcgen(2,L)
+               valgategen(5,n) = valgategen(5,n) + s1(k) * wu(La)
+            enddo
+            if (L1cgensg(i) <= L2cgensg(i)) then ! At least one flow link in this domain is affected by this structure.
+               valgategen(6,n) = 1               ! rank contains the gate.
+               valgategen(7,n) = zcgen(3*i  )    ! id_gategen_openw.
+               valgategen(8,n) = zcgen(3*i-1)    ! id_gategen_edgel.
+               valgategen(9,n) = zcgen(3*i-2)    ! id_gategen_sillh.
+            end if
+            if( jampi == 0 ) then
+               if( valgategen(1,n) == 0d0 ) then
+                  valgategen(2,n) = dmiss
+                  valgategen(3,n) = dmiss
+                  valgategen(4,n) = dmiss
+                  valgategen(5,n) = dmiss
+               else
+                  valgategen(3,n) = valgategen(3,n) / valgategen(1,n)
+                  valgategen(4,n) = valgategen(4,n) / valgategen(1,n)
+                  valgategen(5,n) = min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(5,n)/valgategen(1,n)-zcgen(3*i-2) )
+               endif
+            endif
+         enddo
+      end if
+      !
+      ! === Weirs
+      !
+      if (allocated(valweirgen)) then
+         if (network%sts%numWeirs > 0) then ! new weir
+            do n = 1, nweirgen
+               valweirgen(1:NUMVALS_WEIRGEN,n) = 0d0
+               istru = network%sts%weirIndices(n)
+               pstru => network%sts%struct(istru)
+               nlinks = pstru%numlinks
+               do L = 1, nlinks
+                  Lf = pstru%linknumbers(L)
+                  La = abs( Lf )
+                  if( jampi > 0 ) then
+                     call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                     if ( jaghost.eq.1 ) cycle
+                  endif
+                  dir = sign(1d0,dble(Lf))
+                  call fill_valstruct_perlink(valweirgen(:,n), La, dir, ST_WEIR, istru, L)
+               enddo
+               call average_valstruct(valweirgen(:,n), ST_WEIR, istru, nlinks, NUMVALS_WEIRGEN)
+            enddo
+         else
+            ! old weir, do not compute the new extra fileds
+            do n = 1, nweirgen
+               i = weir2cgen(n)
+               valweirgen(1:NUMVALS_WEIRGEN,n) = 0d0
+               do L = L1cgensg(i),L2cgensg(i)
+                  Lf = kcgen(3,L)
+                  La = abs( Lf )
+                  if( jampi > 0 ) then
+                     call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                     if ( jaghost.eq.1 ) cycle
+                  endif
+                  dir = 1d0
+                  if( Ln(1,La) /= kcgen(1,L) ) then
+                     dir = -1d0
+                  end if
+                  call fill_valstruct_perlink(valweirgen(:,n), La, dir, ST_UNSET, 0, 0)
+               enddo
+               call average_valstruct(valweirgen(:,n), ST_UNSET, 0, 0, 0)
+               if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
+                  valweirgen(NUMVALS_WEIRGEN,n) = 1  ! rank contains the weir.
+                  valweirgen(10,n) = zcgen(3*i  )    ! id_weirgen_crestw.
+                  valweirgen(9,n) = zcgen(3*i-2)     ! id_weirgen_cresth.
+               end if
+            enddo
+         end if
       end if
 
       !
       ! === Orifice
       !
-      do n = 1, network%sts%numOrifices
-         valorifgen(1:NUMVALS_ORIFGEN,n) = 0d0
-         istru = network%sts%orificeIndices(n)
-         pstru => network%sts%struct(istru)
-         nlinks = pstru%numlinks
-         do L = 1, nlinks
-            Lf = pstru%linknumbers(L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valorifgen(:,n), La, dir, ST_ORIFICE, istru, L)
-         enddo
-         call average_valstruct(valorifgen(:,n), ST_ORIFICE, istru, nlinks, NUMVALS_ORIFGEN)
-      enddo
-
-      !
-      ! === Bridge
-      !
-      do n = 1, network%sts%numBridges
-         valbridge(1:NUMVALS_BRIDGE,n) = 0d0
-         istru = network%sts%bridgeIndices(n)
-         pstru => network%sts%struct(istru)
-         nlinks = pstru%numlinks
-         do L = 1, nlinks ! Currently bridges have always only 1 link.
-            Lf = pstru%linknumbers(L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valbridge(:,n), La, dir, ST_BRIDGE, istru, L)
-         enddo
-         call average_valstruct(valbridge(:,n), ST_BRIDGE, istru, nlinks, NUMVALS_BRIDGE)
-      enddo
-
-      !
-      ! === Culvert
-      !
-      do n = 1, network%sts%numCulverts
-         valculvert(1:NUMVALS_CULVERT,n) = 0d0
-         istru = network%sts%culvertIndices(n)
-         pstru => network%sts%struct(istru)
-         nlinks = pstru%numlinks
-         do L = 1, nlinks
-            Lf = pstru%linknumbers(L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valculvert(:,n), La, dir, ST_CULVERT, istru, L)
-         enddo
-         call average_valstruct(valculvert(:,n), ST_CULVERT, istru, nlinks, NUMVALS_CULVERT) ! TODO: UNST-2719: move code aboe/below to valstruc* routines
-         if (valculvert(1,n) == 0) then
-            valculvert(8:NUMVALS_CULVERT,n) = dmiss
-         else
-            valculvert(8,n) = get_crest_level(pstru)
-            valculvert(9,n) = dble(get_culvert_state(pstru))
-            valculvert(10,n) = get_gle(pstru)
-            valculvert(11,n) = get_opening_height(pstru)
-         end if
-      enddo
-
-      !
-      ! === Universal weir
-      !
-      do n = 1, network%sts%numuniweirs
-         valuniweir(1:NUMVALS_UNIWEIR,n) = 0d0
-         istru = network%sts%uniweirIndices(n)
-         pstru => network%sts%struct(istru)
-         nlinks = pstru%numlinks
-         do L = 1, nlinks
-            Lf = pstru%linknumbers(L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(valuniweir(:,n), La, dir, ST_UNI_WEIR, istru, L)
-         enddo
-         call average_valstruct(valuniweir(:,n), ST_UNI_WEIR, istru, nlinks, NUMVALS_UNIWEIR)
-         if (valuniweir(1,n) == 0) then
-            valuniweir(8:NUMVALS_UNIWEIR,n) = dmiss
-         else
-            valuniweir(8,n) = get_crest_level(pstru)
-         end if
-      enddo
-
-      !
-      ! == dambreak
-      !
-      do n = 1, ndambreaksg
-         ! valdambreak(NUMVALS_DAMBREAK,n) is the cumulative over time, we do not reset it to 0
-         valdambreak(1:NUMVALS_DAMBREAK-1,n) = 0d0
-         istru = dambreaks(n)
-         do L = L1dambreaksg(n),L2dambreaksg(n)
-            if (activeDambreakLinks(L) /= 1) then
-               cycle
-            end if
-
-            Lf = kdambreak(3,L)
-            La = abs( Lf )
-            if( jampi > 0 ) then
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = 1d0
-            if( Ln(1,La) /= kdambreak(1,L) ) then
-               dir = -1d0
-            end if
-            valdambreak(1,n) = valdambreak(1,n) + wu(La)
-            valdambreak(2,n) = valdambreak(2,n) + q1(La)*dir
-            valdambreak(6,n) = valdambreak(6,n) + au(La) ! flow area
-            valdambreak(9,n) = valdambreak(9,n) + wu(La)
-         enddo
-         valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
-         valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
-         valdambreak(5,n)  = valdambreak(3,n) - valdambreak(4,n)
-         valdambreak(7,n)  = normalVelocityDambreak(n)
-         if (network%sts%struct(istru)%dambreak%width > 0d0) then
-            valdambreak(8,n) = network%sts%struct(istru)%dambreak%crl ! crest level
-         else
-            La = abs(kdambreak(3,LStartBreach(n)))
-            valdambreak(8,n) = bob(1,La)                              ! No breach started yet, use bob as 'crest'.
-         end if
-         valdambreak(10,n) = waterLevelJumpDambreak(n)
-         valdambreak(11,n) = breachWidthDerivativeDambreak(n)
-         valdambreak(12,n) = valdambreak(12,n) + valdambreak(2,n) * timstep ! cumulative discharge
-      enddo
-      !
-      ! === General structures (from new ext file)
-      !
-      if (network%sts%numGeneralStructures > 0) then
-         do n = 1, ngenstru
-            valgenstru(1:NUMVALS_GENSTRU,n) = 0d0
-            istru = network%sts%generalStructureIndices(n)
+      if (allocated(valorifgen)) then
+         do n = 1, network%sts%numOrifices
+            valorifgen(1:NUMVALS_ORIFGEN,n) = 0d0
+            istru = network%sts%orificeIndices(n)
             pstru => network%sts%struct(istru)
             nlinks = pstru%numlinks
             do L = 1, nlinks
@@ -39802,58 +39676,210 @@ if (jahisbal > 0) then
                   if ( jaghost.eq.1 ) cycle
                endif
                dir = sign(1d0,dble(Lf))
-               call fill_valstruct_perlink(valgenstru(:,n), La, dir, ST_GENERAL_ST, istru, L)
+               call fill_valstruct_perlink(valorifgen(:,n), La, dir, ST_ORIFICE, istru, L)
             enddo
-            call average_valstruct(valgenstru(:,n), ST_GENERAL_ST, istru, nlinks, NUMVALS_GENSTRU)
-         enddo
-      else
-         ! old general structure, do not compute the new extra fileds
-         do n = 1,ngenstru
-            i = genstru2cgen(n)
-            valgenstru(1:NUMVALS_GENSTRU,n) = 0d0
-            do L = L1cgensg(i),L2cgensg(i)
-               Lf = kcgen(3,L)
-               La = abs( Lf )
-               if( jampi > 0 ) then
-                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-                  if ( jaghost.eq.1 ) cycle
-               endif
-               dir = 1d0
-               if( Ln(1,La) /= kcgen(1,L) ) then
-                  dir = -1d0
-               end if
-              call fill_valstruct_perlink(valgenstru(:,n), La, dir, ST_UNSET, 0, 0)
-            enddo
-            call average_valstruct(valgenstru(:,n), ST_UNSET, 0, 0, 0)
-            if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
-               valgenstru(NUMVALS_GENSTRU,n) = 1  ! rank contains the general structure.
-               valgenstru(13,n) = zcgen(3*i  )    ! id_genstru_openw.
-               valgenstru(14,n) = zcgen(3*i-1)    ! id_genstru_edgel.
-               valgenstru(9,n)  = zcgen(3*i-2)    ! id_genstru_cresth.
-            end if
+            call average_valstruct(valorifgen(:,n), ST_ORIFICE, istru, nlinks, NUMVALS_ORIFGEN)
          enddo
       end if
 
       !
-      ! === compound structure
+      ! === Bridge
       !
-      if (network%cmps%count > 0) then
-         do n = 1, network%cmps%count
-            valcmpstru(1:NUMVALS_CMPSTRU,n) = 0d0
-            pcmp => network%cmps%compound(n)
-            nlinks = pcmp%numlinks
-            do L = 1, nlinks
-               Lf = pcmp%linknumbers(L)
+      if (allocated(valbridge)) then
+         do n = 1, network%sts%numBridges
+            valbridge(1:NUMVALS_BRIDGE,n) = 0d0
+            istru = network%sts%bridgeIndices(n)
+            pstru => network%sts%struct(istru)
+            nlinks = pstru%numlinks
+            do L = 1, nlinks ! Currently bridges have always only 1 link.
+               Lf = pstru%linknumbers(L)
                La = abs( Lf )
                if( jampi > 0 ) then
                   call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
                   if ( jaghost.eq.1 ) cycle
                endif
                dir = sign(1d0,dble(Lf))
-               call fill_valstruct_perlink(valcmpstru(:,n), La, dir, ST_COMPOUND, 0, L)
+               call fill_valstruct_perlink(valbridge(:,n), La, dir, ST_BRIDGE, istru, L)
             enddo
-            call average_valstruct(valcmpstru(:,n), ST_COMPOUND, 0, nlinks, NUMVALS_CMPSTRU)
+            call average_valstruct(valbridge(:,n), ST_BRIDGE, istru, nlinks, NUMVALS_BRIDGE)
          enddo
+      end if
+
+      !
+      ! === Culvert
+      !
+      if (allocated(valculvert)) then
+         do n = 1, network%sts%numCulverts
+            valculvert(1:NUMVALS_CULVERT,n) = 0d0
+            istru = network%sts%culvertIndices(n)
+            pstru => network%sts%struct(istru)
+            nlinks = pstru%numlinks
+            do L = 1, nlinks
+               Lf = pstru%linknumbers(L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = sign(1d0,dble(Lf))
+               call fill_valstruct_perlink(valculvert(:,n), La, dir, ST_CULVERT, istru, L)
+            enddo
+            call average_valstruct(valculvert(:,n), ST_CULVERT, istru, nlinks, NUMVALS_CULVERT) ! TODO: UNST-2719: move code aboe/below to valstruc* routines
+            if (valculvert(1,n) == 0) then
+               valculvert(8:NUMVALS_CULVERT,n) = dmiss
+            else
+               valculvert(8,n) = get_crest_level(pstru)
+               valculvert(9,n) = dble(get_culvert_state(pstru))
+               valculvert(10,n) = get_gle(pstru)
+               valculvert(11,n) = get_opening_height(pstru)
+            end if
+         enddo
+      end if
+
+      !
+      ! === Universal weir
+      !
+      if (allocated(valuniweir)) then
+         do n = 1, network%sts%numuniweirs
+            valuniweir(1:NUMVALS_UNIWEIR,n) = 0d0
+            istru = network%sts%uniweirIndices(n)
+            pstru => network%sts%struct(istru)
+            nlinks = pstru%numlinks
+            do L = 1, nlinks
+               Lf = pstru%linknumbers(L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = sign(1d0,dble(Lf))
+               call fill_valstruct_perlink(valuniweir(:,n), La, dir, ST_UNI_WEIR, istru, L)
+            enddo
+            call average_valstruct(valuniweir(:,n), ST_UNI_WEIR, istru, nlinks, NUMVALS_UNIWEIR)
+            if (valuniweir(1,n) == 0) then
+               valuniweir(8:NUMVALS_UNIWEIR,n) = dmiss
+            else
+               valuniweir(8,n) = get_crest_level(pstru)
+            end if
+         enddo
+      end if
+
+      !
+      ! == dambreak
+      !
+      if (allocated(valdambreak)) then
+         do n = 1, ndambreaksg
+            ! valdambreak(NUMVALS_DAMBREAK,n) is the cumulative over time, we do not reset it to 0
+            valdambreak(1:NUMVALS_DAMBREAK-1,n) = 0d0
+            istru = dambreaks(n)
+            do L = L1dambreaksg(n),L2dambreaksg(n)
+               if (activeDambreakLinks(L) /= 1) then
+                  cycle
+               end if
+         
+               Lf = kdambreak(3,L)
+               La = abs( Lf )
+               if( jampi > 0 ) then
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = 1d0
+               if( Ln(1,La) /= kdambreak(1,L) ) then
+                  dir = -1d0
+               end if
+               valdambreak(1,n) = valdambreak(1,n) + wu(La)
+               valdambreak(2,n) = valdambreak(2,n) + q1(La)*dir
+               valdambreak(6,n) = valdambreak(6,n) + au(La) ! flow area
+               valdambreak(9,n) = valdambreak(9,n) + wu(La)
+            enddo
+            valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
+            valdambreak(4,n)  = waterLevelsDambreakDownStream(n)
+            valdambreak(5,n)  = valdambreak(3,n) - valdambreak(4,n)
+            valdambreak(7,n)  = normalVelocityDambreak(n)
+            if (network%sts%struct(istru)%dambreak%width > 0d0) then
+               valdambreak(8,n) = network%sts%struct(istru)%dambreak%crl ! crest level
+            else
+               La = abs(kdambreak(3,LStartBreach(n)))
+               valdambreak(8,n) = bob(1,La)                              ! No breach started yet, use bob as 'crest'.
+            end if
+            valdambreak(10,n) = waterLevelJumpDambreak(n)
+            valdambreak(11,n) = breachWidthDerivativeDambreak(n)
+            valdambreak(12,n) = valdambreak(12,n) + valdambreak(2,n) * timstep ! cumulative discharge
+         enddo
+      end if
+      !
+      ! === General structures (from new ext file)
+      !
+      if (allocated(valgenstru)) then
+         if (network%sts%numGeneralStructures > 0) then
+            do n = 1, ngenstru
+               valgenstru(1:NUMVALS_GENSTRU,n) = 0d0
+               istru = network%sts%generalStructureIndices(n)
+               pstru => network%sts%struct(istru)
+               nlinks = pstru%numlinks
+               do L = 1, nlinks
+                  Lf = pstru%linknumbers(L)
+                  La = abs( Lf )
+                  if( jampi > 0 ) then
+                     call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                     if ( jaghost.eq.1 ) cycle
+                  endif
+                  dir = sign(1d0,dble(Lf))
+                  call fill_valstruct_perlink(valgenstru(:,n), La, dir, ST_GENERAL_ST, istru, L)
+               enddo
+               call average_valstruct(valgenstru(:,n), ST_GENERAL_ST, istru, nlinks, NUMVALS_GENSTRU)
+            enddo
+         else
+            ! old general structure, do not compute the new extra fileds
+            do n = 1,ngenstru
+               i = genstru2cgen(n)
+               valgenstru(1:NUMVALS_GENSTRU,n) = 0d0
+               do L = L1cgensg(i),L2cgensg(i)
+                  Lf = kcgen(3,L)
+                  La = abs( Lf )
+                  if( jampi > 0 ) then
+                     call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                     if ( jaghost.eq.1 ) cycle
+                  endif
+                  dir = 1d0
+                  if( Ln(1,La) /= kcgen(1,L) ) then
+                     dir = -1d0
+                  end if
+                 call fill_valstruct_perlink(valgenstru(:,n), La, dir, ST_UNSET, 0, 0)
+               enddo
+               call average_valstruct(valgenstru(:,n), ST_UNSET, 0, 0, 0)
+               if (L1cgensg(i) <= L2cgensg(i)) then  ! At least one flow link in this domain is affected by this structure.
+                  valgenstru(NUMVALS_GENSTRU,n) = 1  ! rank contains the general structure.
+                  valgenstru(13,n) = zcgen(3*i  )    ! id_genstru_openw.
+                  valgenstru(14,n) = zcgen(3*i-1)    ! id_genstru_edgel.
+                  valgenstru(9,n)  = zcgen(3*i-2)    ! id_genstru_cresth.
+               end if
+            enddo
+         end if
+      end if
+
+      !
+      ! === compound structure
+      !
+      if (allocated(valcmpstru)) then
+         if (network%cmps%count > 0) then
+            do n = 1, network%cmps%count
+               valcmpstru(1:NUMVALS_CMPSTRU,n) = 0d0
+               pcmp => network%cmps%compound(n)
+               nlinks = pcmp%numlinks
+               do L = 1, nlinks
+                  Lf = pcmp%linknumbers(L)
+                  La = abs( Lf )
+                  if( jampi > 0 ) then
+                     call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                     if ( jaghost.eq.1 ) cycle
+                  endif
+                  dir = sign(1d0,dble(Lf))
+                  call fill_valstruct_perlink(valcmpstru(:,n), La, dir, ST_COMPOUND, 0, L)
+               enddo
+               call average_valstruct(valcmpstru(:,n), ST_COMPOUND, 0, nlinks, NUMVALS_CMPSTRU)
+            enddo
+         end if
       end if
       !
       ! === Reduction of structur parameters for parallel
