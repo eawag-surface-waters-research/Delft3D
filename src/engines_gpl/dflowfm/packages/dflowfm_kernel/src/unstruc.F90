@@ -23035,7 +23035,7 @@ end subroutine unc_write_shp
 
  call readyy ('geominit-NODELINKS         ',0.5d0)
 
- if (allocated (ln) ) deallocate(ln,lncn,bob,bob0, dx,dxi,wu,wui,kcu,csu,snu,acl,iadv,teta,wu_mor)
+ if (allocated (ln) ) deallocate(ln,lncn,bob,bob0, dx,dxi,wu,wui,kcu,csu,snu,acl,iadv,teta,wu_mor,wu1D2D,hh1D2D)
  if (allocated(ibot)) deallocate(ibot)
  allocate (  ln   (2,lnx) , stat=ierr  )
  call aerr( 'ln   (2,lnx)', ierr, 2*lnx)
