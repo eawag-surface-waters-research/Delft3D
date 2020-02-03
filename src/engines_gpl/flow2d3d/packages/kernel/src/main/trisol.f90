@@ -2749,7 +2749,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        !
        if (lfbedfrmrou) then
           call timer_start(timer_calksc, gdp)
-          call calksc(nmmax     ,itimtt    ,d(dps)    ,r(s1)     ,lsedtot   , &
+          call calksc(nmmax     ,d(dps)    ,r(s1)     ,lsedtot   , &
                     & r(wrkb3)  ,r(wrkb4)  ,i(kfs)    ,r(z0urou) ,r(z0vrou) , &
                     & i(kfu)    ,i(kfv)    ,r(sig)    ,kmax      ,r(hrms)   , &
                     & r(rlabda) ,r(tp)     ,r(deltau) ,r(deltav) ,icx       , &

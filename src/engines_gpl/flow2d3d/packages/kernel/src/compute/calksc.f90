@@ -1,4 +1,4 @@
-subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
+subroutine calksc(nmmax     ,dps       ,s1        ,lsedtot   , &
                 & u         ,v         ,kfs       ,z0urou    , &
                 & z0vrou    ,kfu       ,kfv       ,sig       , &
                 & kmax      ,hrms      ,rlabda    ,tp        , &
@@ -89,7 +89,6 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
 !
     integer                                           , intent(in)  :: icx
     integer                                           , intent(in)  :: icy
-    integer                                           , intent(in)  :: itimtt
     integer                                           , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer                                           , intent(in)  :: kmax    !  Description and declaration in dimens.igs
     integer                                           , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
@@ -209,22 +208,9 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
        par5 = kdpar(5)
        par6 = kdpar(6)
        !
-       ! In revision 13740, the relaxation coefficients were changed such that
-       ! the meaning of the time scales to be provided by the user are better
-       ! defined and consistent for different time steps.
-       ! We keep the old code temporarily for reference and simple reactivation
-       ! for reproducing old project results.
-       !
-       !relaxr  = 5.0_fp * (dt * tunit * itimtt) / (max(1.0e-3_fp , par4*60.0_fp))
-       !relaxr  = max(min(1.0_fp - relaxr , 1.0_fp) , 0.0_fp)
-       !relaxmr = 5.0_fp * (dt * tunit * itimtt) / (max(1.0e-3_fp , par5*60.0_fp))
-       !relaxmr = max(min(1.0_fp - relaxmr , 1.0_fp) , 0.0_fp)
-       !relaxd  = 5.0_fp * (dt * tunit * itimtt) / (max(1.0e-3_fp , par6*60.0_fp))
-       !relaxd  = max(min(1.0_fp - relaxd , 1.0_fp) , 0.0_fp)
-       !
-       relaxr  = exp(- dt * itimtt / max(1.0e-20_fp, par4))
-       relaxmr = exp(- dt * itimtt / max(1.0e-20_fp, par5))
-       relaxd  = exp(- dt * itimtt / max(1.0e-20_fp, par6))
+       relaxr  = exp(- dt / max(1.0e-20_fp, par4))
+       relaxmr = exp(- dt / max(1.0e-20_fp, par5))
+       relaxd  = exp(- dt / max(1.0e-20_fp, par6))
        !
        do nm = 1, nmmax
           if (kfs(nm)>0) then
