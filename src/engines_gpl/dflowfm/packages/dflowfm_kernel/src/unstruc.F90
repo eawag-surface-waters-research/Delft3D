@@ -39888,35 +39888,35 @@ if (jahisbal > 0) then
          nreducebuf = 0
          reducebuf  = 0d0
          n = 0
-         if( npumpsg > 0 ) then
+         if( npumpsg > 0 .and. allocated(valpump) ) then
             call fill_reduce_buffer( valpump   , npumpsg*NUMVALS_PUMP     )
             n = 1
          endif
-         if( ngatesg > 0 ) then
+         if( ngatesg > 0 .and. allocated(valgate) ) then
             call fill_reduce_buffer( valgate   , ngatesg*NUMVALS_GATE     )
             n = 1
          endif
-         if( ncdamsg > 0 ) then
+         if( ncdamsg > 0 .and. allocated(valcdam) ) then
             call fill_reduce_buffer( valcdam   , ncdamsg*NUMVALS_CDAM     )
             n = 1
          endif
-         if( ncgensg > 0 ) then
+         if( ncgensg > 0 .and. allocated(valcgen) ) then
             call fill_reduce_buffer( valcgen   , ncgensg*NUMVALS_CGEN     )
             n = 1
          endif
-         if( ngategen > 0 ) then
+         if( ngategen > 0 .and. allocated(valgategen) ) then
             call fill_reduce_buffer( valgategen, ngategen*NUMVALS_GATEGEN )
             n = 1
          endif
-         if( nweirgen > 0 ) then
+         if( nweirgen > 0 .and. allocated(valweirgen) ) then
             call fill_reduce_buffer( valweirgen, nweirgen*NUMVALS_WEIRGEN )
             n = 1
          endif
-         if( ngenstru > 0 ) then
+         if( ngenstru > 0 .and. allocated(valgenstru) ) then
             call fill_reduce_buffer( valgenstru, ngenstru*NUMVALS_GENSTRU )
             n = 1
          endif
-         if( ndambreaksg > 0 ) then
+         if( ndambreaksg > 0 .and. allocated(valdambreak) ) then
             call fill_reduce_buffer( valdambreak, ndambreaksg*NUMVALS_DAMBREAK )
             n = 1
          endif
@@ -39925,7 +39925,8 @@ if (jahisbal > 0) then
             !call reduce_struc(reducebuf,nreducebuf)
          endif
 
-         if( ngenstru > 0 ) then
+
+         if( ngenstru > 0 .and. allocated(valgenstru) ) then
             call subsitute_reduce_buffer( valgenstru, ngenstru*NUMVALS_GENSTRU )
             do n = 1,ngenstru
                if( valgenstru(1,n) == 0d0 ) then
@@ -39960,7 +39961,7 @@ if (jahisbal > 0) then
             enddo
          endif
 
-         if( nweirgen > 0 ) then
+         if( nweirgen > 0 .and. allocated(valweirgen) ) then
             call subsitute_reduce_buffer( valweirgen, nweirgen*NUMVALS_WEIRGEN )
             do n = 1,nweirgen
                if( valweirgen(1,n) == 0d0 ) then
@@ -39986,7 +39987,7 @@ if (jahisbal > 0) then
             enddo
          endif
 
-         if( ngategen > 0 ) then
+         if( ngategen > 0 .and. allocated(valgategen) ) then
             call subsitute_reduce_buffer( valgategen, ngategen*NUMVALS_GATEGEN )
             do n = 1,ngategen
                if( valgategen(1,n) == 0d0 ) then
@@ -40009,7 +40010,7 @@ if (jahisbal > 0) then
             enddo
          endif
 
-         if( ncgensg > 0 ) then
+         if( ncgensg > 0 .and. allocated(valcgen) ) then
             call subsitute_reduce_buffer( valcgen, ncgensg*NUMVALS_CGEN     )
             do n = 1,ncgensg
                if( valcgen(1,n) == 0d0 ) then
@@ -40023,7 +40024,7 @@ if (jahisbal > 0) then
             enddo
          endif
 
-         if( ncdamsg > 0 ) then
+         if( ncdamsg > 0 .and. allocated(valcdam) ) then
             call subsitute_reduce_buffer( valcdam   , ncdamsg*NUMVALS_CDAM     )
             do n = 1,ncdamsg
                if( valcdam(1,n) == 0d0 ) then
@@ -40037,7 +40038,7 @@ if (jahisbal > 0) then
             enddo
          endif
 
-         if( ngatesg > 0 ) then
+         if( ngatesg > 0 .and. allocated(valgate) ) then
             call subsitute_reduce_buffer( valgate   , ngatesg*NUMVALS_GATE     )
             do n = 1,ngatesg
                if( valgate(1,n) == 0d0 ) then
@@ -40051,7 +40052,7 @@ if (jahisbal > 0) then
             enddo
          endif
 
-         if( npumpsg > 0 ) then
+         if( npumpsg > 0 .and. allocated(valpump) ) then
             call subsitute_reduce_buffer( valpump   , npumpsg*NUMVALS_PUMP     )
             do n = 1,npumpsg
                if( valpump(1,n) == 0d0 ) then
@@ -40066,7 +40067,7 @@ if (jahisbal > 0) then
             enddo
          endif
          ! === Dambreak
-         if( ndambreaksg > 0 ) then
+         if( ndambreaksg > 0 .and. allocated(valdambreak) ) then
             call subsitute_reduce_buffer( valdambreak, ndambreaksg*NUMVALS_DAMBREAK )
          endif
       endif
