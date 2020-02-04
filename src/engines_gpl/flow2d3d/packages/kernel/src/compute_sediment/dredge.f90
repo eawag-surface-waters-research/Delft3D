@@ -1679,14 +1679,11 @@ subroutine dredge_initialize(gdp)
        !
        do ia = 1, nadred+nasupl
           pdredge => dredge_prop(ia)
+          if (dredge_prop(ia)%itype == DREDGETYPE_NOURISHMENT) cycle
           !
           numpoints = 0.0_fp
           numpoints(                dredge_domainnr) = real(pdredge%npnt,fp)
-          if (associated(pdredge%nm)) then
-             numpoints(dredge_ndomains+dredge_domainnr) = real(size(pdredge%nm,1),fp)
-          else
-             numpoints(dredge_ndomains+dredge_domainnr) = 0.0_fp
-          endif
+          numpoints(dredge_ndomains+dredge_domainnr) = real(size(pdredge%nm,1),fp)
           !
           call dredgecommunicate(numpoints, 2*dredge_ndomains, error, msgstr)
           if (error) goto 999

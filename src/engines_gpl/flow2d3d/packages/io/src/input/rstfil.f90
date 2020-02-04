@@ -171,7 +171,8 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
           if (error .and. .not.ex_nfs) then
              call prterr(lundia    ,'G004'    , &
-             & trim(filtmp) // trim(datetime) // ', ' // trim(filtmp) // ' and ' // trim(restid) // '.dat/.def')
+                 & 'tri-rst.' // trim(restid) // trim(datetime) // ', tri-rst.' // trim(restid) // &
+                 & ' and ' // trim(restid) // '.dat/.def')
           endif
        endif
     endif

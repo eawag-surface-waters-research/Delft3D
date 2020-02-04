@@ -1052,7 +1052,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 pdredge%stilldredging = .false.
                 pdredge%dredgewhendry = .false.
                 pdredge%dumplimited   = .false.
-                pdredge%in1domain     = .false.
+                pdredge%in1domain     = .true.
                 pdredge%if_morfac_0   = .false.
                 pdredge%obey_cmp      = .true.
                 pdredge%triggertype   = DREDGETRIG_POINTBYPOINT
