@@ -54,6 +54,7 @@ module TREE_DATA_TYPES
       character(len=1), dimension(:), pointer         :: node_data_type => null()
       integer                                         :: node_visit     !< Zeroed upon construction, incremented upon node_data request (properties.f90: prop_get_string)
       type(TREE_DATA_PTR), dimension(:), pointer :: child_nodes
+      type(TREE_DATA),                   pointer :: next_node => null()
    end type
 
    type TREE_DATA_PTR
@@ -212,6 +213,7 @@ subroutine tree_add_node(tree, node, ierror)
          if ( newsize .gt. 1 ) then
             children(1:newsize-1) = tree%child_nodes
             deallocate( tree%child_nodes )
+            children(newsize-1)%node_ptr%next_node => node    ! chain siblings
          endif
 
          tree%child_nodes => children
