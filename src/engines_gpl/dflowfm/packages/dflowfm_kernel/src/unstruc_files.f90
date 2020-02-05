@@ -349,7 +349,7 @@ subroutine inidia(basename)
    
     if (mdia > 0) return
     
-    !mdia    = numuni()
+    mdia    = numuni()
    
     L = len_trim(md_ident)
     if (L == 0) then   
@@ -363,7 +363,7 @@ subroutine inidia(basename)
     
     K = 0
     ierr = 0
- 10 OPEN(NEWUNIT=mdia, FILE=trim(filename), action='readwrite', IOSTAT=ierr)
+ 10 OPEN(mdia, FILE=trim(filename), action='readwrite', IOSTAT=ierr)
     inquire(mdia, readwrite=rw)
     IF (ierr .GT. 0 .or. trim(rw)/='YES') THEN
         K = K + 1

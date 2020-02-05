@@ -3499,8 +3499,8 @@ integer,          external   :: numuni
     call makedir(getoutputdir()) ! No problem if it exists already.
 
 !   SPvdP : check status of file, mostly copied from inidia
-    !mdia2 = numuni()
-    open (NEWUNIT=MDIA2, FILE = trim(getoutputdir())//trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
+    mdia2 = numuni()
+    open (MDIA2, FILE = trim(getoutputdir())//trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
 
     if ( ierr.eq.0 ) then
 
