@@ -211,7 +211,7 @@ namespace Deltares.UGrid.Tests.Api
                     Assert.AreEqual("nodeslongNames", networkGeometry.NodeLongNames[0]);
                     Assert.AreEqual("nodeslongNames", networkGeometry.NodeLongNames[1]);
 
-                    Assert.AreEqual(new[] {0}, networkGeometry.BranchOrder);
+                    Assert.AreEqual(new[] {-1}, networkGeometry.BranchOrder);
                     Assert.AreEqual(new[] {1165.29}, networkGeometry.BranchLengths);
                     Assert.AreEqual(new[] {25}, networkGeometry.BranchGeometryNodesCount);
 
@@ -486,6 +486,7 @@ namespace Deltares.UGrid.Tests.Api
                 Assert.AreEqual(1, meshId);
 
                 api.Close();
+                api.Open(path);
 
                 meshId = api.GetMeshIdsByMeshType(UGridMeshType.Mesh1D).First();
                 var readMesh = api.GetMesh1D(meshId);
@@ -565,6 +566,9 @@ namespace Deltares.UGrid.Tests.Api
                 Assert.AreEqual(1, linksId);
 
                 api.Close();
+
+                // re-open file
+                api.Open(path);
 
                 linksId = api.GetLinksId();
                 var readLinksGeometry = api.GetLinks(linksId);

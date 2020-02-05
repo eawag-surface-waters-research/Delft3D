@@ -260,7 +260,8 @@ namespace Deltares.UGrid.Api
             // get dimensions
             var mesh1dDimensions = new Mesh1DGeometryDimensions();
             IoNetCfdImports.ionc_get_1d_mesh_discretisation_points_count_dll(ref dataSetId, ref meshId, ref mesh1dDimensions.NumberOfNodes);
-            
+            IoNetCfdImports.ionc_get_edge_count_dll(ref dataSetId, ref meshId, ref mesh1dDimensions.NumberOfEdges);
+
             var disposable1DMeshGeometry = new Disposable1DMeshGeometry();
             disposable1DMeshGeometry.InitializeWithEmptyData(mesh1dDimensions);
 
@@ -272,6 +273,11 @@ namespace Deltares.UGrid.Api
                 ref startIndex, ref mesh1d.NodeX, ref mesh1d.NodeY);
 
             // todo : add missing ionc_get_1d_mesh_edges_dll call
+
+            IoNetCfdImports.ionc_get_1d_mesh_edges_dll(ref dataSetId, ref meshId,
+                ref mesh1d.EdgeBranchIds, ref mesh1d.EdgeCenterPointOffset,
+                ref mesh1dDimensions.NumberOfEdges, ref startIndex, ref mesh1d.EdgeCenterPointX,
+                ref mesh1d.EdgeCenterPointY);
 
             var type = typeof(Disposable1DMeshGeometry);
 
@@ -286,6 +292,11 @@ namespace Deltares.UGrid.Api
             
             disposable1DMeshGeometry.BranchIDs = mesh1d.BranchIds.CreateValueArray<int>(mesh1dDimensions.NumberOfNodes);
             disposable1DMeshGeometry.BranchOffsets = mesh1d.BranchOffsets.CreateValueArray<double>(mesh1dDimensions.NumberOfNodes);
+
+            disposable1DMeshGeometry.EdgeBranchIds = mesh1d.EdgeBranchIds.CreateValueArray<int>(mesh1dDimensions.NumberOfEdges);
+            disposable1DMeshGeometry.EdgeCenterPointOffset = mesh1d.EdgeCenterPointOffset.CreateValueArray<double>(mesh1dDimensions.NumberOfEdges);
+            disposable1DMeshGeometry.EdgeCenterPointX = mesh1d.EdgeCenterPointX.CreateValueArray<double>(mesh1dDimensions.NumberOfEdges);
+            disposable1DMeshGeometry.EdgeCenterPointY = mesh1d.EdgeCenterPointY.CreateValueArray<double>(mesh1dDimensions.NumberOfEdges);
 
             return disposable1DMeshGeometry;
         }

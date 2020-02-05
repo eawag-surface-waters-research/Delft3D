@@ -2101,8 +2101,8 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       !inquire the variable with that name 
       ierr = att_to_varid(ncid, varid, 'coordinate_space', meshids%varids(mid_1dtopo))
       !read branch id and offsets
-      ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', meshids%varids(mid_1dnodebranch), meshids%varids(mid_1dnodeoffset))
-      ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'edge_coordinates', meshids%varids(mid_1dedgebranch), meshids%varids(mid_1dedgeoffset))
+      ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', meshids%varids(mid_1dnodebranch), meshids%varids(mid_1dnodeoffset), meshids%varids(mid_nodex), meshids%varids(mid_nodey))
+      ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'edge_coordinates', meshids%varids(mid_1dedgebranch), meshids%varids(mid_1dedgeoffset), meshids%varids(mid_edgex),meshids%varids(mid_edgey))
    end if
 
    !
@@ -2202,12 +2202,13 @@ end function ug_init_mesh_topology
 !> Inquire for NetCDF variable IDs based on some
 !! coordinates attribute in a container variable.
 !! For example: mesh1d:node_coordinates
-function att_to_coordvarids(ncid, varin, attname, idx, idy, idz) result(ierr)
+function att_to_coordvarids(ncid, varin, attname, idx, idy, idz, idw) result(ierr)
    integer         ,  intent(in   ) :: ncid     !< NetCDF dataset ID
    integer         ,  intent(in   ) :: varin    !< NetCDF variable ID from which the coordinate attribute will be gotten.
    character(len=*),  intent(in   ) :: attname  !< Name of attribute in varin that contains the coordinate variable names.
    integer         ,  intent(  out) :: idx, idy !< NetCDF variable ID for x,y-coordinates.
    integer, optional, intent(  out) :: idz      !< NetCDF variable ID for z-coordinates.
+   integer, optional, intent(  out) :: idw      !< NetCDF variable ID for additional coordinate
    integer                          :: ierr     !< Result status. NF90_NOERR if successful.
    character(len=nf90_max_name)     :: varname
 
@@ -2251,6 +2252,17 @@ function att_to_coordvarids(ncid, varin, attname, idx, idy, idz) result(ierr)
       end if
       ierr = nf90_inq_varid(ncid, varname(i1:i2-1), idz)
       i1 = i2+1
+   end if
+
+   if (present(idw)) then
+      i2 = index(varname(i1:n), ' ')
+      if (i2 == 0) then
+         i2 = n + 1
+      else
+         i2 = i1 + i2 - 1
+      end if
+      ierr = nf90_inq_varid(ncid, varname(i1:i2-1), idw)
+      i1 = i2 + 1
    end if
 
    return
@@ -3969,6 +3981,9 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space',  trim(networkname))
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension',prefix//'_nNodes')
+   if (nmeshedges > 0) then
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_dimension',prefix//'_nEdges')
+   endif
    if (writexy == 1) then
        ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_node_branch '//prefix//'_node_offset '//prefix//'_node_x '//prefix//'_node_y')
        ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_coordinates', prefix//'_edge_branch '//prefix//'_edge_offset '//prefix//'_edge_x '//prefix//'_edge_y')

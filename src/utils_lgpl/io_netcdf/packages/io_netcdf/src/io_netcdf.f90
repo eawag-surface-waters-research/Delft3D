@@ -133,6 +133,7 @@ public :: ionc_put_1d_mesh_edges
 public :: ionc_write_mesh_1d_edge_nodes
 public :: ionc_create_1d_mesh_ugrid_v1
 public :: ionc_put_network
+public :: ionc_get_1d_mesh_edges
 !links functions
 public :: ionc_def_mesh_contact_ugrid
 public :: ionc_get_contacts_count_ugrid
@@ -1831,6 +1832,17 @@ function ionc_put_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchi
   ierr=ug_put_1d_mesh_discretisation_points_v1(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex, coordx, coordy)  
   
 end function ionc_put_1d_mesh_discretisation_points_ugrid_v1
+
+function ionc_get_1d_mesh_edges(ioncid, meshid, edgebranchidx, edgeoffset, startIndex, edgex, edgey) result(ierr) 
+
+  integer, intent(in)            :: ioncid, meshid, startIndex  
+  integer, intent(inout)         :: edgebranchidx(:)
+  double precision,intent(inout) :: edgeoffset(:), edgex(:), edgey(:) 
+  integer                        :: ierr
+    
+  ierr=ug_get_1d_mesh_edge_coordinates(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), edgebranchidx, edgeoffset, startIndex, edgex, edgey)  
+  
+end function ionc_get_1d_mesh_edges
 
 function ionc_put_1d_mesh_edges(ioncid, meshid, edgebranchidx, edgeoffset, startIndex, coordx, coordy) result(ierr) 
 

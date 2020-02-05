@@ -1357,6 +1357,25 @@ function ionc_get_1d_mesh_discretisation_points_v2_dll(ioncid, meshid, c_branchi
   
 end function ionc_get_1d_mesh_discretisation_points_v2_dll
 
+function ionc_get_1d_mesh_edges_dll(ioncid, meshid, c_edgebranchidx, c_edgeoffset, nmeshedges, startIndex, c_coordx, c_coordy) result(ierr) bind(C, name="ionc_get_1d_mesh_edges")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_edges_dll
+  integer(kind=c_int), intent(in)     :: ioncid, meshid, nmeshedges, startIndex  
+  type(c_ptr), intent(inout)          :: c_edgebranchidx, c_edgeoffset, c_coordx, c_coordy
+  integer                             :: ierr    
+  integer,pointer                     :: edgebranchidx(:)
+  double precision,pointer            :: edgeoffset(:)
+  double precision,pointer            :: coordx(:)
+  double precision,pointer            :: coordy(:)
+  
+  call c_f_pointer(c_edgebranchidx, edgebranchidx, (/ nmeshedges /))
+  call c_f_pointer(c_edgeoffset, edgeoffset, (/ nmeshedges /))
+  call c_f_pointer(c_coordx, coordx, (/ nmeshedges /))
+  call c_f_pointer(c_coordy, coordy, (/ nmeshedges /))
+
+  ierr = ionc_get_1d_mesh_edges(ioncid, meshid, edgebranchidx, edgeoffset, startIndex, coordx, coordy) 
+  
+end function ionc_get_1d_mesh_edges_dll
+
 !
 ! mesh links
 !

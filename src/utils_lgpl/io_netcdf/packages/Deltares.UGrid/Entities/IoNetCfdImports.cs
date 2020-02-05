@@ -627,6 +627,9 @@ namespace Deltares.UGrid.Entities
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_put_1d_mesh_edges", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_put_1d_mesh_edges_dll([In] ref int ioncid, [In, Out] ref int meshid, [In] ref IntPtr c_edgebranchidx, [In] ref IntPtr c_edgeoffset, [In, Out] ref int numEdge, [In] ref int start_index, [In] ref IntPtr c_coordx, [In] ref IntPtr c_coordy);
 
+        [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_1d_mesh_edges", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_1d_mesh_edges_dll([In] ref int ioncid, [In, Out] ref int meshid, [In,Out] ref IntPtr c_edgebranchidx, [In,Out] ref IntPtr c_edgeoffset, [In] ref int numEdge, [In] ref int start_index, [In,Out] ref IntPtr c_coordx, [In,Out] ref IntPtr c_coordy);
+
         #endregion
 
         #endregion
