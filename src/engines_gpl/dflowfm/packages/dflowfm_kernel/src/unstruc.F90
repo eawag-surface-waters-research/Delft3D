@@ -16988,6 +16988,14 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    endif
 
    if (jawind > 0) then
+      if (jawindspeedfac > 0) then 
+         do L = 1,lnx
+            if (windspeedfac(L) .ne. dmiss) then
+                wx(L) = wx(L) *windspeedfac(L)
+                wy(L) = wy(L) *windspeedfac(L)
+            endif
+         enddo
+      endif 
       call setwindstress()
    endif
 
@@ -41789,6 +41797,17 @@ if (mext > 0) then
 
             iCdtyp  = 1 ! only 1 coeff
             success = timespaceinitialfield(xu, yu, Cdwusp, lnx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
+
+        else if (qid == 'windspeedfactor') then
+
+            if (jawindspeedfac == 0) then
+               if (allocated (Windspeedfac) ) deallocate(Windspeedfac)
+               allocate ( Windspeedfac(lnx) , stat=ierr )
+               call aerr('Windspeedfac(lnx)', ierr, lnx ) ; Windspeedfac = dmiss
+            endif
+
+            jawindspeedfac = 1 
+            success = timespaceinitialfield(xu, yu, Windspeedfac, lnx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
 
         else if (qid == 'secchidepth') then
 

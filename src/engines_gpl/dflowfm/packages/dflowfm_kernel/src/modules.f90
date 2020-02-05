@@ -2470,6 +2470,8 @@ end subroutine default_turbulence
 
  integer                           :: jaCdwusp          !< if 1 spatially varying windstress coefficient
 
+ integer                           :: jaWindspeedfac    !< if 1 spatially varying windstress coefficient
+ 
  integer                           :: javiuplus3D = 1   !< add vertical eddy viscosity to horizontal eddy viscosity (1 = yes, 0 = no)
 
  integer                           :: jafrculin         !< use linear friction yes/no
@@ -2936,6 +2938,10 @@ subroutine default_flowparameters()
     javiusp  = 0      !< spatially varying eddyviscosity yes/no 1/0
 
     jadiusp  = 0      !< spatially varying eddydiffusivity yes/no 1/0
+
+    jaCdwusp = 0
+
+    jawindspeedfac = 0 !< use windspeedfac 1/0  
 
     ihorvic  = 0      !< 0=no visc, 1=do visc
 
@@ -3544,6 +3550,7 @@ end module m_vegetation
  double precision, allocatable     :: frculin(:)  !< friction coefficient set by initial fields ( todo mag later ook single real worden)
  integer,          allocatable     :: ifrcutp(:)  !< friction coefficient type   initial fields ( todo mag later ook single real worden)
  double precision, allocatable     :: Cdwusp(:)   !< Wind friction coefficient at u point set by initial fields ( todo mag later ook single real worden)
+ double precision, allocatable     :: Windspeedfac(:) !< Wind friction coefficient at u point set by initial fields ( todo mag later ook single real worden)
  double precision, allocatable     :: z0ucur(:)   !< current related roughness, moved from waves, always needed
  double precision, allocatable     :: z0urou(:)   !< current and wave related roughness
 
