@@ -1240,7 +1240,7 @@ subroutine loadObservCrossSections(filename, jadoorladen)
    integer,          intent(in   ) :: jadoorladen !< Append to existing observation cross sections or not
 
    logical :: jawel
-   integer :: tok
+   integer :: tok_pli, tok_ini
 
    !!!!!
    inquire(file = filename, exist = jawel)
@@ -1248,15 +1248,15 @@ subroutine loadObservCrossSections(filename, jadoorladen)
       if (jadoorladen == 0) then
          call delCrossSections()
       end if
-      tok = index(filename, '.pli')
-      if (tok > 0) then
+      tok_pli = index(filename, '.pli')
+      tok_ini = index(filename, '.ini')
+      if (tok_pli > 0) then
          call loadObservCrossSections_from_pli(filename)
+      else if (tok_ini > 0) then
+         call readObservCrossSections(network, filename)
+         call addObservCrsFromIni(network, filename)
       else
-         tok = index(filename, '.ini')
-         if (tok > 0) then
-            call readObservCrossSections(network, filename)
-            call addObservCrsFromIni(network, filename)
-         end if
+         call mess(LEVEL_WARN, "Observation cross section file ('"//trim(filename)//"') does not end with .pli or .ini.")
       end if
    else
        call mess(LEVEL_ERROR, "Observation cross section file '"//trim(filename)//"' not found!")
