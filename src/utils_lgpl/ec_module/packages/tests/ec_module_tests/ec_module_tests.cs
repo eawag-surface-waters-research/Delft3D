@@ -175,8 +175,7 @@ namespace ECModuleTests
 
         }
 
-        // Create the netcdf files
-        //TODO: add in/out txt
+        // Tests triangle interpolation on model
         [Test]
         [NUnit.Framework.Category("TestTriangleInterpolation")]
         public void TestTriangleInterpolationOnModel()
