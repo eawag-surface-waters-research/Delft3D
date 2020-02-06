@@ -1969,8 +1969,9 @@ subroutine readMDUFile(filename, istat)
    endif
 
    if (len_trim(md_restartfile)>0 .and. Tlfsmo>0d0) then
-      write (msgbuf, '(a,f9.3,a)') 'MDU settings combine a restart file and a smoothing time: Tlfsmo = ',Tlfsmo, '. Allowed, but not recommended, consider using 0.0 instead.'
+      write (msgbuf, '(a,f9.3,a)') 'MDU settings combine a restart file and a smoothing time: Tlfsmo = ',Tlfsmo, '. This is no longer allowed. Tlfsmo is set to 0.0.'
       call warn_flush()
+      Tlfsmo = 0d0
    endif
 
    if (len_trim(md_crsfile) == 0 .and. jashp_crs > 0) then
