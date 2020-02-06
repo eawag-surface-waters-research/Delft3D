@@ -93,7 +93,11 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
             targetY(i) = (meshgeom%nodey(start_node) + meshgeom%nodey(end_node)) * 0.5d0
             numTargets = numTargets + 1
          end if
-      enddo     
+      enddo
+      if(numTargets.ne.size(meshgeom%edge_nodes,2)) then
+         ierr = -1
+         goto 1234  
+      endif
     else
       !not valid location
       ierr = -1
