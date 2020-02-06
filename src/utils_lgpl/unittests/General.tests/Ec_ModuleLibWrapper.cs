@@ -9,6 +9,7 @@ namespace General.tests
         {
             public const string LIB_NAME = "ec_module";
             public const string LIB_DLL_NAME = "ec_module.dll";
+            public const string NETCDF_DEP = "io_netcdf.dll";
         }
 
         #region ec_module_functions_dll
