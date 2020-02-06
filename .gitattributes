@@ -14108,12 +14108,15 @@ src/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f18_boundar_condi
 src/utils_lgpl/ec_module/packages/ec_module_test/tests/readme.txt -text
 src/utils_lgpl/ec_module/packages/ec_module_test/tests/tests.lst -text
 src/utils_lgpl/ec_module/packages/nuget/ecmodule.nuspec -text
+src/utils_lgpl/ec_module/packages/test_data/Manning.xyz -text
+src/utils_lgpl/ec_module/packages/test_data/MeshModel.nc -text
 src/utils_lgpl/ec_module/packages/test_data/in.txt -text
 src/utils_lgpl/ec_module/packages/test_data/inTestAveragingInterpolation.txt -text
 src/utils_lgpl/ec_module/packages/test_data/inTestTriangleInterpolation.txt -text
 src/utils_lgpl/ec_module/packages/test_data/out.txt -text
 src/utils_lgpl/ec_module/packages/test_data/outTestAveragingInterpolation.txt -text
 src/utils_lgpl/ec_module/packages/test_data/outTestTriangleInterpolation.txt -text
+src/utils_lgpl/ec_module/packages/test_data/outTestTriangleInterpolationOnModel.txt -text
 src/utils_lgpl/ec_module/packages/test_data/simplebox_net_ugrid.nc -text
 src/utils_lgpl/ec_module/packages/test_data/tfl_01.pli -text
 src/utils_lgpl/ec_module/packages/test_data/tfl_01_0001.tim -text

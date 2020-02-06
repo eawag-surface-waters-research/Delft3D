@@ -183,6 +183,8 @@ namespace ECModuleTests
         {
             string pathIn = TestHelper.TestFilesDirectoryPath()  + @"\Manning.xyz";
             Assert.IsTrue(File.Exists(pathIn));
+            string pathOut = TestHelper.TestFilesDirectoryPath() + @"\outTestTriangleInterpolationOnModel.txt";
+            Assert.IsTrue(File.Exists(pathOut));
 
             int numSamples = 0;
             var sampleX = new double[numSamples];
@@ -191,6 +193,12 @@ namespace ECModuleTests
 
             readPoints(pathIn, ref sampleX, ref sampleY, ref sampleValues, ref numSamples);
 
+            int numTargets = 0;
+            var targetX = new double[numTargets];
+            var targetY = new double[numTargets];
+            var targetValues = new double[numTargets];
+            readPoints(pathOut, ref targetX, ref targetY, ref targetValues, ref numTargets);
+
             IntPtr c_sampleX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
             IntPtr c_sampleY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
             IntPtr c_sampleValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
@@ -198,7 +206,6 @@ namespace ECModuleTests
             Marshal.Copy(sampleY, 0, c_sampleY, numSamples);
             Marshal.Copy(sampleValues, 0, c_sampleValues, numSamples);
 
-            int numTargets = 184839;
             IntPtr c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
             Marshal.Copy(sampleValues, 0, c_sampleValues, numSamples);
 
@@ -207,7 +214,7 @@ namespace ECModuleTests
             var wrapperNetcdf = new IoNetcdfLibWrapper();
             int iconvtype = 2;
             double convversion = 0.0;
-            string pathNetFile = TestHelper.TestFilesDirectoryPath() + @"\FlowFM_correct_format_net.nc";
+            string pathNetFile = TestHelper.TestFilesDirectoryPath() + @"\MeshModel.nc";
             Assert.IsTrue(File.Exists(pathIn));
             int ierr = wrapperNetcdf.ionc_open(pathNetFile, ref mode, ref ioncid, ref iconvtype, ref convversion);
             Assert.That(ierr, Is.EqualTo(0));
@@ -229,7 +236,7 @@ namespace ECModuleTests
 
             //var gridGeomWrapper = new GridGeomLibWrapper();
             bool includeArrays = true;
-            int startIndex = 1; //the base index of the arrays
+            int startIndex = 0; //the base index of the arrays
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid, ref meshtwod, ref startIndex, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -259,7 +266,7 @@ namespace ECModuleTests
 
             for (int i = 0; i < numTargets; i++)
             {
-                Assert.IsTrue(targetValuesResults[i]> -999.0);
+                Assert.That(targetValuesResults[i], Is.EqualTo(targetValues[i]).Within(1e-6));
             }
 
         }
