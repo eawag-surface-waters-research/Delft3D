@@ -13,9 +13,8 @@ namespace Deltares.UGrid.Api
         private int dataSetId;
         private DataSetConventions convention = DataSetConventions.CONV_NULL;
         private double versionNumber = Double.NaN;
-        private string branchTypeVariableName = "branch_type";
 
-        private int startIndex = 0;
+        private int startIndex;
 
         private bool fileOpenForReading;
         private bool fileOpenForWriting;

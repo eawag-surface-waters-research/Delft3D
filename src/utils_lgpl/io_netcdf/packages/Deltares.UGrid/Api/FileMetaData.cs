@@ -7,7 +7,12 @@ namespace Deltares.UGrid.Api
     [ProtoContract(AsReferenceDefault = true)]
     public class FileMetaData
     {
-        public FileMetaData(string modelName = "Unknown model", string source = "Unknown Source", string version = "-")
+        public FileMetaData() : this("Unknown model", "Unknown Source", "-")
+        {
+
+        }
+
+        public FileMetaData(string modelName, string source, string version)
         {
             ModelName = modelName;
             Source = source;
@@ -18,19 +23,19 @@ namespace Deltares.UGrid.Api
         /// Name of the model for which the file is created
         /// </summary>
         [ProtoMember(1)]
-        public string ModelName { get; }
+        public string ModelName { get; set; }
 
         /// <summary>
         /// Source (application) that creates this file
         /// </summary>
         [ProtoMember(2)]
-        public string Source { get; }
+        public string Source { get; set; }
 
         /// <summary>
         /// Version of the application that creates this file
         /// </summary>
         [ProtoMember(3)]
-        public string Version { get; }
+        public string Version { get; set; }
 
         internal InteropMetadata CreateMetaData()
         {
