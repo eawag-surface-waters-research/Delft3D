@@ -1043,6 +1043,7 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_double(md_ptr, 'numerics', 'Maxwaterleveldiff', s01max)
     call prop_get_double(md_ptr, 'numerics', 'Maxvelocitydiff', u01max)
+    call prop_get_double(md_ptr, 'numerics', 'Maxvelocity', umagmax)
     call prop_get_double(md_ptr, 'numerics', 'MinTimestepBreak', dtminbreak)
     call prop_get_double(md_ptr, 'numerics', 'Epshu' , epshu)
 
@@ -2651,6 +2652,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if(writeall .or. (u01max > 0d0)) then
         call prop_set(prop_ptr, 'numerics', 'Maxvelocitydiff', u01max, 'upper bound (in m/s) on velocity changes (<= 0: no bounds). Run will abort when violated.')
+    endif
+
+    if(writeall .or. (umagmax > 0d0)) then
+        call prop_set(prop_ptr, 'numerics', 'Maxvelocity', umagmax, 'upper bound (in m/s) on velocity (<= 0: no bounds). Run will abort when violated.')
     endif
 
     if (writeall .or. (dtminbreak > 0d0)) then

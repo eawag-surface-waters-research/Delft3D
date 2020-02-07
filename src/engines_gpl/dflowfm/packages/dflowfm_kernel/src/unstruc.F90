@@ -933,29 +933,38 @@ subroutine flow_validatestate(iresult)
 
  q = 0
 
- if (s01max > 0) then     ! water level validation
+ if (s01max > 0d0) then     ! water level difference validation
     do i = 1,ndx
         if(abs(s1(i) - s0(i)) > s01max) then
             call mess(LEVEL_WARN,'water level change above threshold: (cell index, delta s[m]) = ', i, abs(s1(i) - s0(i)))
-            ! TODO: UNST-725, once done, change the above back to LEVEL_ERROR
             q = 1
             exit
         end if
     end do
  end if
 
- if (u01max > 0) then     ! velocity validation
+ if (u01max > 0d0) then     ! velocity difference validation
     do i = 1,lnx
         if(abs(u1(i) - u0(i)) > u01max) then
-            call mess(LEVEL_ERROR,'velocity change above threshold: (flowlink index, delta u[m/s]) = ', i, abs(u1(i) - u0(i)))
-            ! TODO: UNST-725, once done, change the above back to LEVEL_ERROR
+            call mess(LEVEL_WARN,'velocity change above threshold: (flowlink index, delta u[m/s]) = ', i, abs(u1(i) - u0(i)))
+            q = 1
+            exit
+        end if
+    end do
+ end if
+ 
+ if (umagmax > 0d0) then     ! velocity magnitude validation
+    call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
+    do i = 1, ndkx
+        if(ucmag(i) > umagmax) then
+            call mess(LEVEL_WARN,'velocity magnitude above threshold: (cell index, ucmag[m/s]) = ', i, ucmag(i))
             q = 1
             exit
         end if
     end do
  end if
 
-if (dtminbreak > 0) then  ! smallest allowed timestep (in s), checked on a sliding average of several timesteps
+if (dtminbreak > 0d0) then  ! smallest allowed timestep (in s), checked on a sliding average of several timesteps
    ! NOTE: this code below assumes that this routine is called once and exactly once every time step (i.e. in `dnt` rythm)
    dtavgwindow = (time1 - tvalswindow(idtwindow_start)) / max(1d0, min(dble(NUMDTWINDOWSIZE), dnt))
    if (dnt < dble(NUMDTWINDOWSIZE)) then
