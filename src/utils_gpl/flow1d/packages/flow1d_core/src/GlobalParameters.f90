@@ -123,15 +123,15 @@ module m_GlobalParameters
       double precision                :: teta
       
       !data for branch own mouth relations
-      type(t_node), pointer           :: mouth
-      double precision                :: tidal_period
-      double precision                :: start_time_tidal_period    !< start time of this tidal period
-      double precision                :: rho_fresh_water            !< reference density of sea water
-      logical                         :: start_tidal_period         !< indicates whether the first tidal period has started.
-      logical                         :: first_tidal_period         !< indicates whether this is the first tidal period has started.
-      integer                         :: dis_loc                    !< location of discharge point near mouth 
-      integer                         :: dis_dir                    !< direction of discharge point if dis_dir*Q > 0 then flow is into the model  
-      logical                         :: use_f4_dispersion          !< logical indicating, whether f4 dispersion is to be used 
+      type(t_node), pointer              :: mouth
+      double precision                   :: tidal_period
+      double precision                   :: start_time_tidal_period      !< start time of this tidal period
+      double precision                   :: rho_fresh_water              !< reference density of sea water
+      logical                            :: start_tidal_period           !< indicates whether the first tidal period has started.
+      logical                            :: first_tidal_period           !< indicates whether this is the first tidal period has started.
+      integer                            :: dis_loc                      !< location of discharge point near mouth 
+      integer                            :: dis_dir                      !< direction of discharge point if dis_dir*Q > 0 then flow is into the model  
+      logical                            :: use_f4_dispersion            !< logical indicating, whether f4 dispersion is to be used 
       logical, allocatable, dimension(:) :: use_f4_dispersion_for_branch !< logical indicating, whether f4 dispersion is defined on this branch
 
       double precision                :: n

@@ -62,15 +62,15 @@ module m_network
    ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en lin2local uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
    
    type, public :: t_administration_1d
-      integer, allocatable          :: lin2str(:)                          !< indirection list, containing structure numbers for flowlinks.
+      integer, allocatable            :: lin2str(:)                        !< indirection list, containing structure numbers for flowlinks.
                                                                            !< These structure numbers refer to the elements of network%sts%struct.
-      integer, allocatable          :: lin2ibr(:)                          !< indirection list, containing branch number on which the flow link is positioned 
-      integer, allocatable          :: lin2local(:)                        !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
+      integer, allocatable            :: lin2ibr(:)                        !< indirection list, containing branch number on which the flow link is positioned 
+      integer, allocatable            :: lin2local(:)                      !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
       
-      integer, allocatable          :: lin2grid(:)
-      type(t_chainage2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-chainage
-      type(t_chainage2cross), pointer :: gpnt2cross(:) => null()             !< list containing cross section indices per gridpoint-chainage
-      logical, allocatable          :: hysteresis_for_summerdike(:,:)      !< array indicating for hysteresis in summerdikes
+      integer, allocatable            :: lin2grid(:)
+      type(t_chainage2cross), pointer :: line2cross(:) => null()           !< list containing cross section indices per u-chainage
+      type(t_chainage2cross), pointer :: gpnt2cross(:) => null()           !< list containing cross section indices per gridpoint-chainage
+      logical, allocatable            :: hysteresis_for_summerdike(:,:)    !< array indicating for hysteresis in summerdikes
 
    end type
 

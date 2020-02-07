@@ -47,26 +47,26 @@ module m_Culvert
    
    type, public :: t_culvert
       integer                         :: culvertType           !< ST_CULVERT
-      double precision                :: leftlevel             !< left invert level of culvert
-      double precision                :: rightlevel            !< right invert level of culvert
-      type(t_crosssection), pointer   :: pcross => null()      !< pointer to cross section of culvert
-      integer                         :: crosssectionnr        !< cross section index in cross section array
-      integer                         :: allowedflowdir        !< allowed flow direction
+      double precision                :: leftlevel             !< Left invert level of culvert
+      double precision                :: rightlevel            !< Right invert level of culvert
+      type(t_crosssection), pointer   :: pcross => null()      !< Pointer to cross section of culvert
+      integer                         :: crosssectionnr        !< Cross section index in cross section array
+      integer                         :: allowedflowdir        !< Allowed flow direction
                                                                !< 0 all directions
                                                                !< 1 only positive flow
                                                                !< 2 only negative flow
                                                                !< 3 no flow allowed
-      double precision                :: length                !< length of the culvert
-      double precision                :: inletlosscoeff        !< loss coefficient at inflow point
-      double precision                :: outletlosscoeff       !< loss coefficient at outflow point
+      double precision                :: length                !< Length of the culvert
+      double precision                :: inletlosscoeff        !< Loss coefficient at inflow point
+      double precision                :: outletlosscoeff       !< Loss coefficient at outflow point
       logical                         :: has_valve             !< Indicates whether a valve has been added
       double precision                :: valveOpening          !< Current valve opening
-      type(t_table), pointer          :: losscoeff => null()   !< table containing loss coefficients as a function of the relative opening
+      type(t_table), pointer          :: losscoeff => null()   !< Table containing loss coefficients as a function of the relative opening
       integer                         :: state                 !< State of Culvert/Siphon
                                                                !< 0 = No Flow
                                                                !< 1 = Free Culvert Flow 
                                                                !< 2 = Submerged Culvert Flow 
-      double precision, dimension(2) :: bob_orig               !< original bob0 values before the actual bobs are lowered
+      double precision, dimension(2) :: bob_orig               !< Original bob0 values before the actual bobs are lowered
    end type
 
 contains
@@ -102,23 +102,23 @@ contains
       ! Global variables
       !
       type(t_culvert), pointer                     :: culvert
-      integer, intent(out)                         :: kfum
-      double precision, intent(out)                :: aum
-      double precision, intent(out)                :: dadsm
-      double precision, intent(out)                :: fum
+      integer,          intent(  out)              :: kfum
+      double precision, intent(  out)              :: aum
+      double precision, intent(  out)              :: dadsm
+      double precision, intent(  out)              :: fum
       double precision, intent(inout)              :: q0m
       double precision, intent(inout)              :: qm
-      double precision, intent(out)                :: rum
-      double precision, intent(out)                :: cmustr
+      double precision, intent(  out)              :: rum
+      double precision, intent(  out)              :: cmustr
       double precision, intent(inout)              :: u0m
       double precision, intent(inout)              :: u1m
-      double precision, intent(in)                 :: s1m2         !< left waterlevel s(m)          sleft
-      double precision, intent(in)                 :: s1m1         !< right waterlevel s(m+1)       sright
-      double precision, intent(in)                 :: dxm
-      double precision, intent(in)                 :: dt
+      double precision, intent(in   )              :: s1m2         !< left waterlevel s(m)          sleft
+      double precision, intent(in   )              :: s1m1         !< right waterlevel s(m+1)       sright
+      double precision, intent(in   )              :: dxm
+      double precision, intent(in   )              :: dt
       double precision, intent(inout)              :: bob0(2)
-      double precision, intent(in)                 :: wetdown
-      logical, intent(in)                          :: infuru
+      double precision, intent(in   )              :: wetdown
+      logical,          intent(in   )              :: infuru
          
       ! Local variables
       type(t_CrossSection)           :: CrossSection
@@ -185,7 +185,7 @@ contains
       endif
       culvertCrest = max(outflowCrest, inflowCrest) 
 
-      ! Chack on Flow Direction
+      ! Check on Flow Direction
       allowedFlowDir = culvert%allowedflowdir
       if ((allowedFlowDir == 3) .or. &
           (dir == 1  .and. allowedFlowDir == 2) .or. &
@@ -273,7 +273,7 @@ contains
          culvertArea  = valveArea
       endif
       
-      !Friction Loss
+      ! Friction Loss
       frictloss = 2.0d0 * gravity * culvert%length / (chezyCulvert * chezyCulvert * hydrRadius)            ! culvert friction established
       
       ! Check if flow is free flow or submerged

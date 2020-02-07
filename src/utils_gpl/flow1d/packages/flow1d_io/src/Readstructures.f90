@@ -849,7 +849,7 @@ module m_readstructures
    subroutine readUniversalWeir(uniweir, md_ptr, st_id, success)
    
       type(t_uni_weir), pointer, intent(inout) :: uniweir    !< Universal weir structure to be read into.
-      type(tree_data),  pointer, intent(in)    :: md_ptr     !< ini tree pointer with user input.
+      type(tree_data),  pointer, intent(in   ) :: md_ptr     !< ini tree pointer with user input.
       character(IdLen),          intent(in   ) :: st_id      !< Structure character Id.
       logical,                   intent(  out) :: success    !< Result status, whether reading of the structure was successful.
 
@@ -1510,7 +1510,8 @@ module m_readstructures
       type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which orifice forcing will be added if needed.
       logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
-      logical        :: success1
+      character(len=Idlen) :: dirString
+      logical              :: success1
       
       success = .true.
       allocate(generalst)
@@ -1530,6 +1531,10 @@ module m_readstructures
 
       generalst%velheight = .true.
       call prop_get(md_ptr, '', 'useVelocityHeight',  generalst%velheight)
+      
+      dirString = 'both'
+      call prop_get_string(md_ptr, '', 'allowedFlowDir', dirString, success1)
+      generalst%allowedflowdir = allowedFlowDirToInt(dirString)
 
       ! Set default/standard values for orifice
       ! all levels are set to -1d-10. In the time loop these parameters will be set to the bed level.
@@ -1591,7 +1596,7 @@ module m_readstructures
       type(t_forcinglist),                intent(inout) :: forcinglist !< List of all (structure) forcing parameters, to which general structure forcing will be added if needed.
       logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
-      character(len=Idlen) :: dirstring
+      character(len=Idlen) :: dirString
       logical              :: success1
 
       success = .true.
@@ -1632,7 +1637,10 @@ module m_readstructures
       call prop_get_string(md_ptr, '', 'gateOpeningHorizontalDirection',   dirString)
       generalst%openingDirection = openingDirectionToInt(dirString)
       
-
+      dirString = 'both'
+      call prop_get_string(md_ptr, '', 'allowedFlowDir', dirString, success1)
+      generalst%allowedflowdir = allowedFlowDirToInt(dirString)
+      
       generalst%cgf_pos            = 1d0
       call prop_get_double(md_ptr, '', 'posFreeGateflowCoeff',  generalst%cgf_pos)
       generalst%cgd_pos            = 1d0

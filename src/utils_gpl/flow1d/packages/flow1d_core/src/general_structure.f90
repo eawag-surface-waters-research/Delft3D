@@ -96,6 +96,11 @@ module m_General_Structure
                                                                         !< 2 = Drowned Weir Flow
                                                                         !< 3 = Free Gate Flow
                                                                         !< 4 = Drowned Gate Flow
+      integer                          :: allowedflowdir                !< allowed flow direction
+                                                                        !< 0 all directions
+                                                                        !< 1 only positive flow
+                                                                        !< 2 only negative flow
+                                                                        !< 3 no flow allowed
    end type
 
 
@@ -109,27 +114,27 @@ contains
       ! modules
 
       ! Global variables
-      type(t_GeneralStructure), pointer, intent(inout):: genstr     !< Derived type containing general structure information.
-      double precision, intent(in)                 :: maxWidth      !< Maximal width of the structure. Normally the the width of the flow link.
-      double precision, intent(in)                 :: bob0(2)       !< bed level of channel upstream and downstream of the structure.
-      double precision, intent(out)                :: fuL           !< fu component of momentum equation.
-      double precision, intent(out)                :: ruL           !< Right hand side component of momentum equation.
-      double precision, intent(inout)              :: auL           !< Flow area of structure opening.
-      double precision, intent(in)                 :: as1           !< (geometrical) upstream flow area.
-      double precision, intent(in)                 :: as2           !< (geometrical) downstream flow area.
-      double precision, intent(out)                :: structwidth         !< flow width of structure.
-      integer, intent(in)                          :: direction     !< Orientation of flow link w.r.t. the structure. (1d0 for same direction, -1d0 for reverse.)
-      integer, intent(in)                          :: L0            !< Local link index.
-      integer, intent(out)                         :: kfuL          !< Flag indicating whether the structure link is wet (=1) or not (=0).
-      double precision, intent(in)                 :: s1m1          !< (geometrical) upstream water level.
-      double precision, intent(in)                 :: s1m2          !< (geometrical) downstream water level.
-      double precision, intent(in)                 :: qtotal        !< Total discharge (in case of a compound structure this is not equal to 
-                                                                    !< the discharge through the structure).
-      double precision, intent(in)                 :: Cz            !< Chezy value.
-      double precision, intent(in)                 :: dxL           !< Length of the flow link.
-      double precision, intent(in)                 :: dt            !< Time step (s).
-      logical, intent(in)                          :: SkipDimensionChecks  !< Flag indicating whether the dimensions of the structure is to be limited
-                                                                           !< by the cross sectional dimensions of the channel and correct, or not.
+      type(t_GeneralStructure), pointer, intent(inout) :: genstr               !< Derived type containing general structure information.
+      integer,                           intent(in   ) :: direction            !< Orientation of flow link w.r.t. the structure. (1d0 for same direction, -1d0 for reverse.)
+      integer,                           intent(in   ) :: L0                   !< Local link index.
+      double precision,                  intent(in   ) :: maxWidth             !< Maximal width of the structure. Normally the the width of the flow link.
+      double precision,                  intent(in   ) :: bob0(2)              !< Bed level of channel upstream and downstream of the structure.
+      double precision,                  intent(  out) :: fuL                  !< fu component of momentum equation.
+      double precision,                  intent(  out) :: ruL                  !< Right hand side component of momentum equation.
+      double precision,                  intent(inout) :: auL                  !< Flow area of structure opening.
+      double precision,                  intent(in   ) :: as1                  !< (Geometrical) upstream flow area.
+      double precision,                  intent(in   ) :: as2                  !< (Geometrical) downstream flow area.
+      double precision,                  intent(  out) :: structwidth          !< Flow width of structure.
+      integer,                           intent(  out) :: kfuL                 !< Flag indicating whether the structure link is wet (=1) or not (=0).
+      double precision,                  intent(in   ) :: s1m1                 !< (Geometrical) upstream water level.
+      double precision,                  intent(in   ) :: s1m2                 !< (Geometrical) downstream water level.
+      double precision,                  intent(in   ) :: qtotal               !< Total discharge (in case of a compound structure this is not equal to 
+                                                                               !< the discharge through the structure).
+      double precision,                  intent(in   ) :: Cz                   !< Chezy value.
+      double precision,                  intent(in   ) :: dxL                  !< Length of the flow link.
+      double precision,                  intent(in   ) :: dt                   !< Time step (s).
+      logical,                           intent(in   ) :: SkipDimensionChecks  !< Flag indicating whether the dimensions of the structure is to be limited
+                                                                               !< by the cross sectional dimensions of the channel and correct, or not.
       !
       !
       ! Local variables
@@ -142,6 +147,7 @@ contains
       double precision :: bobstru(2)             !< same as BOB0, but with respect to the structure orientation
 
       logical                        :: velheight
+      integer                        :: allowedflowdir
       double precision               :: cgd
       double precision               :: cgf
       double precision               :: crest
@@ -175,6 +181,7 @@ contains
       double precision, dimension(3) :: fu
       double precision, dimension(3) :: ru
       double precision, dimension(3) :: au
+      
       !
       !
       !! executable statements -------------------------------------------------------
@@ -219,6 +226,20 @@ contains
       
       flowDir = direction*flowDir
       
+      allowedflowdir = genstr%allowedflowdir
+      if ((allowedflowdir == 3) .or. &
+          (flowDir == 1  .and. allowedflowDir == 2) .or. &
+          (flowDir == -1 .and. allowedflowDir == 1)) then
+        fuL = 0.0d0
+        ruL = 0.0d0
+        auL = 0.0d0
+        kfuL = 0
+        genstr%fu(:,L0) = 0.0d0
+        genstr%ru(:,L0) = 0.0d0
+        genstr%au(:,L0) = 0.0d0     
+        return
+      endif
+
       call flgtar(genstr, L0, maxWidth, bobstru, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf, cgd,   &
                   cwf, cwd, mugf, lambda)
       !
