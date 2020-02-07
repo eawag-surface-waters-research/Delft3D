@@ -45,6 +45,7 @@ contains
     integer, optional,             intent(out)     :: iostat
     character(len=*), optional,    intent(in)      :: funtype
 
+    integer(kind=8)                                :: fhandle
     success = .false.
     bc%qname = quantityName
     bc%bcname = plilabel
@@ -57,9 +58,11 @@ contains
     select case (bc%ftype)
     case (BC_FTYPE_ASCII)
        if (bc%bcFilePtr%fhandle<0) then                   ! check if file already opened in our adminstration
-          if (.not.ecSupportOpenExistingFileGnu(bc%bcFilePtr%fhandle, bc%bcFilePtr%bcfilename)) then
+          if (.not.ecSupportOpenExistingFileGnu(fhandle, bc%bcFilePtr%bcfilename)) then
              call setECMessage("Unable to open "//trim(bc%bcFilePtr%bcfilename))
              return
+          else
+             bc%bcFilePtr%fhandle = fhandle
           end if
        end if
        if (.not.ecBCFilescan(bc, iostat, funtype=funtype)) then     ! parsing the open bc-file
