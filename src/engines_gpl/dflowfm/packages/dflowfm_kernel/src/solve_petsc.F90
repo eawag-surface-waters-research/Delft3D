@@ -583,7 +583,7 @@ end module m_petsc
 
       implicit none
 
-      integer,                                     intent(inout)    :: iprecnd  !< preconditioner type, 0:default, 1: none, 2:incomplete Cholesky, 3:Cholesky, 4:GAMG (doesn't work)
+      integer,                                     intent(in)    :: iprecnd  !< preconditioner type, 0:default, 1: none, 2:incomplete Cholesky, 3:Cholesky, 4:GAMG (doesn't work)
 
       integer                                                    :: i, n, jasucces
       
@@ -738,14 +738,12 @@ end module m_petsc
 !>  it is assumed that the global cell numbers iglobal, dim(Ndx) are available
 !>  NO GLOBAL RENUMBERING, so the matrix may contain zero rows
    subroutine conjugategradientPETSC(s1,ndx,its,jacompprecond,iprecond)
-!#include <finclude/petscdef.h>
       use petsc
       use m_reduce
-!      use unstruc_messages
       use m_partitioninfo
       use m_petsc
-!      use petscksp; use petscdm
       use m_flowgeom, only: kfs
+      use m_flowtimes, only: dts ! for logging
       use MessageHandling
 
       implicit none
@@ -755,8 +753,8 @@ end module m_petsc
       integer,                                     intent(out)   :: its
       integer,                                     intent(in)    :: jacompprecond   !< compute preconditioner (1) or not (0)
       integer,                                     intent(in)    :: iprecond        !< preconditioner type
-      
-      double precision                                           :: rnorm	    ! residual norm
+
+      double precision                                           :: rnorm           ! residual norm
 
       integer                                                    :: i, n, irank, jasucces
 
@@ -767,32 +765,28 @@ end module m_petsc
       PetscErrorCode                                             :: ierr = PETSC_OK
       KSPConvergedReason                                         :: Reason
       character(len=100)                                         :: message
-      
+
       jasucces = 0
-      
+
       its = 0
-      
+
 !     fill matrix
       call setPETSCmatrixEntries()
       
-      if ( jacompprecond.eq.1 ) then
+      if ( jacompprecond == 1 ) then
 !        compute preconditioner
          call createPETSCPreconditioner(iprecond)
       end if
-      
+
 !     fill vector rhs
       if (ierr == PETSC_OK) call VecGetArray(rhs,dum,idum,ierr)
       i = 0
       rhs_val = 0d0
       do n=nogauss+1,nogauss+nocg
          ndn  = noel(n)
-         if ( iglobal(ndn).gt.0 ) then
+         if ( iglobal(ndn) > 0 ) then
             i = iglobal(ndn)-iglobal(rowtoelem(1))+1
-!            if ( kfs(ndn).ne.0 ) then
-               rhs_val(i)  = ddr(ndn)
-!            else
-!               rhs_val(i) = 0d0
-!            end if
+            rhs_val(i)  = ddr(ndn)
          end if
       end do
 
@@ -800,45 +794,39 @@ end module m_petsc
 
 !     fill vector sol
       if (ierr == PETSC_OK) call VecGetArray(sol,dum,idum,ierr)
-      
+
       sol_val = 0d0
       do n=nogauss+1,nogauss+nocg
          ndn  = noel(n)
-         if ( iglobal(ndn).gt.0 ) then
+         if ( iglobal(ndn) > 0 ) then
             i = iglobal(ndn)-iglobal(rowtoelem(1))+1
-!            if ( kfs(ndn).ne.0 ) then
-               sol_val(i)  = s1(ndn)
-!            else
-!               sol_val(i) = 0d0
-!            end if
+            sol_val(i)  = s1(ndn)
          end if
       end do
-      if ( ierr == PETSC_OK ) call VecRestoreArray(sol,dum,idum,ierr)
-      if ( ierr /= PETSC_OK ) print *,'conjugategradientPETSC: PETSC_ERROR (3)'
-      
+      if ( ierr == PETSC_OK ) call VecRestoreArray(sol, dum, idum, ierr)
+      if ( ierr /= PETSC_OK ) call mess(LEVEL_INFO, 'conjugategradientPETSC: PETSC_ERROR (3)')
+
       if ( ierr /= PETSC_OK ) go to 1234
-      
-      
+
 !     solve system
       if (ierr == PETSC_OK) call KSPSolve(Solver, rhs, sol, ierr) 
-      
+
       if (ierr == PETSC_OK) call KSPGetConvergedReason(Solver, Reason, ierr)
-      
+
 !     check for convergence
       if (ierr == PETSC_OK) then
          if (reason==KSP_DIVERGED_INDEFINITE_PC) then
-            call mess(LEVEL_ERROR,'Divergence because of indefinite preconditioner')
+            call mess(LEVEL_WARN, 'Divergence because of indefinite preconditioner')
          else if (Reason<0) then
-            write(message,*) 'Other kinder of divergence: this should not happen, reason = ', Reason
-            call mess(LEVEL_ERROR,trim(message))
+            call mess(LEVEL_WARN, 'Other kind of divergence: this should not happen, reason = ', Reason)
 !            see http://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/KSP/KSPConvergedReason.html for reason
          else 
             call KSPGetIterationNumber(Solver, its, ierr)
-!	         compute residual
-            call KSPGetResidualNorm(Solver,rnorm,ierr)
-            write(message,*) 'Solver converged in ',its,' iterations, res=', rnorm
-            if (ierr == PETSC_OK) then
-               if ( my_rank.eq.0 ) call mess(LEVEL_INFO, message)
+!           compute residual
+            call KSPGetResidualNorm(Solver, rnorm, ierr)
+            if (ierr == PETSC_OK .and. my_rank == 0) then
+               write(message,'(a,i0,a,g11.4,a,f8.4)') 'Solver converged in ', its,' iterations, res=', rnorm, ' dt = ', dts
+               call mess(LEVEL_INFO, message)
             end if
             jasucces = 1
          end if
@@ -846,55 +834,21 @@ end module m_petsc
       if (ierr /= PETSC_OK) call mess(LEVEL_ERROR, 'conjugategradientPETSC: PETSC_ERROR (after solve)')
       if (ierr /= PETSC_OK) go to 1234
 
-!     begin debug
-      if (.false.) then
-         ! equation: A*sol = rhs
-         ! Residu is: res = A*sol-rhs
-         call MatMult(Amat, sol, res, ierr) ! res :=  Amat * sol
-         call mess(LEVEL_INFO,'MatMul is done')
-         call VecAxpy(res, -1.0d0, rhs, ierr)     ! res -= rhs  => res = Amat * sol - rhs
-         call mess(LEVEL_INFO,'VecAxpy is done')
-         do irank = 0, ndomains-1
-            if (irank == my_rank) then
-               do i = 1,numrows
-                  print '(a,i6,a,i6,100(a,g15.8))','rank ',my_rank,', eq ',iglobal(i),', res= ',-res_val(i),' s1= ',sol_val(i),', rhs=',rhs_val(i)
-               end do
-            end if
-            if (ierr == PETSC_OK) call mpi_barrier(DFM_COMM_DFMWORLD,merr)
-            if (merr /= 0) ierr = PETSC_OK + 1
-!            call mpi_barrier(DFM_COMM_DFMWORLD,merr)
-         end do
-         
-         if (ierr /= PETSC_OK) print *,'conjugategradientPETSC: PETSC_ERROR (4)'
-         stop
-      end if
-!     end debug
-
 !     fill vector sol
       do n=nogauss+1,nogauss+nocg
          ndn  = noel(n)
-         if ( iglobal(ndn).gt.0 .and. kfs(ndn).gt.0 ) then
+         if ( iglobal(ndn) > 0 .and. kfs(ndn) > 0 ) then
             i = iglobal(ndn)-iglobal(rowtoelem(1))+1
             s1(ndn) = sol_val(i) 
          end if
       end do
-      
-!      if ( its.gt.10 ) then
-!         call writesystem()
-!         call mess(LEVEL_ERROR, 'number of iterations exceeded limit')
-!      end if
 
  1234 continue
-      
-!     restore joff
-!      joff = joffsav
-      
-!     clean up|
 
 !     mark fail by setting number of iterations to -999
-      if ( jasucces.ne.1 ) then
+      if ( jasucces /= 1 ) then
          its = -999
-         call mess(LEVEL_ERROR,'conjugategradientPETSC: error')
+         call mess(LEVEL_WARN,'conjugategradientPETSC: error')
       end if
 
    end subroutine conjugategradientPETSC
