@@ -51,6 +51,7 @@ libdflowfm_la_SOURCES=\
         unstruc_ini.f90 \
         xbeach_typesandkinds.F90 \
         dredge_data.f90 \
+		hydrology.f90 \
         bedform_data.f90 \
         d3ddimens.f90 \
         modules.f90 \
