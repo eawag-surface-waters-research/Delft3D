@@ -39455,8 +39455,13 @@ if (jahisbal > 0) then
             if (valpump(7,n) < 0d0) then
                valpump(7,n) = dmiss ! Set to fill value if stage is irrelevant.
             end if
-            valpump(10,n) = getPumpDsLevel(pstru)
-            valpump(11,n) = getPumpSsLevel(pstru)
+            if (pstru%pump%direction*pstru%pump%capacity(1) > 0) then
+               valpump(11,n) = valpump(3,n) ! walter level at delivery side
+               valpump(10,n) = valpump(4,n) ! walter level at suction side
+            else
+               valpump(11,n) = valpump(4,n)
+               valpump(10,n) = valpump(3,n)
+            end if
             valpump(8,n) = valpump(10,n) - valpump(11,n) ! Pump head
             valpump(9,n) = GetPumpReductionFactor(pstru)
             end if
