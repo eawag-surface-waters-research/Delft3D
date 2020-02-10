@@ -296,31 +296,25 @@ subroutine flow_finalize_usertimestep(iresult)
    use m_timer
    use m_flow
    use m_flowgeom
-   use m_transport, only: constituents, NUMCONST, const_names
    use m_fourier_analysis
    use dfm_error
-   use precision_basics
-   use unstruc_files, only: defaultFilename
-   use unstruc_model, only: getoutputdir, md_fou_step
-   use m_partitioninfo, only: jampi, sdmn
+   use precision_basics, only : comparereal
+   use unstruc_model, only: md_fou_step
+   use m_partitioninfo, only: jampi
    implicit none
 
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
-   double precision, pointer, dimension(:,:) :: s1_ptr, ws_ptr, ucx_ptr,  ucy_ptr,  taus_ptr,bl_ptr, u1_ptr
-   double precision, pointer, dimension(:,:) :: xs_ptr, ys_ptr, ucxa_ptr, ucya_ptr, ucmag_ptr, xu_ptr, yu_ptr
-   integer, pointer, dimension(:,:)          :: kfs_ptr
-   double precision, pointer, dimension(:,:,:) :: const_ptr
-   double precision :: tem_dif
-   character(len=255) :: filename_fou_out
+
+   double precision     :: tem_dif
 
    iresult = DFM_GENERICERROR
 
 !   call fm_wq_processes_step(dt_user,time_user)
    if (ti_waqproc > 0) then
      if (comparereal(time_user, time_waqproc, eps10) == 0) then
-         if ( jatimer.eq.1 ) call starttimer(IFMWAQ)
-         call fm_wq_processes_step(ti_waqproc,time_user)
-         if ( jatimer.eq.1 ) call stoptimer (IFMWAQ)
+         if ( jatimer == 1 ) call starttimer(IFMWAQ)
+         call fm_wq_processes_step(ti_waqproc, time_user)
+         if ( jatimer == 1 ) call stoptimer (IFMWAQ)
          tem_dif = time_user/ti_waqproc
          time_waqproc = (floor(tem_dif + 0.001d0)+1)*ti_waqproc
      endif
@@ -338,37 +332,46 @@ subroutine flow_finalize_usertimestep(iresult)
          endif
      endif
    endif
-      
+
    if (comparereal(time1, time_user, eps10)>=0)  then
       if (comparereal(time1, time_user, eps10) <=0) then
          time1 = time_user
          time0 = time1
       endif
-      if ( jatimer.eq.1 ) call starttimer(IOUTPUT)
+      if ( jatimer == 1 ) call starttimer(IOUTPUT)
 
 !       only update values at the observation stations when necessary
 !          alternative: move this to flow_externaloutput
       if (ti_his > 0) then
-         if (comparereal(time1,time_his,eps10)>=0) then
-              call  updateValuesOnObervationStations()
-              if (jampi == 1) then
-                 call  updateValuesOnCrossSections_mpi(time1)
-                 call reduce_particles
-              endif
-              if (jahisbal > 0) then ! Update WaterBalances etc.
-                 call updateBalance()
-              endif
-              if ( jacheckmonitor.eq.1 ) then
-!                compute "checkerboard" monitor
-                 call comp_checkmonitor()
+         if (comparereal(time1, time_his, eps10)>=0) then
+            call updateValuesOnObervationStations()
+            if (jampi == 1) then
+               call updateValuesOnCrossSections_mpi(time1)
+               call reduce_particles
+            endif
+            if (jahisbal > 0) then ! Update WaterBalances etc.
+               call updateBalance()
+            endif
+            if ( jacheckmonitor == 1 ) then
+!              compute "checkerboard" monitor
+               call comp_checkmonitor()
+            endif
          endif
       endif
-      endif
 
+!       in case of discharge dependent roughness,
+!       the cross sections must be up todate each DtTrt
+      if (jatrt > 0) then
+         if (comparereal(time1, dt_trach, eps10)>=0) then
+            if (jampi == 1) then
+               call updateValuesOnCrossSections_mpi(time1)
+            endif
+         endif
+      endif
 
       call flow_externaloutput(time1)
 
-      if ( jatimer.eq.1 ) call stoptimer(IOUTPUT)
+      if ( jatimer == 1 ) call stoptimer(IOUTPUT)
 
    endif
 
@@ -381,8 +384,6 @@ subroutine flow_finalize_usertimestep(iresult)
 
  iresult = DFM_NOERR
  return ! Return with success.
-
-      888 continue
 
  end subroutine flow_finalize_usertimestep
 

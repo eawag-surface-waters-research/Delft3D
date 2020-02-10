@@ -3907,7 +3907,7 @@ end subroutine partition_make_globalnumbers
 #ifdef HAVE_MPI
 
       
-!     disable oberservation stations with missing values in this domain
+!     disable observation stations with missing values in this domain
       do iobs=1,numobs
          do ival=1,numvals
             if ( valobs(ival,iobs).eq.DMISS ) then

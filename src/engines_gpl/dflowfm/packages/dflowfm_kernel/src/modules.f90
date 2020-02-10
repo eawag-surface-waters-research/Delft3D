@@ -2423,7 +2423,7 @@ end subroutine default_turbulence
 
  double precision                  :: doodsonstart, doodsonstop , doodsoneps
 
- integer                           :: jatrt             !< Trtrou = #Y# --> 1 , Trtrou = #N# --> 0  (Delf3D style input)
+ integer                           :: jatrt             !< Trtrou = #Y# --> 1 , Trtrou = #N# --> 0  (Delft3D style input)
 
  integer                           :: jacali            !< use calibration factors (0 = no, 1 = yes)
 
