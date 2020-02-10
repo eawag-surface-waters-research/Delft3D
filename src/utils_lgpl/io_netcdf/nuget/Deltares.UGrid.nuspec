@@ -25,6 +25,6 @@
     <file src="..\packages\io_netcdf\dll\x64\Release\vcruntime140.dll" target="content\native\vcruntime140.dll" />
     <file src="..\packages\io_netcdf\dll\x64\Release\zlib1.dll" target="content\native\zlib1.dll" />
     <file src="..\packages\io_netcdf\dll\x64\Release\Deltares.UGrid.dll" target="lib\net40\Deltares.UGrid.dll" />
-    <file src="UGrid_IO_NetCDF.targets" target="build\net40\UGrid_IO_NetCDF.targets" />
+    <file src="Deltares.UGrid.targets" target="build\net40\Deltares.UGrid.targets" />
   </files>
 </package>

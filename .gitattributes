@@ -14295,7 +14295,7 @@ src/utils_lgpl/io_hyd/packages/io_hyd/src/wrwaqgeomcl.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/wstmod.f90 -text
 src/utils_lgpl/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/nuget/Deltares.UGrid.nuspec -text
-src/utils_lgpl/io_netcdf/nuget/UGrid_IO_NetCDF.targets -text
+src/utils_lgpl/io_netcdf/nuget/Deltares.UGrid.targets -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Api/UGridTest.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Deltares.UGrid.Tests.csproj -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Lib/nunit.framework.dll -text
