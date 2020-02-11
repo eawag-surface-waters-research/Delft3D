@@ -195,7 +195,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     integer                                 :: nMaxNodesPolygon
     real(hp), allocatable                   :: xx(:,:), yy(:,:), xxx(:), yyy(:)
     integer, allocatable                    :: nnn(:)
-    integer                                 :: nNetCells
+    integer                                 :: nNetCells, shift
        
     !get and convert meshgeom to kn table
     ierr = network_data_destructor()
@@ -335,8 +335,13 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
        call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
        targetValues = interpolationResults(1,nodePermutation)
     else if(locType.eq.2) then
+        shift = 1 - meshgeom%start_index
+        do i=1,size(meshgeom%edge_nodes,2)
+          meshgeom%edge_nodes(1,i) = meshgeom%edge_nodes(1,i) + shift
+          meshgeom%edge_nodes(2,i) = meshgeom%edge_nodes(2,i) + shift
+        enddo
        ! if the node have been permuted by findcell, restore the original ordering, supposing is the same as 
-       ! the one in the edge_nodes
+       ! the one in the edge_nodes       
        allocate(rawTargetValues(numTargets))
        rawTargetValues = interpolationResults(1,nodePermutation)
        !reset number of targets, associate c# and fortran pointers
