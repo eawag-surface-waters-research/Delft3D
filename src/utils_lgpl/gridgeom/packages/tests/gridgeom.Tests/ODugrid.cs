@@ -797,24 +797,24 @@ namespace gridgeom.Tests
 
                 //5. declare but do not allocate meshgeom. it will be allocated by gridgeom (fortran)
                 var meshOut = new meshgeom();
-                var meshDimOut = new meshgeomdim();
+                var meshDim = new meshgeomdim();
 
                 //6. call find cells  
                 int startIndex = 1; // provide 1 based (read from netcdf), return 1 based
                 var wrapperGridgeom = new GridGeomLibWrapper();
-                ierr = wrapperGridgeom.ggeo_find_cells(ref meshDimIn, ref meshIn, ref meshDimOut, ref meshOut, ref startIndex);
+                ierr = wrapperGridgeom.ggeo_count_cells(ref meshDimIn, ref meshIn, ref meshDim);
 
-                meshOut.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshDimOut.numface* meshDimOut.maxnumfacenodes);
-                meshOut.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDimOut.numface);
-                meshOut.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDimOut.numface);
+                meshOut.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshDim.numface* meshDim.maxnumfacenodes);
+                meshOut.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDim.numface);
+                meshOut.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDim.numface);
 
                 Assert.That(ierr, Is.EqualTo(0));
-                ierr = wrapperGridgeom.ggeo_find_cells(ref meshDimIn, ref meshIn, ref meshDimOut, ref meshOut, ref startIndex);
+                ierr = wrapperGridgeom.ggeo_find_cells(ref meshDim, ref meshOut);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //7. copy face_nodes to array
-                int[] face_nodes = new int[meshDimOut.maxnumfacenodes * meshDimOut.numface];
-                Marshal.Copy(meshOut.face_nodes, face_nodes, 0, meshDimOut.maxnumfacenodes * meshDimOut.numface);
+                int[] face_nodes = new int[meshDim.maxnumfacenodes * meshDim.numface];
+                Marshal.Copy(meshOut.face_nodes, face_nodes, 0, meshDim.maxnumfacenodes * meshDim.numface);
 
                 //8. deallocate memory allocated by c#
                 Marshal.FreeCoTaskMem(meshIn.nodex);

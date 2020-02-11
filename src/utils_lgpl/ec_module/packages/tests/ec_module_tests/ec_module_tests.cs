@@ -554,25 +554,19 @@ namespace ECModuleTests
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //5. declare but do not allocate meshgeom. it will be allocated by gridgeom (fortran)
-                var meshTwoOut = new meshgeom();
-                var meshTwoDimOut = new meshgeomdim();
+                var meshTwoDim = new meshgeomdim();
+                
                 //6. call find cells
                 var wrapperGridgeom = new GridGeomLibWrapper();
-                ierr = wrapperGridgeom.ggeo_find_cells(ref meshtwoddim, ref meshtwod, ref meshTwoDimOut, ref meshTwoOut,
-                    ref startIndex);
+                ierr = wrapperGridgeom.ggeo_count_cells(ref meshtwoddim, ref meshtwod, ref meshTwoDim);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                meshTwoOut.face_nodes =
-                    Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshTwoDimOut.numface *
-                                           meshTwoDimOut.maxnumfacenodes);
-                meshTwoOut.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshTwoDimOut.numface);
-                meshTwoOut.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshTwoDimOut.numface);
+                meshtwod.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshTwoDim.numface * meshTwoDim.maxnumfacenodes);
+                meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshTwoDim.numface);
+                meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshTwoDim.numface);
 
-                ierr = wrapperGridgeom.ggeo_find_cells(ref meshtwoddim, ref meshtwod, ref meshTwoDimOut, ref meshTwoOut,
-                    ref startIndex);
+                ierr = wrapperGridgeom.ggeo_find_cells(ref meshTwoDim, ref meshtwod);
                 Assert.That(ierr, Is.EqualTo(0));
-                meshtwod.facex = meshTwoOut.facex;
-                meshtwod.facey = meshTwoOut.facey;
 
                 //// default parameters for averaging
                 double Wu1Duni = 2.0; // default value from flow_geom init
@@ -584,7 +578,7 @@ namespace ECModuleTests
                 int locType = 0; // interpolate on the faces
 
                 //test averaging on the faces
-                int numTargets = meshTwoDimOut.numface;
+                int numTargets = meshTwoDim.numface;
                 IntPtr c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
 
                 var wrapper = new Ec_ModuleLibWrapper();
@@ -606,20 +600,7 @@ namespace ECModuleTests
                     ref jasfer3D);
 
                 Assert.That(ierr, Is.EqualTo(0));
-
-                //9. deallocate memory allocated by c#
-                Marshal.FreeCoTaskMem(meshtwod.nodex);
-                Marshal.FreeCoTaskMem(meshtwod.nodey);
-                Marshal.FreeCoTaskMem(meshtwod.nodez);
-                //Marshal.FreeCoTaskMem(meshtwod.facex);
-                //Marshal.FreeCoTaskMem(meshtwod.facey);
-                Marshal.FreeCoTaskMem(meshtwod.facez);
-                Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
                 Marshal.FreeCoTaskMem(c_targetValues);
-
-                //8. deallocate memory allocated by fortran
-                //ierr = wrapperGridgeom.ggeo_meshgeom_destructor(ref meshTwoDimOut, ref meshTwoOut);
-                //Assert.That(ierr, Is.EqualTo(0));
             }
         }
 
