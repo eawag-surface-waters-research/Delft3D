@@ -49,7 +49,7 @@ module m_GlobalParameters
    double precision                 :: thresholdDry                  = 0.001d0
    double precision                 :: thresholdFlood                = 0.01d0
    double precision                 :: factorFloodingDividedByDrying = 10.0d0
-   double precision                 :: summerDikeTransitionHeight    = 0.50d0
+   double precision                 :: summerDikeTransitionHeight    = 0.50d0 !read from CrossSectionDefinitions.ini 
    double precision                 :: summerDikeThreshold           = 0.4d+0
    double precision                 :: ThresholdSiphon               = 0.1d0
    double precision                 :: StructureDynamicsFactor       = 1.0d0

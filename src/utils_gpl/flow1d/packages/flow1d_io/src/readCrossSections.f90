@@ -280,6 +280,7 @@ module m_readCrossSections
       use m_hash_search
       use string_module, only: strcmpi
       use m_read_roughness, only: frictionTypeStringToInteger
+      !use m_globalparameters, only: summerDikeTransitionHeight
    
       type(t_network), target,  intent(inout)   :: network        !< network structure
       type(tree_data), pointer, intent(in   )   :: md_ptr         !< treedata pointer to cross section definitions, already created.
@@ -321,9 +322,14 @@ module m_readCrossSections
 
   crs:do i = 1, numstr
          
-         if (.not. strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Definition')) then
-            cycle
-         endif
+         ! block [Global]
+         if (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Global')) then
+             call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'leveeTransitionHeight',summerDikeTransitionHeight, success)
+             write(msgbuf,'(a,F6.3,a)') 'Levee transition height (summerdike) = ', summerDikeTransitionHeight, ' m'
+             call msg_flush()
+             
+         ! block [Definition]   
+         elseif (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Definition')) then
          
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'id', id, success)
          if (.not. success) then
@@ -483,6 +489,8 @@ module m_readCrossSections
          do j = 1, pCs%frictionSectionsCount
             pCs%frictionSectionIndex(j) = hashsearch(network%rgs%hashlist, pCS%frictionSectionID(j))
          enddo
+         
+         endif !block test
          
       enddo crs
 

@@ -317,8 +317,6 @@ module m_flow1d_reader
            call SetMessage(LEVEL_FATAL, 'Error reading Advanced Parameters')
         endif
         call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters Done')
-     else 
-        summerDikeTransitionHeight = 0.5d0
      endif
      
       
