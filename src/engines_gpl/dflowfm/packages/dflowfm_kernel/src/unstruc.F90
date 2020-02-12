@@ -96,7 +96,7 @@ end subroutine inctime_user_dt
 
  call flow_single_timestep(key, ierr)
 
- call updateValuesOnObervationStations()
+ call updateValuesOnObservationStations()
 
  call flow_externaloutput(time1)                     ! receive signals etc, write map, his etc
                                                      ! these two functions are explicit. therefore, they are in the usertimestep
@@ -297,6 +297,7 @@ subroutine flow_finalize_usertimestep(iresult)
    use m_flow
    use m_flowgeom
    use m_fourier_analysis
+   use m_trachy
    use dfm_error
    use precision_basics, only : comparereal
    use unstruc_model, only: md_fou_step
@@ -344,7 +345,7 @@ subroutine flow_finalize_usertimestep(iresult)
 !          alternative: move this to flow_externaloutput
       if (ti_his > 0) then
          if (comparereal(time1, time_his, eps10)>=0) then
-            call updateValuesOnObervationStations()
+            call updateValuesOnObservationStations()
             if (jampi == 1) then
                call updateValuesOnCrossSections_mpi(time1)
                call reduce_particles
@@ -359,12 +360,17 @@ subroutine flow_finalize_usertimestep(iresult)
          endif
       endif
 
-!       in case of discharge dependent roughness,
-!       the cross sections must be up todate each DtTrt
+!       in case of water level or discharge dependent roughness,
+!       the observations and cross sections must be up todate each DtTrt s (if they are actually used)
       if (jatrt > 0) then
          if (comparereal(time1, dt_trach, eps10)>=0) then
-            if (jampi == 1) then
-               call updateValuesOnCrossSections_mpi(time1)
+            if (trachy_fl%gen%ntrtobs > 0) then
+               call updateValuesOnObservationStations()
+            endif
+            if (trachy_fl%gen%ntrtcrs > 0) then
+               if (jampi == 1) then
+                  call updateValuesOnCrossSections_mpi(time1)
+               endif
             endif
          endif
       endif
@@ -597,7 +603,7 @@ character(len=255)   :: filename_fou_out
        call updateTotalInflowLat(dts)
     end if
  end if
- ! note updateValuesOnObervationStations() in flow_usertimestep
+ ! note updateValuesOnObservationStations() in flow_usertimestep
 
  ! Time-integral statistics on all flow nodes.
  if (is_numndvals > 0) then
@@ -21584,7 +21590,7 @@ endif
 end subroutine
 
 !> update observation station data
-subroutine updateValuesOnObervationStations()
+subroutine updateValuesOnObservationStations()
    use m_observations
    use m_partitioninfo
    use m_timer
@@ -21607,7 +21613,7 @@ subroutine updateValuesOnObervationStations()
    end if
 
    return
-end subroutine updateValuesOnObervationStations
+end subroutine updateValuesOnObservationStations
 
 subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord)
 use netcdf
@@ -25160,7 +25166,7 @@ subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefi
 !   for the following, it is assumed that the moving obsrevation stations have been initialized (in flow_initexternalforcings)
     call init_valobs()   ! (re)initialize work array and set pointers for observation stations
 
-    call updateValuesOnObervationStations() ! and fill first value
+    call updateValuesOnObservationStations() ! and fill first value
 
     call init_structure_hisvalues()
 
