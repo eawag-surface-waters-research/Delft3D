@@ -3958,6 +3958,8 @@
    integer                              :: i,j,k, ierr
 
    !for each face sort the x coordinates
+   ierr = -1
+   
    if(meshgeom%numface < 1)then
       return
    endif
@@ -4022,6 +4024,8 @@
    do i = 1,meshgeom%numface
       mapping(i) = mapping(i) - shift
    enddo
+   
+   ierr = 0
 
    end function ggeo_map_2d_cells
 
