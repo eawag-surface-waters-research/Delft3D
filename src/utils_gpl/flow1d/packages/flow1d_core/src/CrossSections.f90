@@ -235,6 +235,7 @@ module m_CrossSections
        integer                      :: branchid = -1        !< Integer branch id
        double precision             :: chainage             !< Offset in meters along reach
        double precision             :: bedLevel             !< Bed level of the cross section
+       double precision             :: bedLevelMain         !< Bed level of the cross section averaged over the main section
        double precision             :: shift                !< Bed level = reference level cross section definition + SHIFT
        double precision             :: surfaceLevel         !< Highest level of cross section
        double precision             :: charHeight           !< Characteristic height
@@ -759,7 +760,7 @@ integer function  AddCrossSectionByVariables(crs, CSDef, branchid, chainage, ire
 
    crs%cross(i)%chainage            = chainage
    crs%cross(i)%bedLevel            = bedLevel
-   crs%cross(i)%shift               = bedlevel
+   crs%cross(i)%shift               = bedlevel  ! is this correct? WO
    crs%cross(i)%frictionSectionsCount = 1
    crs%cross(i)%crossType = CSDef%CS(iref)%crossType
    allocate(crs%cross(i)%frictionTypePos(1), crs%cross(i)%frictionTypeNeg(1), crs%cross(i)%frictionValuePos(1), crs%cross(i)%frictionValueNeg(1))
@@ -809,7 +810,7 @@ subroutine SetParsCross(CrossDef, cross)
    cross%closed    = Crossdef%closed
 
 
-   if (Crossdef%crossType == cs_tabulated) then
+   if (Crossdef%crossType == CS_TABULATED) then
       cross%surfaceLevel = Crossdef%height(Crossdef%levelsCount) + cross%shift
       cross%bedLevel     = Crossdef%height(1) + cross%shift
    elseif (Crossdef%crossType == CS_YZ_PROF) then
@@ -2813,6 +2814,7 @@ type(t_CrossSection) function CopyCross(CrossFrom)
    CopyCross%branchid           = CrossFrom%branchid
    CopyCross%chainage           = CrossFrom%chainage
    CopyCross%bedLevel           = CrossFrom%bedLevel
+   CopyCross%bedLevelMain       = CrossFrom%bedLevelMain
    CopyCross%shift              = CrossFrom%shift
    CopyCross%surfaceLevel       = CrossFrom%surfaceLevel
    CopyCross%charHeight         = CrossFrom%charHeight
@@ -3358,7 +3360,10 @@ subroutine createTablesForTabulatedProfile(crossDef)
          call msg_flush()
          write(msgbuf, '(''Bed level            = '', f14.2)') cross%bedlevel
          call msg_flush()
-         
+         if (cross%crossType == CS_TABULATED) then
+             write(msgbuf, '(''Bed level Main       = '', f14.2)') cross%bedlevelMain
+             call msg_flush()
+         endif         
          if (cross%crossType == CS_YZ_PROF) then
             call write_conv_tab(cross%convTab)
          endif
