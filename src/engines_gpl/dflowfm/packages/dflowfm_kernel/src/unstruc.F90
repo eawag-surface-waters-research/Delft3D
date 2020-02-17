@@ -1198,7 +1198,8 @@ if(q /= 0) then
              goto 333
           endif
        else
-          goto 111                                      ! redo with timestep reduction => 111 furu
+          if ( jampi == 1 .and. my_rank == 0) call mess(LEVEL_WARN, 'Redo with timestep reduction.')
+          goto 111
        endif
     endif
 

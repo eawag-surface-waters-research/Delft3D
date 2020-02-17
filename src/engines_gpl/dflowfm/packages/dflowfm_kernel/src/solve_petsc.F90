@@ -815,9 +815,9 @@ end module m_petsc
 
 !     check for convergence
       if (ierr == PETSC_OK) then
-         if (reason==KSP_DIVERGED_INDEFINITE_PC) then
-            call mess(LEVEL_WARN, 'Divergence because of indefinite preconditioner')
-         else if (Reason<0) then
+         if (reason == KSP_DIVERGED_INDEFINITE_PC) then
+            if (my_rank == 0) call mess(LEVEL_WARN, 'Divergence because of indefinite preconditioner')
+         else if (Reason < 0) then
             call mess(LEVEL_WARN, 'Other kind of divergence: this should not happen, reason = ', Reason)
 !            see http://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/KSP/KSPConvergedReason.html for reason
          else 
@@ -848,7 +848,7 @@ end module m_petsc
 !     mark fail by setting number of iterations to -999
       if ( jasucces /= 1 ) then
          its = -999
-         call mess(LEVEL_WARN,'conjugategradientPETSC: error')
+         call mess(LEVEL_DEBUG, 'conjugategradientPETSC: error')
       end if
 
    end subroutine conjugategradientPETSC
