@@ -2604,7 +2604,10 @@ end subroutine default_turbulence
  double precision                  :: epshsdif=1d-2     !< hs < epshsdif: no vertical diffusion if hs < epshsdif
  double precision                  :: s01max            !< water level threshold (m) between s0 and s1 in validation routine
  double precision                  :: u01max            !< velocity threshold (m/s) between u0 and u1 in validation routine
- double precision                  :: umagmax           !< velocity threshold (m/s) for u0 in validation routine
+ double precision                  :: umagmax           !< velocity threshold (m/s) for velocity magnitude in validation routine
+ double precision                  :: s01warn           !< warning level water level (m) between s0 in validation routine
+ double precision                  :: u01warn           !< warning level velocity (m/s) between u0 in validation routine
+ double precision                  :: umagwarn          !< warning level velocity (m/s) for velocity magnitude in validation routine
  ! See also m_flowtimes::dtminbreak
 
  ! parameters controlling flooding/drying/solving

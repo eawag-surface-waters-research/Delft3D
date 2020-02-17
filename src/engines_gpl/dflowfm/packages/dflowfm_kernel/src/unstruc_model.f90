@@ -1044,6 +1044,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double(md_ptr, 'numerics', 'Maxwaterleveldiff', s01max)
     call prop_get_double(md_ptr, 'numerics', 'Maxvelocitydiff', u01max)
     call prop_get_double(md_ptr, 'numerics', 'Maxvelocity', umagmax)
+    call prop_get_double(md_ptr, 'numerics', 'Waterlevelwarn', s01warn)
+    call prop_get_double(md_ptr, 'numerics', 'Velocitywarn', u01warn)
+    call prop_get_double(md_ptr, 'numerics', 'Velmagnwarn', umagwarn)
     call prop_get_double(md_ptr, 'numerics', 'MinTimestepBreak', dtminbreak)
     call prop_get_double(md_ptr, 'numerics', 'Epshu' , epshu)
 
@@ -2647,15 +2650,27 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
 
     if (writeall .or. (s01max > 0d0)) then
-        call prop_set(prop_ptr, 'numerics', 'Maxwaterleveldiff', s01max,  'upper bound (in m) on water level changes (<= 0: no bounds). Run will abort when violated.')
+        call prop_set(prop_ptr, 'numerics', 'Maxwaterleveldiff', s01max, 'upper bound (in m) on water level changes (<= 0: no bounds). Run will abort when violated.')
     end if
 
-    if(writeall .or. (u01max > 0d0)) then
+    if (writeall .or. (u01max > 0d0)) then
         call prop_set(prop_ptr, 'numerics', 'Maxvelocitydiff', u01max, 'upper bound (in m/s) on velocity changes (<= 0: no bounds). Run will abort when violated.')
     endif
 
-    if(writeall .or. (umagmax > 0d0)) then
+    if (writeall .or. (umagmax > 0d0)) then
         call prop_set(prop_ptr, 'numerics', 'Maxvelocity', umagmax, 'upper bound (in m/s) on velocity (<= 0: no bounds). Run will abort when violated.')
+    endif
+
+    if (writeall .or. (s01warn > 0d0)) then
+        call prop_set(prop_ptr, 'numerics', 'Waterlevelwarn', s01warn, 'warning level (in m) on water level (<= 0: no check).')
+    end if
+
+    if (writeall .or. (u01warn > 0d0)) then
+        call prop_set(prop_ptr, 'numerics', 'Velocitywarn', u01warn, 'warning level (in m/s) on velocity u1 (<= 0: no check).')
+    endif
+
+    if (writeall .or. (umagwarn > 0d0)) then
+        call prop_set(prop_ptr, 'numerics', 'Velmagnwarn', umagwarn, 'warning level (in m/s) on velocity magnitude (<= 0: no check).')
     endif
 
     if (writeall .or. (dtminbreak > 0d0)) then

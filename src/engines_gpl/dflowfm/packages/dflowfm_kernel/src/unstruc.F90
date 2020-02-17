@@ -923,7 +923,8 @@ end subroutine flow_finalize_single_timestep
 !> Validates the current flow state and returns whether simulation should be aborted.
 !! Moreover, a final snapshot is written into the output files before aborting.
 !!
-!! Validity is determined by s01max, u01max and dtminbreak.
+!! Validity is determined by s01max, u01max, umagmax and dtminbreak.
+!! Also print a warning if water level or velocity > s01warn, u01warn, umagwarn
 subroutine flow_validatestate(iresult)
  use unstruc_messages
  use m_flow
@@ -942,7 +943,7 @@ subroutine flow_validatestate(iresult)
 
  if (s01max > 0d0) then     ! water level difference validation
     do i = 1,ndx
-        if(abs(s1(i) - s0(i)) > s01max) then
+        if (abs(s1(i) - s0(i)) > s01max) then
             call mess(LEVEL_WARN,'water level change above threshold: (cell index, delta s[m]) = ', i, abs(s1(i) - s0(i)))
             q = 1
             exit
@@ -952,21 +953,48 @@ subroutine flow_validatestate(iresult)
 
  if (u01max > 0d0) then     ! velocity difference validation
     do i = 1,lnx
-        if(abs(u1(i) - u0(i)) > u01max) then
+        if (abs(u1(i) - u0(i)) > u01max) then
             call mess(LEVEL_WARN,'velocity change above threshold: (flowlink index, delta u[m/s]) = ', i, abs(u1(i) - u0(i)))
             q = 1
             exit
         end if
     end do
  end if
- 
- if (umagmax > 0d0) then     ! velocity magnitude validation
+
+ if (umagwarn > 0d0 .or. umagmax > 0d0) then     ! velocity magnitude needed
     call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
+ end if
+
+ if (umagmax > 0d0) then     ! velocity magnitude validation
     do i = 1, ndkx
-        if(ucmag(i) > umagmax) then
+        if (ucmag(i) > umagmax) then
             call mess(LEVEL_WARN,'velocity magnitude above threshold: (cell index, ucmag[m/s]) = ', i, ucmag(i))
             q = 1
             exit
+        end if
+    end do
+ end if
+
+ if (s01warn > 0d0) then     ! water level warning
+    do i = 1,ndx
+        if (abs(s1(i)) > s01warn) then
+            call mess(LEVEL_WARN,'water level s1 above threshold: (cell index, s[m]) = ', i, s1(i))
+        end if
+    end do
+ end if
+
+ if (u01warn > 0d0) then     ! velocity component warning
+    do i = 1,lnx
+        if (abs(u1(i)) > u01warn) then
+            call mess(LEVEL_WARN,'velocity u1 above threshold: (flowlink index, u[m/s]) = ', i, u1(i))
+        end if
+    end do
+ end if
+
+ if (umagwarn > 0d0) then     ! velocity magnitude warning
+    do i = 1, ndkx
+        if (ucmag(i) > umagwarn) then
+            call mess(LEVEL_WARN,'velocity magnitude above threshold: (cell index, ucmag[m/s]) = ', i, ucmag(i))
         end if
     end do
  end if
