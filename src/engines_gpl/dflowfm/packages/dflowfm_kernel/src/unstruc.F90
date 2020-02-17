@@ -1117,7 +1117,7 @@ if(q /= 0) then
  integer :: ndraw
  COMMON /DRAWTHIS/  ndraw(50)
 
- integer            :: key, LL, L, k1,k2
+ integer            :: key, LL, L, k1,k2, itype
  integer            :: ja, k, ierror, n, kt, num, js1, noddifmaxlevm, nsiz
  character (len=40) :: tex
  double precision   :: wave_tnow, wave_tstop, t0, t1, dif, difmaxlevm
@@ -1175,16 +1175,11 @@ if(q /= 0) then
     ! endif
 
 !    synchronise all water-levels
-    if ( jampi.eq.1 ) then
-       if ( jaoverlap.eq.0 ) then
-          if ( jatimer.eq.1 ) call starttimer(IUPDSALL)
-          call update_ghosts(ITYPE_SALL, 1, Ndx, s1, ierror)
-          if ( jatimer.eq.1 ) call stoptimer(IUPDSALL)
-       else
-          if ( jatimer.eq.1 ) call starttimer(IUPDSALL)
-          call update_ghosts(ITYPE_Snonoverlap, 1, Ndx, s1, ierror)
-          if ( jatimer.eq.1 ) call stoptimer(IUPDSALL)
-       end if
+    if ( jampi == 1 ) then
+       if ( jatimer == 1 ) call starttimer(IUPDSALL)
+       itype = merge(ITYPE_SALL, ITYPE_Snonoverlap, jaoverlap == 0)
+       call update_ghosts(itype, 1, Ndx, s1, ierror)
+       if ( jatimer == 1 ) call stoptimer(IUPDSALL)
     end if
 
     call poshcheck(key)                                 ! s1 above local bottom? (return through key only for easier interactive)
