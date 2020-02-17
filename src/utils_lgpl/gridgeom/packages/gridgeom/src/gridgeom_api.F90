@@ -294,31 +294,6 @@ function ggeo_get_links_dll(c_arrayfrom, c_arrayto, nlinks, linkType, startIndex
    
 end function ggeo_get_links_dll
 
-function ggeo_map_2d_cells_dll(c_meshgeom, c_meshgeomdim, c_mapping) result(ierr) bind(C, name="ggeo_map_2d_cells")
-!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_map_2d_cells_dll
-   use gridoperations
-   use gridgeom
-   use meshdata
-   
-   type(c_t_ug_meshgeom), intent(in)      :: c_meshgeom
-   type(c_t_ug_meshgeomdim), intent(in)   :: c_meshgeomdim
-   type(c_ptr), intent(inout)             :: c_mapping
-   
-   ! Locals
-   type(t_ug_meshgeom)                    :: meshgeom
-   integer, pointer                       :: mapping(:)
-   integer                                :: ierr
-   
-   ierr = convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom)
-   ierr = ggeo_initialize()
-   ierr = ggeo_convert(meshgeom, c_meshgeom%start_index)
-   
-   call c_f_pointer(c_mapping, mapping, (/ c_meshgeomdim%numface /))
-
-   ierr = ggeo_map_2d_cells(meshgeom, mapping)
-   
-end function ggeo_map_2d_cells_dll
-
 function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchoffset, c_branchlength, c_branchid, c_sourceNodeId, c_targetNodeId, nbranches, nmeshnodes, startIndex) result(ierr) bind(C, name="ggeo_convert_1d_arrays")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_convert_1d_arrays_dll
 
@@ -424,9 +399,6 @@ function ggeo_count_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut) result(ierr) 
    type(t_ug_meshgeom)                        :: meshgeomIn        !< fortran meshgeom
    integer                                    :: ierr, n, nn, maxNumNodes
    
-   ierr = 0
-
-
    ierr = 0
    
    ! destroy any previous state of the library

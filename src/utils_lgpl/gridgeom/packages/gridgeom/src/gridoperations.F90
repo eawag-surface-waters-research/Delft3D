@@ -2,6 +2,7 @@
    module gridoperations
 
    use MessageHandling, only: msgbox, mess, LEVEL_ERROR
+   use meshdata, only: t_ug_meshgeom
    implicit none
 
    !new functions
@@ -17,7 +18,6 @@
    public :: ggeo_deallocate
    public :: ggeo_initialize
    public :: ggeo_make1D2DRiverLinks
-   public :: ggeo_map_2d_cells
 
 
    !from net.f90
@@ -64,6 +64,9 @@
    public :: getcellcircumcenter
 
    private
+   
+   ! for mapping 2d cells
+   type(t_ug_meshgeom) :: meshgeom2d
 
    contains
 
@@ -3248,7 +3251,7 @@
    
    if (start_index == 0) incrementIndex = 1;
 
-   !Prepare net vars for new data and fill with values from file, increases nod, xk, yk, zk, kn if needed
+   ! Prepare net vars for new data and fill with values from file, increases nod, xk, yk, zk, kn if needed
 
    call increasenetw(numk_last + meshgeom%numnode, numl_last + meshgeom%numedge)
    XK(numk_last+1:numk_last+numk_read) = meshgeom%nodex(1:meshgeom%numnode)
@@ -3261,7 +3264,7 @@
       kn(3,  numl_last+l) = meshgeom%dim
    end do
 
-   !Increase the number of links
+   ! Increase the number of links
    if (meshgeom%numedge>0) NUML = numl_last + meshgeom%numedge
    if (meshgeom%numnode>0) NUMK = numk_last + meshgeom%numnode
    if (meshgeom%dim==1) numl1d_last = numl1d_last + meshgeom%numedge
@@ -3269,7 +3272,12 @@
    LNUMK = NUMK
    LNUML = NUML
    NUML1D = numl1d_last
-
+   
+   ! Save meshgeon 2d as used in the gui to build mappings
+   if (meshgeom%dim==2) then
+      meshgeom2d = meshgeom
+   endif
+ 
    end function ggeo_convert
 
    function ggeo_deallocate() result (ierr)
@@ -3313,21 +3321,27 @@
    integer, intent(in)     :: start_index
    integer                 :: ierr, nlinks, l, nc
    integer                 :: linkType
+   integer, allocatable    :: mapping(:)
 
    ierr     = 0
    nlinks   = 0
+   
+   ierr  = ggeo_map_2d_cells(meshgeom2d, mapping)
+   if(ierr.ne.0) then
+      ierr = -1
+      return
+   endif
    
    do l=1,numl1d + numl
       if(kn(3,l).eq.linkType) then
          nlinks = nlinks + 1
          nc = 0
          call incells(xk(kn(1,l)), yk(kn(1,l)), nc)
-         if (nc < 1) then
+         if (nc < 1 .or. nc> size(mapping)) then
             ierr = -1
             return
          endif
-         !2d cell
-         arrayfrom(nlinks) = nc          
+         arrayfrom(nlinks) = mapping(nc)
          !1dpoint
          arrayto(nlinks)   = kn(2,l)
       end if
@@ -3343,7 +3357,6 @@
    !< create meshgeom from array
    function ggeo_convert_1d_arrays(nodex, nodey, nodeoffset, branchlength, nodebranchidx, sourcenodeid, targetnodeid, meshgeom, startindex) result(ierr)
 
-   use meshdata
    use odugrid
    use m_alloc
 
@@ -3941,21 +3954,20 @@
 
    function ggeo_map_2d_cells(meshgeom, mapping) result(ierr)
 
-   use meshdata
    use network_data
    use m_missing, only : dmiss, imiss
    use sorting_algorithms
 
    implicit none
-   type(t_ug_meshgeom), intent(in)      :: meshgeom
-   integer, intent(inout)               :: mapping(:)
-   double precision, allocatable        :: sorted_faces_x_meshgeom(:,:), sorted_faces_y_meshgeom(:,:)
-   double precision, allocatable        :: sorted_faces_x_lib_state(:,:), sorted_faces_y_lib_state(:,:)
-   double precision, parameter          :: tolerance = 1e-4
-   integer                              :: indexses_x(meshgeom%maxnumfacenodes), indexses_y(meshgeom%maxnumfacenodes), shift
-   double precision                     :: array_x_to_sort(meshgeom%maxnumfacenodes), array_y_to_sort(meshgeom%maxnumfacenodes)
-   logical                              :: isFound
-   integer                              :: i,j,k, ierr
+   type(t_ug_meshgeom), intent(in)             :: meshgeom
+   integer, allocatable,intent(inout)          :: mapping(:)
+   double precision, allocatable               :: sorted_faces_x_meshgeom(:,:), sorted_faces_y_meshgeom(:,:)
+   double precision, allocatable               :: sorted_faces_x_lib_state(:,:), sorted_faces_y_lib_state(:,:)
+   double precision, parameter                 :: tolerance = 1e-4
+   integer                                     :: indexses_x(meshgeom%maxnumfacenodes), indexses_y(meshgeom%maxnumfacenodes), shift
+   double precision                            :: array_x_to_sort(meshgeom%maxnumfacenodes), array_y_to_sort(meshgeom%maxnumfacenodes)
+   logical                                     :: isFound
+   integer                                     :: i,j,k, ierr
 
    !for each face sort the x coordinates
    ierr = -1
@@ -3999,7 +4011,8 @@
       enddo
    enddo
 
-   !build the mapping. Note: O(n2) time complexity 
+   !build the mapping2dCells. Note: O(n2) time complexity 
+   allocate(mapping(meshgeom%numface))
    mapping = imiss
    do i = 1,meshgeom%numface
       do j= 1, nump
@@ -4018,11 +4031,6 @@
             exit
          endif
       enddo
-   enddo
-   
-   ! shift as client requested
-   do i = 1,meshgeom%numface
-      mapping(i) = mapping(i) - shift
    enddo
    
    ierr = 0
