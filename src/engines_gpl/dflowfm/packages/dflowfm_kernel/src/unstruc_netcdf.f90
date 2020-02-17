@@ -123,6 +123,8 @@ type t_unc_timespace_id
    integer :: id_flowelemcrsz(MAX_ID_VAR)   = -1 !< Variable ID for cross-section point levels passing through flow node (on 1D).
    integer :: id_flowelemcrsn(MAX_ID_VAR)   = -1 !< Variable ID for cross-section point widths passing through flow node (on 1D).
    integer :: id_jmax                       = -1
+   integer :: id_nCrs                       = -1
+   integer :: id_morCrsName                 = -1
    integer :: id_netnodez(MAX_ID_VAR)       = -1 !< Variable ID for net node bed level. TODO: AvD: UNST-1318: consider removing here.
    
    integer :: id_nlyrdim    = -1 !< Dimension ID for number of bed layers in bed stratigraphy
@@ -2477,7 +2479,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_flowelemxzw, id_flowelemyzw, id_flowlinkxu, id_flowlinkyu,&
         id_flowelemxbnd, id_flowelemybnd, id_bl, id_s0bnd, id_s1bnd, id_blbnd, &
         id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_squ, id_sqi, &
-        id_jmax, id_flowelemcrsz, id_flowelemcrsn, id_ncrs, id_morft, &
+        id_jmax, id_flowelemcrsz, id_ncrs, id_morft, id_morCrsName, id_strlendim, &
         id_culvert_openh
     
     integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
@@ -2952,22 +2954,27 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
       ierr = nf90_put_att(irstfile, id_morbl,   'units'       , 'days')      
       !
       if (ndx1d > 0 .and. stm_included) then
-         nCrs = 0
-         do i = 1,size(network%crs%cross)
-            if (network%crs%cross(i)%crossindx ==	0) exit 
-            nCrs = nCrs + 1
-         enddo
-         pCSs => network%CSDefinitions%CS
-         jmax = 0
-         do i = 1,size(pCSs)
-            if (pCSs(i)%levelscount == 0) exit
-            jmax = max(jmax,pCSs(i)%levelscount)
-         enddo
-         ierr = nf90_def_dim(irstfile, trim(mesh1dname)//'_crs_maxdim', jmax,    id_jmax)
-         ierr = nf90_def_dim(irstfile, trim(mesh1dname)//'_ncrs',      nCrs,   id_ncrs)
-         ierr = nf90_def_var(irstfile, 'flowelem_crs_z', nf90_double, (/ id_jmax, id_ncrs, id_timedim /), id_flowelemcrsz)
-         ierr = nf90_put_att(irstfile, id_flowelemcrsz, 'long_name','cross-section points level')
-         ierr = nf90_put_att(irstfile, id_flowelemcrsz, 'unit', 'm')
+         if (stmpar%morpar%bedupd) then
+            nCrs = 0
+            do i = 1,size(network%crs%cross)
+               if (network%crs%cross(i)%crossindx ==	0) exit 
+               nCrs = nCrs + 1
+            enddo
+            pCSs => network%CSDefinitions%CS
+            jmax = 0
+            do i = 1,size(pCSs)
+               if (pCSs(i)%levelscount == 0) exit
+               jmax = max(jmax,pCSs(i)%levelscount)
+            enddo
+            ierr = nf90_def_dim(irstfile, trim(mesh1dname)//'_crs_maxdim', jmax,    id_jmax)
+            ierr = nf90_def_dim(irstfile, trim(mesh1dname)//'_ncrs',      nCrs,   id_ncrs)
+            ierr = nf90_def_dim(irstfile, 'nStringlen', 100, id_strlendim)
+            ierr = nf90_def_var(irstfile, trim(mesh1dname)//'_mor_crs_z', nf90_double, (/ id_jmax, id_ncrs, id_timedim /), id_flowelemcrsz)
+            ierr = nf90_put_att(irstfile, id_flowelemcrsz, 'long_name','cross-section points level')
+            ierr = nf90_put_att(irstfile, id_flowelemcrsz, 'unit', 'm')
+            ierr = nf90_def_var(irstfile, trim(mesh1dname)//'_mor_crs_name', nf90_char, (/ id_strlendim, id_nCrs /), id_morCrsName)
+            ierr = nf90_put_att(irstfile, id_morCrsName, 'long_name','name of cross-section')
+         endif
       endif
       !
       select case (stmpar%morlyr%settings%iunderlyr)
@@ -3184,6 +3191,15 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     end if
     ierr = nf90_enddef(irstfile)
 
+    ! 1D profile names
+    if (ndx1d > 0 .and. stm_included) then
+       if (stmpar%morpar%bedupd) then
+          do i = 1,nCrs
+             ierr = nf90_put_var(irstfile, id_morCrsName,trim(network%crs%cross(i)%CSID),(/ 1, i /),(/ len(trim(network%crs%cross(i)%CSID)), 1 /))  ! only write once
+          enddo
+       endif
+    endif
+          
     ! Inquire var-id's
     ! NOTE: alle inq_varids below are not needed, since they have just been def_var'd above in this subroutine. Cleanup later together with rst/map cleanup. [AvD]
     if ( kmx>0 ) then
@@ -3644,20 +3660,20 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     
     ! Write 1D cross sections
     if (ndx1d > 0 .and. stm_included) then
-       if (.not.allocated(work1d_z)) then
-          allocate( work1d_z(jmax,nCrs) )
-       endif
-       work1d_z = dmiss
-       do i = 1,nCrs
-          pCS => network%crs%cross(i)%tabdef
-          !if (pCS%crosstype == CS_TABULATED) then
+       if (stmpar%morpar%bedupd) then
+          if (.not.allocated(work1d_z)) then
+             allocate (work1d_z(jmax,nCrs))
+          endif
+          work1d_z = dmiss
+          do i = 1,nCrs
+             pCS => network%crs%cross(i)%tabdef
              do j = 1,pCS%levelscount
                 work1d_z(j,i) = pCS%height(j)
              enddo
-          !endif
-       enddo
-       ierr = nf90_put_var(irstfile, id_flowelemcrsz, work1d_z(1:jmax,1:nCrs), start=(/ 1, 1, itim /), count=(/ jmax, nCrs, 1 /) )
-       deallocate( work1d_z )
+          enddo
+          ierr = nf90_put_var(irstfile, id_flowelemcrsz, work1d_z(1:jmax,1:nCrs), start=(/ 1, 1, itim /), count=(/ jmax, nCrs, 1 /) )
+          deallocate (work1d_z)
+       endif
     endif
     
    
@@ -3849,11 +3865,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    
    type(t_CSType), pointer                       :: pCS
    type(t_CSType), pointer, dimension(:)         :: pCSs
-   integer                                       :: jmax, ndx1d
+   integer                                       :: ndx1d 
+   integer, save                                 :: jmax, nCrs
    double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
    double precision, dimension(:,:,:), allocatable :: work3d
 
-   pCSs => network%CSDefinitions%CS
    ndx1d = ndxi - ndx2d
 
    if (ndxi <= 0) then
@@ -4440,14 +4456,31 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_mfluff  , nf90_double, UNC_LOC_S, 'mfluff'  , '', 'Sediment mass in fluff layer', 'kg m-2', dimids = (/ -2, mapids%id_tsp%id_sedsusdim, -1 /))
          end if
          !
-         if (ndx1d > 0) then
-            !ierr = nf90_def_dim(mapids%ncid, 'nmesh1d_crs_maxdim', jmax,    mapids%id_jmax)
-            ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_mor_crs_z', nf90_double, (/ mapids%id_tsp%id_jmax, mapids%id_tsp%meshids1d%dimids(mdim_node), mapids%id_tsp%id_timedim /), mapids%id_tsp%id_flowelemcrsz(1))
-            ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsz(1), 'long_name','time-varying cross-section points level')
-            ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsz(1), 'unit', 'm')
-            ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_mor_crs_n', nf90_double, (/ mapids%id_tsp%id_jmax, mapids%id_tsp%meshids1d%dimids(mdim_node), mapids%id_tsp%id_timedim /), mapids%id_tsp%id_flowelemcrsn(1))
-            ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), 'long_name','time-varying cross-section points half width')
-            ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), 'unit', 'm')
+         ! 1D cross sections         
+         if (ndx1d > 0 .and. stm_included) then
+            if (stmpar%morpar%bedupd) then
+               nCrs = 0
+               do i = 1,size(network%crs%cross)
+                  if (network%crs%cross(i)%crossindx == 0) exit 
+                  nCrs = nCrs + 1
+               enddo
+               pCSs => network%CSDefinitions%CS
+               jmax = 0
+               do i = 1,size(pCSs)
+                  if (pCSs(i)%levelscount == 0) exit
+                  jmax = max(jmax,pCSs(i)%levelscount)
+               enddo
+               ierr = nf90_def_dim(mapids%ncid, trim(mesh1dname)//'_crs_maxdim', jmax, mapids%id_tsp%id_jmax)
+               ierr = nf90_def_dim(mapids%ncid, trim(mesh1dname)//'_ncrs'      , nCrs, mapids%id_tsp%id_nCrs)
+               ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_mor_crs_z', nf90_double, (/ mapids%id_tsp%id_jmax, mapids%id_tsp%id_nCrs, mapids%id_tsp%id_timedim /), mapids%id_tsp%id_flowelemcrsz(1))
+               ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsz(1), 'long_name','time-varying cross-section points level')
+               ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsz(1), 'unit', 'm')
+               ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_mor_crs_n', nf90_double, (/ mapids%id_tsp%id_jmax, mapids%id_tsp%id_nCrs, mapids%id_tsp%id_timedim /), mapids%id_tsp%id_flowelemcrsn(1))
+               ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), 'long_name','time-varying cross-section points half width')
+               ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), 'unit', 'm')
+               ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_mor_crs_name', nf90_char, (/ mapids%id_tsp%id_strlendim, mapids%id_tsp%id_nCrs /), mapids%id_tsp%id_morCrsName)
+               ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_morCrsName, 'long_name','name of cross-section')
+            endif
          endif
       endif
       !
@@ -4697,7 +4730,16 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = nf90_put_var(mapids%ncid,mapids%id_frac_name,trim(stmpar%sedpar%namsed(j)),(/ 1, j /),(/ len(trim(stmpar%sedpar%namsed(j))), 1 /))  ! only write once
          enddo
       endif
-
+      !
+      ! 1D cross sections         
+      if (ndx1d > 0 .and. stm_included) then
+         if (stmpar%morpar%bedupd) then
+            do i = 1,nCrs
+               ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_morCrsName,trim(network%crs%cross(i)%CSID),(/ 1, i /),(/ len(trim(network%crs%cross(i)%CSID)), 1 /))  ! only write once
+            enddo
+         endif
+      endif
+   
    endif
    ! End of writing time-independent flow geometry data.
    
@@ -5590,35 +5632,23 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          end do
       end if
       !
-      if (ndx1d > 0) then
-         j = 0
-         do i = 1,size(pCSs)
-            if (pCSs(i)%levelscount == 0) exit
-            j = max(j,pCSs(i)%levelscount)
-         enddo
-         jmax = j
-         call realloc(work1d_z, [jmax, ndx1d], fill = dmiss, stat=ierr)
-         if (ierr == 0) call realloc(work1d_n, [jmax, ndx1d], fill = dmiss, stat=ierr)
-         if (ierr /= 0) then
-            call mess(LEVEL_ERROR, 'Allocation error in unc_write_map_filepointer_ugrid.')
-            return
+      if (ndx1d > 0 .and. stm_included) then
+         if (stmpar%morpar%bedupd) then
+            if (allocated(work1d_z)) deallocate(work1d_z)
+            if (allocated(work1d_n)) deallocate(work1d_n)
+            allocate (work1d_z(jmax,nCrs), work1d_n(jmax,nCrs))
+            work1d_z = dmiss
+            work1d_n = dmiss
+            do i = 1,nCrs
+               pCS => network%crs%cross(i)%tabdef
+               do j = 1,pCS%levelscount
+                  work1d_z(j,i) = pCS%height(j)
+                  work1d_n(j,i) = pCS%flowwidth(j)
+               enddo
+            enddo
+            ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsz(1), work1d_z(1:jmax,1:nCrs), start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, nCrs, 1 /))
+            ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), work1d_n(1:jmax,1:nCrs), start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, nCrs, 1 /))
          endif
-         do i = 1,ndx1d
-            k = ndx2d + i
-            if (gridpoint2cross(k)%num_cross_sections==1) then
-               n = gridpoint2cross(k)%cross(1)
-               if (n==-999) cycle
-               pCS => network%crs%cross(n)%tabdef
-               if (pCS%crosstype == CS_TABULATED) then
-                  do j = 1,pCS%levelscount
-                     work1d_z(j,i) = pCS%height(j)
-                     work1d_n(j,i) = pCS%flowWidth(j) * 0.5d0
-                  enddo
-               endif
-            endif
-         enddo
-         ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsz(1), work1d_z, start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, ndx1d, 1 /) )
-         ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), work1d_n, start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, ndx1d, 1 /) )
       endif
    endif
    !
@@ -10560,7 +10590,7 @@ subroutine unc_read_map(filename, tim, ierr)
                id_bl, id_blbnd, id_s0bnd, id_s1bnd, id_xbnd, id_ybnd, &
                id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_flowlink, &
                id_morft, id_taus, id_czs,                       &
-               id_jmax, id_ncrs, id_flowelemcrsz, &
+               id_jmax, id_ncrs, id_flowelemcrsz, id_flowelemcrsn, &
                id_culvertdim, id_culvert_openh
 
 
@@ -10609,7 +10639,7 @@ subroutine unc_read_map(filename, tim, ierr)
     type(t_CSType), pointer                       :: pCS
     type(t_CSType), pointer, dimension(:)         :: pCSs
     integer                                       :: n, jmax, ndx1d, nCrs
-    double precision, dimension(:,:), allocatable :: work1d_z
+    double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
     
     ierr = DFM_GENERICERROR
     
@@ -11912,20 +11942,31 @@ subroutine unc_read_map(filename, tim, ierr)
        ! Read 1D cross sections
        ndx1d = ndxi - ndx2d
        if (ndx1d > 0 .and. stm_included) then
-          ierr = nf90_inq_dimid (imapfile, trim(mesh1dname)//'_crs_maxdim', id_jmax)
-          if (ierr == 0) ierr = nf90_inquire_dimension(imapfile, id_jmax, len =jmax)
-          ierr = nf90_inq_dimid (imapfile, trim(mesh1dname)//'_ncrs', id_ncrs)
-          if (ierr == 0) ierr = nf90_inquire_dimension(imapfile, id_ncrs, len =nCrs)
-          if (allocated(work1d_z)) deallocate(work1d_z)
-          allocate(work1d_z(1:jmax,1:nCrs))
-          ierr = nf90_inq_varid(imapfile, 'flowelem_crs_z', id_flowelemcrsz)
-          ierr = nf90_get_var(imapfile, id_flowelemcrsz, work1d_z(1:jmax,1:nCrs), start = (/ 1, 1/), count = (/jmax, nCrs/))
-          do i = 1,nCrs
-            do j = 1,network%crs%cross(i)%tabdef%levelscount
-              network%crs%cross(i)%tabdef%height(j) = work1d_z(j,i)
-            enddo
-            network%crs%cross(i)%bedlevel = work1d_z(1,i)
-          enddo
+          if (stmpar%morpar%bedupd) then
+             ierr = nf90_inq_dimid (imapfile, trim(mesh1dname)//'_crs_maxdim', id_jmax)
+             if (ierr == 0) ierr = nf90_inquire_dimension(imapfile, id_jmax, len =jmax)
+             ierr = nf90_inq_dimid (imapfile, trim(mesh1dname)//'_ncrs', id_ncrs)
+             if (ierr == 0) ierr = nf90_inquire_dimension(imapfile, id_ncrs, len =nCrs)
+             if (allocated(work1d_z)) deallocate (work1d_z, work1d_n)
+             allocate (work1d_z(1:jmax,1:nCrs), work1d_n(1:jmax,1:nCrs))
+             ierr = nf90_inq_varid(imapfile, trim(mesh1dname)//'_mor_crs_z', id_flowelemcrsz)
+             ierr = nf90_get_var(imapfile, id_flowelemcrsz, work1d_z(1:jmax,1:nCrs), start = (/ 1, 1/), count = (/jmax, nCrs/))
+             do i = 1,nCrs
+                do j = 1,network%crs%cross(i)%tabdef%levelscount
+                   network%crs%cross(i)%tabdef%height(j)    = work1d_z(j,i)
+                enddo
+                network%crs%cross(i)%bedlevel = work1d_z(1,i)
+             enddo
+             ierr = nf90_inq_varid(imapfile, trim(mesh1dname)//'_mor_crs_n', id_flowelemcrsn)
+             if (ierr == 0) ierr = nf90_get_var(imapfile, id_flowelemcrsn, work1d_n(1:jmax,1:nCrs), start = (/ 1, 1/), count = (/jmax, nCrs/))
+             if (ierr == 0) then
+                do i = 1,nCrs
+                   do j = 1,network%crs%cross(i)%tabdef%levelscount
+                      network%crs%cross(i)%tabdef%flowwidth(j) = work1d_n(j,i)
+                   enddo
+                enddo
+             endif
+          endif
        endif
     end if
 
@@ -12352,7 +12393,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    
    type(t_CSType), pointer                       :: pCS
    type(t_CSType), pointer, dimension(:)         :: pCSs
-   integer                                       :: j, jmax
+   integer                                       :: j, jmax, nCrs
    double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
 
    ! re-mapping of 1d mesh coordinates for UGrid
@@ -12569,31 +12610,31 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 
       deallocate( work2 )
       !
-      if (ndx1d > 0 .and. stm_included) then
-         if( stmpar%morpar%bedupd ) then
-            pCSs => network%CSDefinitions%CS
-            j = 1
-            do i = 1,size(pCSs)
-               j = max(j,pCSs(i)%levelscount)
-            enddo
-            jmax = j
-            ierr = nf90_def_dim(ncid, 'n'//trim(mesh1dname)//'_crs_maxdim', jmax,    id_tsp%id_jmax)
-            ierr = nf90_def_var(ncid, 'flowelem_crs_z', nf90_double, (/ id_tsp%id_jmax, id_tsp%meshids1d%dimids(mdim_node) /), id_tsp%id_flowelemcrsz(1))
-            if (jased > 0) then
-                ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsz(1), 'long_name','initial cross-section points level')
-            else
-                ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsz(1), 'long_name','cross-section points level')
-            endif
-            ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsz(1), 'unit', 'm')
-            ierr = nf90_def_var(ncid, 'flowelem_crs_n', nf90_double, (/ id_tsp%id_jmax, id_tsp%meshids1d%dimids(mdim_node) /), id_tsp%id_flowelemcrsn(1))
-            if (jased > 0) then
-                ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsn(1), 'long_name','initial cross-section points half width')
-            else
-                ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsn(1), 'long_name','cross-section points half width')
-            endif
-            ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsn(1), 'unit', 'm')
-         endif
-      endif
+      !if (ndx1d > 0 .and. stm_included) then
+      !   if( stmpar%morpar%bedupd ) then
+      !      pCSs => network%CSDefinitions%CS
+      !      j = 1
+      !      do i = 1,size(pCSs)
+      !         j = max(j,pCSs(i)%levelscount)
+      !      enddo
+      !      jmax = j
+      !      ierr = nf90_def_dim(ncid, 'n'//trim(mesh1dname)//'_crs_maxdim', jmax,    id_tsp%id_jmax)
+      !      ierr = nf90_def_var(ncid, 'flowelem_crs_z', nf90_double, (/ id_tsp%id_jmax, id_tsp%meshids1d%dimids(mdim_node) /), id_tsp%id_flowelemcrsz(1))
+      !      if (jased > 0) then
+      !          ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsz(1), 'long_name','initial cross-section points level')
+      !      else
+      !          ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsz(1), 'long_name','cross-section points level')
+      !      endif
+      !      ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsz(1), 'unit', 'm')
+      !      ierr = nf90_def_var(ncid, 'flowelem_crs_n', nf90_double, (/ id_tsp%id_jmax, id_tsp%meshids1d%dimids(mdim_node) /), id_tsp%id_flowelemcrsn(1))
+      !      if (jased > 0) then
+      !          ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsn(1), 'long_name','initial cross-section points half width')
+      !      else
+      !          ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsn(1), 'long_name','cross-section points half width')
+      !      endif
+      !      ierr = nf90_put_att(ncid, id_tsp%id_flowelemcrsn(1), 'unit', 'm')
+      !   endif
+      !endif
 
       deallocate(x1dn)
       deallocate(y1dn)
@@ -12727,30 +12768,30 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                                                       ! but is not part of ugrid coverage
    endif
    !
-   if (ndx1d > 0 .and. stm_included) then
-      if (stmpar%morpar%bedupd) then
-         ndx1d = ndxi - ndx2d
-         allocate( work1d_z(jmax,ndx1d), work1d_n(jmax,ndx1d) )
-         work1d_z = dmiss
-         work1d_n = dmiss
-         do i = 1,ndx1d
-            if (gridpoint2cross(i)%num_cross_sections==1) then
-               n = gridpoint2cross(i)%cross(1)
-               if (n==-999) cycle
-               pCS => network%crs%cross(n)%tabdef
-               if (pCS%crosstype == CS_TABULATED) then
-                  do j = 1,pCS%levelscount
-                     work1d_z(j,i) = pCS%height(j)
-                     work1d_n(j,i) = pCS%flowWidth(j) * 0.5d0
-                  enddo
-               endif
-            endif
-         enddo
-         ierr = nf90_put_var(ncid, id_tsp%id_flowelemcrsz(1), work1d_z(1:jmax,1:ndx1d), start=(/ 1, 1 /), count=(/ jmax, ndx1d /) )
-         ierr = nf90_put_var(ncid, id_tsp%id_flowelemcrsn(1), work1d_n(1:jmax,1:ndx1d), start=(/ 1, 1 /), count=(/ jmax, ndx1d /) )
-         deallocate( work1d_z, work1d_n )
-      endif
-   endif
+   !if (ndx1d > 0 .and. stm_included) then
+   !   if (stmpar%morpar%bedupd) then
+   !      ndx1d = ndxi - ndx2d
+   !      allocate( work1d_z(jmax,ndx1d), work1d_n(jmax,ndx1d) )
+   !      work1d_z = dmiss
+   !      work1d_n = dmiss
+   !      do i = 1,ndx1d
+   !         if (gridpoint2cross(i)%num_cross_sections==1) then
+   !            n = gridpoint2cross(i)%cross(1)
+   !            if (n==-999) cycle
+   !            pCS => network%crs%cross(n)%tabdef
+   !            if (pCS%crosstype == CS_TABULATED) then
+   !               do j = 1,pCS%levelscount
+   !                  work1d_z(j,i) = pCS%height(j)
+   !                  work1d_n(j,i) = pCS%flowWidth(j) * 0.5d0
+   !               enddo
+   !            endif
+   !         endif
+   !      enddo
+   !      ierr = nf90_put_var(ncid, id_tsp%id_flowelemcrsz(1), work1d_z(1:jmax,1:ndx1d), start=(/ 1, 1 /), count=(/ jmax, ndx1d /) )
+   !      ierr = nf90_put_var(ncid, id_tsp%id_flowelemcrsn(1), work1d_n(1:jmax,1:ndx1d), start=(/ 1, 1 /), count=(/ jmax, ndx1d /) )
+   !      deallocate( work1d_z, work1d_n )
+   !   endif
+   !endif
 
    ! Put the contacts
    if (n1d2dcontacts.gt.0) then
