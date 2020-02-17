@@ -39463,8 +39463,8 @@ if (jahisbal > 0) then
                valpump(7,n) = dmiss ! Set to fill value if stage is irrelevant.
             end if
             if (pstru%pump%direction*pstru%pump%capacity(1) > 0) then
-               valpump(11,n) = valpump(3,n) ! walter level at delivery side
-               valpump(10,n) = valpump(4,n) ! walter level at suction side
+               valpump(11,n) = valpump(3,n) ! water level at delivery side
+               valpump(10,n) = valpump(4,n) ! water level at suction side
             else
                valpump(11,n) = valpump(4,n)
                valpump(10,n) = valpump(3,n)
