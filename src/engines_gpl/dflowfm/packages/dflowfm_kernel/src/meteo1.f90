@@ -7974,7 +7974,11 @@ module m_meteo
          case ('cloudiness')
             sourceItemName = 'cloudfraction'
          case ('solarradiation')
-            sourceItemName = 'sw_radiation_flux'
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemName = 'surface_net_downward_shortwave_flux'
+            else
+               sourceItemName = 'sw_radiation_flux'
+            end if
          case ('nudge_salinity_temperature')
             if (ec_filetype == provFile_netcdf) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_potential_temperature')
@@ -8025,12 +8029,12 @@ module m_meteo
                         if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
                         if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr4)
                         if (success) success = ecAddItemConnection(ecInstancePtr, targetItemPtr4, connectionId)
-                     endif                     
-                  endif                     
-               endif                     
-            else                     
+                     endif
+                  endif
+               endif
+            else
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported quantity specified in ext-file (connect source and target): '//trim(target_name)//'.')
-            endif                     
+            endif
             return
       end select
 
@@ -8051,7 +8055,7 @@ module m_meteo
       end if
       
       success = ecSetConnectionIndexWeights(ecInstancePtr, connectionId)
-            
+
       if ( target_name=='nudge_salinity_temperature' ) then
          call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows, issparse, Ndatasize)
          relcol = dble(col1-col0+1)/dble(ncols)
