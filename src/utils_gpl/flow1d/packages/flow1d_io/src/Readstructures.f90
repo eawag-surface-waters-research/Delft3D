@@ -1454,8 +1454,9 @@ module m_readstructures
       logical,                            intent(  out) :: success     !< Result status, whether reading of the structure was successful.
       
       logical           :: success1
-      success = .true.
+      character(len=Idlen) :: dirString
       
+      success = .true.
       allocate(generalst)
 
       generalst%ws = 1d10
@@ -1470,6 +1471,10 @@ module m_readstructures
       generalst%velheight = .true.
       call prop_get(md_ptr, '', 'useVelocityHeight',  generalst%velheight)
       
+      dirString = 'both'
+      call prop_get_string(md_ptr, '', 'allowedFlowDir', dirString, success1)
+      generalst%allowedflowdir = allowedFlowDirToInt(dirString)
+   
       ! all levels are set to -1d-10. In the time loop these parameters will be set to the bed level.
       generalst%zu1                = -1d10
       generalst%zu2                = -1d10
