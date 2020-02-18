@@ -574,7 +574,6 @@ function shared () {
 # =======================
 function gatherESMF () {
     cp $srcroot/third_party_open/esmf/lnx64/bin/libesmf.so $prefix/lib
-    cp $srcroot/third_party_open/esmf/lnx64/bin/*.so.* $prefix/lib
 }
 
 
