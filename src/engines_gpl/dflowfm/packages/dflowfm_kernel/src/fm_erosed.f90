@@ -270,47 +270,24 @@
             if (c == -999) cycle
             cdef => network%crs%cross(c)%tabdef
             ctype = cdef%crosstype
-            if (gridpoint2cross(nm)%num_cross_sections == 1) then
-               nmm = nm
-               !
-               ! compute the total cell length
-               !
-               ds = 0d0
-               do i = 1,nd(nm)%lnx
-                  LL = nd(nm)%ln(i)
-                  L = iabs(LL)
-                  if (LL < 0) then
-                     ds = ds+dx(L)*acl(L)
-                  else
-                     ds = ds+dx(L)*(1d0 - acl(L))
-                  endif
-               enddo
-            else
-               LL = nd(nm)%ln(j)
-               L = iabs(LL)
-               if (LL < 0) then
-                  ds = dx(L)*acl(L)
-               else
-                  ds = dx(L)*(1d0 - acl(L))
-               endif
-            endif
+            ds = fm_get_ds(nm,j)
             if (ctype == CS_TABULATED) then
                !
                ! determine the reference height href and the cross sectional area  below that level
                !
                iref = cdef%levelscount
                do i = 2, cdef%levelscount - 1
-                  if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm)
+                  if (cdef%flowWidth(i+1)*2d0 > cdef%plains(1)) then ! or cdef%height(i)>s1(nm)
                      iref = i
                      exit
                   endif
                enddo
                aref = 0d0
                do i = 2, iref
-                  aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))*0.5d0
+                  aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))
                enddo
                href = cdef%height(iref)
-               w_active = cdef%flowWidth(iref)
+               w_active = cdef%flowWidth(iref)*2d0
                !
                ! use blchg as bed level change over the total cell area (can be partly dry)
                ! to compute the total volume deposited inside the cell
@@ -342,7 +319,7 @@
                   !
                   do i = iref, cdef%levelscount-1
                      da = da - aref
-                     aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))*0.5d0
+                     aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))
                      if (da<aref) then
                         exit
                      else
@@ -412,7 +389,46 @@
    !
    end subroutine fm_update_crosssections
 
-
+   function fm_get_ds(nm, j) result (ds)
+   use precision
+   use m_oned_functions, only:gridpoint2cross
+   use m_flowgeom, only: acl, dx, ln, nd ! lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D, bai, ba_mor, bai_mor, ndx, ndx2D, ndx1Db
+   
+   integer, intent(in) :: nm   ! gridpoint counter 
+   integer, intent(in) :: j    ! connection counter
+   double precision    :: ds    ! local distance at gridpoint
+   
+   integer i
+   integer LL
+   integer L
+   
+   if (gridpoint2cross(nm)%num_cross_sections == 1) then
+      !
+      ! compute the total cell length
+      !
+      ds = 0d0
+      do i = 1,nd(nm)%lnx
+         LL = nd(nm)%ln(i)
+         L = iabs(LL)
+         if (LL < 0) then
+            ds = ds+dx(L)*acl(L)
+         else
+            ds = ds+dx(L)*(1d0 - acl(L))
+         endif
+      enddo
+   else
+      LL = nd(nm)%ln(j)
+      L = iabs(LL)
+      if (LL < 0) then
+         ds = dx(L)*acl(L)
+      else
+         ds = dx(L)*(1d0 - acl(L))
+      endif
+   endif
+   
+   end function fm_get_ds
+            
+            
    subroutine fm_update_mor_width_area()
    use m_flowgeom, only: lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D, bai, ba_mor, bai_mor, ndx, dx, ln, acl, ndx2D, ndx1Db
    use m_cell_geometry, only: ba
@@ -484,6 +500,70 @@
    endif
 
    end subroutine fm_update_mor_width_area
+
+   
+   subroutine fm_update_mor_width_mean_bedlevel()
+   use m_flowgeom, only: ndxi, bl, bl_ave, ndx, kcs, ndx2d, ba_mor
+   use m_oned_functions, only:gridpoint2cross
+   use m_CrossSections, only: t_CSType, CS_TABULATED
+   use m_flow, only: s1
+   use precision
+   use MessageHandling
+   use unstruc_channel_flow, only: network
+   use m_CrossSections, only: t_CSType, CS_TABULATED   
+   type(t_CSType), pointer :: cdef
+
+   integer :: c
+   integer :: ctype
+   integer :: i
+   integer :: iref
+   integer :: j
+   integer :: nm
+   double precision :: blref   
+   double precision :: href   
+   double precision :: ba_mor_tot
+   double precision :: href_tot
+   double precision :: ds
+   !
+   ! upon entry blchg contains the bed level change averaged over the total cell area
+   !
+   do nm = 1, ndxi
+      if (kcs(nm)==1) then ! only for 1D nodes
+         href_tot = 0d0
+         ba_mor_tot = 0d0
+         do j = 1, gridpoint2cross(nm)%num_cross_sections
+            c = gridpoint2cross(nm)%cross(j)
+            if (c == -999) cycle
+            cdef => network%crs%cross(c)%tabdef
+            ctype = cdef%crosstype
+            if (ctype == CS_TABULATED) then
+               ds = fm_get_ds(nm,j)
+               !
+               ! determine the reference height href and the cross sectional area  below that level
+               !
+               iref = cdef%levelscount
+               do i = 2, cdef%levelscount - 1
+                  if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm)
+                     iref = i
+                     exit
+                  endif
+               enddo
+               blref = cdef%flowWidth(1)*cdef%height(1)
+               do i = 2, iref
+                  blref = blref + (cdef%flowWidth(i) - cdef%flowWidth(i-1))*(cdef%height(i)+cdef%height(i-1)*0.5d0)
+               enddo
+               href_tot = href_tot + blref*ds
+               ba_mor_tot = ba_mor_tot + cdef%flowWidth(iref)*ds
+            else
+               write(msgbuf,'(a,i5)') 'Bed level updating has not yet implemented for cross section type ',ctype
+               call err_flush()
+            endif            
+         enddo
+         bl_ave(nm-ndx2d) = href_tot/ba_mor_tot
+      endif   
+   enddo 
+   
+   end subroutine fm_update_mor_width_mean_bedlevel
 
    end module m_fm_update_crosssections
    !
@@ -2308,7 +2388,7 @@
    use bedcomposition_module
    use sediment_basics_module
    use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au, zws
-   use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor
+   use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor, bl_ave, ndx2d
    use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
    use m_flowparameters, only: epshs, epshu, jawave, eps10
    use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, jaupdates1, m_sediment_sed=>sed
@@ -2356,6 +2436,7 @@
    double precision                     :: sbsum, taucurc, czc
    double precision, dimension(lsedtot) :: bc_sed_distribution
    double precision, dimension(:), allocatable :: bl0
+   double precision, dimension(:), allocatable :: bl_ave0
 
    integer          :: icond
    integer          :: jb
@@ -2392,6 +2473,10 @@
    if (.not. allocated(bl0)) then
       allocate(bl0(1:ndx),stat=ierror)
       bl0 = 0d0
+   endif
+   if (.not. allocated(bl_ave0)) then
+      allocate(bl_ave0(1:ndx-ndx2d),stat=ierror)
+      bl_ave0 = 0d0
    endif
 
    bedload = .false.
@@ -3163,12 +3248,17 @@
       !
       call fm_update_crosssections(blchg)
       !
-      bl0=bl
       do nm = 1, Ndx
          !
          bl(nm) = bl(nm) + blchg(nm)
          !
       enddo
+      !
+      if (dad_included) then 
+         do nm = ndx2d+1, ndxi
+            bl_ave(nm-ndx2d) = bl_ave(nm-ndx2d) + blchg(nm) 
+         enddo
+      endif    
       ! AvD: Sander suggestie: call update_geom(2)
       !
       ! Free morpho boundaries get Neumann update
@@ -3246,11 +3336,34 @@
       ! Dredging and Dumping
       !
       if (dad_included) then
+         bl0=bl                   ! bed level before dredging backup (stores minimum in cross-section)
+         bl_ave0 = bl_ave         ! average bed level before dredging backup
+         !
+         do nm = ndx2d+1, ndxi
+            !
+            bl(nm) = bl_ave0(nm-ndx2d)
+            !
+         enddo
+         ! 
          call fm_dredge(error)
          if (error) then
             call mess(LEVEL_FATAL, 'Error in fm_bott3d :: fm_dredge returned an error.')
             return
          end if
+         !
+         do nm = ndx2d+1, ndxi
+            !
+            bl_ave(nm-ndx2d) = bl(nm)            ! backup average bed level after dredging 
+            blchg(nm) = bl_ave(nm) - bl_ave0(nm) ! get average bed level change 
+            bl(nm) = bl0(nm)                     ! set bed level back to minimum point in cross-section
+            !
+         enddo
+         !
+         call fm_update_crosssections(blchg)     ! update 1d cross-sections after dredging (updates bl for 1D).
+         !
+         do nm = ndx2d+1, ndxi
+            bl(nm) = bl(nm) + blchg(nm)          ! get bed level change with respect to initial bl
+         enddo
       endif
    endif
 

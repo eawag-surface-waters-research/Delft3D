@@ -619,6 +619,7 @@ function init1dField(filename, inifieldfilename, quant) result (ierr)
       ! Step 2: operations
       if (strcmpi(quantity, 'waterlevel')) then
          call spaceInit1dfield(branchId, chainage, values, 2, s1)
+         hs(1:ndxi) = s1(1:ndxi) - bl(1:ndxi)
       else if (strcmpi(quantity, 'waterdepth')) then
          call spaceInit1dfield(branchId, chainage, values, 2, hs)
          s1(1:ndxi) = bl(1:ndxi) + hs(1:ndxi)

@@ -10626,7 +10626,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use unstruc_display, only : ntek, jaGUI
  use m_alloc
  use m_bedform
- use m_fm_update_crosssections, only: fm_update_mor_width_area
+ use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel 
  use unstruc_netcdf_map_class
  use unstruc_caching
  !
@@ -10919,9 +10919,10 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  endif
  call klok(cpu_extra(2,24)) ! end MBA init
 
- call klok(cpu_extra(1,25)) ! update MOR width
+ call klok(cpu_extra(1,25)) ! update MOR width and mean bed level
  if (stm_included) then
      call fm_update_mor_width_area()
+     call fm_update_mor_width_mean_bedlevel()
  endif
  call klok(cpu_extra(2,25)) ! end update MOR width
 
@@ -22725,7 +22726,9 @@ end subroutine unc_write_shp
  use m_flow, only : numlimdt, numlimdt_baorg, a1ini
  use m_oned_functions
  use unstruc_channel_flow, only : network
-
+ use m_dad, only: dad_included
+ use m_sediment, only: stm_included
+ 
  implicit none
 
  integer,     intent(in) :: iphase   ! phase in geominit, 0 (all), 1 (first) or 2 (second)
@@ -22940,6 +22943,11 @@ end subroutine unc_write_shp
 
     call realloc(volMaxUnderground, ndxi-ndx2d, keepExisting = .false., fill = dmiss, stat = ierr)
     call aerr('volMaxUnderground(ndxi-ndx2d)', ierr, ndxi-ndx2d)
+    
+    if (stm_included) then
+        call realloc(bl_ave, ndxi-ndx2d, keepExisting = .false., fill = dmiss, stat = ierr)
+        call aerr('bl_ave(ndxi-ndx2d)', ierr, ndxi-ndx2d)
+    end if 
  end if
  
  if ( allocated (kfs) ) deallocate(kfs)

@@ -1862,7 +1862,7 @@ contains
              if (jampi == 1) then 
                  if (idomain(nm) /= my_rank) cycle
              endif
-             if (ba(nm) > 0.0_fp) then 
+             if (ba_mor(nm) > 0.0_fp) then 
                 istat = 0
                 select case (dredge_prop(i)%ichkloc)
                 case (CHKLOC_ALLCORNER)
@@ -1913,8 +1913,8 @@ contains
              if (imask(nm) > 0) then
                 npnt                      = npnt + 1
                 dredge_prop(i)%nm(npnt)   = nm
-                dredge_prop(i)%area(npnt) = ba(nm)
-                globalareadred(i)         = globalareadred(i) + ba(nm)
+                dredge_prop(i)%area(npnt) = ba_mor(nm)
+                globalareadred(i)         = globalareadred(i) + ba_mor(nm)
              endif
           enddo
           do ic = 1,npnt
@@ -1962,7 +1962,7 @@ contains
                 if (jampi == 1) then 
                     if (idomain(nm) /= my_rank) cycle
                 endif                 
-                if (ba(nm) > 0.0_fp) then 
+                if (ba_mor(nm) > 0.0_fp) then 
                    istat = 0
                    select case (dump_prop(i)%ichkloc)
                    case (CHKLOC_ALLCORNER)
@@ -2016,9 +2016,9 @@ contains
           do nm = 1, ndxi
              if (imask(nm) > 0) then
                 npnt                    = npnt + 1
-                localareadump(i)        = localareadump(i) + ba(nm)
+                localareadump(i)        = localareadump(i) + ba_mor(nm)
                 dump_prop(i)%nm(npnt)   = nm
-                dump_prop(i)%area(npnt) = ba(nm)
+                dump_prop(i)%area(npnt) = ba_mor(nm)
              endif
           enddo
           !
