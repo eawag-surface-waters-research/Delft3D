@@ -2391,8 +2391,8 @@
    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor, bl_ave, ndx2d
    use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
    use m_flowparameters, only: epshs, epshu, jawave, eps10
-   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, jaupdates1, m_sediment_sed=>sed
-   use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds
+   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, jaupdates1, m_sediment_sed=>sed, kcsmor
+   use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user
    use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot
    use unstruc_files, only: mdia, close_all_files
    use m_fm_erosed
@@ -2463,6 +2463,7 @@
    double precision :: r1avg
    double precision :: z
    double precision :: timhr
+    real(hp) :: dim_real
    !!
    !!! executable statements -------------------------------------------------------
    !!
@@ -2485,6 +2486,7 @@
    error = .false.
    timhr = time1 / 3600.0d0
    nto    = nopenbndsect
+   dim_real = real(ndxi*lsedtot,hp)
    !
    !   Calculate suspended sediment transport correction vector (for SAND)
    !   Note: uses GLM velocities, consistent with DIFU
@@ -3081,6 +3083,35 @@
          call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
       end if
       !
+      ! Modifications for running parallel conditions (mormerge)
+      !
+      !
+      if (stmpar%morpar%multi) then
+         !if (comparereal(time1, time_user, eps10)>= 0) then      ! JRE: this assumes a constant dt_user in all processes. dt_user could be communicated, to check with AM
+            ii = 0
+            do ll = 1, lsedtot
+               do nm = 1, ndxi
+                  ii = ii + 1
+                  stmpar%morpar%mergebuf(ii) = real(dbodsd(ll, nm) * kcsmor(nm),hp)
+               enddo
+            enddo
+            call putarray (stmpar%morpar%mergehandle,dim_real,1)
+            call putarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)
+            call getarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)
+            ii = 0
+            do ll = 1, lsedtot
+               do nm = 1, ndxi
+                  ii = ii + 1
+                  dbodsd(ll, nm) = real(stmpar%morpar%mergebuf(ii),fp)
+               enddo
+            enddo
+         !endif
+      else
+         do ll = 1, lsedtot
+            dbodsd(ll,:) = dbodsd(ll,:)*kcsmor
+         end do
+      endif
+      !
       call reconstructsedtransports()   ! reconstruct cell centre transports for morstats and cumulative st output
       call collectcumultransports()     ! Always needed, written on last timestep of simulation
       !
@@ -3504,7 +3535,7 @@
          call getkbotktop(k, kb, kt)
          do kk = kb, kt
             thick = zws(kk) - zws(kk-1)
-            um(k) = um(k) + thick/h0*ucxq(kk)     
+            um(k) = um(k) + thick/h0*ucxq(kk)
             vm(k) = vm(k) + thick/h0*ucyq(kk)
          end do
       end do
@@ -4798,12 +4829,16 @@
 
    implicit none
 
-   integer           :: k, k1, k2, kk, L, ised
-   double precision  :: dum, sx, sy, sL, dt, dhmax, dtmaxmor
+   integer                             :: k, k1, k2, kk, L, ised
+   double precision                    :: dum, sx, sy, sL, dt, dhmax, dtmaxmor
 
    dtmaxmor = huge(0d0)
 
    do k = 1, ndx
+      if (kcsmor(k)==0) then 
+         cycle
+      endif
+      
       do ised = 1, lsedtot
          dum = 0.d0
          do kk = 1, nd(k)%lnx
@@ -4825,6 +4860,7 @@
             dt = dzbdtmax*ba(k) / max(dum,eps10)   ! safety
             if ( dt.lt.dtmaxmor ) then
                dtmaxmor = dt
+               kkcflmx = k
             end if
          end if
       end do

@@ -311,8 +311,8 @@ module m_waves
  integer                                    :: jahissigwav          !< 1: sign wave height on his output; 0: hrms wave height on his output.
  integer                                    :: jamapsigwav          !< 1: sign wave height on map output; 0: hrms wave height on map output.
  integer                                    :: jauorbfromswan       !< 1: get uorb from SWAN, compare with Delft3D
-logical                                     :: extfor_wave_initialized !< is set to .true. when the "external forcing"-part that must be initialized for WAVE during running (instead of during initialization) has actually been initialized
-
+ logical                                    :: extfor_wave_initialized !< is set to .true. when the "external forcing"-part that must be initialized for WAVE during running (instead of during initialization) has actually been initialized
+ 
 contains
 
 !> Sets ALL (scalar) variables in this module to their default values.
@@ -812,6 +812,8 @@ module m_sediment
  double precision, allocatable     :: sswy_raw(:,:)
  double precision, allocatable     :: sbwx_raw(:,:)
  double precision, allocatable     :: sbwy_raw(:,:)
+ 
+ integer,          allocatable     :: kcsmor(:)
 
  !-------------------------------------------------- old sediment transport and morphology
  integer                           :: jased         !< Include sediment, 1=Krone, 2=Soulsby van Rijn 2007, 3=Bert's morphology module

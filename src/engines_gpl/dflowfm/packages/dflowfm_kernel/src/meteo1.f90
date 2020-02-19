@@ -68,6 +68,7 @@ module timespace_parameters
   !                            d) is daarmee bepalend voor de toepasbare interpolatiemethodes
   !
 
+
   ! Enumeration for location specification types (used in selectelset_internal_nodes).
   integer, parameter :: LOCTP_UNKNOWN                  = -1 !< Undefined location specification type.
   integer, parameter :: LOCTP_POLYGON_FILE             = 10 !< A polygon input file used for inside-polygon check.
@@ -6011,6 +6012,7 @@ contains
    use geometry_module, only: dbpinpol
    use gridoperations
    use unstruc_model, only: getoutputdir
+   use string_module, only: get_dirsep
    
    implicit none
    
@@ -6054,7 +6056,6 @@ contains
    double precision                :: rcel_store, percentileminmax_store
    integer                         :: iav_store, nummin_store
 
-   character(len=1), external      :: get_dirsep
    character(len=5)                :: sd
    
    success = .false. 

@@ -116,6 +116,7 @@ end subroutine close_all_files
 function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     use unstruc_model
     use m_flowtimes
+    use string_module, only: get_dirsep
     implicit none
     
     character(len=*), intent(in)  :: filecat             !< File category for which the filename is requested, e.g. 'obs', 'map', 'hyd'.
@@ -126,7 +127,6 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     character(len=255) :: activeFile
     character(len=255) :: basename
     character(len=255) :: shapeOutputDir
-    character(1), external :: get_dirsep
     character(len=20)  :: suffix
     character(len=255) :: defaultFilename
     character(len=16)  :: dateandtime
@@ -426,12 +426,12 @@ end function getfilename
 !! Optionally, a file category may be specified, such that e.g., '_net.nc'
 !! is stripped off (instead of .nc only)
 subroutine basename(filename, filebase, filecat)
+    use string_module, only: get_dirsep
     implicit none
     character(len=*),           intent(in)  :: filename
     character(len=*),           intent(out) :: filebase
     character(len=*), optional, intent(in)  :: filecat
     
-    character(1),     external              :: get_dirsep
 
     integer :: L1,L2
 
@@ -481,24 +481,3 @@ end if
 end subroutine resolvePath
 
 end module unstruc_files
-
-!>
-!> Find out if system is PC (directory seperator character \ (92)
-!>   or UNIX (directory seperator character / (47))
-function get_dirsep()
-   implicit none
-   
-   character(len=1)     :: get_dirsep
-   
-   integer :: lslash
-   character  hlpstr*999,slash*1
-   
-   CALL GET_ENVIRONMENT_VARIABLE('PATH',hlpstr)
-   
-   slash  = CHAR  (47)
-   lslash = INDEX (hlpstr,slash)
-   if (lslash .eq. 0) then
-      slash  = CHAR  (92)
-   endif
-   get_dirsep = slash
-end function get_dirsep

@@ -149,6 +149,7 @@ implicit none
     character(len=255) :: md_morfile       = ' ' !< File containing morphology settings (e.g., *.mor)
     character(len=255) :: md_dredgefile    = ' ' !< File containing dredging settings (e.g., *.dad)
     character(len=255) :: md_bedformfile   = ' ' !< File containing bedform settings (e.g., *.bfm)
+    character(len=255) :: md_morphopol     = ' ' !< File containing boundaries of morphologic change extent (e.g., *.pol)
 
     character(len=1024):: md_obsfile       = ' ' !< File containing observation points  (e.g., *_obs.xyn, *_obs.ini)
     character(len=255) :: md_crsfile       = ' ' !< File containing cross sections (e.g., *_crs.pli, observation cross section *_crs.ini)
@@ -329,6 +330,7 @@ use unstruc_channel_flow
     md_morfile = ' '
     md_dredgefile = ' '
     md_bedformfile = ' '
+    md_morphopol = ' '
 
     md_obsfile = ' '
     md_crsfile = ' '
@@ -422,6 +424,7 @@ subroutine loadModel(filename)
     use m_flow1d_reader
     use m_flowexternalforcings, only: pillar
     use m_sferic
+    use string_module, only: get_dirsep
     use unstruc_caching
 
     interface
@@ -436,7 +439,6 @@ subroutine loadModel(filename)
     character(len=200), dimension(:), allocatable       :: fnames
     double precision, dimension(2) :: tempbob
 
-    character(1), external    :: get_dirsep
     logical                   :: found_1d_network
 
     integer :: istat, minp, ifil, jadoorladen
@@ -1192,6 +1194,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'sediment', 'BndTreatment',         jabndtreatment, success)           ! separate treatment boundary links in upwinding transports
     call prop_get_integer(md_ptr, 'sediment', 'TransVelOutput',       jasedtranspveldebug, success)      ! write sed adv velocities to output ugrid file
     call prop_get_integer(md_ptr, 'sediment', 'SourSink',             jasourcesink, success)             ! switch off source or sink terms for sed advection
+    call prop_get_string (md_ptr, 'sediment', 'MorphoPol',            md_morphopol, success)             ! Only apply mormerge operation/bottom change in polygon 
+        
     call prop_get_integer(md_ptr, 'sediment', 'UpdateS1',             jaupdates1, success )              ! update s1 when updating bottom (1) or not (0, default)
     call prop_get_integer(md_ptr, 'sediment', 'MorCFL',               jamorcfl, success )                ! use morphological time step restriction (1, default) or not (0)
     call prop_get_double (md_ptr, 'sediment', 'DzbDtMax',             dzbdtmax, success)                 ! Max bottom level change per timestep
@@ -1795,7 +1799,7 @@ subroutine readMDUFile(filename, istat)
        call warn_flush()
     endif
     call prop_get_integer( md_ptr, 'output', 'EulerVelocities', jaeulervel)
-    if ((jawave /= 3 .and. jawave /= 4) .and. jaeulervel == 1 ) then    ! also for surfbeat
+    if (jawave<3 .and. jaeulervel == 1 ) then    ! also for surfbeat
        call mess(LEVEL_WARN, '''EulerVelocities'' is not compatible with the selected Wavemodelnr. ''EulerVelocities'' is set to zero.')
        jaeulervel = 0
     endif
@@ -3476,12 +3480,12 @@ end subroutine writeMDUFilepointer
 subroutine setmd_ident(filename)
 use m_partitioninfo
 USE MessageHandling
+use string_module, only: get_dirsep
 
 character(*),     intent(in) :: filename !< Name of file to be read (in current directory or with full path).
 
 integer                      :: L1, L2
 
-character(len=1), external   :: get_DIRSEP
 
 
 ! Set model identifier based on .mdu basename
@@ -3551,12 +3555,12 @@ end subroutine switch_dia_file
 !> get output directory
 function getoutputdir(dircat)
    use m_flowtimes
+   use string_module, only: get_dirsep
    implicit none
 
    character(len=*), optional, intent(in) :: dircat !< (optional) The type of the directory: currently supported only 'waq'.
    character(len=255)         :: getoutputdir
 
-   character(len=1), external :: get_dirsep
 
    character(len=16) :: dircat_
 

@@ -88,6 +88,7 @@ END subroutine initProgram
 subroutine initSysEnv()
     use unstruc_files
     use unstruc_version_module, only : unstruc_program, unstruc_basename
+    use string_module, only: get_dirsep
     implicit none
 
     integer :: larch
@@ -100,7 +101,6 @@ subroutine initSysEnv()
     CHARACTER  FILNAM*76
     character  errtxt*8,arch*10,hlpstr*999,slash*1
     LOGICAL JAWEL ,d3dhom
-    character(1), external :: get_dirsep
 !-----------------------------------------------------------------------
 !-----Environment variable defined as D3D_HOME-ARCH-PROGNM-
 !     or RGForQN_PATH-

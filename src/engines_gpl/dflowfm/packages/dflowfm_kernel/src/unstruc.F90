@@ -3583,7 +3583,8 @@ subroutine setdt()
    implicit none
 
    double precision :: dtsc_loc
-
+   double precision :: dim_real
+   
    integer          :: nsteps
    integer          :: jareduced
 
@@ -3591,7 +3592,8 @@ subroutine setdt()
    call setdtorg(jareduced) ! 7.1 2031
 
    dtsc_loc = dtsc
-
+   dim_real = 1.0d0
+   
 !  globally reduce time step
    if ( jampi.eq.1 .and. jareduced.eq.0 ) then
 !     globally reduce dts (dtsc may now be larger)
@@ -3656,13 +3658,19 @@ subroutine setdt()
       kkcflmx = 0   ! SPvdP: safety, was undefined but could be used later
    endif
    
+   if (stm_included .and. jased>0) then
+      if (stmpar%morpar%multi) then
+         call putarray (stmpar%morpar%mergehandle,dim_real,1)
+         call putarray (stmpar%morpar%mergehandle,dts,1)
+         call getarray (stmpar%morpar%mergehandle,dts,1)
+      endif
+   endif
+      
    call timestepanalysis(dtsc_loc)
 
    if ( jaGUI.eq.1 ) then
       call tekcflmx()
    endif
-
-
 
 end subroutine setdt
 
@@ -40613,7 +40621,6 @@ end subroutine make_mirrorcells
     integer,          intent(in) :: netlinknrs(nbnd) !< Net link nrs in this open bnd section (in any order)
     character(len=*), intent(in) :: plifilename      !< File name of the original boundary condition definition polyline.
     integer,          intent(in) :: ibndtype         !< Type of this boundary section (one of IBNDTP_ZETA, etc...)
-    integer, external :: get_dirsep
     integer :: maxopenbnd, istart, i, n1, n2
 
     ! Start index (-1) of net link numbers for this net boundary section:
@@ -45823,7 +45830,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  use m_sferic
  use m_polygon
  use m_partitioninfo
- use string_module, only: strsplit
+ use string_module, only: strsplit, get_dirsep
  use geometry_module, only: dbdistance, CROSSinbox, dcosphi, duitpl, normalout
  use unstruc_caching
 
@@ -45848,7 +45855,6 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
 
  integer                                     :: jakdtree=1
  character(len=5)                            :: sd
- character(len=1), external                  :: get_dirsep
  character(len=200), dimension(:), allocatable       :: fnames
  integer                                     :: jadoorladen, ifil
  double precision                            :: t0, t1, t_extra(2,10)
@@ -46355,7 +46361,6 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  double precision, allocatable :: dSL(:)
  integer,          allocatable :: iLink(:), iLcr(:), iPol(:)
  character(len=5)              :: sd
- character(len=1), external    :: get_dirsep
  double precision              :: t0, t1
  character(len=128)            :: mesg
 
@@ -46507,7 +46512,6 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
  character(len=128)            :: mesg
 
  character(len=5)              :: sd
- character(len=1), external    :: get_dirsep
 
  if ( len_trim(md_roofsfile) == 0 ) then
     return

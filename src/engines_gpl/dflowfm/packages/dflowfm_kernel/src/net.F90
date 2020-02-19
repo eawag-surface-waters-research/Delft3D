@@ -33806,7 +33806,8 @@ end subroutine copycurvigridboundstopol
       use network_data, only: lne, numl
       use m_flowparameters, only: japartdomain
       use gridoperations
-
+      use string_module, only: get_dirsep
+      
       implicit none
 
       character(len=*),                    intent(in) :: netfilename !< filename of whole network
@@ -33820,7 +33821,6 @@ end subroutine copycurvigridboundstopol
       character(len=maxnamelen)                       :: filename
       character(len=numlen)                           :: sdmn_loc    ! domain number string
       character(len=maxnamelen)                       :: partfilename
-      character(len=1), external                      :: get_dirsep
       integer                                         :: idmn        ! domain number
       integer                                         :: i, len, num, mdep, c1, c2, i1, i2
       integer, allocatable                            :: lned(:,:)   ! lned(:,j) are the cells that are realated to link j, original numbering
@@ -34611,10 +34611,10 @@ end function read_commandline
 
 subroutine print_help_commandline()
 use unstruc_display, only: jaGUI
+use string_module, only: get_dirsep
 implicit none
    character(len=255) :: progarg
    integer            :: is, ie, n, istat
-   character(len=1), external :: get_dirsep
 
    ! Some code to prettyprint the current executable name in help text
    call get_command_argument(0, progarg, n, istat)

@@ -40,6 +40,7 @@
  use m_partitioninfo
  use m_flowparameters, only: icgsolver, ipre
  use m_alloc 
+ use string_module, only: get_dirsep
  
  ! subroutine to intialise the following variables:
  ! noactive
@@ -48,7 +49,6 @@
  integer m,n,ierr, nsiz
  integer idmn, L, k1, k2, k
 
- character(len=1), external :: get_dirsep
 
  
  lintot = lnx ; nodtot = ndx

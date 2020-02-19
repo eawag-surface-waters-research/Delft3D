@@ -1081,6 +1081,9 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        parkeyw(1) = 'ACal'
        parkeyw(2) = 'RatioD90D50'
        parkeyw(3) = 'RouZ0'
+       nparopt    = 1
+       parkeyw(4) = 'AlfaUrms'
+       pardef(4)  = 1.0_fp
     elseif (iform == 12) then
        name       = 'Soulsby'
        nparreq    = 3

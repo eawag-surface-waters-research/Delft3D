@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.13"
+set version "2.14"
 
 global debug
 set debug 0
@@ -85,12 +85,17 @@ set processStarttime 10000
 global queuesys
 set queuesys "sge"
 
+global queue
+set queue "normal-e3"
+
 global DELTAQ_LocalTempDir
 set DELTAQ_LocalTempDir " "
 
 global remoteShell
 set remoteShell "ssh"
 
+global flowNames
+set flowNames {trisim delftflow deltares_hydro d_hydro}
 # --------------------------------------------------------------------
 #   Procedure: debug-prompt
 # --------------------------------------------------------------------
@@ -152,7 +157,7 @@ proc putsDebug { message } {
 #   Procedure: printUsage
 #   Author:    Adri Mourits
 #   Purpose:   Prints the usage of this script
-#   Context:   
+#   Context:
 #   Summary:
 #
 #   Arguments:
@@ -533,7 +538,13 @@ proc readInputFile { inputfilename iflist } {
    global debug
    global platform
    global queuesys
+   global queue
+   global flowNames
 
+   set runscript       " "
+   set dimrexedir      " "
+   set dimrexename     "run_dimr"
+   set dimrargs        " "
    set flowexedir      " "
    set flowexename     "d_hydro"
    set flowargs        " "
@@ -556,6 +567,15 @@ proc readInputFile { inputfilename iflist } {
       set keyword [string tolower [string trim [lindex $words 0]]]
       set value   [string trim [lindex $words 1]]
       switch -- $keyword {
+         "runscript" {
+		    set runscript $value
+		 }
+		 "dimrexedir" {
+            set dimrexedir $value
+         }
+         "dimrargs" {
+            set dimrargs $value
+         }
          "flowexedir" {
             set flowexedir $value
          }
@@ -616,6 +636,9 @@ proc readInputFile { inputfilename iflist } {
          "queuesystem" {
             set queuesys [string tolower $value]
          }
+         "queue" {
+            set queue [string tolower $value]
+         }
          default {
             puts "WARNING: In file $inputfilename"
             puts "         Skipping line $aline"
@@ -625,22 +648,33 @@ proc readInputFile { inputfilename iflist } {
    set numconditions [llength $conditions]
    close $inputfile
 
-   if {$flowexedir == " "} {
+   # First: OR flowexedir, OR dimrexedir must be defined
+   if {$flowexedir == " " && $dimrexedir == " " && $runscript == " "} {
       puts "ERROR: In file $inputfilename"
-      puts "       Expecting executable direction specification, example:"
-      puts "       flowexedir         = /delft3d/flow/bin/wlinux"
+      puts "       Expecting executable direction specification, examples:"
+      puts "       dimrexedir         = /opt/delft3dfm/2.0.2_54830/lnx64/bin"
+      puts "       flowexedir         = /opt/delft3d4/Delft3D-FLOW_WAVE/6.02.13.7545/lnx64/flow2d3d/bin"
+      puts "       runscript          = /opt/delft3d4/Delft3D-FLOW_WAVE/6.02.13.7545/lnx64/bin/run.sh"
       exit 1
    }
-   if {$flowexename != "trisim" && $flowexename != "delftflow" && $flowexename != "deltares_hydro" && $flowexename != "d_hydro"} {
+   if {$runscript == " " && $dimrexedir == " " && $flowexename ni $flowNames} {
       puts "ERROR: In file $inputfilename"
-      puts "       Expecting executable name being \"deltares_hydro\" (default), \"trisim\" (default) or \"delftflow\", example:"
+      puts "       Expecting executable name being \"deltares_hydro\" (default), \"trisim\" (default) or \"delftflow\" or \"runscript\", example:"
       puts "       flowexename         = delftflow"
       exit 1
    }
-   if {$flowargs == " "} {
+
+   # Then: an argument must be defined
+   if {$flowexedir !=  " " && $flowargs == " "} {
       puts "ERROR: In file $inputfilename"
-      puts "       Expecting flow arguments specification, example:"
-      puts "       flowargs         = -r bas.mdf"
+      puts "       Expecting flow arguments specification, examples:"
+      puts "       flowargs         = config_d_hydro.xml"
+      exit 1
+   }
+   if {$dimrexedir != " " && $dimrargs == " "} {
+      puts "ERROR: In file $inputfilename"
+      puts "       Expecting flow arguments specification, examples:"
+      puts "       dimrargs         = dimr_config.xml"
       exit 1
    }
    if {$mormergeexedir == " "} {
@@ -654,8 +688,12 @@ proc readInputFile { inputfilename iflist } {
       puts "WARNING: In file $inputfilename"
       puts "       No wave executable direction specification, example:"
       puts "       waveexedir         = /delft3d/flow/bin/wlinux"
-      puts "       waveexedir is set to $flowexedir"
-      set waveexedir $flowexedir
+      if {$flowexedir != " "} {
+         set waveexedir $flowexedir
+      } else {
+         set waveexedir $dimrexedir
+      }
+      puts "       waveexedir is set to $waveexedir"
    }
    if {$numnodes == 0} {
       puts "WARNING: In file $inputfilename"
@@ -693,6 +731,7 @@ proc readInputFile { inputfilename iflist } {
             # set workdir "sgestage"
             # puts "WARNING: copying to $workdir is done by SGE (StageIn, StageOut)"
          }
+         puts "INFO: using queue $queue"
       }
       if {$localhost} {
          set queuesys "none"
@@ -718,11 +757,21 @@ proc readInputFile { inputfilename iflist } {
       }
    }
    #
+   # reset dimrexedir, to use pwd notation
+   #
+   cd $curdir
+   if { ! [string equal $dimrexedir " "] } {
+      cd $dimrexedir
+      set dimrexedir [file nativename [pwd] ]
+   }
+   #
    # reset flowexedir, to use pwd notation
    #
    cd $curdir
-   cd $flowexedir
-   set flowexedir [file nativename [pwd] ]
+   if { ! [string equal $flowexedir " "] } {
+      cd $flowexedir
+      set flowexedir [file nativename [pwd] ]
+   }
    #
    # reset mormergeexedir, to use pwd notation
    #
@@ -750,6 +799,10 @@ proc readInputFile { inputfilename iflist } {
 
    cd $curdir
 
+   set infillist(runscript)      $runscript
+   set infillist(dimrexedir)     $dimrexedir
+   set infillist(dimrexename)    $dimrexename
+   set infillist(dimrargs)       $dimrargs
    set infillist(flowexedir)     $flowexedir
    set infillist(flowexename)    $flowexename
    set infillist(flowargs)       $flowargs
@@ -838,7 +891,7 @@ proc scanDDBoundFile { ddbfilnam inputdir resultlist } {
 # --------------------------------------------------------------------
 #   Procedure: checkWaveOnline
 #   Author:    Adri Mourits
-#   Purpose:   Check whether one of the related mdf-files 
+#   Purpose:   Check whether one of the related mdf-files
 #              has flag waveol switched on
 #   Context:   Needed to know whether to start wave or not
 #   Summary:
@@ -860,7 +913,12 @@ proc checkWaveOnline { inputdir inputfilename runids inflist} {
    set waveol 0
    set curdir [file nativename [pwd] ]
    cd $inputdir
-   
+
+   if { $infillist(dimrexedir) != " " } {
+      # The script run_dimr is taking care of wave
+      return $waveol
+   }
+
    set checkFinished 0
    foreach runid $runids {
       set mdffile [open "$runid.mdf" "r"]
@@ -883,7 +941,7 @@ proc checkWaveOnline { inputdir inputfilename runids inflist} {
       if { $checkFinished } { break }
    }
    cd $curdir
-   
+
    if { $waveol } {
       if { $infillist(waveexedir) == " " } {
          puts "ERROR: In file $inputfilename"
@@ -930,70 +988,74 @@ proc checkWaveOnline { inputdir inputfilename runids inflist} {
 #   Note:
 #
 # --------------------------------------------------------------------
-proc getRunids { flowargs inputdir numdoms rids} {
+proc getRunids { flowargs dimrargs runscript inputdir numdoms rids} {
    upvar $numdoms numdomains
    upvar $rids    runids
 
    set waveonline 0
    set numdomains 0
    set runids {}
-   if {[string first "<ddbFile>" $flowargs] >=0} {
-      regsub -all "<ddbFile>" $flowargs "" fargs
-      regsub -all "</ddbFile>" $fargs "" fargs
-      set fargs [string trim $fargs]
-      scanDDBoundFile $fargs $inputdir runids
-   } elseif {[string first "<mdfFile>" $flowargs] >=0} {
-      regsub -all "<mdfFile>" $flowargs "" fargs
-      regsub -all "</mdfFile>" $fargs "" fargs
-      regsub -all {.mdf} $fargs "" runid
-      set runid [string trim $runid]
-      lappend runids $runid
+   if {$dimrargs != " " || $runscript != " "} {
+      lappend runids "singledomain"
    } else {
-      set fargs [split $flowargs]
-      set argcount [llength $fargs]
-      if {$argcount == 1} {
-         #the argument is a ddbound file
+      if {[string first "<ddbFile>" $flowargs] >=0} {
+         regsub -all "<ddbFile>" $flowargs "" fargs
+         regsub -all "</ddbFile>" $fargs "" fargs
+         set fargs [string trim $fargs]
          scanDDBoundFile $fargs $inputdir runids
-      }
-      set words [split $flowargs "="]
-      if {[llength $words] == 2} {
-         # the argument has the shape "keyword = value" (from a config.ini file)
-         set keyword [string tolower [string trim [lindex $words 0]]]
-         set value   [string trim [lindex $words 1]]
-         switch -- $keyword {
-            "mdffile" {
-                  set runid $value
-                  regsub -all {.mdf} $runid "" runid
-                  lappend runids $runid
-            }
-            "ddbfile" {
-                  scanDDBoundFile $value $inputdir runids
-            }
-         }
+      } elseif {[string first "<mdfFile>" $flowargs] >=0} {
+         regsub -all "<mdfFile>" $flowargs "" fargs
+         regsub -all "</mdfFile>" $fargs "" fargs
+         regsub -all {.mdf} $fargs "" runid
+         set runid [string trim $runid]
+         lappend runids $runid
       } else {
-         # the arguments are guided with flags like -r or -c
-         set argnumber 0
-         while { $argnumber < $argcount } {
-            set arg [lindex $fargs $argnumber ]
-            switch -- $arg {
-               "-R" -
-               "-r" {
-                  incr argnumber
-                  set runid [lindex $fargs $argnumber]
-                  regsub -all {.mdf} $runid "" runid
-                  lappend runids $runid
+         set fargs [split $flowargs]
+         set argcount [llength $fargs]
+         if {$argcount == 1} {
+            #the argument is a ddbound file
+            scanDDBoundFile $fargs $inputdir runids
+         }
+         set words [split $flowargs "="]
+         if {[llength $words] == 2} {
+            # the argument has the shape "keyword = value" (from a config.ini file)
+            set keyword [string tolower [string trim [lindex $words 0]]]
+            set value   [string trim [lindex $words 1]]
+            switch -- $keyword {
+               "mdffile" {
+                     set runid $value
+                     regsub -all {.mdf} $runid "" runid
+                     lappend runids $runid
                }
-               "-C" -
-               "-c" {
-                  incr argnumber
-                  set ddboundfilename [lindex $fargs $argnumber]
-                  scanDDBoundFile $ddboundfilename $inputdir runids
-               }
-               default {
-                  # skip; just pass through to trisim
+               "ddbfile" {
+                     scanDDBoundFile $value $inputdir runids
                }
             }
-            incr argnumber
+         } else {
+            # the arguments are guided with flags like -r or -c
+            set argnumber 0
+            while { $argnumber < $argcount } {
+               set arg [lindex $fargs $argnumber ]
+               switch -- $arg {
+                  "-R" -
+                  "-r" {
+                     incr argnumber
+                     set runid [lindex $fargs $argnumber]
+                     regsub -all {.mdf} $runid "" runid
+                     lappend runids $runid
+                  }
+                  "-C" -
+                  "-c" {
+                     incr argnumber
+                     set ddboundfilename [lindex $fargs $argnumber]
+                     scanDDBoundFile $ddboundfilename $inputdir runids
+                  }
+                  default {
+                     # skip; just pass through to trisim
+                  }
+               }
+               incr argnumber
+            }
          }
       }
    }
@@ -1030,6 +1092,7 @@ proc waitForNodes { mergedir alist inflist } {
    global scriptscreated
    global waittime
    global queuesys
+   global queue
    global clusterName
    upvar $inflist infillist
    upvar $alist   arglist
@@ -1041,15 +1104,20 @@ proc waitForNodes { mergedir alist inflist } {
    lappend scriptscreated $scriptnamego
    set sfilnamewait [file nativename [file join $mergedir $scriptnamewait] ]
    set sfilnamego   [file nativename [file join $mergedir $scriptnamego]   ]
+
+   # Create wait script
    set scriptfile [open "$sfilnamewait" "w"]
    puts $scriptfile "#!/bin/bash"
+   puts $scriptfile "#\$ -V"
+   puts $scriptfile "#\$ -j yes"
+   puts $scriptfile "#\$ -cwd"
    puts $scriptfile "\n# This script file is automatically generated by mormerge.tcl, version $version\n"
    if {$queuesys == "sge"} {
       if {$clusterName != "h5" && $clusterName != "h6"} {
          puts $scriptfile "\n. /opt/sge/InitSGE\n"
       }
       puts $scriptfile "export ARCH=$arch"
-      puts $scriptfile "qsub -V -pe distrib $infillist(numnodes) $scriptnamego"
+      puts $scriptfile "qsub -V -q $queue -pe distrib $infillist(numnodes) $scriptnamego"
    } else {
       puts $scriptfile "export ARCH=$arch"
       puts $scriptfile "qsub -l nodes=$infillist(numnodes) $scriptnamego"
@@ -1061,8 +1129,12 @@ proc waitForNodes { mergedir alist inflist } {
       putsDebug   "          $errmsg"
    }
    #
+   # Create go script
    set scriptfile [open "$sfilnamego" "w"]
    puts $scriptfile "#!/bin/bash"
+   puts $scriptfile "#\$ -V"
+   puts $scriptfile "#\$ -j yes"
+   puts $scriptfile "#\$ -cwd"
    puts $scriptfile "\n# This script file is automatically generated by mormerge.tcl, version $version\n"
    if {$queuesys == "sge"} {
       if {$clusterName != "h5" && $clusterName != "h6"} {
@@ -1149,7 +1221,16 @@ proc cloneInputDir { inputdir conditions } {
          cd $condinputdir
          set filelist [glob -nocomplain *]
          foreach item $filelist {
-            file copy -force $item $targetdir
+            if { [file isdirectory $item] } {
+               cd $item
+               set filelistsub [glob -nocomplain *]
+               foreach itemsub $filelistsub {
+                  file copy -force $itemsub [file join $targetdir $item]
+               }
+               cd ..
+            } else {
+               file copy -force $item $targetdir
+            }
          }
       } else {
          puts "WARNING: Directory $condinputdir does not exist"
@@ -1162,7 +1243,7 @@ proc cloneInputDir { inputdir conditions } {
       set basename [format "%s%s" $condition "stream"]
       puts $streamfile "[file nativename [file join $rootdir "merge" $basename]]"
       close $streamfile
-      
+
    }
    cd $rootdir
 }
@@ -1277,6 +1358,9 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
       set libdir [file join $homedir "lib"]
       #
       puts $scriptfile "#!/bin/bash"
+      puts $scriptfile "#\$ -V"
+      puts $scriptfile "#\$ -j yes"
+      puts $scriptfile "#\$ -cwd"
       puts $scriptfile "\n# This script file is automatically generated by mormerge.tcl, version $version\n"
       if {$queuesys == "sge"} {
          if { $clusterName != "h5" && $clusterName != "h6"} {
@@ -1288,7 +1372,7 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
       # Needed when compiled with newer Gnu compiler than the default on the calculation machine:
       # puts $scriptfile  "# TEMPORARY SOLUTION: setting LD_PRELOAD"
       # puts $scriptfile "export LD_PRELOAD=[file join $exedir libgfortran.so.3]"
-      
+
       if { $localrun } {
          set worksubdir $idstring
          set worksubsubdir "merge_$runid"
@@ -1379,6 +1463,9 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
    set shellscriptfile [open "$shellfilname" "w"]
    if {$platform == "linux"} {
       puts $shellscriptfile "#!/bin/bash"
+      puts $scriptfile "#\$ -V"
+      puts $scriptfile "#\$ -j yes"
+      puts $scriptfile "#\$ -cwd"
       puts $shellscriptfile "\n# This script file is automatically generated by mormerge.tcl, version $version\n"
       puts $shellscriptfile "$remoteShell -n $node \"$sfilname\" &\n"
    } else {
@@ -1401,7 +1488,7 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
          putsDebug   "          $errmsg"
       }
    }
-   
+
    putsDebug "mormergeruncommand:$shellscriptname"
    after $waittime
    set returnval [runcmd $shellfilname "merge:$runid"]
@@ -1446,7 +1533,7 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
 #   Note:
 #
 # --------------------------------------------------------------------
-proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe waveexe node } {
+proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe waveexe dimrexe runscript node } {
    global rootdir
    global syncdir
    global version
@@ -1474,13 +1561,22 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
    lappend scriptscreated $scriptname
    set rundir [file nativename [file join $rootdir "merge"] ]
    # Collect some directories to be added to PATH/LD_LIBRARY_PATH
-   set flowexedir [file dirname $flowexe]
-   if {$platform == "linux"} {
-      set archpos [string last "bin" $flowexedir]
-      set flowhomedir [string range $flowexe 0 [expr $archpos-2]]
+   if { $infillist(dimrexedir) != " " } {
+      set exedir $infillist(dimrexedir)
+      set exename $infillist(dimrexename)
+   } elseif { $infillist(flowexedir) != " " } {
+      set exedir $infillist(flowexedir)
+      set exename $infillist(flowexename)
    } else {
-      set archpos [string last $arch $flowexedir]
-      set flowhomedir [string range $flowexe 0 [expr $archpos-2]]
+      set exedir "not defined"
+      set exename "noet defined"
+   }
+   if {$platform == "linux"} {
+      set archpos [string last "bin" $exedir]
+      set flowhomedir [string range $exedir 0 [expr $archpos-2]]
+   } else {
+      set archpos [string last $arch $exedir]
+      set flowhomedir [string range $exedir 0 [expr $archpos-2]]
    }
    if { $waveonline } {
       set waveexedir [file dirname $waveexe]
@@ -1497,6 +1593,9 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       set libdir [file join $flowhomedir "lib"]
       #
       puts $scriptfile "#!/bin/bash"
+      puts $scriptfile "#\$ -V"
+      puts $scriptfile "#\$ -j yes"
+      puts $scriptfile "#\$ -cwd"
       puts $scriptfile "\n# This script file is automatically generated by mormerge.tcl, version $version\n"
       if {$queuesys == "sge"} {
          if {$clusterName != "h5" && $clusterName != "h6"} {
@@ -1510,7 +1609,7 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       # puts $scriptfile "export LD_PRELOAD=[file join $exedir libgfortran.so.3]"
       # puts $scriptfile  "# TEMPORARY SOLUTION: setting LD_PRELOAD"
       # puts $scriptfile "export LD_PRELOAD=[file join $flowexedir libgfortran.so.3]"
-  
+
       if { $infillist(localrun) } {
          set worksubdir $idstring
          puts $scriptfile "\n# Running locally\n# Copy modeldir to workdir\n"
@@ -1536,13 +1635,21 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
             puts $scriptfile "\"$tdatomexe\" -r $runid >tdatom$runid.scr 2>&1"
          }
       }
-      puts $scriptfile "\n# Start $infillist(flowexename)\n"
-      puts $scriptfile "export LD_LIBRARY_PATH=$libdir:\$LD_LIBRARY_PATH"
-      puts $scriptfile "\"$flowexe\" $infillist(flowargs) >$infillist(flowexename).scr 2>&1 &"
-      if { $waveonline } {
-         puts $scriptfile "\n# Start wave\n"
-         puts $scriptfile "export PATH=$swanbatdir:\$PATH"
-         puts $scriptfile "\"$waveexe\" $infillist(waveargs) >wave.scr 2>&1 &"
+      if { $infillist(dimrexedir) != " " } {
+         puts $scriptfile "\n# Start $infillist(dimrexename)\n"
+         puts $scriptfile "\"$dimrexe\" $infillist(dimrargs) >$infillist(dimrexename).scr 2>&1 &"
+      } elseif { $infillist(runscript) != " " } {
+         puts $scriptfile "\n# Start $infillist(runscript)\n"
+         puts $scriptfile "\"$infillist(runscript)\" >runscript.scr 2>&1 &"
+      } else {
+         puts $scriptfile "\n# Start $infillist(flowexename)\n"
+         puts $scriptfile "export LD_LIBRARY_PATH=$libdir:\$LD_LIBRARY_PATH"
+         puts $scriptfile "\"$flowexe\" $infillist(flowargs) >$infillist(flowexename).scr 2>&1 &"
+         if { $waveonline } {
+            puts $scriptfile "\n# Start wave\n"
+            puts $scriptfile "export PATH=$swanbatdir:\$PATH"
+            puts $scriptfile "\"$waveexe\" $infillist(waveargs) >wave.scr 2>&1 &"
+         }
       }
       if { $infillist(localrun) } {
          puts $scriptfile "\n# Copy rundir data back to modeldir\n"
@@ -1590,14 +1697,19 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
             puts $scriptfile "start /b [spaceSafe $tdatomexe] -r $runid >tdatom$runid.scr 2>&1"
          }
       }
-      puts $scriptfile "\nrem Start $infillist(flowexename)\n"
-      puts $scriptfile "set PATH=$flowexedir;$sharedir;%PATH%"
-      puts $scriptfile "start /b [spaceSafe $flowexe] $infillist(flowargs) >$infillist(flowexename).scr 2>&1"
-      if { $waveonline } {
-         puts $scriptfile "\nrem Start wave\n"
-         puts $scriptfile "set D3D_HOME=$wavehomedir"
-         puts $scriptfile "set PATH=$swanbatdir;$swanexedir;$waveexedir;$sharedir;%PATH%"
-         puts $scriptfile "start /b [spaceSafe $waveexe] $infillist(waveargs) >wave.scr 2>&1"
+      if { $infillist(dimrexedir) != " " } {
+         puts $scriptfile "\n# Start $infillist(dimrexename)\n"
+         puts $scriptfile "$dimrexe $infillist(dimrargs) >$infillist(dimrexename).scr 2>&1"
+      } else {
+         puts $scriptfile "\nrem Start $infillist(flowexename)\n"
+         puts $scriptfile "set PATH=$flowexedir;$sharedir;%PATH%"
+         puts $scriptfile "start /b [spaceSafe $flowexe] $infillist(flowargs) >$infillist(flowexename).scr 2>&1"
+         if { $waveonline } {
+            puts $scriptfile "\nrem Start wave\n"
+            puts $scriptfile "set D3D_HOME=$wavehomedir"
+            puts $scriptfile "set PATH=$swanbatdir;$swanexedir;$waveexedir;$sharedir;%PATH%"
+            puts $scriptfile "start /b [spaceSafe $waveexe] $infillist(waveargs) >wave.scr 2>&1"
+         }
       }
       if { $infillist(localrun) } {
          puts $scriptfile "\nrem Copy rundir data back to modeldir\n"
@@ -1628,6 +1740,9 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
    set shellscriptfile [open "$shellfilname" "w"]
    if {$platform == "linux"} {
       puts $shellscriptfile "#!/bin/bash"
+      puts $shellscriptfile "#\$ -V"
+      puts $shellscriptfile "#\$ -j yes"
+      puts $shellscriptfile "#\$ -cwd"
       puts $shellscriptfile "\n# This script file is automatically generated by mormerge.tcl, version $version\n"
       puts $shellscriptfile "$remoteShell -n $node \"$sfilname\" &\n"
    } else {
@@ -1651,7 +1766,7 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       }
       after $waittime
    }
-   
+
    putsDebug "Flow Run command:$shellscriptname"
    set returnval [runcmd $shellfilname "flow:$condition"]
    #after [expr 10000 + $waittime]
@@ -1702,7 +1817,7 @@ proc removeCreatedScripts { mergedir } {
    set scriptnamego   "d3d-mormerge_qsubgo.sh"
    lappend scriptscreated $scriptnamewait
    lappend scriptscreated $scriptnamego
-   
+
    cd $mergedir
    foreach script $scriptscreated {
       catch {[file delete -force $script]}
@@ -1841,12 +1956,16 @@ if { [file exists $arglist(infile)] } {
 #
 array set infillist {}
 readInputFile $arglist(infile) infillist
+putsDebug "dimrexedir        : $infillist(dimrexedir)"
+putsDebug "dimrexename       : $infillist(dimrexename)"
+putsDebug "dimrargs          : $infillist(dimrargs)"
 putsDebug "flowexedir        : $infillist(flowexedir)"
 putsDebug "flowexename       : $infillist(flowexename)"
 putsDebug "flowargs          : $infillist(flowargs)"
 putsDebug "waveexedir        : $infillist(waveexedir)"
 putsDebug "waveargs          : $infillist(waveargs)"
 putsDebug "swanbatdir        : $infillist(swanbatdir)"
+putsDebug "runscript         : $infillist(runscript)"
 putsDebug "mormergeexedir    : $infillist(mormergeexedir)"
 putsDebug "$infillist(numconditions) conditions:"
 for {set i 0} {$i < $infillist(numconditions)} {incr i} {
@@ -1860,7 +1979,7 @@ if { $infillist(localrun) } {
 putsDebug "numnodes          : $infillist(numnodes)"
 
 # No separate tdatom when using delftflow/deltares_hydro executable
-if { $infillist(flowexename) == "delftflow" || $infillist(flowexename) == "deltares_hydro" || $infillist(flowexename) == "d_hydro" } {
+if { $infillist(flowexename) in {delftflow deltares_hydro d_hydro} } {
    set arglist(runtdatom) 0
 }
 
@@ -1870,9 +1989,15 @@ if { $infillist(flowexename) == "delftflow" || $infillist(flowexename) == "delta
 #
 # Runids, wave OnLine
 #
-if { $infillist(flowexename) == "trisim" } {
+if { $infillist(runscript) != " " } {
+   putsDebug "Runid set to singledomain for runscript ..."
+   getRunids $infillist(flowargs) $infillist(dimrargs) $infillist(runscript) $inputdir numdomains runids
+} elseif { $infillist(dimrexedir) != " " } {
+   putsDebug "Runid set to singledomain for dimr ..."
+   getRunids $infillist(flowargs) $infillist(dimrargs) $infillist(runscript) $inputdir numdomains runids
+} elseif { $infillist(flowexename) == "trisim" } {
    putsDebug "Scanning commandline arguments for trisim ..."
-   getRunids $infillist(flowargs) $inputdir numdomains runids
+   getRunids $infillist(flowargs) $infillist(dimrargs)  $infillist(runscript) $inputdir numdomains runids
 } elseif { $infillist(flowexename) == "delftflow" } {
    set d3dfilnam [file nativename [file join $rootdir "input" [lindex $infillist(flowargs) 0] ] ]
    putsDebug "Scanning input file $d3dfilnam ..."
@@ -1896,9 +2021,13 @@ putsDebug "$numdomains domain(s):"
 foreach runid $runids {
    putsDebug "   runid : $runid"
 }
-set waveonline [checkWaveOnline $inputdir $arglist(infile) $runids infillist]
 
-
+# Unless a run script is given, check for Delft3D-WAVE
+if { $infillist(runscript) eq " " } {
+    set waveonline [checkWaveOnline $inputdir $arglist(infile) $runids infillist]
+} else {
+    set waveonline 0
+}
 
 #
 #
@@ -1973,37 +2102,48 @@ foreach anode $nodelist {
 #
 # Executables
 #
+set flowexe " "
+set dimrexe " "
+set runscript " "
+
 if {$platform == "linux"} {
    set mergeexe     [file nativename [file join $infillist(mormergeexedir) "mormerge"] ]
    set tdatomexe    [file nativename [file join $infillist(flowexedir) "tdatom"] ]
-   if { $infillist(flowexename) == "trisim" } {
-      set flowexe   [file nativename [file join $infillist(flowexedir) "trisim"] ]
-   } elseif { $infillist(flowexename) == "delftflow" } {
-      set flowexe   [file nativename [file join $infillist(flowexedir) "delftflow"] ]
-   } elseif { $infillist(flowexename) == "deltares_hydro" } {
-      set flowexe   [file nativename [file join $infillist(flowexedir) "deltares_hydro"] ]
-   } elseif { $infillist(flowexename) == "d_hydro" } {
-      set flowexe   [file nativename [file join $infillist(flowexedir) "d_hydro"] ]
+   if { $infillist(dimrexedir) != " " } {
+      set dimrexe      [file nativename [file join $infillist(dimrexedir) "run_dimr.sh"] ]
+   } elseif { $infillist(flowexedir) != " " } {
+      if { $infillist(flowexename) in $flowNames } {
+          set flowexe   [file nativename [file join $infillist(flowexedir) $infillist(flowexename)] ]
+      }
    }
 } else {
    set mergeexe     [file nativename [file join $infillist(mormergeexedir) "mormerge.exe"] ]
    set tdatomexe    [file nativename [file join $infillist(flowexedir) "tdatom.exe"] ]
-   if { $infillist(flowexename) == "trisim" } {
-      set flowexe   [file nativename [file join $infillist(flowexedir) "trisim.exe"] ]
-   } elseif { $infillist(flowexename) == "delftflow" } {
-      set flowexe   [file nativename [file join $infillist(flowexedir) "delftflow.exe"] ]
-   } elseif { $infillist(flowexename) == "deltares_hydro" } {
-      set flowexe   [file nativename [file join $infillist(flowexedir) "deltares_hydro.exe"] ]
-   } elseif { $infillist(flowexename) == "d_hydro" } {
-      set flowexe   [file nativename [file join $infillist(flowexedir) "d_hydro.exe"] ]
+   if { $infillist(dimrexedir) != " " } {
+      set dimrexe      [file nativename [file join $infillist(dimrexedir) "run_dimr.bat"] ]
+   } elseif { $infillist(flowexedir) != " " } {
+      if { $infillist(flowexename) in $flowNames } {
+          set flowexe   [file nativename [file join $infillist(flowexedir) $infillist(flowexename).exe] ]
+      }
    }
+}
+if { $infillist(runscript) ne " " } {
+   set runscript $infillist(runscript)
 }
 
 checkFil exe $mergeexe
 if { $arglist(runtdatom) } {
    checkFil exe $tdatomexe
 }
-checkFil exe $flowexe
+if { $dimrexe != " " } {
+   checkFil exe $dimrexe
+}
+if { $flowexe != " " } {
+   checkFil exe $flowexe
+}
+if { $runscript != " " } {
+   checkFil exe $runscript
+}
 
 if { $waveonline } {
    if {$platform == "linux"} {
@@ -2097,6 +2237,8 @@ foreach condition $infillist(conditions) {
                                       $tdatomexe           \
                                       $flowexe             \
                                       $waveexe             \
+                                      $dimrexe             \
+                                      $runscript           \
                                       $node]
    puts "flow:$condition started, pid: $pidlist($condition)"
 }

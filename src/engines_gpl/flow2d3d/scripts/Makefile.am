@@ -8,6 +8,7 @@ include $(top_srcdir)/common.am
 #-------------------------------------------------------------------------------
 #Includes
 dist_bin_SCRIPTS = \
+	run_aeolis_dflowfm_dwaves.sh \
 	rd2d3d.sh \
 	run_dflow2d3d.sh \
 	run_dflow2d3d_dwaves.sh \

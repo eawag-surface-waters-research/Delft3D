@@ -2797,6 +2797,7 @@
    use m_alloc
    use network_data
    use m_cell_geometry
+   use string_module, only: get_dirsep
 
    implicit none
 
@@ -2809,7 +2810,6 @@
    integer,          allocatable           :: nodroof(:), nod1D(:)
    double precision, allocatable           :: dismin(:)
    character(len=5)                        :: sd
-   character(len=1), external              :: get_dirsep
    integer                                 :: ierr
    integer                                 :: nInputPolygon
    logical                                 :: validOneDMask

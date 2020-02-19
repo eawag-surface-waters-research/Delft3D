@@ -2219,11 +2219,11 @@ end subroutine read_land_boundary_netcdf
 
       SUBROUTINE DATUM2(DATE)
       use unstruc_display, only : jadatetime 
+      use string_module, only: get_dirsep
       implicit none
       integer :: iyear, month, iday, ihour, minute, isecnd
       CHARACTER DATE*20
 
-      character(len=1), external :: get_dirsep
 !              1  4  7   11 14 17
       
       if (jadatetime == 0) then
@@ -4684,6 +4684,7 @@ end subroutine timdat
 
 !> make directory (also for linux)
  subroutine makedir(dirname)
+   use string_module, only: get_dirsep
 #ifdef __INTEL_COMPILER
    use ifport
 #endif
@@ -4691,7 +4692,6 @@ end subroutine timdat
     character(len=*), intent(in) :: dirname
     
     character(len=256)           :: command
-    character(len=1), external   :: get_dirsep
     integer                      :: istat
     logical                      :: l_exist
     integer                      :: i

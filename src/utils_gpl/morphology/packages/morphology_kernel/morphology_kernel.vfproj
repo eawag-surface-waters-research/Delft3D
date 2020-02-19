@@ -63,6 +63,7 @@
 		<File RelativePath=".\src\fgyint.f90"/>
 		<File RelativePath=".\src\fluff_burial.f90"/>
 		<File RelativePath=".\src\getfixfac.f90"/>
+		<File RelativePath=".\src\initmerge.f90"/>
 		<File RelativePath=".\src\initsedtra.f90"/>
 		<File RelativePath=".\src\osmom.f90"/>
 		<File RelativePath=".\src\sand_mud.f90"/>
