@@ -140,6 +140,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     real(fp)                              :: dtm          ! time step in tunits  (flexible precision)
     real(fp)                              :: tunit        ! time unit in seconds (flexible precision)
     real(fp)                              :: t_restart
+    real(fp)                              :: rjulday_restart
     real(fp)                              :: rjuldiffs    ! difference of Julian dates in seconds
     real(fp), dimension(:,:,:,:), pointer :: rst_r1
     real(fp), dimension(:,:,:,:), pointer :: rst_rtur1
@@ -358,12 +359,12 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
             ! determine if there is a difference in reference dates (simulation vs restart file)
             !
             ! time -> units -> "seconds since 1990-08-05 00:00:00"
-            ierror         = nf90_inq_varid(fds, 'time', idvar)
-            ierror         = nf90_get_att(fds, idvar, 'units', timeunitstr)
-            ierror         = parse_ud_timeunit(timeunitstr, iunit, iyear, imonth, iday, ihour, imin, isec)
-            julday_restart = date2mjd(iyear,imonth,iday,ihour,imin,real(isec,hp))
-            rjuldiffs      = (julday_restart - jul2mjd(julday))*86400.0_fp
-            tunit          = real(iunit,fp)
+            ierror          = nf90_inq_varid(fds, 'time', idvar)
+            ierror          = nf90_get_att(fds, idvar, 'units', timeunitstr)
+            ierror          = parse_ud_timeunit(timeunitstr, iunit, iyear, imonth, iday, ihour, imin, isec)
+            rjulday_restart = date2mjd(iyear,imonth,iday,ihour,imin,real(isec,hp))
+            rjuldiffs       = (rjulday_restart - jul2mjd(julday))*86400.0_fp
+            tunit           = real(iunit,fp)
             !
             ! look for restart time on netcdf map file
             !
