@@ -644,9 +644,13 @@ subroutine crewav_netcdf(fg       ,itide    ,hrms     ,tp       ,dir      , &
        ierror = nf90_inq_varid(idfile, 'ubot'   , idvar_ubot   ); call nc_check_err(ierror, "inq_varid ubot   ", filename)
        ierror = nf90_inq_varid(idfile, 'wlen'   , idvar_wlen   ); call nc_check_err(ierror, "inq_varid wlen   ", filename)
     endif
-    ierror = nf90_get_var(idfile, idvar_time , time_read        , start=(/ localcomcount /)   , count=(/ 1 /)); call nc_check_err(ierror, "get_var time", filename)
-    if (time_read(1) /= wavedata%time%timsec) then
-       write(*,'(2(a,e20.5),a)') "ERROR: time_read(", time_read, ") is not equal to curtime (", wavedata%time%timsec, ")"
+    ierror = nf90_get_var(idfile, idvar_time , time_read        , start=(/ localcomcount /)   , count=(/ 1 /))
+    if (localcomcount == 1) then
+       ! When localcomcount>1, get_var(time) will result in an error, but this error can be ignored
+       call nc_check_err(ierror, "get_var time", filename)
+       if (time_read(1) /= wavedata%time%timsec) then
+          write(*,'(2(a,e20.5),a)') "ERROR: time_read(", time_read, ") is not equal to curtime (", wavedata%time%timsec, ")"
+       endif
     endif
     !
     ! put vars (time dependent)

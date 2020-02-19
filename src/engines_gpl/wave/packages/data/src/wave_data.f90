@@ -69,12 +69,15 @@ type wave_time_type
 end type wave_time_type
 !
 type wave_output_type
-   integer  :: count           ! [-]        Counts the number of generated output fields on the wavm file
-   integer  :: comcount        ! [-]        Counts the number of generated output fields on the NetCDF-com file
-   integer  :: ncmode          ! [3 or 4]   NetCDF creation mode: NetCDF3 (NF90_CLASSIC_MODEL) or NetCDF4 (NF90_NETCDF4)
-   real     :: nexttim         ! [sec]      Next time to write to wavm-file
-   real     :: timseckeephot   ! [sec]      seconds since ref date on which time the hotfile should not be deleted
-   logical  :: write_wavm      ! [y/n]      True when writing to wavm file
+   integer  :: count              ! [-]        Counts the number of generated output fields on the wavm file
+   integer  :: comcount           ! [-]        Counts the number of generated output fields on the NetCDF-com file
+   integer  :: lastvalidflowfield ! [-]        0 (default): not defined, >0: When append_com is true, timepoints will be added to the com-file,
+                                  !            containing valid Wave data only. This parameter stores the last field containing valid flow information,
+                                  !            normally it's value will be 1, except when Flow also writes with append_com is true
+   integer  :: ncmode             ! [3 or 4]   NetCDF creation mode: NetCDF3 (NF90_CLASSIC_MODEL) or NetCDF4 (NF90_NETCDF4)
+   real     :: nexttim            ! [sec]      Next time to write to wavm-file
+   real     :: timseckeephot      ! [sec]      seconds since ref date on which time the hotfile should not be deleted
+   logical  :: write_wavm         ! [y/n]      True when writing to wavm file
 end type wave_output_type
 !
 type wave_data_type
@@ -100,21 +103,22 @@ subroutine initialize_wavedata(wavedata)
    type(wave_data_type) :: wavedata
    character(30)        :: txthlp
 
-   wavedata%mode                   =  0
-   wavedata%time%refdate           =  0
-   wavedata%time%timtscale         =  0
-   wavedata%time%calctimtscale     =  0
-   wavedata%time%calctimtscale_prev =  -999
-   wavedata%time%calccount         =  0
-   wavedata%time%tscale            = 60.0
-   wavedata%time%timsec            =  0.0
-   wavedata%time%timmin            =  0.0
-   wavedata%output%count           =  0
-   wavedata%output%comcount        =  0
-   wavedata%output%ncmode          =  ncu_format_to_cmode(0)
-   wavedata%output%nexttim         =  0.0
-   wavedata%output%timseckeephot   =  0.0
-   wavedata%output%write_wavm      =  .false.
+   wavedata%mode                      =  0
+   wavedata%time%refdate              =  0
+   wavedata%time%timtscale            =  0
+   wavedata%time%calctimtscale        =  0
+   wavedata%time%calctimtscale_prev   =  -999
+   wavedata%time%calccount            =  0
+   wavedata%time%tscale               = 60.0
+   wavedata%time%timsec               =  0.0
+   wavedata%time%timmin               =  0.0
+   wavedata%output%count              =  0
+   wavedata%output%comcount           =  0
+   wavedata%output%lastvalidflowfield =  0
+   wavedata%output%ncmode             =  ncu_format_to_cmode(0)
+   wavedata%output%nexttim            =  0.0
+   wavedata%output%timseckeephot      =  0.0
+   wavedata%output%write_wavm         =  .false.
    !
    ! platform definition
    !

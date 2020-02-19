@@ -75,18 +75,18 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
       end subroutine grmap_esmf
 
       subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basename, &
-                              & kmax, flowVelocityType)
-
+                              & lastvalidflowfield, kmax, flowVelocityType)
          use wave_data         
          integer                      , intent(in)  :: i_flow
-         integer                      , intent(in)  :: mmax
-         integer                      , intent(in)  :: nmax
-         integer, optional            , intent(in)  :: kmax
-         integer, optional            , intent(in)  :: flowVelocityType
+         type(wave_time_type)                       :: wavetime
          character(*)                 , intent(in)  :: varname
          real   , dimension(mmax,nmax), intent(out) :: vararr
-         type(wave_time_type)                       :: wavetime
+         integer                      , intent(in)  :: mmax
+         integer                      , intent(in)  :: nmax
          character(*)                               :: basename
+         integer                                    :: lastvalidflowfield
+         integer, optional            , intent(in)  :: kmax
+         integer, optional            , intent(in)  :: flowVelocityType
       end subroutine
    end interface
    !
@@ -116,7 +116,7 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
          !
          call get_var_netcdf (i_flow, wavedata%time , 'dps', &
                             & fif%dps, fif%mmax, fif%nmax, &
-                            & sr%flowgridfile)
+                            & sr%flowgridfile, wavedata%output%lastvalidflowfield)
          !
          ! Map depth to SWAN grid, using ESMF_Regrid weights
          !
@@ -152,7 +152,7 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
          !
          call get_var_netcdf (i_flow, wavedata%time , 's1', &
                             & fif%s1, fif%mmax, fif%nmax, &
-                            & sr%flowgridfile)
+                            & sr%flowgridfile, wavedata%output%lastvalidflowfield)
          !
          ! Map water level to SWAN grid, using ESMF_Regrid weights
          !
@@ -196,17 +196,17 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
          if (fg%kmax == 1) then
             call get_var_netcdf (i_flow, wavedata%time , 'u1', &
                                & fif%u1, fif%mmax, fif%nmax, &
-                               & sr%flowgridfile)
+                               & sr%flowgridfile, wavedata%output%lastvalidflowfield)
             call get_var_netcdf (i_flow, wavedata%time , 'v1', &
                                & fif%v1, fif%mmax, fif%nmax, &
-                               & sr%flowgridfile)
+                               & sr%flowgridfile, wavedata%output%lastvalidflowfield)
          else
             call get_var_netcdf (i_flow, wavedata%time , 'u1', &
                                & fif%u1, fif%mmax, fif%nmax, &
-                               & sr%flowgridfile, fg%kmax,flowVelocityType)
+                               & sr%flowgridfile, wavedata%output%lastvalidflowfield, fg%kmax,flowVelocityType)
             call get_var_netcdf (i_flow, wavedata%time , 'v1', &
                                & fif%u1, fif%mmax, fif%nmax, &
-                               & sr%flowgridfile, fg%kmax,flowVelocityType)                               
+                               & sr%flowgridfile, wavedata%output%lastvalidflowfield, fg%kmax,flowVelocityType)                      
          endif                   
          !
          ! Map velocity components to SWAN grid, using ESMF_Regrid weights
@@ -245,10 +245,10 @@ subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flow
          !
          call get_var_netcdf (i_flow, wavedata%time , 'windx', &
                             & fif%windu, fif%mmax, fif%nmax, &
-                            & sr%flowgridfile)
+                            & sr%flowgridfile, wavedata%output%lastvalidflowfield)
          call get_var_netcdf (i_flow, wavedata%time , 'windy', &
                             & fif%windv, fif%mmax, fif%nmax, &
-                            & sr%flowgridfile)
+                            & sr%flowgridfile, wavedata%output%lastvalidflowfield)
          !
          ! Map wind components to SWAN grid, using ESMF_Regrid weights
          !

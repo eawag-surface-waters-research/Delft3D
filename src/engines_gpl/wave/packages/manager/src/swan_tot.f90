@@ -463,9 +463,17 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
          enddo
          ! Initially comcount = 0
          ! After writing the first data set to (all) the comfile(s), comcount must be increased
-         ! Always write to field 1
-         ! To Do: optionally store all fields
-         wavedata%output%comcount = 1
+         ! Always write to field 1, unless append_com is true
+         if (swan_run%append_com) then
+            ! comcount = 0: The first fields have just been written; next time: comcount = 2
+            if (wavedata%output%comcount == 0) then
+               wavedata%output%comcount = 2
+            else
+               wavedata%output%comcount = wavedata%output%comcount + 1
+            endif
+         else
+            wavedata%output%comcount = 1
+         endif
       endif
    enddo   ! time steps
 end subroutine swan_tot
