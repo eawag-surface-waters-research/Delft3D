@@ -230,6 +230,10 @@ namespace gridgeom.Tests
                     Assert.That(rc_meshXCoords[i], Is.EqualTo(meshXCoords[i]));
                     Assert.That(rc_meshYCoords[i], Is.EqualTo(meshYCoords[i]));
                 }
+
+                ierr = wrapper.ggeo_deallocate();
+                Assert.That(ierr, Is.EqualTo(0));
+
             }
             finally
             {
@@ -493,6 +497,8 @@ namespace gridgeom.Tests
             meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
             meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
             meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            meshtwod.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.maxnumfacenodes * meshtwoddim.numface);
+            meshtwod.startIndex = startIndex;
 
             //5. get the meshgeom arrays
             bool includeArrays = true;
@@ -565,8 +571,7 @@ namespace gridgeom.Tests
                 Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
                 Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
             }
-            //for writing the links look io_netcdf ionc_def_mesh_contact, ionc_put_mesh_contact 
-
+            //for writing the links look io_netcdf ionc_def_mesh_contact, ionc_put_mesh_contact
             ierr = wrapperNetcdf.ionc_close(ref ioncid);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -584,6 +589,9 @@ namespace gridgeom.Tests
             //Free from and to arrays describing the links 
             Marshal.FreeCoTaskMem(c_arrayfrom);
             Marshal.FreeCoTaskMem(c_arrayto);
+
+            ierr = wrapperGridgeom.ggeo_deallocate();
+            Assert.That(ierr, Is.EqualTo(0));
         }
 
         /// <summary>
@@ -655,6 +663,8 @@ namespace gridgeom.Tests
             meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
             meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
             meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            meshtwod.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.maxnumfacenodes * meshtwoddim.numface);
+            meshtwod.startIndex = startIndex;
 
             //5. get the meshgeom arrays
             bool includeArrays = true;
@@ -739,6 +749,10 @@ namespace gridgeom.Tests
             //Free from and to arrays describing the links 
             Marshal.FreeCoTaskMem(c_arrayfrom);
             Marshal.FreeCoTaskMem(c_arrayto);
+
+            //Free gridgeom memory
+            ierr = wrapperGridgeom.ggeo_deallocate();
+            Assert.That(ierr, Is.EqualTo(0));
         }
 
         [Test]
@@ -825,6 +839,11 @@ namespace gridgeom.Tests
                 Marshal.FreeCoTaskMem(meshOut.face_nodes);
                 Marshal.FreeCoTaskMem(meshOut.facex);
                 Marshal.FreeCoTaskMem(meshOut.facey);
+
+                //Free gridgeom
+                ierr = wrapperGridgeom.ggeo_deallocate();
+                Assert.That(ierr, Is.EqualTo(0));
+
             //}, stackSize);
             //th.Start();
             //th.Join();

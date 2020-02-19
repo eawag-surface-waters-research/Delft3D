@@ -3336,13 +3336,17 @@
    
    do l=1, numl
       if(kn(3,l).eq.linkType) then
-         nlinks = nlinks + 1
+         if(kn(2,l)>size(mesh1dMapping)) then
+            ierr = -1
+            return
+         endif
          nc = 0
          call incells(xk(kn(1,l)), yk(kn(1,l)), nc)
          if (nc < 1 .or. nc> size(mesh2dMapping)) then
             ierr = -1
             return
          endif
+         nlinks = nlinks + 1
          arrayfrom(nlinks) = mesh2dMapping(nc)
          !1dpoint
          arrayto(nlinks)   = mesh1dMapping(kn(2,l))
@@ -3372,7 +3376,7 @@
    double precision                      :: tolerance
 
    ierr            = -1
-   tolerance       = 1e-4 !epsilon(nodeoffset(1))
+   tolerance       = 1e-6
    shift           = 1 - startindex
 
    nbranches       = size(sourcenodeid)
