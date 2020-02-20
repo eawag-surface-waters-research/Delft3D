@@ -2621,6 +2621,7 @@ end subroutine default_turbulence
  double precision                  :: chktempdep        !< check heatfluxes for 'drying' below this waterdepth
  double precision                  :: trsh_u1Lb = 0.0d0
  integer                           :: jposhchk          !< check for positive waterdepth; 0 = no
+                                                        !!                               -1 = 1.0*dts, only check for dry cells and report back, restart Nested Newton, not timestep.
                                                         !!                                1 = 0.7*dts, just redo
                                                         !!                                2 = 1.0*dts, close all links
                                                         !!                                3 = 0.7*dts, close all links

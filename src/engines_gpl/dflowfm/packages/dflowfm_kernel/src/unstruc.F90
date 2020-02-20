@@ -1189,7 +1189,7 @@ if(q /= 0) then
        ! At first try only check for positive water depths only
        ! Temporarily save the current JPOSCHK value
        jposhchk_sav = jposhchk
-       jposhchk = 1
+       jposhchk = -1
     endif
     
     call poshcheck(key)                                 ! s1 above local bottom? (return through key only for easier interactive)
@@ -1201,14 +1201,14 @@ if(q /= 0) then
     endif
     
     if (key == 1) then
-       if (firstnniteration) then
-         ! Negative depth(s): retry with full Nested Newton 
+       return                                           ! for easier mouse interrupt
+    else if (key == 2 ) then
+       if (nonlin1D >= 3 .and. firstnniteration) then   ! jposhcheck==-1
+         ! Negative depth(s): retry with restarted Nested Newton
          firstnniteration = .false.
          goto 222
-       else
-          return
        endif
-    else if (key == 2 ) then
+
        if (wrwaqon.and.allocated(qsrcwaq)) then
           qsrcwaq = qsrcwaq0                            ! restore cumulative qsrc for waq from start of this time step to avoid
        end if                                           ! double accumulation and use of incorrect dts in case of time step reduction
@@ -1558,10 +1558,12 @@ if(q /= 0) then
                  call rcirc( xz(n), yz(n) )
               end if
 
-              if (jposhchk == 1) then                            ! only timestep reduction
-
-                 key = 1
-                 
+              if (jposhchk == -1) then                           ! only detect dry cells and return (for Nested Newton restart)
+                 key = 2
+                 exit
+              else if (jposhchk == 1) then                       ! only timestep reduction
+                 key = 2                                         ! flag redo timestep
+                 exit
 
               else if (jposhchk == 2 .or. jposhchk == 3) then    ! set dry all attached links
 
@@ -1620,7 +1622,7 @@ if(q /= 0) then
     nodneg = idum(2)
  end if
 
- if (nodneg /= 0) then
+ if (nodneg /= 0 .and. jposhchk /= -1) then
     if (jposhchk == 1 .or. jposhchk == 3   .or. jposhchk == 5 .or. jposhchk == 7) then
         dts = 0.7d0*dts
     endif
