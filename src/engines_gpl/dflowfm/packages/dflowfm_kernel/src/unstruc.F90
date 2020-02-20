@@ -16987,6 +16987,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    integer                               :: n, ierr, istru, structInd
    double precision, allocatable         :: results(:,:)
    double precision, allocatable         :: waterLevelsLeft(:), waterLevelsRight(:),normalVelocity(:)
+   logical                               :: foundtempforcing
 
    iresult = DFM_EXTFORCERROR
    call klok(cpuext(1))
@@ -17099,29 +17100,37 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
        ! Update arrays rhum, tair and clou in a single method call.
        ! Nothing happens in case quantity 'humidity_airtemperature_cloudiness' has never been added through ec_addtimespacerelation.
-       if (itempforcingtyp == 1) then
+       select case (itempforcingtyp)
+       case (1)
+          success = ec_gettimespacevalue(ecInstancePtr, 'humidity_airtemperature_cloudiness', tim)
+       case (2)
+           success = ec_gettimespacevalue(ecInstancePtr, 'humidity_airtemperature_cloudiness_solarradiation', tim)
+       case (3)
+           success = ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness', tim)
+       case (4)
+           success = ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness_solarradiation', tim)
+       end select
 
-          success = success .or. ec_gettimespacevalue(ecInstancePtr, 'humidity_airtemperature_cloudiness', tim)
+       foundtempforcing = (itempforcingtyp >= 1 .and. itempforcingtyp <= 4)
 
-       else if (itempforcingtyp == 2) then
+       if (btempforcingtypH) then
+           success = success .and. ec_gettimespacevalue(ecInstancePtr, item_humidity, irefdate, tzone, tunit, tim)
+           foundtempforcing = .true.
+       endif
+       if (btempforcingtypA) then
+           success = success .and. ec_gettimespacevalue(ecInstancePtr, item_airtemperature, irefdate, tzone, tunit, tim)
+           foundtempforcing = .true.
+       endif
+       if (btempforcingtypS) then
+           success = success .and. ec_gettimespacevalue(ecInstancePtr, item_solarradiation, irefdate, tzone, tunit, tim)
+           foundtempforcing = .true.
+       endif
+       if (btempforcingtypC) then
+           success = success .and. ec_gettimespacevalue(ecInstancePtr, item_cloudiness, irefdate, tzone, tunit, tim)
+           foundtempforcing = .true.
+       endif
 
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, 'humidity_airtemperature_cloudiness_solarradiation', tim)
-
-       else if (itempforcingtyp == 3) then
-
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness', tim)
-
-       else if (itempforcingtyp == 4) then
-
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness_solarradiation', tim)
-
-       else if (itempforcingtyp == 5) then
-
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_humidity, irefdate, tzone, tunit, tim) ! hk: En bedankt voor de rename he lekker dan
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_airtemperature, irefdate, tzone, tunit, tim)
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_solarradiation, irefdate, tzone, tunit, tim)
-
-       else
+       if (.not. foundtempforcing ) then
             call mess(LEVEL_WARN,'No humidity, airtemperature and  cloudiness forcing found, setting temperature model [physics:Temperature] = 1 (Only transport)')
             jatem = 1
             success = .true.
@@ -42483,7 +42492,7 @@ if (mext > 0) then
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then
-              jatair = 1 ; itempforcingtyp = 5
+              jatair = 1 ; btempforcingtypA = .true.
            endif
 
         else if (qid == 'humidity') then
@@ -42494,7 +42503,7 @@ if (mext > 0) then
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then
-              jarhum = 1  ; itempforcingtyp = 5
+              jarhum = 1  ; btempforcingtypH = .true.
            endif
 
         else if (qid == 'cloudiness') then
@@ -42505,7 +42514,7 @@ if (mext > 0) then
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then
-              jaclou = 1 ; itempforcingtyp = 5
+              jaclou = 1 ; btempforcingtypC = .true.
            endif
 
          else if (qid == 'solarradiation') then
@@ -42516,7 +42525,7 @@ if (mext > 0) then
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then
-              jasol = 1 ;  itempforcingtyp = 5
+              jasol = 1 ;  btempforcingtypS = .true.
            endif
 
         else if (qid(1:8) == 'rainfall' ) then

@@ -6864,13 +6864,13 @@ module m_meteo
             dataPtr1 => rhum                 ! Relative humidity 
          case ('airtemperature')
             itemPtr1 => item_airtemperature
-            dataPtr1 => tair                
+            dataPtr1 => tair
          case ('cloudiness')
             itemPtr1 => item_cloudiness
-            dataPtr1 => clou                 
+            dataPtr1 => clou
          case ('solarradiation')
             itemPtr1 => item_solarradiation
-            dataPtr1 => qrad                
+            dataPtr1 => qrad
          case ('nudge_salinity_temperature')
             itemPtr2 => item_nudge_sal
             dataPtr2 => nudge_sal 

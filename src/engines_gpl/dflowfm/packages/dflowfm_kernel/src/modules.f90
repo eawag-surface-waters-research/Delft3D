@@ -2436,7 +2436,12 @@ end subroutine default_turbulence
  integer                           :: janudge           !< temperature and salinity nudging
  integer                           :: jainiwithnudge   !< initialize salinity and temperature with nudge variables
 
- integer                           :: itempforcingtyp   !< Forcing parameter types 1,2 humidity, 3,4 dewpoint see code
+ integer                           :: itempforcingtyp = 0  !< Forcing parameter types 1,2 humidity, 3,4 dewpoint see code
+
+ logical                           :: btempforcingtypA = .false.  !< Forcing parameter Air temperature is given as a separate field or not
+ logical                           :: btempforcingtypC = .false.  !< Forcing parameter Cloudiness given as a separate field or not
+ logical                           :: btempforcingtypH = .false.  !< Forcing parameter Humidity given as a separate field or not
+ logical                           :: btempforcingtypS = .false.  !< Forcing parameter Solarradiation given as a separate field or not
 
  integer                           :: jarhoxu           !< rho effects in momentum, 0=no, 1=in horizontal adv, 2=+ in vertical adv, 3 = + in pressure term
 
