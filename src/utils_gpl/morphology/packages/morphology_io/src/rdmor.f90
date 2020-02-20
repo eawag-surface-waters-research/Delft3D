@@ -576,10 +576,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           error = .true.
           return
        elseif (ihidexp>1 .and. anymud) then
-          errmsg = 'Mud fractions included: IHidExp should be 1 in ' // trim(filmor)
-          call write_error(errmsg, unit=lundia)
-          error = .true.
-          return
+          errmsg = 'Hiding-exposure with mud is an experimental feature. Hiding-exposure does not take into account the presence of mud.'
+          call write_warning(errmsg, unit=lundia)
        endif
        select case(ihidexp)
        case(4) ! Parker, Klingeman, McLean
