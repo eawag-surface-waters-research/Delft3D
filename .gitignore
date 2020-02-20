@@ -19,13 +19,6 @@ src/engines_gpl/dimr/packages/dimr_testcomponent/[Dd]ebug
 src/engines_gpl/dimr/packages/dimr_testcomponent/[Rr]elease
 src/engines_gpl/dimr/packages/dimr_testcomponent/_Pvt_Extensions
 src/engines_gpl/dimr/packages/dimr_testcomponent/obj
-src/engines_gpl/flow2d3d/packages/flow2d3d_openda/*.aps
-src/engines_gpl/flow2d3d/packages/flow2d3d_openda/*.eto
-src/engines_gpl/flow2d3d/packages/flow2d3d_openda/*.user
-src/engines_gpl/flow2d3d/packages/flow2d3d_openda/[Bb]in
-src/engines_gpl/flow2d3d/packages/flow2d3d_openda/[Dd]ebug
-src/engines_gpl/flow2d3d/packages/flow2d3d_openda/[Rr]elease
-src/engines_gpl/flow2d3d/packages/flow2d3d_openda/obj
 src/engines_gpl/flow2d3d/packages/io/*.aps
 src/engines_gpl/flow2d3d/packages/io/*.eto
 src/engines_gpl/flow2d3d/packages/io/*.user

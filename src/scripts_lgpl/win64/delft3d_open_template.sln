@@ -302,11 +302,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flow2d3d", "engines_gpl\flo
 		{C47698E9-FAF7-4B58-8D5D-416C10685325} = {C47698E9-FAF7-4B58-8D5D-416C10685325}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "flow2d3d_openda_lib", "engines_gpl\flow2d3d\packages\flow2d3d_openda\flow2d3d_openda_lib.vfproj", "{2AA7793E-CE9D-498D-9818-4DB500314029}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F9102D02-48CF-4954-B1C2-ED815BAA11A6} = {F9102D02-48CF-4954-B1C2-ED815BAA11A6}
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nesthd1", "nesthd1", "{ED6C470E-6AD1-4EEC-A3D2-7CEA046CE060}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "nesthd1", "tools_gpl\nesthd1\packages\nesthd1\nesthd1.vfproj", "{E1C16E8B-106C-4F98-B405-7D252766DDA8}"
