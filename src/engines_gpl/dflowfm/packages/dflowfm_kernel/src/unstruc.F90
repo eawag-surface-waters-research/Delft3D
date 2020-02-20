@@ -11088,6 +11088,8 @@ subroutine flow_sedmorinit()
     use m_branch
     use m_oned_functions, only: gridpoint2cross
     use m_fm_morstatistics
+    use timespace_parameters, only: LOCTP_POLYGON_FILE
+    use timespace, only: selectelset_internal_nodes
     use MessageHandling
 
     implicit none
@@ -11373,6 +11375,19 @@ subroutine flow_sedmorinit()
        call realloc(sswx_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
        call realloc(sswy_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
     endif
+    
+    ! mormerge additions
+    !
+    call realloc(kcsmor,ndx,stat=ierr,fill=0,keepExisting=.false.)
+    !
+    inquire (file = trim(md_morphopol), exist = ex)
+    if (.not. ex) then
+       ! do all cells
+       kcsmor = 1
+    else
+       ! find cells inside polygoon
+       call selectelset_internal_nodes(xz, yz, kcs, ndx, kcsmor, ndx, LOC_FILE=md_morphopol, LOC_SPEC_TYPE=LOCTP_POLYGON_FILE)
+    end if
 
     return
 end subroutine flow_sedmorinit
