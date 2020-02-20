@@ -101,7 +101,7 @@ module m_oned_functions
          ! nonlinear computation is required for 1d flow
          if (nonlin1D == 0) then
             nonLin1D = 1
-         elseif (nonlin1D == 2) then
+         elseif (nonlin1D >= 2) then
             CSCalculationOption = CS_TYPE_PLUS
          endif
          

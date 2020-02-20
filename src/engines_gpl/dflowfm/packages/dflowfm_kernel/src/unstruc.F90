@@ -306,7 +306,7 @@ subroutine flow_finalize_usertimestep(iresult)
 
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
 
-   double precision     :: tem_dif
+   double precision :: tem_dif
 
    iresult = DFM_GENERICERROR
 
@@ -346,18 +346,18 @@ subroutine flow_finalize_usertimestep(iresult)
       if (ti_his > 0) then
          if (comparereal(time1, time_his, eps10)>=0) then
             call updateValuesOnObservationStations()
-            if (jampi == 1) then
-               call updateValuesOnCrossSections_mpi(time1)
-               call reduce_particles
-            endif
-            if (jahisbal > 0) then ! Update WaterBalances etc.
-               call updateBalance()
-            endif
+              if (jampi == 1) then
+                 call  updateValuesOnCrossSections_mpi(time1)
+                 call reduce_particles
+              endif
+              if (jahisbal > 0) then ! Update WaterBalances etc.
+                 call updateBalance()
+              endif
             if ( jacheckmonitor == 1 ) then
-!              compute "checkerboard" monitor
-               call comp_checkmonitor()
-            endif
+!                compute "checkerboard" monitor
+                 call comp_checkmonitor()
          endif
+      endif
       endif
 
 !       in case of water level or discharge dependent roughness,
@@ -1117,9 +1117,10 @@ if(q /= 0) then
  integer :: ndraw
  COMMON /DRAWTHIS/  ndraw(50)
 
- integer            :: key, LL, L, k1,k2, itype
+ integer            :: key, jposhchk_sav, LL, L, k1,k2, itype
  integer            :: ja, k, ierror, n, kt, num, js1, noddifmaxlevm, nsiz
  character (len=40) :: tex
+ logical            :: firstnniteration
  double precision   :: wave_tnow, wave_tstop, t0, t1, dif, difmaxlevm
  double precision   :: hw,tw, uorbi,rkw,ustt,hh,cs,sn
 
@@ -1137,7 +1138,8 @@ if(q /= 0) then
  dti      = 1d0/dts
  nums1it  = 0
  nums1mit = 0
-
+ firstnniteration = .true.                            !< Flag for first Nested Newton iteration. Only in case of negative depths
+                                                      !< firstnniteration is set to .false. 
 
  !call flow_set external forcingsonboundaries(time1) ! set boundary conditions for time that you attempt to reach, every step
                                                      ! should formally be at this position if setbacks occur
@@ -1153,7 +1155,8 @@ if(q /= 0) then
 
  if ( itstep.ne.4 ) then                                ! implicit time-step
 
- 222 if (nonlin == 2) then                               ! only for pressurised
+   222 if (nonlin == 2 .or. (nonlin ==3 .and. .not. firstnniteration)) then                               ! only for pressurised
+       ! Nested newton iteration, start with s1m at bed level.
        s1m = bl !  s1mini
        call volsur()
        difmaxlevm = 0d0 ;  noddifmaxlevm = 0
@@ -1180,19 +1183,38 @@ if(q /= 0) then
        itype = merge(ITYPE_SALL, ITYPE_Snonoverlap, jaoverlap == 0)
        call update_ghosts(itype, 1, Ndx, s1, ierror)
        if ( jatimer == 1 ) call stoptimer(IUPDSALL)
-    end if
+       end if
 
+    if (firstnniteration .and. nonlin1D >=3) then
+       ! At first try only check for positive water depths only
+       ! Temporarily save the current JPOSCHK value
+       jposhchk_sav = jposhchk
+       jposhchk = 1
+    endif
+    
     call poshcheck(key)                                 ! s1 above local bottom? (return through key only for easier interactive)
 
+
+    if (firstnniteration .and. nonlin1D >=3) then
+       ! reset JPOSCHK to original value
+       jposhchk = jposhchk_sav
+    endif
+    
     if (key == 1) then
-       return                                           ! go to user control, timestep too small
+       if (firstnniteration) then
+         ! Negative depth(s): retry with full Nested Newton 
+         firstnniteration = .false.
+         goto 222
+       else
+          return
+       endif
     else if (key == 2 ) then
        if (wrwaqon.and.allocated(qsrcwaq)) then
           qsrcwaq = qsrcwaq0                            ! restore cumulative qsrc for waq from start of this time step to avoid
        end if                                           ! double accumulation and use of incorrect dts in case of time step reduction
        call setkfs()
        if (jposhchk == 2 .or. jposhchk == 4) then       ! redo without timestep reduction, setting hu=0 => 333 s1ini
-          if (nonlin == 2) then
+          if (nonlin >= 2) then
              goto 222
           else
              goto 333
@@ -1265,7 +1287,7 @@ if(q /= 0) then
 
     ! beyond or past this point s1 is converged
 
-     if (nonlin == 2) then
+     if (nonlin >= 2) then
        difmaxlevm = 0d0 ;  noddifmaxlevm = 0
        do k = 1,ndx
           dif = abs(s1m(k)-s1(k))
@@ -1538,7 +1560,8 @@ if(q /= 0) then
 
               if (jposhchk == 1) then                            ! only timestep reduction
 
-                 exit
+                 key = 1
+                 
 
               else if (jposhchk == 2 .or. jposhchk == 3) then    ! set dry all attached links
 
@@ -1664,7 +1687,7 @@ if(q /= 0) then
 
  endif
 
- if (nonlin == 2) then
+ if (nonlin >= 2) then
     a1m = 0d0
  endif
 
@@ -1750,7 +1773,7 @@ if(q /= 0) then
        endif
     endif
 
-    if (nonlin == 2) then
+    if (nonlin >= 2) then
 
        LL = L
        if (L > lnxi) then                                   ! for 1D boundary links, refer to attached link
@@ -2588,7 +2611,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  enddo
 
  if (nshiptxy > 0) then
-    if (japerim == 1 .or. nonlin == 2 .and. japressurehull >= 2) then                     ! and nonlin == 2
+    if (japerim == 1 .or. nonlin >= 2 .and. japressurehull >= 2) then                     ! and nonlin == 2
        call addship2D(japerim)
        if (japressurehull == 3 .and. japerim == 0) then
           do n = 1,ndx
@@ -14228,7 +14251,7 @@ else if (nodval == 27) then
        endif
     endif
  else if (nodval == 48) then
-   if (nonlin == 2) then
+   if (nonlin >= 2) then
       znod = a1m(kk)
    endif
  else if (nodval == 49) then
@@ -15905,7 +15928,7 @@ endif
     teta(lnxi+1:lnx) = 1d0
  endif
 
- if (nonlin1d == 2 .or. nonlin2D == 2) then
+ if (nonlin1d == 2 .or. nonlin1d == 3 .or.nonlin2D == 2) then
     if (allocated(s1mini) ) deallocate(s1mini)
     allocate  ( s1mini(ndx) , stat= ierr)
     call aerr ('s1mini(ndx)', ierr, ndx ) ; s1mini = bl
@@ -15975,7 +15998,7 @@ endif
  s00 = s1
 
  nonlin = max(nonlin1D, nonlin2D)
- if (nonlin == 2) then
+ if (nonlin >= 2) then
     if (allocated(s1m) ) deallocate (s1m, a1m)
     allocate ( s1m(ndx), a1m(ndx) , STAT=ierr) ; s1m = s1
     call aerr('s1m(ndx), a1m(ndx)', ierr, ndx)
@@ -16316,7 +16339,7 @@ endif
 888 continue  ! Some error occurred, prevent further flow
  ndx = 0
 
- if (nonlin==2) then
+ if (nonlin>=2) then
     s1m = bl
  endif
 
@@ -37382,7 +37405,7 @@ end subroutine setbobs_fixedweirs
 
                       call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
 
-                      wetdown = max(wetdown, 0.0001d0)
+                       wetdown = max(wetdown, 0.0001d0)
                       call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
                           q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, bob0(:,L), wetdown, .true.)
                       bl(k1) = min(bl(k1), bob0(1,L))
@@ -37926,7 +37949,7 @@ end function ispumpon
  do n = 1,ndx                                        ! Waterlevels, = s1ini
     dtiba  = dti*a1(n)
     bbr(n) = bb(n) + dtiba                           ! need it also for kfs.ne.1 at the boundaries (for parallel runs, see partition_setkfs)
-    if (nonlin == 2) then                            ! pressurised
+    if (nonlin >= 2) then                            ! pressurised
         bbr(n)  = bbr(n) - dti*a1m(n)
     endif
 
@@ -37934,7 +37957,7 @@ end function ispumpon
        if (nonlin > 0) then
           ddr(n) = dd(n)  + dtiba*s1(n)              !
           ddr(n) = ddr(n) + dti*( vol0(n) - vol1(n) )
-          if (nonlin == 2) then                      ! pressurised
+          if (nonlin >= 2) then                      ! pressurised
              ddr(n) = ddr(n) - s1m(n)*a1m(n)*dti
           endif
        else

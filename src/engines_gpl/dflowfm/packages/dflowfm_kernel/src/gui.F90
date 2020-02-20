@@ -2473,7 +2473,7 @@
          OPTION(47)= 'ground water pressure                (m)'
       endif
          
-      if (nonlin == 2) then
+      if (nonlin >= 2) then
          OPTION(48)= 'a1m                                 (m2)'
       endif
          
@@ -21954,7 +21954,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
  if (kmx == 0) then
     call tekrailines(221,1,1) ! s1
-    if (nonlin == 2) then 
+    if (nonlin >= 2) then 
        call tekrailines(ncolana,1,6) ! s1m
        ! call tekrailines(2,0,2)       ! bob 
        ! call tekrailines(2,0,7)       ! bbb
@@ -22736,7 +22736,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 ! make string for local time-stepping
  if ( nsubsteps.eq.1 ) then
     write(c_lts, "(15A)") ' '
-    if (nonlin == 2) then 
+    if (nonlin >= 2) then 
        c_lts = '#s1mit: ' 
        write(c_lts(9:), '(i4)') min(9999, nums1mit)  
     endif   
