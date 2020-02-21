@@ -277,17 +277,17 @@
                !
                iref = cdef%levelscount
                do i = 2, cdef%levelscount - 1
-                  if (cdef%flowWidth(i+1)*2d0 > cdef%plains(1)) then ! or cdef%height(i)>s1(nm)
+                  if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm)
                      iref = i
                      exit
                   endif
                enddo
                aref = 0d0
                do i = 2, iref
-                  aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))
+                  aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))*0.5d0
                enddo
                href = cdef%height(iref)
-               w_active = cdef%flowWidth(iref)*2d0
+               w_active = cdef%flowWidth(iref)
                !
                ! use blchg as bed level change over the total cell area (can be partly dry)
                ! to compute the total volume deposited inside the cell
@@ -319,7 +319,7 @@
                   !
                   do i = iref, cdef%levelscount-1
                      da = da - aref
-                     aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))
+                     aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))*0.5d0
                      if (da<aref) then
                         exit
                      else
@@ -550,7 +550,7 @@
                enddo
                blref = cdef%flowWidth(1)*cdef%height(1)
                do i = 2, iref
-                  blref = blref + (cdef%flowWidth(i) - cdef%flowWidth(i-1))*(cdef%height(i)+cdef%height(i-1)*0.5d0)
+                  blref = blref + (cdef%flowWidth(i) - cdef%flowWidth(i-1))*(cdef%height(i)+cdef%height(i-1))*0.5d0
                enddo
                href_tot = href_tot + blref*ds
                ba_mor_tot = ba_mor_tot + cdef%flowWidth(iref)*ds
