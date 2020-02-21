@@ -17096,19 +17096,18 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 !   !$OMP SECTION
 
     if (jatem > 1) then
-       success = .false.
 
        ! Update arrays rhum, tair and clou in a single method call.
        ! Nothing happens in case quantity 'humidity_airtemperature_cloudiness' has never been added through ec_addtimespacerelation.
        select case (itempforcingtyp)
        case (1)
-          success = ec_gettimespacevalue(ecInstancePtr, 'humidity_airtemperature_cloudiness', tim)
+          success = success .and. ec_gettimespacevalue(ecInstancePtr, 'humidity_airtemperature_cloudiness', tim)
        case (2)
-           success = ec_gettimespacevalue(ecInstancePtr, 'humidity_airtemperature_cloudiness_solarradiation', tim)
+          success = success .and. ec_gettimespacevalue(ecInstancePtr, 'humidity_airtemperature_cloudiness_solarradiation', tim)
        case (3)
-           success = ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness', tim)
+          success = success .and. ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness', tim)
        case (4)
-           success = ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness_solarradiation', tim)
+          success = success .and. ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness_solarradiation', tim)
        end select
 
        foundtempforcing = (itempforcingtyp >= 1 .and. itempforcingtyp <= 4)
@@ -17131,12 +17130,10 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
        endif
 
        if (.not. foundtempforcing ) then
-            call mess(LEVEL_WARN,'No humidity, airtemperature and  cloudiness forcing found, setting temperature model [physics:Temperature] = 1 (Only transport)')
+            call mess(LEVEL_WARN,'No humidity, airtemperature, cloudiness and solar radiation forcing found, setting temperature model [physics:Temperature] = 1 (Only transport)')
             jatem = 1
-            success = .true.
        endif
    endif
-
 
 !   !$OMP SECTION
 
