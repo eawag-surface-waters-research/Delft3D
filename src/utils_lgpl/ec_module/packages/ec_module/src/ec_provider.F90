@@ -853,9 +853,6 @@ module m_ec_provider
                end if
                elementSetName = fileReaderPtr%bc%bcname
          end select 
-         if (trim(str_toupper(quantityName)) == 'RAINFALL') then
-            if (.not.(ecQuantitySet(instancePtr, quantityId, timeint=timeint_rainfall))) return
-         end if
 
          ! N_quantities number of scalar quantities.
          elementSetId = ecInstanceCreateElementSet(instancePtr)

@@ -7654,6 +7654,7 @@ module m_meteo
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity rainfall.')
                return
             end if
+            if (.not.(ecQuantitySet(ecInstancePtr, quantityId, timeint=timeint_rainfall))) return
          case ('rainfall_rate')
             ! the name of the source item depends on the file reader
             if (ec_filetype == provFile_uniform) then
