@@ -1260,6 +1260,8 @@ logical function initboundaryblocksforcings(filename)
        else
           call resolvePath(forcingfile, basedir, forcingfile)
        end if
+       oper = 'O'
+       call prop_get_string(node_ptr, '', 'operand', oper , retVal)
 
        targetmaskfile = ''
        call prop_get_string(node_ptr, '', 'targetMaskFile', targetmaskfile, retVal)
@@ -1310,15 +1312,15 @@ logical function initboundaryblocksforcings(filename)
           filetype = bcascii
           fmmethod = spaceandtime
           ! NOTE: Currently, we only support name=global meteo in.bc files, later maybe station time series as well.
-          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx,  'global', filetype=filetype, forcingfile=forcingfile, method=fmmethod, operand='O')
+          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx,  'global', filetype=filetype, forcingfile=forcingfile, method=fmmethod, operand=oper)
        case ('netcdf')
           filetype = ncgrid
           fmmethod = weightfactors
-          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
+          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx, forcingfile, filetype=filetype, method=fmmethod, operand=oper)
        case ('uniform')
           filetype = provFile_uniform
           fmmethod = spaceandtime
-          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx, forcingfile, filetype=filetype, method=fmmethod, operand='O')
+          success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcsini, kx, forcingfile, filetype=filetype, method=fmmethod, operand=oper)
        case default
           write(msgbuf, '(a)') 'Unknown forcingFileType '''// trim(forcingfiletype) //' in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'
           call warn_flush()
