@@ -10809,7 +10809,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  if (jawave > 2 .or. (jased > 0 .and. stm_included)) then
     call flow_waveinit()
  endif
- ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopen
+ ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopes
  call klok(cpu_extra(1,7)) ! Flow griddim
  if ( len_trim(md_foufile) > 0 .or. len_trim(md_sedfile) > 0 .or. jatrt == 1) then
     call D3Dflow_dimensioninit()
@@ -12038,9 +12038,9 @@ subroutine flow_trachyupdate()
     ! Perform computation of vegetation and alluvial roughness
     !
     if (stm_included) then
-       call trtrou(mdia     ,kmaxtrt   ,numl      , &                                            ! lnx instead of numl ?
+       call trtrou(mdia     ,kmaxtrt   ,numl      ,            &                                            ! lnx instead of numl ?
                 & cftrt     ,rouflo    ,linit     ,dx_trt    , &
-                & hu_trt    ,kcu_trt   ,sig       , &
+                & hu_trt    ,kcu_trt   ,sig       ,            &
                 & z0rou     ,1         ,waqol     ,trachy_fl , &
                 & umag      ,1         ,numl      ,1         , ndx      , &                      ! first entry in row r(u1) should be gdp%gderosed%umod !!WO-temp
                 & rhomean   ,ag        ,vonkar    , viskin   , &              ! ~z0 used for what?   ~viskin instead of vicmol (Delft3D)
@@ -12109,7 +12109,7 @@ subroutine calibration_init()
  use unstruc_model, only: md_cldfile, md_cllfile
  use m_flowgeom,    only: lnx
  use m_flow,        only: ifrcutp, ifrctypuni, frcu, frcu_bkp
-
+ !
  implicit none
  !
  integer         :: LF
@@ -15785,7 +15785,7 @@ end if
  ! Load restart file (*_map.nc) assigned in the *.mdu file OR read a *.rst file
  jawel = .false.
  if (len_trim(md_restartfile) > 0 ) then
-!    Find file extention based on first full stop symbol '.' at the back of the string.
+!    Find file extension based on first full stop symbol '.' at the back of the string.
      N1  = INDEX (md_restartfile,'.', .true.)
      N2  = len_trim(md_restartfile)
      EXT = ' '
@@ -37132,7 +37132,7 @@ end subroutine setbobs_fixedweirs
  use m_alloc
  use m_partitioninfo
  use m_xbeach_data, only: ust, vst, urms, swave, Lwave
- use m_waves, only: ypar, cfwavhi, hminlw, cfhi_vanrijn
+ use m_waves, only: ypar, cfwavhi, hminlw, cfhi_vanrijn, uorb
  use m_sediment
  use unstruc_channel_flow
  use m_cross_helper
@@ -37162,7 +37162,7 @@ end subroutine setbobs_fixedweirs
  double precision :: as1, as2, qtotal, width, st2, cmustr, wetdown, dpt
  double precision :: maxwidth1, maxwidth2
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
- double precision :: hminlwi,fsqrtt
+ double precision :: hminlwi,fsqrtt,uorbL
  double precision :: perimeter, conv, czdum
  logical          :: firstiter
  type(t_structure), pointer :: pstru
@@ -37274,7 +37274,8 @@ end subroutine setbobs_fixedweirs
               elseif (modind==9) then
                  frL = cfhi_vanrijn(L) * sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2)
               elseif (modind==10) then   ! Ruessink 2003
-                 frL = cfuhi(L)*sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2 + (1.16d0*uorb(L)*fsqrtt)**2)
+                 uorbL = .5d0*(uorb(k1)+uorb(k2))
+                 frL = cfuhi(L)*sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2 + (1.16d0*uorbL*fsqrtt)**2)
               end if
 
               !bdmwrs = frL * wavmu(L)
