@@ -519,11 +519,11 @@ contains
    !> 
    subroutine read1polylin(minp,xs,ys,ns,pliname)
       use m_alloc
-      integer          :: minp
-      double precision, allocatable :: xs(:)
-      double precision, allocatable :: ys(:)
-      integer                       :: ns
-      character(len=:),allocatable,optional :: pliname
+      integer          :: minp                          ! unit number of poly file
+      double precision, allocatable :: xs(:)            ! x-coordinates read from file    
+      double precision, allocatable :: ys(:)            ! y-coordinates read from file
+      integer                       :: ns               ! number of pli-points
+      character(len=:),allocatable,optional :: pliname  ! Optional, name (identifier) of pli
    
       character (len=maxnamelen)   :: rec
       integer                      :: k
@@ -5612,7 +5612,7 @@ contains
      integer     , intent(in)        :: filetype   ! spw, arcinfo, uniuvp etc
      logical,      intent(in)        :: usemask    !< Whether to use the mask array kc, or not (allows you to keep kc, but disable it for certain quantities, for example salinitybnd).
      double precision, intent(in), optional :: rrtolrel !< Optional, a more strict rrtolerance value than the global rrtol. selectelset will succeed if cross SL value <= rrtolrel
-     character(len=:),allocatable,optional :: pliname
+     character(len=:),allocatable, optional :: pliname  !< Optional, name (identifier) of pli
      
      ! locals
      double precision, allocatable   :: xs (:)     ! temporary array to hold polygon
@@ -6999,12 +6999,12 @@ module m_meteo
    function initializeConverter(instancePtr, converterId, convtype, operand, method, srcmask, inputptr) result(success)
       logical                    :: success      !< function status
       type(tEcInstance), pointer :: instancePtr  !< 
-      integer                    :: converterId  !< 
-      integer                    :: convtype     !< 
-      integer                    :: operand      !< 
-      integer                    :: method       !< 
-      type (tEcMask), optional   :: srcmask      !< 
-      real(hp), pointer, optional:: inputptr
+      integer                    :: converterId  !< Id of the converter to be initialized
+      integer                    :: convtype     !< Type of conversion
+      integer                    :: operand      !< Operand (add/replace)
+      integer                    :: method       !< Method of interpolation
+      type (tEcMask), optional   :: srcmask      !< Mask excluding source points
+      real(hp), pointer, optional:: inputptr     !< pointer to an input arg for the converter (for QHBND)
       !
       success              = ecSetConverterType(instancePtr, converterId, convtype)
       if (success) success = ecSetConverterOperand(instancePtr, converterId, operand)
@@ -7212,8 +7212,6 @@ module m_meteo
             message = 'Boundary '''//trim(qidname)//''', location='''//trim(location)//''', file='''//trim(forcingfile)//''' failed!' 
             call mess(LEVEL_ERROR, message)
          end if
-!     elseif (ec_filetype == provFile_qh) then
-          
       else
                !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
                !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
