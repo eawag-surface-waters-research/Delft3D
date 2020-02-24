@@ -3470,7 +3470,7 @@
 
 
       ! mesh nodes belongs to this branch
-      if( st>0 .and. en > 0 .and. st< numMeshNodes .and. en < numMeshNodes) then
+      if( st>0 .and. en > 0 .and. st<= numMeshNodes .and. en <= numMeshNodes) then
 
          ! in case the first node is at the start, skip it, already accounted for
          startInternal = st
