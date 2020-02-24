@@ -3448,10 +3448,6 @@
       enn = targetnodeid(branch) + shift
       numLocalNodes = 0
 
-      ! invalid mesh points
-      if( st<=0 .or. en <= 0 .or. st> numMeshNodes .or. en > numMeshNodes) then
-         cycle
-      endif
 
       ! invalid branch index
       if( stn<=0 .or. enn <= 0 .or. stn> numNetworkNodes .or. enn > numNetworkNodes) then
@@ -3473,34 +3469,38 @@
       endif
 
 
-      ! in case the first node is at the start, skip it, already accounted for
-      startInternal = st
-      if(nodeoffset(st)<tolerance ) then
-         startInternal = st + 1
-      endif
+      ! mesh nodes belongs to this branch
+      if( st>0 .and. en > 0 .and. st< numMeshNodes .and. en < numMeshNodes) then
 
-      ! in case the first node is at the end, skip it, already accounted for later
-      endInternal = en
-      if(abs(nodeoffset(en) - branchlength(branch)) < tolerance ) then
-         endInternal = en - 1
-      endif
-
-      !internal nodes
-      do k = startInternal, endInternal
-         numLocalNodes                    = numLocalNodes + 1
-         if(meshnodeIndex(k)==0 ) then
-            numk                          = numk + 1
-            meshnodeIndex(k)              = numk
-            mesh1dMapping(numk)           = k
-            xk(numk)                      = nodex(k)
-            yk(numk)                      = nodey(k)
-            branchids(numk)               = nodebranchidx(k)
+         ! in case the first node is at the start, skip it, already accounted for
+         startInternal = st
+         if(nodeoffset(st)<tolerance ) then
+            startInternal = st + 1
          endif
-         localNodeIndexses(numLocalNodes) = meshnodeIndex(k)
-      enddo
 
-      !end
-      if(networkNodeIndex(enn) > 0) then
+         ! in case the first node is at the end, skip it, already accounted for later
+         endInternal = en
+         if(abs(nodeoffset(en) - branchlength(branch)) < tolerance ) then
+            endInternal = en - 1
+         endif
+
+         !internal nodes
+         do k = startInternal, endInternal
+            numLocalNodes                    = numLocalNodes + 1
+            if(meshnodeIndex(k)==0 ) then
+               numk                          = numk + 1
+               meshnodeIndex(k)              = numk
+               mesh1dMapping(numk)           = k
+               xk(numk)                      = nodex(k)
+               yk(numk)                      = nodey(k)
+               branchids(numk)               = nodebranchidx(k)
+            endif
+            localNodeIndexses(numLocalNodes) = meshnodeIndex(k)
+         enddo
+     endif
+
+     !end
+     if(networkNodeIndex(enn) > 0) then
          if(meshnodeIndex(networkNodeIndex(enn))==0) then
             numk                                 = numk + 1
             meshnodeIndex(networkNodeIndex(enn)) = numk
@@ -3511,14 +3511,14 @@
          endif
          numLocalNodes = numLocalNodes + 1
          localNodeIndexses(numLocalNodes)        = meshnodeIndex(networkNodeIndex(enn))
-      endif
+     endif
 
-      !create edge node table
-      do k = 1, numLocalNodes - 1
-         numl = numl + 1
-         edge_nodes(1,numl) = localNodeIndexses(k)
-         edge_nodes(2,numl) = localNodeIndexses(k+1)
-      enddo
+    !create edge node table
+     do k = 1, numLocalNodes - 1
+        numl = numl + 1
+        edge_nodes(1,numl) = localNodeIndexses(k)
+        edge_nodes(2,numl) = localNodeIndexses(k+1)
+     enddo
 
    enddo
 
