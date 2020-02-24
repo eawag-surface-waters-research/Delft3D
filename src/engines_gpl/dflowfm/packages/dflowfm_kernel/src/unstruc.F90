@@ -35393,7 +35393,7 @@ bft:do ibathyfiletype=1,2
 
     do L = 1,lnx1D                                       ! 1D
 
-       if (iadv(L) > 20 .and. iadv(L) < 30) cycle        ! skip update of bobs for structures
+       if (iadv(L) > 20 .and. iadv(L) < 30 .and. (.not. stm_included)) cycle        ! skip update of bobs for structures
 
        n1  = ln(1,L)   ; n2 = ln(2,L)                    ! flow ref
        k1  = lncn(1,L) ; k2 = lncn(2,L)                  ! net  ref
