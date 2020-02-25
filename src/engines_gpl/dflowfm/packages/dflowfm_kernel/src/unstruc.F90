@@ -5168,12 +5168,7 @@ end subroutine setdt
                 siguL(L-Lb+1) = hu(L) / hu(LL)
              enddo
 
-             if (LL == 300) then
-                advel = 0d0
-             endif
-
              call lineinterp3( siguL, quuL1, volL1, sqaL1, Ltx0, sigk1, quuk1, volk1, sqak1, ktx01)
-
              call lineinterp3( siguL, quuL2, volL2, sqaL2, Ltx0, sigk2, quuk2, volk2, sqak2, ktx02)
 
              do L = Lb, Lt
@@ -5182,15 +5177,9 @@ end subroutine setdt
                 volu = vo1*ac1 + vo2*ac2
 
                 if (volu > 0) then
-
                    qu1   = quuL1(L-Lb+1) - quuL1(L-Lb) - u1(L)*( sqaL1(L-Lb+1) - sqaL1(L-Lb) )
                    qu2   = quuL2(L-Lb+1) - quuL2(L-Lb) - u1(L)*( sqaL2(L-Lb+1) - sqaL2(L-Lb) )
-
                    advel = ( ac1*qu1 + ac2*qu2 ) / volu
-
-                   if (L == Lb .and. LL == 300) then
-                        advel = 1d0*advel
-                   endif
                    adve(L) = adve(L) + advel
                 endif
              enddo
