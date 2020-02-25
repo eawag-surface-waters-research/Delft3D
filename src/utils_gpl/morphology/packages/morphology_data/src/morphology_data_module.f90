@@ -228,7 +228,6 @@ type moroutputtype
     logical :: lyrfrac
     logical :: msed
     logical :: mudfrac
-    logical :: orbvel
     logical :: percentiles
     logical :: poros
     logical :: rca
@@ -1488,7 +1487,6 @@ subroutine nullmorpar(morpar)
     morpar%moroutput%lyrfrac       = .true.
     morpar%moroutput%msed          = .true.
     morpar%moroutput%mudfrac       = .false.
-    morpar%moroutput%orbvel        = .false.
     morpar%moroutput%percentiles   = .false.
     morpar%moroutput%poros         = .true.
     morpar%moroutput%rca           = .true.

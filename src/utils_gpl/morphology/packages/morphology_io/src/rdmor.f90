@@ -724,7 +724,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'ReferenceHeight'             , moroutput%aks)
        call prop_get_logical(mor_ptr, 'Output', 'SettlingVelocity'            , moroutput%ws)
        call prop_get_logical(mor_ptr, 'Output', 'RawTransportsAtZeta'         , moroutput%rawtransports)
-       call prop_get_logical(mor_ptr, 'Output', 'OrbitalVel'                  , moroutput%orbvel)
        call prop_get_logical(mor_ptr, 'Output', 'SedParOut'                   , moroutput%sedparout)
        !
        call prop_get_logical(mor_ptr, 'Output', 'Bedslope'                    , moroutput%dzduuvv)
