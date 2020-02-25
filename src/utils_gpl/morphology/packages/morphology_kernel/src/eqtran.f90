@@ -1,3 +1,8 @@
+!> \page morphology_lib Library of sediment transport formulations
+!! \section eqtran Gateway for all sediment transport formulations
+!! The subroutine \em eqtran provides a standardized interface for calling
+!! any sediment transport in the library.
+
 subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
                 & frac      ,sigmol    ,dicww     ,lundia    ,taucr0    , &
                 & rksrs     ,i2d3d     ,lsecfl    ,spirint   ,suspfrac  , &
@@ -78,7 +83,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     real(fp)                            , intent(in)    :: eps
     real(fp)                            , intent(in)    :: espir
     real(fp)                            , intent(in)    :: frac     !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(30)        , intent(inout) :: par
+    real(fp)     , dimension(32)        , intent(inout) :: par
     real(fp)                            , intent(in)    :: rksrs    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(kmax)      , intent(in)    :: sig      !  Description and declaration in esm_alloc_real.f90
     real(fp)                            , intent(in)    :: sigmol   !  Description and declaration in esm_alloc_real.f90
@@ -318,7 +323,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        sbc_total = .false.
        sus_total = .false.
-    elseif (iform == -2) then
+    elseif (iform == -2 .or. iform == -4) then
        !
        ! Van Rijn 2004
        !
@@ -326,7 +331,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
                 & kmax      ,bed       ,dzduu     ,dzdvv     ,rksrs     , &
                 & tauadd    ,taucr0    ,aks       ,eps       ,camax     , &
                 & frac      ,sig       ,thick     ,ws        , &
-                & dicww     ,ltur      ,aks_ss3d  , &
+                & dicww     ,ltur      ,aks_ss3d  ,iform     , &
                 & kmaxsd    ,taurat    ,caks      ,caks_ss3d ,concin    , &
                 & seddif    ,sigmol    ,rsedeq    ,scour     ,bedw      , &
                 & susw      ,sbcu      ,sbcv      ,sbwu      ,sbwv      , &

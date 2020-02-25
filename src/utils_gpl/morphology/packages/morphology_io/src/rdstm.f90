@@ -213,6 +213,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     !
     call rdtrafrm(lundia, error, filtrn, stm%lsedtot, &
                 & ipardef, rpardef, NPARDEF, stm%trapar, &
+                & stm%morpar%moroutput%sedparout, &
                 & stm%sedpar%sedtyp, stm%sedpar%sedblock, &
                 & griddim)
     if (error) goto 999

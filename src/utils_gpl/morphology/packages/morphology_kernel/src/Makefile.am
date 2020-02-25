@@ -48,6 +48,16 @@ libMorphologyKernel_la_SOURCES = \
          initsedtra.f90 \
          osmom.f90 \
          sand_mud.f90 \
+         santoss.f90 \
+         santoss_abreu.f90 \
+         santoss_bss1.f90 \
+         santoss_bss2.f90 \
+         santoss_bsscurrent.f90 \
+         santoss_core.f90 \
+         santoss_orb.f90 \
+         santoss_ripple.f90 \
+         santoss_rrr12.f90 \
+         santoss_sfltd99.f90 \
          shld.f90 \
          soursin_2d.f90 \
          soursin_3d.f90 \
@@ -68,10 +78,10 @@ libMorphologyKernel_la_SOURCES = \
          tranb4.f90 \
          tranb5.f90 \
          tranb7.f90 \
-		 trab19.f90 \
-		 trab20.f90 \
-		 ua_rvr.f90 \
-		 ua_vt.f90 \
+         trab19.f90 \
+         trab20.f90 \
+         ua_rvr.f90 \
+         ua_vt.f90 \
          updmorfac.f90 \
          wave.f90
 

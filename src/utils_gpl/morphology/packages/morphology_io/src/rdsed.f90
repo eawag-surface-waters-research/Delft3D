@@ -1548,7 +1548,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
           txtput1 = '  WSM'
           write (lundia, '(2a,e12.4)') txtput1, ':', par_settle(3,l)
        elseif (iform_settle(l) == 2) then
-          if (iform(l) == -2) then
+          if (iform(l) == -2 .or. iform(l) == -4) then
              iform_settle(l) = -2
              txtput1 = '  SALMAX'
              write (lundia, '(2a,e12.4)') txtput1, ':', par_settle(1,l)

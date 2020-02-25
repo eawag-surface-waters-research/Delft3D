@@ -1726,7 +1726,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   ,ithisc    , &
                   & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
                   & r(teta)   ,r(rlabda) ,saleqs    , &
                   & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &                   
-                  & r(hv)     ,r(ubot)   ,r(rtur0)  , &
+                  & r(hv)     ,r(ubot)   ,r(rtur0)  ,r(dis)    , &
                   & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
                   & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
                   & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,dtsec     ,1         , &

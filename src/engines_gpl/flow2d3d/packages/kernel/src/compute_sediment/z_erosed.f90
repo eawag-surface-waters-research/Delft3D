@@ -1120,13 +1120,13 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              drho     = (rhosol(l)-rhowat(nm,kbed)) / rhowat(nm,kbed)
              dstar(l) = di50 * (drho*ag/vicmol**2)**0.3333_fp
              if (dstar(l) < 1.0_fp) then
-                if (iform(l) == -2) then
+                if (iform(l) == -2 .or. iform(l) == -4) then
                    tetacr(l) = 0.115_fp / (dstar(l)**0.5_fp)
                 else
                    tetacr(l) = 0.24_fp / dstar(l)
                 endif
              elseif (dstar(l) <= 4.0_fp) then
-                if (iform(l) == -2) then
+                if (iform(l) == -2 .or. iform(l) == -4) then
                    tetacr(l) = 0.115_fp / (dstar(l)**0.5_fp)
                 else
                    tetacr(l) = 0.24_fp / dstar(l)
@@ -1219,6 +1219,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &
                        & aks_ss3d  ,ust2(nm)  ,tsd       ,error     )
              if (error) call d3stop(1, gdp)
+             if (gdp%gdmorpar%moroutput%sedparout) then
+                 do i = 1,gdp%gdtrapar%noutpar(l)
+                     j = gdp%gdtrapar%ioutpar(i,l)
+                     gdp%gdtrapar%outpar(j, nm) = localpar(i)
+                 enddo
+             endif
              if (suspfrac) then
                 aks(nm, l) = taks
                 dss(nm, l) = tdss
@@ -1298,6 +1304,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &
                        & aks_ss3d  ,ust2(nm)  ,tsd       ,error     )
              if (error) call d3stop(1, gdp)
+             if (gdp%gdmorpar%moroutput%sedparout) then
+                 do i = 1,gdp%gdtrapar%noutpar(l)
+                     j = gdp%gdtrapar%ioutpar(i,l)
+                     gdp%gdtrapar%outpar(j, nm) = localpar(i)
+                 enddo
+             endif
              if (suspfrac) then
                 aks   (nm, l)    = taks
                 dss   (nm, l)    = tdss

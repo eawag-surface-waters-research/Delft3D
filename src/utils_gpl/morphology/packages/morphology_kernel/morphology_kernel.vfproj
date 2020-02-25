@@ -67,6 +67,16 @@
 		<File RelativePath=".\src\initsedtra.f90"/>
 		<File RelativePath=".\src\osmom.f90"/>
 		<File RelativePath=".\src\sand_mud.f90"/>
+		<File RelativePath=".\src\santoss.f90"/>
+		<File RelativePath=".\src\santoss_abreu.f90"/>
+		<File RelativePath=".\src\santoss_bss1.f90"/>
+		<File RelativePath=".\src\santoss_bss2.f90"/>
+		<File RelativePath=".\src\santoss_bsscurrent.f90"/>
+		<File RelativePath=".\src\santoss_core.f90"/>
+		<File RelativePath=".\src\santoss_orb.f90"/>
+		<File RelativePath=".\src\santoss_ripple.f90"/>
+		<File RelativePath=".\src\santoss_rrr12.f90"/>
+		<File RelativePath=".\src\santoss_sfltd99.f90"/>
 		<File RelativePath=".\src\shld.f90"/>
 		<File RelativePath=".\src\soursin_2d.f90"/>
 		<File RelativePath=".\src\soursin_3d.f90"/>

@@ -107,6 +107,11 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     real(fp), dimension(:)               , pointer :: uuu
     real(fp), dimension(:)               , pointer :: vvv
     real(fp), dimension(:)               , pointer :: zumod
+    integer          , dimension(:)      , pointer :: noutpar
+    integer          , dimension(:,:)    , pointer :: ioutpar
+    real(fp)         , dimension(:,:)    , pointer :: outpar
+    character(256)   , dimension(:,:)    , pointer :: outpar_name
+    character(256)   , dimension(:,:)    , pointer :: outpar_longname
     integer                              , pointer :: nmaxgl
     integer                              , pointer :: mmaxgl
 !
@@ -154,6 +159,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     integer    , dimension(3,5)                   :: uindex
     real(fp)   , dimension(:,:)    , allocatable  :: rbuff2
     real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
+    character(3)                                  :: sednr
     character(10)                                 :: transpunit
     character(16)                                 :: dxname
     character(256)                                :: errmsg      ! Character var. containing the errormessage to be written to file. The message depends on the error. 
@@ -221,6 +227,11 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     uuu            => gdp%gderosed%uuu
     vvv            => gdp%gderosed%vvv
     zumod          => gdp%gderosed%zumod
+    noutpar        => gdp%gdtrapar%noutpar
+    ioutpar        => gdp%gdtrapar%ioutpar
+    outpar         => gdp%gdtrapar%outpar
+    outpar_name    => gdp%gdtrapar%outpar_name
+    outpar_longname=> gdp%gdtrapar%outpar_longname
     mmaxgl         => gdp%gdparall%mmaxgl
     nmaxgl         => gdp%gdparall%nmaxgl
     lfsdu          => gdp%gdprocs%lfsdu
@@ -376,6 +387,14 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        endif
        if (moroutput%hidexp) then
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'HIDEXP', ' ', io_prec    , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Hiding and exposure factor', acl='z')
+       endif
+       if (moroutput%sedparout) then
+          do l = 1, lsedtot
+             write(sednr,'(I3.3)') l
+             do k = 1, noutpar(l)
+                call addelm(gdp, lundia, FILOUT_MAP, grpnam, trim(outpar_name(k,l))//trim(sednr), ' ', io_prec    , 2, dimids=(/iddim_n, iddim_m/), longname=trim(outpar_longname(k,l))//' for '//trim(gdp%gdsedpar%namsed(l)), acl='z')
+             enddo
+          enddo
        endif
        !
        ! Add mor fields
@@ -1194,6 +1213,29 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                         & nf, nl, mf, ml, iarrc, gdp, lsedtot, &
                         & ierror, lundia, hidexp, 'HIDEXP')
           if (ierror /= 0) goto 9999
+       endif
+       !
+       if (moroutput%sedparout) then
+          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+          i = 0
+          do l = 1, lsedtot
+             write(sednr,'(I3.3)') l
+             do k = 1, noutpar(l)
+                i = ioutpar(k,l)
+                rbuff2(:, :) = -999.0_fp
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff2(n, m) = outpar(i,nm)
+                   enddo
+                enddo
+                call wrtarray_nm(fds, filename, filetype, grpnam, celidt, &
+                              & nf, nl, mf, ml, iarrc, gdp, &
+                              & ierror, lundia, rbuff2, trim(outpar_name(k,l))//trim(sednr))
+                if (ierror /= 0) goto 9999
+             enddo
+          enddo
+          deallocate(rbuff2)
        endif
        !
        ! Add mor fields

@@ -228,6 +228,7 @@ type moroutputtype
     logical :: lyrfrac
     logical :: msed
     logical :: mudfrac
+    logical :: orbvel
     logical :: percentiles
     logical :: poros
     logical :: rca
@@ -239,6 +240,7 @@ type moroutputtype
     logical :: sbcuuvv
     logical :: sbwuv
     logical :: sbwuuvv
+    logical :: sedparout
     logical :: ssuuvv
     logical :: sswuv
     logical :: sswuuvv
@@ -587,42 +589,49 @@ type trapar_type
     !
     ! integers
     !
-    integer                                 :: max_integers_settle !  Maximum number of integers which can be delivered to shared library
-    integer                                 :: max_reals_settle    !  Maximum number of reals which can be delivered to shared library
-    integer                                 :: max_strings_settle  !  Maximum number of character strings which can be delivered to shared library
+    integer                                    :: max_integers_settle !  Maximum number of integers which can be delivered to shared library
+    integer                                    :: max_reals_settle    !  Maximum number of reals which can be delivered to shared library
+    integer                                    :: max_strings_settle  !  Maximum number of character strings which can be delivered to shared library
     !
-    integer                                 :: max_integers !  Maximum number of integers which can be delivered to shared library
-    integer                                 :: max_reals    !  Maximum number of reals which can be delivered to shared library
-    integer                                 :: max_strings  !  Maximum number of character strings which can be delivered to shared library
-    integer                                 :: npar         !  Maximum number of sediment transport formula parameters
-    integer                                 :: nparfld      !  Number of sediment transport formula 2D field parameters
+    integer                                    :: max_integers        !  Maximum number of integers which can be delivered to shared library
+    integer                                    :: max_reals           !  Maximum number of reals which can be delivered to shared library
+    integer                                    :: max_strings         !  Maximum number of character strings which can be delivered to shared library
+    integer                                    :: npar                !  Maximum number of sediment transport formula parameters
+    integer                                    :: nparfld             !  Number of sediment transport formula 2D field parameters
+    integer                                    :: nouttot             !  Total number of output parameters (sum of noutpar)
     !
     ! pointers
     !
-    character(256), dimension(:)  , pointer :: dll_function_settle !  Name of subroutine in DLL that calculates the Settling velocity
-    character(256), dimension(:)  , pointer :: dll_name_settle     !  Name of DLL that contains the Settling velocity subroutine
-    integer(pntrsize), dimension(:)  , pointer :: dll_handle_settle   !  Handle of DLL that contains the Settling velocity subroutine
-    integer       , dimension(:)  , pointer :: dll_integers_settle !  Input integer array to shared library
-    real(hp)      , dimension(:)  , pointer :: dll_reals_settle    !  Input real array to shared library
-    character(256), dimension(:)  , pointer :: dll_strings_settle  !  Input character string array to shared library
-    character(256), dimension(:)  , pointer :: dll_usrfil_settle   !  Name of input file to be passed to subroutine in DLL
-    integer       , dimension(:)  , pointer :: iform_settle        !  Number of sediment settling velocity formula
-    real(fp)      , dimension(:,:), pointer :: par_settle          !  Settling velocity formula parameters
+    integer          , dimension(:)  , pointer :: noutpar             !  (lsedtot) Number of output parameters per sediment fraction i1
+    integer          , dimension(:,:), pointer :: ioutpar             !  (max, lsedtot) Index of output parameter i2 of sediment fraction i1 into XX array
+    real(fp)         , dimension(:,:), pointer :: outpar              !  (noutpar,nmmax) Sediment transport parameters spatially varying
+    character(256)   , dimension(:,:), pointer :: outpar_name         !  (max, lsedtot) Name of sediment transport parameter i2 of sediment fraction i1
+    character(256)   , dimension(:,:), pointer :: outpar_longname     !  (max, lsedtot) Long name of sediment transport parameter i2 of sediment fraction i1
     !
-    character(256), dimension(:)  , pointer :: dll_function !  Name of subroutine in DLL that calculates the Sediment transport formula
-    character(256), dimension(:)  , pointer :: dll_name     !  Name of DLL that calculates the Sediment transport formula
-    integer(pntrsize), dimension(:)  , pointer :: dll_handle   !  DLL containing Sediment transport formula
-    integer       , dimension(:)  , pointer :: dll_integers !  Input integer array to shared library
-    real(hp)      , dimension(:)  , pointer :: dll_reals    !  Input real array to shared library
-    character(256), dimension(:)  , pointer :: dll_strings  !  Input character string array to shared library
-    character(256), dimension(:)  , pointer :: dll_usrfil   !  Name of input file to be passed to subroutine in DLL
-    character(256), dimension(:)  , pointer :: flstrn       !  Sediment transport formula file names
-    integer       , dimension(:)  , pointer :: iform        !  Sediment transport formula number
-    character(256), dimension(:)  , pointer :: name         !  Sediment transport formula names
-    real(fp)      , dimension(:,:), pointer :: par          !  Sediment transport formula parameters
-    integer       , dimension(:,:), pointer :: iparfld      !  Index of parameter in parfld array (0 if constant)
-    real(fp)      , dimension(:,:), pointer :: parfld       !  Sediment transport formula 2D field parameters
-    character(256), dimension(:,:), pointer :: parfil       !  Sediment transport formula file names
+    character(256)   , dimension(:)  , pointer :: dll_function_settle !  Name of subroutine in DLL that calculates the Settling velocity
+    character(256)   , dimension(:)  , pointer :: dll_name_settle     !  Name of DLL that contains the Settling velocity subroutine
+    integer(pntrsize), dimension(:)  , pointer :: dll_handle_settle   !  Handle of DLL that contains the Settling velocity subroutine
+    integer          , dimension(:)  , pointer :: dll_integers_settle !  Input integer array to shared library
+    real(hp)         , dimension(:)  , pointer :: dll_reals_settle    !  Input real array to shared library
+    character(256)   , dimension(:)  , pointer :: dll_strings_settle  !  Input character string array to shared library
+    character(256)   , dimension(:)  , pointer :: dll_usrfil_settle   !  Name of input file to be passed to subroutine in DLL
+    integer          , dimension(:)  , pointer :: iform_settle        !  Number of sediment settling velocity formula
+    real(fp)         , dimension(:,:), pointer :: par_settle          !  Settling velocity formula parameters
+    !
+    character(256)   , dimension(:)  , pointer :: dll_function        !  Name of subroutine in DLL that calculates the Sediment transport formula
+    character(256)   , dimension(:)  , pointer :: dll_name            !  Name of DLL that calculates the Sediment transport formula
+    integer(pntrsize), dimension(:)  , pointer :: dll_handle          !  DLL containing Sediment transport formula
+    integer          , dimension(:)  , pointer :: dll_integers        !  Input integer array to shared library
+    real(hp)         , dimension(:)  , pointer :: dll_reals           !  Input real array to shared library
+    character(256)   , dimension(:)  , pointer :: dll_strings         !  Input character string array to shared library
+    character(256)   , dimension(:)  , pointer :: dll_usrfil          !  Name of input file to be passed to subroutine in DLL
+    character(256)   , dimension(:)  , pointer :: flstrn              !  Sediment transport formula file names
+    integer          , dimension(:)  , pointer :: iform               !  Sediment transport formula number
+    character(256)   , dimension(:)  , pointer :: name                !  Sediment transport formula names
+    real(fp)         , dimension(:,:), pointer :: par                 !  Sediment transport formula parameters
+    integer          , dimension(:,:), pointer :: iparfld             !  Index of parameter in parfld array (0 if constant)
+    real(fp)         , dimension(:,:), pointer :: parfld              !  Sediment transport formula 2D field parameters
+    character(256)   , dimension(:,:), pointer :: parfil              !  Sediment transport formula file names
     ! 
     ! logicals
     !
@@ -1465,43 +1474,45 @@ subroutine nullmorpar(morpar)
     morpar%moroutput%avgintv      = -999d0
     morpar%moroutput%morstats     = .false.
     !
-    morpar%moroutput%aks         = .false.
-    morpar%moroutput%cumavg      = .false.
-    morpar%moroutput%dg          = .false.
-    morpar%moroutput%dgsd        = .false.
-    morpar%moroutput%dm          = .false.
-    morpar%moroutput%dmsedcum     = .false.
-    morpar%moroutput%dpbedlyr     = .true.
-    morpar%moroutput%dzduuvv     = .false.
-    morpar%moroutput%fixfac      = .false.
-    morpar%moroutput%hidexp      = .false.
-    morpar%moroutput%frac        = .false.
-    morpar%moroutput%lyrfrac      = .true.
-    morpar%moroutput%msed         = .true.
-    morpar%moroutput%mudfrac     = .false.
-    morpar%moroutput%percentiles  = .false.
-    morpar%moroutput%poros        = .true.
-    morpar%moroutput%rca          = .true.
-    morpar%moroutput%rsedeq       = .true.
-    morpar%moroutput%sandfrac    = .false.
-    morpar%moroutput%sbuuvv       = .true.
-    morpar%moroutput%sbcuv       = .false.
-    morpar%moroutput%sscuv       = .false.
-    morpar%moroutput%sbcuuvv     = .false.
-    morpar%moroutput%ssuuvv       = .true.
-    morpar%moroutput%sbwuv       = .false.
-    morpar%moroutput%sbwuuvv     = .false.
-    morpar%moroutput%sswuv       = .false.
-    morpar%moroutput%sswuuvv     = .false.
-    morpar%moroutput%suvcor      = .false.
-    morpar%moroutput%sourcesink  = .false.
-    morpar%moroutput%taurat      = .false.
-    morpar%moroutput%umod        = .false.
-    morpar%moroutput%ustar       = .false.
-    morpar%moroutput%uuuvvv      = .false.
-    morpar%moroutput%ws           = .true.
-    morpar%moroutput%zumod        = .false.
-    morpar%moroutput%rawtransports= .false.
+    morpar%moroutput%aks           = .false.
+    morpar%moroutput%cumavg        = .false.
+    morpar%moroutput%dg            = .false.
+    morpar%moroutput%dgsd          = .false.
+    morpar%moroutput%dm            = .false.
+    morpar%moroutput%dmsedcum      = .false.
+    morpar%moroutput%dpbedlyr      = .true.
+    morpar%moroutput%dzduuvv       = .false.
+    morpar%moroutput%fixfac        = .false.
+    morpar%moroutput%hidexp        = .false.
+    morpar%moroutput%frac          = .false.
+    morpar%moroutput%lyrfrac       = .true.
+    morpar%moroutput%msed          = .true.
+    morpar%moroutput%mudfrac       = .false.
+    morpar%moroutput%orbvel        = .false.
+    morpar%moroutput%percentiles   = .false.
+    morpar%moroutput%poros         = .true.
+    morpar%moroutput%rca           = .true.
+    morpar%moroutput%rsedeq        = .true.
+    morpar%moroutput%sandfrac      = .false.
+    morpar%moroutput%sedparout     = .false.
+    morpar%moroutput%sbuuvv        = .true.
+    morpar%moroutput%sbcuv         = .false.
+    morpar%moroutput%sscuv         = .false.
+    morpar%moroutput%sbcuuvv       = .false.
+    morpar%moroutput%ssuuvv        = .true.
+    morpar%moroutput%sbwuv         = .false.
+    morpar%moroutput%sbwuuvv       = .false.
+    morpar%moroutput%sswuv         = .false.
+    morpar%moroutput%sswuuvv       = .false.
+    morpar%moroutput%suvcor        = .false.
+    morpar%moroutput%sourcesink    = .false.
+    morpar%moroutput%taurat        = .false.
+    morpar%moroutput%umod          = .false.
+    morpar%moroutput%ustar         = .false.
+    morpar%moroutput%uuuvvv        = .false.
+    morpar%moroutput%ws            = .true.
+    morpar%moroutput%zumod         = .false.
+    morpar%moroutput%rawtransports = .false.
     !
     morpar%mornum%upwindbedload            = .true.
     morpar%mornum%laterallyaveragedbedload = .false.
