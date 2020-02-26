@@ -70,7 +70,7 @@ module swan_flow_grid_maps
        integer, dimension(:,:), pointer         :: kcs             ! mask-array inactive points
        integer, dimension(:,:), pointer         :: covered         ! mask-array points covered by "other" program
        integer, dimension(:)  , pointer         :: numenclptsppart ! number of enclosure points per enclosure part
-       real                                     :: xymiss          ! missing value
+       real(kind=hp)                            :: xymiss          ! missing value
        real(kind=hp), dimension(:,:), pointer   :: x               ! x-coordinates cell center
        real(kind=hp), dimension(:,:), pointer   :: y               ! y-coordinates cell center
        real(kind=hp), dimension(:), pointer     :: bndx            ! x-coordinates boundary link corners

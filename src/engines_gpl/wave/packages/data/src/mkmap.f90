@@ -55,7 +55,7 @@ subroutine mkmap(code      ,x1        ,y1        ,m1        ,n1        , &
     integer , dimension(n2)                  :: nrin
     integer , dimension(n2)                  :: nrx
     integer , dimension(n2)                  :: nry
-    real                       , intent(in)  :: xymiss  ! missing value in grid 1
+    real(hp)                   , intent(in)  :: xymiss  ! missing value in grid 1
     real    , dimension(4 , n2)              :: w       ! Remains single precision!
     real(hp), dimension(m1, n1), intent(in)  :: x1
     real(hp), dimension(m1, n1), intent(in)  :: y1

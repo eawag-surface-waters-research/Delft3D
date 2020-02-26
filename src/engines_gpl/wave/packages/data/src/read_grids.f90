@@ -60,7 +60,7 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
     integer, dimension(:,:), pointer              :: covered !  0: target point is not covered by source grid
                                                              !  1: target point is covered by   valid points of source grid
                                                              ! -1: target point is covered by invalid points of source grid
-    real                            , intent(out) :: xymiss
+    real(kind=hp)                   , intent(out) :: xymiss
     real   , dimension(:,:), pointer              :: alfas
     real   , dimension(:,:), pointer              :: guu
     real   , dimension(:,:), pointer              :: gvv
@@ -135,7 +135,7 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
     ! missing value is currently not available in the com-file
     ! default is zero
     !
-    xymiss = 0.0
+    xymiss = 0.0_hp
     !
     celidt = 1
     call filldm(elmdms    ,1         ,1         ,1         ,0         , &
@@ -365,7 +365,7 @@ subroutine read_grd(filnam    ,xb     ,yb   ,codb ,covered, mmax  ,nmax ,sferic 
     character(232)                   , intent(in)  :: filnam
     integer                          , intent(out) :: mmax
     integer                          , intent(out) :: nmax
-    real                             , intent(out) :: xymiss
+    real(hp)                         , intent(out) :: xymiss
     integer , dimension(:,:), pointer              :: codb
     integer , dimension(:,:), pointer              :: covered
     real(hp), dimension(:,:), pointer              :: xb
@@ -395,7 +395,7 @@ subroutine read_grd(filnam    ,xb     ,yb   ,codb ,covered, mmax  ,nmax ,sferic 
 !
     ! Default value for missing value: zero
     !
-    xymiss = 0.0
+    xymiss = 0.0_hp
     sferic = .false.
     open (newunit=irgf, file = filnam, form = 'formatted', status = 'old')
     !
@@ -591,7 +591,7 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                          , intent(out) :: kmax
     integer                          , intent(out) :: numenclpts
     integer                          , intent(out) :: numenclparts
-    real                             , intent(out) :: xymiss
+    real(hp)                         , intent(out) :: xymiss
     integer , dimension(:,:), pointer              :: codb
     integer , dimension(:,:), pointer              :: covered
     integer , dimension(:),   pointer              :: numenclptsppart
@@ -697,7 +697,7 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     ! Default value for missing value: zero
     !
     nmax   = 1   ! Unstructured grid: use only mmax to count the elements
-    xymiss = 0.0
+    xymiss = 0.0_hp
     !
     ierror = nf90_open(filename, NF90_NOWRITE, idfile); call nc_check_err(ierror, "opening file", filename)
     if (ierror /= 0) then

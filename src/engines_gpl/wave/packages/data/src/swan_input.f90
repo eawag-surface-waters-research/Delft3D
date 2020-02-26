@@ -3827,6 +3827,7 @@ subroutine write_swan_inp (wavedata, calccount, &
                 & cdd       ,css       ,sferic    ,sr     )
    use properties
    use read_grids
+   use swan_flow_grid_maps
    use wave_data
    !
    implicit none
@@ -4142,8 +4143,9 @@ subroutine write_swan_inp (wavedata, calccount, &
     line(1:6)  = 'CGRID '
     line(7:11) = 'CURV '
     write (line(12:21), '(2(I4,1X))') dom%mxc, dom%myc
-    line(31:48) = 'EXCEPT  0.0    0.0'
-    line(57:58) = ' _'
+    ! Write missing values in exactly the same format as used when writing the grid
+    write (line(22:80), '(A,2(E25.17,1X))') 'EXCEPT ', swan_grids(inest)%xymiss, swan_grids(inest)%xymiss
+    line(82:83) = ' _'
     write (luninp, '(1X,A)') line
     line        = ' '
     if (cs==1) then
