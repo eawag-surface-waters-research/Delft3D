@@ -6432,6 +6432,7 @@ module m_meteo
    integer, target :: item_airtemperature                                    !< 'airtemperature' quantity
    integer, target :: item_cloudiness                                        !< 'cloudiness' quantity
    integer, target :: item_solarradiation                                    !< 'solarradiation' quantity
+   integer, target :: item_longwaveradiation                                 !< 'longwaveradiation' quantity
    
    integer, target :: item_discharge_salinity_temperature_sorsin             !< Unique Item id of the ext-file's 'discharge_salinity_temperature_sorsin' quantity
    integer, target :: item_hrms                                              !< Unique Item id of the ext-file's 'item_hrms' quantity
@@ -6518,6 +6519,7 @@ module m_meteo
       item_airtemperature                        = ec_undef_int
       item_cloudiness                            = ec_undef_int
       item_solarradiation                        = ec_undef_int
+      item_longwaveradiation                     = ec_undef_int
       item_hac_humidity                          = ec_undef_int
       item_hac_airtemperature                    = ec_undef_int
       item_hac_cloudiness                        = ec_undef_int
@@ -6871,6 +6873,9 @@ module m_meteo
          case ('solarradiation')
             itemPtr1 => item_solarradiation
             dataPtr1 => qrad
+         case ('longwaveradiation')
+            itemPtr1 => item_longwaveradiation
+            dataPtr1 => longwave
          case ('nudge_salinity_temperature')
             itemPtr2 => item_nudge_sal
             dataPtr2 => nudge_sal 
@@ -7461,7 +7466,7 @@ module m_meteo
          ! Each qhbnd polytim file replaces exactly one element in the target data array.
          ! Converter will put qh value in target_array(n_qhbnd)
       case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
-            'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy','humidity','airtemperature','cloudiness','solarradiation' )
+            'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy','humidity','airtemperature','cloudiness','solarradiation', 'longwaveradiation' )
          if (present(srcmaskfile)) then 
             if (ec_filetype == provFile_arcinfo .or. ec_filetype == provFile_curvi) then
                if (.not.ecParseARCinfoMask(srcmaskfile, srcmask, fileReaderPtr)) then
@@ -7979,6 +7984,8 @@ module m_meteo
             else
                sourceItemName = 'sw_radiation_flux'
             end if
+         case ('longwaveradiation')
+            sourceItemName = 'long_wave_radiation'
          case ('nudge_salinity_temperature')
             if (ec_filetype == provFile_netcdf) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_potential_temperature')

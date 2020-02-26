@@ -1134,6 +1134,7 @@ double precision, allocatable, target :: tair(:)     !< air temperature       (d
 double precision, allocatable, target :: rhum(:)     !< air relative humidity (%)
 double precision, allocatable, target :: clou(:)     !< air cloudiness        (%)
 double precision, allocatable, target :: qrad(:)     !< solar radiation       (W/m2)
+double precision, allocatable, target :: longwave(:) !< long wave radiation   (W/m2)
 double precision, allocatable         :: heatsrc (:) !< resulting 2D or 3D heat source per cell (Km3/s)
 double precision, allocatable         :: heatsrc0(:) !< resulting 2D or 3D heat source per cell, only set at timeuser (Km3/s)
 double precision, allocatable         :: salsrc (:)  !< salinity source per cell (pptm3/s)
@@ -1154,6 +1155,7 @@ integer                           :: jatair              !< use air temperature 
 integer                           :: jarhum              !< use relative humidity yes or no
 integer                           :: jaclou              !< use cloudiness        yes or no
 integer                           :: jasol = 0           !< use 1 = use solrad, 2 = use cloudiness
+integer                           :: jalongwave = 0      !< >0 longwaveradation from file; otherwise internal formulation
 integer                           :: jaheat_eachstep = 0 !< if 1, do it each step, else in externalforcings (default)
 integer                           :: jaQinext            !< use Qin externally provided yes or no
 integer                           :: jaqin               !< use qin , sum of all in fluxes
@@ -2442,6 +2444,7 @@ end subroutine default_turbulence
  logical                           :: btempforcingtypC = .false.  !< Forcing parameter Cloudiness given as a separate field or not
  logical                           :: btempforcingtypH = .false.  !< Forcing parameter Humidity given as a separate field or not
  logical                           :: btempforcingtypS = .false.  !< Forcing parameter Solarradiation given as a separate field or not
+ logical                           :: btempforcingtypL = .false.  !< Forcing parameter Long wave radiation given as a separate field or not
 
  integer                           :: jarhoxu           !< rho effects in momentum, 0=no, 1=in horizontal adv, 2=+ in vertical adv, 3 = + in pressure term
 

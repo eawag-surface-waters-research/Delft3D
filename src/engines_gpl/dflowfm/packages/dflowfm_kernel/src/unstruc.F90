@@ -17117,6 +17117,10 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
            success = success .and. ec_gettimespacevalue(ecInstancePtr, item_cloudiness, irefdate, tzone, tunit, tim)
            foundtempforcing = .true.
        endif
+       if (btempforcingtypL) then
+           success = success .and. ec_gettimespacevalue(ecInstancePtr, item_longwaveradiation, irefdate, tzone, tunit, tim)
+           foundtempforcing = .true.
+       endif
 
        if (.not. foundtempforcing ) then
             call mess(LEVEL_WARN,'No humidity, airtemperature, cloudiness and solar radiation forcing found, setting temperature model [physics:Temperature] = 1 (Only transport)')
@@ -26751,6 +26755,7 @@ endif
        allocate ( qrad(ndx) , stat = ierr)
        call aerr('qrad(ndx)', ierr, ndx)
        qrad = 0d0
+       if ( allocated(longwave) ) deallocate(longwave)
        if (Soiltempthick > 0) then
           if ( allocated (tbed) )  deallocate (tbed)
           allocate ( tbed(ndx) , stat = ierr)
@@ -42485,8 +42490,9 @@ if (mext > 0) then
         else if (qid == 'humidity') then
 
            if (.not. allocated(rhum) ) then
-              allocate ( rhum(ndx) , stat=ierr)  ; rhum = 0d0
+              allocate ( rhum(ndx) , stat=ierr)
               call aerr('rhum(ndx)', ierr, ndx)
+              rhum = 0d0
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then
@@ -42496,8 +42502,9 @@ if (mext > 0) then
         else if (qid == 'cloudiness') then
 
            if (.not. allocated(clou) ) then
-              allocate ( clou(ndx) , stat=ierr)  ; clou = 0d0
+              allocate ( clou(ndx) , stat=ierr)
               call aerr('clou(ndx)', ierr, ndx)
+              clou = 0d0
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then
@@ -42507,19 +42514,32 @@ if (mext > 0) then
          else if (qid == 'solarradiation') then
 
            if (.not. allocated(qrad) ) then
-              allocate ( qrad(ndx) , stat=ierr)  ; qrad = 0d0
+              allocate ( qrad(ndx) , stat=ierr)
               call aerr('qrad(ndx)', ierr, ndx)
+              qrad = 0d0
            endif
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
            if (success) then
               jasol = 1 ;  btempforcingtypS = .true.
            endif
 
+        else if (qid == 'longwaveradiation') then
+           if (.not. allocated(longwave) ) then
+              allocate ( longwave(ndx) , stat=ierr)
+              call aerr('longwave(ndx)', ierr, ndx)
+              longwave = 0d0
+           endif
+           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
+           if (success) then
+              jalongwave = 1 ;  btempforcingtypL = .true.
+           endif
+
         else if (qid(1:8) == 'rainfall' ) then
 
            if (.not. allocated(rain) ) then
-              allocate ( rain(ndx) , stat=ierr) ; rain = 0d0
+              allocate ( rain(ndx) , stat=ierr)
               call aerr('rain(ndx)', ierr, ndx)
+              rain = 0d0
            endif
 
            ! TODO: AvD: consider adding mask to all quantities.
@@ -47156,8 +47176,12 @@ else if (jatem == 5) then
    Qcon   = -ch*rcpa*windn*(twatn-tairn)                          ! heat loss of water by convection eq.(A.23); Stanton number is ch:
 
    twatK  =  twatn + tkelvn
-   Qlong  = -em*stf*(twatK**4d0)*(0.39d0-0.05d0*sqrt(pvtahu))     ! heat loss by effective infrared back radiation hl, restricted by
-   Qlong  =  Qlong*(1d0 - 0.6d0*cloun**2 )                        !  presence of clouds and water vapour in air; eq.(A.22):
+   if (jalongwave) then
+      Qlong = em * (longwave(n) - stf*(twatK**4))                   ! difference between prescribed long wave downward flux and calculated upward flux
+   else
+      Qlong  = -em*stf*(twatK**4)*(0.39d0-0.05d0*sqrt(pvtahu))       ! heat loss by effective infrared back radiation hl, restricted by
+      Qlong  =  Qlong*(1d0 - 0.6d0*cloun**2 )                        !  presence of clouds and water vapour in air; eq.(A.22):
+   endif
 
    Qfree  = 0d0 ; Qfrcon = 0d0 ; Qfreva = 0d0                     ! Contribution by free convection:
    rhoa0  = ((presn-pvtwmx)/rdry + pvtwmx/rvap) / (Twatn + Tkelvn)
