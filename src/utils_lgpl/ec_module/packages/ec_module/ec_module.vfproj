@@ -127,9 +127,13 @@
 		<File RelativePath="src\ec_module.f90"/>
 		<File RelativePath=".\src\ec_netcdf_timeseries.f90"/>
 		<File RelativePath="src\ec_parameters.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\ec_provider.F90">
 			<FileConfiguration Name="Debug|Win32">
