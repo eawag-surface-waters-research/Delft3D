@@ -1242,7 +1242,7 @@ end module m_wind
  double precision                  :: rcpa            !
  double precision                  :: cpw             ! Specific heat water [J/kg/K]
  double precision                  :: rcpi            ! m3K/J
- double precision                  :: stf             ! Stefan's constant =5.67e-8 [W/m^2/K^4]
+ double precision                  :: stf             ! Stefan's constant =5.6705085e-8 [W/m^2/K^4]
  double precision                  :: emstf           ! Em*Stf [W/m^2/K^4]
  double precision                  :: tkelvn          ! Absolute zero
 
@@ -1250,7 +1250,7 @@ end module m_wind
  double precision                  :: QEVAav          ! Evaporative heat loss     (W/m2)
  double precision                  :: QCONav          ! Convective heat loss      (W/m2)
  double precision                  :: QLongav         ! Long wave back radiation  (W/m2)
- double precision                  :: Qfreeav           ! Free conv + evap heat loss (W/m2)
+ double precision                  :: Qfreeav         ! Free conv + evap heat loss (W/m2)
  double precision                  :: Qfrconav        ! Free convection heat loss (W/m2)
  double precision                  :: Qfrevaav        ! Free evaporation heat loss (W/m2)
 
@@ -1279,7 +1279,7 @@ contains
 subroutine default_heatfluxes()
 use m_physcoef, only : rhomean
 use m_wind    , only : rhoair
-                                      !< Heat flux model comnstants
+                                      !< Heat flux model constants
 albedo  = 0.06d0                      !< reflection coefficient of water () at average incidence angle of 60 deg,
                                       !< (albedo is .025 at angle 0 deg, 0.13 at angle 70 deg)
 em      = 0.985d0                     !< Emissivity ()
@@ -1287,7 +1287,7 @@ cpa     = 1004d0                      !< Specific heat air   [J/kg/K]
 rcpa    = rhoair*cpa                  !
 cpw     = 3986d0                      !< Specific heat water [J/kg/K]
 rcpi    = 1d0/(rhomean*cpw)           !< [m3K/J] or mKs2/kg
-stf     = 5.67d-8                     !< Stefan's constant =5.67e-8 [W/m^2/K^4]
+stf     = 5.6705085d-8                !< Stefan's constant =5.6705085e-8 [W/m^2/K^4] (see 19308-part-iv-physical-processes.pdf from ECMWF)
 emstf   = em*stf
 tkelvn  = 273.15d0                    !< Absolute 0
 
