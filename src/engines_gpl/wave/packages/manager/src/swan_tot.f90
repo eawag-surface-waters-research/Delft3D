@@ -304,7 +304,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
          write(*,'(a)') '  Write SWAN input'
          dom%curlif = swan_grids(i_swan)%tmp_name
 
-         call write_swan_input (swan_run, itide, wavedata%time%calccount, i_swan, wavedata)
+         call write_swan_input (swan_run, itide, wavedata%time%calccount, i_swan, swan_grids(i_swan)%xymiss, wavedata)
 
          ! The following commented code was used for a special version
          ! - to be implemented in a more constructive way

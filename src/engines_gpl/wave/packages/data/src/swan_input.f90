@@ -3778,7 +3778,8 @@ end subroutine read_swan_mdw
 !
 !
 !==============================================================================
-subroutine write_swan_input (sr, itide, calccount, inest, wavedata)
+subroutine write_swan_input (sr, itide, calccount, inest, xymiss, wavedata)
+    use precision_basics
     !
     implicit none
     !
@@ -3787,6 +3788,7 @@ subroutine write_swan_input (sr, itide, calccount, inest, wavedata)
     integer                           :: calccount
     real                              :: wdir
     real                              :: wvel
+    real(hp)                          :: xymiss
     character(37)                     :: curlif
     type(swan)                        :: sr
     type(wave_data_type)              :: wavedata
@@ -3806,7 +3808,7 @@ subroutine write_swan_input (sr, itide, calccount, inest, wavedata)
                     & sr%dyw       ,sr%trane  ,sr%f       , &
                     & sr%ogam      ,sr%obet   ,sr%xpob    ,sr%ypob   ,sr%nlin   , &
                     & sr%varwin    ,sr%varfri ,sr%ncurv   ,sr%ncrv   ,sr%nclin  , &
-                    & sr%xpcu      ,sr%ypcu   ,curlif     ,sr%casl   , &
+                    & sr%xpcu      ,sr%ypcu   ,xymiss     ,curlif    ,sr%casl   , &
                     & sr%cdd       ,sr%css    ,sr%sferic  ,sr     )
 end subroutine write_swan_input
 !
@@ -3823,11 +3825,11 @@ subroutine write_swan_inp (wavedata, calccount, &
                 & dyw       ,trane     ,f         , &
                 & ogam      ,obet      ,xpob      ,ypob      ,nlin      , &
                 & varwin    ,varfri    ,ncurv     ,ncrv      ,nclin     , &
-                & xpcu      ,ypcu      ,curlif    ,casl      , &
+                & xpcu      ,ypcu      ,xymiss    ,curlif    ,casl      , &
                 & cdd       ,css       ,sferic    ,sr     )
+   use precision_basics
    use properties
    use read_grids
-   use swan_flow_grid_maps
    use wave_data
    !
    implicit none
@@ -3875,6 +3877,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     real         , dimension(nobst), intent(in)  :: trane
     real         , dimension(nscr) , intent(in)  :: xpob
     real         , dimension(nscr) , intent(in)  :: ypob
+    real(hp)                       , intent(in)  :: xymiss
     character(16)                  , intent(in)  :: prname
     character(*)                   , intent(in)  :: casl
     character(37)                  , intent(in)  :: curlif
@@ -4144,7 +4147,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     line(7:11) = 'CURV '
     write (line(12:21), '(2(I4,1X))') dom%mxc, dom%myc
     ! Write missing values in exactly the same format as used when writing the grid
-    write (line(22:80), '(A,2(E25.17,1X))') 'EXCEPT ', swan_grids(inest)%xymiss, swan_grids(inest)%xymiss
+    write (line(22:80), '(A,2(E25.17,1X))') 'EXCEPT ', xymiss, xymiss
     line(82:83) = ' _'
     write (luninp, '(1X,A)') line
     line        = ' '
