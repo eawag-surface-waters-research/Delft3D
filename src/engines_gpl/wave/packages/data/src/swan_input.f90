@@ -4555,7 +4555,7 @@ subroutine write_swan_inp (wavedata, calccount, &
              line(6:) = 'SEGM'
              if (bnd%bndtyp == 3) then
                 line(11:) = 'XY'
-                write (line(14:), '(4(F12.3,2X))')         &
+                write (line(14:), '(4(F16.7,X))')          &
                      & bnd%bndcrd_xy(1), bnd%bndcrd_xy(2), &
                      & bnd%bndcrd_xy(3), bnd%bndcrd_xy(4)
              elseif (bnd%bndtyp == 2) then
@@ -4564,7 +4564,7 @@ subroutine write_swan_inp (wavedata, calccount, &
                      & bnd%bndcrd_mn(1), bnd%bndcrd_mn(2), &
                      & bnd%bndcrd_mn(3), bnd%bndcrd_mn(4)
              endif
-             line(72:)  = '&'
+             line(83:)  = '&'
              write (luninp, '(1X,A)') line
              rindx = rindx + 4
           endif
