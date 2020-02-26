@@ -15789,6 +15789,7 @@ end if
          endif
      else ! Restart from *_yyyymmdd_hhmmss_rst.nc or from *_map.nc
        call read_restart_from_map(md_restartfile, iresult) !TODO:JZ modify the name of this subroutine, since it also restarts from rst files.
+       call setbobs()
        if (jampi == 1) then
           ! globally reduce the error
           call reduce_error(iresult)
