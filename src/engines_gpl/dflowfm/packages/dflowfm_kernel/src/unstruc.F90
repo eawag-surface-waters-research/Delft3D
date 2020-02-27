@@ -47177,7 +47177,7 @@ else if (jatem == 5) then
    Qcon   = -ch*rcpa*windn*(twatn-tairn)                          ! heat loss of water by convection eq.(A.23); Stanton number is ch:
 
    twatK  =  twatn + tkelvn
-   if (jalongwave) then
+   if (jalongwave > 0) then
       Qlong = em * (longwave(n) - stf*(twatK**4))                   ! difference between prescribed long wave downward flux and calculated upward flux
    else
       Qlong  = -em*stf*(twatK**4)*(0.39d0-0.05d0*sqrt(pvtahu))       ! heat loss by effective infrared back radiation hl, restricted by
