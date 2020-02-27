@@ -287,7 +287,6 @@ subroutine flow_run_usertimestep(key, iresult)                   ! do computatio
 888 continue
 end subroutine flow_run_usertimestep
 
-
 !> Finalizes the current user-timestep (monitoring and I/O).
 !!
 !! Should be called directly after a flow_run_usertimestep.
@@ -307,6 +306,7 @@ subroutine flow_finalize_usertimestep(iresult)
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
 
    double precision :: tem_dif
+   logical, external :: flow_trachy_needs_update
 
    iresult = DFM_GENERICERROR
 
@@ -346,24 +346,24 @@ subroutine flow_finalize_usertimestep(iresult)
       if (ti_his > 0) then
          if (comparereal(time1, time_his, eps10)>=0) then
             call updateValuesOnObservationStations()
-              if (jampi == 1) then
-                 call  updateValuesOnCrossSections_mpi(time1)
-                 call reduce_particles
-              endif
-              if (jahisbal > 0) then ! Update WaterBalances etc.
-                 call updateBalance()
-              endif
+            if (jampi == 1) then
+               call  updateValuesOnCrossSections_mpi(time1)
+               call reduce_particles
+            endif
+            if (jahisbal > 0) then ! Update WaterBalances etc.
+               call updateBalance()
+            endif
             if ( jacheckmonitor == 1 ) then
-!                compute "checkerboard" monitor
-                 call comp_checkmonitor()
+!              compute "checkerboard" monitor
+               call comp_checkmonitor()
+            endif
          endif
-      endif
       endif
 
 !       in case of water level or discharge dependent roughness,
 !       the observations and cross sections must be up todate each DtTrt s (if they are actually used)
       if (jatrt > 0) then
-         if (comparereal(time1, dt_trach, eps10)>=0) then
+         if (flow_trachy_needs_update(time1)) then
             if (trachy_fl%gen%ntrtobs > 0) then
                call updateValuesOnObservationStations()
             endif
@@ -11856,6 +11856,20 @@ subroutine flow_trachyinit()
 
 end subroutine flow_trachyinit
 
+!> helper function to make sure that the check for updating cross sections is in line with the flow_trachyupdate
+logical function flow_trachy_needs_update(time1)
+   use precision_basics, only : hp
+   use m_flowtimes,      only : tstart_user, dt_user
+   use m_trachy,         only : itimtt
+
+   real(kind=hp), intent(in) :: time1  !< current time
+
+   real(kind=hp) :: ntrtsteps, dt_trachy
+
+   dt_trachy = dt_user * real(itimtt, hp)
+   ntrtsteps = (time1 - tstart_user) / dt_trachy
+   flow_trachy_needs_update = (abs(ntrtsteps - floor(ntrtsteps)) < 1d-6 )
+end function flow_trachy_needs_update
 
 subroutine flow_trachyupdate()
     use unstruc_messages
@@ -16964,12 +16978,11 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    integer,          intent(out)   :: iresult !< Integer error status: DFM_NOERR==0 if succesful.
 
    double precision :: timmin
-   double precision :: ntrtsteps            !< variable to determine if trachytopes should be updated
    double precision :: tem_dif
    integer          :: k, L, i, k1, k2, iFirst, iLast
    logical          :: l_set_frcu_mor = .false.
 
-   logical, external :: flow_initwaveforcings_runtime
+   logical, external :: flow_initwaveforcings_runtime, flow_trachy_needs_update
    character(len=255) :: tmpstr
    type(tEcItem), pointer :: itemPtr !< Item under consideration, for right order of wind items
 
@@ -17330,8 +17343,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    endif
 
    if (jatrt == 1) then
-       ntrtsteps = (time1 - tstart_user)/dt_max/itimtt
-       if (abs(ntrtsteps - floor(ntrtsteps)) .lt. 1e-6 ) then
+       if (flow_trachy_needs_update(time1)) then
            call flow_trachyupdate()                            ! perform a trachy update step
            l_set_frcu_mor = .true.
        end if
