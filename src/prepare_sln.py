@@ -11,10 +11,6 @@ if sys.version_info<(3,0,0):
    # - open files with encoding='utf-8' (Both Python 2.x and 3.x)
    # - Do not use str(line) on lines read from file
    from codecs import open as open
-   from Tkinter import *
-else:
-   from tkinter import *
-
 
 #
 # This script can be used to create/convert the VisualStudio solution and project files
@@ -746,6 +742,10 @@ if __name__ == "__main__":
     # Both vs and ifort defined via command line arguments: do_work
     # Else: Create GUI to select them
     if vs == -999 or ifort == -999:
+        if sys.version_info<(3,0,0):
+            from Tkinter import *
+        else:
+            from tkinter import *
         build_gui()
     else:
         do_work()
