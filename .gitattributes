@@ -2918,7 +2918,6 @@ src/prebuild-h6_buildserver.sh -text
 src/prebuild-h6_buildserver_intel16.sh -text
 src/prepare_sln.cmd -text
 src/prepare_sln.py -text
-src/prepare_sln_vs2017.py -text
 src/readcov.lst -text
 src/readcov.py -text
 src/scripts_lgpl/Makefile.am -text
