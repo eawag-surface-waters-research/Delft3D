@@ -808,7 +808,7 @@ module m_oned_functions
    do i = 1, network%storS%Count
       pSto => network%storS%stor(i)
       if (pSto%useStreetStorage .and. (.not. pSto%useTable)) then
-         groundLevel(pSto%gridPoint) = pSto%streetArea%x(1)
+         groundLevel(pSto%gridPoint-ndx2d) = pSto%streetArea%x(1)
          if (pSto%storageType == nt_Closed) then
             groundStorage(i) = 0
          else
