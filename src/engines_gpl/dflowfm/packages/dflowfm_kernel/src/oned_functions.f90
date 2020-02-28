@@ -805,10 +805,11 @@ module m_oned_functions
    end do
 
    ! set for storage nodes that have prescribed street level, i.e. storageType is reservoir or closed
-   do i = 1, network%storS%Count
-      pSto => network%storS%stor(i)
+   do istor = 1, network%storS%Count
+      i = pSto%gridPoint-ndx2d
+      pSto => network%storS%stor(istor)
       if (pSto%useStreetStorage .and. (.not. pSto%useTable)) then
-         groundLevel(pSto%gridPoint-ndx2d) = pSto%streetArea%x(1)
+         groundLevel(i) = pSto%streetArea%x(1)
          if (pSto%storageType == nt_Closed) then
             groundStorage(i) = 0
          else
