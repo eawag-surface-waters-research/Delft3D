@@ -781,7 +781,7 @@ module m_oned_functions
    type(t_network), intent(inout), target :: network
    type(t_storage), pointer               :: pSto
    type(t_administration_1d), pointer     :: adm
-   integer                                :: i, cc1, cc2
+   integer                                :: i, istor, cc1, cc2
 
    groundlevel(:) = dmiss
    groundStorage(:) = 0
