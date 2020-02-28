@@ -252,6 +252,7 @@ type moroutputtype
     logical :: ws
     logical :: zumod
     logical :: rawtransports    ! output flag for transports before upwinding/bed slope effects
+    logical :: blave
 end type moroutputtype
 
 !
@@ -1511,6 +1512,7 @@ subroutine nullmorpar(morpar)
     morpar%moroutput%ws            = .true.
     morpar%moroutput%zumod         = .false.
     morpar%moroutput%rawtransports = .false.
+    morpar%moroutput%blave         = .false.
     !
     morpar%mornum%upwindbedload            = .true.
     morpar%mornum%laterallyaveragedbedload = .false.
