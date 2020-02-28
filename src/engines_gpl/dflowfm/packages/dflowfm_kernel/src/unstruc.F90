@@ -37230,7 +37230,7 @@ end subroutine setbobs_fixedweirs
                     slopec = -hup
                 endif
              endif
-          else if (slopedrop1d) then            ! 1d droplosses, coding to avoid evaluating array iadv as long as possible,
+          else if (Drop1d) then            ! 1d droplosses, coding to avoid evaluating array iadv as long as possible,
              hup = s0(k2) - bob(2,L)
              if (hup < 0) then
                 slopec = hup
