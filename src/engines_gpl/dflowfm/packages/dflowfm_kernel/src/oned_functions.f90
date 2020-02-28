@@ -902,7 +902,7 @@ module m_oned_functions
 
    !> Compute the cumulative time when water is above ground level.
    subroutine updateTimeWetOnGround(dts)
-   use m_flowparameters, only: epshs
+   use m_flowparameters, only: epswetout
    use m_flowtimes, only: time_wetground
    use m_flow, only: s1
    use m_flowgeom,only: ndxi, ndx2d, groundLevel, groundStorage
