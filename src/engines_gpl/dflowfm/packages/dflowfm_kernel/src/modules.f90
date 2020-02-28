@@ -2792,6 +2792,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
 ! Write partition domain file
  integer                           :: japartdomain              !< Write a separate netcdf file for partition domain info., 0: no, 1: yes
 
+ double precision                  :: epswetout                 !< Waterdepth threshold, above which a cell counts as 'wet'. For output purposes.
 
 ! Write shape files
  integer                           :: jashp_crs                 !< Write a shape file for cross sections
@@ -3188,6 +3189,8 @@ subroutine default_flowparameters()
     jamapTotalInflow1d2d = 0
     jamapTotalInflowLat = 0
     jamapS1Gradient = 0
+    
+    epswetout = 0.1d0 ! 10cm waterdepth counts as 'wet'.
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     japartdomain = 1

@@ -1629,6 +1629,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_nudging', jamapnudge, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waves',jamapwav, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_DTcell',jamapdtcell, success)
+    call prop_get_double (md_ptr, 'output', 'Wrimap_wet_waterdepth_threshold', epswetout, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_time_water_on_ground', jamapTimeWetOnGround, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_freeboard', jamapFreeboard, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterdepth_on_ground', jamapDepthOnGround, success)
@@ -3352,6 +3353,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'output', 'Wrimap_DTcell', jamapdtcell, 'Write time step per cell based on CFL (1: yes, 0: no)')
     endif
 
+
+    if (writeall .or. epswetout /= 0.1d0) then
+       call prop_set(prop_ptr, 'output', 'Wrimap_wet_waterdepth_threshold', epswetout, 'Waterdepth threshold above which a grid point counts as ''wet''. Used for Wrimap_time_water_on_ground.')
+    end if
 
     if (writeall .or. jamapTimeWetOnGround /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_time_water_on_ground', jamapTimeWetOnGround, 'Write cumulative time when water is above ground level to map file, only for 1D nodes (1: yes, 0: no)')

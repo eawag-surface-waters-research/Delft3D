@@ -911,7 +911,7 @@ module m_oned_functions
    
    do i = ndx2d+1, ndxi
       ii = i - ndx2d
-      if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1 .and. s1(i) - groundLevel(ii) >= epshs) then
+      if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1 .and. s1(i) - groundLevel(ii) >= epswetout) then
          time_wetground(i) = time_wetground(i) + dts
       end if
    end do 
