@@ -2577,7 +2577,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     else
        help = 0
     endif
-    call prop_set(prop_ptr, 'numerics', 'Drop1D', help, 'Apply drop losses, (==0: no drop losses)')
+    call prop_set(prop_ptr, 'numerics', 'Drop1D', help, 'Apply drop losses')
 
     if (writeall .or. Drop3D .ne. 1d0) then
        call prop_set(prop_ptr, 'numerics', 'Drop3D'   , Drop3D, 'Apply droplosses in 3D if z upwind below bob + 2/3 hu*drop3D')
