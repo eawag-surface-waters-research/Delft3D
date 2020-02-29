@@ -813,7 +813,9 @@ end subroutine flow_finalize_single_timestep
  call klok(cpu_extra(2,41)) ! End advec
 
  if (jazws0.eq.1)  then
-    call makeq1qaAtStart()                           ! compute q1 and qa to ensure exact restart
+    if (len_trim(md_restartfile) == 0) then
+       call makeq1qaAtStart()                           ! when restart, q1 and qa are already read from the rst file
+    end if
     call setkfs()
  endif
 
@@ -15801,7 +15803,10 @@ end if
          endif
      else ! Restart from *_yyyymmdd_hhmmss_rst.nc or from *_map.nc
        call read_restart_from_map(md_restartfile, iresult) !TODO:JZ modify the name of this subroutine, since it also restarts from rst files.
-       call setbobs()
+       if ((.not. network%loaded) .and. (network%sts%count > 0)) then
+          call setbobs()
+       end if
+       
        if (jampi == 1) then
           ! globally reduce the error
           call reduce_error(iresult)
@@ -37152,6 +37157,7 @@ end subroutine setbobs_fixedweirs
  use m_trachy, only: trachy_resistance
  use m_oned_functions
  use m_compound
+ use unstruc_model, only: md_restartfile
 
  implicit none
 

@@ -2450,7 +2450,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_flowparameters, only: jamd1dfile
     use m_oned_functions, only: gridpoint2cross
     use m_save_ugrid_state, only: mesh1dname
-    use m_structures, only: valculvert
+    use m_structures
    
     integer,           intent(in) :: irstfile
     real(kind=hp),     intent(in) :: tim
@@ -2469,6 +2469,15 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_bndseddim,         &
         id_bnddim,            &
         id_culvertdim,        &
+        id_genstrudim,        &
+        id_genstru_furudim,   &
+        id_genstru_linkdim,   &
+        id_weirgendim,        &
+        id_weirgen_furudim,   &
+        id_weirgen_linkdim,   &
+        id_orifgendim,        &
+        id_orifgen_furudim,   &
+        id_orifgen_linkdim,   &
         id_time, id_timestep, &
         id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_unorm, id_q1, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, &
         id_q1main, &
@@ -2482,12 +2491,17 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_flowelemxbnd, id_flowelemybnd, id_bl, id_s0bnd, id_s1bnd, id_blbnd, &
         id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_squ, id_sqi, &
         id_jmax, id_flowelemcrsz, id_ncrs, id_morft, id_morCrsName, id_strlendim, &
-        id_culvert_openh, id_au
+        id_culvert_openh, id_au, &
+        id_genstru_crestl, id_genstru_edgel, id_genstru_openw, id_genstru_fu, id_genstru_ru, id_genstru_au, id_genstru_crestw, &
+        id_genstru_area, id_genstru_linkw, id_genstru_state, id_genstru_sOnCrest,&
+        id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
+        id_orifgen_crestl, id_orifgen_edgel, id_orifgen_openw, id_orifgen_fu, id_orifgen_ru, id_orifgen_au, id_orifgen_crestw, &
+        id_orifgen_area, id_orifgen_linkw, id_orifgen_state, id_orifgen_sOnCrest
     
     integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
 
-    integer :: i, numContPts, numNodes, itim, k, kb, kt, kk, LL, Lb, Lt, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay, LTX, nlaybL, nrlaylx
+    integer :: i, numContPts, numNodes, itim, k, kb, kt, kk, LL, Lb, Lt, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay, LTX, nlaybL, nrlaylx, maxNumLinks, numLinks, L0, nlen, istru
     double precision              :: vicc, dicc, dens
     double precision, allocatable :: max_threttim(:)
     double precision, dimension(:), allocatable       :: dum
@@ -2504,6 +2518,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     type(t_CSType), pointer, dimension(:)         :: pCSs
     integer                                       :: n, jmax, ndx1d, nCrs
     double precision, dimension(:,:), allocatable :: work1d_z
+    double precision, dimension(:,:), allocatable :: work2d
+    double precision, dimension(:,:,:), allocatable :: work3d
+    integer,          dimension(:,:,:), allocatable :: work3di
     
 
     ! Grid and flow geometry
@@ -3192,12 +3209,157 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     endif
     
     ! Write structure info.
-    if (network%sts%numCulverts > 0) then ! write culvert info.
-       ierr = nf90_def_dim(irstfile, 'nCulvert', network%sts%numculverts, id_culvertdim)
-       ierr = nf90_def_var(irstfile, 'culvert_valve_opening_height', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_openh)
-       ierr = nf90_put_att(irstfile, id_culvert_openh, 'long_name', 'Valve opening height of culvert')
-       ierr = nf90_put_att(irstfile, id_culvert_openh, 'units', 'm')
+    if (network%loaded) then
+       if (network%sts%numCulverts > 0) then ! write culvert info.
+          ierr = nf90_def_dim(irstfile, 'nCulvert', network%sts%numculverts, id_culvertdim)
+          ierr = nf90_def_var(irstfile, 'culvert_valve_opening_height', nf90_double, (/ id_culvertdim, id_timedim /), id_culvert_openh)
+          ierr = nf90_put_att(irstfile, id_culvert_openh, 'long_name', 'Valve opening height of culvert')
+          ierr = nf90_put_att(irstfile, id_culvert_openh, 'units', 'm')
+       end if
+
+       nlen = network%sts%numGeneralStructures
+       if(nlen > 0) then ! write info. of general structure
+          ! define dimensions
+          ierr = nf90_def_dim(irstfile, 'nGeneral_structures', nlen, id_genstrudim)
+          ierr = nf90_def_dim(irstfile, 'nGerneral_structure_furu', 3, id_genstru_furudim)
+          maxNumLinks = get_max_numLinks(ST_GENERAL_ST, nlen)
+          ierr = nf90_def_dim(irstfile, 'nGerneral_structure_max_numlinks', maxNumLinks, id_genstru_linkdim)
+
+          ! define variables
+          ierr = nf90_def_var(irstfile, 'general_structure_crest_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_crestl)
+          ierr = nf90_put_att(irstfile, id_genstru_crestl, 'long_name', 'Crest level of general structure')
+          ierr = nf90_put_att(irstfile, id_genstru_crestl, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_crest_width', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_crestw)
+          ierr = nf90_put_att(irstfile, id_genstru_crestw, 'long_name', 'Crest width of general structure')
+          ierr = nf90_put_att(irstfile, id_genstru_crestw, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_gate_lower_edge_level', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_edgel)
+          ierr = nf90_put_att(irstfile, id_genstru_edgel, 'long_name', 'Gate lower edge level of general structure')
+          ierr = nf90_put_att(irstfile, id_genstru_edgel, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_gate_opening_width', nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_openw)
+          ierr = nf90_put_att(irstfile, id_genstru_openw, 'long_name', 'Gate opening width of general structure')
+          ierr = nf90_put_att(irstfile, id_genstru_openw, 'units', 'm')
+          
+          ierr = nf90_def_var(irstfile, 'general_structure_flow_area', nf90_double, (/ id_genstrudim, id_genstru_linkdim, id_timedim /), id_genstru_area)
+          ierr = nf90_put_att(irstfile, id_genstru_area, 'long_name', 'Flow area of general structure')
+          ierr = nf90_put_att(irstfile, id_genstru_area, 'units', 'm2')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_link_width_closed_by_gate', nf90_double, (/ id_genstrudim, id_genstru_linkdim, id_timedim /), id_genstru_linkw)
+          ierr = nf90_put_att(irstfile, id_genstru_linkw, 'long_name', 'Part of the link width that is closed by the gate')
+          ierr = nf90_put_att(irstfile, id_genstru_linkw, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_fu', nf90_double, dimids = (/ id_genstrudim, id_genstru_furudim, id_genstru_linkdim, id_timedim/), varid = id_genstru_fu)
+          ierr = nf90_put_att(irstfile, id_genstru_fu, 'long_name', 'partial computational value for fu (under/over/between gate, respectively) of general structure')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_ru', nf90_double, dimids = (/ id_genstrudim, id_genstru_furudim, id_genstru_linkdim, id_timedim/), varid =id_genstru_ru)
+          ierr = nf90_put_att(irstfile, id_genstru_ru, 'long_name', 'partial computational value for ru (under/over/between gate, respectively) of general structure')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_au', nf90_double, dimids = (/ id_genstrudim, id_genstru_furudim, id_genstru_linkdim, id_timedim/), varid =id_genstru_au)
+          ierr = nf90_put_att(irstfile, id_genstru_au, 'long_name', 'partial computational value for au (under/over/between gate, respectively) of general structure')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_state', nf90_int, dimids = (/ id_genstrudim, id_genstru_furudim, id_genstru_linkdim, id_timedim/), varid =id_genstru_state)
+          ierr = nf90_put_att(irstfile, id_genstru_state, 'long_name', 'Flow state at general structure')
+
+          ierr = nf90_def_var(irstfile, 'general_structure_water_level_on_crest', nf90_double, dimids = (/ id_genstrudim, id_genstru_linkdim, id_timedim/), varid =id_genstru_sOncrest)
+          ierr = nf90_put_att(irstfile, id_genstru_sOnCrest, 'long_name', 'water level on crest of general structure')
+          ierr = nf90_put_att(irstfile, id_genstru_sOnCrest, 'units', 'm')
+       end if
+
+       nlen = network%sts%numWeirs
+       if( nlen > 0) then ! write info. of weirs
+          ! define dimensions
+          ierr = nf90_def_dim(irstfile, 'nWeirs', nlen, id_weirgendim)
+          ierr = nf90_def_dim(irstfile, 'nWeir_furu', 3, id_weirgen_furudim)
+          maxNumLinks = get_max_numLinks(ST_WEIR, nlen)
+          ierr = nf90_def_dim(irstfile, 'nWeir_max_numlinks', maxNumLinks, id_weirgen_linkdim)
+
+          ! define variables
+          ierr = nf90_def_var(irstfile, 'weirgen_crest_level', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_crestl)
+          ierr = nf90_put_att(irstfile, id_weirgen_crestl, 'long_name', 'Crest level of weir')
+          ierr = nf90_put_att(irstfile, id_weirgen_crestl, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'weirgen_crest_width', nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_crestw)
+          ierr = nf90_put_att(irstfile, id_weirgen_crestw, 'long_name', 'Crest width of weir')
+          ierr = nf90_put_att(irstfile, id_weirgen_crestw, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'weirgen_flow_area', nf90_double, (/ id_weirgendim, id_weirgen_linkdim, id_timedim /), id_weirgen_area)
+          ierr = nf90_put_att(irstfile, id_weirgen_area, 'long_name', 'Flow area of weir')
+          ierr = nf90_put_att(irstfile, id_weirgen_area, 'units', 'm2')
+
+          ierr = nf90_def_var(irstfile, 'weirgen_link_width_closed_by_gate', nf90_double, (/ id_weirgendim, id_weirgen_linkdim, id_timedim /), id_weirgen_linkw)
+          ierr = nf90_put_att(irstfile, id_weirgen_linkw, 'long_name', 'Part of the link width that is closed by the gate')
+          ierr = nf90_put_att(irstfile, id_weirgen_linkw, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'weirgen_fu', nf90_double, dimids = (/ id_weirgendim, id_weirgen_furudim, id_weirgen_linkdim, id_timedim/), varid = id_weirgen_fu)
+          ierr = nf90_put_att(irstfile, id_weirgen_fu, 'long_name', 'partial computational value for fu (under/over/between gate, respectively) of weir')
+
+          ierr = nf90_def_var(irstfile, 'weirgen_ru', nf90_double, dimids = (/ id_weirgendim, id_weirgen_furudim, id_weirgen_linkdim, id_timedim/), varid =id_weirgen_ru)
+          ierr = nf90_put_att(irstfile, id_weirgen_ru, 'long_name', 'partial computational value for ru (under/over/between gate, respectively) of weir')
+
+          ierr = nf90_def_var(irstfile, 'weirgen_au', nf90_double, dimids = (/ id_weirgendim, id_weirgen_furudim, id_weirgen_linkdim, id_timedim/), varid =id_weirgen_au)
+          ierr = nf90_put_att(irstfile, id_weirgen_au, 'long_name', 'partial computational value for au (under/over/between gate, respectively) of weir')
+
+          ierr = nf90_def_var(irstfile, 'weirgen_state', nf90_int, dimids = (/ id_weirgendim, id_weirgen_furudim, id_weirgen_linkdim, id_timedim/), varid =id_weirgen_state)
+          ierr = nf90_put_att(irstfile, id_weirgen_state, 'long_name', 'Flow state at weir')
+
+          ierr = nf90_def_var(irstfile, 'weirgen_water_level_on_crest', nf90_double, dimids = (/ id_weirgendim, id_weirgen_linkdim, id_timedim/), varid =id_weirgen_sOncrest)
+          ierr = nf90_put_att(irstfile, id_weirgen_sOncrest, 'long_name', 'water level on crest of weir')
+          ierr = nf90_put_att(irstfile, id_weirgen_sOncrest, 'units', 'm')
+       end if
+
+       nlen = network%sts%numOrifices
+       if( nlen > 0) then ! write info. of orifice
+          ! define dimensions
+          ierr = nf90_def_dim(irstfile, 'nOrifices', nlen, id_orifgendim)
+          ierr = nf90_def_dim(irstfile, 'nOrifice_furu', 3, id_orifgen_furudim)
+          maxNumLinks = get_max_numLinks(ST_ORIFICE, nlen)
+          ierr = nf90_def_dim(irstfile, 'nOrifice_max_numlinks', maxNumLinks, id_orifgen_linkdim)
+
+          ! define variables
+          ierr = nf90_def_var(irstfile, 'orifice_crest_level', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_crestl)
+          ierr = nf90_put_att(irstfile, id_orifgen_crestl, 'long_name', 'Crest level of orifice')
+          ierr = nf90_put_att(irstfile, id_orifgen_crestl, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'orifice_crest_width', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_crestw)
+          ierr = nf90_put_att(irstfile, id_orifgen_crestw, 'long_name', 'Crest width of orifice')
+          ierr = nf90_put_att(irstfile, id_orifgen_crestw, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'orifice_gate_lower_edge_level', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_edgel)
+          ierr = nf90_put_att(irstfile, id_orifgen_edgel, 'long_name', 'Gate lower edge level of orifice')
+          ierr = nf90_put_att(irstfile, id_orifgen_edgel, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'orifice_gate_opening_width', nf90_double, (/ id_orifgendim, id_timedim /), id_orifgen_openw)
+          ierr = nf90_put_att(irstfile, id_orifgen_openw, 'long_name', 'Gate opening width of orifice')
+          ierr = nf90_put_att(irstfile, id_orifgen_openw, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'orifice_flow_area', nf90_double, (/ id_orifgendim, id_orifgen_linkdim, id_timedim /), id_orifgen_area)
+          ierr = nf90_put_att(irstfile, id_orifgen_area, 'long_name', 'Flow area of orifice')
+          ierr = nf90_put_att(irstfile, id_orifgen_area, 'units', 'm2')
+
+          ierr = nf90_def_var(irstfile, 'orifice_link_width_closed_by_gate', nf90_double, (/ id_orifgendim, id_orifgen_linkdim, id_timedim /), id_orifgen_linkw)
+          ierr = nf90_put_att(irstfile, id_orifgen_linkw, 'long_name', 'Part of the link width that is closed by the gate')
+          ierr = nf90_put_att(irstfile, id_orifgen_linkw, 'units', 'm')
+
+          ierr = nf90_def_var(irstfile, 'orifice_fu', nf90_double, dimids = (/ id_orifgendim, id_orifgen_furudim, id_orifgen_linkdim, id_timedim/), varid = id_orifgen_fu)
+          ierr = nf90_put_att(irstfile, id_orifgen_fu, 'long_name', 'partial computational value for fu (under/over/between gate, respectively) of orifice')
+
+          ierr = nf90_def_var(irstfile, 'orifice_ru', nf90_double, dimids = (/ id_orifgendim, id_orifgen_furudim, id_orifgen_linkdim, id_timedim/), varid =id_orifgen_ru)
+          ierr = nf90_put_att(irstfile, id_orifgen_ru, 'long_name', 'partial computational value for ru (under/over/between gate, respectively) of orifice')
+
+          ierr = nf90_def_var(irstfile, 'orifice_au', nf90_double, dimids = (/ id_orifgendim, id_orifgen_furudim, id_orifgen_linkdim, id_timedim/), varid =id_orifgen_au)
+          ierr = nf90_put_att(irstfile, id_orifgen_au, 'long_name', 'partial computational value for au (under/over/between gate, respectively) of orifice')
+
+          ierr = nf90_def_var(irstfile, 'orifice_state', nf90_int, dimids = (/ id_orifgendim, id_orifgen_furudim, id_orifgen_linkdim, id_timedim/), varid =id_orifgen_state)
+          ierr = nf90_put_att(irstfile, id_orifgen_state, 'long_name', 'Flow state at orifice')
+
+          ierr = nf90_def_var(irstfile, 'orifice_water_level_on_crest', nf90_double, dimids = (/ id_orifgendim, id_orifgen_linkdim, id_timedim/), varid =id_orifgen_sOncrest)
+          ierr = nf90_put_att(irstfile, id_orifgen_sOnCrest, 'long_name', 'water level on crest of orifice')
+          ierr = nf90_put_att(irstfile, id_orifgen_sOnCrest, 'units', 'm')
+       end if
     end if
+
     ierr = nf90_enddef(irstfile)
 
     ! 1D profile names
@@ -3260,8 +3422,47 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_inq_varid(irstfile, 'ero', id_ero)
     endif
     !
-    if (network%sts%numCulverts > 0) then
-       ierr = nf90_inq_varid(irstfile, 'culvert_valve_opening_height', id_culvert_openh)
+    if (network%loaded) then
+       if (network%sts%numCulverts > 0) then
+          ierr = nf90_inq_varid(irstfile, 'culvert_valve_opening_height', id_culvert_openh)
+       end if
+       if(network%sts%numGeneralStructures > 0) then
+          ierr = nf90_inq_varid(irstfile, 'general_structure_crest_level', id_genstru_crestl)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_crest_width', id_genstru_crestw)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_gate_lower_edge_level', id_genstru_edgel)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_gate_opening_width', id_genstru_openw)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_flow_area', id_genstru_area)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_link_width_closed_by_gate', id_genstru_linkw)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_fu', id_genstru_fu)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_ru', id_genstru_ru)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_au', id_genstru_au)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_state', id_genstru_state)
+          ierr = nf90_inq_varid(irstfile, 'general_structure_water_level_on_crest', id_genstru_sOnCrest)
+       end if
+       if(network%sts%numWeirs > 0) then
+          ierr = nf90_inq_varid(irstfile, 'weirgen_crest_level', id_weirgen_crestl)
+          ierr = nf90_inq_varid(irstfile, 'weirgen_crest_width', id_weirgen_crestw)
+          ierr = nf90_inq_varid(irstfile, 'weirgen_flow_area', id_weirgen_area)
+          ierr = nf90_inq_varid(irstfile, 'weirgen_link_width_closed_by_gate', id_weirgen_linkw)
+          ierr = nf90_inq_varid(irstfile, 'weirgen_fu', id_weirgen_fu)
+          ierr = nf90_inq_varid(irstfile, 'weirgen_ru', id_weirgen_ru)
+          ierr = nf90_inq_varid(irstfile, 'weirgen_au', id_weirgen_au)
+          ierr = nf90_inq_varid(irstfile, 'weirgen_state', id_weirgen_state)
+          ierr = nf90_inq_varid(irstfile, 'weirgen_water_level_on_crest', id_weirgen_sOnCrest)
+       end if
+       if(network%sts%numOrifices > 0) then
+          ierr = nf90_inq_varid(irstfile, 'orifice_crest_level', id_orifgen_crestl)
+          ierr = nf90_inq_varid(irstfile, 'orifice_crest_width', id_orifgen_crestw)
+          ierr = nf90_inq_varid(irstfile, 'orifice_gate_lower_edge_level', id_orifgen_edgel)
+          ierr = nf90_inq_varid(irstfile, 'orifice_gate_opening_width', id_orifgen_openw)
+          ierr = nf90_inq_varid(irstfile, 'orifice_flow_area', id_orifgen_area)
+          ierr = nf90_inq_varid(irstfile, 'orifice_link_width_closed_by_gate', id_orifgen_linkw)
+          ierr = nf90_inq_varid(irstfile, 'orifice_fu', id_orifgen_fu)
+          ierr = nf90_inq_varid(irstfile, 'orifice_ru', id_orifgen_ru)
+          ierr = nf90_inq_varid(irstfile, 'orifice_au', id_orifgen_au)
+          ierr = nf90_inq_varid(irstfile, 'orifice_state', id_orifgen_state)
+          ierr = nf90_inq_varid(irstfile, 'orifice_water_level_on_crest', id_orifgen_sOnCrest)
+       end if
     end if
                 
     ! -- Start data writing (flow data) ------------------------
@@ -3708,10 +3909,248 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     end if
     
     ! Write structure info.
-    if (network%sts%numculverts > 0) then
-       ierr = nf90_put_var(irstfile, id_culvert_openh, valculvert(11, 1:network%sts%numculverts), (/1, itim/), (/network%sts%numculverts, 1/))
-    end if
+    if (network%loaded) then
+       ! wrtie info. of culvert
+       if (network%sts%numculverts > 0) then
+          ierr = nf90_put_var(irstfile, id_culvert_openh, valculvert(11, 1:network%sts%numculverts), (/1, itim/), (/network%sts%numculverts, 1/))
+       end if
 
+       ! write info. of general structure
+       nlen = network%sts%numGeneralStructures
+       if(nlen > 0) then
+          ierr = nf90_put_var(irstfile, id_genstru_crestl, valgenstru(9, 1:nlen),  (/1, itim/), (/nlen, 1/))
+          ierr = nf90_put_var(irstfile, id_genstru_crestw, valgenstru(10, 1:nlen), (/1, itim/), (/nlen, 1/))
+          ierr = nf90_put_var(irstfile, id_genstru_edgel,  valgenstru(14, 1:nlen), (/1, itim/), (/nlen, 1/))
+          ierr = nf90_put_var(irstfile, id_genstru_openw,  valgenstru(13, 1:nlen), (/1, itim/), (/nlen, 1/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%generalStructureIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%au(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_genstru_area, work2d, (/1, 1, itim/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%generalStructureIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%generalst%gateclosedfractiononlink(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_genstru_linkw, work2d, (/1, 1, itim/))
+
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%generalStructureIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%fu(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_genstru_fu, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%generalStructureIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%ru(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_genstru_ru, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%generalStructureIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%au(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_genstru_au, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3di, (/nlen, 3, maxNumLinks/), keepExisting=.false.)
+          do i = 1, nlen
+             istru = network%sts%generalStructureIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3di(i,1:3,L0) = network%sts%struct(istru)%generalst%state(1:3,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_genstru_state, work3di, (/1, 1, 1, itim/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%generalStructureIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%generalst%sOnCrest(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_genstru_sOnCrest, work2d, (/1, 1, itim/))
+       end if
+
+       ! write info. of weir
+       nlen = network%sts%numWeirs
+       if(nlen > 0) then
+          ierr = nf90_put_var(irstfile, id_weirgen_crestl, valweirgen(9, 1:nlen), (/1, itim/), (/nlen, 1/))
+          ierr = nf90_put_var(irstfile, id_weirgen_crestw, valweirgen(10, 1:nlen), (/1, itim/), (/nlen, 1/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%weirIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%au(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_weirgen_area, work2d, (/1, 1, itim/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%weirIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%generalst%gateclosedfractiononlink(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_weirgen_linkw, work2d, (/1, 1, itim/))
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%weirIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%fu(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_weirgen_fu, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%weirIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%ru(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_weirgen_ru, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%weirIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%au(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_weirgen_au, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3di, (/nlen, 3, maxNumLinks/), keepExisting=.false.)
+          do i = 1, nlen
+             istru = network%sts%weirIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3di(i,1:3,L0) = network%sts%struct(istru)%generalst%state(1:3,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_weirgen_state, work3di, (/1, 1, 1, itim/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%weirIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%generalst%sOnCrest(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_weirgen_sOnCrest, work2d, (/1, 1, itim/))
+       end if
+
+       ! write info. of orifice
+       nlen = network%sts%numOrifices
+       if(nlen > 0) then
+          ierr = nf90_put_var(irstfile, id_orifgen_crestl, valorifgen(9, 1:nlen),  (/1, itim/), (/nlen, 1/))
+          ierr = nf90_put_var(irstfile, id_orifgen_crestw, valorifgen(10, 1:nlen), (/1, itim/), (/nlen, 1/))
+          ierr = nf90_put_var(irstfile, id_orifgen_edgel,  valorifgen(14, 1:nlen), (/1, itim/), (/nlen, 1/))
+          ierr = nf90_put_var(irstfile, id_orifgen_openw,  valorifgen(13, 1:nlen), (/1, itim/), (/nlen, 1/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%orificeIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%au(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_orifgen_area, work2d, (/1, 1, itim/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%orificeIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%generalst%gateclosedfractiononlink(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_orifgen_linkw, work2d, (/1, 1, itim/))
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%orificeIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%fu(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_orifgen_fu, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%orificeIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%ru(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_orifgen_ru, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3d, (/nlen, 3, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%orificeIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3d(i,1:3,L0) = network%sts%struct(istru)%generalst%au(:,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_orifgen_au, work3d, (/1, 1, 1, itim/))
+
+          call realloc(work3di, (/nlen, 3, maxNumLinks/), keepExisting=.false.)
+          do i = 1, nlen
+             istru = network%sts%orificeIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work3di(i,1:3,L0) = network%sts%struct(istru)%generalst%state(1:3,L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_orifgen_state, work3di, (/1, 1, 1, itim/))
+
+          call realloc(work2d, (/nlen, maxNumLinks/), keepExisting=.false., fill = dmiss)
+          do i = 1, nlen
+             istru = network%sts%orificeIndices(i)
+             numLinks = network%sts%struct(istru)%numlinks
+             do L0 = 1, numLinks
+                work2d(i,L0) = network%sts%struct(istru)%generalst%sOnCrest(L0)
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_orifgen_sOnCrest, work2d, (/1, 1, itim/))
+       end if
+    end if
 
     if ( jampi.eq.1 ) then  
        ! flow cell domain numbers    
@@ -10569,6 +11008,7 @@ subroutine unc_read_map(filename, tim, ierr)
     use m_save_ugrid_state,   only: mesh1dname
     use unstruc_channel_flow, only: network
     use m_oned_functions,     only: gridpoint2cross
+    use m_GlobalParameters
 
     character(len=*),  intent(in)       :: filename   !< Name of NetCDF file.
     real(kind=hp),     intent(in)       :: tim        !< Desired time (snapshot) to be read from map file.
@@ -10644,7 +11084,6 @@ subroutine unc_read_map(filename, tim, ierr)
     double precision, allocatable        :: tmpvar1(:)
     double precision, allocatable        :: tmpvar2(:,:,:)
     double precision, allocatable        :: tmp_s1(:), tmp_bl(:), tmp_s0(:), tmp_sa1(:), tmp_tem1(:)
-    double precision, allocatable        :: tmpvar_stru(:)
     double precision, allocatable        :: rst_bodsed(:,:), rst_mfluff(:,:), rst_thlyr(:,:)
     double precision, allocatable        :: rst_msed(:,:,:)
     real(fp)                             :: mfracsum, poros, sedthick
@@ -11156,26 +11595,6 @@ subroutine unc_read_map(filename, tim, ierr)
           nbnd_read = 0
           jaoldrstfile = 1
        endif
-       
-       ! Ask for dimension of structures
-       jaCulvDim = 0
-       if (network%sts%numCulverts > 0) then
-          ierr = nf90_inq_dimid(imapfile, 'nCulvert', id_culvertdim)
-          if (ierr /= 0) then
-             call mess(LEVEL_WARN, 'read_rst: cannot read a dimension of culvert in restart file '''//trim(filename)//'''. The simulation will continue but the results may not be reliable.')
-          else
-             ierr = nf90_inquire_dimension(imapfile, id_culvertdim, len = nlen)
-             call check_error(ierr, 'Culvert dimension')
-             if (nlen /= network%sts%numCulverts) then
-                call qnerror('Error reading '''//trim(filename)//''': Number of culverts read unequal to number of culverts in model',' ',' ')
-                ierr = DFM_GENERICERROR
-                call readyy('Reading map data',-1d0)
-                goto 999
-             else
-                jaCulvDim = 1 ! dimsion of culvert exists and equal to the number of culverts in model
-             end if
-          end if
-       end if
     end if
 
    ! check if restarting a model with Riemann boundary conditions
@@ -11434,6 +11853,12 @@ subroutine unc_read_map(filename, tim, ierr)
     call check_error(ierr, 'discharges')    
     call readyy('Reading map data',0.50d0)
     
+    ! Read qa (flow link)
+    ierr = get_var_and_shift(imapfile, 'qa', qa, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
+                             ilink_own, ilink_merge)
+    call check_error(ierr, 'qa')    
+    call readyy('Reading map data',0.50d0)
+    
     ! Read discharges (flow link)
     ierr = get_var_and_shift(imapfile, 'au', au, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
                              ilink_own, ilink_merge)
@@ -11514,10 +11939,10 @@ subroutine unc_read_map(filename, tim, ierr)
        ierr =get_var_and_shift(imapfile, 'ww1', ww1, tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
                                inode_own, inode_merge)
        call check_error(ierr, 'ww1') 
-       ! qa
-       ierr = get_var_and_shift(imapfile, 'qa', qa,  tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own,  it_read, jamergedmap, &
-                                ilink_own, ilink_merge)
-       call check_error(ierr, 'qa')
+       !! qa
+       !ierr = get_var_and_shift(imapfile, 'qa', qa,  tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own,  it_read, jamergedmap, &
+       !                         ilink_own, ilink_merge)
+       !call check_error(ierr, 'qa')
        ! qw
        ierr = get_var_and_shift(imapfile, 'qw', qw,  tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
                                 inode_own, inode_merge)
@@ -12070,23 +12495,9 @@ subroutine unc_read_map(filename, tim, ierr)
       call check_error(ierr, 'Thatcher-Harleman boundaries')
     endif
     
-    ! Read structure info.
-    if (jaCulvDim > 0 .and. network%sts%numCulverts > 0) then
-       ierr = nf90_inq_varid(imapfile, 'culvert_valve_opening_height', id_culvert_openh)
-       if (ierr /= 0) then
-          call mess(LEVEL_WARN, 'read_rst: cannot read valve opening height of culverts in restart file'''//trim(filename)//'''. The simulation will continue but the results may not be reliable.')
-       else
-          call realloc(tmpvar_stru, network%sts%numCulverts, stat=ierr, keepExisting=.false.)
-          ierr = nf90_get_var(imapfile, id_culvert_openh, tmpvar_stru, start=(/1, it_read/), count=(/network%sts%numCulverts, 1/))
-          call check_error(ierr, 'culvert_valve_opening_height')
-          
-          do i = 1, network%sts%numCulverts
-             istru = network%sts%culvertIndices(i)
-             network%sts%struct(istru)%culvert%valveOpening = tmpvar_stru(i)
-          end do
-       end if
-    end if
-       
+    ! Read structure 
+    call read_structures_from_rst(imapfile, filename, it_read)
+
     call readyy('Reading map data',0.95d0)    
    
    ! Check if the orientation of each flowlink in the current model is the same with the link in the rst file
@@ -14092,5 +14503,645 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
    call realloc(mesh1dUnmergedToMerged, numMesh1dBeforeMerging, keepExisting=.true.)
 
 end function read_1d_mesh_convention_one
+
+!> Read structure infomation from the rst file
+subroutine read_structures_from_rst(ncid, filename, it_read)
+   use unstruc_channel_flow, only: network
+   use m_alloc
+   use m_GlobalParameters
+   use m_flow, only: au
+   use m_1d_structures
+   use m_General_Structure
+   implicit none 
+   integer,          intent(in   )   :: ncid        !< ID of the rst file
+   character(len=*), intent(in   )   :: filename    !< Name of rst file.
+   integer,          intent(in   )   :: it_read     !< time index for reading
+
+   integer                           :: nStruDim
+   character(len=IdLen), allocatable :: struDimNames(:)
+   integer,              allocatable :: ids_struDim(:)
+   character(len=IdLen)              :: struName
+   double precision,     allocatable :: tmpvar(:), tmpvar3d(:,:,:), tmpvar2d(:,:)
+   integer,              allocatable :: tmpvar3di(:,:,:)
+   integer :: strucDimErr, id_var, i, nLinks, nStru, ierr, iStru, n1, n2, strucVarErr, L, L0
+   integer :: id_culvert_openh, &
+               id_genstru_crestl, id_genstru_edgel, id_genstru_openw, id_genstru_fu, id_genstru_ru, id_genstru_au, id_genstru_crestw, id_genstru_area, id_genstru_linkw, id_genstru_state, id_genstru_sOnCrest,&
+               id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
+               id_orifgen_crestl, id_orifgen_edgel, id_orifgen_openw, id_orifgen_fu, id_orifgen_ru, id_orifgen_au, id_orifgen_crestw, &
+               id_orifgen_area, id_orifgen_linkw, id_orifgen_state, id_orifgen_sOnCrest
+   type(t_structure), pointer        :: pstru
+   type(t_GeneralStructure), pointer :: genstr
+   
+   strucDimErr = 0
+   strucVarErr = 0
+   n1 = 0
+   n2 = 0
+   if (.not. network%loaded) then
+      call mess(LEVEL_WARN, 'read_structures_from_rst: the network array is not loaded, then skip reading structures. The simulation will continue but the results may not be reliable.')
+      return
+   end if
+
+   ! Read info. of culverts
+   nStru = network%sts%numCulverts
+   if (nStru > 0) then
+      ! read dimensions
+      struName = 'culvert'
+      nStruDim = 1
+      call realloc(struDimNames, nStruDim)
+      call realloc(ids_struDim, nStruDim)
+      struDimNames(1) = 'nCulvert'
+      call read_structure_dimensions_from_rst(ncid, filename, ST_CULVERT, trim(struName), nStruDim, struDimNames, ids_struDim, network%sts%numCulverts, strucDimErr)
+
+      ! read variables
+      if (strucDimErr == 0) then
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'culvert_valve_opening_height', id_culvert_openh)
+         ierr = nf90_get_var(ncid, id_culvert_openh, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"culvert_valve_opening_height", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         ierr = nf90_get_var(ncid, id_genstru_crestw, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%culvertIndices(i)
+               network%sts%struct(istru)%culvert%valveOpening = tmpvar(i)
+            end do
+         end if
+
+      end if
+   end if
+
+   ! Read info. of general structures
+   nStru = network%sts%numGeneralStructures
+   if (nStru > 0) then
+      ! read dimensions
+      struName = 'general structure'
+      nStruDim = 3
+      call realloc(struDimNames, nStruDim)
+      call realloc(ids_struDim, nStruDim)
+      struDimNames(1) = 'nGeneral_structures'
+      struDimNames(2) = 'nGerneral_structure_furu'
+      struDimNames(3) = 'nGerneral_structure_max_numlinks'
+      call read_structure_dimensions_from_rst(ncid, filename, ST_GENERAL_ST, trim(struName), nStruDim, struDimNames, ids_struDim, nStru, strucDimErr)
+
+      ! read variables
+      if (strucDimErr == 0) then
+         ! read general_structure_crest_level
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'general_structure_crest_level', id_genstru_crestl)
+         ierr = nf90_get_var(ncid, id_genstru_crestl, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"general_structure_crest_level", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%generalStructureIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%zs_actual = tmpvar(i)
+               genstr%zs = tmpvar(i)
+            end do
+         end if
+
+         ! read general_structure_crest_width
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'general_structure_crest_width', id_genstru_crestw)
+         ierr = nf90_get_var(ncid, id_genstru_crestw, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"general_structure_crest_width", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%generalStructureIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%ws_actual = tmpvar(i)
+               genstr%ws = tmpvar(i)
+            end do
+         end if
+
+         ! read general_structure_gate_lower_edge_level
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'general_structure_gate_lower_edge_level', id_genstru_edgel)
+         ierr = nf90_get_var(ncid, id_genstru_edgel, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"general_structure_gate_lower_edge_level", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%generalStructureIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%gateLowerEdgeLevel_actual = tmpvar(i)
+               genstr%gateLowerEdgeLevel = tmpvar(i)
+            end do
+         end if
+
+         ! read general_structure_gate_opening_width
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'general_structure_gate_opening_width', id_genstru_openw)
+         ierr = nf90_get_var(ncid, id_genstru_openw, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"general_structure_gate_opening_width", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%generalStructureIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%gateopeningwidth_actual = tmpvar(i)
+               genstr%gateopeningwidth = tmpvar(i)
+            end do
+         end if
+
+         ierr = nf90_inquire_dimension(ncid, ids_struDim(2), len = n1)
+         ierr = nf90_inquire_dimension(ncid, ids_struDim(3), len = n2)
+         if (n1 > 0 .and. n2 > 0) then
+            ! read general_structure_flow_area
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'general_structure_flow_area', id_genstru_area)
+            ierr = nf90_get_var(ncid, id_genstru_area, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"general_structure_flow_area", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%generalStructureIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%au(1:nLinks) = tmpvar2d(i, 1:nLinks)
+                  do L0 = 1, nLinks
+                     L = pstru%linknumbers(L0)
+                     au(L) = tmpvar2d(i,L0)
+                  end do
+               end do
+            end if
+
+            ! read general_structure_link_width_closed_by_gate
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'general_structure_link_width_closed_by_gate', id_genstru_linkw)
+            ierr = nf90_get_var(ncid, id_genstru_linkw, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"general_structure_link_width_closed_by_gate", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%generalStructureIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%gateclosedfractiononlink(1:nLinks) = tmpvar2d(i, 1:nLinks)
+               end do
+            end if
+
+            ! read general_structure_fu
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'general_structure_fu', id_genstru_fu)
+            ierr = nf90_get_var(ncid, id_genstru_fu, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"general_structure_fu", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%generalStructureIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%fu(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read general_structure_ru
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'general_structure_ru', id_genstru_ru)
+            ierr = nf90_get_var(ncid, id_genstru_ru, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"general_structure_ru", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%generalStructureIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%ru(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read general_structure_au
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'general_structure_au', id_genstru_au)
+            ierr = nf90_get_var(ncid, id_genstru_au, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"general_structure_au", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%generalStructureIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%au(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read general_structure_state
+            call realloc(tmpvar3di, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'general_structure_state', id_genstru_state)
+            ierr = nf90_get_var(ncid, id_genstru_state, tmpvar3di, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"general_structure_state", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%generalStructureIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%state(1:n1,1:nLinks) = tmpvar3di(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read general_structure_water_level_on_crest
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'general_structure_water_level_on_crest', id_genstru_sOnCrest)
+            ierr = nf90_get_var(ncid, id_genstru_sOnCrest, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"general_structure_water_level_on_crest", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%generalStructureIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%sOnCrest(1:nLinks) = tmpvar2d(i, 1:nLinks)
+               end do
+            end if
+         else
+            call mess(LEVEL_WARN, 'read_structures_from_rst: cannot read varialbes _fu, _ru, _au, _state and water_level_on_crest of general structure. Skip reading these variables. The simulation will continue but the results may not be reliable.')
+         end if
+      end if
+   end if
+
+   ! Read info. of weirs
+   nStru = network%sts%numWeirs
+   if (nStru > 0) then
+      ! read dimensions
+      struName = 'weir'
+      nStruDim = 3
+      call realloc(struDimNames, nStruDim)
+      call realloc(ids_struDim, nStruDim)
+      struDimNames(1) = 'nWeirs'
+      struDimNames(2) = 'nWeir_furu'
+      struDimNames(3) = 'nWeir_max_numlinks'
+      call read_structure_dimensions_from_rst(ncid, filename, ST_WEIR, trim(struName), nStruDim, struDimNames, ids_struDim, nStru, strucDimErr)
+
+      ! read variables
+      if (strucDimErr == 0) then
+         ! read weirgen_crest_level
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'weirgen_crest_level', id_weirgen_crestl)
+         ierr = nf90_get_var(ncid, id_weirgen_crestl, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"weirgen_crest_level", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%weirIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%zs_actual = tmpvar(i)
+               genstr%zs = tmpvar(i)
+            end do
+         end if
+
+         ! read weirgen_crest_width
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'weirgen_crest_width', id_weirgen_crestw)
+         ierr = nf90_get_var(ncid, id_weirgen_crestw, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"weirgen_crest_width", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%weirIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%ws_actual = tmpvar(i)
+               genstr%ws = tmpvar(i)
+            end do
+         end if
+
+         ierr = nf90_inquire_dimension(ncid, ids_struDim(2), len = n1)
+         ierr = nf90_inquire_dimension(ncid, ids_struDim(3), len = n2)
+         if (n1 > 0 .and. n2 > 0) then
+            ! read weirgen_flow_area
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'weirgen_flow_area', id_weirgen_area)
+            ierr = nf90_get_var(ncid, id_weirgen_area, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"weirgen_flow_area", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%weirIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%au(1:nLinks) = tmpvar2d(i, 1:nLinks)
+                  do L0 = 1, nLinks
+                     L = pstru%linknumbers(L0)
+                     au(L) = tmpvar2d(i,L0)
+                  end do
+               end do
+            end if
+
+            ! read weirgen_link_width_closed_by_gate
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'weirgen_link_width_closed_by_gate', id_weirgen_linkw)
+            ierr = nf90_get_var(ncid, id_weirgen_linkw, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"weirgen_link_width_closed_by_gate", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%weirIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%gateclosedfractiononlink(1:nLinks) = tmpvar2d(i, 1:nLinks)
+               end do
+            end if
+
+            ! read weirgen_fu
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'weirgen_fu', id_weirgen_fu)
+            ierr = nf90_get_var(ncid, id_weirgen_fu, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"weirgen_fu", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%weirIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%fu(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read weir_ru
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'weir_ru', id_weirgen_ru)
+            ierr = nf90_get_var(ncid, id_weirgen_ru, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"weir_ru", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%weirIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%ru(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read weirgen_au
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'weirgen_au', id_weirgen_au)
+            ierr = nf90_get_var(ncid, id_weirgen_au, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"weirgen_au", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%weirIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%au(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read weirgen_structure_state
+            call realloc(tmpvar3di, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'weirgen_structure_state', id_weirgen_state)
+            ierr = nf90_get_var(ncid, id_weirgen_state, tmpvar3di, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"weirgen_structure_state", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%weirIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%state(1:n1,1:nLinks) = tmpvar3di(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read weirgen_water_level_on_crest
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'weirgen_water_level_on_crest', id_weirgen_sOnCrest)
+            ierr = nf90_get_var(ncid, id_weirgen_sOnCrest, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"weirgen_water_level_on_crest", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%weirIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%sOnCrest(1:nLinks) = tmpvar2d(i, 1:nLinks)
+               end do
+            end if
+         else
+            call mess(LEVEL_WARN, 'read_structures_from_rst: cannot read varialbes _fu, _ru, _au, _state and water_level_on_crest of weir. Skip reading these variables. The simulation will continue but the results may not be reliable.')
+         end if
+      end if
+   end if
+
+   ! Read info. of orifices
+   nStru = network%sts%numOrifices
+   if (nStru > 0) then
+      ! read dimensions
+      struName = 'orifice'
+      nStruDim = 3
+      call realloc(struDimNames, nStruDim)
+      call realloc(ids_struDim, nStruDim)
+      struDimNames(1) = 'nOrifices'
+      struDimNames(2) = 'nOrifice_furu'
+      struDimNames(3) = 'nOrifice_max_numlinks'
+      call read_structure_dimensions_from_rst(ncid, filename, ST_ORIFICE, trim(struName), nStruDim, struDimNames, ids_struDim, nStru, strucDimErr)
+
+      ! read variables
+      if (strucDimErr == 0) then
+         ! read orifice_crest_level
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'orifice_crest_level', id_orifgen_crestl)
+         ierr = nf90_get_var(ncid, id_orifgen_crestl, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"orifice_crest_level", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%orificeIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%zs_actual = tmpvar(i)
+               genstr%zs = tmpvar(i)
+            end do
+         end if
+
+         ! read orifice_crest_width
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'orifice_crest_width', id_orifgen_crestw)
+         ierr = nf90_get_var(ncid, id_orifgen_crestw, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"orifice_crest_width", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%orificeIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%ws_actual = tmpvar(i)
+               genstr%ws = tmpvar(i)
+            end do
+         end if
+
+         ! read orifice_gate_lower_edge_level
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'orifice_gate_lower_edge_level', id_orifgen_edgel)
+         ierr = nf90_get_var(ncid, id_orifgen_edgel, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"orifice_gate_lower_edge_level", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%orificeIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%gateLowerEdgeLevel_actual = tmpvar(i)
+               genstr%gateLowerEdgeLevel = tmpvar(i)
+            end do
+         end if
+
+         ! read orifice_gate_opening_width
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'orifice_gate_opening_width', id_orifgen_openw)
+         ierr = nf90_get_var(ncid, id_orifgen_openw, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"orifice_gate_opening_width", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%orificeIndices(i)
+               genstr => network%sts%struct(istru)%generalst
+               genstr%gateopeningwidth_actual = tmpvar(i)
+               genstr%gateopeningwidth = tmpvar(i)
+            end do
+         end if
+         
+
+         ierr = nf90_inquire_dimension(ncid, ids_struDim(2), len = n1)
+         ierr = nf90_inquire_dimension(ncid, ids_struDim(3), len = n2)
+         if (n1 > 0 .and. n2 > 0) then
+            ! read orifice_flow_area
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'orifice_flow_area', id_orifgen_area)
+            ierr = nf90_get_var(ncid, id_orifgen_area, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"orifice_flow_area", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%orificeIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%au(1:nLinks) = tmpvar2d(i, 1:nLinks)
+                  do L0 = 1, nLinks
+                     L = pstru%linknumbers(L0)
+                     au(L) = tmpvar2d(i,L0)
+                  end do
+               end do
+            end if
+
+            ! read orifice_link_width_closed_by_gate
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'orifice_link_width_closed_by_gate', id_orifgen_linkw)
+            ierr = nf90_get_var(ncid, id_orifgen_linkw, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"orifice_link_width_closed_by_gate", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%orificeIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%gateclosedfractiononlink(1:nLinks) = tmpvar2d(i, 1:nLinks)
+               end do
+            end if
+            ! read orifice_fu
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'orifice_fu', id_orifgen_fu)
+            ierr = nf90_get_var(ncid, id_orifgen_fu, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"orifice_fu", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%orificeIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%fu(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read orifice_ru
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'orifice_ru', id_orifgen_ru)
+            ierr = nf90_get_var(ncid, id_orifgen_ru, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"orifice_ru", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%orificeIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%ru(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+            
+            ! read orifice_au
+            call realloc(tmpvar3d, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'orifice_au', id_orifgen_au)
+            ierr = nf90_get_var(ncid, id_orifgen_au, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"orifice_au", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%orificeIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%au(1:n1,1:nLinks) = tmpvar3d(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read orifice_state
+            call realloc(tmpvar3di, (/nStru,n1,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'orifice_state', id_orifgen_state)
+            ierr = nf90_get_var(ncid, id_orifgen_state, tmpvar3di, start=(/1, 1, 1, it_read/), count=(/nStru, n1, n2, 1/))
+            call check_error(ierr, '"orifice_state", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%orificeIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%state(1:n1,1:nLinks) = tmpvar3di(i,1:n1,1:nLinks)
+               end do
+            end if
+
+            ! read orifice_water_level_on_crest
+            call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'orifice_water_level_on_crest', id_orifgen_sOnCrest)
+            ierr = nf90_get_var(ncid, id_orifgen_sOnCrest, tmpvar2d, start=(/1, it_read/), count=(/nStru,n2, 1/))
+            call check_error(ierr, '"orifice_water_level_on_crest", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%orificeIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nLinks = pstru%numlinks
+                  pstru%generalst%sOnCrest(1:nLinks) = tmpvar2d(i, 1:nLinks)
+               end do
+            end if
+         else
+            call mess(LEVEL_WARN, 'read_structures_from_rst: cannot read varialbes _fu, _ru, _au, _state and water_level_on_crest of orifice. Skip reading these variables. The simulation will continue but the results may not be reliable.')
+         end if
+      end if
+   end if
+
+end subroutine read_structures_from_rst
+
+
+!> Read and check all the dimensions of a structure. Return strucDimErr = 0 if all the dimensions are correctly read. Otherwise strucDimErr > 0.
+subroutine read_structure_dimensions_from_rst(ncid, filename, istrtypein, struname, nDim, struDimNames, ids_struDim, nstruModel, strucDimErr)
+   use dfm_error, only: DFM_GENERICERROR
+   use unstruc_channel_flow, only: network
+   use m_alloc
+   use m_GlobalParameters
+   implicit none
+   integer,                           intent(in   ) :: ncid        !< ID of the rst file
+   character(len=*),                  intent(in   ) :: filename    !< Name of rst file.
+   integer,                           intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
+                                                                   !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
+   character(len=*),                  intent(in   ) :: struname    !< Name of the structure
+   integer,                           intent(in   ) :: nDim        !< Number of dimensions to be read
+   character(len=*), dimension(nDim), intent(in   ) :: struDimNames!< Names of the structure dimensions
+   integer,                           intent(in   ) :: nstruModel  !< Number of this structure type in the model
+   integer,                           intent(inout) :: strucDimErr !< If all dimensions are correclty read, it equals to 0
+   integer,          dimension(nDim), intent(inout) :: ids_struDim !< Ids of all dimensions
+   integer :: id_strudim1, nlen, ierr
+
+   strucDimErr = 0
+   if (nstruModel > 0) then
+      ierr = nf90_inq_dimid(ncid, trim(struDimNames(1)), ids_struDim(1))
+      if (ierr /= 0) then
+         call mess(LEVEL_WARN, 'read_structures_dimensions_from_rst: cannot read dimension '''//trim(struDimNames(1))//''' in restart file '''//trim(filename)//'''. The simulation will continue but the results may not be reliable.')
+         strucDimErr = strucDimErr + 1
+         return
+      else
+         ierr = nf90_inquire_dimension(ncid, ids_struDim(1), len = nlen)
+         call check_error(ierr, trim(struDimNames(1)))
+         if (nlen /= nstruModel) then
+            call qnerror('Error reading '''//trim(filename)//''': Number of '''//trim(struname)//''' read unequal to number of '''//trim(struname)//''' in model',' ',' ')
+            ierr = DFM_GENERICERROR
+            strucDimErr = strucDimErr + 1
+            return
+         end if
+      end if
+
+      if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then
+         ierr = nf90_inq_dimid(ncid, trim(struDimNames(2)), ids_struDim(2))
+         if (ierr /= 0) then
+            call mess(LEVEL_WARN, 'read_structures_dimensions_from_rst: cannot read dimension '''//trim(struDimNames(2))//''' in restart file '''//trim(filename)//'''. The simulation will continue but the results may not be reliable.')
+            strucDimErr = strucDimErr + 1
+            return
+         else
+            ierr = nf90_inq_dimid(ncid, trim(struDimNames(3)), ids_struDim(3))
+            if (ierr /= 0) then
+               call mess(LEVEL_WARN, 'read_structures_dimensions_from_rst: cannot read dimension '''//trim(struDimNames(3))//''' in restart file '''//trim(filename)//'''. The simulation will continue but the results may not be reliable.')
+               strucDimErr = strucDimErr + 1
+               return
+            end if
+         end if
+      end if
+   end if
+
+end subroutine read_structure_dimensions_from_rst
 
 end module unstruc_netcdf

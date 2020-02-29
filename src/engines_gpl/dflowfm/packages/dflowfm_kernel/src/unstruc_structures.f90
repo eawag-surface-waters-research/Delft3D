@@ -721,14 +721,68 @@ end function get_discharge_under_gate
 !! only when they are not computed for history output.
 !! Values are stored in the val*(:,:) arrays, shared with history output.
 subroutine structure_parameters_rst()
-   use m_1d_structures, only: get_opening_height
+   use m_1d_structures
    implicit none
    integer :: n, istru
+   type(t_structure), pointer    :: pstru
 
    do n = 1, network%sts%numCulverts
       istru = network%sts%culvertIndices(n)
-      valculvert(11,n) = get_opening_height(network%sts%struct(istru))
+      pstru => network%sts%struct(istru)
+      valculvert(11,n) = get_opening_height(pstru)
+   end do
+
+   do n = 1, network%sts%numGeneralStructures
+      istru = network%sts%generalStructureIndices(n)
+      pstru => network%sts%struct(istru)
+      valgenstru(9,n)  = get_crest_level(pstru)
+      valgenstru(10,n) = get_width(pstru)
+      valgenstru(14,n) = get_gle(pstru)
+      valgenstru(13,n) = network%sts%struct(istru)%generalst%gateopeningwidth_actual
+      ! fu, ru, au have been computed in each computational time step, so skip computing them again
+   end do
+   
+   do n = 1, network%sts%numWeirs
+      istru = network%sts%weirIndices(n)
+      pstru => network%sts%struct(istru)
+      valweirgen(9,n)  = get_crest_level(pstru)
+      valweirgen(10,n) = get_width(pstru)
+      ! fu, ru have been computed in each computational time step, so skip computing them again
+   end do
+   
+   do n = 1, network%sts%numOrifices
+      istru = network%sts%orificeIndices(n)
+      pstru => network%sts%struct(istru)
+      valorifgen(9,n)  = get_crest_level(pstru)
+      valorifgen(10,n) = get_width(pstru)
+      valorifgen(14,n) = get_gle(pstru)
+      valorifgen(13,n) = network%sts%struct(istru)%generalst%gateopeningwidth_actual
+      ! fu, ru have been computed in each computational time step, so skip computing them again
    end do
 
 end subroutine structure_parameters_rst
+
+!> Get the maximal number of links of all general structures/weir/orifice, when given the type and the total number of the structure
+integer function get_max_numLinks(istrtypein, nstru)
+   use m_1d_structures
+   implicit none
+   integer, intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
+                                         !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
+   integer, intent(in   ) :: nstru       !< Total number of this structure
+
+   integer :: i
+   
+   get_max_numLinks = 0
+   do i = 1, nstru
+      select case (istrtypein)
+      case (ST_WEIR)
+         get_max_numLinks = max(get_max_numLinks, network%sts%struct(network%sts%weirIndices(i))%numlinks)
+      case (ST_ORIFICE)
+         get_max_numLinks = max(get_max_numLinks, network%sts%struct(network%sts%orificeIndices(i))%numlinks)
+      case (ST_GENERAL_ST)
+         get_max_numLinks = max(get_max_numLinks, network%sts%struct(network%sts%generalStructureIndices(i))%numlinks)
+      end select
+   end do
+
+end function get_max_numLinks
 end module m_structures

@@ -1280,6 +1280,8 @@ end subroutine
          struct%generalst%fu = 0d0
          struct%generalst%ru = 0d0
          struct%generalst%au = 0d0
+         allocate(struct%generalst%gateclosedfractiononlink(numlinks))
+         struct%generalst%gateclosedfractiononlink = 0d0
       case (ST_CULVERT, ST_UNI_WEIR, ST_ORIFICE, ST_GATE, ST_WEIR, ST_PUMP, ST_BRIDGE)
          if (numlinks > 1) then
             istat = 1
