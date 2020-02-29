@@ -999,7 +999,6 @@
    wave = jawave>0
    !
    ! Mass conservation; s1 is updated before entering fm_erosed
-   hs = s1 - bl
    !
    if (varyingmorfac) then
       call updmorfac(stmpar%morpar, time1/3600.0_fp, julrefdat)

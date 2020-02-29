@@ -1324,12 +1324,12 @@ if(q /= 0) then
  if ( itstep.eq.4 ) then   ! explicit time-step
     call update_s_explicit()
  end if
+ hs = s1-bl
+ hs = max(hs,0d0)
 
  ! JRE: moved update of SWAN derived quantities here
  if (jawave==3) then
     if( kmx == 0 ) then
-       hs = s1-bl
-       hs = max(hs,0d0)
        call wave_comp_stokes_velocities()
        call wave_uorbrlabda()                       ! hwav gets depth-limited here
        call tauwave()
@@ -1346,8 +1346,6 @@ if(q /= 0) then
     end if
  end if
  if (jawave.eq.4 .and. jajre.eq.1) then
-    hs = s1-bl
-    hs = max(hs,0d0)
     if (swave.eq.1 ) then
        call xbeach_waves()
     endif
