@@ -344,6 +344,7 @@ use m_meteo, only: ecInstancePtr
     end if
     call close_all_files()
     call unc_closeall()
+    close(mdia)
     
 end subroutine flowfinalize
 
