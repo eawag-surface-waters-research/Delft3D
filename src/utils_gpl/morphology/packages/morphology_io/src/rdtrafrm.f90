@@ -1017,7 +1017,7 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
     parkeyw = ' '
     pardef  = nodef
     if (iform == -4) then
-       name       = 'Abreu et al. (2010): SANTOSS extended Van Rijn (2007)'
+       name       = 'Van der A et al. (2013): SANTOSS extended Van Rijn (2007)'
        nparopt    = 11
        parkeyw(1) = 'IopSus'
        pardef(1)  = 0.0_fp
