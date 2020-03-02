@@ -109,6 +109,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     logical                                              :: ex
     logical                                              :: ex_nfs
     character(16)                                        :: datetime
+    character(300)                                       :: restid0 ! File name restart file 300 = 256 + a bit
     character(300)                                       :: filtmp  ! File name restart file 300 = 256 + a bit
     character(256)                                       :: filpath ! Path specification of restid
     integer                                              :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
@@ -145,7 +146,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        filpath = restid(1:ipos)
        restid  = restid(ipos+1:)
     else
-      filpath = ""
+       filpath = ""
     endif
     write (filtmp, '(4a,a1,i8.8,a1,i6.6)') trim(filpath), 'tri-rst.', trim(restid), trim(datetime)
     inquire (file = trim(filtmp), exist = ex)
@@ -162,8 +163,8 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           ! Check new option: it may be a reference to a TRIM file.
           ! Use restid, because flow_nefis_restart will put it's value in gdp%gdrestart%restid
           !
-          write (filtmp, '(2a)') trim(filpath), trim(restid)
-          restid = filtmp
+          restid0 = restid
+          write (restid, '(2a)') trim(filpath), trim(restid0)
           call restart_trim_flow(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                                & s1        ,u1        ,v1        ,r1        ,rtur1     , &
@@ -171,8 +172,8 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
           if (error .and. .not.ex_nfs) then
              call prterr(lundia    ,'G004'    , &
-                 & 'tri-rst.' // trim(restid) // trim(datetime) // ', tri-rst.' // trim(restid) // &
-                 & ' and ' // trim(restid) // '.dat/.def')
+                 & 'tri-rst.' // trim(restid0) // trim(datetime) // ', tri-rst.' // trim(restid0) // &
+                 & ' and ' // trim(restid0) // '.dat/.def')
           endif
        endif
     endif
