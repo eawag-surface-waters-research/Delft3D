@@ -11834,11 +11834,13 @@ subroutine unc_read_map(filename, tim, ierr)
     call check_error(ierr, 'discharges')    
     call readyy('Reading map data',0.50d0)
     
-    ! Read qa (flow link)
-    ierr = get_var_and_shift(imapfile, 'qa', qa, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
-                             ilink_own, ilink_merge)
-    call check_error(ierr, 'qa')    
-    call readyy('Reading map data',0.50d0)
+    ! Read qa (flow link) only from rst file
+    if (tok1 > 0) then
+       ierr = get_var_and_shift(imapfile, 'qa', qa, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
+                                ilink_own, ilink_merge)
+       call check_error(ierr, 'qa')    
+       call readyy('Reading map data',0.50d0)
+    end if
     
     if (jamergedmap_same == 1) then
        ! Read info. on waterlevel boundaries

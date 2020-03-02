@@ -813,9 +813,9 @@ end subroutine flow_finalize_single_timestep
  call klok(cpu_extra(2,41)) ! End advec
 
  if (jazws0.eq.1)  then
-    if (len_trim(md_restartfile) == 0) then
-       call makeq1qaAtStart()                           ! when restart, q1 and qa are already read from the rst file
-    end if
+    if (index( md_restartfile, '_rst.nc', success ) == 0) then
+       call makeq1qaAtStart()                           ! when restart with a rst file, q1 and qa are already read from it, so skip this step.
+    end if                                              ! for other situations including restart with a map file, still call this subroutine
     call setkfs()
  endif
 
