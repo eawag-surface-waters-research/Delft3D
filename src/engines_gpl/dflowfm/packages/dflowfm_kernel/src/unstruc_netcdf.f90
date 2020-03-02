@@ -2491,7 +2491,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_flowelemxbnd, id_flowelemybnd, id_bl, id_s0bnd, id_s1bnd, id_blbnd, &
         id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_squ, id_sqi, &
         id_jmax, id_flowelemcrsz, id_ncrs, id_morft, id_morCrsName, id_strlendim, &
-        id_culvert_openh, id_au, &
+        id_culvert_openh, &
         id_genstru_crestl, id_genstru_edgel, id_genstru_openw, id_genstru_fu, id_genstru_ru, id_genstru_au, id_genstru_crestw, &
         id_genstru_area, id_genstru_linkw, id_genstru_state, id_genstru_sOnCrest,&
         id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
@@ -2828,13 +2828,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_put_att(irstfile, id_q1   ,'units'        , 'm3 s-1')
        ierr = nf90_put_att(irstfile, id_q1   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
        
-       ! Definition and attributes of flow data on edges: velocity magnitude at previous timestep
-       ierr = nf90_def_var(irstfile, 'au'    , nf90_double, (/ id_flowlinkdim, id_timedim /) , id_au)
-       !!!ierr = nf90_put_att(irstfile, id_au   ,'standard_name', 'discharge')
-       !!!ierr = nf90_put_att(irstfile, id_au   ,'long_name',     'discharge through flow link at current time')
-       !!!ierr = nf90_put_att(irstfile, id_au   ,'units'        , 'm3 s-1')
-       !!!ierr = nf90_put_att(irstfile, id_au   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
-       !!!
        ! Definition and attributes of flow data on edges: velocity magnitude at previous timestep
        ierr = nf90_def_var(irstfile, 'qa'    , nf90_double, (/ id_flowlinkdim, id_timedim /) , id_qa)
        ierr = nf90_put_att(irstfile, id_qa   ,'long_name',     'discharge used in advection')
@@ -3383,7 +3376,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     ierr = nf90_inq_varid(irstfile, 'unorm'   , id_unorm   )
     ierr = nf90_inq_varid(irstfile, 'u0'      , id_u0      )
     ierr = nf90_inq_varid(irstfile, 'q1'      , id_q1      )
-    ierr = nf90_inq_varid(irstfile, 'au'      , id_au      )
     ierr = nf90_inq_varid(irstfile, 'ucx'     , id_ucx     )
     ierr = nf90_inq_varid(irstfile, 'ucy'     , id_ucy     )
     ierr = nf90_inq_varid(irstfile, 'taus'    , id_taus)
@@ -3581,16 +3573,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        enddo
        ierr = nf90_put_var(irstfile, id_q1   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
        
-       work1 = dmiss
-       do LL=1,lnx
-          call getLbotLtopmax(LL,Lb,Ltx)
-          call getlayerindicesLmax(LL, nlaybL, nrlayLx)
-          do L = Lb,Ltx
-             work1(L-Lb+nlaybL,LL) = au(L)
-          enddo
-       enddo
-       ierr = nf90_put_var(irstfile, id_au   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
-       
        ! write averaged u1
        ierr = nf90_put_var(irstfile, id_unorma, u1(1:lnx), start=(/ 1, itim /), count=(/ lnx, 1 /))
        
@@ -3680,7 +3662,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_put_var(irstfile, id_unorm, u1 ,  (/ 1, itim /), (/ lnx , 1 /))
        ierr = nf90_put_var(irstfile, id_u0   , u0 ,  (/ 1, itim /), (/ lnx , 1 /))
        ierr = nf90_put_var(irstfile, id_q1   , q1 ,  (/ 1, itim /), (/ lnx , 1 /))
-       ierr = nf90_put_var(irstfile, id_au   , au ,  (/ 1, itim /), (/ lnx , 1 /))
        ierr = nf90_put_var(irstfile, id_qa   , qa ,  (/ 1, itim /), (/ lnx , 1 /))
        ierr = nf90_put_var(irstfile, id_squ  , squ,  (/ 1, itim /), (/ ndxi, 1 /))
     end if
@@ -11857,12 +11838,6 @@ subroutine unc_read_map(filename, tim, ierr)
     ierr = get_var_and_shift(imapfile, 'qa', qa, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
                              ilink_own, ilink_merge)
     call check_error(ierr, 'qa')    
-    call readyy('Reading map data',0.50d0)
-    
-    ! Read discharges (flow link)
-    ierr = get_var_and_shift(imapfile, 'au', au, tmpvar1, UNC_LOC_U3D, kmx, Lstart, lnx_own, it_read, jamergedmap, &
-                             ilink_own, ilink_merge)
-    call check_error(ierr, 'au')    
     call readyy('Reading map data',0.50d0)
     
     if (jamergedmap_same == 1) then
