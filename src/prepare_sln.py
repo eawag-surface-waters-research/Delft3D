@@ -185,8 +185,8 @@ toolsversion[2013] = "12.0"
 toolsversion[2014] = "12.0"
 toolsversion[2015] = "14.0"
 toolsversion[2016] = "14.0"
-toolsversion[2017] = "14.0"
-toolsversion[2019] = "14.0"
+toolsversion[2017] = "15.0"
+toolsversion[2019] = "15.0"
 
 #
 #
@@ -304,8 +304,8 @@ def process_solution_file(sln, slntemplate):
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2019:
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
-                # else:
-                    # leave line unchanged
+                else:
+                    pass
             startpos = line.find("# Visual Studio")
             if startpos == 0:
                 if vs == 2010:
@@ -323,9 +323,9 @@ def process_solution_file(sln, slntemplate):
                 elif vs == 2017:
                     line = "# Visual Studio 2017\r\n"
                 elif vs == 2019:
-                    line = "# Visual Studio 2019\r\n"
-                # else:
-                    # leave line unchanged
+                    line = "# Visual Studio 16\r\n"
+                else:
+                    pass
             filouthandle.write(line)
 
     # Process all project files referenced in the sln file
@@ -547,18 +547,13 @@ def getUCRTVersionNumber():
             result = ""
             sys.stdout.write("\n\n *** ERROR:Execution failed; is VisualStudio " + str(vs) + " installed?\n\n\n")
         result = result.decode('utf-8')
-        if result.find("UniversalCRTSdkDir") == -1:
+        ucrtpos = result.rfind("UniversalCRTSdkDir=")
+        if ucrtpos == -1:
             # Fallback: it should be this:
             sys.stdout.write("ucrtdir not found; set to default value\n")
-            ucrtdir = "c:\\Program Files (x86)\\Windows Kits\\10\\Lib\\"
+            ucrtdir = "c:\\Program Files (x86)\\Windows Kits\\10\\Lib"
         else:
-            ucrtdir = result[19:]
-            # result may be:
-            # ****\nbladibla\n****\nUniversalCRTSdkDir=<value>
-            # Get the value
-            ucrtpos = ucrtdir.rfind("UniversalCRTSdkDir=")
-            if ucrtpos > -1:
-                ucrtdir = ucrtdir[ucrtpos+19:]
+            ucrtdir = result[ucrtpos+19:]
             # Remove the trailing slash and the newline-character behind it
             lastslash = ucrtdir.rfind("\\")
             if lastslash != -1:
