@@ -4261,8 +4261,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_oned_functions, only: gridpoint2cross
    use string_module, only: replace_multiple_spaces_by_single_spaces
    use m_save_ugrid_state, only: mesh1dname
-   use m_dad, only: dad_included
-   use m_fm_update_crosssections, only: fm_update_mor_width_mean_bedlevel
 
    implicit none
 
@@ -4925,9 +4923,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_morCrsName, 'long_name','name of cross-section')
             endif
             if (stmpar%morpar%moroutput%blave) then
-               if (.not. dad_included) then
-                 call fm_update_mor_width_mean_bedlevel()
-               endif
                ierr = nf90_def_dim(mapids%ncid, trim(mesh1dname)//'_ndx1d', ndx1d, mapids%id_tsp%id_ndx1d)
                ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_bl_ave', nf90_double, (/ mapids%id_tsp%id_ndx1d, mapids%id_tsp%id_timedim /), mapids%id_tsp%id_blave)
                ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_blave, 'long_name','Main channel averaged bed level')
