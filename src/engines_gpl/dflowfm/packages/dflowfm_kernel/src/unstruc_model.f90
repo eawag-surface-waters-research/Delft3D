@@ -2853,6 +2853,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'sediment', 'MorFile'    , trim(md_morfile), 'Morphology settings file (*.mor)')
           call prop_set(prop_ptr, 'sediment', 'DredgeFile'    , trim(md_dredgefile), 'Dredging/dumping settings file (*.dad)')
           call prop_set(prop_ptr, 'sediment', 'TransportVelocity', jatranspvel, 'Velocities for sediment transport, 0=Lagr bed+sus, 1=Eul bed + Lagr sus, 2=Eul bed+sus')
+          call prop_set(prop_ptr, 'sediment', 'MorCFL'    , jamorcfl, 'Use CFL condition for morphologic updating 1=true, 0=false (default)')
+          call prop_set(prop_ptr, 'sediment', 'DzbDtMax', dzbdtmax, 'Maximum bed level change (m) per time step for the case MorCFL=1 (default=0.1 m)')
        end if
        if (jased .ne. 4) then
           call prop_set(prop_ptr, 'sediment', 'Nr_of_sedfractions' ,  mxgr , 'Nr of sediment fractions, (specify the next parameters for each fraction) ')
