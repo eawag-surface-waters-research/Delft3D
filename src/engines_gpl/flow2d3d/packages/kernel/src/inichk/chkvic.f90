@@ -218,7 +218,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           !
           if (real(icount,fp) > real(itotal,fp)/10.0_fp) then
              write (errmsg, '(a)') &
-                  & 'The explicit wall roughness formula violates the courant number in too many points. Decrease the time step to solve this problem.'
+                  & 'The courant number is violated in the viscosity term in more than 10% of the points. Decrease the time step to solve this problem.'
              call prterr(lundia, 'P004', trim(errmsg))
              !
              ! stop routine for DELFT3D
