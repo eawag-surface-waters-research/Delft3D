@@ -21847,7 +21847,7 @@ subroutine wrimap(tim)
           if (md_unc_conv == UNC_CONV_UGRID) then
              ndx1d = ndxi - ndx2d
              if (ndx1d > 0) then
-                if (dad_included) then
+                if (stmpar%morpar%moroutput%blave) then
                    call fm_update_mor_width_mean_bedlevel()
                 endif
              endif

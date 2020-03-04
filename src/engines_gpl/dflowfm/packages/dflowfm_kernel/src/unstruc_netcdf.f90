@@ -125,8 +125,6 @@ type t_unc_timespace_id
    integer :: id_jmax                       = -1
    integer :: id_nCrs                       = -1
    integer :: id_morCrsName                 = -1
-   integer :: id_blave                      = -1
-   integer :: id_ndx1d                      = -1
    integer :: id_netnodez(MAX_ID_VAR)       = -1 !< Variable ID for net node bed level. TODO: AvD: UNST-1318: consider removing here.
    
    integer :: id_nlyrdim    = -1 !< Dimension ID for number of bed layers in bed stratigraphy
@@ -394,6 +392,8 @@ type t_unc_mapids
    integer :: id_qCurLat(MAX_ID_VAR)  = -1 !< Variable ID for current total lateral inflow (discharge)
    integer :: id_vTotLat(MAX_ID_VAR)  = -1 !< Variable ID for cumulative total lateral inflow (volume)
    integer :: id_s1Gradient(MAX_ID_VAR) = -1 !< Variable ID for water level gradient
+   ! for river morphology, only for 1d
+   integer :: id_blave(MAX_ID_VAR)      = -1 !< Variable ID for main channel averaged bed level
    !
    ! Other
    !
@@ -4923,10 +4923,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_morCrsName, 'long_name','name of cross-section')
             endif
             if (stmpar%morpar%moroutput%blave) then
-               ierr = nf90_def_dim(mapids%ncid, trim(mesh1dname)//'_ndx1d', ndx1d, mapids%id_tsp%id_ndx1d)
-               ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_bl_ave', nf90_double, (/ mapids%id_tsp%id_ndx1d, mapids%id_tsp%id_timedim /), mapids%id_tsp%id_blave)
-               ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_blave, 'long_name','Main channel averaged bed level')
-               ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_blave, 'unit', 'm')
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_blave, nf90_double, UNC_LOC_S, 'bl_ave', '', 'Main channel averaged bed level', 'm', dimids = (/ -2, -1 /), which_meshdim = 1)
+               !ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_bl_ave', nf90_double, (/ mapids%id_tsp%id_ndx1d, mapids%id_tsp%id_timedim /), mapids%id_tsp%id_blave)
+               !ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_blave, 'long_name','Main channel averaged bed level')
+               !ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_blave, 'unit', 'm')
             endif
          endif
       endif
@@ -6097,7 +6097,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
             ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), work1d_n(1:jmax,1:nCrs), start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, nCrs, 1 /))
          endif
          if (stmpar%morpar%moroutput%blave) then
-            ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_blave, bl_ave(1:ndx1d), start=(/ 1, mapids%id_tsp%idx_curtime /), count=(/ ndx1d, 1 /))
+            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_blave, UNC_LOC_S, bl_ave)
          endif
       endif
    endif
