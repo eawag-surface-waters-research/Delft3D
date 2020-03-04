@@ -525,7 +525,7 @@
    double precision :: href_tot
    double precision :: ds
    !
-   ! upon entry blchg contains the bed level change averaged over the total cell area
+   ! Generate level change averaged over the main channel
    !
    do nm = 1, ndxi
       if (kcs(nm)==1) then ! only for 1D nodes
@@ -539,7 +539,7 @@
             if (ctype == CS_TABULATED) then
                ds = fm_get_ds(nm,j)
                !
-               ! determine the reference height href and the cross sectional area  below that level
+               ! determine the reference height href and the cross sectional area below that level
                !
                iref = cdef%levelscount
                do i = 2, cdef%levelscount - 1
@@ -555,7 +555,7 @@
                href_tot = href_tot + blref*ds
                ba_mor_tot = ba_mor_tot + cdef%flowWidth(iref)*ds
             else
-               write(msgbuf,'(a,i5)') 'Bed level updating has not yet implemented for cross section type ',ctype
+               write(msgbuf,'(a,i5)') 'Bed level averaging for main channel is not implemented for cross section type ',ctype
                call err_flush()
             endif            
          enddo
