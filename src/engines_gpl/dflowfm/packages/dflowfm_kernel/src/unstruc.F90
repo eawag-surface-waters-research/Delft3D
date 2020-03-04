@@ -21797,6 +21797,10 @@ subroutine wrimap(tim)
     use unstruc_netcdf
     use unstruc_model
     use unstruc_files , only: defaultFilename
+    use m_dad, only: dad_included
+    use m_fm_update_crosssections, only: fm_update_mor_width_mean_bedlevel
+    use m_flowgeom, only: ndx2d, ndxi
+   
     implicit none
     double precision, intent(in) :: tim
 
@@ -21810,6 +21814,7 @@ subroutine wrimap(tim)
     character(len=256) :: filnam
     logical            :: unitused
     double precision, save :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
+    integer            :: ndx1d
 
     ! Another time-partitioned file needs to start, reset iteration count (and file).
     if (ti_split > 0d0 .and. curtime_split /= time_split0) then
@@ -21840,6 +21845,12 @@ subroutine wrimap(tim)
 
        if (mapids%ncid .ne. 0) then
           if (md_unc_conv == UNC_CONV_UGRID) then
+             ndx1d = ndxi - ndx2d
+             if (ndx1d > 0) then
+                if (dad_included) then
+                   call fm_update_mor_width_mean_bedlevel()
+                endif
+             endif
              call unc_write_map_filepointer_ugrid(mapids,tim)  ! wrimap
           else
              call unc_write_map_filepointer(mapids%ncid,tim)  ! wrimap
