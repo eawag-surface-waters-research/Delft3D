@@ -722,6 +722,7 @@ end function get_discharge_under_gate
 !! Values are stored in the val*(:,:) arrays, shared with history output.
 subroutine structure_parameters_rst()
    use m_1d_structures
+   use m_flowexternalforcings
    implicit none
    integer :: n, istru
    type(t_structure), pointer    :: pstru
@@ -758,6 +759,12 @@ subroutine structure_parameters_rst()
       valorifgen(14,n) = get_gle(pstru)
       valorifgen(13,n) = network%sts%struct(istru)%generalst%gateopeningwidth_actual
       ! fu, ru have been computed in each computational time step, so skip computing them again
+   end do
+
+   do n = 1, network%sts%numPumps
+      istru = network%sts%pumpIndices(n)
+      pstru => network%sts%struct(istru)
+      valpump(6,n) = GetPumpCapacity(pstru)
    end do
 
 end subroutine structure_parameters_rst

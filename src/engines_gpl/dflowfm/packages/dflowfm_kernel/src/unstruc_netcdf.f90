@@ -2451,7 +2451,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_oned_functions, only: gridpoint2cross
     use m_save_ugrid_state, only: mesh1dname
     use m_structures
-   
+    use m_1d_structures
+
     integer,           intent(in) :: irstfile
     real(kind=hp),     intent(in) :: tim
 
@@ -2478,6 +2479,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_orifgendim,        &
         id_orifgen_furudim,   &
         id_orifgen_linkdim,   &
+        id_pumpdim,           &
+        id_pump_stagedim,     &
         id_time, id_timestep, &
         id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_unorm, id_q1, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, &
         id_q1main, &
@@ -2496,12 +2499,13 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_genstru_area, id_genstru_linkw, id_genstru_state, id_genstru_sOnCrest,&
         id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
         id_orifgen_crestl, id_orifgen_edgel, id_orifgen_openw, id_orifgen_fu, id_orifgen_ru, id_orifgen_au, id_orifgen_crestw, &
-        id_orifgen_area, id_orifgen_linkw, id_orifgen_state, id_orifgen_sOnCrest
+        id_orifgen_area, id_orifgen_linkw, id_orifgen_state, id_orifgen_sOnCrest, &
+        id_pump_cap, id_pump_ssTrigger, id_pump_dsTrigger
     
     integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
 
-    integer :: i, numContPts, numNodes, itim, k, kb, kt, kk, LL, Lb, Lt, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay, LTX, nlaybL, nrlaylx, maxNumLinks, numLinks, L0, nlen, istru
+    integer :: i, numContPts, numNodes, itim, k, kb, kt, kk, LL, Lb, Lt, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay, LTX, nlaybL, nrlaylx, maxNumLinks, numLinks, L0, nlen, istru, maxNumStages, numStages
     double precision              :: vicc, dicc, dens
     double precision, allocatable :: max_threttim(:)
     double precision, dimension(:), allocatable       :: dum
@@ -2521,6 +2525,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     double precision, dimension(:,:), allocatable :: work2d
     double precision, dimension(:,:,:), allocatable :: work3d
     integer,          dimension(:,:,:), allocatable :: work3di
+    type(t_structure), pointer                    :: pstru
     
 
     ! Grid and flow geometry
@@ -3351,6 +3356,29 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_put_att(irstfile, id_orifgen_sOnCrest, 'long_name', 'water level on crest of orifice')
           ierr = nf90_put_att(irstfile, id_orifgen_sOnCrest, 'units', 'm')
        end if
+
+       nlen = network%sts%numPumps
+       if (nlen > 0) then
+          ! define dimensions
+          ierr = nf90_def_dim(irstfile, 'nPumps', nlen, id_pumpdim)
+          maxNumStages = 0
+          do i = 1, nlen
+             istru = network%sts%pumpIndices(i)
+             maxNumStages = max(maxNumStages, network%sts%struct(istru)%pump%nrstages)
+          end do
+          ierr = nf90_def_dim(irstfile, 'nPump_max_numstages', maxNumStages, id_pump_stagedim)
+
+          ! define variables
+          ierr = nf90_def_var(irstfile, 'pump_capacity', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_cap)
+          ierr = nf90_put_att(irstfile, id_pump_cap, 'long_name', 'Capacity of pump')
+          ierr = nf90_put_att(irstfile, id_pump_cap, 'units', 'm3 s-1')
+
+          ierr = nf90_def_var(irstfile, 'pump_suction_side_trigger', nf90_int, dimids = (/ id_pumpdim, id_pump_stagedim, id_timedim/), varid = id_pump_ssTrigger)
+          ierr = nf90_put_att(irstfile, id_pump_ssTrigger, 'long_name', 'Sunction trigger of pump. 1 means true and 0 means false.')
+
+          ierr = nf90_def_var(irstfile, 'pump_delivery_side_trigger', nf90_int, dimids = (/ id_pumpdim, id_pump_stagedim, id_timedim/), varid = id_pump_dsTrigger)
+          ierr = nf90_put_att(irstfile, id_pump_dsTrigger, 'long_name', 'Delivery trigger of pump. 1 means true and 0 means false.')
+       end if
     end if
 
     ierr = nf90_enddef(irstfile)
@@ -3454,6 +3482,11 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_inq_varid(irstfile, 'orifice_au', id_orifgen_au)
           ierr = nf90_inq_varid(irstfile, 'orifice_state', id_orifgen_state)
           ierr = nf90_inq_varid(irstfile, 'orifice_water_level_on_crest', id_orifgen_sOnCrest)
+       end if
+       if(network%sts%numPumps > 0) then
+          ierr = nf90_inq_varid(irstfile, 'pump_capacity', id_pump_cap)
+          ierr = nf90_inq_varid(irstfile, 'pump_suction_side_trigger', id_pump_ssTrigger)
+          ierr = nf90_inq_varid(irstfile, 'pump_delivery_side_trigger', id_pump_dsTrigger)
        end if
     end if
                 
@@ -4130,6 +4163,42 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
              end do
           end do
           ierr = nf90_put_var(irstfile, id_orifgen_sOnCrest, work2d, (/1, 1, itim/))
+       end if
+
+       ! write info. of pump
+       nlen = network%sts%numPumps
+       if(nlen > 0) then
+          ierr = nf90_put_var(irstfile, id_pump_cap, valpump(6,1:nlen), (/ 1, itim /))
+
+          call realloc(work2d, (/nlen, maxNumStages/), keepExisting=.false.)
+          do i = 1, nlen
+             istru = network%sts%pumpIndices(i)
+             pstru => network%sts%struct(istru)
+             numStages = pstru%pump%nrstages
+             do L0 = 1, numStages
+                if (pstru%pump%ss_trigger(L0)) then
+                   work2d(i,L0) = 1
+                else
+                   work2d(i,L0) = 0
+                end if
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_pump_ssTrigger, work2d, (/1, 1, itim/))
+          
+          call realloc(work2d, (/nlen, maxNumStages/), keepExisting=.false.)
+          do i = 1, nlen
+             istru = network%sts%pumpIndices(i)
+             pstru => network%sts%struct(istru)
+             numStages = pstru%pump%nrstages
+             do L0 = 1, numStages
+                if (pstru%pump%ds_trigger(L0)) then
+                   work2d(i,L0) = 1
+                else
+                   work2d(i,L0) = 0
+                end if
+             end do
+          end do
+          ierr = nf90_put_var(irstfile, id_pump_dsTrigger, work2d, (/1, 1, itim/))
        end if
     end if
 
@@ -14489,6 +14558,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
    use m_flow, only: au
    use m_1d_structures
    use m_General_Structure
+   use m_flowexternalforcings
    implicit none 
    integer,          intent(in   )   :: ncid        !< ID of the rst file
    character(len=*), intent(in   )   :: filename    !< Name of rst file.
@@ -14500,12 +14570,13 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
    character(len=IdLen)              :: struName
    double precision,     allocatable :: tmpvar(:), tmpvar3d(:,:,:), tmpvar2d(:,:)
    integer,              allocatable :: tmpvar3di(:,:,:)
-   integer :: strucDimErr, id_var, i, nLinks, nStru, ierr, iStru, n1, n2, strucVarErr, L, L0
+   integer :: strucDimErr, id_var, i, nLinks, nStru, ierr, iStru, n1, n2, strucVarErr, L, L0, nstages
    integer :: id_culvert_openh, &
                id_genstru_crestl, id_genstru_edgel, id_genstru_openw, id_genstru_fu, id_genstru_ru, id_genstru_au, id_genstru_crestw, id_genstru_area, id_genstru_linkw, id_genstru_state, id_genstru_sOnCrest,&
                id_weirgen_crestl, id_weirgen_crestw, id_weirgen_area, id_weirgen_linkw, id_weirgen_fu, id_weirgen_ru, id_weirgen_au, id_weirgen_state, id_weirgen_sOnCrest, &
                id_orifgen_crestl, id_orifgen_edgel, id_orifgen_openw, id_orifgen_fu, id_orifgen_ru, id_orifgen_au, id_orifgen_crestw, &
-               id_orifgen_area, id_orifgen_linkw, id_orifgen_state, id_orifgen_sOnCrest
+               id_orifgen_area, id_orifgen_linkw, id_orifgen_state, id_orifgen_sOnCrest, &
+               id_pump_cap, id_pump_ssTrigger, id_pump_dsTrigger
    type(t_structure), pointer        :: pstru
    type(t_GeneralStructure), pointer :: genstr
    
@@ -15062,6 +15133,81 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
       end if
    end if
 
+   ! Read info. of pumps
+   nStru = network%sts%numPumps
+   if (nStru > 0) then
+      ! read dimensions
+      struName = 'pump'
+      nStruDim = 2
+      call realloc(struDimNames, nStruDim)
+      call realloc(ids_struDim, nStruDim)
+      struDimNames(1) = 'nPumps'
+      struDimNames(2) = 'nPump_max_numstages'
+      call read_structure_dimensions_from_rst(ncid, filename, ST_PUMP, trim(struName), nStruDim, struDimNames, ids_struDim, nStru, strucDimErr)
+   
+      ! read variables
+      if (strucDimErr == 0) then
+         ! read pump_capacity
+         call realloc(tmpvar, nStru, stat=ierr, keepExisting=.false.)
+         ierr = nf90_inq_varid(ncid, 'pump_capacity', id_pump_cap)
+         ierr = nf90_get_var(ncid, id_pump_cap, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
+         call check_error(ierr, '"pump_capacity", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+
+         if (ierr == 0) then
+            do i = 1, nStru
+               istru = network%sts%pumpIndices(i)
+               pstru => network%sts%struct(istru)
+               pstru%pump%current_capacity = tmpvar(i)
+            end do
+         end if
+         
+         ierr = nf90_inquire_dimension(ncid, ids_struDim(2), len = n1)
+         if (ierr == 0 .and. n1 > 0) then
+            ! read pump_suction_side_trigger
+            call realloc(tmpvar2d, (/nStru,n1/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'pump_suction_side_trigger', id_pump_ssTrigger)
+            ierr = nf90_get_var(ncid, id_pump_ssTrigger, tmpvar2d, start=(/1, it_read/), count=(/nStru,n1, 1/))
+            call check_error(ierr, '"pump_suction_side_trigger", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%pumpIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nstages = pstru%pump%nrstages
+                  do L0 = 1, nstages
+                     if (tmpvar2d(i,L0) == 1) then
+                        pstru%pump%ss_trigger(L0) = .true.
+                     else
+                        pstru%pump%ss_trigger(L0) = .false.
+                     end if
+                  end do
+               end do
+            end if
+            
+            ! read pump_delivery_side_trigger
+            call realloc(tmpvar2d, (/nStru,n1/), stat=ierr, keepExisting=.false.)
+            ierr = nf90_inq_varid(ncid, 'pump_delivery_side_trigger', id_pump_dsTrigger)
+            ierr = nf90_get_var(ncid, id_pump_dsTrigger, tmpvar2d, start=(/1, it_read/), count=(/nStru,n1, 1/))
+            call check_error(ierr, '"pump_delivery_side_trigger", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            if (ierr == 0) then
+               do i = 1, nStru
+                  istru = network%sts%pumpIndices(i)
+                  pstru => network%sts%struct(istru)
+                  nstages = pstru%pump%nrstages
+                  do L0 = 1, nstages
+                     if (tmpvar2d(i,L0) == 1) then
+                        pstru%pump%ds_trigger(L0) = .true.
+                     else
+                        pstru%pump%ds_trigger(L0) = .false.
+                     end if
+                  end do
+               end do
+            end if
+         else
+            call mess(LEVEL_WARN, 'read_structures_from_rst: cannot read varialbes _sunction_side_trigger of pump. Skip reading these variables. The simulation will continue but the results may not be reliable.')
+         end if
+      end if
+   end if
+
 end subroutine read_structures_from_rst
 
 
@@ -15115,6 +15261,15 @@ subroutine read_structure_dimensions_from_rst(ncid, filename, istrtypein, struna
                strucDimErr = strucDimErr + 1
                return
             end if
+         end if
+      end if
+      
+      if (istrtypein == ST_PUMP) then
+         ierr = nf90_inq_dimid(ncid, trim(struDimNames(2)), ids_struDim(2))
+         if (ierr /= 0) then
+            call mess(LEVEL_WARN, 'read_structures_dimensions_from_rst: cannot read dimension '''//trim(struDimNames(2))//''' in restart file '''//trim(filename)//'''. The simulation will continue but the results may not be reliable.')
+            strucDimErr = strucDimErr + 1
+            return
          end if
       end if
    end if
