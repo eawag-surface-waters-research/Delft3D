@@ -813,9 +813,7 @@ end subroutine flow_finalize_single_timestep
  call klok(cpu_extra(2,41)) ! End advec
 
  if (jazws0.eq.1)  then
-    if (index( md_restartfile, '_rst.nc', success ) == 0) then
-       call makeq1qaAtStart()                           ! when restart with a rst file, q1 and qa are already read from it, so skip this step.
-    end if                                              ! for other situations including restart with a map file, still call this subroutine
+    call makeq1qaAtStart()
     call setkfs()
  endif
 
@@ -1081,9 +1079,23 @@ if(q /= 0) then
  subroutine makeq1qaAtStart()
  use m_flow
  use m_flowgeom
+ use unstruc_model, only: md_restartfile
+ use unstruc_netcdf
  implicit none
 
- integer :: L
+ integer :: L, idfile, id_qa, ierr
+
+ ! When it is a restart simulation, check if the restart file (rst/map) contains variable 'qa'.
+ ! If it contains 'qa', then 'qa' has been read before, and no need to compute it again here.
+ if (len_trim(md_restartfile) > 0) then
+    ierr = unc_open(md_restartfile, nf90_nowrite, idfile)
+    call check_error(ierr, 'file '''//trim(md_restartfile)//'''')
+
+    ierr = nf90_inq_varid(idfile, 'qa', id_qa)
+    if (ierr == nf90_noerr) then
+       return
+    end if
+ end if
 
  do L = 1,lnx
     if (hu(L) > 0) then
