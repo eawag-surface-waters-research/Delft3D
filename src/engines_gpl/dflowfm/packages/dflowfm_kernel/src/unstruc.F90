@@ -18714,6 +18714,11 @@ subroutine unc_write_his(tim)            ! wrihis
     end if
 
     ! Close/reset any previous hisfile.
+    if (ihisfile/=0) then  ! reset stord ncid to zero if file not open
+	   ierr = nf90_inquire(ihisfile, ndims)
+	   if (ierr/=0) ihisfile = 0
+    end if
+
     if (ihisfile > 0 .and. it_his == 0) then
         ierr = unc_close(ihisfile)
         ihisfile = 0
@@ -21826,7 +21831,7 @@ subroutine wrimap(tim)
     character(len=256) :: filnam
     logical            :: unitused
     double precision, save :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
-    integer            :: ndx1d
+    integer            :: ndx1d, ndims
 
     ! Another time-partitioned file needs to start, reset iteration count (and file).
     if (ti_split > 0d0 .and. curtime_split /= time_split0) then
@@ -21842,18 +21847,23 @@ subroutine wrimap(tim)
            mapids%ncid = 0
        end if
 
-        if (mapids%ncid == 0) then
-            if (ti_split > 0d0) then
-                filnam = defaultFilename('map', timestamp=time_split0)
-            else
-                filnam = defaultFilename('map')
-            end if
-            ierr = unc_create(filnam , 0, mapids%ncid)
-            if (ierr /= nf90_noerr) then
-                call mess(LEVEL_WARN, 'Could not create map file.')
-                mapids%ncid = 0
-            end if
-        endif
+       if (mapids%ncid/=0) then  ! reset stord ncid to zero if file not open
+		  ierr = nf90_inquire(mapids%ncid, ndims)
+		  if (ierr/=0) mapids%ncid = 0
+       end if
+	   
+       if (mapids%ncid == 0) then
+           if (ti_split > 0d0) then
+               filnam = defaultFilename('map', timestamp=time_split0)
+           else
+               filnam = defaultFilename('map')
+           end if
+           ierr = unc_create(filnam , 0, mapids%ncid)
+           if (ierr /= nf90_noerr) then
+               call mess(LEVEL_WARN, 'Could not create map file.')
+               mapids%ncid = 0
+           end if
+       endif
 
        if (mapids%ncid .ne. 0) then
           if (md_unc_conv == UNC_CONV_UGRID) then
