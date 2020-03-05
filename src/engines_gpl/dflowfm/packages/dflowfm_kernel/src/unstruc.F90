@@ -26782,10 +26782,13 @@ endif
  if (jatem > 0) then
     if ( allocated (tem1) ) deallocate (tem1)
     allocate ( tem1(ndkx)  , stat = ierr)
-    call aerr('tem1(ndkx) ', ierr, 2*ndkx) ; tem1 = temini
+    call aerr('tem1(ndkx) ', ierr, 2*ndkx)
+    tem1 = temini
     if ( allocated (heatsrc) )  deallocate (heatsrc, heatsrc0)
-    allocate ( heatsrc(ndkx), heatsrc0(ndkx) , stat = ierr) ; heatsrc = 0d0 ; heatsrc0 = 0d0
+    allocate ( heatsrc(ndkx), heatsrc0(ndkx) , stat = ierr)
     call aerr('heatsrc(ndkx), heatsrc0(ndkx)', ierr, ndkx)
+    heatsrc = 0d0
+    heatsrc0 = 0d0
 
     if (jatransportmodule == 0) then
         if ( allocated (tupq) )  deallocate (tupq,  qtho)
@@ -26816,35 +26819,44 @@ endif
 
     if ((jamapheatflux > 0 .or. jahisheatflux > 0) .and. jatem > 1) then
        if (allocated (Qtotmap) ) deallocate (Qtotmap)
-       allocate ( Qtotmap(ndx)   , stat = ierr) ; Qtotmap = 0d0
+       allocate ( Qtotmap(ndx)   , stat = ierr)
        call aerr('Qtotmap(ndx)'  , ierr , ndx )
+       Qtotmap = 0d0
     endif
 
     if (jatem == 5) then ! save cd coeff if heat modelling also involved
        if (allocated (cdwcof) ) deallocate(cdwcof)
        allocate ( cdwcof(lnx) , stat = ierr)
-       call aerr('cdwcof(lnx)', ierr ,  lnx) ; cdwcof = 0d0
+       call aerr('cdwcof(lnx)', ierr ,  lnx)
+       cdwcof = 0d0
 
        if (jaroro > 1) then ! save rhoair for windstress
           if (allocated (roair) ) deallocate(roair)
           allocate ( roair(ndx) , stat = ierr)
-          call aerr('roair(ndx)', ierr ,  ndx) ; roair = rhoair
+          call aerr('roair(ndx)', ierr ,  ndx)
+          roair = rhoair
        endif
 
        if (jamapheatflux > 0 .or. jahisheatflux > 0) then ! his or map output
           if (allocated(qsunmap)) deallocate (Qsunmap, Qevamap, Qconmap, Qlongmap, Qfrevamap, Qfrconmap)
-          allocate ( Qsunmap(ndx)   , stat = ierr) ; Qsunmap = 0d0
+          allocate ( Qsunmap(ndx)   , stat = ierr)
           call aerr('Qsunmap(ndx)'  , ierr , ndx )
-          allocate ( Qevamap(ndx)   , stat = ierr) ; Qevamap = 0d0
+          Qsunmap = 0d0
+          allocate ( Qevamap(ndx)   , stat = ierr)
           call aerr('Qevamap(ndx)'  , ierr , ndx )
-          allocate ( Qconmap(ndx)   , stat = ierr) ; Qconmap = 0d0
+          Qevamap = 0d0
+          allocate ( Qconmap(ndx)   , stat = ierr)
           call aerr('Qconmap(ndx)'  , ierr , ndx )
-          allocate ( Qlongmap(ndx)  , stat = ierr) ; Qlongmap = 0d0
+          Qconmap = 0d0
+          allocate ( Qlongmap(ndx)  , stat = ierr)
           call aerr('Qlongmap(ndx)' , ierr , ndx )
-          allocate ( Qfrevamap(ndx) , stat = ierr) ; Qfrevamap = 0d0
+          Qlongmap = 0d0
+          allocate ( Qfrevamap(ndx) , stat = ierr)
           call aerr('Qfrevamap(ndx)', ierr , ndx )
-          allocate ( Qfrconmap(ndx) , stat = ierr) ; Qfrconmap = 0d0
+          Qfrevamap = 0d0
+          allocate ( Qfrconmap(ndx) , stat = ierr)
           call aerr('Qfrconmap(ndx)', ierr , ndx )
+          Qfrconmap = 0d0
        endif
     endif
  endif
@@ -26855,8 +26867,9 @@ endif
     call aerr('sed (mxgr,ndkx)' ,  ierr, ndkx*mxgr)
 
     if ( allocated(sdupq) )  deallocate (sdupq)
-    allocate ( sdupq(mxgr,ndkx) , stat = ierr) ; sdupq = 0d0
+    allocate ( sdupq(mxgr,ndkx) , stat = ierr)
     call aerr('sdupq(mxgr,ndkx)', ierr, ndkx*mxgr)
+    sdupq = 0d0
 
     if (jaceneqtr == 1) then                  ! cell centre equilibrium transport concentration
        mxn = ndx
