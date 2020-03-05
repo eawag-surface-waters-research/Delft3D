@@ -557,6 +557,11 @@ contains
        end select
     enddo
 
+    if (bc%quantity%unit == 'K' .or. bc%quantity%unit == 'KELVIN' .or. bc%quantity%unit == 'Kelvin') then
+       ! convert Kelvin to degrees Celsius (kernel expects degrees Celsius)
+       bc%quantity%offset = bc%quantity%offset - 273.15_hp
+    endif
+
     ! Fill bc%quantity%col2elm(nq) which holds the mapping of columns in the file to vector positions
     bc%quantity%col2elm(iq) = -1
     bc%numcols = iq

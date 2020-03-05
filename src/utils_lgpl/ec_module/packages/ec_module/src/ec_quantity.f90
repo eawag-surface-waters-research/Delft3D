@@ -174,7 +174,6 @@ module m_ec_quantity
          integer,                   intent(in) :: varid       !< id of the variable
                                                               !< order: new = (old*scale) + offset
          character(len=:), allocatable  :: units
-         character(len=5)               :: quantidstr
          integer  :: ierr
          integer  :: attriblen
          real(hp) :: add_offset, scalefactor, fillvalue
@@ -195,11 +194,10 @@ module m_ec_quantity
             end if
          end if
 
-         write(quantidstr,'(i5.5)') quantityId
          ierr = nf90_get_att(ncid, varid, '_FillValue', fillvalue)
          if (ierr==NF90_NOERR) then
             if (.not.(ecQuantitySet(instancePtr, quantityId, fillvalue=fillvalue))) then
-               call setECMessage("Unable to set fillValue for quantity "//quantidstr)
+               call setECMessage("Unable to set fillValue for quantity ", quantityId)
                return
             end if
          end if
@@ -207,7 +205,7 @@ module m_ec_quantity
          ierr = nf90_get_att(ncid, varid, 'scale_factor', scalefactor)
          if (ierr==NF90_NOERR) then
             if (.not.(ecQuantitySet(instancePtr, quantityId, factor=scalefactor))) then
-               call setECMessage("Unable to set scale factor for quantity "//quantidstr)
+               call setECMessage("Unable to set scale factor for quantity ", quantityId)
                return
             end if
          end if
@@ -215,13 +213,18 @@ module m_ec_quantity
          ierr = nf90_get_att(ncid, varid, 'add_offset', add_offset)
          if (ierr==NF90_NOERR) then
             if (.not.(ecQuantitySet(instancePtr, quantityId, offset=add_offset))) then
-               call setECMessage("Unable to set offset for quantity "//quantidstr)
+               call setECMessage("Unable to set offset for quantity ", quantityId)
                return
             end if
          end if
 
+         if (units == 'K' .or. units == 'KELVIN') then
+            ! convert Kelvin to degrees Celsius (kernel expects degrees Celsius)
+            add_offset = add_offset - 273.15_hp
+         end if
+
          success = .true.
-         
+
       end function ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
      
       ! =======================================================================
