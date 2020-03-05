@@ -635,6 +635,7 @@ src/engines_gpl/dflowfm/scripts/team-city/run_dflowfm.bat -text
 src/engines_gpl/dflowfm/scripts/team-city/run_dflowfm.sh -text
 src/engines_gpl/dflowfm/scripts/team-city/run_dfmoutput.bat -text
 src/engines_gpl/dflowfm/scripts/team-city/run_dfmoutput.sh -text
+src/engines_gpl/dflowfm/scripts/team-city/zip_code.py -text
 src/engines_gpl/dflowfm/scripts/template/dflowfm_open_template.sln -text
 src/engines_gpl/dflowfm/scripts/template/dflowfm_unit_tests_template.sln -text
 src/engines_gpl/dflowfm/scripts/template/generate.py -text
