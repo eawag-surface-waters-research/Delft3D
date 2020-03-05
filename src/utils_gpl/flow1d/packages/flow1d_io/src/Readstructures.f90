@@ -404,6 +404,7 @@ module m_readstructures
       integer :: ngate
       integer :: ngenstru
       integer :: nuniweir
+      integer :: npump
       integer,          dimension(:), pointer :: indices
       character(len=IdLen), dimension(:), pointer :: ids
       
@@ -441,6 +442,7 @@ module m_readstructures
       nbridge = 0
       ngate = 0
       nuniweir = 0
+      npump = 0
       do istru = 1, sts%Count
          select case (sts%struct(istru)%type)
          case (ST_WEIR)
@@ -482,6 +484,10 @@ module m_readstructures
          case (ST_UNI_WEIR)
             nuniweir = nuniweir + 1
             sts%uniWeirIndices(nuniweir) = istru
+         case (ST_PUMP)
+            npump = npump+1
+            sts%pumpIndices(npump) = istru
+            sts%struct(istru)%type = ST_PUMP
          end select
       enddo
       
