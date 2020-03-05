@@ -22,8 +22,7 @@ from itertools import chain
 # Currently Assumes Cleaned repository folder.
 def get_relevant_files(svn_root: Path):
     """
-    Get all files from the src and test folders except for the test-data 
-    folders and contents.
+    Get all files from the folders relevant for dflowfm.
 
     :param svn_root: The root path of the svn.
     """
@@ -77,7 +76,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     svn_src_path = Path(args.root_path)
-    build_path = svn_src_path / Path("zip_contents")
 
     today = datetime.date.today()
     zip_file_name = "{}_{}.zip".format(args.zip_name, today.strftime("%Y%m%d"))
