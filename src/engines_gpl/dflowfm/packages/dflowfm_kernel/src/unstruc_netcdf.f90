@@ -14582,8 +14582,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
    
    strucDimErr = 0
    strucVarErr = 0
-   n1 = 0
-   n2 = 0
+
    if (.not. network%loaded) then
       call mess(LEVEL_WARN, 'read_structures_from_rst: the network array is not loaded, then skip reading structures. The simulation will continue but the results may not be reliable.')
       return
@@ -14606,7 +14605,6 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
          ierr = nf90_inq_varid(ncid, 'culvert_valve_opening_height', id_culvert_openh)
          ierr = nf90_get_var(ncid, id_culvert_openh, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
          call check_error(ierr, '"culvert_valve_opening_height", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
-         ierr = nf90_get_var(ncid, id_genstru_crestw, tmpvar, start=(/1, it_read/), count=(/nStru, 1/))
 
          if (ierr == 0) then
             do i = 1, nStru
@@ -14689,9 +14687,11 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
             end do
          end if
 
+         n1 = 0
+         n2 = 0
          ierr = nf90_inquire_dimension(ncid, ids_struDim(2), len = n1)
          ierr = nf90_inquire_dimension(ncid, ids_struDim(3), len = n2)
-         if (n1 > 0 .and. n2 > 0) then
+         if (ierr == 0 .and. n1 > 0 .and. n2 > 0) then
             ! read general_structure_flow_area
             call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
             ierr = nf90_inq_varid(ncid, 'general_structure_flow_area', id_genstru_area)
@@ -14842,9 +14842,11 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
             end do
          end if
 
+         n1 = 0
+         n2 = 0
          ierr = nf90_inquire_dimension(ncid, ids_struDim(2), len = n1)
          ierr = nf90_inquire_dimension(ncid, ids_struDim(3), len = n2)
-         if (n1 > 0 .and. n2 > 0) then
+         if (ierr == 0 .and. n1 > 0 .and. n2 > 0) then
             ! read weirgen_flow_area
             call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
             ierr = nf90_inq_varid(ncid, 'weirgen_flow_area', id_weirgen_area)
@@ -15022,11 +15024,12 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
                genstr%gateopeningwidth = tmpvar(i)
             end do
          end if
-         
 
+         n1 = 0
+         n2 = 0
          ierr = nf90_inquire_dimension(ncid, ids_struDim(2), len = n1)
          ierr = nf90_inquire_dimension(ncid, ids_struDim(3), len = n2)
-         if (n1 > 0 .and. n2 > 0) then
+         if (ierr == 0 .and. n1 > 0 .and. n2 > 0) then
             ! read orifice_flow_area
             call realloc(tmpvar2d, (/nStru,n2/), stat=ierr, keepExisting=.false.)
             ierr = nf90_inq_varid(ncid, 'orifice_flow_area', id_orifgen_area)
