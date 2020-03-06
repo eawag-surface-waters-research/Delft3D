@@ -310,6 +310,8 @@ module m_readstructures
                endif
             case (ST_GENERAL_ST)
                call readGeneralStructure(pstru%generalst, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
+            case (ST_DAMBREAK)
+               call readDambreak(pstru%dambreak, md_ptr%child_nodes(i)%node_ptr, st_id, network%forcinglist, success)
             case (ST_COMPOUND)
                ! Compound structures have been cycled above already.
                continue
@@ -404,6 +406,7 @@ module m_readstructures
       integer :: ngate
       integer :: ngenstru
       integer :: nuniweir
+      integer :: ndambreak
       integer :: npump
       integer,          dimension(:), pointer :: indices
       character(len=IdLen), dimension(:), pointer :: ids
@@ -425,6 +428,7 @@ module m_readstructures
       sts%numGates    = sts%countByType(ST_GATE)
       sts%numGeneralStructures = sts%countByType(ST_GENERAL_ST)
       sts%numUniWeirs = sts%countByType(ST_UNI_WEIR)
+      sts%numDambreaks = sts%countByType(ST_DAMBREAK)
       allocate(sts%weirIndices(sts%numweirs))
       allocate(sts%culvertIndices(sts%numCulverts))
       allocate(sts%pumpIndices(sts%numPumps))
@@ -433,6 +437,7 @@ module m_readstructures
       allocate(sts%bridgeIndices(sts%numBridges))
       allocate(sts%generalStructureIndices(sts%numGeneralStructures))
       allocate(sts%uniWeirIndices(sts%numUniWeirs))
+      allocate(sts%dambreakIndices(sts%numDambreaks))
 
       !set structure indices for different structure types
       nweir = 0
@@ -442,6 +447,7 @@ module m_readstructures
       nbridge = 0
       ngate = 0
       nuniweir = 0
+      ndambreak = 0
       npump = 0
       do istru = 1, sts%Count
          select case (sts%struct(istru)%type)
@@ -459,6 +465,7 @@ module m_readstructures
             if (icross > 0) then
                sts%struct(istru)%culvert%pcross => crs%cross(icross)
             end if
+         ! TODO: why is pump administation missing?
          case (ST_ORIFICE)
             norifice = norifice + 1
             sts%orificeIndices(norifice) = istru
@@ -484,6 +491,9 @@ module m_readstructures
          case (ST_UNI_WEIR)
             nuniweir = nuniweir + 1
             sts%uniWeirIndices(nuniweir) = istru
+         case (ST_DAMBREAK)
+            ndambreak = ndambreak + 1
+            sts%dambreakIndices(ndambreak) = istru
          case (ST_PUMP)
             npump = npump+1
             sts%pumpIndices(npump) = istru
@@ -1153,11 +1163,16 @@ module m_readstructures
    end subroutine readBridge
 
 
-   subroutine readDambreak(dambr, md_ptr, success)
+   !> Read the dambreak specific data for a dambreak structure.
+   !! The common fields for the structure (e.g. x/yCoordinates) must have been read elsewhere.
+   subroutine readDambreak(dambr, md_ptr, st_id, forcinglist, success)
+   
+      type(t_dambreak), pointer,    intent(inout) :: dambr       !< Dambreak structure to be read into.
+      type(tree_data), pointer,     intent(in   ) :: md_ptr      !< ini tree pointer with user input.
+      character(IdLen),             intent(in   ) :: st_id       !< Structure character Id.
+      type(t_forcinglist),          intent(inout) :: forcinglist !< List of all (structure) forcing parameters. (only for uniform interface now, later: to which dambreak forcing will be added if needed.)
+      logical,                      intent(  out) :: success     !< Result status, whether reading of the structure was successful.
 
-      type(t_dambreak), pointer, intent(inout) :: dambr      
-      type(tree_data), pointer, intent(in)     :: md_ptr
-      logical, intent(inout)                   :: success
       
       logical :: localsuccess
 
@@ -1208,6 +1223,8 @@ module m_readstructures
       
       ! get the name of the tim file 
       if (dambr%algorithm == 3) then
+         ! UNST-3308: NOTE that only the .tim filename is read below. It is NOT added to the network%forcinglist.
+         !            All time-space handling of the dambreak is still done in kernel.
          call prop_get_string(md_ptr, 'Structure', 'DambreakLevelsAndWidths', dambr%levelsAndWidths, success)
          if (.not. success) return         
       endif
@@ -1217,7 +1234,7 @@ module m_readstructures
       
       call setCoefficents(dambr)
       
-   end subroutine
+   end subroutine readDambreak
 
    !> Read the pump specific data for a pump structure.
    !! The common fields for the structure (e.g. branchId) must have been read elsewhere.

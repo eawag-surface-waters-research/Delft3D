@@ -2029,6 +2029,7 @@ character(len=IdLen)          :: strid ! TODO: where to put IdLen (now in Messag
 character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in MessageHandling)
                                     ! TODO: in readstruc* change incoming ids to len=*
 character(len=idLen)          :: branchid
+character(len=:), allocatable :: str_buf
 type(t_structure), pointer    :: pstru
 type(t_forcing), pointer      :: pfrc
 logical                       :: successloc
@@ -2040,7 +2041,7 @@ type(c_ptr) :: cptr
 ! dambreak
 double precision              :: x_breach, y_breach, distemp
 double precision              :: xc, yc, xn, yn   
-integer                       :: nDambreakCoordinates, k3, k4, kpol, indexInStructure, indexLink, ja, Lstart
+integer                       :: nDambreakCoordinates, k3, k4, kpol, indexInStructure, indexInPliset, indexLink, ja, Lstart
 double precision              :: xla, xlb, yla, ylb, rn, rt
 integer, allocatable          :: lftopol(:)
 double precision, allocatable :: xl(:,:), yl(:,:)
@@ -2114,6 +2115,9 @@ allocate(dambreakPolygons(nstr))
 !initialize the index
 dambridx = -1
 
+! UNST-3308: early counting of ndambreak is needed here, because of lftopol array
+ndambreak = 0
+
 ! NOTE: readStructures(network, md_structurefile) has already been called.
 do i=1,network%sts%count
    pstru => network%sts%struct(i)
@@ -2122,13 +2126,24 @@ do i=1,network%sts%count
    if (pstru%ibran > 0) then
       loc_spec_type = LOCTP_BRANCHID_CHAINAGE
    else if (pstru%numCoordinates > 0) then
-      loc_spec_type = LOCTP_POLYGON_XY
+      loc_spec_type = LOCTP_POLYLINE_XY
    end if
 
-   call selectelset_internal_links( xz, yz, ndx, ln, lnx, kegen(1:numl), numgen, &
-                                    loc_spec_type, nump = pstru%numCoordinates, xpin = pstru%xCoordinates, ypin = pstru%yCoordinates, &
-                                    branchindex = pstru%ibran, chainage = pstru%chainage, &
-                                    sortLinks = 1)
+   select case (pstru%type)
+   case (ST_DAMBREAK)
+      call selectelset_internal_links( xz, yz, ndx, ln, lnx, kegen(1:numl), numgen, &
+                                       loc_spec_type, nump = pstru%numCoordinates, xpin = pstru%xCoordinates, ypin = pstru%yCoordinates, &
+                                       branchindex = pstru%ibran, chainage = pstru%chainage, &
+                                       xps = dambreakPolygons(i)%xp, yps = dambreakPolygons(i)%yp, nps = dambreakPolygons(i)%np, &
+                                       lftopol = lftopol(ndambreak+1:numl), sortLinks = 1)
+      ndambreak = ndambreak + numgen ! UNST-3308: early counting of ndambreak is needed here, because of lftopol array
+   case default
+      call selectelset_internal_links( xz, yz, ndx, ln, lnx, kegen(1:numl), numgen, &
+                                       loc_spec_type, nump = pstru%numCoordinates, xpin = pstru%xCoordinates, ypin = pstru%yCoordinates, &
+                                       branchindex = pstru%ibran, chainage = pstru%chainage, &
+                                       sortLinks = 1)
+   end select
+   
    if (numgen > 0) then
       istat =  initialize_structure_links(pstru, numgen, kegen(1:numgen), wu)
    else
@@ -2138,6 +2153,8 @@ do i=1,network%sts%count
    endif
    
 end do
+! UNST-3308: early counting of ndambreak was needed here, because of lftopol array, but must be redone later below as well.
+ndambreak = 0
 
 if (network%cmps%Count > 0) then
     istat = max(istat, initialize_compounds(network%cmps, network%sts))
@@ -2170,22 +2187,11 @@ do i=1,nstr
 
    success = .true.
    
-   ! check if this structure concerns Flow1D type structure
-   call prop_get_string(str_ptr, '', 'branchid', strtype, success)
-   if (success) then
-      success = .true.
-      call prop_get_string(str_ptr, '', 'type', strtype, success)
-      
-      if (trim(strtype) /= 'pump') then
-         cycle
-      endif
-      
-   endif
-   call prop_get_string(str_ptr, '', 'filetype', strtype, success)
-   if (success) then
+   if (.not. strcmpi(tree_get_name(str_ptr), 'Structure')) then
+      ! Only read [Structure] blocks, skip any other (e.g., [General]).
       cycle
-   endif
-   
+   end if
+
    strtype = ' '
    call prop_get_string(str_ptr, '', 'type',         strtype, success)
    if (.not. success .or. len_trim(strtype) == 0) then
@@ -2193,6 +2199,14 @@ do i=1,nstr
       call warn_flush()
       cycle
    end if
+
+   ! check if this structure concerns Flow1D type structure
+   call prop_get_string(str_ptr, '', 'branchid', branchid, success)
+   if (success) then
+      if (trim(strtype) /= 'pump') then
+         cycle
+      endif
+   endif
 
    strid = ' '
    call prop_get_string(str_ptr, '', 'id', strid, success)
@@ -2202,32 +2216,60 @@ do i=1,nstr
       cycle
    end if
 
-   branchIndex = -1
-   call prop_get_string(str_ptr, '', 'branchid', branchid, success)
-   if (success .and. strtype == 'pump') then
-      branchIndex = hashsearch(network%brs%hashlist, branchid)
-      if (branchIndex <= 0) then
-         msgbuf ='Branch ' // trim(branchid) // ' in structure ' // trim(strid)//' does not exist.'
-         call warn_flush()
-         cycle
-      endif
-      call prop_get_double(str_ptr, '', 'chainage', chainage, success)
-      if (.not. success) then
-         write(msgbuf, '(a,a,a)') 'Required field ''chainage'' is missing in '//trim(strtype)//' ''', trim(strid), '''.'
-         call warn_flush()
-         cycle
-      endif
+   ! Test for old-style .pli file input, then read it here.
+   ! If not, structure was already read in readStructures().
+   call prop_get_alloc_string(str_ptr, '', 'polylinefile', str_buf, success)
+   if (success) then
+      loc_spec_type = LOCTP_POLYLINE_FILE
+      plifile = str_buf
+      call resolvePath(plifile, md_structurefile_dir, plifile)
    else
-      plifile = ' '
-      call prop_get_string(str_ptr, '', 'polylinefile', plifile, success)
-      if (.not. success .or. len_trim(plifile) == 0) then
+      istrtmp = hashsearch(network%sts%hashlist_structure, strid) ! Assumes unique names across all structure types.
+      if (istrtmp == -1) then
+         ! Not in sts, and also no polylinefile: error
          write(msgbuf, '(a,a,a)') 'Required field ''polylinefile'' missing in '//trim(strtype)//' ''', trim(strid), '''.'
          call warn_flush()
          cycle
-      else
-         call resolvePath(plifile, md_structurefile_dir, plifile)
       end if
-   endif
+
+      pstru => network%sts%struct(istrtmp)
+
+      loc_spec_type = LOCTP_UNKNOWN
+      if (pstru%ibran > 0) then
+         loc_spec_type = LOCTP_BRANCHID_CHAINAGE
+      else if (pstru%numCoordinates > 0) then
+         loc_spec_type = LOCTP_POLYLINE_XY
+      end if
+
+   end if
+   
+   ! TODO: remove branchIndex code for pumps below, use above loc_spec_type instead.
+   !branchIndex = -1
+   !call prop_get_string(str_ptr, '', 'branchid', branchid, success)
+   !if (success .and. strtype == 'pump') then
+   !   branchIndex = hashsearch(network%brs%hashlist, branchid)
+   !   if (branchIndex <= 0) then
+   !      msgbuf ='Branch ' // trim(branchid) // ' in structure ' // trim(strid)//' does not exist.'
+   !      call warn_flush()
+   !      cycle
+   !   endif
+   !   call prop_get_double(str_ptr, '', 'chainage', chainage, success)
+   !   if (.not. success) then
+   !      write(msgbuf, '(a,a,a)') 'Required field ''chainage'' is missing in '//trim(strtype)//' ''', trim(strid), '''.'
+   !      call warn_flush()
+   !      cycle
+   !   endif
+   !else
+   !   plifile = ' '
+   !   call prop_get_string(str_ptr, '', 'polylinefile', plifile, success)
+   !   if (.not. success .or. len_trim(plifile) == 0) then
+   !      write(msgbuf, '(a,a,a)') 'Required field ''polylinefile'' missing in '//trim(strtype)//' ''', trim(strid), '''.'
+   !      call warn_flush()
+   !      cycle
+   !   else
+   !      call resolvePath(plifile, md_structurefile_dir, plifile)
+   !   end if
+   !endif
    select case (strtype)
    case ('gateloweredgelevel')  ! Old-style controllable gateloweredgelevel
         !else if (qid == 'gateloweredgelevel' ) then
@@ -2260,10 +2302,11 @@ do i=1,nstr
       ncdam   = ncdam   + numd
 
    case ('pump')
-      if (branchIndex > 0) then
+      if (loc_spec_type /= LOCTP_POLYLINE_FILE) then
          !use branchId, chainage
-         npum = 1
-         kep(npump+1) = getLinkIndex(network%brs%branch(branchIndex), chainage)
+         npum = pstru%numlinks
+         kep(npump+1:npump+npum) = pstru%linknumbers(1:npum)
+         !getLinkIndex(network%brs%branch(branchIndex), chainage)
       else
          call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYLINE_FILE, plifile)
       endif
@@ -2281,9 +2324,15 @@ do i=1,nstr
 
    case ('dambreak')
 
-      call selectelset_internal_links(xz, yz, ndx, ln, lnx, kedb(ndambreak+1:numl), ndambr, LOCTP_POLYLINE_FILE, plifile, &
-                                      xps = dambreakPolygons(i)%xp, yps = dambreakPolygons(i)%yp, nps = dambreakPolygons(i)%np, &
-                                      lftopol = lftopol(ndambreak+1:numl), sortLinks = 1)
+      if (loc_spec_type /= LOCTP_POLYLINE_FILE) then
+         ndambr = pstru%numlinks
+         kedb(ndambreak+1:ndambreak+ndambr) = pstru%linknumbers(1:ndambr)
+      else
+         call selectelset_internal_links(xz, yz, ndx, ln, lnx, kedb(ndambreak+1:numl), ndambr, LOCTP_POLYLINE_FILE, plifile, &
+                                         xps = dambreakPolygons(i)%xp, yps = dambreakPolygons(i)%yp, nps = dambreakPolygons(i)%np, &
+                                         lftopol = lftopol(ndambreak+1:numl), sortLinks = 1)
+      end if
+
       success = .true.
       WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(plifile) , ndambr, ' nr of dambreak links' ; call msg_flush()
 
@@ -3203,16 +3252,26 @@ if (ndambreak > 0) then
       call prop_get_string(str_ptr, '', 'id', strid, success)
       dambreak_ids(n) = strid
 
-      ! read the type
-      strtype = ' '
-      call prop_get_string(str_ptr, '', 'type', strtype, success)
-      istrtype  = getStructype_from_string(strtype)
-      ! flow1d_io library: add and read SOBEK dambreak
-      ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number is not used in computations)
-      k = L1dambreaksg(n)
-      istrtmp = addStructure(network%sts, kdambreak(1,k), kdambreak(2,k), iabs(kdambreak(3,k)), -1, "", strid, istrtype)
-      call readDambreak(network%sts%struct(istrtmp)%dambreak, str_ptr, success)
+      istrtmp = hashsearch(network%sts%hashlist_structure, strid) ! Assumes unique names across all structure types.
+      if (istrtmp /= -1) then
+         indexInPliset = istrtmp ! dambreakPolygons were already read in network%sts loop.
+         success = .true.
+      else
+         ! Postponed read, because this is with old-style .pli ifile
+         indexInPliset = indexInStructure ! dambreakPolygons were already read in old style .pli count+selectelset loop above.
 
+         ! read the type
+         strtype = ' '
+         call prop_get_string(str_ptr, '', 'type', strtype, success)
+         istrtype  = getStructype_from_string(strtype)
+         ! flow1d_io library: add and read SOBEK dambreak
+         ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number is not used in computations)
+         k = L1dambreaksg(n)
+         istrtmp = addStructure(network%sts, kdambreak(1,k), kdambreak(2,k), iabs(kdambreak(3,k)), -1, "", strid, istrtype)
+         call readDambreak(network%sts%struct(istrtmp)%dambreak, str_ptr, strid, network%forcinglist, success)
+      end if
+
+! TODO UNST-3308 ^^^
       if (success) then
          ! new dambreak format
          write(msgbuf, '(a,a,a)') 'Dambreak ''', trim(strid), ''' set to new format.'
@@ -3278,8 +3337,8 @@ if (ndambreak > 0) then
       endif
       
       ! Project the start of the breach on the polyline, find xn and yn
-      if(.not.allocated(dambreakPolygons(indexInStructure)%xp)) cycle
-      if(.not.allocated(dambreakPolygons(indexInStructure)%yp)) cycle
+      if(.not.allocated(dambreakPolygons(indexInPliset)%xp)) cycle
+      if(.not.allocated(dambreakPolygons(indexInPliset)%yp)) cycle
      
       ! Create the array with the coordinates of the flow links
       if(allocated(xl)) deallocate(xl)
@@ -3303,9 +3362,9 @@ if (ndambreak > 0) then
       ! comp_breach_point takes plain arrays to compute the breach point (also used in unstruct_bmi)      
       call comp_breach_point(network%sts%struct(istrtmp)%dambreak%startLocationX, & 
                              network%sts%struct(istrtmp)%dambreak%startLocationY, & 
-                             dambreakPolygons(indexInStructure)%xp, & 
-                             dambreakPolygons(indexInStructure)%yp, & 
-                             dambreakPolygons(indexInStructure)%np, & 
+                             dambreakPolygons(indexInPliset)%xp, & 
+                             dambreakPolygons(indexInPliset)%yp, & 
+                             dambreakPolygons(indexInPliset)%np, & 
                              xl, & 
                              yl, & 
                              Lstart, & 
@@ -3323,10 +3382,10 @@ if (ndambreak > 0) then
          k3 = lncn(1,Lf)
          k4 = lncn(2,Lf)
          kpol = lftopol(k)
-         xla = dambreakPolygons(indexInStructure)%xp(kpol)
-         xlb = dambreakPolygons(indexInStructure)%xp(kpol + 1)
-         yla = dambreakPolygons(indexInStructure)%yp(kpol)
-         ylb = dambreakPolygons(indexInStructure)%yp(kpol + 1)
+         xla = dambreakPolygons(indexInPliset)%xp(kpol)
+         xlb = dambreakPolygons(indexInPliset)%xp(kpol + 1)
+         yla = dambreakPolygons(indexInPliset)%yp(kpol)
+         ylb = dambreakPolygons(indexInPliset)%yp(kpol + 1)
          
          call normalout( xla, yla, xlb, ylb, xn, yn, jsferic, jasfer3D, dmiss, dxymis)
          dambreakLinksEffectiveLength(k) = dbdistance(xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)
@@ -3336,8 +3395,8 @@ if (ndambreak > 0) then
       enddo
       
       ! Now we can deallocate the polygon
-      deallocate(dambreakPolygons(indexInStructure)%yp)
-      deallocate(dambreakPolygons(indexInStructure)%xp)
+      deallocate(dambreakPolygons(indexInPliset)%yp)
+      deallocate(dambreakPolygons(indexInPliset)%xp)
    enddo
 endif
 if (istat == DFM_NOERR) then

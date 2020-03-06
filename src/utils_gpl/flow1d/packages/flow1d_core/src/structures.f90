@@ -199,6 +199,7 @@ module m_1d_structures
       integer                                               :: numGates                 !< Total number of gates in this structure set. See indices array below.
       integer                                               :: numGeneralStructures     !< Total number of general structures in this structure set. See indices array below.
       integer                                               :: numUniWeirs              !< Total number of universal weirs in this structure set. See indices array below.
+      integer                                               :: numDambreaks              !< Total number of dambreaks in this structure set. See indices array below.
       integer, pointer, dimension(:)                        :: weirIndices              !< (numWeirs) indices of the weirs in the overall struct(:) array. Note: some may actually be of type ST_GENERAL_ST.
       integer, pointer, dimension(:)                        :: culvertIndices           !< (numCulverts) indices of the culverts in the overall struct(:) array.
       integer, pointer, dimension(:)                        :: pumpIndices              !< (numPumps) indices of the pumps in the overall struct(:) array.
@@ -207,6 +208,7 @@ module m_1d_structures
       integer, pointer, dimension(:)                        :: gateIndices              !< (numGates) indices of the gates in the overall struct(:) array. Note: some may actually be of type ST_GENERAL_ST.
       integer, pointer, dimension(:)                        :: generalStructureIndices  !< (numGeneralStructures) indices of the general structures in the overall struct(:) array.
       integer, pointer, dimension(:)                        :: uniWeirIndices           !< (numUniWeirs) indices of the universal weirs in the overall struct(:) array.
+      integer, pointer, dimension(:)                        :: dambreakIndices          !< (numDambreaks) indices of the dambreaks in the overall struct(:) array.
    end type t_structureSet
 
    !> Data type to store user input for structure forcings, to be processed later by a kernel.
@@ -1287,6 +1289,10 @@ end subroutine
             istat = 1
             call setmessage(LEVEL_ERROR, 'Multiple links for culvert structures is not supported, check structure'//trim(struct%id))
          endif
+      case (ST_DAMBREAK)
+         ! NOTE: flow1d currently does not contain any special computations for dambreak on multiple flow links (2D grid).
+         !       But: allow this anyway, because flow1d only stores the dambreak input. Computation is done in kernel (e.g., dflowfm).
+         continue
       case default
          ! A reminder not to forget other structures that are added:
          istat = 1
