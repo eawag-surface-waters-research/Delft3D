@@ -469,7 +469,32 @@ if test "x" != "x$SHAPELIB_DIR"; then
     fi
 fi
 
-AM_CONDITIONAL([USEFORTRANGIS], test "x$with_shapelib" != "xno" -o "x$with_proj" != "xno")
+dnl Check for GDAL
+dnl Note that the option below is a --with-PKG=dir option,
+dnl whereas the third_party_open/fortrangis/ uses a --enable-PKG option.
+dnl As a result the include/lib paths are not automatically correct,
+dnl so we set them below in the central CPPFLAGS and LDFLAGS.
+AC_MSG_CHECKING([if GDAL is wanted])
+AC_ARG_WITH(gdal,[AS_HELP_STRING([--with-gdal[=DIR]],[Build with GDAL support  @<:@default=no@:>@])],[],[with_gdal=no])
+
+AS_IF([test "x$with_gdal" != "xno"],
+	[
+		AC_MSG_RESULT([yes])
+		PKG_CHECK_MODULES([GDAL], [gdal],
+			[
+				AC_DEFINE([HAVE_GDAL],1,[Defined if you have GDAL library.])
+				AX_APPEND_FLAG("${GDAL_CFLAGS}", CPPFLAGS)
+				AX_APPEND_FLAG("${GDAL_LIBS}", LDFLAGS)
+			]
+		)
+	],
+	[
+		AC_MSG_RESULT([no])
+	])
+AM_CONDITIONAL([USEGDAL], test "x$with_gdal" != "xno")
+
+
+AM_CONDITIONAL([USEFORTRANGIS], test "x$with_shapelib" != "xno" -o "x$with_proj" != "xno" -o "x$with_gdal" != "xno")
 
 AC_LANG_PUSH([C])
 AC_CHECK_LIB([dl], [dlclose],, [AC_MSG_ERROR([Compiler can not find libdl])])

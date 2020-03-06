@@ -34470,6 +34470,11 @@ function read_commandline() result(istat)
 #else
             write (*,'(a)') 'Shapelib : no'
 #endif
+#ifdef HAVE_GDAL
+            write (*,'(a)') 'GDAL     : yes'
+#else
+            write (*,'(a)') 'GDAL     : no'
+#endif
 
             istat = DFM_EXIT ! Exit without any error.
             return
