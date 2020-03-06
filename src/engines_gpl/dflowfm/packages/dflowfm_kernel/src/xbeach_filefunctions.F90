@@ -128,23 +128,18 @@ subroutine start_logfiles(error)
 
 
 
-       logfileid       = generate_logfileid()
        if ( jampi.eq.0 ) then
-          open(logfileid,     file='XBlog.txt',       status='replace')
+          open(newunit=logfileid,     file='XBlog.txt',       status='replace')
           
-          errorfileid     = generate_logfileid()
-          open(errorfileid,   file='XBerror.txt',     status='replace')
+          open(newunit=errorfileid,   file='XBerror.txt',     status='replace')
           
-          warningfileid   = generate_logfileid()
-          open(warningfileid, file='XBwarning.txt',   status='replace')
+          open(newunit=warningfileid, file='XBwarning.txt',   status='replace')
        else
-          open(logfileid,     file='XBlog'//'_'//sdmn//'.txt',       status='replace')
+          open(newunit=logfileid,     file='XBlog'//'_'//sdmn//'.txt',       status='replace')
           
-          errorfileid     = generate_logfileid()
-          open(errorfileid,   file='XBerror'//'_'//sdmn//'.txt',     status='replace')
+          open(newunit=errorfileid,   file='XBerror'//'_'//sdmn//'.txt',     status='replace')
           
-          warningfileid   = generate_logfileid()
-          open(warningfileid, file='XBwarning'//'_'//sdmn//'.txt',   status='replace')
+          open(newunit=warningfileid, file='XBwarning'//'_'//sdmn//'.txt',   status='replace')
        end if
 
 
@@ -179,31 +174,6 @@ subroutine start_logfiles(error)
     wid = warningfileid
 
   endsubroutine get_logfileid
-
-  function generate_logfileid() result (tryunit)
-
-    implicit none
-
-    integer     :: tryunit,error
-    logical     :: fileopen
-
-    tryunit  = 98
-    fileopen = .true.
-    error    = 0
-
-    do while (fileopen)
-       inquire(tryunit,OPENED=fileopen)
-       if (fileopen) then
-          tryunit=tryunit-1
-       endif
-       if (tryunit<=10) then
-          tryunit     = -1
-          fileopen    = .false.
-          return
-       endif
-    enddo
-
-  end function generate_logfileid
 
   subroutine progress_indicator(initialize,curper,dper,dt)
 
@@ -1220,22 +1190,6 @@ subroutine start_logfiles(error)
     
   end subroutine assignlogdelegate_internal
 
-   integer function create_new_fid()
-   use m_xbeach_errorhandling
-   implicit none
-   integer    :: fileunit
-
-   fileunit = -1 ! temporary
-
-   fileunit = create_new_fid_generic()
-   if (fileunit==-1) then
-      call writelog('les','','Serious problem: not enough free unit ids to create new file')
-      call xbeach_errorhandler
-   endif
-
-   create_new_fid = fileunit   
-   end function create_new_fid
-
    subroutine check_file_exist(filename,exist,forceclose)
    use m_xbeach_errorhandling
    implicit none
@@ -1286,8 +1240,7 @@ subroutine start_logfiles(error)
 
 
    allocate(dat(d1))
-   fid = create_new_fid()
-   open(fid,file=trim(fname))
+   open(newunit=fid,file=trim(fname))
    read(fid,*,iostat=iost)(dat(i),i=1,d1)
    if (iost .ne. 0) then
       call writelog('sle','','Error processing file ''',trim(fname),'''. File may be too short or contains invalid values.', & 
@@ -1314,8 +1267,7 @@ subroutine start_logfiles(error)
 
 
    allocate(dat(d1,d2))
-   fid = create_new_fid()
-   open(fid,file=trim(fname))
+   open(newunit=fid,file=trim(fname))
    read(fid,*,iostat=iost)((dat(i,j),i=1,d1),j=1,d2)
    if (iost .ne. 0) then
       call writelog('sle','','Error processing file ''',trim(fname),'''. File may be too short or contains invalid values.', & 
@@ -1341,8 +1293,7 @@ subroutine start_logfiles(error)
 
 
    allocate(dat(d1,d2,d3))
-   fid = create_new_fid()
-   open(fid,file=trim(fname))
+   open(newunit=fid,file=trim(fname))
    read(fid,*,iostat=iost)(((dat(i,j,k),i=1,d1),j=1,d2),k=1,d3)
    if (iost .ne. 0) then
       call writelog('esl','Error processing file ''',trim(fname),'''. File may be too short or contains invalid values.', & 
@@ -1384,8 +1335,7 @@ subroutine start_logfiles(error)
 
 
    ier = 0
-   fid  = create_new_fid()
-   open(fid,file=trim(filename))
+   open(newunit=fid,file=trim(filename))
    i=0
    do while (ier==0)
       read(fid,'(a)',iostat=ier)ch
@@ -1412,8 +1362,7 @@ subroutine start_logfiles(error)
             call report_file_read_error(filename)
          endif
          call check_file_exist(trim(bcfiles(ifid)%fname))
-         fid2 = create_new_fid()
-         open(fid2,file=trim(bcfiles(ifid)%fname))
+         open(newunit=fid2,file=trim(bcfiles(ifid)%fname))
          i=0
          ier = 0
          do while (ier==0)
@@ -1432,8 +1381,7 @@ subroutine start_logfiles(error)
    close(fid)
 
    do ifid=1,nlocs
-      fid = create_new_fid()
-      open(fid,file=trim(bcfiles(ifid)%fname))
+      open(newunit=fid,file=trim(bcfiles(ifid)%fname))
       if (trim(instat)=='jons' .or. trim(instat)=='swan' .or. trim(instat)=='vardens') then 
          read(fid,*,iostat=ier)testc
          if (ier .ne. 0) then
@@ -1506,7 +1454,7 @@ subroutine start_logfiles(error)
 
    character(slen), intent(in)             :: filename
    integer                                 :: n
-   integer                                 :: io, error
+   integer                                 :: io, error, lunfil
    real*8                                  :: temp
 
    n   = 0
@@ -1520,12 +1468,12 @@ subroutine start_logfiles(error)
       if (error == 1) then
          n = 0
       else
-         open(11,file=filename)
+         open(newunit=lunfil,file=filename)
          do while (io==0)
             n = n + 1
-            read(11,*,IOSTAT=io) temp
+            read(lunfil,*,IOSTAT=io) temp
          enddo
-         close(11)
+         close(lunfil)
          n = n - 1
       endif
    endif
@@ -1549,23 +1497,5 @@ subroutine start_logfiles(error)
 
    end subroutine check_file_exist_generic
 
-
-   integer function create_new_fid_generic()
-   integer    :: tryunit = 900
-   logical    :: fileopen
-
-   fileopen = .true.    
-   do while (fileopen)
-      inquire(tryunit,OPENED=fileopen)
-      if (fileopen) then
-         tryunit=tryunit-1
-      endif
-      if (tryunit<=10) then 
-         tryunit = -1
-         fileopen = .false.
-      endif
-   enddo
-   create_new_fid_generic = tryunit   
-   end function create_new_fid_generic
 
 end module m_xbeach_filefunctions

@@ -453,6 +453,8 @@ subroutine comp_filter_predictor()
                                
    integer                     :: ierror   ! error (1) or not (0)
    
+   integer                     :: lunfil
+   
    double precision, parameter :: facmax = 0.9d0 ! safety factor for maximum allowed sub time step
  
    if ( itype.eq.0 ) return
@@ -473,7 +475,7 @@ subroutine comp_filter_predictor()
    end if
    
    if ( jadebug.eq.1 ) then
-      open(2345, file='debug.txt')
+      open(newunit=lunfil, file='debug.txt')
    end if
    
    japrecond = 1
@@ -658,7 +660,7 @@ subroutine comp_filter_predictor()
    end if
    
    if ( jadebug.eq.1 ) then
-      close(2345)
+      close(lunfil)
    end if
    
    call stoptimer(IFILT)

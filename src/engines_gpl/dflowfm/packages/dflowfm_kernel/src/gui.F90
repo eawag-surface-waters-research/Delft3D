@@ -12193,7 +12193,6 @@ end subroutine plot_ridges
       integer :: nhcdev
       integer :: nopen, mout
       integer :: numhcopts
-      integer, external :: numuni
       CHARACTER PLOTJE*255,EXT*4
       COMMON /HARDCOPY/  NHCDEV,NUMHCOPTS,IHCOPTS(2,20)
       COMMON /PLOTFIL/   PLOTJE
@@ -12206,8 +12205,7 @@ end subroutine plot_ridges
 !     screendump : nhcdev .ge. 13: 1 dump ,-1 niks , 0 neutraal
       IF (NOPEN .EQ. 1) THEN
 
-         mout = numuni()
-         open (mout, file = trim(md_ident)//'.x1y1x2')
+         open (newunit=mout, file = trim(md_ident)//'.x1y1x2')
          write(mout,*) x1,y1, x2
          close(mout)
 

@@ -112,7 +112,7 @@ use unstruc_messages
 !
 !! executable statements -------------------------------------------------------
 !
-    open(fp, file=trim(filename),action='read', iostat = istat)
+    open(newunit=fp, file=trim(filename),action='read', iostat = istat)
     if (istat /=0) then
         call message('DEM file could not be opened: ', trim(filename), ' ')
     end if

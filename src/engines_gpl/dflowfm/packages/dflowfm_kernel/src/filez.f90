@@ -46,7 +46,6 @@ implicit none
     integer                        :: l2,l1
     integer                        :: l3
     integer                        :: ierr
-    integer,           external    :: numuni
     logical                        :: jawel
     
     istat_ = 0
@@ -69,9 +68,7 @@ implicit none
           endif
        enddo
 
-       minp = numuni()
-
-       open (minp, file = filename(l1:l2), iostat=ierr)
+       open (newunit=minp, file = filename(l1:l2), iostat=ierr)
        if ( ierr.ne.0 ) then
           call err('File: unable to open ', filename(l1:l2), ' ')
           istat_ = ERR_FILEACCESSDENIED
@@ -107,9 +104,15 @@ subroutine doclose(minp)
 use unstruc_files
 implicit none
     integer, intent(inout) :: minp
-    if (minp <= 0) return
+    integer :: i
+    
+    if (minp == 0) return
     close (minp)
-    call mess(LEVEL_INFO, 'Closed file : ', filenames(minp))
+    do i = 1, maxnum
+       if (lunfils(i) == minp) then
+          call mess(LEVEL_INFO, 'Closed file : ', filenames(i))
+       endif
+    enddo
     call reg_file_close(minp)
     minp = 0
 end subroutine doclose
@@ -152,7 +155,6 @@ implicit none
     integer                        :: i
     integer                        :: l2,l1
     integer                        :: l3
-    integer, external :: numuni
     character(*) RW*20
 
     istat_ = 0
@@ -173,8 +175,7 @@ implicit none
        endif
     enddo
 
-    minp = numuni()
-    open (minp, file = filename(l1:l2), action='readwrite', IOSTAT=istat_)
+    open (newunit=minp, file = filename(l1:l2), action='readwrite', IOSTAT=istat_)
     inquire(minp, readwrite=rw)
     IF (istat_ .GT. 0 .or. trim(rw)/='YES') THEN
         call err('File: ', filename(l1:l2), ' could not be opened for writing.')
@@ -802,28 +803,3 @@ subroutine message(w1, w2, w3)
     !
     call mess(LEVEL_INFO, w1, w2, w3)
 end subroutine message
-
-
-!> Returns a new unused file pointer
-function numuni()
-use unstruc_files
-implicit none
-    integer         :: numuni
-
-    logical                        :: opened
-    numuni = 10
-    opened = .true.
-    !                            get unit specifier
-   10 continue
-    if (opened) then
-       numuni = numuni + 1
-       inquire (unit = numuni, opened = opened)
-       goto 10
-    endif
-    !
-    if (opened) then
-       numuni = 0
-       call mess(LEVEL_ERROR, 'new unit number not available')
-    endif
-end function numuni
-

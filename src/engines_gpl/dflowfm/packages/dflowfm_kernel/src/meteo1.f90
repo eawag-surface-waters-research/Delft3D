@@ -963,17 +963,17 @@ contains
   !avhs=1d0 
  
   !Create output file
- ! open (unit=3, file='d:\output_avhs2.txt',status='unknown',position='append')
- ! write(unit=3,fmt=*) i1
- ! write(unit=3,fmt=*) i2
- ! write(unit=3,fmt=*) j1
- ! write(unit=3,fmt=*) j2
+ ! open (newunit=lunfil, file='d:\output_avhs2.txt',status='unknown',position='append')
+ ! write(lunfil,fmt=*) i1
+ ! write(lunfil,fmt=*) i2
+ ! write(lunfil,fmt=*) j1
+ ! write(lunfil,fmt=*) j2
  ! do i=i1,i2
  !   do j=j1,j2
- !       write(unit=3,fmt=*) avhs(i,j)
+ !       write(lunfil,fmt=*) avhs(i,j)
  !   enddo
  ! enddo
- ! close(3)
+ ! close(lunfil)
       
    end subroutine aggregatewaterlevels
 
@@ -1155,23 +1155,23 @@ contains
    enddo
    
    !Create output file
-!   open (unit=1, file='d:\output_SALtide2.txt',status='unknown',position='append')
-!   open (unit=2, file='d:\output_tide2.txt',status='unknown',position='append')
+!   open (newunit=filsal, file='d:\output_SALtide2.txt',status='unknown',position='append')
+!   open (newunit=filtide, file='d:\output_tide2.txt',status='unknown',position='append')
 !   do i=1,nlat
 !            do j=1,nlon
-!                write(unit=1,fmt=*) self1(i-1,j-1)/g
-!                write(unit=2,fmt=*) avhs1(i-1,j-1)
+!                write(filsal,fmt=*) self1(i-1,j-1)/g
+!                write(filtide,fmt=*) avhs1(i-1,j-1)
 !            enddo
 !   enddo
-!   close(1)
-!   close(2)
- !  open (unit=3, file='d:\output_avhs.txt',status='unknown',position='append')
+!   close(filsal)
+!   close(filtide)
+ !  open (newunit=filavhs, file='d:\output_avhs.txt',status='unknown',position='append')
  !  do i=i1,i2
  !           do j=j1,j2
- !               write(unit=3,fmt=*) avhs(i,j)
+ !               write(filavhs,fmt=*) avhs(i,j)
  !           enddo
  !  enddo
- !  close(3)
+ !  close(filavhs)
    
 !  deallocate
    if (allocated(work)   ) deallocate(work)

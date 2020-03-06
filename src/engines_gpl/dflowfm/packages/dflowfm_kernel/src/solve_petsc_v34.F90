@@ -182,7 +182,7 @@ end module m_petsc
       end do
       
 !     unmark deactivated ghost cells
-!      open(6666,file='tmp'//sdmn//'.xyz')
+!      open(newunit=lunfil,file='tmp'//sdmn//'.xyz')
 !      do n=nogauss+1,nogauss+nocg
 !         ndn = noel(n)
 
@@ -199,7 +199,7 @@ end module m_petsc
 !               if ( .not.Lactive ) then
 !                  mask(ndn) = 0
 !                  write(6,"('disabled ghost cell, my_rank=', I3, ', ndn=', I5)") my_rank, ndn
-!                  write(6666,"(3E17.5)") xz(ndn), yz(ndn), dble(my_rank)
+!                  write(lunfil,"(3E17.5)") xz(ndn), yz(ndn), dble(my_rank)
 !               end if
 !            end if
 !         end if
@@ -210,12 +210,12 @@ end module m_petsc
 !!
 !!               if ( iglobal(j).eq.0 ) then
 !!                  write(6,"('zero global cell number, my_rank=', I3, ', j=', I5)") my_rank, ndn
-!!                  write(6666,"(3E17.5)") xz(j), yz(j), dble(my_rank)
+!!                  write(lunfil,"(3E17.5)") xz(j), yz(j), dble(my_rank)
 !!               end if
 !!            end do
 !!         end if
 !      end do
-!      close(6666)
+!      close(lunfil)
 
 !     count nonzero elements
       irow = 0
@@ -915,7 +915,7 @@ end module m_petsc
       implicit none
       
       integer :: i, j, irow, jcol, ifirstrow, n
-      integer :: iter, ierr
+      integer :: iter, ierr, lunfil
       
       do iter=1,6 ! first matrix, then rhs, then rowtoelem, then iglobal (for row elements), then kfs, then construct matrix
          do n=0,ndomains-1
@@ -923,26 +923,26 @@ end module m_petsc
             
 !              open file
                if ( my_rank.eq.0 .and. iter.eq.1 ) then
-                  open(1234,file='matrix.m')
+                  open(newunit=lunfil,file='matrix.m')
                else
-                  open(1234,file='matrix.m',access='append')
+                  open(newunit=lunfil,file='matrix.m',access='append')
                end if
             
 !              write header
                if ( my_rank.eq.0 ) then
                   if ( iter.eq.1 ) then
-                     write(1234,"('dum = [')")
+                     write(lunfil,"('dum = [')")
                   else if ( iter.eq.2 ) then
-                     write(1234,"('rhs = [')")
+                     write(lunfil,"('rhs = [')")
                   else if ( iter.eq.3 ) then
-                     write(1234,"('rowtoelem = [')")
+                     write(lunfil,"('rowtoelem = [')")
                   else if ( iter.eq.4 ) then
-                     write(1234,"('iglobal = [')")
+                     write(lunfil,"('iglobal = [')")
                   else if ( iter.eq.5 ) then
-                     write(1234,"('kfs = [')")
+                     write(lunfil,"('kfs = [')")
                   else if ( iter.eq.6 ) then
-                     write(1234,"('N = max(dum(:,1));')")
-                     write(1234,"('A = sparse(dum(:,1), dum(:,2), dum(:,3), N, N);')")
+                     write(lunfil,"('N = max(dum(:,1));')")
+                     write(lunfil,"('A = sparse(dum(:,1), dum(:,2), dum(:,3), N, N);')")
                   end if
                end if
                
@@ -955,45 +955,45 @@ end module m_petsc
                      
                      do j=idia(i)+1,idia(i+1)
                         jcol = jdia(j) + ifirstrow
-                        write(1234, "(2I7,E15.5)") irow, jcol, adia(j)
+                        write(lunfil, "(2I7,E15.5)") irow, jcol, adia(j)
                      end do
                      do j=ioff(i)+1,ioff(i+1)
                         jcol = joffsav(j) + 1
-                        write(1234, "(2I7,E15.5)") irow, jcol, aoff(j)
+                        write(lunfil, "(2I7,E15.5)") irow, jcol, aoff(j)
                      end do
                   end do
                else if ( iter.eq.2 ) then ! rhs
 !                 write this part of rhs to file
                   do i=1,numrows
-                     write(1234, "(E15.5)") rhs_val(i)
+                     write(lunfil, "(E15.5)") rhs_val(i)
                   end do
                else if ( iter.eq.3 ) then ! rowtoelem
 !                 write this part of rhs to file
                   do i=1,numrows
-                     write(1234, "(I7)") rowtoelem(i)
+                     write(lunfil, "(I7)") rowtoelem(i)
                   end do
                else if ( iter.eq.4 ) then ! iglobal
 !                 write this part of rhs to file
                   do i=1,numrows
-                     write(1234, "(I7)") iglobal(rowtoelem(i))
+                     write(lunfil, "(I7)") iglobal(rowtoelem(i))
                   end do
                else if ( iter.eq.5 ) then ! kfs
 !                 write this part of rhs to file
                   do i=1,numrows
-                     write(1234, "(I7)") kfs(rowtoelem(i))
+                     write(lunfil, "(I7)") kfs(rowtoelem(i))
                   end do
                end if
             
                if ( my_rank.eq.ndomains-1 ) then
 !                 write footer
                   if ( iter.ne.6 ) then
-                     write(1234,"('];')")
+                     write(lunfil,"('];')")
                   end if
                end if
 
 !              close file      
-               call flush(1234)
-               close(1234)
+               call flush(lunfil)
+               close(lunfil)
       
             end if
             call MPI_barrier(DFM_COMM_DFMWORLD, ierr)

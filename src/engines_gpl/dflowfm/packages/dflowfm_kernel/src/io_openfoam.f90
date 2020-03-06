@@ -148,8 +148,6 @@ subroutine foam_write_polymesh(filename)
     use properties
     character(len=*), intent(in) :: filename !< TODO: Output file names
 
-    integer, external :: numuni
-
     integer :: mfil
     integer :: L
     type(tree_data), pointer :: headdict
@@ -163,7 +161,6 @@ subroutine foam_write_polymesh(filename)
     L = len_trim(filename)
 
     ! -- Step 1. points file ----------
-    mfil = numuni()
     call newfil(mfil, filename)
 
 

@@ -357,8 +357,7 @@ contains
     integer                     :: i,ier
   
     ! check the first line of the boundary condition file for FILELIST keyword
-    fid = create_new_fid()
-    open(fid,file=fn%fname,status='old',form='formatted')
+    open(newunit=fid,file=fn%fname,status='old',form='formatted')
     read(fid,*,iostat=ier)testline
     if (ier .ne. 0) then
        call report_file_read_error(fn%fname)
@@ -383,8 +382,7 @@ contains
     ! spectrum file name and rtbc and dtbc. Else the filename and rtbc, dtbc are in
     ! params.txt
     if (filelist) then
-       fid = create_new_fid()
-       open(fid,file=fn%fname,status='old',form='formatted')
+       open(newunit=fid,file=fn%fname,status='old',form='formatted')
        do i=1,fn%listline
           read(fid,*)testline  ! old stuff, not needed anymore
        enddo
@@ -555,9 +553,8 @@ contains
        allocate(scoeff(nmodal))
        allocate(tma(nmodal))
        ! Use spectrum table
-       fid = create_new_fid()
        call writelog('sl','','waveparams: Reading from table ',trim(readfile),' ...')
-       open(fid,file=readfile,status='old',form='formatted')
+       open(newunit=fid,file=readfile,status='old',form='formatted')
        ! read junk up to the correct line in the file
        do i=1,listline                                      ! must be reset when reading second spectrum locfile
           read(fid,*,iostat=ier)dummystring
@@ -956,8 +953,7 @@ contains
     switch  = 0
   
     call writelog('sl','','Reading from SWAN file ',trim(readfile),' ...')
-    fid = create_new_fid()
-    open(fid,file=readfile,form='formatted',status='old')
+    open(newunit=fid,file=readfile,form='formatted',status='old')
   
     ! Read file until RFREQ or AFREQ is found
     do while (switch==0)
@@ -1216,8 +1212,7 @@ contains
   
     ! Open file to start read
     call writelog('sl','','Reading from vardens file ',trim(readfile),' ...')
-    fid = create_new_fid()
-    open(fid,file=readfile,form='formatted',status='old')
+    open(newunit=fid,file=readfile,form='formatted',status='old')
   
     ! Read number of frequencies and frequency vector
     read(fid,*,iostat=ier)specin%nf

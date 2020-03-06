@@ -146,7 +146,6 @@ subroutine read_cldfile(md_cldfile, clddata, phase)
     integer                          :: istr
     integer                          :: lundia 
     integer                          :: luntmp
-    integer, external                :: newunit
     integer                          :: nrflds
     integer                          :: prev_cld_no    = CL_UNDEFINED
     integer                          :: prev_cld_type  = CL_UNDEFINED
@@ -239,8 +238,7 @@ subroutine read_cldfile(md_cldfile, clddata, phase)
     !
     ! open trachytope definition file
     !
-    luntmp = newunit()
-    open (luntmp, file = trim(filtmp), form = 'formatted', iostat = iocond,  &
+    open (newunit=luntmp, file = trim(filtmp), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
        errmsg = 'Error while opening file '// trim(filtmp)
@@ -513,7 +511,6 @@ subroutine read_cllfile(md_cllfile, clddata, phase)
     integer, dimension(CLL_MAXFLD)   :: ifield
     integer, dimension(CLL_MAXFLD)   :: itype
     integer, dimension(CLL_MAXFLD)   :: lenchr
-    integer, external                :: newunit
 !    logical                          :: leql
 !    logical                          :: lfirst
     logical                          :: lokay
@@ -563,8 +560,7 @@ subroutine read_cllfile(md_cllfile, clddata, phase)
     !
     ! open file
     !
-    luntmp = newunit()
-    open (luntmp, file = trim(filnam), form = 'formatted', iostat = iocond,  &
+    open (newunit=luntmp, file = trim(filnam), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
        errmsg = 'Error while opening file '// trim(filnam)

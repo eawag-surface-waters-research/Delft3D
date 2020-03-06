@@ -54,7 +54,6 @@ subroutine initProgram()
 
     logical   :: jawel
     integer   :: istat
-    integer :: numuni
 
     call initSysEnv                   ! Init paths
 
@@ -96,7 +95,6 @@ subroutine initSysEnv()
     integer :: lenp
     integer :: lertxt
     integer :: lslash
-    integer :: numuni
     integer :: nval
     CHARACTER  FILNAM*76
     character  errtxt*8,arch*10,hlpstr*999,slash*1

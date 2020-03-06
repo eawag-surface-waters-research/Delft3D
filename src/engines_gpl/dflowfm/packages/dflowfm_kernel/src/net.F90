@@ -16544,7 +16544,6 @@ SUBROUTINE ORTHOGONALISENET(jarerun)
 
    integer                                       :: ik
 
-   integer                                       :: ioutfile = 666
 
 !   double precision                              :: xx0, yy0, zz0, xx1, yy1, zz1
    double precision                              :: Dx0, Dy0
@@ -17408,7 +17407,7 @@ tp:do no = 1,itatp
       double precision                                             :: DvolL, DvolR, xdum
 !     Matlab output only
 !      integer, dimension(Numl)                                     :: lne1, lne2, kn1, kn2
-!      integer, parameter                                           :: ioutfile=1234
+!      integer, parameter                                           :: ioutfile
 
 !      logical, save                                                :: Lsavematlab = .false.
 
@@ -17578,7 +17577,7 @@ tp:do no = 1,itatp
       ierror = 0
 
 !      if ( Lsavematlab) then
-!         open(ioutfile, file='c:\cygwin\home\pijl\develop\test\testww2x.m')
+!         open(newunit=ioutfile, file='c:\cygwin\home\pijl\develop\test\testww2x.m')
 !
 !         call matlab_write_int(ioutfile, 'nmkx2', (/ nmkx2 /), 1,    1)
 !         call matlab_write_int(ioutfile, 'nmk2',  (/ nmk2  /), Numk, 1)
@@ -17650,7 +17649,7 @@ tp:do no = 1,itatp
       integer,          allocatable, dimension(:)    :: Mcell      ! for matlab output
       double precision, allocatable, dimension(:,:)  :: x,y        ! for matlab output
 
-      integer, parameter                             :: imat=123   ! matlab file unit number
+      integer                                        :: imat       ! matlab file unit number
 
       logical, save                                  :: Lsavematlabfile = .false.
 
@@ -17915,7 +17914,7 @@ tp:do no = 1,itatp
 
 
             if ( Lsavematlabfile ) then
-               open(imat, file='test.m')
+               open(newunit=imat, file='test.m')
 
                call matlab_write_double(imat, 'xi',     xi( 1:nmk2(k0)), nmk2(k0), 1)
                call matlab_write_double(imat, 'eta',    eta(1:nmk2(k0)), nmk2(k0), 1)
@@ -18002,7 +18001,7 @@ tp:do no = 1,itatp
       double precision                               :: alpha, lambda1, lambda2, lfac
       double precision                               :: Phi_ave, vol, ww2
 
-      integer                                        :: k0, imat=666
+      integer                                        :: k0, imat
 
       logical, save                                  :: Lsavematlab = .false.
 
@@ -18105,7 +18104,7 @@ tp:do no = 1,itatp
       end do
 
       if ( Lsavematlab) then
-         open(imat, file='c:\cygwin\home\pijl\develop\refinement.m')
+         open(newunit=imat, file='c:\cygwin\home\pijl\develop\refinement.m')
 
          call matlab_write_double(imat, 'xk', xk, Numk, 1)
          call matlab_write_double(imat, 'yk', yk, Numk, 1)
@@ -21468,6 +21467,8 @@ subroutine fliplinks()
    double precision, external           :: rand
 
    integer                              :: ja
+   
+   integer                              :: lunfil
 
 
    if ( jaswan.ne.1 ) then
@@ -21512,8 +21513,8 @@ subroutine fliplinks()
    maxlin = maxval(nmk(1:numk)) + 10   ! safety
    allocate(linnrs(maxlin),arglin(maxlin),inn(maxlin))
 
-!   open(666, file='test.m')
-!   write(666, "('data=[')")
+!   open(newunit=lunfil, file='test.m')
+!   write(lunfil, "('data=[')")
 
 it:do iter=1,MAXITER
       inodemask  = 0
@@ -21643,7 +21644,7 @@ it:do iter=1,MAXITER
          end if
       end do
 
-!      write(666,*)  iter, numchanged, Etot, Emin
+!      write(lunfil,*)  iter, numchanged, Etot, Emin
 
 !      if ( numchanged.eq.0 ) exit   ! done
 
@@ -21674,8 +21675,8 @@ it:do iter=1,MAXITER
 !  deallocate
    if ( allocated(inodemask) ) deallocate(inodemask)
    if ( allocated(linnrs) )    deallocate(linnrs,arglin,inn)
-!   write(666, "('];')")
-!   close(666)
+!   write(lunfil, "('];')")
+!   close(lunfil)
 
 !  update administration
    call findcells(100) ! also find folded cells

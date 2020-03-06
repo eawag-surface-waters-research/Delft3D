@@ -21827,7 +21827,6 @@ subroutine wrimap(tim)
     integer            :: i
     integer            :: len
     integer, save      :: mtecfil = 0
-    integer, external  :: numuni
     character(len=256) :: filnam
     logical            :: unitused
     double precision, save :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
@@ -24957,7 +24956,7 @@ subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefi
  implicit none
  integer          :: ja
 
- integer              :: minp, n, nr, ierr, k, L, Lp,lnumuniq, nyz, npfx, myzprofs, mxprof
+ integer              :: minp, n, nr, ierr, k, L, Lp, nyz, npfx, myzprofs, mxprof
  logical              :: jawel
  character (len=256)  :: rec
  integer, allocatable :: npr2(:)
@@ -35049,7 +35048,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     iprimpos = 3 ; mx = numk
  end select
 
- if (mext > 0 .or. len_trim(md_inifieldfile) > 0) then
+ if (mext /= 0 .or. len_trim(md_inifieldfile) > 0) then
     ! 0.a Prepare masks for 1D/2D distinctions
     kc_size_store = size(kc)
     allocate(kcc(mx),kc1d(mx),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0
@@ -35081,7 +35080,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     ja1= 0
     ja2= 0
     ! 0.b Prepare loop across old ext file:
-    if (mext > 0) then
+    if (mext /= 0) then
        rewind(mext)
        ja1 = 1
     end if
@@ -41844,7 +41843,7 @@ end function is_1d_boundary_candidate
  endif
 
  ! Finish with all remaining old-style ExtForceFile quantities.
-if (mext > 0) then
+if (mext /= 0) then
  ja = 1
 
  do while (ja .eq. 1)                                ! read *.ext file
@@ -42839,7 +42838,7 @@ if (mext > 0) then
     enddo
 
     ja = 1
-    if (mext > 0) then
+    if (mext /= 0) then
        rewind (mext)
     end if
     kx = 1
@@ -43215,7 +43214,7 @@ endif ! read mext file
     deallocate ( kez, keu, kes, ketm, kesd, ket, keuxy, ken, ke1d2d, keg, ked, kep, kedb, keklep, kevalv, kegs, kegen, itpez, itpenz, itpeu, itpenu, kew, ketr)
 end if
 
- if (mext > 0) then
+ if (mext /= 0) then
     call doclose(mext) ! close ext file
  end if
 

@@ -45,19 +45,17 @@ module wrwaq
       function openwaqbinfile(filename) result (lun)
          character(len=*), intent(in) :: filename !< Output filename.
          integer :: lun
-         integer, external :: numuni
 
 !
 !           WARNING: WAQ input files must be written using form=binary
 !                    instead of unformatted.
 !                    Although it is not standard Fortran
 !
-         lun    = numuni()
 #ifdef HAVE_FC_FORM_BINARY
-         open  ( lun , file=filename , form = 'binary', status = 'replace')
+         open  ( newunit=lun , file=filename , form = 'binary', status = 'replace')
 #else
 ! standardized way if binary is not available
-         open  ( lun , file=filename , form = 'unformatted' , access='stream', status = 'replace')
+         open  ( newunit=lun , file=filename , form = 'unformatted' , access='stream', status = 'replace')
 #endif
          call reg_file_open(lun, filename)
          call mess(LEVEL_INFO, 'Opened file : ', filename)
@@ -68,16 +66,14 @@ module wrwaq
          
          character(len=*), intent(in) :: filename
          integer :: lun
-         integer, external :: numuni
 !
 !           NOTE: Opens a simple ASCII-file. Function is intended only
 !                 to isolate newlun_nogdp dependency.
 !
-         lun    = numuni()
 #ifdef HAVE_FC_FORM_BINARY
-         open  ( lun , file=filename , SHARED )
+         open  ( newunit=lun , file=filename , SHARED )
 #else
-         open  ( lun , file=filename , access='stream')
+         open  ( newunit=lun , file=filename , access='stream')
 #endif
          call reg_file_open(lun, filename)
          call mess(LEVEL_INFO, 'Opened file : ', filename)

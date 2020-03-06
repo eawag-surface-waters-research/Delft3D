@@ -309,9 +309,8 @@ end subroutine create_incident_waves_surfbeat
 !    !
 !    ! open location list file
 ! 
-!    fid = create_new_fid()
 !    err = 0
-!    open(fid,file=waveBoundaryParameters%masterFileName,status='old',form='formatted')
+!    open(newunit=fid,file=waveBoundaryParameters%masterFileName,status='old',form='formatted')
 !    ! check for LOCLIST
 !    read(fid,*)testline
 !    if (trim(testline)=='LOCLIST') then

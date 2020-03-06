@@ -4522,7 +4522,7 @@ end subroutine timdat
 
     curx = 0.0
     cury = 0.0
-    open(mfil, file=trim(filename))
+    open(newunit=mfil, file=trim(filename))
     
     do
         read(mfil,'(a)',end=999) line
@@ -6381,14 +6381,14 @@ subroutine generatePartitionMDUFile(filename, filename_new)
    character(len=*), intent(in)  :: filename, filename_new
    integer                       :: k1, k2, k3, k4, k5, k6, k7, n
    character(len=500)            :: string, string_c, string_tmp, string_v
-   integer                       :: ja_innumerics, ja_icgsolverset
+   integer                       :: ja_innumerics, ja_icgsolverset, lunold, lunnew
 
-   open(261, file = filename, status ="old", action="read", err=999)
-   open(262, file = filename_new, status = "replace", action="write",err=999)
+   open(newunit=lunold, file = filename, status ="old", action="read", err=999)
+   open(newunit=lunnew, file = filename_new, status = "replace", action="write",err=999)
   
    k1 = 0; k2 = 0; k3 = 0; k4 = 0; k5 = 0; k6 = 0; k7 = 0; ja_innumerics = 0; ja_icgsolverset = 0
    do while (.true.)
-      read(261, "(a)", err=999, end=1212) string
+      read(lunold, "(a)", err=999, end=1212) string
       n = index(string, '=')
 
       !> In case icgsolver was not present in input MDU, find-and-replace impossible, so make sure to add it, because it's required.
@@ -6398,7 +6398,7 @@ subroutine generatePartitionMDUFile(filename, filename_new)
          if (ja_icgsolverset == 0) then
             write(string_v, "(I5)") md_icgsolver
             string_tmp = "Icgsolver = "//trim(adjustl(string_v))//"          # Solver type , 1 = sobekGS_OMP, 2 = sobekGS_OMPthreadsafe, 3 = sobekGS, 4 = sobekGS + Saadilud, 5 = parallel/global Saad, 6 = parallel/Petsc, 7 = parallel/GS"
-            write(262, "(a)") trim(string_tmp)
+            write(lunnew, "(a)") trim(string_tmp)
          end if
          ja_innumerics = 0
       end if
@@ -6424,42 +6424,42 @@ subroutine generatePartitionMDUFile(filename, filename_new)
       endif
 
       if(k1==0 .and. k2==0 .and. k3==0 .and. k4==0 .and. k5==0 .and. k6==0 .and. k7==0) then ! Copy the whole row
-         write(262, "(a)") trim(string)
+         write(lunnew, "(a)") trim(string)
       else 
          if (k1 .ne. 0) then      ! modify NetFile
            string_tmp = trim(string_c)//" "//trim(md_netfile)//"        # *_net.nc"
-           write(262, "(a)") trim(string_tmp)
+           write(lunnew, "(a)") trim(string_tmp)
          else if (k2 /= 0) then ! Modify icgsolver
             write(string_v, "(I5)") md_icgsolver
             string_tmp = trim(string_c)//" "//trim(adjustl(string_v))//"          # Solver type , 1 = sobekGS_OMP, 2 = sobekGS_OMPthreadsafe, 3 = sobekGS, 4 = sobekGS + Saadilud, 5 = parallel/global Saad, 6 = parallel/Petsc, 7 = parallel/GS"
-            write(262, "(a)") trim(string_tmp)
+            write(lunnew, "(a)") trim(string_tmp)
             ja_icgsolverset = 1
          else if (k3 /= 0) then ! Modify restart file name
             string_tmp = trim(string_c)//" "//trim(md_restartfile)//"       # Restart file, only from netcdf-file, hence: either *_rst.nc or *_map.nc"
-            write(262, "(a)") trim(string_tmp)
+            write(lunnew, "(a)") trim(string_tmp)
          else if (k7 /= 0) then ! Modify ClassMapFile. Must be before mapfile as we don't check on whole words
             string_tmp = trim(string_c)//" "//trim(md_classmap_file)//"       # ClassMapFile name *.nc"
-            write(262, "(a)") trim(string_tmp)
+            write(lunnew, "(a)") trim(string_tmp)
          else if (k4 /= 0) then ! Modify mapfile
             string_tmp = trim(string_c)//" "//trim(md_mapfile)//"       # MapFile name *_map.nc"
-            write(262, "(a)") trim(string_tmp)
+            write(lunnew, "(a)") trim(string_tmp)
          else if (k5 /= 0) then ! Modify Partitionfile
             string_tmp = trim(string_c)//" "//trim(md_partitionfile)//"          # *_part.pol, polyline(s) x,y"
-            write(262, "(a)") trim(string_tmp)      
+            write(lunnew, "(a)") trim(string_tmp)      
          else if (k6 /= 0) then ! Modify FlowGeomFile
             string_tmp = trim(string_c)//" "//trim(md_flowgeomfile)//"       # FlowGeomFile name *.nc"
-            write(262, "(a)") trim(string_tmp)
+            write(lunnew, "(a)") trim(string_tmp)
          endif
       endif
    enddo
 
 1212 continue
-   close(261)
-   close(262)
+   close(lunold)
+   close(lunnew)
    return
 999 call mess(LEVEL_ERROR, 'Error occurs when generating partition MDU files') 
-   close(261)
-   close(262)
+   close(lunold)
+   close(lunnew)
    return
 end subroutine generatePartitionMDUFile
 

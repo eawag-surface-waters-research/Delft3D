@@ -94,8 +94,7 @@ use m_flowgeom
 integer :: k, ja, mout, km(100)
 double precision :: q30, q31, q32, q40, q41, q42
 
-mout = 87
-open (mout, file = 'tst.out') 
+open (newunit=mout, file = 'tst.out') 
 write(mout,'(a)' ) ' kmx     q30     q40    q31     q41     q32    q42  ' 
 
 km(1)  = 1

@@ -1687,7 +1687,7 @@ subroutine xbeach_instationary()
    logical                                               :: isRecomputed
 
    integer                                               :: k, kb, ki, Lb, LL, Lw, L, nw, k2
-   integer                                               :: LL1, LL2, n
+   integer                                               :: LL1, LL2, n, lunfil
 
    logical, save                                         :: bccreated=.false.
 
@@ -1786,14 +1786,14 @@ subroutine xbeach_instationary()
          call get_refpoint(xref0, yref0)
 
          if (trim(instat)=='ts_1') then
-            open( unit=7, file='bc/gen.ezs')
+            open( newunit=lunfil, file='bc/gen.ezs')
 5           continue
-            read(7,'(a)',iostat=ier) bline
+            read(lunfil,'(a)',iostat=ier) bline
             if (ier .ne. 0) then
                call report_file_read_error('bc/gen.ezs')
             endif
             if(bline.eq.'*') goto 5
-            read(7,*,iostat=ier) nt    ! no of timesteps
+            read(lunfil,*,iostat=ier) nt    ! no of timesteps
             if (ier .ne. 0) then
                call report_file_read_error('bc/gen.ezs')
             endif
@@ -1801,23 +1801,23 @@ subroutine xbeach_instationary()
             allocate(dataE  (nt))
             allocate(tE     (nt))
             do i=1,nt
-               read(7,*,iostat=ier) tE(i),dum,dataE(i)
+               read(lunfil,*,iostat=ier) tE(i),dum,dataE(i)
                if (ier .ne. 0) then
                   call report_file_read_error('bc/gen.ezs')
                endif
             end do
-            close(7)
+            close(lunfil)
             Emean=sum(dataE)/nt
 
          elseif (trim(instat)=='ts_2') then
-            open( unit=7, file='bc/gen.ezs')
+            open( newunit=lunfil, file='bc/gen.ezs')
 6           continue
-            read(7,'(a)',iostat=ier)bline
+            read(lunfil,'(a)',iostat=ier)bline
             if (ier .ne. 0) then
                call report_file_read_error('bc/gen.ezs')
             endif
             if(bline.eq.'*') goto 6
-            read(7,*,iostat=ier)nt
+            read(lunfil,*,iostat=ier)nt
             if (ier .ne. 0) then
                call report_file_read_error('bc/gen.ezs')
             endif
@@ -1826,16 +1826,16 @@ subroutine xbeach_instationary()
             allocate(databi (nt))
             allocate(tE     (nt))
             do i=1,nt
-               read(7,*,iostat=ier) tE(i),databi(i),dataE(i)
+               read(lunfil,*,iostat=ier) tE(i),databi(i),dataE(i)
                if (ier .ne. 0) then
                   call report_file_read_error('bc/gen.ezs')
                endif
             end do
-            close(7)
+            close(lunfil)
             Emean=sum(dataE)/nt
          elseif (trim(instat)=='stat_table') then
-            open( unit=7, file=bcfile)
-            read(7,*,iostat=ier) Hm0, Trep, dir0, dum1, spreadpar, bcendtime, dum2
+            open( newunit=lunfil, file=bcfile)
+            read(lunfil,*,iostat=ier) Hm0, Trep, dir0, dum1, spreadpar, bcendtime, dum2
             if (ier .ne. 0) then
                call report_file_read_error(bcfile)
             endif
@@ -1898,7 +1898,7 @@ subroutine xbeach_instationary()
       if (time0 .ge. bcendtime) then  ! Recalculate bcf-file
          if (trim(instat)=='stat_table') then
             call writelog('ls','','Reading new wave conditions')
-            read(7,*,iostat=ier) Hm0, Trep, dir0, dum1, spreadpar, bcdur, dum2
+            read(lunfil,*,iostat=ier) Hm0, Trep, dir0, dum1, spreadpar, bcdur, dum2
             if (ier .ne. 0) then
                call report_file_read_error(bcfile)
             endif
@@ -2776,9 +2776,8 @@ subroutine xbeach_spectral_wave_init()
    xx = dmiss
    yy = dmiss
    
-   fid = 31415926
    
-   open(fid, file=bcfile)
+   open(newunit=fid, file=bcfile)
    ! check for LOCLIST
    read(fid,*)testline
    if (trim(testline)=='LOCLIST') then
@@ -2885,7 +2884,7 @@ subroutine xbeach_spectral_wave_init()
          endif
 
          ! open location list file
-         open(fid, file=bcfile)
+         open(newunit=fid, file=bcfile)
          ! check for LOCLIST
          read(fid,*)testline
          if (trim(testline)=='LOCLIST') then
@@ -3978,7 +3977,7 @@ subroutine xbeach_fillsystem(solver,NDIM,quant,src_coeff,src_expl,veloc,csx,snx,
    integer                                               :: i, j, n
    integer                                               :: kk, kkother
    integer                                               :: k1, k2
-   integer                                               :: L, LL, irow, icol, ipoint
+   integer                                               :: L, LL, irow, icol, ipoint, lunfil
                                            
    double precision,                       parameter     :: dtol = 1d-10                                
    
@@ -4192,25 +4191,25 @@ subroutine xbeach_fillsystem(solver,NDIM,quant,src_coeff,src_expl,veloc,csx,snx,
    
    if ( jawritesystem.eq.1 ) then
 !     write matrix
-      open(1234,file='system.m')
-      write(1234,"('dum = [')")
+      open(newunit=lunfil,file='system.m')
+      write(lunfil,"('dum = [')")
       do irow=1,solver%numrows
          do j=solver%ia(irow),solver%ia(irow+1)-1
             icol = solver%ja(j)
-            write(1234,"(2I7,E15.5)") irow, icol, solver%a(j)
+            write(lunfil,"(2I7,E15.5)") irow, icol, solver%a(j)
          end do
       end do
-      write(1234,"('];')")
-      write(1234,"('A=sparse(dum(:,1), dum(:,2), dum(:,3));')")
+      write(lunfil,"('];')")
+      write(lunfil,"('A=sparse(dum(:,1), dum(:,2), dum(:,3));')")
       
 !     write rhs
-      write(1234,"('rhs = [')")
+      write(lunfil,"('rhs = [')")
       do irow=1,solver%numrows
-         write(1234,"(E15.5)") solver%rhs(irow)
+         write(lunfil,"(E15.5)") solver%rhs(irow)
       end do
-      write(1234,"('];')")
+      write(lunfil,"('];')")
       
-      close(1234)
+      close(lunfil)
    end if
    
    ierror = 0
@@ -4363,7 +4362,7 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
    double precision                                          :: dis
    integer                                                   :: k, itheta
    integer                                                   :: n
-   integer                                                   :: iters, ierror
+   integer                                                   :: iters, ierror, lunfil
    
    integer, save :: jaoutput=0
       
@@ -4444,30 +4443,30 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
    write(6,*) 'Solve wave energy system:: ierror=', ierror, ', no of iters=',iters
    
    if ( jaoutput.eq.1 ) then
-      open(1235,file='tmp.m')
-      write(1235,"('ee1= [', $)")
+      open(newunit=lunfil,file='tmp.m')
+      write(lunfil,"('ee1= [', $)")
       do k=1,Ndx
          do itheta=1,ntheta
-            write(1235,"(E15.5, $)") ee1(itheta,k)
+            write(lunfil,"(E15.5, $)") ee1(itheta,k)
          end do
       end do
-      write(1235,"('];')")
+      write(lunfil,"('];')")
    
-      write(1235,"('x= [', $)")
+      write(lunfil,"('x= [', $)")
       do k=1,Ndx
-            write(1235,"(E15.5, $)") xz(k)
+            write(lunfil,"(E15.5, $)") xz(k)
       end do
-      write(1235,"('];')")
+      write(lunfil,"('];')")
    
-      write(1235,"('y= [', $)")
+      write(lunfil,"('y= [', $)")
       do k=1,Ndx
-            write(1235,"(E15.5, $)") yz(k)
+            write(lunfil,"(E15.5, $)") yz(k)
       end do
-      write(1235,"('];')")
+      write(lunfil,"('];')")
    
-      write(1235,"('Ndxi=', I0, ';')") Ndxi
+      write(lunfil,"('Ndxi=', I0, ';')") Ndxi
    
-      close(1235)
+      close(lunfil)
       
       jaoutput = 0
    end if
@@ -5444,7 +5443,7 @@ subroutine borecharacter()
    integer                                               :: i, j, n
    integer                                               :: kk, kkother
    integer                                               :: k1, k2
-   integer                                               :: L, LL, irow, icol, ipoint
+   integer                                               :: L, LL, irow, icol, ipoint, lunfil
                                            
    double precision,                       parameter     :: dtol = 1d-10                                
    
@@ -5674,25 +5673,25 @@ subroutine borecharacter()
    
    if ( jawritesystem.eq.1 ) then
 !     write matrix
-      open(1234,file='system.m')
-      write(1234,"('dum = [')")
+      open(newunit=lunfil,file='system.m')
+      write(lunfil,"('dum = [')")
       do irow=1,solver%numrows
          do j=solver%ia(irow),solver%ia(irow+1)-1
             icol = solver%ja(j)
-            write(1234,"(2I7,E15.5)") irow, icol, solver%a(j)
+            write(lunfil,"(2I7,E15.5)") irow, icol, solver%a(j)
          end do
       end do
-      write(1234,"('];')")
-      write(1234,"('A=sparse(dum(:,1), dum(:,2), dum(:,3));')")
+      write(lunfil,"('];')")
+      write(lunfil,"('A=sparse(dum(:,1), dum(:,2), dum(:,3));')")
       
 !     write rhs
-      write(1234,"('rhs = [')")
+      write(lunfil,"('rhs = [')")
       do irow=1,solver%numrows
-         write(1234,"(E15.5)") solver%rhs(irow)
+         write(lunfil,"(E15.5)") solver%rhs(irow)
       end do
-      write(1234,"('];')")
+      write(lunfil,"('];')")
       
-      close(1234)
+      close(lunfil)
    end if
    
    ierror = 0

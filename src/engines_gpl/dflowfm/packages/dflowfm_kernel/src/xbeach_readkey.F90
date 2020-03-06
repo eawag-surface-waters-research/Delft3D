@@ -537,9 +537,8 @@ contains
        ier=0
        ! Read the file for all lines with "=" 
        call writelog('ls','','XBeach reading from ',trim(fname))
-       lun=99
        i=0
-       open(lun,file=fname)
+       open(newunit=lun,file=fname)
        do while (ier==0)
           read(lun,'(a)',iostat=ier)ch
           if (ier==0)i=i+1
@@ -551,7 +550,7 @@ contains
        values = '' 
        if (allocated(readindex)) deallocate(readindex)
        ! Read through the file to fill all the keyword = value combinations
-       open(lun,file=fname)
+       open(newunit=lun,file=fname)
        ikey=0
        do i=1,nlines
           read(lun,'(a)')line

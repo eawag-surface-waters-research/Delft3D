@@ -460,10 +460,8 @@
 !   implicit none
 !   logical                  :: success
 !   integer                  :: minp
-!   integer, external :: numuni
 !
 !   success = .false.
-!   minp = numuni()
 !
 !end function readwindseriesfiles
 !

@@ -45,6 +45,7 @@ implicit none
     integer, parameter :: maxlength = 256  !< Max length of a file name (not checked upon).
     integer            :: maxnum = 0       !< Current length of filenames list.
     character(maxlength), dimension(:), allocatable :: filenames
+    integer             , dimension(:), allocatable :: lunfils !< Unit number corresponding to filenames with the same index
 
     integer :: mdia = 0 !< File pointer to .dia file
     integer :: mini = 0 !< File pointer to .ini file
@@ -70,14 +71,24 @@ subroutine reg_file_open(mfil, filename)
    integer,          intent(in) :: mfil     !< File unit number (e.g., from numuni)
    character(len=*), intent(in) :: filename
 
+   integer :: ifil
 
-    if (mfil > maxnum) then
-        MAXNUM = MFIL + 50
-        call realloc(filenames, maxnum, fill=' ')
-    end if
-
-    filenames(mfil) = filename
-end subroutine
+   do ifil = 1, maxnum
+      if (lunfils(ifil) == mfil) then
+         ! Already registered as being open
+         ! Update filename and return
+         filenames(ifil) = filename
+         return
+      endif
+   enddo
+   ! Not registered yet as being open
+   ! Add it
+   maxnum = maxnum + 1
+   call realloc(filenames, maxnum, fill=' ')
+   call realloc(lunfils  , maxnum, fill=0)
+   filenames(maxnum) = filename
+   lunfils(maxnum)   = mfil
+end subroutine reg_file_open
 
 
 !> 'Unregisters' a file name from the list upon closing.
@@ -85,24 +96,37 @@ end subroutine
 subroutine reg_file_close(mfil)
     integer,          intent(in) :: mfil
 
-    filenames(mfil) = ' '
-end subroutine
+    integer :: ifil
+
+    do ifil = 1, maxnum
+       if (lunfils(ifil) == mfil) then
+          ! Empty name and related lunfil
+          ! No deallocation needed
+          filenames(ifil) = ' '
+          lunfils  (ifil) = 0
+          return
+       endif
+    enddo   
+end subroutine reg_file_close
 
 
 !> Closes all remaining files in the file list.
 subroutine close_all_files()
     integer :: mfil
 
-    do mfil = maxnum,1,-1
-       if (mfil .ne. mdia) then ! SPvdP: need to close dia-file last
-          close(mfil) ! No need to check file status, just attempt to close.
-          if (filenames(mfil) /= ' ') then
-             call mess(LEVEL_INFO, 'Closed file : ', filenames(mfil))
+    do mfil = 1, maxnum
+       if (lunfils(mfil) /=  mdia) then ! SPvdP: need to close dia-file last
+          if (lunfils(mfil) /= 0) then  ! 0: already closed
+             close(lunfils(mfil)) ! No need to check file status, just attempt to close.
+             if (filenames(mfil) /= ' ') then
+                call mess(LEVEL_INFO, 'Closed file : ', filenames(mfil))
+             end if
           end if
        end if
     end do
     
     if (allocated(filenames)) deallocate(filenames)
+    if (allocated(lunfils)  ) deallocate(lunfils)
 
     maxnum = 0
 end subroutine close_all_files
@@ -340,7 +364,6 @@ subroutine inidia(basename)
   
     character(len=*)  :: basename
 
-    integer, external :: numuni
     integer :: ierr
     integer :: k
     integer :: L
@@ -349,7 +372,6 @@ subroutine inidia(basename)
    
     if (mdia > 0) return
     
-    mdia    = numuni()
    
     L = len_trim(md_ident)
     if (L == 0) then   
@@ -363,7 +385,7 @@ subroutine inidia(basename)
     
     K = 0
     ierr = 0
- 10 OPEN(mdia, FILE=trim(filename), action='readwrite', IOSTAT=ierr)
+ 10 OPEN(newunit=mdia, FILE=trim(filename), action='readwrite', IOSTAT=ierr)
     inquire(mdia, readwrite=rw)
     IF (ierr .GT. 0 .or. trim(rw)/='YES') THEN
         K = K + 1
@@ -395,15 +417,13 @@ end subroutine sysfilepath
 SUBROUTINE SYSFIL(LUNID,FILNAM)
     integer, intent(inout)   :: lunid
     CHARACTER, intent(in)    :: FILNAM*76
-    integer, external        :: numuni
     character                :: FULNAM*180
     logical                  :: ja
 
     call sysfilepath(filnam, fulnam)
     INQUIRE(FILE= FULNAM,EXIST=JA)
     IF (JA) THEN
-        LUNID = NUMUNI()
-        OPEN(LUNID,FILE= FULNAM)
+        OPEN(NEWUNIT=LUNID,FILE= FULNAM)
         call reg_file_open(lunid, fulnam)
      ENDIF
 

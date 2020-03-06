@@ -238,13 +238,13 @@ implicit none
 double precision                    :: t, deltax
 double precision, allocatable, save :: uexa(:),zexa(:), xexa(:)
 integer         , allocatable, save :: iexa(:)
-integer                             :: L, k1, k2, n, i
+integer                             :: L, k1, k2, n, i, lunfil
 
 if (t == 0d0) then
    if (allocated (uexa) ) deallocate (uexa, zexa, xexa,iexa)
    allocate( uexa(ndx), zexa(ndx), xexa(ndx), iexa(ndx) )
    call indexx(ndx,xz,iexa)
-   open (811, file = 'eqa.txt')
+   open (newunit=lunfil, file = 'eqa.txt')
 endif
 
 k1 = ln(1,1) ; k2 = ln(2,1)
@@ -263,10 +263,10 @@ if (t == 18000d0) then
    do n = 1,ndx
       i = iexa(n)
       if (n < 40) then
-         write(811,*) xz(i), zexa(i), s1(i)
+         write(lunfil,*) xz(i), zexa(i), s1(i)
       endif
    enddo
-   close (811)
+   close (lunfil)
 endif
 
 do L = 1,lnx
@@ -711,7 +711,7 @@ subroutine poiseuille(init)
  logical,          save                        :: Lwriteheader = .true., Lheaderwritten = .false.
  logical                                       :: Lwritetime
 
- integer,          parameter                   :: fid = 666
+ integer                                       :: fid
 
  character (len=40)                            :: tex
  double precision                              :: sumba
@@ -850,9 +850,9 @@ else
 
 !   open file
     if ( Lwriteheader ) then
-       open(fid, file=trim(FNAM))
+       open(newunit=fid, file=trim(FNAM))
     else
-       open(fid, file=trim(FNAM), access="append")
+       open(newunit=fid, file=trim(FNAM), access="append")
     end if
 
 !   allocate

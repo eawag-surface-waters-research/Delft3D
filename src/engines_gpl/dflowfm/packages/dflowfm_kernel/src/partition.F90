@@ -3287,11 +3287,11 @@ end subroutine partition_make_globalnumbers
 !         end do
        end if
       
-!      open(6666,file='globalnrs_'//sdmn//'.xyz')
+!      open(newunit=lunfil,file='globalnrs_'//sdmn//'.xyz')
 !      do i=1,Ndx
-!         write(6666,"(2E15.7, I7)") xz(i), yz(i), iglobnum(i)
+!         write(lunfil,"(2E15.7, I7)") xz(i), yz(i), iglobnum(i)
 !      end do
-!      close(6666)
+!      close(lunfil)
 
       ierror = 0
  1234 continue
@@ -3790,19 +3790,19 @@ end subroutine partition_make_globalnumbers
 !       call MPI_barrier(DFM_COMM_DFMWORLD,ierror)
 !       do idmn=0,ndomains-1
 !          if ( idmn.eq.my_rank) then
-!             open(unit=666,file='deleteme.txt', access='append')
+!             open(newunit=lunfil,file='deleteme.txt', access='append')
 !             
 !             if ( my_rank.eq.0 ) then             
-!                write(666,"('reduce_kobs')")
-!                write(666,"('before reduce')")
+!                write(lunfil,"('reduce_kobs')")
+!                write(lunfil,"('before reduce')")
 !             end if
 !             
-!             write(666,"('my_rank=',I0)") idmn
+!             write(lunfil,"('my_rank=',I0)") idmn
 !             do i=1,N
-!                write(666,"(I4, I8, E17.4)") i, kobs(i), dist(i)
+!                write(lunfil,"(I4, I8, E17.4)") i, kobs(i), dist(i)
 !             end do
 !             
-!             close(666)
+!             close(lunfil)
 !          end if
 !          
 !          call MPI_barrier(DFM_COMM_DFMWORLD,ierror)
@@ -3856,18 +3856,18 @@ end subroutine partition_make_globalnumbers
 !       call MPI_barrier(DFM_COMM_DFMWORLD,ierror)
 !       do idmn=0,ndomains-1
 !          if ( idmn.eq.my_rank) then
-!             open(unit=666,file='deleteme.txt', access='append')
+!             open(newunit=lunfil,file='deleteme.txt', access='append')
 !             
 !             if ( my_rank.eq.0 ) then   
-!                write(666,"('after reduce')")
+!                write(lunfil,"('after reduce')")
 !             end if
 !             
-!             write(666,"('my_rank=',I0)") idmn
+!             write(lunfil,"('my_rank=',I0)") idmn
 !             do i=1,N
-!                write(666,"(I4, I8, 2E17.4)") i, kobs(i), dist(i), dist_all(i)
+!                write(lunfil,"(I4, I8, 2E17.4)") i, kobs(i), dist(i), dist_all(i)
 !             end do
 !             
-!             close(666)
+!             close(lunfil)
 !          end if
 !          
 !          call MPI_barrier(DFM_COMM_DFMWORLD,ierror)
@@ -5046,7 +5046,7 @@ end subroutine partition_make_globalnumbers
       logical                                         :: Lexist
       
       integer, parameter                              :: ISTRLEN = 20
-      integer, parameter                              :: MFILE   = 1234
+      integer                                         :: MFILE
       
       integer, parameter                              :: Ntvarlist = 13
       integer, dimension(Ntvarlist), parameter        :: itvarlist = (/ 1, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 /)
@@ -5094,7 +5094,7 @@ end subroutine partition_make_globalnumbers
       
       if ( jadoit.eq.1 ) then
          inquire(FILE=FNAM,EXIST=Lexist)
-         open(unit=MFILE,FILE=trim(FNAM),access='APPEND')
+         open(newunit=MFILE,FILE=trim(FNAM),access='APPEND')
          
          if ( .not.Lexist ) then
 !           print header
@@ -5813,11 +5813,11 @@ end subroutine partition_make_globalnumbers
 !         end do
 !         
 !         if ( my_rank.eq.1 .and. other_domain.eq.18 ) then
-!            open(666,file='temp.xyz', status='replace', action='write')
+!            open(newunit=lunfil,file='temp.xyz', status='replace', action='write')
 !            do i=1,num
-!               write(666,"(3E15.5)") xyrec(1:3,i)
+!               write(lunfil,"(3E15.5)") xyrec(1:3,i)
 !            end do
-!            close(666)
+!            close(lunfil)
 !            stop
 !         end if
 !!        END DEBUG

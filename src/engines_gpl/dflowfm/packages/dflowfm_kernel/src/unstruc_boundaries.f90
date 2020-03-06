@@ -86,7 +86,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  if (len(trim(md_extfile)) > 0) then
     inquire (file = trim(md_extfile), exist = jawel)
     if (jawel) then
-       if (mext > 0) then
+       if (mext /= 0) then
           ! Close first, if left open after prior flow_geominit().
           ! NOTE: AvD: this if-check relies on the fact that mext is *not* set to 0 in default_flowexternalforcings(), when reinitializing an already initialized model.
           call doclose(mext)
@@ -257,7 +257,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  deallocate(kce)
  deallocate(ke)
 
- if (mext > 0) then
+ if (mext /= 0) then
     rewind (mext)                                      ! prepare input file
  end if
  numbnp = nbndz + nbndu + nbnd1d2d                             ! nr of boundary points =
@@ -3408,7 +3408,7 @@ endif
 ! Cleanup:
 888 continue
     
- if (mext > 0) then
+ if (mext /= 0) then
 !    call doclose(mext) ! close ext file
 !    deallocate ( keg, ked, kep, kegs) ! TODO: AvD: cleanup now still done in initexternalforcings. Split off later, or not?
  end if

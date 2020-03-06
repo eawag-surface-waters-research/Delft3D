@@ -467,32 +467,32 @@
       
       logical                                            :: Lexist
                                               
-      integer                                            :: irow, icol, j
+      integer                                            :: irow, icol, j, lunfil
       
       inquire(file=trim(FNAM), exist=Lexist)
       if ( jaappend.eq.0 .or. .not.Lexist ) then
-         open(1234,file=trim(FNAM))
+         open(newunit=lunfil,file=trim(FNAM))
       else
-         open(1234,file=trim(FNAM), access="append")
+         open(newunit=lunfil,file=trim(FNAM), access="append")
       end if
       
       
-      write(1234,"('dum = [')")
+      write(lunfil,"('dum = [')")
       do irow=1,N
          do j=ia(irow),ia(irow+1)-1
             icol = ja(j)
-            write(1234,"(2I7,E20.10)") irow, icol, a(j)
+            write(lunfil,"(2I7,E20.10)") irow, icol, a(j)
          end do
       end do
-      write(1234,"('];')")
-      write(1234,"(A16, '=sparse(dum(:,1), dum(:,2), dum(:,3));')") VARNAM
+      write(lunfil,"('];')")
+      write(lunfil,"(A16, '=sparse(dum(:,1), dum(:,2), dum(:,3));')") VARNAM
       
 !     write rhs
-!      write(1234,"('rhs = [')")
+!      write(lunfil,"('rhs = [')")
 !      do irow=1,solver%numrows
-!         write(1234,"(E15.5)") solver%rhs(irow)
+!         write(lunfil,"(E15.5)") solver%rhs(irow)
 !      end do
-!      write(1234,"('];')")
+!      write(lunfil,"('];')")
       
-      close(1234)
+      close(lunfil)
    end subroutine writeMatrix

@@ -74,10 +74,10 @@ subroutine kml_write_net(filename)
 
     real(kind=hp) :: zmin, zmax, zp, half
     integer :: i, n, numls, numlt, kcur, knext, lcur, L, iloc, kn3cur, LMOD
-    integer :: kmlunit=1234, ios
+    integer :: kmlunit, ios
     
 
-    open(kmlunit, file=trim(filename), status='replace', action='write', iostat=ios)
+    open(newunit=kmlunit, file=trim(filename), status='replace', action='write', iostat=ios)
     if (ios /= 0) then
         return
     end if
@@ -671,7 +671,6 @@ subroutine foam_write_polymesh(filename)
     use properties
     character(len=*), intent(in) :: filename !< TODO: Output file names
 
-    integer, external :: numuni
 
     integer :: mfil
     integer :: L
