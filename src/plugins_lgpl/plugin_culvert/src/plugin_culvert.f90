@@ -485,6 +485,7 @@ character(len=256) :: error_message
 !
 integer            :: istat
 integer            :: n
+integer            :: lunfil
 real(hp)           :: a
 real(hp)           :: dz
 !
@@ -551,13 +552,13 @@ if (first) then
    !
    ! Read parameters from filenm
    !
-   open(717, file=filenm, status='OLD', action='READ', iostat=istat)
+   open(newunit=lunfil, file=filenm, status='OLD', action='READ', iostat=istat)
    if (istat/=0) then
       write(error_message,*) 'Error ',istat,' while reading input file'
       return
    endif
    !
-   read(717,*, iostat=istat) npairs
+   read(lunfil,*, iostat=istat) npairs
    if (istat/=0) then
       write(error_message,*) 'Error reading dimension of discharge table'
       return
@@ -574,7 +575,7 @@ if (first) then
    endif
    !
    do n = 1,npairs
-      read(717,*, iostat=istat) dzw(n), disch(n)
+      read(lunfil,*, iostat=istat) dzw(n), disch(n)
       if (istat/=0) then
          write(error_message,*) 'Error reading value pair ',n,' of discharge table'
          return
@@ -590,7 +591,7 @@ if (first) then
          endif
       endif
    enddo
-   close(717)
+   close(lunfil)
    !
    first = .false.
 endif
