@@ -94,7 +94,7 @@
       integer(ip), parameter            :: max_len_blockname=4
       integer(ip), parameter            :: max_len_key=20
 
-      integer(ip)                       :: lun_ini=50
+      integer(ip)                       :: lun_ini
       integer(ip)                       :: ios, ier
       integer(ip)                       :: npart_pol, isub, i, np, nerr
       integer(ip)                       :: nrows, ncols
@@ -138,7 +138,7 @@
       polygone_complete = .false.
       len_file          =  len_trim(ini_file)
 
-      open(lun_ini,file=ini_file,status='old',iostat=ios)
+      open(newunit=lun_ini,file=ini_file,status='old',iostat=ios)
       if (ios /= 0) go to 900
 
       do ipol = 1,npol

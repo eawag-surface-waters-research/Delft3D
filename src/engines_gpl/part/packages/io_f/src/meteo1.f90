@@ -50,10 +50,8 @@ function readwindseriesfiles(minp) result(success)
    implicit none
    logical                  :: success
    integer                  :: minp
-   integer, external        :: numuni
 
    success = .false.
-   minp = numuni()
 
 end function readwindseriesfiles
 
@@ -112,12 +110,10 @@ subroutine readgrid( gridfile, mmax, nmax, x, y )
     integer              :: lugrd, ierror, i, j
     character(len=10)    :: header
     character(len=1)     :: dummy
-    integer, external    :: numuni
     double precision, dimension(:,:), allocatable :: xc, yc
 
 
-    lugrd = numuni()
-    open( lugrd, file = gridfile, status = 'old' )
+    open( newunit=lugrd, file = gridfile, status = 'old' )
 
     do
         read( lugrd, '(a)', iostat = ierror ) header

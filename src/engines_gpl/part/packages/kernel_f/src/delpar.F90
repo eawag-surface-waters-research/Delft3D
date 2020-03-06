@@ -398,7 +398,7 @@
 
       include "omp_lib.h"
 
-      integer(ip)         :: itime   , lunpr
+      integer(ip)         :: itime   , lunpr, lunfil
       integer(ip)         :: nosubud , noth
       integer(ip)         :: ilp, isp, iext, nores, noras
       real(sp)            :: dtstep
@@ -651,12 +651,12 @@
             size_file = fname(1)
             iext = len_trim(size_file) - 3
             size_file(iext+1:iext+5) = 'size'    !dump file for drawn plastic sizes
-            open  (50, file = size_file, form = 'formatted')
-            write(50 , '(A10,100A20)') 'particle', (trim(substi(isp)), isp=1,nosubs)
+            open  (newunit=lunfil, file = size_file, form = 'formatted')
+            write(lunfil , '(A10,100A20)') 'particle', (trim(substi(isp)), isp=1,nosubs)
             do ilp = 1, npmax
-               write(50 , '(I10,100E20.7)') ilp, spart(1:nosubs,ilp)
+               write(lunfil , '(I10,100E20.7)') ilp, spart(1:nosubs,ilp)
             enddo
-            close(50)
+            close(lunfil)
          endif
       end if
 
@@ -942,24 +942,24 @@
                res_file(iext+1:iext+4) = 'res'     !all results, except those that are inactive (outside model)
             end if
             write ( lunpr, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
-            call openfl ( 50, res_file, ftype(2), 1 )
-            write ( 50 ) 0, nores, nosubs
+            call openfl ( lunfil, res_file, ftype(2), 1 )
+            write ( lunfil ) 0, nores, nosubs
 
             do ilp = 1, nopart
                if (npart(ilp)>1.and.mpart(ilp)>1) then
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
                      if (modtyp.ne.6) then
-                        write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
+                        write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                                      wpart(1:nosubs,ilp), iptime(ilp)
                      else
-                        write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
+                        write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                                      wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
                      end if
                   end if
                end if
             enddo
             write (lunpr,*) ' Number of active particles in the restart file: ',nores
-            close ( 50 )
+            close ( lunfil )
          else
 !        Write the restart file with all active paritcles below a certain age
             if (modtyp.eq.6)then
@@ -970,24 +970,24 @@
             end if
             write ( lunpr, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
             write ( lunpr, * ) ' Particles older than ',max_restart_age,' seconds are removed'
-            call openfl ( 50, res_file, ftype(2), 1 )
-            write ( 50 ) 0, noras, nosubs
+            call openfl ( lunfil, res_file, ftype(2), 1 )
+            write ( lunfil ) 0, noras, nosubs
 
             do ilp = 1, nopart
                if (npart(ilp)>1.and.mpart(ilp)>1) then
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
                      if (modtyp.ne.6) then
-                        write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
+                        write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                                      wpart(1:nosubs,ilp),iptime(ilp)
                      else
-                        write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
+                        write ( lunfil ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                                      wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
                      end if
                   end if
                end if
             enddo
             write (lunpr,*) ' Number of active particles in the restart file below maximum age: ',noras
-            close ( 50 )
+            close ( lunfil )
          end if
       end if
 

@@ -43,6 +43,7 @@
       implicit none
 
       integer           :: iexit
+      integer           :: lunfil
 !
       if (iexit == 0) then
          write (*,*) 'Normal end'
@@ -50,9 +51,9 @@
          write (*,*) 'Simulation stopped because of errors - check the report'
       endif
 
-      open  ( 13 , file = 'delpar.rtn' )
-      write ( 13 , * ) iexit
-      close ( 13 )
+      open  ( newunit = lunfil , file = 'delpar.rtn' )
+      write ( lunfil , * ) iexit
+      close ( lunfil )
 
       if (useexeption_part) call throwexception()
 

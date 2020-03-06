@@ -56,12 +56,13 @@
 
 !     kind            function         name           description
 
-      integer  ( ip), intent(in   ) :: lun1          !< unit number input file
-      integer  ( ip), intent(in   ) :: lun2          !< unit number report file
+      integer  ( ip), intent(inout) :: lun1          !< unit number input file
+      integer  ( ip), intent(inout) :: lun2          !< unit number report file
       character(256), intent(in   ) :: lnam1         !< name of the input file
 
 !     Locals
 
+      integer  ( ip)                 lunfil
       integer  ( ip)                 ierr            ! cumulative error variable
       integer  ( ip)                 ierr2           ! local error variable
       integer  ( 4 )                 itype           ! returned type of gettoken
@@ -136,7 +137,7 @@
       npos    = 200
       iposr   =   0
       close ( lun1 )
-      open  ( ilun(i), file=lch(i), iostat=ios) ! File might already be open
+      open  ( newunit=ilun(i), file=lch(i), iostat=ios) ! File might already be open
       if (ios.ne.0 .and. ios.ne.5004) then
          write ( lun2, * ) ' Error opening PART input file'
          write ( *   , * ) ' Error opening PART input file'
@@ -780,10 +781,10 @@
                   if ( gettoken( permearight , ierr2 ) .ne. 0 ) goto 9202   ! rightside permeability of screeens
                   if ( gettoken( fiscreens   , ierr2 ) .ne. 0 ) goto 9203   ! screens polygon
 
-                  open ( 50, file=fiscreens, status='old', iostat=ierr2 )
+                  open ( newunit=lunfil, file=fiscreens, status='old', iostat=ierr2 )
                   if ( ierr2 .ne. 0 ) go to 9204
-                  call getdim_dis ( 50, fiscreens, nrowsscreens, lun2 )
-                  close (50)
+                  call getdim_dis ( lunfil, fiscreens, nrowsscreens, lun2 )
+                  close (lunfil)
                   if ( nrowsscreens .gt. 0) then
 !     allocate memory for the dispersant polygons, and read them into memory
                      call alloc ( "xpoltmp", xpolscreens, nrowsscreens )
@@ -984,27 +985,27 @@
 
          if (ini_opt .eq. 1 ) then
             if ( gettoken( ini_file, ierr2 ) .ne. 0 ) goto 6012
-            open ( 50, file=ini_file, status='old', iostat=ierr2 )
+            open ( newunit=lunfil, file=ini_file, status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1710
 
 !           get maximum no. of initial particles (npmax) and
 !           maximum no. of rows for polygones (nrowsmax)
             write ( lun2, * ) ' Reading number of initial particles from polygon file:', trim(ini_file)
 
-            call getdim_ini ( 50, ini_file, npmax, npolmax, nrowsmax, lun2 )
-            close ( 50 )
+            call getdim_ini ( lunfil, ini_file, npmax, npolmax, nrowsmax, lun2 )
+            close ( lunfil )
          endif
 !        ini_opt = 2 : ascii text file from rasterdata
          if (ini_opt .eq. 2 ) then                              
             if ( gettoken( ini_file, ierr2 ) .ne. 0 ) goto 6012
-            open ( 50, file=ini_file, status='old', iostat=ierr2 )
+            open ( newunit=lunfil, file=ini_file, status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1710
 
 !           get maximum no. of initial particles (npmax) and
 !           maximum no. of rows for coordinates (nrowsmax)
             write ( lun2, * ) ' Reading number of initial particles from ascii file:', trim(ini_file)
-            call getdim_asc ( 50, ini_file, npmax, nrowsmax, lun2 )
-            close ( 50 )
+            call getdim_asc ( lunfil, ini_file, npmax, nrowsmax, lun2 )
+            close ( lunfil )
          endif
 
 
@@ -1037,10 +1038,10 @@
 !     read dispersant polygon file
                   if ( gettoken( fidisp(i), ierr2 ) .ne. 0 ) goto 6010
 !     determine maximum no. of rows for polygons (nrowsmax)
-                  open ( 50, file=fidisp(i), status='old', iostat=ierr2 )
+                  open ( newunit=lunfil, file=fidisp(i), status='old', iostat=ierr2 )
                   if ( ierr2 .ne. 0 ) go to 1700
-                  call getdim_dis ( 50, fidisp(i), nrowsmax, lun2 )
-                  close (50)
+                  call getdim_dis ( lunfil, fidisp(i), nrowsmax, lun2 )
+                  close (lunfil)
 
 !     check for ascending order of events, and one per timestep
                   idisset (i) = id*86400 + ih*3600 + im*60 + is
@@ -1094,10 +1095,10 @@
                   end do
                   if ( gettoken( fiboom(i), ierr2 ) .ne. 0 ) goto 6010
 !     determine maximum no. of rows for polygones (nrowsmax)
-                  open ( 50, file=fiboom(i), status='old', iostat=ierr2 )
+                  open ( newunit=lunfil, file=fiboom(i), status='old', iostat=ierr2 )
                   if ( ierr2 .ne. 0 ) go to 1701
-                  call getdim_dis ( 50, fiboom(i), nrowsmax, lun2 )
-                  close (50)
+                  call getdim_dis ( lunfil, fiboom(i), nrowsmax, lun2 )
+                  close (lunfil)
 
 !     check for ascending order of events, and one per timestep
                   iboomset (i) = id*86400 + ih*3600 + im*60 + is
@@ -1172,10 +1173,10 @@
          if ( idp_file .ne. ' ' ) then
             write ( *, * ) ' Reading number of initial particles from file:', idp_file(1:len_trim(idp_file))
             write ( lun2, * ) ' Reading number of initial particles from file:', idp_file(1:len_trim(idp_file))
-            call openfl ( 50, idp_file, ftype(2), 0 )
+            call openfl ( lunfil, idp_file, ftype(2), 0 )
 !           get maximum no. of initial particles (nrespart), don't combine ini_oil with this!
-            read ( 50 ) idummy, nopart_res, idummy
-            close ( 50 )
+            read ( lunfil ) idummy, nopart_res, idummy
+            close ( lunfil )
             npmax = nopart_res
          endif
          if ( gettoken( nosta, ierr2 ) .ne. 0 ) goto 4031
@@ -1378,10 +1379,10 @@
                fidye(i) = ' '
             else               
                radius(i) = -999.0
-               open ( 50, file=fidye(i), status='old', iostat=ierr2 )
+               open ( newunit=lunfil, file=fidye(i), status='old', iostat=ierr2 )
                if ( ierr2 .ne. 0 ) go to 1702
-               call getdim_dis ( 50, fidye(i), nrowsmax, lun2 )
-               close (50)
+               call getdim_dis ( lunfil, fidye(i), nrowsmax, lun2 )
+               close (lunfil)
             endif
          else
             radius(i) = 0
@@ -1485,10 +1486,10 @@
             fiwaste(i+nodye) = ' '
          else               
             radius(i+nodye) = -999.0
-            open ( 50, file=fiwaste(i+nodye), status='old', iostat=ierr2 )
+            open ( newunit=lunfil, file=fiwaste(i+nodye), status='old', iostat=ierr2 )
             if ( ierr2 .ne. 0 ) go to 1703
-            call getdim_dis ( 50, fiwaste(i+nodye), nrowsmax, lun2 )
-            close (50)
+            call getdim_dis ( lunfil, fiwaste(i+nodye), nrowsmax, lun2 )
+            close (lunfil)
          endif
          
          if ( gettoken( wparm (i+nodye), ierr2 ) .ne. 0 ) goto 4043
@@ -2695,10 +2696,10 @@ subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
       integer(ip) :: lun
 !
       if(ftype=='unformatted') then
-         open ( lun, file = finam, form = ftype, status ='old',  &
+         open ( newunit = lun, file = finam, form = ftype, status ='old',  &
                  err = 99)
       elseif (ftype=='binary') then
-            open ( lun, file = finam, form = ftype, status = 'old', &
+            open ( newunit = lun, file = finam, form = ftype, status = 'old', &
                    err = 99)
       endif
 !

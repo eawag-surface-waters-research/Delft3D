@@ -85,12 +85,13 @@
       integer  ( ip) nobndl                      !  number of boundaries in 1 layer
 
       integer(4) ithndl              ! handle to time this subroutine
+      integer(ip) lun
       data       ithndl / 0 /
       if ( timon ) call timstrt( "rdlgri", ithndl )
 
 !       initialize the allocation system
 
-      call init_alloc( 97 , lunit(2) )
+      call init_alloc( lun , lunit(2) )
 
 !       initialize the tokenized reading facility
 

@@ -70,21 +70,10 @@ contains
       inquire ( file=filnam, exist = lexist )
       if ( .not. lexist ) goto 9999
 !
-!     select availeble unitnumber
-!
-      do 100 ilun = 10, 99
-         inquire ( unit=ilun, opened = lopen )
-         if ( .not. lopen ) then
-            iolun = ilun
-            goto 101
-         endif
-  100 continue
-  101 continue
-!
 !     open and close file
 !
       if ( iolun  /=  0 ) then
-         open  ( iolun, file = filnam  , err = 900 )
+         open  ( newunit = iolun, file = filnam  , err = 900 )
          close ( iolun, status='delete', err = 900 )
       else
          ierror = 1

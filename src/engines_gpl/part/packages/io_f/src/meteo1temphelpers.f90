@@ -33,30 +33,6 @@ module m_missing
 end module m_missing
 
 
-!> Returns a new unused file pointer
-function numuni()
-implicit none
-    integer, save :: lastnum = 10
-    integer         :: numuni
-
-    logical                        :: opened
-    numuni = lastnum
-    opened = .true.
-    !                            get unit specifier
-   10 continue
-    if (opened) then
-       numuni = numuni + 1
-       inquire (unit = numuni, opened = opened)
-       goto 10
-    endif
-    !
-    if (opened) then
-       numuni = 0
-       write (*,*) 'new unit number not available'
-    endif
-    lastnum = numuni
-end function numuni
-
 !> Opens an existing file for reading.
 !!
 !! When file does not exist or is already open, program stops with
@@ -72,7 +48,6 @@ implicit none
     integer,external                        :: ifirstchar
     integer                        :: l2,l1
     integer                        :: l3
-    integer, external :: numuni
     logical                        :: jawel
     
     istat_ = 0
@@ -86,10 +61,7 @@ implicit none
     endif
     inquire (file = filename(l1:l2), exist = jawel)
     if (jawel) then
-
-       minp = numuni()
-
-       open (minp, file = filename(l1:l2))
+       open (newunit = minp, file = filename(l1:l2))
        write (*,*) 'Opened file :', filename(l1:l2)
     elseif (ifirstchar(filename)==0) then
        write (*,*) 'Filename is empty'
@@ -129,7 +101,6 @@ implicit none
     integer,external                        :: ifirstchar
     integer                        :: l2,l1
     integer                        :: l3
-    integer, external :: numuni
     character(*) RW*20
 
     istat_ = 0
@@ -142,8 +113,7 @@ implicit none
        goto 999
     endif
 
-    minp = numuni()
-    open (minp, file = filename(l1:l2), action='readwrite', IOSTAT=istat_)
+    open (newunit = minp, file = filename(l1:l2), action='readwrite', IOSTAT=istat_)
     inquire(minp, readwrite=rw)
     IF (istat_ .GT. 0 .or. trim(rw)/='YES') THEN
         write (*,*) 'File: ', filename(l1:l2), ' could not be opened for writing.'

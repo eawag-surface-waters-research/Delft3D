@@ -51,7 +51,7 @@
       integer(ip), parameter            :: max_len_blockname=4
       integer(ip), parameter            :: max_len_key=20
 
-      integer(ip)                       :: lun_pol=50
+      integer(ip)                       :: lun_pol
       integer(ip)                       :: ios, ncols
       integer(ip)                       :: i, len_file
 
@@ -66,7 +66,7 @@
 
       len_file          =  len_trim(pol_file)
 
-      open(lun_pol,file=pol_file,status='old',iostat=ios)
+      open(newunit=lun_pol,file=pol_file,status='old',iostat=ios)
       if (ios /= 0) go to 900
 
       write(lunpr,*) ' '

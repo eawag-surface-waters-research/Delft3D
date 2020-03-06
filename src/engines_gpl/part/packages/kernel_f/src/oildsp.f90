@@ -388,7 +388,7 @@ module oildsp_mod
          do ifrac = 1, nfract
             luncsv(ifrac) = 70+ifrac
             write( csv_fnam, '(a,a)' ) trim(substi((ifrac-1)*3 + 1)),'.csv'
-            open ( luncsv(ifrac), file=trim(csv_fnam) )
+            open ( newunit=luncsv(ifrac), file=trim(csv_fnam) )
             write( luncsv(ifrac), 1000 )                      &
                      'Time (hours)          ,',               &
                      'Total mass-floating   ,',               &

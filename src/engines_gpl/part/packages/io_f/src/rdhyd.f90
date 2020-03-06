@@ -108,7 +108,7 @@ end module
 
       ipath = scan(fnam(18),"\",.true.)
       if ( ipath .eq. 0 ) ipath = scan(fnam(18),"/",.true.)
-      open ( lunit(18), file = fnam(18) )
+      open ( newunit = lunit(18), file = fnam(18) )
       read ( lunit(18), '(A)', iostat=error ) line
       do while ( error .eq. 0 )
          if ( line .eq. ' ' ) then
