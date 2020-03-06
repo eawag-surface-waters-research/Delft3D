@@ -51,9 +51,8 @@ c     Include data structures for tables and PDF-file
       character*50 adduni
       character*255 ArgumentString
       real         actdef, versio
-      integer      lu_inp, lu_mes, status
+      integer      lu_inp, lu_mes, status, lunfil
       data         lu_inp /14/
-      data         lu_mes /11/
       
 c     Defaults for command line arguments
 
@@ -77,7 +76,7 @@ c     Defaults for command line arguments
 
 
       itmswi = .false.
-      open ( lu_mes , file = 'waqpb_export.log' )
+      open ( newunit=lu_mes , file = 'waqpb_export.log' )
       if (newfrm) then
         write (lu_mes,'(''Using NEW format'')')
 	else
@@ -152,8 +151,8 @@ c----------------------------------------------------------------------c
 
       write (*,'('' Making PROCES.ASC......'')')
       write (*,*)
-      open ( 15 , file = 'procesm.asc' )
-      write ( 15 , '(i10,50x,f8.2,2x,i10)' ) nproc,versio,serial
+      open ( newunit=lunfil , file = 'procesm.asc' )
+      write ( lunfil , '(i10,50x,f8.2,2x,i10)' ) nproc,versio,serial
 
       do 800 iproc=1,nproc
 
@@ -451,7 +450,7 @@ c         Write PDF file (formats as in HARMONIZE to allow comparison)
      j                  procfo(iproc), 15 )
           endif
   800 continue
-      close (15)
+      close (lunfil)
 
 c     Write all active coefficients to COEFEDIT.DAT in the Sobek-format
       call coefed(serial,itmswi)

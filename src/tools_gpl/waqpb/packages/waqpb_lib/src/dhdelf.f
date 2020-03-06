@@ -54,25 +54,10 @@
       INQUIRE ( FILE=FILNAM, EXIST = LEXIST )
       IF ( .NOT. LEXIST ) RETURN
 !
-!     Select availeble ubitnumber
-!
-      DO 100 ILUN = 10, 99
-         INQUIRE ( UNIT=ILUN, OPENED = LOPEN )
-         IF ( .NOT. LOPEN ) THEN
-            IOLUN = ILUN
-            GOTO 101
-         ENDIF
-  100 CONTINUE
-  101 CONTINUE
-!
 !     Open and close file
 !
-      IF ( IOLUN .NE. 0 ) THEN
-         OPEN  ( IOLUN, FILE = FILNAM  , ERR = 900 )
-         CLOSE ( IOLUN, STATUS='DELETE', ERR = 900 )
-      ELSE
-         IERROR = 1
-      ENDIF
+      OPEN  ( NEWUNIT = IOLUN, FILE = FILNAM  , ERR = 900 )
+      CLOSE ( IOLUN, STATUS='DELETE', ERR = 900 )
 !
       RETURN
 !

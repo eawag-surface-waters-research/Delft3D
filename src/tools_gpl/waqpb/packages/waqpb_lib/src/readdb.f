@@ -42,7 +42,7 @@ c     Read database containing Processes Library
 
 c     Read Table P1
 
-      open ( lu_inp , file = 'grpsub.csv')
+      open ( newunit = lu_inp , file = 'grpsub.csv')
       read ( lu_inp , * )
       nsgrp = 0
     5 if ( nsgrp+1 .gt. nsgrpm ) stop 'dimension NSGRPM'
@@ -55,7 +55,7 @@ c     Read Table P1
 
 c     Read Table P2
 
-      open ( lu_inp , file = 'items.csv' )
+      open ( newunit = lu_inp , file = 'items.csv' )
       read ( lu_inp , * )
       nitem = 0
    10 if ( nitem+1 .gt. nitemm ) stop 'dimension NITEMM'
@@ -72,7 +72,7 @@ c     Read Table P2
 
 c     Read Table P3
 
-      open ( lu_inp , file = 'fortran.csv' )
+      open ( newunit = lu_inp , file = 'fortran.csv' )
       read ( lu_inp , * )
       nfort = 0
    15 if ( nfort+1 .gt. nfortm ) stop 'dimension NFORTM'
@@ -86,7 +86,7 @@ c     Read Table P3
 
 c     Read Table P4
 
-      open ( lu_inp , file = 'proces.csv' )
+      open ( newunit = lu_inp , file = 'proces.csv' )
       read ( lu_inp , * )
       nproc = 0
    20 if ( nproc+1 .gt. nprocm ) stop 'dimension NprocM'
@@ -101,7 +101,7 @@ c     Read Table P4
 
 c     Read table P5
 
-      open ( lu_inp , file = 'config.csv' )
+      open ( newunit = lu_inp , file = 'config.csv' )
       read ( lu_inp , * )
       nconf = 0
   100 if ( nconf+1 .gt. nconfm ) stop 'dimension NconfM'
@@ -115,7 +115,7 @@ c     Read table P5
 c     Read table R1
 
       write (lu_mes,'(5x,'' processing file CON_PRO.CSV ...'')')
-      open ( lu_inp , file = 'con_pro.csv' )
+      open ( newunit = lu_inp , file = 'con_pro.csv' )
       read ( lu_inp , * ) c10,(chkcnf(iconf),iconf=1,nconf)
 c     check consistency beween Config and Con_pro files
       do 110 iconf = 1,nconf
@@ -169,7 +169,7 @@ c                 write ( lu_mes , * ) 'SWITCH OFF '
 
 c     Read table R2
 
-      open ( lu_inp , file = 'con_sub.csv' )
+      open ( newunit = lu_inp , file = 'con_sub.csv' )
       read ( lu_inp , * )
       ncnsb = 0
   130 if ( ncnsb+1 .gt. ncnsbm ) stop 'dimension ncnsb'
@@ -182,7 +182,7 @@ c     Read table R2
 
 c     Read table R3
 
-      open ( lu_inp , file = 'inputs.csv' )
+      open ( newunit = lu_inp , file = 'inputs.csv' )
       read ( lu_inp , * )
       ninpu = 0
    40 if ( ninpu+1 .gt. ninpum ) stop 'dimension NinpuM'
@@ -204,7 +204,7 @@ C     Sort table R3
 
 c     Read table R4
 
-      open ( lu_inp , file = 'outputs.csv' )
+      open ( newunit = lu_inp , file = 'outputs.csv' )
       read ( lu_inp , * )
       noutp = 0
    50 if ( noutp+1 .gt. noutpm ) stop 'dimension NoutpM'
@@ -225,7 +225,7 @@ C     Sort table R4
 
 c     Read table R5
 
-      open ( lu_inp , file = 'outpflx.csv' )
+      open ( newunit = lu_inp , file = 'outpflx.csv' )
       read ( lu_inp , * )
       noutf = 0
    60 if ( noutf+1 .gt. noutfm ) stop 'dimension NoutfM'
@@ -246,7 +246,7 @@ C     Sort table R5
 
 c     Read table R6
 
-      open ( lu_inp , file = 'stochi.csv' )
+      open ( newunit = lu_inp , file = 'stochi.csv' )
       read ( lu_inp , * )
       nstoc = 0
    70 if ( nstoc+1 .gt. nstocm ) stop 'dimension NstocM'
@@ -265,7 +265,7 @@ C     Sort table R6
 
 c     Read table R7
 
-      open ( lu_inp , file = 'velocs.csv' )
+      open ( newunit = lu_inp , file = 'velocs.csv' )
       read ( lu_inp , * )
       nvelo = 0
    90 if ( nvelo+1 .gt. nvelom ) stop 'dimension NveloM'
@@ -284,7 +284,7 @@ C     Sort table R7
 
 c     Read table R8
 
-      open ( lu_inp , file = 'disps.csv' )
+      open ( newunit = lu_inp , file = 'disps.csv' )
       read ( lu_inp , * )
       ndisp = 0
    80 if ( ndisp+1 .gt. ndispm ) stop 'dimension NdispM'
@@ -303,7 +303,7 @@ C     Sort table R8
 
 c     Read table R9
 
-      open ( lu_inp , file = 'table5.csv' )
+      open ( newunit = lu_inp , file = 'table5.csv' )
       read ( lu_inp , * , end = 202 )
       nmodv = 0
   200 if ( nmodv+1 .gt. nmodvm ) stop 'dimension NmodvM'
@@ -317,7 +317,7 @@ c     Read table R9
 
 c     Table old_items
 
-      open ( lu_inp , file = 'old_items.csv' )
+      open ( newunit = lu_inp , file = 'old_items.csv' )
       read ( lu_inp , * , end = 302 )
       n_old_items = 0
   300 if ( n_old_items+1 .gt. n_old_items_max ) stop 'dimension n_old_items_max'
@@ -348,7 +348,7 @@ c     Table old_items
 
 c     Table P1
 
-      open ( lu , file = 'grpsub.csv' )
+      open ( newunit = lu , file = 'grpsub.csv' )
       write (lu,'(''sgrpid,sgrpnm'')')
       if ( nsgrp .gt. 0 )
      jwrite (lu,'(''"'',a30,''","'',a50,''"'')')
@@ -357,7 +357,7 @@ c     Table P1
 
 c     Table P2
 
-      open ( lu , file = 'items.csv' )
+      open ( newunit = lu , file = 'items.csv' )
       write (lu,'(''itemid,itemse,itemex,itemde,itemun,itemnm,'',
      j        ''itemag,itemda,itemwk,itemgr'')')
       if ( nitem .gt. 0 )
@@ -370,7 +370,7 @@ c     Table P2
 
 c     Table P3
 
-      open ( lu , file = 'fortran.csv' )
+      open ( newunit = lu , file = 'fortran.csv' )
       write (lu,'(''fortid'')')
       if ( nfort .gt. 0 )
      jwrite (lu,'(''"'',a10,''"'')') (fortid(i),i=1,nfort)
@@ -378,7 +378,7 @@ c     Table P3
 
 c     Table P4
 
-      open ( lu , file = 'proces.csv' )
+      open ( newunit = lu , file = 'proces.csv' )
       write (lu,'(''procid,procco,procfo,procnm'')')
       if ( nproc .gt. 0 )
      jwrite (lu,'(''"''a10,''",'',i3,'',"'',a10,''","'',a50,''"'')')
@@ -387,7 +387,7 @@ c     Table P4
 
 c     Table P5
 
-      open ( lu , file = 'config.csv' )
+      open ( newunit = lu , file = 'config.csv' )
       write ( lu ,'(''confid,confnm'')')
       if ( nconf .gt. 0 )
      jwrite (lu,'(''"'',a10,''","'',a50,''"'')')
@@ -396,7 +396,7 @@ c     Table P5
 
 c     Table R1
 
-      open ( lu , file = 'con_pro.csv' )
+      open ( newunit = lu , file = 'con_pro.csv' )
       c10 = 'Config:'
       write ( lu , '(''"'',a10,''"'',99('',"'',a10,''"''))')
      j    c10,(confid(i),i=1,nconf)
@@ -415,7 +415,7 @@ c     Table R1
 
 c     Table R2
 
-      open ( lu , file = 'con_sub.csv' )
+      open ( newunit = lu , file = 'con_sub.csv' )
       write ( lu ,'(''r2_cid,r2_sid'')')
       if ( ncnsb .gt. 0 )
      jwrite (lu,'(''"'',a10,''","'',a10,''"'')')
@@ -424,7 +424,7 @@ c     Table R2
 
 c     Table R3
 
-      open ( lu , file = 'inputs.csv' )
+      open ( newunit = lu , file = 'inputs.csv' )
       write (lu,'(''inpupr,inpuit,inpunm,inpude,inpudo,inpusx'')')
       if ( ninpu .gt. 0 )
      jwrite (lu,'(''"'',a10,''","'',a10,''",'',i4,'',"'',a1,
@@ -435,7 +435,7 @@ c     Table R3
 
 c     Table R4
 
-      open ( lu , file = 'outputs.csv' )
+      open ( newunit = lu , file = 'outputs.csv' )
       write (lu,'(''outppr,outpit,outpnm,outpdo,outpsx'')')
       if ( noutp .gt. 0 )
      jwrite (lu,'(''"'',a10,''","'',a10,''",'',i4,'',"'',a1,
@@ -445,7 +445,7 @@ c     Table R4
 
 c     Table R5
 
-      open ( lu , file = 'outpflx.csv' )
+      open ( newunit = lu , file = 'outpflx.csv' )
       write (lu,'(''outfpr,outffl,outfnm,outfdo'')')
       if ( noutf .gt. 0 )
      jwrite (lu,'(''"'',a10,''","'',a10,''",'',i4,'',"'',a1,''"'')')
@@ -454,7 +454,7 @@ c     Table R5
 
 c     Table R6
 
-      open ( lu , file = 'stochi.csv' )
+      open ( newunit = lu , file = 'stochi.csv' )
       write (lu,'(''stocfl,stocsu,stocsc'')')
       if ( nstoc .gt. 0 )
      jwrite (lu,'(''"'',a10,''","'',a10,''",'',f10.5)')
@@ -463,7 +463,7 @@ c     Table R6
 
 c     Table R7
 
-      open ( lu , file = 'velocs.csv' )
+      open ( newunit = lu , file = 'velocs.csv' )
       write (lu,'(''veloit,velosu,velosc'')')
       if ( nvelo .gt. 0 )
      jwrite (lu,'(''"''a10,''","'',a10,''",'',f10.5)')
@@ -472,7 +472,7 @@ c     Table R7
 
 c     Table R8
 
-      open ( lu , file = 'disps.csv' )
+      open ( newunit = lu , file = 'disps.csv' )
       write (lu,'(''dispit,dispsu,dispsc'')')
       if ( ndisp .gt. 0 )
      jwrite (lu,'(''"''a10,''","'',a10,''",'',f10.5)')
@@ -481,7 +481,7 @@ c     Table R8
 
 c     Table old_items
 
-      open ( lu , file = 'old_items.csv' )
+      open ( newunit = lu , file = 'old_items.csv' )
       write (lu,'(''old_name,new_name,old_default,configuration,serial,action_type'')')
       if ( n_old_items .gt. 0 )
      jwrite (lu,'(''"'',a10,''","'',a10,''",'',g15.6,'',"'',a10,''",'',i10,'','',i10)')

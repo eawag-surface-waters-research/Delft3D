@@ -52,9 +52,7 @@ c
       parameter   (delete = 1, replac = 2, insert = 3, abort  = 0,
      j             none   = 4)
       logical      newtab, duprol, newfrm
-      integer      io_mes, io_asc, io_inp
-      data         io_mes /11/
-      data         io_asc /14/
+      integer      io_mes, io_asc, io_inp, lunfil
       data         io_inp /15/
       data         grp /'DummyGroup                          '/
       data         initialConfgId /'DummyConfg'/
@@ -76,7 +74,7 @@ c     Command line arguments
             if (index(ArgumentString,'-newfrm').gt.0) newfrm = .true.
       enddo
 
-      open ( io_mes , file = 'waqpb_import.log' )
+      open ( newunit=io_mes , file = 'waqpb_import.log' )
 	if (duprol) then
           write (io_mes,'(''DUPROL import'')')
           newtab = .true.
@@ -137,7 +135,7 @@ c         Remove secondary tables R4 till R8
       write (*,'('' Decomposing '',a,''......'')') pdffil
       write (*,*)
       write (io_mes,'('' Decomposing '',a,''......'')') pdffil
-      open ( io_asc , file = pdffil , status='old', err=999)
+      open ( newunit=io_asc , file = pdffil , status='old', err=999)
       read ( io_asc , * ) nprocl
       call iniind
 
@@ -509,18 +507,18 @@ c----------------------------------------------------------------------c
             procesnaam = pdffil(1:i-1)
           endif
           pdffil = trim(procesnaam)//'.0'
-	    open (15,file=pdffil)
-	    write (15,1000) 
-      	write (15,'(''this file is not available for a DUFLOW model '')')
-          close (15)
+	    open (newunit=lunfil,file=pdffil)
+	    write (lunfil,1000) 
+      	write (lunfil,'(''this file is not available for a DUFLOW model '')')
+          close (lunfil)
           pdffil = trim(procesnaam)//'.des'
-	    open (15,file=pdffil)
-	    write (15,'(''DUFLOW model '',a)') trim(procesnaam)
-	    close (15)
+	    open (newunit=lunfil,file=pdffil)
+	    write (lunfil,'(''DUFLOW model '',a)') trim(procesnaam)
+	    close (lunfil)
           pdffil = trim(procesnaam)//'.sub'
-	    open (15,file=pdffil)
-	    call wrisub(15)
-	    close (15)
+	    open (newunit=lunfil,file=pdffil)
+	    call wrisub(lunfil)
+	    close (lunfil)
       endif
 
  1000 format ('configuration ''DUPROL'' serial 2011010101') 

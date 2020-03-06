@@ -77,11 +77,11 @@ program run_processes
     integer            :: number_outputs
     integer            :: number_fluxes
 
-    integer            :: luproces  = 11
-    integer            :: luinputs  = 12
-    integer            :: luoutputs = 13
-    integer            :: luoutpflx = 14
-    integer            :: luitems   = 15
+    integer            :: luproces
+    integer            :: luinputs
+    integer            :: luoutputs
+    integer            :: luoutpflx
+    integer            :: luitems
     integer            :: ierr
 
     integer            :: number_items
@@ -127,11 +127,11 @@ program run_processes
     !
     ! Open the table files
     !
-    open( luproces,  file = 'waq_tables/proces.csv'  )
-    open( luinputs,  file = 'waq_tables/inputs.csv'  )
-    open( luoutputs, file = 'waq_tables/outputs.csv' )
-    open( luoutpflx, file = 'waq_tables/outpflx.csv' )
-    open( luitems,   file = 'waq_tables/items.csv'   )
+    open( newunit = luproces,  file = 'waq_tables/proces.csv'  )
+    open( newunit = luinputs,  file = 'waq_tables/inputs.csv'  )
+    open( newunit = luoutputs, file = 'waq_tables/outputs.csv' )
+    open( newunit = luoutpflx, file = 'waq_tables/outpflx.csv' )
+    open( newunit = luitems,   file = 'waq_tables/items.csv'   )
 
     call load_items( luitems, item_data )
 
@@ -278,7 +278,7 @@ subroutine load_items( luitems, item_data )
     !
     ! Read the non-default values
     !
-    open( luitems, file = 'run_processes.inp' )
+    open( newunit = luitems, file = 'run_processes.inp' )
 
     do
          read( luitems, '(a)', iostat = ierr ) line

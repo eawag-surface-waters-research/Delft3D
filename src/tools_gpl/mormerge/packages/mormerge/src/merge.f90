@@ -71,7 +71,6 @@ subroutine merge (inputfile, workdir, runid)
     integer                                             :: lunout
     integer                                             :: scanmode
     integer, external                                   :: createstream
-    integer, external                                   :: newunit
     integer       , dimension(:)  , allocatable         :: handles         ! data stream handles
     real(hp)                                            :: dim_real
     real(hp)                                            :: totalweight

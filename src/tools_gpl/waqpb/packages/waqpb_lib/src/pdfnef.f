@@ -53,7 +53,7 @@ C
 C     Declaration of arguments
 C
       INTEGER       LUNREP      , SERIAL     ,
-     +              IERROR
+     +              IERROR      , lunfil
       REAL          VERSIO
 C
 C     Common declarations
@@ -355,21 +355,21 @@ C
      +                VERSIO, SERIAL, RUNDAT, SOURCE, REMARK,
      +                LUNREP, IERROR)
 
-      open(88, file='filid.pptex')
-      write(88,'(a30,'' colsep '', a20, '' \\'')')
+      open(newunit=lunfil, file='filid.pptex')
+      write(lunfil,'(a30,'' colsep '', a20, '' \\'')')
      *         'Creation date', rundat
-      write(88,'(a30,'' colsep '', i10, '' \\'')')
+      write(lunfil,'(a30,'' colsep '', i10, '' \\'')')
      *         'File serial number', serial
-      write(88,'(a30,'' colsep '', f12.3, '' \\'')')
+      write(lunfil,'(a30,'' colsep '', f12.3, '' \\'')')
      *         'Version processes library', versio
-      close(88)
+      close(lunfil)
 
-      open(88, file='conf_name.pptex')
+      open(newunit=lunfil, file='conf_name.pptex')
       do ic = 1, nconf
-          write(88,'(a10,'' colsep '', a50, '' \\'')')
+          write(lunfil,'(a10,'' colsep '', a50, '' \\'')')
      *              confid(ic), confnm(ic)
       enddo
-      close(88)
+      close(lunfil)
 
       IF ( IERROR .NE. 0 ) THEN
          WRITE(LUNREP,*) 'ERROR writing file identification group'
