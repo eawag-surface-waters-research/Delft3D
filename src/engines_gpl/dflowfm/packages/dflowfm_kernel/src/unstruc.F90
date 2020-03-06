@@ -18609,6 +18609,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use netcdf
     use unstruc_files, only: defaultFilename
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer
+    use unstruc_netcdf, only: ihisfile, mapids
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -18631,7 +18632,7 @@ subroutine unc_write_his(tim)            ! wrihis
     double precision, intent(in) :: tim !< Current time, should in fact be time1, since the data written is always s1, ucx, etc.
 
     ! locals
-    integer, save :: ihisfile = 0, id_laydim , id_laydimw, &
+    integer, save :: id_laydim , id_laydimw, &
                      id_statdim, id_mstatdim, id_strlendim, id_crsdim, id_crslendim, id_crsptsdim, id_timedim, &
                      id_statx, id_staty, id_statid, id_statname, id_time, id_timestep, &
                      id_mstatx, id_mstaty, id_mstatname, &
@@ -21822,7 +21823,6 @@ subroutine wrimap(tim)
     double precision, intent(in) :: tim
 
     ! locals
-    type(t_unc_mapids), save :: mapids ! TODO: AvD: move this to global state (so that it can be reset as well, just like old it_map)
     integer            :: ierr
     integer            :: i
     integer            :: len

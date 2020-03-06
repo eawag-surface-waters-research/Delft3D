@@ -400,6 +400,9 @@ type t_unc_mapids
    !integer :: idx_curtime  = 0  !< Index of current time (typically of latest snapshot being written).
 end type t_unc_mapids
 
+type(t_unc_mapids) :: mapids       !< Global descriptor for the (open) map-file
+integer            :: ihisfile = 0 !< Global netcdf ID of the his-file
+
 type(t_crs), target :: crs !< crs read from net file, to be written to flowgeom. TODO: AvD: temp, move this global CRS into ug_meshgeom (now a bit difficult with old and new file format)
 
 interface unc_put_var_map
@@ -4435,6 +4438,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       call check_error(ierr, 'def time dim')
       tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
       ierr = unc_def_var_nonspatial(mapids%ncid, mapids%id_time, nf90_double, (/ mapids%id_tsp%id_timedim /), 'time', 'time', '', trim(tmpstr))
+      mapids%id_tsp%idx_curtime = 0
+
       
       ! Size of latest timestep
       ierr = unc_def_var_nonspatial(mapids%ncid, mapids%id_timestep, nf90_double, (/ mapids%id_tsp%id_timedim /), 'timestep', '',     'Latest computational timestep size in each output interval', 's')
