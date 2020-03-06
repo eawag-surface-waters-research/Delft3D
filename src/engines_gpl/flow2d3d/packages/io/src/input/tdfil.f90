@@ -98,8 +98,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
     lfile = len(filtd)
     !
     if (exifil(filtd, lundia)) then
-       luntmp = newlun(gdp)
-       open (luntmp, file = filtd(1:lfile), form = fmttmp, status = 'old')
+       open (newunit=luntmp, file = filtd(1:lfile), form = fmttmp, status = 'old')
        !
        ! unformatted file
        !

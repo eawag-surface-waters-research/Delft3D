@@ -133,8 +133,7 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
     !
     ! Read the general diffuser characteritics from jet3d input file
     !
-    luntmp1 = newlun(gdp)
-    open (luntmp1, file='str3dinp.def', status='old')
+    open (newunit=luntmp1, file='str3dinp.def', status='old')
     !
     ! Position diffuser
     !
@@ -216,8 +215,7 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
     !
     ! Write jet3d input file
     !
-    luntmp2 = newlun(gdp)
-    open (luntmp2,file='str3dinp.xxx',status='unknown')
+    open (newunit=luntmp2,file='str3dinp.xxx',status='unknown')
     read  (luntmp1,'(a256)') record
     write (record(11:20),'(f10.3)') s1(nm_diff) + real(dps(nm_diff),fp)
     write (luntmp2,'(a256)') record

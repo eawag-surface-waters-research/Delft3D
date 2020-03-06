@@ -218,8 +218,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              goto 9999
           endif
           !
-          lunout = newlun(gdp)
-          open (lunout, file = filout(:8 + lrid))
+          open (newunit=lunout, file = filout(:8 + lrid))
           read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
           close (lunout)
           lunout = 8
@@ -255,20 +254,18 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! from Profile <step> = 83
              !
              mxlrec = 89
-             lunout = newlun(gdp)
              inquire (file = filout(:8 + lrid), exist = ex)
              if (ex) then
-                open (lunout, file = filout(:8 + lrid))
+                open (newunit=lunout, file = filout(:8 + lrid))
                 close (lunout, status = 'delete')
              endif
-             open (lunout, file = filout(:8 + lrid), form = 'formatted',     &
+             open (newunit=lunout, file = filout(:8 + lrid), form = 'formatted',     &
                  & access = 'direct', status = 'unknown', recl = mxlrec)
              write (lunout, fmtbcc(1), rec = 1) '#', mxlrec, eol
              !
              ! Open FILBCC to read data from
              !
-             lunrd = newlun(gdp)
-             open (lunrd, file = filbcc(:lf), form = 'formatted',            &
+             open (newunit=lunrd, file = filbcc(:lf), form = 'formatted',            &
                   & status = 'old')
              write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
              call prterr(lundia, 'G051', trim(message))
@@ -281,8 +278,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !
              ! Open FILBCC to read data from
              !
-             lunrd = newlun(gdp)
-             open (lunrd, file = filbcc(:lf), form = 'formatted',            &
+             open (newunit=lunrd, file = filbcc(:lf), form = 'formatted',            &
                   & status = 'old')
              write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
              call prterr(lundia, 'G051', trim(message))
@@ -322,13 +318,12 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! case for data in MDF file
        !
        mxlrec = 89
-       lunout = newlun(gdp)
        inquire (file = filout(:8 + lrid), exist = ex)
        if (ex) then
-          open (lunout, file = filout(:8 + lrid))
+          open (newunit=lunout, file = filout(:8 + lrid))
           close (lunout, status = 'delete')
        endif
-       open (lunout, file = filout(:8 + lrid), form = 'formatted',           &
+       open (newunit=lunout, file = filout(:8 + lrid), form = 'formatted',           &
             & access = 'direct', status = 'unknown', recl = mxlrec)
        write (lunout, fmtbcc(1), rec = 1) '#', mxlrec, eol
        !

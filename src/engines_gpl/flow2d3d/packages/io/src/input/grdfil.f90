@@ -78,8 +78,7 @@ subroutine grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
     lfile = len(filgrd)
     !
     if (exifil(filgrd, lundia)) then
-       luntmp = newlun(gdp)
-       open (luntmp, file = filgrd(1:lfile), form = fmttmp, status = 'old')
+       open (newunit=luntmp, file = filgrd(1:lfile), form = fmttmp, status = 'old')
        !
        !--------unformatted file
        !

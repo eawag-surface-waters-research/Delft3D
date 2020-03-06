@@ -123,8 +123,7 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
        !
        inquire (file = filnam(:8 + lrid), opened = opend)
        if (.not.opend) then
-          luneva = newlun(gdp)
-          open (luneva, file = filnam(:8 + lrid), form = 'unformatted',         &
+          open (newunit=luneva, file = filnam(:8 + lrid), form = 'unformatted',         &
                & status = 'old')
        endif
        !

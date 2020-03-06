@@ -73,8 +73,7 @@ subroutine delnef(filnam, gdp)
        inquire (file = locfnm(:ind), exist = exists)
        if (exists) then
           call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind))
-          luntmp = newlun(gdp)
-          open (luntmp, file = locfnm(:ind))
+          open (newunit=luntmp, file = locfnm(:ind))
           close (luntmp, status = 'delete')
        endif
     else
@@ -84,8 +83,7 @@ subroutine delnef(filnam, gdp)
        inquire (file = locfnm(:ind) // '.dat', exist = exists)
        if (exists) then
           call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.dat')
-          luntmp = newlun(gdp)
-          open (luntmp, file = locfnm(:ind) // '.dat')
+          open (newunit=luntmp, file = locfnm(:ind) // '.dat')
           close (luntmp, status = 'delete')
        endif
        !
@@ -94,8 +92,7 @@ subroutine delnef(filnam, gdp)
        inquire (file = locfnm(:ind) // '.def', exist = exists)
        if (exists) then
           call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.def')
-          luntmp = newlun(gdp)
-          open (luntmp, file = locfnm(:ind) // '.def')
+          open (newunit=luntmp, file = locfnm(:ind) // '.def')
           close (luntmp, status = 'delete')
        endif
     endif

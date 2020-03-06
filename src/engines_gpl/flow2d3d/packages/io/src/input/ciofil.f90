@@ -102,8 +102,7 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
        ! 
        if ( inode /= master ) goto 10 
        ! 
-       luntmp = newlun(gdp) 
-       open (luntmp, file = filcio(1:lfile), form = 'formatted', status = 'old') 
+       open (newunit=luntmp, file = filcio(1:lfile), form = 'formatted', status = 'old') 
        ! 
        ! Freeformatted file, skip lines starting with a '*' 
        ! 

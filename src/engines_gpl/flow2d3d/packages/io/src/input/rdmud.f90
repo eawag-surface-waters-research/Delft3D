@@ -138,8 +138,7 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
     !     routine DIMSED
     !     Open file and read data
     !
-    luninp = newlun(gdp)
-    open (luninp, file = filnam, form = 'formatted', status = 'old',            &
+    open (newunit=luninp, file = filnam, form = 'formatted', status = 'old',            &
         & iostat = iost)
     if (iost==0) then
        !

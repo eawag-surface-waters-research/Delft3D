@@ -190,7 +190,6 @@
       integer  (4) istat               !!  allocate return status
       integer, allocatable :: isaggrl(:) !!  segment aggregation pointer (only top/bottom layer, depending on zmodel)
       integer  (4) ipiv                !!  help variable for array shift
-      integer, external :: newunit
       type(t_ug_meta)     :: meta
 !
 !! executable statements -------------------------------------------------------
@@ -447,8 +446,7 @@
             open  ( newunit = lunvdf , file=trim(filnam)//'vdf' , form = 'binary' , SHARED )
          endif
          open  ( newunit = luntau , file=trim(filnam)//'tau' , form = 'binary' , SHARED )
- !       lunfmap   = newunit()
- !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'binary' )
+ !       open  ( newunit = lunfmap, file=trim(filnam)//'fmap', form = 'binary' )
          if ( nsrc .gt. 0 ) then
             open  ( newunit = lunsrctmp , file='TMP_'//trim(filnam)//'src' , SHARED )
             if ( nowalk .gt. 0 ) then
@@ -483,8 +481,7 @@
             open  ( newunit = lunvdf , file=trim(filnam)//'vdf' , form = 'unformatted', access='stream')
          endif
          open  ( newunit = luntau , file=trim(filnam)//'tau' , form = 'unformatted', access='stream')
- !       lunfmap   = newunit()
- !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'unformatted', access='stream')
+ !       open  ( newunit = lunfmap, file=trim(filnam)//'fmap', form = 'unformatted', access='stream')
          if ( nsrc .gt. 0 ) then
             open  ( newunit = lunsrctmp , file='TMP_'//trim(filnam)//'src' )
             if ( nowalk .gt. 0 ) then

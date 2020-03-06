@@ -84,8 +84,7 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
     !
     ! open formatted file, if not formatted IOCOND <> 0
     !
-    luntmp = newlun(gdp)
-    open (luntmp, file = filnam(:lfile), form = 'formatted',              &
+    open (newunit=luntmp, file = filnam(:lfile), form = 'formatted',              &
         & status = 'old', iostat = iocond)
     if (iocond/=0) then
        error = .true.

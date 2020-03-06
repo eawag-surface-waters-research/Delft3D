@@ -113,8 +113,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
     !
     inquire (file = filnam(:8 + lrid), opened = opend)
     if (.not.opend) then
-       lunbcq = newlun(gdp)
-       open (lunbcq, file = filnam(:8 + lrid), form = 'formatted',              &
+       open (newunit=lunbcq, file = filnam(:8 + lrid), form = 'formatted',              &
             & status = 'old')
        read (lunbcq, '(a1,i5)', iostat = iocond) dumchr, lrec
        !
@@ -136,7 +135,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
           !
           ! file not open as direct access!
           !
-          open (lunbcq, file = filnam(:8 + lrid), form = 'formatted')
+          open (newunit=lunbcq, file = filnam(:8 + lrid), form = 'formatted')
    10     continue
           irecrd = irecrd + 1
           read (lunbcq, '(a)', end=20) record(:lrec - 1)
@@ -164,7 +163,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
        !
        ! Open file as direct access
        !
-       open (lunbcq, file = filnam(:8 + lrid), form = 'formatted',              &
+       open (newunit=lunbcq, file = filnam(:8 + lrid), form = 'formatted',              &
             & access = 'direct', recl = lrec)
        !
        ! Initialize ITBCT array

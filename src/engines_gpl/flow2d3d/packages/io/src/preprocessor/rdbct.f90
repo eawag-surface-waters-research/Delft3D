@@ -225,8 +225,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              goto 9999
           endif
           !
-          lunout = newlun(gdp)
-          open (lunout, file = filout(:8 + lrid))
+          open (newunit=lunout, file = filout(:8 + lrid))
           read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
           close (lunout)
           lunout = 8
@@ -259,20 +258,18 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! profile type
              !
              mxlrec = 83
-             lunout = newlun(gdp)
              inquire (file = filout(:8 + lrid), exist = ex)
              if (ex) then
-                open (lunout, file = filout(:8 + lrid))
+                open (newunit=lunout, file = filout(:8 + lrid))
                 close (lunout, status = 'delete')
              endif
-             open (lunout, file = filout(:8 + lrid), form = 'formatted',     &
+             open (newunit=lunout, file = filout(:8 + lrid), form = 'formatted',     &
                  & access = 'direct', status = 'unknown', recl = mxlrec)
              write (lunout, fmtbct(1), rec = 1) '#', mxlrec, eol
              !
              ! Open FILBCT to read data from
              !
-             lunrd = newlun(gdp)
-             open (lunrd, file = filbct(:lf), form = 'formatted',            &
+             open (newunit=lunrd, file = filbct(:lf), form = 'formatted',            &
                   & status = 'old')
              write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
              call prterr(lundia, 'G051', trim(message))
@@ -288,8 +285,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !
              call flw_readtable(tseriesfile, filbct, julday, gdp)
              !
-             lunrd = newlun(gdp)
-             open (lunrd, file = filbct(:lf), form = 'formatted',            &
+             open (newunit=lunrd, file = filbct(:lf), form = 'formatted',            &
                   & status = 'old')
              write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
              call prterr(lundia, 'G051', trim(message))
@@ -330,13 +326,12 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! case for data in MDF file
        !
        mxlrec = 83
-       lunout = newlun(gdp)
        inquire (file = filout(:8 + lrid), exist = ex)
        if (ex) then
-          open (lunout, file = filout(:8 + lrid))
+          open (newunit=lunout, file = filout(:8 + lrid))
           close (lunout, status = 'delete')
        endif
-       open (lunout, file = filout(:8 + lrid), form = 'formatted',           &
+       open (newunit=lunout, file = filout(:8 + lrid), form = 'formatted',           &
             & access = 'direct', status = 'unknown', recl = mxlrec)
        write (lunout, fmtbct(1), rec = 1) '#', mxlrec, eol
        !

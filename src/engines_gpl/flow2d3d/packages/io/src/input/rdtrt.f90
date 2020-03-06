@@ -289,8 +289,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     !
     ! open trachytope definition file
     !
-    luntmp = newlun(gdp)
-    open (luntmp, file = filtmp(1:lfile), form = 'formatted', iostat = iocond,  &
+    open (newunit=luntmp, file = filtmp(1:lfile), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
        call prterr(lundia    ,'U015'    ,filtmp(1:lfile)      )

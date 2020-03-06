@@ -87,8 +87,7 @@ subroutine corinp_gen(idensform, gdp)
     theta0         => gdp%gdnfl%theta0
     nflmod         => gdp%gdnfl%nflmod
     !
-    luntmp = newlun(gdp)
-    open (luntmp,file='corinp.dat')
+    open (newunit=luntmp,file='corinp.dat')
     !
     ! Read position diffusor
     !

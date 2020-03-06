@@ -199,8 +199,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
        filid = 'runid'
        inquire (file = filid, exist = ex)
        if (ex) then
-          lunid = newlun(gdp)
-          open (lunid, file = filid, form = 'formatted', status = 'old')
+          open (newunit=lunid, file = filid, form = 'formatted', status = 'old')
           read (lunid, '(a)') runid
           close (lunid)
        else

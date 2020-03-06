@@ -134,8 +134,7 @@ subroutine dimiwe(lunmd     ,lundia    ,error     ,nrrec     ,iweflg    , &
           !
           inquire (file = filiwe(1:lfile), exist = ex)
           if (ex) then
-             luntmp = newlun(gdp)
-             open (luntmp, file = filiwe(:lfile), form = 'formatted',           &
+             open (newunit=luntmp, file = filiwe(:lfile), form = 'formatted',           &
                   & status = 'old')
              !
              ! Free formatted file

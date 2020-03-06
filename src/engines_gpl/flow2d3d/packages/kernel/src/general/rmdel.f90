@@ -73,8 +73,7 @@ subroutine rmdel(filnam    ,gdp       )
           ! Need to close this first. The status = 'delete' triggers an error when file was opened as readonly.
           close (luntmp, iostat = ierr)
        endif
-       luntmp = newlun(gdp)
-       open (luntmp, file = filnam(:lfil), iostat = ierr)
+       open (newunit=luntmp, file = filnam(:lfil), iostat = ierr)
        if (ierr==0) then
           close (luntmp, status = 'delete', iostat = ierr)
           if (ierr==0) then

@@ -135,8 +135,7 @@ subroutine dimfou(lunmd     ,lundia    ,error     ,nrrec     ,filfou    , &
           !
           ! open input file
           !
-          luntmp = newlun(gdp)
-          open (luntmp, file = filfou(1:lfile), form = fmttmp, status = 'old')
+          open (newunit=luntmp, file = filfou(1:lfile), form = fmttmp, status = 'old')
           !
           ! read data from attribute file
           !

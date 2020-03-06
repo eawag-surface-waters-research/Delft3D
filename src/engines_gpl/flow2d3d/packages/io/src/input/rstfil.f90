@@ -191,8 +191,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           ! This check is based on the assumption of a 4 bytes integer representing the record length
           ! (ifort default convention, i.e. not /assume:byterecl).
           !
-          luntmp = newlun(gdp)
-          open (luntmp, file = trim(filtmp), form = 'unformatted',              &
+          open (newunit=luntmp, file = trim(filtmp), form = 'unformatted',              &
                & access = 'direct', recl = 4, status = 'old')
           read (luntmp, rec=1) l
           close(luntmp)
@@ -206,7 +205,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
               ftype = FTYPE_UNKNOWN
           endif
           !
-          open (luntmp, file = trim(filtmp), form = 'unformatted',              &
+          open (newunit=luntmp, file = trim(filtmp), form = 'unformatted',              &
                & status = 'old')
        endif
        !

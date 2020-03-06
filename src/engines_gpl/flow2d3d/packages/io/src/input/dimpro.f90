@@ -266,8 +266,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
              error = .true.
              goto 9999
           else
-             uw = newlun(gdp)
-             open (uw, file = filrol)
+             open (newunit=uw, file = filrol)
              call skipstarlines(uw)
              read (uw, *) ncmax
              close (uw)

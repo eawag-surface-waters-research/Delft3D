@@ -111,13 +111,12 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
     !-----Open output file
     !
     filout = 'TMP_Bar.bcb'
-    lunout = newlun(gdp)
     inquire (file = filout, exist = ex)
     if (ex) then
-       open (lunout, file = filout)
+       open (newunit=lunout, file = filout)
        close (lunout, status = 'delete')
     endif
-    open (lunout, file = filout, form = 'unformatted', status = 'unknown')
+    open (newunit=lunout, file = filout, form = 'unformatted', status = 'unknown')
     !
     !---- Read the data, check it and write the output file
     !

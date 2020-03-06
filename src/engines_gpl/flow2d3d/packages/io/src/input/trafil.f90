@@ -97,8 +97,7 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
     error = .not.exifil(filtra, lundia)
     if (error) goto 9999
     !
-    luntmp = newlun(gdp)
-    open (luntmp, file = filtra(:lfile), form = fmttmp, status = 'old')
+    open (newunit=luntmp, file = filtra(:lfile), form = fmttmp, status = 'old')
     !
     !-----unformatted file
     !     read input and test iocond

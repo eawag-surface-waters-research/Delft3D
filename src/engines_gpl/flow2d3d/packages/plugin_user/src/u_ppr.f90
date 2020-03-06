@@ -422,18 +422,15 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     !
     if (first) then
        if (filus1 /= ' ') then
-          lunus1 = newlun(gdp)
-          open (lunus1, file = filus1, form = 'formatted')
+          open (newunit=lunus1, file = filus1, form = 'formatted')
           write (lundia, *) ' Writing user HIS file: ', filus1
        endif
        if (filus2 /= ' ') then
-          lunus2 = newlun(gdp)
-          open (lunus2, file = filus2, form = 'formatted')
+          open (newunit=lunus2, file = filus2, form = 'formatted')
           write (lundia, *) ' Writing user DRO file: ', filus2
        endif
        if (filus1 /= ' ') then
-          lunus3 = newlun(gdp)
-          open (lunus3, file = filus3, form = 'formatted')
+          open (newunit=lunus3, file = filus3, form = 'formatted')
           write (lundia, *) ' Writing user MAP file: ', filus3, itmapc
        endif
     endif

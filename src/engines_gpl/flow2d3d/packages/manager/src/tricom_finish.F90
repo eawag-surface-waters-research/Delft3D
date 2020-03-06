@@ -812,8 +812,7 @@ subroutine tricom_finish(olv_handle, gdp)
     ! Mormerge synchronisation
     !
     if (multi) then
-       lunfil = newlun(gdp)
-       open (lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
+       open (newunit=lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
        if (istat /= 0) then
           write(*,*)' *** WARNING: unable to write in file ',trim(mmsyncfilnam)
        else

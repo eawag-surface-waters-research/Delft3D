@@ -187,8 +187,7 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
        !
        call DATE_AND_TIME(date, time)
        ddbfile = trim(runid) // "_" // trim(date) // "_" // trim(time) // ".ddb"
-       fillun = newlun(gdp)
-       open(fillun, file=trim(ddbfile), action="WRITE", iostat = istat)
+       open(newunit=fillun, file=trim(ddbfile), action="WRITE", iostat = istat)
        if (istat /= 0) then
           write(message,'(3a)') "Unable to open file """,trim(ddbfile),""". Skipping generation."
           call prterr(lundia, 'U190', trim(message))

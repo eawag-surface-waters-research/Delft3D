@@ -163,8 +163,7 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     inquire (file = filiwe(1:lfile), exist = ex)
     if (ex) then
-       luntmp = newlun(gdp)
-       open (luntmp, file = filiwe(:lfile), form = 'formatted', status = 'old')
+       open (newunit=luntmp, file = filiwe(:lfile), form = 'formatted', status = 'old')
        !
        ! Free formatted file
        ! Read flag for extra writing diagnostic information

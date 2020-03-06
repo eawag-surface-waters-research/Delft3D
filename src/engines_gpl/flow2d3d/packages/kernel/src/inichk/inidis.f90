@@ -181,8 +181,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
     !
     inquire (file = filnam(:8 + lrid), opened = opend)
     if (.not.opend) then
-       lundis = newlun(gdp)
-       open (lundis, file = filnam(:8 + lrid), form = 'formatted',              &
+       open (newunit=lundis, file = filnam(:8 + lrid), form = 'formatted',              &
             & status = 'old')
        read (lundis, '(a1,i5)', iostat = iocond) dumchr, lrec
        !
@@ -202,7 +201,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
           !
           ! file not open as direct access!
           !
-          open (lundis, file = filnam(:8 + lrid), form = 'formatted')
+          open (newunit=lundis, file = filnam(:8 + lrid), form = 'formatted')
    10     continue
           irecrd = irecrd + 1
           read (lundis, '(a)', end=20) record(:lrec - 1)
@@ -240,7 +239,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        !
        ! Open file as direct access
        !
-       open (lundis, file = filnam(:8 + lrid), form = 'formatted',              &
+       open (newunit=lundis, file = filnam(:8 + lrid), form = 'formatted',              &
             & access = 'direct', recl = lrec)
        !
        ! Initialize ITDIS array

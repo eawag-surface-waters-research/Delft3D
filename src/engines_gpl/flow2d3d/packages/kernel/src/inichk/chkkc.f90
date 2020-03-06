@@ -283,7 +283,6 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
     !     open and read file till EOF
     !
     if (fldry) then
-       lundry = newlun(gdp)
        filnam = 'TMP_' // runid(:lrid) // '.dry'
        !
        ! append node number to file name in case of parallel computing within single-domain case
@@ -294,7 +293,7 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
           write(filnam(8+lrid+1:8+lrid+linod),'(a,i3.3)') '-', inode
        endif
        !
-       open (lundry, file = filnam(:8 + lrid+linod), form = 'unformatted',      &
+       open (newunit=lundry, file = filnam(:8 + lrid+linod), form = 'unformatted',      &
             & status = 'old')
             ! -->
   310  continue
@@ -350,7 +349,6 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
     !     open and read file till EOF
     !
     if (fltd) then
-       luntd = newlun(gdp)
        filnam = 'TMP_' // runid(:lrid) // '.td '
        !
        ! append node number to file name in case of parallel computing within single-domain case
@@ -361,7 +359,7 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
           write(filnam(7+lrid+1:7+lrid+linod),'(a,i3.3)') '-', inode
        endif
        !
-       open (luntd, file = filnam(:7 + lrid+linod), form = 'unformatted',       &
+       open (newunit=luntd, file = filnam(:7 + lrid+linod), form = 'unformatted',       &
             & status = 'old')
             ! -->
   410  continue

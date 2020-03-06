@@ -93,8 +93,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
     !
     if (exifil(filrgh, lundia)) then
        if (inode==master) then
-          luntmp = newlun(gdp)
-          open (luntmp, file = filrgh(1:lfile), form = fmttmp, status = 'old')
+          open (newunit=luntmp, file = filrgh(1:lfile), form = fmttmp, status = 'old')
        endif
        !
        ! allocate temporary array to store roughness of entire domain read from file

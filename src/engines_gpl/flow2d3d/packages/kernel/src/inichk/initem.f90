@@ -201,8 +201,7 @@ subroutine initem(runid, cyclic, timnow, ktemp, temint, patm, gdp)
        !
        inquire (file = filnam(:8 + lrid), opened = opend)
        if (.not.opend) then
-          luntem = newlun(gdp)
-          open (luntem, file = filnam(:8 + lrid), form = 'unformatted',         &
+          open (newunit=luntem, file = filnam(:8 + lrid), form = 'unformatted',         &
                & status = 'old')
        endif
        !

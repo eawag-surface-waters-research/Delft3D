@@ -156,8 +156,7 @@ subroutine wri_cormix(u1    ,v1    ,rho    ,thick ,kmax  ,dps   ,&
     !
     ! Write corjet
     !
-    luntmp = newlun(gdp)
-    open (luntmp,file='corjet.inp',status='unknown')
+    open (newunit=luntmp,file='corjet.inp',status='unknown')
     write (luntmp,'(''# Corjet input file'')')
     write (luntmp,'(''# Title line (50 characters max.):'')')
     write (luntmp,'(''Corjet run initiated from flow'')')

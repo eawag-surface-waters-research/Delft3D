@@ -167,8 +167,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              goto 9999
           endif
           !
-          lunout = newlun(gdp)
-          open (lunout, file = filout(:8 + lrid))
+          open (newunit=lunout, file = filout(:8 + lrid))
           read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
           close (lunout)
           lunout = 8
@@ -198,8 +197,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !
              ! Open FILBCQ to read data from
              !
-             lunrd = newlun(gdp)
-             open (lunrd, file = filbcq(:lf), form = 'formatted',               &
+             open (newunit=lunrd, file = filbcq(:lf), form = 'formatted',               &
                  & status = 'old')
              write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbcq(:lf)
              call prterr(lundia, 'G051', trim(message))

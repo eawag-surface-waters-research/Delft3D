@@ -668,8 +668,7 @@ subroutine tricom_step(olv_handle, gdp)
        if (multi) then
           if (mod(nst2go,5) == 0) then
              call timer_start(timer_tricom_rest, gdp)
-             lunfil = newlun(gdp)
-             open (lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
+             open (newunit=lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
              if (istat /= 0) then
                 write(*,*)' *** WARNING: unable to write in file ',trim(mmsyncfilnam)
              else
@@ -753,8 +752,7 @@ subroutine tricom_step(olv_handle, gdp)
                 ierror = flow_to_wave_command(flow_wave_comm_perform_step, &
                                              & numdomains, mudlay, nst)
                 if (sleepduringwave > 0) then
-                   lunfil = newlun(gdp)
-                   open (lunfil, file = "TMP_sleepduringwave.txt", status = 'new')
+                   open (newunit=lunfil, file = "TMP_sleepduringwave.txt", status = 'new')
                    write(lunfil,*) 1
                    close(lunfil)
                 endif
@@ -773,7 +771,7 @@ subroutine tricom_step(olv_handle, gdp)
              endif
              call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
              if (inode==master .and. sleepduringwave > 0) then
-                open (lunfil, file = "TMP_sleepduringwave.txt", status = 'old')
+                open (newunit=lunfil, file = "TMP_sleepduringwave.txt", status = 'old')
                 close(lunfil, status='delete')
              endif
              call timer_stop(timer_wait, gdp)

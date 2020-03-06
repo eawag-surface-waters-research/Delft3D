@@ -107,8 +107,7 @@ subroutine cormix2flow(thick  ,kmax  ,dps   ,s1    ,disch_nf ,sour_nf , &
     ! Open cormix output file and read jet characteristics end of near field
     ! end of corjet computation
     !
-    luntmp = newlun (gdp)
-    open (luntmp,file='corjet.out',status='old')
+    open (newunit=luntmp,file='corjet.out',status='old')
     record (1:13) = '             '
     !
     do while (record (6:13) .ne. 'X      Y')

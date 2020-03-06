@@ -147,8 +147,7 @@ subroutine dimbub(error, gdp)
           !
           ! open input file
           !
-          luntmp = newlun(gdp)
-          open (luntmp, file = trim(filtmp), status = 'old')
+          open (newunit=luntmp, file = trim(filtmp), status = 'old')
           if (fmttmp(1:2) == 'un') then
              !
              ! unformatted file

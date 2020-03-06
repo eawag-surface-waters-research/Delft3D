@@ -84,8 +84,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
     lfile = len(fildry)
     !
     if (exifil(fildry, lundia)) then
-       luntmp = newlun(gdp)
-       open (luntmp, file = fildry(1:lfile), form = fmttmp, status = 'old')
+       open (newunit=luntmp, file = fildry(1:lfile), form = fmttmp, status = 'old')
        !
        !--------unformatted file
        !

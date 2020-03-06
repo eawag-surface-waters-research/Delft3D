@@ -89,8 +89,7 @@ subroutine u_rdat(lundia    ,error     ,gdp       )
     if (.not.ex) goto 9999
     !
     call prterr(lundia    ,'G051'    ,'User defined output specified' )
-    luninp = newlun(gdp)
-    open (luninp, file = inpfil, form = 'formatted', err = 7777)
+    open (newunit=luninp, file = inpfil, form = 'formatted', err = 7777)
     !
     ! Read 3 file names from user file (EXAMPLE)
     ! One file for each of the following data: Map, History and Drogues

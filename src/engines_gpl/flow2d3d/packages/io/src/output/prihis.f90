@@ -83,8 +83,7 @@ subroutine prihis(gdp)
        !
        inquire (file = filtmp(1:8 + lrid), opened = opend)
        if (.not.opend) then
-          lunprt = newlun(gdp)
-          open (lunprt, file = filtmp(1:8 + lrid), form = 'formatted')
+          open (newunit=lunprt, file = filtmp(1:8 + lrid), form = 'formatted')
           nrec = 0
           ! -->
   210        continue
@@ -108,8 +107,7 @@ subroutine prihis(gdp)
              ! Error occured while reading, delete file and re-open
              !
              close (lunprt, status = 'delete')
-             lunprt = newlun(gdp)
-             open (lunprt, file = filtmp(1:8 + lrid), form = 'formatted',    &
+             open (newunit=lunprt, file = filtmp(1:8 + lrid), form = 'formatted',    &
                  & status = 'new')
           endif
        else
@@ -119,8 +117,7 @@ subroutine prihis(gdp)
           inquire (file = filtmp(1:8 + lrid), number = lunprt)
        endif
     else
-       lunprt = newlun(gdp)
-       open (lunprt, file = filtmp(1:8 + lrid), form = 'formatted',          &
+       open (newunit=lunprt, file = filtmp(1:8 + lrid), form = 'formatted',          &
             & status = 'new')
     endif
 end subroutine prihis

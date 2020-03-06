@@ -603,9 +603,8 @@ subroutine tdatom(runid, filmrs, nuerr, gdp)
               ! Write an unformatted intermediate file with 
               ! OMEGA, AMPLITUDES and PHASES 
               ! 
-              lunbch = newlun(gdp) 
               filnam = 'TMP_' // runid(:lrid) // '.bch' 
-              open (lunbch, file = filnam(:8 + lrid), form = 'unformatted',            & 
+              open (newunit=lunbch, file = filnam(:8 + lrid), form = 'unformatted',            & 
                    & status = 'unknown') 
               ! 
               ! Write file for DATBND values of NTOF are 'H' 

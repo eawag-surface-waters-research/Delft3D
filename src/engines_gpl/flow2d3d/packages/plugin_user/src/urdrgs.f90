@@ -125,8 +125,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
        !--------File exists
        !
        nrigid = 0
-       luntmp = newlun(gdp)
-       open (luntmp, file = filusr(1:lfile), form = 'formatted', status = 'old')
+       open (newunit=luntmp, file = filusr(1:lfile), form = 'formatted', status = 'old')
        !
        !-->     Read input till end-of-file
        !

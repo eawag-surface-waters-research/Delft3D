@@ -66,8 +66,7 @@ subroutine chkrefinement(gdp)
 !
     filnam = 'TMP_refinement'
     if (gdp%gdprognm%nummappers == 0) return
-    tmpfile = newlun(gdp)
-    open(unit=tmpfile, file=trim(filnam), iostat=ierr)
+    open(newunit=tmpfile, file=trim(filnam), iostat=ierr)
     do
        read(tmpfile,'(a)', iostat=ierr) line
        if (ierr /= 0) then

@@ -100,8 +100,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
        ittdep = -1
        itold  = -1
        !
-       lunrd = newlun(gdp)
-       open (lunrd, file = filnam(:lfile), form = fmttmp, status = 'old')
+       open (newunit=lunrd, file = filnam(:lfile), form = fmttmp, status = 'old')
        if (fmttmp(:2)/='un') then
           !
           !-----------skip lines starting with a '*'

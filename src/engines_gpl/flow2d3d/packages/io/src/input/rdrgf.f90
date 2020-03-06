@@ -116,8 +116,7 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     ! 
     if ( inode /= master ) goto 50 
     ! 
-    lunrgf = newlun(gdp) 
-    open (lunrgf, file = filrgf(:ilen), form = 'formatted', status = 'old') 
+    open (newunit=lunrgf, file = filrgf(:ilen), form = 'formatted', status = 'old') 
     ! 
     ! Read file, check for end of file or error in file: 
     ! - The first line always contains comments 

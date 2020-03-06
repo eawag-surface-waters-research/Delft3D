@@ -414,8 +414,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
               filbch = 'TMP_' // fixid(1:lrid) // '.bch'
               inquire (file = filbch, exist = lexist)
               if (lexist) then
-                  luntmp = newlun(gdp)
-                  open (luntmp, file = filbch, form = 'unformatted', status = 'old')
+                  open (newunit=luntmp, file = filbch, form = 'unformatted', status = 'old')
                   read (luntmp) kc
                   close (luntmp)
               else

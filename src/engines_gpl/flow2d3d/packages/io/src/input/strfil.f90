@@ -164,8 +164,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
        ! file = exist
        !
        nrigid = 0
-       luntmp = newlun(gdp)
-       open (luntmp, file = filstr(1:lfile), form = 'formatted', status = 'old')
+       open (newunit=luntmp, file = filstr(1:lfile), form = 'formatted', status = 'old')
        !
        ! freeformatted file, skip lines starting with a '*'
        !

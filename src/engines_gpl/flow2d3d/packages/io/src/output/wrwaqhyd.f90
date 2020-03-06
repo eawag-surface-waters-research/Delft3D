@@ -105,7 +105,6 @@
       character(21)  datetime          !! Date/time to be filled in the header
       character(256) filstring, file1, file2
       character(6) sf                  !! character variable for s(ediment)f(iles)
-      integer, external :: newunit
       integer(4)    lunout1 !! write hyd file for structured grid needed for delpar
       integer(4)    lunout2 !! write hyd-file for DeltaShell (unstructured format)
 !

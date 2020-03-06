@@ -75,7 +75,6 @@
       integer(4) mnmax, notot              !!  nmax*mmax   and times kmax
       integer(4) nosegl                    !!  layer help variables
       logical    filex                     !!  TRUE if file exists
-      integer, external :: newunit
       integer(4) lunout, lunaggr
       integer(4) istat                     !!  allocate return status
       character(300) message

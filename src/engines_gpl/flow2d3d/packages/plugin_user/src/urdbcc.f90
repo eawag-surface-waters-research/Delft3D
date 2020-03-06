@@ -109,8 +109,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
        !
        !--------file = exist
        !
-       luntmp = newlun(gdp)
-       open (luntmp, file = filusr(1:lfile), form = 'formatted', status = 'old')
+       open (newunit=luntmp, file = filusr(1:lfile), form = 'formatted', status = 'old')
        into = 0
        !
        !-->     read boundary condition input (each boundary is optional)

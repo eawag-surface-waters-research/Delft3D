@@ -164,8 +164,7 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        ! file = exist
        !
-       luntmp = newlun(gdp)
-       open (luntmp, file = filq2e(1:lfile), form = 'formatted', status = 'old')
+       open (newunit=luntmp, file = filq2e(1:lfile), form = 'formatted', status = 'old')
        !
        !-->     read boundary condition (at each boundary point, optional)
        !

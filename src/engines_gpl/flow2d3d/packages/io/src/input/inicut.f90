@@ -177,7 +177,6 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
     ! open unformatted scratch file for 45 degrees staircase boundary
     ! (see rdgrid)
     !
-    luntmp = newlun(gdp)
     filnam = 'TMP_' // fixid(1:lrid) // '.45'
     !
     ! append node number to file name in case of parallel computing within single-domain case
@@ -188,7 +187,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
        write(filnam(7+lrid+1:7+lrid+linod),666) inode
     endif
     !
-    open (luntmp, file = filnam(:7 + lrid+linod), form = 'unformatted',     &
+    open (newunit=luntmp, file = filnam(:7 + lrid+linod), form = 'unformatted',     &
         & status = 'old')
         !
         ! --> read all points
@@ -285,7 +284,6 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
     ! open unformatted scratch file for 1:n staircase boundary
     ! (see rdgrid)
     !
-    luntmp = newlun(gdp)
     filnam = 'TMP_' // fixid(1:lrid) // '.cut'
     !
     ! append node number to file name in case of parallel computing within single-domain case
@@ -296,7 +294,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
        write(filnam(8+lrid+1:8+lrid+linod),666) inode
     endif
     !
-    open (luntmp, file = filnam(:8 + lrid+linod),                     &
+    open (newunit=luntmp, file = filnam(:8 + lrid+linod),                     &
         & form = 'unformatted', status = 'old')
         !
         ! --> read all points

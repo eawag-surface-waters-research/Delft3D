@@ -93,8 +93,7 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
        ! allocate temporary array to store hydrbc of entire domain read from file
        !
        allocate (rtmp(ntofgl,kc))
-       luntmp = newlun(gdp)
-       open (luntmp, file = filbch(:8 + lrid), form = 'unformatted', status = 'old')
+       open (newunit=luntmp, file = filbch(:8 + lrid), form = 'unformatted', status = 'old')
        !
        ! unformatted file
        !

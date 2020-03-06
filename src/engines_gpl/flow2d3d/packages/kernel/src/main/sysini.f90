@@ -225,8 +225,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,prgnm     , &
        filtmp(1:8 + lrid) = 'td-diag.' // runid
        inquire (file = filtmp(1:8 + lrid), exist = ex)
        if (ex) then
-          lunhlp = newlun(gdp)
-          open (lunhlp, file = filtmp(1:8 + lrid), form = 'formatted')
+          open (newunit=lunhlp, file = filtmp(1:8 + lrid), form = 'formatted')
    50     continue
           read (lunhlp, '(a)', end = 100, err = 100) txthlp
           write (lundia, '(a,a)') '      ',trim(txthlp)

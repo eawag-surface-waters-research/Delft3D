@@ -231,8 +231,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 goto 9999
              endif
              !
-             lunout = newlun(gdp)
-             open (lunout, file = filout(:8 + lrid), form = 'unformatted')
+             open (newunit=lunout, file = filout(:8 + lrid), form = 'unformatted')
              read (lunout, iostat = iocond) rdummy
              close (lunout)
              lunout = 8
@@ -270,13 +269,12 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           !-----------open unformatted eva-file
           !
-          lunout = newlun(gdp)
           inquire (file = filout(:8 + lrid), exist = ex)
           if (ex) then
-             open (lunout, file = filout(:8 + lrid))
+             open (newunit=lunout, file = filout(:8 + lrid))
              close (lunout, status = 'delete')
           endif
-          open (lunout, file = filout(:8 + lrid), form = 'unformatted',      &
+          open (newunit=lunout, file = filout(:8 + lrid), form = 'unformatted',      &
               & status = 'unknown')
           !
           write (message, '(2a)') 'Reading Evaporation & Rain file ', fileva(:lf)
@@ -308,13 +306,12 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        !---------Open file
        !
-       lunout = newlun(gdp)
        inquire (file = filout(:8 + lrid), exist = ex)
        if (ex) then
-          open (lunout, file = filout(:8 + lrid))
+          open (newunit=lunout, file = filout(:8 + lrid))
           close (lunout, status = 'delete')
        endif
-       open (lunout, file = filout(:8 + lrid), form = 'unformatted',         &
+       open (newunit=lunout, file = filout(:8 + lrid), form = 'unformatted',         &
             & status = 'unknown')
        !
        !-------time varying evaporation/rain data contains a group of records

@@ -1026,8 +1026,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! The file will be deleted by waves.exe after the map is written
           ! Note: the creation of file TMP_write_wavm will be repeated for each domain, but doesn't matter
           !
-          filwri = newlun(gdp)
-          open(filwri, file='TMP_write_wavm', status='unknown')
+          open(newunit=filwri, file='TMP_write_wavm', status='unknown')
           close(filwri, status='keep')
        endif
        !

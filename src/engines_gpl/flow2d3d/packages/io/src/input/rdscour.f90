@@ -96,8 +96,7 @@ subroutine rdscour(lundia    ,error     ,nmmax     ,gdp       )
     else
        inquire (file = flname, exist = lex)
        if (lex) then
-          inp = newlun(gdp)
-          open (inp, file = flname,status = 'old', iostat = iost)
+          open (newunit=inp, file = flname,status = 'old', iostat = iost)
           if (iost/=0) then
              call prterr(lundia, 'G004', trim(flname))
              error = .true.

@@ -118,8 +118,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
        endif
        !
        if (inode == master) then
-          luntmp = newlun(gdp)
-          open (luntmp, file = filedy(1:lfile), form = fmttmp, status = 'old')
+          open (newunit=luntmp, file = filedy(1:lfile), form = fmttmp, status = 'old')
        endif
        !
        ! Read records with horizontal eddy-viscosity, for each row one record

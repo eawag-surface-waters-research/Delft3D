@@ -129,10 +129,6 @@ subroutine wrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
        write (filrst(8 + lrid + 1:8 + lrid + 16), '(a1,i8.8,a1,i6.6)') &
            & '.', idate, '.', itime
        !
-       !-----Define new unit number
-       !
-       lunrst = newlun(gdp)
-       !
        !-----Test existence of restart file
        !
        inquire (file = filrst(1:8 + lrid + 16), exist = ex)
@@ -144,13 +140,13 @@ subroutine wrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
              call prterr(lundia    ,'S014'    ,filrst(:8 + lrid + 16)          )
           !
           endif
-          open (lunrst, file = filrst(:8 + lrid + 16))
+          open (newunit=lunrst, file = filrst(:8 + lrid + 16))
           close (lunrst, status = 'delete')
        endif
        !
        !-----New file => open file
        !
-       open (lunrst, file = filrst(:8 + lrid + 16), form = 'unformatted',          &
+       open (newunit=lunrst, file = filrst(:8 + lrid + 16), form = 'unformatted',          &
             & status = 'new')
        !
     endif

@@ -1010,14 +1010,13 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! Create trigger file for TRISIM to indicate RTC running
     !
     if (rtcmod/=noRTC .and. rtcact/=RTCviaBMI) then
-       luntri = newlun(gdp)
        filsim = 'TMP_SYNC.RUN'
        inquire (file = filsim, exist = lexist)
        if (lexist) then
-          open (luntri, file = filsim)
+          open (newunit=luntri, file = filsim)
           close (luntri, status = 'delete')
        endif
-       open (luntri, file = filsim, form = 'unformatted', status = 'unknown')
+       open (newunit=luntri, file = filsim, form = 'unformatted', status = 'unknown')
        !
        ! Write 'RUNRTC' by telephone
        !

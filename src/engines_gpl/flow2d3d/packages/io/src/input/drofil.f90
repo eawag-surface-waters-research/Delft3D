@@ -101,8 +101,7 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
     error = .not.exifil(fildro, lundia)
     if (error) goto 9999
     !
-    luntmp = newlun(gdp)
-    open (luntmp, file = fildro(:lfile), form = fmttmp, status = 'old')
+    open (newunit=luntmp, file = fildro(:lfile), form = fmttmp, status = 'old')
     !
     ! unformatted file
     ! read input and test iocond

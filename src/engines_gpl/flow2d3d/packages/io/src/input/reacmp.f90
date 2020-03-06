@@ -106,8 +106,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
        !
        inquire (file = filana, exist = ex)
        if (ex) then
-          mcmp = newlun(gdp)
-          open (mcmp, file = filana)
+          open (newunit=mcmp, file = filana)
        else
           !
           ! Triana file not found
@@ -217,8 +216,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
           do j = 1, 2
              inquire (file = statns(i, j), exist = ex)
              if (ex) then
-                mcmp = newlun(gdp)
-                open (mcmp, file = statns(i, j))
+                open (newunit=mcmp, file = statns(i, j))
              else
                 !
                 ! Getijsys file not found

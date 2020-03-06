@@ -91,8 +91,7 @@ subroutine pppsol(mmax      ,nmax      ,kmax      ,lstsci    ,ltur      , &
     ddb = gdp%d%ddbound
     call remove_leading_spaces(runid     ,lenid     )
     filnam = 'tstprt.' // runid(:lenid)
-    lunsol = newlun(gdp)
-    open (lunsol, file = filnam)
+    open (newunit=lunsol, file = filnam)
     !
     ! print water elevation
     !

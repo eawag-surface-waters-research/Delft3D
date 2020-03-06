@@ -98,8 +98,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres      , &
     !     isdir    input     mask array, 0 if scalar, 1 if direction (deg)
     !     nres     input     number of values on record
     !
-    iuntim = newlun(gdp)
-    open (iuntim, file = fname, err = 999)
+    open (newunit=iuntim, file = fname, err = 999)
   100 continue
     read (iuntim, '(A)') blname
     if (blname(1:1)=='*') goto 100

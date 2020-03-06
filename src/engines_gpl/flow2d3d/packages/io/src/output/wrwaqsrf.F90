@@ -83,7 +83,6 @@
       integer(4) nolay                      !!  number of layers in the model
       integer(4) nosegl, nobndl, noq3l
       real   (4), pointer :: surf(:), cc(:), dd(:)
-      integer, external :: newunit
       integer(4) lunout
       integer(4) istat                      !!  allocate return status
 !

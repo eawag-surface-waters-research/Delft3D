@@ -67,10 +67,8 @@ subroutine removeDuplicateDDBFiles(runid, ddbfile, gdp)
        !
        ! Compare defaultfile and ddbfile
        identicalFiles = .true.
-       fillun      = newlun(gdp)
-       open(fillun, file=trim(ddbfile), action="READWRITE", iostat = istat)
-       fillundef   = newlun(gdp)
-       if (istat==0) open(fillundef, file=trim(defaultfile), action="READ", iostat = istat)
+       open(newunit=fillun, file=trim(ddbfile), action="READWRITE", iostat = istat)
+       if (istat==0) open(newunit=fillundef, file=trim(defaultfile), action="READ", iostat = istat)
        if (istat /= 0) then
           identicalFiles = .false.
           write(message,'(5a)') "Unable to open files """, trim(ddbfile), """ and """, trim(defaultfile), """. Skipping moving."
@@ -118,10 +116,8 @@ subroutine removeDuplicateDDBFiles(runid, ddbfile, gdp)
        !
        ! Move ddbfile to defaultfile
        !
-       fillun      = newlun(gdp)
-       open(fillun, file=trim(ddbfile), action="READWRITE", iostat = istat)
-       fillundef   = newlun(gdp)
-       if (istat==0) open(fillundef, file=trim(defaultfile), action="WRITE", iostat = istat)
+       open(newunit=fillun, file=trim(ddbfile), action="READWRITE", iostat = istat)
+       if (istat==0) open(newunit=fillundef, file=trim(defaultfile), action="WRITE", iostat = istat)
        if (istat /= 0) then
           write(message,'(5a)') "Unable to open files """, trim(ddbfile), """ and """, trim(defaultfile), """. Skipping moving."
           call prterr(lundia, 'U190', trim(message))

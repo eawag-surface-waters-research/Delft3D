@@ -54,7 +54,6 @@
       real(4), pointer :: cor(:,:)       !!  To deal with double precission
       integer(4) i, j                    !!  loop counters
       real   (4) x, y                    !!  for the first (x,y) point
-      integer, external :: newunit
       integer(4) lunout
       integer(4) istat                   !!  allocate return status
 !

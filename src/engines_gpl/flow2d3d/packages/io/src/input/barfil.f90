@@ -140,8 +140,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     !
     ! open formatted file, if not formatted IOCOND <> 0
     !
-    luntmp = newlun(gdp)
-    open (luntmp, file = filbar(:lfile), form = 'formatted', status = 'old',    &
+    open (newunit=luntmp, file = filbar(:lfile), form = 'formatted', status = 'old',    &
         & iostat = iocond)
     if (iocond/=0) then
        error = .true.

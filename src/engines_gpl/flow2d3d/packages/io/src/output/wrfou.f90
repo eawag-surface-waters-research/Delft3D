@@ -317,8 +317,7 @@ subroutine wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
           ! Open output file 'fourier.'runid on master node
           !
           if (inode == master) then
-             lunfou = newlun(gdp)
-             open (lunfou, file = filename, status = 'unknown')
+             open (newunit=lunfou, file = filename, status = 'unknown')
              !
              ! Write all requested fourier function output until IFOU > NOFOU
              !

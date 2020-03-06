@@ -101,14 +101,13 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
     !
     ! open scratch file
     !
-    lungrd = newlun(gdp)
     filnam = 'TMP_' // fixid(1:lrid) // '.grd'
     !
     ! append node number to file name
     !
     call remove_leading_spaces(filnam,lfnm)
     write(filnam(lfnm+1:lfnm+4),666) inode
-    open (lungrd, file = trim(filnam), form = 'unformatted', status = 'unknown')
+    open (newunit=lungrd, file = trim(filnam), form = 'unformatted', status = 'unknown')
     !
     ! store own array ICOM in scratch file
     !

@@ -120,8 +120,7 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
     !    !
     !    inquire (file = filspp, exist = ex)
     !    if ( ex ) then
-    !       luntmp = newlun(gdp)
-    !       open (luntmp, file = filspp, form = 'formatted', status = 'old')
+    !       open (newunit=luntmp, file = filspp, form = 'formatted', status = 'old')
     !       do i = 1, 3
     !          read (luntmp, '(a)') txt1
     !       enddo
@@ -145,8 +144,7 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
     !       enddo
     ! 10    close(luntmp)
     !    else
-    !       luntmp = newlun(gdp)
-    !       open (luntmp, file = filspp, form = 'formatted', status = 'unknown')
+    !       open (newunit=luntmp, file = filspp, form = 'formatted', status = 'unknown')
     !       txt1 = '# list of non-default processor speeds in % of default'
     !       txt2 = '# default speed = 100%'
     !       write (luntmp, '(a)') trim(txt1)

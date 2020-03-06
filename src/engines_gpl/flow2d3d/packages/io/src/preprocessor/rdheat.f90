@@ -154,13 +154,12 @@ subroutine rdheat(lunmd     ,lundia    ,error     ,nrrec       ,mdfrec    , &
        !
        ! open unformatted tem-file
        !
-       lunout = newlun(gdp)
        inquire (file = filout(:8 + lrid), exist = ex)
        if (ex) then
-          open (lunout, file = filout(:8 + lrid))
+          open (newunit=lunout, file = filout(:8 + lrid))
           close (lunout, status = 'delete')
        endif
-       open (lunout, file = filout(:8 + lrid), form = 'unformatted',      &
+       open (newunit=lunout, file = filout(:8 + lrid), form = 'unformatted',      &
            & status = 'unknown')
        !
        write (message, '(2a)') 'Reading Heat module file ', filtem(:lf)
@@ -187,10 +186,9 @@ subroutine rdheat(lunmd     ,lundia    ,error     ,nrrec       ,mdfrec    , &
        !
        ! Open file
        !
-       lunout = newlun(gdp)
        inquire (file = filout(:8 + lrid), exist = ex)
        if (ex) then
-          open (lunout, file = filout(:8 + lrid))
+          open (newunit=lunout, file = filout(:8 + lrid))
           close (lunout, status = 'delete')
        endif
        !

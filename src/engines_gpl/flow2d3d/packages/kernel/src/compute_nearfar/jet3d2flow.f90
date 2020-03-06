@@ -97,8 +97,7 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s1     ,disch_nf ,sour_nf , &
     !
     ! Open Jet3d output file and read jet characteristics end of near field
     !
-    luntmp = newlun (gdp)
-    open (luntmp,file='str3dtek.xxx',status='old')
+    open (newunit=luntmp,file='str3dtek.xxx',status='old')
     !
     call skipstarlines (luntmp)
     read (luntmp,'( )',end = 999)

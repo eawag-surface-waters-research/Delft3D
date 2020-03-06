@@ -114,8 +114,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     !
     ! open file
     !
-    luntmp = newlun(gdp)
-    open (luntmp, file = filnam(1:lfile), form = 'formatted', iostat = iocond,  &
+    open (newunit=luntmp, file = filnam(1:lfile), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
        call prterr(lundia    ,'U015'    ,filnam(1:lfile)      )

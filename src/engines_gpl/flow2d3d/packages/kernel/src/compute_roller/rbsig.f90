@@ -133,8 +133,7 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
     !
     inquire (file = filrol(1:lfile), exist = ex)
     if (ex) then
-       uw = newlun(gdp)
-       open (uw, file = filrol(1:lfile), form = 'formatted',               &
+       open (newunit=uw, file = filrol(1:lfile), form = 'formatted',               &
            & status = 'old')
        write (lundia, *)
        write (lundia, '(a)') '*** Wave components input'

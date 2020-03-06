@@ -134,8 +134,7 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           !---------read data from external file
           !
-          lunfou = newlun(gdp)
-          open (lunfou, file = filfou(1:lfile), form = fmtfou,               &
+          open (newunit=lunfou, file = filfou(1:lfile), form = fmtfou,               &
               & status = 'old')
           call reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
                     & lstsc     ,lsal      ,ltem      ,nofou     ,gdp       )

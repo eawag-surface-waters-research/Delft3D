@@ -131,8 +131,7 @@ subroutine inimet(lundia    ,error     ,versio    ,wave      ,trasol    , &
                 ! YES file, read input
                 !
                 if (ex) then
-                   lunmet = newlun(gdp)
-                   open (lunmet, file = filusr(nfil)(:lfil), form = 'formatted',&
+                   open (newunit=lunmet, file = filusr(nfil)(:lfil), form = 'formatted',&
                        & status = 'old')
                    !
                    ! Read numerical method

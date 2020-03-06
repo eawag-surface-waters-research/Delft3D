@@ -97,8 +97,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
     call remove_leading_spaces(filbch, lfile)
     !
     if (exifil(filbch, lundia)) then
-       luntmp = newlun(gdp)
-       open (luntmp, file = filbch(1:lfile), form = fmttmp, status = 'old')
+       open (newunit=luntmp, file = filbch(1:lfile), form = fmttmp, status = 'old')
        !
        ! Unformatted file
        !

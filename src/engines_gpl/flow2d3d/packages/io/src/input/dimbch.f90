@@ -159,8 +159,7 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,kc        , &
        ! determine kc by reading the TRIANA file, and look for components used
        ! first, set pindex(component number)
        !
-       mcmp = newlun(gdp)
-       open (mcmp, file = filana)
+       open (newunit=mcmp, file = filana)
        do
           read (mcmp, '(a)', iostat = iocond) rec132
           if (iocond < 0) exit
@@ -235,8 +234,7 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,kc        , &
           !
           ! open input file
           !
-          luntmp = newlun(gdp)
-          open (luntmp, file = filtmp(1:lfile), form = fmttmp, status = 'old')
+          open (newunit=luntmp, file = filtmp(1:lfile), form = fmttmp, status = 'old')
           !
           ! unformatted file, start with KC = MXKC, and substract till actual value for KC is found
           ! NOTE: this does not work on SUN (rvar array and test on 0.)

@@ -138,8 +138,7 @@ subroutine bndfil(lundia    ,error     ,kmax      ,lnto      ,lntof     , &
     !
     if (exifil(filbnd, lundia)) then
        !
-       luntmp = newlun(gdp)
-       open (luntmp, file = filbnd(1:lfile), form = fmttmp, status = 'old')
+       open (newunit=luntmp, file = filbnd(1:lfile), form = fmttmp, status = 'old')
        !
        ! unformatted file
        ! read per NTO: NAMBND, TYPBND, DATBND, MNBND(6) and ALPHA

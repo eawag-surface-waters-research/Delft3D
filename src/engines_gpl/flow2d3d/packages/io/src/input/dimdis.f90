@@ -160,8 +160,7 @@ subroutine dimdis(lunmd     ,lundia    ,error     ,nrrec     ,nsrc      , &
           !
           ! open input file
           !
-          luntmp = newlun(gdp)
-          open (luntmp, file = filtmp(1:lfile), form = fmttmp, status = 'old')
+          open (newunit=luntmp, file = filtmp(1:lfile), form = fmttmp, status = 'old')
           if (fmttmp(1:2)=='un') then
           !
           ! unformatted file

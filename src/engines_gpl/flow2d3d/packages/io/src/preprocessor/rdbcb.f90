@@ -133,8 +133,7 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           !---------Open FILBCB to read data from
           !
-          lunrd = newlun(gdp)
-          open (lunrd, file = filbcb(:lf), form = 'formatted', status = 'old')
+          open (newunit=lunrd, file = filbcb(:lf), form = 'formatted', status = 'old')
           write (message, '(2a)') 'Reading Barrier Heights file ', filbcb(:lf)
           call prterr(lundia, 'G051', trim(message))
           !

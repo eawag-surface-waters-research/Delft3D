@@ -120,8 +120,7 @@ subroutine rdencl( lunmd     ,lundia    ,error     , runid    , &
     !=======================================================================
     ! open semi-scratch file
     !
-    lungrd = newlun(gdp)
-    open (lungrd, file = 'TMP_' // fixid(1:lrid) // '.grd',                  &
+    open (newunit=lungrd, file = 'TMP_' // fixid(1:lrid) // '.grd',                  &
          & form = 'unformatted', status = 'unknown')
     !
     ! 'Filgrd': grid enclosure file

@@ -131,7 +131,6 @@ subroutine inigrd(lundia    ,error     ,runid     ,nmax      ,mmax      , &
     !
     ! open unformatted scratch file for grid (see rdgrid)
     !
-    lungrd = newlun(gdp)
     filnam = 'TMP_' // fixid(1:lrid) // '.grd'
     !
     ! append node number to file name in case of parallel computing within single-domain case
@@ -142,7 +141,7 @@ subroutine inigrd(lundia    ,error     ,runid     ,nmax      ,mmax      , &
        write(filnam(8+lrid+1:8+lrid+linod),'(a,i3.3)') '-', inode
     endif
     !
-    open (lungrd, file = filnam(:8 + lrid+linod),                      &
+    open (newunit=lungrd, file = filnam(:8 + lrid+linod),                      &
         & form = 'unformatted', status = 'old')
     !
     ! in case of parallel Delft3D-FLOW array ICOM is already stored in scratch file

@@ -102,8 +102,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
     !
     if (exifil(filic, lundia)) then
        if (inode == master) then
-          luntmp = newlun(gdp)
-          open (luntmp, file = filic(1:lfile), form = fmttmp, status = 'old')
+          open (newunit=luntmp, file = filic(1:lfile), form = fmttmp, status = 'old')
        endif
        !
        ! Unformatted file

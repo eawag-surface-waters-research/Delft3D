@@ -215,13 +215,12 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           ! Open output file
           ! and write length direct access file to file first
           !
-          lunout = newlun(gdp)
           inquire (file = filout(:lflout), exist = ex)
           if (ex) then
-             open (lunout, file = filout(:lflout))
+             open (newunit=lunout, file = filout(:lflout))
              close (lunout, status = 'delete')
           endif
-          open (lunout, file = filout(:lflout), form = 'formatted',             &
+          open (newunit=lunout, file = filout(:lflout), form = 'formatted',             &
                & access = 'direct', status = 'unknown', recl = mxlrec)
           !
           irec = 1

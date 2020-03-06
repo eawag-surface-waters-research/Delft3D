@@ -107,8 +107,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
     !
     ! open formatted file, if not formatted IOCOND <> 0
     !
-    luntmp = newlun(gdp)
-    open (luntmp, file = filsrc(:lfile), form = 'formatted', status = 'old',    &
+    open (newunit=luntmp, file = filsrc(:lfile), form = 'formatted', status = 'old',    &
         & iostat = iocond)
     if (iocond /= 0) then
        error = .true.
