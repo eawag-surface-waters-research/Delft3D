@@ -69,10 +69,7 @@ revision = '**'
 config_major    = '**'
 config_minor    = '**'
 
-handlein  = 33
-handleout = 34
-
-open (unit=handlein, file=trim(vnInputFile), iostat=ierr)
+open (newunit=handlein, file=trim(vnInputFile), iostat=ierr)
 do
   read(handlein,'(a)', iostat=ierr) line
   if (ierr /= 0) then
@@ -115,8 +112,8 @@ do
   endif
 enddo
 
-open (unit=handlein , file=trim(inputFile), iostat=ierr)
-open (unit=handleout, file=trim(outputFile), iostat=ierr)
+open (newunit=handlein , file=trim(inputFile), iostat=ierr)
+open (newunit=handleout, file=trim(outputFile), iostat=ierr)
 do
   read(handlein,'(a)', iostat=ierr) line
   if (ierr /= 0) then
