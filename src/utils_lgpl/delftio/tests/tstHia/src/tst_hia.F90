@@ -47,8 +47,7 @@ subroutine read_his_long(datasetName)
 
     call DioSyncMakeBaseName(datasetName, baseName)
     resFile = 'TEST' // trim(baseName) // '-res.txt'
-    resLun = 11
-    open(resLun,file=resFile)
+    open(newunit=resLun,file=resFile)
 
 !   Get HIS IN data set
 

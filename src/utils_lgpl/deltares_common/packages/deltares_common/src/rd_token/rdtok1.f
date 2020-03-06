@@ -135,8 +135,8 @@ C
       IF ( ITYPEX .EQ. -999) THEN
          WRITE ( LUNUT , 1040 ) CHULP2
          IFL       = IFL + 1
-         LUNIN     = 800+IFL
-         OPEN ( LUNIN, FILE = CHULP2, STATUS = 'old', IOSTAT = IOERR)
+         OPEN (NEWUNIT = LUNIN, FILE = CHULP2, STATUS = 'old', 
+     *         IOSTAT = IOERR)
          IF ( IOERR .GT. 0 ) THEN
             IFL = IFL - 1
             WRITE ( LUNUT , 1050 )
@@ -284,8 +284,8 @@ C
          ENDIF
          WRITE ( LUNUT , 1040 ) CHULP
          IFL       = IFL + 1
-         LUNIN     = 800+IFL
-         OPEN ( LUNIN, FILE = CHULP, STATUS = 'old', IOSTAT = IOERR)
+         OPEN (NEWUNIT = LUNIN, FILE = CHULP, STATUS = 'old', 
+     *         IOSTAT = IOERR)
          IF ( IOERR .GT. 0 ) THEN
             IFL = IFL - 1
             WRITE ( LUNUT , 1050 )

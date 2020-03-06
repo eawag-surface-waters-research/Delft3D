@@ -63,8 +63,7 @@ subroutine write_his_long_2dget(synched, auto, resFileName)
 
 !   Open file for results, write DioVersion
 
-    resLun = 11
-    open(resLun,file=resFileName)
+    open(newunit=resLun,file=resFileName)
     call DioGetVersion(dioVersion)
     call DioGetIdent(dioIdent)
     write(resLun,*) 'dioVersion: ', dioVersion

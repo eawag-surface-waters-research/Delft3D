@@ -123,7 +123,6 @@ contains
     logical                             :: found
     real(hp), dimension(:,:,:), pointer :: open_bnd              ! open boundary coordinates
     integer , dimension(:)    , pointer :: nr_bnd_cells          
-    integer, external                   :: newunit
     integer                             :: lunbnd                ! logical unit boundary file
     character(len=256)                  :: bndfilename           ! boundary filename
 

@@ -105,7 +105,6 @@ C                 .. NEFIS-FUNCTION: CLOSE A DEFINITION FILE
 C                 .. NEFIS-FUNCTION: RETRIEVE ERROR STRING
 C=======================================================================
 C                 ..
-      OBSFIL = 11
 C                 .. LET US WRITE THE DATA IN NEUTRAL REPRESENTATION
       CODING = 'N'
 C                 ..
@@ -178,7 +177,7 @@ C                 ..
 C                 .. NOW, READ ALL FIELD OBSERVATIONS FROM A FILE
       write(*,'(''Demo1: Read observation data from input file'',
      *             '' (not a NEFIS action)'')')
-      OPEN (OBSFIL,FILE='observ.inp')
+      OPEN (NEWUNIT=OBSFIL,FILE='observ.inp')
       DO 10 I = 1, 10
          READ (OBSFIL,*)
          DO 20 J = 1, 100

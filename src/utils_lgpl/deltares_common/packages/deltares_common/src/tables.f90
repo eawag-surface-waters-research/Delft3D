@@ -159,7 +159,6 @@ subroutine org_readtable(this, filnam, refjulday, errorstring)
     integer                   , dimension(:), allocatable :: itype
     integer                   , dimension(:), allocatable :: ifield
     integer                   , dimension(:), allocatable :: lenchr
-    integer                   , external                  :: newunit
     !
     logical                                               :: feof
     logical                                               :: error

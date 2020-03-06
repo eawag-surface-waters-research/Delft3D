@@ -112,8 +112,7 @@ subroutine read_his_long_l
 
 !   Open file for storing results
 
-    resLun = 11
-    open(resLun,file='TESTHisLong-res.txt', iostat=ierr)
+    open(newunit=resLun,file='TESTHisLong-res.txt', iostat=ierr)
 
 !   Get HIS IN data set
 

@@ -166,8 +166,7 @@ C     destroy datasets
       integer errNr
 
 C     Open file for storing results
-      resLun = 11
-      open(resLun,file='TESTEndTime-res.txt')
+      open(newunit=resLun,file='TESTEndTime-res.txt')
 
 C     Get HIS IN data set
 

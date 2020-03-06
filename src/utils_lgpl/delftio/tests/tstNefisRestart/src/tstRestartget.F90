@@ -73,12 +73,12 @@ program test_nefis_restart_get
     integer :: errNr
     character(Len=DioMaxErrMsgLen) :: errMsg
     character(Len=DioMaxStreamLen) :: resFileName = 'TESTNefisRestart-res.txt'
-    integer :: resLun=11
+    integer :: resLun
 
     double precision :: currentTimeStep
 
 
-    open(resLun,file=resFileName)
+    open(newunit=resLun,file=resFileName)
 
 !   Initialize dio library
     call DioInit

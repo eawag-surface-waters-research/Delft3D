@@ -36,9 +36,9 @@ program test_get_shmds_f90
     character(len=100) :: name = 'testje'
 
     character(len=100) :: resFileName = 'TESTShmF90-res.txt' ! result file
-    integer            :: resLun = 11    ! handle to result file
+    integer            :: resLun                             ! handle to result file
 
-    open(resLun,file=resFileName)
+    open(newunit=resLun,file=resFileName)
 
     do t = 1, nTimes
 

@@ -314,8 +314,7 @@ C     Test Discription calls
 C     !   Open file for results
 
       resFileName = 'TESTF77PUTLIB-res.txt'
-      resLun = 11
-      open(resLun,file=resFileName)
+      open(newunit=resLun,file=resFileName)
 
       call getheaderf77('TestReal.his'             , resLun )
       call getheaderf77('TestRealWithRunId.his'    , resLun )

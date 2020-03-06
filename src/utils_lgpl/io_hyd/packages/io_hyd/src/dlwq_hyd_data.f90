@@ -884,7 +884,6 @@
          noloc = dlwqdata%no_loc
          nobrk = max(dlwqdata%no_brk,1)
 
-         call dhnlun(701,lun)
          ftype = 2
          if ( mod(dlwqdata%filetype,10) .eq. FILE_UNFORMATTED ) ftype = ftype + 10
          if ( dlwqdata%filetype/10 .eq. 1 ) ftype = ftype + 20       ! I am in for a better solution (lp)

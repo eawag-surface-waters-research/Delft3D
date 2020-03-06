@@ -845,36 +845,6 @@ contains
     success = .true.
   end function ecBCReadLine
 
-  ! =======================================================================
-
-  ! Realloc sub and oldfil function to be removed lateron,
-  ! only included for standalone-testing
-  ! realloc can be found in m_alloc (deltares common)
-  ! oldfil to be replaced by ! ecSupportOpenExistingFile(fhandle, fname)
-  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  integer function oldfil(fname, maxunit, iostat) result(unit)
-    implicit none
-    character(len=*),       intent(in)      :: fname
-    integer,                intent(in)      :: maxunit
-    integer,                intent(out)     :: iostat
-
-    logical     :: opened
-
-    iostat = 0                ! ran out of free file handles
-    do unit=1, maxunit
-       inquire(unit,opened=opened)
-       if (.not.opened) then
-          exit
-       endif
-    enddo
-    if (unit<=maxunit) then
-       open(unit, file=trim(fname), status='old', iostat=iostat)
-    else
-       iostat = -66           ! ran out of free file handles
-    endif
-    ! .....
-    return
-  end function oldfil
 
   ! =======================================================================
 

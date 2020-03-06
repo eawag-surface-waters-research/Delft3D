@@ -105,8 +105,7 @@ C     ! Data for Selection testing
 C     !   Open file for results, write DioVersion
 
       resFileName = 'TESTMany-res.txt'
-      resLun = 11
-      open(resLun,file=resFileName)
+      open(newunit=resLun,file=resFileName)
 
 C     !   Initialise expected Data
 

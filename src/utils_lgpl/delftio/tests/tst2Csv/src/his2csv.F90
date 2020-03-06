@@ -126,13 +126,11 @@ program his2csv
 
     if ( retVal == 0 ) then
 
-        outFileHandle = DioNewLun()
-
         if (numArgs == 2) then  ! all values
 
             rValues => DioPltGetAllReals(plt)
             outFileName = trim(hisFileName(1:len_trim(hisFileName)-4))//'.csv'
-            open(outFileHandle,file=outFileName)
+            open(newunit=outFileHandle,file=outFileName)
 
             ! full his file
             do par = 1, nPar

@@ -31,9 +31,8 @@ c
       integer obsfil
       integer i, j
 c
-      obsfil = 11
 
-      open (obsfil, file='observ.inp')
+      open (newunit=obsfil, file='observ.inp')
 
       do 10 i = 1, 10
          write(obsfil,'(''location: '',i3)') i

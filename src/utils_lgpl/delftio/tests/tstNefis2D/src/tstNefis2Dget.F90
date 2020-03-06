@@ -44,8 +44,7 @@ program test_get_dio_f90
 
 !   Open file for storing results
 
-    resLun = 11
-    open(resLun,file='TESTNefis2D-res.txt')
+    open(newunit=resLun,file='TESTNefis2D-res.txt')
 
 !   Open data stream
 

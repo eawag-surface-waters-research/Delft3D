@@ -46,8 +46,7 @@ program test_get_dio_f90
 
 !   Open file for storing results
 
-    resLun = 11
-    open(resLun,file='TESTHisCopy-res.txt')
+    open(newunit=resLun,file='TESTHisCopy-res.txt')
 
 !   Open data stream
 

@@ -119,7 +119,7 @@ subroutine test_triton_retrieve(fileName)
     character(Len=*), intent(IN)  :: fileName    ! restart file name
 
     ! resultFile
-    integer                       :: resLun = 11 ! handle to result file
+    integer                       :: resLun      ! handle to result file
     character(Len=DioMaxStreamLen):: resFileName = 'TESTTriton-res.txt'
 
     ! sizes
@@ -156,7 +156,7 @@ subroutine test_triton_retrieve(fileName)
     ! INITIALIZE
     !
     
-    open(resLun, file=resFileName)
+    open(newunit=resLun, file=resFileName)
   
     depth     = 0.D+00
     depth_aux = 0.D+00

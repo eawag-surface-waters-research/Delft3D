@@ -84,13 +84,12 @@
       integer                                :: lunrep                 ! unit number report file
 
       if ( dlwqfile%status .eq. 0 ) then
-         call dhnlun(10,dlwqfile%unit_nr)
          if ( dlwqfile%type .eq. FT_ASC ) then
-            open(dlwqfile%unit_nr,file=dlwqfile%name,iostat=io_error)
+            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,iostat=io_error)
          elseif ( dlwqfile%type .eq. FT_BIN ) then
-            open(dlwqfile%unit_nr,file=dlwqfile%name,access='STREAM',iostat=io_error)
+            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,access='STREAM',iostat=io_error)
          elseif ( dlwqfile%type .eq. FT_UNF ) then
-            open(dlwqfile%unit_nr,file=dlwqfile%name,form='UNFORMATTED',iostat=io_error)
+            open(newunit=dlwqfile%unit_nr,file=dlwqfile%name,form='UNFORMATTED',iostat=io_error)
          else
             call getmlu(lunrep)
             write(*,*) 'ERROR opening file:',trim(dlwqfile%name)

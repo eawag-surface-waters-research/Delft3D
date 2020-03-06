@@ -36,8 +36,7 @@
       integer resLun
 
       resFileName = 'TESTShmF77-res.txt'
-      resLun = 11
-      open(resLun,file=resFileName)
+      open(newunit=resLun,file=resFileName)
 
       nRealTimes = 10
       nGetTimes = 15

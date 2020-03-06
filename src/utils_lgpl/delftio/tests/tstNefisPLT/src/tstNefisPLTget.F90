@@ -51,8 +51,7 @@ program test_get_dio_f90
 
 !   Open file for storing results
 
-    resLun = 11
-    open(resLun,file='TESTNefisPLT-res.txt')
+    open(newunit=resLun,file='TESTNefisPLT-res.txt')
 
 !   Open data stream
 

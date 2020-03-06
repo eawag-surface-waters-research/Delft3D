@@ -37,7 +37,7 @@ program DatasetsInMem
     logical                       :: toScreen = .False. ! write to screen?
     logical                       :: toFile   = .True.  ! write to file?
 
-    integer, parameter            :: resLun  = 11
+    integer, parameter            :: resLun
     character(len=100), parameter :: resFile = 'TESTShmPlt2dfInMem-res.txt'
 
     ! PLT datasets and their data
@@ -87,7 +87,7 @@ program DatasetsInMem
     real                        :: rTempVal
 
 
-    open(resLun, file=resFile)
+    open(newunit=resLun, file=resFile)
 
 !
 !   Create Data to be put

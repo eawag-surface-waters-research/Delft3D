@@ -94,7 +94,6 @@
 		<File RelativePath="src\MessageHandling.f90"/>
 		<File RelativePath=".\src\multi_file_io.f90"/>
 		<File RelativePath="src\nan_check_module.f90"/>
-		<File RelativePath="src\newunit.f90"/>
 		<File RelativePath=".\src\physicalconsts.f90"/>
 		<File RelativePath=".\src\precision.F90"/>
 		<File RelativePath=".\src\precision_basics.F90"/>

@@ -88,8 +88,7 @@ program tst_his_get_selection
 
 !   Open file for storing results
 
-    resLun = 11
-    open(resLun,file=resFileName)
+    open(newunit=resLun,file=resFileName)
 
 !   Open data stream
 

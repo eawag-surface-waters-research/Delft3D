@@ -78,8 +78,7 @@ C     ! locals
 
 C     !   Open file for results, write DioVersion
 
-      resLun = 11
-      open(resLun,file=resFileName)
+      open(newunit=resLun,file=resFileName)
 
       write(resLun,*) 'getDatasets_f77get: ', synched
 

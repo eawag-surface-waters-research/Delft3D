@@ -114,8 +114,7 @@ subroutine read_map_long
     ! nullify(locs)
 !   Open file for storing results
 
-    resLun = 11
-    open(resLun,file='TESTMapLong-res.txt', iostat=ierr)
+    open(newunit=resLun,file='TESTMapLong-res.txt', iostat=ierr)
 
 !   Get MAP IN data set
 

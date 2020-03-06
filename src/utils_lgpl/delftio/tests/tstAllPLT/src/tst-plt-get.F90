@@ -66,8 +66,7 @@ subroutine getDatasets_pltget(synched, auto, resFileName)
 
 !   Open file for results, write DioVersion
 
-    resLun = 802
-    open(resLun,file=resFileName)
+    open(newunit=resLun,file=resFileName)
     call DioGetVersion(dioVersion)
     call DioGetIdent(dioIdent)
     write(resLun,*) 'dioVersion: ', trim(dioVersion)

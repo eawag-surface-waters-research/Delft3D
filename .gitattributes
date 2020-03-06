@@ -17188,7 +17188,6 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/mathconsts.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/message_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/multi_file_io.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/nan_check_module.f90 -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/newunit.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/physicalconsts.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/precision.F90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_basics.F90 -text

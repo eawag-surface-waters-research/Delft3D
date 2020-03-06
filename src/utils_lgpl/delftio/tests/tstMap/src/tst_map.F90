@@ -50,8 +50,7 @@ program read_map
 !   Open file for storing results
 
     resFile = 'TESTMap-res.txt'
-    resLun = 11
-    open(resLun,file=resFile)
+    open(newunit=resLun,file=resFile)
 
 !   Get MAP IN data set
 
