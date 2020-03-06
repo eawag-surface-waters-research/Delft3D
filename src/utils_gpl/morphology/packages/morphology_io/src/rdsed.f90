@@ -148,7 +148,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                     :: n                   ! Temporary storage for nseddia(l)
     integer                     :: nm
     integer                     :: version
-    integer          , external :: newunit
     integer(pntrsize), external :: open_shared_library
     real(fp)                    :: rmissval
     real(fp)                    :: seddxx              ! Temporary storage for sediment diameter
@@ -915,7 +914,6 @@ subroutine opensedfil(lundia    ,error     ,filsed    ,luninp    ,version  )
 !
     integer                                                :: i
     integer                                                :: iocond
-    integer                                     , external :: newunit
     character(256)                                         :: string
     character(256)                                         :: errmsg
 !

@@ -66,7 +66,6 @@ subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
 ! Local variables
 !
     integer                        :: ilun
-    integer, external              :: newunit
     logical, save                  :: crstr
     logical, save                  :: exist
     logical, save                  :: first

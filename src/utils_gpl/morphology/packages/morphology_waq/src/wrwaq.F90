@@ -41,18 +41,16 @@
       function openwaqbinfile(filename) result (lun)
          character*(*), intent(in) :: filename !< Output filename.
          integer :: lun
-         integer, external :: newunit
 !
 !           WARNING: WAQ input files must be written using form=binary
 !                    instead of unformatted.
 !                    Although it is not standard Fortran
 !
-         lun    = newunit()
 #ifdef HAVE_FC_FORM_BINARY
-         open  ( lun , file=filename , form = 'binary' , SHARED )
+         open  ( newunit=lun , file=filename , form = 'binary' , SHARED )
 #else
 ! standardized way if binary is not available
-         open  ( lun , file=filename , form = 'unformatted' , access='stream' )
+         open  ( newunit=lun , file=filename , form = 'unformatted' , access='stream' )
 #endif
       end function openwaqbinfile
 
@@ -60,16 +58,14 @@
       function openasciifile(filename) result (lun)
          character*(*), intent(in) :: filename
          integer :: lun
-         integer, external :: newunit
 !
 !           NOTE: Opens a simple ASCII-file. Function is intended only
 !                 to isolate newunit dependency.
 !
-         lun    = newunit()
 #ifdef HAVE_FC_FORM_BINARY
-         open  ( lun , file=filename , form='formatted', SHARED )
+         open  ( newunit=lun , file=filename , form='formatted', SHARED )
 #else
-         open  ( lun , file=filename , form='formatted', access='stream')
+         open  ( newunit=lun , file=filename , form='formatted', access='stream')
 #endif
       end function openasciifile
 

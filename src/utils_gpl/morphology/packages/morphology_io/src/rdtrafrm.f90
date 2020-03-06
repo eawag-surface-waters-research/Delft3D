@@ -466,7 +466,6 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
     integer                        :: nparreq
     integer                        :: nparopt
     integer                        :: version
-    integer        , external      :: newunit
     integer        , external      :: open_shared_library
     logical                        :: lex
     real(fp)                       :: nodef

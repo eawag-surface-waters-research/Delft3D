@@ -178,7 +178,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                                                           :: nxxprog
     integer                                                           :: nxxuser
     integer                                                           :: version
-    integer                    , external                             :: newunit
     integer                    , dimension(6)                         :: stat_flags
     integer                    , dimension(:) , allocatable           :: itype
     integer                    , dimension(:) , allocatable           :: ifield

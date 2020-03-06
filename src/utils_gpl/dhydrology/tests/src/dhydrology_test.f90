@@ -26,7 +26,6 @@
     logical                             :: opened, exist !RL666
     logical                             :: ja_custom_data_format
     logical                             :: ja_custom_time_format
-    integer                             :: newunit
     type(ec_module_query)               :: query
     
     call getcwd(startupDir)                         
