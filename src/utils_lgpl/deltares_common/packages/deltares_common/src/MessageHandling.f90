@@ -109,6 +109,7 @@ module MessageHandling
    public SetMessage
    public GetMessageCount
    public SetMessageHandling
+   public FinalizeMessageHandling
    public mess
    public err
    public GetMessage_MH
@@ -308,6 +309,11 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    alreadyInCallback = .false.
 
 end subroutine SetMessageHandling
+
+subroutine FinalizeMessageHandling()
+  close (lunMess)
+  lunMess = 0
+end subroutine FinalizeMessageHandling
 
 subroutine set_mh_callback(callback)
   procedure(mh_callbackiface) :: callback

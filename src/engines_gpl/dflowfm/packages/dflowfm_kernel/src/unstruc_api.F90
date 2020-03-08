@@ -329,6 +329,7 @@ integer                   :: ndraw
 subroutine flowfinalize()
 use unstruc_files
 use unstruc_netcdf
+use MessageHandling, only: FinalizeMessageHandling
 use m_ec_module
 use m_meteo, only: ecInstancePtr
  !!   cpuall(1) = cpuall0 ! Reset original start timing, for accurate totals
@@ -345,6 +346,7 @@ use m_meteo, only: ecInstancePtr
     call unc_closeall()
     mapids%ncid = 0    !< Reset global map-file ncid
     ihisfile = 0       !< Reset global his-file ncid
+    call FinalizeMessageHandling()
     close(mdia)
     
 end subroutine flowfinalize
