@@ -15729,7 +15729,7 @@ end if
     call savesam()
     NS = 0
     call oldfil(msam, md_s1inifile)
-    if (msam > 0) then
+    if (msam /= 0) then
         call reasam(msam, 0)
         call flow_initfloodfill()
     end if
