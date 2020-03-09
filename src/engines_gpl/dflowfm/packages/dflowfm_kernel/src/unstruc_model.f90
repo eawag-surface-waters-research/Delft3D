@@ -1009,7 +1009,7 @@ subroutine readMDUFile(filename, istat)
     end if
 
     call prop_get_double( md_ptr, 'numerics', 'Slopedrop2D'  , Slopedrop2D)
-    call prop_get_logical( md_ptr, 'numerics', 'Drop1D'      , Drop1D)
+    call prop_get_logical(md_ptr, 'numerics', 'Drop1D'      , Drop1D)
     call prop_get_double( md_ptr, 'numerics', 'Drop3D'       , Drop3D)
     call prop_get_integer(md_ptr, 'numerics', 'Lincontin'    , lincontin)
     call prop_get_double (md_ptr, 'numerics', 'Chkadvd'      , chkadvd)
@@ -2577,7 +2577,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     else
        help = 0
     endif
-    call prop_set(prop_ptr, 'numerics', 'Drop1D', help, 'Apply drop losses')
+    call prop_set(prop_ptr, 'numerics', 'Drop1D', help, 'Apply drop losses in 1D (0: no, 1:yes)')
 
     if (writeall .or. Drop3D .ne. 1d0) then
        call prop_set(prop_ptr, 'numerics', 'Drop3D'   , Drop3D, 'Apply droplosses in 3D if z upwind below bob + 2/3 hu*drop3D')
