@@ -303,7 +303,7 @@ module wrwaq
          !
          ! ascii output
          !
-         if (lunout<0) then
+         if (lunout == 0) then
             lunout = openasciifile(filename)
          endif
          write(lunout,'(a,i10)') 'Time = ', itim
@@ -315,7 +315,7 @@ module wrwaq
          !
          ! binary output
          !
-         if (lunout<0) then
+         if (lunout == 0) then
             lunout = openwaqbinfile(filename)
          endif
          write(lunout) itim
@@ -417,7 +417,7 @@ contains
         if (lun > 0) then
             call doclose(lun)
         end if
-        lun = -1
+        lun = 0
     end subroutine close_and_reset
 
 end subroutine reset_waq
