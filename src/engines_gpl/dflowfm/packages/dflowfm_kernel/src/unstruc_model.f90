@@ -930,9 +930,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double( md_ptr, 'numerics', 'CFLMax'          , cflmx)
     !call prop_get_double( md_ptr, 'numerics', 'CFLWaveFrac'     , cflw)
     call prop_get_integer(md_ptr, 'numerics', 'AdvecType'       , iadvec)
-    if (Layertype > 1) then
-       iadvec = 33 ; iadvec1D = 33
-    endif
+    !if (Layertype > 1) then
+    !   iadvec = 33 ; iadvec1D = 33
+    !endif
     call prop_get_integer(md_ptr, 'numerics', 'TimeStepType'    , itstep)
 
     maxNonlinearIterations = 100
@@ -1030,7 +1030,11 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'Turbulenceadvection' , javakeps)
     call prop_get_double (md_ptr, 'numerics', 'Eddyviscositybedfacmax' , Eddyviscositybedfacmax)
     call prop_get_integer(md_ptr, 'numerics', 'AntiCreep' , jacreep)
+    call prop_get_integer(md_ptr, 'numerics', 'Orgbarockeywords' , jaorgbarockeywords)
+    if (jaorgbarockeywords == 1) then 
     call prop_get_integer(md_ptr, 'numerics', 'Barocterm' , jabarocterm)
+    call prop_get_integer(md_ptr, 'numerics', 'Baroctimeint' , jabaroctimeint)
+    endif
     call prop_get_integer(md_ptr, 'numerics', 'EnableJRE', jajre)
 
     if ( icgsolver.eq.8 ) then   ! for parms solver
@@ -2641,8 +2645,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'numerics', 'AntiCreep', jacreep, 'Include anti-creep calculation (0: no, 1: yes)')
     endif
 
-    if( writeall .or. (jabarocterm .ne. 2 .and. kmx > 0) ) then
-        call prop_set(prop_ptr, 'numerics', 'Barocterm', jabarocterm, '(original = 1, current = 2 )')
+    if( jaorgbarockeywords == 1) then 
+        call prop_set(prop_ptr, 'numerics', 'orgbarockeywords', jaorgbarockeywords, '(1=yes)')
+        call prop_set(prop_ptr, 'numerics', 'Barocterm'       , jabarocterm       , '(     )')
+        call prop_set(prop_ptr, 'numerics', 'Baroctimeint'    , jabaroctimeint    , '(     )')
     endif
 
     if ( icgsolver.eq.8 ) then   ! for parms solver

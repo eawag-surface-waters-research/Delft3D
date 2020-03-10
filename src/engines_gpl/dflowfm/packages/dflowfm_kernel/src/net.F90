@@ -485,8 +485,10 @@
    use unstruc_files, only: defaultFilename
 
    implicit none
-   integer            :: n, i, ntbal
+   integer            :: n, i, ntbal, k1, k2
    double precision   :: tim, ue, te
+   double precision   :: vv1, vv2, eh1, eh2, ee1, ee2, ft, dinch, wid,h1, h2, rr1, rr2, xl1, xl2, df1, df2, hb, AA1, AA2, QQ, s12, froude2
+
    character(len=256) :: nam
 
     if (mxls /= 0 .and. dnt == 1) then  ! volerr, volerrcum
@@ -501,12 +503,25 @@
       ntbal = -1 + int(Tstop_user - Tstart_user) / Ti_xls
 
       if (nshiptxy == 0) then
-         write(mxls,'(a)') '* column 1  : Time (min) '
-         write(mxls,'(a)') '* column 2  : Waterlevel Obs 1     (m  ) '
-         write(mxls,'(a)') '* column 3  : Waterdepth Obs 1     (m  ) '
+         !write(mxls,'(a)') '* column 2  : Waterlevel Obs 1     (m  ) '
+         !write(mxls,'(a)') '* column 3  : Waterdepth Obs 1     (m  ) '
+
+         write(mxls,'(a)') '* column 1  : Time (min)'
+         write(mxls,'(a)') '* column 2  : H1 DFM (m)'
+         write(mxls,'(a)') '* column 3  : H2 DFM (m)'
+         write(mxls,'(a)') '* column 4  : S12 DFM (m)'
+         write(mxls,'(a)') '* column 5  : Hb DFM (m)'
+         write(mxls,'(a)') '* column 6  : Kb1 DFM ( )'
+         write(mxls,'(a)') '* column 7  : Kb2 DFM ( )'
+         write(mxls,'(a)') '* column 8  : F12 DFM (m)'
+         write(mxls,'(a)') '* column 9  : EH1 DFM (m)'
+         write(mxls,'(a)') '* column 10 : QS DFM (m2/s)'
+         write(mxls,'(a)') '* column 11 : Z12 DFM (m2/s)'
+         write(mxls,'(a)') '* column 12 : Froude2 DFM ( )'
+
 
          write(mxls,'(a)') 'BL01'
-         write(mxls,'(i0, a)') ntbal, '   4'
+         write(mxls,'(i0, a)') ntbal+2, '   12'
       else
          write(mxls, '(a)' )       '*tim,   (fx2(n),    fy2(n),    fm2(n),    fricx(n),    fricy(n),    fricm(n),  &
                                    fx2(n)+fricx(n),   fy2(n)+fricy(n),  fm2(n)+fricm(n),   shx(n),    shu(n), squat(n), squatbow(n), n=1, nshiptxy ), cfav'
@@ -528,9 +543,26 @@
 
       !write(mxls,'(13f14.6)') tim/Te ,  ucx(kobs(1)) / ue !   , s1(kobs(1)) - bl(kobs(1))
       if (numobs > 0 .and. kobs(1) > 0 ) then
-         write(mxls,'(13f14.6)') tim/60d0,  s1(kobs(1)), s1(kobs(1)) - bl(kobs(1))
+         
+         k1   = kobs(1)                                 ; k2  = kobs(2)
+         ft   = 0.3048 ; dinch = 0.0254d0               ; wid = 6d0*dinch 
+         h1   = hs(k1)                                  ; h2  = hs(k2)
+         AA1  = h1*wid                                  ; AA2 = h2*wid
+         QQ   = crs(1)%sumvalcur(1) 
+         vv1  = sqrt( ucx(k1)**2 + ucy(k1)**2 )         ; vv2 = sqrt( ucx(k2)**2 + ucy(k2)**2 ) ! centre value  
+         vv1  = QQ/AA1                                  ; vv2 = QQ/AA2                          ! average value 
+         eh1  = vv1*vv1/(2d0*ag)                        ; ee1 = s1(k1) + eh1 
+         eh2  = vv2*vv2/(2d0*ag)                        ; ee2 = s1(k2) + eh2 
+         RR1  = AA1 / (wid + 2*h1)                      ; RR2 = AA2 / (wid + 2*h2)  
+         xl1  = 1.43d0                                  ; xl2 = 1.59d0 
+         df1  = xL1*0.01*0.01*vv1*vv1/(RR1**1.333333)   ; df2 = xL2*0.01*0.01*vv2*vv2/(RR2**1.333333) 
+         hb   = ee1 - ee2 - (df1+df2) 
+         s12  = s1(k1) - s1(k2) 
+         Froude2 = vv2/sqrt(ag*h2)
+         write(mxls,'(15F8.4)') tim/60d0,  h1, h2, s12, hb, hb/max(eh1,0.001d0), hb/max(eh2,0.001d0), (df1+df2), eh1, QQ/wid, bl(k1) - bl(k2), froude2 
       endif
    endif
+
 
    end subroutine wrihistek
 
@@ -9287,6 +9319,52 @@ end subroutine checknetwork
 
   RETURN
   END SUBROUTINE COPYPOLTOSPLINE
+
+  SUBROUTINE COPYPOLTo1Dnet()
+  use m_polygon
+  USE M_netw
+  USE M_MISSING
+  use network_data, only: kn3typ
+  implicit none
+
+  integer :: k, L, kn3o
+
+  kn3o = kn3typ ; kn3typ = 1
+
+  ! CALL INCREASENETW(NUMK+NPL, NUML+NPL-1)
+  DO K = 2,NPL
+        
+     if (xpl(k) .ne. dmiss .and. xpl(K-1) .ne. dmiss) then 
+         call addnetlink(xpl(k-1), ypl(k-1), xpl(k), ypl(k), L) 
+     endif 
+
+  ENDDO
+
+  kn3typ = kn3o 
+  CALL DELPOL()
+  RETURN
+  END SUBROUTINE COPYPOLTo1Dnet
+
+subroutine getnetnodenr(x,y,k)
+use m_missing
+double precision :: x,y,z
+integer          :: k 
+
+z = dmiss
+CALL ISNODE(K, X, Y, z )
+if (k == 0) then 
+   CALL DSETNEWPOINT(X,Y,K) 
+endif  
+end subroutine getnetnodenr 
+
+subroutine addnetlink(x1,y1,x2,y2,L)
+use gridoperations ! or you can not call connectdbn
+double precision :: x1,y1,x2,y2
+integer          :: k1,k2,L 
+call getnetnodenr(x1,y1,k1)
+call getnetnodenr(x2,y2,k2)
+call CONNECTDBN(K1,K2,L)
+end subroutine addnetlink
 
 
 !> copy spline to resampled polygon

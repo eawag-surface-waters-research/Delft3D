@@ -2311,6 +2311,8 @@ end module unstruc_channel_flow
  double precision, allocatable     :: rho      (:)      ! density at cell centres (kg/m3)
  double precision, allocatable     :: rho0     (:)      ! density at cell centres (kg/m3), previous step
  double precision, allocatable     :: dpbdx0   (:)      ! previous step baroclinic pressure gradient, at u points
+ double precision, allocatable     :: rvdn     (:)      ! help integral of (rho-rhomean)*deltaz at pressure points (kg/m2)
+ double precision, allocatable     :: grn      (:)      ! help integral of baroclinic pressure at pressure points  (kg/m) 
 
  double precision, allocatable     :: rhou     (:)      ! density at flow links   (kg/m3)
 
@@ -2670,6 +2672,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jabaroctimeint    !< time integration baroclini pressure, 1 = Euler, abs() = 2; rho at n+1/2, 3: AdamsB
 
  integer                           :: jabarocterm       !< 1 or 2 for original or revised term, we only document the revised term, keep org for backw. comp.
+
+ integer                           :: jaorgbarockeywords !< default=0=new, 1=org 
 
  integer                           :: jalts = 1         ! local time-stepping (1) or not (0)
 
@@ -3098,8 +3102,9 @@ subroutine default_flowparameters()
     JaZlayercenterbedvel = 1
     JaZerozbndinflowadvection = 0
 
-    jabaroctimeint = -3  !< time integration baroclini pressure, 1 = explicit, abs() = 2; adams bashford , 3 = ab3, 5 = adv rho
-    jabarocterm = 2      ! revised baroc term
+    jabaroctimeint = -4  !< time integration baroclini pressure, 1 = expl., 2=AB rho , 3 = AB barocterm, 4=3dryfloodproof 5 = advect rho (n+1/2) 
+    jabarocterm    = 4   !  revised baroc term
+    jaorgbarockeywords = 0
 
     jaanalytic = 0                    !< analytic solution available in black sideview => do not also show computed surface in black
     jaustarint                = 1     !< 1=integral bed layer velocity,  0=velocity at half bed layer

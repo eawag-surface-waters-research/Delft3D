@@ -14766,8 +14766,11 @@ else if (nodval == 27) then
     zlin = Lbot(LL)
  else if ( linval == 52) then
     zlin = Ltop(LL)
- else
-    zlin = -999
+ else if ( linval == 53) then
+    dum = min(a1(ln(1,LL)), a1(ln(2,LL)) )
+    if (dum > 0) then 
+       zlin = max(a1(ln(1,LL)), a1(ln(2,LL)) ) / dum 
+    endif
  endif
 
  end function zlin
@@ -26376,19 +26379,26 @@ endif
 
  if (jasal > 0 .or. jatem > 0 .or. jased> 0 .or. stm_included ) then
     if (abs(jabaroctimeint) >= 2) then
-       if (jacreep == 1 .or. abs(jabaroctimeint) >= 3) then
+       if (jacreep == 1 .or. abs(jabaroctimeint) == 3 .or. abs(jabaroctimeint) == 4) then
           if (allocated(dpbdx0) ) deallocate(dpbdx0)
           allocate ( dpbdx0 (lnkx) , stat= ierr )
           call aerr('dpbdx0 (lnkx)', ierr, lnkx ) ; dpbdx0 = 0d0
        endif
 
-       if (jacreep .ne. 1 .and. abs(jabaroctimeint) .ne. 3) then
+       if (jacreep .ne. 1 .and. abs(jabaroctimeint) == 2 .or. abs(jabaroctimeint) == 5) then
           if (allocated(rho0) ) deallocate(rho0)
           allocate ( rho0 (ndkx) , stat= ierr )
           call aerr('rho0 (ndkx)', ierr, ndkx ) ; rho0  = rhomean
        endif
 
     endif
+    
+    if (jabarocterm == 4) then 
+       if (allocated (rvdn) ) deallocate(rvdn, grn)
+       allocate ( rvdn(ndkx), grn(ndkx) , stat= ierr ) ; rvdn = 0d0 ; grn = 0d0
+       call aerr('rvdn(ndkx), grn(ndkx)', ierr, 2*ndkx )   
+    endif
+
  endif
 
  if (kmx > 0) then
@@ -26838,22 +26848,22 @@ endif
 
        if (jamapheatflux > 0 .or. jahisheatflux > 0) then ! his or map output
           if (allocated(qsunmap)) deallocate (Qsunmap, Qevamap, Qconmap, Qlongmap, Qfrevamap, Qfrconmap)
-          allocate ( Qsunmap(ndx)   , stat = ierr)
+          allocate ( Qsunmap(ndx)   , stat = ierr) 
           call aerr('Qsunmap(ndx)'  , ierr , ndx )
           Qsunmap = 0d0
-          allocate ( Qevamap(ndx)   , stat = ierr)
+          allocate ( Qevamap(ndx)   , stat = ierr) 
           call aerr('Qevamap(ndx)'  , ierr , ndx )
           Qevamap = 0d0
-          allocate ( Qconmap(ndx)   , stat = ierr)
+          allocate ( Qconmap(ndx)   , stat = ierr) 
           call aerr('Qconmap(ndx)'  , ierr , ndx )
           Qconmap = 0d0
-          allocate ( Qlongmap(ndx)  , stat = ierr)
+          allocate ( Qlongmap(ndx)  , stat = ierr) 
           call aerr('Qlongmap(ndx)' , ierr , ndx )
           Qlongmap = 0d0
-          allocate ( Qfrevamap(ndx) , stat = ierr)
+          allocate ( Qfrevamap(ndx) , stat = ierr) 
           call aerr('Qfrevamap(ndx)', ierr , ndx )
           Qfrevamap = 0d0
-          allocate ( Qfrconmap(ndx) , stat = ierr)
+          allocate ( Qfrconmap(ndx) , stat = ierr) 
           call aerr('Qfrconmap(ndx)', ierr , ndx )
           Qfrconmap = 0d0
        endif
@@ -27101,7 +27111,7 @@ endif
           if ( ktop(n) > kt1 + 1) then
              h0     = s1(n) - zws(kt1)
              dtopsi = 1d0/dble(ktx - kt1)
-             do k   = kt1 + 1, ktx
+             do k   = kt1 + 1, ktx - 1
                 kk  = k - kt1
                 zws(k) = zws(kt1) + h0*dble(kk)*dtopsi
              enddo
@@ -30760,10 +30770,7 @@ subroutine addbaroclinicpressure()
 use m_flowgeom
 use m_flow
 implicit none
-integer                    :: L,LL,Lb,Lt,k1,k2
-double precision, external :: hordiflimited
-double precision           :: hordif,baroc,barocup
-
+integer                    :: L,LL,Lb,Lt,n
 
 if (jabarocterm == 1) then
 
@@ -30781,7 +30788,7 @@ enddo
 
 !$OMP END PARALLEL DO
 
-else
+else if (jabarocterm == 2 .or. jabarocterm == 3) then 
 
 !$OMP PARALLEL DO       &
 !$OMP PRIVATE(LL,Lb,Lt)
@@ -30797,10 +30804,143 @@ do LL = 1,lnxi
 
 !$OMP END PARALLEL DO
 
+ else  
+ 
+ rvdn = 0d0 ; grn = 0d0
+
+!$OMP PARALLEL DO       &
+!$OMP PRIVATE(n)
+ do n = 1,ndx
+    call addbarocn(n)
+ enddo
+!$OMP END PARALLEL DO
+
+!$OMP PARALLEL DO       &
+!$OMP PRIVATE(LL,Lb,Lt)
+ do LL = 1,lnxi
+   if (hu(LL) == 0d0) cycle
+   call getLbotLtop(LL,Lb,Lt)
+   if (Lt < Lb) then
+       cycle
+   endif
+   call addbarocL(LL,Lb,Lt)
+ enddo
+!$OMP END PARALLEL DO
+
  endif
 
  end subroutine addbaroclinicpressure
 
+ subroutine addbarocn(n)
+ use m_flowgeom
+ use m_flow
+
+ implicit none
+ integer, intent(in) :: n
+
+ integer             :: k,kb,kt
+ double precision    :: rhosw(0:kmxx) ! rho at pressure point layer interfaces
+ double precision    :: fzu , fzd, alf, pu, pd, gr, dzz, rvn
+ 
+ call getkbotktop(n,kb,kt)
+ if (kt < kb) return 
+
+ if (kt > kb) then 
+    do k = kb, kt-1
+       fzu           = (zws(k+1) - zws(k)) / (zws(k+1) - zws(k-1)) ; fzd = 1d0 - fzu
+       rhosw(k-kb+1) = fzu*rho(k+1) + fzd*rho(k) - rhomean
+    enddo
+    rhosw(0)       = 2d0*(rho(kb) - rhomean) - rhosw(1)
+    rhosw(kt-kb+1) = 2d0*(rho(kt) - rhomean) - rhosw(kt-kb)
+ else
+    rhosw(0)       = rho(kb) - rhomean 
+    rhosw(1)       = rhosw(0) 
+ endif 
+
+ grn(kt)  = 0d0  
+ rvdn(kt) = 0d0 
+ pd       = 0d0  
+ rvn      = 0d0
+ do k = kt, kb, -1  
+    dzz     = zws(k) - zws(k-1)
+    rvn     = rvn + 0.5d0*( rhosw(k-kb+1) + rhosw(k-kb) ) * dzz
+    rvdn(k) = rvn 
+    alf = rhosw(k-kb) - rhosw(k-kb+1)
+    pu  = pd 
+    pd  = pu + rhosw(k-kb+1)*dzz + 0.5d0*alf*dzz
+    gr  = pu*dzz + 0.5d0*rhosw(k-kb+1)*dzz*dzz + alf*dzz*dzz/6d0             ! your left  wall
+    grn(k) = gr 
+ enddo
+
+ end subroutine addbarocn
+
+ subroutine addbarocL(LL,Lb,Lt)
+ use m_flowgeom
+ use m_flow
+ use m_flowtimes
+
+ implicit none
+ integer, intent(in) :: LL,Lb,Lt
+
+ integer             :: L, k1, k2, k1t, k2t
+ double precision    :: gradpu(kmxx), rhovol(kmxx), gr3, barocL, ft
+ 
+ do L = Lb,Lt
+    k1 = ln(1,L) ; k1t = k1 
+    k2 = ln(2,L) ; k2t = k2 
+    if (L == Lt) then
+       k1t = ktop(ln(1,LL)) ; k2t = ktop(ln(2,LL))  
+    endif
+    rhovol(L-Lb+1) = 0.5d0*( zws(k1t) - zws(k1-1) + zws(k2t) - zws(k2-1) )*dx(LL)*0.5d0*(rho(k1) + rho(k2)) ! write in rvdn
+    gr3            = 0.5d0*( rvdn(k1) + rvdn(k2) )*(zws(k1-1) - zws(k2-1))
+    gradpu(L-Lb+1) = grn(k1) - grn(k2) + gr3
+    if (L > Lb ) then
+       gradpu(L-Lb) = gradpu(L-Lb)     - gr3            ! ceiling of ff# downstairs neighbours
+    endif
+ enddo
+
+ ! this last piece is identical to addbaroc2, that will be removed at some moment 
+ if (jabaroctimeint == 3) then                                           ! original AB implementation
+
+    do L = Lb, Lt
+       if (rhovol(L-Lb+1) > 0d0) then
+           barocl    = ag*gradpu(L-Lb+1)/rhovol(L-Lb+1)                  !  
+           adve(L)   = adve(L) - 1.5d0*barocl + 0.5d0*dpbdx0(L)
+           dpbdx0(L) = barocL
+        endif
+    enddo
+
+ else if (abs(jabaroctimeint) == 4) then                                 ! AB + better drying flooding
+
+    ft = 0.5d0*dts/dtprev 
+    do L = Lb, Lt
+       if (rhovol(L-Lb+1) > 0d0) then
+           barocl  = ag*gradpu(L-Lb+1)/rhovol(L-Lb+1)                    
+           if (dpbdx0(L) .ne. 0d0) then                                  
+               adve(L)   = adve(L) - (1d0+ft)*barocl + ft*dpbdx0(L)
+           else 
+               adve(L)   = adve(L) - barocl
+           endif
+           dpbdx0(L) = barocL
+       endif
+    enddo
+    
+    do L = Lt+1,Lb+kmxL(LL)-1 
+       dpbdx0(L) = 0d0
+    enddo
+
+ else
+
+    do L = Lb, Lt
+        if (rhovol(L-Lb+1) > 0d0) then
+           barocl  = ag*gradpu(L-Lb+1)/rhovol(L-Lb+1)                     !  Explicit 
+           adve(L) = adve(L) - barocl
+       endif
+    enddo
+
+ endif
+
+ end subroutine addbarocL
 
  subroutine addbaroc2(LL,Lb,Lt)
  use m_flowgeom
@@ -30970,7 +31110,7 @@ do LL = 1,lnxi
        else if (z1d < z2d) then
           dz3  = z2d - z1d
           alf3 = r1d - r2d
-          gr3  = p2d*dz3 + 0.5d0*r2d*dz3*dz3 + alf3*dz3*dz3/6d0          ! your own floor (kg*m2)
+          gr3  = p2d*dz3 + 0.5d0*r2d*dz3*dz3 + alf3*dz3*dz3/6d0          ! your own floor (kg/m)
           gr3  = -gr3
        endif
     else
@@ -30999,7 +31139,7 @@ do LL = 1,lnxi
         endif
     enddo
 
- else if (jabaroctimeint == 4) then                                      ! AB + better drying flooding
+ else if (abs(jabaroctimeint) == 4) then                                      ! AB + better drying flooding
 
     do L = Lb, Lt
        if (rhovol(L-Lb+1) > 0d0) then
@@ -42599,9 +42739,8 @@ if (mext /= 0) then
         else if (qid(1:8) == 'rainfall' ) then
 
            if (.not. allocated(rain) ) then
-              allocate ( rain(ndx) , stat=ierr)
+              allocate ( rain(ndx) , stat=ierr) ; rain = 0d0
               call aerr('rain(ndx)', ierr, ndx)
-              rain = 0d0
            endif
 
            ! TODO: AvD: consider adding mask to all quantities.
@@ -42951,6 +43090,7 @@ if (mext /= 0) then
 
     do n = 1,numlatsg
        balat(n) = 0d0
+       if ( n1latsg(n) == 0) cycle   
        do k1=n1latsg(n),n2latsg(n)
           k = nnlat(k1)
           if (jampi == 1) then
