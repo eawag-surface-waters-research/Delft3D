@@ -37,8 +37,8 @@ subroutine oldfil(minp, filename)!, istat)
 use unstruc_files
 use string_module, only: find_first_char
 implicit none
-    integer,           intent(out) :: minp     !< New file pointer to opened file.
-    character(*),      intent(in)  :: filename !< Name of the file to open.
+    integer,           intent(  out) :: minp     !< New file pointer to opened file. 0 in case of some error.
+    character(*),      intent(in   ) :: filename !< Name of the file to open.
 !    integer, optional, intent(out) :: istat
 
     integer                        :: istat_
@@ -49,6 +49,7 @@ implicit none
     logical                        :: jawel
     
     istat_ = 0
+    minp = 0
 
     l1 = max(1, find_first_char(filename))
     l2 = len_trim(filename)
@@ -103,7 +104,7 @@ end subroutine oldfil
 subroutine doclose(minp)
 use unstruc_files
 implicit none
-    integer, intent(inout) :: minp
+    integer, intent(inout) :: minp !< File unit of a (probably open) file. Will be set to 0 upon return.
     integer :: i
     
     if (minp == 0) return
@@ -147,8 +148,8 @@ subroutine newfil(minp, filename)!, istat)
 use unstruc_files
 use string_module, only: find_first_char
 implicit none
-    integer,           intent(out) :: minp     !< New file pointer to opened file.
-    character(*),      intent(in)  :: filename !< Name of the file to open.
+    integer,           intent(  out) :: minp     !< New file pointer to opened file. 0 in case of some error.
+    character(*),      intent(in   ) :: filename !< Name of the file to open.
 !    integer, optional, intent(out) :: istat
 
     integer                        :: istat_
@@ -158,6 +159,7 @@ implicit none
     character(*) RW*20
 
     istat_ = 0
+    minp = 0
 
     l1 = max(1, find_first_char(filename))
     l2 = len_trim(filename)
@@ -188,6 +190,10 @@ implicit none
     return
 
 999 continue
+    ! Upon error, reset file pointer.
+    if (istat_ /= 0) then
+        minp = 0
+    end if
 !    if (present(istat)) then
 !        istat = istat_
 !        return

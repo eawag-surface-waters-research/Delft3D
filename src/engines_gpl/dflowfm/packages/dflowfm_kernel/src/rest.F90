@@ -2633,13 +2633,15 @@ end subroutine read_land_boundary_netcdf
   use unstruc_messages
   use unstruc_files
   implicit none
+  CHARACTER(len=*), intent(in   ) :: FILNAM !< Name of file to be opened.
+  integer,          intent(  out) :: lunid  !< File unit of the opened file, 0 in case of error.
+  integer,          intent(in   ) :: mustbe !< Whether or not (1/0) the file must be checked whether it exists. When 1 and file does not exist, an error is given.
+
   integer :: istart
   integer :: k1
   integer :: k2
-  integer :: lunid
-  integer :: mustbe
   integer :: istat
-  CHARACTER FILNAM*76,FULNAM*180
+  CHARACTER FULNAM*180
   LOGICAL JA
 
   LUNID = 0
