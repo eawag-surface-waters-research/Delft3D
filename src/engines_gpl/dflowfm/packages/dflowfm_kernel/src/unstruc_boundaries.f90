@@ -2129,6 +2129,7 @@ do i=1,network%sts%count
       loc_spec_type = LOCTP_POLYLINE_XY
    end if
 
+   ! NOTE: kegen below does not apply to general structures. Just a placeholder for the link snapping of all structure types.
    select case (pstru%type)
    case (ST_DAMBREAK)
       call selectelset_internal_links( xz, yz, ndx, ln, lnx, kegen(1:numl), numgen, &
