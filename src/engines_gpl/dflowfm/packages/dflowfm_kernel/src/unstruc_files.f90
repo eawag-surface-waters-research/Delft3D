@@ -289,7 +289,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
         suffix     = '_snapped_genstruc' ! .shp extension will be added automatically (and .shx/.dbf)
         
     !---------------------------------------------------------!
-    ! Shape files
+    ! DELWAQ files
     !---------------------------------------------------------!
 
     ! Delwaq files: filecat is identical to file extension
