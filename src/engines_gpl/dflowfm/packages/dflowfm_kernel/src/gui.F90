@@ -728,7 +728,7 @@
    integer :: midp
    integer :: mtek
    integer :: ndraw
-   integer :: i, k
+   integer :: i, k, ierror
    logical :: jawel
 
    interface
@@ -747,11 +747,11 @@
    IF (NWHAT .EQ. 1) THEN
       FILNAM = '*.mdu'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .EQ. -1) THEN   ! Cancel
+      ELSE IF (ierror .EQ. -1) THEN   ! Cancel
          NUM = 1
       ELSE
         call doclose(mlan) ! TODO: change... [AvD]
@@ -776,11 +776,11 @@
    ELSE IF (NWHAT .EQ. 2) THEN
       FILNAM = '*_net.nc'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
         call doclose(mlan) ! TODO: change... [AvD]
@@ -802,11 +802,11 @@
    ELSE IF (NWHAT .EQ. 3) THEN
       FILNAM = '*_net.nc'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          IF (INDEX(FILNAM, '.jan') > 0) then 
@@ -833,11 +833,11 @@
    ELSE IF (NWHAT .EQ. 4) THEN
       FILNAM = '*.grd'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          CALL REAgrid(MLAN,FILNAM,ja)  ! DOORLADEN
@@ -854,11 +854,11 @@
    ELSE IF (NWHAT .EQ. 5) THEN
       FILNAM = '*.asc'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          CALL readarcinfo(MLAN,ja)  ! DOORLADEN
@@ -875,11 +875,11 @@
    ELSE IF (NWHAT .EQ. 6) THEN
       FILNAM = '*.pol,*.pli'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          CALL REAPOL(MLAN, 0)
@@ -898,8 +898,8 @@
    ELSE IF (NWHAT .EQ. 7) THEN
       FILNAM = '*.spl'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .GE. 1) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (MLAN .NE. 0) THEN
          CALL readSplines(mlan)
          IF (mcs .GT. 0) THEN
             CALL MESSAGE('You Opened File ', FILNAM, ' ')
@@ -912,11 +912,11 @@
    ELSE IF (NWHAT .EQ. 8) THEN
       FILNAM = '*.ldb'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
         i = len_trim(filnam)
@@ -945,11 +945,11 @@
    ELSE IF (NWHAT .EQ. 9 .or. NWHAT .EQ. 10 ) THEN
       FILNAM = '*_obs.xyn'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          ja = 0
@@ -969,11 +969,11 @@
    ELSE IF (NWHAT .EQ. 11 .or. NWHAT .EQ. 12 ) THEN
       FILNAM = '*_crs.pli'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          ja = 0
@@ -994,11 +994,11 @@
    ELSE IF (NWHAT .EQ. 13 .or. NWHAT .EQ. 14 ) THEN
       FILNAM = '*_thd.pli'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          ja = 0
@@ -1018,11 +1018,11 @@
    ELSE IF (NWHAT .EQ. 15) THEN
       FILNAM = '*.xyz,*.dem,*.asc'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          ja = 0
@@ -1067,11 +1067,11 @@
          return
       endif
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          if (ibedlevtyp == 1) then
@@ -1085,11 +1085,11 @@
    ELSE IF (NWHAT .EQ. 17) THEN
       FILNAM = '*_rst.nc'
       MLAN   = 0
-      CALL FILEMENU(MLAN,FILNAM)
-      IF (MLAN .EQ. -2) THEN
+      CALL FILEMENU(MLAN,FILNAM,ierror)
+      IF (ierror .EQ. -2) THEN
          CALL qnerror('file' , filnam, 'not found ')
          NUM = 1
-      ELSE IF (MLAN .LE. 0) THEN
+      ELSE IF (ierror .EQ. -1) THEN
          NUM = 1
       ELSE
          i = len_trim(filnam)
@@ -1122,10 +1122,10 @@
          NUM    = 0
          FILNAM = '*.bmp'
          MIDP   = 0
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NDRAW(26) = 0
-         ELSE IF (MIDP .GE. 1) THEN
+         ELSE IF (MIDP /= 0) THEN
             CALL DOCLOSE(MIDP)
             CALL LOADBITMAP(FILNAM)
             CALL MESSAGE('YOU LOADED ' , filnam, ' ')
@@ -1135,8 +1135,8 @@
    ELSE IF (NWHAT .EQ. 20) THEN
       FILNAM = '*.mdu'
       MTEK   = 1
-      CALL FILEMENU(MTEK,FILNAM)
-      IF (MTEK .LE. 0) THEN
+      CALL FILEMENU(MTEK,FILNAM,ierror)
+      IF (ierror /= 0) THEN
          NUM = 1
       ELSE
          call doclose(mtek)
@@ -1156,8 +1156,8 @@
          end if
          
          MTEK   = 1
-         CALL FILEMENU(MTEK,FILNAM)
-         IF (MTEK .LE. 0) THEN
+         CALL FILEMENU(MTEK,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             call doclose(mtek)
@@ -1206,8 +1206,8 @@
              ja = 1 ! Hereafter, 1 means 'no/cancelled'
          end if
          if (ja==0) then ! 0: NOT cancelled
-            CALL FILEMENU(MTEK,FILNAM)
-            IF (MTEK .LE. 0) THEN
+            CALL FILEMENU(MTEK,FILNAM,ierror)
+            IF (ierror /= 0) THEN
                 NUM = 1
             ELSE
                 call doclose(mtek)
@@ -1225,8 +1225,8 @@
       ELSE
          FILNAM = '*.grd'
          MTEK   = 1
-         CALL FILEMENU(MTEK,FILNAM)
-         IF (MTEK .LE. 0) THEN
+         CALL FILEMENU(MTEK,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             call wrirgf(mtek, filnam)
@@ -1241,8 +1241,8 @@
       ELSE
          FILNAM = '*.pol,*.pli'
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             CALL WRIPOL(MIDP)
@@ -1260,8 +1260,8 @@
       ELSE
          FILNAM = '*.spl'
          MLAN   = 1
-         CALL FILEMENU(MLAN,FILNAM)
-         IF (MLAN .GE. 1) THEN
+         CALL FILEMENU(MLAN,FILNAM,ierror)
+         IF (ierror == 0) THEN
             CALL writeSplines(MLAN)
             CALL MESSAGE('You Saved File ', FILNAM, ' ')
          ENDIF
@@ -1273,8 +1273,8 @@
       ELSE
          FILNAM = '*.ldb'
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             CALL WRILAN(MIDP)
@@ -1291,8 +1291,8 @@
       ELSE
          FILNAM = defaultFilename('obs')
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             call doclose(midp)
@@ -1310,8 +1310,8 @@
       ELSE
          FILNAM = '*_crs.pli'
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             CALL WRICRS(MIDP)
@@ -1328,8 +1328,8 @@
       ELSE
          FILNAM = '*.xyz'
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             CALL WRIsam(MIDP)
@@ -1353,8 +1353,8 @@
             return
          endif
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             if (ibedlevtyp == 1) then
@@ -1373,8 +1373,8 @@
       ELSE
          FILNAM = '*_rst.nc'
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             call doclose(midp)
@@ -1391,8 +1391,8 @@
       ELSE
          FILNAM = '*_map.nc'
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             call doclose(midp)
@@ -1404,8 +1404,8 @@
    ELSE IF (NWHAT .EQ. 35) THEN
      FILNAM = '*'
      MIDP   = 0
-     CALL FILEMENU(MIDP,FILNAM)
-     IF (MIDP .LE. 0) THEN
+     CALL FILEMENU(MIDP,FILNAM,ierror)
+     IF (ierror /= 0) THEN
         NUM = 1
      ELSE
         call doclose(midp)
@@ -1419,11 +1419,11 @@
 !   ELSE IF (NWHAT .EQ. 20) THEN
 !      FILNAM = '*.unt'
 !      MLAN   = 0
-!      CALL FILEMENU(MLAN,FILNAM)
-!      IF (MLAN .EQ. -2) THEN
+!      CALL FILEMENU(MLAN,FILNAM,ierror)
+!      IF (ierror .EQ. -2) THEN
 !         CALL qnerror('file' , filnam, 'not found ')
 !         NUM = 1
-!      ELSE IF (MLAN .LE. 0) THEN
+!      ELSE IF (ierror /= 0) THEN
 !         NUM = 1
 !      ELSE
 !         CALL reajanet(MLAN,JA,1) !1=DOORLADEN
@@ -1441,8 +1441,8 @@
       ELSE
          FILNAM = '*.node'
          MIDP   = 1
-         CALL FILEMENU(MIDP,FILNAM)
-         IF (MIDP .LE. 0) THEN
+         CALL FILEMENU(MIDP,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             CALL WRIswan(MIDP,filnam)
@@ -1457,8 +1457,8 @@
 !         FILNAM = '*_net.nc'
          filnam = md_netfile
          MTEK   = 1
-         CALL FILEMENU(MTEK,FILNAM)
-         IF (MTEK .LE. 0) THEN
+         CALL FILEMENU(MTEK,FILNAM,ierror)
+         IF (ierror /= 0) THEN
             NUM = 1
          ELSE
             call doclose(mtek)
@@ -2130,6 +2130,7 @@
    character(len=255) :: filnam
    integer :: mfil
    integer :: i
+   integer :: ierror
    integer :: numopt
 
    integer, parameter :: MAXOP = 64
@@ -2187,10 +2188,10 @@
       ELSEIF (NWHAT2 == 4) THEN ! Load display preset
          FILNAM = '*.cfg'
          MFIL   = 0
-         CALL FILEMENU(MFIL,FILNAM)
-         IF (MFIL .EQ. -2) THEN
+         CALL FILEMENU(MFIL,FILNAM,ierror)
+         IF (ierror .EQ. -2) THEN
             CALL qnerror('file' , filnam, 'not found ')
-         ELSE IF (mfil > 0) THEN
+         ELSE IF (mfil /= 0) THEN
             call initGUI(0) ! NO INTINI
             call doclose(mfil)
             call load_displaysettings(filnam)
@@ -2204,8 +2205,8 @@
             FILNAM = trim(md_ident)//'.cfg'
          endif
          mfil   = 1
-         CALL FILEMENU(mfil,FILNAM)
-         IF (mfil > 0) THEN
+         CALL FILEMENU(mfil,FILNAM,ierror)
+         IF (ierror /= 0) THEN
              call doclose(mfil)
              CALL save_displaysettings(filnam)
              CALL MESSAGE('YOU SAVED ' , filnam, ' ')
@@ -3174,6 +3175,7 @@
 
    implicit none
    integer :: i
+   integer  :: ierror
    integer :: ifexit
    integer :: ifinit
    integer :: ih
@@ -3430,7 +3432,7 @@
            CALL IFORMGETMENU(2*19, iselect)
            if ( iselect.eq.2 ) then
               minp = 2  ! select file only
-              call filemenu(minp,md_dryptsfile)
+              call filemenu(minp,md_dryptsfile,ierror)
            else if ( iselect.eq.3 ) then
               md_dryptsfile = ''
            end if
@@ -16511,20 +16513,23 @@ double precision :: value
       END
 
 
-      SUBROUTINE FILEMENU(MRGF,FILNAM)
+      SUBROUTINE FILEMENU(mrgf,filnam,ierror)
       use unstruc_display
       use unstruc_version_module, only : unstruc_company, unstruc_program
       use unstruc_files, only : filnammenu
       implicit none
+      integer,           intent(inout) :: mrgf    !<  call with mrgf = 0 means LOAD, mrgf = 1  means SAVE, mrgf = 2 means get filename only
+      character(len=*),  intent(inout) :: filnam
+      integer,           intent(  out) :: ierror  !<  return value -1 = ESC
       integer :: ih, ihl, imenuscroll, imp, infoinput, inp, iw, ixp, iyp, jatab, jazekr, keepstartdir, key, l, len
-      integer :: maxfil, maxhlp, mrgf, nahead, nbut, nlevel, numdir, numf, numfil, numtop, numtxi, numtxt
+      integer :: maxfil, maxhlp, nahead, nbut, nlevel, numdir, numf, numfil, numtop, numtxi, numtxt
 
 !     Gives menu with files filnam
-!     call with mrgf = 0 means LOAD, mrgf = 1  means SAVE, mrgf = 2 means get filename only
-!     return value -2 = old files not found, -1 = ESC
+
+
       PARAMETER (MAXHLP = 2000, MAXFIL = 2000)
       INTEGER IFDATE(MAXFIL), IFSIZE(MAXFIL)
-      CHARACTER  HLPTXT(MAXHLP)*80,FILIST(MAXFIL)*86,FILNAM*86,WRDKEY*40
+      CHARACTER  HLPTXT(MAXHLP)*80,FILIST(MAXFIL)*86,WRDKEY*40
       CHARACTER  DIR*86, CURDIR*86, DIR2*86,FILNAM2*86
       LOGICAL JA
       COMMON /HELPC/     HLPTXT,NUMTXT
@@ -16532,8 +16537,9 @@ double precision :: value
       
       integer jaopen ! open file (1) or not (0)
       
+      ierror     = 0 ! Default: no error
       filnammenu = ' '  
-      jaopen = 1
+      jaopen     = 1
       if ( mrgf.eq.2 ) then
          mrgf = 0
          jaopen = 0
@@ -16682,7 +16688,7 @@ double precision :: value
          WRDKEY = 'FILE-MENU INSTRUCTIONS'
          CALL HELP(WRDKEY,NLEVEL)
       ELSE IF (KEY .EQ. 23) THEN   ! Esc
-         MRGF = -1
+         ierror = -1
          GOTO 9999
       ELSE IF (KEY .EQ. 27) THEN   ! Tab
          JATAB = JATAB + 1
@@ -16726,7 +16732,7 @@ double precision :: value
             if ( jaopen.eq.1 ) then
                CALL NEWFIL(MRGF,FILNAM)
             else
-               if ( mrgf.lt.0 ) then
+               if ( ierror /= 0 ) then
                   FILNAM = ''
                end if
             end if
@@ -17530,6 +17536,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     implicit none
     double precision :: dv, dv2
     integer :: i
+    integer :: ierror
     integer :: iblue
     integer :: igreen
     integer :: ihue
@@ -17556,7 +17563,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     FOLNAM = FILNAM
     IF (FILNAM(1:5) .EQ. '*.hls') THEN
        MINP   = 0
-       CALL FILEMENU(MINP,FOLNAM)
+       CALL FILEMENU(MINP,FOLNAM,ierror)
     ELSE
        k = len_trim(filnam)
        folnam(1:k) = filnam(1:k)

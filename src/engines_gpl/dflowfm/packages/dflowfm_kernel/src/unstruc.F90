@@ -46911,8 +46911,8 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
  Filnam = '*.pliz, *.xyz'
  select case (imake1d2dtype)
  case (I1D2DTP_1TO1) ! 0: HK
-    CALL FILEMENU(minp,FILNAM)
-    if (minp == -1) then
+    CALL FILEMENU(minp,FILNAM,ierr)
+    if (ierr == -1) then
        ierr = make1D2Dinternalnetlinks(xpl(1:npl), ypl(1:npl), zpl(1:npl))
     else if (index(filnam, '.pliz' ) > 0)  then
        call reapol (minp, 0)
