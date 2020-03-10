@@ -2306,7 +2306,6 @@ do i=1,nstr
          !use branchId, chainage
          npum = pstru%numlinks
          kep(npump+1:npump+npum) = pstru%linknumbers(1:npum)
-         !getLinkIndex(network%brs%branch(branchIndex), chainage)
       else
          call selectelset_internal_links(xz, yz, ndx, ln, lnx, kep(npump+1:numl), npum, LOCTP_POLYLINE_FILE, plifile)
       endif

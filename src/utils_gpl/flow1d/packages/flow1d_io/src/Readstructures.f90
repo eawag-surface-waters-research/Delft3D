@@ -465,7 +465,6 @@ module m_readstructures
             if (icross > 0) then
                sts%struct(istru)%culvert%pcross => crs%cross(icross)
             end if
-         ! TODO: why is pump administation missing?
          case (ST_ORIFICE)
             norifice = norifice + 1
             sts%orificeIndices(norifice) = istru

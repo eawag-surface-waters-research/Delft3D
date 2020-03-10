@@ -199,7 +199,7 @@ module m_1d_structures
       integer                                               :: numGates                 !< Total number of gates in this structure set. See indices array below.
       integer                                               :: numGeneralStructures     !< Total number of general structures in this structure set. See indices array below.
       integer                                               :: numUniWeirs              !< Total number of universal weirs in this structure set. See indices array below.
-      integer                                               :: numDambreaks              !< Total number of dambreaks in this structure set. See indices array below.
+      integer                                               :: numDambreaks             !< Total number of dambreaks in this structure set. See indices array below.
       integer, pointer, dimension(:)                        :: weirIndices              !< (numWeirs) indices of the weirs in the overall struct(:) array. Note: some may actually be of type ST_GENERAL_ST.
       integer, pointer, dimension(:)                        :: culvertIndices           !< (numCulverts) indices of the culverts in the overall struct(:) array.
       integer, pointer, dimension(:)                        :: pumpIndices              !< (numPumps) indices of the pumps in the overall struct(:) array.
