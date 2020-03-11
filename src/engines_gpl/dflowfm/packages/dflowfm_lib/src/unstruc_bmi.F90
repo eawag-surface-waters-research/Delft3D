@@ -1496,7 +1496,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
 
    integer :: iconst
    integer :: itrac
-   integer :: imeshid
+   integer :: k1
 
    ! The fortran name of the attribute name
    character(len=MAXSTRLEN) :: var_name
@@ -1765,8 +1765,9 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
             x = c_loc(qplat(item_index))
             return
          case("water_level")
-            imeshid = nnlat(n1latsg(item_index))
-            x = c_loc(s1(imeshid))
+            ! NOTE: Return the "point-value", not an area-averaged water level (in case of lateral polygons).
+            k1 = nnlat(n1latsg(item_index))
+            x = c_loc(s1(k1))
             return
       end select
    end select ! var_name
@@ -2138,6 +2139,8 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
       select case(field_index)
       case(1)
          field_name = "water_discharge"
+      case(2)
+         field_name = "water_level"
       case default
          return
       end select
