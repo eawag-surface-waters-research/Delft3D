@@ -819,7 +819,8 @@ module m_ec_filereader_read
 
                if (item%elementSetPtr%nCoordinates > 0) then
                   if ( issparse == 1 ) then
-                     call read_data_sparse(fileReaderPtr%fileHandle, varid, n_cols, n_rows, item%elementSetPtr%n_layers, timesndx, ia, ja, Ndatasize, fieldPtr%arr1dPtr, ierror)
+                     call read_data_sparse(fileReaderPtr%fileHandle, varid, n_cols, n_rows, item%elementSetPtr%n_layers, &
+                                           timesndx, fileReaderPtr%relndx, ia, ja, Ndatasize, fieldPtr%arr1dPtr, ierror)
                      valid_field = .true.
                   else
                      if (item%elementSetPtr%n_layers == 0) then 
@@ -2061,7 +2062,7 @@ module m_ec_filereader_read
        end subroutine strip_comment
        
 !     read data and store in CRS format
-      subroutine read_data_sparse(filehandle, varid, n_cols, n_rows, n_layers, timesndx, ia, ja, Ndatasize, arr1d, ierror)
+      subroutine read_data_sparse(filehandle, varid, n_cols, n_rows, n_layers, timesndx, relndx, ia, ja, Ndatasize, arr1d, ierror)
          use netcdf
          implicit none
          
@@ -2071,6 +2072,7 @@ module m_ec_filereader_read
          integer,                        intent(in)    :: n_rows      !< number of rows in input
          integer,                        intent(in)    :: n_layers    !< number of layers in input
          integer,                        intent(in)    :: timesndx    !< time index
+         integer,                        intent(in)    :: relndx      !< realization index in an ensemble
          integer,          dimension(:), intent(in)    :: ia          !< CRS sparsity pattern, startpointers
          integer,          dimension(:), intent(in)    :: ja          !< CRS sparsity pattern, column numbers
          integer,                        intent(in)    :: Ndatasize   !< dimension of sparse data
@@ -2144,6 +2146,9 @@ module m_ec_filereader_read
 !                 read data
                   start(1:2)   = (/ mcolmin(j), nrowmin /)
                   start(ndims) = timesndx
+                  if (relndx>0 .and. ndims>=5) then
+                     start(3) = relndx
+                  endif
                   if ( n_layers /= 0 ) then
                      start(ndims-1) = k
                   end if
