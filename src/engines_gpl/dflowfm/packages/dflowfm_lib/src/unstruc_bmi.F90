@@ -1496,6 +1496,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
 
    integer :: iconst
    integer :: itrac
+   integer :: imeshid
 
    ! The fortran name of the attribute name
    character(len=MAXSTRLEN) :: var_name
@@ -1762,6 +1763,10 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
       select case(field_name)
          case("water_discharge")
             x = c_loc(qplat(item_index))
+            return
+         case("water_level")
+            imeshid = nnlat(n1latsg(item_index))
+            x = c_loc(s1(imeshid))
             return
       end select
    end select ! var_name
