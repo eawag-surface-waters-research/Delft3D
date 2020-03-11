@@ -263,6 +263,12 @@ module m_ec_provider
                   ! todo: error handling with message
                   return
                end if
+               if (size(fileReaderPtr%dim_length)>=5) then
+                  if (fileReaderPtr%relndx>fileReaderPtr%dim_length(3)) then
+                     call setECMessage("ERROR: ec_provider::ecProviderInitializeFileReader: Number of realization is outside the ensemble size.")
+                     return        
+                  end if
+               end if
             end select
 
             if(present(dtnodal)) then
@@ -2358,7 +2364,7 @@ module m_ec_provider
          integer                                                 :: expectedLength
          character(len=:), allocatable                           :: nameVar         ! variable name in error message
          character(len=2)                                        :: cnum1, cnum2    ! 1st and 2nd number converted to string for error message
-         integer                                                 :: nrow, ncol, nlay
+         integer                                                 :: nrow, ncol, nlay, nrel
          !
          success = .false.
          itemPtr => null()
@@ -2729,7 +2735,14 @@ module m_ec_provider
                   return
                end if
 
-               dim_offset = merge(1, 0, realization_dimid > 0)
+               if (realization_dimid > 0) then
+                  dim_offset = 1
+                  nrel = fileReaderPtr%dim_length(dimids(1))
+               else
+                  dim_offset = 0
+                  nrel = 0
+               endif
+
                if (grid_type == elmSetType_samples) then
                   ncol = fileReaderPtr%dim_length(dimids(1))
                   nrow = 1

@@ -349,7 +349,7 @@ module m_ec_typedefs
       character(len=100), dimension(:), allocatable :: variable_names                !<Variable names by varid in a netcdf file 
 !     integer, dimension(:), allocatable            :: dim_varids                    !<For each dimension in NetCDF: id of the associated variable                               
 !     integer, dimension(:), allocatable            :: dim_length                    !<For each dimension in NetCDF: length
-      integer                                       :: relndx = -1                   !<Index of realization in an ensemble, for the reader
+      integer                                       :: relndx = 0                    !<Index of realization in an ensemble, for the reader
                                                                                      ! ignored if below zero or file is not an ensemble
       integer, dimension(:), pointer                :: dim_varids => null()          !<For each dimension in NetCDF: id of the associated variable                               
       integer, dimension(:), pointer                :: dim_length => null()          !<For each dimension in NetCDF: length
