@@ -11044,7 +11044,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  ! store the grid-based information in the cache file
  call klok(cpu_extra(1,36)) ! remainder
- call storeCachingFile(filename = md_ident, usecaching = md_usecaching)
+ call storeCachingFile(md_ident, md_usecaching)
 
 call writesomeinitialoutput()
 
@@ -12743,12 +12743,15 @@ subroutine writesomeinitialoutput()
  use m_save_ugrid_state
  use  m_xbeach_avgoutput, only: default_xbeach_avgoutput
  use m_ship
+ use unstruc_caching
  implicit none
 
     ! Only reset counters and other scalars, allocatables should be
     ! automatically reset elsewhere (e.g., allocateandset*, flow_geominit)
 
     call init_unstruc_netcdf()
+    
+    call default_caching()
 
     ! TODO: UNST-487: Add default_fourier + reset
     call resetModel()
@@ -46222,7 +46225,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     success = .false.
  endif
  if ( .not. success ) then
- call find_crossed_links_kdtree2(treeglob,NPL,XPL,YPL,2,Lnx,1,numcrossedLinks, iLink, iPol, dSL, ierror)
+    call find_crossed_links_kdtree2(treeglob,NPL,XPL,YPL,2,Lnx,1,numcrossedLinks, iLink, iPol, dSL, ierror)
     call cacheFixedWeirs( npl, xpl, ypl, numcrossedLinks, iLink, iPol, dSL )
  endif
  call klok(t_extra(2,3))

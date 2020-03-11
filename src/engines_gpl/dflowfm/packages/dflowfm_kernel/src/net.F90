@@ -15034,13 +15034,22 @@ subroutine obs_on_flowgeom(iobstype)
         n2 = numobs
     end if
 
-    if ( cacheRetrieved() ) then
-        call copyCachedObservations( cache_success )
+    ! Try to read normal (non-moving) stations from cache file
+    cache_success = .false.
+    if (iobstype == 0 .or. iobstype == 2) then
+       if ( cacheRetrieved() ) then
+          call copyCachedObservations( cache_success )
+       endif
+    end if
+
+    if (cache_success) then
+       ! When necessary, process also the moving observation points (which are not in cache file)
+       if ((iobstype == 1 .or. iobstype == 2) .and. nummovobs > 0) then
+          call find_flownode_for_obs(numobs+1, numobs+nummovobs)
+       end if
     else
-        cache_success = .false.
-    endif
-    if ( .not. cache_success ) then
-    call find_flownode_for_obs(n1, n2)
+       ! No cache, so process all requested observation points.
+       call find_flownode_for_obs(n1, n2)
     endif
 
     if (loglevel_StdOut == LEVEL_DEBUG) then

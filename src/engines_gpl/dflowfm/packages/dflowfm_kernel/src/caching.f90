@@ -30,7 +30,7 @@
 ! $HeadURL$
 
 ! NOTES:
-! - Observation points can be "moving" - does that have influence on the data that need to be cached?
+! - Observation points can be "moving" - these are excluded.
 ! - How about the global index to these items?
 !
 
@@ -39,9 +39,10 @@
 module unstruc_caching
     use precision
     use m_observations, only: numobs, xobs, yobs, locTpObs, kobs
-    use m_monitoring_crosssections, only: crs, tcrs
+    use m_monitoring_crosssections, only: crs, tcrs, deallocCrossSections
     !use m_crspath, only: tcrspath
     use md5_checksum
+    use m_alloc
 
     implicit none
 
@@ -76,20 +77,44 @@ module unstruc_caching
     type(tcrs), dimension(:), allocatable               :: cache_cross_sections
 
 
-    character(len=30), private :: version_string = "D-Flow FM, cache file, 1.0"
+    character(len=30), parameter, private :: version_string = "D-Flow FM, cache file, 1.0"
     character(len=14), private :: md5current
 
 
 
 contains
+!> Sets ALL (scalar) variables in this module to their default values.
+subroutine default_caching()
+
+   cache_success = .false.
+
+   if (allocated(cache_xobs))        deallocate(cache_xobs)
+   if (allocated(cache_yobs))        deallocate(cache_yobs)
+   if (allocated(cache_xpl_fixed))   deallocate(cache_xpl_fixed)
+   if (allocated(cache_ypl_fixed))   deallocate(cache_ypl_fixed)
+   if (allocated(cache_dsl_fixed))   deallocate(cache_dsl_fixed)
+   if (allocated(cache_locTpObs))    deallocate(cache_locTpObs)
+   if (allocated(cache_kobs))        deallocate(cache_kobs)
+   if (allocated(cache_ilink_fixed)) deallocate(cache_ilink_fixed)
+   if (allocated(cache_ipol_fixed))  deallocate(cache_ipol_fixed)
+   if (allocated(cache_linklist))    deallocate(cache_linklist)
+   if (allocated(cache_ipol))        deallocate(cache_ipol)
+
+   if (allocated(cache_cross_sections)) call deallocCrossSections(cache_cross_sections)
+
+   md5current = ''
+
+end subroutine default_caching
+
+
 !> Check that the caching file contained compatible information
 logical function cacheRetrieved()
     cacheRetrieved = cache_success
 end function cacheRetrieved
 
-!> Load the information from the caching file - if any
-subroutine loadCachingFile( filename, netfile, usecaching )
-    character(len=*), intent(in   ) :: filename      !< Name of MDU file (used to construct the name of the caching file)
+!> Load the information from the caching file - if any.
+subroutine loadCachingFile( basename, netfile, usecaching )
+    character(len=*), intent(in   ) :: basename      !< Basename to construct the name of the caching file (typically md_ident).
     character(len=*), intent(in   ) :: netfile       !< Full name of the network file
     integer,          intent(in   ) :: usecaching    !< Use the cache file if possible (1) or not (0)
 
@@ -101,6 +126,7 @@ subroutine loadCachingFile( filename, netfile, usecaching )
     character(len=14) :: md5checksum
     logical :: okay
     logical :: success
+    character(len=256) :: filename
 
     cache_success = .false.
 
@@ -108,15 +134,9 @@ subroutine loadCachingFile( filename, netfile, usecaching )
         return
     endif
 
-    !
-    ! Allocate the arrays to zero length
-    !
-    if (.not. allocated(cache_xobs)) then
-       allocate( cache_xobs(0), cache_yobs(0), cache_xpl_fixed(0), cache_ypl_fixed(0), cache_dsl_fixed(0), &
-                 cache_locTpObs(0), cache_kobs(0), cache_ilink_fixed(0), cache_ipol_fixed(0) )
-    endif
+    filename = trim(basename) // '.cache'
 
-    open( newunit = lun, file = trim(filename) // ".cache", status = "old", access = "stream", iostat = ierr )
+    open( newunit = lun, file = trim(filename), status = "old", access = "stream", iostat = ierr )
 
     !
     ! Apparently there is no caching file, so return without further processing
@@ -168,9 +188,11 @@ subroutine loadCachingFile( filename, netfile, usecaching )
         return
     endif
 
-    deallocate( cache_xobs, cache_yobs, cache_locTpObs, cache_kobs )
 
-    allocate( cache_xobs(number), cache_yobs(number), cache_kobs(number), cache_locTpObs(number) )
+    call realloc(cache_xobs,     number, keepExisting=.false.)
+    call realloc(cache_yobs,     number, keepExisting=.false.)
+    call realloc(cache_locTpObs, number, keepExisting=.false.)
+    call realloc(cache_kobs,     number, keepExisting=.false.)
 
     if ( number > 0 ) then
         read( lun, iostat = ierr ) cache_xobs      ; okay = ierr == 0
@@ -186,7 +208,7 @@ subroutine loadCachingFile( filename, netfile, usecaching )
 
     !
     ! Load the information on the fixed weirs:
-    ! Copy the node numbers when successful
+    ! Copy the link numbers when successful
     !
     read( lun, iostat = ierr ) key, number, number_links
 
@@ -195,11 +217,12 @@ subroutine loadCachingFile( filename, netfile, usecaching )
         return
     endif
 
-    deallocate( cache_xpl_fixed, cache_ypl_fixed, cache_ilink_fixed, cache_ipol_fixed, cache_dsl_fixed )
-
-    allocate( cache_xpl_fixed(number), cache_ypl_fixed(number) )
-    allocate( cache_ilink_fixed(number_links), cache_ipol_fixed(number_links), cache_dsl_fixed(number_links) )
-
+    call realloc(cache_xpl_fixed,   number,       keepExisting=.false.)
+    call realloc(cache_ypl_fixed,   number,       keepExisting=.false.)
+    call realloc(cache_ilink_fixed, number_links, keepExisting=.false.)
+    call realloc(cache_ipol_fixed,  number_links, keepExisting=.false.)
+    call realloc(cache_dsl_fixed,   number_links, keepExisting=.false.)
+    
     if ( number > 0 ) then
         read( lun, iostat = ierr ) cache_xpl_fixed   ; okay = ierr == 0
         read( lun, iostat = ierr ) cache_ypl_fixed   ; okay = okay .and. ierr == 0
@@ -241,7 +264,7 @@ subroutine loadCachingFile( filename, netfile, usecaching )
 
 end subroutine loadCachingFile
 
-!> Load cached cross sections from a caching file
+!> Load cached cross sections from a caching file.
 subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
     integer,                  intent(in   ) :: lun       !< LU-number of the caching file
     integer, dimension(:),    intent(  out) :: linklist  !< Cached list of crossed flow links
@@ -293,7 +316,7 @@ subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
     enddo
 end subroutine loadCachedSections
 
-!> Save the link list of crossed flow links for later storage in the caching file
+!> Save the link list of crossed flow links for later storage in the caching file.
 subroutine saveLinklist( length, linklist, ipol )
     integer,                  intent(in   ) :: length    !< Length of the list of crossed flow links
     integer, dimension(:),    intent(in   ) :: linklist  !< List of crossed flow links to be saved
@@ -303,13 +326,14 @@ subroutine saveLinklist( length, linklist, ipol )
     cache_ipol     = ipol(1:length)
 end subroutine saveLinklist
 
-!> Store the grid-based information in the caching file
-subroutine storeCachingFile( filename, usecaching )
-    character(len=*), intent(in   ) :: filename            !< Name of the MDU file (to construct the name of the caching file)
+!> Store the grid-based information in the caching file.
+subroutine storeCachingFile( basename, usecaching )
+    character(len=*), intent(in   ) :: basename            !< Basename to construct the name of the caching file (typically md_ident).
     integer,          intent(in   ) :: usecaching          !< Write the caching file (1) or not (0) - in accordance with the user setting
 
     integer :: lun
     integer :: ierr
+    character(len=256) :: filename
 
     cache_success = .false.
 
@@ -319,13 +343,15 @@ subroutine storeCachingFile( filename, usecaching )
     if ( usecaching /= 1 ) then
         return
     endif
+    
+    filename = trim(basename) // '.cache'
 
-    open( newunit = lun, file = trim(filename) // ".cache", access = "stream", status = "old", action = 'read',  iostat = ierr )
+    open( newunit = lun, file = trim(filename), access = "stream", status = "old", action = 'read',  iostat = ierr )
 
     if ( ierr == 0 ) then
         close( lun, status = "delete" )
     endif
-    open( newunit = lun, file = trim(filename) // ".cache", access = "stream" )
+    open( newunit = lun, file = trim(filename), access = "stream" )
 
     !
     ! Store version string and checksum (already determined at start-up)
@@ -362,12 +388,12 @@ subroutine storeCachingFile( filename, usecaching )
 
 end subroutine storeCachingFile
 
-!> Store cross sections to a caching file
+!> Store cross sections to a caching file.
 subroutine storeSections( lun, sections, linklist, ipol )
-    integer, intent(in)                  :: lun       !< LU-number of the caching file
-    type(tcrs), dimension(:), intent(in) :: sections  !< Array of cross-sections to be filled
-    integer, dimension(:), intent(in)    :: linklist  !< List of crossed flow links
-    integer, dimension(:), intent(in)    :: ipol      !< Polygon administration
+    integer,                  intent(in   ) :: lun       !< LU-number of the caching file
+    type(tcrs), dimension(:), intent(in   ) :: sections  !< Array of cross-sections to be filled
+    integer, dimension(:),    intent(in   ) :: linklist  !< List of crossed flow links
+    integer, dimension(:),    intent(in   ) :: ipol      !< Polygon administration
 
     integer                              :: i, np, nlink
 
@@ -396,7 +422,7 @@ subroutine storeSections( lun, sections, linklist, ipol )
     enddo
 end subroutine storeSections
 
-!> Copy the cached network information for observation points
+!> Copy the cached network information for observation points.
 subroutine copyCachedObservations( success )
     logical, intent(  out) :: success             !< The cached information was compatible if true
 
@@ -405,7 +431,9 @@ subroutine copyCachedObservations( success )
         !
         ! Check the number of observations
         !
-        if ( numobs /= size(cache_xobs) ) then
+        if (.not. allocated(cache_xobs)) then
+            return
+        else if ( numobs /= size(cache_xobs) ) then
             return
         endif
         !
@@ -475,24 +503,25 @@ subroutine copyCachedCrossSections( linklist, ipol, success )
     endif
 end subroutine copyCachedCrossSections
 
-!> Copy the cached information on fixed weirs
+!> Copy the cached information on fixed weirs.
 subroutine copyCachedFixedWeirs( npl, xpl, ypl, number_links, iLink, iPol, dSL, success )
-    integer, intent(in   )                         :: npl                !< Number of vertices in the polygons making up the weirs
-    double precision, dimension(:), intent(in   )  :: xpl                !< X-coordinates of the vertices for the weirs
-    double precision, dimension(:), intent(in   )  :: ypl                !< Y-coordinates of the vertices for the weirs
-
-    integer, intent(  out)                         :: number_links       !< Number of links that was cached
-    double precision, dimension(:), intent(  out)  :: dSL                !< Distances along the links that were cached
-    integer, dimension(:), intent(  out)           :: iLink              !< Cached lInkage information
-    integer, dimension(:), intent(  out)           :: iPol               !< Cached polygon information
-    logical, intent(  out)                         :: success            !< The cached information was compatible if true
+    integer,                        intent(in   ) :: npl                !< Number of points in the polylines making up the weirs
+    double precision, dimension(:), intent(in   ) :: xpl                !< X-coordinates of the polyline points for the weirs
+    double precision, dimension(:), intent(in   ) :: ypl                !< Y-coordinates of the polyline points for the weirs
+    integer,                        intent(  out) :: number_links       !< Number of flow links that was cached
+    double precision, dimension(:), intent(  out) :: dSL                !< Intersection distance of each flow link on polyline segments that were cached
+    integer, dimension(:),          intent(  out) :: iLink              !< Flow link numbers that were cached
+    integer, dimension(:),          intent(  out) :: iPol               !< Intersected polyline segment numbers that were cached
+    logical,                        intent(  out) :: success            !< The cached information was compatible if true
 
     success = .false.
     if ( cache_success ) then
         !
         ! Check the number of coordinate pairs
         !
-        if ( npl /= size(cache_xpl_fixed) ) then
+        if (.not. allocated(cache_xpl_fixed)) then
+            return
+        else if ( npl /= size(cache_xpl_fixed) ) then
             return
         endif
         !
@@ -511,15 +540,14 @@ end subroutine copyCachedFixedWeirs
 !> cacheFixedWeirs:
 !>     The arrays for fixed weirs are partly local - they do not reside in a
 !>     module, so explicitly store them when we have the actual data
-!
 subroutine cacheFixedWeirs( npl, xpl, ypl, number_links, iLink, iPol, dSL )
-    integer, intent(in   )                        :: npl             !< Number of vertices in the polygons making up the weirs
-    integer, intent(in   )                        :: number_links    !< Number of links that is to be cached
-    double precision, dimension(:), intent(in   ) :: xpl             !< X-coordinates of the vertices for the weirs
-    double precision, dimension(:), intent(in   ) :: ypl             !< Y-coordinates of the vertices for the weirs
-    double precision, dimension(:), intent(in   ) :: dSL             !< Distances along the links that are to be cached
-    integer, dimension(:), intent(in   )          :: iLink           !< LInkage information to be cached
-    integer, dimension(:), intent(in   )          :: iPol            !< Polygon information to be cached
+    integer,                        intent(in   ) :: npl             !< Number of points in the polylines making up the weirs
+    integer,                        intent(in   ) :: number_links    !< Number of flow links that is to be cached
+    double precision, dimension(:), intent(in   ) :: xpl             !< X-coordinates of the polyline points for the weirs
+    double precision, dimension(:), intent(in   ) :: ypl             !< Y-coordinates of the polyline points for the weirs
+    double precision, dimension(:), intent(in   ) :: dSL             !< Intersection distance of each flow link on polyline segments that are to be cached
+    integer, dimension(:),          intent(in   ) :: iLink           !< Flow link numbers to be cached
+    integer, dimension(:),          intent(in   ) :: iPol            !< Intersected polyline segment number to be cached
 
     cache_xpl_fixed   = xpl(1:npl)
     cache_ypl_fixed   = ypl(1:npl)
