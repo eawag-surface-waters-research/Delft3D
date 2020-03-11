@@ -1322,7 +1322,7 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
          endif
       end if
 
-      if (id_var(1) > 0 .and. lnx1d > 0) then
+      if (id_var(4) > 0 .and. lnx1d > 0) then
          ! 1d2d contacts
          if(size(id_tsp%contactstoln,1).gt.0) then
             ierr = nf90_put_var(ncid, id_var(4), values(id_tsp%contactstoln(:)), start = (/ 1, id_tsp%idx_curtime /))
