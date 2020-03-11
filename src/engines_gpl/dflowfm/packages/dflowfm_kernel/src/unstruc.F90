@@ -27065,6 +27065,9 @@ endif
 
        if (jased>0)  zws(kb-1) = bl(n)
        h0        = s1(n) - zws(kb-1) ! bl(n)
+       !if (h0 < epshs) then 
+       !    ktop(n) = 1 ; cycle
+       !endif 
        do k = 1, kmxn(n)
           kk       = kb + k - 1
           zws(kk)  = zws(kb-1) + h0*zslay(k,1)
@@ -27087,6 +27090,12 @@ endif
     do n  = 1,ndx
 
        kb  = kbot(n)
+
+       !if (jased>0)  zws(kb-1) = bl(n)
+       !h0        = s1(n) - zws(kb-1) ! bl(n)
+       !if (h0 < epshs) then 
+       ! ktop(n) = 1 ; cycle
+       !endif 
 
        ktx = kb + kmxn(n) - 1
        call getzlayerindices(n,nlayb,nrlay)
@@ -30843,7 +30852,12 @@ do LL = 1,lnxi
  double precision    :: fzu , fzd, alf, pu, pd, gr, dzz, rvn
 
  call getkbotktop(n,kb,kt)
- if (kt < kb) return
+ ! if (kt < kb) return
+ if (zws(kt) - zws(kb-1) < epshu) then 
+     grn(kb:kt)  = 0d0
+     rvdn(kb:kt) = 1d-10
+     return
+ endif
 
  if (kt > kb) then
     do k = kb, kt-1
