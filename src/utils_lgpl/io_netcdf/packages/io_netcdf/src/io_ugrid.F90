@@ -4490,7 +4490,14 @@ function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, n
    if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'could not read the branch dimension')
    end if
-   
+
+   if (nmeshpoints < size(nodebranchidx) .or. nmeshpoints < size(nodeoffset)) then
+      write (msgbuf, '(a,i0,a,i0,a)') 'Cannot write 1D mesh points: number of points in mesh definition (',nmeshpoints, &
+         ') differs from input array size (', max(size(nodebranchidx), size(nodeoffset)), ').'
+      call err_flush()
+      return
+   end if
+
    !we have not defined the start_index, so when we put the variable it must be zero based
    allocate(shiftednodebranchidx(size(nodebranchidx)))
    shiftednodebranchidx = nodebranchidx
