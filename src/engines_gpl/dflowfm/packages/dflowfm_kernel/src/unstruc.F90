@@ -41982,6 +41982,9 @@ end function is_1d_boundary_candidate
 
  call setzminmax(); call setsigmabnds() ! our side of preparation for 3D ec module
 
+ ! Start processing ext files, start with success.
+ success = .true.
+
  ! First initialize new-style ExtForceFileNew quantities.
  if (len_trim(md_extfile_new) > 0) then
     success = initboundaryblocksforcings(md_extfile_new)
