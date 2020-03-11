@@ -34805,7 +34805,7 @@ endif
    write (*,*) '      in a file called ''cutcellpolygons.lst''.'
    write (*,*) ' '
    write (*,*) ' --no-geom-cache'
-   write (*,*) '      If you do not want to use the cache file with geometry information'
+   write (*,*) '      Do not load nor save cache file with geometry information.'
    write (*,*) ' '
    write (*,*) '  -q, --quiet'
    write (*,*) '      Minimal output: Only (fatal) errors are shown.'

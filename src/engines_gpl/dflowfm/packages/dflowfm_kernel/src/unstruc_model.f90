@@ -373,6 +373,9 @@ use unstruc_channel_flow
     md_part3Dtype = 0
 
     md_cfgfile = ' '
+
+    md_usecaching = 0      !< Use the caching file if it exists (1) or not (0)
+
     ! The following settings are intentionally *not* reset for each model.
     !md_snapshot_seqnr  = 0 ! not handy in practice, it destroys previous plots without warning
     !md_japartition     = 0   !< partition (1) or not (0)
@@ -787,8 +790,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'IniFieldFile',     md_inifieldfile, success)
 
     call prop_get_integer( md_ptr, 'geometry', 'UseCaching',       md_usecaching,   success)
-    if ( iarg_usecaching == 0 ) then
-        md_usecaching = 0
+   ! Merge cmd line switches with mdu file settings
+    if ( iarg_usecaching /= -1 ) then
+        md_usecaching = iarg_usecaching
     endif
 
     call prop_get_string ( md_ptr, 'geometry', 'FixedWeirFile',    md_fixedweirfile, success)
@@ -2288,7 +2292,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', 'ProfdefFile',      trim(md_profdeffile),   'Channel profile definition file *_profdefinition.def with definition for all profile numbers'  )
     call prop_set(prop_ptr, 'geometry', 'ProfdefxyzFile',   trim(md_profdefxyzfile),'Channel profile definition file _profdefinition.def with definition for all profile numbers'  )
     call prop_set(prop_ptr, 'geometry', 'IniFieldFile',     trim(md_inifieldfile),  'Initial values and parameter fields file'  )
-    call prop_set(prop_ptr, 'geometry', 'UseCaching',       md_usecaching,          'Use caching for geometrical/network-related items (1) or not (0)'  )
+    call prop_set(prop_ptr, 'geometry', 'UseCaching',       md_usecaching,          'Use caching for geometrical/network-related items (0: no, 1: yes)')
 
 
     call prop_set(prop_ptr, 'geometry', 'Uniformwidth1D',   wu1Duni,                'Uniform width for channel profiles not specified by profloc')
