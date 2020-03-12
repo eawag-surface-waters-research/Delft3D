@@ -11,7 +11,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="rem call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="dll\$(ConfigurationName)" IntermediateDirectory="dll\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
@@ -31,7 +31,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="rem call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="dll\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="dll\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
@@ -46,7 +46,8 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>
-		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+		<File RelativePath=".\include\version_number.rc"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\ec_module_api.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
