@@ -12440,6 +12440,32 @@ subroutine writesomeinitialoutput()
     msgbuf = ' ' ; call msg_flush()
  enddo
 
+ cpu_extra_label       = ' '
+ cpu_extra_label(1:45) = [ 'Basic steps         ', 'Wave input          ', 'Internal links      ', &
+                           'Flow geometry       ', 'Bobsongullies       ', 'Wave initialisation ', &
+                           'Flow grid           ', 'Bed forms init (1)  ', '1D rougnhess        ', &
+                           'Sed/mor             ', 'Bed forms init (2)  ', 'Adm. vertical       ', &
+                           'Net link tree 0     ', 'Flow trachy init    ', 'Calibration init    ', &
+                           'Net link tree 1     ', 'Save 1d             ', 'WAQ processes init  ', &
+                           'Transport init      ', 'Part init           ', 'Observations init   ', &
+                           'Structures init     ', 'Flow init           ', 'MBA init            ', &
+                           'Update MOR width    ', 'Dredging init       ', 'Xbeach init         ', &
+                           'Observations init 2 ', 'Structure parameters', 'Trachy update       ', &
+                           'Set fcru MOR        ', 'Flow init           ', 'Fourier init        ', &
+                           'MDU file pointer    ', 'Flowgeom            ', 'Remainder           ', &
+                           'Flow alloc          ', 'initime setbnd      ', 'initime sethuau     ', &
+                           'initime setdt       ', 'initime advec       ', 'initime u0u1        ', &
+                           'initime setumod     ', 'initime cfuhi       ', 'initime structactual']
+
+ do i = 1,size(cpu_extra,2)
+     if ( cpu_extra_label(i) /=  ' '  ) then
+        if ( cpu_extra(2,i) - cpu_extra(1,i) > 0.01d0) then ! only the relevant
+           write(msgbuf,'(a,a,F25.10)') 'extra timer:' , cpu_extra_label(i), cpu_extra(2,i) - cpu_extra(1,i)      ; call msg_flush()
+        endif
+     endif
+ enddo
+
+
 ! use current time instead of tstop_user in statistics
  tstop = time1
  if ( tstop.ne.tstop_user ) then
@@ -12475,28 +12501,6 @@ subroutine writesomeinitialoutput()
  write(msgbuf,'(a,F25.10)') 'total computation time (s)  :' , cpuall(3) - cpuall(1)      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , cpuall(2) - cpuall(1)      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , cpuall(3) - cpuall(2)      ; call msg_flush()
- cpu_extra_label       = ' '
- cpu_extra_label(1:45) = [ 'Basic steps         ', 'Wave input          ', 'Internal links      ', &
-                           'Flow geometry       ', 'Bobsongullies       ', 'Wave initialisation ', &
-                           'Flow grid           ', 'Bed forms init (1)  ', '1D rougnhess        ', &
-                           'Sed/mor             ', 'Bed forms init (2)  ', 'Adm. vertical       ', &
-                           'Net link tree 0     ', 'Flow trachy init    ', 'Calibration init    ', &
-                           'Net link tree 1     ', 'Save 1d             ', 'WAQ processes init  ', &
-                           'Transport init      ', 'Part init           ', 'Observations init   ', &
-                           'Structures init     ', 'Flow init           ', 'MBA init            ', &
-                           'Update MOR width    ', 'Dredging init       ', 'Xbeach init         ', &
-                           'Observations init 2 ', 'Structure parameters', 'Trachy update       ', &
-                           'Set fcru MOR        ', 'Flow init           ', 'Fourier init        ', &
-                           'MDU file pointer    ', 'Flowgeom            ', 'Remainder           ', &
-                           'Flow alloc          ', 'initime setbnd      ', 'initime sethuau     ', &
-                           'initime setdt       ', 'initime advec       ', 'initime u0u1        ', &
-                           'initime setumod     ', 'initime cfuhi       ', 'initime structactual']
-
- do i = 1,size(cpu_extra,2)
-     if ( cpu_extra_label(i) /=  ' ' ) then
-         write(msgbuf,'(a,a,F25.10)') 'extra timer:' , cpu_extra_label(i), cpu_extra(2,i) - cpu_extra(1,i)      ; call msg_flush()
-     endif
- enddo
 
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
@@ -12523,11 +12527,13 @@ subroutine writesomeinitialoutput()
        write(msgbuf,'(a,F25.10)') 'time processes [s]         :' , gettimer(1,IFMWAQ)
        call msg_flush()
     endif
+    if (idebug > 0) then
     write(msgbuf,'(a,F25.10)') 'time debug     [s]         :' , gettimer(1,IDEBUG)
     call msg_flush()
-
+    endif
+    if (jafilter > 0) then
     write(msgbuf,'(a,F25.10)') 'time filter coeff.      [s]:' , gettimer(1,IFILT_COEF)
-    call msg_flush()
+    call msg_flush()                                   
     write(msgbuf,'(a,F25.10)') 'time filter solve       [s]:' , gettimer(1,IFILT_SOLV)
     call msg_flush()
     write(msgbuf,'(a,F25.10)') 'time filter cnstr. mat. [s]:' , gettimer(1,IFILT_MAT)
@@ -12538,6 +12544,7 @@ subroutine writesomeinitialoutput()
     call msg_flush()
     write(msgbuf,'(a,F25.10)') 'time filter             [s]:' , gettimer(1,IFILT)
     call msg_flush()
+    endif
  end if
 
  do k = 1,3
@@ -25984,9 +25991,9 @@ end do
                     zmx  = Floorlevtoplay
                  else
                     zmx  = Floorlevtoplay + dztop
+                 endif
+              endif
            endif
-        endif
-        endif
         endif
 
         if (dztopuniabovez == dmiss) then

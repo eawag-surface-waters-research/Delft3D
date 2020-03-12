@@ -186,6 +186,9 @@ subroutine update_constituents(jarhoonly)
 
       if ( kmx.lt.1 ) then   ! 2D, call to 3D as well for now
          call solve_2D(NUMCONST, Ndkx, Lnkx, vol1, kbot, ktop, Lbot, Ltop, sumhorflux, fluxver, const_sour, const_sink, nsubsteps, jaupdate, ndeltasteps, constituents, rhs)
+         if (jalimitdiff == 3) then
+            call diffusionimplicit2D()
+         endif  
       else
          call comp_fluxver( NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, ktop, constituents, nsubsteps, jaupdate, ndeltasteps, fluxver, wsf)
 
@@ -265,6 +268,43 @@ do k = 1,ndkx
    enddo  
 enddo
 end subroutine decaytracers 
+
+subroutine diffusionimplicit2D()
+use m_transport
+use m_flowgeom
+use m_flow
+use m_flowtimes
+use m_reduce
+double precision :: ddx, difcoeff
+
+do i=1,numconst
+
+   bbr = vol1*dti ; ccr = 0d0
+   do L=1,lnx
+      k1 = ln(1,L) ; k2 = ln(2,L)  
+      if (jadiusp == 1) then 
+          diuspL = diusp(LL)
+      else
+          diuspL = dicouv
+      endif 
+      difcoeff    = sigdifi(i)*viu(L) + difsedu(i) + diuspL   
+      ddx         = dxiau(L)*difcoeff  
+      bbr(k1)     = bbr(k1)     + ddx 
+      bbr(k2)     = bbr(k2)     + ddx 
+      ccr(lv2(L)) = ccr(lv2(L)) - ddx
+   enddo  
+   do n = 1,ndx 
+      workx(n) = constituents(i,n)  
+   enddo 
+   ddr = workx*vol1*dti 
+   call solve_matrix(workx,ndx,itsol)
+   do n = 1,ndx 
+      constituents(i,n) = workx(n)   
+   enddo   
+
+enddo
+
+end subroutine diffusionimplicit2D 
 
 
 !> compute horizontal transport fluxes at flowlink
@@ -528,7 +568,7 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
 !  END DEBUG
 
 !  diffusion
-   if (dicouv >= 0d0) then
+   if (dicouv >= 0d0 .and. jalimitdiff .ne. 3) then
       
       !$OMP PARALLEL DO                             &
       !$OMP PRIVATE(LL,dfac1,dfac2,Lb,Lt,L,k1,k2,fluxfacMaxL,fluxfacMaxR,j,difcoeff,fluxfac,diuspL) &
@@ -1319,6 +1359,10 @@ subroutine ini_transport()
    case ( 2 )
 !     no limitation of transport time step due to diffusion, and no limitation of diffusion 
       jalimitdiff = 0
+      jalimitdtdiff = 0
+   case ( 3 )
+!     only for 2D, implicit  
+      jalimitdiff = 3
       jalimitdtdiff = 0
    case default   ! as 0
       jalimitdiff = 1

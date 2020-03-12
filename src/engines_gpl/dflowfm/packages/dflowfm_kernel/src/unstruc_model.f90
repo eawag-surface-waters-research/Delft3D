@@ -935,9 +935,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double( md_ptr, 'numerics', 'CFLMax'          , cflmx)
     !call prop_get_double( md_ptr, 'numerics', 'CFLWaveFrac'     , cflw)
     call prop_get_integer(md_ptr, 'numerics', 'AdvecType'       , iadvec)
-    !if (Layertype > 1) then
-    !   iadvec = 33 ; iadvec1D = 33
-    !endif
+    if (Layertype > 1) then
+       iadvec = 33 ; iadvec1D = 33
+    endif
     call prop_get_integer(md_ptr, 'numerics', 'TimeStepType'    , itstep)
 
     maxNonlinearIterations = 100
@@ -2517,7 +2517,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'numerics', 'TransportMethod', jatransportmodule,   'Transport method (0: Herman''s method, 1: transport module)')
     if (writeall .or. jatransportmodule == 1) then
        call prop_set(prop_ptr, 'numerics', 'TransportTimestepping', jaLts,   'Timestepping method in Transport module, 0 = global, 1 = local (default) ')
-       call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestep', jatransportautotimestepdiff,   'Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion')
+       call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion, 3=implicit (only 2D)')
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
@@ -3025,11 +3025,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'time', 'TStop',              tstop_user/tfac,        'Stop  time w.r.t. RefDate (in TUnit)')
 
     if (len_trim(Startdatetime) > 0) then
-    call prop_set(prop_ptr, 'time', 'Startdatetime', trim(Startdatetime),  'Computation Startdatetime (yyyymmddhhmmss)')
+    call prop_set(prop_ptr, 'time', 'Startdatetime', trim(Startdatetime),  'Computation Startdatetime (yyyymmddhhmmss), when specified, overrides Tstart')
     endif
 
     if (len_trim(Stopdatetime) > 0) then
-    call prop_set(prop_ptr, 'time', 'Stopdatetime',  trim(Stopdatetime),   'Computation Stopdatetime  (yyyymmddhhmmss)')
+    call prop_set(prop_ptr, 'time', 'Stopdatetime',  trim(Stopdatetime),   'Computation Stopdatetime  (yyyymmddhhmmss), when specified, overrides Tstop')
     endif
 
 
