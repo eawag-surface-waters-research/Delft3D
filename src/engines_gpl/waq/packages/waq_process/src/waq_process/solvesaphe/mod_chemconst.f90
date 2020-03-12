@@ -24,6 +24,7 @@
 MODULE MOD_CHEMCONST
 
 USE MOD_PRECISION
+USE PHYSICALCONSTS
 
 IMPLICIT NONE
 
@@ -59,7 +60,7 @@ REAL(KIND=wp), PARAMETER, PRIVATE :: gasconst_bar_cm3_o_mol_k = 83.14510_wp ! li
 ! 0 degrees centigrade in Kelvin
 ! ------------------------------
 
-REAL(KIND=wp), PARAMETER, PRIVATE :: t_k_zerodegc = 273.15_wp ! Handbook (2007)
+REAL(KIND=wp), PARAMETER, PRIVATE :: t_k_zerodegc = CtoKelvin ! Handbook (2007)
 
 
 ! --------------------------------------------------------------

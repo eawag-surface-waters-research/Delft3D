@@ -60,6 +60,7 @@
 
 !     Name     Type   Library
 !     ------   -----  ------------
+      USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
 
       REAL     PMSA  ( * ) , FL    (*)
@@ -80,7 +81,7 @@
      +            CRIT1  =     1.9    ,
      +            CRIT2  =     5.0    ,
      +            E      =     2.718  ,
-     +            KELVIN =   273.15   ,
+     +            KELVIN =   real(CtoKelvin),
      +            VCMIN  =     0.001  ,
      +            C11    =     1.293  ,
      +            C12    =     0.00367,

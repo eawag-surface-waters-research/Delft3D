@@ -85,6 +85,7 @@
 !
       USE MOD_CHEMCONST
       USE MOD_ACBW_PHSOLVERS
+      USE PHYSICALCONSTS, ONLY: CtoKelvin
 
       IMPLICIT NONE
       
@@ -111,7 +112,7 @@
       REAL, PARAMETER :: CM3TOM3       =    1.0E-6
       REAL, PARAMETER :: ATMTOMICROATM =    1.0E+6
       REAL, PARAMETER :: ATMTOPA       =    101325.0
-      REAL, PARAMETER :: KELVIN        =    273.15
+      REAL, PARAMETER :: KELVIN        =    real(CtoKelvin)
       REAL, PARAMETER :: R             =    8.314
 
       

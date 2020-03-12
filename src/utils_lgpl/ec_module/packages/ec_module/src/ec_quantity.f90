@@ -166,6 +166,7 @@ module m_ec_quantity
       function ecQuantitySetUnitsFillScaleOffsetFromNcidVarid(instancePtr, quantityId, ncid, varid) result(success)
       use netcdf
       use string_module
+      use physicalconsts, only : CtoKelvin
          implicit none
          logical                               :: success     !< function status
          type(tEcInstance), pointer            :: instancePtr !< intent(in)
@@ -220,7 +221,7 @@ module m_ec_quantity
 
          if (units == 'K' .or. units == 'KELVIN') then
             ! convert Kelvin to degrees Celsius (kernel expects degrees Celsius)
-            add_offset = add_offset - 273.15_hp
+            add_offset = add_offset - CtoKelvin
          end if
 
          success = .true.

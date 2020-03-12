@@ -60,6 +60,7 @@
 
 !     Name     Type   Library
 !     ------   -----  ------------
+      USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
 
       REAL     PMSA  ( * ) , FL    (*)
@@ -69,7 +70,7 @@
 !     Local declarations, constants in source
 !
       PARAMETER ( MC     =    12.0    ,  MCO2 = 44.0 ,
-     +           MHCO3  =    61.0    ,  M3TOL = 1.0E-3, KELVIN = 273.15)
+     +           MHCO3  =    61.0    ,  M3TOL = 1.0E-3, KELVIN = real(CtoKelvin))
       integer, save :: nr_mes = 0     ! message count negative total carbonate
       integer, save :: nrmes2 = 0     ! message count negative salinity
       integer, save :: nrmes3 = 0     ! message count high salinity

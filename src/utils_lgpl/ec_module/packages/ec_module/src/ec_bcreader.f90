@@ -7,6 +7,7 @@ module m_ec_bcreader
   use m_alloc
   use multi_file_io
   use string_module
+  use physicalconsts, only : CtoKelvin
   implicit none
 
   private
@@ -559,7 +560,7 @@ contains
 
     if (bc%quantity%unit == 'K' .or. bc%quantity%unit == 'KELVIN' .or. bc%quantity%unit == 'Kelvin') then
        ! convert Kelvin to degrees Celsius (kernel expects degrees Celsius)
-       bc%quantity%offset = bc%quantity%offset - 273.15_hp
+       bc%quantity%offset = bc%quantity%offset - CtoKelvin
     endif
 
     ! Fill bc%quantity%col2elm(nq) which holds the mapping of columns in the file to vector positions

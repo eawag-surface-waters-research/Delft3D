@@ -252,6 +252,7 @@ end function qsun_nominal
 
 
    subroutine default_heatfluxes()
+      use physicalconsts, only : CtoKelvin
       tempPars%rhoair         = 1.205
       tempPars%alfa_albedo    = 0.06d0
       tempPars%S_solar        = 1368d0
@@ -271,7 +272,7 @@ end function qsun_nominal
       tempPars%c_frconv       = 0.14d0
       tempPars%nu_air         = 16.0d-6
       tempPars%sigma_prandtl  = 0.7d0
-      tempPars%tkelvn         = 273.15d0
+      tempPars%tkelvn         = CtoKelvin
    end subroutine default_heatfluxes
    
 

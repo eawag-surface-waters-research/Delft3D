@@ -49,6 +49,7 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
+      USE PHYSICALCONSTS, ONLY : CtoKelvin
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
@@ -108,7 +109,7 @@
 !
 ! =====================================================================
 
-         TEMPA  = TEMP + 273.15
+         TEMPA  = TEMP + real(CtoKelvin)
          RION   = 0.147E-02 + 0.3592E-01*CL2 + 0.68E-04*CL2**2
          RKCO2  = 10.0**(-( - 0.238573E+04/TEMPA + 0.140184E+02 -
      J         0.152642E-01*TEMPA + RION*(0.28569 - 0.6167E-05*TEMPA)))

@@ -51,6 +51,7 @@
 !-----------------------------------------------------------------------
 !     Name     Type   Library
 !     ------   -----  ------------
+      USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
 
       REAL     PMSA  ( * ) , FL    (*)
@@ -58,7 +59,7 @@
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 !
       PARAMETER ( MNITRO =    14.0    ,
-     +            KELVIN =   273.15   ,
+     +            KELVIN =    real(CtoKelvin),
      +            M3TOL  =     1.0E-3   )
 !
 !     set pointers

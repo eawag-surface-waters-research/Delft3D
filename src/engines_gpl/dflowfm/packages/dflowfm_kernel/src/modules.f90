@@ -1233,18 +1233,19 @@ end module m_wind
 
 
  module m_heatfluxes
+ use physicalconsts
  implicit none
 
- double precision                  :: albedo          ! reflection coefficient of water () at average incidence angle of 60 deg,
-                                                      ! (albedo is .025 at angle 0 deg, 0.13 at angle 70 deg)
- double precision                  :: em              ! Emissivity ()
- double precision                  :: cpa             ! Specific heat air   [J/kg/K]
- double precision                  :: rcpa            !
- double precision                  :: cpw             ! Specific heat water [J/kg/K]
- double precision                  :: rcpi            ! m3K/J
- double precision                  :: stf             ! Stefan's constant =5.6705085e-8 [W/m^2/K^4]
- double precision                  :: emstf           ! Em*Stf [W/m^2/K^4]
- double precision                  :: tkelvn          ! Absolute zero
+ double precision             :: albedo             ! reflection coefficient of water () at average incidence angle of 60 deg,
+                                                    ! (albedo is .025 at angle 0 deg, 0.13 at angle 70 deg)
+ double precision             :: em                 ! Emissivity ()
+ double precision             :: cpa                ! Specific heat air   [J/kg/K]
+ double precision             :: rcpa               !
+ double precision             :: cpw                ! Specific heat water [J/kg/K]
+ double precision             :: rcpi               ! m3K/J
+ double precision             :: stf                ! Stefan's constant =5.6705085e-8 [W/m^2/K^4]
+ double precision             :: emstf              ! Em*Stf [W/m^2/K^4]
+ double precision, parameter  :: tkelvn = CtoKelvin ! Absolute zero
 
  double precision                  :: QSUNav          ! Solar influx              (W/m2)
  double precision                  :: QEVAav          ! Evaporative heat loss     (W/m2)
@@ -1289,7 +1290,6 @@ cpw     = 3986d0                      !< Specific heat water [J/kg/K]
 rcpi    = 1d0/(rhomean*cpw)           !< [m3K/J] or mKs2/kg
 stf     = 5.6705085d-8                !< Stefan's constant =5.6705085e-8 [W/m^2/K^4] (see 19308-part-iv-physical-processes.pdf from ECMWF)
 emstf   = em*stf
-tkelvn  = 273.15d0                    !< Absolute 0
 
 jamapheatflux = 0
 jaRichardsononoutput = 0

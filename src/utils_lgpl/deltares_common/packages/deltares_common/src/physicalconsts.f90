@@ -36,11 +36,13 @@ module physicalconsts
 !!--declarations----------------------------------------------------------------
    use precision
    implicit none
+   private
    !
    ! high precision constants
    !
 
-   real(hp), save :: earth_radius = 6378137_hp                       !< earth radius (m) 
-   real(hp), save :: dtol_pole    = 0.0001_hp                        !< pole tolerance in degrees
-         
+   real(kind=hp), parameter, public :: earth_radius = 6378137_hp   !< earth radius (m)
+   real(kind=hp), parameter, public :: dtol_pole    = 0.0001_hp    !< pole tolerance in degrees
+   real(kind=hp), parameter, public :: CtoKelvin    = 273.15_hp    !< conversion offset between Celsius and Kelvin
+
 end module physicalconsts

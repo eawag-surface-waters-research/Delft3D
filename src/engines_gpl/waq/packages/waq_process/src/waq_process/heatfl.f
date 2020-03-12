@@ -86,6 +86,7 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
+      USE PHYSICALCONSTS, ONLY : CtoKelvin
       IMPLICIT NONE
       REAL     PMSA  ( * ) , FL  (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
@@ -103,6 +104,7 @@
      j         HTVap, Fwind, Ql, Beta, Qsg, Qt, Qrb, Tref,
      j         dTemp, cp, DEPTH, RelHum, Psvap, Hm, Ha, Vevap, Fwind2,
      j         VWinda, DeltaT, HtVRef, RhoRef, Rho0, MODTEMP, mindeptht
+      REAL, PARAMETER :: sCtoKelvin = real(CtoKelvin)
       INTEGER  LUNREP
 
       IP1   = IPOINT( 1)
@@ -210,7 +212,7 @@
                Emiss = (0.51 + 0.066 * SQRT(Pvap)) *
      j                 (1.0 + 0.17 * cloud ** 2.0)
 !
-               Qa = Emiss * SBC * (TempAt + 273.15) ** 4.0
+               Qa = Emiss * SBC * (TempAt + sCtoKelvin) ** 4.0
 !
 !           ----2.  Option 2 = Edinger, 1965 and Koberg, 1962
 !
@@ -223,7 +225,7 @@
 !
                Emiss = 1.1 * C + 0.030 * SQRT(Pvap)
 !
-               Qa = Emiss * SBC * (TempAt + 273.15) ** 4.0
+               Qa = Emiss * SBC * (TempAt + sCtoKelvin) ** 4.0
 !
 !           ----3.  Option 3 = Edinger, 1965
 !
@@ -233,7 +235,7 @@
      j                 0.0045 * (1 - 0.4 * cloud) *
      j                 Pvap
 !
-               Qa = Emiss * SBC * (TempAt + 273.15) ** 4.0
+               Qa = Emiss * SBC * (TempAt + sCtoKelvin) ** 4.0
 !
 !           ----4.  Option 4 = Ludikhuize, 1994 as in WAQUA
 !
@@ -253,7 +255,7 @@
 !
 !     ------Long wave back radiation from water------
 !
-            Qbr = Ewater * SBC * ((TempWa + DeltaT + 273.15) ** 4.0)
+            Qbr = Ewater * SBC * ((TempWa + DeltaT + sCtoKelvin) ** 4.0)
 !
 !     ------Latent heat (evaporation or condensation)-----
 !

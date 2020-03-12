@@ -64,6 +64,7 @@
 
 !     Name     Type   Library
 !     ------   -----  ------------
+      USE PHYSICALCONSTS, ONLY: CtoKelvin
       IMPLICIT REAL (A-H,J-Z)
 
       REAL     PMSA  ( * ) , FL    (*)
@@ -73,7 +74,7 @@
 !     Local declarations, constants in source
 !
       PARAMETER ( E      =     2.718  ,
-     +            KELVIN =   273.15   ,
+     +            KELVIN = real(CtoKelvin),
      +            NL     = 55510.     ,
      +            P      =     1.01E+5,
      +            R      =     8.314    )
