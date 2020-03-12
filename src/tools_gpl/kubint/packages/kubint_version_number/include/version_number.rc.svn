@@ -53,6 +53,7 @@ BEGIN
             VALUE "OriginalFilename", "kubint.exe\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", "kubint\0"
+            VALUE "ProductVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "SpecialBuild", "-\0"
         END
     END

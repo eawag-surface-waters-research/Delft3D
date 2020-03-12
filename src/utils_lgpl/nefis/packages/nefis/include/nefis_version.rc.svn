@@ -53,6 +53,7 @@ BEGIN
             VALUE "OriginalFilename", "nefis.dll\0"
             VALUE "PrivateBuild", "-\0"
             VALUE "ProductName", "NEFIS\0"
+            VALUE "ProductVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "SpecialBuild", "-\0"
         END
     END
