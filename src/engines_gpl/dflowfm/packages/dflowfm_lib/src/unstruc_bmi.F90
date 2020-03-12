@@ -3102,7 +3102,7 @@ subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jaconti
    netfile_out = char_array_to_string(c_netfile_out, strlen(c_netfile_out))
 
    if(ndomains > 1) then
-      call partition_write_domains(netfile_out,6,1,0)
+      call partition_write_domains(netfile_out,6,1,0,0)
    endif
 
 end subroutine write_partition_metis
@@ -3153,7 +3153,7 @@ subroutine write_partition_pol(c_netfile_in, c_netfile_out, c_polfile) bind(C, n
    netfile_out = char_array_to_string(c_netfile_out, strlen(c_netfile_out))
 
    if(ndomains > 1) then
-      call partition_write_domains(netfile_out,6,1,0)
+      call partition_write_domains(netfile_out,6,1,0,0)
    endif
 
 end subroutine write_partition_pol

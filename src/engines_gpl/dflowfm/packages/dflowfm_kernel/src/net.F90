@@ -33884,10 +33884,10 @@ end subroutine copycurvigridboundstopol
 
 !> write the network domains to file
 !>    it is assumed that the domain coloring "idomain" is available
-   subroutine partition_write_domains(netfilename,icgsolver,jacells,japolygon)
+   subroutine partition_write_domains(netfilename, icgsolver, jacells, japolygon, japartugrid)
 
       use m_partitioninfo
-      use unstruc_netcdf, only: unc_write_net
+      use unstruc_netcdf, only: unc_write_net, UNC_CONV_UGRID, UNC_CONV_CFOLD
       use m_polygon, only: NPL
       use dfm_error
 !      use m_missing, only: intmiss
@@ -33902,7 +33902,8 @@ end subroutine copycurvigridboundstopol
       integer,                             intent(in) :: icgsolver   !< intended solver
      ! integer,                             intent(in) :: gui_polygon !< polygon from the old GUI
       integer,                             intent(in) :: jacells     !< write cell and subdomain numbers to file
-      integer,                             intent(in) :: japolygon   !< write paritioning polygon
+      integer,                             intent(in) :: japolygon   !< write partitioning polygon
+      integer,                             intent(in) :: japartugrid !< write partitioning in ugrid format (1) or not (0)
       integer,                  parameter             :: maxnamelen=255
       integer,                  parameter             :: numlen=4    ! number of digits in domain number string/filename
 
@@ -33910,7 +33911,7 @@ end subroutine copycurvigridboundstopol
       character(len=numlen)                           :: sdmn_loc    ! domain number string
       character(len=maxnamelen)                       :: partfilename
       integer                                         :: idmn        ! domain number
-      integer                                         :: i, len, num, mdep, c1, c2, i1, i2
+      integer                                         :: i, len, num, mdep, c1, c2, i1, i2, iconv
       integer, allocatable                            :: lned(:,:)   ! lned(:,j) are the cells that are realated to link j, original numbering
       integer                                         :: ierror
 
@@ -33924,6 +33925,8 @@ end subroutine copycurvigridboundstopol
 !     get file basename
       filename = ''
       len = index(netfilename, '_net')-1
+
+      iconv = merge(UNC_CONV_UGRID, UNC_CONV_CFOLD, japartugrid > 0)
 
       if ( len.lt.1 ) then
          call qnerror('write domains: net filename error', ' ', ' ')
@@ -33949,7 +33952,7 @@ end subroutine copycurvigridboundstopol
             i2 = len_trim(netfilename)
             partfilename = netfilename(1:i1)//"DFM_interpreted_idomain_"//netfilename(i1+1:i2)
          endif
-         call unc_write_net(partfilename, janetcell = 1, janetbnd = 1, jaidomain = 1)
+         call unc_write_net(partfilename, janetcell = 1, janetbnd = 1, jaidomain = 1, iconventions = iconv)
       endif
 
 
@@ -33974,7 +33977,7 @@ end subroutine copycurvigridboundstopol
          if (ierror /= DFM_NOERR) goto 1234
 
 !        write partitioning net files, including cell info. and idomain
-         call unc_write_net(filename, janetcell = 1, janetbnd = 1, jaidomain = jacells, jaiglobal_s = jacells) ! Save net bnds to prevent unnecessary open bnds
+         call unc_write_net(filename, janetcell = 1, janetbnd = 1, jaidomain = jacells, jaiglobal_s = jacells, iconventions = iconv) ! Save net bnds to prevent unnecessary open bnds
 
 !        begin debug
 !        make and write the ghost lists
@@ -34234,7 +34237,7 @@ end subroutine make_dual_mesh
 
 
 !>  perform partitioning from command line
-subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icgsolver, md_pmethod, md_dryptsfile, md_encfile, md_genpolygon)
+subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icgsolver, md_pmethod, md_dryptsfile, md_encfile, md_genpolygon, md_partugrid)
 
    use network_data
    use m_partitioninfo
@@ -34253,6 +34256,7 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
    character(len=255), intent(in) :: md_dryptsfile    !< dry points file
    character(len=255), intent(in) :: md_encfile       !< Enclosure file to clip outer parts from the grid *.pol
    integer,            intent(in) :: md_genpolygon    !< make partition file (1) or not (0)
+   integer,            intent(in) :: md_partugrid     !< write partitioning in ugrid format (1) or not (0)
 
    integer                        :: jacells
    integer                        :: japolygon
@@ -34294,7 +34298,7 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
    end if
 
    if ( ndomains.gt.1 ) then
-      call partition_write_domains(trim(fnam),md_icgsolver,jacells,japolygon)
+      call partition_write_domains(trim(fnam),md_icgsolver,jacells,japolygon,md_partugrid)
    end if
 
    return
@@ -34387,19 +34391,25 @@ function read_commandline() result(istat)
             md_icgsolver = 0
             md_genpolygon = 0          ! default: no polygon
             md_pmethod = 0             ! partition method using Metis: (=0)Recursive Bisection, (=1)K-way
+            md_partugrid = 0           ! ugrid for partitioned netfiles is work-in-progress
 !           key-value pairs
-            do ikey=1,Nkeys
-               if (trim(Skeys(ikey)) == 'ndomains') then
-                  md_ndomains = ivals(ikey)
-               else if (trim(Skeys(ikey)) == 'method') then
-                  md_pmethod = ivals(ikey)
-               else if (trim(Skeys(ikey)) == 'contiguous') then
+            do ikey = 1, Nkeys
+               select case (Skeys(ikey))
+               case ('ndomains')
+                  md_ndomains     = ivals(ikey)
+               case ('method')
+                  md_pmethod      = ivals(ikey)
+               case ('contiguous')
                   md_jacontiguous = ivals(ikey)
-               else if (trim(Skeys(ikey)) == 'icgsolver') then
-                  md_icgsolver  = ivals(ikey)
-               else if (trim(Skeys(ikey)) == 'genpolygon') then
-                  md_genpolygon  = ivals(ikey)
-               end if
+               case ('icgsolver')
+                  md_icgsolver    = ivals(ikey)
+               case ('genpolygon')
+                  md_genpolygon   = ivals(ikey)
+               case ('ugrid')
+                  md_partugrid    = ivals(ikey)
+               case default
+                  write(*,*) 'Partitioning option "', trim(Skeys(ikey)), '" not recoqnized; skipping.'
+               end select
             end do
 
          case ('t', 'threads')
