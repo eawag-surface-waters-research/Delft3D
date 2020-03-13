@@ -292,6 +292,7 @@ module m_readCrossSections
       logical :: success
       character(len=IdLen) :: id
       character(len=IdLen) :: typestr
+      character(len=10) :: msgstr = ''
       double precision :: diameter
       integer :: numLevels
       double precision, allocatable :: level(:)
@@ -325,8 +326,6 @@ module m_readCrossSections
          ! block [Global]
          if (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Global')) then
              call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'leveeTransitionHeight',summerDikeTransitionHeight, success)
-             write(msgbuf,'(a,F6.3,a)') 'Levee transition height (summerdike) = ', summerDikeTransitionHeight, ' m'
-             call msg_flush()
              
          ! block [Definition]   
          elseif (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Definition')) then
@@ -493,6 +492,14 @@ module m_readCrossSections
          endif !block test
          
       enddo crs
+
+      if (anySummerDike) then 
+          if (summerDikeTransitionHeight == 0.5) then 
+              msgstr = '(default)'
+          endif 
+          write(msgbuf,'(a,F6.3,a,a)') 'Levee transition height (summerdike) = ', summerDikeTransitionHeight, ' m ', msgstr 
+          call msg_flush()
+      endif 
 
    end subroutine parseCrossSectionDefinitionFile
 
