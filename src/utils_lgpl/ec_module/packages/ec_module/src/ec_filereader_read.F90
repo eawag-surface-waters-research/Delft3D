@@ -2146,7 +2146,7 @@ module m_ec_filereader_read
 !                 read data
                   start(1:2)   = (/ mcolmin(j), nrowmin /)
                   start(ndims) = timesndx
-                  if (relndx>0 .and. ndims>=5) then
+                  if (relndx>0 .and. ndims>=4) then
                      start(3) = relndx
                   endif
                   if ( n_layers /= 0 ) then
