@@ -288,6 +288,7 @@ contains
        character(256)                          :: refplanefile
        character(80)                           :: stringval
        character(256)                          :: errmsg
+       character(256)                          :: infomsg
        character(255), intent(in)              :: md_dredgefile
        type(tree_data), pointer                :: dad_ptr
        type(tree_data), pointer                :: dredge_area_ptr
@@ -1775,6 +1776,7 @@ contains
           if (istat == 0) call reallocP(dredgepar%link_sum, (/nalink+noutletlinks,lsedtot/), fill = 0.0_fp, stat = istat)
           if (istat == 0) call reallocP(dredgepar%voldump, (/nadump+1,lsedtot/), fill = 0.0_fp, stat = istat)
           if (istat == 0) call reallocP(dredgepar%totvoldump, nadump+1, fill = 0.0_fp, stat = istat)
+          if (istat == 0) call reallocP(dredgepar%totvoldumpfrac, (/nadump+1,lsedtot/), fill = 0.0_fp, stat = istat)
           if (istat == 0) call reallocP(dredgepar%localareadump, nadump+1, fill = 0.0_fp, stat = istat)
           if (istat == 0) call reallocP(dredgepar%globalareadump, nadump+1, fill = 0.0_fp, stat = istat)
           if (istat == 0) call reallocP(dredgepar%globaldumpcap, nadump+1, fill = 0.0_fp, stat = istat)
@@ -2095,7 +2097,7 @@ subroutine fm_dredge(error)
     use m_physcoef              ! or mathconst from deltares_common...
     use m_flow, only: s1
     use m_flowtimes
-    use m_flowgeom, only: bl, ndx, ndxi
+    use m_flowgeom, only: bl_ave, ndx, ndxi
     use m_dad
     use m_sediment, only: stmpar
     use unstruc_files, only: mdia
@@ -2496,7 +2498,7 @@ subroutine fm_dredge(error)
              reflevel(i) = min(s1(nm),refplane(nm))
           end select
           if (kfsed(nm)==1 .or. pdredge%dredgewhendry) then
-             voltim = voltim + max( (reflevel(i) - pdump%mindumpdepth) - bl(nm), 0.0_fp)*area(i) ! to check
+             voltim = voltim + max( (reflevel(i) - pdump%mindumpdepth) - bl_ave(nm), 0.0_fp)*area(i) ! to check
           endif
        enddo
        !
@@ -2602,7 +2604,7 @@ subroutine fm_dredge(error)
           nm = pdredge%nm(i)
           if (nm==0) cycle
           !
-          bedlevel(i) = bl(nm)
+          bedlevel(i) = bl_ave(nm)
           !
           if (pdredge%use_dunes) hdune(i) = duneheight(nm)
           !
@@ -3357,9 +3359,9 @@ subroutine fm_dredge(error)
              dz                = dz + dzl
           enddo
           if (pdredge%obey_cmp) then
-             bl(nm)               = bl(nm) - dz
+             bl_ave(nm)           = bl_ave(nm) - dz
           else
-             bl(nm)               = bl(nm) - dz_dredge(i)
+             bl_ave(nm)           = bl_ave(nm) - dz_dredge(i)
              voldred(ia,lsedtot+1) = voldred(ia,lsedtot+1) + (dz_dredge(i)-dz) * area(i)
           endif
           dzdred(nm)        = 0.0_fp
@@ -3549,7 +3551,7 @@ subroutine fm_dredge(error)
           nm = pdump%nm(i)
           if (nm==0) cycle
           !
-          bedlevel(i) = real(bl(nm),fp)
+          bedlevel(i) = real(bl_ave(nm),fp)
           if (pdump%use_dunes) hdune(i) = duneheight(nm)
           !
           if (kfsed(nm)==1 .or. pdump%dumpwhendry) then
@@ -3754,7 +3756,7 @@ subroutine fm_dredge(error)
              dbodsd(lsed, nm) = dbodsd(lsed, nm) + dpadd * cdryb(lsed)
           enddo
           !
-          bl(nm) = bl(nm) + real(dz_dump(i), prec)
+          bl_ave(nm) = bl_ave(nm) + real(dz_dump(i), prec)
           if (pdump%use_dunes) duneheight(nm) = hdune(i)
        enddo
     enddo

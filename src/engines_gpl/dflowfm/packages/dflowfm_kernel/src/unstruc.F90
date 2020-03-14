@@ -23052,12 +23052,13 @@ end subroutine unc_write_shp
     call realloc(volMaxUnderground, ndxi-ndx2d, keepExisting = .false., fill = dmiss, stat = ierr)
     call aerr('volMaxUnderground(ndxi-ndx2d)', ierr, ndxi-ndx2d)
 
-    if (stm_included) then
-        call realloc(bl_ave, ndxi-ndx2d, keepExisting = .false., fill = dmiss, stat = ierr)
-        call aerr('bl_ave(ndxi-ndx2d)', ierr, ndxi-ndx2d)
-    end if
  end if
 
+ if (stm_included) then
+     call realloc(bl_ave, ndx, keepExisting = .false., fill = dmiss, stat = ierr)
+     call aerr('bl_ave(ndx)', ierr, ndx)
+ end if
+ 
  if ( allocated (kfs) ) deallocate(kfs)
  allocate(kfs(ndx))   ;  kfs   = 0
 

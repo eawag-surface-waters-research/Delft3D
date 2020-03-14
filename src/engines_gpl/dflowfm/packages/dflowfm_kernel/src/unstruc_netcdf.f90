@@ -6171,7 +6171,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
             ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), work1d_n(1:jmax,1:nCrs), start=(/ 1, 1, mapids%id_tsp%idx_curtime /), count=(/ jmax, nCrs, 1 /))
          endif
          if (stmpar%morpar%moroutput%blave) then
-            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_blave, UNC_LOC_S, bl_ave)
+            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_blave, UNC_LOC_S, bl_ave(ndx2d+1:ndxi))
          endif
       endif
    endif

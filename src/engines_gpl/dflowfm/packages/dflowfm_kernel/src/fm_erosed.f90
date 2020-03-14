@@ -228,9 +228,13 @@
    implicit none
    contains
 
+   !> Updates 1D cross-section profiles
+   !! 
+   !! Updates cross-section based on main average bed level change
+   !! Returns bed level change for lowest point in cross-section
    subroutine fm_update_crosssections(blchg)
    use precision
-   use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor, ba_mor, bai_mor, bl, ndx, acl
+   use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor, ba_mor, bai_mor, bl, ndx, acl, ndx2d
    use m_oned_functions, only:gridpoint2cross
    use unstruc_channel_flow, only: network, t_node, nt_LinkNode
    use m_CrossSections, only: t_CSType, CS_TABULATED
@@ -263,8 +267,7 @@
    !
    ! upon entry blchg contains the bed level change averaged over the total cell area
    !
-   do nm = 1, ndxi
-      if (kcs(nm)==1) then ! only for 1D nodes
+   do nm = ndx2D + 1, ndxi ! only for internal 1D nodes
          do j = 1, gridpoint2cross(nm)%num_cross_sections
             c = gridpoint2cross(nm)%cross(j)
             if (c == -999) cycle
@@ -357,10 +360,9 @@
                call err_flush()
             endif
          enddo
-      endif
    enddo
    !
-   ! set blchg to bed level change for deepest point of incoming branches
+   ! set blchg to bed level change for lowest point of incoming branches
    !
    ! loop over connection nodes
    do inod = 1, network%nds%Count
@@ -389,14 +391,18 @@
    !
    end subroutine fm_update_crosssections
 
+   !> Returns local grid distance at 1D computational node 
+   !! 
+   !! At single attached cross-section distance between two neighbouring links
+   !! At multple attached cross-sections (e.g. branch node) distance to nearest link
    function fm_get_ds(nm, j) result (ds)
    use precision
    use m_oned_functions, only:gridpoint2cross
    use m_flowgeom, only: acl, dx, ln, nd ! lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D, bai, ba_mor, bai_mor, ndx, ndx2D, ndx1Db
    
-   integer, intent(in) :: nm   ! gridpoint counter 
-   integer, intent(in) :: j    ! connection counter
-   double precision    :: ds    ! local distance at gridpoint
+   integer, intent(in) :: nm   !< flow node index 
+   integer, intent(in) :: j    !< local link index for flow node nm
+   double precision    :: ds   !< distance 
    
    integer i
    integer LL
@@ -503,7 +509,7 @@
 
    
    subroutine fm_update_mor_width_mean_bedlevel()
-   use m_flowgeom, only: ndxi, bl, bl_ave, ndx, kcs, ndx2d, ba_mor
+   use m_flowgeom, only: ndxi, bl, bl_ave, ndx, kcs, ndx2d, ba_mor, ndx1Db
    use m_oned_functions, only:gridpoint2cross
    use m_CrossSections, only: t_CSType, CS_TABULATED
    use m_flow, only: s1
@@ -527,8 +533,7 @@
    !
    ! Generate level change averaged over the main channel
    !
-   do nm = 1, ndxi
-      if (kcs(nm)==1) then ! only for 1D nodes
+   do nm = ndx2D + 1, ndxi ! only for internal 1D nodes
          href_tot = 0d0
          ba_mor_tot = 0d0
          do j = 1, gridpoint2cross(nm)%num_cross_sections
@@ -559,9 +564,16 @@
                call err_flush()
             endif            
          enddo
-         bl_ave(nm-ndx2d) = href_tot/ba_mor_tot
-      endif   
+         bl_ave(nm) = href_tot/ba_mor_tot
    enddo 
+
+   do nm = 1, ndx2D  ! internal 2d nodes
+      bl_ave(nm) = bl(nm)
+   enddo 
+
+   do nm = ndx1Db, ndx ! boundary 2d nodes 
+      bl_ave(nm) = bl(nm)
+   enddo
    
    end subroutine fm_update_mor_width_mean_bedlevel
 
@@ -999,6 +1011,7 @@
    wave = jawave>0
    !
    ! Mass conservation; s1 is updated before entering fm_erosed
+   !hs = s1 - bl !improvement? - to check WO
    !
    if (varyingmorfac) then
       call updmorfac(stmpar%morpar, time1/3600.0_fp, julrefdat)
@@ -2470,12 +2483,8 @@
    morbnd              => stmpar%morpar%morbnd
    cmpupd              => stmpar%morpar%cmpupd
 
-   if (.not. allocated(bl0)) then
-      allocate(bl0(1:ndx),stat=ierror)
-      bl0 = 0d0
-   endif
    if (.not. allocated(bl_ave0)) then
-      allocate(bl_ave0(1:ndx-ndx2d),stat=ierror)
+      allocate(bl_ave0(1:ndx),stat=ierror)
       bl_ave0 = 0d0
    endif
 
@@ -3275,8 +3284,14 @@
    ! Update bottom elevations
    !
    if (bedupd) then
+      ! 
+      if (dad_included) then 
+         do nm = 1, ndx
+            bl_ave(nm) = bl_ave(nm) + blchg(nm) 
+         enddo
+      endif    
       !
-      call fm_update_crosssections(blchg)
+      call fm_update_crosssections(blchg) ! blchg gets updated for 1d cross-sectional profiles in this routine
       !
       do nm = 1, Ndx
          !
@@ -3284,11 +3299,6 @@
          !
       enddo
       !
-      if (dad_included) then 
-         do nm = ndx2d+1, ndxi
-            bl_ave(nm-ndx2d) = bl_ave(nm-ndx2d) + blchg(nm) 
-         enddo
-      endif    
       ! AvD: Sander suggestie: call update_geom(2)
       !
       ! Free morpho boundaries get Neumann update
@@ -3366,33 +3376,25 @@
       ! Dredging and Dumping
       !
       if (dad_included) then
-         bl0=bl                   ! bed level before dredging backup (stores minimum in cross-section)
-         bl_ave0 = bl_ave         ! average bed level before dredging backup
-         !
-         do nm = ndx2d+1, ndxi
-            !
-            bl(nm) = bl_ave0(nm-ndx2d)
-            !
-         enddo
          ! 
+         bl_ave0 = bl_ave         ! backup average bed level before dredging, needed to compute bed level change due to dredging  
+         !
          call fm_dredge(error)
          if (error) then
             call mess(LEVEL_FATAL, 'Error in fm_bott3d :: fm_dredge returned an error.')
             return
          end if
          !
-         do nm = ndx2d+1, ndxi
+         do nm = 1, ndx
             !
-            bl_ave(nm-ndx2d) = bl(nm)            ! backup average bed level after dredging 
             blchg(nm) = bl_ave(nm) - bl_ave0(nm) ! get average bed level change 
-            bl(nm) = bl0(nm)                     ! set bed level back to minimum point in cross-section
             !
          enddo
          !
          call fm_update_crosssections(blchg)     ! update 1d cross-sections after dredging (updates bl for 1D).
          !
-         do nm = ndx2d+1, ndxi
-            bl(nm) = bl(nm) + blchg(nm)          ! get bed level change with respect to initial bl
+         do nm = 1, ndx
+            bl(nm) = bl(nm) + blchg(nm)          ! update bed level 
          enddo
       endif
    endif
