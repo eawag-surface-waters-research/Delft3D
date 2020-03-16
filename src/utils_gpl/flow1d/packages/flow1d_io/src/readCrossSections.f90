@@ -376,7 +376,7 @@ module m_readCrossSections
             endif
             
             call prop_get_logical(md_ptr%child_nodes(i)%node_ptr, '', 'closed', closed, success)
-            if (.not. success) closed = .false. ! Default
+            if (.not. success) closed = .true. ! Default
             
             if (closed) then
                call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'height', height, success)
