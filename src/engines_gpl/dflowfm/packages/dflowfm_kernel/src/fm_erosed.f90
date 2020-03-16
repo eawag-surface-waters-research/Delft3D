@@ -230,8 +230,8 @@
 
    !> Updates 1D cross-section profiles
    !! 
-   !! Updates cross-section based on main average bed level change
-   !! Returns bed level change for lowest point in cross-section
+   !! Updates cross-section based on main average bed level change.
+   !! Returns bed level change for lowest point in cross-section.
    subroutine fm_update_crosssections(blchg)
    use precision
    use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor, ba_mor, bai_mor, bl, ndx, acl, ndx2d
@@ -391,18 +391,20 @@
    !
    end subroutine fm_update_crosssections
 
-   !> Returns local grid distance at 1D computational node 
+   !> Returns local grid cell length at a 1D computational node.
    !! 
-   !! At single attached cross-section distance between two neighbouring links
-   !! At multple attached cross-sections (e.g. branch node) distance to nearest link
+   !! Two possibilities:
+   !! * For a point within a branch, between midpoints of the two neighbouring flowlinks.
+   !! * At a connection node with multiple attached branches, the half-length of the
+   !!   user-specified flow link index (i.e., only the requested branch).
    function fm_get_ds(nm, j) result (ds)
    use precision
    use m_oned_functions, only:gridpoint2cross
    use m_flowgeom, only: acl, dx, ln, nd ! lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D, bai, ba_mor, bai_mor, ndx, ndx2D, ndx1Db
    
    integer, intent(in) :: nm   !< flow node index 
-   integer, intent(in) :: j    !< local link index for flow node nm
-   double precision    :: ds   !< distance 
+   integer, intent(in) :: j    !< local link (branch) index at flow node nm (only used on points with multiple branches)
+   double precision    :: ds   !< Resulting grid cell length.
    
    integer i
    integer LL
