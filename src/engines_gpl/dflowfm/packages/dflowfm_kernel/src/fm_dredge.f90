@@ -1325,7 +1325,7 @@ contains
                                return
                             else
                                j2 = cntsedidx
-                               write(message, '(a,a,a,f2.2)' ) '  Percentage of ', trim(namsed(j2)), ': ', sedperc
+                               write(message, '(a,a,a,f6.2)' ) '  Percentage of ', trim(namsed(j2)), ': ', sedperc
                                call mess(LEVEL_INFO, message)
                                percsupl(cntsupl,j2) = sedperc
                                cntsedidx            = 0
@@ -1391,7 +1391,7 @@ contains
                       sumperc = 0.0_fp
                       do lsed = 1, lsedtot
                          if (percsupl(cntsupl,lsed) > 0.0_fp) then
-                            write(message, '(a,f2.2,2a)') '    ', percsupl(cntsupl,lsed),'% of sed. fraction  : ', trim(namsed(lsed))
+                            write(message, '(a,f6.2,2a)') '    ', percsupl(cntsupl,lsed),'% of sed. fraction  : ', trim(namsed(lsed))
                             call mess(LEVEL_INFO, message)
                          endif
                          sumperc = sumperc + percsupl(cntsupl,lsed)
