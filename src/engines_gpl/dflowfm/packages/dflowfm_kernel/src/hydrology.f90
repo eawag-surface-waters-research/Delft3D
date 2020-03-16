@@ -45,7 +45,8 @@ module m_hydrology
    double precision, allocatable, target :: Precipitation(:) 
    integer                               :: precipitationTarget
     
-   double precision, allocatable, target :: PotEvap(:)    
+   double precision, allocatable, target :: PotEvap(:)     !< [m/s] Potential evaporation
+   double precision, allocatable, target :: ActEvap(:)     !< [m/s] Actual evaporation
    integer                               :: potEvapTarget
    
    double precision, allocatable, target :: CanopyGapFraction(:) 

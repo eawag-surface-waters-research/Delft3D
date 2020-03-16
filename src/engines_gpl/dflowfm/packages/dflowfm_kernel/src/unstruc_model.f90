@@ -1569,6 +1569,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_zcor', jahiszcor, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_evaporation', jamapevap, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_volume1', jamapvol1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterdepth_hu', jamaphu, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_ancillary_variables', jamapanc, success)
@@ -3267,6 +3268,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jamaps1 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, 'Write water levels to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamaps1 /= 1) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_evaporation', jamapevap, 'Write evaporation to map file (1: yes, 0: no)')
     endif
     if (writeall .or. jamapvol1 > 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_volume1', jamapvol1, 'Write volumes to map file (1: yes, 0: no)')

@@ -37910,7 +37910,7 @@ end function ispumpon
  use m_reduce
  use m_ship
  use m_transport, only : constituents, itemp
-
+ use m_hydrology, only : ActEvap
  implicit none
 
  integer          :: L, k1, k2, k, kb, n, LL, kk, kt
@@ -37959,6 +37959,7 @@ end function ispumpon
        do k = 1,ndxi
           if (hs(k) > epshu) then
              Qeva    = -min( 0.5d0*vol1(k)/dts + qin(k) , -evap(k)*bare(k) )
+             ActEvap(k) = Qeva
              qin(k)  = qin(k)  + Qeva
              qouteva = qouteva - Qeva
           endif

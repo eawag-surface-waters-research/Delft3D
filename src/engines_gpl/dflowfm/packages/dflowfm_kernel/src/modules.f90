@@ -2746,6 +2746,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  ! written to map file yes or no
  integer                           :: jamaps0                   !< previous step water levels to map file, 0: no, 1: yes
  integer                           :: jamaps1                   !< water levels to map file, 0: no, 1: yes
+ integer                           :: jamapevap                 !< evaporation to map file, 0: no, 1: yes 
  integer                           :: jamapvol1                 !< Volumes to map file, 0: no, 1: yes
  integer                           :: jamaphu                   !< Water depths on u point to map file, 0: no, 1: yes
  integer                           :: jamapanc                  !< Ancillary variables attribute added to map file, 0: no, 1: yes (http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#ancillary-data)
