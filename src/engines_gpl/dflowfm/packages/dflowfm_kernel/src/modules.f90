@@ -3153,6 +3153,7 @@ subroutine default_flowparameters()
 
     jamaps0 = 1
     jamaps1 = 1
+    jamapevap = 0
     jamapvol1 = 0
     jamaphu = 0
     jamapanc = 0

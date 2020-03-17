@@ -41,8 +41,8 @@ module m_hydrology_data
    double precision, allocatable, target :: Precipitation(:) 
    integer                               :: precipitationTarget
     
-   double precision, allocatable, target :: PotEvap(:)     !< [m/s] Potential evaporation
-   double precision, allocatable, target :: ActEvap(:)     !< [m/s] Actual evaporation
+   double precision, allocatable, target :: PotEvap(:)     !< [m/s] Potential evaporation {"location": "face", "shape": ["ndx"]}
+   double precision, allocatable, target :: ActEvap(:)     !< [m/s] Actual evaporation {"location": "face", "shape": ["ndx"]}
    integer                               :: potEvapTarget
    
    double precision, allocatable, target :: CanopyGapFraction(:) 

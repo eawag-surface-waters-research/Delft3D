@@ -3269,7 +3269,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jamaps1 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, 'Write water levels to map file (1: yes, 0: no)')
     endif
-    if (writeall .or. jamaps1 /= 1) then
+    if (writeall .or. jamapevap /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_evaporation', jamapevap, 'Write evaporation to map file (1: yes, 0: no)')
     endif
     if (writeall .or. jamapvol1 > 0) then

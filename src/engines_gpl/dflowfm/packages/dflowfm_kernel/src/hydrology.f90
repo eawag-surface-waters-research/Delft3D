@@ -42,8 +42,10 @@ module m_hydrology
 !> Initializes the hydrology module and processes.
 !! Intended to be called as part of flow_modelinit().
 subroutine init_hydrology()
+   use m_alloc
 
-! allocate statements and more...
+   call realloc(PotEvap, ndx, keepExisting = .false., fill = 0d0)
+   call realloc(ActEvap, ndx, keepExisting = .false., fill = 0d0)
 
 end subroutine init_hydrology
 

@@ -37988,7 +37988,7 @@ end function ispumpon
        do k = 1,ndxi
           if (hs(k) > epshu) then
              Qeva    = -min( 0.5d0*vol1(k)/dts + qin(k) , -evap(k)*bare(k) )
-             ActEvap(k) = Qeva
+             ActEvap(k) = -Qeva
              qin(k)  = qin(k)  + Qeva
              qouteva = qouteva - Qeva
           endif
