@@ -10672,6 +10672,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use dfm_error
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
+ use m_hydrology, only: jadhyd, init_hydrology
  use m_integralstats
  use m_xbeach_data, only: instat, newstatbc
  use m_oned_functions
@@ -10904,6 +10905,10 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call flow_trachyinit ()                          ! initialise the trachytopes module
  end if
  call klok(cpu_extra(2,14)) ! end flow trachy init
+
+ if (jadhyd == 1) then
+    call init_hydrology()                          ! initialise the hydrology module
+ end if
 
  call klok(cpu_extra(1,15)) ! calibration init
  if (jacali == 1) then
@@ -12758,6 +12763,7 @@ subroutine writesomeinitialoutput()
  use m_fixedweirs
  use m_sediment
  use m_trachy
+ use m_hydrology_data
  use m_kml_parameters
  use m_structures
  use m_heatfluxes
@@ -12800,6 +12806,8 @@ subroutine writesomeinitialoutput()
     call default_sediment()  ! stm_included not defined yet
 
     call default_trachy()
+    
+    call default_hydrology_data()
 
     call default_fm_wq_processes()
 
@@ -12850,6 +12858,7 @@ subroutine writesomeinitialoutput()
  use m_flowtimes
  use waq
  use m_waves
+ use m_hydrology_data
  use m_sobekdfm
  use m_save_ugrid_state, only: reset_save_ugrid_state
  implicit none
@@ -12887,6 +12896,8 @@ subroutine writesomeinitialoutput()
     call reset_save_ugrid_state()
 
     call reset_sedtra()
+    
+    call reset_hydrology_data()
 
  end subroutine resetFlow
 

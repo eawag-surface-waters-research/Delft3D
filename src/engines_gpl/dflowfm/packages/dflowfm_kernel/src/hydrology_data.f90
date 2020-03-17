@@ -54,4 +54,20 @@ module m_hydrology_data
    double precision, allocatable, target :: LeftOver(:) 
    double precision, allocatable, target :: Interception(:) 
 
+contains
+
+!> Sets ALL (scalar) variables in this module to their default values.
+!! For a reinit prior to flow computation, only call reset_hydrology_data() instead.
+subroutine default_hydrology_data()
+    jadhyd = 0 !< Whether or not (1/0) external hydrology processes are enabled.
+
+    call reset_hydrology_data()
+end subroutine default_hydrology_data
+
+
+!> Resets only hydrology_data variables intended for a restart of an existing flow simulation (same MDU).
+!! Upon loading of new model/MDU, call default_hydrology_data() instead.
+subroutine reset_hydrology_data()
+end subroutine reset_hydrology_data
+
 end module m_hydrology_data

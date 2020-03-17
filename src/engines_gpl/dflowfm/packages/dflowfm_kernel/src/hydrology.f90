@@ -34,7 +34,17 @@
 !> Module for hydrological processes used in the dflowfm kernel.
 module m_hydrology
    use m_hydrology_data
+   use m_flowgeom
 
    implicit none
+   contains
+
+!> Initializes the hydrology module and processes.
+!! Intended to be called as part of flow_modelinit().
+subroutine init_hydrology()
+
+! allocate statements and more...
+
+end subroutine init_hydrology
 
 end module m_hydrology
