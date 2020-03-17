@@ -29,12 +29,29 @@
 
 ! $Id$
 ! $HeadURL$
-!-------------------------------------------------------------------------------------------------------
 
-!> Module for hydrological processes used in the dflowfm kernel.
-module m_hydrology
-   use m_hydrology_data
-
+!> Module for storing the optional hydrology state variables
+module m_hydrology_data
+   
    implicit none
+   
+   integer :: jadhyd !< Whether or not (1/0) external hydrology processes are enabled.
 
-end module m_hydrology
+   ! Some hydrology state vars maintained in FM:
+   double precision, allocatable, target :: Precipitation(:) 
+   integer                               :: precipitationTarget
+    
+   double precision, allocatable, target :: PotEvap(:)     !< [m/s] Potential evaporation
+   double precision, allocatable, target :: ActEvap(:)     !< [m/s] Actual evaporation
+   integer                               :: potEvapTarget
+   
+   double precision, allocatable, target :: CanopyGapFraction(:) 
+   double precision, allocatable, target :: Cmax(:) 
+   double precision, allocatable, target :: CanopyStorage(:) 
+   double precision, allocatable, target :: NetInterception(:) 
+   double precision, allocatable, target :: ThroughFall(:)    
+   double precision, allocatable, target :: StemFlow(:) 
+   double precision, allocatable, target :: LeftOver(:) 
+   double precision, allocatable, target :: Interception(:) 
+
+end module m_hydrology_data

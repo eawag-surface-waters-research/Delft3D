@@ -506,6 +506,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/gui.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/hrfft.f -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/hydrology.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/hydrology_data.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/inquire_flowgeom.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/io_openfoam.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/m_filter.f90 -text
