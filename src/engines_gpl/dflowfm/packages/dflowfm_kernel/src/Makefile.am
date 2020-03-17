@@ -52,13 +52,13 @@ libdflowfm_la_SOURCES=\
         xbeach_typesandkinds.F90 \
         dredge_data.f90 \
         hydrology_data.f90 \
-        hydrology.f90 \
         bedform_data.f90 \
         d3ddimens.f90 \
         modules.f90 \
         dfm_signals.F90 \
         inquire_flowgeom.f90 \
         oned_functions.f90 \
+        hydrology.f90 \
         d_flooding.f90 \
         partition.F90 \
         unstruc_structures.f90 \
