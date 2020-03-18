@@ -5995,12 +5995,12 @@ contains
    ! ==========================================================================
    !> 
    function timespaceinitialfield(xu, yu, zu, nx, filename, filetype, method, operand, transformcoef, iprimpos, kcc) result(success)  ! 
-      
+
    use kdtree2Factory
    use m_samples
    use m_netw
    use m_flowgeom, only : xz, yz, ln2lne, Ln, Lnx, Wu1Duni
-   use m_partitioninfo  
+   use m_partitioninfo
    use unstruc_netcdf
    use m_flowexternalforcings, only: qid
    use m_ec_interpolationsettings
@@ -6037,44 +6037,44 @@ contains
    double precision, intent(in)    :: transformcoef(:) !< Transformation coefficients
    integer     ,     intent(in)    :: iprimpos   ! only needed for averaging, position of primitive variables in network
                                                  ! 1 = u point, cellfacemid, 2 = zeta point, cell centre, 3 = netnode
-   
+
    double precision, allocatable   :: zh(:) 
    integer                         :: ierr
    integer                         :: minp0, inside,k, jdla, mout 
    double precision, allocatable   :: xx(:,:), yy(:,:)
    integer         , allocatable   :: nnn (:)
-   
+
    double precision, allocatable   :: xxx(:), yyy(:)
    integer,          allocatable   :: LnnL(:), Lorg(:)
-   
+
    double precision                :: zz
 
    integer                         :: n6 , L, Lk, n, nn, n1, n2, i
    integer                         :: ierror, jakc
    integer                         :: jakdtree=1
-   
+
    double precision                :: rcel_store, percentileminmax_store
    integer                         :: iav_store, nummin_store
 
    character(len=5)                :: sd
-   
+
    success = .false. 
    minp0 = 0
    jakc  = 0
-   if (present(kcc)) then 
+   if (present(kcc)) then
       jakc = 1
    endif
-   
-   if (filename == 'empty') then 
+
+   if (filename == 'empty') then
       do k=1,nx
          call operate(zu(k), transformcoef(1), operand)
       enddo
-   endif   
-   
+   endif
+
    allocate(   zh(nx) , stat=ierr)
-   zh = dmiss_default
    call aerr( 'zh(nx)', ierr, nx)
-   
+   zh = dmiss_default
+
    if (filetype .ne. ncflow .and. filetype .ne. arcinfo) then
        call oldfil(minp0, filename)
    end if
@@ -6084,27 +6084,26 @@ contains
    !   ! return?
    !end if
 
-   if (method == 4) then       ! polyfil 
-        
+   if (method == 4) then       ! polyfil
+
       call savepol()
       call reapol(minp0, 0)
-             
+
       inside = -1
       do k=1,nx
          if (jakc == 1) then  
             if (kcc(k) == 0) cycle
          endif
-         call dbpinpol(xu(k), yu(k), inside, &
-                       dmiss, JINS, NPL, xpl, ypl, zpl)  
+         call dbpinpol(xu(k), yu(k), inside, dmiss, JINS, NPL, xpl, ypl, zpl)
          if (inside == 1) then
             call operate(zu(k), transformcoef(1), operand)
-            zh(k) = zu(k) 
+            zh(k) = zu(k)
          end if
       enddo
-      call restorepol() 
-      
+      call restorepol()
+
    else if (method == 5 .or. method == 6) then  ! triangulation    todo
-   
+
       if (filetype == ncflow) then
           call read_flowsamples_from_netcdf(filename, qid, ierr)
       elseif (filetype == ncgrid) then
@@ -6117,63 +6116,63 @@ contains
       else
           call reasam(minp0, 0) 
       end if
-         
+
       if (method == 5) then
-          jdla = 1 
-          if (jakc == 0) then  
+          jdla = 1
+          if (jakc == 0) then
              call triinterp2(xu,yu,zh,nx,jdla, XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, & 
                              NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
           else 
              call triinterp2(xu,yu,zh,nx,jdla, XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, & 
                              NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef, kcc)
           endif
-             
+
       else if (method == 6) then                ! and this only applies to flow-link data
-      
+
 !         store settings
           iav_store = iav
           rcel_store = rcel
           percentileminmax_store = percentileminmax
           nummin_store = nummin
-            
-          if ( transformcoef(4).ne.DMISS ) then
-              iav  = int(transformcoef(4)) 
+
+          if ( transformcoef(4) /= DMISS ) then
+              iav  = int(transformcoef(4))
           end if
-          if ( transformcoef(5).ne.DMISS ) then
-              rcel = transformcoef(5)             
+          if ( transformcoef(5) /= DMISS ) then
+              rcel = transformcoef(5)
           end if
-          if ( transformcoef(7).ne.DMISS ) then
+          if ( transformcoef(7) /= DMISS ) then
               percentileminmax = transformcoef(7)
           end if
-          if ( transformcoef(8).ne.DMISS ) then
+          if ( transformcoef(8) /= DMISS ) then
              nummin = int(transformcoef(8))
           end if
-             
+
           if (iprimpos == 1) then                ! primitime position = velocitypoint, cellfacemid 
                n6 = 4
                allocate( xx(n6,lnx), yy(n6,lnx), nnn(lnx) )
                do L = 1,lnx
-               xx(1,L) = xzw(ln(1,L))
-               yy(1,L) = yzw(ln(1,L))
-               xx(3,L) = xzw(ln(2,L))
-               yy(3,L) = yzw(ln(2,L))
-               Lk      = ln2lne(L)
-               xx(2,L) = xk(kn(1,Lk))
-               yy(2,L) = yk(kn(1,Lk))
-               xx(4,L) = xk(kn(2,Lk))
-               yy(4,L) = yk(kn(2,Lk))
+                   xx(1,L) = xzw(ln(1,L))
+                   yy(1,L) = yzw(ln(1,L))
+                   xx(3,L) = xzw(ln(2,L))
+                   yy(3,L) = yzw(ln(2,L))
+                   Lk      = ln2lne(L)
+                   xx(2,L) = xk(kn(1,Lk))
+                   yy(2,L) = yk(kn(1,Lk))
+                   xx(4,L) = xk(kn(2,Lk))
+                   yy(4,L) = yk(kn(2,Lk))
                enddo
                nnn = 4 ! array nnn
           else if (iprimpos == 2) then           ! primitime position = waterlevelpoint, cell centre  
                n6 = maxval(netcell%n)
-               if ( jsferic.eq.1 ) then
+               if ( jsferic == 1 ) then
                   n6 = n6+2   ! safety at poles
                end if
-               
+
                allocate( xx(n6,nx), yy(n6,nx), nnn(nx) )
-               
+
                allocate(LnnL(n6), Lorg(n6))  ! not used
-               
+
                do n = 1,nx
 !                  nnn(n) = netcell(n)%n
 !                  do nn = 1, nnn(n)
@@ -6201,21 +6200,21 @@ contains
                      yy(i,k) = yyy(i)
                   enddo
                enddo
-            
-               DEALLOCATE(xxx,yyy)
-          end if    
-                
-          if ( jakdtree.eq.1 ) then
+
+               deallocate(xxx,yyy)
+          end if
+
+          if ( jakdtree == 1 ) then
 !              initialize kdtree
                call build_kdtree(treeglob,Ns,xs,ys,ierror, jsferic, dmiss)
-               if ( ierror.ne.0 ) then
+               if ( ierror /= 0 ) then
 !                 disable kdtree
                   call delete_kdtree2(treeglob)
                   jakdtree = 0
                end if
           end if
-                   
-          if (jakc == 0) then  
+
+          if (jakc == 0) then
              call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree,&
                              dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
           else
@@ -6223,70 +6222,69 @@ contains
                              dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, kcc)
           end if
           deallocate(xx,yy,nnn)
-          if ( iprimpos.eq.2 ) then
+          if ( iprimpos == 2 ) then
              if ( allocated(LnnL) ) deallocate(LnnL)
              if ( allocated(Lorg) ) deallocate(Lorg)
           end if
-          
+
 !         restore settings
           iav  = iav_store
           rcel = rcel_store
           percentileminmax = percentileminmax_store
           nummin = nummin_store
-            
-          if ( jakdtree.eq.1 ) then
+
+          if ( jakdtree == 1 ) then
               call delete_kdtree2(treeglob)
-          end if    
-             
-      end if    
-             
+          end if
+
+      end if
+
       do k=1,nx
-         if ( zh(k) .ne. dmiss_default) then
+         if ( zh(k) /= dmiss_default) then
              call operate(zu(k), zh(k), operand)
              zh(k) = zu(k)
          end if
       end do
-!      call delsam(0)
-      
+
 !     SPvdP: sample set can be large, delete it and do not make a copy
       call delsam(-1)
-      
+
    end if
-   success = .true. 
+   success = .true.
    call doclose(minp0)
 
-   N1  = index (trim(filename) , get_dirsep() , .true.)
-   
-   !  fix for Linux-prepared input on Windows
-   if ( N1.eq.0 ) then
-        N1 = index(trim(filename), char(47), .true.)
-   end if
-   
-   sd  = ''
-   if (jampi == 1) then
-       sd = '_'//trim(sdmn) 
-   end if    
-      
-   N2  = INDEX (trim(filename) , '.' , .true.) 
-   if (n2 == 0) then 
-       n2 = len_trim(filename) 
-   else 
-       n2 = n2 -1
-   end if
-      
-   if (jawriteDFMinterpretedvalues > 0) then 
+   if (jawriteDFMinterpretedvalues > 0) then
+      n1  = index (trim(filename) , get_dirsep() , .true.)
+
+      !  fix for Linux-prepared input on Windows
+      if ( n1 == 0 ) then
+           n1 = index(trim(filename), char(47), .true.)
+      end if
+
+      sd  = ''
+      if (jampi == 1) then
+          sd = '_'//trim(sdmn) 
+      end if
+
+      n2  = index (trim(filename) , '.' , .true.)
+      if (n2 == 0) then 
+          n2 = len_trim(filename)
+      else 
+          n2 = n2 -1
+      end if
+
       call newfil(mout, trim(getoutputdir())//'DFM_interpreted_values_'//trim(filename(n1+1:n2))//trim(sd)//'.xyz')
-          
+
       do k = 1,nx
-         if (zh(k) .ne. dmiss_default) then 
+         if (zh(k) /= dmiss_default) then 
             write(mout,*) xu(k), yu(k), zu(k)
          end if
       enddo
       call doclose(mout)
    endif
-      
-   if (allocated (zh) ) deallocate(zh) 
-   
+
+   if (allocated (zh) ) deallocate(zh)
+
    end function timespaceinitialfield
    !
    !

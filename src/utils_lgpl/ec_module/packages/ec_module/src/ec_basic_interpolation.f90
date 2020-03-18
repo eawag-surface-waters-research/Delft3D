@@ -1477,25 +1477,31 @@
     subroutine AVERAGING2(NDIM,NS,XS,YS,ZSS,IPSAM,XC,YC,ZC,NX,XX,YY,N6,NNN,jakdtree_, &
                           dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, kcc) ! WERKT ALLEEN VOOR CELL REGIONS, DIE ZITTEN IN XX EN YY
     implicit none
-    integer,                              intent(in)    :: NDIM                 ! sample vector dimension
-    integer,                              intent(in)    :: NS                   ! number of samples
-    real(kind=hp)   , dimension(ns),      intent(in)    :: XS, YS               ! sample coordinates
-    real(kind=hp)   , dimension(ndim,ns), intent(in)    :: ZSS                  ! sample values
-    integer,          dimension(ns),      intent(in)    :: IPSAM                ! sample permutation array (increasing x-coordinate)
-    integer,                              intent(in)    :: NX, N6               ! number of polygons and maximum polygon size
-    real(kind=hp)   ,                     intent(in)    :: XC(NX), YC(NX)       ! polygon center coordinates
-    real(kind=hp)   ,                     intent(inout) :: ZC(NDIM,NX)          ! ZC not initialized here
-    real(kind=hp)   ,                     intent(in)    :: XX(N6,NX), YY(N6,NX) ! polygon coordinates
-    integer,                              intent(in)    :: NNN(NX)              ! polygon sizes
-    integer,                              intent(in)    :: jakdtree_            ! use kdtree (1) or not (0)
-    integer ,                             intent(in), optional  :: kcc(:) !< Masking array for each of the target points.
+    integer,                                  intent(in)    :: NDIM                 !< sample vector dimension
+    integer,                                  intent(in)    :: NS                   !< number of samples
+    real(kind=hp)   , dimension(ns),          intent(in)    :: XS, YS               !< sample coordinates
+    real(kind=hp)   , dimension(ndim,ns),     intent(in)    :: ZSS                  !< sample values
+    integer,          dimension(ns),          intent(in)    :: IPSAM                !< sample permutation array (increasing x-coordinate)
+    integer,                                  intent(in)    :: NX, N6               !< number of polygons and maximum polygon size
+    real(kind=hp)   ,                         intent(in)    :: XC(NX), YC(NX)       !< polygon center coordinates
+    real(kind=hp)   ,                         intent(inout) :: ZC(NDIM,NX)          !< ZC not initialized here
+    real(kind=hp)   ,                         intent(in)    :: XX(N6,NX), YY(N6,NX) !< polygon coordinates
+    integer,                                  intent(in)    :: NNN(NX)              !< polygon sizes
+    integer,                                  intent(in)    :: jakdtree_            !< use kdtree (1) or not (0)
+    real(kind=hp)   ,                         intent(in)    :: dmiss                !< missing value
+    integer,                                  intent(in)    :: jsferic              !< spherical or not
+    integer,                                  intent(in)    :: jasfer3D             !< 0 = org, 1 = sqrt(dx2+dy2+dz2), 2= greatcircle
+    integer,                                  intent(in)    :: JINS                 !< inside option
+    integer,                                  intent(in)    :: NPL                  !< number of polygon points
+    double precision, dimension(:),           intent(in)    :: XPL, YPL, ZPL        !< grid coordinates
+    integer,          dimension(:), optional, intent(in)    :: kcc                  !< Masking array for each of the target points.
 
     real(kind=hp)   , allocatable     :: XH(:), YH(:)
     real(kind=hp)   , dimension(NDIM) :: HPARR, RHP
     real(kind=hp)      :: XLOW, XHIH, YLOW, YHIH, RMIN2, WALL, DIS2, WEIGHT, XDUM
-    INTEGER            :: N,K,NN,MODIN, NLOWX, NHIHX, NUMXY, IFIRS, INHUL
-    INTEGER            :: IVAR
-    INTEGER            :: K_, k_start, k_end
+    integer            :: N,K,NN,MODIN, NLOWX, NHIHX, NUMXY, IFIRS, INHUL
+    integer            :: IVAR
+    integer            :: K_, k_start, k_end
 
     integer            :: japrogressbar, jadoen, in, numsam
     real(kind=hp)      :: R2search, rnn
@@ -1507,9 +1513,6 @@
     integer         , allocatable :: kkin(:)
     integer                       :: nin, n1, n2, n12, num
 
-    real(kind=hp)   , intent(in)            :: dmiss
-    integer, intent(in)                     :: jsferic, jasfer3D, NPL, JINS
-    double precision, intent(in)            :: XPL(:), YPL(:), ZPL(:)
     integer               :: jakc
 
     ! default/no samples in cell
