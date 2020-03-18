@@ -298,6 +298,22 @@ select case(var_name)
     type_name = "double"
   case("is_dtint")
     type_name = "double"
+  case("taucr")
+    type_name = "double"
+  case("tetacr")
+    type_name = "double"
+  case("TcrEro")
+    type_name = "double"
+  case("TcrSed")
+    type_name = "double"
+  case("Qsunmap")
+    type_name = "double"
+  case("SedFrac")
+    type_name = "double"
+  case("SurfTem")
+    type_name = "double"
+  case("taus")
+    type_name = "double"
   case default
     type_name = ""
 end select

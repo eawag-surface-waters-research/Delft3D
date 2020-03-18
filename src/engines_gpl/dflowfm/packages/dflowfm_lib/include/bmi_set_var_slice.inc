@@ -555,4 +555,28 @@
   case("is_dtint")
      ! Does not apply to scalar variables
      continue
+  case("taucr")
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     taucr(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("tetacr")
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     tetacr(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("TcrEro")
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+	 stmpar%trapar%par(13,c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("TcrSed")
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+	 stmpar%trapar%par(12,c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("Qsunmap")
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     Qsunmap(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("SedFrac")
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+	 constituents(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("SurfTem")
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     tem1(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("taus")
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     taus(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   end select

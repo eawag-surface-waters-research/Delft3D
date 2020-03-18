@@ -298,5 +298,26 @@
      x = c_loc(is_maxvalsnd)
   case("is_dtint") !<  [s] total time interval since last statistics reset. {"rank": 0}
      x = c_loc(is_dtint)
+  case("taucr") !<  [?] dimensional critical shear stress taucr () {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(taucr)
+  case("tetacr") !<  [-] dimensionless critical shear stress () {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(tetacr)
+  case("TcrEro")
+     x = c_loc(stmpar%trapar%par(13,:))
+  case("TcrSed")
+     x = c_loc(stmpar%trapar%par(12,:))
+  case("Qsunmap") !<  [W/m2] solar radiation reaching water surface () {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(Qsunmap)
+  case("SedFrac")
+     x = c_loc(constituents(ISED1:ISEDN,:))
+  case("SurfTem") !<  [C] surface water temperature () {"location": "face", "shape": ["ndx"]}
+     if (kmx > 0) then
+	    do k = 1,ndx
+		   call getkbotktop(k, kb, kt)
+		   tem1(k) = tem1(kt)    !!! Check whether temp1(1:ndx) is used for other purpose in 3D
+		enddo
+	 endif
+     x = c_loc(tem1(1:ndx))
+  case("taus") !<  [?] Total shear stress taus () {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(taus)
   end select
-

@@ -298,5 +298,21 @@
      var_name = "is_maxvalsnd"
   case(134)
      var_name = "is_dtint"
+  case(135)
+     var_name = "taucr"
+  case(136)
+     var_name = "tetacr"
+  case(137)
+     var_name = "TcrEro"
+  case(138)
+     var_name = "TcrSed"
+  case(139)
+     var_name = "Qsunmap"
+  case(140)
+     var_name = "SedFrac"
+  case(141)
+     var_name = "SurfTem"
+  case(142)
+     var_name = "taus"
   end select
 

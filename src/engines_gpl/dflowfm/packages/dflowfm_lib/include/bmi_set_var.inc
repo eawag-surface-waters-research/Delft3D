@@ -433,4 +433,28 @@
   case("is_dtint")
      call c_f_pointer(xptr, x_0d_double_ptr)
      is_dtint = x_0d_double_ptr
+  case("taucr")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(taucr))
+     taucr(:) = x_1d_double_ptr
+  case("tetacr")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(tetacr))
+     tetacr(:) = x_1d_double_ptr
+  case("TcrEro")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%trapar%par(13,:)))
+	 stmpar%trapar%par(13,:) = x_1d_double_ptr
+  case("TcrSed")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%trapar%par(12,:)))
+	 stmpar%trapar%par(12,:) = x_1d_double_ptr
+  case("Qsunmap")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(Qsunmap))
+     Qsunmap(:) = x_1d_double_ptr
+  case("SedFrac")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(constituents(ISED1:ISEDN,:)))
+	 constituents(ISED1:ISEDN,:) = x_2d_double_ptr
+  case("SurfTem")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(tem1))
+     tem1(1:ndx) = x_1d_double_ptr
+  case("taus")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(taus))
+     taus(:) = x_1d_double_ptr
   end select

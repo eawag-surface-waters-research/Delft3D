@@ -308,4 +308,21 @@
        shape(1) = ndx
     case("is_dtint")
        shape(1) = 0
+    case("taucr")
+       shape(1) = ndx
+    case("tetacr")
+       shape(1) = ndx
+    case("TcrEro")
+       shape(1) = stmpar%lsedtot
+    case("TcrSed")
+       shape(1) = stmpar%lsedtot
+    case("Qsunmap")
+       shape(1) = ndx
+	case("SedFrac")
+       shape(2) = ISEDN - ISED1 + 1
+       shape(1) = ndx
+    case("SurfTem")
+       shape(1) = ndx
+	case("taus")
+	   shape(1) = ndx
   end select

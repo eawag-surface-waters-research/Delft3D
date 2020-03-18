@@ -55,6 +55,8 @@ module bmi
   use m_integralstats
   use gridoperations
   use unstruc_model
+  use m_fm_erosed, only: taucr, tetacr
+  use m_heatfluxes, only: Qsunmap
 
   implicit none
 
@@ -994,7 +996,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    integer(c_int), target, allocatable, save :: xi(:,:)
    real(c_double), target, allocatable, save :: xd(:,:)
 
-   integer :: i, j, k, Lf, knb
+   integer :: i, j, k, Lf, knb, kb, kt
 
 
    ! The fortran name of the attribute name

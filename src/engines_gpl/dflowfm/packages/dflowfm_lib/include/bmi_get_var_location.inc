@@ -298,6 +298,22 @@ select case(var_name)
     location_name = "face"
   case("is_dtint")
     location_name = ""
+  case("taucr")
+     location_name = "face"
+  case("tetacr")
+     location_name = "face"
+  case("TcrEro")
+     location_name = ""
+  case("TcrSed")
+     location_name = ""
+  case("Qsunmap")
+     location_name = "face"
+  case("SedFrac")
+     location_name = "face"
+  case("SurfTem")
+     location_name = "face"
+  case("taus")
+     location_name = "face"
   case default
     location_name = ""
 end select

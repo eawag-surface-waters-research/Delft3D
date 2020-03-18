@@ -298,6 +298,22 @@
      rank = 2
   case("is_dtint")
      rank = 0
+  case("taucr")
+     rank = 1
+  case("tetacr")
+     rank = 1
+  case("TcrEro")
+     rank = 1
+  case("TcrSed")
+     rank = 1
+  case("Qsunmap")
+     rank = 1
+  case("SedFrac")
+     rank = 2
+  case("SurfTem")
+     rank = 1
+  case("taus")
+     rank = 1
   case default
      rank = 0
   end select
