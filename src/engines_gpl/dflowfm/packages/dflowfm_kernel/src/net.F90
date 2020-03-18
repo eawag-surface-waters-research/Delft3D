@@ -206,11 +206,13 @@
 
    if (.not. allocated(xk)) then
       allocate( xk (1), yk (1), zk (1) , NOD (1) , KC (1) , NMK (1) , KN(3,1), LC(1), RNOD(1), RLIN(1))
+      allocate(nod(1))
       allocate(nod(1)%lin(1))
       NMK = 0
    endif
    if (.not. allocated(xk0)) then
       allocate( xk0(1), yk0(1), zk0(1) , NOD0(1) , KC0(1) , NMK0(1), KN0(3,1), LC0(1)  )
+      allocate(nod0(1))
       allocate(nod0(1)%lin(1))
       nmk0 = 0
    endif

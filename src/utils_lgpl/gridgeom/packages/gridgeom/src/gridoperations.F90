@@ -107,7 +107,12 @@
    NODSIZ = SIZE(NOD)
 
    DO K = 1,KX
-      LS0 = SIZE(NOD0(K)%LIN )  ! LS0 = NMK0(K)
+      IF (ALLOCATED(NOD0(K)%LIN) ) THEN
+         LS0 = SIZE(NOD0(K)%LIN )  ! LS0 = NMK0(K)
+      ELSE
+         LS0 = 0
+      ENDIF
+
       IF (LS0 .GE. 1) THEN
          ! IF (.NOT. ASSOCIATED(NOD(K)%LIN) ) THEN
          IF (ALLOCATED(NOD(K)%LIN) ) THEN
