@@ -958,6 +958,10 @@ subroutine readMDUFile(filename, istat)
     endif
     call prop_get_integer(md_ptr, 'numerics', 'TransportTimestepping' , jaLts)
     call prop_get_integer(md_ptr, 'numerics', 'TransportAutoTimestep' , jatransportautotimestepdiff)
+    if (jatransportautotimestepdiff == 3 .and. kmx > 0) then
+       call mess(LEVEL_ERROR, 'Implicit horizontaldiffusion is only implemented in 2D', 'set TransportAutoTimestepdiff = 1 or 2')
+    endif
+
 
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'   , javasal)
 

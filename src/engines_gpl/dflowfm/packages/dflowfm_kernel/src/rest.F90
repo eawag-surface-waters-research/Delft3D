@@ -1313,7 +1313,7 @@ end subroutine read_land_boundary_netcdf
       
     
 !     SPvdP: close dia-file
-      if ( mdia.gt.0 .and. mdia.lt.maxnum ) then
+      if ( mdia.ne.0 .and. mdia.lt.maxnum ) then
          close(mdia)
          mdia = 0
       end if
