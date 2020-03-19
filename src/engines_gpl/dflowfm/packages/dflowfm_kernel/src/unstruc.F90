@@ -2020,9 +2020,7 @@ if(q /= 0) then
  else if (hu(L) > 0d0) then
 
     hpr1    = hu(L)
-
-       
-    frcn = frcu(L) 
+    frcn    = frcu(L) 
     ifrctyp = ifrcutp(L)
     if (jaconveyance2D > 0) then
 
@@ -2037,8 +2035,12 @@ if(q /= 0) then
        au(L) = aru
     else
        au(L) = hpr1*wu(L)
-       call getcz(hpr1, frcn, ifrctyp, Cz, L)
-       cfuhi(L) = ag / (Cz**2 * hpr1)
+       if (frcn >  0) then
+          call getcz(hpr1, frcn, ifrctyp, Cz, L)
+          cfuhi(L) = ag / (hpr1*Cz*Cz)
+       else
+          cfuhi(L) = 0d0
+       end if
     endif
  endif
  end subroutine addlink1D2Dinternal
