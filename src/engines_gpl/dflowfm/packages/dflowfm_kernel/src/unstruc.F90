@@ -1982,7 +1982,7 @@ if(q /= 0) then
  integer           :: k1, k2, k3, k4, K, jaconv, jaconvu,ifrctyp
  double precision  :: hpr1, ar1, wid1, aconv1, hpr2, ar2, wid2, aconv2, aru, widu, aconvu
  double precision  :: dx1, dx2, frcn, BL1, BL2, b21, wu2, ai
- double precision  :: beta, bt2, deltaa,hyr, uucn, ucna
+ double precision  :: beta, bt2, deltaa,hyr, uucn, ucna, Cz
 
  k1  = ln(1,L) ; k2 = ln(2,L)
   if (bob0(1,L) < bob0(2,L)) then
@@ -2021,10 +2021,12 @@ if(q /= 0) then
 
     hpr1    = hu(L)
 
+       
+    frcn = frcu(L) 
+    ifrctyp = ifrcutp(L)
     if (jaconveyance2D > 0) then
 
        jaconv = min(2,jaconveyance2D)
-       frcn = frcu(L) ; ifrctyp = ifrcutp(L)
        CALL getprof2d(hpr1,wu2,b21,ai,frcn,ifrctyp, widu,aru,aconvu,jaconv, beta, deltaa,hyr)
 
        if (frcn >  0) then
@@ -2035,6 +2037,8 @@ if(q /= 0) then
        au(L) = aru
     else
        au(L) = hpr1*wu(L)
+       call getcz(hpr1, frcn, ifrctyp, Cz, L)
+       cfuhi(L) = ag / (Cz**2 * hpr1)
     endif
  endif
  end subroutine addlink1D2Dinternal
