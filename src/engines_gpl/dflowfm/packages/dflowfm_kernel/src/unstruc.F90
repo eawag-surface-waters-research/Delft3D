@@ -1533,7 +1533,7 @@ if(q /= 0) then
     do k=1,Ndx
        s1(k) = s0(k) + sq(k)*bai(k)*dts
     end do
-    call sets01zbnd(1) ! expl
+    call sets01zbnd(1, 0) ! expl
 
 !   synchronise all water-levels
     if ( jampi.eq.1 ) then
@@ -2844,7 +2844,7 @@ subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  !  Nevertheless, s0 at the boundary (at the old time-level) will now be filled with boundary conditions at the new time level
  if(jazws0==0 .or. len_trim(md_restartfile)==0) then
     ! if(jazws0==1 .and. len_trim(md_restartfile)>0) then s0 and s1 are read from restart file, in this case, no need to call the following subroutine
-    call sets01zbnd(0)                               ! set s0 on z-boundaries
+    call sets01zbnd(0, 0)                               ! set s0 on z-boundaries
  endif
 
  if (uniformhu > 0d0) then
@@ -3545,7 +3545,8 @@ end subroutine sethu
 
  end subroutine setau
 
- subroutine sets01zbnd(n01)
+ !> Sets s1 or s0 water levels at zbndz-type boundaries.
+ subroutine sets01zbnd(n01, jasetBlDepth)
  use m_flowgeom
  use m_flow
  use m_flowtimes
@@ -3553,7 +3554,10 @@ end subroutine sethu
  use m_sobekdfm
  use unstruc_model, only: md_restartfile
  implicit none
- integer          :: n, kb, k2, itpbn, L, n01
+ integer, intent(in) :: n01          !< Selects whether s0 or s1 has to be set. 
+ integer, intent(in) :: jasetBlDepth !< Whether or not (1/0) to set the boundary node bed levels, based on depth below s1. Typically only upon model init (based on initial water levels).
+
+ integer          :: n, kb, k2, itpbn, L, ibnd
  double precision :: zb, hh, dtgh, alf, zcor
  double precision, external :: barocpsteric
 
@@ -3600,6 +3604,16 @@ end subroutine sethu
 
 !    zb = max( zb, bl(kb) + 1d-3 )
 
+    ! When requested, set bl of bnd nodes to a certain depth below (initial) water level.
+    if (jasetBlDepth == 1 .and. allocated(bndBlDepth)) then
+       ibnd = kbndz(5,n)
+       if (bndBlDepth(ibnd) /= dmiss) then
+          bl(kb) = min(bl(kb), zb - bndBlDepth(ibnd))
+          bob(1,L) = max(bl(kb), bl(k2))
+          bob(2,L) = bob(1,L)
+       end if
+    end if
+ 
     if (itpbn < 6 .or. itpbn == 7) then
        if (n01 == 0) then
           s0(kb) = max(zb, bl(kb)) ! TODO: AvD: if single time step is being restarted, then this line will have overwritten some of the old s0 values.
@@ -15938,12 +15952,11 @@ end if
  tim1fld = tstart_user
 
 if (.not. jawelrestart) then ! If one restarts a simulation, then s0 and s1 are read from the restart file (new version), no need to set them.
-   call sets01zbnd(1)
+   call sets01zbnd(1, 1)
 else if (jaoldrstfile==1) then ! If the restart file is of old version (which does not have waterlevel etc info on boundaries), then need to set.
-   call sets01zbnd(0)
-   call sets01zbnd(1)
+   call sets01zbnd(0, 0)
+   call sets01zbnd(1, 1)
 endif
-
 
  do n  = 1, nbndn                                  ! for normal velocity boundaries, also initialise velocity on link
     LL = kbndn(3,n)
@@ -41355,7 +41368,6 @@ end function is_1d_boundary_candidate
  ! \DEBUG
  integer                       :: minp0, npli, inside, filetype0, iad
  integer, allocatable          :: ihu(:)             ! temp
- integer, allocatable          :: lnxbnd(:)          ! temp
  double precision, allocatable :: viuh(:)            ! temp
  double precision, allocatable :: tt(:)
  logical :: exist
@@ -41443,11 +41455,10 @@ end function is_1d_boundary_candidate
  if (allocated(patm))         deallocate(patm)
  if (allocated(kbndz))        deallocate(xbndz,ybndz,xy2bndz,zbndz,kbndz,zbndz0)
  if (allocated(zkbndz))       deallocate(zkbndz)
- if(allocated(lnxbnd))        deallocate(lnxbnd)
  id_first_wind =  huge(id_first_wind)
  id_last_wind  = -huge(id_last_wind)
 
- allocate(lnxbnd(lnx-lnxi))
+ call realloc(lnxbnd, lnx-lnxi, keepExisting = .false., fill = 0)
 
  n4 = 6
  if (nbndz > 0) then                                 ! now you know the elementsets for the waterlevel bnds
@@ -42037,9 +42048,6 @@ end function is_1d_boundary_candidate
 
  if ( allocated(xe) ) then
     deallocate (xyen, xe, ye)
- endif
- if ( allocated(lnxbnd) ) then
-    deallocate(lnxbnd)
  endif
 
  if (nshiptxy > 0) then
@@ -45524,8 +45532,9 @@ double precision :: perimgr, perimgr2, alfg, czg, hpr
 
 double precision :: frcn, cz, cf, conv, af_sub(3), perim_sub(3), cz_sub(3)
 double precision :: q_sub(3)             ! discharge per segment
-integer          :: LL, ka, kb, itp, ifrctyp
+integer          :: LL, ka, kb, itp, ifrctyp, ibndsect
 integer          :: k1, k2
+integer          :: jacustombnd1d
 double precision :: u1L, q1L, s1L, dpt, factor
 type(t_CrossSection), pointer :: cross1, cross2
 
@@ -45536,7 +45545,47 @@ endif
 
 hpr = hprL
 
-if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
+jacustombnd1d = 0
+if (kcu(L) == -1 .and. allocated(bndWidth1D)) then
+   ibndsect = lnxbnd(L-lnxi)
+   if (ibndsect > 0) then
+      if (bndWidth1D(ibndsect) /= dmiss) then
+         jacustombnd1d = 1
+      end if
+   end if
+end if
+
+if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width. 
+   width = bndwidth1D(ibndsect)
+   area = hpr*width
+   perim = width+2*hpr
+
+   if (japerim == 1) then
+      hydrad = area / perim
+      cz = 0d0
+      if (abs(kcu(ll))==1 .and. network%loaded) then ! flow1d used only for 1d channels and not for 1d2d roofs and gullies
+         cz = frcu(LL) ! We know that cz was set in frcu by a previous call for internal flow link LL.
+         frcu(L)        = cz
+         frcu_mor(L)    = cz
+         u_to_umain(L)  = 1d0
+         q1_main(L)     = q1(L)
+         wu(L)          = width
+      else                                           ! for conventional prof1D approach
+         if (frcu(LL) > 0) then
+            call getcz(hydrad, frcu(LL), ifrcutp(LL), cz,LL)
+         end if
+      end if
+
+      if (cz > 0d0) then
+         cfuhi(L)       = ag/(hydrad*cz*cz)
+      else
+         cfuhi(L) = 0d0
+      end if
+   end if
+
+   return
+   
+else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
    cz = 0d0
 
    if (japerim == 0) then ! calculate total area and volume

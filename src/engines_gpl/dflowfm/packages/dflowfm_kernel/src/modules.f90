@@ -1751,8 +1751,12 @@ end module m_crspath
  integer, allocatable              :: openbndtype(:)    !< (nopenbndsect) Type of this boundary section (one of IBNDTP_ZETA, etc...)
  integer, allocatable              :: nopenbndlin(:)    !< (nopenbndsect) Nr. of links/exchanges per section.
  integer, allocatable              :: openbndlin(:)     !< (sum(nopenbndlin(1:nopenbndsect)) Net link nrs for each open boundary.
- character(len=256), allocatable   :: openbndname(:)    !< (nopenbndsec)
- character(len=256), allocatable   :: openbndfile(:)    !< (nopenbndsec)
+ character(len=256), allocatable   :: openbndname(:)    !< (nopenbndsect)
+ character(len=256), allocatable   :: openbndfile(:)    !< (nopenbndsect)
+ double precision, allocatable     :: bndWidth1D(:)     !< (nopenbndsect) Optional custom width for (1D) boundary flow links.
+ double precision, allocatable     :: bndBlDepth(:)     !< (nopenbndsect) Optional custom bed level depth for boundary flow links.
+ integer, allocatable              :: lnxbnd(:)         !< (lnx-lnxi) Mapping from boundary flow link nr to nopenbndsect index.
+
 
  integer,          parameter       :: NTRANSFORMCOEF=26
  double precision                  :: transformcoef(NTRANSFORMCOEF) !< Transform coefficients a+b*x

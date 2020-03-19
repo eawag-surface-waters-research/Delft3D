@@ -279,6 +279,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  use m_alloc
  use string_module, only: strcmpi
  use unstruc_model, only: ExtfileNewMajorVersion, ExtfileNewMinorVersion
+ use m_missing, only: dmiss
 
  implicit none
 
@@ -300,6 +301,9 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  character(len=ini_value_len) :: forcingfile         !
  double precision             :: return_time         !
  double precision             :: rrtolb              ! Local, optional boundary tolerance value.
+ double precision             :: width1D             ! Local, optional custom 1D boundary width
+ double precision             :: blDepth             ! Local, optional custom boundary bed level depth below initial water level
+
  integer                      :: i                   !
  integer                      :: num_items_in_file   !
  logical                      :: file_ok             !
@@ -383,11 +387,17 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
        rrtolb = 0d0
        call prop_get_double(node_ptr, '', 'openBoundaryTolerance', rrtolb)
 
+       width1D = dmiss
+       call prop_get_double(node_ptr, '', 'bndWidth1D', width1D)
+
+       blDepth = dmiss
+       call prop_get_double(node_ptr, '', 'bndBlDepth', blDepth)
+
        if (group_ok) then
           if (rrtolb > 0d0) then
-             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = (1+2*rrtolb)/(1+2*rrtol))
+             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = (1+2*rrtolb)/(1+2*rrtol), width1D = width1D, blDepth = blDepth)
           else
-             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = 1d0)
+             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = 1d0, width1D = width1D, blDepth = blDepth)
           end if
           num_bc_ini_blocks = num_bc_ini_blocks + 1
        endif
@@ -440,7 +450,8 @@ end subroutine appendrettime
 !! This routine is based upon the network admin only, not on the flow admin.
 subroutine processexternalboundarypoints(qid, filename, filetype, return_time, nx, kce, &
                                          numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, &
-                                         numqh, numw, numtr, numsf, rrtolrel, tfc) ! helper for finding external boundary points
+                                         numqh, numw, numtr, numsf, rrtolrel, tfc, &
+                                         width1D, blDepth) ! helper for finding external boundary points
  use m_netw
  use m_flow, qid_flow => qid, filetype_flow => filetype
  use m_flowgeom
@@ -459,6 +470,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use m_flowparameters, only: jawave
  use string_module
  use m_strucs, only: numgeneralkeywrd
+ use m_missing, only: dmiss
  
  implicit none
 
@@ -473,6 +485,8 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  double precision      , intent(in)    :: rrtolrel !< To enable a more strict rrtolerance value than the global rrtol. Measured w.r.t. global rrtol.
  
  double precision, dimension(numgeneralkeywrd), optional, intent(in) :: tfc
+ double precision, optional, intent(in) :: width1D !< Optional custom width for boundary flow link.
+ double precision, optional, intent(in) :: blDepth !< Optional custom bed level depths below water level boundaries's initial value for boundary points.
  
  character(len=256)                    :: qidfm                               !
  integer                               :: itpbn
@@ -516,6 +530,19 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      itpez(nbndz+1:nbndz+numz) =  itpbn
      
      call addopenbndsection(numz, kez(nbndz+1:nbndz+numz), filename, IBNDTP_ZETA)
+     
+     ! When present, set custom geometry for open boundaries (bed level for bndz and/or width1D for 1D bndz/u).
+     ! Only for z:
+     if (present(blDepth)) then
+        call realloc(bndBlDepth, size(openbndtype), fill = dmiss)
+        bndBlDepth(nopenbndsect) = blDepth
+     end if
+     ! For z and u:
+     if (present(width1D)) then
+        call realloc(bndWidth1D, size(openbndtype), fill = dmiss)
+        bndWidth1D(nopenbndsect) = width1D
+     end if
+
      itpenz(nbndz+1:nbndz+numz) = nopenbndsect
      nbndz = nbndz + numz
      
@@ -556,6 +583,13 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      itpeu(nbndu+1:nbndu+numu) = itpbn
 
      call addopenbndsection(numu, keu(nbndu+1:nbndu+numu), filename, IBNDTP_U)
+
+     ! When present, set custom geometry for open boundaries (width1D for 1D bndz/u).
+     ! For z and u:
+     if (present(width1D)) then
+        call realloc(bndWidth1D, size(openbndtype), fill = dmiss)
+        bndWidth1D(nopenbndsect) = width1D
+     end if
 
      itpenu(nbndu+1:nbndu+numu) = nopenbndsect
      nbndu = nbndu + numu
