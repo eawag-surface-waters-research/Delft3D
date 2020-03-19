@@ -60,7 +60,7 @@ REAL(KIND=wp), PARAMETER, PRIVATE :: gasconst_bar_cm3_o_mol_k = 83.14510_wp ! li
 ! 0 degrees centigrade in Kelvin
 ! ------------------------------
 
-REAL(KIND=wp), PARAMETER, PRIVATE :: t_k_zerodegc = CtoKelvin ! Handbook (2007)
+REAL(KIND=wp), PARAMETER, PRIVATE :: t_k_zerodegc = real(CtoKelvin, wp) ! Handbook (2007)
 
 
 ! --------------------------------------------------------------
