@@ -1263,7 +1263,7 @@ end module m_wind
  integer                           :: jaSecchisp           !< Spatial Secchi 0,1
  integer                           :: jaRoro               !< Use roair(n)/rho(ntop) in windstress 0,1
 
- double precision, allocatable     :: Qsunmap(:)
+ double precision, allocatable, target :: Qsunmap(:)
  double precision, allocatable     :: Qevamap(:)
  double precision, allocatable     :: Qconmap(:)
  double precision, allocatable     :: Qlongmap(:)
