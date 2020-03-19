@@ -149,7 +149,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     !DEC$ ATTRIBUTES DLLEXPORT :: averaging
     use kdtree2Factory
     use m_ec_interpolationsettings
-    use m_ec_basic_interpolation, only: averaging2
+    use m_ec_basic_interpolation, only: averaging2, TerrorInfo
     use gridoperations
     use precision_basics
     use m_missing
@@ -175,6 +175,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     real(c_double), intent(in)              :: relativeSearchSize  !< relative search cell size
     integer(c_int), intent(in)              :: jsferic
     integer(c_int), intent(in)              :: jasfer3D
+    integer                                 :: ierr
 
     ! local variables
     type(t_ug_meshgeom)                     :: meshgeom            !< fortran meshgeom
@@ -190,13 +191,14 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     double precision, allocatable           :: targetX(:)
     double precision, allocatable           :: targetY(:)
     double precision, allocatable           :: rawTargetValues(:)
-    integer                                 :: k, IAVtmp, NUMMINtmp, INTTYPEtmp, ierr, i, jakdtree, numTargets
+    integer                                 :: k, IAVtmp, NUMMINtmp, INTTYPEtmp, i, jakdtree, numTargets
     double precision                        :: RCELtmp, valFirstNode,valSecondNode
     integer                                 :: nMaxNodesPolygon
     real(hp), allocatable                   :: xx(:,:), yy(:,:), xxx(:), yyy(:)
     integer, allocatable                    :: nnn(:)
     integer                                 :: nNetCells, shift
-       
+    type(TerrorInfo)                        :: errorInfo
+
     !get and convert meshgeom to kn table
     ierr = network_data_destructor()
     ierr = convert_cptr_to_meshgeom(meshtwod, meshtwoddim, meshgeom)
@@ -316,14 +318,20 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     dmiss,&
     jsferic,&
     jasfer3D,&
-    jins = 1,&
-    NPL = 0,&
-    XPL = XPL,&
-    YPL = YPL,&
-    ZPL = ZPL)
-    
+    1,&
+    0,&
+    XPL,&
+    YPL,&
+    ZPL, &
+    errorInfo)
+
     !delete kdtree
     call delete_kdtree2(treeglob)
+
+    if ( .not. errorInfo%success) then
+       ierr = -1
+       goto 1234
+    end if
 
     !copy values back
     if (locType.eq.0) then

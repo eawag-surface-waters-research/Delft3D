@@ -6008,7 +6008,7 @@ contains
    use m_missing
    use m_sferic, only: jsferic, jasfer3D
    use m_polygon, only: NPL, xpl, ypl, zpl
-   use m_ec_basic_interpolation, only: triinterp2, averaging2
+   use m_ec_basic_interpolation, only: triinterp2, averaging2, TerrorInfo
    use geometry_module, only: dbpinpol
    use gridoperations
    use unstruc_model, only: getoutputdir
@@ -6057,6 +6057,8 @@ contains
    integer                         :: iav_store, nummin_store
 
    character(len=5)                :: sd
+
+   type(TerrorInfo)                :: errorInfo
 
    success = .false. 
    minp0 = 0
@@ -6108,9 +6110,10 @@ contains
           call read_flowsamples_from_netcdf(filename, qid, ierr)
       elseif (filetype == ncgrid) then
          ! TODO: support reading initial fields from NetCDF too
-         write (msgbuf, '(A)') 'timespace::timespaceinitialfield: Error while reading '''//qid//''' from file '''//trim(filename)//'''. File type not supported for initial fields.'
+         msgbuf = 'timespace::timespaceinitialfield: Error while reading ''' // trim(qid) // &
+            ''' from file ''' // trim(filename) // '''. File type not supported for initial fields.'
          call warn_flush()
-         success = .false.
+         return
       else if (filetype == arcinfo) then
           call read_samples_from_arcinfo(filename, 0)
       else
@@ -6119,13 +6122,8 @@ contains
 
       if (method == 5) then
           jdla = 1
-          if (jakc == 0) then
-             call triinterp2(xu,yu,zh,nx,jdla, XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, & 
-                             NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
-          else 
-             call triinterp2(xu,yu,zh,nx,jdla, XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, & 
-                             NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef, kcc)
-          endif
+          call triinterp2(xu,yu,zh,nx,jdla, XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, & 
+                          NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef, kcc)
 
       else if (method == 6) then                ! and this only applies to flow-link data
 
@@ -6163,7 +6161,7 @@ contains
                    yy(4,L) = yk(kn(2,Lk))
                enddo
                nnn = 4 ! array nnn
-          else if (iprimpos == 2) then           ! primitime position = waterlevelpoint, cell centre  
+          else if (iprimpos == 2) then           ! primitime position = waterlevelpoint, cell centre
                n6 = maxval(netcell%n)
                if ( jsferic == 1 ) then
                   n6 = n6+2   ! safety at poles
@@ -6171,19 +6169,14 @@ contains
 
                allocate( xx(n6,nx), yy(n6,nx), nnn(nx) )
 
-               allocate(LnnL(n6), Lorg(n6))  ! not used
+               allocate(LnnL(n6), Lorg(n6))
 
                do n = 1,nx
-!                  nnn(n) = netcell(n)%n
-!                  do nn = 1, nnn(n)
-!                     xx(nn,n) = xk(netcell(n)%nod(nn))
-!                     yy(nn,n) = yk(netcell(n)%nod(nn))
-!                  enddo
-               
                   call get_cellpolygon(n,n6,nnn(n),rcel,xx(1,n),yy(1,n),LnnL,Lorg,zz)
                enddo
-          else if (iprimpos == 3) then           ! primitime position = netnode, cell corner    
-            
+               deallocate(LnnL, Lorg)
+          else if (iprimpos == 3) then           ! primitime position = netnode, cell corner
+
                n6 = 3*maxval(nmk)   ! 2: safe upper bound , 3 : even safer!
                allocate( xx(n6,numk), yy(n6,numk), nnn(numk), xxx(n6), yyy(n6) )
                do k = 1,numk
@@ -6193,7 +6186,7 @@ contains
                      end if
                   end if
 
-!              get the celllist
+!                 get the cell list
                   call make_dual_cell(k, n6, rcel, xxx, yyy, nnn(k), Wu1Duni)
                   do i=1,nnn(k)
                      xx(i,k) = xxx(i)
@@ -6214,18 +6207,19 @@ contains
                end if
           end if
 
-          if (jakc == 0) then
-             call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree,&
-                             dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
-          else
-             call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree,&
-                             dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, kcc)
-          end if
+          call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree,&
+                             dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo, kcc)
           deallocate(xx,yy,nnn)
-          if ( iprimpos == 2 ) then
-             if ( allocated(LnnL) ) deallocate(LnnL)
-             if ( allocated(Lorg) ) deallocate(Lorg)
+
+          if (errorInfo%cntNoSamples > 0) then
+              write (msgbuf,'(5a,i0,a)') 'For quantity ', trim(qid), ' in file ', trim(filename), ' no values found for ', errorInfo%cntNoSamples, ' cells/links.'
+              call warn_flush()
           end if
+          if (allocated(errorInfo%message)) then
+             msgbuf = errorInfo%message
+             call warn_flush()
+          endif
+          if ( .not. errorInfo%success) return
 
 !         restore settings
           iav  = iav_store

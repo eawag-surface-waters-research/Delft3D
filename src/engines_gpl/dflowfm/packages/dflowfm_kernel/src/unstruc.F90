@@ -34769,7 +34769,7 @@ end
  use m_grid
  use kdtree2Factory
  use m_polygon, only: NPL, xpl, ypl, zpl
- use m_ec_basic_interpolation, only: triinterp2, averaging2
+ use m_ec_basic_interpolation, only: triinterp2, averaging2, TerrorInfo
  use m_sferic, only: jsferic, jasfer3D
  use gridoperations
 
@@ -34784,6 +34784,7 @@ end
  integer :: i, ierror
  integer :: jdla, jakdtree = 1
  double precision           :: xn, yn, dist
+ type(TerrorInfo)           :: errorInfo
 
  if (NAAR == 1 .AND. ndx == 0) then
     call qnerror('First reinitialise flow model, current dimensions are 0',' ',' ')
@@ -34835,8 +34836,9 @@ end
              ENDDO
           ENDDO
           call averaging2(1,NS,XS,YS,ZS,IPSAM,XZ,YZ,BL,NDX,XX,YY,N6,NNN,jakdtree, &
-                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
           DEALLOCATE(XX,YY,NNN)
+          call checkErrorInfo(errorInfo)
        ENDIF
     else if (ibedlevtyp == 2) then                             ! to flowlinks bottomlevel blu will be phased out but not yet..
        if (INTERPOLATIONTYPE == 1) THEN
@@ -34854,8 +34856,9 @@ end
           enddo
           nnn = 4 ! array nnn
           call averaging2(1,NS,XS,YS,ZS,IPSAM,Xu,Yu,BLu,lnx,XX,YY,N6,NNN,jakdtree, &
-                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)  ! interpdivers
+                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)  ! interpdivers
           DEALLOCATE(XX,YY,NNN)
+          call checkErrorInfo(errorInfo)
        endif
     endif
 
@@ -34876,8 +34879,9 @@ end
           enddo
        enddo
        call averaging2(1,NS,XS,YS,ZS,IPSAM,XK,YK,ZK,NUMK,XX,YY,N6,NNN,jakdtree, &
-                       dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+                       dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
        DEALLOCATE(XX,YY,xxx,yyy,NNN)
+       call checkErrorInfo(errorInfo)
     ELSE IF (INTERPOLATIONTYPE == 3 ) THEN
       call sam2net_curvi(numk,xk,yk,zk)
     ENDIF
@@ -34896,8 +34900,9 @@ end
           nnn(K) = NN  ! array nnn
        enddo
        call averaging2(1,NS,XS,YS,ZS,IPSAM,Xz,Yz,s1,Ndx,XX,YY,N6,NNN,jakdtree, &
-                       dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+                       dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
        DEALLOCATE(XX,YY,NNN)
+       call checkErrorInfo(errorInfo)
     ENDIF
     do k = 1,ndx
        if (s1(k) == dmiss) then
@@ -34931,11 +34936,31 @@ end
     ENDIF
  endif
 
- if ( jakdtree.eq.1 ) then
+ if ( jakdtree == 1 ) then
     call delete_kdtree2(treeglob)
  end if
 
- END subroutine interpdivers
+ contains
+
+   subroutine checkErrorInfo(errorInfo)
+      use MessageHandling
+      type(TerrorInfo), intent(in) :: errorInfo
+
+      if (errorInfo%cntNoSamples > 0) then
+         write (msgbuf,'(a,i0,a)') 'In interpdivers, no values found for ', errorInfo%cntNoSamples, ' cells/links.'
+         call warn_flush()
+      end if
+      if (allocated(errorInfo%message)) then
+         msgbuf = errorInfo%message
+         if (errorInfo%success) then
+            call warn_flush()
+         else
+            call err_flush()
+         endif
+      endif
+   end subroutine checkErrorInfo
+
+ end subroutine interpdivers
 
  subroutine pixcount(xs,ys,zs,jatel)
 
@@ -35301,17 +35326,17 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
 bft:do ibathyfiletype=1,2
     if (ibathyfiletype == 1) then
        call split_filename(md_extfile,      basedir, fnam) ! Remember base dir of *.ext file, to resolve all refenced files below w.r.t. that base dir.
-       if (ja1 .eq. 1) then
+       if (ja1 == 1) then
           ja = 1
        end if
     else if (ibathyfiletype == 2) then
        call split_filename(md_inifieldfile, basedir, fnam) ! Remember base dir of *.ini file, to resolve all refenced files below w.r.t. that base dir.
-       if (ja2 .eq. 1) then
+       if (ja2 == 1) then
           ja = 1
        end if
     end if
 
-    do while (ja .eq. 1)
+    do while (ja == 1)
        if (ibathyfiletype == 1) then       ! read *.ext file
           call delpol()
           call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
@@ -35336,10 +35361,11 @@ bft:do ibathyfiletype=1,2
              call mess(LEVEL_WARN, 'Bed level info should be defined in file '''//trim(md_inifieldfile)//'''. Quantity '//trim(qid)//' ignored in external forcing file '''//trim(md_extfile)//'''.')
              cycle bft ! Try ini field file next
           end if
+          success = .true.
           if (strcmpi(qid, 'bedlevel1D') .or. (strcmpi(qid, 'bedlevel') .and. ibathyfiletype == 2 .and. iLocType == ILATTP_1D)) then
              call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting 1D bedlevel from file '''//trim(filename)//'''.')
              kc(1:mx) = kc1D
-             success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, 3, kc) ! zie meteo module
+             success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, 3, kc) ! see meteo module
           else if (strcmpi(qid,'bedlevel', 8)) then
              if ((strcmpi(qid, 'bedlevel') .and. ibathyfiletype == 1) .or. (strcmpi(qid, 'bedlevel') .and. ibathyfiletype == 2 .and. iLocType == ILATTP_ALL))  then
                 call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting both 1D and 2D bedlevel from file '''//trim(filename)//'''.')
@@ -35350,13 +35376,16 @@ bft:do ibathyfiletype=1,2
              endif
 
              if (ibedlevtyp == 3) then
-                success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! zie meteo module
+                success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! see meteo module
              else if (ibedlevtyp == 2) then
-                success = timespaceinitialfield_mpi(xu, yu, blu, lnx, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! zie meteo module
+                success = timespaceinitialfield_mpi(xu, yu, blu, lnx, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! see meteo module
              else if (ibedlevtyp == 1) then
-                success = timespaceinitialfield_mpi(xz, yz, bl, ndx, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! zie meteo module
+                success = timespaceinitialfield_mpi(xz, yz, bl, ndx, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! see meteo module
              endif
           endif
+          if ( .not. success) then
+             call mess(LEVEL_FATAL, "Error reading " // trim(qid) // " from " // trim(filename) // ".")
+          end if
        endif
 
     end do ! ja==1 provider loop
@@ -35369,7 +35398,7 @@ bft:do ibathyfiletype=1,2
     call tree_destroy(inifield_ptr)
 
     ! Interpreted values for debugging.
-    if ( md_jasavenet.eq.1 ) then
+    if ( md_jasavenet == 1 ) then
 !      save network
        select case (ibedlevtyp)
           case (3,4,5,6) ! primitime position = netnode, cell corner

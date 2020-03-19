@@ -5076,7 +5076,7 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
   USE m_missing
   USE m_ec_interpolationsettings
   use m_sferic, only: jsferic, jasfer3D, dtol_pole
-  use m_ec_basic_interpolation, only: triinterp2, bilin_interp, averaging2
+  use m_ec_basic_interpolation, only: triinterp2, bilin_interp, averaging2, TerrorInfo
   use m_flowexternalforcings, only: transformcoef
   use gridoperations
 
@@ -5091,6 +5091,7 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
 
   DOUBLE PRECISION, ALLOCATABLE :: XX(:,:), YY(:,:)
   INTEGER         , ALLOCATABLE :: NNN (:)
+  type(TerrorInfo)              :: errorInfo
 
   CALL SAVENET()
 
@@ -5150,7 +5151,7 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
            ENDDO
         ENDDO
         call averaging2(1,NS,XS,YS,ZS,IPSAM,XC,YC,ZC,NUMP,XX,YY,N6,NNN,0,&
-                        dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+                        dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
         DEALLOCATE(XX,YY,NNN)
      endif
 
@@ -29652,7 +29653,7 @@ subroutine refinecellsandfaces2()
       use kdtree2Factory
       use m_missing, only: dmiss, JINS
       use m_polygon, only: NPL, xpl, ypl, zpl
-      use m_ec_basic_interpolation, only: averaging2
+      use m_ec_basic_interpolation, only: averaging2, TerrorInfo
       use m_sferic, only: jsferic, jasfer3D
       use geometry_module, only: dbdistance, comp_masscenter
 
@@ -29685,6 +29686,7 @@ subroutine refinecellsandfaces2()
       integer                                           :: jacounterclockwise          ! counterclockwise (1) or not (0) (not used here)
 
       double precision, parameter                       :: FAC = 1d0
+      type(TerrorInfo)                                  :: errorInfo
 !      double precision, parameter                       :: dtol = 1d-8
 
 
@@ -29724,7 +29726,7 @@ subroutine refinecellsandfaces2()
 
           zc = DMISS
           call averaging2(NDIM,NS,xs,ys,zss,ipsam,xc,yc,zc,1,x,y,N,nnn,jakdtree,&
-                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
 
           do ivar=1,3
              if ( zc(ivar).eq.DMISS ) goto 1234
@@ -29764,7 +29766,7 @@ subroutine refinecellsandfaces2()
          if ( Dt_maxcour.gt.0d0 .or. irefinetype.eq.ITYPE_MESHWIDTH ) then
             zc = DMISS
             call averaging2(1,NS,xs,ys,zs,ipsam,xc,yc,zc,1,x,y,N,nnn,jakdtree, &
-                            dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+                            dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, errorInfo)
 !           check if a value is found, use nearest sample from cell center if not so
                if ( zc(1).eq.DMISS .and. jakdtree.eq.1 .and. jaoutsidecell.eq.1 ) then
                call find_nearest_sample_kdtree(treeglob,Ns,1,xs,ys,zs,xc(1),yc(1),1,isam,ierror, jsferic, dmiss)
