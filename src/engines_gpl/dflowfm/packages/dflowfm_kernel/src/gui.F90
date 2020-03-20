@@ -2206,7 +2206,7 @@
          endif
          mfil   = 1
          CALL FILEMENU(mfil,FILNAM,ierror)
-         IF (ierror /= 0) THEN
+         IF (ierror == 0) THEN
              call doclose(mfil)
              CALL save_displaysettings(filnam)
              CALL MESSAGE('YOU SAVED ' , filnam, ' ')

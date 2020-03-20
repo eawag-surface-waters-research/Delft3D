@@ -32838,14 +32838,20 @@ end subroutine Swart
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
 
- call getwavenr(depth,tsig,rk)
- hrm    = min( Hrms,gammax*depth )
- arms   = 0.5d0*hrms
- omeg   = twopi/tsig
- shs    = sinhsafei(rk*depth)
- uorbi  = omeg*arms*shs                        !omeg*(0.5*hsig)
- ust    = 0.5d0*omeg*arms*arms/depth
- rlabd  = twopi/rk
+ 
+ if (depth < 0.1d0 .or. Tsig == 0) then
+    Uorbi = 0d0 ; rlabd = 0d0 ; ust = 0d0
+ else 
+    call getwavenr(depth,tsig,rk)
+    hrm    = min( Hrms,gammax*depth )
+    arms   = 0.5d0*hrm
+    omeg   = twopi/tsig
+    shs    = sinhsafei(rk*depth)
+    uorbi  = omeg*arms*shs                        !omeg*(0.5*hsig)
+    ust    = 0.5d0*omeg*arms*arms/depth
+    rlabd  = twopi/rk
+ endif
+
  return
 
  if (ndraw(28) > 40) then
@@ -37778,9 +37784,15 @@ end subroutine setbobs_fixedweirs
       call comp_filter_predictor()
     end if
 
+    if (jawave > 0 ) then ! now every timestep, not only at getfetch updates
+       do k = 1,ndx
+          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rlabda(k), ustk(k)) 
+       enddo
+    endif
+
     call update_verticalprofiles()
 
-          endif
+ endif
 
  do n  = 1, nbndu
     LL    = kbndu(3,n)
