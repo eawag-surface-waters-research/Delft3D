@@ -185,6 +185,9 @@ type t_unc_mapids
    integer :: id_timestep             = -1 !< Variable ID for 
    integer :: id_numlimdt(MAX_ID_VAR) = -1 !< Variable ID for 
    integer :: id_s1(MAX_ID_VAR)       = -1 !< Variable ID for water level (on 1D, 2D, 3D grid parts resp.)
+   integer :: id_evap(MAX_ID_VAR)     = -1 !< Variable ID for prescribed evaporation
+   integer :: id_potevap(MAX_ID_VAR)  = -1 !< Variable ID for potential evaporation
+   integer :: id_actevap(MAX_ID_VAR)  = -1 !< Variable ID for actual evaporation
    integer :: id_s0(MAX_ID_VAR)       = -1 !< Variable ID for 
    integer :: id_hs(MAX_ID_VAR)       = -1 !< Variable ID for 
    integer :: id_vol1(MAX_ID_VAR)     = -1 !< Variable ID for volume
@@ -4341,6 +4344,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_oned_functions, only: gridpoint2cross
    use string_module, only: replace_multiple_spaces_by_single_spaces
    use m_save_ugrid_state, only: mesh1dname
+   use m_hydrology_data, only : jadhyd, ActEvap, PotEvap
 
    implicit none
 
@@ -4464,6 +4468,18 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       if (jamaps0 > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s0, nf90_double, UNC_LOC_S, 's0', 'sea_surface_height', 'Water level on previous timestep', 'm')
       end if
+      
+      ! Evaporation
+      if (jamapevap > 0) then
+         if(jadhyd == 1) then
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_potevap, nf90_double, UNC_LOC_S, 'potential evaporation', '', 'Potential evaporation at pressure points', 'm/s')
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_actevap, nf90_double, UNC_LOC_S, 'actual evaporation', '', 'Actual evaporation at pressure points', 'm/s')
+         end if
+         if (jaevap == 1) then
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_evap, nf90_double, UNC_LOC_S, 'prescribed evaporation', '', 'Prescribed evaporation at pressure points', 'm/s')
+         end if
+      end if     
+        
 
       ! Volumes
       if (jamapvol1 > 0) then
@@ -5300,7 +5316,18 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    if (jamaps0 == 1) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s0, UNC_LOC_S, s0)
    end if
-
+   
+   ! Evaporation
+   if (jamapevap == 1) then
+      if(jadhyd == 1) then
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_potevap, UNC_LOC_S, PotEvap)
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_actevap, UNC_LOC_S, ActEvap)
+      end if
+      if (jaevap == 1) then
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_evap, UNC_LOC_S, evap)
+      end if         
+   end if   
+   
    ! Volumes
    if (jamapvol1 == 1) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol1, ilocS, vol1) 
