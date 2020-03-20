@@ -4472,11 +4472,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ! Evaporation
       if (jamapevap > 0) then
          if(jadhyd == 1) then
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_potevap, nf90_double, UNC_LOC_S, 'potential evaporation', '', 'Potential evaporation at pressure points', 'm/s')
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_actevap, nf90_double, UNC_LOC_S, 'actual evaporation', '', 'Actual evaporation at pressure points', 'm/s')
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_potevap, nf90_double, UNC_LOC_S, 'potevap', 'water_potential_evaporation_flux', 'Potential evaporation rate at pressure points', 'm s-1')
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_actevap, nf90_double, UNC_LOC_S, 'actevap', 'lwe_water_evaporation_rate', 'Actual evaporation rate at pressure points', 'm s-1') ! Intentionally did not use standard_name='water_potential_evaporation_flux', because that one requires other units: kg m-2 s-1.
          end if
          if (jaevap == 1) then
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_evap, nf90_double, UNC_LOC_S, 'prescribed evaporation', '', 'Prescribed evaporation at pressure points', 'm/s')
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_evap, nf90_double, UNC_LOC_S, 'prescrevap', '', 'Prescribed evaporation rate at pressure points', 'm s-1')
          end if
       end if     
         
@@ -5319,7 +5319,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    
    ! Evaporation
    if (jamapevap == 1) then
-      if(jadhyd == 1) then
+      if (jadhyd == 1) then
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_potevap, UNC_LOC_S, PotEvap)
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_actevap, UNC_LOC_S, ActEvap)
       end if
