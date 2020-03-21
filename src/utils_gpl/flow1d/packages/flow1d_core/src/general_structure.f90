@@ -101,6 +101,10 @@ module m_General_Structure
                                                                         !< 1 only positive flow
                                                                         !< 2 only negative flow
                                                                         !< 3 no flow allowed
+      logical                          :: uselimitFlowNeg               !< flag for limiting the maximum discharge through an orifice for negative flow  
+      logical                          :: uselimitFlowPos               !< flag for limiting the maximum discharge through an orifice for positive flow   
+      double precision                 :: limitFlowNeg                  !< maximal discharge in positive direction (in case useLimitFLowPos is true)
+      double precision                 :: limitFlowpos                  !< maximal discharge in negative direction (in case useLimitFLowNeg is true
    end type
 
 
@@ -177,6 +181,7 @@ contains
       double precision               :: gle
       double precision               :: dx_struc  
       double precision               :: dsL
+      double precision               :: maxFlowL
       double precision               :: u1L           
       double precision, dimension(3) :: fu
       double precision, dimension(3) :: ru
@@ -264,6 +269,27 @@ contains
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, ds, genstr%state(1,L0), velheight)
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
          
+         ! FLow limiter is only applicable for an orifice type structure. In this case only flow under the door 
+         ! is possible. For General Structures and Weirs this limiter is not implemented.
+         ! In 2d the maximum flow rate is divided over all individual links, where the limiter is applied for 
+         ! each flow link individually
+
+         qL = direction * au(1) * (ru(1) - fu(1)*dsL )
+         if (qL > 0d0 .and. genstr%uselimitFlowPos) then
+            maxFlowL = genstr%limitFlowPos * gatefraction*wstr / genstr%ws_actual
+            if (qL > maxFlowL) then
+               fu(1) = 0.0
+               ru(1) = direction * maxFlowL / au(1)
+            endif
+         else if (qL < 0d0 .and. genstr%uselimitFlowNeg) then
+            maxFlowL = genstr%limitFlowNeg * gatefraction*wstr / genstr%ws_actual
+            if (abs(qL) > maxFlowL) then
+               fu(1) = 0.0
+               ru(1) = -  direction * maxFlowL / au(1)
+            endif
+       
+         endif
+
          !calculate flow over gate
          dg = huge(1d0)
          zgate = gle+genstr%gatedoorheight

@@ -1563,6 +1563,20 @@ module m_readstructures
       call prop_get_string(md_ptr, '', 'allowedFlowDir', dirString, success1)
       generalst%allowedflowdir = allowedFlowDirToInt(dirString)
 
+      generalst%uselimitFlowPos = .false.
+      call prop_get_logical(md_ptr, ' ', 'useLimitFlowPos', generalst%uselimitFlowPos)
+      if (generalst%uselimitFlowPos) then
+         call prop_get_double(md_ptr, ' ', 'limitFlowPos', generalst%limitFlowPos, success1)
+         success = success .and. check_input_result(success1, st_id, 'limitFlowPos')
+      endif
+
+      generalst%uselimitFlowNeg = .false.
+      call prop_get_logical(md_ptr, ' ', 'useLimitFlowNeg', generalst%uselimitFlowNeg)
+      if (generalst%uselimitFlowNeg) then
+         call prop_get_double(md_ptr, ' ', 'limitFlowNeg', generalst%limitFlowNeg, success1)
+         success = success .and. check_input_result(success1, st_id, 'limitFlowNeg')
+      endif
+
       ! Set default/standard values for orifice
       ! all levels are set to -1d-10. In the time loop these parameters will be set to the bed level.
       generalst%zu1                = -1d10
