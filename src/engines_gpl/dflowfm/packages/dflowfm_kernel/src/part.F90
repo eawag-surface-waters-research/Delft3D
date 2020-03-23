@@ -1830,7 +1830,7 @@ subroutine copy_sam2part()
    
    if ( japart.ne.1 ) then
       dum = ' '
-      call ini_part(0, dum, 0,0d0,0d0,0)
+      call ini_part(0, dum, dum, 0,0d0,0d0,0)
    end if
    
    call add_particles(Ns, xs, ys, 0, 1)
@@ -1888,6 +1888,12 @@ subroutine dealloc_particles()
    if ( allocated(numzero)     ) deallocate(numzero)
    
    Npart = 0
+
+   if ( allocated(trpart)       ) deallocate(trpart)
+   if ( allocated(xrpart)       ) deallocate(xrpart)
+   if ( allocated(yrpart)       ) deallocate(yrpart)
+   if ( allocated(zrpart)       ) deallocate(zrpart)
+   Nrpart = 0
    
    return
 end subroutine dealloc_particles
@@ -2044,7 +2050,7 @@ subroutine dealloc_partrecons()
 end subroutine dealloc_partrecons
 
 !> initialize particles
-subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_loc, threeDtype_loc)
+subroutine ini_part(japartfile, partfile, partrelfile, jatracer_loc, starttime_loc, timestep_loc, threeDtype_loc)
    use m_particles
    use m_samples
    use m_flow, only: s1, kmx
@@ -2056,7 +2062,8 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
    implicit none
    
    integer,            intent(in) :: japartfile    !< use particle file (1) or not (0)
-   character(len=255), intent(in) :: partfile      !< particle file
+   character(len=255), intent(in) :: partfile      !< initial particle file
+   character(len=255), intent(in) :: partrelfile   !< particle release file
    integer,            intent(in) :: jatracer_loc  !< add tracer (1) or not (0)
    double precision,   intent(in) :: starttime_loc !< start time (>0) or not (0)
    double precision,   intent(in) :: timestep_loc  !< time step (>0) or every computational time step (0)
@@ -2084,7 +2091,10 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
    call dealloc_auxfluxes()
    call dealloc_partparallel()
    
+   Nrpart = 0
+   irpart = 0
    Nglob = 0
+   NpartOut = 0
    
    timenext = 0d0
    timelast = DMISS
@@ -2128,6 +2138,16 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
             call mess(LEVEL_ERROR, 'the specified initial particle locations file could not be found: ', trim(partfile))
          end if
       end if
+      if ( len_trim(partrelfile).gt.0 ) then
+   !     read initial samples from inputfile  
+         inquire(FILE = trim(partrelfile), exist = lexist)
+         if ( lexist ) then
+            call read_particles_release_file(partrelfile)
+            japart = 1
+         else
+            call mess(LEVEL_ERROR, 'the specified particle release file could not be found: ', trim(partfile))
+         end if
+      end if
    else  ! initialize only
       japart = 1
    end if
@@ -2146,6 +2166,7 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
       if ( Ns.gt.0 ) then
          call add_particles(Ns, xs, ys, 0, 1)
          timepart = tstart_user
+         NpartOut = NpartOut + Ns
          
          call delsam(0)
       else
@@ -2166,6 +2187,94 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
    
    return
 end subroutine ini_part
+
+
+!> read particles release file
+subroutine read_particles_release_file(partrelfile)
+   use m_particles
+   use m_missing
+   use m_alloc
+   use unstruc_messages
+   implicit none
+
+   character(len=255), intent(in) :: partrelfile   !< release particle file
+   character(len=1000) :: line
+   character(len=1)    :: char
+   integer             :: lun, ios, ipart, linenr
+   double precision    :: tr, xr, yr, zr
+
+   call oldfil(lun, partrelfile)
+   
+   Nrpart = 0
+   linenr = 0
+   ios = 0
+   
+   do while ( ios==0 )
+      read(lun, '(a1000)', iostat=ios) line
+      linenr = linenr + 1
+      if (ios==0) then
+         read(line, '(a)', iostat=ios) char
+         if (char.ne.'*'.and.char.ne.'#'.and.char.ne.'!') then
+            read(line, *, iostat=ios) tr, xr, yr, zr
+            if (ios==0) then
+               Nrpart = Nrpart + 1
+            endif
+         endif
+      endif
+   end do
+
+   if (Nrpart.gt.0) then
+      ipart = 0
+      linenr = 0
+      ios = 0
+
+      rewind (lun)
+      call realloc(trpart, Nrpart)
+      call realloc(xrpart, Nrpart)
+      call realloc(yrpart, Nrpart)
+      call realloc(zrpart, Nrpart)
+
+      do while ( ios==0 )
+         read(lun, '(a1000)', iostat=ios) line
+         linenr = linenr + 1
+         if (ios==0) then
+            read(line, '(a)', iostat=ios) char
+            if (char.ne.'*'.and.char.ne.'#'.and.char.ne.'!') then
+               ipart = ipart + 1               
+               read(line, *, iostat=ios) trpart(ipart), xrpart(ipart), yrpart(ipart), zrpart(ipart)
+               if (ios.ne.0 .or. trpart(ipart).eq.dmiss .or. xrpart(ipart).eq.dmiss .or.  yrpart(ipart).eq.dmiss .or. zrpart(ipart).eq.dmiss) then
+                  call mess(LEVEL_ERROR, 'error reading particle release file '''//trim(partrelfile)//''' at line', linenr)
+               endif
+               if (ipart.gt.1) then
+                  if (trpart(ipart).lt.trpart(ipart-1)) then
+                     call mess(LEVEL_ERROR, 'timing in particle release file '''//trim(partrelfile)//''' is not incremental at line', linenr)
+                  endif
+               endif
+            endif
+         endif
+      end do
+      irpart = 1
+      NpartOut = NpartOut + Nrpart
+   endif
+   close(lun)
+end subroutine read_particles_release_file
+
+
+!> add released particles
+subroutine add_particles_from_release_file(time0)
+   use m_particles
+   double precision, intent(in) :: time0       !< current   julian (s) of s0
+   logical :: adding
+   
+   if (irpart.eq.0 .or. irpart.gt.Nrpart) return
+   
+   do while (irpart.lt.Nrpart)
+      if (trpart(irpart)*60.0d0.gt.time0) exit
+      call add_particles(1, xrpart(irpart), yrpart(irpart), 0, 1)
+      irpart = irpart + 1
+   end do
+end subroutine add_particles_from_release_file
+
 
 !> compute concentrations of particles (parts per unit volume) in flownodes
 subroutine comp_concentration(s, nconst, iconst, c)
@@ -2288,6 +2397,7 @@ subroutine update_part()
 
    if ( time0.ge.starttime ) then
    
+      call add_particles_from_release_file(time0)
       if ( timestep.le.0d0 ) then   ! update particles every computational time step
          if ( .not.Lsurface ) then
             call update_particles(q1,s0,s1,dts)

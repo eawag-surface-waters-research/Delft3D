@@ -10964,7 +10964,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
 ! initialize part
  call klok(cpu_extra(1,20)) ! part init
- call ini_part(1, md_partfile, md_partjatracer, md_partstarttime, md_parttimestep, md_part3Dtype)
+ call ini_part(1, md_partfile, md_partrelfile, md_partjatracer, md_partstarttime, md_parttimestep, md_part3Dtype)
  call klok(cpu_extra(2,20)) ! end part init
 
  call klok(cpu_extra(1,21)) ! observations init
@@ -21249,7 +21249,7 @@ subroutine unc_write_part_header(ifile,id_timedim,id_partdim,id_parttime,id_part
        return
    end if
 
-   ierr = nf90_def_dim(ifile, 'particles', Nglob, id_partdim)
+   ierr = nf90_def_dim(ifile, 'particles', NpartOut, id_partdim)
 
    ierr = nf90_def_var(ifile, 'particles_time', nf90_double, id_timedim, id_parttime)
    ierr = nf90_put_att(ifile, id_parttime, 'long_name', 'particles time')
@@ -21313,11 +21313,11 @@ subroutine unc_write_part(ifile,itime,id_parttime,id_partx,id_party,id_partz)
    end if
 
 !  allocate
-   allocate(iperm(Nglob))
+   allocate(iperm(NpartOut))
    iperm = 0
-   allocate(xx(Nglob))
+   allocate(xx(NpartOut))
    xx = dmiss
-   allocate(yy(Nglob))
+   allocate(yy(NpartOut))
    yy = dmiss
 
 !  order particles
@@ -21351,7 +21351,7 @@ subroutine unc_write_part(ifile,itime,id_parttime,id_partx,id_party,id_partz)
          end if
       end do
    else
-      do ii=1,Nglob
+      do ii=1,NpartOut
          i = iperm(ii)
          if ( i.gt.0 ) then
             xx(ii) = xpart(i)
@@ -21362,9 +21362,9 @@ subroutine unc_write_part(ifile,itime,id_parttime,id_partx,id_party,id_partz)
 
    ierr = nf90_put_var(ifile, id_parttime, timepart, (/ itime /))
    if ( ierr.ne.0 ) goto 1234
-   ierr = nf90_put_var(ifile, id_partx, xx, start=(/ 1,itime /), count=(/ Nglob,1 /) )
+   ierr = nf90_put_var(ifile, id_partx, xx, start=(/ 1,itime /), count=(/ NpartOut,1 /) )
    if ( ierr.ne.0 ) goto 1234
-   ierr = nf90_put_var(ifile, id_party, yy, start=(/ 1,itime /), count=(/ Nglob,1 /) )
+   ierr = nf90_put_var(ifile, id_party, yy, start=(/ 1,itime /), count=(/ NpartOut,1 /) )
    if ( ierr.ne.0 ) goto 1234
 
    if ( kmx.gt.0 ) then

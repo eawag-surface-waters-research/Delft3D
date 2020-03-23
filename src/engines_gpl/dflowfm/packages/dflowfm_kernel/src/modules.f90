@@ -5740,6 +5740,14 @@ module m_particles
 !   character(len=40), dimension(:),   allocatable :: namepart     !< name of particle, dim(Npart)
    integer,           dimension(:),   allocatable :: iglob        !< global number, dim(Npart)
    integer                                        :: Nglob        !< maximum global number
+   integer                                        :: NpartOut     !< number of particle tracks in output
+
+   integer                                        :: Nrpart       !< number of particles to be released
+   integer                                        :: irpart       !< current number of particle to be released
+   double precision,  dimension(:),   allocatable :: trpart       !< timing of to be released particles, dim(Npart)
+   double precision,  dimension(:),   allocatable :: xrpart       !< x-coordinates of to be released particles, dim(Npart)
+   double precision,  dimension(:),   allocatable :: yrpart       !< y-coordinates of to be released particles, dim(Npart)
+   double precision,  dimension(:),   allocatable :: zrpart       !< z-coordinates of to be released particles, dim(Npart), for spherical models
 
    integer,           dimension(:),   allocatable :: numzero      !< number of consecutive (sub)times a particle was not displaces within a time-step
 

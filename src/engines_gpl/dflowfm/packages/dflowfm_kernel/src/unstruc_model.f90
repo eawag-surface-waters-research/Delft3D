@@ -172,6 +172,7 @@ implicit none
 
 !   particles
     character(len=255) :: md_partfile      = ' ' !< intitial particles file (*.xyz)
+    character(len=255) :: md_partrelfile   = ' ' !< particles release file (*.txyz)
     integer            :: md_partjatracer      = 0
     double precision   :: md_partstarttime     = 0d0
     double precision   :: md_parttimestep      = 0d0
@@ -348,6 +349,7 @@ use unstruc_channel_flow
     md_partitionfile = ' '
     md_outputdir     = ' '
     md_partfile      = ' '
+    md_partrelfile   = ' '
     md_trtrfile     = ' '
     md_trtdfile     = ' '
     md_trtlfile     = ' '
@@ -368,6 +370,7 @@ use unstruc_channel_flow
     md_jaAutoStart     = MD_NOAUTOSTART !< Autostart simulation after loading or not.
 
     md_partfile = ' '
+    md_partrelfile = ' '
     md_partjatracer = 0
     md_partstarttime = 0d0
     md_parttimestep = 0d0
@@ -1944,6 +1947,7 @@ subroutine readMDUFile(filename, istat)
 
 !  particles
    call prop_get_string (md_ptr, 'particles', 'ParticlesFile', md_partfile, success)
+   call prop_get_string (md_ptr, 'particles', 'ParticlesReleaseFile', md_partrelfile, success)
    call prop_get_integer(md_ptr, 'particles', 'AddTracer', md_partjatracer, success)
    call prop_get_double (md_ptr, 'particles', 'StartTime', md_partstarttime, success)
    call prop_get_double (md_ptr, 'particles', 'TimeStep', md_parttimestep, success)
@@ -3469,6 +3473,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if ( get_japart() .or. writeall ) then
 !      particles
        call prop_set_string(prop_ptr, 'particles', 'ParticlesFile', md_partfile, ' ')
+       call prop_set_string(prop_ptr, 'particles', 'ParticlesReleaseFile', md_partrelfile, ' ')
        call prop_set_integer(prop_ptr, 'particles', 'AddTracer', md_partjatracer, 'add tracer (1) or not (other)')
        call prop_set_double (prop_ptr, 'particles', 'StartTime', md_partstarttime, 'starttime (if >0)')
        call prop_set_double (prop_ptr, 'particles', 'TimeStep', md_parttimestep, 'time step (>0) or every computational time step')
