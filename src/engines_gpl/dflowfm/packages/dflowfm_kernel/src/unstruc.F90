@@ -18703,7 +18703,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_varAu,  & ! id_varAuavg,
                      id_varu,  id_varwx, id_varwy, id_varrain, id_varpatm, &!id_varuavg,
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
-                     id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, &
+                     id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, id_zwu, &
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
                      id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, &
                      id_pumpdim,    id_pump_id,     id_pump_dis,     id_pump_cap,      id_pump_s1up,      id_pump_s1dn,     id_pump_head,      &
@@ -18932,25 +18932,25 @@ subroutine unc_write_his(tim)            ! wrihis
                !ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
 
                if (iturbulencemodel >= 3 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_turkin,nf90_double, idims,3, 'tke'   , 'turbulent kinetic energy'   , 'm2 s-2',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                  call definencvar(ihisfile,id_turkin,nf90_double, idims,3, 'tke'   , 'turbulent kinetic energy'   , 'm2 s-2',  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu')
                   jawrizw = 1
                endif
                if (iturbulencemodel > 1 .and. jahistur > 0 ) then
-                  call definencvar(ihisfile,id_vicwwu,nf90_double, idims,3, 'vicww' , 'turbulent vertical eddy viscosity'    , 'm2 s-1' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                  call definencvar(ihisfile,id_vicwwu,nf90_double, idims,3, 'vicww' , 'turbulent vertical eddy viscosity'    , 'm2 s-1' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu')
                   ierr = nf90_put_att(ihisfile, id_turkin, 'standard_name', 'specific_turbulent_kinetic_energy_of_sea_water')
                   jawrizw = 1
                endif
                if (iturbulencemodel == 3 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'eps'   , 'turbulent energy dissipation', 'm2 s-3'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'eps'   , 'turbulent energy dissipation', 'm2 s-3'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu')
                   ierr = nf90_put_att(ihisfile, id_tureps, 'standard_name', 'specific_turbulent_kinetic_energy_dissipation_in_sea_water')
                   jawrizw = 1
                else if (iturbulencemodel == 4 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'tau'   , 'turbulent time scale', 's-1'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'tau'   , 'turbulent time scale', 's-1'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu')
                   jawrizw = 1
                endif
 
                if (jarichardsononoutput > 0) then
-                  call definencvar(ihisfile,id_rich,nf90_double, idims,3, 'rich' , 'Richardson Nr'    , '  ' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                  call definencvar(ihisfile,id_rich,nf90_double, idims,3, 'rich' , 'Richardson Nr'    , '  ' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu')
                   jawrizw = 1
                end if
 
@@ -19380,8 +19380,10 @@ subroutine unc_write_his(tim)            ! wrihis
                idims(1) = id_laydimw
                idims(2) = id_statdim
                idims(3) = id_timedim
-               call definencvar   (ihisfile, id_zws, nf90_double, idims,3, 'zcoordinate_w' , 'vertical coordinate at edge of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+               call definencvar   (ihisfile, id_zws, nf90_double, idims,3, 'zcoordinate_w' , 'vertical coordinate at centre of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
                ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
+               call definencvar   (ihisfile, id_zwu, nf90_double, idims,3, 'zcoordinate_wu' , 'vertical coordinate at edge of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu')
+               ierr = nf90_put_att(ihisfile, id_zwu, 'positive' , 'up')
             endif
         end if
 
@@ -20737,6 +20739,7 @@ subroutine unc_write_his(tim)            ! wrihis
     if (kmx > 0 ) then
        do kk = 1, kmx+1
           ierr = nf90_put_var(ihisfile,    id_zws,    valobsT(:,IPNT_ZWS+kk-1),   start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_zwu,    valobsT(:,IPNT_ZWU+kk-1),   start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
           if (kk > 1) then
              ierr = nf90_put_var(ihisfile, id_zcs,    valobsT(:,IPNT_ZCS+kk-2),   start = (/ kk-1,1, it_his /), count = (/ 1, ntot, 1 /))
           endif
@@ -21632,8 +21635,10 @@ subroutine fill_valobs()
                klay = L-Lb+2
                if (layertype == 2) then
                   valobs(IPNT_ZWS+klay-1,i) = zws(kb + L-Lb)
+                  valobs(IPNT_ZWU+klay-1,i) = min(bob(1,LL),bob(2,LL)) + hu(L)
                else
-                  valobs(IPNT_ZWS+klay-1,i) = min(bob(1,LL),bob(2,LL)) + hu(L)
+                  valobs(IPNT_ZWS+klay-1,i) = zws(kb + L-Lb)
+                  valobs(IPNT_ZWU+klay-1,i) = min(bob(1,LL),bob(2,LL)) + hu(L)
                end if
 
                if ( IVAL_WS1.gt.0 ) then

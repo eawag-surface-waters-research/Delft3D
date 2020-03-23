@@ -108,6 +108,7 @@ implicit none
     integer                           :: IVAL_SFN
     integer                           :: IVAL_ZCS
     integer                           :: IVAL_ZWS         ! 3D, layer interfaces after layer centered
+    integer                           :: IVAL_ZWU
     integer                           :: IVAL_TKIN
     integer                           :: IVAL_TEPS
     integer                           :: IVAL_VICWW
@@ -184,6 +185,7 @@ implicit none
     integer                           :: IPNT_SED
     integer                           :: IPNT_ZCS
     integer                           :: IPNT_ZWS
+    integer                           :: IPNT_ZWU
     integer                           :: IPNT_TKIN
     integer                           :: IPNT_TEPS
     integer                           :: IPNT_VICWW
@@ -316,6 +318,7 @@ subroutine init_valobs_pointers()
    IVAL_SED        = 0
    IVAL_ZCS        = 0
    IVAL_ZWS        = 0
+   IVAL_ZWU        = 0
    IVAL_TKIN       = 0
    IVAL_TEPS       = 0
    IVAL_VICWW      = 0
@@ -477,6 +480,7 @@ subroutine init_valobs_pointers()
    i0=i;
    if ( kmx.gt.0 ) then
       i=i+1;            IVAL_ZWS        = i
+      i=i+1;            IVAL_ZWU        = i
       if ( iturbulencemodel.gt.0 ) then
          i=i+1;         IVAL_TKIN       = i
          i=i+1;         IVAL_TEPS       = i
@@ -529,6 +533,7 @@ subroutine init_valobs_pointers()
    IPNT_WAVEU = ivalpoint(IVAL_WAVEU, kmx)
    IPNT_ZCS   = ivalpoint(IVAL_ZCS,   kmx)
    IPNT_ZWS   = ivalpoint(IVAL_ZWS,   kmx)
+   IPNT_ZWU   = ivalpoint(IVAL_ZWU,   kmx)
    IPNT_TKIN  = ivalpoint(IVAL_TKIN,  kmx)
    IPNT_TEPS  = ivalpoint(IVAL_TEPS,  kmx)
    IPNT_VICWW = ivalpoint(IVAL_VICWW, kmx)
