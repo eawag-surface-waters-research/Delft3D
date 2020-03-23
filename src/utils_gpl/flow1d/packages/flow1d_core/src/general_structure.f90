@@ -269,11 +269,13 @@ contains
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, ds, genstr%state(1,L0), velheight)
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
          
-         ! FLow limiter is only applicable for an orifice type structure. In this case only flow under the door 
-         ! is possible. For General Structures and Weirs this limiter is not implemented.
-         ! In 2d the maximum flow rate is divided over all individual links, where the limiter is applied for 
-         ! each flow link individually
+         ! Flow limiter is only available for an orifice type structure. In this case only flow under the door 
+         ! is possible. For General Structures (and Weirs) this limiter is not further implemented, only part "1"
+         ! (out of 1:3) of the flow is limited.
+         ! In 2D the maximum flow rate is divided over all individual links, where the limiter is applied for 
+         ! each flow link individually, weighted by flow link width.
 
+         ! qL is in orientation of structure (as are the limitFlow values)
          qL = direction * au(1) * (ru(1) - fu(1)*dsL )
          if (qL > 0d0 .and. genstr%uselimitFlowPos) then
             maxFlowL = genstr%limitFlowPos * gatefraction*wstr / genstr%ws_actual

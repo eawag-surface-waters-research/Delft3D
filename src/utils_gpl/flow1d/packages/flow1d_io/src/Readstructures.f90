@@ -1566,16 +1566,28 @@ module m_readstructures
       generalst%uselimitFlowPos = .false.
       call prop_get_logical(md_ptr, ' ', 'useLimitFlowPos', generalst%uselimitFlowPos)
       if (generalst%uselimitFlowPos) then
-         call prop_get_double(md_ptr, ' ', 'limitFlowPos', generalst%limitFlowPos, success1)
-         success = success .and. check_input_result(success1, st_id, 'limitFlowPos')
-      endif
+         if (generalst%allowedflowdir /= 0 .and. generalst%allowedflowdir /= 1) then
+            write (msgbuf, '(a,a,a,a,a)') 'Structure ''', trim(st_id), ''': useLimitFlowPos can not be combined with allowedFlowDir=', &
+               allowedFlowDirToString(generalst%allowedflowdir), '. Ignoring limitFlowPos.'
+            call warn_flush()
+         else
+            call prop_get_double(md_ptr, ' ', 'limitFlowPos', generalst%limitFlowPos, success1)
+            success = success .and. check_input_result(success1, st_id, 'limitFlowPos')
+         end if
+      end if
 
       generalst%uselimitFlowNeg = .false.
       call prop_get_logical(md_ptr, ' ', 'useLimitFlowNeg', generalst%uselimitFlowNeg)
       if (generalst%uselimitFlowNeg) then
-         call prop_get_double(md_ptr, ' ', 'limitFlowNeg', generalst%limitFlowNeg, success1)
-         success = success .and. check_input_result(success1, st_id, 'limitFlowNeg')
-      endif
+         if (generalst%allowedflowdir /= 0 .and. generalst%allowedflowdir /= 2) then
+            write (msgbuf, '(a,a,a,a,a)') 'Structure ''', trim(st_id), ''': useLimitFlowNeg can not be combined with allowedFlowDir=', &
+               allowedFlowDirToString(generalst%allowedflowdir), '. Ignoring limitFlowNeg.'
+            call warn_flush()
+         else
+            call prop_get_double(md_ptr, ' ', 'limitFlowNeg', generalst%limitFlowNeg, success1)
+            success = success .and. check_input_result(success1, st_id, 'limitFlowNeg')
+         end if
+      end if
 
       ! Set default/standard values for orifice
       ! all levels are set to -1d-10. In the time loop these parameters will be set to the bed level.
@@ -1785,7 +1797,29 @@ module m_readstructures
       end select
       
    end function  allowedFlowDirToInt
-  
+
+
+   !> Gives the string value for an 'allowedFlowDir' integer value.
+   function allowedFlowDirToString(flowDirInt)
+      integer,          intent(in   ) :: flowDirInt
+      character(len=:), allocatable   :: allowedFlowDirToString
+
+      select case (flowDirInt)
+      case (0)
+         allowedFlowDirToString = 'both'
+      case (1)
+         allowedFlowDirToString = 'positive'
+      case (2)
+         allowedFlowDirToString = 'negative'
+      case (3)
+         allowedFlowDirToString = 'none'
+      case default
+         allowedFlowDirToString = 'invalid'
+      end select
+      
+   end function allowedFlowDirToString
+
+
    !> Read the general structure parameters for version 1.00 files
    subroutine readGeneralStructure_v100(generalst, md_ptr, success)
    
