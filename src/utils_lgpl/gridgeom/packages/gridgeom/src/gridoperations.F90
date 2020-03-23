@@ -649,7 +649,7 @@
 
    double precision :: X(4), Y(4)
 
-   double precision, dimension(:), allocatable :: Lperm_new
+   integer, dimension(:), allocatable :: Lperm_new
    integer :: numremoved
 
    integer :: jacrosscheck ! remove 2D crossing netlinks (1) or not (0)
