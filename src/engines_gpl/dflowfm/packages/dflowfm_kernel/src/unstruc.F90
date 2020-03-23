@@ -3609,8 +3609,8 @@ end subroutine sethu
        ibnd = kbndz(5,n)
        if (bndBlDepth(ibnd) /= dmiss) then
           bl(kb) = min(bl(kb), zb - bndBlDepth(ibnd))
-          bob(1,L) = max(bl(kb), bl(k2))
-          bob(2,L) = bob(1,L)
+          bob(1,L) = bl(kb)
+          bob(2,L) = bl(k2)
        end if
     end if
  
