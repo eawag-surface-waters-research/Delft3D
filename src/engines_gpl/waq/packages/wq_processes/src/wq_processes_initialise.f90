@@ -243,10 +243,10 @@
       write ( lunlsp , 2080 ) nosys , notot-nosys , notot
       write ( lunlsp , 2100 )
       do isys = 1,nosys
-          write(lunlsp , '(I7,A,A)' ) isys, '  active      ', syname_sub(isys)
+          write(lunlsp , 2110 ) isys, '  active      ', syname_sub(isys)
       end do
       do isys = nosys+1,notot
-          write(lunlsp , '(I7,A,A)' ) isys, '  inactive    ', syname_sub(isys)
+          write(lunlsp , 2110 ) isys, '  inactive    ', syname_sub(isys)
       end do
       write( lunlsp, '(/)')
       ! command line settingen , commands
@@ -905,9 +905,10 @@
  2004 format( ' Using BLOOM definition file   : ',a    /)
  2020 format (//' Model :            ',a40,/20x,a40 )
  2030 format (//' Run   :            ',a40,/20x,a40//)
- 2080 format ( /' Number of active (transported) constituents       :',I3,/ &
-                ' Number of inactive (not transported) constituents :',I3,/ &
-                ' Total number of constituents                      :',I3  )
- 2100 format ( /' Number  (in)active  name')
- 2090 format ( 'I4,8X,A,4X,A' )
+ 2080 format ( /' Number of active (transported) WQ substances       :',I3,/ &
+                ' Number of inactive (not transported) WQ substances :',I3,/ &
+                ' Total number of WQ substances                      :',I3  )
+ 2100 format ( /' NOTE: The numbering of FM constituents may differ from the WQ numbering here! Check the dia-file!',// &
+                ' WQ Number  (in)active  name')
+ 2110 format ( i7,3x,a,a )
       end
