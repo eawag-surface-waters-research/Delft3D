@@ -827,7 +827,7 @@
    use m_xbeach_paramsconst
    use m_tables, only: interpolate
    use m_partitioninfo
-   use compbsskin_module, only: compbsskin
+   use compbsskin_module, only: compbsskin, get_alpha_fluff
    !
    implicit none
    !
@@ -879,6 +879,7 @@
    integer                       :: k1, k2, k3, k4
    logical                       :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
    real(fp)                      :: sigdif    ! Prandtl-Schmidt; to do: change to array
+   real(fp)                      :: afluff
    real(fp)                      :: aks_ss3d
    real(fp)                      :: caks
    real(fp)                      :: caks_ss3d
@@ -1470,9 +1471,10 @@
          !
          ! Compute bed stress resulting from skin friction
          !
+         afluff = get_alpha_fluff(iflufflyr, lsed, nm, mfluff(:,nm), stmpar%trapar, stmpar%sedpar)
          call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
                           & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
-                          & rhowat(kbed), vismol, stmpar%sedpar)
+                          & rhowat(kbed), vismol, stmpar%sedpar, afluff)
       else
          !
          ! use max bed shear stress, rather than mean

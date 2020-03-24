@@ -69,7 +69,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     use bedcomposition_module
     use morphology_data_module
     use sediment_basics_module
-    use compbsskin_module, only: compbsskin
+    use compbsskin_module, only: compbsskin, get_alpha_fluff
     use globaldata
     use dfparall
     !
@@ -317,6 +317,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                         :: klc
     integer                         :: kmaxlc    
     logical                         :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
+    real(fp)                        :: afluff
     real(fp)                        :: aks_ss3d
     real(fp)                        :: caks
     real(fp)                        :: caks_ss3d
@@ -842,9 +843,10 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           ! Compute bed stress resulting from skin friction
           !
+          afluff = get_alpha_fluff(iflufflyr, lsed, nm, mfluff(:,nm), gdp%gdtrapar, gdp%gdsedpar)
           call compbsskin(umean, vmean, h1, wave, uorb(nm), tp(nm), &
                            & teta(nm), thcmud(nm), mudfrac(nm), taub, &
-                           & rhowat(nm,kbed), vicmol, gdp%gdsedpar)
+                           & rhowat(nm,kbed), vicmol, gdp%gdsedpar, afluff)
        else
           !
           ! use max bed shear stress, rather than mean

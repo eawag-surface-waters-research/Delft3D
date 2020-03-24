@@ -72,6 +72,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)                           , pointer :: kssand
     real(fp)                           , pointer :: sc_cmf1
     real(fp)                           , pointer :: sc_cmf2
+    real(fp)                           , pointer :: sc_flcf
     integer                            , pointer :: nmudfrac
     integer                            , pointer :: sc_mudfac
     real(fp)         , dimension(:)    , pointer :: rhosol
@@ -176,6 +177,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     kssand               => sedpar%kssand
     sc_cmf1              => sedpar%sc_cmf1
     sc_cmf2              => sedpar%sc_cmf2
+    sc_flcf              => sedpar%sc_flcf
     nmudfrac             => sedpar%nmudfrac
     sc_mudfac            => sedpar%sc_mudfac
     rhosol               => sedpar%rhosol
@@ -439,8 +441,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        bsskin = .false.
        call prop_get_logical(sed_ptr, 'SedimentOverall', 'BsSkin', bsskin)
        if (bsskin) then
-          kssilt = 0.0_fp
-          kssand = 0.0_fp
           call prop_get(sed_ptr, 'SedimentOverall', 'KsSilt', kssilt)
           call prop_get(sed_ptr, 'SedimentOverall', 'KsSand', kssand)
           !
@@ -459,8 +459,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              return
           end select
           !
-          sc_cmf1 = 0.01_fp
-          sc_cmf2 = 0.01_fp
           call prop_get(sed_ptr, 'SedimentOverall', 'SC_cmf1', sc_cmf1)
           call prop_get(sed_ptr, 'SedimentOverall', 'SC_cmf2', sc_cmf2)
           if (sc_mudfac == SC_MUDFRAC) then
@@ -470,6 +468,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              sc_cmf1 = max(0.0_fp , sc_cmf1)
              sc_cmf2 = max(sc_cmf1, sc_cmf2)
           endif
+          !
+          call prop_get(sed_ptr, 'SedimentOverall', 'SC_flcf', sc_flcf)
        endif
        !
        do l = 1, lsedtot
@@ -984,6 +984,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     real(fp)                          , pointer :: kssand
     real(fp)                          , pointer :: sc_cmf1
     real(fp)                          , pointer :: sc_cmf2
+    real(fp)                          , pointer :: sc_flcf
     integer                           , pointer :: sc_mudfac
     real(fp)        , dimension(:)    , pointer :: rhosol
     real(fp)        , dimension(:,:,:), pointer :: logseddia
@@ -1039,6 +1040,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     kssand               => sedpar%kssand
     sc_cmf1              => sedpar%sc_cmf1
     sc_cmf2              => sedpar%sc_cmf2
+    sc_flcf              => sedpar%sc_flcf
     sc_mudfac            => sedpar%sc_mudfac
     rhosol               => sedpar%rhosol
     logseddia            => sedpar%logseddia
@@ -1141,6 +1143,9 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
        write (lundia, '(2a,f12.6)') txtput1,':', kssilt
        txtput1 = 'Kssand '
        write (lundia, '(2a,f12.6)') txtput1,':', kssand
+       !
+       txtput1 = 'Critical fluff layer coverage factor'
+       write (lundia, '(2a,f12.6)') txtput1,':', sc_flcf
     endif
     !
     do l = 1, lsedtot

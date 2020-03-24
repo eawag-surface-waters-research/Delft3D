@@ -517,6 +517,7 @@ type sedpar_type
     real(fp) :: kssand    !  ks value for sand (used above sc_cmf2)
     real(fp) :: sc_cmf1   !  lower critical mud factor for determining bed roughness length for Soulsby & Clarke (2005)
     real(fp) :: sc_cmf2   !  upper critical mud factor for determining bed roughness length for Soulsby & Clarke (2005)
+    real(fp) :: sc_flcf   !  fraction of ParFluff0/ParFluff1 when the fluff layer fully covers the bed for Soulsby & Clarke (2005)
     real(fp) :: version   !  interpreter version
     !
     ! reals
@@ -1175,6 +1176,7 @@ subroutine nullsedpar(sedpar)
     sedpar%kssand   = 0.0_fp
     sedpar%sc_cmf1  = 0.01_fp
     sedpar%sc_cmf2  = 0.01_fp
+    sedpar%sc_flcf  = 0.5_fp
     sedpar%kssand   = 0.0_fp
     sedpar%version  = 2.0_fp
     !
