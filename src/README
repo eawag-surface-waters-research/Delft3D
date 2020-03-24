@@ -28,7 +28,7 @@ Compiling on Linux
          ./autogen.sh
          cd -
          CFLAGS='-O2' CXXFLAGS='-O2' FFLAGS='-O2' FCFLAGS='-O2' ./configure --prefix=`pwd` --with-netcdf --with-mpi --with-metis --with-petsc
-         make ds-install
+         FC=mpif90 make ds-install
      Option B):
          Use script build.sh. Executing "./build.sh" will show the usage. The following example line is used to create the latest fully tested version:
          ./build.sh -intel14
