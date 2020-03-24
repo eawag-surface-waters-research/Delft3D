@@ -3,7 +3,7 @@
     <documentation>
         <fileVersion>1.00</fileVersion>
         <createdBy>Deltares, Sobek3 To D-Flow FM converter, version 1.10</createdBy>
-        <creationDate>2019-07-03 17:51</creationDate>
+        <creationDate>2019-07-03T17:51</creationDate>
     </documentation>
     <control>
         <start name="myNameDFlowFM"/>
