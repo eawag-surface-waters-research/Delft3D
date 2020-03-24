@@ -42892,6 +42892,8 @@ if (mext /= 0) then
            call realloc(nnlat, max(2*ndxi, nlatnd+ndxi), keepExisting = .true., fill = 0)
            call selectelset_internal_nodes(xz, yz, kclat, ndxi, nnLat(nlatnd+1:), nlat, &
                                           LOCTP_POLYGON_FILE, filename)
+           call realloc(n1latsg, numlatsg)
+           call realloc(n2latsg, numlatsg)
            n1latsg(numlatsg) = nlatnd + 1
            n2latsg(numlatsg) = nlatnd + nlat
 
@@ -43205,12 +43207,9 @@ if (mext /= 0) then
     call realloc(balat, numlatsg, keepExisting = .false., fill = 0d0)
     call realloc(qplat, numlatsg, keepExisting = .false., fill = 0d0)
     call realloc(lat_ids, numlatsg, keepExisting = .false., fill = '')
-    call realloc(n1latsg, numlatsg, keepExisting = .false., fill = 0)
-    call realloc(n2latsg, numlatsg, keepExisting = .false., fill = 0)
 
     do n = 1,numlatsg
        balat(n) = 0d0
-       if ( n1latsg(n) == 0) cycle
        do k1=n1latsg(n),n2latsg(n)
           k = nnlat(k1)
           if (jampi == 1) then
