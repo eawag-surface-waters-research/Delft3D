@@ -469,7 +469,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              sc_cmf2 = max(sc_cmf1, sc_cmf2)
           endif
           !
-          call prop_get(sed_ptr, 'SedimentOverall', 'SC_flcf', sc_flcf)
+          call prop_get(sed_ptr, 'SedimentOverall', 'CritFluffFactor', sc_flcf)
        endif
        !
        do l = 1, lsedtot
