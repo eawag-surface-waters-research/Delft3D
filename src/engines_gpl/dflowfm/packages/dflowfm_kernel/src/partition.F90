@@ -5181,7 +5181,7 @@ end subroutine partition_make_globalnumbers
       
       return
    end subroutine print_timings
-   
+
 !> generate partition numbering with METIS
 !!   1D links are supported now
    subroutine partition_METIS_to_idomain(Nparts, jacontiguous, method)
@@ -5192,194 +5192,183 @@ end subroutine partition_make_globalnumbers
       use MessageHandling
       use unstruc_messages
       implicit none
-      
+
       integer,                         intent(in) :: Nparts          !< number of partitions
-      integer,                         intent(in) :: method         !< partition method. 1: K-Way, 0,2: Recursive
+      integer,                         intent(in) :: method          !< partition method. 1: K-Way, 0,2: Recursive, 3: Mesh
       integer,                         intent(in) :: jacontiguous    !< enforce contiguous domains (1) or not (0)
-      
+
       integer                                     :: ierror
-      
+
       integer                                     :: Ne              ! number of elements
       integer                                     :: Nn              ! number of nodes
-      !integer,          allocatable, dimension(:) :: eptr, eind      ! mesh
+      integer,          allocatable, dimension(:) :: eptr, eind      ! mesh
       integer,          allocatable, dimension(:) :: vwgt            ! vertex weights, dim(Ne)
       integer,          allocatable, dimension(:) :: vsize           ! communication volume, dim(Ne)
-      !integer                                     :: ncommon         ! number of common nodes between elements
+      integer                                     :: ncommon         ! number of common nodes between elements
       real, allocatable,             dimension(:) :: tpwgts          ! target weight of partitions, dim(Nparts)
       integer                                     :: objval          ! edgecut or total communication volume
-      integer,          allocatable, dimension(:) :: npart           ! node    partition number, dim(Nn)                                                 
- !     integer                                     :: ic, k, N, ipoint, icursize
- !     integer,          allocatable, dimension(:) :: xadj, adjncy    ! Adjacency structure of a graph, using compressed storage format (CSR)
+      integer,          allocatable, dimension(:) :: npart           ! node    partition number, dim(Nn)
+      integer                                     :: ic, k, N, ipoint, icursize
+      integer,          allocatable, dimension(:) :: xadj, adjncy    ! Adjacency structure of a graph, using compressed storage format (CSR)
       integer,          allocatable, dimension(:) :: ncon            ! number of balancing constrains, at least 1
       real,             allocatable, dimension(:) :: ubvec           ! specify the allowed load imbalance tolerance for each constraint.=1.001 when ncon=1
-!      integer,          allocatable, dimension(:) :: adjwgt          ! weights of edges
-!      integer                                     :: c_xadj, c_adjncy, nod_j, edgej_k, nlinkj, icellj, cellk, ilink, ncellj ! these variables are used when build dual graph for 1d network
-!      integer                                     :: j, kk, i, length, n0, ierr, L, nc1, nc2, k1, k2
-      
+      integer                                     :: c_xadj, c_adjncy, nod_j, edgej_k, nlinkj, icellj, cellk, ilink, ncellj ! these variables are used when build dual graph for 1d network
+      integer                                     :: j, kk, i, length, n0, ierr, L, nc1, nc2, k1, k2
+
       integer,          allocatable, dimension(:)  :: iadj_tmp
       integer,          allocatable, dimension(:)  :: iadj, jadj, adjw
-      integer                                      :: i, k, k1, k2, L, LL
-      
+      integer                                      :: LL
+
       integer,                       external      :: metisopts
-    
+
       ierror = 1
-      
+
 !     check validity of objected number of subdomains
-      if ( Nparts.lt.1 ) then
+      if ( Nparts < 1 ) then
          call qnerror('partition_METIS_to_idomain: number of subdomains < 1', ' ', ' ')
          goto 1234
       end if
-      
-!     number of nodes shared by two cells on each side of an edge
-      !ncommon = 2
-      
+
+
       !if ( netstat.eq.NETSTAT_CELLS_DIRTY ) then
       !   call findcells(0)
       !   call find1dcells()
       !endif
-      
+
       Ne = nump1d2d
-!      if (nump < nump1d2d) Ne = nump1d2d   ! if 1d netlink exists
-!      Nn = numk
-      
+
 !     deallocate
       if ( allocated(idomain) ) deallocate(idomain)
-      
+
 !     allocate
       allocate(idomain(Ne))
-      
+
 #ifdef HAVE_METIS
 !     allocate
-      !allocate(eptr(Ne+1))
-      !allocate(eind(4*Ne))
-      allocate(vwgt(Ne))
-      allocate(vsize(Ne))
       allocate(tpwgts(Nparts))
-      allocate(npart(Ne))     
-!      allocate(adjwgt(10*Ne))
-      allocate(ncon(1))
-      allocate(ubvec(1))
-      
+      if (method == 3) then
+         !if (nump < nump1d2d) Ne = nump1d2d   ! if 1d netlink exists
+         Nn = numk
+         allocate(eptr(nump+1))
+         allocate(eind(4*max(Ne,Nn)))
+         allocate(vwgt(max(Ne,Nn)))
+         allocate(vsize(max(Ne,Nn)))
+         allocate(npart(max(Ne,Nn)))
+      else
+         allocate(vwgt(Ne))
+         allocate(vsize(Ne))
+         allocate(npart(Ne))
+         allocate(ncon(1))
+         allocate(ubvec(1))
+      endif
+
 !     set default options
       call METIS_SetDefaultOptions(opts)
-      
-      if ( jacontiguous.eq.1 .and. method .eq. 1) then
-         ierror = metisopts(opts,"CONTIG",1)   ! enforce contiguous domains, observation: number of cells per domain becomes less homogeneous
-         if ( ierror.ne.0 ) goto 1234
+
+      if ( jacontiguous == 1 .and. method == 1) then
+         ierror = metisopts(opts, "CONTIG", 1)   ! enforce contiguous domains, observation: number of cells per domain becomes less homogeneous
+         if ( ierror /= 0 ) goto 1234
       endif
 !      i = metisopts(opts,"NCUTS",10)
-      ierror = metisopts(opts,"DBGLVL",1)     ! output
-      if ( ierror.ne.0 ) goto 1234
-      
-      ierror = metisopts(opts,"UFACTOR",1)    ! allowed load imbalance TODO, MJ: should be an integer x, and tolerance is (1+x)/1000 according to manual, but 1+x/1000 according to us and "macros.h"
-      if ( ierror.ne.0 ) goto 1234
-      
-      ierror = metisopts(opts,"NITER",100)    ! observation: increasing this number will visually improve the partitioning
-      if ( ierror.ne.0 ) goto 1234
-      
+      ierror = metisopts(opts, "DBGLVL", 1)     ! output
+      if ( ierror /= 0 ) goto 1234
+
+      ierror = metisopts(opts, "UFACTOR", 1)    ! allowed load imbalance TODO, MJ: should be an integer x, and tolerance is (1+x)/1000 according to manual, but 1+x/1000 according to us and "macros.h"
+      if ( ierror /= 0 ) goto 1234
+
+      ierror = metisopts(opts, "NITER", 100)    ! observation: increasing this number will visually improve the partitioning
+      if ( ierror /= 0 ) goto 1234
+
       vwgt   = 1                         ! weights of vertices
       vsize  = 1                         ! size of vertices for computing the total communication volume
       tpwgts = 1d0/dble(Nparts)          ! desired weight for each partition
-!      adjwgt = 1                         ! weight of edges
-      ncon = 1                           ! number of balancing constraints
-      ubvec = 1.001                      ! allowed load imbalance tolerance
 
 !!     make mesh
-!      ipoint   = 1
-!      icursize = size(eind)
-!      do ic=1,nump
-!         eptr(ic) = ipoint
-!         N=netcell(ic)%N
-!         do k=1,N
-!!           reallocate if necessary            
-!            if ( ipoint.gt.icursize ) then
-!               icursize = int(1.2d0*ipoint) + 1
-!               call realloc(eind, icursize, keepExisting=.true.)
-!            end if
-!            eind(ipoint) = netcell(ic)%nod(k)
-!            ipoint = ipoint+1
-!         end do
-!      end do
-!      eptr(nump+1) = ipoint
-!      
-!!     make mesh arrays zero-based
-!      eptr = eptr-1
-!      eind = eind-1
-      
-      
-      
-      
-!     generate adjacency structure in CSR format 
-      allocate(iadj(nump1d2d+1))
-      allocate(iadj_tmp(nump1d2d+1))
-      
-!     count number of connection per vertex
-      iadj_tmp = 0
-      do L=1,numL
-         if ( lnn(L).gt.1 ) then
-            k1 = iabs(lne(1,L))
-            k2 = iabs(lne(2,L))
-            iadj_tmp(k1) = iadj_tmp(k1) + 1
-            iadj_tmp(k2) = iadj_tmp(k2) + 1
-         end if
-      end do
-      
-!     set startpointers
-      iadj(1) = 1
-      do k=1,nump1d2d
-         iadj(k+1) = iadj(k) + iadj_tmp(k)
-      end do
-      
-!     set connections      
-      allocate(jadj(iadj(nump1d2d+1)-1))
-      
-      iadj_tmp = iadj
-      do L=1,numL
-         if ( lnn(L).gt.1 ) then
-            k1 = iabs(lne(1,L))
-            k2 = iabs(lne(2,L))
-            jadj(iadj_tmp(k1)) = k2
-            jadj(iadj_tmp(k2)) = k1
-            iadj_tmp(k1) = iadj_tmp(k1)+1
-            iadj_tmp(k2) = iadj_tmp(k2)+1
-         end if
-      end do
-      
-!     edge weights
-      allocate(adjw(iadj(nump1d2d+1)-1))
-      adjw = 1
-      
-!     make CSR arrays zero-based
-      iadj = iadj-1
-      jadj = jadj-1
-      
-      netstat = NETSTAT_CELLS_DIRTY
-!      
-!      !call METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
-!      
-      if ( method.eq.1 ) then
-         call METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+       if (method == 3) then
+          ncommon  = 2    !  number of nodes shared by two cells on each side of an edge
+          ipoint   = 1
+          icursize = size(eind)
+          do ic=1,nump
+             eptr(ic) = ipoint
+             N=netcell(ic)%N
+             do k=1,N
+!!              reallocate if necessary
+                if ( ipoint > icursize ) then
+                   icursize = int(1.2d0*ipoint) + 1
+                   call realloc(eind, icursize, keepExisting=.true.)
+                end if
+                eind(ipoint) = netcell(ic)%nod(k)
+                ipoint = ipoint+1
+             end do
+          end do
+          eptr(nump+1) = ipoint
+!
+!!       make mesh arrays zero-based
+         eptr = eptr-1
+         eind = eind-1
       else
-         call METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+
+         ncon = 1                           ! number of balancing constraints
+         ubvec = 1.001                      ! allowed load imbalance tolerance
+
+!        generate adjacency structure in CSR format 
+         allocate(iadj(nump1d2d+1))
+         allocate(iadj_tmp(nump1d2d+1))
+
+!        count number of connection per vertex
+         iadj_tmp = 0
+         do L=1,numL
+            if ( lnn(L) > 1 ) then
+               k1 = abs(lne(1,L))
+               k2 = abs(lne(2,L))
+               iadj_tmp(k1) = iadj_tmp(k1) + 1
+               iadj_tmp(k2) = iadj_tmp(k2) + 1
+            end if
+         end do
+
+!        set startpointers
+         iadj(1) = 1
+         do k=1,nump1d2d
+            iadj(k+1) = iadj(k) + iadj_tmp(k)
+         end do
+
+!        set connections
+         allocate(jadj(iadj(nump1d2d+1)-1))
+
+         iadj_tmp = iadj
+         do L=1,numL
+            if ( lnn(L).gt.1 ) then
+               k1 = abs(lne(1,L))
+               k2 = abs(lne(2,L))
+               jadj(iadj_tmp(k1)) = k2
+               jadj(iadj_tmp(k2)) = k1
+               iadj_tmp(k1) = iadj_tmp(k1)+1
+               iadj_tmp(k2) = iadj_tmp(k2)+1
+            end if
+         end do
+
+!        edge weights
+         allocate(adjw(iadj(nump1d2d+1)-1))
+         adjw = 1
+
+!        make CSR arrays zero-based
+         iadj = iadj-1
+         jadj = jadj-1
       endif
-      
-!     deallocate
-      !if ( allocated(eptr)   ) deallocate(eptr)
-      !if ( allocated(eind)   ) deallocate(eind)
-      if ( allocated(vwgt)   ) deallocate(vwgt)
-      if ( allocated(vsize)  ) deallocate(vsize)
-      if ( allocated(tpwgts) ) deallocate(tpwgts)
- !     if ( allocated(xadj)   ) deallocate(xadj)
- !     if ( allocated(adjncy) ) deallocate(adjncy)
-      if ( allocated(npart) ) deallocate(npart)
-      if ( allocated(Ncon)  ) deallocate(ncon)
-      if ( allocated(ubvec) ) deallocate(ubvec)
-      
-      if ( allocated(iadj) )     deallocate(iadj)
-      if ( allocated(iadj_tmp) ) deallocate(iadj_tmp)
-      if ( allocated(jadj) )     deallocate(jadj)
-      if ( allocated(adjw) )     deallocate(adjw)
-      
+
+      netstat = NETSTAT_CELLS_DIRTY
+
+      select case (method)
+      case (1)
+         call METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+      case (0,2)
+         call METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
+      case (3)
+         call METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
+      case default
+         call mess(LEVEL_ERROR, 'Unknown partitioning method number', method)
+      end select
+
 #else
       idomain = 0
       call mess(LEVEL_ERROR, 'This version was built without the METIS mesh partitioner support, '&
@@ -5391,28 +5380,28 @@ end subroutine partition_make_globalnumbers
 
       return
    end subroutine partition_METIS_to_idomain
-   
-!  set METIS options, returns error (1) or no error (0)   
+
+!  set METIS options, returns error (1) or no error (0)
    integer function metisopts(opts,optionname,optionval)
       implicit none
-      
+
       integer,            intent(inout) :: opts(*)         ! options array
-      character(len=*),   intent(in)    :: optionname   ! option name
+      character(len=*),   intent(in)    :: optionname      ! option name
       integer,            intent(in)    :: optionval       ! option value
 #ifdef HAVE_METIS      
       integer           :: i
-      
+
       integer, external :: metisoptions
-      
+
       i = metisoptions(opts,trim(optionname)//char(0),optionval)
-      
+
       metisopts = i
 #else
       metisopts = 1
 #endif
    end function metisopts
-   
-   
+
+
 !> generate partition numbers from polygons, or with METIS of no polygons are present
    subroutine partition_to_idomain()
       
