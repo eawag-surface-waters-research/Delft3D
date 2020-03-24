@@ -807,15 +807,15 @@
          if ( japermout.eq.1 ) then
             nodePermutation(k) = kk     ! k is old node number, kk is new number
          end if
-      else
-         write (msgbuf, '(a,i0,a)') 'setnodadm: removed mesh node #', K, ' (missing, or not connected in any mesh edge).'
-         call warn_flush()
+      !else
+      !   write (msgbuf, '(a,i0,a)') 'setnodadm: removed mesh node #', K, ' (missing, or not connected in any mesh edge).'
+      !   call warn_flush()
       ENDIF
    ENDDO
-   if (numk /= KK) then
-      write (msgbuf, '(a,i0,a,i0,a,i0,a)') 'setnodadm: ', (NUMK-KK), ' mesh nodes were removed. Input: ', NUMK, ' nodes. New: ', KK, ' nodes. See preceding messages for details.'
-      call warn_flush()
-   end if
+   !if (numk /= KK) then
+   !   write (msgbuf, '(a,i0,a,i0,a,i0,a)') 'setnodadm: ', (NUMK-KK), ' mesh nodes were removed. Input: ', NUMK, ' nodes. New: ', KK, ' nodes. See preceding messages for details.'
+   !   call warn_flush()
+   !end if
    NUMK = KK
 
    DO L   = 1,NUML
