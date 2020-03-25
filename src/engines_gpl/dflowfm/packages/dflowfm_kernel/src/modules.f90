@@ -3652,8 +3652,8 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  ! extra
  double precision                  :: qinrain     !< total influx rain                         (m3/s)
  double precision                  :: qouteva     !< total outflux evaporation                 (m3/s)
- double precision                  :: qinlat      !< total influx diffuse laterals             (m3/s)
- double precision                  :: qoutlat     !< total outflux diffuse laterals            (m3/s)
+ double precision, dimension(2)    :: qinlat      !< total influx diffuse laterals (1D and 2D) (m3/s)
+ double precision, dimension(2)    :: qoutlat     !< total outflux diffuse laterals (1D and 2D)(m3/s)
  double precision                  :: qingrw      !< total influx groundwater                  (m3/s)
  double precision                  :: qoutgrw     !< total outflux groundwater                 (m3/s)
  double precision                  :: qinsrc      !< total influx local point sources          (m3/s)
@@ -3661,8 +3661,8 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
 
  double precision                  :: vinrain     !< total volume in  rain                     (m3) in the last time step
  double precision                  :: vouteva     !< total volume out evaporation              (m3) "
- double precision                  :: vinlat      !< total volume in  diffuse laterals         (m3) "
- double precision                  :: voutlat     !< total volume out diffuse laterals         (m3) "
+ double precision, dimension(2)    :: vinlat      !< total volume in  diffuse laterals (1D and 2D) (m3) "
+ double precision, dimension(2)    :: voutlat     !< total volume out diffuse laterals (1D and 2D) (m3) "
  double precision                  :: vingrw      !< total volume in  groundwater              (m3) "
  double precision                  :: voutgrw     !< total volume out groundwater              (m3) "
  double precision                  :: vinsrc      !< total volume in  local point sources      (m3) "
@@ -3670,8 +3670,8 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
 
  double precision                  :: vinraincum  !< total inflow from rain                    (m3) integrated over all time steps
  double precision                  :: voutevacum  !< total outflow to evaporation              (m3) "
- double precision                  :: vinlatcum   !< total inflow from diffuse laterals        (m3) "
- double precision                  :: voutlatcum  !< total outflow to diffuse laterals         (m3) "
+ double precision, dimension(2)    :: vinlatcum   !< total inflow from diffuse laterals (1D and 2D) (m3) "
+ double precision, dimension(2)    :: voutlatcum  !< total outflow to diffuse laterals  (1D and 2D) (m3) "
  double precision                  :: vingrwcum   !< total inflow from groundwater             (m3) "
  double precision                  :: voutgrwcum  !< total outflow to groundwater              (m3) "
  double precision                  :: vinsrccum   !< total inflow from local point sources     (m3) "
@@ -3725,7 +3725,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer                           :: Lnmin         !< link nr where min zlin is found in viewing area
  integer                           :: Lnmax         !< link nr where max zlin is found in viewing area
 
- integer, parameter :: MAX_IDX        = 22
+ integer, parameter :: MAX_IDX        = 28
  double precision, dimension(MAX_IDX)    :: volcur !< Volume totals in *current* timestep only (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: cumvolcur =0d0 !< Cumulative volume totals starting from the previous His output time, cumulate with volcur (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: voltot
@@ -3752,6 +3752,12 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer, parameter :: IDX_LATIN      = 20
  integer, parameter :: IDX_LATOUT     = 21
  integer, parameter :: IDX_LATTOT     = 22
+ integer, parameter :: IDX_LATIN1D    = 23
+ integer, parameter :: IDX_LATOUT1D   = 24
+ integer, parameter :: IDX_LATTOT1D   = 25
+ integer, parameter :: IDX_LATIN2D    = 26
+ integer, parameter :: IDX_LATOUT2D   = 27
+ integer, parameter :: IDX_LATTOT2D   = 28
 
 
 ! Delft3D structure of grid dimensions
@@ -3818,19 +3824,17 @@ subroutine reset_flow()
  ! extra
     qinrain     = 0    ! total inflow rain                       (m3/s)
     qouteva     = 0    ! total outflow evaporation               (m3/s)
-    qinlat      = 0    ! total inflow diffuse laterals           (m3/s)
-    qoutlat     = 0    ! total outflow diffuse laterals          (m3/s)
+    qinlat(1:2) = 0    ! total inflow diffuse laterals           (m3/s)
+    qoutlat(1:2)= 0    ! total outflow diffuse laterals          (m3/s)
     qingrw      = 0    ! total inflow from groundwater           (m3/s)
     qoutgrw     = 0    ! total outflow to groundwater            (m3/s)
     qinsrc      = 0    ! total inflow local point sources        (m3/s)
     qoutsrc     = 0    ! total outflow local pount sources       (m3/s)
-    qinlat      = 0    !
-    qoutlat     = 0    !
 
     vinrain     = 0    ! total volume in  rain                   (m3)
     vouteva     = 0    ! total volume out evaporation            (m3)
-    vinlat      = 0    ! total volume in  diffuse laterals       (m3)
-    voutlat     = 0    ! total volume out diffuse laterals       (m3)
+    vinlat(1:2) = 0    ! total volume in  diffuse laterals       (m3)
+    voutlat(1:2)= 0    ! total volume out diffuse laterals       (m3)
     vingrw      = 0    ! total volume in  groundwater            (m3)
     voutgrw     = 0    ! total volume out groundwater            (m3)
     vinsrc      = 0    ! total volume in  local point sources    (m3)
@@ -3838,8 +3842,8 @@ subroutine reset_flow()
 
     vinraincum  = 0    ! total inflow rain                       (m3)
     voutevacum  = 0    ! total outflow evaporation               (m3)
-    vinlatcum   = 0    ! total inflow diffuse laterals           (m3)
-    voutlatcum  = 0    ! total outflow diffuse laterals          (m3)
+    vinlatcum(1:2) = 0 ! total inflow diffuse laterals           (m3)
+    voutlatcum(1:2)= 0 ! total outflow diffuse laterals          (m3)
     vingrwcum   = 0    ! total inflow groundwater                (m3)
     voutgrwcum  = 0    ! total outflow groundwater               (m3)
     vinsrccum   = 0    ! total inflow local point sources        (m3)
@@ -3901,6 +3905,12 @@ subroutine reset_flow()
     voltotname(IDX_LATIN  ) = 'laterals_in'
     voltotname(IDX_LATOUT ) = 'laterals_out'
     voltotname(IDX_LATTOT ) = 'laterals_total'
+    voltotname(IDX_LATIN1D ) = 'laterals_in_1D'
+    voltotname(IDX_LATOUT1D) = 'laterals_out_1D'
+    voltotname(IDX_LATTOT1D) = 'laterals_total_1D'
+    voltotname(IDX_LATIN2D ) = 'laterals_in_2D'
+    voltotname(IDX_LATOUT2D) = 'laterals_out_2D'
+    voltotname(IDX_LATTOT2D) = 'laterals_total_2D'
 
     jacftrtfac  = 0   !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's returned roughness values.
 

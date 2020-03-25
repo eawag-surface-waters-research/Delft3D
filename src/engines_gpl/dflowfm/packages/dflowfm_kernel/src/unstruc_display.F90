@@ -1778,7 +1778,7 @@ subroutine tekwindvector()
  integer :: ndraw 
  double precision :: xp, yp, vfw, ws, dyp, upot, ukin, rv
  character tex*30 
- integer :: ncol, k, kk
+ integer :: ncol, k, kk, vlatin, vlatout
  
  if (a1ini == 0d0) return
  
@@ -1843,15 +1843,17 @@ subroutine tekwindvector()
        call GTEXT(tex, xp, yp, ncol)
     endif
 
-    if (vinlatcum > 0 .or. voutlatcum > 0) then 
+    vlatin  = sum(vinlatcum(1:2))
+    vlatout = sum(voutlatcum(1:2))
+    if (vlatin > 0 .or. vlatout > 0) then 
        yp  = yp - dyp                 
        tex = 'HinLat :               (m)'
-       write(tex(10:20), '(F11.4)')  vinlatcum/a1ini   
+       write(tex(10:20), '(F11.4)')  vlatin/a1ini   
        call GTEXT(tex, xp, yp, ncol)
    
        yp  = yp - dyp                 
        tex = 'HoutLat:               (m)'
-       write(tex(10:20), '(F11.4)') -voutlatcum/a1ini   
+       write(tex(10:20), '(F11.4)') -vlatout/a1ini   
        call GTEXT(tex, xp, yp, ncol)
     endif
 

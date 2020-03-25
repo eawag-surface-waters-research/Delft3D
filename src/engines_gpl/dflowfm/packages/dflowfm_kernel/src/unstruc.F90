@@ -38007,7 +38007,7 @@ end function ispumpon
  use m_hydrology_data, only : jadhyd, ActEvap
  implicit none
 
- integer          :: L, k1, k2, k, kb, n, LL, kk, kt
+ integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim
  double precision :: aufu, auru, tetau
  double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qext
 
@@ -38029,7 +38029,7 @@ end function ispumpon
 
  if (jaqin > 0) then                                         ! sources and sinks through meteo
 
-    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qinlat = 0d0 ; qoutlat = 0d0
+    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0
     if (jarain > 0) then
        if (rainuni > 0d0) then
           rain     = rainuni*24d0                             ! mm/hr  => mm/day
@@ -38091,11 +38091,17 @@ end function ispumpon
 
        ! Now, handle the total lateral discharge for each grid cell
        do k = 1,ndxi
+          if (k <= ndx2d) then
+             idim = 2
+          else
+             idim = 1
+          end if
+
           if (QQLat(k) > 0) then
-             qinlat = qinlat + QQLat(k)                        ! Qlat can be pos or neg
+             qinlat(idim) = qinlat(idim) + QQLat(k)                        ! Qlat can be pos or neg
           else if (hs(k) > epshu) then
              QQlat(k) = - min(0.5d0*vol1(k)/dts , -QQlat(k))
-             qoutlat = qoutlat - QQlat(k)
+             qoutlat(idim) = qoutlat(idim) - QQlat(k)
           else
              QQlat(k) = 0d0
           endif
@@ -39669,8 +39675,8 @@ if (jahisbal > 0) then
     ! extra
     vinrain     = qinrain *dts
     vouteva     = qouteva *dts
-    vinlat      = qinlat  *dts
-    voutlat     = qoutlat *dts
+    vinlat(1:2) = qinlat(1:2) *dts
+    voutlat(1:2)= qoutlat(1:2)*dts
     vingrw      = qingrw  *dts
     voutgrw     = qoutgrw *dts
 
@@ -39699,8 +39705,8 @@ if (jahisbal > 0) then
     ! Time-summed cumulative volumes (nowhere used)
     vinraincum  = vinraincum   + vinrain
     voutevacum  = voutevacum   + vouteva
-    vinlatcum   = vinlatcum    + vinlat
-    voutlatcum  = voutlatcum   + voutlat
+    vinlatcum(1:2)  = vinlatcum(1:2)    + vinlat(1:2)
+    voutlatcum(1:2) = voutlatcum(1:2)   + voutlat(1:2)
     vingrwcum   = vingrwcum    + vingrw
     voutgrwcum  = voutgrwcum   + voutgrw
     vinsrccum   = vinsrccum    + vinsrc
@@ -39752,9 +39758,15 @@ if (jahisbal > 0) then
     volcur(IDX_GRWOUT)  = voutgrw
     volcur(IDX_GRWTOT)  = (vingrw - voutgrw)
 
-    volcur(IDX_LATIN )  = vinlat
-    volcur(IDX_LATOUT)  = voutlat
-    volcur(IDX_LATTOT)  = (vinlat - voutlat)
+    volcur(IDX_LATIN )    = sum(vinlat(1:2))
+    volcur(IDX_LATOUT)    = sum(voutlat(1:2))
+    volcur(IDX_LATTOT)    = volcur(IDX_LATIN) - volcur(IDX_LATOUT)
+    volcur(IDX_LATIN1D )  = vinlat(1)
+    volcur(IDX_LATOUT1D)  = voutlat(1)
+    volcur(IDX_LATTOT1D)  = (vinlat(1) - voutlat(1))
+    volcur(IDX_LATIN2D )  = vinlat(2)
+    volcur(IDX_LATOUT2D)  = voutlat(2)
+    volcur(IDX_LATTOT2D)  = (vinlat(2) - voutlat(2))
 
    ! cumulate
     cumvolcur = cumvolcur + volcur
