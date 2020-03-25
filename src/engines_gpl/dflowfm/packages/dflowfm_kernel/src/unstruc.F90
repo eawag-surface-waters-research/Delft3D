@@ -38064,15 +38064,15 @@ end function ispumpon
 
     if (jaQinext > 0) then
        do k = 1,ndxi
-           if (qinext(k) > 0) then ! inflow is always possible
-               Qext = qinext(k)
-           else if (hs(k) > epshu) then
-               Qext = - min(0.5d0*vol1(k)/dts , -qinext(k))
-           else ! (almost) no water
-               Qext = 0.0d0
-           endif
-           qinextreal(k) = Qext
-           qin(k) = qin(k) + Qext
+          if (qinext(k) > 0) then ! inflow is always possible
+             Qext = qinext(k)
+          else if (hs(k) > epshu) then
+             Qext = - min(0.5d0*vol1(k)/dts , -qinext(k))
+          else ! (almost) no water
+             Qext = 0.0d0
+          endif
+          qinextreal(k) = Qext
+          qin(k) = qin(k) + Qext
        enddo
     end if
 
