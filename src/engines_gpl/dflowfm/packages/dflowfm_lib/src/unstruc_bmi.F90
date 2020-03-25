@@ -1177,6 +1177,7 @@ end subroutine get_var
 subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    !DEC$ ATTRIBUTES DLLEXPORT :: set_var
    ! Return a pointer to the variable
+   use unstruc_model
    use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
 
    character(kind=c_char), intent(in) :: c_var_name(*)
@@ -1197,7 +1198,8 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    real(c_float), pointer  :: x_2d_float_ptr(:,:)
    real(c_float), pointer  :: x_3d_float_ptr(:,:,:)
    ! The fortran name of the attribute name
-   character(len=strlen(c_var_name)) :: var_name
+   character(len=strlen(c_var_name))            :: var_name
+   character(kind=c_char),dimension(:), pointer :: c_value => null()
    integer :: i
 
    ! Store the name
@@ -1213,6 +1215,16 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
       enddo
       call land_change_callback()
 
+      return
+   case("processlibrary")
+      call c_f_pointer(xptr, c_value,[MAXSTRLEN])
+      md_pdffile = " "
+      if (associated(c_value)) then
+         do i=1,MAXSTRLEN
+            if (c_value(i) == c_null_char) exit
+            md_pdffile(i:i) = c_value(i)
+         enddo
+      endif
       return
    end select
   
