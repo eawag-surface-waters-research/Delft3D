@@ -146,7 +146,7 @@ c     back for next sweep
       if ( flag ) goto 100
 c      write (*,*) ' Processes sorted '
 c      do ir = 1,nr
-c          write (11,*) ir,sortnr(ir),pr(ir),it(ir)
+c          write (*,*) ir,sortnr(ir),pr(ir),it(ir)
 c      enddo
 
 c     Sort on number!!!
@@ -157,7 +157,7 @@ c     Sort on number!!!
 c         Find items within current process
 
           do ir = noffse + 1, nr
-c              write (11,*) ' ir ',ir
+c              write (*,*) ' ir ',ir
               if ( sortnr(ir) .ne. sortnr(noffse+1) ) then
                   nrsub = ir-1-noffse
                   goto 200
@@ -168,7 +168,7 @@ c              write (11,*) ' ir ',ir
               endif
           enddo
   200     continue
-c          write (11,*) ' Cycle ',irarr, ' from ',noffse+1,' to ',
+c          write (*,*) ' Cycle ',irarr, ' from ',noffse+1,' to ',
 c     j                 noffse+nrsub
 
 c         Sort

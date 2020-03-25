@@ -52,7 +52,6 @@ c     Include data structures for tables and PDF-file
       character*255 ArgumentString
       real         actdef, versio
       integer      lu_inp, lu_mes, status, lunfil
-      data         lu_inp /14/
       
 c     Defaults for command line arguments
 
@@ -137,11 +136,11 @@ c----------------------------------------------------------------------c
 c     SET VERSION, SERIAL AND WRITE NEFIS FILE
 c----------------------------------------------------------------------c
 
-      write (11,'(''Writing NEFIS process definition file'')')
+      write (lu_mes,'(''Writing NEFIS process definition file'')')
       call makind()
-      call pdfnef(11    , serial, versio, ierror)
+      call pdfnef(lu_mes    , serial, versio, ierror)
       if ( ierror .ne. 0 ) then
-         write (11,'(''ERROR writing NEFIS file'')')
+         write (lu_mes,'(''ERROR writing NEFIS file'')')
          write (*,'(''ERROR writing NEFIS file, see report file'')')
       endif
 
@@ -381,7 +380,7 @@ c             Process current row
 
 c             Lookup flux in items table
               ioutf = ioffse + flu-1
-c             write (11,*) ' flu ',flu,' ioutf ', ioutf
+c             write (lu_mes,*) ' flu ',flu,' ioutf ', ioutf
               call zoek ( outffl(ioutf), nitem, itemid, 10, iitem)
               if ( iitem .le. 0 ) stop 'unknown FLUX'
 
@@ -444,10 +443,10 @@ c         Write PDF file (formats as in HARMONIZE to allow comparison)
 
           if (newfrm) then
           call wripdn ( procid(iproc), procnm(iproc), procco(iproc),
-     j                  procfo(iproc), 15 )
+     j                  procfo(iproc), lunfil )
           else
           call wripdf ( procid(iproc), procnm(iproc), procco(iproc),
-     j                  procfo(iproc), 15 )
+     j                  procfo(iproc), lunfil )
           endif
   800 continue
       close (lunfil)
@@ -456,7 +455,7 @@ c     Write all active coefficients to COEFEDIT.DAT in the Sobek-format
       call coefed(serial,itmswi)
 
   900 continue
-      close (11)
+      close (lu_mes)
 
       stop 'Normal end'
       end

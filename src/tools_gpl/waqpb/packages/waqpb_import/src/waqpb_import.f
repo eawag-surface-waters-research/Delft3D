@@ -53,7 +53,6 @@ c
      j             none   = 4)
       logical      newtab, duprol, newfrm
       integer      io_mes, io_asc, io_inp, lunfil
-      data         io_inp /15/
       data         grp /'DummyGroup                          '/
       data         initialConfgId /'DummyConfg'/
       
@@ -414,11 +413,11 @@ c         DUPROL format has two additional blocks, specifying active and inactiv
 c     Sort and check R6-R7-R8
 
       call sortst ( stocfl, stocsu, stocsc, nstoc )
-      call chksto ( stocfl, stocsu, stocsc, nstoc , itemid, nitem )
+      call chksto ( stocfl, stocsu, stocsc, nstoc , itemid, nitem, io_mes )
       call sortst ( dispit, dispsu, dispsc, ndisp )
-      call chksto ( dispit, dispsu, dispsc, ndisp , itemid, nitem )
+      call chksto ( dispit, dispsu, dispsc, ndisp , itemid, nitem, io_mes )
       call sortst ( veloit, velosu, velosc, nvelo )
-      call chksto ( veloit, velosu, velosc, nvelo , itemid, nitem )
+      call chksto ( veloit, velosu, velosc, nvelo , itemid, nitem, io_mes )
 
 c     Create/update tables R1, R2
       call cratab (grp,newtab,initialConfgId,initialConfgName)
@@ -493,7 +492,7 @@ c----------------------------------------------------------------------c
 c     Dump tables
 c----------------------------------------------------------------------c
 
-      call writdb ( 15 )
+      call writdb ( io_inp )
 
 c----------------------------------------------------------------------c
 c     Write prefined set for SOBEK (DUPROL mode ONLY)
