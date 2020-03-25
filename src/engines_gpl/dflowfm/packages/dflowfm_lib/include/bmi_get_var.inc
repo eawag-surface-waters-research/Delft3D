@@ -110,8 +110,8 @@
      x = c_loc(qinext)
   case("qinextreal") !<  [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
      x = c_loc(qinextreal)
-  case("vincum") !<  [m3] Cumulative realized volume through qinext {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(vincum)
+  case("vinextcum") !<  [m3] Cumulative realized volume through qinext {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(vinextcum)
   case("rainuni") !<  [mm/hr] uniform rain intensity. {"rank": 0}
      x = c_loc(rainuni)
   case("zbndz") !<  [m] waterlevel boundary points function {"location": "edge", "shape": ["nbndz"]}

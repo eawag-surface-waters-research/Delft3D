@@ -111,7 +111,7 @@
   case(40)
      var_name = "qinextreal"
   case(41)
-     var_name = "vincum"
+     var_name = "vinextcum"
   case(42)
      var_name = "rainuni"
   case(43)

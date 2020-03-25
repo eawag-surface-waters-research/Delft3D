@@ -110,7 +110,7 @@ select case(var_name)
     type_name = "double"
   case("qinextreal")
     type_name = "double"
-  case("vincum")
+  case("vinextcum")
     type_name = "double"
   case("rainuni")
     type_name = "double"

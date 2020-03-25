@@ -1128,7 +1128,7 @@ integer,          allocatable, target :: kclat(:)    !< [-] for each cell: 0 whe
 
 double precision, allocatable, target :: qinext(:)      !< [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
 double precision, allocatable, target :: qinextreal(:)  !< [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
-double precision, allocatable, target :: vincum(:)      !< [m3] Cumulative realized volume through qinext {"location": "face", "shape": ["ndkx"]}
+double precision, allocatable, target :: vinextcum(:)   !< [m3] Cumulative realized volume through qinext {"location": "face", "shape": ["ndkx"]}
 
 double precision, allocatable, target :: tair(:)     !< air temperature       (degC)
 double precision, allocatable, target :: rhum(:)     !< air relative humidity (%)

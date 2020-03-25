@@ -112,7 +112,7 @@
        shape(1) = ndkx
     case("qinextreal")
        shape(1) = ndkx
-    case("vincum")
+    case("vinextcum")
        shape(1) = ndkx
     case("rainuni")
        shape(1) = 0

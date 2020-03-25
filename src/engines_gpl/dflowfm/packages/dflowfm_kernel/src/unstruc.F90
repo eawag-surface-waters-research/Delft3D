@@ -27041,8 +27041,8 @@ endif
     call aerr('qinext(ndkx)', ierr, ndkx)
     call realloc(qinextreal, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
     call aerr('qinextreal(ndkx)', ierr, ndkx)
-    call realloc(vincum, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('vincum(ndkx)', ierr, ndkx)
+    call realloc(vinextcum, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('vinextcum(ndkx)', ierr, ndkx)
  end if
 
  if (nshiptxy > 0) then

@@ -151,9 +151,9 @@
   case("qinextreal")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(qinextreal))
      qinextreal(:) = x_1d_double_ptr
-  case("vincum")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(vincum))
-     vincum(:) = x_1d_double_ptr
+  case("vinextcum")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(vinextcum))
+     vinextcum(:) = x_1d_double_ptr
   case("rainuni")
      call c_f_pointer(xptr, x_0d_double_ptr)
      rainuni = x_0d_double_ptr

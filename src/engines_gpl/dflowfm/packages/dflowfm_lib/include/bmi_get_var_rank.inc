@@ -110,7 +110,7 @@
      rank = 1
   case("qinextreal")
      rank = 1
-  case("vincum")
+  case("vinextcum")
      rank = 1
   case("rainuni")
      rank = 0

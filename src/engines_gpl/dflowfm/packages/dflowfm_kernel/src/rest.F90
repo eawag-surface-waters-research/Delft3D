@@ -6321,7 +6321,7 @@ implicit none
    timprev = tim1
 end subroutine updateValuesOnSourceSinks
 
-! update m_wind::vincum(:) with the realized inflow from m_wind::qinextreal(:)
+! update m_wind::vinextcum(:) with the realized inflow from m_wind::qinextreal(:)
 subroutine updateCumulativeInflow(deltat) 
     use m_wind
     use m_flowgeom, only : ndx
@@ -6332,7 +6332,7 @@ subroutine updateCumulativeInflow(deltat)
     if (jaQinext == 0) return
 
     do k = 1, ndx
-        vincum(k) = vincum(k) + qinextreal(k)*deltat
+        vinextcum(k) = vinextcum(k) + qinextreal(k)*deltat
     enddo
     
 end subroutine updateCumulativeInflow
