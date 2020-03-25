@@ -41423,6 +41423,7 @@ end function is_1d_boundary_candidate
  double precision              :: area, width, hdx
  type(t_storage), pointer      :: stors(:)
  integer                       :: i, nstor
+ integer                       :: num_lat_ini_blocks !< Number of [Lateral] providers read from new extforce file.
 
  iresult = DFM_NOERR
 
@@ -42089,6 +42090,7 @@ end function is_1d_boundary_candidate
  success = .true.
 
  ! First initialize new-style ExtForceFileNew quantities.
+ num_lat_ini_blocks = 0
  if (len_trim(md_extfile_new) > 0) then
     success = initboundaryblocksforcings(md_extfile_new)
     if (.not. success) then
@@ -42097,6 +42099,7 @@ end function is_1d_boundary_candidate
       call qnerror('Error occurred while running, please inspect your diagnostic output.',' ', ' ')
       goto 888
     end if
+    num_lat_ini_blocks = numlatsg ! nr of [Lateral] providers in new extforce file
     if (.false.) then ! DEBUG
        call ecInstancePrintState(ecInstancePtr,callback_msg,LEVEL_DEBUG)
     end if
@@ -42871,7 +42874,7 @@ if (mext /= 0) then
                jaqin = 1
            endif
 
-        else if (qid(1:16) == 'lateraldischarge' ) then
+        else if (num_lat_ini_blocks == 0 .and. qid(1:16) == 'lateraldischarge' ) then
 
            call ini_alloc_laterals()
 
@@ -43202,7 +43205,7 @@ if (mext /= 0) then
     enddo
  endif
 
- if (numlatsg > 0) then ! Allow laterals from old ext, even when new structures file is present.
+ if (num_lat_ini_blocks == 0 .and. numlatsg > 0) then ! Allow laterals from old ext, even when new structures file is present (but only when *no* [Lateral]s were in new extforce file).
 
     call realloc(balat, numlatsg, keepExisting = .false., fill = 0d0)
     call realloc(qplat, numlatsg, keepExisting = .false., fill = 0d0)
