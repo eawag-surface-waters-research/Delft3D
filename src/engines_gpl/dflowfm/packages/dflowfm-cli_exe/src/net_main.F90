@@ -354,6 +354,11 @@
            if (idum == DFM_SIGINT .or. md_jaAutoStart >= MD_AUTOSTARTSTOP) then
               goto 1234   ! finalize and stop
            end if
+        else
+           if (jaGUI == 0) then
+              call mess(LEVEL_INFO, 'Model '''//trim(md_ident)//''' successfully initialized, but no run was started.')
+              call mess(LEVEL_INFO, 'Consider using commandline option --autostartstop.')
+           end if
         end if
     end if
     
