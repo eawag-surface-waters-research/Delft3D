@@ -106,11 +106,11 @@ select case(var_name)
     location_name = ""
   case("kclat")
     location_name = "face"
-  case("qinext")
+  case("qext")
     location_name = "face"
-  case("qinextreal")
+  case("qextreal")
     location_name = "face"
-  case("vinextcum")
+  case("vextcum")
     location_name = "face"
   case("rainuni")
     location_name = ""

@@ -145,15 +145,15 @@
   case("kclat")
      call c_f_pointer(xptr, x_1d_int_ptr, shape(kclat))
      kclat(:) = x_1d_int_ptr
-  case("qinext")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(qinext))
-     qinext(:) = x_1d_double_ptr
-  case("qinextreal")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(qinextreal))
-     qinextreal(:) = x_1d_double_ptr
-  case("vinextcum")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(vinextcum))
-     vinextcum(:) = x_1d_double_ptr
+  case("qext")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(qext))
+     qext(:) = x_1d_double_ptr
+  case("qextreal")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(qextreal))
+     qextreal(:) = x_1d_double_ptr
+  case("vextcum")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(vextcum))
+     vextcum(:) = x_1d_double_ptr
   case("rainuni")
      call c_f_pointer(xptr, x_0d_double_ptr)
      rainuni = x_0d_double_ptr

@@ -107,11 +107,11 @@
   case(38)
      var_name = "kclat"
   case(39)
-     var_name = "qinext"
+     var_name = "qext"
   case(40)
-     var_name = "qinextreal"
+     var_name = "qextreal"
   case(41)
-     var_name = "vinextcum"
+     var_name = "vextcum"
   case(42)
      var_name = "rainuni"
   case(43)

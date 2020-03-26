@@ -1447,8 +1447,8 @@ subroutine readMDUFile(filename, istat)
     if (jarain > 0) then
        jaqin = 1
     end if
-    call prop_get_integer(md_ptr, 'external forcing', 'QinExt', jaQinext, success)
-    if (jaQinext > 0) then
+    call prop_get_integer(md_ptr, 'external forcing', 'QExt', jaQext, success)
+    if (jaQext > 0) then
        jaqin = 1
     end if
     call prop_get_integer(md_ptr, 'external forcing', 'Evaporation', jaevap, success)
@@ -3052,8 +3052,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jarain > 0) then
        call prop_set(prop_ptr, 'external forcing', 'Rainfall', jarain, 'Include rainfall, (0=no, 1=yes)')
     end if
-    if (writeall .or. jaQinext > 0) then
-       call prop_set(prop_ptr, 'external forcing', 'QinExt', jaQinext, 'Include user Qin, externally provided, (0=no, 1=yes)')
+    if (writeall .or. jaQext > 0) then
+       call prop_set(prop_ptr, 'external forcing', 'QExt', jaQext, 'Include user Qin/out, externally provided, (0=no, 1=yes)')
     end if
     if (writeall .or. jaevap > 0) then
        call prop_set(prop_ptr, 'external forcing', 'Evaporation', jaevap, 'Include evaporation in water balance, (0=no, 1=yes)')

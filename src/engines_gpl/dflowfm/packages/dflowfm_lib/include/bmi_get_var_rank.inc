@@ -106,11 +106,11 @@
      rank = 1
   case("kclat")
      rank = 1
-  case("qinext")
+  case("qext")
      rank = 1
-  case("qinextreal")
+  case("qextreal")
      rank = 1
-  case("vinextcum")
+  case("vextcum")
      rank = 1
   case("rainuni")
      rank = 0

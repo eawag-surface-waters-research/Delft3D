@@ -106,12 +106,12 @@
      x = c_loc(nnlat)
   case("kclat") !<  [-] for each cell: 0 when not accepting lateral discharge (e.g. pipe) {"location": "face", "shape": ["ndx"]}
      x = c_loc(kclat)
-  case("qinext") !<  [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(qinext)
-  case("qinextreal") !<  [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(qinextreal)
-  case("vinextcum") !<  [m3] Cumulative realized volume through qinext {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(vinextcum)
+  case("qext") !<  [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(qext)
+  case("qextreal") !<  [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(qextreal)
+  case("vextcum") !<  [m3] Cumulative realized volume through qext {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(vextcum)
   case("rainuni") !<  [mm/hr] uniform rain intensity. {"rank": 0}
      x = c_loc(rainuni)
   case("zbndz") !<  [m] waterlevel boundary points function {"location": "edge", "shape": ["nbndz"]}

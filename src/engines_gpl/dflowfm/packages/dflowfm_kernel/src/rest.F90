@@ -6321,7 +6321,7 @@ implicit none
    timprev = tim1
 end subroutine updateValuesOnSourceSinks
 
-! update m_wind::vinextcum(:) with the realized inflow from m_wind::qinextreal(:)
+! update m_wind::vextcum(:) with the realized inflow from m_wind::qextreal(:)
 subroutine updateCumulativeInflow(deltat) 
     use m_wind
     use m_flowgeom, only : ndx
@@ -6329,10 +6329,10 @@ subroutine updateCumulativeInflow(deltat)
     integer :: k  
     double precision, intent(in) :: deltat ! dt of current timestep
     
-    if (jaQinext == 0) return
+    if (jaQext == 0) return
 
     do k = 1, ndx
-        vinextcum(k) = vinextcum(k) + qinextreal(k)*deltat
+        vextcum(k) = vextcum(k) + qextreal(k)*deltat
     enddo
     
 end subroutine updateCumulativeInflow

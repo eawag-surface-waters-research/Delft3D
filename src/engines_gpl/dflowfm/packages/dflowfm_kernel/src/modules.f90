@@ -1126,9 +1126,9 @@ integer,          allocatable, target :: n2latsg(:)  !< [-] second nlatnd point 
 integer,          allocatable, target :: nnlat(:)    !< [-] for each lateral node, flow node number == pointer to qplat/balat {"shape": ["nlatnd"]}
 integer,          allocatable, target :: kclat(:)    !< [-] for each cell: 0 when not accepting lateral discharge (e.g. pipe) {"location": "face", "shape": ["ndx"]}
 
-double precision, allocatable, target :: qinext(:)      !< [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
-double precision, allocatable, target :: qinextreal(:)  !< [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
-double precision, allocatable, target :: vinextcum(:)   !< [m3] Cumulative realized volume through qinext {"location": "face", "shape": ["ndkx"]}
+double precision, allocatable, target :: qext(:)     !< [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
+double precision, allocatable, target :: qextreal(:) !< [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
+double precision, allocatable, target :: vextcum(:)  !< [m3] Cumulative realized volume through qext {"location": "face", "shape": ["ndkx"]}
 
 double precision, allocatable, target :: tair(:)     !< air temperature       (degC)
 double precision, allocatable, target :: rhum(:)     !< air relative humidity (%)
@@ -1157,7 +1157,7 @@ integer                           :: jaclou              !< use cloudiness      
 integer                           :: jasol = 0           !< use 1 = use solrad, 2 = use cloudiness
 integer                           :: jalongwave = 0      !< >0 longwaveradation from file; otherwise internal formulation
 integer                           :: jaheat_eachstep = 0 !< if 1, do it each step, else in externalforcings (default)
-integer                           :: jaQinext            !< use Qin externally provided yes or no
+integer                           :: jaQext              !< use Qin externally provided yes or no
 integer                           :: jaqin               !< use qin , sum of all in fluxes
 
 double precision                  :: windxav, windyav  !< average wind for plotting
@@ -1213,7 +1213,7 @@ use m_physcoef, only : rhomean
     jarain  = 0         !< use rain yes or no
     jaevap  = 0         !< use evap yes or no
     jaqin   = 0         !< use qin , sum of all in fluxes
-    jaQinext= 0         !< use Qin externally provided yes or no
+    jaQext  = 0         !< use Qin externally provided yes or no
     jawind  = 0         !< use wind yes or no
 
     ! Remaining of variables is handled in reset_wind()

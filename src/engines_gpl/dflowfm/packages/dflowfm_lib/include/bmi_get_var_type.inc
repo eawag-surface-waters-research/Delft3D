@@ -106,11 +106,11 @@ select case(var_name)
     type_name = "int"
   case("kclat")
     type_name = "int"
-  case("qinext")
+  case("qext")
     type_name = "double"
-  case("qinextreal")
+  case("qextreal")
     type_name = "double"
-  case("vinextcum")
+  case("vextcum")
     type_name = "double"
   case("rainuni")
     type_name = "double"

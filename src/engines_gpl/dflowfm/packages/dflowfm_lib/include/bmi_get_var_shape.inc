@@ -108,11 +108,11 @@
        shape(1) = nlatnd
     case("kclat")
        shape(1) = ndx
-    case("qinext")
+    case("qext")
        shape(1) = ndkx
-    case("qinextreal")
+    case("qextreal")
        shape(1) = ndkx
-    case("vinextcum")
+    case("vextcum")
        shape(1) = ndkx
     case("rainuni")
        shape(1) = 0

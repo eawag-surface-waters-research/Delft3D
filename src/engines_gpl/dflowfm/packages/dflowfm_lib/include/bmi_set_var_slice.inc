@@ -182,18 +182,18 @@
 
      call c_f_pointer(xptr, x_1d_int_ptr, (/c_count(1)/))
      kclat(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_int_ptr
-  case("qinext")
+  case("qext")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     qinext(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("qinextreal")
+     qext(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("qextreal")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     qinextreal(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("vinextcum")
+     qextreal(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("vextcum")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     vinextcum(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+     vextcum(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("rainuni")
      ! Does not apply to scalar variables
      continue

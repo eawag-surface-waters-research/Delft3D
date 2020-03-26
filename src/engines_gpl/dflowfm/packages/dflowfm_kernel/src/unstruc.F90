@@ -580,7 +580,7 @@ character(len=255)   :: filename_fou_out
 
  ! call wriinc(time1)
 
-  if (jaQinext > 0) then
+  if (jaQext > 0) then
      call updateCumulativeInflow(dts)
   end if
 
@@ -27036,13 +27036,13 @@ endif
     call realloc(kcw, lnx, keepExisting = .false., fill = 1, stat = ierr)
  end if
 
- if (jaQinext > 0) then
-    call realloc(qinext, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('qinext(ndkx)', ierr, ndkx)
-    call realloc(qinextreal, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('qinextreal(ndkx)', ierr, ndkx)
-    call realloc(vinextcum, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('vinextcum(ndkx)', ierr, ndkx)
+ if (jaQext > 0) then
+    call realloc(qext, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('qext(ndkx)', ierr, ndkx)
+    call realloc(qextreal, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('qextreal(ndkx)', ierr, ndkx)
+    call realloc(vextcum, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('vextcum(ndkx)', ierr, ndkx)
  end if
 
  if (nshiptxy > 0) then
@@ -38009,7 +38009,7 @@ end function ispumpon
 
  integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim
  double precision :: aufu, auru, tetau
- double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qext
+ double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qextk
 
  buitje = 0.013d0/300d0                                      ! 13 mm in 5 minutes
 
@@ -38062,17 +38062,17 @@ end function ispumpon
        enddo
     endif
 
-    if (jaQinext > 0) then
+    if (jaQext > 0) then
        do k = 1,ndxi
-          if (qinext(k) > 0) then ! inflow is always possible
-             Qext = qinext(k)
+          if (qext(k) > 0) then ! inflow is always possible
+             Qextk = qext(k)                                               ! Qext can be pos or neg
           else if (hs(k) > epshu) then
-             Qext = - min(0.5d0*vol1(k)/dts , -qinext(k))
+             Qextk = - min(0.5d0*vol1(k)/dts , -qext(k))
           else ! (almost) no water
-             Qext = 0.0d0
+             Qextk = 0.0d0
           endif
-          qinextreal(k) = Qext
-          qin(k) = qin(k) + Qext
+          qextreal(k) = Qextk
+          qin(k) = qin(k) + Qextk
        enddo
     end if
 
@@ -38109,7 +38109,7 @@ end function ispumpon
        enddo
     endif
 
-    if (jarain > 0 .or. jaevap > 0 .or. jaQinext > 0) then ! TODO: Qlat not here?
+    if (jarain > 0 .or. jaevap > 0 .or. jaQext > 0) then ! TODO: Qlat not here?
        do k  = 1,ndxi
           kt = ktop(k)
           if (kmx > 0) then
