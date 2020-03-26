@@ -443,6 +443,7 @@ else
     PROJ_LDFLAGS=""
     PROJ_CONFARGS=""
     if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
+	   # NOTE: PROJ_DIR was set during the execution of "module load $projModule"
        PROJ_CPPFLAGS=-I$PROJ_DIR/include
        PROJ_LDFLAGS=-L$PROJ_DIR/lib
        PROJ_CONFARGS="--with-proj=$PROJ_DIR"
@@ -470,6 +471,7 @@ else
     SHAPELIB_LDFLAGS=""
     SHAPELIB_CONFARGS=""
     if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
+	   # NOTE: SHAPELIB_DIR was set during the execution of "module load $shapelibModule"
        SHAPELIB_CPPFLAGS=-I$SHAPELIB_DIR/include
        SHAPELIB_LDFLAGS=-L$SHAPELIB_DIR/lib
        SHAPELIB_CONFARGS="--with-shapelib=$SHAPELIB_DIR"
@@ -492,6 +494,7 @@ else
     GDAL_LDFLAGS=""
     GDAL_CONFARGS=""
     if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
+	   # NOTE: GDAL_DIR was set during the execution of "module load $gdalModule"
        GDAL_CPPFLAGS=-I$GDAL_DIR/include
        GDAL_LDFLAGS=-L$GDAL_DIR/lib
        GDAL_CONFARGS="--with-gdal=$GDAL_DIR"
