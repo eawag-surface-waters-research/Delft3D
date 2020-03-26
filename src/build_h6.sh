@@ -428,7 +428,8 @@ fi
 #---------------------
 # proj
 
-# icc c++11 features are only available if gcc is in the path. This is required by proj
+# OLD: icc c++11 features are only available if gcc is in the path. This is required by proj
+# NEW: proj only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
 projModule="gcc/4.9.2 proj/6.3.1_gcc5.3.1"
 
 initProj="module load $projModule"
@@ -438,7 +439,7 @@ if [ $? -ne 0 ]; then
     cd $orgdir
     exit 1
 else
-    # NOTE: PROJ currently ONLY available on H6 for Intel, disable for GNU compiler.
+    # if PROJ fails, disable this optional package.
     PROJ_CPPFLAGS=""
     PROJ_LDFLAGS=""
     PROJ_CONFARGS=""
@@ -480,6 +481,7 @@ fi
 
 # gdal
 
+# NEW: gdal only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
 gdalModule="gcc/4.9.2 gdal/3.0.4_gcc5.3.1"
 
 initgdal="module load $gdalModule"
@@ -581,7 +583,7 @@ log "Running $command in `pwd`"
 eval $command
 cd ../..
 
-if [ ! -z "$shapelibModule" -o ! -z "$projModule" ]; then
+if [ ! -z "$shapelibModule" -o ! -z "$projModule" -o ! -z "$gdalModule" ]; then
 cd third_party_open/fortrangis
 cp -f ../../autogen.sh . # temp fix
 log "Running $command in `pwd`"
