@@ -38029,7 +38029,7 @@ end function ispumpon
 
  if (jaqin > 0) then                                         ! sources and sinks through meteo
 
-    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0
+    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0; qinext(1:2) = 0d0 ; qoutext(1:2) = 0d0
     if (jarain > 0) then
        if (rainuni > 0d0) then
           rain     = rainuni*24d0                             ! mm/hr  => mm/day
@@ -38064,10 +38064,17 @@ end function ispumpon
 
     if (jaQext > 0) then
        do k = 1,ndxi
+          if (k <= ndx2d) then
+             idim = 2
+          else
+             idim = 1
+          end if
           if (qext(k) > 0) then ! inflow is always possible
              Qextk = qext(k)                                               ! Qext can be pos or neg
+             qinext(idim) = qinext(idim) + Qextk
           else if (hs(k) > epshu) then
              Qextk = - min(0.5d0*vol1(k)/dts , -qext(k))
+             qoutext(idim) = qoutext(idim) - Qextk
           else ! (almost) no water
              Qextk = 0.0d0
           endif
@@ -39701,6 +39708,8 @@ if (jahisbal > 0) then
 
     vinsrc  = qinsrc  * dts
     voutsrc = qoutsrc * dts
+    vinext(1:2) = qinext(1:2) *dts
+    voutext(1:2)= qoutext(1:2)*dts
 
     ! Time-summed cumulative volumes (nowhere used)
     vinraincum  = vinraincum   + vinrain
@@ -39711,6 +39720,8 @@ if (jahisbal > 0) then
     voutgrwcum  = voutgrwcum   + voutgrw
     vinsrccum   = vinsrccum    + vinsrc
     voutsrccum  = voutsrccum   + voutsrc
+    vinextcum(1:2)  = vinextcum(1:2)    + vinext(1:2)
+    voutextcum(1:2) = voutextcum(1:2)   + voutext(1:2)
 
     ! Volume totals at current time (for his output)
     volcur(IDX_STOR  ) = vol1tot
@@ -39768,7 +39779,17 @@ if (jahisbal > 0) then
     volcur(IDX_LATOUT2D)  = voutlat(2)
     volcur(IDX_LATTOT2D)  = (vinlat(2) - voutlat(2))
 
-   ! cumulate
+    volcur(IDX_EXTIN )    = sum(vinext(1:2))
+    volcur(IDX_EXTOUT)    = sum(voutext(1:2))
+    volcur(IDX_EXTTOT)    = volcur(IDX_EXTIN) - volcur(IDX_EXTOUT)
+    volcur(IDX_EXTIN1D )  = vinext(1)
+    volcur(IDX_EXTOUT1D)  = voutext(1)
+    volcur(IDX_EXTTOT1D)  = (vinext(1) - voutext(1))
+    volcur(IDX_EXTIN2D )  = vinext(2)
+    volcur(IDX_EXTOUT2D)  = voutext(2)
+    volcur(IDX_EXTTOT2D)  = (vinext(2) - voutext(2))
+
+    ! cumulate
     cumvolcur = cumvolcur + volcur
  end if
 

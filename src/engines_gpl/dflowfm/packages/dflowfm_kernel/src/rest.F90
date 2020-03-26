@@ -6342,40 +6342,24 @@ subroutine updateBalance()
    use m_flow
    use m_partitioninfo
    implicit none
+   
+   integer :: ivar
 
    if (jampi == 1) then
       call reduce_bal(cumvolcur, MAX_IDX)
 !     only need to reduce the first two entries of volcur, but we do the reduce for the whole array here 
       call reduce_bal(volcur,    MAX_IDX)
    endif
-   voltot(IDX_STOR)    = volcur(IDX_STOR) - vol1ini
-   voltot(IDX_VOLTOT)  = volcur(IDX_VOLTOT)
-   voltot(IDX_VOLERR)  = voltot(IDX_VOLERR)  + cumvolcur(IDX_VOLERR)
-   voltot(IDX_BNDIN )  = voltot(IDX_BNDIN )  + cumvolcur(IDX_BNDIN ) 
-   voltot(IDX_BNDOUT)  = voltot(IDX_BNDOUT)  + cumvolcur(IDX_BNDOUT) 
-   voltot(IDX_BNDTOT)  = voltot(IDX_BNDTOT)  + cumvolcur(IDX_BNDTOT) 
-   voltot(IDX_EXCHIN)  = voltot(IDX_EXCHIN)  + cumvolcur(IDX_EXCHIN) 
-   voltot(IDX_EXCHOUT) = voltot(IDX_EXCHOUT) + cumvolcur(IDX_EXCHOUT)
-   voltot(IDX_EXCHTOT) = voltot(IDX_EXCHTOT) + cumvolcur(IDX_EXCHTOT)
-   voltot(IDX_PRECIP)  = voltot(IDX_PRECIP)  + cumvolcur(IDX_PRECIP) 
-   voltot(IDX_EVAP)    = voltot(IDX_EVAP)    + cumvolcur(IDX_EVAP)
-   voltot(IDX_SOUR)    = voltot(IDX_SOUR)    + cumvolcur(IDX_SOUR)
-   voltot(IDX_InternalTidesDissipation) = voltot(IDX_InternalTidesDIssipation) + cumvolcur(IDX_InternalTidesDIssipation)
-   voltot(IDX_GravInput) = voltot(IDX_GravInput) + cumvolcur(IDX_GravInput)
-   voltot(IDX_SALInput)  = voltot(IDX_SALInput)  + cumvolcur(IDX_SALInput)
-   voltot(IDX_SALInput2) = voltot(IDX_SALInput2) + cumvolcur(IDX_SALInput2)
-   voltot(IDX_GRWIN )  = voltot(IDX_GRWIN )  + cumvolcur(IDX_GRWIN ) 
-   voltot(IDX_GRWOUT)  = voltot(IDX_GRWOUT)  + cumvolcur(IDX_GRWOUT) 
-   voltot(IDX_GRWTOT)  = voltot(IDX_GRWTOT)  + cumvolcur(IDX_GRWTOT) 
-   voltot(IDX_LATIN )  = voltot(IDX_LATIN )  + cumvolcur(IDX_LATIN ) 
-   voltot(IDX_LATOUT)  = voltot(IDX_LATOUT)  + cumvolcur(IDX_LATOUT) 
-   voltot(IDX_LATTOT)  = voltot(IDX_LATTOT)  + cumvolcur(IDX_LATTOT) 
-   voltot(IDX_LATIN1D )  = voltot(IDX_LATIN1D )  + cumvolcur(IDX_LATIN1D ) 
-   voltot(IDX_LATOUT1D)  = voltot(IDX_LATOUT1D)  + cumvolcur(IDX_LATOUT1D) 
-   voltot(IDX_LATTOT1D)  = voltot(IDX_LATTOT1D)  + cumvolcur(IDX_LATTOT1D) 
-   voltot(IDX_LATIN2D )  = voltot(IDX_LATIN2D )  + cumvolcur(IDX_LATIN2D ) 
-   voltot(IDX_LATOUT2D)  = voltot(IDX_LATOUT2D)  + cumvolcur(IDX_LATOUT2D) 
-   voltot(IDX_LATTOT2D)  = voltot(IDX_LATTOT2D)  + cumvolcur(IDX_LATTOT2D) 
+   do ivar = 1,MAX_IDX
+      if (ivar == IDX_STOR) then
+         voltot(IDX_STOR)    = volcur(IDX_STOR) - vol1ini
+      else if (ivar == IDX_VOLTOT) then
+         voltot(IDX_VOLTOT)  = volcur(IDX_VOLTOT)
+      else
+         ! All other variables are simply cumlative total in time:
+         voltot(ivar)  = voltot(ivar)  + cumvolcur(ivar)
+      end if
+   end do
 
    cumvolcur = 0d0
 end subroutine updateBalance

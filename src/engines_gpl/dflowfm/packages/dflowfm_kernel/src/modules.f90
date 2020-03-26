@@ -3658,6 +3658,8 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  double precision                  :: qoutgrw     !< total outflux groundwater                 (m3/s)
  double precision                  :: qinsrc      !< total influx local point sources          (m3/s)
  double precision                  :: qoutsrc     !< total outflux local pount sources         (m3/s)
+ double precision, dimension(2)    :: qinext      !< total influx Qext (1D and 2D)             (m3/s)
+ double precision, dimension(2)    :: qoutext     !< total outflux Qext(1D and 2D)             (m3/s)
 
  double precision                  :: vinrain     !< total volume in  rain                     (m3) in the last time step
  double precision                  :: vouteva     !< total volume out evaporation              (m3) "
@@ -3667,6 +3669,8 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  double precision                  :: voutgrw     !< total volume out groundwater              (m3) "
  double precision                  :: vinsrc      !< total volume in  local point sources      (m3) "
  double precision                  :: voutsrc     !< total volume out local pount sources      (m3) "
+ double precision, dimension(2)    :: vinext      !< total volume in  Qext (1D and 2D)         (m3) "
+ double precision, dimension(2)    :: voutext     !< total volume out Qext (1D and 2D)         (m3) "
 
  double precision                  :: vinraincum  !< total inflow from rain                    (m3) integrated over all time steps
  double precision                  :: voutevacum  !< total outflow to evaporation              (m3) "
@@ -3676,6 +3680,8 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  double precision                  :: voutgrwcum  !< total outflow to groundwater              (m3) "
  double precision                  :: vinsrccum   !< total inflow from local point sources     (m3) "
  double precision                  :: voutsrccum  !< total outflow to local pount sources      (m3) "
+ double precision, dimension(2)    :: vinextcum   !< total inflow from Qext (1D and 2D)        (m3) "
+ double precision, dimension(2)    :: voutextcum  !< total outflow to  Qext (1D and 2D)        (m3) "
 
  double precision                  :: DissInternalTides  !< total Internal Tides Dissipation (J/s)
  double precision, allocatable     :: DissInternalTidesPerArea(:)  !< internal tides dissipation / area (J/(m^2 s))
@@ -3725,7 +3731,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer                           :: Lnmin         !< link nr where min zlin is found in viewing area
  integer                           :: Lnmax         !< link nr where max zlin is found in viewing area
 
- integer, parameter :: MAX_IDX        = 28
+ integer, parameter :: MAX_IDX        = 37
  double precision, dimension(MAX_IDX)    :: volcur !< Volume totals in *current* timestep only (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: cumvolcur =0d0 !< Cumulative volume totals starting from the previous His output time, cumulate with volcur (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: voltot
@@ -3758,6 +3764,15 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer, parameter :: IDX_LATIN2D    = 26
  integer, parameter :: IDX_LATOUT2D   = 27
  integer, parameter :: IDX_LATTOT2D   = 28
+ integer, parameter :: IDX_EXTIN      = 29
+ integer, parameter :: IDX_EXTOUT     = 30
+ integer, parameter :: IDX_EXTTOT     = 31
+ integer, parameter :: IDX_EXTIN1D    = 32
+ integer, parameter :: IDX_EXTOUT1D   = 33
+ integer, parameter :: IDX_EXTTOT1D   = 34
+ integer, parameter :: IDX_EXTIN2D    = 35
+ integer, parameter :: IDX_EXTOUT2D   = 36
+ integer, parameter :: IDX_EXTTOT2D   = 37
 
 
 ! Delft3D structure of grid dimensions
@@ -3830,6 +3845,8 @@ subroutine reset_flow()
     qoutgrw     = 0    ! total outflow to groundwater            (m3/s)
     qinsrc      = 0    ! total inflow local point sources        (m3/s)
     qoutsrc     = 0    ! total outflow local pount sources       (m3/s)
+    qinext(1:2) = 0    ! total influx Qext (1D and 2D)           (m3/s)
+    qoutext(1:2)= 0    ! total outflux Qext(1D and 2D)           (m3/s)
 
     vinrain     = 0    ! total volume in  rain                   (m3)
     vouteva     = 0    ! total volume out evaporation            (m3)
@@ -3839,6 +3856,8 @@ subroutine reset_flow()
     voutgrw     = 0    ! total volume out groundwater            (m3)
     vinsrc      = 0    ! total volume in  local point sources    (m3)
     voutsrc     = 0    ! total volume out local pount sources    (m3)
+    vinext(1:2) = 0    ! total volume in  Qext (1D and 2D)       (m3)
+    voutext(1:2)= 0    ! total volume out Qext (1D and 2D)       (m3)
 
     vinraincum  = 0    ! total inflow rain                       (m3)
     voutevacum  = 0    ! total outflow evaporation               (m3)
@@ -3848,6 +3867,8 @@ subroutine reset_flow()
     voutgrwcum  = 0    ! total outflow groundwater               (m3)
     vinsrccum   = 0    ! total inflow local point sources        (m3)
     voutsrccum  = 0    ! total outflow local pount sources       (m3)
+    vinextcum(1:2) = 0 ! total inflow from Qext (1D and 2D)      (m3)
+    voutextcum(1:2)= 0 ! total outflow to  Qext (1D and 2D)      (m3)
 
     DissInternalTides = 0d0   !< total Internal Tides Dissipation (J/s)
 
@@ -3911,6 +3932,15 @@ subroutine reset_flow()
     voltotname(IDX_LATIN2D ) = 'laterals_in_2D'
     voltotname(IDX_LATOUT2D) = 'laterals_out_2D'
     voltotname(IDX_LATTOT2D) = 'laterals_total_2D'
+    voltotname(IDX_EXTIN  )  = 'Qext_in'
+    voltotname(IDX_EXTOUT )  = 'Qext_out'
+    voltotname(IDX_EXTTOT )  = 'Qext_total'
+    voltotname(IDX_EXTIN1D ) = 'Qext_in_1D'
+    voltotname(IDX_EXTOUT1D) = 'Qext_out_1D'
+    voltotname(IDX_EXTTOT1D) = 'Qext_total_1D'
+    voltotname(IDX_EXTIN2D ) = 'Qext_in_2D'
+    voltotname(IDX_EXTOUT2D) = 'Qext_out_2D'
+    voltotname(IDX_EXTTOT2D) = 'Qext_total_2D'
 
     jacftrtfac  = 0   !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's returned roughness values.
 
