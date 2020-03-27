@@ -439,16 +439,10 @@ if [ $? -ne 0 ]; then
     cd $orgdir
     exit 1
 else
-    # if PROJ fails, disable this optional package.
-    PROJ_CPPFLAGS=""
-    PROJ_LDFLAGS=""
-    PROJ_CONFARGS=""
-    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
-	   # NOTE: PROJ_DIR was set during the execution of "module load $projModule"
-       PROJ_CPPFLAGS=-I$PROJ_DIR/include
-       PROJ_LDFLAGS=-L$PROJ_DIR/lib
-       PROJ_CONFARGS="--with-proj=$PROJ_DIR"
-    fi
+   # NOTE: PROJ_DIR was set during the execution of "module load $projModule"
+   PROJ_CPPFLAGS=-I$PROJ_DIR/include
+   PROJ_LDFLAGS=-L$PROJ_DIR/lib
+   PROJ_CONFARGS="--with-proj=$PROJ_DIR"
 fi
 
 #---------------------
@@ -470,7 +464,7 @@ else
     # NOTE: Shapelib currently ONLY available on H6 for Intel, disable for GNU compiler.
     SHAPELIB_CPPFLAGS=""
     SHAPELIB_LDFLAGS=""
-    SHAPELIB_CONFARGS=""
+    SHAPELIB_CONFARGS="--disable-shapelib"
     if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
 	   # NOTE: SHAPELIB_DIR was set during the execution of "module load $shapelibModule"
        SHAPELIB_CPPFLAGS=-I$SHAPELIB_DIR/include
@@ -491,16 +485,10 @@ if [ $? -ne 0 ]; then
     cd $orgdir
     exit 1
 else
-    # NOTE: gdal currently ONLY available on H6 for Intel, disable for GNU compiler.
-    GDAL_CPPFLAGS=""
-    GDAL_LDFLAGS=""
-    GDAL_CONFARGS=""
-    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
-	   # NOTE: GDAL_DIR was set during the execution of "module load $gdalModule"
-       GDAL_CPPFLAGS=-I$GDAL_DIR/include
-       GDAL_LDFLAGS=-L$GDAL_DIR/lib
-       GDAL_CONFARGS="--with-gdal=$GDAL_DIR"
-    fi
+   # NOTE: GDAL_DIR was set during the execution of "module load $gdalModule"
+   GDAL_CPPFLAGS=-I$GDAL_DIR/include
+   GDAL_LDFLAGS=-L$GDAL_DIR/lib
+   GDAL_CONFARGS="--with-gdal=$GDAL_DIR"
 fi
 
 #===============================================================================
