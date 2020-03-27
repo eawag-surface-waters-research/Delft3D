@@ -2,14 +2,17 @@ module interception
     implicit none	
 
     contains
-subroutine rainfall_interception_modrut(Precipitation, PotEvap, CanopyStorage, CanopyGapFraction, Cmax, n,NetInterception,&
-     ThroughFall, StemFlow,LeftOver, Interception)
+function rainfall_interception_modrut(Precipitation, PotEvap, CanopyStorage, CanopyGapFraction, Cmax, n, NetInterception,&
+     ThroughFall, StemFlow,LeftOver, Interception) result(ierr)
 
     integer, intent(in) :: n
     double precision, intent(in) :: Precipitation(n), PotEvap(n), CanopyGapFraction(n), Cmax(n) 
     double precision, intent(inout) :: CanopyStorage(n)
     double precision, intent(out) :: NetInterception(n), ThroughFall(n), StemFlow(n),LeftOver(n), Interception(n)
     double precision :: pt(n), Pfrac(n), DD(n), dC(n), D(n) 
+    integer                         :: ierr
+
+    ierr = -1
     
     !f2py intent(in) :: n, Precipitation, PotEvap, CanopyGapFraction, Cmax
     !f2py intent(out) :: NetInterception, ThroughFall, StemFlow,LeftOver, Interception
@@ -58,8 +61,8 @@ subroutine rainfall_interception_modrut(Precipitation, PotEvap, CanopyStorage, C
     NetInterception = Precipitation - ThroughFall - StemFlow
     Interception = -dC
     
-
-end subroutine rainfall_interception_modrut
+   
+end function rainfall_interception_modrut
 
 
 subroutine rainfall_interception_gash(Cmax, EoverR, CanopyGapFraction, Precipitation, CanopyStorage, maxevap, n, ThroughFall, & 
