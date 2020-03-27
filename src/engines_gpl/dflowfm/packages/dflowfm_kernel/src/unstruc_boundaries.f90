@@ -1093,7 +1093,7 @@ logical function initboundaryblocksforcings(filename)
                 if (filetype == node_id .or. quantity == 'qhbnd') then
                    select case(quantity)
                    case ('waterlevelbnd')
-                      targetindex = maxloc(itpenz(1:nbndz),itpenz(1:nbndz)==ib)   
+                      targetindex = findloc(itpenz(1:nbndz), ib)   
                    case ('qhbnd')
                       ibqh = ibqh + 1
                       targetindex = (/ibqh/)
@@ -1101,12 +1101,16 @@ logical function initboundaryblocksforcings(filename)
                           locationfile = qhpliname(ibqh)
                       end if
                    case ('dischargebnd')
-                      targetindex = maxloc(itpenu(1:nbndu),itpenu(1:nbndu)==ib)   
+                      targetindex = findloc(itpenu(1:nbndu), ib)   
                    case default
                       targetindex = (/-1/)
                    end select
 
-                   if (forcingfile == '-') then
+                   if (targetindex(1) <= 0) then
+                      ! This boundary has been skipped in an earlier phase (findexternalboundarypoints),
+                      ! so, also do *not* connect it as a spacetimerelation here.
+                      retVal = .true. ! No failure: boundaries are allowed to remain disconnected.
+                   else if (forcingfile == '-') then
                       retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=node_id, method=fmmethod, operand=oper, &
                                                                targetindex=targetindex(1))
                    else
