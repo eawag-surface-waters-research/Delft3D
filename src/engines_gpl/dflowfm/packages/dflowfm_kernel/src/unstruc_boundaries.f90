@@ -966,7 +966,7 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: k, n, k1, nini
  integer                      :: fmmethod
  integer, dimension(1)        :: targetindex 
- integer                      :: ib, ibqh
+ integer                      :: ib, ibqh, ibt
  integer                      :: maxlatsg
  integer                      :: major, minor
  integer                      :: loc_spec_type
@@ -1093,7 +1093,14 @@ logical function initboundaryblocksforcings(filename)
                 if (filetype == node_id .or. quantity == 'qhbnd') then
                    select case(quantity)
                    case ('waterlevelbnd')
-                      targetindex = findloc(itpenz(1:nbndz), ib)   
+                      targetIndex = 0
+                      do ibt=1,nbndz
+                         if (itpenz(ibt) == ib) then
+                            targetIndex = ibt
+                            exit ! Found
+                         end if
+                      end do
+
                    case ('qhbnd')
                       ibqh = ibqh + 1
                       targetindex = (/ibqh/)
@@ -1101,7 +1108,13 @@ logical function initboundaryblocksforcings(filename)
                           locationfile = qhpliname(ibqh)
                       end if
                    case ('dischargebnd')
-                      targetindex = findloc(itpenu(1:nbndu), ib)   
+                      targetIndex = 0
+                      do ibt=1,nbndu
+                         if (itpenu(ibt) == ib) then
+                            targetIndex = ibt
+                            exit ! Found
+                         end if
+                      end do
                    case default
                       targetindex = (/-1/)
                    end select
