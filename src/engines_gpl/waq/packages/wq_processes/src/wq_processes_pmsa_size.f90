@@ -180,9 +180,15 @@ arrdm3(iivol ) = 1
       arrdm3(iilocx) = 1
 
       isizea = 1 ! a(1) is 'dump' location
+      write ( lunrep, '(/a/)' ) "  Size of PMSA arrays in 4-byte words"
+      write ( lunrep, '(a)' ) "  nr array name            array size"
+      write ( lunrep, '(a)' ) "  -----------------------------------"
       do i_rar = 1 , nr_rar
          arrlen(i_rar) = arrdm1(i_rar)*arrdm2(i_rar)*arrdm3(i_rar)
          isizea = isizea + arrlen(i_rar)
+         if (arrnam(i_rar).ne.' ') then
+            write ( lunrep, 2040 ) i_rar, arrnam(i_rar), arrlen(i_rar)
+         endif
          if ( isizea .lt. 0 ) then
             write(lunrep,2005)
             call srstop(1)
@@ -211,6 +217,12 @@ arrdm3(iivol ) = 1
          ip_rar(i_rar) = ip
          arrpoi(i_rar) = ip
       enddo
+
+      write ( lunrep, '(a)' ) "  -----------------------------------"
+      write ( lunrep, '(5x,a20,i12/)' ) "Total (4 byte words)", isizea
+      write ( lunrep, '(5x,"Memory",i3,"-GB ",i3,"-MB ",i3,"-KB ",i3,"-B"//)') &
+                      isizea/1000000000, mod(isizea,1000000000)/1000000, &
+                      mod(isizea, 1000000)/1000, mod(isizea, 1000)
 
       return
 
