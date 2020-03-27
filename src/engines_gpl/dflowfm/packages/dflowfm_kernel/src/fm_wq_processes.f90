@@ -42,9 +42,9 @@
       use m_flowtimes
       use timers
       use m_wind, only: jawind, jarain
-      
+
       implicit none
-      
+
       integer                    :: ierr_sub            !< error status
       integer                    :: ierr_eho            !< error status
       character(256)             :: cerr                !< error message
@@ -55,7 +55,7 @@
 
       integer :: janew, iex, ierr
       integer :: kk, k, kb, kt, ktmax, kdum
-      
+
       logical :: Lsub, Leho, Lstt, Lpdf, Lblm, Lallocated
 
       integer(4), save         :: ithndl = 0
@@ -67,21 +67,21 @@
       call mess(LEVEL_INFO, 'Water quality timers switched on')
       if (timon) call timstrt( "fm_wq_processes", ithndlwq )
       if (timon) call timstrt( "fm_wq_processes_ini_sub", ithndl )
-      
+
       ibflag = 0
-      
+
       substance_file = md_subfile
       his_output_file = md_ehofile
       proc_def_file = md_pdffile
       bloom_file = md_blmfile
       statistics_file = md_sttfile
-      
+
 !     check if substance file exists
       inquire(file=substance_file,exist=Lsub)
       if ( .not.Lsub) then
          call mess(LEVEL_ERROR, 'Substance file does not exist: ', trim(substance_file))
       end if
-      
+
 !     check if additional history output file exists
       if (his_output_file.ne.' ') then
          inquire(file=his_output_file,exist=Leho)
@@ -108,8 +108,8 @@
          end if
       else
          call mess(LEVEL_ERROR, 'No process library file specified. Use commandline argument --processlibrary "<path>/<name>"')
-      endif   
-      
+      endif
+
 !     check if bloom file exists
       if (bloom_file.ne.' ') then
          inquire(file=bloom_file,exist=Lblm)
@@ -129,13 +129,13 @@
          noq2 = 0
          noq3 = noseg - 2*Ndxi + 1
          noq4 = 0
-         
+
 !        allocate vertical exchanges array
          call realloc(iexpnt, [4, noq3], keepExisting=.false., fill=0)
-      
+
 !        allocate array that indicates active cells (segments)
          call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
-         
+
 !        set vertical exchanges
          iex = 0
          do kk=1,Ndxi
@@ -146,7 +146,7 @@
                iexpnt(2,iex) = k-1 - kbx+1
             end do
          end do
-            
+
 !        set array that indicates active cells (segments)
          iknmrk = 0
          do kk=1,Ndxi
@@ -164,18 +164,18 @@
       else
          kbx = 1
          ktx = Ndxi
-         noseg = Ndxi 
+         noseg = Ndxi
          noq1 = 0
          noq2 = 0
          noq3 = 0
          noq4 = 0
-         
+
 !        allocate vertical exchanges array
          call realloc(iexpnt, [4, noq3], keepExisting=.false., fill=0)
 
 !        allocate array that indicates active cells (segments)
          call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
-         
+
 !        set array that indicates active cells (segments)
          iknmrk = 1101
       end if
@@ -183,7 +183,7 @@
 !    allocate array that indicates is dflowfm cells are wet or dry
      call realloc(wetdry, ktx, keepExisting=.false., fill=.true.)
      call realloc(doproc, ktx, keepExisting=.false., fill=.true.)
-   
+
 ! ======================
 ! Start initialising WAQ
 ! ======================
@@ -191,7 +191,7 @@
 !     Read the substance file for the process defintion
 !     Reset number of messages
       ierr=0
-      
+
       call mess(LEVEL_INFO, 'Opening substance file: ', trim(substance_file))
       Lallocated = .false.
       call rd_sub(Lallocated,substance_file,nosys,notot,nocons,noout_sub,syname_sub,syunit_sub,coname_sub, &
@@ -239,7 +239,7 @@
           syname(i) = syname_sub(i)
           syunit(i) = syunit_sub(i)
       end do
-      
+
       call realloc(amass, [notot, noseg], keepExisting=.false., fill=0.0d0)       !< mass array to be updated
 
 !     add corresponding tracers and bottom substances, if not already defined by initial and/or boundary conditions
@@ -258,12 +258,12 @@
 !     No spatial parameters for now, they should come from DFM
       nopa = 0
       call realloc(paname, nopa)
-      
+
 !      Use functions to set 2D (or 0D variables) from DFM per column
       nofun = 0
       allocate(funame(nofun))
       call realloc(funame, nofun)
-      
+
       nosfun = 0
       allocate(sfunname(nofun))
       call realloc(sfunname, nofun)
@@ -278,7 +278,7 @@
 
       if ( timon ) call timstop ( ithndl )
    end subroutine fm_wq_processes_ini_sub
-   
+
    subroutine fm_wq_processes_ini_proc()
       use m_fm_wq_processes
       use m_alloc
@@ -294,7 +294,7 @@
       use m_flowtimes
       use timers
       use m_wind, only: jawind, jarain
-      
+
       implicit none
 
       type(procespropcoll)     :: statprocesdef   !< the statistical proces definition
@@ -310,9 +310,9 @@
 
       integer :: iex
       integer :: kk, k, kb, kt, ktmax
-      
+
       integer :: lunlsp
-      
+
       integer(4), save         :: ithndl = 0
 
       character*20,parameter   :: ctauflow = 'tauflow'
@@ -409,7 +409,7 @@
             call mess(LEVEL_INFO, '''salinity'' is the sub-file but ''salinity'' is not in the hydrodynamic model.')
          endif
       end if
-      
+
       call zoekns(ctemperatureflow,nocons,coname_sub,20,icon)
       isftem = 0
       if ( jatem.ge.1 ) then
@@ -455,7 +455,7 @@
             call mess(LEVEL_INFO, '''vwind'' is the sub-file but ''wind velocity'' is not in the hydrodynamic model.')
          endif
       end if
-      
+
       call zoekns(cwinddir,nocons,coname_sub,20,icon)
       isfwinddir = 0
       if ( jawind.ge.1 ) then
@@ -497,7 +497,7 @@
             call mess(LEVEL_INFO, '''fetch'' or ''initdepth'' is the sub-file but ''fetch length''/''fetch depth'' are not in the hydrodynamic model.')
          endif
       end if
-      
+
       call zoekns(cirradiation,nocons,coname_sub,20,icon)
       isfradsurf = 0
       if ( jasol.eq.1 .and. jatem.gt.1 ) then
@@ -514,7 +514,7 @@
             call mess(LEVEL_INFO, '''radsurf'' is the sub-file but ''solar radiation'' is not in the hydrodynamic model.')
          endif
       end if
-      
+
       call zoekns(crain,nocons,coname_sub,20,icon)
       isfrain = 0
       if ( jarain.eq.1 ) then
@@ -578,7 +578,7 @@
       allocate(outputs%pointers(noout_user))
       allocate(outputs%units(noout_user))
       allocate(outputs%descrs(noout_user))
-      
+
       outputs%cursize  = noout_user
       do i = 1, noout_sub
           outputs%names(i) = ouname_sub(i)
@@ -635,11 +635,11 @@
 !     Allocate the work arrays for the pointers
       call realloc(ipmsa, nipmsa, keepExisting=.false., fill=0)
       call realloc(increm,nipmsa, keepExisting=.false., fill=0)
-      
+
 !     allocate flux and deriv arrays
       call realloc(flux, [nflux, noseg], keepExisting=.false., fill=0.0 )       !< Proces fluxes
       call realloc(deriv, [noseg, notot], keepExisting=.false., fill=0.0 )      !< Model derivatives (= stochi(notot ,noflux) * flux(noflux, noseg))
-      call realloc(velonw, [nveln, noq3], keepExisting=.false., fill=0.0 )      !< New velocity array   
+      call realloc(velonw, [nveln, noq3], keepExisting=.false., fill=0.0 )      !< New velocity array
 
 !     Determine size of a array from process system and noseg/noq3, and allocate it
       call wq_processes_pmsa_size( lunlsp, noseg, noq3, sizepmsa )
@@ -669,7 +669,7 @@
                ip = ip + 1
             end do
          end do
-      end if            
+      end if
 
 !      functions from DFM, one value for the whole system
 !      -> can be used for timeseries that are updated by DFM, e.g. global irradiation
@@ -701,7 +701,7 @@
       do j=1,noout
           call zoekns(outputs%names(j),novar,varnam,20,ivar)
           outvar(j) = ivar
-      enddo  
+      enddo
 
 ! If there is a parameter 'doprocesses', mask the area where processes are active by setting doproc to .true./.false. (default=.true.)
       call zoekns(cdoprocesses,nopa,paname,20,ipar)
@@ -767,11 +767,11 @@
    call realloc(mbadef, Ndkx, keepExisting=.false., fill =-999)
    call realloc(mbadefdomain, Ndkx, keepExisting=.false., fill =-999)
 
-   if (mext /= 0) then 
+   if (mext /= 0) then
       ja = 1
 
       do while (ja .eq. 1)                                ! read *.ext file
- 
+
          call delpol()                                    ! remove a possibly existing polygon
          call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,sourcemask)
          if (ja == 1) then
@@ -786,10 +786,10 @@
             if (filetype == 7 .and. method == 4) then
                method = 5                                   ! upward compatible fix
             endif
-      
+
             if (qid(1:12) == 'waqparameter') then
                ipa = findname(nopa, paname, waqinput)
-      
+
                if ( ipa.eq.0 ) then
                   nopa = nopa + 1
                   ipa = nopa
@@ -797,7 +797,7 @@
                   call realloc(painp, [nopa, Ndkx], keepExisting=.true., fill=0.0)
                end if
                call realloc(viuh, Ndkx, keepExisting=.false., fill=dmiss)
-      
+
 !              copy existing parameter values (if they existed) in temp array
                do kk=1,Ndxi
                   call getkbotktop(kk,kb,kt)
@@ -806,10 +806,10 @@
                      viuh(k) = painp(ipa,k)
                   end do
                end do
-      
-!              will only fill 2D part of viuh          
+
+!              will only fill 2D part of viuh
                success = timespaceinitialfield(xz, yz, viuh, Ndx, filename, filetype, method, operand, transformcoef, 2)
-      
+
                if (success) then
                   do kk = 1,Ndxi
                      if (viuh(kk) .ne. dmiss) then
@@ -822,22 +822,58 @@
                   enddo
                endif
                deallocate(viuh)
-      
+
+            elseif (qid(1:16) == 'waqsegmentnumber') then
+               ipa = findname(nopa, paname, waqinput)
+
+               if ( ipa.eq.0 ) then
+                  nopa = nopa + 1
+                  ipa = nopa
+                  call realloc(paname, nopa, keepExisting=.true., fill=waqinput)
+                  call realloc(painp, [nopa, Ndkx], keepExisting=.true., fill=0.0)
+               end if
+               call realloc(viuh, Ndkx, keepExisting=.false., fill=dmiss)
+
+!              copy existing parameter values (if they existed) in temp array
+               do kk=1,Ndxi
+                  call getkbotktop(kk,kb,kt)
+                  viuh(kk) = painp(ipa,kk)
+                  do k=kb,kb+kmxn(kk)-1
+                     viuh(k) = painp(ipa,k)
+                  end do
+               end do
+
+!              will only fill 2D part of viuh
+               success = timespaceinitialfield(xz, yz, viuh, Ndx, filename, filetype, method, operand, transformcoef, 2)
+
+               if (success) then
+                  do kk = 1,Ndxi
+                     if (viuh(kk) .ne. dmiss) then
+                        painp(ipa,kk) = global_to_local( viuh(kk) )
+                        call getkbotktop(kk,kb,kt)
+                        do k=kb,kb+kmxn(kk)-1
+                           painp(ipa,k) = painp(ipa,kk)
+                        end do
+                     endif
+                  enddo
+               endif
+               deallocate(viuh)
+
             else if (qid(1:11) == 'waqfunction') then
-      
+
                ifun = findname(nofun, funame, waqinput)
-      
+
                if ( ifun.eq.0 ) then
                   nofun = nofun + 1
                   call realloc(funame, nofun, keepExisting=.true., fill=waqinput)
                   call reallocP(funinp, [nofun, 1], keepExisting=.true., fill=0.0d0)
                end if
                success = .true.
-      
+
             else if (qid(1:18) == 'waqsegmentfunction') then
-      
+
                isfun = findname(nosfun, sfunname, waqinput)
-      
+
                if ( isfun.eq.0 ) then
                   nosfun = nosfun + 1
                   call realloc(sfunname, nosfun, keepExisting=.true., fill=waqinput)
@@ -847,17 +883,17 @@
 
             else if (qid(1:18) == 'waqmassbalancearea') then
                imba = findname(nomba, mbaname, waqinput)
-      
+
                if ( imba.eq.0 ) then
                   nomba = nomba + 1
                   imba = nomba
                   call realloc(mbaname,nomba,keepExisting=.true.,fill=waqinput)
                end if
                call realloc(viuh,Ndkx,keepExisting=.false.,Fill=dmiss)
-      
-!              will only fill 2D part of viuh          
+
+!              will only fill 2D part of viuh
                success = timespaceinitialfield(xz, yz, viuh, Ndx, filename, filetype, method, operand, transformcoef, 2)
-      
+
                if (success) then
                   do kk=1,Ndxi
                      if (viuh(kk).ne.dmiss) then
@@ -873,22 +909,22 @@
                   end do
                endif
                deallocate(viuh)
-      
+
             else if (qid(1:17) == 'waqmonitoringarea') then
                imna = findname(nomon, monname, waqinput)
-      
+
                if ( imna.eq.0 ) then
                   nomon = nomon + 1
                   imna = nomon
                   call realloc(monname, nomon, keepExisting=.true., fill=waqinput)
                   call realloc(mondef, [nomon, Ndkx], keepExisting=.true., fill=2)
                end if
-      
+
                call realloc(viuh, Ndkx, keepExisting=.false., fill=dmiss)
-      
-!              will only fill 2D part of viuh          
+
+!              will only fill 2D part of viuh
                success = timespaceinitialfield(xz, yz, viuh, Ndx, filename, filetype, method, operand, transformcoef, 2)
-      
+
                if (success) then
                   do kk=1,Ndxi
                      if (viuh(kk).ne.dmiss) then
@@ -905,12 +941,12 @@
 !              just accept any other keyword as success, they are evaluated again in unstruc.F90
                success = .true.
             endif
-      
+
         endif
-      
+
       enddo
- 
-   endif ! read mext file 
+
+   endif ! read mext file
 
 !  Check if there are any cells left that are not part of a mass balance area, and if we need an extra area.
    needextramba = 0
@@ -920,13 +956,13 @@
          exit
       endif
    end do
-   
+
    if (jampi.eq.1) then
 !     check this among all domains (it could be that there are no remaing cels in this domain, while there are in other domains).
       call reduce_int_sum(needextramba, needextrambar)
       needextramba = needextrambar
    endif
-   
+
    if(needextramba.ne.0) then
 !     add the extra 'Unnamed' mass balance area, and assing the unassigned cells to this area.
       nomba = nomba + 1
@@ -942,7 +978,7 @@
          endif
       end do
    endif
-   
+
    do kk=1,Ndxi
       if ( jampi.eq.1 ) then
 !        do not include ghost cells
@@ -962,23 +998,51 @@
    if (.not. success) then
       iresult = DFM_EXTFORCERROR
    end if
-    
+
    if (mext /= 0) then
       rewind(mext) ! rewind ext file
    end if
+
+   contains
+
+   !> Internal function: Translate the global segment number to the
+   !! number used within the current domain
+   double precision function global_to_local( global_number )
+       use m_partitioninfo, only: iglobal_s
+
+       double precision, intent(in) :: global_number !< Global segment number to be translated
+
+       double precision, save       :: previous_global = -1
+       double precision, save       :: previous_local  = -1
+       integer                      :: i
+
+       global_to_local = dmiss
+       if ( global_number == previous_global ) then
+           global_to_local = previous_local
+       else
+           do i = 1,size(iglobal_s)
+               if ( global_number == iglobal_s(i) ) then
+                   global_to_local = i
+                   previous_global = global_number
+                   previous_local  = i
+               endif
+           enddo
+      endif
+   end function global_to_local
+
    end subroutine dfm_waq_initexternalforcings
 
 
-   
+
 !> Convert qid (from .ext file) to waq input name (split in generic qidname and specific input name).
 !! If the input qid is not waq input name, then the same qid is returned (and no waq input name)
    subroutine get_waqinputname(qid, inputname, qidname)
       implicit none
-      
+
       character(len=*), intent(in)    :: qid       !< Original quantityid, e.g., 'waqfunctionradsurf'.
       character(len=*), intent(inout) :: inputname !< The trimmed waq input name, e.g., 'fluor'.
       character(len=*), intent(inout) :: qidname   !< The base input name for further use in external file analisys, e.g., 'tracerbnd'.
-      
+
       character(len=256)              :: qidloc    !< Original quantityid, e.g., 'waqfunctionradsurf'.
 
       qidloc = qid
@@ -1013,7 +1077,7 @@
             inputname = trim(qidloc(18:))
          end if
       end if
-      
+
       return
    end subroutine get_waqinputname
 
@@ -1026,29 +1090,29 @@
       use m_missing
       use unstruc_messages
       implicit none
-      
+
       character(len=*), intent(in)  :: wqbotnam
       character(len=20), intent(in) :: wqbotunit
       integer,          intent(out) :: iwqbot
       integer,          intent(out) :: janew
-      
+
       integer,          external    :: findname
-      
+
       integer                       :: itrac
-      
+
       iwqbot = findname(numwqbots, wqbotnames, wqbotnam)
       itrac = findname(numtracers, trnames, wqbotnam)
-   
+
       if ( itrac.ne.0 ) then
          call mess(LEVEL_ERROR, 'add_wqbot: water quality bottom variable named '''//trim(wqbotnam)//''' already exists as a tracer.')
       endif
-      
+
       janew = 0
       if ( iwqbot.eq.0 ) then
          janew = 1
    !     add bottom substance
-      
-         numwqbots = numwqbots+1    
+
+         numwqbots = numwqbots+1
    !     realloc
          call realloc(wqbot, [numwqbots,Ndxi], keepExisting=.true., fill=0.0d0)
          call realloc(wqbotnames, numwqbots, keepExisting=.true., fill='')
@@ -1068,29 +1132,29 @@
       use timers
 
       implicit none
-      
+
       double precision, intent(in) :: dt   !< timestep for waq in seconds
       double precision, intent(in) :: time !< time     for waq in seconds
-      
+
       integer                      :: ipoiconc
       integer                      :: i, j
-                                   
+
       integer                      :: ipoivol, ipoisurf, ipoiarea
       integer                      :: ipoivelx, ipoidefa
-      
+
       integer                      :: idt, itime
-                                   
+
       integer                      :: ierr
-      
+
       double precision             :: dti
-      
+
       integer                      :: ipvol, isys, k
 
       integer(4), save :: ithand0 = 0
       integer(4), save :: ithand1 = 0
       integer(4), save :: ithand2 = 0
       if ( timon ) call timstrt ( "fm_wq_processes_step", ithand0 )
-      
+
       if ( jawaqproc .eq. 0 ) then
          return
       else if ( jawaqproc .eq. 1 ) then
@@ -1098,23 +1162,23 @@
          jawaqproc = 2
       endif
       flux_int = md_flux_int
-      
-!     copy data from D-FlowFM to WAQ 
+
+!     copy data from D-FlowFM to WAQ
       if ( timon ) call timstrt ( "copy_data_from_fm_to_wq_processes", ithand1 )
       call copy_data_from_fm_to_wq_processes(time)
       if ( timon ) call timstop ( ithand1 )
-      
+
       ipoiconc = arrpoi(iiconc)
       ipoivol  = arrpoi(iivol)
       ipoivelx = arrpoi(iivelx)
       ipoidefa = arrpoi(iidefa)
       ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg
       ipoiarea = arrpoi(iiarea)
-      
+
       idt   = int(dt)
       itime = int(time)
       pmsa(ipoidefa+1) = itime
-      
+
       call wq_processes_proces (notot , noseg , pmsa(ipoiconc), pmsa(ipoivol) , itime , idt   , deriv , ndmpar, &
                                 nproc , nflux , ipmsa , prvnio, promnr, iflux , increm, flux  , flxdmp, stochi, &
                                 ibflag, ipbloo, ioffbl, amass , nosys , isfact, itfact , iexpnt, iknmrk, noq1  , &
@@ -1131,18 +1195,18 @@
       if ( timon ) call timstop ( ithand0 )
       return
    end subroutine fm_wq_processes_step
-  
+
 !
-!  copy data from D-FlowFM to WAQ 
+!  copy data from D-FlowFM to WAQ
 !
-   subroutine copy_data_from_fm_to_wq_processes(time) 
+   subroutine copy_data_from_fm_to_wq_processes(time)
       use m_flowgeom,       only: Ndxi, ba
       use m_flow,           only: vol1, sa1, tem1, ucx, ucy
       use m_flowtimes,      only: irefdate, tunit
-      use m_fm_wq_processes           
+      use m_fm_wq_processes
       use m_transport,      only: itrac2const, constituents
       use m_sferic,         only: twopi, rd2dg
-      use m_wind  
+      use m_wind
       use m_meteo
       use processes_input
       use m_waves,          only: fetch, nwf
@@ -1153,7 +1217,7 @@
 
       double precision :: taucurc, czc
       double precision :: u10, dir, wdir, FetchL, FetchD
-      
+
       integer          :: isys, iconst, iwqbot
       integer          :: ipoisurf, ipoitau, ipoivel
       integer          :: ipoivol, ipoiconc, ipoisal, ipoitem
@@ -1161,10 +1225,10 @@
       integer          :: i, ip, ifun, isfun
       integer          :: kk, k, kb, kt, ktmax, kwaq
       integer          :: L, nw1, nw2
-                       
+
       integer          :: iknmrk_dry, iknmrk_wet
       logical, save    :: first = .true.
-      
+
       if (nofun>0) then
          do ifun=1,nofun
             success = ec_gettimespacevalue(ecInstancePtr, item_waqfun(ifun), irefdate, tzone, tunit, time)
@@ -1197,30 +1261,30 @@
          end do
       end if
 
-      ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg 
+      ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
          do k=kb,ktmax
             pmsa(ipoisurf + k-kbx) = ba(kk)
          end do
       end do
-      
+
       ipoivol = arrpoi(iivol)
       do k=0,ktx-kbx
          pmsa(ipoivol + k) = vol1(k+kbx)
       end do
-      
+
       if (isftau.gt.0) then
-         ipoitau  = arrpoi(iisfun) + (isftau-1)*noseg 
+         ipoitau  = arrpoi(iisfun) + (isftau-1)*noseg
          do kk=1,Ndxi
             call getkbotktop(kk,kb,kt)
             call gettau(kk,taucurc,czc)
             pmsa(ipoitau+kb-kbx) = taucurc
          end do
-      end if         
-         
+      end if
+
       if (isfvel.gt.0) then
-         ipoivel  = arrpoi(iisfun) + (isfvel-1)*noseg 
+         ipoivel  = arrpoi(iisfun) + (isfvel-1)*noseg
          do kk=1,Ndxi
             call getkbotktopmax(kk,kb,kt,ktmax)
             do k=kb,ktmax
@@ -1235,14 +1299,14 @@
             pmsa(ipoisal + k) = sa1(k+kbx)
          end do
       end if
-      
+
       if ( isftem.gt.0 ) then
          ipoitem = arrpoi(iisfun) + (isftem-1)*noseg
          do k=0,ktx-kbx
             pmsa(ipoitem + k) = tem1(k+kbx)
          end do
       end if
-      
+
 !     copy 2D arrays for wind velocity magnitude, fetch length, solar radiation and rain to 3D waq arrays, fill over whole column (safety)
       if ( isfvwind.gt.0 ) then
          ipoivwind = arrpoi(iisfun) + (isfvwind-1)*noseg
@@ -1258,9 +1322,9 @@
             do k=0,ktx-kbx
                pmsa(ipoivwind + k) = windsp
             end do
-         end if         
+         end if
       end if
-      
+
       if ( isfwinddir.gt.0 ) then
          ipoiwinddir = arrpoi(iisfun) + (isfwinddir-1)*noseg
          if(jawind.eq.1) then
@@ -1278,7 +1342,7 @@
             do k=0,ktx-kbx
                pmsa(ipoiwinddir + k) = winddir
             end do
-         end if         
+         end if
       end if
 
       if ( isffetchl.gt.0 ) then   ! note: no fetch without wind
@@ -1291,7 +1355,7 @@
             pmsa(ipoifetchd + kb-kbx : ipoifetchd + ktmax-kbx) = FetchD
          end do
       end if
-      
+
       if ( isfradsurf.gt.0 ) then
          ipoiradsurf = arrpoi(iisfun) + (isfradsurf-1)*noseg
          do kk=1,Ndxi
@@ -1300,7 +1364,7 @@
             pmsa(ipoiradsurf + kb-kbx : ipoiradsurf + ktmax-kbx) = qrad(kk)
          end do
       end if
-      
+
       if ( isfrain.gt.0 ) then
          ipoirain = arrpoi(iisfun) + (isfrain-1)*noseg
          do kk=1,Ndxi
@@ -1308,16 +1372,16 @@
             pmsa(ipoirain + kb-kbx : ipoirain + ktmax-kbx) = rain(kk)/24.0d0 ! rain: mm/day => mm/h
          end do
       end if
-         
-!     determine dry/wet cells 
+
+!     determine dry/wet cells
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
          do k=kb,ktmax
             wetdry(k) = vol1(k).gt.waq_vol_dry_thr .and. (vol1(k)/ba(kk)).gt.waq_dep_dry_thr
          enddo
       enddo
-      
-!     fill concentrations   
+
+!     fill concentrations
       ipoiconc = arrpoi(iiconc)
       do k=kbx,ktx
          do isys=1,nosys !notot
@@ -1340,7 +1404,7 @@
             end do
          endif
       end do
-      
+
 !     fill masses (not transported, only first time)
       if (notot>nosys.and.first) then
          first = .false.
@@ -1359,21 +1423,21 @@
             call getkbotktopmax(kk,kb,kt,ktmax)
             do k=kb,kt
                kwaq = k-kbx+1
-               
+
                iknmrk_dry = int(iknmrk(kwaq)/10) * 10
                iknmrk_wet = iknmrk_dry + 1
-               
+
                if (wetdry(k).and.doproc(k)) then
                   iknmrk(kwaq) = iknmrk_wet
                else
                   iknmrk(kwaq) = iknmrk_dry
                end if
             end do
-            
+
 !           segments above kt always inactive (z-layer)
             do k=kt+1,ktmax
                kwaq = k-kbx+1
-               
+
                iknmrk_dry = int(iknmrk(kwaq)/10) * 10
                iknmrk(kwaq) = iknmrk_dry
             end do
@@ -1386,21 +1450,21 @@
                iknmrk(k) = 1100
             end if
          end do
-      end if      
+      end if
       return
    end subroutine copy_data_from_fm_to_wq_processes
 
 !
 !  copy data from WAQ to D-FlowFM
 !
-   subroutine copy_data_from_wq_processes_to_fm() 
+   subroutine copy_data_from_wq_processes_to_fm()
       use m_missing,        only: dmiss
       use m_flowgeom,       only: Ndxi, ba
       use m_flow,           only: vol1
-      use m_fm_wq_processes           
+      use m_fm_wq_processes
       use m_transport,      only: itrac2const, constituents
       use m_sferic,         only: twopi
-      use m_wind            
+      use m_wind
       use m_waves,          only: fetch, nwf
       use unstruc_messages
 
@@ -1412,8 +1476,8 @@
       integer          :: iarknd, ip_arr, idim1, idim2
       integer          :: incr
       integer          :: i, j, ip
-      integer          :: kk, k, kb, kt, ktmax                 
-      
+      integer          :: kk, k, kb, kt, ktmax
+
 !     fill concentrations (transported)
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
@@ -1426,7 +1490,7 @@
             end if
          end do
       end do
-      
+
 !     fill concentrations (not transported)
       if (notot>nosys) then
          do kk=1,Ndxi
@@ -1437,11 +1501,11 @@
             end do
          end do
       end if
-      
+
 ! Ouputs to waq outputs array
       waqoutputs=dmiss
-      noout = outputs%cursize   
-      do j = 1, noout   
+      noout = outputs%cursize
+      do j = 1, noout
          ivar   = outvar(j)  ! which variable is it
          if (ivar > 0) then
             iarr   = vararr(ivar)         ! which array in pmsa
@@ -1465,7 +1529,7 @@
                    ip = ip + incr
                enddo
             endif
-      enddo 
+      enddo
       return
    end subroutine copy_data_from_wq_processes_to_fm
 
@@ -1474,15 +1538,15 @@
       use m_fm_wq_processes
       use unstruc_model
       implicit none
-      
+
       jawaqproc = 0
-      jamba = 0      
+      jamba = 0
       md_subfile = ''
       md_ehofile = ''
       md_sttfile = ''
       md_thetav_waq = 0d0
       md_dt_waqproc = 0d0
-      
+
       return
    end subroutine default_fm_wq_processes
 
@@ -1491,7 +1555,7 @@
       use unstruc_files, only: defaultFilename
       use m_fm_wq_processes, only: ithndlwq
       use timers
-	  
+	
       character(len=255) :: filename
 
       if ( timon ) then
