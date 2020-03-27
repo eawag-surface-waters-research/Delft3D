@@ -21,9 +21,9 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libMorphologyKernel_la_SOURCES = \
+libDhydrologyKernel_la_SOURCES = \
          interception.f90 \
-		 horton.f90 \
+         horton.f90 \
          wflowSbm.f90
          
 
