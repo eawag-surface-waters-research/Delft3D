@@ -1,10 +1,13 @@
-﻿using System.Linq;
-using Deltares.UGrid.Entities;
+﻿using Deltares.UGrid.Entities;
 using Deltares.UGrid.Helpers;
 using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// Class describing 1D mesh geometry (computation points) based on a 1D network
+    /// (see: <see cref="Network1DGeometry"/>)
+    /// </summary>
     [ProtoContract(AsReferenceDefault = true)]
     public class Disposable1DMeshGeometry : DisposableMeshObject
     {

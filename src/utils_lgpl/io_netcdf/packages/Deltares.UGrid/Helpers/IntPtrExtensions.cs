@@ -28,7 +28,7 @@ namespace Deltares.UGrid.Helpers
             }
             else
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException("Currently only double, int and string are supported");
             }
 
             return array;

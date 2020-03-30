@@ -4,6 +4,9 @@ using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// Class describing a 1D network (nodes, branches etc.)
+    /// </summary>
     [ProtoContract(AsReferenceDefault = true)]
     public class DisposableNetworkGeometry : DisposableMeshObject
     {

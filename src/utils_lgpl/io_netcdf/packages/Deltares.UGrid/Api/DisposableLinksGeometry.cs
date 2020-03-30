@@ -4,6 +4,10 @@ using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// Class describing links between a 1D mesh (see: <see cref="Disposable1DMeshGeometry"/>) and a
+    /// 2D mesh (see: <see cref="Disposable2DMeshGeometry"/>)
+    /// </summary>
     [ProtoContract(AsReferenceDefault = true)]
     public class DisposableLinksGeometry : DisposableMeshObject
     {

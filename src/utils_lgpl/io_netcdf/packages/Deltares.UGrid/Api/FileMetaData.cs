@@ -4,6 +4,9 @@ using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// Class for storing meta data about the UGrid file (model, source and version)
+    /// </summary>
     [ProtoContract(AsReferenceDefault = true)]
     public class FileMetaData
     {

@@ -1,5 +1,8 @@
 ﻿namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// The mode in which the NetCDF file should be opened
+    /// </summary>
     public enum NetcdfOpenMode
     {
         nf90_nowrite = 0,

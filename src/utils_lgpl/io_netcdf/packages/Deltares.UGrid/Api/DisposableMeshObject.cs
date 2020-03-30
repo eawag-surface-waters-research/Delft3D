@@ -6,19 +6,29 @@ using Deltares.UGrid.Helpers;
 
 namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// Base class for disposable mesh objects. Provides pinning of arrays in memory for exchange with native calls.
+    /// </summary>
     public abstract class DisposableMeshObject : IDisposable
     {
         private readonly Dictionary<object,GCHandle> objectGarbageCollectHandles = new Dictionary<object, GCHandle>();
+        private bool disposed;
+
+        ~DisposableMeshObject()
+        {
+            Dispose(false);
+        }
 
         protected bool IsMemoryPinned
         {
             get { return objectGarbageCollectHandles.Count > 0; }
         }
-        
+
         /// <inheritdoc/>
         public void Dispose()
         {
-            UnPinMemory();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected IntPtr GetPinnedObjectPointer(object objectToLookUp)
@@ -76,6 +86,21 @@ namespace Deltares.UGrid.Api
         {
             var key = lookupObject ?? objectToPin;
             objectGarbageCollectHandles.Add(key, GCHandle.Alloc(objectToPin, GCHandleType.Pinned));
+        }
+
+        private void ReleaseUnmanagedResources()
+        {
+            UnPinMemory();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            ReleaseUnmanagedResources();
+
+            disposed = true;
         }
     }
 }

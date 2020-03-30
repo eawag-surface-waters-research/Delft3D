@@ -2,6 +2,9 @@
 
 namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// Type of location on the mesh (node, edge etc.)
+    /// </summary>
     public enum GridLocationType
     {
         [Description("Unknown")]

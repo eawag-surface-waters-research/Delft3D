@@ -3,6 +3,9 @@ using ProtoBuf;
 
 namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// Class describing a 2D mesh (vertices, edges and cells) 
+    /// </summary>
     [ProtoContract(AsReferenceDefault = true)]
     public class Disposable2DMeshGeometry : DisposableMeshObject
     {

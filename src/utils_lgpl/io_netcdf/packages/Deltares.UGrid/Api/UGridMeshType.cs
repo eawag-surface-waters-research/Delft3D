@@ -1,5 +1,8 @@
 ﻿namespace Deltares.UGrid.Api
 {
+    /// <summary>
+    /// Type of UGrid mesh
+    /// </summary>
     public enum UGridMeshType
     {
         Combined = 0,
