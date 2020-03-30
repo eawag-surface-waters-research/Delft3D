@@ -974,6 +974,7 @@ logical function initboundaryblocksforcings(filename)
  double precision, allocatable :: xcoordinates(:), ycoordinates(:)
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
+ integer, allocatable          :: itpenzr(:), itpenur(:)
 
  if (allocated(xdum  )) deallocate(xdum, ydum, kdum) !, xy2dum)
  allocate ( xdum(1), ydum(1), kdum(1)) !, xy2dum(2,1) , stat=ierr)
@@ -1001,6 +1002,22 @@ logical function initboundaryblocksforcings(filename)
  call split_filename(filename, basedir, fnam) ! Remember base dir of input file, to resolve all refenced files below w.r.t. that base dir.
 
  num_items_in_file = tree_num_nodes(bnd_ptr)
+
+ ! Build temporary reverse lookup table that maps boundary block # in file -> boundary condition nr in openbndsect (separate for u and z).
+ allocate(itpenzr(num_items_in_file)); itpenzr = 0
+ allocate(itpenur(num_items_in_file)); itpenur = 0
+ do ibt=1,nbndz
+    ib = itpenz(ibt)
+    if (ib > 0) then
+       itpenzr(ib) = ibt
+    end if
+ end do
+ do ibt=1,nbndu
+    ib = itpenu(ibt)
+    if (ib > 0) then
+       itpenur(ib) = ibt
+    end if
+ end do
 
  ! Allocate lateral provider array now, just once, because otherwise realloc's in the loop would destroy target arrays in ecInstance.
  maxlatsg = tree_count_nodes_byname(bnd_ptr, 'lateral')
@@ -1093,14 +1110,7 @@ logical function initboundaryblocksforcings(filename)
                 if (filetype == node_id .or. quantity == 'qhbnd') then
                    select case(quantity)
                    case ('waterlevelbnd')
-                      targetIndex = 0
-                      do ibt=1,nbndz
-                         if (itpenz(ibt) == ib) then
-                            targetIndex = ibt
-                            exit ! Found
-                         end if
-                      end do
-
+                      targetIndex = itpenzr(ib)
                    case ('qhbnd')
                       ibqh = ibqh + 1
                       targetindex = (/ibqh/)
@@ -1108,13 +1118,7 @@ logical function initboundaryblocksforcings(filename)
                           locationfile = qhpliname(ibqh)
                       end if
                    case ('dischargebnd')
-                      targetIndex = 0
-                      do ibt=1,nbndu
-                         if (itpenu(ibt) == ib) then
-                            targetIndex = ibt
-                            exit ! Found
-                         end if
-                      end do
+                      targetIndex = itpenur(ib)
                    case default
                       targetindex = (/-1/)
                    end select
@@ -1392,6 +1396,9 @@ logical function initboundaryblocksforcings(filename)
        call warn_flush()
     end select
  end do
+ 
+ if (allocated(itpenzr)) deallocate(itpenzr)
+ if (allocated(itpenur)) deallocate(itpenur)
 
  if (numlatsg > 0) then
     do n = 1,numlatsg
