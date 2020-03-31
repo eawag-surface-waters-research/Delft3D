@@ -17790,6 +17790,7 @@ src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/DisposableNetworkGeometry.c
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/FileMetaData.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/GridLocationType.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/IUGridApi.cs -text
+src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/IoNetCdfNativeError.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/NetcdfOpenMode.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/StringBufferSizeAttribute.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/UGridApi.cs -text

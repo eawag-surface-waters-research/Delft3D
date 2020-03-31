@@ -70,6 +70,7 @@
     <Compile Include="Api\DisposableMeshObject.cs" />
     <Compile Include="Api\DisposableNetworkGeometry.cs" />
     <Compile Include="Api\GridLocationType.cs" />
+    <Compile Include="Api\IoNetCdfNativeError.cs" />
     <Compile Include="Api\IUGridApi.cs" />
     <Compile Include="Api\NetcdfOpenMode.cs" />
     <Compile Include="Api\StringBufferSizeAttribute.cs" />

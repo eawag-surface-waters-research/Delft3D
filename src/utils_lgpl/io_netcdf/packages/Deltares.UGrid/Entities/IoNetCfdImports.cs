@@ -6,9 +6,15 @@ namespace Deltares.UGrid.Entities
 {
     /// <summary>
     /// Class containing all static imports for IONetCdf library
+    /// <remarks>
+    /// This class contains unused functions and functions that are
+    /// not documented properly. This is because the native dll
+    /// will be rewritten to use structures instead of separate function
+    /// calls to get/set meshes, networks, links etc.</remarks>
     /// </summary>
     internal static class IoNetCfdImports
     {
+        internal const int NoErrorCode = 0;
         internal const string GRIDDLL_NAME = "io_netcdf.dll";
         
         #region Generic
@@ -23,7 +29,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="ioncid">The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.</param>
         /// <param name="iconvtype">The detected conventions in the file.</param>
         /// <param name="convversion"></param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_open", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_open_dll([In] string c_path, [In] ref int mode, [In, Out] ref int ioncid, [In, Out] ref int iconvtype, ref double convversion);
 
@@ -31,7 +37,7 @@ namespace Deltares.UGrid.Entities
         /// Tries to close an open io_netcdf data set.
         /// </summary>
         /// <param name="ioncid">The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_close", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_close_dll([In] ref int ioncid);
 
@@ -60,8 +66,6 @@ namespace Deltares.UGrid.Entities
         /// <returns></returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_create", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_create_dll([In] string c_path, [In] ref int mode, [In, Out] ref int ioncid);
-
-
 
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_initialize", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_initialize_dll(IO_NetCDF_Message_Callback c_message_callback, IO_NetCDF_Progress_Callback c_progress_callback);
@@ -132,7 +136,7 @@ namespace Deltares.UGrid.Entities
         /// </summary>
         /// <param name="ioncid">The IONC data set id.</param>
         /// <param name="nmesh">Number of meshes.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_mesh_count", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_mesh_count_dll([In, Out] ref int ioncid, [In, Out] ref int nmesh);
 
@@ -166,7 +170,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="ioncid">The IONC data set id.</param>
         /// <param name="meshId">Mesh id.</param>
         /// <param name="meshName">The mesh name.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_mesh_name", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_mesh_name_dll([In, Out] ref int ioncid, [In, Out] ref int meshId, [MarshalAs(UnmanagedType.LPStr)][In, Out] StringBuilder meshName);
 
@@ -176,7 +180,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="ioncid">The IONC data set id.</param>
         /// <param name="meshId">The mesh id in the specified data set.</param>
         /// <param name="nnode">Number of nodes.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_node_count", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_node_count_dll(ref int ioncid, ref int meshId, ref int nnode);
 
@@ -186,7 +190,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="ioncid">The IONC data set id.</param>
         /// <param name="meshId">The mesh id in the specified data set.</param>
         /// <param name="nedge">Number of edges.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_edge_count", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_edge_count_dll(ref int ioncid, ref int meshId, ref int nedge);
 
@@ -196,7 +200,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="ioncid">The IONC data set id.</param>
         /// <param name="meshId">The mesh id in the specified data set.</param>
         /// <param name="nface">Number of faces.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_face_count", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_face_count_dll(ref int ioncid, ref int meshId, ref int nface);
 
@@ -206,7 +210,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="ioncid">The IONC data set id.</param>
         /// <param name="meshId">The mesh id in the specified data set.</param>
         /// <param name="nmaxfacenodes">The maximum number of nodes per face in the mesh.Number of faces.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_max_face_nodes", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_max_face_nodes_dll(ref int ioncid, ref int meshId, ref int nmaxfacenodes);
 
@@ -218,7 +222,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="c_xptr">Pointer to array for x-coordinates</param>
         /// <param name="c_yptr">Pointer to array for y-coordinates</param>
         /// <param name="nnode">The number of nodes in the mesh.</param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_node_coordinates", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_node_coordinates_dll([In] ref int ioncid, [In, Out] ref int meshId, [In, Out] ref IntPtr c_xptr, [In, Out]ref IntPtr c_yptr, [In, Out] ref int nnode);
 
@@ -231,7 +235,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="c_edge_nodes_ptr">Pointer to array for the edge-node connectivity table.</param>
         /// <param name="nedge">The number of edges in the mesh.</param>
         /// <param name="startIndex"></param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_edge_nodes_dll(ref int ioncid, ref int meshId, ref IntPtr c_edge_nodes_ptr, ref int nedge, ref int startIndex);
 
@@ -246,7 +250,7 @@ namespace Deltares.UGrid.Entities
         /// <param name="nmaxfacenodes">The maximum number of nodes per face in the mesh.</param>
         /// <param name="fillvalue"></param>
         /// <param name="startIndex"></param>
-        /// <returns>Result status (IONC_NOERR if successful).</returns>
+        /// <returns>Result status (NoErrorCode if successful).</returns>
         [DllImport(GRIDDLL_NAME, EntryPoint = "ionc_get_face_nodes", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_face_nodes_dll(ref int ioncid, ref int meshId, ref IntPtr c_face_nodes_ptr, ref int nface, ref int nmaxfacenodes, ref int fillvalue, ref int startIndex);
 
