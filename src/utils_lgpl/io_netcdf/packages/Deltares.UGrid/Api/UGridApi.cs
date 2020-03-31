@@ -260,10 +260,18 @@ namespace Deltares.UGrid.Api
 
             disposableNetworkGeometry.BranchOrder = geometry.BranchOrder.CreateValueArray<int>(numberOfBranches);
 
-            DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_get_1d_network_branchtype_dll),
-                () => IoNetCfdImports.ionc_get_1d_network_branchtype_dll(ref dataSetId, ref networkId, ref geometry.BranchTypes, ref numberOfBranches));
+            try
+            {
+                DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_get_1d_network_branchtype_dll),
+                    () => IoNetCfdImports.ionc_get_1d_network_branchtype_dll(ref dataSetId, ref networkId,
+                        ref geometry.BranchTypes, ref numberOfBranches));
 
-            disposableNetworkGeometry.BranchTypes = geometry.BranchTypes.CreateValueArray<int>(numberOfBranches);
+                disposableNetworkGeometry.BranchTypes = geometry.BranchTypes.CreateValueArray<int>(numberOfBranches);
+            }
+            catch (IoNetCdfNativeError netCdfNativeError) when(netCdfNativeError.ErrorCode == IoNetCfdImports.VariableNotFoundErrorCode)
+            {
+                // Optional branch type variable could not be found
+            }
 
             return disposableNetworkGeometry;
         }

@@ -96,7 +96,10 @@ namespace Deltares.UGrid.Tests.Api
         [TestCase(1, GridLocationType.UG_LOC_EDGE, 0)]
         [TestCase(2, GridLocationType.UG_LOC_NODE, 2)]
         [TestCase(2, GridLocationType.UG_LOC_EDGE, 3)]
-        [TestCase(3, GridLocationType.UG_LOC_ALL2D, 0)]
+        [TestCase(2, GridLocationType.UG_LOC_FACE, 3)]
+        [TestCase(2, GridLocationType.UG_LOC_VOL, 0)]
+        [TestCase(2, GridLocationType.UG_LOC_NONE, 0)]
+        [TestCase(2, GridLocationType.UG_LOC_ALL2D, 8)]
         public void GivenUGrid_GetVarCount_ShouldWork(int meshId, GridLocationType locationType, int expectedVarCount)
         {
             // Arrange & Act

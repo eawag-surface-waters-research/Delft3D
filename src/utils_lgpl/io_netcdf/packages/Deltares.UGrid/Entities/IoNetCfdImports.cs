@@ -15,8 +15,10 @@ namespace Deltares.UGrid.Entities
     internal static class IoNetCfdImports
     {
         internal const int NoErrorCode = 0;
+        internal static int VariableNotFoundErrorCode = -49;
+
         internal const string GRIDDLL_NAME = "io_netcdf.dll";
-        
+
         #region Generic
 
         #region IO
