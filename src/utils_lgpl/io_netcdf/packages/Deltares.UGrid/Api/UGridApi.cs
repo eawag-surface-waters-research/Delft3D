@@ -32,6 +32,11 @@ namespace Deltares.UGrid.Api
             NativeLibrary.LoadNativeDll(IoNetCfdImports.GRIDDLL_NAME, Path.GetDirectoryName(typeof(UGridApi).Assembly.Location));
         }
 
+        ~UGridApi()
+        {
+            ReleaseUnmanagedResources();
+        }
+
         private bool FileOpen
         {
             get { return fileOpenForReading || fileOpenForWriting; }
@@ -325,8 +330,6 @@ namespace Deltares.UGrid.Api
                     ref mesh1d.BranchOffsets, ref mesh1d.NodeIds, ref mesh1d.NodeLongNames, ref mesh1dDimensions.NumberOfNodes,
                     ref startIndex, ref mesh1d.NodeX, ref mesh1d.NodeY));
 
-            // todo : add missing ionc_get_1d_mesh_edges_dll call
-
             DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_get_1d_mesh_edges_dll),
                 () => IoNetCfdImports.ionc_get_1d_mesh_edges_dll(ref dataSetId, ref meshId,
                     ref mesh1d.EdgeBranchIds, ref mesh1d.EdgeCenterPointOffset,
@@ -501,13 +504,11 @@ namespace Deltares.UGrid.Api
             return contactId;
         }
 
-        // TODO: Missing finalizer, which should be needed for unmanaged resources
-        // TODO: For consistency sake you could also implement this according to the Dispose pattern
-        // TODO: though this is not required as this is a sealed class.
         /// <inheritdoc/>
         public void Dispose()
         {
-            Close();
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
         }
 
         private static T[] GetArrayFromIoNetCdf<T>(Func<int> getSizeFunction, Action<IntPtr, int> setArrayFunction)
@@ -556,6 +557,11 @@ namespace Deltares.UGrid.Api
                 : "";
 
             DoIoNetCfdCall(methodName, ioNetCdfCall.Compile(), cSharpFunctionName);
+        }
+
+        private void ReleaseUnmanagedResources()
+        {
+            Close();
         }
     }
 };

@@ -419,7 +419,6 @@ namespace Deltares.UGrid.Tests.Api
 
                 using (var mesh1D = api.GetMesh1D(id))
                 {
-                    // TODO: I would move these asserts to separate private functions.
                     Assert.AreEqual("1dmesh", mesh1D.Name);
 
                     Assert.AreEqual(25, mesh1D.NodesX.Length);
