@@ -14898,6 +14898,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Decay4    ","dDecdTR4  ",   2,"Y","x",1
 "Decay5    ","dTR5      ",   1,"N","x",1
 "Decay5    ","dDecdTR5  ",   2,"Y","x",1
+"CalTemp   ","TempFlow  ",   1,"N","x",1
+"CalTemp   ","AddTemp   ",   2,"Y","x",1
 "TEO       ","Temp      ",   1,"Y","x",1
 "TEO       ","SurTemp   ",   2,"N","x",1
 "TEO       ","Surf      ",   3,"N","x",1

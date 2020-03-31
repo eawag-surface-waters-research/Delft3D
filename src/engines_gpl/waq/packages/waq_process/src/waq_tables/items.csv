@@ -11310,6 +11310,8 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "BlBioBas  ","x"," ",    50.0000    ,"(gC/m3)             ","Base biomass level per group                      ","volume    ","volume    "," ","                              "
 "SWBlMorChk","x"," ",    1.00000    ,"(-)                 ","Switch to use extra mortality constraints         ","volume    ","volume    "," ","                              "
 "BlTopLev  ","x"," ",    2.50000    ,"(gDW/m3)            ","Top level of mortality constraints                ","volume    ","volume    "," ","                              "
+"TempFlow  ","x"," ",   -999.000    ,"(oC)                ","Temperature calculated by flow model              ","volume    ","volume    "," ","                              "
+"AddTemp   ","x"," ",    0.00000    ,"(oC)                ","Additional temperature                            ","volume    ","volume    "," ","                              "
 "RadMaxHour","x"," ",   -999.000    ,"(W/m2)              ","maximum irradiance over day Et                    ","volume    ","volume    "," ","                              "
 "RadMaxDayA","x"," ",   -999.000    ,"(W/m2)              ","maximum average irradiance over day Ed            ","volume    ","volume    "," ","                              "
 "Cloud_1   ","x"," ",   -999.000    ,"(%)                 ","Cloudiness at station 1                           ","volume    ","volume    "," ","                              "

@@ -690,4 +690,5 @@
 "Decay3    ",A,A,A,A,
 "Decay4    ",A,A,A,A,
 "Decay5    ", , , , ,
+"CalTemp   ",A,A,A,A,
 "TEO       ", , , , ,
