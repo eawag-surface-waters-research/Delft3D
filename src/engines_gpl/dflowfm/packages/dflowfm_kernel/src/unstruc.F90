@@ -19485,7 +19485,13 @@ subroutine unc_write_his(tim)            ! wrihis
             crs_geom_container_name = 'cross_section_geometry_container'
             nNodeTot = 0
             do i = 1, ncrs
-               nNodeTot = nNodeTot + crs(i)%path%lnx + 1
+               nlinks = crs(i)%path%lnx
+               if (nlinks > 0 ) then
+                  nNodes = nlinks + 1
+               else if (nlinks == 0) then
+                  nNodes = 0
+               end if
+               nNodeTot = nNodeTot +  nNodes
             end do
             call sgeom_def_geometry_variables(ihisfile, crs_geom_container_name, 'line', 'cross_section_geom_node_count', &
                'cross_section_geom_x_coordinate', 'cross_section_geom_y_coordinate', 'cross_section_nGeometryNodes', nNodeTot, &
@@ -19997,13 +20003,24 @@ subroutine unc_write_his(tim)            ! wrihis
                do i = 1, nweirgen
                   istru = network%sts%weirIndices(i)
                   pstru => network%sts%struct(istru)
-                  nNodeTot = nNodeTot + pstru%numlinks + 1
+                  nlinks = pstru%numlinks
+                  if (nlinks > 0) then
+                     nNodes = nlinks + 1
+                  else if (nlinks == 0) then
+                     nNodes = 0
+                  end if
+                  nNodeTot = nNodeTot + nNodes
                end do
             else ! old weir
                do n = 1, nweirgen
                   i = weir2cgen(n)
                   nlinks = L2cgensg(i) - L1cgensg(i) + 1
-                  nNodeTot = nNodeTot + nlinks + 1
+                  if (nlinks > 0) then
+                     nNodes = nlinks + 1
+                  else if (nlinks == 0) then
+                     nNodes = 0
+                  end if
+                  nNodeTot = nNodeTot + nNodes
                end do
             end if
 
@@ -20523,47 +20540,53 @@ subroutine unc_write_his(tim)            ! wrihis
             j = 1
             do i = 1, ncrs
                nlinks = crs(i)%path%lnx
-               nNodes = nlinks + 1
+               if (nlinks > 0) then
+                  nNodes = nlinks + 1
+               else if (nlinks == 0) then
+                  nNodes = 0
+               end if
                ierr = nf90_put_var(ihisfile, id_crsgeom_node_count, nNodes, (/ i /))
 
-               call realloc(geom_x, nNodes)
-               call realloc(geom_y, nNodes)
-               L = crs(i)%path%iperm(1)
-               geom_x(1) = crs(i)%path%xk(1,L)
-               geom_x(2) = crs(i)%path%xk(2,L)
-               geom_y(1) = crs(i)%path%yk(1,L)
-               geom_y(2) = crs(i)%path%yk(2,L)
-
-               if (nlinks > 1) then
-                  L0 = crs(i)%path%iperm(2)
-
-                  if ((abs(geom_x(1)-crs(i)%path%xk(1,L0)) < 1d-10 .and. abs(geom_y(1)-crs(i)%path%yk(1,L0))<1d-10) &
-                      .or. (abs(geom_x(1)-crs(i)%path%xk(2,L0)) < 1d-10 .and. abs(geom_y(1)-crs(i)%path%yk(2,L0))<1d-10)) then
-                     ! if the starting node of the line is the same as any node of the second segment, then it is not a starting node
-                     geom_x(1) = crs(i)%path%xk(2,L)
-                     geom_x(2) = crs(i)%path%xk(1,L)
-                     geom_y(1) = crs(i)%path%yk(2,L)
-                     geom_y(2) = crs(i)%path%yk(1,L)
-                  end if
-
-                  k = 3
-                  do L0 = 2, nlinks
-                     L = crs(i)%path%iperm(L0)
-                     geom_x(k) = crs(i)%path%xk(2,L)
-                     geom_y(k) = crs(i)%path%yk(2,L)
-                     if ((abs(geom_x(k-1)-geom_x(k)) < 1d-10 .and. abs(geom_y(k-1)-geom_y(k))<1d-10)) then
-                        ! if the newly added node are the same as the previous node
-                        geom_x(k) = crs(i)%path%xk(1,L)
-                        geom_y(k) = crs(i)%path%yk(1,L)
+               if (nlinks > 0) then
+                  call realloc(geom_x, nNodes)
+                  call realloc(geom_y, nNodes)
+                  L = crs(i)%path%iperm(1)
+                  geom_x(1) = crs(i)%path%xk(1,L)
+                  geom_x(2) = crs(i)%path%xk(2,L)
+                  geom_y(1) = crs(i)%path%yk(1,L)
+                  geom_y(2) = crs(i)%path%yk(2,L)
+                  
+                  if (nlinks > 1) then
+                     L0 = crs(i)%path%iperm(2)
+                  
+                     if ((abs(geom_x(1)-crs(i)%path%xk(1,L0)) < 1d-10 .and. abs(geom_y(1)-crs(i)%path%yk(1,L0))<1d-10) &
+                         .or. (abs(geom_x(1)-crs(i)%path%xk(2,L0)) < 1d-10 .and. abs(geom_y(1)-crs(i)%path%yk(2,L0))<1d-10)) then
+                        ! if the starting node of the line is the same as any node of the second segment, then it is not a starting node
+                        geom_x(1) = crs(i)%path%xk(2,L)
+                        geom_x(2) = crs(i)%path%xk(1,L)
+                        geom_y(1) = crs(i)%path%yk(2,L)
+                        geom_y(2) = crs(i)%path%yk(1,L)
                      end if
-
-                     k = k+1
-                  end do
+                  
+                     k = 3
+                     do L0 = 2, nlinks
+                        L = crs(i)%path%iperm(L0)
+                        geom_x(k) = crs(i)%path%xk(2,L)
+                        geom_y(k) = crs(i)%path%yk(2,L)
+                        if ((abs(geom_x(k-1)-geom_x(k)) < 1d-10 .and. abs(geom_y(k-1)-geom_y(k))<1d-10)) then
+                           ! if the newly added node are the same as the previous node
+                           geom_x(k) = crs(i)%path%xk(1,L)
+                           geom_y(k) = crs(i)%path%yk(1,L)
+                        end if
+                  
+                        k = k+1
+                     end do
+                  end if
+                  
+                  ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordx, geom_x, (/j/))
+                  ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordy, geom_y, (/j/))
+                  j = j + nNodes
                end if
-
-               ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordx, geom_x, (/j/))
-               ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordy, geom_y, (/j/))
-               j = j + nNodes
             end do
         end if
 
@@ -21225,101 +21248,113 @@ subroutine unc_write_his(tim)            ! wrihis
                   istru = network%sts%weirIndices(i)
                   pstru => network%sts%struct(istru)
                   nlinks = pstru%numlinks
-                  nNodes = nlinks + 1
+                  if (nlinks > 0) then
+                     nNodes = nlinks + 1
+                  else if (nlinks == 0) then
+                     nNodes = 0
+                  end if
 
                   ierr = nf90_put_var(ihisfile, id_weirgeom_node_count, nNodes, start = (/ i /))
 
-                  call realloc(geom_x, nNodes)
-                  call realloc(geom_y, nNodes)
-
-                  L = abs(pstru%linknumbers(1))
-                  k1 = ln(1,L)
-                  k2 = ln(2,L)
-                  if (nlinks > 1) then
-                     L0 = abs(pstru%linknumbers(2))
-                     k3 = ln(1,L0)
-                     k4 = ln(2,L0)
-                     if (k1 == k3 .or. k1 == k4) then
-                        ! if the starting node k1 is the same as any node of the second segment, then it is not a starting node
-                        k1 = ln(2,L)
-                        k2 = ln(1,L)
-                     end if
-                  end if
-
-                  geom_x(1) = xz(k1)
-                  geom_x(2) = xz(k2)
-                  geom_y(1) = yz(k1)
-                  geom_y(2) = yz(k2)
-                  if (nlinks > 1) then
-                     k = 3
-                     do L0 = 2, nlinks
-                        L = abs(pstru%linknumbers(L0))
-                        k3 = ln(2,L)
-                        if (k3 == k2) then
-                           ! if the newly added node k3 equals to the previous node k2
-                           k3 = ln(1,L)
+                  if (nlinks > 0) then
+                     call realloc(geom_x, nNodes)
+                     call realloc(geom_y, nNodes)
+                     
+                     L = abs(pstru%linknumbers(1))
+                     k1 = ln(1,L)
+                     k2 = ln(2,L)
+                     if (nlinks > 1) then
+                        L0 = abs(pstru%linknumbers(2))
+                        k3 = ln(1,L0)
+                        k4 = ln(2,L0)
+                        if (k1 == k3 .or. k1 == k4) then
+                           ! if the starting node k1 is the same as any node of the second segment, then it is not a starting node
+                           k1 = ln(2,L)
+                           k2 = ln(1,L)
                         end if
+                     end if
 
-                        geom_x(k) = xz(k3)
-                        geom_y(k) = yz(k3)
-                        k = k+1
-                        k2 = k3 ! update k2
-                     end do
+                     geom_x(1) = xz(k1)
+                     geom_x(2) = xz(k2)
+                     geom_y(1) = yz(k1)
+                     geom_y(2) = yz(k2)
+                     if (nlinks > 1) then
+                        k = 3
+                        do L0 = 2, nlinks
+                           L = abs(pstru%linknumbers(L0))
+                           k3 = ln(2,L)
+                           if (k3 == k2) then
+                              ! if the newly added node k3 equals to the previous node k2
+                              k3 = ln(1,L)
+                           end if
+                     
+                           geom_x(k) = xz(k3)
+                           geom_y(k) = yz(k3)
+                           k = k+1
+                           k2 = k3 ! update k2
+                        end do
+                     end if
+                     
+                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x, start = (/j/))
+                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y, start = (/j/))
+                     j = j + nNodes
                   end if
-
-                  ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x, start = (/j/))
-                  ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y, start = (/j/))
-                  j = j + nNodes
                end do
             else
                j = 1
                do n = 1, nweirgen
                   i = weir2cgen(n)
                   nlinks = L2cgensg(i) - L1cgensg(i) + 1
-                  nNodes = nlinks + 1
+                  if (nlinks > 0) then
+                     nNodes = nlinks + 1
+                  else if (nlinks == 0) then
+                     nNodes = 0
+                  end if
 
                   ierr = nf90_put_var(ihisfile, id_weirgeom_node_count, nNodes, start = (/ n /))
 
-                  call realloc(geom_x, nNodes)
-                  call realloc(geom_y, nNodes)
-
-                  L = L1cgensg(1)
-                  k1 = ln(1,L)
-                  k2 = ln(2,L)
-                  if (nlinks > 1) then
-                     L0 = L + 1
-                     k3 = ln(1,L0)
-                     k4 = ln(2,L0)
-                     if (k3 == k1 .or. k4 == k1) then
-                        ! if the starting node k1 is the same as any node of the second segment, then it is not a starting node
-                        k1 = ln(2,L)
-                        k2 = ln(1,L)
-                     end if
-                  end if
-
-                  geom_x(1) = xz(k1)
-                  geom_x(2) = xz(k2)
-                  geom_y(1) = yz(k1)
-                  geom_y(2) = yz(k2)
-                  if (nlinks > 1) then
-                     k = 3
-                     do L0 = L1cgensg(2), L2cgensg(i)
-                        L = abs(kcgen(3,L0))
-                        k3 = ln(2,L)
-                        if (k3 == k2) then
-                           ! if the newly added node k3 equals to the previous node k2
-                           k3 = ln(1,L)
+                  if (nlinks > 0) then
+                     call realloc(geom_x, nNodes)
+                     call realloc(geom_y, nNodes)
+                     
+                     L = L1cgensg(1)
+                     k1 = ln(1,L)
+                     k2 = ln(2,L)
+                     if (nlinks > 1) then
+                        L0 = L + 1
+                        k3 = ln(1,L0)
+                        k4 = ln(2,L0)
+                        if (k3 == k1 .or. k4 == k1) then
+                           ! if the starting node k1 is the same as any node of the second segment, then it is not a starting node
+                           k1 = ln(2,L)
+                           k2 = ln(1,L)
                         end if
-                        geom_x(k) = xz(k3)
-                        geom_y(k) = yz(k3)
-                        k = k+1
-                        k2 = k3 ! update k2
-                     end do
-                  end if
+                     end if
+                     
+                     geom_x(1) = xz(k1)
+                     geom_x(2) = xz(k2)
+                     geom_y(1) = yz(k1)
+                     geom_y(2) = yz(k2)
+                     if (nlinks > 1) then
+                        k = 3
+                        do L0 = L1cgensg(2), L2cgensg(i)
+                           L = abs(kcgen(3,L0))
+                           k3 = ln(2,L)
+                           if (k3 == k2) then
+                              ! if the newly added node k3 equals to the previous node k2
+                              k3 = ln(1,L)
+                           end if
+                           geom_x(k) = xz(k3)
+                           geom_y(k) = yz(k3)
+                           k = k+1
+                           k2 = k3 ! update k2
+                        end do
+                     end if
 
-                  ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x, start = (/j/))
-                  ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y, start = (/j/))
-                  j = j + nNodes
+                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x, start = (/j/))
+                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y, start = (/j/))
+                     j = j + nNodes
+                  end if
                end do
             end if
          end if
