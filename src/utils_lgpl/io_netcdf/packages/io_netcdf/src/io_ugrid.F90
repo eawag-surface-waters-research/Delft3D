@@ -3880,7 +3880,7 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    
    !6 Branch type
    ierr = nf90_def_var(ncid, prefix//'_branch_type', nf90_int, (/ netids%dimids(ntdim_1dedges) /) , netids%varids(ntid_1dbranchtype))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchtype), 'long_name', 'Type of branches for interpolation')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchtype), 'long_name', 'Type of branches')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchtype), 'mesh', prefix)
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchtype), 'location', 'edge')
 
