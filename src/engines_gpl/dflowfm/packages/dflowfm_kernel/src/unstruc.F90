@@ -45252,7 +45252,7 @@ subroutine update_verticalprofiles()
     endif
 
     if (umod == 0d0) then         ! from dry to wet
-       umod = max(1d-4, dts*ag*abs( s1(ln(1,LL)) - s1(ln(2,LL)) )*dxi(LL) )
+       umod = max(1d-4, dts*ag*dxi(LL)*min( abs( s1(ln(1,LL)) - s1(ln(2,LL)) ), 0.333333d0*hu(LL) ) )
     else
        umod = max(umod, 1d-4)     ! 1d-5 for some wave cases     ! until 3D handled like 2D iterative loop , solves Roses problem: ust=1.1e-104 to the power 3 is underflow
     endif
