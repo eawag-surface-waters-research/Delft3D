@@ -6,12 +6,12 @@ namespace Deltares.UGrid.Entities
 {
     /// <summary>
     /// Class containing all static imports for IONetCdf library
+    /// </summary>
     /// <remarks>
     /// This class contains unused functions and functions that are
     /// not documented properly. This is because the native dll
     /// will be rewritten to use structures instead of separate function
     /// calls to get/set meshes, networks, links etc.</remarks>
-    /// </summary>
     internal static class IoNetCfdImports
     {
         internal const int NoErrorCode = 0;
