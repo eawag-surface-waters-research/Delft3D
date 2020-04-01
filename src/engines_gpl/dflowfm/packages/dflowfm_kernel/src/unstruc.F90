@@ -18857,12 +18857,10 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_statname,  'long_name'    , 'observation station name') ! REF
 
             ! Define geometry related variables
-            station_geom_container_name = 'station_geometry_container'
+            station_geom_container_name = 'station_geom'
             nNodeTot = numobs+nummovobs
-            call sgeom_def_geometry_variables(ihisfile, station_geom_container_name, 'point', 'station_geom_node_count', &
-               'station_geom_x_coordinate', 'station_geom_y_coordinate', 'station_nGeometryNodes', nNodeTot, id_statdim, &
-               'Number of stations', 'x-coordinate of stations', 'y-coordinate of stations', id_statgeom_node_count, &
-               id_statgeom_node_coordx, id_statgeom_node_coordy, ierr)
+            ierr = sgeom_def_geometry_variables(ihisfile, station_geom_container_name, 'station', 'point', nNodeTot, id_statdim, &
+               id_statgeom_node_count, id_statgeom_node_coordx, id_statgeom_node_coordy)
 
             if ( jahiswatlev > 0 ) then
                ierr = nf90_def_var(ihisfile, 'waterlevel', nf90_double, (/ id_statdim, id_timedim /), id_vars)
@@ -19482,7 +19480,7 @@ subroutine unc_write_his(tim)            ! wrihis
             !ierr = unc_addcoordatts(ihisfile, id_crsx, id_crsy, jsferic)
 
             ! Define geometry related variables
-            crs_geom_container_name = 'cross_section_geometry_container'
+            crs_geom_container_name = 'cross_section_geom'
             nNodeTot = 0
             do i = 1, ncrs
                nlinks = crs(i)%path%lnx
@@ -19493,10 +19491,8 @@ subroutine unc_write_his(tim)            ! wrihis
                end if
                nNodeTot = nNodeTot +  nNodes
             end do
-            call sgeom_def_geometry_variables(ihisfile, crs_geom_container_name, 'line', 'cross_section_geom_node_count', &
-               'cross_section_geom_x_coordinate', 'cross_section_geom_y_coordinate', 'cross_section_nGeometryNodes', nNodeTot, &
-               id_crsdim, 'Number of cross sections', 'cross_section_x_coordinate', 'cross_section_y_coordinate', &
-               id_crsgeom_node_count, id_crsgeom_node_coordx, id_crsgeom_node_coordy, ierr)
+            ierr = sgeom_def_geometry_variables(ihisfile, crs_geom_container_name, 'cross section', 'line', nNodeTot, id_crsdim, &
+               id_crsgeom_node_count, id_crsgeom_node_coordx, id_crsgeom_node_coordy)
 
             ierr = nf90_def_var(ihisfile, 'cross_section_discharge',     nf90_double, (/ id_crsdim, id_timedim /), id_varQ)
             ierr = nf90_put_att(ihisfile, id_varQ,    'units', 'm3 s-1')
@@ -19997,7 +19993,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_weirgen_id,  'long_name', 'Id of weir'    )
 
             ! Define geometry related variables
-            weir_geom_container_name = 'weirgen_geometry_container'
+            weir_geom_container_name = 'weirgen_geom'
             nNodeTot = 0
             if (network%sts%numWeirs > 0) then ! new weir
                do i = 1, nweirgen
@@ -20024,10 +20020,8 @@ subroutine unc_write_his(tim)            ! wrihis
                end do
             end if
 
-            call sgeom_def_geometry_variables(ihisfile, weir_geom_container_name, 'line', 'weirgen_geom_node_count', &
-               'weirgen_geom_x_coordinate', 'weirgen_geom_y_coordinate', 'weirgen_nGeometryNodes', nNodeTot, id_weirgendim, &
-               'Number of weirs', 'x-coordinate of weirs', 'y-coordinate of weirs', id_weirgeom_node_count, &
-               id_weirgeom_node_coordx, id_weirgeom_node_coordy, ierr)
+            ierr = sgeom_def_geometry_variables(ihisfile, weir_geom_container_name, 'weir', 'line', nNodeTot, id_weirgendim, &
+               id_weirgeom_node_count, id_weirgeom_node_coordx, id_weirgeom_node_coordy)
 
             ierr = nf90_def_var(ihisfile, 'weirgen_discharge',     nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_dis)
             !ierr = nf90_put_att(ihisfile, id_weirgen_dis, 'standard_name', 'integral_of_discharge_wrt_time') ! TODO: introduce time windows in nc
