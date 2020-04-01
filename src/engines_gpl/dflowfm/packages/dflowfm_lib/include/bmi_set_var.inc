@@ -434,11 +434,11 @@
      call c_f_pointer(xptr, x_0d_double_ptr)
      is_dtint = x_0d_double_ptr
   case("taucr")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(taucr))
-     taucr(:) = x_1d_double_ptr
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%sedpar%taucr))
+     stmpar%sedpar%taucr(:) = x_1d_double_ptr
   case("tetacr")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(tetacr))
-     tetacr(:) = x_1d_double_ptr
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%sedpar%tetacr))
+     stmpar%sedpar%tetacr(:) = x_1d_double_ptr
   case("TcrEro")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%trapar%par(13,:)))
 	 stmpar%trapar%par(13,:) = x_1d_double_ptr
@@ -454,6 +454,12 @@
   case("SurfTem")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(tem1))
      tem1(1:ndx) = x_1d_double_ptr
+     if (kmx > 0) then
+	    do k = 1,ndx
+		   call getkbotktop(k, kb, kt)
+		   tem1(kt) = tem1(k)    !!! Check whether temp1(1:ndx) is used for other purpose in 3D
+		enddo
+	 endif
   case("taus")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(taus))
      taus(:) = x_1d_double_ptr

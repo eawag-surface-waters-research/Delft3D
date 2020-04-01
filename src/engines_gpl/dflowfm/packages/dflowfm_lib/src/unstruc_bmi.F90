@@ -1200,7 +1200,7 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    ! The fortran name of the attribute name
    character(len=strlen(c_var_name))            :: var_name
    character(kind=c_char),dimension(:), pointer :: c_value => null()
-   integer :: i
+   integer :: i, k, kb, kt
 
    ! Store the name
    var_name = char_array_to_string(c_var_name, strlen(c_var_name))

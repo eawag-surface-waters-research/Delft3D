@@ -299,9 +299,9 @@
   case("is_dtint") !<  [s] total time interval since last statistics reset. {"rank": 0}
      x = c_loc(is_dtint)
   case("taucr") !<  [?] dimensional critical shear stress taucr () {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(taucr)
+     x = c_loc(stmpar%sedpar%taucr)
   case("tetacr") !<  [-] dimensionless critical shear stress () {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(tetacr)
+     x = c_loc(stmpar%sedpar%tetacr)
   case("TcrEro")
      x = c_loc(stmpar%trapar%par(13,:))
   case("TcrSed")
