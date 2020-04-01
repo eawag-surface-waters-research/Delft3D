@@ -43807,7 +43807,11 @@ if (mext /= 0) then
              ! Converter will put 'qsrc, sasrc and tmsrc' values in array qstss on positions: (3*numsrc-2), (3*numsrc-1), and (3*numsrc), respectively.
              success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename0, filetype0, method=spaceandtime, operand='O', targetIndex=numsrc)
           else
-             success = .true. ! TODO: now, this is no error, because sorsin values will be handled below as transformcoef. Long term solution: only support timeseries??
+             if (transformcoef(1) == dmiss) then
+               success = .false.
+             else
+               success = .true. ! TODO: now, this is no error, because sorsin values will be handled below as transformcoef. Long term solution: only support timeseries??
+             endif
           endif
        endif
     enddo
