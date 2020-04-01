@@ -72,7 +72,7 @@
       real(4)    totnut(4)        ! Total C,N,P,Si in algae (g/m3)
       real(4)    chltot           ! Total chlorophyl in algae (mgChl/m3)
       real(4)    flprpa(nuspec)   ! Primary production fluxes (gC/m3/d)
-      real(4)    fluptn(5)        ! Uptake fluxes (g/m3/d)
+      real(4)    fluptn(10)       ! Uptake fluxes (g/m3/d)
       real(4)    faclim(6)        ! Limiting factors (-)
       real(4)    uptnit           ! Nitrogen uptake per day
       real(4)    fracam           ! Fraction NH4 of N uptake
