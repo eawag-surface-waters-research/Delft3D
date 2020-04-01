@@ -194,6 +194,7 @@ module swan_input
        integer                                 :: ncrp
        integer                                 :: ncrv
        integer                                 :: ncurv
+       integer                                 :: ndec
        integer                                 :: n_meteofiles_gen
        integer                                 :: nnest
        integer                                 :: nobst
@@ -1330,6 +1331,10 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     endif
     sr%flowLinkConnectivity = .false.
     call prop_get_logical (mdw_ptr, 'General', 'flowLinkConnectivity', sr%flowLinkConnectivity)
+    !
+    ! Write format for SWAN input
+    sr%ndec = 8
+    call prop_get_integer (mdw_ptr, 'General', 'NDec', sr%ndec)
     !
     ! Time points
     !
@@ -4867,8 +4872,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     ! The following line avoids "****" being written in the spectral files due to format errors
     !
-    line       = 'OUTPUT OPTIONS SPEC ndec=8'
-    write (luninp, '(1X,A)') line
+    write (luninp, '(A,I0)') 'OUTPUT OPTIONS SPEC ndec=',sr%ndec
     do i=1, size(varnam1)
        write (luninp, '(1X,3A)') 'QUANTITY ',varnam1(i), ' excv=-999.0'
     enddo
