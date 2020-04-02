@@ -161,11 +161,11 @@ arrdm3(iivol ) = 1
       arrdm2(iidefa) = 1
       arrdm3(iidefa) = 1
       
-!      arrnam(iidspx) = 'DISPX '
-!      arrknd(iidspx) = 2
-!      arrdm1(iidspx) = ndspx
-!      arrdm2(iidspx) = noq
-!      arrdm3(iidspx) = 1
+      arrnam(iidspx) = 'DISPX '
+      arrknd(iidspx) = 2
+      arrdm1(iidspx) = ndspx
+      arrdm2(iidspx) = noq
+      arrdm3(iidspx) = 1
 
       arrnam(iivelx) = 'VELX  '
       arrknd(iivelx) = 2
