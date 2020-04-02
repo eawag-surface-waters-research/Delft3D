@@ -13931,7 +13931,7 @@ subroutine read_flowsamples_from_netcdf(fileName, quantityName, ierr)
         ierr = nf90_inq_varid(iNetcdfFile, 'FlowElem_ycc', id_varYcoord)
         ierr = nf90_get_var(iNetcdfFile, id_varYcoord, ys(1:ns))
         
-        ! Read the actual water levels
+        ! Read the actual salinity values
         ierr = nf90_inq_varid(iNetcdfFile, 'sa1', id_varData)
         if (ierr .lt. 0) then
             ierr = unc_close(iNetcdfFile)
@@ -13958,7 +13958,7 @@ subroutine read_flowsamples_from_netcdf(fileName, quantityName, ierr)
         ierr = nf90_inq_varid(iNetcdfFile, 'FlowElem_ycc', id_varYcoord)
         ierr = nf90_get_var(iNetcdfFile, id_varYcoord, ys(1:ns))
         
-        ! Read the actual water levels
+        ! Read the actual velocity x values
         ierr = nf90_inq_varid(iNetcdfFile, 'ucx', id_varData)
         if (ierr .lt. 0) then
             ierr = unc_close(iNetcdfFile)
@@ -13985,7 +13985,7 @@ subroutine read_flowsamples_from_netcdf(fileName, quantityName, ierr)
         ierr = nf90_inq_varid(iNetcdfFile, 'FlowElem_ycc', id_varYcoord)
         ierr = nf90_get_var(iNetcdfFile, id_varYcoord, ys(1:ns))
         
-        ! Read the actual water levels
+        ! Read the actual velocity y values
         ierr = nf90_inq_varid(iNetcdfFile, 'ucy', id_varData)
         if (ierr .lt. 0) then
             ierr = unc_close(iNetcdfFile)
