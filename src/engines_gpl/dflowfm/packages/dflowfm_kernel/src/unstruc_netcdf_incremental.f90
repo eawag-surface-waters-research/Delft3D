@@ -104,9 +104,9 @@ end subroutine reset_unstruc_netcdf_map_class
    integer :: id_twodim
    character(len=:), allocatable :: errmsg, tmpstr
    logical :: isLast, need_flush
-   double precision, allocatable :: ucdir(:)
-   double precision :: angle
-   double precision, allocatable :: workbounds(:,:)
+   real(kind=hp), allocatable :: ucdir(:)
+   real(kind=hp) :: angle
+   real(kind=hp), allocatable :: workbounds(:,:)
    integer :: nclasses_s1, nclasses_hs, nclasses_ucmag, nclasses_ucdir
 
    ierr = nf90_noerr
@@ -357,10 +357,10 @@ function def_var_classmap_ugrid(name, ncid, id_twodim, var_id_class_bnds, var_id
    integer                           :: ierr               !< function result. 0=ok
 
    integer :: id_class, actual_chunksize, ids(MAX_ID_VAR), ndims(2), i
-   double precision, pointer :: map_classes(:)
+   real(kind=hp), pointer :: map_classes(:)
    character(len=:), allocatable :: unit
    character(len=:), allocatable :: classbndsname
-   double precision :: lbound, ubound
+   real(kind=hp) :: lbound, ubound
 
    ! By default, first and last classes are open ended:
    lbound = dmiss
@@ -550,11 +550,11 @@ subroutine classes_to_classbounds(N, class_bnds, bnds_table, lbound, ubound)
    use string_module, only : replace_char
    use m_missing, only: dmiss
    use m_alloc
-   integer,                       intent(in   ) :: N               !< Number of input classes
-   double precision,              intent(in   ) :: class_bnds(:)   !< (N) class boundary values
-   double precision, allocatable, intent(inout) :: bnds_table(:,:) !< (2, N+1) output table with class bounds
-   double precision, optional,    intent(in   ) :: lbound          !< (Optional) Value that represents the lower bound of the first class. (Only needed when not open ended.)
-   double precision, optional,    intent(in   ) :: ubound          !< (Optional) Value that represents the upper bound of the last class. (Only needed when not open ended.)
+   integer,                    intent(in   ) :: N               !< Number of input classes
+   real(kind=hp),              intent(in   ) :: class_bnds(:)   !< (N) class boundary values
+   real(kind=hp), allocatable, intent(inout) :: bnds_table(:,:) !< (2, N+1) output table with class bounds
+   real(kind=hp), optional,    intent(in   ) :: lbound          !< (Optional) Value that represents the lower bound of the first class. (Only needed when not open ended.)
+   real(kind=hp), optional,    intent(in   ) :: ubound          !< (Optional) Value that represents the upper bound of the last class. (Only needed when not open ended.)
 
    integer :: i
 
@@ -577,20 +577,20 @@ end subroutine classes_to_classbounds
 function put_flag_attributes(ncid, varid, class_bnds, unit, classbnds_name, lbound, ubound) result (ierr)
    use string_module, only : replace_char
    use m_missing, only: dmiss
-   integer,                    intent(in   ) :: ncid          !< NetCDF file id
-   integer,                    intent(in   ) :: varid         !< variable id of the data variable that is stored using classes/flag values.
-   double precision,           intent(in   ) :: class_bnds(:) !< class boundaries, used to construct the meanings string.
-   character(len=*),           intent(inout) :: unit          !< the unit of the variable (spaces, if any, are removed)
-   character(len=*),           intent(in   ) :: classbnds_name!< Name of another variable containing the class bounds table. Used in flag_bounds attribute.
-   double precision, optional, intent(in   ) :: lbound        !< (Optional) Value that represents the lower bound of the first class (or use dmiss when open ended).
-   double precision, optional, intent(in   ) :: ubound        !< (Optional) Value that represents the upper bound of the last class (or use dmiss when open ended).
-   integer                         :: ierr          !< function result; 0=OK
+   integer,                 intent(in   ) :: ncid          !< NetCDF file id
+   integer,                 intent(in   ) :: varid         !< variable id of the data variable that is stored using classes/flag values.
+   real(kind=hp),           intent(in   ) :: class_bnds(:) !< class boundaries, used to construct the meanings string.
+   character(len=*),        intent(inout) :: unit          !< the unit of the variable (spaces, if any, are removed)
+   character(len=*),        intent(in   ) :: classbnds_name!< Name of another variable containing the class bounds table. Used in flag_bounds attribute.
+   real(kind=hp), optional, intent(in   ) :: lbound        !< (Optional) Value that represents the lower bound of the first class (or use dmiss when open ended).
+   real(kind=hp), optional, intent(in   ) :: ubound        !< (Optional) Value that represents the upper bound of the last class (or use dmiss when open ended).
+   integer                                :: ierr          !< function result; 0=OK
 
    integer :: i, max_user_classes
    character(len=:),   allocatable :: meanings, meaning
    integer(kind=int8), allocatable :: values(:)
    character(len=12) :: meaning_p, meaning_c
-   double precision :: lbound_, ubound_
+   real(kind=hp) :: lbound_, ubound_
 
    ierr = nf90_noerr
 
