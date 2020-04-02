@@ -19437,7 +19437,7 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_varrain, 'units', 'mm day-1')
                ierr = nf90_put_att(ihisfile, id_varrain, '_FillValue', dmiss)
                ierr = nf90_put_att(ihisfile, id_varrain, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-               ierr = nf90_put_att(ihisfile, id_varrain, 'standard_name', 'precipitation_flux')
+               ierr = nf90_put_att(ihisfile, id_varrain, 'standard_name', 'lwe_precipitation_rate')
                ierr = nf90_put_att(ihisfile, id_varrain, 'long_name', 'precipitation depth per time unit')
                ierr = nf90_put_att(ihisfile, id_varrain, 'geometry', station_geom_container_name)
             endif
