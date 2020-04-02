@@ -9243,7 +9243,7 @@ subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, 
     if (iconv == UNC_CONV_UGRID) then
        mapids%ncid = inetfile
        ierr = ug_addglobalatts(mapids%ncid, meta) !Add UGRID convention
-       call unc_write_net_ugrid2(mapids%ncid, mapids%id_tsp, janetcell=janetcell_loc)   
+       call unc_write_net_ugrid2(mapids%ncid, mapids%id_tsp, janetcell=janetcell_loc, jaidomain=jaidomain_loc, jaiglobal_s=jaiglobal_s_loc)
     else
        call unc_write_net_filepointer(inetfile, janetcell=janetcell_loc, janetbnd=janetbnd_loc, jaidomain=jaidomain_loc, jaiglobal_s=jaiglobal_s_loc)
     end if
@@ -9548,23 +9548,13 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     end if
 
    if (jaidomain_ /= 0) then
-       ierr = nf90_def_var(inetfile, 'idomain', nf90_int, (/id_netelemdim /), id_idomain)
-       ierr = nf90_put_att(inetfile, id_idomain, 'long_name', 'partition subdomain numbers')
-       ierr = nf90_put_att(inetfile, id_idomain, 'short_name', 'idomain')
-       ierr = nf90_put_att(inetfile, id_idomain, 'valid_max', ndomains)  ! the total number of subdomains
-       ierr = nf90_put_att(inetfile, id_idomain, 'mesh', 'Mesh2D')
-       ierr = nf90_put_att(inetfile, id_idomain, 'location', 'face')
+       ierr = unc_def_idomain(inetfile, id_idomain, id_netelemdim)
    end if
-   
+
    if (jaiglobal_s_ /= 0) then
-       ierr = nf90_def_var(inetfile, 'iglobal_s', nf90_int, (/id_netelemdim /), id_iglobal_s)
-       ierr = nf90_put_att(inetfile, id_iglobal_s, 'long_name', 'global netcell numbers')
-       ierr = nf90_put_att(inetfile, id_iglobal_s, 'short_name', 'iglobal_s')
-       ierr = nf90_put_att(inetfile, id_iglobal_s, 'valid_max', Nglobal_s)
-       ierr = nf90_put_att(inetfile, id_iglobal_s, 'mesh', 'Mesh2D')
-       ierr = nf90_put_att(inetfile, id_iglobal_s, 'location', 'face')
+       ierr = unc_def_iglobal(inetfile, id_iglobal_s, id_netelemdim)
     endif
-    
+
     ierr = nf90_enddef(inetfile)
     call readyy('Writing net data',.05d0)
 
@@ -9772,15 +9762,45 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     call readyy('Writing net data',-1d0)
 end subroutine unc_write_net_filepointer
 
+!> helper function to define idomain
+function unc_def_idomain(inetfile, id_idomain, id_netelemdim) result(ierr)
+   use m_partitioninfo, only : ndomains
+   integer, intent(in   ) :: inetfile, id_netelemdim
+   integer, intent(  out) :: id_idomain
+   integer                :: ierr
+
+                           ierr = nf90_def_var(inetfile, 'idomain', nf90_int, (/id_netelemdim /), id_idomain)
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_idomain, 'long_name', 'partition subdomain numbers')
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_idomain, 'short_name', 'idomain')
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_idomain, 'valid_max', ndomains)  ! the total number of subdomains
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_idomain, 'mesh', 'Mesh2D')
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_idomain, 'location', 'face')
+end function unc_def_idomain
+
+!> helper function to define iglobal_s
+function unc_def_iglobal(inetfile, id_iglobal_s, id_netelemdim) result(ierr)
+   use m_partitioninfo, only :Nglobal_s
+   integer, intent(in   ) :: inetfile, id_netelemdim
+   integer, intent(  out) :: id_iglobal_s
+   integer                :: ierr
+
+                           ierr = nf90_def_var(inetfile, 'iglobal_s', nf90_int, (/id_netelemdim /), id_iglobal_s)
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_iglobal_s, 'long_name', 'global netcell numbers')
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_iglobal_s, 'short_name', 'iglobal_s')
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_iglobal_s, 'valid_max', Nglobal_s)
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_iglobal_s, 'mesh', 'Mesh2D')
+   if (ierr == NF90_NOERR) ierr = nf90_put_att(inetfile, id_iglobal_s, 'location', 'face')
+end function unc_def_iglobal
 
 ! NOTE: AvD: this routine below is a temporary working function that should replace unc_write_ugrid soon.
 ! It should contain two things:
 ! * io_ugrid-based writing of all basic net data (nodes/edges/faces)
 ! * AND NetLinkContour-related variables (see the original unc_write_net_filepointer routine)
 !> Writes the unstructured network in UGRID format to an already opened netCDF dataset.
-subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
+subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
    use m_flowgeom, only: xz, yz
    use network_data, xe_no=>xe, ye_no=>ye
+   use m_partitioninfo, only: idomain, ndomains, iglobal_s
    use m_sferic
    use m_missing
    use netcdf
@@ -9792,12 +9812,15 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
 
    implicit none
 
-   integer                          :: ncid
-   type(t_unc_timespace_id), intent(inout):: id_tsp
+   integer, intent(in)                      :: ncid
+   type(t_unc_timespace_id), intent(inout) :: id_tsp
    integer, optional, intent(in)    :: janetcell
-   integer                          :: janetcell_
-   
-   
+   integer, optional, intent(in)    :: jaidomain   !< write subdomain numbers (1) or not (0, default)
+   integer, optional, intent(in)    :: jaiglobal_s !< write global netcell numbers (1) or not (0, default)
+
+   integer                          :: janetcell_, jaidomain_, jaiglobal_s_
+   integer                          :: id_idomain, id_iglobal_s, id_netelemdim
+
    integer :: nn
    integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:), contacts(:,:) 
    integer :: layer_count, layer_type
@@ -9830,7 +9853,17 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
    else
       janetcell_   = 0
    end if
-   
+   if ( present(jaidomain)) then
+      jaidomain_ = jaidomain
+   else
+      jaidomain_ = 0
+   end if
+   if (present(jaiglobal_s)) then
+      jaiglobal_s_ = jaiglobal_s
+   else
+      jaiglobal_s_ = 0
+   end if
+
    !We need the cells for the face_nodes
    if (janetcell_ /= 0) then 
    !    if (size(lnn) < numl .or. netstat == NETSTAT_CELLS_DIRTY ) then
@@ -10201,6 +10234,18 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
       deallocate(edge_type)
    end if
 
+   if (jaidomain_ /= 0 .or. jaiglobal_s_ /= 0) then
+      ierr = nf90_def_dim(ncid, 'nNetElem', nump1d2d,  id_netelemdim)
+   end if
+
+   if (jaidomain_ /= 0) then
+      ierr = unc_def_idomain(ncid, id_idomain, id_netelemdim)
+   end if
+
+   if (jaiglobal_s_ /= 0) then
+      ierr = unc_def_iglobal(ncid, id_iglobal_s, id_netelemdim)
+   endif
+
    ierr = nf90_enddef(ncid)
 
    ! -- Start data writing (time-independent data) ------------
@@ -10300,6 +10345,14 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
        ierr = nf90_put_var(ncid, id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl2d /) )
        ierr = nf90_put_var(ncid, id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl2d /) )
     end if
+
+   if ( jaidomain_ /= 0) then
+      ierr = nf90_put_var(ncid, id_idomain,   idomain,   count = (/ nump1d2d /))
+   endif
+
+   if ( jaiglobal_s_ /= 0) then
+      ierr = nf90_put_var(ncid, id_iglobal_s, iglobal_s, count = (/ nump1d2d /))
+   end if
 
    ! TODO: AvD:
    ! * in WAVE: handle the obsolete 'nFlowElemWithBnd'/'nFlowElem' difference
