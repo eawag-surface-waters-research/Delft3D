@@ -14570,6 +14570,7 @@ subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist, 
     use sorting_algorithms, only: indexx
     use geometry_module, only: dbdistance, normalout
     use m_missing, only: dmiss, dxymis
+    use m_alloc
 
     implicit none
 
@@ -14653,28 +14654,33 @@ subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist, 
         end if
    enddo
 
-   if ( path%lnx.gt.0 .and. jaloc3 == 0) then
+   if ( path%lnx.gt.0 ) then
+      if ( jaloc3 == 0) then
 
-   !  determine permutation array of flowlinks by increasing arc length order
-      do i=1,path%lnx
-         path%sp(i) = dble(path%indexp(i)) + (1d0-path%wfp(i))
-      end do
-
-      call indexx(path%lnx,path%sp,path%iperm)
-
-   !  compute arc length
-      allocate(dpl(path%np))
-      dpl(1) = 0d0
-      do i=2,path%np
-         dpl(i) = dpl(i-1) + dbdistance(path%xp(i-1),path%yp(i-1),path%xp(i),path%yp(i), jsferic, jasfer3D, dmiss)
-      end do
-
-      do i=1,path%lnx
-         path%sp(i) = dpl(path%indexp(i))   *      path%wfp(i)  +  &
-                      dpl(path%indexp(i)+1) * (1d0-path%wfp(i))
-      end do
-
-      deallocate(dpl)
+      !  determine permutation array of flowlinks by increasing arc length order
+         do i=1,path%lnx
+            path%sp(i) = dble(path%indexp(i)) + (1d0-path%wfp(i))
+         end do
+      
+         call indexx(path%lnx,path%sp,path%iperm)
+      
+      !  compute arc length
+         allocate(dpl(path%np))
+         dpl(1) = 0d0
+         do i=2,path%np
+            dpl(i) = dpl(i-1) + dbdistance(path%xp(i-1),path%yp(i-1),path%xp(i),path%yp(i), jsferic, jasfer3D, dmiss)
+         end do
+      
+         do i=1,path%lnx
+            path%sp(i) = dpl(path%indexp(i))   *      path%wfp(i)  +  &
+                         dpl(path%indexp(i)+1) * (1d0-path%wfp(i))
+         end do
+      
+         deallocate(dpl)
+      else
+         ! only 1 link
+         call realloc(path%iperm, 1, fill = 1, keepExisting = .false.)
+      end if
    end if
 
 end subroutine crspath_on_flowgeom
