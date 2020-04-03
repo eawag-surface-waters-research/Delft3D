@@ -67,7 +67,8 @@ integer            :: open_datasets_(maxopenfiles) !< Dataset IDs of open NetCDF
 integer            :: nopen_files_ = 0             !< Nr. of NetCDF files currently open.
 
 private :: nerr_, err_firsttime_, err_firstline_, &
-           !prepare_error, check_error, &
+           t_unc_netelem_ids, unc_def_net_elem, unc_write_net_elem, &
+           unc_def_idomain, unc_def_iglobal, &
            open_files_, open_datasets_, nopen_files_
 
 integer, parameter :: UNC_CONV_CFOLD = 1 !< Old CF-only conventions.
@@ -402,6 +403,19 @@ type t_unc_mapids
    !
    !integer :: idx_curtime  = 0  !< Index of current time (typically of latest snapshot being written).
 end type t_unc_mapids
+
+type t_unc_netelem_ids
+   integer :: id_netelemmaxnodedim
+   integer :: id_netelemdim
+   integer :: id_netlinkcontourptsdim
+   integer :: id_netlinkdim
+   integer :: id_netelemnode
+   integer :: id_netelemlink
+   integer :: id_netlinkcontourx
+   integer :: id_netlinkcontoury
+   integer :: id_netlinkxu
+   integer :: id_netlinkyu
+end type t_unc_netelem_ids
 
 type(t_unc_mapids) :: mapids       !< Global descriptor for the (open) map-file
 integer            :: ihisfile = 0 !< Global netcdf ID of the his-file
@@ -9197,16 +9211,16 @@ end subroutine unc_write_map_filepointer
 !> Writes the unstructured net to a netCDF file.
 !! If file exists, it will be overwritten.
 subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, iconventions)
-    character(len=*), intent(in) :: filename
-
+    use unstruc_model, only : md_ident
+    character(len=*), intent(in)  :: filename
     integer, optional, intent(in) :: janetcell  !< write additional network cell information (1) or not (0). Default: 0.
     integer, optional, intent(in) :: janetbnd   !< write additional network boundary information (1) or not (0). Default: 0.
     integer, optional, intent(in) :: jaidomain  !< write subdomain numbers (1) or not (0, default)
     integer, optional, intent(in) :: jaiglobal_s !< write global netcell number (1) or not (0, default)
     integer, optional, intent(in) :: iconventions
+
     type(t_unc_mapids)            :: mapids
     type(t_ug_meta)               :: meta 
-
     integer :: inetfile, ierr, janetcell_loc, janetbnd_loc, jaidomain_loc, jaiglobal_s_loc, iconv
 
     janetcell_loc = 0
@@ -9242,7 +9256,9 @@ subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, 
 
     if (iconv == UNC_CONV_UGRID) then
        mapids%ncid = inetfile
-       ierr = ug_addglobalatts(mapids%ncid, meta) !Add UGRID convention
+       meta = ug_meta_fm
+       meta%modelname = md_ident
+       ierr = ug_addglobalatts(mapids%ncid, meta)
        call unc_write_net_ugrid2(mapids%ncid, mapids%id_tsp, janetcell=janetcell_loc, jaidomain=jaidomain_loc, jaiglobal_s=jaiglobal_s_loc)
     else
        call unc_write_net_filepointer(inetfile, janetcell=janetcell_loc, janetbnd=janetbnd_loc, jaidomain=jaidomain_loc, jaiglobal_s=jaiglobal_s_loc)
@@ -9278,28 +9294,23 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     integer, allocatable :: kn3(:), ibndlink(:)
 
     integer :: ierr
-    integer :: id_netnodedim, id_netlinkdim, id_netlinkptsdim, &   !< Dimensions
+    integer :: id_netnodedim, id_netlinkptsdim, &   !< Dimensions
                id_bndlinkdim, &
                id_encinstdim, id_encptsdim, id_encpartdim, &
-               id_netelemdim, id_netelemmaxnodedim, &
-               id_netelemlinkdim, id_netelemlinkptsdim, id_netlinkcontourptsdim, &
+               id_netelemlinkptsdim, &
                id_netnodex, id_netnodey, id_netnodez, &            !< Node variables
                id_netnodelon, id_netnodelat, &                     !< Mandatory lon/lat coords for net nodes
                id_netlink, id_netlinktype, &                       !< Link variables
-               id_netlinkxu, id_netlinkyu, &
-               id_netlinkcontourx, id_netlinkcontoury, &
                id_bndlink, id_bndlinktype, &                       !< Boundary variables
                id_enc_container, id_encx, id_ency, &               !< Grid enclosure variables
                id_enc_nodecount, id_enc_partnodecount, &
                id_enc_interiorring, &
-               id_netelemnode, id_netelemlink, &
-               id_idomain, id_iglobal_s                            !< Netelem variables   
-    integer, allocatable, dimension(:,:) :: netcellnod, netcelllin
+               id_idomain, id_iglobal_s                            !< Netelem variables
+    type(t_unc_netelem_ids) :: ids_netelem
     integer :: id_mesh2d
     integer :: jaInDefine
-    integer :: k, L, nv, numbnd, maxbnd, numencparts, numencpts, ja, k1, k2, kt, n1, nv1
-    double precision :: xzn,yzn,x3, y3, x4, y4,DIS,XP,YP,rl, xn, yn, t0, t1
-    double precision, allocatable :: xtt(:,:), ytt(:,:), xut(:), yut(:), polc(:)
+    integer :: k, L, nv, numbnd, maxbnd, numencparts, numencpts, ja
+    double precision, allocatable :: polc(:)
     integer, dimension(:), allocatable :: kn1write
     integer, dimension(:), allocatable :: kn2write
     integer :: istart, iend, ipoint, ipoly, numpoints, iorient, iinterior
@@ -9312,7 +9323,6 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     janetbnd_  = 1
     jaidomain_ = 0
     jaiglobal_s_ = 0
-  
 
     if ( present(janetcell) ) then
       janetcell_ = janetcell
@@ -9410,9 +9420,9 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
         
     ! Dimensions
     ierr = nf90_def_dim(inetfile, 'nNetNode',        numk,   id_netnodedim)
-    ierr = nf90_def_dim(inetfile, 'nNetLink',        numl,   id_netlinkdim)
+    ierr = nf90_def_dim(inetfile, 'nNetLink',        numl,   ids_netelem%id_netlinkdim)
     ierr = nf90_def_dim(inetfile, 'nNetLinkPts',     2,      id_netlinkptsdim)
-    ierr = nf90_def_dim(inetfile, 'nNetElem',        nump1d2d,   id_netelemdim)
+    ierr = nf90_def_dim(inetfile, 'nNetElem',        nump1d2d,   ids_netelem%id_netelemdim)
     if ( janetbnd_ /= 0 .and. numbnd > 0) then
        ierr = nf90_def_dim(inetfile, 'nBndLink',        numbnd, id_bndlinkdim)
 
@@ -9448,8 +9458,8 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     end if
 
     if (janetcell_ /= 0 .and. nump1d2d > 0) then
-       ierr = nf90_def_dim(inetfile, 'nNetElemMaxNode', nv,     id_netelemmaxnodedim)
-       ierr = nf90_def_dim(inetfile, 'nNetLinkContourPts', 4,   id_netlinkcontourptsdim) ! Momentum control volume a la Perot: rectangle around xu/yu
+       ierr = nf90_def_dim(inetfile, 'nNetElemMaxNode', nv,     ids_netelem%id_netelemmaxnodedim)
+       ierr = nf90_def_dim(inetfile, 'nNetLinkContourPts', 4,   ids_netelem%id_netlinkcontourptsdim) ! Momentum control volume a la Perot: rectangle around xu/yu
     end if
 
 !    ierr = nf90_def_dim(inetfile, 'nNetElemLink',    numl,   id_netelemlinkdim)
@@ -9485,58 +9495,19 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
 !    ierr = unc_add_gridmapping_att(inetfile, (/ id_netnodex, id_netnodey, id_netnodez /), jsferic)
 
     ! Netlinks
-    ierr = nf90_def_var(inetfile, 'NetLink', nf90_int, (/ id_netlinkptsdim, id_netlinkdim /) , id_netlink)
+    ierr = nf90_def_var(inetfile, 'NetLink', nf90_int, (/ id_netlinkptsdim, ids_netelem%id_netlinkdim /) , id_netlink)
     ierr = nf90_put_att(inetfile, id_netlink, 'standard_name', 'netlink')
     ierr = nf90_put_att(inetfile, id_netlink, 'long_name',     'link between two netnodes')
     ierr = nf90_put_att(inetfile, id_netlink, 'start_index', 1)
 
-    ierr = nf90_def_var(inetfile, 'NetLinkType', nf90_int, id_netlinkdim, id_netlinktype)
+    ierr = nf90_def_var(inetfile, 'NetLinkType', nf90_int, ids_netelem%id_netlinkdim, id_netlinktype)
     ierr = nf90_put_att(inetfile, id_netlinktype, 'long_name',     'type of netlink')
     ierr = nf90_put_att(inetfile, id_netlinktype, 'valid_range',   (/ 0, 4 /))
     ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_values',   (/ 0, 1, 2, 3, 4 /))
     ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_meanings', 'closed_link_between_2D_nodes link_between_1D_nodes link_between_2D_nodes embedded_1D2D_link 1D2D_link')
 
     if (janetcell_ /= 0 .and. nump1d2d > 0) then
-       ierr = nf90_put_att(inetfile, id_mesh2d, 'topology_dimension', 2)
-       ierr = nf90_put_att(inetfile, id_mesh2d, 'face_node_connectivity', 'NetElemNode')
-       ierr = nf90_put_att(inetfile, id_mesh2d, 'face_dimension', 'nNetElem')
-       !
-       ! Netcells
-       ! Netcell-to-netnode mapping    
-       ierr = nf90_def_var(inetfile, 'NetElemNode', nf90_int, (/ id_netelemmaxnodedim, id_netelemdim /) , id_netelemnode)
-       ierr = nf90_put_att(inetfile, id_netelemnode, 'long_name', 'mapping from net cell to net nodes (counterclockwise)')
-       ierr = nf90_put_att(inetfile, id_netelemnode, 'start_index', 1)
-       ierr = nf90_put_att(inetfile, id_netelemnode, '_FillValue', intmiss)
-
-       ierr = nf90_def_var(inetfile, 'NetElemLink', nf90_int, (/ id_netelemmaxnodedim, id_netelemdim /) , id_netelemlink)! netcell()%Lin
-       ierr = nf90_put_att(inetfile, id_netelemlink, 'long_name', 'mapping from net cell to its net links (counterclockwise)')
-       ierr = nf90_put_att(inetfile, id_netelemlink, 'short_name', 'netcell()%LIN')
-       
-       !ierr = nf90_def_var(inetfile, 'ElemCenter_x', nf90_double, (/ id_netelemdim /), id_elemcenx)
-       !ierr = nf90_put_att(inetfile, id_elemcenx, 'long_name', 'x coordinate of cell center')
-       !ierr = nf90_put_att(inetfile, id_elemcenx, 'short_name', 'xz')
-       !
-       !ierr = nf90_def_var(inetfile, 'ElemCenter_y', nf90_double, (/ id_netelemdim /), id_elemceny)
-       !ierr = nf90_put_att(inetfile, id_elemceny, 'long_name', 'y coordinate of cell center')
-       !ierr = nf90_put_att(inetfile, id_elemceny, 'short_name', 'yz')
-    
-       ierr = nf90_def_var(inetfile, 'NetLinkContour_x',     nf90_double, (/ id_netlinkcontourptsdim, id_netlinkdim /) ,   id_netlinkcontourx)
-       ierr = nf90_def_var(inetfile, 'NetLinkContour_y',     nf90_double, (/ id_netlinkcontourptsdim, id_netlinkdim /) ,   id_netlinkcontoury)
-       ierr = unc_addcoordatts(inetfile, id_netlinkcontourx, id_netlinkcontoury, jsferic)
-       ierr = nf90_put_att(inetfile, id_netlinkcontourx, 'long_name'    , 'list of x-contour points of momentum control volume surrounding each net/flow link')
-       ierr = nf90_put_att(inetfile, id_netlinkcontoury, 'long_name'    , 'list of y-contour points of momentum control volume surrounding each net/flow link')
-       ierr = nf90_put_att(inetfile, id_netlinkcontourx, '_FillValue', dmiss)
-       ierr = nf90_put_att(inetfile, id_netlinkcontoury, '_FillValue', dmiss)
-       
-       ierr = nf90_def_var(inetfile, 'NetLink_xu',     nf90_double, (/ id_netlinkdim /) ,   id_netlinkxu)
-       ierr = nf90_def_var(inetfile, 'NetLink_yu',     nf90_double, (/ id_netlinkdim /) ,   id_netlinkyu)
-       ierr = unc_addcoordatts(inetfile, id_netlinkxu, id_netlinkyu, jsferic)
-       ierr = nf90_put_att(inetfile, id_netlinkxu, 'long_name'    , 'x-coordinate of net link center (velocity point)')
-       ierr = nf90_put_att(inetfile, id_netlinkyu, 'long_name'    , 'y-coordinate of net link center (velocity point)')
-
-       ! Add grid_mapping reference to all original coordinate and data variables
-!       ierr = unc_add_gridmapping_att(inetfile, &
-!          (/ id_netlinkxu, id_netlinkyu, id_netlinkcontourx, id_netlinkcontoury /), jsferic)
+       ierr = unc_def_net_elem(inetfile, ids_netelem, id_mesh2d)
     else
        ierr = nf90_put_att(inetfile, id_mesh2d, 'topology_dimension', 1)
     end if
@@ -9548,11 +9519,11 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     end if
 
    if (jaidomain_ /= 0) then
-       ierr = unc_def_idomain(inetfile, id_idomain, id_netelemdim)
+       ierr = unc_def_idomain(inetfile, id_idomain, ids_netelem%id_netelemdim)
    end if
 
    if (jaiglobal_s_ /= 0) then
-       ierr = unc_def_iglobal(inetfile, id_iglobal_s, id_netelemdim)
+       ierr = unc_def_iglobal(inetfile, id_iglobal_s, ids_netelem%id_netelemdim)
     endif
 
     ierr = nf90_enddef(inetfile)
@@ -9643,108 +9614,7 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     end if
     
     if ( janetcell_ /= 0 .and. nump1d2d > 0) then
-       ! Write net cells 
-        ierr = nf90_inquire_dimension(inetfile, id_netelemmaxnodedim, len = nv)
-       allocate(netcellnod(nv, nump1d2d))
-       allocate(netcelllin(nv, nump1d2d))
-       netcellnod = intmiss
-       netcelllin = intmiss
-       do k = 1, nump1d2d
-          nv1 = netcell(k)%n
-          netcellnod(1:nv1,k) = netcell(k)%nod
-          netcelllin(1:nv1,k) = netcell(k)%lin
-       enddo
-       ierr = nf90_put_var(inetfile, id_netelemnode, netcellnod)
-       call check_error(ierr, 'Write netcell elem.')
-       ierr = nf90_put_var(inetfile, id_netelemlink, netcelllin)
-       call check_error(ierr, 'Write netcell links')
-       deallocate(netcellnod)
-       deallocate(netcelllin)
-  
-     call readyy('Writing net data',.65d0)
-!       call klok(t0)
-       allocate(xtt(4, numl), ytt(4, numl), xut(numl), yut(numl))
-       xtt = dmiss
-       ytt = dmiss
-       do L=1,numl1d
-          xut(L) = .5d0*(xk(kn(1,L)) + xk(kn(2,L)))
-          yut(L) = .5d0*(yk(kn(1,L)) + yk(kn(2,L)))
-       end do
-
-       do L=numl1d+1,numl
-          xut(L) = .5d0*(xk(kn(1,L)) + xk(kn(2,L)))
-          yut(L) = .5d0*(yk(kn(1,L)) + yk(kn(2,L)))
-          xtt(:,L) = 0d0
-          ytt(:,L) = 0d0
-          if (LNN(L) >= 1) then
-             K1 = kn(1,L)
-             k2 = kn(2,L)
-
-             ! 'left' half
-             n1 = LNE(1,L)
-             if (n1 < 0) n1 = -n1
-             x3 = xk(k1)
-             y3 = yk(k1)
-             x4 = xk(k2)
-             y4 = yk(k2)
-             xzn = xz(n1)
-             yzn = yz(n1)
-
-             ! Normal distance from circumcenter to net link:
-             call dLINEDIS2(xzn,yzn,x3, y3, x4, y4,JA,DIS,XP,YP,rl)
-
-             ! Note: we're only in net-mode, not yet in flow-mode, so we can NOT assume that net node 3->4 have a 'rightward' flow node orientation 1->2
-             ! Instead, compute outward normal, and swap points 3 and 4 if necessary, such that we locally achieve the familiar k3->k4 + n1->n2 orientation.
-             ! Outward normal vector of net link (cell 1 considered 'inward'):
-             call normaloutchk(x3, y3, x4, y4, xzw(n1), yzw(n1), xn, yn, ja, jsferic, jasfer3D, dmiss, dxymis)
-             if (ja == 1) then ! normal was flipped, so swap net point 3 and 4 locally, to construct counterclockwise cell hereafter.
-                kt = k1
-                k1 = k2
-                k2 = kt
-                xp = x3
-                yp = y3
-                x3 = x4
-                y3 = y4
-                x4 = xp
-                y4 = yp
-             end if
-
-             xtt(1,L) = x4 - DIS*xn
-             ytt(1,L) = y4 - DIS*yn
-             xtt(2,L) = x3 - DIS*xn
-             ytt(2,L) = y3 - DIS*yn
-             
-             if (LNN(L) == 2) then
-                ! second half
-                n1 = LNE(2,L)
-                if (n1 < 0) n1 = -n1
-                xzn = xz(n1)
-                yzn = yz(n1)
-                call dLINEDIS2(xzn,yzn,x3, y3, x4, y4,JA,DIS,XP,YP,rl)
-                xtt(3, L) = x3 + DIS*xn
-                ytt(3, L) = y3 + DIS*yn
-                xtt(4, L) = x4 + DIS*xn
-                ytt(4, L) = y4 + DIS*yn
-             else
-                ! closed net boundary, no second half cell, just close off with netlink
-                xtt(3, L) = x3
-                ytt(3, L) = y3
-                xtt(4, L) = x4
-                ytt(4, L) = y4
-             end if
-          else
-             ! No surrounding cells: leave missing fill values in file.
-             xtt(:,L) = dmiss
-             ytt(:,L) = dmiss
-          end if
-       enddo
-       ierr = nf90_put_var(inetfile, id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl /) )
-       ierr = nf90_put_var(inetfile, id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl /) )
-       ierr = nf90_put_var(inetfile, id_netlinkxu, xut)
-       ierr = nf90_put_var(inetfile, id_netlinkyu, yut)
-!      call klok(t1)
-!      write(msgbuf,"('writing netlinkcontours at once, elapsed time: ', G15.5, 's.')") t1-t0
-!      call msg_flush()
+       ierr = unc_write_net_elem(inetfile, ids_netelem)
     end if
 
     ! Leave the dataset in the same mode as we got it.
@@ -9754,13 +9624,193 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
 
     if (allocated(ibndlink)) deallocate(ibndlink)
     if (allocated(kn3))      deallocate(kn3)
-    if (allocated(xtt))      deallocate(xtt)
-    if (allocated(ytt))      deallocate(ytt)
-    if (allocated(xut))      deallocate(xut)
-    if (allocated(yut))      deallocate(yut)
 
     call readyy('Writing net data',-1d0)
 end subroutine unc_write_net_filepointer
+
+!> helper function to define the net elements in an open NetCDF file
+function unc_def_net_elem(inetfile, ids, id_mesh2d) result (ierr)
+   use m_missing, only : dmiss, intmiss
+   use m_sferic,  only : jsferic
+   integer,                 intent(in   )           :: inetfile
+   type(t_unc_netelem_ids), intent(inout)           :: ids
+   integer,                 intent(in   ), optional :: id_mesh2d
+   integer                                          :: ierr
+
+   ierr = 0
+   if (present(id_mesh2d)) then
+      ierr = nf90_put_att(inetfile, id_mesh2d, 'topology_dimension', 2)
+      ierr = nf90_put_att(inetfile, id_mesh2d, 'face_node_connectivity', 'NetElemNode')
+      ierr = nf90_put_att(inetfile, id_mesh2d, 'face_dimension', 'nNetElem')
+   end if
+   !
+   ! Netcells
+   ! Netcell-to-netnode mapping
+   ierr = nf90_def_var(inetfile, 'NetElemNode', nf90_int, (/ ids%id_netelemmaxnodedim, ids%id_netelemdim /) , ids%id_netelemnode)
+   if (ierr /= 0) goto 999
+   ierr = nf90_put_att(inetfile, ids%id_netelemnode, 'long_name', 'mapping from net cell to net nodes (counterclockwise)')
+   ierr = nf90_put_att(inetfile, ids%id_netelemnode, 'start_index', 1)
+   ierr = nf90_put_att(inetfile, ids%id_netelemnode, '_FillValue', intmiss)
+
+   ierr = nf90_def_var(inetfile, 'NetElemLink', nf90_int, (/ ids%id_netelemmaxnodedim, ids%id_netelemdim /) , ids%id_netelemlink)
+   if (ierr /= 0) goto 999
+   ierr = nf90_put_att(inetfile, ids%id_netelemlink, 'long_name', 'mapping from net cell to its net links (counterclockwise)')
+   ierr = nf90_put_att(inetfile, ids%id_netelemlink, 'short_name', 'netcell()%LIN')
+
+   ierr = nf90_def_var(inetfile, 'NetLinkContour_x', nf90_double, (/ ids%id_netlinkcontourptsdim, ids%id_netlinkdim /) , ids%id_netlinkcontourx)
+   if (ierr /= 0) goto 999
+   ierr = nf90_def_var(inetfile, 'NetLinkContour_y', nf90_double, (/ ids%id_netlinkcontourptsdim, ids%id_netlinkdim /) , ids%id_netlinkcontoury)
+   if (ierr /= 0) goto 999
+   ierr = unc_addcoordatts(inetfile, ids%id_netlinkcontourx, ids%id_netlinkcontoury, jsferic)
+   ierr = nf90_put_att(inetfile, ids%id_netlinkcontourx, 'long_name', 'list of x-contour points of momentum control volume surrounding each net/flow link')
+   ierr = nf90_put_att(inetfile, ids%id_netlinkcontoury, 'long_name', 'list of y-contour points of momentum control volume surrounding each net/flow link')
+   ierr = nf90_put_att(inetfile, ids%id_netlinkcontourx, '_FillValue', dmiss)
+   ierr = nf90_put_att(inetfile, ids%id_netlinkcontoury, '_FillValue', dmiss)
+
+   ierr = nf90_def_var(inetfile, 'NetLink_xu',     nf90_double, (/ ids%id_netlinkdim /) , ids%id_netlinkxu)
+   if (ierr /= 0) goto 999
+   ierr = nf90_def_var(inetfile, 'NetLink_yu',     nf90_double, (/ ids%id_netlinkdim /) , ids%id_netlinkyu)
+   if (ierr /= 0) goto 999
+   ierr = unc_addcoordatts(inetfile, ids%id_netlinkxu, ids%id_netlinkyu, jsferic)
+   ierr = nf90_put_att(inetfile, ids%id_netlinkxu, 'long_name', 'x-coordinate of net link center (velocity point)')
+   ierr = nf90_put_att(inetfile, ids%id_netlinkyu, 'long_name', 'y-coordinate of net link center (velocity point)')
+
+   return
+
+999 continue ! label for NetCDF errors
+   call check_error(ierr, 'unc_def_net_elem')
+
+end function unc_def_net_elem
+
+!> helper function to write the net elements to an already open NetCDF file
+function unc_write_net_elem(inetfile, ids) result(ierr)
+   use network_data
+   use m_missing,       only : dmiss, intmiss, dxymis
+   use m_sferic,        only : jsferic, jasfer3D
+   use m_flowgeom,      only : xz, yz
+   use geometry_module, only : normaloutchk
+
+   integer,                 intent(in) :: inetfile
+   type(t_unc_netelem_ids), intent(in) :: ids
+   integer                             :: ierr
+
+   integer,       allocatable :: netcellnod(:,:), netcelllin(:,:)
+   real(kind=hp), allocatable :: xtt(:,:), ytt(:,:), xut(:), yut(:)
+   integer                    :: nv, k, l, k1, k2, kt, n1, nv1, ja
+   real(kind=hp)              :: xzn,yzn,x3, y3, x4, y4,DIS,XP,YP,rl, xn, yn, t0, t1
+   real(kind=hp), parameter    :: half = 0.5_hp
+
+   ! Write net cells
+   ierr = nf90_inquire_dimension(inetfile, ids%id_netelemmaxnodedim, len = nv)
+   if (ierr /= 0) goto 999
+   allocate(netcellnod(nv, nump1d2d), netcelllin(nv, nump1d2d), stat=ierr)
+   if (ierr /= 0) goto 888
+   netcellnod = intmiss
+   netcelllin = intmiss
+   do k = 1, nump1d2d
+      nv1 = netcell(k)%n
+      netcellnod(1:nv1,k) = netcell(k)%nod
+      netcelllin(1:nv1,k) = netcell(k)%lin
+   enddo
+   ierr = nf90_put_var(inetfile, ids%id_netelemnode, netcellnod)
+   if (ierr == 0) ierr = nf90_put_var(inetfile, ids%id_netelemlink, netcelllin)
+   if (ierr /= 0) goto 999
+   deallocate(netcellnod, netcelllin)
+
+   call readyy('Writing net data',.65d0)
+   allocate(xtt(4, numl), ytt(4, numl), xut(numl), yut(numl), stat=ierr)
+   if (ierr /= 0) goto 888
+   xtt = dmiss
+   ytt = dmiss
+   do L=1,numl1d
+      xut(L) = half *(xk(kn(1,L)) + xk(kn(2,L)))
+      yut(L) = half *(yk(kn(1,L)) + yk(kn(2,L)))
+   end do
+
+   do L=numl1d+1,numl
+      xut(L) = half *(xk(kn(1,L)) + xk(kn(2,L)))
+      yut(L) = half *(yk(kn(1,L)) + yk(kn(2,L)))
+      xtt(:,L) = 0d0
+      ytt(:,L) = 0d0
+      if (lnn(L) >= 1) then
+         K1 = kn(1,L)
+         k2 = kn(2,L)
+
+         ! 'left' half
+         n1 = lne(1,L)
+         if (n1 < 0) n1 = -n1
+         x3 = xk(k1)
+         y3 = yk(k1)
+         x4 = xk(k2)
+         y4 = yk(k2)
+         xzn = xz(n1)
+         yzn = yz(n1)
+
+         ! Normal distance from circumcenter to net link:
+         call dlinedis2(xzn, yzn, x3, y3, x4, y4, ja, dis, xp, yp, rl)
+
+         ! Note: we're only in net-mode, not yet in flow-mode, so we can NOT assume that net node 3->4 have a 'rightward' flow node orientation 1->2
+         ! Instead, compute outward normal, and swap points 3 and 4 if necessary, such that we locally achieve the familiar k3->k4 + n1->n2 orientation.
+         ! Outward normal vector of net link (cell 1 considered 'inward'):
+         call normaloutchk(x3, y3, x4, y4, xzw(n1), yzw(n1), xn, yn, ja, jsferic, jasfer3D, dmiss, dxymis)
+         if (ja == 1) then ! normal was flipped, so swap net point 3 and 4 locally, to construct counterclockwise cell hereafter.
+            kt = k1
+            k1 = k2
+            k2 = kt
+            xp = x3
+            yp = y3
+            x3 = x4
+            y3 = y4
+            x4 = xp
+            y4 = yp
+         end if
+
+         xtt(1,L) = x4 - dis*xn
+         ytt(1,L) = y4 - dis*yn
+         xtt(2,L) = x3 - dis*xn
+         ytt(2,L) = y3 - dis*yn
+         
+         if (lnn(l) == 2) then
+            ! second half
+            n1 = lne(2,L)
+            if (n1 < 0) n1 = -n1
+            xzn = xz(n1)
+            yzn = yz(n1)
+            call dlinedis2(xzn, yzn, x3, y3, x4, y4, ja, dis, xp, yp, rl)
+            xtt(3, L) = x3 + dis*xn
+            ytt(3, L) = y3 + dis*yn
+            xtt(4, L) = x4 + dis*xn
+            ytt(4, L) = y4 + dis*yn
+         else
+            ! closed net boundary, no second half cell, just close off with netlink
+            xtt(3, L) = x3
+            ytt(3, L) = y3
+            xtt(4, L) = x4
+            ytt(4, L) = y4
+         end if
+      else
+         ! No surrounding cells: leave missing fill values in file.
+         xtt(:,L) = dmiss
+         ytt(:,L) = dmiss
+      end if
+   enddo
+   ierr = nf90_put_var(inetfile, ids%id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl /) )
+   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl /) )
+   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkxu, xut)
+   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkyu, yut)
+   if (ierr /= 0) goto 999
+
+   deallocate(xtt, ytt, xut, yut)
+
+   return
+
+888 continue ! label for allocation errors
+   call mess(LEVEL_ERROR, 'Allocation error in unc_write_net_elem')
+   return
+
+999 continue ! label for NetCDF errors
+   call check_error(ierr, 'unc_write_net_elem')
+end function unc_write_net_elem
 
 !> helper function to define idomain
 function unc_def_idomain(inetfile, id_idomain, id_netelemdim) result(ierr)
@@ -9819,7 +9869,9 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
    integer, optional, intent(in)    :: jaiglobal_s !< write global netcell numbers (1) or not (0, default)
 
    integer                          :: janetcell_, jaidomain_, jaiglobal_s_
-   integer                          :: id_idomain, id_iglobal_s, id_netelemdim
+   integer                          :: id_idomain, id_iglobal_s !, id_netelemdim
+   integer                          :: id_mesh2d, id_netnodedim ! id_netlinkdim, , 
+   type(t_unc_netelem_ids)          :: ids_netelem
 
    integer :: nn
    integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:), contacts(:,:) 
@@ -10234,16 +10286,25 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
       deallocate(edge_type)
    end if
 
-   if (jaidomain_ /= 0 .or. jaiglobal_s_ /= 0) then
-      ierr = nf90_def_dim(ncid, 'nNetElem', nump1d2d,  id_netelemdim)
+   ! Dimensions
+   ierr = nf90_def_dim(ncid, 'nNetNode', numk, id_netnodedim)
+   ierr = nf90_def_dim(ncid, 'nNetLink', numl, ids_netelem%id_netlinkdim)
+   ierr = nf90_def_dim(ncid, 'nNetElem', nump1d2d,   ids_netelem%id_netelemdim)
+
+   if (janetcell_ /= 0 .and. nump1d2d > 0) then
+      ierr = nf90_def_dim(ncid, 'nNetElemMaxNode', nv,     ids_netelem%id_netelemmaxnodedim)
+      ierr = nf90_def_dim(ncid, 'nNetLinkContourPts', 4,   ids_netelem%id_netlinkcontourptsdim) ! Momentum control volume a la Perot: rectangle around xu/yu
+      ierr = unc_def_net_elem(ncid, ids_netelem)
+   else if (jaidomain_ /= 0 .or. jaiglobal_s_ /= 0) then
+      ierr = nf90_def_dim(ncid, 'nNetElem', nump1d2d, ids_netelem%id_netelemdim)
    end if
 
    if (jaidomain_ /= 0) then
-      ierr = unc_def_idomain(ncid, id_idomain, id_netelemdim)
+      ierr = unc_def_idomain(ncid, id_idomain, ids_netelem%id_netelemdim)
    end if
 
    if (jaiglobal_s_ /= 0) then
-      ierr = unc_def_iglobal(ncid, id_iglobal_s, id_netelemdim)
+      ierr = unc_def_iglobal(ncid, id_iglobal_s, ids_netelem%id_netelemdim)
    endif
 
    ierr = nf90_enddef(ncid)
@@ -10344,6 +10405,10 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
        enddo
        ierr = nf90_put_var(ncid, id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl2d /) )
        ierr = nf90_put_var(ncid, id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl2d /) )
+    end if
+
+    if ( janetcell_ /= 0 .and. nump1d2d > 0) then
+       ierr = unc_write_net_elem(ncid, ids_netelem)
     end if
 
    if ( jaidomain_ /= 0) then
