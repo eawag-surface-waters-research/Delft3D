@@ -211,7 +211,13 @@ module bloom_data_vtrans
    logical            :: active_vtrans = .false.    ! switch indicating if VTRANS functionality is active
    logical            :: reset_vtrans  = .true.     ! switch indicating if new distribution step is needed
    logical            :: init_vtrans   = .false.    ! switch indicating if VTRANS is initialised
-  
+   logical            :: fm_vtrans = .false.        ! switch indicating if VTRANS is running unstructured within Flexible Mesh
+
+   integer, allocatable :: fmlayer(:)               ! layer number of each segment
+   integer, allocatable :: fmktop(:)                ! top segment number of water column for this segment
+   integer, allocatable :: fmkbot(:)                ! bottom segment number of water column for this segment
+   integer              :: nolayfm = 0              ! number of layers in FM
+   
    real, allocatable  :: concv(:,:)                 ! calculated concentration distribution per layer
    real, allocatable  :: timev(:,:)                 ! accumulated time per layer
    real, allocatable  :: fracv(:,:)                 ! fraction of the time per layer, updated every accumulating step

@@ -35,33 +35,34 @@
 ! NOLAY   I*4 1 I     number of layers
 !
 
-      USE      bloom_data_vtrans
+      use      bloom_data_vtrans
 
-      IMPLICIT NONE
+      implicit none
 
-      REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
-     +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+      real     pmsa  ( * ) , fl    (*)
+      integer  ipoint( * ) , increm(*) , noseg , noflux,
+     +         iexpnt(4,*) , iknmrk(*) , noq1, noq2, noq3, noq4
 !
-!     Local declarations
+!     local declarations
 !
-      INTEGER  IERR_ALLOC      , LUNREP
-      INTEGER  IP1   , IP2   , IP3   , IP4   , IP5   ,
-     +         IP6   , IP7   , IP8   , IP9   , IP10  ,
-     +         IP11  , IP12
-      INTEGER  IN1   , IN2   , IN3   , IN4   , IN5   ,
-     +         IN6   , IN7   , IN8   , IN9   , IN10  ,
-     +         IN11  , IN12
-      INTEGER  IDT   , NOLAY , NOSEGL, NOQ   , NOQ12 ,
-     +         ILAY  , ISEGL , ISEG  , IFROM , ITO   ,
-     +         NOSUB , ISUB  , IQ    , IQTEST, IKMRK1,
-     +         NOSEGW, IKMRK2, ITIME
-      REAL     DISP  , AREA  , LENFR , LENTO , AL    ,
-     +         E     , DIAG  , CODIAG, RHS   , VOLUME,
-     +         DELT  , PERIOD
-      LOGICAL     LFOUND
-      CHARACTER   CDUMMY
-      REAL        RDUMMY
+      integer  ierr_alloc      , lunrep
+      integer  ip1   , ip2   , ip3   , ip4   , ip5   ,
+     +         ip6   , ip7   , ip8   , ip9   , ip10  ,
+     +         ip11  , ip12  , ip13  , ip14  , ip15
+      integer  in1   , in2   , in3   , in4   , in5   ,
+     +         in6   , in7   , in8   , in9   , in10  ,
+     +         in11  , in12  , in13  , in14  , in15
+      integer  idt   , nolay , nosegl, noq   , noq12 ,
+     +         ilay  , isegl , iseg  , ifrom , ito   ,
+     +         nosub , isub  , iq    , iqtest, ikmrk1,
+     +         nosegw, ikmrk2, itime
+      real     disp  , area  , lenfr , lento , al    ,
+     +         e     , diag  , codiag, rhs   , volume,
+     +         delt  , period
+
+      logical                  :: lfound
+      character                :: cdummy
+      real                     :: rdummy
       logical                  :: l_initial
       logical, save            :: l_restart
       character(len=256)       :: file_initial
@@ -73,66 +74,91 @@
       integer                  :: ierr2
       logical                  :: dhltim
 !
-      IP1  = IPOINT( 1)
-      IP2  = IPOINT( 2)
-      IP3  = IPOINT( 3)
-      IP5  = IPOINT( 5)
-      IP11 = IPOINT(11)
+      ip1  = ipoint( 1)
+      ip2  = ipoint( 2)
+      ip3  = ipoint( 3)
+      ip5  = ipoint( 5)
+      ip6  = ipoint( 6)
+      ip7  = ipoint( 7)
+      ip8  = ipoint( 8)
+      ip14 = ipoint(14)
 !
-      IDT    = NINT(PMSA(IP1))
-      DELT   =      PMSA(IP2)
-      PERIOD =      PMSA(IP3)/24.
-      ITIME  = NINT(PMSA(IP5))
+      idt    = nint(pmsa(ip1))
+      delt   =      pmsa(ip2)
+      period =      pmsa(ip3)/24.
+      itime  = nint(pmsa(ip5))
 
-      CALL DHNOSEG(NOSEGW)
-      CALL DHNOLAY(NOLAY)
-!
+      if (.not.fm_vtrans) then
+         call dhnoseg(nosegw)
+         call dhnolay(nolay)
+      else
+         nolay = nolayfm
+         nosegw = noseg
+      endif
+
 !     initialise and allocate memory in module bloom_data_vtrans
-!
-      IF ( .NOT. INIT_VTRANS ) THEN
-         INIT_VTRANS = .TRUE.
-         CALL GETMLU(LUNREP)
-         IF ( NOQ3 .GT. 0 ) THEN
-            IF (NOLAY.NE.0) THEN
-               NOSEGL = NOSEGW/NOLAY
-            ELSE
-               NOSEGW = -1
-            ENDIF
-            ACTIVE_VTRANS=.TRUE.
-            PMSA(IP11) = 1.0
-            IF ( NOSEGL*NOLAY .NE. NOSEGW ) THEN
-               WRITE(LUNREP,*) ' WARNING unstructured 3D application'
-               WRITE(LUNREP,*) ' Vertical distribution routine VTRANS not possible'
-               NOLAY = 1
-               ACTIVE_VTRANS=.FALSE.
-               PMSA(IP11) = 0.0
-            ENDIF
-         ELSE
-            WRITE(LUNREP,*) ' WARNING 2D application'
-            WRITE(LUNREP,*) ' Vertical distribution routine VTRANS not possible'
-            NOLAY = 1
-            ACTIVE_VTRANS=.FALSE.
-            PMSA(IP11) = 0.0
-         ENDIF
-         IF ( ACTIVE_VTRANS ) THEN
-            NOLAYLOCAL = NOLAY
-            NOSEGLOCAL = NOSEG
-            ALLOCATE(CONCV(NOLAY,NOSEG),
-     +               TIMEV(NOLAY,NOSEG),
-     +               FRACV(NOLAY,NOSEG),
-     +               DERVV(NOLAY,NOSEG),
-     +               STAT=IERR_ALLOC)
-            IF ( IERR_ALLOC .NE. 0 ) THEN
-               WRITE ( LUNREP , 1000 ) IERR_ALLOC
-               WRITE ( LUNREP , 1001 ) NOSEG
-               WRITE ( LUNREP , 1002 ) NOLAY
-               CALL SRSTOP(1)
-            ENDIF
+      if ( .not. init_vtrans ) then
+         init_vtrans = .true.
+         call getmlu(lunrep)
+         if ( noq3 .gt. 0 ) then
+            if (nolay.ne.0) then
+               nosegl = nosegw/nolay
+            else
+               nosegw = -1
+            endif
+            active_vtrans=.true.
+            pmsa(ip14) = 1.0
+            if (fm_vtrans) then
+               allocate(fmlayer(noseg), fmktop(noseg), fmkbot(noseg),stat=ierr_alloc)
+               if ( ierr_alloc .ne. 0 ) then
+                  write ( lunrep , 1000 ) ierr_alloc
+                  write ( lunrep , 1001 ) noseg
+               endif
+               do iseg = 1 , noseg
+                  fmlayer(iseg) = pmsa(ip6)
+                  fmktop(iseg)  = pmsa(ip7)
+                  fmkbot(iseg)  = pmsa(ip8)
+                  ip6  = ip6 + increm(6)
+                  ip7  = ip7 + increm(7)
+                  ip8  = ip8 + increm(8)
+               enddo
+               nolayfm = maxval(fmlayer)
+               nolay = nolayfm
+               nosegw = noseg
+            else if(nosegl*nolay .ne. nosegw ) then
+               write(lunrep,*) ' WARNING unstructured 3D application'
+               write(lunrep,*) ' Vertical distribution routine VTRANS not possible'
+               nolay = 1
+               active_vtrans=.false.
+               pmsa(ip14) = 0.0
+            endif
+         else
+            write(lunrep,*) ' WARNING 2D application'
+            write(lunrep,*) ' Vertical distribution routine VTRANS not possible'
+            nolay = 1
+            active_vtrans=.false.
+            pmsa(ip14) = 0.0
+         endif
+         if ( active_vtrans ) then
+            nolaylocal = nolay
+            noseglocal = noseg
+            allocate(concv(nolay,noseg),timev(nolay,noseg),fracv(nolay,noseg),dervv(nolay,noseg),stat=ierr_alloc)
+            if ( ierr_alloc .ne. 0 ) then
+               write ( lunrep , 1000 ) ierr_alloc
+               write ( lunrep , 1001 ) noseg
+               write ( lunrep , 1002 ) nolay
+               call srstop(1)
+            endif
 
             ! read initial file?
 
-            call getcom('-vtrans_initial', 3 , l_initial, idummy, rdummy, file_initial, ierr2)
-            call getcom('-vtrans_restart', 3 , l_restart, idummy, rdummy, file_restart, ierr2)
+            if(.not.fm_vtrans) then
+               call getcom('-vtrans_initial', 3 , l_initial, idummy, rdummy, file_initial, ierr2)
+               call getcom('-vtrans_restart', 3 , l_restart, idummy, rdummy, file_restart, ierr2)
+            else
+               l_initial = .false.
+               l_restart = .false.
+            endif
             if ( l_initial ) then
                write(lunrep,*) 'vtrans using initial condition from file:',trim(file_initial)
                call dhnlun(200,ilun)
@@ -147,30 +173,39 @@
 
                ! initialise concentration level 1.0 in the specific layer, 0.0 rest layers, init timev 0.0
 
-               CONCV=0.0
-               TIMEV=0.0
-               FRACV=0.0
-               TIMTOT = 0.0
-               DO ILAY = 1 , NOLAY
-                  ISEGL = (ILAY-1)*NOSEGL+1
-                  CONCV(ILAY,ISEGL:ISEGL+NOSEGL-1)=1.0
-               ENDDO
+               concv=0.0
+               timev=0.0
+               fracv=0.0
+               timtot = 0.0
+               if(.not.fm_vtrans) then
+                  do ilay = 1 , nolay
+                     isegl = (ilay-1)*nosegl+1
+                     concv(ilay,isegl:isegl+nosegl-1)=1.0
+                  enddo
+               else
+                  do iseg = 1 , noseg
+                     ilay = fmlayer(iseg)
+                     if(ilay.gt.0) then
+                        concv(ilay,iseg)=1.0
+                     endif
+                  enddo
+               endif
             endif
             if ( l_restart ) then
                write(lunrep,*) 'vtrans will write restart condition to file:',trim(file_restart)
             endif
-         ENDIF
+         endif
       else
          l_initial = .false.
-      ENDIF
+      endif
 !
-      IF ( .NOT. ACTIVE_VTRANS ) RETURN
+      if ( .not. active_vtrans ) return
 !
-      NOLAY  = NOLAYLOCAL
-      NOSEGL = NOSEGW/NOLAY
-      NOSUB  = NOLAY
-      NOQ    = NOQ1 + NOQ2 + NOQ3
-      NOQ12  = NOQ1 + NOQ2
+      nolay  = nolaylocal
+      nosegl = nosegw/nolay
+      nosub  = nolay
+      noq    = noq1 + noq2 + noq3
+      noq12  = noq1 + noq2
 
       ! not the first time if initialised to prevent double step
 
@@ -178,83 +213,83 @@
 !
 !        make masses , volumes on diagonal + test for active exchange for z model
 !
-         IN4  = INCREM(4)
-         IP4  = IPOINT(4)
-         DO ISEG = 1 , NOSEGW
-               VOLUME = PMSA(IP4)
-               DO ILAY = 1 , NOLAY
-                  CONCV(ILAY,ISEG) = CONCV(ILAY,ISEG) * VOLUME
-                  DERVV(ILAY,ISEG) = VOLUME
-               ENDDO
-            IP4 = IP4 + IN4
-         ENDDO
+         in4  = increm(4)
+         ip4  = ipoint(4)
+         do iseg = 1 , nosegw
+            volume = pmsa(ip4)
+            do ilay = 1 , nolay
+               concv(ilay,iseg) = concv(ilay,iseg) * volume
+               dervv(ilay,iseg) = volume
+            enddo
+            ip4 = ip4 + in4
+         enddo
 !
 !        do a transport step in the vertical, dispersion only, double sweep see also DLWQD1
 !
-         IN6  = INCREM(6)
-         IN7  = INCREM(7)
-         IN8  = INCREM(8)
-         IN9  = INCREM(9)
-         IN10 = INCREM(10)
-         IP6  = IPOINT(6) + NOQ12*IN6
-         IP7  = IPOINT(7) + NOQ12*IN7
-         IP8  = IPOINT(8) + NOQ12*IN8
-         IP9  = IPOINT(9) + NOQ12*IN9
-         IP10 = IPOINT(10)+ NOQ12*IN10
-         DO IQ = NOQ12+1,NOQ
-            IFROM = IEXPNT(1,IQ)
-            ITO   = IEXPNT(2,IQ)
-            IF ( IFROM .GT. 0 .AND. ITO .GT. 0 ) THEN
-               CALL DHKMRK(1,IKNMRK(ITO),IKMRK1)
-               IF (IKMRK1.EQ.1) THEN
-                  DISP  = PMSA(IP6) + PMSA(IP10)
-               ELSE
-                  DISP  = 0.0
-               ENDIF
-               AREA  = PMSA(IP7)
-               LENFR = PMSA(IP8)
-               LENTO = PMSA(IP9)
+         in9  = increm(9)
+         in10 = increm(10)
+         in11 = increm(11)
+         in12 = increm(12)
+         in13 = increm(13)
+         ip9  = ipoint(9) + noq12*in9 
+         ip10 = ipoint(10)+ noq12*in10
+         ip11 = ipoint(11)+ noq12*in11
+         ip12 = ipoint(12)+ noq12*in12
+         ip13 = ipoint(13)+ noq12*in13
+         do iq = noq12+1,noq
+            ifrom = iexpnt(1,iq)
+            ito   = iexpnt(2,iq)
+            if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
+               call dhkmrk(1,iknmrk(ito),ikmrk1)
+               if (ikmrk1.eq.1) then
+                  disp  = pmsa(ip9) + pmsa(ip13)
+               else
+                  disp  = 0.0
+               endif
+               area  = pmsa(ip10)
+               lenfr = pmsa(ip11)
+               lento = pmsa(ip12)
 !
-               AL = MAX( TINY(1.0), LENFR + LENTO )
-               E  = IDT*DISP*AREA/AL
-               DO ISUB=1,NOSUB
+               al = max( tiny(1.0), lenfr + lento )
+               e  = idt*disp*area/al
+               do isub=1,nosub
 !
 !                 row of the 'from' segment
 !
-                  DIAG              = DERVV(ISUB,IFROM) + E
-                  CODIAG            = -E / DIAG
-                  RHS               = CONCV(ISUB,IFROM) / DIAG
-                  DERVV(ISUB,IFROM) = CODIAG
-                  CONCV(ISUB,IFROM) = RHS
+                  diag              = dervv(isub,ifrom) + e
+                  codiag            = -e / diag
+                  rhs               = concv(isub,ifrom) / diag
+                  dervv(isub,ifrom) = codiag
+                  concv(isub,ifrom) = rhs
 !                 row of the 'to  ' segment
-                  DERVV(ISUB,ITO)   = DERVV(ISUB,ITO) + (E + E*CODIAG)
-                  CONCV(ISUB,ITO)   = CONCV(ISUB,ITO) + E*RHS
-               ENDDO
-            ENDIF
-            IP6  = IP6  + IN6
-            IP7  = IP7  + IN7
-            IP8  = IP8  + IN8
-            IP9  = IP9  + IN9
-            IP10 = IP10 + IN10
-         ENDDO
+                  dervv(isub,ito)   = dervv(isub,ito) + (e + e*codiag)
+                  concv(isub,ito)   = concv(isub,ito) + e*rhs
+               enddo
+            endif
+            ip9  = ip9  + in9 
+            ip10 = ip10 + in10
+            ip11 = ip11 + in11
+            ip12 = ip12 + in12
+            ip13 = ip13 + in13
+         enddo
 !
 !            Loop over exchanges, single sweep backward
 !
-         DO IQ = NOQ , NOQ12+1 , -1
-            IFROM = IEXPNT(1,IQ)
-            ITO   = IEXPNT(2,IQ)
-            IF ( IFROM .GT. 0 .AND. ITO .GT. 0 ) THEN
-               DO ISUB=1,NOSUB
-                  CODIAG            = DERVV(ISUB,IFROM)
-                  DIAG              = DERVV(ISUB,ITO)
-                  RHS               = CONCV(ISUB,ITO)/DIAG
-                  CONCV(ISUB,IFROM) = CONCV(ISUB,IFROM) - CODIAG*RHS
-                  CONCV(ISUB,ITO)   = RHS
-                  DERVV(ISUB,IFROM) = 1.0
-                  DERVV(ISUB,ITO)   = 1.0
-               ENDDO
-            ENDIF
-         ENDDO
+         do iq = noq , noq12+1 , -1
+            ifrom = iexpnt(1,iq)
+            ito   = iexpnt(2,iq)
+            if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
+               do isub=1,nosub
+                  codiag            = dervv(isub,ifrom)
+                  diag              = dervv(isub,ito)
+                  rhs               = concv(isub,ito)/diag
+                  concv(isub,ifrom) = concv(isub,ifrom) - codiag*rhs
+                  concv(isub,ito)   = rhs
+                  dervv(isub,ifrom) = 1.0
+                  dervv(isub,ito)   = 1.0
+               enddo
+            endif
+         enddo
 
          do iseg = 1, nosegw      !  for if some diagonal entries are not 1.0
             do ilay = 1, nolay
@@ -267,34 +302,42 @@
 !
 !        cummulate time
 !
-         TIMEV = TIMEV + CONCV*DELT
-         TIMTOT = TIMTOT + DELT
+         timev = timev + concv*delt
+         timtot = timtot + delt
 !
 !        if accumulated time equal or greater then accumulation period then calculate fraction of time
 !        and reset the distribution
 !
-         IF ( TIMTOT .GE. (PERIOD-DELT*0.5) ) THEN
-            FRACV = TIMEV/TIMTOT
-            CONCV=0.0
-            TIMEV=0.0
-            TIMTOT = 0.0
-            DO ILAY = 1 , NOLAY
-               ISEGL = (ILAY-1)*NOSEGL+1
-               CONCV(ILAY,ISEGL:ISEGL+NOSEGL-1)=1.0
-            ENDDO
-         ENDIF
-
+         if ( timtot .ge. (period-delt*0.5) ) then
+            fracv = timev/timtot
+            concv=0.0
+            timev=0.0
+            timtot = 0.0
+            if(.not.fm_vtrans) then
+               do ilay = 1 , nolay
+                  isegl = (ilay-1)*nosegl+1
+                  concv(ilay,isegl:isegl+nosegl-1)=1.0
+               enddo
+            else
+               do iseg = 1 , noseg
+                  ilay = fmlayer(iseg)
+                  if(ilay.gt.0) then
+                     concv(ilay,iseg)=1.0
+                  endif
+               enddo
+            endif
+         endif
       endif
 !
-!     output IP11 is switch for the PLCT/BLOOM
+!     output IP14 is switch for the PLCT/BLOOM
 !     furthermore there is a max of 100 output, the fraction of time
 !
-      DO ISEG = 1 , NOSEG
-         DO ILAY = 1 , MIN(100,NOLAY)
-            IP12 = IPOINT(11+ILAY)+(ISEG-1)*INCREM(11+ILAY)
-            PMSA(IP12) = FRACV(ILAY,ISEG)
-         ENDDO
-      ENDDO
+      do iseg = 1 , noseg
+         do ilay = 1 , min(100,nolay)
+            ip15 = ipoint(14+ilay)+(iseg-1)*increm(14+ilay)
+            pmsa(ip15) = fracv(ilay,iseg)
+         enddo
+      enddo
 
       ! write restart file? at last time
 
@@ -311,8 +354,8 @@
          endif
       endif
 !
-      RETURN
- 1000 FORMAT(' ERROR: allocating memory in VTRANS :',I10)
- 1001 FORMAT(' NOSEG = ',I10)
- 1002 FORMAT(' NOLAY = ',I10)
-      END
+      return
+ 1000 format(' ERROR: allocating memory in process ''vtrans'' :',I10)
+ 1001 format(' noseg = ',I10)
+ 1002 format(' nolay = ',I10)
+      end

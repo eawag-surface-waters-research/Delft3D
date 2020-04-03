@@ -35,107 +35,40 @@
 !     SRSTOP, stops execution
 
 !     arguments
-
-      INTEGER  NOSEG      ! input, total number of segments
-      INTEGER  NOSEGW     ! input, number of segments in the water phase
-      INTEGER  NOSEGL     ! input, number of segments per layer
-      INTEGER  NOLAY      ! input, number of layers
-      INTEGER  NGRO       ! input, number of BLOOM algae groups
-      INTEGER  NTYP       ! input, number of BLOOM algae types
-
-!     local decalarations
-
-      INTEGER  IERR_ALLOC ! error number memory allocation
-      INTEGER  LUNREP     ! unit number report file
-
-      NOSEG_3DL  = NOSEG
-      NOSEGL_3DL = NOSEGL
-      NOLAY_3DL  = NOLAY
-      NGRO_3DL   = NGRO
-      NTYP_3DL   = NTYP
-
-      ALLOCATE ( RADSURF_3DL(NOSEG)      , &
-                 EFFIC_3DL(NTYP,NOSEG)   , &
-                 STAT = IERR_ALLOC     )
-      IF ( IERR_ALLOC .NE. 0 ) THEN
-         CALL GETMLU(LUNREP)
-         WRITE ( LUNREP , 1000 ) IERR_ALLOC
-         WRITE ( LUNREP , 1001 ) NOSEG
-         WRITE ( LUNREP , 1002 ) NTYP
-         CALL SRSTOP(1)
-      ENDIF
-      EFFIC_3DL    = 0.0
-
-      RETURN
- 1000 FORMAT(' ERROR: allocating memory in INIT_3DL:',I10)
- 1001 FORMAT(' NOSEG, number of segments           :',I10)
- 1002 FORMAT(' NTYP , number of BLOOM  algae types :',I10)
-      END SUBROUTINE INIT_3DL
-
-      SUBROUTINE EMIN_3DL( EMIN  , EMINLAY, ITYPE  )
-
-!     FUNCTION : Gives minimal effeiciency for current layer given a total minimal efficiency
-
-!     use the results from the vertical distribution VTRANS
-
-      use bloom_data_vtrans
-      use bloom_data_3dl
-
-      implicit none
-
-!     arguments
-
-      REAL*8   EMIN       ! input , total minimal efficiency
-      REAL*8   EMINLAY    ! output, minmal efficiency for this layer
-      INTEGER  ITYPE      ! input , index number of BLOOM algae type
+      integer  noseg      ! input, total number of segments
+      integer  nosegw     ! input, number of segments in the water phase
+      integer  nosegl     ! input, number of segments per layer
+      integer  nolay      ! input, number of layers
+      integer  ngro       ! input, number of BLOOM algae groups
+      integer  ntyp       ! input, number of BLOOM algae types
 
 !     local decalarations
+      integer  ierr_alloc ! error number memory allocation
+      integer  lunrep     ! unit number report file
 
-      INTEGER  ILAY       ! layer counter
-      INTEGER  ISEG       ! segment number
-      REAL*8   ELAYS      ! efficiency in other layers
-      REAL*8   FLAY       ! time factor in a specific layer
-      REAL*8   ELAY       ! efficiency in a specific layer
-      REAL*8   EFFI       ! efficiency in all layers
+      noseg_3dl  = noseg
+      nosegl_3dl = nosegl
+      nolay_3dl  = nolay
+      ngro_3dl   = ngro
+      ntyp_3dl   = ntyp
 
-!     check if active
+      allocate ( radsurf_3dl(noseg), effic_3dl(ntyp,noseg), stat = ierr_alloc)
+      if ( ierr_alloc .ne. 0 ) then
+         call getmlu(lunrep)
+         write ( lunrep , 1000 ) ierr_alloc
+         write ( lunrep , 1001 ) noseg
+         write ( lunrep , 1002 ) ntyp
+         call srstop(1)
+      endif
+      effic_3dl    = 0.0
 
-      IF ( .NOT. ACTIVE_3DL ) THEN
+      return
+ 1000 format(' ERROR: allocating memory in INIT_3DL:',I10)
+ 1001 format(' NOSEG, number of segments           :',I10)
+ 1002 format(' NTYP , number of BLOOM  algae types :',I10)
+      end subroutine init_3dl
 
-!        if not active then EMINLAY = EMIN
-
-         EMINLAY = EMIN
-
-      ELSE
-
-!        accumulate efficiencies in other layers ELAY * the time fraction per layer FLAY
-
-         ELAYS = 0.0
-         DO ILAY = 1 , NOLAY_3DL
-            IF ( ILAY .NE. ILAY_3DL ) THEN
-               ISEG  = (ILAY-ILAY_3DL)*NOSEGL_3DL + ISEG_3DL
-               FLAY  = FRACV(ILAY,ISEG_3DL)
-               ELAY  = EFFIC_3DL(ITYPE,ISEG)
-               ELAYS = ELAYS + FLAY*ELAY
-            ENDIF
-         ENDDO
-
-!        compute minimal efficiency for this layer
-
-         FLAY    = FRACV(ILAY_3DL,ISEG_3DL)
-         EFFI  = ELAYS  + EFFIC_3DL(ITYPE,ISEG_3DL) * FLAY
-         IF ( FLAY .GT. 1.E-20 ) THEN
-            EMINLAY = MAX((EMIN-ELAYS)/FLAY,0.01*EMIN)
-         ELSE
-            EMINLAY = EMIN
-         ENDIF
-
-      ENDIF
-
-      RETURN
-      END SUBROUTINE EMIN_3DL
-
-      SUBROUTINE EFFI_3DL( EFFI , ITYPE )
+      subroutine effi_3dl( effi , itype )
 
 !     FUNCTION : Gives average effeiciency over the layers
 
@@ -147,44 +80,43 @@
       implicit none
 
 !     arguments
-
-      REAL*8   EFFI       ! output, average effieciency
-      INTEGER  ITYPE      ! input , index number of BLOOM algae type
+      real*8   effi       ! output, average effieciency
+      integer  itype      ! input , index number of BLOOM algae type
 
 !     local decalarations
-
-      INTEGER  ILAY       ! layer counter
-      INTEGER  ISEG       ! segment number
-      REAL*8   FLAY       ! time factor in a specific layer
-      REAL*8   ELAY       ! efficiency in a specific layer
+      integer  ilay       ! layer counter
+      integer  iseg       ! segment number
+      real*8   flay       ! time factor in a specific layer
+      real*8   elay       ! efficiency in a specific layer
 
 !     check if active
-
-      IF ( .NOT. ACTIVE_3DL ) THEN
-
+      if ( .not. active_3dl ) then
 !        just take efficiency for this layer
-
-         EFFI = EFFIC_3DL(ITYPE,ISEG_3DL)
-
-      ELSE
-
+         effi = effic_3dl(itype,iseg_3dl)
+      else
 !        accumulate efficiencies over the layers ELAY * the time fraction per layer FLAY
+         effi = 0.0
+         if(.not.fm_vtrans) then
+            do ilay = 1 , nolay_3dl
+               iseg  = (ilay-ilay_3dl)*nosegl_3dl + iseg_3dl
+               flay  = fracv(ilay,iseg_3dl)
+               elay  = effic_3dl(itype,iseg)
+               effi  = effi + flay*elay
+            enddo
+         else
+            do iseg = fmktop(iseg_3dl), fmkbot(iseg_3dl), -1
+               ilay = fmlayer(iseg)
+               flay  = fracv(ilay,iseg_3dl)
+               elay  = effic_3dl(itype,iseg)
+               effi  = effi + flay*elay
+            enddo
+         endif
+         effi = effi
+      endif
+      return
+      end subroutine effi_3dl
 
-         EFFI = 0.0
-         DO ILAY = 1 , NOLAY_3DL
-            ISEG  = (ILAY-ILAY_3DL)*NOSEGL_3DL + ISEG_3DL
-            FLAY  = FRACV(ILAY,ISEG_3DL)
-            ELAY  = EFFIC_3DL(ITYPE,ISEG)
-            EFFI  = EFFI + FLAY*ELAY
-         ENDDO
-         EFFI = EFFI
-
-      ENDIF
-
-      RETURN
-      END SUBROUTINE EFFI_3DL
-
-      SUBROUTINE EFFILAY_3DL( SURF, EXTTOT, DEP   , IGROUP, ITYPE )
+      subroutine effilay_3dl( surf, exttot, dep   , igroup, itype )
 
       use bloom_data_3dl
 
@@ -193,37 +125,34 @@
 !     FUNCTION : calculate and store efficiency for this layer
 
 !     arguments
-
-      REAL*8   SURF       ! input , corrected irradiation
-      REAL*8   EXTTOT     ! input , total extinction
-      REAL*8   DEP        ! input , depth of the layer
-      INTEGER  IGROUP     ! input , index number of BLOOM algae group
-      INTEGER  ITYPE      ! input , index number of BLOOM algae type
+      real*8   surf       ! input , corrected irradiation
+      real*8   exttot     ! input , total extinction
+      real*8   dep        ! input , depth of the layer
+      integer  igroup     ! input , index number of BLOOM algae group
+      integer  itype      ! input , index number of BLOOM algae type
 
 !     local decalarations
+      real*8   phi_s      ! x value tabulated function at surface
+      real*8   fun_s      ! function at surface
+      real*8   der_s      ! derivative at sutface
+      real*8   phi_d      ! x value tabulated function at dep
+      real*8   fun_d      ! function at surface at dep
+      real*8   der_d      ! derivative at sutface at dep
+      real*8   effi       ! calculated efficiency
 
-      REAL*8   PHI_S      ! x value tabulated function at surface
-      REAL*8   FUN_S      ! function at surface
-      REAL*8   DER_S      ! derivative at sutface
-      REAL*8   PHI_D      ! x value tabulated function at dep
-      REAL*8   FUN_D      ! function at surface at dep
-      REAL*8   DER_D      ! derivative at sutface at dep
-      REAL*8   EFFI       ! calculated efficiency
-
-      IF ( SURF .GT. 1.0 .AND. EXTTOT*DEP .GT. 1.0D-10) THEN
-         PHI_S = - DLOG(SURF)
-         CALL EBCALC(PHI_S,FUN_S,DER_S,IGROUP)
-         PHI_D = EXTTOT*DEP - DLOG(SURF)
-         CALL EBCALC(PHI_D,FUN_D,DER_D,IGROUP)
-         EFFI   = (FUN_D-FUN_S)/EXTTOT/DEP
-         EFFI = MAX(EFFI,0.0)
-      ELSE
-         EFFI = 0.0
-      ENDIF
+      if ( surf .gt. 1.0 .and. exttot*dep .gt. 1.0d-10) then
+         phi_s = - dlog(surf)
+         call ebcalc(phi_s,fun_s,der_s,igroup)
+         phi_d = exttot*dep - dlog(surf)
+         call ebcalc(phi_d,fun_d,der_d,igroup)
+         effi   = (fun_d-fun_s)/exttot/dep
+         effi = max(effi,0.0)
+      else
+         effi = 0.0
+      endif
 
 !     store for later use
+      effic_3dl(itype,iseg_3dl) = effi
 
-      EFFIC_3DL(ITYPE,ISEG_3DL) = EFFI
-
-      RETURN
-      END SUBROUTINE EFFILAY_3DL
+      return
+      end subroutine effilay_3dl

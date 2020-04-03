@@ -281,6 +281,7 @@
 
    subroutine fm_wq_processes_ini_proc()
       use m_fm_wq_processes
+      use bloom_data_vtrans
       use m_alloc
       use unstruc_messages
       use m_flow, only: kmx, Lnkx
@@ -307,6 +308,7 @@
       integer                  :: ierr, ierr2     !< error count
 
       integer( 4)              :: i, j, ip, isys, icon, ipar, ifun, isfun, ivar
+      integer                  :: ipoifmlayer, ipoifmktop, ipoifmkbot
 
       integer :: iex
       integer :: kk, k, kb, kt, ktmax
@@ -327,6 +329,8 @@
       character*20,parameter   :: cfetchd = 'initdepth'
       character*20,parameter   :: cirradiation = 'radsurf'
       character*20,parameter   :: crain = 'rain'
+      character*20,parameter   :: cvtrans = 'ACTIVE_vtrans'
+      character*20,parameter   :: cvertdisp = 'ACTIVE_vertdisp'
       character*10,parameter   :: cbloom = 'd40blo'
       character*20,parameter   :: cdoprocesses = 'DoProcesses'
       character*20,parameter   :: cprocessesinactive = 'ProcessesInactive'
@@ -531,6 +535,32 @@
             call mess(LEVEL_INFO, '''rain'' is the sub-file but ''rain'' is not in the hydrodynamic model.')
          endif
       end if
+      
+!     data only needed for vtrans
+      call zoekns(cvtrans,nocons,coname_sub,20,icon)
+      if (icon>0) then
+         call zoekns(cvertdisp,nocons,coname_sub,20,icon)
+         if (icon<=0) then
+            call mess(LEVEL_ERROR, 'The water quality process ''vtrans'' requires the process ''vertdisp'' to be active.')
+         else if (kmx==0) then
+            call mess(LEVEL_WARN, 'The water quality process ''vtrans'' was not switched on because the model is not 3D.')
+         else
+            fm_vtrans = .true.
+            nosfun = nosfun+1
+            isfvertdisper = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='VertDisper')
+            nosfun = nosfun+1
+            isffmlayer = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='FMLayer')
+            nosfun = nosfun+1
+            isffmktop = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='FMkTop')
+            nosfun = nosfun+1
+            isffmkbot = nosfun
+            call realloc(sfunname, nosfun, keepExisting=.true., fill='FMkBot')
+            call mess(LEVEL_INFO, 'Found process ''vtrans'', added ''VertDisper'', ''FMLayer'', ''FMkTop'' and ''FMkBot''')
+         end if         
+      end if         
       call mess(LEVEL_INFO, '--------------------------------------------------------------------------')
 
       noconm = nocons + 1000
@@ -686,6 +716,20 @@
             iex = iex+1
          end do
       end do
+
+      if ( isffmlayer.gt.0 ) then
+         ipoifmlayer = arrpoi(iisfun) + (isffmlayer-1)*noseg
+         ipoifmktop  = arrpoi(iisfun) + (isffmktop-1)*noseg
+         ipoifmkbot  = arrpoi(iisfun) + (isffmkbot-1)*noseg
+         do kk=1,Ndxi
+            call getkbotktopmax(kk,kb,kt,ktmax)
+            do k=kb,ktmax
+               pmsa(ipoifmlayer + k-kbx) = ktmax - k + 1
+               pmsa(ipoifmktop  + k-kbx) = ktmax - kbx + 1
+               pmsa(ipoifmkbot  + k-kbx) = kb - kbx + 1
+            end do
+         end do
+      end if
 
       call zoekns(cbloom,nproc,pronam,10,ipbloo)
       if (ipbloo.gt.0) then
@@ -1221,7 +1265,7 @@
       integer          :: isys, iconst, iwqbot
       integer          :: ipoisurf, ipoitau, ipoivel
       integer          :: ipoivol, ipoiconc, ipoisal, ipoitem
-      integer          :: ipoivwind, ipoiwinddir, ipoifetchl, ipoifetchd, ipoiradsurf, ipoirain
+      integer          :: ipoivwind, ipoiwinddir, ipoifetchl, ipoifetchd, ipoiradsurf, ipoirain, ipoivertdisper, ipoileng
       integer          :: i, ip, ifun, isfun
       integer          :: kk, k, kb, kt, ktmax, kwaq
       integer          :: L, nw1, nw2
@@ -1368,12 +1412,34 @@
       if ( isfrain.gt.0 ) then
          ipoirain = arrpoi(iisfun) + (isfrain-1)*noseg
          do kk=1,Ndxi
-               call getkbotktopmax(kk,kb,kt,ktmax)
+            call getkbotktopmax(kk,kb,kt,ktmax)
             pmsa(ipoirain + kb-kbx : ipoirain + ktmax-kbx) = rain(kk)/24.0d0 ! rain: mm/day => mm/h
          end do
       end if
+         
+      if ( isfvertdisper.gt.0 ) then
+         ipoivertdisper = arrpoi(iisfun) + (isfvertdisper-1)*noseg
+         do kk=1,Ndxi
+            call getkbotktopmax(kk,kb,kt,ktmax)
+            do k=kb,ktmax
+               pmsa(ipoivertdisper + k-kbx) = vicwws(k-1)
+            end do
+         end do
+!        set vertical dispersion lengths
+         ipoileng =  arrpoi(iileng)
+         do kk=1,Ndxi
+            call getkbotktopmax(kk,kb,kt,ktmax)
+            do k=ktmax,kb+1,-1
+               pmsa(ipoileng) = 0.5d0*(zws(k)-zws(k-1))
+               ipoileng = ipoileng + 1
+               pmsa(ipoileng) = 0.5d0*(zws(k-1)-zws(k-2))
+               ipoileng = ipoileng + 1
+            end do
+         end do
+         
+      end if
 
-!     determine dry/wet cells
+!     determine dry/wet cells 
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
          do k=kb,ktmax

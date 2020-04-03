@@ -5411,6 +5411,10 @@ module m_fm_wq_processes
    integer                                   :: isffetchd                   !< pointer to fetch depth     segment function
    integer                                   :: isfradsurf                  !< pointer to solar radiation segment function
    integer                                   :: isfrain                     !< pointer to rain            segment function
+   integer                                   :: isfvertdisper               !< pointer to vertdisper      segment function
+   integer                                   :: isffmlayer                  !< pointer to fmlayer         segment function
+   integer                                   :: isffmktop                   !< pointer to fmktop          segment function
+   integer                                   :: isffmkbot                   !< pointer to fmkbot          segment function
 !
 !     Balance output
 !

@@ -808,11 +808,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "vtrans    ","PeriodVTRA",   3,"N","x",1
 "vtrans    ","Volume    ",   4,"N","x",1
 "vtrans    ","ITIME     ",   5,"N","x",1
-"vtrans    ","VertDisp  ",   6,"N","x",0
-"vtrans    ","XArea     ",   7,"N","x",0
-"vtrans    ","XLenFrom  ",   8,"N","x",0
-"vtrans    ","XLenTo    ",   9,"N","x",0
-"vtrans    ","Disp3     ",  10,"Y","x",0
+"vtrans    ","FMLayer   ",   6,"Y"," ",1
+"vtrans    ","FMkTop    ",   7,"Y"," ",1
+"vtrans    ","FMkBot    ",   8,"Y"," ",1
+"vtrans    ","VertDisp  ",   9,"N","x",0
+"vtrans    ","XArea     ",  10,"N","x",0
+"vtrans    ","XLenFrom  ",  11,"N","x",0
+"vtrans    ","XLenTo    ",  12,"N","x",0
+"vtrans    ","Disp3     ",  13,"Y","x",0
 "EffMBlo_P ","SWBLMEffi ",   1,"Y"," ",1
 "EffMBlo_P ","Temp      ",   2,"Y","x",1
 "EffMBlo_P ","Rad       ",   3,"N","x",1
