@@ -33896,6 +33896,7 @@ end subroutine copycurvigridboundstopol
 
       use m_partitioninfo
       use unstruc_netcdf, only: unc_write_net, UNC_CONV_UGRID, UNC_CONV_CFOLD
+      use unstruc_model, only: md_ident
       use m_polygon, only: NPL
       use dfm_error
 !      use m_missing, only: intmiss
@@ -33960,7 +33961,7 @@ end subroutine copycurvigridboundstopol
             i2 = len_trim(netfilename)
             partfilename = netfilename(1:i1)//"DFM_interpreted_idomain_"//netfilename(i1+1:i2)
          endif
-         call unc_write_net(partfilename, janetcell = 1, janetbnd = 1, jaidomain = 1, iconventions = iconv)
+         call unc_write_net(partfilename, janetcell = 1, janetbnd = 1, jaidomain = 1, iconventions = iconv, md_ident = md_ident)
       endif
 
 

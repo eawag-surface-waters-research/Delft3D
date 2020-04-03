@@ -9210,14 +9210,14 @@ end subroutine unc_write_map_filepointer
 
 !> Writes the unstructured net to a netCDF file.
 !! If file exists, it will be overwritten.
-subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, iconventions)
-    use unstruc_model, only : md_ident
-    character(len=*), intent(in)  :: filename
-    integer, optional, intent(in) :: janetcell  !< write additional network cell information (1) or not (0). Default: 0.
-    integer, optional, intent(in) :: janetbnd   !< write additional network boundary information (1) or not (0). Default: 0.
-    integer, optional, intent(in) :: jaidomain  !< write subdomain numbers (1) or not (0, default)
-    integer, optional, intent(in) :: jaiglobal_s !< write global netcell number (1) or not (0, default)
-    integer, optional, intent(in) :: iconventions
+subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, iconventions, md_ident)
+    character(len=*),           intent(in) :: filename     !< output filename
+    integer,          optional, intent(in) :: janetcell    !< write additional network cell information (1) or not (0). Default: 0.
+    integer,          optional, intent(in) :: janetbnd     !< write additional network boundary information (1) or not (0). Default: 0.
+    integer,          optional, intent(in) :: jaidomain    !< write subdomain numbers (1) or not (0, default)
+    integer,          optional, intent(in) :: jaiglobal_s  !< write global netcell number (1) or not (0, default)
+    integer,          optional, intent(in) :: iconventions !< type output convention (default: UNC_CONV_CFOLD = 1)
+    character(len=*), optional, intent(in) :: md_ident     !< identifier of the model (default: blank)
 
     type(t_unc_mapids)            :: mapids
     type(t_ug_meta)               :: meta 
@@ -9227,13 +9227,8 @@ subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, 
     janetbnd_loc  = 0
     jaidomain_loc = 0
     jaiglobal_s_loc = 0
-    
-    if (.not. present(iconventions)) then
-       iconv = UNC_CONV_CFOLD
-    else
-       iconv = iconventions
-    end if
-   
+    iconv = UNC_CONV_CFOLD
+
     if ( present(janetcell) ) then
       janetcell_loc = janetcell
     end if
@@ -9246,7 +9241,10 @@ subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, 
     if ( present(jaiglobal_s) ) then
       jaiglobal_s_loc = jaiglobal_s
     end if
-    
+    if (present(iconventions)) then
+       iconv = iconventions
+    end if
+
     ierr = unc_create(filename, 0, inetfile)
     if (ierr /= nf90_noerr) then
         call mess(LEVEL_ERROR, 'Could not create net file '''//trim(filename)//'''.')
@@ -9257,7 +9255,9 @@ subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, 
     if (iconv == UNC_CONV_UGRID) then
        mapids%ncid = inetfile
        meta = ug_meta_fm
-       meta%modelname = md_ident
+       if (present(md_ident)) then
+          meta%modelname = md_ident
+       end if
        ierr = ug_addglobalatts(mapids%ncid, meta)
        call unc_write_net_ugrid2(mapids%ncid, mapids%id_tsp, janetcell=janetcell_loc, jaidomain=jaidomain_loc, jaiglobal_s=jaiglobal_s_loc)
     else
