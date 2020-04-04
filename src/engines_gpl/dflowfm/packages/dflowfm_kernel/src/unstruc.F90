@@ -22217,6 +22217,7 @@ subroutine wrimap(tim)
     logical            :: unitused
     double precision, save :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
     integer            :: ndx1d, ndims
+    integer            :: jabndnd
 
     ! Another time-partitioned file needs to start, reset iteration count (and file).
     if (ti_split > 0d0 .and. curtime_split /= time_split0) then
@@ -22258,7 +22259,9 @@ subroutine wrimap(tim)
                    call fm_update_mor_width_mean_bedlevel()
                 endif
              endif
-             call unc_write_map_filepointer_ugrid(mapids,tim)  ! wrimap
+             jabndnd = 0
+             if (jamapbnd > 0) jabndnd = 1
+             call unc_write_map_filepointer_ugrid(mapids,tim,jabndnd)  ! wrimap
           else
              call unc_write_map_filepointer(mapids%ncid,tim)  ! wrimap
           endif

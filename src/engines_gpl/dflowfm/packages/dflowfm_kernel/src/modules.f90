@@ -2798,6 +2798,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jaeulervel                !< 0:GLM, 1:Euler velocities
  integer                           :: jamombal                  !< records some gradients of primitives 0:no, 1:yes
  integer                           :: jarstbnd                  !< Waterlevel, bedlevel and coordinates of boundaries, 0: no, 1: yes
+ integer                           :: jamapbnd                  !< Includes boundary points in map output
+ 
 ! Write partition domain file
  integer                           :: japartdomain              !< Write a separate netcdf file for partition domain info., 0: no, 1: yes
 
@@ -3204,6 +3206,7 @@ subroutine default_flowparameters()
     epswetout = 0.1d0 ! 10cm waterdepth counts as 'wet'.
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
+    jamapbnd = 0
     japartdomain = 1
     jashp_crs = 0
     jashp_obs = 0
