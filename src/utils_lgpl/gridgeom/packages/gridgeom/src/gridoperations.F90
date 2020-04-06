@@ -3502,6 +3502,11 @@
          cycle
       endif
 
+      !invalid edge
+      if(networkNodeIndex(stn)==networkNodeIndex(enn)) then
+        cycle
+      endif
+
       ! start
       if(networkNodeIndex(stn) > 0) then
          if(meshnodeIndex(networkNodeIndex(stn)) ==0) then
