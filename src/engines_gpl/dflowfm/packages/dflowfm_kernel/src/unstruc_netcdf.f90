@@ -68,7 +68,7 @@ integer            :: nopen_files_ = 0             !< Nr. of NetCDF files curren
 
 private :: nerr_, err_firsttime_, err_firstline_, &
            t_unc_netelem_ids, unc_def_net_elem, unc_write_net_elem, &
-           unc_def_idomain, unc_def_iglobal, &
+           unc_def_idomain, unc_def_iglobal, fill_xtt_ytt, &
            open_files_, open_datasets_, nopen_files_
 
 integer, parameter :: UNC_CONV_CFOLD = 1 !< Old CF-only conventions.
@@ -9784,10 +9784,7 @@ end function unc_def_net_elem
 !> helper function to write the net elements to an already open NetCDF file
 function unc_write_net_elem(inetfile, ids) result(ierr)
    use network_data
-   use m_missing,       only : dmiss, intmiss, dxymis
-   use m_sferic,        only : jsferic, jasfer3D, rd2dg, ra
-   use m_flowgeom,      only : xz, yz
-   use geometry_module, only : normaloutchk
+   use m_missing, only : dmiss, intmiss
 
    integer,                 intent(in) :: inetfile
    type(t_unc_netelem_ids), intent(in) :: ids
@@ -9795,8 +9792,7 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
 
    integer,       allocatable :: netcellnod(:,:), netcelllin(:,:)
    real(kind=hp), allocatable :: xtt(:,:), ytt(:,:), xut(:), yut(:)
-   integer                    :: nv, k, l, k1, k2, kt, n1, nv1, ja
-   real(kind=hp)              :: xzn,yzn,x3, y3, x4, y4, dis, xp, yp, rl, xn, yn, t0, t1
+   integer                    :: k, l, nv, nv1
    real(kind=hp), parameter   :: half = 0.5_hp
 
    ! Write net cells
@@ -9819,16 +9815,48 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
    call readyy('Writing net data',.65d0)
    allocate(xtt(4, numl), ytt(4, numl), xut(numl), yut(numl), stat=ierr)
    if (ierr /= 0) goto 888
-   xtt = dmiss
-   ytt = dmiss
-   do L=1,numl1d
+   do L=1,numl
       xut(L) = half *(xk(kn(1,L)) + xk(kn(2,L)))
       yut(L) = half *(yk(kn(1,L)) + yk(kn(2,L)))
    end do
+   call fill_xtt_ytt(xtt, ytt)
+   ierr = nf90_put_var(inetfile, ids%id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl /) )
+   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl /) )
+   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkxu, xut)
+   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkyu, yut)
+   if (ierr /= 0) goto 999
+
+   deallocate(xtt, ytt, xut, yut)
+
+   return
+
+888 continue ! label for allocation errors
+   call mess(LEVEL_ERROR, 'Allocation error in unc_write_net_elem')
+   return
+
+999 continue ! label for NetCDF errors
+   call check_error(ierr, 'unc_write_net_elem')
+end function unc_write_net_elem
+
+!> helper function to fill arrays xtt and ytt
+subroutine fill_xtt_ytt(xtt, ytt)
+   use network_data
+   use m_missing,       only : dmiss, intmiss, dxymis
+   use m_sferic,        only : jsferic, jasfer3D, rd2dg, ra
+   use m_flowgeom,      only : xz, yz
+   use geometry_module, only : normaloutchk
+
+   real(kind=hp), intent(out) :: xtt(:,:), ytt(:,:)
+
+   integer                    :: n1, l, k1, k2, kt, ja
+   real(kind=hp)              :: xzn, yzn, x3, y3, x4, y4, dis, xp, yp, rl, xn, yn
+
+   do L=1,numl1d
+      xtt(:,L) = dmiss
+      ytt(:,L) = dmiss
+   end do
 
    do L=numl1d+1,numl
-      xut(L) = half *(xk(kn(1,L)) + xk(kn(2,L)))
-      yut(L) = half *(yk(kn(1,L)) + yk(kn(2,L)))
       xtt(:,L) = 0d0
       ytt(:,L) = 0d0
       if (lnn(L) >= 1) then
@@ -9899,23 +9927,7 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
          ytt(:,L) = dmiss
       end if
    enddo
-   ierr = nf90_put_var(inetfile, ids%id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl /) )
-   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl /) )
-   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkxu, xut)
-   if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkyu, yut)
-   if (ierr /= 0) goto 999
-
-   deallocate(xtt, ytt, xut, yut)
-
-   return
-
-888 continue ! label for allocation errors
-   call mess(LEVEL_ERROR, 'Allocation error in unc_write_net_elem')
-   return
-
-999 continue ! label for NetCDF errors
-   call check_error(ierr, 'unc_write_net_elem')
-end function unc_write_net_elem
+end subroutine fill_xtt_ytt
 
 !> helper function to define idomain
 function unc_def_idomain(inetfile, id_idomain, id_netelemdim) result(ierr)
@@ -9952,15 +9964,13 @@ end function unc_def_iglobal
 ! * io_ugrid-based writing of all basic net data (nodes/edges/faces)
 ! * AND NetLinkContour-related variables (see the original unc_write_net_filepointer routine)
 !> Writes the unstructured network in UGRID format to an already opened netCDF dataset.
-subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
-   use m_flowgeom, only: xz, yz
+subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    use network_data, xe_no=>xe, ye_no=>ye
    use m_partitioninfo, only: idomain, ndomains, iglobal_s
-   use m_sferic
-   use m_missing
+   use m_sferic, only : jsferic
+   use m_missing, only : dmiss
    use netcdf
    use m_alloc
-   use dfm_error
    use geometry_module
    use m_save_ugrid_state
    use gridoperations
@@ -9974,27 +9984,22 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
    integer, optional, intent(in)    :: jaiglobal_s !< write global netcell numbers (1) or not (0, default)
 
    integer                          :: janetcell_, jaidomain_, jaiglobal_s_
-   integer                          :: id_idomain, id_iglobal_s !, id_netelemdim
-   integer                          :: id_mesh2d, id_netnodedim ! id_netlinkdim, , 
+   integer                          :: id_idomain, id_iglobal_s
+   integer                          :: id_mesh2d, id_netnodedim
    type(t_unc_netelem_ids)          :: ids_netelem
 
    integer :: nn
-   integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:), contacts(:,:) 
-   integer :: layer_count, layer_type
+   integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:), contacts(:,:)
    real(kind=dp), dimension(:), pointer :: layer_zs=>null(), interface_zs =>null()
-!   type(t_crs) :: pj
 
    integer :: ierr
-   integer :: i, k, k1, k2, numContPts, n, numl2d, numk1d, numk2d, L, Lnew, nv, n1, n2, ja, kt
-   double precision :: xzn,yzn,x3, y3, x4, y4,DIS,XP,YP,rl,xperp,yperp
+   integer :: i, k, k1, k2, numl2d, numk1d, numk2d, L, Lnew, nv, n1, n2
    double precision, allocatable :: xtt(:,:), ytt(:,:)
    integer :: id_flowelemcontourptsdim, id_flowelemcontourx, id_flowelemcontoury, &
               id_netelemmaxnodedim, id_netlinkcontourptsdim, &
               id_netlinkcontourx, id_netlinkcontoury
    integer :: jaInDefine
 
-   double precision :: xx, yy
-   double precision, dimension(:), allocatable :: zz
    double precision, allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:)
    double precision, allocatable :: work2(:,:)
 
@@ -10436,84 +10441,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
   
        !call readyy('Writing net data',.65d0)
        allocate(xtt(4, numl), ytt(4, numl))
-       xtt = dmiss
-       ytt = dmiss
-       !do L=1,numl1d
-       !   xut(L) = .5d0*(xk(kn(1,L)) + xk(kn(2,L)))
-       !   yut(L) = .5d0*(yk(kn(1,L)) + yk(kn(2,L)))
-       !end do
-
-       do L=numl1d+1,numl
-          xtt(:,L) = 0d0
-          ytt(:,L) = 0d0
-          if (LNN(L) >= 1) then
-             K1 = kn(1,L)
-             k2 = kn(2,L)
-
-             ! 'left' half
-             n1 = LNE(1,L)
-             if (n1 < 0) n1 = -n1
-             x3 = xk(k1)
-             y3 = yk(k1)
-             x4 = xk(k2)
-             y4 = yk(k2)
-             xzn = xz(n1)
-             yzn = yz(n1)
-
-             ! Normal distance from circumcenter to net link:
-             call dLINEDIS2(xzn,yzn,x3, y3, x4, y4,JA,DIS,XP,YP,rl)
-             if (jsferic == 1) then
-                DIS = rd2dg*DIS/ra  ! convert m to degrees; valid if not to close to one of the poles
-             endif
-
-             ! Note: we're only in net-mode, not yet in flow-mode, so we can NOT assume that net node 3->4 have a 'rightward' flow node orientation 1->2
-             ! Instead, compute outward normal, and swap points 3 and 4 if necessary, such that we locally achieve the familiar k3->k4 + n1->n2 orientation.
-             ! Outward normal vector of net link (cell 1 considered 'inward'):
-             call normaloutchk(x3, y3, x4, y4, xzw(n1), yzw(n1), xperp, yperp, ja, jsferic, jasfer3D, dmiss, dxymis)
-             if (ja == 1) then ! normal was flipped, so swap net point 3 and 4 locally, to construct counterclockwise cell hereafter.
-                kt = k1
-                k1 = k2
-                k2 = kt
-                xp = x3
-                yp = y3
-                x3 = x4
-                y3 = y4
-                x4 = xp
-                y4 = yp
-             end if
-
-             xtt(1,L) = x4 - DIS*xperp
-             ytt(1,L) = y4 - DIS*yperp
-             xtt(2,L) = x3 - DIS*xperp
-             ytt(2,L) = y3 - DIS*yperp
-             
-             if (LNN(L) == 2) then
-                ! second half
-                n1 = LNE(2,L)
-                if (n1 < 0) n1 = -n1
-                xzn = xz(n1)
-                yzn = yz(n1)
-                call dLINEDIS2(xzn,yzn,x3, y3, x4, y4,JA,DIS,XP,YP,rl)
-                if (jsferic == 1) then
-                   DIS = rd2dg*DIS/ra  ! convert m to degrees; valid if not to close to one of the poles
-                endif
-                xtt(3, L) = x3 + DIS*xperp
-                ytt(3, L) = y3 + DIS*yperp
-                xtt(4, L) = x4 + DIS*xperp
-                ytt(4, L) = y4 + DIS*yperp
-             else
-                ! closed net boundary, no second half cell, just close off with netlink
-                xtt(3, L) = x3
-                ytt(3, L) = y3
-                xtt(4, L) = x4
-                ytt(4, L) = y4
-             end if
-          else
-             ! No surrounding cells: leave missing fill values in file.
-             xtt(:,L) = dmiss
-             ytt(:,L) = dmiss
-          end if
-       enddo
+       call fill_xtt_ytt(xtt, ytt)
        ierr = nf90_put_var(ncid, id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl2d /) )
        ierr = nf90_put_var(ncid, id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl2d /) )
     end if
