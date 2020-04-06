@@ -216,7 +216,7 @@
          in4  = increm(4)
          ip4  = ipoint(4)
          do iseg = 1 , nosegw
-            volume = pmsa(ip4)
+            volume = pmsa(ip4) + tiny(1.0)
             do ilay = 1 , nolay
                concv(ilay,iseg) = concv(ilay,iseg) * volume
                dervv(ilay,iseg) = volume
