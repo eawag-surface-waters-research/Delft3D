@@ -153,6 +153,7 @@ subroutine loadCachingFile( basename, netfile, usecaching )
     read( lun, iostat = ierr ) version_file, md5checksum
 
     if ( ierr /= 0 ) then
+        close( lun )
         return
     endif
 
@@ -161,6 +162,7 @@ subroutine loadCachingFile( basename, netfile, usecaching )
         ! As there is no history of versions yet, the version in the file
         ! should match exactly
         !
+        close( lun )
         return
     endif
 
@@ -222,7 +224,7 @@ subroutine loadCachingFile( basename, netfile, usecaching )
     call realloc(cache_ilink_fixed, number_links, keepExisting=.false.)
     call realloc(cache_ipol_fixed,  number_links, keepExisting=.false.)
     call realloc(cache_dsl_fixed,   number_links, keepExisting=.false.)
-    
+
     if ( number > 0 ) then
         read( lun, iostat = ierr ) cache_xpl_fixed   ; okay = ierr == 0
         read( lun, iostat = ierr ) cache_ypl_fixed   ; okay = okay .and. ierr == 0
@@ -277,11 +279,13 @@ subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
 
     read( lun, iostat = ierr ) linklist
     if ( ierr /= 0 ) then
+        close( lun )
         return
     endif
 
     read( lun, iostat = ierr ) ipol
     if ( ierr /= 0 ) then
+        close( lun )
         return
     endif
 
@@ -311,6 +315,7 @@ subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
             endif
         endif
         if ( ierr /= 0 ) then
+            close( lun )
             exit
         endif
     enddo
@@ -343,7 +348,7 @@ subroutine storeCachingFile( basename, usecaching )
     if ( usecaching /= 1 ) then
         return
     endif
-    
+
     filename = trim(basename) // '.cache'
 
     open( newunit = lun, file = trim(filename), access = "stream", status = "old", action = 'read',  iostat = ierr )
