@@ -9785,7 +9785,7 @@ end function unc_def_net_elem
 function unc_write_net_elem(inetfile, ids) result(ierr)
    use network_data
    use m_missing,       only : dmiss, intmiss, dxymis
-   use m_sferic,        only : jsferic, jasfer3D
+   use m_sferic,        only : jsferic, jasfer3D, rd2dg, ra
    use m_flowgeom,      only : xz, yz
    use geometry_module, only : normaloutchk
 
@@ -9796,8 +9796,8 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
    integer,       allocatable :: netcellnod(:,:), netcelllin(:,:)
    real(kind=hp), allocatable :: xtt(:,:), ytt(:,:), xut(:), yut(:)
    integer                    :: nv, k, l, k1, k2, kt, n1, nv1, ja
-   real(kind=hp)              :: xzn,yzn,x3, y3, x4, y4,DIS,XP,YP,rl, xn, yn, t0, t1
-   real(kind=hp), parameter    :: half = 0.5_hp
+   real(kind=hp)              :: xzn,yzn,x3, y3, x4, y4, dis, xp, yp, rl, xn, yn, t0, t1
+   real(kind=hp), parameter   :: half = 0.5_hp
 
    ! Write net cells
    ierr = nf90_inquire_dimension(inetfile, ids%id_netelemmaxnodedim, len = nv)
@@ -9847,6 +9847,9 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
 
          ! Normal distance from circumcenter to net link:
          call dlinedis2(xzn, yzn, x3, y3, x4, y4, ja, dis, xp, yp, rl)
+         if (jsferic == 1) then
+            dis = rd2dg*dis/ra  ! convert m to degrees; valid if not to close to one of the poles
+         endif
 
          ! Note: we're only in net-mode, not yet in flow-mode, so we can NOT assume that net node 3->4 have a 'rightward' flow node orientation 1->2
          ! Instead, compute outward normal, and swap points 3 and 4 if necessary, such that we locally achieve the familiar k3->k4 + n1->n2 orientation.
@@ -9876,6 +9879,9 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
             xzn = xz(n1)
             yzn = yz(n1)
             call dlinedis2(xzn, yzn, x3, y3, x4, y4, ja, dis, xp, yp, rl)
+            if (jsferic == 1) then
+               dis = rd2dg*dis/ra  ! convert m to degrees; valid if not to close to one of the poles
+            endif
             xtt(3, L) = x3 + dis*xn
             ytt(3, L) = y3 + dis*yn
             xtt(4, L) = x4 + dis*xn
@@ -10456,6 +10462,9 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
 
              ! Normal distance from circumcenter to net link:
              call dLINEDIS2(xzn,yzn,x3, y3, x4, y4,JA,DIS,XP,YP,rl)
+             if (jsferic == 1) then
+                DIS = rd2dg*DIS/ra  ! convert m to degrees; valid if not to close to one of the poles
+             endif
 
              ! Note: we're only in net-mode, not yet in flow-mode, so we can NOT assume that net node 3->4 have a 'rightward' flow node orientation 1->2
              ! Instead, compute outward normal, and swap points 3 and 4 if necessary, such that we locally achieve the familiar k3->k4 + n1->n2 orientation.
@@ -10485,6 +10494,9 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell, jaidomain, jaiglobal_s)
                 xzn = xz(n1)
                 yzn = yz(n1)
                 call dLINEDIS2(xzn,yzn,x3, y3, x4, y4,JA,DIS,XP,YP,rl)
+                if (jsferic == 1) then
+                   DIS = rd2dg*DIS/ra  ! convert m to degrees; valid if not to close to one of the poles
+                endif
                 xtt(3, L) = x3 + DIS*xperp
                 ytt(3, L) = y3 + DIS*yperp
                 xtt(4, L) = x4 + DIS*xperp
