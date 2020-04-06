@@ -17794,6 +17794,7 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_ugrid.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/meshdata.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/netcdf_utils.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/simple_geometry.f90 -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/Deltares.UGrid.doxygen -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/Deltares.UGrid.sln -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/DataSetConventions.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/Disposable1DMeshGeometry.cs -text
@@ -17810,7 +17811,6 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/String
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/UGridApi.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/UGridMeshType.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Deltares.UGrid.csproj -text
-src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Deltares.UGrid.doxygen -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/InteropMetadata.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/IoNetCfdImports.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/LinksGeometry.cs -text
