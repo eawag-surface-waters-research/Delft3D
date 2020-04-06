@@ -39,8 +39,6 @@ namespace Deltares.UGrid.Api
         /// </summary>
         /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
         /// returned from a native function</exception>
-        /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
-        /// returned from a native function</exception>
         void Close();
 
         /// <summary>
