@@ -15,16 +15,16 @@
     <tags>native</tags>
   </metadata>
   <files>
-    <file src="..\packages\io_netcdf\dll\x64\Release\hdf5.dll" target="content\native\hdf5.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\hdf5_hl.dll" target="content\native\hdf5_hl.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\io_netcdf.dll" target="content\native\io_netcdf.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\libifcoremd.dll" target="content\native\libifcoremd.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\libmmd.dll" target="content\native\libmmd.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\netcdf.dll" target="content\native\netcdf.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\ucrtbase.dll" target="content\native\ucrtbase.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\vcruntime140.dll" target="content\native\vcruntime140.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\zlib1.dll" target="content\native\zlib1.dll" />
-    <file src="..\packages\io_netcdf\dll\x64\Release\Deltares.UGrid.dll" target="lib\net40\Deltares.UGrid.dll" />
+    <file src="..\packages\bin\Release\hdf5.dll" target="content\native\hdf5.dll" />
+    <file src="..\packages\bin\Release\hdf5_hl.dll" target="content\native\hdf5_hl.dll" />
+    <file src="..\packages\bin\Release\io_netcdf.dll" target="content\native\io_netcdf.dll" />
+    <file src="..\packages\bin\Release\libifcoremd.dll" target="content\native\libifcoremd.dll" />
+    <file src="..\packages\bin\Release\libmmd.dll" target="content\native\libmmd.dll" />
+    <file src="..\packages\bin\Release\netcdf.dll" target="content\native\netcdf.dll" />
+    <file src="..\packages\bin\Release\ucrtbase.dll" target="content\native\ucrtbase.dll" />
+    <file src="..\packages\bin\Release\vcruntime140.dll" target="content\native\vcruntime140.dll" />
+    <file src="..\packages\bin\Release\zlib1.dll" target="content\native\zlib1.dll" />
+    <file src="..\packages\bin\Release\Deltares.UGrid.dll" target="lib\net40\Deltares.UGrid.dll" />
     <file src="Deltares.UGrid.targets" target="build\net40\Deltares.UGrid.targets" />
   </files>
 </package>

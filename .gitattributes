@@ -17781,6 +17781,7 @@ src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Api/UGridTest.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Deltares.UGrid.Tests.csproj -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Lib/nunit.framework.dll -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.Tests/Properties/AssemblyInfo.cs -text
+src/utils_lgpl/io_netcdf/packages/Deltares.UGrid.sln -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/DataSetConventions.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/Disposable1DMeshGeometry.cs -text
 src/utils_lgpl/io_netcdf/packages/Deltares.UGrid/Api/Disposable2DMeshGeometry.cs -text
