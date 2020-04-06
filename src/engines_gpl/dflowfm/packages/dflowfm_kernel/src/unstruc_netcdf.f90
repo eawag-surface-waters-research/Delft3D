@@ -9977,11 +9977,11 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
    implicit none
 
-   integer, intent(in)                      :: ncid
-   type(t_unc_timespace_id), intent(inout) :: id_tsp
-   integer, optional, intent(in)    :: janetcell
-   integer, optional, intent(in)    :: jaidomain   !< write subdomain numbers (1) or not (0, default)
-   integer, optional, intent(in)    :: jaiglobal_s !< write global netcell numbers (1) or not (0, default)
+   integer,                  intent(in   ) :: ncid        !< NetCDF file id
+   type(t_unc_timespace_id), intent(inout) :: id_tsp      !< struct holding NetCDF ids
+   integer,        optional, intent(in   ) :: janetcell   !< write net cell (1) or not (0, default)
+   integer,        optional, intent(in   ) :: jaidomain   !< write subdomain numbers (1) or not (0, default)
+   integer,        optional, intent(in   ) :: jaiglobal_s !< write global netcell numbers (1) or not (0, default)
 
    integer                          :: janetcell_, jaidomain_, jaiglobal_s_
    integer                          :: id_idomain, id_iglobal_s
@@ -9990,21 +9990,17 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
    integer :: nn
    integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:), contacts(:,:)
-   real(kind=dp), dimension(:), pointer :: layer_zs=>null(), interface_zs =>null()
+   real(kind=hp), dimension(:), pointer :: layer_zs=>null(), interface_zs =>null()
 
    integer :: ierr
    integer :: i, k, k1, k2, numl2d, numk1d, numk2d, L, Lnew, nv, n1, n2
-   double precision, allocatable :: xtt(:,:), ytt(:,:)
-   integer :: id_flowelemcontourptsdim, id_flowelemcontourx, id_flowelemcontoury, &
-              id_netelemmaxnodedim, id_netlinkcontourptsdim, &
-              id_netlinkcontourx, id_netlinkcontoury
    integer :: jaInDefine
 
-   double precision, allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:)
-   double precision, allocatable :: work2(:,:)
+   real(kind=hp), allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:)
+   real(kind=hp), allocatable :: work2(:,:)
 
-   integer                       :: n1dedges, n1d2dcontacts, start_index
-   integer,allocatable           :: contacttype(:) 
+   integer                    :: n1dedges, n1d2dcontacts, start_index
+   integer, allocatable       :: contacttype(:) 
 
    jaInDefine = 0
    n1d2dcontacts = 0
@@ -10372,22 +10368,6 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
          ierr = nf90_redef(ncid) ! TODO: AvD: I know that all this redef is slow. Split definition and writing soon.
       endif
 
-
-      if (janetcell_ /= 0 .and. nump > 0) then
-         !ierr = nf90_def_dim(mapids%ncid, 'nmesh2d_NetElemMaxNode', nv,     id_netelemmaxnodedim)
-         ierr = nf90_def_dim(ncid, 'n'//trim(mesh2dname)//'_NetLinkContourPts', 4,   id_netlinkcontourptsdim) ! Momentum control volume a la Perot: rectangle around xu/yu
-      end if
-
-      ierr = nf90_def_var(ncid, trim(mesh2dname)//'_NetLinkContour_x',     nf90_double, (/ id_netlinkcontourptsdim, id_tsp%meshids2d%dimids(mdim_edge) /) ,   id_netlinkcontourx)
-      ierr = nf90_def_var(ncid, trim(mesh2dname)//'_NetLinkContour_y',     nf90_double, (/ id_netlinkcontourptsdim, id_tsp%meshids2d%dimids(mdim_edge) /) ,   id_netlinkcontoury)
-      ierr = unc_addcoordatts(ncid, id_netlinkcontourx, id_netlinkcontoury, jsferic)
-      ierr = nf90_put_att(ncid, id_netlinkcontourx, 'long_name'    , 'list of x-contour points of momentum control volume surrounding each net/flow link')
-      ierr = nf90_put_att(ncid, id_netlinkcontoury, 'long_name'    , 'list of y-contour points of momentum control volume surrounding each net/flow link')
-      ierr = nf90_put_att(ncid, id_netlinkcontourx, '_FillValue', dmiss)
-      ierr = nf90_put_att(ncid, id_netlinkcontoury, '_FillValue', dmiss)
-      !ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%meshids2d%varids(mid_edgex), 'bounds', 'mesh1d_FlowElemContour_x') ! TODO: AvD: this would conflict with io_ugrid bounds for edge: 2 endpoints, instead of momentum cell
-      !ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%meshids2d%varids(mid_edgey), 'bounds', 'mesh1d_FlowElemContour_y')
-
       deallocate(xn)
       deallocate(yn)
       deallocate(zn)
@@ -10420,32 +10400,6 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    ierr = nf90_enddef(ncid)
 
    ! -- Start data writing (time-independent data) ------------
-    if ( janetcell_ /= 0 .and. nump1d2d > 0) then
-       !! Write net cells 
-       !ierr = nf90_inquire_dimension(inetfile, id_netelemmaxnodedim, len = nv)
-       !allocate(netcellnod(nv, nump1d2d))
-       !allocate(netcelllin(nv, nump1d2d))
-       !netcellnod = intmiss
-       !netcelllin = intmiss
-       !do k = 1, nump1d2d
-       !   nv1 = netcell(k)%n
-       !   netcellnod(1:nv1,k) = netcell(k)%nod
-       !   netcelllin(1:nv1,k) = netcell(k)%lin
-       !enddo
-       !ierr = nf90_put_var(inetfile, id_netelemnode, netcellnod)
-       !call check_error(ierr, 'Write netcell elem.')
-       !ierr = nf90_put_var(inetfile, id_netelemlink, netcelllin)
-       !call check_error(ierr, 'Write netcell links')
-       !deallocate(netcellnod)
-       !deallocate(netcelllin)
-  
-       !call readyy('Writing net data',.65d0)
-       allocate(xtt(4, numl), ytt(4, numl))
-       call fill_xtt_ytt(xtt, ytt)
-       ierr = nf90_put_var(ncid, id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl2d /) )
-       ierr = nf90_put_var(ncid, id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl2d /) )
-    end if
-
     if ( janetcell_ /= 0 .and. nump1d2d > 0) then
        ierr = unc_write_net_elem(ncid, ids_netelem)
     end if
