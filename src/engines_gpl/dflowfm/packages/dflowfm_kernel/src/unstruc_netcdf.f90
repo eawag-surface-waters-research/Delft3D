@@ -15431,4 +15431,31 @@ subroutine read_structure_dimensions_from_rst(ncid, filename, istrtypein, struna
 
 end subroutine read_structure_dimensions_from_rst
 
+subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord, geometry)
+   use netcdf
+   use m_sferic
+   implicit none
+   
+   integer,                   intent(in   ) :: ncid  ! file unit
+   integer,                   intent(inout) :: idq   ! quantity id
+   integer,                   intent(in   ) :: itype ! double or integer etc
+   integer,                   intent(in   ) :: n     ! dim of idim
+   integer,                   intent(in   ) :: idims(n)
+   character(len=*),          intent(in   ) :: name, desc, unit, namecoord
+   character(len=*), optional,intent(in   ) :: geometry
+
+   integer                          :: ierr
+   ierr = 0
+   ierr = nf90_def_var(ncid, name , itype, idims , idq)
+   ierr = nf90_put_att(ncid, idq  , 'coordinates'  , namecoord)
+   ierr = nf90_put_att(ncid, idq  , 'long_name'    , desc)
+   ierr = nf90_put_att(ncid, idq  , 'units'        , unit)
+
+   ierr = unc_add_gridmapping_att(ncid, (/idq/), jsferic)
+
+   if (present(geometry)) then
+      ierr = nf90_put_att(ncid, idq, 'geometry', geometry)
+   end if
+
+   end subroutine definencvar
 end module unstruc_netcdf
