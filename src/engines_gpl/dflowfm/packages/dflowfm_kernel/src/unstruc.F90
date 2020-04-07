@@ -15813,17 +15813,23 @@ end if
  do L = 1,lnx
     if (frcu(L) == dmiss) then
        if (L <= lnx1D) then
-           if (kcu(L) == 3) then
-              frcu(L)  = frcuni1d2d
-           else if (kcu(L) == 5) then       ! 1D2D internal link pipe streetinlet
-              frcu(L)  = frcunistreetinlet
-           else if (kcu(L) == 7) then       ! 1D2D internal link pipe roofgutterpipe
-              frcu(L)  = frcuniroofgutterpipe
-           else
-              frcu(L)  = frcuni1d
-           endif
+          if (kcu(L) == 3) then
+             frcu(L)  = frcuni1d2d
+          else if (kcu(L) == 5) then       ! 1D2D internal link pipe streetinlet
+             ! Because frcunistreetinlet is not available in the mdu file, the friction type is
+             ! always manning.
+             frcu(L)  = frcunistreetinlet
+             ifrcutp(L) = 1
+          else if (kcu(L) == 7) then       ! 1D2D internal link pipe roofgutterpipe
+             ! Because frcuniroofgutterpipe is not available in the mdu file, the friction type is
+             ! always manning
+             frcu(L)  = frcuniroofgutterpipe
+             ifrcutp(L) = 1
+          else
+             frcu(L)  = frcuni1d
+          endif
        else
-           frcu(L) =  frcuni
+          frcu(L) =  frcuni
        endif
     endif
     if (ifrcutp(L) == -999) then
