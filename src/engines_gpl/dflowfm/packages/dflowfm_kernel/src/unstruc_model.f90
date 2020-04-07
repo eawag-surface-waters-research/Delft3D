@@ -933,6 +933,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'AllowBndAtBifurcation',  jaAllowBndAtBifurcation)
     call prop_get_integer( md_ptr, 'geometry', 'CreateLinks1D2D',  md_jamake1d2dlinks)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
+    dxDoubleAt1DEndNodes = .true.
+    call prop_get_logical( md_ptr, 'geometry', 'dxDoubleAt1DEndNodes', dxDoubleAt1DEndNodes)
 
 ! Numerics
     call prop_get_double( md_ptr, 'numerics', 'CFLMax'          , cflmx)
@@ -2454,6 +2456,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall) then !
        call prop_set (prop_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber, 'Renumber the flow nodes (1: yes, 0: no)') ! hidden option for testing renumbering
+       if (dxDoubleAt1DEndNodes) then
+         call prop_set (prop_ptr, 'geometry', 'dxDoubleAt1DEndNodes',  1, 'Extend 1D end nodes by 0.5 dx (1: yes, 0: no)') ! hidden option for testing renumbering
+       else
+         call prop_set (prop_ptr, 'geometry', 'dxDoubleAt1DEndNodes',  0, 'Extend 1D end nodes by 0.5 dx (1: yes, 0: no)') ! hidden option for testing renumbering
+       endif
+       
     end if
     if (writeall .or. (kmx > 0)) then
        call prop_set(prop_ptr, 'geometry', 'Kmx' ,              kmx,               'Maximum number of vertical layers')

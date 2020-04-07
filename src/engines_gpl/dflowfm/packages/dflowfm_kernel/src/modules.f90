@@ -2399,6 +2399,7 @@ end subroutine default_turbulence
                                                         !< 20=Energy conserving compact, piaczek fully implicit, weir
  integer                           :: maxNonlinearIterations!< maximal iterations in non linear iteration loop before a time step reduction is applied
  logical                           :: setHorizontalBobsFor1d2d !< bobs are set to 2d bedlevel, to prevent incorrect storage in sewer system.
+ logical                           :: dxDoubleAt1DEndNodes !< indicaties whether a 1D grid cell at the end of a network has to be extended with 0.5*dx 
  integer                           :: iadvec1D          !< same, now for 1D links
 
  integer                           :: lincontin         !< 0 = no, 1 = yes linear continuity

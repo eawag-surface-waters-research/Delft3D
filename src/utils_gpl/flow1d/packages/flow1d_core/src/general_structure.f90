@@ -281,13 +281,13 @@ contains
             maxFlowL = genstr%limitFlowPos * gatefraction*wstr / genstr%ws_actual
             if (qL > maxFlowL) then
                fu(1) = 0.0
-               ru(1) = direction * maxFlowL / au(1)
+               ru(1) = direction * maxFlowL / max(1d-6,au(1))
             endif
          else if (qL < 0d0 .and. genstr%uselimitFlowNeg) then
             maxFlowL = genstr%limitFlowNeg * gatefraction*wstr / genstr%ws_actual
             if (abs(qL) > maxFlowL) then
                fu(1) = 0.0
-               ru(1) = -  direction * maxFlowL / au(1)
+               ru(1) = -  direction * maxFlowL /  max(1d-6,au(1))
             endif
        
          endif

@@ -1738,6 +1738,7 @@ if(q /= 0) then
  use m_flowgeom
  use m_flow
  use m_missing
+ use m_flowparameters
  use unstruc_channel_flow
 
  implicit none
@@ -1753,16 +1754,17 @@ if(q /= 0) then
     calcConv = 0
     k1  = ln(1,L) ; k2 = ln(2,L)
 
-    dx1 = 0.5d0*dx(L) ; dx2 = dx1
-    if (kcu(L) == 1) then
-       if ( nd(k1)%lnx == 1 ) then
-          dx1 = 2d0*dx1
-       endif
-       if ( nd(k2)%lnx == 1 ) then
-          dx2 = 2d0*dx2
+    if (dxDoubleAt1DEndNodes) then
+       dx1 = 0.5d0*dx(L) ; dx2 = dx1
+       if (kcu(L) == 1) then
+          if ( nd(k1)%lnx == 1 ) then
+             dx1 = 2d0*dx1
+          endif
+          if ( nd(k2)%lnx == 1 ) then
+             dx2 = 2d0*dx2
+          endif
        endif
     endif
-
 
     if (kcs(k1) == 1) then
        hpr = s1(k1)-bob0(1,L)
@@ -37846,13 +37848,13 @@ end subroutine setbobs_fixedweirs
                 endif
              endif
           else if (iadv(L) == 8) then            ! 1d or 1D2D droplosses, coding to avoid evaluating array iadv as long as possible,
-             hup = s0(k2) - ( max(bob(1,L), bob(2,L) ) + twot*hu(L) )
+             hup = s0(k2) - ( max(bob(1,L), bob(2,L) ) ) !+ twot*hu(L) )
              if (hup < 0) then
                 slopec = hup
              else
-                hup = s0(k1) - ( max( bob(1,L), bob(2,L) ) + twot*hu(L) )
+                hup = s0(k1) - ( max( bob(1,L), bob(2,L) ) ) !+ twot*hu(L) )
                 if (hup < 0) then
-                    slopec = -hup
+                     slopec = -hup
                 endif
              endif
           else if (Drop1d) then            ! 1d droplosses, coding to avoid evaluating array iadv as long as possible,
