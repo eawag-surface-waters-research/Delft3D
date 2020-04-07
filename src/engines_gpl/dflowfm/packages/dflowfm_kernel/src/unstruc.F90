@@ -1754,16 +1754,16 @@ if(q /= 0) then
     calcConv = 0
     k1  = ln(1,L) ; k2 = ln(2,L)
 
-    if (dxDoubleAt1DEndNodes) then
     dx1 = 0.5d0*dx(L) ; dx2 = dx1
-    if (kcu(L) == 1) then
-       if ( nd(k1)%lnx == 1 ) then
-          dx1 = 2d0*dx1
+    if (dxDoubleAt1DEndNodes) then
+       if (kcu(L) == 1) then
+          if ( nd(k1)%lnx == 1 ) then
+             dx1 = 2d0*dx1
+          endif
+          if ( nd(k2)%lnx == 1 ) then
+             dx2 = 2d0*dx2
+          endif
        endif
-       if ( nd(k2)%lnx == 1 ) then
-          dx2 = 2d0*dx2
-       endif
-    endif
     endif
 
     if (kcs(k1) == 1) then
@@ -24892,6 +24892,7 @@ end subroutine unc_write_shp
  use unstruc_model
  use m_sferic
  use geometry_module, only: dbdistance
+ use m_partitioninfo
  implicit none
 
  integer          :: minp, Ls, Lf, n, k1, k2
@@ -24899,7 +24900,7 @@ end subroutine unc_write_shp
  logical          :: jawel
 
  inquire(file=trim(md_pipefile) , exist=jawel)
- if (.not. jawel) return
+ if (.not. jawel) return 
 
  call oldfil(minp, md_pipefile)
  call reapol(minp,0)
@@ -24908,7 +24909,7 @@ end subroutine unc_write_shp
  do n  = 1,npl-1
 
     x1 = xpl(n)   ; y1 = ypl(n)   ; z1 = zpl(n)   ; w1 = dzL(n)   ; h1 = dzR(n)
-    x2 = xpl(n+1) ; y2 = ypl(n+1) ; z2 = zpl(n+1) ; w2 = dzL(n+1) ; h2 = dzR(n+1)
+    x2 = xpl(n+1) ; y2 = ypl(n+1) ; z2 = zpl(n+1) ; w2 = dzL(n+1) ; h2 = dzR(n+1) 
     if (x1 == DMISS .or. x2 == DMISS) cycle
     if (w1 <= 0d0 .or. w2 <= 0d0) then
        call qnerror(' pipes: width <= 0d0, fourth column', 'in', md_pipefile)
@@ -24922,15 +24923,18 @@ end subroutine unc_write_shp
         if (Ls > 0) then
             Lf = lne2ln(Ls)
             if (kcu(Lf) == 1 .or. kcu(Lf) == 5) then
-               k1 = ln(1,Lf) ; k2 = ln(2,Lf)
-               IF ( dbdistance(X1,Y1,Xzw(K1),Yzw(K1), jsferic, jasfer3D, dmiss) < dbdistance(X1,Y1,Xzw(K2),Yzw(K2), jsferic, jasfer3D, dmiss) ) THEN
-                  bob(1,Lf)  = z1 ; bl(k1) = min(z1, bl(k1) )
-                  bob(2,Lf)  = z2 ; bl(k2) = min(z2, bl(k2) )
-                else
-                  bob(1,Lf)  = z2 ; bl(k1) = min(z2, bl(k1) )
-                  bob(2,Lf)  = z1 ; bl(k2) = min(z1, bl(k2) )
+               k1 = ln(1,Lf) ; k2 = ln(2,Lf)  
+               if (jampi == 1) then 
+                  if (idomain(k1) /= my_rank .and. idomain(k2)  /= my_rank) cycle
                endif
-               prof1D(1,Lf)  = w1 ; wu(Lf) = w1
+               IF ( dbdistance(X1,Y1,Xzw(K1),Yzw(K1), jsferic, jasfer3D, dmiss) < dbdistance(X1,Y1,Xzw(K2),Yzw(K2), jsferic, jasfer3D, dmiss) ) THEN
+                  bob(1,Lf)  = z1 ; bl(k1) = min(z1, bl(k1) )   
+                  bob(2,Lf)  = z2 ; bl(k2) = min(z2, bl(k2) )  
+                else
+                  bob(1,Lf)  = z2 ; bl(k1) = min(z2, bl(k1) )   
+                  bob(2,Lf)  = z1 ; bl(k2) = min(z1, bl(k2) )
+               endif  
+               prof1D(1,Lf)  = w1 ; wu(Lf) = w1 
                prof1D(2,Lf)  = h1
                prof1D(3,Lf)  =  2                                      ! for now, simple rectan
                jaduiktmp(Lf) =  1

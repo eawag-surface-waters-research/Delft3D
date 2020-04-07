@@ -17642,7 +17642,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 22, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 23, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -17676,6 +17676,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(20) = 'JaExplicitsinks                     ( ) ' ; it(2*20) = 2
    OPTION(21) = 'Corioadamsbashfordfac               ( ) ' ; it(2*21) = 6
    OPTION(22) = 'Newcorio                            ( ) ' ; it(2*22) = 2
+   OPTION(23) = 'Barocterm                           ( ) ' ; it(2*23) = 2
  
  
 !   123456789012345678901234567890123456789012345678901234567890
@@ -17703,6 +17704,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM (20) = '1=expl, 0 = impl                                            '
    HELPM (21) = '>0 = Adams Bashford, standard= 0.5, only for Newcorio=1     '
    HELPM (22) = '0=prior to 27-11-2019, 1=no normal forcing on open bnds, 12#'
+   HELPM (23) = '3=default, 4=new                                            '
    
    
    CALL SAVEKEYS()
@@ -17794,6 +17796,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFORMPUTinteger (2*20 ,jaexplicitsinks  )     
    CALL IFormputDouble  (2*21 ,Corioadamsbashfordfac,'(e10.5)')        
    CALL IFormputinteger (2*22 ,Newcorio)        
+   CALL IFormputinteger (2*23 ,Jabarocterm)        
 
 
    !  Display the form with numeric fields left justified
@@ -17854,6 +17857,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
           CALL IFormgetDouble  (2*19 ,epshu           )        
           CALL IFORMgeTinteger (2*20 ,jaexplicitsinks )        
           CALL IFormgetDouble  (2*21 ,Corioadamsbashfordfac)        
+          CALL IFormgetinteger (2*22 ,Newcorio)            
+          CALL IFormgetinteger (2*23 ,Jabarocterm)        
 
           epshs    = 0.2d0*epshu  ! minimum waterdepth for setting cfu
           if (niadvec .ne. iadvec) then
@@ -19345,7 +19350,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 23, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 24, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -19381,6 +19386,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(21)= 'Sillheightmin                       ( ) ' ; it(2*21) = 6
    OPTION(22)= 'Mxlayz nr of vertical z-layers      ( ) ' ; it(2*22) = 2
    OPTION(23)= 'Output full time-varying grid data  ( ) ' ; it(2*23) = 2
+   OPTION(24)= 'Keepzlayering at bed                ( ) ' ; it(2*24) = 2
    
 
 !   123456789012345678901234567890123456789012345678901234567890
@@ -19410,6 +19416,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM (21)= 'Only Fixedweirs if both left and right sillheight > Sillmin '
    HELPM (22)= 'max nr of z-layers                                          '
    HELPM (23)= '0=compact, 1=full                                           '
+   HELPM (24)= '0=no, 1=yes, 2=kb/kb+1 50/50                                '
 
 
    CALL SAVEKEYS()
@@ -19503,6 +19510,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFormPutDouble  (2*21,Sillheightmin    , '(F8.3)')
    CALL IFORMPUTINTEGER (2*22,Mxlayz              )
    CALL IFORMPUTINTEGER (2*23,jafullgridoutput    )
+   CALL IFORMPUTINTEGER (2*24,keepzlayeringatbed  )
+
 
    !  Display the form with numeric fields left justified
    !  and set the initial field to number 2
@@ -19563,6 +19572,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
            CALL IFormGetDouble  (2*21,Sillheightmin)
            CALL IFORMgetINTEGER (2*22,Mxlayz       )
            CALL IFORMgeTINTEGER (2*23,jafullgridoutput)
+           CALL IFORMgeTINTEGER (2*24,keepzlayeringatbed)
+
            if (kmx > 0 .or. mxlayz > 0) then
               if (layertype > 1) then 
                  kmx = max(kmx,mxlayz) ; iadvec = 33
