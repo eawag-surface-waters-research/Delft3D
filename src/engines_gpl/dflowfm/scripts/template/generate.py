@@ -25,6 +25,7 @@ def main(fortranfiles, templatedir="templates"):
 
     variable_re = re.compile(r'''
     ^\s*                                                                 # start of the line
+    ([!][$]BMIEXPORT\s*)?                                                # optionally allow commented variables, useful if they resolve to another (non-commented) variable via the JSON "internal:" attribute.
     (?P<fortrantype>(character|logical|double\s+precision|integer|real)) # type
     .*                                                                   # anything
     (::)                                                                 # double colon
