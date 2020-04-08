@@ -21313,7 +21313,7 @@ subroutine unc_write_his(tim)            ! wrihis
                         call realloc(geom_x, nNodes)
                         call realloc(geom_y, nNodes)
 
-                        L0 = L1cgensg(1)
+                        L0 = L1cgensg(i)
                         L = abs(kcgen(3,L0))
                         k1 = ln(1,L)
                         k2 = ln(2,L)
@@ -21323,7 +21323,7 @@ subroutine unc_write_his(tim)            ! wrihis
                         geom_y(2) = yz(k2)
                         if (nlinks > 1) then
                            k = 3
-                           do L0 = L1cgensg(2), L2cgensg(i)
+                           do L0 = L1cgensg(i)+1, L2cgensg(i)
                               L = abs(kcgen(3,L0))
                               k3 = ln(2,L)
                               geom_x(k) = xz(k3)
@@ -21526,7 +21526,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   call realloc(geom_x, nNodes)
                   call realloc(geom_y, nNodes)
 
-                  L0 = L1cgensg(1)
+                  L0 = L1cgensg(i)
                   L = abs(kcgen(3,L0))
                   k1 = ln(1,L)
                   k2 = ln(2,L)
@@ -21536,7 +21536,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   geom_y(2) = yz(k2)
                   if (nlinks > 1) then
                      k = 3
-                     do L0 = L1cgensg(2), L2cgensg(i)
+                     do L0 = L1cgensg(i)+1, L2cgensg(i)
                         L = abs(kcgen(3,L0))
                         k3 = ln(2,L)
                         geom_x(k) = xz(k3)
@@ -21612,7 +21612,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      call realloc(geom_x, nNodes)
                      call realloc(geom_y, nNodes)
 
-                     L0 = L1cgensg(1)
+                     L0 = L1cgensg(i)
                      L = abs(kcgen(3,L0))
                      k1 = ln(1,L)
                      k2 = ln(2,L)
@@ -21622,7 +21622,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      geom_y(2) = yz(k2)
                      if (nlinks > 1) then
                         k = 3
-                        do L0 = L1cgensg(2), L2cgensg(i)
+                        do L0 = L1cgensg(i)+1, L2cgensg(i)
                            L = abs(kcgen(3,L0))
                            k3 = ln(2,L)
                            geom_x(k) = xz(k3)
