@@ -68,7 +68,7 @@ integer            :: nopen_files_ = 0             !< Nr. of NetCDF files curren
 
 private :: nerr_, err_firsttime_, err_firstline_, &
            t_unc_netelem_ids, unc_def_net_elem, unc_write_net_elem, &
-           unc_def_idomain, unc_def_iglobal, fill_xtt_ytt, &
+           unc_def_idomain, unc_def_iglobal, fill_netlink_geometry, &
            open_files_, open_datasets_, nopen_files_
 
 integer, parameter :: UNC_CONV_CFOLD = 1 !< Old CF-only conventions.
@@ -404,17 +404,19 @@ type t_unc_mapids
    !integer :: idx_curtime  = 0  !< Index of current time (typically of latest snapshot being written).
 end type t_unc_mapids
 
+!> type for clustering ids regarding netelements and netlinks
+!! only used within this module, but between a few functions
 type t_unc_netelem_ids
-   integer :: id_netelemmaxnodedim
-   integer :: id_netelemdim
-   integer :: id_netlinkcontourptsdim
-   integer :: id_netlinkdim
-   integer :: id_netelemnode
-   integer :: id_netelemlink
-   integer :: id_netlinkcontourx
-   integer :: id_netlinkcontoury
-   integer :: id_netlinkxu
-   integer :: id_netlinkyu
+   integer :: id_netelemmaxnodedim     !< id for netelemmaxnodedim
+   integer :: id_netelemdim            !< id for netelemdim
+   integer :: id_netlinkcontourptsdim  !< id for netlinkcontourptsdim
+   integer :: id_netlinkdim            !< id for netlinkdim
+   integer :: id_netelemnode           !< id for netelemnode
+   integer :: id_netelemlink           !< id for netelemlink
+   integer :: id_netlinkcontourx       !< id for netlinkcontourx
+   integer :: id_netlinkcontoury       !< id for netlinkcontoury
+   integer :: id_netlinkxu             !< id for netlinkxu
+   integer :: id_netlinkyu             !< id for netlinkyu
 end type t_unc_netelem_ids
 
 type(t_unc_mapids) :: mapids       !< Global descriptor for the (open) map-file
@@ -9731,10 +9733,10 @@ end subroutine unc_write_net_filepointer
 function unc_def_net_elem(inetfile, ids, id_mesh2d) result (ierr)
    use m_missing, only : dmiss, intmiss
    use m_sferic,  only : jsferic
-   integer,                 intent(in   )           :: inetfile
-   type(t_unc_netelem_ids), intent(inout)           :: ids
-   integer,                 intent(in   ), optional :: id_mesh2d
-   integer                                          :: ierr
+   integer,                 intent(in   )           :: inetfile   !< file id NetCDF file
+   type(t_unc_netelem_ids), intent(inout)           :: ids        !< struct holding variable ids
+   integer,                 intent(in   ), optional :: id_mesh2d  !< id for mesh2d (is case of UGRID-0.8)
+   integer                                          :: ierr       !< function result
 
    ierr = 0
    if (present(id_mesh2d)) then
@@ -9786,14 +9788,15 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
    use network_data
    use m_missing, only : dmiss, intmiss
 
-   integer,                 intent(in) :: inetfile
-   type(t_unc_netelem_ids), intent(in) :: ids
-   integer                             :: ierr
+   integer,                 intent(in) :: inetfile  !< id of the NetCDF file
+   type(t_unc_netelem_ids), intent(in) :: ids       !< struct holding variable ids
+   integer                             :: ierr      !< function result
 
    integer,       allocatable :: netcellnod(:,:), netcelllin(:,:)
    real(kind=hp), allocatable :: xtt(:,:), ytt(:,:), xut(:), yut(:)
-   integer                    :: k, l, nv, nv1
-   real(kind=hp), parameter   :: half = 0.5_hp
+   integer                    :: k, nv, nv1
+
+   ierr = 0
 
    ! Write net cells
    ierr = nf90_inquire_dimension(inetfile, ids%id_netelemmaxnodedim, len = nv)
@@ -9815,11 +9818,7 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
    call readyy('Writing net data',.65d0)
    allocate(xtt(4, numl), ytt(4, numl), xut(numl), yut(numl), stat=ierr)
    if (ierr /= 0) goto 888
-   do L=1,numl
-      xut(L) = half *(xk(kn(1,L)) + xk(kn(2,L)))
-      yut(L) = half *(yk(kn(1,L)) + yk(kn(2,L)))
-   end do
-   call fill_xtt_ytt(xtt, ytt)
+   call fill_netlink_geometry(xtt, ytt, xut, yut)
    ierr = nf90_put_var(inetfile, ids%id_netlinkcontourx, xtt, (/ 1, 1 /), (/ 4, numl /) )
    if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkcontoury, ytt, (/ 1, 1 /), (/ 4, numl /) )
    if (ierr ==0) ierr = nf90_put_var(inetfile, ids%id_netlinkxu, xut)
@@ -9838,18 +9837,27 @@ function unc_write_net_elem(inetfile, ids) result(ierr)
    call check_error(ierr, 'unc_write_net_elem')
 end function unc_write_net_elem
 
-!> helper function to fill arrays xtt and ytt
-subroutine fill_xtt_ytt(xtt, ytt)
+!> helper function to fill coordinate arrays (see below)
+subroutine fill_netlink_geometry(xtt, ytt, xut, yut)
    use network_data
    use m_missing,       only : dmiss, intmiss, dxymis
    use m_sferic,        only : jsferic, jasfer3D, rd2dg, ra
    use m_flowgeom,      only : xz, yz
    use geometry_module, only : normaloutchk
 
-   real(kind=hp), intent(out) :: xtt(:,:), ytt(:,:)
+   real(kind=hp), intent(out) :: xtt(:,:)  !< array with x-contour points of momentum control volume surrounding each net/flow link
+   real(kind=hp), intent(out) :: ytt(:,:)  !< array with y-contour points of momentum control volume surrounding each net/flow link
+   real(kind=hp), intent(out) :: xut(:)    !< array with x-coordinate of net link center (velocity point)
+   real(kind=hp), intent(out) :: yut(:)    !< array with y-coordinate of net link center (velocity point)
 
    integer                    :: n1, l, k1, k2, kt, ja
    real(kind=hp)              :: xzn, yzn, x3, y3, x4, y4, dis, xp, yp, rl, xn, yn
+   real(kind=hp), parameter   :: half = 0.5_hp
+
+   do L=1,numl
+      xut(L) = half *(xk(kn(1,L)) + xk(kn(2,L)))
+      yut(L) = half *(yk(kn(1,L)) + yk(kn(2,L)))
+   end do
 
    do L=1,numl1d
       xtt(:,L) = dmiss
@@ -9927,7 +9935,7 @@ subroutine fill_xtt_ytt(xtt, ytt)
          ytt(:,L) = dmiss
       end if
    enddo
-end subroutine fill_xtt_ytt
+end subroutine fill_netlink_geometry
 
 !> helper function to define idomain
 function unc_def_idomain(inetfile, id_idomain, id_netelemdim) result(ierr)

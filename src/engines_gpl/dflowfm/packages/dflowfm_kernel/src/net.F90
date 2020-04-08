@@ -33986,7 +33986,8 @@ end subroutine copycurvigridboundstopol
          if (ierror /= DFM_NOERR) goto 1234
 
 !        write partitioning net files, including cell info. and idomain
-         call unc_write_net(filename, janetcell = 1, janetbnd = 1, jaidomain = jacells, jaiglobal_s = jacells, iconventions = iconv) ! Save net bnds to prevent unnecessary open bnds
+         call unc_write_net(filename, janetcell = 1, janetbnd = 1, jaidomain = jacells, &
+            jaiglobal_s = jacells, iconventions = iconv, md_ident = md_ident) ! Save net bnds to prevent unnecessary open bnds
 
 !        begin debug
 !        make and write the ghost lists
@@ -34781,6 +34782,7 @@ end if
    write (*,*) '                          Only available when K-Way is enabled (method=1).'
    write (*,*) '        icgsolver = [67]  Parallel CG solver (When MDUFILE is specified).'
    write (*,*) '                          6: PETSc (recommended), 7: parallel GS+CG.'
+   write (*,*) '        ugrid     = [01]  write cf UGRID 0.8 (0, default) or UGRID 1.0 (1)'
    write (*,*) ' '
    write (*,*) '  -t N, --threads N'
    write (*,*) '      Set maximum number of OpenMP threads. N must be a positive integer.'

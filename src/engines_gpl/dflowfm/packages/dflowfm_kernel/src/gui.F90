@@ -1462,7 +1462,7 @@
             NUM = 1
          ELSE
             call doclose(mtek)
-            call partition_write_domains(filnam,6,1,1,0) ! make subdomains for default solver
+            call partition_write_domains(filnam, 6, 1, 1, md_partugrid) ! make subdomains for default solver
             CALL MESSAGE('YOU SAVED ' , filnam, ' partitions')
             md_netfile = ' '
             md_netfile = filnam
