@@ -26613,6 +26613,8 @@ end do
            zmn = zlaybot
         endif
 
+        dztopuniabovez = max(dztopuniabovez, zmn +0.01d0)
+
         if ( jampi.eq.1 ) then
            call reduce_double_min(zmn)
         end if
@@ -27769,17 +27771,16 @@ endif
        enddo
 
        if (numtopsig > 0) then
-          kt1    = max(kb-1, ktx - numtopsig )
-          if ( ktop(n) > kt1 + 1) then
-             h0     = s1(n) - zws(kt1)
-             dtopsi = 1d0/dble(ktx - kt1)
-             do k   = kt1 + 1, ktx - 1
-                kk  = k - kt1
-                zws(k) = zws(kt1) + h0*dble(kk)*dtopsi
+          kt1 = max(kb, ktx - numtopsig + 1)
+          if ( ktop(n) >= kt1) then
+             h0     = s1(n) - zws(kt1 - 1)
+             dtopsi = 1d0/dble(ktx - kt1 + 1)
+             do k   = kt1, ktx
+                kk  = k - kt1 + 1 
+                zws(k) = zws(kt1-1) + h0*dble(kk)*dtopsi
              enddo
-
-             ktop(n) = ktx
-
+             zws(ktx) = s1(n)
+             ktop(n)  = ktx
           endif
        endif
 
@@ -31436,58 +31437,58 @@ integer                    :: L,LL,Lb,Lt,n
 
 if (jabarocterm == 1) then
 
-!$OMP PARALLEL DO       &
-!$OMP PRIVATE(LL,Lb,Lt)
-
-do LL = 1,lnxi
-   if (hu(LL) == 0d0) cycle
-   call getLbotLtop(LL,Lb,Lt)
-   if (Lt < Lb) then
-       cycle
-   endif
-   call addbaroc(LL,Lb,Lt)
-enddo
-
-!$OMP END PARALLEL DO
+   !$OMP PARALLEL DO       &
+   !$OMP PRIVATE(LL,Lb,Lt)
+   
+   do LL = 1,lnxi
+      if (hu(LL) == 0d0) cycle
+      call getLbotLtop(LL,Lb,Lt)
+      if (Lt < Lb) then
+          cycle
+      endif
+      call addbaroc(LL,Lb,Lt)
+   enddo
+   
+   !$OMP END PARALLEL DO
 
 else if (jabarocterm == 2 .or. jabarocterm == 3 .or. kmx == 0) then
 
-!$OMP PARALLEL DO       &
-!$OMP PRIVATE(LL,Lb,Lt)
+   !$OMP PARALLEL DO       &
+   !$OMP PRIVATE(LL,Lb,Lt)
 
-do LL = 1,lnxi
-   if (hu(LL) == 0d0) cycle
-   call getLbotLtop(LL,Lb,Lt)
-   if (Lt < Lb) then
-       cycle
-   endif
-   call addbaroc2(LL,Lb,Lt)
- enddo
+   do LL = 1,lnxi
+      if (hu(LL) == 0d0) cycle
+      call getLbotLtop(LL,Lb,Lt)
+      if (Lt < Lb) then
+          cycle
+      endif
+      call addbaroc2(LL,Lb,Lt)
+    enddo
 
-!$OMP END PARALLEL DO
+   !$OMP END PARALLEL DO
 
  else
 
- rvdn = 0d0 ; grn = 0d0
-
-!$OMP PARALLEL DO       &
-!$OMP PRIVATE(n)
- do n = 1,ndx
-    call addbarocn(n)
- enddo
-!$OMP END PARALLEL DO
-
-!$OMP PARALLEL DO       &
-!$OMP PRIVATE(LL,Lb,Lt)
- do LL = 1,lnxi
-   if (hu(LL) == 0d0) cycle
-   call getLbotLtop(LL,Lb,Lt)
-   if (Lt < Lb) then
-       cycle
-   endif
-   call addbarocL(LL,Lb,Lt)
- enddo
-!$OMP END PARALLEL DO
+    rvdn = 0d0 ; grn = 0d0
+   
+   !$OMP PARALLEL DO       &
+   !$OMP PRIVATE(n)
+    do n = 1,ndx
+       call addbarocn(n)
+    enddo
+   !$OMP END PARALLEL DO
+   
+   !$OMP PARALLEL DO       &
+   !$OMP PRIVATE(LL,Lb,Lt)
+    do LL = 1,lnxi
+      if (hu(LL) == 0d0) cycle
+      call getLbotLtop(LL,Lb,Lt)
+      if (Lt < Lb) then
+          cycle
+      endif
+      call addbarocL(LL,Lb,Lt)
+    enddo
+   !$OMP END PARALLEL DO
 
  endif
 
