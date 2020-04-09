@@ -237,7 +237,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
        if (sferic) then
           xcoordname = 'longitude'
           xcoordunit = 'degrees_east'
-          ycoordname = 'laitude'
+          ycoordname = 'latitude'
           ycoordunit = 'degrees_north'
        else
           xcoordname = 'projection_x_coordinate'
