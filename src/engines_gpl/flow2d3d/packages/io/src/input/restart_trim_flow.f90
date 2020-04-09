@@ -680,7 +680,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     ! restart ROLLER model
     !
     if (roller) then
-       call restart_trim_roller(lundia    ,error     ,restid1,   &
+       call restart_trim_roller(lundia    ,error     ,fds       ,filename  ,filetype  ,   &
                               & i_restart ,r(ewave1) ,r(eroll1) ,r(qxkr)   , &
                               & r(qykr)   ,r(qxkw)   ,r(qykw)   ,r(fxw)    ,r(fyw)    , &
                               & r(wsu)    ,r(wsv)    ,r(guu)    ,r(gvv)    , &
