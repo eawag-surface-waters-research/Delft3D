@@ -2860,6 +2860,10 @@ subroutine default_flowparameters()
     iadvec   = 33     ! adv type, 0=no, 1= Wenneker vol, qu-udzt array, 2=1, function, 3=Perot in uit, 4=Perot in, 5=3,piaczek
     iadvec1D = 33     ! same, now for 1D links
 
+    maxNonlinearIterations   = 100     !< maximal iterations in non linear iteration loop before a time step reduction is applied
+    setHorizontalBobsFor1d2d = .false. !< bobs are set to 2d bedlevel, to prevent incorrect storage in sewer system.
+    dxDoubleAt1DEndNodes     = .true.  !< indicates whether a 1D grid cell at the end of a network has to be extended with 0.5*dx 
+
     lincontin= 0      ! 0 = no, 1 = yes linear continuity
 
     iPerot   = 1      ! Perot weigthing type of cell center velocities ucx, ucy
