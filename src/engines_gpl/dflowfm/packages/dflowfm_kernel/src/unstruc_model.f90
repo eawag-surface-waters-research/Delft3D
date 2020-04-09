@@ -2451,15 +2451,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or.  md_jamake1d2dlinks > 0) then
        call prop_set(prop_ptr, 'geometry', 'CreateLinks1D2D',  md_jamake1d2dlinks, 'Ruecksichtslos create links between 1D nodes and 2D cells when initializing model (1: yes, 0: no)')
     endif
-    if (writeall) then !
+    if (writeall) then
        call prop_set (prop_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber, 'Renumber the flow nodes (1: yes, 0: no)') ! hidden option for testing renumbering
-       if (dxDoubleAt1DEndNodes) then
-         call prop_set (prop_ptr, 'geometry', 'dxDoubleAt1DEndNodes',  1, 'Extend 1D end nodes by 0.5 dx (1: yes, 0: no)') ! hidden option for testing renumbering
-       else
-         call prop_set (prop_ptr, 'geometry', 'dxDoubleAt1DEndNodes',  0, 'Extend 1D end nodes by 0.5 dx (1: yes, 0: no)') ! hidden option for testing renumbering
-       endif
-       
     end if
+    if (writeall .or. .not. dxDoubleAt1DEndNodes) then
+       call prop_set (prop_ptr, 'geometry', 'dxDoubleAt1DEndNodes',  merge(1, 0, dxDoubleAt1DEndNodes), 'Extend 1D end nodes by 0.5 dx (1: yes, 0: no).')
+    endif
+
     if (writeall .or. (kmx > 0)) then
        call prop_set(prop_ptr, 'geometry', 'Kmx' ,              kmx,               'Maximum number of vertical layers')
        call prop_set(prop_ptr, 'geometry', 'Layertype' ,        Layertype,         'Vertical layer type (1: all sigma, 2: all z, 3: use VertplizFile)')
@@ -2512,6 +2510,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     call prop_set(prop_ptr, 'numerics', 'AdvecType',    iadvec,     'Advection type (0: none, 1: Wenneker, 2: Wenneker q(uio-u), 3: Perot q(uio-u), 4: Perot q(ui-u), 5: Perot q(ui-u) without itself)')
     call prop_set(prop_ptr, 'numerics', 'TimeStepType', itstep,     'Time step handling (0: only transport, 1: transport + velocity update, 2: full implicit step-reduce, 3: step-Jacobi, 4: explicit)')
+    if (writeall .or. maxNonlinearIterations /= 100) then
+        call prop_set(prop_ptr, 'numerics', 'maxNonlinearIterations'    , maxNonlinearIterations, 'Maximal iterations in non-linear iteration loop before a time step reduction is applied')
+    end if
+    if (writeall .or. setHorizontalBobsFor1d2d) then
+        call prop_set(prop_ptr, 'numerics', 'setHorizontalBobsFor1d2d', merge(1, 0, setHorizontalBobsFor1d2d), 'bobs are set to 2D bedlevel, to prevent incorrect storage in sewer system (0: no, 1:yes).')
+    end if
     call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 5=default, 3,4 no weights, 5-10 Kleptsova hu/hs, 25-30 Ham hs/hu, odd: 2D hs/hu, even: hsk/huk ')
     call prop_set(prop_ptr, 'numerics', 'Newcorio',      newcorio,  '0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants )')
     if (Corioadamsbashfordfac .ne. 0) then
