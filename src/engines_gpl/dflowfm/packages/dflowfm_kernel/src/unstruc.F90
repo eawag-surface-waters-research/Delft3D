@@ -26612,8 +26612,7 @@ end do
         else
            zmn = zlaybot
         endif
-
-        dztopuniabovez = max(dztopuniabovez, zmn +0.01d0)
+      
 
         if ( jampi.eq.1 ) then
            call reduce_double_min(zmn)
