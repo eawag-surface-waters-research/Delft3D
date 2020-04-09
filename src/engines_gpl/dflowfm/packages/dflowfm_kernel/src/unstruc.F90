@@ -1084,7 +1084,7 @@ if(q /= 0) then
  implicit none
 
  integer :: L, idfile, idvar, ierr, jaq1, jaqa
- 
+
  jaq1 = 1
  jaqa = 1
 
@@ -2022,7 +2022,7 @@ if(q /= 0) then
  else if (hu(L) > 0d0) then
 
     hpr1    = hu(L)
-    frcn    = frcu(L) 
+    frcn    = frcu(L)
     ifrctyp = ifrcutp(L)
     if (jaconveyance2D > 0) then
 
@@ -3556,7 +3556,7 @@ end subroutine sethu
  use m_sobekdfm
  use unstruc_model, only: md_restartfile
  implicit none
- integer, intent(in) :: n01          !< Selects whether s0 or s1 has to be set. 
+ integer, intent(in) :: n01          !< Selects whether s0 or s1 has to be set.
  integer, intent(in) :: jasetBlDepth !< Whether or not (1/0) to set the boundary node bed levels, based on depth below s1. Typically only upon model init (based on initial water levels).
 
  integer          :: n, kb, k2, itpbn, L, ibnd
@@ -3615,7 +3615,7 @@ end subroutine sethu
           bob(2,L) = bl(k2)
        end if
     end if
- 
+
     if (itpbn < 6 .or. itpbn == 7) then
        if (n01 == 0) then
           s0(kb) = max(zb, bl(kb)) ! TODO: AvD: if single time step is being restarted, then this line will have overwritten some of the old s0 values.
@@ -12578,7 +12578,7 @@ subroutine writesomeinitialoutput()
     endif
     if (jafilter > 0) then
     write(msgbuf,'(a,F25.10)') 'time filter coeff.      [s]:' , gettimer(1,IFILT_COEF)
-    call msg_flush()                                   
+    call msg_flush()
     write(msgbuf,'(a,F25.10)') 'time filter solve       [s]:' , gettimer(1,IFILT_SOLV)
     call msg_flush()
     write(msgbuf,'(a,F25.10)') 'time filter cnstr. mat. [s]:' , gettimer(1,IFILT_MAT)
@@ -12803,7 +12803,7 @@ subroutine writesomeinitialoutput()
     ! automatically reset elsewhere (e.g., allocateandset*, flow_geominit)
 
     call init_unstruc_netcdf()
-    
+
     call default_caching()
 
     ! TODO: UNST-487: Add default_fourier + reset
@@ -12828,7 +12828,7 @@ subroutine writesomeinitialoutput()
     call default_sediment()  ! stm_included not defined yet
 
     call default_trachy()
-    
+
     call default_hydrology_data()
 
     call default_fm_wq_processes()
@@ -12918,7 +12918,7 @@ subroutine writesomeinitialoutput()
     call reset_save_ugrid_state()
 
     call reset_sedtra()
-    
+
     call reset_hydrology_data()
 
  end subroutine resetFlow
@@ -23696,7 +23696,7 @@ end subroutine unc_write_shp
      call realloc(bl_ave, ndx, keepExisting = .false., fill = dmiss, stat = ierr)
      call aerr('bl_ave(ndx)', ierr, ndx)
  end if
- 
+
  if ( allocated (kfs) ) deallocate(kfs)
  allocate(kfs(ndx))   ;  kfs   = 0
 
@@ -25160,7 +25160,7 @@ end subroutine unc_write_shp
  logical          :: jawel
 
  inquire(file=trim(md_pipefile) , exist=jawel)
- if (.not. jawel) return 
+ if (.not. jawel) return
 
  call oldfil(minp, md_pipefile)
  call reapol(minp,0)
@@ -25169,7 +25169,7 @@ end subroutine unc_write_shp
  do n  = 1,npl-1
 
     x1 = xpl(n)   ; y1 = ypl(n)   ; z1 = zpl(n)   ; w1 = dzL(n)   ; h1 = dzR(n)
-    x2 = xpl(n+1) ; y2 = ypl(n+1) ; z2 = zpl(n+1) ; w2 = dzL(n+1) ; h2 = dzR(n+1) 
+    x2 = xpl(n+1) ; y2 = ypl(n+1) ; z2 = zpl(n+1) ; w2 = dzL(n+1) ; h2 = dzR(n+1)
     if (x1 == DMISS .or. x2 == DMISS) cycle
     if (w1 <= 0d0 .or. w2 <= 0d0) then
        call qnerror(' pipes: width <= 0d0, fourth column', 'in', md_pipefile)
@@ -25183,18 +25183,18 @@ end subroutine unc_write_shp
         if (Ls > 0) then
             Lf = lne2ln(Ls)
             if (kcu(Lf) == 1 .or. kcu(Lf) == 5) then
-               k1 = ln(1,Lf) ; k2 = ln(2,Lf)  
-               if (jampi == 1) then 
+               k1 = ln(1,Lf) ; k2 = ln(2,Lf)
+               if (jampi == 1) then
                   if (idomain(k1) /= my_rank .and. idomain(k2)  /= my_rank) cycle
                endif
                IF ( dbdistance(X1,Y1,Xzw(K1),Yzw(K1), jsferic, jasfer3D, dmiss) < dbdistance(X1,Y1,Xzw(K2),Yzw(K2), jsferic, jasfer3D, dmiss) ) THEN
-                  bob(1,Lf)  = z1 ; bl(k1) = min(z1, bl(k1) )   
-                  bob(2,Lf)  = z2 ; bl(k2) = min(z2, bl(k2) )  
+                  bob(1,Lf)  = z1 ; bl(k1) = min(z1, bl(k1) )
+                  bob(2,Lf)  = z2 ; bl(k2) = min(z2, bl(k2) )
                 else
-                  bob(1,Lf)  = z2 ; bl(k1) = min(z2, bl(k1) )   
+                  bob(1,Lf)  = z2 ; bl(k1) = min(z2, bl(k1) )
                   bob(2,Lf)  = z1 ; bl(k2) = min(z1, bl(k2) )
-               endif  
-               prof1D(1,Lf)  = w1 ; wu(Lf) = w1 
+               endif
+               prof1D(1,Lf)  = w1 ; wu(Lf) = w1
                prof1D(2,Lf)  = h1
                prof1D(3,Lf)  =  2                                      ! for now, simple rectan
                jaduiktmp(Lf) =  1
@@ -26612,7 +26612,7 @@ end do
         else
            zmn = zlaybot
         endif
-      
+
 
         if ( jampi.eq.1 ) then
            call reduce_double_min(zmn)
@@ -27719,9 +27719,9 @@ endif
 
        if (jased>0)  zws(kb-1) = bl(n)
        h0        = s1(n) - zws(kb-1) ! bl(n)
-       !if (h0 < epshs) then 
+       !if (h0 < epshs) then
        !    ktop(n) = 1 ; cycle
-       !endif 
+       !endif
        do k = 1, kmxn(n)
           kk       = kb + k - 1
           zws(kk)  = zws(kb-1) + h0*zslay(k,1)
@@ -27747,9 +27747,9 @@ endif
 
        !if (jased>0)  zws(kb-1) = bl(n)
        !h0        = s1(n) - zws(kb-1) ! bl(n)
-       !if (h0 < epshs) then 
+       !if (h0 < epshs) then
        ! ktop(n) = 1 ; cycle
-       !endif 
+       !endif
 
        ktx = kb + kmxn(n) - 1
        call getzlayerindices(n,nlayb,nrlay)
@@ -27775,7 +27775,7 @@ endif
              h0     = s1(n) - zws(kt1 - 1)
              dtopsi = 1d0/dble(ktx - kt1 + 1)
              do k   = kt1, ktx
-                kk  = k - kt1 + 1 
+                kk  = k - kt1 + 1
                 zws(k) = zws(kt1-1) + h0*dble(kk)*dtopsi
              enddo
              zws(ktx) = s1(n)
@@ -31438,7 +31438,7 @@ if (jabarocterm == 1) then
 
    !$OMP PARALLEL DO       &
    !$OMP PRIVATE(LL,Lb,Lt)
-   
+
    do LL = 1,lnxi
       if (hu(LL) == 0d0) cycle
       call getLbotLtop(LL,Lb,Lt)
@@ -31447,7 +31447,7 @@ if (jabarocterm == 1) then
       endif
       call addbaroc(LL,Lb,Lt)
    enddo
-   
+
    !$OMP END PARALLEL DO
 
 else if (jabarocterm == 2 .or. jabarocterm == 3 .or. kmx == 0) then
@@ -31469,14 +31469,14 @@ else if (jabarocterm == 2 .or. jabarocterm == 3 .or. kmx == 0) then
  else
 
     rvdn = 0d0 ; grn = 0d0
-   
+
    !$OMP PARALLEL DO       &
    !$OMP PRIVATE(n)
     do n = 1,ndx
        call addbarocn(n)
     enddo
    !$OMP END PARALLEL DO
-   
+
    !$OMP PARALLEL DO       &
    !$OMP PRIVATE(LL,Lb,Lt)
     do LL = 1,lnxi
@@ -31506,7 +31506,7 @@ else if (jabarocterm == 2 .or. jabarocterm == 3 .or. kmx == 0) then
 
  call getkbotktop(n,kb,kt)
  ! if (kt < kb) return
- if (zws(kt) - zws(kb-1) < epshu) then 
+ if (zws(kt) - zws(kb-1) < epshu) then
      grn(kb:kt)  = 0d0
      rvdn(kb:kt) = 1d-10
      return
@@ -33432,10 +33432,10 @@ end subroutine Swart
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
 
- 
+
  if (depth < 0.1d0 .or. Tsig == 0) then
     Uorbi = 0d0 ; rlabd = 0d0 ; ust = 0d0
- else 
+ else
     call getwavenr(depth,tsig,rk)
     hrm    = min( Hrms,gammax*depth )
     arms   = 0.5d0*hrm
@@ -38380,7 +38380,7 @@ end subroutine setbobs_fixedweirs
 
     if (jawave > 0 ) then ! now every timestep, not only at getfetch updates
        do k = 1,ndx
-          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rlabda(k), ustk(k)) 
+          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rlabda(k), ustk(k))
        enddo
     endif
 
@@ -43629,8 +43629,10 @@ if (mext /= 0) then
            ! Converter will put 'x' in array(2*nummovobs-1) and 'y' in array(2*nummovobs).
            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename, filetype, method, operand, targetIndex=nummovobs)
 
-        else if (qid(1:12) == 'waqparameter' .or. qid(1:18) == 'waqmassbalancearea' .or. qid(1:17) == 'waqmonitoringarea') then
+        else if (qid(1:12) == 'waqparameter' .or. qid(1:18) == 'waqmassbalancearea' .or. qid(1:17) == 'waqmonitoringarea' .or. &
+                 qid(1:16) == 'waqsegmentnumber') then
            ! Already taken care of in m_fm_wq_processes
+
            success  =  .true.
 
         else if (qid(1:11) == 'waqfunction') then
@@ -46202,7 +46204,7 @@ if (kcu(L) == -1 .and. allocated(bndWidth1D)) then
    end if
 end if
 
-if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width. 
+if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
    width = bndwidth1D(ibndsect)
    area = hpr*width
    perim = width+2*hpr
@@ -46231,7 +46233,7 @@ if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
    end if
 
    return
-   
+
 else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
    cz = 0d0
 
