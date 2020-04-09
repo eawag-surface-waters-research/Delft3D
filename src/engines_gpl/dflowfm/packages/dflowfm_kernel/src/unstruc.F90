@@ -1766,7 +1766,7 @@ if(q /= 0) then
        endif
     endif
 
-    if (kcs(k1) == 1) then
+    if (kcs(k1) == 1) then ! TODO: consider *also* adding storage area to the 2D side k1, if kcu(L)==5, maybe not for kcu(L)==7
        hpr = s1(k1)-bob0(1,L)
        if (hpr >= 0d0) then
           call getprof_1D(L, hpr, ar1, wid1, japerim, calcConv, perim)
@@ -1787,7 +1787,7 @@ if(q /= 0) then
        endif
     endif
 
-    if (kcs(k2) == 1) then
+    if (kcs(k2) == 1) then ! TODO: consider *also* adding storage area to the 2D side k2, if kcu(L)==5, maybe not for kcu(L)==7
        hpr = s1(k2)-bob0(2,L)
        if (hpr >= 0d0) then
           call getprof_1D(L, hpr, ar2, wid2, japerim, calcConv, perim)
