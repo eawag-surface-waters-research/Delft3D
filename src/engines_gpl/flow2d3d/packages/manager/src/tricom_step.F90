@@ -785,7 +785,7 @@ subroutine tricom_step(olv_handle, gdp)
           elseif (nst == itwav .and. waveol==1) then
              itrw = nst + 1
           endif
-          if (nst == itrw) then
+          if (nst == itrw .or. (nst == itstrt .and. restid /= ' ')) then
              if (waveol==2) then ! wave times can only be updated in online coupled mode
                 call rdtimw(comfil    ,lundia    ,error     ,ntwav     , &
                           & waverd    ,nmaxus    ,mmax      ,gdp       )
