@@ -15439,18 +15439,22 @@ subroutine read_structure_dimensions_from_rst(ncid, filename, istrtypein, struna
 
 end subroutine read_structure_dimensions_from_rst
 
+!> Defines a new variable in a NetCDF dataset, also setting some frequently used attributes.
 subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord, geometry)
    use netcdf
    use m_sferic
    implicit none
    
-   integer,                   intent(in   ) :: ncid  ! file unit
-   integer,                   intent(inout) :: idq   ! quantity id
-   integer,                   intent(in   ) :: itype ! double or integer etc
-   integer,                   intent(in   ) :: n     ! dim of idim
-   integer,                   intent(in   ) :: idims(n)
-   character(len=*),          intent(in   ) :: name, desc, unit, namecoord
-   character(len=*), optional,intent(in   ) :: geometry
+   integer,                   intent(in   ) :: ncid  !< NetCDF dataset id.
+   integer,                   intent(inout) :: idq   !< NetCDF variable id for the newly created variable.
+   integer,                   intent(in   ) :: itype !< data type, one of the standard nf90_* data types.
+   integer,                   intent(in   ) :: n     !< Rank of the variable
+   integer,                   intent(in   ) :: idims(n) !< NetCDF dimension id(s) for this variable.
+   character(len=*),          intent(in   ) :: name  !< Variable name in the dataset
+   character(len=*),          intent(in   ) :: desc  !< Description of the variable, used in the :long_name attribute.
+   character(len=*),          intent(in   ) :: unit  !< Units of the variable (udunit-compatible), used in the :units attribute.
+   character(len=*),          intent(in   ) :: namecoord !< Text string the with coordinate variable names, used in the :coordinates attribute.
+   character(len=*), optional,intent(in   ) :: geometry !< (optional) Variable name of a geometry variable in the same dataset, used in the :geometry attribute.
 
    integer                          :: ierr
    ierr = 0

@@ -18758,6 +18758,7 @@ subroutine unc_write_his(tim)            ! wrihis
                id_culvertgeom_node_count,  id_culvertgeom_node_coordx,  id_culvertgeom_node_coordy, &
                id_gategengeom_node_count,  id_gategengeom_node_coordx,  id_gategengeom_node_coordy, &
                id_pumpgeom_node_count,     id_pumpgeom_node_coordx,     id_pumpgeom_node_coordy,    &
+               id_bridgegeom_node_count,   id_bridgegeom_node_coordx,   id_bridgegeom_node_coordy,  &
                id_srcgeom_node_count,      id_srcgeom_node_coordx,      id_srcgeom_node_coordy
     double precision, allocatable :: geom_x(:), geom_y(:)
     integer, allocatable :: node_count(:)
@@ -18773,7 +18774,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer                      :: ntot, mobs, k, i, j, jj, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4, nNodeTot, nNodes, L0, k1, k2, nlinks
     character(len=255)           :: station_geom_container_name, crs_geom_container_name, weir_geom_container_name, orif_geom_container_name, &
                                     genstru_geom_container_name, uniweir_geom_container_name, culvert_geom_container_name, &
-                                    gategen_geom_container_name, pump_geom_container_name, src_geom_container_name
+                                    gategen_geom_container_name, pump_geom_container_name, bridge_geom_container_name, src_geom_container_name
     logical                      :: jawel
     double precision             :: xp, yp, qsum, vals, valx, valy, valwx, valwy, valpatm, wind, cof0, tmpx, tmpy
 
@@ -19602,14 +19603,12 @@ subroutine unc_write_his(tim)            ! wrihis
             src_geom_container_name = 'source_sink_geom'
             nNodeTot = 0
             do i = 1, numsrc
-               if (ksrc(1,i) == 0 .and. ksrc(4,i)== 0) then ! both source and sink points are not in the model region
-                  nNodes = 0
-               else if (ksrc(1,i) == 0) then
-                  nNodes = 1
-               else if (ksrc(4,i) == 0) then
-                  nNodes = 1
-               else
-                  nNodes = 2
+               nNodes = 0
+               if (k1 /= 0) then
+                  nNodes = nNodes + 1
+               end if
+               if (k2 /= 0) then
+                  nNodes = nNodes + 1
                end if
                nNodeTot = nNodeTot + nNodes
             end do
@@ -19696,7 +19695,7 @@ subroutine unc_write_his(tim)            ! wrihis
             genstru_geom_container_name = 'general_structure_geom'
             nNodeTot = 0
             if (network%sts%numGeneralStructures > 0) then ! new general structure
-               nNodeTot = get_total_number_of_nodes(ST_GENERAL_ST, network%sts%numGeneralStructures)
+               nNodeTot = get_total_number_of_geom_nodes(ST_GENERAL_ST, network%sts%numGeneralStructures)
             else ! old general structure
                do n = 1, ngenstru
                   i = genstru2cgen(n)
@@ -19880,7 +19879,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ! Define geometry related variables
             pump_geom_container_name = 'pump_geom'
             nNodeTot = 0
-            nNodeTot = get_total_number_of_nodes(ST_PUMP, network%sts%numPumps)
+            nNodeTot = get_total_number_of_geom_nodes(ST_PUMP, network%sts%numPumps)
 
             ierr = sgeom_def_geometry_variables(ihisfile, pump_geom_container_name, 'pump', 'line', nNodeTot, id_pumpdim, &
                id_pumpgeom_node_count, id_pumpgeom_node_coordx, id_pumpgeom_node_coordy)
@@ -20111,7 +20110,7 @@ subroutine unc_write_his(tim)            ! wrihis
             weir_geom_container_name = 'weirgen_geom'
             nNodeTot = 0
             if (network%sts%numWeirs > 0) then ! new weir
-               nNodeTot = get_total_number_of_nodes(ST_WEIR, network%sts%numWeirs)
+               nNodeTot = get_total_number_of_geom_nodes(ST_WEIR, network%sts%numWeirs)
             else ! old weir
                do n = 1, nweirgen
                   i = weir2cgen(n)
@@ -20214,9 +20213,9 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_orifgen_id,  'long_name', 'Id of orifice')
 
             ! Define geometry related variables
-            orif_geom_container_name = 'orifgen_geom'
+            orif_geom_container_name = 'orifice_geom'
             nNodeTot = 0
-            nNodeTot = get_total_number_of_nodes(ST_ORIFICE, network%sts%numOrifices)
+            nNodeTot = get_total_number_of_geom_nodes(ST_ORIFICE, network%sts%numOrifices)
 
             ierr = sgeom_def_geometry_variables(ihisfile, orif_geom_container_name, 'orifice', 'line', nNodeTot, id_orifgendim, &
                id_orifgeom_node_count, id_orifgeom_node_coordx, id_orifgeom_node_coordy)
@@ -20314,55 +20313,72 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_bridge_id,  'cf_role',   'timeseries_id')
             ierr = nf90_put_att(ihisfile, id_bridge_id,  'long_name', 'Id of bridge')
 
+            ! Define geometry related variables
+            bridge_geom_container_name = 'bridge_geom'
+            nNodeTot = 0
+            nNodeTot = get_total_number_of_geom_nodes(ST_BRIDGE, network%sts%numBridges)
+
+            ierr = sgeom_def_geometry_variables(ihisfile, bridge_geom_container_name, 'bridge', 'line', nNodeTot, id_bridgedim, &
+               id_bridgegeom_node_count, id_bridgegeom_node_coordx, id_bridgegeom_node_coordy)
+
             ierr = nf90_def_var(ihisfile, 'bridge_discharge',     nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_dis)
             ierr = nf90_put_att(ihisfile, id_bridge_dis, 'long_name', 'Discharge through bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_dis, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_bridge_dis, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_dis, 'geometry', bridge_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'bridge_s1up',     nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_s1up)
             ierr = nf90_put_att(ihisfile, id_bridge_s1up, 'standard_name', 'sea_surface_height')
             ierr = nf90_put_att(ihisfile, id_bridge_s1up, 'long_name', 'Water level upstream of bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_s1up, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_s1up, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_s1up, 'geometry', bridge_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'bridge_s1dn',     nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_s1dn)
             ierr = nf90_put_att(ihisfile, id_bridge_s1dn, 'standard_name', 'sea_surface_height')
             ierr = nf90_put_att(ihisfile, id_bridge_s1dn, 'long_name', 'Water level downstream of bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_s1dn, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_s1dn, 'geometry', bridge_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'bridge_head', nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_head)
             ierr = nf90_put_att(ihisfile, id_bridge_head, 'long_name', 'Head difference across bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_head, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_head, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_head, 'geometry', bridge_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'bridge_flow_area ', nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_au)
             ierr = nf90_put_att(ihisfile, id_bridge_au, 'long_name', 'Flow area at bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_au, 'units', 'm2')
             ierr = nf90_put_att(ihisfile, id_bridge_au, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_au, 'geometry', bridge_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'bridge_velocity ', nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_vel)
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'long_name', 'Velocity through bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_bridge_vel, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_vel, 'geometry', bridge_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'bridge_blup',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_blup)
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'standard_name', 'altitude')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'long_name', 'Bed level at upstream of bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_blup, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_blup, 'geometry', bridge_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'bridge_bldn',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_bldn)
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'standard_name', 'altitude')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'long_name', 'Bed level at downstream of bridge')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_bldn, 'geometry', bridge_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'bridge_bl_actual',  nf90_double, (/ id_bridgedim, id_timedim /), id_bridge_bl_act)
             ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'standard_name', 'altitude')
             ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'long_name', 'Actual bed level of bridge (crest)')
             ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'coordinates', 'bridge_id')
+            ierr = nf90_put_att(ihisfile, id_bridge_bl_act, 'geometry', bridge_geom_container_name)
         endif
 
         ! Culvert
@@ -20375,7 +20391,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ! Define geometry related variables
             culvert_geom_container_name = 'culvert_geom'
             nNodeTot = 0
-            nNodeTot = get_total_number_of_nodes(ST_CULVERT, network%sts%numculverts)
+            nNodeTot = get_total_number_of_geom_nodes(ST_CULVERT, network%sts%numculverts)
 
             ierr = sgeom_def_geometry_variables(ihisfile, culvert_geom_container_name, 'culvert', 'line', nNodeTot, id_culvertdim, &
                id_culvertgeom_node_count, id_culvertgeom_node_coordx, id_culvertgeom_node_coordy)
@@ -20523,7 +20539,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ! Define geometry related variables
             uniweir_geom_container_name = 'uniweir_geom'
             nNodeTot = 0
-            nNodeTot = get_total_number_of_nodes(ST_UNI_WEIR, network%sts%numuniweirs)
+            nNodeTot = get_total_number_of_geom_nodes(ST_UNI_WEIR, network%sts%numuniweirs)
 
             ierr = sgeom_def_geometry_variables(ihisfile, uniweir_geom_container_name, 'uniweir', 'line', nNodeTot, id_uniweirdim, &
                id_uniweirgeom_node_count, id_uniweirgeom_node_coordx, id_uniweirgeom_node_coordy)
@@ -20691,6 +20707,7 @@ subroutine unc_write_his(tim)            ! wrihis
             end do
             ! write geometry variables at the first time of history output
             j = 1
+            call realloc(node_count, ncrs, fill = 0)
             do i = 1, ncrs
                nlinks = crs(i)%path%lnx
                if (nlinks > 0) then
@@ -20698,9 +20715,9 @@ subroutine unc_write_his(tim)            ! wrihis
                else if (nlinks == 0) then
                   nNodes = 0
                end if
-               ierr = nf90_put_var(ihisfile, id_crsgeom_node_count, nNodes, (/ i /))
+               node_count(i) = nNodes
 
-               if (nlinks > 0) then
+               if (nNodes > 0) then
                   call realloc(geom_x, nNodes)
                   call realloc(geom_y, nNodes)
                   L = crs(i)%path%iperm(1)
@@ -20720,11 +20737,12 @@ subroutine unc_write_his(tim)            ! wrihis
                      end do
                   end if
 
-                  ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordx, geom_x, (/j/))
-                  ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordy, geom_y, (/j/))
+                  ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  ierr = nf90_put_var(ihisfile, id_crsgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                   j = j + nNodes
                end if
             end do
+            ierr = nf90_put_var(ihisfile, id_crsgeom_node_count, node_count, start = (/ 1 /), count = (/ ncrs /))
         end if
 
         if (jahiscgen > 0 .and. ntmp > 0) then
@@ -21188,36 +21206,29 @@ subroutine unc_write_his(tim)            ! wrihis
        if (it_his == 1) then
           j = 1
           call realloc(node_count, numsrc, fill = 0)
+          call realloc(geom_x, 2)
+          call realloc(geom_y, 2)
           do i = 1, numsrc
              k1= ksrc(1,i)
              k2= ksrc(4,i)
-             if (k1 == 0 .and. k2 == 0) then ! both source and sink points are not in the model region
-                nNodes = 0
-                cycle
-             else if (k1 == 0) then
-                nNodes = 1
-                call realloc(geom_x, nNodes)
-                call realloc(geom_y, nNodes)
-                geom_x(1) = xz(k2)
-                geom_y(1) = yz(k2)
-             else if (k2 == 0) then
-                nNodes = 1
-                call realloc(geom_x, nNodes)
-                call realloc(geom_y, nNodes)
-                geom_x(1) = xz(k1)
-                geom_y(1) = yz(k1)
-             else
-                nNodes = 2
-                call realloc(geom_x, nNodes)
-                call realloc(geom_y, nNodes)
-                geom_x(1) = xz(k1)
-                geom_y(1) = yz(k1)
-                geom_x(2) = xz(k2)
-                geom_y(2) = yz(k2)
+             nNodes = 0
+             if (k1 /= 0) then
+                nNodes = nNodes + 1
+                geom_x(nNodes) = xz(k1)
+                geom_y(nNodes) = yz(k1)
              end if
+             if (k2 /= 0) then
+                nNodes = nNodes + 1
+                geom_x(nNodes) = xz(k2)
+                geom_y(nNodes) = yz(k2)
+             end if
+
              node_count(i) = nNodes
-             ierr = nf90_put_var(ihisfile, id_srcgeom_node_coordx,  geom_x(:), start = (/ j /), count = (/ nNodes /))
-             ierr = nf90_put_var(ihisfile, id_srcgeom_node_coordy,  geom_y(:), start = (/ j /), count = (/ nNodes /))
+             if (nNodes > 0) then
+                ierr = nf90_put_var(ihisfile, id_srcgeom_node_coordx,  geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                ierr = nf90_put_var(ihisfile, id_srcgeom_node_coordy,  geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
+             end if
+
              j = j + nNodes
           end do
           ierr = nf90_put_var(ihisfile, id_srcgeom_node_count, node_count)
@@ -21285,19 +21296,22 @@ subroutine unc_write_his(tim)            ! wrihis
             if (it_his == 1) then
                if (network%sts%numGeneralStructures > 0) then ! new general structure
                   j = 1
+                  call realloc(node_count, network%sts%numGeneralStructures, fill = 0)
                   do i = 1, network%sts%numGeneralStructures
-                     nNodes = get_number_of_nodes(ST_GENERAL_ST, i)
-                     ierr = nf90_put_var(ihisfile, id_genstrugeom_node_count, nNodes, start = (/ i /))
+                     nNodes = get_number_of_geom_nodes(ST_GENERAL_ST, i)
+                     node_count(i) = nNodes
 
                      if (nNodes > 0) then
-                        call get_coordinates_of_structure(ST_GENERAL_ST, i, nNodes, geom_x, geom_y)
-                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordx, geom_x, start = (/j/))
-                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordy, geom_y, start = (/j/))
+                        call get_geom_coordinates_of_structure(ST_GENERAL_ST, i, nNodes, geom_x, geom_y)
+                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                         j = j + nNodes
                      end if
                   end do
+                  ierr = nf90_put_var(ihisfile, id_genstrugeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numGeneralStructures /))
                else ! old general structure
                   j = 1
+                  call realloc(node_count, ngenstru, fill = 0)
                   do n = 1, ngenstru
                      i = genstru2cgen(n)
                      nlinks = L2cgensg(i) - L1cgensg(i) + 1
@@ -21306,8 +21320,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      else if (nlinks == 0) then
                         nNodes = 0
                      end if
-
-                     ierr = nf90_put_var(ihisfile, id_genstrugeom_node_count, nNodes, start = (/ n /))
+                     node_count(n) = nNodes
 
                      if (nNodes > 0) then
                         call realloc(geom_x, nNodes)
@@ -21315,28 +21328,29 @@ subroutine unc_write_his(tim)            ! wrihis
 
                         L0 = L1cgensg(i)
                         L = abs(kcgen(3,L0))
-                        k1 = ln(1,L)
-                        k2 = ln(2,L)
-                        geom_x(1) = xz(k1)
-                        geom_x(2) = xz(k2)
-                        geom_y(1) = yz(k1)
-                        geom_y(2) = yz(k2)
+                        k1 = lncn(1,L)
+                        k2 = lncn(2,L)
+                        geom_x(1) = xk(k1)
+                        geom_x(2) = xk(k2)
+                        geom_y(1) = yk(k1)
+                        geom_y(2) = yk(k2)
                         if (nlinks > 1) then
                            k = 3
                            do L0 = L1cgensg(i)+1, L2cgensg(i)
                               L = abs(kcgen(3,L0))
-                              k3 = ln(2,L)
-                              geom_x(k) = xz(k3)
-                              geom_y(k) = yz(k3)
+                              k3 = lncn(2,L)
+                              geom_x(k) = xk(k3)
+                              geom_y(k) = yk(k3)
                               k = k+1
                            end do
                         end if
 
-                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordx, geom_x, start = (/j/))
-                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordy, geom_y, start = (/j/))
+                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                        ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                         j = j + nNodes
                      end if
                   end do
+                  ierr = nf90_put_var(ihisfile, id_genstrugeom_node_count, node_count, start = (/ 1 /), count = (/ ngenstru /))
                end if
             end if
          endif
@@ -21359,17 +21373,19 @@ subroutine unc_write_his(tim)            ! wrihis
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             j = 1
+            call realloc(node_count, network%sts%numPumps, fill = 0)
             do i = 1, network%sts%numPumps
-               nNodes = get_number_of_nodes(ST_PUMP, i)
-               ierr = nf90_put_var(ihisfile, id_pumpgeom_node_count, nNodes, start = (/ i /))
+               nNodes = get_number_of_geom_nodes(ST_PUMP, i)
+               node_count(i) = nNodes
 
                if (nNodes > 0) then
-                  call get_coordinates_of_structure(ST_PUMP, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordx, geom_x, start = (/j/))
-                  ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordy, geom_y, start = (/j/))
+                  call get_geom_coordinates_of_structure(ST_PUMP, i, nNodes, geom_x, geom_y)
+                  ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                   j = j + nNodes
                end if
             end do
+            ierr = nf90_put_var(ihisfile, id_pumpgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numPumps /))
          end if
       end if
 
@@ -21392,17 +21408,19 @@ subroutine unc_write_his(tim)            ! wrihis
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             j = 1
+            call realloc(node_count, network%sts%numOrifices, fill = 0)
             do i = 1, network%sts%numOrifices
-               nNodes = get_number_of_nodes(ST_ORIFICE, i)
-               ierr = nf90_put_var(ihisfile, id_orifgeom_node_count, nNodes, start = (/ i /))
+               nNodes = get_number_of_geom_nodes(ST_ORIFICE, i)
+               node_count(i) = nNodes
 
                if (nNodes > 0) then
-                  call get_coordinates_of_structure(ST_ORIFICE, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_orifgeom_node_coordx, geom_x, start = (/j/))
-                  ierr = nf90_put_var(ihisfile, id_orifgeom_node_coordy, geom_y, start = (/j/))
+                  call get_geom_coordinates_of_structure(ST_ORIFICE, i, nNodes, geom_x, geom_y)
+                  ierr = nf90_put_var(ihisfile, id_orifgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  ierr = nf90_put_var(ihisfile, id_orifgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                   j = j + nNodes
                end if
             end do
+            ierr = nf90_put_var(ihisfile, id_orifgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numOrifices /))
          end if
       end if
 
@@ -21418,6 +21436,23 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_bridge_bldn,  valbridge(9,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_bridge_bl_act,valbridge(10,i),(/ i, it_his /))
          enddo
+         ! write geometry variables at the first time of history output
+         if (it_his == 1) then
+            j = 1
+            call realloc(node_count, network%sts%numBridges, fill = 0)
+            do i = 1, network%sts%numBridges
+               nNodes = get_number_of_geom_nodes(ST_BRIDGE, i)
+               node_count(i) = nNodes
+
+               if (nNodes > 0) then
+                  call get_geom_coordinates_of_structure(ST_BRIDGE, i, nNodes, geom_x, geom_y)
+                  ierr = nf90_put_var(ihisfile, id_bridgegeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  ierr = nf90_put_var(ihisfile, id_bridgegeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  j = j + nNodes
+               end if
+            end do
+            ierr = nf90_put_var(ihisfile, id_bridgegeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numBridges /))
+         end if
       end if
 
       if (jahisculv > 0 .and. network%sts%numCulverts > 0) then
@@ -21436,17 +21471,19 @@ subroutine unc_write_his(tim)            ! wrihis
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             j = 1
+            call realloc(node_count, network%sts%numCulverts, fill = 0)
             do i = 1, network%sts%numCulverts
-               nNodes = get_number_of_nodes(ST_CULVERT, i)
-               ierr = nf90_put_var(ihisfile, id_culvertgeom_node_count, nNodes, start = (/ i /))
+               nNodes = get_number_of_geom_nodes(ST_CULVERT, i)
+               node_count(i) = nNodes
 
                if (nNodes > 0) then
-                  call get_coordinates_of_structure(ST_CULVERT, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_culvertgeom_node_coordx, geom_x, start = (/j/))
-                  ierr = nf90_put_var(ihisfile, id_culvertgeom_node_coordy, geom_y, start = (/j/))
+                  call get_geom_coordinates_of_structure(ST_CULVERT, i, nNodes, geom_x, geom_y)
+                  ierr = nf90_put_var(ihisfile, id_culvertgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  ierr = nf90_put_var(ihisfile, id_culvertgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                   j = j + nNodes
                end if
             end do
+            ierr = nf90_put_var(ihisfile, id_culvertgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numCulverts /))
          end if
       end if
 
@@ -21463,17 +21500,19 @@ subroutine unc_write_his(tim)            ! wrihis
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             j = 1
+            call realloc(node_count, network%sts%numuniweirs, fill = 0)
             do i = 1, network%sts%numuniweirs
-               nNodes = get_number_of_nodes(ST_UNI_WEIR, i)
-               ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_count, nNodes, start = (/ i /))
+               nNodes = get_number_of_geom_nodes(ST_UNI_WEIR, i)
+               node_count(i) = nNodes
 
                if (nNodes > 0) then
-                  call get_coordinates_of_structure(ST_UNI_WEIR, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_coordx, geom_x, start = (/j/))
-                  ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_coordy, geom_y, start = (/j/))
+                  call get_geom_coordinates_of_structure(ST_UNI_WEIR, i, nNodes, geom_x, geom_y)
+                  ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                   j = j + nNodes
                end if
             end do
+            ierr = nf90_put_var(ihisfile, id_uniweirgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numuniweirs /))
          end if
       end if
 
@@ -21511,6 +21550,7 @@ subroutine unc_write_his(tim)            ! wrihis
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
             j = 1
+            call realloc(node_count, ngategen, fill = 0)
             do n = 1, ngategen
                i = gate2cgen(n)
                nlinks = L2cgensg(i) - L1cgensg(i) + 1
@@ -21519,8 +21559,7 @@ subroutine unc_write_his(tim)            ! wrihis
                else if (nlinks == 0) then
                   nNodes = 0
                end if
-
-               ierr = nf90_put_var(ihisfile, id_gategengeom_node_count, nNodes, start = (/ n /))
+               node_count(n) = nNodes
 
                if (nNodes > 0) then
                   call realloc(geom_x, nNodes)
@@ -21528,28 +21567,29 @@ subroutine unc_write_his(tim)            ! wrihis
 
                   L0 = L1cgensg(i)
                   L = abs(kcgen(3,L0))
-                  k1 = ln(1,L)
-                  k2 = ln(2,L)
-                  geom_x(1) = xz(k1)
-                  geom_x(2) = xz(k2)
-                  geom_y(1) = yz(k1)
-                  geom_y(2) = yz(k2)
+                  k1 = lncn(1,L)
+                  k2 = lncn(2,L)
+                  geom_x(1) = xk(k1)
+                  geom_x(2) = xk(k2)
+                  geom_y(1) = yk(k1)
+                  geom_y(2) = yk(k2)
                   if (nlinks > 1) then
                      k = 3
                      do L0 = L1cgensg(i)+1, L2cgensg(i)
                         L = abs(kcgen(3,L0))
-                        k3 = ln(2,L)
-                        geom_x(k) = xz(k3)
-                        geom_y(k) = yz(k3)
+                        k3 = lncn(2,L)
+                        geom_x(k) = xk(k3)
+                        geom_y(k) = yk(k3)
                         k = k+1
                      end do
                   end if
 
-                  ierr = nf90_put_var(ihisfile, id_gategengeom_node_coordx, geom_x, start = (/j/))
-                  ierr = nf90_put_var(ihisfile, id_gategengeom_node_coordy, geom_y, start = (/j/))
+                  ierr = nf90_put_var(ihisfile, id_gategengeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  ierr = nf90_put_var(ihisfile, id_gategengeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                   j = j + nNodes
                end if
             end do
+            ierr = nf90_put_var(ihisfile, id_gategengeom_node_count, node_count, start = (/ 1 /), count = (/ ngategen /))
          end if
       end if
 
@@ -21582,21 +21622,24 @@ subroutine unc_write_his(tim)            ! wrihis
          if (it_his == 1) then
             if (network%sts%numWeirs > 0) then ! new weir
                j = 1
+               call realloc(node_count, network%sts%numWeirs, fill = 0)
                do i = 1, nweirgen
-                  nNodes = get_number_of_nodes(ST_WEIR, i)
-                  ierr = nf90_put_var(ihisfile, id_weirgeom_node_count, nNodes, start = (/ i /))
+                  nNodes = get_number_of_geom_nodes(ST_WEIR, i)
+                  node_count(i) = nNodes
 
                   if (nNodes > 0) then
 
-                     call get_coordinates_of_structure(ST_WEIR, i, nNodes, geom_x, geom_y)
+                     call get_geom_coordinates_of_structure(ST_WEIR, i, nNodes, geom_x, geom_y)
 
-                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x, start = (/j/))
-                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y, start = (/j/))
+                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                      j = j + nNodes
                   end if
                end do
+               ierr = nf90_put_var(ihisfile, id_weirgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numWeirs /))
             else
                j = 1
+               call realloc(node_count, nweirgen, fill = 0)
                do n = 1, nweirgen
                   i = weir2cgen(n)
                   nlinks = L2cgensg(i) - L1cgensg(i) + 1
@@ -21605,8 +21648,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   else if (nlinks == 0) then
                      nNodes = 0
                   end if
-
-                  ierr = nf90_put_var(ihisfile, id_weirgeom_node_count, nNodes, start = (/ n /))
+                  node_count(n) = nNodes
 
                   if (nNodes > 0) then
                      call realloc(geom_x, nNodes)
@@ -21614,28 +21656,29 @@ subroutine unc_write_his(tim)            ! wrihis
 
                      L0 = L1cgensg(i)
                      L = abs(kcgen(3,L0))
-                     k1 = ln(1,L)
-                     k2 = ln(2,L)
-                     geom_x(1) = xz(k1)
-                     geom_x(2) = xz(k2)
-                     geom_y(1) = yz(k1)
-                     geom_y(2) = yz(k2)
+                     k1 = lncn(1,L)
+                     k2 = lncn(2,L)
+                     geom_x(1) = xk(k1)
+                     geom_x(2) = xk(k2)
+                     geom_y(1) = yk(k1)
+                     geom_y(2) = yk(k2)
                      if (nlinks > 1) then
                         k = 3
                         do L0 = L1cgensg(i)+1, L2cgensg(i)
                            L = abs(kcgen(3,L0))
-                           k3 = ln(2,L)
-                           geom_x(k) = xz(k3)
-                           geom_y(k) = yz(k3)
+                           k3 = lncn(2,L)
+                           geom_x(k) = xk(k3)
+                           geom_y(k) = yk(k3)
                            k = k+1
                         end do
                      end if
 
-                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x, start = (/j/))
-                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y, start = (/j/))
+                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                     ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                      j = j + nNodes
                   end if
                end do
+               ierr = nf90_put_var(ihisfile, id_weirgeom_node_count, node_count, start = (/ 1 /), count = (/ nweirgen /))
             end if
          end if
       end if

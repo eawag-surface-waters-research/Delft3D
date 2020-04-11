@@ -812,18 +812,22 @@ integer function get_istru(istrtypein, i)
       get_istru = network%sts%culvertIndices(i)
    case (ST_UNI_WEIR)
       get_istru = network%sts%uniweirIndices(i)
+   case (ST_BRIDGE)
+      get_istru = network%sts%bridgeIndices(i)
    case (ST_PUMP)
       get_istru = network%sts%pumpIndices(i)
    end select
 end function get_istru
 
-!!> Gets number of nodes when given a structure type and structure index
-integer function get_number_of_nodes(istrtypein, i)
+!> Gets number of geometry nodes for a single structure type and structure index.
+!! Geometry nodes can be used in a (multi-) polyline representation of the placement
+!! of a structure on flow links.
+integer function get_number_of_geom_nodes(istrtypein, i)
    use m_1d_structures
    implicit none
    integer, intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                          !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
-   integer, intent(in   ) :: i           !< Structure index
+   integer, intent(in   ) :: i           !< Structure index for this structure type.
 
    integer :: istru, nLinks
    type(t_structure), pointer    :: pstru
@@ -834,15 +838,21 @@ integer function get_number_of_nodes(istrtypein, i)
    pstru => network%sts%struct(istru)
    nLinks = pstru%numlinks
    if (nLinks > 0) then
-      get_number_of_nodes = nLinks + 1
+      ! "2D" representation: nLinks+1 polyline points.
+      ! TODO: for multiple 1D links in a single structure, we could consider
+      !       a multi-part polyline. That would mean: get_number_of_geom_nodes = 2*nLinks
+      get_number_of_geom_nodes = nLinks + 1
    else if (nLinks == 0) then
-      get_number_of_nodes = 0
+      ! When no links: empty geometry.
+      get_number_of_geom_nodes = 0
    end if
 
-end function get_number_of_nodes
+end function get_number_of_geom_nodes
 
-!!> Gets total number of nodes of a given structure type and total number of the structures
-integer function get_total_number_of_nodes(istrtypein, nstru)
+!> Gets total number of geometry nodes for a given structure type and total number of the structures.
+!! Geometry nodes can be used in a (multi-) polyline representation of the placement
+!! of structures on flow links.
+integer function get_total_number_of_geom_nodes(istrtypein, nstru)
    use m_1d_structures
    implicit none
    integer, intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
@@ -852,26 +862,29 @@ integer function get_total_number_of_nodes(istrtypein, nstru)
    integer :: i, istru, nNodes, nLinks
    type(t_structure), pointer    :: pstru
 
-   get_total_number_of_nodes = 0
+   get_total_number_of_geom_nodes = 0
    do i = 1, nstru
-      nNodes = get_number_of_nodes(istrtypein, i)
-      get_total_number_of_nodes = get_total_number_of_nodes + nNodes
+      nNodes = get_number_of_geom_nodes(istrtypein, i)
+      get_total_number_of_geom_nodes = get_total_number_of_geom_nodes + nNodes
    end do
 
-end function get_total_number_of_nodes
+end function get_total_number_of_geom_nodes
 
-!> Gets coordinates of a structure
-subroutine get_coordinates_of_structure(istrtypein, i, nNodes, x, y)
+!> Gets geometry coordinates of a structure.
+!! Geometry coordinates can be used in a (multi-) polyline representation of the placement
+!! of structures on flow links.
+subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
    use m_1d_structures
    use m_alloc
-   use m_flowgeom, only: xz, yz, ln
+   use m_flowgeom, only: lncn
+   use network_data, only: xk, yk
    implicit none
    integer,                       intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                                                !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
-   integer,                       intent(in   ) :: i           !< Structure index
-   integer,                       intent(in   ) :: nNodes      !< Number of nodes in this structure
-   double precision, allocatable, intent(  out) :: x(:)           !< x-coordinate of the structure
-   double precision, allocatable, intent(  out) :: y(:)           !< y-coordinate of the structure
+   integer,                       intent(in   ) :: i           !< Structure index for this structure type.
+   integer,                       intent(in   ) :: nNodes      !< Number of geometry nodes in this structure (as computed by get_number_of_geom_nodes()).
+   double precision, allocatable, intent(  out) :: x(:)        !< x-coordinates of the structure (will be reallocated when needed)
+   double precision, allocatable, intent(  out) :: y(:)        !< y-coordinates of the structure (will be reallocated when needed)
 
    integer :: istru, nLinks, L, L0, k1, k2, k3, k
    type(t_structure), pointer    :: pstru
@@ -881,27 +894,27 @@ subroutine get_coordinates_of_structure(istrtypein, i, nNodes, x, y)
    nLinks = pstru%numlinks
 
    if (nNodes > 0) then
-      call realloc(x, nNodes)
-      call realloc(y, nNodes)
+      call realloc(x, nNodes, keepExisting = .false.)
+      call realloc(y, nNodes, keepExisting = .false.)
 
       L = abs(pstru%linknumbers(1))
-      k1 = ln(1,L)
-      k2 = ln(2,L)
+      k1 = lncn(1,L)
+      k2 = lncn(2,L)
 
-      x(1) = xz(k1)
-      x(2) = xz(k2)
-      y(1) = yz(k1)
-      y(2) = yz(k2)
+      x(1) = xk(k1)
+      x(2) = xk(k2)
+      y(1) = yk(k1)
+      y(2) = yk(k2)
       if (nLinks > 1) then
          k = 3
          do L0 = 2, nLinks
             L = abs(pstru%linknumbers(L0))
-            k3 = ln(2,L)
-            x(k) = xz(k3)
-            y(k) = yz(k3)
+            k3 = lncn(2,L)
+            x(k) = xk(k3)
+            y(k) = yk(k3)
             k = k+1
          end do
       end if
    end if
-end subroutine get_coordinates_of_structure
+end subroutine get_geom_coordinates_of_structure
 end module m_structures
