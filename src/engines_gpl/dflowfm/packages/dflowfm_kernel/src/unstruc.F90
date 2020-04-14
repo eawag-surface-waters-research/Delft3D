@@ -19604,6 +19604,8 @@ subroutine unc_write_his(tim)            ! wrihis
             nNodeTot = 0
             do i = 1, numsrc
                nNodes = 0
+               k1= ksrc(1,i)
+               k2= ksrc(4,i)
                if (k1 /= 0) then
                   nNodes = nNodes + 1
                end if
