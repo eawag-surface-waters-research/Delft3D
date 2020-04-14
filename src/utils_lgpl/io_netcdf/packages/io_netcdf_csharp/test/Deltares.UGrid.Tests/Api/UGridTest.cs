@@ -616,7 +616,7 @@ namespace Deltares.UGrid.Tests.Api
             {
                 api.Open(Path);
                 var id = api.GetMeshIdsByMeshType(UGridMeshType.Mesh2D).FirstOrDefault();
-                
+
                 var values = api.GetVariableValues("face_y", id, GridLocationType.Face);
 
                 Assert.AreEqual(values.Length, 375);
@@ -697,7 +697,7 @@ namespace Deltares.UGrid.Tests.Api
                 };
 
                 var variableName = "abc";
-                api.SetVariableValues(variableName, "alphabet", "The alphabet.","l", meshId, locationType, valuesToSet);
+                api.SetVariableValues(variableName, "alphabet", "The alphabet.","l", meshId, locationType, valuesToSet, -300);
 
                 api.Close();
 
@@ -706,8 +706,10 @@ namespace Deltares.UGrid.Tests.Api
                 meshId = api.GetMeshIdsByMeshType(UGridMeshType.Mesh2D).First();
 
                 var values = api.GetVariableValues(variableName, meshId, locationType);
+                var noDataValue = api.GetVariableNoDataValue(variableName, meshId, locationType);
 
                 Assert.AreEqual(valuesToSet, values);
+                Assert.AreEqual(-300, noDataValue);
             }
         }
     }

@@ -165,6 +165,25 @@ namespace Deltares.UGrid.Api
                 });
         }
 
+        public double GetVariableNoDataValue(string variableName, int meshId, GridLocationType location)
+        {
+            var locationValue = (int)location;
+
+            if (GetVariableId(variableName, meshId) == -1)
+            {
+                return IoNetCfdImports.DEFAULT_FILL_VALUE;
+            }
+
+            // no separate call yet for getting no data value
+            var noDataValue = double.NaN;
+            GetArrayFromIoNetCdf<double>(() => GetLocationCount(location, meshId),
+                (p, i) => DoIoNetCfdCall(() => IoNetCfdImports.ionc_get_var_dll(ref dataSetId, ref meshId, ref locationValue, variableName, ref p, ref i, ref noDataValue)));
+
+            return !double.IsNaN(noDataValue) 
+                ? noDataValue 
+                : IoNetCfdImports.DEFAULT_FILL_VALUE;
+        }
+
         /// <inheritdoc/>
         public double[] GetVariableValues(string variableName, int meshId, GridLocationType location)
         {
@@ -175,14 +194,15 @@ namespace Deltares.UGrid.Api
                 return new double[0];
             }
 
-            var noDataValue = 0.0;
+            var noData = double.NaN;
+            var arrayFromIoNetCdf = GetArrayFromIoNetCdf<double>(()=> GetLocationCount(location, meshId), 
+                (p,i)=> DoIoNetCfdCall(() => IoNetCfdImports.ionc_get_var_dll(ref dataSetId, ref meshId, ref locationValue, variableName, ref p, ref i, ref noData)));
 
-            return GetArrayFromIoNetCdf<double>(()=> GetLocationCount(location, meshId), 
-                (p,i)=> DoIoNetCfdCall(() => IoNetCfdImports.ionc_get_var_dll(ref dataSetId, ref meshId, ref locationValue, variableName, ref p, ref i, ref noDataValue)));
+            return arrayFromIoNetCdf;
         }
 
         /// <inheritdoc/>
-        public void SetVariableValues(string variableName, string standardName, string longName, string unit, int meshId, GridLocationType location, double[] values)
+        public void SetVariableValues(string variableName, string standardName, string longName, string unit, int meshId, GridLocationType location, double[] values, double noDataValue = -999)
         {
             var locationNumber = (int) location;
 
@@ -203,7 +223,7 @@ namespace Deltares.UGrid.Api
 
                 var nf90Double = IoNetCfdImports.NF90_DOUBLE;
                 var defaultFillValueInt = IoNetCfdImports.DEFAULT_FILL_VALUE_INT;
-                var defaultFillValue = IoNetCfdImports.DEFAULT_FILL_VALUE;
+                var defaultFillValue = noDataValue;
 
                 DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_def_var_dll), () =>
                     IoNetCfdImports.ionc_def_var_dll(ref dataSetId, ref meshId, ref networkId,

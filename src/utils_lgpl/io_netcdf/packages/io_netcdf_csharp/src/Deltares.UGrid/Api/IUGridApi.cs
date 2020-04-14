@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Deltares.UGrid.Entities;
 
 namespace Deltares.UGrid.Api
 {
@@ -97,11 +98,21 @@ namespace Deltares.UGrid.Api
         int[] GetVarIds(int meshId, GridLocationType locationType);
 
         /// <summary>
+        /// Gets the no data value for variable based on the <paramref name="variableName"/>, <paramref name="meshId"/> and <paramref name="location"/>
+        /// </summary>
+        /// <param name="variableName">Name of the variable</param>
+        /// <param name="meshId">>Id of the mesh on which the variable is based</param>
+        /// <param name="location">Location of the values on the mesh</param>
+        /// <returns>No data value for the variable</returns>
+        double GetVariableNoDataValue(string variableName, int meshId, GridLocationType location);
+
+        /// <summary>
         /// Gets the variable values based on the <paramref name="variableName"/>, <paramref name="meshId"/> and <paramref name="location"/>
         /// </summary>
         /// <param name="variableName">Name of the variable</param>
         /// <param name="meshId">>Id of the mesh on which the variable is based</param>
         /// <param name="location">Location of the values on the mesh</param>
+        /// <returns>The values for the variable</returns>
         double[] GetVariableValues(string variableName, int meshId, GridLocationType location);
 
         /// <summary>
@@ -115,7 +126,8 @@ namespace Deltares.UGrid.Api
         /// <param name="meshId">Id of the mesh on which the variable is based</param>
         /// <param name="location">Location of the values on the mesh</param>
         /// <param name="values">Values to set</param>
-        void SetVariableValues(string variableName, string standardName, string longName, string unit, int meshId, GridLocationType location, double[] values);
+        /// <param name="noDataValue">Value to consider a no data value</param>
+        void SetVariableValues(string variableName, string standardName, string longName, string unit, int meshId, GridLocationType location, double[] values, double noDataValue = IoNetCfdImports.DEFAULT_FILL_VALUE);
 
         /// <summary>
         /// Gets the EPSG code (Coordinate system code)
