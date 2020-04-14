@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using Deltares.UGrid.Api;
 using NUnit.Framework;
@@ -91,15 +92,15 @@ namespace Deltares.UGrid.Tests.Api
         }
 
         [Test]
-        [TestCase(1, GridLocationType.UG_LOC_ALL2D, 0)]
-        [TestCase(1, GridLocationType.UG_LOC_NODE, 0)]
-        [TestCase(1, GridLocationType.UG_LOC_EDGE, 0)]
-        [TestCase(2, GridLocationType.UG_LOC_NODE, 2)]
-        [TestCase(2, GridLocationType.UG_LOC_EDGE, 3)]
-        [TestCase(2, GridLocationType.UG_LOC_FACE, 3)]
-        [TestCase(2, GridLocationType.UG_LOC_VOL, 0)]
-        [TestCase(2, GridLocationType.UG_LOC_NONE, 0)]
-        [TestCase(2, GridLocationType.UG_LOC_ALL2D, 8)]
+        [TestCase(1, GridLocationType.All2D, 0)]
+        [TestCase(1, GridLocationType.Node, 0)]
+        [TestCase(1, GridLocationType.Edge, 0)]
+        [TestCase(2, GridLocationType.Node, 2)]
+        [TestCase(2, GridLocationType.Edge, 3)]
+        [TestCase(2, GridLocationType.Face, 3)]
+        [TestCase(2, GridLocationType.Volume, 0)]
+        [TestCase(2, GridLocationType.None, 0)]
+        [TestCase(2, GridLocationType.All2D, 8)]
         public void GivenUGrid_GetVarCount_ShouldWork(int meshId, GridLocationType locationType, int expectedVarCount)
         {
             // Arrange & Act
@@ -114,8 +115,8 @@ namespace Deltares.UGrid.Tests.Api
         }
 
         [Test]
-        [TestCase(2, GridLocationType.UG_LOC_NODE, new[] {25, 26})]
-        [TestCase(2, GridLocationType.UG_LOC_EDGE, new[] {22, 27, 28})]
+        [TestCase(2, GridLocationType.Node, new[] {25, 26})]
+        [TestCase(2, GridLocationType.Edge, new[] {22, 27, 28})]
         public void GivenUGrid_GetVarIds_ShouldWork(int meshId, GridLocationType locationType, int[] expectedIds)
         {
             // Arrange & Act
@@ -132,8 +133,7 @@ namespace Deltares.UGrid.Tests.Api
         [Test]
         public void GivenUGrid_GetCoordinateSystemCode_ShouldWork()
         {
-            var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(@"..\..\..\", "test_data",
-                "2d_net_river.nc"));
+            var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(@"..\..\..\", "test_data", "2d_net_river.nc"));
 
             if (!File.Exists(path))
             {
@@ -605,6 +605,109 @@ namespace Deltares.UGrid.Tests.Api
                         Assert.AreEqual(disposableLinksGeometry.Mesh2DTo, readLinksGeometry.Mesh2DTo);
                     }
                 }
+            }
+        }
+
+        [Test]
+        public void GivenUGrid_GetVariableValuesOnMesh2D_ShouldWork()
+        {
+            // Arrange & Act
+            using (var api = new UGridApi())
+            {
+                api.Open(Path);
+                var id = api.GetMeshIdsByMeshType(UGridMeshType.Mesh2D).FirstOrDefault();
+                
+                var values = api.GetVariableValues("face_y", id, GridLocationType.Face);
+
+                Assert.AreEqual(values.Length, 375);
+            }
+        }
+
+        [Test]
+        [TestCase(GridLocationType.Node)]
+        [TestCase(GridLocationType.Face)]
+        [TestCase(GridLocationType.Edge)]
+        public void GivenUGrid_SetVariableValuesOnMesh2D_ShouldWork(GridLocationType locationType)
+        {
+            //
+            //          7
+            //    6.----.----. 8
+            //     |    |    | 
+            //     |    |    | 
+            //    3.----.----. 5
+            //     |   4|    | 
+            //     |    |    | 
+            //     .----.----.
+            //     0    1    2
+            //
+            //
+            var disposable2DMeshGeometry = new Disposable2DMeshGeometry
+            {
+                Name = "Mesh2d",
+                NodesX = new double[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 },
+                NodesY = new double[] { 1, 1, 1, 2, 2, 2, 3, 3, 3 },
+                EdgeNodes = new[] { 0, 1, 1, 2, 0, 3, 1, 4, 2, 5, 3, 4, 4, 5, 3, 6, 4, 7, 5, 8, 6, 7, 7, 8 },
+                FaceNodes = new[] { 0, 1, 3, 4, 1, 2, 4, 5, 3, 4, 6, 7, 4, 5, 7, 8 },
+                FaceX = new double[] { 1.5, 1.5, 2.5, 2.5 },
+                FaceY = new double[] { 1.5, 2.5, 1.5, 2.5 },
+                MaxNumberOfFaceNodes = 4
+            };
+
+            // Arrange & Act
+            using (disposable2DMeshGeometry)
+            using (var api = new UGridApi())
+            {
+                var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(".", TestContext.CurrentContext.Test.Name + ".nc"));
+
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                api.CreateFile(path, new FileMetaData("Test_model", "Test", "10.4"));
+
+                var meshId = api.WriteMesh2D(disposable2DMeshGeometry);
+                
+                Assert.AreEqual(1, meshId);
+
+                api.Close(); // flush grid
+
+                api.Open(path, OpenMode.Appending);
+
+                var valuesToSet= new double[0];
+
+                switch (locationType)
+                {
+                    case GridLocationType.None:
+                        break;
+                    case GridLocationType.Node:
+                        valuesToSet = Enumerable.Range(1, disposable2DMeshGeometry.NodesX.Length).Select(Convert.ToDouble).ToArray();
+                        break;
+                    case GridLocationType.Edge:
+                        valuesToSet = Enumerable.Range(1, disposable2DMeshGeometry.EdgeNodes.Length/2).Select(Convert.ToDouble).ToArray();
+                        break;
+                    case GridLocationType.Face:
+                    case GridLocationType.Volume:
+                        valuesToSet = Enumerable.Range(1, disposable2DMeshGeometry.FaceX.Length).Select(Convert.ToDouble).ToArray();
+                        break;
+                    case GridLocationType.All2D:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(locationType), locationType, null);
+                };
+
+                var variableName = "abc";
+                api.SetVariableValues(variableName, "alphabet", "The alphabet.","l", meshId, locationType, valuesToSet);
+
+                api.Close();
+
+                api.Open(path);
+
+                meshId = api.GetMeshIdsByMeshType(UGridMeshType.Mesh2D).First();
+
+                var values = api.GetVariableValues(variableName, meshId, locationType);
+
+                Assert.AreEqual(valuesToSet, values);
             }
         }
     }

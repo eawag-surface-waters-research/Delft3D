@@ -32,6 +32,9 @@ namespace Deltares.UGrid.Api
             NativeLibrary.LoadNativeDll(IoNetCfdImports.GRIDDLL_NAME, Path.GetDirectoryName(typeof(UGridApi).Assembly.Location));
         }
 
+        /// <summary>
+        /// Disposes the unmanaged resources
+        /// </summary>
         ~UGridApi()
         {
             ReleaseUnmanagedResources();
@@ -51,7 +54,7 @@ namespace Deltares.UGrid.Api
         /// <inheritdoc/>
         public void CreateFile(string filePath, FileMetaData fileMetaData)
         {
-            var mode = (int)NetcdfOpenMode.nf90_write;
+            var mode = (int) NetcdfOpenMode.nf90_write;
             DoIoNetCfdCall(() => IoNetCfdImports.ionc_create_dll(filePath, ref mode, ref dataSetId));
 
             var metaData = fileMetaData.CreateMetaData();
@@ -62,7 +65,7 @@ namespace Deltares.UGrid.Api
         }
 
         /// <inheritdoc/>
-        public void Open(string filePath)
+        public void Open(string filePath, OpenMode mode = OpenMode.Reading)
         {
             Close();
 
@@ -72,13 +75,13 @@ namespace Deltares.UGrid.Api
             }
 
             var conventionTypeNumber = 0;
-            var mode = (int) NetcdfOpenMode.nf90_nowrite;
+            var openMode = (int) GetNetcdfOpenMode(mode);
 
-            DoIoNetCfdCall(() => IoNetCfdImports.ionc_open_dll(filePath, ref mode, ref dataSetId, 
+            DoIoNetCfdCall(() => IoNetCfdImports.ionc_open_dll(filePath, ref openMode, ref dataSetId, 
                 ref conventionTypeNumber, ref versionNumber));
 
             fileOpenForReading = true;
-            fileOpenForWriting = false;
+            fileOpenForWriting = mode != OpenMode.Reading;
 
             convention = typeof(DataSetConventions).IsEnumDefined(conventionTypeNumber)
                 ? (DataSetConventions) conventionTypeNumber
@@ -163,12 +166,73 @@ namespace Deltares.UGrid.Api
         }
 
         /// <inheritdoc/>
+        public double[] GetVariableValues(string variableName, int meshId, GridLocationType location)
+        {
+            var locationValue =(int) location;
+
+            if (GetVariableId(variableName, meshId) == -1)
+            {
+                return new double[0];
+            }
+
+            var noDataValue = 0.0;
+
+            return GetArrayFromIoNetCdf<double>(()=> GetLocationCount(location, meshId), 
+                (p,i)=> DoIoNetCfdCall(() => IoNetCfdImports.ionc_get_var_dll(ref dataSetId, ref meshId, ref locationValue, variableName, ref p, ref i, ref noDataValue)));
+        }
+
+        /// <inheritdoc/>
+        public void SetVariableValues(string variableName, string standardName, string longName, string unit, int meshId, GridLocationType location, double[] values)
+        {
+            var locationNumber = (int) location;
+
+            var expectedValueCount = GetLocationCount(location, meshId);
+            if (expectedValueCount != values.Length)
+            {
+                throw new ArgumentException($"The number of values ({values.Length}) does not match the expected number of values for this mesh and location type ({expectedValueCount})");
+            }
+
+            var variableId = GetVariableId(variableName, meshId);
+
+            if (variableId == -1) // does not exist yet
+            {
+                var isMesh1dVariable = GetMeshIdsByMeshType(UGridMeshType.Mesh1D).Contains(meshId);
+                var networkId = isMesh1dVariable
+                    ? GetNetworkIdFromMeshId(meshId)
+                    : 0; // dummy value
+
+                var nf90Double = IoNetCfdImports.NF90_DOUBLE;
+                var defaultFillValueInt = IoNetCfdImports.DEFAULT_FILL_VALUE_INT;
+                var defaultFillValue = IoNetCfdImports.DEFAULT_FILL_VALUE;
+
+                DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_def_var_dll), () =>
+                    IoNetCfdImports.ionc_def_var_dll(ref dataSetId, ref meshId, ref networkId,
+                        ref variableId, ref nf90Double, ref locationNumber, 
+                        variableName, standardName, longName, unit, 
+                        ref defaultFillValueInt, ref defaultFillValue));
+            }
+
+            SetArrayToIoNetCdf(values,
+                (p, count) =>
+                {
+                    DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_def_var_dll), 
+                        () =>  IoNetCfdImports.ionc_put_var_dll(ref dataSetId, ref meshId, ref locationNumber, variableName, ref p, ref count));
+                });
+        }
+
+        /// <inheritdoc/>
         public int GetCoordinateSystemCode()
         {
             int epsgCode = 0;
             DoIoNetCfdCall(() => IoNetCfdImports.ionc_get_coordinate_system_dll(ref dataSetId, ref epsgCode));
 
             return epsgCode;
+        }
+
+        /// <inheritdoc/>
+        public void SetCoordinateSystemCode(int epsgCode)
+        {
+            throw new NotImplementedException("This function is not yet implemented by io_NetCdf.");
         }
 
         /// <inheritdoc/>
@@ -340,9 +404,9 @@ namespace Deltares.UGrid.Api
 
             DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_get_1d_mesh_edges_dll),
                 () => IoNetCfdImports.ionc_get_1d_mesh_edges_dll(ref dataSetId, ref meshId,
-                    ref mesh1d.EdgeBranchIds, ref mesh1d.EdgeCenterPointOffset,
-                    ref mesh1dDimensions.NumberOfEdges, ref startIndex, ref mesh1d.EdgeCenterPointX,
-                    ref mesh1d.EdgeCenterPointY));
+                ref mesh1d.EdgeBranchIds, ref mesh1d.EdgeCenterPointOffset,
+                ref mesh1dDimensions.NumberOfEdges, ref startIndex, ref mesh1d.EdgeCenterPointX,
+                ref mesh1d.EdgeCenterPointY));
 
             var type = typeof(Disposable1DMeshGeometry);
 
@@ -438,7 +502,7 @@ namespace Deltares.UGrid.Api
             var geometry = mesh.CreateMeshGeometry();
             var geometryDimensions = mesh.CreateMeshDimensions();
 
-            var meshName = mesh.Name;
+            var meshName = mesh.Name?? "Mesh2d";
             var networkName = "network";
 
             DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_put_meshgeom_dll),
@@ -496,8 +560,8 @@ namespace Deltares.UGrid.Api
             var contactName = "links";
             var firstMesh1dId = GetMeshIdsByMeshType(UGridMeshType.Mesh1D).FirstOrDefault();
             var firstMesh2dId = GetMeshIdsByMeshType(UGridMeshType.Mesh2D).FirstOrDefault();
-            var location1D = (int) GridLocationType.UG_LOC_NODE;
-            var location2D = (int) GridLocationType.UG_LOC_FACE;
+            var location1D = (int) GridLocationType.Node;
+            var location2D = (int) GridLocationType.Face;
 
             DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_def_mesh_contact_dll),
                 () => IoNetCfdImports.ionc_def_mesh_contact_dll(ref dataSetId, ref contactId, contactName,
@@ -539,6 +603,34 @@ namespace Deltares.UGrid.Api
             }
         }
 
+        private static void SetArrayToIoNetCdf<T>(T[] values, Action<IntPtr, int> setArrayFunction)
+        {
+            var handle = GCHandle.Alloc(values, GCHandleType.Pinned);
+
+            try
+            {
+                var pointer = handle.AddrOfPinnedObject();
+                setArrayFunction(pointer, values.Length);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+        private NetcdfOpenMode GetNetcdfOpenMode(OpenMode mode)
+        {
+            switch (mode)
+            {
+                case OpenMode.Reading:
+                    return NetcdfOpenMode.nf90_nowrite;
+                case OpenMode.Appending:
+                    return NetcdfOpenMode.nf90_write;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
+        }
+
         private string GetNetworkNameById(int networkId)
         {
             var bufferSize = typeof(DisposableNetworkGeometry).GetBufferSize(nameof(DisposableNetworkGeometry.NetworkName));
@@ -547,6 +639,55 @@ namespace Deltares.UGrid.Api
             DoIoNetCfdCall(() => IoNetCfdImports.ionc_get_network_name_dll(ref dataSetId, ref networkId, stringBuilder));
 
             return stringBuilder.ToString();
+        }
+
+        private int GetLocationCount(GridLocationType locationType, int meshId)
+        {
+            var locationCount = 0;
+            switch (locationType)
+            {
+                case GridLocationType.Node:
+                    DoIoNetCfdCall(() =>
+                        IoNetCfdImports.ionc_get_node_count_dll(ref dataSetId, ref meshId, ref locationCount));
+                    break;
+                case GridLocationType.Edge:
+                    DoIoNetCfdCall(() =>
+                        IoNetCfdImports.ionc_get_edge_count_dll(ref dataSetId, ref meshId, ref locationCount));
+                    break;
+                case GridLocationType.Face:
+                case GridLocationType.Volume:
+                    DoIoNetCfdCall(() =>
+                        IoNetCfdImports.ionc_get_face_count_dll(ref dataSetId, ref meshId, ref locationCount));
+                    break;
+                case GridLocationType.All2D:
+                case GridLocationType.None:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(locationType), locationType, null);
+            }
+
+            return locationCount;
+        }
+
+        /// <summary>
+        /// Gets the variable id for the provided <paramref name="variableName"/> en <paramref name="meshId"/>
+        /// </summary>
+        /// <param name="variableName">Name of the variable</param>
+        /// <param name="meshId">Id of the mesh</param>
+        /// <returns>Variable id (-1 if the variable could not be found)</returns>
+        private int GetVariableId(string variableName, int meshId)
+        {
+            try
+            {
+                var variableId = -1;
+                DoIoNetCfdCall(() => IoNetCfdImports.ionc_inq_varid_dll(ref dataSetId, ref meshId, variableName, ref variableId));
+                return variableId;
+            }
+            catch (IoNetCdfNativeError nativeError) when(nativeError.ErrorCode == -1015)
+            {
+                // Variable could not be found
+                return -1;
+            }
         }
 
         private static void DoIoNetCfdCall(string ioNetCdfFunctionName, Func<int> ioNetCdfCall, [CallerMemberName] string cSharpFunctionName = null)

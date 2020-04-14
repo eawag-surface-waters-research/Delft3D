@@ -3,7 +3,7 @@
     /// <summary>
     /// The mode in which the NetCDF file should be opened
     /// </summary>
-    public enum NetcdfOpenMode
+    internal enum NetcdfOpenMode
     {
         nf90_nowrite = 0,
         nf90_write = 1,

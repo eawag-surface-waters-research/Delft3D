@@ -10,11 +10,20 @@ namespace Deltares.UGrid.Api
     [ProtoContract(AsReferenceDefault = true)]
     public class FileMetaData
     {
+        /// <summary>
+        /// Construct a <see cref="FileMetaData"/> object for an unknown model/source
+        /// </summary>
         public FileMetaData() : this("Unknown model", "Unknown Source", "-")
         {
 
         }
 
+        /// <summary>
+        /// Construct a <see cref="FileMetaData"/> object based on provided parameters
+        /// </summary>
+        /// <param name="modelName">Name of the model</param>
+        /// <param name="source">Source of the model</param>
+        /// <param name="version">Version of the model</param>
         public FileMetaData(string modelName, string source, string version)
         {
             ModelName = modelName;

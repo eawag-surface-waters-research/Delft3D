@@ -17806,7 +17806,7 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/FileMe
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/GridLocationType.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/IUGridApi.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/IoNetCdfNativeError.cs -text
-src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/NetcdfOpenMode.cs -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/OpenMode.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/StringBufferSizeAttribute.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/UGridApi.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Api/UGridMeshType.cs -text
@@ -17821,6 +17821,7 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/M
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/Mesh2DGeometryDimensions.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/MeshGeometry.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/MeshGeometryDimensions.cs -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/NetcdfOpenMode.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/Network1DGeometry.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Entities/Network1DGeometryDimensions.cs -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_csharp/src/Deltares.UGrid/Helpers/IntPtrExtensions.cs -text

@@ -17,6 +17,11 @@ namespace Deltares.UGrid.Entities
         internal const int NoErrorCode = 0;
         internal static int VariableNotFoundErrorCode = -49;
 
+        internal const int NF90_INT = 4;
+        internal const int NF90_DOUBLE = 6;
+        internal const double DEFAULT_FILL_VALUE = -999.0;
+        internal const int DEFAULT_FILL_VALUE_INT = -999;
+
         internal const string GRIDDLL_NAME = "io_netcdf.dll";
 
         #region Generic

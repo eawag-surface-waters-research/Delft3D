@@ -7,17 +7,40 @@ namespace Deltares.UGrid.Api
     /// </summary>
     public enum GridLocationType
     {
+        /// <summary>
+        /// No location on grid
+        /// </summary>
         [Description("Unknown")]
-        UG_LOC_NONE = 0,
+        None = 0,
+
+        /// <summary>
+        /// Located on the nodes
+        /// </summary>
         [Description("Node")]
-        UG_LOC_NODE = 1,
+        Node = 1,
+
+        /// <summary>
+        /// Located on the edges
+        /// </summary>
         [Description("Edge")]
-        UG_LOC_EDGE = 2,
+        Edge = 2,
+
+        /// <summary>
+        /// Located on the cells
+        /// </summary>
         [Description("Cell")]
-        UG_LOC_FACE = 4,
+        Face = 4,
+
+        /// <summary>
+        /// Located on the volumes
+        /// </summary>
         [Description("Volume")]
-        UG_LOC_VOL = 8,
+        Volume = 8,
+        
+        /// <summary>
+        /// Located on all 2D elements (node, edge, face)
+        /// </summary>
         [Description("All")]
-        UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE
+        All2D = Node + Edge + Face
     }
 }

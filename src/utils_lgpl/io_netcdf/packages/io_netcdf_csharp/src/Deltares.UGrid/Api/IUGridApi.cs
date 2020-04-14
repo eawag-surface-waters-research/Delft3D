@@ -29,10 +29,11 @@ namespace Deltares.UGrid.Api
         /// Tries to open a NetCDF file and initialize based on its specified conventions.
         /// </summary>
         /// <param name="filePath">File name for netCDF dataset to be opened.</param>
+        /// <param name="mode">Type of mode to open the file in </param>
         /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
         /// returned from a native function</exception>
         /// <exception cref="FileNotFoundException">Thrown when file does not exist</exception>
-        void Open(string filePath);
+        void Open(string filePath, OpenMode mode = OpenMode.Reading);
 
         /// <summary>
         /// Tries to close an open io_netcdf data set.
@@ -60,7 +61,7 @@ namespace Deltares.UGrid.Api
         /// Gets number of meshes of specified <paramref name="meshType"/>
         /// </summary>
         /// <param name="meshType">Type of mesh to inquire for</param>
-        /// <returns>Number of meshes of type <see cref="meshType"/>.</returns>
+        /// <returns>Number of meshes of type <paramref name="meshType"/>.</returns>
         /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
         /// returned from a native function</exception>
         int GetNumberOfMeshByType(UGridMeshType meshType);
@@ -69,7 +70,7 @@ namespace Deltares.UGrid.Api
         /// Gets mesh ids of specified <paramref name="meshType"/>
         /// </summary>
         /// <param name="meshType">Type of mesh to inquire for</param>
-        /// <returns>Ids of the meshes of type <see cref="meshType"/></returns>
+        /// <returns>Ids of the meshes of type <paramref name="meshType"/></returns>
         /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
         /// returned from a native function</exception>
         int[] GetMeshIdsByMeshType(UGridMeshType meshType);
@@ -96,6 +97,27 @@ namespace Deltares.UGrid.Api
         int[] GetVarIds(int meshId, GridLocationType locationType);
 
         /// <summary>
+        /// Gets the variable values based on the <paramref name="variableName"/>, <paramref name="meshId"/> and <paramref name="location"/>
+        /// </summary>
+        /// <param name="variableName">Name of the variable</param>
+        /// <param name="meshId">>Id of the mesh on which the variable is based</param>
+        /// <param name="location">Location of the values on the mesh</param>
+        double[] GetVariableValues(string variableName, int meshId, GridLocationType location);
+
+        /// <summary>
+        /// Sets (or adds) the specified variable (<paramref name="meshId"/>, <paramref name="location"/>) with the
+        /// given <paramref name="values"/>
+        /// </summary>
+        /// <param name="variableName">Name of the variable</param> 
+        /// <param name="standardName">Standard name of the variable (optional)</param>
+        /// /// <param name="longName">Long name or description</param>
+        /// <param name="unit">Unit of the variable</param>
+        /// <param name="meshId">Id of the mesh on which the variable is based</param>
+        /// <param name="location">Location of the values on the mesh</param>
+        /// <param name="values">Values to set</param>
+        void SetVariableValues(string variableName, string standardName, string longName, string unit, int meshId, GridLocationType location, double[] values);
+
+        /// <summary>
         /// Gets the EPSG code (Coordinate system code)
         /// </summary>
         /// <returns>EPSG code (-1 if no code is specified)</returns>
@@ -103,6 +125,11 @@ namespace Deltares.UGrid.Api
         /// returned from a native function</exception>
         int GetCoordinateSystemCode();
 
+        /// <summary>
+        /// Sets the coordinate system with the given <paramref name="epsgCode"/>
+        /// </summary>
+        /// <param name="epsgCode">EPSG code (coordinate system) to set</param>
+        void SetCoordinateSystemCode(int epsgCode);
         #endregion
 
         #region Network geometry
@@ -179,7 +206,7 @@ namespace Deltares.UGrid.Api
         #region Mesh 2D
 
         /// <summary>
-        /// Reads the 2d mesh for the specified <see cref="meshId"/>
+        /// Reads the 2d mesh for the specified <paramref name="meshId"/>
         /// </summary>
         /// <param name="meshId">Id of the mesh to get</param>
         /// <returns>An instance of <see cref="Disposable2DMeshGeometry"/> containing

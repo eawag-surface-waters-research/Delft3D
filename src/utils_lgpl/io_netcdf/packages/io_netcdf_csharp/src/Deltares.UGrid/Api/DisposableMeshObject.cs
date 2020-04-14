@@ -14,11 +14,17 @@ namespace Deltares.UGrid.Api
         private readonly Dictionary<object,GCHandle> objectGarbageCollectHandles = new Dictionary<object, GCHandle>();
         private bool disposed;
 
+        /// <summary>
+        /// Disposes the unmanaged resources
+        /// </summary>
         ~DisposableMeshObject()
         {
             Dispose(false);
         }
 
+        /// <summary>
+        /// Indicates if arrays are pinned in memory
+        /// </summary>
         protected bool IsMemoryPinned
         {
             get { return objectGarbageCollectHandles.Count > 0; }
@@ -30,7 +36,12 @@ namespace Deltares.UGrid.Api
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
+        
+        /// <summary>
+        /// Get the pointer to the pinned object
+        /// </summary>
+        /// <param name="objectToLookUp">Object to get </param>
+        /// <returns></returns>
         protected IntPtr GetPinnedObjectPointer(object objectToLookUp)
         {
             if (!IsMemoryPinned)
@@ -41,6 +52,9 @@ namespace Deltares.UGrid.Api
             return objectGarbageCollectHandles[objectToLookUp].AddrOfPinnedObject();
         }
 
+        /// <summary>
+        /// Pins the arrays in memory (no garbage collect until unpinned (done in dispose))
+        /// </summary>
         protected void PinMemory()
         {
             var arrayFields = GetType().GetFields().Where(f => f.FieldType.IsArray);
@@ -72,6 +86,21 @@ namespace Deltares.UGrid.Api
             }
         }
 
+        /// <summary>
+        /// Disposes resources
+        /// </summary>
+        /// <param name="disposing">Boolean indicating that the call is called from the dispose method
+        /// not the destructor</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            ReleaseUnmanagedResources();
+
+            disposed = true;
+        }
+
         private void UnPinMemory()
         {
             foreach (var valuePair in objectGarbageCollectHandles)
@@ -91,16 +120,6 @@ namespace Deltares.UGrid.Api
         private void ReleaseUnmanagedResources()
         {
             UnPinMemory();
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            ReleaseUnmanagedResources();
-
-            disposed = true;
         }
     }
 }
