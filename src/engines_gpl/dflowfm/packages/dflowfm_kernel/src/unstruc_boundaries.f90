@@ -917,7 +917,7 @@ logical function initboundaryblocksforcings(filename)
  use m_alloc
  use m_meteo, only: ec_addtimespacerelation
  use timespace
- use string_module, only: str_tolower
+ use string_module, only: str_tolower, strcmpi
  use m_meteo, only: countbndpoints
  use system_utils
  use unstruc_files, only: resolvePath
@@ -1360,6 +1360,30 @@ logical function initboundaryblocksforcings(filename)
                 wx = 0.0_hp ; wy = 0.0_hp ; kcw = 1
              endif
              kx = 1
+          case ('qext')
+             ! Only time-independent sample file supported for now: sets Qext initially and this remains constant in time.
+             if (jaQext == 0) then
+                write(msgbuf, '(a)') 'quantity '''// trim(quantity) //' in file ''', trim(filename), ''': [', trim(groupname), '] is missing QExt=1 in MDU. Ignoring this block.'
+                call warn_flush()
+                cycle
+             end if
+             if (strcmpi(forcingFileType, 'sample')) then
+                filetype = triangulation
+                fmmethod = 5 ! triangulation
+!                transformcoef(4) = 2 ! Nearest-neighbour
+             else
+                write(msgbuf, '(a)') 'Unknown forcingFileType '''// trim(forcingfiletype) //' in file ''', trim(filename), ''': [', trim(groupname), '], quantity=', trim(quantity), '. Ignoring this block.'
+                call warn_flush()
+                cycle
+             end if
+             
+
+             call realloc(kcsini, ndx, keepExisting=.false., fill = 0)
+             !call prepare_lateral_mask(kcsini, iLocType)
+             kcsini(ndx2d+1:ndxi) = 1 ! Only 1D for now 
+            
+             success = timespaceinitialfield(xz, yz, qext, ndx, forcingFile, filetype, fmmethod, oper, transformcoef, 2, kcsini) ! zie meteo module
+             cycle ! This was a special case, don't continue with timespace processing below.
        end select
        select case (trim(str_tolower(forcingfiletype)))
        case ('bcascii')
