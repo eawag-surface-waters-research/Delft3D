@@ -848,7 +848,7 @@ module m_oned_functions
    a1_tmp = a1
    
    allocate(a1m_tmp(ndx))
-   a1m_tmp = a1
+   a1m_tmp = a1m
 
    ! 2. set s1 to be the ground level
    s1(ndx2d+1:ndxi) = groundLevel(1:ndx1d)
