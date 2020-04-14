@@ -500,4 +500,22 @@ else
 end if
 end subroutine resolvePath
 
+! =================================================================================================
+! =================================================================================================
+subroutine get_filename(mfil, filename)
+
+   integer,          intent(in) :: mfil     !< File unit number (e.g., from numuni)
+   character(len=*), intent(out) :: filename
+
+   integer :: ifil
+
+   filename = " "
+   do ifil = 1, maxnum
+      if (lunfils(ifil) == mfil) then
+         filename = filenames(ifil)
+         return
+      endif
+   enddo
+end subroutine get_filename
+
 end module unstruc_files

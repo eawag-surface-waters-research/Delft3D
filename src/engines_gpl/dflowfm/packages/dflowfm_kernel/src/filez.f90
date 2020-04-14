@@ -773,8 +773,10 @@ subroutine readerror(w1, w2, minp)
     character(len=*), intent(in) :: w1
     character(len=*), intent(in) :: w2
     integer,          intent(in) :: minp
+    character(len=1024)          :: fileName_loc    ! Local parameter
 
-    call mess(LEVEL_ERROR, w1, w2, ' in file ' // filenames(minp))
+    call get_filename (minp, fileName_loc)
+    call mess(LEVEL_ERROR, w1, w2, ' in file ' // trim(adjustl(fileName_loc)))
 end subroutine readerror
 
 
@@ -783,8 +785,10 @@ subroutine eoferror(minp)
     use unstruc_files
     implicit none
     integer, intent(in)            :: minp
+    character(len=1024)            :: fileName_loc    ! Local parameter
 
-    call mess(LEVEL_ERROR, 'unexpected end of file in ', filenames(minp))
+    call get_filename (minp, fileName_loc)
+    call mess(LEVEL_ERROR, 'unexpected end of file in ', trim(adjustl(fileName_loc)))
 end subroutine eoferror
 
 
