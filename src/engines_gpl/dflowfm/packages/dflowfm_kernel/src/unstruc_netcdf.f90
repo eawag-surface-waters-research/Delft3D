@@ -10001,14 +10001,19 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    real(kind=hp), dimension(:), pointer :: layer_zs=>null(), interface_zs =>null()
 
    integer :: ierr
-   integer :: i, k, k1, k2, numl2d, numk1d, numk2d, L, Lnew, nv, n1, n2
+   integer :: i, ii, k, k1, k2, numl2d, numk1d, numk2d, L, Lnew, nv, n1, n2
    integer :: jaInDefine
 
    real(kind=hp), allocatable :: xn(:), yn(:), zn(:), xe(:), ye(:)
    real(kind=hp), allocatable :: work2(:,:)
 
    integer                    :: n1dedges, n1d2dcontacts, start_index
-   integer, allocatable       :: contacttype(:) 
+   integer, allocatable       :: contacttype(:)
+
+   ! nbranchids, nodeids, nodelongnames, nodeoffsets for current domain when partitioning:
+   character(len=ug_idsLen), allocatable :: nodeids_p(:), nodelongnames_p(:)
+   real(kind=hp)           , pointer     :: nodeoffsets_p(:)
+   integer                 , pointer     :: nbranchids_p(:)
 
    jaInDefine = 0
    n1d2dcontacts = 0
@@ -10192,8 +10197,27 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
 
       if (associated(meshgeom1d%ngeopointx)) then
-         if (meshgeom1d%numnode .ge. 0) then ! TODO: LC:  check the number of mesh nodes has not changed 
-         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
+         if (meshgeom1d%numnode >= 0) then ! TODO: LC:  check the number of mesh nodes has not changed 
+            if (jaidomain_ /= 0 .and. jaiglobal_s_ /= 0) then
+               allocate(nbranchids_p(numk1d), nodeids_p(numk1d), nodeoffsets_p(numk1d), nodelongnames_p(numk1d), stat=ierr)
+               do i = 1, numk1d
+                  ii = iglobal_s(i)
+                  nodeids_p(i) = nodeids(ii)
+                  nbranchids_p(i) = meshgeom1d%nodebranchidx(ii)
+                  nodeoffsets_p(i) = meshgeom1d%nodeoffsets(ii)
+                  nodelongnames_p(i) = nodelongnames(ii)
+               end do
+               ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
+                                    edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:1), yzw(1:1), &
+                                    crs, -999, dmiss, start_index, -999, -999, null(), null(), & ! Indexing is 1 based
+                                    id_tsp%network1d, network1dname, meshgeom1d%nnodex, meshgeom1d%nnodey, nnodeids, nnodelongnames, &
+                                    meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
+                                    meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
+                                    meshgeom1d%nbranchorder, &
+                                    nodeids = nodeids_p, nodelongnames = nodelongnames_p, nodebranchidx = nbranchids_p, nodeoffsets = nodeoffsets_p, edgebranchidx = meshgeom1d%edgebranchidx, edgeoffsets = meshgeom1d%edgeoffsets)
+               deallocate(nbranchids_p, nodeids_p, nodeoffsets_p, nodelongnames_p, stat=ierr)
+            else
+               ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
                                     edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:1), yzw(1:1), &
                                     crs, -999, dmiss, start_index, -999, -999, null(), null(), & ! Indexing is 1 based
                                     id_tsp%network1d, network1dname, meshgeom1d%nnodex, meshgeom1d%nnodey, nnodeids, nnodelongnames, &
@@ -10201,9 +10225,10 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                     meshgeom1d%nbranchorder, &
                                     nodeids = nodeids, nodelongnames = nodelongnames, nodebranchidx = meshgeom1d%nodebranchidx, nodeoffsets = meshgeom1d%nodeoffsets, edgebranchidx = meshgeom1d%edgebranchidx, edgeoffsets = meshgeom1d%edgeoffsets)
+            end if
          else
-               call mess(LEVEL_ERROR, 'Could not put header in net geometry file.')
-               return
+            call mess(LEVEL_ERROR, 'Could not put header in net geometry file.')
+            return
          endif
       else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
@@ -10382,6 +10407,8 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
       deallocate(face_nodes)
       deallocate(edge_nodes)
       deallocate(edge_type)
+   else
+      nv = 2
    end if
 
    ! Dimensions
@@ -10408,7 +10435,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    ierr = nf90_enddef(ncid)
 
    ! -- Start data writing (time-independent data) ------------
-    if ( janetcell_ /= 0 .and. nump1d2d > 0) then
+    if ( janetcell_ /= 0 .and. nump1d2d > 0 .and. numl2d > 0) then
        ierr = unc_write_net_elem(ncid, ids_netelem)
     end if
 
