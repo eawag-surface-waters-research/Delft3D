@@ -398,6 +398,8 @@ type t_unc_mapids
    integer :: id_s1Gradient(MAX_ID_VAR) = -1 !< Variable ID for water level gradient
    ! for river morphology, only for 1d
    integer :: id_blave(MAX_ID_VAR)      = -1 !< Variable ID for main channel averaged bed level
+   integer :: id_bamor(MAX_ID_VAR)      = -1 !< Variable ID for main channel cell area
+   integer :: id_wumor(MAX_ID_VAR)      = -1 !< Variable ID for main channel width at flow link
    !
    ! Other
    !
@@ -5141,6 +5143,12 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                !ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_blave, 'long_name','Main channel averaged bed level')
                !ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_blave, 'unit', 'm')
             endif
+            if (stmpar%morpar%moroutput%bamor) then
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_bamor, nf90_double, UNC_LOC_S, 'mor_area', '', '', 'm2', is_timedep = 0, which_meshdim = 1, jabndnd=jabndnd_)
+            endif
+            if (stmpar%morpar%moroutput%wumor) then
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wumor, nf90_double, UNC_LOC_U, 'mor_width_u', '', 'Main channel cell width at flow link', 'm', is_timedep = 0, which_meshdim = 1, jabndnd=jabndnd_)
+            endif   
          endif
       endif
       !
@@ -6322,6 +6330,12 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          endif
          if (stmpar%morpar%moroutput%blave) then
             ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_blave, UNC_LOC_S, bl_ave(ndx2d+1:ndxndxi), jabndnd=jabndnd_)
+         endif
+         if (stmpar%morpar%moroutput%bamor) then
+            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_bamor, UNC_LOC_S, ba_mor(ndx2d+1:ndxndxi), jabndnd=jabndnd_)
+         endif
+         if (stmpar%morpar%moroutput%wumor) then
+            ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wumor, UNC_LOC_U, wu_mor, jabndnd=jabndnd_)
          endif
       endif
    endif

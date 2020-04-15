@@ -747,6 +747,10 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        call prop_get_logical(mor_ptr, 'Output', 'MainChannelAveragedBedLevel' , moroutput%blave)
        !
+       call prop_get_logical(mor_ptr, 'Output', 'MainChannelCellArea'         , moroutput%bamor)
+       !
+       call prop_get_logical(mor_ptr, 'Output', 'MainChannelWidthAtFlux'      , moroutput%wumor)
+       !
        call prop_get(mor_ptr,         'Output', 'MorStatsOutputInterval'      , moroutput%avgintv, 3, ex)
        if (ex) then
           moroutput%morstats = .true.    ! only used in FM, separate _sed.nc file
