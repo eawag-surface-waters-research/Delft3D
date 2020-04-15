@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Deltares.UGrid.Api;
 using NUnit.Framework;
 
@@ -143,7 +144,7 @@ namespace Deltares.UGrid.Tests.Api
             // Arrange & Act
             using (var api = new UGridApi())
             {
-                api.Open(Path);
+                api.Open(path);
                 var epsgCode = api.GetCoordinateSystemCode();
 
                 // Assert
@@ -193,7 +194,7 @@ namespace Deltares.UGrid.Tests.Api
             }
         }
 
-        [Test, Ignore("Does not run with other tests, possible memory leak in native code")]
+        [Test]
         public void GivenUGrid_GetNetworkGeometry_ShouldWork()
         {
             // Arrange & Act
@@ -414,32 +415,46 @@ namespace Deltares.UGrid.Tests.Api
         [Test]
         public void GivenUGrid_GetMesh1D_ShouldWork()
         {
+            // can not use river1_full_net.nc because it misses the edge x,y coordinates and we get an exception
+            var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(@"..\..\..\", "test_data", "NetworkAnd1DMesh.nc"));
+            
             // Arrange & Act
             using (var api = new UGridApi())
             {
-                api.Open(Path);
+                api.Open(path);
                 var id = api.GetMeshIdsByMeshType(UGridMeshType.Mesh1D).FirstOrDefault();
 
                 using (var mesh1D = api.GetMesh1D(id))
                 {
-                    Assert.AreEqual("1dmesh", mesh1D.Name);
+                    Assert.AreEqual("mesh1d", mesh1D.Name);
 
-                    Assert.AreEqual(25, mesh1D.NodesX.Length);
-                    Assert.AreEqual(25, mesh1D.NodesY.Length);
+                    Assert.AreEqual(24, mesh1D.NodesX.Length);
+                    Assert.AreEqual(24, mesh1D.NodesY.Length);
 
-                    Assert.AreEqual(25, mesh1D.NodeIds.Length); 
-                    Assert.AreEqual("meshnodeids", mesh1D.NodeIds[0]);
+                    Assert.AreEqual(24, mesh1D.NodeIds.Length); 
+                    Assert.AreEqual("Channel_1D_1_0.000", mesh1D.NodeIds[0]);  
 
-                    Assert.AreEqual(25, mesh1D.NodeLongNames.Length);
-                    Assert.AreEqual("meshnodelongnames", mesh1D.NodeLongNames[0]);
+                    Assert.AreEqual(24, mesh1D.NodeLongNames.Length);
+                    Assert.AreEqual("", mesh1D.NodeLongNames[0]);
 
-                    var expectedBranchIds = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-                    var expectedBranchOffsets = new[] { 0.0, 49.65, 99.29, 148.92, 198.54, 248.09, 297.62, 347.15, 396.66, 446.19, 495.8, 545.44, 595.08, 644.63, 694.04, 743.52, 793.07, 842.65, 892.26, 941.89, 991.53, 1041.17, 1090.82, 1140.46, 1165.29 };
+                    var expectedBranchIds = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    var expectedBranchOffsets = new[]
+                    {
+                        0,  97.396285913251234, 194.79257182650247,
+                        292.1888577397537, 389.58514365300493, 486.98142956625617,
+                        584.3777154795074, 681.77400139275869, 779.17028730600987,
+                        876.566573219261, 973.96285913251234, 1071.3591450457636,
+                        1168.7554309590148, 1266.151716872266, 1363.5480027855174,
+                        1460.9442886987686, 1558.3405746120197, 1655.7368605252709,
+                        1753.1331464385221, 1850.5294323517735, 1947.9257182650247,
+                        2045.3220041782758, 2142.7182900915273, 2240.114576
 
-                    Assert.AreEqual(25, mesh1D.BranchIDs.Length);
+                    };
+
+                    Assert.AreEqual(24, mesh1D.BranchIDs.Length);
                     Assert.AreEqual(expectedBranchIds, mesh1D.BranchIDs);
 
-                    Assert.AreEqual(25, mesh1D.BranchOffsets.Length);
+                    Assert.AreEqual(24, mesh1D.BranchOffsets.Length);
                     Assert.AreEqual(expectedBranchOffsets, mesh1D.BranchOffsets);
                 }
             }

@@ -17848,6 +17848,7 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf_python/io_netcdf[!!-~]Python[!!-~]te
 src/utils_lgpl/io_netcdf/packages/test_data/2d_net_river.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/Custom_Ugrid.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/Custom_Ugrid_map.nc -text
+src/utils_lgpl/io_netcdf/packages/test_data/NetworkAnd1DMesh.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/hex7_ugrid_net.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/river1_full_net.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/write1d.nc -text
