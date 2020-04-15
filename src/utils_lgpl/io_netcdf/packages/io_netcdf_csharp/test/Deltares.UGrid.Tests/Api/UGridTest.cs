@@ -427,7 +427,7 @@ namespace Deltares.UGrid.Tests.Api
                     Assert.AreEqual(25, mesh1D.NodesX.Length);
                     Assert.AreEqual(25, mesh1D.NodesY.Length);
 
-                    Assert.AreEqual(25, mesh1D.NodeIds.Length);
+                    Assert.AreEqual(25, mesh1D.NodeIds.Length); 
                     Assert.AreEqual("meshnodeids", mesh1D.NodeIds[0]);
 
                     Assert.AreEqual(25, mesh1D.NodeLongNames.Length);
@@ -711,6 +711,150 @@ namespace Deltares.UGrid.Tests.Api
                 Assert.AreEqual(valuesToSet, values);
                 Assert.AreEqual(-300, noDataValue);
             }
+        }
+
+        [Test]
+        public void GivenUGrid_ReSettingVariableValuesOnMesh2D_ShouldWork()
+        {
+            //
+            //          7
+            //    6.----.----. 8
+            //     |    |    | 
+            //     |    |    | 
+            //    3.----.----. 5
+            //     |   4|    | 
+            //     |    |    | 
+            //     .----.----.
+            //     0    1    2
+            //
+            //
+            var disposable2DMeshGeometry = new Disposable2DMeshGeometry
+            {
+                Name = "Mesh2d",
+                NodesX = new double[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 },
+                NodesY = new double[] { 1, 1, 1, 2, 2, 2, 3, 3, 3 },
+                EdgeNodes = new[] { 0, 1, 1, 2, 0, 3, 1, 4, 2, 5, 3, 4, 4, 5, 3, 6, 4, 7, 5, 8, 6, 7, 7, 8 },
+                FaceNodes = new[] { 0, 1, 3, 4, 1, 2, 4, 5, 3, 4, 6, 7, 4, 5, 7, 8 },
+                FaceX = new double[] { 1.5, 1.5, 2.5, 2.5 },
+                FaceY = new double[] { 1.5, 2.5, 1.5, 2.5 },
+                MaxNumberOfFaceNodes = 4
+            };
+
+            // Arrange & Act
+            using (disposable2DMeshGeometry)
+            using (var api = new UGridApi())
+            {
+                var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(".", TestContext.CurrentContext.Test.Name + ".nc"));
+
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                api.CreateFile(path, new FileMetaData("Test_model", "Test", "10.4"));
+
+                var meshId = api.WriteMesh2D(disposable2DMeshGeometry);
+
+                Assert.AreEqual(1, meshId);
+
+                api.Close(); // flush grid
+
+                var locationType = GridLocationType.Node;
+                var variableName = "abc";
+
+                api.Open(path, OpenMode.Appending);
+
+                // write values
+                var valuesToSet = Enumerable.Range(1, disposable2DMeshGeometry.NodesX.Length).Select(Convert.ToDouble).ToArray();
+
+                api.SetVariableValues(variableName, "alphabet", "The alphabet.", "l", meshId, locationType, valuesToSet, -300);
+
+                api.Close();
+
+                api.Open(path, OpenMode.Appending);
+
+                // rewrite values
+                var newValuesToSet = Enumerable.Range(1, disposable2DMeshGeometry.NodesX.Length).Select(i => Convert.ToDouble(i) + 10).ToArray();
+
+                api.SetVariableValues(variableName, "alphabet", "The alphabet.", "l", meshId, locationType, newValuesToSet, -300);
+
+                api.Close();
+
+                api.Open(path);
+
+                meshId = api.GetMeshIdsByMeshType(UGridMeshType.Mesh2D).First();
+
+                var values = api.GetVariableValues(variableName, meshId, locationType);
+                var noDataValue = api.GetVariableNoDataValue(variableName, meshId, locationType);
+
+                Assert.AreEqual(newValuesToSet, values);
+                Assert.AreEqual(-300, noDataValue);
+            }
+        }
+
+        [Test]
+        public void GivenUGrid_DoingResetMeshVerticesCoordinates_ShouldResetMeshVerticesToNewValues()
+        {
+            //
+            //          7
+            //    6.----.----. 8
+            //     |    |    | 
+            //     |    |    | 
+            //    3.----.----. 5
+            //     |   4|    | 
+            //     |    |    | 
+            //     .----.----.
+            //     0    1    2
+            //
+            // 
+
+            var disposable2DMeshGeometry = new Disposable2DMeshGeometry
+            {
+                Name = "Mesh2d",
+                NodesX = new double[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 },
+                NodesY = new double[] { 1, 1, 1, 2, 2, 2, 3, 3, 3 },
+                EdgeNodes = new[] { 0, 1, 1, 2, 0, 3, 1, 4, 2, 5, 3, 4, 4, 5, 3, 6, 4, 7, 5, 8, 6, 7, 7, 8 },
+                FaceNodes = new[] { 0, 1, 3, 4, 1, 2, 4, 5, 3, 4, 6, 7, 4, 5, 7, 8 },
+                FaceX = new double[] { 1.5, 1.5, 2.5, 2.5 },
+                FaceY = new double[] { 1.5, 2.5, 1.5, 2.5 },
+                MaxNumberOfFaceNodes = 4
+            };
+
+            // Arrange & Act
+            using (disposable2DMeshGeometry)
+            using (var api = new UGridApi())
+            {
+                var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(".", TestContext.CurrentContext.Test.Name + ".nc"));
+
+                // create file with original mesh
+                api.CreateFile(path, new FileMetaData("Test_model", "Test", "10.4"));
+
+                var meshId = api.WriteMesh2D(disposable2DMeshGeometry);
+
+                Assert.AreEqual(1, meshId);
+
+                api.Close();
+
+                // rewrite vertices coordinates
+                api.Open(path, OpenMode.Appending);
+
+                var newXValues = disposable2DMeshGeometry.NodesX.Select(x => x + 2).ToArray();
+                var newYValues = disposable2DMeshGeometry.NodesY.Select(x => x + 3).ToArray();
+
+                api.ResetMeshVerticesCoordinates(meshId, newXValues, newYValues);
+
+                api.Close();
+
+                api.Open(path);
+
+                meshId = api.GetMeshIdsByMeshType(UGridMeshType.Mesh2D).First();
+                using (var readMesh2DGeometry = api.GetMesh2D(meshId))
+                {
+                    Assert.AreEqual(newXValues, readMesh2DGeometry.NodesX);
+                    Assert.AreEqual(newYValues, readMesh2DGeometry.NodesY);
+                }
+            }
+
         }
     }
 }

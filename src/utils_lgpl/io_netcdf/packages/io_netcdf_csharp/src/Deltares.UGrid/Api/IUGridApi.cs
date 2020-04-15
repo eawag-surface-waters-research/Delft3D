@@ -104,6 +104,8 @@ namespace Deltares.UGrid.Api
         /// <param name="meshId">>Id of the mesh on which the variable is based</param>
         /// <param name="location">Location of the values on the mesh</param>
         /// <returns>No data value for the variable</returns>
+        /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
+        /// returned from a native function</exception>
         double GetVariableNoDataValue(string variableName, int meshId, GridLocationType location);
 
         /// <summary>
@@ -113,6 +115,8 @@ namespace Deltares.UGrid.Api
         /// <param name="meshId">>Id of the mesh on which the variable is based</param>
         /// <param name="location">Location of the values on the mesh</param>
         /// <returns>The values for the variable</returns>
+        /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
+        /// returned from a native function</exception>
         double[] GetVariableValues(string variableName, int meshId, GridLocationType location);
 
         /// <summary>
@@ -127,7 +131,24 @@ namespace Deltares.UGrid.Api
         /// <param name="location">Location of the values on the mesh</param>
         /// <param name="values">Values to set</param>
         /// <param name="noDataValue">Value to consider a no data value</param>
+        /// <exception cref="ArgumentException">This error is thrown when the number of values
+        /// is not the same as the expected <paramref name="location"/> and mesh (<paramref name="meshId"/>)</exception>
+        /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
+        /// returned from a native function</exception>
         void SetVariableValues(string variableName, string standardName, string longName, string unit, int meshId, GridLocationType location, double[] values, double noDataValue = IoNetCfdImports.DEFAULT_FILL_VALUE);
+
+        /// <summary>
+        /// Resets the mesh vertices with new values (<paramref name="xValues"/>, <paramref name="yValues"/>)
+        /// This is mostly used for resetting coordinates after a coordinate transformation
+        /// </summary>
+        /// <param name="meshId">Id of the mesh</param>
+        /// <param name="xValues">New x values for the vertices</param>
+        /// <param name="yValues">New y values for the vertices</param>
+        /// <exception cref="ArgumentException">This error is thrown when the number of values
+        /// is not the same as the expected <paramref name="location"/> and mesh (<paramref name="meshId"/>)</exception>
+        /// <exception cref="IoNetCdfNativeError">This error is thrown when an error code is
+        /// returned from a native function</exception>
+        void ResetMeshVerticesCoordinates(int meshId, double[] xValues, double[] yValues);
 
         /// <summary>
         /// Gets the EPSG code (Coordinate system code)

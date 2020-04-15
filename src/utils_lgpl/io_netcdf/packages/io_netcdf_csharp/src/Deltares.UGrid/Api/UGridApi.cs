@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -165,6 +166,7 @@ namespace Deltares.UGrid.Api
                 });
         }
 
+        /// <inheritdoc/>
         public double GetVariableNoDataValue(string variableName, int meshId, GridLocationType location)
         {
             var locationValue = (int)location;
@@ -237,6 +239,24 @@ namespace Deltares.UGrid.Api
                 {
                     DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_def_var_dll), 
                         () =>  IoNetCfdImports.ionc_put_var_dll(ref dataSetId, ref meshId, ref locationNumber, variableName, ref p, ref count));
+                });
+        }
+
+        /// <inheritdoc/>
+        public void ResetMeshVerticesCoordinates(int meshId, double[] xValues, double[] yValues)
+        {
+            SetArraysToIoNetCdf<double>(new List<double[]> {xValues, yValues},
+                (pointers, lengths) =>
+                {
+                    DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_put_node_coordinates_dll),() =>
+                    {
+                        var xValuesPtr = pointers[0];
+                        var yValuesPtr = pointers[1];
+                        var nNode = lengths[0];
+
+                        return IoNetCfdImports.ionc_put_node_coordinates_dll(ref dataSetId, ref meshId,
+                                ref xValuesPtr, ref yValuesPtr, ref nNode);
+                    });
                 });
         }
 
@@ -623,19 +643,29 @@ namespace Deltares.UGrid.Api
             }
         }
 
-        private static void SetArrayToIoNetCdf<T>(T[] values, Action<IntPtr, int> setArrayFunction)
+        private static void SetArraysToIoNetCdf<T>(ICollection<T[]> values, Action<IList<IntPtr>, IList<int>> setArraysFunction)
         {
-            var handle = GCHandle.Alloc(values, GCHandleType.Pinned);
+            var handles = values.Select(v => GCHandle.Alloc(v, GCHandleType.Pinned)).ToArray();
 
             try
             {
-                var pointer = handle.AddrOfPinnedObject();
-                setArrayFunction(pointer, values.Length);
-            }
+                var pointers = handles.Select(h => h.AddrOfPinnedObject()).ToArray();
+                var lengths = values.Select(v => v.Length).ToArray();
+                setArraysFunction(pointers, lengths);
+            }   
             finally
             {
-                handle.Free();
+                foreach (var handle in handles)
+                {
+                    handle.Free();
+                }
             }
+        }
+
+
+        private static void SetArrayToIoNetCdf<T>(T[] values, Action<IntPtr, int> setArrayFunction)
+        {
+            SetArraysToIoNetCdf(new List<T[]>{values}, (p, l)=> setArrayFunction(p[0], l[0]));
         }
 
         private NetcdfOpenMode GetNetcdfOpenMode(OpenMode mode)
