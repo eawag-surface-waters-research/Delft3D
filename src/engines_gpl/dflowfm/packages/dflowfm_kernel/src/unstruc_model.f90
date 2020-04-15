@@ -990,7 +990,7 @@ subroutine readMDUFile(filename, istat)
     if (icgsolver == 7 .or. icgsolver == 6) then
        Jajipjan = min(Jajipjan, 4) ! no deallocation of
     endif
-
+    call prop_get_integer(md_ptr, 'numerics', 'jposhchk'       , jposhchk)
     call prop_get_integer(md_ptr, 'numerics', 'FixedWeirScheme'  , ifixedweirscheme, success)
     !if (.not. success) then ! Backwards compatibility: read old Fixedweirscheme keyword.
     !   call prop_get_integer(md_ptr, 'numerics', 'Ithindykescheme'  , ifixedweirscheme)
@@ -2569,6 +2569,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     if (writeall .or. Jajipjan > 0 ) then
        call prop_set(prop_ptr, 'numerics', 'Noderivedtypes', Jajipjan,  '0=use der. types. , 1 = less, 2 = lesser, 5 = also dealloc der. types')
+    end if
+    if (writeall .or. jposhchk /= 2) then
+       call prop_set(prop_ptr, 'numerics', 'jposhchk',       jposhchk, 'Check for positive waterdepth (0: no, 1: 0.7*dts, just redo, 2: 1.0*dts, close all links, 3: 0.7*dts, close all links, 4: 1.0*dts, reduce au, 5: 0.7*dts, reduce au)')
     end if
 
     if (writeall .or. (len_trim(md_fixedweirfile) > 0)) then
