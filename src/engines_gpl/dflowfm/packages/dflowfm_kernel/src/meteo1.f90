@@ -55,8 +55,9 @@ module timespace_parameters
   integer, parameter :: ncflow                         = 12  ! NetCDF flow, with arbitrary type of input
   integer, parameter :: ncwave                         = 14  ! NetCDF com file, with arbitrary type of input
   integer, parameter :: bcascii                        = 17  ! .bc format as ASCII file
-  integer, parameter :: field1d                        = 18  ! 1d field ini file
-  integer, parameter :: max_file_types                 = 103  !  max nr of supported types for end user in ext file.
+  integer, parameter :: field1d                        = 18  ! Scalar quantity on a 1D network, used for initial fields.
+  integer, parameter :: geotiff                        = 19  ! GeoTIFF, used for initial fields.
+  integer, parameter :: max_file_types                 = 103 !  max nr of supported types for end user in ext file.
   ! Enumeration for file types of sub-providers (not directly in ext file)
   integer, parameter :: fourier                        = 101 ! period(hrs), ampl(m), phas(deg) NOTE: not directly used in ext file by users.
   integer, parameter :: multiple_uni                   = 102 ! multiple time series, no spatial relation 
@@ -6046,6 +6047,7 @@ contains
 
    double precision, allocatable   :: xxx(:), yyy(:)
    integer,          allocatable   :: LnnL(:), Lorg(:)
+   logical, external               :: read_samples_from_geotiff
 
    double precision                :: zz
 
@@ -6104,7 +6106,7 @@ contains
       enddo
       call restorepol()
 
-   else if (method == 5 .or. method == 6) then  ! triangulation    todo
+   else if (method == 5 .or. method == 6) then  ! triangulation & averaging
 
       if (filetype == ncflow) then
           call read_flowsamples_from_netcdf(filename, qid, ierr)
@@ -6115,7 +6117,12 @@ contains
          call warn_flush()
          return
       else if (filetype == arcinfo) then
-          call read_samples_from_arcinfo(filename, 0)
+         call read_samples_from_arcinfo(filename, 0)
+      else if (filetype == geotiff) then
+         success = read_samples_from_geotiff(filename)
+         if (.not. success) then
+            return
+         end if
       else
           call reasam(minp0, 0) 
       end if

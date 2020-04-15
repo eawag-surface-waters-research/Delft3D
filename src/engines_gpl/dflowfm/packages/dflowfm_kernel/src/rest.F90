@@ -2800,8 +2800,122 @@ end subroutine read_land_boundary_netcdf
       IPSTAT = IPSTAT_OK
     END IF
     CALL READYY(' ',-1d0)
-end subroutine read_samples_from_dem
+   end subroutine read_samples_from_dem
 
+
+!> Read samples from a geoTIFF file.
+!! Samples are being stored in a global dataset of m_samples.  
+function read_samples_from_geotiff(filename) result(success)
+   use MessageHandling
+   use, intrinsic :: iso_c_binding
+   use gdal
+   use m_samples, only: ns, xs, ys, zs
+   implicit none   
+
+   character(len=*), intent(in) :: filename                        ! Path of the file to read
+   logical :: success                                              ! Return values to describe success of the operations
+   
+   ! local
+   type(gdaldataseth)              :: dataset                      ! Gdal dataset 
+   integer(kind=c_int)             :: nx, ny, nz, offsetx, offsety ! Geometry of dataset
+   real(kind=c_float), allocatable :: pbuffer(:,:,:)               ! Buffer containing data of dataset
+   real(kind=c_double)             :: geotransform(6)              ! Geo information of dataset
+   double precision                :: dxa, dya                     ! Pixel size
+   double precision                :: x0, y0                       ! Origin
+   integer :: i, j                                                 ! Counters used for loops
+   integer(kind=c_int)             :: ierr                         ! Integer to store return values of C functions
+   double precision                :: eps                          ! Small value to be used with inequalities involving floating point numbers
+
+#ifdef HAVE_GDAL
+   
+      ! Register all available gdal drivers
+      call gdalallregister()      
+      
+      ! Opening a GeoTIFF gdal dataset for reading
+      dataset = gdalopen(trim(filename)//char(0), GA_ReadOnly)
+      if (.not.gdalassociated(dataset)) then
+         call mess(LEVEL_INFO, 'Error opening dataset on geoTIFF file: '// trim(filename))
+         goto 888
+      endif
+      
+      ! Get dimensions of dataset
+      nx =  gdalgetrasterxsize(dataset)
+      ny =  gdalgetrasterysize(dataset)
+      nz =  gdalgetrastercount(dataset)
+      
+      ! Throw warning if TIFF with multiple layers is given
+      if (nz /= 1) then
+         call mess(LEVEL_INFO, 'geoTIFF files with multiple layers are currently not supported: ' // trim(filename))
+         goto 888
+      endif      
+                  
+      ! Read tiff data into pbuffer and throw warning if something went wrong
+      offsetx = 0
+      offsety = 0
+      allocate(pbuffer(nx, ny, nz))
+      ierr = gdaldatasetrasterio_f(dataset, GF_Read, offsetx, offsety, pbuffer)
+      if (ierr /= 0) then
+         call mess(LEVEL_INFO, 'Could not read geoTIFF data of ' // trim(filename) // ' into an array buffer')
+         goto 888
+      endif
+      
+      ! Get geotransform
+      ierr = gdalgetgeotransform(dataset, geotransform)
+      if (ierr /= 0) then
+         call mess(LEVEL_INFO, 'Error getting the geotransform from dataset of file ' // trim(filename))
+         goto 888
+      endif
+      
+      ! Get origin and pixel size from geotransform 
+      x0  = geotransform(1)
+      y0  = geotransform(4)
+      dxa = geotransform(2)
+      dya = geotransform(6)      
+      
+      ! Throw warning if rotated TIFF was given
+      eps = 1d-6
+      if(abs(geotransform(3)) > eps .or. abs(geotransform(5)) > eps) then
+         call mess(LEVEL_INFO, 'Rotated geoTIFF files are currently not supported: '// trim(filename))
+         goto 888
+      endif
+      
+      ! Set global sample arrays xs, ys, zs of m_samples 
+      ns = 0
+      do i = 1,nx
+         do j = ny,1,-1
+             ns = ns+1
+             xs(ns) =  x0 + dxa*(i-1+0.5d0) ! "-1" to convert to 0-based C, "0.5d0" to get the middle of the cell instead of its edge
+             ys(ns) =  y0 + dya*(j-1+0.5d0) 
+             zs(ns) =  pbuffer(i, j, nz)
+         enddo
+      enddo
+      
+      deallocate(pbuffer)
+      call gdalclose(dataset)
+      success = .true.
+#else
+      call mess(LEVEL_INFO, 'GDAL is necessary to read geoTIFF files')
+      success = .false.
+#endif   
+   return
+
+   888 continue
+   ! Some error occurred
+   success = .false.
+   if (gdalassociated(dataset)) then
+      call gdalclose(dataset)
+   endif
+
+   if (allocated(pbuffer)) then
+      deallocate(pbuffer)
+   endif
+
+   return
+end function read_samples_from_geotiff
+
+
+!> Read samples from an ASCII file.
+!! Samples are being stored in a global dataset of m_samples.  
 subroutine read_samples_from_arcinfo(filnam, jadoorladen)  ! reaasc
     use m_missing
     use m_samples
@@ -2873,7 +2987,7 @@ subroutine read_samples_from_arcinfo(filnam, jadoorladen)  ! reaasc
     end do
     call get_samples_boundingbox()
     IPSTAT = IPSTAT_OK
-end subroutine read_samples_from_arcinfo
+end subroutine read_samples_from_arcinfo   
 
       SUBROUTINE REASAM(MSAM, JADOORLADEN)
       USE M_MISSING

@@ -481,7 +481,7 @@
       OPTION(12)= ' add cross sections          (*_crs.pli)'
       OPTION(13)= 'Load thin dams               (*_thd.pli)'
       OPTION(14)= ' add thin dams               (*_thd.pli)'
-      OPTION(15)= 'Load samples         (*.xyz/*.dem/*.asc)'
+      OPTION(15)= 'Load samples  (*.xyz/*.dem/*.asc/*.tif*)'
       OPTION(16)= 'Load flow bathymetry (*.xybl or *.xyblu)'
       OPTION(17)= 'Load flow restart             (*_rst.nc)'
       OPTION(18)= 'Load bitmap                      (*.bmp)'
@@ -730,6 +730,7 @@
    integer :: ndraw
    integer :: i, k, ierror
    logical :: jawel
+   logical, external :: read_samples_from_geotiff
 
    interface
       subroutine realan(mlan, antot)
@@ -1016,7 +1017,7 @@
          md_thdfile = filnam
       ENDIF
    ELSE IF (NWHAT .EQ. 15) THEN
-      FILNAM = '*.xyz,*.dem,*.asc'
+      FILNAM = '*.xyz,*.dem,*.asc,*.tif*'
       MLAN   = 0
       CALL FILEMENU(MLAN,FILNAM,ierror)
       IF (ierror .EQ. -2) THEN
@@ -1043,7 +1044,10 @@
                 call restorepol()
 
                 call read_samples_from_arcinfo(trim(filnam), ja)  ! reaasc
-            else
+            else if (filnam(i-3:i) == '.tif' .or. filnam(i-3:i) == '.TIF' &
+                .or. filnam(i-4:i) == '.tiff' .or. filnam(i-4:i) == '.TIFF') then
+               success = read_samples_from_geotiff(filnam)
+            else if (filnam(i-3:i) == '.xyz' .or. filnam(i-3:i) == '.XYZ') then
                 CALL reasam(MLAN,ja)  ! DOORLADEN
             end if
          else

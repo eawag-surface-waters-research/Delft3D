@@ -45,6 +45,11 @@ module m_hydrology_data
    double precision, allocatable, target :: ActEvap(:)     !< [m/s] Actual evaporation {"location": "face", "shape": ["ndx"]}
    integer                               :: potEvapTarget
    
+   double precision, allocatable, target :: HortonMinInfCap(:)     !< [mm/hr] Minimum infiltration capacity {"location": "face", "shape": ["ndx"]}
+   double precision, allocatable, target :: HortonMaxInfCap(:)     !< [mm/hr] Maximum infiltration capacity {"location": "face", "shape": ["ndx"]}
+   double precision, allocatable, target :: HortonDecreaseRate(:)  !< [1/hr]  Decrease rate {"location": "face", "shape": ["ndx"]}
+   double precision, allocatable, target :: HortonRecoveryRate(:)  !< [1/hr]  Recovery rate {"location": "face", "shape": ["ndx"]}
+   
    double precision, allocatable, target :: CanopyGapFraction(:) 
    double precision, allocatable, target :: Cmax(:) 
    double precision, allocatable, target :: CanopyStorage(:) 

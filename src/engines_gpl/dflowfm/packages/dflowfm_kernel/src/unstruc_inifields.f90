@@ -109,6 +109,8 @@ function initInitialFields(inifilename) result(ierr)
    use network_data
    use m_alloc
    use dfm_error
+   use m_hydrology_data, only:  HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate
+
    implicit none
    character(len=*), intent(in   ) :: inifilename         !< name of initial field file
    integer                         :: ierr                !< Result status (DFM_NOERR on success)
@@ -185,8 +187,33 @@ function initInitialFields(inifilename) result(ierr)
             call prepare_lateral_mask(kcsini, iLocType)
             
             success = timespaceinitialfield(xz, yz, hs, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
-            s1(1:ndxi) = bl(1:ndxi) + hs(1:ndxi)
+            s1(1:ndxi) = bl(1:ndxi) + hs(1:ndxi)         
+         else if (strcmpi(qid, 'HortonMinInfCap')) then
+            call realloc(kcsini, ndx, keepExisting=.false.)
+            call prepare_lateral_mask(kcsini, iLocType)
             
+            success = timespaceinitialfield(xz, yz, HortonMinInfCap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
+         else if (strcmpi(qid, 'HortonMinInfCap')) then
+            call realloc(kcsini, ndx, keepExisting=.false.)
+            call prepare_lateral_mask(kcsini, iLocType)
+            
+            success = timespaceinitialfield(xz, yz, HortonMinInfCap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
+         else if (strcmpi(qid, 'HortonMaxInfCap')) then
+            call realloc(kcsini, ndx, keepExisting=.false.)
+            call prepare_lateral_mask(kcsini, iLocType)
+            
+            success = timespaceinitialfield(xz, yz, HortonMaxInfCap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
+         else if (strcmpi(qid, 'HortonDecreaseRate')) then
+            call realloc(kcsini, ndx, keepExisting=.false.)
+            call prepare_lateral_mask(kcsini, iLocType)
+            
+            success = timespaceinitialfield(xz, yz, HortonDecreaseRate, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
+         else if (strcmpi(qid, 'HortonRecoveryRate')) then
+            call realloc(kcsini, ndx, keepExisting=.false.)
+            call prepare_lateral_mask(kcsini, iLocType)
+            
+            success = timespaceinitialfield(xz, yz, HortonRecoveryRate, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
+
          else if (strcmpi(qid, 'frictioncoefficient')) then
             ! TODO: masking u points
             success = timespaceinitialfield(xu, yu, frcu, lnx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
@@ -229,6 +256,7 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
    use timespace_parameters, only: inside_polygon, field1D
    use m_ec_interpolationsettings, only: RCEL_DEFAULT
    use m_wind, only: ILATTP_1D, ILATTP_2D, ILATTP_ALL
+   use m_grw
    character (len=*), intent(in   )           :: inifilename         !< Name of the ini file, only used in warning messages, actual data is read from node_ptr.
    type(tree_data), pointer                   :: node_ptr            !< The tree structure containing a single ini-file chapter/block.
    character (len=*), intent(  out)           :: groupname           !< Identifier of the read chapter (e.g., 'Initial')
@@ -393,6 +421,12 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
             end select
          end if
       end if
+      
+      ! if the infiltrationmodel is not horton, but a horton quantity is detected, then send a error message
+      if (infiltrationmodel /= 4 .and. &
+         (strcmpi(quantity,'HortonMinInfCap') .or. strcmpi(quantity,'HortonMaxInfCap') .or. strcmpi(quantity,'HortonDecreaseRate')  .or. strcmpi(quantity,'HortonRecoveryRate'))) then
+         call mess(LEVEL_ERROR, 'The infiltrationmodel needs to be set to horton in the mdu file')
+      end if
          
       ! read extrapolationMethod
       call prop_get_integer(node_ptr,'','extrapolationMethod', extrapolation, retVal)
@@ -424,7 +458,7 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
       end if
    end if
 
-   varname = ''  ! TODO: Suppor reading varname for NetCDF files as well.
+   varname = ''  ! TODO: Support reading varname for NetCDF files as well.
 
    ! We've made it to here, success!
    ja = 1
@@ -657,7 +691,7 @@ end function init1dField
 !> Converts fileType string to an integer.
 !! Returns -1 when an invalid type string is given.
 subroutine fileTypeStringToInteger(sFileType, iFileType)
-   use timespace_parameters
+   use timespace_parameters 
    implicit none
    character(len=*), intent(in   ) :: sFileType        !< file type string
    integer,          intent(  out) :: iFileType        !< file type integer
@@ -672,6 +706,8 @@ subroutine fileTypeStringToInteger(sFileType, iFileType)
          iFileType = field1D
       case ('polygon')
          iFileType = inside_polygon
+      case ('geoTIFF')
+         iFileType = geotiff
       case default
          iFileType = -1
    end select
