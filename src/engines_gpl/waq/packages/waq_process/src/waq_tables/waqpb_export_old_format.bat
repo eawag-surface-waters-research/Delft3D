@@ -18,8 +18,8 @@ if %toolfound%==true (
     echo Run waqpb_help.bat for more information
     echo.	
     pause
-    if %toolx64%==true ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\x64\Release\waqpb_export.exe -version%version% -serial%serial% -newfrm
-    if not %toolx64%==true ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_export.exe -version%version% -serial%serial% -newfrm
+    if %toolx64%==true ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\x64\Release\waqpb_export.exe -version%version% -serial%serial%
+    if not %toolx64%==true ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_export.exe -version%version% -serial%serial%
     copy proc_def.* ..\..\..\..\default
     echo.
     pause
