@@ -248,6 +248,7 @@ endif
 
 if USEFORTRANGIS
 FMODULES += \
+    -I$(top_builddir)/third_party_open/fortrangis/libfortranc \
     -I$(top_builddir)/third_party_open/fortrangis/libfortrangis
 EXTRALIBS += \
     $(top_builddir)/third_party_open/fortrangis/libfortranc/libfortranc.la \
