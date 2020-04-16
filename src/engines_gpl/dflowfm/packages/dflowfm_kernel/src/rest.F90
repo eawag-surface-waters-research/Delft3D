@@ -2808,8 +2808,10 @@ end subroutine read_land_boundary_netcdf
 function read_samples_from_geotiff(filename) result(success)
    use MessageHandling
    use, intrinsic :: iso_c_binding
+   use fortranc
    use gdal
-   use m_samples, only: ns, xs, ys, zs
+   use m_samples
+   use string_module, only: strcmpi
    implicit none   
 
    character(len=*), intent(in) :: filename                        ! Path of the file to read
@@ -2825,6 +2827,9 @@ function read_samples_from_geotiff(filename) result(success)
    integer :: i, j                                                 ! Counters used for loops
    integer(kind=c_int)             :: ierr                         ! Integer to store return values of C functions
    double precision                :: eps                          ! Small value to be used with inequalities involving floating point numbers
+   type(c_ptr)                     :: c_area_or_point
+   logical                         :: is_area
+   double precision                :: pixeloffset
 
 #ifdef HAVE_GDAL
    
@@ -2878,14 +2883,31 @@ function read_samples_from_geotiff(filename) result(success)
          call mess(LEVEL_INFO, 'Rotated geoTIFF files are currently not supported: '// trim(filename))
          goto 888
       endif
-      
+
+      ! Detect whether data location should be interpreted as area (pixel) or point.
+      ! In case of area: offset our internal sample coordinates xs,ys with +0.5*pixelsize,
+      ! such that they represent the centre of the pixels.
+      c_area_or_point = GDALGetMetadataItem(gdalmajorobjecth_new(dataset), 'AREA_OR_POINT'//C_NULL_CHAR, C_NULL_CHAR)
+      if (.not. c_associated(c_area_or_point)) then
+         ! Meta data AREA_OR_POINT not present, we assume Area (pixels).
+         is_area = .true.
+      else
+         is_area = strcmpi(strtofchar(c_area_or_point, 5), 'Area', 4)
+      end if
+
+      if (is_area) then
+         pixeloffset = .5d0
+      else
+         pixeloffset = 0d0
+      end if
+
       ! Set global sample arrays xs, ys, zs of m_samples 
       ns = 0
       do i = 1,nx
          do j = ny,1,-1
              ns = ns+1
-             xs(ns) =  x0 + dxa*(i-1+0.5d0) ! "-1" to convert to 0-based C, "0.5d0" to get the middle of the cell instead of its edge
-             ys(ns) =  y0 + dya*(j-1+0.5d0) 
+             xs(ns) =  x0 + dxa*(i-1+pixeloffset) ! "-1" to convert to 0-based C, pixeloffset to get the middle of the pixel instead of its edge
+             ys(ns) =  y0 + dya*(j-1+pixeloffset) 
              zs(ns) =  pbuffer(i, j, nz)
          enddo
       enddo
