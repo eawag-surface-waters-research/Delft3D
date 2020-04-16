@@ -287,6 +287,9 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
    case ('shpgenstruc')
         activeFile = ''
         suffix     = '_snapped_genstruc' ! .shp extension will be added automatically (and .shx/.dbf)
+    case ('mba')
+        activeFile = ''
+        suffix = '_mass_balances.txt'
         
     !---------------------------------------------------------!
     ! DELWAQ files
@@ -309,9 +312,6 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     case ('wq_lsp')
         activeFile = ''
         suffix = '_wq_proc.lsp'
-    case ('wq_bal')
-        activeFile = ''
-        suffix = '_wq_proc_bal.txt'
     case ('wq_timers')
         activeFile = ''
         suffix = '_wq_proc_timers.txt'
@@ -341,7 +341,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     
     ! Output files are generally stored in a subfolder, so prefix them here with that.
     select case (trim(filecat))
-    case ('his', 'map', 'clm', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com','avgsedquant', 'wq_lsp', 'wq_bal', 'wq_timers') !! JRE
+    case ('his', 'map', 'clm', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com','avgsedquant', 'mba', 'wq_lsp', 'wq_timers') !! JRE
         if (prefix_dir) then
             defaultFilename = trim(getoutputdir())//trim(defaultFilename)
         end if

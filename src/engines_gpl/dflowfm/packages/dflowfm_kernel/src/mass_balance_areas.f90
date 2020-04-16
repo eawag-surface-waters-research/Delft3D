@@ -32,7 +32,9 @@
    subroutine mba_init()
    
    use m_alloc
+   use m_mass_balance_areas
    use m_fm_wq_processes
+   use m_transport
    use m_partitioninfo
    use m_flowtimes, only: tstart_user
    use m_flowgeom, only: Ndxi, Lnxi, ln, lne2ln
@@ -42,11 +44,13 @@
 
    implicit none
    
-   integer :: isys, imba, i, j, istart, ibnd, isrc, L, LL, Lf, kk1, kk2, ba1, ba2, to, from
+   integer :: iconst, imbs, isys, iwqbot, imba, i, j, istart, ibnd, isrc, L, LL, Lf, kk1, kk2, ba1, ba2, to, from, ierr
    logical :: writebalance
    character(len=64)  :: ident !< Identifier of the model, used as suggested basename for some files. (runid)
 
    jamba = 1
+   ibflag = 1
+
    timembastart = tstart_user ! when DFM doesn't start at t=0.0??
    timembastarttot = timembastart
    itimembastart = nint(tstart_user)
@@ -55,7 +59,21 @@
    flxdmp = 0.0
    flxdmptot = 0.0
 
-!  Allocate the massbalance, flux and derivative arrays
+!  Allocate the mass names, balance flux and derivative arrays
+   nombs = numconst + numwqbots
+   call realloc(mbsname, nombs, keepExisting=.false., fill=' ')
+   call realloc(imbs2sys, nombs, keepExisting=.false., fill=0)
+   do iconst = 1, numconst
+      mbsname(iconst) = const_names(iconst)
+      if (nosys.gt.0) then
+         imbs2sys(iconst) = iconst2sys(iconst)
+      endif
+   enddo
+   do iwqbot = 1, numwqbots
+      mbsname(numconst + iwqbot) = wqbotnames(iwqbot)
+      imbs2sys(numconst + iwqbot) = nosys + iwqbot
+   enddo
+  
    nombabnd = nomba + nopenbndsect
 
    call realloc(mbaarea, nomba, keepExisting=.false., fill=0d0)
@@ -69,25 +87,23 @@
    call realloc(mbaflowsorsin, [2, numsrc], keepExisting=.false., fill=0d0)
    call realloc(mbaflowsorsintot, [2, numsrc], keepExisting=.false., fill=0d0)
 
-   call realloc(mbamassbegin   , [notot, nomba], keepExisting=.false., fill=0d0)
-   call realloc(mbamassbegintot, [notot, nomba], keepExisting=.false., fill=0d0)
-   call realloc(mbamassend     , [notot, nomba], keepExisting=.false., fill=0d0)
+   call realloc(mbamassbegin   , [nombs, nomba], keepExisting=.false., fill=0d0)
+   call realloc(mbamassbegintot, [nombs, nomba], keepExisting=.false., fill=0d0)
+   call realloc(mbamassend     , [nombs, nomba], keepExisting=.false., fill=0d0)
       
-   call realloc(mbafluxhor, [2, nosys, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
-   call realloc(mbafluxhortot, [2, nosys, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
-   call realloc(mbafluxsorsin, [2, 2, notot, numsrc], keepExisting=.false., fill=0d0)
-   call realloc(mbafluxsorsintot, [2, 2, notot, numsrc], keepExisting=.false., fill=0d0)
+   call realloc(mbafluxhor, [2, numconst, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
+   call realloc(mbafluxhortot, [2, numconst, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
+   call realloc(mbafluxsorsin, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
+   call realloc(mbafluxsorsintot, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
 
    if ( jampi.eq.1 ) then
       call realloc(mbavolumereduce  , nomba, keepExisting=.false., fill=0d0)
       call realloc(mbaflowhorreduce , [2, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
       call realloc(mbaflowsorsinreduce, [2, numsrc], keepExisting=.false., fill=0d0)
-      call realloc(mbamassreduce    , [notot, nomba], keepExisting=.false., fill=0d0)
-      call realloc(mbafluxhorreduce , [2, nosys, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
-      call realloc(mbafluxsorsinreduce, [2, 2, notot, numsrc], keepExisting=.false., fill=0d0)
+      call realloc(mbamassreduce    , [nombs, nomba], keepExisting=.false., fill=0d0)
+      call realloc(mbafluxhorreduce , [2, numconst, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
+      call realloc(mbafluxsorsinreduce, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
    end if
-
-   ibflag = 1
 
 !  Determine 2D pointers fo links (from balance area to balance area)
    nombaln = 0 
@@ -178,8 +194,8 @@
    call realloc(flxdmpreduce, [2,nflux, nomba], keepExisting=.false., fill=0.0d0 )       !< Fluxes at dump segments
    call realloc(flxdmptot, [2,nflux, nomba], keepExisting=.false., fill=0.0d0 )       !< Fluxes at dump segments
 
-   call mba_sum_area(nomba, mbaarea)
-   call mba_sum(nomba, notot, mbavolumebegin, mbamassbegin)
+   call mba_sum_area(nomba, mbadef, mbaarea)
+   call mba_sum(nombs, nomba, mbadef, mbavolumebegin, mbamassbegin)
    if ( jampi.eq.1 ) then
       call reduce_double_sum(nomba, mbaarea, mbavolumereduce)
       do imba =1, nomba
@@ -189,10 +205,10 @@
       do imba =1, nomba
          mbavolumebegin(imba) = mbavolumereduce(imba)
       enddo
-      call reduce_double_sum(notot * nomba, mbamassbegin, mbamassreduce)
+      call reduce_double_sum((nombs) * nomba, mbamassbegin, mbamassreduce)
       do imba =1, nomba
-         do isys = 1, notot
-            mbamassbegin(isys, imba) = mbamassreduce(isys, imba)
+         do imbs = 1, nombs
+            mbamassbegin(imbs, imba) = mbamassreduce(imbs, imba)
          enddo
       enddo
    endif
@@ -202,8 +218,8 @@
    end do
 
    do imba = 1, nomba
-      do isys=1,notot
-         mbamassbegintot(isys,imba) = mbamassbegin(isys,imba)
+      do imbs=1, nombs
+         mbamassbegintot(imbs,imba) = mbamassbegin(imbs,imba)
       end do
    end do
 
@@ -227,9 +243,9 @@
 !      open(newunit=lunmbahis,file=trim(getoutputdir())//trim(ident)//'_mba.his', &
 !           form='unformatted', access='stream', status='replace')
 !      call mba_write_his_header(lunmbahis)
-      open(newunit=lunmbabal,file=defaultfilename('wq_bal'))
-      call mba_write_bal_header(lunmbabal, nosys, notot, nomba, mbaname, syname_sub, nflux, &
-                                totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, fluxsys)
+      open(newunit=lunmbabal,file=defaultfilename('mba'))
+      call mba_write_bal_header(lunmbabal, numconst, const_names, iconst2sys, nosys, notot, isys2wqbot, syname_sub, nomba, mbaname, nflux, &
+                                totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, ipfluxsys, fluxsys)
 
 !      open(newunit=lunmbatothis,file=trim(getoutputdir())//trim(ident)//'_mbatot.his', &
 !           form='unformatted', access='stream', status='replace')
@@ -238,23 +254,51 @@
    
    end subroutine mba_init
 
+!> Convert qid (from .ext file) to waq input name (split in generic qidname and specific input name).
+!! If the input qid is not mba input name, then the same qid is returned (and no mba input name)
+   subroutine get_mbainputname(qid, inputname, qidname)
+      implicit none
+
+      character(len=*), intent(in)    :: qid       !< Original quantityid, e.g., 'massbalanceareanorth'.
+      character(len=*), intent(inout) :: inputname !< The trimmed waq input name, e.g., 'north'.
+      character(len=*), intent(inout) :: qidname   !< The base input name for further use in external file analisys, e.g., 'massbalancearea'.
+
+      character(len=256)              :: qidloc    !< Original quantityid, e.g., 'massbalanceareanorth'.
+
+      qidloc = qid
+      if (qidloc(1:15).eq.'massbalancearea' ) then
+         qidname = qidloc(1:15)
+         if ( len_trim(qidloc).gt.15 ) then
+            inputname = trim(qidloc(16:))
+         end if
+      else if (qidloc(1:18).eq.'waqmassbalancearea' ) then ! keep for backwards compatibility
+         qidname = 'massbalancearea'
+         if ( len_trim(qidloc).gt.18 ) then
+            inputname = trim(qidloc(19:))
+         end if
+      end if
+      return
+   end subroutine get_mbainputname
+
    subroutine mba_update(time)
+   use m_mass_balance_areas
    use m_fm_wq_processes
    use m_partitioninfo
    use m_flowexternalforcings, only: numsrc, srcname
+   use m_transport, only: numconst
 
    implicit none
 
    double precision, intent(in) :: time !< time     for waq in seconds
 
-   integer :: isys, imba, jmba, iflx, isrc, j
+   integer :: iconst, imbs, imba, jmba, iflx, isrc, j
    logical :: writebalance
 
    itimembaend = int(time)
    timembaend = time
 
 !  New total volumes and masses
-   call mba_sum(nomba, notot, mbavolumeend, mbamassend)
+   call mba_sum(nombs, nomba, mbadef, mbavolumeend, mbamassend)
 
 !  If in parallel mode, reduce arrays
    writebalance = .true.
@@ -274,16 +318,16 @@
       
       call reduce_double_sum(notot * nomba, mbamassend, mbamassreduce)
       do imba =1, nomba
-         do isys = 1, notot
-            mbamassend(isys, imba) = mbamassreduce(isys, imba)
+         do imbs = 1, nombs
+            mbamassend(imbs, imba) = mbamassreduce(imbs, imba)
          enddo
       enddo
 
-      call reduce_double_sum(2 * nosys * nombabnd * nombabnd, mbafluxhor, mbafluxhorreduce)
+      call reduce_double_sum(2 * numconst * nombabnd * nombabnd, mbafluxhor, mbafluxhorreduce)
       do imba = 1, nombabnd
          do jmba = 1, nombabnd
-            do isys = 1, nosys
-               mbafluxhor(1:2, isys, imba, jmba) = mbafluxhorreduce(1:2, isys, imba, jmba)
+            do iconst = 1, numconst
+               mbafluxhor(1:2, iconst, imba, jmba) = mbafluxhorreduce(1:2, iconst, imba, jmba)
             enddo
          enddo
       enddo
@@ -293,32 +337,29 @@
          mbaflowsorsin(1:2,isrc) = mbaflowsorsinreduce(1:2,isrc)
       enddo
 
-      call reduce_double_sum(2 * 2 * notot * numsrc, mbafluxsorsin, mbafluxsorsinreduce)
+      call reduce_double_sum(2 * 2 * numconst * numsrc, mbafluxsorsin, mbafluxsorsinreduce)
       do isrc = 1, numsrc
-         do isys = 1, nosys
-            mbafluxsorsin(1:2,1:2,isys,isrc) = mbafluxsorsinreduce(1:2,1:2,isys,isrc)
+         do iconst = 1, numconst
+            mbafluxsorsin(1:2,1:2,iconst,isrc) = mbafluxsorsinreduce(1:2,1:2,iconst,isrc)
          enddo
       enddo
 
-      call reduce_double_sum(2 * nflux * nomba, flxdmp, flxdmpreduce)
-      do imba = 1, nomba
-         do iflx = 1, nflux
-            flxdmp(1:2, iflx, imba) = flxdmpreduce(1:2, iflx, imba)
+      if(nflux.gt.0) then
+         call reduce_double_sum(2 * nflux * nomba, flxdmp, flxdmpreduce)
+         do imba = 1, nomba
+            do iflx = 1, nflux
+               flxdmp(1:2, iflx, imba) = flxdmpreduce(1:2, iflx, imba)
+            enddo
          enddo
-      enddo
+      endif
    endif
 
    if (writebalance) then
-!      call mba_write_his_time_step(lunmbahis, itimembastart, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-!                                   mbavolumebegin, mbavolumeend, mbaflowhor, &
-!                                   mbamassbegin, mbamassend, mbafluxhor, &
-!                                   flxdmp, stochi, nfluxsys, fluxsys)
-
-      call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-                                   mbaname, syname_sub, mbalnused, numsrc, srcname, mbasorsinout, &
+      call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
+                                   nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, &
                                    mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, &
-                                   flxdmp, stochi, fluxname, nfluxsys, fluxsys)
+                                   flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys)
    endif
 
    ! Store end volumes and masses as begin volumes and masses for the next balance output step
@@ -329,8 +370,8 @@
    end do
 
    do imba = 1, nomba
-      do isys=1,notot
-         mbamassbegin(isys,imba) = mbamassend(isys,imba)
+      do imbs=1, nombs
+         mbamassbegin(imbs,imba) = mbamassend(imbs,imba)
       end do
    end do
 
@@ -347,27 +388,25 @@
 
    do imba = 1, nombabnd
       do jmba = 1, nombabnd
-         do isys=1,nosys
-            mbafluxhortot(1:2, isys, imba, jmba) = mbafluxhortot(1:2, isys, imba, jmba) + mbafluxhor(1:2, isys, imba, jmba)
+         do iconst = 1, numconst
+            mbafluxhortot(1:2, iconst, imba, jmba) = mbafluxhortot(1:2, iconst, imba, jmba) + mbafluxhor(1:2, iconst, imba, jmba)
          enddo
       enddo
    enddo
 
    do isrc = 1, numsrc
-      do isys=1,nosys
-         mbafluxsorsintot(1:2,1:2,isys,isrc) = mbafluxsorsintot(1:2,1:2,isys,isrc) + mbafluxsorsin(1:2,1:2,isys,isrc)
+      do iconst = 1, numconst
+         mbafluxsorsintot(1:2,1:2,iconst,isrc) = mbafluxsorsintot(1:2,1:2,iconst,isrc) + mbafluxsorsin(1:2,1:2,iconst,isrc)
       enddo
    enddo
-!   double precision, allocatable            :: mbaflowsorsin(:,:,:)   ! periodical flow from source sinks
-!   double precision, allocatable            :: mbaflowsorsintot(:,:,:)! total flow from source sinks
-!   double precision, allocatable            :: mbafluxsorsin(:,:,:,:)    ! periodical fluxes from source sinks
-!   double precision, allocatable            :: mbafluxsorsintot(:,:,:,:) ! total fluxes from source sinks
 
-   do imba = 1, nomba
-      do iflx = 1, nflux
-         flxdmptot(1:2, iflx, imba) = flxdmptot(1:2, iflx, imba) + flxdmp(1:2, iflx, imba)
+   if (nflux.gt.0) then
+      do imba = 1, nomba
+         do iflx = 1, nflux
+            flxdmptot(1:2, iflx, imba) = flxdmptot(1:2, iflx, imba) + flxdmp(1:2, iflx, imba)
+         enddo
       enddo
-   enddo
+   endif
 
    ! reset flux accumulators
    mbaflowhor = 0.0d0
@@ -380,9 +419,11 @@
    end subroutine mba_update
 
    subroutine mba_final(time)
+   use m_mass_balance_areas
    use m_fm_wq_processes
    use m_partitioninfo
    use m_flowexternalforcings, only: numsrc, srcname
+   use m_transport, only: numconst
 
    implicit none
 
@@ -399,17 +440,12 @@
    endif
 
    if (writebalance) then
-!      call mba_write_his_time_step(lunmbatothis, itimembastarttot, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-!                                   mbavolumebegintot, mbavolumeend, mbaflowhortot, &
-!                                   mbamassbegintot, mbamassend, mbafluxhortot, &
-!                                   flxdmptot, stochi, nfluxsys, fluxsys)
-      
       write(lunmbabal,1000)
-      call mba_write_bal_time_step(lunmbabal, timembastarttot, timembaend, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-                                   mbaname, syname_sub, mbalnused, numsrc, srcname, mbasorsinout, &
+      call mba_write_bal_time_step(lunmbabal, timembastarttot, timembaend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
+                                   nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot,mbaflowsorsintot,  &
                                    mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, &
-                                   flxdmptot, stochi, fluxname, nfluxsys, fluxsys)
+                                   flxdmptot, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys)
    endif
 
    1000 format (///'============================================================='&
@@ -418,9 +454,9 @@
 
    end subroutine mba_final
 
-   subroutine mba_sum(nmba, ntot, mbavolume, mbamass)
+   subroutine mba_sum(nombs, nomba, mbadef, mbavolume, mbamass)
    
-   use m_fm_wq_processes
+   use m_fm_wq_processes, only: numwqbots, wqbot
    use m_partitioninfo
    use m_flowgeom
    use m_flow
@@ -428,11 +464,12 @@
    
    implicit none
 
-   integer :: nmba, ntot
-   double precision :: mbavolume(nmba)      ! volumes
-   double precision :: mbamass(ntot, nmba)  ! masses
+   integer          :: nombs, nomba
+   integer          :: mbadef(ndxi)
+   double precision :: mbavolume(nomba)      ! volumes
+   double precision :: mbamass(nombs, nomba)  ! masses
 
-   integer :: k, kk, kb, kt, isys, iconst, iwqbot, imba
+   integer :: k, kk, kb, kt, iconst, iwqbot, imba
 
    mbavolume = 0.0d0
    mbamass = 0.0d0
@@ -446,28 +483,26 @@
       call getkbotktop(kk,kb,kt)
       do k = kb,kt
          mbavolume(imba) = mbavolume(imba) + vol1(k)
-         do isys=1,nosys
-            iconst = isys2const(isys)
-            mbamass(isys,imba) = mbamass(isys,imba) + constituents(iconst,k)*vol1(k)
+         do iconst=1,numconst
+            mbamass(iconst,imba) = mbamass(iconst,imba) + constituents(iconst,k)*vol1(k)
          end do
       end do
-      do isys=nosys+1,notot
-         iwqbot = isys2wqbot(isys)
-         mbamass(isys,imba) = mbamass(isys,imba) + wqbot(iwqbot,kk)*ba(kk)
+      do iwqbot=1,numwqbots
+         mbamass(numconst+iwqbot,imba) = mbamass(numconst+iwqbot,imba) + wqbot(iwqbot,kk)*ba(kk)
       end do
    end do 
    end subroutine mba_sum
 
-   subroutine mba_sum_area(nmba, mbaba)
+   subroutine mba_sum_area(nomba, mbadef, mbaba)
    
-   use m_fm_wq_processes
    use m_partitioninfo
    use m_flowgeom
    
    implicit none
 
-   integer :: nmba
-   double precision :: mbaba(nmba)      ! areas
+   integer          :: nomba
+   integer          :: mbadef(ndxi)
+   double precision :: mbaba(nomba)      ! areas
 
    integer :: kk, imba
 
@@ -482,218 +517,9 @@
       mbaba(imba) = mbaba(imba) + ba(kk)
    end do 
    end subroutine mba_sum_area
-   
-   subroutine mba_write_his_header(lunhis)
-   
-   use m_alloc
-   use m_fm_wq_processes
-   use unstruc_model, only: md_ident
-   use unstruc_files
 
-   implicit none
-   
-   integer :: lunhis, isys, imba, i, j, jflux
-
-   character(20), allocatable :: balterms(:)
-   character(20), allocatable :: mbanamehis(:)
-   character(40)              :: moname(4)
-   
-   integer :: nobalterms, ifluxsys
-
-!  write mbahis to a his file (for now
-   moname=' '
-   moname(1)='Mass balance information'
-   moname(2)=trim(md_ident(1:40))
-   nobalterms = (4 + 2 * (nombabnd) + nosys * 2 * (2 + nombabnd) + (notot-nosys) * 2 * 2 + 2 * sum(nfluxsys))
-   call realloc(balterms, nobalterms, keepexisting=.false., fill =' ')
-   balterms(1) = 'Begin water'
-   balterms(2) = 'End   water'
-   balterms(3) = 'Water in  storage'
-   balterms(4) = 'Water out storage'
-   j = 4
-   do i = 1, nombabnd
-      j = j + 1
-      balterms(j) = 'Water in '//mbaname(i)
-      j = j + 1
-      balterms(j) = 'Water out '//mbaname(i)
-   enddo
-   ifluxsys = 0
-   do isys = 1, notot
-      j = j + 1
-      balterms(j) = trim(syname_sub(isys))//' begin mass'
-      j = j + 1
-      balterms(j) = trim(syname_sub(isys))//' end   mass'
-      j = j + 1
-      balterms(j) = trim(syname_sub(isys))//' in  storage'
-      j = j + 1
-      balterms(j) = trim(syname_sub(isys))//' out storage'
-      if (isys.le.nosys) then
-         do i = 1, nombabnd
-            j = j + 1
-            balterms(j) = trim(syname_sub(isys))//' in  '//trim(mbaname(i))
-            j = j + 1
-            balterms(j) = trim(syname_sub(isys))//' out '//trim(mbaname(i))
-         enddo
-      endif
-      if (nfluxsys(isys).gt.0) then
-         do i = ifluxsys + 1, ifluxsys + nfluxsys(isys)
-            jflux = fluxsys(i)
-            j = j + 1
-            balterms(j) = trim(syname_sub(isys))//' in  '//fluxname(jflux)
-            j = j + 1
-            balterms(j) = trim(syname_sub(isys))//' out '//fluxname(jflux)
-         enddo
-         ifluxsys = ifluxsys + nfluxsys(isys)
-      endif
-   end do
-   call realloc(mbanamehis, nomba + 1, keepexisting=.false., fill=' ')
-   do i = 1, nomba
-      mbanamehis(i) = trim(mbaname(i)(1:20))
-   end do
-   mbanamehis(nomba+1) = 'Total mass balance'
-
-   write(lunhis) moname
-   write(lunhis) nobalterms
-   write(lunhis) nomba + 1
-   write(lunhis) balterms
-   write(lunhis) (i, mbanamehis(i), i = 1, nomba+1)
-   
-   end subroutine mba_write_his_header
-
-   subroutine mba_write_his_time_step(lunmbahis, itime, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-                                      mbavolumebegin, mbavolumeend, mbaflowhor, &
-                                      mbamassbegin, mbamassend, mbafluxhor, &
-                                      flxdmp, stochi, nfluxsys, fluxsys)
-   
-   use precision
-   
-   implicit none
-   
-   integer                     :: lunmbahis                 ! logical unit
-   
-   integer                     :: itime                     ! start time of balance period
-   integer                     :: notot                     ! Number of systems
-   integer                     :: nosys                     ! Number of active systems
-   integer                     :: nomba                     ! Number of balance areas
-   integer                     :: nombabnd                  ! Number of balance areas and boundaries
-   integer                     :: nflux                     ! number of fluxes
-   integer                     :: totfluxsys                ! total number of fluxes for all sustances
-
-   double precision            :: mbavolumebegin(nomba)     ! begin volume in mass balance area
-   double precision            :: mbavolumeend(nomba)       ! end volume in mass balance area
-   double precision            :: mbaflowhor(2,nombabnd,nombabnd) ! periodical flows between balance areas and between boundaries and balance areas
-
-   double precision            :: mbamassbegin(notot,nomba) ! begin volume in mass balance area
-   double precision            :: mbamassend(notot,nomba)   ! end volume in mass balance area
-   double precision            :: mbafluxhor(2,nosys,nombabnd,nombabnd) ! periodical fluxes between balance areas and between boundaries and balance areas
-
-   double precision            :: flxdmp(2,nflux, nomba)
-   real                        :: stochi(notot,nflux)
-      
-   integer                     :: nfluxsys(notot)
-   integer                     :: fluxsys(totfluxsys)
-
-   double precision            :: summbavolumebegin
-   double precision            :: summbavolumeend
-   double precision            :: summbamassbegin
-   double precision            :: summbamassend
-   double precision            :: flux(2)
-   integer :: imba, jmba, isys, iflux, jflux, ifluxsys
-   real :: zero = 0.0
-
-   write (lunmbahis) itime
-
-   do imba = 1, nomba
-      write (lunmbahis) real(mbavolumebegin(imba),kind=sp)
-      write (lunmbahis) real(mbavolumeend(imba),kind=sp)
-      if (mbavolumebegin(imba).gt.mbavolumeend(imba)) then
-         write (lunmbahis) real(mbavolumebegin(imba)-mbavolumeend(imba),kind=sp), zero
-      else
-         write (lunmbahis) zero, real(mbavolumeend(imba)-mbavolumebegin(imba),kind=sp)
-      endif
-      do jmba = 1, nombabnd
-         write (lunmbahis) real(mbaflowhor(1:2, imba, jmba),kind=sp)
-      end do
-      ifluxsys = 0
-      do isys = 1, notot
-         write (lunmbahis) real(mbamassbegin(isys, imba),kind=sp)
-         write (lunmbahis) real(mbamassend(isys, imba),kind=sp)
-         if (mbamassbegin(isys, imba).gt.mbamassend(isys, imba)) then
-            write (lunmbahis) real(mbamassbegin(isys, imba) - mbamassend(isys, imba),kind=sp), zero
-         else
-            write (lunmbahis) zero, real(mbamassend(isys, imba) - mbamassbegin(isys, imba),kind=sp)
-         endif
-         if (isys.le.nosys) then
-            do jmba = 1, nombabnd
-               write (lunmbahis) real(mbafluxhor(1:2, isys, imba, jmba),kind=sp)
-            end do
-         endif
-         if (nfluxsys(isys).gt.0) then
-            do iflux = ifluxsys + 1, ifluxsys + nfluxsys(isys)
-               jflux = fluxsys(iflux)
-               if(stochi(isys,jflux).ge.0.0) then
-                  flux(1) =  dble(stochi(isys,jflux)) * flxdmp(1,jflux, imba)
-                  flux(2) =  dble(stochi(isys,jflux)) * flxdmp(2,jflux, imba)
-               else
-                  flux(1) =  -dble(stochi(isys,jflux)) * flxdmp(2,jflux, imba)
-                  flux(2) =  -dble(stochi(isys,jflux)) * flxdmp(1,jflux, imba)
-               endif
-               write (lunmbahis) real(flux(1:2),kind=sp)
-            enddo
-            ifluxsys = ifluxsys + nfluxsys(isys)
-         endif
-      end do
-   end do
-
-   summbavolumebegin = sum(mbavolumebegin)
-   summbavolumeend = sum(mbavolumeend)
-   write (lunmbahis) real(summbavolumebegin,kind=sp)
-   write (lunmbahis) real(summbavolumeend,kind=sp)
-   if (summbavolumebegin.gt.summbavolumeend) then
-      write (lunmbahis) real(summbavolumebegin-summbavolumeend,kind=sp), zero
-   else
-      write (lunmbahis) zero, real(summbavolumeend-summbavolumebegin,kind=sp)
-   endif
-   do jmba = 1, nombabnd
-      write (lunmbahis) real(sum(mbaflowhor(1, :, jmba))), real(sum(mbaflowhor(2, :, jmba)),kind=sp)
-   end do
-   ifluxsys = 0
-   do isys = 1, notot
-      summbamassbegin = sum(mbamassbegin(isys, :))
-      summbamassend = sum(mbamassend(isys, :))
-      write (lunmbahis) real(summbamassbegin,kind=sp)
-      write (lunmbahis) real(summbamassend,kind=sp)
-      if (summbamassbegin.gt.summbamassend) then
-         write (lunmbahis) real(summbamassbegin - summbamassend,kind=sp), zero
-      else
-         write (lunmbahis) zero, real(summbamassend - summbamassbegin,kind=sp)
-      endif
-      if (isys.le.nosys) then
-         do jmba = 1, nombabnd
-            write (lunmbahis) real(sum(mbafluxhor(1, isys, :, jmba)),kind=sp), &
-                              real(sum(mbafluxhor(2, isys, :, jmba)),kind=sp)
-         end do
-      endif
-      if (nfluxsys(isys).gt.0) then
-         do iflux = ifluxsys + 1, ifluxsys + nfluxsys(isys)
-            jflux = fluxsys(iflux)
-            if(stochi(isys,jflux).ge.0.0) then
-               flux(1) =  dble(stochi(isys,jflux)) * sum(flxdmp(1,jflux, :))
-               flux(2) =  dble(stochi(isys,jflux)) * sum(flxdmp(2,jflux, :))
-            else
-               flux(1) =  -dble(stochi(isys,jflux)) * sum(flxdmp(2,jflux, :))
-               flux(2) =  -dble(stochi(isys,jflux)) * sum(flxdmp(1,jflux, :))
-            endif
-            write (lunmbahis) real(flux(1:2),kind=sp)
-         enddo
-         ifluxsys = ifluxsys + nfluxsys(isys)
-      endif
-   end do
-   return
-   end subroutine mba_write_his_time_step
-
-   subroutine mba_write_bal_header(lunbal, nosys, notot, nomba, mbaname, syname, nflux, &
-                                   totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, fluxsys)
+   subroutine mba_write_bal_header(lunbal, numconst, const_names, iconst2sys, nosys, notot, isys2wqbot, syname_sub, nomba, mbaname, nflux, &
+                                   totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, ipfluxsys, fluxsys)
    
    use unstruc_version_module, only: unstruc_version_full, get_unstruc_source
 
@@ -701,12 +527,17 @@
    
    integer                     :: lunbal                    ! logical unit
 
+   integer                     :: numconst                  ! Total number of constituents
+   character(len=*)            :: const_names(numconst)     ! constituent names
+   
+   integer                     :: iconst2sys(numconst)      ! WAQ substance to D-Flow FM constituents
    integer                     :: nosys                     ! Number of active systems
    integer                     :: notot                     ! Number of systems
-   integer                     :: nomba                     ! Number of balance areas
+   integer                     :: isys2wqbot(notot)         ! WAQ inactive system to D-FlowFM water quality bottom variable
+   character(20)               :: syname_sub(notot)         ! sunstance names
 
+   integer                     :: nomba                     ! Number of balance areas
    character(*)                :: mbaname(nomba)            ! balance names
-   character(20)               :: syname(notot)             ! sunstance names
    
    integer                     :: nflux                     ! number of fluxes
    integer                     :: totfluxsys                ! total number of fluxes for all sustances
@@ -716,11 +547,13 @@
    character(10)               :: fluxprocname(nflux)
       
    integer                     :: nfluxsys(notot)
+   integer                     :: ipfluxsys(notot)
    integer                     :: fluxsys(totfluxsys)
 
    character(255)              :: tex
    character(20)               :: rundat
    integer                     :: imba
+   integer                     :: iconst
    integer                     :: isys
    integer                     :: iflux
    integer                     :: jflux
@@ -742,17 +575,29 @@
       write (lunbal, '(I8,2X,A40)') imba, mbaname(imba)
    enddo
 
-   write (lunbal, '(/"Overview of substances")')
+   write (lunbal, '(/"Overview of constituents and substances")')
    write (lunbal, '( "-------------------------------------------------------------")')
-   write (lunbal, '( "Total number of substances                      :",I8)') notot
+   write (lunbal, '(/"Total number of FM constituents                 :",I8)') numconst
+   write (lunbal, '( "Total number of WQ substances                   :",I8)') notot
    write (lunbal, '( "Number of active (transported) substances       :",I8)') nosys
-   do isys = 1, nosys
-      write (lunbal, '(I8,2X,A20)') isys, syname(isys)
+   write (lunbal, '( "Number of inactive (not transported) substances :",I8)') notot - nosys
+   write (lunbal, '(/"List of consituents/active WQ substances")')
+   write (lunbal, '(/" FM number   WQ number  Name")')
+   do iconst = 1, numconst
+      isys = iconst2sys(iconst)
+      if (isys.gt.0) then
+         write (lunbal, '(2x,i8,4x,i8,2x,a)') iconst, isys, const_names(iconst)
+      else
+         write (lunbal, '(2x,i8,11x,"-",2x,a)') iconst, const_names(iconst)
+      endif
    enddo
-   write (lunbal, '(/"Number of inactive (not transported) substances :",I8)') notot - nosys
-   do isys = nosys + 1, notot
-      write (lunbal, '(I8,2X,A20)') isys, syname(isys)
-   enddo
+   if(nosys .lt. notot) then
+      write (lunbal, '(/"List of WQ bot variables/inactive WQ substances")')
+      write (lunbal, '(/" FM number   WQ number  Name")')
+      do isys = nosys + 1, notot
+         write (lunbal, '(2x,i8,4x,i8,2x,a)') isys2wqbot(isys), isys, syname_sub(isys)
+      enddo
+   endif
 
    write (lunbal, '(/"Overview of fluxes")')
    write (lunbal, '( "-------------------------------------------------------------")')
@@ -761,10 +606,11 @@
    write (lunbal, '( "-------------------------------------------------------------")')
    ifluxsys = 0
    do isys = 1, notot
+      ipfluxsys(isys) = ifluxsys
       if (nfluxsys(isys).gt.0) then
          do iflux = ifluxsys + 1, ifluxsys + nfluxsys(isys)
             jflux = fluxsys(iflux)
-            write (lunbal, '(A10,5X,A10,5X,A10,ES20.6)') syname(isys), fluxprocname(jflux), fluxname(jflux), stochi(isys,jflux)
+            write (lunbal, '(A10,5X,A10,5X,A10,ES20.6)') syname_sub(isys), fluxprocname(jflux), fluxname(jflux), stochi(isys,jflux)
          enddo
          ifluxsys = ifluxsys + nfluxsys(isys)
       endif
@@ -773,26 +619,28 @@
    return
    end subroutine mba_write_bal_header
    
-   subroutine mba_write_bal_time_step(lunbal, timestart, timeend, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-                                      mbaname, syname, mbalnused, numsrc, srcname, mbasorsinout, &
+   subroutine mba_write_bal_time_step(lunbal, timestart, timeend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
+                                      nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
                                       mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, &
                                       mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, &
-                                      flxdmp, stochi, fluxname, nfluxsys, fluxsys)
+                                      flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys)
    implicit none
    
    integer                     :: lunbal                    ! logical unit
    
    double precision            :: timestart                 ! start time of balance period
    double precision            :: timeend                   ! end time of balance period
-   integer                     :: notot                     ! Number of systems
-   integer                     :: nosys                     ! Number of active systems
+   integer                     :: numconst                  ! Number of constituents
+   integer                     :: nombs                     ! Number of mass balances
    integer                     :: nomba                     ! Number of balance areas
+   integer                     :: notot                     ! Number of WAQ sustances
+   integer                     :: imbs2sys(nombs)           ! mass balance number to WAQ substance (0=not a WAQ substance)
    integer                     :: nombabnd                  ! Number of balance areas and boundaries
    integer                     :: nflux                     ! number of fluxes
    integer                     :: totfluxsys                ! total number of fluxes for all sustances
 
-   character(*)                :: mbaname(nombabnd)         ! balance names
-   character(20)               :: syname(notot)             ! sunstance names
+   character(*)                :: mbsname(nombs)            ! mass balance names
+   character(*)                :: mbaname(nombabnd)         ! mass balance area names
    
    integer                     :: mbalnused(nomba,nombabnd) ! number of links between mda and mbabnd that are actually active
 
@@ -807,21 +655,22 @@
    double precision            :: mbaflowhor(2,nombabnd,nombabnd) ! periodical flows between balance areas and between boundaries and balance areas
    double precision            :: mbaflowsorsin(2,numsrc)   ! periodical flow from source sinks
 
-   double precision            :: mbamassbegin(notot,nomba) ! begin volume in mass balance area
-   double precision            :: mbamassend(notot,nomba)   ! end volume in mass balance area
-   double precision            :: mbafluxhor(2,nosys,nombabnd,nombabnd) ! periodical fluxes between balance areas and between boundaries and balance areas
-   double precision            :: mbafluxsorsin(2,2,notot,numsrc) ! periodical fluxes from source sinks
+   double precision            :: mbamassbegin(nombs,nomba) ! begin volume in mass balance area
+   double precision            :: mbamassend(nombs,nomba)   ! end volume in mass balance area
+   double precision            :: mbafluxhor(2,numconst,nombabnd,nombabnd) ! periodical fluxes between balance areas and between boundaries and balance areas
+   double precision            :: mbafluxsorsin(2,2,numconst,numsrc) ! periodical fluxes from source sinks
 
    double precision            :: flxdmp(2,nflux, nomba)
    real                        :: stochi(notot,nflux)
    character(10)               :: fluxname(nflux)
       
    integer                     :: nfluxsys(notot)
+   integer                     :: ipfluxsys(notot)
    integer                     :: fluxsys(totfluxsys)
 
    integer, parameter :: long = SELECTED_INT_KIND(16)
    character(len=20), external :: seconds_to_dhms
-   integer :: imba, jmba, isrc, isys, iflux, jflux, ifluxsys
+   integer :: imbs, imba, jmba, isrc, isys, iflux, jflux, ifluxsys
    double precision            :: totals(2)                 ! totals for both columns
    double precision            :: concbegin
    double precision            :: concend
@@ -838,7 +687,6 @@
 
     do imba = 1, nomba
       totals = zero
-      ifluxsys = 0
       write (lunbal, 1000) mbaname(imba)
       write (lunbal, 1001) seconds_to_dhms(nint(timestart, long)), seconds_to_dhms(nint(timeend, long)), mbaarea(imba)
       write (lunbal, 2000) mbavolumebegin(imba), mbavolumeend(imba)
@@ -881,87 +729,88 @@
       else
          write (lunbal, 2012)
       endif
-      do isys = 1, notot
+      do imbs = 1, nombs
          totals = zero
-         write (lunbal, 1010) seconds_to_dhms(nint(timestart, long)), seconds_to_dhms(nint(timeend, long)), mbaname(imba), syname(isys)
-         write (lunbal, 2000) mbamassbegin(isys, imba), mbamassend(isys, imba)
-         if (isys.le.nosys) then
+         write (lunbal, 1010) seconds_to_dhms(nint(timestart, long)), seconds_to_dhms(nint(timeend, long)), mbaname(imba), mbsname(imbs)
+         write (lunbal, 2000) mbamassbegin(imbs, imba), mbamassend(imbs, imba)
+         if (imbs.le.numconst) then
             write (lunbal, 1011)
             if (mbavolumebegin(imba).gt.0.0) then
-               concbegin = mbamassbegin(isys, imba) / mbavolumebegin(imba)
+               concbegin = mbamassbegin(imbs, imba) / mbavolumebegin(imba)
             else
                concbegin = 0.0
             endif
             if (mbavolumeend(imba).gt.0.0) then
-               concend = mbamassend(isys, imba) / mbavolumeend(imba)
+               concend = mbamassend(imbs, imba) / mbavolumeend(imba)
             else
                concend = 0.0
             endif
          else
             write (lunbal, 1012)
             if (mbaarea(imba).gt.0.0) then
-               concbegin = mbamassbegin(isys, imba) / mbaarea(imba)
-               concend = mbamassend(isys, imba) / mbaarea(imba)
+               concbegin = mbamassbegin(imbs, imba) / mbaarea(imba)
+               concend = mbamassend(imbs, imba) / mbaarea(imba)
             else
                concbegin = 0.0
                concend = 0.0
             endif
          endif
          write (lunbal, 2000) concbegin, concend
-         write (lunbal, 1013) syname(isys)
-         if (mbamassbegin(isys, imba).gt.mbamassend(isys, imba)) then
-            totals(1) = mbamassbegin(isys, imba) - mbamassend(isys, imba)
+         write (lunbal, 1013) mbsname(imbs)
+         if (mbamassbegin(imbs, imba).gt.mbamassend(imbs, imba)) then
+            totals(1) = mbamassbegin(imbs, imba) - mbamassend(imbs, imba)
          else
-            totals(2) = mbamassend(isys, imba) - mbamassbegin(isys, imba)
+            totals(2) = mbamassend(imbs, imba) - mbamassbegin(imbs, imba)
          endif
          write (lunbal, 2002) totals
-         if (isys.le.nosys) then
+         if (imbs.le.numconst) then
             do jmba = 1, nombabnd
                if (mbalnused(imba,jmba).gt.0) then
-                  totals = totals + mbafluxhor(1:2, isys, imba, jmba)
-                  write (lunbal, 2001) mbaname(jmba), mbafluxhor(1:2, isys, imba, jmba)
+                  totals = totals + mbafluxhor(1:2, imbs, imba, jmba)
+                  write (lunbal, 2001) mbaname(jmba), mbafluxhor(1:2, imbs, imba, jmba)
                endif
             end do
             do isrc = 1, numsrc
                if (mbasorsinout(1,isrc).eq.imba) then
-                  totals = totals + mbafluxsorsin(1:2, 1, isys, isrc)
-                  write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(1:2, 1, isys, isrc)
+                  totals = totals + mbafluxsorsin(1:2, 1, imbs, isrc)
+                  write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(1:2, 1, imbs, isrc)
                endif
                if (mbasorsinout(2,isrc).eq.imba) then
-                  totals = totals + mbafluxsorsin(2:1:-1, 2, isys, isrc)
-                  write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(2:1:-1, 2, isys, isrc)
+                  totals = totals + mbafluxsorsin(2:1:-1, 2, imbs, isrc)
+                  write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(2:1:-1, 2, imbs, isrc)
                endif
             end do
          endif
-         if (nfluxsys(isys).gt.0) then
-            do iflux = ifluxsys + 1, ifluxsys + nfluxsys(isys)
-               jflux = fluxsys(iflux)
-               if(stochi(isys,jflux).ge.0.0) then
-                  flux(1) =  dble(stochi(isys,jflux)) * flxdmp(1,jflux, imba)
-                  flux(2) =  dble(stochi(isys,jflux)) * flxdmp(2,jflux, imba)
-               else
-                  flux(1) =  -dble(stochi(isys,jflux)) * flxdmp(2,jflux, imba)
-                  flux(2) =  -dble(stochi(isys,jflux)) * flxdmp(1,jflux, imba)
-               endif
-               write (lunbal, 2004) fluxname(jflux), flux(1:2)
-               totals(1:2) = totals(1:2) + flux(1:2)
-            enddo
-            ifluxsys = ifluxsys + nfluxsys(isys)
+         isys = imbs2sys(imbs)
+         if (isys.gt.0) then
+            if (nfluxsys(isys).gt.0) then
+               do iflux = ipfluxsys(isys) + 1, ipfluxsys(isys) + nfluxsys(isys)
+                  jflux = fluxsys(iflux)
+                  if(stochi(isys,jflux).ge.0.0) then
+                     flux(1) =  dble(stochi(isys,jflux)) * flxdmp(1,jflux, imba)
+                     flux(2) =  dble(stochi(isys,jflux)) * flxdmp(2,jflux, imba)
+                  else
+                     flux(1) =  -dble(stochi(isys,jflux)) * flxdmp(2,jflux, imba)
+                     flux(2) =  -dble(stochi(isys,jflux)) * flxdmp(1,jflux, imba)
+                  endif
+                  write (lunbal, 2004) fluxname(jflux), flux(1:2)
+                  totals(1:2) = totals(1:2) + flux(1:2)
+               enddo
+            endif
          endif
          write (lunbal, 1004)
          write (lunbal, 2003) totals
-         write (lunbal, 2020) syname(isys), totals(2)-totals(1)
-         reference = max(abs(mbamassbegin(isys,imba)),abs(mbamassend(isys,imba)),totals(1),totals(2))
+         write (lunbal, 2020) mbsname(imbs), totals(2)-totals(1)
+         reference = max(abs(mbamassbegin(imbs,imba)),abs(mbamassend(imbs,imba)),totals(1),totals(2))
          if (reference .gt. tiny) then
             relative_error = 1.0d2*abs(totals(2)-totals(1))/reference
-            write (lunbal, 2021) syname(isys), relative_error
+            write (lunbal, 2021) mbsname(imbs), relative_error
          else
-            write (lunbal, 2022) syname(isys)
+            write (lunbal, 2022) mbsname(imbs)
          end if
       end do
    end do
    totals = zero
-   ifluxsys = 0
    summbaarea = sum(mbaarea)
    summbavolumebegin = sum(mbavolumebegin)
    summbavolumeend = sum(mbavolumeend)
@@ -1006,13 +855,13 @@
    else
       write (lunbal, 2012)
    endif
-   do isys = 1, notot
+   do imbs = 1, nombs
       totals = zero
-      write (lunbal, 1010) seconds_to_dhms(nint(timestart, long)), seconds_to_dhms(nint(timeend, long)), 'Whole model', syname(isys)
-      summbamassbegin = sum(mbamassbegin(isys, :))
-      summbamassend = sum(mbamassend(isys, :))
+      write (lunbal, 1010) seconds_to_dhms(nint(timestart, long)), seconds_to_dhms(nint(timeend, long)), 'Whole model', mbsname(imbs)
+      summbamassbegin = sum(mbamassbegin(imbs, :))
+      summbamassend = sum(mbamassend(imbs, :))
       write (lunbal, 2000) summbamassbegin, summbamassend
-      if(isys.le.nosys) then
+      if(imbs.le.numconst) then
          write (lunbal, 1011)
          if (summbavolumebegin.gt.0.0) then
             concbegin = summbamassbegin / summbavolumebegin
@@ -1035,54 +884,56 @@
          endif
       endif
       write (lunbal, 2000) concbegin, concend
-      write (lunbal, 1013) syname(isys)
+      write (lunbal, 1013) mbsname(imbs)
       if (summbamassbegin.gt.summbamassend) then
          totals(1) = summbamassbegin - summbamassend
       else
          totals(2) = summbamassend - summbamassbegin
       endif
       write (lunbal, 2002) totals
-      if (isys.le.nosys) then
+      if (imbs.le.numconst) then
          do jmba = nomba + 1, nombabnd
-            totals(1) = totals(1) + sum(mbafluxhor(1, isys, :, jmba))
-            totals(2) = totals(2) + sum(mbafluxhor(2, isys, :, jmba))
-            write (lunbal, 2001) mbaname(jmba), sum(mbafluxhor(1, isys, :, jmba)), sum(mbafluxhor(2, isys, :, jmba))
+            totals(1) = totals(1) + sum(mbafluxhor(1, imbs, :, jmba))
+            totals(2) = totals(2) + sum(mbafluxhor(2, imbs, :, jmba))
+            write (lunbal, 2001) mbaname(jmba), sum(mbafluxhor(1, imbs, :, jmba)), sum(mbafluxhor(2, imbs, :, jmba))
          end do
          do isrc = 1, numsrc
             if (mbasorsinout(1,isrc).gt.0) then
-               totals = totals + mbafluxsorsin(1:2, 1, isys, isrc)
-               write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(1:2, 1, isys, isrc)
+               totals = totals + mbafluxsorsin(1:2, 1, imbs, isrc)
+               write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(1:2, 1, imbs, isrc)
             endif
             if (mbasorsinout(2,isrc).gt.0) then
                totals = totals + mbafluxsorsin(2:1:-1, 2, isys, isrc)
-               write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(2:1:-1, 2, isys, isrc)
+               write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(2:1:-1, 2, imbs, isrc)
             endif
          end do
       endif
-      if (nfluxsys(isys).gt.0) then
-         do iflux = ifluxsys + 1, ifluxsys + nfluxsys(isys)
-            jflux = fluxsys(iflux)
-            if(stochi(isys,jflux).ge.0.0) then
-               flux(1) =  dble(stochi(isys,jflux)) * sum(flxdmp(1,jflux, :))
-               flux(2) =  dble(stochi(isys,jflux)) * sum(flxdmp(2,jflux, :))
-            else
-               flux(1) =  -dble(stochi(isys,jflux)) * sum(flxdmp(2,jflux, :))
-               flux(2) =  -dble(stochi(isys,jflux)) * sum(flxdmp(1,jflux, :))
-            endif
-            write (lunbal, 2004) fluxname(jflux), flux(1:2)
-            totals(1:2) = totals(1:2) + flux(1:2)
-         enddo
-         ifluxsys = ifluxsys + nfluxsys(isys)
+      isys = imbs2sys(imbs)
+      if (isys.gt.0) then
+         if (nfluxsys(isys).gt.0) then
+            do iflux = ipfluxsys(isys) + 1, ipfluxsys(isys) + nfluxsys(isys)
+               jflux = fluxsys(iflux)
+               if(stochi(isys,jflux).ge.0.0) then
+                  flux(1) =  dble(stochi(isys,jflux)) * sum(flxdmp(1,jflux, :))
+                  flux(2) =  dble(stochi(isys,jflux)) * sum(flxdmp(2,jflux, :))
+               else
+                  flux(1) =  -dble(stochi(isys,jflux)) * sum(flxdmp(2,jflux, :))
+                  flux(2) =  -dble(stochi(isys,jflux)) * sum(flxdmp(1,jflux, :))
+               endif
+               write (lunbal, 2004) fluxname(jflux), flux(1:2)
+               totals(1:2) = totals(1:2) + flux(1:2)
+            enddo
+         endif
       endif
       write (lunbal, 1004)
       write (lunbal, 2003) totals
-      write (lunbal, 2020) syname(isys), totals(2)-totals(1)
+      write (lunbal, 2020) mbsname(imbs), totals(2)-totals(1)
       reference = max(abs(summbamassbegin),abs(summbamassend),totals(1),totals(2))
       if (reference .gt. tiny) then
          relative_error = 1.0d2*abs(totals(2)-totals(1))/reference
-         write (lunbal, 2021) syname(isys), relative_error
+         write (lunbal, 2021) mbsname(imbs), relative_error
       else
-         write (lunbal, 2022) syname(isys)
+         write (lunbal, 2022) mbsname(imbs)
       end if
    end do
 

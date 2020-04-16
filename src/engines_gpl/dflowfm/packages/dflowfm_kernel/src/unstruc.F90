@@ -322,14 +322,14 @@ subroutine flow_finalize_usertimestep(iresult)
    endif
 
 !   call mba_update(time_user)
-   if (ti_waqbal > 0) then
+   if (ti_mba > 0) then
      if (comparereal(time_user, time_mba, eps10) == 0) then
          call mba_update(time0)
-         tem_dif = time_user/ti_waqbal
+         tem_dif = time_user/ti_mba
          if (ti_waqproc > 0d0) then
-            time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_waqbal, floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc)
+            time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_mba, floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc)
          else
-            time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_waqbal, tstop_user)
+            time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_mba, tstop_user)
          endif
      endif
    endif
@@ -10993,7 +10993,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call klok(cpu_extra(2,18)) ! end waq processes init
 
  call klok(cpu_extra(1,24)) ! MBA init
- if (ti_waqbal > 0) then
+ if (ti_mba > 0) then
     call mba_init()
  endif
  call klok(cpu_extra(2,24)) ! end MBA init
@@ -12633,7 +12633,7 @@ subroutine writesomeinitialoutput()
  ! call wrimap(time1)                                ! schrijf aan het einde ook een .map-file weg
 
 !   call mba_final(time_user)
- if (ti_waqbal > 0) then
+ if (ti_mba > 0) then
     call mba_final(time_user)
  endif
 
@@ -42029,6 +42029,7 @@ end function is_1d_boundary_candidate
  use m_alloc
  use m_sediment
  use m_transport
+ use m_mass_balance_areas
  use m_fm_wq_processes
  use m_strucs
  use dfm_error
@@ -42085,6 +42086,8 @@ end function is_1d_boundary_candidate
  integer                       :: ilattype
  integer                       :: ifun
  character(len=20)             :: wqinput
+ character(len=NAMMBALEN)      :: mbainputname
+ integer                       :: imba, needextramba, needextrambar
  character(len=20)             :: wqbotunit
  logical                       :: hyst_dummy(2)
  double precision              :: area, width, hdx
@@ -42753,6 +42756,12 @@ end function is_1d_boundary_candidate
 
  call setzminmax(); call setsigmabnds() ! our side of preparation for 3D ec module
 
+! initialise mass balance areas
+ if (ti_mba > 0) then
+   call realloc(mbadef, Ndkx, keepExisting=.false., fill =-999)
+   call realloc(mbadefdomain, Ndkx, keepExisting=.false., fill =-999)
+ endif
+ 
  ! Start processing ext files, start with success.
  success = .true.
 
@@ -42791,6 +42800,7 @@ if (mext /= 0) then
         call get_tracername(qid, tracnam, qidnam)
         call get_sedfracname(qid, sfnam, qidnam)
         call get_waqinputname(qid, wqinput, qidnam)
+        call get_mbainputname(qid, mbainputname, qidnam)
 
         lenqidnam = len_trim(qidnam)
         if (filetype == 7 .and. method == 4) then
@@ -43674,10 +43684,43 @@ if (mext /= 0) then
            ! Converter will put 'x' in array(2*nummovobs-1) and 'y' in array(2*nummovobs).
            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename, filetype, method, operand, targetIndex=nummovobs)
 
-        else if (qid(1:12) == 'waqparameter' .or. qid(1:18) == 'waqmassbalancearea' .or. qid(1:17) == 'waqmonitoringarea' .or. &
-                 qid(1:16) == 'waqsegmentnumber') then
-           ! Already taken care of in m_fm_wq_processes
+        else if (qid(1:15) == 'massbalancearea' .or. qid(1:18) == 'waqmassbalancearea') then
+           ! Already taken care of in mass_balance_areas
+           if (ti_mba > 0) then
+               imba = findname(nomba, mbaname, mbainputname)
 
+               if ( imba.eq.0 ) then
+                  nomba = nomba + 1
+                  imba = nomba
+                  call realloc(mbaname,nomba,keepExisting=.true.,fill=mbainputname)
+               end if
+               call realloc(viuh,Ndkx,keepExisting=.false.,Fill=dmiss)
+
+!              will only fill 2D part of viuh
+               success = timespaceinitialfield(xz, yz, viuh, Ndx, filename, filetype, method, operand, transformcoef, 2)
+
+               if (success) then
+                  do kk=1,Ndxi
+                     if (viuh(kk).ne.dmiss) then
+                        if (mbadef(kk).ne. -999) then
+                           ! warn that segment nn at xx, yy is nog mon area imba
+                        endif
+                        mbadef(kk) = imba
+                        call getkbotktop(kk,kb,kt)
+                        do k=kb,kb+kmxn(kk)-1
+                           mbadef(k) = imba
+                        end do
+                     endif
+                  end do
+               endif
+               deallocate(viuh)
+            else
+               call qnerror('Quantity massbalancearea in the ext-file, but no MbaInterval specified in the mdu-file.', ' ', ' ')
+               success = .false.
+            endif
+
+        else if (qid(1:12) == 'waqparameter' .or. qid(1:17) == 'waqmonitoringarea' .or. qid(1:16) == 'waqsegmentnumber') then
+           ! Already taken care of in fm_wq_processes
            success  =  .true.
 
         else if (qid(1:11) == 'waqfunction') then
@@ -44452,6 +44495,51 @@ end if
  if (allocated(kcsini)) then
     deallocate(kcsini)
  end if
+
+!  Check if there are any cells left that are not part of a mass balance area, and if we need an extra area.
+if (ti_mba>0) then
+   needextramba = 0
+   do kk=1,Ndxi
+      if (mbadef(kk).eq.-999) then
+         needextramba = 1
+         exit
+      endif
+   end do
+
+   if (jampi.eq.1) then
+!     check this among all domains (it could be that there are no remaing cels in this domain, while there are in other domains).
+      call reduce_int_sum(needextramba, needextrambar)
+      needextramba = needextrambar
+   endif
+
+   if(needextramba.ne.0) then
+!     add the extra 'Unnamed' mass balance area, and assing the unassigned cells to this area.
+      nomba = nomba + 1
+      call realloc(mbaname,nomba,keepExisting=.true.,fill="Unnamed")
+      imba = nomba
+      do kk=1,Ndxi
+         if (mbadef(kk).eq.-999) then
+            mbadef(kk) = imba
+            call getkbotktop(kk,kb,kt)
+            do k=kb,kb+kmxn(kk)-1
+               mbadef(k) = imba
+            end do
+         endif
+      end do
+   endif
+
+   do kk=1,Ndxi
+      if ( jampi.eq.1 ) then
+!        do not include ghost cells
+         if ( idomain(kk).ne.my_rank ) cycle
+      end if
+      mbadefdomain(kk) = mbadef(kk)
+      call getkbotktop(kk,kb,kt)
+      do k=kb,kb+kmxn(kk)-1
+            mbadefdomain(k) = mbadef(k)
+      end do
+   end do
+ endif
 
  ! Copy NUMCONST to NUMCONST_MDU, before the user (optionally) adds tracers interactively
  NUMCONST_MDU = NUMCONST

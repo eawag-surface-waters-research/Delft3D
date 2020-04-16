@@ -131,7 +131,7 @@ libdflowfm_la_SOURCES+=\
         fm_dredge.f90 \
         fm_erosed.f90 \
         fm_wq_processes.f90 \
-        fm_wq_processes_mba.f90 \
+        mass_balance_areas.f90 \
         fm_thahbc.f90 \
         tecplot.F90 \
         transport.f90 \

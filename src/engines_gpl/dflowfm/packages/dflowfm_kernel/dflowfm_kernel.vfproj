@@ -81,7 +81,6 @@
 		<File RelativePath="src\fm_morstatistics.f90"/>
 		<File RelativePath="src\fm_thahbc.f90"/>
 		<File RelativePath="src\fm_wq_processes.f90"/>
-		<File RelativePath=".\src\fm_wq_processes_mba.f90"/>
 		<File RelativePath="src\fourier_analysis.f90"/>
 		<File RelativePath="src\gui.F90">
 			<FileConfiguration Name="Debug|Win32">
@@ -98,6 +97,7 @@
 		<File RelativePath=".\src\inquire_flowgeom.f90"/>
 		<File RelativePath=".\src\m_filter.f90"/>
 		<File RelativePath="src\manholes.f90"/>
+		<File RelativePath="src\mass_balance_areas.f90"/>
 		<File RelativePath="src\meteo1.f90"/>
 		<File RelativePath="src\model_specific.f90"/>
 		<File RelativePath="src\modules.f90"/>
@@ -113,7 +113,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\network.f90"/>
 		<File RelativePath="src\oned_functions.f90"/>
-		<File RelativePath="src\part.f90"/>
+		<File RelativePath=".\src\part.F90"/>
 		<File RelativePath="src\partition.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>

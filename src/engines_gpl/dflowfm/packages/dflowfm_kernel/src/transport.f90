@@ -46,6 +46,7 @@ subroutine update_constituents(jarhoonly)
    use m_turbulence, only: sigdifi
    use m_physcoef,   only: dicoww, vicouv, difmolsal
    use m_transport
+   use m_mass_balance_areas
    use m_flowparameters, only: limtypsa, limtyptm, limtypsed
    use m_alloc
    use m_partitioninfo
@@ -53,7 +54,6 @@ subroutine update_constituents(jarhoonly)
    use unstruc_messages
    use m_sediment,   only: jatranspvel, jased, stmpar, stm_included, mtd
    use m_waves
-   use m_fm_wq_processes
    implicit none
 
    integer :: jarhoonly 
@@ -175,8 +175,8 @@ subroutine update_constituents(jarhoonly)
          call comp_horfluxtot()
       endif
 
-      if (jamba > 0) then  ! at moment, this function is only required by waq processes
-         call comp_horfluxwaq()
+      if (jamba > 0) then  ! at moment, this function is only required for the mass balance areas
+         call comp_horfluxmba()
       endif
 
 !     determine which cells need to be updated
@@ -259,6 +259,7 @@ use m_flowgeom
 use m_flow
 use m_flowtimes
 double precision :: decaytime
+integer :: i, k
 do k = 1,ndkx
    do i=ITRA1,ITRAN
       decaytime = decaytimetracers(i - itra1 + 1)
@@ -275,7 +276,8 @@ use m_flowgeom
 use m_flow
 use m_flowtimes
 use m_reduce
-double precision :: ddx, difcoeff
+double precision :: ddx, difcoeff, diuspL
+integer i, k1, k2, L, LL, n
 
 do i=1,numconst
 
@@ -1603,8 +1605,8 @@ subroutine alloc_transport(Keepexisting)
    if ( jawaqproc > 0 ) then
 !     WAQ
       call realloc(isys2const,  notot, keepExisting=.true., fill=0)
-      call realloc(iconst2sys,  NUMCONST, keepExisting=.true., fill=0)
    end if
+   call realloc(iconst2sys,  NUMCONST, keepExisting=.true., fill=0)
    return
 end subroutine alloc_transport
 
@@ -1615,7 +1617,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    use m_flowgeom
    use m_flow
    use m_sediment
-   use m_fm_wq_processes
+   use m_mass_balance_areas
    use m_partitioninfo
    use m_sferic, only: jsferic, fcorio
    use m_flowtimes , only : dnt, dts
@@ -1628,7 +1630,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    
    double precision            :: dvoli
    integer, intent(in)         :: jas 
-   integer                     :: i, iconst, j, kk, kkk, k, kb, kt, n, kk2, L, s, jamba_src
+   integer                     :: i, iconst, j, kk, kkk, k, kb, kt, n, kk2, L, jamba_src
    double precision, parameter :: dtol=1d-8   
    double precision            :: spir_ce, spir_be, spir_e, alength_a, time_a, alpha, fcoriocof, qsrck, qsrckk, dzss
    
@@ -1850,20 +1852,14 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) - qsrck*constituents(L,k)*dvoli
                   if (jamba_src > 0) then
-                     s = iconst2sys(L)
-                     if (s > 0 .and. s <= nosys) then
-                       mbafluxsorsin(2,1,s,n) = mbafluxsorsin(2,1,s,n) + qsrck*constituents(L,k)*dts
-                     endif
+                     mbafluxsorsin(2,1,L,n) = mbafluxsorsin(2,1,L,n) + qsrck*constituents(L,k)*dts
                   endif
                enddo   
             else if  (qsrck  < 0) then       ! FROM k2 to k
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) - qsrck*ccsrc(L,n)*dvoli
                   if (jamba_src > 0) then
-                     s = iconst2sys(L)
-                     if (s > 0 .and. s <= nosys) then
-                        mbafluxsorsin(1,1,s,n) = mbafluxsorsin(1,1,s,n) - qsrck*ccsrc(L,n)*dts
-                     endif
+                     mbafluxsorsin(1,1,L,n) = mbafluxsorsin(1,1,L,n) - qsrck*ccsrc(L,n)*dts
                   endif
                enddo   
             endif
@@ -1885,20 +1881,14 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) + qsrck*ccsrc(L,n)*dvoli
                   if (jamba_src > 0) then
-                     s = iconst2sys(L)
-                     if (s > 0 .and. s <= nosys) then
-                        mbafluxsorsin(2,2,s,n) = mbafluxsorsin(2,2,s,n) + qsrck*ccsrc(L,n)*dts
-                     endif
+                     mbafluxsorsin(2,2,L,n) = mbafluxsorsin(2,2,L,n) + qsrck*ccsrc(L,n)*dts
                   endif
                enddo   
             else if  (qsrck  < 0) then  
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) + qsrck*constituents(L,k)*dvoli
                   if (jamba_src > 0) then
-                     s = iconst2sys(L)
-                     if (s > 0 .and. s <= nosys) then
-                        mbafluxsorsin(1,2,s,n) = mbafluxsorsin(1,2,s,n) -  qsrck*constituents(L,k)*dts
-                     endif
+                     mbafluxsorsin(1,2,L,n) = mbafluxsorsin(1,2,L,n) -  qsrck*constituents(L,k)*dts
                   endif
                enddo   
             endif
@@ -2806,17 +2796,17 @@ subroutine comp_horfluxtot()
 
 end subroutine comp_horfluxtot
 
-subroutine comp_horfluxwaq()
+subroutine comp_horfluxmba()
    use m_flowgeom, only: Lnx
    use m_flow, only: Lbot, Ltop, kmx, Lnkx, q1 
    use m_transport, only: NUMCONST, fluxhor
    use m_flowtimes, only: dts
-   use m_fm_wq_processes
+   use m_mass_balance_areas
    implicit none
    
   
    integer :: LL, L, Lb, Lt, k1, k2, i
-   integer :: isys, iconst
+   integer :: iconst
    
    do i=1,nombaln
       LL = mbalnlist(i)
@@ -2835,8 +2825,7 @@ subroutine comp_horfluxwaq()
       end do
    end do
 
-   do isys=1,nosys
-      iconst = isys2const(isys)
+   do iconst=1,numconst
       do i=1,nombaln
          LL = mbalnlist(i)
          Lb = Lbot(LL)
@@ -2845,17 +2834,17 @@ subroutine comp_horfluxwaq()
          k2 = mbalnfromto(2,i)
          do L=Lb,Lt
             if (fluxhor(iconst,L).gt.0.0) then
-               mbafluxhor(2,isys,k1,k2) = mbafluxhor(2,isys,k1,k2) + fluxhor(iconst,L) * dts
-               mbafluxhor(1,isys,k2,k1) = mbafluxhor(1,isys,k2,k1) + fluxhor(iconst,L) * dts
+               mbafluxhor(2,iconst,k1,k2) = mbafluxhor(2,iconst,k1,k2) + fluxhor(iconst,L) * dts
+               mbafluxhor(1,iconst,k2,k1) = mbafluxhor(1,iconst,k2,k1) + fluxhor(iconst,L) * dts
             else
-               mbafluxhor(1,isys,k1,k2) = mbafluxhor(1,isys,k1,k2) - fluxhor(iconst,L) * dts
-               mbafluxhor(2,isys,k2,k1) = mbafluxhor(2,isys,k2,k1) - fluxhor(iconst,L) * dts
+               mbafluxhor(1,iconst,k1,k2) = mbafluxhor(1,iconst,k1,k2) - fluxhor(iconst,L) * dts
+               mbafluxhor(2,iconst,k2,k1) = mbafluxhor(2,iconst,k2,k1) - fluxhor(iconst,L) * dts
             endif
          end do
       end do
    end do
 
-end subroutine comp_horfluxwaq
+end subroutine comp_horfluxmba
 
 !subroutine update_constituents_RK3
 !   use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd  ! static mesh information

@@ -22,8 +22,8 @@
 !!  rights reserved.
       module processes_input
 
-      integer  ( 4)              :: notot           !< Number of systems
-      integer  ( 4)              :: nosys           !< Number of active systems
+      integer  ( 4)              :: notot = 0       !< Number of systems
+      integer  ( 4)              :: nosys = 0       !< Number of active systems
       integer  ( 4)              :: nocons          !< Number of constants used
       integer  ( 4)              :: noconm          !< Maximum number of constants used
       integer  ( 4)              :: nopa            !< Number of parameters
@@ -91,7 +91,7 @@
       integer                    :: nproc           !< Number of called processes
       integer                    :: noloc           !< Number of local vars in the proces subsystem
       integer                    :: novar           !< Number of variables
-      integer                    :: nflux           !< total number of fluxes
+      integer                    :: nflux = 0       !< total number of fluxes
       integer                    :: nodef           !< Number of defaults in proces subsystem
       integer                    :: noutp           !< Number of files in OUTPUT system
       integer                    :: nrvart          !< Number of extra output variables
@@ -154,6 +154,7 @@
       
       integer                    :: totfluxsys      !< Total number of fluxes for all substances
       integer      , allocatable :: nfluxsys(:)     !< Number of fluxes per substances (dim=nosys)
+      integer      , allocatable :: ipfluxsys(:)    !< Index pointer of fluxes per substances (dim=nosys)
       integer      , allocatable :: fluxsys(:)      !< Index of flux for this substance (dim=totfluxsys)
 
       integer   iivol  / 1/, iiarea / 2/, iiflow / 3/, iileng / 4/, &

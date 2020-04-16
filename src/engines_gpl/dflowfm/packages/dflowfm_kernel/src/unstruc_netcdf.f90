@@ -4449,6 +4449,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_bedform
    use m_wind
    use m_flowparameters, only: jatrt, jamd1dfile
+   use m_mass_balance_areas
    use m_fm_wq_processes
    use m_xbeach_data
    use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const, u1sed, q1sed, ucxsed, ucysed, qcxsed, qcysed, xsedflux, ysedflux
@@ -6663,6 +6664,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     use m_bedform
     use m_wind
     use m_flowparameters, only: jatrt, jacali
+    use m_mass_balance_areas
     use m_fm_wq_processes
     use m_xbeach_data
     use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const

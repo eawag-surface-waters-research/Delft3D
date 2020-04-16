@@ -807,10 +807,6 @@
 
    call settimespacerefdat(refdat, julrefdat, Tzone, Timjan)
 
-   ! initialise mass balance areas
-   call realloc(mbadef, Ndkx, keepExisting=.false., fill =-999)
-   call realloc(mbadefdomain, Ndkx, keepExisting=.false., fill =-999)
-
    if (mext /= 0) then
       ja = 1
 
@@ -925,35 +921,6 @@
                end if
                success = .true.
 
-            else if (qid(1:18) == 'waqmassbalancearea') then
-               imba = findname(nomba, mbaname, waqinput)
-
-               if ( imba.eq.0 ) then
-                  nomba = nomba + 1
-                  imba = nomba
-                  call realloc(mbaname,nomba,keepExisting=.true.,fill=waqinput)
-               end if
-               call realloc(viuh,Ndkx,keepExisting=.false.,Fill=dmiss)
-
-!              will only fill 2D part of viuh
-               success = timespaceinitialfield(xz, yz, viuh, Ndx, filename, filetype, method, operand, transformcoef, 2)
-
-               if (success) then
-                  do kk=1,Ndxi
-                     if (viuh(kk).ne.dmiss) then
-                        if (mbadef(kk).ne. -999) then
-                           ! warn that segment nn at xx, yy is nog mon area imba
-                        endif
-                        mbadef(kk) = imba
-                        call getkbotktop(kk,kb,kt)
-                        do k=kb,kb+kmxn(kk)-1
-                           mbadef(k) = imba
-                        end do
-                     endif
-                  end do
-               endif
-               deallocate(viuh)
-
             else if (qid(1:17) == 'waqmonitoringarea') then
                imna = findname(nomon, monname, waqinput)
 
@@ -991,49 +958,6 @@
       enddo
 
    endif ! read mext file
-
-!  Check if there are any cells left that are not part of a mass balance area, and if we need an extra area.
-   needextramba = 0
-   do kk=1,Ndxi
-      if (mbadef(kk).eq.-999) then
-         needextramba = 1
-         exit
-      endif
-   end do
-
-   if (jampi.eq.1) then
-!     check this among all domains (it could be that there are no remaing cels in this domain, while there are in other domains).
-      call reduce_int_sum(needextramba, needextrambar)
-      needextramba = needextrambar
-   endif
-
-   if(needextramba.ne.0) then
-!     add the extra 'Unnamed' mass balance area, and assing the unassigned cells to this area.
-      nomba = nomba + 1
-      call realloc(mbaname,nomba,keepExisting=.true.,fill="Unnamed")
-      imba = nomba
-      do kk=1,Ndxi
-         if (mbadef(kk).eq.-999) then
-            mbadef(kk) = imba
-            call getkbotktop(kk,kb,kt)
-            do k=kb,kb+kmxn(kk)-1
-               mbadef(k) = imba
-            end do
-         endif
-      end do
-   endif
-
-   do kk=1,Ndxi
-      if ( jampi.eq.1 ) then
-!        do not include ghost cells
-         if ( idomain(kk).ne.my_rank ) cycle
-      end if
-      mbadefdomain(kk) = mbadef(kk)
-      call getkbotktop(kk,kb,kt)
-      do k=kb,kb+kmxn(kk)-1
-            mbadefdomain(k) = mbadef(k)
-      end do
-   end do
 
    if (loglevel_StdOut == LEVEL_DEBUG) then
       call ecInstancePrintState(ecInstancePtr,callback_msg,LEVEL_DEBUG)
@@ -1171,6 +1095,7 @@
 
    subroutine fm_wq_processes_step(dt,time)
       use m_fm_wq_processes
+      use m_mass_balance_areas
       use m_missing, only: dmiss
       use unstruc_model, only: md_flux_int
       use timers
@@ -1606,7 +1531,6 @@
       implicit none
 
       jawaqproc = 0
-      jamba = 0
       md_subfile = ''
       md_ehofile = ''
       md_sttfile = ''

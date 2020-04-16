@@ -788,6 +788,7 @@
       enddo
 
       call realloc(nfluxsys, notot, keepExisting=.false.,Fill=0)
+      call realloc(ipfluxsys, notot, keepExisting=.false.,Fill=0)
       call realloc(fluxsys, totfluxsys, keepExisting=.false.,Fill=0)
       
       ifluxsys = 0

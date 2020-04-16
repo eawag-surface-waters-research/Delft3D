@@ -4355,12 +4355,12 @@ end subroutine reset_flowgeom
  double precision                  :: ti_rst      !< restart interval (s)
  double precision                  :: ti_rsts     !< Start of restart output period (as assigned in mdu-file) (s)
  double precision                  :: ti_rste     !< End   of restart output period (as assigned in mdu-file) (s)
+ double precision                  :: ti_mba      !< Time step for mass balance area output
  double precision                  :: ti_waq      !< Interval between output in delwaq files (s).
  double precision                  :: ti_waqs     !< Start of WAQ output period
  double precision                  :: ti_waqe     !< End   of WAQ output period
  logical                           :: wrwaqon = .false. !< Waq output was initialised
  double precision                  :: ti_waqproc  !< Time step for water quality processes
- double precision                  :: ti_waqbal   !< Time step for water quality mass balance output
 
  double precision                  :: ti_classmap        !< class map interval (s)
  double precision                  :: ti_classmaps       !< Start of class map output period (as assigned in mdu-file) (s)
@@ -4519,7 +4519,7 @@ subroutine reset_flowtimes()
     time_waq     = ti_waqs           !< next time for waq output, starting at the output start time
     time_waqset  = tstart_user       !< next time for reset the quantities for waq output
     time_waqproc = tstart_user+ti_waqproc !< next time for wq processes
-    time_mba = tstart_user+ti_waqbal !< next time for balance update
+    time_mba     = tstart_user+ti_mba !< next time for balance update
     if ( ti_stat.gt.0d0 ) then
        time_stat    = tstart_user    !< next model time for simulation statistics output
     else
@@ -5396,7 +5396,8 @@ module m_fm_wq_processes
    real(sp), allocatable, dimension(:,:)     :: flux                        !< Proces fluxes in mass/m3/s
 
    integer,  allocatable, dimension(:)       :: isys2const                  !< WAQ substance to D-Flow FM constituents
-   integer,  allocatable, dimension(:)       :: iconst2sys                  !< WAQ substance to D-Flow FM constituents
+   integer,  allocatable, dimension(:)       :: iconst2sys                  !< D-Flow FM constituents to WAQ substance
+   integer,  allocatable, dimension(:)       :: imbs2sys                    !< D-Flow FM mass balance number to WAQ substance (0=not a WAQ substance)
    integer,  allocatable, dimension(:)       :: isys2trac                   !< WAQ active system to D-FlowFM tracer
    integer,  allocatable, dimension(:)       :: isys2wqbot                  !< WAQ inactive system to D-FlowFM water quality bottom variable
    integer,  allocatable, dimension(:)       :: ifall2vpnw                  !< substance-with-fall-velocity to WAQ numbering in fall-velocity array
@@ -5436,12 +5437,19 @@ module m_fm_wq_processes
    real(hp), allocatable, dimension(:,:,:)   :: flxdmpreduce                !< Fluxes at dump segments
    real(hp), allocatable, dimension(:,:,:)   :: flxdmptot                   !< Total fluxes at dump segments
 
-!   double precision           :: dum
-
-   integer                                   :: jamba                       !< switch for mass balance areas being active
+   integer                                   :: nomon                       !< number of mass balance areas
+   character(len=NAMWAQLEN),allocatable      :: monname(:)                  !< parameter names
+   integer, allocatable                      :: mondef(:,:)                 !< monitoring area definition
+end module m_fm_wq_processes
+   
+module m_mass_balance_areas
+   integer, parameter                        :: NAMMBALEN = 128             !< maximum length of mass balance area names
+   integer                                   :: jamba = 0                   !< switch for mass balance areas being active
+   integer                                   :: nombs = 0                   !< number of mass balances
+   character(len=NAMMBALEN),allocatable      :: mbsname(:)                  !< mass balance names
    integer                                   :: nomba = 0                   !< number of mass balance areas
    integer                                   :: nombabnd                    !< number of mass balance areas and boundaries
-   character(len=NAMWAQLEN),allocatable      :: mbaname(:)                  !< parameter names
+   character(len=NAMMBALEN),allocatable      :: mbaname(:)                  !< parameter names
    integer, allocatable                      :: mbadef(:)                   !< mass balance area (mba) definition
    integer, allocatable                      :: mbadefdomain(:)             !< mass balance area (mba) definition without ghost cells
    integer                                   :: id_mba(3)                   !< mbd id's in map-file
@@ -5452,9 +5460,6 @@ module m_fm_wq_processes
    integer                                   :: nombaln                     !< number of links needed for mass balance (2D)
    integer, allocatable                      :: mbalnlist(:)                !< list of links needed for the mass balance (2D)
    logical                                   :: mbaremaining                !< mass balance area for ramaining cells added?
-   integer                                   :: nomon                       !< number of mass balance areas
-   character(len=NAMWAQLEN),allocatable      :: monname(:)                  !< parameter names
-   integer, allocatable                      :: mondef(:,:)                 !< monitoring area definition
    integer                                   :: lunmbahis                   !< logical unit of mba his-file
    integer                                   :: lunmbatothis                !< logical unit of mba total his-file
    integer                                   :: lunmbabal                   !< logical unit of mba bal-file
@@ -5466,34 +5471,33 @@ module m_fm_wq_processes
    double precision                          :: timembastarttot             !< start time of balance period
    double precision                          :: timembaend                  !< end time of balance period
 
-   real(hp), allocatable, dimension(:)       :: mbaarea                     !< surface area of mass balance area
+   double precision, allocatable             :: mbaarea(:)                  !< surface area of mass balance area
 
-   real(hp), allocatable, dimension(:)       :: mbavolumebegin              !< begin volume in mass balance area
-   real(hp), allocatable, dimension(:)       :: mbavolumebegintot           !< total begin volume in mass balance area
-   real(hp), allocatable, dimension(:)       :: mbavolumeend                !< end volume in mass balance area
+   double precision, allocatable             :: mbavolumebegin(:)           !< begin volume in mass balance area
+   double precision, allocatable             :: mbavolumebegintot(:)        !< total begin volume in mass balance area
+   double precision, allocatable             :: mbavolumeend(:)             !< end volume in mass balance area
 
-   real(hp), allocatable, dimension(:,:,:)   :: mbaflowhor                  !< periodical flow between balance areas and between boundaries and balance areas
-   real(hp), allocatable, dimension(:,:,:)   :: mbaflowhortot               !< total flow between balance areas and between boundaries and balance areas
-   real(hp), allocatable, dimension(:,:)     :: mbaflowsorsin               !< periodical flow from source sinks
-   real(hp), allocatable, dimension(:,:)     :: mbaflowsorsintot            !< total flow from source sinks
+   double precision, allocatable             :: mbaflowhor(:,:,:)           !< periodical flow between balance areas and between boundaries and balance areas
+   double precision, allocatable             :: mbaflowhortot(:,:,:)        !< total flow between balance areas and between boundaries and balance areas
+   double precision, allocatable             :: mbaflowsorsin(:,:)          !< periodical flow from source sinks
+   double precision, allocatable             :: mbaflowsorsintot(:,:)       !< total flow from source sinks
 
-   real(hp), allocatable, dimension(:,:)     :: mbamassbegin                !< begin volume in mass balance area
-   real(hp), allocatable, dimension(:,:)     :: mbamassbegintot             !< total begin volume in mass balance area
-   real(hp), allocatable, dimension(:,:)     :: mbamassend                  !< end volume in mass balance area
+   double precision, allocatable             :: mbamassbegin(:,:)           !< begin volume in mass balance area
+   double precision, allocatable             :: mbamassbegintot(:,:)        !< total begin volume in mass balance area
+   double precision, allocatable             :: mbamassend(:,:)             !< end volume in mass balance area
 
-   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxhor                  !< periodical fluxes between balance areas and between boundaries and balance areas
-   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxhortot               !< total fluxes between balance areas and between boundaries and balance areas
-   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxsorsin               !< periodical fluxes from source sinks
-   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxsorsintot            !< total fluxes from source sinks
+   double precision, allocatable             :: mbafluxhor(:,:,:,:)         !< periodical fluxes between balance areas and between boundaries and balance areas
+   double precision, allocatable             :: mbafluxhortot(:,:,:,:)      !< total fluxes between balance areas and between boundaries and balance areas
+   double precision, allocatable             :: mbafluxsorsin(:,:,:,:)      !< periodical fluxes from source sinks
+   double precision, allocatable             :: mbafluxsorsintot(:,:,:,:)   !< total fluxes from source sinks
 
-   real(hp), allocatable, dimension(:)       :: mbavolumereduce             !< begin volume in mass balance area
-   real(hp), allocatable, dimension(:,:,:)   :: mbaflowhorreduce            !< periodical flow between balance areas and between boundaries and balance areas
-   real(hp), allocatable, dimension(:,:)     :: mbaflowsorsinreduce         !< periodical flow from sources sinks
-   real(hp), allocatable, dimension(:,:)     :: mbamassreduce               !< begin volume in mass balance area
-   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxhorreduce            !< periodical fluxes between balance areas and between boundaries and balance areas
-   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxsorsinreduce         !< periodical fluxes from source sinks
-
-end module
+   double precision, allocatable             :: mbavolumereduce    (:)      !< begin volume in mass balance area
+   double precision, allocatable             :: mbaflowhorreduce   (:,:,:)  !< periodical flow between balance areas and between boundaries and balance areas
+   double precision, allocatable             :: mbaflowsorsinreduce(:,:)    !< periodical flow from sources sinks
+   double precision, allocatable             :: mbamassreduce      (:,:)    !< begin volume in mass balance area
+   double precision, allocatable             :: mbafluxhorreduce   (:,:,:,:)!< periodical fluxes between balance areas and between boundaries and balance areas
+   double precision, allocatable             :: mbafluxsorsinreduce(:,:,:,:)!< periodical fluxes from source sinks
+end module m_mass_balance_areas
 
 module dfm_error
 implicit none

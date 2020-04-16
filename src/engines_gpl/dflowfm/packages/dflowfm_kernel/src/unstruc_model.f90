@@ -186,7 +186,7 @@ implicit none
     character(len=255) :: md_sttfile = ' '      !< statistics definition file
     double precision   :: md_thetav_waq = 0d0   !< thetav for waq
     double precision   :: md_dt_waqproc = 0d0   !< processes time step
-    double precision   :: md_dt_waqbal = 0d0    !< mass balance output time step
+    double precision   :: md_dt_waqbal = 0d0    !< mass balance output time step (old)
     integer            :: md_flux_int = 1       !< process fluxes integration option (1: WAQ, 2: D-Flow FM)
 
     ! TODO: reading for trachytopes is still within rdtrt, below was added for partitioning (when no initialization)
@@ -1695,6 +1695,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_doubles(md_ptr, 'output', 'RstInterval'   ,  ti_rst_array, 3, success)
     call getOutputTimeArrays(ti_rst_array, ti_rsts, ti_rst, ti_rste, success)
 
+    call prop_get_double (md_ptr, 'output', 'MbaInterval', ti_mba, success)
+
 !    call prop_get_string(md_ptr, 'output', 'WaqFileBase', md_waqfilebase, success)
     ! Default basename of Delwaq files is model identifier:
     if (len_trim(md_waqfilebase) == 0) then
@@ -1724,7 +1726,7 @@ subroutine readMDUFile(filename, istat)
             ti_waq = 0d0
             write(msgbuf, '(a,f9.3)') 'WaqInterval cannot be clipped to integer number of seconds. Waq output has been disabled '
          end if
-         call msg_flush()
+         call mess(LEVEL_WARN, msgbuf) 
        end if
     end if
 
@@ -1970,7 +1972,7 @@ subroutine readMDUFile(filename, istat)
             ti_waqproc = max(1,floor(md_dt_waqproc/dt_user))*dt_user
             ! Processes timestep can only a multiple of dtuser...
             write(msgbuf, '(a,f9.3,a,f9.3,a)') 'DtProcesses should be a multiple of DtUser. It has been reset to: ', ti_waqproc, '(was: ',md_dt_waqproc,')'
-            call msg_flush()
+            call mess(LEVEL_WARN, msgbuf) 
          end if
       end if
    else if (md_dt_waqproc < 0d0) then
@@ -1979,13 +1981,21 @@ subroutine readMDUFile(filename, istat)
    end if
 
    call prop_get_double (md_ptr, 'processes', 'DtMassBalance', md_dt_waqbal, success)
-   ti_waqbal = md_dt_waqbal
-   if(md_dt_waqbal > 0d0 .and. md_dt_waqproc > 0d0) then
-      if(md_dt_waqbal < md_dt_waqproc .or. modulo(md_dt_waqbal, md_dt_waqproc) /= 0d0) then
-         ti_waqbal = max(1,floor(md_dt_waqbal/md_dt_waqproc))*dt_user
-         ! Processes timestep can only a multiple of dtprocesses...
-         write(msgbuf, '(a,f9.3,a,f9.3,a)') 'DtMassBalance should be a multiple of DtProcesses. It has been reset to: ', ti_waqbal, '(was: ',md_dt_waqbal,')'
-         call msg_flush()
+   if(md_dt_waqbal > 0d0) then
+      call mess(LEVEL_WARN, 'The keyword DtMassBalance in the Processes section is now replaced by MbaInterval in the Output section.') 
+      if (ti_mba > 0d0) then
+         call mess(LEVEL_WARN, 'MbaInterval was already specified, will ignore DtMassBalance.') 
+      else
+         call mess(LEVEL_WARN, 'MbaInterval was not specified, will use DtMassBalance for backwards compatibility.') 
+         ti_mba = md_dt_waqbal
+      endif
+   endif
+   if(ti_mba > 0d0 .and. md_dt_waqproc > 0d0) then
+      if(ti_mba < md_dt_waqproc .or. modulo(ti_mba, md_dt_waqproc) /= 0d0) then
+         ti_mba = max(1,floor(ti_mba/md_dt_waqproc))*dt_user
+         ! dtprocesses can only a multiple of Processes timestep (when processes are on)...
+         write(msgbuf, '(a,f9.3,a,f9.3,a)') 'MbaInterval should be a multiple of DtProcesses when WQ processes are on. It has been reset to: ', ti_mba, '(was: ',md_dt_waqbal,')'
+         call mess(LEVEL_WARN, msgbuf) 
       end if
    end if
 
@@ -3131,7 +3141,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     ti_rst_array(2) = ti_rsts
     ti_rst_array(3) = ti_rste
     call prop_set(prop_ptr, 'output', 'RstInterval', ti_rst_array, 'Restart times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period')
-
+    call prop_set(prop_ptr, 'output', 'MbaInterval', ti_mba, 'Mass balance area output interval (s)')
+    
 !    call prop_set(prop_ptr, 'output', 'WaqFileBase', trim(md_waqfilebase), 'Basename (without extension) for all Delwaq files to be written.')
     call prop_set(prop_ptr, 'output', 'WaqOutputDir',   trim(md_waqoutputdir),    'Output directory of WAQ communication files (flowgeom, vol, flo, etc.), default: DFM_DELWAQ_<modelname>. Set to . for current dir.')
 
