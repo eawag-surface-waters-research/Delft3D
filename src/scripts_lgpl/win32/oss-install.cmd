@@ -753,7 +753,7 @@ if NOT %globalErrorLevel% EQU 0 (
     rem 
     echo An error occurred while executing this file
     echo Returning with error number %globalErrorLevel%
-    exit %globalErrorLevel%
+    exit /B %globalErrorLevel%
 )
 
 :endproc

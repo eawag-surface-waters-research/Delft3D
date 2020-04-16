@@ -45,7 +45,7 @@ REM Skip generation if 6th argument is 1. PRESENT and 2. equal to "Debug" and 3.
 IF "%6"=="Debug" (
    IF EXIST "%5" (
       echo %0: Leaving existing file '%5' as is.
-      EXIT
+      EXIT /B
    ) ELSE (
       echo %0: Create missing file '%5'.
    )

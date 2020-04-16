@@ -7,5 +7,5 @@ echo executing: %TCL_EXE% changeprecision.tcl double
 %TCL_EXE% changeprecision.tcl double
 
 if NOT %ErrorLevel% EQU 0 (
-    exit %ErrorLevel%
+    exit /B %ErrorLevel%
 )

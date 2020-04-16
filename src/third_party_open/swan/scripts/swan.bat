@@ -82,4 +82,4 @@ goto finish
 set OMP_NUM_THREADS=%OMP_NUM_THREADS_BACKUP%
 
 @echo on
-rem exit
+rem exit /B

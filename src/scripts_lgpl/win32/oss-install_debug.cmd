@@ -360,7 +360,7 @@ if NOT %ErrorLevel% EQU 0 (
     rem
     rem Only jump to :end when the script is completely finished
     rem 
-    exit %ErrorLevel%
+    exit /B %ErrorLevel%
 )
 
 :endproc

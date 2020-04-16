@@ -105,5 +105,5 @@ third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamc
 if NOT %globalErrorLevel% EQU 0 (
     echo An error occurred in one or more compilation steps
     echo Returning with error number %globalErrorLevel%
-    exit %globalErrorLevel%
+    exit /B %globalErrorLevel%
 )

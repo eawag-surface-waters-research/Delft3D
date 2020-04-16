@@ -8,5 +8,5 @@ cd %~dp0
 call scripts_lgpl\win32\oss-install.cmd %1 %2
 
 if NOT %ErrorLevel% EQU 0 (
-    exit %ErrorLevel%
+    exit /B %ErrorLevel%
 )
