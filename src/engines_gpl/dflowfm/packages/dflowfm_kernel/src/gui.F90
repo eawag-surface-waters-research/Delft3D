@@ -763,11 +763,12 @@
         ! Check for presence of associated display presets
         inquire (file = trim(md_ident)//'.cfg', exist = jawel)
         if (jawel) then
-            ja = 1
-            !CALL CONFRM('Model-specific display presets found in '//trim(md_ident)//'.cfg. Do you want to load these?', JA)
-            if (JA == 1) THEN
-                call load_displaysettings(trim(md_ident)//'.cfg')
-            end if
+            call load_displaysettings(trim(md_ident)//'.cfg')
+        else 
+            inquire (file = 'unstruc.cfg', exist = jawel)
+            if (jawel) then
+               call load_displaysettings('unstruc.cfg')
+            endif
         end if
 
         NDRAW(2) = 1
@@ -2634,8 +2635,9 @@
       OPTION(49)= 'Number of active layers          (     )'
       OPTION(50)= 'Maximum nr of layers             (     )'
       OPTION(51)= 'Lbot                             (     )'
-      OPTION(52)= 'Ttop                             (     )'
-      numopt = 52
+      OPTION(52)= 'Ltop                             (     )'
+      OPTION(53)= 'Smoothness min(AL,AR)/max(AL,AR) (     )'
+      numopt = 53
       if ( stm_included ) then
          numopt = numopt+1
          numoptsed = numopt
@@ -18910,6 +18912,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    use unstruc_display
    use unstruc_version_module, only : unstruc_company, unstruc_program
    use unstruc_messages
+   use m_flow
    implicit none
    integer :: numpar, numfld, numparactual, numfldactual
    PARAMETER  (NUMPAR = 13, NUMFLD = 2*NUMPAR)
@@ -18921,12 +18924,12 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    external :: highlight_form_line
 !
    integer :: ir, il, iw, ixp, iyp, ih, i, iuvfieldorg, ifexit, ifinit, key
-   integer :: nbut, imp, inp
+   integer :: nbut, imp, inp, ierr
 
    NLEVEL     = 4
    OPTION( 1) = 'Dt_user                             (s) ' ; it(2*1)  = 6
    OPTION( 2) = 'Dt_max                              (s) ' ; it(2*2)  = 6
-   OPTION( 3) = 'Use automatic time step or not (1/0)( ) ' ; it(2*3)  = 2
+   OPTION( 3) = 'Use automatic time step             ( ) ' ; it(2*3)  = 2
    OPTION( 4) = 'Tstart_user                         (s) ' ; it(2*4)  = 6
    OPTION( 5) = 'Tstop_user                          (s) ' ; it(2*5)  = 6
    OPTION( 6) = 'HisInterval                         (s) ' ; it(2*6)  = 6
@@ -18944,7 +18947,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
    HELPM ( 1) = 'User timestep (rythm of external forcing updates)           '
    HELPM ( 2) = 'Max timestep                                                '
-   HELPM ( 3) = 'Use automatic time step (CFL-based) or not (1 or 0)         '
+   HELPM ( 3) = ' 1=2D V/Qouth, 3=3D Vk/Qouthk, 5=3D Vk/Qouhvk, 8=5, kt-1    '
    HELPM ( 4) = '                                                            '
    HELPM ( 5) = '                                                            '
    HELPM ( 6) = '                                                            '
@@ -19093,6 +19096,9 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
                call msg_flush()
            end if
 
+           if (ja_timestep_auto == 3 .or. ja_timestep_auto == 4) then 
+              if (.not. allocated(Squ2D) ) allocate ( squ2D(ndkx) , stat=ierr )
+           endif
        ENDIF
        CALL IWinClose(1)
        CALL IWinClose(1)
@@ -19354,7 +19360,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 24, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 25, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -19391,7 +19397,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(22)= 'Mxlayz nr of vertical z-layers      ( ) ' ; it(2*22) = 2
    OPTION(23)= 'Output full time-varying grid data  ( ) ' ; it(2*23) = 2
    OPTION(24)= 'Keepzlayering at bed                ( ) ' ; it(2*24) = 2
-   
+   OPTION(25)= 'Numtopsig (only for z-layers)       ( ) ' ; it(2*25) = 2
+  
 
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
@@ -19421,6 +19428,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM (22)= 'max nr of z-layers                                          '
    HELPM (23)= '0=compact, 1=full                                           '
    HELPM (24)= '0=no, 1=yes, 2=kb/kb+1 50/50                                '
+   HELPM (25)= 'only for zlayers: numer of top layers behaving sigma like   '
 
 
    CALL SAVEKEYS()
@@ -19515,6 +19523,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFORMPUTINTEGER (2*22,Mxlayz              )
    CALL IFORMPUTINTEGER (2*23,jafullgridoutput    )
    CALL IFORMPUTINTEGER (2*24,keepzlayeringatbed  )
+   CALL IFORMPUTINTEGER (2*25,numtopsig )
+
 
 
    !  Display the form with numeric fields left justified
@@ -19577,6 +19587,8 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
            CALL IFORMgetINTEGER (2*22,Mxlayz       )
            CALL IFORMgeTINTEGER (2*23,jafullgridoutput)
            CALL IFORMgeTINTEGER (2*24,keepzlayeringatbed)
+           CALL IFORMgeTINTEGER (2*25,numtopsig)
+
 
            if (kmx > 0 .or. mxlayz > 0) then
               if (layertype > 1) then 
