@@ -10,6 +10,9 @@
     rem     When there is an smpd already running on the machine, it must be ended first, using the Microsoft Task Manager, 
     rem     or in the command  box: smpd -uninstall
 
+rem call ..\..\..\..\src\bin\x64\dflowfm\scripts\run_dflowfm.bat "--partition:ndomains=3:icgsolver=6" westerscheldt.mdu
+
+
 call ..\..\..\..\src\bin\x64\dimr\scripts\run_dimr_parallel.bat 3 dimr_config.xml
 
 
