@@ -38,6 +38,36 @@ select case(var_name)
     location_name = "face"
   case("Uorb")
     location_name = "face"
+  case("bodsed")
+    location_name = "face"
+  case("dpsed")
+    location_name = "face"
+  case("msed")
+    location_name = "face"
+  case("thlyr")
+    location_name = "face"
+  case("rsedeq")
+    location_name = "face"
+  case("sbcx")
+    location_name = "face"
+  case("sbcy")
+    location_name = "face"
+  case("sbwx")
+    location_name = "face"
+  case("sbwy")
+    location_name = "face"
+  case("sscx")
+    location_name = "face"
+  case("sscy")
+    location_name = "face"
+  case("sswx")
+    location_name = "face"
+  case("sswy")
+    location_name = "face"
+  case("taucr")
+    location_name = "face"
+  case("tetacr")
+    location_name = "face"
   case("infilt")
     location_name = "face"
   case("infiltcap")
@@ -114,6 +144,8 @@ select case(var_name)
     location_name = "face"
   case("rainuni")
     location_name = ""
+  case("Qsunmap")
+    location_name = "face"
   case("zbndz")
     location_name = "edge"
   case("zbndu")
@@ -204,6 +236,8 @@ select case(var_name)
     location_name = "edge"
   case("diusp")
     location_name = "edge"
+  case("taus")
+    location_name = "face"
   case("ndxi")
     location_name = ""
   case("ndx1db")
@@ -225,6 +259,8 @@ select case(var_name)
   case("lnx")
     location_name = ""
   case("ln")
+    location_name = ""
+  case("LLkkk")
     location_name = ""
   case("lncn")
     location_name = ""
@@ -264,16 +300,6 @@ select case(var_name)
     location_name = ""
   case("numk")
     location_name = ""
-  case("ndx2d")
-    location_name = ""
-  case("ndx")
-    location_name = ""
-  case("xz")
-    location_name = "face"
-  case("yz")
-    location_name = "face"
-  case("ba")
-    location_name = "face"
   case("zbnd1d2d1")
     location_name = ""
   case("zbnd1d2d0")
@@ -298,22 +324,16 @@ select case(var_name)
     location_name = "face"
   case("is_dtint")
     location_name = ""
-  case("taucr")
-     location_name = "face"
-  case("tetacr")
-     location_name = "face"
-  case("TcrEro")
-     location_name = ""
-  case("TcrSed")
-     location_name = ""
-  case("Qsunmap")
-     location_name = "face"
-  case("SedFrac")
-     location_name = "face"
-  case("SurfTem")
-     location_name = "face"
-  case("taus")
-     location_name = "face"
+  case("ndx2d")
+    location_name = ""
+  case("ndx")
+    location_name = ""
+  case("xz")
+    location_name = "face"
+  case("yz")
+    location_name = "face"
+  case("ba")
+    location_name = "face"
   case default
     location_name = ""
 end select

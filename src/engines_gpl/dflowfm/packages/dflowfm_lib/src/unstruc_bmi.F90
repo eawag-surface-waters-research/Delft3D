@@ -78,6 +78,9 @@ module bmi
   real(c_double), target, allocatable, save :: froude(:)
   real(c_double), target, allocatable, save :: sed1(:)
   real(c_double), target, allocatable, save :: const_t(:,:) !< Placeholder array for returning constituents (transposed: dim(numconst,ndkx))
+  real(c_double), target, allocatable, save :: tem1Surf (:)
+  real(c_double), target, allocatable, save :: TcrEro   (:)
+  real(c_double), target, allocatable, save :: TcrSed   (:)
   integer, private :: iconst
   integer, external :: findname
 
@@ -608,7 +611,7 @@ subroutine get_var_count(c_var_count) bind(C, name="get_var_count") ! non-BMI
    integer(c_int), intent(out)         :: c_var_count
    include "bmi_get_var_count.inc"
    ! plus extra local vars
-   c_var_count = var_count + var_count_compound + numconst + 9
+   c_var_count = var_count + var_count_compound + numconst + 12
 end subroutine get_var_count
 
 subroutine get_var_name(var_index, c_var_name) bind(C, name="get_var_name")
@@ -682,6 +685,12 @@ subroutine get_var_name(var_index, c_var_name) bind(C, name="get_var_name")
       var_name = "flowelemcontour_y"
    case(9)
       var_name = "kn"
+   case(10)
+      var_name = "TcrEro"
+   case(11)
+      var_name = "TcrSed"
+   case(12)
+      var_name = "tem1Surf"
    end select
    c_var_name = string_to_char_array(trim(var_name), len(trim(var_name)))
 
@@ -740,6 +749,8 @@ subroutine get_var_type(c_var_name, c_type)  bind(C, name="get_var_type")
    case("flowelemnode", "flowelemnbs", "flowelemlns")
       type_name = "int"
    case("flowelemcontour_x", "flowelemcontour_y")
+      type_name = "double"
+   case("TcrEro", "TcrSed", "tem1Surf")
       type_name = "double"
    end select
 
@@ -817,6 +828,8 @@ subroutine get_var_rank(c_var_name, rank) bind(C, name="get_var_rank")
       rank = 2
    case("pumps", "weirs", "orifices", "gates", "generalstructures", "culverts", "sourcesinks", "dambreak", "observations", "crosssections", "laterals") ! Compound vars: shape = [numobj, numfields_per_obj]
       rank = 2
+   case("TcrEro", "TcrSed", "tem1Surf")
+      rank = 1
    end select
 
    if (numconst > 0) then
@@ -870,6 +883,12 @@ subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
    case("flowelemcontour_x", "flowelemcontour_y")
       shape(1) = ndx
       shape(2) = get_flow_elem_max_contour()
+      return
+   case("TcrEro", "TcrSed")
+      shape(1) = stmpar%lsedtot
+      return
+   case("")
+      shape(1) = ndx
       return
 
 ! Compounds:
@@ -1119,6 +1138,37 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    case("kn")
       x = c_loc(kn)
       return
+      
+   case("tem1Surf")
+      if (.not. allocated(tem1Surf)) then
+         allocate (tem1Surf(ndx))
+      endif
+	    do k = 1,ndx
+		     call getkbotktop(k, kb, kt)
+		     tem1Surf(k) = tem1(kt)
+      enddo
+      x = c_loc(tem1Surf)
+      
+   case("TcrEro")
+      k = size(stmpar%trapar%par, 2)
+      if (.not. allocated(TcrEro)) then
+         allocate (TcrEro(k))
+      endif
+      do i = 1,k
+         TcrEro(i) = stmpar%trapar%par(13,i)
+      enddo
+      x = c_loc(TcrEro)
+      
+   case("TcrSed")
+      k = size(stmpar%trapar%par, 2)
+      if (.not. allocated(TcrSed)) then
+         allocate (TcrSed(k))
+      endif
+      do i = 1,k
+         TcrSed(i) = stmpar%trapar%par(12,i)
+      enddo
+      x = c_loc(TcrSed)
+
    end select
 
    ! Try to parse variable name as slash-separated id (e.g., 'weirs/Lith/crest_level')

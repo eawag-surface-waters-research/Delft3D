@@ -38,6 +38,36 @@
      x = c_loc(twav)
   case("Uorb") !<  [m/s] orbital velocity {"location": "face", "shape": ["ndx"]}
      x = c_loc(Uorb)
+  case("bodsed") !<  [kg m-2] Available sediment in the bed in flow cell center. {"location": "face", "shape": ["stmpar%morlyr%settings%nfrac", "ndx"], "internal": "stmpar%morlyr%state%bodsed"}
+     x = c_loc(stmpar%morlyr%state%bodsed)
+  case("dpsed") !<  [m] Sediment thickness in the bed in flow cell center. {"location": "face", "shape": ["ndx"], "internal": "stmpar%morlyr%state%dpsed"}
+     x = c_loc(stmpar%morlyr%state%dpsed)
+  case("msed") !<  [kg m-2] Available sediment in a layer of the bed in flow cell center. {"location": "face", "shape": ["stmpar%morlyr%settings%nfrac", "stmpar%morlyr%settings%nlyr", "ndx"], "internal": "stmpar%morlyr%state%msed"}
+     x = c_loc(stmpar%morlyr%state%msed)
+  case("thlyr") !<  [m] Thickness of a layer of the bed in flow cell center. {"location": "face", "shape": ["stmpar%morlyr%settings%nlyr","ndx"], "internal": "stmpar%morlyr%state%thlyr"}
+     x = c_loc(stmpar%morlyr%state%thlyr)
+  case("rsedeq") !<  [kg m-3] Equilibrium sediment concentration. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%rsedeq"}
+     x = c_loc(sedtra%rsedeq)
+  case("sbcx") !<  [kg s-1 m-1] bed load transport due to currents, x-component. {"location": "face", "shape": ["ndx","stmpar%lsedtot"], "internal": "sedtra%sbcx"}
+     x = c_loc(sedtra%sbcx)
+  case("sbcy") !<  [kg s-1 m-1] bed load transport due to currents, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedtot"], "internal": "sedtra%sbcy"}
+     x = c_loc(sedtra%sbcy)
+  case("sbwx") !<  [kg s-1 m-1] bed load transport due to waves, x-component. {"location": "face", "shape": ["ndx","stmpar%lsedtot"], "internal": "sedtra%sbwx"}
+     x = c_loc(sedtra%sbwx)
+  case("sbwy") !<  [kg s-1 m-1] bed load transport due to waves, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedtot"], "internal": "sedtra%sbwy"}
+     x = c_loc(sedtra%sbwy)
+  case("sscx") !<  [kg s-1 m-1] suspended load transport due to currents, x-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sscx"}
+     x = c_loc(sedtra%sscx)
+  case("sscy") !<  [kg s-1 m-1] suspended load transport due to currents, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sscy"}
+     x = c_loc(sedtra%sscy)
+  case("sswx") !<  [kg s-1 m-1] suspended load transport due to waves, x-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswx"}
+     x = c_loc(sedtra%sswx)
+  case("sswy") !<  [kg s-1 m-1] suspended load transport due to waves, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswy"}
+     x = c_loc(sedtra%sswy)
+  case("taucr") !<  [kg s-2 m] dimensional critical shear stress taucr. {"location": "face", "shape": ["ndx"], "internal": "stmpar%sedpar%taucr"}
+     x = c_loc(stmpar%sedpar%taucr)
+  case("tetacr") !<  [-] dimensionless critical shear stress tetacr. {"location": "face", "shape": ["ndx"], "internal": "stmpar%sedpar%tetacr"}
+     x = c_loc(stmpar%sedpar%tetacr)
   case("infilt") !<  [m3 s-1] Actual infiltration flux at current time {"location": "face", "shape": ["ndx"]}
      x = c_loc(infilt)
   case("infiltcap") !<  [m s-1] Maximum infiltration capacity on each cell {"location": "face", "shape": ["ndx"]}
@@ -114,6 +144,8 @@
      x = c_loc(vextcum)
   case("rainuni") !<  [mm/hr] uniform rain intensity. {"rank": 0}
      x = c_loc(rainuni)
+  case("Qsunmap") !<  [W/m2] solar radiation reaching water surface {"location": "face", "shape": ["ndx"]}
+     x = c_loc(Qsunmap)
   case("zbndz") !<  [m] waterlevel boundary points function {"location": "edge", "shape": ["nbndz"]}
      x = c_loc(zbndz)
   case("zbndu") !<  [m/s] velocity   boundary points function {"location": "edge", "shape": ["nbndu"]}
@@ -204,6 +236,8 @@
      x = c_loc(viusp)
   case("diusp") !<  [m2/s] user defined spatial eddy diffusivity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
      x = c_loc(diusp)
+  case("taus") !<  [kg s-2 m] cell centre tau N/m2 {"location": "face", "shape": ["ndx"]}
+     x = c_loc(taus)
   case("ndxi") !<  [-] Number of internal flowcells  (internal = 2D + 1D ). {"rank": 0}
      x = c_loc(ndxi)
   case("ndx1db") !<  [-] Number of flow nodes incl. 1D bnds (internal 2D+1D + 1D bnd). {"rank": 0}
@@ -226,6 +260,8 @@
      x = c_loc(lnx)
   case("ln") !<  [-] 1D link (2,*) node   administration, 1=nd1,  2=nd2   linker en rechter celnr {"shape": [2, "lnkx"]}
      x = c_loc(ln)
+  case("LLkkk") !<  [-] Link Link admin (5,*) , 1=lowL 2=hihL, 3=leftk, 4= midk, 5=rightk {"shape": [5, "lnx"]}
+     x = c_loc(LLkkk)
   case("lncn") !<  [-] 2D link (2,*) corner administration, 1=nod1, 2=nod2  linker en rechter netnr {"shape": [2, "lnkx"]}
      x = c_loc(lncn)
   case("iadv") !<  [-] type of advection for this link {"location": "edge", "shape": ["lnx"]}
@@ -264,16 +300,6 @@
      x = c_loc(kn)
   case("numk") !<  [-] Nr. of net nodes. {"shape": []}
      x = c_loc(numk)
-  case("ndx2d") !<  [-] Number of 2D flow cells (= NUMP). {"rank": 0}
-     x = c_loc(ndx2d)
-  case("ndx") !<  [-] Number of flow nodes (internal + boundary). {"rank": 0}
-     x = c_loc(ndx)
-  case("xz") !<  [m/degrees_east] waterlevel point / cell centre, x-coordinate (m) {"location": "face", "shape": ["ndx"]}
-     x = c_loc(xz)
-  case("yz") !<  [m/degrees_north] waterlevel point / cell centre, y-coordinate (m) {"location": "face", "shape": ["ndx"]}
-     x = c_loc(yz)
-  case("ba") !<  [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
-     x = c_loc(ba)
   case("zbnd1d2d1") !<  [m] 1d2d boundary points 1d water level at new time level {"shape": ["nbnd1d2d"]}
      x = c_loc(zbnd1d2d1)
   case("zbnd1d2d0") !<  [m] 1d2d boundary points 1d water level at previous time level {"shape": ["nbnd1d2d"]}
@@ -298,26 +324,15 @@
      x = c_loc(is_maxvalsnd)
   case("is_dtint") !<  [s] total time interval since last statistics reset. {"rank": 0}
      x = c_loc(is_dtint)
-  case("taucr") !<  [?] dimensional critical shear stress taucr () {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(stmpar%sedpar%taucr)
-  case("tetacr") !<  [-] dimensionless critical shear stress () {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(stmpar%sedpar%tetacr)
-  case("TcrEro")
-     x = c_loc(stmpar%trapar%par(13,:))
-  case("TcrSed")
-     x = c_loc(stmpar%trapar%par(12,:))
-  case("Qsunmap") !<  [W/m2] solar radiation reaching water surface () {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(Qsunmap)
-  case("SedFrac")
-     x = c_loc(constituents(ISED1:ISEDN,:))
-  case("SurfTem") !<  [C] surface water temperature () {"location": "face", "shape": ["ndx"]}
-     if (kmx > 0) then
-	    do k = 1,ndx
-		   call getkbotktop(k, kb, kt)
-		   tem1(k) = tem1(kt)    !!! Check whether temp1(1:ndx) is used for other purpose in 3D
-		enddo
-	 endif
-     x = c_loc(tem1(1:ndx))
-  case("taus") !<  [?] Total shear stress taus () {"location": "face", "shape": ["ndkx"]}
-     x = c_loc(taus)
+  case("ndx2d") !<  [-] Number of 2D flow cells (= NUMP). {"rank": 0}
+     x = c_loc(ndx2d)
+  case("ndx") !<  [-] Number of flow nodes (internal + boundary). {"rank": 0}
+     x = c_loc(ndx)
+  case("xz") !<  [m/degrees_east] waterlevel point / cell centre, x-coordinate (m) {"location": "face", "shape": ["ndx"]}
+     x = c_loc(xz)
+  case("yz") !<  [m/degrees_north] waterlevel point / cell centre, y-coordinate (m) {"location": "face", "shape": ["ndx"]}
+     x = c_loc(yz)
+  case("ba") !<  [m2] bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
+     x = c_loc(ba)
   end select
+

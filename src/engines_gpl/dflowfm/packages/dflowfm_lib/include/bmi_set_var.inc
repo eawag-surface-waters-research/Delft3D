@@ -43,6 +43,51 @@
   case("Uorb")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(Uorb))
      Uorb(:) = x_1d_double_ptr
+  case("bodsed")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(stmpar%morlyr%state%bodsed))
+     stmpar%morlyr%state%bodsed(:,:) = x_2d_double_ptr
+  case("dpsed")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%morlyr%state%dpsed))
+     stmpar%morlyr%state%dpsed(:) = x_1d_double_ptr
+  case("msed")
+     call c_f_pointer(xptr, x_3d_double_ptr, shape(stmpar%morlyr%state%msed))
+     stmpar%morlyr%state%msed(:,:,:) = x_3d_double_ptr
+  case("thlyr")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(stmpar%morlyr%state%thlyr))
+     stmpar%morlyr%state%thlyr(:,:) = x_2d_double_ptr
+  case("rsedeq")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%rsedeq))
+     sedtra%rsedeq(:,:) = x_2d_double_ptr
+  case("sbcx")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%sbcx))
+     sedtra%sbcx(:,:) = x_2d_double_ptr
+  case("sbcy")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%sbcy))
+     sedtra%sbcy(:,:) = x_2d_double_ptr
+  case("sbwx")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%sbwx))
+     sedtra%sbwx(:,:) = x_2d_double_ptr
+  case("sbwy")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%sbwy))
+     sedtra%sbwy(:,:) = x_2d_double_ptr
+  case("sscx")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%sscx))
+     sedtra%sscx(:,:) = x_2d_double_ptr
+  case("sscy")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%sscy))
+     sedtra%sscy(:,:) = x_2d_double_ptr
+  case("sswx")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%sswx))
+     sedtra%sswx(:,:) = x_2d_double_ptr
+  case("sswy")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(sedtra%sswy))
+     sedtra%sswy(:,:) = x_2d_double_ptr
+  case("taucr")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%sedpar%taucr))
+     stmpar%sedpar%taucr(:) = x_1d_double_ptr
+  case("tetacr")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%sedpar%tetacr))
+     stmpar%sedpar%tetacr(:) = x_1d_double_ptr
   case("infilt")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(infilt))
      infilt(:) = x_1d_double_ptr
@@ -157,6 +202,9 @@
   case("rainuni")
      call c_f_pointer(xptr, x_0d_double_ptr)
      rainuni = x_0d_double_ptr
+  case("Qsunmap")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(Qsunmap))
+     Qsunmap(:) = x_1d_double_ptr
   case("zbndz")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(zbndz))
      zbndz(:) = x_1d_double_ptr
@@ -292,6 +340,9 @@
   case("diusp")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(diusp))
      diusp(:) = x_1d_double_ptr
+  case("taus")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(taus))
+     taus(:) = x_1d_double_ptr
   case("ndxi")
      call c_f_pointer(xptr, x_0d_int_ptr)
      ndxi = x_0d_int_ptr
@@ -325,6 +376,9 @@
   case("ln")
      call c_f_pointer(xptr, x_2d_int_ptr, shape(ln))
      ln(:,:) = x_2d_int_ptr
+  case("LLkkk")
+     call c_f_pointer(xptr, x_2d_int_ptr, shape(LLkkk))
+     LLkkk(:,:) = x_2d_int_ptr
   case("lncn")
      call c_f_pointer(xptr, x_2d_int_ptr, shape(lncn))
      lncn(:,:) = x_2d_int_ptr
@@ -382,21 +436,6 @@
   case("numk")
      call c_f_pointer(xptr, x_0d_int_ptr)
      numk = x_0d_int_ptr
-  case("ndx2d")
-     call c_f_pointer(xptr, x_0d_int_ptr)
-     ndx2d = x_0d_int_ptr
-  case("ndx")
-     call c_f_pointer(xptr, x_0d_int_ptr)
-     ndx = x_0d_int_ptr
-  case("xz")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(xz))
-     xz(:) = x_1d_double_ptr
-  case("yz")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(yz))
-     yz(:) = x_1d_double_ptr
-  case("ba")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(ba))
-     ba(:) = x_1d_double_ptr
   case("zbnd1d2d1")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(zbnd1d2d1))
      zbnd1d2d1(:) = x_1d_double_ptr
@@ -433,34 +472,19 @@
   case("is_dtint")
      call c_f_pointer(xptr, x_0d_double_ptr)
      is_dtint = x_0d_double_ptr
-  case("taucr")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%sedpar%taucr))
-     stmpar%sedpar%taucr(:) = x_1d_double_ptr
-  case("tetacr")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%sedpar%tetacr))
-     stmpar%sedpar%tetacr(:) = x_1d_double_ptr
-  case("TcrEro")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%trapar%par(13,:)))
-	 stmpar%trapar%par(13,:) = x_1d_double_ptr
-  case("TcrSed")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(stmpar%trapar%par(12,:)))
-	 stmpar%trapar%par(12,:) = x_1d_double_ptr
-  case("Qsunmap")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(Qsunmap))
-     Qsunmap(:) = x_1d_double_ptr
-  case("SedFrac")
-     call c_f_pointer(xptr, x_2d_double_ptr, shape(constituents(ISED1:ISEDN,:)))
-	 constituents(ISED1:ISEDN,:) = x_2d_double_ptr
-  case("SurfTem")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(tem1))
-     tem1(1:ndx) = x_1d_double_ptr
-     if (kmx > 0) then
-	    do k = 1,ndx
-		   call getkbotktop(k, kb, kt)
-		   tem1(kt) = tem1(k)    !!! Check whether temp1(1:ndx) is used for other purpose in 3D
-		enddo
-	 endif
-  case("taus")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(taus))
-     taus(:) = x_1d_double_ptr
+  case("ndx2d")
+     call c_f_pointer(xptr, x_0d_int_ptr)
+     ndx2d = x_0d_int_ptr
+  case("ndx")
+     call c_f_pointer(xptr, x_0d_int_ptr)
+     ndx = x_0d_int_ptr
+  case("xz")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(xz))
+     xz(:) = x_1d_double_ptr
+  case("yz")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(yz))
+     yz(:) = x_1d_double_ptr
+  case("ba")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(ba))
+     ba(:) = x_1d_double_ptr
   end select

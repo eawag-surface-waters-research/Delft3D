@@ -47,6 +47,66 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      Uorb(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("bodsed")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     stmpar%morlyr%state%bodsed(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("dpsed")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     stmpar%morlyr%state%dpsed(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("msed")
+
+     call c_f_pointer(xptr, x_3d_double_ptr, (/c_count(1), c_count(2), c_count(3)/))
+     stmpar%morlyr%state%msed(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2)),c_start(3)+1:(c_start(3)+c_count(3))) = x_3d_double_ptr
+  case("thlyr")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     stmpar%morlyr%state%thlyr(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("rsedeq")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%rsedeq(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("sbcx")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%sbcx(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("sbcy")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%sbcy(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("sbwx")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%sbwx(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("sbwy")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%sbwy(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("sscx")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%sscx(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("sscy")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%sscy(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("sswx")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%sswx(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("sswy")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     sedtra%sswy(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("taucr")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     taucr(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("tetacr")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     tetacr(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("infilt")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -197,6 +257,10 @@
   case("rainuni")
      ! Does not apply to scalar variables
      continue
+  case("Qsunmap")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     Qsunmap(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("zbndz")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -377,6 +441,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      diusp(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("taus")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     taus(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("ndxi")
      ! Does not apply to scalar variables
      continue
@@ -415,6 +483,10 @@
 
      call c_f_pointer(xptr, x_2d_int_ptr, (/c_count(1), c_count(2)/))
      ln(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_int_ptr
+  case("LLkkk")
+
+     call c_f_pointer(xptr, x_2d_int_ptr, (/c_count(1), c_count(2)/))
+     LLkkk(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_int_ptr
   case("lncn")
 
      call c_f_pointer(xptr, x_2d_int_ptr, (/c_count(1), c_count(2)/))
@@ -490,24 +562,6 @@
   case("numk")
      ! Does not apply to scalar variables
      continue
-  case("ndx2d")
-     ! Does not apply to scalar variables
-     continue
-  case("ndx")
-     ! Does not apply to scalar variables
-     continue
-  case("xz")
-
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     xz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("yz")
-
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     yz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("ba")
-
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     ba(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("zbnd1d2d1")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -555,28 +609,22 @@
   case("is_dtint")
      ! Does not apply to scalar variables
      continue
-  case("taucr")
+  case("ndx2d")
+     ! Does not apply to scalar variables
+     continue
+  case("ndx")
+     ! Does not apply to scalar variables
+     continue
+  case("xz")
+
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     taucr(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("tetacr")
+     xz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("yz")
+
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     tetacr(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("TcrEro")
+     yz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("ba")
+
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-	 stmpar%trapar%par(13,c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("TcrSed")
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-	 stmpar%trapar%par(12,c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("Qsunmap")
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     Qsunmap(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("SedFrac")
-     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
-	 constituents(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
-  case("SurfTem")
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     tem1(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("taus")
-     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
-     taus(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+     ba(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   end select

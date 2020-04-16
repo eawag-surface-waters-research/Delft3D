@@ -38,6 +38,36 @@
      rank = 1
   case("Uorb")
      rank = 1
+  case("bodsed")
+     rank = 2
+  case("dpsed")
+     rank = 1
+  case("msed")
+     rank = 3
+  case("thlyr")
+     rank = 2
+  case("rsedeq")
+     rank = 2
+  case("sbcx")
+     rank = 2
+  case("sbcy")
+     rank = 2
+  case("sbwx")
+     rank = 2
+  case("sbwy")
+     rank = 2
+  case("sscx")
+     rank = 2
+  case("sscy")
+     rank = 2
+  case("sswx")
+     rank = 2
+  case("sswy")
+     rank = 2
+  case("taucr")
+     rank = 1
+  case("tetacr")
+     rank = 1
   case("infilt")
      rank = 1
   case("infiltcap")
@@ -114,6 +144,8 @@
      rank = 1
   case("rainuni")
      rank = 0
+  case("Qsunmap")
+     rank = 1
   case("zbndz")
      rank = 1
   case("zbndu")
@@ -204,6 +236,8 @@
      rank = 1
   case("diusp")
      rank = 1
+  case("taus")
+     rank = 1
   case("ndxi")
      rank = 0
   case("ndx1db")
@@ -225,6 +259,8 @@
   case("lnx")
      rank = 0
   case("ln")
+     rank = 2
+  case("LLkkk")
      rank = 2
   case("lncn")
      rank = 2
@@ -264,16 +300,6 @@
      rank = 2
   case("numk")
      rank = 0
-  case("ndx2d")
-     rank = 0
-  case("ndx")
-     rank = 0
-  case("xz")
-     rank = 1
-  case("yz")
-     rank = 1
-  case("ba")
-     rank = 1
   case("zbnd1d2d1")
      rank = 1
   case("zbnd1d2d0")
@@ -298,21 +324,15 @@
      rank = 2
   case("is_dtint")
      rank = 0
-  case("taucr")
+  case("ndx2d")
+     rank = 0
+  case("ndx")
+     rank = 0
+  case("xz")
      rank = 1
-  case("tetacr")
+  case("yz")
      rank = 1
-  case("TcrEro")
-     rank = 1
-  case("TcrSed")
-     rank = 1
-  case("Qsunmap")
-     rank = 1
-  case("SedFrac")
-     rank = 2
-  case("SurfTem")
-     rank = 1
-  case("taus")
+  case("ba")
      rank = 1
   case default
      rank = 0

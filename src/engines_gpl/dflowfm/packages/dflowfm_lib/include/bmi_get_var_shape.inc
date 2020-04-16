@@ -40,6 +40,49 @@
        shape(1) = ndx
     case("Uorb")
        shape(1) = ndx
+    case("bodsed")
+       shape(2) = stmpar%morlyr%settings%nfrac
+       shape(1) = ndx
+    case("dpsed")
+       shape(1) = ndx
+    case("msed")
+       shape(3) = stmpar%morlyr%settings%nfrac
+       shape(2) = stmpar%morlyr%settings%nlyr
+       shape(1) = ndx
+    case("thlyr")
+       shape(2) = stmpar%morlyr%settings%nlyr
+       shape(1) = ndx
+    case("rsedeq")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("sbcx")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedtot
+    case("sbcy")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedtot
+    case("sbwx")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedtot
+    case("sbwy")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedtot
+    case("sscx")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("sscy")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("sswx")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("sswy")
+       shape(2) = ndx
+       shape(1) = stmpar%lsedsus
+    case("taucr")
+       shape(1) = ndx
+    case("tetacr")
+       shape(1) = ndx
     case("infilt")
        shape(1) = ndx
     case("infiltcap")
@@ -116,6 +159,8 @@
        shape(1) = ndkx
     case("rainuni")
        shape(1) = 0
+    case("Qsunmap")
+       shape(1) = ndx
     case("zbndz")
        shape(1) = nbndz
     case("zbndu")
@@ -206,6 +251,8 @@
        shape(1) = lnx
     case("diusp")
        shape(1) = lnx
+    case("taus")
+       shape(1) = ndx
     case("ndxi")
        shape(1) = 0
     case("ndx1db")
@@ -229,6 +276,9 @@
     case("ln")
        shape(2) = 2
        shape(1) = lnkx
+    case("LLkkk")
+       shape(2) = 5
+       shape(1) = lnx
     case("lncn")
        shape(2) = 2
        shape(1) = lnkx
@@ -271,16 +321,6 @@
        shape(1) = numl
     case("numk")
        shape(1) = 0
-    case("ndx2d")
-       shape(1) = 0
-    case("ndx")
-       shape(1) = 0
-    case("xz")
-       shape(1) = ndx
-    case("yz")
-       shape(1) = ndx
-    case("ba")
-       shape(1) = ndx
     case("zbnd1d2d1")
        shape(1) = nbnd1d2d
     case("zbnd1d2d0")
@@ -308,21 +348,14 @@
        shape(1) = ndx
     case("is_dtint")
        shape(1) = 0
-    case("taucr")
+    case("ndx2d")
+       shape(1) = 0
+    case("ndx")
+       shape(1) = 0
+    case("xz")
        shape(1) = ndx
-    case("tetacr")
+    case("yz")
        shape(1) = ndx
-    case("TcrEro")
-       shape(1) = stmpar%lsedtot
-    case("TcrSed")
-       shape(1) = stmpar%lsedtot
-    case("Qsunmap")
+    case("ba")
        shape(1) = ndx
-	case("SedFrac")
-       shape(2) = ISEDN - ISED1 + 1
-       shape(1) = ndx
-    case("SurfTem")
-       shape(1) = ndx
-	case("taus")
-	   shape(1) = ndx
   end select

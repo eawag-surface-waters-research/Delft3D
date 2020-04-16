@@ -803,6 +803,10 @@ module m_sediment
  !$BMIEXPORT double precision      :: sscy(:,:)     !< [kg s-1 m-1] suspended load transport due to currents, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sscy"}
  !$BMIEXPORT double precision      :: sswx(:,:)     !< [kg s-1 m-1] suspended load transport due to waves, x-component.    {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswx"}
  !$BMIEXPORT double precision      :: sswy(:,:)     !< [kg s-1 m-1] suspended load transport due to waves, y-component.    {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswy"}
+ 
+ !$BMIEXPORT double precision      :: taucr(:)      !< [kg s-2 m] dimensional critical shear stress taucr.                 {"location": "face", "shape": ["ndx"], "internal": "stmpar%sedpar%taucr"}
+ !$BMIEXPORT double precision      :: tetacr(:)     !< [-] dimensionless critical shear stress tetacr.                     {"location": "face", "shape": ["ndx"], "internal": "stmpar%sedpar%tetacr"}
+ 
 
  type(mortmpdummy), target         :: mtd           !< Dummy quantities not yet available in D-Flow FM
 
@@ -1264,7 +1268,7 @@ end module m_wind
  integer                           :: jaSecchisp           !< Spatial Secchi 0,1
  integer                           :: jaRoro               !< Use roair(n)/rho(ntop) in windstress 0,1
 
- double precision, allocatable, target :: Qsunmap(:)
+ double precision, allocatable, target :: Qsunmap(:) !< [W/m2] solar radiation reaching water surface {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: Qevamap(:)
  double precision, allocatable     :: Qconmap(:)
  double precision, allocatable     :: Qlongmap(:)
@@ -3619,7 +3623,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
 
  double precision, allocatable     :: zn2rn (:)   !< weight from zn to rn, flownode to netnode
 
- double precision, allocatable, target :: taus  (:)   !< cell centre tau N/m2
+ double precision, allocatable, target :: taus (:) !< [kg s-2 m] cell centre tau N/m2 {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: q1waq (:)   !< Cumulative q1 within current waq-timestep
  double precision, allocatable     :: qwwaq (:)   !< Cumulative qw within current waq-timestep
 
