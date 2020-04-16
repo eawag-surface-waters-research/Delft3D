@@ -56,7 +56,8 @@ def platformArtifacts(platform):
                 if str(path).find(sharedir) == -1:
                     print("    Checking directory " + path + " ...")
                     for afile in files:
-                        if any(afile in asharefile for asharefile in sharefiles):
+#                        if any(afile in asharefile for asharefile in sharefiles):
+                        if afile in sharefiles:
                             print("      To be removed: " + os.path.join(path,afile))
                             os.remove(os.path.join(path,afile))
                             
