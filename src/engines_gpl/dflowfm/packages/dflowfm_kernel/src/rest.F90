@@ -2811,6 +2811,7 @@ function read_samples_from_geotiff(filename) result(success)
    use fortranc
    use gdal
    use m_samples
+   use m_samples_refine, only: iHesstat, iHesstat_DIRTY
    use string_module, only: strcmpi
    implicit none   
 
@@ -2824,18 +2825,21 @@ function read_samples_from_geotiff(filename) result(success)
    real(kind=c_double)             :: geotransform(6)              ! Geo information of dataset
    double precision                :: dxa, dya                     ! Pixel size
    double precision                :: x0, y0                       ! Origin
-   integer :: i, j                                                 ! Counters used for loops
+   integer :: i, j, istep                                          ! Counters used for loops
    integer(kind=c_int)             :: ierr                         ! Integer to store return values of C functions
    double precision                :: eps                          ! Small value to be used with inequalities involving floating point numbers
    type(c_ptr)                     :: c_area_or_point
    logical                         :: is_area
    double precision                :: pixeloffset
+   integer :: ndraw
+   COMMON /DRAWTHIS/ ndraw(50)
 
 #ifdef HAVE_GDAL
    
       ! Register all available gdal drivers
       call gdalallregister()      
       
+      CALL READYY('Reading GeoTIFF file',0d0)
       ! Opening a GeoTIFF gdal dataset for reading
       dataset = gdalopen(trim(filename)//char(0), GA_ReadOnly)
       if (.not.gdalassociated(dataset)) then
@@ -2901,9 +2905,16 @@ function read_samples_from_geotiff(filename) result(success)
          pixeloffset = 0d0
       end if
 
+      CALL READYY('Reading GeoTIFF file',0.5d0)
+
       ! Set global sample arrays xs, ys, zs of m_samples 
+      call increasesam(nx*ny)
+      istep = max(int(nx/100d0+.5d0),1)
       ns = 0
       do i = 1,nx
+         if (mod(i,istep) .eq. 0) then
+            call readyy('Reading GeoTIFF file',min( 1d0,.5d0+.5d0*dble(i)/nx))
+         endif
          do j = ny,1,-1
              ns = ns+1
              xs(ns) =  x0 + dxa*(i-1+pixeloffset) ! "-1" to convert to 0-based C, pixeloffset to get the middle of the pixel instead of its edge
@@ -2911,12 +2922,31 @@ function read_samples_from_geotiff(filename) result(success)
              zs(ns) =  pbuffer(i, j, nz)
          enddo
       enddo
+      ! mark samples as structured, and in supply block sizes
+      mxsam = ny   ! j is fastest running index
+      mysam = nx
+      ipstat = IPSTAT_NOTOK
       
+      ! new sample set: no Hessians computed yet
+      iHesstat = iHesstat_DIRTY
+
       deallocate(pbuffer)
       call gdalclose(dataset)
+
+      if (ns > 100000) ndraw(32) = 7 ! Squares (faster than circles)
+      if (ns > 500000) ndraw(32) = 3 ! Small dots (fastest)
+
+      ! No TIDYSAMPLES required: geoTiff grid was already loaded in correctly sorted order.
+      do i=1,ns
+        ipsam(i) = i
+      end do
+      call get_samples_boundingbox()
+      ipstat = IPSTAT_OK
+
+      CALL READYY('Reading GeoTIFF file',1d0)
       success = .true.
 #else
-      call mess(LEVEL_INFO, 'GDAL is necessary to read geoTIFF files')
+      call mess(LEVEL_WARN, 'GDAL is not available: cannot read GeoTIFF file '// trim(filename))
       success = .false.
 #endif   
    return
