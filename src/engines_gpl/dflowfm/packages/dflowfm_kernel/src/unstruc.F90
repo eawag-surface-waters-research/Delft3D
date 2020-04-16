@@ -43685,7 +43685,6 @@ if (mext /= 0) then
            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename, filetype, method, operand, targetIndex=nummovobs)
 
         else if (qid(1:15) == 'massbalancearea' .or. qid(1:18) == 'waqmassbalancearea') then
-           ! Already taken care of in mass_balance_areas
            if (ti_mba > 0) then
                imba = findname(nomba, mbaname, mbainputname)
 
