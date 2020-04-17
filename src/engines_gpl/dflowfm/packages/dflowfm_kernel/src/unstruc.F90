@@ -1673,12 +1673,14 @@ if(q /= 0) then
  use m_flowgeom
  use m_flow
  use m_ship
+
  implicit none
  ! locals
  integer           :: japerim
  integer           :: L, n, k1, k2, k
  double precision  :: ha, hh
 
+ 
  japerim = 0
 
 ! call sets01zbnd(1) ! set s1 on z-boundaries   SPvdP: not necessary, values at the boundaries were already properly filled in solve_matrix, as the boundary nodes are included in the solution vector
@@ -1723,7 +1725,9 @@ if(q /= 0) then
     a1m = 0d0
  endif
 
+ !call checkvolnan(1)
  call VOL12D(japerim)                                   ! and add area's and volumes of 1D links
+ !call checkvolnan(2)
 
  do L = lnxi+1,Lnx
     k1 = ln(1,L) ; k2 = ln(2,L)
@@ -1733,6 +1737,17 @@ if(q /= 0) then
  enddo
 
  end subroutine volsur
+
+ subroutine checkvolnan(i)
+ use MessageHandling 
+ use m_flowgeom
+ use m_flow
+ do n = 1,ndx
+    if (isnan(vol1(n))) then 
+       write(msgbuf,*)  ' volnan ', i, n ; call msg_flush()
+    endif
+ enddo
+ end subroutine checkvolnan
 
  subroutine addlink1D(L,japerim)                        ! and add area's and volumes of 1D links
  use m_flowgeom
@@ -2051,6 +2066,7 @@ if(q /= 0) then
  use m_flowgeom
  use m_flow
  use m_missing
+ use m_sferic
 
  implicit none
 
@@ -2132,8 +2148,11 @@ if(q /= 0) then
            endif
 
            if (jaconv >= 3) then
-!              uucn = abs ( ucnx(k3)*csu(L) + ucny(k3)*snu(L))
-              uucn = abs( csu(L)*cor2linx(L,1,ucnx(k3),ucny(k3)) + snu(L)*cor2liny(L,1,ucnx(k3),ucny(k3)) )
+              if (jasfer3D == 0) then 
+                 uucn = abs ( ucnx(k3)*csu(L) + ucny(k3)*snu(L))
+              else
+                 uucn = abs( csu(L)*cor2linx(L,1,ucnx(k3),ucny(k3)) + snu(L)*cor2liny(L,1,ucnx(k3),ucny(k3)) )
+              endif
               ucna =     ( ucnx(k3)**2     + ucny(k3)**2 )
               if (ucna > 0d0 .and. uucn > 0d0) then
                   ucna = sqrt( ucna )
@@ -2145,8 +2164,11 @@ if(q /= 0) then
                  beta = 1d0    ! do simple hydraulic radius approach
               endif
 
-!              uucn = abs ( ucnx(k4)*csu(L) + ucny(k4)*snu(L))
-              uucn = abs( csu(L)*cor2linx(L,2,ucnx(k4),ucny(k4)) + snu(L)*cor2liny(L,2,ucnx(k4),ucny(k4)) )
+              if (jasfer3D == 0) then 
+                 uucn = abs ( ucnx(k4)*csu(L) + ucny(k4)*snu(L))
+              else
+                 uucn = abs( csu(L)*cor2linx(L,2,ucnx(k4),ucny(k4)) + snu(L)*cor2liny(L,2,ucnx(k4),ucny(k4)) )
+              endif
               ucna =     ( ucnx(k4)**2     + ucny(k4)**2 )
               if (ucna > 0d0  .and. uucn > 0d0) then
                  ucna = sqrt( ucna)
@@ -16225,14 +16247,10 @@ endif
     endif
  endif
 
- if (jasal > 0 .and. kmx > 0 .and. inisal2D > 0 .and. jarestart.eq.0 ) then
+ if (jasal > 0 .and. kmx > 0 .and. inisal2D >= 1 .and. jarestart.eq.0 ) then
     do kk = 1,ndx
        call getkbotktop(kk,kb,kt)
-       if (inisal2D == 1) then
-          do k = kb, kt
-             sa1(k) = sa1(kk)
-          enddo
-       else  if (inisal2D == 2) then
+       if (inisal2D == 2) then
           do k = kb, kt
              if (kt == kb) then
                 rr  = 1d0
@@ -42103,6 +42121,10 @@ end function is_1d_boundary_candidate
  allocate ( xdum(1), ydum(1), kdum(1), xy2dum(2,1) , stat=ierr)
  call aerr('xdum(1), ydum(1), kdum(1), xy2dum     ', ierr, 3)
  xdum = 1d0 ; ydum = 1d0; kdum = 1; xy2dum = 0d0
+ if (.not. allocated(sah) ) then
+     allocate ( sah(ndx) , stat=ierr)
+     call aerr('sah(ndx)', ierr, ndx)
+ endif
 
  call settimespacerefdat(refdat, julrefdat, Tzone, Timjan)
 
@@ -43053,13 +43075,13 @@ if (mext /= 0) then
         else if (qid == 'initialsalinity') then
 
             if (jasal > 0) then
-               success = timespaceinitialfield(xz, yz, sa1, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
+               sah     = dmiss
+               success = timespaceinitialfield(xz, yz, sah, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
                if (success) then
-                   inisal2D = 1
-               endif
-            else
-               success = .true. ! We allow to disable salinity without removing the quantity.
+                   call initialfield2Dto3D( sah, sa1, transformcoef(13), transformcoef(14) )
+               endif 
             end if
+            success = .true. ! We allow to disable salinity without removing the quantity.
 
         else if (qid == 'initialsalinitytop') then
 
@@ -43083,7 +43105,7 @@ if (mext /= 0) then
                endif
                success = timespaceinitialfield(xz, yz, sabot, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
                if (success .and. transformcoef(3) .ne. dmiss) then
-                   inisal2D = 3 ; uniformsalinitybelowz = transformcoef(3)
+                   inisal2D = 3 ; uniformsalinitybelowz = transformcoef(4)
                endif
             else
                success = .true. ! We allow to disable salinity without removing the quantity.
@@ -44513,6 +44535,7 @@ end if
  if (allocated(kcsini)) then
     deallocate(kcsini)
  end if
+ deallocate (sah)
 
 !  Check if there are any cells left that are not part of a mass balance area, and if we need an extra area.
 if (ti_mba>0) then
@@ -44564,6 +44587,35 @@ if (ti_mba>0) then
 
  end function flow_initexternalforcings
 
+ subroutine initialfield2Dto3D( v2D, v3D, tr13, tr14 )
+ use m_flowgeom
+ use m_flow
+ use m_missing
+ use timespace
+ Double precision :: v2D(*) , v3D(*)
+ double precision :: tr13, tr14
+ double precision :: zb, zt
+ integer          :: n, k, kb, kt
+ !character(len=1), intent(in)    :: operand !< Operand type, valid values: 'O', 'A', '+', '*', 'X', 'N'.
+ 
+ zb = -1d9 ; if (tr13 .ne. dmiss) zb = tr13 
+ zt =  1d9 ; if (tr14 .ne. dmiss) zt = tr14 
+ do n = 1,ndx
+    if ( v2D(n) .ne. dmiss ) then 
+       if (kmx == 0) then 
+          call operate(v3D(n), v2D(n), operand) 
+       else 
+          kb = kbot(n) ; kt = ktop(n)
+          do k = kb, kt
+             zz = 0.5d0*( zws(k) + zws(k-1) )
+             if (zz > zb .and. zz < zt ) then
+                call operate(v3D(k), v2D(n), operand) 
+             endif
+          enddo  
+       endif
+    endif
+ enddo
+ end subroutine initialfield2Dto3D
 
  subroutine setinitialverticalprofile(yy,ny,filename) ! polyfil
  use m_flowgeom

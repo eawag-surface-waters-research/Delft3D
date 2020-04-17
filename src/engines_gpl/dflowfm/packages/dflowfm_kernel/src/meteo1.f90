@@ -472,10 +472,23 @@ contains
      keywrd = 'UNIFORMSALINITYBELOWZ'
      call zoekopt(minp, rec, trim(keywrd), jaopt)
      if (jaopt == 1) then
-         read (rec,*) transformcoef(3)
+         read (rec,*) transformcoef(4)
      end if
      
-     if (qid == 'generalstructure') then 
+ 
+     keywrd = 'UNIFORMVALUEABOVEZ'
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+         read (rec,*) transformcoef(13)
+     end if
+
+     keywrd = 'UNIFORMVALUEBELOWZ'
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+         read (rec,*) transformcoef(14)
+     end if
+     
+    if (qid == 'generalstructure') then 
         do k = 1,numgeneralkeywrd        ! generalstructure 
            call readandchecknextrecord(minp, rec, generalkeywrd_old(k), jaopt)
            if (jaopt == 1) then
