@@ -83,8 +83,10 @@
           ARGUM =  CONCTR/CONCWA
           IF (ARGUM .LT. 1E-20 ) THEN
               AGE = -999.
-          ELSE
+          ELSEIF ( ABS(ARGUM-1.0) > 1.0E-3 ) THEN
               AGE = - LOG(ARGUM) / DECAYR
+          ELSE
+              AGE = - ( (ARGUM-1.0) - (ARGUM-1.0)**2 / 2.0 ) / DECAYR
           ENDIF
       ENDIF
 !
