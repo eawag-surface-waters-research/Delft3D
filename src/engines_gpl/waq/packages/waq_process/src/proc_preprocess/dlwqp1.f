@@ -886,7 +886,7 @@
          if ( iindx .gt. 0) then
             outputs%stdnames(ioutp) = allitems%itemproppnts(iindx)%pnt%stdn
             outputs%units(ioutp) = allitems%itemproppnts(iindx)%pnt%stdu
-            outputs%descrs(ioutp) = allitems%itemproppnts(iindx)%pnt%text//' '//allitems%itemproppnts(iindx)%pnt%unit
+            outputs%descrs(ioutp) = trim(allitems%itemproppnts(iindx)%pnt%text)//' '//allitems%itemproppnts(iindx)%pnt%unit
          else if (outname.eq.'theta') then
             outputs%stdnames(ioutp) = ' '
             outputs%units(ioutp) = ' '
@@ -898,11 +898,11 @@
                if (algcof(icof, ialg) .ge. 0) then
                   outputs%stdnames(ioutp) = ' '
                   outputs%units(ioutp) = 'g m-3'
-                  outputs%descrs(ioutp) = algdsc(ialg)//' (gC/m3)'
+                  outputs%descrs(ioutp) = trim(algdsc(ialg))//' (gC/m3)'
                else
                   outputs%stdnames(ioutp) = ' '
                   outputs%units(ioutp) = 'g m-2'
-                  outputs%descrs(ioutp) = algdsc(ialg)//' (gC/m2)'
+                  outputs%descrs(ioutp) = trim(algdsc(ialg))//' (gC/m2)'
                endif
             else
                outputs%stdnames(ioutp) = ' '
