@@ -42092,7 +42092,7 @@ end function is_1d_boundary_candidate
  logical                       :: hyst_dummy(2)
  double precision              :: area, width, hdx
  type(t_storage), pointer      :: stors(:)
- integer                       :: i, nstor
+ integer                       :: i, nstor, ec_item
  integer                       :: num_lat_ini_blocks !< Number of [Lateral] providers read from new extforce file.
 
  iresult = DFM_NOERR
@@ -43202,22 +43202,41 @@ if (mext /= 0) then
               end do
            end do
 
-!          will only fill 2D part of viuh
-           success = timespaceinitialfield(xz, yz, viuh, Ndx, filename, filetype, method, operand, transformcoef, 2)
-
-           if (success) then
-              do kk = 1,Ndx
-                 if (viuh(kk) .ne. dmiss) then
-                    constituents(iconst,kk) = viuh(kk)
-                    call getkbotktop(kk,kb,kt)
-                    do k=kb,kb+kmxn(kk)-1
-!                       fff = constituents(iconst,k)
-!                       call operate(fff, viuh(kk) , operand)
-!                       constituents(iconst,k) = fff
-                       constituents(iconst,k) = constituents(iconst,kk)
-                    end do
-                 endif
-              enddo
+           if (method == 3) then
+              kx = 1
+              pkbot => kbot
+              pktop => ktop
+              if (allocated (kcw) ) deallocate(kcw)
+              allocate( kcw(ndx) )
+              kcw = 1
+              ec_item = ec_undef_int
+              success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, &
+                 filetype, method, operand, z=zcs, pkbot=pkbot, pktop=pktop, varname=varname, tgt_item1=ec_item)
+              success = ec_gettimespacevalue_by_itemID(ecInstancePtr, ec_item, irefdate, tzone, tunit, tstart_user, viuh)
+              !write(*,*) 'min, max ', trim(qid), minval(viuh, mask = viuh/=dmiss), maxval(viuh)
+              do k = 1, Ndkx
+                 if (viuh(k) /= dmiss) then
+                    constituents(iconst,k) = viuh(k)
+                 end if
+              end do
+              deallocate(kcw)
+           else
+!             will only fill 2D part of viuh
+              success = timespaceinitialfield(xz, yz, viuh, Ndx, filename, filetype, method, operand, transformcoef, 2)
+              if (success) then
+                 do kk = 1,Ndx
+                    if (viuh(kk) /= dmiss) then
+                       constituents(iconst,kk) = viuh(kk)
+                       call getkbotktop(kk,kb,kt)
+                       do k=kb,kb+kmxn(kk)-1
+!                          fff = constituents(iconst,k)
+!                          call operate(fff, viuh(kk) , operand)
+!                          constituents(iconst,k) = fff
+                          constituents(iconst,k) = constituents(iconst,kk)
+                       end do
+                    endif
+                 enddo
+              endif
            endif
            deallocate(viuh)
 

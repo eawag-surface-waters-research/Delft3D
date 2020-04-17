@@ -369,6 +369,8 @@ module m_ec_provider
                      case default
                         if (index(quantityName,'waqsegmentfunction')==1) then
                            success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
+                        else if (index(quantityName, 'initialtracer')==1) then
+                           success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
                         else
                            call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
                               //trim(quantityname)//"', file='"//trim(fileReaderPtr%filename)//"'.")
@@ -2477,6 +2479,9 @@ module m_ec_provider
             if (index(quantityName,'waqsegmentfunction')==1) then
                ncvarnames(1) = quantityName
                ncstdnames(1) = quantityName
+            else if (index(quantityName,'initialtracer')==1) then
+               ncvarnames(1) = quantityName(14:)
+               ncstdnames(1) = quantityName(14:)
             else
                ! we have faulty 
                call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")

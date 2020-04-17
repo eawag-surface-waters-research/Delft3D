@@ -6939,6 +6939,8 @@ module m_meteo
             isfun = findname(nosfunext, sfunname, waqinput)
             itemPtr1 => item_waqsfun(isfun)
             dataPtr1 => sfuninp(isfun,:)
+         case ('initialtracer')
+            continue
          case default
             call mess(LEVEL_FATAL, 'm_meteo::fm_ext_force_name_to_ec_item: Unsupported quantity specified in ext-file (construct target field): '//qidname)
             success = .false.
@@ -8012,6 +8014,10 @@ module m_meteo
             else
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '''//trim(name)//'''')
                return
+            end if
+         case ('initialtracer')
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemName = name(14:)
             end if
          case default
             fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId)
