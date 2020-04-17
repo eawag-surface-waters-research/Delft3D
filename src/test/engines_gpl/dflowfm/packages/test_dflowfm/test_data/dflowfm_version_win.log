@@ -10,4 +10,4 @@ PETSc    : yes
 METIS    : yes
 PROJ     : yes
 Shapelib : yes
-GDAL     : no
+GDAL     : yes
