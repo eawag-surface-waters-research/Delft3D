@@ -101,7 +101,7 @@ namespace Deltares.UGrid.Api
         {
             return new Mesh1DGeometryDimensions
             {
-                name = Name.ToCharArray(),
+                name = Name.Replace(' ', '_').ToCharArray(),
                 NumberOfNodes = NodesX?.Length ?? 0,
                 NumberOfEdges = EdgeBranchIds?.Length ?? 0
             };
