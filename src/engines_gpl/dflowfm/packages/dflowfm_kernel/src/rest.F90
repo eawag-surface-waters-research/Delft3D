@@ -2815,8 +2815,8 @@ function read_samples_from_geotiff(filename) result(success)
    use string_module, only: strcmpi
    implicit none   
 
-   character(len=*), intent(in) :: filename                        ! Path of the file to read
-   logical :: success                                              ! Return values to describe success of the operations
+   character(len=*), intent(in) :: filename                        !< Path of the file to be read
+   logical :: success                                              !< Return value to describe success of the operations
    
    ! local
    type(gdaldataseth)              :: dataset                      ! Gdal dataset 
@@ -2843,7 +2843,7 @@ function read_samples_from_geotiff(filename) result(success)
       ! Opening a GeoTIFF gdal dataset for reading
       dataset = gdalopen(trim(filename)//char(0), GA_ReadOnly)
       if (.not.gdalassociated(dataset)) then
-         call mess(LEVEL_INFO, 'Error opening dataset on geoTIFF file: '// trim(filename))
+         call mess(LEVEL_WARN, 'Error opening dataset on GeoTIFF file: '// trim(filename))
          goto 888
       endif
       
@@ -2854,7 +2854,7 @@ function read_samples_from_geotiff(filename) result(success)
       
       ! Throw warning if TIFF with multiple layers is given
       if (nz /= 1) then
-         call mess(LEVEL_INFO, 'geoTIFF files with multiple layers are currently not supported: ' // trim(filename))
+         call mess(LEVEL_WARN, 'GeoTIFF files with multiple layers are currently not supported: ' // trim(filename))
          goto 888
       endif      
                   
@@ -2864,14 +2864,14 @@ function read_samples_from_geotiff(filename) result(success)
       allocate(pbuffer(nx, ny, nz))
       ierr = gdaldatasetrasterio_f(dataset, GF_Read, offsetx, offsety, pbuffer)
       if (ierr /= 0) then
-         call mess(LEVEL_INFO, 'Could not read geoTIFF data of ' // trim(filename) // ' into an array buffer')
+         call mess(LEVEL_WARN, 'Could not read GeoTIFF data of ' // trim(filename) // ' into an array buffer')
          goto 888
       endif
       
       ! Get geotransform
       ierr = gdalgetgeotransform(dataset, geotransform)
       if (ierr /= 0) then
-         call mess(LEVEL_INFO, 'Error getting the geotransform from dataset of file ' // trim(filename))
+         call mess(LEVEL_WARN, 'Error getting the geotransform from dataset of file ' // trim(filename))
          goto 888
       endif
       
@@ -2884,7 +2884,7 @@ function read_samples_from_geotiff(filename) result(success)
       ! Throw warning if rotated TIFF was given
       eps = 1d-6
       if(abs(geotransform(3)) > eps .or. abs(geotransform(5)) > eps) then
-         call mess(LEVEL_INFO, 'Rotated geoTIFF files are currently not supported: '// trim(filename))
+         call mess(LEVEL_WARN, 'Rotated GeoTIFF files are currently not supported: '// trim(filename))
          goto 888
       endif
 
@@ -2936,7 +2936,7 @@ function read_samples_from_geotiff(filename) result(success)
       if (ns > 100000) ndraw(32) = 7 ! Squares (faster than circles)
       if (ns > 500000) ndraw(32) = 3 ! Small dots (fastest)
 
-      ! No TIDYSAMPLES required: geoTiff grid was already loaded in correctly sorted order.
+      ! No TIDYSAMPLES required: GeoTiff grid was already loaded in correctly sorted order.
       do i=1,ns
         ipsam(i) = i
       end do
