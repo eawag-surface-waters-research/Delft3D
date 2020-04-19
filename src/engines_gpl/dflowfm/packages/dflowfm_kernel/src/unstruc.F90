@@ -19622,8 +19622,8 @@ subroutine unc_write_his(tim)            ! wrihis
             nNodeTot = 0
             do i = 1, numsrc
                nNodes = 0
-               k1= ksrc(1,i)
-               k2= ksrc(4,i)
+               k1 = ksrc(1,i)
+               k2 = ksrc(4,i)
                if (k1 /= 0) then
                   nNodes = nNodes + 1
                end if
@@ -21229,8 +21229,8 @@ subroutine unc_write_his(tim)            ! wrihis
           call realloc(geom_x, 2)
           call realloc(geom_y, 2)
           do i = 1, numsrc
-             k1= ksrc(1,i)
-             k2= ksrc(4,i)
+             k1 = ksrc(1,i)
+             k2 = ksrc(4,i)
              nNodes = 0
              if (k1 /= 0) then
                 nNodes = nNodes + 1

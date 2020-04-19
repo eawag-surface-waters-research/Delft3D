@@ -926,6 +926,7 @@ module m_oned_functions
    !! It equals dmiss if the ground level is not applicable: node has storageType closed, or if the relevant cross sections are closed, or no cross section is defined.
    subroutine updateDepthOnGround(network)
    use m_flow, only: hsOnGround, s1
+   use m_flowparameters, only: epswetout
    use m_network
    use m_flowgeom, only: ndxi, ndx2d, groundLevel, groundStorage
    implicit none
@@ -936,7 +937,7 @@ module m_oned_functions
    hsOnGround = dmiss
    do i = ndx2d+1, ndxi
       ii = i-ndx2d
-      if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1) then ! if groundLevel is applicable
+      if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1 .and. s1(i) - groundLevel(ii) >= epswetout) then ! if groundLevel is applicable
          hsOnGround(i) = max(0d0, s1(i) - groundLevel(ii))
       end if
    end do
@@ -948,7 +949,8 @@ module m_oned_functions
    !! It has minimal value 0d0
    !! It equals to dmiss if the node has storageType closed, or if the relevant cross sections are closed, or no cross section is defined.
    subroutine updateVolOnGround(network)
-   use m_flow,     only: vol1, volOnGround
+   use m_flow, only: vol1, volOnGround, s1
+   use m_flowparameters, only: epswetout
    use m_flowgeom, only: volMaxUnderground, ndxi, ndx2d, groundLevel, groundStorage
    use m_network
    implicit none
@@ -958,7 +960,7 @@ module m_oned_functions
    volOnGround = dmiss
    do i = ndx2d+1, ndxi
       ii = i-ndx2d
-      if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1) then ! if groundLevel is applicable
+      if (groundLevel(ii) .ne. dmiss .and. groundStorage(ii) == 1 .and. s1(i) - groundLevel(ii) >= epswetout) then ! if groundLevel is applicable
          volOnGround(i) = max(0d0, vol1(i) - volMaxUnderground(ii))
       end if
    end do
