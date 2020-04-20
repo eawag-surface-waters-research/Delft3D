@@ -266,7 +266,7 @@ namespace Deltares.UGrid.Tests.Api
 
             var geometry = new DisposableNetworkGeometry
             {
-                NetworkName = "Test_network",
+                NetworkName = "Test network",
 
                 NodesY = new double[] { 4, 6 },
                 NodesX = new double[] { 1, 4 },
@@ -495,7 +495,7 @@ namespace Deltares.UGrid.Tests.Api
 
             var disposable1DMeshGeometry = new Disposable1DMeshGeometry
             {
-                Name = "Mesh_1d",
+                Name = "Mesh 1d",
                 NodesX = new double[] { 1, 2, 3 },
                 NodesY = new double[] { 1, 1, 1 },
                 BranchIDs = new int[] { 0, 0, 0 },

@@ -24,6 +24,7 @@ namespace Deltares.UGrid.Api
 
         private bool fileOpenForReading;
         private bool fileOpenForWriting;
+        private char spaceReplacementCharacter = '%';
 
         /// <summary>
         /// The static constructor loads the native library in the current process (<see cref="NativeLibrary.LoadNativeDll"/>)
@@ -319,7 +320,7 @@ namespace Deltares.UGrid.Api
             var stringBuilder = new StringBuilder(type.GetBufferSize(nameof(DisposableNetworkGeometry.NetworkName)));
             DoIoNetCfdCall(() => IoNetCfdImports.ionc_get_network_name_dll(ref dataSetId, ref networkId, stringBuilder));
 
-            disposableNetworkGeometry.NetworkName = stringBuilder.ToString().Replace('_', ' ');
+            disposableNetworkGeometry.NetworkName = stringBuilder.ToString().Replace(spaceReplacementCharacter, ' ');
 
             // set with empty arrays for setting in io_netcdf
             disposableNetworkGeometry.InitializeWithEmptyData(geometryDimensions);
@@ -384,7 +385,7 @@ namespace Deltares.UGrid.Api
         public int WriteNetworkGeometry(DisposableNetworkGeometry networkGeometry)
         {
             var networkId = -1;
-            var name = networkGeometry.NetworkName.Replace(' ', '_');
+            var name = networkGeometry.NetworkName.Replace(' ', spaceReplacementCharacter);
             var geometry = networkGeometry.CreateNetwork1DGeometry();
             var geometryDimensions = networkGeometry.CreateNetwork1DGeometryDimensions();
 
@@ -454,7 +455,7 @@ namespace Deltares.UGrid.Api
             DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_get_mesh_name_dll),
                 () => IoNetCfdImports.ionc_get_mesh_name_dll(ref dataSetId, ref meshId, stringBuilder));
 
-            disposable1DMeshGeometry.Name = stringBuilder.ToString().Replace('_', ' '); ;
+            disposable1DMeshGeometry.Name = stringBuilder.ToString().Replace(spaceReplacementCharacter, ' '); ;
             disposable1DMeshGeometry.NodesX = mesh1d.NodeX.CreateValueArray<double>(mesh1dDimensions.NumberOfNodes);
             disposable1DMeshGeometry.NodesY = mesh1d.NodeY.CreateValueArray<double>(mesh1dDimensions.NumberOfNodes);
             disposable1DMeshGeometry.NodeIds = mesh1d.NodeIds.CreateValueArray<string>(mesh1dDimensions.NumberOfNodes, type.GetBufferSize(nameof(Disposable1DMeshGeometry.NodeIds)));
@@ -482,7 +483,7 @@ namespace Deltares.UGrid.Api
             var networkName = GetNetworkNameById(networkId);
             var writeXy = 1;
             DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_create_1d_mesh_v1_dll),
-                () => IoNetCfdImports.ionc_create_1d_mesh_v1_dll(ref dataSetId, networkName, ref meshId, mesh.Name,
+                () => IoNetCfdImports.ionc_create_1d_mesh_v1_dll(ref dataSetId, networkName, ref meshId, mesh.Name.Replace(' ',spaceReplacementCharacter),
                     ref mesh1dDimensions.NumberOfNodes, ref mesh1dDimensions.NumberOfEdges, ref writeXy));
 
             DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_put_1d_mesh_discretisation_points_v2_dll),
@@ -512,7 +513,7 @@ namespace Deltares.UGrid.Api
 
             var disposable2DMeshGeometry = new Disposable2DMeshGeometry
             {
-                Name = stringBuilder.ToString().Replace('_', ' '),
+                Name = stringBuilder.ToString().Replace(spaceReplacementCharacter, ' '),
                 MaxNumberOfFaceNodes = mesh2dDimensions.maxnumfacenodes
             };
 
@@ -542,7 +543,7 @@ namespace Deltares.UGrid.Api
             var geometry = mesh.CreateMeshGeometry();
             var geometryDimensions = mesh.CreateMeshDimensions();
 
-            var meshName = mesh.Name?.Replace(' ', '_') ?? "Mesh2d";
+            var meshName = mesh.Name?.Replace(' ', spaceReplacementCharacter) ?? "Mesh2d";
             var networkName = "network";
 
             DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_put_meshgeom_dll),
