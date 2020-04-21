@@ -26,7 +26,8 @@ module interception
    
    function rainfall_interception_modrut(Precipitation, PotEvap, CanopyStorage, CanopyGapFraction, Cmax, n, NetInterception,&
                                          ThroughFall, StemFlow,LeftOver, Interception) result(ierr)
-
+      use dhydrology_error
+      
       integer,          intent(in  )   :: n
       double precision, intent(in  )   :: Precipitation(n), PotEvap(n), CanopyGapFraction(n), Cmax(n) 
       double precision, intent(inout)  :: CanopyStorage(n)
@@ -36,7 +37,7 @@ module interception
       double precision                 :: pt(n), Pfrac(n), DD(n), dC(n), D(n) 
       integer                          :: ierr
 
-      ierr = -1
+      ierr = DHYD_NOERR
    
       !f2py intent(in) :: n, Precipitation, PotEvap, CanopyGapFraction, Cmax
       !f2py intent(out) :: NetInterception, ThroughFall, StemFlow,LeftOver, Interception
@@ -89,19 +90,25 @@ module interception
    end function rainfall_interception_modrut
 
 
-   subroutine rainfall_interception_gash(Cmax, EoverR, CanopyGapFraction, Precipitation, CanopyStorage, maxevap, n, &
-                                         ThroughFall, Interception, StemFlow)
-    
-      integer, intent(in) :: n
-      double precision, intent(in) :: Cmax(n), EoverR(n), CanopyGapFraction(n), Precipitation(n), maxevap(n) 
-      double precision, intent(inout) :: CanopyStorage(n)
-      double precision, intent(out) :: ThroughFall(n), Interception(n), StemFlow(n)
-      double precision :: pt(n), P_sat(n), Iwet(n), Isat(n), Idry(n), Itrunc(n), OverEstimate(n)
+   function rainfall_interception_gash(Cmax, EoverR, CanopyGapFraction, Precipitation, CanopyStorage, maxevap, n, &
+                                         ThroughFall, Interception, StemFlow) result(ierr)
+      
+      use dhydrology_error
+      
+      integer,                 intent(in   ) :: n
+      double precision,        intent(in   ) :: Cmax(n), EoverR(n), CanopyGapFraction(n), Precipitation(n), maxevap(n) 
+      double precision,        intent(inout) :: CanopyStorage(n)
+      double precision,        intent(  out) :: ThroughFall(n), Interception(n), StemFlow(n)
+      integer                                :: ierr
+      
+      ! local
+      double precision                       :: pt(n), P_sat(n), Iwet(n), Isat(n), Idry(n), Itrunc(n), OverEstimate(n)
    
       !f2py intent(in) :: n, Cmax, EoverR, CanopyGapFraction, Precipitation,maxevap
       !f2py intent(out) :: ThroughFall, Interception, StemFlow
       !f2py intent(in,out) :: CanopyStorage
-   
+      
+      ierr = DHYD_NOERR
       pt = 0.1 * CanopyGapFraction
 
       P_sat = MAX(0.0,(-Cmax / EoverR) * LOG (1.0 - (EoverR/(1.0 - CanopyGapFraction - pt))))
@@ -142,5 +149,5 @@ module interception
       ! Add surpluss to the thoughdfall
       ThroughFall = ThroughFall + OverEstimate
 
-   end subroutine rainfall_interception_gash
+   end function rainfall_interception_gash
 end module interception

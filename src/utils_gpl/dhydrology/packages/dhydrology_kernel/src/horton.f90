@@ -25,9 +25,10 @@ module horton
 
    contains 
    
-   subroutine infiltration_horton_formula(n, MinInfCap, MaxInfCap, DecreaseRate, RecoveryRate, PreviousInfCap, NewInfCap, &
-                                       TimestepSize, Dt, InitialStorage, Rainfall, InfCapStatus, InfiltrationMM)
-
+   function infiltration_horton_formula(n, MinInfCap, MaxInfCap, DecreaseRate, RecoveryRate, PreviousInfCap, NewInfCap, &
+                                       TimestepSize, Dt, InitialStorage, Rainfall, InfCapStatus, InfiltrationMM) result(ierr)
+      use dhydrology_error
+      
       integer,          intent(in   )  :: n
       double precision, intent(in   )  :: MinInfCap(n), MaxInfCap(n), DecreaseRate(n), RecoveryRate(n), PreviousInfCap(n)
       double precision, intent(inout)  :: Dt(n)
@@ -35,6 +36,7 @@ module horton
       double precision, intent(  out)  :: NewInfCap(n)      
       integer,          intent(  out)  :: InfCapStatus(n)
       double precision, intent(  out)  :: InfiltrationMM(n)
+      integer                          :: ierr
       
       ! local
       double precision                 :: Dt1(n)
@@ -64,7 +66,8 @@ module horton
       ! Note: infiltration capacity defined in mm/hr, decrease and recovery rate in 1/hr
       ! Note: typical timestep used in application is 1 minute (i.e. much smaller than 1 hour)
       ! Note: otherwise computation of infiltration volume (in mm) should be more refined (using integral of capacity function, depending on status recovery or decrease)
-
+      
+      ierr = DHYD_NOERR
       NrSecondsPerHour = 3600
       RFRAC = Dble(TimestepSize) / Dble(NrSecondsPerHour)
       DT1   = DT  + RFRAC
@@ -131,5 +134,5 @@ module horton
 
       InfiltrationMM = NewInfCap * TimeStepSize / NrSecondsPerHour
 
-   end subroutine infiltration_horton_formula
+   end function infiltration_horton_formula
 end module horton

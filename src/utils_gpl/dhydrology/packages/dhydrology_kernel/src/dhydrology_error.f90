@@ -19,30 +19,30 @@
 !  2600 MH Delft, The Netherlands
 !                                               
 !-------------------------------------------------------------------------------
-
-!> DFlowFM will call the concept, for now is coded in Python
-function interceptionSbm(timeStep, n, Precipitation, PotEvap, CanopyStorage, CanopyGapFraction, Cmax,NetInterception,&
-      ThroughFall, StemFlow,LeftOver, Intercep) result(ierr)
-
-   use interception
-   use dhydrology_error
-
+   
+module dhydrology_error
    implicit none
-   double precision, intent(in)    :: timeStep
-   integer, intent(in)             :: n
-   double precision, intent(in)    :: Precipitation(n), PotEvap(n), CanopyGapFraction(n), Cmax(n)
-   double precision, intent(inout) :: CanopyStorage(n)
-   double precision, intent(out)   :: NetInterception(n), ThroughFall(n), StemFlow(n),LeftOver(n), Intercep(n)
-   double precision                :: pt(n), Pfrac(n), DD(n), dC(n), D(n)
-   integer                         :: ierr
+   
+   integer, parameter :: DHYD_NOERR         = 0   !< Success code.
+   integer, parameter :: DHYD_GENERICERROR  = 1   !< Error without further details.   
+   
+   contains
+   
+   !> Returns a human-readable error string for a given integer error code.
+   function dhyd_strerror(ierr) result(errorstring)
+      use MessageHandling, only: Charln
+      
+      integer,          intent(in)  :: ierr        !< The error code for which the error string should be returned.
+      character(len=Charln)         :: errorstring !< The string variable in which the error text will be put.
+      
+      select case (ierr)
+      case (DHYD_NOERR)
+         errorstring = 'No error'
+      case (DHYD_GENERICERROR)
+         errorstring = 'Generic error'
+      case default
+         write (errorstring, '(a,i0,a)') 'Unknown error (', ierr, ')'
+      end select
+   end function dhyd_strerror
 
-   ierr = DHYD_NOERR
-
-   if (timestep < 100) then
-       ierr = rainfall_interception_modrut(Precipitation, PotEvap, CanopyStorage, CanopyGapFraction, Cmax, n, NetInterception, &
-         ThroughFall, StemFlow, LeftOver, Intercep)
-   else
-      !call rainfall_interception_modrut_type2()
-   end if
-
-end function interceptionSbm
+end module dhydrology_error
