@@ -1066,6 +1066,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double(md_ptr, 'numerics', 'Velmagnwarn', umagwarn)
     call prop_get_double(md_ptr, 'numerics', 'MinTimestepBreak', dtminbreak)
     call prop_get_double(md_ptr, 'numerics', 'Epshu' , epshu)
+    epshs = .2d0*epshu ! minimum waterdepth for setting cfu
 
     call prop_get_double(md_ptr, 'numerics', 'SobekDFM_umin', sbkdfm_umin)
     call prop_get_integer(md_ptr, 'numerics', 'SobekDFM_umin_method', sbkdfm_umin_method)
@@ -1645,6 +1646,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_nudging', jamapnudge, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waves',jamapwav, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_DTcell',jamapdtcell, success)
+    epswetout = epshs ! the same as numerical threshold to counts as 'wet'.
     call prop_get_double (md_ptr, 'output', 'Wrimap_wet_waterdepth_threshold', epswetout, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_time_water_on_ground', jamapTimeWetOnGround, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_freeboard', jamapFreeboard, success)
