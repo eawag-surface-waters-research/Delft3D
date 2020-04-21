@@ -2974,7 +2974,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. jagrw > 0 .or. Infiltrationmodel > 0) then
        call prop_set(prop_ptr, 'grw', 'groundwater'        , jagrw,             '0=No (horizontal) groundwater flow, 1=With groundwater flow')
-       call prop_set(prop_ptr, 'grw', 'Infiltrationmodel'  , Infiltrationmodel, '0=No infiltration, 1=infiltration=interceptionlayer (with grw), 2=infiltration=Infiltrationcapacity, 3=model unsaturated/saturated (with grw), 4=infiltration=Horton ( )' )
+       call prop_set(prop_ptr, 'grw', 'Infiltrationmodel'  , Infiltrationmodel, '0=No infiltration, 1=infiltration=interceptionlayer (with grw), 2=infiltration=Infiltrationcapacity, 3=model unsaturated/saturated (with grw), 4=Horton' )
        call prop_set(prop_ptr, 'grw', 'Hinterceptionlayer' , Hinterceptionlayer,'Intercept this amount of rain (m)' )
        call prop_set(prop_ptr, 'grw', 'UnifInfiltrationCapacity' , infiltcapuni, 'Uniform maximum infiltration capacity (m/s)' )
        call prop_set(prop_ptr, 'grw', 'Conductivity'       , Conductivity,      'non dimensionless K conductivity   saturated (m/s), Q = K*A*i (m3/s)' )

@@ -2803,8 +2803,8 @@ end subroutine read_land_boundary_netcdf
    end subroutine read_samples_from_dem
 
 
-!> Read samples from a geoTIFF file.
-!! Samples are being stored in a global dataset of m_samples.  
+!> Read samples from a GeoTIFF file.
+!! Samples are being stored in the global dataset of m_samples.  
 function read_samples_from_geotiff(filename) result(success)
    use MessageHandling
    use, intrinsic :: iso_c_binding
@@ -2815,8 +2815,8 @@ function read_samples_from_geotiff(filename) result(success)
    use string_module, only: strcmpi
    implicit none   
 
-   character(len=*), intent(in) :: filename                        !< Path of the file to be read
-   logical :: success                                              !< Return value to describe success of the operations
+   character(len=*), intent(in) :: filename !< Path of the file to be read
+   logical                      :: success  !< Return value to describe success of the operations
    
    ! local
    type(gdaldataseth)              :: dataset                      ! Gdal dataset 

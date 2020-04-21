@@ -193,11 +193,6 @@ function initInitialFields(inifilename) result(ierr)
             call prepare_lateral_mask(kcsini, iLocType)
             
             success = timespaceinitialfield(xz, yz, HortonMinInfCap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
-         else if (strcmpi(qid, 'HortonMinInfCap')) then
-            call realloc(kcsini, ndx, keepExisting=.false.)
-            call prepare_lateral_mask(kcsini, iLocType)
-            
-            success = timespaceinitialfield(xz, yz, HortonMinInfCap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
          else if (strcmpi(qid, 'HortonMaxInfCap')) then
             call realloc(kcsini, ndx, keepExisting=.false.)
             call prepare_lateral_mask(kcsini, iLocType)
@@ -424,8 +419,8 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
       
       ! if the infiltrationmodel is not horton, but a horton quantity is detected, then send a error message
       if (infiltrationmodel /= 4 .and. &
-         (strcmpi(quantity,'HortonMinInfCap') .or. strcmpi(quantity,'HortonMaxInfCap') .or. strcmpi(quantity,'HortonDecreaseRate')  .or. strcmpi(quantity,'HortonRecoveryRate'))) then
-         call mess(LEVEL_ERROR, 'The infiltrationmodel needs to be set to horton in the mdu file')
+         strcmpi(quantity,'Horton', 6)) then
+         call mess(LEVEL_WARN, 'File '''//trim(inifilename)//''' contains quantity '''//trim(quantity)//'''. This requires infiltrationmodel=4 in the MDU file (Horton).')
       end if
          
       ! read extrapolationMethod
@@ -706,7 +701,7 @@ subroutine fileTypeStringToInteger(sFileType, iFileType)
          iFileType = field1D
       case ('polygon')
          iFileType = inside_polygon
-      case ('geoTIFF')
+      case ('geotiff')
          iFileType = geotiff
       case default
          iFileType = -1

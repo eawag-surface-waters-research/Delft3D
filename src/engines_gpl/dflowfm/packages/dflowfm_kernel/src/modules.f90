@@ -963,7 +963,7 @@ end module m_bedform
  module m_grw
  !  TODO: UNST-3691: Use named parameter constants for infiltrationmodel and jaintercept2D
  integer                               :: jagrw                !< include ground water
- integer                               :: infiltrationmodel    !< 0=nogrw, 1 = Hinterceptionlayer, 2=Conductivity=constant, 3=Function of pressure, 4=Horton 
+ integer                               :: infiltrationmodel    !< 0=nogrw, 1 = Hinterceptionlayer, 2=Conductivity=constant, 3=Function of pressure, 4=Horton
  double precision, allocatable         :: sgrw0(:)             !< ground water level start
  double precision, allocatable         :: sgrw1(:)             !< ground water level end of timestep
  double precision, allocatable         :: pgrw (:)             !< pressure and plotting of sgrw
@@ -996,7 +996,7 @@ contains
 !! For a reinit prior to flow computation, only call reset_grw() instead.
 subroutine default_grw()
    jagrw             = 0       !< include ground water
-   infiltrationmodel = 0       !< 0=nogrw, 1 = Hinterceptionlayer, 2=Conductivity=constant, 3=function of pressure, 4=horton
+   infiltrationmodel = 0       !< 0=nogrw, 1 = Hinterceptionlayer, 2=Conductivity=constant, 3=function of pressure, 4=Horton
    jaintercept2D     = 0       !< 1 = uniform, 2 = spatially variable
    !Hinterceptionlayer          !< thickness of interception layer in  (m) only if infiltrationmodel == 1
    !infiltcapuni                !< (m/s), Only used if infiltrationmodel == 2

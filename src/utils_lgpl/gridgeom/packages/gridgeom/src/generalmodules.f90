@@ -315,7 +315,7 @@
    !> Main sample set
    module m_samples
    implicit none
-   double precision, ALLOCATABLE  :: XS(:), YS(:), ZS(:)   !! x-coordinate, y-coordinate and value of sample set
+   double precision, ALLOCATABLE  :: XS(:), YS(:), ZS(:)   !< x-coordinate, y-coordinate and value of sample set
    INTEGER,          ALLOCATABLE  :: IPSAM(:)              !< permutation array (increasing x-coordinate)
    integer,          parameter    :: IPSTAT_OK=0           !< permutation array is OK
    integer,          parameter    :: IPSTAT_NOTOK=1        !< permutation array is out of date

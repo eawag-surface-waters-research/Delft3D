@@ -720,6 +720,7 @@
    use m_flowtimes
    use dfm_error
    use gridoperations
+   use string_module, only: strcmpi
 
    implicit none
    integer :: MODE, NUM,  NWHAT,  KEY
@@ -1031,10 +1032,10 @@
          key = 3
          i = len_trim(filnam)
          if (i > 3) then
-            if (filnam(i-3:i) == '.dem' .or. filnam(i-3:i) == '.DEM') then
+            if (strcmpi(filnam(i-3:i), '.dem')) then
                 call doclose(mlan)
                 call read_samples_from_dem(trim(filnam), ja)
-            else if (filnam(i-3:i) == '.asc' .or. filnam(i-3:i) == '.ASC') then
+            else if (strcmpi(filnam(i-3:i), '.asc')) then
                 call doclose(mlan)
 
 !               delete all samples, regardless of selecting polygon
@@ -1045,10 +1046,10 @@
                 call restorepol()
 
                 call read_samples_from_arcinfo(trim(filnam), ja)  ! reaasc
-            else if (filnam(i-3:i) == '.tif' .or. filnam(i-3:i) == '.TIF' &
-                .or. filnam(i-4:i) == '.tiff' .or. filnam(i-4:i) == '.TIFF') then
+            else if (strcmpi(filnam(      i-3 :i), '.tif') &
+                .or. strcmpi(filnam(max(1,i-4):i), '.tiff')) then
                success = read_samples_from_geotiff(filnam)
-            else if (filnam(i-3:i) == '.xyz' .or. filnam(i-3:i) == '.XYZ') then
+            else if (strcmpi(filnam(i-3:i), '.xyz')) then
                 CALL reasam(MLAN,ja)  ! DOORLADEN
             end if
          else

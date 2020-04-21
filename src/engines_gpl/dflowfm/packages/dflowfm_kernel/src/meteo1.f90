@@ -50,13 +50,13 @@ module timespace_parameters
   integer, parameter :: node_id                        = -1  ! for a reference to a node ID
   integer, parameter :: link_id                        = -1  ! for a reference to a link ID
   integer, parameter :: poly_tim                       =  9  ! for line oriented bnd conditions, refs to uniform, fourier or harmonic
-  integer, parameter :: inside_polygon                 = 10  ! Constant value inside polygon, used for initial fields.
+  integer, parameter :: inside_polygon                 = 10  ! Constant value inside polygon, used for initial/parameter fields.
   integer, parameter :: ncgrid                         = 11  ! NetCDF grid, rectangular type as arcinfo  
   integer, parameter :: ncflow                         = 12  ! NetCDF flow, with arbitrary type of input
   integer, parameter :: ncwave                         = 14  ! NetCDF com file, with arbitrary type of input
   integer, parameter :: bcascii                        = 17  ! .bc format as ASCII file
-  integer, parameter :: field1d                        = 18  ! Scalar quantity on a 1D network, used for initial fields.
-  integer, parameter :: geotiff                        = 19  ! GeoTIFF, used for initial fields.
+  integer, parameter :: field1d                        = 18  ! Scalar quantity on a 1D network, used for initial/parameter fields.
+  integer, parameter :: geotiff                        = 19  ! GeoTIFF, used for initial/parameter fields.
   integer, parameter :: max_file_types                 = 103 !  max nr of supported types for end user in ext file.
   ! Enumeration for file types of sub-providers (not directly in ext file)
   integer, parameter :: fourier                        = 101 ! period(hrs), ampl(m), phas(deg) NOTE: not directly used in ext file by users.
