@@ -21,7 +21,7 @@
 !-------------------------------------------------------------------------------
 
 !> DFlowFM will call the concept, for now is coded in Python
-   function interceptionSbm(timeStep, n, Precipitation, PotEvap, CanopyStorage, CanopyGapFraction, Cmax,NetInterception,&
+function interceptionSbm(timeStep, n, Precipitation, PotEvap, CanopyStorage, CanopyGapFraction, Cmax,NetInterception,&
       ThroughFall, StemFlow,LeftOver, Intercep) result(ierr)
 
    use interception
@@ -44,4 +44,4 @@
       !call rainfall_interception_modrut_type2()
    end if
 
-   end function interceptionSbm
+end function interceptionSbm
