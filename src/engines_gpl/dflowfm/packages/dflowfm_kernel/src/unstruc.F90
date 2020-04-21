@@ -38657,9 +38657,10 @@ end function ispumpon
  use m_ship
  use m_transport, only : constituents, itemp
  use m_hydrology_data, only : jadhyd, ActEvap
+ use m_mass_balance_areas
  implicit none
 
- integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim
+ integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim, imba
  double precision :: aufu, auru, tetau
  double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qextk
 
@@ -38698,6 +38699,16 @@ end function ispumpon
              Qrain   = 0d0
           endif
           qin(k) = Qrain
+          if (jamba > 0) then
+             imba = mbadefdomain(k)
+             if (imba > 0) then
+                if (Qrain > 0) then
+                   mbaflowraineva(1,imba) = mbaflowraineva(1,imba) + Qrain*dts
+                else
+                   mbaflowraineva(2,imba) = mbaflowraineva(2,imba) - Qrain*dts
+                endif
+             endif
+          endif
        enddo
     endif
 
@@ -38710,6 +38721,12 @@ end function ispumpon
              endif
              qin(k)  = qin(k)  + Qeva
              qouteva = qouteva - Qeva
+             if (jamba > 0) then
+                imba = mbadefdomain(k)
+                if (imba > 0) then
+                   mbafloweva(imba) = mbafloweva(imba) - Qeva*dts
+                endif
+             endif
           endif
        enddo
     endif

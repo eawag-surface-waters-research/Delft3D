@@ -86,6 +86,10 @@
    call realloc(mbaflowhortot, [2, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
    call realloc(mbaflowsorsin, [2, numsrc], keepExisting=.false., fill=0d0)
    call realloc(mbaflowsorsintot, [2, numsrc], keepExisting=.false., fill=0d0)
+   call realloc(mbaflowraineva, [2, nomba], keepExisting=.false., fill=0d0)
+   call realloc(mbaflowrainevatot, [2, nomba], keepExisting=.false., fill=0d0)
+   call realloc(mbafloweva, nomba, keepExisting=.false., fill=0d0)
+   call realloc(mbaflowevatot, nomba, keepExisting=.false., fill=0d0)
 
    call realloc(mbamassbegin   , [nombs, nomba], keepExisting=.false., fill=0d0)
    call realloc(mbamassbegintot, [nombs, nomba], keepExisting=.false., fill=0d0)
@@ -100,6 +104,8 @@
       call realloc(mbavolumereduce  , nomba, keepExisting=.false., fill=0d0)
       call realloc(mbaflowhorreduce , [2, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
       call realloc(mbaflowsorsinreduce, [2, numsrc], keepExisting=.false., fill=0d0)
+      call realloc(mbaflowrainevareduce , [2, nomba], keepExisting=.false., fill=0d0)
+      call realloc(mbaflowevareduce , nomba, keepExisting=.false., fill=0d0)
       call realloc(mbamassreduce    , [nombs, nomba], keepExisting=.false., fill=0d0)
       call realloc(mbafluxhorreduce , [2, numconst, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
       call realloc(mbafluxsorsinreduce, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
@@ -194,8 +200,8 @@
    call realloc(flxdmpreduce, [2,nflux, nomba], keepExisting=.false., fill=0.0d0 )       !< Fluxes at dump segments
    call realloc(flxdmptot, [2,nflux, nomba], keepExisting=.false., fill=0.0d0 )       !< Fluxes at dump segments
 
-   call mba_sum_area(nomba, mbadef, mbaarea)
-   call mba_sum(nombs, nomba, mbadef, mbavolumebegin, mbamassbegin)
+   call mba_sum_area(nomba, mbadefdomain, mbaarea)
+   call mba_sum(nombs, nomba, mbadefdomain, mbavolumebegin, mbamassbegin)
    if ( jampi.eq.1 ) then
       call reduce_double_sum(nomba, mbaarea, mbavolumereduce)
       do imba =1, nomba
@@ -285,7 +291,9 @@
    use m_fm_wq_processes
    use m_partitioninfo
    use m_flowexternalforcings, only: numsrc, srcname
-   use m_transport, only: numconst
+   use m_wind, only: jarain, jaevap
+   use m_flowparameters, only: jatem
+   use m_transport, only: numconst, isalt, itemp
 
    implicit none
 
@@ -298,7 +306,7 @@
    timembaend = time
 
 !  New total volumes and masses
-   call mba_sum(nombs, nomba, mbadef, mbavolumeend, mbamassend)
+   call mba_sum(nombs, nomba, mbadefdomain, mbavolumeend, mbamassend)
 
 !  If in parallel mode, reduce arrays
    writebalance = .true.
@@ -315,14 +323,25 @@
             mbaflowhor(1:2, imba, jmba) = mbaflowhorreduce(1:2, imba, jmba)
          enddo
       enddo
-      
+      call reduce_double_sum(2 * numsrc, mbaflowsorsin, mbaflowsorsinreduce)
+      do isrc = 1, numsrc
+         mbaflowsorsin(1:2,isrc) = mbaflowsorsinreduce(1:2,isrc)
+      enddo
+      call reduce_double_sum(2 * nomba, mbaflowraineva, mbaflowrainevareduce)
+      do imba = 1, nomba
+         mbaflowraineva(1:2,imba) = mbaflowrainevareduce(1:2,imba)
+      enddo
+      call reduce_double_sum(nomba, mbafloweva, mbaflowevareduce)
+      do imba = 1, nomba
+         mbafloweva(imba) = mbaflowevareduce(imba)
+      enddo
+
       call reduce_double_sum(notot * nomba, mbamassend, mbamassreduce)
       do imba =1, nomba
          do imbs = 1, nombs
             mbamassend(imbs, imba) = mbamassreduce(imbs, imba)
          enddo
       enddo
-
       call reduce_double_sum(2 * numconst * nombabnd * nombabnd, mbafluxhor, mbafluxhorreduce)
       do imba = 1, nombabnd
          do jmba = 1, nombabnd
@@ -331,19 +350,12 @@
             enddo
          enddo
       enddo
-
-      call reduce_double_sum(2 * numsrc, mbaflowsorsin, mbaflowsorsinreduce)
-      do isrc = 1, numsrc
-         mbaflowsorsin(1:2,isrc) = mbaflowsorsinreduce(1:2,isrc)
-      enddo
-
       call reduce_double_sum(2 * 2 * numconst * numsrc, mbafluxsorsin, mbafluxsorsinreduce)
       do isrc = 1, numsrc
          do iconst = 1, numconst
             mbafluxsorsin(1:2,1:2,iconst,isrc) = mbafluxsorsinreduce(1:2,1:2,iconst,isrc)
          enddo
       enddo
-
       if(nflux.gt.0) then
          call reduce_double_sum(2 * nflux * nomba, flxdmp, flxdmpreduce)
          do imba = 1, nomba
@@ -357,9 +369,9 @@
    if (writebalance) then
       call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
                                    nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
-                                   mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, &
-                                   mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, &
-                                   flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys)
+                                   mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
+                                   mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, &
+                                   flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
    endif
 
    ! Store end volumes and masses as begin volumes and masses for the next balance output step
@@ -368,7 +380,6 @@
    do imba = 1, nomba
       mbavolumebegin(imba) = mbavolumeend(imba)
    end do
-
    do imba = 1, nomba
       do imbs=1, nombs
          mbamassbegin(imbs,imba) = mbamassend(imbs,imba)
@@ -381,9 +392,14 @@
          mbaflowhortot(1:2, imba, jmba) = mbaflowhortot(1:2, imba, jmba) + mbaflowhor(1:2, imba, jmba)
       enddo
    enddo
-
    do isrc = 1, numsrc
       mbaflowsorsintot(1:2,isrc) = mbaflowsorsintot(1:2,isrc) + mbaflowsorsin(1:2,isrc)
+   enddo
+   do imba = 1, nomba
+      mbaflowrainevatot(1:2,imba) = mbaflowrainevatot(1:2,imba) + mbaflowraineva(1:2,imba)
+   enddo
+   do imba = 1, nomba
+      mbaflowevatot(imba) = mbaflowevatot(imba) + mbafloweva(imba)
    enddo
 
    do imba = 1, nombabnd
@@ -393,13 +409,11 @@
          enddo
       enddo
    enddo
-
    do isrc = 1, numsrc
       do iconst = 1, numconst
          mbafluxsorsintot(1:2,1:2,iconst,isrc) = mbafluxsorsintot(1:2,1:2,iconst,isrc) + mbafluxsorsin(1:2,1:2,iconst,isrc)
       enddo
    enddo
-
    if (nflux.gt.0) then
       do imba = 1, nomba
          do iflx = 1, nflux
@@ -411,6 +425,8 @@
    ! reset flux accumulators
    mbaflowhor = 0.0d0
    mbaflowsorsin = 0.0d0
+   mbaflowraineva = 0.0d0
+   mbafloweva = 0.0d0
    mbafluxhor = 0.0d0
    mbafluxsorsin = 0.0d0
    flxdmp = 0.0
@@ -423,7 +439,9 @@
    use m_fm_wq_processes
    use m_partitioninfo
    use m_flowexternalforcings, only: numsrc, srcname
-   use m_transport, only: numconst
+   use m_transport, only: numconst, isalt, itemp
+   use m_wind, only: jarain, jaevap
+   use m_flowparameters, only: jatem
 
    implicit none
 
@@ -443,9 +461,9 @@
       write(lunmbabal,1000)
       call mba_write_bal_time_step(lunmbabal, timembastarttot, timembaend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
                                    nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
-                                   mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot,mbaflowsorsintot,  &
-                                   mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, &
-                                   flxdmptot, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys)
+                                   mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot, mbaflowsorsintot, mbaflowrainevatot, &
+                                   mbaflowevatot, mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, &
+                                   flxdmptot, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
    endif
 
    1000 format (///'============================================================='&
@@ -621,9 +639,10 @@
    
    subroutine mba_write_bal_time_step(lunbal, timestart, timeend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
                                       nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
-                                      mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, &
-                                      mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, &
-                                      flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys)
+                                      mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
+                                      mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, flxdmp, stochi, &
+                                      fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
+
    implicit none
    
    integer                     :: lunbal                    ! logical unit
@@ -654,6 +673,8 @@
    double precision            :: mbavolumeend(nomba)       ! end volume in mass balance area
    double precision            :: mbaflowhor(2,nombabnd,nombabnd) ! periodical flows between balance areas and between boundaries and balance areas
    double precision            :: mbaflowsorsin(2,numsrc)   ! periodical flow from source sinks
+   double precision            :: mbaflowraineva(2,nomba)   ! periodical flow from rain and forced evaportion
+   double precision            :: mbafloweva(nomba)       ! periodical flow from calculated evaportion
 
    double precision            :: mbamassbegin(nombs,nomba) ! begin volume in mass balance area
    double precision            :: mbamassend(nombs,nomba)   ! end volume in mass balance area
@@ -667,6 +688,12 @@
    integer                     :: nfluxsys(notot)
    integer                     :: ipfluxsys(notot)
    integer                     :: fluxsys(totfluxsys)
+   
+   integer                     :: jarain                    ! use rain yes or no
+   integer                     :: jaevap                    ! use evaporation yes or no
+   integer                     :: jatem                     ! Temperature model (0=no, 5=heatfluxmodel)
+   integer                     :: isalt                     ! constituent that is salt
+   integer                     :: itemp                     ! constituent that is temperature
 
    integer, parameter :: long = SELECTED_INT_KIND(16)
    character(len=20), external :: seconds_to_dhms
@@ -719,6 +746,14 @@
             write (lunbal, 2001) 'src_'//srcname(isrc), mbaflowsorsin(2:1:-1, isrc)
          endif
       end do
+      if (jarain > 0) then
+         totals = totals + mbaflowraineva(1:2, imba)
+         write (lunbal, 2001) 'Rain/prescribed evaporation   ', mbaflowraineva(1:2, imba)
+      endif   
+      if (jaevap > 0 .and. jatem > 3) then
+         totals(2) = totals(2) + mbafloweva(imba)
+         write (lunbal, 2001) 'Calculated evaporation        ', 0.0d0, mbafloweva(imba)
+      endif   
       write (lunbal, 1004)
       write (lunbal, 2003) totals
       write (lunbal, 2010) totals(2)-totals(1)
@@ -734,7 +769,13 @@
          write (lunbal, 1010) seconds_to_dhms(nint(timestart, long)), seconds_to_dhms(nint(timeend, long)), mbaname(imba), mbsname(imbs)
          write (lunbal, 2000) mbamassbegin(imbs, imba), mbamassend(imbs, imba)
          if (imbs.le.numconst) then
-            write (lunbal, 1011)
+            if (imbs == isalt) then
+               write (lunbal, 1012)
+            else if (imbs == itemp) then
+               write (lunbal, 1013)
+            else
+               write (lunbal, 1011)
+            endif
             if (mbavolumebegin(imba).gt.0.0) then
                concbegin = mbamassbegin(imbs, imba) / mbavolumebegin(imba)
             else
@@ -746,7 +787,7 @@
                concend = 0.0
             endif
          else
-            write (lunbal, 1012)
+            write (lunbal, 1014)
             if (mbaarea(imba).gt.0.0) then
                concbegin = mbamassbegin(imbs, imba) / mbaarea(imba)
                concend = mbamassend(imbs, imba) / mbaarea(imba)
@@ -756,7 +797,7 @@
             endif
          endif
          write (lunbal, 2000) concbegin, concend
-         write (lunbal, 1013) mbsname(imbs)
+         write (lunbal, 1015) mbsname(imbs)
          if (mbamassbegin(imbs, imba).gt.mbamassend(imbs, imba)) then
             totals(1) = mbamassbegin(imbs, imba) - mbamassend(imbs, imba)
          else
@@ -845,6 +886,15 @@
          write (lunbal, 2001) 'src_'//srcname(isrc), mbaflowsorsin(2:1:-1, isrc)
       endif
    end do
+   if (jarain > 0) then
+      totals(1) = totals(1) + sum(mbaflowraineva(1, :))
+      totals(2) = totals(2) + sum(mbaflowraineva(2, :))
+      write (lunbal, 2001) 'Rain/prescribed evaporation   ', sum(mbaflowraineva(1, :)), sum(mbaflowraineva(2, :))
+   endif
+   if (jaevap > 0 .and. jatem > 3) then
+      totals(2) = totals(2) + sum(mbafloweva(:))
+      write (lunbal, 2001) 'Calculated evaporation        ', 0.0d0, sum(mbafloweva(:))
+   endif   
    write (lunbal, 1004)
    write (lunbal, 2003) totals
    write (lunbal, 2010) totals(2)-totals(1)
@@ -874,7 +924,7 @@
             concend = 0.0
          endif
       else
-         write (lunbal, 1012)
+         write (lunbal, 1014)
          if (summbaarea.gt.0.0) then
             concbegin = summbamassbegin / summbaarea
             concend = summbamassend / summbaarea
@@ -884,7 +934,7 @@
          endif
       endif
       write (lunbal, 2000) concbegin, concend
-      write (lunbal, 1013) mbsname(imbs)
+      write (lunbal, 1015) mbsname(imbs)
       if (summbamassbegin.gt.summbamassend) then
          totals(1) = summbamassbegin - summbamassend
       else
@@ -962,9 +1012,13 @@
                   /'-------------------------------------------------------------')
    1011 format (  /'Average concentration (mass/m3)         Begin            End '&
                   /'-------------------------------------------------------------')
-   1012 format (  /'Average concentration (mass/m2)         Begin            End '&
+   1012 format (  /'Average concentration (1e-3)            Begin            End '&
                   /'-------------------------------------------------------------')
-   1013 format (  /'Substance ',A20,'Sources/Inflows Sinks/Outflows '             &
+   1013 format (  /'Average concentration (degC)            Begin            End '&
+                  /'-------------------------------------------------------------')
+   1014 format (  /'Average concentration (mass/m2)         Begin            End '&
+                  /'-------------------------------------------------------------')
+   1015 format (  /'Substance ',A20,'Sources/Inflows Sinks/Outflows '             &
                   /'-------------------------------------------------------------')
 
    2000 format (30X,2ES15.6E3)

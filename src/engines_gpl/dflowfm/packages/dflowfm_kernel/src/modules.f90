@@ -5481,6 +5481,10 @@ module m_mass_balance_areas
    double precision, allocatable             :: mbaflowhortot(:,:,:)        !< total flow between balance areas and between boundaries and balance areas
    double precision, allocatable             :: mbaflowsorsin(:,:)          !< periodical flow from source sinks
    double precision, allocatable             :: mbaflowsorsintot(:,:)       !< total flow from source sinks
+   double precision, allocatable             :: mbaflowraineva(:,:)         !< periodical flow from rain and prescribed evaporation
+   double precision, allocatable             :: mbaflowrainevatot(:,:)      !< total flow from rain and prescribed evaporation
+   double precision, allocatable             :: mbafloweva(:)               !< periodical flow from calculated evaporation
+   double precision, allocatable             :: mbaflowevatot(:)            !< total flow from calculated evaporation
 
    double precision, allocatable             :: mbamassbegin(:,:)           !< begin volume in mass balance area
    double precision, allocatable             :: mbamassbegintot(:,:)        !< total begin volume in mass balance area
@@ -5494,6 +5498,8 @@ module m_mass_balance_areas
    double precision, allocatable             :: mbavolumereduce    (:)      !< begin volume in mass balance area
    double precision, allocatable             :: mbaflowhorreduce   (:,:,:)  !< periodical flow between balance areas and between boundaries and balance areas
    double precision, allocatable             :: mbaflowsorsinreduce(:,:)    !< periodical flow from sources sinks
+   double precision, allocatable             :: mbaflowrainevareduce(:,:)   !< periodical flow from rainfal and prescribed evaporation
+   double precision, allocatable             :: mbaflowevareduce(:)         !< periodical flow from calculated evaporation
    double precision, allocatable             :: mbamassreduce      (:,:)    !< begin volume in mass balance area
    double precision, allocatable             :: mbafluxhorreduce   (:,:,:,:)!< periodical fluxes between balance areas and between boundaries and balance areas
    double precision, allocatable             :: mbafluxsorsinreduce(:,:,:,:)!< periodical fluxes from source sinks
