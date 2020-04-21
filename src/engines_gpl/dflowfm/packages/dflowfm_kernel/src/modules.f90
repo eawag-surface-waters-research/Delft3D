@@ -3213,7 +3213,7 @@ subroutine default_flowparameters()
     jamapTotalInflowLat = 0
     jamapS1Gradient = 0
     
-    epswetout = 0.1d0 ! 10cm waterdepth counts as 'wet'.
+    epswetout = epshs ! the same as numerical threshold to counts as 'wet'.
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     jamapbnd = 0
