@@ -12544,7 +12544,8 @@ subroutine writesomeinitialoutput()
 
  write(msgbuf,'(a,F25.10)') 'nr of timesteps        ( )  :' , dnt-1                      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'average timestep       (s)  :' , dtav                       ; call msg_flush()
-
+ write(msgbuf,'(a,F25.10)') 'nr of setbacks         ( )  :' , dsetb                      ; call msg_flush()
+ 
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
 
