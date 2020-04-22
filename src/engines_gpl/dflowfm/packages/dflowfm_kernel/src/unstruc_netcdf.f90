@@ -11965,8 +11965,8 @@ subroutine unc_read_map(filename, tim, ierr)
           tmpstr  = filename(tok1-15:tok1-8)//filename(tok1-6:tok1-1)
           call maketimeinverse(tmpstr(1:14), trefdat_rst, iostat)
           fname_has_date = (iostat==0)    
-          tok3    = index( filename(tok1-15:tok1-1), '_', success )
-          fname_has_date = fname_has_date .and. success                   ! require connecting underscore between date and time 
+          tok3    = index( filename(tok1-15:tok1-1), '_')
+          fname_has_date = fname_has_date .and. (tok3 > 0)                    ! require connecting underscore between date and time 
        endif 
             
        if (.not.fname_has_date) then
