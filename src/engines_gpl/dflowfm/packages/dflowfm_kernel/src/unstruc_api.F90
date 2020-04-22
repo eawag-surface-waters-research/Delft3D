@@ -332,12 +332,6 @@ use unstruc_netcdf
 use MessageHandling, only: FinalizeMessageHandling
 use m_ec_module
 use m_meteo, only: ecInstancePtr
- !!   cpuall(1) = cpuall0 ! Reset original start timing, for accurate totals
-    ! TODO: AvD: in library/interactive mode, this reset to cpuall0 does not make sense.
-    !            (Much additional wall clock time may have passed when flowstep() was
-    !            called in an (interactive) loop instead of batchmode flow().)
- !!   call klok(cpuall(2))
- !!   cpuall(3) = cpuall(2) - cpuall0
 
     if (.not.ecFreeInstance(ecInstancePtr)) then
        continue     

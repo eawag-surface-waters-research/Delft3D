@@ -4411,18 +4411,18 @@ end subroutine reset_flowgeom
  integer                           :: it_waq      !< Nr of snapshots presently in delwaq files.
  integer                           :: it_stat     !< Nr of simulation statistics presently in log file.
  ! for performance timings
- logical                           :: debugtimeon !< timing yes or no
- double precision                  :: cpusteps(3) !< cputime timesteps (1)=start,(2)=stop,(3)=total
- double precision                  :: cpuumod (3) !< cputime set-umod  (1)=start,(2)=stop,(3)=total
- double precision                  :: cpusol  (3) !< cputime conj-grad (1)=start,(2)=stop,(3)=total
- double precision                  :: cpufuru (3) !< cputime conj-grad (1)=start,(2)=stop,(3)=total
- double precision                  :: cpuall  (3) !< cputime steps + plots 1,2,3 idem
- double precision                  :: cpuinistep(3) !< cputime inistep 1,2,3 idem
- double precision                  :: cpuiniext (3) !< cputime init externalforcings (1)=start,(2)=stop,(3)=total
- double precision                  :: cpuext    (3) !< cputime externalforcings      (1)=start,(2)=stop,(3)=total
- double precision                  :: cpuextbnd (3) !< cputime externalforcingsonbnd (1)=start,(2)=stop,(3)=total
- double precision                  :: cpu_extra(3,45) !< cputime, extra timers (1)=start,(2)=stop,(3)=total
- double precision                  :: cpuwri      !< cputime writing (s)
+ logical                           :: debugtimeon     !< timing yes or no
+ integer                           :: handle_steps    !< timer handle for timesteps 
+ integer                           :: handle_umod     !< timer handle for set-umod  
+ integer                           :: handle_sol      !< timer handle for conj-grad 
+ integer                           :: handle_furu     !< timer handle for conj-grad 
+ integer                           :: handle_all      !< timer handle for steps + plots
+ integer                           :: handle_inistep  !< timer handle for inistep
+ integer                           :: handle_iniext   !< timer handle for init externalforcings
+ integer                           :: handle_ext      !< timer handle for externalforcings     
+ integer                           :: handle_extbnd   !< timer handle for externalforcingsonbnd
+ integer                           :: handle_extra(45)!< timer handles for extra timers
+ 
  double precision                  :: dsetb       !< number of setbacks ()
  double precision                  :: walltime0   !< wall time at start of timeloop (s)
 
@@ -4499,6 +4499,7 @@ end subroutine default_flowtimes
 !> Resets only flow times variables intended for a restart of flow simulation.
 !! Upon loading of new model/MDU, use default_flowtimes() instead.
 subroutine reset_flowtimes()
+   use Timers
     dtprev       = dt_init           !< previous computational timestep (s)  (1s is a bit like sobek)
     dts          = dt_init           !< internal computational timestep (s)
     !tfac         = 1d0               !< Time unit in seconds JRE: disabled, and handled in readMDU
@@ -4548,15 +4549,63 @@ subroutine reset_flowtimes()
 
 ! for performance timings
     debugtimeon   = .false.          !< timing yes or no
-    cpusteps  (3) = 0                !< cputime timesteps (1)=start,(2)=stop,(3)=total
-    cpufuru   (3) = 0                !< cputime furu      (1)=start,(2)=stop,(3)=total
-    cpusol    (3) = 0                !< cputime conj-grad (1)=start,(2)=stop,(3)=total
-    cpuall    (3) = 0                !< cputime steps + plots 1,2,3 idem
-    cpuinistep(3) = 0                !< cputime steps + plots 1,2,3 idem
-    cpuiniext (3) = 0                !< init external forcing
-    cpuext    (3) = 0                !< external forcing
-    cpuextbnd (3) = 0                !< external forcing bnd
-    cpuwri        = 0                !< cputime writing (s)
+    call timini()
+    
+    handle_steps     = tim_get_new_handle('single_timestep') !< timer for timesteps
+    handle_furu      = tim_get_new_handle('furu')            !< timer for furu
+    handle_sol       = tim_get_new_handle('conjugate_gradients')
+    handle_all       = tim_get_new_handle('all')
+    handle_inistep   = tim_get_new_handle('init_timestep') !< cputime steps + plots 1,2,3 idem
+    handle_iniext    = tim_get_new_handle('init_external_forcing')  !< init external forcing
+    handle_ext       = tim_get_new_handle('external_forcing')       !< external forcing
+    handle_extbnd    = tim_get_new_handle('external_forcing_bnd')   !< external forcing bnd
+    handle_umod      = tim_get_new_handle('umod')
+    handle_extra( 1) = tim_get_new_handle('Basic steps         ')
+    handle_extra( 2) = tim_get_new_handle('Wave input          ')
+    handle_extra( 3) = tim_get_new_handle('Internal links      ')
+    handle_extra( 4) = tim_get_new_handle('Flow geometry       ')
+    handle_extra( 5) = tim_get_new_handle('Bobsongullies       ')
+    handle_extra( 6) = tim_get_new_handle('Wave initialisation ')
+    handle_extra( 7) = tim_get_new_handle('Flow grid           ')
+    handle_extra( 8) = tim_get_new_handle('Bed forms init (1)  ')
+    handle_extra( 9) = tim_get_new_handle('1D rougnhess        ')
+    handle_extra(10) = tim_get_new_handle('Sed/mor             ')
+    handle_extra(11) = tim_get_new_handle('Bed forms init (2)  ')
+    handle_extra(12) = tim_get_new_handle('Adm. vertical       ')
+    handle_extra(13) = tim_get_new_handle('Net link tree 0     ')
+    handle_extra(14) = tim_get_new_handle('Flow trachy init    ')
+    handle_extra(15) = tim_get_new_handle('Calibration init    ')
+    handle_extra(16) = tim_get_new_handle('Net link tree 1     ')
+    handle_extra(17) = tim_get_new_handle('Save 1d             ')
+    handle_extra(18) = tim_get_new_handle('WAQ processes init  ')
+    handle_extra(19) = tim_get_new_handle('Transport init      ')
+    handle_extra(20) = tim_get_new_handle('Part init           ')
+    handle_extra(21) = tim_get_new_handle('Observations init   ')
+    handle_extra(22) = tim_get_new_handle('Structures init     ')
+    handle_extra(23) = tim_get_new_handle('Flow init           ')
+    handle_extra(24) = tim_get_new_handle('MBA init            ')
+    handle_extra(25) = tim_get_new_handle('Update MOR width    ')
+    handle_extra(26) = tim_get_new_handle('Dredging init       ')
+    handle_extra(27) = tim_get_new_handle('Xbeach init         ')
+    handle_extra(28) = tim_get_new_handle('Observations init 2 ')
+    handle_extra(29) = tim_get_new_handle('Structure parameters')
+    handle_extra(30) = tim_get_new_handle('Trachy update       ')
+    handle_extra(31) = tim_get_new_handle('Set fcru MOR        ')
+    handle_extra(32) = tim_get_new_handle('Flow init           ')
+    handle_extra(33) = tim_get_new_handle('Fourier init        ')
+    handle_extra(34) = tim_get_new_handle('MDU file pointer    ')
+    handle_extra(35) = tim_get_new_handle('Flowgeom            ')
+    handle_extra(36) = tim_get_new_handle('Remainder           ')
+    handle_extra(37) = tim_get_new_handle('Flow alloc          ')
+    handle_extra(38) = tim_get_new_handle('initime setbnd      ')
+    handle_extra(39) = tim_get_new_handle('initime sethuau     ')
+    handle_extra(40) = tim_get_new_handle('initime setdt       ')
+    handle_extra(41) = tim_get_new_handle('initime advec       ')
+    handle_extra(42) = tim_get_new_handle('initime u0u1        ')
+    handle_extra(43) = tim_get_new_handle('initime setumod     ')
+    handle_extra(44) = tim_get_new_handle('initime cfuhi       ')
+    handle_extra(45) = tim_get_new_handle('initime structactual')
+
     dsetb         = 0                !< number of setbacks ()
     alfsmo        = 1d0              !<
 end subroutine reset_flowtimes

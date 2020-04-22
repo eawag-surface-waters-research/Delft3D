@@ -445,6 +445,7 @@ end subroutine flow_single_timestep
 
 !> Initializes a single computational timestep, call this prior to flow_perform_single_timestep.
 subroutine flow_init_single_timestep(iresult)
+use timers
 use m_flow
 use m_flowgeom
 use m_flowtimes
@@ -464,7 +465,7 @@ integer :: N, L
     goto 888
  end if
 
- call klok(cpusteps(1))
+ call timstrt(handle_steps)
 
  if ( jatimer.eq.1 ) call starttimer(ITIMESTEP)
 
@@ -486,6 +487,7 @@ end subroutine flow_init_single_timestep
 !> Performs a single computational timestep, but not the init and finalize of the timestep.
 subroutine flow_run_single_timestep(key, iresult)                ! do only 1 flow timestep
 use m_flow
+use timers
 use m_flowgeom
 use m_flowtimes
 use unstruc_model, only : jawritebalancefile
@@ -516,7 +518,7 @@ integer :: N, L
 
    ! Finalize timestep code used to be here, now flow_finalize_single_timestep()
 
-   call klok(cpusteps(2)) ; cpusteps(3) = cpusteps(3) + cpusteps(2) - cpusteps(1)
+ call timstop(handle_steps)
 
    ! Finalize timestep code used to be here, now flow_finalize_single_timestep()
 
@@ -680,6 +682,7 @@ end subroutine flow_finalize_single_timestep
  end subroutine velocities_explicit
 
  subroutine flow_initimestep(jazws0, iresult)                     ! intialise flow timestep, also called once after flowinit
+ use timers  
  use m_flowtimes
  use m_flow
  use m_flowgeom
@@ -699,7 +702,7 @@ end subroutine flow_finalize_single_timestep
 
  iresult = DFM_GENERICERROR
 
- call klok(cpuinistep(1))
+ call timstrt(handle_inistep)
 
  if (jazws0.eq.0)  s0 = s1                           ! progress water levels
 
@@ -723,9 +726,9 @@ end subroutine flow_finalize_single_timestep
 
  tim1bnd = max(time0+dts, tim1bnd)
 
- call klok(cpu_extra(1,38)) ! Start bnd
+ call timstrt(handle_extra(38)) ! Start bnd
  call flow_setexternalforcingsonboundaries(tim1bnd , iresult)  ! boundary forcings
- call klok(cpu_extra(2,38)) ! End bnd
+ call timstop(handle_extra(38)) ! End bnd
 
  if (iresult /= DFM_NOERR) then
     write (msgbuf,*) ' Error found in EC-module ' ; call err_flush()
@@ -755,42 +758,42 @@ end subroutine flow_finalize_single_timestep
     call xbeach_flow_bc()
  end if
 
- call klok(cpu_extra(1,42)) ! Start u0u1
+ call timstrt(handle_extra(42)) ! Start u0u1
  if (jazws0.eq.0) then
     u0 = u1                           ! progress velocities
     call set_u0isu1_structures(network%sts)
  endif
- call klok(cpu_extra(2,42)) ! End u0u1
+ call timstop(handle_extra(42)) ! End u0u1
 
 
  advi = 0d0
  adve = 0d0
 
- call klok(cpu_extra(1,39)) ! Start huau
+ call timstrt(handle_extra(39)) ! Start huau
  call sethu(jazws0)
 
  call setau()                                        ! set au and cfuhi for conveyance after limited h upwind at u points
- call klok(cpu_extra(2,39)) ! End huau
+ call timstop(handle_extra(39)) ! End huau
 
- call klok(cpu_extra(1,43)) ! Start setumod
+ call timstrt(handle_extra(43)) ! Start setumod
  if (newcorio == 1) then
     call setumodnew(jazws0)
  else
     call setumod(jazws0)                             ! set cell center velocities, should be here as prior to 2012 orso
  endif
- call klok(cpu_extra(2,43)) ! End setumod
+ call timstop(handle_extra(43)) ! End setumod
 
- call klok(cpu_extra(1,44)) ! Start cfuhi
+ call timstrt(handle_extra(44)) ! Start cfuhi
  call setcfuhi()                                     ! set frictioncoefficient
- call klok(cpu_extra(2,44)) ! End cfuhi
+ call timstop(handle_extra(44)) ! End cfuhi
 
  if (kmx == 0 .and. javeg > 0) then                  ! overwrite cfuhi in 2D with veg in plant area's
     call setbaptist()
  endif
 
- call klok(cpu_extra(1,45)) ! Start structactual
+ call timstrt(handle_extra(45)) ! Start structactual
  call initialize_structures_actual_params(network%sts)
- call klok(cpu_extra(2,45)) ! Start structactual
+ call timstop(handle_extra(45)) ! Start structactual
 
  if (japillar == 1 .or. japillar == 3) then
     call pillar_upd()
@@ -798,19 +801,19 @@ end subroutine flow_finalize_single_timestep
 
  ! TIDAL TURBINES: Insert equivalent calls to updturbine and applyturbines here
 
- call klok(cpu_extra(1,40)) ! Start setdt
+ call timstrt(handle_extra(40)) ! Start setdt
  if (jazws0.eq.0 .and. nshiptxy == 0)  then
     call setdt()                                     ! set computational timestep dt based on active hu's,
  end if
- call klok(cpu_extra(2,40)) ! End setdt
+ call timstop(handle_extra(40)) ! End setdt
 
  if (nshiptxy > 0) then
      call setship()                                  ! in initimestep
  endif
 
- call klok(cpu_extra(1,41)) ! Start advec
+ call timstrt(handle_extra(41)) ! Start advec
  call advecdriver()                                  ! advec limiting for depths below chkadvdp, so should be called after all source terms such as spiralforce
- call klok(cpu_extra(2,41)) ! End advec
+ call timstop(handle_extra(41)) ! End advec
 
  if (jazws0.eq.1)  then
     call makeq1qaAtStart()
@@ -826,7 +829,7 @@ end subroutine flow_finalize_single_timestep
     call heatu(tim1bnd/3600d0)                                  ! from externalforcings
  endif
 
- call klok(cpuinistep(2)) ; cpuinistep(3) = cpuinistep(3) + cpuinistep(2) - cpuinistep(1)
+ call timstop(handle_inistep)
 
  iresult = DFM_NOERR
 
@@ -5929,6 +5932,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
                                                      ! set corner based Perot velocities
 
  use m_flow
+ use timers
  use m_flowgeom
  use m_flowtimes
  use m_sferic
@@ -5979,7 +5983,7 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
  !   taucx = 0d0; taucy = 0d0
  !endif
 
- call klok(cpuumod(1))                               ! Perot velocities
+ call timstrt(handle_umod)
  if(jazws0==1 .and. len_trim(md_restartfile)>0) then
    ! This is the moment after the restart file is read and before the first output of the inital info.
    ! At this moment, u0 is used to compute the cell-center velocities. And hs has been computed in flow_initimestep, using s0.
@@ -6516,7 +6520,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
 
  endif
 
- call klok(cpuumod(2)) ; cpuumod(3) = cpuumod(3) + cpuumod(2) - cpuumod(1)
+ call timstop(handle_umod)
 
 
  end subroutine setumod
@@ -7138,7 +7142,7 @@ end subroutine setucxucyucxuucyu
                                                      ! set tangential velocities at u point
                                                      ! set velocity gradient at u point
                                                      ! set corner based Perot velocities
-
+ use timers
  use m_flow
  use m_flowgeom
  use m_flowtimes
@@ -7190,7 +7194,7 @@ end subroutine setucxucyucxuucyu
  !   taucx = 0d0; taucy = 0d0
  !endif
 
- call klok(cpuumod(1))                               ! Perot velocities
+ call timstrt(handle_umod)
  if(jazws0==1 .and. len_trim(md_restartfile)>0) then
    ! This is the moment after the restart file is read and before the first output of the inital info.
    ! At this moment, u0 is used to compute the cell-center velocities. And hs has been computed in flow_initimestep, using s0.
@@ -7813,8 +7817,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
 
  endif
 
- call klok(cpuumod(2)) ; cpuumod(3) = cpuumod(3) + cpuumod(2) - cpuumod(1)
-
+ call timstop(handle_umod)
 
  end subroutine setumodnew
 
@@ -10699,6 +10702,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  !> Initializes the entire current model (geometry, boundaries, initial state)
  !! @return Error status: error (/=0) or not (0)
  integer function flow_modelinit() result(iresult)                     ! initialise flowmodel
+ use timers
  use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx, kfs
  use waq,           only: reset_waq
  use m_flow,        only: zws, zws0, kmx, jasecflow, lnkx
@@ -10752,13 +10756,13 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call datum2(rundat2)
  L = len_trim(rundat2)
- call klok(cpuall(1))
+ call timstrt(handle_all)
 
  IF (ti_waq > 0d0) then
     call makedir(getoutputdir('waq'))  ! No problem if it exists already.
  end if
 
- call klok(cpu_extra(1,1)) ! Basic steps
+  call timstrt(handle_extra(1)) ! Basic steps
 
  md_snapshotdir =  trim(getoutputdir())                  ! plot output to outputdir
  ! Make sure output dir for plot files exists
@@ -10778,17 +10782,17 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call reset_waq()
 
- call klok(cpu_extra(2,1)) ! End basic steps
+ call timstop(handle_extra(1)) ! End basic steps
 
 ! JRE
- call klok(cpu_extra(1,2)) ! Wave input
+ call timstrt(handle_extra(2)) ! Wave input
  if (jawave == 4) then
     call xbeach_wave_input()  ! will set swave and lwave
  endif
- call klok(cpu_extra(2,2)) ! End wave input
+ call timstop(handle_extra(2)) ! End wave input
 
 
- call klok(cpu_extra(1,3)) ! Internal links
+ call timstrt(handle_extra(3)) ! Internal links
  if (md_jamake1d2dlinks == 1) then
     ierr = make1D2Dinternalnetlinks()
      if (ierr /= DFM_NOERR) then
@@ -10796,11 +10800,11 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
       goto 1234
     end if
  end if
- call klok(cpu_extra(2,3)) ! End internal links
+ call timstop(handle_extra(3)) ! End internal links
 
  ! TODO: unc_wri_map_header
 
- call klok(cpu_extra(1,4)) ! Flow geometry
+ call timstrt(handle_extra(4)) ! Flow geometry
  call mess(LEVEL_INFO,'Initializing flow model geometry...')
  if ( jampi.eq.0 ) then
     call flow_geominit(0)                                ! initialise flow geometry based upon present network, time independent
@@ -10844,7 +10848,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
        goto 1234
     end if
  end if
- call klok(cpu_extra(2,4)) ! End flow geometry
+ call timstop(handle_extra(4)) ! End flow geometry
 
 
  if( kmx > 0 .and. jasecflow > 0) then         ! An error announcement (or warning, with correction to jasecflow to 0)
@@ -10853,9 +10857,9 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call mess(LEVEL_WARN,'         Secondary flow is turned off')
  endif
 
- call klok(cpu_extra(1,5)) ! bobsongullies
+ call timstrt(handle_extra(5)) ! bobsongullies
  call setbobsongullies()
- call klok(cpu_extra(2,5)) ! End bobsongullies
+ call timstop(handle_extra(5)) ! End bobsongullies
 
  if (javeg > 0) then
     ! NOTE: AvD: hardcoded for now: if vegetation is on, maintain max shear stresses for Peter and Jasper.
@@ -10863,9 +10867,9 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  end if
 
  ! 3D: flow_allocflow will set kmxn, kmxL and kmxc arrays
- call klok(cpu_extra(1,37)) ! alloc flow
+ call timstrt(handle_extra(37)) ! alloc flow
  call flow_allocflow()                               ! allocate   flow arrays
- call klok(cpu_extra(2,37)) ! end alloc flow
+ call timstop(handle_extra(37)) ! end alloc flow
  !
  if (jawave > 0) then
     call alloc9basicwavearrays()
@@ -10874,37 +10878,37 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call flow_waveinit()
  endif
  ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopes
- call klok(cpu_extra(1,7)) ! Flow griddim
+ call timstrt(handle_extra(7)) ! Flow griddim
  if ( len_trim(md_foufile) > 0 .or. len_trim(md_sedfile) > 0 .or. jatrt == 1) then
     call D3Dflow_dimensioninit()
  endif
- call klok(cpu_extra(2,7)) ! End flow griddim
+ call timstop(handle_extra(7)) ! End flow griddim
 
- call klok(cpu_extra(1,8)) ! Bed forms
+ call timstrt(handle_extra(8)) ! Bed forms
  if ((jased > 0 .and. stm_included) .or. bfm_included .or. jatrt > 0 ) then
     call flow_bedforminit(1)        ! bedforms stage 1: datastructure init
  endif
- call klok(cpu_extra(2,8)) ! End bed forms
+ call timstop(handle_extra(8)) ! End bed forms
 
  !! flow1d -> dflowfm initialization
- call klok(cpu_extra(1,9)) ! 1d roughness
+ call timstrt(handle_extra(9)) ! 1d roughness
  call set_1d_roughnesses()
- call klok(cpu_extra(2,9)) ! End 1d roughness
+ call timstop(handle_extra(9)) ! End 1d roughness
 
  ! need number of fractions for allocation of sed array
- call klok(cpu_extra(1,10)) ! sedmor
+  call timstrt(handle_extra(10)) ! sedmor
  if ( len_trim(md_sedfile) > 0 ) then
       call flow_sedmorinit ()
  endif
- call klok(cpu_extra(2,10)) ! End sedmor
+ call timstop(handle_extra(10)) ! End sedmor
 
- call klok(cpu_extra(1,11)) ! bedform
+ call timstrt(handle_extra(11)) ! bedform
  if ((jased > 0 .and. stm_included) .or. bfm_included ) then
     call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
  endif
- call klok(cpu_extra(2,11)) ! End bedform
+ call timstop(handle_extra(11)) ! End bedform
 
- call klok(cpu_extra(1,12)) ! vertical administration
+ call timstrt(handle_extra(12)) ! vertical administration
  if (jampi == 1) then
 !   update vertical administration
     call update_vertadmin()
@@ -10936,104 +10940,101 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     end if
 #endif
  end if
- call klok(cpu_extra(2,12)) ! vertical administration
+ call timstop(handle_extra(12)) ! vertical administration
 
- call klok(cpu_extra(1,13)) ! netlink tree 0
+ call timstrt(handle_extra(13)) ! netlink tree 0
  if ((jatrt == 1) .or. (jacali == 1)) then
      call netlink_tree(0)
  endif
- call klok(cpu_extra(2,13)) ! end netlink tree
+ call timstop(handle_extra(13)) ! end netlink tree
 
- call klok(cpu_extra(1,14)) ! flow trachy init
+ call timstrt(handle_extra(14)) ! flow trachy init
  if (jatrt == 1) then
     call flow_trachyinit ()                          ! initialise the trachytopes module
  end if
- call klok(cpu_extra(2,14)) ! end flow trachy init
+ call timstop(handle_extra(14)) ! end flow trachy init
 
  if (jadhyd == 1) then
     call init_hydrology()                          ! initialise the hydrology module
  end if
 
- call klok(cpu_extra(1,15)) ! calibration init
+ call timstrt(handle_extra(15)) ! calibration init
  if (jacali == 1) then
      call calibration_init()                          ! initialise the calibration memory structures and read .cld and .cll files
  end if
- call klok(cpu_extra(2,15)) ! end calibration init
+ call timstop(handle_extra(15)) ! end calibration init
 
- call klok(cpu_extra(1,16)) ! netlink tree 1
+ call timstrt(handle_extra(16)) ! netlink tree 1
  if ((jatrt == 1) .or. (jacali == 1)) then
      call netlink_tree(1)
  endif
- call klok(cpu_extra(2,16)) ! netlink tree 1
+ call timstop(handle_extra(16)) ! netlink tree 1
 
  !! flow1d -> dflowfm update
- call klok(cpu_extra(1,17)) ! save 1d
+ call timstrt(handle_extra(17)) ! save 1d
  if (stm_included) then
     call save_1d_nrd_vars_in_stm()
  end if
- call klok(cpu_extra(2,17)) ! end save 1d
+ call timstop(handle_extra(17)) ! end save 1d
 
 ! initialize waq and add to tracer administration
- call klok(cpu_extra(1,18)) ! waq processes init
+ call timstrt(handle_extra(18)) ! waq processes init
  if ( len_trim(md_subfile) > 0 ) then
     call fm_wq_processes_ini_sub()
  end if
- call klok(cpu_extra(2,18)) ! end waq processes init
+ call timstop(handle_extra(18)) ! end waq processes init
 
- call klok(cpu_extra(1,19)) ! transport module
+ call timstrt(handle_extra(19)) ! transport module
  if ( jatransportmodule.ne.0 ) then
     call ini_transport()
  end if
- call klok(cpu_extra(2,19)) ! end transport module
+ call timstop(handle_extra(19)) ! end transport module
 
 ! initialize part
- call klok(cpu_extra(1,20)) ! part init
+ call timstrt(handle_extra(20)) ! part init
  call ini_part(1, md_partfile, md_partrelfile, md_partjatracer, md_partstarttime, md_parttimestep, md_part3Dtype)
- call klok(cpu_extra(2,20)) ! end part init
+ call timstop(handle_extra(20)) ! end part init
 
- call klok(cpu_extra(1,21)) ! observations init
+ call timstrt(handle_extra(21)) ! observations init
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (1st call required for call to flow_trachy_update)
- call klok(cpu_extra(2,21)) ! end observations init
+ call timstop(handle_extra(21)) ! end observations init
 
- cpu_extra(:,22) = 0.0d0    ! call removed
- call klok(cpu_extra(1,23)) ! flow init
+ call timstrt(handle_extra(23)) ! flow init
  iresult = flow_flowinit()                           ! initialise flow arrays and time dependent params for a given user time
  if (iresult /= DFM_NOERR) then
     goto 1234
  end if
- call klok(cpu_extra(2,23)) ! end flow init
+ call timstop(handle_extra(23)) ! end flow init
 
 ! initialize waq and add to tracer administration
- cpu_waqinit = cpu_extra(2,18) - cpu_extra(1,18)
- call klok(cpu_extra(1,18)) ! waq processes init
- cpu_extra(1,18) = cpu_extra(1,18) - cpu_waqinit ! deduct first initialisation phase of waq processes
+ call timstrt(handle_extra(18)) ! waq processes init
  if (ti_waqproc /= 0d0) then
     if ( jawaqproc .eq. 1 ) then
        call fm_wq_processes_step(ti_waqproc,time_user)
     endif
  endif
- call klok(cpu_extra(2,18)) ! end waq processes init
+ call timstop(handle_extra(18)) ! end waq processes init
 
- call klok(cpu_extra(1,24)) ! MBA init
+ call timstrt(handle_extra(24)) ! MBA init
  if (ti_mba > 0) then
     call mba_init()
  endif
- call klok(cpu_extra(2,24)) ! end MBA init
+ call timstop(handle_extra(24)) ! end MBA init
 
- call klok(cpu_extra(1,25)) ! update MOR width and mean bed level
+ call timstrt(handle_extra(25)) ! update MOR width and mean bed level
  if (stm_included) then
      call fm_update_mor_width_area()
      call fm_update_mor_width_mean_bedlevel()
  endif
- call klok(cpu_extra(2,25)) ! end update MOR width
+ call timstop(handle_extra(25)) ! end update MOR width
 
- call klok(cpu_extra(1,26)) ! dredging init
+ call timstrt(handle_extra(26)) ! dredging init
  if ( len_trim(md_dredgefile) > 0 .and. stm_included) then
     call flow_dredgeinit()          ! dredging and dumping. Moved here because julrefdate needed
  endif
- call klok(cpu_extra(2,26)) ! end dredging init
+ call timstop(handle_extra(26)) ! end dredging init
 
- call klok(cpu_extra(1,27)) ! Xbeach init
+ call timstrt(handle_extra(27)) ! Xbeach init
  if (jawave .eq. 4) then
     call xbeach_wave_init()
 
@@ -11049,57 +11050,57 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
        endif
     end if
  end if
- call klok(cpu_extra(2,27)) ! end Xbeach init
+ call timstop(handle_extra(27)) ! end Xbeach init
 
- call klok(cpu_extra(1,28)) ! observations init 2
+ call timstrt(handle_extra(28)) ! observations init 2
  call flow_obsinit()                                 ! initialise stations and cross sections on flow grid + structure his (2nd time required to fill values in observation stations)
- call klok(cpu_extra(2,28)) ! end observations init 2
+ call timstop(handle_extra(28)) ! end observations init 2
 
- call klok(cpu_extra(1,29)) ! structure parameters
+ call timstrt(handle_extra(29)) ! structure parameters
  call structure_parameters()                         ! initialize structure values, after flow_flowinit() so that initial water levels and discharges are already set.
- call klok(cpu_extra(2,29)) ! end structure parameters
+ call timstop(handle_extra(29)) ! end structure parameters
 
- call klok(cpu_extra(1,30)) ! trachy update
+ call timstrt(handle_extra(30)) ! trachy update
  if (jatrt == 1) then
     call flow_trachyupdate()                         ! Perform a trachy update step to correctly set initial field quantities
  endif                                               ! Generally flow_trachyupdate() is called from flow_setexternalforcings()
- call klok(cpu_extra(2,30)) ! end trachy update
+ call timstop(handle_extra(30)) ! end trachy update
 
- call klok(cpu_extra(1,31)) ! set fcru mor
+ call timstrt(handle_extra(31)) ! set fcru mor
  if ((jased>0) .and. stm_included) then
     if (jamd1dfile == 0) then
        call set_frcu_mor(1)        !otherwise frcu_mor is set in getprof_1d()
     endif
     call set_frcu_mor(2)
  endif
- call klok(cpu_extra(2,31)) ! end set fcru mor
+ call timstop(handle_extra(31)) ! end set fcru mor
 
- call klok(cpu_extra(1,32)) ! flow ini timestep
+ call timstrt(handle_extra(32)) ! flow ini timestep
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
- call klok(cpu_extra(2,32)) ! end flow ini timestep
+ call timstop(handle_extra(32)) ! end flow ini timestep
 
 
  jaFlowNetChanged = 0
 
 
  ! Initialise Fourier Analysis
- call klok(cpu_extra(1,33)) ! Fourier init
+ call timstrt(handle_extra(33)) ! Fourier init
  if (len_trim(md_foufile)>0) then
     call flow_fourierinit()
  endif
- call klok(cpu_extra(2,33)) ! end Fourier init
+ call timstop(handle_extra(33)) ! end Fourier init
 
 
 
- call klok(cpu_extra(1,34)) ! writeMDUFilepointer
+ call timstrt(handle_extra(34)) ! writeMDUFilepointer
  call mess(LEVEL_INFO, '** Model initialization was successful **')
  call mess(LEVEL_INFO, '* Active Model definition:')! Print model settings in diagnostics file.
  call writeMDUFilepointer(mdia, .true., istat)
 
  call mess(LEVEL_INFO, '**')
- call klok(cpu_extra(2,34)) ! end writeMDUFilepointer
+ call timstop(handle_extra(34)) ! end writeMDUFilepointer
 
- call klok(cpu_extra(1,35)) ! write flowgeom ugrid
+ call timstrt(handle_extra(35)) ! write flowgeom ugrid
  if (len_trim(md_flowgeomfile) > 0) then             ! Save initial flow geometry to file.
     if (md_unc_conv == UNC_CONV_UGRID) then
        call unc_write_net_flowgeom_ugrid(trim(md_flowgeomfile)) ! UGRID
@@ -11107,15 +11108,15 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
        call unc_write_net_flowgeom(trim(md_flowgeomfile)) ! CFOLD
     end if
  end if
- call klok(cpu_extra(2,35)) ! end write flowgeom ugrid
+ call timstop(handle_extra(35)) ! end write flowgeom ugrid
 
  ! store the grid-based information in the cache file
- call klok(cpu_extra(1,36)) ! remainder
+ call timstrt(handle_extra(36)) ! remainder
  call storeCachingFile(md_ident, md_usecaching)
 
-call writesomeinitialoutput()
+ call writesomeinitialoutput()
 
- call klok(cpu_extra(2,36)) ! End remainder
+ call timstop(handle_extra(36)) ! End remainder
  iresult = DFM_NOERR
  return
 1234 continue
@@ -12355,6 +12356,7 @@ end subroutine dbdistancehk
 
 subroutine writesomeinitialoutput()
  use m_sferic
+ use timers
  use m_flow
  use m_netw
  use m_flowgeom
@@ -12371,7 +12373,9 @@ subroutine writesomeinitialoutput()
 
  batotown = 0 ; voltotown = 0
 
- call klok  (cpuall(2))
+ ! Stop for initialisation timer and start timer for actual computation time
+ call timstop(handle_all)
+ call timstrt(handle_all)
  call datum (rundat0)
 
  write(msgbuf,'(a,a)') 'Modelinit finished   at: '         , rundat0                  ; call msg_flush()
@@ -12470,6 +12474,7 @@ subroutine writesomeinitialoutput()
 
  subroutine writesomefinaloutput()
  use m_sferic
+ use timers
  use m_flow
  use m_flowgeom
  use m_flowtimes
@@ -12485,50 +12490,39 @@ subroutine writesomeinitialoutput()
 #endif
 
  implicit none
-
+ 
  integer           :: k, mout, i
  double precision  :: frac, tot, dtav
  double precision  :: dum, f
  double precision  :: tstop
-
- character(len=20), dimension(size(cpu_extra,2)) :: cpu_extra_label
+ double precision  :: tcpustep
+ double precision  :: time_cpu
+ double precision  :: tcpusol
+ double precision  :: totalcomp
+ double precision  :: timestep
 
  if (ndx == 0) then
     write(msgbuf,'(a)')    'Empty model, no flow cells found. No statistics to report.'; call msg_flush()
     return
  end if
 
- frac = cpusol(3) / max(1d-10,cpusteps(3))
- call klok(cpuall(3))
- tot  = ( cpuall(3) - cpuall(2) )/ max(1d0, ndx*(dnt-1) )
+ tcpustep = tim_get_cpu(handle_steps)
+ tcpusol  = tim_get_cpu(handle_sol)
+
+ frac = tcpusol / max(1d-10,tcpustep)
+ call timstop(handle_all)
+
+ tot  = tim_get_cpu(handle_all)/ max(1d0, ndx*(dnt-1) )
  dtav = (tstop_user - tstart_user)/max(1d0, dnt-1)
 
  do k = 1,3
     msgbuf = ' ' ; call msg_flush()
  enddo
 
- cpu_extra_label       = ' '
- cpu_extra_label(1:45) = [ 'Basic steps         ', 'Wave input          ', 'Internal links      ', &
-                           'Flow geometry       ', 'Bobsongullies       ', 'Wave initialisation ', &
-                           'Flow grid           ', 'Bed forms init (1)  ', '1D rougnhess        ', &
-                           'Sed/mor             ', 'Bed forms init (2)  ', 'Adm. vertical       ', &
-                           'Net link tree 0     ', 'Flow trachy init    ', 'Calibration init    ', &
-                           'Net link tree 1     ', 'Save 1d             ', 'WAQ processes init  ', &
-                           'Transport init      ', 'Part init           ', 'Observations init   ', &
-                           'Structures init     ', 'Flow init           ', 'MBA init            ', &
-                           'Update MOR width    ', 'Dredging init       ', 'Xbeach init         ', &
-                           'Observations init 2 ', 'Structure parameters', 'Trachy update       ', &
-                           'Set fcru MOR        ', 'Flow init           ', 'Fourier init        ', &
-                           'MDU file pointer    ', 'Flowgeom            ', 'Remainder           ', &
-                           'Flow alloc          ', 'initime setbnd      ', 'initime sethuau     ', &
-                           'initime setdt       ', 'initime advec       ', 'initime u0u1        ', &
-                           'initime setumod     ', 'initime cfuhi       ', 'initime structactual']
-
- do i = 1,size(cpu_extra,2)
-     if ( cpu_extra_label(i) /=  ' '  ) then
-        if ( cpu_extra(2,i) - cpu_extra(1,i) > 0.01d0) then ! only the relevant
-           write(msgbuf,'(a,a,F25.10)') 'extra timer:' , cpu_extra_label(i), cpu_extra(2,i) - cpu_extra(1,i)      ; call msg_flush()
-        endif
+  do i = 1,size(handle_extra)
+     time_cpu = tim_get_cpu(handle_extra(i))
+     if ( time_cpu > 0.01d0) then ! only the relevant
+        write(msgbuf,'(a,a,F25.10)') 'extra timer:' , tim_get_label(handle_extra(i)), time_cpu      ; call msg_flush()
      endif
  enddo
 
@@ -12550,40 +12544,42 @@ subroutine writesomeinitialoutput()
  msgbuf = ' ' ; call msg_flush()
 
  f = 24d0*3600d0
+ totalcomp = tim_get_cpu(handle_all)
+ timestep = tim_get_cpu_inc(handle_all)
  write(msgbuf,'(a,F25.10)') 'simulation period      (d)  :' , (tstop - tstart_user)/f  ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'total computation time (d)  :' , (cpuall(3) - cpuall(1))/f  ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time modelinit         (d)  :' , (cpuall(2) - cpuall(1))/f  ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (d)  :' , (cpuall(3) - cpuall(2))/f  ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'total computation time (d)  :' , (totalcomp)/f             ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time modelinit         (d)  :' , (totalcomp-timestep)/f   ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (d)  :' , (timestep)/f             ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
 
  f = 3600d0
  write(msgbuf,'(a,F25.10)') 'simulation period      (h)  :' , (tstop - tstart_user)/f  ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'total computation time (h)  :' , (cpuall(3) - cpuall(1))/f  ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time modelinit         (h)  :' , (cpuall(2) - cpuall(1))/f  ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (h)  :' , (cpuall(3) - cpuall(2))/f  ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'total computation time (h)  :' , (totalcomp)/f            ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time modelinit         (h)  :' , (totalcomp-timestep)/f   ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (h)  :' , (timestep)/f             ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
 
- write(msgbuf,'(a,F25.10)') 'simulation period      (s)  :' , tstop - tstart_user   ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'total computation time (s)  :' , cpuall(3) - cpuall(1)      ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , cpuall(2) - cpuall(1)      ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , cpuall(3) - cpuall(2)      ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'simulation period      (s)  :' , tstop - tstart_user      ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'total computation time (s)  :' , (totalcomp)/f            ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , (totalcomp-timestep)/f   ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , (timestep)/f             ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
 
- write(msgbuf,'(a,F25.10)') 'time iniexternalforc.  (s)  :' , cpuiniext(3)               ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time iniexternalforc.  (s)  :' , tim_get_cpu(handle_iniext) ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
 
- write(msgbuf,'(a,F25.10)') 'time inistep           (s)  :' , cpuinistep(3)              ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time setumod           (s)  :' , cpuumod(3)                 ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time furu              (s)  :' , cpufuru(3)                 ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time solve             (s)  :' , cpusol(3)                  ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time setexternalforc.  (s)  :' , cpuext(3)                  ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time setexternalfbnd.  (s)  :' , cpuextbnd(3)               ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time steps             (s)  :' , cpusteps(3)                ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time inistep           (s)  :' , tim_get_cpu(handle_inistep) ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time setumod           (s)  :' , tim_get_cpu(handle_umod)   ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time furu              (s)  :' , tim_get_cpu(handle_furu)   ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time solve             (s)  :' , tim_get_cpu(handle_sol)    ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time setexternalforc.  (s)  :' , tim_get_cpu(handle_ext)    ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time setexternalfbnd.  (s)  :' , tim_get_cpu(handle_extbnd) ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time steps             (s)  :' , tim_get_cpu(handle_steps)  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'fraction solve/steps   ( )  :' , frac                       ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'total/(dnt*ndx)        (s)  :' , tot                        ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'av nr of cont. it s1it ( )  :' , dnums1it/max(dnt,1d-8)     ; call msg_flush()
@@ -12625,7 +12621,7 @@ subroutine writesomeinitialoutput()
  msgbuf = ' ' ; call msg_flush()
 
  write(msgbuf,'(a,F25.10)') 'simulation period      (h)  :' , (tstop - tstart_user)/3600d0 ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'total time in timeloop (h)  :' , (cpuall(3) - cpuall(2)   )/3600d0 ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'total time in timeloop (h)  :' , (timestep   )/3600d0 ; call msg_flush()
 
 
 #ifdef HAVE_MPI
@@ -14874,6 +14870,7 @@ else if (nodval == 27) then
  !> Initialise flow model time dependent parameters
  !! @return Integer error status (0) if succesful.
  integer function flow_flowinit() result(iresult)
+ use timers
  use m_netw
  use m_flowgeom
  use m_flow
@@ -14939,7 +14936,6 @@ else if (nodval == 27) then
  Lnmax = 0 ; Lnmin = 0
  ndmax = 0 ; ndmin = 0
 
- cpusteps = 0; cpusol = 0                            ! timing to zero
  call inisferic()                                    ! also set coriolis :<
  if (icorio > 0) then
     call inifcori()
@@ -15743,10 +15739,10 @@ end if
  call setkbotktop(1)                                 ! prior to correctblforzlayerpoints, setting kbot
 
  call mess(LEVEL_INFO, 'Start initializing external forcings...')
- call klok(cpuiniext(1))
+ call timstrt(handle_iniext)
  iresult = flow_initexternalforcings()               ! this is the general hook-up to wind and boundary conditions
- call klok(cpuiniext(2)) ; cpuiniext(3) = cpuiniext(3) + cpuiniext(2) - cpuiniext(1)
-
+ call timstop(handle_iniext)
+ 
  ! from hereon, the processes are in sync
  if (jampi == 1) then
     ! globally reduce the error
@@ -17052,6 +17048,7 @@ end subroutine flow_initfloodfill
 !> set field oriented boundary conditions
 subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    use m_timer
+   use timers
    use m_flowtimes
    use m_flowgeom
    use m_flow
@@ -17096,7 +17093,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    logical                               :: foundtempforcing
 
    iresult = DFM_EXTFORCERROR
-   call klok(cpuext(1))
+   call timstrt(handle_ext)
 
    timmin = tim/60d0   ! talking to Meteo1 is in minutes
 
@@ -17420,7 +17417,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_discharge_salinity_temperature_sorsin, irefdate, tzone, tunit, tim)
    endif
 
-   call klok(cpuext(2)) ; cpuext(3) = cpuext(3) + cpuext(2) - cpuext(1)
+   call timstop(handle_ext)
 
    if (.not. success) then
       goto 888
@@ -17864,6 +17861,7 @@ end subroutine adjust_bobs_on_dambreak_breach
 
 !> set boundary conditions
 subroutine flow_setexternalforcingsonboundaries(tim, iresult)
+   use timers
    use m_flowtimes
    use m_flowgeom
    use m_flow
@@ -17889,7 +17887,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    character(maxMessageLen) :: message123
 
    iresult = DFM_EXTFORCERROR
-   call klok(cpuextbnd(1))
+   call timstrt(handle_extbnd)
 
    call setzminmax()                                   ! our side of preparation for 3D ec module
    call setsigmabnds()                                 ! our side of preparation for 3D ec module
@@ -18046,7 +18044,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       call update_dambreak_breach(tim, dts)
    endif
 
-   call klok(cpuextbnd(2)) ; cpuextbnd(3) = cpuextbnd(3) + cpuextbnd(2) - cpuextbnd(1)
+   call timstop(handle_extbnd)
 
    iresult = DFM_NOERR
 
@@ -18687,6 +18685,7 @@ end subroutine inctime_split
 
 !> Write history data in NetCDF format.
 subroutine unc_write_his(tim)            ! wrihis
+    use Timers
     use m_flowtimes
     use m_flow
     use m_flowgeom
@@ -21879,7 +21878,7 @@ subroutine unc_write_his(tim)            ! wrihis
       ierr = nf90_put_var(ihisfile, id_checkmon, checkmonitor, start=(/ 1, it_his /))
 
       ierr = nf90_put_var(ihisfile, id_num_timesteps, int(dnt), start=(/ it_his /))
-      ierr = nf90_put_var(ihisfile, id_comp_time, cpusteps(3), start=(/ it_his /))
+      ierr = nf90_put_var(ihisfile, id_comp_time, tim_get_cpu(handle_steps), start=(/ it_his /))
     end if
 
     ierr = nf90_sync(ihisfile) ! Flush file
@@ -38089,6 +38088,7 @@ end subroutine setbobs_fixedweirs
  subroutine furu()                                   ! set fu, ru and kfs
  use m_flow                                          ! substitue u1 and q1
  use m_flowgeom
+ use timers
  use m_flowtimes
  use m_alloc
  use m_partitioninfo
@@ -38142,7 +38142,7 @@ end subroutine setbobs_fixedweirs
 
  hminlwi=1d0/hminlw
  fsqrtt = sqrt(0.5d0)
- call klok(cpufuru(1))
+ call timstrt(handle_furu)
 
  if (kmx == 0 .or. ifixedweirscheme > 0)  then  ! original 2D coding
 
@@ -38566,7 +38566,7 @@ end subroutine setbobs_fixedweirs
  endif
 ! END DEBUG
 
- call klok(cpufuru(2)) ; cpufuru(3) = cpufuru(3) + cpufuru(2) - cpufuru(1)
+ call timstop(handle_furu)
 
  end subroutine furu
 

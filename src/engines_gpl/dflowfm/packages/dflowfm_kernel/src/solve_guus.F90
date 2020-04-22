@@ -485,6 +485,7 @@ endif
 
 
  subroutine solve_matrix(s1,ndx,itsol)
+ use Timers
  use m_flowparameters
  use m_reduce
  use m_flowtimes
@@ -516,7 +517,7 @@ endif
 
  if ( jatimer.eq.1 ) call starttimer(ITOTALSOL)
 
- call klok(cpusol(1))
+ call timstrt(handle_sol)
  
  if ( jatimer.eq.1 ) call starttimer(IGAUSSEL)
 
@@ -602,7 +603,7 @@ endif
  
  if ( jatimer.eq.1 ) call stoptimer(ITOTALSOL)
  
- call klok(cpusol(2)) ; cpusol(3) = cpusol(3) + cpusol(2) - cpusol(1)
+ call timstop(handle_sol)
 
  itsol = nocgiter
  

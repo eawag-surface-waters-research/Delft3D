@@ -37,6 +37,7 @@
 !! screen together with the number of remaining timesteps.
 subroutine step_to_screen()
     use precision
+    use Timers
     use m_flowtimes
     use unstruc_messages
     !
@@ -58,6 +59,7 @@ subroutine step_to_screen()
     character(20) :: string   !!  string for remaining time
     integer, save :: ifirsttime = 1
     real(fp)      :: dt_ave
+    real(fp)      :: tcpu
     real(fp), save :: timesav = 0d0
     real(fp), save :: dntsav  = 0d0
     
@@ -92,8 +94,9 @@ subroutine step_to_screen()
     !
     ! determine total seconds remaining from timer_simulation
     !
-    sec2go_long   = nint(cpusteps(3) * real(nst2go,hp) / real(max(int(dnt_user)-itstrt,1),hp),long)
-    if (cpusteps(3) <= 0.0) then
+    tcpu = tim_get_cpu(handle_steps)
+    sec2go_long   = nint(tcpu * real(nst2go,hp) / real(max(int(dnt_user)-itstrt,1),hp),long)
+    if (tcpu <= 0.0) then
         sec2go_long = -1
     end if
     !
@@ -158,7 +161,7 @@ subroutine step_to_screen()
     write(msgbuf, '(4(1x,a20),i11,f8.1,a1,f12.5)') &
         seconds_to_dhms(nint(time_user-tstart_user, long)), &
         seconds_to_dhms(nint(tstop_user-time_user, long)), &
-        seconds_to_dhms(nint(cpusteps(3), long)), &
+        seconds_to_dhms(nint(tim_get_cpu(handle_steps), long)), &
         seconds_to_dhms(sec2go_long), &
         nst2go, &
         perc_compl, &

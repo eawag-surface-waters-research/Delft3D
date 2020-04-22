@@ -22683,6 +22683,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 
  SUBROUTINE TEXTFLOW()
  use m_flowgeom
+ use Timers
  !USE M_NETW
  USE M_FLOW
  USE M_FLOWTIMES
@@ -22696,6 +22697,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
  implicit none
  double precision,external :: znod, zlin
  double precision :: cpuperstep, solrest, znn, dtav
+ double precision :: tsteps, tsol, tstepinc
  integer :: nn, LL, nl
 
  CHARACTER TEX*210
@@ -22729,8 +22731,11 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 
  TEX =  ' '
  solrest = 0
- if (cpusteps(3)-cpusol(3) .ne. 0) solrest = cpusol(3)/ (cpusteps(3)-cpusol(3) )
- cpuperstep = max(0d0, min(100d0,  (cpusteps(2) - cpusteps(1)) ) )
+ tsteps = tim_get_cpu(handle_steps)
+ tsol   = tim_get_cpu(handle_sol)
+ if (tsteps-tsol .ne. 0) solrest = tsol/ (tsteps-tsol )
+ tstepinc = tim_get_cpu_inc(handle_steps)
+ cpuperstep = max(0d0, min(100d0,  tstepinc))
 
  call maketime(tex,time1)
 
@@ -22742,7 +22747,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 
  WRITE (TEX(18:),'( A4,F8.3, A8,F7.3, A10,F7.3, A5,F8.1, A10,E7.2, A8,E14.8,  A8,E14.8)') &
  'dt: ', dts, ' Avg.dt: ', dtav, &
- ' CPU/step: ', cpuperstep, ' Tot: ', cpusteps(3), ' Sol/Rest: ', solrest , ' Samer: ', samerr, ' Samtot: ', sam1tot ! sam1tot ! samerr
+ ' CPU/step: ', cpuperstep, ' Tot: ', tsteps, ' Sol/Rest: ', solrest , ' Samer: ', samerr, ' Samtot: ', sam1tot ! sam1tot ! samerr
  CALL ICTEXT(TRIM(TEX),13,2,221)
  TEX1=TEX
 
