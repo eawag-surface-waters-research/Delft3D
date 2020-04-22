@@ -37,10 +37,10 @@ module dhydrology_error
    
    !> Returns a human-readable error string for a given integer error code.
    function dhyd_strerror(ierr) result(errorstring)
-      use MessageHandling, only: Charln
+      use MessageHandling, only: msgbuf
       
       integer,          intent(in)  :: ierr        !< The error code for which the error string should be returned.
-      character(len=Charln)         :: errorstring !< The string variable in which the error text will be put.
+      character(len=:), allocatable :: errorstring !< The string variable in which the error text will be put (already trimmed).
       
       select case (ierr)
       case (DHYD_NOERR)
@@ -48,7 +48,8 @@ module dhydrology_error
       case (DHYD_GENERICERROR)
          errorstring = 'Generic error'
       case default
-         write (errorstring, '(a,i0,a)') 'Unknown error (', ierr, ')'
+         write (msgbuf, '(a,i0,a)') 'Unknown error (', ierr, ')'
+         errorstring = trim(msgbuf)
       end select
    end function dhyd_strerror
 

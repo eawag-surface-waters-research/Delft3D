@@ -42,7 +42,7 @@ module interception
    
       ! local
       double precision                 :: pt(n), Pfrac(n), DD(n), dC(n), D(n) 
-      integer                          :: ierr
+      integer                          :: ierr              !< Result status, DHYD_NOERR if successful.
 
       ierr = DHYD_NOERR
    

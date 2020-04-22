@@ -441,6 +441,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dhydrology", "dhydrology", "{EB5F12BE-0390-4778-89C2-EAF1F0B16ACA}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "dhydrology_kernel", "utils_gpl\dhydrology\packages\dhydrology_kernel\dhydrology_kernel.vfproj", "{AAB706B3-4AD2-4F2F-A01F-53297CD70F9A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqpb", "waqpb", "{2E7CD335-7618-4BCD-8F30-EE4220091AFB}"
 EndProject

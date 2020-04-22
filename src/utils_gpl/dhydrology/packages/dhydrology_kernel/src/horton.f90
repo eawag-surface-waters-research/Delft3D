@@ -43,7 +43,7 @@ module horton
       double precision, intent(  out)  :: NewInfCap(n)      
       integer,          intent(  out)  :: InfCapStatus(n)
       double precision, intent(  out)  :: InfiltrationMM(n)
-      integer                          :: ierr
+      integer                          :: ierr              !< Result status, DHYD_NOERR if successful.
       
       ! local
       double precision                 :: Dt1(n)

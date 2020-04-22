@@ -22,6 +22,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libDhydrologyKernel_la_SOURCES = \
+         dhydrology_error.f90 \
          interception.f90 \
          horton.f90 \
          wflowSbm.f90
