@@ -1159,6 +1159,7 @@
       real(kind=hp)                                       :: D
       integer                                             :: idim
       real(kind=hp)   , parameter                         :: dtol = 0d0
+      Double precision :: d1,d2,d3,sd 
 
       slo = DMISS
       if ( jslo == 1 ) then
@@ -1195,14 +1196,25 @@
          w(3) = inprod(xxp-xx1, A(:,2))
          w(1) = 1d0 - w(2) - w(3)
 
-!        interpolate
-         do idim=1,NDIM
-            zp(idim) = w(1) * z(idim,1) + w(2) * z(idim,2) + w(3) * z(idim,3)
-         end do
       else
-         zp = DMISS
-         call mess(LEVEL_ERROR, 'linear3D: area too small')
+         !zp = DMISS
+         !call mess(LEVEL_ERROR, 'linear3D: area too small') 
+         ! probably collinear points with at least 2 y = 90  
+         call DBDISTANCEhk( Xp, yp, x(1), y(1), d1 ) 
+         call DBDISTANCEhk( Xp, yp, x(2), y(2), d2 ) 
+         call DBDISTANCEhk( Xp, yp, x(3), y(3), d3 )
+         sd = d1 + d2 + d3
+         if (sd > 0) then  
+            w(1) = d1/sd ;  w(2) = d2/sd ;  w(3) = d3/sd 
+         else  
+            w = 0.3333333d0  ! everyone one top of each other
+         endif
       end if
+
+!     interpolate
+      do idim=1,NDIM
+         zp(idim) = w(1) * z(idim,1) + w(2) * z(idim,2) + w(3) * z(idim,3)
+      end do
 
    end subroutine linear3D
 
