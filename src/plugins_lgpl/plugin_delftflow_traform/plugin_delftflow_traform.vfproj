@@ -50,5 +50,6 @@
 		<File RelativePath="src\partheniades_krone.f90"/>
 		<File RelativePath="src\settling_velocity.f90"/>
 		<File RelativePath="src\shld.f90"/>
-		<File RelativePath="src\vrijn84_riv_77.f90"/></Filter></Files>
+		<File RelativePath="src\vrijn84_riv_77.f90"/>
+		<File RelativePath="src\vrijn84_hxbs.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
