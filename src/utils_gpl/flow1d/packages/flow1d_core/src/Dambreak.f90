@@ -59,8 +59,10 @@
       double precision :: waterLevelUpstreamLocationY       = -999d0
       double precision :: waterLevelDownstreamLocationX     = -999d0	
       double precision :: waterLevelDownstreamLocationY     = -999d0
-      character(Charln) :: levelsAndWidths                  = ''
-      
+      character(Charln):: levelsAndWidths                   = ''
+      character(IdLen) :: waterLevelUpstreamNodeId          = ''
+      character(IdLen) :: waterLevelDownstreamNodeId        = ''
+
       ! State variables, not to be read
       integer          :: phase
       double precision :: width

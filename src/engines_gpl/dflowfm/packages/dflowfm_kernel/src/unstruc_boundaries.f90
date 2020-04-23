@@ -2089,6 +2089,7 @@ use unstruc_model, only: md_structurefile_dir
 use unstruc_files, only: resolvePath
 use string_module, only: str_lower, strcmpi
 use iso_c_binding
+use m_inquire_flowgeom
 
 implicit none
 logical                       :: status
@@ -3388,6 +3389,16 @@ if (ndambreak > 0) then
                   dambreakLocationsUpstreamMapping(nDambreakLocationsUpstream) = n
                   dambreakLocationsUpstream(nDambreakLocationsUpstream) = k
                endif
+            else if (network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId /= '') then
+               ierr = findnode(network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId, k)
+               if (ierr /= DFM_NOERR) then
+                  write(msgbuf, '(a,a,a)') 'Cannot find the node for waterLevelUpstreamNodeId = ''', trim(network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId), '''.'
+                  call err_flush()
+               else
+                  nDambreakLocationsUpstream = nDambreakLocationsUpstream + 1
+                  dambreakLocationsUpstreamMapping(nDambreakLocationsUpstream) = n
+                  dambreakLocationsUpstream(nDambreakLocationsUpstream) = k
+               end if
             else
                nDambreakAveragingUpstream = nDambreakAveragingUpstream + 1
                dambreakAverigingUpstreamMapping(nDambreakAveragingUpstream) = n
@@ -3406,6 +3417,16 @@ if (ndambreak > 0) then
                   dambreakLocationsDownstreamMapping(nDambreakLocationsDownstream) = n
                   dambreakLocationsDownstream(nDambreakLocationsDownstream) = k
                endif
+            else if (network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId /= '') then
+               ierr = findnode(network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId, k)
+               if (ierr /= DFM_NOERR) then
+                  write(msgbuf, '(a,a,a)') 'Cannot find the node for waterLevelDownstreamNodeId = ''', trim(network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId), '''.'
+                  call err_flush()
+               else
+                  nDambreakLocationsDownstream = nDambreakLocationsDownstream + 1
+                  dambreakLocationsDownstreamMapping(nDambreakLocationsDownstream) = n
+                  dambreakLocationsDownstream(nDambreakLocationsDownstream) = k
+               end if
             else
                nDambreakAveragingDownstream = nDambreakAveragingDownstream + 1
                dambreakAverigingDownstreamMapping(nDambreakAveragingDownstream) = n
