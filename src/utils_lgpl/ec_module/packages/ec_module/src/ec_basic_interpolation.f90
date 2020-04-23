@@ -1203,12 +1203,9 @@
          call DBDISTANCEhk( Xp, yp, x(1), y(1), d1 ) 
          call DBDISTANCEhk( Xp, yp, x(2), y(2), d2 ) 
          call DBDISTANCEhk( Xp, yp, x(3), y(3), d3 )
-         sd = d1 + d2 + d3
-         if (sd > 0) then  
-            w(1) = d1/sd ;  w(2) = d2/sd ;  w(3) = d3/sd 
-         else  
-            w = 0.3333333d0  ! everyone one top of each other
-         endif
+         w(1) = 1d0/max(d1,1d-3) ;  w(2) = 1d0/max(d2,1d-3) ;  w(3) = 1d0/max(d3,1d-3)
+         sd   = w(1) + w(2) + w(3)
+         w    = w/sd
       end if
 
 !     interpolate
