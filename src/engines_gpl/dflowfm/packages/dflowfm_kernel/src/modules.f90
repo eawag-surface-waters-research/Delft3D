@@ -5543,6 +5543,8 @@ module m_mass_balance_areas
    double precision, allocatable             :: mbafluxhortot(:,:,:,:)      !< total fluxes between balance areas and between boundaries and balance areas
    double precision, allocatable             :: mbafluxsorsin(:,:,:,:)      !< periodical fluxes from source sinks
    double precision, allocatable             :: mbafluxsorsintot(:,:,:,:)   !< total fluxes from source sinks
+   double precision, allocatable             :: mbafluxheat(:,:)            !< temperature heat flux
+   double precision, allocatable             :: mbafluxheattot(:,:)         !< total temperature heat flux
 
    double precision, allocatable             :: mbavolumereduce    (:)      !< begin volume in mass balance area
    double precision, allocatable             :: mbaflowhorreduce   (:,:,:)  !< periodical flow between balance areas and between boundaries and balance areas
@@ -5552,6 +5554,7 @@ module m_mass_balance_areas
    double precision, allocatable             :: mbamassreduce      (:,:)    !< begin volume in mass balance area
    double precision, allocatable             :: mbafluxhorreduce   (:,:,:,:)!< periodical fluxes between balance areas and between boundaries and balance areas
    double precision, allocatable             :: mbafluxsorsinreduce(:,:,:,:)!< periodical fluxes from source sinks
+   double precision, allocatable             :: mbafluxheatreduce(:,:)      !< temperature heat flux
 end module m_mass_balance_areas
 
 module dfm_error

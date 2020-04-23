@@ -99,6 +99,8 @@
    call realloc(mbafluxhortot, [2, numconst, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
    call realloc(mbafluxsorsin, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
    call realloc(mbafluxsorsintot, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
+   call realloc(mbafluxheat, [2, nomba], keepExisting=.false., fill=0d0)
+   call realloc(mbafluxheattot, [2, nomba], keepExisting=.false., fill=0d0)
 
    if ( jampi.eq.1 ) then
       call realloc(mbavolumereduce  , nomba, keepExisting=.false., fill=0d0)
@@ -109,6 +111,7 @@
       call realloc(mbamassreduce    , [nombs, nomba], keepExisting=.false., fill=0d0)
       call realloc(mbafluxhorreduce , [2, numconst, nombabnd, nombabnd], keepExisting=.false., fill=0d0)
       call realloc(mbafluxsorsinreduce, [2, 2, numconst, numsrc], keepExisting=.false., fill=0d0)
+      call realloc(mbafluxheatreduce, [2, nomba], keepExisting=.false., fill=0d0)
    end if
 
 !  Determine 2D pointers fo links (from balance area to balance area)
@@ -356,6 +359,10 @@
             mbafluxsorsin(1:2,1:2,iconst,isrc) = mbafluxsorsinreduce(1:2,1:2,iconst,isrc)
          enddo
       enddo
+      call reduce_double_sum(2 * nomba, mbafluxheat, mbafluxheatreduce)
+      do imba = 1, nomba
+         mbafluxheat(1:2, imba) = mbafluxheatreduce(1:2, imba)
+      enddo
       if(nflux.gt.0) then
          call reduce_double_sum(2 * nflux * nomba, flxdmp, flxdmpreduce)
          do imba = 1, nomba
@@ -370,7 +377,7 @@
       call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
                                    nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
-                                   mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, &
+                                   mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, mbafluxheat, &
                                    flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
    endif
 
@@ -414,6 +421,9 @@
          mbafluxsorsintot(1:2,1:2,iconst,isrc) = mbafluxsorsintot(1:2,1:2,iconst,isrc) + mbafluxsorsin(1:2,1:2,iconst,isrc)
       enddo
    enddo
+   do imba = 1, nomba
+      mbafluxheattot(1:2, imba) = mbafluxheattot(1:2, imba) + mbafluxheat(1:2, imba)
+   enddo
    if (nflux.gt.0) then
       do imba = 1, nomba
          do iflx = 1, nflux
@@ -429,6 +439,7 @@
    mbafloweva = 0.0d0
    mbafluxhor = 0.0d0
    mbafluxsorsin = 0.0d0
+   mbafluxheat = 0.0d0
    flxdmp = 0.0
 
 
@@ -462,7 +473,7 @@
       call mba_write_bal_time_step(lunmbabal, timembastarttot, timembaend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
                                    nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot, mbaflowsorsintot, mbaflowrainevatot, &
-                                   mbaflowevatot, mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, &
+                                   mbaflowevatot, mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, mbafluxheattot, &
                                    flxdmptot, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
    endif
 
@@ -640,8 +651,8 @@
    subroutine mba_write_bal_time_step(lunbal, timestart, timeend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
                                       nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
                                       mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
-                                      mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, flxdmp, stochi, &
-                                      fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
+                                      mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, mbafluxheat, flxdmp, &
+                                      stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
 
    implicit none
    
@@ -680,6 +691,7 @@
    double precision            :: mbamassend(nombs,nomba)   ! end volume in mass balance area
    double precision            :: mbafluxhor(2,numconst,nombabnd,nombabnd) ! periodical fluxes between balance areas and between boundaries and balance areas
    double precision            :: mbafluxsorsin(2,2,numconst,numsrc) ! periodical fluxes from source sinks
+   double precision            :: mbafluxheat(2,nomba)      ! temperature rheat flux
 
    double precision            :: flxdmp(2,nflux, nomba)
    real                        :: stochi(notot,nflux)
@@ -711,8 +723,11 @@
    double precision            :: relative_error            ! relative error
    double precision, parameter :: zero = 0.0
    double precision, parameter :: tiny = 1.0d-10
+   character(len=30), parameter:: labelraineva = 'Rain/prescribed evaporation   '
+   character(len=30), parameter:: labeleva = 'Calculated evaporation        '
+   character(len=30), parameter:: labelheatflux = 'Heat flux'
 
-    do imba = 1, nomba
+   do imba = 1, nomba
       totals = zero
       write (lunbal, 1000) mbaname(imba)
       write (lunbal, 1001) seconds_to_dhms(nint(timestart, long)), seconds_to_dhms(nint(timeend, long)), mbaarea(imba)
@@ -748,11 +763,11 @@
       end do
       if (jarain > 0) then
          totals = totals + mbaflowraineva(1:2, imba)
-         write (lunbal, 2001) 'Rain/prescribed evaporation   ', mbaflowraineva(1:2, imba)
+         write (lunbal, 2001) labelraineva, mbaflowraineva(1:2, imba)
       endif   
       if (jaevap > 0 .and. jatem > 3) then
          totals(2) = totals(2) + mbafloweva(imba)
-         write (lunbal, 2001) 'Calculated evaporation        ', 0.0d0, mbafloweva(imba)
+         write (lunbal, 2001) labeleva, 0.0d0, mbafloweva(imba)
       endif   
       write (lunbal, 1004)
       write (lunbal, 2003) totals
@@ -822,6 +837,10 @@
                endif
             end do
          endif
+         if (imbs == itemp .and. jatem > 1) then
+            totals = totals + mbafluxheat(1:2, imba)
+            write (lunbal, 2001) labelheatflux, mbafluxheat(1:2, imba)
+         endif
          isys = imbs2sys(imbs)
          if (isys.gt.0) then
             if (nfluxsys(isys).gt.0) then
@@ -889,11 +908,11 @@
    if (jarain > 0) then
       totals(1) = totals(1) + sum(mbaflowraineva(1, :))
       totals(2) = totals(2) + sum(mbaflowraineva(2, :))
-      write (lunbal, 2001) 'Rain/prescribed evaporation   ', sum(mbaflowraineva(1, :)), sum(mbaflowraineva(2, :))
+      write (lunbal, 2001) labelraineva, sum(mbaflowraineva(1, :)), sum(mbaflowraineva(2, :))
    endif
    if (jaevap > 0 .and. jatem > 3) then
       totals(2) = totals(2) + sum(mbafloweva(:))
-      write (lunbal, 2001) 'Calculated evaporation        ', 0.0d0, sum(mbafloweva(:))
+      write (lunbal, 2001) labeleva, 0.0d0, sum(mbafloweva(:))
    endif   
    write (lunbal, 1004)
    write (lunbal, 2003) totals
@@ -957,6 +976,11 @@
                write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(2:1:-1, 2, imbs, isrc)
             endif
          end do
+      endif
+      if (imbs == itemp .and. jatem > 1) then
+         totals(1) = totals(1) + sum(mbafluxheat(1, :))
+         totals(2) = totals(2) + sum(mbafluxheat(2, :))
+         write (lunbal, 2001) labelheatflux, sum(mbafluxheat(1, :)), sum(mbafluxheat(2, :))
       endif
       isys = imbs2sys(imbs)
       if (isys.gt.0) then
