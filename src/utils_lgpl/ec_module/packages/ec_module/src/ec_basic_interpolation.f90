@@ -952,7 +952,7 @@
       if ( jasfer3D == 0 ) then
          call linear(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, JATEK, wf, dmiss, jsferic)
       else
-         call linear3D(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, wf, dmiss)
+         call linear3D(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, wf, jsferic, jasfer3D, dmiss)
       end if
       do k = 1,3
          ind(k) = indx(k,nrfind)
@@ -1140,7 +1140,7 @@
    return
    end subroutine LINEAR
 
-   subroutine linear3D(X, Y, Z, NDIM, XP, YP, ZP, JSLO, SLO, w, dmiss)
+   subroutine linear3D(X, Y, Z, NDIM, XP, YP, ZP, JSLO, SLO, w, jsferic, jasfer3D, dmiss)
       implicit none
 
       integer,                             intent(in)     :: NDIM       !< sample vector dimension
@@ -1152,6 +1152,7 @@
       real(kind=hp)   , dimension(NDIM),   intent(out)    :: slo(NDIM)
       real(kind=hp)   , dimension(3),      intent(out)    :: w
       real(kind=hp)   ,                    intent(in)     :: dmiss
+      integer         ,                    intent(in)     :: jsferic, jasfer3D
 
       real(kind=hp)   , dimension(3)                      :: xx1, xx2, xx3, xxp
       real(kind=hp)   , dimension(3)                      :: s123, rhs
@@ -1200,9 +1201,9 @@
          !zp = DMISS
          !call mess(LEVEL_ERROR, 'linear3D: area too small') 
          ! probably collinear points with at least 2 y = 90  
-         call DBDISTANCEhk( Xp, yp, x(1), y(1), d1 ) 
-         call DBDISTANCEhk( Xp, yp, x(2), y(2), d2 ) 
-         call DBDISTANCEhk( Xp, yp, x(3), y(3), d3 )
+         d1 = dbdistance( Xp, yp, x(1), y(1), jsferic, jasfer3D, dmiss )
+         d2 = dbdistance( Xp, yp, x(2), y(2), jsferic, jasfer3D, dmiss )
+         d3 = dbdistance( Xp, yp, x(3), y(3), jsferic, jasfer3D, dmiss )
          w(1) = 1d0/max(d1,1d-3) ;  w(2) = 1d0/max(d2,1d-3) ;  w(3) = 1d0/max(d3,1d-3)
          sd   = w(1) + w(2) + w(3)
          w    = w/sd
