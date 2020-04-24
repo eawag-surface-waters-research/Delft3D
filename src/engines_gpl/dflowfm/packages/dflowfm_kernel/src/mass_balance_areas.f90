@@ -972,7 +972,7 @@
                write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(1:2, 1, imbs, isrc)
             endif
             if (mbasorsinout(2,isrc).gt.0) then
-               totals = totals + mbafluxsorsin(2:1:-1, 2, isys, isrc)
+               totals = totals + mbafluxsorsin(2:1:-1, 2, imbs, isrc)
                write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(2:1:-1, 2, imbs, isrc)
             endif
          end do
