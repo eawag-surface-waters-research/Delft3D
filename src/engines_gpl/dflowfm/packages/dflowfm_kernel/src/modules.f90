@@ -961,22 +961,18 @@ module m_bedform
 end module m_bedform
 
  module m_grw
- !  TODO: UNST-3691: Use named parameter constants for infiltrationmodel and jaintercept2D
+ use m_hydrology_data
  integer                               :: jagrw                !< include ground water
- integer                               :: infiltrationmodel    !< 0=nogrw, 1 = Hinterceptionlayer, 2=Conductivity=constant, 3=Function of pressure, 4=Horton
  double precision, allocatable         :: sgrw0(:)             !< ground water level start
  double precision, allocatable         :: sgrw1(:)             !< ground water level end of timestep
  double precision, allocatable         :: pgrw (:)             !< pressure and plotting of sgrw
  double precision, allocatable         :: h_unsat(:)           !< initial height unsaturated zone
  double precision, allocatable         :: bgrw(:)              !< initial height unsaturated zone
 
- double precision, allocatable, target :: infilt(:)            !< [m3 s-1] Actual infiltration flux at current time {"location": "face", "shape": ["ndx"]}
- double precision, allocatable, target :: infiltcap(:)         !< [m s-1] Maximum infiltration capacity on each cell {"location": "face", "shape": ["ndx"]}
- double precision, allocatable         :: infiltcaproofs(:)    !< temporary of the same
 
+ !  TODO: UNST-3763: Use named parameter constant for jaintercept2D
  integer                               :: jaintercept2D        !< 1 = uniform, 2 = spatially variable
  double precision                      :: Hinterceptionlayer   !< thickness of interception layer in  (m) only if infiltrationmodel == 1
- double precision                      :: infiltcapuni         !< (m/s), Only used if infiltrationmodel == 2
  double precision                      :: Conductivity         !< non dimensionless K conductivity   saturated (m/s), Q = K*A*i (m3/s)
  double precision                      :: Unsatfac             !< reduction factor for conductivity in unsaturated zone
 
@@ -996,10 +992,8 @@ contains
 !! For a reinit prior to flow computation, only call reset_grw() instead.
 subroutine default_grw()
    jagrw             = 0       !< include ground water
-   infiltrationmodel = 0       !< 0=nogrw, 1 = Hinterceptionlayer, 2=Conductivity=constant, 3=function of pressure, 4=Horton
    jaintercept2D     = 0       !< 1 = uniform, 2 = spatially variable
    !Hinterceptionlayer          !< thickness of interception layer in  (m) only if infiltrationmodel == 1
-   !infiltcapuni                !< (m/s), Only used if infiltrationmodel == 2
    Conductivity      = 0d-4    !< non dimensionless K conductivity   saturated (m/s), Q = K*A*i (m3/s)
    Unsatfac          = 1.0d0   !< reduction factor for conductivity in unsaturated zone
 

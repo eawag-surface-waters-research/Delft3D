@@ -43,12 +43,11 @@ module m_hydrology
    !! Intended to be called as part of flow_modelinit().
    subroutine init_hydrology()
       use m_alloc
-      use m_grw
 
       call realloc(PotEvap, ndx, keepExisting = .false., fill = 0d0)
       call realloc(ActEvap, ndx, keepExisting = .false., fill = 0d0)
       
-      if (infiltrationmodel == 4) then ! horton
+      if (infiltrationmodel == DFM_HYD_INFILT_HORTON) then ! horton
          call realloc(HortonMinInfCap, ndx, keepExisting = .false., fill = 0d0)
          call realloc(HortonMaxInfCap, ndx, keepExisting = .false., fill = 0d0)
          call realloc(HortonDecreaseRate, ndx, keepExisting = .false., fill = 0d0)

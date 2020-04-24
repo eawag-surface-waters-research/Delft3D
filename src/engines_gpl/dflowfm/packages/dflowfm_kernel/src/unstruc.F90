@@ -3868,9 +3868,11 @@ end subroutine setdt
                 squloc = squ(k)
              end if
 
+
              if (squloc > eps10) then                   ! outflow only
                 if (hs(k) > epshu .and. vol1(k) > 0.0 .and. squloc > 0.0) then
                    dtsc = cflmx*vol1(k)/squloc
+
                    if (jamapdtcell > 0) then
                       dtcell(k) = dtsc
                    endif
@@ -3885,6 +3887,7 @@ end subroutine setdt
           enddo
           !end if
           continue
+
        else ! explicit time-step
           do k = 1,ndxi
              if ( jampi.eq.1 ) then
@@ -16169,7 +16172,7 @@ endif
 
  endif
 
- if (infiltrationmodel == 2 .or. infiltrationmodel == 3) then  ! set infiltcap=0 for closed links only
+ if (infiltrationmodel ==  DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_DARCY) then  ! set infiltcap=0 for closed links only
     call realloc(kcsini, ndx, keepExisting=.false., fill = 0)
     do L = 1,lnx  ! only one connected open profile will open surface runoff
        n1 = ln(1,L) ; n2 = ln(2,L)
@@ -27649,10 +27652,10 @@ endif
     call aerr('sqwave (ndx)', ierr, ndx)                ; sqwave  = 0
  end if
 
- if (infiltrationmodel > 0) then
+ if (infiltrationmodel /= DFM_HYD_NOINFILT) then
     call realloc(infilt, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
 
-    if (infiltrationmodel >= 2) then
+    if (infiltrationmodel == DFM_HYD_INFILT_CONST) then
        call realloc(infiltcap, ndx, keepExisting = .false., fill = infiltcapuni, stat=ierr )
     endif
  end if
@@ -38669,7 +38672,7 @@ end function ispumpon
 
  bb = 0d0 ; ccr = 0d0 ; dd = 0d0
 
- if (jagrw > 0 .or. numsrc > 0 .or. infiltrationmodel > 0 .or. nshiptxy > 0) then
+ if (jagrw > 0 .or. numsrc > 0 .or. infiltrationmodel /= DFM_HYD_NOINFILT .or. nshiptxy > 0) then
     jaqin = 1
  endif
 
@@ -38806,7 +38809,7 @@ end function ispumpon
        enddo
     endif
 
-    if (jagrw > 0 .or. infiltrationmodel > 0) then
+    if (jagrw > 0 .or. infiltrationmodel /= DFM_HYD_NOINFILT) then
        call setgrwflowexpl()                                 ! add grw-flow exchange to the qin array
     endif
 
@@ -39211,7 +39214,7 @@ end function ispumpon
      enddo
      return
 
- else if (infiltrationmodel == 2 .and. jagrw == 0) then  ! spatially varying prescribed max infiltration capacity
+ else if (infiltrationmodel == DFM_HYD_INFILT_CONST .and. jagrw == 0) then  ! spatially varying prescribed max infiltration capacity
 
     do k = 1,ndx2D
        Qmx       = max(0d0, vol1(k)/dts + qin(k) )
@@ -39263,9 +39266,9 @@ end function ispumpon
      else                                                           ! groundwater below bed => seepage from open water
          Qmx      = vol1(k)/dts + qin(k)
          fac      = min ( 1d0, max(0d0, ( hunsat / h_transfer ) ) ) ! 0 at bed, 1 at sgrw
-         if (infiltrationmodel == 2) then
+         if (infiltrationmodel == DFM_HYD_INFILT_CONST) then
             Qgrw     = Infiltcap(k)*ba(k)                           ! Prescribed infiltration velocity m3/s
-         else if (infiltrationmodel == 3) then
+         else if (infiltrationmodel == DFM_HYD_INFILT_DARCY) then
             fc       = min ( 1d0, max(0d0, ( sgrw1(k)+h_capillair - bl(k) ) / h_capillair  ) )
             Conduct  = Conductivity*(fc + unsatfac*(1-fc) )         ! lineair weight sat - unsat over capillair zone
             Qgrw     = Conduct*(sgrw1(k)-bgrw(k))*(s1(k) - bl(k))   ! Darcy in vertical m3/s
@@ -43044,11 +43047,12 @@ if (mext /= 0) then
             endif
 
         else if (qid == 'infiltrationcapacity') then
-            if (infiltrationmodel >= 2) then
+            if (infiltrationmodel == DFM_HYD_INFILT_CONST) then
                success = timespaceinitialfield(xz, yz, infiltcap, ndx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
                infiltcap = infiltcap*1d-3/(24d0*3600d0)            ! mm/day => m/s
             else
-               call mess(LEVEL_WARN, 'flow_initexternalforcings: quantity ' // trim(qid) // ' requires ''InfiltrationModel = 2'' in MDU. Skipping file '''//trim(filename)//'''.')
+               write (msgbuf, '(a,i0,a)') 'flow_initexternalforcings: quantity ' // trim(qid) // ' requires ''InfiltrationModel = ', DFM_HYD_INFILT_CONST, ''' in MDU. Skipping file '''//trim(filename)//'''.'
+               call warn_flush()
             end if
 
         else if (qid == '__bathymetry__') then ! this is for the D-Flow FM User interface!!!
@@ -47789,7 +47793,7 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
 
  allocate ( frcuroofs(lnx)      , stat = ierr)
  call aerr('frcuroofs(lnx)'     , ierr,   lnx) ; frcuroofs      = dmiss
- if (infiltrationmodel >= 2) then
+ if (infiltrationmodel == DFM_HYD_INFILT_CONST) then
     allocate ( infiltcaproofs(ndx) , stat = ierr)
     call aerr('infiltcaproofs(ndx)', ierr,   lnx) ; infiltcaproofs = dmiss
  endif
@@ -47923,7 +47927,7 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
              bl(n1)   = zc
              bl(n2)   = zc
              frcuroofs(L)       = frcuniroof
-             if (infiltrationmodel >= 2) then
+             if (infiltrationmodel == DFM_HYD_INFILT_CONST) then
                 infiltcaproofs(n1) = 0d0
                 infiltcaproofs(n2) = 0d0
              endif

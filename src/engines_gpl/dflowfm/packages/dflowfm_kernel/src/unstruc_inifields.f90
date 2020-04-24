@@ -418,9 +418,10 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
       end if
       
       ! if the infiltrationmodel is not horton, but a horton quantity is detected, then send a error message
-      if (infiltrationmodel /= 4 .and. &
+      if (infiltrationmodel /= DFM_HYD_INFILT_HORTON .and. &
          strcmpi(quantity,'Horton', 6)) then
-         call mess(LEVEL_WARN, 'File '''//trim(inifilename)//''' contains quantity '''//trim(quantity)//'''. This requires infiltrationmodel=4 in the MDU file (Horton).')
+         write (msgbuf, '(a,i0,a)') 'File '''//trim(inifilename)//''' contains quantity '''//trim(quantity)//'''. This requires ''InfiltrationModel=',DFM_HYD_INFILT_CONST, ''' in the MDU file (Horton).'
+         call warn_flush()
       end if
          
       ! read extrapolationMethod
