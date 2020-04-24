@@ -15784,17 +15784,20 @@ end if
  if (Slopedrop2D > 0) then !todo, uitsluitende test maken
     do L  = lnx1D+1,lnxi
        k1 = ln(1,L) ; k2 = ln(2,L)
-       if (.not. (iadv(L) >= 21 .and. iadv(L) <=25) .and. dxi(L)*abs(bl(k1) - bl(k2)) > Slopedrop2D) then ! Not for fixed weirs itself.
+       if (iadv(L) /=0 .and. .not. (iadv(L) >= 21 .and. iadv(L) <=25) .and. dxi(L)*abs(bl(k1) - bl(k2)) > Slopedrop2D) then ! Not for fixed weirs itself.
            iadv(L) = 8
        endif
     enddo
  endif
 
  do L  = 1,lnxi
-    if (kcu(L) == 3) then         ! lateral overflow
-       iadv(L) = 8
-    else if (kcu(L) == 5 .or. kcu(L) == 7) then   ! pipe connection
-       iadv(L) = 8
+    if (iadv(L) /= 0) then
+       ! only when advection calculation is on, change the advection type
+       if (kcu(L) == 3) then         ! lateral overflow
+          iadv(L) = 8
+       else if (kcu(L) == 5 .or. kcu(L) == 7) then   ! pipe connection
+          iadv(L) = 8
+       endif
     endif
  enddo
 
@@ -48007,7 +48010,10 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
          bob0(:,L) = bob(:,L)
          bl(n1)   = min(bl(n1),zc)
          bl(n2)   = min(bl(n2),zc)
-         iadv(L)  = 8
+         ! Do not change the advection for this link, when advection was turned off
+         if (iadv(L) /= 0) then
+            iadv(L)  = 8
+         endif
          nt2 = nt2 + 1
      endif
 
