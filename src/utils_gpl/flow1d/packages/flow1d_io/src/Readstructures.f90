@@ -1210,16 +1210,17 @@ module m_readstructures
          if (.not. success) return
          
          ! optional extra fields
-         call prop_get_double(md_ptr, 'Structure', 'WaterLevelUpstreamLocationX', dambr%waterLevelUpstreamLocationX, localsuccess)
-         if (localsuccess) then
+         call prop_get_string(md_ptr, 'Structure', 'waterLevelUpstreamNodeId ', dambr%waterLevelUpstreamNodeId, localsuccess)
+         if (.not. localsuccess) then
+            call prop_get_double(md_ptr, 'Structure', 'WaterLevelUpstreamLocationX', dambr%waterLevelUpstreamLocationX, localsuccess)
             call prop_get_double(md_ptr, 'Structure', 'WaterLevelUpstreamLocationY', dambr%waterLevelUpstreamLocationY, localsuccess)
-            
+         end if
+
+         call prop_get_string(md_ptr, 'Structure', 'waterLevelDownstreamNodeId ', dambr%waterLevelDownstreamNodeId, localsuccess)
+         if (.not. localsuccess) then
             call prop_get_double(md_ptr, 'Structure', 'WaterLevelDownstreamLocationX', dambr%waterLevelDownstreamLocationX, localsuccess)
-            
             call prop_get_double(md_ptr, 'Structure', 'WaterLevelDownstreamLocationY', dambr%waterLevelDownstreamLocationY, localsuccess)
          else
-            call prop_get_string(md_ptr, 'Structure', 'waterLevelUpstreamNodeId ', dambr%waterLevelUpstreamNodeId, localsuccess)
-            call prop_get_string(md_ptr, 'Structure', 'waterLevelDownstreamNodeId ', dambr%waterLevelDownstreamNodeId, localsuccess)
          end if
          if (.not.localsuccess) return
       endif

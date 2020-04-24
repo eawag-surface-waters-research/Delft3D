@@ -3382,23 +3382,24 @@ if (ndambreak > 0) then
             .or. network%sts%struct(istrtmp)%dambreak%algorithm == 3) then ! 3: Needed for output only.
             xla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationX
             yla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationY
-            if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then
-               call incells(xla,yla,k)
-               if (k > 0) then
-                  nDambreakLocationsUpstream = nDambreakLocationsUpstream + 1
-                  dambreakLocationsUpstreamMapping(nDambreakLocationsUpstream) = n
-                  dambreakLocationsUpstream(nDambreakLocationsUpstream) = k
-               endif
-            else if (network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId /= '') then
+            if (network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId /= '') then
                ierr = findnode(network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId, k)
                if (ierr /= DFM_NOERR) then
-                  write(msgbuf, '(a,a,a)') 'Cannot find the node for waterLevelUpstreamNodeId = ''', trim(network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId), '''.'
+                  write(msgbuf, '(a,a,a,a,a)') 'Cannot find the node for waterLevelUpstreamNodeId = ''', trim(network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamNodeId), &
+                     ''' in dambreak ''', trim(strid), '''.'
                   call err_flush()
                else
                   nDambreakLocationsUpstream = nDambreakLocationsUpstream + 1
                   dambreakLocationsUpstreamMapping(nDambreakLocationsUpstream) = n
                   dambreakLocationsUpstream(nDambreakLocationsUpstream) = k
                end if
+            else if (xla /= dmiss .and. yla /= dmiss) then
+               call incells(xla,yla,k)
+               if (k > 0) then
+                  nDambreakLocationsUpstream = nDambreakLocationsUpstream + 1
+                  dambreakLocationsUpstreamMapping(nDambreakLocationsUpstream) = n
+                  dambreakLocationsUpstream(nDambreakLocationsUpstream) = k
+               endif
             else
                nDambreakAveragingUpstream = nDambreakAveragingUpstream + 1
                dambreakAverigingUpstreamMapping(nDambreakAveragingUpstream) = n
@@ -3410,23 +3411,24 @@ if (ndambreak > 0) then
             .or. network%sts%struct(istrtmp)%dambreak%algorithm == 3) then ! 3: Needed for output only.
             xla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationX
             yla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationY
-            if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then
-               call incells(xla,yla,k)
-               if (k > 0) then
-                  nDambreakLocationsDownstream = nDambreakLocationsDownstream + 1
-                  dambreakLocationsDownstreamMapping(nDambreakLocationsDownstream) = n
-                  dambreakLocationsDownstream(nDambreakLocationsDownstream) = k
-               endif
-            else if (network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId /= '') then
+            if (network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId /= '') then
                ierr = findnode(network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId, k)
                if (ierr /= DFM_NOERR) then
-                  write(msgbuf, '(a,a,a)') 'Cannot find the node for waterLevelDownstreamNodeId = ''', trim(network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId), '''.'
+                  write(msgbuf, '(a,a,a,a,a)') 'Cannot find the node for waterLevelDownstreamNodeId = ''', trim(network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamNodeId), &
+                     ''' in dambreak ''', trim(strid), '''.'
                   call err_flush()
                else
                   nDambreakLocationsDownstream = nDambreakLocationsDownstream + 1
                   dambreakLocationsDownstreamMapping(nDambreakLocationsDownstream) = n
                   dambreakLocationsDownstream(nDambreakLocationsDownstream) = k
                end if
+            else if (xla /= dmiss .and. yla /= dmiss) then
+               call incells(xla,yla,k)
+               if (k > 0) then
+                  nDambreakLocationsDownstream = nDambreakLocationsDownstream + 1
+                  dambreakLocationsDownstreamMapping(nDambreakLocationsDownstream) = n
+                  dambreakLocationsDownstream(nDambreakLocationsDownstream) = k
+               endif
             else
                nDambreakAveragingDownstream = nDambreakAveragingDownstream + 1
                dambreakAverigingDownstreamMapping(nDambreakAveragingDownstream) = n
