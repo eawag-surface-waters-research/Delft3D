@@ -4,7 +4,7 @@ subroutine vrijn84_hxbs(dll_integers, max_integers, &
                   sbc_total, sbc  , sbcu, sbcv, sbwu, sbwv     , &
                   equi_conc, cesus, ssus, sswu, sswv, t_relax  , &
                   error_message   )
-!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'VR84HXBS' :: VR84HXBS
+!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'VRIJN84_HXBS' :: VRIJN84_HXBS
 !!--copyright-------------------------------------------------------------------
 ! Copyright (c) 2005, WL | Delft Hydraulics. All rights reserved.
 !!--disclaimer------------------------------------------------------------------
