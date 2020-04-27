@@ -4549,19 +4549,22 @@ function ug_put_1d_mesh_edges(ncid, meshids, edgebranchidx, edgeoffset, startInd
        ierr = convert_start_index(shiftededgebranchidx, imiss, startIndex, 0)
    endif
 
-   ierr = nf90_put_var(ncid, meshids%varids(mid_1dedgebranch), shiftededgebranchidx)
-   ierr = nf90_put_var(ncid, meshids%varids(mid_1dedgeoffset), edgeoffset)
-   
+   if (ierr == UG_NOERR) ierr = nf90_put_var(ncid, meshids%varids(mid_1dedgebranch), shiftededgebranchidx)
+   if (ierr == UG_NOERR) ierr = nf90_put_var(ncid, meshids%varids(mid_1dedgeoffset), edgeoffset)
+
    if( present(coordx) .and. present(coordy) ) then
-      ierr = nf90_put_var(ncid, meshids%varids(mid_edgex), coordx)
-      ierr = nf90_put_var(ncid, meshids%varids(mid_edgey), coordy)
+      if (ierr == UG_NOERR) ierr = nf90_put_var(ncid, meshids%varids(mid_edgex), coordx)
+      if (ierr == UG_NOERR) ierr = nf90_put_var(ncid, meshids%varids(mid_edgey), coordy)
    endif
 
    ! Leave the dataset in the mode we got it in.
    if (jaInData == 0) then
-      ierr = nf90_redef(ncid)
+      if (ierr == UG_NOERR) ierr = nf90_redef(ncid)
    end if
 
+   if (ierr /= UG_NOERR) then
+       Call SetMessage(Level_Fatal, 'could not write the 1d mesh edges')
+   end if
 
 end function ug_put_1d_mesh_edges
 
