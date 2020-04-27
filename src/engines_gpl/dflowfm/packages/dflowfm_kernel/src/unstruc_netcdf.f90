@@ -10030,6 +10030,10 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    character(len=ug_idsLen), allocatable :: nodeids_p(:), nodelongnames_p(:)
    real(kind=hp)           , pointer     :: nodeoffsets_p(:)
    integer                 , pointer     :: nbranchids_p(:)
+   ! edgebranchidx and edgeoffsets for current domain when partitioning:
+   integer                 , pointer     :: edgebranchidx_p(:)
+   real(kind=hp)           , pointer     :: edgeoffsets_p(:)
+   integer                               :: hulp(2)
 
    jaInDefine = 0
    n1d2dcontacts = 0
@@ -10223,6 +10227,18 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
                   nodeoffsets_p(i) = meshgeom1d%nodeoffsets(ii)
                   nodelongnames_p(i) = nodelongnames(ii)
                end do
+               allocate(edgebranchidx_p(n1dedges), edgeoffsets_p(n1dedges), stat=ierr)
+               do i = 1, n1dedges
+                  hulp(1) = iglobal_s(edge_nodes(1,i))
+                  hulp(2) = iglobal_s(edge_nodes(2,i))
+                  do ii = 1, size(meshgeom1d%nedge_nodes, 2)
+                     if (all(hulp == meshgeom1d%nedge_nodes(:,ii))) then
+                        edgebranchidx_p(i) = meshgeom1d%edgebranchidx(ii)
+                        edgeoffsets_p(i) = meshgeom1d%edgeoffsets(ii)
+                        exit ! todo: not always found; check why
+                     end if
+                  end do
+               end do
                ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
                                     edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:1), yzw(1:1), &
                                     crs, -999, dmiss, start_index, -999, -999, null(), null(), & ! Indexing is 1 based
@@ -10230,8 +10246,8 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
                                     meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                     meshgeom1d%nbranchorder, &
-                                    nodeids = nodeids_p, nodelongnames = nodelongnames_p, nodebranchidx = nbranchids_p, nodeoffsets = nodeoffsets_p, edgebranchidx = meshgeom1d%edgebranchidx, edgeoffsets = meshgeom1d%edgeoffsets)
-               deallocate(nbranchids_p, nodeids_p, nodeoffsets_p, nodelongnames_p, stat=ierr)
+                                    nodeids = nodeids_p, nodelongnames = nodelongnames_p, nodebranchidx = nbranchids_p, nodeoffsets = nodeoffsets_p, edgebranchidx = edgebranchidx_p, edgeoffsets = edgeoffsets_p)
+               deallocate(nbranchids_p, nodeids_p, nodeoffsets_p, nodelongnames_p, edgebranchidx_p, edgeoffsets_p, stat=ierr)
             else
                ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, numk1d, n1dedges, 0, 0, &
                                     edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:1), yzw(1:1), &
