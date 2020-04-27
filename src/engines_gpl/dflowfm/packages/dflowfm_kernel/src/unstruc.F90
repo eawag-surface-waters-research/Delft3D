@@ -1745,6 +1745,12 @@ if(q /= 0) then
  use MessageHandling 
  use m_flowgeom
  use m_flow
+
+ implicit none
+
+ integer, intent(in) :: i
+ integer :: n
+
  do n = 1,ndx
     if (isnan(vol1(n))) then 
        write(msgbuf,*)  ' volnan ', i, n ; call msg_flush()
@@ -44617,10 +44623,13 @@ if (ti_mba>0) then
  use m_flow
  use m_missing
  use timespace
- Double precision :: v2D(*) , v3D(*)
- double precision :: tr13, tr14
- double precision :: zb, zt
- integer          :: n, k, kb, kt
+
+ implicit none
+
+ double precision, intent(inout) :: v2D(*) , v3D(*)
+ double precision, intent(in   ) :: tr13, tr14
+ double precision                :: zb, zt, zz
+ integer                         :: n, k, kb, kt
  !character(len=1), intent(in)    :: operand !< Operand type, valid values: 'O', 'A', '+', '*', 'X', 'N'.
  
  zb = -1d9 ; if (tr13 .ne. dmiss) zb = tr13 
