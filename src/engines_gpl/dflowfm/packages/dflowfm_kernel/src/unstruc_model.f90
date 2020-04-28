@@ -1333,7 +1333,13 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'grw'  , 'groundwater'        , jagrw)
 
-    call prop_get_integer(md_ptr, 'grw'  , 'Infiltrationmodel'  , Infiltrationmodel) ; if (Infiltrationmodel == 1 .or. infiltrationmodel == DFM_HYD_INFILT_DARCY) jagrw = 1
+    call prop_get_integer(md_ptr, 'grw'  , 'Infiltrationmodel'  , Infiltrationmodel)
+    if (infiltrationmodel == 1 .or. infiltrationmodel == DFM_HYD_INFILT_DARCY) then
+       jagrw = 1
+    else if (infiltrationmodel == DFM_HYD_INFILT_HORTON) then
+       jadhyd = 1
+    end if
+
     call prop_get_double (md_ptr, 'grw'  , 'Hinterceptionlayer' , Hinterceptionlayer)
     call prop_get_double (md_ptr, 'grw'  , 'InfiltrationVelocity' , infiltcapuni) ! old keyword: backwards compatibility
     call prop_get_double (md_ptr, 'grw'  , 'UnifInfiltrationCapacity' , infiltcapuni)

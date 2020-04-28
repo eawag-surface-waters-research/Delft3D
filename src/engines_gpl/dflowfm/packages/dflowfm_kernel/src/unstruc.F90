@@ -39201,12 +39201,21 @@ end function ispumpon
  use m_flowgeom
  use m_flow
  use m_flowtimes
+ use m_hydrology_data
+ use horton
  implicit none
  integer          :: k1, k2, L, k
+ integer          :: ierr
  double precision :: z1, z2, h1, h2, dh, dQ, hunsat, hunsat1, hunsat2, fac, qgrw, h2Q
  double precision :: fc, conduct, dum, h_upw, Qmx, hintercept
 
  qingrw = 0d0 ; qoutgrw = 0d0; Volgrw = 0d0
+
+ if (infiltrationmodel == DFM_HYD_INFILT_HORTON) then  ! Horton's infiltration equation
+    infiltcap0 = infiltcap
+    ierr = infiltration_horton_formula(ndx, HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, infiltcap0, infiltcap, &
+                                       dts, HortonStateTime, hs, rain, HortonState)
+ end if
 
  if (infiltrationmodel == 1) then  ! orig. interceptionmodel: no horizontal groundwater flow, and infiltration is instantaneous as long as it fits in unsat zone (called 'interception' here, but naming to be discussed)
 
@@ -39223,8 +39232,8 @@ end function ispumpon
      enddo
      return
 
- else if (infiltrationmodel == DFM_HYD_INFILT_CONST .and. jagrw == 0) then  ! spatially varying prescribed max infiltration capacity
-
+ else if ((infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) &
+          .and. jagrw == 0) then  ! spatially varying prescribed max infiltration capacity
     do k = 1,ndx2D
        Qmx       = max(0d0, vol1(k)/dts + qin(k) )
        infilt(k) = infiltcap(k)*ba(k)                    ! Prescribed infiltration flux m3/s

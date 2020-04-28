@@ -189,6 +189,7 @@ FMODULES += \
     -I$(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_kernel/src \
     -I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_core/src \
     -I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src \
+    -I$(top_builddir)/utils_gpl/dhydrology/packages/dhydrology_kernel/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
     -I$(top_builddir)/third_party_open/libsigwatch \
     -I$(top_builddir)/third_party_open/md5/md5file \
@@ -284,6 +285,7 @@ endif
 
 
 EXTRALIBS+=\
+        $(top_builddir)/utils_gpl/dhydrology/packages/dhydrology_kernel/src/libDhydrologyKernel.la \
         $(top_builddir)/utils_gpl/flow1d/packages/flow1d/src/libflow1d.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_plugins_c/src/libMorphologyPluginsC.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src/libMorphologyKernel.la \
