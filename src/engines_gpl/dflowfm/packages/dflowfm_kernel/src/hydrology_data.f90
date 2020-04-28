@@ -96,10 +96,10 @@ contains
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, only call reset_hydrology_data() instead.
 subroutine default_hydrology_data()
-   jadhyd            = 0  !< Whether or not (1/0) external hydrology processes are enabled.
+   jadhyd            = 0
 
-   infiltrationmodel = DFM_HYD_NOINFILT  !< Infiltration formula, one of DFM_HYD_NOINFLT, DFM_HYD_INFILT_(CONST|DARCY|HORTON).
-   infiltcapuni      = 0d0               !< [m s-1] Uniform infiltration capacity. Only used if infiltrationmodel == 2 (DFM_HYD_INFILT_CONST).
+   infiltrationmodel = DFM_HYD_NOINFILT
+   infiltcapuni      = 0d0
 
    call reset_hydrology_data()
 end subroutine default_hydrology_data
