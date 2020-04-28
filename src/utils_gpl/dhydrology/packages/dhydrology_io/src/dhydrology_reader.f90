@@ -171,7 +171,9 @@ module dhydrology_reader_module
 
    if (query%quantitynr<=size(itemIDs)) then
       if (query%useBcBlockApproach) then
-         success = ecItemGetValues(ecInstancePtr, itemIDs(query%quantitynr),46800.d0, targetArray)
+         ! UNST-3838: TODO: update this call to match ec_module's changed API (ec_module commit #62379).
+         success = .false.
+         ! success = ecItemGetValues(ecInstancePtr, itemIDs(query%quantitynr),46800.d0, targetArray)
       else
          ! UNST-3838: TODO: update this call to match ec_module's changed API (ec_module commit #62379).
          success = .false.
