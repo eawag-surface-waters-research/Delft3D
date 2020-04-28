@@ -33,17 +33,14 @@
 !     Function       : Handles everything to conveniently time a FORTRAN program
 !
 !         contains                 meaning
-!         timini   ( )               : Should be called once first to initialize. Logical 'timon'
-!                                      must be switched to .true. afterwards by the caller !
-!         timinc   ( )               : Used internally if the arrays run out of space
-!         timstrt(subrou,ihandl)     : Starts timing for this subroutine or program part.
-!                                      'subrou' is a max. 40 character ID-string.
-!                                      'ihandl' must be saved by the caller
-!         timstrt(ihandl)            : See previous definition, however the subrou parameter is not
-!                                      required.
-!         timstop(ihandl)            : stops timing for this handle and accumulates the result
-!         timdump(filename)          : writes the results to the report file 'filename'
-!         tim_get_new_handle(subrou) : Define a new timer handle with name 'subrou'
+!         timini   ( )           : Should be called once first to initialize. Logical 'timon'
+!                                  must be switched to .true. afterwards by the caller !
+!         timinc   ( )           : Used internally if the arrays run out of space
+!         timstrt(subrou,ihandl) : Starts timing for this subroutine or program part.
+!                                  'subrou' is a max. 40 character ID-string.
+!                                  'ihandl' must be saved by the caller
+!         timstop(ihandl)        : stops timing for this handle and accumulates the result
+!         timdump(filename)      : writes the results to the report file 'filename'
 !         tim_get_cpu(handle)        : Get the cpu time for 'handle'  
 !         tim_get_cpu_inc(handle)    : Get the incremental cpu time for 'handle' (= latest interval 
 !                                      between start and stop)
@@ -119,13 +116,9 @@
 !            (The instructions to switch 'timon' off and on cannot be nested)
 !            Furthermore it is assumed that your handles are saved by the program parts, so you
 !            must insert the 'save' instruction for the handle if that is not done automatically.
-      interface timstrt
-         module procedure timstrt_original
-         module procedure timstrt_single_parameter
-      end interface timstrt
 
       logical                             :: timon          !< is the timer switched on or off
-      integer  ( 4), private              :: nohmax         !< current maximum size of the timer arrays
+      integer  ( 4), private              :: nohmax = 0     !< current maximum size of the timer arrays
       integer  ( 4), private              :: nohandl        !< current highest timer handle
       integer  ( 4), private              :: handinc        !< increment of # of timer handles
       integer  ( 4), private              :: noshndl        !< current highest subroutine handle
@@ -134,6 +127,7 @@
       integer  ( 4), private              :: maxlvl         !< maximum level of call trees
       integer  ( 4), private, pointer     :: ntimcal(:) => null()    !< call frequency
       integer  ( 4), private, pointer     :: level  (:)     !< call level
+      integer  ( 4), private, pointer     :: handle2ihandl(:) !< indirection table
       real     ( 8), private, pointer     :: cpstart(:)     !< to save cpu startimes
       real     ( 8), private, pointer     :: cptime (:)     !< to accumulate cpu times
       real     ( 8), private, pointer     :: cpinc (:)      !< incremental cpu times
@@ -146,6 +140,7 @@
       integer  ( 4), private, pointer     :: context(:,:,:) !< call context
       integer  ( 4), private, pointer     :: ntim1(:)       !< call frequency
       integer  ( 4), private, pointer     :: levl1(:)       !< call level
+      integer  ( 4), private, pointer     :: ha2iha1(:)     !< indirection table
       real     ( 8), private, pointer     :: cpst1(:)       !< to save cp startimes
       real     ( 8), private, pointer     :: cptt1(:)       !< to save cp times
       real     ( 8), private, pointer     :: cpin1 (:)      !< incremental cpu times
@@ -157,29 +152,27 @@
       integer  ( 4), private, pointer     :: cont1(:,:,:)   !< context
       integer  ( 8), private              :: count          !< system clock count
       integer  ( 8), private              :: rate           !< ticks per second
-      logical      , private, pointer     :: isactive(:)    !< flag indicating if a timer is started
-      logical      , private, pointer     :: isactive1(:)    !< flag indicating if a timer is started
 
-   contains
+      contains
 
 !***************
 !                                      
    !> Should be called once first to initialize. Logical 'timon'
    !! must be switched to .true. afterwards by the caller !
-   subroutine timini  ( )
+      subroutine timini  ( )
 
-      nohmax  =  10
-      handinc =  10
+      handinc =  30
       nohandl =   0
       noshndl =   0
       prevhnd =   0
       timon   = .false.
       dlevel  =   0
       maxlvl  =   0
-      if (.not. associated(ntimcal)) then
-
+      if (nohmax ==0) then
+         nohmax = handinc
          allocate ( ntimcal(     nohmax) )
          allocate ( level  (     nohmax) )
+         allocate ( handle2ihandl(nohmax) )
          allocate ( cpstart(     nohmax) )
          allocate ( cptime (     nohmax) )
          allocate ( cpinc  (     nohmax) )
@@ -189,12 +182,12 @@
          allocate ( tmsubnm(     nohmax) )
          allocate ( ncontxt(     nohmax) )
          allocate ( context(99,3,nohmax) )
-         allocate ( isactive(    nohmax) )
       endif
 
       ntimcal = 0
       level   = 0
-      ncontxt = 0
+      ncontxt =   0
+      handle2ihandl = 0
       cpstart = 0d0
       cptime  = 0d0
       cpinc   = 0d0
@@ -204,7 +197,6 @@
       tmsubnm = ''
       ncontxt = 0
       context = 0
-      isactive= .false.
 
       return
       end subroutine timini
@@ -216,6 +208,7 @@
 
       allocate ( ntim1(     nohmax+handinc) )
       allocate ( levl1(     nohmax+handinc) )
+      allocate ( ha2iha1(   nohmax+handinc) )
       allocate ( cpst1(     nohmax+handinc) )
       allocate ( cptt1(     nohmax+handinc) )
       allocate ( cpin1(     nohmax+handinc) )
@@ -225,11 +218,24 @@
       allocate ( tmsu1(     nohmax+handinc) )
       allocate ( ncon1(     nohmax+handinc) )
       allocate ( cont1(99,3,nohmax+handinc) )
-      allocate ( isactive1( nohmax+handinc) )
       ncon1 = 0
 
+      ntim1   = 0
+      levl1   = 0
+      ha2iha1 = 0d0
+      cpst1   = 0d0
+      cptt1   = 0d0
+      cpin1   = 0d0
+      wcst1   = 0d0
+      wctt1   = 0d0
+      wcin1   = 0d0
+      tmsu1   = ''
+      ncon1   = 0
+      cont1   = 0
+      
       ntim1(    1:nohmax) = ntimcal
       levl1(    1:nohmax) = level
+      ha2iha1(  1:nohmax) = handle2ihandl
       cpst1(    1:nohmax) = cpstart
       cptt1(    1:nohmax) = cptime
       cpin1(    1:nohmax) = cpinc
@@ -239,10 +245,10 @@
       tmsu1(    1:nohmax) = tmsubnm
       ncon1(    1:nohmax) = ncontxt
       cont1(:,:,1:nohmax) = context
-      isactive1(1:nohmax) = isactive
 
       deallocate ( ntimcal )
       deallocate ( level   )
+      deallocate ( handle2ihandl )
       deallocate ( cpstart )
       deallocate ( cptime  )
       deallocate ( cpinc   )
@@ -252,10 +258,10 @@
       deallocate ( tmsubnm )
       deallocate ( ncontxt )
       deallocate ( context )
-      deallocate ( isactive)
 
       ntimcal => ntim1
       level   => levl1
+      handle2ihandl => ha2iha1
       cpstart => cpst1
       cptime  => cptt1
       cpinc   => cpin1
@@ -265,7 +271,6 @@
       tmsubnm => tmsu1
       ncontxt => ncon1
       context => cont1
-      isactive=> isactive1
 
       nohmax  = nohmax + handinc
 
@@ -277,134 +282,96 @@
       !> Starts timing for this subroutine or program part.
       !! 'subrou' is a max. 40 character ID-string.
       !! 'ihandl' must be saved by the caller
-      subroutine timstrt_original ( subrou, ihandl )
-      
-         character(len=*), intent(in   ) :: subrou    !<  name of (part of) subroutine to monitor
-         integer(4)      , intent(inout) :: ihandl    !<  handle of the timer
-         integer(4)                      handle    !  handle of the timer
-         integer(4)                      i         !  loop counter
-         integer(4)                      ival(8)
-         real   (4)                      time
-   
-         handle = 0
-         if ( ihandl .eq. 0 ) then                              !  first time that the timer is called for
-            noshndl = noshndl + 1                               !  this handle
-            if ( noshndl .eq. nohmax ) call timinc ( )          !  allocate new batch of memory
-            ihandl  = noshndl
-         else                                                   !  find its occurence in the call trees
-            do i = 1, ncontxt(ihandl)
-               if ( context(i,1,ihandl) .eq. prevhnd ) then
-                  handle = context(i,2,ihandl)
-                  exit
-               endif
-            enddo
-         endif
-         if ( handle .eq. 0 ) then                              !  this is new call tree entry
-            i               = ncontxt(ihandl) + 1               !  increase context counter for this ihandl
-            ncontxt(ihandl) = i
-            context(i,1,ihandl) = prevhnd                       !  save unique timer handle of the caller,
-            nohandl = nohandl + 1                               !  to allow to find the calling context
-            if ( nohandl .eq. nohmax ) call timinc ( )
-            handle  = nohandl                                   !  make a new timer handle
-            context(i,2,ihandl) = handle                        !  save this handle for this context
-            context(1,3,handle) = ihandl
-            tmsubnm(handle) = subrou                            !  save the ID of this timer
-            ntimcal(handle) = 0                                 !  zero the accumulators
-            cptime (handle) = 0.0d00
-            wctime (handle) = 0.0d00
-         endif
-         dlevel  = dlevel + 1                                   !  level is 1 deeper than previous level
-         level  (handle) = dlevel                               !  levels are only used to indent the
-         maxlvl = max (maxlvl,dlevel)                           !  reported output
-         prevhnd = handle                                       !  now this timer may become the caller
-   
-         call timstrt_single_parameter(handle)
-   
-         return
-      !end subroutine timstrt
-      end subroutine timstrt_original
+      subroutine timstrt ( subrou, handle )
 
-      !> Define a new timer handle with name 'subrou'
-      integer function tim_get_new_handle( subrou ) result(handle)
-      
-         character*(*), intent(in   ) :: subrou    !<  name of (part of) subroutine to monitor
-         integer(4)                      ihandl    !<  timer handle 
+      character*(*), intent(in   ) :: subrou    !  name of (part of) subroutine to monitor
+      integer(4)   , intent(inout) :: handle    !  handle of the section
+      integer(4)                      ihandl    !  handle of the timer
+      integer(4)                      i         !  loop counter
+      integer(4)                      ival(8)
+      real   (4)                      time
 
-   
-         handle = 0
+      if ( handle .eq. 0 ) then                              !  first time that the timer is called for
          noshndl = noshndl + 1                               !  this handle
          if ( noshndl .eq. nohmax ) call timinc ( )          !  allocate new batch of memory
-         handle  = noshndl                                   !  make a new timer handle
+         ihandl  = noshndl
+      else                                                   !  find its occurence in the call trees
+         ihandl = handle2ihandl(handle)
+         handle = 0
+         do i = 1, ncontxt(ihandl)
+            if ( context(i,1,ihandl) .eq. prevhnd ) then
+               handle = context(i,2,ihandl)
+               exit
+            endif
+         enddo
+      endif
+      if ( handle .eq. 0 ) then                              !  this is new call tree entry
+         i               = ncontxt(ihandl) + 1               !  increase context counter for this ihandl
+         ncontxt(ihandl) = i
+         context(i,1,ihandl) = prevhnd                       !  save unique timer handle of the caller,
+         nohandl = nohandl + 1                               !  to allow to find the calling context
+         if ( nohandl .eq. nohmax ) call timinc ( )
+         handle  = nohandl                                   !  make a new timer handle
+         context(i,2,ihandl) = handle                        !  save this handle for this context
+         context(1,3,handle) = ihandl
          tmsubnm(handle) = subrou                            !  save the ID of this timer
          ntimcal(handle) = 0                                 !  zero the accumulators
          cptime (handle) = 0.0d00
          wctime (handle) = 0.0d00
-         isactive(handle) = .false.
-         return
-      end function tim_get_new_handle
+         handle2ihandl(handle) = ihandl
+      endif
+      dlevel  = dlevel + 1                                   !  level is 1 deeper than previous level
+      level  (handle) = dlevel                               !  levels are only used to indent the
+      maxlvl = max (maxlvl,dlevel)                           !  reported output
+      prevhnd = handle                                       !  now this timer may become the caller
 
-      !> start the timer for handle IHANDL
-      subroutine timstrt_single_parameter ( handle )
-   
-         integer(4)   , intent(in) :: handle    !<  handle of the section
+      call cpu_time      (          time )                   !  this is straight forward timing
+      cpstart(handle) = time
+      call system_clock  ( count, rate )
+      call date_and_time ( values = ival )
+      wcstart(handle) = real( count, 8 ) / real( rate, 8 )
+      ntimcal(handle) = ntimcal(handle) + 1
 
-         integer(4)                      i         !  loop counter
-         integer(4)                      ival(8)
-         real   (4)                      time
-   
-   
-         call cpu_time      (          time )                   !  this is straight forward timing
-         cpstart(handle) = time
-         call system_clock  ( count, rate )
-         call date_and_time ( values = ival )
-         wcstart(handle) = real( count, 8 ) / real( rate, 8 )
-         ntimcal(handle) = ntimcal(handle) + 1
-         isactive(handle) = .true.
-   
-         return
-      end subroutine timstrt_single_parameter
-      
+      return
+      end subroutine timstrt
+
 !***************
 
       !> stops timing for this handle and accumulates the result
-      subroutine timstop ( ihandl )
+      subroutine timstop ( handle )
 
-      integer(4)   , intent(in   ) :: ihandl    !<  handle of the subroutine
-      integer(4)                      handle    !  handle of the timer
+      integer(4)   , intent(in   ) :: handle    !  handle of the subroutine
+      integer(4)                      ihandl    !  handle of the timer
+      integer(4)                      handle2    !  handle of the timer
       integer(4)                      i         !  loop counter
       real   (8)                      stopt
       real   (4)                      time
 
-      if (isactive(ihandl)) then
-         isactive(ihandl) = .false.
-         handle = ihandl
-      else
-         dlevel = dlevel-1                                      !  we return, decrease the level
-         handle = -1
-         do i = 1, ncontxt(ihandl)                              !  find the context of the timer handle
-            if ( context(i,2,ihandl) .eq. prevhnd ) then        !  (prevhnd) that we close now
-               handle  = prevhnd                                !  this is the handle that we close
-               prevhnd = context(i,1,ihandl)                    !  we retrieve the calling handle from
-               exit                                             !  context
-            endif
-         enddo
-      endif
+      dlevel = dlevel-1                                      !  we return, decrease the level
+      handle2 = -1
+      do i = 1, ncontxt(ihandl)                              !  find the context of the timer handle
+         if ( context(i,2,ihandl) .eq. prevhnd ) then        !  (prevhnd) that we close now
+            handle2  = prevhnd                               !  this is the handle that we close
+            prevhnd = context(i,1,ihandl)                    !  we retrieve the calling handle from
+            exit                                             !  context
+         endif
+      enddo
 
-      if ( handle == -1 ) then
+      if ( handle2 == -1 ) then
          write( *, * ) 'Programming error: unbalanced calls to timstart/timstop'
          write( *, * ) 'Found in the context of handle ', ihandl, ncontxt(ihandl)
          return
       endif
 
       call cpu_time ( time )
-      cpinc(handle)  = time  - cpstart(handle)
       cptime(handle) = cptime(handle) + time  - cpstart(handle)
+      cpinc(handle)  = time  - cpstart(handle)
 
       call system_clock  ( count, rate )
       stopt = real( count, 8 ) / real( rate, 8 )
-      wcinc(handle)  = stopt  - wcstart(handle)
       wctime(handle) = wctime(handle) + stopt - wcstart(handle)
-
+      wcinc(handle)  = stopt - wcstart(handle)
+      
       return
       end subroutine timstop
 
@@ -493,7 +460,12 @@
 
       integer, intent(in) :: handle          !<  handle of the timer
 
-      tim_get_cpu = cptime(handle)
+      if (handle==0) then
+         tim_get_cpu = 0d0
+      else
+         tim_get_cpu = cptime(handle)
+      endif
+
       end function tim_get_cpu
 
       !>  Get the incremental cpu time for 'handle' (= latest interval 
@@ -502,15 +474,34 @@
 
       integer, intent(in) :: handle          !<  handle of the timer
 
-      tim_get_cpu_inc = cpstart(handle)
+      if (handle==0) then
+         tim_get_cpu_inc = 0d0
+      else
+         tim_get_cpu_inc = cpinc(handle)
+      endif
       end function tim_get_cpu_inc
 
       !> Get the wall clock time for 'handle'  
+      real(8) function tim_get_wallclock_inc(handle)
+
+      integer, intent(in) :: handle          !<  handle of the timer
+
+      if (handle==0) then
+         tim_get_wallclock_inc = 0d0
+      else
+         tim_get_wallclock_inc = wcinc(max(1, handle))
+      endif
+      end function tim_get_wallclock_inc
+
       real(8) function tim_get_wallclock(handle)
 
       integer, intent(in) :: handle          !<  handle of the timer
 
-      tim_get_wallclock = wctime(handle)
+      if (handle==0) then
+         tim_get_wallclock = 0d0
+      else
+         tim_get_wallclock = wctime(max(1, handle))
+      endif
       end function tim_get_wallclock
 
       !> Get the incremental wall clock time for 'handle' (= latest 

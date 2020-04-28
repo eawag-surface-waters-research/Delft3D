@@ -22731,10 +22731,10 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 
  TEX =  ' '
  solrest = 0
- tsteps = tim_get_cpu(handle_steps)
- tsol   = tim_get_cpu(handle_sol)
+ tsteps = tim_get_wallclock(handle_steps)
+ tsol   = tim_get_wallclock(handle_sol)
  if (tsteps-tsol .ne. 0) solrest = tsol/ (tsteps-tsol )
- tstepinc = tim_get_cpu_inc(handle_steps)
+ tstepinc = tim_get_wallclock_inc(handle_steps)
  cpuperstep = max(0d0, min(100d0,  tstepinc))
 
  call maketime(tex,time1)

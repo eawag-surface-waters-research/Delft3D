@@ -94,7 +94,7 @@ subroutine step_to_screen()
     !
     ! determine total seconds remaining from timer_simulation
     !
-    tcpu = tim_get_cpu(handle_steps)
+    tcpu = tim_get_wallclock(handle_steps)
     sec2go_long   = nint(tcpu * real(nst2go,hp) / real(max(int(dnt_user)-itstrt,1),hp),long)
     if (tcpu <= 0.0) then
         sec2go_long = -1
@@ -161,7 +161,7 @@ subroutine step_to_screen()
     write(msgbuf, '(4(1x,a20),i11,f8.1,a1,f12.5)') &
         seconds_to_dhms(nint(time_user-tstart_user, long)), &
         seconds_to_dhms(nint(tstop_user-time_user, long)), &
-        seconds_to_dhms(nint(tim_get_cpu(handle_steps), long)), &
+        seconds_to_dhms(nint(tim_get_wallclock(handle_steps), long)), &
         seconds_to_dhms(sec2go_long), &
         nst2go, &
         perc_compl, &

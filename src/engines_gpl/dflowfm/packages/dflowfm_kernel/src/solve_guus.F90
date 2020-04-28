@@ -517,7 +517,7 @@ endif
 
  if ( jatimer.eq.1 ) call starttimer(ITOTALSOL)
 
- call timstrt(handle_sol)
+ call timstrt('Conjugate Gradient solver', handle_sol)
  
  if ( jatimer.eq.1 ) call starttimer(IGAUSSEL)
 

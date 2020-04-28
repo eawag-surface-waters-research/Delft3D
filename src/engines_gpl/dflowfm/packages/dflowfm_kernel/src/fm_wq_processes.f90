@@ -62,7 +62,6 @@
 
       call mess(LEVEL_INFO, 'Initialising water quality processes')
 
-      call timini ( )
       timon = .true.
       call mess(LEVEL_INFO, 'Water quality timers switched on')
       if (timon) call timstrt( "fm_wq_processes", ithndlwq )
@@ -277,6 +276,7 @@
       jawaqproc = 1 ! substances succesfully initiated
 
       if ( timon ) call timstop ( ithndl )
+      if (timon)   call timstop( ithndlwq )
    end subroutine fm_wq_processes_ini_sub
 
    subroutine fm_wq_processes_ini_proc()
@@ -1561,8 +1561,7 @@
       if ( timon ) then
          filename = defaultfilename('wq_timers')
          call mess(LEVEL_INFO, 'finalising water quality timers and writing output to: ', filename)
-         if ( timon ) call timstop ( ithndlwq  )
+         !if ( timon ) call timstop ( ithndlwq  )
          call timdump(filename)
-         call timfinalize()
       endif
    end subroutine fm_wq_processes_finalise
