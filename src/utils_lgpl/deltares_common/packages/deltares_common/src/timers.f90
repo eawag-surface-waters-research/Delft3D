@@ -349,6 +349,7 @@
 
       dlevel = dlevel-1                                      !  we return, decrease the level
       handle2 = -1
+      ihandl = handle2ihandl(handle)
       do i = 1, ncontxt(ihandl)                              !  find the context of the timer handle
          if ( context(i,2,ihandl) .eq. prevhnd ) then        !  (prevhnd) that we close now
             handle2  = prevhnd                               !  this is the handle that we close
