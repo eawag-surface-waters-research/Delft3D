@@ -9,4 +9,5 @@ include $(top_srcdir)/common.am
 #Includes
 dist_bin_SCRIPTS = \
 	run_dflowfm.sh \
+	run_dflowfm_processes.sh \
 	run_dfmoutput.sh
