@@ -14,6 +14,7 @@ namespace Deltares.UGrid.Entities
         public IntPtr NodeLongNames;
 
         public IntPtr EdgeBranchIds;
+        public IntPtr EdgeNodes;
         public IntPtr EdgeCenterPointOffset;
         public IntPtr EdgeCenterPointX;
         public IntPtr EdgeCenterPointY;

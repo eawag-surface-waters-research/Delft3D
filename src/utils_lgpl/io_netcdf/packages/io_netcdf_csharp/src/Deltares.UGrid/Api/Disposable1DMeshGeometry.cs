@@ -1,4 +1,5 @@
-﻿using Deltares.UGrid.Entities;
+﻿using System.Runtime.Serialization.Formatters;
+using Deltares.UGrid.Entities;
 using Deltares.UGrid.Helpers;
 using ProtoBuf;
 
@@ -63,6 +64,12 @@ namespace Deltares.UGrid.Api
         public int[] EdgeBranchIds;
 
         /// <summary>
+        /// Nodes for every edge {[from, to], [from, to] ... }
+        /// </summary>
+        [ProtoMember(9)]
+        public int[] EdgeNodes;
+
+        /// <summary>
         /// Offset values of the center point of each edge
         /// </summary>
         [ProtoMember(9)]
@@ -92,6 +99,7 @@ namespace Deltares.UGrid.Api
             BranchOffsets = new double[dimensions.NumberOfNodes];
             
             EdgeBranchIds = new int[dimensions.NumberOfEdges];
+            EdgeNodes = new int[dimensions.NumberOfEdges * 2];
             EdgeCenterPointOffset = new double[dimensions.NumberOfEdges];
             EdgeCenterPointX = new double[dimensions.NumberOfEdges];
             EdgeCenterPointY = new double[dimensions.NumberOfEdges];
@@ -125,6 +133,7 @@ namespace Deltares.UGrid.Api
                 BranchOffsets = GetPinnedObjectPointer(BranchOffsets),
 
                 EdgeBranchIds = GetPinnedObjectPointer(EdgeBranchIds),
+                EdgeNodes = GetPinnedObjectPointer(EdgeNodes),
                 EdgeCenterPointOffset = GetPinnedObjectPointer(EdgeCenterPointOffset),
                 EdgeCenterPointX = GetPinnedObjectPointer(EdgeCenterPointX),
                 EdgeCenterPointY = GetPinnedObjectPointer(EdgeCenterPointY)

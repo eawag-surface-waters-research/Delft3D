@@ -496,6 +496,10 @@ namespace Deltares.UGrid.Api
                     ref mesh1d.EdgeCenterPointOffset, ref mesh1dDimensions.NumberOfEdges, ref startIndex, ref mesh1d.EdgeCenterPointX,
                     ref mesh1d.EdgeCenterPointY));
 
+            DoIoNetCfdCall(nameof(IoNetCfdImports.ionc_write_mesh_1d_edge_nodes_dll),
+                () => IoNetCfdImports.ionc_write_mesh_1d_edge_nodes_dll(ref dataSetId, ref meshId,  ref mesh1dDimensions.NumberOfEdges, 
+                    ref mesh1d.EdgeNodes, ref startIndex));
+
             return meshId;
         }
 

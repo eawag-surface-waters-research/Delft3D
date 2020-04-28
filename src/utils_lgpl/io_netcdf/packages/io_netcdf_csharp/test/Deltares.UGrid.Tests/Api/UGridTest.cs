@@ -503,6 +503,7 @@ namespace Deltares.UGrid.Tests.Api
                 NodeLongNames = new string[] { "Long name 1", "Long name 2", "Long name 3" },
                 NodeIds = new string[] { "Node1", "Node2", "Node3" },
                 EdgeBranchIds = new int[] {0, 0},
+                EdgeNodes = new int[] { 0, 1, 1, 2, 2, 3 },
                 EdgeCenterPointOffset = new double[] {1.5, 2.5},
                 EdgeCenterPointX = new []{1.5,2.5},
                 EdgeCenterPointY = new[] { 1.5, 2.5 }
