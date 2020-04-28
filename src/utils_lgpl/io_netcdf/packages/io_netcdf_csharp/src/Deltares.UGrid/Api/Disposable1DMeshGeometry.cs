@@ -72,19 +72,19 @@ namespace Deltares.UGrid.Api
         /// <summary>
         /// Offset values of the center point of each edge
         /// </summary>
-        [ProtoMember(9)]
+        [ProtoMember(10)]
         public double[] EdgeCenterPointOffset;
 
         /// <summary>
         /// X values of the center point of each edge
         /// </summary>
-        [ProtoMember(10)]
+        [ProtoMember(11)]
         public double[] EdgeCenterPointX;
 
         /// <summary>
         /// Y values of the center point of each edge
         /// </summary>
-        [ProtoMember(11)]
+        [ProtoMember(12)]
         public double[] EdgeCenterPointY;
 
         internal void InitializeWithEmptyData(Mesh1DGeometryDimensions dimensions)
