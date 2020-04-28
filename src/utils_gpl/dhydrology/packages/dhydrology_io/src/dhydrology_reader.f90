@@ -147,12 +147,14 @@ module dhydrology_reader_module
    call realloc(itemIDs,ntgt)
    itemIDs = ec_undef_int
 
-   success = ecModuleAddTimeSpaceRelation(ecInstancePtr, query%quantityname, &
-      query%x, query%y, query%vectormax, &
-      query%inFilename, query%inFiletype, &
-      query%method, query%operand, &
-      query%tgt_refdate, query%tgt_tzone, query%tgt_tunit, &
-      query%jasferic, query%missing_value, itemIDs, varname = query%varname, dtnodal = query%dtnodal)
+   ! UNST-3838: TODO: update this call to match ec_module's changed API (ec_module commit #63478).
+   success = .false.
+   ! success = ecModuleAddTimeSpaceRelation(ecInstancePtr, query%quantityname, &
+   !    query%x, query%y, query%vectormax, &
+   !    query%inFilename, query%inFiletype, &
+   !    query%method, query%operand, &
+   !    query%tgt_refdate, query%tgt_tzone, query%tgt_tunit, &
+   !    query%jasferic, query%missing_value, itemIDs, varname = query%varname, dtnodal = query%dtnodal)
 
    if(.not.success) ierr = -1
 
@@ -171,7 +173,9 @@ module dhydrology_reader_module
       if (query%useBcBlockApproach) then
          success = ecItemGetValues(ecInstancePtr, itemIDs(query%quantitynr),46800.d0, targetArray)
       else
-         success = ec_gettimespacevalue_by_itemID(ecInstancePtr, itemIDs(query%quantitynr), 46800.d0, targetArray)
+         ! UNST-3838: TODO: update this call to match ec_module's changed API (ec_module commit #62379).
+         success = .false.
+         ! success = ec_gettimespacevalue_by_itemID(ecInstancePtr, itemIDs(query%quantitynr), 46800.d0, targetArray)
       endif
    endif
 
