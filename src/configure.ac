@@ -790,6 +790,12 @@ tools_gpl/waqpb/packages/waqpb_import/Makefile
 tools_gpl/waqpb/packages/waqpb_import/src/Makefile
 tools_gpl/waqpb/packages/waqpb_lib/Makefile
 tools_gpl/waqpb/packages/waqpb_lib/src/Makefile
+utils_gpl/dhydrology/Makefile
+utils_gpl/dhydrology/packages/Makefile
+utils_gpl/dhydrology/packages/dhydrology_io/Makefile
+utils_gpl/dhydrology/packages/dhydrology_io/src/Makefile
+utils_gpl/dhydrology/packages/dhydrology_kernel/Makefile
+utils_gpl/dhydrology/packages/dhydrology_kernel/src/Makefile
 utils_gpl/flow1d/include/Makefile
 utils_gpl/flow1d/Makefile
 utils_gpl/flow1d/packages/flow1d_core/Makefile

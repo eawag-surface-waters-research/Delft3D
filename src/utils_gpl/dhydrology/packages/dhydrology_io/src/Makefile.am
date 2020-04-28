@@ -1,12 +1,3 @@
-#-------------------------------------------------------------------------------
-#   Makefile for delftflow
-#
-#   luca.carniato@deltares.nl
-#   18 jun 2018
-#
-#   Copyright (C)  Stichting Deltares, 2018.
-#-------------------------------------------------------------------------------
-
 include $(top_srcdir)/common.am
 noinst_LTLIBRARIES = libDhydrologyIO.la
 
