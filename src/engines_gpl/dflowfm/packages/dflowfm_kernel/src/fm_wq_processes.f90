@@ -976,7 +976,7 @@
    !> Internal function: Translate the global segment number to the
    !! number used within the current domain
    double precision function global_to_local( global_number )
-       use m_partitioninfo, only: iglobal_s
+       use m_partitioninfo, only: jampi, iglobal_s
 
        double precision, intent(in) :: global_number !< Global segment number to be translated
 
@@ -984,18 +984,22 @@
        double precision, save       :: previous_local  = -1
        integer                      :: i
 
-       global_to_local = dmiss
-       if ( global_number == previous_global ) then
-           global_to_local = previous_local
+       if (jampi==0) then
+          global_to_local = global_number
        else
-           do i = 1,size(iglobal_s)
-               if ( global_number == iglobal_s(i) ) then
-                   global_to_local = i
-                   previous_global = global_number
-                   previous_local  = i
-               endif
-           enddo
-      endif
+          global_to_local = dmiss
+          if ( global_number == previous_global ) then
+              global_to_local = previous_local
+          else
+              do i = 1,size(iglobal_s)
+                  if ( global_number == iglobal_s(i) ) then
+                      global_to_local = i
+                      previous_global = global_number
+                      previous_local  = i
+                  endif
+              enddo
+          endif
+       endif       
    end function global_to_local
 
    end subroutine dfm_waq_initexternalforcings
@@ -1024,6 +1028,11 @@
          qidname = qidloc(1:11)
          if ( len_trim(qidloc).gt.11 ) then
             inputname = trim(qidloc(12:))
+         end if
+      else if ( qidloc(1:16).eq.'waqsegmentnumber' ) then
+         qidname = qidloc(1:16)
+         if ( len_trim(qidloc).gt.16 ) then
+            inputname = trim(qidloc(17:))
          end if
       else if ( qidloc(1:18).eq.'waqsegmentfunction' ) then
          qidname = qidloc(1:18)
