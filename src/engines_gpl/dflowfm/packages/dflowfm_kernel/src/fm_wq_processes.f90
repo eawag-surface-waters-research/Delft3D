@@ -1013,6 +1013,7 @@
 
       character(len=256)              :: qidloc    !< Original quantityid, e.g., 'waqfunctionradsurf'.
 
+      inputname = ''
       qidloc = qid
       if ( qidloc(1:13).eq.'initialwaqbot' ) then
          qidname = qidloc(1:13)

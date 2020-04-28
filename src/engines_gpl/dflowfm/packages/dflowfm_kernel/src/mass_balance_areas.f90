@@ -274,6 +274,7 @@
 
       character(len=256)              :: qidloc    !< Original quantityid, e.g., 'massbalanceareanorth'.
 
+      inputname = ''
       qidloc = qid
       if (qidloc(1:15).eq.'massbalancearea' ) then
          qidname = qidloc(1:15)
