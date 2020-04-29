@@ -14320,20 +14320,23 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
       ierr = nf90_inquire_dimension(inetfile, id_netlinkdim, len=numl)
       call check_error(ierr, 'link count')
       if (nerr_ > 0) goto 888
-      
-      allocate(kn_tmp(2, numl))
-      allocate(ltype_tmp(numl))
+
       ierr = nf90_inq_varid(inetfile, 'NetLink', id_netlink)
-      ierr = nf90_get_var(inetfile, id_netlink, kn_tmp)
       call check_error(ierr, 'NetLink')
-      kn(1:2,1:numl) = kn_tmp(1:2, 1:numl)
-      
-      ierr = nf90_inq_varid(inetfile, 'NetLinkType', id_netlinktype)
-      ierr = nf90_get_var(inetfile, id_netlinktype, ltype_tmp)
-      call check_error(ierr, 'NetLinkType')
-      kn(3,1:numl) = ltype_tmp(1:numl)
-      deallocate(kn_tmp,ltype_tmp)
-      call check_error(ierr, 'NetLink')
+      if (ierr == 0) then
+         allocate(kn_tmp(2, numl))
+         allocate(ltype_tmp(numl))
+         ierr = nf90_get_var(inetfile, id_netlink, kn_tmp)
+         call check_error(ierr, 'NetLink')
+         kn(1:2,1:numl) = kn_tmp(1:2, 1:numl)
+         
+         ierr = nf90_inq_varid(inetfile, 'NetLinkType', id_netlinktype)
+         ierr = nf90_get_var(inetfile, id_netlinktype, ltype_tmp)
+         call check_error(ierr, 'NetLinkType')
+         kn(3,1:numl) = ltype_tmp(1:numl)
+         deallocate(kn_tmp,ltype_tmp)
+         call check_error(ierr, 'NetLink')
+      end if
     endif
     
     call readyy('Reading net data',1d0) 

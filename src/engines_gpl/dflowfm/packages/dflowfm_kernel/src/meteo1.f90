@@ -5694,6 +5694,9 @@ contains
         if (m <= 0) then
            errormessage = 'Unknown node id: '// trim(filename)
            return
+        else if (m > size(kc)) then
+           errormessage = 'node_id out of bounds'
+           return
         else
            if (usemask .and. kc(m) .eq. -1 ) then
               errormessage = 'Boundary with nodeId '''//trim(filename)//''' already claimed; Overlap with other bnds?'
