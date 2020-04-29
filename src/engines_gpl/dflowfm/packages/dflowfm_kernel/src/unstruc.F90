@@ -470,7 +470,7 @@ integer :: N, L
     goto 888
  end if
 
-call timstrt('Time loop', handle_steps)
+ call timstrt('Time steps', handle_steps)
 
  if ( jatimer.eq.1 ) call starttimer(ITIMESTEP)
 
@@ -780,7 +780,7 @@ end subroutine flow_finalize_single_timestep
  call setau()                                        ! set au and cfuhi for conveyance after limited h upwind at u points
  call timstop(handle_extra(39)) ! End huau
 
- call timstrt('Set umod     ', handle_extra(43)) ! Start setumod
+ call timstrt('Setumod     ', handle_extra(43)) ! Start setumod
  if (newcorio == 1) then
     call setumodnew(jazws0)
  else
@@ -806,7 +806,7 @@ end subroutine flow_finalize_single_timestep
 
  ! TIDAL TURBINES: Insert equivalent calls to updturbine and applyturbines here
 
- call timstrt('Compute timestep (dt)       ', handle_extra(40)) ! Start setdt
+ call timstrt('setdt', handle_extra(40)) ! Start setdt
  if (jazws0.eq.0 .and. nshiptxy == 0)  then
     call setdt()                                     ! set computational timestep dt based on active hu's,
  end if
@@ -7208,7 +7208,7 @@ end subroutine setucxucyucxuucyu
  !   taucx = 0d0; taucy = 0d0
  !endif
 
- call timstrt('Umod', handle_umod)
+ call timstrt('Umod new', handle_umod)
  if(jazws0==1 .and. len_trim(md_restartfile)>0) then
    ! This is the moment after the restart file is read and before the first output of the inital info.
    ! At this moment, u0 is used to compute the cell-center velocities. And hs has been computed in flow_initimestep, using s0.
@@ -10775,7 +10775,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call makedir(getoutputdir('waq'))  ! No problem if it exists already.
  end if
 
-  call timstrt('Basic steps         ', handle_extra(1)) ! Basic steps
+  call timstrt('Basic init', handle_extra(1)) ! Basic steps
 
  md_snapshotdir =  trim(getoutputdir())                  ! plot output to outputdir
  ! Make sure output dir for plot files exists
@@ -10798,7 +10798,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call timstop(handle_extra(1)) ! End basic steps
 
 ! JRE
- call timstrt('Wave input          ', handle_extra(2)) ! Wave input
+ call timstrt('Xbeach input init', handle_extra(2)) ! Wave input
  if (jawave == 4) then
     call xbeach_wave_input()  ! will set swave and lwave
  endif
@@ -10904,12 +10904,12 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call timstop(handle_extra(8)) ! End bed forms
 
  !! flow1d -> dflowfm initialization
- call timstrt('1D rougnhess        ', handle_extra(9)) ! 1d roughness
+ call timstrt('1D roughness        ', handle_extra(9)) ! 1d roughness
  call set_1d_roughnesses()
  call timstop(handle_extra(9)) ! End 1d roughness
 
  ! need number of fractions for allocation of sed array
-  call timstrt('Sedimentation Morphology', handle_extra(10)) ! sedmor
+  call timstrt('Sedimentation Morphology init', handle_extra(10)) ! sedmor
  if ( len_trim(md_sedfile) > 0 ) then
       call flow_sedmorinit ()
  endif
@@ -12517,7 +12517,7 @@ subroutine writesomeinitialoutput()
  double precision  :: time_cpu
  double precision  :: tcpusol
  double precision  :: totalcomp
- double precision  :: timestep
+ double precision  :: timeloop
  character(len=255) :: timersfilename
 
  if (ndx == 0) then
@@ -12566,26 +12566,26 @@ subroutine writesomeinitialoutput()
 
  f = 24d0*3600d0
  totalcomp = tim_get_wallclock(handle_all)
- timestep = tim_get_wallclock_inc(handle_all)
+ timeloop  = tim_get_wallclock_inc(handle_all)
  write(msgbuf,'(a,F25.10)') 'simulation period      (d)  :' , (tstop - tstart_user)/f  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'total computation time (d)  :' , (totalcomp)/f             ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time modelinit         (d)  :' , (totalcomp-timestep)/f   ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (d)  :' , (timestep)/f             ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time modelinit         (d)  :' , (totalcomp-timeloop)/f   ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (d)  :' , (timeloop)/f             ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
 
  f = 3600d0
  write(msgbuf,'(a,F25.10)') 'simulation period      (h)  :' , (tstop - tstart_user)/f  ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'total computation time (h)  :' , (totalcomp)/f            ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time modelinit         (h)  :' , (totalcomp-timestep)/f   ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (h)  :' , (timestep)/f             ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time modelinit         (h)  :' , (totalcomp-timeloop)/f   ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (h)  :' , (timeloop)/f             ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
 
  write(msgbuf,'(a,F25.10)') 'simulation period      (s)  :' , tstop - tstart_user      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'total computation time (s)  :' , (totalcomp)              ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , (totalcomp-timestep)     ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , (timestep)               ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , (totalcomp-timeloop)     ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , (timeloop)               ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
