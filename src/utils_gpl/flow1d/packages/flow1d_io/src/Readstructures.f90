@@ -1220,9 +1220,7 @@ module m_readstructures
          if (.not. localsuccess) then
             call prop_get_double(md_ptr, 'Structure', 'WaterLevelDownstreamLocationX', dambr%waterLevelDownstreamLocationX, localsuccess)
             call prop_get_double(md_ptr, 'Structure', 'WaterLevelDownstreamLocationY', dambr%waterLevelDownstreamLocationY, localsuccess)
-         else
          end if
-         if (.not.localsuccess) return
       endif
       
       ! get the name of the tim file 
