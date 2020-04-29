@@ -567,12 +567,14 @@ command="./autogen.sh --verbose &> $log"
 log "Running $command in `pwd`"
 eval $command
 cd third_party_open/kdtree2
+log="`pwd`/logs/autogen_kdtree.log"
 log "Running $command in `pwd`"
 eval $command
 cd ../..
 
 if [ ! -z "$shapelibModule" -o ! -z "$projModule" -o ! -z "$gdalModule" ]; then
 cd third_party_open/fortrangis
+log="`pwd`/logs/autogen_fortrangis.log"
 cp -f ../../autogen.sh . # temp fix
 log "Running $command in `pwd`"
 eval $command

@@ -439,11 +439,11 @@ if [ $? -ne 0 ]; then
     cd $orgdir
     exit 1
 else
-   # NOTE: PROJ_DIR was set during the execution of "module load $projModule"
-   PROJ_CPPFLAGS=-I$PROJ_DIR/include
-   PROJ_LDFLAGS=-L$PROJ_DIR/lib
-   PROJ_CONFARGS="--with-proj=$PROJ_DIR"
-fi
+	   # NOTE: PROJ_DIR was set during the execution of "module load $projModule"
+       PROJ_CPPFLAGS=-I$PROJ_DIR/include
+       PROJ_LDFLAGS=-L$PROJ_DIR/lib
+       PROJ_CONFARGS="--with-proj=$PROJ_DIR"
+    fi
 
 #---------------------
 # shapelib
@@ -485,10 +485,10 @@ if [ $? -ne 0 ]; then
     cd $orgdir
     exit 1
 else
-   # NOTE: GDAL_DIR was set during the execution of "module load $gdalModule"
-   GDAL_CPPFLAGS=-I$GDAL_DIR/include
-   GDAL_LDFLAGS=-L$GDAL_DIR/lib
-   GDAL_CONFARGS="--with-gdal=$GDAL_DIR"
+	   # NOTE: GDAL_DIR was set during the execution of "module load $gdalModule"
+       GDAL_CPPFLAGS=-I$GDAL_DIR/include
+       GDAL_LDFLAGS=-L$GDAL_DIR/lib
+       GDAL_CONFARGS="--with-gdal=$GDAL_DIR"
 fi
 
 #===============================================================================
@@ -566,13 +566,16 @@ log="`pwd`/logs/autogen.log"
 command="./autogen.sh --verbose &> $log"
 log "Running $command in `pwd`"
 eval $command
+
 cd third_party_open/kdtree2
+log="`pwd`/logs/autogen_kdtree.log"
 log "Running $command in `pwd`"
 eval $command
 cd ../..
 
 if [ ! -z "$shapelibModule" -o ! -z "$projModule" -o ! -z "$gdalModule" ]; then
 cd third_party_open/fortrangis
+log="`pwd`/logs/autogen_fortrangis.log"
 cp -f ../../autogen.sh . # temp fix
 log "Running $command in `pwd`"
 eval $command
