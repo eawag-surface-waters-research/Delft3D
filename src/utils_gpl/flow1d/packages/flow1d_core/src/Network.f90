@@ -248,7 +248,7 @@ contains
       do ibran = 1, network%brs%Count
          pbran => network%brs%branch(ibran)
          do m = 1, pbran%uPointsCount
-            if (pbran%lin(m) > 0) then
+            if (pbran%lin(m) > 0 .and. pbran%lin(m) <= size(adm%lin2ibr)) then
                adm%lin2ibr(pbran%lin(m)) = ibran
                adm%lin2local(pbran%lin(m)) = m
                adm%lin2grid(pbran%lin(m))  = pbran%grd(m)
@@ -336,7 +336,7 @@ contains
                   adm%line2cross(ilnk)%distance  = 0d0
                   interpolDone            = .true.
                   
-               else
+               else if (ilnk <= size(adm%line2cross)) then
                   
                   chainage1 = network%crs%cross(crossOrder(icrs1))%chainage
                   chainage2 = network%crs%cross(crossOrder(icrs2))%chainage
@@ -366,7 +366,7 @@ contains
 
                endif
                   
-               if (ilnk > 0) then
+               if (ilnk > 0 .and. ilnk <= size(adm%line2cross)) then
                   
                   if (ibran == network%crs%cross(crossOrder(icrs2))%branchid) then
                      
@@ -431,6 +431,7 @@ contains
 
                chainageg = pbran%gridPointschainages(m)
                igpt = pbran%grd(m)
+               if (igpt > size(adm%gpnt2cross)) cycle
                
                if (icrsBeg == icrsEnd) then
                   
