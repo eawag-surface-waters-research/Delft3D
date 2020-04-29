@@ -1537,7 +1537,13 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_YZ_PROF)
          call YZProfile(dpt, cross%convtab, 1, totalArea, totalWidth, maxwidth, wetPerimeter)
-         totalWidth= max(totalWidth, sl)
+         if (totalWidth < sl) then
+            ! Assume a rectangular profile for widths < sl, in order to 
+            ! prevent "no convergence" in the non-linear solver. 
+            totalWidth= sl
+            totalArea = sl*dpt
+         endif
+         
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
       end select
