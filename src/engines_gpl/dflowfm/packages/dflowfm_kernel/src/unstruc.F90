@@ -1636,7 +1636,7 @@ if(q /= 0) then
            endif
 
 
-        !   s1(n) = bl(n)
+           s1(n) = bl(n)
         endif
     endif
 
