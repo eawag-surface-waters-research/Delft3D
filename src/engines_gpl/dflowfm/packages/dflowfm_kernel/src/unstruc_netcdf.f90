@@ -10440,7 +10440,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
       deallocate(edge_nodes)
       deallocate(edge_type)
    else
-      nv = 2
+      nv = 1
    end if
 
    ! Dimensions
@@ -10467,7 +10467,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    ierr = nf90_enddef(ncid)
 
    ! -- Start data writing (time-independent data) ------------
-    if ( janetcell_ /= 0 .and. nump1d2d > 0 .and. numl2d > 0) then
+    if ( janetcell_ /= 0 .and. nump1d2d > 0) then
        ierr = unc_write_net_elem(ncid, ids_netelem)
     end if
 
