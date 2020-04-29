@@ -164,6 +164,7 @@ end subroutine flow_run_sometimesteps
 !> A complete single user time step (init-run-finalize).
  subroutine flow_usertimestep(key, iresult)                   ! do computational flowsteps until timeuser
  use m_flowtimes
+ use timers
  use unstruc_messages
  use m_partitioninfo
  use unstruc_display, only: jaGUI
@@ -172,6 +173,8 @@ end subroutine flow_run_sometimesteps
  implicit none
    integer, intent(out) :: key     !< Key number if any key was pressed in GUI.
  integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
+
+   call timstrt('User time loop', handle_user)
 
    iresult = DFM_GENERICERROR
    key = 0
@@ -190,6 +193,8 @@ end subroutine flow_run_sometimesteps
    if (iresult /= DFM_NOERR) then
       goto 888
    end if
+
+   call timstop(handle_user)
 
    iresult = DFM_NOERR
    return ! Return with success.
@@ -518,10 +523,6 @@ integer :: N, L
 
    ! Finalize timestep code used to be here, now flow_finalize_single_timestep()
 
- call timstop(handle_steps)
-
-   ! Finalize timestep code used to be here, now flow_finalize_single_timestep()
-
    if (iresult /= DFM_TIMESETBACK) then
       iresult = DFM_NOERR
    end if
@@ -542,6 +543,7 @@ use m_flowtimes
 use unstruc_model, only : jawritebalancefile
 use unstruc_model, only : md_fou_step
 use unstruc_netcdf
+use timers
 use m_timer
 use unstruc_display, only : jaGUI
 use dfm_error
@@ -633,6 +635,9 @@ character(len=255)   :: filename_fou_out
       endif
       call postpr_fourier(time0, dts)
    endif
+
+   call timstop(handle_steps)
+
 end subroutine flow_finalize_single_timestep
 
  subroutine velocities_explicit()
@@ -11018,7 +11023,11 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call timstrt('WAQ processes init  ', handle_extra(18)) ! waq processes init
  if (ti_waqproc /= 0d0) then
     if ( jawaqproc .eq. 1 ) then
+       call fm_wq_processes_ini_proc()
+       jawaqproc = 2
+       timon = .false. ! switch off timers during first dummy processes time step
        call fm_wq_processes_step(ti_waqproc,time_user)
+       timon = .true.
     endif
  endif
  call timstop(handle_extra(18)) ! end waq processes init
@@ -12493,6 +12502,7 @@ subroutine writesomeinitialoutput()
  use m_monitoring_crosssections
  use m_observations, only : mxls
  use unstruc_model, only : md_subfile
+ use unstruc_files, only : defaultFilename
 #ifdef _OPENMP
  use omp_lib
 #endif
@@ -12508,6 +12518,7 @@ subroutine writesomeinitialoutput()
  double precision  :: tcpusol
  double precision  :: totalcomp
  double precision  :: timestep
+ character(len=255) :: timersfilename
 
  if (ndx == 0) then
     write(msgbuf,'(a)')    'Empty model, no flow cells found. No statistics to report.'; call msg_flush()
@@ -12572,9 +12583,9 @@ subroutine writesomeinitialoutput()
  msgbuf = ' ' ; call msg_flush()
 
  write(msgbuf,'(a,F25.10)') 'simulation period      (s)  :' , tstop - tstart_user      ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'total computation time (s)  :' , (totalcomp)/f            ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , (totalcomp-timestep)/f   ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , (timestep)/f             ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'total computation time (s)  :' , (totalcomp)              ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time modelinit         (s)  :' , (totalcomp-timestep)     ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'time steps (+ plots)   (s)  :' , (timestep)               ; call msg_flush()
 
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
@@ -12666,8 +12677,10 @@ subroutine writesomeinitialoutput()
     call mba_final(time_user)
  endif
 
- if ( len_trim(md_subfile) > 0 ) then
-    call fm_wq_processes_finalise()
+ if ( jawriteDetailedTimers == 1 ) then
+    timersfilename = defaultfilename('timers')
+    call mess(LEVEL_INFO, 'writing detailed timers output to: ', timersfilename)
+    call timdump(timersfilename)
  endif
 
  msgbuf = ' ' ; call msg_flush()

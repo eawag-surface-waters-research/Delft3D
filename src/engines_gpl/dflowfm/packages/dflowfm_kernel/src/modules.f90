@@ -2820,6 +2820,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
 
  integer                           :: jawriteDFMinterpretedvalues = 0 !< Write interpretedvalues
 
+ integer                           :: jawriteDetailedTimers = 0 !< Write detailed timers output file
+
 ! parameters for parms solver
  integer,                                   parameter :: NPARMS_INT=2              !< for parms solver, number of integer parameters
  integer,                                   parameter :: IPARMS_ILUTYPE=1
@@ -4406,6 +4408,7 @@ end subroutine reset_flowgeom
  integer                           :: it_stat     !< Nr of simulation statistics presently in log file.
  ! for performance timings
  logical                           :: debugtimeon     !< timing yes or no
+ integer                           :: handle_user     !< timer handle for user timesteps 
  integer                           :: handle_steps    !< timer handle for timesteps 
  integer                           :: handle_umod     !< timer handle for set-umod  
  integer                           :: handle_sol      !< timer handle for conj-grad 
@@ -5354,7 +5357,6 @@ module m_fm_wq_processes
    character(len=256)                        :: statistics_file             !< file with configuration for statistics
 
    integer, parameter                        :: NAMWAQLEN = 128
-   integer                                   :: ithndlwq = 0                !< overall timer for water quality processes
    integer                                   :: jawaqproc = 0               !< switch for water quality processes (1 = substances initiated, 2 = processes activated too)
    real(hp)                                  :: waq_vol_dry_thr = 1.0d-3    !< minimum volume for processes to be active
    real(hp)                                  :: waq_dep_dry_thr = 1.0d-3    !< minimum depth for processes to be active

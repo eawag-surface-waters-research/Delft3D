@@ -38,6 +38,7 @@
       use m_transport
       use m_partitioninfo
       use unstruc_model
+      use m_flowparameters, only: jawriteDetailedTimers
       use unstruc_files
       use m_flowtimes
       use timers
@@ -63,8 +64,7 @@
       call mess(LEVEL_INFO, 'Initialising water quality processes')
 
       timon = .true.
-      call mess(LEVEL_INFO, 'Water quality timers switched on')
-      if (timon) call timstrt( "fm_wq_processes", ithndlwq )
+      jawriteDetailedTimers = 1
       if (timon) call timstrt( "fm_wq_processes_ini_sub", ithndl )
 
       ibflag = 0
@@ -276,7 +276,6 @@
       jawaqproc = 1 ! substances succesfully initiated
 
       if ( timon ) call timstop ( ithndl )
-      if (timon)   call timstop( ithndlwq )
    end subroutine fm_wq_processes_ini_sub
 
    subroutine fm_wq_processes_ini_proc()
@@ -1132,14 +1131,12 @@
       integer(4), save :: ithand0 = 0
       integer(4), save :: ithand1 = 0
       integer(4), save :: ithand2 = 0
-      if ( timon ) call timstrt ( "fm_wq_processes_step", ithand0 )
 
       if ( jawaqproc .eq. 0 ) then
          return
-      else if ( jawaqproc .eq. 1 ) then
-         call fm_wq_processes_ini_proc()
-         jawaqproc = 2
       endif
+
+      if ( timon ) call timstrt ( "fm_wq_processes_step", ithand0 )
       flux_int = md_flux_int
 
 !     copy data from D-FlowFM to WAQ
@@ -1549,19 +1546,4 @@
 
       return
    end subroutine default_fm_wq_processes
-
-   subroutine fm_wq_processes_finalise()
-      use unstruc_messages
-      use unstruc_files, only: defaultFilename
-      use m_fm_wq_processes, only: ithndlwq
-      use timers
-	
-      character(len=255) :: filename
-
-      if ( timon ) then
-         filename = defaultfilename('wq_timers')
-         call mess(LEVEL_INFO, 'finalising water quality timers and writing output to: ', filename)
-         !if ( timon ) call timstop ( ithndlwq  )
-         call timdump(filename)
-      endif
-   end subroutine fm_wq_processes_finalise
+   
