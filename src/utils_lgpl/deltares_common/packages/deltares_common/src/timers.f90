@@ -461,7 +461,7 @@
 
       integer, intent(in) :: handle          !<  handle of the timer
 
-      if (handle==0) then
+      if (handle <= 0) then
          tim_get_cpu = 0d0
       else
          tim_get_cpu = cptime(handle)
@@ -475,38 +475,39 @@
 
       integer, intent(in) :: handle          !<  handle of the timer
 
-      if (handle==0) then
+      if (handle <= 0) then
          tim_get_cpu_inc = 0d0
       else
          tim_get_cpu_inc = cpinc(handle)
       endif
       end function tim_get_cpu_inc
 
-      !> Get the wall clock time for 'handle'  
+      !> Get the incremental wall clock time for 'handle' (= latest 
+      !! interval between start and stop)  
       real(8) function tim_get_wallclock_inc(handle)
 
       integer, intent(in) :: handle          !<  handle of the timer
 
-      if (handle==0) then
+      if (handle <= 0) then
          tim_get_wallclock_inc = 0d0
       else
-         tim_get_wallclock_inc = wcinc(max(1, handle))
+         tim_get_wallclock_inc = wcinc(handle)
       endif
       end function tim_get_wallclock_inc
 
+      !> Get the wall clock time for 'handle'  
       real(8) function tim_get_wallclock(handle)
 
       integer, intent(in) :: handle          !<  handle of the timer
 
-      if (handle==0) then
+      if (handle <= 0) then
          tim_get_wallclock = 0d0
       else
-         tim_get_wallclock = wctime(max(1, handle))
+         tim_get_wallclock = wctime(handle)
       endif
       end function tim_get_wallclock
 
-      !> Get the incremental wall clock time for 'handle' (= latest 
-      !! interval between start and stop)  
+      !> Get the label (name) for 'handle'
       character(len=40) function tim_get_label(handle)
       integer, intent(in) :: handle          !<  handle of the timer
       
