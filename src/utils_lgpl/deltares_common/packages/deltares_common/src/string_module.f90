@@ -66,6 +66,7 @@ module string_module
    public :: real2string, real2stringLeft
    public :: GetLine
    public :: get_dirsep
+   public :: find_last_slash
 
    interface strip_quotes
       module procedure strip_quotes1
@@ -943,6 +944,16 @@ module string_module
          endif
          get_dirsep = slash
       end function get_dirsep
-      
-      
+
+      !> find the last slash in a string.
+      !! can a forward or a backward slash
+      !! returns 0 if not found
+      function find_last_slash(path) result (ipos)
+         character(len=*), intent(in) :: path  !< string with a path including slash(es)
+         integer                      :: ipos  !< position of slash
+
+         ipos = max(index(path,'\', .true.), index(path,'/', .true.))
+
+      end function find_last_slash
+
 end module string_module

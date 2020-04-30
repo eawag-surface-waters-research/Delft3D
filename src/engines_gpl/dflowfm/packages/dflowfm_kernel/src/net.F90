@@ -33899,73 +33899,67 @@ end subroutine copycurvigridboundstopol
       use unstruc_model, only: md_ident
       use m_polygon, only: NPL
       use dfm_error
-!      use m_missing, only: intmiss
       use network_data, only: lne, numl
       use m_flowparameters, only: japartdomain
       use gridoperations
-      use string_module, only: get_dirsep
-      
+      use string_module, only: find_last_slash
+
       implicit none
 
       character(len=*),                    intent(in) :: netfilename !< filename of whole network
       integer,                             intent(in) :: icgsolver   !< intended solver
-     ! integer,                             intent(in) :: gui_polygon !< polygon from the old GUI
       integer,                             intent(in) :: jacells     !< write cell and subdomain numbers to file
       integer,                             intent(in) :: japolygon   !< write partitioning polygon
       integer,                             intent(in) :: japartugrid !< write partitioning in ugrid format (1) or not (0)
-      integer,                  parameter             :: maxnamelen=255
-      integer,                  parameter             :: numlen=4    ! number of digits in domain number string/filename
 
-      character(len=maxnamelen)                       :: filename
+      integer,                  parameter             :: numlen=4    ! number of digits in domain number string/filename
       character(len=numlen)                           :: sdmn_loc    ! domain number string
-      character(len=maxnamelen)                       :: partfilename
+
+      character(len=:), allocatable                   :: filename
+      character(len=:), allocatable                   :: partfilename
       integer                                         :: idmn        ! domain number
-      integer                                         :: i, len, num, mdep, c1, c2, i1, i2, iconv
+      integer                                         :: len_basename, mdep, i1, i2, iconv
       integer, allocatable                            :: lned(:,:)   ! lned(:,j) are the cells that are realated to link j, original numbering
       integer                                         :: ierror
 
       ierror = 1
 
 !     save network
-      call SAVENET()
+      call savenet()
 !     save netcell, lne, lnn, idomain, xz, yz, xzw, yzw, ba
       call savecells()
 
-!     get file basename
-      filename = ''
-      len = index(netfilename, '_net')-1
-
       iconv = merge(UNC_CONV_UGRID, UNC_CONV_CFOLD, japartugrid > 0)
 
-      if ( len.lt.1 ) then
+!     get file basename
+      len_basename = index(netfilename, '_net')-1
+      if ( len_basename < 1 ) then
          call qnerror('write domains: net filename error', ' ', ' ')
          goto 1234
       end if
+
 !     write partitioning polygon
       if (japolygon == 1) then
-         if ( NPL.gt.0 ) then
+         if ( NPL > 0 ) then
 !        use existing polygon
          else
             call generate_partition_pol_from_idomain(ierror)
          end if
-         filename = trim(netfilename(1:len)//'_part.pol')
-         call newfil(MDEP,filename)
+         filename = trim(netfilename(1:len_basename)//'_part.pol')
+         call newfil(mdep, filename)
          call wripol(mdep)
       endif
 !     Write a partition domain netfile with idomain
       if (japartdomain == 1) then
-         i1 = max(index(netfilename,'\', .true.),index(netfilename,'/', .true.))
+         i1 = find_last_slash(netfilename)
          if (i1 == 0) then
-            partfilename = "DFM_interpreted_idomain_"//trim(netfilename)
+            partfilename = "DFM_interpreted_idomain_" // trim(netfilename)
          else
             i2 = len_trim(netfilename)
-            partfilename = netfilename(1:i1)//"DFM_interpreted_idomain_"//netfilename(i1+1:i2)
+            partfilename = netfilename(1:i1) // "DFM_interpreted_idomain_ " // netfilename(i1+1:i2)
          endif
          call unc_write_net(partfilename, janetcell = 1, janetbnd = 1, jaidomain = 1, iconventions = iconv, md_ident = md_ident)
       endif
-
-
-
 
 !     set ghostlevel parameters
       call partition_setghost_params(icgsolver)
@@ -33973,13 +33967,8 @@ end subroutine copycurvigridboundstopol
 !     loop over all domains
       do idmn=0,ndomains-1
 !        make the domain number string
-         if ( numlen.eq.4 ) then
-            write(sdmn_loc, '(I4.4)') idmn
-         else
-            call qnerror('write domains: partition filename error', ' ', ' ')
-            goto 1234
-         end if
-         filename = trim(netfilename(1:len)//'_'//sdmn_loc//'_net.nc')
+         write(sdmn_loc, '(I4.4)') idmn
+         filename = netfilename(1:len_basename) // '_' // sdmn_loc // '_net.nc'
 
 !        make the domain by deleting other parts of the net, and s
          call partition_make_domain(idmn, numlay_cellbased, numlay_nodebased, jacells, ierror)
@@ -33989,20 +33978,11 @@ end subroutine copycurvigridboundstopol
          call unc_write_net(filename, janetcell = 1, janetbnd = 1, jaidomain = jacells, &
             jaiglobal_s = jacells, iconventions = iconv, md_ident = md_ident) ! Save net bnds to prevent unnecessary open bnds
 
-!        begin debug
-!        make and write the ghost lists
-!         filename = trim(netfilename(1:len)//'_'//sdmn_loc//'_gst.pli')
-!         call partition_make_ghostlists(idmn, ierror)
-!         if ( ierror.ne.0 ) cycle
-!         callf write_ghosts(filename)
-!        end debug
-
 !        restore network
          call restore()
          call restorecells() ! restore netcell, lne, lnn and idomain,xz, yz, xzw, yzw, ba
       end do
 
-     ! deallocate(xzw0, yzw0)
       ierror = 0
  1234 continue
 
