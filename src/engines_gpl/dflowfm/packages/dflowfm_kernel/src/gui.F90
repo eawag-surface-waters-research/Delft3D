@@ -1491,8 +1491,10 @@
    END SUBROUTINE NFILES
 
    subroutine plotnu(fnam)
+   implicit none
    COMMON /DRAWTHIS/  ndraw(50)
    COMMON /PLOTFIL/   PLOTJE
+   integer :: key, ndraw
    CHARACTER PLOTJE*255
    character (len=*) fnam
    
@@ -5335,25 +5337,31 @@
 subroutine getktoplot(kk,k)
  use m_flowgeom
  use m_flow
- if (kplotfrombedorsurface == 1) then  
+ implicit none
+ integer, intent(in) :: kk
+ integer, intent(out) :: k
+ if (kplotfrombedorsurface == 1) then
      k = kbot(kk) - 1 + min( kplot, kmxn(kk) )
      k = min(k, ktop(kk) )
  else
      k = kbot(kk) + kmxn(kk) - kplot
      k = max(k, kbot(kk) )
- endif   
- end subroutine getktoplot 
+ endif
+ end subroutine getktoplot
 
 subroutine getLtoplot(kk,k)
  use m_flowgeom
  use m_flow
- if (kplotfrombedorsurface == 1) then  
+ implicit none
+ integer, intent(in) :: kk
+ integer, intent(out) :: k
+ if (kplotfrombedorsurface == 1) then
      k = Lbot(kk) - 1 + min( kplot, kmxL(kk) )
      k = min(k, Ltop(kk) )
  else
      k = Lbot(kk) + kmxL(kk) - kplot
      k = max(k, Lbot(kk) )
- endif   
+ endif
  end subroutine getLtoplot 
 
      SUBROUTINE KPLOTPLUSMIN(IPM)
@@ -23652,8 +23660,10 @@ use m_flowexternalforcings
 use unstruc_display
 use m_transport, only: isalt, itemp 
 use gridoperations
+implicit none
 COMMON /DRAWTHIS/  ndraw(50)
-integer           :: n, k, kb, kt, n2
+integer           :: ndraw
+integer           :: n, k, kb, kt, n2, ncol
 character*40      :: tex
 double precision  :: znod, temb, temt, xp, yp
 
