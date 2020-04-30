@@ -261,6 +261,8 @@ subroutine load_displaysettings(filename)
        write (nrstring, '(I2)') i
        call prop_get_integer(dis_ptr, '*', 'ndraw('//trim(adjustl(nrstring))//')', ndraw(i), success)
     end do
+
+    call prop_get_integer(dis_ptr, '*', 'grwhydopt', grwhydopt, success)
     
 !   load active constituent number
     call prop_get_integer(dis_ptr, '*', 'ICONST', iconst_cur, success)
@@ -512,6 +514,8 @@ subroutine save_displaysettings(filename)
     call prop_set(dis_ptr, '*', 'ndraw(39)' , ndraw(39), ' ! show bedlevels (0:no, 1:yes)                                                         ')
     call prop_set(dis_ptr, '*', 'ndraw(40)' , ndraw(40), ' ! show waterbalance (0:no, 1:yes)                                                         ')
     call prop_set(dis_ptr, '*', 'ndraw(41)' , ndraw(41), ' ! show sorsin (0:no, 1:yes source=white, sink=black, 2=1+names)                                                         ')
+
+    call prop_set(dis_ptr, '*', 'grwhydopt' , grwhydopt, ' ! suboption display flow nodes > grw&hydrology parameters')
     
     call prop_set(dis_ptr, '*', 'ndrawpol'  , ndrawpol , ' ! Polygon, 1=No, 2=Regular, 3=plus numbers ZPL, 4=plus isocolour ZPL                                               ')
     call prop_set(dis_ptr, '*', 'ndrawobs'  , ndrawobs , ' ! 1=NO, 2=Cross, 3=Cross + name4=Polyfil,5=Polyfil + name,6=Cross+waterlevel,7=Cross+velocity magnitudes           ')
