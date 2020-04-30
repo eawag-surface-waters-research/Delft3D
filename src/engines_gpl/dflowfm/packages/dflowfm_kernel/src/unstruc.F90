@@ -39225,6 +39225,8 @@ end function ispumpon
  use m_hydrology_data
  use horton
  implicit none
+ double precision, parameter :: mmphr_to_mps = 1d-3/3600d0
+
  integer          :: k1, k2, L, k
  integer          :: ierr
  double precision :: z1, z2, h1, h2, dh, dQ, hunsat, hunsat1, hunsat2, fac, qgrw, h2Q
@@ -39236,6 +39238,7 @@ end function ispumpon
     infiltcap0 = infiltcap
     ierr = infiltration_horton_formula(ndx, HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, infiltcap0, infiltcap, &
                                        dts, HortonStateTime, hs, rain, HortonState)
+    infiltcap = infiltcap*mmphr_to_mps
  end if
 
  if (infiltrationmodel == 1) then  ! orig. interceptionmodel: no horizontal groundwater flow, and infiltration is instantaneous as long as it fits in unsat zone (called 'interception' here, but naming to be discussed)
@@ -43086,7 +43089,7 @@ if (mext /= 0) then
             endif
 
         else if (qid == 'infiltrationcapacity') then
-            if (infiltrationmodel == DFM_HYD_INFILT_CONST) then
+            if (infiltrationmodel == DFM_HYD_INFILT_CONST) then ! NOTE: old ext file: mm/day (iniFieldFile assumes mm/hr)
                success = timespaceinitialfield(xz, yz, infiltcap, ndx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
                infiltcap = infiltcap*1d-3/(24d0*3600d0)            ! mm/day => m/s
             else
