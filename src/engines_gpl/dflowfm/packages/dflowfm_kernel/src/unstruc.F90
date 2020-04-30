@@ -38443,6 +38443,9 @@ end subroutine setbobs_fixedweirs
                    pstru%generalst%fu(:,L0) = 0d0
                    pstru%generalst%ru(:,L0) = 0d0
                    pstru%generalst%au(:,L0) = 0d0
+                   pstru%generalst%state(:,L0) = 0
+                else if (pstru%type == ST_CULVERT) then
+                   pstru%culvert%state = 0
                 endif
              endif
              call set_fu_ru_structure(pstru, L0, fu(L), ru(L), au(L))
