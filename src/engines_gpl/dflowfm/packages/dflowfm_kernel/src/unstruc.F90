@@ -14370,11 +14370,13 @@ else if (nodval == 27) then
  else if (nodval == 47 .and. (jagrw > 0 .or. jadhyd > 0)) then
     select case (grwhydopt)
     case (1) ! Ground water pressure
-       if (infiltrationmodel == 1) then
-          znod = sgrw1(k)
-       else
-          znod = pgrw(kk)
-       endif
+       if (jagrw > 0) then
+          if (infiltrationmodel == 1) then
+             znod = sgrw1(k)
+          else
+             znod = pgrw(kk)
+          endif
+       end if
     case (4) ! Infiltration capacity
        if (infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) then
           znod = infiltcap(kk)*1d3*3600d0 ! m/s -> mm/hr
