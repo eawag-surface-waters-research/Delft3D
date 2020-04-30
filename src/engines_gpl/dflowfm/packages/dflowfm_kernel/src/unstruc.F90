@@ -14183,6 +14183,7 @@ end subroutine land_change_callback
  use m_flowparameters, only: ispirparopt
  use m_sferic, only:pi , rd2dg
  use m_wind, only: jawind
+ use unstruc_display, only: grwhydopt
 
 
  implicit none
@@ -14366,14 +14367,20 @@ else if (nodval == 27) then
     end if
  else if (nodval == 46) then
     znod =  turkinepsws(1,k)
- else if (nodval == 47) then
-    if (jagrw > 0) then
+ else if (nodval == 47 .and. (jagrw > 0 .or. jadhyd > 0)) then
+    select case (grwhydopt)
+    case (1) ! Ground water pressure
        if (infiltrationmodel == 1) then
           znod = sgrw1(k)
        else
           znod = pgrw(kk)
        endif
-    endif
+    case (4) ! Infiltration capacity
+       if (infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) then
+          znod = infiltcap(kk)*1d3*3600d0 ! m/s -> mm/hr
+       end if
+    end select
+
  else if (nodval == 48) then
    if (nonlin >= 2) then
       znod = a1m(kk)

@@ -168,6 +168,8 @@ implicit none
     integer :: ndrawStructures    = 1   !< structures, 1=No, 2=Yes (only symbols), 3=Yes (symbols and IDs)
     integer :: idisLink           = 0   !< Index of flowlink which is to be displayed with more information
   
+    integer :: grwhydopt = 1            !< Groundwater & Hydrology display menu item
+
     integer :: numzoomshift       = 250 !< nr of steps in zoomshift
     double precision :: wetplot   = 0.001 !< only show wet waterlevel points if (hs>wetplot)
     double precision :: yfac      = 0.0   !< cheap perspective

@@ -2480,8 +2480,8 @@
 
       OPTION(46)= 'turkinws                                '
          
-      if (jagrw > 0) then 
-         OPTION(47)= 'ground water pressure                (m)'
+      if (jagrw > 0 .or. jadhyd > 0) then 
+         OPTION(47)= 'Hydrology & groundwater parameters      '
       endif
          
       if (nonlin >= 2) then
@@ -2545,6 +2545,15 @@
          if ( NUMCONST.gt.0 ) then
             ndraw(28) = 1
             nwhat = 37
+            goto 1234
+         else
+            ndraw(28) = 0
+         end if
+
+      else if (ndraw(28).eq.47) then
+         if (jagrw > 0 .or. jadhyd > 0) then
+            ndraw(28) = 1
+            nwhat     = 46 ! Grw & Hydrology submenu
             goto 1234
          else
             ndraw(28) = 0
@@ -3167,6 +3176,28 @@
       sedparopt = nwhat2
       
       NDRAW(28) = numoptsed
+      if ( nwhat2.gt.0 ) then
+         CALL PARAMTEXT(option(nwhat2),1)
+      end if
+
+   ELSE IF (NWHAT .EQ. 46) THEN     ! Groundwater & Hydrology submenu 
+      EXP(1)    = 'MENU                                    '
+      EXP(2)    = 'SHOW Groundwater & Hydrology Parameters '
+      OPTION(1) = 'Groundwater pressure                 (m)'
+      OPTION(2) = ' ' ! Reserved
+      OPTION(3) = ' ' ! Reserved
+      OPTION(4) = 'Infiltration capacity            (mm/hr)'
+      OPTION(5) = ' ' ! Reserved for 'Actual infiltration              (mm/hr)'
+      ! Later: PotEvap, ActEvap, hsIntercept, etc.
+
+      MAXOPT    = 5
+      NWHAT2    = NDRAW(28)
+      CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
+      NDRAW(28) = NWHAT2
+      KEY = 3
+      grwhydopt = nwhat2
+      
+      NDRAW(28) = 47 ! set back to grw/hyd menu name
       if ( nwhat2.gt.0 ) then
          CALL PARAMTEXT(option(nwhat2),1)
       end if
