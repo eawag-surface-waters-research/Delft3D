@@ -83,6 +83,7 @@ implicit none
     integer                           :: IVAL_WY
     integer                           :: IVAL_PATM
     integer                           :: IVAL_RAIN
+    integer                           :: IVAL_INFILTCAP
     integer                           :: IVAL_WAVEH
     integer                           :: IVAL_WAVET
     integer                           :: IVAL_WAVED
@@ -158,6 +159,7 @@ implicit none
     integer                           :: IPNT_WX
     integer                           :: IPNT_WY
     integer                           :: IPNT_RAIN
+    integer                           :: IPNT_INFILTCAP
     integer                           :: IPNT_PATM
     integer                           :: IPNT_WAVEH
     integer                           :: IPNT_WAVET
@@ -339,6 +341,7 @@ subroutine init_valobs_pointers()
    IVAL_QFRC       = 0
    IVAL_QTOT       = 0
    IVAL_RAIN       = 0
+   IVAL_INFILTCAP  = 0
    IVAL_RHO        = 0
    IVAL_SBCX1      = 0          ! should be done per fraction
    IVAL_SBCXN      = 0
@@ -405,6 +408,9 @@ subroutine init_valobs_pointers()
    end if
    if ( jahisrain.gt.0 ) then
       i=i+1;            IVAL_RAIN       = i
+   end if
+   if ( jahisinfilt.gt.0 ) then
+      i=i+1;            IVAL_INFILTCAP  = i
    end if
    if ( numwqbots.gt.0 ) then
       i=i+1;            IVAL_WQB1       = i
@@ -578,6 +584,7 @@ subroutine init_valobs_pointers()
    IPNT_QFRC  = ivalpoint(IVAL_QFRC,  kmx)
    IPNT_QTOT  = ivalpoint(IVAL_QTOT,  kmx)
    IPNT_RAIN  = ivalpoint(IVAL_RAIN,  kmx)
+   IPNT_INFILTCAP = ivalpoint(IVAL_INFILTCAP,  kmx)
    IPNT_WQB1  = ivalpoint(IVAL_WQB1,  kmx)
    IPNT_WQBN  = ivalpoint(IVAL_WQBN,  kmx)
    

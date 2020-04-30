@@ -18768,6 +18768,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_varQ, id_varQint, id_varb, & ! id_varQavg,
                      id_varAu,  & ! id_varAuavg,
                      id_varu,  id_varwx, id_varwy, id_varrain, id_varpatm, &!id_varuavg,
+                     id_infiltcap, &
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
                      id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, id_zwu, &
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
@@ -18859,8 +18860,8 @@ subroutine unc_write_his(tim)            ! wrihis
 
     ! Close/reset any previous hisfile.
     if (ihisfile/=0) then  ! reset stord ncid to zero if file not open
-	   ierr = nf90_inquire(ihisfile, ndims)
-	   if (ierr/=0) ihisfile = 0
+       ierr = nf90_inquire(ihisfile, ndims)
+       if (ierr/=0) ihisfile = 0
     end if
 
     if (ihisfile > 0 .and. it_his == 0) then
@@ -19496,6 +19497,16 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_varrain, 'standard_name', 'lwe_precipitation_rate')
                ierr = nf90_put_att(ihisfile, id_varrain, 'long_name', 'precipitation depth per time unit')
                ierr = nf90_put_att(ihisfile, id_varrain, 'geometry', station_geom_container_name)
+            endif
+
+            if ((infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) .and. jahisinfilt > 0) then
+               ierr = nf90_def_var(ihisfile, 'infiltration_cap', nf90_double, (/ id_statdim, id_timedim /), id_infiltcap)
+               ierr = nf90_put_att(ihisfile, id_infiltcap, 'units', 'mm hr-1')
+               ierr = nf90_put_att(ihisfile, id_infiltcap, '_FillValue', dmiss)
+               ierr = nf90_put_att(ihisfile, id_infiltcap, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               !ierr = nf90_put_att(ihisfile, id_infiltcap, 'standard_name', 'infiltration_rate)
+               ierr = nf90_put_att(ihisfile, id_infiltcap, 'long_name', 'Infiltration capacity')
+               ierr = nf90_put_att(ihisfile, id_infiltcap, 'geometry', station_geom_container_name)
             endif
 
             if (kmx.gt.0 .and. jawrizc == 1) then
@@ -21028,6 +21039,10 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile, id_varrain,  valobsT(:,IPNT_rain),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
     endif
 
+    if ((infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) .and. jahisinfilt > 0) then
+       ierr = nf90_put_var(ihisfile, id_infiltcap,  valobsT(:,IPNT_infiltcap),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
+    endif
+
     if (numobs+nummovobs > 0) then
       if ( kmx>0 ) then
 !      3D
@@ -22395,6 +22410,11 @@ subroutine fill_valobs()
 !        Rainfall
          if (jarain > 0 .and. jahisrain > 0) then
             valobs(IPNT_RAIN,i) = rain(k)
+         end if
+
+!        Infiltration
+         if ((infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) .and. jahisinfilt > 0) then
+            valobs(IPNT_INFILTCAP,i) = infiltcap(k)*1d3*3600d0 ! m/s -> mm/hr
          end if
 
 !        Heatflux

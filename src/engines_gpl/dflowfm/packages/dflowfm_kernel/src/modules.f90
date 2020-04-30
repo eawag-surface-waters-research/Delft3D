@@ -2733,6 +2733,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jahistur                  !< Write k, eps and vicww to his file, 0: no, 1: yes
  integer                           :: jahiswind                 !< Write wind velocities to his file, 0: no, 1: yes
  integer                           :: jahisrain                 !< Write precipitation intensity  (depth per time) to this file, 0: no, 1: yes
+ integer                           :: jahisinfilt               !< Write infiltration rate to this file, 0: no, 1: yes
  integer                           :: jahistem                  !< Write temperature to his file, 0: no, 1: yes
  integer                           :: jahisheatflux             !< Write heatfluxes to his file, 0: no, 1: yes
  integer                           :: jahissal                  !< Write salinity to his file, 0: no, 1: yes
@@ -3149,6 +3150,7 @@ subroutine default_flowparameters()
     jahistur = 1
     jahiswind = 1
     jahisrain = 1
+    jahisinfilt = 1
     jahistem = 1
     jahisheatflux = 1
     jahissal = 1
@@ -5916,6 +5918,7 @@ module m_save_ugrid_state
    integer, allocatable, dimension(:)                 :: mesh1dUnmergedToMerged(:)
    !integer, allocatable, dimension(:)                 :: mesh1dMergedToUnMerged(:)
    integer                                            :: numMesh1dBeforeMerging
+   character(len=ug_idsLen),allocatable               :: contactids(:)
 
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, only call reset_save_ugrid_state() instead.
