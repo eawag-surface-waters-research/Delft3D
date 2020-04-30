@@ -397,26 +397,23 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
          end if
       end if
          
-      ! read locationType, only when quantity is waterlevel/bedlevel/waterdepth
-      if (strcmpi(quantity,'waterlevel') .or. strcmpi(quantity,'bedlevel') .or. strcmpi(quantity,'waterdepth')) then
-         call prop_get_string(node_ptr, '', 'locationType ', locationType , retVal)
-         if (.not. retVal) then
-            ilocType = ILATTP_ALL
-         else
-            call str_lower(locationType)
-            select case (trim(locationType))
-               case ('1d')
-                  ilocType = ILATTP_1D
-               case ('2d')
-                  ilocType = ILATTP_2D
-               case ('1d2d')
-                  ilocType = ILATTP_ALL
-               case default
-                  ilocType = ILATTP_ALL
-            end select
-         end if
+      call prop_get_string(node_ptr, '', 'locationType ', locationType , retVal)
+      if (.not. retVal) then
+         ilocType = ILATTP_ALL
+      else
+         call str_lower(locationType)
+         select case (trim(locationType))
+            case ('1d')
+               ilocType = ILATTP_1D
+            case ('2d')
+               ilocType = ILATTP_2D
+            case ('1d2d')
+               ilocType = ILATTP_ALL
+            case default
+               ilocType = ILATTP_ALL
+         end select
       end if
-      
+
       ! if the infiltrationmodel is not horton, but a horton quantity is detected, then send a error message
       if (infiltrationmodel /= DFM_HYD_INFILT_HORTON .and. &
          strcmpi(quantity,'Horton', 6)) then
