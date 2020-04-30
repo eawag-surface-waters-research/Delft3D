@@ -10734,7 +10734,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use dfm_error
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
- use m_hydrology, only: jadhyd, init_hydrology
+ use m_hydrology, only: jadhyd, alloc_hydrology, init_hydrology
  use m_integralstats
  use m_xbeach_data, only: instat, newstatbc
  use m_oned_functions
@@ -10968,7 +10968,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call timstop(handle_extra(14)) ! end flow trachy init
 
  if (jadhyd == 1) then
-    call init_hydrology()                          ! initialise the hydrology module
+    call alloc_hydrology()                          ! allocate the hydrology module (for spatial input reading in flow_flowinit())
  end if
 
  call timstrt('Initialise Calibration', handle_extra(15)) ! calibration init
@@ -11019,7 +11019,11 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  end if
  call timstop(handle_extra(23)) ! end flow init
 
-! initialize waq and add to tracer administration
+ if (jadhyd == 1) then
+    call init_hydrology()                          ! initialise the hydrology module (after flow_flowinit())
+ end if
+
+ ! initialize waq and add to tracer administration
  call timstrt('WAQ processes init  ', handle_extra(18)) ! waq processes init
  if (ti_waqproc /= 0d0) then
     if ( jawaqproc .eq. 1 ) then
@@ -39264,7 +39268,7 @@ end function ispumpon
  qingrw = 0d0 ; qoutgrw = 0d0; Volgrw = 0d0
 
  if (infiltrationmodel == DFM_HYD_INFILT_HORTON) then  ! Horton's infiltration equation
-    infiltcap0 = infiltcap
+    infiltcap0 = infiltcap/mmphr_to_mps
     ierr = infiltration_horton_formula(ndx, HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, infiltcap0, infiltcap, &
                                        dts, HortonStateTime, hs, rain, HortonState)
     infiltcap = infiltcap*mmphr_to_mps

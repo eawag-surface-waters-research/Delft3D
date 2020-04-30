@@ -40,9 +40,10 @@ module m_hydrology
    implicit none   
    contains
       
-   !> Initializes the hydrology module and processes.
+   !> Initializes all memory for the the hydrology module members.
    !! Intended to be called as part of flow_modelinit().
-   subroutine init_hydrology()
+   !! Actual initialization is done in init_hydrology().
+   subroutine alloc_hydrology()
       use m_alloc
 
       integer :: ierr
@@ -64,7 +65,7 @@ module m_hydrology
       endif
 
       if (infiltrationmodel == DFM_HYD_INFILT_HORTON) then
-         call realloc(infiltcap0, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+         call realloc(infiltcap0, ndx, keepExisting = .false., fill = huge(1d0), stat = ierr)
          call realloc(infiltcap,  ndx, keepExisting = .false., fill = 0d0, stat = ierr)
          call realloc(HortonMinInfCap, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
          call realloc(HortonMaxInfCap, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
@@ -72,6 +73,27 @@ module m_hydrology
          call realloc(HortonRecoveryRate, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
          call realloc(HortonStateTime, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
          call realloc(HortonState,     ndx, keepExisting = .false., fill = HORTON_CAPSTAT_NOCHANGE, stat = ierr)
+      end if
+      
+   end subroutine alloc_hydrology
+
+
+   !> Initializes the hydrology module and processes.
+   !! Intended to be called as part of flow_modelinit().
+   !! Memory allocation must have done before by alloc_hydrology().
+   subroutine init_hydrology()
+      use m_alloc
+
+      integer :: ierr
+
+      !
+      ! Infiltration
+      !
+
+      ! Start Horton at max infiltration (alsoto trigger decrease mode).
+      if (infiltrationmodel == DFM_HYD_INFILT_HORTON) then
+         infiltcap  = HortonMaxInfCap * 1d-3/3600d0 ! mm/hr -> m/s
+         infiltcap0 = infiltcap
       end if
       
    end subroutine init_hydrology
