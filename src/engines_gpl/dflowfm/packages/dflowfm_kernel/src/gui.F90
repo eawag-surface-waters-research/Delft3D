@@ -3191,9 +3191,8 @@
       ! Later: PotEvap, ActEvap, hsIntercept, etc.
 
       MAXOPT    = 5
-      NWHAT2    = NDRAW(28)
+      NWHAT2    = grwhydopt
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
-      NDRAW(28) = NWHAT2
       KEY = 3
       grwhydopt = nwhat2
       
