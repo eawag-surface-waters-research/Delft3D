@@ -6095,7 +6095,7 @@ contains
    call aerr( 'zh(nx)', ierr, nx)
    zh = dmiss_default
 
-   if (filetype .ne. ncflow .and. filetype .ne. arcinfo) then
+   if (filetype .ne. ncflow .and. filetype .ne. arcinfo .and. filetype /= geotiff) then
        call oldfil(minp0, filename)
    end if
 
