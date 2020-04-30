@@ -687,7 +687,7 @@ end subroutine flow_finalize_single_timestep
  end subroutine velocities_explicit
 
  subroutine flow_initimestep(jazws0, iresult)                     ! intialise flow timestep, also called once after flowinit
- use timers  
+ use timers
  use m_flowtimes
  use m_flow
  use m_flowgeom
@@ -1688,7 +1688,7 @@ if(q /= 0) then
  integer           :: L, n, k1, k2, k
  double precision  :: ha, hh
 
- 
+
  japerim = 0
 
 ! call sets01zbnd(1) ! set s1 on z-boundaries   SPvdP: not necessary, values at the boundaries were already properly filled in solve_matrix, as the boundary nodes are included in the solution vector
@@ -1747,7 +1747,7 @@ if(q /= 0) then
  end subroutine volsur
 
  subroutine checkvolnan(i)
- use MessageHandling 
+ use MessageHandling
  use m_flowgeom
  use m_flow
 
@@ -1757,7 +1757,7 @@ if(q /= 0) then
  integer :: n
 
  do n = 1,ndx
-    if (isnan(vol1(n))) then 
+    if (isnan(vol1(n))) then
        write(msgbuf,*)  ' volnan ', i, n ; call msg_flush()
     endif
  enddo
@@ -2162,7 +2162,7 @@ if(q /= 0) then
            endif
 
            if (jaconv >= 3) then
-              if (jasfer3D == 0) then 
+              if (jasfer3D == 0) then
                  uucn = abs ( ucnx(k3)*csu(L) + ucny(k3)*snu(L))
               else
                  uucn = abs( csu(L)*cor2linx(L,1,ucnx(k3),ucny(k3)) + snu(L)*cor2liny(L,1,ucnx(k3),ucny(k3)) )
@@ -2178,7 +2178,7 @@ if(q /= 0) then
                  beta = 1d0    ! do simple hydraulic radius approach
               endif
 
-              if (jasfer3D == 0) then 
+              if (jasfer3D == 0) then
                  uucn = abs ( ucnx(k4)*csu(L) + ucny(k4)*snu(L))
               else
                  uucn = abs( csu(L)*cor2linx(L,2,ucnx(k4),ucny(k4)) + snu(L)*cor2liny(L,2,ucnx(k4),ucny(k4)) )
@@ -4607,9 +4607,9 @@ end subroutine setdt
 
        if (kk > 0 .and. ksb > 0) then
 
+          qnn = qsrc(n)
           do k  = ksb,kst
-             qnn = qsrc(n)
-             qn  = qnn
+             qn = qnn
              if (kmx > 0) then
                 dzss  = zws(kst) - zws(ksb-1)
                 if (dzss > epshs) then
@@ -4618,7 +4618,7 @@ end subroutine setdt
                    qn = qnn / (kst - ksb + 1)
                 endif
              endif
-             uqn = qn*qn / arsrc(n)
+             uqn = qn*qnn / arsrc(n)
 
              if (jarhoxu > 0) then
                 rhoinsrc = rhomean   ! just for now
@@ -4629,11 +4629,13 @@ end subroutine setdt
              if (qsrc(n) > 0) then               ! from 1 to 2
                 uqcx(k) = uqcx(k) - uqn*cssrc(2,n)
                 uqcy(k) = uqcy(k) - uqn*snsrc(2,n)
+                sqa(k)  = sqa(k)  - qn           ! sqa : out - in
              else                                ! from 2 to 1
                 uqcx(k) = uqcx(k) + uqn*cssrc(1,n)
                 uqcy(k) = uqcy(k) + uqn*snsrc(1,n)
+                sqa(k)  = sqa(k)  + qn           ! sqa : out - in
              endif
-             sqa(k) = sqa(k) - qn                ! sqa : out - in
+
           enddo
 
        endif
@@ -12508,7 +12510,7 @@ subroutine writesomeinitialoutput()
 #endif
 
  implicit none
- 
+
  integer           :: k, mout, i
  double precision  :: frac, tot, dtav
  double precision  :: dum, f
@@ -12560,7 +12562,7 @@ subroutine writesomeinitialoutput()
  write(msgbuf,'(a,F25.10)') 'nr of timesteps        ( )  :' , dnt-1                      ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'average timestep       (s)  :' , dtav                       ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'nr of setbacks         ( )  :' , dsetb                      ; call msg_flush()
- 
+
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
 
@@ -12695,7 +12697,7 @@ subroutine writesomeinitialoutput()
        write(msgbuf,'(F14.3)') crs(i)%sumvalcur(2) ; call msg_flush()
     enddo
  endif
- 
+
  call timstrt('All', handle_all)
  end subroutine writesomefinaloutput
 
@@ -15778,7 +15780,7 @@ end if
  call timstrt('Initialise external forcings', handle_iniext)
  iresult = flow_initexternalforcings()               ! this is the general hook-up to wind and boundary conditions
  call timstop(handle_iniext)
- 
+
  ! from hereon, the processes are in sync
  if (jampi == 1) then
     ! globally reduce the error
@@ -42880,7 +42882,7 @@ end function is_1d_boundary_candidate
    call realloc(mbadef, Ndkx, keepExisting=.false., fill =-999)
    call realloc(mbadefdomain, Ndkx, keepExisting=.false., fill =-999)
  endif
- 
+
  ! Start processing ext files, start with success.
  success = .true.
 
@@ -43177,7 +43179,7 @@ if (mext /= 0) then
                success = timespaceinitialfield(xz, yz, sah, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
                if (success) then
                    call initialfield2Dto3D( sah, sa1, transformcoef(13), transformcoef(14) )
-               endif 
+               endif
             end if
             success = .true. ! We allow to disable salinity without removing the quantity.
 
@@ -44698,21 +44700,21 @@ if (ti_mba>0) then
  double precision                :: zb, zt, zz
  integer                         :: n, k, kb, kt
  !character(len=1), intent(in)    :: operand !< Operand type, valid values: 'O', 'A', '+', '*', 'X', 'N'.
- 
- zb = -1d9 ; if (tr13 .ne. dmiss) zb = tr13 
- zt =  1d9 ; if (tr14 .ne. dmiss) zt = tr14 
+
+ zb = -1d9 ; if (tr13 .ne. dmiss) zb = tr13
+ zt =  1d9 ; if (tr14 .ne. dmiss) zt = tr14
  do n = 1,ndx
-    if ( v2D(n) .ne. dmiss ) then 
-       if (kmx == 0) then 
-          call operate(v3D(n), v2D(n), operand) 
-       else 
+    if ( v2D(n) .ne. dmiss ) then
+       if (kmx == 0) then
+          call operate(v3D(n), v2D(n), operand)
+       else
           kb = kbot(n) ; kt = ktop(n)
           do k = kb, kt
              zz = 0.5d0*( zws(k) + zws(k-1) )
              if (zz > zb .and. zz < zt ) then
-                call operate(v3D(k), v2D(n), operand) 
+                call operate(v3D(k), v2D(n), operand)
              endif
-          enddo  
+          enddo
        endif
     endif
  enddo
