@@ -12642,7 +12642,7 @@ subroutine writesomeinitialoutput()
  msgbuf = ' ' ; call msg_flush()
 
  write(msgbuf,'(a,F25.10)') 'simulation period      (h)  :' , (tstop - tstart_user)/3600d0 ; call msg_flush()
- write(msgbuf,'(a,F25.10)') 'total time in timeloop (h)  :' , (timestep   )/3600d0 ; call msg_flush()
+ write(msgbuf,'(a,F25.10)') 'total time in timeloop (h)  :' , (timeloop)/3600d0 ; call msg_flush()
 
 
 #ifdef HAVE_MPI
