@@ -1008,7 +1008,7 @@
    if (istat /= 0) then
       error = .true.
       write(errmsg,'(a)') 'fm_erosed::error allocating memory.'
-      call write_error(errmsg, unit=mdia)
+      call mess(LEVEL_FATAL, errmsg)
    endif
    !
    wave = jawave>0
@@ -1550,7 +1550,7 @@
       !
       if (max_reals < MAX_RP) then
          write(errmsg,'(a)') 'fm_erosed::Insufficient space to pass real values to transport routine.'
-         call write_error(errmsg, unit=mdia)
+         call mess(LEVEL_FATAL, errmsg)
          error = .true.
          return
       endif
@@ -1613,7 +1613,7 @@
 
       if (max_integers < MAX_IP) then
          write(errmsg,'(a)') 'fm_erosed::Insufficient space to pass integer values to transport routine.'
-         call write_error(errmsg, unit=mdia)
+         call mess(LEVEL_FATAL, errmsg)
          error = .true.
          return
       endif
@@ -1621,7 +1621,7 @@
       !
       if (max_strings < MAX_SP) then
          write(errmsg,'(a)') 'fm_erosed::Insufficient space to pass strings to transport routine.'
-         call write_error(errmsg, unit=mdia)
+         call mess(LEVEL_FATAL, errmsg)
          error = .true.
          return
       endif
@@ -1699,7 +1699,7 @@
                        & error          ,wstau        , sinktot     , sourse(nm,l)  , sourfluff)
             if (error) then
                write(errmsg,'(a)') 'fm_erosed::erosilt returned an error. Check your inputs.'
-               call write_error(errmsg, unit=mdia)
+               call mess(LEVEL_FATAL, errmsg)
             end if
             !
             if (iflufflyr>0) then
@@ -1866,7 +1866,7 @@
             !
             if (error) then
                write(errmsg,'(a)') 'fm_erosed::eqtran in 3D returned an error. Check your inputs.'
-               call write_error(errmsg, unit=mdia)
+               call mess(LEVEL_FATAL, errmsg)
             end if
             !
             if (suspfrac) then
@@ -1948,7 +1948,7 @@
 
             if (error) then
                write(errmsg,'(a)') 'fm_erosed::eqtran in 2D returned an error. Check your inputs.'
-               call write_error(errmsg, unit=mdia)
+               call mess(LEVEL_FATAL, errmsg)
             end if
 
             if (suspfrac) then
@@ -2214,7 +2214,7 @@
       call duneaval(e_sbcn, error)         ! only on current related bed transport
       if (error) then
          write(errmsg,'(a)') 'fm_erosed::duneavalan returned an error. Check your inputs.'
-         call write_error(errmsg, unit=mdia)
+         call mess(LEVEL_FATAL, errmsg)
       end if
    end if
    !
@@ -2296,7 +2296,7 @@
    if (istat /= 0) then
       error = .true.
       write(errmsg,'(a)') 'fm_erosed::error deallocating memory.'
-      call write_error(errmsg, unit=mdia)
+      call mess(LEVEL_FATAL, errmsg)
    endif
 
    end subroutine fm_erosed

@@ -3,7 +3,7 @@ subroutine vrijn84_hxbs(dll_integers, max_integers, &
                   dll_strings , max_strings , &
                   sbc_total, sbc  , sbcu, sbcv, sbwu, sbwv     , &
                   equi_conc, cesus, ssus, sswu, sswv, t_relax  , &
-                  error_message   )
+                  error_message_c  )
 !DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'VRIJN84_HXBS' :: VRIJN84_HXBS
 !!--copyright-------------------------------------------------------------------
 ! Copyright (c) 2005, WL | Delft Hydraulics. All rights reserved.
@@ -56,7 +56,7 @@ real(hp)                                   , intent(out) :: sswu
 real(hp)                                   , intent(out) :: sswv
 real(hp)                                   , intent(out) :: t_relax
 character(len=256), dimension(max_strings) , intent(in)  :: dll_strings
-character(len=256)                         , intent(out) :: error_message
+character(kind=c_char)                     , intent(out) :: error_message_c(*) ! not empty: echo and stop run
 logical                                    , intent(out) :: equi_conc     ! equilibrium concentration near bedlevel
 logical                                    , intent(out) :: sbc_total     ! Sediment bedlevel concentration  (scalar)
 !
@@ -106,9 +106,12 @@ logical, save      :: firsttime = .true.
 logical, save      :: original = .true.
 integer, save      :: ihidexp = 1
 real(hp), save     :: rhidexp = 1.0
+character(len=256) :: error_message
+
 !
 ! Local variables
 !
+    integer        :: i 
     real(hp)       :: a
     real(hp)       :: ah
     real(hp), save :: alf1
@@ -182,7 +185,7 @@ equi_conc     = .false.
 	if (firsttime) then 
 	  firsttime = .false. 
 	    write(*,*) 'Van Rijn transport formula (including hiding exposure) -- Version 0.3 (bedload = bedload+suspended)'
-	    open (lundia, file='vr84hx.par')
+	    open (newunit=lundia, file='vr84hx.par')
 		read (lundia,*) line
 		read (line,*) rmuc  !Constant ripple factor 
         if (rmuc < 0.0) then
@@ -229,32 +232,20 @@ equi_conc     = .false.
 		end select
 	    close (lundia)
 	endif 
-	!write(*,*) dstar
-!	    d50tot = sqrt(d10*d90)
-!		write(*,*) 'd10    =', d10
-!		write(*,*) 'd50    =', d50
-!		write(*,*) 'd90    =', d90
-!		write(*,*) 'd50tot =', d50tot
-!		write(*,*) '------------------------------------------------'
 		select case (ihidexp)	
-			case (1)
-				error_message = 'D50 of complete mixture on the basis of hiding-exposure not possible'
 			case (2)
 				!hidexp = (log(19.0)/(log(19.0)+log(d50/d50tot)))**2
 				!d50/d50tot = 10**(log(19.0)/sqrt(hidexp)-log(19.0))
 				d50tot = d50/(10**(log(19.0)/sqrt(hidexp)-log(19.0)))
-				error_message = 'D50 of complete mixture on the basis of hiding-exposure not possible'
-			case (3)
-				error_message = 'D50 of complete mixture on the basis of hiding-exposure not possible'
 			case (4)
 				d50tot = hidexp**(1.0/rhidexp)*d50
-			case (5)
-				error_message = 'D50 of complete mixture on the basis of hiding-exposure not possible'
 			case default
 				error_message = 'D50 of complete mixture on the basis of hiding-exposure not possible'
+                do i=1,256
+                   error_message_c(i) = error_message(i:i)
+                enddo
+                return 
 		end select
-	!write(*,*) dstar
-
 
 	ntrsi = 1
     sbc = 0.0
@@ -353,8 +344,12 @@ sbcv    = 0.0_hp
 sbwu    = 0.0_hp
 sbwv    = 0.0_hp
 cesus   = 0.0_hp
-!ssus    = 0.0_hp
 sswu    = 0.0_hp
 sswv    = 0.0_hp
 t_relax = 0.0_hp
+
+do i=1,256
+   error_message_c(i) = error_message(i:i)
+enddo
+
 end subroutine vrijn84_hxbs
