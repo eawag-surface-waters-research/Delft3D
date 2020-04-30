@@ -10734,7 +10734,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use dfm_error
  use m_fm_wq_processes, only: jawaqproc
  use m_vegetation
- use m_hydrology, only: jadhyd, alloc_hydrology, init_hydrology
+ use m_hydrology, only: jadhyd, init_hydrology
  use m_integralstats
  use m_xbeach_data, only: instat, newstatbc
  use m_oned_functions
@@ -10966,10 +10966,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call flow_trachyinit ()                          ! initialise the trachytopes module
  end if
  call timstop(handle_extra(14)) ! end flow trachy init
-
- if (jadhyd == 1) then
-    call alloc_hydrology()                          ! allocate the hydrology module (for spatial input reading in flow_flowinit())
- end if
 
  call timstrt('Initialise Calibration', handle_extra(15)) ! calibration init
  if (jacali == 1) then
@@ -26601,6 +26597,7 @@ end do
  use m_transport, only : NUMCONST
  use m_integralstats
  use unstruc_channel_flow
+ use m_hydrology, only: jadhyd, alloc_hydrology, init_hydrology
 
  implicit none
  integer :: ierr, n, k, mxn, j, kj, kk, LL, L, k1, k2, k3, k4, n1, n2, n3, n4, nL, kb1, kb2, numkmin, numkmax, kbc1, kbc2
@@ -27258,6 +27255,10 @@ endif
        call aerr('spiraty( ndx )', ierr, ndx   ) ; spiraty = 0
     endif
  endif
+
+ if (jadhyd == 1) then
+    call alloc_hydrology()                          ! allocate the hydrology module (for spatial input reading in flow_flowinit())
+ end if
 
  if (jabarrieradvection == 3) then
     if (allocated (struclink) ) then
