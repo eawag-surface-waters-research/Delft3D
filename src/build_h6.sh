@@ -563,7 +563,7 @@ fi
 # autogen: sanity checks, libtoolize and autoreconf
 
 log="`pwd`/logs/autogen.log"
-command="./autogen.sh --verbose"
+command="./autogen.sh --verbose &> $log"
 log "Running $command in `pwd`"
 eval $command
 
@@ -617,7 +617,8 @@ command=" \
     AM_FCFLAGS='$LDFLAGSMT_ADDITIONAL $AM_FCFLAGS' \
     FCFLAGS='$flags $fflags $FCFLAGS' \
     AM_LDFLAGS='$LDFLAGSMT_ADDITIONAL $AM_LDFLAGS' \
-        ./configure --prefix=`pwd` --with-netcdf --with-mpi --with-petsc --with-metis=$METIS_DIR $PROJ_CONFARGS $SHAPELIB_CONFARGS $GDAL_CONFARGS $configureArgs"
+        ./configure --prefix=`pwd` --with-netcdf --with-mpi --with-petsc --with-metis=$METIS_DIR $PROJ_CONFARGS $SHAPELIB_CONFARGS $GDAL_CONFARGS $configureArgs &> $log \
+    "
 
 log "Running `echo $command | sed 's/ +/ /g'`"
 eval $command
@@ -640,7 +641,7 @@ if [ $noMake -eq 1 ]; then
 fi
 
 log='logs/make.log'
-command="FC=mpif90 make ds-install"
+command="FC=mpif90 make ds-install &> $log"
 
 log "Running $command"
 eval $command
@@ -656,13 +657,13 @@ if [ $useSp -eq 0 ]; then
     # build fix: clean and rebuild with FC=ifort, because fortrangis
     # does not currently accept mpif90, and therefore falls back to gfortran.
     log='logs/make_fortrangis.log'
-    command="FC=ifort make clean install -C third_party_open/fortrangis"
+    command="FC=ifort make clean install -C third_party_open/fortrangis &> $log"
 
     log "Running $command"
     eval $command
 
     log='logs/make_dflowfm.log'
-    command="FC=mpif90 make ds-install -C engines_gpl/dflowfm"
+    command="FC=mpif90 make ds-install -C engines_gpl/dflowfm &> $log"
 
     log "Running $command"
     eval $command
@@ -679,7 +680,7 @@ fi
 # Post-install cleaning
 log "Executing python script 'dimr_artifacts.py' to clean up installation directory"
 log='logs/post-install.log'
-command="python $maindir/engines_gpl/dimr/scripts/dimr_artifacts.py $maindir"
+command="python $maindir/engines_gpl/dimr/scripts/dimr_artifacts.py $maindir &> $log"
 
 log "Running $command"
 eval $command
