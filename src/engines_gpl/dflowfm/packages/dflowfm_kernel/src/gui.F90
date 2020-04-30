@@ -1048,6 +1048,7 @@
                 call read_samples_from_arcinfo(trim(filnam), ja)  ! reaasc
             else if (strcmpi(filnam(      i-3 :i), '.tif') &
                 .or. strcmpi(filnam(max(1,i-4):i), '.tiff')) then
+               call doclose(mlan)
                success = read_samples_from_geotiff(filnam)
             else if (strcmpi(filnam(i-3:i), '.xyz')) then
                 CALL reasam(MLAN,ja)  ! DOORLADEN
