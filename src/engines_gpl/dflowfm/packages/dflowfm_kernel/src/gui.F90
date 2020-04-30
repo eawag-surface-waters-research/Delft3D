@@ -1468,6 +1468,8 @@
             NUM = 1
          ELSE
             call doclose(mtek)
+            md_partugrid = 1
+            call getint('NetCDF ugrid? (0:UGRID-0.9, 1:UGRID-1.0, needed for 1D)', md_partugrid)
             call partition_write_domains(filnam, 6, 1, 1, md_partugrid) ! make subdomains for default solver
             CALL MESSAGE('YOU SAVED ' , filnam, ' partitions')
             md_netfile = ' '
@@ -22753,9 +22755,9 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
     dtav = dts
  endif
 
- WRITE (TEX(18:),'( A4,F8.3, A8,F7.3, A10,F7.3, A5,F8.1, A10,E7.2, A8,E14.8,  A8,E14.8)') &
+ WRITE (TEX(18:),'( A4,F8.3, A8,F7.3, A10,F7.3, A5,F8.1, A,E8.2, A8,E14.8,  A8,E14.8)') &
  'dt: ', dts, ' Avg.dt: ', dtav, &
- ' CPU/step: ', cpuperstep, ' Tot: ', tsteps, ' Sol/Rest: ', solrest , ' Samer: ', samerr, ' Samtot: ', sam1tot ! sam1tot ! samerr
+ ' CPU/step: ', cpuperstep, ' Tot: ', tsteps, ' Sol/Rest:', solrest , ' Samer: ', samerr, ' Samtot: ', sam1tot ! sam1tot ! samerr
  CALL ICTEXT(TRIM(TEX),13,2,221)
  TEX1=TEX
 

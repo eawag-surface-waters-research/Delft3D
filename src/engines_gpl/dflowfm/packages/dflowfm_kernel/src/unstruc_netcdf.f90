@@ -10035,6 +10035,8 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    real(kind=hp)           , pointer     :: edgeoffsets_p(:)
    integer                               :: hulp(2)
 
+   call readyy('Writing net data', 0d0)
+
    jaInDefine = 0
    n1d2dcontacts = 0
    start_index   = 1
@@ -10337,6 +10339,8 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
       deallocate(edge_type)
    end if ! 1D network geometry
 
+   call readyy('Writing net data', 0.3d0)
+
    numl2d = numl-numl1d
    if (numl2d > 0) then ! 2D net geometry
       call realloc(edge_nodes, (/ 2, numl2d /), fill = -999, keepExisting = .false.)
@@ -10443,6 +10447,8 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
       nv = 1
    end if
 
+   call readyy('Writing net data', 0.5d0)
+
    ! Dimensions
    ierr = nf90_def_dim(ncid, 'nNetNode', numk, id_netnodedim)
    ierr = nf90_def_dim(ncid, 'nNetLink', numl, ids_netelem%id_netlinkdim)
@@ -10474,10 +10480,12 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    if ( jaidomain_ /= 0) then
       ierr = nf90_put_var(ncid, id_idomain,   idomain,   count = (/ nump1d2d /))
    endif
+   call readyy('Writing net data', 0.8d0)
 
    if ( jaiglobal_s_ /= 0) then
       ierr = nf90_put_var(ncid, id_iglobal_s, iglobal_s, count = (/ nump1d2d /))
    end if
+   call readyy('Writing net data', 0.9d0)
 
    ! TODO: AvD:
    ! * in WAVE: handle the obsolete 'nFlowElemWithBnd'/'nFlowElem' difference
@@ -10490,6 +10498,7 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
    end if
 
    !call readyy('Writing flow geometry data',-1d0)
+   call readyy('Writing net data',-1d0)
    return
 
 888 continue
