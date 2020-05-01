@@ -33,6 +33,7 @@ char * getversionstring_dimr_exe(void);
 char * getfullversionstring_dimr_exe(void);
 char * getshortversionstring_dimr_exe(void);
 char * geturlstring_dimr_exe(void);
+char * getversionidstring_dimr_exe(void);
 
 #endif /* DIMR_EXE_VERSION */
 

@@ -119,7 +119,10 @@ Dimr::Dimr(void) {
     dirSeparator = "/";
 #else
     dirSeparator = "\\";
-#endif                                            
+#endif
+    // Do not remove the next two lines; they ensure that the version numbers are added to the binary
+	char * dimrlibversion = getversionidstring_dimr_lib();
+	char * dimrurl = geturlstring_dimr_lib();
 }
 
 

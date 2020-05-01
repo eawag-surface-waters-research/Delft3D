@@ -107,6 +107,8 @@ int main (int     argc,
     int rc = mcheck_pedantic (& memAbort);
     printf ("DEBUG: mcheck_pedantic returns %d\n", rc);
 #endif
+    // Do not delete the next line; it ensures that the version string is added to the binary
+	char * dimrexeversion = getversionidstring_dimr_exe();
 
     int ireturn = -1;
     DimrExe * DHE;
