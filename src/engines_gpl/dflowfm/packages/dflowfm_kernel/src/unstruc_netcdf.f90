@@ -10233,11 +10233,11 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
                do i = 1, n1dedges
                   hulp(1) = iglobal_s(edge_nodes(1,i))
                   hulp(2) = iglobal_s(edge_nodes(2,i))
-                  do ii = 1, size(meshgeom1d%nedge_nodes, 2)
-                     if (all(hulp == meshgeom1d%nedge_nodes(:,ii))) then
+                  do ii = 1, size(meshgeom1d%edge_nodes, 2)
+                     if (all(hulp == meshgeom1d%edge_nodes(:,ii))) then
                         edgebranchidx_p(i) = meshgeom1d%edgebranchidx(ii)
                         edgeoffsets_p(i) = meshgeom1d%edgeoffsets(ii)
-                        exit ! todo: not always found; check why
+                        exit
                      end if
                   end do
                end do
