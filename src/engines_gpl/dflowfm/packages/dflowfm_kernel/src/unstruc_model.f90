@@ -1414,6 +1414,7 @@ subroutine readMDUFile(filename, istat)
     !   call warn_flush()
     ! endif
     call prop_get_integer (md_ptr, 'time', 'AutoTimestepNoStruct' , ja_timestep_nostruct, success)
+    call prop_get_integer (md_ptr, 'time', 'AutoTimestepNoQin' ,    ja_timestep_noqout,    success)
 
     call prop_get_double  (md_ptr, 'time', 'Dtfacmax',  dtfacmax)
 
@@ -3058,6 +3059,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. ja_timestep_nostruct .ne. 0) then
         call prop_set(prop_ptr, 'time', 'AutoTimestepNoStruct' , ja_timestep_nostruct, '0 = no, 1 = yes (Exclude structure links (and neighbours) from time step limitation)' )
+    endif
+
+    if (writeall .or. ja_timestep_noqout /= 1) then
+       call prop_set(prop_ptr, 'time', 'AutoTimestepNoQout' , ja_timestep_noqout, '0 = no, 1 = yes (Exclude negative qin terms from time step limitation)' )
     endif
 
     call prop_set(prop_ptr, 'time', 'Tunit',                   md_tunit,        'Time unit for start/stop times (D, H, M or S)')

@@ -3803,6 +3803,7 @@ end subroutine setdt
  subroutine setdtorg(jareduced)                            ! set computational timestep dts
  use m_flowgeom
  use m_flow
+ use m_wind
  use m_flowtimes
 ! use unstruc_model
  use m_partitioninfo
@@ -3878,6 +3879,10 @@ end subroutine setdt
                 squloc = squ(k)
              end if
 
+             ! DO not include negative qin in timestep
+             if (ja_timestep_noqout > 0) then
+                squloc = squloc - max(-qin(k), 0d0)
+             end if
 
              if (squloc > eps10) then                   ! outflow only
                 if (hs(k) > epshu .and. vol1(k) > 0.0 .and. squloc > 0.0) then
@@ -3895,6 +3900,11 @@ end subroutine setdt
                 endif
              endif
           enddo
+          ! UNST-3844: DEBUG code:
+          !if (kkcflmx > 0) then
+          !   write (*,'(2(a,i8),3(a,e16.5))') '#dt: ', int(dnt), ', kkcflmx = ', kkcflmx, ', dts = ', dts, ', qextreal(kkcflmx) = ', qextreal(kkcflmx), ', squcor(kkcflmx) = ', squcor(kkcflmx)
+          !   write (*,'(4(a,e16.5))') 'vol1(kkcflmx) = ', vol1(kkcflmx), ', qin(kkcflmx) = ', qin(kkcflmx), ', q1(i) = ', q1(abs(nd(kkcflmx)%ln(1))), ', q1(ii) = ', q1(abs(nd(kkcflmx)%ln(min(nd(kkcflmx)%lnx,2)))) 
+          !   flush(6)
           !end if
           continue
 

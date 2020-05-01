@@ -4304,6 +4304,7 @@ end subroutine reset_flowgeom
  integer                           :: ja_timestep_auto      !< Use CFL-based dt (with dt_max as upper bound)
  integer                           :: ja_timestep_auto_visc !< Use explicit time step restriction based on viscosity term
  integer                           :: ja_timestep_nostruct  !< Exclude (structure) links without advection from the time step limitation
+ integer                           :: ja_timestep_noqout    !< Exclude negative qin term from timestep limitation.
  double precision                  :: tstart_user !< User specified time start (s) w.r.t. refdat
  double precision                  :: tstop_user  !< User specified time stop  (s) w.r.t. refdat
  double precision                  :: time_user   !< Next time of external forcings update (steps increment by dt_user).
@@ -4457,6 +4458,7 @@ subroutine default_flowtimes()
     ja_timestep_auto = 1            !< Use CFL-based dt (with dt_max as upper bound)
     ja_timestep_auto_visc = 0       !< Use explicit time step restriction based on viscosity term
     ja_timestep_nostruct = 0        !< Exclude (structure) links without advection from the time step limitation
+    ja_timestep_noqout   = 1        !< Exclude negative qin terms from the time step limitation
     tstart_user = 0d0               !< User specified time start (s) w.r.t. refdat
     tstop_user  = 100*24*3600       !< User specified time stop  (s) w.r.t. refdat
     time_user   = tstart_user       !< Next time of external forcings update (steps increment by dt_user).
