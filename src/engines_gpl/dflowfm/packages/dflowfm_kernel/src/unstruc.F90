@@ -618,6 +618,7 @@ character(len=255)   :: filename_fou_out
     call TEXTFLOW()
  end if
 
+ call timstop(handle_steps)
  iresult = dfm_check_signals()                   ! Abort when Ctrl-C was pressed
  if (iresult /= DFM_NOERR) goto 888
 
@@ -635,8 +636,6 @@ character(len=255)   :: filename_fou_out
       endif
       call postpr_fourier(time0, dts)
    endif
-
-   call timstop(handle_steps)
 
 end subroutine flow_finalize_single_timestep
 
