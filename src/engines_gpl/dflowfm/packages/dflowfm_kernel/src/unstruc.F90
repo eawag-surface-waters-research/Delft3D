@@ -38731,7 +38731,7 @@ end function ispumpon
 
  integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim, imba
  double precision :: aufu, auru, tetau
- double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qextk
+ double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qextk, aloc
 
  buitje = 0.013d0/300d0                                      ! 13 mm in 5 minutes
 
@@ -38896,8 +38896,10 @@ end function ispumpon
           hsk = s0(k) - bl(k)
           if (a1(k) > 0.0) then
              ds  = -dts*qin(k)/a1(k)                            ! altijd minder dan daling bij niet-lin volumes
+             aloc = a1(k)
           else
-          ds  = -dts*qin(k)/ba(k)                            ! altijd minder dan daling bij niet-lin volumes
+             ds  = -dts*qin(k)/ba(k)                            ! altijd minder dan daling bij niet-lin volumes
+             aloc = ba(k)
           endif
           if (kfs(k) == 0) then                              ! niet in matrix
              if (ds  < hsk) then                             ! er is genoeg
@@ -38905,7 +38907,7 @@ end function ispumpon
              else                                            ! leeg
                 s1(k) = bl(k) ; ds = hsk
              endif
-             qin(k) = -ds*ba(k)/dts
+             qin(k) = -ds*aloc/dts
 
           else if (hsk > 0d0) then                            ! all explicit
              dd(k)  = -min( vol1(k)/dts, abs(qin(k) ) )
