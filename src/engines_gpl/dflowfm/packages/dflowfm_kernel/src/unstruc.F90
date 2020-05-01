@@ -14382,6 +14382,10 @@ else if (nodval == 27) then
        if (infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) then
           znod = infiltcap(kk)*1d3*3600d0 ! m/s -> mm/hr
        end if
+   case (6) ! Interception layer thickness
+      if (jaintercep == 1) then
+         znod = InterceptionLayerThickness(kk)
+      end if
     end select
 
  else if (nodval == 48) then

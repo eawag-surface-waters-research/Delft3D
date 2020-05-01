@@ -1349,6 +1349,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'grw'  , 'sgrwini'            , sgrwini)
     call prop_get_double (md_ptr, 'grw'  , 'bgrwuni'            , bgrwuni)
 
+    call prop_get_integer(md_ptr, 'hydrology'  , 'jaintercep'   , jaintercep)
 
 ! Time
     call prop_get_string(md_ptr, 'time', 'RefDate', refdat)
@@ -3003,6 +3004,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'grw', 'sgrwini'            , sgrwini,           'initial groundwater level, if h_unsatini < 0')
        endif
     endif
+
+    if (writeall .or. jagrw > 0 .or. jaintercep > 0) then
+      call prop_set(prop_ptr, 'grw', 'jaintercep'        , jaintercep,           '0=No interception, 1=With interception')
+   endif
 
 
    ! JRE -> aanvullen, kijken wat aangeleverd wordt

@@ -89,7 +89,9 @@ module m_hydrology_data
    double precision, allocatable, target :: ThroughFall(:)    
    double precision, allocatable, target :: StemFlow(:) 
    double precision, allocatable, target :: LeftOver(:) 
-   double precision, allocatable, target :: Interception(:) 
+   double precision, allocatable, target :: Interception(:)
+   double precision, allocatable, target :: InterceptionLayerThickness(:)     !< [m] Interception layer thickness {"location": "face", "shape": ["ndx"]}
+   integer                               :: jaintercep                        !< [-] Integer indicating if interception is off (0) or on (1)
 
 contains
 
@@ -97,6 +99,7 @@ contains
 !! For a reinit prior to flow computation, only call reset_hydrology_data() instead.
 subroutine default_hydrology_data()
    jadhyd            = 0
+   jaintercep = 0
 
    infiltrationmodel = DFM_HYD_NOINFILT
    infiltcapuni      = 0d0

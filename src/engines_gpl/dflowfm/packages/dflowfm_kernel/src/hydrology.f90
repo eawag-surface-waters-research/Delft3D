@@ -54,6 +54,11 @@ module m_hydrology
       call realloc(ActEvap, ndx, keepExisting = .false., fill = 0d0)
 
       !
+      ! Interception
+      !
+      call realloc(InterceptionLayerThickness, ndx, keepExisting = .false., fill = 0d0)
+
+      !
       ! Infiltration
       !
       if (infiltrationmodel /= DFM_HYD_NOINFILT) then
