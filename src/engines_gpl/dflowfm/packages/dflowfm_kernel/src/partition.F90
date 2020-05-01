@@ -56,7 +56,8 @@ end module
 module m_partitioninfo
 
 use m_tpoly
-! use dfm_error   ! removed it, the if's are not safe, they rely on 0 or 1
+use precision_basics, only : hp
+use meshdata, only : ug_idsLen
 
 #ifdef HAVE_MPI
    use mpi, only: NAMECLASH_MPI_COMM_WORLD => MPI_COMM_WORLD ! Apparently PETSc causes a name clash, see commit #28532.
@@ -236,6 +237,15 @@ use m_tpoly
    double precision :: prectol = 0.50D-2 ! tolerance for drop of preconditioner
    integer          :: jabicgstab = 1 ! 
    integer          :: Nsubiters  = 1000
+
+!  1D global arrays that are stored during partitioning
+   character(len=ug_idsLen), private, allocatable :: nodeids_g(:), nodelongnames_g(:)
+   real(kind=hp)           , private, pointer     :: nodeoffsets_g(:)
+   integer                 , private, pointer     :: nbranchids_g(:)
+   integer                 , private, pointer     :: edgebranchidx_g(:)
+   real(kind=hp)           , private, pointer     :: edgeoffsets_g(:)
+   logical                 , private              :: branches_partitioned = .false.
+
    contains
 
 !> generate partition numbering from partition polygons and
@@ -763,6 +773,9 @@ use m_tpoly
          
 !        remove masked netcells
          call remove_masked_netcells()
+
+         call partition_make_branches_in_domain(idmn, numl1d, ierror)
+         if (ierror /= 0) goto 1234
       endif
       ierror = DFM_NOERR
  1234 continue
@@ -771,8 +784,153 @@ use m_tpoly
 
       return
    end subroutine partition_make_domain
-   
-   
+
+   !> partition 1D arrays
+   subroutine partition_make_branches_in_domain(idmn, numl1d, ierror)
+      use m_save_ugrid_state, only : meshgeom1d, nodeids, nodelongnames
+      implicit none
+      integer, intent(in   )                :: idmn   !< domain number
+      integer, intent(in   )                :: numl1d !< number of 1D links
+      integer, intent(  out)                :: ierror !< (allocation) error code. 0=success
+
+      integer, allocatable                  :: edge_nodes(:,:)
+      integer                               :: hulp(2), i, ii, n1dedges, numk1d
+      character(len=ug_idsLen), allocatable :: nodeids_p(:), nodelongnames_p(:)
+      real(kind=hp)           , pointer     :: nodeoffsets_p(:)
+      integer                 , pointer     :: nbranchids_p(:)
+      integer                 , pointer     :: edgebranchidx_p(:)
+      real(kind=hp)           , pointer     :: edgeoffsets_p(:)
+
+      ierror = 0
+      if (meshgeom1d%numnode < 0) return
+
+      ! set pointers to keep global arrays, and allow restore (see subroutine restore_branches below)
+      if (idmn == 0) then
+         call move_alloc(nodeids,       nodeids_g)
+         call move_alloc(nodelongnames, nodelongnames_g)
+         nodeoffsets_g   => meshgeom1d%nodeoffsets
+         nbranchids_g    => meshgeom1d%nodebranchidx
+         edgebranchidx_g => meshgeom1d%edgebranchidx
+         edgeoffsets_g   => meshgeom1d%edgeoffsets
+         branches_partitioned = .true.
+      else
+         ! clean up arrays from previous domain
+         deallocate(nodeids, nodelongnames)
+         deallocate(meshgeom1d%nodeoffsets, meshgeom1d%nodebranchidx, meshgeom1d%edgebranchidx, meshgeom1d%edgeoffsets)
+      end if
+
+      ! create edge_nodes (Edge-to-node mapping array)
+      call get_edge_nodes_in_domain(numl1d, numk1d, edge_nodes, ierror)
+      if (ierror /= 0) return
+
+      ! partition node arrays
+      allocate(nbranchids_p(numk1d), nodeids_p(numk1d), nodeoffsets_p(numk1d), nodelongnames_p(numk1d), stat=ierror)
+      if (ierror /= 0) return
+      do i = 1, numk1d
+         ii = iglobal_s(i)
+         nodeids_p(i) = nodeids_g(ii)
+         nbranchids_p(i) = nbranchids_g(ii)
+         nodeoffsets_p(i) = nodeoffsets_g(ii)
+         nodelongnames_p(i) = nodelongnames_g(ii)
+      end do
+
+      ! partition edge arrays
+      n1dedges = size(edge_nodes, 2)
+      allocate(edgebranchidx_p(n1dedges), edgeoffsets_p(n1dedges), stat=ierror)
+      if (ierror /= 0) return
+      do i = 1, n1dedges
+         hulp(1) = iglobal_s(edge_nodes(1,i))
+         hulp(2) = iglobal_s(edge_nodes(2,i))
+         do ii = 1, size(meshgeom1d%edge_nodes, 2)
+            if (all(hulp == meshgeom1d%edge_nodes(:,ii))) then
+               edgebranchidx_p(i) = edgebranchidx_g(ii)
+               edgeoffsets_p(i) = edgeoffsets_g(ii)
+               exit
+            end if
+         end do
+      end do
+
+      ! finally, set pointers and allocatables in meshgeom1d and m_save_ugrid_state
+      call move_alloc(nodeids_p, nodeids)
+      call move_alloc(nodelongnames_p, nodelongnames)
+      meshgeom1d%nodeoffsets   => nodeoffsets_p
+      meshgeom1d%nodebranchidx => nbranchids_p
+      meshgeom1d%edgebranchidx => edgebranchidx_p
+      meshgeom1d%edgeoffsets   => edgeoffsets_p
+   end subroutine partition_make_branches_in_domain
+
+   !> helper routine to get edge_nodes for current domain while partitioning
+   subroutine get_edge_nodes_in_domain(numl1d, numk1d, edge_nodes, ierror)
+      use network_data, only : kn
+      implicit none
+      integer, intent(in)               :: numl1d          !< number of 1D links
+      integer, intent(out), allocatable :: edge_nodes(:,:) !< Edge-to-node mapping array.
+      integer, intent(out)              :: numk1d          !< number of 1D nodes
+      integer, intent(out)              :: ierror          !< error code
+
+      integer              :: k1, k2, n1dedges, l, size
+      integer, allocatable :: kc(:)
+
+      size = maxval(kn(1:2, 1:numl1d))
+      allocate(kc(size), stat=ierror)
+      if (ierror /= 0) return
+      kc(:) = 0
+
+      n1dedges = 0
+      do l=1,numl1d
+         if (kn(3,l) == 1 .or. kn(3,l) == 6) then
+            n1dedges = n1dedges + 1
+         end if
+      end do
+      allocate(edge_nodes(2, n1dedges), stat=ierror)
+      if (ierror /= 0) return
+
+      n1dedges = 0
+      numk1d = 0
+      do l=1,numl1d
+         if (kn(3,l) == 1 .or. kn(3,l) == 6) then
+            n1dedges = n1dedges + 1
+
+            k1 = kn(1,l)
+            k2 = kn(2,l)
+            if (kc(k1) == 0) then
+               numk1d = numk1d+1
+               kc(k1) = -numk1d ! remember new node number
+            end if
+            if (kc(k2) == 0) then
+               numk1d = numk1d+1
+               kc(k2) = -numk1d ! remember new node number
+            end if
+
+            edge_nodes(1,n1dedges) = abs(kc(kn(1,l)))
+            edge_nodes(2,n1dedges) = abs(kc(kn(2,l)))
+         end if
+      end do
+   end subroutine get_edge_nodes_in_domain
+
+   !> restore 1D arrays that are partitioned in partition_make_branches_in_domain
+   !! also clean up of 1D arrays from the last domain
+   subroutine restore_branches()
+      use m_save_ugrid_state, only : meshgeom1d, nodeids, nodelongnames
+
+      implicit none
+
+      if (branches_partitioned) then
+         ! clean up last domain
+         deallocate(nodeids, nodelongnames)
+         deallocate(meshgeom1d%nodeoffsets, meshgeom1d%nodebranchidx, meshgeom1d%edgebranchidx, meshgeom1d%edgeoffsets)
+         ! restore global arrays
+         call move_alloc(nodeids_g,       nodeids)
+         call move_alloc(nodelongnames_g, nodelongnames)
+         meshgeom1d%nodeoffsets   => nodeoffsets_g
+         meshgeom1d%nodebranchidx => nbranchids_g
+         meshgeom1d%edgebranchidx => edgebranchidx_g
+         meshgeom1d%edgeoffsets   => edgeoffsets_g
+         branches_partitioned = .false.
+         nullify(nodeoffsets_g, nbranchids_g, edgebranchidx_g, edgeoffsets_g)
+      end if
+   end subroutine restore_branches
+
 !> find original cell numbers
    subroutine find_original_cell_numbers(L2Lorg, Lne_org, iorg)
       use unstruc_messages
