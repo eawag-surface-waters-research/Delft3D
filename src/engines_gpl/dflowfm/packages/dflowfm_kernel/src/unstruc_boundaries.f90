@@ -1376,11 +1376,22 @@ logical function initboundaryblocksforcings(filename)
                 call warn_flush()
                 cycle
              end if
+             call prop_get(node_ptr, '', 'locationType', itemtype, success)
+             select case (str_tolower(trim(itemtype)))
+             case ('1d')
+                ilattype = ILATTP_1D
+             case ('2d')
+                ilattype = ILATTP_2D
+             case ('1d2d', 'all')
+                ilattype = ILATTP_ALL
+             case default
+                ilattype = ILATTP_ALL
+             end select
              
 
              call realloc(kcsini, ndx, keepExisting=.false., fill = 0)
-             !call prepare_lateral_mask(kcsini, iLocType)
-             kcsini(ndx2d+1:ndxi) = 1 ! Only 1D for now 
+             call prepare_lateral_mask(kcsini, ilattype)
+             !kcsini(ndx2d+1:ndxi) = 1 ! Only 1D for now 
             
              success = timespaceinitialfield(xz, yz, qext, ndx, forcingFile, filetype, fmmethod, oper, transformcoef, 2, kcsini) ! zie meteo module
              cycle ! This was a special case, don't continue with timespace processing below.
