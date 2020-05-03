@@ -10778,8 +10778,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  iresult = DFM_GENERICERROR
  
- call reset_timers()
- 
  call datum2(rundat2)
  L = len_trim(rundat2)
  call timstrt('All', handle_all)
@@ -12858,6 +12856,8 @@ subroutine writesomeinitialoutput()
 
     ! Only reset counters and other scalars, allocatables should be
     ! automatically reset elsewhere (e.g., allocateandset*, flow_geominit)
+
+    call reset_timers()
 
     call init_unstruc_netcdf()
 
