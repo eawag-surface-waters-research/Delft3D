@@ -213,7 +213,6 @@ module m_flow1d_reader
       nullify(md_ptr)
       md1d_flow1d_file = filenames%onednetwork
       folder = filenames%roughnessdir
-      call timini()
       timon = .true.
       
       if (len_trim(md1d_flow1d_file) > 0) then
@@ -256,7 +255,6 @@ module m_flow1d_reader
          endif
       endif
       
-      call timini()
       timon = .true.
 
       success = .true.
@@ -401,7 +399,6 @@ module m_flow1d_reader
       integer                         :: timerFileUnit
       integer                         :: res 
       
-      call timini()
       timon = .true.
 
       success = .true.

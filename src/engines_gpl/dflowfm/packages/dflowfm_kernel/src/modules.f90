@@ -4555,6 +4555,24 @@ subroutine reset_flowtimes()
     alfsmo        = 1d0              !<
 end subroutine reset_flowtimes
 
+subroutine reset_timers()
+   use Timers
+
+   call timini()
+   handle_user    = 0
+   handle_steps   = 0
+   handle_umod    = 0
+   handle_sol     = 0
+   handle_furu    = 0
+   handle_all     = 0
+   handle_inistep = 0
+   handle_iniext  = 0
+   handle_ext     = 0
+   handle_extbnd  = 0
+   handle_extra   = 0
+
+end subroutine reset_timers
+
 end module m_flowtimes
 
 

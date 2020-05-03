@@ -127,7 +127,6 @@
       integer  ( 4), private              :: maxlvl         !< maximum level of call trees
       integer  ( 4), private, pointer     :: ntimcal(:) => null()    !< call frequency
       integer  ( 4), private, pointer     :: level  (:)     !< call level
-      integer  ( 4), private, pointer     :: handle2ihandl(:) !< indirection table
       real     ( 8), private, pointer     :: cpstart(:)     !< to save cpu startimes
       real     ( 8), private, pointer     :: cptime (:)     !< to accumulate cpu times
       real     ( 8), private, pointer     :: cpinc (:)      !< incremental cpu times
@@ -140,7 +139,6 @@
       integer  ( 4), private, pointer     :: context(:,:,:) !< call context
       integer  ( 4), private, pointer     :: ntim1(:)       !< call frequency
       integer  ( 4), private, pointer     :: levl1(:)       !< call level
-      integer  ( 4), private, pointer     :: ha2iha1(:)     !< indirection table
       real     ( 8), private, pointer     :: cpst1(:)       !< to save cp startimes
       real     ( 8), private, pointer     :: cptt1(:)       !< to save cp times
       real     ( 8), private, pointer     :: cpin1 (:)      !< incremental cpu times
@@ -172,7 +170,6 @@
          nohmax = handinc
          allocate ( ntimcal(     nohmax) )
          allocate ( level  (     nohmax) )
-         allocate ( handle2ihandl(nohmax) )
          allocate ( cpstart(     nohmax) )
          allocate ( cptime (     nohmax) )
          allocate ( cpinc  (     nohmax) )
@@ -187,7 +184,6 @@
       ntimcal = 0
       level   = 0
       ncontxt =   0
-      handle2ihandl = 0
       cpstart = 0d0
       cptime  = 0d0
       cpinc   = 0d0
@@ -208,7 +204,6 @@
 
       allocate ( ntim1(     nohmax+handinc) )
       allocate ( levl1(     nohmax+handinc) )
-      allocate ( ha2iha1(   nohmax+handinc) )
       allocate ( cpst1(     nohmax+handinc) )
       allocate ( cptt1(     nohmax+handinc) )
       allocate ( cpin1(     nohmax+handinc) )
@@ -222,7 +217,6 @@
 
       ntim1   = 0
       levl1   = 0
-      ha2iha1 = 0d0
       cpst1   = 0d0
       cptt1   = 0d0
       cpin1   = 0d0
@@ -235,7 +229,6 @@
       
       ntim1(    1:nohmax) = ntimcal
       levl1(    1:nohmax) = level
-      ha2iha1(  1:nohmax) = handle2ihandl
       cpst1(    1:nohmax) = cpstart
       cptt1(    1:nohmax) = cptime
       cpin1(    1:nohmax) = cpinc
@@ -248,7 +241,6 @@
 
       deallocate ( ntimcal )
       deallocate ( level   )
-      deallocate ( handle2ihandl )
       deallocate ( cpstart )
       deallocate ( cptime  )
       deallocate ( cpinc   )
@@ -261,7 +253,6 @@
 
       ntimcal => ntim1
       level   => levl1
-      handle2ihandl => ha2iha1
       cpstart => cpst1
       cptime  => cptt1
       cpinc   => cpin1
@@ -282,22 +273,21 @@
       !> Starts timing for this subroutine or program part.
       !! 'subrou' is a max. 40 character ID-string.
       !! 'ihandl' must be saved by the caller
-      subroutine timstrt ( subrou, handle )
+      subroutine timstrt ( subrou, ihandl )
 
       character*(*), intent(in   ) :: subrou    !  name of (part of) subroutine to monitor
-      integer(4)   , intent(inout) :: handle    !  handle of the section
-      integer(4)                      ihandl    !  handle of the timer
+      integer(4)   , intent(inout) :: ihandl    !  handle of the section
+      integer(4)                      handle    !  handle of the timer
       integer(4)                      i         !  loop counter
       integer(4)                      ival(8)
       real   (4)                      time
 
-      if ( handle .eq. 0 ) then                              !  first time that the timer is called for
+      handle = 0
+      if ( ihandl .eq. 0 ) then                              !  first time that the timer is called for
          noshndl = noshndl + 1                               !  this handle
          if ( noshndl .eq. nohmax ) call timinc ( )          !  allocate new batch of memory
          ihandl  = noshndl
       else                                                   !  find its occurence in the call trees
-         ihandl = handle2ihandl(handle)
-         handle = 0
          do i = 1, ncontxt(ihandl)
             if ( context(i,1,ihandl) .eq. prevhnd ) then
                handle = context(i,2,ihandl)
@@ -318,7 +308,6 @@
          ntimcal(handle) = 0                                 !  zero the accumulators
          cptime (handle) = 0.0d00
          wctime (handle) = 0.0d00
-         handle2ihandl(handle) = ihandl
       endif
       dlevel  = dlevel + 1                                   !  level is 1 deeper than previous level
       level  (handle) = dlevel                               !  levels are only used to indent the
@@ -338,27 +327,25 @@
 !***************
 
       !> stops timing for this handle and accumulates the result
-      subroutine timstop ( handle )
+      subroutine timstop ( ihandl )
 
-      integer(4)   , intent(in   ) :: handle    !  handle of the subroutine
-      integer(4)                      ihandl    !  handle of the timer
-      integer(4)                      handle2    !  handle of the timer
+      integer(4)   , intent(in   ) :: ihandl    !  handle of the section
+      integer(4)                      handle    !  handle of the timer
       integer(4)                      i         !  loop counter
       real   (8)                      stopt
       real   (4)                      time
 
       dlevel = dlevel-1                                      !  we return, decrease the level
-      handle2 = -1
-      ihandl = handle2ihandl(handle)
+      handle = -1
       do i = 1, ncontxt(ihandl)                              !  find the context of the timer handle
          if ( context(i,2,ihandl) .eq. prevhnd ) then        !  (prevhnd) that we close now
-            handle2  = prevhnd                               !  this is the handle that we close
+            handle  = prevhnd                               !  this is the handle that we close
             prevhnd = context(i,1,ihandl)                    !  we retrieve the calling handle from
             exit                                             !  context
          endif
       enddo
 
-      if ( handle2 == -1 ) then
+      if ( handle == -1 ) then
          write( *, * ) 'Programming error: unbalanced calls to timstart/timstop'
          write( *, * ) 'Found in the context of handle ', ihandl, ncontxt(ihandl)
          return
@@ -378,7 +365,7 @@
 
 !***************
 
-      !> writes the results to the report file 'filename'
+      !> writes the results to the report file 'afile'
       subroutine timdump ( afile )
 
       integer(4)    i                         !   loop accross timer handles
@@ -456,61 +443,93 @@
 
 !***************
    
-      !> Get the cpu time for 'handle'  
-      real(8) function tim_get_cpu(handle)
+      !> Get the cpu time for 'ihandl'  
+      real(8) function tim_get_cpu(ihandl)
 
-      integer, intent(in) :: handle          !<  handle of the timer
+      integer, intent(in) :: ihandl          !<  handle of the section
+      integer             :: handle          !<  handle of the timer
+      integer             :: i
 
-      if (handle <= 0) then
-         tim_get_cpu = 0d0
+      tim_get_cpu = 0d0
+
+      if (ihandl > 0) then
+         do i = 1, ncontxt(ihandl)
+            handle = context(i,2,ihandl)
+            tim_get_cpu = tim_get_cpu + cptime(handle)
+         enddo
       else
-         tim_get_cpu = cptime(handle)
+         tim_get_cpu = 0d0
       endif
 
       end function tim_get_cpu
 
-      !>  Get the incremental cpu time for 'handle' (= latest interval 
+      !>  Get the incremental cpu time for 'ihandl' (= latest interval 
       !!  between start and stop)
-      real(8) function tim_get_cpu_inc(handle)
+      real(8) function tim_get_cpu_inc(ihandl)
 
-      integer, intent(in) :: handle          !<  handle of the timer
+      integer, intent(in) :: ihandl          !<  handle of the section
+      integer             :: handle          !<  handle of the timer
+      integer             :: i
 
-      if (handle <= 0) then
-         tim_get_cpu_inc = 0d0
+      tim_get_cpu_inc = 0d0
+
+      if (ihandl > 0) then
+         do i = 1, ncontxt(ihandl)
+            handle = context(i,2,ihandl)
+            tim_get_cpu_inc = tim_get_cpu_inc + cpinc(handle)
+         enddo
       else
-         tim_get_cpu_inc = cpinc(handle)
+         tim_get_cpu_inc = 0d0
       endif
+
       end function tim_get_cpu_inc
 
-      !> Get the incremental wall clock time for 'handle' (= latest 
+      !> Get the incremental wall clock time for 'ihandl' (= latest 
       !! interval between start and stop)  
-      real(8) function tim_get_wallclock_inc(handle)
+      real(8) function tim_get_wallclock_inc(ihandl)
 
-      integer, intent(in) :: handle          !<  handle of the timer
+      integer, intent(in) :: ihandl          !<  handle of the section
+      integer             :: handle          !<  handle of the timer
+      integer             :: i
 
-      if (handle <= 0) then
-         tim_get_wallclock_inc = 0d0
+      tim_get_wallclock_inc = 0d0
+
+      if (ihandl > 0) then
+         do i = 1, ncontxt(ihandl)
+            handle = context(i,2,ihandl)
+            tim_get_wallclock_inc = tim_get_wallclock_inc + wcinc(handle)
+         enddo
       else
-         tim_get_wallclock_inc = wcinc(handle)
+         tim_get_wallclock_inc = 0d0
       endif
+
       end function tim_get_wallclock_inc
 
-      !> Get the wall clock time for 'handle'  
-      real(8) function tim_get_wallclock(handle)
+      !> Get the wall clock time for 'ihandl'  
+      real(8) function tim_get_wallclock(ihandl)
 
-      integer, intent(in) :: handle          !<  handle of the timer
+      integer, intent(in) :: ihandl          !<  handle of the section
+      integer             :: handle          !<  handle of the timer
+      integer             :: i
 
-      if (handle <= 0) then
-         tim_get_wallclock = 0d0
+      tim_get_wallclock = 0d0
+
+      if (ihandl > 0) then
+         do i = 1, ncontxt(ihandl)
+            handle = context(i,2,ihandl)
+            tim_get_wallclock = tim_get_wallclock + wctime(handle)
+         enddo
       else
-         tim_get_wallclock = wctime(handle)
+         tim_get_wallclock = 0d0
       endif
       end function tim_get_wallclock
 
-      !> Get the label (name) for 'handle'
-      character(len=40) function tim_get_label(handle)
-      integer, intent(in) :: handle          !<  handle of the timer
-      
+      !> Get the label (name) for 'ihandl'
+      character(len=40) function tim_get_label(ihandl)
+      integer, intent(in) :: ihandl          !<  handle of the section
+      integer             :: handle          !<  handle of the timer
+
+      handle = context(1,2,ihandl)
       tim_get_label = tmsubnm(handle)
       end function tim_get_label
 
