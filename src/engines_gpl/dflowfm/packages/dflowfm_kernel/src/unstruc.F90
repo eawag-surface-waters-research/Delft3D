@@ -47210,6 +47210,8 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  use string_module, only: strsplit, get_dirsep
  use geometry_module, only: dbdistance, CROSSinbox, dcosphi, duitpl, normalout
  use unstruc_caching
+ use dfm_error
+ use m_structures, only: compute_link_width_of_1D2D_link
 
  implicit none
 
@@ -47425,8 +47427,8 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        bob(1,L) = max(bob(1,L), zc) ; bob(2,L) = max(bob(2,L), zc)
 
 
-       if (kcu(L) .ne. 2 .and. kcu(L) .ne. 1) then
-          cycle  ! weirs only on regular links
+       if (kcu(L) .ne. 2 .and. kcu(L) .ne. 1 .and. kcu(L) .ne. 3) then
+          cycle  ! weirs only on regular links and 1d2d links
        endif
 
        jaweir   = 0
@@ -47499,14 +47501,21 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        endif
 
        if (jaweir > 0) then                                      ! set weir treatment
-
-          ihu(L) = k
-          call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)
-
-          k3 = lncn(1,L) ; k4 = lncn(2,L)
-          wu(L) = dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)  ! set 2D link width
-
-          wu(L) = wu(L) * abs( xn*csu(L) + yn*snu(L) )           ! projected length of fixed weir
+          if (kcu(L) == 3) then ! for a 1d2d flow link
+             call compute_link_width_of_1d2d_link(L, wu(L), ierror)
+             if (ierror /= DFM_NOERR) then
+                write(msgbuf, '(a,I0,a)') 'Cannot compute the link width of flow link ''', L, ''' for fixed weirs.'
+                call err_flush()
+             end if
+          else
+             ihu(L) = k
+             call normalout( XPL(k), YPL(k), XPL(k+1), YPL(k+1) , xn, yn, jsferic, jasfer3D, dmiss, dxymis)
+             
+             k3 = lncn(1,L) ; k4 = lncn(2,L)
+             wu(L) = dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)  ! set 2D link width
+             
+             wu(L) = wu(L) * abs( xn*csu(L) + yn*snu(L) )           ! projected length of fixed weir
+          end if
 
           if (jakol45 == 2) then                                 ! use local type definition
              !

@@ -917,4 +917,55 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
       end if
    end if
 end subroutine get_geom_coordinates_of_structure
+
+
+!> Computes the link width "linkw" of the 1d2d flow link "Lf", also returns ierr == DFM_NOERR
+!> If error occurs in the computation, then returns ierr == DFM_GENERICERROR
+subroutine compute_link_width_of_1d2d_link(Lf, linkw, ierr)
+   use m_flowgeom, only: lncn, ln, nd, ndx2d, ndxi
+   use network_data
+   use m_missing, only: dmiss
+   use m_sferic, only: jsferic, jasfer3D
+   use unstruc_messages
+   use dfm_error
+   use geometry_module, only: dbdistance
+   implicit none
+   integer,          intent(in   ) :: Lf       !< 1d2d flow link index
+   double precision, intent(  out) :: linkw    !< Link width
+   integer,          intent(  out) :: ierr     !< error index
+   integer :: k, k1, k2, k3, k4, L, LL, La, n
+   double precision :: dist
+
+   linkw = 0d0
+   ierr  = DFM_GENERICERROR
+   k = 0
+
+   k1 = ln(1,Lf)
+   k2 = ln(2,Lf)
+
+   ! Find k as the 1d flow node that is connected by the 1d2d link Lf
+   if (k1 > ndx2d .and. k1 < ndxi) then
+      k = k1
+   else if (k2 > ndx2d .and. k2 < ndxi) then
+      k = k2
+   end if
+
+   if (k /= 0) then
+      do L = 1, nd(k)%lnx
+         LL = nd(k)%ln(L)
+         La = abs(LL)
+         if (La == Lf) then
+            cycle
+         else
+            k3 = lncn(1,La)
+            k4 = lncn(2,La)
+            dist = dbdistance(xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)
+            linkw = dist + linkw
+         end if
+      end do
+      n = nd(k)%lnx - 1 ! number of connected nodes
+      linkw = linkw / n
+      ierr = DFM_NOERR
+   end if
+end subroutine compute_link_width_of_1d2d_link
 end module m_structures
