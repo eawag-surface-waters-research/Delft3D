@@ -32,6 +32,12 @@
 !
 !     Function       : Handles everything to conveniently time a FORTRAN program
 !
+!         Most API functions below receive an 'ihandle', which refers to a particular subroutine
+!         or code section to be times. Timings are maintained separately for all different
+!         call trees ("contexts") in which this subroutine/section appears. So, a single 'ihandle'
+!         may have multiple timer 'handle's created by timstrt().
+!         The tim_get_*() functions either sum or take the latests of these contexts.
+!
 !         contains                 meaning
 !         timini   ( )           : Should be called once first to initialize. Logical 'timon'
 !                                  must be switched to .true. afterwards by the caller !
@@ -41,12 +47,13 @@
 !                                  'ihandl' must be saved by the caller
 !         timstop(ihandl)        : stops timing for this handle and accumulates the result
 !         timdump(filename)      : writes the results to the report file 'filename'
-!         tim_get_cpu(handle)        : Get the cpu time for 'handle'  
-!         tim_get_cpu_inc(handle)    : Get the incremental cpu time for 'handle' (= latest interval 
-!                                      between start and stop)
-!         tim_get_wallclock(handle)  : Get the wall clock time for 'handle'  
-!         tim_get_label(handle)      : Get the incremental wall clock time for 'handle' (= latest 
-!                                      interval between start and stop)  
+!         tim_get_cpu(ihandle)         : Get the cpu time for 'ihandle', summed for all its contexts.
+!         tim_get_cpu_inc(handle)      : Get the incremental cpu time for 'handle' (= latest
+!                                        interval between start and stop), in its latest context.
+!         tim_get_wallclock(handle)    : Get the wall clock time for 'handle', summed for all its contexts.
+!         tim_get_wallclock_inc(handle): Get the incremental wall clock time for 'handle'
+!                                        (= latest interval between start and stop)
+!         tim_get_label(handle)  : Get the label (name) for 'handle'
 !         !      
 !     Example:
 !
@@ -136,7 +143,11 @@
       
       character(40), private, pointer     :: tmsubnm(:)     !< name of the subroutine
       integer  ( 4), private, pointer     :: ncontxt(:)     !< number of contexts per subroutine
-      integer  ( 4), private, pointer     :: context(:,:,:) !< call context
+      integer  ( 4), private, pointer     :: context(:,:,:) !< call contexts for a subroutine/code section.
+                                                            !< (context#, 1, ihandle): unique 'prevhnd' of the caller.
+                                                            !< (context#, 2, ihandle): timer 'handle' of this context.
+                                                            !< (       1, 2, handle):  subroutine/code section 'ihandle' of this single timer.
+                                                            !< Note that values on index (..,1:2,X) have no relation to (..,3,X).
       integer  ( 4), private, pointer     :: ntim1(:)       !< call frequency
       integer  ( 4), private, pointer     :: levl1(:)       !< call level
       real     ( 8), private, pointer     :: cpst1(:)       !< to save cp startimes
@@ -272,11 +283,15 @@
 
       !> Starts timing for this subroutine or program part.
       !! 'subrou' is a max. 40 character ID-string.
-      !! 'ihandl' must be saved by the caller
-      subroutine timstrt ( subrou, ihandl )
+      !! If ihandl==0, a new timer with name 'subrou' will be created.
+      !! 'ihandl' must afterwards be saved by the caller
+      subroutine timstrt ( subrou, ihandl, handle_)
 
-      character*(*), intent(in   ) :: subrou    !  name of (part of) subroutine to monitor
-      integer(4)   , intent(inout) :: ihandl    !  handle of the section
+      character*(*), intent(in   ) :: subrou    !<  name of (part of) subroutine to monitor
+      integer(4)   , intent(inout) :: ihandl    !<  handle of the section
+      integer(4)   , optional, intent(  out) :: handle_ !< Handle of the unique timer that has now been started.
+                                                        !< Either retrieved from a context of ihandl that was called before.
+                                                        !< Or newly created when this start of ihandle is from a new place in the call tree.
       integer(4)                      handle    !  handle of the timer
       integer(4)                      i         !  loop counter
       integer(4)                      ival(8)
@@ -321,6 +336,10 @@
       wcstart(handle) = real( count, 8 ) / real( rate, 8 )
       ntimcal(handle) = ntimcal(handle) + 1
 
+      ! NOTE: in future API extensions, we might add subroutines tim_get_*(handle)
+      !!      that receive a handle (not ihandl), and then return the timings for a
+      !!      single timer(-context), i.e., not summed for all contexts of an ihandl.
+      if (present(handle_)) handle_ = handle
       return
       end subroutine timstrt
 
@@ -443,7 +462,7 @@
 
 !***************
    
-      !> Get the cpu time for 'ihandl'  
+      !> Get the cpu time for 'ihandl', summed for all its contexts. 
       real(8) function tim_get_cpu(ihandl)
 
       integer, intent(in) :: ihandl          !<  handle of the section
@@ -464,7 +483,7 @@
       end function tim_get_cpu
 
       !>  Get the incremental cpu time for 'ihandl' (= latest interval 
-      !!  between start and stop)
+      !!  between start and stop), summed for all its contexts.
       real(8) function tim_get_cpu_inc(ihandl)
 
       integer, intent(in) :: ihandl          !<  handle of the section
@@ -485,7 +504,7 @@
       end function tim_get_cpu_inc
 
       !> Get the incremental wall clock time for 'ihandl' (= latest 
-      !! interval between start and stop)  
+      !! interval between start and stop), summed for all its contexts.
       real(8) function tim_get_wallclock_inc(ihandl)
 
       integer, intent(in) :: ihandl          !<  handle of the section
@@ -505,7 +524,7 @@
 
       end function tim_get_wallclock_inc
 
-      !> Get the wall clock time for 'ihandl'  
+      !> Get the wall clock time for 'ihandl', summed for all its contexts.
       real(8) function tim_get_wallclock(ihandl)
 
       integer, intent(in) :: ihandl          !<  handle of the section
