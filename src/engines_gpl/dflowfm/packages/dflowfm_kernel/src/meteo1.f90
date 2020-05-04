@@ -8243,6 +8243,7 @@ module m_meteo
    subroutine dewpt2rhum(td,tm,rh)
    ! in-place conversion of dewpoint temperature to relative humidity, given the air temperature 
    ! $$RH(T,T_d) = \exp\left[\frac{BT}{C+T} - \frac{BT_d}{C+T_d}\right] \times 100$$ 
+   use physicalconsts, only : CtoKelvin
    implicit none
    double precision, dimension(:), pointer   :: td    !< dewpoint temperature
    double precision, dimension(:), pointer   :: tm    !< air temperature
@@ -8250,12 +8251,11 @@ module m_meteo
 
    double precision, parameter               :: B =   17.502 ! exactly as in 
    double precision, parameter               :: C =   -32.19
-   double precision, parameter               :: T_0 = 273.16
    integer                                   :: i, n
    td => rh                                  ! Dewpoint temperature was stored in the array where relative humidity will be stored 
    n = size(td)
    do i=1,n
-      rh(i) = exp(B*td(i)/(C+td(i)+T_0) - B*tm(i)/(C+tm(i)+T_0)) * 100.d0
+      rh(i) = exp(B*td(i)/(C+td(i)+CtoKelvin) - B*tm(i)/(C+tm(i)+CtoKelvin)) * 100.d0
    end do
    end subroutine dewpt2rhum
 
