@@ -1349,7 +1349,10 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'grw'  , 'sgrwini'            , sgrwini)
     call prop_get_double (md_ptr, 'grw'  , 'bgrwuni'            , bgrwuni)
 
-    call prop_get_integer(md_ptr, 'hydrology'  , 'jaintercep'   , jaintercep)
+    !
+    ! Hydrology (takes over some functionality that used to be under [grw])
+    !
+    call prop_get_integer(md_ptr, 'hydrology'  , 'InterceptionModel', interceptionmodel)
 
 ! Time
     call prop_get_string(md_ptr, 'time', 'RefDate', refdat)
@@ -3006,9 +3009,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        endif
     endif
 
-    if (writeall .or. jagrw > 0 .or. jaintercep > 0) then
-      call prop_set(prop_ptr, 'grw', 'jaintercep'        , jaintercep,           '0=No interception, 1=With interception')
-   endif
+    !
+    ! Hydrology (takes over some functionality that used to be under [grw])
+    !
+    if (writeall .or. interceptionmodel /= DFM_HYD_NOINTERCEPT) then
+       call prop_set(prop_ptr, 'hydrology', 'InterceptionModel', interceptionmodel, 'Interception model (0: none, 1: on, via layer thickness')
+    end if
 
 
    ! JRE -> aanvullen, kijken wat aangeleverd wordt

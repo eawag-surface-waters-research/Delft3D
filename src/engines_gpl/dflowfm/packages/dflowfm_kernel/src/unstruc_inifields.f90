@@ -109,7 +109,8 @@ function initInitialFields(inifilename) result(ierr)
    use network_data
    use m_alloc
    use dfm_error
-   use m_hydrology_data, only:  HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, InterceptionLayerThickness, jaintercep, jadhyd
+   use m_hydrology_data, only:  HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, &
+                                InterceptThickness, interceptionmodel, DFM_HYD_INTERCEPT_LAYER, jadhyd
 
    implicit none
    character(len=*), intent(in   ) :: inifilename         !< name of initial field file
@@ -211,11 +212,11 @@ function initInitialFields(inifilename) result(ierr)
          else if (strcmpi(qid, 'InterceptionLayerThickness')) then
             call realloc(kcsini, ndx, keepExisting=.false.)
             call prepare_lateral_mask(kcsini, iLocType)
-            
-            call realloc(InterceptionLayerThickness, ndx)
-            success = timespaceinitialfield(xz, yz, InterceptionLayerThickness, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
+
+            call realloc(InterceptThickness, ndx, keepExisting=.false.)
+            success = timespaceinitialfield(xz, yz, InterceptThickness, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
             if (success) then
-               jaintercep = 1
+               interceptionmodel = DFM_HYD_INTERCEPT_LAYER
                jadhyd = 1
             end if
          else if (strcmpi(qid, 'frictioncoefficient')) then

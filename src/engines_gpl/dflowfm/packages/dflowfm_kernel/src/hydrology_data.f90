@@ -44,6 +44,10 @@ module m_hydrology_data
    integer, parameter :: DFM_HYD_INFILT_DARCY  = 3 !< Function of pressure.
    integer, parameter :: DFM_HYD_INFILT_HORTON = 4 !< Horton's infiltration equation.
 
+   integer, parameter :: DFM_HYD_NOINTERCEPT     = 0 !< No interception active.
+   integer, parameter :: DFM_HYD_INTERCEPT_LAYER = 1 !< Basic interception layer with a certain thickness (max depth).
+   ! Future codes for interception might include modrut and gash.
+
    integer :: jadhyd !< Whether or not (1/0) external hydrology processes are enabled.
 
    ! Some hydrology state vars maintained in FM:
@@ -52,6 +56,12 @@ module m_hydrology_data
    !
    double precision, allocatable, target :: Precipitation(:) 
    integer                               :: precipitationTarget
+
+   !
+   ! Interception
+   integer                               :: interceptionmodel       !< [-] Interception model, indicating if interception is off (0) or on (1)
+   double precision, allocatable, target :: InterceptThickness(:)   !< [m] Interception layer thickness (max depth) {"location": "face", "shape": ["ndx"]}
+   double precision, allocatable, target :: InterceptHs(:)          !< [m] Interception layer water depth at current time {"location": "face", "shape": ["ndx"]}
 
    !
    ! Evaporation
@@ -80,7 +90,7 @@ module m_hydrology_data
    integer         , allocatable, target :: HortonState(:)         !< [-]     Infiltration capacity state (one of HORTON_CAPSTAT_(NOCHANGE|RECOVERY|INCREASE)) {"location": "face", "shape": ["ndx"]}
 
    !
-   ! dhydrology state
+   ! dhydrology state (not used yet, only when WFLOW functionality will be connected)
    !
    double precision, allocatable, target :: CanopyGapFraction(:) 
    double precision, allocatable, target :: Cmax(:) 
@@ -90,8 +100,6 @@ module m_hydrology_data
    double precision, allocatable, target :: StemFlow(:) 
    double precision, allocatable, target :: LeftOver(:) 
    double precision, allocatable, target :: Interception(:)
-   double precision, allocatable, target :: InterceptionLayerThickness(:)     !< [m] Interception layer thickness {"location": "face", "shape": ["ndx"]}
-   integer                               :: jaintercep                        !< [-] Integer indicating if interception is off (0) or on (1)
 
 contains
 
@@ -99,7 +107,7 @@ contains
 !! For a reinit prior to flow computation, only call reset_hydrology_data() instead.
 subroutine default_hydrology_data()
    jadhyd            = 0
-   jaintercep = 0
+   interceptionmodel = 0
 
    infiltrationmodel = DFM_HYD_NOINFILT
    infiltcapuni      = 0d0

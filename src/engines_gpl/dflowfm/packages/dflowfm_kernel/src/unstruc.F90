@@ -14393,8 +14393,8 @@ else if (nodval == 27) then
           znod = infiltcap(kk)*1d3*3600d0 ! m/s -> mm/hr
        end if
    case (6) ! Interception layer thickness
-      if (jaintercep == 1) then
-         znod = InterceptionLayerThickness(kk)
+      if (interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then
+         znod = InterceptThickness(kk)
       end if
     end select
 
@@ -43128,7 +43128,7 @@ if (mext /= 0) then
               end if
            end if
 
-        else if (qid == 'initialunsaturedzonethickness' .or. qid == 'interceptionlayerthickness') then
+        else if (qid == 'initialunsaturedzonethickness' .or. qid == 'interceptionlayerthickness') then ! HK-style, in module grw. See initInitialFields() for the new hydrology module.
 
             if (.not. allocated (h_unsat) ) then
                allocate (h_unsat(ndx)) ; h_unsat = -999d0
