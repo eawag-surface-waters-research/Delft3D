@@ -38780,7 +38780,19 @@ end function ispumpon
           else
              Qrain   = 0d0
           endif
-          qin(k) = Qrain
+
+          if (Qrain > 0 .and. interceptionmodel == 1) then                    ! Is there rainfall AND interception?
+             if ((InterceptHs(k)+Qrain/bare(k)) < InterceptThickness(k)) then ! Can the interception hold the complete rainfall of this timestep?
+               qin(k) = 0
+               InterceptHs(k) = InterceptHs(k) + Qrain/bare(k)
+             else               
+               qin(k) = InterceptHs(k)*bare(k) + Qrain - InterceptThickness(k)*bare(k)
+               InterceptHs(k) = InterceptThickness(k)
+             endif           
+          else
+             qin(k) = Qrain
+          endif
+
           if (jamba > 0) then
              imba = mbadefdomain(k)
              if (imba > 0) then
