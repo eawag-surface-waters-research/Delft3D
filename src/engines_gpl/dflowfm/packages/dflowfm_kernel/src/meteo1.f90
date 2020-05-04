@@ -8002,7 +8002,7 @@ module m_meteo
                sourceItemName = 'sw_radiation_flux'
             end if
          case ('longwaveradiation')
-            sourceItemName = 'long_wave_radiation'
+            sourceItemName = 'surface_net_downward_longwave_flux'
          case ('nudge_salinity_temperature')
             if (ec_filetype == provFile_netcdf) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_potential_temperature')

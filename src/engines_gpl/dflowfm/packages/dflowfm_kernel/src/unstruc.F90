@@ -42230,6 +42230,14 @@ end function is_1d_boundary_candidate
 
  success = .true.    ! default if no valid providers are present in *.ext file (m_flowexternalforcings::success)
 
+ ! (re-)initialize flags/counters related to temperature forcings
+ itempforcingtyp = 0
+ btempforcingtypA = .false.
+ btempforcingtypC = .false.
+ btempforcingtypH = .false.
+ btempforcingtypS = .false.
+ btempforcingtypL = .false.
+
  if (allocated(xdum  )) deallocate(xdum, ydum, kdum, xy2dum)
  allocate ( xdum(1), ydum(1), kdum(1), xy2dum(2,1) , stat=ierr)
  call aerr('xdum(1), ydum(1), kdum(1), xy2dum     ', ierr, 3)

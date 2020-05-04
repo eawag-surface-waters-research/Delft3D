@@ -2469,7 +2469,7 @@ module m_ec_provider
             ncstdnames(1) = 'surface_net_downward_shortwave_flux'
          case ('longwaveradiation')
             ncvarnames(1) = 'strd'                           ! outgoing long wave radiation
-            ncstdnames(1) = 'long_wave_radiation'
+            ncstdnames(1) = 'surface_net_downward_longwave_flux'
          case ('nudge_salinity_temperature')
             ncvarnames(1) = 'thetao'                         ! temperature
             ncstdnames(1) = 'sea_water_potential_temperature'
