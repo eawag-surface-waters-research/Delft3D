@@ -4492,6 +4492,9 @@ subroutine default_flowtimes()
 
     tmini       = -1d9              !< initial time for updating the 4 above
 
+    ! Wall clock timers are restarted here already, because some timers are started *prior* to flow_modelinit().
+    call reset_timers()
+
     ! Remaining of variables is handled in reset_flowtimes()
     call reset_flowtimes()
 end subroutine default_flowtimes
@@ -4559,6 +4562,8 @@ subroutine reset_timers()
    use Timers
 
    call timini()
+   timon = .true.
+
    handle_user    = 0
    handle_steps   = 0
    handle_umod    = 0

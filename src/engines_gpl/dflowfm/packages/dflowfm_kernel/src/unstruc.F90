@@ -12857,7 +12857,6 @@ subroutine writesomeinitialoutput()
     ! Only reset counters and other scalars, allocatables should be
     ! automatically reset elsewhere (e.g., allocateandset*, flow_geominit)
 
-    call reset_timers()
 
     call init_unstruc_netcdf()
 
