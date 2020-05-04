@@ -171,7 +171,7 @@ use meshdata, only : ug_idsLen
    integer                                    :: Nglobal_s          !< total number of global net cells, equals unpartitioned nump1d2d, Ndxi
    integer, dimension(:), allocatable         :: numcells           !< number of active cells per domain, dim(0:ndomains-1)
    
-   double precision, dimension(:), allocatable :: work, workrec  !< work array
+   double precision, dimension(:), allocatable, private :: work, workrec  !< work array
    
    double precision, dimension(:,:), allocatable :: workmatbd ! for overlap (solver): matrix (bbr,ddr)
    double precision, dimension(:,:), allocatable :: workmatc  ! for overlap (solver): matrix (ccr)
@@ -245,6 +245,9 @@ use meshdata, only : ug_idsLen
    integer                 , private, pointer     :: edgebranchidx_g(:)
    real(kind=hp)           , private, pointer     :: edgeoffsets_g(:)
    logical                 , private              :: branches_partitioned = .false.
+
+   private :: partition_make_branches_in_domain, get_edge_nodes_in_domain
+   private :: hp, ug_idsLen
 
    contains
 
@@ -629,27 +632,24 @@ use meshdata, only : ug_idsLen
 
       implicit none
 
-      integer,                 intent(in)  :: idmn   !< domain number
+      integer,                 intent(in)  :: idmn        !< domain number
       integer,                 intent(in)  :: numlay_cell !< number of cell-based ghostcell layers
       integer,                 intent(in)  :: numlay_node !< number of node-based ghostcell layers
       integer,                 intent(in)  :: jacells     !< generate partition domain and cell numbers
-      integer,                 intent(out) :: ierror
+      integer,                 intent(out) :: ierror      !< error code
 
       integer                              :: ic1, ic2, k1, k2, L
-      integer                              :: L1, L2, JA, K3, LL, c1, c2, c3, c4, L_old, i, n
+      integer                              :: i
       integer, dimension(:,:), allocatable :: lne_org(:,:)
       integer                              :: nLink2Dhang  ! number of hanging 2D links found
-      
-      
-      integer              :: i_old
-      
-      character(len=128)   :: message
+      integer                              :: i_old
+      character(len=128)                   :: message
 
       ierror = DFM_GENERICERROR
 
 !     set the ghostcells level in module variables ighostlev, ighostlev_cellbased and ighostlev_nodebased
       call partition_set_ghostlevels(idmn, numlay_cell, numlay_node, 0, ierror)
-      if ( ierror.ne.0 ) goto 1234
+      if ( ierror /= 0 ) goto 1234
 
 !     delete other part of network, by using the node mask (network_data variable kc)
 !      if ( allocated(kc) ) deallocate(kc)
@@ -660,8 +660,8 @@ use meshdata, only : ug_idsLen
       Lc = 0
       nLink2Dhang = 0
       do L=1,numL
-!        check for hanging 2D links (not supported)      
-         if ( kn(3,L).eq.2 .and. lnn(L).eq.0 ) then
+!        check for hanging 2D links (not supported)
+         if ( kn(3,L) == 2 .and. lnn(L) == 0 ) then
 !            call qnerror('Hanging 2D links not supported', ' ', ' ')
 !            call teklink(L,NCOLWARN1)
 !            ierror=1
@@ -671,22 +671,22 @@ use meshdata, only : ug_idsLen
              nLink2Dhang = nLink2dhang+1
              cycle
          end if
-         
+
          ic1 = iabs(lne(1,L))
          ic2 = iabs(lne(min(lnn(L),2),L))
-         if ( kn(3,L).eq.2 ) then   ! 2D links
-            if ( idomain(ic1).eq.idmn .or. ighostlev(ic1).ne.0 .or.  &
-                 idomain(ic2).eq.idmn .or. ighostlev(ic2).ne.0 ) then
+         if ( kn(3,L) == 2 ) then   ! 2D links
+            if ( idomain(ic1) == idmn .or. ighostlev(ic1) /= 0 .or.  &
+                 idomain(ic2) == idmn .or. ighostlev(ic2) /= 0 ) then
                !kc(kn(1,L)) = 1
                !kc(kn(2,L)) = 1
                Lc(L) = 1
             end if
-         else if ( kn(3,L).ne.0 ) then    ! kn(3,L).eq.1 .or. kn(3,L).eq.3 .or. kn(3,L).eq.4 ) then ! 1D link
+         else if ( kn(3,L) /= 0 ) then    ! kn(3,L)==1 .or. kn(3,L)==3 .or. kn(3,L)==4 ) then ! 1D link
 !           need to check connected netcells, since the netnode may not be associated with a 1D netcell (1D-2D coupling)
             k1 = kn(1,L)
             k2 = kn(2,L)
-            if ( (idomain(ic1).eq.idmn .or. ighostlev(ic1).ne.0 ).and.   &
-                 (idomain(ic2).eq.idmn .or. ighostlev(ic2).ne.0 )) then ! active 1D cell
+            if ( (idomain(ic1) == idmn .or. ighostlev(ic1) /= 0 ).and.   &
+                 (idomain(ic2) == idmn .or. ighostlev(ic2) /= 0 )) then ! active 1D cell
                !kc(k1) = 1
                !kc(k2) = 1
                Lc(L) = 1
@@ -703,16 +703,16 @@ use meshdata, only : ug_idsLen
 
 !     deactive links
       do L=1,numL
-         if ( Lc(L).eq.0 ) then
+         if ( Lc(L) == 0 ) then
             kn(1,L) = 0
             kn(2,L) = 0
             kn(3,L) = 0
          end if
       end do
-      
-      if ( jacells.eq.1 ) then
+
+      if ( jacells == 1 ) then
          Nglobal_s = nump1d2d
-         
+
 !        save lne
          allocate(lne_org(2, numL))
          lne_org = 0
@@ -720,45 +720,45 @@ use meshdata, only : ug_idsLen
             lne_org(1,i) = abs(lne(1,i))
             lne_org(2,i) = abs(lne(2,i))
          enddo
-      endif      
+      endif
 
 !     physically remove nodes and links from network
       NPL = 0           ! number of polygon points, we set no polygon
       call findcells(100000)  ! output link permutation array "Lperm" (only used if jacells.eq.1)
       call find1dcells()
-   
+
       call delete_dry_points_and_areas()
-  
+
       if (numk == 0 .or. numl == 0) then
          write(message,"('While making partition domain #', I0, ': empty domain (', I0, ' net nodes, ', I0, ' net links).')") idmn, numk, numl
          call mess(LEVEL_WARN, trim(message))
          ierror = DFM_GENERICERROR
          goto 1234
       end if
-         
+
 !     output number of hanging 2D links
-      if ( idmn.eq.0 ) then
-         if ( nLink2Dhang.gt.0 ) then
+      if ( idmn == 0 ) then
+         if ( nLink2Dhang > 0 ) then
             write(message,"(I0, ' hanging 2D links disregarded.')") nLink2Dhang
             call mess(LEVEL_WARN, trim(message))
          end if
       end if
 
-      if ( jacells.eq.1 ) then
+      if ( jacells == 1 ) then
 !        allocate cellmask array (used to flag illegal cells)
          call realloc(cellmask, nump1d2d, keepExisting=.false., fill=0)
-         
+
 !        (re)allocate global cell numbers array
          call realloc(iglobal_s, nump1d2d, keepExisting=.false., fill=0)
-         
+
 !        find original cell numbers
          call find_original_cell_numbers(Lperm, Lne_org, iglobal_s)
-      
+
       !  generate idomain for the current subdomain so that idomain can be written to the partition file
          do i = 1, nump1d2d 
             i_old = iglobal_s(i)
-            
-            if ( i_old.gt.0 ) then
+
+            if ( i_old > 0 ) then
                idomain(i) = idomain0(i_old)
                iglobal_s(i) = i_old
             else
@@ -770,7 +770,7 @@ use meshdata, only : ug_idsLen
                cellmask(i) = 1
             end if
          enddo
-         
+
 !        remove masked netcells
          call remove_masked_netcells()
 
