@@ -38738,13 +38738,13 @@ end function ispumpon
  use m_reduce
  use m_ship
  use m_transport, only : constituents, itemp
- use m_hydrology_data, only : jadhyd, ActEvap
+ use m_hydrology_data, only : jadhyd, ActEvap, interceptionmodel, InterceptThickness, InterceptHs, DFM_HYD_INTERCEPT_LAYER
  use m_mass_balance_areas
  implicit none
 
  integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim, imba
  double precision :: aufu, auru, tetau
- double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qextk, aloc
+ double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qintc, Qextk, aloc
 
  buitje = 0.013d0/300d0                                      ! 13 mm in 5 minutes
 
@@ -38781,14 +38781,10 @@ end function ispumpon
              Qrain   = 0d0
           endif
 
-          if (Qrain > 0 .and. interceptionmodel == 1) then                    ! Is there rainfall AND interception?
-             if ((InterceptHs(k)+Qrain/bare(k)) < InterceptThickness(k)) then ! Can the interception hold the complete rainfall of this timestep?
-               qin(k) = 0
-               InterceptHs(k) = InterceptHs(k) + Qrain/bare(k)
-             else               
-               qin(k) = InterceptHs(k)*bare(k) + Qrain - InterceptThickness(k)*bare(k)
-               InterceptHs(k) = InterceptThickness(k)
-             endif           
+          if (Qrain > 0 .and. interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then                    ! Is there rainfall AND interception?
+             Qintc = min(Qrain, dti*bare(k)*(InterceptThickness(k) - InterceptHs(k)))
+             InterceptHs(k) = InterceptHs(k) + dts*Qintc/bare(k)
+             qin(k) = Qrain - Qintc
           else
              qin(k) = Qrain
           endif
