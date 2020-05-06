@@ -227,16 +227,6 @@ end subroutine api_loadmodel
        write(*,*) 'Initializing flow: flow_modelinit'
        iresult = flow_modelinit()
        
-       ! Print model settings in diagnostics file.
-       ! write(mdia,'(a)') '* Active Model definition:'
-       ! call writeMDUFilepointer(mdia, istat)
-       ! write(mdia,'(a)') '**'
-       
-      ! Save initial flow geometry to file.
-       if (len_trim(md_flowgeomfile) > 0) then  
-          call unc_write_net_flowgeom(trim(md_flowgeomfile))
-       end if
-       
        if (jawind > 0 .and. jatekcD > 0) then 
           call writeCdcoeffs()
        endif   
