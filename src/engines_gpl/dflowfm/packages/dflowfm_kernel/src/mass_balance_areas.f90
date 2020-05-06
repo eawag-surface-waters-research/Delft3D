@@ -138,9 +138,12 @@
       
    if (nopenbndsect.gt.0) then
       istart = 1
-      call realloc(mbaname, nombabnd, keepExisting=.true., fill=' ')
+      call realloc(mbabndname, nombabnd, keepExisting=.true., fill=' ')
+      do imba = 1, nomba
+         mbabndname(imba) = 'From/to area '//mbaname(imba)
+      end do
       do ibnd=1,nopenbndsect
-         mbaname(nomba + ibnd) = 'bnd_'//openbndname(ibnd)
+         mbabndname(nomba + ibnd) = 'Boundary '//openbndname(ibnd)
          do LL = istart, nopenbndlin(ibnd)
             L  = openbndlin(LL)
             Lf = lne2ln(L)
@@ -376,7 +379,7 @@
 
    if (writebalance) then
       call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
-                                   nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
+                                   nflux, totfluxsys, mbsname, mbaname, mbabndname, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
                                    mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, mbafluxheat, &
                                    flxdmp, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
@@ -472,7 +475,7 @@
    if (writebalance) then
       write(lunmbabal,1000)
       call mba_write_bal_time_step(lunmbabal, timembastarttot, timembaend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
-                                   nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
+                                   nflux, totfluxsys, mbsname, mbaname, mbabndname, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot, mbaflowsorsintot, mbaflowrainevatot, &
                                    mbaflowevatot, mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, mbafluxheattot, &
                                    flxdmptot, stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
@@ -650,7 +653,7 @@
    end subroutine mba_write_bal_header
    
    subroutine mba_write_bal_time_step(lunbal, timestart, timeend, numconst, notot, nombs, imbs2sys, nomba, nombabnd, &
-                                      nflux, totfluxsys, mbsname, mbaname, mbalnused, numsrc, srcname, mbasorsinout, &
+                                      nflux, totfluxsys, mbsname, mbaname, mbabndname, mbalnused, numsrc, srcname, mbasorsinout, &
                                       mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, mbaflowraineva, &
                                       mbafloweva, mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, mbafluxheat, flxdmp, &
                                       stochi, fluxname, nfluxsys, ipfluxsys, fluxsys, jarain, jaevap, jatem, isalt, itemp)
@@ -671,7 +674,8 @@
    integer                     :: totfluxsys                ! total number of fluxes for all sustances
 
    character(*)                :: mbsname(nombs)            ! mass balance names
-   character(*)                :: mbaname(nombabnd)         ! mass balance area names
+   character(*)                :: mbaname(nomba)            ! mass balance area names
+   character(*)                :: mbabndname(nombabnd)      ! mass balance area exchange names
    
    integer                     :: mbalnused(nomba,nombabnd) ! number of links between mda and mbabnd that are actually active
 
@@ -724,6 +728,7 @@
    double precision            :: relative_error            ! relative error
    double precision, parameter :: zero = 0.0
    double precision, parameter :: tiny = 1.0d-10
+   character(len=12), parameter:: labelsourcesink = 'Source/sink '
    character(len=30), parameter:: labelraineva = 'Rain/prescribed evaporation   '
    character(len=30), parameter:: labeleva = 'Calculated evaporation        '
    character(len=30), parameter:: labelheatflux = 'Heat flux'
@@ -749,17 +754,17 @@
       do jmba = 1, nombabnd
          if (mbalnused(imba,jmba).gt.0) then
             totals = totals + mbaflowhor(1:2, imba, jmba)
-            write (lunbal, 2001) mbaname(jmba), mbaflowhor(1:2, imba, jmba)
+            write (lunbal, 2001) mbabndname(jmba), mbaflowhor(1:2, imba, jmba)
          endif
       end do
       do isrc = 1, numsrc
          if (mbasorsinout(1,isrc).eq.imba) then
             totals = totals + mbaflowsorsin(1:2, isrc)
-            write (lunbal, 2001) 'src_'//srcname(isrc), mbaflowsorsin(1:2, isrc)
+            write (lunbal, 2001) labelsourcesink//srcname(isrc), mbaflowsorsin(1:2, isrc)
          endif
          if (mbasorsinout(2,isrc).eq.imba) then
             totals = totals + mbaflowsorsin(2:1:-1, isrc)
-            write (lunbal, 2001) 'src_'//srcname(isrc), mbaflowsorsin(2:1:-1, isrc)
+            write (lunbal, 2001) labelsourcesink//srcname(isrc), mbaflowsorsin(2:1:-1, isrc)
          endif
       end do
       if (jarain > 0) then
@@ -824,17 +829,17 @@
             do jmba = 1, nombabnd
                if (mbalnused(imba,jmba).gt.0) then
                   totals = totals + mbafluxhor(1:2, imbs, imba, jmba)
-                  write (lunbal, 2001) mbaname(jmba), mbafluxhor(1:2, imbs, imba, jmba)
+                  write (lunbal, 2001) mbabndname(jmba), mbafluxhor(1:2, imbs, imba, jmba)
                endif
             end do
             do isrc = 1, numsrc
                if (mbasorsinout(1,isrc).eq.imba) then
                   totals = totals + mbafluxsorsin(1:2, 1, imbs, isrc)
-                  write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(1:2, 1, imbs, isrc)
+                  write (lunbal, 2001) labelsourcesink//srcname(isrc), mbafluxsorsin(1:2, 1, imbs, isrc)
                endif
                if (mbasorsinout(2,isrc).eq.imba) then
                   totals = totals + mbafluxsorsin(2:1:-1, 2, imbs, isrc)
-                  write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(2:1:-1, 2, imbs, isrc)
+                  write (lunbal, 2001) labelsourcesink//srcname(isrc), mbafluxsorsin(2:1:-1, 2, imbs, isrc)
                endif
             end do
          endif
@@ -894,16 +899,16 @@
    do jmba = nomba + 1, nombabnd
       totals(1) = totals(1) + sum(mbaflowhor(1, :, jmba))
       totals(2) = totals(2) + sum(mbaflowhor(2, :, jmba))
-      write (lunbal, 2001) mbaname(jmba), sum(mbaflowhor(1, :, jmba)), sum(mbaflowhor(2, :, jmba))
+      write (lunbal, 2001) mbabndname(jmba), sum(mbaflowhor(1, :, jmba)), sum(mbaflowhor(2, :, jmba))
    end do
    do isrc = 1, numsrc
       if (mbasorsinout(1,isrc).gt.0) then
          totals = totals + mbaflowsorsin(1:2, isrc)
-         write (lunbal, 2001) 'src_'//srcname(isrc), mbaflowsorsin(1:2, isrc)
+         write (lunbal, 2001) labelsourcesink//srcname(isrc), mbaflowsorsin(1:2, isrc)
       endif
       if (mbasorsinout(2,isrc).gt.0) then
          totals = totals + mbaflowsorsin(2:1:-1, isrc)
-         write (lunbal, 2001) 'src_'//srcname(isrc), mbaflowsorsin(2:1:-1, isrc)
+         write (lunbal, 2001) labelsourcesink//srcname(isrc), mbaflowsorsin(2:1:-1, isrc)
       endif
    end do
    if (jarain > 0) then
@@ -965,16 +970,16 @@
          do jmba = nomba + 1, nombabnd
             totals(1) = totals(1) + sum(mbafluxhor(1, imbs, :, jmba))
             totals(2) = totals(2) + sum(mbafluxhor(2, imbs, :, jmba))
-            write (lunbal, 2001) mbaname(jmba), sum(mbafluxhor(1, imbs, :, jmba)), sum(mbafluxhor(2, imbs, :, jmba))
+            write (lunbal, 2001) mbabndname(jmba), sum(mbafluxhor(1, imbs, :, jmba)), sum(mbafluxhor(2, imbs, :, jmba))
          end do
          do isrc = 1, numsrc
             if (mbasorsinout(1,isrc).gt.0) then
                totals = totals + mbafluxsorsin(1:2, 1, imbs, isrc)
-               write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(1:2, 1, imbs, isrc)
+               write (lunbal, 2001) labelsourcesink//srcname(isrc), mbafluxsorsin(1:2, 1, imbs, isrc)
             endif
             if (mbasorsinout(2,isrc).gt.0) then
                totals = totals + mbafluxsorsin(2:1:-1, 2, imbs, isrc)
-               write (lunbal, 2001) 'src_'//srcname(isrc), mbafluxsorsin(2:1:-1, 2, imbs, isrc)
+               write (lunbal, 2001) labelsourcesink//srcname(isrc), mbafluxsorsin(2:1:-1, 2, imbs, isrc)
             endif
          end do
       endif
@@ -1013,52 +1018,51 @@
    end do
 
    return
-   
-   1000 format (///'============================================================='&
-                  /'Mass balances for ',a                                         &
-                  /'=============================================================')
-   1001 format (  /'Mass balance period start time: ',a                           &
-                  /'Mass balance period end time  : ',a                           &
-                 //'Surface area (m2)             : ',ES15.6E3                    &
-                 //'Water (m3)                              Begin            End '&
-                  /'-------------------------------------------------------------')
-   1002 format (  /'Average depth (m)                       Begin            End '&
-                  /'-------------------------------------------------------------')
-   1003 format (  /'Water (m3)                    Sources/Inflows Sinks/Outflows '&
-                  /'-------------------------------------------------------------')
+   1000 format (///'==========================================================================================='&
+                  /'Mass balances for ',a                                                                       &
+                  /'===========================================================================================')
+   1001 format (  /'Mass balance period start time: ',a                                                         &
+                  /'Mass balance period end time  : ',a                                                         &
+                 //'Surface area (m2)             : ',ES15.6E3                                                  &
+                 //'Water (m3)                                                            Begin            End '&
+                  /'-------------------------------------------------------------------------------------------')
+   1002 format (  /'Average depth (m)                                                     Begin            End '&
+                  /'-------------------------------------------------------------------------------------------')
+   1003 format (  /'Water (m3)                                                  Sources/Inflows Sinks/Outflows '&
+                  /'-------------------------------------------------------------------------------------------')
 
-   1004 format (   '-------------------------------------------------------------')
+   1004 format (   '-------------------------------------------------------------------------------------------')
 
-   1010 format ( //'-------------------------------------------------------------'&
-                  /'Mass balance period start time: ',a                           &
-                  /'Mass balance period end time  : ',a                           &
-                 //'Mass balance area             : ',a                           &
-                 //'Mass substance ',A20,'     Begin            End '             &
-                  /'-------------------------------------------------------------')
-   1011 format (  /'Average concentration (mass/m3)         Begin            End '&
-                  /'-------------------------------------------------------------')
-   1012 format (  /'Average concentration (1e-3)            Begin            End '&
-                  /'-------------------------------------------------------------')
-   1013 format (  /'Average concentration (degC)            Begin            End '&
-                  /'-------------------------------------------------------------')
-   1014 format (  /'Average concentration (mass/m2)         Begin            End '&
-                  /'-------------------------------------------------------------')
-   1015 format (  /'Substance ',A20,'Sources/Inflows Sinks/Outflows '             &
-                  /'-------------------------------------------------------------')
+   1010 format ( //'-------------------------------------------------------------------------------------------'&
+                  /'Mass balance period start time: ',a                                                         &
+                  /'Mass balance period end time  : ',a                                                         &
+                 //'Mass balance area             : ',a                                                         &
+                 //'Mass substance ',A50,'     Begin            End '                                           &
+                  /'-------------------------------------------------------------------------------------------')
+   1011 format (  /'Average concentration (mass/m3)                                       Begin            End '&
+                  /'-------------------------------------------------------------------------------------------')
+   1012 format (  /'Average concentration (1e-3)                                          Begin            End '&
+                  /'-------------------------------------------------------------------------------------------')
+   1013 format (  /'Average concentration (degC)                                          Begin            End '&
+                  /'-------------------------------------------------------------------------------------------')
+   1014 format (  /'Average concentration (mass/m2)                                       Begin            End '&
+                  /'-------------------------------------------------------------------------------------------')
+   1015 format (  /'Substance ',A50,'Sources/Inflows Sinks/Outflows '                                           &
+                  /'-------------------------------------------------------------------------------------------')
 
-   2000 format (30X,2ES15.6E3)
-   2001 format (A30,2ES15.6E3)
-   2002 format (   'Taken from/added to storage   ',2ES15.6E3)
-   2003 format (   'Sum of all terms              ',2ES15.6E3)
-   2004 format (   'Process flux ',A10,7X,2ES15.6E3)
-   2005 format (45X,'no surface area')
+   2000 format (60X,2ES15.6E3)
+   2001 format (A60,2ES15.6E3)
+   2002 format (   'Taken from/added to storage                                 ',2ES15.6E3)
+   2003 format (   'Sum of all terms                                            ',2ES15.6E3)
+   2004 format (   'Process flux ',A10,37X,2ES15.6E3)
+   2005 format (75X,'no surface area')
 
-   2010 format (  /'Water balance error (m3)                     ',ES15.6E3)
-   2011 format (   'Water balance error                          ',F15.6,'%')
-   2012 format (   'Water balance error                                       - %')
+   2010 format (  /'Water balance error (m3)                                                   ',ES15.6E3)
+   2011 format (   'Water balance error                                                        ',F15.6,'%')
+   2012 format (   'Water balance error                                                                     - %')
  
-   2020 format (  /A20,' Mass balance error      ',ES15.6E3)
-   2021 format (   A20,' Mass balance error      ',F15.6,'%')
-   2022 format (   A20,' Mass balance error                   - %')
+   2020 format (  /'Mass balance error ',A50,'     ',ES15.6E3)
+   2021 format (   'Mass balance error ',A50,'     ',F15.6,'%')
+   2022 format (   'Mass balance error ',A50,'                  - %')
 
    end subroutine mba_write_bal_time_step

@@ -5465,7 +5465,8 @@ module m_mass_balance_areas
    character(len=NAMMBALEN),allocatable      :: mbsname(:)                  !< mass balance names
    integer                                   :: nomba = 0                   !< number of mass balance areas
    integer                                   :: nombabnd                    !< number of mass balance areas and boundaries
-   character(len=NAMMBALEN),allocatable      :: mbaname(:)                  !< parameter names
+   character(len=NAMMBALEN),allocatable      :: mbaname(:)                  !< mass balance area names
+   character(len=NAMMBALEN),allocatable      :: mbabndname(:)               !< mass balance area horizontal transport names
    integer, allocatable                      :: mbadef(:)                   !< mass balance area (mba) definition
    integer, allocatable                      :: mbadefdomain(:)             !< mass balance area (mba) definition without ghost cells
    integer                                   :: id_mba(3)                   !< mbd id's in map-file
