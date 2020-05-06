@@ -13,6 +13,7 @@
    ObstacleFile         = obw.obs                      
    CurvesFile           =                              
    TScale               = 60.0
+   NDec                 = 9
 [TimePoint]
    Time                 =  0.000000000000000000e+000         
    WaterLevel           =  0.000000000000000000e+000         
