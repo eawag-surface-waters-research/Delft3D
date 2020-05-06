@@ -543,10 +543,14 @@ def getUCRTVersionNumber():
         sys.stdout.write("Trying to execute: " + getucrtdir[str(vs)] + " ...\n")
         try:
             result = subprocess.check_output(getucrtdir[str(vs)], shell=True)
-        except:
+            result = result.decode('utf-8')
+        except Exception as e:
             result = ""
-            sys.stdout.write("\n\n *** ERROR:Execution failed; is VisualStudio " + str(vs) + " installed?\n\n\n")
-        result = result.decode('utf-8')
+            sys.stdout.write("\n\n *** ERROR:Execution failed; is VisualStudio " + str(vs) + " installed?")
+            sys.stdout.write("Python reported: " + str(e))
+            sys.stdout.write("The ucrtdir is: " + getucrtdir[str(vs)])
+            sys.stdout.write("\n\n\n")
+
         ucrtpos = result.rfind("UniversalCRTSdkDir=")
         if ucrtpos == -1:
             # Fallback: it should be this:
