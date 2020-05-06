@@ -234,6 +234,7 @@ type t_unc_mapids
    integer :: id_qfrcon(MAX_ID_VAR)      = -1 !< Variable ID for 
    integer :: id_qtot(MAX_ID_VAR)        = -1 !< Variable ID for 
    integer :: id_rain(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_icepths(MAX_ID_VAR)     = -1 !< Variable ID for interception layer waterdepth.
    integer :: id_wind(MAX_ID_VAR)        = -1 !< Variable ID for 
    integer :: id_patm(MAX_ID_VAR)        = -1 !< Variable ID for 
    integer :: id_tair(MAX_ID_VAR)        = -1 !< Variable ID for 
@@ -4462,7 +4463,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_oned_functions, only: gridpoint2cross
    use string_module, only: replace_multiple_spaces_by_single_spaces
    use m_save_ugrid_state, only: mesh1dname
-   use m_hydrology_data, only : jadhyd, ActEvap, PotEvap
+   use m_hydrology_data, only : jadhyd, ActEvap, PotEvap, interceptionmodel, DFM_HYD_NOINTERCEPT, InterceptHs
 
    implicit none
 
@@ -4811,6 +4812,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ! Meteo forcings
       if (jamaprain > 0 .and. jarain /= 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_rain,  nf90_double, UNC_LOC_S, 'rainfall_rate',  'rainfall_rate', 'Rainfall rate', 'm s-1', jabndnd=jabndnd_)
+      end if
+
+      ! interception
+      if (jamapicept > 0 .and. interceptionmodel /= DFM_HYD_NOINTERCEPT) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_icepths,  nf90_double, UNC_LOC_S, 'interception_waterdepth',  '', 'Waterdepth in interception layer', 'm', jabndnd=jabndnd_)
       end if
 
       if (jamapwind > 0 .and. japatm /= 0) then
@@ -6411,12 +6417,18 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       deallocate (windx, windy, stat=ierr)
    end if
 
+   ! Rain
    if (jamaprain > 0 .and. jarain /= 0) then
       call realloc(workx, ndx, keepExisting = .false., fill = dmiss)
       do n=1,ndxndxi
          workx(n) = rain(n)*bare(n)/ba(n)*1d-3/(24d0*3600d0) ! mm/day->(m3/s / m2) Average actual rainfall rate on grid cell area (maybe zero bare).
       end do
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_rain  , UNC_LOC_S, workx, jabndnd=jabndnd_)
+   endif
+
+   ! Interception
+   if (jamapicept > 0 .and. interceptionmodel /= DFM_HYD_NOINTERCEPT) then
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_icepths  , UNC_LOC_S, InterceptHs, jabndnd=jabndnd_)
    endif
 
    if (jamapwind > 0 .and. japatm > 0) then

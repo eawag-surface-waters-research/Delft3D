@@ -2771,6 +2771,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamaptur                  !< k, eps and vicww to map file, 0: no, 1: yes
  integer                           :: jamaptrachy               !< trachytope roughnesses to map file, 0: no, 1: yes
  integer                           :: jamaprain                 !< wind velocities to map file, 0: no, 1: yes
+ integer                           :: jamapicept                !< Interception layer to map file, 0: no, 1: yes
  integer                           :: jamapwind                 !< wind velocities to map file, 0: no, 1: yes
  integer                           :: jamapwindstress           !< wind stress to map file, 0: no, 1: yes
  integer                           :: jamapviu                  !< horizontal viscosity to map file, 0: no, 1: yes
@@ -3187,6 +3188,7 @@ subroutine default_flowparameters()
     jamaptrachy = 1
     jamapcali = 1
     jamaprain = 0
+    jamapicept = 0
     jamapwind = 1
     jamapwindstress = 0
     jamapviu = 1
