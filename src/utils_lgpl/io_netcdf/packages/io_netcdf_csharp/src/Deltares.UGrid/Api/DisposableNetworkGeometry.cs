@@ -113,8 +113,8 @@ namespace Deltares.UGrid.Api
 
             NodesX = new double[numberOfNodes];
             NodesY = new double[numberOfNodes];
-            NodeIds = new string[numberOfBranches].GetFixedLengthStringArray(40);
-            NodeLongNames = new string[numberOfBranches].GetFixedLengthStringArray(80);
+            NodeIds = new string[numberOfNodes].GetFixedLengthStringArray(40);
+            NodeLongNames = new string[numberOfNodes].GetFixedLengthStringArray(80);
 
             BranchLengths = new double[numberOfBranches];
             BranchTypes = new int[numberOfBranches];
