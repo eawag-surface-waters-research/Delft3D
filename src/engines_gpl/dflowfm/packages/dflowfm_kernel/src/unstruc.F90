@@ -36525,7 +36525,7 @@ bft:do ibathyfiletype=1,2
     if (setHorizontalBobsFor1d2d) then
        bob(:,L) = max(bob(1,L), bob(2,L))
     endif
-    bob0(:,L) = bob0(:,L)
+    bob0(:,L) = bob(:,L)
     bl(n1) = min( bl(n1) , bob(1,L) )
     bl(n2) = min( bl(n2) , bob(2,L) )
  endif
