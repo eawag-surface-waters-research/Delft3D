@@ -175,7 +175,6 @@ module m_1d_networkreader
    character(len=IdLen), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
    integer                                          :: firstNode, lastNode
    double precision, parameter                      :: snapping_tolerance = 1e-10
-   double precision                                 :: meanLength, distance
    
 
    ierr = -1
@@ -311,14 +310,8 @@ module m_1d_networkreader
          localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
       endif
 
-      if(nodesOnBranchVertices==0 .and. firstNode /= -1 .and. lastNode /= -1) then
-         if (gridPointsCount > 1) then
-            meanLength = (localOffsets(gridPointsCount) - localOffsets(1)) / dble(gridPointsCount - 1)
-         else
-            meanLength = meshgeom%nbranchlengths(ibran)
-         end if
-         distance = localOffsets(1)
-         if ((distance > snapping_tolerance .and. distance < 2d0 * meanLength) .or. gridpointsCount == 0) then
+      if(nodesOnBranchVertices==0) then
+         if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
             !start point missing
             localOffsets(1:gridPointsCount+1)=(/ 0.0d0, localOffsets(1:gridPointsCount) /)
             localGpsX(1:gridPointsCount+1)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount) /)
@@ -327,8 +320,7 @@ module m_1d_networkreader
             gridPointsCount = gridPointsCount + 1
          endif
          ! TODO: consider using a relative tolerance
-         distance = abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))
-         if ((distance > snapping_tolerance .and. distance < 2d0 * meanLength) .or. gridpointsCount == 1) then
+         if(abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance .or. gridpointsCount == 1) then
             !end point missing
             localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
             localGpsX(1:gridPointsCount+1)=(/ localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
