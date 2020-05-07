@@ -73,7 +73,7 @@ module m_hydrology_data
    !
    ! Infiltration
    !
-   integer                               :: infiltrationmodel      !< Infiltration formula, one of DFM_HYD_NOINFLT, DFM_HYD_INFILT_(CONST|DARCY|HORTON).
+   integer                               :: infiltrationmodel      !< Infiltration formula, one of DFM_HYD_NOINFILT, DFM_HYD_INFILT_(CONST|DARCY|HORTON).
 
    double precision                      :: infiltcapuni           !< [m s-1] Uniform infiltration capacity. Only used if infiltrationmodel == 2 (DFM_HYD_INFILT_CONST).
    double precision, allocatable, target :: infilt(:)              !< [m3 s-1] Actual infiltration flux at current time {"location": "face", "shape": ["ndx"]}
