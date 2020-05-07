@@ -154,6 +154,7 @@ module m_oned_functions
       nbr = network%brs%count
       do ibr = 1, nbr
          pbr => network%brs%branch(ibr)
+         if (pbr%gridPointsCount == 0) cycle
          call realloc(pbr%lin, pbr%uPointsCount)
          call realloc(pbr%grd, pbr%gridPointsCount)
          lin => pbr%lin
