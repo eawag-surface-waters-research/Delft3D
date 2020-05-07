@@ -3497,11 +3497,7 @@ if (ndambreak > 0) then
       do k = L1dambreaksg(n), L2dambreaksg(n)
          Lf = iabs(kdambreak(3,k))
          if (kcu(Lf) == 3) then ! 1d2d flow link
-            call compute_link_width_of_1d2d_link(Lf, dambreakLinksEffectiveLength(k), ierr)
-            if (ierr /= DFM_NOERR) then
-               write(msgbuf, '(a,I0,a,a,a)') 'Cannot compute the link width of flow link ''', Lf, ''' for dam break ''', trim(strid), '''.'
-               call err_flush()
-            end if
+            dambreakLinksEffectiveLength(k) = wu(Lf)
          else
             k3 = lncn(1,Lf)
             k4 = lncn(2,Lf)
