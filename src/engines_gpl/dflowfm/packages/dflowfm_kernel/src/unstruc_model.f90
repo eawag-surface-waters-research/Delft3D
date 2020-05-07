@@ -1713,6 +1713,11 @@ subroutine readMDUFile(filename, istat)
     call getOutputTimeArrays(ti_rst_array, ti_rsts, ti_rst, ti_rste, success)
 
     call prop_get_double (md_ptr, 'output', 'MbaInterval', ti_mba, success)
+    
+    call prop_get_integer (md_ptr, 'output', 'MbaLumpFromToMba', jambalumpmba, success)
+    call prop_get_integer (md_ptr, 'output', 'MbaLumpBoundaries', jambalumpbnd, success)
+    call prop_get_integer (md_ptr, 'output', 'MbaLumpSourceSinks', jambalumpsrc, success)
+    call prop_get_integer (md_ptr, 'output', 'MbaLumpProcesses', jambalumpproc, success)
 
 !    call prop_get_string(md_ptr, 'output', 'WaqFileBase', md_waqfilebase, success)
     ! Default basename of Delwaq files is model identifier:
@@ -3174,6 +3179,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'output', 'RstInterval', ti_rst_array, 'Restart times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period')
     call prop_set(prop_ptr, 'output', 'MbaInterval', ti_mba, 'Mass balance area output interval (s)')
 
+    call prop_set(prop_ptr, 'output', 'MbaLumpFromToMba', jambalumpmba, 'Lump MBA from/to other areas mass balance terms (1: yes, 0: no)')
+    call prop_set(prop_ptr, 'output', 'MbaLumpBoundaries', jambalumpbnd, 'Lump MBA boundary mass balance terms (1: yes, 0: no)')
+    call prop_set(prop_ptr, 'output', 'MbaLumpSourceSinks', jambalumpsrc, 'Lump MBA source/sink mass balance terms (1: yes, 0: no)')
+    call prop_set(prop_ptr, 'output', 'MbaLumpProcesses', jambalumpproc, 'Lump MBA processes mass balance terms (1: yes, 0: no)')
+    
 !    call prop_set(prop_ptr, 'output', 'WaqFileBase', trim(md_waqfilebase), 'Basename (without extension) for all Delwaq files to be written.')
     call prop_set(prop_ptr, 'output', 'WaqOutputDir',   trim(md_waqoutputdir),    'Output directory of WAQ communication files (flowgeom, vol, flo, etc.), default: DFM_DELWAQ_<modelname>. Set to . for current dir.')
 

@@ -2818,6 +2818,11 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jashp_dry                 !< Write a shape file for dry areas
  integer                           :: jashp_genstruc            !< Write a shape file for general structures
 
+ integer                           :: jambalumpmba              !< Lump MBA from/to other areas mass balance terms
+ integer                           :: jambalumpbnd              !< Lump MBA boundary mass balance terms
+ integer                           :: jambalumpsrc              !< Lump MBA source/sink mass balance terms
+ integer                           :: jambalumpproc             !< Lump MBA processes mass balance terms
+
  integer                           :: jawriteDFMinterpretedvalues = 0 !< Write interpretedvalues
 
  integer                           :: jawriteDetailedTimers = 0 !< Write detailed timers output file
@@ -3227,6 +3232,11 @@ subroutine default_flowparameters()
     jashp_pump= 0
     jashp_dry = 0
     jashp_genstruc = 0
+    
+    jambalumpmba = 0
+    jambalumpbnd = 0
+    jambalumpsrc = 0
+    jambalumpproc = 0
 
     ispirparopt = 1
 
