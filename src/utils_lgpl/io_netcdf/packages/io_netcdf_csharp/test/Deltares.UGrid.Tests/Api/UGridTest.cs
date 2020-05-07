@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Deltares.UGrid.Api;
 using NUnit.Framework;
 
@@ -26,7 +25,7 @@ namespace Deltares.UGrid.Tests.Api
             }
         }
 
-        [Test, Ignore("Fails with System.AccessViolationException : Attempted to read or write protected memory.")]
+        [Test]
         public void GivenUGrid_ReadingGeometry_ShouldNotCorruptMemory()
         {
             //Arrange
