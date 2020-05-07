@@ -38805,23 +38805,27 @@ end function ispumpon
     if (jaevap > 0) then                                      ! computed evaporation is always positive, must be extracted
        do k = 1,ndxi
           if (hs(k) > epshu) then
-             ! Calculates the flow rate describing the actual evaporation of the surface water.
-             ! It is capped by the available water plus the incoming flow calculated in the code above.
-             ! qin is used explicitly in the following , therefore a safety factor of 0.5 is introduced to prevent negative water levels.
-             Qeva_ow = -min(0.5d0*vol1(k)/dts + qin(k), -evap(k)*bare(k))
-             if (interceptionmodel == 1) then
-               ! Calculates the flow rate describing the actual evaporation of the intercepted water.
+             ! Calculates the actual evaporation rate from surface water.
+             ! It is capped by the available water plus the incoming rain calculated in the code above.
+             ! qin is used explicitly in the following , therefore an additional safety factor of 0.5
+             ! is introduced to prevent negative water depths.
+             Qeva_ow = -min(0.5d0*vol1(k)*dti + qin(k), -evap(k)*bare(k))
+
+             if (interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then
+               ! Calculates the actual evaporation rate from intercepted water.
                ! No safety factor is needed here, since no horizontal fluxes are present.
-               Qeva_intc = -min(InterceptHs(k)*bare(k)/dts, -evap(k)*bare(k))
+               ! Basic evaporation from interception occurs at the same potential rate as the surface water.
+               Qeva_intc = -min(dti*InterceptHs(k)*bare(k), -evap(k)*bare(k))
                InterceptHs(k) = InterceptHs(k) + Qeva_intc/bare(k)*dts
              else
-               Qeva_intc = 0
+               Qeva_intc = 0d0
              endif
+
              if (jadhyd == 1) then ! TODO: this is can be removed once jaevap and jadhyd have been merged
                 ActEvap(k) = -Qeva_ow/bare(k) ! m s-1
              endif
              qin(k)  = qin(k)  + Qeva_ow
-             qouteva = qouteva - Qeva_ow - Qeva_intc
+             qouteva = qouteva - Qeva_ow ! TODO: UNST-3851: add evaporation from interception to mass balances ! - Qeva_intc
              if (jamba > 0) then
                 imba = mbadefdomain(k)
                 if (imba > 0) then
