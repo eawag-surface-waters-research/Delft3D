@@ -26,6 +26,24 @@ namespace Deltares.UGrid.Tests.Api
             }
         }
 
+        [Test, Ignore("Fails with System.AccessViolationException : Attempted to read or write protected memory.")]
+        public void GivenUGrid_ReadingGeometry_ShouldNotCorruptMemory()
+        {
+            //Arrange
+            var path = @"..\..\test\Deltares.UGrid.Tests\TestData\FlowFM_net.nc";
+
+            // Act & Assert
+            using (var api = new UGridApi())
+            {
+                api.Open(path);
+                var id = api.GetNetworkIds();
+
+                var mesh = api.GetNetworkGeometry(id[0]);
+                Assert.NotNull(mesh);
+            }
+        }
+
+
         [Test]
         [TestCase(UGridMeshType.Mesh1D, 1)]
         [TestCase(UGridMeshType.Mesh2D, 1)]
