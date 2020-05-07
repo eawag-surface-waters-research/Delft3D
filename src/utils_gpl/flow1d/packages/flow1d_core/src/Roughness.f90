@@ -96,16 +96,16 @@ module m_Roughness
                                                          !! 3 = Floodplan2
                                                          !! Any other = Other section (Default 0)
       integer                           :: iSection = 0
-      type(t_tablematrix), pointer      :: table(:)          !< table for space and parameter dependent roughness
+      type(t_tablematrix), pointer      :: table(:) => null()!< table for space and parameter dependent roughness
       logical                           :: useGlobalFriction !< Flag indicates to use frictionValue and frictionType or to use the table
       double precision                  :: frictionValue     !< Global friction Value
       integer                           :: frictionType      !< Global friction Type
-      integer, pointer                  :: rgh_type_pos(:)   !< Roughness type for positive flow direction at a branch
-      integer, pointer                  :: fun_type_pos(:)   !< Roughness parameter value for positive flow direction at a branch     
+      integer, pointer                  :: rgh_type_pos(:) => null() !< Roughness type for positive flow direction at a branch
+      integer, pointer                  :: fun_type_pos(:) => null() !< Roughness parameter value for positive flow direction at a branch     
 
       ! All fields below: branch oriented data (roughness v1, obsolete for v2)
-      integer, pointer                  :: rgh_type_neg(:)   !< Roughness type for negative flow direction at a branch
-      integer, pointer                  :: fun_type_neg(:)   !< Roughness parameter value for negative flow direction at a branch
+      integer, pointer                  :: rgh_type_neg(:) => null() !< Roughness type for negative flow direction at a branch
+      integer, pointer                  :: fun_type_neg(:) => null() !< Roughness parameter value for negative flow direction at a branch
 
       integer                           :: spd_pos_idx       !< Index to Spatial Data for positive flow direction parameter values
       integer                           :: spd_neg_idx       !< Index to Spatial Data for negative flow direction parameter values
@@ -117,7 +117,7 @@ module m_Roughness
       integer                                           :: Size = 0         !< Current size
       integer                                           :: growsBy = 2000   !< Increment for growing array
       integer                                           :: Count= 0         !< Number of elements in array
-      type(t_Roughness), pointer, dimension(:)          :: rough            !< Array containing roughness sections
+      type(t_Roughness), pointer, dimension(:)          :: rough => null()  !< Array containing roughness sections
       type(t_tableSet)                                  :: tables           !< Array with tables for flow or water level dependend parameter values
       type(t_hashlist)                                  :: hashlist         !< hashlist for fast searching.
    end type t_RoughnessSet

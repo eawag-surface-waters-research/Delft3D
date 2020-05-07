@@ -71,17 +71,17 @@ module m_compound
       character(IdLen)                   :: id                    !< Id of the compound structure.
       character(IdLen)                   :: name                  !< Name of the compound structure.
       integer                            :: numstructs            !< Number of the structure elements in the compound.
-      integer, dimension(:), pointer     :: structure_indices     !< Indices of the structure elements.
+      integer, dimension(:), pointer     :: structure_indices => null() !< Indices of the structure elements.
       integer                            :: numlinks              !< Number of links .
-      integer, dimension(:), pointer     :: linknumbers           !< Link numbers.
-      character(len=IdLen), dimension(:), pointer :: structureIds !< ids of the structure elements
+      integer, dimension(:), pointer     :: linknumbers => null() !< Link numbers.
+      character(len=IdLen), dimension(:), pointer :: structureIds => null() !< ids of the structure elements
    end type t_compound
 
    type, public :: t_compoundSet
       integer                                               :: Size     = 0
       integer                                               :: growsBy = 2000
       integer                                               :: Count    = 0
-     type(t_compound), pointer, dimension(:)                :: compound
+     type(t_compound), pointer, dimension(:)                :: compound => null()
    end type t_compoundSet
 
    contains
