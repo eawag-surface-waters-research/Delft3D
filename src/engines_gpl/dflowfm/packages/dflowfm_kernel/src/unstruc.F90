@@ -38744,7 +38744,7 @@ end function ispumpon
 
  integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim, imba
  double precision :: aufu, auru, tetau
- double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva, Qrain, Qintc, Qextk, aloc
+ double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva_ow, Qeva_intc, Qrain, Qintc, Qextk, aloc
 
  buitje = 0.013d0/300d0                                      ! 13 mm in 5 minutes
 
@@ -38805,16 +38805,27 @@ end function ispumpon
     if (jaevap > 0) then                                      ! computed evaporation is always positive, must be extracted
        do k = 1,ndxi
           if (hs(k) > epshu) then
-             Qeva    = -min( 0.5d0*vol1(k)/dts + qin(k) , -evap(k)*bare(k) )
-             if (jadhyd == 1) then ! TODO: this is can be removed once jaevap and jadhyd have been merged
-                ActEvap(k) = -Qeva/bare(k) ! m s-1
+             ! Calculates the flow rate describing the actual evaporation of the surface water.
+             ! It is capped by the available water plus the incoming flow calculated in the code above.
+             ! qin is used explicitly in the following , therefore a safety factor of 0.5 is introduced to prevent negative water levels.
+             Qeva_ow = -min(0.5d0*vol1(k)/dts + qin(k), -evap(k)*bare(k))
+             if (interceptionmodel == 1) then
+               ! Calculates the flow rate describing the actual evaporation of the intercepted water.
+               ! No safety factor is needed here, since no horizontal fluxes are present.
+               Qeva_intc = -min(InterceptHs(k)*bare(k)/dts, -evap(k)*bare(k))
+               InterceptHs(k) = InterceptHs(k) + Qeva_intc/bare(k)*dts
+             else
+               Qeva_intc = 0
              endif
-             qin(k)  = qin(k)  + Qeva
-             qouteva = qouteva - Qeva
+             if (jadhyd == 1) then ! TODO: this is can be removed once jaevap and jadhyd have been merged
+                ActEvap(k) = -Qeva_ow/bare(k) ! m s-1
+             endif
+             qin(k)  = qin(k)  + Qeva_ow
+             qouteva = qouteva - Qeva_ow - Qeva_intc
              if (jamba > 0) then
                 imba = mbadefdomain(k)
                 if (imba > 0) then
-                   mbafloweva(imba) = mbafloweva(imba) - Qeva*dts
+                   mbafloweva(imba) = mbafloweva(imba) - Qeva_ow*dts
                 endif
              endif
           endif
