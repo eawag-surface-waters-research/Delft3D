@@ -33902,7 +33902,7 @@ end subroutine copycurvigridboundstopol
       use network_data, only: lne, numl
       use m_flowparameters, only: japartdomain
       use gridoperations
-      use string_module, only: find_last_slash
+      use system_utils, only: find_last_slash
 
       implicit none
 
