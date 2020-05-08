@@ -137,7 +137,7 @@ module m_1d_networkreader
    !! but the input meshgeom often will only have one unique grid point on a connection node.
    !! In that case, parameter nodesOnBranchVertices allows to automatically create duplicate start/end points.
    integer function construct_network_from_meshgeom(network, meshgeom, branchids, branchlongnames, nodeids, nodelongnames, & !1d network character variables
-      gpsID, gpsIDLongnames, network1dname, mesh1dname, nodesOnBranchVertices) result(ierr)
+      gpsID, gpsIDLongnames, network1dname, mesh1dname, nodesOnBranchVertices, jampi) result(ierr)
 
    use gridgeom
    use meshdata
@@ -157,6 +157,7 @@ module m_1d_networkreader
    character(len=ug_idsLongNamesLen),intent(in)                                :: mesh1dname
    integer, intent(in)                                                         :: nodesOnBranchVertices !< Whether or not (1/0) the input meshgeom itself already contains duplicate points on each connection node between multiple branches.
                                                                                                         !! If not (0), additional grid points will be created.
+   integer, intent(in), optional                                               :: jampi                 !! running in parallel mode (1) or not (0)
 
    !locals
    integer, allocatable, dimension(:)               :: gpFirst
@@ -175,9 +176,14 @@ module m_1d_networkreader
    character(len=IdLen), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
    integer                                          :: firstNode, lastNode
    double precision, parameter                      :: snapping_tolerance = 1e-10
-   
+   double precision                                 :: distance, meanLength
+   integer                                          :: jampi_
 
    ierr = -1
+
+   jampi_ = 0
+   if (present(jampi)) jampi_ = jampi
+
    ! check data are present and correct
    if (meshgeom%numnode .eq. -1) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%numnode')
@@ -310,23 +316,33 @@ module m_1d_networkreader
          localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
       endif
 
-      if(nodesOnBranchVertices==0) then
+      if(nodesOnBranchVertices==0 .and. jampi == 0) then
          if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
             !start point missing
-            localOffsets(1:gridPointsCount+1)=(/ 0.0d0, localOffsets(1:gridPointsCount) /)
-            localGpsX(1:gridPointsCount+1)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount) /)
-            localGpsY(1:gridPointsCount+1)=(/ meshgeom%nnodey(meshgeom%nedge_nodes(1,ibran)), localGpsY(1:gridPointsCount) /)
-            localGpsID(1:gridPointsCount+1)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount) /)
-            gridPointsCount = gridPointsCount + 1
+            call add_start_point()
          endif
          ! TODO: consider using a relative tolerance
          if(abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance .or. gridpointsCount == 1) then
             !end point missing
-            localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
-            localGpsX(1:gridPointsCount+1)=(/ localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
-            localGpsY(1:gridPointsCount+1)=(/ localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
-            localGpsID(1:gridPointsCount+1)=(/ localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
-            gridPointsCount = gridPointsCount + 1
+            call add_end_point()
+         endif
+      else if(nodesOnBranchVertices==0 .and. jampi == 1) then
+         if(firstNode /= -1 .and. lastNode /= -1) then
+            if (gridPointsCount > 1) then
+               meanLength = (localOffsets(gridPointsCount) - localOffsets(1)) / dble(gridPointsCount - 1)
+            else
+               meanLength = meshgeom%nbranchlengths(ibran)
+            end if
+            distance = localOffsets(1)
+            if (distance > snapping_tolerance .and. distance < 2d0 * meanLength) then
+               !start point missing
+               call add_start_point()
+            endif
+            distance = abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))
+            if (distance > snapping_tolerance .and. distance < 2d0 * meanLength) then
+               !end point missing
+               call add_end_point()
+            endif
          endif
       endif
 
@@ -343,6 +359,21 @@ module m_1d_networkreader
    deallocate(gpsX)
    deallocate(gpsY)
 
+   contains
+      subroutine add_start_point()
+         localOffsets(1:gridPointsCount+1)=(/ 0.0d0, localOffsets(1:gridPointsCount) /)
+         localGpsX(1:gridPointsCount+1)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount) /)
+         localGpsY(1:gridPointsCount+1)=(/ meshgeom%nnodey(meshgeom%nedge_nodes(1,ibran)), localGpsY(1:gridPointsCount) /)
+         localGpsID(1:gridPointsCount+1)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount) /)
+         gridPointsCount = gridPointsCount + 1
+      end subroutine add_start_point
+      subroutine add_end_point()
+            localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
+            localGpsX(1:gridPointsCount+1)=(/ localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
+            localGpsY(1:gridPointsCount+1)=(/ localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
+            localGpsID(1:gridPointsCount+1)=(/ localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
+            gridPointsCount = gridPointsCount + 1
+      end subroutine add_end_point
    end function construct_network_from_meshgeom
 
    subroutine read_1d_ugrid(network, ioncid, dflowfm)

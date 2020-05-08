@@ -10492,6 +10492,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    use dfm_error
    use m_alloc
    use gridoperations
+   use m_partitioninfo, only : jampi
 
    use unstruc_channel_flow
    use m_cross_helper
@@ -10676,7 +10677,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          YK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeY
          network%numk = meshgeom%numnode
          ! construct network and administrate
-         ierr = construct_network_from_meshgeom(network, meshgeom, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname, nodesOnBranchVertices)
+         ierr = construct_network_from_meshgeom(network, meshgeom, nbranchids, nbranchlongnames, nnodeids, &
+            nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname, nodesOnBranchVertices, jampi)
          ! get the edge nodes, usually not available (needs to be generated)
          if (meshgeom%numedge.eq.-1) then
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%nodebranchidx, meshgeom%nodeoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)
