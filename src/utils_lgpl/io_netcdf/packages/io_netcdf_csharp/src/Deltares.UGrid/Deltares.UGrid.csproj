@@ -99,6 +99,7 @@
       <Link>%(Filename)%(Extension)</Link>
     </None>
     <None Include="packages.config" />
+    <None Include="UML\Overview.cd" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Lib\" />
