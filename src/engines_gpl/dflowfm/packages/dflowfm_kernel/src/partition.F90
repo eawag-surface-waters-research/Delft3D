@@ -239,14 +239,15 @@ use meshdata, only : ug_idsLen
    integer          :: Nsubiters  = 1000
 
 !  1D global arrays that are stored during partitioning
-   character(len=ug_idsLen), private, allocatable :: nodeids_g(:), nodelongnames_g(:)
-   real(kind=hp)           , private, pointer     :: nodeoffsets_g(:)
-   integer                 , private, pointer     :: nbranchids_g(:)
-   integer                 , private, pointer     :: edgebranchidx_g(:)
-   real(kind=hp)           , private, pointer     :: edgeoffsets_g(:)
-   logical                 , private              :: branches_partitioned = .false.
+   character(len=ug_idsLen), private, allocatable :: nodeids_g(:)                   !< backup for nodeids during partitioning
+   character(len=ug_idsLen), private, allocatable :: nodelongnames_g(:)             !< backup for nodelongnames during partitioning
+   real(kind=hp)           , private, pointer     :: nodeoffsets_g(:)               !< backup for nodeoffsets during partitioning
+   integer                 , private, pointer     :: nodebranchidx_g(:)             !< backup for nodebranchidx during partitioning
+   integer                 , private, pointer     :: edgebranchidx_g(:)             !< backup for edgebranchidx during partitioning
+   real(kind=hp)           , private, pointer     :: edgeoffsets_g(:)               !< backup for edgeoffsets during partitioning
+   logical                 , private              :: branches_partitioned = .false. !< 1D arrays above are in use
 
-   private :: partition_make_branches_in_domain, get_edge_nodes_in_domain
+   private :: partition_make_1dugrid_in_domain, get_edge_nodes_in_domain
    private :: hp, ug_idsLen
 
    contains
@@ -774,7 +775,7 @@ use meshdata, only : ug_idsLen
 !        remove masked netcells
          call remove_masked_netcells()
 
-         call partition_make_branches_in_domain(idmn, numl1d, ierror)
+         call partition_make_1dugrid_in_domain(idmn, numl1d, ierror)
          if (ierror /= 0) goto 1234
       endif
       ierror = DFM_NOERR
@@ -785,8 +786,9 @@ use meshdata, only : ug_idsLen
       return
    end subroutine partition_make_domain
 
-   !> partition 1D arrays
-   subroutine partition_make_branches_in_domain(idmn, numl1d, ierror)
+   !> partition (only) the 1D mesh part of the 1D UGRID, not the 1D network part.
+   !! NOTE: mesh1dNodeIds is not partitioned.
+   subroutine partition_make_1dugrid_in_domain(idmn, numl1d, ierror)
       use m_save_ugrid_state, only : meshgeom1d, nodeids, nodelongnames
       implicit none
       integer, intent(in   )                :: idmn   !< domain number
@@ -804,12 +806,12 @@ use meshdata, only : ug_idsLen
       ierror = 0
       if (meshgeom1d%numnode < 0) return
 
-      ! set pointers to keep global arrays, and allow restore (see subroutine restore_branches below)
+      ! set pointers to keep global arrays, and allow restore (see subroutine restore_1dugrid_state below)
       if (idmn == 0) then
          call move_alloc(nodeids,       nodeids_g)
          call move_alloc(nodelongnames, nodelongnames_g)
          nodeoffsets_g   => meshgeom1d%nodeoffsets
-         nbranchids_g    => meshgeom1d%nodebranchidx
+         nodebranchidx_g => meshgeom1d%nodebranchidx
          edgebranchidx_g => meshgeom1d%edgebranchidx
          edgeoffsets_g   => meshgeom1d%edgeoffsets
          branches_partitioned = .true.
@@ -829,7 +831,7 @@ use meshdata, only : ug_idsLen
       do i = 1, numk1d
          ii = iglobal_s(i)
          nodeids_p(i) = nodeids_g(ii)
-         nbranchids_p(i) = nbranchids_g(ii)
+         nbranchids_p(i) = nodebranchidx_g(ii)
          nodeoffsets_p(i) = nodeoffsets_g(ii)
          nodelongnames_p(i) = nodelongnames_g(ii)
       end do
@@ -857,7 +859,7 @@ use meshdata, only : ug_idsLen
       meshgeom1d%nodebranchidx => nbranchids_p
       meshgeom1d%edgebranchidx => edgebranchidx_p
       meshgeom1d%edgeoffsets   => edgeoffsets_p
-   end subroutine partition_make_branches_in_domain
+   end subroutine partition_make_1dugrid_in_domain
 
    !> helper routine to get edge_nodes for current domain while partitioning
    subroutine get_edge_nodes_in_domain(numl1d, numk1d, edge_nodes, ierror)
@@ -908,9 +910,9 @@ use meshdata, only : ug_idsLen
       end do
    end subroutine get_edge_nodes_in_domain
 
-   !> restore 1D arrays that are partitioned in partition_make_branches_in_domain
+   !> restore 1D arrays that are partitioned in partition_make_1dugrid_in_domain
    !! also clean up of 1D arrays from the last domain
-   subroutine restore_branches()
+   subroutine restore_1dugrid_state()
       use m_save_ugrid_state, only : meshgeom1d, nodeids, nodelongnames
 
       implicit none
@@ -923,13 +925,13 @@ use meshdata, only : ug_idsLen
          call move_alloc(nodeids_g,       nodeids)
          call move_alloc(nodelongnames_g, nodelongnames)
          meshgeom1d%nodeoffsets   => nodeoffsets_g
-         meshgeom1d%nodebranchidx => nbranchids_g
+         meshgeom1d%nodebranchidx => nodebranchidx_g
          meshgeom1d%edgebranchidx => edgebranchidx_g
          meshgeom1d%edgeoffsets   => edgeoffsets_g
          branches_partitioned = .false.
-         nullify(nodeoffsets_g, nbranchids_g, edgebranchidx_g, edgeoffsets_g)
+         nullify(nodeoffsets_g, nodebranchidx_g, edgebranchidx_g, edgeoffsets_g)
       end if
-   end subroutine restore_branches
+   end subroutine restore_1dugrid_state
 
 !> find original cell numbers
    subroutine find_original_cell_numbers(L2Lorg, Lne_org, iorg)

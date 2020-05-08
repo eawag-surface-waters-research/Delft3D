@@ -33982,7 +33982,7 @@ end subroutine copycurvigridboundstopol
          call restore()
          call restorecells() ! restore netcell, lne, lnn and idomain,xz, yz, xzw, yzw, ba
       end do
-      call restore_branches()
+      call restore_1dugrid_state()
 
       ierror = 0
  1234 continue
