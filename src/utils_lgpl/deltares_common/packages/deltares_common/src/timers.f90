@@ -418,7 +418,11 @@
       character(60) forchr
       data          forchr / '(i5,i11,x,D13.6,x,f7.2,x,D13.6,'  /
 
-      cpfact = 100.0d00/cptime(1)
+      if (cptime(1) > 0d0) then
+         cpfact = 100.0d00/cptime(1)
+      else
+         cpfact = 1d0
+      endif
       wcfact = 100.0d00/wctime(1)
       write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' ) &
                                          (level(ihandl)-1)*5+2,(maxlvl-level(ihandl))*5+1
