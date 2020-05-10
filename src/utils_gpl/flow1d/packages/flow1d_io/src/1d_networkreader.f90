@@ -316,7 +316,7 @@ module m_1d_networkreader
          localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
       endif
 
-      if(nodesOnBranchVertices==0 .and. jampi == 0) then
+      if(nodesOnBranchVertices==0 .and. jampi_ == 0) then
          if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
             !start point missing
             call add_start_point()
@@ -326,7 +326,7 @@ module m_1d_networkreader
             !end point missing
             call add_end_point()
          endif
-      else if(nodesOnBranchVertices==0 .and. jampi == 1) then
+      else if(nodesOnBranchVertices==0 .and. jampi_ == 1) then
          if(firstNode /= -1 .and. lastNode /= -1) then
             if (gridPointsCount > 1) then
                meanLength = (localOffsets(gridPointsCount) - localOffsets(1)) / dble(gridPointsCount - 1)
