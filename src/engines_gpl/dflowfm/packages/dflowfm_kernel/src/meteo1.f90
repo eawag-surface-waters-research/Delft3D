@@ -6419,6 +6419,7 @@ module m_meteo
    integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantityxy' quantity
    integer, target :: item_pump_capacity                                     !< Unique Item id of the structure file's 'pump capacity' quantity
    integer, target :: item_weir_crestLevel                                   !< Unique Item id of the structure file's 'weir crestLevel' quantity
+   integer, target :: item_frcutim                                           !< Unique Item id of the friction file's 'friction coeffifcient' quantity
    integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantxy' quantity
    integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
    integer, target :: item_gateloweredgelevel                                !< Unique Item id of the ext-file's 'gateloweredgelevel' quantity
@@ -6514,6 +6515,7 @@ module m_meteo
       item_pump                                  = ec_undef_int
       item_pump_capacity                         = ec_undef_int
       item_weir_crestLevel                       = ec_undef_int
+      item_frcutim                               = ec_undef_int
       item_valve1D                               = ec_undef_int    
       item_lateraldischarge                      = ec_undef_int
       item_damlevel                              = ec_undef_int
@@ -6957,6 +6959,10 @@ module m_meteo
             dataPtr1 => sfuninp(isfun,:)
          case ('initialtracer')
             continue
+         case ('friction_coefficient_Chezy', 'friction_coefficient_Manning', 'friction_coefficient_WalLlawNikuradse', &
+               'friction_coefficient_WhiteColebrook', 'friction_coefficient_StricklerNikuradse', &
+               'friction_coefficient_Strickler', 'friction_coefficient_deDosBijkerk')
+            itemPtr1 => item_frcutim ! the same for all types (type is stored elsewhere)
          case default
             call mess(LEVEL_FATAL, 'm_meteo::fm_ext_force_name_to_ec_item: Unsupported quantity specified in ext-file (construct target field): '//qidname)
             success = .false.

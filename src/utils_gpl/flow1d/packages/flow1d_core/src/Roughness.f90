@@ -60,6 +60,7 @@ module m_Roughness
    public getFrictionParameters
    public frictionTypeStringToInteger
    public functionTypeStringToInteger
+   public frictionTypeIntegerToString
 
    
    double precision :: vonkar      = 0.41        !< von Karman constant ()
@@ -96,12 +97,16 @@ module m_Roughness
                                                          !! 3 = Floodplan2
                                                          !! Any other = Other section (Default 0)
       integer                           :: iSection = 0
-      type(t_tablematrix), pointer      :: table(:) => null()!< table for space and parameter dependent roughness
-      logical                           :: useGlobalFriction !< Flag indicates to use frictionValue and frictionType or to use the table
-      double precision                  :: frictionValue     !< Global friction Value
-      integer                           :: frictionType      !< Global friction Type
-      integer, pointer                  :: rgh_type_pos(:) => null() !< Roughness type for positive flow direction at a branch
-      integer, pointer                  :: fun_type_pos(:) => null() !< Roughness parameter value for positive flow direction at a branch     
+      type(t_tablematrix), pointer      :: table(:) => null()              !< table for space and parameter dependent roughness
+      logical                           :: useGlobalFriction               !< Flag indicates to use frictionValue and frictionType or to use the table
+      double precision                  :: frictionValue                   !< Global friction Value
+      integer                           :: frictionType                    !< Global friction Type
+      integer, pointer                  :: rgh_type_pos(:) => null()       !< Roughness type for positive flow direction at a branch
+      integer, pointer                  :: fun_type_pos(:) => null()       !< Roughness parameter value for positive flow direction at a branch     
+      character(len=charLn)             :: frictionValuesFile              !< *.bc file containing the timeseries with friction values
+      type(t_hashlist)                  :: frictionIds                     !< Hashlist containing friction ids of the timeseries
+      integer, pointer                  :: frictionIndexes(:) => null()    !< Get index in frictionIds and/or frictionvalues based on branch index 
+      double precision, allocatable     :: frictionValues(:)               !< Friction values of time dependent items (same index as frictionIds).
 
       ! All fields below: branch oriented data (roughness v1, obsolete for v2)
       integer, pointer                  :: rgh_type_neg(:) => null() !< Roughness type for negative flow direction at a branch
@@ -120,11 +125,13 @@ module m_Roughness
       type(t_Roughness), pointer, dimension(:)          :: rough => null()  !< Array containing roughness sections
       type(t_tableSet)                                  :: tables           !< Array with tables for flow or water level dependend parameter values
       type(t_hashlist)                                  :: hashlist         !< hashlist for fast searching.
+      logical                                           :: timeseries_defined = .false. !< Indicates whether time dependent roughnesses are defined
    end type t_RoughnessSet
 
    integer, parameter, public                           :: R_FunctionConstant = 0      !< Constant type roughness function
    integer, parameter, public                           :: R_FunctionDischarge = 1     !< Discharge dependend roughness 
    integer, parameter, public                           :: R_FunctionLevel = 2         !< Water level dependend roughness
+   integer, parameter, public                           :: R_FunctionTimeSeries = 3    !< Time dependend roughness
    integer, parameter, public                           :: R_Chezy = 0                 !< Chezy type roughness
    integer, parameter, public                           :: R_Manning = 1               !< Manning  roughness formula
    integer, parameter, public                           :: R_Nikuradse = 7             !< Nikuradse roughness formula
@@ -287,6 +294,35 @@ end function frictiontype_v1_to_new
    
    end subroutine frictionTypeStringToInteger
    
+   !> Converts a friction integer type to a text string 
+   !! E.g. R_Manning, etc. 
+   character(len=25) function frictionTypeIntegerToString(ifricType)
+      use string_module, only:str_lower
+      implicit none
+      integer,          intent(  out) :: ifricType !< Friction type integer. When string is invalid, -1 is returned.
+      
+      select case (ifricType)
+         case(R_Chezy)
+            frictionTypeIntegerToString = 'Chezy'
+         case(R_Manning)
+            frictionTypeIntegerToString = 'Manning'
+         case(2)
+            frictionTypeIntegerToString = 'WalLlawNikuradse'
+         case(R_WhiteColebrook)
+            frictionTypeIntegerToString = 'WhiteColebrook'
+         case(R_Nikuradse)
+            frictionTypeIntegerToString = 'StricklerNikuradse'
+         case(R_Strickler)
+            frictionTypeIntegerToString = 'Strickler'
+         case(R_BosBijkerk)
+            frictionTypeIntegerToString = 'deDosBijkerk'
+         case default
+            frictionTypeIntegerToString = 'unknown'
+      end select
+      return
+   
+   end function frictionTypeIntegerToString
+   
    !> Converts a (friction) function type as text string into the integer parameter constant.
    !! E.g. R_FunctionConstant, etc. If input string is invalid, -1 is returned.
    subroutine functionTypeStringToInteger(sfuncType, ifuncType)
@@ -303,6 +339,8 @@ end function frictiontype_v1_to_new
             ifuncType = R_FunctionDischarge
          case ('waterlevel')
             ifuncType = R_FunctionLevel
+         case ('timeseries')
+            ifuncType = R_FunctionTimeseries
          case default
             ifuncType = -1
       end select

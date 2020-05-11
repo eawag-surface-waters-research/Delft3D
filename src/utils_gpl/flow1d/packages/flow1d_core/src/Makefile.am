@@ -21,6 +21,7 @@ libflow1d_core_la_SOURCES = \
          nodes.f90 \
          ModelTypes.f90 \
          GlobalParameters.f90 \
+         forcinglist.f90 \
          branches.f90 \
          spatial_data.f90 \
          Roughness.f90 \

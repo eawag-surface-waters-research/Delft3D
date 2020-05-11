@@ -17928,6 +17928,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    use m_ec_parameters
    use dfm_error
    use m_sobekdfm
+   use unstruc_channel_flow
 
 
    implicit none
@@ -18095,6 +18096,10 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    !dambreak
    if (ndambreak > 0) then
       call update_dambreak_breach(tim, dts)
+   endif
+
+   if (network%rgs%timeseries_defined) then
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_frcutim, irefdate, tzone, tunit, tim)
    endif
 
    call timstop(handle_extbnd)
