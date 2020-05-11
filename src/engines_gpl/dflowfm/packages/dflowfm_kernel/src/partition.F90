@@ -822,7 +822,7 @@ use meshdata, only : ug_idsLen
       end if
 
       ! create edge_nodes (Edge-to-node mapping array)
-      call get_edge_nodes_in_domain(numl1d, numk1d, edge_nodes, ierror)
+      call get_edge_nodes_in_domain(numl1d, numk1d, n1dedges, edge_nodes, ierror)
       if (ierror /= 0) return
 
       ! partition node arrays
@@ -861,16 +861,17 @@ use meshdata, only : ug_idsLen
       meshgeom1d%edgeoffsets   => edgeoffsets_p
    end subroutine partition_make_1dugrid_in_domain
 
-   !> helper routine to get edge_nodes for current domain while partitioning
-   subroutine get_edge_nodes_in_domain(numl1d, numk1d, edge_nodes, ierror)
+   !> Helper routine to get 1D edge_nodes for current domain while partitioning.
+   subroutine get_edge_nodes_in_domain(numl1d, numk1d, n1dedges, edge_nodes, ierror)
       use network_data, only : kn
       implicit none
-      integer, intent(in)               :: numl1d          !< number of 1D links
-      integer, intent(out), allocatable :: edge_nodes(:,:) !< Edge-to-node mapping array.
-      integer, intent(out)              :: numk1d          !< number of 1D nodes
-      integer, intent(out)              :: ierror          !< error code
+      integer,              intent(in   ) :: numl1d          !< number of 1D links in original 1d mesh
+      integer,              intent(  out) :: numk1d          !< number of 1D nodes returned
+      integer,              intent(  out) :: n1dedges        !< number of 1D edges returned
+      integer, allocatable, intent(  out) :: edge_nodes(:,:) !< Edge-to-node mapping array.
+      integer,              intent(  out) :: ierror          !< error code
 
-      integer              :: k1, k2, n1dedges, l, size
+      integer              :: k1, k2, l, size
       integer, allocatable :: kc(:)
 
       size = maxval(kn(1:2, 1:numl1d))
