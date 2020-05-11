@@ -129,9 +129,9 @@ module m_Roughness
    end type t_RoughnessSet
 
    integer, parameter, public                           :: R_FunctionConstant = 0      !< Constant type roughness function
-   integer, parameter, public                           :: R_FunctionDischarge = 1     !< Discharge dependend roughness 
-   integer, parameter, public                           :: R_FunctionLevel = 2         !< Water level dependend roughness
-   integer, parameter, public                           :: R_FunctionTimeSeries = 3    !< Time dependend roughness
+   integer, parameter, public                           :: R_FunctionDischarge = 1     !< Discharge dependent roughness 
+   integer, parameter, public                           :: R_FunctionLevel = 2         !< Water level dependent roughness
+   integer, parameter, public                           :: R_FunctionTimeSeries = 3    !< Time dependent roughness
    integer, parameter, public                           :: R_Chezy = 0                 !< Chezy type roughness
    integer, parameter, public                           :: R_Manning = 1               !< Manning  roughness formula
    integer, parameter, public                           :: R_Nikuradse = 7             !< Nikuradse roughness formula
@@ -295,11 +295,12 @@ end function frictiontype_v1_to_new
    end subroutine frictionTypeStringToInteger
    
    !> Converts a friction integer type to a text string 
-   !! E.g. R_Manning, etc. 
-   character(len=25) function frictionTypeIntegerToString(ifricType)
+   !! E.g. 'Manning' -> R_Manning, etc. 
+   function frictionTypeIntegerToString(ifricType)
       use string_module, only:str_lower
       implicit none
-      integer,          intent(  out) :: ifricType !< Friction type integer. When string is invalid, -1 is returned.
+      integer,          intent(  out) :: ifricType !< Friction type integer. When string is invalid, 'unknown' is returned.
+      character(:), allocatable :: frictionTypeIntegerToString
       
       select case (ifricType)
          case(R_Chezy)
@@ -307,7 +308,7 @@ end function frictiontype_v1_to_new
          case(R_Manning)
             frictionTypeIntegerToString = 'Manning'
          case(2)
-            frictionTypeIntegerToString = 'WalLlawNikuradse'
+            frictionTypeIntegerToString = 'WallLawNikuradse'
          case(R_WhiteColebrook)
             frictionTypeIntegerToString = 'WhiteColebrook'
          case(R_Nikuradse)
@@ -315,7 +316,7 @@ end function frictiontype_v1_to_new
          case(R_Strickler)
             frictionTypeIntegerToString = 'Strickler'
          case(R_BosBijkerk)
-            frictionTypeIntegerToString = 'deDosBijkerk'
+            frictionTypeIntegerToString = 'deBosBijkerk'
          case default
             frictionTypeIntegerToString = 'unknown'
       end select

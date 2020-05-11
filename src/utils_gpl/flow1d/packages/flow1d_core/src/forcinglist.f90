@@ -1,3 +1,37 @@
+!----- AGPL --------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2017-2020.                                
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify              
+!  it under the terms of the GNU Affero General Public License as               
+!  published by the Free Software Foundation version 3.                         
+!                                                                               
+!  This program is distributed in the hope that it will be useful,                  
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU Affero General Public License for more details.                          
+!                                                                               
+!  You should have received a copy of the GNU Affero General Public License     
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.             
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!                                                                               
+!-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
+!-------------------------------------------------------------------------------
+
+!> Functionality to store user input for forcings (e.g., time series), to be processed later by a kernel.
+!! For example, a pump's capacity may be prescribed by a time series in a .bc file.
+!! The flow1d structure reader only reads all user-supplied input, and later it is up to
+!! the calling kernel to initialize that forcing provider, and get time-interpolated values from it.
 module m_forcinglist
 
    use messagehandling
@@ -15,7 +49,7 @@ module m_forcinglist
       module procedure deallocForcingList
    end interface dealloc
 
-  !> Data type to store user input for structure forcings, to be processed later by a kernel.
+  !> Data type to store user input for forcings, to be processed later by a kernel.
   !! For example, a pump's capacity may be prescribed by a time series in a .bc file.
   !! The flow1d structure reader only reads all user-supplied input, and later it is up to
   !! the calling kernel to initialize that forcing provider.

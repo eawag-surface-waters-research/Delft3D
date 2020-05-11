@@ -6419,7 +6419,7 @@ module m_meteo
    integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantityxy' quantity
    integer, target :: item_pump_capacity                                     !< Unique Item id of the structure file's 'pump capacity' quantity
    integer, target :: item_weir_crestLevel                                   !< Unique Item id of the structure file's 'weir crestLevel' quantity
-   integer, target :: item_frcutim                                           !< Unique Item id of the friction file's 'friction coeffifcient' quantity
+   integer, target :: item_frcutim                                           !< Unique Item id of the friction file's 'friction_coefficient_*' quantity
    integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantxy' quantity
    integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
    integer, target :: item_gateloweredgelevel                                !< Unique Item id of the ext-file's 'gateloweredgelevel' quantity

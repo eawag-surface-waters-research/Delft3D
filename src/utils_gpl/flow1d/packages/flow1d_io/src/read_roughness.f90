@@ -459,12 +459,12 @@ contains
             fricType = ''
             call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', fricType, success)
             if (.not. success) then
-               call setmessage(LEVEL_ERROR, 'Missing frictionType for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
+               call setmessage(LEVEL_ERROR, 'Missing frictionType for branchId '//trim(branchid)//', see input file: '//trim(inputfile))
                cycle
             end if
             call frictionTypeStringToInteger(fricType, rgh%rgh_type_pos(ibr))
             if (rgh%rgh_type_pos(ibr) < 0) then
-               call setmessage(LEVEL_ERROR, 'frictionType '''//trim(fricType)//''' invalid for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
+               call setmessage(LEVEL_ERROR, 'frictionType '''//trim(fricType)//''' invalid for branchId '//trim(branchid)//', see input file: '//trim(inputfile))
                cycle
             endif
 
@@ -472,18 +472,15 @@ contains
             call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'functionType', funcType, success)
             call functionTypeStringToInteger(funcType, rgh%fun_type_pos(ibr))
             if (rgh%fun_type_pos(ibr) < 0) then
-               call setmessage(LEVEL_ERROR, 'functionType '''//trim(funcType)//''' invalid for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
+               call setmessage(LEVEL_ERROR, 'functionType '''//trim(funcType)//''' invalid for branchId '//trim(branchid)//', see input file: '//trim(inputfile))
                cycle
             endif
             
             if (rgh%fun_type_pos(ibr) == R_FunctionTimeseries) then
-               if (.not. associated(rgh%frictionIndexes)) then
-                  allocate(rgh%frictionIndexes(brs%Count))
-                  rgh%frictionIndexes = -1
-               endif
-               call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'timeseriesId', timeseriesId, success)   
+               call reallocP(rgh%frictionIndexes, brs%Count, keepExisting=.true., fill = -1)
+               call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'timeSeriesId', timeseriesId, success)   
                if (.not. success) then
-                  call setmessage(LEVEL_ERROR, 'TimeseriesId was expected, but was not found in the input fro branchid '//trim(branchid))
+                  call setmessage(LEVEL_ERROR, 'timeSeriesId is required for functionType='//trim(funcType)//', but was not found in the input for branchId '//trim(branchid)', see input file: '//trim(inputfile))
                   cycle
                endif
                rgh%frictionIndexes(ibr) = hashsearch_or_add(rgh%frictionIds, timeseriesId)
