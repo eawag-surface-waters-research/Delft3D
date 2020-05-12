@@ -480,7 +480,7 @@ contains
                call reallocP(rgh%frictionIndexes, brs%Count, keepExisting=.true., fill = -1)
                call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'timeSeriesId', timeseriesId, success)   
                if (.not. success) then
-                  call setmessage(LEVEL_ERROR, 'timeSeriesId is required for functionType='//trim(funcType)//', but was not found in the input for branchId '//trim(branchid)', see input file: '//trim(inputfile))
+                  call setmessage(LEVEL_ERROR, 'timeSeriesId is required for functionType='//trim(funcType)//', but was not found in the input for branchId '//trim(branchid)//', see input file: '//trim(inputfile))
                   cycle
                endif
                rgh%frictionIndexes(ibr) = hashsearch_or_add(rgh%frictionIds, timeseriesId)
