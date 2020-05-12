@@ -18789,7 +18789,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_varQ, id_varQint, id_varb, & ! id_varQavg,
                      id_varAu,  & ! id_varAuavg,
                      id_varu,  id_varwx, id_varwy, id_varrain, id_varpatm, &!id_varuavg,
-                     id_infiltcap, &
+                     id_infiltcap, id_infiltact, &
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
                      id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, id_zwu, &
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
@@ -19528,6 +19528,13 @@ subroutine unc_write_his(tim)            ! wrihis
                !ierr = nf90_put_att(ihisfile, id_infiltcap, 'standard_name', 'infiltration_rate)
                ierr = nf90_put_att(ihisfile, id_infiltcap, 'long_name', 'Infiltration capacity')
                ierr = nf90_put_att(ihisfile, id_infiltcap, 'geometry', station_geom_container_name)
+
+               ierr = nf90_def_var(ihisfile, 'infiltration_actual', nf90_double, (/ id_statdim, id_timedim /), id_infiltact)
+               ierr = nf90_put_att(ihisfile, id_infiltact, 'units', 'm3 s-1')
+               ierr = nf90_put_att(ihisfile, id_infiltact, '_FillValue', dmiss)
+               ierr = nf90_put_att(ihisfile, id_infiltact, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_infiltact, 'long_name', 'Actual infiltration flux')
+               ierr = nf90_put_att(ihisfile, id_infiltact, 'geometry', station_geom_container_name)
             endif
 
             if (kmx.gt.0 .and. jawrizc == 1) then
@@ -21062,6 +21069,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
     if ((infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) .and. jahisinfilt > 0) then
        ierr = nf90_put_var(ihisfile, id_infiltcap,  valobsT(:,IPNT_infiltcap),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_infiltact,  valobsT(:,IPNT_infiltact),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
     endif
 
     if (numobs+nummovobs > 0) then
@@ -22436,6 +22444,7 @@ subroutine fill_valobs()
 !        Infiltration
          if ((infiltrationmodel == DFM_HYD_INFILT_CONST .or. infiltrationmodel == DFM_HYD_INFILT_HORTON) .and. jahisinfilt > 0) then
             valobs(IPNT_INFILTCAP,i) = infiltcap(k)*1d3*3600d0 ! m/s -> mm/hr
+            valobs(IPNT_INFILTACT,i) = infilt(k)
          end if
 
 !        Heatflux
