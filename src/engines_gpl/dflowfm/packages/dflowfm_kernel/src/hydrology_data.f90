@@ -59,7 +59,7 @@ module m_hydrology_data
 
    !
    ! Interception
-   integer                               :: interceptionmodel       !< [-] Interception model, indicating if interception is off (0) or on (1)
+   integer                               :: interceptionmodel       !< [-] Interception model, one of DFM_HYD_(NOINTERCEPT|DFM_HYD_INTERCEPT_LAYER)
    double precision, allocatable, target :: InterceptThickness(:)   !< [m] Interception layer thickness (max depth) {"location": "face", "shape": ["ndx"]}
    double precision, allocatable, target :: InterceptHs(:)          !< [m] Interception layer water depth at current time {"location": "face", "shape": ["ndx"]}
 

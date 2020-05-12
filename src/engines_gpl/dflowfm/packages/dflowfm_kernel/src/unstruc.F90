@@ -38769,7 +38769,7 @@ end function ispumpon
 
  if (jaqin > 0) then                                         ! sources and sinks through meteo
 
-    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0; qinext(1:2) = 0d0 ; qoutext(1:2) = 0d0
+    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qoutevaintc = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0; qinext(1:2) = 0d0 ; qoutext(1:2) = 0d0
     if (jarain > 0) then
        if (rainuni > 0d0) then
           rain     = rainuni*24d0                             ! mm/hr  => mm/day
@@ -38786,13 +38786,13 @@ end function ispumpon
              Qrain   = 0d0
           endif
 
-          if (Qrain > 0 .and. interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then                    ! Is there rainfall AND interception?
+          if (Qrain > 0d0 .and. interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then                    ! Is there rainfall AND interception?
              Qintc = min(Qrain, dti*bare(k)*(InterceptThickness(k) - InterceptHs(k)))
-             InterceptHs(k) = InterceptHs(k) + dts*Qintc/bare(k)
-             qin(k) = Qrain - Qintc
+             InterceptHs(k) = InterceptHs(k) + dts*Qintc/bare(k)             
           else
-             qin(k) = Qrain
+             Qintc = 0
           endif
+          qin(k) = Qrain - Qintc
 
           if (jamba > 0) then
              imba = mbadefdomain(k)
@@ -38830,7 +38830,8 @@ end function ispumpon
                 ActEvap(k) = -Qeva_ow/bare(k) ! m s-1
              endif
              qin(k)  = qin(k)  + Qeva_ow
-             qouteva = qouteva - Qeva_ow ! TODO: UNST-3851: add evaporation from interception to mass balances ! - Qeva_intc
+             qouteva = qouteva - Qeva_ow
+             qoutevaintc = qoutevaintc - Qeva_intc
              if (jamba > 0) then
                 imba = mbadefdomain(k)
                 if (imba > 0) then
@@ -40369,17 +40370,24 @@ subroutine reallocsrc(n)
 
  integer :: k
 
- if ( jampi.ne.1 ) then
+ if ( jampi /= 1 ) then
     a1tot     = sum(a1  (1:ndxi))
     vol1tot   = sum(vol1(1:ndxi))
+    if (interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then
+       vol1icept = sum(bare(1:ndxi)*InterceptHs(1:ndxi))
+    endif
  else
     a1tot  = 0d0
     vol1tot = 0d0
+    vol1icept = 0d0
 
     do k=1,Ndxi
-       if ( idomain(k).eq.my_rank ) then
+       if ( idomain(k) == my_rank ) then
           a1tot   = a1tot + a1(k)
           vol1tot = vol1tot + vol1(k)
+          if (interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then
+             vol1icept = vol1icept + bare(k)*InterceptHs(k)
+          endif
        end if
     end do
 
@@ -40475,6 +40483,7 @@ if (jahisbal > 0) then
     ! extra
     vinrain     = qinrain *dts
     vouteva     = qouteva *dts
+    voutevaintc = qoutevaintc*dts
     vinlat(1:2) = qinlat(1:2) *dts
     voutlat(1:2)= qoutlat(1:2)*dts
     vingrw      = qingrw  *dts
@@ -40517,7 +40526,7 @@ if (jahisbal > 0) then
     voutextcum(1:2) = voutextcum(1:2)   + voutext(1:2)
 
     ! Volume totals at current time (for his output)
-    volcur(IDX_STOR  ) = vol1tot
+    volcur(IDX_STOR  )  = vol1tot
     volcur(IDX_VOLTOT)  = vol1tot
     volcur(IDX_VOLERR)  = volerr
     volcur(IDX_BNDIN )  = vinbnd
@@ -40538,6 +40547,8 @@ if (jahisbal > 0) then
     volcur(IDX_PRECIP) = vinrain
     volcur(IDX_EVAP)   = vouteva
     volcur(IDX_SOUR  ) = vinsrc - voutsrc
+    volcur(IDX_ICEPT) = vol1icept
+    volcur(IDX_EVAP_INTC) = voutevaintc
 
     if ( jaFrcInternalTides2D.eq.1 ) then
        volcur(IDX_InternalTidesDIssipation) = DissInternalTides*dts

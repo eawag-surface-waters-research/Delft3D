@@ -3648,6 +3648,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  double precision                  :: vol0tot     !< Total volume start of timestep            (m3)
  double precision                  :: vol1tot     !< Total volume   end of timestep            (m3)
  double precision                  :: vol1ini     !< Total volume   initially                  (m3)
+ double precision                  :: vol1icept   !< Total volume interception end of timestep (m3)
  double precision                  :: Volgrw      !< Total volume grw end of timestep          (m3)
  double precision                  :: Volgrwini   !< Total volume grw initially                (m3)
 
@@ -3671,53 +3672,55 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  double precision                  :: dvolbot     !<     (m3), associated with jamorf
 
  ! extra
- double precision                  :: qinrain     !< total influx rain                         (m3/s)
- double precision                  :: qouteva     !< total outflux evaporation                 (m3/s)
- double precision, dimension(2)    :: qinlat      !< total influx diffuse laterals (1D and 2D) (m3/s)
- double precision, dimension(2)    :: qoutlat     !< total outflux diffuse laterals (1D and 2D)(m3/s)
- double precision                  :: qingrw      !< total influx groundwater                  (m3/s)
- double precision                  :: qoutgrw     !< total outflux groundwater                 (m3/s)
- double precision                  :: qinsrc      !< total influx local point sources          (m3/s)
- double precision                  :: qoutsrc     !< total outflux local pount sources         (m3/s)
- double precision, dimension(2)    :: qinext      !< total influx Qext (1D and 2D)             (m3/s)
- double precision, dimension(2)    :: qoutext     !< total outflux Qext(1D and 2D)             (m3/s)
+ double precision                  :: qinrain     !< Total influx rain                         (m3/s)
+ double precision                  :: qouteva     !< Total outflux evaporation                 (m3/s)
+ double precision                  :: qoutevaintc !< Total outflux evaporation from interception layer (m3/s)
+ double precision, dimension(2)    :: qinlat      !< Total influx diffuse laterals (1D and 2D) (m3/s)
+ double precision, dimension(2)    :: qoutlat     !< Total outflux diffuse laterals (1D and 2D)(m3/s)
+ double precision                  :: qingrw      !< Total influx groundwater                  (m3/s)
+ double precision                  :: qoutgrw     !< Total outflux groundwater                 (m3/s)
+ double precision                  :: qinsrc      !< Total influx local point sources          (m3/s)
+ double precision                  :: qoutsrc     !< Total outflux local pount sources         (m3/s)
+ double precision, dimension(2)    :: qinext      !< Total influx Qext (1D and 2D)             (m3/s)
+ double precision, dimension(2)    :: qoutext     !< Total outflux Qext(1D and 2D)             (m3/s)
 
- double precision                  :: vinrain     !< total volume in  rain                     (m3) in the last time step
- double precision                  :: vouteva     !< total volume out evaporation              (m3) "
- double precision, dimension(2)    :: vinlat      !< total volume in  diffuse laterals (1D and 2D) (m3) "
- double precision, dimension(2)    :: voutlat     !< total volume out diffuse laterals (1D and 2D) (m3) "
- double precision                  :: vingrw      !< total volume in  groundwater              (m3) "
- double precision                  :: voutgrw     !< total volume out groundwater              (m3) "
- double precision                  :: vinsrc      !< total volume in  local point sources      (m3) "
- double precision                  :: voutsrc     !< total volume out local pount sources      (m3) "
- double precision, dimension(2)    :: vinext      !< total volume in  Qext (1D and 2D)         (m3) "
- double precision, dimension(2)    :: voutext     !< total volume out Qext (1D and 2D)         (m3) "
+ double precision                  :: vinrain     !< Total volume in  rain                     (m3) in the last time step
+ double precision                  :: vouteva     !< Total volume out evaporation              (m3)
+ double precision                  :: voutevaintc !< Total volume out evaporation from interception layer (m3)
+ double precision, dimension(2)    :: vinlat      !< Total volume in  diffuse laterals (1D and 2D) (m3)
+ double precision, dimension(2)    :: voutlat     !< Total volume out diffuse laterals (1D and 2D) (m3)
+ double precision                  :: vingrw      !< Total volume in  groundwater              (m3)
+ double precision                  :: voutgrw     !< Total volume out groundwater              (m3)
+ double precision                  :: vinsrc      !< Total volume in  local point sources      (m3)
+ double precision                  :: voutsrc     !< Total volume out local pount sources      (m3)
+ double precision, dimension(2)    :: vinext      !< Total volume in  Qext (1D and 2D)         (m3)
+ double precision, dimension(2)    :: voutext     !< Total volume out Qext (1D and 2D)         (m3)
 
- double precision                  :: vinraincum  !< total inflow from rain                    (m3) integrated over all time steps
- double precision                  :: voutevacum  !< total outflow to evaporation              (m3) "
- double precision, dimension(2)    :: vinlatcum   !< total inflow from diffuse laterals (1D and 2D) (m3) "
- double precision, dimension(2)    :: voutlatcum  !< total outflow to diffuse laterals  (1D and 2D) (m3) "
- double precision                  :: vingrwcum   !< total inflow from groundwater             (m3) "
- double precision                  :: voutgrwcum  !< total outflow to groundwater              (m3) "
- double precision                  :: vinsrccum   !< total inflow from local point sources     (m3) "
- double precision                  :: voutsrccum  !< total outflow to local pount sources      (m3) "
- double precision, dimension(2)    :: vinextcum   !< total inflow from Qext (1D and 2D)        (m3) "
- double precision, dimension(2)    :: voutextcum  !< total outflow to  Qext (1D and 2D)        (m3) "
+ double precision                  :: vinraincum  !< Total inflow from rain                    (m3) integrated over all time steps
+ double precision                  :: voutevacum  !< Total outflow to evaporation              (m3) "
+ double precision, dimension(2)    :: vinlatcum   !< Total inflow from diffuse laterals (1D and 2D) (m3) "
+ double precision, dimension(2)    :: voutlatcum  !< Total outflow to diffuse laterals  (1D and 2D) (m3) "
+ double precision                  :: vingrwcum   !< Total inflow from groundwater             (m3) "
+ double precision                  :: voutgrwcum  !< Total outflow to groundwater              (m3) "
+ double precision                  :: vinsrccum   !< Total inflow from local point sources     (m3) "
+ double precision                  :: voutsrccum  !< Total outflow to local pount sources      (m3) "
+ double precision, dimension(2)    :: vinextcum   !< Total inflow from Qext (1D and 2D)        (m3) "
+ double precision, dimension(2)    :: voutextcum  !< Total outflow to  Qext (1D and 2D)        (m3) "
 
- double precision                  :: DissInternalTides  !< total Internal Tides Dissipation (J/s)
- double precision, allocatable     :: DissInternalTidesPerArea(:)  !< internal tides dissipation / area (J/(m^2 s))
- double precision                  :: GravInput          !< total Gravitational Input (incl. SAL) (J/s)
- double precision                  :: SALInput           !< total SAL Input (J/s)
- double precision                  :: SALInput2          !< total SAL Input (J/s), different formulation
+ double precision                  :: DissInternalTides  !< Total Internal Tides Dissipation (J/s)
+ double precision, allocatable     :: DissInternalTidesPerArea(:)  !< Internal tides dissipation / area (J/(m^2 s))
+ double precision                  :: GravInput          !< Total Gravitational Input (incl. SAL) (J/s)
+ double precision                  :: SALInput           !< Total SAL Input (J/s)
+ double precision                  :: SALInput2          !< Total SAL Input (J/s), different formulation
 
 
- double precision                  :: a0tot       !< total wet surface area start of timestep (m2)
- double precision                  :: a1tot       !< total wet surface area   end of timestep (m2)
- double precision                  :: a1ini       !< total model area rain evap               (m2)
- double precision                  :: ek1tot      !< volume averaged kin energy (m2/s2) end of timestep
- double precision                  :: ep1tot      !< volume averaged pot energy (m2/s2) end of timestep
- double precision                  :: ep1rela     !< time av ep1tot
- double precision                  :: hsaver      !< average waterdepth (m), vol/are
+ double precision                  :: a0tot       !< Total wet surface area start of timestep (m2)
+ double precision                  :: a1tot       !< Total wet surface area   end of timestep (m2)
+ double precision                  :: a1ini       !< Total model area rain evap               (m2)
+ double precision                  :: ek1tot      !< Volume averaged kin energy (m2/s2) end of timestep
+ double precision                  :: ep1tot      !< Volume averaged pot energy (m2/s2) end of timestep
+ double precision                  :: ep1rela     !< Time av ep1tot
+ double precision                  :: hsaver      !< Average waterdepth (m), vol/are
 
  ! basis zout
  double precision                  :: sam0tot      !< Total mass start of timestep            (m3ppt)
@@ -3752,7 +3755,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer                           :: Lnmin         !< link nr where min zlin is found in viewing area
  integer                           :: Lnmax         !< link nr where max zlin is found in viewing area
 
- integer, parameter :: MAX_IDX        = 37
+ integer, parameter :: MAX_IDX        = 39
  double precision, dimension(MAX_IDX)    :: volcur !< Volume totals in *current* timestep only (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: cumvolcur =0d0 !< Cumulative volume totals starting from the previous His output time, cumulate with volcur (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: voltot
@@ -3794,6 +3797,8 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer, parameter :: IDX_EXTIN2D    = 35
  integer, parameter :: IDX_EXTOUT2D   = 36
  integer, parameter :: IDX_EXTTOT2D   = 37
+ integer, parameter :: IDX_ICEPT      = 38
+ integer, parameter :: IDX_EVAP_INTC  = 39
 
 
 ! Delft3D structure of grid dimensions
@@ -3833,6 +3838,7 @@ subroutine reset_flow()
 ! basis
     vol0tot     = 0    ! total volume start of timestep          (m3)
     vol1tot     = 0    ! total volume   end of timestep          (m3)
+    vol1icept   = 0d0  ! total volume interception end of timestep (m3)
     vol1ini     = -1d0 ! total volume   initially                (m3)
     Volgrw      = 0    ! total grw volume                        (m3)
     Volgrwini   = 0d0  ! total grw volume initially              (m3)
@@ -3871,6 +3877,7 @@ subroutine reset_flow()
 
     vinrain     = 0    ! total volume in  rain                   (m3)
     vouteva     = 0    ! total volume out evaporation            (m3)
+    voutevaintc = 0    ! total volume out evaporation from interception layer (m3)
     vinlat(1:2) = 0    ! total volume in  diffuse laterals       (m3)
     voutlat(1:2)= 0    ! total volume out diffuse laterals       (m3)
     vingrw      = 0    ! total volume in  groundwater            (m3)
@@ -3925,43 +3932,45 @@ subroutine reset_flow()
     samerr      = 0d0  !< vol1tot - vol0tot - vinbnd + voutbnd - vincel + voutcel   (m3)
 
     voltot(:)   = 0d0
-    voltotname(IDX_VOLTOT ) = 'total_volume'
-    voltotname(IDX_STOR   ) = 'storage'
-    voltotname(IDX_VOLERR ) = 'volume_error'
-    voltotname(IDX_BNDIN  ) = 'boundaries_in'
-    voltotname(IDX_BNDOUT ) = 'boundaries_out'
-    voltotname(IDX_BNDTOT ) = 'boundaries_total'
-    voltotname(IDX_EXCHIN ) = 'exchange_with_1D_in'
-    voltotname(IDX_EXCHOUT) = 'exchange_with_1D_out'
-    voltotname(IDX_EXCHTOT) = 'exchange_with_1D_total'
-    voltotname(IDX_PRECIP ) = 'precipitation'
-    voltotname(IDX_EVAP   ) = 'evaporation'
-    voltotname(IDX_SOUR   ) = 'source_sink'
+    voltotname(IDX_VOLTOT )                  = 'total_volume'
+    voltotname(IDX_STOR   )                  = 'storage'
+    voltotname(IDX_VOLERR )                  = 'volume_error'
+    voltotname(IDX_BNDIN  )                  = 'boundaries_in'
+    voltotname(IDX_BNDOUT )                  = 'boundaries_out'
+    voltotname(IDX_BNDTOT )                  = 'boundaries_total'
+    voltotname(IDX_EXCHIN )                  = 'exchange_with_1D_in'
+    voltotname(IDX_EXCHOUT)                  = 'exchange_with_1D_out'
+    voltotname(IDX_EXCHTOT)                  = 'exchange_with_1D_total'
+    voltotname(IDX_PRECIP )                  = 'precipitation'
+    voltotname(IDX_EVAP   )                  = 'evaporation'
+    voltotname(IDX_SOUR   )                  = 'source_sink'
     voltotname(IDX_InternalTidesDissipation) = 'InternalTidesDissipation'
-    voltotname(IDX_GravInput) = 'Gravitational_Input'
-    voltotname(IDX_SalInput) = 'SAL_Input'
-    voltotname(IDX_SalInput2) = 'SAL_Input_2'
-    voltotname(IDX_GRWIN  ) = 'groundwater_in'
-    voltotname(IDX_GRWOUT ) = 'groundwater_out'
-    voltotname(IDX_GRWTOT ) = 'groundwater_total'
-    voltotname(IDX_LATIN  ) = 'laterals_in'
-    voltotname(IDX_LATOUT ) = 'laterals_out'
-    voltotname(IDX_LATTOT ) = 'laterals_total'
-    voltotname(IDX_LATIN1D ) = 'laterals_in_1D'
-    voltotname(IDX_LATOUT1D) = 'laterals_out_1D'
-    voltotname(IDX_LATTOT1D) = 'laterals_total_1D'
-    voltotname(IDX_LATIN2D ) = 'laterals_in_2D'
-    voltotname(IDX_LATOUT2D) = 'laterals_out_2D'
-    voltotname(IDX_LATTOT2D) = 'laterals_total_2D'
-    voltotname(IDX_EXTIN  )  = 'Qext_in'
-    voltotname(IDX_EXTOUT )  = 'Qext_out'
-    voltotname(IDX_EXTTOT )  = 'Qext_total'
-    voltotname(IDX_EXTIN1D ) = 'Qext_in_1D'
-    voltotname(IDX_EXTOUT1D) = 'Qext_out_1D'
-    voltotname(IDX_EXTTOT1D) = 'Qext_total_1D'
-    voltotname(IDX_EXTIN2D ) = 'Qext_in_2D'
-    voltotname(IDX_EXTOUT2D) = 'Qext_out_2D'
-    voltotname(IDX_EXTTOT2D) = 'Qext_total_2D'
+    voltotname(IDX_GravInput)                = 'Gravitational_Input'
+    voltotname(IDX_SalInput)                 = 'SAL_Input'
+    voltotname(IDX_SalInput2)                = 'SAL_Input_2'
+    voltotname(IDX_GRWIN  )                  = 'groundwater_in'
+    voltotname(IDX_GRWOUT )                  = 'groundwater_out'
+    voltotname(IDX_GRWTOT )                  = 'groundwater_total'
+    voltotname(IDX_LATIN  )                  = 'laterals_in'
+    voltotname(IDX_LATOUT )                  = 'laterals_out'
+    voltotname(IDX_LATTOT )                  = 'laterals_total'
+    voltotname(IDX_LATIN1D )                 = 'laterals_in_1D'
+    voltotname(IDX_LATOUT1D)                 = 'laterals_out_1D'
+    voltotname(IDX_LATTOT1D)                 = 'laterals_total_1D'
+    voltotname(IDX_LATIN2D )                 = 'laterals_in_2D'
+    voltotname(IDX_LATOUT2D)                 = 'laterals_out_2D'
+    voltotname(IDX_LATTOT2D)                 = 'laterals_total_2D'
+    voltotname(IDX_EXTIN  )                  = 'Qext_in'
+    voltotname(IDX_EXTOUT )                  = 'Qext_out'
+    voltotname(IDX_EXTTOT )                  = 'Qext_total'
+    voltotname(IDX_EXTIN1D )                 = 'Qext_in_1D'
+    voltotname(IDX_EXTOUT1D)                 = 'Qext_out_1D'
+    voltotname(IDX_EXTTOT1D)                 = 'Qext_total_1D'
+    voltotname(IDX_EXTIN2D )                 = 'Qext_in_2D'
+    voltotname(IDX_EXTOUT2D)                 = 'Qext_out_2D'
+    voltotname(IDX_EXTTOT2D)                 = 'Qext_total_2D'
+    voltotname(IDX_ICEPT)                    = 'total_volume_interception'
+    voltotname(IDX_EVAP_INTC)                = 'evaporation_interception'
 
     jacftrtfac  = 0   !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's returned roughness values.
 
