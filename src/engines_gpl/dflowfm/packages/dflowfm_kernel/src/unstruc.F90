@@ -38758,7 +38758,7 @@ end function ispumpon
 
  integer          :: L, k1, k2, k, kb, n, LL, kk, kt, idim, imba
  double precision :: aufu, auru, tetau
- double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva_ow, Qeva_intc, Qrain, Qintc, Qextk, aloc
+ double precision :: zb, dir, ds, qhs, hsk, buitje, Qeva_ow, Qeva_icept, Qrain, Qicept, Qextk, aloc
 
  buitje = 0.013d0/300d0                                      ! 13 mm in 5 minutes
 
@@ -38778,7 +38778,7 @@ end function ispumpon
 
  if (jaqin > 0) then                                         ! sources and sinks through meteo
 
-    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qoutevaintc = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0; qinext(1:2) = 0d0 ; qoutext(1:2) = 0d0
+    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qoutevaicept = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0; qinext(1:2) = 0d0 ; qoutext(1:2) = 0d0
     if (jarain > 0) then
        if (rainuni > 0d0) then
           rain     = rainuni*24d0                             ! mm/hr  => mm/day
@@ -38796,12 +38796,12 @@ end function ispumpon
           endif
 
           if (Qrain > 0d0 .and. interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then                    ! Is there rainfall AND interception?
-             Qintc = min(Qrain, dti*bare(k)*(InterceptThickness(k) - InterceptHs(k)))
-             InterceptHs(k) = InterceptHs(k) + dts*Qintc/bare(k)             
+             Qicept = min(Qrain, dti*bare(k)*(InterceptThickness(k) - InterceptHs(k)))
+             InterceptHs(k) = InterceptHs(k) + dts*Qicept/bare(k)
           else
-             Qintc = 0
+             Qicept = 0d0
           endif
-          qin(k) = Qrain - Qintc
+          qin(k) = Qrain - Qicept
 
           if (jamba > 0) then
              imba = mbadefdomain(k)
@@ -38829,10 +38829,10 @@ end function ispumpon
                ! Calculates the actual evaporation rate from intercepted water.
                ! No safety factor is needed here, since no horizontal fluxes are present.
                ! Basic evaporation from interception occurs at the same potential rate as the surface water.
-               Qeva_intc = -min(dti*InterceptHs(k)*bare(k), -evap(k)*bare(k))
-               InterceptHs(k) = InterceptHs(k) + Qeva_intc/bare(k)*dts
+               Qeva_icept = -min(dti*InterceptHs(k)*bare(k), -evap(k)*bare(k))
+               InterceptHs(k) = InterceptHs(k) + Qeva_icept/bare(k)*dts
              else
-               Qeva_intc = 0d0
+               Qeva_icept = 0d0
              endif
 
              if (jadhyd == 1) then ! TODO: this is can be removed once jaevap and jadhyd have been merged
@@ -38840,7 +38840,7 @@ end function ispumpon
              endif
              qin(k)  = qin(k)  + Qeva_ow
              qouteva = qouteva - Qeva_ow
-             qoutevaintc = qoutevaintc - Qeva_intc
+             qoutevaicept = qoutevaicept - Qeva_icept
              if (jamba > 0) then
                 imba = mbadefdomain(k)
                 if (imba > 0) then
@@ -40492,7 +40492,7 @@ if (jahisbal > 0) then
     ! extra
     vinrain     = qinrain *dts
     vouteva     = qouteva *dts
-    voutevaintc = qoutevaintc*dts
+    voutevaicept = qoutevaicept*dts
     vinlat(1:2) = qinlat(1:2) *dts
     voutlat(1:2)= qoutlat(1:2)*dts
     vingrw      = qingrw  *dts
@@ -40557,7 +40557,7 @@ if (jahisbal > 0) then
     volcur(IDX_EVAP)   = vouteva
     volcur(IDX_SOUR  ) = vinsrc - voutsrc
     volcur(IDX_ICEPT) = vol1icept
-    volcur(IDX_EVAP_INTC) = voutevaintc
+    volcur(IDX_EVAP_ICEPT) = voutevaicept
 
     if ( jaFrcInternalTides2D.eq.1 ) then
        volcur(IDX_InternalTidesDIssipation) = DissInternalTides*dts

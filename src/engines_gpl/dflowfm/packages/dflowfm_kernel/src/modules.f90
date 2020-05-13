@@ -3674,7 +3674,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  ! extra
  double precision                  :: qinrain     !< Total influx rain                         (m3/s)
  double precision                  :: qouteva     !< Total outflux evaporation                 (m3/s)
- double precision                  :: qoutevaintc !< Total outflux evaporation from interception layer (m3/s)
+ double precision                  :: qoutevaicept!< Total outflux evaporation from interception layer (m3/s)
  double precision, dimension(2)    :: qinlat      !< Total influx diffuse laterals (1D and 2D) (m3/s)
  double precision, dimension(2)    :: qoutlat     !< Total outflux diffuse laterals (1D and 2D)(m3/s)
  double precision                  :: qingrw      !< Total influx groundwater                  (m3/s)
@@ -3686,7 +3686,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
 
  double precision                  :: vinrain     !< Total volume in  rain                     (m3) in the last time step
  double precision                  :: vouteva     !< Total volume out evaporation              (m3)
- double precision                  :: voutevaintc !< Total volume out evaporation from interception layer (m3)
+ double precision                  :: voutevaicept!< Total volume out evaporation from interception layer (m3)
  double precision, dimension(2)    :: vinlat      !< Total volume in  diffuse laterals (1D and 2D) (m3)
  double precision, dimension(2)    :: voutlat     !< Total volume out diffuse laterals (1D and 2D) (m3)
  double precision                  :: vingrw      !< Total volume in  groundwater              (m3)
@@ -3798,7 +3798,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer, parameter :: IDX_EXTOUT2D   = 36
  integer, parameter :: IDX_EXTTOT2D   = 37
  integer, parameter :: IDX_ICEPT      = 38
- integer, parameter :: IDX_EVAP_INTC  = 39
+ integer, parameter :: IDX_EVAP_ICEPT = 39
 
 
 ! Delft3D structure of grid dimensions
@@ -3877,7 +3877,7 @@ subroutine reset_flow()
 
     vinrain     = 0    ! total volume in  rain                   (m3)
     vouteva     = 0    ! total volume out evaporation            (m3)
-    voutevaintc = 0    ! total volume out evaporation from interception layer (m3)
+    voutevaicept = 0   ! total volume out evaporation from interception layer (m3)
     vinlat(1:2) = 0    ! total volume in  diffuse laterals       (m3)
     voutlat(1:2)= 0    ! total volume out diffuse laterals       (m3)
     vingrw      = 0    ! total volume in  groundwater            (m3)
@@ -3970,7 +3970,7 @@ subroutine reset_flow()
     voltotname(IDX_EXTOUT2D)                 = 'Qext_out_2D'
     voltotname(IDX_EXTTOT2D)                 = 'Qext_total_2D'
     voltotname(IDX_ICEPT)                    = 'total_volume_interception'
-    voltotname(IDX_EVAP_INTC)                = 'evaporation_interception'
+    voltotname(IDX_EVAP_ICEPT)               = 'evaporation_interception'
 
     jacftrtfac  = 0   !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's returned roughness values.
 
