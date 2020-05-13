@@ -219,6 +219,16 @@ function initInitialFields(inifilename) result(ierr)
                interceptionmodel = DFM_HYD_INTERCEPT_LAYER
                jadhyd = 1
             end if
+         else if (strcmpi(qid, 'PotentialEvaporation')) then
+            call realloc(kcsini, ndx, keepExisting=.false.)
+            call prepare_lateral_mask(kcsini, iLocType)
+
+            call realloc(PotEvap, ndx, keepExisting=.true., fill = 0d0)
+            success = timespaceinitialfield(xz, yz, PotEvap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
+            if (success) then
+               ! Auto-enable hydrology module, if PotentialEvaporation was supplied.
+               jadhyd = 1
+            end if
          else if (strcmpi(qid, 'frictioncoefficient')) then
             ! TODO: masking u points
             success = timespaceinitialfield(xu, yu, frcu, lnx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
