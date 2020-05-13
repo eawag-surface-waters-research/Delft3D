@@ -894,10 +894,10 @@ use m_tablematrices
              rgh => rgs%rough(isec)
              if (rgh%useGlobalFriction)then
                 cz = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
-             elseif (rgh%frictionIndexes(ibranch) > 0 ) then
+             elseif (rgh%timeSeriesIndexes(ibranch) > 0 ) then
                 ! time dependent roughness
                 rgh_type  => rgh%rgh_type_pos 
-                cpar = rgh%frictionvalues(rgh%frictionIndexes(ibranch))
+                cpar = rgh%currentValues(rgh%timeSeriesIndexes(ibranch))
                 cz = GetChezy(rgh_type(ibranch), cpar, rad, dep, u)
              else
                 ! For now, direction independent, always *_pos values.

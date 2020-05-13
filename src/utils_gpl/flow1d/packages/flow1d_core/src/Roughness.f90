@@ -104,9 +104,9 @@ module m_Roughness
       integer, pointer                  :: rgh_type_pos(:) => null()       !< Roughness type for positive flow direction at a branch
       integer, pointer                  :: fun_type_pos(:) => null()       !< Roughness parameter value for positive flow direction at a branch     
       character(len=charLn)             :: frictionValuesFile              !< *.bc file containing the timeseries with friction values
-      type(t_hashlist)                  :: frictionIds                     !< Hashlist containing friction ids of the timeseries
-      integer, pointer                  :: frictionIndexes(:) => null()    !< Get index in frictionIds and/or frictionvalues based on branch index 
-      double precision, allocatable     :: frictionValues(:)               !< Friction values of time dependent items (same index as frictionIds).
+      type(t_hashlist)                  :: timeSeriesIds                   !< Hashlist containing friction ids of the timeseries
+      integer, pointer                  :: timeSeriesIndexes(:) => null()  !< Get index in frictionIds and/or frictionvalues based on branch index 
+      double precision, allocatable     :: currentValues(:)                !< Friction values of time dependent items (same index as frictionIds).
 
       ! All fields below: branch oriented data (roughness v1, obsolete for v2)
       integer, pointer                  :: rgh_type_neg(:) => null() !< Roughness type for negative flow direction at a branch

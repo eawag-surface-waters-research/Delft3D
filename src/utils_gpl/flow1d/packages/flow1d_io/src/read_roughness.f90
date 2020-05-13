@@ -224,10 +224,10 @@ contains
       
       do i = 1, rgs%count
          prgh => rgs%rough(i)
-         if (prgh%frictionIds%id_count > 0) then
-            count = prgh%frictionIds%id_count 
+         if (prgh%timeSeriesIds%id_count > 0) then
+            count = prgh%timeSeriesIds%id_count 
             rgs%timeseries_defined = .true.
-            call realloc(prgh%frictionValues, count)
+            call realloc(prgh%currentValues, count)
             do j = 1, count
 
                ! Extend forcinglist by one and reallocate in case of insufficient space
@@ -237,17 +237,18 @@ contains
                end if
 
                ! For correct roughness type we need a branch index:
-               do ibr = 1, size(prgh%frictionIndexes)
-                  if (prgh%frictionIndexes(ibr) == j) then
+               do ibr = 1, size(prgh%timeSeriesIndexes)
+                  if (prgh%timeSeriesIndexes(ibr) == j) then
                      exit
                   endif
                enddo
-               forcinglist%forcing(forcinglist%Count)%object_id   = prgh%frictionIds%id_list(j)
+               forcinglist%forcing(forcinglist%Count)%object_id   = prgh%timeSeriesIds%id_list(j)
                forcinglist%forcing(forcinglist%Count)%quantity_id = 'friction_coefficient_'//         &
                                              trim(frictionTypeIntegerToString(prgh%rgh_type_pos(ibr)))
                forcinglist%forcing(forcinglist%Count)%param_name  = frictionTypeIntegerToString(prgh%rgh_type_pos(ibr))
-               forcinglist%forcing(forcinglist%Count)%targetptr  => prgh%frictionValues(j)
+               forcinglist%forcing(forcinglist%Count)%targetptr  => prgh%currentValues(j)
                forcinglist%forcing(forcinglist%Count)%filename    = prgh%frictionValuesFile
+               forcinglist%forcing(forcinglist%Count)%object_type = 'friction_coefficient'
    
             enddo
          endif
@@ -402,6 +403,12 @@ contains
             if (.not. associated(rgh%fun_type_pos))   allocate(rgh%fun_type_pos(brs%Count))
             if (.not. associated(rgh%table))          allocate(rgh%table(brs%Count))
          endif         
+   
+         if (.not. associated(rgh%timeSeriesIndexes)) then
+            allocate(rgh%timeSeriesIndexes(brs%Count))
+            rgh%timeSeriesIndexes = -1
+         endif
+
          rgh%rgh_type_pos = -1
          rgh%fun_type_pos = -1
          do i = 1, brs%count
@@ -483,7 +490,7 @@ contains
                   call setmessage(LEVEL_ERROR, 'timeSeriesId is required for functionType='//trim(funcType)//', but was not found in the input for branchId '//trim(branchid)//', see input file: '//trim(inputfile))
                   cycle
                endif
-               rgh%frictionIndexes(ibr) = hashsearch_or_add(rgh%frictionIds, timeseriesId)
+               rgh%timeSeriesIndexes(ibr) = hashsearch_or_add(rgh%timeSeriesIds, timeseriesId)
                numlevels = 0
                maxlevels = 1
                numlocations = 0
