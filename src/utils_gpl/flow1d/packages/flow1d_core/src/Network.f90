@@ -250,6 +250,7 @@ contains
          pbran => network%brs%branch(ibran)
          do m = 1, pbran%uPointsCount
             if (pbran%lin(m) > 0 .and. pbran%lin(m) <= size(adm%lin2ibr)) then
+               ! Skip links not in this partition
                adm%lin2ibr(pbran%lin(m)) = ibran
                adm%lin2local(pbran%lin(m)) = m
                adm%lin2grid(pbran%lin(m))  = pbran%grd(m)
@@ -339,6 +340,7 @@ contains
                   
                else if (ilnk <= size(adm%line2cross)) then
                   
+                  ! Skip links not in this partition
                   chainage1 = network%crs%cross(crossOrder(icrs1))%chainage
                   chainage2 = network%crs%cross(crossOrder(icrs2))%chainage
                   adm%line2cross(ilnk)%distance  = chainage2 - chainage1
@@ -368,7 +370,8 @@ contains
                endif
                   
                if (ilnk > 0 .and. ilnk <= size(adm%line2cross)) then
-                  
+                  ! Skip links not in this partition
+
                   if (ibran == network%crs%cross(crossOrder(icrs2))%branchid) then
                      
                      if (.not. interpolDone) then
@@ -432,6 +435,8 @@ contains
 
                chainageg = pbran%gridPointschainages(m)
                igpt = pbran%grd(m)
+
+               ! Skip gridpoints not in this partition
                if (igpt > size(adm%gpnt2cross)) cycle
                
                if (icrsBeg == icrsEnd) then

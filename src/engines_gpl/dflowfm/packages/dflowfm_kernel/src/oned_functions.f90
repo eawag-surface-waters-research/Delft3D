@@ -154,6 +154,8 @@ module m_oned_functions
       nbr = network%brs%count
       do ibr = 1, nbr
          pbr => network%brs%branch(ibr)
+
+         ! branches can have no grid points in case of parallel computing
          if (pbr%gridPointsCount == 0) cycle
          call realloc(pbr%lin, pbr%uPointsCount)
          call realloc(pbr%grd, pbr%gridPointsCount)
