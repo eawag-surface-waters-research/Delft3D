@@ -55,6 +55,7 @@ module m_forcinglist
   !! the calling kernel to initialize that forcing provider.
   type, public :: t_forcing
      character(IdLen)                 :: object_id      !< The character Id of the object (e.g. a structure id or a timeseries id).
+     character(IdLen)                 :: object_type    !< The character type of the object (e.g. a structure id or a timeseries id).
      character(IdLen)                 :: param_name     !< Name of the parameter that this forcing data is for.
      character(IdLen)                 :: quantity_id    !< The name of the quantity id in the *.bc file
      double precision, pointer        :: targetptr => null() !< Pointer to scalar variable in which the provided

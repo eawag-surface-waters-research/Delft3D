@@ -1403,6 +1403,7 @@ module m_readstructures
             end if
             forcinglist%forcing(forcinglist%Count)%object_id      = st_id
             call GetStrucType_from_int(st_type, structuretype)
+            forcinglist%forcing(forcinglist%Count)%object_type = trim(structuretype)
             forcinglist%forcing(forcinglist%Count)%quantity_id = trim(structuretype)//'_'//trim(key)
             forcinglist%forcing(forcinglist%Count)%param_name = key
             forcinglist%forcing(forcinglist%Count)%targetptr  => value

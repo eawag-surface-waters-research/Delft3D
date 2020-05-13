@@ -2163,7 +2163,7 @@ do i=1,network%forcinglist%Count
    ! Time-interpolated value will be placed in structure's appropriate member field, available in %targetptr, when calling ec_gettimespacevalue.
    cptr = c_loc( pfrc%targetptr )
    call c_f_pointer( cptr, tgtarr, [1] )
-   success = adduniformtimerelation_objects(qid, '', strtype, trim(pfrc%object_id), trim(pfrc%param_name), trim(fnam), 1, 1, tgtarr)
+   success = adduniformtimerelation_objects(qid, '', trim(pfrc%object_type), trim(pfrc%object_id), trim(pfrc%param_name), trim(fnam), 1, 1, tgtarr)
 
 end do
 
