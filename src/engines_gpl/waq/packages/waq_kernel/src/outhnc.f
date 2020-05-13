@@ -101,17 +101,16 @@
       integer :: station_names_id, station_x_id, station_y_id, station_z_id
 
       integer, dimension(3)             :: coord_id
-      character(len=25), dimension(4,4) :: station_property = reshape(
-
+      character(len=25), dimension(5,4) :: station_property = reshape(
      &    [ 'variableName             ', 'standard_name            ',
-     &      'long_name                ', 'unit                     ',
+     &      'long_name                ', 'unit                     ', 'units                    ',
      &      'station_x                ', 'projection_x_coordinate  ',
-     &      'x-coordinate             ', 'm                        ',
+     &      'x-coordinate             ', 'm                        ', 'm                        ',
      &      'station_y                ', 'projection_y_coordinate  ',
-     &      'y-coordinate             ', 'm                        ',
+     &      'y-coordinate             ', 'm                        ', 'm                        ',
      &      'station_z                ', 'projection_z_coordinate  ',
-     &      'z-coordinate             ', 'm                        '],
-     &    [4,4] )
+     &      'z-coordinate             ', 'm                        ', 'm                        '],
+     &    [5,4] )
 
 
       integer(4) ithandl /0/
@@ -230,7 +229,7 @@
                  goto 800
              endif
 
-             do j = 2,4
+             do j = 2,5
                  inc_error = nf90_put_att( ncidhis, coord_id(i-1), station_property(j,1), station_property(j,i) )
                  if ( inc_error /= nf90_noerr ) then
                      write( lunut , 2586) station_property(j,i)
@@ -317,6 +316,9 @@
             inc_error =
      &          inc_error + nf90_put_att( ncidhis, wqid1(iout,1),
      &              'unit', 'mg/l' )                                  ! TODO: correct unit!
+            inc_error =
+     &          inc_error + nf90_put_att( ncidhis, wqid1(iout,1),
+     &              'units', 'mg/l' )                                 ! Issue Delft3D-37486
             if ( inc_error /= 4*nf90_noerr ) then
                 write( lunut , 2586) 'substance ' // synam1(iout)
                 goto 800
@@ -362,6 +364,9 @@
             inc_error =
      &          inc_error + nf90_put_att( ncidhis, wqid2(iout,1),
      &              'unit', 'mg/l' )                                  ! TODO: correct unit!
+            inc_error =
+     &          inc_error + nf90_put_att( ncidhis, wqid2(iout,1),
+     &              'units', 'mg/l' )                                 ! Issue Delft3D-37486
             if ( inc_error /= 4*nf90_noerr ) then
                 write( lunut , 2586) 'substance ' // synam2(iout)
                 goto 800
