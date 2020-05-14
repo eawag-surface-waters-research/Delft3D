@@ -110,7 +110,8 @@ function initInitialFields(inifilename) result(ierr)
    use m_alloc
    use dfm_error
    use m_hydrology_data, only:  HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, &
-                                InterceptThickness, interceptionmodel, DFM_HYD_INTERCEPT_LAYER, jadhyd
+                                InterceptThickness, interceptionmodel, DFM_HYD_INTERCEPT_LAYER, jadhyd, &
+                                PotEvap
 
    implicit none
    character(len=*), intent(in   ) :: inifilename         !< name of initial field file
