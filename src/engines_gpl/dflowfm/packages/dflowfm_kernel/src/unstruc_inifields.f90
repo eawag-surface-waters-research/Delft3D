@@ -109,7 +109,8 @@ function initInitialFields(inifilename) result(ierr)
    use network_data
    use m_alloc
    use dfm_error
-   use m_hydrology_data, only:  HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, &
+   use m_hydrology_data, only:  infiltcap, infiltrationmodel, DFM_HYD_INFILT_CONST, &
+                                HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, &
                                 InterceptThickness, interceptionmodel, DFM_HYD_INTERCEPT_LAYER, jadhyd, &
                                 PotEvap
 
@@ -190,6 +191,19 @@ function initInitialFields(inifilename) result(ierr)
             
             success = timespaceinitialfield(xz, yz, hs, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
             s1(1:ndxi) = bl(1:ndxi) + hs(1:ndxi)         
+         else if (strcmpi(qid, 'InfiltrationCapacity')) then
+            if (infiltrationmodel /= DFM_HYD_INFILT_CONST) then
+               write (msgbuf, '(a,i0,a)') 'File '''//trim(inifilename)//''' contains quantity '''//trim(qid)//'''. This requires ''InfiltrationModel=', DFM_HYD_INFILT_CONST, ''' in the MDU file (constant).'
+               call warn_flush() ! No error, just warning and continue
+            end if
+            call realloc(kcsini, ndx, keepExisting=.false.)
+            call prepare_lateral_mask(kcsini, iLocType)
+            
+            success = timespaceinitialfield(xz, yz, infiltcap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
+            if (success) then
+               infiltcap = infiltcap*1d-3/(24d0*3600d0)            ! mm/day => m/s
+            end if
+
          else if (strcmpi(qid, 'HortonMinInfCap')) then
             call realloc(kcsini, ndx, keepExisting=.false.)
             call prepare_lateral_mask(kcsini, iLocType)
