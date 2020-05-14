@@ -437,7 +437,7 @@ subroutine readIniFieldProvider(inifilename, node_ptr,groupname,quantity,filenam
       ! if the infiltrationmodel is not horton, but a horton quantity is detected, then send a error message
       if (infiltrationmodel /= DFM_HYD_INFILT_HORTON .and. &
          strcmpi(quantity,'Horton', 6)) then
-         write (msgbuf, '(a,i0,a)') 'File '''//trim(inifilename)//''' contains quantity '''//trim(quantity)//'''. This requires ''InfiltrationModel=',DFM_HYD_INFILT_CONST, ''' in the MDU file (Horton).'
+         write (msgbuf, '(a,i0,a)') 'File '''//trim(inifilename)//''' contains quantity '''//trim(quantity)//'''. This requires ''InfiltrationModel=',DFM_HYD_INFILT_HORTON, ''' in the MDU file (Horton).'
          call warn_flush()
       end if
          
