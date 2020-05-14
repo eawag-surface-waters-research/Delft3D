@@ -164,8 +164,7 @@ module m_1d_networkreader
    integer, allocatable, dimension(:)               :: gpLast
    double precision, allocatable, dimension(:)      :: gpsX
    double precision, allocatable, dimension(:)      :: gpsY
-   type(t_node), dimension(:), pointer              :: pnodes
-   integer                                          :: ibran, inode, i, j, jsferic
+   integer                                          :: ibran, inode, jsferic
    integer                                          :: gridPointsCount
    double precision, allocatable, dimension(:)      :: localOffsets
    double precision, allocatable, dimension(:)      :: localOffsetsSorted
@@ -319,12 +318,12 @@ module m_1d_networkreader
       if(nodesOnBranchVertices==0 .and. jampi_ == 0) then
          if(localOffsets(1)>snapping_tolerance .or. gridpointsCount == 0) then
             !start point missing
-            call add_start_point()
+            call add_point(.true., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
          endif
          ! TODO: consider using a relative tolerance
          if(abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance .or. gridpointsCount == 1) then
             !end point missing
-            call add_end_point()
+            call add_point(.false., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
          endif
       else if(nodesOnBranchVertices==0 .and. jampi_ == 1) then
          if(firstNode /= -1 .and. lastNode /= -1) then
@@ -336,12 +335,12 @@ module m_1d_networkreader
             distance = localOffsets(1)
             if (distance > snapping_tolerance .and. distance < 2d0 * meanLength) then
                !start point missing
-               call add_start_point()
+               call add_point(.true., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
             endif
             distance = abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))
             if (distance > snapping_tolerance .and. distance < 2d0 * meanLength) then
                !end point missing
-               call add_end_point()
+               call add_point(.false., localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
             endif
          endif
       endif
@@ -359,22 +358,34 @@ module m_1d_networkreader
    deallocate(gpsX)
    deallocate(gpsY)
 
-   contains
-      subroutine add_start_point()
-         localOffsets(1:gridPointsCount+1)=(/ 0.0d0, localOffsets(1:gridPointsCount) /)
-         localGpsX(1:gridPointsCount+1)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount) /)
-         localGpsY(1:gridPointsCount+1)=(/ meshgeom%nnodey(meshgeom%nedge_nodes(1,ibran)), localGpsY(1:gridPointsCount) /)
-         localGpsID(1:gridPointsCount+1)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount) /)
-         gridPointsCount = gridPointsCount + 1
-      end subroutine add_start_point
-      subroutine add_end_point()
-            localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
-            localGpsX(1:gridPointsCount+1)=(/ localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
-            localGpsY(1:gridPointsCount+1)=(/ localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
-            localGpsID(1:gridPointsCount+1)=(/ localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
-            gridPointsCount = gridPointsCount + 1
-      end subroutine add_end_point
    end function construct_network_from_meshgeom
+
+   !> helper function to add a point at the start or end of a branch
+   subroutine add_point(atStart, localOffsets, localGpsX, localGpsY, localGpsID, idMeshNodesInNetworkNodes, gridPointsCount, ibran, meshgeom)
+   use meshdata, only : t_ug_meshgeom
+   logical,                                         intent(in   ) :: atStart     !< add point at start (true) or end (false) of branch
+   double precision,     allocatable, dimension(:), intent(inout) :: localGpsX
+   double precision,     allocatable, dimension(:), intent(inout) :: localGpsY
+   double precision,     allocatable, dimension(:), intent(inout) :: localOffsets
+   character(len=IdLen), allocatable, dimension(:), intent(inout) :: localGpsID
+   character(len=IdLen), allocatable, dimension(:), intent(in   ) :: idMeshNodesInNetworkNodes
+   integer,                                         intent(inout) :: gridPointsCount
+   integer,                                         intent(in   ) :: ibran
+   type(t_ug_meshgeom),                             intent(in   ) :: meshgeom
+
+   if (atStart) then
+      localOffsets(1:gridPointsCount+1)=(/ 0.0d0, localOffsets(1:gridPointsCount) /)
+      localGpsX(1:gridPointsCount+1)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount) /)
+      localGpsY(1:gridPointsCount+1)=(/ meshgeom%nnodey(meshgeom%nedge_nodes(1,ibran)), localGpsY(1:gridPointsCount) /)
+      localGpsID(1:gridPointsCount+1)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount) /)
+   else
+      localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
+      localGpsX(1:gridPointsCount+1)=(/ localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
+      localGpsY(1:gridPointsCount+1)=(/ localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
+      localGpsID(1:gridPointsCount+1)=(/ localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
+   end if
+   gridPointsCount = gridPointsCount + 1
+   end subroutine add_point
 
    subroutine read_1d_ugrid(network, ioncid, dflowfm)
 
@@ -389,8 +400,6 @@ module m_1d_networkreader
    type(t_network), target, intent(inout) :: network
    integer, intent(in)                    :: ioncid
    logical, optional, intent(inout)       :: dflowfm
-
-   integer                   :: igridpoint
 
    integer                   :: ierr
    integer                   :: numMesh
