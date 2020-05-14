@@ -1148,6 +1148,10 @@ logical function initboundaryblocksforcings(filename)
                 continue                   ! used in findexternalboundarypoints/readlocationfiles... to set search distance. Not relevant here. 
              else if (property_name == 'nodeid') then
                 continue                   
+             else if (property_name == 'bndwidth1d') then
+                continue                   
+             else if (property_name == 'bndbldepth') then
+                continue                   
              else
                 ! initboundaryblocksforcings remains unchanged: support ignored lines in ext file.
                 write(msgbuf, '(9a)') 'Unrecognized line in file ''', trim(filename), ''' for block [', trim(groupname), ']: ', trim(property_name), ' = ', trim(property_value), '. Ignoring this line.'
