@@ -30150,8 +30150,6 @@ subroutine transport()                           ! transport for now, advect sal
 
  double precision, allocatable, save  :: dsq(:), pp(:), pm(:), qp(:), qm(:), alf(:) ! todo kuzmin limiting jalim2D==1
 
- double precision, external     :: upwsalslope, upwsal, rminmod
-
  double precision, external     :: dslim, setrho, dlimitercentral
 
  integer                        :: j, kj, kdj, kuj, kl1j, kl2j, kbj, kij, ki, jastep, kk, kb1, kb2, n1, n2, kkua, kkub, ku2
@@ -34105,7 +34103,6 @@ end SUBROUTINE getwavenrqn
  double precision d1, d2                             ! voorslope, naslope
  integer limtyp
  double precision :: dminmod, dvanleer, dkoren,dcentral,dcminmod, dsuperbee
- double precision :: rminmod,rvanleer,rkoren,rcentral
  double precision :: dlimiter,dlimitercentral
 
  ! In order to translate psi to limiter, you have to multiply the psi function with ds2
