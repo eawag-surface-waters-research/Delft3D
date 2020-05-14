@@ -642,6 +642,8 @@ module m_oned_functions
          struct%fu = 0d0
          struct%ru = 0d0
          struct%au = 0d0
+         struct%pump%ss_trigger = .false.
+         struct%pump%ds_trigger = .false.
       else
 
          ! Limit the pump discharge in case the volume in the cells at the suction side is limited.
