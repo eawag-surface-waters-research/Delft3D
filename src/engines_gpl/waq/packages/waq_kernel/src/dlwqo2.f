@@ -213,6 +213,10 @@
       character*40  ouuni(*)      , syuni(*)
       character*60  oudsc(*)      , sydsc(*)
 
+      character*100, allocatable :: hnc_standard(:)
+      character*40, allocatable  :: hnc_unit(:)
+      character*60, allocatable  :: hnc_description(:)
+
       character*40  moname(4)
       character*(*) lchar (*)
       logical       imflag, idflag, ihflag
@@ -238,6 +242,7 @@
      +              ierr  , ierr2 , i     , i1    , i2    ,
      +              ifi   , ncout , nrvar2, nrvar3, ip1   ,
      +              iof   , nsegou, intopt
+
       character*255 lchout
       character*20  name
       logical       loflag, lmfirs, ldfirs, lhfirs, ldummy, lnonans
@@ -470,11 +475,28 @@
      +           isrtou .eq. imo3 .or.
      +           isrtou .eq. ihi3 .or.
      +           isrtou .eq. ihn3     ) then
+
+               if ( allocated(hnc_standard) ) then
+                  deallocate( hnc_standard )
+                  deallocate( hnc_unit )
+                  deallocate( hnc_description )
+               endif
+
+               allocate( hnc_standard(notot+nrvar2) )
+               allocate( hnc_unit(notot+nrvar2) )
+               allocate( hnc_description(notot+nrvar2) )
+
                do 30 i = 1 , notot
-                  nambuf(i) = syname(i)
+                  nambuf(i)          = syname(i)
+                  hnc_standard(i)    = sysnm(i)
+                  hnc_unit(i)        = syuni(i)
+                  hnc_description(i) = sydsc(i)
    30          continue
                do 40 i = 1 , nrvar2
-                  nambuf(notot+i) = ounam(k1+i-1)
+                  nambuf(notot+i)          = ounam(k1+i-1)
+                  hnc_standard(notot+i)    = ousnm(k1+i-1)
+                  hnc_unit(notot+i)        = ouuni(k1+i-1)
+                  hnc_description(notot+i) = oudsc(k1+i-1)
    40          continue
             endif
 !
@@ -602,6 +624,7 @@
 !
 !           Let op RANAM achter DANAM
 !
+
                hncrec = hncrec + 1
                nrvar3 = notot + nrvar2
                nsegou = ndmpar + noraai
@@ -609,10 +632,10 @@
                call outhnc (lun(47)   , lchar(47), lchar(46), timeidh,
      +                      bndtimeidh, hncrec   , itime    , moname ,
      +                      idump     , danam    , nsegou   , 0      ,
-     +                      conc      , nambuf   , sysnm    , syuni  ,   !<== TODO: standard, unit, description should be checked
+     +                      conc      , nambuf   , sysnm    , syuni  ,
      +                      sydsc     , hncwqid1 , nrvar3   , riobuf ,
-     +                      nambuf    , ousnm(k1), ouuni(k1), oudsc(k1),
-     +                      hncwqid2  , lun(19))
+     +                      nambuf    , hnc_standard, hnc_unit(k1)   ,
+     +                      hnc_description,       hncwqid2  , lun(19))
 !
             elseif ( isrtou .eq. ihi4 ) then
 !
