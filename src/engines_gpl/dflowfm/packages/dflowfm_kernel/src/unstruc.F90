@@ -38825,29 +38825,27 @@ end function ispumpon
              ! qin is used explicitly in the following , therefore an additional safety factor of 0.5
              ! is introduced to prevent negative water depths.
              Qeva_ow = -min(0.5d0*vol1(k)*dti + qin(k), -evap(k)*bare(k))
-
-             if (interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then
-               ! Calculates the actual evaporation rate from intercepted water.
-               ! No safety factor is needed here, since no horizontal fluxes are present.
-               ! Basic evaporation from interception occurs at the same potential rate as the surface water.
-               Qeva_icept = -min(dti*InterceptHs(k)*bare(k), -evap(k)*bare(k))
-               InterceptHs(k) = InterceptHs(k) + Qeva_icept/bare(k)*dts
-             else
-               Qeva_icept = 0d0
-             endif
-
              if (jadhyd == 1) then ! TODO: this is can be removed once jaevap and jadhyd have been merged
                 ActEvap(k) = -Qeva_ow/bare(k) ! m s-1
              endif
              qin(k)  = qin(k)  + Qeva_ow
              qouteva = qouteva - Qeva_ow
-             qoutevaicept = qoutevaicept - Qeva_icept
              if (jamba > 0) then
                 imba = mbadefdomain(k)
                 if (imba > 0) then
                    mbafloweva(imba) = mbafloweva(imba) - Qeva_ow*dts
                 endif
              endif
+          endif
+          if (interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then
+             if (InterceptHs(k) > epshu) then
+                ! Calculates the actual evaporation rate from intercepted water.
+                ! No safety factor is needed here, since no horizontal fluxes are present.
+                ! Basic evaporation from interception occurs at the same potential rate as the surface water.
+                Qeva_icept = -min(dti*InterceptHs(k)*bare(k), -evap(k)*bare(k))
+                InterceptHs(k) = InterceptHs(k) + Qeva_icept/bare(k)*dts
+                qoutevaicept = qoutevaicept - Qeva_icept
+             endif            
           endif
        enddo
     endif
