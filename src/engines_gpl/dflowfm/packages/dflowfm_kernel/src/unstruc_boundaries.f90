@@ -1399,6 +1399,10 @@ logical function initboundaryblocksforcings(filename)
             
              success = timespaceinitialfield(xz, yz, qext, ndx, forcingFile, filetype, fmmethod, oper, transformcoef, 2, kcsini) ! zie meteo module
              cycle ! This was a special case, don't continue with timespace processing below.
+          case default
+             write(msgbuf, '(a)') 'Unknown quantity '''// trim(quantity) //' in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'
+             call warn_flush()
+             cycle
        end select
        select case (trim(str_tolower(forcingfiletype)))
        case ('bcascii')
