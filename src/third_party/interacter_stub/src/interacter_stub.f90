@@ -3058,6 +3058,7 @@
 !        ICODE = this%icode
 !        this%icode = this%nextICode
 !        this%nextICode = -999
+        ICODE = -999
     end subroutine
 
     subroutine InKeyEventCursor(ICODE)
@@ -3094,6 +3095,7 @@
 !        ICODE = this%icode
 !        this%icode = -999
 !
+        ICODE = -999
     end subroutine
 
     subroutine InKeyEventImm(ICODE)
@@ -3108,6 +3110,7 @@
         !10 CALL UPDATE
         !CALL InKeyEventImm(ICODE)
         !IF (ICODE.LT.170.OR.ICODE.GT.250) GOTO 10
+        ICODE = -999
     end subroutine
 
     LOGICAL function InYesNo(IECHO) result(res)
