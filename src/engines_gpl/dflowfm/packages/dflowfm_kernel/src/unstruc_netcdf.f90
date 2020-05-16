@@ -11507,7 +11507,7 @@ subroutine unc_read_map(filename, tim, ierr)
           call realloc(ilink_own, lnx, keepExisting=.false.)
           call realloc(tmpvar1, max(ndxi,lnx), keepExisting=.false.) ! Only necessary for buffered reading from merged map.
           
-          if (nbnd_read > 0 .and. jaoldrstfile == 0) then
+          if (nbnd_read > 0 .and. jaoldrstfile == 0 .and. jampi == 0) then
               do kk = 1, nbnd_read
                  ibnd_own(kk) = kk
               enddo
