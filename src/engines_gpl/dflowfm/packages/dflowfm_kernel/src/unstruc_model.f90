@@ -3019,7 +3019,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     ! Hydrology (takes over some functionality that used to be under [grw])
     !
     if (writeall .or. interceptionmodel /= DFM_HYD_NOINTERCEPT) then
-       call prop_set(prop_ptr, 'hydrology', 'InterceptionModel', interceptionmodel, 'Interception model (0: none, 1: on, via layer thickness')
+       call prop_set(prop_ptr, 'hydrology', 'InterceptionModel', interceptionmodel, 'Interception model (0: none, 1: on, via layer thickness)')
     end if
 
 
