@@ -201,7 +201,9 @@ function initInitialFields(inifilename) result(ierr)
             
             success = timespaceinitialfield(xz, yz, infiltcap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
             if (success) then
-               infiltcap = infiltcap*1d-3/(24d0*3600d0)            ! mm/day => m/s
+               where (infiltcap /= dmiss)
+                  infiltcap = infiltcap*1d-3/(24d0*3600d0)            ! mm/day => m/s
+               end where
             end if
 
          else if (strcmpi(qid, 'HortonMinInfCap')) then
