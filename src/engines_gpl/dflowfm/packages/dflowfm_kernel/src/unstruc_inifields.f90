@@ -243,6 +243,16 @@ function initInitialFields(inifilename) result(ierr)
             call realloc(PotEvap, ndx, keepExisting=.true., fill = 0d0)
             success = timespaceinitialfield(xz, yz, PotEvap, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
             if (success) then
+               where (PotEvap /= dmiss)
+                  PotEvap = PotEvap*1d-3/(3600d0)            ! mm/hr => m/s
+               end where
+               ! TODO: UNST-3875: when proper EvaporationModel is introduced: remove/refactor the lines below.
+               jaevap = 1
+               if (.not. allocated(evap)) then
+                  call realloc(evap, ndx, keepExisting=.false., fill = 0d0)
+               end if
+               evap = PotEvap ! evap and PotEvap are now still doubling
+
                ! Auto-enable hydrology module, if PotentialEvaporation was supplied.
                jadhyd = 1
             end if
