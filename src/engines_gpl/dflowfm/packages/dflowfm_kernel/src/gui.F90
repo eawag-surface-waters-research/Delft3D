@@ -3189,10 +3189,12 @@
       OPTION(3) = ' ' ! Reserved
       OPTION(4) = 'Infiltration capacity            (mm/hr)'
       OPTION(5) = ' ' ! Reserved for 'Actual infiltration              (mm/hr)'
-      OPTION(6) = 'Interception layer thickness'
-      ! Later: PotEvap, ActEvap, hsIntercept, etc.
+      OPTION(6) = 'Interception layer thickness         (m)'
+      OPTION(7) = 'Interception layer water depth       (m)'
+      OPTION(8) = 'Potential evaporation            (mm/hr)'
+      OPTION(9) = 'Actual evaporation open water    (mm/hr)'
 
-      MAXOPT    = 6
+      MAXOPT    = 9
       NWHAT2    = grwhydopt
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       KEY = 3

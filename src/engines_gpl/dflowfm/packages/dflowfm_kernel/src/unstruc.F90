@@ -14395,7 +14395,19 @@ else if (nodval == 27) then
       if (interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then
          znod = InterceptThickness(kk)
       end if
-    end select
+   case (7) ! Interception layer water depth       (m)
+      if (interceptionmodel == DFM_HYD_INTERCEPT_LAYER) then
+         znod = InterceptHs(kk)
+      end if
+   case (8) ! Potential evaporation            (mm/hr)
+      if (jadhyd == 1) then
+         znod = PotEvap(kk)*1d3*3600d0 ! m/s -> mm/hr
+      end if
+   case (9) ! Actual evaporation open water    (mm/hr)
+      if (jadhyd == 1) then
+         znod = ActEvap(kk)*1d3*3600d0 ! m/s -> mm/hr
+      end if
+   end select
 
  else if (nodval == 48) then
    if (nonlin >= 2) then
