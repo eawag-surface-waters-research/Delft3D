@@ -1586,6 +1586,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_sediment', jahissed, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_constituents', jahisconst, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_zcor', jahiszcor, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrihis_lateral', jahislateral, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_evaporation', jamapevap, success)
@@ -3338,6 +3339,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jahiszcor /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_zcor', jahiszcor, 'Write vertical coordinates to his file (1: yes, 0: no)' )
+    endif
+    if (writeall .or. jahislateral /= 1) then
+       call prop_set(prop_ptr, 'output', 'Wrihis_lateral', jahislateral, 'Write lateral data to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jamaps0 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, 'Write water levels for previous time step to map file (1: yes, 0: no)')

@@ -6487,6 +6487,78 @@ implicit none
    timprev = tim1
 end subroutine updateValuesOnSourceSinks
 
+!> Updates values on laterals for history output, starting from the starting time of history output
+subroutine updateValuesOnLaterals(tim1, timestep)
+   use m_flowtimes, only: ti_his, time_his, ti_hiss
+   use m_wind, only: qqLat, numlatsg, qplat, qplatCum, qplatCumPre, qplatAve, qLatReal, &
+                     qLatRealCum, qLatRealCumPre, qLatRealAve, n1latsg,  n1latsg, n2latsg, nnlat
+   use precision
+   use m_flowparameters, only: eps10
+   implicit none
+   double precision, intent(in) :: tim1     !< Current (new) time
+   double precision, intent(in) :: timestep !< Timestep is the difference between tim1 and the last update time
+
+   integer :: i, k, k1
+
+   ! If current time has not reached the history output time yet, do not update
+   if (comparereal(tim1, ti_hiss, eps10) < 0) then
+      return
+   end if
+
+   ! At the starting time of history output, initialize variables
+   if (comparereal(tim1, ti_hiss, eps10)== 0) then
+      allocate(qplatCum(numlatsg))
+      allocate(qplatCumPre(numlatsg))
+      allocate(qplatAve(numlatsg))
+
+      allocate(qLatReal(numlatsg))
+      allocate(qLatRealCum(numlatsg))
+      allocate(qLatRealCumPre(numlatsg))
+      allocate(qLatRealAve(numlatsg))
+
+      qplatCum = 0d0
+      qplatCumPre = 0d0
+      qplatAve = 0d0
+
+      qLatRealCum = 0d0
+      qLatRealCumPre = 0d0
+      qLatRealAve = 0d0
+   end if
+
+   ! Compute realized discharge
+   qLatReal = 0d0
+   do i = 1,numlatsg
+      do k1=n1latsg(i),n2latsg(i)
+         k = nnlat(k1)
+         qLatReal(i) = qLatReal(i) + qqLat(k)
+      end do
+   end do
+   
+   ! At the starting time of history output, average discharge is 0, and skip the following computing
+   if (comparereal(tim1, ti_hiss, eps10)== 0) then
+      return
+   end if
+
+   !! Compute average discharge
+   ! cumulative discharge from starting time of history output
+   do i = 1, numlatsg
+      qplatCum(i) =qplatCum(i) + timestep*qplat(i)
+      qLatRealCum(i) = qLatRealCum(i) + timestep*qLatReal(i)
+   enddo
+
+   ! At the history output time, compute average discharge in the past His-interval
+   if (comparereal(tim1, time_his, eps10)== 0) then
+      do i = 1, numlatsg
+         qplatAve(i) = (qplatCum(i) - qplatCumPre(i)) / ti_his
+         qLatRealAve(i) = (qLatRealCum(i) - qLatRealCumPre(i)) / ti_his
+
+         qplatCumPre(i) = qplatCum(i)
+         qLatRealCumPre(i) = qLatRealCum(i)
+      enddo
+   endif
+
+end subroutine updateValuesOnLaterals
+
 ! update m_wind::vextcum(:) with the realized inflow from m_wind::qextreal(:)
 subroutine updateCumulativeInflow(deltat) 
     use m_wind

@@ -594,6 +594,11 @@ character(len=255)   :: filename_fou_out
        call updateValuesonSourceSinks(time1)         ! Compute discharge and volume on sources and sinks
     endif
  endif
+ 
+ if (jahislateral > 0 .and. numlatsg > 0) then
+    call updateValuesOnLaterals(time1, dts)
+ end if
+
 
  ! for 1D only
  if (network%loaded .and. ndxi-ndx2d > 0) then
@@ -18836,7 +18841,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_cmpstrudim, id_cmpstru_id, id_cmpstru_dis, id_cmpstru_s1up,  id_cmpstru_s1dn, &
                      id_cmpstru_vel, id_cmpstru_au, id_cmpstru_head, &
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
-                     id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim
+                     id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim, &
+                     id_latdim, id_lat_id, id_lat_predis_inst, id_lat_predis_ave, id_lat_realdis_inst, id_lat_realdis_ave
     ! ids for geometry variables, only use them once at the first time of history output
     integer :: id_statgeom_node_count,     id_statgeom_node_coordx,     id_statgeom_node_coordy,    &
                id_crsgeom_node_count,      id_crsgeom_node_coordx,      id_crsgeom_node_coordy,     &
@@ -18848,7 +18854,8 @@ subroutine unc_write_his(tim)            ! wrihis
                id_gategengeom_node_count,  id_gategengeom_node_coordx,  id_gategengeom_node_coordy, &
                id_pumpgeom_node_count,     id_pumpgeom_node_coordx,     id_pumpgeom_node_coordy,    &
                id_bridgegeom_node_count,   id_bridgegeom_node_coordx,   id_bridgegeom_node_coordy,  &
-               id_srcgeom_node_count,      id_srcgeom_node_coordx,      id_srcgeom_node_coordy
+               id_srcgeom_node_count,      id_srcgeom_node_coordx,      id_srcgeom_node_coordy,     &
+               id_latgeom_node_count,      id_latgeom_node_coordx,      id_latgeom_node_coordy
     double precision, allocatable :: geom_x(:), geom_y(:)
     integer, allocatable :: node_count(:)
     integer, allocatable, save :: id_tra(:)
@@ -18863,7 +18870,8 @@ subroutine unc_write_his(tim)            ! wrihis
     integer                      :: ntot, mobs, k, i, j, jj, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4, nNodeTot, nNodes, L0, k1, k2, nlinks
     character(len=255)           :: station_geom_container_name, crs_geom_container_name, weir_geom_container_name, orif_geom_container_name, &
                                     genstru_geom_container_name, uniweir_geom_container_name, culvert_geom_container_name, &
-                                    gategen_geom_container_name, pump_geom_container_name, bridge_geom_container_name, src_geom_container_name
+                                    gategen_geom_container_name, pump_geom_container_name, bridge_geom_container_name, src_geom_container_name, &
+                                    lat_geom_container_name
     logical                      :: jawel
     double precision             :: xp, yp, qsum, vals, valx, valy, valwx, valwy, valpatm, wind, cof0, tmpx, tmpy
 
@@ -20737,6 +20745,44 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_cmpstru_vel, 'coordinates', 'cmpstru_id')
         endif
 
+        ! Lateral
+        if(jahislateral > 0 .and. numlatsg > 0) then
+            ierr = nf90_def_dim(ihisfile, 'lateral', numlatsg, id_latdim)
+            ierr = nf90_def_var(ihisfile, 'lateral_id',  nf90_char,   (/ id_strlendim, id_latdim /), id_lat_id)
+            ierr = nf90_put_att(ihisfile, id_lat_id,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_lat_id,  'long_name', 'Id of lateral')
+
+            ! Define geometry related variables
+            lat_geom_container_name = 'lateral_geom'
+            nNodeTot = nlatnd
+            ierr = sgeom_def_geometry_variables(ihisfile, lat_geom_container_name, 'lateral', 'point', nNodeTot, id_latdim, &
+               id_latgeom_node_count, id_latgeom_node_coordx, id_latgeom_node_coordy)
+
+            ierr = nf90_def_var(ihisfile, 'lateral_prescribed_discharge_instantaneous ', nf90_double, (/ id_latdim, id_timedim /), id_lat_predis_inst)
+            ierr = nf90_put_att(ihisfile, id_lat_predis_inst, 'long_name', 'Prescribed discharge through lateral at current time step (instantaneous)')
+            ierr = nf90_put_att(ihisfile, id_lat_predis_inst, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_lat_predis_inst, 'coordinates', 'lateral_id')
+            ierr = nf90_put_att(ihisfile, id_lat_predis_inst, 'geometry', lat_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'lateral_prescribed_discharge_average ', nf90_double, (/ id_latdim, id_timedim /), id_lat_predis_ave)
+            ierr = nf90_put_att(ihisfile, id_lat_predis_ave, 'long_name', 'Prescribed discharge through lateral, average over the last history time interval')
+            ierr = nf90_put_att(ihisfile, id_lat_predis_ave, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_lat_predis_ave, 'coordinates', 'lateral_id')
+            ierr = nf90_put_att(ihisfile, id_lat_predis_ave, 'geometry', lat_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'lateral_realized _discharge_instantaneous ', nf90_double, (/ id_latdim, id_timedim /), id_lat_realdis_inst)
+            ierr = nf90_put_att(ihisfile, id_lat_realdis_inst, 'long_name', 'Realized discharge through lateral at current time step (instantaneous)')
+            ierr = nf90_put_att(ihisfile, id_lat_realdis_inst, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_lat_realdis_inst, 'coordinates', 'lateral_id')
+            ierr = nf90_put_att(ihisfile, id_lat_realdis_inst, 'geometry', lat_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'lateral_realized _discharge_average ', nf90_double, (/ id_latdim, id_timedim /), id_lat_realdis_ave)
+            ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'long_name', 'Realized discharge through lateral, average over the last history time interval')
+            ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'coordinates', 'lateral_id')
+            ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'geometry', lat_geom_container_name)
+        endif
+
         if(dad_included) then  ! Output for dredging and dumping
             ierr = nf90_def_dim(ihisfile, 'ndredlink', dadpar%nalink, id_dredlinkdim)
             ierr = nf90_def_dim(ihisfile, 'ndred', dadpar%nadred+dadpar%nasupl, id_dreddim)
@@ -20902,6 +20948,12 @@ subroutine unc_write_his(tim)            ! wrihis
         if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
            do i = 1, network%cmps%count
               ierr = nf90_put_var(ihisfile, id_cmpstru_id,  trim(network%cmps%compound(i)%id),  (/ 1, i /))
+           end do
+        end if
+
+        if (jahislateral > 0 .and. numlatsg > 0) then
+           do i = 1, numlatsg
+              ierr = nf90_put_var(ihisfile, id_lat_id,  trim(lat_ids(i)), (/ 1, i /))
            end do
         end if
 
@@ -21638,6 +21690,33 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_cmpstru_au,             valcmpstru(6,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_cmpstru_vel,            valcmpstru(7,i), (/ i, it_his /))
          enddo
+      end if
+      
+      if (jahislateral > 0 .and. numlatsg > 0) then
+         ierr = nf90_put_var(ihisfile, id_lat_predis_inst,  qplat,       start = (/1,it_his/), count = (/numlatsg,1/))
+         ierr = nf90_put_var(ihisfile, id_lat_predis_ave,   qplatAve,    start = (/1,it_his/), count = (/numlatsg,1/))
+         ierr = nf90_put_var(ihisfile, id_lat_realdis_inst, qLatReal,    start = (/1,it_his/), count = (/numlatsg,1/))
+         ierr = nf90_put_var(ihisfile, id_lat_realdis_ave,  qLatRealAve, start = (/1,it_his/), count = (/numlatsg,1/))
+         ! write geometry variables at the first time of history output
+         if (it_his == 1) then
+            j = 1
+            call realloc(node_count, numlatsg, fill = 0)
+            call realloc(geom_x, nlatnd)
+            call realloc(geom_y, nlatnd)
+            do i = 1, numlatsg
+               do k1=n1latsg(i),n2latsg(i)
+                  k = nnlat(k1)
+                  geom_x(j) = xz(k)
+                  geom_y(j) = yz(k)
+                  j = j + 1
+               end do
+               node_count(i) = n2latsg(i)-n1latsg(i)+1
+            end do
+
+            ierr = nf90_put_var(ihisfile, id_latgeom_node_coordx, geom_x(1:nlatnd), start = (/ 1 /), count = (/ nlatnd /))
+            ierr = nf90_put_var(ihisfile, id_latgeom_node_coordy, geom_y(1:nlatnd), start = (/ 1 /), count = (/ nlatnd /))
+            ierr = nf90_put_var(ihisfile, id_latgeom_node_count, node_count)
+         end if
       end if
 
       if (jahisgate > 0 .and. ngatesg > 0) then

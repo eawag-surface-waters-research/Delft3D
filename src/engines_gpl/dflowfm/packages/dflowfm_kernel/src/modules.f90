@@ -1112,11 +1112,18 @@ integer, parameter :: ILATTP_ALL = 0 !< Type code for laterals that apply to bot
 integer, parameter :: ILATTP_1D  = 1 !< Type code for laterals that only apply to 1D nodes.
 integer, parameter :: ILATTP_2D  = 2 !< Type code for laterals that only apply to 2D nodes.
 
-integer                      , target :: numlatsg    !< [-] nr of lateral discharge providers  {"rank": 0}
-double precision, allocatable, target :: qplat(:)    !< [m3/s] Lateral discharge of provider {"shape": ["numlatsg"]}
-double precision, allocatable, target :: qqlat(:)    !< [m3/s] Lateral discharge at xz,yz {"location": "face", "shape": ["ndx"]}
-double precision, allocatable, target :: balat(:)    !< [m2] total area of all cells in provider numlatsg {"shape": ["numlatsg"]}
-character(len=128), allocatable       :: lat_ids(:)  !< id of laterals {"shape": ["numlatsg"]}
+integer                      , target :: numlatsg          !< [-] nr of lateral discharge providers  {"rank": 0}
+double precision, allocatable, target :: qplat(:)          !< [m3/s] Lateral discharge of provider {"shape": ["numlatsg"]}
+double precision, allocatable, target :: qqlat(:)          !< [m3/s] Lateral discharge at xz,yz {"location": "face", "shape": ["ndx"]}
+double precision, allocatable, target :: balat(:)          !< [m2] total area of all cells in provider numlatsg {"shape": ["numlatsg"]}
+character(len=128), allocatable       :: lat_ids(:)        !< id of laterals {"shape": ["numlatsg"]}
+double precision, allocatable, target :: qplatCum(:)       !< [m3/s] Cumulative lateral discharge of provider {"shape": ["numlatsg"]}
+double precision, allocatable, target :: qplatCumPre(:)    !< [m3/s] Cumulative lateral discharge of provider at previous history output time{"shape": ["numlatsg"]}
+double precision, allocatable, target :: qplatAve(:)       !< [m3/s] Average lateral discharge of provider during the past history output interal {"shape": ["numlatsg"]}
+double precision, allocatable, target :: qLatReal(:)       !< [m3/s] Realized lateral discharge {"shape": ["numlatsg"]}
+double precision, allocatable, target :: qLatRealCum(:)    !< [m3/s] Cumulative realized lateral discharge {"shape": ["numlatsg"]}
+double precision, allocatable, target :: qLatRealCumPre(:) !< [m3/s] Cumulative realized lateral discharge at previous history output time{"shape": ["numlatsg"]}
+double precision, allocatable, target :: qLatRealAve(:)    !< [m3/s] Average realized lateral discharge during the past history output interal{"shape": ["numlatsg"]}
 
 !! Lateral lookup tables: n1/n2latsg(ilat) = n1/n2, nnlat(n1:n2) = { flow node nrs affected by lateral ilat }
 integer                               :: nlatnd      !< lateral nodes dimension, counter of nnlat(:)
@@ -2745,6 +2752,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jahisconst                !< Write tracers to his file, 0: no, 1: yes
  integer                           :: jahiszcor                 !< Write the vertical coordinate to his file, 0: no, 1: yes
  integer                           :: jahiswav                  !< Write wave data to his file, 0: no, 1: yes
+ integer                           :: jahislateral              !< Write lateral data to his file, 0: no, 1: yes
 
  ! written to map file yes or no
  integer                           :: jamaps0                   !< previous step water levels to map file, 0: no, 1: yes
@@ -3168,6 +3176,7 @@ subroutine default_flowparameters()
     jahisconst = 1
     jahiszcor  = 1
     jahiswav = 1
+    jahislateral = 1
 
     jamaps0 = 1
     jamaps1 = 1

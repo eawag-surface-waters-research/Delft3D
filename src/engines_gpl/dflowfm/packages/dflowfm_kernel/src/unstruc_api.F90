@@ -216,7 +216,7 @@ end subroutine api_loadmodel
    use m_wind
    use dfm_error
    use m_partitioninfo, only: jampi
-   use m_flowparameters, only: jahisbal, jatekcd
+   use m_flowparameters, only: jahisbal, jatekcd, jahislateral
 
    integer, external :: flow_modelinit
 
@@ -241,6 +241,10 @@ end subroutine api_loadmodel
         call updateBalance() 
      endif
     call updateValuesonSourceSinks(time1)
+
+    if (jahislateral > 0 .and. numlatsg > 0) then
+       call updateValuesOnLaterals(time1, dts)
+    end if
 
     if (jampi == 1) then
        call updateValuesOnCrossSections_mpi(time1)
