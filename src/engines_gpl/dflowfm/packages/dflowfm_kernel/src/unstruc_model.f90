@@ -1715,6 +1715,8 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_double (md_ptr, 'output', 'MbaInterval', ti_mba, success)
     
+    call prop_get_integer (md_ptr, 'output', 'MbaWriteCsv', jambawritecsv, success)
+
     call prop_get_integer (md_ptr, 'output', 'MbaLumpFromToMba', jambalumpmba, success)
     call prop_get_integer (md_ptr, 'output', 'MbaLumpBoundaries', jambalumpbnd, success)
     call prop_get_integer (md_ptr, 'output', 'MbaLumpSourceSinks', jambalumpsrc, success)
@@ -3179,6 +3181,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     ti_rst_array(3) = ti_rste
     call prop_set(prop_ptr, 'output', 'RstInterval', ti_rst_array, 'Restart times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period')
     call prop_set(prop_ptr, 'output', 'MbaInterval', ti_mba, 'Mass balance area output interval (s)')
+
+    call prop_set(prop_ptr, 'output', 'MbaWriteCsv', jambawritecsv, 'Write mass balance area output to a csv-file (1: yes, 0: no)')
 
     call prop_set(prop_ptr, 'output', 'MbaLumpFromToMba', jambalumpmba, 'Lump MBA from/to other areas mass balance terms (1: yes, 0: no)')
     call prop_set(prop_ptr, 'output', 'MbaLumpBoundaries', jambalumpbnd, 'Lump MBA boundary mass balance terms (1: yes, 0: no)')
