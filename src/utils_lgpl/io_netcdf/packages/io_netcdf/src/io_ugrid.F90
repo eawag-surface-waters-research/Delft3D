@@ -1987,10 +1987,22 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    ierr = UG_NOERR
    
    netids%varids(ntid_1dtopo) = varid
+   ierr = nf90_inquire_variable(ncid, varid, name = varname)
+
    ierr = att_to_dimid(ncid, varid, 'edge_dimension',  netids%dimids(ntdim_1dedges))
+   if (ierr /= UG_NOERR) then
+      call SetMessage(LEVEL_WARN, 'ug_init_network_topology: Could not find dimension for network edges (see '//trim(varname)//':edge_dimension).')
+   end if
+
    ierr = att_to_dimid(ncid, varid, 'node_dimension',  netids%dimids(ntdim_1dnodes))
+   if (ierr /= UG_NOERR) then
+      call SetMessage(LEVEL_WARN, 'ug_init_network_topology: Could not find dimension for network nodes (see '//trim(varname)//':node_dimension).')
+   end if
    !edge_geometry container
    ierr = att_to_varid(ncid, varid, 'edge_geometry'  ,  netids%varids(ntid_1dgeometry))
+   if (ierr /= UG_NOERR) then
+      call SetMessage(LEVEL_WARN, 'ug_init_network_topology: Could not find variable with network geometry (see '//trim(varname)//':edge_geometry).')
+   end if
    !geometry x and  y
    ierr = att_to_coordvarids(ncid, netids%varids(ntid_1dgeometry), 'node_coordinates', netids%varids(ntid_1dgeox), netids%varids(ntid_1dgeoy))
    !ndim_1dgeopoints
@@ -2863,7 +2875,7 @@ function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_nodex), xn)
    if(ierr /= UG_NOERR) then 
-      call SetMessage(LEVEL_WARN, 'could not read x-coordinates') ! low level lib may not throw fatal errors
+      call SetMessage(LEVEL_WARN, 'Could not read mesh node x-coordinates. Check any previous warnings.') ! low level lib may not throw fatal errors
    end if 
    ierr = nf90_get_var(ncid, meshids%varids(mid_nodey), yn)
    ! TODO: AvD: some more careful error handling
@@ -2881,7 +2893,7 @@ function ug_put_node_coordinates(ncid, meshids, xn, yn) result(ierr)
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodex), xn)
    if(ierr /= NF90_NOERR) then 
-      call SetMessage(LEVEL_WARN, 'could not put x-coordinates') ! low level lib may not throw fatal errors
+      call SetMessage(LEVEL_WARN, 'Could not put mesh node x-coordinates. Check any previous warnings.') ! low level lib may not throw fatal errors
    end if 
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodey), yn)
    ! TODO: AvD: some more careful error handling
@@ -2961,7 +2973,7 @@ function ug_get_face_coordinates(ncid, meshids, xf, yf) result(ierr)
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facex), xf)
    if(ierr /= UG_NOERR) then 
-      call SetMessage(LEVEL_WARN, 'could not read x-coordinates') ! low level lib may not throw fatal errors
+      call SetMessage(LEVEL_WARN, 'Could not read mesh face x-coordinates. Check any previous warnings.') ! low level lib may not throw fatal errors
    end if 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facey), yf)
    ! TODO: AvD: some more careful error handling
@@ -2979,7 +2991,7 @@ function ug_put_face_coordinates(ncid, meshids, xf, yf) result(ierr)
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_facex), xf)
    if(ierr /= NF90_NOERR) then 
-      call SetMessage(LEVEL_WARN, 'could not put x-coordinates') ! low level lib may not throw fatal errors
+      call SetMessage(LEVEL_WARN, 'Could not put mesh face x-coordinates. Check any previous warnings.') ! low level lib may not throw fatal errors
    end if 
    ierr = nf90_put_var(ncid, meshids%varids(mid_facey), yf)
    ! TODO: AvD: some more careful error handling
@@ -4145,11 +4157,11 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    !select the location type
    call ug_loctype_to_location(locationType1Id,locationType1)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not select locationType1')
+       Call SetMessage(Level_Fatal, 'Could not select locationType1 for mesh contact '''//trim(linkmeshname)//'''.')
    end if 
    call ug_loctype_to_location(locationType2Id,locationType2)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not select locationType2')
+       Call SetMessage(Level_Fatal, 'Could not select locationType2 for mesh contact '''//trim(linkmeshname)//'''.')
    end if 
    
    !get the mesh names
@@ -4260,17 +4272,17 @@ function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
    
    ierr = nf90_inquire_variable( ncid, contactids%varids(cid_contacttopo), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not inquire the number of contacts')
+       Call SetMessage(Level_Fatal, 'Could not inquire the number of contacts for mesh contact '''//trim(name)//'''.')
    endif
    
    ierr = nf90_inquire_dimension(ncid, dimids(1), len=ncontactsDim1)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the first dimension of the link mesh')
+       Call SetMessage(Level_Fatal, 'Could not read the first dimension for mesh contact '''//trim(name)//'''.')
    endif
    
    ierr = nf90_inquire_dimension(ncid, dimids(2), len=ncontactsDim2)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the second dimension of the link mesh')
+       Call SetMessage(Level_Fatal, 'Could not read the second dimension for mesh contact '''//trim(name)//'''.')
    endif
    
    ! ncontacts = max(ncontactsDim1,ncontactsDim2)
@@ -4484,7 +4496,7 @@ function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, nodebranchidx, n
    
    ierr = nf90_inquire_dimension(ncid, meshids%dimids(mdim_node), len=nmeshpoints)
    if(ierr /= UG_NOERR) then
-       Call SetMessage(Level_Fatal, 'could not read the branch dimension')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D mesh node dimension. Check any previous warnings.')
    end if
 
    if (nmeshpoints < size(nodebranchidx) .or. nmeshpoints < size(nodeoffset)) then
@@ -4539,7 +4551,7 @@ function ug_put_1d_mesh_edges(ncid, meshids, edgebranchidx, edgeoffset, startInd
 
    ierr = nf90_inquire_dimension(ncid, meshids%dimids(mdim_edge), len=nmeshedges)
    if (ierr /= UG_NOERR) then
-       Call SetMessage(Level_Fatal, 'could not read the mesh1d edge dimension')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D mesh edge dimension. Check any previous warnings.')
    end if
    
    !we have not defined the start_index, so when we put the variable it must be zero based
@@ -4563,7 +4575,7 @@ function ug_put_1d_mesh_edges(ncid, meshids, edgebranchidx, edgeoffset, startInd
    end if
 
    if (ierr /= UG_NOERR) then
-       Call SetMessage(Level_Fatal, 'could not write the 1d mesh edges')
+       Call SetMessage(Level_Fatal, 'Could not write the 1d mesh edges. Check any previous warnings.')
    end if
 
 end function ug_put_1d_mesh_edges
@@ -4579,7 +4591,7 @@ function ug_get_1d_network_nodes_count(ncid,netids, nNodes) result(ierr)
    
   ierr = nf90_inquire_dimension(ncid, netids%dimids(ntdim_1dnodes), len=nNodes)
   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the 1d nodes count')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network nodes count. Check previous warnings.')
   end if 
    
 end function ug_get_1d_network_nodes_count
@@ -4594,7 +4606,7 @@ function ug_get_1d_network_branches_count(ncid,netids, nbranches) result(ierr)
    
   ierr = nf90_inquire_dimension(ncid, netids%dimids(ntdim_1dedges), len=nbranches)
   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the 1d number of branches')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network number of branches. Check any previous warnings.')
   end if 
    
 end function ug_get_1d_network_branches_count
@@ -4609,7 +4621,7 @@ function ug_get_1d_network_branches_geometry_coordinate_count(ncid,netids, ngeom
    
   ierr = nf90_inquire_dimension(ncid, netids%dimids(ntdim_1dgeopoints), len=ngeometry)
   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the 1d number of geometry points')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network number of geometry points. Check any previous warnings.')
   end if 
 
 end function ug_get_1d_network_branches_geometry_coordinate_count
@@ -4625,22 +4637,22 @@ function ug_read_1d_network_nodes(ncid, netids, nodesX, nodesY, nodeids, nodelon
  
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodex), nodesX)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read x-coordinates of 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read 1D network node x-coordinates. Check any previous warnings.')
    end if 
    
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodey), nodesY)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read y-coordinates of 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read 1D network node y-coordinates. Check any previous warnings.')
    end if 
    
    if(present(nodeids)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodids), nodeids)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read nodeids of 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read 1D network node ids. Check any previous warnings.')
    end if 
    
    if(present(nodelongnames)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodlongnames), nodelongnames)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read nodelongnames of 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read 1D network node longnames. Check any previous warnings.')
    end if 
 
 end function ug_read_1d_network_nodes
@@ -4661,7 +4673,7 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
 
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
    if(ierr /= UG_NOERR) then
-       Call SetMessage(Level_Fatal, 'could not read the source and targets nodes of each branch in 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network branches''s start and end nodes. Check any previous warnings.')
    end if 
    
    !we check for the start_index, we do not know if the variable was written as 0 based
@@ -4684,23 +4696,23 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchlengths), branchlengths)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the branch lengths of 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network branch lengths. Check any previous warnings.')
    end if 
    
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrypoints)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the geometry points of each branch in 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network branches geometry points. Check any previous warnings.')
    end if 
    
    if (present(nbranchid).and.present(nbranchlongnames)) then
       ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchids), nbranchid)
       if(ierr /= UG_NOERR) then 
-         Call SetMessage(Level_Fatal, 'could not read the branch ids of 1d network')
+         Call SetMessage(Level_Fatal, 'Could not read the 1D network branch ids. Check any previous warnings.')
       end if 
    
       ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchlongnames), nbranchlongnames)
       if(ierr /= UG_NOERR) then 
-         Call SetMessage(Level_Fatal, 'could not read the branch longnames of 1d network')
+         Call SetMessage(Level_Fatal, 'Could not read the 1D network branch longnames. Check any previous warnings.')
       end if 
    endif
    
@@ -4716,7 +4728,7 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchorder), branchorder) 
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the branch order of 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network branch order. Check any previous warnings.')
    end if 
 
    end function ug_get_1d_network_branchorder   
@@ -4730,7 +4742,7 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchtype), branchtype) 
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the branch type of 1d network')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D network branch type. Check any previous warnings.')
    end if 
 
    end function ug_get_1d_network_branchtype  
@@ -4745,12 +4757,12 @@ function ug_read_1d_network_branches_geometry(ncid, netids, geopointsX, geopoint
          
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dgeox), geopointsX)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the x-coordinates of the geometry points')
+       Call SetMessage(Level_Fatal, 'Could not read the network 1D geometry x-coordinates. Check any previous warnings.')
    end if 
    
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dgeoy), geopointsY)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the y-coordinates of the geometry points')
+       Call SetMessage(Level_Fatal, 'Could not read the network 1D geometry y-coordinates. Check any previous warnings.')
    end if 
 
 end function ug_read_1d_network_branches_geometry
@@ -4765,7 +4777,7 @@ function ug_get_1d_mesh_discretisation_points_count(ncid, meshids, nmeshpoints) 
    
    ierr = nf90_inquire_dimension(ncid, meshids%dimids(mdim_node), len=nmeshpoints)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the number of mesh points')
+       Call SetMessage(Level_Fatal, 'Could not read the number of 1D mesh nodes. Check any previous warnings.')
    end if 
    
 end function ug_get_1d_mesh_discretisation_points_count
@@ -4793,24 +4805,24 @@ function ug_get_1d_mesh_discretisation_points(ncid, meshids, nodebranchidx, node
    
    !define dim
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the branch ids')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D mesh node branch ids. Check any previous warnings.')
    end if 
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dnodeoffset), nodeoffsets)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the node offsets')
+       Call SetMessage(Level_Fatal, 'Could not read the 1D mesh node offsets. Check any previous warnings.')
    end if 
    
    if(present(coordx)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_nodex), coordx)
       if(ierr /= UG_NOERR) then 
-         Call SetMessage(Level_Fatal, 'could not read the branch mesh x-coordinates')
+         Call SetMessage(Level_Fatal, 'Could not read the 1D mesh node x-coordinates. Check any previous warnings.')
       end if 
    endif
    
    if(present(coordy)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_nodey), coordy)
       if(ierr /= UG_NOERR) then 
-         Call SetMessage(Level_Fatal, 'could not read the branch mesh y coords')
+         Call SetMessage(Level_Fatal, 'Could not read the 1D mesh nodes y-coordinates. Check any previous warnings.')
       end if
    endif
     
@@ -4835,7 +4847,7 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dedgebranch), edgebranchidx)
    if (ierr /= nf90_noerr)  then
       edgebranchidx(:) = imiss ! UNST-2795: Protect against a bug in NetCDF lib: when variable does not exist, returned array may be polluted.
-      call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the edge branch ids')
+      call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the 1Dmesh edge branch ids. Check any previous warnings.')
       goto 888
    end if 
 
@@ -4849,14 +4861,14 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dedgeoffset), edgeoffsets)
    if (ierr /= nf90_noerr) then 
-      call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the edge offsets')
+      call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the 1D mesh edge offsets. Check any previous warnings.')
       goto 888
    end if
 
    if (present(edgex)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_edgex), edgex)
       if (ierr /= nf90_noerr) then 
-         call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the mesh edge x-coordinates')
+         call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the 1D mesh edge x-coordinates. Check any previous warnings.')
          goto 888
       end if 
    endif
@@ -4864,7 +4876,7 @@ function ug_get_1d_mesh_edge_coordinates(ncid, meshids, edgebranchidx, edgeoffse
    if (present(edgey)) then
       ierr = nf90_get_var(ncid, meshids%varids(mid_edgey), edgey)
       if (ierr /= nf90_noerr) then 
-         call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the mesh edge y-coordinates')
+         call SetMessage(LEVEL_WARN, 'ug_get_1d_mesh_edge_coordinates: could not read the 1D mesh edge y-coordinates. Check any previous warnings.')
          goto 888
       end if
    endif
