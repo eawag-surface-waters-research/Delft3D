@@ -571,7 +571,7 @@ character(len=255)   :: filename_fou_out
  ! TODO: UNST-3415: investigate if this statement can be moved to step_reduce.
  hs = s1 - bl
 
- call structure_parameters
+ call structure_parameters()
 
  dnt    = dnt + 1
  time0  = time1                                      ! idem
