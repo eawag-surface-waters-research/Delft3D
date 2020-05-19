@@ -1077,7 +1077,7 @@ end subroutine setfouunit
           write(cnum,*) real(time0)
           cquant = merge('quantities', 'quantity  ', nfou > 1)
           write(msgbuf,'(a,i0,4a)') 'Updated ', nfou, ' Fourier ', trim(cquant), ' for t = ', adjustl(cnum)
-          call dbg_flush
+          call dbg_flush()
        endif
        !
        ! Write results of fourier analysis to data file

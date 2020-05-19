@@ -467,7 +467,7 @@ contains
        nmodal     = readkey_int (readfile, 'nmodal',  1,  1, 4)
        if (nmodal<1) then
           call writelog('lswe','','Error: number of spectral partions may not be less than 1 in ',trim(readfile))
-          call xbeach_errorhandler
+          call xbeach_errorhandler()
        endif
        !
        ! Allocate space for all spectral parameters
@@ -492,7 +492,7 @@ contains
           fp     = readkey_dblvec(readfile, 'fp',nmodal,nmodal, 0.08d0,0.0625d0,   0.4d0, bcast=.false.)
        elseif (.not. isSetParameter(readfile,'fp',bcast=.false.) .and. .not. isSetParameter(readfile,'Tp',bcast=.false.)) then
           call writelog('lswe','','Error: missing required value for parameter ''Tp'' or ''fp'' in ',trim(readfile))
-          call xbeach_errorhandler
+          call xbeach_errorhandler()
        else
           fp     = 1.d0/readkey_dblvec(readfile, 'Tp',nmodal,nmodal, 12.5d0, 2.5d0, 20.0d0, bcast=.false.)
           call writelog('lsw','','Warning: selecting to read peak period (Tp) instead of frequency (fp) in ',trim(readfile))
@@ -566,7 +566,7 @@ contains
        if (ier .ne. 0) then
           call writelog('lswe','','Error reading file ',trim(readfile))
           close(fid)
-          call xbeach_errorhandler
+          call xbeach_errorhandler()
        endif
        ! move the line pointer in the file
        listline = listline+1
@@ -816,7 +816,7 @@ contains
                                          ' Check spectral partitioning in ',trim(readfile))
                  call writelog('lswe','','If the partitioning should be carried out regardles of energy loss, ', &
                                           'set ''forcepartition = 1'' in ',trim(readfile))
-                 call xbeach_errorhandler
+                 call xbeach_errorhandler()
               endif
            elseif (scalefac1(ip)>0.2d0 .and. scalefac1(ip)<=0.5d0) then
               call writelog('lsw','(a,f0.0,a,i0,a,a,a)', &
@@ -1001,7 +1001,7 @@ contains
        switch = 2
     else
        call writelog('ewls','', 'SWAN directional bins keyword not found')
-       call xbeach_errorhandler
+       call xbeach_errorhandler()
     endif
   
     ! Read ndir, theta
@@ -1084,7 +1084,7 @@ contains
        switch = 2
     else
        call writelog('slwe','', 'SWAN VaDens/EnDens keyword not found')
-       call xbeach_errorhandler
+       call xbeach_errorhandler()
     end if
     read(fid,'(a)',iostat=ier)rtext
     read(fid,*,iostat=ier2)exc
@@ -1103,10 +1103,10 @@ contains
           i=1
        elseif (rtext == 'ZERO  ') then
           call writelog('lswe','','Zero energy density input for this point')
-          call xbeach_errorhandler
+          call xbeach_errorhandler()
        elseif (rtext == 'NODATA') then
           call writelog('lwse','','SWAN file has no data for this point')
-          call xbeach_errorhandler
+          call xbeach_errorhandler()
        end if
     end do
     read(fid,*,iostat=ier)factor

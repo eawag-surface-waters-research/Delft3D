@@ -150,7 +150,7 @@ subroutine start_logfiles(error)
 
     if (error==1) then
        write(*,*) 'Error: not able to open log file. Stopping simulation'
-       call xbeach_errorhandler
+       call xbeach_errorhandler()
     endif
 
   end subroutine start_logfiles
@@ -218,7 +218,7 @@ subroutine start_logfiles(error)
 
      call writelog('lswe','','Error reading file ''',trim(filename),'''')
      call writelog('lswe','','Check file for incorrect decimal format, line breaks and tab characters')
-     call xbeach_errorhandler
+     call xbeach_errorhandler()
 
   end subroutine report_file_read_error
 
@@ -275,7 +275,7 @@ subroutine start_logfiles(error)
      call writelog('ls','','End of program xbeach')
 
 
-     call close_logfiles
+     call close_logfiles()
 
   end subroutine writelog_finalize
 
@@ -1213,7 +1213,7 @@ subroutine start_logfiles(error)
 
       call writelog('sle','','File ''',trim(filename),''' not found. Terminating simulation')
 
-      call xbeach_errorhandler
+      call xbeach_errorhandler()
    endif
 
    if (present(exist)) then

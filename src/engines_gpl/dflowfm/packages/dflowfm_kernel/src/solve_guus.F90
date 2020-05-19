@@ -1654,7 +1654,7 @@ subroutine gauss_eliminationjipjan
  call setkfs() 
  
  if ( jampi.eq.1 ) then 
-    call partition_setkfs  ! exclude all water-level ghostnodes from solution vector
+    call partition_setkfs()  ! exclude all water-level ghostnodes from solution vector
  endif
  
  nowet=0
@@ -1721,9 +1721,9 @@ subroutine gauss_eliminationjipjan
 
  !
  call readyy('ini Gauss/CG', 0d0)
- call inireduce
+ call inireduce()
  call readyy('ini Gauss/CG', .35d0)
- call mindegree
+ call mindegree()
  call readyy('ini Gauss/CG', .40d0)
  nogauss=0
  nocg=0
@@ -1735,7 +1735,7 @@ subroutine gauss_eliminationjipjan
    if ( jagauss(nn).eq.1 ) then
       if (nbrstk(ndn)/=0.and.nodbr2(ndn)==mindgr) then
         minold=mindgr
-        call pointonstack
+        call pointonstack()
         if (minold>mindgr) nn=0
       endif
    else   
@@ -1744,23 +1744,23 @@ subroutine gauss_eliminationjipjan
    if (nn==nodtot) then
  !  if (nn==noactive) then
  
-     call mindegree
+     call mindegree()
      nn=0
    endif
  enddo
  call readyy('ini Gauss/CG', .75d0)
- call cijadres
+ call cijadres()
  call readyy('ini Gauss/CG', .80d0)
- call inigauss
+ call inigauss()
  call readyy('ini Gauss/CG', .90d0)
- if (nogauss<noactive) call inicg
+ if (nogauss<noactive) call inicg()
  call readyy('ini Gauss/CG', .95d0)
 
  deallocate(ij)
  deallocate(nbrstk, nodstk, nodbr2)
  if ( allocated( jagauss) ) deallocate(jagauss)
 
- call allocate_arrays
+ call allocate_arrays()
 
  ! lv2 = lv2
 

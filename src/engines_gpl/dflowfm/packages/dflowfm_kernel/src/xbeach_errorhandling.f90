@@ -41,7 +41,7 @@ contains
     implicit none
 
     call unc_closeall()
-    call close_all_files
+    call close_all_files()
     close(mdia)
     stop
   end subroutine xbeach_errorhandler

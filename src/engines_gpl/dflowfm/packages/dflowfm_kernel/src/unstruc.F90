@@ -353,7 +353,7 @@ subroutine flow_finalize_usertimestep(iresult)
             call updateValuesOnObservationStations()
             if (jampi == 1) then
                call  updateValuesOnCrossSections_mpi(time1)
-               call reduce_particles
+               call reduce_particles()
             endif
             if (jahisbal > 0) then ! Update WaterBalances etc.
                call updateBalance()
@@ -5643,11 +5643,11 @@ if (jawind > 0) then
     if (kmx < 2) then
        call linkstocenterstwodoubles( czssf, czusf )               ! converting chezy cofficient to the flow nodes
        if( spirbeta > 0.0d0 ) then
-          call get_spiralforce
+          call get_spiralforce()
        endif
     else
        !call linkstocenterstwodoubles( czssf, czusf )
-       call get_spiral3d                                           ! compute equivalent secondary flow intensity
+       call get_spiral3d()                                           ! compute equivalent secondary flow intensity
     endif
  end if
 
@@ -18618,7 +18618,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       if (jatimer.gt.0 ) then
          runtime = gettimer(1,ITOTAL)
          if ( runtime.gt.time_stat ) then
-            call step_to_screen
+            call step_to_screen()
             time_stat = runtime + abs(ti_stat)
          end if
       end if

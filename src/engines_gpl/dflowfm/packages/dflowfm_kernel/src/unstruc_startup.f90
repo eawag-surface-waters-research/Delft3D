@@ -55,7 +55,7 @@ subroutine initProgram()
     logical   :: jawel
     integer   :: istat
 
-    call initSysEnv                   ! Init paths
+    call initSysEnv()                   ! Init paths
 
 
 

@@ -139,7 +139,7 @@ contains
        else
           if (lrequired) then
              call writelog('lse','','Error: missing required value for parameter ',printkey)
-             call xbeach_errorhandler
+             call xbeach_errorhandler()
           else
              value_dbl=defval
              call writelog('l','(a12,a,f0.4,a)',(printkey),' = ',value_dbl,' (no record found, default value used)')
@@ -210,7 +210,7 @@ contains
        else
           if (lrequired) then
              call writelog('lse','','Error: missing required value for parameter ',printkey)
-             call xbeach_errorhandler   
+             call xbeach_errorhandler()
           else
              value_int=defval
              call writelog('l','(a12,a,i0,a)',(printkey),' = ',value_int,' (no record found, default value used)')
@@ -280,7 +280,7 @@ contains
          else
             if (lrequired) then
                call writelog('lse','','Error: missing required value for parameter ',printkey)
-               call xbeach_errorhandler
+               call xbeach_errorhandler()
             else
                value_vec(1:vlength)=defval
                do i=1,vlength
@@ -329,7 +329,7 @@ contains
        if (value == ' ') then
           if (lrequired) then
              call writelog('lse','','Error: missing required value for parameter ',printkey)
-             call xbeach_errorhandler
+             call xbeach_errorhandler()
           else 
              value_str=defval
              call writelog('l','(a12,a,a,a)',(printkey),' = ',trim(value_str),' (no record found, default value used)')
@@ -359,7 +359,7 @@ contains
              do j=1,nov
                 call writelog('sle','(a12)',trim(old(j)))
              enddo
-             call xbeach_errorhandler
+             call xbeach_errorhandler()
           endif
        endif
   end function readkey_str
@@ -395,7 +395,7 @@ contains
        if (value == ' ') then
           if (lrequired) then
              call writelog('lse','','Error: missing required value for parameter ',printkey)
-             call xbeach_errorhandler
+             call xbeach_errorhandler()
           else 
              value_str=' '
              call writelog('l',' (a12,a)'    ,printkey,' = None specified')
@@ -445,7 +445,7 @@ contains
           if (ioerr < 0) then
              call writelog('lse','','Error reading value for parameter ',printkey)
              call writelog('lse','','Check whether parameter is given sufficient number of input values')
-             call xbeach_errorhandler
+             call xbeach_errorhandler()
           endif
           do i=1,vlength
              if (value_vec(i)>mxval) then
@@ -463,7 +463,7 @@ contains
        else
           if (lrequired) then
              call writelog('lse','','Error: missing required value for parameter ',printkey)
-             call xbeach_errorhandler
+             call xbeach_errorhandler()
           else
              value_vec(1:vlength)=defval
              do i=1,vlength

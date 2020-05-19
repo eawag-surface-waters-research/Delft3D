@@ -248,7 +248,7 @@ end subroutine api_loadmodel
 
     if (jampi == 1) then
        call updateValuesOnCrossSections_mpi(time1)
-       call reduce_particles
+       call reduce_particles()
     endif
     
     call mess(LEVEL_INFO,'Writing initial output to file(s)...')

@@ -418,7 +418,7 @@
       ELSE IF (NWHAT .EQ. 5) THEN
          CALL CHANGEGRIDPARAMETERS()
       ELSE IF (NWHAT .EQ. 6) THEN
-         CALL CHANGEINTERPOLATIONPARAMETERS
+         CALL CHANGEINTERPOLATIONPARAMETERS()
       ELSE IF (NWHAT .EQ. 7) THEN
          CALL MAPPROJECTIONS(-1,JA) ! -1, INTERACTIEF
          if (ja == 1) then
@@ -14921,7 +14921,7 @@ end subroutine highlight_form_line
    call inhighlight('blue', 'bwhite')
    call timlin()
    call InStringXYDef(ixp,iyp,text,1,string_tmp,lstring)
-   call timlin
+   call timlin()
    key = InfoInput(55)
    if (key >=24 .and. key <= 26) then
       nlevel = 3
@@ -16426,7 +16426,7 @@ double precision :: value
                NPUT = 2
                CALL ZOOM3(KEY,NPUT)
             ELSE IF (OPTION(NWHAT) .EQ. 'STOP         ;') THEN
-               CALL STOPINT
+               CALL STOPINT()
                ! CALL STOPLOGO()
             ELSE
                KEY    = ICHAR( OPTION(NWHAT)(1:1) )

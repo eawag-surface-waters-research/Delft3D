@@ -11316,7 +11316,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
                 call deleteObservation(I)
             end if
    10 CONTINUE
-    call purgeObservations
+    call purgeObservations()
 
       RETURN
 
@@ -20491,19 +20491,19 @@ subroutine nettoland()
    call confrm('Do you want to snap net boundary to the land boundary only?', ja)
    if ( ja.eq.1) then
       call find_nearest_meshline(2) ! net boundaries only
-      call snap_to_landboundary
+      call snap_to_landboundary()
    else
       ja = 1
       call confrm('Do you want to snap inner net to the land boundary too?', ja)
       if ( ja.eq.1) then
          call find_nearest_meshline(3)
-         call snap_to_landboundary
+         call snap_to_landboundary()
       else
          ja = 1
          call confrm('Do you want to snap all net to the land boundary?', ja)
          if ( ja.eq.1) then
             call find_nearest_meshline(4)
-            call snap_to_landboundary
+            call snap_to_landboundary()
          end if
       end if
    end if
@@ -25005,7 +25005,7 @@ subroutine spline2curvi()
       end do
    end do
 
-   call deallocate_splineprops
+   call deallocate_splineprops()
    call get_splineprops(mcs_old, id, iLRmfac)
 
 !  artificial cross spline: remove the last part of the subintervals (since it makes no sence, as the artificial cross spline has an arbitrary, but sufficiently large, length)
@@ -28192,7 +28192,7 @@ subroutine derefine_mesh(xp,yp,Lconfirm)
 
 
    call findcells(100)
-   call makenetnodescoding
+   call makenetnodescoding()
 
    if ( Lconfirm ) then
       Lplot = .true.

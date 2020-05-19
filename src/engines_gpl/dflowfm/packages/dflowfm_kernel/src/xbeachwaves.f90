@@ -4902,7 +4902,7 @@ subroutine xbeach_stationary()
          !  check array size
          if ( NLNX.gt.MAXLNX ) then
             call mess(LEVEL_ERROR, 'xbeach_absgen_bc: array size error')
-            call xbeach_errorhandler
+            call xbeach_errorhandler()
          end if
 
          ! zbndu for absgen bc is a water level

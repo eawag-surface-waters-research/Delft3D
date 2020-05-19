@@ -421,7 +421,7 @@ CONTAINS
     radf = pi2 * jc
     pi2 = pi2 * 2.0_fftkind !-- use 2 PI from here on
 
-    CALL factorize
+    CALL factorize()
 
     maxfactor = MAXVAL(factor (:nfactor))
     IF (nfactor - ISHFT(kt, 1) > 0) THEN
@@ -433,20 +433,20 @@ CONTAINS
     IF (PRESENT(stat)) THEN
        ALLOCATE(ctmp(maxfactor), sine(maxfactor), cosine(maxfactor), STAT=stat)
        IF (stat /= 0) RETURN
-       CALL transform
+       CALL transform()
        DEALLOCATE(sine, cosine, STAT=stat)
        IF (stat /= 0) RETURN
        ALLOCATE(perm(nperm), STAT=stat)
        IF (stat /= 0) RETURN
-       CALL permute
+       CALL permute()
        DEALLOCATE(perm, ctmp, STAT=stat)
        IF (stat /= 0) RETURN
     ELSE
        ALLOCATE(ctmp(maxfactor), sine(maxfactor), cosine(maxfactor))
-       CALL transform
+       CALL transform()
        DEALLOCATE(sine, cosine)
        ALLOCATE(perm(nperm))
-       CALL permute
+       CALL permute()
        DEALLOCATE(perm, ctmp)
     END IF
 
