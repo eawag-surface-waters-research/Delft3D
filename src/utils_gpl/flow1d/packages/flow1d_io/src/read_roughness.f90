@@ -382,8 +382,9 @@ contains
             call setmessage(LEVEL_ERROR, 'frictionId not found in roughness definition file: '//trim(inputfile))
             return
          endif
+
          frictionValuesFileName = ' '
-         call prop_get_string(tree_ptr, 'Global', 'frictionValuesFile', frictionValuesFileName, success)
+         call prop_get_string(tree_ptr, 'General', 'frictionValuesFile', frictionValuesFileName, success)
 
          irgh = hashsearch_or_add(rgs%hashlist, frictionId)
          if (irgh > rgs%size) then
