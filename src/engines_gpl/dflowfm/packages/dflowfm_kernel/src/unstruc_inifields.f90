@@ -269,7 +269,7 @@ function initInitialFields(inifilename) result(ierr)
                      enddo
                   endif
                endif
-         else if (strcmpi(qid, 'bedlevel')) then
+         else if (strcmpi(groupname, 'Initial') .and. strcmpi(qid, 'bedlevel')) then
             ! Bed level was earlier set in setbedlevelfromextfile()
             cycle
          else
