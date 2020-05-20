@@ -71,9 +71,18 @@
    implicit none
    integer, parameter              :: INTP_INTP = 1
    integer, parameter              :: INTP_AVG  = 2
+
+   !> Averaging methods, when interpolation type == INTP_AVG
+   integer, parameter              :: AVGTP_MEAN      = 1 !< Simple mean of all samples in search cell
+   integer, parameter              :: AVGTP_NEARESTNB = 2 !< Nearest point to search center
+   integer, parameter              :: AVGTP_MAX       = 3 !< Maximum of all samples in search cell, possibly with percentileminmax
+   integer, parameter              :: AVGTP_MIN       = 4 !< Minimum of all samples in search cell, possibly with percentileminmax
+   integer, parameter              :: AVGTP_INVDIST   = 5 !< Inverse distance weighted average of all samples in search cell
+   integer, parameter              :: AVGTP_MINABS    = 6 !< Sample with smallest absolute value in search cell.
+
    integer                         :: INTERPOLATIONTYPE            ! 1 = TRIANGULATION/BILINEAR INTERPOLATION 2= CELL AVERAGING
    integer                         :: JTEKINTERPOLATIONPROCESS     ! TEKEN INTERPOLATION PROCESS YES/NO 1/0
-   integer                         :: IAV                          ! AVERAGING METHOD, 1 = SIMPLE AVERAGING, 2 = CLOSEST POINT, 3 = MAX, 4 = MIN, 5 = INVERSE WEIGHTED DISTANCE, 6 = MINABS, 7 = KDTREE
+   integer                         :: IAV                          ! AVERAGING METHOD, One of AVGTP_* parameters: 1 = SIMPLE AVERAGING, 2 = CLOSEST POINT, 3 = MAX, 4 = MIN, 5 = INVERSE WEIGHTED DISTANCE, 6 = MINABS
    integer                         :: NUMMIN                       ! MINIMUM NR OF POINTS NEEDED INSIDE CELL TO HANDLE CELL
    real(kind=hp)   , parameter     :: RCEL_DEFAULT = 1.01d0        ! we need a default
    real(kind=hp)                   :: RCEL                         ! RELATIVE SEARCH CELL SIZE, DEFAULT 1D0 = ACTUAL CELL SIZE, 2D0=TWICE AS LARGE
@@ -88,7 +97,7 @@
 
    INTERPOLATIONTYPE        = INTP_INTP      ! 1 = TRIANGULATION/BILINEAR INTERPOLATION 2= CELL AVERAGING
    JTEKINTERPOLATIONPROCESS = 0              ! TEKEN INTERPOLATION PROCESS YES/NO 1/0
-   IAV                      = 1              ! AVERAGING METHOD, 1 = SIMPLE AVERAGING, 2 = CLOSEST POINT, 3 = MAX, 4 = MIN, 5 = INVERSE WEIGHTED DISTANCE, 6 = MINABS, 7 = KDTREE
+   IAV                      = AVGTP_MEAN     ! AVERAGING METHOD, 1 = SIMPLE AVERAGING, 2 = CLOSEST POINT, 3 = MAX, 4 = MIN, 5 = INVERSE WEIGHTED DISTANCE, 6 = MINABS
    NUMMIN                   = 1              ! MINIMUM NR OF POINTS NEEDED INSIDE CELL TO HANDLE CELL
    RCEL                     = RCEL_DEFAULT   ! RELATIVE SEARCH CELL SIZE, DEFAULT 1D0 = ACTUAL CELL SIZE, 2D0=TWICE AS LARGE
    Interpolate_to           = 2              ! 1=bathy, 2=zk, 3=s1, 4=Zc
@@ -1667,39 +1676,39 @@
              if (inhul == 1) then
                 do ivar = 1, ndim
                    select case (iav)
-                   case (1)
-                      numxy  = numxy + 1
+                   case (AVGTP_MEAN)
+                      numxy  = numxy + 1 ! NOTE: numxy will be equal to #included samples TIMES ndim!
                       hparr(ivar) = hparr(ivar) + zss(ivar,k)
-                   case (2)
+                   case (AVGTP_NEARESTNB)
                       dis2 = dbdistance(xs(k), ys(k), xc(n), yc(n), jsferic, jasfer3D, dmiss)
                       if (dis2  <  rmin2) then
                          rmin2 = dis2
                          hparr(ivar) = zss(ivar,k)
                          numxy = 1
                       endif
-                   case (3, 4, 6)
+                   case (AVGTP_MAX, AVGTP_MIN, AVGTP_MINABS)
                       if (ifirs == 0) then
                          ifirs = 1
                          hparr(ivar) = zss(ivar,k)
                          numxy = 1
                       endif
                       select case (iav)
-                      case (3)
+                      case (AVGTP_MAX)
                          hparr(ivar) = max(hparr(ivar),zss(ivar,k))
                          if (percentileminmax > 0d0 .and. ivar == 1) then
                             nin = nin + 1
                             kkin(nin) = k
                          endif
-                      case (4)
+                      case (AVGTP_MIN)
                          hparr(ivar) = min(hparr(ivar),zss(ivar,k))
                          if (percentileminmax > 0d0 .and. ivar == 1) then
                             nin = nin + 1
                             kkin(nin) = k
                          endif
-                      case (6)
+                      case (AVGTP_MINABS)
                          hparr(ivar) = min(abs(hparr(ivar)),abs(zss(ivar,k)))
                       end select
-                   case (5)
+                   case (AVGTP_INVDIST)
                       numxy  = numxy + 1
                       dis2   = dbdistance(xs(k), ys(k), xc(n), yc(n), jsferic, jasfer3D, dmiss)
                       dis2   = max(0.01_hp, dis2)
@@ -1718,17 +1727,17 @@
        enddo sam
 
        rhp = dmiss
-       if (iav == 1 .or. iav == 5) then
+       if (iav == AVGTP_MEAN .or. iav == AVGTP_INVDIST) then
           if (numxy  >=  nummin) then
-             if (iav == 1) then
+             if (iav == AVGTP_MEAN) then
                 rhp = hparr / real(numxy)
-             else if (iav == 5) then
+             else if (iav == AVGTP_INVDIST) then
                 rhp = hparr/wall
              endif
           endif
        else if (numxy  >=  1) then
           rhp = hparr
-          if ((iav == 3 .or. iav == 4) .and. percentileminmax > 0d0 .and. ndim == 1) then  ! compute percentile
+          if ((iav == AVGTP_MAX .or. iav == AVGTP_MIN) .and. percentileminmax > 0d0 .and. ndim == 1) then  ! compute percentile
              do nn = 1,nin
                 zz(nn) = zss( 1,kkin(nn) )
              enddo
@@ -1736,7 +1745,7 @@
              rnn   = 0
              rhp(1) = 0d0
              num = nint(0.01d0*percentileminmax*nin)
-             if (iav == 4) then
+             if (iav == AVGTP_MIN) then
                 n1 = 1
                 n2 =  num
                 n12 = 1

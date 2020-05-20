@@ -29724,10 +29724,10 @@ subroutine refinecellsandfaces2()
 !         ridge detection
 !------------------------------------------------------------------------
 
-          if ( interpolationtype.ne.INTP_AVG .or. IAV.ne.3) then
+          if ( interpolationtype.ne.INTP_AVG .or. IAV.ne.AVGTP_MAX) then
     !         call qnerror('Interpolation type is set to averaging and averaging type to maximum', ' ', ' ')
-             interpolationtype = 2
-             IAV = 3
+             interpolationtype = INTP_AVG
+             IAV = AVGTP_MAX
           end if
 
           zc = DMISS
@@ -29765,7 +29765,7 @@ subroutine refinecellsandfaces2()
           if ( interpolationtype.ne.INTP_AVG .or. IAV.ne.6) then
     !         call qnerror('Interpolation type is set to averaging and averaging type to minabs', ' ', ' ')
              interpolationtype = 2
-             IAV = 6    ! minabs
+             IAV = AVGTP_MINABS    ! minabs
           end if
 
 !        only interpolate samples if necessary

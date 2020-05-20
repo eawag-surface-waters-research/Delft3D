@@ -782,27 +782,29 @@ end subroutine methodStringToInteger
 !> Converts averaging type string to an integer value.
 !! Returns -1 when an invalid type string is given.
 subroutine averagingTypeStringToInteger(sAveragingType, iAveragingType)
+   use m_ec_interpolationsettings
    implicit none
    character(len=*), intent(in   ) :: sAveragingType        ! averaging type string
    integer,          intent(  out) :: iAveragingType        ! averaging type integer
    
    call str_lower(sAveragingType)
    select case (trim(sAveragingType))
-      case ('mean')
-         iAveragingType = 1
-      case ('nearestnb')
-         iAveragingType = 2
-      case ('max')
-         iAveragingType = 3
-      case ('min')
-         iAveragingType = 4
-      case ('invdist')
-         iAveragingType = 5
-      case ('minabs')
-         iAveragingType = 6
-      case default
-         iAveragingType = -1
+   case ('mean')
+      iAveragingType = AVGTP_MEAN
+   case ('nearestnb')
+      iAveragingType = AVGTP_NEARESTNB
+   case ('max')
+      iAveragingType = AVGTP_MAX
+   case ('min')
+      iAveragingType = AVGTP_MIN
+   case ('invdist')
+      iAveragingType = AVGTP_INVDIST
+   case ('minabs')
+      iAveragingType = AVGTP_MINABS
+   case default
+      iAveragingType = -1
    end select
+
    return
 
 end subroutine averagingTypeStringToInteger

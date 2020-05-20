@@ -36048,8 +36048,8 @@ subroutine setbedlevelfromnetfile()
 
             ! NOTE: associate cell bl's from file with our model's flowgeom cells via nearest neighbour matching.
             NS = nflownode
-            INTERPOLATIONTYPE = 2
-            IAV = 2
+            INTERPOLATIONTYPE = INTP_AVG
+            IAV = AVGTP_NEARESTNB
             call interpdivers(1)
 
          end do ! nummesh
