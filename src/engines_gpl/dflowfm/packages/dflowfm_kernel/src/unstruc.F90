@@ -595,7 +595,7 @@ character(len=255)   :: filename_fou_out
     endif
  endif
  
- if (jahislateral > 0 .and. numlatsg > 0) then
+ if (jahislateral > 0 .and. numlatsg > 0 .and. ti_his > 0) then
     call updateValuesOnLaterals(time1, dts)
  end if
 

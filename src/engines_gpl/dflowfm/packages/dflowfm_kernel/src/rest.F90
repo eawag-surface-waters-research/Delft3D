@@ -6493,6 +6493,7 @@ subroutine updateValuesOnLaterals(tim1, timestep)
    use m_wind, only: qqLat, numlatsg, qplat, qplatCum, qplatCumPre, qplatAve, qLatReal, &
                      qLatRealCum, qLatRealCumPre, qLatRealAve, n1latsg,  n1latsg, n2latsg, nnlat
    use precision
+   use m_alloc
    use m_flowparameters, only: eps10
    implicit none
    double precision, intent(in) :: tim1     !< Current (new) time
@@ -6500,29 +6501,21 @@ subroutine updateValuesOnLaterals(tim1, timestep)
 
    integer :: i, k, k1
 
-   ! If current time has not reached the history output time yet, do not update
+   ! If current time has not reached the history output start time yet, do not update
    if (comparereal(tim1, ti_hiss, eps10) < 0) then
       return
    end if
 
    ! At the starting time of history output, initialize variables
    if (comparereal(tim1, ti_hiss, eps10)== 0) then
-      allocate(qplatCum(numlatsg))
-      allocate(qplatCumPre(numlatsg))
-      allocate(qplatAve(numlatsg))
+      call realloc(qplatCum,       numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qplatCumPre,    numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qplatAve,       numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qLatReal,       numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qLatRealCum,    numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qLatRealCumPre, numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qLatRealAve,    numlatsg, keepExisting = .false., fill = 0d0)
 
-      allocate(qLatReal(numlatsg))
-      allocate(qLatRealCum(numlatsg))
-      allocate(qLatRealCumPre(numlatsg))
-      allocate(qLatRealAve(numlatsg))
-
-      qplatCum = 0d0
-      qplatCumPre = 0d0
-      qplatAve = 0d0
-
-      qLatRealCum = 0d0
-      qLatRealCumPre = 0d0
-      qLatRealAve = 0d0
    end if
 
    ! Compute realized discharge
@@ -6530,6 +6523,7 @@ subroutine updateValuesOnLaterals(tim1, timestep)
    do i = 1,numlatsg
       do k1=n1latsg(i),n2latsg(i)
          k = nnlat(k1)
+         ! TODO: UNST-3639: this needs a jampi == 1 treatment
          qLatReal(i) = qLatReal(i) + qqLat(k)
       end do
    end do
@@ -6542,12 +6536,13 @@ subroutine updateValuesOnLaterals(tim1, timestep)
    !! Compute average discharge
    ! cumulative discharge from starting time of history output
    do i = 1, numlatsg
-      qplatCum(i) =qplatCum(i) + timestep*qplat(i)
+      qplatCum(i) = qplatCum(i) + timestep*qplat(i)
       qLatRealCum(i) = qLatRealCum(i) + timestep*qLatReal(i)
    enddo
 
    ! At the history output time, compute average discharge in the past His-interval
-   if (comparereal(tim1, time_his, eps10)== 0) then
+   if (comparereal(tim1, time_his, eps10)== 0 .and. ti_his > 0) then
+      ! TODO: UNST-3639: this needs MPI reduction sum first.
       do i = 1, numlatsg
          qplatAve(i) = (qplatCum(i) - qplatCumPre(i)) / ti_his
          qLatRealAve(i) = (qLatRealCum(i) - qLatRealCumPre(i)) / ti_his
