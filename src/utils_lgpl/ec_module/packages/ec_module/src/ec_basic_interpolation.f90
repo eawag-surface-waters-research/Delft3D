@@ -79,10 +79,11 @@
    integer, parameter              :: AVGTP_MIN       = 4 !< Minimum of all samples in search cell, possibly with percentileminmax
    integer, parameter              :: AVGTP_INVDIST   = 5 !< Inverse distance weighted average of all samples in search cell
    integer, parameter              :: AVGTP_MINABS    = 6 !< Sample with smallest absolute value in search cell.
+   integer, parameter              :: AVGTP_MEDIAN    = 7 !< Median value of all samples in search cell.
 
    integer                         :: INTERPOLATIONTYPE            ! 1 = TRIANGULATION/BILINEAR INTERPOLATION 2= CELL AVERAGING
    integer                         :: JTEKINTERPOLATIONPROCESS     ! TEKEN INTERPOLATION PROCESS YES/NO 1/0
-   integer                         :: IAV                          ! AVERAGING METHOD, One of AVGTP_* parameters: 1 = SIMPLE AVERAGING, 2 = CLOSEST POINT, 3 = MAX, 4 = MIN, 5 = INVERSE WEIGHTED DISTANCE, 6 = MINABS
+   integer                         :: IAV                          ! AVERAGING METHOD, One of AVGTP_* parameters: 1 = SIMPLE AVERAGING, 2 = CLOSEST POINT, 3 = MAX, 4 = MIN, 5 = INVERSE WEIGHTED DISTANCE, 6 = MINABS, 7 = MEDIAN
    integer                         :: NUMMIN                       ! MINIMUM NR OF POINTS NEEDED INSIDE CELL TO HANDLE CELL
    real(kind=hp)   , parameter     :: RCEL_DEFAULT = 1.01d0        ! we need a default
    real(kind=hp)                   :: RCEL                         ! RELATIVE SEARCH CELL SIZE, DEFAULT 1D0 = ACTUAL CELL SIZE, 2D0=TWICE AS LARGE
@@ -97,7 +98,7 @@
 
    INTERPOLATIONTYPE        = INTP_INTP      ! 1 = TRIANGULATION/BILINEAR INTERPOLATION 2= CELL AVERAGING
    JTEKINTERPOLATIONPROCESS = 0              ! TEKEN INTERPOLATION PROCESS YES/NO 1/0
-   IAV                      = AVGTP_MEAN     ! AVERAGING METHOD, 1 = SIMPLE AVERAGING, 2 = CLOSEST POINT, 3 = MAX, 4 = MIN, 5 = INVERSE WEIGHTED DISTANCE, 6 = MINABS
+   IAV                      = AVGTP_MEAN     ! AVERAGING METHOD, 1 = SIMPLE AVERAGING, 2 = CLOSEST POINT, 3 = MAX, 4 = MIN, 5 = INVERSE WEIGHTED DISTANCE, 6 = MINABS, 7 = MEDIAN
    NUMMIN                   = 1              ! MINIMUM NR OF POINTS NEEDED INSIDE CELL TO HANDLE CELL
    RCEL                     = RCEL_DEFAULT   ! RELATIVE SEARCH CELL SIZE, DEFAULT 1D0 = ACTUAL CELL SIZE, 2D0=TWICE AS LARGE
    Interpolate_to           = 2              ! 1=bathy, 2=zk, 3=s1, 4=Zc
@@ -1715,6 +1716,12 @@
                       weight = 1.0_hp / dis2
                       wall   = wall + weight
                       hparr(ivar) = hparr(ivar) + weight*zss(ivar,k)
+                   case (AVGTP_MEDIAN)
+                      numxy = 1
+                      if (ivar == 1) then ! median only for ndim==1
+                         nin = nin + 1
+                         kkin(nin) = k
+                      endif
                    case default
                       errorInfo%success = .false.
                       errorInfo%message = repeat(' ', len(cfmt) + 10)
@@ -1737,30 +1744,42 @@
           endif
        else if (numxy  >=  1) then
           rhp = hparr
-          if ((iav == AVGTP_MAX .or. iav == AVGTP_MIN) .and. percentileminmax > 0d0 .and. ndim == 1) then  ! compute percentile
+          if ((((iav == AVGTP_MAX .or. iav == AVGTP_MIN) .and. percentileminmax > 0d0) &
+               .OR. iav == AVGTP_MEDIAN) &
+              .and. ndim == 1) then  ! compute percentile or median
+             
+             ! Sort selected samples
              do nn = 1,nin
                 zz(nn) = zss( 1,kkin(nn) )
              enddo
              call indexx(nin,zz,kkin)
-             rnn   = 0
-             rhp(1) = 0d0
-             num = nint(0.01d0*percentileminmax*nin)
-             if (iav == AVGTP_MIN) then
-                n1 = 1
-                n2 =  num
-                n12 = 1
-             else
-                n1 = nin
-                n2 =  nin - num + 1
-                n12 = -1
-             endif
-             do nn = n1, n2, n12
-                rnn = rnn + 1d0
-                rhp(1) = rhp(1) + zz(kkin(nn))
-             enddo
-             if (rnn > 0) then
-                rhp(1) = rhp(1) / rnn
-             endif
+
+             if (iav == AVGTP_MEDIAN) then
+                n1 = floor(nin/2d0)
+                n2 = ceiling(nin/2d0)
+                rhp(1) = (zz(kkin(n1)) + zz(kkin(n2)))/2d0
+
+             else if (iav == AVGTP_MAX .or. iav == AVGTP_MIN) then
+                rnn   = 0
+                rhp(1) = 0d0
+                num = nint(0.01d0*percentileminmax*nin)
+                if (iav == AVGTP_MIN) then
+                   n1 = 1
+                   n2 =  num
+                   n12 = 1
+                else if (iav == AVGTP_MAX) then
+                   n1 = nin
+                   n2 =  nin - num + 1
+                   n12 = -1
+                endif
+                do nn = n1, n2, n12
+                   rnn = rnn + 1d0
+                   rhp(1) = rhp(1) + zz(kkin(nn))
+                enddo
+                if (rnn > 0) then
+                   rhp(1) = rhp(1) / rnn
+                endif
+             end if
           endif
        endif
 
@@ -1770,7 +1789,7 @@
           endif
        end do
 
-    enddo
+    enddo ! n=1,nx
 
     deallocate (XH, YH)
 

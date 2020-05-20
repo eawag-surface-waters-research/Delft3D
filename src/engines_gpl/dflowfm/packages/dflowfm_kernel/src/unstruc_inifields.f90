@@ -801,6 +801,8 @@ subroutine averagingTypeStringToInteger(sAveragingType, iAveragingType)
       iAveragingType = AVGTP_INVDIST
    case ('minabs')
       iAveragingType = AVGTP_MINABS
+   case ('median')
+      iAveragingType = AVGTP_MEDIAN
    case default
       iAveragingType = -1
    end select
