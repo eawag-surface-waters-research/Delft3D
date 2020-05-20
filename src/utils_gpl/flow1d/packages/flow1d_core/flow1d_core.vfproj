@@ -52,7 +52,6 @@
 		<File RelativePath=".\src\bridge.f90"/>
 		<File RelativePath=".\src\c_structures.f90"/>
 		<File RelativePath=".\src\callback_functions.F90"/>
-		<File RelativePath=".\src\cf_timers.f90"/>
 		<File RelativePath=".\src\compound.f90"/>
 		<File RelativePath=".\src\cross_helper.f90"/>
 		<File RelativePath=".\src\CrossSections.f90"/>

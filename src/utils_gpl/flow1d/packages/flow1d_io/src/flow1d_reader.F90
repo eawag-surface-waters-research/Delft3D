@@ -258,8 +258,6 @@ module m_flow1d_reader
 
       success = .true.
      
-      call timstrt('ReadFiles', timerRead)
-
       ! Read roughnessFile file
       call timstrt('ReadRoughness', timerReadRoughness)
       call SetMessage(LEVEL_INFO, 'Reading Roughness ...')
@@ -318,9 +316,6 @@ module m_flow1d_reader
      
       
      ! log timings
-     call timstop(timerRead)
-     call timdump('read-model-timings.log')
-     
      call tree_destroy(md_ptr)
      
      ! Stop in case of errors
@@ -399,7 +394,6 @@ module m_flow1d_reader
 
       success = .true.
       
-      call timstrt('ReadFiles', timerRead)
 
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
@@ -715,8 +709,6 @@ module m_flow1d_reader
       call timstop(timerReadInitial)
 
       ! log timings
-      call timstop(timerRead)
-      call timdump('read-model-timings.log')
       
       call tree_destroy(md_ptr)
       

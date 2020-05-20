@@ -50,7 +50,6 @@ libflow1d_core_la_SOURCES = \
          Network.f90 \
          c_structures.f90 \
          callback_functions.F90 \
-         cf_timers.f90 \
          cross_helper.f90 \
          flow1d_core.F90 \
          quantity_statistics.f90 \

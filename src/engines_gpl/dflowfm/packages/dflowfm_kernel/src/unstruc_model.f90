@@ -410,6 +410,7 @@ end subroutine resetModel
 
 !> Loads a model definition from file and makes it active.
 subroutine loadModel(filename)
+    use timers
     use m_readstructures
     use m_netw
     use m_observations
@@ -454,6 +455,11 @@ subroutine loadModel(filename)
     integer :: i, ipli
     integer :: L, k1, k2, tok
     integer :: ntot_lb
+    integer :: handle_loadModel
+    integer :: timerHandle
+
+    handle_loadModel = 0
+    call timstrt('Load model', handle_loadModel)
 
     call resetModel()
 
@@ -474,7 +480,11 @@ subroutine loadModel(filename)
 
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
+
+    timerHandle = 0
+    call timstrt('Load network from flow1d', timerHandle)
     call load_network_from_flow1d(md_1dfiles, found_1d_network)
+    call timstop(timerHandle)
 
     if (found_1d_network) then
        jadoorladen = 1
@@ -482,7 +492,10 @@ subroutine loadModel(filename)
        jadoorladen = 0
     endif
 
+    timerHandle = 0
+    call timstrt('Load network', timerHandle)
     call loadNetwork(md_netfile, istat, jadoorladen)
+    call timstop(timerHandle)
 
     network%sferic = jsferic==1
 
@@ -491,10 +504,16 @@ subroutine loadModel(filename)
     if (istat == 0 .and. jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
 
 
-       call read_1d_attributes(md_1dfiles, network)
+      timerHandle = 0
+      call timstrt('Read 1d attributes', timerHandle)
+      call read_1d_attributes(md_1dfiles, network)
+      call timstop(timerHandle)
 
        ! set administration arrays and fill cross section list. So getbobs for 1d can be called.
-       call initialize_1dadmin(network, network%numl)
+      timerHandle = 0
+      call timstrt('Initialise 1d administration', timerHandle)
+      call initialize_1dadmin(network, network%numl)
+      call timstop(timerHandle)
 
        ! fill bed levels from values based on links
        do L = 1, network%numl
@@ -516,11 +535,15 @@ subroutine loadModel(filename)
 
     endif
 
+    timerHandle = 0
+    call timstrt('Read structures', timerHandle)
+    
     if (len_trim(md_1dfiles%structures) > 0) then
-       call SetMessage(LEVEL_INFO, 'Reading Structures ...')
-       call readStructures(network, md_1dfiles%structures)
-       call SetMessage(LEVEL_INFO, 'Reading Structures Done')
-    endif
+      call SetMessage(LEVEL_INFO, 'Reading Structures ...')
+      call readStructures(network, md_1dfiles%structures)
+      call SetMessage(LEVEL_INFO, 'Reading Structures Done')
+   endif
+   call timstop(timerHandle)
 
     if (getMaxErrorLevel() >= LEVEL_ERROR) then
        msgbuf = 'loadModel for '''//trim(filename)//''': Errors were found, please check the diagnostics file.'
@@ -543,80 +566,83 @@ subroutine loadModel(filename)
     end if
 
     ! Load observations from file.
+    timerHandle = 0
+    call timstrt('Read polygon type information', timerHandle)
     call deleteObservations()
     if (len_trim(md_obsfile) > 0) then
-        call strsplit(md_obsfile,1,fnames,1)
-        call loadObservations(fnames(1), 0)
-        do ifil=2,size(fnames)
-           call loadObservations(fnames(ifil), 1)
-        enddo
-        deallocate(fnames)
-    end if
+      call strsplit(md_obsfile,1,fnames,1)
+      call loadObservations(fnames(1), 0)
+      do ifil=2,size(fnames)
+         call loadObservations(fnames(ifil), 1)
+      enddo
+      deallocate(fnames)
+   end if
 
-    ! Cross sections in two steps
-    call delCrossSections()
-    call delpol()
+   ! Cross sections in two steps
+   call delCrossSections()
+   call delpol()
 
-    ! Load thin dam polygons from file.
-    if (len_trim(md_thdfile) > 0) then
-        call strsplit(md_thdfile,1,fnames,1)
-        call oldfil(minp, fnames(1))
-        call reapol(minp,0)
-        do ifil=2,size(fnames)
-           call oldfil(minp, fnames(ifil))
-           call reapol(minp,1)
-        enddo
-        call pol_to_thindams(xpl, ypl, npl)
-        deallocate(fnames)
-    end if
+   ! Load thin dam polygons from file.
+   if (len_trim(md_thdfile) > 0) then
+      call strsplit(md_thdfile,1,fnames,1)
+      call oldfil(minp, fnames(1))
+      call reapol(minp,0)
+      do ifil=2,size(fnames)
+         call oldfil(minp, fnames(ifil))
+         call reapol(minp,1)
+      enddo
+      call pol_to_thindams(xpl, ypl, npl)
+      deallocate(fnames)
+   end if
 
-    ! Load fixed weirs polygons from file.
-    if (len_trim(md_fixedweirfile) > 0) then
-        call strsplit(md_fixedweirfile,1,fnames,1)
-        if (isimplefixedweirs == 0) then
-           call oldfil(minp, fnames(1))
-           call reapol(minp, 0)
-           do ifil=2,size(fnames)
-              call oldfil(minp, fnames(ifil))
-              call reapol(minp, 1)
-           enddo
-           call pol_to_flowlinks(xpl, ypl, zpl, npl, nfxw, fxw)
-        endif
-        deallocate(fnames)
-    end if
+   ! Load fixed weirs polygons from file.
+   if (len_trim(md_fixedweirfile) > 0) then
+      call strsplit(md_fixedweirfile,1,fnames,1)
+      if (isimplefixedweirs == 0) then
+         call oldfil(minp, fnames(1))
+         call reapol(minp, 0)
+         do ifil=2,size(fnames)
+            call oldfil(minp, fnames(ifil))
+            call reapol(minp, 1)
+         enddo
+         call pol_to_flowlinks(xpl, ypl, zpl, npl, nfxw, fxw)
+      endif
+      deallocate(fnames)
+   end if
 
-    ! Load pillar polygons from file.
-    if (len_trim(md_pillarfile) > 0) then
-        call strsplit(md_pillarfile,1,fnames,1)
-        i = size(fnames)
-        if (allocated(pillar)) deallocate(pillar)
-        allocate( pillar(i) )
-        do ifil=1,size(fnames)
-           call oldfil(minp, fnames(ifil))
-           call reapol(minp, 1)
-           allocate( pillar(ifil)%xcor(npl) ) ; pillar(ifil)%xcor = dmiss
-           allocate( pillar(ifil)%ycor(npl) ) ; pillar(ifil)%ycor = dmiss
-           allocate( pillar(ifil)%dia(npl)  ) ; pillar(ifil)%dia  = dmiss
-           allocate( pillar(ifil)%cd(npl)   ) ; pillar(ifil)%cd   = dmiss
-           pillar(ifil)%np = npl
-           do i = 1,npl
-              pillar(ifil)%xcor(i) = xpl(i)
-              pillar(ifil)%ycor(i) = ypl(i)
-              pillar(ifil)%dia(i)  = zpl(i)
-              pillar(ifil)%cd(i)   = dzl(i)
-           enddo
-        enddo
-        deallocate(fnames)
-    end if
-    ! Load cross sections polygons from file, and load observation cross sections from *.ini files
-    if (len_trim(md_crsfile) > 0) then
-        call strsplit(md_crsfile,1,fnames,1)
-        call loadObservCrossSections(fnames(1), 0)
-        do ifil=2,size(fnames)
-           call loadObservCrossSections(fnames(ifil), 1)
-        enddo
-        deallocate(fnames)
-    end if
+   ! Load pillar polygons from file.
+   if (len_trim(md_pillarfile) > 0) then
+      call strsplit(md_pillarfile,1,fnames,1)
+      i = size(fnames)
+      if (allocated(pillar)) deallocate(pillar)
+      allocate( pillar(i) )
+      do ifil=1,size(fnames)
+         call oldfil(minp, fnames(ifil))
+         call reapol(minp, 1)
+         allocate( pillar(ifil)%xcor(npl) ) ; pillar(ifil)%xcor = dmiss
+         allocate( pillar(ifil)%ycor(npl) ) ; pillar(ifil)%ycor = dmiss
+         allocate( pillar(ifil)%dia(npl)  ) ; pillar(ifil)%dia  = dmiss
+         allocate( pillar(ifil)%cd(npl)   ) ; pillar(ifil)%cd   = dmiss
+         pillar(ifil)%np = npl
+         do i = 1,npl
+            pillar(ifil)%xcor(i) = xpl(i)
+            pillar(ifil)%ycor(i) = ypl(i)
+            pillar(ifil)%dia(i)  = zpl(i)
+            pillar(ifil)%cd(i)   = dzl(i)
+         enddo
+      enddo
+      deallocate(fnames)
+   end if
+   ! Load cross sections polygons from file, and load observation cross sections from *.ini files
+   if (len_trim(md_crsfile) > 0) then
+      call strsplit(md_crsfile,1,fnames,1)
+      call loadObservCrossSections(fnames(1), 0)
+      do ifil=2,size(fnames)
+         call loadObservCrossSections(fnames(ifil), 1)
+      enddo
+      deallocate(fnames)
+   end if
+   call timstop(timerHandle)
 
     ! Load manholes from file.
     call delete_manholes()
@@ -633,7 +659,7 @@ subroutine loadModel(filename)
 
     call delpol()
 
-
+    call timstop(handle_loadModel)
 end subroutine loadModel
 
 

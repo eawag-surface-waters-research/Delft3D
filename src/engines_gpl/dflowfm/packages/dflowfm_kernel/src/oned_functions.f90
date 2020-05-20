@@ -85,6 +85,7 @@ module m_oned_functions
    !! into the 1D network structure for branches, storage nodes, 
    !! cross sections and structures, etc. 
    subroutine set_1d_indices_in_network()
+      use timers
       use m_sediment
       use m_flowgeom
       use m_flow
@@ -94,7 +95,11 @@ module m_oned_functions
       
       
       implicit none
-      
+      integer handle_tot
+      integer handle
+
+      handle_tot = 0
+      call timstrt('Set 1d indices', handle_tot)
       default_width = wu1DUNI
       
       if (network%loaded) then
@@ -109,18 +114,37 @@ module m_oned_functions
       endif
       
       if (.not. network%initialized) then
+
+         handle = 0
+         call timstrt('Set linknumbers in branches', handle)
          call set_linknumbers_in_branches()
+         call timstop(handle)
+
+         handle = 0
+         call timstrt('Set node numbers for storage nodes', handle)
          call set_node_numbers_for_storage_nodes()
+         call timstop(handle)
+
+         handle = 0
+         call timstrt('Set structure grid numbers', handle)
          call set_structure_grid_numbers()
+         call timstop(handle)
       
          if (jased > 0 .and. stm_included) then
             ! 
+            handle = 0
+            call timstrt('Set cross sections to grid points', handle)
             call set_cross_sections_to_gridpoints()
+            call timstop(handle)
          endif
+         handle = 0
+         call timstrt('Set structure indices', handle)
          call set_structure_indices()
+         call timstop(handle)
          
          network%initialized = .true.         
       endif
+      call timstop(handle_tot)
       
    end subroutine set_1d_indices_in_network
 

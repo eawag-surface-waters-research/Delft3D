@@ -4608,6 +4608,7 @@ subroutine reset_timers()
    handle_extbnd  = 0
    handle_extra   = 0
 
+   call timstrt('All', handle_all)
 end subroutine reset_timers
 
 end module m_flowtimes

@@ -1682,6 +1682,7 @@ if(q /= 0) then
 
 
  subroutine volsur()                                 ! volsur entirely in s1 because of s1 iteration
+ use timers
  use m_flowgeom
  use m_flow
  use m_ship
@@ -1691,8 +1692,9 @@ if(q /= 0) then
  integer           :: japerim
  integer           :: L, n, k1, k2, k
  double precision  :: ha, hh
+ integer, save    	    :: handle = 0
 
-
+ call timstrt('Volume calculation', handle)
  japerim = 0
 
 ! call sets01zbnd(1) ! set s1 on z-boundaries   SPvdP: not necessary, values at the boundaries were already properly filled in solve_matrix, as the boundary nodes are included in the solution vector
@@ -1747,6 +1749,8 @@ if(q /= 0) then
     vol1(k1) = vol1(k2) ! a1(k1)*(s1(k1) - bl(k1))
     vol1_f(k1) = vol1_f(k2)
  enddo
+
+ call timstop(handle)
 
  end subroutine volsur
 
@@ -10785,7 +10789,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  
  call datum2(rundat2)
  L = len_trim(rundat2)
- call timstrt('All', handle_all)
 
  IF (ti_waq > 0d0) then
     call makedir(getoutputdir('waq'))  ! No problem if it exists already.
@@ -11108,9 +11111,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  endif
  call timstop(handle_extra(31)) ! end set fcru mor
 
- call timstrt('Flow initialise timestep', handle_extra(32)) ! flow ini timestep
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
- call timstop(handle_extra(32)) ! end flow ini timestep
 
 
  jaFlowNetChanged = 0
@@ -12407,8 +12408,6 @@ subroutine writesomeinitialoutput()
  batotown = 0 ; voltotown = 0
 
  ! Stop for initialisation timer and start timer for actual computation time
- call timstop(handle_all)
- call timstrt('All', handle_all)
  call datum (rundat0)
 
  write(msgbuf,'(a,a)') 'Modelinit finished   at: '         , rundat0                  ; call msg_flush()
@@ -12508,6 +12507,7 @@ subroutine writesomeinitialoutput()
  subroutine writesomefinaloutput()
  use m_sferic
  use timers
+ use unstruc_model
  use m_flow
  use m_flowgeom
  use m_flowtimes
@@ -12711,6 +12711,8 @@ subroutine writesomeinitialoutput()
        write(msgbuf,'(F14.3)') crs(i)%sumvalcur(2) ; call msg_flush()
     enddo
  endif
+ 
+ call timdump(trim(getoutputdir())//'modeltimings.txt', .true.)
 
  call timstrt('All', handle_all)
  end subroutine writesomefinaloutput

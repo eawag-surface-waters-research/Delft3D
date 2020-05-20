@@ -207,6 +207,7 @@ end subroutine api_loadmodel
 
 
  integer function flowinit() result(iresult)
+   use timers
    use unstruc_model
    use unstruc_netcdf, only : unc_write_net_flowgeom
    use m_crosssections
@@ -219,42 +220,65 @@ end subroutine api_loadmodel
    use m_flowparameters, only: jahisbal, jatekcd, jahislateral
 
    integer, external :: flow_modelinit
+   integer :: timerHandle, inner_timerhandle
 
    !call inidia('api')
    
+   timerHandle = 0
+   call timstrt('Initialise flow', timerHandle)
    iresult = DFM_NOERR
     if (ndx == 0) then
        write(*,*) 'Initializing flow: flow_modelinit'
+       inner_timerhandle = 0
+       call timstrt('Flow model initialisation', inner_timerhandle)
        iresult = flow_modelinit()
+       call timstop(inner_timerhandle)
        
        if (jawind > 0 .and. jatekcD > 0) then 
+          inner_timerhandle = 0
+          call timstrt('Write CD coefficients', inner_timerhandle)
           call writeCdcoeffs()
+          call timstop(inner_timerhandle)
        endif   
        
     end if
-    if (ndx == 0) return                                ! No valid flow network was initialized
+    if (ndx == 0) then
+      call timstop(timerhandle)
+      return                                ! No valid flow network was initialized
+    endif
     
     call klok(cpuall0)
 
+    inner_timerhandle = 0
+    call timstrt('Update various', inner_timerhandle)
+    
     call updateValuesOnCrossSections(time1)             ! Initial statistics, copied from flow_usertimestep
     if (jahisbal > 0) then                              ! Update WaterBalances etc.
-        call updateBalance() 
-     endif
-    call updateValuesonSourceSinks(time1)
-
+      call updateBalance() 
+   endif
+   call updateValuesonSourceSinks(time1)
+   
     if (jahislateral > 0 .and. numlatsg > 0) then
        call updateValuesOnLaterals(time1, dts)
     end if
 
-    if (jampi == 1) then
-       call updateValuesOnCrossSections_mpi(time1)
+   if (jampi == 1) then
+      call updateValuesOnCrossSections_mpi(time1)
        call reduce_particles()
-    endif
+   endif
+   call timstop(inner_timerhandle)
     
     call mess(LEVEL_INFO,'Writing initial output to file(s)...')
+    inner_timerhandle = 0
+    call timstrt('Write external output', inner_timerhandle)
     call flow_externaloutput(time1)
+    call timstop(inner_timerhandle)
     
     call mess(LEVEL_INFO,'Done writing initial output to file(s).')
+    call timstop(timerhandle)
+    call timstop(handle_all)
+    call timstrt('All', handle_all)
+    call timdump(trim(getoutputdir())//'modeltimings_initialisation.txt', .true.)
   end function flowinit
 
  subroutine flowstep(jastop, iresult)
