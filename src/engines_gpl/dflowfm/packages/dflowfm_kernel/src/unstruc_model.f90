@@ -534,10 +534,10 @@ subroutine loadModel(filename)
         call strsplit(md_ldbfile,1,fnames,1)
         call oldfil (minp, fnames(1))
         ntot_lb = 0
-        if (minp > 0) call realan(minp, ntot_lb)
+        if (minp /= 0) call realan(minp, ntot_lb)
         do ifil=2,size(fnames)
            call oldfil(minp, fnames(ifil))
-           if (minp > 0) call realan(minp, ntot_lb)
+           if (minp /= 0) call realan(minp, ntot_lb)
         enddo
         deallocate(fnames)
     end if
