@@ -465,7 +465,7 @@ subroutine loadModel(filename)
 
     call setmd_ident(filename)
 
-    call readMDUFile(trim(md_ident)//'.mdu', istat)
+    call readMDUFile(filename, istat)
 
     if (istat /= 0) then
         return
