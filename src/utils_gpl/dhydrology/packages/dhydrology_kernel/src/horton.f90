@@ -137,6 +137,7 @@ module horton
       NewInfCap = min(NewInfCap, MaxInfCap)
       NewInfCap = max(NewInfCap, MinInfCap)
 
+      DT = DT1
       if (present(InfiltrationMM)) then
          InfiltrationMM = NewInfCap * TimeStepSize / NrSecondsPerHour
       end if
