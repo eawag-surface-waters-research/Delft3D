@@ -134,7 +134,6 @@
       integer  ( 4), private              :: maxlvl         !< maximum level of call trees
       integer  ( 4), private, pointer     :: ntimcal(:) => null()    !< call frequency
       integer  ( 4), private, pointer     :: level  (:)     !< call level
-      integer  ( 4), private, pointer     :: leveltmp(:)    !< call level
       real     ( 8), private, pointer     :: cpstart(:)     !< to save cpu startimes
       real     ( 8), private, pointer     :: cptime (:)     !< to accumulate cpu times
       real     ( 8), private, pointer     :: cpinc (:)      !< incremental cpu times
@@ -349,7 +348,7 @@
       !> stops timing for this handle and accumulates the result
       subroutine timstop ( ihandl )
 
-      integer(4)   , intent(in   ) :: ihandl    !  handle of the section
+      integer(4)   , intent(in   ) :: ihandl    !<  handle of the section
       integer(4)                      handle    !  handle of the timer
       integer(4)                      i         !  loop counter
       real   (8)                      stopt
@@ -387,13 +386,14 @@
 
       !> writes the results to the report file 'afile'
       subroutine timdump ( afile, write_total_time )
-
-      logical, intent(in), optional :: write_total_time 
-      integer(4)    i                         !   loop accross timer handles
-	   integer       lun
-      character*(*) afile
-      real   (8)    total_perc_cpu,total_perc_wc,perc_cpu_local, perc_wc_local
-      logical       write_total_time_local 
+         
+      character*(*), intent(in)     :: afile             !< Name of the output file
+      logical, intent(in), optional :: write_total_time  !< Flag for requesting totals of the timers of the children
+      integer(4)                    :: i                         !   loop accross timer handles
+	   integer                       :: lun
+      real   (8)                    :: total_perc_cpu,total_perc_wc,perc_cpu_local, perc_wc_local
+      logical                       :: write_total_time_local 
+      integer  ( 4), pointer        :: leveltmp(:)    !< call level
 
       open(newunit=lun, file=afile, recl=100+maxlvl*5 )
       
@@ -426,19 +426,21 @@
 
 !***************
 
+      !> Writes the timer information for a specific handle and it's children
       recursive subroutine timline ( ihandl, lun, perc_cpu, perc_wc, write_total_time)
-      logical, intent(in) :: write_total_time 
+      integer(4), intent(in   )  :: ihandl               !< Timer handle
+      integer(4), intent(in   )  :: lun                  !< unit number of the output file
+      real(8),    intent(  out)  :: perc_cpu             !< percentage of the cpu time used
+      real(8),    intent(  out)  :: perc_wc              !< percentage of the wall clock time used
+      logical,    intent(in   )  :: write_total_time     !< Flag for requesting totals of the timers of the children
 
-      real(8), intent(out) :: perc_cpu, perc_wc
-      integer(4)    ihandl
-      integer(4)    lun
-      integer(4)    count
-      integer(4)    i, j, k
-      real   (8)    cpfact, wcfact
-      real   (8)    perc_cpu_local, perc_wc_local
-      real   (8)    perc_cpu_total, perc_wc_total
+      integer(4)   :: count
+      integer(4)   :: i, j, k
+      real   (8)   :: cpfact, wcfact
+      real   (8)   :: perc_cpu_local, perc_wc_local
+      real   (8)   :: perc_cpu_total, perc_wc_total
 
-      character(60) forchr
+      character(60):: forchr
       
       forchr = '(i5,i11,x,D13.6,x,f7.2,x,D13.6,'
 
