@@ -134,6 +134,7 @@
       integer  ( 4), private              :: maxlvl         !< maximum level of call trees
       integer  ( 4), private, pointer     :: ntimcal(:) => null()    !< call frequency
       integer  ( 4), private, pointer     :: level  (:)     !< call level
+      integer  ( 4), private, pointer     :: leveltmp(:)    !< call level
       real     ( 8), private, pointer     :: cpstart(:)     !< to save cpu startimes
       real     ( 8), private, pointer     :: cptime (:)     !< to accumulate cpu times
       real     ( 8), private, pointer     :: cpinc (:)      !< incremental cpu times
@@ -385,60 +386,97 @@
 !***************
 
       !> writes the results to the report file 'afile'
-      subroutine timdump ( afile )
+      subroutine timdump ( afile, write_total_time )
 
+      logical, intent(in), optional :: write_total_time 
       integer(4)    i                         !   loop accross timer handles
-	  integer       lun
+	   integer       lun
       character*(*) afile
+      real   (8)    total_perc_cpu,total_perc_wc,perc_cpu_local, perc_wc_local
+      logical       write_total_time_local 
 
       open(newunit=lun, file=afile, recl=100+maxlvl*5 )
+      
+      write_total_time_local = .false.
+      if (present(write_total_time)) then 
+         write_total_time_local = write_total_time
+      endif
+      
+      allocate(leveltmp(nohmax))
+      leveltmp = level
       write(lun, '(a,98(a ))' ) ' nr.     times     cpu time      cpu    wall clock      wc', &
                                   '  level',('     ',i=3,maxlvl),' routine name'
       write(lun, '(a,98(i5))' ) '        called    in seconds      %     in seconds       %', &
                                   ( i, i=2,maxlvl)
+      total_perc_cpu = 0d0
+      total_perc_wc  = 0d0
       do i = 1, nohandl
          if ( level(i) .eq. -1 ) cycle
-         call timline ( i, lun )
+         call timline ( i, lun, perc_cpu_local, perc_wc_local, write_total_time_local )
+         total_perc_cpu = total_perc_cpu  + perc_cpu_local
+         total_perc_wc  = total_perc_wc   + perc_wc_local
       enddo
 
       close ( lun )
 
+      level = leveltmp
+      deallocate(leveltmp)
       return
       end subroutine timdump
 
 !***************
 
-      recursive subroutine timline ( ihandl, lun)
+      recursive subroutine timline ( ihandl, lun, perc_cpu, perc_wc, write_total_time)
+      logical, intent(in) :: write_total_time 
 
+      real(8), intent(out) :: perc_cpu, perc_wc
       integer(4)    ihandl
       integer(4)    lun
+      integer(4)    count
       integer(4)    i, j, k
       real   (8)    cpfact, wcfact
+      real   (8)    perc_cpu_local, perc_wc_local
+      real   (8)    perc_cpu_total, perc_wc_total
 
       character(60) forchr
-      data          forchr / '(i5,i11,x,D13.6,x,f7.2,x,D13.6,'  /
+      
+      forchr = '(i5,i11,x,D13.6,x,f7.2,x,D13.6,'
 
       if (cptime(1) > 0d0) then
          cpfact = 100.0d00/cptime(1)
       else
          cpfact = 1d0
       endif
+      perc_cpu = cpfact*cptime(ihandl)
       wcfact = 100.0d00/wctime(1)
+      perc_wc = wcfact*wctime(ihandl)
       write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' ) &
                                          (level(ihandl)-1)*5+2,(maxlvl-level(ihandl))*5+1
       write(lun, forchr ) ihandl,ntimcal(ihandl),cptime(ihandl),cptime(ihandl)*cpfact, &
                                           wctime(ihandl),wctime(ihandl)*wcfact,tmsubnm(ihandl)
       
       level(ihandl) = -1
-
+      perc_cpu_total = 0d0
+      perc_wc_total = 0d0
+      count = 0
       do i = ihandl+1, nohandl
          if ( level(i) .eq. -1 ) cycle
          j = context(1,3,i)
          do k = 1, ncontxt(j)
-            if ( context(k,1,j) .eq. ihandl .and. context(k,2,j) .eq. i ) call timline ( i, lun )
+            if ( context(k,1,j) .eq. ihandl .and. context(k,2,j) .eq. i ) then
+               call timline ( i, lun, perc_cpu_local, perc_wc_local, write_total_time)
+               count = count + 1
+               perc_cpu_total = perc_cpu_total  + perc_cpu_local
+               perc_wc_total  = perc_wc_total  + perc_wc_local
+            endif
          enddo
       enddo
 
+      if (count >= 2 .and. write_total_time) then
+         forchr(2:17) = '31x'
+         write(lun, forchr ) perc_cpu_total, wctime(ihandl),perc_wc_total
+         write(lun, '(1x)')
+      endif
       return
       end subroutine timline
 
