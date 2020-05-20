@@ -38896,7 +38896,9 @@ end function ispumpon
              Qicept = 0d0
           endif
           qin(k) = Qrain - Qicept
-          qinrainground = qinrainground + Qrain - Qicept
+          if (Qrain - Qicept > 0) then
+             qinrainground = qinrainground + Qrain - Qicept
+          end if
 
           if (jamba > 0) then
              imba = mbadefdomain(k)

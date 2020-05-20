@@ -3686,7 +3686,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
 
  ! extra
  double precision                  :: qinrain     !< Total influx rain                         (m3/s)
- double precision                  :: qinrainground !< Total influx rain onto the ground (m3/s)
+ double precision                  :: qinrainground !< Total influx rain onto the ground       (m3/s)
  double precision                  :: qouteva     !< Total outflux evaporation                 (m3/s)
  double precision                  :: qoutevaicept!< Total outflux evaporation from interception layer (m3/s)
  double precision, dimension(2)    :: qinlat      !< Total influx diffuse laterals (1D and 2D) (m3/s)
