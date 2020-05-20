@@ -3686,6 +3686,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
 
  ! extra
  double precision                  :: qinrain     !< Total influx rain                         (m3/s)
+ double precision                  :: qinrainground !< Total influx rain onto the ground (m3/s)
  double precision                  :: qouteva     !< Total outflux evaporation                 (m3/s)
  double precision                  :: qoutevaicept!< Total outflux evaporation from interception layer (m3/s)
  double precision, dimension(2)    :: qinlat      !< Total influx diffuse laterals (1D and 2D) (m3/s)
@@ -3698,6 +3699,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  double precision, dimension(2)    :: qoutext     !< Total outflux Qext(1D and 2D)             (m3/s)
 
  double precision                  :: vinrain     !< Total volume in  rain                     (m3) in the last time step
+ double precision                  :: vinrainground !< Total volume of rain falling onto the ground (in the last time step) (m3)
  double precision                  :: vouteva     !< Total volume out evaporation              (m3)
  double precision                  :: voutevaicept!< Total volume out evaporation from interception layer (m3)
  double precision, dimension(2)    :: vinlat      !< Total volume in  diffuse laterals (1D and 2D) (m3)
@@ -3768,7 +3770,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer                           :: Lnmin         !< link nr where min zlin is found in viewing area
  integer                           :: Lnmax         !< link nr where max zlin is found in viewing area
 
- integer, parameter :: MAX_IDX        = 39
+ integer, parameter :: MAX_IDX        = 40
  double precision, dimension(MAX_IDX)    :: volcur !< Volume totals in *current* timestep only (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: cumvolcur =0d0 !< Cumulative volume totals starting from the previous His output time, cumulate with volcur (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: voltot
@@ -3782,7 +3784,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer, parameter :: IDX_EXCHIN     = 7
  integer, parameter :: IDX_EXCHOUT    = 8
  integer, parameter :: IDX_EXCHTOT    = 9
- integer, parameter :: IDX_PRECIP     = 10
+ integer, parameter :: IDX_PRECIP_TOTAL = 10
  integer, parameter :: IDX_EVAP       = 11
  integer, parameter :: IDX_SOUR       = 12
  integer, parameter :: IDX_InternalTidesDissipation = 13
@@ -3812,6 +3814,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer, parameter :: IDX_EXTTOT2D   = 37
  integer, parameter :: IDX_ICEPT      = 38
  integer, parameter :: IDX_EVAP_ICEPT = 39
+ integer, parameter :: IDX_PRECIP_GROUND = 40
 
 
 ! Delft3D structure of grid dimensions
@@ -3878,6 +3881,7 @@ subroutine reset_flow()
 
  ! extra
     qinrain     = 0    ! total inflow rain                       (m3/s)
+    qinrainground = 0  ! Total influx rain onto the ground       (m3/s)
     qouteva     = 0    ! total outflow evaporation               (m3/s)
     qinlat(1:2) = 0    ! total inflow diffuse laterals           (m3/s)
     qoutlat(1:2)= 0    ! total outflow diffuse laterals          (m3/s)
@@ -3889,6 +3893,7 @@ subroutine reset_flow()
     qoutext(1:2)= 0    ! total outflux Qext(1D and 2D)           (m3/s)
 
     vinrain     = 0    ! total volume in  rain                   (m3)
+    vinrainground = 0  ! Total volume of rain falling onto the ground (in the last time step) (m3)
     vouteva     = 0    ! total volume out evaporation            (m3)
     voutevaicept = 0   ! total volume out evaporation from interception layer (m3)
     vinlat(1:2) = 0    ! total volume in  diffuse laterals       (m3)
@@ -3954,7 +3959,7 @@ subroutine reset_flow()
     voltotname(IDX_EXCHIN )                  = 'exchange_with_1D_in'
     voltotname(IDX_EXCHOUT)                  = 'exchange_with_1D_out'
     voltotname(IDX_EXCHTOT)                  = 'exchange_with_1D_total'
-    voltotname(IDX_PRECIP )                  = 'precipitation'
+    voltotname(IDX_PRECIP_TOTAL)             = 'precipitation_total'
     voltotname(IDX_EVAP   )                  = 'evaporation'
     voltotname(IDX_SOUR   )                  = 'source_sink'
     voltotname(IDX_InternalTidesDissipation) = 'InternalTidesDissipation'
@@ -3984,6 +3989,7 @@ subroutine reset_flow()
     voltotname(IDX_EXTTOT2D)                 = 'Qext_total_2D'
     voltotname(IDX_ICEPT)                    = 'total_volume_interception'
     voltotname(IDX_EVAP_ICEPT)               = 'evaporation_interception'
+    voltotname(IDX_PRECIP_GROUND)            = 'precipitation_on_ground'
 
     jacftrtfac  = 0   !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's returned roughness values.
 

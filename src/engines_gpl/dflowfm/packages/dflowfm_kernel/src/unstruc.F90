@@ -38872,7 +38872,7 @@ end function ispumpon
 
  if (jaqin > 0) then                                         ! sources and sinks through meteo
 
-    qin = 0d0 ; qinrain = 0d0; qouteva = 0d0; qoutevaicept = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0; qinext(1:2) = 0d0 ; qoutext(1:2) = 0d0
+    qin = 0d0 ; qinrain = 0d0; qinrainground = 0d0; qouteva = 0d0; qoutevaicept = 0d0; qinlat(1:2) = 0d0 ; qoutlat(1:2) = 0d0; qinext(1:2) = 0d0 ; qoutext(1:2) = 0d0
     if (jarain > 0) then
        if (rainuni > 0d0) then
           rain     = rainuni*24d0                             ! mm/hr  => mm/day
@@ -38896,6 +38896,7 @@ end function ispumpon
              Qicept = 0d0
           endif
           qin(k) = Qrain - Qicept
+          qinrainground = qinrainground + Qrain - Qicept
 
           if (jamba > 0) then
              imba = mbadefdomain(k)
@@ -40583,6 +40584,7 @@ subroutine reallocsrc(n)
 if (jahisbal > 0) then
     ! extra
     vinrain     = qinrain *dts
+    vinrainground = qinrainground*dts
     vouteva     = qouteva *dts
     voutevaicept = qoutevaicept*dts
     vinlat(1:2) = qinlat(1:2) *dts
@@ -40645,7 +40647,8 @@ if (jahisbal > 0) then
          volcur(IDX_EXCHOUT) = volcur(IDX_EXCHOUT) - q1(Lf)*dts
       endif
     end do
-    volcur(IDX_PRECIP) = vinrain
+    volcur(IDX_PRECIP_TOTAL) = vinrain
+    volcur(IDX_PRECIP_GROUND) = vinrainground
     volcur(IDX_EVAP)   = vouteva
     volcur(IDX_SOUR  ) = vinsrc - voutsrc
     volcur(IDX_ICEPT) = vol1icept
