@@ -384,11 +384,12 @@
 
 !***************
 
-      !> writes the results to the report file 'afile'
+      !> Writes the timer results to the report file 'afile'.
       subroutine timdump ( afile, write_total_time )
          
       character*(*), intent(in)     :: afile             !< Name of the output file
-      logical, intent(in), optional :: write_total_time  !< Flag for requesting totals of the timers of the children
+      logical, intent(in), optional :: write_total_time  !< Flag for writing totals of the timers of the children. Default: .false.
+
       integer(4)                    :: i                         !   loop accross timer handles
 	   integer                       :: lun
       real   (8)                    :: total_perc_cpu,total_perc_wc,perc_cpu_local, perc_wc_local
@@ -426,13 +427,13 @@
 
 !***************
 
-      !> Writes the timer information for a specific handle and it's children
+      !> Writes the timer results for a specific handle and its children.
       recursive subroutine timline ( ihandl, lun, perc_cpu, perc_wc, write_total_time)
       integer(4), intent(in   )  :: ihandl               !< Timer handle
       integer(4), intent(in   )  :: lun                  !< unit number of the output file
-      real(8),    intent(  out)  :: perc_cpu             !< percentage of the cpu time used
-      real(8),    intent(  out)  :: perc_wc              !< percentage of the wall clock time used
-      logical,    intent(in   )  :: write_total_time     !< Flag for requesting totals of the timers of the children
+      real(8),    intent(  out)  :: perc_cpu             !< percentage (of overall total) of the cpu time used
+      real(8),    intent(  out)  :: perc_wc              !< percentage (of the overall total) of the wall clock time used
+      logical,    intent(in   )  :: write_total_time     !< Flag for writing totals of the timers of the children. Default: .false.
 
       integer(4)   :: count
       integer(4)   :: i, j, k
