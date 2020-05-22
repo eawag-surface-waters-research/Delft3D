@@ -95,7 +95,7 @@ subroutine get_var_netcdf(i_flow, wavetime, varname, vararr, mmax, nmax, basenam
 !
 !! executable statements -------------------------------------------------------
 !
-   pi    = 4.0*tanh(1.0)
+   pi    = 4.0*atan(1.0)
    eps   = 1.0e-6
    kmax_ = 1
    if (present(kmax)) then
