@@ -2807,6 +2807,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamombal                  !< records some gradients of primitives 0:no, 1:yes
  integer                           :: jarstbnd                  !< Waterlevel, bedlevel and coordinates of boundaries, 0: no, 1: yes
  integer                           :: jamapbnd                  !< Includes boundary points in map output
+ integer                           :: jamapqin                  !< Includes sum of all influxes in map output
  
 ! Write partition domain file
  integer                           :: japartdomain              !< Write a separate netcdf file for partition domain info., 0: no, 1: yes
@@ -3231,6 +3232,7 @@ subroutine default_flowparameters()
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     jamapbnd = 0
+    jamapqin = 0
     japartdomain = 1
     jashp_crs = 0
     jashp_obs = 0

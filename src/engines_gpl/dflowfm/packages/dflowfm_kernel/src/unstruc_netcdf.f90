@@ -188,6 +188,7 @@ type t_unc_mapids
    integer :: id_s1(MAX_ID_VAR)       = -1 !< Variable ID for water level (on 1D, 2D, 3D grid parts resp.)
    integer :: id_evap(MAX_ID_VAR)     = -1 !< Variable ID for prescribed evaporation
    integer :: id_potevap(MAX_ID_VAR)  = -1 !< Variable ID for potential evaporation
+   integer :: id_qin(MAX_ID_VAR)      = -1 !< Variable ID for sum of all influxes
    integer :: id_actevap(MAX_ID_VAR)  = -1 !< Variable ID for actual evaporation
    integer :: id_s0(MAX_ID_VAR)       = -1 !< Variable ID for 
    integer :: id_hs(MAX_ID_VAR)       = -1 !< Variable ID for 
@@ -4587,6 +4588,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       if (jamaps0 > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s0, nf90_double, UNC_LOC_S, 's0', 'sea_surface_height', 'Water level on previous timestep', 'm', jabndnd=jabndnd_)
       end if
+
+      ! Influx
+      if (jamapqin > 0) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qin, nf90_double, UNC_LOC_W, 'influx', 'water_influx_sum', 'Sum of all water influx', 'm3 s-1', jabndnd=jabndnd_)
+      endif
       
       ! Evaporation
       if (jamapevap > 0) then
@@ -5447,6 +5453,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s0, UNC_LOC_S, s0, jabndnd=jabndnd_)
    end if
    
+   if (jamapqin == 1) then
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_qin, UNC_LOC_W, qin, jabndnd=jabndnd_)
+   end if
+
    ! Evaporation
    if (jamapevap == 1) then
       if (jadhyd == 1) then
