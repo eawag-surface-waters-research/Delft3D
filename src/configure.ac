@@ -760,8 +760,6 @@ tools_gpl/mormerge/Makefile
 tools_gpl/mormerge/packages/Makefile
 tools_gpl/mormerge/packages/mormerge/Makefile
 tools_gpl/mormerge/packages/mormerge/src/Makefile
-tools_gpl/mormerge/packages/mormerge_version_number/Makefile
-tools_gpl/mormerge/packages/mormerge_version_number/src/Makefile
 tools_gpl/nesthd1/Makefile
 tools_gpl/nesthd1/packages/Makefile
 tools_gpl/nesthd1/packages/nesthd1/Makefile

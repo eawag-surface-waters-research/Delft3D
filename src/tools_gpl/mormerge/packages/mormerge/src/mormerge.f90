@@ -32,6 +32,7 @@ program mormerge
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+use mormerge_version_module
 implicit none
 !
 ! Local constants
@@ -49,7 +50,7 @@ character(256)                            :: version_full   ! by calling getfull
 !
 !! executable statements -------------------------------------------------------
 !
-call getfullversionstring_MORMERGE(version_full)
+call get_full_versionstring_mormerge_full(version_full)
 !
 if (COMMAND_ARGUMENT_COUNT() /= numarg) then
    call printUsage()
