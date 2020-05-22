@@ -45,7 +45,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Resource Files" Filter="fi;fd">
-		<File RelativePath="..\mormerge_version_number\include\version_number.rc"/></Filter>
+		<File RelativePath="..\..\res\version_number.rc"/></Filter>
 		<Filter Name="Source Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 		<File RelativePath="src\merge.f90"/>
 		<File RelativePath="src\mormerge.f90"/>
