@@ -1471,7 +1471,12 @@
          !
          ! Compute bed stress resulting from skin friction
          !
-         afluff = get_alpha_fluff(iflufflyr, lsed, nm, mfluff(:,nm), stmpar%trapar, stmpar%sedpar)
+         if (iflufflyr>0) then
+            afluff = get_alpha_fluff(iflufflyr, lsed, nm, mfluff(:,nm), stmpar%trapar, stmpar%sedpar)
+         else
+            afluff = 0d0
+         endif
+         !
          call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
                           & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
                           & rhowat(kbed), vismol, stmpar%sedpar, afluff)

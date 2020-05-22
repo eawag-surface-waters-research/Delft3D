@@ -843,7 +843,11 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           ! Compute bed stress resulting from skin friction
           !
-          afluff = get_alpha_fluff(iflufflyr, lsed, nm, mfluff(:,nm), gdp%gdtrapar, gdp%gdsedpar)
+          if (iflufflyr>0) then
+             afluff = get_alpha_fluff(iflufflyr, lsed, nm, mfluff(:,nm), gdp%gdtrapar, gdp%gdsedpar)
+          else
+             afluff = 0.0_fp
+          endif
           call compbsskin(umean, vmean, h1, wave, uorb(nm), tp(nm), &
                            & teta(nm), thcmud(nm), mudfrac(nm), taub, &
                            & rhowat(nm,kbed), vicmol, gdp%gdsedpar, afluff)
