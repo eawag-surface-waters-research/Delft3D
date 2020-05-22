@@ -357,6 +357,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   ,ithisc    , &
     integer(pntrsize)                    , pointer :: vortic
     integer(pntrsize)                    , pointer :: w1
     integer(pntrsize)                    , pointer :: w10mag
+    integer(pntrsize)                    , pointer :: windcd
     integer(pntrsize)                    , pointer :: windsu
     integer(pntrsize)                    , pointer :: windsv
     integer(pntrsize)                    , pointer :: windu
@@ -808,6 +809,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   ,ithisc    , &
     vortic              => gdp%gdr_i_ch%vortic
     w1                  => gdp%gdr_i_ch%w1
     w10mag              => gdp%gdr_i_ch%w10mag
+    windcd              => gdp%gdr_i_ch%windcd
     windsu              => gdp%gdr_i_ch%windsu
     windsv              => gdp%gdr_i_ch%windsv
     windu               => gdp%gdr_i_ch%windu
@@ -1033,7 +1035,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   ,ithisc    , &
        call timer_start(timer_incmeteo, gdp)
        call incmeteo(timhr     , grdang   , &
                    & r(windu) , r(windv) , r(patm)  ,    &
-                   & i(kcs)   , r(alfas) ,               &
+                   & i(kcs)   , r(alfas) , r(windcd),    &
                    & r(windsu), r(windsv), r(w10mag), gdp)
        call timer_stop(timer_incmeteo, gdp)
     endif
