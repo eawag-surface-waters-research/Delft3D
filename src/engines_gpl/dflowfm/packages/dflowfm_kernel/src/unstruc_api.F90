@@ -216,11 +216,12 @@ end subroutine api_loadmodel
    use waq
    use m_wind
    use dfm_error
-   use m_partitioninfo, only: jampi
+   use m_partitioninfo, only: jampi, sdmn
    use m_flowparameters, only: jahisbal, jatekcd, jahislateral
 
    integer, external :: flow_modelinit
-   integer :: timerHandle, inner_timerhandle
+   integer          :: timerHandle, inner_timerhandle
+   character(len=5) :: sd
 
    !call inidia('api')
    
@@ -278,7 +279,11 @@ end subroutine api_loadmodel
     call timstop(timerhandle)
     call timstop(handle_all)
     call timstrt('All', handle_all)
-    call timdump(trim(getoutputdir())//'modeltimings_initialisation.txt', .true.)
+    sd  = ''
+    if (jampi == 1) then
+        sd = '_' // trim(sdmn) 
+    end if
+    call timdump(trim(getoutputdir()) // 'modeltimings_initialisation' // trim(sd) // '.txt', .true.)
   end function flowinit
 
  subroutine flowstep(jastop, iresult)

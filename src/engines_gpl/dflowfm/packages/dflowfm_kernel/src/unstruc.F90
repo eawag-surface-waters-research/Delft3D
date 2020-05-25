@@ -12535,6 +12535,7 @@ subroutine writesomeinitialoutput()
  double precision  :: totalcomp
  double precision  :: timeloop
  character(len=255) :: timersfilename
+ character(len=  5) :: sd
 
  if (ndx == 0) then
     write(msgbuf,'(a)')    'Empty model, no flow cells found. No statistics to report.'; call msg_flush()
@@ -12712,7 +12713,11 @@ subroutine writesomeinitialoutput()
     enddo
  endif
  
- call timdump(trim(getoutputdir())//'modeltimings.txt', .true.)
+ sd  = ''
+ if (jampi == 1) then
+     sd = '_' // trim(sdmn) 
+ end if
+ call timdump(trim(getoutputdir()) // 'modeltimings' // trim(sd) // '.txt', .true.)
 
  call timstrt('All', handle_all)
  end subroutine writesomefinaloutput
