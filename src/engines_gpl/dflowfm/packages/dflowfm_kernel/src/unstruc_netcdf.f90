@@ -10859,19 +10859,25 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       call mess(LEVEL_WARN,  'ug_get_contact_topo_count: No mesh contacts found in UGRID net file '''//trim(filename)//'''.')
       goto 999
    end if 
+
+   contactnlinks = 0
    do im = 1, ncontactmeshes
       
       ierr = ionc_get_contacts_count_ugrid(ioncid, im, ncontacts)
       
-      allocate(mesh1indexes(ncontacts))
-      allocate(mesh2indexes(ncontacts))
-      allocate(contactsids(ncontacts))
-      allocate(contactslongnames(ncontacts))
-      allocate(contacttype(ncontacts))
-    
-      ierr = ionc_get_mesh_contact_ugrid(ioncid, im, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, 1 )
-      ierr = ionc_get_contact_name(ioncid, im, contactname)
+      call realloc(mesh1indexes, ncontacts, keepExisting = .false.)
+      call realloc(mesh2indexes, ncontacts, keepExisting = .false.)
+      call realloc(contactslongnames, ncontacts, keepExisting = .false.)
+      call realloc(contacttype, ncontacts, keepExisting = .false.)
+
+      call realloc(hashlist_contactids%id_list, contactnlinks + ncontacts, keepExisting = .true.) ! Remember contactids for later use.
+      call realloc(contactnetlinks, contactnlinks + ncontacts, keepExisting = .true.) ! Remember contact netlinks for later use.
       
+      ierr = ionc_get_mesh_contact_ugrid(ioncid, im, mesh1indexes, mesh2indexes, hashlist_contactids%id_list(contactnlinks+1:contactnlinks+ncontacts), contactslongnames, contacttype, 1 )
+      hashlist_contactids%id_count = contactnlinks + ncontacts
+
+      ierr = ionc_get_contact_name(ioncid, im, contactname)
+    
       call increasenetw(numk_last + ncontacts, numl_last + ncontacts)      
       do l = 1, ncontacts
          XK(numk_last+l) = xface(mesh2indexes(l))
@@ -10891,6 +10897,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          endif
          kn(2,numl_last+l) = numk_last+l
          kn(3,numl_last+l) = contacttype(l)
+         contactnetlinks(contactnlinks+L) = numl_last + L
       enddo
       ! Set the ZK to dmiss 
       ZK(numk_last+1:numk_last+ncontacts) = dmiss
@@ -10900,7 +10907,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       
       numl_read = numl_read + ncontacts
       numl_last = numl_last + ncontacts
+
+      contactnlinks = contactnlinks + ncontacts
    enddo
+
+   call hashfill(hashlist_contactids)
 
    ! Success
 888 continue    

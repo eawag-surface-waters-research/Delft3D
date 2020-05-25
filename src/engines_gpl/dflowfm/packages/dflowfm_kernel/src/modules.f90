@@ -5978,6 +5978,7 @@ end module m_partparallel
 module m_save_ugrid_state
 
    use meshdata
+   use m_hash_search
 
    type(t_ug_meshgeom)                                :: meshgeom1d
    character(len=ug_idsLen),allocatable               :: nbranchids(:), nnodeids(:), nodeids(:)
@@ -5987,7 +5988,10 @@ module m_save_ugrid_state
    integer, allocatable, dimension(:)                 :: mesh1dUnmergedToMerged(:)
    !integer, allocatable, dimension(:)                 :: mesh1dMergedToUnMerged(:)
    integer                                            :: numMesh1dBeforeMerging
-   character(len=ug_idsLen),allocatable               :: contactids(:)
+   integer, allocatable                               :: contactnetlinks(:) !< netlink number for each contact
+   integer                                            :: contactnlinks      !< Total number of links in all mesh contacts (typically we'll have one mesh contact with many netlinks part of it) 
+
+   type(t_hashlist)                                   :: hashlist_contactids!< Hash list for quick search for contact ids.
 
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, only call reset_save_ugrid_state() instead.
@@ -6009,6 +6013,10 @@ contains
       if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
       if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
       !if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
+
+      if (allocated(contactnetlinks)) deallocate(contactnetlinks)
+      contactnlinks = 0
+      call dealloc(hashlist_contactids)
    end subroutine reset_save_ugrid_state
 
 end module m_save_ugrid_state

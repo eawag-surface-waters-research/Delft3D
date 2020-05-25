@@ -23590,9 +23590,9 @@ end subroutine unc_write_shp
                cycle
             end if
 
-            call prop_get_string(node_ptr, '', 'contactId', contactID, success)
+            call prop_get_string(node_ptr, '', 'contactId', contactId, success)
             if (success) then ! the contact is defined by contactId
-               loc_spec_type = LOCTP_UNKNOWN ! TODO: AVD: LOCTP_CONTACT_ID
+               loc_spec_type = LOCTP_CONTACTID
             else ! the contact is defined by x, y coordinates and contactType
                call prop_get(node_ptr, '', 'numCoordinates',   numcoordinates, success)
                if (success .and. numcoordinates > 0) then
@@ -23606,46 +23606,59 @@ end subroutine unc_write_shp
                      loc_spec_type = LOCTP_POLYGON_XY
                   end if
                end if
+            end if
 
+            if (.not. success) then
+               write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
+                                             trim(filename)//'''. No contactId or coordinates specified.'
+               call err_flush()
+               cycle
+            end if
+
+            num1d2dprops = 0
+            call selectelset_internal_links( xz, yz, ndx, ln, lnx, ke1d2dprops(1:lnx1D), num1d2dprops, &
+                                             loc_spec_type, nump = numcoordinates, xpin = xcoordinates, ypin = ycoordinates, &
+                                             contactId = contactId, linktype = icontactType)
+
+            if (loc_spec_type == LOCTP_CONTACTID .and. num1d2dprops == 1) then
+               Lf = ke1d2dprops(1)
+               if (icontactType /= IFLTP_ALL .and. icontactType /= kcu(Lf)) then
+                  write (msgbuf, '(a,i0,a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
+                                                  trim(filename)//'''. Given contactType='//trim(contactType)// &
+                                                  ' does not match the flow link type ', kcu(Lf), '.'
+                  call err_flush()
+                  cycle
+               else
+                  ! Auto-determine contactType from this single flow link's type.
+                  icontactType = kcu(Lf)
+               end if
+            end if
+
+            select case (icontactType)
+            case (IFLTP_1D2D_STREET)
+               call prop_get(node_ptr, '', 'openingWidth',  wu1D2Dread, success)
                if (.not. success) then
                   write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
-                                              trim(filename)//'''. No contactId or coordinates specified.'
+                                                trim(filename)//'''. No openingWidth specified.'
                   call err_flush()
                   cycle
                end if
 
-               num1d2dprops = 0
-               call selectelset_internal_links( xz, yz, ndx, ln, lnx, ke1d2dprops(1:lnx1D), num1d2dprops, &
-                                                loc_spec_type, nump = numcoordinates, xpin = xcoordinates, ypin = ycoordinates, &
-                                                linktype = icontactType)
+               call prop_get(node_ptr, '', 'openingHeight', hh1D2Dread, success)
+               if (.not. success) then
+                  write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
+                                                trim(filename)//'''. No openingHeight specified.'
+                  call err_flush()
+                  cycle
+               end if
+            end select
 
+            do LL=1,num1d2dprops
+               Lf = ke1d2dprops(LL)
+               wu1D2D(Lf) = wu1D2Dread
+               hh1D2D(Lf) = hh1D2Dread
+            end do
 
-               select case (icontactType)
-               case (IFLTP_1D2D_STREET)
-                  call prop_get(node_ptr, '', 'openingWidth',  wu1D2Dread, success)
-                  if (.not. success) then
-                     write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
-                                                 trim(filename)//'''. No openingWidth specified.'
-                     call err_flush()
-                     cycle
-                  end if
-
-                  call prop_get(node_ptr, '', 'openingHeight', hh1D2Dread, success)
-                  if (.not. success) then
-                     write (msgbuf, '(a,i0,a)') 'Error Reading mesh contact parameters from block #', numcontactblocks, ' in file ''' // &
-                                                 trim(filename)//'''. No openingHeight specified.'
-                     call err_flush()
-                     cycle
-                  end if
-               end select
-
-               do LL=1,num1d2dprops
-                  Lf = ke1d2dprops(LL)
-                  wu1D2D(Lf) = wu1D2Dread
-                  hh1D2D(Lf) = hh1D2Dread
-               end do
-
-            end if
             numok = numok + 1
          endif
       end do

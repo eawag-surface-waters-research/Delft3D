@@ -39,6 +39,7 @@ module m_inquire_flowgeom
    public findlink !< find flowlink number
    public findnode !< find flownode number
    public findlink_by_nodeid       !< find the flow link number, using node id
+   public findlink_by_contactid    !< find the flow link number, using contactId
    
    interface findlink
       module procedure findlink_by_pli          !< find the flow link number, using a polyline
@@ -223,6 +224,31 @@ module m_inquire_flowgeom
       end if
 
    end function findlink_by_branchid
+
+   !> Find the unique flow link number for a given location, using contactId.
+   function findlink_by_contactid(contactId, L) result(ierr)
+      use unstruc_channel_flow
+      use m_flowgeom, only : lne2ln
+      use m_save_ugrid_state, only: hashlist_contactids, contactnetlinks
+      use m_hash_search
+      use dfm_error
+
+      integer                             :: ierr           !< Result status, DFM_NOERR in case of success.
+      character(len=Idlen), intent(in   ) :: contactId      !< contactId to be searched in mesh contact set.
+      integer,              intent(  out) :: L              !< Found flow link number, -1 when not found.
+      
+      integer :: LL
+
+      L = -1
+      ierr = DFM_NOERR
+
+      LL = hashsearch(hashlist_contactids, contactId)
+      if (LL > 0) then
+         L = lne2ln(contactnetlinks(LL))
+      end if
+
+   end function findlink_by_contactid
+
 
    !> find the flow link number, using node id
    function findlink_by_nodeid(nodeId, L)  result(ierr)

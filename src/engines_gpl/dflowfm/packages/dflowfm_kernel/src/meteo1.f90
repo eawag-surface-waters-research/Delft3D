@@ -78,6 +78,7 @@ module timespace_parameters
   integer, parameter :: LOCTP_POLYLINE_XY              = 13 !< x/y arrays containing a polyline used for link-crosses-polyline check.
   integer, parameter :: LOCTP_BRANCHID_CHAINAGE        = 14 !< branchid+chainage combination to select the 1D grid point closest to that network branch location.
   integer, parameter :: LOCTP_NODEID                   = 15 !< nodeid to select the 1D grid point closest to the network point with that nodeId.
+  integer, parameter :: LOCTP_CONTACTID                = 16 !< contactid to select the 1D flow link corresponding with that contactId.
 
   integer            :: mdia                           =  0 !  -1  ! -1 = write dia, 0 = do not write dia
 
@@ -5724,9 +5725,10 @@ contains
    !! * polylines: all flow links intersecting these polylines are selected.
    !! * polygons:  all flow links whose center lies inside these polygons are selected.
    !! * branchid+chainage: the one flow link on this location is selected.
+   !! * contactid: the one flow link on this mesh contact is selected.
    !! Only one of these methods is tried, based on loc_spec_type input.
    subroutine selectelset_internal_links( xz, yz, nx, ln, lnx, keg, numg, &
-                                          loc_spec_type, loc_file, nump, xpin, ypin, branchindex, chainage, linktype, &
+                                          loc_spec_type, loc_file, nump, xpin, ypin, branchindex, chainage, contactId, linktype, &
                                           xps, yps, nps, lftopol, sortLinks)
      use m_inquire_flowgeom
      use m_flowgeom, only: lnx1D, xu, yu, kcu
@@ -5746,13 +5748,14 @@ contains
      integer                   , intent(  out) :: keg(:)      !< Output array containing the flow link numbers that were selected.
                                                               !< Size of array is responsability of call site, and filling starts at index 1 upon each call.
      integer                   , intent(  out) :: numg        !< Number of flow links that were selected (i.e., keg(1:numg) will be filled).
-     integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: LOCTP_POLYGON_FILE, LOCTP_POLYLINE_FILE, LOCTP_POLYGON_XY , LOCTP_POLYLINE_XY or LOCTP_BRANCHID_CHAINAGE.
+     integer,                    intent(in   ) :: loc_spec_type !< Type of spatial input for selecting nodes. One of: LOCTP_POLYGON_FILE, LOCTP_POLYLINE_FILE, LOCTP_POLYGON_XY , LOCTP_POLYLINE_XY, LOCTP_BRANCHID_CHAINAGE or LOCTP_CONTACTID.
      character(len=*), optional, intent(in   ) :: loc_file    !< (Optional) File name of a polyline file (when loc_spec_type==LOCTP_POLYGON_FILE).
      integer         , optional, intent(in   ) :: nump        !< (Optional) Number of points in polyline coordinate arrays xpin and ypin (when loc_spec_type==LOCTP_POLYGON_XY/LOCTP_POLYLINE_XY).
      double precision, optional, intent(in   ) :: xpin(:)     !< (Optional) Array with x-coordinates of a polygon/line, used instead of a polygon/line file (when loc_spec_type==LOCTP_POLYGON_XY/LOCTP_POLYLINE_XY).
      double precision, optional, intent(in   ) :: ypin(:)     !< (Optional) Array with y-coordinates of a polygon/line, used instead of a polygon/line file (when loc_spec_type==LOCTP_POLYGON_XY/LOCTP_POLYLINE_XY).
      integer         , optional, intent(in   ) :: branchindex !< (Optional) Branch index on which flow link is searched for (when loc_spec_type==LOCTP_BRANCHID_CHAINAGE).
      double precision, optional, intent(in   ) :: chainage    !< (Optional) Offset along specified branch (when loc_spec_type==LOCTP_BRANCHID_CHAINAGE).
+     character(len=*), optional, intent(in   ) :: contactId   !< (Optional) Unique contactId for one flow link (when loc_spec_type==LOCTP_CONTACTID) (stored as mesh contact in input grid).
      integer,          optional, intent(in   ) :: linktype    !< (Optional) Limit search to specific link types: only 1D flow links (linktype==IFLTP_1D), 2D (linktype==IFLTP_2D), or both (linktype==IFLTP_ALL).
      double precision, allocatable, optional, intent(inout) :: xps(:), yps(:) !< (Optional) Arrays in which the read in polyline x,y-points can be stored (only relevant when loc_spec_type==LOCTP_POLYGON_FILE/LOCTP_POLYLINE_FILE).
      integer,          optional, intent(inout) :: nps         !< (Optional) Number of polyline points that have been read in (only relevant when loc_spec_type==LOCTP_POLYGON_FILE/LOCTP_POLYLINE_FILE).
@@ -5774,7 +5777,7 @@ contains
      end if
 
      numg = 0 
-     if (loc_spec_type /= LOCTP_BRANCHID_CHAINAGE) then
+     if (loc_spec_type /= LOCTP_BRANCHID_CHAINAGE .and. loc_spec_type /= LOCTP_CONTACTID) then
         ! This routine uses global xpl, ypl, because of subroutine inwhichpolygon().
         call savepol()
      end if
@@ -5807,6 +5810,17 @@ contains
               numg = 0
            end if
         endif
+     else if (loc_spec_type==LOCTP_CONTACTID .and. present(contactId)) then
+        !
+        ! Match by contactId
+        !
+        ierr = findlink_by_contactid(contactId, L) ! NOTE: L is here assumed to be a net link number
+        if (ierr==DFM_NOERR) then
+           keg(1) = L
+           numg = 1
+        else
+           numg = 0
+        end if
      endif
      
      if (loc_spec_type == LOCTP_POLYLINE_FILE .or. loc_spec_type == LOCTP_POLYLINE_XY) then
