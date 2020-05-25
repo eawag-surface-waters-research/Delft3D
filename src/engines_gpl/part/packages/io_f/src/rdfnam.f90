@@ -167,6 +167,7 @@
       npos    = 200
       iposr   =   0
       open  ( newunit=ilun(ifil), file=lch(ifil) )
+      lun(1) = ilun(ifil)
 
 !       read irrelevant information
 
