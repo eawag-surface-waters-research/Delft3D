@@ -451,7 +451,12 @@
          cpfact = 1d0
       endif
       perc_cpu = cpfact*cptime(ihandl)
-      wcfact = 100.0d00/wctime(1)
+
+      if (wctime(1) > 0d0) then
+         wcfact = 100.0d00/wctime(1)
+      else
+         wcfact = 1d0
+      end if
       perc_wc = wcfact*wctime(ihandl)
       write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' ) &
                                          (level(ihandl)-1)*5+2,(maxlvl-level(ihandl))*5+1
