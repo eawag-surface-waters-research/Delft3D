@@ -788,6 +788,7 @@ subroutine readMDUFile(filename, istat)
 ! Note: in future, version checking may be done on a per-key basis below
 
 
+    program = ''
     call prop_get_string(md_ptr, bnam, 'Program', program, success)
 ! Correct program ?
     if (.not. success .or. (program /= 'Unstruc' .and. program /= 'UNSTRUC' .and. program /= 'D-Flow FM' .and. program /= 'D-Flow Flexible Mesh')) then
