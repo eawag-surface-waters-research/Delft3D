@@ -442,7 +442,7 @@ subroutine loadModel(filename)
        end subroutine realan
     end interface
 
-    character(*), intent(in)  :: filename !< Name of file to be read (in current directory or with full path).
+    character(*), intent(inout)  :: filename !< Name of file to be read (in current directory or with full path).
 
     character(len=200), dimension(:), allocatable       :: fnames
     double precision, dimension(2) :: tempbob
@@ -2255,8 +2255,8 @@ end subroutine list_ignored_md
 
 !> Write a model definition to a file.
 subroutine writeMDUFile(filename, istat)
-    character(*), intent(in)  :: filename !< Name of file to be read (in current directory or with full path).
-    integer, intent(out) :: istat !< Return status (0=success)
+    character(*), intent(inout) :: filename !< Name of file to be read (in current directory or with full path).
+    integer,      intent(  out) :: istat !< Return status (0=success)
 
     integer :: mout
 
@@ -3628,8 +3628,8 @@ use m_partitioninfo
 USE MessageHandling
 use string_module, only: get_dirsep
 
-character(*),     intent(in) :: filename !< Name of file to be read (in current directory or with full path).
-
+character(*),     intent(inout) :: filename !< Name of file to be read (in current directory or with full path).
+                                            !! in case of parallel computing, the partition number is inserted.
 integer                      :: L1, L2
 
 
@@ -3648,6 +3648,7 @@ else
 
     if ( JAMPI.eq.1 .and. numranks.gt.1 ) then
         md_ident = trim(md_ident) // '_' // sdmn          ! add rank number to ident
+        filename = trim(md_ident) // filename(L2:)
     end if
 
    !  NOTE: The switch_dia_file() call is now in loadModel().
