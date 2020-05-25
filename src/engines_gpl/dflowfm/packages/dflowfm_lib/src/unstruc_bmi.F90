@@ -1276,6 +1276,16 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
          enddo
       endif
       return
+   case("bloomspecies")
+      call c_f_pointer(xptr, c_value,[MAXSTRLEN])
+      md_blmfile = " "
+      if (associated(c_value)) then
+         do i=1,MAXSTRLEN
+            if (c_value(i) == c_null_char) exit
+            md_blmfile(i:i) = c_value(i)
+         enddo
+      endif
+      return
    end select
   
    if (numconst > 0) then
