@@ -845,7 +845,7 @@ module m_oned_functions
          else
             groundStorage(i) = 1
          end if
-      else if (.not. pSto%useStreetStorage) then
+      else
          groundStorage(i) = 0
       end if
    end do
