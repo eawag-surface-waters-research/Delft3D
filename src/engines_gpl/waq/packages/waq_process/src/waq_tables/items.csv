@@ -10902,7 +10902,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "ThickS2   ","x"," ",   0.500000    ,"(m)                 ","thickness of layer S2 van Rijn pick-up resusp.    ","volume    ","volume    "," ","                              "
 "MaxResPup ","x"," ",   0.100000E+21,"(g/m2/d)            ","Maximum resuspension pick-up                      ","volume    ","volume    "," ","                              "
 "FactResPup","x"," ",   0.330000E-03,"(-)                 ","Factor resuspension pick-up (3.3E-4)              ","volume    ","volume    "," ","                              "
-"FrIM1S2Pup","x"," ",   -999.000    ,"(g/m2/d)            ","pick-up resuspension flux IM1 from S2             ","volume    ","volume    "," ","                              "
+"fRIM1S2Pup","x"," ",   -999.000    ,"(g/m2/d)            ","pick-up resuspension flux IM1 from S2             ","volume    ","volume    "," ","                              "
 "fRIM2S2Pup","x"," ",   -999.000    ,"(g/m2/d)            ","pick-up resuspension flux IM2 from S2             ","volume    ","volume    "," ","                              "
 "fRIM3S2Pup","x"," ",   -999.000    ,"(g/m2/d)            ","pick-up resuspension flux IM3 from S2             ","volume    ","volume    "," ","                              "
 "fRTIMS2Pup","x"," ",   -999.000    ,"(g/m2/d)            ","pick-up resuspension flux TIM from S2             ","volume    ","volume    "," ","                              "
