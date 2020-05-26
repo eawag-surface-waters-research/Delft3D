@@ -64,6 +64,7 @@ subroutine test_read_snapped_observ_crs
     double precision                             :: refdata2(2,2)
     double precision                             :: refdata3(2)
     character(len=40), dimension(N_Observ_Crs)   :: refnames
+    character(len=40)                            :: mdufile
     
    
     ! reference: coordinates of the original location of the three observation cross sections
@@ -101,7 +102,8 @@ subroutine test_read_snapped_observ_crs
     
     !
     istat = CHANGEDIRQQ("observCrossSections_snapped")
-    call loadModel('FlowFM.mdu')
+    mdufile = 'FlowFM.mdu'
+    call loadModel(mdufile)
     istat = flow_modelinit()
     istat = CHANGEDIRQQ("..")
     !

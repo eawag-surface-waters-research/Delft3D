@@ -114,6 +114,7 @@ subroutine test_read_snapped_obs_points
     integer          , dimension(N_OBS_POINTS)   :: ref_k
     double precision , dimension(2,N_OBS_POINTS) :: refdata
     character(len=40), dimension(N_OBS_POINTS)   :: refnames
+    character(len=40)                            :: mdufile
     !
     data ref_k / 522, 1043, 1565, 1304 /
     data refdata /100000.000000         , 25000.0000000         , &
@@ -135,7 +136,8 @@ subroutine test_read_snapped_obs_points
     istat = CHANGEDIRQQ("observations_snapped")
     !istat = SYSTEM("echo %CD%")
     
-    call loadModel('Flow1d.mdu')
+    mdufile = 'Flow1d.mdu'
+    call loadModel(mdufile)
     istat = flow_modelinit()
     
     istat = CHANGEDIRQQ("..")

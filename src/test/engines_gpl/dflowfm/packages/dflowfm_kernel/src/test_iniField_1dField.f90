@@ -65,6 +65,7 @@ subroutine test_iniField1dField
     double precision          :: chai
     type(t_branch), pointer   :: pbr
     character(len=256)        :: brId
+    character(len=40)         :: mdufile
     integer                   :: checkibr(5)
     ! reference: initial water levels
     data refs1_br4 /8.0,8.0,8.935625, 10.115884705882353,10.925428235294117,11.0/
@@ -86,7 +87,8 @@ subroutine test_iniField1dField
     call resetFullFlowModel()
     !
     istat = CHANGEDIRQQ("IniField1dField")
-    call loadModel('Flow1D.mdu')
+    mdufile = 'Flow1D.mdu'
+    call loadModel(mdufile)
     istat = flow_modelinit()
     istat = CHANGEDIRQQ("..")
     
@@ -174,6 +176,7 @@ subroutine test_iniField1dField_waterdepth
     integer                                     :: i
     integer                                     :: istat, ierr
     double precision, dimension(:), allocatable :: refs1
+    character(len=40)                           :: mdufile
     !
     ! Body
     jampi = 0
@@ -342,7 +345,8 @@ subroutine test_iniField1dField_waterdepth
     call resetFullFlowModel()
     !
     istat = CHANGEDIRQQ("IniField1dField_waterdepth")
-    call loadModel('dflow1d.mdu')
+    mdufile = 'dflow1d.mdu'
+    call loadModel(mdufile)
     istat = flow_modelinit()
     istat = CHANGEDIRQQ("..")
     
@@ -377,6 +381,7 @@ subroutine test_iniField1dField_waterlevel
     integer                                     :: istat, ierr
     double precision                            :: deltas
     double precision, dimension(:), allocatable :: refs1
+    character(len=40)                           :: mdufile
     !
     ! Body
     jampi = 0
@@ -546,7 +551,8 @@ subroutine test_iniField1dField_waterlevel
     call resetFullFlowModel()
     !
     istat = CHANGEDIRQQ("IniField1dField_waterlevel")
-    call loadModel('dflow1d.mdu')
+    mdufile = 'dflow1d.mdu'
+    call loadModel(mdufile)
     istat = flow_modelinit()
     istat = CHANGEDIRQQ("..")
     
