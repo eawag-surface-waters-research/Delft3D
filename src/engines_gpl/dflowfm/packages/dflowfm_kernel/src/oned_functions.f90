@@ -855,10 +855,10 @@ module m_oned_functions
    !> Set maximal volume for 1d nodes, later used for computation of volOnGround(:).
    subroutine set_max_volume_for_1d_nodes()
    use m_flowgeom, only: groundLevel, volMaxUnderground, ndx, ndxi, ndx2d
-   use m_flow,     only: s1, vol1, a1, vol1_f, a1m
+   use m_flow,     only: s1, vol1, a1, vol1_f, a1m, s1m
    use m_alloc
    implicit none
-   double precision, allocatable :: s1_tmp(:), vol1_tmp(:), a1_tmp(:), vol1_ftmp(:), a1m_tmp(:)
+   double precision, allocatable :: s1_tmp(:), vol1_tmp(:), a1_tmp(:), vol1_ftmp(:), a1m_tmp(:), s1m_tmp(:)
    integer                       :: ndx1d
 
    ndx1d = ndxi-ndx2d
@@ -870,6 +870,9 @@ module m_oned_functions
    allocate(s1_tmp(ndx))
    s1_tmp = s1
    
+   allocate(s1m_tmp(ndx))
+   s1m_tmp = s1m
+
    allocate(vol1_tmp(ndx))
    vol1_tmp = vol1
    
@@ -883,12 +886,12 @@ module m_oned_functions
    a1m_tmp = a1m
 
    ! 2. set s1 to be the ground level
-   s1(ndx2d+1:ndxi) = groundLevel(1:ndx1d)
+   s1(ndx2d+1:ndxi)  = groundLevel(1:ndx1d)
+   s1m(ndx2d+1:ndxi) = groundLevel(1:ndx1d)
    vol1   = 0d0
    vol1_f = 0d0
    a1     = 0d0
    a1m    = 0d0
-   
 
    ! 3. compute the maximal volume
    call vol12d(0)
@@ -900,6 +903,7 @@ module m_oned_functions
    vol1_f = vol1_ftmp
    a1     = a1_tmp
    a1m    = a1m_tmp
+   s1m    = s1m_tmp
 
    end subroutine set_max_volume_for_1d_nodes
 
