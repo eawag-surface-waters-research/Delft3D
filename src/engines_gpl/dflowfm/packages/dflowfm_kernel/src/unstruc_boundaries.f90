@@ -1291,7 +1291,9 @@ logical function initboundaryblocksforcings(filename)
        if (.not. success .and. major <= 1) then ! Old pre-2.00 keyword 'flow'
           call prop_get(node_ptr, '', 'flow', rec, success)
        end if
-       if (.not. success .or. len_trim(rec) == 0) then
+       if (len_trim(rec) > 0) then
+          call resolvePath(rec, basedir, rec)
+       else
           write(msgbuf, '(a,a,a)') 'Required field ''discharge'' missing in lateral ''', trim(locid), '''.'
           call warn_flush()
           cycle
