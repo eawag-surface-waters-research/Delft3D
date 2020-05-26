@@ -274,6 +274,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  use tree_structures
  use messageHandling
  use m_flowgeom, only: rrtol
+ use m_flowexternalforcings, only: transformcoef
  use system_utils
  use unstruc_files, only: resolvePath
  use m_alloc
@@ -300,6 +301,8 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  character(len=ini_value_len) :: locationfile        !< contains either the name of the polygon file (.pli) or the nodeId
  character(len=ini_value_len) :: forcingfile         !
  double precision             :: return_time         !
+ double precision             :: tr_ws               ! Tracer fall velocity
+ double precision             :: tr_decay_time       ! Tracer decay time
  double precision             :: rrtolb              ! Local, optional boundary tolerance value.
  double precision             :: width1D             ! Local, optional custom 1D boundary width
  double precision             :: blDepth             ! Local, optional custom boundary bed level depth below initial water level
@@ -384,6 +387,14 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
        call prop_get_double(node_ptr, '', 'returnTime', return_time )
        call prop_get_double(node_ptr, '', 'return_time', return_time ) ! UNST-2386: Backwards compatibility reading.
 
+       tr_ws = 0d0
+       call prop_get_double(node_ptr, '', 'tracerFallVelocity', tr_ws)
+       transformcoef(4) = tr_ws
+
+       tr_decay_time = 0d0
+       call prop_get_double(node_ptr, '', 'tracerDecayTime', tr_decay_time)
+       transformcoef(5) = tr_decay_time
+
        rrtolb = 0d0
        call prop_get_double(node_ptr, '', 'openBoundaryTolerance', rrtolb)
 
@@ -395,9 +406,9 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
 
        if (group_ok) then
           if (rrtolb > 0d0) then
-             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = (1+2*rrtolb)/(1+2*rrtol), width1D = width1D, blDepth = blDepth)
+             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = (1+2*rrtolb)/(1+2*rrtol), tfc = transformcoef, width1D = width1D, blDepth = blDepth)
           else
-             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = 1d0, width1D = width1D, blDepth = blDepth)
+             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = 1d0, tfc = transformcoef, width1D = width1D, blDepth = blDepth)
           end if
           num_bc_ini_blocks = num_bc_ini_blocks + 1
        endif
@@ -3799,7 +3810,19 @@ subroutine add_bndtracer(tracnam, tracunit, itrac, janew)
 
       trnames(numtracers) = trim(tracnam)
       itrac = numtracers
+   else
+      if (transformcoef(4) /= dmiss .and. transformcoef(4) /= 0d0 .and. transformcoef(4) /= wstracers(itrac)) then
+         write (msgbuf, '(a,e10.5,a,e10.5,a)') 'add_bndtracer: tracer '''//trim(tracnam)//''' already has a fall velocity (', wstracers(itrac), &
+                                               '). Ignoring different value (', transformcoef(4),').'
+         call warn_flush()
+      end if
+      if (transformcoef(5) /= dmiss .and. transformcoef(5) /= 0d0 .and. transformcoef(5) /= decaytimetracers(itrac)) then
+         write (msgbuf, '(a,e10.5,a,e10.5,a)') 'add_bndtracer: tracer '''//trim(tracnam)//''' already has a decay time (', decaytimetracers(itrac), &
+                                               '). Ignoring different value (', transformcoef(5),').'
+         call warn_flush()
+      end if
    end if
+
    trunits(itrac) = tracunit
 end subroutine add_bndtracer
 
