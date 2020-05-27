@@ -6432,7 +6432,15 @@ module m_meteo
    integer, target :: item_movingstationtxy                                  !< Unique Item id of the ext-file's 'movingstationtxy' quantity
    integer, target :: item_pump                                              !< Unique Item id of the ext-file's 'pump' quantityxy' quantity
    integer, target :: item_pump_capacity                                     !< Unique Item id of the structure file's 'pump capacity' quantity
+   integer, target :: item_culvert_valveOpeningHeight                        !< Unique Item id of the structure file's 'culvert valveOpeningHeight' quantity
    integer, target :: item_weir_crestLevel                                   !< Unique Item id of the structure file's 'weir crestLevel' quantity
+   integer, target :: item_orifice_crestLevel                                !< Unique Item id of the structure file's 'orifice crestLevel' quantity
+   integer, target :: item_orifice_gateLowerEdgeLevel                        !< Unique Item id of the structure file's 'orifice gateLowerEdgeLevel' quantity
+   integer, target :: item_general_structure_crestLevel                      !< Unique Item id of the structure file's 'general structure crestLevel' quantity
+   integer, target :: item_general_structure_gateLowerEdgeLevel              !< Unique Item id of the structure file's 'general structure gateLowerEdgeLevel' quantity
+   integer, target :: item_general_structure_crestWidth                      !< Unique Item id of the structure file's 'general structure crestWidth' quantity
+   integer, target :: item_general_structure_gateOpeningWidth                !< Unique Item id of the structure file's 'general structure gateOpeningWidth' quantity
+   
    integer, target :: item_frcutim                                           !< Unique Item id of the friction file's 'friction_coefficient_*' quantity
    integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantxy' quantity
    integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
@@ -6528,7 +6536,14 @@ module m_meteo
       item_movingstationtxy                      = ec_undef_int
       item_pump                                  = ec_undef_int
       item_pump_capacity                         = ec_undef_int
+      item_culvert_valveOpeningHeight            = ec_undef_int
       item_weir_crestLevel                       = ec_undef_int
+      item_orifice_crestLevel                    = ec_undef_int
+      item_orifice_gateLowerEdgeLevel            = ec_undef_int
+      item_general_structure_crestLevel          = ec_undef_int
+      item_general_structure_gateLowerEdgeLevel  = ec_undef_int
+      item_general_structure_crestWidth          = ec_undef_int
+      item_general_structure_gateOpeningWidth    = ec_undef_int
       item_frcutim                               = ec_undef_int
       item_valve1D                               = ec_undef_int    
       item_lateraldischarge                      = ec_undef_int
@@ -6838,12 +6853,36 @@ module m_meteo
          case ('pump')
             itemPtr1 => item_pump
             !dataPtr1      => qpump
-         case ('pump_capacity') ! flow1d pump
+
+         ! Hydraulic structure parameters from flow1d: need explicit items here:
+         case ('pump_capacity')                        ! flow1d pump
             itemPtr1 => item_pump_capacity
             dataPtr1  => qpump ! TODO: UNST-2724: needs more thinking, see issue comments.
-         case ('weir_crestLevel') ! flow1d weir
+         case ('culvert_valveOpeningHeight')           ! flow1d culvert
+            itemPtr1 => item_culvert_valveOpeningHeight
+            !dataPtr1  => null() ! flow1d structure has its own data structure
+         case ('weir_crestLevel')                      ! flow1d weir
             itemPtr1 => item_weir_crestLevel
-            ! dataPtr1
+            !dataPtr1  => null() ! flow1d structure has its own data structure
+         case ('orifice_crestLevel')                   ! flow1d orifice
+            itemPtr1 => item_orifice_crestLevel
+            !dataPtr1  => null() ! flow1d structure has its own data structure
+         case ('orifice_gateLowerEdgeLevel')            ! flow1d orifice
+            itemPtr1 => item_orifice_gateLowerEdgeLevel
+            !dataPtr1  => null() ! flow1d structure has its own data structure
+         case ('general_structure_crestLevel')         ! flow1d general structure
+            itemPtr1 => item_general_structure_crestLevel
+            !dataPtr1  => null() ! flow1d structure has its own data structure
+         case ('general_structure_gateLowerEdgeLevel') ! flow1d general structure
+            itemPtr1 => item_general_structure_gateLowerEdgeLevel
+            !dataPtr1  => null() ! flow1d structure has its own data structure
+         case ('general_structure_crestWidth')         ! flow1d general structure
+            itemPtr1 => item_general_structure_crestWidth
+            !dataPtr1  => null() ! flow1d structure has its own data structure
+         case ('general_structure_gateOpeningWidth')   ! flow1d general structure
+            itemPtr1 => item_general_structure_gateOpeningWidth
+            !dataPtr1  => null() ! flow1d structure has its own data structure
+
          case ('valve1D')
             itemPtr1 => item_valve1D
          case ('damlevel')

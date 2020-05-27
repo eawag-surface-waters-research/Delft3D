@@ -17459,10 +17459,32 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_pump_capacity, irefdate, tzone, tunit, tim)
    endif
 
-!   !$OMP SECTION
+   !   !$OMP SECTION
+
+   if (network%sts%numCulverts > 0) then
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_culvert_valveOpeningHeight, irefdate, tzone, tunit, tim)
+   endif
+
+   !   !$OMP SECTION
 
    if (network%sts%numWeirs > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_weir_crestLevel, irefdate, tzone, tunit, tim)
+   endif
+
+   !   !$OMP SECTION
+
+   if (network%sts%numOrifices > 0) then
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_orifice_crestLevel, irefdate, tzone, tunit, tim)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_orifice_gateLowerEdgeLevel, irefdate, tzone, tunit, tim)
+   endif
+
+   !   !$OMP SECTION
+
+   if (network%sts%numGeneralStructures > 0) then
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_crestLevel, irefdate, tzone, tunit, tim)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_gateLowerEdgeLevel, irefdate, tzone, tunit, tim)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_crestWidth, irefdate, tzone, tunit, tim)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_gateOpeningWidth, irefdate, tzone, tunit, tim)
    endif
 
    !   !$OMP SECTION
