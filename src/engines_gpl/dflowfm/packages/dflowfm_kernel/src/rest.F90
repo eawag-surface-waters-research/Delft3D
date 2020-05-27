@@ -6487,6 +6487,25 @@ implicit none
    timprev = tim1
 end subroutine updateValuesOnSourceSinks
 
+!> Initializes all administration necessary for writing lateral discharge output to his-files.
+subroutine init_lateral_his()
+use m_wind
+use m_flowparameters, only: jahislateral
+use m_alloc
+implicit none
+   ! At the starting time of history output, initialize variables
+   if (jahislateral > 0.and. numlatsg > 0) then
+      call realloc(qplatCum,       numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qplatCumPre,    numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qplatAve,       numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qLatReal,       numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qLatRealCum,    numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qLatRealCumPre, numlatsg, keepExisting = .false., fill = 0d0)
+      call realloc(qLatRealAve,    numlatsg, keepExisting = .false., fill = 0d0)
+   end if
+end subroutine init_lateral_his
+
+
 !> Updates values on laterals for history output, starting from the starting time of history output
 subroutine updateValuesOnLaterals(tim1, timestep)
    use m_flowtimes, only: ti_his, time_his, ti_hiss
@@ -6504,18 +6523,6 @@ subroutine updateValuesOnLaterals(tim1, timestep)
    ! If current time has not reached the history output start time yet, do not update
    if (comparereal(tim1, ti_hiss, eps10) < 0) then
       return
-   end if
-
-   ! At the starting time of history output, initialize variables
-   if (comparereal(tim1, ti_hiss, eps10)== 0) then
-      call realloc(qplatCum,       numlatsg, keepExisting = .false., fill = 0d0)
-      call realloc(qplatCumPre,    numlatsg, keepExisting = .false., fill = 0d0)
-      call realloc(qplatAve,       numlatsg, keepExisting = .false., fill = 0d0)
-      call realloc(qLatReal,       numlatsg, keepExisting = .false., fill = 0d0)
-      call realloc(qLatRealCum,    numlatsg, keepExisting = .false., fill = 0d0)
-      call realloc(qLatRealCumPre, numlatsg, keepExisting = .false., fill = 0d0)
-      call realloc(qLatRealAve,    numlatsg, keepExisting = .false., fill = 0d0)
-
    end if
 
    ! Compute realized discharge

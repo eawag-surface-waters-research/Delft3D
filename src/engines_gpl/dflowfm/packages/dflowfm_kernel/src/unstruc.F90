@@ -10741,6 +10741,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use waq,           only: reset_waq
  use m_flow,        only: zws, zws0, kmx, jasecflow, lnkx
  use m_flowtimes
+ use m_wind, only: numlatsg
  use network_data,  only: netstat, NETSTAT_CELLS_DIRTY
  use gridoperations, only: make1D2Dinternalnetlinks
  use m_partitioninfo
@@ -11036,6 +11037,10 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  if (jadhyd == 1) then
     call init_hydrology()                          ! initialise the hydrology module (after flow_flowinit())
+ end if
+
+ if (numlatsg > 0) then
+    call init_lateral_his()
  end if
 
  ! initialize waq and add to tracer administration
