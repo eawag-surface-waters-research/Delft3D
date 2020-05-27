@@ -198,7 +198,7 @@ subroutine api_loadmodel(filename)
    use unstruc_model
    character(len=*), intent(in) :: filename
 
-   character(len=len(filename)) :: file_name  ! local copy of filename, as loadmodel inserts partition number in case of parallel computing
+   character(len=len(filename)+5) :: file_name  ! local copy of filename, as loadmodel inserts partition number in case of parallel computing
 
    call resetFullFlowModel()
    write(*,*) 'loading model'
