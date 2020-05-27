@@ -3409,10 +3409,17 @@ subroutine createTablesForTabulatedProfile(crossDef)
       cross1 => cross(line2cross%c1)
       cross2 => cross(line2cross%c2)
       f = line2cross%f
+
       if(cross1%crossIndx == cross2%crossIndx) then
          ! Same Cross-Section, no interpolation needed 
          call YZProfile(dpt, cross1%convTab, 0, area, width, maxwidth, perimeter, u1, cz, conv, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
       else
+         if (cross1%crosstype /= cross2%crosstype) then
+            write(msgbuf, '(a,a,a,a,a)') 'getYZConveyance: cross sections ''', trim(cross1%csid), ''' and ''', trim(cross2%csid), &
+               ''' are incompatible: cannot interpolate between YZ-cross section and non-YZ cross section.'
+            call err_flush()
+            return
+         end if
          call YZProfile(dpt, cross1%convTab, 0, area, width, maxwidth, perimeter, u1, cz1, conv1, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
          call YZProfile(dpt, cross2%convTab, 0, area, width, maxwidth, perimeter, u1, cz2, conv2, cross2%frictionTypePos(1), cross2%frictionValuePos(1))
          cz   = (1.0d0 - f) * cz1   + f * cz2
