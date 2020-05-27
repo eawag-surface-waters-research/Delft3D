@@ -855,7 +855,7 @@ module m_oned_functions
    !> Set maximal volume for 1d nodes, later used for computation of volOnGround(:).
    subroutine set_max_volume_for_1d_nodes()
    use m_flowgeom, only: groundLevel, volMaxUnderground, ndx, ndxi, ndx2d
-   use m_flow,     only: s1, vol1, a1, vol1_f, a1m, s1m
+   use m_flow,     only: s1, vol1, a1, vol1_f, a1m, s1m, nonlin
    use m_alloc
    implicit none
    double precision, allocatable :: s1_tmp(:), vol1_tmp(:), a1_tmp(:), vol1_ftmp(:), a1m_tmp(:), s1m_tmp(:)
