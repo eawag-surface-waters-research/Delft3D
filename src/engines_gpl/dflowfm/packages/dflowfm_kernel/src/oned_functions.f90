@@ -870,8 +870,13 @@ module m_oned_functions
    allocate(s1_tmp(ndx))
    s1_tmp = s1
    
-   allocate(s1m_tmp(ndx))
-   s1m_tmp = s1m
+   if (nonlin >= 2) then
+      allocate(s1m_tmp(ndx))
+      s1m_tmp = s1m
+
+      allocate(a1m_tmp(ndx))
+      a1m_tmp = a1m
+   end if
 
    allocate(vol1_tmp(ndx))
    vol1_tmp = vol1
@@ -882,16 +887,17 @@ module m_oned_functions
    allocate(a1_tmp(ndx))
    a1_tmp = a1
    
-   allocate(a1m_tmp(ndx))
-   a1m_tmp = a1m
 
    ! 2. set s1 to be the ground level
    s1(ndx2d+1:ndxi)  = groundLevel(1:ndx1d)
-   s1m(ndx2d+1:ndxi) = groundLevel(1:ndx1d)
+   if (nonlin >= 2) then
+      s1m(ndx2d+1:ndxi) = groundLevel(1:ndx1d)
+      a1m    = 0d0
+   end if
+
    vol1   = 0d0
    vol1_f = 0d0
    a1     = 0d0
-   a1m    = 0d0
 
    ! 3. compute the maximal volume
    call vol12d(0)
@@ -902,8 +908,10 @@ module m_oned_functions
    vol1   = vol1_tmp
    vol1_f = vol1_ftmp
    a1     = a1_tmp
-   a1m    = a1m_tmp
-   s1m    = s1m_tmp
+   if (nonlin >= 2) then
+      s1m    = s1m_tmp
+      a1m    = a1m_tmp
+   end if
 
    end subroutine set_max_volume_for_1d_nodes
 
