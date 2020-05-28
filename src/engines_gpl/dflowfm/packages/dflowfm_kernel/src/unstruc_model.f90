@@ -3676,7 +3676,7 @@ external :: getmdia, setmdia
 
        call getmdia(mdia)
 
-       if ( mdia >0 ) then ! rename diagnostic file to md_ident.dia
+       if ( mdia /= 0 ) then ! rename diagnostic file to md_ident.dia
           rewind(mdia)
 
 10        read (mdia, '(a)', end = 20) rec
