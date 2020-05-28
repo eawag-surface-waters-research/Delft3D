@@ -1165,7 +1165,7 @@
 
 !     copy data from WAQ to D-FlowFM
       if ( timon ) call timstrt ( "copy_data_from_wq_processes_to_fm", ithand2 )
-      call copy_data_from_wq_processes_to_fm()
+      call copy_data_from_wq_processes_to_fm(dt, time)
       if ( timon ) call timstop ( ithand2 )
 
       if ( timon ) call timstop ( ithand0 )
@@ -1180,7 +1180,7 @@
       use m_flow,           only: vol1, sa1, tem1, ucx, ucy
       use m_flowtimes,      only: irefdate, tunit
       use m_fm_wq_processes
-      use m_transport,      only: itrac2const, constituents
+      use m_transport,      only: constituents
       use m_sferic,         only: twopi, rd2dg
       use m_wind
       use m_meteo
@@ -1455,18 +1455,21 @@
 !
 !  copy data from WAQ to D-FlowFM
 !
-   subroutine copy_data_from_wq_processes_to_fm()
+   subroutine copy_data_from_wq_processes_to_fm(dt, tim)
       use m_missing,        only: dmiss
       use m_flowgeom,       only: Ndxi, ba
       use m_flow,           only: vol1
+      use m_flowtimes
+      use m_flowparameters, only: eps10
       use m_fm_wq_processes
-      use m_transport,      only: itrac2const, constituents
-      use m_sferic,         only: twopi
-      use m_wind
-      use m_waves,          only: fetch, nwf
+      use m_transport,      only: constituents
       use unstruc_messages
+      use precision_basics
 
       implicit none
+
+      double precision, intent(in) :: dt
+      double precision, intent(in) :: tim
 
       integer          :: isys, iconst, iwqbot
       integer          :: ipoiconc
@@ -1475,6 +1478,7 @@
       integer          :: incr
       integer          :: i, j, ip
       integer          :: kk, k, kb, kt, ktmax
+      logical          :: copyoutput
 
 !     fill concentrations (transported)
       do kk=1,Ndxi
@@ -1500,34 +1504,49 @@
          end do
       end if
 
-! Ouputs to waq outputs array
-      waqoutputs=dmiss
-      noout = outputs%cursize
-      do j = 1, noout
-         ivar   = outvar(j)  ! which variable is it
-         if (ivar > 0) then
-            iarr   = vararr(ivar)         ! which array in pmsa
-            iv_idx = varidx(ivar)         ! which index within the array
-            iarknd = arrknd(iarr)         ! which type of array (increm is 0, dim1 or 1)
-            ip_arr = arrpoi(iarr)         ! start point of the array in pmsa
-            idim1  = arrdm1(iarr)         ! dimension in the 1e direction
-            idim2  = arrdm2(iarr)         ! dimension in the 2e direction
-            if ( iarknd .eq. 1 ) then
-               ip = ip_arr + iv_idx - 1
-               incr = 0
-            elseif ( iarknd .eq. 2 ) then
-               ip = ip_arr + iv_idx - 1
-               incr = idim1
-            elseif ( iarknd .eq. 3 ) then
-               ip = ip_arr + (iv_idx-1)*idim1
-               incr = 1
-            endif
-               do i = 1, noseg
-                   waqoutputs(j,i) = pmsa(ip)
-                   ip = ip + incr
-               enddo
-            endif
-      enddo
+! Ouputs to waq outputs array (only when outputs will be written within the next timestep)
+      copyoutput = .false.
+      if (ti_his > 0) then
+         if (comparereal(tim+dt-2.0_hp*eps10, time_his, eps10)>= 0) then
+            copyoutput = .true.
+         endif
+      endif
+      if (ti_map > 0 .or. ti_mpt(1) > 0) then
+        if (comparereal(tim+dt-2.0_hp*eps10, time_map, eps10) >= 0) then
+            copyoutput = .true.
+         endif
+      endif
+      copyoutput = .true.
+
+      if (copyoutput) then
+         waqoutputs=dmiss
+         noout = outputs%cursize
+         do j = 1, noout
+            ivar   = outvar(j)  ! which variable is it
+            if (ivar > 0) then
+               iarr   = vararr(ivar)         ! which array in pmsa
+               iv_idx = varidx(ivar)         ! which index within the array
+               iarknd = arrknd(iarr)         ! which type of array (increm is 0, dim1 or 1)
+               ip_arr = arrpoi(iarr)         ! start point of the array in pmsa
+               idim1  = arrdm1(iarr)         ! dimension in the 1e direction
+               idim2  = arrdm2(iarr)         ! dimension in the 2e direction
+               if ( iarknd .eq. 1 ) then
+                  ip = ip_arr + iv_idx - 1
+                  incr = 0
+               elseif ( iarknd .eq. 2 ) then
+                  ip = ip_arr + iv_idx - 1
+                  incr = idim1
+               elseif ( iarknd .eq. 3 ) then
+                  ip = ip_arr + (iv_idx-1)*idim1
+                  incr = 1
+               endif
+                  do i = 1, noseg
+                      waqoutputs(j,i) = pmsa(ip)
+                      ip = ip + incr
+                  enddo
+               endif
+         enddo
+      endif
       return
    end subroutine copy_data_from_wq_processes_to_fm
 
