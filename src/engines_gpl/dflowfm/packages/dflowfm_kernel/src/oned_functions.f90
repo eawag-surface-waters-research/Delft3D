@@ -811,7 +811,7 @@ module m_oned_functions
    type(t_network), intent(inout), target :: network
    type(t_storage), pointer               :: pSto
    type(t_administration_1d), pointer     :: adm
-   integer                                :: i, istor, cc1, cc2
+   integer                                :: i, istor, cc1, cc2, length
 
    groundlevel(:) = dmiss
    groundStorage(:) = 0
@@ -835,18 +835,24 @@ module m_oned_functions
    end do
 
    ! set for storage nodes that have prescribed street level, i.e. storageType is reservoir or closed
-   do istor = 1, network%storS%Count
+    do istor = 1, network%storS%Count
       pSto => network%storS%stor(istor)
       i = pSto%gridPoint-ndx2d
-      if (pSto%useStreetStorage .and. (.not. pSto%useTable)) then
-         groundLevel(i) = pSto%streetArea%x(1)
-         if (pSto%storageType == nt_Closed) then
-            groundStorage(i) = 0
+      if (.not. pSto%useTable) then ! Manhole
+         if (pSto%useStreetStorage) then
+            groundLevel(i) = pSto%streetArea%x(1)
+            if (pSto%storageType == nt_Closed) then
+               groundStorage(i) = 0
+            else
+               groundStorage(i) = 1
+            end if
          else
-            groundStorage(i) = 1
+            groundStorage(i) = 0
          end if
-      else
-         groundStorage(i) = 0
+      else ! storage node on open channel, the ground level equals to the top level of the definition table
+         length = pSto%storageArea%length
+         groundLevel(i) = maxval(pSto%storageArea%x(1:length))
+         groundStorage(i) = 1
       end if
    end do
 
