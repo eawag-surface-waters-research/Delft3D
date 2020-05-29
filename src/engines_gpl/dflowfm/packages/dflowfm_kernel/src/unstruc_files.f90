@@ -376,7 +376,7 @@ subroutine inidia(basename)
     CHARACTER(*) FILENAME*256, BASE*256
     character(*) RW*20
    
-    if (mdia > 0) return
+    if (mdia /= 0) return
     
    
     L = len_trim(md_ident)
