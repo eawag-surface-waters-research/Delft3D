@@ -157,11 +157,11 @@ ifrctypuni  = 1         ! 0=chezy, 1=manning, 2=white colebrook (D3D), 3=white c
 frcunilin   = 0d0       !
 umodlin     = 1.d0      ! linear friction umod , ifrctyp 4,5,6
 wall_ks     = 0.0d0     ! vertical wall nIKURADSE ROUGHNESSs (m)
-vicouv      = 0.1d0       ! constant horizontal eddy viscosity (m2/s) mom
-dicouv      = 0.1d0       ! constant horizontal eddy diffusivity (m2/s) sal, sed
+vicouv      = 0.1d0     ! constant horizontal eddy viscosity (m2/s) mom
+dicouv      = 0.1d0     ! constant horizontal eddy diffusivity (m2/s) sal, sed
 
 Elder       = 0d0       ! add Elder viscosity
-Smagorinsky = 0.2d0       ! add Smagorinsky Cs coefficient, vic = vic + (Cs*dx)**2 * S
+Smagorinsky = 0.2d0     ! add Smagorinsky Cs coefficient, vic = vic + (Cs*dx)**2 * S
 viuchk      = 0.24      ! if < 0.5 then eddy viscosity cell check viu<viuchk*dx*dx/dt
 
 vicoww      = 5d-5      ! 1D-6   !                 ! constant vertical   eddy viscosity (m2/s)
