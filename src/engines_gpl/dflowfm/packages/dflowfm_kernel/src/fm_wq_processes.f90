@@ -1222,11 +1222,10 @@
          do isfun=1,nosfunext
             success = ec_gettimespacevalue(ecInstancePtr, item_waqsfun(isfun), irefdate, tzone, tunit, time)
             if (.not.success) then
-               call mess(LEVEL_ERROR, 'Error reading data for segment function: ', trim(sfunname(ifun)))
+               call mess(LEVEL_ERROR, 'Error reading data for segment function: ', trim(sfunname(isfun)))
             endif
          end do
          do isfun=1,nosfunext
-!            pmsa(ip+ifun-1) = funinp(ifun,1)
             ip = arrpoi(iisfun) + (isfun-1)*noseg
             do kk=1,Ndxi
                call getkbotktopmax(kk,kb,kt,ktmax)
