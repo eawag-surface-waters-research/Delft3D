@@ -3656,7 +3656,8 @@ end subroutine sethu
        if (bndBlDepth(ibnd) /= dmiss) then
           bl(kb) = min(bl(kb), zb - bndBlDepth(ibnd))
           bob(1,L) = bl(kb)
-          bob(2,L) = bl(k2)
+          bob(2,L) = bl(kb)
+          bl(k2) = bl(kb)
        end if
     end if
 
@@ -46743,7 +46744,7 @@ if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
          end if
       end if
 
-      if (cz > 0d0) then
+      if (hydrad > 0d0 .and. cz > 0d0) then
          cfuhi(L)       = ag/(hydrad*cz*cz)
       else
          cfuhi(L) = 0d0
