@@ -2636,9 +2636,9 @@ module m_ec_provider
                                           //' coordinates variable '//trim(coord_names(2))//' referenced but not found')
                         return
                      end if
-                     if (strcmpi(fileReaderPtr%standard_names(varid),'projected_x_coordinate')) then
+                     if (strcmpi(fileReaderPtr%standard_names(varid),'projection_x_coordinate')) then
                          fgd_id = varid
-                     else if (strcmpi(fileReaderPtr%standard_names(varid),'projected_y_coordinate')) then
+                     else if (strcmpi(fileReaderPtr%standard_names(varid),'projection_y_coordinate')) then
                          sgd_id = varid
                      else if (strcmpi(fileReaderPtr%standard_names(varid),'longitude')) then
                          fgd_id = varid
