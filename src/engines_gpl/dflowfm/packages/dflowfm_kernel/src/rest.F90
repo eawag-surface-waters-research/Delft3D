@@ -29,7 +29,9 @@
 
 ! $Id$
 ! $HeadURL$
-
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
       SUBROUTINE dCROSS(X1,Y1,X2,Y2,X3,Y3,X4,Y4,JACROS,SL,SM,XCR,YCR,CRP) ! liggen 3 en 4 aan weerszijden van lijn 12
       use m_sferic
       use geometry_module, only: getdxdy, sphertoCart3D, Cart3Dtospher, crossinbox
@@ -2808,8 +2810,10 @@ end subroutine read_land_boundary_netcdf
 function read_samples_from_geotiff(filename) result(success)
    use MessageHandling
    use, intrinsic :: iso_c_binding
+#ifdef HAVE_GDAL
    use fortranc
    use gdal
+#endif
    use m_samples
    use m_samples_refine, only: iHesstat, iHesstat_DIRTY
    use string_module, only: strcmpi
@@ -2818,6 +2822,7 @@ function read_samples_from_geotiff(filename) result(success)
    character(len=*), intent(in) :: filename !< Path of the file to be read
    logical                      :: success  !< Return value to describe success of the operations
    
+#ifdef HAVE_GDAL
    ! local
    type(gdaldataseth)              :: dataset                      ! Gdal dataset 
    integer(kind=c_int)             :: nx, ny, nz, offsetx, offsety ! Geometry of dataset
@@ -2834,7 +2839,6 @@ function read_samples_from_geotiff(filename) result(success)
    integer :: ndraw
    COMMON /DRAWTHIS/ ndraw(50)
 
-#ifdef HAVE_GDAL
    
       ! Register all available gdal drivers
       call gdalallregister()      
@@ -2945,10 +2949,6 @@ function read_samples_from_geotiff(filename) result(success)
 
       CALL READYY('Reading GeoTIFF file',1d0)
       success = .true.
-#else
-      call mess(LEVEL_WARN, 'GDAL is not available: cannot read GeoTIFF file '// trim(filename))
-      success = .false.
-#endif   
    return
 
    888 continue
@@ -2963,6 +2963,10 @@ function read_samples_from_geotiff(filename) result(success)
    endif
 
    return
+#else
+      call mess(LEVEL_WARN, 'GDAL is not available: cannot read GeoTIFF file '// trim(filename))
+      success = .false.
+#endif   
 end function read_samples_from_geotiff
 
 
