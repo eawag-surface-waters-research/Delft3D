@@ -540,14 +540,13 @@ contains
             enddo
             
          enddo
-         
+         call timstop(timerhandle)
+
          deallocate(crossOrder)
          deallocate(lastAtBran)
          
       endif
-      
-      call timstop(timerhandle)
-      
+
       if (initError) then 
          call setmessage(LEVEL_FATAL, 'Error initialising network')
       endif 

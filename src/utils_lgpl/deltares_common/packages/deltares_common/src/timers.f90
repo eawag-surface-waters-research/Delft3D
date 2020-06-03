@@ -459,7 +459,7 @@
       end if
       perc_wc = wcfact*wctime(ihandl)
       write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' ) &
-                                         (max(level(ihandl),1)-1)*5+2,(maxlvl-max(level(ihandl),1))*5+1
+                                         (level(ihandl)-1)*5+2,(maxlvl-level(ihandl))*5+1
       write(lun, forchr ) ihandl,ntimcal(ihandl),cptime(ihandl),cptime(ihandl)*cpfact, &
                                           wctime(ihandl),wctime(ihandl)*wcfact,tmsubnm(ihandl)
       
