@@ -1017,9 +1017,10 @@ module m_readCrossSections
             if (positions(1) == 0.0d0  .and. comparereal(positions(frictionCount+1), pCS%y(numLevels) - pCS%y(1), 1d-6) == 0) then
                ! Probably lined out wrong because of import from SOBEK2
                locShift = positions(frictionCount + 1) - pCS%y(numLevels)
-               do i = 1, frictionCount + 1
+               !do i = 1, frictionCount + 1
+                  i = frictionCount + 1
                   positions(i) = positions(i) - locShift
-               enddo
+               !enddo
                call SetMessage(LEVEL_WARN, 'Friction sections corrected for YZ-Cross-Section Definition ID: '//trim(pCS%id))
             else
                write (msgbuf, '(a,f16.10,a,f16.10,a)') 'Section data not consistent for (X)YZ-Cross-Section Definition ID: '//trim(pCS%id)// &
