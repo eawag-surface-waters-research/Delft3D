@@ -8261,12 +8261,6 @@ module m_meteo
       !
       if (trim(group_name) == 'rainfall') then
          if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall, irefdate, tzone, tunit, timesteps)) return
-         ! rain = rain * 86400.0                  ! EC delivers rainfall intensity in mm/s, convert to mm/day
-         ! Hi Robert, if you change some input definition in 2017, than please repair code from 2009 till now
-         ! foreseeing problems like this, I first called this quantity rainfall_mmperday.
-         ! Then someone changed the name in 2015 
-         ! Now you change the unit in 2017. 
-         ! I give a course this Thursday, please no surprises 
          end if
       if (trim(group_name) == 'rainfall_rate') then
          if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall_rate, irefdate, tzone, tunit, timesteps)) return
