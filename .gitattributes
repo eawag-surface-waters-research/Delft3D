@@ -1713,7 +1713,6 @@ src/engines_gpl/flow2d3d/scripts/fluidmud_run.sh -text
 src/engines_gpl/flow2d3d/scripts/kill.tcl -text
 src/engines_gpl/flow2d3d/scripts/kill_d3dflow.tcl -text
 src/engines_gpl/flow2d3d/scripts/meteo_old2new.m -text
-src/engines_gpl/flow2d3d/scripts/mormerge.tcl -text
 src/engines_gpl/flow2d3d/scripts/rd2d3d.sh -text
 src/engines_gpl/flow2d3d/scripts/run_aeolis_dflowfm_dwaves.sh -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d.bat -text
@@ -1727,8 +1726,6 @@ src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel.sh -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel_dwaves.bat -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel_dwaves.sh -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_rtc.bat -text
-src/engines_gpl/flow2d3d/scripts/run_mormerge.bat -text
-src/engines_gpl/flow2d3d/scripts/run_mormerge.sh -text
 src/engines_gpl/flow2d3d/scripts/submit_dflow2d3d.sh -text
 src/engines_gpl/part/Makefile.am -text
 src/engines_gpl/part/packages/Makefile.am -text
@@ -15526,6 +15523,10 @@ src/tools_gpl/mormerge/packages/mormerge/src/mormerge_version.F90.svn -text
 src/tools_gpl/mormerge/res/resource.h -text
 src/tools_gpl/mormerge/res/version_number.ini -text
 src/tools_gpl/mormerge/res/version_number.rc.svn -text
+src/tools_gpl/mormerge/scripts/Makefile.am -text
+src/tools_gpl/mormerge/scripts/mormerge.tcl -text
+src/tools_gpl/mormerge/scripts/run_mormerge.bat -text
+src/tools_gpl/mormerge/scripts/run_mormerge.sh -text
 src/tools_gpl/nesthd1/Makefile.am -text
 src/tools_gpl/nesthd1/packages/Makefile.am -text
 src/tools_gpl/nesthd1/packages/nesthd1/Makefile.am -text

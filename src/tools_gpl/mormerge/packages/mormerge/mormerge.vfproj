@@ -42,6 +42,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\tools_gpl\mormerge\res\version_number.rc ..\..\..\..\tools_gpl\mormerge\ ..\..\..\..\tools_gpl\mormerge\res\version_number.ini&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\tools_gpl\mormerge\packages\mormerge\src\mormerge_version.F90 ..\..\..\..\tools_gpl\mormerge\ ..\..\..\..\tools_gpl\mormerge\res\version_number.ini"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd mormerge bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Resource Files" Filter="fi;fd">

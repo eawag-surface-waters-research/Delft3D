@@ -771,15 +771,15 @@ rem ====================
 :mormerge
     echo "installing mormerge . . ."
 
-    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
-    set dest_scripts="!dest_main!\x64\dflow2d3d\scripts"
+    set dest_bin="!dest_main!\x64\dmor\bin"
+    set dest_scripts="!dest_main!\x64\dmor\scripts"
     set dest_share="!dest_main!\x64\share\bin"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_scripts!
 
-    call :copyFile engines_gpl\flow2d3d\scripts\mormerge.tcl                     !dest_scripts!
-    call :copyFile engines_gpl\flow2d3d\scripts\run_mormerge.bat                 !dest_scripts!
+    call :copyFile tools_gpl\mormerge\scripts\mormerge.tcl                       !dest_scripts!
+    call :copyFile tools_gpl\mormerge\scripts\run_mormerge.bat                   !dest_scripts!
     call :copyFile tools_gpl\mormerge\packages\mormerge\x64\Release\mormerge.exe !dest_bin!
     call :copyFile third_party_open\tcl\bin\win64\tclkitsh852.exe                !dest_share!
 goto :endproc
