@@ -280,7 +280,7 @@ end subroutine api_loadmodel
     
     call mess(LEVEL_INFO,'Done writing initial output to file(s).')
     call timstop(timerhandle)
-    call timstop(handle_all)
+    call timstop(handle_all) ! This stores all time spent so far for model initialization.
     call timstrt('All', handle_all)
     sd  = ''
     if (jampi == 1) then
