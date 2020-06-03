@@ -234,7 +234,7 @@ subroutine prterr(lundia, msgno, filtxt)
     case ('U003')
        msg = '*** ERROR Undefined grid dimensions - goto domain/grid/dimension menu'
     case ('U004')
-       msg = '*** ERROR Value lies outside the valid range #'
+       msg = '*** ERROR Layer thickness is equal to or less than zero for k = #'
     case ('U005')
        msg = '*** WARNING Iteration parameter is set to #'
     case ('U006')
