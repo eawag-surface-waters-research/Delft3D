@@ -2568,7 +2568,7 @@ module m_ec_provider
                   sgd_id = y_varid
                else
                   call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
-                      //' requires ''projected_x_coordinate'' and ''projected_y_coordinate''.')
+                      //' requires ''projection_x_coordinate'' and ''projection_y_coordinate''.')
                   return
                end if
             else if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
