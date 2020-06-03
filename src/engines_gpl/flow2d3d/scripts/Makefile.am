@@ -15,7 +15,4 @@ dist_bin_SCRIPTS = \
 	run_dflow2d3d_fluidmud.sh \
 	run_dflow2d3d_parallel.sh \
 	run_dflow2d3d_parallel_dwaves.sh \
-	run_mormerge.sh \
-	submit_dflow2d3d.sh \
-	mormerge.tcl
-
+	submit_dflow2d3d.sh
