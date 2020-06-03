@@ -2736,6 +2736,18 @@ module m_ec_provider
                   ! Something wrong with the coordinate dimensions 
                endif 
 
+               ! Scale metric coordinates if needed:
+               units = ''
+               ierror = nf90_get_att(fileReaderPtr%fileHandle, fgd_id, 'units', units)
+               if (ierror == nf90_noerr .and. (strcmpi(units, 'km') .or. strcmpi(units, 'kilometer') .or. strcmpi(units, 'kilometre'))) then
+                  fgd_data_1d = fgd_data_1d*1000d0
+               end if
+               units = ''
+               ierror = nf90_get_att(fileReaderPtr%fileHandle, sgd_id, 'units', units)
+               if (ierror == nf90_noerr .and. (strcmpi(units, 'km') .or. strcmpi(units, 'kilometer') .or. strcmpi(units, 'kilometre'))) then
+                  sgd_data_1d = sgd_data_1d*1000d0
+               end if
+
                if (.not.ecElementSetSetType(instancePtr, elementSetId, grid_type)) then
                   return
                end if
