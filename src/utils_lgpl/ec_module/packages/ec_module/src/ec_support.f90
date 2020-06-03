@@ -1249,18 +1249,33 @@ end subroutine ecInstanceListSourceItems
                   if (ierr /= 0) ierr = nf90_get_att(ncid, ivar, 'AXIS', axis) ! support 'axis' in upper case, lower case and camel case
                   if (ierr /= 0) ierr = nf90_get_att(ncid, ivar, 'Axis', axis)
 
+                  if (ierr == nf90_noerr) then
+                     if (strcmpi(axis,'X')) then
+                        x_varid = ivar
+                        x_dimid = dimids(1)
+                     else if (strcmpi(axis,'Y')) then
+                        y_varid = ivar
+                        y_dimid = dimids(1)
+                     else if (strcmpi(axis,'Z')) then
+                        z_varid = ivar
+                        z_dimid = dimids(1)
+                     end if
+                  else
+                     ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
+                     select case (stdname)
+                     case ('projection_x_coordinate')
+                        x_varid = ivar
+                        x_dimid = dimids(1)
+                     case ('projection_y_coordinate')
+                        y_varid = ivar
+                        y_dimid = dimids(1)
+                     case default
+                        ierr = EC_DATA_NOTFOUND
+                     end select
+                  end if
                   if (ierr /= 0) then
-                      ierr = nf90_inquire_variable(ncid, ivar, name = varname)
-                      call setECmessage("attribute 'axis' not found for variable " // trim(varname))
-                  else if (strcmpi(axis,'X')) then
-                     x_varid = ivar
-                     x_dimid = dimids(1)
-                  else if (strcmpi(axis,'Y')) then
-                     y_varid = ivar
-                     y_dimid = dimids(1)
-                  else if (strcmpi(axis,'Z')) then
-                     z_varid = ivar
-                     z_dimid = dimids(1)
+                     ierr = nf90_inquire_variable(ncid, ivar, name = varname)
+                     call setECmessage("attribute 'axis' not found for variable " // trim(varname)// ", nor 'projection_x/y_coordinate' was found.")
                   end if
                case default
                   ! see if is the time dimension
