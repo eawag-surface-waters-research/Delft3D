@@ -51,7 +51,7 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
 #if MOR_USE_ECMODULE
    use m_ec_module
    use m_ec_filereader_read, only: ecSampleReadAll
-   use m_ec_basic_interpolation, only: triinterp2
+   use m_ec_basic_interpolation, only: triinterp2, nearest_neighbour
 #endif
    use system_utils
    ! 
@@ -100,6 +100,10 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    character(20)         :: xlocstring
    character(20)         :: ylocstring
    
+   integer                                    :: k, n, jamiss
+   integer, dimension(:), allocatable, target :: kcc
+   integer, dimension(:), allocatable         :: Mn
+   
    ! 
    !! executable statements ------------------------------------------------------- 
    ! 
@@ -131,6 +135,32 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
                       XS, YS, ZS(1,:), NS, dmiss, jsferic, jins, jasfer3D, NPL, 0, 0, XPL, YPL, ZPL, transformcoef)
       array(ifld,:,1) = array1d
       deallocate(array1d, stat=ierror)
+      
+      if (allocated(kcc)) deallocate(kcc)
+      allocate (kcc(ngrid))
+      kcc    = 0
+      jamiss = 0
+      do k = 1,ngrid
+         if (array(ifld,k,1) == dmiss) then
+            kcc(k) = 1
+            jamiss = 1
+         endif
+      enddo
+      
+      if (jamiss == 1) then
+         if (allocated(Mn)) deallocate(Mn)
+         allocate(Mn(ngrid))
+         Mn = 0
+         call nearest_neighbour(ngrid, dims%xz, dims%yz, kcc, Mn, dmiss, XS, YS, NS, jsferic, jasfer3D)
+         do k = 1,ngrid
+            if (kcc(k) == 1) then
+               n = Mn(k)
+               array(ifld,k,1) = ZS(1,n)
+            endif
+         enddo
+         deallocate(Mn)
+      end if
+      deallocate(kcc)
       
       ! mirror boundary cells if undefined if equal to dmiss
       do ibnd = 1, size(dims%nmbnd,1)  ! loop over boundary flow links (TO DO: what about 3D?)
@@ -174,7 +204,7 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    use grid_dimens_module
 #if MOR_USE_ECMODULE
    use m_ec_module
-   use m_ec_basic_interpolation, only: triinterp2
+   use m_ec_basic_interpolation, only: triinterp2, nearest_neighbour
    use m_ec_filereader_read, only: ecSampleReadAll
 #endif
    use system_utils
@@ -222,6 +252,10 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    character(256)        :: ext
    character(20)         :: xlocstring
    character(20)         :: ylocstring
+   
+   integer                                    :: k, n, jamiss
+   integer, dimension(:), allocatable, target :: kcc
+   integer, dimension(:), allocatable         :: Mn
    ! 
    !! executable statements ------------------------------------------------------- 
    ! 
@@ -254,6 +288,33 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
                       XS, YS, ZS(1,:), NS, dmiss, jsferic, jins, jasfer3D, NPL, 0, 0, XPL, YPL, ZPL, transformcoef)
       array(ifld,:,1) = array1d
       deallocate(array1d, stat=ierror)
+      
+      if (allocated(kcc)) deallocate(kcc)
+      allocate (kcc(ngrid))
+      kcc    = 0
+      jamiss = 0
+      do k = 1,ngrid
+         if (array(ifld,k,1) == dmiss) then
+            kcc(k) = 1
+            jamiss = 1
+         endif
+      enddo
+
+      if (jamiss == 1) then
+         if (allocated(Mn)) deallocate(Mn)
+         allocate(Mn(ngrid))
+         Mn = 0
+         call nearest_neighbour(ngrid, dims%xz, dims%yz, kcc, Mn, dmiss, XS, YS, NS, jsferic, jasfer3D)
+         do k = 1,ngrid
+            if (kcc(k) == 1) then
+               n = Mn(k)
+               array(ifld,k,1) = ZS(1,n)
+            endif
+         enddo
+         deallocate(Mn)
+      end if
+      deallocate(kcc)
+
       ! mirror boundary cells if undefined if equal to dmiss
       do ibnd = 1, size(dims%nmbnd,1)  ! loop over boundary flow links (TO DO: what about 3D?)
          nm  = dims%nmbnd(ibnd,1)      ! point outside net
