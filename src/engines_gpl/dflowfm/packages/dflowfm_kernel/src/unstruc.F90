@@ -12555,7 +12555,7 @@ subroutine writesomeinitialoutput()
  call timstop(handle_all)
 
  tot  = tim_get_wallclock(handle_all)/ max(1d0, ndx*(dnt-1) )
- dtav = (tstop_user - tstart_user)/max(1d0, dnt-1)
+ dtav = (time1 - tstart_user)/max(1d0, dnt)
 
  do k = 1,3
     msgbuf = ' ' ; call msg_flush()
