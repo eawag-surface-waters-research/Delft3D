@@ -149,7 +149,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer,                      allocatable :: var_wdimpos(:)     !< Position in var_dimids(1:4,iv) of layer interface dimension (-1 if not timedep)
    integer,                      allocatable :: file_ndims(:)      !< Nr. dimensions in every input file
    integer,                      allocatable :: dimids_uses(:)     !< Nr. vectormax-like dimensions that are used
-   character(len=NF90_MAX_NAME), allocatable :: mesh_names(:)      !< Mesh names in one input file.
+   character(len=NF90_MAX_NAME), allocatable :: mesh_names(:,:)    !< Mesh names in every input file.
    integer,                      allocatable :: nMesh(:)           !< Nr. meshes in every input file
    integer :: ivarcandidate, ifirstdim, ilastdim
    integer, parameter :: MAX_VAR_DIMS = 4 !< Max nr of dimensions for a single var. Support: (vectormax, layers, space, time).
@@ -185,7 +185,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    character*8  :: cdate
    character*10 :: ctime
    character*5  :: czone
-   integer      :: meshid
+   integer      :: meshid, nMaxMeshes
 
    if (nfiles <= 1) then
       write (*,'(a)') 'Error: mapmerge: At least two input files required.'
@@ -218,6 +218,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    nt         =  0
    ndxbnd     =  0
    netfacemaxnodes = 0
+   meshid     = 0
+   nMaxMeshes = 0
 
    !! 0a. Open input files
    call dfm_order_by_partition(infiles, nfiles)
@@ -360,9 +362,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
 
       if (jaugrid == 1) then ! UGRID format
-         ierr = ionc_get_mesh_count(ioncids(ii), nMesh(ii)) 
-         !im = 1 ! only 2D mesh now, TODO: 1D mesh
+         ierr = ionc_get_mesh_count(ioncids(ii), nMesh(ii))
+         if (nMesh(ii) > nMaxMeshes) then
+            nMaxMeshes = nMesh(ii)
+            call realloc(mesh_names,(/nMaxMeshes,nfiles/), keepExisting = .true.)
+         end if
+
          do im=1,nMesh(ii)
+            ierr = ionc_get_mesh_name(ioncids(ii), im, mesh_names(im,ii))
             ierr = ionc_get_topology_dimension(ioncids(ii), im, topodim)
             if (topodim == 2) then
                exit ! We found the correct mesh in #im, no further searching
@@ -714,6 +721,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
    end if
 
+   
    !! 2a. Write top level attributes to file as a copy from input file.
    ierr = ncu_copy_atts(ncids(ifile), ncids(noutfile), nf90_global, nf90_global)
 
@@ -823,14 +831,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    end if
    do ii=1,nfiles
       if (jaugrid == 1) then
-         call realloc(mesh_names, nMesh(ii), keepExisting = .false.)
-         do meshid=1, nMesh(ii)
-            ierr = ionc_get_mesh_name(ioncids(ii), meshid, mesh_names(im))
-         end do
-         ! only 2D now, TODO: 1D
+         ! only 2D now, TODO: 1D, 1D2D
          meshid = 1
       end if
-
       !! 3a.1: handle flow nodes (faces)
       nfaceglob0 = nfaceglob
       face_domain(nfacecount+1:nfacecount+ndx(ii)) = ii-1 ! Just set default domain if FlowElemDomain not present.
@@ -965,7 +968,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (jaugrid==0) then
             write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemNode from `'//trim(infiles(ii))//'''. '
          else
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(im))//'''_face_nodes from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(meshid,ii))//'''_face_nodes from `'//trim(infiles(ii))//'''. '
          end if
          if (.not. verbose_mode) goto 888
       end if
@@ -1009,7 +1012,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (jaugrid==0) then
             write (*,'(a)') 'Warning: mapmerge: could not retrieve NetLink from `'//trim(infiles(ii))//'''. '
          else
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(im))//'''_edge_nodes from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(meshid,ii))//'''_edge_nodes from `'//trim(infiles(ii))//'''. '
          end if
          if (.not. verbose_mode) goto 888
       end if
@@ -1025,7 +1028,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (jaugrid==0) then
             write (*,'(a)') 'Warning: mapmerge: could not retrieve ElemLink from `'//trim(infiles(ii))//'''. '
          else
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(im))//'''_edge_faces from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(meshid,ii))//'''_edge_faces from `'//trim(infiles(ii))//'''. '
          end if
          if (.not. verbose_mode) goto 888
       end if
@@ -1276,7 +1279,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode'
          ! has dimension 3 and 4, respectively. Then this variable in the target merged map should have dimension nlen=4,
          ! which is the maximum (UNST-1842).
-         if (dimname == 'nNetElemMaxNode' .or. dimname == 'max_n'//trim(mesh_names(meshid))//'_face_nodes'  .or. dimname == trim(mesh_names(meshid))//'_nMax_face_nodes' .or. dimname=='nFlowElemContourPts') then
+         if (dimname == 'nNetElemMaxNode' .or. dimname == 'max_n'//trim(mesh_names(meshid,ifile))//'_face_nodes'  .or. dimname == trim(mesh_names(meshid,ifile))//'_nMax_face_nodes' .or. dimname=='nFlowElemContourPts') then
             nlen = maxval(netfacemaxnodes)
          end if
 
@@ -1422,7 +1425,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ! Skip merging the connectivity variables when coordinates of netnodes or netedges are not read from the files
       if (jamerge_cntv == 0 .and. (var_names(iv) .eq. 'NetLink' .or. var_names(iv) .eq. 'NetElemNode' .or. &
           var_names(iv) .eq. 'NetElemLink' .or. var_names(iv) .eq. 'ElemLink' .or. &
-          var_names(iv) .eq. trim(mesh_names(meshid))//'_edge_nodes' .or. var_names(iv) .eq. trim(mesh_names(meshid))//'_face_nodes' .or. var_names(iv) .eq. trim(mesh_names(meshid))//'_edge_faces')) then
+          var_names(iv) .eq. trim(mesh_names(meshid,ifile))//'_edge_nodes' .or. var_names(iv) .eq. trim(mesh_names(meshid,ifile))//'_face_nodes' .or. var_names(iv) .eq. trim(mesh_names(meshid,ifile))//'_edge_faces')) then
           write (*,'(a)') 'Warning: mapmerge: Skipping merging topology variable: `'//trim(var_names(iv))//''', because coordinates of netnodes or netedges can not be read from the file.'
           cycle
       end if
@@ -1625,7 +1628,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                ! should be consistent in the current file. If this dimension is smaller than the maximal nlen, then a seperate array
                ! "itmpvar2D_tmpmax" will be defined by the current vectormax dimension. We first read values into this new array and then
                ! put them into array "itmpvar2D" (UNST-1842).
-               if (var_kxdimpos(iv) /= -1 .and. (dimname == 'nNetElemMaxNode' .or. dimname == 'max_n'//trim(mesh_names(meshid))//'_face_nodes' .or. dimname == trim(mesh_names(meshid))//'_nMax_face_nodes' .or. dimname=='nFlowElemContourPts')) then
+               if (var_kxdimpos(iv) /= -1 .and. (dimname == 'nNetElemMaxNode' .or. dimname == 'max_n'//trim(mesh_names(meshid,ifile))//'_face_nodes' .or. dimname == trim(mesh_names(meshid,ifile))//'_nMax_face_nodes' .or. dimname=='nFlowElemContourPts')) then
                   count_read(is) = netfacemaxnodes(ii)
                   if (netfacemaxnodes(ii) < nlen) then
                      jaread_sep = 1
@@ -1685,7 +1688,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                ! such that global item (edge/node) nrs form one increasing range in tmpvar.
                ! Faces related variables in the merged file are numbered by 'FlowElemGlobalNr'
                ! Conectivity arrays are taken care seperately.
-               if (var_names(iv) .eq. 'NetLink' .or. var_names(iv) .eq. trim(mesh_names(meshid))//'_edge_nodes') then
+               if (var_names(iv) .eq. 'NetLink' .or. var_names(iv) .eq. trim(mesh_names(meshid,ifile))//'_edge_nodes') then
                    nnetedgecount = sum(numl(1:ii-1))
                    nnodecount = sum(numk(1:ii-1))
                    do ip=1,item_counts(ii)
@@ -1704,7 +1707,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                            end if
                        end if
                    end do
-               else if (var_names(iv) .eq. 'NetElemNode' .or. var_names(iv) .eq. trim(mesh_names(meshid))//'_face_nodes') then
+               else if (var_names(iv) .eq. 'NetElemNode' .or. var_names(iv) .eq. trim(mesh_names(meshid,ifile))//'_face_nodes') then
                    nfacecount = sum(nump(1:ii-1))
                    nnodecount = sum(numk(1:ii-1))
                    do ip=1, item_counts(ii)
@@ -1748,7 +1751,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                    if (ii==nfiles) then
                        itmpvar2D(:,1:nitemglob) = itmpvar2D_tmp(:,1:nitemglob)
                    end if
-               else if (var_names(iv) .eq. 'ElemLink' .or. var_names(iv) .eq. trim(mesh_names(meshid))//'_edge_faces') then
+               else if (var_names(iv) .eq. 'ElemLink' .or. var_names(iv) .eq. trim(mesh_names(meshid,ifile))//'_edge_faces') then
                    nnetedgecount = sum(numl(1:ii-1))
                    nfacecount = sum(nump(1:ii-1))
                    do ip=1,item_counts(ii)
