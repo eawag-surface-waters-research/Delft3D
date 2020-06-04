@@ -41,9 +41,9 @@ logical, parameter, private :: printToStdout = .true.
 integer :: threshold_abort = LEVEL_ERROR
 
 ! Verbosity levels for logging on screen and in diagnostics file.
-! Configurable at runtime with '--verbose:...'-flag.
+! Configurable at runtime with '--verbose:...'-flag or set_var('verbose') in bmi
 integer :: loglevel_StdOut = LEVEL_INFO
-integer :: loglevel_file   = LEVEL_DEBUG
+integer :: loglevel_file   = LEVEL_INFO
 
 !> The message buffer allows you to write any number of variables in any
 !! order to a character string. Call msg_flush or err_flush to output

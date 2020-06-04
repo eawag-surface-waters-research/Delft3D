@@ -1228,6 +1228,7 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    !DEC$ ATTRIBUTES DLLEXPORT :: set_var
    ! Return a pointer to the variable
    use unstruc_model
+   use MessageHandling
    use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
 
    character(kind=c_char), intent(in) :: c_var_name(*)
@@ -1250,7 +1251,8 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    ! The fortran name of the attribute name
    character(len=strlen(c_var_name))            :: var_name
    character(kind=c_char),dimension(:), pointer :: c_value => null()
-   integer :: i, k, kb, kt
+   character(len=:), allocatable                :: levels
+   integer :: i, k, kb, kt, ipos
 
    ! Store the name
    var_name = char_array_to_string(c_var_name, strlen(c_var_name))
@@ -1286,8 +1288,24 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
          enddo
       endif
       return
+   case("verbose")
+      call c_f_pointer(xptr, c_value,[MAXSTRLEN])
+      levels = ''
+      do i = 1, MAXSTRLEN
+         if (c_value(i) == c_null_char) exit
+         levels = levels // c_value(i)
+      enddo
+      ipos = index(levels, ':')
+      if (ipos > 0) then
+         loglevel_StdOut = stringtolevel(levels(:ipos-1))
+         loglevel_file   = stringtolevel(levels(ipos+1:))
+      else
+         loglevel_StdOut = stringtolevel(levels)
+         loglevel_file   = stringtolevel(levels)
+      endif
+      return
    end select
-  
+
    if (numconst > 0) then
       iconst = findname(numconst, const_names, var_name)
    endif
