@@ -834,7 +834,7 @@ module m_oned_functions
       end if
    end do
 
-   ! set for storage nodes that have prescribed street level, i.e. storageType is reservoir or closed
+   ! set for storage nodes (either from a table, or a prescribed street level (storageType is reservoir or closed))
     do istor = 1, network%storS%Count
       pSto => network%storS%stor(istor)
       i = pSto%gridPoint-ndx2d
@@ -849,7 +849,7 @@ module m_oned_functions
          else
             groundStorage(i) = 0
          end if
-      else ! storage node on open channel, the ground level equals to the top level of the definition table
+      else ! storage node on open storage table, the ground level is set to the top level of the definition table.
          length = pSto%storageArea%length
          groundLevel(i) = maxval(pSto%storageArea%x(1:length))
          groundStorage(i) = 1
