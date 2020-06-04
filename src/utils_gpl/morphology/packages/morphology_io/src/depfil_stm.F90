@@ -147,14 +147,14 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
          endif
       enddo
       
+      ! For any remaining missing points after regular interpolation, fill them up with nearest neigbour values.
       if (jamiss == 1) then
-         if (allocated(Mn)) deallocate(Mn)
          allocate(Mn(ngrid))
          Mn = 0
          call nearest_neighbour(ngrid, dims%xz, dims%yz, kcc, Mn, dmiss, XS, YS, NS, jsferic, jasfer3D)
          do k = 1,ngrid
-            if (kcc(k) == 1) then
-               n = Mn(k)
+            n = Mn(k)
+            if (n > 0) then
                array(ifld,k,1) = ZS(1,n)
             endif
          enddo
