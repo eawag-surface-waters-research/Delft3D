@@ -131,6 +131,11 @@
       module procedure triinterp2_realreal
    end interface triinterp2
 
+   interface nearest_neighbour
+      module procedure nearest_neighbour_dbl
+      module procedure nearest_neighbour_real
+   end interface nearest_neighbour
+
    type TerrorInfo
       logical                       :: success
       integer                       :: cntNoSamples
@@ -1231,7 +1236,7 @@
    !---------------------------------------------------------------------------!
 
    !> return the index of the nearest neighbouring source point for each of the target grid points
-   subroutine nearest_neighbour(Nc, xc, yc, kc, Mn, dmiss, XS, YS, MSAM, jsferic, jasfer3D)
+   subroutine nearest_neighbour_dbl(Nc, xc, yc, kc, Mn, dmiss, XS, YS, MSAM, jsferic, jasfer3D)
    implicit none
 
    integer,                      intent(in   ) :: Nc       !< number of points to be interpolated
@@ -1263,8 +1268,34 @@
          end if
       end do
    end do
-   end subroutine nearest_neighbour
+   end subroutine nearest_neighbour_dbl
 
+   !> return the index of the nearest neighbouring source point for each of the target grid points
+   subroutine nearest_neighbour_real(Nc, xc, yc, kc, Mn, dmiss, XS, YS, MSAM, jsferic, jasfer3D)
+   implicit none
+
+   integer,                      intent(in   ) :: Nc       !< number of points to be interpolated
+   real(kind=sp), dimension(Nc), intent(in   ) :: xc, yc   !< point coordinates of target grid points
+   integer,       pointer      , intent(in   ) :: kc(:)    !< Target mask array-pointer, whether or not (1/0) target points should be included. Pass null() when no masking is wanted.
+   integer,       dimension(Nc), intent(  out) :: Mn       !< source index for each target point
+   real(kind=hp),                intent(in   ) :: dmiss    !< Missing value inside xc, yx (if any).
+   real(kind=hp),                intent(in   ) :: XS(:), YS(:) !< point coordinates of source data points
+   integer,                      intent(in   ) :: MSAM     !< Number of points in source data point set.
+   integer,                      intent(in   ) :: jsferic  !< Whether or not (1/0) input coordinates are spherical or not.
+   integer,                      intent(in   ) :: jasfer3D !< Whether or not 3D distance calculation must be done, across the globe surface.
+
+   real(kind=hp), dimension (:), allocatable :: xc_dbl, yc_dbl
+   integer :: ierror
+
+   allocate (xc_dbl(Nc), stat=ierror)
+   allocate (yc_dbl(Nc), stat=ierror)
+
+   xc_dbl = dble(xc)
+   yc_dbl = dble(yc)
+
+   call nearest_neighbour_dbl(Nc, xc_dbl, yc_dbl, kc, Mn, dmiss, XS, YS, MSAM, jsferic, jasfer3D)
+
+   end subroutine nearest_neighbour_real
 
 
    !---------------------------------------------------------------------------!
