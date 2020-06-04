@@ -182,7 +182,10 @@
     case default    ! Nonzero error code. Return.
        goto 1234
     end select
-    
+
+    if ( md_pressakey == 1 ) then
+       call pressakey()
+    end if
 
 !   set jaopengl from commandline option (if available)
     call iset_jaopengl(md_jaopengl)
@@ -200,10 +203,6 @@
     lastmode = 1
     NFLD = 1
     KEY  = 3
-    
-    if ( md_pressakey.eq.1 ) then
-       call pressakey()
-    end if
     
     if ( md_jatest.eq.1 ) then
        call initimer()
