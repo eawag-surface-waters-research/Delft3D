@@ -1402,13 +1402,14 @@
          endif
       end do
 
-!     fill masses (not transported, only first time)
+!     fill concentrations and masses (not transported, only first time)
       if (notot>nosys.and.first) then
          first = .false.
          do kk=1,Ndxi
             call getkbotktopmax(kk,kb,kt,ktmax)
             do isys=nosys+1,notot
                iwqbot = isys2wqbot(isys)
+               pmsa(ipoiconc+(kb-kbx)*(notot)+isys-1) = wqbot(iwqbot,kk)
                amass(isys,kb-kbx+1) = wqbot(iwqbot,kk)*ba(kk)
             end do
          end do
