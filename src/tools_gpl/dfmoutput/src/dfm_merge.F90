@@ -856,7 +856,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (jaugrid == 0) then
             ierr = nf90_inq_varid(ncids(ii), 'FlowElemGlobalNr', id_faceglobnr)
          else
-            ! TODO: UNST-1794: generalize to multiple meshes in the UGRID file, a bit like the following:
             ierr = ionc_inq_varid(ioncids(ii), meshid, 'flowelem_globalnr', id_faceglobnr)
          end if
       end if
@@ -884,44 +883,44 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ndxg(ii)   = nfaceglob-nfaceglob0
 
       !! 3a.2: handle flow links (edges)
-      if (jaugrid==0) then ! TODO: zhao: why is this if different from the one for faces and nodes?
-      nedgeglob0 = nedgeglob
-      ierr = nf90_inq_varid(ncids(ii), 'FlowLink', id_edgefaces)
-      if (ierr == nf90_noerr) then
-         ierr = nf90_get_var(ncids(ii), id_edgefaces, ln(:,nedgecount+1:nedgecount+lnx(ii)), count=(/ 2,lnx(ii) /))
-      else
-         write (*,'(a)') 'Warning: mapmerge: could not retrieve FlowLink from `'//trim(infiles(ii))//'''. '
-         if (.not. verbose_mode) goto 888
-      end if
-
-      ! Count the actual unique flow links (to get rid of partition overlap, and also of duplicate boundary links)
-      do ip=1,lnx(ii)
-         ! For each link, take 2nd point (such that boundary links will be uniquely
-         ! owned by the domain who owns the internal flow node of that link.)
-         n1 = ln(1,nedgecount+ip) ! Could be a boundary point
-         n2 = ln(2,nedgecount+ip)
-         if (n1 > ndx(ii)) then
-            idom = ii - 1 ! Boundary mirrornodes are always owned by the domain itself.
-            isBndLink = 1 ! Mark the boundary link
+      if (jaugrid==0) then ! Only old format files contain FlowLink varaible, UGRID format files do not contain it
+         nedgeglob0 = nedgeglob
+         ierr = nf90_inq_varid(ncids(ii), 'FlowLink', id_edgefaces)
+         if (ierr == nf90_noerr) then
+            ierr = nf90_get_var(ncids(ii), id_edgefaces, ln(:,nedgecount+1:nedgecount+lnx(ii)), count=(/ 2,lnx(ii) /))
          else
-            idom = face_domain(nfacecount+n1)
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve FlowLink from `'//trim(infiles(ii))//'''. '
+            if (.not. verbose_mode) goto 888
          end if
 
-         idom = min(idom, face_domain(nfacecount+n2))
+         ! Count the actual unique flow links (to get rid of partition overlap, and also of duplicate boundary links)
+         do ip=1,lnx(ii)
+            ! For each link, take 2nd point (such that boundary links will be uniquely
+            ! owned by the domain who owns the internal flow node of that link.)
+            n1 = ln(1,nedgecount+ip) ! Could be a boundary point
+            n2 = ln(2,nedgecount+ip)
+            if (n1 > ndx(ii)) then
+               idom = ii - 1 ! Boundary mirrornodes are always owned by the domain itself.
+               isBndLink = 1 ! Mark the boundary link
+            else
+               idom = face_domain(nfacecount+n1)
+            end if
 
-         if (isBndLink == 1 .and. face_domain(nfacecount+n2) .ne. ii-1) then
-         ! If this boundary link connects an interior flownode which does not belong to the current subdomain
-            idom = - 999
-         endif
-         edge_domain(nedgecount+ip) = idom
-         if (idom == ii-1) then
-            nedgeglob = nedgeglob+1
-            edge_g2c(nedgeglob) = nedgecount + ip
-               edge_c2g(nedgecount+ip) = nedgeglob
-         end if
-         isBndLink = 0
-      end do
-      lnxg(ii)   = nedgeglob-nedgeglob0
+            idom = min(idom, face_domain(nfacecount+n2))
+
+            if (isBndLink == 1 .and. face_domain(nfacecount+n2) .ne. ii-1) then
+            ! If this boundary link connects an interior flownode which does not belong to the current subdomain
+               idom = - 999
+            endif
+            edge_domain(nedgecount+ip) = idom
+            if (idom == ii-1) then
+               nedgeglob = nedgeglob+1
+               edge_g2c(nedgeglob) = nedgecount + ip
+                  edge_c2g(nedgecount+ip) = nedgeglob
+            end if
+            isBndLink = 0
+         end do
+         lnxg(ii)   = nedgeglob-nedgeglob0
       end if
 
       !! 3a.3: handle net nodes (nodes)
