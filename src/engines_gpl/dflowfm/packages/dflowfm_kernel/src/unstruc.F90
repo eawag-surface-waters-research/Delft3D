@@ -42412,7 +42412,7 @@ end function is_1d_boundary_candidate
  integer                       :: imba, needextramba, needextrambar
  character(len=20)             :: wqbotunit
  logical                       :: hyst_dummy(2)
- double precision              :: area, width, hdx
+ double precision              :: area, width, hdx, factor
  type(t_storage), pointer      :: stors(:)
  integer                       :: i, nstor, ec_item
  integer                       :: num_lat_ini_blocks !< Number of [Lateral] providers read from new extforce file.
@@ -43549,9 +43549,10 @@ if (mext /= 0) then
                  filetype, method, operand, z=zcs, pkbot=pkbot, pktop=pktop, varname=varname, tgt_item1=ec_item)
               success = ec_gettimespacevalue_by_itemID(ecInstancePtr, ec_item, irefdate, tzone, tunit, tstart_user, viuh)
               !write(*,*) 'min, max ', trim(qid), minval(viuh, mask = viuh/=dmiss), maxval(viuh)
+              factor = merge(transformcoef(2), 1.0_hp, transformcoef(2) /= -999d0)
               do k = 1, Ndkx
                  if (viuh(k) /= dmiss) then
-                    constituents(iconst,k) = viuh(k)
+                    constituents(iconst,k) = viuh(k) * factor
                  end if
               end do
               deallocate(kcw)
