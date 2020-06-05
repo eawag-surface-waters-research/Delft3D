@@ -14372,11 +14372,12 @@ subroutine crosssections_on_flowgeom()
           pCrs => network%observcrs%observcross(ii)
           branchIdx = pCrs%branchIdx
           if (branchIdx > 0) then
-             ierror = 1
              ierror = findlink(branchIdx, pCrs%chainage, linknr) ! find flow link given branchIdx and chainage
-             if (ierror == DFM_NOERR) then
+             if (linknr == -1) then
+                continue  ! on another domain
+             else if (ierror == DFM_NOERR) then
                 numlist(ic) = 1
-				    linklist(1,ic) = linknr
+                linklist(1,ic) = linknr
                 call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 1)
              else
                 call SetMessage(LEVEL_ERROR, 'Error occurs when snapping Observation cross section '''//trim(crs(ic)%name)//''' to a 1D flow link.')

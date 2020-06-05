@@ -193,17 +193,22 @@ module m_branch
        double precision, intent(in)    :: chainage  !< Chainage
 
        integer                         :: i
-       
-       do i = 2, branch%gridPointsCount
-           if (branch%gridPointschainages(i) >= chainage) then !found
-              getLinkIndex = branch%lin(i-1)
-              exit
-           endif
-       enddo
-       if (branch%gridPointschainages(branch%gridPointsCount) < chainage) then
-          getLinkIndex = branch%lin(branch%gridPointsCount-1)
+
+       if (branch%gridPointsCount == 0) then
+          ! empty branch, could be in another domain
+          getLinkIndex = -1
+       else
+          do i = 2, branch%gridPointsCount
+              if (branch%gridPointschainages(i) >= chainage) then !found
+                 getLinkIndex = branch%lin(i-1)
+                 exit
+              endif
+          enddo
+          if (branch%gridPointschainages(branch%gridPointsCount) < chainage) then
+             getLinkIndex = branch%lin(branch%gridPointsCount-1)
+          endif
        endif
-       
+
    end function getLinkIndex
    
    integer function getLinkNumber(brs, ibranch, dist)
