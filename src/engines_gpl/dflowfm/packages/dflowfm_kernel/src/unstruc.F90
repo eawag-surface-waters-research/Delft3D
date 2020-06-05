@@ -22505,15 +22505,19 @@ subroutine fill_valobs()
 !         end if
 
          if ( kmx.gt.0 ) then
+            call getkbotktop(k, kb, kt)
+            do kk = kb-1, kt
+               klay = kk - kb + 2
+               valobs(IPNT_ZWS+klay-1,i) = zws(kk)
+            enddo
+
             call getlink1(k,LL)
             call getLbotLtop(LL,Lb,Lt)
             do L = Lb-1, Lt
                klay = L-Lb+2
                if (layertype == 2) then
-                  valobs(IPNT_ZWS+klay-1,i) = zws(kb + L-Lb)
                   valobs(IPNT_ZWU+klay-1,i) = min(bob(1,LL),bob(2,LL)) + hu(L)
                else
-                  valobs(IPNT_ZWS+klay-1,i) = zws(kb + L-Lb)
                   valobs(IPNT_ZWU+klay-1,i) = min(bob(1,LL),bob(2,LL)) + hu(L)
                end if
 
