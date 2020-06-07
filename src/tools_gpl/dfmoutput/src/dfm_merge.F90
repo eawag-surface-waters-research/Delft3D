@@ -212,6 +212,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    id_bnddim  = -1
    id_sedtotdim = -1
    id_sedsusdim = -1
+   id_netfacemaxnodesdim = -1
    ndx        =  0
    lnx        =  0
    kmx        =  0
@@ -371,19 +372,23 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          do im=1,nMesh(ii)
             ierr = ionc_get_mesh_name(ioncids(ii), im, mesh_names(im,ii))
             ierr = ionc_get_topology_dimension(ioncids(ii), im, topodim)
-            if (topodim == 2) then
+            if (topodim == 2 .or. topodim == 1) then
                exit ! We found the correct mesh in #im, no further searching
+                    ! Currently we support only 2D/3D, or only 1D mesh. 
+                    ! TODO: for 1D2D meshes, a loop needs to be added
             end if
          end do
 
          ! find the mesh topology variables
          ! face -netelem
-         ierr = ionc_get_dimid(ioncids(ii), im, mdim_face, id)
-         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
-         id_facedim(ii) = id
-         facedimname    = dimname
-         ndx(ii)        = nlen
-         nump(ii)       = nlen
+         if (topodim /= 1) then
+            ierr = ionc_get_dimid(ioncids(ii), im, mdim_face, id)
+            ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+            id_facedim(ii) = id
+            facedimname    = dimname
+            ndx(ii)        = nlen
+            nump(ii)       = nlen
+         end if
          ! net node
          ierr = ionc_get_dimid(ioncids(ii), im, mdim_node, id)
          ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
@@ -397,33 +402,36 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          netedgedimname    = dimname ! note: ugrid has no flow link, netlink only (==edge)
          numl(ii)          = nlen
          ! max face node
-         ierr = ionc_get_dimid(ioncids(ii), im, mdim_maxfacenodes, id)
-         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
-         if (id > 0) then
-            dimids(id, ii) = id
+         if (topodim /= 1) then
+            ierr = ionc_get_dimid(ioncids(ii), im, mdim_maxfacenodes, id)
+            ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+            if (id > 0) then
+               dimids(id, ii) = id
+            end if
+            id_netfacemaxnodesdim(ii) = id
+            netfacemaxnodesdimname    = dimname
+            netfacemaxnodes(ii)       = nlen
          end if
-
-         id_netfacemaxnodesdim(ii) = id
-         netfacemaxnodesdimname    = dimname
-         netfacemaxnodes(ii)       = nlen
 
          ! Dimensions for 3D models
-         ierr = ionc_get_dimid(ioncids(ii), im, mdim_layer, id)
-         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
-         if (ierr == nf90_noerr) then
-            id_laydim(ii) = id
-            laydimname    = dimname
-            kmx(ii)       = nlen
-         else
-            ierr = nf90_noerr
-         end if
-         ierr = ionc_get_dimid(ioncids(ii), im, mdim_interface, id)
-         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
-         if (ierr == nf90_noerr) then
-            id_wdim(ii) = id
-            wdimname    = dimname
-         else
-            ierr = nf90_noerr
+         if (topodim /= 1) then ! mesh1d does not support layer yet
+            ierr = ionc_get_dimid(ioncids(ii), im, mdim_layer, id)
+            ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+            if (ierr == nf90_noerr) then
+               id_laydim(ii) = id
+               laydimname    = dimname
+               kmx(ii)       = nlen
+            else
+               ierr = nf90_noerr
+            end if
+            ierr = ionc_get_dimid(ioncids(ii), im, mdim_interface, id)
+            ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+            if (ierr == nf90_noerr) then
+               id_wdim(ii) = id
+               wdimname    = dimname
+            else
+               ierr = nf90_noerr
+            end if
          end if
 
          ! other dimensions
