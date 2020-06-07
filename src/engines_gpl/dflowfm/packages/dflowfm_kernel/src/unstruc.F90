@@ -46728,22 +46728,26 @@ if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
    width = bndwidth1D(ibndsect)
    area = hpr*width
    perim = width+2*hpr
+         
+   ! Use the water level at the inner point of the boundary link
+   k2 = ln(2,L)
 
    if (japerim == 1) then
       hydrad = area / perim
-      cz = 0d0
-      if (abs(kcu(ll))==1 .and. network%loaded) then ! flow1d used only for 1d channels and not for 1d2d roofs and gullies
-         cz = frcu(LL) ! We know that cz was set in frcu by a previous call for internal flow link LL.
-         frcu(L)        = cz
-         frcu_mor(L)    = cz
-         u_to_umain(L)  = 1d0
-         q1_main(L)     = q1(L)
-         wu(L)          = width
-      else                                           ! for conventional prof1D approach
-         if (frcu(LL) > 0) then
-            call getcz(hydrad, frcu(LL), ifrcutp(LL), cz,LL)
-         end if
-      end if
+      perim_sub = (/perim, 0d0, 0d0/)
+      af_sub = (/area, 0d0, 0d0/)
+      !
+      ! Calculate the conveyance and Chezy value, using the friction parameters on the internal link, using the 
+      ! local water depth
+      ! NOTE: In case of a YZ-type cross section the conveyance is computed, using the given water depth, but
+      !       using the cross sectional profile of this YZ-cross section. In that case we need the Chezy value
+      !       for computing the conveyance based on the rectangular.
+      call getconveyance(network, hpr, u1(L), q1(L), s1(k2), LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
+      frcu(L)        = cz
+      frcu_mor(L)    = cz
+      u_to_umain(L)  = 1d0
+      q1_main(L)     = q1(L)
+      wu(L)          = width
 
       if (hydrad > 0d0 .and. cz > 0d0) then
          cfuhi(L)       = ag/(hydrad*cz*cz)
