@@ -73,7 +73,6 @@
       character(8) :: cdate
       character(1) :: errind
       
-      integer      :: nout
       integer      :: inhib
       integer      :: irerun
       integer      :: ni
@@ -124,9 +123,9 @@
 ! solution?
    40 continue
       if (irerun .eq. 3) then
-         write (nout,50) cdate
+         write (outdbg,50) cdate
    50    format (/,' ',' !!! SEVERE ERROR MESSAGE time ',A8,'.')
-         write (nout,60) irs(2)
+         write (outdbg,60) irs(2)
    60    format ('  Problem remains infeasible due to constraint ',I2,
      &           '.',/,'  All biomasses set to 0.0.')
          errind = '!'
@@ -162,7 +161,7 @@
          irerun = 2
          errind = '*'
          extrem = extb
-         if (idump .eq. 1) write (nout,90) cdate
+         if (idump .eq. 1) write (outdbg,90) cdate
    90    format (/,' ',' *** Warning message for time ',A8,'.')
          do k = 1,nuecog
             b(k + nuexro) = bgro(k)
@@ -171,17 +170,17 @@
 
          if (swblsa .eq. 1) then
             b(irs(3)) = 0.0
-            if (idump .eq. 1) write (nout,110) grname (index)
+            if (idump .eq. 1) write (outdbg,110) grname (index)
   110          format (' Mortality constraint of species ',A8,' is violated.',/,' This constraint is dropped.')
          else
             do k = it2(index,1), it2(index,2)
                if (aroot(2*k) .lt. extrem) then
                    aroot(2*k) = extrem
-                   if (idump .eq. 1) write (nout, 120) grname(index)
+                   if (idump .eq. 1) write (outdbg, 120) grname(index)
   120              format (' Mortality constraint of species ',A8,'is violated.',/,' KMAX NOW set above mortality constaint.')
                else
                    b(irs(3)) = 0.0
-                   if (idump .eq. 1) write (nout, 110) grname(index)
+                   if (idump .eq. 1) write (outdbg, 110) grname(index)
                end if
             end do
          end if
@@ -240,8 +239,8 @@
          if (xi .lt. 0.0) then
             if (swblsa .ne. 1) then
                if (idump .eq. 1) then
-                  write (nout,50) cdate
-                  write (nout,180) cstra(i)
+                  write (outdbg,50) cdate
+                  write (outdbg,180) cstra(i)
   180             format (' One of the mortality constraints violates the ',A8,' constraint.',/,' Problem is infeasible.')
                   errind = '!'
                end if
@@ -250,16 +249,16 @@
                if (ni .eq. 0) then
                   xi = 0.0
                   if (idump .eq. 1) then
-                      write (nout,90) cdate
-                      write (nout,190) cstra(i)
+                      write (outdbg,90) cdate
+                      write (outdbg,190) cstra(i)
   190                 format (' One of the mortality constraints violates the ',A8,' constraint.',/,' Negative concentrations ',
      &                        'are tolerated.',/,' All species set to their mortality constraints.')
                       errind = '*'
                end if
                else
                  if (idump .eq. 1) then
-                    write (nout,90) cdate
-                    write (nout,200) cstra(i)
+                    write (outdbg,90) cdate
+                    write (outdbg,200) cstra(i)
   200               format (' One of the mortality constraints violates the ',A8,' constraint.',/,
      &                      ' All mortality constaints will be released.')
                     errind = '*'
