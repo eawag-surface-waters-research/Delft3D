@@ -4520,7 +4520,9 @@ subroutine default_flowtimes()
     ti_sede     = 0d0
     ti_xls      = 0d0               !< history interval (s) xls
     ti_rst      = 24d0*3600d0       !< restart interval (s)
+    ti_mba      = 0d0
     ti_waq      = 0d0               !< delwaq interval (s) (Default: off)
+    ti_waqproc  = 0d0
     ti_stat     = -60d0             !< simulation statistics interval (s) (Default: off, will later default to dt_user), <0: use wc-time
     ti_timings  = 0d0               !< timings output interval
     ti_split    = 0d0               !< Time interval for time splitting of output files.
