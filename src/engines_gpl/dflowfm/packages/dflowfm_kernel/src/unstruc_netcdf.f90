@@ -13526,6 +13526,9 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    ! domain numbers
    if ( jampi.eq.1 ) then  
       ! FlowElemDomain
+      if (ndx1d > 0) then
+         ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(1), idomain(ndx2d+1:ndx2d+ndx1d))
+      end if
       if (ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(2), idomain(1:ndx2d))
       endif
