@@ -3100,6 +3100,9 @@ subroutine default_flowparameters()
     u01max     = 0d0     ! max. velocity change: off
     umagmax    = 0d0     ! max. velocity: off
     ! See also: m_flowtimes::dtminbreak
+    s01warn    = 0d0
+    u01warn    = 0d0
+    umagwarn   = 0d0
 
                          ! parameters controlling flooding/drying/solving
     epshu      = 1d-4    ! minimum waterdepth for setting hu>0
