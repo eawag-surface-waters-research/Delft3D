@@ -195,6 +195,7 @@
 !   SPARSKIT SQRT(DDOT(residualvector,residualvector)) is considered, which is
 !   weighing of residualvector in L2 norm *times* the number of unknowns per
 !   direction
+      fpar = 0d0 ! initialize all params to 0
       fpar(1) = 0.0D-16         ! relative tolerance ('exact' solve, except
 !     fpar(2) = 1.0D-14 * 1.0D2 ! absolute tolerance  for round-off errors)
 !             = 1.0D-14 as in method GS * underestimation of number of unknowns
