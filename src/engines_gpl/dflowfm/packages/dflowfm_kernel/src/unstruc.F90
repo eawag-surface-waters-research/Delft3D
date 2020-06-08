@@ -46738,7 +46738,7 @@ if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
       af_sub = (/area, 0d0, 0d0/)
       !
       ! Calculate the conveyance and Chezy value, using the friction parameters on the internal link, using the 
-      ! local water depth
+      ! local water depth on this boundary link.
       ! NOTE: In case of a YZ-type cross section the conveyance is computed, using the given water depth, but
       !       using the cross sectional profile of this YZ-cross section. In that case we need the Chezy value
       !       for computing the conveyance based on the rectangular.
