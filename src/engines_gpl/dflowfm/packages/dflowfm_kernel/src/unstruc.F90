@@ -1182,6 +1182,7 @@ if(q /= 0) then
  dti      = 1d0/dts
  nums1it  = 0
  nums1mit = 0
+ dnums1it = 0
  firstnniteration = .true.                            !< Flag for first Nested Newton iteration. Only in case of negative depths
                                                       !< firstnniteration is set to .false.
 
