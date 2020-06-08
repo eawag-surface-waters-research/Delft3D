@@ -373,6 +373,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             ierr = ionc_get_mesh_name(ioncids(ii), im, mesh_names(im,ii))
             ierr = ionc_get_topology_dimension(ioncids(ii), im, topodim)
             if (topodim == 2 .or. topodim == 1) then
+               meshid = im
                exit ! We found the correct mesh in #im, no further searching
                     ! Currently we support only 2D/3D, or only 1D mesh. 
                     ! TODO: for 1D2D meshes, a loop needs to be added
@@ -463,86 +464,86 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          enddo
       else ! old format
 
-      do id=1,file_ndims(ii)
-         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen) ! NetCDF-F90 allows us to assume that the dim IDs are 1:ndims
-         if (ierr /= nf90_noerr) then
-            write (*,'(a,i0,a)') 'Error: mapmerge: unable to read dimension information from file `'//trim(infiles(ii))//''' for #', id,'.'
-            if (.not. verbose_mode) goto 888
-         end if
-
-         if (trim(dimname) == 'nFlowElem') then
-         !! Flow nodes (face) dimension
-            id_facedim(ii) = id
-            facedimname    = dimname
-            ndx(ii)        = nlen
-
-         else if (trim(dimname) == 'nFlowLink') then
-         !! Flow links (edge) dimension
-            id_edgedim(ii) = id
-            edgedimname    = dimname
-            lnx(ii)        = nlen
-
-         else if (trim(dimname) == 'laydim') then ! TODO: AvD: also wdim?
-            id_laydim(ii) = id
-            laydimname    = dimname
-            kmx(ii)       = nlen
-         else if (trim(dimname) == 'wdim') then
-            id_wdim(ii) = id
-            wdimname    = dimname
-
-      !! Now some Net* related dimensions (in addition to Flow*).
-
-         else if (trim(dimname) == 'nNetElem') then
-         !! Net cells (again face) dimension
-            id_netfacedim(ii) = id
-            netfacedimname    = dimname
-            nump(ii)          = nlen
-
-
-         else if (trim(dimname) == 'nNetElemMaxNode') then ! TODO: AvD: now we detect nNetElemMaxNode, but should be not change to nFlowElemMaxNode, now that facedim is the overall counter and netfacedim is hardly used anymore?
-            dimids(id, ii) = id ! Store this now, because later it is just a vectormax dim, so should be available in dim filter
-            id_netfacemaxnodesdim(ii) = id
-            netfacemaxnodesdimname    = dimname
-            netfacemaxnodes(ii)       = nlen
-
-         else if (trim(dimname) == 'nNetNode') then
-         !! Net nodes (node) dimension
-            id_nodedim(ii) = id
-            nodedimname    = dimname
-            numk(ii)       = nlen
-
-         else if (trim(dimname) == 'nNetLink') then
-         !! Net links (again edge) dimension
-            id_netedgedim(ii) = id
-            netedgedimname    = dimname
-            numl(ii)          = nlen
-
-         else if (trim(dimname) == 'time') then
-         !! Time dimension
-            id_timedim(ii) = id
-            timedimname    = dimname
-            nt(ii)         = nlen
-         else if (trim(dimname) == 'nFlowElemBnd') then
-         !! Flow nodes (face) boundary points dimension
-            id_bnddim(ii) = id
-            ndxbnd(ii)   = nlen
-            ! TODO: dimname needed?
-            if (verbose_mode) then
-               write (*,'(a)') 'Info: mapmerge: find dimension of boundary waterlevel points in file `'//trim(infiles(ii))//'''.'
-            endif
-         else
-            ! No special dimension, so probably just some vectormax-type dimension that
-            ! we may need later for some variables, so store it.
-            dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
-            
-            ! check if it is a dimension for sediment variables
-            if (strcmpi(dimname, 'nSedTot')) then
-               id_sedtotdim(ii) = id
-            else if (strcmpi(dimname, 'nSedSus')) then
-               id_sedsusdim(ii) = id
+         do id=1,file_ndims(ii)
+            ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen) ! NetCDF-F90 allows us to assume that the dim IDs are 1:ndims
+            if (ierr /= nf90_noerr) then
+               write (*,'(a,i0,a)') 'Error: mapmerge: unable to read dimension information from file `'//trim(infiles(ii))//''' for #', id,'.'
+               if (.not. verbose_mode) goto 888
             end if
-         end if
-      end do ! id
+         
+            if (trim(dimname) == 'nFlowElem') then
+            !! Flow nodes (face) dimension
+               id_facedim(ii) = id
+               facedimname    = dimname
+               ndx(ii)        = nlen
+         
+            else if (trim(dimname) == 'nFlowLink') then
+            !! Flow links (edge) dimension
+               id_edgedim(ii) = id
+               edgedimname    = dimname
+               lnx(ii)        = nlen
+         
+            else if (trim(dimname) == 'laydim') then ! TODO: AvD: also wdim?
+               id_laydim(ii) = id
+               laydimname    = dimname
+               kmx(ii)       = nlen
+            else if (trim(dimname) == 'wdim') then
+               id_wdim(ii) = id
+               wdimname    = dimname
+         
+         !! Now some Net* related dimensions (in addition to Flow*).
+         
+            else if (trim(dimname) == 'nNetElem') then
+            !! Net cells (again face) dimension
+               id_netfacedim(ii) = id
+               netfacedimname    = dimname
+               nump(ii)          = nlen
+         
+         
+            else if (trim(dimname) == 'nNetElemMaxNode') then ! TODO: AvD: now we detect nNetElemMaxNode, but should be not change to nFlowElemMaxNode, now that facedim is the overall counter and netfacedim is hardly used anymore?
+               dimids(id, ii) = id ! Store this now, because later it is just a vectormax dim, so should be available in dim filter
+               id_netfacemaxnodesdim(ii) = id
+               netfacemaxnodesdimname    = dimname
+               netfacemaxnodes(ii)       = nlen
+         
+            else if (trim(dimname) == 'nNetNode') then
+            !! Net nodes (node) dimension
+               id_nodedim(ii) = id
+               nodedimname    = dimname
+               numk(ii)       = nlen
+         
+            else if (trim(dimname) == 'nNetLink') then
+            !! Net links (again edge) dimension
+               id_netedgedim(ii) = id
+               netedgedimname    = dimname
+               numl(ii)          = nlen
+         
+            else if (trim(dimname) == 'time') then
+            !! Time dimension
+               id_timedim(ii) = id
+               timedimname    = dimname
+               nt(ii)         = nlen
+            else if (trim(dimname) == 'nFlowElemBnd') then
+            !! Flow nodes (face) boundary points dimension
+               id_bnddim(ii) = id
+               ndxbnd(ii)   = nlen
+               ! TODO: dimname needed?
+               if (verbose_mode) then
+                  write (*,'(a)') 'Info: mapmerge: find dimension of boundary waterlevel points in file `'//trim(infiles(ii))//'''.'
+               endif
+            else
+               ! No special dimension, so probably just some vectormax-type dimension that
+               ! we may need later for some variables, so store it.
+               dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
+               
+               ! check if it is a dimension for sediment variables
+               if (strcmpi(dimname, 'nSedTot')) then
+                  id_sedtotdim(ii) = id
+               else if (strcmpi(dimname, 'nSedSus')) then
+                  id_sedsusdim(ii) = id
+               end if
+            end if
+         end do ! id
       end if
    end do ! ii
 
@@ -838,10 +839,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ' : ', '   flow nodes', ' | flow links', ' |  net nodes', ' |  net links', ' | times'
    end if
    do ii=1,nfiles
-      if (jaugrid == 1) then
-         ! only 2D now, TODO: 1D, 1D2D
-         meshid = 1
-      end if
       !! 3a.1: handle flow nodes (faces)
       nfaceglob0 = nfaceglob
       face_domain(nfacecount+1:nfacecount+ndx(ii)) = ii-1 ! Just set default domain if FlowElemDomain not present.
@@ -936,7 +933,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (jaugrid==0) then
          ierr = nf90_inq_varid(ncids(ii), 'NetElemNode', id_netfacenodes)
       else
-         ierr = ionc_inq_varid(ioncids(ii), meshid, 'face_nodes', id_netfacenodes)
+         if (topodim /= 1) then
+            ierr = ionc_inq_varid(ioncids(ii), meshid, 'face_nodes', id_netfacenodes)
+         end if
       endif
       if (ierr == nf90_noerr) then
          ierr = ncu_inq_var_fill(ncids(ii), id_netfacenodes, nofill, ifill_value)
@@ -1027,7 +1026,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (jaugrid==0) then
          ierr = nf90_inq_varid(ncids(ii), 'ElemLink', id_netedgefaces)
       else
-         ierr = ionc_inq_varid(ioncids(ii), meshid, 'edge_faces', id_netedgefaces)
+         if (topodim /= 1) then
+            ierr = ionc_inq_varid(ioncids(ii), meshid, 'edge_faces', id_netedgefaces)
+         end if
       end if
       if (ierr == nf90_noerr) then
          ierr = nf90_get_var(ncids(ii), id_netedgefaces, netedgefaces(:,nnetedgecount+1:nnetedgecount+numl(ii)), count=(/ 2, numl(ii) /))
@@ -1053,16 +1054,18 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             if (.not. verbose_mode) goto 888
          end if
       else ! UGRID map file does not contain _face_edges, build it here: netfaceedges
-         do iedge = 1, numl(ii)
-            do ikk = 1, 2
-               ic = netedgefaces(ikk,iedge+nnetedgecount)
-               if (ic > 0) then
-                  iface = ic + nfacecount
-                  nfaceedges(iface) = nfaceedges(iface) +1
-                  netfaceedges(nfaceedges(iface), iface) = iedge
-               end if
+         if (topodim /= 1) then
+            do iedge = 1, numl(ii)
+               do ikk = 1, 2
+                  ic = netedgefaces(ikk,iedge+nnetedgecount)
+                  if (ic > 0) then
+                     iface = ic + nfacecount
+                     nfaceedges(iface) = nfaceedges(iface) +1
+                     netfaceedges(nfaceedges(iface), iface) = iedge
+                  end if
+               end do
             end do
-         end do
+         end if
       end if
 
       if (jaugrid ==0) then
