@@ -11052,7 +11052,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
        call fm_wq_processes_ini_proc()
        jawaqproc = 2
        timon = .false. ! switch off timers during first dummy processes time step
-       call fm_wq_processes_step(ti_waqproc,time_user)
+       call fm_wq_processes_step(ti_waqproc,tstart_user)
        timon = .true.
     endif
  endif
