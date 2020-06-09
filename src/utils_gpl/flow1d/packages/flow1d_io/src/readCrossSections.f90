@@ -180,6 +180,7 @@ module m_readCrossSections
          pCrs%itabDef             = iref
          pCrs%tabDef              => network%CSDefinitions%CS(iref)
          
+         pCrs%shift = pCrs%shift + pCrs%tabDef%bedLevel
          call SetParsCross(network%CSDefinitions%CS(iref), network%crs%cross(inext))
          pCrs => network%crs%cross(inext)
          
@@ -208,6 +209,8 @@ module m_readCrossSections
          call GetRougnessForProfile(network, network%crs%cross(inext))
          if (network%CSDefinitions%CS(iref)%crossType == cs_YZ_Prof) then
             ! Prematurely to facilitate Conveyance Data to Delta Shell
+
+
             call CalcConveyance(network%crs%cross(inext))
             
          endif
@@ -354,6 +357,7 @@ module m_readCrossSections
          pCS => network%CSDefinitions%CS(inext)
          pCS%id = id
          pCS%crossType = crosstype
+         pCS%bedLevel = 0d0
          
          select case (crossType)
          case(CS_TABULATED)
@@ -932,7 +936,8 @@ module m_readCrossSections
       integer :: frictionCount
       logical :: success, sferic_local
       double precision, allocatable, dimension(:) :: positions
-      double precision, allocatable, dimension(:) :: xcoordinates, ycoordinates
+      double precision, allocatable, dimension(:) :: xcoordinates, ycoordinates, ycoordinates_help, zcoordinates
+      integer,          allocatable, dimension(:) :: segmentToSectionIndex
       integer          :: i
       double precision :: locShift
       logical          :: xyz_cross_section 
@@ -973,14 +978,14 @@ module m_readCrossSections
          call err_flush()
       endif
       
-      pCS%levelsCount           = numLevels
       pCS%frictionSectionsCount = frictionCount
       pCS%storLevelsCount       = 0
       
-      call realloc(xcoordinates, numlevels)
-      call realloc(ycoordinates, numlevels)
-      call realloc(pCS%y, numlevels)
-      call realloc(pCS%z, numlevels)
+      call realloc(xcoordinates, numlevels+frictionCount)
+      call realloc(ycoordinates, numlevels+frictionCount)
+      call realloc(ycoordinates_help, numlevels+frictionCount)
+      call realloc(zcoordinates, numlevels+frictionCount)
+      call realloc(segmentToSectionIndex, numlevels+frictionCount)
       call realloc(pCS%storLevels, 2)
       call realloc(pCS%YZstorage, 2)
       call realloc(pCS%frictionSectionFrom, frictionCount)
@@ -990,19 +995,18 @@ module m_readCrossSections
       xcoordinates = 0d0
       call prop_get_doubles(node_ptr, '', 'xCoordinates', xcoordinates, numlevels, success)
       call prop_get_doubles(node_ptr, '', 'yCoordinates', ycoordinates, numlevels, success)
-      if (success) call prop_get_doubles(node_ptr, '', 'zCoordinates', pCS%z, numlevels, success)
+      if (success) call prop_get_doubles(node_ptr, '', 'zCoordinates', zcoordinates, numlevels, success)
       if (.not. success) then
           call SetMessage(LEVEL_ERROR, 'Error while reading number of yz-levels for YZ-Cross-Section Definition ID: '//trim(pCS%id))
       endif
       
+      ycoordinates_help = ycoordinates
       if (xyz_cross_section) then
-         pCS%y(1) = 0d0
+         ycoordinates(1) = 0d0
          do i = 2, numlevels
-            call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), earth_radius)
-            pCS%y(i) = pCS%y(i-1) + pCS%y(i) 
+            call distance(sferic_local, xcoordinates(i-1), ycoordinates_help(i-1), xcoordinates(i), ycoordinates_help(i), ycoordinates(i), earth_radius)
+            ycoordinates(i) = ycoordinates(i-1) + ycoordinates(i) 
          enddo
-      else
-         pcs%y = ycoordinates
       endif
       
       pCS%storLevels = 0
@@ -1012,11 +1016,11 @@ module m_readCrossSections
       if (success) then
          
          ! Check Consistency of Rougness Positions
-         if (positions(1) .ne. pCS%y(1) .or. positions(frictionCount + 1) .ne. pCS%y(numLevels)) then
+         if (positions(1) .ne. ycoordinates(1) .or. positions(frictionCount + 1) .ne. ycoordinates(numLevels)) then
             
             if (positions(1) == 0.0d0  .and. comparereal(positions(frictionCount+1), pCS%y(numLevels) - pCS%y(1), 1d-6) == 0) then
                ! Probably lined out wrong because of import from SOBEK2
-               locShift = positions(frictionCount + 1) - pCS%y(numLevels)
+               locShift = positions(frictionCount + 1) - ycoordinates(numLevels)
                !do i = 1, frictionCount + 1
                   i = frictionCount + 1
                   positions(i) = positions(i) - locShift
@@ -1032,8 +1036,8 @@ module m_readCrossSections
          endif
          
       elseif (.not.success .and. frictionCount==1) then
-         positions(1) = pCS%y(1)
-         positions(2) = pCS%y(numLevels)
+         positions(1) = ycoordinates(1)
+         positions(2) = ycoordinates(numLevels)
          success = .true.
       endif
       
@@ -1044,6 +1048,23 @@ module m_readCrossSections
       allocate(pCS%groundlayer)
       pCS%groundlayer%used      = .false.
       pCS%groundlayer%thickness = 0.0d0
+
+      ! Actions: 
+      ! * remove double points
+      ! * prevent horizontal segments
+      ! * add extra points (if necessary) at frictionsection transitions
+      ! * generate segmentToSectionIndex
+      call regulate_yz_coordinates(ycoordinates, zcoordinates, pcs%bedlevel, segmentToSectionIndex, numlevels, pCS%frictionSectionFrom, &
+                                   pCs%frictionSectionTo, frictionCount)
+
+      call realloc(pCS%y, numlevels)
+      call realloc(pCS%z, numlevels)
+      call realloc(pCS%segmentToSectionIndex, numlevels)
+
+      pCS%levelsCount           = numLevels
+      pCS%y(1:numlevels) = ycoordinates(1:numlevels)
+      pCS%z(1:numlevels) = zcoordinates(1:numlevels)
+      pCS%segmentToSectionIndex(1:numlevels) = segmentToSectionIndex(1:numlevels)
       
       deallocate(positions)
       readYZCS = success
@@ -1444,7 +1465,7 @@ module m_readCrossSections
       integer, intent(in)      :: ibin           !< unit number of binary file
       type(t_crsu), intent(in) :: convtab        !< conveyance table
       
-      integer                  :: i, j, nhmax
+      integer                  :: i, j
       
       write(ibin) convtab%jopen
       write(ibin) convtab%msec
@@ -1459,23 +1480,17 @@ module m_readCrossSections
       
       write(ibin) convtab%chezy_act
 
-      write(ibin) (convtab%hu (i), i = 1, convtab%nru) 
-      write(ibin) (convtab%af (i), i = 1, convtab%nru) 
-      write(ibin) (convtab%wf (i), i = 1, convtab%nru) 
-      write(ibin) (convtab%pf (i), i = 1, convtab%nru) 
-      write(ibin) (convtab%co1(i), i = 1, convtab%nru) 
-      write(ibin) (convtab%co2(i), i = 1, convtab%nru) 
-      write(ibin) (convtab%cz1(i), i = 1, convtab%nru) 
-      write(ibin) (convtab%cz2(i), i = 1, convtab%nru) 
+      write(ibin) (convtab%water_depth (i), i = 1, convtab%nru) 
+      write(ibin) (convtab%flow_area (i), i = 1, convtab%nru) 
+      write(ibin) (convtab%flow_width (i), i = 1, convtab%nru) 
+      write(ibin) (convtab%perimeter (i), i = 1, convtab%nru) 
+      write(ibin) (convtab%conveyance_pos(i), i = 1, convtab%nru) 
+      write(ibin) (convtab%conveyance_neg(i), i = 1, convtab%nru) 
+      write(ibin) (convtab%chezy_pos(i), i = 1, convtab%nru) 
+      write(ibin) (convtab%chezy_neg(i), i = 1, convtab%nru) 
       
-      write(ibin) (convtab%nrhh(i), i = 1, 2)
-      write(ibin) (convtab%iolh(i), i = 1, 2)
-      write(ibin) (convtab%bob (i), i = 1, 2)
-      
-      nhmax = max(convtab%nrhh(1), convtab%nrhh(2))
-      write(ibin) ((convtab%hh(i, j), i = 1, nhmax), j = 1, 2) 
-      write(ibin) ((convtab%at(i, j), i = 1, nhmax), j = 1, 2)
-      write(ibin) ((convtab%wt(i, j), i = 1, nhmax), j = 1, 2)
+      write(ibin) (convtab%total_area (i), i = 1, convtab%nru)
+      write(ibin) (convtab%total_width(i), i = 1, convtab%nru)
       
    end subroutine write_convtab
    
@@ -1485,7 +1500,7 @@ module m_readCrossSections
       integer, intent(in)         :: ibin        !< unit number of binary file
       type(t_crsu), intent(inout) :: convtab     !< conveyance table
       
-      integer                     :: i, j, nhmax
+      integer                     :: i, j
       
       read(ibin) convtab%jopen
       read(ibin) convtab%msec
@@ -1501,36 +1516,29 @@ module m_readCrossSections
       read(ibin) convtab%chezy_act
 
 
-      allocate(convtab%hu (convtab%nru))
-      allocate(convtab%af (convtab%nru))
-      allocate(convtab%wf (convtab%nru))
-      allocate(convtab%pf (convtab%nru))
-      allocate(convtab%co1(convtab%nru))
-      allocate(convtab%co2(convtab%nru))
-      allocate(convtab%cz1(convtab%nru))
-      allocate(convtab%cz2(convtab%nru))
+      allocate(convtab%water_depth (convtab%nru))
+      allocate(convtab%flow_area (convtab%nru))
+      allocate(convtab%flow_width (convtab%nru))
+      allocate(convtab%perimeter (convtab%nru))
+      allocate(convtab%conveyance_pos(convtab%nru))
+      allocate(convtab%conveyance_neg(convtab%nru))
+      allocate(convtab%chezy_pos(convtab%nru))
+      allocate(convtab%chezy_neg(convtab%nru))
       
-      read(ibin) (convtab%hu (i), i = 1, convtab%nru) 
-      read(ibin) (convtab%af (i), i = 1, convtab%nru) 
-      read(ibin) (convtab%wf (i), i = 1, convtab%nru) 
-      read(ibin) (convtab%pf (i), i = 1, convtab%nru) 
-      read(ibin) (convtab%co1(i), i = 1, convtab%nru) 
-      read(ibin) (convtab%co2(i), i = 1, convtab%nru) 
-      read(ibin) (convtab%cz1(i), i = 1, convtab%nru) 
-      read(ibin) (convtab%cz2(i), i = 1, convtab%nru) 
+      read(ibin) (convtab%water_depth (i), i = 1, convtab%nru) 
+      read(ibin) (convtab%flow_area (i), i = 1, convtab%nru) 
+      read(ibin) (convtab%flow_width (i), i = 1, convtab%nru) 
+      read(ibin) (convtab%perimeter (i), i = 1, convtab%nru) 
+      read(ibin) (convtab%conveyance_pos(i), i = 1, convtab%nru) 
+      read(ibin) (convtab%conveyance_neg(i), i = 1, convtab%nru) 
+      read(ibin) (convtab%chezy_pos(i), i = 1, convtab%nru) 
+      read(ibin) (convtab%chezy_neg(i), i = 1, convtab%nru) 
       
-      read(ibin) (convtab%nrhh(i), i = 1, 2)
-      read(ibin) (convtab%iolh(i), i = 1, 2)
-      read(ibin) (convtab%bob (i), i = 1, 2)
+      allocate(convtab%total_area(convtab%nru))
+      allocate(convtab%total_width(convtab%nru))
       
-      nhmax = max(convtab%nrhh(1), convtab%nrhh(2))
-      allocate(convtab%hh(nhmax, 2))
-      allocate(convtab%at(nhmax, 2))
-      allocate(convtab%wt(nhmax, 2))
-      
-      read(ibin) ((convtab%hh(i, j), i = 1, nhmax), j = 1, 2) 
-      read(ibin) ((convtab%at(i, j), i = 1, nhmax), j = 1, 2)
-      read(ibin) ((convtab%wt(i, j), i = 1, nhmax), j = 1, 2)
+      read(ibin) (convtab%total_area(i), i = 1, convtab%nru)
+      read(ibin) (convtab%total_width(i), i = 1, convtab%nru)
 
    end subroutine read_convtab
    
@@ -1672,7 +1680,7 @@ module m_readCrossSections
       integer, intent(in)      :: dmpUnit        !< unit number of file
       type(t_crsu), intent(in) :: convtab        !< conveyance table
       
-      integer                  :: i, j, nhmax
+      integer                  :: i, j
       
       write(dmpUnit, *) convtab%jopen
       write(dmpUnit, *) convtab%msec
@@ -1687,23 +1695,16 @@ module m_readCrossSections
       
       write(dmpUnit, *) convtab%chezy_act
 
-      write(dmpUnit, *) (convtab%hu (i), i = 1, convtab%nru) 
-      write(dmpUnit, *) (convtab%af (i), i = 1, convtab%nru) 
-      write(dmpUnit, *) (convtab%wf (i), i = 1, convtab%nru) 
-      write(dmpUnit, *) (convtab%pf (i), i = 1, convtab%nru) 
-      write(dmpUnit, *) (convtab%co1(i), i = 1, convtab%nru) 
-      write(dmpUnit, *) (convtab%co2(i), i = 1, convtab%nru) 
-      write(dmpUnit, *) (convtab%cz1(i), i = 1, convtab%nru) 
-      write(dmpUnit, *) (convtab%cz2(i), i = 1, convtab%nru) 
-      
-      write(dmpUnit, *) (convtab%nrhh(i), i = 1, 2)
-      write(dmpUnit, *) (convtab%iolh(i), i = 1, 2)
-      write(dmpUnit, *) (convtab%bob (i), i = 1, 2)
-      
-      nhmax = max(convtab%nrhh(1), convtab%nrhh(2))
-      write(dmpUnit, *) ((convtab%hh(i, j), i = 1, nhmax), j = 1, 2) 
-      write(dmpUnit, *) ((convtab%at(i, j), i = 1, nhmax), j = 1, 2)
-      write(dmpUnit, *) ((convtab%wt(i, j), i = 1, nhmax), j = 1, 2)
+      write(dmpUnit, *) (convtab%water_depth (i), i = 1, convtab%nru) 
+      write(dmpUnit, *) (convtab%flow_area (i), i = 1, convtab%nru) 
+      write(dmpUnit, *) (convtab%flow_width (i), i = 1, convtab%nru) 
+      write(dmpUnit, *) (convtab%perimeter (i), i = 1, convtab%nru) 
+      write(dmpUnit, *) (convtab%conveyance_pos(i), i = 1, convtab%nru) 
+      write(dmpUnit, *) (convtab%conveyance_neg(i), i = 1, convtab%nru) 
+      write(dmpUnit, *) (convtab%chezy_pos(i), i = 1, convtab%nru) 
+      write(dmpUnit, *) (convtab%chezy_neg(i), i = 1, convtab%nru) 
+      write(dmpUnit, *) (convtab%total_area(i), i = 1, convtab%nru)
+      write(dmpUnit, *) (convtab%total_width(i), i = 1, convtab%nru)
       
    end subroutine dumpConvtab
    

@@ -188,7 +188,9 @@ module m_CrossSections
 
        !*** data for yz cross sections
        double precision, allocatable            :: y(:)                 !< tranversal co-ordinate
-       double precision, allocatable            :: z(:)                 !< z-co-ordinate
+       double precision, allocatable            :: z(:)                 !< z-co-ordinate (shifted, with base level = 0)
+       double precision                         :: bedLevel             !< lowest point in cross section
+       integer, allocatable                     :: segmentToSectionIndex(:) !< Returns friction section index for segment i
        integer                                  :: conveyanceType       !< Conveyance type possible values CS_LUMPED or CS_VERT_SEGM
        integer                                  :: storLevelsCount = 0  !< Number of actual storage levels
        double precision, allocatable            :: storLevels(:)        !< Storage levels
@@ -2551,37 +2553,37 @@ maxwidth = 0d0
 if (i012 .eq. 0) then                                ! look at u points, mom. eq.
 
    nr = convtab%nru                                    ! number of table entries
-   i  = convtab%iolu                                   ! last index found
+   i  = convtab%last_position                                ! last index found
 
-   do while ( i + 1 < nr .and. convtab%hu(i+1) < dpt ) ! look up, imax = nr - 1
+   do while ( i + 1 < nr .and. convtab%water_depth(i+1) < dpt ) ! look up, imax = nr - 1
       i = i + 1
    enddo
 
-   do while ( i     > 1  .and. convtab%hu(i)   > dpt ) ! look down, imin = 1
-      i = i - 1
+   do while ( i     > 1  .and. convtab%water_depth(i)   > dpt ) ! look down, imin = 1
+      i = i - 1   
    enddo
    convtab%iolu = i                                    ! and store last index found
 
    do i1 = 1, i
-      maxwidth = max(maxwidth, convtab%wf(i1))
+      maxwidth = max(maxwidth, convtab%flow_width(i1))
    enddo
    
    i1  = i                                            ! so i1, i2 always inside table
    i2  = i+1
-   hu2 = convtab%hu(i2) ; dh2 = hu2 - dpt
-   if (dpt .LE. convtab%hu(i2) ) then !  .and. convtab%jopen .eq. 0) then     ! weightfactors. If profile closed no extrapolation
-      hu1 = convtab%hu(i1) ; dh1 = dpt - hu1
+   hu2 = convtab%water_depth(i2) ; dh2 = hu2 - dpt
+   if (dpt .LE. convtab%water_depth(i2) ) then !  .and. convtab%jopen .eq. 0) then     ! weightfactors. If profile closed no extrapolation
+      hu1 = convtab%water_depth(i1) ; dh1 = dpt - hu1
       a1  = dh2 / ( hu2-hu1)                          ! eis parser: hu = wel monotoon stijgend
       a2 = 1d0 - a1
       !
-      c1    = convtab%pf(i1) ; c2 = convtab%pf(i2)
+      c1    = convtab%perimeter(i1) ; c2 = convtab%perimeter(i2)
       perimeter = a1*c1 + a2*c2
       !
-      c1    = convtab%wf(i1) ; c2 = convtab%wf(i2)
+      c1    = convtab%flow_width(i1) ; c2 = convtab%flow_width(i2)
       width = a1*c1 + a2*c2
       maxwidth = max(maxwidth, width)
       !
-      z1    = convtab%af(i1) ; z2 = convtab%af(i2)
+      z1    = convtab%flow_area(i1) ; z2 = convtab%flow_area(i2)
       ar1   = 0.5d0*dh1*(c1 + width)                     ! area above i1
       ar2   = 0.5d0*dh2*(c2 + width)                     ! area below i2
       area  = a1*(z1+ar1)   + a2*(z2-ar2)
@@ -2593,19 +2595,19 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
          endif
          !
          if (japos .eq. 1) then
-            z1 = convtab%cz1(i1)
-            z2 = convtab%cz1(i2)   ! positive flow direction
+            z1 = convtab%chezy_pos(i1)
+            z2 = convtab%chezy_pos(i2)   ! positive flow direction
             if (convtab%conveyType==CS_VERT_SEGM) then
-            c1 = convtab%co1(i1)
-            c2 = convtab%co1(i2)
+            c1 = convtab%conveyance_pos(i1)
+            c2 = convtab%conveyance_pos(i2)
             endif
          else
-            z1 = convtab%cz2(i1)
-            z2 = convtab%cz2(i2)   ! negative flow direction
+            z1 = convtab%chezy_neg(i1)
+            z2 = convtab%chezy_neg(i2)   ! negative flow direction
          
             if (convtab%conveyType==CS_VERT_SEGM) then
-               c1 = convtab%co2(i1)
-               c2 = convtab%co2(i2)
+               c1 = convtab%conveyance_neg(i1)
+               c2 = convtab%conveyance_neg(i2)
             endif
          endif
          !
@@ -2633,11 +2635,11 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
 !(*)!  document SOBEK-21942: Change of roughness formulations in "Y-Z" and
    ! "Asymetrical Trapezium" profiles, Author:     Thieu van Mierlo
    !                                   Programmer: Daniel Abel
-      WIDTH = convtab%wf (i2)
-      perimeter = convtab%PF (i2)
-      AREA  = convtab%AF (i2)
+      WIDTH = convtab%flow_width (i2)
+      perimeter = convtab%perimeter (i2)
+      AREA  = convtab%flow_area (i2)
       if (present(conv)) then
-         CONV  = convtab%co1(i2)
+         CONV  = convtab%conveyance_pos(i2)
       endif
       
       !
@@ -2678,31 +2680,31 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
 
 else                                                      ! look at left or right h, cont. eq.
 
-   nr = convtab%nrhh(i012)                                  ! number of entries
-   i  = convtab%iolh(i012)                                  ! last found
+   nr = convtab%nru                                  ! number of entries
+   i  = convtab%last_position                                  ! last found
 
-   do while ( i + 1 < nr .and. convtab%hh(i+1,i012) < dpt ) ! look up
+   do while ( i + 1 < nr .and. convtab%water_depth(i+1) < dpt ) ! look up
       i = i + 1
    enddo
 
-   do while ( i     > 1  .and. convtab%hh(i  ,i012) > dpt ) ! look down
+   do while ( i     > 1  .and. convtab%water_depth(i) > dpt ) ! look down
       i = i - 1
    enddo
-   convtab%iolh(i012) = i
+   convtab%last_position = i
 
    i1 = i                                                  ! so i1, i2 always inside table
    i2 = i+1
-   hh2 = convtab%hh(i2,i012) ; dh2 = hh2 - dpt
-   if (i2 .eq. nr .and. dpt .ge. convtab%hh(i2,i012) ) then ! Weightfactors. If profile closed no extrapolation
+   hh2 = convtab%water_depth(i2) ; dh2 = hh2 - dpt
+   if (i2 .eq. nr .and. dpt .ge. convtab%water_depth(i2) ) then ! Weightfactors. If profile closed no extrapolation
       a1 = 0d0 ; dh1 = 0
    else
-      hh1 = convtab%hh(i1,i012) ; dh1 = dpt - hh1
+      hh1 = convtab%water_depth(i1) ; dh1 = dpt - hh1
       a1  = dh2 / ( hh2-hh1 )                              ! parser: hh = wel monotoon stijgend
    endif
    a2 = 1d0 - a1
 
-   c1    = convtab%wt(i1,i012) ; c2 = convtab%wt(i2,i012)
-   z1    = convtab%at(i1,i012) ; z2 = convtab%at(i2,i012)
+   c1    = convtab%total_width(i1) ; c2 = convtab%total_width(i2)
+   z1    = convtab%total_area(i1) ; z2 = convtab%total_area(i2)
 
    width = a1*c1 + a2*c2
 
@@ -2744,8 +2746,9 @@ use messageHandling
    call generateConvtab(convtab, crs%tabDef%levelsCount, crs%shift, crs%tabDef%groundLayer%thickness, crs%tabDef%crossType, &
                         nc, crs%tabDef%frictionSectionsCount, crs%branchid, crs%frictionTypePos(1),                               &
                         crs%groundFriction, crs%tabdef%y, crs%tabdef%z,                                                        &
-                        crs%frictionSectionFrom, crs%frictionSectionTo, crs%frictionTypePos,              &
+                        crs%tabDef%segmentToSectionIndex, crs%frictionTypePos,              &
                         crs%frictionValuePos, crs%frictionTypeNeg, crs%frictionValueNeg )
+  
    convTab%conveyType = crs%tabDef%conveyanceType
    crs%convTab => convTab
 
@@ -2782,7 +2785,7 @@ double precision function getHighest1dLevelSingle(cross)
          getHighest1dLevelSingle = 1.5d0 * cross%tabdef%diameter + cross%bedlevel
       case (CS_YZ_PROF)
          levelsCount = cross%convtab%nru
-         getHighest1dLevelSingle = cross%convtab%hu(levelsCount) - cross%convtab%bob(1)
+         getHighest1dLevelSingle = cross%convtab%water_depth(levelsCount) - cross%convtab%bedlevel
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross-section in getHighest1dLevelSingle')
    end select
@@ -2977,9 +2980,8 @@ type(t_crsu) function CopyCrossConv(CrossConvFrom)
    CopyCrossConv%b_pos_extr = CrossConvFrom%b_pos_extr
    CopyCrossConv%b_neg_extr = CrossConvFrom%b_neg_extr
 
-   CopyCrossConv%nrhh       = CrossConvFrom%nrhh
-   CopyCrossConv%iolh       = CrossConvFrom%iolh
-   CopyCrossConv%bob        = CrossConvFrom%bob
+   CopyCrossConv%last_position = CrossConvFrom%last_position
+   CopyCrossConv%bedlevel      = CrossConvFrom%bedlevel
       
    CopyCrossConv%chezy_act  = CrossConvFrom%chezy_act
       
@@ -2987,59 +2989,59 @@ type(t_crsu) function CopyCrossConv(CrossConvFrom)
 
    if (CrossConvFrom%nru > 0) then
       
-      if (allocated(CrossConvFrom%hu)) then
-         allocate(CopyCrossConv%hu(CrossConvFrom%nru))
-         CopyCrossConv%hu = CrossConvFrom%hu
+      if (allocated(CrossConvFrom%water_depth)) then
+         allocate(CopyCrossConv%water_depth(CrossConvFrom%nru))
+         CopyCrossConv%water_depth = CrossConvFrom%water_depth
       endif
          
-      if (allocated(CrossConvFrom%af)) then
-         allocate(CopyCrossConv%af(CrossConvFrom%nru))
-         CopyCrossConv%af = CrossConvFrom%af
+      if (allocated(CrossConvFrom%flow_area)) then
+         allocate(CopyCrossConv%flow_area(CrossConvFrom%nru))
+         CopyCrossConv%flow_area = CrossConvFrom%flow_area
       endif
          
-      if (allocated(CrossConvFrom%wf)) then
-         allocate(CopyCrossConv%wf(CrossConvFrom%nru))
-         CopyCrossConv%wf = CrossConvFrom%wf
+      if (allocated(CrossConvFrom%flow_width)) then
+         allocate(CopyCrossConv%flow_width(CrossConvFrom%nru))
+         CopyCrossConv%flow_width = CrossConvFrom%flow_width
       endif
          
-      if (allocated(CrossConvFrom%pf)) then
-         allocate(CopyCrossConv%pf(CrossConvFrom%nru))
-         CopyCrossConv%pf = CrossConvFrom%pf
+      if (allocated(CrossConvFrom%perimeter)) then
+         allocate(CopyCrossConv%perimeter(CrossConvFrom%nru))
+         CopyCrossConv%perimeter = CrossConvFrom%perimeter
       endif
          
-      if (allocated(CrossConvFrom%co1)) then
-         allocate(CopyCrossConv%co1(CrossConvFrom%nru))
-         CopyCrossConv%co1 = CrossConvFrom%co1
+      if (allocated(CrossConvFrom%conveyance_pos)) then
+         allocate(CopyCrossConv%conveyance_pos(CrossConvFrom%nru))
+         CopyCrossConv%conveyance_pos = CrossConvFrom%conveyance_pos
       endif
          
-      if (allocated(CrossConvFrom%co2)) then
-         allocate(CopyCrossConv%co2(CrossConvFrom%nru))
-         CopyCrossConv%co2 = CrossConvFrom%co2
+      if (allocated(CrossConvFrom%conveyance_neg)) then
+         allocate(CopyCrossConv%conveyance_neg(CrossConvFrom%nru))
+         CopyCrossConv%conveyance_neg = CrossConvFrom%conveyance_neg
       endif
          
-      if (allocated(CrossConvFrom%cz1)) then
-         allocate(CopyCrossConv%cz1(CrossConvFrom%nru))
-         CopyCrossConv%cz1 = CrossConvFrom%cz1
+      if (allocated(CrossConvFrom%chezy_pos)) then
+         allocate(CopyCrossConv%chezy_pos(CrossConvFrom%nru))
+         CopyCrossConv%chezy_pos = CrossConvFrom%chezy_pos
       endif
          
-      if (allocated(CrossConvFrom%cz2)) then
-         allocate(CopyCrossConv%cz2(CrossConvFrom%nru))
-         CopyCrossConv%cz2 = CrossConvFrom%cz2
+      if (allocated(CrossConvFrom%chezy_neg)) then
+         allocate(CopyCrossConv%chezy_neg(CrossConvFrom%nru))
+         CopyCrossConv%chezy_neg = CrossConvFrom%chezy_neg
       endif
          
-      if (allocated(CrossConvFrom%hh)) then
-         allocate(CopyCrossConv%hh(CrossConvFrom%nru, 2))
-         CopyCrossConv%hh = CrossConvFrom%hh
+      if (allocated(CrossConvFrom%water_depth)) then
+         allocate(CopyCrossConv%water_depth(CrossConvFrom%nru))
+         CopyCrossConv%water_depth = CrossConvFrom%water_depth
       endif
          
-      if (allocated(CrossConvFrom%at)) then
-         allocate(CopyCrossConv%at(CrossConvFrom%nru, 2))
-         CopyCrossConv%at = CrossConvFrom%at
+      if (allocated(CrossConvFrom%total_area)) then
+         allocate(CopyCrossConv%total_area(CrossConvFrom%nru))
+         CopyCrossConv%total_area = CrossConvFrom%total_area
       endif
          
-      if (allocated(CrossConvFrom%wt)) then
-         allocate(CopyCrossConv%wt(CrossConvFrom%nru, 2))
-         CopyCrossConv%wt = CrossConvFrom%wt
+      if (allocated(CrossConvFrom%total_width)) then
+         allocate(CopyCrossConv%total_width(CrossConvFrom%nru))
+         CopyCrossConv%total_width = CrossConvFrom%total_width
       endif
          
    endif
