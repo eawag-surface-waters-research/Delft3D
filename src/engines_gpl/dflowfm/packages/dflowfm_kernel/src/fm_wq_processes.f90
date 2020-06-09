@@ -301,6 +301,7 @@
       integer  ( 4), parameter :: nomult = 0      !< number of multiple substances
       integer  ( 4)            :: imultp(2,nomult)!< multiple substance administration
       type(t_dlwq_item)        :: constants       !< delwaq constants list
+      integer                  :: nocons_used     !< number of constants actually used
       integer                  :: rank            !< mpi rank (-1 is no mpi)
       integer                  :: noinfo          !< count of informative message
       integer                  :: nowarn          !< count of warnings
@@ -566,13 +567,9 @@
       call realloc(coname, noconm)
       ierr2 = dlwq_init_item(constants)
       ierr2 = dlwq_resize(constants,noconm)
-      j=1
-      coname(j) = 'itime'
-      constants%ipnt(j) = 1
-      constants%name(j) = 'itime'
-      constants%constant(j) = 0.0
 
 !     Skip constants from the sub-file that will be added by DFM as parameter/function/segment function
+      nocons_used = 0
       do i = 1, nocons
          call zoekns(coname_sub(i),nopa,paname,20,ipar)
          if (ipar>0) then
@@ -587,14 +584,14 @@
             call mess(LEVEL_INFO, 'Water quality constant replaced by segment function: ', coname_sub(i))
          endif
          if (ipar<0 .and. ifun<0 .and. isfun<0) then
-            j = j + 1
-            coname(j) = coname_sub(i)
-            constants%ipnt(j) = i
-            constants%name(j) = coname_sub(i)
-            constants%constant(j) = covalue_sub(i)
+            nocons_used = nocons_used + 1
+            coname(nocons_used) = coname_sub(i)
+            constants%ipnt(nocons_used) = i
+            constants%name(nocons_used) = coname_sub(i)
+            constants%constant(nocons_used) = covalue_sub(i)
          end if
       end do
-      nocons = j
+      nocons = nocons_used
       constants%no_item = nocons
 
 !     Set the required output data.
