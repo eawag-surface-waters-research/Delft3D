@@ -804,8 +804,8 @@ module m_sediment
  !$BMIEXPORT double precision      :: sswx(:,:)     !< [kg s-1 m-1] suspended load transport due to waves, x-component.    {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswx"}
  !$BMIEXPORT double precision      :: sswy(:,:)     !< [kg s-1 m-1] suspended load transport due to waves, y-component.    {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswy"}
  
- !$BMIEXPORT double precision      :: taucr(:)      !< [kg s-2 m] dimensional critical shear stress taucr.                 {"location": "face", "shape": ["ndx"], "internal": "stmpar%sedpar%taucr"}
- !$BMIEXPORT double precision      :: tetacr(:)     !< [-] dimensionless critical shear stress tetacr.                     {"location": "face", "shape": ["ndx"], "internal": "stmpar%sedpar%tetacr"}
+ !$BMIEXPORT double precision      :: taucr(:)      !< [kg s-2 m] dimensional critical shear stress taucr.                 {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%taucr"}
+ !$BMIEXPORT double precision      :: tetacr(:)     !< [-] dimensionless critical shear stress tetacr.                     {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%tetacr"}
  
 
  type(mortmpdummy), target         :: mtd           !< Dummy quantities not yet available in D-Flow FM

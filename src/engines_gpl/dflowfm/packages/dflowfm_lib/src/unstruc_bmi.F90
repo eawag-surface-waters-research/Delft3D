@@ -79,8 +79,8 @@ module bmi
   real(c_double), target, allocatable, save :: sed1(:)
   real(c_double), target, allocatable, save :: const_t(:,:) !< Placeholder array for returning constituents (transposed: dim(numconst,ndkx))
   real(c_double), target, allocatable, save :: tem1Surf (:)
-  real(c_double), target, allocatable, save :: TcrEro   (:)
-  real(c_double), target, allocatable, save :: TcrSed   (:)
+  real(c_double), target, allocatable, save :: TcrEro   (:,:)
+  real(c_double), target, allocatable, save :: TcrSed   (:,:)
   integer, private :: iconst
   integer, external :: findname
 
@@ -828,7 +828,9 @@ subroutine get_var_rank(c_var_name, rank) bind(C, name="get_var_rank")
       rank = 2
    case("pumps", "weirs", "orifices", "gates", "generalstructures", "culverts", "sourcesinks", "dambreak", "observations", "crosssections", "laterals") ! Compound vars: shape = [numobj, numfields_per_obj]
       rank = 2
-   case("TcrEro", "TcrSed", "tem1Surf")
+   case("TcrEro", "TcrSed")
+      rank = 2
+   case("tem1Surf")
       rank = 1
    end select
 
@@ -885,7 +887,8 @@ subroutine get_var_shape(c_var_name, shape) bind(C, name="get_var_shape")
       shape(2) = get_flow_elem_max_contour()
       return
    case("TcrEro", "TcrSed")
-      shape(1) = stmpar%lsedtot
+      shape(1) = ndx
+      shape(2) = stmpar%lsedtot
       return
    case("")
       shape(1) = ndx
@@ -1015,7 +1018,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    integer(c_int), target, allocatable, save :: xi(:,:)
    real(c_double), target, allocatable, save :: xd(:,:)
 
-   integer :: i, j, k, Lf, knb, kb, kt
+   integer :: i, j, k, Lf, knb, kb, kt, n
 
 
    ! The fortran name of the attribute name
@@ -1152,20 +1155,22 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
    case("TcrEro")
       k = size(stmpar%trapar%par, 2)
       if (.not. allocated(TcrEro)) then
-         allocate (TcrEro(k))
+         allocate (TcrEro(ndx,k))
       endif
       do i = 1,k
-         TcrEro(i) = stmpar%trapar%par(13,i)
+         n = stmpar%trapar%iparfld(13,i)
+         TcrEro(:,i) = stmpar%trapar%parfld(:,n)
       enddo
       x = c_loc(TcrEro)
       
    case("TcrSed")
       k = size(stmpar%trapar%par, 2)
       if (.not. allocated(TcrSed)) then
-         allocate (TcrSed(k))
+         allocate (TcrSed(ndx,k))
       endif
       do i = 1,k
-         TcrSed(i) = stmpar%trapar%par(12,i)
+         n = stmpar%trapar%iparfld(12,i)
+         TcrSed(:,i) = stmpar%trapar%parfld(:,n)
       enddo
       x = c_loc(TcrSed)
 
@@ -1252,7 +1257,7 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
    character(len=strlen(c_var_name))            :: var_name
    character(kind=c_char),dimension(:), pointer :: c_value => null()
    character(len=:), allocatable                :: levels
-   integer :: i, k, kb, kt, ipos
+   integer :: i, k, kb, kt, ipos, n
 
    ! Store the name
    var_name = char_array_to_string(c_var_name, strlen(c_var_name))
@@ -1304,6 +1309,22 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
          loglevel_file   = stringtolevel(levels)
       endif
       return
+   case("TcrEro")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(TcrEro))
+     TcrEro(:,:) = x_2d_double_ptr
+      do i = 1,size(TcrEro,2)
+         n = stmpar%trapar%iparfld(13,i)
+         stmpar%trapar%parfld(:,n) = TcrEro(:,i)
+      enddo
+     return
+   case("TcrSed")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(TcrSed))
+     TcrSed(:,:) = x_2d_double_ptr
+      do i = 1,size(TcrSed,2)
+         n = stmpar%trapar%iparfld(12,i)
+         stmpar%trapar%parfld(:,n) = TcrSed(:,i)
+      enddo
+     return
    end select
 
    if (numconst > 0) then
@@ -1333,7 +1354,7 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
    integer(c_int), intent(in)         :: c_count(*)
    character(kind=c_char), intent(in) :: c_var_name(*)
    type(c_ptr), value, intent(in) :: xptr
-   integer :: i
+   integer :: i, n
 
    real(c_double), pointer :: x_0d_double_ptr
 
@@ -1408,6 +1429,24 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
       !zkdropstep = value - zk(index + 1)
       !call dropland(xz(index + 1), yz(index + 1), 1)
       return
+      
+  case("TcrEro")
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     TcrEro(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+     do i = 1,size(TcrEro,2)
+        n = stmpar%trapar%iparfld(13,i)
+        stmpar%trapar%parfld(:,n) = TcrEro(:,i)
+     enddo
+     return
+     
+  case("TcrSed")
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     TcrSed(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+      do i = 1,size(TcrSed,2)
+         n = stmpar%trapar%iparfld(12,i)
+         stmpar%trapar%parfld(:,n) = TcrSed(:,i)
+      enddo
+     return
    end select
 
    if (numconst > 0) then

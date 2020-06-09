@@ -80,9 +80,9 @@
        shape(2) = ndx
        shape(1) = stmpar%lsedsus
     case("taucr")
-       shape(1) = ndx
+       shape(1) = stmpar%lsedtot
     case("tetacr")
-       shape(1) = ndx
+       shape(1) = stmpar%lsedtot
     case("infilt")
        shape(1) = ndx
     case("infiltcap")

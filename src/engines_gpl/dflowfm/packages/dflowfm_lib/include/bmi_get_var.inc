@@ -64,9 +64,9 @@
      x = c_loc(sedtra%sswx)
   case("sswy") !<  [kg s-1 m-1] suspended load transport due to waves, y-component. {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswy"}
      x = c_loc(sedtra%sswy)
-  case("taucr") !<  [kg s-2 m] dimensional critical shear stress taucr. {"location": "face", "shape": ["ndx"], "internal": "stmpar%sedpar%taucr"}
+  case("taucr") !<  [kg s-2 m] dimensional critical shear stress taucr. {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%taucr"}
      x = c_loc(stmpar%sedpar%taucr)
-  case("tetacr") !<  [-] dimensionless critical shear stress tetacr. {"location": "face", "shape": ["ndx"], "internal": "stmpar%sedpar%tetacr"}
+  case("tetacr") !<  [-] dimensionless critical shear stress tetacr. {"location": "face", "shape": ["stmpar%lsedtot"], "internal": "stmpar%sedpar%tetacr"}
      x = c_loc(stmpar%sedpar%tetacr)
   case("infilt") !<  [m3 s-1] Actual infiltration flux at current time {"location": "face", "shape": ["ndx"]}
      x = c_loc(infilt)
