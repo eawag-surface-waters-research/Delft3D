@@ -2920,10 +2920,10 @@ function read_samples_from_geotiff(filename) result(success)
             call readyy('Reading GeoTIFF file',min( 1d0,.5d0+.5d0*dble(i)/nx))
          endif
          do j = ny,1,-1
-             ns = ns+1
-             xs(ns) =  x0 + dxa*(i-1+pixeloffset) ! "-1" to convert to 0-based C, pixeloffset to get the middle of the pixel instead of its edge
-             ys(ns) =  y0 + dya*(j-1+pixeloffset) 
-             zs(ns) =  pbuffer(i, j, nz)
+            ns = ns+1
+            xs(ns) =  x0 + dxa*(i-1+pixeloffset) ! "-1" to convert to 0-based C, pixeloffset to get the middle of the pixel instead of its edge
+            ys(ns) =  y0 + dya*(j-1+pixeloffset) 
+            zs(ns) =  pbuffer(i, j, nz)
          enddo
       enddo
       ! mark samples as structured, and in supply block sizes
