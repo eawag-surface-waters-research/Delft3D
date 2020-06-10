@@ -399,11 +399,11 @@ subroutine CalcConveyanceTables(frictype, vf, y, z, hlv, nc,  jgetlevels, zminpr
     ! for the number of levels
     j = 2
     do while (j .le. nh)
-      zh = ( hlv(j)+hlv(j-1) )*0.5d0
       dz = hlv(j) - hlv(j-1)
-
+      
       if (dz .gt. 3.0d-3) then
-
+         
+         zh = ( hlv(j)+hlv(j-1) )*0.5d0
          call ConveyYZ(nc,y,z,frictype,vf,zh,a,total_area,w,total_width,p,co)
 
          conv = 0.5d0*ikpt(j) + 0.5d0*ikpt(j-1)
@@ -638,31 +638,31 @@ subroutine regulate_yz_coordinates(y, z, bedlevel, segmentToSectionIndex, nc, fr
    ! steunpunten worden aangemaakt
 
    do i = 1, sectionCount                          !hk: do over the friction sections
-   yya   = frictionSectionFrom(i)
-   yyb   = frictionSectionTo(i)
-   k1 = 0
-   do k = 1,nc                            !hk: zoek punt links van yya grens
-      if (y(k) .lt. yya) k1 = k
-   enddo
-   if ((k1 .ne. 0 .and. k1 .ne. nc) .and. (abs(y(k1+1) - yya) > 1d-4)) then   !hk: als nodig bepaal tussenpunt
-      a   = (y(k1+1) - yya)/(y(k1+1) - y(k1))
-      dda = z(k1)*a + z(k1+1)*(1-a)
-      nc  = nc + 1
-      do k = nc, k1+2,-1                  !hk: dan opschuiven
-         y(k) = y(k-1)
-         z(k) = z(k-1)
-      enddo                               ! en tussenpunt zetten
-      y(k1+1) = yya
-      z(k1+1) = dda
-   endif
-   do k = k1+1,nc
-      ! zet frictietypes
-      !  if (z(k) .eq. zground .and. z(k+1) .eq. zground) then ! grondlaag kan alleen horizontaal zijn
-      !    !  NOT IMPLEMENTED
-      !  else
-      segmentToSectionIndex(k) = i
-      !  endif
-   enddo
+      yya   = frictionSectionFrom(i)
+      yyb   = frictionSectionTo(i)
+      k1 = 0
+      do k = 1,nc                            !hk: zoek punt links van yya grens
+         if (y(k) .lt. yya) k1 = k
+      enddo
+      if ((k1 .ne. 0 .and. k1 .ne. nc) .and. (abs(y(k1+1) - yya) > 1d-4)) then   !hk: als nodig bepaal tussenpunt
+         a   = (y(k1+1) - yya)/(y(k1+1) - y(k1))
+         dda = z(k1)*a + z(k1+1)*(1-a)
+         nc  = nc + 1
+         do k = nc, k1+2,-1                  !hk: dan opschuiven
+            y(k) = y(k-1)
+            z(k) = z(k-1)
+         enddo                               ! en tussenpunt zetten
+         y(k1+1) = yya
+         z(k1+1) = dda
+      endif
+      do k = k1+1,nc
+         ! zet frictietypes
+         !  if (z(k) .eq. zground .and. z(k+1) .eq. zground) then ! grondlaag kan alleen horizontaal zijn
+         !    !  NOT IMPLEMENTED
+         !  else
+         segmentToSectionIndex(k) = i
+         !  endif
+      enddo
    enddo
 
 ! Einde aanpassingen tbv frictie secties
