@@ -6031,11 +6031,10 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
     call setucxucyucxuucyu() !reconstruct cell-center velocities
     u1     = u1_tmp
     deallocate(u1_tmp)
-
-    dti = 1d0/dts
  else
     call setucxucyucxuucyu()
  endif
+ dti = 1d0/dts
 
  ! set friction velocities umod, tangential velocities v and velocity gradients and windstresses
 
