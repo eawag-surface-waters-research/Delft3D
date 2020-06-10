@@ -45,6 +45,8 @@ integer :: threshold_abort = LEVEL_ERROR
 integer :: loglevel_StdOut = LEVEL_INFO
 integer :: loglevel_file   = LEVEL_INFO
 
+integer, parameter :: maxerrprint = 50 !< Maximum number of errors of same type printed on screen (only used by some code pieces).
+
 !> The message buffer allows you to write any number of variables in any
 !! order to a character string. Call msg_flush or err_flush to output
 !! the actual message or error.

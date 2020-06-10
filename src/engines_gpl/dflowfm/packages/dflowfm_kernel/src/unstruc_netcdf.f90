@@ -10553,6 +10553,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    character(len=255)                        :: tmpstring
    integer :: n1, n2, ibr_n1, ibr_n2, ibr
    double precision :: off1, off2
+   integer :: numerr
 
    numk_read = 0
    numl_read = 0
@@ -10563,7 +10564,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    do_edgelengths = .false.
    networkIndex = 0
    koffset1dmesh = 0
-
+   numerr = 0
    ierr = ionc_open(filename, NF90_NOWRITE, ioncid, iconvtype, convversion)
 
    if (ierr /= ionc_noerr .or. iconvtype /= IONC_CONV_UGRID .or. convversion < 1.0) then ! NOTE: no check on conventions version number (yet?)
@@ -10884,8 +10885,22 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
 
       ierr = ionc_get_contact_name(ioncid, im, contactname)
     
+      numerr = 0
       call increasenetw(numk_last + ncontacts, numl_last + ncontacts)      
       do l = 1, ncontacts
+         if (contacttype(L) < 3) then
+            numerr = numerr + 1
+            if (numerr <= maxerrprint) then
+               write (msgbuf, '(a,a,a,i0,a,i0,a)') 'Error while reading net file ''', trim(filename), ''', contact type of link ', &
+                  L, ' is not valid: ', contacttype(L), '. Should be >= 3.'
+               call warn_flush()
+            elseif (numerr == maxerrprint+1) then
+               call mess(LEVEL_WARN, 'Skipping more errors of this type...')
+            end if
+
+            cycle
+         end if
+
          XK(numk_last+l) = xface(mesh2indexes(l))
          YK(numk_last+l) = yface(mesh2indexes(l))
          currentNodeId   = nodeids(mesh1indexes(l))
@@ -10905,6 +10920,13 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          kn(3,numl_last+l) = contacttype(l)
          contactnetlinks(contactnlinks+L) = numl_last + L
       enddo
+      
+      if (numerr > 0) then
+         write (msgbuf, '(a,a,a,i0,a)') 'Error(s) while reading net file ''', trim(filename), ''', ', numerr, &
+            ' 1D2D links contained errors. See previous warnings.'
+         call err_flush()
+      end if
+
       ! Set the ZK to dmiss 
       ZK(numk_last+1:numk_last+ncontacts) = dmiss
       
