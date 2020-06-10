@@ -73,7 +73,7 @@ module m_ObservCrossSections
       integer                                                :: Size = 0                 !< Actual size of observation cross-section set
       integer                                                :: growsBy = 2000           !< Increment for observation cross-section set
       integer                                                :: Count= 0                 !< Actual number of observation cross-section sets
-      type(t_ObservCrossSection), pointer, dimension(:)      :: Observcross              !< Current observation cross-section
+      type(t_ObservCrossSection), pointer, dimension(:)      :: Observcross => null()    !< Current observation cross-section
       
       type(t_hashlist)                                       :: hashlist
    end type t_ObservCrossSectionSet
