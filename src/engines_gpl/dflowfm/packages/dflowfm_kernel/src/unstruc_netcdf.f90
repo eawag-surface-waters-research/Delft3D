@@ -5390,7 +5390,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          end if
       end if
       ierr = nf90_enddef(mapids%ncid)
-      
+      if (ierr == NF90_EVARSIZE .and. unc_cmode /= NF90_NETCDF4) then
+         call mess(LEVEL_ERROR, 'Error while writing map file. Probably model grid is too large for classic NetCDF format. Try setting [output] NcFormat = 4 in your MDU.')
+      else if (ierr /= NF90_NOERR) then
+         write (msgbuf, '(a,i0,a)') 'Error while writing map file. Error code: ', ierr, '.'
+         call err_flush()
+      end if
+
       if ( janudge.gt.0 .and. jamapnudge.gt.0 ) then
 !        output static nudging time
          workx = 0d0
