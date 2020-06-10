@@ -476,7 +476,11 @@ fi
 # gdal
 
 # NEW: gdal only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
-gdalModule="gcc/4.9.2 gdal/3.0.4_gcc5.3.1"
+# Update June 10, 2020: GDAL is still leading to linker errors in combination with GNU. Disabled until further notice.
+gdalModule=""
+if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
+    gdalModule="gcc/4.9.2 gdal/3.0.4_gcc5.3.1"
+fi
 
 initgdal="module load $gdalModule"
 eval $initgdal
@@ -485,10 +489,16 @@ if [ $? -ne 0 ]; then
     cd $orgdir
     exit 1
 else
+    # NOTE: GDAL currently ONLY in use on H6 for Intel, disable for GNU compiler.
+    GDAL_CPPFLAGS=""
+    GDAL_LDFLAGS=""
+    GDAL_CONFARGS="--disable-gdal"
+    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
 	   # NOTE: GDAL_DIR was set during the execution of "module load $gdalModule"
        GDAL_CPPFLAGS=-I$GDAL_DIR/include
        GDAL_LDFLAGS=-L$GDAL_DIR/lib
        GDAL_CONFARGS="--with-gdal=$GDAL_DIR"
+    fi
 fi
 
 #===============================================================================
