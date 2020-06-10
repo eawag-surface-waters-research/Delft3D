@@ -44516,7 +44516,7 @@ if (mext /= 0) then
           if (exist) then
              filetype0 = uniform            ! uniform=single time series vectormax = ..
              ! Converter will put 'qsrc, sasrc and tmsrc' values in array qstss on positions: (3*numsrc-2), (3*numsrc-1), and (3*numsrc), respectively.
-             success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename0, filetype0, method=spaceandtime, operand='O', targetIndex=numsrc)
+             success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename0, filetype0, method, operand='O', targetIndex=numsrc)
           else
             success = .false.
           endif
