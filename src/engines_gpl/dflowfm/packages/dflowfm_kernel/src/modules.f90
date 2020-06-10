@@ -3888,6 +3888,7 @@ subroutine reset_flow()
     qinrain     = 0    ! total inflow rain                       (m3/s)
     qinrainground = 0  ! Total influx rain onto the ground       (m3/s)
     qouteva     = 0    ! total outflow evaporation               (m3/s)
+    qoutevaicept = 0  ! JanM ??? [?]
     qinlat(1:2) = 0    ! total inflow diffuse laterals           (m3/s)
     qoutlat(1:2)= 0    ! total outflow diffuse laterals          (m3/s)
     qingrw      = 0    ! total inflow from groundwater           (m3/s)

@@ -176,7 +176,7 @@
       sol  = 0d0  
 
 
-!!   ipar(1) = 0               ! initialized in "itaux"
+      ipar = 0 ! initialize all params to 0
       ipar(2) = 1               ! no (0), left (1), right (2), both (3) precond
       ipar(3) = 1               ! stopping criteria
       ipar(4) = nwk             ! number of elems in array 'wk'
