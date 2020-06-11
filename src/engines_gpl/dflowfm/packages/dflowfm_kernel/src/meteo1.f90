@@ -5693,10 +5693,12 @@ contains
         
         ierr = findlink_by_nodeid(filename, m)
         if (m <= 0) then
-           errormessage = 'Unknown node id: '// trim(filename)
+           errormessage = 'Boundary nodeId '''// trim(filename) // ''' was not found in the network.'
+           call mess(LEVEL_WARN, errormessage)
            return
         else if (m > size(kc)) then
-           errormessage = 'node_id out of bounds'
+           errormessage = 'Boundary nodeId '''// trim(filename) // ''' exceeds the network size.'
+           call mess(LEVEL_WARN, errormessage)
            return
         else
            if (usemask .and. kc(m) .eq. -1 ) then
