@@ -760,6 +760,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
     if (success) then
        bnam = 'General'
+       call prop_get_string(md_ptr, bnam, 'fileType', tmpstr, success) ! Not used currently. Mark as read to prevent warnings.
     else
        bnam = 'model'
        tmpstr = ''
@@ -796,6 +797,7 @@ subroutine readMDUFile(filename, istat)
         call mess(LEVEL_ERROR, 'Wrong model definition file. ', trim(program), ' should be ''D-Flow FM''.')
         return
     end if
+    call prop_get_string(md_ptr, bnam, 'Version', tmpstr, success) ! Not used currently. Mark as read to prevent warnings.
 
     call prop_get_integer(md_ptr, bnam, 'AutoStart',  md_jaAutoStart)
     call prop_get_string(md_ptr,  bnam, 'ModelSpecific',  md_specific)
