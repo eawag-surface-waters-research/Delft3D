@@ -856,7 +856,7 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_double ( md_ptr, 'geometry', 'Uniformwidth1Droofgutterpipes'  , wu1Duni7          , success)
     call prop_get_double ( md_ptr, 'geometry', 'Uniformheight1roofgutterpipes'  , hh1Duni7          , success)
-    call prop_get_integer( md_ptr, 'geometry', 'Uniformtyp1Dstreetgutterpipes'  , iproftypuni7      , success)
+    call prop_get_integer( md_ptr, 'geometry', 'Uniformtyp1Droofgutterpipes'  , iproftypuni7      , success)
     call prop_get_string ( md_ptr, 'geometry', '1D2DLinkFile' ,     md_1d2dlinkfile , success)
 
     call prop_get_double ( md_ptr, 'geometry', 'Dxmin1D'       , Dxmin1D)
