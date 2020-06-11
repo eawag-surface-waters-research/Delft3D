@@ -2733,6 +2733,7 @@ use messageHandling
    type(t_crsu), pointer   :: convTab
    integer                 :: i
    convtab=>null()
+   allocate(convtab)
    nc = crs%tabDef%levelsCount
    ! Check if type is not equal to walLawNikuradse (type=2), since this option is not implemented yet
    do i = 1, crs%frictionSectionsCount
@@ -2752,6 +2753,7 @@ use messageHandling
    convTab%conveyType = crs%tabDef%conveyanceType
    convTab%last_position = 1
 
+   crs%convtab => convtab
 end subroutine CalcConveyance
 
 !> Get the highest level for the two cross sections and interpolate, using weighing factor F
