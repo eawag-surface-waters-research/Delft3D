@@ -936,53 +936,53 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       !! 3a.3: handle net nodes (nodes)
       nnodeglob0 = nnodeglob
-      if (jaugrid==0) then
-         ierr = nf90_inq_varid(ncids(ii), 'NetElemNode', id_netfacenodes)
-      else
-         if (topodim /= 1) then
-            ierr = ionc_inq_varid(ioncids(ii), meshid, 'face_nodes', id_netfacenodes)
-         end if
-      endif
-      if (ierr == nf90_noerr) then
-         ierr = ncu_inq_var_fill(ncids(ii), id_netfacenodes, nofill, ifill_value)
-         call realloc (netfacenodesl, (/ netfacemaxnodes(ii), nump(ii) /), keepExisting = .false.)
-         ierr = nf90_get_var(ncids(ii), id_netfacenodes, netfacenodesl(:,:), count=(/ netfacemaxnodes(ii), nump(ii) /))
-         do ip=1,nump(ii)
-           netfacenodes(1:netfacemaxnodes(ii),nflownodecount+ip) = netfacenodesl(1:netfacemaxnodes(ii),ip)
-           ! generate node_faces: the faces that surround a node
-           do ik =1, netfacemaxnodes(ii) ! for its every node
-               k1 = netfacenodesl(ik,ip)
-               if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
-                   nfaces = node_faces(netnodemaxface+1, nnodecount+k1) + 1
-                   node_faces(netnodemaxface+1, nnodecount+k1) = nfaces ! update the counter
-                   node_faces(nfaces,nnodecount+k1) = nflownodecount+ip
-               end if
-           end do
-         end do
-
-         ! read coordinates of net nodes
+      if (topodim /= 1) then
          if (jaugrid==0) then
-            ierr = nf90_inq_varid(ncids(ii), 'NetNode_x', id_nodex)
-            ierr = nf90_inq_varid(ncids(ii), 'NetNode_y', id_nodey)
-            ierr = nf90_get_var(ncids(ii), id_nodex, node_x(nnodecount+1:nnodecount+numk(ii)))
-            ierr = nf90_get_var(ncids(ii), id_nodey, node_y(nnodecount+1:nnodecount+numk(ii)))
+            ierr = nf90_inq_varid(ncids(ii), 'NetElemNode', id_netfacenodes)
          else
-            ierr = ionc_inq_varid(ioncids(ii), meshid, 'node_x', id_nodex)
-            ierr = ionc_inq_varid(ioncids(ii), meshid, 'node_y', id_nodey)
-            ierr = nf90_get_var(ncids(ii), id_nodex, node_x(nnodecount+1:nnodecount+numk(ii)))
-            ierr = nf90_get_var(ncids(ii), id_nodey, node_y(nnodecount+1:nnodecount+numk(ii)))
+            ierr = ionc_inq_varid(ioncids(ii), meshid, 'face_nodes', id_netfacenodes)
+         endif
+         if (ierr == nf90_noerr) then
+            ierr = ncu_inq_var_fill(ncids(ii), id_netfacenodes, nofill, ifill_value)
+            call realloc (netfacenodesl, (/ netfacemaxnodes(ii), nump(ii) /), keepExisting = .false.)
+            ierr = nf90_get_var(ncids(ii), id_netfacenodes, netfacenodesl(:,:), count=(/ netfacemaxnodes(ii), nump(ii) /))
+            do ip=1,nump(ii)
+              netfacenodes(1:netfacemaxnodes(ii),nflownodecount+ip) = netfacenodesl(1:netfacemaxnodes(ii),ip)
+              ! generate node_faces: the faces that surround a node
+              do ik =1, netfacemaxnodes(ii) ! for its every node
+                  k1 = netfacenodesl(ik,ip)
+                  if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
+                      nfaces = node_faces(netnodemaxface+1, nnodecount+k1) + 1
+                      node_faces(netnodemaxface+1, nnodecount+k1) = nfaces ! update the counter
+                      node_faces(nfaces,nnodecount+k1) = nflownodecount+ip
+                  end if
+              end do
+            end do
+         else
+            if (jaugrid==0) then
+               write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemNode from `'//trim(infiles(ii))//'''. '
+            else
+               write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(meshid,ii))//'''_face_nodes from `'//trim(infiles(ii))//'''. '
+            end if
+            if (.not. verbose_mode) goto 888
+         end if
+      end if
+      
+      ! read coordinates of net nodes
+      if (jaugrid==0) then
+         ierr = nf90_inq_varid(ncids(ii), 'NetNode_x', id_nodex)
+         ierr = nf90_inq_varid(ncids(ii), 'NetNode_y', id_nodey)
+         ierr = nf90_get_var(ncids(ii), id_nodex, node_x(nnodecount+1:nnodecount+numk(ii)))
+         ierr = nf90_get_var(ncids(ii), id_nodey, node_y(nnodecount+1:nnodecount+numk(ii)))
+      else
+         ierr = ionc_inq_varid(ioncids(ii), meshid, 'node_x', id_nodex)
+         ierr = ionc_inq_varid(ioncids(ii), meshid, 'node_y', id_nodey)
+         ierr = nf90_get_var(ncids(ii), id_nodex, node_x(nnodecount+1:nnodecount+numk(ii)))
+         ierr = nf90_get_var(ncids(ii), id_nodey, node_y(nnodecount+1:nnodecount+numk(ii)))
       end if
       if (ierr /= nf90_noerr) then
-            jamerge_cntv = 0
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve coordinates of net nodes from `'//trim(infiles(ii))//'''. '
-         end if
-      else
-         if (jaugrid==0) then
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemNode from `'//trim(infiles(ii))//'''. '
-         else
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(meshid,ii))//'''_face_nodes from `'//trim(infiles(ii))//'''. '
-         end if
-         if (.not. verbose_mode) goto 888
+         jamerge_cntv = 0
+         write (*,'(a)') 'Warning: mapmerge: could not retrieve coordinates of net nodes from `'//trim(infiles(ii))//'''. '
       end if
 
       ! Identify the node domain based on the already processed net cells
