@@ -2750,7 +2750,7 @@ use messageHandling
                         crs%frictionValuePos, crs%frictionTypeNeg, crs%frictionValueNeg )
   
    convTab%conveyType = crs%tabDef%conveyanceType
-   crs%convTab => convTab
+   convTab%last_position = 1
 
 end subroutine CalcConveyance
 
