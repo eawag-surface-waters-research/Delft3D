@@ -2825,8 +2825,12 @@ function read_samples_from_geotiff(filename) result(success)
 #ifdef HAVE_GDAL
    ! local
    type(gdaldataseth)              :: dataset                      ! Gdal dataset 
+   type(GDALRasterBandH)           :: rasterband                   ! Selected raster band in GDAL dataset
    integer(kind=c_int)             :: nx, ny, nz, offsetx, offsety ! Geometry of dataset
-   real(kind=c_float), allocatable :: pbuffer(:,:,:)               ! Buffer containing data of dataset
+   real(kind=c_double), allocatable :: dbuffer(:,:,:)              ! Buffer containing data of dataset (for 64-bit raster bands)
+   real(kind=c_float),  allocatable :: fbuffer(:,:,:)              ! Buffer containing data of dataset (for 32-bit raster bands)
+   integer(kind=c_int)             :: rasterband_datatypesize
+
    real(kind=c_double)             :: geotransform(6)              ! Geo information of dataset
    double precision                :: dxa, dya                     ! Pixel size
    double precision                :: x0, y0                       ! Origin
@@ -2861,12 +2865,26 @@ function read_samples_from_geotiff(filename) result(success)
          call mess(LEVEL_WARN, 'GeoTIFF files with multiple layers are currently not supported: ' // trim(filename))
          goto 888
       endif      
-                  
-      ! Read tiff data into pbuffer and throw warning if something went wrong
+
+      rasterband = gdalgetrasterband(dataset, 1)
+      rasterband_datatypesize = gdalgetdatatypesize(gdalgetrasterdatatype(rasterband))
+
+      ! Read tiff data into buffer and throw warning if something went wrong
       offsetx = 0
       offsety = 0
-      allocate(pbuffer(nx, ny, nz))
-      ierr = gdaldatasetrasterio_f(dataset, GF_Read, offsetx, offsety, pbuffer)
+      if (rasterband_datatypesize == 32) then
+         allocate(fbuffer(nx, ny, nz))
+         ierr = gdaldatasetrasterio_f(dataset, GF_Read, offsetx, offsety, fbuffer)
+      else if (rasterband_datatypesize == 64) then
+         allocate(dbuffer(nx, ny, nz))
+         ierr = gdaldatasetrasterio_f(dataset, GF_Read, offsetx, offsety, dbuffer)
+      else
+         write (msgbuf, '(a,a,i0,a)') 'Error reading ''' // trim(filename) // ''': GeoTIFF files with non-float raster bands are currently not supported.', &
+            ' Detected data type size: ', rasterband_datatypesize, ' bits.'
+         call warn_flush()
+         goto 888
+      end if
+
       if (ierr /= 0) then
          call mess(LEVEL_WARN, 'Could not read GeoTIFF data of ' // trim(filename) // ' into an array buffer')
          goto 888
@@ -2923,7 +2941,11 @@ function read_samples_from_geotiff(filename) result(success)
             ns = ns+1
             xs(ns) =  x0 + dxa*(i-1+pixeloffset) ! "-1" to convert to 0-based C, pixeloffset to get the middle of the pixel instead of its edge
             ys(ns) =  y0 + dya*(j-1+pixeloffset) 
-            zs(ns) =  pbuffer(i, j, nz)
+            if (rasterband_datatypesize == 32) then
+               zs(ns) =  fbuffer(i, j, nz)
+            else if (rasterband_datatypesize == 64) then
+               zs(ns) =  dbuffer(i, j, nz)
+            end if
          enddo
       enddo
       ! mark samples as structured, and in supply block sizes
@@ -2934,7 +2956,8 @@ function read_samples_from_geotiff(filename) result(success)
       ! new sample set: no Hessians computed yet
       iHesstat = iHesstat_DIRTY
 
-      deallocate(pbuffer)
+      if (allocated(fbuffer)) deallocate(fbuffer)
+      if (allocated(dbuffer)) deallocate(dbuffer)
       call gdalclose(dataset)
 
       if (ns > 100000) ndraw(32) = 7 ! Squares (faster than circles)
@@ -2958,9 +2981,8 @@ function read_samples_from_geotiff(filename) result(success)
       call gdalclose(dataset)
    endif
 
-   if (allocated(pbuffer)) then
-      deallocate(pbuffer)
-   endif
+   if (allocated(fbuffer)) deallocate(fbuffer)
+   if (allocated(dbuffer)) deallocate(dbuffer)
 
    return
 #else
