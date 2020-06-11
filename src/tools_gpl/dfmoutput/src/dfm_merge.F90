@@ -77,7 +77,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, dimension(nfiles+1), target :: ndx, lnx, ndxg, lnxg, kmx, numk, numl, nump, numkg, numlg, netfacemaxnodes, nt, ndxbnd !< counters, maintained for all input files + 1 output file.
    integer, dimension(:), pointer :: item_counts !< Generalized count pointer, will point to ndx, lnx, numl, or numk during var data reading + writing.
    integer:: noutfile !< array index/position of output file ids, by default the last, i.e., nfiles + 1.
-   integer, allocatable, target  :: flownode_domain(:), facebnd_domain(:), edge_domain(:), node_domain(:), netedge_domain(:) !< Global flownode(face)/edge/node numbers and their domain number.
+   integer, allocatable, target  :: face_domain(:), facebnd_domain(:), edge_domain(:), node_domain(:), netedge_domain(:) !< Global flownode(face)/edge/node numbers and their domain number.
    integer,              pointer :: item_domain(:)
    integer, allocatable :: ln(:,:) !< Flow links
    integer, allocatable :: edgenodes(:,:) !< Net links
@@ -97,11 +97,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: intmiss = -2147483647 ! integer fillvalue
    double precision :: dmiss = -999d0, intfillv
 !netface_g2c(:)
-   integer :: id_flownodedomain, id_flownodeglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
+   integer :: id_facedomain , id_faceglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
    integer :: ierri
    integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, itm, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype
    integer :: netfacemaxnodesg, netnodemaxface=10, ndxc, lnxc, numkc, numlc,ndx_bndc
-   integer :: nflownodeglob, nflownodeglob0, nflownodecount, iflownodeglob
+   integer :: nfaceglob, nfaceglob0, nfacecount, ifaceglob
    integer :: nedgeglob,    nedgeglob0,    nedgecount, iedgeglob
    integer :: nnodeglob,    nnodeglob0,    nnodecount
    integer :: nbndglob,     nbndcount
@@ -399,9 +399,6 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          id_nodedim(ii) = id
          nodedimname    = dimname
          numk(ii)       = nlen
-         if (topodim == 1) then
-            ndx(ii)        = nlen
-         end if
          ! edge
          ierr = ionc_get_dimid(ioncids(ii), im, mdim_edge, id)
          ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
@@ -786,12 +783,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    !! 3. Construct merged flow geometry (using proper cellmasks, global numbers, etc.
    !! 3a. Count dimensions (removing partition overlap) for merged flow nodes (faces) and flow links (edges).
-   nflownodecount= 0 !< running total of ndx(ii) while iterating the files
+   nfacecount    = 0 !< running total of ndx(ii) while iterating the files
    nedgecount    = 0 !< running total of lnx(ii) while iterating the files
    nnodecount    = 0 !< running total of numk(ii) while iterating the files
    !nnetfacecount = 0 !< running total of nump(ii) while iterating the files
    nnetedgecount = 0 !< running total of numl(ii) while iterating the files
-   nflownodeglob = 0 !< total number of flow nodes (faces) without duplicates
+   nfaceglob     = 0 !< total number of flow nodes (faces) without duplicates
    nedgeglob     = 0 !< total number of flow links (edges) without duplicates
    nnodeglob     = 0 !< total number of net nodes (nodes) without duplicates
    !nnetfaceglob  = 0 !< total number of net cells (faces) without duplicates
@@ -800,7 +797,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    nbndcount     = 0 !< total number of boundary waterlevel points
 
    ndxc = sum(ndx(1:nfiles))
-   call realloc(flownode_domain, ndxc, keepExisting=.false., fill=-1)
+   call realloc(face_domain, ndxc, keepExisting=.false., fill=-1)
    call realloc(face_c2g,    ndxc, keepExisting=.false.)
    call realloc(face_g2c,    ndxc, keepExisting=.false.)
 
@@ -846,15 +843,15 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    end if
    do ii=1,nfiles
       !! 3a.1: handle flow nodes (faces)
-      nflownodeglob0 = nflownodeglob
-      flownode_domain(nflownodecount+1:nflownodecount+ndx(ii)) = ii-1 ! Just set default domain if FlowElemDomain not present.
+      nfaceglob0 = nfaceglob
+      face_domain(nfacecount+1:nfacecount+ndx(ii)) = ii-1 ! Just set default domain if FlowElemDomain not present.
       if (jaugrid == 0) then
-         ierr = nf90_inq_varid(ncids(ii), 'FlowElemDomain', id_flownodedomain)
+         ierr = nf90_inq_varid(ncids(ii), 'FlowElemDomain', id_facedomain )
       else
-         ierr = ionc_inq_varid(ioncids(ii), meshid, 'flowelem_domain', id_flownodedomain)
+         ierr = ionc_inq_varid(ioncids(ii), meshid, 'flowelem_domain', id_facedomain )
       endif
       if (ierr == nf90_noerr) then
-         ierr = nf90_get_var(ncids(ii), id_flownodedomain, flownode_domain(nflownodecount+1:nflownodecount+ndx(ii)), count=(/ ndx(ii) /))
+         ierr = nf90_get_var(ncids(ii), id_facedomain , face_domain(nfacecount+1:nfacecount+ndx(ii)), count=(/ ndx(ii) /))
          if (ierr /= nf90_noerr) then
             write (*,'(a)') 'Error: mapmerge: could not retrieve FlowElemDomain from `'//trim(infiles(ii))//'''. '
             if (.not. verbose_mode) goto 888
@@ -865,13 +862,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       if (ierr == nf90_noerr) then
          if (jaugrid == 0) then
-            ierr = nf90_inq_varid(ncids(ii), 'FlowElemGlobalNr', id_flownodeglobnr)
+            ierr = nf90_inq_varid(ncids(ii), 'FlowElemGlobalNr', id_faceglobnr)
          else
-            ierr = ionc_inq_varid(ioncids(ii), meshid, 'flowelem_globalnr', id_flownodeglobnr)
+            ierr = ionc_inq_varid(ioncids(ii), meshid, 'flowelem_globalnr', id_faceglobnr)
          end if
       end if
       if (ierr == nf90_noerr) then
-         ierr = nf90_get_var(ncids(ii), id_flownodeglobnr, face_c2g(nflownodecount+1:nflownodecount+ndx(ii)), count=(/ ndx(ii) /))
+         ierr = nf90_get_var(ncids(ii), id_faceglobnr, face_c2g(nfacecount+1:nfacecount+ndx(ii)), count=(/ ndx(ii) /))
          if (ierr /= nf90_noerr) then
             write (*,'(a)') 'Error: mapmerge: could not retrieve FlowElemGlobalNr from `'//trim(infiles(ii))//'''. '
             if (.not. verbose_mode) goto 888
@@ -879,19 +876,19 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       else
          ! no problem if FlowElemGlobalNr is missing: just include all elems: global nr is equal to 'concat-index'.
          do ip=1,ndx(ii)
-            face_c2g(nflownodecount+ip) = nflownodecount+ip
+            face_c2g(nfacecount+ip) = nfacecount+ip
          end do
       end if
 
       ! Count the actual unique flow nodes (to get rid of partition overlap)
       do ip=1,ndx(ii)
-         if (flownode_domain(nflownodecount+ip) == ii-1) then
-            nflownodeglob = nflownodeglob+1
-            iflownodeglob = face_c2g(nflownodecount+ip)
-            face_g2c(iflownodeglob) = nflownodecount + ip
+         if (face_domain(nfacecount+ip) == ii-1) then
+            nfaceglob = nfaceglob+1
+            ifaceglob = face_c2g(nfacecount+ip)
+            face_g2c(ifaceglob) = nfacecount + ip
          end if
       end do
-      ndxg(ii)   = nflownodeglob-nflownodeglob0
+      ndxg(ii)   = nfaceglob-nfaceglob0
 
       !! 3a.2: handle flow links (edges)
       if (jaugrid==0) then ! Only old format files contain FlowLink varaible, UGRID format files do not contain it
@@ -914,12 +911,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                idom = ii - 1 ! Boundary mirrornodes are always owned by the domain itself.
                isBndLink = 1 ! Mark the boundary link
             else
-               idom = flownode_domain(nflownodecount+n1)
+               idom = face_domain(nfacecount+n1)
             end if
 
-            idom = min(idom, flownode_domain(nflownodecount+n2))
+            idom = min(idom, face_domain(nfacecount+n2))
 
-            if (isBndLink == 1 .and. flownode_domain(nflownodecount+n2) .ne. ii-1) then
+            if (isBndLink == 1 .and. face_domain(nfacecount+n2) .ne. ii-1) then
             ! If this boundary link connects an interior flownode which does not belong to the current subdomain
                idom = - 999
             endif
@@ -947,14 +944,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             call realloc (netfacenodesl, (/ netfacemaxnodes(ii), nump(ii) /), keepExisting = .false.)
             ierr = nf90_get_var(ncids(ii), id_netfacenodes, netfacenodesl(:,:), count=(/ netfacemaxnodes(ii), nump(ii) /))
             do ip=1,nump(ii)
-              netfacenodes(1:netfacemaxnodes(ii),nflownodecount+ip) = netfacenodesl(1:netfacemaxnodes(ii),ip)
+              netfacenodes(1:netfacemaxnodes(ii),nfacecount+ip) = netfacenodesl(1:netfacemaxnodes(ii),ip)
               ! generate node_faces: the faces that surround a node
               do ik =1, netfacemaxnodes(ii) ! for its every node
                   k1 = netfacenodesl(ik,ip)
                   if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
                       nfaces = node_faces(netnodemaxface+1, nnodecount+k1) + 1
                       node_faces(netnodemaxface+1, nnodecount+k1) = nfaces ! update the counter
-                      node_faces(nfaces,nnodecount+k1) = nflownodecount+ip
+                      node_faces(nfaces,nnodecount+k1) = nfacecount+ip
                   end if
               end do
             end do
@@ -988,12 +985,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ! Identify the node domain based on the already processed net cells
       do ip=1,nump(ii)
          do ik=1,netfacemaxnodes(ii)
-            k1 = netfacenodes(ik, nflownodecount+ip)
+            k1 = netfacenodes(ik, nfacecount+ip)
             if (k1 == -1 .or. k1 == ifill_value) then
                exit
             end if
             ! Owner of the node will be the lowest domain number of any of the cells surrounding that node.
-            node_domain(nnodecount+k1) = min(node_domain(nnodecount+k1), flownode_domain(nflownodecount+ip))
+            node_domain(nnodecount+k1) = min(node_domain(nnodecount+k1), face_domain(nfacecount+ip))
          end do
       end do
       !numpg(ii)   = nnetfaceglob-nnetfaceglob0
@@ -1050,7 +1047,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (jaugrid==0) then
          ierr = nf90_inq_varid(ncids(ii), 'NetElemLink', id_netfaceedges)
          if (ierr == nf90_noerr) then
-            ierr = nf90_get_var(ncids(ii), id_netfaceedges, netfaceedges(1:netfacemaxnodes(ii),nflownodecount+1:nflownodecount+nump(ii)), count=(/ netfacemaxnodes(ii), nump(ii) /))
+            ierr = nf90_get_var(ncids(ii), id_netfaceedges, netfaceedges(1:netfacemaxnodes(ii),nfacecount+1:nfacecount+nump(ii)), count=(/ netfacemaxnodes(ii), nump(ii) /))
             if (ierr /= nf90_noerr) then
                jamerge_cntv = 0
                write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
@@ -1065,7 +1062,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                do ikk = 1, 2
                   ic = netedgefaces(ikk,iedge+nnetedgecount)
                   if (ic > 0) then
-                     iface = ic + nflownodecount
+                     iface = ic + nfacecount
                      nfaceedges(iface) = nfaceedges(iface) +1
                      netfaceedges(nfaceedges(iface), iface) = iedge
                   end if
@@ -1119,7 +1116,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       ! Intentional: all of these need to be done at very last instant:
       nedgecount    = nedgecount    + lnx(ii)
-      nflownodecount= nflownodecount+ ndx(ii)
+      nfacecount= nfacecount+ ndx(ii)
       nnodecount    = nnodecount    + numk(ii)
       nnetedgecount = nnetedgecount + numl(ii)
       !nnetfacecount = nnetfacecount + nump(ii)
@@ -1141,7 +1138,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    !! fulfill node_c2g, because in domain that is larger than 0000, there are nodes which are in this domain but
    !  their domain numbers are another domain.
     do ii = 2, nfiles
-        nflownodecount = sum(nump(1:ii-1))
+        nfacecount = sum(nump(1:ii-1))
         nnodecount = sum(numk(1:ii-1))
         do ik=1,numk(ii)
             if (node_c2g(nnodecount+ik)==-1) then
@@ -1149,9 +1146,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                 do ikk = 1, node_faces(netnodemaxface+1, nnodecount+ik)
                     ic = node_faces(ikk,nnodecount+ik) ! index of one surrounding cell
                     if (ic .ne. -1) then
-                       if (flownode_domain(ic) .ne. ii-1 .and. flownode_domain(ic) == node_domain(nnodecount+ik)) then ! cell ic is not in current domain, and is in the same domain with node ik
-                           iflownodeglob = face_c2g(ic)
-                           ifacec = face_g2c(iflownodeglob) ! and this is now from the OTHER domain.
+                       if (face_domain(ic) .ne. ii-1 .and. face_domain(ic) == node_domain(nnodecount+ik)) then ! cell ic is not in current domain, and is in the same domain with node ik
+                           ifaceglob = face_c2g(ic)
+                           ifacec = face_g2c(ifaceglob) ! and this is now from the OTHER domain.
                            ! in which domain (iii) does iface belong
                            do iii = 1, nfiles
                                if (ifacec > sum(nump(1:iii-1)) .and. ifacec <= sum(nump(1:iii))) then
@@ -1187,13 +1184,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
     !  but their domain numbers are another domain.
     do ii = 2, nfiles
         netedgecount = sum(numl(1:ii-1))
-        nflownodecount = sum(nump(1:ii-1))
+        nfacecount = sum(nump(1:ii-1))
         do ip = 1, numl(ii)
             k1 = netedgefaces(1, netedgecount+ip)  ! flowelem that edge L connects
             k2 = netedgefaces(2, netedgecount+ip)
             if (k1.ne.0 .and. k2.ne. 0) then       ! When edge L is not on the boundary
-                g1 = flownode_domain(nflownodecount+k1)    ! domain number of this flownode
-                g2 = flownode_domain(nflownodecount+k2)
+                g1 = face_domain(nfacecount+k1)    ! domain number of this flownode
+                g2 = face_domain(nfacecount+k2)
                 if (g1 .ne. g2) then               ! if edge L lies on the boundary of two different domains
                     if (g1==ii-1 .and. g1>g2) then ! decide which flowelem is in the current domain, which is not
                         ifacein = k1
@@ -1205,8 +1202,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         cycle
                     end if
 
-                    iflownodeglob = face_c2g(ifaceout+nflownodecount) ! for the flownode which is in another domain with smaller domain number
-                    ifacec = face_g2c(iflownodeglob)                  ! and this is now from the OTHER domain.
+                    ifaceglob = face_c2g(ifaceout+nfacecount) ! for the flownode which is in another domain with smaller domain number
+                    ifacec = face_g2c(ifaceglob)                  ! and this is now from the OTHER domain.
                     ! in which domain (iii) does iface belong
                     do iii = 1, nfiles
                         if (ifacec>sum(nump(1:iii-1)) .and. ifacec < sum(nump(1:iii))) then
@@ -1243,7 +1240,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       endif
    enddo
 
-   ndx (noutfile) = nflownodeglob
+   ndx (noutfile) = nfaceglob
    lnx (noutfile) = nedgeglob
    numk(noutfile) = nnodeglob
    numl(noutfile) = nnetedgeglob
@@ -1423,7 +1420,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    end if
 
    ! 1D tmp array: take largest of all topological position counts:
-   maxitems = max(nedgecount, nflownodecount, nnodecount, nnetedgecount, nbndcount, kmx(noutfile)+1)
+   maxitems = max(nedgecount, nfacecount, nnodecount, nnetedgecount, nbndcount, kmx(noutfile)+1)
    call realloc( tmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D_tmp,maxitems, keepExisting=.false.)
@@ -1490,10 +1487,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       select case (var_loctype(iv))
       case (UNC_LOC_S)
          item_counts => ndx
-         item_domain => flownode_domain
+         item_domain => face_domain
       case (UNC_LOC_SN)
          item_counts => ndx
-         item_domain => flownode_domain
+         item_domain => face_domain
       case (UNC_LOC_U)
          item_counts => lnx
          item_domain => edge_domain
@@ -1724,12 +1721,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                        end if
                    end do
                else if (var_names(iv) .eq. 'NetElemNode' .or. var_names(iv) .eq. trim(meshname)//'_face_nodes') then
-                   nflownodecount = sum(nump(1:ii-1))
+                   nfacecount = sum(nump(1:ii-1))
                    nnodecount = sum(numk(1:ii-1))
                    do ip=1, item_counts(ii)
-                       if (item_domain(nflownodecount+ip) == ii-1) then
-                           iflownodeglob = face_c2g(nflownodecount+ip)
-                           if (iflownodeglob > 0) then
+                       if (item_domain(nfacecount+ip) == ii-1) then
+                           ifaceglob = face_c2g(nfacecount+ip)
+                           if (ifaceglob > 0) then
                                nitemglob = nitemglob + 1
                                itmpvar2D_tmp(:,nitemglob) = itmpvar2D(:,nitemglob0+ip)
                                do ikk = 1, netfacemaxnodes(ii)
@@ -1746,12 +1743,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                        itmpvar2D(:,1:nitemglob) = itmpvar2D_tmp(:,1:nitemglob)
                    end if
                else if (var_names(iv) .eq. 'NetElemLink') then
-                   nflownodecount = sum(nump(1:ii-1))
+                   nfacecount = sum(nump(1:ii-1))
                    nnetedgecount = sum(numl(1:ii-1))
                    do ip =1, item_counts(ii)
-                       if (item_domain(nflownodecount+ip) == ii-1) then
-                           iflownodeglob = face_c2g(nflownodecount+ip)
-                           if (iflownodeglob > 0) then
+                       if (item_domain(nfacecount+ip) == ii-1) then
+                           ifaceglob = face_c2g(nfacecount+ip)
+                           if (ifaceglob > 0) then
                                nitemglob = nitemglob + 1
                                itmpvar2D_tmp(:,nitemglob) = itmpvar2D(:,nitemglob0+ip)
                                do ikk = 1, netfacemaxnodes(ii)
@@ -1769,7 +1766,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                    end if
                else if (var_names(iv) .eq. 'ElemLink' .or. var_names(iv) .eq. trim(meshname)//'_edge_faces') then
                    nnetedgecount = sum(numl(1:ii-1))
-                   nflownodecount = sum(nump(1:ii-1))
+                   nfacecount = sum(nump(1:ii-1))
                    do ip=1,item_counts(ii)
                        if (item_domain(nnetedgecount+ip) == ii-1) then
                            inetedgeglob = netedge_c2g(nnetedgecount+ip)
@@ -1779,7 +1776,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                                do ikk=1,2
                                    g1 = itmpvar2D(ikk, nitemglob)
                                    if (g1 > 0) then
-                                       g1 = g1 + nflownodecount
+                                       g1 = g1 + nfacecount
                                        itmpvar2D(ikk,nitemglob) = face_c2g(g1)
                                    else if (g1 == 0) then
                                        itmpvar2D(ikk,nitemglob) = 0
@@ -1790,7 +1787,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                    end do
                else if (var_names(iv) .eq. 'FlowLink') then
                    nedgecount = sum(lnx(1:ii-1))
-                   nflownodecount = sum(nump(1:ii-1))
+                   nfacecount = sum(nump(1:ii-1))
                    do ip=1,item_counts(ii)
                        if (item_domain(nedgecount+ip) == ii-1) then
                            iedgeglob = edge_c2g(nedgecount+ip)
@@ -1800,7 +1797,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                                do ikk=1,2
                                    g1 = itmpvar2D_tmp(ikk, nitemglob)
                                    if (g1 > 0 .and. g1 <= nump(ii)) then
-                                       g1 = g1 + nflownodecount
+                                       g1 = g1 + nfacecount
                                        itmpvar2D_tmp(ikk,nitemglob) = face_c2g(g1)
                                    else if (g1 > nump(ii)) then
                                        itmpvar2D_tmp(ikk,nitemglob) = intmiss
@@ -1814,13 +1811,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                    end if
                !else if (var_loctype(iv) == UNC_LOC_S) then ! variables that locate on faces, temporaly disabled
                !    if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
-               !      nflownodecount = sum(nump(1:ii-1))
+               !      nfacecount = sum(nump(1:ii-1))
                !      do ip=1, item_counts(ii)
-               !         if (item_domain(nflownodecount+ip) == ii-1) then
-               !            iflownodeglob = face_c2g(nflownodecount+ip)
-               !            if (iflownodeglob > 0) then
+               !         if (item_domain(nfacecount+ip) == ii-1) then
+               !            ifaceglob = face_c2g(nfacecount+ip)
+               !            if (ifaceglob > 0) then
                !               nitemglob = nitemglob + 1
-               !               itmpvar1D_tmp(iflownodeglob) = itmpvar1D(nitemglob0+ip)
+               !               itmpvar1D_tmp(ifaceglob) = itmpvar1D(nitemglob0+ip)
                !            end if
                !         end if
                !      end do
@@ -1828,13 +1825,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                !          itmpvar1D(1:nitemglob) = itmpvar1D_tmp(1:nitemglob)
                !      end if
                !   else if (var_types(iv) == nf90_byte) then
-               !      nflownodecount = sum(nump(1:ii-1))
+               !      nfacecount = sum(nump(1:ii-1))
                !      do ip=1, item_counts(ii)
-               !         if (item_domain(nflownodecount+ip) == ii-1) then
-               !            iflownodeglob = face_c2g(nflownodecount+ip)
-               !            if (iflownodeglob > 0) then
+               !         if (item_domain(nfacecount+ip) == ii-1) then
+               !            ifaceglob = face_c2g(nfacecount+ip)
+               !            if (ifaceglob > 0) then
                !               nitemglob = nitemglob + 1
-               !               btmpvar1D_tmp(iflownodeglob,itm:itm) = btmpvar1D(nitemglob0+ip,itm:itm)
+               !               btmpvar1D_tmp(ifaceglob,itm:itm) = btmpvar1D(nitemglob0+ip,itm:itm)
                !            end if
                !         end if
                !      end do
@@ -1842,14 +1839,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                !          btmpvar1D(1:nitemglob,itm:itm) = btmpvar1D_tmp(1:nitemglob,itm:itm)
                !      end if
                !   else
-               !      nflownodecount = sum(nump(1:ii-1))
+               !      nfacecount = sum(nump(1:ii-1))
                !      if (tmpvarDim == 1) then
                !         do ip=1, item_counts(ii)
-               !            if (item_domain(nflownodecount+ip) == ii-1) then
-               !               iflownodeglob = face_c2g(nflownodecount+ip)
-               !               if (iflownodeglob > 0) then
+               !            if (item_domain(nfacecount+ip) == ii-1) then
+               !               ifaceglob = face_c2g(nfacecount+ip)
+               !               if (ifaceglob > 0) then
                !                  nitemglob = nitemglob + 1
-               !                  tmpvar1D_tmp(iflownodeglob) = tmpvar1D(nitemglob0+ip)
+               !                  tmpvar1D_tmp(ifaceglob) = tmpvar1D(nitemglob0+ip)
                !               end if
                !            end if
                !         end do
@@ -1858,11 +1855,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                !         end if
                !      else if (tmpvarDim == 2) then
                !         do ip=1, item_counts(ii)
-               !            if (item_domain(nflownodecount+ip) == ii-1) then
-               !               iflownodeglob = face_c2g(nflownodecount+ip)
-               !               if (iflownodeglob > 0) then
+               !            if (item_domain(nfacecount+ip) == ii-1) then
+               !               ifaceglob = face_c2g(nfacecount+ip)
+               !               if (ifaceglob > 0) then
                !                  nitemglob = nitemglob + 1
-               !                  tmpvar2D_tmp(:,iflownodeglob)=tmpvar2D(:,nitemglob0+ip)
+               !                  tmpvar2D_tmp(:,ifaceglob)=tmpvar2D(:,nitemglob0+ip)
                !               end if
                !            end if
                !         end do
@@ -1981,16 +1978,16 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    ! 6. Write some useful meta info on all merged domains into the output file
 
-   nflownodecount = 0
+   nfacecount = 0
    nedgecount = 0
    nnodecount = 0
 
    do ii=1,nfiles
-      ierr = nf90_put_var(ncids(noutfile), id_part_face_start, nflownodecount+1, start=(/ ii /))
+      ierr = nf90_put_var(ncids(noutfile), id_part_face_start, nfacecount+1, start=(/ ii /))
       ierr = nf90_put_var(ncids(noutfile), id_part_edge_start, nedgecount+1, start=(/ ii /))
       ierr = nf90_put_var(ncids(noutfile), id_part_node_start, nnodecount+1, start=(/ ii /))
 
-      nflownodecount = nflownodecount + ndxg (ii)
+      nfacecount = nfacecount + ndxg (ii)
       nedgecount = nedgecount + lnxg (ii)
       nnodecount = nnodecount + numkg(ii)
    end do
