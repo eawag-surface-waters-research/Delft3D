@@ -1737,8 +1737,6 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'output', 'WriteDFMinterpretedvalues', jawriteDFMinterpretedvalues, success)
 
-    call prop_get_integer(md_ptr, 'output', 'WriteDetailedTimers', jawriteDetailedTimers, success)
-
     ti_rst_array = 0d0
     call prop_get_doubles(md_ptr, 'output', 'RstInterval'   ,  ti_rst_array, 3, success)
     call getOutputTimeArrays(ti_rst_array, ti_rsts, ti_rst, ti_rste, success)
@@ -3573,8 +3571,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
 
     call prop_set(prop_ptr, 'output', 'WriteDFMinterpretedvalues', jaWriteDFMinterpretedvalues, 'Write DFMinterpretedvalues (1: yes, 0: no)' )
-
-    call prop_set(prop_ptr, 'output', 'WriteDetailedTimers', jawriteDetailedTimers, 'Write detailed timers output file (1: yes, 0: no)' )
 
     call prop_set(prop_ptr, 'output', 'MapOutputTimeVector',  trim(md_mptfile), 'File (*.mpt) containing fixed map output times (s) w.r.t. RefDate')
     call prop_set(prop_ptr, 'output', 'FullGridOutput', jafullgridoutput, 'Full grid output mode (0: compact, 1: full time-varying grid data)')

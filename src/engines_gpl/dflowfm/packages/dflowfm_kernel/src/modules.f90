@@ -2836,8 +2836,6 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
 
  integer                           :: jawriteDFMinterpretedvalues = 0 !< Write interpretedvalues
 
- integer                           :: jawriteDetailedTimers = 0 !< Write detailed timers output file
-
 ! parameters for parms solver
  integer,                                   parameter :: NPARMS_INT=2              !< for parms solver, number of integer parameters
  integer,                                   parameter :: IPARMS_ILUTYPE=1

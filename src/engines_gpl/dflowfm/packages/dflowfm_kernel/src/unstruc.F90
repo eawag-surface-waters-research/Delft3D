@@ -11050,9 +11050,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     if ( jawaqproc .eq. 1 ) then
        call fm_wq_processes_ini_proc()
        jawaqproc = 2
-       timon = .false. ! switch off timers during first dummy processes time step
        call fm_wq_processes_step(ti_waqproc,tstart_user)
-       timon = .true.
     endif
  endif
  call timstop(handle_extra(18)) ! end waq processes init
@@ -12540,7 +12538,6 @@ subroutine writesomeinitialoutput()
  double precision  :: tcpusol
  double precision  :: totalcomp
  double precision  :: timeloop
- character(len=255) :: timersfilename
  character(len=  5) :: sd
 
  if (ndx == 0) then
@@ -12698,12 +12695,6 @@ subroutine writesomeinitialoutput()
 !   call mba_final(time_user)
  if (ti_mba > 0) then
     call mba_final(time_user)
- endif
-
- if ( jawriteDetailedTimers == 1 ) then
-    timersfilename = defaultfilename('timers')
-    call mess(LEVEL_INFO, 'writing detailed timers output to: ', timersfilename)
-    call timdump(timersfilename)
  endif
 
  msgbuf = ' ' ; call msg_flush()
