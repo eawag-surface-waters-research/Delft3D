@@ -5919,6 +5919,8 @@ contains
    use m_polygon
    use m_alloc
    use m_missing
+   use dfm_error
+   use unstruc_messages
    
    implicit none
    
@@ -5958,12 +5960,22 @@ contains
       npl = numcoord
    case (LOCTP_BRANCHID_CHAINAGE)
       ierr = findnode(branchId, chainage, n)
-      if (ierr /= 0) return
+      if (ierr /= DFM_NOERR) then
+         errormessage = 'While selecting grid points: branchId '''// trim(branchId) // ''' was not found in the network.'
+         call mess(LEVEL_WARN, errormessage)
+         return
+      end if
+
       numsel     = 1
       kp(numsel) = n
    case (LOCTP_NODEID)
       ierr = findnode(nodeId, n)
-      if (ierr /= 0) return
+      if (ierr /= DFM_NOERR) then
+         errormessage = 'While selecting grid points: nodeId '''// trim(nodeId) // ''' was not found in the network.'
+         call mess(LEVEL_WARN, errormessage)
+         return
+      end if
+
       numsel     = 1
       kp(numsel) = n
    case default
