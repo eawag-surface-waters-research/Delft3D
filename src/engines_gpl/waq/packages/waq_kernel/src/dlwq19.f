@@ -906,8 +906,8 @@
             do isys = 1, nosys
                dq = q*conc(isys,iseg)
                rhs (isys,iseg) = rhs(isys,iseg) - dq
-               if ( massbal    ) amass2(isys,    3) = amass2(isys    ,3) + dq
-               if ( ipb .gt. 0 ) dmps  (isys,ipb,3) = dmps  (isys,ipb,3) + dq
+               if ( massbal    ) amass2(isys,    3) = amass2(isys    ,3) - dq
+               if ( ipb .gt. 0 ) dmps  (isys,ipb,3) = dmps  (isys,ipb,3) - dq
             enddo
             do k = 1, nowst
                if ( iseg2 .eq. iwaste(k) ) then
@@ -1314,8 +1314,8 @@
                do isys = 1, nosys
                   dq = q*dconc2(isys,iseg)
                   rhs (isys,iseg) = rhs(isys,iseg) - dq
-                  if ( massbal    ) amass2(isys,    3) = amass2(isys    ,3) + dq
-                  if ( ipb .gt. 0 ) dmps  (isys,ipb,3) = dmps  (isys,ipb,3) + dq
+                  if ( massbal    ) amass2(isys,    3) = amass2(isys    ,3) - dq
+                  if ( ipb .gt. 0 ) dmps  (isys,ipb,3) = dmps  (isys,ipb,3) - dq
                enddo
                do k = 1, nowst
                   if ( iseg .eq. iwaste(k) ) then
