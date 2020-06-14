@@ -1060,38 +1060,36 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (.not. verbose_mode) goto 888
       end if
 
-      if (jaugrid==0) then
-         ierr = nf90_inq_varid(ncids(ii), 'ElemLink', id_netedgefaces)
-      else
-         if (topodim /= 1) then
+      if (topodim /= 1) then
+         if (jaugrid==0) then
+            ierr = nf90_inq_varid(ncids(ii), 'ElemLink', id_netedgefaces)
+         else
             ierr = ionc_inq_varid(ioncids(ii), meshid, 'edge_faces', id_netedgefaces)
          end if
-      end if
-      if (ierr == nf90_noerr) then
-         ierr = nf90_get_var(ncids(ii), id_netedgefaces, netedgefaces(:,nnetedgecount+1:nnetedgecount+numl(ii)), count=(/ 2, numl(ii) /))
-      else
-         if (jaugrid==0) then
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve ElemLink from `'//trim(infiles(ii))//'''. '
-         else
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(meshid,ii))//'''_edge_faces from `'//trim(infiles(ii))//'''. '
-         end if
-         if (.not. verbose_mode) goto 888
-      end if
-
-      if (jaugrid==0) then
-         ierr = nf90_inq_varid(ncids(ii), 'NetElemLink', id_netfaceedges)
          if (ierr == nf90_noerr) then
-            ierr = nf90_get_var(ncids(ii), id_netfaceedges, netfaceedges(1:netfacemaxnodes(ii),nfacecount+1:nfacecount+nump(ii)), count=(/ netfacemaxnodes(ii), nump(ii) /))
-            if (ierr /= nf90_noerr) then
-               jamerge_cntv = 0
-               write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
-            end if
+            ierr = nf90_get_var(ncids(ii), id_netedgefaces, netedgefaces(:,nnetedgecount+1:nnetedgecount+numl(ii)), count=(/ 2, numl(ii) /))
          else
-            write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
+            if (jaugrid==0) then
+               write (*,'(a)') 'Warning: mapmerge: could not retrieve ElemLink from `'//trim(infiles(ii))//'''. '
+            else
+               write (*,'(a)') 'Warning: mapmerge: could not retrieve `'//trim(mesh_names(meshid,ii))//'''_edge_faces from `'//trim(infiles(ii))//'''. '
+            end if
             if (.not. verbose_mode) goto 888
          end if
-      else ! UGRID map file does not contain _face_edges, build it here: netfaceedges
-         if (topodim /= 1) then
+         
+         if (jaugrid==0) then
+            ierr = nf90_inq_varid(ncids(ii), 'NetElemLink', id_netfaceedges)
+            if (ierr == nf90_noerr) then
+               ierr = nf90_get_var(ncids(ii), id_netfaceedges, netfaceedges(1:netfacemaxnodes(ii),nfacecount+1:nfacecount+nump(ii)), count=(/ netfacemaxnodes(ii), nump(ii) /))
+               if (ierr /= nf90_noerr) then
+                  jamerge_cntv = 0
+                  write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
+               end if
+            else
+               write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
+               if (.not. verbose_mode) goto 888
+            end if
+         else ! UGRID map file does not contain _face_edges, build it here: netfaceedges
             do iedge = 1, numl(ii)
                do ikk = 1, 2
                   ic = netedgefaces(ikk,iedge+nnetedgecount)
@@ -1122,13 +1120,17 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          write (*,'(a)') 'Warning: mapmerge: could not retrieve coordinates of net edges from `'//trim(infiles(ii))//'''. '
       end if
 
-      ! Identify the net link node domain based on the already processed net nodes
+      ! Identify the net link domain based on the already processed net nodes
       do ip=1,numl(ii)
          k1 = edgenodes(1,nnetedgecount+ip)
          k2 = edgenodes(2,nnetedgecount+ip)
          ! NOTE: AvD: by taking the MAX below, I believe this also guarantees that one and
          !            the same domain owns both the net link and the associated flow link.
-         idom = max(node_domain(nnodecount+k1), node_domain(nnodecount+k2))
+         if (topodim /= 1) then
+            idom = max(node_domain(nnodecount+k1), node_domain(nnodecount+k2))
+         else
+            idom = min(flownode_domain(nnodecount+k1), flownode_domain(nnodecount+k2))
+         end if
 
          netedge_domain(nnetedgecount+ip) = idom
 
