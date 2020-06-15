@@ -451,11 +451,16 @@ subroutine CalcConveyanceTables(frictype, vf, y, z, hlv, nc,  jgetlevels, zminpr
       if (j==nh) then
          ! check if previous conveyance is large enough
          
-         if (j==1) then
+         if (j==1 .or. ikpt(max(1,j-1)) < MINCONV) then
             hlv(j+1) = hlv(j)+EXTRA_HEIGHT
-            nh = nh+1
-         elseif (ikpt(j-1) < MINCONV) then
-            hlv(j+1) = hlv(j)+EXTRA_HEIGHT
+            call ConveyYZ(nc,y,z,frictype,vf,hlv(j+1),a,total_area,w,total_width,p,co)
+            iwft(j+1) = total_width
+            iaft(j+1) = total_area
+            ipft(j+1) = p
+            ikpt(j+1) = co
+            iknt(j+1) = co
+            iatt(j+1) = total_area
+            iwtt(j+1) = total_width
             nh = nh+1
          endif
          
