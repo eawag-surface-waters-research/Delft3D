@@ -2550,7 +2550,10 @@ double precision   :: c_a, c_b !< variables related to extrapolation
 double precision   :: r3, ar1, ar2
 
 maxwidth = 0d0
-if (i012 .eq. 0) then                                ! look at u points, mom. eq.
+if (convtab%last_position == 0) then
+   width = 0d0
+   area  = 0d0
+else if (i012 == 0) then                                ! look at u points, mom. eq.
 
    nr = convtab%nru                                    ! number of table entries
    i  = convtab%last_position                                ! last index found
