@@ -294,7 +294,7 @@ module m_readStorageNodes
             nullify(pSto%storageArea)
             nullify(pSto%streetArea)
 
-            ! Bcause of the complicated data structure of SOBEK storage in 'connection nodes'
+            ! Because of the complicated data structure of SOBEK storage in 'connection nodes'
             ! must be separated from the ordinary gridpoints
             pSto%id        = storgNodeId
             pSto%name      = storgNodeName

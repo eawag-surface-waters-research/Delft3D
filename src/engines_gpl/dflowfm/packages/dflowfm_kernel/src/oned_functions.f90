@@ -159,44 +159,64 @@ module m_oned_functions
 
       implicit none
 
-      integer :: L
-      integer :: ibr
-      integer :: nbr, upointscount, pointscount
-      integer :: storageCount
-      integer :: i, j, jpos, linkcount
-      integer :: k1, k2, igrid
-      integer :: c1, c2
-      integer :: storage_count
-      type(t_branch), pointer                 :: pbr
+      integer                                 :: L
+      integer                                 :: ibr, jbr
+      integer                                 :: nbr, upointscount, pointscount
+      integer                                 :: storageCount
+      integer                                 :: i, j, jpos, linkcount
+      integer                                 :: k1, k2, igrid
+      integer                                 :: c1, c2
+      integer                                 :: storage_count
+      type(t_branch), pointer                 :: pbr, qbr
       type(t_storage), pointer                :: pstor
       integer, dimension(:), pointer          :: lin
       integer, dimension(:), pointer          :: grd
       double precision, dimension(:), pointer :: chainage
-      type(t_chainage2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
+      type(t_chainage2cross), pointer         :: gpnt2cross(:)                   !< list containing cross section indices per u-location
       type (t_CrossSection), pointer          :: cross1, cross2
+      logical                                 :: foundFrom, foundTo
 
       nbr = network%brs%count
       do ibr = 1, nbr
          pbr => network%brs%branch(ibr)
 
          ! branches can have no grid points in case of parallel computing
-         if (pbr%gridPointsCount == 0) cycle
-         call realloc(pbr%lin, pbr%uPointsCount)
-         call realloc(pbr%grd, pbr%gridPointsCount)
-         lin => pbr%lin
-         grd => pbr%grd
-         L = lin(1)
-         k1  =  iabs(ln(1,L))
-         pbr%FromNode%gridNumber = k1
-         upointscount = pbr%uPointsCount
-         do i = 1, uPointsCount
-            L = lin(i)
-            k1 = iabs(ln(1,L))
-            grd(i) = k1
-         enddo
-         k2 = ln(2,iabs(lin(upointscount)))
-         pbr%tonode%gridnumber = k2
-         grd(upointscount+1) = k2
+         if (pbr%gridPointsCount == 0) then
+            foundFrom = .false.
+            foundTo = .false.
+            do jbr = 1, ibr - 1
+               qbr => network%brs%branch(jbr)
+               if (qbr%FromNode%id == pbr%FromNode%id .or. qbr%ToNode%id == pbr%FromNode%id) then
+                  foundFrom = .true.
+               endif
+               if (qbr%FromNode%id == pbr%ToNode%id .or. qbr%ToNode%id == pbr%ToNode%id) then
+                  foundTo = .true.
+               endif
+            end do
+            if (.not. foundFrom) then
+               pbr%FromNode%gridNumber = -1
+            endif
+            if (.not. foundTo) then
+               pbr%tonode%gridnumber = -1
+            endif
+         else
+            call realloc(pbr%lin, pbr%uPointsCount)
+            call realloc(pbr%grd, pbr%gridPointsCount)
+            lin => pbr%lin
+            grd => pbr%grd
+            L = lin(1)
+            k1  =  abs(ln(1,L))
+            pbr%FromNode%gridNumber = k1
+            upointscount = pbr%uPointsCount
+            do i = 1, uPointsCount
+               L = lin(i)
+               k1 = abs(ln(1,L))
+               grd(i) = k1
+            enddo
+            k2 = ln(2,iabs(lin(upointscount)))
+            pbr%tonode%gridnumber = k2
+            grd(upointscount+1) = k2
+         end if
       enddo
    end subroutine set_linknumbers_in_branches
 
@@ -493,7 +513,9 @@ module m_oned_functions
    do i = 1, nstor
       pstor => network%storS%stor(i)
       n1 = pstor%gridPoint
-      bl(n1) = min(bl(n1), pstor%storageArea%x(1))
+      if (n1 > 0) then
+         bl(n1) = min(bl(n1), pstor%storageArea%x(1))
+      end if
    enddo
       
    do L = 1, lnx1D
@@ -542,6 +564,7 @@ module m_oned_functions
       do i = 1, nstor
          pstor => network%storS%stor(i)
          n1 = pstor%gridPoint
+         if (n1 <= 0) cycle
          if (bl(n1) < pstor%storageArea%x(1)) then
             call setmessage(LEVEL_WARN, 'At node '//trim(network%nds%node(i)%id)//' the bedlevel is below the bedlevel of the assigned storage area.')
             write(msgbuf, '(''The bedlevel (due to invert levels of incoming channels/pipes) = '', g14.2, '' and the bottom level of the storage area is '', g14.2)') &

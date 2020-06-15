@@ -2654,13 +2654,15 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
 
 
-    nstor = network%stors%count
+ nstor = network%stors%count
  if (japerim == 0 .and. nstor > 0) then
     stors => network%stors%stor
     do i = 1, nstor
        k1 = stors(i)%gridPoint
-       vol1(k1) = vol1(k1) + getVolume(stors(i), s1(k1))
-       a1(k1)   = a1(k1)   + getSurface(stors(i), s1(k1))
+       if (k1 > 0) then
+         vol1(k1) = vol1(k1) + getVolume(stors(i), s1(k1))
+         a1(k1)   = a1(k1)   + getSurface(stors(i), s1(k1))
+       end if
     enddo
  endif
 

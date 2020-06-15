@@ -876,7 +876,7 @@ module m_1d_networkreader
       enddo
 
       pbr%gridPointsCount = gridPointsCount
-      uPointsCount        = pbr%gridPointsCount - 1
+      uPointsCount        = max(0, pbr%gridPointsCount - 1)
       pbr%uPointsCount    = uPointsCount
       
       call realloc(pbr%gridPointschainages, pbr%gridPointsCount)
@@ -920,9 +920,13 @@ module m_1d_networkreader
             gridIndex = ip2
          endif
          if (node%nodeType == nt_NotSet) then
-            ! probably end node (until proved otherwise
+            ! probably end node (until proved otherwise)
             node%nodeType = nt_endNode
-         node%gridNumber = gridIndex
+            if (gridPointsCount > 0) then
+               node%gridNumber = gridIndex
+            else
+               node%gridNumber = -1
+            endif
          elseif (node%nodeType == nt_endNode) then
             ! Already one branch connected, so not an endNode
             node%nodeType = nt_LinkNode
