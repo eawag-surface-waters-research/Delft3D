@@ -1490,10 +1490,12 @@ subroutine ini_alloc_laterals()
 
    if (.not. allocated(QQlat) ) then                      ! just once
       nlatndguess = ndx2d+2*(ndxi-ndx2d)  ! first guess: all 2D + twice all 1D, nnlat *might* be bigger.
-      allocate ( QQLat(ndx) , stat=ierr) ; QQLat = 0d0
+      allocate ( QQLat(ndx) , stat=ierr)
       call aerr('QQLAT(ndx)', ierr, ndx)
-      allocate ( nnLat(nlatndguess) , stat=ierr) ; nnLat = 0
+      QQLat = 0d0
+      allocate ( nnLat(nlatndguess) , stat=ierr)
       call aerr('nnLat(nlatndguess)', ierr, nlatndguess)
+      nnLat = 0
    endif
    if (.not. allocated(kcLat) ) then 
       allocate ( kcLat(ndx) , stat=ierr)                  ! only if needed  

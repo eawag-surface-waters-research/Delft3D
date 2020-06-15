@@ -6557,7 +6557,10 @@ subroutine updateValuesOnLaterals(tim1, timestep)
       do k1=n1latsg(i),n2latsg(i)
          k = nnlat(k1)
          ! TODO: UNST-3639: this needs a jampi == 1 treatment
-         qLatReal(i) = qLatReal(i) + qqLat(k)
+         ! k > 0 prevents using laterals in another domain (in case of 1D / 1D2D)
+         if (k > 0) then
+            qLatReal(i) = qLatReal(i) + qqLat(k)
+         end if
       end do
    end do
    
