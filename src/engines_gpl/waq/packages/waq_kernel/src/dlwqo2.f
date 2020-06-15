@@ -634,7 +634,7 @@
      +                      idump     , danam    , nsegou   , 0      ,
      +                      conc      , nambuf   , sysnm    , syuni  ,
      +                      sydsc     , hncwqid1 , nrvar3   , riobuf ,
-     +                      nambuf    , hnc_standard, hnc_unit(k1)   ,
+     +                      nambuf    , hnc_standard, hnc_unit       ,
      +                      hnc_description,       hncwqid2  , lun(19))
 !
             elseif ( isrtou .eq. ihi4 ) then
