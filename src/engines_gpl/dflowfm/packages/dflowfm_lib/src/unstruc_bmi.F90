@@ -1308,6 +1308,7 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
          loglevel_StdOut = stringtolevel(levels)
          loglevel_file   = stringtolevel(levels)
       endif
+      call initMessaging(mdia)
       return
    case("TcrEro")
      call c_f_pointer(xptr, x_2d_double_ptr, shape(TcrEro))
