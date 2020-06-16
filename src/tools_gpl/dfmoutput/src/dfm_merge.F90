@@ -1142,6 +1142,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          end if
       end do
       numlg(ii)   = nnetedgeglob-nnetedgeglob0
+      if (topodim == 1) then
+         lnxg(ii) = numlg(ii)
+      end if
 
       !! 3a.5: handle boundary waterlevel points
       if (ndxbnd(ii) > 0) then
@@ -1315,8 +1318,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       endif
    enddo
 
-   ndx (noutfile) = nfaceglob
-   lnx (noutfile) = nedgeglob
+   if (topodim /= 1) then
+      ndx(noutfile) = nfaceglob
+      lnx(noutfile) = nedgeglob
+   else
+      ndx(noutfile) = nnodeglob
+      lnx(noutfile) = nnetedgeglob
+   end if
    numk(noutfile) = nnodeglob
    numl(noutfile) = nnetedgeglob
    kmx (noutfile) = nkmxglob
@@ -1346,7 +1354,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ierr = nf90_def_dim(ncids(noutfile), trim(netedgedimname), numl(noutfile), id_netedgedim(noutfile))
       ierr = nf90_def_dim(ncids(noutfile), 'nFlowElemBnd', ndxbnd(noutfile), id_bnddim(noutfile))! TODO: Add if ndxbnd > 0
    else
-      ierr = nf90_def_dim(ncids(noutfile), trim(facedimname), ndx(noutfile),  id_facedim(noutfile))
+      if (topodim /= 1) then
+         ierr = nf90_def_dim(ncids(noutfile), trim(facedimname), ndx(noutfile),  id_facedim(noutfile))
+      end if
       ierr = nf90_def_dim(ncids(noutfile), trim(netedgedimname), numl(noutfile), id_netedgedim(noutfile))
       ierr = nf90_def_dim(ncids(noutfile), trim(nodedimname), numk(noutfile), id_nodedim(noutfile))
       if (kmx(noutfile) > 0) then
