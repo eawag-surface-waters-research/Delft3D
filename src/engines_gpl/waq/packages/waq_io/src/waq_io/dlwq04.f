@@ -625,6 +625,23 @@
 !       here ends the alternative input
 
   100 continue
+
+!       check the layers/3D model information:
+!       - is it a 3D model?
+!       - do we have consistency?
+
+      if ( noq3 /= 0 ) then
+          if ( nolay == 1 ) then
+              iwar = iwar + 1
+              write( lunut, 3000 ) noseg, noq3
+              write( lunut, 3005 )
+              write( *, '(1x,a)' ) 'WARNING: inconsistency if 3D model',
+     &                             '         check .lst file'
+          else
+              write( lunut, 3010 ) nolay
+          endif
+      endif
+
       if ( ierr2 .gt. 0 ) ierr = ierr + 1
       if ( ierr2 .eq. 3 ) call srstop(1)
       call check  ( cdummy , iwidth , 4      , ierr2  , ierr   )
@@ -685,5 +702,15 @@
  2340 format (  /,' from   to fr-1 to+1  dispersion',
      &   '     surface        flow from-length   to-length')
  2350 format (   4I5,1P,5E12.4 )
+ 3000 format ( //,' WARNING: The model seems to be a 3D model, but:'
+     &         ,/,'          Number of segments:           ',i10
+     &         ,/,'          Number of vertical exchanges: ',i10
+     &         ,/,'          Difference gives expected number of'
+     &         ,/,'          segments per layer:           ',i10)
+ 3005 format (  /,'          - this is inconsistent'
+     &         ,/,'          You can specify the number of layers via'
+     &         ,/,'          these keywords:'
+     &        ,//,'          MULTIGRID ZMODEL NOLAY ... END_MULTIGRID')
+ 3010 format ( //,' Number of layers in the model:', I5)
 
       end
