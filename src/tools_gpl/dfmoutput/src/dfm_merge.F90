@@ -93,6 +93,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    double precision              :: xx, yy
    integer :: im,nm,topodim, ikk, ic, iii, k1c, g1, g2, nfaces, iedge, iface, tmpvarDim, jafound
    integer :: ifacefile, ifacein, ifaceout, ifacec
+   integer :: inodefile, netedgecount2
    integer :: id_nodex, id_nodey, id_edgex, id_edgey
    integer :: intmiss = -2147483647 ! integer fillvalue
    double precision :: dmiss = -999d0, intfillv
@@ -1171,101 +1172,139 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    end do ! ii
 
    if (jamerge_cntv == 1) then
-   !! fulfill node_c2g, because in domain that is larger than 0000, there are nodes which are in this domain but
-   !  their domain numbers are another domain.
-    do ii = 2, nfiles
-        nfacecount = sum(nump(1:ii-1))
-        nnodecount = sum(numk(1:ii-1))
-        do ik=1,numk(ii)
-            if (node_c2g(nnodecount+ik)==-1) then
-                jafound = 0
-                do ikk = 1, node_faces(netnodemaxface+1, nnodecount+ik)
-                    ic = node_faces(ikk,nnodecount+ik) ! index of one surrounding cell
-                    if (ic .ne. -1) then
-                       if (flownode_domain(ic) .ne. ii-1 .and. flownode_domain(ic) == node_domain(nnodecount+ik)) then ! cell ic is not in current domain, and is in the same domain with node ik
-                           ifaceglob = face_c2g(ic)
-                           ifacec = face_g2c(ifaceglob) ! and this is now from the OTHER domain.
-                           ! in which domain (iii) does iface belong
-                           do iii = 1, nfiles
-                               if (ifacec > sum(nump(1:iii-1)) .and. ifacec <= sum(nump(1:iii))) then
-                                   ifacefile = iii
-                                   exit
-                               end if
-                           end do
-                           ! Loop on all the nodes of face ifacec, to find the node which has the same coordinates with node ik from file ii
-                           do im=1,netfacemaxnodes(ifacefile)
-                               k1 = netfacenodes(im, ifacec)
-                               if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
-                                   k1c = k1 + sum(numk(1:ifacefile-1)) ! concatinated index of nodes
-                                   xx = node_x(k1c)
-                                   yy = node_y(k1c)
-                                   if (abs(node_x(ik+nnodecount)-xx)<1d-10 .and. abs(node_y(ik+nnodecount)-yy)<1d-10) then
-                                       node_c2g(ik+nnodecount) = node_c2g(k1c)
-                                       jafound = 1
+      if (topodim /= 1) then ! for 1D map file, node_c2g has been read from the input map files, so skip
+         !! fulfill node_c2g, because in domain that is larger than 0000, there are nodes which are in this domain but
+         !  their domain numbers are another domain.
+         do ii = 2, nfiles
+             nfacecount = sum(nump(1:ii-1))
+             nnodecount = sum(numk(1:ii-1))
+             do ik=1,numk(ii)
+                 if (node_c2g(nnodecount+ik)==-1) then
+                     jafound = 0
+                     do ikk = 1, node_faces(netnodemaxface+1, nnodecount+ik)
+                         ic = node_faces(ikk,nnodecount+ik) ! index of one surrounding cell
+                         if (ic .ne. -1) then
+                            if (flownode_domain(ic) .ne. ii-1 .and. flownode_domain(ic) == node_domain(nnodecount+ik)) then ! cell ic is not in current domain, and is in the same domain with node ik
+                                ifaceglob = face_c2g(ic)
+                                ifacec = face_g2c(ifaceglob) ! and this is now from the OTHER domain.
+                                ! in which domain (iii) does iface belong
+                                do iii = 1, nfiles
+                                    if (ifacec > sum(nump(1:iii-1)) .and. ifacec <= sum(nump(1:iii))) then
+                                        ifacefile = iii
+                                        exit
+                                    end if
+                                end do
+                                ! Loop on all the nodes of face ifacec, to find the node which has the same coordinates with node ik from file ii
+                                do im=1,netfacemaxnodes(ifacefile)
+                                    k1 = netfacenodes(im, ifacec)
+                                    if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
+                                        k1c = k1 + sum(numk(1:ifacefile-1)) ! concatinated index of nodes
+                                        xx = node_x(k1c)
+                                        yy = node_y(k1c)
+                                        if (abs(node_x(ik+nnodecount)-xx)<1d-10 .and. abs(node_y(ik+nnodecount)-yy)<1d-10) then
+                                            node_c2g(ik+nnodecount) = node_c2g(k1c)
+                                            jafound = 1
+                                            exit
+                                        end if
+                                    end if
+                                end do
+                            end if
+                         end if
+                     end do
+                     if (jafound == 0 .and. verbose_mode) then
+                         write (*,'(a,i0,a)') 'Warning: mapmerge: node_c2g: could not find global number for node # ', ik ,' of file `'//trim(infiles(ii))//'''. '
+                     end if
+                 end if
+             end do
+         end do
+      end if
+
+      !! for 2D/3D, fulfill netedge_c2g, because in domain larger than 0000, there are netedges which are in this domain
+      !  but their domain numbers are another domain.
+      if (topodim /= 1) then 
+         do ii = 2, nfiles
+            netedgecount = sum(numl(1:ii-1))
+            nfacecount = sum(nump(1:ii-1))
+            do ip = 1, numl(ii)
+                k1 = netedgefaces(1, netedgecount+ip)  ! flowelem that edge L connects
+                k2 = netedgefaces(2, netedgecount+ip)
+                if (k1.ne.0 .and. k2.ne. 0) then       ! When edge L is not on the boundary
+                    g1 = flownode_domain(nfacecount+k1)    ! domain number of this flownode
+                    g2 = flownode_domain(nfacecount+k2)
+                    if (g1 .ne. g2) then               ! if edge L lies on the boundary of two different domains
+                        if (g1==ii-1 .and. g1>g2) then ! decide which flowelem is in the current domain, which is not
+                            ifacein = k1
+                            ifaceout= k2
+                        else if (g2==ii-1 .and. g2>g1) then
+                            ifacein = k2
+                            ifaceout= k1
+                        else
+                            cycle
+                        end if
+
+                        ifaceglob = face_c2g(ifaceout+nfacecount) ! for the flownode which is in another domain with smaller domain number
+                        ifacec = face_g2c(ifaceglob)                  ! and this is now from the OTHER domain.
+                        ! in which domain (iii) does iface belong
+                        do iii = 1, nfiles
+                            if (ifacec>sum(nump(1:iii-1)) .and. ifacec < sum(nump(1:iii))) then
+                                ifacefile = iii
+                                exit
+                            end if
+                        end do
+                        ! Loop on all netedges of face ifacec
+                        do im = 1, netfacemaxnodes(ifacefile)
+                            k1 = netfaceedges(im, ifacec)
+                            if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
+                               if (k1 .ne. -1) then
+                                   k1c= k1 + sum(numl(1:ifacefile-1))! concatinated index of the edge
+                                   xx = edge_x(k1c)
+                                   yy = edge_y(k1c)
+                                   if (abs(edge_x(ip+netedgecount)-xx)<1d-10 .and. abs(edge_y(ip+netedgecount)-yy)<1d-10) then
+                                       netedge_c2g(ip+netedgecount) = netedge_c2g(k1c)
                                        exit
                                    end if
                                end if
-                           end do
-                       end if
+                            end if
+                        end do
                     end if
-                end do
-                if (jafound == 0 .and. verbose_mode) then
-                    write (*,'(a,i0,a)') 'Warning: mapmerge: node_c2g: could not find global number for node # ', ik ,' of file `'//trim(infiles(ii))//'''. '
                 end if
-            end if
-        end do
-    end do
+            end do
+         end do
+      else ! for 1D, fill in netedge_c2g for edges whose domain numbers are not in current domain
+         do ii = 1, nfiles
+            netedgecount = sum(numl(1:ii-1))
+            nnodecount   = sum(numk(1:ii-1))
+            do ip = 1, numl(ii)
+               if (netedge_c2g(netedgecount+ip) < 0) then ! to be filled in
+                  k1 = edgenodes(1, netedgecount+ip)      ! flownode that edge ip connects
+                  k2 = edgenodes(2, netedgecount+ip)
+                  g1 = flownode_domain(nnodecount+k1)     ! domain number of the node
+                  g2 = flownode_domain(nnodecount+k2)
+                  if (g1 == g2) then                      ! k1 and k2 are in the same domain
+                     inodefile = g1 + 1                   ! Later search edge ip in inodefile
+                  else                                    ! edge ip is on a partition boundary
+                     if (g1 == ii-1) then
+                        inodefile = g2 + 1
+                     else if (g2 == ii-1) then
+                        inodefile = g1 + 1
+                     end if
+                  end if
 
-    !! fulfill netedge_c2g, because in domain larger than 0000, there are netedges which are in this domain
-    !  but their domain numbers are another domain.
-    do ii = 2, nfiles
-        netedgecount = sum(numl(1:ii-1))
-        nfacecount = sum(nump(1:ii-1))
-        do ip = 1, numl(ii)
-            k1 = netedgefaces(1, netedgecount+ip)  ! flowelem that edge L connects
-            k2 = netedgefaces(2, netedgecount+ip)
-            if (k1.ne.0 .and. k2.ne. 0) then       ! When edge L is not on the boundary
-                g1 = flownode_domain(nfacecount+k1)    ! domain number of this flownode
-                g2 = flownode_domain(nfacecount+k2)
-                if (g1 .ne. g2) then               ! if edge L lies on the boundary of two different domains
-                    if (g1==ii-1 .and. g1>g2) then ! decide which flowelem is in the current domain, which is not
-                        ifacein = k1
-                        ifaceout= k2
-                    else if (g2==ii-1 .and. g2>g1) then
-                        ifacein = k2
-                        ifaceout= k1
-                    else
-                        cycle
-                    end if
-
-                    ifaceglob = face_c2g(ifaceout+nfacecount) ! for the flownode which is in another domain with smaller domain number
-                    ifacec = face_g2c(ifaceglob)                  ! and this is now from the OTHER domain.
-                    ! in which domain (iii) does iface belong
-                    do iii = 1, nfiles
-                        if (ifacec>sum(nump(1:iii-1)) .and. ifacec < sum(nump(1:iii))) then
-                            ifacefile = iii
-                            exit
-                        end if
-                    end do
-                    ! Loop on all netedges of face ifacec
-                    do im = 1, netfacemaxnodes(ifacefile)
-                        k1 = netfaceedges(im, ifacec)
-                        if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
-                           if (k1 .ne. -1) then
-                               k1c= k1 + sum(numl(1:ifacefile-1))! concatinated index of the edge
-                               xx = edge_x(k1c)
-                               yy = edge_y(k1c)
-                               if (abs(edge_x(ip+netedgecount)-xx)<1d-10 .and. abs(edge_y(ip+netedgecount)-yy)<1d-10) then
-                                   netedge_c2g(ip+netedgecount) = netedge_c2g(k1c)
-                                   exit
-                               end if
-                           end if
-                        end if
-                    end do
-                end if
-            end if
-        end do
-    end do
+                  ! search edge ip in inodefile, based on edge coordinates
+                  netedgecount2 = sum(numl(1:inodefile-1))
+                  ! Loop on all netedges
+                  do im = 1, numl(inodefile)
+                     xx = edge_x(netedgecount2+im)
+                     yy = edge_y(netedgecount2+im)
+                     if (abs(edge_x(ip+netedgecount)-xx)<1d-10 .and. abs(edge_y(ip+netedgecount)-yy)<1d-10) then
+                        netedge_c2g(ip+netedgecount) = netedge_c2g(netedgecount2+im)
+                        exit
+                     end if
+                  end do
+               end if
+            end do
+         end do
+      end if
    end if
    nkmxglob = kmx(1)
    do ii = 2,nfiles
