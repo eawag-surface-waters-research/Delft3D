@@ -518,10 +518,10 @@ contains
     character*1                                 :: ch
     character(len=*), intent(in)                :: fname,key
     character(len=*), intent(out)               :: value
-    character(slen), dimension(1024),save          :: keyword,values
-    character(slen)                                :: line,lineWithoutSpecials
+    character(slen), dimension(1024),save       :: keyword,values
+    character(slen)                             :: line,lineWithoutSpecials
     integer, save                               :: nkeys
-    character(slen), save                          :: fnameold=''
+    character(slen), save                       :: fnameold=''
     integer, dimension(:),allocatable,save      :: readindex
 
     if ( fname.eq.'' ) then   ! (re-)initialize

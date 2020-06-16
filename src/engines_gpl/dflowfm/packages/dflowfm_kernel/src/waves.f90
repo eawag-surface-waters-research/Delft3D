@@ -143,12 +143,18 @@
       call aerr('kdismx(lnx)', ierr, lnx)
 
    end if
+   !
    if  (jawave > 0) then
-       call realloc( hwavcom,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
+      call realloc( hwavcom,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
       call aerr   ('hwavcom   (ndx)', ierr, ndx)
-    endif
-
+   endif
+   !
    if (jawave .eq. 4) then
+      if (trim(instat)=='stat' .or. &
+          trim(instat)=='stat_table') then
+         call allocstatsolverarrays(ierr)
+      endif   
+      
       call realloc(ee0, (/ntheta,ndx/), stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('ee0  (ntheta,ndx)', ierr, ntheta*ndx)
       call realloc(ee1, (/ntheta,ndx/), stat=ierr, keepExisting = .false., fill = 0d0)

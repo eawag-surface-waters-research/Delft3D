@@ -405,7 +405,6 @@ module m_xbeach_data
    ! XBeach related variables
    !==================================================================================================================================
    !! Hydrodynamics arrays, allocatables
-   double precision, allocatable              :: s1initial(:)    !< initial waterlevel (m ) for Riemann boundary condition
    double precision, allocatable              :: ee0(:,:)        !< wave energy at begin of timestep
    double precision, allocatable              :: ee1(:,:)        !< wave energy at end of timestep
    double precision, allocatable              :: cwav(:)         !< phase speed (m/s)
@@ -482,22 +481,46 @@ module m_xbeach_data
    integer,          allocatable, dimension(:) :: kbndz2kbndw    !< mapping water level bc pts to wave bc pts
    double precision, allocatable, dimension(:) :: uave           !< boundary averaged velocity
    double precision, allocatable, dimension(:) :: vave           !<
-   double precision, allocatable, dimension(:) :: dlengthrm        !< boundary length
-   double precision, allocatable, dimension(:) :: umeanrm          !< relaxated velocity riemann bnd
-   double precision, allocatable, dimension(:) :: vmeanrm          !<
-   double precision, allocatable, dimension(:) :: u1rm             !<
+   double precision, allocatable, dimension(:) :: dlengthrm      !< boundary length
+   double precision, allocatable, dimension(:) :: umeanrm        !< relaxated velocity riemann bnd
+   double precision, allocatable, dimension(:) :: vmeanrm        !<
+   double precision, allocatable, dimension(:) :: u1rm           !<
 
-   !  for stationary solver
-   !integer,          dimension(:,:), allocatable :: isweepup, isweepdown
-   type(tsolver)                                 :: solver
-
+   !>  for stationary solver
+   type(tsolver)                                  :: solver
+   integer, dimension(:,:), allocatable           :: connected_nodes
+   integer                                        :: no_connected_nodes
+   integer, dimension(:), allocatable             :: nmmask
+   double precision, dimension(:,:), allocatable  :: wmask      ! not integer, has weights
+   !
+   ! statsolver netnode oriented quantities
+   integer                                                  :: noseapts     ! number of offshore wave boundary net nodes
+   integer         , dimension(:)     , allocatable         :: seapts       ! netnodes on wave boundary
+   double precision, dimension(:,:,:) , allocatable         :: w            ! weights of upwind grid points, 2 per grid point and per wave direction
+   double precision, dimension(:,:)   , allocatable         :: ds           ! distance to interpolated upwind point, per grid point and direction
+   logical         , dimension(:)     , allocatable         :: inner        ! mask of inner grid points (not on boundary)
+   integer         , dimension(:,:,:) , allocatable         :: prev         ! two upwind grid points per grid point and wave direction
+   double precision, dimension(:)     , allocatable         :: hhstat       ! water depth
+   double precision, dimension(:)     , allocatable         :: kwavstat     ! wave number
+   double precision, dimension(:)     , allocatable         :: cgstat       ! group velocity
+   double precision, dimension(:)     , allocatable         :: cstat        ! group velocity
+   double precision, dimension(:,:)   , allocatable         :: cthetastat   ! refraction speed
+   double precision, dimension(:,:)   , allocatable         :: eestat       ! wave energy distribution
+   double precision, dimension(:)     , allocatable         :: fwstat       ! wave friction factor
+   double precision, dimension(:)     , allocatable         :: Hstat        ! wave height
+   double precision, dimension(:)     , allocatable         :: Dwstat       ! wave breaking dissipation
+   double precision, dimension(:)     , allocatable         :: Dfstat       ! wave friction dissipation
+   double precision, dimension(:)     , allocatable         :: thetam       ! mean wave direction
+   double precision, dimension(:)     , allocatable         :: uorbstat     ! orbital velocity
+   double precision, dimension(:)     , allocatable         :: dhdxstat    ! orbital velocity
+   double precision, dimension(:)     , allocatable         :: dhdystat     ! orbital velocity
+   
    !  for plotting
    integer                                     :: itheta_view=5
    double precision, allocatable               :: ustx_cc(:),usty_cc(:)
 
    !! Model parameters
    !! 1. DFLOW specific
-   !integer                                    :: limtypw         !< 0=no, 1=minmod, 2=vanleer, 3=koren 4=MC, 21=central voor wave action transport
    double precision                           :: dtmaxwav        !< subtimestepping for xbeach wave driver
    double precision                           :: dtmaximp        !< pseudotimestepping for implicit wave driver
 

@@ -172,28 +172,21 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
             trnames(1) = ''
  numtracers = 0
  
- ! JRE DEBUG sedfrac 
- 
-    if (allocated(kesf) ) deallocate(kesf)          
-    allocate ( kesf(1,nx), stat = ierr )   ! would have been nice to have stmpar%lsedsus,
-    call aerr('kesf(1,nx)', ierr, nx)      ! but no can do, jammer de bammer...
-               kesf = 0
-               
-    if ( allocated(nbndsf) ) deallocate(nbndsf)
-    allocate ( nbndsf(1), stat = ierr )
-    call aerr('nbndsf(1)', ierr, 1 )
-               nbndsf = 0
-               
-    if ( allocated(sfnames) ) deallocate(sfnames)
-    allocate ( sfnames(1), stat = ierr )
-    call aerr('sfnames(1)', ierr, 1 )
-    sfnames = ''
-    numfracs = 0
-    !do ifrac = 1, stmpar%lsedsus
-    !   sfnames(ifrac) = stmpar%sedpar%NAMSED(sedtot2sedsus(ifrac))
-    !end do
-
- !\DEBUG sedfrac 
+ if (allocated(kesf) ) deallocate(kesf)          
+ allocate ( kesf(1,nx), stat = ierr )   ! would have been nice to have stmpar%lsedsus,
+ call aerr('kesf(1,nx)', ierr, nx)      ! but no can do, jammer de bammer...
+ kesf = 0
+            
+ if ( allocated(nbndsf) ) deallocate(nbndsf)
+ allocate ( nbndsf(1), stat = ierr )
+ call aerr('nbndsf(1)', ierr, 1 )
+ nbndsf = 0
+            
+ if ( allocated(sfnames) ) deallocate(sfnames)
+ allocate ( sfnames(1), stat = ierr )
+ call aerr('sfnames(1)', ierr, 1 )
+ sfnames = ''
+ numfracs = 0
       
  call make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror) 
  
@@ -221,7 +214,6 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  ncdamsg = 0                                         ! nr of controllable dam signals
  npumpsg = 0                                         ! nr of pump signals
  nshiptxy = 0                                        ! nr of ship xyt signals
-
  nwbnd    = 0                                        ! nr of wave-energy boundaries
 
 

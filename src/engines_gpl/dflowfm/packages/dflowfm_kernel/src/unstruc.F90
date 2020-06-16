@@ -437,7 +437,7 @@ subroutine flow_finalize_usertimestep(iresult)
       goto 888
    end if
 
-   ! JRE DEBUG: avoid annoying dt_user interference
+   ! JRE avoid annoying dt_user interference
     call xbeach_write_stats(time1)
     call sedmor_write_stats(time1)
    iresult = DFM_NOERR
@@ -696,7 +696,7 @@ end subroutine flow_finalize_single_timestep
  use m_flow
  use m_flowgeom
  use unstruc_model, only: md_ident, md_restartfile
- use m_xbeach_data, only: swave, Lwave, uin, vin, cgwav
+ use m_xbeach_data, only: swave, Lwave, uin, vin, cgwav, instat
  use unstruc_channel_flow
  use m_1d_structures, only: initialize_structures_actual_params, set_u0isu1_structures
  use dfm_error
@@ -704,9 +704,9 @@ end subroutine flow_finalize_single_timestep
  use m_partitioninfo
  implicit none
 
- integer          :: jazws0
+ integer              :: jazws0
  integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if succesful.
- integer          :: k, n, LL
+ integer              :: k, n, LL
  integer              :: ierror
 
  iresult = DFM_GENERICERROR
@@ -759,7 +759,11 @@ end subroutine flow_finalize_single_timestep
     if ( swave.eq.1 ) then
        call xbeach_wave_bc()
        call xbeach_apply_wave_bc()
-       call xbeach_wave_compute_celerities()        ! for setdt
+       if (.not.(trim(instat)=='stat') .and. .not.(trim(instat)=='stat_table')) then
+          call xbeach_wave_compute_celerities()        ! for setdt
+       else
+          call xbeach_wave_compute_statcelerities(iresult)
+       endif
     else
        uin = 0d0
        vin = 0d0
@@ -1392,7 +1396,7 @@ if(q /= 0) then
  end if
  if (jawave.eq.4 .and. jajre.eq.1) then
     if (swave.eq.1 ) then
-       call xbeach_waves()
+       call xbeach_waves(ierror)
     endif
     call tauwave()
     if ( jaGUI.eq.1 ) then                                          ! this part is for online visualisation
@@ -3699,7 +3703,7 @@ end function barocpsteric
 subroutine setdt()
    use m_partitioninfo
    use m_flowparameters, only: jawave
-   use m_xbeach_data,    only: swave
+   use m_xbeach_data,    only: swave, instat
    use m_flowtimes
    use m_flow,           only: kkcflmx
    use m_timer
@@ -3736,7 +3740,9 @@ subroutine setdt()
 
    if ( jawave.eq.4 .and. swave.eq.1 ) then
       call xbeach_absgen_maxtimestep()
-      call xbeach_wave_maxtimestep()
+      if (.not.(trim(instat)=='stat' .or. trim(instat)=='stat_table')) then
+         call xbeach_wave_maxtimestep()
+      endif
    end if
 
    if (jased .eq. 4 .and. stm_included) then
@@ -6100,26 +6106,6 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
  enddo
 
  !$OMP END PARALLEL DO
-
-! JR: compute depth-averaged tangential velocity in 3D  ! hk: integrated in prev loop, is this necessay each step?
-! if ( kmx.gt.0 ) then
-! !$OMP PARALLEL DO                           &
-! !$OMP PRIVATE(L,LL,Lb,Lt)
-!    do LL=1,Lnx
-!       v(LL) = 0d0
-!
-!       call getLbotLtop(LL,Lb,Lt)
-!       do L = Lb,Lt
-!          v(LL) = v(LL) + v(L)*Au(L)
-!       end do
-!
-!       if ( Au(LL).gt.0d0 ) then
-!          v(LL) = v(LL) / Au(LL)
-!       end if
-!    end do
-!     !$OMP END PARALLEL DO
-! end if
-
 
  !updvertp
 
@@ -9058,11 +9044,11 @@ end subroutine getucmag
  allocate ( wcny4(lnx)  , stat  = ierr) ; wcny4 = 0
  call aerr('wcny4(lnx) ', ierr, lnx)
 
- if (kmx > 0 .and. jased > 0 .and. jased < 4) then
+ !if (kmx > 0 .and. jased > 0 .and. jased < 4) then
     if ( allocated (wcLn) ) deallocate(wcLn)
     allocate ( wcLn(2,lnx) , stat  = ierr) ; wcLn = 0
     call aerr('wcLn(2,lnx)', ierr, lnx)
- endif
+ !endif
 
  nx = 0
  do L = lnx1D+1, lnx
@@ -9086,10 +9072,8 @@ end subroutine getucmag
     wcnxy(3,k3)= wcnxy(3,k3) + wud
     wcnxy(3,k4)= wcnxy(3,k4) + wud
 
-    if (kmx > 0 .and. jased > 0 .and. jased < 4) then
-       wcLn(1,L) = wud
-       wcLn(2,L) = wud
-    endif
+    wcLn(1,L) = wud
+    wcLn(2,L) = wud
 
 !    csa  = max( 1d-6,abs(csu(L)) )
 !    sna  = max( 1d-6,abs(snu(L)) )
@@ -9176,10 +9160,9 @@ end subroutine getucmag
     if (wcnxy(1,k4) .ne. 0) wcnx4(L) = wcnx4(L)/wcnxy(1,k4)
     if (wcnxy(2,k4) .ne. 0) wcny4(L) = wcny4(L)/wcnxy(2,k4)
 
-    if (kmx > 0 .and. jased > 0 .and. jased < 4) then
-       if (wcnxy(3,k3) .ne. 0) wcLn(1,L) = wcLn(1,L) / wcnxy(3,k3)
-       if (wcnxy(3,k4) .ne. 0) wcLn(2,L) = wcLn(2,L) / wcnxy(3,k4)
-    endif
+    if (wcnxy(3,k3) .ne. 0) wcLn(1,L) = wcLn(1,L) / wcnxy(3,k3)
+    if (wcnxy(3,k4) .ne. 0) wcLn(2,L) = wcLn(2,L) / wcnxy(3,k4)
+
 
     if (irov == 2) then  ! zero cornervelocities for no-slip
 
@@ -11081,7 +11064,8 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call xbeach_wave_init()
 
     if ( trim(instat).eq.'stat' .or. trim(instat)=='stat_table') then   ! for stationary solver: initialize with stationary field
-       call xbeach_stationary()
+       !call xbeach_stationary()
+       call xbeach_solve_wave_stationary(iresult)
        newstatbc   = 0
        if ( jaGUI.eq.1 ) then                                          ! this part is for online visualisation
           if (ntek > 0) then
@@ -14957,7 +14941,6 @@ else if (nodval == 27) then
  use m_fixedweirs
  use m_partitioninfo
  use m_sediment
- use m_xbeach_data, only: s1initial
  use m_transport
  use dfm_error
  use m_sobekdfm
@@ -16458,12 +16441,6 @@ endif
        if (icgsolver == 10) then
           call alloc_jacobi(ndx,lnx)
        endif
- end if
-
- if ( jawave.eq.4 ) then   ! JRE: remember initial water level for Riemann boundary condition
-    if ( allocated(s1initial) ) deallocate(s1initial)
-    allocate(s1initial(Ndx))
-    s1initial = s1
  end if
 
  if ( janudge.eq.1 ) then
@@ -24647,7 +24624,7 @@ end subroutine unc_write_shp
  enddo
 
  do n = 1,ndx
-    bai(n) = 1d0/ba(n)                               ! inbitially, ba based on 'max wet envelopes', take bai used in linktocentreweights
+    bai(n) = 1d0/ba(n)                               ! initially, ba based on 'max wet envelopes', take bai used in linktocentreweights
  enddo
 
  ! call message ('cutcell call 4',' ',' ')
@@ -24998,7 +24975,7 @@ end subroutine unc_write_shp
 !         xx(4) = 0.5d0*( xk(k2)+xk(k3) )  ;  yy(4) = 0.5d0*( yk(k2)+yk(k3) )
          call half(xk(k2),yk(k2),xk(k3),yk(k3),xx(4),yy(4), jsferic, jasfer3D)
 
-         call dAREAN( XX, YY, 4, banh(ka) , DLENGTH, DLENMX )
+         call dAREAN( XX, YY, 4, banh(ka) , DLENGTH, DLENMX )   ! area and length of enclosed subpolygon
          nbanh(1,ka) = k2                               ! netnode nr
          nbanh(2,ka) = k                                ! flownode nr
          rr(ka)      = k2
@@ -32684,7 +32661,7 @@ end function densfm
 
  implicit none
 
- integer,          intent (in)  :: kk,mx                         ! flowcell kk or ban kk
+ integer,          intent (in)  :: kk,mx                         ! flowcell kk or ban kk, mx fracnr
  double precision, intent (out) :: seq(mx)                       ! seq(kg/m3)
  double precision, intent (out) :: wse(mx)                       ! effective fall velocity (m/s)
  double precision, intent (out) :: hsk                           ! waterdepth, flowcell or ban
@@ -34010,7 +33987,7 @@ end SUBROUTINE getwavenrqn
 !       yzup = 2d0*yz(k) - yz(kd)                     ! need be found
 
        if (abs(kcu(L)) ==  1 ) then
-          if ( nd(k)%lnx .ne. 2) then
+          if ( nd(k)%lnx .ne. 2) then                 ! dangling 
              cycle
           endif
        endif
@@ -41913,7 +41890,7 @@ subroutine make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror)
 
    ierror = 1
 
-   do L  = 1,numL                                      ! kandidate points and distance tolerance of closed (u) points
+   do L  = 1,numL                                      ! candidate points and distance tolerance of closed (u) points
       k3 = kn(1,L)  ; k4 = kn(2,L)
 
 !      if ( abs(xk(k3)+11.5d0)+abs(xk(k4)+11.5d0) .lt. 1d-8 ) then
@@ -42369,9 +42346,7 @@ end function is_1d_boundary_candidate
  character (len=64)            :: varname
  character (len=NAMTRACLEN)    :: tracnam, qidnam
  character (len=NAMWAQLEN)     :: wqbotnam
- ! JRE DEBUG
  character (len=NAMSFLEN)      :: sfnam, qidsfnam
- ! \DEBUG
  integer                       :: minp0, npli, inside, filetype0, iad
  integer, allocatable          :: ihu(:)             ! temp
  double precision, allocatable :: viuh(:)            ! temp
@@ -42755,7 +42730,6 @@ end function is_1d_boundary_candidate
  end if
  if (nbndw > 0) then
     numnos = 0
-    !jawave = 4
     call mess(LEVEL_INFO, 'Enabled wave forcing while reading external forcings.')
     if (allocated   (kbndw) ) deallocate(  xbndw,ybndw,xy2bndw,zbndw,kbndw)
     allocate ( xbndw(nbndw), ybndw(nbndw), xy2bndw(2,nbndw), zbndw(ntheta,nbndw), kbndw(4,nbndw), kdw(nbndw) , stat=ierr     )

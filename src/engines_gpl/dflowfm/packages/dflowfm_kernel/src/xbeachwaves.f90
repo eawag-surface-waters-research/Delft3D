@@ -99,7 +99,7 @@ subroutine xbeach_all_input()
    !
    ! Grid parameters
    call writelog('l','','--------------------------------')
-   call writelog('l','','Grid parameters: ')
+   call writelog('l','','Directional wave grid parameters: ')
    thetamin = readkey_dbl (md_surfbeatfile,'thetamin', -90.d0,    -180.d0,  180.d0,required=(swave==1))
    thetamax = readkey_dbl (md_surfbeatfile,'thetamax',  90.d0,    -180.d0,  180.d0,required=(swave==1))
    dtheta   = readkey_dbl (md_surfbeatfile,'dtheta',    10.d0,      0.1d0,   20.d0,required=(swave==1))
@@ -157,20 +157,20 @@ subroutine xbeach_all_input()
       Hrms  = readkey_dbl (md_surfbeatfile,'Hrms',      1.d0,      0.d0,    10.d0)
       Tm01  = readkey_dbl (md_surfbeatfile,'Tm01',     10.d0,      1.d0,    20.d0)
       Trep  = readkey_dbl (md_surfbeatfile,'Trep',     Tm01,   1.d0,    20.d0)
-      dir0  = readkey_dbl (md_surfbeatfile,'dir0',    270.d0,    180.d0,   360.d0)
+      dir0  = readkey_dbl (md_surfbeatfile,'dir0',    270.d0,    0d0,   360.d0)
       m     = readkey_int (md_surfbeatfile,'m',        10,         2,      128)
    elseif (trim(instat) == 'bichrom') then
       Hrms  = readkey_dbl (md_surfbeatfile,'Hrms',      1.d0,      0.d0,    10.d0)
       Tm01  = readkey_dbl (md_surfbeatfile,'Tm01',     10.d0,      1.d0,    20.d0)
       Trep  = readkey_dbl (md_surfbeatfile,'Trep',     Tm01,   1.d0,    20.d0)
       Tlong = readkey_dbl (md_surfbeatfile,'Tlong',    80.d0,     20.d0,   300.d0)
-      dir0  = readkey_dbl (md_surfbeatfile,'dir0',    270.d0,    180.d0,   360.d0)
+      dir0  = readkey_dbl (md_surfbeatfile,'dir0',    270.d0,    0.d0,   360.d0)
       m     = readkey_int (md_surfbeatfile,'m',        10,         2,      128)
    elseif (trim(instat) == 'ts_1' .or. trim(instat) == 'ts_2') then
       Hrms  = readkey_dbl (md_surfbeatfile,'Hrms',      1.d0,      0.d0,    10.d0)
       Tm01  = readkey_dbl (md_surfbeatfile,'Tm01',     10.d0,      1.d0,    20.d0)
       Trep  = readkey_dbl (md_surfbeatfile,'Trep',     Tm01,   1.d0,    20.d0)
-      dir0  = readkey_dbl (md_surfbeatfile,'dir0',    270.d0,    180.d0,   360.d0)
+      dir0  = readkey_dbl (md_surfbeatfile,'dir0',    270.d0,    0.d0,   360.d0)
       m     = readkey_int (md_surfbeatfile,'m',        10,         2,      128)
       call check_file_exist('bc/gen.ezs')
    endif
@@ -387,6 +387,13 @@ subroutine xbeach_all_input()
          call xbeach_errorhandler()   
       endif
    endif
+   !
+   if (trim(instat)=='stat' .or. trim(instat)=='stat_table') then
+      thetanaut = 1
+      thetamin = dir0-90d0
+      thetamax = dir0+90d0
+      call writelog('lws','','Warning: Calculating with stationary bc. Thetamin and thetamax reset to -/+90 degrees from dir0.')
+   endif   
    !facmax = 0.25d0*sqrt(ag)*rhomean*gamma**2
    !
    !
@@ -400,35 +407,33 @@ subroutine xbeach_all_input()
       wci = 0
    end if
    !
-   !!
-   !! Only allow bore-averaged turbulence in combination with vanthiel waveform
-   !if ((waveform .ne. WAVEFORM_VANTHIEL) .and. (turb .eq. TURB_BORE_AVERAGED)) then
-   !   call writelog('lse','','Error: Cannot compute bore-averaged turbulence without vanthiel wave form.')
-   !   call writelog('lse','','       Please set waveform=vanthiel in input file, or choose another')
-   !   call writelog('lse','','       wave turbulence model.')
-   !   call xbeach_errorhandler()
-   !endif
    ! Check for unknown parameters
    call readkey(md_surfbeatfile,'checkparams',dummystring)
 
    !   check swave and Lwave
-   if ( swave.eq.0 ) lwave = 0
+   if ( swave.eq.0 ) then
+      lwave = 0
+      call writelog('lws','','Warning: swave is 0, so lwave set to 0.')
+   endif
 
 end subroutine xbeach_all_input
 
 
-subroutine xbeach_wave_init
+subroutine xbeach_wave_init()
    use m_flowgeom
    use m_flowexternalforcings
    use m_xbeach_data
    use m_sferic, only: pi, twopi
    use m_physcoef
+   use network_data
 
    implicit none
 
-   integer, allocatable, dimension(:) :: idum
+   integer, allocatable, dimension(:)     :: idum, kcstore
+   integer, allocatable, dimension(:,:)   :: kp
 
    integer                            :: itheta, i, k, L, ierror
+   integer, parameter                 :: np=12
 
    if ( trim(instat)=='jons' .or. &
       trim(instat)=='jons_table' .or. &
@@ -445,7 +450,6 @@ subroutine xbeach_wave_init
    endif
 
    if ( ntheta.gt.0 ) then
-
       ! dispersion
       if (windmodel .eq. 1) then   
          tt1 = Trepini
@@ -458,28 +462,28 @@ subroutine xbeach_wave_init
       endif 
       
       if (windmodel.eq.0) then
-      do k = 1, ndx    ! stack overflow
-          sigmwav(k) = sum(sigt(:,k), dim=1)/dble(ntheta)
-          L0(k) = 2*pi*ag/(sigmwav(k)**2)
-          L1(k) = L0(k)
-          Ltemp(k) = L0(k)
-      end do
+         do k = 1, ndx    ! stack overflow
+             sigmwav(k) = sum(sigt(:,k), dim=1)/dble(ntheta)
+             L0(k) = 2*pi*ag/(sigmwav(k)**2)
+             L1(k) = L0(k)
+             Ltemp(k) = L0(k)
+         end do
       else
-          L0t = 2*pi*ag/(sigt**2)
-          L1t = L0t
-          Ltempt = L0t      
+         L0t = 2*pi*ag/(sigt**2)
+         L1t = L0t
+         Ltempt = L0t      
       endif
       
       ! initialize celerities
       if (windmodel .eq. 1) then
-          call xbeach_dispersion_windmodel()
+         call xbeach_dispersion_windmodel()
       else 
-          call xbeach_dispersion()    
+         call xbeach_dispersion()    
       endif
 
    end if
 
-
+   ! map boundary types to each other's positions
    if ( allocated(kbndu2kbndw) ) deallocate(kbndu2kbndw)
    allocate(kbndu2kbndw(nbndu))
 
@@ -533,33 +537,56 @@ subroutine xbeach_wave_init
       vmeanrm = 0d0
    end if
    
-   if ( (windmodel.eq.1) .and. (jawsource.eq.1) ) then
-   !define source term coefficients
-      CE1 = 8d0/(aa1*aa1*bb1 ) * (16d0/(aa1*aa1 ) )**(1d0/(2d0* bb1) -1d0 )
-      CE2 = 1d0/(2d0* bb1) -1d0   
-      CT1 = 1d0/(aa2*bb2 ) * (1d0/(aa2 ) )**(1d0/bb2 -1d0 )
-      CT2 = 1d0/bb2 -1d0     
+   if ( windmodel.eq.1) then
+      if (jawsource.eq.1) then
+         !define source term coefficients
+         CE1 = 8d0/(aa1*aa1*bb1 ) * (16d0/(aa1*aa1 ) )**(1d0/(2d0* bb1) -1d0 )
+         CE2 = 1d0/(2d0* bb1) -1d0
+         CT1 = 1d0/(aa2*bb2 ) * (1d0/(aa2 ) )**(1d0/bb2 -1d0 )
+         CT2 = 1d0/bb2 -1d0
+      endif
+      !map wind field to cell centers
+      call xbeach_map_wind_field(wx, wy, mwind, wmagcc, windspreadfac)
    endif
-    
-   !map wind field to cell centers
-   if (windmodel .eq. 1) then
-          call xbeach_map_wind_field(wx, wy, mwind, wmagcc, windspreadfac)
-   endif   
    
    if (trim(instat)=='stat' .or. trim(instat)=='stat_table') then
-      call xbeach_wave_bc()
-      call xbeach_apply_wave_bc()
-      call xbeach_wave_compute_celerities()  ! get a ctheta, and assume it does not change sign   
-      call xbeach_wave_maxtimestep()         ! sets dtmaxwav
-      call xbeach_inisolver(solver,ntheta,ierror)
+      !
+      if (allocated(kp)) deallocate(kp,stat=ierror)
+      allocate(kp(numk,np), stat=ierror)
+      kp=0
+      !
+      if (.not. allocated(nb)) then
+         if (allocated(kcstore)) deallocate(kcstore)
+         allocate(kcstore(numk))
+         kcstore=kc
+         kc = 1
+         call MAKENETNODESCODING()
+         kc=kcstore
+      endif   
+      !
+      ! set inner mask
+      !where (nb==1)
+         inner = .true.
+      !endwhere 
+      !
+      call getbndwzcornerpts(ierror)        ! sets wmask, nmmask, seapoints
+      ! get nodes per netcell
+      call fill_connected_nodes(ierror)
+      ! Find calculation kernel around points
+      call fm_surrounding_points(xk,yk,numk,connected_nodes,no_connected_nodes,nump,kp, ierror)
+      ! Find upwind neighbours for each grid point and wave direction
+      call find_upwind_neighbours(xk,yk,numk,thetabin,ntheta,kp,np,w,prev,ds,ierror)
+      ! set e01
+      call xbeach_wave_bc()     
+      ! compute advection and refraction velocities in net nodes
+      call xbeach_wave_compute_statcelerities(ierror)      
    end if
 
    if ( allocated(idum) ) deallocate(idum)
+   if ( allocated(kp) ) deallocate(kp)
 
    return
    end subroutine xbeach_wave_init
-
-
 
    !> make the thetagrid, in init_flowgeom
    subroutine xbeach_makethetagrid()
@@ -642,7 +669,7 @@ subroutine xbeach_wave_init
       csx(itheta)     = cos(thetabin(itheta))
       snx(itheta)     = sin(thetabin(itheta))
       do k = 1, ndx
-         thet(itheta,k)  = thetabin(itheta)
+         thet(itheta,k)  = thetabin(itheta)          ! JRE to do: necessary?
          costh(itheta,k) = cos(thetabin(itheta))
          sinth(itheta,k) = sin(thetabin(itheta))
       enddo
@@ -848,19 +875,13 @@ subroutine xbeach_wave_init
       if (hu(L) > epshu) then                            ! link flows
          k1 = ln(1,L)
          k2 = ln(2,L)
-         !dsdx(k1) = dsdx(k1) + wcx1(L)*(s1(k2) - s1(k1)) * dxi(L) ! dimension m/m
-         !dsdy(k1) = dsdy(k1) + wcy1(L)*(s1(k2) - s1(k1)) * dxi(L)
-         !dsdx(k2) = dsdx(k2) + wcx2(L)*(s1(k2) - s1(k1)) * dxi(L)
-         !dsdy(k2) = dsdy(k2) + wcy2(L)*(s1(k2) - s1(k1)) * dxi(L)
+
          dhsdx(k1) = dhsdx(k1) + wcx1(L)*(hs(k2) - hs(k1)) * dxi(L) ! dimension m/m
          dhsdy(k1) = dhsdy(k1) + wcy1(L)*(hs(k2) - hs(k1)) * dxi(L)
          dhsdx(k2) = dhsdx(k2) + wcx2(L)*(hs(k2) - hs(k1)) * dxi(L)
          dhsdy(k2) = dhsdy(k2) + wcy2(L)*(hs(k2) - hs(k1)) * dxi(L)
       endif
    enddo
-
-   !dhsdx = dsdx - dbdx
-   !dhsdy = dsdy - dbdy
 
    do kkk  = 1,nbndu
       kb = kbndu(1,kkk)
@@ -2093,8 +2114,6 @@ subroutine xbeach_instationary()
          rr(itheta,kb) = rr(itheta,ki)
          
          if (windmodel.eq.1) then
-             !cgwavt(itheta,kb) = cgwavt(itheta,ki)
-             !cwavt(itheta,kb) = cwavt(itheta,ki)
              tt1(itheta,kb) = tt1(itheta,ki)
          endif
          
@@ -2120,8 +2139,7 @@ subroutine xbeach_instationary()
        sigt      = twopi/Trep
    endif
    
-
-   end subroutine xbeach_apply_wave_bc
+end subroutine xbeach_apply_wave_bc
 
 
 subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci,windmodel)
@@ -2308,7 +2326,7 @@ subroutine advec_horz(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
    integer                                         :: nwalls
    
    advec = 0d0
-   do L  = 1,lnx                                                              ! upwind (supq) + limited high order (dsq), loop over link
+   do L  = 1,lnx                                                           ! upwind (supq) + limited high order (dsq), loop over link
         k1  = ln(1,L) ; k2 = ln(2,L)                                       ! linker en rechtercelnr geassocieerd aan de links
         velocL = acL(L)*veloc(k1) + (1d0-acL(L))*veloc(k2)
         
@@ -2341,9 +2359,9 @@ subroutine advec_horz(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
                         waku  = quant(itheta,kl1)*sl1 + quant(itheta,kl2)*sl2   ! gewogen gemiddelde upwind waarden
                     endif  
 
-                    sl3 = slnup(3+ip,L)
-                    cf  =  dtmaxwav*abs(cwuL)*dxi(L)                  
-                    cf  =  half*max( 0d0,1d0-cf )                    
+                    sl3  =  slnup(3+ip,L)
+                    cf   =  dtmaxwav*abs(cwuL)*dxi(L)                  
+                    cf   =  half*max( 0d0,1d0-cf )                    
                     ds2  =  quant(itheta,kd) - quant(itheta,k)        ! ds1 = voorlopende slope, ds2 = eigen slope
                     ds1  = (quant(itheta,k)  - waku )*sl3
 
@@ -4549,7 +4567,7 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
    return
 end subroutine update_ee1rr
    
-subroutine xbeach_waves()
+subroutine xbeach_waves(ierr)
    use m_flowtimes
    use m_xbeach_data
    use m_xbeach_netcdf
@@ -4557,12 +4575,16 @@ subroutine xbeach_waves()
       
    implicit none
    
+   integer, intent(out)   :: ierr
+   
    integer          :: num, itheta
    double precision :: wave_tnow, wave_tstop
    
    if (trim(instat)=='stat' .or. trim(instat)=='stat_table') then
-      if ((abs(mod(time1,wavint))<0.000001d0) .or. newstatbc==1) then
-         call xbeach_stationary()                                          ! Sander's nieuwe solver
+      if ((abs(mod(time1,wavint))<1d-6) .or. newstatbc==1) then
+         !call xbeach_stationary()                                          ! Sander's nieuwe solver
+         call xbeach_wave_compute_statcelerities(ierr)
+         call xbeach_solve_wave_stationary(ierr)
          newstatbc   = 0
       endif
 
@@ -5739,7 +5761,7 @@ subroutine borecharacter()
    dist0=0d0   
    windspreadfac=0d0
    
-   do L = 1, lnx                                                              ! interpolate face values to cell centered values 
+   do L = 1, lnx                                         ! interpolate face values to cell centered values 
       k1 = ln(1,L); k2 = ln(2,L)
       wxcc(k1) = wxcc(k1) + wcl(1,L)*wx(L)
       wxcc(k2) = wxcc(k2) + wcl(2,L)*wx(L)
@@ -5789,7 +5811,7 @@ subroutine borecharacter()
    double precision, dimension(ntheta, ndx), intent(in) :: ee1              !<   wave energy/rad 
    double precision, dimension(ndx)        , intent(in) :: E                !<   nodal wave energy
    double precision, dimension(ntheta, ndx), intent(in) :: tt1              !<   wave period in directional bin
-   double precision, dimension(ndx)        , intent(in) :: sigmwav             !<   nodal wave period
+   double precision, dimension(ndx)        , intent(in) :: sigmwav          !<   nodal wave period
    double precision, dimension(ntheta, ndx), intent(in) :: cgwavt           !<   group celerity per bin
    double precision, dimension(ndx)        , intent(in) :: cgwav            !<   nodal group celerity
    double precision, dimension(ndx)        , intent(in) :: hh               !<   water depth
@@ -5943,10 +5965,6 @@ subroutine advec_horz_cg(dtmaxwav, snx, csx, veloc, gradcg)
    do nwalls=1,nthd
      k1 = thindam(1,nwalls)
      
-     if (k1==7488) then
-        continue
-     end if
-     
      cs = thindam(5,nwalls)  ! outward facing positive? Check with JRE
      sn = -thindam(4,nwalls)
      wuL = thindam(6,nwalls)
@@ -5962,10 +5980,10 @@ end subroutine advec_horz_cg
 
 subroutine xbeach_wave_period_breaker_dissipation( Df, E, sigmwav, cgwav, kwav, DtotT)
    use m_flowgeom, only: ndx
-use m_xbeach_data, only: ndissip, coefdispT, coefdispk
-use m_physcoef, only: rhomean, ag, rhog
-use m_sferic, only: twopi
-implicit none
+   use m_xbeach_data, only: ndissip, coefdispT, coefdispk
+   use m_physcoef, only: rhomean, ag, rhog
+   use m_sferic, only: twopi
+   implicit none
 
    double precision, dimension(ndx)        , intent(in)  :: Df
    double precision, dimension(ndx)        , intent(in)  :: E
@@ -5974,23 +5992,19 @@ implicit none
    double precision, dimension(ndx)        , intent(in)  :: kwav   
    double precision, dimension(ndx)        , intent(out) :: DtotT
    
-   
    DtotT = - coefdispT * tanh(coefdispk * kwav) * 1.d0 /(1.d0 -ndissip) * (twopi) / sigmwav / sigmwav * cgwav * kwav / E * Df              
-
-      
-      
-1234 continue
-
-     
+   
+1234 continue 
    return
    
 end subroutine xbeach_wave_period_breaker_dissipation    
 
 subroutine xbeach_wave_compute_period_depth_limitation(E, Tmaxdep )
-use m_flowgeom, only: ndx
-use m_xbeach_data, only: wmagcc, aa1, aa2, bb1, bb2
-use m_physcoef, only: rhomean, ag 
-implicit none
+   use m_flowgeom, only: ndx
+   use m_xbeach_data, only: wmagcc, aa1, aa2, bb1, bb2
+   use m_physcoef, only: rhomean, ag 
+   
+   implicit none
 
    double precision, dimension(ndx)        , intent(in)  :: E
    double precision, dimension(ndx)        , intent(out) :: Tmaxdep
@@ -6004,18 +6018,15 @@ implicit none
    allocate(Edls(1:ndx), Tdls(1:ndx), stat = ierr)
    
    Edls=ag / rhomean / wmagcc**4d0 * E
-   
    Tdls=aa2*(16d0* Edls / (aa1*aa1) )**(bb2/(2*bb1)) 
-   
    Tmaxdep = wmagcc * Tdls / ag
       
 1234 continue
-
-   deallocate(Edls, Tdls, stat=ierr)
-     
-   return
+   deallocate(Edls, Tdls, stat=ierr)  
+   return   
+ end subroutine xbeach_wave_compute_period_depth_limitation 
    
-end subroutine xbeach_wave_compute_period_depth_limitation 
+   
  subroutine advec_horz_windmodel(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
    use m_sferic
    use m_physcoef
@@ -6042,15 +6053,11 @@ end subroutine xbeach_wave_compute_period_depth_limitation
    advec = 0d0
    do L  = 1,lnx                                                              ! upwind (supq) + limited high order (dsq), loop over link
         k1  = ln(1,L) ; k2 = ln(2,L)                                       ! linker en rechtercelnr geassocieerd aan de links
-
         
         do itheta = 1,ntheta
-		
             velocL  = acL(L)*veloc(itheta,k1) + (1d0-acL(L))*veloc(itheta,k2)
-			
             cwuL    = velocL*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )   ! *au(L)   met cwi: u1(L) + cg*( csu(L)*csx(itheta) + snu(L)*snx(itheta) )
                                                                            ! inproduct cgx*csu+cgy*snu
-
             if (cwuL > 0) then                                              !   ->      ds1   ds2
                 k = k1 ; kd = k2 ; is =  1 ; half = 1d0 - acl(L) ; ip = 0   !   ->   ku     k     kd
             else                                                            !   <-      ds2   ds1
@@ -6099,12 +6106,7 @@ end subroutine xbeach_wave_compute_period_depth_limitation
     
 !  account for outflow at closed boundaries   
    do nwalls=1,mxwalls
-     k1 = walls(1,nwalls)
-     
-     if (k1==7420) then
-        continue
-     end if
-     
+     k1 = walls(1,nwalls)     
      cs =  walls(8,nwalls) ! outward positive
      sn = -walls(7,nwalls)
      wuL = walls(9,nwalls)
@@ -6121,12 +6123,7 @@ end subroutine xbeach_wave_compute_period_depth_limitation
    
 ! account for thin dams
    do nwalls=1,nthd
-     k1 = thindam(1,nwalls)
-     
-     if (k1==7488) then
-        continue
-     end if
-     
+     k1 = thindam(1,nwalls)     
      cs = thindam(5,nwalls) 
      sn = -thindam(4,nwalls)
      wuL = thindam(6,nwalls)
@@ -6562,10 +6559,1283 @@ subroutine xbeach_dispersion_windmodel()
    enddo
    
    ! define thetabin-energy-weighted average values for propagationspeeds and wave numbers
-   cgwav = max(sum(ee1*cgwavt,1),0.00001d0)/max(sum(ee1,1),0.00001d0)
-   cwav  = max(sum(ee1*cwavt,1),0.00001d0) /max(sum(ee1,1),0.00001d0)
-   nwav  = max(sum(ee1*nwavt,1),0.00001d0) /max(sum(ee1,1),0.00001d0)
-   kwav  = max(sum(ee1*kwavt,1),0.00001d0) /max(sum(ee1,1),0.00001d0)
+   cgwav = max(sum(ee1*cgwavt,1),1d-6)/max(sum(ee1,1),1d-6)
+   cwav  = max(sum(ee1*cwavt,1),1d-6) /max(sum(ee1,1),1d-6)
+   nwav  = max(sum(ee1*nwavt,1),1d-6) /max(sum(ee1,1),1d-6)
+   kwav  = max(sum(ee1*kwavt,1),1d-6) /max(sum(ee1,1),1d-6)
    
    end subroutine xbeach_dispersion_windmodel
    
+! ======================   
+! Stationary solver
+! ====================== 
+   
+subroutine xbeach_solve_wave_stationary(ierr)
+   ! Based on wave energy balance for directionally spread waves, single representative frequency
+   ! 4-sweep implicit method
+   ! At the main level arrays are two-dimensional in 
+   ! space but at lower level they are 1D.
+   !
+   ! (c) 2020 Dano Roelvink, Johan Reyns IHE Delft
+   !
+   use m_xbeach_paramsconst, only: TURB_NONE
+   use m_xbeach_data
+   use m_flowgeom
+   use m_flow, only: hs, epshs
+   use network_data, only: xk, yk, numk
+   use m_sferic, only: pi, dg2rd, rd2dg
+   use m_physcoef, only: ag, rhomean
+   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, uorb, rlabda
+   
+   implicit none
+   
+   integer, intent(out)   :: ierr
+   
+   ! Local variables
+   integer                                             :: k, k1, k2, L
+   integer                                             :: itheta
+   double precision                                    :: sigm            ! angular frequency
+   double precision                                    :: wavdir          ! incident angle in radians
+   double precision                                    :: t0,t1,t2,t3,t4  ! timers
+   !
+   double precision, allocatable, dimension(:)         :: costemp, costemp2, sintemp, sintemp2, hh
+   double precision, allocatable, dimension(:)         :: uwf, vwf, ustr, urf, vrf, ustw
+   !
+   ierr = 1
+   !
+   if (allocated(costemp)) deallocate(costemp, costemp2, sintemp, sintemp2, hh, &
+                                      ustw, uwf, vwf, ustr, urf, vrf, stat=ierr)
+   allocate(costemp(1:ndx), costemp2(1:ndx), sintemp(1:ndx), sintemp2(1:ndx), hh(1:ndx), stat=ierr)
+   allocate(ustw(1:ndx), uwf(1:ndx), vwf(1:ndx), ustr(1:ndx), stat = ierr)
+   allocate(urf(1:ndx), vrf(1:ndx), stat = ierr)
+   costemp  = 0d0
+   costemp2 = 0d0 
+   sintemp  = 0d0
+   sintemp2 = 0d0
+   ustw     = 0d0
+   uwf      = 0d0
+   vwf      = 0d0
+   ustr     = 0d0
+   urf      = 0d0
+   vrf      = 0d0
+   !
+   call timer(t0)
+   wavdir = (270d0-dir0)*dg2rd
+   !
+   hh = max(hs, epshs)
+   !
+   call flownod2corner(fw, ndx, fwstat, numk, ierr)
+   where (hhstat>fwcutoff)
+      fw = 0d0   
+   endwhere   
+   !
+   call timer(t1)
+   !
+   ! Solve the directional wave energy balance on an unstructured grid
+   call solve_energy_balance2Dstat (xk,yk,numk,w,ds,inner,prev,seapts,noseapts,nmmask,       &
+                                    e01,thetabin,ntheta,wavdir,                                    &
+                                    hhstat,kwavstat,cgstat,cthetastat,fwstat,Trep,dtmaximp,rhomean,alpha,gamma,                     &
+                                    Hstat,Dwstat,Dfstat,thetam,uorbstat,eestat)
+   call timer(t2)
+   !
+   ! copy values to flow nodes
+   call corner2flownod(Hstat, numk, H, ndxi, ndx, .false., ierr)
+   E = 1d0/8d0*rhomean*ag*H**2   ! assumes H already depth limited
+   call corner2flownod(Dwstat, numk, D, ndxi, ndx, .false., ierr)
+   call corner2flownod(Dfstat, numk, Df, ndxi, ndx, .false., ierr)
+   call corner2flownod(uorbstat, numk, urms_cc, ndxi, ndx, .false., ierr)
+   urms_cc = urms_cc/sqrt(2d0)
+   call corner2flownod(kwavstat, numk, kwav, ndxi, ndx, .false., ierr)
+   !
+   do itheta = 1, ntheta
+      costemp = eestat(:,itheta)  ! stack
+      call corner2flownod(costemp, numk, costemp2, ndxi, ndx, .true., ierr)   
+      ee1(itheta,:) = costemp2
+   enddo 
+   costemp=0d0; costemp2=0d0
+   call xbeach_apply_wave_bc()   ! fill boundary nodes
+   !
+   ! compute urms
+   do L=1,Lnx
+      k1 = ln(1,L)
+      k2 = ln(2,L)
+      urms(L) = (acL(L) * urms_cc(k1) + (1d0-acl(L))*urms_cc(k2))
+   end do
+   !
+   ! get value for roller energy
+   call corner2flownod(cstat, numk, cwav, ndxi, ndx, .false., ierr)
+   R = D*cwav/2d0/ag/beta
+   !
+   ! get mean wave direction
+   costemp = cos(thetam)
+   sintemp = sin(thetam)
+   call corner2flownod(costemp, numk, costemp2, ndxi, ndx, .false., ierr)
+   call corner2flownod(sintemp, numk, sintemp2, ndxi, ndx, .false., ierr)
+   thetamean = atan2(sintemp2, costemp2)
+   !
+   ! compute stokes drift contributions
+   do k=1,ndx    
+      ustw(k)= E(k)/max(cwav(k),sqrt(epshs*ag))/rhomean/hh(k)      ! waves
+      ustr(k)= 2d0*R(k)/max(cwav(k),sqrt(epshs*ag))/rhomean/hh(k)  ! roller
+      uwf(k) = ustw(k)*cos(thetamean(k))                           ! Cartesian decomposition
+      vwf(k) = ustw(k)*sin(thetamean(k))
+      urf(k) = ustr(k)*cos(thetamean(k))
+      vrf(k) = ustr(k)*sin(thetamean(k))
+      ustx_cc(k) = uwf(k)+urf(k); usty_cc(k)=vwf(k)+vrf(k)
+   end do
+   !
+   do L=1,lnx                                   
+      k1 = ln(1,L); k2 = ln(2,L)
+      ust(L) = acL(L)*(csu(L)*(uwf(k1)+urf(k1))+snu(L)*(vwf(k1)+vrf(k1))) + &
+         (1d0-acL(L))*(csu(L)*(uwf(k2)+urf(k2))+snu(L)*(vwf(k2)+vrf(k2)))
+   
+   
+      vst(L) = acL(L)*(-snu(L)*(uwf(k1)+urf(k1))+csu(L)*(vwf(k1)+vrf(k1))) + &
+         (1d0-acL(L))*(-snu(L)*(uwf(k2)+urf(k2))+csu(L)*(vwf(k2)+vrf(k2)))
+   enddo
+   ! 
+   if (roller.eq.1 .and. turb.ne.TURB_NONE) then
+      call borecharacter()                   ! calculates BR and Tbore using Rieneck&Fenton approach   
+   end if 
+   !
+   ! Assign values to wave communication arrays
+   hwav = H
+   twav = 2.0*pi/sigmwav
+   phiwav = thetamean*rd2dg
+   rlabda = 2d0*pi/kwav
+   uorb = urms_cc
+   ustokes = ust
+   vstokes = vst 
+   !
+   call timer(t3)
+   !
+   write(*,*) 'stationary wave computation:               ',t2-t1,' seconds'
+   write(*,*) 'copy corner values to flow nodes:          ',t3-t2,' seconds'
+   write(*,*) 'total computation time solver:             ',t3-t0,' seconds'
+   !
+   ierr = 0
+1234 continue
+     return
+end subroutine xbeach_solve_wave_stationary
+!
+subroutine find_upwind_neighbours(x,y,mn,theta,ntheta,kp,np,w,prev,ds,ierr)
+
+   implicit none
+
+   integer, intent(in)                                    :: mn,ntheta           ! length of x,y; length of theta
+   integer, intent(in)                                    :: np                  ! max no surrounding points
+   double precision,  dimension(mn),          intent(in)  :: x,y                 ! x, y coordinates of grid
+   integer,           dimension(mn,np),       intent(in)  :: kp                  ! grid indices of surrounding points per grid point
+   double precision,  dimension(ntheta),      intent(in)  :: theta               ! array of wave angles 
+   double precision,  dimension(mn,ntheta,2), intent(out) :: w                   ! per grid point and direction, weight of upwind points
+   integer,           dimension(mn,ntheta,2), intent(out) :: prev                ! per grid point and direction, indices of upwind points
+   double precision,  dimension(mn,ntheta),   intent(out) :: ds                  ! upwind distance to intersection point for each direction
+   integer,                                   intent(out) :: ierr
+   
+   double precision,  dimension(2)                        :: xsect,ysect,ww
+   double precision                                       :: pi,dss,xi,yi
+   integer                                                :: ind1,ind2
+   integer                                                :: ip,nploc
+   integer                                                :: k, itheta
+   
+   ierr = 1
+   
+   ! find upwind neighbours for each cell in an unstructured grid x,y (1d
+   ! vectors) given vector of directions theta
+
+   pi=4d0*atan(1.d0)
+
+   do k=1,mn
+      call findlocpos(kp(k,:),np,0,nploc)
+      nploc=nploc-1
+      if (kp(k,1)/=0) then
+         do itheta=1,ntheta
+            do ip=1,nploc-1
+               ind1=kp(k,ip)
+               ind2=kp(k,ip+1)
+               xsect=[x(ind1),x(ind2)]
+               ysect=[y(ind1),y(ind2)]
+               call intersect_angle(x(k),y(k),theta(itheta)+pi,xsect,ysect,ww,dss,xi,yi)
+               if (dss/=0) then
+                  w(k,itheta,1)=ww(1)
+                  w(k,itheta,2)=ww(2)
+                  ds(k,itheta)=dss
+                  prev(k,itheta,1)=kp(k,ip)
+                  prev(k,itheta,2)=kp(k,ip+1)
+                  exit
+               endif
+            enddo
+            if (dss==0) then
+               prev(k,itheta,1)=1
+               prev(k,itheta,2)=1
+               w(k,itheta,1)=0
+               w(k,itheta,2)=0
+            endif
+         enddo
+      endif
+   enddo
+   
+   ierr = 0
+1234 continue
+     return
+
+end subroutine find_upwind_neighbours
+!
+subroutine intersect_angle(x0,y0,phi,x,y,W,ds,xi,yi)
+
+   implicit none
+
+   double precision, intent(in)               :: x0,y0,phi
+   double precision, dimension(2),intent(in)  :: x,y
+   double precision, dimension(2),intent(out) :: W
+   double precision, intent(out)              :: ds,xi,yi
+   
+   double precision                           :: m,a,b,n,L,d1,d2
+   double precision                           :: err
+   double precision, parameter                :: eps = 1d-3
+   
+   if (abs(x(2)-x(1))>eps) then
+      m=(y(2)-y(1))/(x(2)-x(1))
+      a=y(1)-m*x(1)
+      n=tan(phi)
+      b=y0-n*x0
+      xi=(b-a)/(m-n)
+      yi=a+m*xi
+   else
+      yi=(x(1)-x0)*tan(phi)+y0
+      xi=x(1)
+   endif
+
+   L=hypot(x(2)-x(1),y(2)-y(1))
+   d1=hypot(xi-x(1),yi-y(1))
+   d2=hypot(xi-x(2),yi-y(2))
+   ds=hypot(xi-x0,yi-y0)
+   err=hypot((x0-xi)+ds*cos(phi),(y0-yi)+ds*sin(phi))
+   if (abs(L-d1-d2)<eps .and. err<eps) then
+      W(1)=d2/L
+      W(2)=d1/L
+   else
+      W(1)=0.d0
+      W(2)=0.d0
+      ds=0.d0
+   endif
+
+end subroutine intersect_angle
+!
+subroutine solve_energy_balance2Dstat(x,y,mn,w,ds,inner,prev,seapts,noseapts,neumannconnected,       &
+                                      ee0,theta,ntheta,thetamean,                                    &
+                                      hh,kwav,cg,ctheta,fw,T,dt,rho,alfa,gamma,                      &
+                                      H,Dw,Df,thetam,uorb,ee)
+   
+   implicit none
+
+   ! In/output variables and arrays
+   integer, intent(in)                        :: mn,ntheta              ! number of grid points, number of directions
+   real*8, dimension(mn),intent(in)           :: x,y                    ! x,y coordinates of grid
+   real*8,  dimension(mn,ntheta,2),intent(in) :: w                      ! weights of upwind grid points, 2 per grid point and per wave direction
+   real*8, dimension(mn,ntheta), intent(in)   :: ds                     ! distance to interpolated upwind point, per grid point and direction
+   real*8, intent(in)                         :: thetamean              ! mean offshore wave direction (rad)
+   real*8, dimension(ntheta), intent(in)      :: ee0,theta              ! distribution of wave angles and offshore wave energy density
+   logical, dimension(mn), intent(in)         :: inner                  ! mask of inner grid points (not on boundary)
+   integer, dimension(mn,ntheta,2),intent(in) :: prev                   ! two upwind grid points per grid point and wave direction
+   integer, intent(in)                        :: noseapts               ! number of offshore wave boundary points
+   integer, dimension(noseapts)               :: seapts                 ! indices of offshore wave boundary points
+   integer, dimension(mn),intent(in)          :: neumannconnected       ! number of neumann boundary point if connected to inner point
+   real*8, dimension(mn), intent(in)          :: hh                     ! water depth
+   real*8, dimension(mn), intent(in)          :: kwav                   ! wave number
+   real*8, dimension(mn), intent(in)          :: cg                     ! group velocity
+   real*8, dimension(mn,ntheta), intent(in)   :: ctheta                 ! refraction speed
+   real*8, dimension(mn), intent(in)          :: fw                     ! wave friction factor
+   real*8, intent(in)                         :: T                      ! wave period
+   real*8, intent(in)                         :: dt                     ! time step (s)
+   real*8, intent(in)                         :: rho                    ! water density
+   real*8, intent(in)                         :: alfa,gamma             ! coefficients in Baldock wave breaking dissipation
+   real*8, dimension(mn), intent(out)         :: H                      ! wave height
+   real*8, dimension(mn), intent(out)         :: Dw                     ! wave breaking dissipation
+   real*8, dimension(mn), intent(out)         :: Df                     ! wave friction dissipation
+   real*8, dimension(mn), intent(out)         :: thetam                 ! mean wave direction
+   real*8, dimension(mn), intent(out)         :: uorb                   ! orbital velocity
+   real*8, dimension(mn,ntheta), intent(out)  :: ee                     ! wave energy distribution
+
+   ! Local variables and arrays
+   integer, dimension(:), allocatable         :: ok                     ! mask for fully iterated points
+   real*8                                     :: eemax,dtheta           ! maximum wave energy density, directional resolution
+   integer                                    :: sweep,niter            ! sweep number, number of iterations
+   integer                                    :: k,k1,k2,i,ind(1)       ! counters (k is grid index)
+   integer, dimension(:,:), allocatable       :: indx                   ! index for grid sorted per sweep direction
+   real*8, dimension(:,:), allocatable        :: eeold               ! wave energy density, energy density previous iteration
+   real*8, dimension(:,:), allocatable        :: dee                    ! difference with energy previous iteration
+   real*8, dimension(:), allocatable          :: eeprev, cgprev         ! energy density and group velocity at upwind intersection point
+   real*8, dimension(:,:),allocatable         :: A,B,C,R                ! coefficients in the tridiagonal matrix solved per point
+   real*8, dimension(:), allocatable          :: DoverE                 ! ratio of mean wave dissipation over mean wave energy
+   real*8, dimension(:), allocatable          :: E                      ! mean wave energy
+   real*8, dimension(:), allocatable          :: diff                   ! maximum difference of wave energy relative to previous iteration
+   real*8, dimension(:), allocatable          :: ra                     ! coordinate in sweep direction
+   integer, dimension(4)                      :: shift
+   integer                                    :: iter
+   integer                                    :: count
+   integer                                    :: itheta
+   real*8                                     :: percok
+   real*8                                     :: error
+   real*8,parameter                           :: pi=4.d0*atan(1.d0)
+   real*8,parameter                           :: g=9.81d0
+   real*8,parameter                           :: hmin=0.1d0             ! minimum water depth
+   real*8,parameter                           :: fac=0.25d0             ! underrelaxation factor for DoverE
+   real*8,parameter                           :: crit=0.0001            ! relative accuracy
+
+   ! Allocate local arrays
+   allocate(ok(mn))
+   allocate(indx(mn,4))
+   !allocate(ee(mn,ntheta)); ee=0d0
+   allocate(eeold(mn,ntheta)); eeold=0d0
+   allocate(dee(mn,ntheta)); dee=0d0
+   allocate(eeprev(ntheta)); eeprev=0d0
+   allocate(cgprev(ntheta)); cgprev=0d0
+   allocate(A(mn,ntheta)); A=0d0
+   allocate(B(mn,ntheta)); B=0d0
+   allocate(C(mn,ntheta)); C=0d0
+   allocate(R(mn,ntheta)); R=0d0
+   allocate(DoverE(mn)); DoverE=0d0
+   allocate(E(mn)); E=0d0
+   allocate(diff(mn)); diff=0d0
+   allocate(ra(mn)); ra=0d0
+
+   ok=0
+   indx=0
+   ee=0d0
+   eemax=1.d0;
+   dtheta=theta(2)-theta(1)
+   niter=400
+   
+   ! Sort coordinates in sweep directions
+   shift=[0,1,-1,2]
+   do sweep=1,4
+      ra=x*cos(thetamean+shift(sweep)*pi/2.d0)+y*sin(thetamean+shift(sweep)*pi/2.d0)
+      call hpsort_eps_epw (mn, ra , indx(:,sweep), 1.d-6)
+   enddo
+
+   ! Boundary condition at sea side (uniform)
+   do i=1,noseapts
+      k=seapts(i)
+      ee(k,:)=ee0
+   enddo
+   
+   ! Start iteration
+   do iter=1,niter
+      sweep=mod(iter,4)
+      if (sweep==0) then
+         sweep=4;
+      endif
+      if (sweep==1) then
+         eeold=ee;
+      endif
+      !  Loop over all points depending on sweep direction
+      do count=1,mn
+         k=indx(count,sweep)
+         if (inner(k)) then
+            if (hh(k)>1.1*hmin) then
+               if (.not. ok(k)) then
+                  ! Only perform computations on wet inner points that are not yet converged (ok)
+                  do itheta=1,ntheta
+                     k1=prev(k,itheta,1)
+                     k2=prev(k,itheta,2)
+                     eeprev(itheta)=w(k,itheta,1)*ee(k1,itheta)+w(k,itheta,2)*ee(k2,itheta)
+                     cgprev(itheta)=w(k,itheta,1)*cg(k1)+w(k,itheta,2)*cg(k2)
+                  enddo
+                  do itheta=2,ntheta-1
+                     A(k,itheta)=-ctheta(k,itheta-1)/2/dtheta
+                     B(k,itheta)=1/dt+cg(k)/ds(k,itheta)+DoverE(k)
+                     C(k,itheta)=ctheta(k,itheta+1)/2/dtheta
+                     R(k,itheta)=ee(k,itheta)/dt+cgprev(itheta)*eeprev(itheta)/ds(k,itheta)
+                  enddo
+                  if (ctheta(k,1)<0) then
+                     A(k,1)=0.d0
+                     B(k,1)=1/dt-ctheta(k,1)/dtheta+cg(k)/ds(k,1)+DoverE(k)
+                     C(k,1)=ctheta(k,2)/dtheta
+                     R(k,1)=ee(k,1)/dt+cgprev(itheta)*eeprev(1)/ds(k,1)
+                  else
+                     A(k,1)=0.d0
+                     B(k,1)=1.d0/dt
+                     C(k,1)=0.d0
+                     R(k,1)=0.d0
+                  endif
+                  if (ctheta(k,ntheta)>0) then
+                     A(k,ntheta)=-ctheta(k,ntheta-1)/dtheta
+                     B(k,ntheta)=1/dt+ctheta(k,ntheta)/dtheta+cg(k)/ds(k,ntheta)+DoverE(k)
+                     C(k,ntheta)=0d0
+                     R(k,ntheta)=ee(k,ntheta)/dt+cgprev(itheta)*eeprev(ntheta)/ds(k,ntheta)
+                  else
+                     A(k,ntheta)=0.d0
+                     B(k,ntheta)=1.d0/dt
+                     C(k,ntheta)=0.d0
+                     R(k,ntheta)=0.d0
+                  endif
+                  ! Solve tridiagonal system per point
+                  call solve_tridiag(A(k,:),B(k,:),C(k,:),R(k,:),ee(k,:),ntheta)
+                  ee(k,:)=max(ee(k,:),0.d0)
+                  E(k)=sum(ee(k,:))*dtheta
+                  H(k)=sqrt(8*E(k)/rho/g)
+                  H(k)=min(H(k),gamma*hh(k))
+                  E(k)=0.125d0*rho*g*H(k)**2
+                  call baldock(g,rho,alfa,gamma,kwav(k),hh(k),H(k),T,1,Dw(k))
+                  uorb(k)=pi*H(k)/T/sinh(kwav(k)*hh(k))
+                  Df(k)=0.28d0*rho*fw(k)*uorb(k)**3
+                  DoverE(k)=(1.d0-fac)*DoverE(k)+fac*(Dw(k)+Df(k))/max(E(k),1.d-6)
+                  do itheta=1,ntheta
+                     B(k,itheta)=1/dt+cg(k)/ds(k,itheta)+DoverE(k)
+                  enddo
+                  ! Solve tridiagonal system per point
+                  call solve_tridiag(A(k,:),B(k,:),C(k,:),R(k,:),ee(k,:),ntheta)
+                  ee(k,:)=max(ee(k,:),0.d0)
+               endif
+            else
+               ee(k,:)=0
+            endif
+            if (neumannconnected(k)/=0) then
+                ee(neumannconnected(k),:)=ee(k,:)
+            endif
+            
+         endif
+
+      enddo
+      !      
+      do k=1,mn
+         ! Compute directionally integrated paraneters
+         ee(k,:)=max(ee(k,:),0.d0)
+         E(k)=sum(ee(k,:))*dtheta
+         H(k)=sqrt(8*E(k)/rho/g)
+         call baldock(g,rho,alfa,gamma,kwav(k),hh(k),H(k),T,1,Dw(k))
+         uorb(k)=pi*H(k)/T/sinh(kwav(k)*hh(k))
+         Df(k)=0.28d0*rho*fw(k)*uorb(k)**3
+         DoverE(k)=(1.d0-fac)*DoverE(k)+fac*(Dw(k)+Df(k))/max(E(k),1.d-6)
+         thetam(k)=atan2(sum(ee(k,:)*sin(theta)),sum(ee(k,:)*cos(theta)))
+      enddo
+      if (sweep==4) then
+         ! Check convergence after all 4 sweeps
+         do k=1,mn
+            dee(k,:)=ee(k,:)-eeold(k,:)
+            diff(k)=maxval(abs(dee(k,:)))
+            if (diff(k)/eemax<crit) ok(k)=1
+         enddo
+         ! Percentage of converged points
+         percok=sum(ok)/dble(mn)*100.d0;
+         eemax=maxval(ee)
+         ! Relative maximum error
+         error=maxval(diff)/eemax
+         write(*,'(a,i6,a,f10.5,a,f7.2)')'iteration ',iter/4 ,' error = ',error,'   %ok = ',percok
+         if (error<crit .and. iter>4) then
+            write(*,*) 'Solver converged, exiting...'
+            exit
+         endif
+      endif
+   enddo
+
+end subroutine solve_energy_balance2Dstat
+!
+!
+subroutine solve_tridiag(a,b,c,d,x,n)
+   implicit none
+   !	 a - sub-diagonal (means it is the diagonal below the main diagonal)
+   !	 b - the main diagonal
+   !	 c - sup-diagonal (means it is the diagonal above the main diagonal)
+   !	 d - right part
+   !	 x - the answer
+   !	 n - number of equations
+
+   integer,                      intent(in)    :: n
+   double precision,dimension(n),intent(in)    :: a,b,c,d
+   double precision,dimension(n),intent(out)   :: x
+   double precision,dimension(n)               :: cp,dp
+   double precision                            :: m
+   
+   integer                                     :: i
+   integer,parameter                           :: r8 = kind(1.d0)
+
+   ! initialize c-prime and d-prime
+   cp(1) = c(1)/b(1)
+   dp(1) = d(1)/b(1)
+   ! solve for vectors c-prime and d-prime
+   do i = 2,n
+      m = b(i)-cp(i-1)*a(i)
+      cp(i) = c(i)/m
+      dp(i) = (d(i)-dp(i-1)*a(i))/m
+   end do
+   ! initialize x
+   x(n) = dp(n)
+   ! solve for x from the vectors c-prime and d-prime
+   do i = n-1, 1, -1
+      x(i) = dp(i)-cp(i)*x(i+1)
+   end do
+
+end subroutine solve_tridiag
+!
+subroutine baldock (rho,g,alfa,gamma,k,hh,H,T,opt,Dw)
+
+  implicit none  
+
+  double precision, intent(in)                :: rho
+  double precision, intent(in)                :: g
+  double precision, intent(in)                :: alfa
+  double precision, intent(in)                :: gamma
+  double precision, intent(in)                :: k
+  double precision, intent(in)                :: hh
+  double precision, intent(in)                :: H
+  double precision, intent(in)                :: T
+  integer, intent(in)                         :: opt
+  double precision, intent(out)               :: Dw
+  
+  double precision                            :: dtol
+  double precision                            :: Hmax
+
+  dtol = 1d-8
+  if (H<dtol) then
+     Dw = 0d0
+     return
+  endif   
+   ! Compute dissipation according to Baldock
+   Hmax=0.88/k*tanh(gamma*k*hh/0.88d0)
+   if (opt==1) then
+      Dw=0.25*alfa*rho*g/T*exp(-(Hmax/H)**2)*(Hmax**2+H**2)
+   else
+      Dw=0.25*alfa*rho*g/T*exp(-(Hmax/H)**2)*(Hmax**3+H**3)/gamma/hh
+   endif
+end subroutine baldock
+!
+!
+! Copyright (C) 2010-2016 Samuel Ponce', Roxana Margine, Carla Verdi, Feliciano Giustino
+! Copyright (C) 2007-2009 Jesse Noffsinger, Brad Malone, Feliciano Giustino
+!
+! This file is distributed under the terms of the GNU General Public
+! License. See the file `LICENSE' in the root directory of the
+! present distribution, or http://www.gnu.org/copyleft.gpl.txt .
+!
+! Adapted from flib/hpsort_eps
+!---------------------------------------------------------------------
+subroutine hpsort_eps_epw (n, ra, ind, eps)
+   !---------------------------------------------------------------------
+   ! sort an array ra(1:n) into ascending order using heapsort algorithm,
+   ! and considering two elements being equal if their values differ
+   ! for less than "eps".
+   ! n is input, ra is replaced on output by its sorted rearrangement.
+   ! create an index table (ind) by making an exchange in the index array
+   ! whenever an exchange is made on the sorted data array (ra).
+   ! in case of equal values in the data array (ra) the values in the
+   ! index array (ind) are used to order the entries.
+   ! if on input ind(1)  = 0 then indices are initialized in the routine,
+   ! if on input ind(1) != 0 then indices are assumed to have been
+   !                initialized before entering the routine and these
+   !                indices are carried around during the sorting process
+   !
+   ! no work space needed !
+   ! free us from machine-dependent sorting-routines !
+   !
+   ! adapted from Numerical Recipes pg. 329 (new edition)
+   !
+   implicit none
+   
+   !-input/output variables
+   integer,                        intent(in)    :: n
+   double precision,               intent(in)    :: eps
+   integer, dimension(n),          intent(inout) :: ind
+   double precision, dimension(n), intent(inout) :: ra
+   
+   !-local variables
+   integer          :: i, ir, j, l, iind
+   double precision :: rra
+   !
+   ! initialize index array
+   IF (ind (1) .eq.0) then
+      DO i = 1, n
+         ind (i) = i
+      ENDDO
+   ENDIF
+   ! nothing to order
+   IF (n.lt.2) return
+   ! initialize indices for hiring and retirement-promotion phase
+   l = n / 2 + 1
+
+   ir = n
+
+   sorting: do
+
+      ! still in hiring phase
+      IF ( l .gt. 1 ) then
+         l    = l - 1
+         rra  = ra (l)
+         iind = ind (l)
+         ! in retirement-promotion phase.
+      ELSE
+         ! clear a space at the end of the array
+         rra  = ra (ir)
+         !
+         iind = ind (ir)
+         ! retire the top of the heap into it
+         ra (ir) = ra (1)
+         !
+         ind (ir) = ind (1)
+         ! decrease the size of the corporation
+         ir = ir - 1
+         ! done with the last promotion
+         IF ( ir .eq. 1 ) then
+            ! the least competent worker at all !
+            ra (1)  = rra
+            !
+            ind (1) = iind
+            exit sorting
+         ENDIF
+      ENDIF
+      ! wheter in hiring or promotion phase, we
+      i = l
+      ! set up to place rra in its proper level
+      j = l + l
+      !
+      DO while ( j .le. ir )
+         IF ( j .lt. ir ) then
+            ! compare to better underling
+            IF ( hslt( ra (j),  ra (j + 1) ) ) then
+               j = j + 1
+            ENDIF
+         ENDIF
+         ! demote rra
+         IF ( hslt( rra, ra (j) ) ) then
+            ra (i) = ra (j)
+            ind (i) = ind (j)
+            i = j
+            j = j + j
+         ELSE
+            ! set j to terminate do-while loop
+            j = ir + 1
+         ENDIF
+      ENDDO
+      ra (i) = rra
+      ind (i) = iind
+
+   END DO sorting
+contains
+
+   !  internal function
+   !  compare two real number and return the result
+
+   logical function hslt( a, b )
+      double precision :: a, b
+      IF( abs(a-b) <  eps ) then
+         hslt = .false.
+      ELSE
+         hslt = ( a < b )
+      end if
+   end function hslt
+   !
+end subroutine hpsort_eps_epw
+!
+!
+subroutine disper_approx(h,T,k,n,C,Cg,mn)
+   integer, intent(in)                :: mn
+   double precision, dimension(mn), intent(in)  :: h
+   double precision, intent(in)                 :: T
+   double precision, dimension(mn), intent(out) :: k,n,C,Cg
+
+   double precision                             :: sigma,g,pi
+   g=9.81d0
+   pi=4.d0*atan(1.d0)
+   sigma=2.d0*pi/T
+   k = sigma**2/g*(1-exp(-(sigma*sqrt(h/g))**(2.5)))**(-0.4)
+   C= sigma/k
+   n = 0.5d0+k*h/sinh(2*k*h)
+   Cg=n*C
+
+end subroutine disper_approx
+!
+!subroutine timer(t)
+!   real*8,intent(out)               :: t
+!   integer*4                        :: count,count_rate,count_max
+!   call system_clock (count,count_rate,count_max)
+!   t = dble(count)/count_rate
+!end subroutine timer
+!
+subroutine fm_surrounding_points(xn,yn,no_nodes,connected_nodes,no_connected_nodes, no_cells, kp, ierr)
+   use m_flowgeom
+   use m_flow, only: hs, hu, epshu
+   
+   implicit none
+
+   double precision,  dimension(no_nodes),          intent(in)  :: xn,yn              ! coordinates of network nodes
+   integer,                                         intent(in)  :: no_nodes           ! number of network nodes
+   integer,                                         intent(in)  :: no_connected_nodes ! max node numbers connected to each cell
+   integer, dimension(no_cells,no_connected_nodes), intent(in)  :: connected_nodes    ! node numbers connected to each cell
+   integer,                                         intent(in)  :: no_cells           ! number of cells
+   integer, dimension(no_nodes,12),                 intent(out) :: kp                 ! sorted surrounding node numbers for each node
+   integer,                                         intent(out) :: ierr
+   
+   ! Local variables
+   integer, dimension(:),   allocatable         :: no_connected_cells
+   integer, dimension(:,:), allocatable         :: connected_cells
+   integer, dimension(4)                        :: kpts, edge
+   integer, dimension(20)                       :: surr_points
+   integer, dimension(12)                       :: surr_pts
+   double precision,  dimension(12)             :: xp,yp,zp              ! x,y,z of sorted surrounding nodes for each node
+
+   integer                                      :: k, k1, k2, k3, k4
+   integer                                      :: ip, j, jj
+   integer                                      :: inode, knode, kcell, kn, isp, isp2
+   integer                                      :: next
+   integer                                      :: L
+   double precision                             :: dhds
+   
+   ierr = 1
+   
+   if (allocated(no_connected_cells)) deallocate(no_connected_cells, connected_cells)
+   allocate(no_connected_cells(no_nodes))
+   allocate(connected_cells(no_nodes,12))
+   no_connected_cells=0
+   connected_cells=0
+   kp=0
+
+   do k=1,no_cells
+       do inode=1,no_connected_nodes
+           knode=connected_nodes(k,inode)
+           if (knode >0) then
+               no_connected_cells(knode)=no_connected_cells(knode)+1
+               connected_cells(knode,no_connected_cells(knode))=k
+           endif
+       enddo
+   enddo
+
+   do kn=1,no_nodes                                ! for each node (numk)
+       surr_points=0
+       surr_pts=0
+       isp=1
+       do kcell=1,no_connected_cells(kn)           ! for each cell connected to node
+           k=connected_cells(kn,kcell)             ! get cell number
+           kpts=connected_nodes(k,:)               ! all nodes in that cell
+           if (kpts(4)==0) then
+               jj=0
+               do j=1,3
+                   if (kpts(j)/=kn) then
+                       jj=jj+1
+                       edge(jj)=kpts(j)
+                   endif
+               enddo
+               surr_points(isp:isp+1)=edge(1:2)
+               isp=isp+2
+           else
+               ip=minloc(abs(kpts-kn),1)
+               if (ip==1) then
+                   edge=[kpts(2),kpts(3),kpts(3),kpts(4)]
+               elseif (ip==2) then
+                   edge=[kpts(3),kpts(4),kpts(4),kpts(1)]
+               elseif (ip==3) then
+                   edge=[kpts(4),kpts(1),kpts(1),kpts(2)]
+               else
+                   edge=[kpts(1),kpts(2),kpts(2),kpts(3)]
+               endif
+               surr_points(isp:isp+3)=edge(1:4)
+               isp=isp+4
+           endif
+       enddo
+       isp=isp-1  ! number of surrounding points
+   !   now connect the edges
+       if (isp>=2) then
+          surr_pts(1:2)=surr_points(1:2)
+          surr_points=[surr_points(3:),0,0]
+          isp2=2
+          isp=isp-2
+          do while (isp>=2)
+               call findlocpos(surr_points,isp,surr_pts(isp2),next)
+               if (next/=-1) then
+                  if (mod(next,2)==1) then
+                      surr_pts(1:isp2+1)=[surr_pts(1:isp2),surr_points(next+1)]
+                      surr_points=[surr_points(1:next-1),surr_points(next+2:)]
+                  else
+                      surr_pts(1:isp2+1)=[surr_pts(1:isp2),surr_points(next-1)]
+                      surr_points=[surr_points(1:next-2),surr_points(next+1:)]
+                  endif
+               else
+                  call findlocpos(surr_points,isp,surr_pts(1),next)
+                  if (mod(next,2)==1) then
+                      surr_pts(1:isp2+1)=[surr_points(next+1),surr_pts(1:isp2)]
+                      surr_points=[surr_points(1:next-1),surr_points(next+2:)]
+                  else
+                      surr_pts(1:isp2+1)=[surr_points(next-1),surr_pts(1:isp2)]
+                      surr_points=[surr_points(1:next-2),surr_points(next+1:)]
+                  endif
+   
+               endif
+            
+               isp2=isp2+1      
+               isp=isp-2
+           end do
+       else
+           surr_pts=0
+       endif
+       kp(kn,:)=surr_pts
+    
+   end do
+
+   ierr = 0
+1234 continue
+     return
+   
+end
+!    
+subroutine findlocpos(a,n,b,indx)
+
+   implicit none
+
+   integer, intent(in)               :: n,b
+   integer, intent(out)              :: indx
+   integer, dimension(n), intent(in) :: a
+   
+   integer                           :: i
+   
+   indx=-1
+   do i=1,n
+       if (a(i)==b) then
+           indx=i
+           return
+       endif
+   enddo
+end   
+   
+subroutine fill_connected_nodes(ierr)
+   use network_data
+   use m_xbeach_data
+   
+   implicit none
+   
+   integer, intent(out)    :: ierr
+   
+   integer                                :: L, k, kk
+   
+   ierr = 1
+   ! get maximum number of connected nodes over model domain
+   no_connected_nodes = 0
+   do k = 1, nump
+      no_connected_nodes = max(no_connected_nodes,netcell(k)%n)
+   enddo
+   
+   no_connected_nodes = no_connected_nodes+1                     ! possible ghost node
+   if (allocated(connected_nodes)) deallocate(connected_nodes)
+   allocate(connected_nodes(nump,no_connected_nodes))
+   connected_nodes = 0
+   
+   ! fill array with netnodes per netcell
+   do k = 1, nump
+      do kk = 1, netcell(k)%n
+         connected_nodes(k,kk) = netcell(k)%nod(kk)   
+      end do
+   enddo
+   
+   ierr = 0
+1234 continue
+   return  
+
+   end subroutine fill_connected_nodes
+   
+   !> Interpolate zbndw values to boundary net nodes
+   !  Not needed for now, e01 is available and spatially uniform
+   !  This needs to be written when I change the wave bc module to accept anything
+!   subroutine apply_stat_wavebc(ee, wmask, zbndw, nbndw, numk, ntheta, ierr)
+!      
+!      implicit none
+!      
+!      integer, intent(in)                   :: numk
+!      integer, intent(in)                   :: ntheta
+!      integer, intent(in)                   :: nbndw
+!      double precision, dimension(ntheta)
+!      
+!      double precision
+!      
+!      integer                            :: k, kb, ki, L
+!      
+!      ierr = 1
+!      
+!      
+!      ierr = 0
+!1234  continue
+!      return
+!      
+!   end subroutine apply_stat_wavebc
+   
+   subroutine getbndwzcornerpts(ierr)
+      use m_flowexternalforcings
+      use m_flowgeom
+      use network_data
+      use m_xbeach_data, only: kbndu2kbndw, kbndz2kbndw, noseapts, seapts, wmask, nmmask, inner
+      use gridoperations, only: othernode
+   
+      implicit none
+   
+      integer                                   , intent(out)     :: ierr
+                                                  
+      ! local variables                           
+      integer                                                     :: cn1, cn2
+      integer                                                     :: k, ko
+      integer                                                     :: L, LL
+      integer                                                     :: cnt
+      integer                                                     :: iwalls
+                                                                  
+      double precision, dimension(:), allocatable                 :: sumw
+      
+      ierr = 1
+      ! 1: weight 1 of attached wave bnd wmask(2,L), 3: weight 2 of attached bnd of attached wave bnd wmask(4,L)
+      wmask = 0
+      
+      ! bnd point connected to inner point of neumann bnd;
+      nmmask = 0
+      
+      if (allocated(sumw)) deallocate(sumw)
+      allocate(sumw(numk))
+      sumw = 0d0
+      
+      !> wave energy boundaries
+      !  set mask
+      do k = 1,nbndw
+         L   = kbndw(3,k)
+         cn1 = lncn(1,L)
+         cn2 = lncn(2,L)
+         wmask(1,cn1) = wcLn(1,L); wmask(2,cn1)=k
+         wmask(3,cn2) = wcLn(2,L); wmask(4,cn2)=k
+         ! debug
+         inner(cn1) = .false.
+         inner(cn2) = .false.
+         !\ debug
+      enddo
+      !
+      ! Normalize weights
+      do k = 1, numk
+         sumw = wmask(1,k) + wmask(3,k)
+         if (sumw(k)==0d0) cycle
+         wmask(1,k) = wmask(1,k)/sumw(k)
+         wmask(3,k) = wmask(3,k)/sumw(k)
+      enddo
+      !
+      !> get indexes of edge nodes with wave boundary
+      noseapts = 0
+      do k = 1, numk
+         if (wmask(2,k)>0 .or. wmask(4,k)>0) noseapts = noseapts+1    
+      enddo
+      !
+      ! allocate seapts array and fill
+      if (allocated(seapts)) deallocate(seapts)
+      allocate(seapts(noseapts))
+      cnt = 0
+      do k = 1, numk
+         if (wmask(2,k)>0 .or. wmask(4,k)>0) then
+            cnt = cnt+1
+            seapts(cnt) = k
+         endif   
+      enddo        
+ 
+      !> non-wave open u and z boundaries get neumann flag
+      do k = 1,nbndz
+         if (kbndz2kbndw(k)/=0) cycle      ! then wave dirichlet bnd
+         L   = kbndz(3,k)
+         cn1 = lncn(1,L)
+         cn2 = lncn(2,L)
+         !
+         ! Find internal node attached to bnd node (implicitly assumes no triangular borders, if so takes last one)
+         !! network_data::NB values: 1=INTERN, 2=RAND, 3=HOEK, 0/-1=DOET NIET MEE OF 1D
+         !  (KN(3,L) == 2) 2D
+         do LL = 1, size(nod(cn1)%lin)
+            if (kn(3,abs(nod(cn1)%lin(LL)))/=2) cycle       ! not 2d link
+            call othernode(cn1,abs(nod(cn1)%lin(LL)),ko)
+            if (nb(ko) /= 1) cycle                          ! not inner net node
+            nmmask(ko) = cn1
+         enddo
+         !
+         do LL = 1, size(nod(cn2)%lin)
+            if (kn(3,abs(nod(cn2)%lin(LL)))/=2) cycle
+            call othernode(cn2,abs(nod(cn2)%lin(LL)),ko)
+            if (nb(ko) /= 1) cycle
+            nmmask(ko) = cn2
+         enddo
+      enddo
+      !
+      do k = 1,nbndu
+         if (kbndu2kbndw(k)/=0) cycle      ! then wave dirichlet bnd
+         L = kbndu(3,k)
+         cn1 = lncn(1,L)
+         cn2 = lncn(2,L)
+         !
+         ! Find internal node
+         do LL = 1, size(nod(cn1)%lin)
+            if (kn(3,abs(nod(cn1)%lin(LL)))/=2) cycle
+            call othernode(cn1,abs(nod(cn1)%lin(LL)),ko)
+            if (nb(ko) /= 1) cycle
+            nmmask(ko) = cn1
+         enddo
+         !
+         do LL = 1, size(nod(cn2)%lin)
+            if (kn(3,abs(nod(cn2)%lin(LL)))/=2) cycle
+            call othernode(cn2,abs(nod(cn2)%lin(LL)),ko)
+            if (nb(ko) /= 1) cycle
+            nmmask(ko) = cn2
+         enddo
+      enddo
+      !
+      ! walls: could be simpler using attached links, but not here for consistency
+!      do iwalls = 1, mxwalls
+!         cn1  = walls(2,iwalls)                              ! first corner
+!         cn2  = walls(3,iwalls)                              ! second corner
+!         ! Find internal node
+!         if (wmask(2,cn1)>0 .or. wmask(4,cn1)>0) goto 10     ! do next node
+!         do LL = 1, size(nod(cn1)%lin)
+!            if (kn(3,abs(nod(cn1)%lin(LL)))/=2) cycle
+!            call othernode(cn1,abs(nod(cn1)%lin(LL)),ko)
+!            if (nb(ko) /= 1) cycle
+!            nmmask(ko) = cn1
+!         enddo
+!         !
+!10       if (wmask(2,cn2)>0 .or. wmask(4,cn2)>0) cycle    
+!         do LL = 1, size(nod(cn2)%lin)
+!            if (kn(3,abs(nod(cn2)%lin(LL)))/=2) cycle
+!            call othernode(cn2,abs(nod(cn2)%lin(LL)),ko)
+!            if (nb(ko) /= 1) cycle
+!            nmmask(ko) = cn2
+!         enddo
+!      enddo   
+      
+      ierr = 0
+1234  continue
+      if (allocated(sumw)) deallocate(sumw)
+      return
+   end subroutine getbndwzcornerpts
+   
+   subroutine allocstatsolverarrays(ierr)
+      use m_alloc
+      use m_xbeach_data
+      use m_flowgeom, only: ntheta
+      use network_data, only: numk
+       
+      implicit none
+      
+      integer                  :: ierr
+      
+      ierr = 1
+            
+      call realloc(w, (/numk,ntheta,2/), stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('w  (numk,ntheta,2)', ierr, ntheta*numk*2)
+      call realloc(ds, (/numk,ntheta/), stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('ds  (numk,ntheta,2)', ierr, ntheta*numk)
+      call realloc(inner, numk, stat=ierr, keepExisting = .false., fill = .false.)
+      call aerr('inner  (numk)', ierr, numk)
+      call realloc(prev, (/numk,ntheta,2/), stat=ierr, keepExisting = .false., fill = 0)
+      call aerr('prev  (numk,ntheta,2)', ierr, ntheta*numk*2)      
+      call realloc(hhstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('hhstat  (numk)', ierr, numk)       
+      call realloc(kwavstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('kwavstat  (numk)', ierr, numk)         
+      call realloc(cgstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('cgstat  (numk)', ierr, numk)      
+      call realloc(cstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('cstat  (numk)', ierr, numk)
+      call realloc(cthetastat, (/numk,ntheta/), stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('cthetastat  (numk,ntheta)', ierr, numk*ntheta)
+      call realloc(eestat, (/numk,ntheta/), stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('eestat  (numk,ntheta)', ierr, numk*ntheta)        
+      call realloc(fwstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('fwstat  (numk)', ierr, numk)   
+      call realloc(Hstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('Hstat  (numk)', ierr, numk)       
+      call realloc(Dwstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('Dwstat  (numk)', ierr, numk)   
+      call realloc(Dfstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('Dfstat  (numk)', ierr, numk)       
+      call realloc(thetam, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('thetam  (numk)', ierr, numk)  
+      call realloc(uorbstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('uorbstat  (numk)', ierr, numk)       
+      call realloc(dhdxstat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('dhdxstat  (numk)', ierr, numk) 
+      call realloc(dhdystat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('dhdystat  (numk)', ierr, numk)  
+      call realloc(dhdystat, numk, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('dhdystat  (numk)', ierr, numk)
+      call realloc(wmask, (/4,numk/), stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('wmask  (4,numk)', ierr, 4*numk) 
+      call realloc(nmmask, numk, stat=ierr, keepExisting = .false., fill = 0)
+      call aerr('nmmask  (numk)', ierr, numk)
+      if (ierr>0) goto 1234
+      ierr = 0
+1234  continue
+      if (ierr>0) write(*,*) 'allocstatsolverarrays :: Error.'
+      return 
+   end subroutine allocstatsolverarrays
+   
+   subroutine corner2flownod(quantin, numk, quantout, ndxi, ndx, skipnbndw, ierr)
+      use m_flowgeom, only: banf, ba, mxban, nban
+      use m_flowexternalforcings
+      use m_xbeach_data, only: kbndz2kbndw, kbndu2kbndw
+   
+      implicit none
+      
+      logical                          , intent(in)   :: skipnbndw
+      integer                          , intent(in)   :: numk
+      integer                          , intent(in)   :: ndxi
+      integer                          , intent(in)   :: ndx
+      double precision, dimension(numk), intent(in)   :: quantin
+      double precision, dimension(ndx) , intent(out)  :: quantout
+      integer, intent(out)                            :: ierr
+      
+      ! local variables
+      integer                                         :: k, kb, ki
+      integer                                         :: n, mx
+      
+      ierr = 1
+      
+      quantout = 0d0
+      do mx = 1, mxban
+         k   = nban(1,mx)    ! corner
+         n   = nban(2,mx)    ! cell centre
+         !
+         quantout(n) = quantout(n) + banf(mx)*quantin(k)
+      enddo   
+      
+      do k = 1, ndxi
+         quantout(k) = quantout(k)/ba(k)
+      enddo
+      
+      ! open boundaries that are not wave energy bnds get inner domain value
+      do k = 1, nbndz
+         if (skipnbndw .and. allocated(zbndw)) then
+            if (kbndz2kbndw(k)>0) cycle
+         endif   
+         kb = kbndz(1,k)
+         ki = kbndz(2,k)
+         quantout(kb) = quantout(ki)
+      enddo 
+      
+      do k = 1, nbndu
+         if (skipnbndw .and. allocated(zbndw)) then
+            if (kbndu2kbndw(k)>0) cycle
+         endif
+         kb = kbndu(1,k)
+         ki = kbndu(2,k)
+         quantout(kb) = quantout(ki)
+      enddo 
+      
+      ierr = 0
+1234  continue
+      return
+   
+   end subroutine corner2flownod
+   
+   subroutine flownod2corner(quantin, ndx, quantout, numk, ierr)
+      use m_flowgeom, only: ban, banf, mxban, nban
+   
+      implicit none
+      
+      integer,                           intent(in)    :: ndx
+      integer,                           intent(in)    :: numk
+      double precision, dimension(ndx),  intent(in)    :: quantin
+      double precision, dimension(numk), intent(out)   :: quantout
+      integer,                           intent(out)   :: ierr
+
+      ! local variables
+      integer                                         :: k, n, mx
+      
+      ierr = 1
+      
+      quantout = 0d0
+      do mx = 1, mxban
+         k   = nban(1,mx)    ! corner
+         n   = nban(2,mx)    ! cell centre
+         !
+         quantout(k) = quantout(k) + banf(mx)*quantin(n)
+      enddo 
+      
+      do k = 1, numk
+         quantout(k) = quantout(k)/ban(k)
+      enddo      
+      
+      ierr = 0
+1234  continue
+      return
+   
+   end subroutine flownod2corner
+   
+   subroutine getwaterdepthgradient(ierr)
+      use network_data
+      use m_flowgeom
+      use m_flow, only: hu, hs, epshu
+      use m_xbeach_data, only: dhdxstat, dhdystat
+   
+      implicit none
+      
+      integer, intent(out)   :: ierr
+      
+      ! local variables
+      integer            :: k1, k2, k3, k4
+      integer            :: L
+      double precision   :: dhds
+      
+      ierr = 1
+      
+      ! Calculate water depth gradient in net nodes
+      dhdxstat = 0d0
+      dhdystat = 0d0
+      do L = 1,lnx
+         if (hu(L)<epshu) cycle
+         k1 = ln(1,L); k2 = ln(2,L)
+         k3 = lncn(1,L); k4 = lncn(2,L)
+         dhds = (hs(k2) - hs(k1))*dxi(L)  ! dhds
+         dhdxstat(k3) = dhdxstat(k3) + wcnx3(L)*dhds
+         dhdxstat(k4) = dhdxstat(k4) + wcnx4(L)*dhds
+         dhdystat(k3) = dhdystat(k3) + wcny3(L)*dhds
+         dhdystat(k4) = dhdystat(k4) + wcny4(L)*dhds
+      enddo
+      
+      ierr = 0
+1234  continue
+      return
+      
+   end subroutine getwaterdepthgradient
+
+   subroutine xbeach_wave_compute_statcelerities(ierr)
+      use m_xbeach_data
+      use m_flow, only: hs 
+      use m_flowgeom
+      use network_data
+      use m_sferic, only: pi
+      
+      implicit none
+      
+      integer, intent(out)      :: ierr
+      
+      ! local variables
+      integer                                        :: itheta
+      double precision                               :: sigm
+      double precision, allocatable, dimension(:)    :: nwavstat
+      double precision, dimension(ntheta)            :: sint
+      double precision, dimension(ntheta)            :: cost
+      
+      ierr = 1
+      
+      if (allocated(nwavstat)) deallocate(nwavstat, stat=ierr)
+      allocate(nwavstat(numk))
+      nwavstat = 0d0
+      
+      call getwaterdepthgradient(ierr)
+      call flownod2corner(hs, ndx, hhstat, numk, ierr)
+      hhstat=max(hhstat,hminlw)
+      ! 
+      ! Compute celerities and refraction speed
+      call disper_approx(hhstat,Trep,kwavstat,nwavstat,cstat,cgstat,numk)
+      sint=sin(thetabin)
+      cost=cos(thetabin)
+      sigm=2.d0*pi/Trep
+      do itheta=1,ntheta
+         cthetastat(:,itheta)= sigm/sinh(2.d0*kwavstat*hhstat)*(dhdxstat*sint(itheta)-dhdystat*cost(itheta))
+      enddo      
+      
+      ierr = 0
+1234  continue
+      return
+   end subroutine xbeach_wave_compute_statcelerities
+   
+   subroutine timer(t)
+      double precision,intent(out)               :: t
+      integer                                    :: count,count_rate,count_max
+      call system_clock (count,count_rate,count_max)
+      t = dble(count)/count_rate
+   end subroutine timer

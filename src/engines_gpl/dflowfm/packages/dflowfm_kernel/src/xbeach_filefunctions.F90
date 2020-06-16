@@ -143,8 +143,8 @@ subroutine start_logfiles(error)
        end if
 
 
-
-       if (logfileid < 0 .or. errorfileid < 0 .or. warningfileid < 0) error = 1
+       ! newunit returns negative file id's
+       if (logfileid > 0 .or. errorfileid > 0 .or. warningfileid > 0) error = 1
 
 
 
@@ -253,31 +253,31 @@ subroutine start_logfiles(error)
 
   end subroutine writelog_startup
 
-  subroutine writelog_finalize(tbegin, n, t, nx, ny, t0, t01)
-
-     implicit none
-
-     integer                                         :: n,nx,ny
-     real*8                                          :: tbegin,tend
-     real*8                                          :: t,duration,dt,performance
-     real*8, optional                                :: t0,t01
-
-     call cpu_time(tend)
-
-     duration    = tend-tbegin
-     dt          = t/n
-     performance = duration/(nx+1)/(ny+1)/n
-
-     call writelog('ls','','Duration   : ',duration,' seconds'       )
-     call writelog('ls','','Timesteps  : ',n                         )
-     call writelog('ls','','Average dt : ',dt,' seconds'             )
-     call writelog('ls','','Unit speed : ',performance,' seconds/1'  )
-     call writelog('ls','','End of program xbeach')
-
-
-     call close_logfiles()
-
-  end subroutine writelog_finalize
+  !subroutine writelog_finalize(tbegin, n, t, nx, ny, t0, t01)
+  !
+  !   implicit none
+  !
+  !   integer                                         :: n,nx,ny
+  !   real*8                                          :: tbegin,tend
+  !   real*8                                          :: t,duration,dt,performance
+  !   real*8, optional                                :: t0,t01
+  !
+  !   call cpu_time(tend)
+  !
+  !   duration    = tend-tbegin
+  !   dt          = t/n
+  !   performance = duration/(nx+1)/(ny+1)/n
+  !
+  !   call writelog('ls','','Duration   : ',duration,' seconds'       )
+  !   call writelog('ls','','Timesteps  : ',n                         )
+  !   call writelog('ls','','Average dt : ',dt,' seconds'             )
+  !   call writelog('ls','','Unit speed : ',performance,' seconds/1'  )
+  !   call writelog('ls','','End of surfbeat module')
+  !
+  !
+  !   call close_logfiles()
+  !
+  !end subroutine writelog_finalize
 
   subroutine writelog_distribute(destination,display)
 
