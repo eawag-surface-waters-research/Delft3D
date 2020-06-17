@@ -259,8 +259,7 @@ module m_waves
  double precision, allocatable, target      :: vstokes(:)           !< [m/s] wave induced velocity, link-based and link-oriented
  double precision, allocatable              :: rlabda(:)            !< [m] wave length
  double precision, allocatable              :: ustk(:)              !< [m/s] Ustokes depth averaged cell centres
-
-
+ 
  double precision, allocatable, target      :: dsurf(:)             !< [w/m2] wave energy dissipation rate due to breaking at the free surface, "DISSURF" in WAVE
  double precision, allocatable, target      :: dwcap(:)             !< [w/m2] wave energy dissipation rate due to white capping
  integer         , allocatable, target      :: kdismx(:)            !< help array to determine the layer of hrms effect
@@ -287,6 +286,7 @@ module m_waves
  double precision, allocatable, target      :: mywav(:)             !< wave induced volume flux, in y-direction at flow-nodes
 
  double precision, allocatable              :: taubxu(:)            !< Maximal bed shear stress
+ double precision, allocatable              :: taubu(:)             !< Maximal bed shear stress
  double precision, allocatable              :: ypar(:)
  double precision, allocatable              :: cfwavhi(:)
  double precision, allocatable              :: cfhi_vanrijn(:)
@@ -534,7 +534,7 @@ module m_xbeach_data
 
    ! [Section] Wave boundary condition parameters
    character(slen)         :: instat                     = 'abc'   !  [-] Wave boundary condtion type
-   double precision        :: taper                      = -123    !  [s] Spin-up time of wave boundary conditions, in morphological time
+   double precision        :: taper                      = -123    !  [s] Spin-up time of wave boundary conditions, in hydrodynamic time
    double precision        :: Hrms                       = -123    !  [m] Hrms wave height for instat = 0,1,2,3
    double precision        :: Tm01                       = -123    !  [s] (deprecated) Old name for Trep
    double precision        :: Trep                       = -123    !  [s] Representative wave period for instat = 0,1,2,3
@@ -542,7 +542,9 @@ module m_xbeach_data
    double precision        :: dir0                       = -123    !  [deg] Mean wave direction (Nautical convention) for instat = 0,1,2,3
    double precision        :: nwavmax                    = -123    !  [-] (advanced) maximum ratio of cg/c fro computing long wave boundary conditions
    integer                 :: m                          = -123    !  [-] Power in cos^m directional distribution for instat = 0,1,2,3
-
+   logical                 :: bccreated                  = .false. !  [-] Boundary conditions created or not for current run
+   integer                 :: rmfilno                    = -123    !  [-] debug file id for bc check
+    
    ! [Section] Wave-spectrum boundary condition parameters
    character(slen)         :: bcfile                     = 'abc'   !  [-] Name of spectrum file
    integer                 :: random                     = -123    !  [-] (advanced) Random seed on (1) or off (0) for instat = 4,5,6 boundary conditions
@@ -563,12 +565,13 @@ module m_xbeach_data
    integer                 :: order                      = -123    !  [-] (advanced) Switch for order of wave steering, 1 = first order wave steering (short wave energy only), 2 = second oder wave steering (bound long wave corresponding to short wave forcing is added)
    integer                 :: freewave                   = -123    !  [-] (advanced) Switch for free wave propagation 0 = use cg (default); 1 = use sqrt(gh) in instat = 3
    double precision        :: epsi                       = -123    !  [-] (advanced) Ratio of mean current to time varying current through offshore boundary
-   character(slen)         :: tidetype                   = 'abc'   !  [-] (advanced) Switch for offfshore boundary, velocity boundary or instant water level boundary (default)
+   character(slen)         :: tidetype                   = 'abc'   !  [-] (advanced) Switch for offshore boundary, velocity boundary or instant water level boundary (default)
+   character(slen)         :: absgentype                 = 'abc'   !  [-] (advanced) Switch for offshore boundary, 1d flumelike boundary or full 2d absorbing generating bnd
    integer                 :: ARC                        = -123    !  [-] (advanced) Switch for active reflection compensation at seaward boundary: 0 = reflective, 1 = weakly (non) reflective
    double precision        :: hminlw                     = -123    !  [-] minimum depth for wave forcing in flow momentum equation RHS
 
    ! [Section] Wave breaking parameters
-   character(slen)                :: break          = 'abc'   !  [-] Type of breaker formulation (1=roelvink, 2=baldock, 3=roelvink adapted, 4=roelvink on/off breaking)
+   character(slen)                :: break          = 'abc'   !  [-] Type of breaker formulation 
    double precision               :: gamma          = -123    !  [-] Breaker parameter in Baldock or Roelvink formulation
    double precision               :: gamma2         = -123    !  [-] End of breaking parameter in break = 4 formulation
    double precision               :: alpha          = -123    !  [-] (advanced) Wave dissipation coefficient in Roelvink formulation
@@ -840,9 +843,10 @@ module m_sediment
  double precision, allocatable     :: sbwx_raw(:,:)
  double precision, allocatable     :: sbwy_raw(:,:)
  
+ double precision, allocatable     :: avalflux(:,:)
+ 
  integer,          allocatable     :: kcsmor(:)
 
- !-------------------------------------------------- old sediment transport and morphology
  integer                           :: jased         !< Include sediment, 1=Krone, 2=Soulsby van Rijn 2007, 3=Bert's morphology module
  integer                           :: jaseddenscoupling=0    !< Include sediment in rho 1 = yes , 0 = no
  double precision                  :: vismol        !< molecular viscosity (m2/s)
@@ -853,9 +857,9 @@ module m_sediment
  integer                           :: numoptsed
  integer                           :: jaBndTreatment
  integer                           :: jasedtranspveldebug
- integer                           :: jaupdates1
  integer                           :: jamorcfl
  double precision                  :: dzbdtmax
+ double precision                  :: botcrit       !< mass balance: minimum depth after bottom update to adapt concentrations
  !
  !-------------------------------------------------- old sediment transport and morphology
  integer                           :: mxgrKrone     !< mx grainsize index nr that followsKrone. Rest follows v.Rijn
@@ -925,9 +929,9 @@ module m_sediment
  jamorf              = 0
  jaBndTreatment      = 0
  jasedtranspveldebug = 0
- jaupdates1          = 0
  jamorcfl            = 1
  dzbdtmax            = 0.1d0
+ botcrit             = 1d-4
  end subroutine default_sediment
 
  subroutine allocgrains() ! for all fractions:
@@ -2259,6 +2263,7 @@ end module unstruc_channel_flow
  double precision                  :: sqcmukep
  double precision                  :: sqcmukepi
  double precision                  :: cewall
+ double precision                  :: cde
  double precision                  :: c1e
  double precision                  :: c2e
  double precision                  :: sigdif
@@ -2379,6 +2384,7 @@ use m_physcoef
     sqcmukep  = sqrt(cmukep)
     sqcmukepi = 1.d0 / sqcmukep
 
+    cde       = cmukep**0.75d0
     cewall    = cmukep**0.75d0/vonkar   ! 0.4769d0  !        0.09**0.75/0.41  ! /vonkar
     c2e       = 1.92d0
     c1e       = 1.44d0
@@ -2399,7 +2405,7 @@ use m_physcoef
     c1     = 0.08d0
     e1     = 1.80d0
     e2     = 1.33d0
-!e2     = e1-1+vonkar**2*b1**0.6667/skmy
+!e2     = e1-1+vonkar**2*b1**0.6667/skmy = 1.358, not 1.33?
     ghmin  =-0.280d0
     ghmax  = 0.0233d0
 end subroutine default_turbulence
@@ -2754,6 +2760,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jajre                     !< 0: default, 1: sb
 
  integer                           :: jasourcesink              !< 1: source+sink 2:source 3:sink for sediment
+ 
+ integer                           :: jalogsolverconvergence    !< log solver convergence message bloat (default 1, preferable 0)
 
  ! written to his file yes or no
  integer                           :: jahisbal                  !< Write mass balance/volume totals to his file, 0: no, 1: yes
@@ -3183,6 +3191,7 @@ subroutine default_flowparameters()
     dparms = 0d0  ! parms-default
 
     jaupwindsrc = 1
+    jalogsolverconvergence = 1
 
     jahisbal = 1
     jahissourcesink = 1
@@ -3426,7 +3435,7 @@ end module m_vegetation
                                                         !
  double precision, allocatable     ::dzslay(:,:)        ! the normalized thickness of layer, dim = (: , maxlaydefs)
 
-                                                        !double precision, allocatable     :: dzu(:)           !< vertical layer size at layer centre    at u-velocity points (m) 1:kmx Local
+ !double precision, allocatable     :: dzu(:)           !< vertical layer size at layer centre    at u-velocity points (m) 1:kmx Local
  !double precision, allocatable     :: dzw(:)           !< vertical layer size at layer interface at u-velocity points (m) 1:kmx Local
                                                         !< 1:kmx: bottom interface not included
 
@@ -3606,7 +3615,7 @@ end module m_vegetation
  double precision, allocatable     :: vih   (:)   !< horizontal eddy viscosity in cell center (m2/s)
  double precision, allocatable     :: qin   (:)   !< rain, evap, qlat and src netto inloop (m3/s)
 
- double precision                     errmas      !< (cumulative) mass   error ()
+ double precision                  ::   errmas      !< (cumulative) mass   error ()
 
 
 ! link related, dim = lnkx
@@ -3671,6 +3680,7 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  double precision, allocatable     :: zn2rn (:)   !< weight from zn to rn, flownode to netnode
 
  double precision, allocatable, target :: taus (:) !< [kg s-2 m] cell centre tau N/m2 {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: tausmax  (:)   !< cell centre taumax N/m2
  double precision, allocatable     :: q1waq (:)   !< Cumulative q1 within current waq-timestep
  double precision, allocatable     :: qwwaq (:)   !< Cumulative qw within current waq-timestep
 
@@ -4265,7 +4275,7 @@ double precision, allocatable      :: thindam(:,:)
 ! netnode/flownode  related, dim = mxban
  double precision, allocatable     :: banf  (:)     !< horizontal netnode/flownode area (m2)
  double precision, allocatable     :: ban  (:)      !< horizontal netnode          area (m2)
- integer         , allocatable     :: nban  (:,:)   !< base area pointers to banf, 1,* = netnode number, 2,* = flow node number, 3,* = link number
+ integer         , allocatable     :: nban  (:,:)   !< base area pointers to banf, 1,* = netnode number, 2,* = flow node number, 3,* = link number, 4,* = 2nd link number
  integer                           :: mxban         !< max dim of ban
 
  ! 1D2D link properties
