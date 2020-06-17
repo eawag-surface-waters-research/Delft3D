@@ -12524,7 +12524,6 @@ subroutine writesomeinitialoutput()
  double precision  :: tcpusol
  double precision  :: totalcomp
  double precision  :: timeloop
- character(len=  5) :: sd
 
  if (ndx == 0) then
     write(msgbuf,'(a)')    'Empty model, no flow cells found. No statistics to report.'; call msg_flush()
@@ -12696,11 +12695,7 @@ subroutine writesomeinitialoutput()
     enddo
  endif
  
- sd  = ''
- if (jampi == 1) then
-     sd = '_' // trim(sdmn) 
- end if
- call timdump(trim(getoutputdir()) // 'modeltimings' // trim(sd) // '.txt', .true.)
+ call timdump(trim(defaultFilename('timers')), .true.)
 
  call timstrt('All', handle_all)
  end subroutine writesomefinaloutput
@@ -44482,6 +44477,7 @@ if (mext /= 0) then
           inquire (file = trim(filename0), exist = exist)
           if (exist) then
              filetype0 = uniform            ! uniform=single time series vectormax = ..
+             method = min(1, method)        ! only method 0 and 1 are allowed, methods > 1 are set to 1 (no spatial interpolation possible here).
              ! Converter will put 'qsrc, sasrc and tmsrc' values in array qstss on positions: (3*numsrc-2), (3*numsrc-1), and (3*numsrc), respectively.
              success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename0, filetype0, method, operand='O', targetIndex=numsrc)
           else
