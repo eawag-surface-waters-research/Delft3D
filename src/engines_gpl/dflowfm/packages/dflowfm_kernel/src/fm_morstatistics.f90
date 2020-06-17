@@ -2,6 +2,7 @@ module m_fm_morstatistics
    use unstruc_netcdf
    use m_sediment
    use m_flowgeom
+   use m_flow, only: kmx, ndkx
    use m_flowtimes
    use precision
    
@@ -290,8 +291,8 @@ module m_fm_morstatistics
       !
       real(fp), dimension(stmpar%lsedtot, ndx),    intent(in)  :: dbodsd !  change in sediment composition, units : kg/m2
       real(fp), dimension(ndx)         ,           intent(in)  :: hs_mor        
-      real(fp), dimension(ndx)         ,           intent(in)  :: ucxq_mor  
-      real(fp), dimension(ndx)         ,           intent(in)  :: ucyq_mor  
+      real(fp), dimension(ndkx)        ,           intent(in)  :: ucxq_mor  
+      real(fp), dimension(ndkx)        ,           intent(in)  :: ucyq_mor  
       real(fp), dimension(ndx, stmpar%lsedtot),    intent(in)  :: sbcx   
       real(fp), dimension(ndx, stmpar%lsedtot),    intent(in)  :: sbcy   
       real(fp), dimension(ndx, stmpar%lsedsus),    intent(in)  :: sbwx
@@ -305,6 +306,8 @@ module m_fm_morstatistics
       !
       integer                                        :: ll
       integer                                        :: k
+      integer                                        :: kb
+      integer                                        :: kt
       integer                                        :: idx
       real(fp)                                       :: q
       real(fp)                                       :: qu
@@ -335,7 +338,12 @@ module m_fm_morstatistics
          endif
          !
          if (morstatflg(1,2)>0) then
-            call local_stats_vec(morstatflg(:,2), k, ucxq_mor(k), ucyq_mor(k), wght)
+            if (kmx>0) then
+               call getkbotktop(k, kb, kt)
+               call local_stats_vec(morstatflg(:,2), k, ucxq_mor(kb), ucyq_mor(kb), wght)   ! only bed layer
+            else
+               call local_stats_vec(morstatflg(:,2), k, ucxq_mor(k), ucyq_mor(k), wght)
+            endif
          endif
          !
          if (morstatflg(1,3)>0) then
