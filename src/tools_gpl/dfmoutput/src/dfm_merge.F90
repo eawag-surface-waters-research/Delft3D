@@ -77,7 +77,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, dimension(nfiles+1), target :: ndx, lnx, ndxg, lnxg, kmx, numk, numl, nump, numkg, numlg, netfacemaxnodes, nt, ndxbnd !< counters, maintained for all input files + 1 output file.
    integer, dimension(:), pointer :: item_counts !< Generalized count pointer, will point to ndx, lnx, numl, or numk during var data reading + writing.
    integer:: noutfile !< array index/position of output file ids, by default the last, i.e., nfiles + 1.
-   integer, allocatable, target  :: flownode_domain(:), facebnd_domain(:), edge_domain(:), node_domain(:), netedge_domain(:) !< Global flownode(face)/edge/node numbers and their domain number.
+   integer, allocatable, target  :: face_domain(:), facebnd_domain(:), edge_domain(:), node_domain(:), netedge_domain(:) !< Global face/edge/node numbers and their domain number.
    integer,              pointer :: item_domain(:)
    integer, allocatable :: ln(:,:) !< Flow links
    integer, allocatable :: edgenodes(:,:) !< Net links
@@ -804,7 +804,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    nbndcount     = 0 !< total number of boundary waterlevel points
 
    ndxc = sum(ndx(1:nfiles))
-   call realloc(flownode_domain, ndxc, keepExisting=.false., fill=-1)
+   call realloc(face_domain, ndxc, keepExisting=.false., fill=-1)
    call realloc(face_c2g,    ndxc, keepExisting=.false.)
    call realloc(face_g2c,    ndxc, keepExisting=.false.)
 
@@ -852,10 +852,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       !! 3a.0 read domain numbers and global numbers of flow nodes
       if (topodim /= 1) then
          nfaceglob0 = nfaceglob
-         flownode_domain(nfacecount+1:nfacecount+ndx(ii)) = ii-1 ! Just set default domain if FlowElemDomain not present.
+         face_domain(nfacecount+1:nfacecount+ndx(ii)) = ii-1 ! Just set default domain if FlowElemDomain not present.
       else
          nnodeglob0 = nnodeglob
-         flownode_domain(nnodecount+1:nnodecount+ndx(ii)) = ii-1
+         node_domain(nnodecount+1:nnodecount+ndx(ii)) = ii-1
       end if
       if (jaugrid == 0) then
          ierr = nf90_inq_varid(ncids(ii), 'FlowElemDomain', id_flownodedomain )
@@ -864,9 +864,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       endif
       if (ierr == nf90_noerr) then
          if (topodim /= 1) then
-            ierr = nf90_get_var(ncids(ii), id_flownodedomain, flownode_domain(nfacecount+1:nfacecount+ndx(ii)), count=(/ ndx(ii) /))
+            ierr = nf90_get_var(ncids(ii), id_flownodedomain, face_domain(nfacecount+1:nfacecount+ndx(ii)), count=(/ ndx(ii) /))
          else
-            ierr = nf90_get_var(ncids(ii), id_flownodedomain, flownode_domain(nnodecount+1:nnodecount+ndx(ii)), count=(/ ndx(ii) /))
+            ierr = nf90_get_var(ncids(ii), id_flownodedomain, node_domain(nnodecount+1:nnodecount+ndx(ii)), count=(/ ndx(ii) /))
          end if
          if (ierr /= nf90_noerr) then
             write (*,'(a)') 'Error: mapmerge: could not retrieve FlowElemDomain from `'//trim(infiles(ii))//'''. '
@@ -895,16 +895,22 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          end if
       else
          ! no problem if FlowElemGlobalNr is missing: just include all elems: global nr is equal to 'concat-index'.
-         do ip=1,ndx(ii)
-            face_c2g(nfacecount+ip) = nfacecount+ip
-         end do
+         if (topodim /= 1) then
+            do ip=1,ndx(ii)
+               face_c2g(nfacecount+ip) = nfacecount+ip
+            end do
+         else
+            do ip=1,ndx(ii)
+               node_c2g(nnodecount+ip) = nnodecount+ip
+            end do
+         end if
       end if
 
       !! 3a.1: handle flow nodes (faces in 2D, nodes in 1D)
       ! Count the actual unique flow nodes (to get rid of partition overlap)
       if (topodim /= 1) then
          do ip=1,ndx(ii)
-            if (flownode_domain(nfacecount+ip) == ii-1) then
+            if (face_domain(nfacecount+ip) == ii-1) then
                nfaceglob = nfaceglob+1
                ifaceglob = face_c2g(nfacecount+ip)
                face_g2c(ifaceglob) = nfacecount + ip
@@ -912,8 +918,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          end do
          ndxg(ii)   = nfaceglob-nfaceglob0
       else
+         ! In 1D the node_c2g mapping follows directly from flowelem_globalnr
+         ! In 2D the node_g2c mapping if determined later, once faces and edges have been treated.
+         ! TODO: merge this loop with the 2D node loop later, because nnodeglob and node_g2c treatment is the same here and there.
          do ip=1,ndx(ii)
-            if (flownode_domain(nnodecount+ip) == ii-1) then
+            if (node_domain(nnodecount+ip) == ii-1) then
                nnodeglob = nnodeglob+1
                inodeglob = node_c2g(nnodecount + ip)
                node_g2c(inodeglob) = nnodecount + ip
@@ -944,12 +953,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                idom = ii - 1 ! Boundary mirrornodes are always owned by the domain itself.
                isBndLink = 1 ! Mark the boundary link
             else
-               idom = flownode_domain(nfacecount+n1)
+               idom = face_domain(nfacecount+n1)
             end if
 
-            idom = min(idom, flownode_domain(nfacecount+n2))
+            idom = min(idom, face_domain(nfacecount+n2))
 
-            if (isBndLink == 1 .and. flownode_domain(nfacecount+n2) .ne. ii-1) then
+            if (isBndLink == 1 .and. face_domain(nfacecount+n2) .ne. ii-1) then
             ! If this boundary link connects an interior flownode which does not belong to the current subdomain
                idom = - 999
             endif
@@ -964,7 +973,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          lnxg(ii)   = nedgeglob-nedgeglob0
       end if
 
-      !! 3a.3: handle net nodes (nodes), only for 2D/3D map files
+      !! 3a.3: handle net nodes (nodes)
+      
+      ! Only for 2D/3D map files: face-node connectivity
       if (topodim /= 1) then
          nnodeglob0 = nnodeglob
          if (jaugrid==0) then
@@ -1024,7 +1035,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   exit
                end if
                ! Owner of the node will be the lowest domain number of any of the cells surrounding that node.
-               node_domain(nnodecount+k1) = min(node_domain(nnodecount+k1), flownode_domain(nfacecount+ip))
+               node_domain(nnodecount+k1) = min(node_domain(nnodecount+k1), face_domain(nfacecount+ip))
             end do
          end do
          !numpg(ii)   = nnetfaceglob-nnetfaceglob0
@@ -1130,7 +1141,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (topodim /= 1) then
             idom = max(node_domain(nnodecount+k1), node_domain(nnodecount+k2))
          else
-            idom = min(flownode_domain(nnodecount+k1), flownode_domain(nnodecount+k2))
+            ! in 1D: net edge==flow link, take lowest flow node domain number, equivalent to 2D.
+            idom = min(node_domain(nnodecount+k1), node_domain(nnodecount+k2))
          end if
 
          netedge_domain(nnetedgecount+ip) = idom
@@ -1187,7 +1199,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                      do ikk = 1, node_faces(netnodemaxface+1, nnodecount+ik)
                          ic = node_faces(ikk,nnodecount+ik) ! index of one surrounding cell
                          if (ic .ne. -1) then
-                            if (flownode_domain(ic) .ne. ii-1 .and. flownode_domain(ic) == node_domain(nnodecount+ik)) then ! cell ic is not in current domain, and is in the same domain with node ik
+                            if (face_domain(ic) .ne. ii-1 .and. face_domain(ic) == node_domain(nnodecount+ik)) then ! cell ic is not in current domain, and is in the same domain with node ik
                                 ifaceglob = face_c2g(ic)
                                 ifacec = face_g2c(ifaceglob) ! and this is now from the OTHER domain.
                                 ! in which domain (iii) does iface belong
@@ -1232,8 +1244,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                 k1 = netedgefaces(1, netedgecount+ip)  ! flowelem that edge L connects
                 k2 = netedgefaces(2, netedgecount+ip)
                 if (k1.ne.0 .and. k2.ne. 0) then       ! When edge L is not on the boundary
-                    g1 = flownode_domain(nfacecount+k1)    ! domain number of this flownode
-                    g2 = flownode_domain(nfacecount+k2)
+                    g1 = face_domain(nfacecount+k1)    ! domain number of this flownode
+                    g2 = face_domain(nfacecount+k2)
                     if (g1 .ne. g2) then               ! if edge L lies on the boundary of two different domains
                         if (g1==ii-1 .and. g1>g2) then ! decide which flowelem is in the current domain, which is not
                             ifacein = k1
@@ -1281,8 +1293,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                if (netedge_c2g(netedgecount+ip) < 0) then ! to be filled in
                   k1 = edgenodes(1, netedgecount+ip)      ! flownode that edge ip connects
                   k2 = edgenodes(2, netedgecount+ip)
-                  g1 = flownode_domain(nnodecount+k1)     ! domain number of the node
-                  g2 = flownode_domain(nnodecount+k2)
+                  g1 = node_domain(nnodecount+k1)     ! domain number of the node
+                  g2 = node_domain(nnodecount+k2)
                   if (g1 == g2) then                      ! k1 and k2 are in the same domain
                      inodefile = g1 + 1                   ! Later search edge ip in inodefile
                   else                                    ! edge ip is on a partition boundary
@@ -1572,10 +1584,18 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       select case (var_loctype(iv))
       case (UNC_LOC_S)
          item_counts => ndx
-         item_domain => flownode_domain
+         if (topodim /= 1) then 
+            item_domain => face_domain
+         else
+            item_domain => node_domain
+         end if
       case (UNC_LOC_SN)
          item_counts => ndx
-         item_domain => flownode_domain
+         if (topodim /= 1) then 
+            item_domain => face_domain
+         else
+            item_domain => node_domain
+         end if
       case (UNC_LOC_U)
          item_counts => lnx
          item_domain => edge_domain
