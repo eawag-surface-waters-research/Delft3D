@@ -1474,6 +1474,11 @@ subroutine readMDUFile(filename, istat)
            Tstop_user = tim
         endif
     endif
+    
+    ! Set update frequency for the time dependend roughness
+    call prop_get (md_ptr, 'time', 'UpdateRougnessInterval', Dt_UpdateRoughness)
+    ! Initialize roughness_times
+    times_update_roughness = tstart_user
 
     !
     ! TIDAL TURBINES: Insert calls to rdturbine and echoturbine here (use the structure_turbines variable defined in m_structures)
@@ -3135,6 +3140,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'time', 'Stopdatetime',  trim(Stopdatetime),   'Computation Stopdatetime  (yyyymmddhhmmss), when specified, overrides Tstop')
     endif
 
+    call prop_set (md_ptr, 'time', 'UpdateRougnessInterval', Dt_UpdateRoughness)
 
 ! Restart settings
     call prop_set(prop_ptr, 'restart', 'RestartFile',     trim(md_restartfile) ,  'Restart netcdf-file, either *_rst.nc or *_map.nc')

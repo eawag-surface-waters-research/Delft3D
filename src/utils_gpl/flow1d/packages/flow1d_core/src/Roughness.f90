@@ -106,7 +106,9 @@ module m_Roughness
       character(len=charLn)             :: frictionValuesFile              !< *.bc file containing the timeseries with friction values
       type(t_hashlist)                  :: timeSeriesIds                   !< Hashlist containing ids of the timeseries
       integer, pointer                  :: timeSeriesIndexes(:) => null()  !< Get index in timeSeriesIds and/or frictionvalues based on branch index 
-      double precision, allocatable     :: currentValues(:)                !< Friction values of time dependent items (same index as timeSeriesIds).
+      double precision, allocatable     :: currentValues(:)                !< Time Interpolated Friction values of time dependent items (same index as timeSeriesIds).
+      double precision, allocatable     :: timeValues(:,:)                 !< Friction values of time dependent items (same index as timeSeriesIds).
+
 
       ! All fields below: branch oriented data (roughness v1, obsolete for v2)
       integer, pointer                  :: rgh_type_neg(:) => null() !< Roughness type for negative flow direction at a branch
@@ -125,7 +127,8 @@ module m_Roughness
       type(t_Roughness), pointer, dimension(:)          :: rough => null()  !< Array containing roughness sections
       type(t_tableSet)                                  :: tables           !< Array with tables for flow or water level dependend parameter values
       type(t_hashlist)                                  :: hashlist         !< hashlist for fast searching.
-      logical                                           :: timeseries_defined = .false. !< Indicates whether time dependent roughnesses are defined
+      logical                                           :: timeseries_defined = .false.   !< Indicates whether time dependent roughnesses are defined
+      integer                                           :: roughnessFileMajorVersion      !< current major version number of the roughness ini files
    end type t_RoughnessSet
 
    integer, parameter, public                           :: R_FunctionConstant = 0      !< Constant type roughness function

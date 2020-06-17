@@ -106,7 +106,7 @@ contains
       default = 60d0
       def_type = 1
       def_type = 1
-      
+      network%rgs%roughnessFileMajorVersion = RoughFileMajorVersion
       !> Check if the model definition file contains global values for roughness
       if (present(md_ptr)) then
          call prop_get_double(md_ptr, 'GlobalValues', 'roughness', default, success)
@@ -228,6 +228,7 @@ contains
             count = prgh%timeSeriesIds%id_count 
             rgs%timeseries_defined = .true.
             call realloc(prgh%currentValues, count)
+            call realloc(prgh%timeValues, (/ count, 2 /))
             do j = 1, count
 
                ! Extend forcinglist by one and reallocate in case of insufficient space
@@ -246,7 +247,7 @@ contains
                forcinglist%forcing(forcinglist%Count)%quantity_id = 'friction_coefficient_'//         &
                                              trim(frictionTypeIntegerToString(prgh%rgh_type_pos(ibr)))
                forcinglist%forcing(forcinglist%Count)%param_name  = frictionTypeIntegerToString(prgh%rgh_type_pos(ibr))
-               forcinglist%forcing(forcinglist%Count)%targetptr  => prgh%currentValues(j)
+               forcinglist%forcing(forcinglist%Count)%targetptr  => prgh%timeValues(j,2)
                forcinglist%forcing(forcinglist%Count)%filename    = prgh%frictionValuesFile
                forcinglist%forcing(forcinglist%Count)%object_type = 'friction_coefficient'
    
@@ -525,7 +526,12 @@ contains
             endif
             
             if (success) then
-               call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', values, numlevels*numlocations, success)
+               if (rgh%fun_type_pos(ibr) == R_FunctionTimeseries) then
+                  call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionValue', values, numlevels*numlocations, success)
+               else
+                  call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', values, numlevels*numlocations, success)
+               endif
+               
             endif
             
             if (.not. success) then

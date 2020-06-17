@@ -77,6 +77,7 @@ module m_readCrossSections
    !> Read the cross section location file
    subroutine readCrossSectionLocationFile(network, CrossSectionfile)
       use m_CrossSections
+      use m_network
       type(t_network), intent(inout) :: network                 !< Network structure
       character(len=*), intent(in)   :: CrossSectionFile        !< name of the crossection location input file 
 
@@ -206,13 +207,13 @@ module m_readCrossSections
          network%crs%count = inext
          
          ! Retrieve Roughness for Profile from Spatial Data
-         call GetRougnessForProfile(network, network%crs%cross(inext))
+         call GetRoughnessForProfile(network, network%crs%cross(inext))
          if (network%CSDefinitions%CS(iref)%crossType == cs_YZ_Prof) then
             ! Prematurely to facilitate Conveyance Data to Delta Shell
 
-
+            pCrs%convtab1 => null()
+            pCrs%hasTimeDependentConveyance = .false. ! until proven otherwise
             call CalcConveyance(network%crs%cross(inext))
-            
          endif
          
       end do
@@ -1370,9 +1371,9 @@ module m_readCrossSections
             write(ibin) (pcross%frictionValueNeg(j), j = 1, pcross%frictionSectionsCount)
          endif
          
-         write(ibin) associated(pcross%convtab)
-         if (associated(pcross%convtab) ) then
-            call write_convtab(ibin, pcross%convtab)
+         write(ibin) associated(pcross%convtab1)
+         if (associated(pcross%convtab1) ) then
+            call write_convtab(ibin, pcross%convtab1)
          endif
          
       enddo
@@ -1447,8 +1448,8 @@ module m_readCrossSections
 
          read(ibin) isAssociated
          if (isAssociated) then
-            allocate(pcross%convtab)
-            call read_convtab(ibin, pcross%convtab)
+            allocate(pcross%convtab1)
+            call read_convtab(ibin, pcross%convtab1)
          endif
       enddo
       
@@ -1654,10 +1655,10 @@ module m_readCrossSections
          
          write(dmpUnit, *) pcross%iTabDef
          
-         write(dmpUnit, *) associated(pcross%convtab)
-         if (associated(pcross%convtab) ) then
+         write(dmpUnit, *) associated(pcross%convtab1)
+         if (associated(pcross%convtab1) ) then
             write(dmpUnit, *) '################### CONVTAB ######################'
-            call dumpConvtab(dmpUnit, pcross%convtab)
+            call dumpConvtab(dmpUnit, pcross%convtab1)
          endif
          
          write(dmpUnit, *) '############## END CROSS #####################'
@@ -1709,97 +1710,6 @@ module m_readCrossSections
    end subroutine dumpConvtab
    
    !> Retrieve the roughness for given cross section
-   subroutine getRougnessForProfile(network, crs)
-      use m_read_roughness, only: RoughFileMajorVersion
-   
-      type(t_network), intent(inout)      :: network      !< Network structure
-      type(t_CrossSection), intent(inout) :: crs          !< cross section
-      
-      integer                        :: i
-      integer                        :: iRough
-      type(t_Roughness), pointer     :: pRgs
-      type(t_spatial_data), pointer  :: pSpData
-      double precision               :: frictionValue
-      integer                        :: frictionType
-      integer                        :: iStatus
-      
-      if (crs%frictionSectionsCount <= 0) then
-         call SetMessage(LEVEL_ERROR, 'No Friction Section Data for Cross-Section ID: '//trim(crs%csid))
-         return
-      endif
-           
-      do i = 1, crs%frictionSectionsCount
-           
-         iRough = hashsearch(network%rgs%hashlist, crs%frictionSectionID(i))
-         if (iRough <= 0) then
-            call SetMessage(LEVEL_ERROR, 'No Data found for Section '//trim(crs%frictionSectionID(i))//' of Cross-Section ID: '//trim(crs%csid))
-            cycle
-         endif
-         
-         pRgs => network%rgs%rough(iRough)
-         if (network%rgs%version == RoughFileMajorVersion) then
-            call getFrictionParameters(pRgs,  1d0, crs%branchid, crs%chainage, crs%frictionTypePos(i), crs%frictionValuePos(i))
-            call getFrictionParameters(pRgs, -1d0, crs%branchid, crs%chainage, crs%frictionTypeNeg(i), crs%frictionValueNeg(i))
-            cycle
-         endif
-         
-         if (pRgs%iSection == 0) then
-            ! roughness section does not exist
-            call setMessage(LEVEL_ERROR, 'Roughness section '// trim(crs%frictionSectionID(i)) //', used in '//trim(crs%csid)//' does not exist')
-            cycle
-         endif
-            
-         
-         crs%frictionTypePos(i) = pRgs%rgh_type_pos(crs%branchid)
-         if (associated(pRgs%rgh_type_neg)) then
-            crs%frictionTypeNeg(i) = pRgs%rgh_type_neg(crs%branchid)
-         else
-            crs%frictionTypeNeg(i) = pRgs%rgh_type_pos(crs%branchid)
-         endif
-         
-         if (pRgs%spd_pos_idx <= 0 .and. pRgs%spd_neg_idx <= 0) then
-            call SetMessage(LEVEL_ERROR, 'No Spatial Data specified for Section '//trim(crs%frictionSectionID(i))//' of Cross-Section ID: '//trim(crs%csid))
-            cycle
-         endif
-         
-         ! Positive direction
-         if (pRgs%spd_pos_idx > 0) then
-         
-            pSpData => network%spData%quant(pRgs%spd_pos_idx)
-            
-            iStatus = getValueAtLocation(pSpData, crs%branchid, crs%chainage, frictionValue, frictionType)
-            
-            if (istatus >= 0) crs%frictionValuePos(i) = frictionValue
-            if (istatus > 0)  crs%frictionTypePos(i)  = frictionType
-
-         endif
-           
-         ! Negative direction
-         if (pRgs%spd_neg_idx > 0) then
-         
-            pSpData => network%spData%quant(pRgs%spd_neg_idx)
-            
-            iStatus = getValueAtLocation(pSpData, crs%branchid, crs%chainage, frictionValue, frictionType)
-            
-            if (istatus >= 0) crs%frictionValueNeg(i) = frictionValue
-            if (istatus > 0)  crs%frictionTypeNeg(i)  = frictionType
-
-         endif
-         
-         if (pRgs%spd_pos_idx > 0 .and. pRgs%spd_neg_idx <= 0) then
-            crs%frictionValueNeg(i) = crs%frictionValuePos(i)
-            crs%frictionTypeNeg(i)  = crs%frictionTypePos(i)
-         endif
-         
-         if (pRgs%spd_pos_idx <= 0 .and. pRgs%spd_neg_idx > 0) then
-            crs%frictionValuePos(i) = crs%frictionValueNeg(i)
-            crs%frictionTypePos(i)  = crs%frictionTypeNeg(i)
-         endif
-           
-      enddo
-         
-         
-   end subroutine getRougnessForProfile
    
    !==========================================================================================================
    !

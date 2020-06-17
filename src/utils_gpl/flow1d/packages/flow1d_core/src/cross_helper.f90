@@ -97,20 +97,27 @@ contains
    end function getdeltax
 ! =================================================================================================
 ! =================================================================================================
-   subroutine getConveyance(network, dpt, u1L, q1L, s1L, L, perim_sub, flowarea_sub, conv, cz_sub, cz, flowArea, wetPerimeter)
+   subroutine getConveyance(network, dpt, u1L, q1L, s1L, L, perim_sub, flowarea_sub, conv, cz_sub, cz, flowArea, wetPerimeter, factor_time_interpolation)
       use m_CrossSections     , only: t_CSType, CS_TABULATED, CS_YZ_PROF
       
       implicit none
-      type(t_network), intent(in)    :: network
-      double precision               :: dpt, u1L, q1L, s1L
-      double precision, intent(out)  :: conv
-      integer                        :: i , L, n
-      double precision, dimension(3), intent(in) :: flowarea_sub, perim_sub
-      double precision, dimension(3), intent(out) :: cz_sub
-      double precision, intent(out)  :: cz
-      double precision, intent(in)   :: flowArea
-      double precision, intent(in)   :: wetPerimeter
+      type(t_network),                intent(in   )    :: network                      !< Network data structure
+      double precision,               intent(in   )    :: dpt                          !< Water depth 
+      double precision,               intent(in   )    :: u1L                          !< Flow velocity 
+      double precision,               intent(in   )    :: q1L                          !< Discharge 
+      double precision,               intent(in   )    :: s1L                          !< Upstream water level 
+      double precision,               intent(  out)    :: conv                         !< Conveyance 
+      integer,                        intent(in   )    :: L                            !< Link number 
+      double precision, dimension(3), intent(in   )    :: flowarea_sub                 !< Flow area in subsections (for ZW-river cross sections) 
+      double precision, dimension(3), intent(in   )    :: perim_sub                    !< Wet perimeter in subsections (for ZW-river cross sections)
+      double precision, dimension(3), intent(  out)    :: cz_sub                       !< Chezy value in subsections (for ZW-river cross sections)
+      double precision,               intent(  out)    :: cz                           !< Chezy value 
+      double precision,               intent(in   )    :: flowArea                     !< Flow area
+      double precision,               intent(in   )    :: wetPerimeter                 !< Wet perimeter 
+      double precision,               intent(in   )    :: factor_time_interpolation    !< Factor for interpolation of time dependent conveyance tables
+                                                                                       !< conveyance = (1-factor)*conv1 + factor*conv2
 
+      integer                        :: i , n
       double precision, parameter    :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
       double precision               :: r, cz1, cz2
       double precision               :: f
@@ -132,7 +139,7 @@ contains
       endif
       
       if (yz_conveyance) then
-         call getYZConveyance(network%adm%line2cross(L), network%crs%cross, dpt, u1L, cz, conv)
+         call getYZConveyance(network%adm%line2cross(L), network%crs%cross, dpt, u1L, cz, conv, factor_time_interpolation)
 
       else
          igrid   = network%adm%lin2grid(L)
@@ -158,8 +165,12 @@ contains
             enddo
          endif
          ! compute average chezy 
-         cz = conv/(flowArea*sqrt(flowArea/wetPerimeter))
-
+         if (flowArea > 1d-10) then
+            cz = conv/(flowArea*sqrt(flowArea/wetPerimeter))
+         else 
+            cz = 0d0
+         endif
+         
       endif
       !        criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet
       if (cz * cz * flowArea < 1.0d0) then

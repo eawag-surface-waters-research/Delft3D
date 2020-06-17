@@ -51,7 +51,10 @@ module m_oned_functions
    public updateTotalInflow1d2d
    public updateTotalInflowLat
    public updateS1Gradient
-
+   public interpolateRoughnessParameters
+   public reCalculateConveyanceTables
+   public shiftTimeDependentRoughnessValues
+   
    type, public :: t_gridp2cs
       integer :: num_cross_sections
       integer, allocatable, dimension(:) :: cross
@@ -159,20 +162,20 @@ module m_oned_functions
 
       implicit none
 
-      integer                                 :: L
+      integer :: L
       integer                                 :: ibr, jbr
-      integer                                 :: nbr, upointscount, pointscount
-      integer                                 :: storageCount
-      integer                                 :: i, j, jpos, linkcount
-      integer                                 :: k1, k2, igrid
-      integer                                 :: c1, c2
-      integer                                 :: storage_count
+      integer :: nbr, upointscount, pointscount
+      integer :: storageCount
+      integer :: i, j, jpos, linkcount
+      integer :: k1, k2, igrid
+      integer :: c1, c2
+      integer :: storage_count
       type(t_branch), pointer                 :: pbr, qbr
       type(t_storage), pointer                :: pstor
       integer, dimension(:), pointer          :: lin
       integer, dimension(:), pointer          :: grd
       double precision, dimension(:), pointer :: chainage
-      type(t_chainage2cross), pointer         :: gpnt2cross(:)                   !< list containing cross section indices per u-location
+      type(t_chainage2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
       type (t_CrossSection), pointer          :: cross1, cross2
       logical                                 :: foundFrom, foundTo
 
@@ -200,22 +203,22 @@ module m_oned_functions
                pbr%tonode%gridnumber = -1
             endif
          else
-            call realloc(pbr%lin, pbr%uPointsCount)
-            call realloc(pbr%grd, pbr%gridPointsCount)
-            lin => pbr%lin
-            grd => pbr%grd
-            L = lin(1)
+         call realloc(pbr%lin, pbr%uPointsCount)
+         call realloc(pbr%grd, pbr%gridPointsCount)
+         lin => pbr%lin
+         grd => pbr%grd
+         L = lin(1)
             k1  =  abs(ln(1,L))
-            pbr%FromNode%gridNumber = k1
-            upointscount = pbr%uPointsCount
-            do i = 1, uPointsCount
-               L = lin(i)
+         pbr%FromNode%gridNumber = k1
+         upointscount = pbr%uPointsCount
+         do i = 1, uPointsCount
+            L = lin(i)
                k1 = abs(ln(1,L))
-               grd(i) = k1
-            enddo
-            k2 = ln(2,iabs(lin(upointscount)))
-            pbr%tonode%gridnumber = k2
-            grd(upointscount+1) = k2
+            grd(i) = k1
+         enddo
+         k2 = ln(2,iabs(lin(upointscount)))
+         pbr%tonode%gridnumber = k2
+         grd(upointscount+1) = k2
          end if
       enddo
    end subroutine set_linknumbers_in_branches
@@ -514,7 +517,7 @@ module m_oned_functions
       pstor => network%storS%stor(i)
       n1 = pstor%gridPoint
       if (n1 > 0) then
-         bl(n1) = min(bl(n1), pstor%storageArea%x(1))
+      bl(n1) = min(bl(n1), pstor%storageArea%x(1))
       end if
    enddo
       
@@ -1112,5 +1115,70 @@ module m_oned_functions
    end do
    
    end subroutine updateS1Gradient
+
+   subroutine reCalculateConveyanceTables(network)
+
+      use m_network
+      use m_CrossSections
+      use m_readCrossSections
+
+      type(t_network), intent(inout) :: network !< Network definition
+   
+      integer        :: count, i
+      type(t_CrossSection), dimension(:), pointer :: cross
+
+      
+      count = network%crs%Count
+      cross => network%crs%cross
+      do i = 1, count
+         if (cross(i)%tabDef%crossType == CS_YZ_PROF) then
+            call getRoughnessForProfile(network, cross(i))
+            if (cross(i)%hasTimeDependentConveyance) then
+               call CalcConveyance(cross(i))
+            endif
+         endif
+      enddo
+   end subroutine reCalculateConveyanceTables
+   
+   subroutine interpolateRoughnessParameters(rgs, times_update_roughness, tim)
+      use m_Roughness
+
+      type(t_RoughnessSet),          intent(inout)    :: rgs
+      double precision, dimension(2),intent(in   )    :: times_update_roughness   
+      double precision,              intent(in   )    :: tim   
+
+      double precision, pointer, dimension(:)      :: currentValues
+      double precision, pointer, dimension(:,:)    :: timeValues
+      integer irgh, i, timeseries_count
+      double precision f
+
+      f = (tim - times_update_roughness(1))/(times_update_roughness(2)-times_update_roughness(1))
+      do irgh = 1, rgs%Count
+         timeseries_count = rgs%rough(irgh)%timeSeriesIds%id_count 
+         if (timeseries_count> 0) then 
+            currentValues => rgs%rough(irgh)%currentValues
+            timeValues    =>  rgs%rough(irgh)%timeValues
+            do i = 1, timeseries_count
+               currentValues(i) = (1d0-f) * timeValues(i,1) + f * timeValues(i,2)
+            enddo
+         endif
+      enddo
+   end subroutine interpolateRoughnessParameters
+
+   subroutine shiftTimeDependentRoughnessValues(rgs)
+      use m_Roughness
+
+      type(t_RoughnessSet),          intent(inout)    :: rgs
+
+      double precision, pointer, dimension(:,:)    :: timeValues
+      integer :: irgh
+
+      do irgh = 1, rgs%Count
+         if (rgs%rough(irgh)%timeSeriesIds%id_count> 0) then 
+            timeValues    =>  rgs%rough(irgh)%timeValues
+            timeValues(:,1) = timeValues(:,2)
+         endif
+      enddo
+   end subroutine shiftTimeDependentRoughnessValues
 
 end module m_oned_functions

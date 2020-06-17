@@ -247,7 +247,10 @@ module m_CrossSections
        integer                      :: iTabDef              !< Temporary item to save ireference number to cross section definition
                                                             !! Necessary for reallocation of arrays
        type(t_CSType), pointer      :: tabDef => null()
-       type(t_crsu), pointer        :: convTab => null()
+       logical                      :: hasTimeDependentConveyance !< Flag indicates whether the cross section has time dependent roughness
+       type(t_crsu), pointer        :: convTab1 => null()   !< Conveyance table for YZ-cross sections
+       type(t_crsu), pointer        :: convTab2 => null()   !< Conveyance table for YZ-cross sections at new time level, in case the friction
+                                                            !< for this cross section is time dependent
        
        integer                                  :: frictionSectionsCount = 0 !< Number of actual friction sections
        character(IdLen), allocatable            :: frictionSectionID(:)      !< Friction Section Identification
@@ -635,8 +638,11 @@ subroutine deallocCrossSection(cross)
 
    if (.not. cross%IsCopy) then
    
-      if (associated(cross%convTab)) then
-         call dealloc(cross%convTab)
+      if (associated(cross%convTab1)) then
+         call dealloc(cross%convTab1)
+      endif
+      if (associated(cross%convTab2)) then
+         call dealloc(cross%convTab2)
       endif
       
       if (associated(cross%tabDef)) then
@@ -653,7 +659,8 @@ subroutine deallocCrossSection(cross)
 
    endif
 
-   cross%convTab => null()
+   cross%convTab1 => null()
+   cross%convTab2 => null()
    cross%tabDef => null()
 
 end subroutine deallocCrossSection
@@ -676,8 +683,6 @@ subroutine deallocCrossSections(crs)
          if(.not. crs%cross(i)%IsCopy) then
             call dealloc(crs%cross(i))
          endif
-         crs%cross(i)%tabDef  => null()
-         crs%cross(i)%convTab => null()
       enddo
 
       if (associated(crs%crossSectionIndex)) then
@@ -1374,7 +1379,8 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
       maxFlowWidth1 = flowWidth
    case (CS_YZ_PROF)
-      call YZProfile(dpt, cross%convtab, 0, flowArea, flowWidth, maxFlowWidth1, wetPerimeter)
+      ! Also in case a conveyance table is time dependent, the geometry remains constant, so no need for interpolation of time dependent conveyance tables is required.
+      call YZProfile(dpt, cross%convtab1, 0, flowArea, flowWidth, maxFlowWidth1, wetPerimeter)
    case default
       call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
@@ -1538,7 +1544,8 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          !TODO:
          call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_YZ_PROF)
-         call YZProfile(dpt, cross%convtab, 1, totalArea, totalWidth, maxwidth, wetPerimeter)
+         ! Also in case a conveyance table is time dependent, the geometry remains constant, so no need for interpolation of time dependent conveyance tables required.
+         call YZProfile(dpt, cross%convtab1, 1, totalArea, totalWidth, maxwidth, wetPerimeter)
          if (totalWidth < sl) then
             ! Assume a rectangular profile for widths < sl, in order to 
             ! prevent "no convergence" in the non-linear solver. 
@@ -2735,7 +2742,6 @@ use messageHandling
    
    type(t_crsu), pointer   :: convTab
    integer                 :: i
-   convtab=>null()
    allocate(convtab)
    nc = crs%tabDef%levelsCount
    ! Check if type is not equal to walLawNikuradse (type=2), since this option is not implemented yet
@@ -2756,7 +2762,16 @@ use messageHandling
    convTab%conveyType = crs%tabDef%conveyanceType
    convTab%last_position = 1
 
-   crs%convtab => convtab
+   if (associated(crs%convtab1)) then
+      if (associated(crs%convTab2)) then
+         call dealloc(crs%convTab1)
+         crs%convTab1 => crs%convTab2
+      endif
+      crs%convTab2 => convTab
+   else
+      crs%convTab1 => convTab
+   endif
+      
 end subroutine CalcConveyance
 
 !> Get the highest level for the two cross sections and interpolate, using weighing factor F
@@ -2789,8 +2804,8 @@ double precision function getHighest1dLevelSingle(cross)
       case (CS_EGG)
          getHighest1dLevelSingle = 1.5d0 * cross%tabdef%diameter + cross%bedlevel
       case (CS_YZ_PROF)
-         levelsCount = cross%convtab%nru
-         getHighest1dLevelSingle = cross%convtab%water_depth(levelsCount) - cross%convtab%bedlevel
+         levelsCount = cross%convtab1%nru
+         getHighest1dLevelSingle = cross%convtab1%water_depth(levelsCount) - cross%convtab1%bedlevel
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross-section in getHighest1dLevelSingle')
    end select
@@ -2846,9 +2861,13 @@ type(t_CrossSection) function CopyCross(CrossFrom)
       CopyCross%tabDef = CopyCrossDef(CrossFrom%tabDef)
    endif
 
-   if (associated(CrossFrom%convTab)) then
-      allocate(CopyCross%convTab)
-      CopyCross%convTab = CopyCrossConv(CrossFrom%convTab)
+   if (associated(CrossFrom%convTab1)) then
+      allocate(CopyCross%convTab1)
+      CopyCross%convTab1 = CopyCrossConv(CrossFrom%convTab1)
+   endif
+   if (associated(CrossFrom%convTab2)) then
+      allocate(CopyCross%convTab2)
+      CopyCross%convTab2 = CopyCrossConv(CrossFrom%convTab2)
    endif
 
    end function CopyCross
@@ -3377,7 +3396,8 @@ subroutine createTablesForTabulatedProfile(crossDef)
          call msg_flush()
          
          if (cross%crossType == CS_YZ_PROF) then
-            call write_conv_tab(cross%convTab)
+            call write_conv_tab(cross%convTab1)
+            call write_conv_tab(cross%convTab2)
          endif
          
       enddo
@@ -3389,7 +3409,7 @@ subroutine createTablesForTabulatedProfile(crossDef)
    end subroutine write_crosssection_data
 
    !> Get the flow area, wet perimeter and flow width located on a link
-   subroutine getYZConveyance(line2cross, cross, dpt, u1, cz, conv)
+   subroutine getYZConveyance(line2cross, cross, dpt, u1, cz, conv, factor_time_interpolation)
 
       use m_GlobalParameters
    
@@ -3401,6 +3421,8 @@ subroutine createTablesForTabulatedProfile(crossDef)
       double precision,             intent(in)        :: u1             !< water velocity at cross section
       double precision,             intent(  out)     :: cz             !< computed Chezy value
       double precision,             intent(  out)     :: conv           !< conveyance
+      double precision,             intent(in)        :: factor_time_interpolation    !< Factor for interpolation of time dependent conveyance tables
+                                                                                       !< conveyance = (1-factor)*conv1 + factor*conv2
 
       type (t_CrossSection), pointer        :: cross1         !< cross section
       type (t_CrossSection), pointer        :: cross2         !< cross section
@@ -3410,7 +3432,7 @@ subroutine createTablesForTabulatedProfile(crossDef)
       double precision                      :: maxwidth
       double precision                      :: perimeter 
       double precision                      :: cz1, cz2
-      double precision                      :: conv1, conv2
+      double precision                      :: conv1, conv2, conv3
       
 
       cross1 => cross(line2cross%c1)
@@ -3419,7 +3441,13 @@ subroutine createTablesForTabulatedProfile(crossDef)
 
       if(cross1%crossIndx == cross2%crossIndx) then
          ! Same Cross-Section, no interpolation needed 
-         call YZProfile(dpt, cross1%convTab, 0, area, width, maxwidth, perimeter, u1, cz, conv, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
+         call YZProfile(dpt, cross1%convTab1, 0, area, width, maxwidth, perimeter, u1, cz, conv, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
+         if (cross1%hasTimeDependentConveyance) then
+            ! time interpolation is required, compute the conveyance, using the conveyance table, at the end of the interval
+            call YZProfile(dpt, cross1%convTab2, 0, area, width, maxwidth, perimeter, u1, cz, conv1, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
+            ! Interpolate to the correct time level
+            conv = (1d0-factor_time_interpolation) * conv + factor_time_interpolation * conv1
+         endif
       else
          if (cross1%crosstype /= cross2%crosstype) then
             write(msgbuf, '(a,a,a,a,a)') 'getYZConveyance: cross sections ''', trim(cross1%csid), ''' and ''', trim(cross2%csid), &
@@ -3427,8 +3455,19 @@ subroutine createTablesForTabulatedProfile(crossDef)
             call err_flush()
             return
          end if
-         call YZProfile(dpt, cross1%convTab, 0, area, width, maxwidth, perimeter, u1, cz1, conv1, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
-         call YZProfile(dpt, cross2%convTab, 0, area, width, maxwidth, perimeter, u1, cz2, conv2, cross2%frictionTypePos(1), cross2%frictionValuePos(1))
+         call YZProfile(dpt, cross1%convTab1, 0, area, width, maxwidth, perimeter, u1, cz1, conv1, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
+         if (cross1%hasTimeDependentConveyance) then
+            ! time interpolation is required, compute the conveyance, using the conveyance table, at the end of the interval
+            call YZProfile(dpt, cross1%convTab2, 0, area, width, maxwidth, perimeter, u1, cz1, conv3, cross1%frictionTypePos(1), cross1%frictionValuePos(1))
+            conv1 = (1d0-factor_time_interpolation) * conv1 + factor_time_interpolation * conv3
+         endif
+
+         call YZProfile(dpt, cross2%convTab1, 0, area, width, maxwidth, perimeter, u1, cz2, conv2, cross2%frictionTypePos(1), cross2%frictionValuePos(1))
+         if (cross2%hasTimeDependentConveyance) then
+            ! time interpolation is required, compute the conveyance, using the conveyance table, at the end of the interval
+            call YZProfile(dpt, cross2%convTab2, 0, area, width, maxwidth, perimeter, u1, cz2, conv3, cross2%frictionTypePos(1), cross2%frictionValuePos(1))
+            conv2 = (1d0-factor_time_interpolation) * conv2 + factor_time_interpolation * conv3
+         endif
          cz   = (1.0d0 - f) * cz1   + f * cz2
          conv = (1.0d0 - f) * conv1 + f * conv2
       endif

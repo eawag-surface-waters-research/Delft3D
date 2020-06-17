@@ -18015,6 +18015,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    use dfm_error
    use m_sobekdfm
    use unstruc_channel_flow
+   use m_oned_functions
 
 
    implicit none
@@ -18185,7 +18186,21 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    endif
 
    if (network%rgs%timeseries_defined) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_frcutim, irefdate, tzone, tunit, tim)
+      if (times_update_roughness(2) == tstart_user) then
+         ! The roughness values for tstart is not set yet
+         success = success .and. ec_gettimespacevalue(ecInstancePtr, item_frcutim, irefdate, tzone, tunit, times_update_roughness(1))
+         call reCalculateConveyanceTables(network)
+      endif
+      if (tim >= times_update_roughness(2)) then
+         ! Shift the time dependent roughness values and collect the values for the new time instance 
+         times_update_roughness(1) = times_update_roughness(2)
+         times_update_roughness(2) = times_update_roughness(2) + dt_UpdateRoughness ! (bijv 86400 s)
+         call shiftTimeDependentRoughnessValues(network%rgs)
+         success = success .and. ec_gettimespacevalue(ecInstancePtr, item_frcutim, irefdate, tzone, tunit, times_update_roughness(2))
+         ! update conveyance tables
+         call reCalculateConveyanceTables(network)
+      endif
+      call interpolateRoughnessParameters(network%rgs, times_update_roughness, tim)
    endif
 
    call timstop(handle_extbnd)
@@ -46830,6 +46845,7 @@ subroutine getprof_1D(L, hprL, area, width, japerim, calcConv, perim)
 use m_profiles
 use m_flow
 use m_flowgeom
+use m_flowtimes
 use m_missing
 use unstruc_channel_flow
 use m_crosssections
@@ -46893,7 +46909,8 @@ if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
       ! NOTE: In case of a YZ-type cross section the conveyance is computed, using the given water depth, but
       !       using the cross sectional profile of this YZ-cross section. In that case we need the Chezy value
       !       for computing the conveyance based on the rectangular.
-      call getconveyance(network, hpr, u1(L), q1(L), s1(k2), LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
+      factor = (time1 - times_update_roughness(1))/dt_UpdateRoughness
+      call getconveyance(network, hpr, u1(L), q1(L), s1(k2), LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim, factor)
       frcu(L)        = cz
       frcu_mor(L)    = cz
       u_to_umain(L)  = 1d0
@@ -46926,7 +46943,8 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
          s1L = acl(L)*s1(k1) + (1d0-acl(L))*s1(k2)
          dpt = hu(L)
          cz = 0d0
-         call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
+         factor = (time1 - times_update_roughness(1))/dt_UpdateRoughness
+            call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim, factor)
 
          ! For sediment transport the discharge in the main channel is required:
          ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)

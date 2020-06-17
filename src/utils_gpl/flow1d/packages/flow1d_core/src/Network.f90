@@ -49,7 +49,8 @@ module m_network
    public initialize_1dadmin
    public getFrictionValue
    public update_flow1d_admin
-   
+   public getRoughnessForProfile
+
    interface realloc
       module procedure realloc_1dadmin
    end interface realloc
@@ -1105,6 +1106,106 @@ use m_tablematrices
     getFrictionCparValue = cpar
     
 end function getFrictionCparValue
+
+subroutine getRoughnessForProfile(network, crs)
+   use precision_basics
+   use m_hash_search
+
+   type(t_network),        intent(inout) :: network      !< Network structure
+   type(t_CrossSection),   intent(inout) :: crs          !< cross section
+   
+   integer                        :: i
+   integer                        :: iRough
+   type(t_Roughness), pointer     :: pRgs
+   type(t_spatial_data), pointer  :: pSpData
+   double precision               :: frictionValue
+   integer                        :: frictionType
+   integer                        :: iStatus
+   if (crs%frictionSectionsCount <= 0) then
+      call SetMessage(LEVEL_ERROR, 'No Friction Section Data for Cross-Section ID: '//trim(crs%csid))
+      return
+   endif
+        
+   do i = 1, crs%frictionSectionsCount
+        
+      iRough = hashsearch(network%rgs%hashlist, crs%frictionSectionID(i))
+      if (iRough <= 0) then
+         call SetMessage(LEVEL_ERROR, 'No Data found for Section '//trim(crs%frictionSectionID(i))//' of Cross-Section ID: '//trim(crs%csid))
+         cycle
+      endif
+      
+      pRgs => network%rgs%rough(iRough)
+      if (network%rgs%version == network%rgs%roughnessFileMajorVersion) then
+         frictionValue = crs%frictionValuePos(i)
+         call getFrictionParameters(pRgs,  1d0, crs%branchid, crs%chainage, crs%frictionTypePos(i), crs%frictionValuePos(i))
+         if (comparereal(frictionValue, crs%frictionValuePos(i)) /= 0) then
+            crs%hasTimeDependentConveyance = .true.
+         endif
+         frictionValue = crs%frictionValueNeg(i)
+         call getFrictionParameters(pRgs, -1d0, crs%branchid, crs%chainage, crs%frictionTypeNeg(i), crs%frictionValueNeg(i))
+         if (comparereal(frictionValue, crs%frictionValueNeg(i)) /= 0) then
+               crs%hasTimeDependentConveyance = .true.
+         endif
+         cycle
+      endif
+      
+      if (pRgs%iSection == 0) then
+         ! roughness section does not exist
+         call setMessage(LEVEL_ERROR, 'Roughness section '// trim(crs%frictionSectionID(i)) //', used in '//trim(crs%csid)//' does not exist')
+         cycle
+      endif
+         
+      
+      crs%frictionTypePos(i) = pRgs%rgh_type_pos(crs%branchid)
+      if (associated(pRgs%rgh_type_neg)) then
+         crs%frictionTypeNeg(i) = pRgs%rgh_type_neg(crs%branchid)
+      else
+         crs%frictionTypeNeg(i) = pRgs%rgh_type_pos(crs%branchid)
+      endif
+      
+      if (pRgs%spd_pos_idx <= 0 .and. pRgs%spd_neg_idx <= 0) then
+         call SetMessage(LEVEL_ERROR, 'No Spatial Data specified for Section '//trim(crs%frictionSectionID(i))//' of Cross-Section ID: '//trim(crs%csid))
+         cycle
+      endif
+      
+      ! Positive direction
+      if (pRgs%spd_pos_idx > 0) then
+      
+         pSpData => network%spData%quant(pRgs%spd_pos_idx)
+         
+         iStatus = getValueAtLocation(pSpData, crs%branchid, crs%chainage, frictionValue, frictionType)
+         
+         if (istatus >= 0) crs%frictionValuePos(i) = frictionValue
+         if (istatus > 0)  crs%frictionTypePos(i)  = frictionType
+
+      endif
+        
+      ! Negative direction
+      if (pRgs%spd_neg_idx > 0) then
+      
+         pSpData => network%spData%quant(pRgs%spd_neg_idx)
+         
+         iStatus = getValueAtLocation(pSpData, crs%branchid, crs%chainage, frictionValue, frictionType)
+         
+         if (istatus >= 0) crs%frictionValueNeg(i) = frictionValue
+         if (istatus > 0)  crs%frictionTypeNeg(i)  = frictionType
+
+      endif
+      
+      if (pRgs%spd_pos_idx > 0 .and. pRgs%spd_neg_idx <= 0) then
+         crs%frictionValueNeg(i) = crs%frictionValuePos(i)
+         crs%frictionTypeNeg(i)  = crs%frictionTypePos(i)
+      endif
+      
+      if (pRgs%spd_pos_idx <= 0 .and. pRgs%spd_neg_idx > 0) then
+         crs%frictionValuePos(i) = crs%frictionValueNeg(i)
+         crs%frictionTypePos(i)  = crs%frictionTypeNeg(i)
+      endif
+        
+   enddo
+      
+      
+end subroutine getRoughnessForProfile
 
 !> Remove already removed links (administered in LC-array) from the branch administration
 subroutine update_flow1d_admin(network, lc)
