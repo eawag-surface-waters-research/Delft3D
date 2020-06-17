@@ -110,6 +110,6 @@ module wave_boundary_datastore
    type(waveBoundaryParametersType),     allocatable, save   :: waveBoundaryParameters(:)
    type(waveBoundaryAdministrationType), allocatable, save   :: waveBoundaryAdministration(:)
    type(waveBoundaryTimeSeriesType),     allocatable, save   :: waveBoundaryTimeSeries(:)
-   type(waveSpectrumAdministrationType), allocatable, save    :: waveSpectrumAdministration(:)
+   type(waveSpectrumAdministrationType), allocatable, save   :: waveSpectrumAdministration(:)
       
 end module wave_boundary_datastore

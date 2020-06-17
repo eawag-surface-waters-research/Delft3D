@@ -204,10 +204,11 @@ subroutine xbeach_all_input()
       trim(instat)=='stat_table' .or. &
       trim(instat)=='jons_table' &
       )then
+   filetype = 0   ! JRE to check
    bcfile = readkey_name(md_surfbeatfile,'bcfile')
    call check_file_exist(bcfile)
    call checkbcfilelength(tstop_user-tstart_user,instat,bcfile, nspectrumloc, filetype)
-   !filetype = 0
+
    elseif (trim(instat)=='reuse') then
       ! TO DO: check file length is done after recomputation of tstop due to morfacopt
       ! at the end of this subroutine.
@@ -251,7 +252,11 @@ subroutine xbeach_all_input()
    order       = readkey_dbl (md_surfbeatfile,'order',    2.d0,           1.d0,    2.d0    )
    freewave    = readkey_int (md_surfbeatfile,'freewave', 0,    0,       1       )
    epsi        = readkey_dbl (md_surfbeatfile,'epsi',     -1.d0,          -1.d0,   0.2d0   )
-   hminlw      =  readkey_dbl (md_surfbeatfile,'hmin',    0.2d0,     0.001d0,      1.d0)
+   hminlw      = readkey_dbl (md_surfbeatfile,'hmin',    0.2d0,     0.001d0,      1.d0)
+   allocate(allowednames(2),oldnames(0))
+   allowednames=(/'abs_1d','abs_2d'/)
+   absgentype  = readkey_str(md_surfbeatfile,'absgentype','abs1d',2,0,allowednames,oldnames)
+   if (allocated(allowednames)) deallocate(allowednames, oldnames)
    allocate(allowednames(2),oldnames(0))
    allowednames=(/'instant ','velocity'/)
    tidetype= readkey_str(md_surfbeatfile,'tidetype','velocity',2,0,allowednames,oldnames)
@@ -462,23 +467,23 @@ subroutine xbeach_wave_init()
       endif 
       
       if (windmodel.eq.0) then
-         do k = 1, ndx    ! stack overflow
-             sigmwav(k) = sum(sigt(:,k), dim=1)/dble(ntheta)
-             L0(k) = 2*pi*ag/(sigmwav(k)**2)
-             L1(k) = L0(k)
-             Ltemp(k) = L0(k)
-         end do
+      do k = 1, ndx    ! stack overflow
+          sigmwav(k) = sum(sigt(:,k), dim=1)/dble(ntheta)
+          L0(k) = 2*pi*ag/(sigmwav(k)**2)
+          L1(k) = L0(k)
+          Ltemp(k) = L0(k)
+      end do
       else
-         L0t = 2*pi*ag/(sigt**2)
-         L1t = L0t
-         Ltempt = L0t      
+          L0t = 2*pi*ag/(sigt**2)
+          L1t = L0t
+          Ltempt = L0t      
       endif
       
       ! initialize celerities
       if (windmodel .eq. 1) then
-         call xbeach_dispersion_windmodel()
+          call xbeach_dispersion_windmodel()
       else 
-         call xbeach_dispersion()    
+          call xbeach_dispersion()    
       endif
 
    end if
@@ -528,8 +533,9 @@ subroutine xbeach_wave_init()
    end do
    
    if (.not. allocated(uave)) then
-      allocate(uave(nubnd),vave(nubnd),dlengthrm(nubnd), stat=ierror)
-      allocate(umeanrm(nubnd), vmeanrm(nubnd), stat = ierror)
+      maxnumbnds=100
+      allocate(uave(maxnumbnds),vave(maxnumbnds),dlengthrm(maxnumbnds), stat=ierror)
+      allocate(umeanrm(maxnumbnds), vmeanrm(maxnumbnds), stat = ierror)
       uave = 0d0
       vave = 0d0
       dlengthrm = 0d0
@@ -539,14 +545,14 @@ subroutine xbeach_wave_init()
    
    if ( windmodel.eq.1) then
       if (jawsource.eq.1) then
-         !define source term coefficients
-         CE1 = 8d0/(aa1*aa1*bb1 ) * (16d0/(aa1*aa1 ) )**(1d0/(2d0* bb1) -1d0 )
+   !define source term coefficients
+      CE1 = 8d0/(aa1*aa1*bb1 ) * (16d0/(aa1*aa1 ) )**(1d0/(2d0* bb1) -1d0 )
          CE2 = 1d0/(2d0* bb1) -1d0
-         CT1 = 1d0/(aa2*bb2 ) * (1d0/(aa2 ) )**(1d0/bb2 -1d0 )
+      CT1 = 1d0/(aa2*bb2 ) * (1d0/(aa2 ) )**(1d0/bb2 -1d0 )
          CT2 = 1d0/bb2 -1d0
-      endif
-      !map wind field to cell centers
-      call xbeach_map_wind_field(wx, wy, mwind, wmagcc, windspreadfac)
+   endif
+   !map wind field to cell centers
+          call xbeach_map_wind_field(wx, wy, mwind, wmagcc, windspreadfac)
    endif
    
    if (trim(instat)=='stat' .or. trim(instat)=='stat_table') then
@@ -913,6 +919,7 @@ subroutine xbeach_instationary()
    use m_timer
    use m_alloc
    use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb, jauorb
+   use m_flowtimes, only:dts
 
    implicit none
 
@@ -945,11 +952,9 @@ subroutine xbeach_instationary()
    horadvec=0d0
    horadvec2=0d0
    thetaadvec=0d0
-   thetaadvec2=0d0
- 
+   thetaadvec2=0d0                          
    
-   call xbeach_wave_compute_celerities()
-   
+   call xbeach_wave_compute_celerities()      
 
    hh = max(hs, epshs)
 
@@ -988,18 +993,14 @@ subroutine xbeach_instationary()
             enddo
       enddo
       
-      if (advecmod.eq.1) then              
-          
+      if (advecmod.eq.1) then               
          sigt=min(mb/ma,twopi/tt_eps)
          ee1=max(mb,ee_eps)     
          tt1=twopi/sigt
-         
      else  
-        
         sigt=min(mb/ma,twopi/tt_eps)
         ee1=max(ma,ee_eps)
-        tt1=twopi/sigt
-                  
+        tt1=twopi/sigt         
       endif
       
       call xbeach_wave_compute_celerities()
@@ -1007,13 +1008,13 @@ subroutine xbeach_instationary()
    else !regular xbeach approach, fixed period
        
       ee1 = ee1/sigt      
-      call advec_horz(dtmaxwav, snx, csx, limtypw, ee1, cgwav, horadvec)
+      call advec_horz(dts, snx, csx, limtypw, ee1, cgwav, horadvec)
       call advec_dir(ee1, ctheta, thetaadvec)
 
       do k = 1,ndxi
          do itheta = 1,ntheta
             if ( vol1(k) > epshs*ba(k) ) then
-               ee1(itheta,k) = ee1(itheta,k) - dtmaxwav*(horadvec(itheta,k)  * bai(k) + thetaadvec(itheta,k))
+               ee1(itheta,k) = ee1(itheta,k) - dts*(horadvec(itheta,k)*bai(k) + thetaadvec(itheta,k))
             else
                ee1(itheta,k) = 0d0
             endif
@@ -1025,7 +1026,7 @@ subroutine xbeach_instationary()
 
    endif 
    !
-   !   Energy integrated over wave directions,Hrms, depthlimitation on energy
+   !   Energy integrated over wave directions,Hrms, depth limitation on energy
    !
    do k=1,ndx
        E(k)=sum(ee1(:,k),dim=1)*dtheta
@@ -1041,12 +1042,11 @@ subroutine xbeach_instationary()
    end do
    
    !   Breaker dissipation
-   call xbeach_wave_breaker_dissipation(dtmaxwav, break, DeltaH, waveps, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci, windmodel)
+   call xbeach_wave_breaker_dissipation(dts, break, DeltaH, waveps, kwav, km, gamma, gamma2, nroelvink, QB, alpha, Trep, cwav, thetamean, E, D, sigmwav, wci, windmodel)
 
    !   Dissipation by bed friction
    dfac = 2.d0*fw*rhomean/(3.d0*pi)
    do k=1,Ndx
-!      urms_cc(k) = pi * H(k) / Trep / sinh(min(max(kwav(k),0.01d0)*max(hh(k),deltaH*H(k)),10.0d0))   ! uorb uit XBeach
       urms_cc(k) = H(k) * sigmwav(k) / 2d0 / sinh(min(max(kwav(k),0.01d0)*max(hh(k),deltaH*H(k)),10.0d0))   ! uorb uit XBeach
       Df(k)=dfac(k)*urms_cc(k)**3
    end do
@@ -1066,9 +1066,7 @@ subroutine xbeach_instationary()
       dd(itheta,:)   = ddlok(itheta,:) + ee1(itheta,:)*Df/max(E,0.00001d0)   ! breaking plus friction
    enddo
 
-
    if (windmodel.eq.1) then
-       
      ! wave period depth limitation 
       call xbeach_wave_compute_period_depth_limitation( 1.d0/8.d0*rhog*(gammax*hh**2) , Tdeplim)  
       do itheta=1,ntheta
@@ -1089,8 +1087,6 @@ subroutine xbeach_instationary()
           SwE=0.d0
           SwT=0.d0
       endif
-      
-      
    endif ! windmodel
    
    
@@ -1103,49 +1099,44 @@ subroutine xbeach_instationary()
    enddo
 
    !!  Roller energy balance
-   call advec_horz(dtmaxwav, snx, csx, limtypw, rr, cwav, rrhoradvec)
+   call advec_horz(dts, snx, csx, limtypw, rr, cwav, rrhoradvec)
    call advec_dir(rr,ctheta,rrthetaadvec)
 
    do k = 1,ndxi
       do itheta = 1,ntheta
-         if ( vol1(k) > 0d0 ) then
-            rr(itheta,k) = rr(itheta,k) - dtmaxwav*(rrhoradvec(itheta,k)  * bai(k) + rrthetaadvec(itheta,k))
+         if ( vol1(k) > epshs*ba(k) ) then
+            rr(itheta,k) = rr(itheta,k) - dts*(rrhoradvec(itheta,k)  * bai(k) + rrthetaadvec(itheta,k))
          else
-            rr(itheta,k) = 0d0  ! check
+            rr(itheta,k) = 0d0
          endif
       enddo
    enddo
 
    rr=max(rr,0.0d0)
    
-   !  euler step roller energy dissipation (source and sink function)
-   
+   !  euler step roller energy dissipation
    if (windmodel.eq.1) then
        do k = 1,ndx  
          do itheta=1,ntheta
-            if(wete(itheta, k)==1) then
-                
+            if (wete(itheta, k)==1) then 
                ee1(itheta,k) = ee1(itheta, k) + min( dtmaxwav * (wsorE(itheta, k) -  dd(itheta, k) )  , ee1(itheta, k) ) 
                tt1(itheta,k) = tt1(itheta, k) + min( dtmaxwav * (wsorT(itheta, k) -  ddT(k) ) , tt1(itheta, k) )
-               
-            if(roller==1) then
-                  drr(itheta, k) = 2*ag*BR(k)*max(rr(itheta, k),0.0d0)/ cwav(k)
-                  rr(itheta, k)=rr(itheta, k)+dtmaxwav*(ddlok(itheta, k) -drr(itheta, k))
-            else if (roller==0) then
-               rr(itheta, k)  = 0.0d0
-               drr(itheta, k) = 0.0d0
-            endif
-               
+               ! 
+               if(roller==1) then
+                     drr(itheta, k) = 2*ag*BR(k)*max(rr(itheta, k),0.0d0)/ cwav(k)
+                     rr(itheta, k)=rr(itheta, k)+dtmaxwav*(ddlok(itheta, k) -drr(itheta, k))
+               else if (roller==0) then
+                  rr(itheta, k)  = 0.0d0
+                  drr(itheta, k) = 0.0d0
+               endif
+               !
                ee1(itheta, k)    = max(ee1(itheta, k),ee_eps)
                tt1(itheta, k)    = max(tt1(itheta, k), tt_eps)
                rr(itheta, k)     = max(rr(itheta, k),0.0d0)
-               
             elseif(wete(itheta, k)==0) then
-                
                ee1(itheta, k)    = ee_eps
                tt1(itheta, k)    = tt_eps
                rr(itheta, k)     = 0.0d0
-               
             end if
          end do
        end do
@@ -1159,11 +1150,11 @@ subroutine xbeach_instationary()
       do k = 1,ndx  ! ndx
          do itheta=1,ntheta
             if(wete(itheta, k)==1) then
-               ee1(itheta,k)=ee1(itheta, k)-dtmaxwav*dd(itheta, k)                ! totale dissipatie
+               ee1(itheta,k)=ee1(itheta, k)-dts*dd(itheta, k)                ! totale dissipatie
                if(roller==1) then
-                  drr(itheta, k) = 2*ag*BR(k)*max(rr(itheta, k),0.0d0)/    &
+                  drr(itheta, k) = 2.0*ag*BR(k)*max(rr(itheta, k),0.0d0)/    &
                                    cwav(k)
-                  rr(itheta, k)=rr(itheta, k)+dtmaxwav*(ddlok(itheta, k)   &      ! only wave breaker dissipation
+                  rr(itheta, k)=rr(itheta, k)+dts*(ddlok(itheta, k)   &      ! only wave breaker dissipation
                                 -drr(itheta, k))
                else if (roller==0) then
                   rr(itheta, k)  = 0.0d0
@@ -1192,7 +1183,7 @@ subroutine xbeach_instationary()
    do L=1,Lnx
       k1 = ln(1,L)
       k2 = ln(2,L)
-      urms(L) = (acL(L) * urms_cc(k1) + (1d0-acl(L))*urms_cc(k2)) * fsqrtt
+      urms(L) = (acL(L)*urms_cc(k1) + (1d0-acl(L))*urms_cc(k2)) * fsqrtt
    end do
 
    call xbeach_apply_wave_bc()
@@ -1234,7 +1225,6 @@ subroutine xbeach_instationary()
       call borecharacter()                   ! calculates BR and Tbore using Rieneck&Fenton approach   
    end if
    
-   ! Debug
    ! En voor de uniformiteit van de golfkoppelingetjes:
    hwav = H
    twav = 2.0*pi/sigmwav
@@ -1243,7 +1233,6 @@ subroutine xbeach_instationary()
    uorb = urms_cc
    ustokes = ust
    vstokes = vst   
-   ! \Debug
 
    deallocate(hh, ddlok, wete, drr, stat = ierr)
    deallocate(ustw, ustr, uwf, vwf, urf, vrf, stat = ierr)
@@ -1256,13 +1245,15 @@ subroutine xbeach_instationary()
    use m_flow
    use m_xbeach_data
    use m_flowgeom
+   use m_partitioninfo
+   use m_timer
 
    implicit none
 
    integer                        :: k, L, k1, k2
    double precision               :: dumFx, dumFy, cs, sn, wul
    doUbLE PREciSIOn               :: Sxx2, Sxy2, Syy2
-   iNtEGeR                        :: nwalls
+   iNtEGeR                        :: nwalls, ierror
 
    !   Radiation stresses
    nwav = cgwav/max(cwav,1d-10)
@@ -1293,6 +1284,7 @@ subroutine xbeach_instationary()
       Fy_cc(k) = Fy_cc(k)*bai(k)
    enddo
 
+   ! Open boundaries: Neumann
    do L = 1,nbndw
       k1 = kbndw(1,L); k2=kbndw(2,L)
       Fx_cc(k1) = Fx_cc(k2)
@@ -1310,8 +1302,8 @@ subroutine xbeach_instationary()
       Fx_cc(k1) = Fx_cc(k2)
       Fy_cc(k1) = Fy_cc(k2)
    end do
-           
-!  closed
+   
+   !  closed
    do nwalls=1,mxwalls
       k1 = walls(1,nwalls)
       
@@ -1347,7 +1339,17 @@ subroutine xbeach_instationary()
       Fx_cc(k1) = Fx_cc(k1) + dumFx
       Fy_cc(k1) = Fy_cc(k1) + dumFy
    end do
-     
+
+   ! JRE DEBUG
+   if (jampi.eq.1) then
+      if ( jatimer.eq.1 ) call starttimer(IXBEACH)
+      call update_ghosts(ITYPE_SALL, 1, ndx, Fx_cc, ierror)
+      call update_ghosts(ITYPE_SALL, 1, ndx, Fy_cc, ierror)
+      if ( jatimer.eq.1 ) call stoptimer(IXBEACH)
+   endif
+   !\  DEBUG
+   
+                   
    do L = 1,Lnx
       k1 = ln(1,L); k2 = ln(2,L)
       Fx(L) = ( acL(L)*Fx_cc(k1) + (1d0-acL(L))*Fx_cc(k2) )
@@ -1409,11 +1411,11 @@ subroutine xbeach_instationary()
          end if
       end do
    end do
-
+   !
    if ( jampi.eq.1 ) then
       call reduce_double_min(dtmaxwav)
    end if
-
+   !
    if (dtmaxwav > dts) dtmaxwav = dts
    dtmaxwav = dts/ceiling(dts/dtmaxwav)
    ! 
@@ -1422,7 +1424,6 @@ subroutine xbeach_instationary()
       dti = 1d0/dts
    end if
    ! 
-
    end subroutine xbeach_wave_maxtimestep
 
    subroutine xbeach_wave_compute_celerities
@@ -1463,7 +1464,7 @@ subroutine xbeach_instationary()
    
    hh = max(hs,waveps)
    do k=1, ndx ! stack
-      thetamean(k)=(sum(ee1(:,k)*thet(:,k),1)/dble(ntheta))/(max(sum(ee1(:,k),1),0.00001d0)/dble(ntheta))
+      thetamean(k)=(sum(ee1(:,k)*thet(:,k),dim=1))/(max(sum(ee1(:,k),1),0.00001d0))
    end do
    
    if (windmodel .eq. 0) then
@@ -1598,7 +1599,7 @@ subroutine xbeach_instationary()
    call dhsdxdhsdy(dhsdx, dhsdy)
 
    ! slope of velocities
-   ! JRE TO DO: what with 3D situation? See ucxucyucxuucyu
+   ! JRE TO DO: what with 3D situation? See ucxucyucxuucyu, quantities delivered to swan
    !
    !if (wci .ne. 0) then
    !   do L = 1,lnx
@@ -1673,8 +1674,8 @@ subroutine xbeach_instationary()
    use m_flowtimes, only: time0, time1, tstop_user
    use m_physcoef, only: rhomean, ag
    use m_sferic, only: pi
-   use m_flowparameters, only: epshs
-   use m_flow, only:hs, u1, v, plotlin
+   use m_flowparameters, only: epshs, epshu
+   use m_flow, only:hs, u1, v, plotlin, s1
    use m_alloc
    use m_xbeach_filefunctions
    use wave_boundary_datastore
@@ -1692,7 +1693,7 @@ subroutine xbeach_instationary()
    double precision, save                                :: bcendtime,bcstarttime
    double precision                                      :: em,tshifted,tnew,fac,hboundary(nwbnd)
    double precision, save                                :: Emean,Llong
-   double precision                                      :: hh
+   double precision                                      :: hh, ht
    character(len=1)                                      :: bline
    character(slen)                                       :: ebcfname,qbcfname,fname
    logical                                               :: startbcf
@@ -1710,28 +1711,27 @@ subroutine xbeach_instationary()
    integer                                               :: k, kb, ki, Lb, LL, Lw, L, nw, k2
    integer                                               :: LL1, LL2, n, lunfil
 
-   logical, save                                         :: bccreated=.false.
-
+   !logical, save                                         :: bccreated=.false.  ! now in module
 
    ierror = 1
    if (.not. allocated(dist)) allocate(dist(1:ntheta),factor(1:ntheta), e01(1:ntheta))
-
+   !
    eeout = 0d0
-   uin = 0d0
-   vin = 0d0
-   qxbc = 0d0
-   qybc = 0d0
-
+   uin   = 0d0
+   vin   = 0d0
+   qxbc  = 0d0
+   qybc  = 0d0
+   !
    !  note: also in xbeach_spectral_wave_init
    call get_hboundary(hboundary)
-
+   !
    startbcf=.false.
-
+   !
    if(  .not. (trim(instat).eq.'stat' .or. &
-      trim(instat).eq.'bichrom' .or. &
-      trim(instat).eq.'ts_1' .or. &
-      trim(instat).eq.'ts_2' .or. &
-      trim(instat).eq.'stat_table' &
+               trim(instat).eq.'bichrom' .or. &
+               trim(instat).eq.'ts_1' .or. &
+               trim(instat).eq.'ts_2' .or. &
+               trim(instat).eq.'stat_table' &
       ))then
 
       select case (trim(instat))
@@ -1756,7 +1756,6 @@ subroutine xbeach_instationary()
       else
          randomseed=-999
       end if
-      
       !
       do n = 1,nwbnd
          LL1 = L1wbnd(n)
@@ -1776,28 +1775,25 @@ subroutine xbeach_instationary()
                                              eeout(LL1:LL2,:),qxbc(LL1:LL2),qybc(LL1:LL2), &
                                              Hbc,Tbc,Dbc,isRecomputed,nspr=nspr,sprdthr=sprdthr, &
                                              trepfac=trepfac,nmax=nwavmax,fcutoff=fcutoff,rho=rhomean, &
-                                             Tm01switch=Tm01switch,swkhmin=swkhmin)
-         
+                                             Tm01switch=Tm01switch,swkhmin=swkhmin)         
       end do
-      Trep = Tbc
-      
+      Trep      = Tbc
+      !
       do i=1,nbndu       !! for absgen bnd's
          nw = kbndu2kbndw(i)
          if ( nw.gt.0 ) then
-            hh = max(hs(kbndw(1,nw)),epshs)
-            uin(nw) = qxbc(nw)/hh
+            hh = max(s1(kbndw(1,nw))-bl(kbndw(1,nw)),epshs)
+            uin(nw) = qxbc(nw)/hh             ! x and y, are oriented later according to link direction in absgen_bc
             vin(nw) = qybc(nw)/hh
          end if
       end do
-      
+      !
       do i=1,nbndw
          zbndw(1:ntheta,i) = eeout(i,1:ntheta)
       end do
-
-
-
+           
    else !! instat = stat, stat_table, ts_1, ts_2, bichrom
-      if(.not. bccreated ) then
+      if(.not. bccreated ) then        
          call writelog('ls','','Setting up boundary conditions')
          bccreated=.true.
          startbcf=.true.                     ! trigger read from bcf for instat 3,4,5,7
@@ -1888,7 +1884,6 @@ subroutine xbeach_instationary()
          E0=0.125d0*ag*rhomean*Hrms**2
 
          ! energy density distribution
-
          if (sum(dist)>0.d0) then
             factor = (dist/sum(dist))/dtheta
          else
@@ -1904,7 +1899,7 @@ subroutine xbeach_instationary()
                Llong = -huge(0d0)                                            !! Llong only for bichrom waves 
             end if
          else
-            if ( nbndw.gt.0 ) then    ! may give different results for parallel runs
+            if ( nbndw.gt.0 ) then                                           ! may give different results for parallel runs
                Llong=Tlong*maxval(cgwav(kbndw(1,1:nbndw)))
             else
                Llong = -huge(0d0)
@@ -1937,14 +1932,15 @@ subroutine xbeach_instationary()
                do itheta=1,ntheta
                   sigt(itheta,:) = 2d0*pi/Trep
                end do
-            else
-               do k = 1,nbndw
-                   kb = kbndw(1,k)
-                   do itheta = 1,ntheta
-                       sigt(itheta,kb) = 2.d0 * pi / Trep
-                   end do
-               enddo
-            end if
+            endif
+
+            do k = 1,nbndw
+                kb = kbndw(1,k)
+                do itheta = 1,ntheta
+                    sigt(itheta,kb) = 2.d0 * pi / Trep
+                end do
+            enddo
+            
             sigmwav = max(sum(sigt,1)/dble(ntheta), epshs)
             call xbeach_dispersion()
 
@@ -1966,7 +1962,7 @@ subroutine xbeach_instationary()
             e01    = factor*E0;
             e01    = max(e01,0.0d0);
          elseif (trim(instat)=='reuse') then
-            close(71)
+            close(71)                          ! to do, newlun
             close(72)
             startbcf=.true.
             if (time0 <= (tstop_user-time0)) then
@@ -1979,20 +1975,21 @@ subroutine xbeach_instationary()
       !!> Calculate boundary wave energy bc
       if (trim(instat)=='stat' .or. trim(instat)=='stat_table') then
          if (newstatbc==1) then
-            do itheta = 1, ntheta
-               ee1(itheta,:) = e01(itheta)
-            end do
+            !do itheta = 1, ntheta
+            !   ee1(itheta,:) = e01(itheta)
+            !end do
+            ee1=0d0
          end if
          do L = 1, nbndw
             kb = kbndw(1,L)
             if (windmodel.eq.1) then
                zbndw(:,L)=max(e01,Eini) 
             else
-               !if (taper>tiny(0d0)) then
-               !   zbndw(:,L)=e01*min(time0/taper,1.0d0)
-               !else
-                  zbndw(:,L)=e01
-               !endif   
+               if (taper>tiny(0d0)) then
+                  zbndw(:,L)=e01*min(time0/taper,1.0d0)
+               else
+                  zbndw(:,L)=e01   
+               endif
             endif  
             bi(L) = 0.0d0
          end do
@@ -2008,6 +2005,7 @@ subroutine xbeach_instationary()
 
          ! to check: MPI compliancy - okay for xref0, yref0
       elseif (trim(instat)=='bichrom') then
+         theta0=(1.5d0*pi)-dir0*atan(1.d0)/45.d0
          do L = 1, nbndw
             kb = kbndw(1,L)
             zbndw(:,L)=e01*0.5d0 * &
@@ -2015,17 +2013,40 @@ subroutine xbeach_instationary()
                +cos(theta0)*(xbndw(L) - xref0))/Llong))) * &
                min(time0/taper,1.d0)
             if (nbndu .gt. 0) then
+               Lb = kbndw2kbndu(L)
+               ht = max(zbndu(Lb) - max(bob(1,Lb),bob(2,Lb)), epshu)   ! mean depth, not instantaneous
                em = (sum(0.5d0*e01))*dtheta *min(time0/taper,1.d0)
                ei =  sum(zbndw(:,L), dim=1)*dtheta
-               bi(L) = -(2d0*cgwav(kb)/cwav(kb)-0.5d0)*(em-ei)/(cgwav(kb)**2-ag*hs(kb))/rhomean
-               uin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/hs(kb)*cos(theta0)
+               bi(L) = -(2d0*cgwav(kb)/cwav(kb)-0.5d0)*(em-ei)/(cgwav(kb)**2-ag*ht)/rhomean
+               uin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/ht*cos(theta0)
+               vin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/ht*sin(theta0)
             end if
          end do
 
       elseif (trim(instat)=='ts_1') then
+         theta0=(1.5d0*pi)-dir0*atan(1.d0)/45.d0
          do L = 1, nbndw
             kb = kbndw(1,L)
-            call linear_interp(tE,dataE,nt,time0,E1,E_idx)
+            !
+            if (abs(theta0)<1e-3) then
+               call linear_interp(tE,dataE,nt,time0,E1,E_idx)
+            else
+               if (jampi .eq. 0) then
+                  cgwavin = maxval(cgwav(kbndw(1,1:nbndw)))
+               else
+                  if ( nbndw.gt.0 ) then    ! to check for different results for parallel runs
+                     cgwavin = maxval(cgwav(kbndw(1,1:nbndw)))
+                  else
+                     cgwavin = -huge(0d0)
+                  end if
+                  call reduce_double_max(cgwavin)
+               end if
+               !
+               tshifted = max(time0-(ybndw(L)-ybndw(1))*sin(theta0)/cgwav(kbndw(1,1)) &
+                  -(xbndw(L)-xbndw(1))*cos(theta0)/cgwavin,0.d0)
+               call linear_interp(tE,dataE,nt,tshifted,E1,E_idx)
+            endif
+
             if (windmodel .eq. 1) then
                zbndw(:,L)=max(e01*E1/max(Emean,0.000001d0)*min(time0/taper,1.d0),Eini)                
             else 
@@ -2033,14 +2054,20 @@ subroutine xbeach_instationary()
             endif
             
             if (nbndu .gt. 0) then
-               em = Emean *min(time0/taper,1.d0)
+               Lb = kbndw2kbndu(L)
+               ht = max(zbndu(Lb) - min(bob(1,Lb),bob(2,Lb)), epshu)   ! mean depth, not instantaneous
+               em = Emean*min(time0/taper,1.d0)
                ei = sum(zbndw(:,L), dim=1)*dtheta
-               bi(L) = -(2*cgwav(kb)/cwav(kb)-0.5d0)*(em-ei)/(cgwav(kb)**2-ag*hs(kb))/rhomean
-               uin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/hs(kb)*cos(theta0)
+               bi(L) = -(2.0*cgwav(kb)/cwav(kb)-0.5d0)*(em-ei)/(cgwav(kb)**2-ag*ht)/rhomean
+               uin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/ht*cos(theta0)
+               vin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/ht*sin(theta0)
             end if
          end do
 
       elseif (trim(instat)=='ts_2') then
+         ! debug
+         !open(newunit=rmfilno, file='uin.txt', access='append')
+         !\debug
          theta0=(1.5d0*pi)-dir0*atan(1.d0)/45.d0
          do L = 1,nbndw
             kb = kbndw(1,L)
@@ -2063,25 +2090,35 @@ subroutine xbeach_instationary()
                end if
 
                tshifted = max(time0-(ybndw(L)-ybndw(1))*sin(theta0)/cgwav(kbndw(1,1)) &
-                  -(xbndw(L)-xbndw(1))*cos(theta0)/cgwavin,0.d0)
+                            -(xbndw(L)-xbndw(1))*cos(theta0)/cgwavin,0.d0)
                call linear_interp(tE,dataE,nt,tshifted,E1,E_idx)
                call linear_interp(tE,databi,nt,tshifted,bi(L),E_idx)
             endif
 
             zbndw(:,L)=e01*E1/max(Emean,0.000001d0)*min(time0/taper,1.d0)
             if (nbndu .gt. 0) then
+               Lb = kbndw2kbndu(L)
+               ht = max(zbndu(Lb) - min(bob(1,Lb),bob(2,Lb)), epshu)   ! mean depth, not instantaneous
                if (freewave == 1) then
-                  uin(kbndw2kbndu(L)) = sqrt(ag/hs(kb))*bi(L)
+                  uin(kbndw2kbndu(L)) = sqrt(ag/ht)*bi(L)
+                  vin(kbndw2kbndu(L)) = 0d0                      ! for completeness
                else
-                  uin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/hs(kb)*cos(theta0)*min(time0/taper,1.d0)
+                  uin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/ht*cos(theta0)*min(time0/taper,1.d0)
+                  vin(kbndw2kbndu(L)) = cgwav(kb)*bi(L)/ht*sin(theta0)*min(time0/taper,1.d0)
                end if
+               ! debug
+               !write(rmfilno,"(E15.7,I3,2E15.7)") time1, kbndw2kbndu(L), uin(kbndw2kbndu(L)), vin(kbndw2kbndu(L))
+               !\debug   
             end if
+
          end do
+         !close(rmfilno)
       end if
    end if
 
    ! safety on processes included
    if (allocated(uin)) uin   = lwave*(order - 1)*uin
+   if (allocated(vin)) vin   = lwave*(order - 1)*vin
    if (allocated(zbndw)) zbndw = swave*zbndw
 
    ierror = 0
@@ -2175,17 +2212,18 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, kwav
    integer                                          :: ierr, i, k
    double precision, allocatable                    :: hh(:), hr(:), kmr(:), arg(:), kh(:), Hb(:), Qb_advec(:), ka(:), f(:), gam(:), H(:), R(:)
 
-   allocate(hh(1:ndx), hr(1:ndx), kmr(1:ndx), arg(1:ndx), kh(1:ndx), Hb(1:ndx), Qb_advec(1:ndx), ka(1:ndx), f(1:ndx), gam(1:ndx), H(1:ndx), R(1:ndx), stat=ierr)
-   !hh  = 0d0
-   !hr  = 0d0
-   !kmr = 0d0
-   !ka  = 0d0
-   !arg = 0d0
-   !kh  = 0d0
-   !Hb  = 0d0
-   !H   = 0d0
-   !R   = 0d0
-   !Qb_advec = 0d0
+   call realloc(hh,       ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(hr,       ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(kmr,      ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(arg,      ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(kh,       ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(Hb,       ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(Qb_advec, ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(ka,       ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(f,        ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(gam,      ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(H,        ndx, stat=ierr, fill=0d0, keepExisting=.false.)
+   call realloc(R,        ndx, stat=ierr, fill=0d0, keepExisting=.false.)
 
    break = trim(break)
    hh = max(hs, waveps)
@@ -2326,7 +2364,7 @@ subroutine advec_horz(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
    integer                                         :: nwalls
    
    advec = 0d0
-   do L  = 1,lnx                                                           ! upwind (supq) + limited high order (dsq), loop over link
+   do L  = 1,lnx                                                              ! upwind (supq) + limited high order (dsq), loop over link
         k1  = ln(1,L) ; k2 = ln(2,L)                                       ! linker en rechtercelnr geassocieerd aan de links
         velocL = acL(L)*veloc(k1) + (1d0-acL(L))*veloc(k2)
         
@@ -2359,9 +2397,9 @@ subroutine advec_horz(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
                         waku  = quant(itheta,kl1)*sl1 + quant(itheta,kl2)*sl2   ! gewogen gemiddelde upwind waarden
                     endif  
 
-                    sl3  =  slnup(3+ip,L)
-                    cf   =  dtmaxwav*abs(cwuL)*dxi(L)                  
-                    cf   =  half*max( 0d0,1d0-cf )                    
+                    sl3 = slnup(3+ip,L)
+                    cf  =  dtmaxwav*abs(cwuL)*dxi(L)                  
+                    cf  =  half*max( 0d0,1d0-cf )                    
                     ds2  =  quant(itheta,kd) - quant(itheta,k)        ! ds1 = voorlopende slope, ds2 = eigen slope
                     ds1  = (quant(itheta,k)  - waku )*sl3
 
@@ -2383,10 +2421,6 @@ subroutine advec_horz(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
 !  account for outflow at closed boundaries   
    do nwalls=1,mxwalls
      k1 = walls(1,nwalls)
-     
-     if (k1==7420) then
-        continue
-     end if
      
      cs =  walls(8,nwalls) ! outward positive
      sn = -walls(7,nwalls)
@@ -2748,7 +2782,7 @@ subroutine xbeach_spectral_wave_init()
    
    type(filenames), dimension(:), allocatable :: tempspecfiles
 
-   logical, save                             :: bccreated = .false.
+   !logical, save                             :: bccreated = .false.
 
    ierr = 1
 
@@ -3036,16 +3070,6 @@ subroutine xbeach_spectral_wave_init()
                   wavespectrumadministration(ibnd)%wR(i) = 1d0 - wavespectrumadministration(ibnd)%wL(i)
                end if
             end do         ! i
-            
-            !do LL=LL1,LL2
-            !   i = LL-LL1+1
-            !   kkL = wavespectrumadministration(ibnd)%kL(i)
-            !   kkR = wavespectrumadministration(ibnd)%kR(i)
-            !   wwL = wavespectrumadministration(ibnd)%wL(i)
-            !   wwR = wavespectrumadministration(ibnd)%wR(i)
-            !   L = kbndw(3,LL)
-            !   write(6,"(i7, F7.1, 2i5, 2F12.5)") L, yu(L), kkL, kkR, wwL, wwR
-            !end do
             
             deallocate(drL,iperm,kpl)
             deallocate(kL,kR,wL,wR)
@@ -3823,7 +3847,7 @@ subroutine xbeach_inisolver(solver, NDIM, ierror)
 
    solver%lfil  = 3
    solver%alpha = 1d0
-!   solver%tol   = 0.50D-2
+   !solver%tol   = 0.50D-2
    solver%tol   = 0.1d-2
    
    solver%jabcgstab = 1
@@ -4607,10 +4631,10 @@ subroutine xbeach_waves(ierr)
         num = num+1
         call xbeach_instationary()   
         if (jaavgwavquant .eq. 1) then
-           call xbeach_makeaverages(dtmaxwav)          ! time-averaged stats
+           call xbeach_makeaverages(dts)          ! time-averaged stats
         end if
-        wave_tnow = wave_tnow + dtmaxwav
-        call xbeach_wave_maxtimestep()                ! get new wave timestep based on updated wave field
+        wave_tnow = wave_tnow + dts
+        !call xbeach_wave_maxtimestep()                ! get new wave timestep based on updated wave field
       end do
    endif
    
@@ -4630,6 +4654,7 @@ subroutine xbeach_stationary()
    use m_timer
    use m_alloc
    use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb
+   use unstruc_display, only: jaGUI 
    
    implicit none
    
@@ -4650,7 +4675,7 @@ subroutine xbeach_stationary()
    
    integer                        :: ierror, iters
    
-   double precision, parameter    :: dtol=1d0
+   !double precision, parameter    :: dtol=1d0
 
    allocate(hh(1:ndx), Dbottom(1:ndx), ddlok(1:ntheta, 1:ndx), wete(1:ntheta, 1:ndx), drr(1:ntheta,1:ndx), stat = ierr)
    allocate(ustw(1:ndx), uwf(1:ndx), vwf(1:ndx), ustr(1:ndx), stat = ierr)
@@ -4672,6 +4697,7 @@ subroutine xbeach_stationary()
    hh = max(hs, epshs)
      
    call xbeach_wave_compute_celerities()
+   call xbeach_apply_wave_bc()
    
    do iter=1, maxiter
        write(*,*) 'Iteration loop nr: ', iter
@@ -4698,11 +4724,12 @@ subroutine xbeach_stationary()
                          ee1, rr, drr, wci, rhs, solver, nbndw, kbndw(1,:), zbndw, d_relaxfac)
               
        endif
-         
-       key=3
-       call drawnu(key)
+       
+       !if (jaGUI==1) then
+       !   key=3
+       !   call drawnu(key)
+       !endif 
        if ( jampi.eq.1 ) then
-          write(6,*) 'my_rank=', my_rank
           if ( jatimer.eq.1 ) call starttimer(IXBEACH)
           call update_ghosts(ITYPE_Sall, Ntheta, Ndx, ee1, ierr)
           call update_ghosts(ITYPE_Sall, Ntheta, Ndx, rr,  ierr)
@@ -4805,9 +4832,9 @@ subroutine xbeach_stationary()
    !> compute bc for absorbing generating boundary
    subroutine xbeach_absgen_bc()
    use m_sferic
-   use m_xbeach_data, only: cgwav, uin, vin, kbndu2kbndw, cats, Trep, dtmaxwav, uave, vave, maxnumbnds, dlengthrm, umeanrm, vmeanrm, u1rm, windmodel,sigmwav
+   use m_xbeach_data, only: cgwav, uin, vin, kbndu2kbndw, cats, Trep, dtmaxwav, uave, vave, maxnumbnds, dlengthrm, umeanrm, vmeanrm, u1rm, windmodel,sigmwav,absgentype
    use m_flowgeom
-   use m_flow, only: u1, v, s1, hs
+   use m_flow, only: u1, v, s1, hs, s0, u0
    use m_physcoef, only: ag, rhomean
    use m_flowexternalforcings
    use m_alloc
@@ -4815,6 +4842,7 @@ subroutine xbeach_stationary()
    use m_xbeach_errorhandling
    use m_missing
    use m_partitioninfo
+   use m_flowtimes, only: dts, time1
    
    implicit none
    
@@ -4828,16 +4856,22 @@ subroutine xbeach_stationary()
    
    double precision :: uin_loc, vin_loc, hum
    double precision :: factime
+   double precision :: hsk
    
    integer :: n, Lb, L, kb, ki, k1, k2, k3, k4, i, jj
    integer :: NLNX, nw
    
+   ! debug
+   !integer :: lunfil
+
+   !\debug
+   
    ierror = 1
    
    if (windmodel .eq. 0) then
-      factime = 1d0/cats/Trep*dtmaxwav
+      factime = 1d0/cats/Trep*dts
    else
-      factime = 1d0/cats/minval(sigmwav)/2d0/pi*dtmaxwav       
+      factime = 1d0/cats/minval(sigmwav)/2d0/pi*dts       
    endif
       
 !  compute boundary-averaged velocities
@@ -4847,24 +4881,24 @@ subroutine xbeach_stationary()
    dlengthrm = 0d0
    
    do n=1,nbndu      
-      if ( kbndu(4,n).eq. 5 ) then
+      if ( kbndu(4,n) .eq. 5 ) then
          Lb = kbndu(3,n)
          numbnd = kbndu(5,n)
-         !if ( numbnd.gt.maxnumbnds ) then
-         !   maxnumbnds = max(int(1.2d0*numbnd),maxnumbnds+1)
-         !   ! 
-         !   if (jampi==1) then
-         !      idum(1) = maxnumbnds
-         !      call reduce_int_max(1,idum)
-         !      maxnumbnds=idum(1)
-         !   end if
-         !   !
-         !   call realloc(uave, maxnumbnds, keepExisting=.true., fill=0d0)
-         !   call realloc(vave, maxnumbnds, keepExisting=.true., fill=0d0)
-         !   call realloc(dlengthrm, maxnumbnds, keepExisting=.true., fill=0d0)
-         !   call realloc(umeanrm, maxnumbnds, keepExisting=.true., fill=0d0)
-         !   call realloc(vmeanrm, maxnumbnds, keepExisting=.true., fill=0d0)
-         !end if
+         if ( numbnd.gt.maxnumbnds ) then
+            maxnumbnds = max(int(1.2d0*numbnd),maxnumbnds+1)
+            ! 
+            if (jampi==1) then
+               idum(1) = maxnumbnds
+               call reduce_int_max(1,idum)
+               maxnumbnds=idum(1)
+            end if
+            !
+            call realloc(uave, maxnumbnds, keepExisting=.true., fill=0d0)
+            call realloc(vave, maxnumbnds, keepExisting=.true., fill=0d0)
+            call realloc(dlengthrm, maxnumbnds, keepExisting=.true., fill=0d0)
+            call realloc(umeanrm, maxnumbnds, keepExisting=.true., fill=0d0)
+            call realloc(vmeanrm, maxnumbnds, keepExisting=.true., fill=0d0)
+         end if
          ! 
          if (jampi==0) then
             uave(numbnd) = uave(numbnd) + wu(Lb)*u1rm(n)
@@ -4895,13 +4929,16 @@ subroutine xbeach_stationary()
       end if
    end if
    
-   if (nubnd .gt. 0) then
+   if (nubnd .gt. 0) then       
       uave = uave/max(dlengthrm,1d-16)
       vave = vave/max(dlengthrm,1d-16)
       umeanrm = factime*uave + (1d0-factime)*umeanrm
       vmeanrm = factime*vave + (1d0-factime)*vmeanrm
    end if
    
+   !debug
+   !open(newunit=lunfil,file='absgen1d.txt',access='append')
+   !\debug
    do n=1,nbndu
       if ( kbndu(4,n).eq. 5 ) then  ! absgen boundary
          kb     = kbndu(1,n)
@@ -4927,15 +4964,29 @@ subroutine xbeach_stationary()
             call xbeach_errorhandler()
          end if
 
-         ! zbndu for absgen bc is a water level
-         u1(Lb) = (1d0+sqrt(ag*hs(ki))/cgwav(ki))*uin_loc - sqrt(ag/hs(ki))*(s1(ki) - zbndu(n)) + umeanrm(numbnd)
-         s1(kb) = s1(ki)
-                  
-         u1rm(n) = u1(Lb)
-         !v1rm(Lb) = v(Lb)
+         if (trim(absgentype)=='abs_1d') then
+            ! zbndu for absgen bc is slowly varying tide+surge water level
+            hsk = s1(ki) - bl(ki)
+            !hsk = zbndu(n) - bl(ki)
+            !u1(Lb) = (1d0+sqrt(ag*hs(ki))/cgwav(ki))*uin_loc - sqrt(ag/hs(ki))*(s0(ki) - zbndu(n)) + umeanrm(numbnd)
+            u1(Lb) = (1d0+sqrt(ag*hsk)/cgwav(ki))*uin_loc - sqrt(ag/hsk)*(s1(ki) - zbndu(n)) + umeanrm(numbnd)
+            s0(kb) = s0(ki)
+            s1(kb) = s1(ki)
+
+            u1rm(n) = u1(Lb)
+            !v1rm(Lb) = v(Lb)
+            !write(lunfil,"(E15.7,I5,6E15.7)") time1, nw, factime, u1(Lb), s1(kb), (1d0+sqrt(ag*hsk)/cgwav(ki))*uin_loc,  sqrt(ag/hsk)*(s1(ki)), umeanrm(numbnd) 
+         endif
+         
+         if (trim(absgentype)=='abs_2d') then
+            ! todo
+         endif
          
       end if   ! riemannpuntje
    end do ! loop snelheidslinks
+   ! debug
+   !close(lunfil)
+   !\debug
    
    ierror = 0
    
@@ -5115,9 +5166,11 @@ subroutine xbeach_stationary()
 !
 !         Fn      = csu(Lb) * Fx(Lb) + snu(Lb) * Fy(Lb)   ! 1-2 direction (inward positive)
 !         !           compute bed friction
-!         Ftau    =  cfuhi(Lb) * sqrt(u1(Lb)**2+v(Lb)**2) * ( u1(Lb)-ust(Lb) )  ! formally, not exactly correct, since we also need u1L (see furu)
-!
-!         c = sqrt(ag*hu(Lb))
+!         Ftau    =  cfuhi(Lb) * sqrt(u1(Lb)**2+v(Lb)**2) * ( u1(Lb)-ust(Lb) )  ! formally, not exactly correct, since we also need u1L (see furu). JRE: but we can use u1rm old timelevel
+!         !
+          ! to add: wind Fwind
+   
+!         c = sqrt(ag*hu(Lb))  ! to check, only outgoing free wave?
 !
 !         if ( abs(hu(Lb)).lt.1d-6 ) then
 !            goto 1234
@@ -5761,7 +5814,7 @@ subroutine borecharacter()
    dist0=0d0   
    windspreadfac=0d0
    
-   do L = 1, lnx                                         ! interpolate face values to cell centered values 
+   do L = 1, lnx                                                              ! interpolate face values to cell centered values 
       k1 = ln(1,L); k2 = ln(2,L)
       wxcc(k1) = wxcc(k1) + wcl(1,L)*wx(L)
       wxcc(k2) = wxcc(k2) + wcl(2,L)*wx(L)
@@ -5811,7 +5864,7 @@ subroutine borecharacter()
    double precision, dimension(ntheta, ndx), intent(in) :: ee1              !<   wave energy/rad 
    double precision, dimension(ndx)        , intent(in) :: E                !<   nodal wave energy
    double precision, dimension(ntheta, ndx), intent(in) :: tt1              !<   wave period in directional bin
-   double precision, dimension(ndx)        , intent(in) :: sigmwav          !<   nodal wave period
+   double precision, dimension(ndx)        , intent(in) :: sigmwav             !<   nodal wave period
    double precision, dimension(ntheta, ndx), intent(in) :: cgwavt           !<   group celerity per bin
    double precision, dimension(ndx)        , intent(in) :: cgwav            !<   nodal group celerity
    double precision, dimension(ndx)        , intent(in) :: hh               !<   water depth
@@ -5993,7 +6046,7 @@ subroutine xbeach_wave_period_breaker_dissipation( Df, E, sigmwav, cgwav, kwav, 
    double precision, dimension(ndx)        , intent(out) :: DtotT
    
    DtotT = - coefdispT * tanh(coefdispk * kwav) * 1.d0 /(1.d0 -ndissip) * (twopi) / sigmwav / sigmwav * cgwav * kwav / E * Df              
-   
+      
 1234 continue 
    return
    
@@ -6025,7 +6078,7 @@ subroutine xbeach_wave_compute_period_depth_limitation(E, Tmaxdep )
    deallocate(Edls, Tdls, stat=ierr)  
    return   
  end subroutine xbeach_wave_compute_period_depth_limitation 
-   
+     
    
  subroutine advec_horz_windmodel(dtmaxwav, snx, csx, limtypw, quant, veloc, advec)
    use m_sferic
