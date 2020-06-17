@@ -808,7 +808,7 @@
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
    use m_flowgeom, only: ndxi, bl, kfs, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, xz, yz, xu, yu, wu, wu_mor
    use m_flow, only: s0, s1, u1, u0, v, ucx, ucy, kbot, ktop, kmx, kmxn, plotlin, sa1, tem1, zws, hs, ucxq, ucyq, layertype, &
-      iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, q1, frcu_mor
+      iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, q1, frcu_mor, au
    use m_flowtimes, only: julrefdat, dts, time1
    use unstruc_files, only: mdia
    use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
@@ -2045,7 +2045,7 @@
             !
             if (u1(L)*Ldir < 0d0) then
                ! Outgoing discharge
-               qb1d = -q1(L)*Ldir  ! replace with junction advection: to do WO
+               qb1d = -u1(L)*au(L)*Ldir  ! replace with junction advection: to do WO
                width_out(inod) = width_out(inod) + wb1d
                qb_out(inod)    = qb_out(inod) + qb1d
                do ised = 1, lsedtot
@@ -2110,7 +2110,7 @@
             do j=1,nd(k3)%lnx
                L = iabs(nd(k3)%ln(j))
                Ldir = sign(1,nd(k3)%ln(j))
-               qb1d = -Ldir*q1(L)
+               qb1d = -u1(L)*au(L)*Ldir
                wb1d = wu_mor(L)
 
                ! Get Nodal Point Relation Data
