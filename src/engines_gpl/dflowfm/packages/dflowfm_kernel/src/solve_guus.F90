@@ -1473,7 +1473,7 @@ subroutine conjugategradient_omp(s1,ndx,ipre)
     do m=L1row(ndn), L2row(ndn)              
       d0(ndn)=d0(ndn)-ccr(iarow(m))*s1(jrow(m))         
     enddo
-    
+    ! JRE
     s1(ndn)=d0(ndn)
  enddo
  
@@ -1910,6 +1910,7 @@ subroutine conjugategradient_MPI(s1,ndx,ipre,nocgiter_loc,ierror)
 ! END MPI
  use m_timer
  use MessageHandling
+ use m_flowparameters, only: jalogsolverconvergence
 
  implicit none
  integer          :: ndx, ipre
@@ -2025,13 +2026,16 @@ subroutine conjugategradient_MPI(s1,ndx,ipre,nocgiter_loc,ierror)
  eps = eps_tmp
  ! END MPI
 
- if (eps.lt.epscg ) then
-   if ( my_rank.eq.0 ) then
-      write(message,*) 'Solver converged in ', nocgiter_loc,' iterations'
-      call mess(LEVEL_INFO, message)
-   end if
-   return 
- endif
+
+    if (eps.lt.epscg ) then
+       if ( my_rank.eq.0 ) then
+          if (jalogsolverconvergence .eq. 1) then 
+             write(message,*) 'Solver converged in ', nocgiter_loc,' iterations'
+             call mess(LEVEL_INFO, message)
+          end if
+       endif
+       return
+    endif
 
 
  10    CONTINUE
@@ -2170,13 +2174,18 @@ subroutine conjugategradient_MPI(s1,ndx,ipre,nocgiter_loc,ierror)
       zkr = 0d0
    end if
  endif
+ 
+
  if (eps.lt.epscg) then
-   if ( my_rank.eq.0 ) then
-      write(message,*) 'Solver converged in ', nocgiter_loc,' iterations'
-      call mess(LEVEL_INFO, message)
-   end if
-   return
+    if ( my_rank.eq.0 ) then
+       if (jalogsolverconvergence .eq. 1) then
+          write(message,*) 'Solver converged in ', nocgiter_loc,' iterations'
+          call mess(LEVEL_INFO, message)
+       end if
+    endif
+    return
  endif
+
  nocgiter_loc=nocgiter_loc+1
  
  ! MPI
@@ -2419,6 +2428,7 @@ integer :: mout, n, i, jj, j, ntot
     use unstruc_messages
     use m_timer
     use network_data, only: xzw
+    use m_flowparameters, only: jalogsolverconvergence
     use mpi
     implicit none
     
@@ -2711,9 +2721,11 @@ integer :: mout, n, i, jj, j, ntot
     end do
     
     if ( my_rank.eq.0 ) then
-       write(message,"('Solver converged in ', I0, ' (', I0, ') iterations')" ) nocgiter, iter
-       call mess(LEVEL_INFO, message)
-    end if
+       if (jalogsolverconvergence .eq. 1) then 
+          write(message,"('Solver converged in ', I0, ' (', I0, ') iterations')" ) nocgiter, iter
+          call mess(LEVEL_INFO, message)
+       end if
+    endif
     
    
 1234 continue

@@ -745,6 +745,7 @@ end module m_petsc
       use m_flowgeom, only: kfs
       use m_flowtimes, only: dts ! for logging
       use MessageHandling
+      use m_flowparameters, only: jalogsolverconvergence
 
       implicit none
 
@@ -822,11 +823,14 @@ end module m_petsc
 !            see http://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/KSP/KSPConvergedReason.html for reason
          else 
             call KSPGetIterationNumber(Solver, its, ierr)
-!           compute residual
+            !           compute residual
             call KSPGetResidualNorm(Solver, rnorm, ierr)
+            !
             if (ierr == PETSC_OK .and. my_rank == 0) then
-               write(message,'(a,i0,a,g11.4,a,f8.4)') 'Solver converged in ', its,' iterations, res=', rnorm, ' dt = ', dts
-               call mess(LEVEL_INFO, message)
+               if (jalogsolverconvergence .eq. 1) then
+                  write(message,'(a,i0,a,g11.4,a,f8.4)') 'Solver converged in ', its,' iterations, res=', rnorm, ' dt = ', dts
+                  call mess(LEVEL_INFO, message)
+               end if
             end if
             jasucces = 1
          end if
