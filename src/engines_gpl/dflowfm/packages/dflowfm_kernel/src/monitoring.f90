@@ -97,6 +97,8 @@ implicit none
     integer                           :: IVAL_UCZ
     integer                           :: IVAL_UCXQ
     integer                           :: IVAL_UCYQ
+    integer                           :: IVAL_UCXST
+    integer                           :: IVAL_UCYST
     integer                           :: IVAL_SA1
     integer                           :: IVAL_TEM1
     integer                           :: IVAL_TRA1
@@ -175,6 +177,8 @@ implicit none
     integer                           :: IPNT_UCZ
     integer                           :: IPNT_UCXQ
     integer                           :: IPNT_UCYQ
+    integer                           :: IPNT_UCXST
+    integer                           :: IPNT_UCYST
     integer                           :: IPNT_SA1
     integer                           :: IPNT_TEM1
     integer                           :: IPNT_TRA1
@@ -365,7 +369,10 @@ subroutine init_valobs_pointers()
    IVAL_SOUR1      = 0
    IVAL_SOURN      = 0
    IVAL_SINK1      = 0
-   IVAL_SINKN      = 0   
+   IVAL_SINKN      = 0
+   IVAL_UCXST      = 0
+   IVAL_UCYST      = 0
+   
 !  2D
    i=0
    i0=i;
@@ -457,6 +464,10 @@ subroutine init_valobs_pointers()
       i=i+1;            IVAL_UCXQ       = i
       i=i+1;            IVAL_UCYQ       = i
    end if
+   if (jawave .gt. 0) then
+      i=i+1;            IVAL_UCXST      = i
+      i=i+1;            IVAL_UCYST      = i
+   endif
    if ( jasal.gt.0 ) then
       i=i+1;            IVAL_SA1        = i
    end if
@@ -521,6 +532,8 @@ subroutine init_valobs_pointers()
    IPNT_UCZ   = ivalpoint(IVAL_UCZ,   kmx)   
    IPNT_UCXQ  = ivalpoint(IVAL_UCXQ,  kmx)   
    IPNT_UCYQ  = ivalpoint(IVAL_UCYQ,  kmx)   
+   IPNT_UCXST  = ivalpoint(IVAL_UCXST,kmx)   
+   IPNT_UCYST  = ivalpoint(IVAL_UCYST,kmx)   
    IPNT_SA1   = ivalpoint(IVAL_SA1,   kmx)
    IPNT_TEM1  = ivalpoint(IVAL_TEM1,  kmx)
    IPNT_TRA1  = ivalpoint(IVAL_TRA1,  kmx)
@@ -574,6 +587,8 @@ subroutine init_valobs_pointers()
       IPNT_SSWXN = ivalpoint(IVAL_SSWXN,   kmx)
       IPNT_SSWY1 = ivalpoint(IVAL_SSWY1,   kmx)
       IPNT_SSWYN = ivalpoint(IVAL_SSWYN,   kmx)
+      IPNT_UCXST = ivalpoint(IVAL_UCXST,   kmx)
+      IPNT_UCYST = ivalpoint(IVAL_UCYST,   kmx)
    endif
    
    IPNT_TAIR  = ivalpoint(IVAL_TAIR,  kmx)
@@ -945,7 +960,7 @@ subroutine loadObservations(filename, jadoorladen)
             call deleteObservations()
         end if
 
-        tok = index(filename, '.xyn')
+        tok = index(filename, '.xy')
         if (tok > 0) then
            call loadObservations_from_xyn(filename)
         else

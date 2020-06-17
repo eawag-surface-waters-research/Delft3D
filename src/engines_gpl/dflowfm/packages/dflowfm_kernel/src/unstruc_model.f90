@@ -1126,6 +1126,8 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Numlimdt_baorg'  , Numlimdt_baorg)
     call prop_get_double (md_ptr, 'numerics', 'Baorgfracmin'    , Baorgfracmin)
+    
+    call prop_get_integer(md_ptr, 'numerics', 'LogSolverConvergence', jalogsolverconvergence)
 
     ! Physics
     call prop_get_double (md_ptr, 'physics', 'UnifFrictCoef'  , frcuni)
@@ -1239,12 +1241,11 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'sediment', 'BndTreatment',         jabndtreatment, success)           ! separate treatment boundary links in upwinding transports
     call prop_get_integer(md_ptr, 'sediment', 'TransVelOutput',       jasedtranspveldebug, success)      ! write sed adv velocities to output ugrid file
     call prop_get_integer(md_ptr, 'sediment', 'SourSink',             jasourcesink, success)             ! switch off source or sink terms for sed advection
-    call prop_get_string (md_ptr, 'sediment', 'MorphoPol',            md_morphopol, success)             ! Only apply mormerge operation/bottom change in polygon
-
-    call prop_get_integer(md_ptr, 'sediment', 'UpdateS1',             jaupdates1, success )              ! update s1 when updating bottom (1) or not (0, default)
+    call prop_get_string (md_ptr, 'sediment', 'MorphoPol',            md_morphopol, success)             ! Only apply mormerge operation/bottom change in polygon 
     call prop_get_integer(md_ptr, 'sediment', 'MorCFL',               jamorcfl, success )                ! use morphological time step restriction (1, default) or not (0)
     call prop_get_double (md_ptr, 'sediment', 'DzbDtMax',             dzbdtmax, success)                 ! Max bottom level change per timestep
-
+    call prop_get_double (md_ptr, 'sediment', 'MasBalMinDep',         botcrit, success)                  ! Minimum depth *after* bottom update for SSC adaptation mass balance
+    
     call prop_get_integer(md_ptr, 'sediment', 'Nr_of_sedfractions' ,  Mxgr)
     call prop_get_integer(md_ptr, 'sediment', 'MxgrKrone'          ,  MxgrKrone)
     call prop_get_integer(md_ptr, 'sediment', 'Seddenscoupling'    ,  jaseddenscoupling)
@@ -1359,7 +1360,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'waves', 'jamapsigwav'         , jamapsigwav)     ! 1: sign wave height on map output; 0: hrms wave height on map output. Default=0 (legacy)
     call prop_get_integer(md_ptr, 'waves', 'jauorbfromswan'      , jauorbfromswan)  ! 1: use orbital velocities from com file; 0=internal uorb calculation
     call prop_get_double (md_ptr, 'waves', 'ftauw'               , ftauw)           ! factor for adjusting wave-related bed shear stress, default 1.0
-
+    call prop_get_integer(md_ptr, 'waves', '3Dstokesprofile'     , jawaveStokes)    ! Stokes profile. 0: no, 1:uniform over depth, 2: 2nd order Stokes theory; 3: 2, with vertical stokes gradient in adve 
+    call prop_get_integer(md_ptr, 'waves', '3Dwavestreaming'     , jawavestreaming) ! Influence of wave streaming. 0: no, 1: added to adve, 2: added to adve+turb (2 not used now)
+    
     call prop_get_integer(md_ptr, 'grw'  , 'groundwater'        , jagrw)
 
     call prop_get_integer(md_ptr, 'grw'  , 'Infiltrationmodel'  , Infiltrationmodel)
@@ -2582,10 +2585,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'numerics', 'Icoriolistype', icorio,    '0=No, 5=default, 3,4 no weights, 5-10 Kleptsova hu/hs, 25-30 Ham hs/hu, odd: 2D hs/hu, even: hsk/huk ')
     call prop_set(prop_ptr, 'numerics', 'Newcorio',      newcorio,  '0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants )')
     if (Corioadamsbashfordfac .ne. 0) then
-    call prop_set(prop_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac,    '0=No, 0.5d0=AdamsBashford, only for Newcorio=1)')
+       call prop_set(prop_ptr, 'numerics', 'Corioadamsbashfordfac', Corioadamsbashfordfac,    '0=No, 0.5d0=AdamsBashford, only for Newcorio=1)')
     endif
     if (hhtrshcor>0) then
-    call prop_set(prop_ptr, 'numerics', 'Coriohhtrsh', hhtrshcor,    '0=default=no safety in hu/hus weightings, only for Newcorio=1)')
+       call prop_set(prop_ptr, 'numerics', 'Coriohhtrsh', hhtrshcor,    '0=default=no safety in hu/hus weightings, only for Newcorio=1)')
     endif ! change hhtrshcor to Coriohhtrsh
 
 !   call prop_set_integer(prop_ptr, 'numerics', 'numoverlap', numoverlap, ' ')
@@ -2948,14 +2951,15 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'sediment', 'SedFile'    , trim(md_sedfile), 'Sediment characteristics file (*.sed)')
           call prop_set(prop_ptr, 'sediment', 'MorFile'    , trim(md_morfile), 'Morphology settings file (*.mor)')
           call prop_set(prop_ptr, 'sediment', 'DredgeFile'    , trim(md_dredgefile), 'Dredging/dumping settings file (*.dad)')
-          call prop_set(prop_ptr, 'sediment', 'TransportVelocity', jatranspvel, 'Velocities for sediment transport, 0=Lagr bed+sus, 1=Eul bed + Lagr sus, 2=Eul bed+sus')
+          call prop_set(prop_ptr, 'sediment', 'MorCFL'    , jamorcfl, 'Use morphological time step restriction (0=no, 1=yes)') 
+          call prop_set(prop_ptr, 'sediment', 'DzbDtMax'    , dzbdtmax, 'Maximum allowed total bottom level change per timestep when MorCFL=1 [m]') 
           call prop_set(prop_ptr, 'sediment', 'MorCFL'    , jamorcfl, 'Use CFL condition for morphologic updating 1=true, 0=false (default)')
           call prop_set(prop_ptr, 'sediment', 'DzbDtMax', dzbdtmax, 'Maximum bed level change (m) per time step for the case MorCFL=1 (default=0.1 m)')
        end if
        if (jased .ne. 4) then
           call prop_set(prop_ptr, 'sediment', 'Nr_of_sedfractions' ,  mxgr , 'Nr of sediment fractions, (specify the next parameters for each fraction) ')
           call prop_set(prop_ptr, 'sediment', 'MxgrKrone'  ,  MxgrKrone    , 'Highest fraction index treated by Krone ')
-          call prop_set(prop_ptr, 'sediment', 'Seddenscoupling',  jaseddenscoupling     , 'Sed rho coupling (0=no, 1 =yes')
+          call prop_set(prop_ptr, 'sediment', 'Seddenscoupling',  jaseddenscoupling     , 'Sed rho coupling (0=no, 1=yes')
           if (Mxgr > 0) then
 
              call prop_set(prop_ptr, 'sediment', 'D50'       ,              D50,   'Mean Sandgrain diameter (m), e.g. 0.0001')

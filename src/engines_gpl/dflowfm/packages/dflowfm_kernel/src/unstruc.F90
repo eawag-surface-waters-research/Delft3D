@@ -1146,7 +1146,7 @@ if(q /= 0) then
  subroutine step_reduce(key)                         ! do a flow timestep dts guus, reduce once, then elimin conjugate grad substi
  use m_flow                                          ! when entering this subroutine, s1=s0, u1=u0, etc
  use m_flowgeom
- use m_sediment, only: stm_included
+ use m_sediment, only: stm_included, stmpar
  use m_flowtimes
  use m_sferic
  use m_wind
@@ -1158,8 +1158,8 @@ if(q /= 0) then
  use MessageHandling
  use m_sobekdfm
  use unstruc_display
- use m_waves, only: hwav, twav, phiwav, rlabda, ustokes, uorb
-
+ use m_waves, only: hwav, twav, phiwav, rlabda, ustokes, vstokes, uorb, taubxu
+  
  implicit none
 
  integer :: ndraw
@@ -1170,7 +1170,7 @@ if(q /= 0) then
  character (len=40) :: tex
  logical            :: firstnniteration
  double precision   :: wave_tnow, wave_tstop, t0, t1, dif, difmaxlevm
- double precision   :: hw,tw, uorbi,rkw,ustt,hh,cs,sn
+ double precision   :: hw,tw, uorbi,rkw,ustt,hh,cs,sn,thresh
 
  character(len=128) :: msg
 
@@ -1200,9 +1200,9 @@ if(q /= 0) then
 
 !-----------------------------------------------------------------------------------------------
  hs = max(hs,0d0)
- call furu()                                            ! staat in s0
+ call furu()                                             ! staat in s0
 
- if ( itstep.ne.4 ) then                                ! implicit time-step
+ if ( itstep.ne.4 ) then                                 ! implicit time-step
 
    222 if (nonlin == 2 .or. (nonlin ==3 .and. .not. firstnniteration)) then                               ! only for pressurised
        ! Nested newton iteration, start with s1m at bed level.
@@ -1232,7 +1232,7 @@ if(q /= 0) then
        itype = merge(ITYPE_SALL, ITYPE_Snonoverlap, jaoverlap == 0)
        call update_ghosts(itype, 1, Ndx, s1, ierror)
        if ( jatimer == 1 ) call stoptimer(IUPDSALL)
-       end if
+    end if
 
     if (firstnniteration .and. nonlin1D >=3) then
        ! At first try only check for positive water depths only
@@ -1376,23 +1376,14 @@ if(q /= 0) then
  hs = s1-bl
  hs = max(hs,0d0)
 
- ! JRE: moved update of SWAN derived quantities here
  if (jawave==3) then
     if( kmx == 0 ) then
        call wave_comp_stokes_velocities()
-       call wave_uorbrlabda()                       ! hwav gets depth-limited here
+       call wave_uorbrlabda()                                          ! hwav gets depth-limited here
        call tauwave()
-       if ( jaGUI.eq.1 ) then                                          ! this part is for online visualisation
-          if (ntek > 0) then
-             if (mod(int(dnt_user),ntek) .eq. 0) then
-                call wave_makeplotvars()                                ! Potentially only at ntek interval
-             end if
-          endif
-       endif
-       ! wavfu: wave force at links, to be used in the advection equation
-       call setwavfu()
-       call setwavmubnd()
     end if
+    call setwavfu()
+    call setwavmubnd()
  end if
  if (jawave.eq.4 .and. jajre.eq.1) then
     if (swave.eq.1 ) then
@@ -1418,6 +1409,7 @@ if(q /= 0) then
           sn = 0.5*(sin(phiwav(k1)*dg2rd)+sin(phiwav(k2)*dg2rd))
           call tauwavehk(hw, tw, hh, uorbi, rkw, ustt)
           ustokes(L) = ustt*(csu(L)*cs + snu(L)*sn)
+          vstokes(L) = ustt*(-snu(L)*cs + csu(L)*sn)
        enddo
        do k=1,ndx
           call tauwavehk(hwav(k), twav(k), hs(k), uorbi, rkw, ustt)
@@ -1429,6 +1421,10 @@ if(q /= 0) then
 
  if (jased > 0 .and. stm_included) then
     if ( jatimer.eq.1 ) call starttimer(IEROSED)
+    if (jawave==0) then
+       call settaubxu_nowave()  ! set taubxu for no wave conditions BEFORE erosed
+    endif
+    !
     call fm_fallve()                   ! update fall velocities
     call fm_erosed()                   ! source/sink, bedload/total load
     if ( jatimer.eq.1 ) call stoptimer(IEROSED)
@@ -3709,7 +3705,7 @@ subroutine setdt()
    use m_timer
    use unstruc_display,  only: jaGUI
    use m_sediment,       only: jased, stm_included, stmpar, jamorcfl
-   implicit none
+   implicit none                                                          
 
    double precision :: dtsc_loc
    double precision :: dim_real
@@ -3745,7 +3741,7 @@ subroutine setdt()
       endif
    end if
 
-   if (jased .eq. 4 .and. stm_included) then
+   if (jased.eq.4 .and. stm_included) then
      call setdtmaxavalan(dts)
    end if
 
@@ -3779,7 +3775,7 @@ subroutine setdt()
           !else
           ! NOTE: when the model has an extremely small timestep, nsteps gets an integer overflow,
           ! then becomes negative, so the max below sets nsteps=1, violating the dtmax requirement. (UNST-1926)
-             nsteps = max(1,ceiling((time_user-time0) / dts ) )
+             nsteps = max(1,ceiling((time_user-time0) / dts))
              dts = ( time_user-time0 ) / dble(nsteps)
           !end if
       endif
@@ -5528,43 +5524,40 @@ if (jawind > 0) then
 
  endif
 
- if (jawave == 3 .and. kmx .eq. 0) then      ! if a SWAN computation is performed, add wave forces to adve
-                                             ! This part is mainly based on the wave forces formulation (wsu) of Delft3D (cucnp.f90)
-
-     !if ( kmx.eq.0 ) then  ! 2D
-     !$OMP PARALLEL DO                                          &
-     !$OMP PRIVATE(L)
-     do L  = 1,lnx
-        adve(L) = adve(L) - wavfu(L)
-     enddo
-     !$OMP END PARALLEL DO
-     !else
-     !!$OMP PARALLEL DO                                          &
-     !!$OMP PRIVATE(L)
-     !   do LL  = 1,lnx
-     !      !if ( hu(LL).gt.0 ) then ! need to check
-     !         call LbotLtop(LL,Lb,Lt)
-     !         do L=Lb,Lt
-     !             adve(L) = adve(L) - wavfu(L)/(rhomean*hu(L))           ! Dimensions [m/s^2]
-     !         end do
-     !      !end if
-     !   enddo
-     !!$OMP END PARALLEL DO
-     !end if
-
+ if (jawave == 3) then      ! if a SWAN computation is performed, add wave forces to adve
+    !    
+    if ( kmx.eq.0 ) then  ! 2D
+       !$OMP PARALLEL DO                                          &
+       !$OMP PRIVATE(L)
+       do L  = 1,lnx
+          adve(L) = adve(L) - wavfu(L)
+       enddo
+       !$OMP END PARALLEL DO
+    else
+       !$OMP PARALLEL DO                                          &
+       !$OMP PRIVATE(LL, Lb, Lt)
+       do LL  = 1,lnx
+          call getLbotLtop(LL,Lb,Lt)
+          do L=Lb,Lt
+             adve(L) = adve(L) - wavfu(L)           ! Dimensions [m/s^2]
+          end do
+       enddo
+    !$OMP END PARALLEL DO
+    end if
  endif
 
 ! JRE
- if (jawave .eq. 4 .and. Lwave.eq.1) then                              ! wave forcing from XBeach
-     call xbeach_wave_compute_flow_forcing()
-     !$OMP PARALLEL DO                                          &
-     !$OMP PRIVATE(L)
-     do L  = 1,Lnx
-        floc = Fx(L)*csu(L) + Fy(L)*snu(L)
-        adve(L) = adve(L) - floc/ (rhomean*max(hu(L), hminlw) ) ! Johan+Dano: lower depth set to 20cm, cf XBeach
-     enddo
-     !$OMP END PARALLEL DO
-
+ if (jawave .eq. 4) then                              ! wave forcing from XBeach
+    call xbeach_wave_compute_flow_forcing()
+    if (lwave==1)  then
+      !! !$OMP PARALLEL DO                                          &
+      !! !$OMP PRIVATE(L, floc)
+       do L  = 1,Lnx
+          floc = Fx(L)*csu(L) + Fy(L)*snu(L)
+          adve(L) = adve(L) - floc/ (rhomean*max(hu(L), hminlw) )    ! Johan+Dano: lower depth set to 20cm, cf XBeach
+       enddo
+      !! !$OMP END PARALLEL DO
+    endif
  endif
 
  if (japatm > 0 .or. jatidep > 0) then
@@ -6778,6 +6771,14 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
                 ucyq(kbk) = ucyq(k2k)
              end if
           end if
+
+          !if (jased > 0 .and. stm_included) then   ! similar as 2D, JRE to check
+          !   dischcorrection = hs(k2) / hs(kb)
+          !   !ucx(kb)  = ucx(kb)  * dischcorrection
+          !   !ucy(kb)  = ucy(kb)  * dischcorrection
+          !   ucxq(kbk) = ucxq(kbk) * dischcorrection
+          !   ucyq(kbk) = ucyq(kbk) * dischcorrection
+          !endif
        enddo
     endif
  enddo
@@ -9493,6 +9494,49 @@ end subroutine getucmag
  endif
  end subroutine linkstocenterstwodoubles2
 
+ subroutine linkstocentercartcomp(vnod,vlin) 
+ use m_flow
+ use m_netw
+ use m_flowgeom
+
+ implicit none
+
+ double precision, intent(in)       :: vlin(lnkx)
+ double precision, intent(out)      :: vnod(2,ndkx)
+ integer                :: L, k1, k2, LL, Lb, Lt, kk, kb, kt, k
+
+ vnod = 0d0
+ if (kmx == 0) then
+    do L   = 1,lnx
+       k1  = ln  (1,L) ; k2 = ln  (2,L)
+       vnod(1,k1) = vnod(1,k1) + vlin (L)*wcx1(L)
+       vnod(1,k2) = vnod(1,k2) + vlin (L)*wcx2(L)
+       vnod(2,k1) = vnod(2,k1) + vlin (L)*wcy1(L)
+       vnod(2,k2) = vnod(2,k2) + vlin (L)*wcy2(L)
+    enddo
+ else
+    do LL  = 1,lnx
+       call getLbotLtop(LL,Lb,Lt)
+       do L = Lb,Lt
+          k1  = ln  (1,L) ; k2 = ln  (2,L)
+          vnod(1,k1) = vnod(1,k1) + vlin (L)*wcx1(LL)
+          vnod(1,k2) = vnod(1,k2) + vlin (L)*wcx2(LL)
+          vnod(2,k1) = vnod(2,k1) + vlin (L)*wcy1(LL)
+          vnod(2,k2) = vnod(2,k2) + vlin (L)*wcy2(LL)
+       enddo
+    enddo
+
+    do kk = 1,ndx
+       call getkbotktop(kk,kb,kt)
+       do k = kt+1, kb+kmxn(kk)-1
+          vnod(1,k) = vnod(1,kt)
+          vnod(2,k) = vnod(2,kt)
+       enddo
+    enddo
+
+ endif
+ end subroutine linkstocentercartcomp
+ 
  subroutine setcentertolinkorientations()
     use m_flowgeom
     use network_data, only: xk, yk
@@ -10743,7 +10787,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_vegetation
  use m_hydrology, only: jadhyd, init_hydrology
  use m_integralstats
- use m_xbeach_data, only: instat, newstatbc
+ use m_xbeach_data, only: instat, newstatbc, bccreated
  use m_oned_functions
  use unstruc_display, only : ntek, jaGUI
  use m_alloc
@@ -10806,6 +10850,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 ! JRE
  call timstrt('Xbeach input init', handle_extra(2)) ! Wave input
  if (jawave == 4) then
+    bccreated = .false.       ! for reinit
     call xbeach_wave_input()  ! will set swave and lwave
  endif
  call timstop(handle_extra(2)) ! End wave input
@@ -11216,10 +11261,9 @@ subroutine flow_sedmorinit()
     character(20) , dimension(:), allocatable :: nambnd        !   TO DO nambnd: needed for morphological bc
     character     , dimension(200)            :: mes
     character(40)                             :: errstr
-   !type(griddimtype) :: griddim
-    type (bedbndtype)     , dimension(:) , pointer :: morbnd
+    type (bedbndtype), dimension(:) , pointer :: morbnd
     integer                                   :: kk, k, kbot, ktop, i, j, isus, ifrac, isusmud, isussand, isf, ised, Lf, npnt, j0, ierr
-    integer                                   :: ibr, nbr, pointscount, k1
+    integer                                   :: ibr, nbr, pointscount, k1, ltur_
     integer                                   :: npnterror=0   !< number of grid points without cross-section definition
     type(t_branch), pointer                   :: pbr
 
@@ -11252,8 +11296,25 @@ subroutine flow_sedmorinit()
     do k = 1,nopenbndsect
        nambnd(k) = openbndname(k)
     enddo
-
-    call rdstm(stmpar, griddim, md_sedfile, md_morfile, filtrn='', lundia=mdia, lsal=jasal, ltem=jatem, ltur=max(0,iturbulencemodel-1), lsec=jasecflow, lfbedfrm=bfm_included, julrefday=julrefdat, dtunit='Tunit='//md_tunit, nambnd=nambnd, error=error)
+    !
+    ! Set ltur
+    ltur_ = 0
+    if (kmx>0) then
+       select case (iturbulencemodel)
+          case (0)
+             ltur_ = 0
+          case (1)
+             ltur_ = 0
+          case (2)
+             ltur_ = 0
+          case (3)
+             ltur_ = 2
+          case (4)
+             ltur_ = 2
+       end select
+    end if
+        
+    call rdstm(stmpar, griddim, md_sedfile, md_morfile, filtrn='', lundia=mdia, lsal=jasal, ltem=jatem, ltur=ltur_, lsec=jasecflow, lfbedfrm=bfm_included, julrefday=julrefdat, dtunit='Tunit='//md_tunit, nambnd=nambnd, error=error)
     if (error) then
         call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Error in subroutine rdstm.')
         return
@@ -11494,8 +11555,15 @@ subroutine flow_sedmorinit()
        call realloc(sswy_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
     endif
 
-    ! mormerge additions
-    !
+    if (stmpar%morpar%duneavalan) then
+       if (allocated(avalflux)) then
+          deallocate(avalflux)
+       endif
+       call realloc(avalflux,(/lnx,stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
+       botcrit = max(botcrit, 1d-4)   ! mass balance with avalanching
+    endif
+    
+    ! morphological polygon additions    !
     call realloc(kcsmor,ndx,stat=ierr,fill=0,keepExisting=.false.)
     !
     inquire (file = trim(md_morphopol), exist = ex)
@@ -11503,11 +11571,11 @@ subroutine flow_sedmorinit()
        ! do all cells
        kcsmor = 1
     else
-       ! find cells inside polygoon
+       ! find cells inside polygon
        call selectelset_internal_nodes(xz, yz, kcs, ndx, kcsmor, ndx, LOC_FILE=md_morphopol, LOC_SPEC_TYPE=LOCTP_POLYGON_FILE)
     end if
 
-    return
+1234 return
 end subroutine flow_sedmorinit
 
 subroutine flow_dredgeinit()
@@ -12671,11 +12739,11 @@ subroutine writesomeinitialoutput()
  enddo
 
  ! if (ti_xls > 0) then
-    ! call wrirstfileold(time1)                        ! schrijf aan het einde     een ascii.rst-file weg
- call wrinumlimdt()                               ! number of limitating timesteps per node
+ ! call wrirstfileold(time1)                     ! schrijf aan het einde     een ascii.rst-file weg
+ call wrinumlimdt()                                 ! number of limitating timesteps per node
  ! endif
- ! call unc_write_his(time1)                         ! schrijf aan het einde ook een .his-file weg
- ! call wrimap(time1)                                ! schrijf aan het einde ook een .map-file weg
+ !call unc_write_his(time1)                         ! schrijf aan het einde ook een .his-file weg
+ !call wrimap(time1)                                ! schrijf aan het einde ook een .map-file weg
 
 !   call mba_final(time_user)
  if (ti_mba > 0) then
@@ -14397,7 +14465,7 @@ else if (nodval == 27) then
       if (jadhyd == 1) then
          znod = ActEvap(kk)*1d3*3600d0 ! m/s -> mm/hr
       end if
-   end select
+    end select
 
  else if (nodval == 48) then
    if (nonlin >= 2) then
@@ -14448,6 +14516,7 @@ else if (nodval == 27) then
       end select
 
     else
+     call wave_makeplotvars()
      select case (waveparopt)
        case (1)
           if (jawave.ne.4) then
@@ -16275,9 +16344,9 @@ endif
        call wave_comp_stokes_velocities()
        call wave_uorbrlabda()                       ! hwav gets depth-limited here
        call tauwave()
-       call setwavfu()
-       call setwavmubnd()
     end if
+    call setwavfu()
+    call setwavmubnd()
  end if
 
  if (jawave==5) then
@@ -18842,7 +18911,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_cmpstru_vel, id_cmpstru_au, id_cmpstru_head, &
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim, &
-                     id_latdim, id_lat_id, id_lat_predis_inst, id_lat_predis_ave, id_lat_realdis_inst, id_lat_realdis_ave
+                     id_latdim, id_lat_id, id_lat_predis_inst, id_lat_predis_ave, id_lat_realdis_inst, id_lat_realdis_ave, &
+                     id_ustx, id_usty
     ! ids for geometry variables, only use them once at the first time of history output
     integer :: id_statgeom_node_count,     id_statgeom_node_coordx,     id_statgeom_node_coordy,    &
                id_crsgeom_node_count,      id_crsgeom_node_coordx,      id_crsgeom_node_coordy,     &
@@ -18895,7 +18965,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
     ! Another time-partitioned file needs to start, reset iteration count (and file).
     if (ti_split > 0d0 .and. curtime_split /= time_split0) then
-        it_his       = 0
+        it_his        = 0
         curtime_split = time_split0
     end if
 
@@ -19198,6 +19268,29 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_WU, 'geometry', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_WU, '_FillValue', dmiss)
 
+               if (kmx==0) then
+                   ierr = nf90_def_var(ihisfile, 'ustokes',  nf90_double, ((/ id_statdim, id_timedim /)) , id_USTX)
+                   ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+                   ierr = nf90_def_var(ihisfile, 'vstokes',  nf90_double, ((/ id_statdim, id_timedim /)) , id_USTY)
+                   ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')   
+               else
+                   ierr = nf90_def_var(ihisfile, 'ustokes',  nf90_double, ((/ id_laydim, id_statdim, id_timedim /)) , id_USTX)
+                   ierr = nf90_put_att(ihisfile, id_USTX,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                   ierr = nf90_def_var(ihisfile, 'vstokes',  nf90_double, ((/ id_laydim, id_statdim, id_timedim /)) , id_USTY)
+                   ierr = nf90_put_att(ihisfile, id_USTY,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')                     
+                   jawrizc = 1
+               endif
+               
+               ierr = nf90_put_att(ihisfile, id_USTX,   'standard_name', 'sea_surface_wave_stokes_drift_x')
+               ierr = nf90_put_att(ihisfile, id_USTX,   'long_name'    , 'Stokes drift, x-component')
+               ierr = nf90_put_att(ihisfile, id_USTX,   'units'        , 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_USTX, '_FillValue', dmiss)
+               
+               ierr = nf90_put_att(ihisfile, id_USTY,   'standard_name', 'sea_surface_wave_stokes_drift_y')
+               ierr = nf90_put_att(ihisfile, id_USTY,   'long_name'    , 'Stokes drift, y-component')
+               ierr = nf90_put_att(ihisfile, id_USTY,   'units'        , 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_USTY, '_FillValue', dmiss)             
+               
                ierr = nf90_def_var(ihisfile, 'tauwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
                ierr = nf90_put_att(ihisfile, id_WTAU,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
                ierr = nf90_put_att(ihisfile, id_WTAU,   'standard_name', 'sea_surface_wave_bottom_shear_stress')
@@ -19398,7 +19491,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_def_var(ihisfile, 'Sediment settling velocity', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_ws)
                endif
                !
-               ierr = nf90_put_att(ihisfile, id_sf, 'long_name', 'Sediment mass concentration')
+               ierr = nf90_put_att(ihisfile, id_sf, 'long_name', 'Sediment concentration')
                ierr = nf90_put_att(ihisfile, id_sf, 'units', 'kg m-3')
                ierr = nf90_put_att(ihisfile, id_sf, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
                ierr = nf90_put_att(ihisfile, id_sf, 'geometry', station_geom_container_name)
@@ -21182,6 +21275,10 @@ subroutine unc_write_his(tim)            ! wrihis
              enddo
              ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
           end if
+          if (jawave>0) then
+             ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+             ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))   
+          endif
        enddo
      else
 !      2D
@@ -21227,6 +21324,10 @@ subroutine unc_write_his(tim)            ! wrihis
        if (jased > 0 .and. .not. stm_included) then
           ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        end if
+       if (jawave>0) then                                                                                                      
+          ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       endif
      endif
 
 !    waq bottom variables are always 2D
@@ -22239,7 +22340,7 @@ subroutine fill_valobs()
    use m_flowgeom
    use m_observations
    use m_sediment
-   use m_waves, only: hwav, twav, phiwav, rlabda, uorb
+   use m_waves, only: hwav, twav, phiwav, rlabda, uorb, ustokes
    use m_xbeach_data, only: R
    use m_ship
 
@@ -22248,6 +22349,7 @@ subroutine fill_valobs()
    integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa
    integer :: ipoint, ival, klayt, kmx_const
    double precision :: wavfac
+   double precision, allocatable :: wa(:,:)
 
    kmx_const = kmx
    if (jaeulervel==1 .and. jawave > 0) then
@@ -22259,7 +22361,9 @@ subroutine fill_valobs()
          wavfac = 1d0
       else
          wavfac = sqrt(2d0)
-      end  if
+      endif
+      allocate(wa(1:2,1:ndkx))
+      call linkstocentercartcomp(wa,ustokes)
    endif
 
    valobs = DMISS
@@ -22274,7 +22378,6 @@ subroutine fill_valobs()
             kb = k
             kt = k
          end if
-
 
 !        store values in valobs work array
          valobs(:,i)        = 0d0   ! should not be DMISS, as DMISS is used to mark observation stations outside subdomain in reduce_valobs
@@ -22391,6 +22494,12 @@ subroutine fill_valobs()
                valobs(IPNT_UCX+klay-1,i) = workx(kk)
                valobs(IPNT_UCY+klay-1,i) = worky(kk)
             endif
+            
+            if (jawave>0 .and. hs(k)>epshu) then
+               valobs(IPNT_UCXST+klay-1,i) = wa(1,kk)
+               valobs(IPNT_UCYST+klay-1,i) = wa(2,kk)
+            endif
+            
             if ( kmx>0 ) then
                valobs(IPNT_UCZ+klay-1,i)  = ucz(kk)
             end if
@@ -22543,7 +22652,7 @@ subroutine fill_valobs()
                valobs(IPNT_INFILTACT,i) = infilt(k)/ba(k)*1d3*3600d0 ! m/s -> mm/hr
             else
                valobs(IPNT_INFILTACT,i) = 0d0
-            end if
+         end if
          end if
 
 !        Heatflux
@@ -22602,7 +22711,8 @@ subroutine fill_valobs()
       end do
    end if
 
-
+   if (allocated(wa)) deallocate(wa)
+   
    return
    end subroutine fill_valobs
 
@@ -27294,7 +27404,7 @@ endif
  allocate ( rho (ndkx) , stat= ierr )
  call aerr('rho (ndkx)', ierr, ndkx ) ; rho  = rhomean
 
- if (jasal > 0 .or. jatem > 0 .or. jased> 0 .or. stm_included ) then
+ if (jasal > 0 .or. jatem > 0 .or. (jased> 0 .and. stm_included) ) then
     if (abs(jabaroctimeint) >= 2) then
        if (jacreep == 1 .or. abs(jabaroctimeint) == 3 .or. abs(jabaroctimeint) == 4) then
           if (allocated(dpbdx0) ) deallocate(dpbdx0)
@@ -27593,7 +27703,7 @@ endif
  allocate ( qa   (lnkx)  , stat = ierr)
  call aerr('qa   (lnkx)' , ierr , lnkx )  ; qa    = 0
  allocate ( v    (lnkx)  , stat = ierr)
- call aerr('v    (lnkx)' , ierr , lnkx )  ; v     = 0  ; v(1:lnx) = 100d0
+ call aerr('v    (lnkx)' , ierr , lnkx )  ; v     = 0
  allocate ( ucxu (lnkx)  , stat = ierr)
  call aerr('ucxu (lnkx)' , ierr , lnkx )  ; ucxu  = 0
  allocate ( ucyu (lnkx)  , stat = ierr)
@@ -33531,9 +33641,13 @@ Hrms   = 0.5d0*( Hwav(k1)   + Hwav(k2) )
 Hrms   = min(hrms,gammax*hu(LL))
 asg    = 0.5d0*Hrms                              ! Wave amplitude = 0.5*Hrms
 shs    = sinhsafei(rk*hu(LL))
+costu  =  csw*csu(LL) + snw*snu(LL)              ! and compute stokes drift
+sintu  = -csw*snu(LL) + snw*csu(LL)
+
 if (shs > 0d0) then
-   uorbu  = omeg*asg*shs                         ! Orbital velocity
-   call  Swart(Tsig, uorbu, z00, fw, ustw2)
+   uorbu  = omeg*asg*shs*sqrt(pi)/2.0                        ! Orbital velocity, without sqrt(pi) factor
+   !call  Swart(Tsig, uorbu, z00, fw, ustw2)
+   call soulsby(Tsig, uorbu, z00, fw, ustw2)
    ustw2  = ftauw*ustw2                          ! ustar wave squared times calibrationcoeff
 
    dks    = 30d0*z00                             ! should be 30 for consistency with getustb
@@ -33543,22 +33657,17 @@ if (shs > 0d0) then
    deltau = min(0.5d0*hu(LL), deltau)            !
 
    Dfu    = ustw2*uorbu/sqrt(pi)                 ! dissipation by waves (m3/s3)
+   !Dfu    = 0.28d0*ftauw*fw*abs(uorbu**3d0)     ! dissipation by waves (m3/s3), note Dano
+   Dfu =    ftauw *  fw * uorbu**3 / (sqrt(pi))  ! THIS IS TO CHECK
    Dfu    = Dfu/deltau                           ! divided by deltau    (m2/s3)
    Dfuc   = Dfu*rk*Tsig/twopi                    ! Dfuc = dfu/c,        (m /s2) is contribution to adve
+      
 else
    ustw2  = 0d0
    Dfu    = 0d0
    Dfuc   = 0d0
    deltau = 0d0
 endif
-
-!Dfu   = ustw2*uorbu*rhomean/sqrt(pi)  ! in D3D it is multiplication with rhomean here icw with division by rhomean at setting RHS
-!deltau(nm) = 0.09_fp * (ks/hu(nm)) * (a/ks)**0.82_fp
-!deltau(nm) = alfaw*max(ee*z0ucur(nm)/hu(nm) , deltau(nm))
-!deltau(nm) = min(0.5_fp, deltau(nm))*hu(nm)
-
-costu  =  csw*csu(LL) + snw*snu(LL)            ! and compute stokes drift
-sintu  = -csw*snu(LL) + snw*csu(LL)
 
 if (jawaveStokes == 1) then
    uusto          =  0.5d0*omeg*asg*asg/hu(LL)
@@ -33677,6 +33786,7 @@ if (astar > 296.088d0)  then                       ! 30pipi
 else
     fw = 0.3d0
 endif
+
 ustw2 = 0.5d0*fw*uorbu*uorbu
 
 end subroutine Swart
@@ -33685,7 +33795,7 @@ end subroutine Swart
  subroutine tauwavehk(Hrms, Tsig, Depth, Uorbi, rlabd, ust)
  use m_flow, only: plotlin, rhog, rhomean, jased
  use m_sferic
- use m_waves, only : gammax
+ use m_waves, only : gammax, jauorb
 
  implicit none
  double precision           :: Hrms, Tsig, Depth, uorbi, Tauw, hrm, ust
@@ -33707,6 +33817,9 @@ end subroutine Swart
     omeg   = twopi/tsig
     shs    = sinhsafei(rk*depth)
     uorbi  = omeg*arms*shs                        !omeg*(0.5*hsig)
+    if (jauorb==0) then              ! for consistency with old d3d convention
+       uorbi = uorbi*sqrt(pi)/2d0    
+    end if
     ust    = 0.5d0*omeg*arms*arms/depth
     rlabd  = twopi/rk
  endif
@@ -38645,7 +38758,6 @@ end subroutine setbobs_fixedweirs
     if ( jafilter.ne.0 ) then
       call comp_filter_predictor()
     end if
-
     if (jawave > 0 ) then ! now every timestep, not only at getfetch updates
        do k = 1,ndx
           call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rlabda(k), ustk(k))
@@ -38671,12 +38783,12 @@ end subroutine setbobs_fixedweirs
     ! DEBUG
     ! Original:
     !zbndun = zbndu( (n-1)*kmxd + 1 )
-    if (kbndu(4,n) .ne.5) then
+    if (kbndu(4,n) .ne. 5) then
        zbndun = zbndu(n)
        zbndu0n = zbndu0(n)
     else
-       zbndun  = u1(LL)     ! set in xbeach_absgen_bc
        zbndu0n = u0(LL)
+       zbndun  = u1(LL)     ! set in xbeach_absgen_bc
     end if
     !\ DEBUG
 
@@ -38737,15 +38849,6 @@ end subroutine setbobs_fixedweirs
           endif
        endif
 
-       if (kbndu(4,n) == 5) then                     ! JRE, to do: Riemann boundary
-     !     kb    = kbndu(1,n)
-     !     k2    = kbndu(2,n)
-     !     riep  = s0(k2)*sqrt(ag*huvli(L))
-     !     ru(L) = ru(L) - riep
-     !     as    = 0.5d0*sqrt(ag*huvli(L))
-     !!  fu(L) =  as
-     !!  ru(L) = -2d0*as*s0(kb)  ! -2d0*sqrt(ag/huvli(L)) +2d0*sqrt(ag*5d0)
-       endif
     enddo
 
  enddo
@@ -38753,10 +38856,20 @@ end subroutine setbobs_fixedweirs
  call furusobekstructures()
 
  if ( jawave.eq.3 ) then
-!   add wave-induced mass fluxes on boundaries
-    do L=Lnxi+1,Lnx
-       ru(L) = ru(L) + wavmubnd(L)
-    end do
+    if (kmx==0) then
+       !   add wave-induced mass fluxes on boundaries to convert euler input to GLM
+       do L=Lnxi+1,Lnx
+          ru(L) = ru(L) + wavmubnd(L)
+       end do
+    else ! to check: vertical distribution
+       do L = lnxi+1,lnx
+          call getLbotLtop(L,Lb,Lt)
+          if (Lt<Lb) cycle
+          do LL=Lb, Lt
+             ru(LL) = ru(LL) + wavmubnd(LL)
+          enddo
+       enddo
+    endif
  end if
 
 ! BEGIN DEBUG
@@ -42720,7 +42833,7 @@ end function is_1d_boundary_candidate
 
 ! JRE ================================================================
  if (nbndw > 0 .and. .not. (jawave .eq. 4)) then
-    call qnerror('Wave energy boundary defined without setting correct wavemodelnr. Wavemodelnr=4 required.',' ',' ')
+    call qnerror('Wave energy boundary defined without setting correct wavemodelnr.',' ',' ')
     iresult = DFM_WRONGINPUT
  end if
  if (nbndw > 0) then
@@ -45037,6 +45150,7 @@ subroutine update_verticalprofiles()
 
  use m_flow
  use m_flowgeom
+ use m_waves, only: hwav, dwcap, dsurf, gammax, ustokes, vstokes
  use m_partitioninfo
  use m_flowtimes
  use m_ship
@@ -45052,16 +45166,18 @@ subroutine update_verticalprofiles()
 
  double precision :: hdzb, hdzs, dtiL, hdz, adv, omega1, omega2, omegu, drhodz1, drhodz2, rhomea, sousin
 
- double precision :: dzu(kmxx), dzw(kmxx), womegu(kmxx)
+ double precision :: dzu(kmxx), dzw(kmxx), womegu(kmxx), pkwav(kmxx)
 
  double precision :: gradk, gradt, grad, gradd, gradu, volki, arLL, qqq
 
  double precision :: wk,wke,vk,um,tauinv,tauinf,xlveg,rnv, diav,ap1,alf,c2esqcmukep,teps,tkin
 
  double precision :: cfuhi3D, vicwmax, tkewin, zint, z1, vicwww, alfaT, tke, eps, tttctot, c3t, c3e
+ 
+ double precision :: rhoLL, pkwmag, hrmsLL, dsurfLL, dwcapLL, wdep, hbot, dzwav
 
  integer          :: k, ku, kd, kb, kt, n, kbn, kbn1, kn, knu, kk, kbk, ktk, kku, LL, L, Lb, Lt, kxL, Lu, Lb0, kb0
- integer          :: k1, k2, k1u, k2u, n1, n2, ifrctyp, ierr, jadrhodz = 1, kup, ierror, Ltv, ktv
+ integer          :: k1, k2, k1u, k2u, n1, n2, ifrctyp, ierr, jadrhodz = 1, kup, ierror, Ltv, ktv, whit
 
  if (iturbulencemodel <= 0 .or. kmx == 0) return
 
@@ -45124,7 +45240,7 @@ subroutine update_verticalprofiles()
 
     !$OMP END PARALLEL DO
 
- else  if (iturbulencemodel == 2) then                   ! 2=algebraic , just testing 1D flow
+ else if (iturbulencemodel == 2) then                   ! 2=algebraic , just testing 1D flow
 
    !$xOMP PARALLEL DO                                     &
    !$xOMP PRIVATE(LL,Lb,Lt,kxL,dzu,frcn,L,k,Cz,z00,sqcf,zz,n1,n2,zb1,zb2,volu)
@@ -45302,8 +45418,8 @@ subroutine update_verticalprofiles()
      else
         advi(Lb) = advi(Lb)  + cfuhi3D
      endif
-     tkebot   = sqcmukepi * ustb(LL)**2
-     tkesur   = sqcmukepi * ustw(LL)**2
+     tkebot   = sqcmukepi * ustb(LL)**2                    ! this has stokes incorporated when jawave>0
+     tkesur   = sqcmukepi * ustw(LL)**2                    ! only wind+ship contribution
 
      if (ieps == 3) then                                   ! as Delft3D
          vicwwu(Lb0) = vonkar*ustb(LL)*z00                 ! as Delft3D
@@ -45318,6 +45434,24 @@ subroutine update_verticalprofiles()
      dk(0:kxL) = dtiL*turkin0(Lb0:Lt)
 
      vicu      = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*sigtkei        !
+
+     ! Calculate turkin source from wave dissipation: preparation
+     if (jawave==3) then
+        k1=ln(1,LL); k2=ln(2,LL)
+        ac1=acl(LL); ac2=1d0-ac1
+        hrmsLL  = min(max(ac1*hwav(k1)  + ac2*hwav(k2), 0.01),gammax*hu(LL))
+        dsurfLL = ac1*dsurf(k1) + ac2*dsurf(k2)                      ! JRE to do: generic surface diss array, for jawave==4
+        dwcapLL = ac1*dwcap(k1) + ac2*dwcap(k2)                
+        rhoLL   = rhomean                                            ! to do: variable rho              
+        !
+        pkwmag=2d0*(dsurfLL+dwcapLL)/(rhoLL*hrmsLL)                  ! 2/hrms is the inverse integral of the linear distribution
+        !                                                            ! so effectively, P=D
+        ! tke boundary condition at surface
+        tkesur = tkesur + (pkwmag*vonkar*0.5d0*hrmsLL/(30.d0*cde))**(2d0/3d0) 
+        wdep   = hu(LL) - 0.5d0*hrmsLL
+        pkwav = 0d0
+        whit = 0
+     endif
 
      do L  = Lb, Lt - 1                                               ! Loop over layer interfaces
         Lu    = L + 1
@@ -45397,7 +45531,7 @@ subroutine update_verticalprofiles()
                   dk(k) = dk(k) - buoflu(k)
                endif
             endif
-        endif
+        endif      
 
         !c TKEPRO is the energy transfer flux from Internal Wave energy to
         !c Turbulent Kinetic energy and thus a source for the k-equation.
@@ -45411,13 +45545,35 @@ subroutine update_verticalprofiles()
         ! Addition of production and of dissipation to matrix ;
         ! observe implicit treatment by Newton linearization.
 
-        dijdij(k) = ( ( u1(Lu) - u1(L) ) ** 2 + ( v(Lu) - v(L) ) ** 2 ) / dzw(k)**2
+        if (jawave>0 .and. jawaveStokes>=1) then  ! shear based on eulerian velocity field, see turclo,note JvK, Ardhuin 2006
+           dijdij(k) = ( ( u1(Lu) - u1(L) - ( ustokes(Lu) - ustokes(L) )) ** 2 + ( v(Lu) - v(L) - ( vstokes(Lu) - vstokes(L) )) ** 2 ) / dzw(k)**2
+        else
+           dijdij(k) = ( ( u1(Lu) - u1(L) ) ** 2 + ( v(Lu) - v(L) ) ** 2 ) / dzw(k)**2
+        endif
 
         if (jarichardsononoutput > 0) then                ! save richardson nr to output
             rich(L) = sigrho*bruva(k)/max(1d-8,dijdij(k)) ! sigrho because bruva premultiplied by 1/sigrho
         endif
 
-        sourtu    = max(vicwwu(L),vicwminb)*dijdij(k) ! + tkepro(L)
+        sourtu    = max(vicwwu(L),vicwminb)*dijdij(k) 
+        
+        ! Add wave dissipation contribution to tke production
+        if (jawave>2 .and. jawave<5) then
+           if (hu(L)>=wdep .and. whit==0) then
+              whit = 1
+              hbot = max(wdep,hu(L-1))
+              dzwav = hu(LL)-hbot
+              pkwav(k) = pkwmag*(1.0-dzwav/hrmsLL)*dzw(k)
+              sourtu = sourtu + pkwav(k)
+           elseif (whit==1) then               
+              dzwav = hu(LL)-hu(L)
+              pkwav(k) = pkwmag*(1.0-dzwav/hrmsLL)*dzw(k)
+              sourtu = sourtu + pkwav(k)
+           endif
+           !
+           ! Bottom contribution from getustbcfhui, taken account of in ustb
+           ! sourtu = sourtu + tkepro(k)
+        endif
 
         if (iturbulencemodel == 3) then
            sinktu = tureps0(L) / turkin0(L)               ! + tkedis(L) / turkin0(L)
@@ -45433,7 +45589,7 @@ subroutine update_verticalprofiles()
 
      enddo
 
-     ! Boundary conditions:
+     ! Boundary conditions:    
      ! TKE at free surface
      ak(kxL)  = 0.d0
      bk(kxL)  = 1.d0
@@ -45498,9 +45654,7 @@ subroutine update_verticalprofiles()
                    bk(k) = bk(k) + ( ac1*sqcu(k1) + ac2*sqcu(k2) ) * volki
                 endif
             enddo
-
          endif
-
      endif
 
      if (javeg > 0) then             ! in turbulence model
@@ -45615,6 +45769,13 @@ subroutine update_verticalprofiles()
            ! split for implicit treatment for avoiding negative epsilon.
 
            sourtu  =  c1e*cmukep*turkin0(L)*dijdij(k)
+           !
+           ! Add wave dissipation eps production term
+           if (jawave>2 .and. jawave<5) then
+              !sourtu = sourtu + c1e*tureps0(L)/turkin0(L)*pkwav(k)   ! or, see above shear term and techref:
+              sourtu = sourtu + c1e*cmukep*turkin0(L)/max(vicwwu(L),vicwminb)*pkwav(k)     !         
+           endif
+           
            tkedisL =  0d0 ! tkedis(L)
            sinktu  =  c2e*(tureps0(L) + tkedisL) / turkin1(L)    ! yoeri has here : /turkin0(L)
 
@@ -45676,6 +45837,9 @@ subroutine update_verticalprofiles()
        bk(kxL) =  1.d0
        ck(kxL) =  0.d0
        dk(kxL) =  4d0*abs(ustw(LL))**3/ (vonkar*dzu(Lt-Lb+1))
+       if (jawave>2 .and. jawave<5) then                ! wave dissipation at surface
+          dk(kxL) = dk(kxL) + pkwmag
+       endif
 
        ak(0)  =  0.d0                     ! at the bed:
        bk(0)  =  1.d0
@@ -45941,6 +46105,7 @@ subroutine update_verticalprofiles()
  double precision :: csw, snw                                ! wave direction cosines
  double precision :: Dfu, Dfu0, Dfu1, tkpr, tkp0, tkp1, aa   ! wave dissipation by bed friction, / (rhomean*c*deltau)
  double precision :: deltau                                  ! wave dissipation layer thickness
+ double precision :: huL0, huL1, huL, u2dh
 
  integer          :: nit, nitm = 100
  double precision :: r, rv = 123.8d0, e = 8.84d0 , eps = 1d-2, s, sd, er, ers, dzb, uux, uuy, htop, dzw, dzu, alin
@@ -45997,7 +46162,7 @@ subroutine update_verticalprofiles()
 
     10  continue
 
-    if (jawaveStokes >= 1) then                                      ! ustokes correction at bed
+    if (jawave>0 .and. jawaveStokes >= 1) then                                      ! ustokes correction at bed
        umod = sqrt( (u1Lb-ustokes(Lb))*(u1Lb-ustokes(Lb)) + (v(Lb)-vstokes(Lb))*(v(Lb)-vstokes(Lb)) )
     else
         umod = sqrt( u1Lb*u1Lb + v(Lb)*v(Lb) )
@@ -46012,14 +46177,19 @@ subroutine update_verticalprofiles()
     ustbLL = sqcf*umod                                           ! ustar based upon bottom layer velocity
 
     if (jawave > 0) then
-
-       call getustwav(LL, z00, fw, ustw2, csw, snw, Dfu, Dfuc, deltau, costu) ! get ustar wave squared, fw and wavedirection cosines  based upon Swart
+       call getustwav(LL, z00, fw, ustw2, csw, snw, Dfu, Dfuc, deltau, costu) ! get ustar wave squared, fw and wavedirection cosines  based upon Swart, ustokes  
        if (ustw2 > 1d-8) then
-          ustc2 = ustbLL*ustbLL
+          !ustc2 = ustbLL*ustbLL
           if (modind < 9) then                                   ! wave-current interaction Soulsby (1997)
-             Cdrag  = ag/(cz*cz)
-             uux    = acL(LL)*ucx(ln(1,Lb)) + (1d0-acL(LL))*ucx(ln(2,Lb))
+             cdrag  = ag/(cz*cz)
+             uux    = acL(LL)*ucx(ln(1,Lb)) + (1d0-acL(LL))*ucx(ln(2,Lb))  
              uuy    = acL(LL)*ucy(ln(1,Lb)) + (1d0-acL(LL))*ucy(ln(2,Lb))
+             ! Virtual 2dh velocity
+             u2dh = (umod/hu(LL)                                             &
+                     & *((hu(LL) + z0urou(LL))*log(1.0 + hu(LL)/z0urou(LL))     &
+                     & - hu(LL)))/log(1.0 + 0.5d0*hu(Lb)/z0urou(LL))
+             !ustc2  = cdrag*(uux**2 + uuy**2)
+             ustc2  = cdrag*u2dh**2
              abscos = abs( csw*uux     + snw*uuy ) / max(1d-4, sqrt(uux*uux + uuy*uuy) )         ! abs(prodin(uw,uc))
              call getsoulsbywci(modind, z00, ustc2, ustw2, fw, cdrag, umod, abscos, taubpuLL, taubxuLL)
           else if (modind == 9) then                          ! wave-current interaction van Rijn (2004)
@@ -46027,38 +46197,56 @@ subroutine update_verticalprofiles()
           endif
           ustbLL = sqrt(umod*taubpuLL)
           sqcf   = max(sqcf,ustbLL / umod )                      ! waveps not needed, see umod = max(umod, 1d-4) line above
-          if (stm_included .or. jawaveSwartDelwaq > 1)  then                                  ! For usage in coupled models
+          if (stm_included .or. jawaveSwartDelwaq > 1)  then     ! For usage in coupled models
              taubxu(LL) = taubxuLL
              z0ucur(LL) = z00                                    ! And, in case anybody needs these arrays :
              z0urou(LL) = dzb*exp(-vonkar/sqcf - 1d0)            ! inverse of jaustarint == 1 above
              wblt(LL) = deltau
              ! N.b., in Delft3D zourou is established upon velocities just outside the wave boundary layer, at L = Lbw1:
           endif
-
+          !
           if (jawavestreaming >= 1 .and. deltau > 0d0)  then     ! Streaming below deltau with linear distribution
-             tkpr  = 2d0*Dfu                                     ! (m2/s3)
-             tkp0  = tkpr
-             tkepro(0) = tkpr*0.5d0*hu(Lb)/deltau                ! fraction in bed layer
+             !tkpr  = 2d0*Dfu                                     ! (m2/s3)
+             !tkepro(0) = tkpr*0.5d0*hu(Lb)/deltau                ! fraction in bed layer
              Dfuc  = Dfuc*costu                                  ! (m/s2)
-             Dfu0  = Dfuc
-             do L  = Lb, Ltop(LL)
-                if (hu(L) <= deltau) then
-                   htop   = min( hu(L), deltau )                 ! max height within waveboundarylayer
-                   alin   = 1d0 -  htop / deltau                 ! linear from 1 at bed to 0 at deltau
+             huL0 = 0d0
+             huL1 = huL0
+             do L  = Lb, Ltop(LL) 
+                huL0 = huL1
+                huL1 = hu(L)
+                huL = ( huL0 + huL1 ) * 0.5d0
+                if (huL1 <= deltau) then
+                   alin   = 1d0 -  huL / deltau               ! linear from 1 at bed to 0 at deltau 
                    Dfu1   = Dfuc*alin
-                   dzu    = htop-hu(L-1)
-                   adve(L) = adve(L) - 0.5d0*(Dfu0 + Dfu1)*dzu / deltau
-                   if (jawavestreaming >= 2 .and. L < Ltop(LL) ) then
-                       tkp1 = tkpr*alin
-                       dzw  = min( deltau, 0.5d0*(hu(L+1) + hu(L) ) )  - 0.5d0*( hu(L) + hu(L-1) )
-                       tkepro(L-Lb+1) = tkp1*dzw / deltau
-                   endif
-                endif
-                Dfu0    = dfu1
-                if (hu(L) > deltau) then
+                   adve(L) = adve(L) - Dfu1
+                elseif( huL0 <= deltau ) then
+                   alin = (min( huL1, deltau )- huL0 ) / (2d0 * (huL1 - huL0) )
+                   Dfu1   = Dfuc*alin
+                   adve(L) = adve(L) - Dfu1
+                else
                    exit
-                endif
+                endif   
              enddo
+             !Dfu0  = Dfuc
+             !Dfu1  = 0.0 
+             !do L  = Lb, Ltop(LL)
+             !   if (hu(L) <= deltau) then
+             !      htop   = min( hu(L), deltau )                 ! max height within waveboundarylayer
+             !      alin   = 1d0 -  htop / deltau                 ! linear from 1 at bed to 0 at deltau
+             !      Dfu1   = Dfuc*alin
+             !      dzu    = htop-hu(L-1)
+             !      adve(L) = adve(L) - 0.5d0*(Dfu0 + Dfu1)*dzu / deltau
+             !      !if (jawavestreaming >= 2 .and. L < Ltop(LL) ) then
+             !      !    tkp1 = tkpr*alin
+             !      !    dzw  = min( deltau, 0.5d0*(hu(L+1) + hu(L) ) )  - 0.5d0*( hu(L) + hu(L-1) )
+             !      !    tkepro(L-Lb+1) = tkp1*dzw / deltau
+             !      !endif
+             !   endif
+             !   Dfu0    = dfu1
+             !   if (hu(L) > deltau) then
+             !      exit
+             !   endif
+             !enddo
           endif
        endif
     endif
@@ -46073,15 +46261,15 @@ subroutine update_verticalprofiles()
     endif
 
     if (jawave>0 .and. jawaveStokes >= 1) then                               ! Ustokes correction at bed
-       adve(Lb)  = adve(Lb) - cfuhi3D*ustokes(Lb)
+       adve(Lb)  = adve(Lb) - cfuhi3D*ustokes(Lb)                            
     endif
 
  else if (ifrctyp == 10) then                                 ! Hydraulically smooth, glass etc
      nit = 0
      u1Lb = u1(Lb)
       if (jawaveStokes >= 1) then
-         umod  = sqrt( (u1Lb-ustokes(LL))*(u1Lb-ustokes(LL)) + (v(Lb)-vstokes(LL))*(v(Lb)-vstokes(LL)) )
-     else
+         umod  = sqrt( (u1Lb-ustokes(Lb))*(u1Lb-ustokes(Lb)) + (v(Lb)-vstokes(Lb))*(v(Lb)-vstokes(Lb)) )   ! was ustokes(LL)
+      else
          umod  = sqrt( u1Lb*u1Lb + v(Lb)*v(Lb) )
      endif
 
@@ -46503,7 +46691,7 @@ integer            :: jav3
        adv = 0d0; adv1 = 0d0
     endif
 
-    if (jawaveStokes == 3) then                            ! ustokes correction in vertical viscosity
+    if (jawave>0 .and. jawaveStokes >= 2) then                            ! ustokes correction in vertical viscosity
        ustv   = vstress*(ustokes(L) - ustokes(L-1))
        d(k+1) = d(k+1) + ustv / dzu(k+1)
        d(k  ) = d(k  ) - ustv / dzu(k  )
@@ -50477,3 +50665,22 @@ end subroutine alloc_jacobi
       end do
 
    end subroutine set_saltem_nudge
+   
+   subroutine soulsby( tsig, uorbu, z00, fw, ustw2 )
+      use m_sferic, only: pi
+   
+      implicit none
+      double precision, intent(in ) :: tsig, uorbu, z00
+      double precision, intent(out) :: fw, ustw2
+      double precision              :: a
+      a = uorbu * tsig /2d0/pi
+      if( a > 0d0 ) then
+         fw = min( 1.39d0 * (a/z00)**(-0.52d0), 0.3d0 )
+      else
+         fw = 0.3d0
+      endif
+      
+      ustw2 = 0.5*fw*uorbu**2
+   end subroutine soulsby
+
+

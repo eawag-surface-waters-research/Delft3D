@@ -694,7 +694,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         
      end if
 
-     call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kesf(nbndsf(isf)+1:,isf), numsf, usemask=.false.)
+     call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kesf(nbndsf(isf)+1:,isf), numsf, usemask=.false., rrtolrel=rrtolrel)
      write(msgbuf,'(3a,i8,a)') trim(qid), ' ', trim(filename) , numsf, ' nr of sedfrac bndcells' ; call msg_flush()
      if (numsf > 0) then
         call appendrettime(qidfm, nbndsf(isf) + 1, return_time)

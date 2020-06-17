@@ -6888,7 +6888,7 @@ subroutine smooth_samples_from_GUI()
    
 !  check if samples are structured
    if ( MXSAM*MYSAM.ne.NS ) then
-      call qnerror('Samples or not structured', ' ', ' ')
+      call qnerror('Samples are not structured', ' ', ' ')
       goto 1234
    end if
    

@@ -97,6 +97,10 @@
    call aerr('cfhi_vanrijn(lnx)', ierr, lnx)
    call realloc(taubxu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)   ! Always needs to be allocated, even if jawave == 0, used in gettau()
    call aerr('taubxu(lnx)', ierr, lnx)
+   call realloc(taubu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)   
+   call aerr('taubu(lnx)', ierr, lnx)  
+   call realloc(tausmax, ndx, stat=ierr, keepExisting = .false., fill = 0d0)   
+   call aerr('tausmax(ndx)', ierr, ndx) 
    call realloc(ktb, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr('ktb  (ndx)', ierr, ndx)
    call realloc(taux_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -111,12 +115,12 @@
    call aerr('wblt(lnx)', ierr, lnx)
 
    if (jawave == 3) then
-      call realloc(wavfu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('wavfu  (lnx)', ierr, lnx)
+      call realloc(wavfu, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('wavfu  (lnkx)', ierr, lnx)
       call realloc(wavfv, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('wavfv  (lnx)', ierr, lnx)
-      call realloc(wavmubnd, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('wavmubnd  (lnx)', ierr, lnx)
+      call realloc(wavmubnd, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
+      call aerr('wavmubnd  (lnkx)', ierr, lnx)
       call realloc(sxwav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('sxwav  (ndx)', ierr, ndx)
       call realloc(sywav, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -605,11 +609,13 @@
    use m_sediment
    use m_sferic
    use m_flowparameters
-   use m_flow, only: plotlin, rhog, rhomean, ag, s1, s0, hu, jaconveyance2D, hs, u1, v, taus, frcu, ifrcutp, cfuhi, huvli, z0ucur, z0urou !, wavmu
+   use m_flow, only: plotlin, rhog, rhomean, ag, s1, s0, hu, jaconveyance2D, hs, u1, v, taus, frcu, ifrcutp, cfuhi, huvli, z0ucur, z0urou , tausmax
    use m_flowgeom
+   use m_flowtimes, only: time1
    use m_physcoef, only:  rhomean, ee, sag, vonkar
    use m_waves
    use m_bedform, only: bfmpar
+   use m_turbulence, only: rho
    use unstruc_messages
 
    implicit none
@@ -621,7 +627,7 @@
    double precision           :: dsk2, rk, astar, fw, hss, per, astarc, tauwav, taucur, tauwci, cdrag, z0, uorbu, tpu
    double precision           :: cz, frcn, uuu, vvv, umod, umodsq, cvalue, costu, sintu, abscos, uorbhs, waveps, u2dh
    double precision           :: xpar, ymxpar, lfc, cj, coeffb, coeffp, coeffq, ci,coeffa, coeffm, coeffn, yparL
-   double precision           :: hpr, wu2, b21, ai, BL1, BL2, ust, ac1, ac2
+   double precision           :: hpr, wu2, b21, ai, BL1, BL2, ust, ac1, ac2, rhoL
    double precision           :: ar, alfaw, wbl, rz, cf, cwall
    double precision           :: a, ks, phivr
    double precision           :: hrmsu, rlabdau, rr,umax,t1,u11,a11,raih,rmax, uon, uoff, uwbih
@@ -666,9 +672,6 @@
       ypar(L)   = 0.0d0
       cfwavhi(L)= 0.0d0
       !
-      ! TO DO: Replace the following messing with angles by an inproduct, without
-      ! the expensive atan2 call -> requires acos call, and quadrant messing, so hardly cheaper
-      !
       ! phigrid: angle between "normal direction on link" and "positive x-axis"
       phigrid = atan2(snu(L),csu(L)) * rd2dg
       ! phiwave: angle between "wave propagation direction" and "positive x-axis"
@@ -680,10 +683,15 @@
       phiwave = atan2(sink1, cosk1)*rd2dg
       ! phi: angle between "wave propagation direction" and "normal direction on link"
       phi     = phiwave - phigrid
+      !phi     = modulo(phi,360d0) 
+      !if (phi>180d0) phi = 360d0-phi
 
       ! interpolate uorbu, tpu and wavmu from flownodes to flowlinks
       uorbu = ac1*uorb(k1) + ac2*uorb(k2)
       tpu   = ac1*twav(k1) + ac2*twav(k2)
+      
+      ! get water density on flow link
+      rhoL = ac1*rho(k1) + ac2*rho(k2)
 
       ! get current related roughness height
       call getczz0(hu(L),dble(frcu(L)),ifrcutp(L),cz,z0)
@@ -711,11 +719,11 @@
             ! magnitude of bottom friction due to waves alone
             ! and due to current alone
             !
-            tauwav = 0.5d0*rhomean*fw*uorbu**2           ! wave related bed shear stress
-            u2dh = umod                                    ! AM: INCLUDE STOKES DRIFT?
+            tauwav = 0.5d0*rhomean*fw*ftauw*uorbu*uorbu           ! wave related bed shear stress
+            u2dh = umod                                           
             cdrag = ag/(cz**2)
-            taucur = rhomean*cdrag*u2dh**2               ! current related bed shear stress
-            !cdrag = cfuhi(L)*hu(L)
+            taucur = rhoL*cdrag*u2dh**2                           ! current related bed shear stress
+
             !
             ! parameterized models
             !
@@ -725,7 +733,7 @@
             ! bottom friction for combined waves and current
             !
             taubxu(L) = ymxpar*(taucur + tauwav)                       ! maximum shear stress due to waves and currents, eq to taubxu in D3D
-            ! ypar*(taucur + tauwav) is mean shear stress
+            taubu(L)  = yparL*(taucur + tauwav)                         ! mean shear stress
             if (modind < 9) then
                !tauwci = ypar*(taucur + tauwav)
                !!
@@ -743,35 +751,35 @@
                umax     = rr * 2d0 * uorbhs
                t1       = tpu  * sqrt(ag/hu(L))
                u11      = umax / sqrt(ag*hu(L))
-               a11      = -0.0049_fp*t1**2 - 0.069_fp*t1 + 0.2911_fp
-               raih     = max(0.5_fp , -5.25_fp-6.1_fp*tanh(a11*u11-1.76_fp))
-               rmax     = max(0.62_fp , min(0.75_fp , -2.5_fp*hu(L)/max(rlabdau,1.0e-20_fp) + 0.85_fp))
-               uon      = umax * (0.5_fp + (rmax-0.5_fp)*tanh((raih-0.5_fp)/(rmax-0.5_fp)))
+               a11      = -0.0049d0*t1**2 - 0.069d0*t1 + 0.2911d0
+               raih     = max(0.5d0 , -5.25d0-6.1d0*tanh(a11*u11-1.76d0))
+               rmax     = max(0.62d0 , min(0.75 , -2.5d0*hu(L)/max(rlabdau,1.0d-20) + 0.85d0))
+               uon      = umax * (0.5d0 + (rmax-0.5d0)*tanh((raih-0.5d0)/(rmax-0.5d0)))
                uoff     = umax - uon
-               uon      = max(1.0e-5_fp , uon)
-               uoff     = max(1.0e-5_fp , uoff)
-               uwbih    = (0.5_fp*uon**3.0_fp + 0.5_fp*uoff**3.0_fp)**(1.0_fp/3.0_fp)
+               uon      = max(1.0d-5 , uon)
+               uoff     = max(1.0d-5 , uoff)
+               uwbih    = (0.5d0*uon**3d0 + 0.5d0*uoff**3d0)**(1d0/3d0)
                rksru    = ac1*bfmpar%rksr(k1)+ac2*bfmpar%rksr(k2)                            ! these exist, okay
                rksmru   = ac1*bfmpar%rksmr(k1)+ac2*bfmpar%rksmr(k2)
                !
                ! Van Rijn 2004 formulation
                !
                phivr      = acos((uuu*costu+vvv*sintu) / umod)
-               gamma      = 0.8_fp + phivr - 0.3_fp*phivr**2
+               gamma      = 0.8d0 + phivr - 0.3d0*phivr**2
                ksc        = sqrt(rksru**2 + rksmru**2)
-               uratio     = min(uwbih/(u2dh+waveps) , 5.0_fp)
+               uratio     = min(uwbih/(u2dh+waveps) , 5.0d0)
                ka         = ksc * exp(gamma*uratio)
-               ka         = min(ka , 10.0_fp*ksc , 0.2_fp*hu(L))
-               ca         = 18.0_fp * log10(12.0_fp*hu(L)/max(ka,waveps))
+               ka         = min(ka , 10d0*ksc , 0.2d0*hu(L))
+               ca         = 18d0 * log10(12d0*hu(L)/max(ka,waveps))
                cfhi_vanrijn(L) = min(huvli(L),hminlwi)*ag / ca**2         ! umod * rhomean * ag * umod / ca**2
             endif
 
-            if (tpu > 1d-1) then
+            if (tpu > 1d-1) then              ! not needed if 2D, and 3D done in update_verticalprofiles
                ks         = z0*33d0
                omega      = 2d0 * pi / tpu
                a          = uorbu / omega
                !
-               wbl = 0.09d0 * alfaw * (ks/max(hu(L),epshu)) * (a/ks)**0.82_fp
+               wbl = 0.09d0 * alfaw * (ks/max(hu(L),epshu)) * (a/ks)**0.82d0
                wbl = max(alfaw*ee*z0/hu(L) , wbl)
                wblt(L) = min(0.5_fp, wbl)*hu(L)
             else
@@ -786,12 +794,12 @@
             rz = 1d0 + hu(L)/(ee*z0urou(L))
             cf = log(rz)/vonkar
             cwall         = 1d0/(cf**2)
-            taubxu(L)    = rhomean*cwall*umod*umod
+            taubxu(L)    = rhoL*cwall*umod*umod
          endif
       else
          if (hu(L) > epshu) then
             ! Avoid z0 of zero
-            ust  = sqrt(ypar(L)*(taucur + tauwav)/rhomean)
+            ust  = sqrt(ypar(L)*(taucur + tauwav)/rhoL)
             if (ust > waveps) then
                cf = min(umod/ust,40.0_fp)
                z0urou(L) = hu(L)/((exp(vonkar*cf) - 1d0)*ee)
@@ -808,13 +816,23 @@
    !      In Delft3D this parameter is named 'maximum bottom friction' via the taumax
    !      This is NOT the same as 'bed shear stress' which is defined in Delft3D as rhow*(taubpu*u1 + taubsu)
    !      MIND: taus computed here ~= gettaus!!
-   taus(:)   = 0.0d0
+   tausmax(:)   = 0d0
    do L=1,LNx
       k1=ln(1,L)
       k2=ln(2,L)
       if (hu(L) > epshu) then
-         taus(k1) = taus(k1) + taubxu(L)*wcL(1,L)
-         taus(k2) = taus(k2) + taubxu(L)*wcL(2,L)
+         tausmax(k1) = tausmax(k1) + taubxu(L)*wcL(1,L)
+         tausmax(k2) = tausmax(k2) + taubxu(L)*wcL(2,L)
+      end if
+   enddo
+   !
+   taus(:)   = 0d0
+   do L=1,LNx
+      k1=ln(1,L)
+      k2=ln(2,L)
+      if (hu(L) > epshu) then
+         taus(k1) = taus(k1) + taubu(L)*wcL(1,L)
+         taus(k2) = taus(k2) + taubu(L)*wcL(2,L)
       end if
    enddo
 
@@ -826,6 +844,7 @@
    use m_flowgeom, only: ndx
    use m_physcoef, only: ag
    use m_sferic, only: pi
+   use m_flowtimes, only: time1
 
    implicit none
 
@@ -836,8 +855,7 @@
    double precision                   :: hss, per, omeg, k0, k0h, rk, uorb1
 
    do k = 1,ndx
-
-      hss  = max(0.01, hs(k))
+      hss = max(0.01, hs(k))
       per = max(0.01, twav(k))                   ! wave period
 
       hwav(k) = min(hwavcom(k), gammax*hs(k))       ! Prevent unrealistic Hrms in shallow water. Use original comfile value again every time, as hs changes per dts
@@ -904,94 +922,126 @@
    end subroutine setmodind
 
    !> subroutine to compute wave forces from SWAN output
-   !> originates from Bas Stengs, extended by AM
    subroutine setwavfu()
    use unstruc_messages
    use MessageHandling
    use m_flowparameters
    use m_flowgeom
-   use m_flow, only: hu, huvli, wavfu, wavfv, rhomean
+   use m_flow, only: hu, huvli, wavfu, wavfv, rhomean,kmx,rho
    use m_waves
    use m_physcoef, only: sag
    implicit none
 
    integer          :: mout
+   integer          :: L,LL,Lb,Lt
    double precision :: wavfx, wavfy, wavfbx, wavfby
-   double precision :: wavfu_loc, wavfbu_loc, twavL
+   double precision :: wavfu_loc, wavfbu_loc, twavL, hwavL, wavfuL, cc
    double precision :: wavfv_loc, wavfbv_loc, wavfmag, wavfbmag,wavfang, wavfbang
-   double precision :: fmax, ac1, ac2, hminlwi
+   double precision :: fmax, ac1, ac2, hminlwi, rhoL, zw
 
-   integer          :: L, k1, k2
+   integer          :: k1, k2
 
-   ! done: compute only once after (re)initialization
-   ! facmax = 0.25d0*sag*rhomean*gammax**2
    hminlwi = 1d0/hminlw
    wavfu = 0d0
-   !sywav = 0d0
 
-   do L = 1,lnx
-      if (hu(L) < epshu) cycle
-      if (L > lnx1D) then
-         k1 = ln(1,L) ; k2 = ln(2,L)
-         ac1 = acl(L)
-         ac2 = 1d0-ac1
-         ! interpolation from flownodes to flowlinks
-         wavfx = ac1*sxwav(k1) + ac2*sxwav(k2)
-         wavfy = ac1*sywav(k1) + ac2*sywav(k2)
+   if (kmx==0) then
+      do L = 1,lnx
+         if (hu(L) < epshu) cycle
+         if (L > lnx1D) then
+            k1 = ln(1,L) ; k2 = ln(2,L)
+            ac1 = acl(L)
+            ac2 = 1d0-ac1
 
-         wavfbx = ac1*sbxwav(k1) + ac2*sbxwav(k2)
-         wavfby = ac1*sbywav(k1) + ac2*sbywav(k2)
+            wavfx = ac1*sxwav(k1) + ac2*sxwav(k2)
+            wavfy = ac1*sywav(k1) + ac2*sywav(k2)
 
-         twavL = ac1*twav(k1)   + ac2*twav(k2)
+            wavfbx = ac1*sbxwav(k1) + ac2*sbxwav(k2)
+            wavfby = ac1*sbywav(k1) + ac2*sbywav(k2)
 
-         ! projection in face-normal direction
-         wavfu_loc  = wavfx*csu(L)  + wavfy*snu(L)
-         wavfv_loc  = -wavfx*snu(L)  + wavfy*csu(L)
-         wavfbu_loc = wavfbx*csu(L) + wavfby*snu(L)
-         wavfbv_loc = -wavfbx*snu(L) + wavfby*csu(L)
+            twavL = ac1*twav(k1)   + ac2*twav(k2)
 
-         ! limit forces
-         fmax       = facmax*hu(L)**1.5 / max(0.01d0, twavL)
+            ! projection in face-normal direction
+            wavfu_loc  = wavfx*csu(L)  + wavfy*snu(L)
+            wavfv_loc  = -wavfx*snu(L)  + wavfy*csu(L)
+            wavfbu_loc = wavfbx*csu(L) + wavfby*snu(L)
+            wavfbv_loc = -wavfbx*snu(L) + wavfby*csu(L)
 
-         !wavfu_loc  = min(max(wavfu_loc, -fmax),fmax)
-         !wavfbu_loc = min(max(wavfbu_loc,-fmax),fmax)
-         
-         ! Should be done on the vector norm, nt separate comps
-         wavfmag = min(sqrt(wavfu_loc*wavfu_loc + wavfv_loc*wavfv_loc),fmax)
-         wavfbmag = min(sqrt(wavfbu_loc*wavfbu_loc + wavfbv_loc*wavfbv_loc),fmax)
-         wavfang  = atan2(wavfv_loc,wavfu_loc)
-         wavfbang  = atan2(wavfbv_loc,wavfbu_loc)    ! necessary?
-         wavfu_loc = wavfmag*cos(wavfang)
-         wavfv_loc = wavfmag*sin(wavfang)
-         wavfbu_loc = wavfbmag*cos(wavfbang)
-         wavfbv_loc = wavfbmag*sin(wavfbang)
+            ! limit forces
+            fmax       = facmax*hu(L)**1.5 / max(0.1d0, twavL)
 
-         ! for 3D: account for relative top-layer height in wavfu_loc, e.g.
-         !         wavfu(L) = wavfu_loc * dz(L)/hu(LL) + wavfbu_loc
-         wavfu(L) = wavfu_loc + wavfbu_loc
-         wavfv(L) = wavfv_loc + wavfbv_loc
-      else
-         ! then get data from network points. Turn off for now..
-      endif
-      !wavfu(L) = wavfu(L)/ (rhomean*hu(L))                          ! Depth is taken into account using facmax
-      wavfu(L) = wavfu(L) * min(huvli(L), hminlwi) / rhomean       ! Dimensions [m/s^2]
-      wavfv(L) = wavfv(L) * min(huvli(L), hminlwi) / rhomean       ! Dimensions [m/s^2]
-   enddo
+            ! Should be done on the vector norm, nt separate comps
+            wavfmag = min(sqrt(wavfu_loc*wavfu_loc + wavfv_loc*wavfv_loc),fmax)
+            wavfbmag = min(sqrt(wavfbu_loc*wavfbu_loc + wavfbv_loc*wavfbv_loc),fmax)
+            wavfang  = atan2(wavfv_loc,wavfu_loc)
+            wavfbang  = atan2(wavfbv_loc,wavfbu_loc)    ! necessary?
+            wavfu_loc = wavfmag*cos(wavfang)
+            wavfv_loc = wavfmag*sin(wavfang)
+            wavfbu_loc = wavfbmag*cos(wavfbang)
+            wavfbv_loc = wavfbmag*sin(wavfbang)
+
+            wavfu(L) = wavfu_loc + wavfbu_loc
+            wavfv(L) = wavfv_loc + wavfbv_loc
+         endif
+         wavfu(L) = wavfu(L) * min(huvli(L), hminlwi) / rhomean       ! Dimensions [m/s^2]
+         wavfv(L) = wavfv(L) * min(huvli(L), hminlwi) / rhomean       ! Dimensions [m/s^2]
+      enddo
+   else  ! kmx>0
+      do LL=1, lnx
+         if (hu(LL)<epshu) cycle
+         call getLbotLtop(LL, Lb, Lt)
+         if (Lt<Lb) cycle
+         k1 = ln(1,LL); k2 = ln(2,LL)
+         ac1 = acL(LL); ac2 = 1d0-ac1
+         !
+         hwavL = ac1*hwav(k1) + ac2*hwav(k2)
+         twavL = ac1*twav(k1) + ac2*twav(k2)
+         fmax  = facmax*hu(LL)**1.5 / max(0.1d0, twavL)
+         rhoL  = ac1*rho(ln(1,Lt)) + ac2*rho(ln(2,Lt)) 
+         !
+         ! Surface force, linear decrease over 0.5*hrms
+         !
+         wavfx     = ac1*sxwav(k1) + ac2*sxwav(k2)
+         wavfy     = ac1*sywav(k1) + ac2*sywav(k2)
+         wavfu_loc = csu(LL)*wavfx + snu(LL)*wavfy
+         wavfuL    = 4d0*sign(min(abs(wavfu_loc), fmax), wavfu_loc)/hwavL          ! hwavL/4 is integral over 0.5*hwavL waterdepth of linear decrease
+         zw=0.5*(hu(Lt)-hu(Lt-1))    ! center top layer
+         do L=Lt,Lb+1,-1
+            if (zw<=0.5*hwavL) then
+               wavfu(L) = wavfuL*(1d0-2d0*zw/hwavL)/rhoL/hu(LL)*(hu(L)-hu(L-1))/hu(LL)                         
+               zw = zw + 0.5*(hu(L)-hu(L-1)) + 0.5*(hu(L-1)-hu(L-2))
+            elseif (zw>0.5*hwavL .and. hu(L)>(hu(LL)-0.5*hwavL)) then                      ! partial layer
+               cc = 0.5*(hu(L)+(hu(LL)-0.5*hwavL))                                         ! replaced layer center
+               wavfu(L) = wavfuL*(1d0-2d0*zw/hwavL)/rhoL/hu(LL)*(hu(L)-cc)/hu(LL)          ! contribution over partial layer
+            endif
+         enddo
+         !
+         ! Body forces, uniform over depth
+         !
+         wavfx     = ac1*sbxwav(k1) + ac2*sbxwav(k2)
+         wavfy     = ac1*sbywav(k1) + ac2*sbywav(k2)
+         wavfu_loc = csu(LL)*wavfx + snu(LL)*wavfy
+         do L=Lb,Lt
+            rhoL  = ac1*rho(ln(1,L)) + ac2*rho(ln(2,L))
+            wavfu(L) = wavfu(L) + sign(min(abs(wavfu_loc), fmax),wavfu_loc)/rhoL/hu(LL)/hu(LL)*(hu(L)-hu(L-1))   ! integral equals wavfu_loc/rho/hu
+         enddo
+      enddo
+   endif
 
    end subroutine setwavfu
 
-
+! JRE TODO: ustokes values used here are in 3D from previous timestep (updateverticalprofile)
+! Potential solution is to separate this in subroutine to use here and in updatevp. You will lose point operation speed 
    subroutine setwavmubnd()
    use m_flowgeom
    use m_flowparameters
    use m_flowexternalforcings
-   use m_flow, only: hu, huvli, wavmubnd
+   use m_flow, only: hu, huvli, wavmubnd, kmx
    use m_waves
    implicit none
 
    double precision :: ac1, ac2
 
-   integer          :: kb, ki, L, n
+   integer          :: kb, ki, L, n, LL, Lb, Lt
    double precision :: hminlwi
 
    hminlwi = 1d0/hminlw
@@ -1005,12 +1055,21 @@
       L  = kbndu(3,n)
       ! interpolate cell-centered mass fluxes to flow links
       if (hu(L) < epshu) cycle
-      ac1 = acl(L)
-      ac2 = 1d0-ac1
-      wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
-         (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
+      if (kmx==0) then
+         ac1 = acl(L)
+         ac2 = 1d0-ac1
+         wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
+                       (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
 
-      wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
+         wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
+      else
+         call getLbotLtop(L,Lb,Lt)
+         do LL=Lb,Lt
+            wavmubnd(LL) = ustokes(LL)
+            wavmubnd(L)  = wavmubnd(L) + ustokes(LL)*(hu(LL)-hu(LL-1))  ! needed for check below
+         enddo
+         wavmubnd(L) = wavmubnd(L)/max(hu(L),epshu)
+      endif
    end do
 
    do n=1,nbndz
@@ -1020,13 +1079,22 @@
          L  = kbndz(3,n)
          if (hu(L) < epshu) cycle
          if ( wavmubnd(L).ne.0d0 ) cycle
-         ! interpolate cell-centered mass fluxes to flow links
-         ac1 = acl(L)
-         ac2 = 1d0-ac1
-         wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
-            (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
+         if (kmx==0) then
+            ! interpolate cell-centered mass fluxes to flow links
+            ac1 = acl(L)
+            ac2 = 1d0-ac1
+            wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
+               (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
 
-         wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
+            wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
+         else
+            call getLbotLtop(L,Lb,Lt)
+            do LL=Lb,Lt
+               wavmubnd(LL) = ustokes(LL)
+               wavmubnd(L)  = wavmubnd(L) + ustokes(LL)*(hu(LL)-hu(LL-1))
+            enddo
+            wavmubnd(L) = wavmubnd(L)/max(hu(L),epshu)
+         endif
       end if
    end do
 
@@ -1037,13 +1105,22 @@
       L  = kbndn(3,n)
       if (hu(L) < epshu) cycle
       if ( wavmubnd(L).ne.0d0 ) cycle
-      ! interpolate cell-centered mass fluxes to flow links
-      ac1 = acl(L)
-      ac2 = 1d0-ac1
-      wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
-         (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
+      if (kmx==0) then
+         ! interpolate cell-centered mass fluxes to flow links
+         ac1 = acl(L)
+         ac2 = 1d0-ac1
+         wavmubnd(L) = (ac1*mxwav(kb) + ac2*mxwav(ki)) * csu(L) + &
+            (ac1*mywav(kb) + ac2*mywav(ki)) * snu(L)
 
-      wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
+         wavmubnd(L) = wavmubnd(L) * min(huvli(L),hminlwi)
+      else
+         call getLbotLtop(L,Lb,Lt)
+         do LL=Lb,Lt
+            wavmubnd(LL) = ustokes(LL)
+            wavmubnd(L)  = wavmubnd(L) + ustokes(LL)*(hu(LL)-hu(LL-1))
+         enddo
+         wavmubnd(L) = wavmubnd(L)/max(hu(L),epshu)
+      endif
    end do
 
    !  tangential-velocity boundaries: not needed to define mass fluxes
@@ -1057,6 +1134,7 @@
    use m_flow, only: hu, huvli, hs
    use m_physcoef, only: sag
    use m_waves
+   use m_partitioninfo
    implicit none
 
    double precision :: Mu, Mv, hminlwi, massflux_max, mnorm, mangle          ! link-based and link-oriented wave-induced volume fluxes
@@ -1084,24 +1162,22 @@
       mx(k)  = mnorm*dcos(mangle)
       my(k)  = mnorm*dsin(mangle)
    end do
+   
+   if (jampi>0) then
+      call update_ghosts(ITYPE_SALL, 1, ndx, mx, ierror)
+      call update_ghosts(ITYPE_SALL, 1, ndx, my, ierror)
+   endif
 
    do L=1,Lnxi
       if ( hu(L).gt.epshu ) then
          k1 = ln(1,L); k2 = ln(2,L)
-         !massflux_max = 1d0/8d0*sag*(hu(L)**1.5)*gammax**2
-         !Mu =    acL(L) *(csu(L)*(Mxwav(k1)) + snu(L)*(Mywav(k1))) + &
-         !   (1d0-acL(L))*(csu(L)*(Mxwav(k2)) + snu(L)*(Mywav(k2)))
+
          Mu =    acL(L) *(csu(L)*(Mx(k1)) + snu(L)*(My(k1))) + &
             (1d0-acL(L))*(csu(L)*(Mx(k2)) + snu(L)*(My(k2)))
-         !Mv =    acL(L) *(-snu(L)*(Mxwav(k1)) + csu(L)*(Mywav(k1))) + &
-         !   (1d0-acL(L))*(-snu(L)*(Mxwav(k2)) + csu(L)*(Mywav(k2)))
+
          Mv =    acL(L) *(-snu(L)*(Mx(k1)) + csu(L)*(My(k1))) + &
             (1d0-acL(L))*(-snu(L)*(Mx(k2)) + csu(L)*(My(k2)))
-         !Mu = min(max(Mu, -massflux_max),massflux_max)
-         !Mv = min(max(Mv, -massflux_max),massflux_max)
-         
-         !ustokes(L) = Mu * min(huvli(L),hminlwi)                           ! "Corrects" for unphysical longshore drift along waterline
-         !vstokes(L) = Mv * min(huvli(L),hminlwi)
+
          ustokes(L) = Mu * huvli(L)
          vstokes(L) = Mv * huvli(L)
       else
@@ -1115,21 +1191,13 @@
          k1 = ln(1,L) ! buiten
          k2 = ln(2,L) ! binnen
          Mx(k1) = Mx(k2);  My(k1) = My(k2)
-         !Mxwav(k1) = Mxwav(k2);  Mywav(k1) = Mywav(k2)
-         !massflux_max = 1d0/8d0*sag*(hu(L)**1.5)*gammax**2
-         !Mu =    acL(L) *(csu(L)*(Mxwav(k1)) + snu(L)*(Mywav(k1))) + &
-         !   (1d0-acL(L))*(csu(L)*(Mxwav(k2)) + snu(L)*(Mywav(k2)))
+
          Mu =    acL(L) *(csu(L)*(Mx(k1)) + snu(L)*(My(k1))) + &
             (1d0-acL(L))*(csu(L)*(Mx(k2)) + snu(L)*(My(k2)))
-         !Mv =    acL(L) *(-snu(L)*(Mxwav(k1)) + csu(L)*(Mywav(k1))) + &
-         !   (1d0-acL(L))*(-snu(L)*(Mxwav(k2)) + csu(L)*(Mywav(k2)))
+
          Mv =    acL(L) *(-snu(L)*(Mx(k1)) + csu(L)*(My(k1))) + &
             (1d0-acL(L))*(-snu(L)*(Mx(k2)) + csu(L)*(My(k2)))
-         !Mu = min(max(Mu, -massflux_max),massflux_max)
-         !Mv = min(max(Mv, -massflux_max),massflux_max)
          
-         !ustokes(L) = Mu * min(huvli(L),hminlwi)                           ! "Corrects" for unphysical longshore drift along waterline
-         !vstokes(L) = Mv * min(huvli(L),hminlwi)
          ustokes(L) = Mu * huvli(L)
          vstokes(L) = Mv * huvli(L)
       else
@@ -1137,6 +1205,13 @@
          vstokes(L) = 0d0
       end if
    end do
+   
+   if (jampi>0) then
+      call update_ghosts(ITYPE_U, 1, lnx, ustokes, ierror)
+      call update_ghosts(ITYPE_U, 1, lnx, vstokes, ierror)
+   !   call update_ghostboundvals(ITYPE_U, 1, lnx, ustokes, 0, ierror)
+   !   call update_ghostboundvals(ITYPE_U, 1, lnx, vstokes, 0, ierror)
+   endif
 
    ierror = 0 
 1234 continue

@@ -18209,7 +18209,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(12) = 'Epsmaxlev                            (m)' ; it(2*12) = 6
    OPTION(13) = 'Epsmaxlevm                           (m)' ; it(2*13) = 6
    OPTION(14) = 'jawavestreaming terms in D3Dwavemodel( )' ; it(2*14) = 2
-   OPTION(15) = 'jawaveStokes 0,1,2                   ( )' ; it(2*15) = 2
+   OPTION(15) = 'jawaveStokes 0,1,2,3                 ( )' ; it(2*15) = 2
    OPTION(16) = 'jawaveRoller                         ( )' ; it(2*16) = 2
    OPTION(17) = 'Maxitforestersal                     ( )' ; it(2*17) = 2
    OPTION(18) = 'Maxitforestertem                     ( )' ; it(2*18) = 2

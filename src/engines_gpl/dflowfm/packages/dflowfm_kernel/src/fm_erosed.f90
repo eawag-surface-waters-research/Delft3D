@@ -587,6 +587,7 @@
    subroutine inipointers_erosed()
    use m_fm_erosed
    use m_flowgeom, only: ndx, lnx
+   use m_flow, only: ndkx
    implicit none
    integer :: ierr
 
@@ -768,7 +769,7 @@
    rca                 => sedtra%rca
    statqnt             => sedtra%statqnt
 
-   allocate(ucxq_mor(1:ndx), ucyq_mor(1:ndx), hs_mor(1:ndx), stat=ierr)   ! JRE TODO
+   allocate(ucxq_mor(1:ndkx), ucyq_mor(1:ndkx), hs_mor(1:ndkx), stat=ierr)   ! JRE TODO
    ucxq_mor = 0d0; ucyq_mor = 0d0; hs_mor = 0d0
    allocate(q_zeta(2,lnx), stat=ierr)
    q_zeta = 0d0
@@ -1235,7 +1236,6 @@
          vvv  (nm) = 0.0_fp
          umod (nm) = 0.0_fp
          zumod(nm) = 0.0_fp
-         cycle
       endif
    end do
    !
@@ -1380,13 +1380,13 @@
             ! at layer interfaces, but not at bed and surface
             do k = kb, kt-1
                do l = 1, lsed
-                  seddif(l, k) = max(vicwws(k),dicoww)   ! sigrhoi * vicwws(k) + difsed(l), with sigrhoi = 1d0
+                  seddif(l, k) = vicwws(k)+dicoww        ! sigrhoi * vicwws(k) + difsed(l), with sigrhoi = 1d0
                enddo                                     ! consistent with eqtran.f90, line 265
             enddo
             ! in layers
             do k = kb, kt
                do l = 1, lsed
-                  rsedeq(k, l) = 0.0_fp
+                  rsedeq(k, l) = 0d0
                enddo
             enddo
          endif
@@ -1460,7 +1460,7 @@
          z0rou = z0curk(nm)       ! currents+potentially trachy
       end if
       !
-      chezy = sag * log( 1.0_fp + h1/max(1.0e-8_fp,ee*z0rou) ) / vonkar
+      chezy = sag * log( 1.0_fp + h1/max(1.0d-10,ee*z0rou) ) / vonkar
       !
       ! bed shear stress as used in flow, or
       ! skin fiction following Soulsby; "Bed shear stress under
@@ -1496,18 +1496,7 @@
       ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,epshs))
       !if (scour) then
       !
-      ! Calculate extra stress (tauadd) for point = nm, if so required by
-      ! user input. Increment TAUB(MX) and USTARC.
-      !
-      !!          call shearx(tauadd, nm, gdp)
-      !taub = sqrt(taub**2 + tauadd**2)
-      !!
-      !tauc = rhowat(kbed)*ustarc**2
-      !tauc = sqrt(tauc**2 + tauadd**2)
-      !ustarc = sqrt(tauc/rhowat(kbed))
-      !else
-      tauadd = 0.0_fp
-      !endif
+      tauadd = 0d0
       !
       ! Compute effective depth averaged velocity
       !
@@ -1528,28 +1517,28 @@
          temperature = backgroundwatertemperature
       endif
       !
-      taks0 = 0.0_fp
+      taks0 = 0d0
       !
       ! Calculate Van Rijn's reference height
       !
       if (iopkcw==1) then            !  iopkcw: options to calculate curr related roughness height
-         rc = 30.0_fp*z0curk(nm)
+         rc = 30.d0*z0curk(nm)       ! 33?
       else
          rc = rdc
       endif
-      taks0 = max(aksfac*rc, 0.01_fp*h1)
+      taks0 = max(aksfac*rc, 0.01d0*h1)
       !
       if (jawave>0) then
-         if (twav(nm)>0.0_fp) then
-            delr  = 0.025_fp
-            taks0 = max(0.5_fp*delr, taks0)
+         if (twav(nm)>0d0) then
+            delr  = 0.025d0
+            taks0 = max(0.5d0*delr, taks0)
          end if
       endif
       !
       ! Limit maximum aks to 20% of water depth
       ! (may be used when water depth becomes very small)
       !
-      taks0 = min(taks0, 0.2_fp*h1)
+      taks0 = min(taks0, 0.2d0*h1)
       !
       ! Input parameters are passed via dll_reals/integers/strings-arrays
       !
@@ -1691,8 +1680,8 @@
             endif
             !
             kmaxsd        = 1                       ! for mud fractions kmaxsd points to the grid cell at the bottom of the water column
-            thick0        = thicklc(kmaxsd) * h0
-            thick1        = thicklc(kmaxsd) * h1
+            thick0        = max(thicklc(kmaxsd) * h0, epshs)
+            thick1        = max(thicklc(kmaxsd) * h1, epshs)
             !
             call erosilt(thicklc        ,kmaxlc       , wslc        , mdia          , &
                        & thick1         ,thick1       , fixfac(nm,l), srcmax(nm, l) , &                         ! mass conservation
@@ -1731,7 +1720,7 @@
                !
                klc    = 0
                do k = kt, kb-1, -1
-                  seddif(l, k) = max(vicwws(k),dicoww)     ! constant value from mdu; JRE to check
+                  seddif(l, k) = vicwws(k)+dicoww     ! constant value from mdu; JRE to check
                   klc=klc+1
                enddo
             endif
@@ -1835,7 +1824,7 @@
                dcwwlc = 0.0_fp
                wslc   = 0.0_fp
                do kk = kt, kb-1, -1         ! sigma convention
-                  dcwwlc(klc) = max(vicwws(kk),dicoww)  ! JRE to check for double counting
+                  dcwwlc(klc) = vicwws(kk)+dicoww  ! JRE to check for double counting
                   wslc(klc)   = ws(kk, l)
                   klc=klc+1
                enddo
@@ -1975,7 +1964,7 @@
       enddo ! next sediment fraction
       ua(nm) = real(dll_reals(RP_UAU), fp)
       va(nm) = real(dll_reals(RP_VAU), fp)
-   enddo ! next nm point
+   enddo ! next nm point 
    !
    ! Distribute velocity asymmetry to links
    !
@@ -2216,7 +2205,7 @@
    endif
    !
    if (duneavalan) then
-      call duneaval(e_sbcn, error)         ! only on current related bed transport
+      call duneaval(error)         ! only on current related bed transport
       if (error) then
          write(errmsg,'(a)') 'fm_erosed::duneavalan returned an error. Check your inputs.'
          call mess(LEVEL_FATAL, errmsg)
@@ -2408,13 +2397,13 @@
    use precision
    use bedcomposition_module
    use sediment_basics_module
-   use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au, zws
+   use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au, zws, sa1, tem1
    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor, bl_ave, ndx2d
    use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
-   use m_flowparameters, only: epshs, epshu, jawave, eps10
-   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, jaupdates1, m_sediment_sed=>sed, kcsmor
+   use m_flowparameters, only: epshs, epshu, jawave, eps10, jasal, jatem
+   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, m_sediment_sed=>sed, avalflux, botcrit, kcsmor
    use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user
-   use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot
+   use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot, itra1, itran, numconst
    use unstruc_files, only: mdia, close_all_files
    use m_fm_erosed
    use Messagehandling
@@ -2436,54 +2425,55 @@
    !!
    !! Local parameters
    !!
-   character(len=256)                               :: msg
+   character(len=256)                             :: msg
    !!
    !! Global variables
    !!
    !!
    !! Local variables
    !!
-   logical                              :: bedload, error
-   integer                              :: ierror
-   integer                              :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout, kk, ised
-   integer                              :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2, iL
-   double precision                     :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor
-   double precision                     :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux, bedflxtot
-
-   integer,          parameter          :: bedchangemessmax = 50
-   double precision, parameter          :: dtol = 1d-16
-
-   double precision                     :: tausum2(1)
-   double precision                     :: sbsum, taucurc, czc
-   double precision, dimension(lsedtot) :: bc_sed_distribution
+   logical                                     :: bedload, error
+   integer                                     :: ierror
+   integer                                     :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout, kk, ised, itrac
+   integer                                     :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2, iL, ac1, ac2
+   double precision                            :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor, hsk, ddp
+   double precision                            :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux, bedflxtot
+                                               
+   integer,          parameter                 :: bedchangemessmax = 50
+   double precision, parameter                 :: dtol = 1d-16
+                                               
+   double precision                            :: tausum2(1)
+   double precision                            :: sbsum, taucurc, czc
+   double precision, dimension(lsedtot)        :: bc_sed_distribution
    double precision, dimension(:), allocatable :: bl0
    double precision, dimension(:), allocatable :: bl_ave0
 
-   integer          :: icond
-   integer          :: jb
-   integer          :: ib
-   integer          :: kvalue
-   integer          :: li
-   integer          :: lsedbed
-   integer          :: nxmx
-   integer          :: nmk
-   integer          :: lm
-   double precision :: aksu
-   double precision :: apower
-   double precision :: cavg
-   double precision :: cavg1
-   double precision :: cavg2
-   double precision :: ceavg
-   double precision :: cumflux
-   double precision :: alfa_dist
-   double precision :: alfa_mag
-   double precision :: dz
-   double precision :: dzup
-   double precision :: htdif
-   double precision :: rate
-   double precision :: r1avg
-   double precision :: z
-   double precision :: timhr
+   integer                                     :: icond
+   integer                                     :: jb
+   integer                                     :: ib
+   integer                                     :: kvalue
+   integer                                     :: li
+   integer                                     :: lsedbed
+   integer                                     :: nxmx
+   integer                                     :: nmk
+   integer                                     :: lm
+   double precision                            :: aksu
+   double precision                            :: apower
+   double precision                            :: cavg
+   double precision                            :: cavg1
+   double precision                            :: cavg2
+   double precision                            :: ceavg
+   double precision                            :: cumflux
+   double precision                            :: alfa_dist
+   double precision                            :: alfa_mag
+   double precision                            :: dz
+   double precision                            :: dzup
+   double precision                            :: htdif
+   double precision                            :: rate
+   double precision                            :: r1avg
+   double precision                            :: z
+   double precision                            :: timhr
+   double precision                            :: smax
     real(hp) :: dim_real
    !!
    !!! executable statements -------------------------------------------------------
@@ -2537,7 +2527,11 @@
                !                call dfexchg( fluxu(:,:,ll) ,1, kmax, dfloat, nm_pos, gdp)
                !                call dfexchg( fluxv(:,:,ll) ,1, kmax, dfloat, nm_pos, gdp)
                do Lx = 1, lnx
+                  ac1 = acL(Lx)
+                  ac2 = 1d0 - ac1
+                  k1 = ln(1,Lx); k2 = ln(2,Lx)
                   call getLbotLtop(Lx, Lb, Lt)
+                  if (Lt<Lb) cycle
                   !
                   ! try new approach - should be smoother
                   ! don't worry about direction of the flow
@@ -2554,12 +2548,9 @@
                      !
                      ! Determine reference height aks in vel. pt.
                      if (Lx>lnxi) then ! boundary link, take inner point value
-                        k2 = ln(2,Lx)
                         aksu = aks(k2,l)
                      else
-                        k1 = ln(1,Lx); k2 = ln(2,Lx)
-                        !aksu = 0.5*(aks(k1, l) + aks(k2, l))
-                        aksu = acL(Lx)*aks(k1, l) + (1d0-acL(Lx))*aks(k2, l)
+                        aksu = ac1*aks(k1, l) + ac2*aks(k2, l)
                      end if
                      !
                      ! work up through layers integrating transport
@@ -2570,7 +2561,7 @@
                      do Lf = Lb, Lt
                         zktop = hu(Lf)
                         if (Lf==Lt) then
-                           dz = hu(Lf)
+                           dz = hu(Lx)
                         else
                            dz = hu(Lf)-hu(Lf-1)
                         end if
@@ -2590,9 +2581,9 @@
                      enddo
                      !
                      k = ka
-                     if (k==0) then
+                     if (ka==0) then
                         ! aksu larger than water depth, so all done
-                     elseif (k==Lt) then
+                     elseif (ka==Lt) then
                         ! aksu is located in top layer; use simple flux
                         ! approximation assuming uniform flux
                         cumflux = cumflux + fluxhortot(ll,k)*(aksu - zktop + dz)/dz
@@ -2600,18 +2591,17 @@
                         ! aksu is located in a layer below the top layer
                         !
                         ! Get reference concentration at aksu
-                        !
-                        k1 = ln(1,Lx); k2 = ln(2,Lx)  
+                        !  
                         if (Lx>lnxi) then ! boundary link, take inner point value
                            ceavg = rca(k2,l)
                         else
-                           ceavg = acL(Lx)*rca(k1, l) + (1d0-acL(Lx))*rca(k2, l)   ! Perot average
+                           ceavg = ac1*rca(k1, l) + ac2*rca(k2, l)   ! Perot average
                         end if
                         !
                         ! Get concentration in layer above this layer
                         !
                         kf1 = ln(1,k+1); kf2 = ln(2,k+1)
-                        r1avg = acL(Lx)*constituents(ll,kf1) + (1d0-acL(Lx))*constituents(ll,kf2)
+                        r1avg = ac1*constituents(ll,kf1) + ac2*constituents(ll,kf2)
                         !
                         ! If there is a significant concentration gradient, and significant
                         ! reference concentration
@@ -2677,7 +2667,7 @@
                      ! a case, the suspended sediment transport vector must
                      ! also be reduced.
                      !
-                     if (e_scrn(Lx,l) > 0.0d0 .and. Lx<lnxi) then
+                     if (e_scrn(Lx,l) > 0.0d0 .and. Lx<=lnxi) then
                         e_scrn(Lx,l) = e_scrn(Lx,l)*fixfac(k1, l)      ! to check
                      else
                         e_scrn(Lx,l) = e_scrn(Lx,l)*fixfac(k2, l)      ! binnenpunt
@@ -2690,10 +2680,11 @@
          enddo       ! l
       endif          ! kmx>0; end of correction for bed/total load
       !       !
-      !       if (lsed > 0) then
-      !          call dfexchg( e_scrn,   1, lsed, dfloat, nm_pos, gdp)
-      !          call dfexchg( e_scrt,   1, lsed, dfloat, nm_pos, gdp)
-      !       endif
+      !if (kmx>0 .and. jampi>0) then
+      !   if (lsed > 0) then
+      !      call update_ghosts(ITYPE_U, lsed, lnx, e_scrn, ierror)   
+      !   endif
+      !end if
    endif           ! sus /= 0.0
 
    do ll = 1, lsed
@@ -2701,12 +2692,21 @@
       do L=1,lnx
          e_ssn(L, ll) = 0d0
          call getLbotLtop(L,Lb,Lt)
+         if (Lt<Lb) cycle
          do iL = Lb,Lt
             e_ssn(L, ll)  = e_ssn(L, ll) + fluxhortot(j,iL)/max(wu(L), epshu)             ! timestep transports per layer [kg/s/m]
          enddo
          e_ssn(L, ll)  = e_ssn(L, ll) + e_scrn(L, ll)  ! bottom layer correction
       enddo
    enddo
+   !
+   !if (jampi>0) then
+   !   call update_ghosts(ITYPE_U, lsedtot, lnx, e_sbn, ierror)
+   !   call update_ghosts(ITYPE_U, NUMCONST,lnx,fluxhortot,ierror)
+   !   if (lsed>0) then
+   !      call update_ghosts(ITYPE_U, lsed, lnx, e_ssn, ierror)
+   !   endif
+   !endif   
    !
    ! if morphological computations have started
    !
@@ -2812,7 +2812,8 @@
                   if (morbnd(jb)%ibcmt(3) == lsedbed) then
                      !rate = bc_mor_array(li)
                      call gettau( ln(2,lm), taucurc, czc )
-                     if ( tausum2(1) > 0d0 ) then
+                     !if ( tausum2(1) > 0d0 ) then
+                     if ( tausum2(1) > 0d0 .and. wu_mor(lm)>0d0) then    ! fix cutcell
                         rate = bc_sed_distribution(li) * taucurc**2 / wu_mor(lm) / tausum2(1)
                      else
                         rate = bc_mor_array(li)
@@ -2876,6 +2877,7 @@
                         LL = nd(nm)%ln(ii)
                         Lf = iabs(LL)
                         call getLbotLtop(Lf,Lb,Lt)
+                        if (Lt<Lb) cycle
                         flux = 0d0
                         do iL = Lb,Lt
                            flux = flux + fluxhortot(j,iL)
@@ -2955,13 +2957,28 @@
                   Lf = iabs(LL)
                   flux = e_sbn(Lf,l)*wu_mor(Lf)
 
-                  if ( LL>0 ) then  ! inward
+                  if ( LL>0 ) then     ! inward
                      sumflux = sumflux + flux
                   else                 ! outward
                      sumflux = sumflux - flux
                   end if
                end do
                trndiv = trndiv + sumflux * bai_mor(nm)
+            endif
+            !
+            if (duneavalan) then   ! take fluxes out of timestep restriction 
+               sumflux = 0d0       ! drawback: avalanching fluxes not included in total transports 
+               do ii=1,nd(nm)%lnx
+                  LL = nd(nm)%ln(ii)
+                  Lf = iabs(LL)
+                  flux = avalflux(Lf,l)*wu_mor(Lf)
+                  if ( LL>0 ) then  ! inward
+                     sumflux = sumflux + flux
+                  else              ! outward
+                     sumflux = sumflux - flux
+                  end if
+               end do
+               trndiv = trndiv + sumflux * bai_mor(nm)   
             endif
             !
             dsdnm = (trndiv+sedflx-eroflx) * dtmor
@@ -3006,7 +3023,6 @@
          !
          ! If this is a cell in which sediment processes are active then ...
          !
-         !if (kcs(nm)*kfs(nm)*kfsed(nm) /= 1) cycle
          if (kfsed(nm) /= 1 .or. hs(nm)<epshs) cycle                    ! check whether sufficient as condition
          !
          totdbodsd = 0d0
@@ -3079,6 +3095,9 @@
                   do L=1,nd(nm)%lnx
                      k1 = ln(1,iabs(nd(nm)%ln(L))); k2 = ln(2,iabs(nd(nm)%ln(L)))
                      Lf = iabs(nd(nm)%ln(L))
+                     ! DEBUG for cutcells:
+                     if (wu_mor(Lf)==0d0) cycle
+                     !\ DEBUG for cutcells
                      if (k2 == nm) then
                         knb = k1
                      else
@@ -3098,6 +3117,8 @@
 
       if ( jampi.gt.0 ) then
          call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
+         !call update_ghosts(ITYPE_U, lsedtot, lnx, e_sbn, ierror)
+         !call update_ghosts(ITYPE_U, lsedtot, lnx, e_ssn, ierror)
       end if
       !
       ! Modifications for running parallel conditions (mormerge)
@@ -3132,7 +3153,7 @@
       call reconstructsedtransports()   ! reconstruct cell centre transports for morstats and cumulative st output
       call collectcumultransports()     ! Always needed, written on last timestep of simulation
       !
-      if (stmpar%morpar%moroutput%morstats .and. ti_sed>0d0) then
+      if (stmpar%morpar%moroutput%morstats .and. ti_sed>0d0) then 
          call morstats(dbodsd, hs_mor, ucxq_mor, ucyq_mor, sbcx, sbcy, sbwx, sbwy, sscx, sscy, sswx, sswy)
       endif
       !
@@ -3213,7 +3234,7 @@
             ! entries in the morbnd structure. The sum of alfa_mag(ib)**2
             ! will be equal to 1.
             !
-            if (u1(lm)<0d0) icond = 0
+            if (u1(lm)<0d0) icond = 0         ! to do: 3d
             !
             select case(icond)
             case (0,4,5)
@@ -3290,6 +3311,10 @@
       enddo
    endif ! nst >= itmor
    !
+   !if (jampi>0) then
+   !   call update_ghosts(ITYPE_SALL, 1, Ndx, blchg, ierror)
+   !endif
+   !
    ! Update bottom elevations
    !
    if (bedupd) then
@@ -3302,13 +3327,25 @@
       !
       call fm_update_crosssections(blchg) ! blchg gets updated for 1d cross-sectional profiles in this routine
       !
-      do nm = 1, Ndx
-         !
-         bl(nm) = bl(nm) + blchg(nm)
-         !
-      enddo
+      !if (jampi==1) then    ! restrict ifs in do loops
+      !   do nm = 1, Ndx
+      !      !
+      !      if (.not. (idomain(nm)==my_rank)) cycle
+      !      bl(nm) = bl(nm) + blchg(nm)
+      !      !
+      !   enddo
+      !else
+         do nm = 1, Ndx
+            !
+            bl(nm) = bl(nm) + blchg(nm)
+            !
+         enddo
+      !endif
       !
       ! AvD: Sander suggestie: call update_geom(2)
+      !if (jampi>0) then
+      !   call update_ghosts(ITYPE_SALL, 1, Ndx, bl, ierror)
+      !endif
       !
       ! Free morpho boundaries get Neumann update
       !
@@ -3324,38 +3361,78 @@
       !
       ! JRE+BJ: Update concentrations in water column to conserve mass because of bottom update
       ! This needs to happen in work array sed, not constituents, because of copying back and forth later on
-      ! To do: 3D
+      !
       if (kmx==0) then
-         do ll = 1, stmpar%lsedsus
-            m_sediment_sed(ll,:) = m_sediment_sed(ll,:) * hs / max(hs - blchg, 1d-10)
+         do k = 1, ndx
+            hsk = hs(k)
+            if (hsk<epshs) cycle
+            ddp = hsk/max(hsk-blchg(k),botcrit)
+            do ll = 1, stmpar%lsedsus
+               m_sediment_sed(ll,k) = m_sediment_sed(ll,k) * ddp
+            enddo
+            !
+            if (jasal>0) then
+               sa1(k) =  sa1(k) * ddp
+            endif
+            !
+            !if (jatem>0) then
+            !   tem1(k) =  tem1(k)* ddp
+            !end if
+            !
+            if (ITRA1>0) then
+               do itrac=ITRA1,ITRAN
+                  constituents(itrac,k) = constituents(itrac,k)*ddp
+               enddo
+            endif
          enddo
       else
          do ll = 1, stmpar%lsedsus       ! works for sigma only
             do k=1,ndx
+               hsk = hs(k)
+               if (hsk<epshs) cycle
+               ddp = hsk/max(hsk-blchg(k),botcrit)
                call getkbotktop(k,kb,kt)
                do kk=kb,kt
-                  m_sediment_sed(ll,kk) = m_sediment_sed(ll,kk) * hs(k) / max(hs(k) - blchg(k), 1d-10)
+                  m_sediment_sed(ll,kk) = m_sediment_sed(ll,kk) * ddp
                enddo
             enddo
          enddo
+         !
+         if (jasal>0) then
+            do k=1,ndx
+               if (hs(k)<epshs) cycle
+               call getkbotktop(k,kb,kt)
+               do kk=kb,kt
+                  sa1(kk) = sa1(kk) * hs(k) / max(hs(k) - blchg(k), botcrit)
+               enddo
+            enddo
+         endif
+         !
+         !if (jatem>0) then
+         !   do k=1,ndx
+         !      if (hs(k)<epshs) cycle
+         !      call getkbotktop(k,kb,kt)
+         !      do kk=kb,kt
+         !         tem1(kk) = tem1(kk) * hs(k) / max(hs(k) - blchg(k), botcrit)
+         !      enddo
+         !   enddo
+         !endif
+         !
+         if (ITRA1>0) then
+            do itrac=ITRA1,ITRAN
+               do k=1,ndx
+                  if (hs(k)<epshs) cycle
+                  call getkbotktop(k,kb,kt)
+                  do kk=kb,kt
+                     constituents(itrac,kk) = constituents(itrac,kk)*hs(k) / max(hs(k) - blchg(k), botcrit)
+                  enddo
+               enddo
+            enddo
+         endif
+         !
       endif
       !
-      ! Placeholders, question is whether we need this here:
-      !if (jasal>0) then
-      !   ! to do
-      !endif
-      !!
-      !if (jatem>0) then
-      !   ! to do
-      !end if
-      !!
-      !if (TRA1>0) then
-      !   ! you guessed it...
-      !endif
-
-      !
       do nm = 1, ndx
-         !
          ! note: if kcs(nm)=0 then blchg(nm)=0.0
          ! should change to following test because blchg may be small
          ! due to truncation errors
@@ -3367,7 +3444,7 @@
          ! bed or maximum water level in surrounding wet cells
          ! (whichever is higher)
          !
-         if (hs(nm) < epshs .or. jaupdates1==1) then
+         if (hs(nm)<epshs) then
             s1(nm) = s1(nm) + blchg(nm)
             s0(nm) = s0(nm) + blchg(nm)
          endif
@@ -3897,12 +3974,12 @@
                   reducfac = (h1*dzmax)/abs(dz)
                   if (reducfac < 0.01 .and. (time1 > tstart_user + tmor * tfac) .and. bedupd) then
                      reducmesscount = reducmesscount + 1
-                     if (reducmesscount <= reducmessmax) then
-                        write(message,'(a,i0,a,f12.2,a,2(i0,a))') &
-                           & 'Source and sink term sediment ',l,' reduced with factor', &
-                           & 1/reducfac,' node number=(',nm,'), after ', int(dnt) , ' timesteps.'
-                        call write_warning(message, unit=mdia)
-                     endif
+                     !if (reducmesscount <= reducmessmax) then
+                     !   write(message,'(a,i0,a,f12.2,a,2(i0,a))') &
+                     !      & 'Source and sink term sediment ',l,' reduced with factor', &
+                     !      & 1/reducfac,' node number=(',nm,'), after ', int(dnt) , ' timesteps.'
+                     !   call write_warning(message, unit=mdia)
+                     !endif
                   endif
                   sourse(nm, l)  = sourse(nm, l) *reducfac
                   sour_im(nm, l) = sour_im(nm, l)*reducfac
@@ -3951,6 +4028,7 @@
             j=ll+ISED1-1 ! constituent index
             do LLL=Lnxi+1,Lnx
                call getLbotLtop(LLL,Lb,Lt)
+               if (Lt<Lb) cycle
                do L=Lb,Lt
                   kb = ln(1,L); ki = ln(2,L)
                   constituents(j,kb) = constituents(j,ki)
@@ -3967,6 +4045,7 @@
             do k=1,nbndsf(ll)
                LLL = bndsf(ll)%k(3,k)
                call getLbotLtop(LLL,Lb,Lt)
+               if (Lt<Lb) cycle
                if ( hu(LLL)>0d0 ) then
                   do L=Lb,Lt
                      kb = ln(1,L); ki = ln(2,L)
@@ -3996,6 +4075,7 @@
             j=ll+ISED1-1 ! constituent index
             do LLL=Lnxi+1,Lnx
                call getLbotLtop(LLL,Lb,Lt)
+               if (Lt<Lb) cycle
                do L=Lb,Lt
                   kb = ln(1,L); ki = ln(2,L)
                   constituents(j,kb) = constituents(j,ki)
@@ -4012,6 +4092,7 @@
             do k=1,nbndsf(ll)
                LLL = bndsf(ll)%k(3,k)
                call getLbotLtop(LLL,Lb,Lt)
+               if (Lt<Lb) cycle
                do L=Lb,Lt
                   kb = ln(1,L); ki = ln(2,L)
                   kk =  kmxd*(k-1)+L-Lb+1
@@ -4053,7 +4134,7 @@
    !! Local variables
    !!
    logical                :: di50spatial
-   integer                :: l, Lf, k1, k2, lbot, ltop
+   integer                :: l, Lf, k1, k2, lb, lt
 
    double precision       :: di50, phi, tphi, sbedm, depth, dzdp, dzds, bagnol, alfas
    double precision       :: delta, dmloc, ftheta, hidexploc, shield, sina, cosa, tnorm, frc, fixf
@@ -4073,11 +4154,14 @@
    tphi = tan(phi)
 
    do Lf = 1, Lnx
+      ! for cutcell
+      if (wu_mor(Lf)==0d0) cycle    
+      !
       if (hu(Lf) > 0d0) then
          k1 = ln(1, Lf)
          k2 = ln(2, Lf)
-         call getLbotLtop(Lf, Lbot, Ltop)
-
+         call getLbotLtop(Lf, Lb, Lt)
+         if (Lt<Lb) cycle
          do l = 1, lsedtot
             if (sedtyp(l) /= SEDTYP_COHESIVE) then
                di50 = sedd50(l)
@@ -4159,7 +4243,7 @@
                      if (di50spatial) then
                         di50 = sqrt(sedd50fld(k1)*sedd50fld(k2))
                      endif
-                     delta   = (rhosol(l) - rhou(lbot))/rhou(lbot)
+                     delta   = (rhosol(l) - rhou(lb))/rhou(lb)
                      shield  = ust2avg/ag/delta/di50
                      !
                      if (shield/=0.0_fp) then
@@ -4538,7 +4622,7 @@
    enddo
    end subroutine bndmorlyr
 
-   subroutine duneaval(sbn, error)
+   subroutine duneaval(error)
    use m_fm_erosed
    use m_sediment
    use m_flowgeom
@@ -4548,17 +4632,20 @@
    implicit none
 
    logical,                                      intent(out)   :: error
-   double precision, dimension(1:lnx,1:lsedtot), intent(inout) :: sbn
 
    integer                    :: ierr
-   integer                    :: k1, k2, L, lsd
+   integer                    :: k1, k2, L, lsd, ac1, ac2
    double precision           :: slp, slpmax, avflux, maxflux
 
-   error = .false.
-
+   error = .true.
+   avalflux = 0d0
+   
    do lsd = 1, lsedtot
+      if (sedtyp(lsd) == SEDTYP_COHESIVE) cycle
       do L = 1, lnx
+         if (wu_mor(L)==0d0) cycle
          k1 = ln(1,L); k2 = ln(2,L)
+         ac1 = acL(L); ac2=1d0-ac1
          if (hs(k1)>hswitch .or. hs(k2)> hswitch) then
             slpmax = wetslope
          else
@@ -4567,7 +4654,7 @@
          !
          slp = sqrt(e_dzdn(L)*e_dzdn(L)+e_dzdt(L)*e_dzdt(L))
          if (slp>slpmax) then
-            avflux = ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * (bl(k2)-bl(k1) + slpmax*e_dzdn(L)/slp*Dx(L)) * (acL(L) * frac(k1,lsd) + (1 - acL(L)) * frac(k2,lsd)) / avaltime / morfac
+            avflux = ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * (bl(k2)-bl(k1) + slpmax*e_dzdn(L)/slp*Dx(L)) * (ac1*frac(k1,lsd) + ac2*frac(k2,lsd)) / avaltime / morfac
 
             maxflux= ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * dzmaxdune / morfac
 
@@ -4579,12 +4666,12 @@
                end if
             endif
 
-            sbn(L, lsd) = sbn(L,lsd) - avflux*rhosol(lsd)/wu_mor(L)
+            avalflux(L, lsd) = avalflux(L,lsd) - avflux*rhosol(lsd)/wu_mor(L)
          end if
       end do
    end do
    !
-   ierr = 0
+   error = .false.
 1234 continue
    end subroutine duneaval
 
@@ -4719,78 +4806,155 @@
 
    end subroutine
 
-   ! =================================================================================================
-   ! =================================================================================================
    subroutine setucxqucyq()
    use m_fm_erosed, only: ucxq_mor, ucyq_mor, hs_mor
-   use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl
-   use m_flow, only: hs, hu, u1, ucxq, ucyq
-   use m_flowparameters ,only: jacstbnd, epshs
+   use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl, ndxi
+   use m_flow, only: hs, hu, u1, ucxq, ucyq, zws, kmx, kmxL
+   use m_flowparameters ,only: jacstbnd, epshs, eps10
    use m_sediment, only: stmpar
+   use m_turbulence, only:ln0
 
    implicit none
-   integer          :: L, LL, k, k1, k2
-   double precision :: wcxu, wcyu, cs, sn, uin
+   integer          :: L, LL, k, k1, k2, Lt, Lb, kk, kb, kt
+   double precision :: wcxu, wcyu, cs, sn, uin, huL
    logical, pointer :: maximumwaterdepth
 
    maximumwaterdepth => stmpar%morpar%mornum%maximumwaterdepth
 
-   ucxq_mor = 0d0 ; ucyq_mor = 0d0
+   ucxq_mor = 0d0 ; ucyq_mor = 0d0; hs_mor = 0d0
 
    if( .not. maximumwaterdepth ) then
-      do k = 1,ndx
-         ucxq_mor(k) = ucxq(k)
-         ucyq_mor(k) = ucyq(k)
-         hs_mor(k)   = hs(k)
-      enddo
+      if (kmx<1) then
+         do k = 1,ndx
+            ucxq_mor(k) = ucxq(k)
+            ucyq_mor(k) = ucyq(k)
+            hs_mor(k)   = hs(k)
+         enddo
+      else
+         do k=1,ndx
+            ucxq_mor(k) = ucxq(k)   ! depth-averaged values
+            ucyq_mor(k) = ucyq(k)
+            hs_mor(k)    = hs(k) 
+            call getkbotktop(k,kb,kt)
+            do kk=kb,kt
+               ucxq_mor(kk) = ucxq(kk)
+               ucyq_mor(kk) = ucyq(kk)  
+            enddo
+         enddo
+      endif
       return
    endif
 
-   do L = 1,lnx
-      if (u1(L) == 0d0) cycle
-      k1 = ln(1,L) ; k2 = ln(2,L)
-      wcxu = wcx1(L)*u1(L)
-      ucxq_mor (k1) = ucxq_mor(k1) + wcxu*hu(L)
-      wcyu = wcy1(L)*u1(L)
-      ucyq_mor (k1) = ucyq_mor(k1) + wcyu*hu(L)
-      wcxu = wcx2(L)*u1(L)
-      ucxq_mor (k2) = ucxq_mor(k2) + wcxu*hu(L)
-      wcyu = wcy2(L)*u1(L)
-      ucyq_mor (k2) = ucyq_mor(k2) + wcyu*hu(L)
-   enddo
-
-   do L = lnxi+1,lnx
-      k1 = ln(1,L) ; k2 = ln(2,L)
-      cs = csu(L) ; sn = snu(L)
-      if ( jacstbnd == 0 ) then
-         uin = ucxq_mor(k2) * cs + ucyq_mor(k2) * sn
-         ucxq_mor(k1) = uin * cs
-         ucyq_mor(k1) = uin * sn
-         bl(k2) = bl(k1)
-      else
-         ucxq_mor(k1) = ucxq_mor(k2)
-         ucyq_mor(k1) = ucyq_mor(k2)
-      end if
-   enddo
-
-   do k = 1,ndx
-      hs_mor(k) = hs(k)
-      do L = 1,nd(k)%lnx
-         LL = abs( nd(k)%ln(L) )
-         hs_mor(k) = max( hs_mor(k), hu(LL) )
+   if (kmx<1) then
+      do L = 1,lnx
+         if (u1(L) == 0d0) cycle
+         k1 = ln(1,L) ; k2 = ln(2,L)
+         wcxu = wcx1(L)*u1(L)
+         ucxq_mor (k1) = ucxq_mor(k1) + wcxu*hu(L)
+         wcyu = wcy1(L)*u1(L)
+         ucyq_mor (k1) = ucyq_mor(k1) + wcyu*hu(L)
+         wcxu = wcx2(L)*u1(L)
+         ucxq_mor (k2) = ucxq_mor(k2) + wcxu*hu(L)
+         wcyu = wcy2(L)*u1(L)
+         ucyq_mor (k2) = ucyq_mor(k2) + wcyu*hu(L)
       enddo
-   enddo
 
-   do k = 1,ndx
-      if( hs_mor(k) > epshs) then
-         ucxq_mor(k) = ucxq_mor(k) / hs_mor(k)
-         ucyq_mor(k) = ucyq_mor(k) / hs_mor(k)
-      else
-         ucxq_mor(k) = 0d0
-         ucyq_mor(k) = 0d0
-      endif
-   enddo
-
+      do L = lnxi+1,lnx
+         k1 = ln(1,L) ; k2 = ln(2,L)
+         cs = csu(L) ; sn = snu(L)
+         if ( jacstbnd == 0 ) then
+            uin = ucxq_mor(k2) * cs + ucyq_mor(k2) * sn
+            ucxq_mor(k1) = uin * cs
+            ucyq_mor(k1) = uin * sn
+            bl(k2) = bl(k1)
+         else
+            ucxq_mor(k1) = ucxq_mor(k2)
+            ucyq_mor(k1) = ucyq_mor(k2)
+         end if
+      enddo
+      
+      do k = 1,ndx
+         hs_mor(k) = hs(k)
+         do L = 1,nd(k)%lnx
+            LL = abs( nd(k)%ln(L) )
+            hs_mor(k) = max( hs_mor(k), hu(LL) )
+         enddo
+      enddo
+      
+      do k = 1,ndx
+         if( hs_mor(k) > epshs) then
+            ucxq_mor(k) = ucxq_mor(k) / hs_mor(k)
+            ucyq_mor(k) = ucyq_mor(k) / hs_mor(k)
+         else
+            ucxq_mor(k) = 0d0
+            ucyq_mor(k) = 0d0
+         endif
+      enddo
+   else   
+      do LL = 1,lnx
+         if (u1(LL)<eps10) cycle
+         call getLbotLtop(LL,lb,Lt)
+         !Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
+         do L = Lb, Lt
+            k1 = ln0(1,L); k2 = ln0(2,L)                          
+            huL = hu(L)
+            if (L>Lb) then
+               huL   = huL - hu(L-1)
+            endif
+            ucxq_mor(k1) = ucxq_mor(k1) + wcx1(LL)*u1(L)*huL
+            ucyq_mor(k1) = ucyq_mor(k1) + wcy1(LL)*u1(L)*huL
+            ucxq_mor(k2) = ucxq_mor(k2) + wcx2(LL)*u1(L)*huL
+            ucyq_mor(k2) = ucyq_mor(k2) + wcy2(LL)*u1(L)*huL
+         enddo
+      enddo
+      
+      do L = lnxi+1,lnx
+         cs = csu(L) ; sn = snu(L)
+         call getLbotLtop(L,Lb,Lt)
+         do LL=Lb,Lt
+            k1 = ln0(1,LL) ; k2 = ln0(2,LL)
+            if ( jacstbnd == 0 ) then
+               uin = ucxq_mor(k2) * cs + ucyq_mor(k2) * sn
+               ucxq_mor(k1) = uin * cs
+               ucyq_mor(k1) = uin * sn
+            else
+               ucxq_mor(k1) = ucxq_mor(k2)
+               ucyq_mor(k1) = ucyq_mor(k2)
+            end if
+         enddo
+      enddo
+      !
+      do k = 1,ndx
+         hs_mor(k) = hs(k)
+         do L = 1,nd(k)%lnx
+            LL = abs( nd(k)%ln(L) )
+            hs_mor(k) = max( hs_mor(k), hu(LL) )
+         enddo
+         !
+         call getkbotktop(k,kb,kt)
+         do kk=kb,kt
+            hs_mor(kk) = zws(kk)-zws(kk-1)
+            do L = 1,nd(kk)%lnx
+               LL = abs( nd(kk)%ln(L) )
+               hs_mor(kk) = max( hs_mor(kk), hu(LL)-hu(LL-1) )
+            enddo   
+         enddo
+      enddo
+      !
+      do k = 1,ndxi
+        if (hs_mor(k) > eps10)  then
+           call getkbotktop(k,kb,kt)
+           ucxq_mor(k) = sum(ucxq_mor(kb:kt)) / hs_mor(k)
+           ucyq_mor(k) = sum(ucyq_mor(kb:kt)) / hs_mor(k)
+           do kk = kb,kt
+              if (hs_mor(kk) > eps10) then
+                 ucxq_mor(kk) = ucxq_mor(k)/hs_mor(kk)
+                 ucyq_mor(kk) = ucyq_mor(k)/hs_mor(kk)
+              endif
+         enddo
+        endif
+      enddo
+   endif
    end subroutine setucxqucyq
 
    ! =================================================================================================
@@ -4839,25 +5003,28 @@
 
    implicit none
 
-   integer                             :: k, k1, k2, kk, L, ised
-   double precision                    :: dum, sx, sy, sL, dt, dhmax, dtmaxmor
+   integer           :: k, k1, k2, kk, L, ised, ac1, ac2
+   double precision  :: dum, sx, sy, sL, dt, dtmaxmor, dhmax
 
    dtmaxmor = huge(0d0)
 
    do k = 1, ndx
+      dum = 0.d0
       if (kcsmor(k)==0) then 
          cycle
       endif
       
       do ised = 1, lsedtot
-         dum = 0.d0
+         !
          do kk = 1, nd(k)%lnx
             L = iabs(nd(k)%ln(kk))
             k1 = ln(1,L)
             k2 = ln(2,L)
+            ac1 = acl(L)
+            ac2 = 1d0-ac1
 
-            sx = (acL(L)*sxtot(k1,ised) + (1-acL(L))*sxtot(k2,ised))/cdryb(ised)*max(morfac,1d0)
-            sy = (acL(L)*sytot(k1,ised) + (1-acL(L))*sytot(k2,ised))/cdryb(ised)*max(morfac,1d0)
+            sx = (ac1*sxtot(k1,ised) + ac2*sxtot(k2,ised))/cdryb(ised)*max(morfac,1d0)
+            sy = (ac1*sytot(k1,ised) + ac2*sytot(k2,ised))/cdryb(ised)*max(morfac,1d0)
             sL = csu(L)*sx + snu(L)*sy
 
             if (k2 .eq. k) sL = -sL
@@ -4866,14 +5033,13 @@
                dum = dum + sL*wu(L)
             end if
          end do
-         if (dum > tiny(0d0)) then
-            dt = dzbdtmax*ba(k) / max(dum,eps10)   ! safety
-            if ( dt.lt.dtmaxmor ) then
-               dtmaxmor = dt
-               kkcflmx = k
-            end if
-         end if
       end do
+      if (dum > tiny(0d0)) then
+         dt = dzbdtmax*ba(k) / max(dum,eps10)   ! safety
+         if ( dt.lt.dtmaxmor ) then
+            dtmaxmor = dt
+         end if
+      end if
    end do
 
    if ( jampi.eq.1 ) then
@@ -4886,5 +5052,38 @@
    dts = dtmaxmor
    dti = 1d0/dts
 
-
    end subroutine fm_mor_maxtimestep
+   
+   subroutine settaubxu_nowave()
+      use m_flowgeom
+      use m_flow
+      use m_physcoef
+      use m_waves, only: taubxu
+   
+      integer            :: L , Lb, Lt
+      double precision   :: cz, z00
+   
+   do L = 1, lnx
+      call getLbotLtop(L,Lb,Lt)
+      if (Lt<Lb) cycle
+      if (hu(L)>0d0) then
+         if (frcu(L)>0d0) then
+            call getczz0(hu(L), frcu(L), ifrcutp(L), cz, z00)
+         else
+            call getczz0(hu(L), frcuni, ifrctypuni, cz, z00)
+         end if
+         umod = sqrt(u1(Lb)*u1(Lb) + v(Lb)*v(Lb))
+         z0urou(L) = hu(L)/(ee*(exp(vonkar*cz/sag) - 1d0))   ! In getczz0: c9of1==9, en dan z0 = h0*exp(-1d0 - vonkar*cz/sag)
+                                                             ! Hier gekozen voor consistentie met D3D4 (c9of1==1)
+         if (kmx>0) then
+            rz = 1d0 + hu(Lb)/2d0/z0urou(L)     ! cell centre first bottom layer
+         else
+            rz = 1d0 + hu(L)/(ee*z0urou(L))
+         endif
+         cz            = log(rz)/vonkar
+         cwall         = 1./(cz**2)
+         taubxu(L)    = rhomean*cwall*umod*umod
+      endif
+   enddo
+   
+   end subroutine

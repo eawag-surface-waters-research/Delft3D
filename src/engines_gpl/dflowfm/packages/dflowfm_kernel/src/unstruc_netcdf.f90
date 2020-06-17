@@ -195,6 +195,7 @@ type t_unc_mapids
    integer :: id_vol1(MAX_ID_VAR)     = -1 !< Variable ID for volume
    integer :: id_au(MAX_ID_VAR)       = -1 !< Variable ID for flow area
    integer :: id_taus(MAX_ID_VAR)     = -1 !< Variable ID for 
+   integer :: id_tausmax(MAX_ID_VAR)     = -1 !< Variable ID for 
    integer :: id_ucx(MAX_ID_VAR)      = -1 !< Variable ID for 
    integer :: id_ucy(MAX_ID_VAR)      = -1 !< Variable ID for 
    integer :: id_ucz(MAX_ID_VAR)      = -1 !< Variable ID for 
@@ -244,6 +245,7 @@ type t_unc_mapids
    integer :: id_E(MAX_ID_VAR)           = -1 !< Variable ID for 
    integer :: id_R(MAX_ID_VAR)           = -1 !< Variable ID for 
    integer :: id_hwav(MAX_ID_VAR)        = -1 !< Variable ID for 
+   integer :: id_twav(MAX_ID_VAR)        = -1 !< Variable ID for 
    integer :: id_D(MAX_ID_VAR)           = -1 !< Variable ID for 
    integer :: id_DR(MAX_ID_VAR)          = -1 !< Variable ID for 
    integer :: id_Df(MAX_ID_VAR)          = -1 !< Variable ID for 
@@ -275,6 +277,9 @@ type t_unc_mapids
    integer :: id_ducxdy(MAX_ID_VAR)      = -1
    integer :: id_ducydx(MAX_ID_VAR)      = -1
    integer :: id_ducydy(MAX_ID_VAR)      = -1
+   ! DEBUG
+   integer :: id_horadvec(MAX_ID_VAR)    = -1
+   ! /DEBUG
    integer :: id_windx(MAX_ID_VAR)       = -1 !< Variable ID for wind on cell center, x-component
    integer :: id_windy(MAX_ID_VAR)       = -1 !< Variable ID for wind on cell center, y-component
    integer :: id_windxu(MAX_ID_VAR)      = -1 !< Variable ID for wind on flow links, x-component
@@ -2469,7 +2474,6 @@ subroutine unc_append_3dflowgeom_put(imapfile, jaseparate, itim_in)
        ! mapfile, store/use ids number 1
        iid = 1
     endif
- 
     !
     ! inquire ids of netcdf file if it is the first step of writing to the file
     !                         or if it is a seperate write file   
@@ -2663,6 +2667,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     endif
 
     if (ndx > 0) then
+       ndx1d = ndxi-ndx2d
        ierr = nf90_def_dim(irstfile, 'nFlowElem', ndxi, id_flowelemdim)
        if (jarstbnd > 0) then  ! If write boundary points
           if (jampi == 0) then
@@ -4481,12 +4486,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    double precision, allocatable                       :: ust_x(:), ust_y(:), wavout(:), wavout2(:)
    character(len=255)                                  :: tmpstr
    integer                                             :: nm
+   integer                                             :: Lf
    character(16)                                       :: dxname
    character(64)                                       :: dxdescr
    character(15)                                       :: transpunit
    double precision                                    :: rhol, dens, mortime, wavfac
    double precision                                    :: moravg, morstarthyd, dmorft, dmorfs, rhodt
-   double precision, dimension(:,:), allocatable       :: poros, toutputx, toutputy
+   double precision, dimension(:,:), allocatable       :: poros, toutputx, toutputy, sxtotori, sytotori
    double precision, dimension(:,:,:), allocatable     :: frac
    integer, dimension(:), allocatable                  :: flag_val
    character(len=10000)                                :: flag_mean
@@ -4706,6 +4712,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ! Bed shear stress
       if (jamaptaucurrent > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_taus   , nf90_double, UNC_LOC_S, 'taus'  , '', 'Total bed shear stress', 'N m-2', jabndnd=jabndnd_)
+
+         if (jawave>2 .or. stm_included) then
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_tausmax   , nf90_double, UNC_LOC_S, 'tausmax'  , '', 'Total maximum bed shear stress', 'N m-2')   ! max shear stress
+         endif
       endif
 
       ! Chezy data on flow-nodes
@@ -5231,6 +5241,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_kwav     , nf90_double, UNC_LOC_S, 'kwav'     , 'sea_surface_wave_wavenumber'          , 'Sea_surface_wave_wavenumber'                      , 'rad m-1', jabndnd=jabndnd_) ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_nwav     , nf90_double, UNC_LOC_S, 'nwav'     , 'sea_surface_wave_cg_over_c'           , 'Sea_surface_wave_ratio_group_phase_speed'         , '-', jabndnd=jabndnd_) ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ctheta   , nf90_double, UNC_LOC_S, 'ctheta'   , 'sea_surface_wave_refraction_celerity' , 'Sea_surface_wave_refraction_celerity'             , 'rad s-1', dimids = (/ mapids%id_tsp%id_ntheta, -2,  -1 /), jabndnd=jabndnd_) ! not CF
+         ! DEBUG
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_horadvec   , nf90_double, UNC_LOC_S, 'horadvec'   , 'horizontal wave energy advection' , 'horizontal wave energy advection'             , 'W m-2 m s-1', dimids = (/ mapids%id_tsp%id_ntheta, -2,  -1 /)) ! not CF
+         !/DEBUG
          if (windmodel.eq.0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_l1       , nf90_double, UNC_LOC_S, 'L1'       , 'sea_surface_wave_wavelength'          , 'Sea_surface_wave_wavelength'                      , 'm', jabndnd=jabndnd_      ) ! not CF
          elseif ( (windmodel .eq. 1) .and. (jawsource .eq. 1) ) then
@@ -5277,6 +5290,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          
          !\debug
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_thetamean, nf90_double, UNC_LOC_S, 'thetamean'       , 'sea_surface_wave_from_direction'      , 'Wave from direction'      , 'deg from N', jabndnd=jabndnd_) ! not CF
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_twav,      nf90_double, UNC_LOC_S, 'twav'       ,      'sea_surface_wave_period'      , 'Wave period'      , 's') ! not CF
       end if
  
       end if
@@ -5646,6 +5660,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    end if
    if (jamaptaucurrent > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_taus, UNC_LOC_S, taus, jabndnd=jabndnd_)
+      if (jawave>2 .or. stm_included) then
+        ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tausmax, UNC_LOC_S, tausmax) 
+      endif
    end if    
    if (jamapchezy > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czs , UNC_LOC_S, czs, jabndnd=jabndnd_)
@@ -6127,6 +6144,21 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sscy_reconstructed   , UNC_LOC_S, toutputy, jabndnd=jabndnd_)
    endif
    !
+   if (stmpar%morpar%duneavalan) then
+      ! Add avalanching fluxes to total transport for output
+      call realloc(sxtotori,(/ndx, stmpar%lsedtot/), stat=ierr, keepExisting=.false.,fill=0d0)
+      call realloc(sytotori,(/ndx, stmpar%lsedtot/), stat=ierr, keepExisting=.false.,fill=0d0)
+      sxtotori = sedtra%sxtot
+      sytotori = sedtra%sytot
+      !
+      do l = 1, stmpar%lsedtot
+         do Lf = 1, lnx  
+            sedtra%e_sbcn(Lf,l) = sedtra%e_sbcn(Lf,l) + avalflux(Lf,l)*wu_mor(Lf) 
+         enddo
+      enddo 
+      call reconstructsedtransports()
+   endif
+   !
    call realloc(toutputx, (/ndxndxi, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
    call realloc(toutputy, (/ndxndxi, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
    do l = 1, stmpar%lsedtot
@@ -6143,6 +6175,12 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    end do
    ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sxtot   , UNC_LOC_S, toutputx, jabndnd=jabndnd_)
    ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sytot   , UNC_LOC_S, toutputy, jabndnd=jabndnd_)
+   !
+   if (stmpar%morpar%duneavalan) then
+      ! restore for timestep calculation
+      sedtra%sxtot = sxtotori
+      sedtra%sytot = sytotori
+   endif
    !
    ! Time averaged transports, could probably be more concise...
    !morstarthyd = tstart_user + stmpar%morpar%tmor*tfac        ! seconds
@@ -6524,6 +6562,9 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       end if
 
       ierr = nf90_put_var(mapids%ncid, mapids%id_ctheta(2)   , ctheta(:,1:ndxndxi) , start = (/ 1, 1, itim /), count = (/ ntheta, ndxndxi, 1 /))
+      ! DEBUG
+      ierr = nf90_put_var(mapids%ncid, mapids%id_horadvec(2)   , horadvec(:,1:ndxi) , start = (/ 1, 1, itim /), count = (/ ntheta, ndxi, 1 /))
+      !? DEBUG
    endif
    
    if (jawave == 3) then
@@ -6551,6 +6592,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       wa = modulo(270d0 - phiwav, 360d0)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_thetamean, UNC_LOC_S, wa, jabndnd=jabndnd_) 
       deallocate(wa)
+      
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_twav, UNC_LOC_S, twav)
       
       ! ustokes, vstokes
       if (.not. allocated(ust_x)) allocate(ust_x(ndkx), ust_y(ndkx), wavout(lnx),wavout2(lnx))
@@ -6959,9 +7002,9 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                    !    ierr = nf90_def_var(imapfile, 'ucy'   , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucy(iid)  )
                     ierr = nf90_def_var(imapfile, 'ucz'  , nf90_double, (/ id_laydim(iid), id_flowelemdim(iid), id_timedim (iid)/) , id_ucz(iid)  )
 
-                    ! Depth-averaged cell-center velocities in 3D:
-                    ierr = nf90_def_var(imapfile, 'ucxa' , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucxa(iid)  )
-                    ierr = nf90_def_var(imapfile, 'ucya' , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucya(iid)  )
+                   ! Depth-averaged cell-center velocities in 3D:
+                   ierr = nf90_def_var(imapfile, 'ucxa' , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucxa(iid)  )
+                   ierr = nf90_def_var(imapfile, 'ucya' , nf90_double, (/ id_flowelemdim(iid), id_timedim (iid)/) , id_ucya(iid)  )
 
                 endif
                 if(jamapww1 > 0) then
@@ -7819,16 +7862,6 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
              ierr = nf90_put_att(imapfile, id_vst(iid),'standard_name', 'sea_surface_Stokes_drift_north')
              ierr = nf90_put_att(imapfile, id_vst(iid),'units'        , 'm s-1')
              ierr = nf90_put_att(imapfile, id_vst(iid),'coordinates'  , 'FlowLink_xu FlowLink_yu')
-             
-             !ierr = nf90_def_var(imapfile, 'Fx' , nf90_double, (/ id_flowlinkdim(iid), id_timedim(iid) /) , id_Fx(iid))
-             !ierr = nf90_put_att(imapfile, id_Fx(iid),'standard_name', 'sea_surface_wave_force_east')
-             !ierr = nf90_put_att(imapfile, id_Fx(iid),'units'        , 'N m-2')
-             !ierr = nf90_put_att(imapfile, id_Fx(iid),'coordinates'  , 'FlowLink_xu FlowLink_yu')
-             !
-             !ierr = nf90_def_var(imapfile, 'Fy' , nf90_double, (/ id_flowlinkdim(iid), id_timedim(iid) /) , id_Fy(iid))
-             !ierr = nf90_put_att(imapfile, id_Fy(iid),'standard_name', 'sea_surface_wave_force_north')
-             !ierr = nf90_put_att(imapfile, id_Fy(iid),'units'        , 'N m-2')
-             !ierr = nf90_put_att(imapfile, id_Fy(iid),'coordinates'  , 'FlowLink_xu FlowLink_yu')
            
              ierr = nf90_def_var(imapfile, 'thetamean',  nf90_double, (/ id_flowelemdim(iid), id_timedim(iid)/) , id_thetamean(iid))
              ierr = nf90_put_att(imapfile, id_thetamean(iid),   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
@@ -8347,8 +8380,6 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            ierr = nf90_inq_varid(imapfile, 'urms_cc'  , id_urmscc(iid))
            ierr = nf90_inq_varid(imapfile, 'ust'      , id_ust(iid))
            ierr = nf90_inq_varid(imapfile, 'vst'      , id_vst(iid))
-           !ierr = nf90_inq_varid(imapfile, 'Fx'       , id_Fx(iid))
-           !ierr = nf90_inq_varid(imapfile, 'Fy'       , id_Fy(iid))
            ierr = nf90_inq_varid(imapfile, 'Fx_cc'    , id_Fxcc(iid))
            ierr = nf90_inq_varid(imapfile, 'Fy_cc'    , id_Fycc(iid))
            !if (jamombal>0) then
@@ -8453,10 +8484,10 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        ierr = nf90_inq_varid(imapfile, 'FlowElem_bl', id_swanbl(iid))     
        ierr = nf90_put_var(imapfile, id_swanbl(iid),  -bl,   (/ 1, itim /), (/ ndxndxi, 1 /))
     end if
-    !    
+    !
     ! Water level
     ierr = nf90_put_var(imapfile, id_s1(iid),  s1,   (/ 1, itim /), (/ ndxndxi, 1 /))
-   
+    !   
     if ( kmx==0 ) then
        ierr = nf90_put_var(imapfile, id_ucx  (iid), workx,  (/ 1, itim /), (/ ndxndxi, 1 /))
        ierr = nf90_put_var(imapfile, id_ucy  (iid), worky,  (/ 1, itim /), (/ ndxndxi, 1 /))

@@ -1696,7 +1696,6 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
          if (dicouv .ge. 0d0) difsedu(iconst) = 0d0
          if (dicoww .ge. 0d0) then 
             difsedw(iconst) = dicoww 
-            ! difsedw(iconst,:) = mtd%seddif(i,:)
             sigdifi(iconst) = 1d0/sigsed
          endif
          if (jased < 4) wsf(iconst) = ws(i)
@@ -3019,7 +3018,6 @@ subroutine comp_sinktot()
       enddo
    else               ! 3D
       do k=1,ndx
-         call getkbotktop(k,kb,kt)
          do j=ISED1,ISEDN
             ll = j-ISED1+1
             sinksetot(j,k) = sinksetot(j,k) + vol1(sedtra%kmxsed(k,ll))*sedtra%sinkse(k,ll) *constituents(j,sedtra%kmxsed(k,ll))*dts
