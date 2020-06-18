@@ -12763,7 +12763,9 @@ subroutine writesomeinitialoutput()
     enddo
  endif
  
- call timdump(trim(defaultFilename('timers')), .true.)
+ if (jawriteDetailedTimers > 0) then
+    call timdump(trim(defaultFilename('timers')), .true.)
+ end if
 
  call timstrt('All', handle_all)
  end subroutine writesomefinaloutput
