@@ -633,7 +633,7 @@
       if ( noq3 /= 0 ) then
           if ( nolay == 1 ) then
               iwar = iwar + 1
-              write( lunut, 3000 ) noseg, noq3
+              write( lunut, 3000 ) noseg, noq3, noseg-noq3
               write( lunut, 3005 )
               write( *, '(1x,a)' ) 'WARNING: inconsistency if 3D model',
      &                             '         check .lst file'
@@ -708,7 +708,9 @@
      &         ,/,'          Difference gives expected number of'
      &         ,/,'          segments per layer:           ',i10)
  3005 format (  /,'          - this is inconsistent'
-     &         ,/,'          You can specify the number of layers via'
+     &         ,/,'          Note that the program will now assume one',
+     &                       ' (1) layer!'
+     &        ,//,'          You can specify the number of layers via'
      &         ,/,'          these keywords:'
      &        ,//,'          MULTIGRID ZMODEL NOLAY ... END_MULTIGRID')
  3010 format ( //,' Number of layers in the model:', I5)
