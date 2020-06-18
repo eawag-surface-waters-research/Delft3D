@@ -107,7 +107,7 @@ module m_Roughness
       type(t_hashlist)                  :: timeSeriesIds                   !< Hashlist containing ids of the timeseries
       integer, pointer                  :: timeSeriesIndexes(:) => null()  !< Get index in timeSeriesIds and/or frictionvalues based on branch index 
       double precision, allocatable     :: currentValues(:)                !< Time Interpolated Friction values of time dependent items (same index as timeSeriesIds).
-      double precision, allocatable     :: timeValues(:,:)                 !< Friction values of time dependent items (same index as timeSeriesIds).
+      double precision, allocatable     :: timeDepValues(:,:)                 !< Friction values of time dependent items (same index as timeSeriesIds).
 
 
       ! All fields below: branch oriented data (roughness v1, obsolete for v2)
@@ -685,11 +685,11 @@ use m_tablematrices
       ! In case of a time dependent roughness, overwrite the friction parameter
       if (fun_type(ibranch) ==R_FunctionTimeSeries) then
          ! There is a time dependency 
-         if (rgh%timeValues(ibranch,2) > 0d0) then
+         if (rgh%timeDepValues(ibranch,2) > 0d0) then
             ! The values are set 
             ! This subroutine is used for filling the YZ-cross section with new friction parameters
             ! As a result the value at the latest time instance is required
-            c_par = rgh%timeValues(ibranch,2)
+            c_par = rgh%timeDepValues(ibranch,2)
          endif
       endif
    endif

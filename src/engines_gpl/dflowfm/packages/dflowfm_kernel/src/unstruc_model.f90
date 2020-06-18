@@ -1476,8 +1476,10 @@ subroutine readMDUFile(filename, istat)
     endif
     
     ! Set update frequency for the time dependent roughness from frictFile.
-    call prop_get (md_ptr, 'time', 'UpdateRougnessInterval', Dt_UpdateRoughness)
-
+    call prop_get (md_ptr, 'time', 'UpdateRoughnessInterval', dt_UpdateRoughness)
+    if (dt_UpdateRoughness < dt_User) then
+       call SetMessage(LEVEL_ERROR, 'The value of "UpdateRoughnessInterval" must be equal to or larger than the user time step.')
+    endif
     !
     ! TIDAL TURBINES: Insert calls to rdturbine and echoturbine here (use the structure_turbines variable defined in m_structures)
     !
@@ -3141,7 +3143,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     if (writeall .or. Dt_UpdateRoughness /= 86400d0) then
-       call prop_set (prop_ptr, 'time', 'UpdateRougnessInterval', Dt_UpdateRoughness)
+       call prop_set (prop_ptr, 'time', 'UpdateRoughnessInterval', Dt_UpdateRoughness)
     end if
 
 ! Restart settings

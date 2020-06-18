@@ -228,8 +228,8 @@ contains
             count = prgh%timeSeriesIds%id_count 
             rgs%timeseries_defined = .true.
             call realloc(prgh%currentValues, count)
-            call realloc(prgh%timeValues, (/ count, 2 /))
-            prgh%timeValues = -10d0
+            call realloc(prgh%timeDepValues, (/ count, 2 /))
+            prgh%timeDepValues = -10d0
 
             do j = 1, count
 
@@ -249,7 +249,7 @@ contains
                forcinglist%forcing(forcinglist%Count)%quantity_id = 'friction_coefficient_'//         &
                                              trim(frictionTypeIntegerToString(prgh%rgh_type_pos(ibr)))
                forcinglist%forcing(forcinglist%Count)%param_name  = frictionTypeIntegerToString(prgh%rgh_type_pos(ibr))
-               forcinglist%forcing(forcinglist%Count)%targetptr  => prgh%timeValues(j,2)
+               forcinglist%forcing(forcinglist%Count)%targetptr  => prgh%timeDepValues(j,2)
                forcinglist%forcing(forcinglist%Count)%filename    = prgh%frictionValuesFile
                forcinglist%forcing(forcinglist%Count)%object_type = 'friction_coefficient'
    

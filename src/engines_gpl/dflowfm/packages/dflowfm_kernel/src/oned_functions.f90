@@ -203,22 +203,22 @@ module m_oned_functions
                pbr%tonode%gridnumber = -1
             endif
          else
-         call realloc(pbr%lin, pbr%uPointsCount)
-         call realloc(pbr%grd, pbr%gridPointsCount)
-         lin => pbr%lin
-         grd => pbr%grd
-         L = lin(1)
-            k1  =  abs(ln(1,L))
-         pbr%FromNode%gridNumber = k1
-         upointscount = pbr%uPointsCount
-         do i = 1, uPointsCount
-            L = lin(i)
-               k1 = abs(ln(1,L))
-            grd(i) = k1
-         enddo
-         k2 = ln(2,iabs(lin(upointscount)))
-         pbr%tonode%gridnumber = k2
-         grd(upointscount+1) = k2
+            call realloc(pbr%lin, pbr%uPointsCount)
+            call realloc(pbr%grd, pbr%gridPointsCount)
+            lin => pbr%lin
+            grd => pbr%grd
+            L = lin(1)
+               k1  =  abs(ln(1,L))
+            pbr%FromNode%gridNumber = k1
+            upointscount = pbr%uPointsCount
+            do i = 1, uPointsCount
+               L = lin(i)
+                  k1 = abs(ln(1,L))
+               grd(i) = k1
+            enddo
+            k2 = ln(2,iabs(lin(upointscount)))
+            pbr%tonode%gridnumber = k2
+            grd(upointscount+1) = k2
          end if
       enddo
    end subroutine set_linknumbers_in_branches
@@ -1116,6 +1116,7 @@ module m_oned_functions
    
    end subroutine updateS1Gradient
 
+   !> Update the friction parameters in case of time dependent roughness, and if necessary update the conveyance table
    subroutine reCalculateConveyanceTables(network)
 
       use m_network
@@ -1140,15 +1141,16 @@ module m_oned_functions
       enddo
    end subroutine reCalculateConveyanceTables
    
+   ! Perform a time interpolation of the roughness parameters and store them in the currentValues array
    subroutine interpolateRoughnessParameters(rgs, times_update_roughness, tim)
       use m_Roughness
 
-      type(t_RoughnessSet),          intent(inout)    :: rgs
-      double precision, dimension(2),intent(in   )    :: times_update_roughness   
-      double precision,              intent(in   )    :: tim   
+      type(t_RoughnessSet),          intent(inout)    :: rgs                        !< Roughness set
+      double precision, dimension(2),intent(in   )    :: times_update_roughness     !< Times at which the time dependent values are set
+      double precision,              intent(in   )    :: tim                        !< Current time
 
       double precision, pointer, dimension(:)      :: currentValues
-      double precision, pointer, dimension(:,:)    :: timeValues
+      double precision, pointer, dimension(:,:)    :: timeDepValues
       integer irgh, i, timeseries_count
       double precision f
 
@@ -1157,26 +1159,27 @@ module m_oned_functions
          timeseries_count = rgs%rough(irgh)%timeSeriesIds%id_count 
          if (timeseries_count> 0) then 
             currentValues => rgs%rough(irgh)%currentValues
-            timeValues    =>  rgs%rough(irgh)%timeValues
+            timeDepValues    =>  rgs%rough(irgh)%timeDepValues
             do i = 1, timeseries_count
-               currentValues(i) = (1d0-f) * timeValues(i,1) + f * timeValues(i,2)
+               currentValues(i) = (1d0-f) * timeDepValues(i,1) + f * timeDepValues(i,2)
             enddo
          endif
       enddo
    end subroutine interpolateRoughnessParameters
 
+   !> Shift the time dependent values, called prior to the update of the roughness parameters for a new time level
    subroutine shiftTimeDependentRoughnessValues(rgs)
       use m_Roughness
 
-      type(t_RoughnessSet),          intent(inout)    :: rgs
+      type(t_RoughnessSet),          intent(inout)    :: rgs            !< Roughness set
 
-      double precision, pointer, dimension(:,:)    :: timeValues
+      double precision, pointer, dimension(:,:)    :: timeDepValues
       integer :: irgh
 
       do irgh = 1, rgs%Count
          if (rgs%rough(irgh)%timeSeriesIds%id_count> 0) then 
-            timeValues    =>  rgs%rough(irgh)%timeValues
-            timeValues(:,1) = timeValues(:,2)
+            timeDepValues    =>  rgs%rough(irgh)%timeDepValues
+            timeDepValues(:,1) = timeDepValues(:,2)
          endif
       enddo
    end subroutine shiftTimeDependentRoughnessValues

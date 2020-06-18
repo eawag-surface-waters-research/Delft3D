@@ -2726,7 +2726,8 @@ endif
 
 end subroutine YZProfile
 
-!> Generate conveyance table
+!> Generate conveyance table. This subroutine should only be called once at initialisation and 
+!! during the simulation as soon as a new update of the friction values is performed.
 subroutine CalcConveyance(crs)
 
 use M_newcross
