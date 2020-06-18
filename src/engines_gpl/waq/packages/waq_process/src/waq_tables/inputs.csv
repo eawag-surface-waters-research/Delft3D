@@ -773,7 +773,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "CalcRad   ","a_enh     ",   4,"Y","x",1
 "CalcRad   ","Surf      ",   5,"N","x",1
 "CalcRad   ","SwEmersion",   6,"Y","x",1
-"CalcRad   ","RadBot    ",   7,"N"," ",1
+"CalcRad   ","Rad       ",   7,"N"," ",1
 "CalcRad   ","fRefl     ",   8,"Y","x",1
 "CalcRadDay","ExtVl     ",   1,"N","x",1
 "CalcRadDay","Depth     ",   2,"N","x",1
@@ -781,7 +781,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "CalcRadDay","a_enh     ",   4,"Y","x",1
 "CalcRadDay","Surf      ",   5,"N","x",1
 "CalcRadDay","SwEmersion",   6,"Y","x",1
-"CalcRadDay","RadBotDay ",   7,"N"," ",1
+"CalcRadDay","RadDay    ",   7,"N"," ",1
 "CalcRadDay","fRefl     ",   8,"Y","x",1
 "CalcRadUV ","ExtUv     ",   1,"N","x",1
 "CalcRadUV ","Depth     ",   2,"N","x",1
@@ -789,7 +789,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "CalcRadUV ","a_enh     ",   4,"Y"," ",1
 "CalcRadUV ","Surf      ",   5,"N","x",1
 "CalcRadUV ","SwEmersion",   6,"Y","x",1
-"CalcRadUV ","RadBot_uv ",   7,"N"," ",1
+"CalcRadUV ","Rad_uv    ",   7,"N"," ",1
 "CalcRadUV ","fRefl     ",   8,"Y","x",1
 "Daylength ","ITIME     ",   1,"N","x",1
 "Daylength ","Latitude  ",   2,"Y","x",1

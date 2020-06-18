@@ -63,6 +63,7 @@
 
       INTEGER            :: IP1,IP2,IP3,IP4,IP5,IP6,IP7,IP8,IP9,IP10 ! index pointers in PMSA array
       INTEGER            :: IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10 ! increments in PMSA array
+      INTEGER            :: LUNREP         ! report file
       INTEGER            :: ISEG           ! loop counter segment loop
       INTEGER            :: IKMRK1         ! first feature inactive(0)-active(1)-bottom(2) segment
       INTEGER            :: IK1VN          ! first feature inactive(0)-active(1)-bottom(2) VAN segment
@@ -94,6 +95,15 @@
       IP8  = IPOINT(8)
       IP9  = IPOINT(9)
       IP10  = IPOINT(10)
+
+      IF (IP7.NE.IP9) THEN
+         CALL GETMLU(LUNREP)
+         WRITE(LUNREP,*) 'Error in CLCRAD: Rad/RadDay/Rad_uv should be an input too!'
+         WRITE(LUNREP,*) 'Use the correct proc_def!'
+         WRITE(*,*) 'Error in CLCRAD: Rad/RadDay/Rad_uv should be an input too!'
+         WRITE(*,*) 'Use the correct proc_def!'
+         CALL SRSTOP(1)
+      END IF
 
       IN1  = INCREM(1)
       IN2  = INCREM(2)
@@ -233,7 +243,7 @@
 
                   EXTVL  = PMSA( IP1 + (INAAR-1) * IN1 )
                   DEPTH  = PMSA( IP2 + (INAAR-1) * IN2 )
-                  RADTOP = PMSA( IP9 + (INAAR-1) * IN9 )
+                  RADTOP = PMSA( IP7 + (INAAR-1) * IN7 )
 
                   RADBOT = RADTOP * EXP( -EXTVL * DEPTH )
 
