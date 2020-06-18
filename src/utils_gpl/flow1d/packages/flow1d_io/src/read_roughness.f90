@@ -229,6 +229,8 @@ contains
             rgs%timeseries_defined = .true.
             call realloc(prgh%currentValues, count)
             call realloc(prgh%timeValues, (/ count, 2 /))
+            prgh%timeValues = -10d0
+
             do j = 1, count
 
                ! Extend forcinglist by one and reallocate in case of insufficient space

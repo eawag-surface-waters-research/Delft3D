@@ -46946,7 +46946,7 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
          s1L = acl(L)*s1(k1) + (1d0-acl(L))*s1(k2)
          dpt = hu(L)
          cz = 0d0
-         factor = (time1 - times_update_roughness(1))/dt_UpdateRoughness
+         factor = min(0d0,(time1 - times_update_roughness(1))/dt_UpdateRoughness)
             call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim, factor)
 
          ! For sediment transport the discharge in the main channel is required:

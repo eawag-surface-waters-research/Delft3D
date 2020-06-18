@@ -666,8 +666,8 @@ use m_tablematrices
     !
     !     Prevention against zero hydraulic radius and depth
     !
-    
-   if (rgh%useGlobalFriction)then
+   
+   if (rgh%useGlobalFriction)  then
       c_par = rgh%frictionValue
       c_type = rgh%frictionType
    else
@@ -678,9 +678,19 @@ use m_tablematrices
          c_type = rgh%frictionType
       else
          ys = 0d0
-             
          c_par = interpolate(rgh%table(ibranch), chainage, ys)
          c_type = rgh_type(ibranch)
+      endif
+
+      ! In case of a time dependent roughness, overwrite the friction parameter
+      if (fun_type(ibranch) ==R_FunctionTimeSeries) then
+         ! There is a time dependency 
+         if (rgh%timeValues(ibranch,2) > 0d0) then
+            ! The values are set 
+            ! This subroutine is used for filling the YZ-cross section with new friction parameters
+            ! As a result the value at the latest time instance is required
+            c_par = rgh%timeValues(ibranch,2)
+         endif
       endif
    endif
 
