@@ -6987,7 +6987,7 @@ subroutine solve_energy_balance2Dstat(x,y,mn,w,ds,inner,prev,seapts,noseapts,neu
          k=indx(count,sweep)
          if (inner(k)) then
             if (hh(k)>1.1*hmin) then
-               if (.not. ok(k)) then
+               if (ok(k) == 0) then
                   ! Only perform computations on wet inner points that are not yet converged (ok)
                   do itheta=1,ntheta
                      k1=prev(k,itheta,1)
