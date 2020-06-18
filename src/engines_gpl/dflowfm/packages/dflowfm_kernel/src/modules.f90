@@ -2865,9 +2865,8 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jambalumpsrc              !< Lump MBA source/sink mass balance terms
  integer                           :: jambalumpproc             !< Lump MBA processes mass balance terms
 
- integer                           :: jawriteDFMinterpretedvalues = 0 !< Write interpretedvalues
-
- integer                           :: jawriteDetailedTimers = 0 !< Write detailed timers output file
+ integer                           :: jawriteDFMinterpretedvalues !< Write interpretedvalues
+ integer                           :: jawriteDetailedTimers       !< Write detailed timers output file
 
 ! parameters for parms solver
  integer,                                   parameter :: NPARMS_INT=2              !< for parms solver, number of integer parameters
@@ -3287,6 +3286,9 @@ subroutine default_flowparameters()
     jambalumpbnd = 0
     jambalumpsrc = 0
     jambalumpproc = 0
+
+    jawriteDFMinterpretedvalues = 0
+    jawriteDetailedTimers = 0
 
     ispirparopt = 1
 
