@@ -4514,8 +4514,8 @@ end subroutine reset_flowgeom
 
  double precision                  :: Tspinupturblogprof = 0d0    !< From Tstart to Tstart+Tspinupturblogprof, Turbulent profiles based on log profiles
                                                                   !< 0d0 = No
- double precision                  :: dt_UpdateRoughness          !< Update interval for time dependent roughness values
- double precision                  :: times_update_roughness(2)   !< Time instances for wich the current roughness parameters are valid
+ double precision                  :: dt_UpdateRoughness          !< Update interval for time dependent roughness values (from frictFile).
+ double precision                  :: times_update_roughness(2)   !< Time window for wich the current time dependent roughness values (from FrictFile) are valid.
 
 contains
 
@@ -4571,6 +4571,8 @@ subroutine default_flowtimes()
     if (allocated(map_classes_ucdir)) deallocate(map_classes_ucdir)
 
     tmini       = -1d9              !< initial time for updating the 4 above
+
+    dt_UpdateRoughness = 86400d0
 
     ! Wall clock timers are restarted here already, because some timers are started *prior* to flow_modelinit().
     call reset_timers()
@@ -4631,8 +4633,7 @@ subroutine reset_flowtimes()
     it_waq       = 0                 !< Nr of snapshots presently in waq couple files
     it_stat      = 0                 !< Nr of simulation statistics presently in log file.
 
-    Dt_UpdateRoughness = 86400d0
-    times_update_roughness = tstart_user
+    times_update_roughness(1:2) = tstart_user
 
 ! for performance timings
     debugtimeon   = .false.          !< timing yes or no

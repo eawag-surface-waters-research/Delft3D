@@ -18187,15 +18187,16 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
    if (network%rgs%timeseries_defined) then
       if (times_update_roughness(2) == tstart_user) then
-         ! The roughness values for tstart is not set yet
+         ! First time: the roughness values for tstart are not set yet
          success = success .and. ec_gettimespacevalue(ecInstancePtr, item_frcutim, irefdate, tzone, tunit, times_update_roughness(1))
          call reCalculateConveyanceTables(network)
       endif
       if (tim >= times_update_roughness(2)) then
          ! Shift the time dependent roughness values and collect the values for the new time instance 
          times_update_roughness(1) = times_update_roughness(2)
-         times_update_roughness(2) = times_update_roughness(2) + dt_UpdateRoughness ! (bijv 86400 s)
+         times_update_roughness(2) = times_update_roughness(2) + dt_UpdateRoughness ! (e.g., 86400 s)
          call shiftTimeDependentRoughnessValues(network%rgs)
+         ! The next gettimespace call will automatically read and fill new values in prgh%timeValues(:,2).
          success = success .and. ec_gettimespacevalue(ecInstancePtr, item_frcutim, irefdate, tzone, tunit, times_update_roughness(2))
          ! update conveyance tables
          call reCalculateConveyanceTables(network)
