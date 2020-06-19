@@ -196,6 +196,10 @@ module m_oned_functions
                   foundTo = .true.
                endif
             end do
+            !
+            ! if foundFrom / foundTo: do not change gridNumber as set for a lower branch number ibr
+            ! if not found: set to -1 as it is in another domain:
+            !
             if (.not. foundFrom) then
                pbr%FromNode%gridNumber = -1
             endif
@@ -231,6 +235,7 @@ module m_oned_functions
       use m_sediment
       use messageHandling
       use m_GlobalParameters, only: INDTP_ALL
+      use m_partitioninfo, only: jampi
 
       implicit none
 
@@ -280,7 +285,7 @@ module m_oned_functions
             if (k_tmp(i) > 0) then
                pstor => network%storS%stor(ixy2stor(i))
                pstor%gridPoint = k_tmp(i)
-            else
+            else if (jampi > 0) then
                call SetMessage(LEVEL_ERROR, 'Error when snapping storage node '''//trim(name_tmp(i))//''' to a flow node.')
             end if
          end do
@@ -863,6 +868,7 @@ module m_oned_functions
    ! set for storage nodes (either from a table, or a prescribed street level (storageType is reservoir or closed))
     do istor = 1, network%storS%Count
       pSto => network%storS%stor(istor)
+      if (pSto%gridPoint < 1) cycle
       i = pSto%gridPoint-ndx2d
       if (.not. pSto%useTable) then ! Manhole
          if (pSto%useStreetStorage) then

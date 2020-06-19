@@ -44923,8 +44923,10 @@ end if
        stors => network%stors%stor
        do i = 1, nstor
           k1 = stors(i)%gridPoint
-          ! Add storage area to BA by using a water depth of 1000 m
-          bare(k1)   = bare(k1)   + getSurface(stors(i), bl(k1) + 1d3) ! TODO: needs change! Don't catch rain on storage area, only on manhole area.
+          if (k1 > 0) then
+             ! Add storage area to BA by using a water depth of 1000 m
+             bare(k1)   = bare(k1)   + getSurface(stors(i), bl(k1) + 1d3) ! TODO: needs change! Don't catch rain on storage area, only on manhole area.
+          endif
        enddo
     endif
 
