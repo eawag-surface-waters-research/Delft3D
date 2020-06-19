@@ -40596,12 +40596,16 @@ subroutine reallocsrc(n)
     pstru => network%sts%struct(istru)
     do L0=1,pstru%numlinks
        L = pstru%linknumbers(L0)
-       k1 = ln(1,L)
-       k2 = ln(2,L)
-       if (hu(L) > 0) then
-          call set_u1q1_structure(pstru, L0, s1(k1), s1(k2), teta(L))
-       else
+       if (L < 1) then
           pstru%u1(L0) = 0d0
+       else
+          if (hu(L) > 0) then
+             k1 = ln(1,L)
+             k2 = ln(2,L)
+             call set_u1q1_structure(pstru, L0, s1(k1), s1(k2), teta(L))
+          else
+             pstru%u1(L0) = 0d0
+          end if
        end if
     end do
  end do
