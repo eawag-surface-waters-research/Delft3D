@@ -4501,6 +4501,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    integer, dimension(:),   allocatable                :: idum
    double precision, dimension(:), allocatable         :: work1d
    double precision                                    :: vicc, dicc, ddum
+   integer                                             :: Tzonehrs
+   character(len=1)                                    :: Tzonesgn
 
 !    Secondary Flow 
 !        id_rsi, id_rsiexact, id_dudx, id_dudy, id_dvdx, id_dvdy, id_dsdx, id_dsdy
@@ -4574,7 +4576,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ! Current time t1
       ierr = nf90_def_dim(mapids%ncid, 'time', nf90_unlimited, mapids%id_tsp%id_timedim)
       call check_error(ierr, 'def time dim')
-      tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
+      Tzonehrs = int(TZone)
+      if (Tzone<0) then
+         Tzonesgn = '-'
+      else
+         Tzonesgn = '+'
+      end if
+      write(tmpstr,'(a,i2.2,a)') 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00 '//Tzonesgn, abs(Tzonehrs),':00' 
       ierr = unc_def_var_nonspatial(mapids%ncid, mapids%id_time, nf90_double, (/ mapids%id_tsp%id_timedim /), 'time', 'time', '', trim(tmpstr))
       mapids%id_tsp%idx_curtime = 0
 
