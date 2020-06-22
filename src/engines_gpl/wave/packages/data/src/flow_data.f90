@@ -69,7 +69,7 @@ subroutine flow_init (mode, it01, tscale)
    real(hp)                         :: d_tscale
    real                             :: dummy     = -999.0
    logical                          :: mud
-   character(80), dimension(25)     :: subdom_names
+   character(80), dimension(100)    :: subdom_names
    character(256)                   :: filnam
 !
 !! executable statements -------------------------------------------------------

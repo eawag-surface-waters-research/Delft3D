@@ -47,7 +47,7 @@ implicit none
 !
 ! Module parameters
 !
-integer, parameter :: max_num_subdoms = 50    ! max # subdomains
+integer, parameter :: max_num_subdoms = 100    ! max # subdomains
                                               ! (= #locations in DioPlt)
 !
 ! Derived Type definitions (PLT datasets)
