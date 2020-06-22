@@ -1019,7 +1019,7 @@ module m_readCrossSections
          ! Check Consistency of Rougness Positions
          if (positions(1) .ne. ycoordinates(1) .or. positions(frictionCount + 1) .ne. ycoordinates(numLevels)) then
             
-            if (positions(1) == 0.0d0  .and. comparereal(positions(frictionCount+1), pCS%y(numLevels) - pCS%y(1), 1d-6) == 0) then
+            if (positions(1) == 0.0d0  .and. comparereal(positions(frictionCount+1), ycoordinates(numLevels) - ycoordinates(1), 1d-6) == 0) then
                ! Probably lined out wrong because of import from SOBEK2
                locShift = positions(frictionCount + 1) - ycoordinates(numLevels)
                !do i = 1, frictionCount + 1
@@ -1030,7 +1030,7 @@ module m_readCrossSections
             else
                write (msgbuf, '(a,f16.10,a,f16.10,a)') 'Section data not consistent for (X)YZ-Cross-Section Definition ID: '//trim(pCS%id)// &
                   ', friction section width (', (positions(frictionCount+1)-positions(1)), &
-                  ') differs from cross section width (', (pCS%y(numLevels) - pCS%y(1)), ').'
+                  ') differs from cross section width (', (ycoordinates(numLevels) - ycoordinates(1)), ').'
                call err_flush()
             endif
          
