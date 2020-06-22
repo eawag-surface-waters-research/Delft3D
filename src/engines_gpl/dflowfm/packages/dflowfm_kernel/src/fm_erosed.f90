@@ -1178,10 +1178,16 @@
          k1=ln(1,L); k2=ln(2,L)
          z0rouk(k1) = z0rouk(k1)+wcl(1,L)*z0urou(L)
          z0rouk(k2) = z0rouk(k2)+wcl(2,L)*z0urou(L)
-         taub(k1)   = taub(k1)+wcl(1,L)*taubxu(L)
-         taub(k2)   = taub(k2)+wcl(2,L)*taubxu(L)
+         !taub(k1)   = taub(k1)+wcl(1,L)*taubxu(L)
+         !taub(k2)   = taub(k2)+wcl(2,L)*taubxu(L)
       end do
    endif
+   !
+   do L=1,lnx
+      k1=ln(1,L); k2=ln(2,L)
+      taub(k1)   = taub(k1)+wcl(1,L)*taubxu(L)
+      taub(k2)   = taub(k2)+wcl(2,L)*taubxu(L)
+   end do
    !
    if (kmx > 0) then            ! 3D
       deltas = 0d0
@@ -1480,20 +1486,9 @@
          call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
                           & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
                           & rhowat(kbed), vismol, stmpar%sedpar, afluff)
-      else
-         !
-         ! use max bed shear stress, rather than mean
-         !
-         if (jawave>0) then
-            ! from tauwave, done in call linkstocenterstwodoubles(taub,taubu)
-         else
-            ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,epshs))
-            taub(nm) = ustarc*ustarc*rhowat(kbed)
-         endif
-
       endif
       !
-      ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,epshs))
+      ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,eps10))
       !if (scour) then
       !
       tauadd = 0d0
