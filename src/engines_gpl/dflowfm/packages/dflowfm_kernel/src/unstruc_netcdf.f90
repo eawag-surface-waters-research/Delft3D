@@ -4705,7 +4705,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_put_att(mapids%ncid, mapids%id_q1, 'comment', 'Positive direction is from first to second neighbouring face (flow element).')
       end if
 
-      if(jamapq1main > 0) then
+      if(jamapq1main > 0 .and. allocated(q1_main)) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_q1main, nf90_double, iLocU, 'q1_main', '', 'Main channel discharge through flow link at current time', 'm3 s-1', cell_method = 'sum', jabndnd=jabndnd_)
          ierr = unc_put_att(mapids%ncid, mapids%id_q1main, 'comment', 'Positive direction is from first to second neighbouring face (flow element).')
       end if
@@ -5582,7 +5582,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_q1, iLocU, q1, 0d0, jabndnd=jabndnd_)
    end if
 
-   if (jamapq1main == 1) then
+   if (jamapq1main == 1 .and. allocated(q1_main)) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_q1main, iLocU, q1_main, 0d0, jabndnd=jabndnd_)
    end if
    
@@ -6994,8 +6994,8 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                 if(jamapq1 > 0) then
                     ierr = nf90_def_var(imapfile, 'q1'   , nf90_double, (/ id_laydim(iid), id_flowlinkdim(iid), id_timedim (iid)/) , id_q1(iid)   )
                 endif
-                if(jamapq1main > 0) then
-                    ierr = nf90_def_var(imapfile, 'q1main', nf90_double, (/ id_laydim(iid), id_flowlinkdim(iid), id_timedim (iid)/) , id_q1(iid)   )
+                if(jamapq1main > 0 .and. allocated(q1_main)) then
+                    ierr = nf90_def_var(imapfile, 'q1main', nf90_double, (/ id_laydim(iid), id_flowlinkdim(iid), id_timedim (iid)/) , id_q1main(iid)   )
                 endif
                 if(jamapviu > 0) then
                     ierr = nf90_def_var(imapfile, 'viu'   , nf90_double, (/ id_laydim(iid), id_flowlinkdim(iid), id_timedim (iid)/) , id_viu(iid)   )
@@ -7075,7 +7075,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                if(jamapq1 > 0) then
                   ierr = nf90_def_var(imapfile, 'q1'    , nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_q1(iid)   )
                endif
-               if(jamapq1main > 0) then
+               if(jamapq1main > 0 .and. allocated(q1_main)) then
                   ierr = nf90_def_var(imapfile, 'q1main', nf90_double, (/ id_flowlinkdim(iid), id_timedim (iid)/) , id_q1main(iid)   )
                endif
                if(jamapviu > 0) then
@@ -7106,12 +7106,12 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                ierr = nf90_put_att(imapfile, id_q1(iid)   ,'units'        , 'm3 s-1')
                ierr = nf90_put_att(imapfile, id_q1(iid)   ,'_FillValue'   , dmiss)
             endif
-            if(jamapq1main > 0) then
-               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
-               !ierr = nf90_put_att(imapfile, id_q1(iid)   ,'standard_name', 'discharge') ! not CF
-               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'long_name'    , 'flow flux in main channel')
-               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'units'        , 'm3 s-1')
-               ierr = nf90_put_att(imapfile, id_q1(iid)   ,'_FillValue'   , dmiss)
+            if(jamapq1main > 0 .and. allocated(q1_main)) then
+               ierr = nf90_put_att(imapfile, id_q1main(iid)   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
+               !ierr = nf90_put_att(imapfile, id_q1main(iid)   ,'standard_name', 'discharge') ! not CF
+               ierr = nf90_put_att(imapfile, id_q1main(iid)   ,'long_name'    , 'flow flux in main channel')
+               ierr = nf90_put_att(imapfile, id_q1main(iid)   ,'units'        , 'm3 s-1')
+               ierr = nf90_put_att(imapfile, id_q1main(iid)   ,'_FillValue'   , dmiss)
             endif
 
             if(jamapviu > 0) then
