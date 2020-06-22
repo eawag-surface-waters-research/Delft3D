@@ -14223,6 +14223,7 @@ subroutine crosssections_on_flowgeom()
     use unstruc_channel_flow
     use m_inquire_flowgeom
     use unstruc_caching, only: copyCachedCrossSections, saveLinkList
+    use m_partitioninfo, only: jampi
     implicit none
 
     integer                                       :: ic, icmod
@@ -14373,7 +14374,7 @@ subroutine crosssections_on_flowgeom()
           branchIdx = pCrs%branchIdx
           if (branchIdx > 0) then
              ierror = findlink(branchIdx, pCrs%chainage, linknr) ! find flow link given branchIdx and chainage
-             if (linknr == -1) then
+             if (linknr == -1 .and. jampi > 0) then
                 continue  ! on another domain
              else if (ierror == DFM_NOERR) then
                 numlist(ic) = 1
