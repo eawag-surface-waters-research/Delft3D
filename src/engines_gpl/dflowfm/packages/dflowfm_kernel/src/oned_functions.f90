@@ -285,8 +285,8 @@ module m_oned_functions
             if (k_tmp(i) > 0) then
                pstor => network%storS%stor(ixy2stor(i))
                pstor%gridPoint = k_tmp(i)
-            else if (jampi > 0) then
-               call SetMessage(LEVEL_ERROR, 'Error when snapping storage node '''//trim(name_tmp(i))//''' to a flow node.')
+            else if (jampi == 0) then
+               call SetMessage(LEVEL_ERROR, 'Error when snapping storage node '''//trim(name_tmp(i))//''' to a flow node. Are coordinates correct?')
             end if
          end do
       
