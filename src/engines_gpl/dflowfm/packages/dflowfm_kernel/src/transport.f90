@@ -54,6 +54,8 @@ subroutine update_constituents(jarhoonly)
    use unstruc_messages
    use m_sediment,   only: jatranspvel, jased, stmpar, stm_included, mtd
    use m_waves
+   use timers
+
    implicit none
 
    integer :: jarhoonly 
@@ -68,8 +70,10 @@ subroutine update_constituents(jarhoonly)
    integer                                               :: istep
    integer                                               :: numstepssync
    
+   integer(4) ithndl /0/
    
    if ( NUMCONST.eq.0 ) return  ! nothing to do
+   if (timon) call timstrt ( "update_constituents", ithndl )
    
    ierror = 1
   
@@ -249,7 +253,8 @@ subroutine update_constituents(jarhoonly)
 
 !  restore dts
    dts = dts_store
-
+   
+   if (timon) call timstop( ithndl )
    return
 end subroutine update_constituents
 
@@ -258,8 +263,16 @@ use m_transport
 use m_flowgeom
 use m_flow
 use m_flowtimes
+use timers
+
+implicit none
+
 double precision :: decaytime
 integer :: i, k
+
+integer(4) ithndl /0/
+if (timon) call timstrt ( "decaytracers", ithndl )
+
 do k = 1,ndkx
    do i=ITRA1,ITRAN
       decaytime = decaytimetracers(i - itra1 + 1)
@@ -268,6 +281,8 @@ do k = 1,ndkx
       endif 
    enddo  
 enddo
+
+if (timon) call timstop( ithndl )
 end subroutine decaytracers 
 
 subroutine diffusionimplicit2D()
@@ -276,8 +291,15 @@ use m_flowgeom
 use m_flow
 use m_flowtimes
 use m_reduce
+use timers
+
+implicit none
+
 double precision :: ddx, difcoeff, diuspL
 integer i, k1, k2, L, LL, n
+
+integer(4) ithndl /0/
+if (timon) call timstrt ( "diffusionimplicit2D", ithndl )
 
 do i=1,numconst
 
@@ -306,6 +328,7 @@ do i=1,numconst
 
 enddo
 
+if (timon) call timstop( ithndl )
 end subroutine diffusionimplicit2D 
 
 
@@ -317,6 +340,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
    use m_flow,      only: jadiusp, diusp, dicouv, jacreep, dsalL, dtemL, hu, epshu
    use m_transport, only: ISALT, ITEMP
    use m_missing 
+   use timers
+
    implicit none
 
    integer,                                    intent(in)    :: NUMCONST     !< number of transported quantities
@@ -368,7 +393,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
    double precision, external                                :: dlimiter, dlimitercentral
    double precision, external                                :: dlimiter_nonequi
 
-   continue
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "comp_fluxhor3D", ithndl )
    
    dt_loc = dts
    
@@ -649,6 +675,7 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
       !$OMP END PARALLEL DO
    end if
    
+   if (timon) call timstop( ithndl )
    return
 end subroutine comp_fluxhor3D
 
@@ -664,6 +691,8 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    use unstruc_messages
    use m_sediment, only : jased, ws, sedtra, stmpar, stm_included
    use sediment_basics_module
+   use timers
+
    implicit none
 
    integer,                                    intent(in)    :: NUMCONST     !< number of transported quantities
@@ -695,6 +724,9 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    double precision, external                                :: dlimiter
                                                             
    double precision, parameter                               :: DTOL = 1d-8
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "comp_fluxver", ithndl )
    
    if ( sum(1d0-thetavert(1:NUMCONST)).lt.DTOL ) goto 1234 ! nothing to do
    
@@ -805,6 +837,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
 
 1234 continue
 
+   if (timon) call timstop( ithndl )
    return
 end subroutine comp_fluxver
 
@@ -812,6 +845,7 @@ end subroutine comp_fluxver
 subroutine make_rhs(NUMCONST, thetavert, Ndkx, Lnkx, kmx, vol1, kbot, ktop, Lbot, Ltop, sumhorflux, fluxver, source, sed, nsubsteps, jaupdate, ndeltasteps, rhs)
    use m_flowgeom, only: Ndxi, Ndx, Lnx, Ln, ba  ! static mesh information
    use m_flowtimes, only: dts
+   use timers
    
    implicit none
 
@@ -844,6 +878,9 @@ subroutine make_rhs(NUMCONST, thetavert, Ndkx, Lnkx, kmx, vol1, kbot, ktop, Lbot
 
    double precision, parameter                           :: dtol=1d-8
    
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "make_rhs", ithndl )
+
    dt_loc = dts
    
 !   rhs = 0d0
@@ -936,6 +973,7 @@ subroutine make_rhs(NUMCONST, thetavert, Ndkx, Lnkx, kmx, vol1, kbot, ktop, Lbot
       end if
    end if
    
+   if (timon) call timstop( ithndl )
 end subroutine make_rhs
 
 
@@ -943,6 +981,7 @@ end subroutine make_rhs
 subroutine solve_2D(NUMCONST, Ndkx, Lnkx, vol1, kbot, ktop, Lbot, Ltop, sumhorflux, fluxver, source, sink, nsubsteps, jaupdate, ndeltasteps, sed, rhs)
    use m_flowgeom, only: Ndxi, Ndx, Lnx, Ln, ba  ! static mesh information
    use m_flowtimes, only: dts
+   use timers
    
    implicit none
 
@@ -971,6 +1010,9 @@ subroutine solve_2D(NUMCONST, Ndkx, Lnkx, vol1, kbot, ktop, Lbot, Ltop, sumhorfl
    
    integer                                                   :: j, k
    
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "solve_2D", ithndl )
+
    thetavert = 0d0
    
    dt_loc = dts
@@ -997,6 +1039,7 @@ subroutine solve_2D(NUMCONST, Ndkx, Lnkx, vol1, kbot, ktop, Lbot, Ltop, sumhorfl
    end do
    !$OMP END PARALLEL DO
 
+   if (timon) call timstop( ithndl )
    return
 end subroutine solve_2D
 
@@ -1013,6 +1056,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
    use m_flow,      only: epshsdif, s1, kmxn, xlozmidov, rhomean, rho, ag, a1, wsf  ! do not use m_flow, please put this in the argument list
    use m_sediment,  only: mtd, jased, ws, sedtra, stmpar
    use sediment_basics_module
+   use timers
    
    implicit none
 
@@ -1059,6 +1103,9 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                                                             
    double precision, parameter                               :: dtol=1d-8
    
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "solve_vertical", ithndl )
+
    dt_loc = dts
    
    rhs = 0d0
@@ -1200,6 +1247,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
 
   !$OMP END PARALLEL DO
 
+   if (timon) call timstop( ithndl )
    return
 end subroutine solve_vertical
 
@@ -1624,6 +1672,8 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    use unstruc_messages
    use m_flowparameters, only: janudge
    use m_missing
+   use timers
+
    implicit none
    
    character(len=128)          :: message
@@ -1636,6 +1686,9 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    
    double precision            :: Trefi
       
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "fill_constituents", ithndl )
+
    const_sour = 0d0
    const_sink = 0d0
    
@@ -1819,7 +1872,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    !       but apply_sediment_bc must still be done here, since above the boundary
    !       nodes's constituents(kb,:) = sed(kb,:) has reset it to 0.
    if ( stm_included ) call apply_sediment_bc()
-   if (jas == 0) return                    ! no sources from initialise
+   if (jas == 0) goto 1234                    ! no sources from initialise
    
    do n  = 1,numsrc
       kk     = ksrc(1,n)                   ! 2D pressure cell nr FROM
@@ -1908,6 +1961,9 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
 
    enddo
 
+1234 continue 
+
+   if (timon) call timstop( ithndl )
    return
 end subroutine fill_constituents
 
@@ -1919,10 +1975,15 @@ subroutine fill_rho()
    use m_transport
    use m_sferic
    use m_flowtimes , only : dnt
+   use timers
+
    implicit none
 
    integer          :: kk, k, kb, kt
    double precision :: dvoli, dtol=1d-8
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "fill_rho", ithndl )
   
    do k=1,Ndkx
       constituents(1,k) = rho(k)
@@ -1938,6 +1999,7 @@ subroutine fill_rho()
       end do
    enddo    
    
+   if (timon) call timstop( ithndl )
    return
 end subroutine fill_rho
    
@@ -1951,11 +2013,15 @@ subroutine extract_constituents()
    use messageHandling
    use m_missing
    use m_plotdots
+   use timers
+
    implicit none
    
    integer :: i, iconst, k, kk, limmin, limmax
-   
    double precision :: dmin
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "extract_constituents", ithndl )
      
    do k=1,Ndkx
       if ( ISALT.ne.0 ) then
@@ -2044,6 +2110,7 @@ subroutine extract_constituents()
      call doforester()
   endif 
      
+  if (timon) call timstop( ithndl )
   return
 end subroutine extract_constituents
 
@@ -2052,9 +2119,14 @@ subroutine extract_rho()
    use m_flow
    use m_sediment
    use m_transport
+   use timers
+
    implicit none
    
    integer :: k
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "extract_rho", ithndl )
    
    do k=1,Ndkx
       rho(k) = constituents(1,k)
@@ -2063,6 +2135,7 @@ subroutine extract_rho()
       endif   
    enddo
    
+   if (timon) call timstop( ithndl )
    return
 end subroutine extract_rho
 
@@ -2341,6 +2414,7 @@ subroutine apply_tracer_bc()
    use m_meteo
    use m_flowgeom, only: ln
    use m_flow, only: kmxd, q1, kmxL
+   use timers
    implicit none
    
    character (len=NAMTRACLEN)    :: tracnam
@@ -2350,6 +2424,9 @@ subroutine apply_tracer_bc()
    integer :: itrac, iconst
    integer :: k, kk, ki, kb
    integer :: L, LL, Lb, Lt
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "apply_tracer_bc", ithndl )
    
 !  loop over the tracer boundary conditions
    do itrac=1,numtracers
@@ -2385,6 +2462,7 @@ subroutine apply_tracer_bc()
       end do
    end do
    
+   if (timon) call timstop( ithndl )
    return
 end subroutine apply_tracer_bc 
 
@@ -2399,6 +2477,7 @@ subroutine get_dtmax()
    use m_timer
    use m_transport
    use m_partitioninfo
+   use timers
 
    implicit none
    
@@ -2412,7 +2491,10 @@ subroutine get_dtmax()
    integer                                       :: ierror
    
    double precision,                 parameter   :: dtmax_default = 1d4
-   
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "get_dtmax", ithndl )
+  
    dtmin_transp = huge(1d0)
    kk_dtmin = 0
    
@@ -2539,6 +2621,7 @@ subroutine get_dtmax()
       if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
    end if
    
+   if (timon) call timstop( ithndl )
    return
 end subroutine get_dtmax
 
@@ -2548,6 +2631,8 @@ subroutine get_ndeltasteps()
    use m_flowgeom, only: Ndxi, Lnxi, Lnx, ln
    use m_flowtimes, only: dts
    use m_transport
+   use timers
+
    implicit none
    
    double precision                      :: dt, dtmin
@@ -2556,6 +2641,9 @@ subroutine get_ndeltasteps()
    integer                               :: kk, LL
    
    double precision, external            :: get_dt
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "get_ndeltasteps", ithndl )
    
    numnonglobal = 0
    
@@ -2592,12 +2680,15 @@ subroutine get_ndeltasteps()
    
    end if
    
+   if (timon) call timstop( ithndl )
    return  
 end subroutine get_ndeltasteps
 
 !> sum horizontal fluxes
 subroutine comp_sumhorflux(NUMCONST, kmx, Lnkx, Ndkx, Lbot, Ltop, fluxhor, sumhorflux)
    use m_flowgeom, only: Lnx, Ln, nd, Ndx    ! static mesh information
+   use timers
+
    implicit none
    
    integer,                                    intent(in)    :: NUMCONST      !< number of transported quantities
@@ -2613,6 +2704,9 @@ subroutine comp_sumhorflux(NUMCONST, kmx, Lnkx, Ndkx, Lbot, Ltop, fluxhor, sumho
    integer :: j, k1, k2
    integer :: k
    
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "comp_sumhorflux", ithndl )
+
    if ( kmx.lt.1 ) then
 !     add horizontal fluxes to right-hand side
       do L=1,Lnx
@@ -2641,11 +2735,14 @@ subroutine comp_sumhorflux(NUMCONST, kmx, Lnkx, Ndkx, Lbot, Ltop, fluxhor, sumho
       end do
    end if
    
+   if (timon) call timstop( ithndl )
    return
 end subroutine comp_sumhorflux
 
 !> determine if the cells have to be updated (1) or not (0)
 subroutine get_jaupdate(istep,nsubsteps,Ndxi,Ndx,ndeltasteps,jaupdate)
+   use timers
+
    implicit none
    
    integer,                  intent(in)  :: istep        !< substep number
@@ -2658,6 +2755,8 @@ subroutine get_jaupdate(istep,nsubsteps,Ndxi,Ndx,ndeltasteps,jaupdate)
    integer                               :: kk
    integer                               :: num
    
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "get_jaupdate", ithndl )
 
    jaupdate = 0
    
@@ -2678,12 +2777,15 @@ subroutine get_jaupdate(istep,nsubsteps,Ndxi,Ndx,ndeltasteps,jaupdate)
 !      write(6,"(I0,':',I0, ' ', $)") istep+1, num
 !   end if
    
+   if (timon) call timstop( ithndl )
    return
 end subroutine get_jaupdate
 
 !> determine if the horizontal fluxes have to be updated (1) or not (0) from cell-based mask
 subroutine get_jaupdatehorflux(nsubsteps, limtyp, jaupdate,jaupdatehorflux)
    use m_flowgeom,  only: Ndx, Lnx, ln, klnup
+   use timers
+
    implicit none
    
    integer,                  intent(in)  :: nsubsteps       !< number of substeps
@@ -2695,6 +2797,9 @@ subroutine get_jaupdatehorflux(nsubsteps, limtyp, jaupdate,jaupdatehorflux)
    integer                               :: kk1L, kk2L
    integer                               :: kk1R, kk2R
    
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "get_jaupdatehorflux", ithndl )
+
    if ( nsubsteps.eq.1 ) then
       jaupdatehorflux = 1
    else
@@ -2750,6 +2855,7 @@ subroutine get_jaupdatehorflux(nsubsteps, limtyp, jaupdate,jaupdatehorflux)
       end if
    end if
    
+   if (timon) call timstop( ithndl )
    return
 end subroutine get_jaupdatehorflux
    
@@ -2758,11 +2864,15 @@ use m_flow    ,   only : sa1, vol1, ndkx, kbot, ktop, kmxn, ndkx, maxitverticalf
 use m_flowgeom,   only : ndx, ndxi  
 use m_turbulence, only : kmxx
 use m_transport,  only : constituents, numconst, itemp
+use timers
 
 implicit none
 
 integer          :: kk, km, kb 
 double precision :: a(kmxx), d(kmxx)
+
+integer(4) ithndl /0/
+if (timon) call timstrt ( "doforester", ithndl )
 
 do kk = 1,ndxi  
    km = ktop(kk) - kbot(kk) + 1
@@ -2773,7 +2883,8 @@ do kk = 1,ndxi
       call foresterpoint2(constituents, numconst, ndkx, itemp, vol1(kb:), a, d, km, kmxn(kk), kb, maxitverticalforestertem, -1)
    endif   
 enddo   
-   
+
+if (timon) call timstop( ithndl )
 end subroutine doforester
 
 subroutine comp_horfluxtot()
@@ -2781,12 +2892,16 @@ subroutine comp_horfluxtot()
    use m_flow, only: Lbot, Ltop, kmx, Lnkx 
    use m_transport, only: ISED1, ISEDN, fluxhor, fluxhortot, sinksetot, sinkftot
    use m_flowtimes, only: dts
+   use timers
+
    implicit none
    
-  
    integer :: LL, L, Lb, Lt
    integer :: j
    
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "comp_horfluxtot", ithndl )
+  
    if ( kmx<1 ) then
       do L=1,Lnx
          do j=ISED1, ISEDN
@@ -2805,6 +2920,7 @@ subroutine comp_horfluxtot()
       end do
    end if
 
+   if (timon) call timstop( ithndl )
 end subroutine comp_horfluxtot
 
 subroutine comp_horfluxmba()
@@ -2813,12 +2929,16 @@ subroutine comp_horfluxmba()
    use m_transport, only: NUMCONST, fluxhor
    use m_flowtimes, only: dts
    use m_mass_balance_areas
+   use timers
+
    implicit none
-   
-  
+
    integer :: LL, L, Lb, Lt, k1, k2, i
    integer :: iconst
    
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "comp_horfluxmba", ithndl )
+
    do i=1,nombaln
       LL = mbalnlist(i)
       Lb = Lbot(LL)
@@ -2855,6 +2975,7 @@ subroutine comp_horfluxmba()
       end do
    end do
 
+   if (timon) call timstop( ithndl )
 end subroutine comp_horfluxmba
 
 !subroutine update_constituents_RK3
@@ -2997,13 +3118,16 @@ subroutine comp_sinktot()
    use m_flowgeom, only: ndx
    use m_flowtimes, only: dts
    use m_sediment
+   use timers
 
    implicit none
 
    integer   :: k, j, kb, kt, ll
-   !
 
+   integer(4) ithndl /0/
    if (.not. stm_included) return
+   if (timon) call timstrt ( "comp_sinktot", ithndl )
+
    if (mxgr == 0) return
    
    if (kmx<1) then    ! 2D
@@ -3028,6 +3152,7 @@ subroutine comp_sinktot()
       enddo
    endif
 
+   if (timon) call timstop( ithndl )
 end subroutine comp_sinktot
 
 ! compute Au/Dx for diffusive flux
@@ -3035,10 +3160,15 @@ subroutine comp_dxiAu()
    use m_flowgeom, only: ln, Lnx, dxi, wu
    use m_flow, only: hs, zws, kmx, Au
    use m_transport, only : dxiAu, jalimitdtdiff
+   use timers
+
    implicit none
    
    integer :: k1, k2
    integer :: LL, L, Lb, Lt
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "comp_dxiAu", ithndl )
    
    if ( jalimitdtdiff.eq.0 ) then
       if ( kmx.eq.0 ) then
@@ -3072,7 +3202,7 @@ subroutine comp_dxiAu()
       end if
    end if
       
-   
+   if (timon) call timstop( ithndl )
    return
 end subroutine comp_dxiAu
 
