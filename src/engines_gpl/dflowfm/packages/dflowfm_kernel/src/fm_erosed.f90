@@ -5059,9 +5059,10 @@
       use m_flow
       use m_physcoef
       use m_waves, only: taubxu
+      implicit none
    
       integer            :: L , Lb, Lt
-      double precision   :: cz, z00
+      double precision   :: cz, z00, umod, rz, cwall
    
    do L = 1, lnx
       call getLbotLtop(L,Lb,Lt)
