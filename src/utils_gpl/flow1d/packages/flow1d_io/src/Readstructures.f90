@@ -263,8 +263,10 @@ module m_readstructures
             else 
                call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'numCoordinates', pstru%numCoordinates, success1)
                success = success .and. check_input_result(success1, st_id, 'numCoordinates')
+               write (*,*) 'readStructureFile for '//pstru%id//', numCoordinates = ', pstru%numCoordinates, ', success1 = ', success1, ', success = ', success
                if (success) then
-                  allocate(pstru%xCoordinates(pstru%numCoordinates), pstru%yCoordinates(pstru%numCoordinates))
+                  allocate(pstru%xCoordinates(pstru%numCoordinates), pstru%yCoordinates(pstru%numCoordinates), stat = istat)
+                  write (*,*) 'readStructureFile, allocate(pstru%xCoordinates(', pstru%numCoordinates, ') and y), stat=', istat
                   
                   call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'xCoordinates', pstru%xCoordinates, &
                                 pstru%numCoordinates, success1)

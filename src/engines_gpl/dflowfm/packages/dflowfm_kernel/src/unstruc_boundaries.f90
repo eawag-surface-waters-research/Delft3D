@@ -2239,6 +2239,9 @@ do i=1,network%sts%count
    ! NOTE: kegen below does not apply to general structures. Just a placeholder for the link snapping of all structure types.
    select case (pstru%type)
    case (ST_DAMBREAK)
+      write (*,*) 'flow_init_structurecontrol, for '//pstru%id//', numCoordinates=', pstru%numCoordinates
+      write (*,*) '... associated(pstru%xCoordinates)', associated(pstru%xCoordinates), ', associated(pstru%yCoordinates)', associated(pstru%yCoordinates)
+      
       call selectelset_internal_links( xz, yz, ndx, ln, lnx, kegen(1:numl), numgen, &
                                        loc_spec_type, nump = pstru%numCoordinates, xpin = pstru%xCoordinates, ypin = pstru%yCoordinates, &
                                        branchindex = pstru%ibran, chainage = pstru%chainage, &
