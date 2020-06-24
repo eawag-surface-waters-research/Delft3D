@@ -515,7 +515,10 @@
      J             C(ISNAM),
      J             C(IPNAM),
      J             C(ISFNA),
-     J             C(IFNAM) )
+     J             C(IFNAM),
+     &             J(IIOUT),
+     &             J(IIOPO),
+     &             C(IONAM))
 !
       if ( timon ) call timstop ( ithandl )
       RETURN
@@ -526,14 +529,14 @@
      +                   VOLUME, NOSEG , NOSYS , NDMPAR, IPDMP ,
      +                   BOUND , NOLOC , PROLOC, NODEF , DEFAUL,
      +                   NTDMPQ, DANAM , SYNAME, paname, sfname,
-     +                   funame)
+     +                   funame, IOUTPS, IOPOIN, OUNAM )
       use timers
 
 
       INTEGER    NOCONS, NOPA  , NOFUN , NOSFUN,
      +           NOTOT , IDT   , ITIME , NOSEG , NOSYS ,
      +           NDMPAR, NOLOC , NODEF , NTDMPQ
-      INTEGER    IPDMP(*)
+      INTEGER    IPDMP(*), IOUTPS(7,*), IOPOIN(*)
       REAL       CONC(NOTOT,*),
      +           SEGFUN(NOSEG,*), FUNC(*)      ,
      +           PARAM(*)       , CONS(*)      ,
@@ -555,7 +558,7 @@
 !     IOPOIN is not used if NRVAR = 0
 
       real, allocatable, save : : outval(:)
-      integer iopoin, nrvar, ncout, io_rtc, isys, idmp
+      integer nrvar, ncout, io_rtc, isys, idmp
       logical first, rewine
       character*40 moname(4)
       character*255 filnam
@@ -569,7 +572,6 @@
       data    first   /.true./
       data    rewine  /.true./
       data    io_rtc /1234/
-      data    nrvar  /0/
       data    moname /'Interface from Delwaq to RTC',
      j                'Concentrations for current time step',
      j                ' ',
@@ -577,8 +579,15 @@
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "rtcint", ithandl )
 
+      !
+      ! Pointers into the output system arrays
+      ! - use the history file
+      !
+      k1    = 1 + ioutps(4,1) + ioutps(4,2)
+      nrvar = ioutps(4,3)
+
       if ( first ) then
-          allocate ( outval(ndmpar*notot) )
+          allocate ( outval(ndmpar*(notot+nrvar)) )
           filnam = ' '
           call getcom ( '-i'  , 3    , lfound, idummy, rdummy,
      +                  inifil, ierr2)
@@ -597,8 +606,9 @@
           if ( filnam .eq. ' ' ) filnam = 'wq2rtc.his'
       endif
 
+
       ncout =  notot
-      CALL FIOSUB       (OUTVAL, IOPOIN, NRVAR , NOCONS, NOPA  ,
+      CALL FIOSUB       (OUTVAL, IOPOIN(K1), NRVAR , NOCONS, NOPA  ,
      +                   NOFUN , NOSFUN, NOTOT , CONC  , SEGFUN,
      +                   FUNC  , PARAM , CONS  , IDT   , ITIME ,
      +                   VOLUME, NOSEG , NOSYS , NDMPAR, IPDMP ,
@@ -611,12 +621,13 @@
 
           write ( io_rtc ) moname
           write ( io_rtc ) notot, ndmpar
-          write ( io_rtc ) (syname(isys),isys=1,notot)
+          write ( io_rtc ) (syname(isys),isys=1,notot),
+     &                     (ounam(k1+isys-1),isys=1,nrvar)
           write ( io_rtc ) (idmp,danam(idmp),idmp=1,ndmpar)
       endif
 
       write ( io_rtc ) itime
-      write ( io_rtc ) (outval(isys),isys=1,notot*ndmpar)
+      write ( io_rtc ) (outval(isys),isys=1,(notot+nrvar)*ndmpar)
 
       if ( rewine ) close ( io_rtc )
 
