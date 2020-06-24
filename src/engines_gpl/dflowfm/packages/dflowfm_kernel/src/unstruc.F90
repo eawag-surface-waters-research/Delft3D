@@ -2037,8 +2037,9 @@ if(q /= 0) then
 
  if (japerim == 0) then
 
-    hpr1   = s1(k1)-BL1                                                                            ! == 1,2: (ibedlevtyp=3), hrad = A/P   , link or node
-    if (hpr1 > 0) then
+    hpr1   = s1(k1)-BL1     
+    ! Also include waterdepth ==0 in order to make a1 /=0, this prevents SAAD errors                                                                       ! == 1,2: (ibedlevtyp=3), hrad = A/P   , link or node
+    if (hpr1 >= 0) then
        call getlinkareawid2D(L,wu2,b21,ai,hpr1,ar1,wid1)
        dx1   = 0.5d0*dx(L)*0.5d0 ! acl(L)
        !if (k1 > ndx2D) dx1 = 2*dx1
@@ -2048,7 +2049,8 @@ if(q /= 0) then
     endif
 
     hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
-    if (hpr2 > 0) then
+    ! Also include waterdepth ==0 in order to make a1 /=0, this prevents SAAD errors
+    if (hpr2 >= 0) then
        call getlinkareawid2D(L,wu2,b21,ai,hpr2,ar2,wid2)
        dx2      = 0.5d0*dx(L)*0.5d0 ! (1d0-acl(L))
        !if (k2 > ndx2D) dx2 = 2*dx2
@@ -46928,7 +46930,7 @@ if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
       ! NOTE: In case of a YZ-type cross section the conveyance is computed, using the given water depth, but
       !       using the cross sectional profile of this YZ-cross section. In that case we need the Chezy value
       !       for computing the conveyance based on the rectangular.
-      factor = max(0d0,(time1 - times_update_roughness(1))/(times_update_roughness(2)-times_update_roughness(1)))
+      factor = max(0d0,(time1 - times_update_roughness(1))/(dt_UpdateRoughness))
       call getconveyance(network, hpr, u1(L), q1(L), s1(k2), LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim, factor)
       frcu(L)        = cz
       frcu_mor(L)    = cz
