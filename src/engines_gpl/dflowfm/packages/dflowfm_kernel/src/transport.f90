@@ -3126,9 +3126,8 @@ subroutine comp_sinktot()
 
    integer(4) ithndl /0/
    if (.not. stm_included) return
-   if (timon) call timstrt ( "comp_sinktot", ithndl )
-
    if (mxgr == 0) return
+   if (timon) call timstrt ( "comp_sinktot", ithndl )
    
    if (kmx<1) then    ! 2D
       do k=1,ndx
