@@ -74,7 +74,7 @@ subroutine ua_rvr(facas,    facsk,    sws,    h,    hrms, &
     alpha = -log10(exp(1.0_fp))/m4
     beta  = exp(m3/m4)
     !
-    waveno = twopi / rlabda
+    waveno = twopi / max(rlabda,1.0e-12_fp)
     urs = 3.0_fp/8.0_fp*sqrt(2.0_fp)*hrms*waveno/(waveno*h)**3              !Ursell number
     urs = max(urs,1e-12_fp)
     bm = m1 + (m2-m1)/(1.0_fp+beta*urs**alpha)                              !Boltzmann sigmoid (eq 6)         

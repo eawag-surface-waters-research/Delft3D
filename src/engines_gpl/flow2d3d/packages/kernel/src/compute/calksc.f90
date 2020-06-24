@@ -262,7 +262,7 @@ subroutine calksc(nmmax     ,dps       ,s1        ,lsedtot   , &
              endif
              if (wave) then
                 hs     = hrms(nm) * sqrt(2.0_fp)
-                arg = 2.0_fp * pi * depth / rlabda(nm)
+                arg = 2.0_fp * pi * depth / max(rlabda(nm),1.0e-12_fp)
                 if (arg > 50.0_fp) then
                    uw = 0.0_fp
                 else

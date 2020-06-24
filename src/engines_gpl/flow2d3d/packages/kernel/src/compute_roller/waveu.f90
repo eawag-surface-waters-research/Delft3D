@@ -233,7 +233,7 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
                  !
                  ! Compute Gamma
                  !
-                 gamBaSti = 0.5_fp + 0.4_fp*tanh(33.0_fp*hrms0/rlabda0)
+                 gamBaSti = 0.5_fp + 0.4_fp*tanh(33.0_fp*hrms0/max(rlabda0,1.0e-12_fp))
               else
                  call prterr(lundia, 'U021', 'Battjes & Stive formulation can not be used without wavecon file')
                  call d3stop(1, gdp)

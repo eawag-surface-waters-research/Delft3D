@@ -195,7 +195,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
     endif
     if (wave .and. tp>0.1_fp) then
        hs  = hrms*sqrt(2.0_fp)
-       arg = 2.0_fp * pi * h1 / rlabda
+       arg = 2.0_fp * pi * h1 / max(rlabda,1.0e-12_fp)
        if (arg > 50.0_fp) then
           awb = 0.0_fp
           uwb = 0.0_fp

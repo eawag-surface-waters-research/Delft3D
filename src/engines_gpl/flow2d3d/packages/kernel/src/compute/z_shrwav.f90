@@ -100,7 +100,7 @@ subroutine z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
                 ! dfu is dissipation multiplied with costu (see TAUBOT)
                 ! angle between waves and current. (so dissipation can be negative) 
                 !
-                ku = 2.0_fp * pi / (0.5_fp*(rlabda(nm)+rlabda(nmu)))
+                ku = 2.0_fp * pi / (max(0.5_fp*(rlabda(nm)+rlabda(nmu)),1.0e-12_fp))
                 !
                 ! Add term for streaming in momentum equations 
                 ! for layers in the wave boundary layer

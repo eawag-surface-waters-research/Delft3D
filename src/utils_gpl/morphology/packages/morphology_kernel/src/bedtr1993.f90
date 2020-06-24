@@ -177,7 +177,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
           ! Calculate Uon and Uoff, asymmetrie ISOBE
           !
           hs    = hrms*sqrt(2.0)
-          rls   = rlabda
+          rls   = max(rlabda,1.0e-12_fp)
           rhs13 = hs/rls
           tp1   = tp
           if (h1*2.0*pi/rls > 20.0) then

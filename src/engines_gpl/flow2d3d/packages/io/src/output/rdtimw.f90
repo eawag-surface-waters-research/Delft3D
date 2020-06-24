@@ -120,6 +120,7 @@ subroutine rdtimw(comfil    ,lundia    ,error     ,ntwav     , &
        ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
        error = .true.
+       ierror = clsnef(fds)
     endif
     !
 9999 continue
