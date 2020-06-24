@@ -3144,7 +3144,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     if (writeall .or. Dt_UpdateRoughness /= 86400d0) then
-       call prop_set (prop_ptr, 'time', 'UpdateRoughnessInterval', Dt_UpdateRoughness)
+       call prop_set (prop_ptr, 'time', 'UpdateRoughnessInterval', Dt_UpdateRoughness, 'Update interval for time dependent roughness parameters (in s)')
     end if
 
 ! Restart settings
