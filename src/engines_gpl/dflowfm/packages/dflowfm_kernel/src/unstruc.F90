@@ -46930,7 +46930,11 @@ if (jacustombnd1d == 1) then ! This link is a 1D bnd *and* has a custom width.
       ! NOTE: In case of a YZ-type cross section the conveyance is computed, using the given water depth, but
       !       using the cross sectional profile of this YZ-cross section. In that case we need the Chezy value
       !       for computing the conveyance based on the rectangular.
-      factor = max(0d0,(time1 - times_update_roughness(1))/(dt_UpdateRoughness))
+      if (network%rgs%timeseries_defined) then
+         factor = max(0d0,(time1 - times_update_roughness(1))/(times_update_roughness(2)-times_update_roughness(1)))
+      else
+         factor = 1d0
+      end if
       call getconveyance(network, hpr, u1(L), q1(L), s1(k2), LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim, factor)
       frcu(L)        = cz
       frcu_mor(L)    = cz
