@@ -18198,7 +18198,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
          times_update_roughness(1) = times_update_roughness(2)
          times_update_roughness(2) = times_update_roughness(2) + dt_UpdateRoughness ! (e.g., 86400 s)
          call shiftTimeDependentRoughnessValues(network%rgs)
-         ! The next gettimespace call will automatically read and fill new values in prgh%timeDepalues(:,2).
+         ! The next gettimespace call will automatically read and fill new values in prgh%timeDepValues(:,2).
          success = success .and. ec_gettimespacevalue(ecInstancePtr, item_frcutim, irefdate, tzone, tunit, times_update_roughness(2))
          ! update conveyance tables
          call reCalculateConveyanceTables(network)
