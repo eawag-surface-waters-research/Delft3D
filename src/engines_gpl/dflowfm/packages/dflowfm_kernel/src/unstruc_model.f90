@@ -1478,6 +1478,7 @@ subroutine readMDUFile(filename, istat)
     ! Set update frequency for the time dependent roughness from frictFile.
     call prop_get (md_ptr, 'time', 'UpdateRoughnessInterval', dt_UpdateRoughness)
     if (dt_UpdateRoughness < dt_User) then
+       ! NOTE: dt_UpdateRoughness must at least be >= DTMax, but we'll enforce DTUser, because that makes more sense anyway.
        call SetMessage(LEVEL_ERROR, 'The value of "UpdateRoughnessInterval" must be equal to or larger than the user time step.')
     endif
     !
