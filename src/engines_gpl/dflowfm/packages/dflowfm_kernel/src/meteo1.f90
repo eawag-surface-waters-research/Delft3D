@@ -5795,13 +5795,9 @@ contains
         call reapol(minp, 0)
      else if ((loc_spec_type==LOCTP_POLYGON_XY .or. loc_spec_type==LOCTP_POLYLINE_XY) .and. present(xpin) .and. present(ypin) .and. present(nump)) then
         if (nump > 0) then
-!           write (*,*) 'selectelset_internal_links, before increasepol'
            call increasepol(nump, 0)
-!           write (*,*) 'selectelset_internal_links, after increasepol'
            xpl(1:nump) = xpin(1:nump)
-!           write (*,*) 'selectelset_internal_links, after xpl = xpin'
            ypl(1:nump) = ypin(1:nump)
-!           write (*,*) 'selectelset_internal_links, after ypl = ypin'
            npl = nump
         end if
      else if (loc_spec_type==LOCTP_BRANCHID_CHAINAGE .and. present(branchindex) .and. present(chainage) ) then
