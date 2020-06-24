@@ -311,6 +311,7 @@ module m_inquire_flowgeom
          strucid_tmp = network%sts%struct(i)%id
          if (trim(strucid_tmp) == trim(strucid)) then
             L = network%sts%struct(i)%linknumbers(1)
+            ! NOTE: intentionally no abs() here, but also not on call site: L = -1 means not found, and for 1D structures, linknumber(1) is always > 0.
             exit
          end if
       end do

@@ -544,7 +544,7 @@ module m_oned_functions
    do i = 1, nstruc
       pstruc => network%sts%struct(i)
       do L0 = 1, pstruc%numlinks
-         L = pstruc%linknumbers(L0)
+         L = abs(pstruc%linknumbers(L0))
          bob(:,L) = huge(1d0)
       enddo
    enddo
@@ -554,7 +554,7 @@ module m_oned_functions
       pstruc => network%sts%struct(i)
       crest_level = get_crest_level(pstruc)
       do L0 = 1, pstruc%numlinks
-         L = pstruc%linknumbers(L0)
+         L = abs(pstruc%linknumbers(L0))
          if (crest_level < huge(1d0)) then
             bob(1,L) = min(bob(1,L), crest_level)
             bob(2,L) = min(bob(2,L), crest_level)

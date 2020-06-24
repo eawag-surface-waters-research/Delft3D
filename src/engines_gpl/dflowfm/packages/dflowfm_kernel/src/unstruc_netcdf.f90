@@ -15001,7 +15001,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
                   nLinks = pstru%numlinks
                   pstru%au(1:nLinks) = tmpvar2d(1:nLinks,i)
                   do L0 = 1, nLinks
-                     L = pstru%linknumbers(L0)
+                     L = abs(pstru%linknumbers(L0))
                      au(L) = tmpvar2d(L0,i)
                   end do
                end do
@@ -15158,7 +15158,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
                   nLinks = pstru%numlinks
                   pstru%au(1:nLinks) = tmpvar2d(1:nLinks,i)
                   do L0 = 1, nLinks
-                     L = pstru%linknumbers(L0)
+                     L = abs(pstru%linknumbers(L0))
                      au(L) = tmpvar2d(L0,i)
                   end do
                end do
@@ -15343,7 +15343,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
                   nLinks = pstru%numlinks
                   pstru%au(1:nLinks) = tmpvar2d(1:nLinks,i)
                   do L0 = 1, nLinks
-                     L = pstru%linknumbers(L0)
+                     L = abs(pstru%linknumbers(L0))
                      au(L) = tmpvar2d(L0,i)
                   end do
                end do

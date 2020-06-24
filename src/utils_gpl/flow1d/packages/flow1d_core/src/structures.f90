@@ -1394,7 +1394,7 @@ end subroutine deallocstructure
       if (lin2str(L) > 0) then
          istru = lin2str(L)
          do i = 1, struct(istru)%numlinks
-            if (L==struct(istru)%linknumbers(i)) then
+            if (L==abs(struct(istru)%linknumbers(i))) then
                L0 = i
             endif
          enddo

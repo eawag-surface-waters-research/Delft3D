@@ -38666,7 +38666,7 @@ end subroutine setbobs_fixedweirs
           if (network%sts%struct(istru)%type == ST_GENERAL_ST )then
              SkipDimensionChecks = .false.
              if (pstru%numlinks == 1) then
-                L = pstru%linknumbers(1)
+                L = abs(pstru%linknumbers(1))
                 if (L <= lnx1D) then
                    if (network%adm%line2cross(L)%c1 < 0) then
                       SkipDimensionChecks = .true.
@@ -38772,7 +38772,7 @@ end subroutine setbobs_fixedweirs
     do i = 1, ncompound
        pcompound => network%cmps%compound(i)
        do L0 = 1, pcompound%numlinks
-          L = pcompound%linknumbers(L0)
+          L = abs(pcompound%linknumbers(L0))
           if (hu(l) > 0) then
              call computeCompound(pcompound, network%sts%struct, L0, u0(L), teta(L), fu(L), ru(L), au(L))
           end if
@@ -40605,7 +40605,7 @@ subroutine reallocsrc(n)
  do istru=1,network%sts%count
     pstru => network%sts%struct(istru)
     do L0=1,pstru%numlinks
-       L = pstru%linknumbers(L0)
+       L = abs(pstru%linknumbers(L0))
        if (L < 1) then
           pstru%u1(L0) = 0d0
        else
