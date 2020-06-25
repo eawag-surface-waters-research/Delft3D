@@ -6162,7 +6162,7 @@ contains
          call warn_flush()
          return
       else if (filetype == arcinfo) then
-         call read_samples_from_arcinfo(filename, 0)
+         call read_samples_from_arcinfo(filename, 0, 0)
       else if (filetype == geotiff) then
          success = read_samples_from_geotiff(filename)
          if (.not. success) then

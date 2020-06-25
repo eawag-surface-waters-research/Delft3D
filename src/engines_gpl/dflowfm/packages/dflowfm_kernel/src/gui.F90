@@ -1045,7 +1045,7 @@
                 call delsam(0)
                 call restorepol()
 
-                call read_samples_from_arcinfo(trim(filnam), ja)  ! reaasc
+                call read_samples_from_arcinfo(trim(filnam), ja, 1)  ! reaasc
             else if (strcmpi(filnam(      i-3 :i), '.tif') &
                 .or. strcmpi(filnam(max(1,i-4):i), '.tiff')) then
                call doclose(mlan)
