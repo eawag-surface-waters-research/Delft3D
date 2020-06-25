@@ -3407,6 +3407,8 @@ end module m_vegetation
  integer                           :: kplotordepthaveraged  = 1 !< 1 = kplot, 2 = averaged
  integer                           :: layertype         !< 1= all sigma, 2 = all z, 3 = left sigma, 4 = left z
  integer                           :: numtopsig = 0     !< number of top layers in sigma
+ integer                           :: janumtopsiguniform = 1  !< specified nr of top layers in sigma is same everywhere
+
  double precision                  :: Tsigma = 100      !< relaxation period density controlled sigma
  integer, parameter                :: LAYTP_SIGMA     = 1
  integer, parameter                :: LAYTP_Z         = 2
@@ -4791,7 +4793,7 @@ end module m_flowtimes
  MODULE M_ARCINFO
    implicit none
    double precision, ALLOCATABLE :: D(:,:)
-   INTEGER                       :: MCa = 0, NCa
+   INTEGER                       :: MCa = 0, NCa 
    double precision              :: X0=0, Y0=0, DXa=1d0, DYa=1d0, RMIS=-999d0
  END MODULE M_ARCINFO
 
@@ -5045,7 +5047,7 @@ module m_samples_refine     ! used in refinecellsandfaces2 and in sample paths
    integer                                         :: MAXLEVEL       = 10    !< maximum number of refinement levels
    double precision                                :: threshold      = 1d2   !< typical obstacle height in grid refinement
    double precision                                :: thresholdmin   = 1d0   !< minimum obstacle height grid refinement
-   double precision                                :: hmin           = 5d4   !< minimum cell size
+   double precision                                :: hmin           = 5d3   !< minimum cell size
    integer                                         :: jadirectional  = 0     !< directional refinement (1) or not (0)
 
    integer, parameter                              :: iHesstat_OK    = 0     !< sample Hessians up-to-date
@@ -5057,7 +5059,7 @@ module m_samples_refine     ! used in refinecellsandfaces2 and in sample paths
    integer, parameter                              :: ITYPE_MESHWIDTH   = 3     !< criterion based on maximum mesh width
    integer                                         :: irefinetype       = ITYPE_WAVECOURANT     !< refinement criterion type
    integer                                         :: jaconnect         = 1     !< connect hanging nodes (1) or not (0)
-   double precision                                :: Dt_maxcour        = 0d0   !< maximum time-step in courant grid
+   double precision                                :: Dt_maxcour        = 300d0   !< maximum time-step in courant grid
    double precision                                :: dminsampledist    = 0d0   !< minimum sample distance
    integer                                         :: jaoutsidecell     = 1     !< take samples outside cell into account (1) or not (0)
 end module m_samples_refine

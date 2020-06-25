@@ -27053,6 +27053,9 @@ end do
            dzm  = (zmx - zbt) / mxlayz
         else
            dzm  = dztop ; mxlayz = (zmx - zbt) / dzm
+           if (numtopsig > 0 .and. janumtopsiguniform == 1) then 
+              mxlayz = max(mxlayz, numtopsig)
+           endif
         endif
 
         kuni = mxlayz  ; mx = kuni
@@ -28104,7 +28107,7 @@ endif
  integer          :: ktmn, ktmx, kt0, kt1, kt2, kt3, LL, L, Lb, Lt, n1,n2, kb1,kb2,ki,kt, kkk, kwaq, Ltn, Ldn
  double precision :: zkk, h0, zks, zkz, sigm, hdz, toplaymint, volkt, savolkt, tevolkt, dtopsi
  double precision :: w1, w2, w3, h1, h2, h3, dz1, dz2, dz3, zw1, zw2, zw3, bL1, bL2, bL3, ht1, ht2, ht3
- integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3, numtopsig2
+integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
 
  integer          :: numbd, numtp, j
  double precision :: drhok, dzk, a, aa, h00, zsl, aaa, sig, dsig, dsig0
@@ -28146,7 +28149,6 @@ endif
 
     ! toplayminthick = 0d0
 
-    numtopsig2 = numtopsig / 2
 
     do n  = 1,ndx
 
@@ -29026,12 +29028,20 @@ endif
  nlayb = mx ; nrlay = 1 ! default
 ! if (nlaybn(n) == 0) then
     do k = 1,mx
+       if (numtopsig > 0 .and. janumtopsiguniform ==1) then 
+          if ( zslay(k,Ltn) > bl(n) .or. mx-k+1 <= numtopsig ) then
+              nlayb = k
+              nrlay = mx - k + 1
+              exit
+          endif
+       else 
        if ( zslay(k,Ltn) > bl(n) ) then
            nlayb = k
            nrlay = mx - k + 1
            exit
        endif
-    enddo
+      endif  
+   enddo
 !    nlayb = nlaybn(n)
 !    nrlay = nrlayn(n)
 

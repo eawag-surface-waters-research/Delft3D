@@ -915,6 +915,7 @@ subroutine readMDUFile(filename, istat)
     endif
 
     call prop_get_integer( md_ptr, 'geometry', 'Numtopsig'        , Numtopsig)
+    call prop_get_integer( md_ptr, 'geometry', 'Numtopsiguniform' , JaNumtopsiguniform)
     call prop_get_double ( md_ptr, 'geometry', 'SigmaGrowthFactor', sigmagrowthfactor)
     call prop_get_double ( md_ptr, 'geometry', 'Dztopuniabovez'   , dztopuniabovez )
     call prop_get_double ( md_ptr, 'geometry', 'Dztop'            , Dztop )
@@ -1058,6 +1059,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'numerics', 'Epshstem'     , epshstem)
 
     call prop_get_integer(md_ptr, 'numerics', 'Keepzlayeringatbed'      , keepzlayeringatbed)
+    call prop_get_integer(md_ptr, 'geometry', 'Keepzlayeringatbed'      , keepzlayeringatbed)
+
 
     call prop_get_double (md_ptr, 'numerics', 'Teta0'        , teta0)
     call prop_get_double (md_ptr, 'numerics', 'Qhrelax'      , qhrelax)
@@ -2536,6 +2539,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'geometry', 'Kmx' ,              kmx,               'Maximum number of vertical layers')
        call prop_set(prop_ptr, 'geometry', 'Layertype' ,        Layertype,         'Vertical layer type (1: all sigma, 2: all z, 3: use VertplizFile)')
        call prop_set(prop_ptr, 'geometry', 'Numtopsig' ,        Numtopsig,         'Number of sigma layers in top of z-layer model')
+       if (janumtopsiguniform .ne. 1) then
+           call prop_set(prop_ptr, 'geometry', 'Numtopsiguniform' , jaNumtopsiguniform,         'Number of sigma layers in top of z-layer model')
+       endif
+
        call prop_set(prop_ptr, 'geometry', 'SigmaGrowthFactor', sigmagrowthfactor, 'Layer thickness growth factor from bed up')
        if (dztop .ne. dmiss) then
           call prop_set(prop_ptr, 'geometry', 'Dztop', Dztop, 'Z-layer thickness of layers above level Dztopuniabovez')
@@ -2572,6 +2579,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        endif
        if (Tsigma .ne. 100d0) then
           call prop_set(prop_ptr, 'geometry', 'Tsigma', Tsigma ,'Sigma Adaptation period for Layertype==4 (s)')
+       endif
+
+       if (keepzlayeringatbed .ne. 2) then
+          call prop_set(prop_ptr, 'geometry', 'Keepzlayeringatbed'  , keepzlayeringatbed, '0:bedlayerthickness == zlayerthickness, 1:possibly very thin layer at bed, 2=equal thickness first two layers')
        endif
 
     endif
@@ -2702,10 +2713,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. Zwsbtol .ne. 0d0) then
        call prop_set(prop_ptr, 'numerics', 'Zwsbtol'  , zwsbtol, 'tolerance for zws(kb-1) at bed')
-    endif
-
-    if (writeall .or. keepzlayeringatbed .ne. 1) then
-       call prop_set(prop_ptr, 'numerics', 'Keepzlayeringatbed'  , keepzlayeringatbed, ' bedlayerthickness = zlayerthickness at bed 0 or 1')
     endif
 
     if (writeall .or. Teta0 .ne. 0.55d0) then
