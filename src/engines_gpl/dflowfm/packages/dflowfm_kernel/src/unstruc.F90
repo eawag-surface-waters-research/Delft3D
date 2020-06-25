@@ -39280,6 +39280,7 @@ end function ispumpon
 
  subroutine s1nod()                                  ! nodes in continuity eq
  use precision_basics
+ use m_plotdots
  use MessageHandling
  use m_flow
  use m_flowgeom
@@ -39334,15 +39335,6 @@ end function ispumpon
  !   ccr(lv2(L)) = 0d0
  ! end do
 
-!  a1(4958) = 0d0
-!  a1(4981) = 0d0
-!  a1(4997) = 0d0
-!  a1m(4958) = 0d0
-!  a1m(4981) = 0d0
-!  a1m(4997) = 0d0
-!  bb(4958) = 0d0
-!  bb(4981) = 0d0
-!  bb(4997) = 0d0
  !$OMP PARALLEL DO           &
  !$OMP PRIVATE(n,dtiba)
  do n = 1,ndx                                        ! Waterlevels, = s1ini
@@ -39362,6 +39354,7 @@ end function ispumpon
        call setMessage(LEVEL_WARN, msgbuf)
        call SetMessage(-1, 'This might lead to a SAAD error in the solve process' )
        write(msgbuf, '(a,g16.2)') 'Current time is ', time1
+       call setMessage(-1, msgbuf)
        write(msgbuf,'(a,f9.2,a,f9.2,a)') 'The location of the node is at (',xz(n),',',yz(n),')'
        call setMessage(-1, msgbuf)
        L = -1
@@ -39389,12 +39382,7 @@ end function ispumpon
             write(msgbuf,'(a, f9.2)') 'The gridpoint lies at branch with id ''' //trim(branch(ibr)%id)// ''' at chainage: ', gridPointsChainages(k)
             call setMessage(-1, msgbuf)
          endif
-         if ( jaGUI.eq.1 ) then
-            call setcol(247) ! white
-         end if
-         if ( jaGUI.eq.1 ) then
-            call rcirc( xz(n), yz(n) )
-         end if
+         call adddot(xz(n), yz(n), colournumber = 247)
       endif
 
     endif

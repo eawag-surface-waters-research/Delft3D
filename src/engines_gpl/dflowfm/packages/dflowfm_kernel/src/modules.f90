@@ -5823,7 +5823,7 @@ module m_plotdots
    integer                                     :: NSIZE=0      ! array size
    double precision, dimension(:), allocatable :: xdots, ydots ! dot coordinates, dim(NSIZE)
    double precision, dimension(:), allocatable :: zdots        ! dot z-value
-
+   integer,          dimension(:), allocatable :: colnumber    ! colour number 
    double precision,               parameter   :: ZDOTDEFAULT = 0d0
 
    contains
@@ -5841,18 +5841,20 @@ module m_plotdots
          call realloc(xdots, NSIZE, keepExisting=.true., fill=DMISS)
          call realloc(ydots, NSIZE, keepExisting=.true., fill=DMISS)
          call realloc(zdots, NSIZE, keepExisting=.true., fill=ZDOTDEFAULT)
+         call realloc(colnumber, NSIZE, keepExisting=.true., fill=imiss)
       end if
 
       return
    end subroutine reallocdots
 
 !> add a dot
-   subroutine adddot(x,y,z)
+   subroutine adddot(x,y,z, colournumber)
+      use unstruc_colors
       implicit none
 
       double precision,           intent(in) :: x, y
       double precision, optional, intent(in) :: z
-
+      integer,          optional, intent(in) :: colournumber
       double precision :: zloc
 
       zloc = ZDOTDEFAULT
@@ -5865,6 +5867,11 @@ module m_plotdots
       xdots(numdots) = x
       ydots(numdots) = y
       zdots(numdots) = zloc
+      if (present(colournumber)) then
+         colnumber(numdots) = colournumber
+      else
+         colnumber(numdots) = ncolhl
+      endif
 
       return
    end subroutine adddot

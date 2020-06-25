@@ -23685,7 +23685,7 @@ end subroutine unstruc_guimessage
          if ( Ndrawdots.ne.2 ) return
          
          do i=1,numdots
-            call cirr(xdots(i), ydots(i), ncolhl)
+            call cirr(xdots(i), ydots(i), colnumber(i))
          end do
          
          return
