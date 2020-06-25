@@ -65,9 +65,9 @@ select case(var_name)
   case("sswy")
     location_name = "face"
   case("taucr")
-    location_name = "face"
+    location_name = ""
   case("tetacr")
-    location_name = "face"
+    location_name = ""
   case("infilt")
     location_name = "face"
   case("infiltcap")

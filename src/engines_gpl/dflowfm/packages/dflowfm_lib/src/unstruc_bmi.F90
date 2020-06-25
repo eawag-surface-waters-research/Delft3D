@@ -1153,24 +1153,40 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
       x = c_loc(tem1Surf)
       
    case("TcrEro")
-      k = size(stmpar%trapar%par, 2)
+      k = size(stmpar%trapar%par, 2) ! equivalent to stmpar%lsedtot
       if (.not. allocated(TcrEro)) then
          allocate (TcrEro(ndx,k))
       endif
       do i = 1,k
-         n = stmpar%trapar%iparfld(13,i)
-         TcrEro(:,i) = stmpar%trapar%parfld(:,n)
+         if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
+            n = stmpar%trapar%iparfld(13,i)
+            if (n > 0) then ! if spatially varying
+               TcrEro(:,i) = stmpar%trapar%parfld(:,n)
+            else ! if not spatially varying
+               TcrEro(:,i) = stmpar%trapar%par(13,i)
+            endif
+         else ! Other transport formula than Parteniades-Krone
+            TcrEro(:,i) = -999
+         endif
       enddo
       x = c_loc(TcrEro)
       
    case("TcrSed")
-      k = size(stmpar%trapar%par, 2)
+      k = size(stmpar%trapar%par, 2) ! equivalent to stmpar%lsedtot
       if (.not. allocated(TcrSed)) then
          allocate (TcrSed(ndx,k))
       endif
       do i = 1,k
-         n = stmpar%trapar%iparfld(12,i)
-         TcrSed(:,i) = stmpar%trapar%parfld(:,n)
+         if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
+            n = stmpar%trapar%iparfld(12,i)
+            if (n > 0) then ! if spatially varying
+               TcrSed(:,i) = stmpar%trapar%parfld(:,n)
+            else ! if not spatially varying
+               TcrSed(:,i) = stmpar%trapar%par(12,i)
+            endif
+         else ! Other transport formula than Parteniades-Krone
+            TcrSed(:,i) = -999
+         endif
       enddo
       x = c_loc(TcrSed)
 
@@ -1311,21 +1327,45 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
       call initMessaging(mdia)
       return
    case("TcrEro")
-     call c_f_pointer(xptr, x_2d_double_ptr, shape(TcrEro))
-     TcrEro(:,:) = x_2d_double_ptr
+      k = size(stmpar%trapar%par, 2) ! equivalent to stmpar%lsedtot
+      if (.not. allocated(TcrEro)) then
+         allocate (TcrEro(ndx,k))
+      endif
+      call c_f_pointer(xptr, x_2d_double_ptr, shape(TcrEro))
+      TcrEro(:,:) = x_2d_double_ptr
       do i = 1,size(TcrEro,2)
-         n = stmpar%trapar%iparfld(13,i)
-         stmpar%trapar%parfld(:,n) = TcrEro(:,i)
+         if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
+            n = stmpar%trapar%iparfld(13,i)
+            if (n > 0) then ! if spatially varying
+               stmpar%trapar%parfld(:,n) = TcrEro(:,i)
+            else ! if not spatially varying
+               ! not yet supported ... copy single value to par(13,i) ... check if data provided is spatially uniform?
+            endif
+         else ! Other transport formula than Parteniades-Krone
+            ! TcrEro not defined
+         endif
       enddo
-     return
+      return
    case("TcrSed")
-     call c_f_pointer(xptr, x_2d_double_ptr, shape(TcrSed))
-     TcrSed(:,:) = x_2d_double_ptr
+      k = size(stmpar%trapar%par, 2) ! equivalent to stmpar%lsedtot
+      if (.not. allocated(TcrSed)) then
+         allocate (TcrSed(ndx,k))
+      endif
+      call c_f_pointer(xptr, x_2d_double_ptr, shape(TcrSed))
+      TcrSed(:,:) = x_2d_double_ptr
       do i = 1,size(TcrSed,2)
-         n = stmpar%trapar%iparfld(12,i)
-         stmpar%trapar%parfld(:,n) = TcrSed(:,i)
+         if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
+            n = stmpar%trapar%iparfld(12,i)
+            if (n > 0) then ! if spatially varying
+               stmpar%trapar%parfld(:,n) = TcrSed(:,i)
+            else ! if not spatially varying
+               ! not yet supported ... copy single value to par(12,i) ... check if data provided is spatially uniform?
+            endif
+         else ! Other transport formula than Parteniades-Krone
+            ! TcrSed not defined
+         endif
       enddo
-     return
+      return
    end select
 
    if (numconst > 0) then
@@ -1431,23 +1471,47 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
       !call dropland(xz(index + 1), yz(index + 1), 1)
       return
       
-  case("TcrEro")
-     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
-     TcrEro(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
-     do i = 1,size(TcrEro,2)
-        n = stmpar%trapar%iparfld(13,i)
-        stmpar%trapar%parfld(:,n) = TcrEro(:,i)
-     enddo
-     return
-     
-  case("TcrSed")
-     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
-     TcrSed(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
-      do i = 1,size(TcrSed,2)
-         n = stmpar%trapar%iparfld(12,i)
-         stmpar%trapar%parfld(:,n) = TcrSed(:,i)
+   case("TcrEro")
+      call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+      k = size(stmpar%trapar%par, 2) ! equivalent to stmpar%lsedtot
+      if (.not. allocated(TcrEro)) then
+         allocate (TcrEro(ndx,k))
+      endif
+      TcrEro(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+      do i = c_start(2)+1,(c_start(2)+c_count(2))
+         if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
+            n = stmpar%trapar%iparfld(13,i)
+            if (n > 0) then ! if spatially varying
+               stmpar%trapar%parfld(c_start(1)+1:(c_start(1)+c_count(1)),n) = TcrEro(c_start(1)+1:(c_start(1)+c_count(1)),i)
+            else ! if not spatially varying
+               ! not yet supported ... copy single value to par(13,i) ... check if data provided is spatially uniform?
+            endif
+         else ! Other transport formula than Parteniades-Krone
+            ! TcrEro not defined
+         endif
       enddo
-     return
+      return
+     
+   case("TcrSed")
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+      k = size(stmpar%trapar%par, 2) ! equivalent to stmpar%lsedtot
+      if (.not. allocated(TcrSed)) then
+         allocate (TcrSed(ndx,k))
+      endif
+      TcrSed(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+      do i = c_start(2)+1,(c_start(2)+c_count(2))
+         if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
+            n = stmpar%trapar%iparfld(12,i)
+            if (n > 0) then ! if spatially varying
+               stmpar%trapar%parfld(c_start(1)+1:(c_start(1)+c_count(1)),n) = TcrSed(c_start(1)+1:(c_start(1)+c_count(1)),i)
+            else ! if not spatially varying
+               ! not yet supported ... copy single value to par(12,i) ... check if data provided is spatially uniform?
+            endif
+         else ! Other transport formula than Parteniades-Krone
+            ! TcrSed not defined
+         endif
+      enddo
+      return
    end select
 
    if (numconst > 0) then
