@@ -2994,24 +2994,31 @@ end function read_samples_from_geotiff
 
 !> Read samples from an ASCII file.
 !! Samples are being stored in a global dataset of m_samples.  
-subroutine read_samples_from_arcinfo(filnam, jadoorladen)  ! reaasc
+subroutine read_samples_from_arcinfo(filnam, jadoorladen, japrompt)  ! reaasc
     use m_missing
     use m_samples
     use m_samples_refine, only: iHesstat, iHesstat_DIRTY
     use m_arcinfo
     use unstruc_display, only: jagui
     implicit none
-    character(len=*), intent(in) :: filnam
-    integer, intent(in) :: jadoorladen
-    integer :: i, j, istep, marc
+    character(len=*), intent(in   ) :: filnam      !< Name of *.asc file.
+    integer,          intent(in   ) :: jadoorladen !< Whether or not (1/0) to keep the existing samples in the global set.
+    integer,          intent(in   ) :: japrompt    !< Whether or not (1/0) to prompt in the GUI for istep-jstep subsampled reading.
+
+    integer :: i, j, istep, marc, japrompt_
     character(len=10) :: TEX
 
     integer :: ndraw
     COMMON /DRAWTHIS/ ndraw(50)
 
+    japrompt_ = japrompt
+    if (jagui /= 1) then
+       japrompt_ = 0
+    end if
+
     CALL READYY('Reading arcinfo file',0d0)
     call oldfil(marc, filnam)
-    call reaarc (marc,jagui)
+    call reaarc (marc,japrompt_)
     CALL DOCLOSE(marc)
     CALL READYY('Reading arcinfo file',1d0)
 
