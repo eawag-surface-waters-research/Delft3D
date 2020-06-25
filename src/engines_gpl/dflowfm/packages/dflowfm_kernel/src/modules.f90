@@ -2241,7 +2241,7 @@ end module m_flowexternalforcings
 module unstruc_channel_flow
 use m_network
 implicit none
-type(t_network)              :: network
+type(t_network), target              :: network
 integer                      :: CSCalculationOption  !< calculation option for total area computation in 1d
 contains
 

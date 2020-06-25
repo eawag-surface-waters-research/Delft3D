@@ -39279,6 +39279,8 @@ end function ispumpon
  end subroutine s1ini
 
  subroutine s1nod()                                  ! nodes in continuity eq
+ use precision_basics
+ use MessageHandling
  use m_flow
  use m_flowgeom
  use m_flowtimes
@@ -39287,18 +39289,22 @@ end function ispumpon
  use m_missing
  use m_alloc
  use m_sobekdfm
+ use unstruc_channel_flow
  use unstruc_display, only : ntek, jaGUI
 
  implicit none
 
  integer          :: n
  integer          :: kb , k2 , L, k, LL, LS, itpbn
- integer          :: kbk, k2k, Lk
+ integer          :: kbk, k2k, Lk, ibr
  double precision :: dtiba, hh, zb, dir, dtgh, alf
  double precision :: sqrtgfh, cffu, rowsum, fuL, ruL, huL, hep
  integer          :: i, ierr
-
+ character(len=2) :: dim_text
  double precision, parameter :: HBMIN = 1d-3
+ double precision, pointer, dimension(:)  :: gridPointsChainages
+ integer, pointer, dimension(:)           :: lin2ibr, lin2local
+ type(t_branch), pointer, dimension(:)    :: branch
 
  !bbr = bb + dti*a1     !m2/s
  !ddr = dd + dti*a1*s1  !m3/s
@@ -39328,6 +39334,15 @@ end function ispumpon
  !   ccr(lv2(L)) = 0d0
  ! end do
 
+!  a1(4958) = 0d0
+!  a1(4981) = 0d0
+!  a1(4997) = 0d0
+!  a1m(4958) = 0d0
+!  a1m(4981) = 0d0
+!  a1m(4997) = 0d0
+!  bb(4958) = 0d0
+!  bb(4981) = 0d0
+!  bb(4997) = 0d0
  !$OMP PARALLEL DO           &
  !$OMP PRIVATE(n,dtiba)
  do n = 1,ndx                                        ! Waterlevels, = s1ini
@@ -39337,6 +39352,53 @@ end function ispumpon
         bbr(n)  = bbr(n) - dti*a1m(n)
     endif
 
+    if (comparerealdouble(bbr(n),0d0)==0) then
+       if (n <= ndx2d) then
+          dim_text = '2D'
+       else
+          dim_text = '1D'
+       endif
+       write(msgbuf,'(a, i0, a)') 'The surface area of '//dim_text//'-node with node number ''', n, ''' is equal to 0'
+       call setMessage(LEVEL_WARN, msgbuf)
+       call SetMessage(-1, 'This might lead to a SAAD error in the solve process' )
+       write(msgbuf, '(a,g16.2)') 'Current time is ', time1
+       write(msgbuf,'(a,f9.2,a,f9.2,a)') 'The location of the node is at (',xz(n),',',yz(n),')'
+       call setMessage(-1, msgbuf)
+       L = -1
+       if (n > ndx2d) then 
+          do i = 1, nd(n)%lnx
+             if (abs(nd(n)%ln(i)) < lnx1d) then
+                L = abs(nd(n)%ln(i))
+                exit
+             endif
+          enddo
+          if (L/=-1) then
+            lin2ibr   => network%adm%lin2ibr
+            lin2local => network%adm%lin2local
+            ibr = network%adm%lin2ibr(L)
+            LL = network%adm%lin2local(L)
+
+            branch => network%brs%branch
+            gridPointsChainages => network%brs%branch(ibr)%gridPointsChainages
+            if (nd(n)%ln(i) < 0) then
+               ! gridpoint at start of link internal gridpoint is equal to 
+               k = LL
+            else
+               k = LL+1
+            endif
+            write(msgbuf,'(a, f9.2)') 'The gridpoint lies at branch with id ''' //trim(branch(ibr)%id)// ''' at chainage: ', gridPointsChainages(k)
+            call setMessage(-1, msgbuf)
+         endif
+         if ( jaGUI.eq.1 ) then
+            call setcol(247) ! white
+         end if
+         if ( jaGUI.eq.1 ) then
+            call rcirc( xz(n), yz(n) )
+         end if
+      endif
+
+    endif
+       
     if (kfs(n) == 1) then                            ! only for implicit points
        if (nonlin > 0) then
           ddr(n) = dd(n)  + dtiba*s1(n)              !
