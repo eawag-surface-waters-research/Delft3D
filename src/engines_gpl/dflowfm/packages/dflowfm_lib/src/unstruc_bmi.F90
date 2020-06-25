@@ -1395,7 +1395,7 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
    integer(c_int), intent(in)         :: c_count(*)
    character(kind=c_char), intent(in) :: c_var_name(*)
    type(c_ptr), value, intent(in) :: xptr
-   integer :: i, n
+   integer :: i, k, n
 
    real(c_double), pointer :: x_0d_double_ptr
 
