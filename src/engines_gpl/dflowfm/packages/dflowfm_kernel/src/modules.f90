@@ -5851,7 +5851,6 @@ module m_plotdots
 
 !> add a dot
    subroutine adddot(x,y,z, colournumber)
-      use unstruc_colors
       implicit none
 
       double precision,           intent(in) :: x, y
@@ -5872,7 +5871,7 @@ module m_plotdots
       if (present(colournumber)) then
          colnumber(numdots) = colournumber
       else
-         colnumber(numdots) = ncolhl
+         colnumber(numdots) = 31 ! ncolhl
       endif
 
       return
