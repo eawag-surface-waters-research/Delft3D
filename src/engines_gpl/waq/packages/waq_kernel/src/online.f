@@ -507,7 +507,7 @@
      J             J(IPDMP),
      +             A(IBOUN),
      j             NOLOC ,
-     j             PROLOC,
+     j             A(IPLOC),
      j             NODEF ,
      +             A(IDEFA),
      j             NTDMPQ,
@@ -542,7 +542,7 @@
      +           PARAM(*)       , CONS(*)      ,
      +           VOLUME(*)      , BOUND(*)     ,
      +           PROLOC(*)      , DEFAUL(*)
-      CHARACTER*20 DANAM(*), SYNAME(*)
+      CHARACTER*20 DANAM(*), SYNAME(*), OUNAM(*)
       character(len=20), intent(in   ) :: paname(*) ! parameter names
       character(len=20), intent(in   ) :: sfname(*) ! segment function names
       character(len=20), intent(in   ) :: funame(*) ! function names
@@ -558,7 +558,7 @@
 !     IOPOIN is not used if NRVAR = 0
 
       real, allocatable, save : : outval(:)
-      integer nrvar, ncout, io_rtc, isys, idmp
+      integer nrvar, ncout, io_rtc, isys, idmp, nrvar2
       logical first, rewine
       character*40 moname(4)
       character*255 filnam
@@ -583,11 +583,12 @@
       ! Pointers into the output system arrays
       ! - use the history file
       !
-      k1    = 1 + ioutps(4,1) + ioutps(4,2)
-      nrvar = ioutps(4,3)
+      k1     = 1 + ioutps(4,1) + ioutps(4,2)
+      nrvar  = ioutps(4,3)
+      nrvar2 = nrvar / 2
 
       if ( first ) then
-          allocate ( outval(ndmpar*(notot+nrvar)) )
+          allocate ( outval(ndmpar*(notot+nrvar2)) )
           filnam = ' '
           call getcom ( '-i'  , 3    , lfound, idummy, rdummy,
      +                  inifil, ierr2)
@@ -606,9 +607,8 @@
           if ( filnam .eq. ' ' ) filnam = 'wq2rtc.his'
       endif
 
-
-      ncout =  notot
-      CALL FIOSUB       (OUTVAL, IOPOIN(K1), NRVAR , NOCONS, NOPA  ,
+      ncout  = notot
+      CALL FIOSUB       (OUTVAL, IOPOIN(K1), NRVAR2 , NOCONS, NOPA  ,
      +                   NOFUN , NOSFUN, NOTOT , CONC  , SEGFUN,
      +                   FUNC  , PARAM , CONS  , IDT   , ITIME ,
      +                   VOLUME, NOSEG , NOSYS , NDMPAR, IPDMP ,
@@ -620,14 +620,14 @@
           CALL DHOPNF ( IO_RTC, FILNAM, 21    , 1     , IDUM  )
 
           write ( io_rtc ) moname
-          write ( io_rtc ) notot, ndmpar
+          write ( io_rtc ) notot+nrvar2, ndmpar
           write ( io_rtc ) (syname(isys),isys=1,notot),
-     &                     (ounam(k1+isys-1),isys=1,nrvar)
+     &                     (ounam(k1+isys-1),isys=1,nrvar2)
           write ( io_rtc ) (idmp,danam(idmp),idmp=1,ndmpar)
       endif
 
       write ( io_rtc ) itime
-      write ( io_rtc ) (outval(isys),isys=1,(notot+nrvar)*ndmpar)
+      write ( io_rtc ) (outval(isys),isys=1,(notot+nrvar2)*ndmpar)
 
       if ( rewine ) close ( io_rtc )
 
