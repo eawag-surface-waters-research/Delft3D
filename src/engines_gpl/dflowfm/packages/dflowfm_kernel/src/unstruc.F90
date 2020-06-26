@@ -39314,7 +39314,6 @@ end function ispumpon
  character(len=2) :: dim_text
  double precision, parameter :: HBMIN = 1d-3
  double precision, pointer, dimension(:)  :: gridPointsChainages
- integer, pointer, dimension(:)           :: lin2ibr, lin2local
  type(t_branch), pointer, dimension(:)    :: branch
 
  !bbr = bb + dti*a1     !m2/s
@@ -39376,13 +39375,11 @@ end function ispumpon
              endif
           enddo
           if (L/=-1) then
-            lin2ibr   => network%adm%lin2ibr
-            lin2local => network%adm%lin2local
             ibr = network%adm%lin2ibr(L)
             LL = network%adm%lin2local(L)
 
             branch => network%brs%branch
-            gridPointsChainages => network%brs%branch(ibr)%gridPointsChainages
+            gridPointsChainages => branch(ibr)%gridPointsChainages
             if (nd(n)%ln(i) < 0) then
                ! gridpoint at start of link internal gridpoint is equal to 
                k = LL
