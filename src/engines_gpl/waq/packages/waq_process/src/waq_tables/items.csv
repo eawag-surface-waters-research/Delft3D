@@ -1857,7 +1857,6 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "TcMrtEColi","x"," ",    1.07000    ,"(-)                 ","temperature coefficient for mortality EColi       ","volume    ","volume    "," ","                              "
 "CTMrtEColi","x"," ",    2.00000    ,"(oC)                ","critical temperature for mortality EColi          ","volume    ","volume    "," ","                              "
 "CFRAD     ","x"," ",   0.860000E-01,"(m2/W/d)            ","conversion factor RAD to mortality rate           ","volume    ","volume    "," ","                              "
-"FrUvVL    ","x"," ",   0.120000    ,"(-)                 ","fraction UV light in visible light                ","volume    ","volume    "," ","                              "
 "SpMrtEColi","x"," ",   0.110000E-04,"(m3/g/d)            ","chloride enhanced mortality rate EColi            ","volume    ","volume    "," ","                              "
 "MrtToEColi","x"," ",   -999.000    ,"(1/d)               ","overall mortality rate EColi                      ","volume    ","volume    "," ","                              "
 "MrtRaEColi","x"," ",   -999.000    ,"(1/d)               ","mortality rate due to by radiation EColi          ","volume    ","volume    "," ","                              "

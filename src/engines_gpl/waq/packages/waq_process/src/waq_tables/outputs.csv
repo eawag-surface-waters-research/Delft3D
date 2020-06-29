@@ -1055,7 +1055,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "CalVSALG30","SalFnAlg30",   2,"x",1
 "CalVSALG30","FloFnAlg30",   3,"x",1
 "CalVSALG30","VSedAlg30 ",   4," ",0
-"Res_Pickup","FrIM1S2Pup",   1,"x",1
+"Res_Pickup","fRIM1S2Pup",   1,"x",1
 "Res_Pickup","fRIM2S2Pup",   2,"x",1
 "Res_Pickup","fRIM3S2Pup",   3,"x",1
 "Res_Pickup","fRTIMS2Pup",   4,"x",1

@@ -39,21 +39,21 @@
 ! Name    T   L I/O   Description                                   Units
 ! ----    --- -  -    -------------------                            ----
 ! BACT    R*4 1 I concentration bacteria                              [gX]
-! CFRAD   R*4 1 I conversion factor RAD->mortality                    [m2/W/d]
-! CRTEMP  R*4 1 I critical temperature for mortality                      [xC]
-! MORT    R*4 1 L overall first order mortality rate                     [1/d]
-! MRTRAD  R*4 1 O part of firt order mortality rate from RAD             [1/d]
+! CFRAD   R*4 1 I conversion factor RAD->mortality                [m2/W/d]
+! CRTEMP  R*4 1 I critical temperature for mortality                  [xC]
+! MORT    R*4 1 L overall first order mortality rate                 [1/d]
+! MRTRAD  R*4 1 O part of firt order mortality rate from RAD         [1/d]
 ! DEPTH   R*4 1 I water depth                                          [m]
-! EXTUV   R*4 1 I extinction of UV radiation                         [1/m]
-! FL (1)  R*4 1 O mortality flux                                      [X/m3/d]
-! RAD     R*4 1 I solar radiation at surface (daily averge)         [W/m2]
-! RCMRT   R*4 1 I user defined first order mortality rate                [1/d]
+! EXTVL   R*4 1 I extinction of visible light                        [1/m]
+! FL (1)  R*4 1 O mortality flux                                  [X/m3/d]
+! RAD     R*4 1 I solar radiation at surface (instantaneous)        [W/m2]
+! RCMRT   R*4 1 I user defined first order mortality rate            [1/d]
 ! TEMP    R*4 1 I ambient temperature                                 [xC]
 ! TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [xC]
 ! TEMPF   R*4 1 L temperature function                                 [-]
-! TCMRT   R*4 1 I temperature coefficient for mortality                  [1/d]
+! TCMRT   R*4 1 I temperature coefficient for mortality              [1/d]
 ! VOLUME  R*4 1 L DELWAQ volume                                       [m3]
-! ZOUT    R*4 1 I chloride concentration                            [g/m3]
+! CL      R*4 1 I chloride concentration                            [g/m3]
 !     Logical Units : -
 
 !     Modules called : -
@@ -61,11 +61,17 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
-      IMPLICIT REAL (A-H,J-Z)
+      IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+      INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, IP9, IP10,
+     &         IP11, IP12, IP13
+      INTEGER  IFLUX, ISEG
+      REAL     BACT, RCMRT, TCMRT, TEMP, CRTEMP, CL, RAD, CFRAD,
+     &         EXTVL, DEPTH, SPMRTZ, TEMP20, TEMPF, MRTRAD, MORT
+
 
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
@@ -80,8 +86,6 @@
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
       IP13 = IPOINT(13)
-      IP14 = IPOINT(14)
-      IP15 = IPOINT(15)
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
@@ -94,16 +98,12 @@
       TCMRT  = PMSA( IP3 )
       TEMP   = PMSA( IP4 )
       CRTEMP = PMSA( IP5 )
-      ZOUT   = PMSA( IP6 )
+      CL     = PMSA( IP6 )
       RAD    = PMSA( IP7 )
       CFRAD  = PMSA( IP8 )
-      DAYL   = PMSA( IP9 )
-      FRUV   = PMSA( IP10)
-      EXTUV  = PMSA( IP11)
-      DEPTH  = PMSA( IP12)
-      SPMRTZ = PMSA( IP13)
-
-      IF (EXTUV .LT. 1E-20 )  CALL ERRSYS ('EXTUV in BACMRT zero', 1 )
+      EXTVL  = PMSA( IP9)
+      DEPTH  = PMSA( IP10)
+      SPMRTZ = PMSA( IP11)
 
 !***********************************************************************
 !**** Processes connected to the MORTALITY OF BACTERIA
@@ -124,19 +124,23 @@
          TEMPF  = TCMRT ** TEMP20
 
 !        Calculation of the RAD dependent part of the mortality
-         MRTRAD = CFRAD*RAD*FRUV*DAYL*(1 - EXP(-EXTUV * DEPTH) )
-     &                        / (EXTUV * DEPTH )
+         IF ( EXTVL > 0.0 ) THEN
+            MRTRAD = CFRAD*RAD*(1 - EXP(-EXTVL * DEPTH) )
+     &                           / (EXTVL * DEPTH )
+         ELSE
+            ! Limit case if extvl zero or negative
+            MRTRAD = CFRAD*RAD
+         ENDIF
 
 !        Calculation of the overall mortality
-!        MORT  = ( RCMRT + 1.1*1E-5 * ZOUT ) * TEMPF + MRTRAD
-         MORT  = ( RCMRT + SPMRTZ * ZOUT ) * TEMPF + MRTRAD
+         MORT  = ( RCMRT + SPMRTZ * CL ) * TEMPF + MRTRAD
 !
          FL ( 1 + IFLUX  ) = MORT * BACT
 !
       ENDIF
 
-      PMSA (IP14 ) = MORT
-      PMSA (IP15 ) = MRTRAD
+      PMSA (IP12 ) = MORT
+      PMSA (IP13 ) = MRTRAD
 !
       ENDIF
       IFLUX = IFLUX + NOFLUX
@@ -153,8 +157,6 @@
       IP11  = IP11  + INCREM ( 11 )
       IP12  = IP12  + INCREM ( 12 )
       IP13  = IP13  + INCREM ( 13 )
-      IP14  = IP14  + INCREM ( 14 )
-      IP15  = IP15  + INCREM ( 15 )
 !
  9000 CONTINUE
 !

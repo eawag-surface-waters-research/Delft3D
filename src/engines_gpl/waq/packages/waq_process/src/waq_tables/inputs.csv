@@ -50,21 +50,21 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Meteo     ","Cloud_5   ",  35,"Y","x",1
 "Meteo     ","Rad_6     ",  36,"Y","x",1
 "Meteo     ","VWind_6   ",  37,"Y","x",1
-"Meteo     ","WinDir_6  ",  38,"Y","x",1
+"Meteo     ","WinDir_6  ",  38,"N","x",1
 "Meteo     ","RelHum_6  ",  39,"Y","x",1
 "Meteo     ","AirTemp_6 ",  40,"Y","x",1
 "Meteo     ","AirPres_6 ",  41,"Y","x",1
 "Meteo     ","Cloud_6   ",  42,"Y","x",1
 "Meteo     ","Rad_7     ",  43,"Y","x",1
 "Meteo     ","VWind_7   ",  44,"Y","x",1
-"Meteo     ","WinDir_7  ",  45,"Y","x",1
+"Meteo     ","WinDir_7  ",  45,"N","x",1
 "Meteo     ","RelHum_7  ",  46,"Y","x",1
 "Meteo     ","AirTemp_7 ",  47,"Y","x",1
 "Meteo     ","AirPres_7 ",  48,"Y","x",1
 "Meteo     ","Cloud_7   ",  49,"Y","x",1
 "Meteo     ","Rad_8     ",  50,"Y","x",1
 "Meteo     ","VWind_8   ",  51,"Y","x",1
-"Meteo     ","WinDir_8  ",  52,"Y","x",1
+"Meteo     ","WinDir_8  ",  52,"N","x",1
 "Meteo     ","RelHum_8  ",  53,"Y","x",1
 "Meteo     ","AirTemp_8 ",  54,"Y","x",1
 "Meteo     ","AirPres_8 ",  55,"Y","x",1
@@ -106,8 +106,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Meteo     ","XYScaleFac",  91,"Y","x",1
 "Meteo     ","NoMeteoSta",  92,"Y","x",1
 "Meteo     ","MeteoClcSW",  93,"Y","x",1
-"Meteo     ","XSeg      ",  94,"Y","x",1
-"Meteo     ","YSeg      ",  95,"Y","x",1
+"Meteo     ","XSeg      ",  94,"N","x",1
+"Meteo     ","YSeg      ",  95,"N","x",1
 "HeatBal   ","RadSW     ",   1,"Y","x",1
 "HeatBal   ","fReflSW   ",   2,"Y","x",1
 "HeatBal   ","Cloud     ",   3,"N","x",1
@@ -2317,53 +2317,45 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "EColiMrt  ","TcMrtEColi",   3,"Y","x",1
 "EColiMrt  ","Temp      ",   4,"Y","x",1
 "EColiMrt  ","CTMrtEColi",   5,"Y","x",1
-"EColiMrt  ","Cl        ",   6,"Y","x",1
-"EColiMrt  ","Rad_uv    ",   7,"N","x",1
+"EColiMrt  ","Cl        ",   6,"N","x",1
+"EColiMrt  ","RadDay    ",   7,"N","x",1
 "EColiMrt  ","CFRAD     ",   8,"Y","x",1
-"EColiMrt  ","DayL      ",   9,"Y","x",1
-"EColiMrt  ","FrUvVL    ",  10,"Y","x",1
-"EColiMrt  ","ExtUv     ",  11,"Y","x",1
-"EColiMrt  ","Depth     ",  12,"N","x",1
-"EColiMrt  ","SpMrtEColi",  13,"Y","x",1
+"EColiMrt  ","ExtVl     ",   9,"N","x",1
+"EColiMrt  ","Depth     ",  10,"N","x",1
+"EColiMrt  ","SpMrtEColi",  11,"Y","x",1
 "FColiMrt  ","FColi     ",   1,"N","x",1
 "FColiMrt  ","RcMrtFColi",   2,"Y","x",1
 "FColiMrt  ","TcMrtFColi",   3,"Y","x",1
 "FColiMrt  ","Temp      ",   4,"Y","x",1
 "FColiMrt  ","CTMrtFColi",   5,"Y","x",1
-"FColiMrt  ","Cl        ",   6,"Y","x",1
-"FColiMrt  ","Rad_uv    ",   7,"N","x",1
+"FColiMrt  ","Cl        ",   6,"N","x",1
+"FColiMrt  ","RadDay    ",   7,"N","x",1
 "FColiMrt  ","CFRAD     ",   8,"Y","x",1
-"FColiMrt  ","DayL      ",   9,"Y","x",1
-"FColiMrt  ","FrUvVL    ",  10,"Y","x",1
-"FColiMrt  ","ExtUv     ",  11,"Y","x",1
-"FColiMrt  ","Depth     ",  12,"N","x",1
-"FColiMrt  ","SpMrtFColi",  13,"Y","x",1
+"FColiMrt  ","ExtVl     ",   9,"N","x",1
+"FColiMrt  ","Depth     ",  10,"N","x",1
+"FColiMrt  ","SpMrtFColi",  11,"Y","x",1
 "TColiMrt  ","TColi     ",   1,"N","x",1
 "TColiMrt  ","RcMrtTColi",   2,"Y","x",1
 "TColiMrt  ","TcMrtTColi",   3,"Y","x",1
 "TColiMrt  ","Temp      ",   4,"Y","x",1
 "TColiMrt  ","CTMrtTColi",   5,"Y","x",1
-"TColiMrt  ","Cl        ",   6,"Y","x",1
-"TColiMrt  ","Rad_uv    ",   7,"N","x",1
+"TColiMrt  ","Cl        ",   6,"N","x",1
+"TColiMrt  ","RadDay    ",   7,"N","x",1
 "TColiMrt  ","CFRAD     ",   8,"Y","x",1
-"TColiMrt  ","DayL      ",   9,"Y","x",1
-"TColiMrt  ","FrUvVL    ",  10,"Y","x",1
-"TColiMrt  ","ExtUv     ",  11,"Y","x",1
-"TColiMrt  ","Depth     ",  12,"N","x",1
-"TColiMrt  ","SpMrtTColi",  13,"Y","x",1
+"TColiMrt  ","ExtVl     ",   9,"N","x",1
+"TColiMrt  ","Depth     ",  10,"N","x",1
+"TColiMrt  ","SpMrtTColi",  11,"Y","x",1
 "EnCocMrt  ","EnCoc     ",   1,"N","x",1
 "EnCocMrt  ","RcMrtEnCoc",   2,"Y","x",1
 "EnCocMrt  ","TcMrtEnCoc",   3,"Y","x",1
 "EnCocMrt  ","Temp      ",   4,"Y","x",1
 "EnCocMrt  ","CTMrtEnCoc",   5,"Y","x",1
-"EnCocMrt  ","Cl        ",   6,"Y","x",1
-"EnCocMrt  ","Rad_uv    ",   7,"N","x",1
+"EnCocMrt  ","Cl        ",   6,"N","x",1
+"EnCocMrt  ","RadDay    ",   7,"N","x",1
 "EnCocMrt  ","CFRAD     ",   8,"Y","x",1
-"EnCocMrt  ","DayL      ",   9,"Y","x",1
-"EnCocMrt  ","FrUvVL    ",  10,"Y","x",1
-"EnCocMrt  ","ExtUv     ",  11,"Y","x",1
-"EnCocMrt  ","Depth     ",  12,"N","x",1
-"EnCocMrt  ","SpMrtEnCoc",  13,"Y","x",1
+"EnCocMrt  ","ExtVl     ",   9,"N","x",1
+"EnCocMrt  ","Depth     ",  10,"N","x",1
+"EnCocMrt  ","SpMrtEnCoc",  11,"Y","x",1
 "SaturCO2  ","Cl        ",   1,"Y","x",1
 "SaturCO2  ","Temp      ",   2,"Y","x",1
 "SaturCO2  ","SWSatCO2  ",   3,"Y","x",1
