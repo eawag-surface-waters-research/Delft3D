@@ -197,13 +197,7 @@ subroutine ini_noderel(nrd, sedpar, lsedtot)
                   
                elseif (pNodRel%Method == 'function') then
                   call prop_get(block_ptr, '*', 'k', pNodRel%expQ)
-                  if (pNodRel%expQ < 0.0_fp) then
-                     call SetMessage(LEVEL_FATAL, 'Exponent k of Discharge Ratio not/wrongly Specified in File: '//trim(fileName))
-                  endif
                   call prop_get(block_ptr, '*', 'm', pNodRel%expW)
-                  if (pNodRel%expW < 0.0_fp) then
-                     call SetMessage(LEVEL_FATAL, 'Exponent m of Width Ratio not/wrongly Specified in File: '//trim(fileName))
-                  endif
                else
                  call SetMessage(LEVEL_FATAL, 'Unknown Method Specified in File: '//trim(fileName))
                endif
