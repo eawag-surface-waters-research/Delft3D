@@ -112,7 +112,7 @@ function initInitialFields(inifilename) result(ierr)
    use m_hydrology_data, only:  infiltcap, infiltrationmodel, DFM_HYD_INFILT_CONST, &
                                 HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, &
                                 InterceptThickness, interceptionmodel, DFM_HYD_INTERCEPT_LAYER, jadhyd, &
-                                PotEvap, ActEvap
+                                PotEvap, ActEvap, InterceptHs
 
    implicit none
    character(len=*), intent(in   ) :: inifilename         !< name of initial field file
@@ -233,6 +233,7 @@ function initInitialFields(inifilename) result(ierr)
             call realloc(InterceptThickness, ndx, keepExisting=.false.)
             success = timespaceinitialfield(xz, yz, InterceptThickness, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini)
             if (success) then
+               call realloc(InterceptHs,        ndx, keepExisting = .false., fill = 0d0)
                interceptionmodel = DFM_HYD_INTERCEPT_LAYER
                jadhyd = 1
             end if
