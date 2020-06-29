@@ -1220,6 +1220,7 @@ subroutine default_wind()
 use m_physcoef, only : rhomean
     windsp  = 0
     winddir = 90d0        !< deg from north sailor
+    rainuni = 0d0
     rhoair  = 1.2d0
     paver   = 101325.0
     Pavini  = 0d0
