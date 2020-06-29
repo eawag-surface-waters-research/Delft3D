@@ -112,7 +112,7 @@ function initInitialFields(inifilename) result(ierr)
    use m_hydrology_data, only:  infiltcap, infiltrationmodel, DFM_HYD_INFILT_CONST, &
                                 HortonMinInfCap, HortonMaxInfCap, HortonDecreaseRate, HortonRecoveryRate, &
                                 InterceptThickness, interceptionmodel, DFM_HYD_INTERCEPT_LAYER, jadhyd, &
-                                PotEvap
+                                PotEvap, ActEvap
 
    implicit none
    character(len=*), intent(in   ) :: inifilename         !< name of initial field file
@@ -252,6 +252,10 @@ function initInitialFields(inifilename) result(ierr)
                   call realloc(evap, ndx, keepExisting=.false., fill = 0d0)
                end if
                evap = PotEvap ! evap and PotEvap are now still doubling
+
+               if (.not. allocated(ActEvap)) then
+                  call realloc(ActEvap, ndx, keepExisting=.false., fill = 0d0)
+               end if
 
                ! Auto-enable hydrology module, if PotentialEvaporation was supplied.
                jadhyd = 1
