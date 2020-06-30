@@ -252,7 +252,7 @@ function initInitialFields(inifilename) result(ierr)
                if (.not. allocated(evap)) then
                   call realloc(evap, ndx, keepExisting=.false., fill = 0d0)
                end if
-               evap = PotEvap ! evap and PotEvap are now still doubling
+               evap = -PotEvap ! evap and PotEvap are now still doubling
 
                if (.not. allocated(ActEvap)) then
                   call realloc(ActEvap, ndx, keepExisting=.false., fill = 0d0)
