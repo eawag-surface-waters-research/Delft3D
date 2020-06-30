@@ -11347,6 +11347,7 @@ subroutine unc_read_map(filename, tim, ierr)
     use unstruc_channel_flow, only: network
     use m_oned_functions,     only: gridpoint2cross
     use m_GlobalParameters
+    use unstruc_model, only: jarstignorebl
 
     character(len=*),  intent(in)       :: filename   !< Name of NetCDF file.
     real(kind=hp),     intent(in)       :: tim        !< Desired time (snapshot) to be read from map file.
@@ -11938,8 +11939,8 @@ subroutine unc_read_map(filename, tim, ierr)
    ! check if restarting a model with Riemann boundary conditions
     if (allocated(kbndz)) then
        if( any(kbndz(4,:) .eq. 5) .and. jaoldrstfile == 1) then
-          call mess(LEVEL_WARN, 'When restarting a model with Riemann boundary conditions, the restart file is suggested to be '&
-                    //'a *_rst file which contians waterlevel info. on boundaries. Otherwise FM still runs but the resutls are '&
+          call mess(LEVEL_WARN, 'When restarting a model with Riemann boundary conditions, the restart file should be '&
+                    //'a *_rst file which contains waterlevel info. on boundaries. Otherwise FM still runs but the results are '&
                     //'not accurate.') 
        endif
     endif
@@ -12168,6 +12169,8 @@ subroutine unc_read_map(filename, tim, ierr)
     ! Read bedlevels (flow elem)
     if (jaoldrstfile == 1) then
        call mess(LEVEL_INFO, 'The restart file is of an old version, therefore no bedlevel info is read')
+    else if (jarstignorebl .eq. 0) then 
+       call mess(LEVEL_INFO, 'Ignoring bedlevel information on restart file')
     else if (jased > 0) then 
        ierr = get_var_and_shift(imapfile, 'FlowElem_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, 1, jamergedmap, &
                                 inode_own, inode_merge)
@@ -12210,15 +12213,19 @@ subroutine unc_read_map(filename, tim, ierr)
           if (ierr/=0) goto 999
           ierr = nf90_inq_varid(imapfile, 's1_bnd', id_s1bnd)
           if (ierr/=0) goto 999
-          ierr = nf90_inq_varid(imapfile, 'bl_bnd', id_blbnd)
-          if (ierr/=0) goto 999
+          if (jarstignorebl .eq. 0) then 
+             ierr = nf90_inq_varid(imapfile, 'bl_bnd', id_blbnd)
+             if (ierr/=0) goto 999
+          endif   
           
           ierr = nf90_get_var(imapfile, id_s0bnd, tmp_s0, start=(/ kstart_bnd, it_read/), count = (/ nbnd_read, 1 /))
           call check_error(ierr, 's0_bnd')
           ierr = nf90_get_var(imapfile, id_s1bnd, tmp_s1, start=(/ kstart_bnd, it_read/), count = (/ nbnd_read, 1 /))
           call check_error(ierr, 's1_bnd')
-          ierr = nf90_get_var(imapfile, id_blbnd, tmp_bl, start=(/ kstart_bnd, it_read/), count = (/ nbnd_read, 1 /))
-          call check_error(ierr, 'bl_bnd')
+          if (jarstignorebl .eq. 0) then 
+              ierr = nf90_get_var(imapfile, id_blbnd, tmp_bl, start=(/ kstart_bnd, it_read/), count = (/ nbnd_read, 1 /))
+              call check_error(ierr, 'bl_bnd')
+          endif    
           if (nerr_/=0) goto 999
           
           if (jampi==0) then
@@ -12226,7 +12233,9 @@ subroutine unc_read_map(filename, tim, ierr)
                 kk = ln(1, lnxi+i)
                 s0(kk) = tmp_s0(i)
                 s1(kk) = tmp_s1(i)
-                bl(kk) = tmp_bl(i)
+                if (jarstignorebl .eq. 0) then 
+                   bl(kk) = tmp_bl(i)
+                endif 
              enddo
           else
              do i = 1, nbnd_read ! u and z bnd
@@ -12234,7 +12243,9 @@ subroutine unc_read_map(filename, tim, ierr)
                 kk = ln(1, Lf) ! boundary flow node (the external one)
                 s0(kk) = tmp_s0(i)
                 s1(kk) = tmp_s1(i)
-                bl(kk) = tmp_bl(i)
+                if (jarstignorebl .eq. 0) then 
+                   bl(kk) = tmp_bl(i)
+                endif 
              enddo
           endif
        endif
@@ -12245,17 +12256,20 @@ subroutine unc_read_map(filename, tim, ierr)
        if (ndxbnd_own > 0 .and. jaoldrstfile == 0) then
           call realloc(tmp_s1, ndx-ndxi, stat=ierr, keepExisting=.false.)
           call realloc(tmp_s0, ndx-ndxi, stat=ierr, keepExisting=.false.)
-          call realloc(tmp_bl, ndx-ndxi, stat=ierr, keepExisting=.false.)
-          
+          if (jarstignorebl .eq. 0) then 
+             call realloc(tmp_bl, ndx-ndxi, stat=ierr, keepExisting=.false.)
+          endif 
           ierr = get_var_and_shift(imapfile, 's0_bnd', tmp_s0, tmpvar1, UNC_LOC_S, kmx, kstart, ndxbnd_own, it_read, &
                                    jamergedmap, ibnd_own, ibnd_merge)
           call check_error(ierr, 's0_bnd')
           ierr = get_var_and_shift(imapfile, 's1_bnd', tmp_s1, tmpvar1, UNC_LOC_S, kmx, kstart, ndxbnd_own, it_read, &
                                    jamergedmap, ibnd_own, ibnd_merge)
           call check_error(ierr, 's1_bnd')
-          ierr = get_var_and_shift(imapfile, 'bl_bnd', tmp_bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxbnd_own, it_read, &
-                                   jamergedmap, ibnd_own, ibnd_merge)
-          call check_error(ierr, 'bl_bnd')
+          if (jarstignorebl .eq. 0) then 
+             ierr = get_var_and_shift(imapfile, 'bl_bnd', tmp_bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxbnd_own, it_read, &
+                                      jamergedmap, ibnd_own, ibnd_merge)
+             call check_error(ierr, 'bl_bnd')
+          endif   
           
           do i=1,ndxbnd_own
              j=ibnd_own(i)
@@ -12263,7 +12277,9 @@ subroutine unc_read_map(filename, tim, ierr)
              kk=ln(1,Lf)
              s0(kk) = tmp_s0(j)
              s1(kk) = tmp_s1(j)
-             bl(kk) = tmp_bl(j)
+             if (jarstignorebl .eq. 0) then 
+                bl(kk) = tmp_bl(j)
+             endif   
           enddo
        endif      
     endif
@@ -12527,8 +12543,10 @@ subroutine unc_read_map(filename, tim, ierr)
        end if
        
        ! morbl
-       ierr = get_var_and_shift(imapfile, 'mor_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, it_read, jamergedmap, &
+       if (jarstignorebl .eq. 0) then 
+           ierr = get_var_and_shift(imapfile, 'mor_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, it_read, jamergedmap, &
                                 inode_own, inode_merge)
+       end if
        
        ! morphological time
        ierr = nf90_inq_varid(imapfile, 'morft', id_morft)
