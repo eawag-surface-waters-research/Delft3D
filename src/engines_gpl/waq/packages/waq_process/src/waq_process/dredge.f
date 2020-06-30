@@ -190,34 +190,34 @@
       allocate( ip0_im1s2(nim1), ip0_im2s2(nim2), ip0_im3s2(nim3) )
 
       do ifrac_im1 = 1,nim1
-         ip0_im1s1(ifrac_im1) = 14 + ifrac_im1 - 1
+         ip0_im1s1(ifrac_im1) = 14 + ifrac_im1
       enddo
 
       nim2s1 = nint(pmsa(ipoint(14+nim1s1+1)))
       do ifrac_im2 = 1,nim2
-         ip0_im2s1(ifrac_im2) = 14+nim1s1+1 + ifrac_im2 - 1
+         ip0_im2s1(ifrac_im2) = 14+nim1s1+1 + ifrac_im2
       enddo
 
       nim3s1 = nint(pmsa(ipoint(14+nim1s1+1+nim2s1+1)))
       do ifrac_im3 = 1,nim3
-         ip0_im3s1(ifrac_im3) = 14+nim1s1+1+nim2s1+1 + ifrac_im3 - 1
+         ip0_im3s1(ifrac_im3) = 14+nim1s1+1+nim2s1+1 + ifrac_im3
       enddo
 
       ipoff  = 17 + nim1s1 + nim2s1 + nim3s1
 
       nim1s2 = nint(pmsa(ipoint(ipoff)))
       do ifrac_im1 = 1,nim1
-         ip0_im1s2(ifrac_im1) = ipoff + ifrac_im1 - 1
+         ip0_im1s2(ifrac_im1) = ipoff + ifrac_im1
       enddo
 
       nim2s2 = nint(pmsa(ipoint(ipoff+nim1s2+1)))
       do ifrac_im2 = 1,nim2
-         ip0_im2s2(ifrac_im2) = ipoff+nim1s2+1 + ifrac_im2 - 1
+         ip0_im2s2(ifrac_im2) = ipoff+nim1s2+1 + ifrac_im2
       enddo
 
       nim3s2 = nint(pmsa(ipoint(ipoff+nim1s2+1+nim2s2+1)))
-      do ifrac_im2 = 1,nim2
-         ip0_im3s2(ifrac_im3) = ipoff+nim1s2+1+nim2s2+1 + ifrac_im3 - 1
+      do ifrac_im3 = 1,nim2
+         ip0_im3s2(ifrac_im3) = ipoff+nim1s2+1+nim2s2+1 + ifrac_im3
       enddo
 
       ipoff  = 20 + nim1s1 + nim2s1 + nim3s1 + nim1s2 + nim2s2 + nim3s2
