@@ -133,7 +133,6 @@ implicit none
     character(len=255) :: md_inifieldfile  = ' ' !< File of initial fields            (e.g., *.ini)
 
     character(len=255) :: md_restartfile   = ' ' !< File containing map-files to restart a computation          (e.g., *_map.nc), input only, NOT used for storing the names of output restart files.
-    integer            :: jarstignorebl    = 0   !< Flag indicating if bed level on restart file should be ignored (0/1, default: 0)
 
     character(len=255) :: md_extfile       = ' ' !< External forcing specification file (e.g., *.ext)
     character(len=255) :: md_extfile_new   = ' ' !< External forcing specification file new style (bct format), (e.g., *.ext)
@@ -3159,7 +3158,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 ! Restart settings
     call prop_set(prop_ptr, 'restart', 'RestartFile',     trim(md_restartfile) ,  'Restart netcdf-file, either *_rst.nc or *_map.nc')
     call prop_set(prop_ptr, 'restart', 'RestartDateTime', trim(restartdatetime),  'Restart date and time (yyyymmddhhmmss) when restarting from *_map.nc')
-    call prop_set(prop_ptr, 'restart', 'RstIgnoreBl',     jarstignorebl,          'Flag indicating whether bed level from restart should be ignored (0=no, 1=yes)')
+    call prop_set(prop_ptr, 'restart', 'RstIgnoreBl',     jarstignorebl,          'Flag indicating whether bed level from restart should be ignored (0=no (default), 1=yes)')
 
 ! External forcings
     call prop_set(prop_ptr, 'external forcing', 'ExtForceFile',    trim(md_extfile),     'Old format for external forcings file *.ext, link with tim/cmp-format boundary conditions specification')

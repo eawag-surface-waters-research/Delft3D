@@ -11347,7 +11347,6 @@ subroutine unc_read_map(filename, tim, ierr)
     use unstruc_channel_flow, only: network
     use m_oned_functions,     only: gridpoint2cross
     use m_GlobalParameters
-    use unstruc_model, only: jarstignorebl
 
     character(len=*),  intent(in)       :: filename   !< Name of NetCDF file.
     real(kind=hp),     intent(in)       :: tim        !< Desired time (snapshot) to be read from map file.

@@ -2841,6 +2841,9 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jamapbnd                  !< Includes boundary points in map output
  integer                           :: jamapqin                  !< Includes sum of all influxes in map output
  
+! read from restart     
+ integer                           :: jarstignorebl             !< Flag indicating if bed level on restart file should be ignored (0/1, default: 0)
+ 
 ! Write partition domain file
  integer                           :: japartdomain              !< Write a separate netcdf file for partition domain info., 0: no, 1: yes
 
@@ -3262,6 +3265,8 @@ subroutine default_flowparameters()
     jamapTotalInflow1d2d = 0
     jamapTotalInflowLat = 0
     jamapS1Gradient = 0
+    
+    jarstignorebl = 0
     
     epswetout = epshs ! the same as numerical threshold to counts as 'wet'.
     jatekcd = 1     ! wind cd coeffs on tek
