@@ -64,6 +64,7 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\getidentification.f"/>
+		<File RelativePath=".\src\waq_mpi_processes_stubs.f90"/>
 		<File RelativePath=".\src\waq_bmi.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>

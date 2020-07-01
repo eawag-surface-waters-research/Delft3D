@@ -1892,6 +1892,7 @@ src/engines_gpl/waq/packages/delwaq/src/delwaq2_global_data.f90 -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq_version.F90.svn -text
 src/engines_gpl/waq/packages/delwaq/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq/src/waq_bmi.F90 -text
+src/engines_gpl/waq/packages/delwaq/src/waq_mpi_processes_stubs.f90 -text
 src/engines_gpl/waq/packages/delwaq/src/waq_mt3d_api.f90 -text
 src/engines_gpl/waq/packages/delwaq/src/waq_omi_api.f90 -text
 src/engines_gpl/waq/packages/delwaq/src/waq_omi_lib.f90 -text

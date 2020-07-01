@@ -181,6 +181,15 @@
 !    allocate array that indicates is dflowfm cells are wet or dry
      call realloc(wetdry, ktx, keepExisting=.false., fill=.true.)
      call realloc(doproc, ktx, keepExisting=.false., fill=.true.)
+     call realloc(wqmydomain, noseg, keepExisting=.false., fill=.true.)
+     if(jampi.eq.1) then
+        do kk=1,Ndxi
+           call getkbotktopmax(kk,kb,kt,ktmax)
+           do k=kb,ktmax
+              wqmydomain(k-kbx+1) = idomain(kk).eq.my_rank
+           enddo
+        enddo
+      endif
 
 ! ======================
 ! Start initialising WAQ
@@ -789,7 +798,7 @@
    integer, intent (out)         :: iresult
 
    character(len=256)            :: filename, sourcemask
-   integer                       :: kb, k, ja, method, kk, kt, lenqidnam, ipa, ifun, isfun, imba, imna
+   integer                       :: kb, k, klocal, ja, method, kk, kt, ktopx, lenqidnam, ipa, ifun, isfun, imba, imna
    character (len=NAMTRACLEN)    :: qidnam
    character (len=20)            :: waqinput
    integer                       :: minp0, npli, inside, filetype0, iad, needextramba, needextrambar
@@ -884,7 +893,13 @@
                if (success) then
                   do kk = 1,Ndxi
                      if (viuh(kk) .ne. dmiss) then
-                        painp(ipa,kk) = global_to_local( viuh(kk) )
+                        klocal = global_to_local( viuh(kk) )
+                        if(klocal.ge.1.and.klocal.le.Ndxi) then
+                           call getkbotktop(klocal,kb,kt)
+                           painp(ipa,kk) = kb+kmxn(kk)-kbx
+                        else
+                           painp(ipa,kk) = -999.0
+                        endif
                         call getkbotktop(kk,kb,kt)
                         do k=kb,kb+kmxn(kk)-1
                            painp(ipa,k) = painp(ipa,kk)
@@ -1546,6 +1561,48 @@
       return
    end subroutine copy_data_from_wq_processes_to_fm
 
+   logical function wq_processes_mydomain(iseg)
+
+   use m_fm_wq_processes
+   use m_partitioninfo
+   
+   implicit none
+   
+   integer :: iseg
+   if(jampi.eq.1) then
+      if(iseg.gt.0.and.iseg.le.noseg) then
+         wq_processes_mydomain = wqmydomain(iseg)
+      else
+         wq_processes_mydomain = .false.
+      endif
+   else
+      wq_processes_mydomain = .true.
+   endif
+   
+   end function wq_processes_mydomain
+
+   logical function reduce_sum_wq_processes(size_wq_processes_data, wq_processes_data)
+   
+   use m_partitioninfo
+   
+   implicit none
+
+   integer             :: size_wq_processes_data
+   real                :: wq_processes_data(size_wq_processes_data)
+
+   double precision    :: mpi_wq_processes_data(size_wq_processes_data)
+   double precision    :: mpi_wq_processes_data_reduce(size_wq_processes_data)
+
+   if (jampi==1) then
+      mpi_wq_processes_data = dble(wq_processes_data)
+      call reduce_double_sum(size_wq_processes_data, mpi_wq_processes_data, mpi_wq_processes_data_reduce)
+      wq_processes_data = sngl(mpi_wq_processes_data_reduce)
+   end if
+   
+   reduce_sum_wq_processes = .true.
+
+   end function reduce_sum_wq_processes
+   
    !> defaults for process library (WAQ)
    subroutine default_fm_wq_processes()
       use m_fm_wq_processes

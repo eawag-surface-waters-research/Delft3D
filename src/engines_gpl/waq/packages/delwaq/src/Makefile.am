@@ -33,6 +33,7 @@ MPILIBS += $(MPILIBS_ADDITIONAL)
 #Sources
 libdelwaq_la_SOURCES = \
        delwaq2_global_data.f90 \
+       waq_mpi_processes_stubs.f90 \
        delwaq_version.F90 \
        getidentification.f \
        delwaq1.f \
