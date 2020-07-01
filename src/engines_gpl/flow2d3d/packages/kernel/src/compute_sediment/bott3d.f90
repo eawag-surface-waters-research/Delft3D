@@ -248,6 +248,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp) :: totfixfrac
     real(fp) :: trndiv
     real(fp) :: z
+    real(hp) :: dim_real
 !
 !! executable statements -------------------------------------------------------
 !
@@ -314,10 +315,11 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     sinkf               => gdp%gdmorpar%flufflyr%sinkf
     sourf               => gdp%gdmorpar%flufflyr%sourf
     !
-    lstart  = max(lsal, ltem)
-    bedload = .false.
-    dtmor   = dt*morfac
-    nm_pos  = 1
+    lstart   = max(lsal, ltem)
+    bedload  = .false.
+    dtmor    = dt*morfac
+    nm_pos   = 1
+    dim_real = real(nmmax*lsedtot,hp)
     !
     !   Calculate suspended sediment transport correction vector (for SAND)
     !   Note: uses GLM velocites, consistent with DIFU
@@ -961,7 +963,13 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 mergebuf(i) = real(dbodsd(l, nm),hp)
              enddo
           enddo
+          ! First sent the array size
+          ! Needed since FM communicates the time step (dim_real=1)
+          ! Since here the dbodsed array is going to be communicated, dim_real=nmmax*lsedtot
+          call putarray (mergehandle,dim_real,1)
+          ! Then sent the dbodsed array
           call putarray (mergehandle,mergebuf(1:nmmax*lsedtot),nmmax*lsedtot)
+          ! Then receive the merged dbodsed array
           call getarray (mergehandle,mergebuf(1:nmmax*lsedtot),nmmax*lsedtot)
           i = 0
           do l = 1, lsedtot

@@ -32,16 +32,15 @@ echo Working directory: %workdir%
     rem
 set D3D_HOME=%~dp0..\..\..
 
-rem Remove "\dflow2d3d\scripts\..\..\.." from D3D_HOME
-set D3DT=%D3D_HOME:~0,-27%
+rem Remove "\dmor\scripts\..\..\.." from D3D_HOME
+set D3DT=%D3D_HOME:~0,-22%
 rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
-set dflow2d3ddir=%D3D_HOME%\%ARCH%\dflow2d3d\bin
-set dflow2d3dscripts=%D3D_HOME%\%ARCH%\dflow2d3d\scripts
+set dmorscripts=%D3D_HOME%\%ARCH%\dmor\scripts
 set sharedir=%D3D_HOME%\%ARCH%\share\bin
 set TCL_EXE=%sharedir%\tclkitsh852.exe
-set scriptname=%dflow2d3dscripts%/mormerge.tcl
+set scriptname=%dmorscripts%/mormerge.tcl
 
 
     rem

@@ -34,7 +34,7 @@ echo exedir:%exedir%
 
     rem
     rem Prepare environment and logdir
-set PATH=%exedir%\swan\scripts;%exedir%\swan\bin;%exedir%\dwaves\bin;%exedir%\dflow2d3d\bin;%exedir%\share\bin;%PATH%
+set PATH=%exedir%\dmor\bin;%exedir%\swan\scripts;%exedir%\swan\bin;%exedir%\dwaves\bin;%exedir%\dflow2d3d\bin;%PATH%;%exedir%\share\bin
 rmdir /S /Q %workdir%\merge\sync
 mkdir %workdir%\merge\sync
 
@@ -42,8 +42,8 @@ mkdir %workdir%\merge\sync
     rem
     rem Start 1 mormerge for each subdomain
 cd /D %workdir%\merge
-start /B %exedir%\dflow2d3d\bin\mormerge.exe -i basin_windows.mm -w . -r %subdomain1% >mormerge_%subdomain1%.scr 2>&1
-start /B %exedir%\dflow2d3d\bin\mormerge.exe -i basin_windows.mm -w . -r %subdomain2% >mormerge_%subdomain2%.scr 2>&1
+start /B %exedir%\dmor\bin\mormerge.exe -i basin_windows.mm -w . -r %subdomain1% >mormerge_%subdomain1%.scr 2>&1
+start /B %exedir%\dmor\bin\mormerge.exe -i basin_windows.mm -w . -r %subdomain2% >mormerge_%subdomain2%.scr 2>&1
 
 
     rem

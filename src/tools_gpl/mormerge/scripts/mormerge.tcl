@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.14"
+set version "2.15"
 
 global debug
 set debug 0
@@ -1702,7 +1702,7 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
          puts $scriptfile "$dimrexe $infillist(dimrargs) >$infillist(dimrexename).scr 2>&1"
       } else {
          puts $scriptfile "\nrem Start $infillist(flowexename)\n"
-         puts $scriptfile "set PATH=$flowexedir;$sharedir;%PATH%"
+         puts $scriptfile "set PATH=$exedir;$sharedir;%PATH%"
          puts $scriptfile "start /b [spaceSafe $flowexe] $infillist(flowargs) >$infillist(flowexename).scr 2>&1"
          if { $waveonline } {
             puts $scriptfile "\nrem Start wave\n"
@@ -2006,7 +2006,7 @@ if { $infillist(runscript) != " " } {
       if { [string length $aline] > 3 } break
    }
    close $d3dinfile
-   getRunids $aline $inputdir numdomains runids
+   getRunids $aline $infillist(dimrargs) $infillist(runscript) $inputdir numdomains runids
 } elseif { $infillist(flowexename) == "deltares_hydro" || $infillist(flowexename) == "d_hydro" } {
    set d3dfilnam [file nativename [file join $rootdir "input" [lindex $infillist(flowargs) 0] ] ]
    putsDebug "Scanning input file $d3dfilnam ..."
@@ -2015,7 +2015,7 @@ if { $infillist(runscript) != " " } {
       if { [string match -nocase "*mdffile*" $aline] || [string match -nocase "*ddbfile*" $aline] } break
    }
    close $d3dinfile
-   getRunids $aline $inputdir numdomains runids
+   getRunids $aline $infillist(dimrargs) $infillist(runscript) $inputdir numdomains runids
 }
 putsDebug "$numdomains domain(s):"
 foreach runid $runids {
