@@ -149,6 +149,7 @@
       
       logical, external    :: wq_processes_mydomain
       logical              :: mydomain
+      logical, external    :: reduce_int_max_wq_processes
       logical, external    :: reduce_sum_wq_processes
       
       call getmlu( lunrep )
@@ -175,6 +176,10 @@
             no_basin = max(no_basin,basin_no)
             ip_basin_no = ip_basin_no + increm(2)
          enddo
+         if(.not.reduce_int_max_wq_processes(no_basin)) then
+            write (lunrep, *) 'ERROR in dredge process while reducing actual number of basins through mpi!'
+            call srstop(1)
+         endif
          pmsa(ipoint(3)) = real(no_basin)
       endif
 
@@ -397,12 +402,10 @@
 
       !  synchronise over MPI when necessary
       if(any(dredge_moment)) then
-         write(lunrep,*) 'before MPI:', sum_dredge(1:size_sum_dredge)
          if(.not.reduce_sum_wq_processes(size_sum_dredge, sum_dredge)) then
-            write (lunrep, *) 'error while reducing water quality processes data through mpi.'
+            write (lunrep, *) 'ERROR in dredge process while reducing water quality processes data through mpi.'
             call srstop(1)
          endif
-         write(lunrep,*) 'after MPI:', sum_dredge(1:size_sum_dredge)
       end if
 
       ! dump loop

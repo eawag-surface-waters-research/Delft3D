@@ -1603,6 +1603,22 @@
 
    end function reduce_sum_wq_processes
    
+   logical function reduce_int_max_wq_processes(wq_processes_data)
+   
+   use m_partitioninfo
+   
+   implicit none
+
+   integer             :: wq_processes_data
+
+   if (jampi==1) then
+      call reduce_int1_max(wq_processes_data)
+   end if
+   
+   reduce_int_max_wq_processes = .true.
+
+   end function reduce_int_max_wq_processes
+
    !> defaults for process library (WAQ)
    subroutine default_fm_wq_processes()
       use m_fm_wq_processes

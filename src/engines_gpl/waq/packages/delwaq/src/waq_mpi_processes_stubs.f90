@@ -48,4 +48,13 @@
    reduce_sum_wq_processes = .true.
 
    end function reduce_sum_wq_processes
+
+   logical function reduce_int_max_wq_processes(wq_processes_data)
    
+   implicit none
+
+   integer             :: wq_processes_data
+
+   reduce_int_max_wq_processes = .true.
+
+   end function reduce_int_max_wq_processes
