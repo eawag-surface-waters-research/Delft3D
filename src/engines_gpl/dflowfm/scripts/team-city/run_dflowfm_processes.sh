@@ -100,7 +100,7 @@ if [ ! "$userprocfile" == "" ]
     then
     procfile=$userprocfile
 else
-    procfile=$D3D_HOME/share/delft3d/proc_def
+    procfile=$D3D_HOME/share/delft3d/proc_def.dat
 fi
 
 if [ ! -f $procfile ]; then
@@ -133,9 +133,9 @@ set_omp_threads
 if [ "$eco" == "true" ]
    then
        echo $D3D_HOME/bin/dflowfm --nodisplay --autostartstop --processlibrary $procfile --bloomspecies $spefile $dfmoptions
-       echo $D3D_HOME/bin/dflowfm --nodisplay --autostartstop --processlibrary $procfile --bloomspecies $spefile $dfmoptions
+       $D3D_HOME/bin/dflowfm --nodisplay --autostartstop --processlibrary $procfile --bloomspecies $spefile $dfmoptions
    else
        echo $D3D_HOME/bin/dflowfm --nodisplay --autostartstop --processlibrary $procfile $dfmoptions
-       echo $D3D_HOME/bin/dflowfm --nodisplay --autostartstop --processlibrary $procfile $dfmoptions
+       $D3D_HOME/bin/dflowfm --nodisplay --autostartstop --processlibrary $procfile $dfmoptions
    fi
 
