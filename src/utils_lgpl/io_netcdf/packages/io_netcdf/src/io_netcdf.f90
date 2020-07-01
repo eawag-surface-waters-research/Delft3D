@@ -638,7 +638,7 @@ function ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom, start_index, inc
    integer,             intent(in   ) :: ioncid        !< The IONC data set id.
    integer,             intent(in   ) :: meshid        !< The mesh id in the specified data set.
    integer                            :: networkid     !< The mesh id in the specified data set.
-   type(t_ug_meshgeom), intent(out  ) :: meshgeom      !< Structure in which all mesh geometry will be stored.
+   type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    integer                            :: ierr          !< Result status, ionc_noerr if successful.
    type(t_ug_network)                 :: netid 
    
