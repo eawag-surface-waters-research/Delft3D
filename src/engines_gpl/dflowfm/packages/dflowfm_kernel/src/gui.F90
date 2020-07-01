@@ -18624,7 +18624,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
           CALL IFORMgetdouble  (2*16 , Cdleaf     ) 
           CALL IFORMgetdouble  (2*17 , Arealeaf   ) 
           do L = 1,Lnx1D
-             if (prof1D(1,L) > 0) then  ! only direct profiles
+             if (prof1D(1,L) >= 0) then  ! only direct profiles
                 if (kcu(L) == 1 ) then 
                    if (wu1DUNI  .ne. w1 ) then  
                       prof1D(1,L) = wu1DUNI

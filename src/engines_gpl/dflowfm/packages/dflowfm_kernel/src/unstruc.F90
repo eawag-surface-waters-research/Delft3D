@@ -24682,7 +24682,7 @@ end subroutine unc_write_shp
        else if (kcu(L) == 3) then                         ! 1D2D internal link 3  flows over side of attached 1D channel
           call getdxofconnectedkcu1(L,wu(L))              !  dbdistance ( xk(k3), yk(k3), xk(k4), yk(k4) )  ! set 2D link width
        else
-          IF ( prof1D(1,LL) > 0) THEN
+          IF ( prof1D(1,LL) >= 0) THEN
              wu(L) = prof1d(1,LL)                         ! todo, wu1DUNI from max width of profile interpolations
           ELSE
              KA    = -PROF1D(1,LL); KB = -PROF1D(2,LL); ALFA  = PROF1D(3,LL)
@@ -47110,7 +47110,7 @@ endif
 
 
 ! No flow1d cross input, OR a 1d2d link. Proceeed with conventional prof1D approach.
-if (prof1D(1,LL) > 0 ) then            ! direct profile based upon link value
+if (prof1D(1,LL) >= 0 ) then            ! direct profile based upon link value
     ka    = 0; kb = 0                  ! do not use profiles
     profw = prof1D(1,LL)
     profh = prof1D(2,LL)
@@ -47254,7 +47254,7 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
    return
 endif
 
-if (prof1D(1,LL) > 0 ) then              ! direct profile based upon link value
+if (prof1D(1,LL) >= 0 ) then              ! direct profile based upon link value
     ka    = 0; kb = 0                    ! do not use profiles
     profw = prof1D(1,LL)
     profh = prof1D(2,LL)
