@@ -39397,6 +39397,7 @@ end function ispumpon
         bbr(n)  = bbr(n) - dti*a1m(n)
     endif
 
+    ! Check for zero (0d0) value on diagonal, to print a warning before a resulting Saad crash.
     if (comparerealdouble(bbr(n),0d0)==0) then
        if (n <= ndx2d) then
           dim_text = '2D'
@@ -39406,14 +39407,15 @@ end function ispumpon
        write(msgbuf,'(a, i0, a)') 'The surface area of '//dim_text//'-node with node number ''', n, ''' is equal to 0'
        call setMessage(LEVEL_WARN, msgbuf)
        call SetMessage(-1, 'This might lead to a SAAD error in the solve process' )
-       write(msgbuf, '(a,g16.2)') 'Current time is ', time1
+       write(msgbuf, '(a)') 'Current time is: '
+       call maketime(msgbuf(18:), time1)
        call setMessage(-1, msgbuf)
        write(msgbuf,'(a,f9.2,a,f9.2,a)') 'The location of the node is at (',xz(n),',',yz(n),')'
        call setMessage(-1, msgbuf)
        L = -1
-       if (n > ndx2d) then 
+       if (n > ndx2d .and. network%loaded) then 
           do i = 1, nd(n)%lnx
-             if (abs(nd(n)%ln(i)) < lnx1d) then
+             if (abs(nd(n)%ln(i)) <= lnx1d) then
                 L = abs(nd(n)%ln(i))
                 exit
              endif
@@ -39424,6 +39426,9 @@ end function ispumpon
 
             branch => network%brs%branch
             gridPointsChainages => branch(ibr)%gridPointsChainages
+            ! UNST-4031: Dangerous code: this assumes that flow links and flow nodes
+            ! on a single branch are perfectly sorted, which is not required in input
+            ! networks. The k value below may not be correct.
             if (nd(n)%ln(i) < 0) then
                ! gridpoint at start of link internal gridpoint is equal to 
                k = LL
@@ -39433,9 +39438,8 @@ end function ispumpon
             write(msgbuf,'(a, f9.2)') 'The gridpoint lies at branch with id ''' //trim(branch(ibr)%id)// ''' at chainage: ', gridPointsChainages(k)
             call setMessage(-1, msgbuf)
          endif
-         call adddot(xz(n), yz(n), colournumber = 247)
       endif
-
+      call adddot(xz(n), yz(n), colournumber = 247)
     endif
        
     if (kfs(n) == 1) then                            ! only for implicit points
