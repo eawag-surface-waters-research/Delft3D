@@ -163,11 +163,17 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          do k = ind, endGeometryNode - 1
             totalLength = totalLength + branchSegmentLengths(k)
             if (totalLength >= branchoffsets(iin)) then
-                  previousLength = totalLength - branchSegmentLengths(k)
-                  ind = k
+               ind = k
                exit
             endif
          enddo
+         if (k == endGeometryNode) then
+            ! Safety: if loop exit above was not reached due to roundoff errors
+            ! (or branchoffsets(iin) too big), make sure to use the last geometry segment.
+            ind = endGeometryNode-1
+         end if
+         previousLength = totalLength - branchSegmentLengths(ind)
+
          fractionbranchlength =  branchoffsets(iin) - previousLength                           ! "real world" length
          cartMeshXCoords(iin) = cartGeopointsX(ind) + fractionbranchlength * xincrement(ind)
          cartMeshYCoords(iin) = cartGeopointsY(ind) + fractionbranchlength * yincrement(ind)
