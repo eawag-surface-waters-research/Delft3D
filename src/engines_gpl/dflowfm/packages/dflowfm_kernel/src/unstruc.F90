@@ -17790,8 +17790,8 @@ subroutine update_dambreak_breach(startTime, deltaTime)
          do n = 1, nDambreakAveragingDownstream
             if (dambreakAveraging(2,n)>0.0d0) then
                waterLevelsDambreakDownStream(dambreakAverigingDownstreamMapping(n))  = dambreakAveraging(1,n)/dambreakAveraging(2,n)
-            else if (abs(startTime-network%sts%struct(dambreaks(dambreakAverigingUpstreamMapping(n)))%dambreak%T0)<1d-10) then
-               waterLevelsDambreakDownStream(dambreakAverigingUpstreamMapping(n)) = s1(kdambreak(2,LStartBreach(dambreakAverigingUpstreamMapping(n))))
+            else if (abs(startTime-network%sts%struct(dambreaks(dambreakAverigingDownstreamMapping(n)))%dambreak%T0)<1d-10) then
+               waterLevelsDambreakDownStream(dambreakAverigingDownstreamMapping(n)) = s1(kdambreak(2,LStartBreach(dambreakAverigingDownstreamMapping(n))))
             else
                continue
             endif
@@ -41442,6 +41442,7 @@ if (jahisbal > 0) then
                valdambreak(1:NUMVALS_DAMBREAK-1,n) = dmiss               ! No breach started yet, set FillValue
                La = abs(kdambreak(3,LStartBreach(n)))
                valdambreak(8,n) = bob(1,La)                              ! No breach started yet, use bob as 'crest'.
+               valdambreak(9,n) = 0d0                                    ! No breach started yet, set crest width to 0
                cycle
             end if
             valdambreak(3,n)  = waterLevelsDambreakUpStream(n)
