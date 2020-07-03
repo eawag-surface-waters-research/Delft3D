@@ -12066,7 +12066,7 @@ subroutine flow_trachyupdate()
     use unstruc_messages
     use unstruc_files, only: mdia
     use m_flow, only: kmx, zslay, ucx, ucy, cftrt, hu, hs, frcu, ifrcutp, cftrtfac, jacftrtfac, s1
-    use m_flowgeom, only: ndx, lnx, kcu, dx, lne2ln, ln2lne, nd, bob, bl
+    use m_flowgeom, only: ndx, lnx, lnx1d, kcu, dx, lne2ln, ln2lne, nd, bob, bl
     use m_physcoef
     use m_trachy
     use m_trtrou
@@ -12204,7 +12204,8 @@ subroutine flow_trachyupdate()
             trachy_fl%dir(1)%zsu_prev(L) = trachy_fl%dir(1)%blu_trt(L) + hu_trt(L)
         end do
         !
-        do LF = 1, lnx
+        ! Skip 1d friction types. For now the ifrcutp is always equal to 1, while FRCU contains the actual (calculated) Chezy value
+        do LF = lnx1D + 1, lnx
             if (ifrcutp(LF) /= ifrctypuni) then
                 error = .true.
                 call mess(LEVEL_ERROR, 'Only uniform background roughness definition supported in combination with Trachytopes', mdia)
@@ -12301,7 +12302,7 @@ subroutine calibration_init()
  use m_calibration
  use unstruc_messages
  use unstruc_model, only: md_cldfile, md_cllfile
- use m_flowgeom,    only: lnx
+ use m_flowgeom,    only: lnx, lnx1d
  use m_flow,        only: ifrcutp, ifrctypuni, frcu, frcu_bkp
  !
  implicit none
@@ -12309,7 +12310,8 @@ subroutine calibration_init()
  integer         :: LF
  logical         :: error
 
- do LF = 1, lnx
+ ! Skip 1d friction types. For now the ifrcutp is always equal to 1, while FRCU contains the actual (calculated) Chezy value
+ do LF = lnx1D+1, lnx
      if (ifrcutp(LF) /= ifrctypuni) then
          error = .true.
          call mess(LEVEL_ERROR, 'Only uniform background roughness definition supported in combination with [calibration]DefinitionFile')
