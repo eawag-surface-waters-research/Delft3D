@@ -508,7 +508,7 @@ use m_flowgeom
     double precision               :: zb2
     double precision               :: zs, gateloweredgelevel, gatedoorheight
     double precision               :: DsL
-    double precision               :: gatefraction, g1, fu_sav, ru_sav, au_sav
+    double precision               :: gatefraction, fu_sav, ru_sav, au_sav
 
 !
 !! executable statements -------------------------------------------------------
