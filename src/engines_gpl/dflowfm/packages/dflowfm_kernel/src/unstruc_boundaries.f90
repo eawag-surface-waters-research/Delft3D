@@ -2338,6 +2338,8 @@ do i=1,nstr
          if (.not. strcmpi(strtype, 'compound') ) then
             write(msgbuf, '(a,a,a)') 'Required field ''polylinefile'' missing in '//trim(strtype)//' ''', trim(strid), '''.'
             call warn_flush()
+         else
+            success = .true. ! Compound processed elsewhere, success here.
          end if
          cycle
       end if
@@ -2454,7 +2456,13 @@ do i=1,nstr
 
 
    case ('gate', 'weir', 'generalstructure') !< The various generalstructure-based structures
-      call selectelset_internal_links(xz, yz, ndx, ln, lnx, kegen(ncgen+1:numl), numgen, LOCTP_POLYLINE_FILE, plifile, sortLinks = 1)
+      if (loc_spec_type /= LOCTP_POLYLINE_FILE) then
+         numgen = pstru%numlinks
+         kegen(ncgen+1:ncgen+numgen) = pstru%linknumbers(1:numgen)
+      else
+         call selectelset_internal_links(xz, yz, ndx, ln, lnx, kegen(ncgen+1:numl), numgen, LOCTP_POLYLINE_FILE, plifile, sortLinks = 1)
+      end if
+
       success = .true.
       WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(plifile) , numgen, ' nr of '//trim(strtype)//' cells' ; call msg_flush()
 
@@ -2609,7 +2617,7 @@ end do
       cgen_ids(n) = strid
 
       plifile = ' '
-      call prop_get_string(str_ptr, '', 'polylinefile', plifile, success) ! TODO: Remove? This plifile is nowhere used below
+      call prop_get_string(str_ptr, '', 'polylinefile', plifile, successloc) ! TODO: Remove? This plifile is nowhere used below
       call resolvePath(plifile, md_structurefile_dir, plifile)
 
       ! Start with some general structure default params, and thereafter, make changes depending on actual strtype
