@@ -628,7 +628,7 @@ use m_flowgeom
        endif
     endif
 
-    if ( gatefraction.lt.1d0 .and. gatefraction.gt.0d0 ) then
+    if ( gatefraction.gt.0d0 .and. gatefraction.lt.1d0) then
        fu_sav = fu(Lf)
        ru_sav = ru(Lf)
        au_sav = au(Lf)
@@ -642,11 +642,9 @@ use m_flowgeom
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
        fusav(3,n) = fu(Lf) ; rusav(3,n) = ru(Lf) ; ausav(3,n) = au(Lf)
 
-       g1 = 1d0-gatefraction
-
-       fu(Lf) = gatefraction * fu_sav + g1 * fu(Lf)
-       ru(Lf) = gatefraction * ru_sav + g1 * ru(Lf)
-       au(Lf) = gatefraction * au_sav + g1 * au(Lf)
+       fu(Lf) = (1d0-gatefraction) * fu_sav + gatefraction * fu(Lf)
+       ru(Lf) = (1d0-gatefraction) * ru_sav + gatefraction * ru(Lf)
+       au(Lf) = (1d0-gatefraction) * au_sav + gatefraction * au(Lf)
     end if
 
     if (au(Lf) == 0d0) then
