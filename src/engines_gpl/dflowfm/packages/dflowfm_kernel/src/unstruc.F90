@@ -16132,12 +16132,10 @@ end if
  tim1bnd = tstart_user
  tim1fld = tstart_user
 
-if (.not. jawelrestart) then ! If one restarts a simulation, then s0 and s1 are read from the restart file (new version), no need to set them.
-   call sets01zbnd(1, 1)
-else if (jaoldrstfile==1) then ! If the restart file is of old version (which does not have waterlevel etc info on boundaries), then need to set.
-   call sets01zbnd(0, 0)
-   call sets01zbnd(1, 1)
-endif
+ if (jaoldrstfile==1) then ! If the restart file is of old version (which does not have waterlevel etc info on boundaries), then need to set.
+    call sets01zbnd(0, 0)
+ endif
+ call sets01zbnd(1, 1)
 
  do n  = 1, nbndn                                  ! for normal velocity boundaries, also initialise velocity on link
     LL = kbndn(3,n)
