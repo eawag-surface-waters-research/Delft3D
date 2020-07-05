@@ -3369,7 +3369,7 @@ end subroutine sethu
  implicit none
 
  integer                                           :: n, nq, L, k1, k2, nlowest
- integer                                           :: ierror, ng, Lnu, LL, iup
+ integer                                           :: ierror, ng, Lnu, LL, iup, k
  double precision                                  :: at, ssav, wwav, blowest, fac, zlu, zgaten, sup, bupmin, bup, openfact, afac
 
  double precision, parameter                       :: FAC23 = 0.6666666666667d0
@@ -3380,6 +3380,14 @@ end subroutine sethu
 
 
     call vol12D(1)
+
+    ! set correct flow areas for dambreaks, using the actual flow width
+    do n = 1, ndambreaksg
+       do k = L1dambreaksg(n), L2dambreaksg(n)
+          L = iabs(kdambreak(3,k))
+          au(L) = hu(L) * dambreakLinksActualLength(k)
+       enddo
+    enddo
 
  endif
 
@@ -17899,11 +17907,11 @@ subroutine adjust_bobs_on_dambreak_breach(width, crl, startingLink, L1, L2, stru
    bob(2,Lf) = max(bob0(2, Lf), crl)
    activeDambreakLinks(startingLink) = 1
    if ((width - dambreakLinksEffectiveLength(startingLink))<= 0) then
-      wu(Lf) = width
+      dambreakLinksActualLength(startingLink) = width
       return
    else
       !left from the breach point: the breach width is larger
-      wu(Lf) = dambreakLinksEffectiveLength(startingLink)
+      dambreakLinksActualLength(startingLink) = dambreakLinksEffectiveLength(startingLink)
       leftBreachWidth = (width - dambreakLinksEffectiveLength(startingLink))/2.0d0
       rightBreachWidth = leftBreachWidth
         do k = startingLink - 1, L1, -1
@@ -17912,13 +17920,13 @@ subroutine adjust_bobs_on_dambreak_breach(width, crl, startingLink, L1, L2, stru
             bob(1,Lf) = max(bob0(1, Lf), crl)
             bob(2,Lf) = max(bob0(2, Lf), crl)
             activeDambreakLinks(k) = 1
-            wu(Lf) = dambreakLinksEffectiveLength(k)
+            dambreakLinksActualLength(k) = dambreakLinksEffectiveLength(k)
             leftBreachWidth = leftBreachWidth - dambreakLinksEffectiveLength(k)
          else
             bob(1,Lf) = max(bob0(1, Lf), crl)
             bob(2,Lf) = max(bob0(2, Lf), crl)
             activeDambreakLinks(k) = 1
-            wu(Lf) = leftBreachWidth
+            dambreakLinksActualLength(k) = leftBreachWidth
             leftBreachWidth = 0d0
             exit
          endif
@@ -17930,13 +17938,13 @@ subroutine adjust_bobs_on_dambreak_breach(width, crl, startingLink, L1, L2, stru
             bob(1,Lf) = max(bob0(1, Lf), crl)
             bob(2,Lf) = max(bob0(2, Lf), crl)
             activeDambreakLinks(k) = 1
-            wu(Lf) = dambreakLinksEffectiveLength(k)
+            dambreakLinksActualLength(k) = dambreakLinksEffectiveLength(k)
             rightBreachWidth = rightBreachWidth - dambreakLinksEffectiveLength(k)
          else
             bob(1,Lf) = max(bob0(1, Lf), crl)
             bob(2,Lf) = max(bob0(2, Lf), crl)
             activeDambreakLinks(k) = 1
-            wu(Lf) = rightBreachWidth
+            dambreakLinksActualLength(k) = rightBreachWidth
             rightBreachWidth = 0d0
             exit
          endif
@@ -41433,10 +41441,10 @@ if (jahisbal > 0) then
                if( Ln(1,La) /= kdambreak(1,L) ) then
                   dir = -1d0
                end if
-               valdambreak(1,n) = valdambreak(1,n) + wu(La)
+               valdambreak(1,n) = valdambreak(1,n) + dambreakLinksActualLength(L)
                valdambreak(2,n) = valdambreak(2,n) + q1(La)*dir
                valdambreak(6,n) = valdambreak(6,n) + au(La) ! flow area
-               valdambreak(9,n) = valdambreak(9,n) + wu(La)
+               valdambreak(9,n) = valdambreak(9,n) + dambreakLinksActualLength(L)
             enddo
             if (network%sts%struct(istru)%dambreak%width > 0d0) then
                valdambreak(8,n) = network%sts%struct(istru)%dambreak%crl ! crest level

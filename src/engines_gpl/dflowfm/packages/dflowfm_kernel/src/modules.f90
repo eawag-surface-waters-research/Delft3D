@@ -2088,7 +2088,8 @@ end module m_crspath
  double precision, allocatable           :: waterLevelJumpDambreak(:)             !< water level jumps
  !constant in time
  double precision, allocatable           :: maximumDambreakWidths(:)              !< the total dambreak width (from pli file)
- double precision, allocatable           :: dambreakLinksEffectiveLength(:)       !< dambreak links index array
+ double precision, allocatable           :: dambreakLinksEffectiveLength(:)       !< dambreak maximum flow widths
+ double precision, allocatable           :: dambreakLinksActualLength(:)               !< dambreak actual flow widths
  integer        , allocatable            :: dambreaks(:)                          !< store the dambreaks indexes among all structures
  integer                                 :: ndambreak                             !< nr of dambreak links
  integer                                 :: ndambreaksg                           !< nr of dambreak signals
