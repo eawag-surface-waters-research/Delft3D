@@ -628,7 +628,7 @@ use m_flowgeom
        endif
     endif
 
-    if ( gatefraction.gt.0d0 .and. gatefraction.lt.1d0) then
+    if ( husb >= gateloweredgelevel .and. gatefraction > 0d0 .and. gatefraction < 1d0) then
        fu_sav = fu(Lf)
        ru_sav = ru(Lf)
        au_sav = au(Lf)
