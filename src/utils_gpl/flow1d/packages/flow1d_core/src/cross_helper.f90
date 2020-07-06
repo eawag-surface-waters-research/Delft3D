@@ -61,28 +61,22 @@ contains
       double precision :: factor
       double precision :: linkpos
 
-      if (network%adm%line2cross(ilink)%c1 < 0) then
+      if (network%adm%line2cross(ilink, 2)%c1 < 0) then
          ! no cross section on this branch
          res = huge(1d0)
          return
       endif
 
-      cross1 => network%crs%cross(network%adm%line2cross(ilink)%c1)
-      cross2 => network%crs%cross(network%adm%line2cross(ilink)%c2)
-      
-      if (network%adm%line2cross(ilink)%c1 == network%adm%line2cross(ilink)%c2) then 
-          res(1) = getBob(cross1)
-          res(2) = res(1)
-      else
-          dxlocal = 0.5d0*getdeltax(network, ilink) 
-          distancelocal = cross2%chainage - cross1%chainage
-          dx = dxlocal/distancelocal
-          linkpos = network%adm%line2cross(ilink)%f
-          factor = linkpos - dx
-          res(1) = getBob(cross1, cross2, factor)      
-          factor = linkpos + dx
-          res(2) = getBob(cross1, cross2, factor)      
-      endif    
+      cross1 => network%crs%cross(network%adm%line2cross(ilink, 1)%c1)
+      cross2 => network%crs%cross(network%adm%line2cross(ilink, 1)%c2)
+      factor = network%adm%line2cross(ilink,1)%f
+      res(1) = getBob(cross1, cross2, factor)      
+
+      cross1 => network%crs%cross(network%adm%line2cross(ilink, 3)%c1)
+      cross2 => network%crs%cross(network%adm%line2cross(ilink, 3)%c2)
+      factor = network%adm%line2cross(ilink, 3)%f
+      res(2) = getBob(cross1, cross2, factor)      
+
    end function getbobs   
    
    double precision function getdeltax(network, ilink)
@@ -127,7 +121,7 @@ contains
       double precision               :: chainage
       type(t_CSType), pointer        :: cross
       
-      n = network%adm%line2cross(L)%c1
+      n = network%adm%line2cross(L, 2)%c1
       if ( n <= 0) then
          ! no cross section defined on L
          conv = 45d0* flowarea_sub(1) * sqrt(flowarea_sub(1) / perim_sub(1))
@@ -139,7 +133,7 @@ contains
       endif
       
       if (yz_conveyance) then
-         call getYZConveyance(network%adm%line2cross(L), network%crs%cross, dpt, u1L, cz, conv, factor_time_interpolation)
+         call getYZConveyance(network%adm%line2cross(L, 2), network%crs%cross, dpt, u1L, cz, conv, factor_time_interpolation)
 
       else
          igrid   = network%adm%lin2grid(L)
@@ -150,13 +144,13 @@ contains
             do i = 1, 3
                if (perim_sub(i) > eps .and. flowarea_sub(i) > 0.0d0) then
                   r = flowarea_sub(i)/perim_sub(i)
-                  cross => network%crs%cross(network%adm%line2cross(L)%c1)%tabdef
+                  cross => network%crs%cross(network%adm%line2cross(L, 2)%c1)%tabdef
                   cz1 = getFrictionValue(network%rgs, network%spdata, cross, ibranch, i, igrid, s1L, q1L, u1L, r, dpt, chainage)
-                  cross => network%crs%cross(network%adm%line2cross(L)%c2)%tabdef
+                  cross => network%crs%cross(network%adm%line2cross(L, 2)%c2)%tabdef
                   cz2 = getFrictionValue(network%rgs, network%spdata, cross, ibranch, i, igrid, s1L, q1L, u1L, r, dpt, chainage)
                   ! Compute weighting of left and right cross section on this grid point.
                   ! Note: friction coefficient was already interpolated onto this grid point inside getFrictionValue.
-                  f = network%adm%line2cross(L)%f
+                  f = network%adm%line2cross(L, 2)%f
                   cz_sub(i) = (1.0d0 - f) * cz1     + f * cz2
                   conv = conv + cz_sub(i) * flowarea_sub(i) * sqrt(flowarea_sub(i) / perim_sub(i))
                else

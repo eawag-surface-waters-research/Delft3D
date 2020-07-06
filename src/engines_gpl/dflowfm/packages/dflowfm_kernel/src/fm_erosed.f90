@@ -464,9 +464,9 @@
       ! This could also be chosen as the minimum of the main channel width and the
       ! flow width (this is apparently how it was implemented in Sobek-RE).
       do L = 1, lnx1d
-         factor = network%adm%line2cross(L)%f
-         icrs1 = network%adm%line2cross(L)%c1
-         icrs2 = network%adm%line2cross(L)%c2
+         factor = network%adm%line2cross(L,2)%f
+         icrs1 = network%adm%line2cross(L,2)%c1
+         icrs2 = network%adm%line2cross(L,2)%c2
          cdef1 => network%crs%cross(icrs1)%tabdef
          cdef2 => network%crs%cross(icrs2)%tabdef
          if (cdef1%crosstype == CS_TABULATED .and. cdef2%crosstype == CS_TABULATED) then

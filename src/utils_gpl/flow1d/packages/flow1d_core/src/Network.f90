@@ -64,14 +64,16 @@ module m_network
    ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en lin2local uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
    
    type, public :: t_administration_1d
-      integer, allocatable            :: lin2str(:)                        !< indirection list, containing structure numbers for flowlinks.
+      integer, allocatable            :: lin2str(:)                        !< Indirection list, containing structure numbers for flowlinks.
                                                                            !< These structure numbers refer to the elements of network%sts%struct.
-      integer, allocatable            :: lin2ibr(:)                        !< indirection list, containing branch number on which the flow link is positioned 
-      integer, allocatable            :: lin2local(:)                      !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
+      integer, allocatable            :: lin2ibr(:)                        !< Indirection list, containing branch number on which the flow link is positioned 
+      integer, allocatable            :: lin2local(:)                      !< Indirection list, containing relative index of link on branch adm%lin2ibr(l)
       
       integer, allocatable            :: lin2grid(:)
-      type(t_chainage2cross), pointer :: line2cross(:) => null()           !< list containing cross section indices per u-chainage
-      type(t_chainage2cross), pointer :: gpnt2cross(:) => null()           !< list containing cross section indices per gridpoint-chainage
+      type(t_chainage2cross), pointer :: line2cross(:,:) => null()         !< List containing cross section indices per flow link: (L,1) for gridpoint at 
+                                                                           !< the start of the flow link, (L,2) for the flow link itself and (L,1) for gridpoint at 
+                                                                           !< the end of the flow link.
+      type(t_chainage2cross), pointer :: gpnt2cross(:) => null()         !< list containing cross section indices per gridpoint-chainage at begin and end of a link
       logical, allocatable            :: hysteresis_for_summerdike(:,:)    !< array indicating for hysteresis in summerdikes
 
    end type
@@ -114,7 +116,7 @@ contains
       if (.not. allocated(adm%lin2ibr))      allocate(adm%lin2ibr   (links_count))   
       if (.not. allocated(adm%lin2local))    allocate(adm%lin2local (links_count)) 
       if (.not. allocated(adm%lin2grid))     allocate(adm%lin2grid  (links_count)) 
-      if (.not. associated(adm%line2cross))  allocate(adm%line2cross(links_count))
+      if (.not. associated(adm%line2cross))  allocate(adm%line2cross(links_count, 3))
       if (.not. associated(adm%gpnt2cross))  allocate(adm%gpnt2cross(gridp_count))
       if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,links_count))
       adm%hysteresis_for_summerdike = .true.
@@ -215,7 +217,7 @@ contains
       double precision                   :: dpu2
       double precision                   :: chainage1
       double precision                   :: chainage2
-      double precision                   :: chainageu
+      double precision                   :: chainage
       double precision                   :: chainageg
       double precision                   :: chezy
       double precision                   :: as
@@ -230,7 +232,7 @@ contains
       integer                            :: icrsEnd
       double precision                   :: xBeg
       double precision                   :: xEnd
-      integer                            :: i
+      integer                            :: i, j
       integer                            :: timerHandle
       logical                            :: interpolDone
       logical                            :: initError = .false.
@@ -305,10 +307,10 @@ contains
                call setmessage(LEVEL_WARN, 'No cross sections found on branch '//trim(pbran%id)//'. Using default rectangular cross section')
                do i = 1, pbran%uPointsCount
                   ilnk = pbran%lin(i)
-                  adm%line2cross(ilnk)%c1 = -1
-                  adm%line2cross(ilnk)%c2 = -1
-                  adm%line2cross(ilnk)%f  = 1.0d0
-                  adm%line2cross(ilnk)%distance  = 0d0
+                  adm%line2cross(ilnk, :)%c1 = -1
+                  adm%line2cross(ilnk, :)%c2 = -1
+                  adm%line2cross(ilnk, :)%f  = 1.0d0
+                  adm%line2cross(ilnk, :)%distance  = 0d0
                enddo
                
                cycle
@@ -320,69 +322,83 @@ contains
             xBeg = network%crs%cross(crossOrder(icrsBeg))%chainage
             xEnd = network%crs%cross(crossOrder(icrsEnd))%chainage
             
+            ! loop over all grid points and upoints
             do m = 1, pbran%uPointsCount
-               
-               chainageu = pbran%uPointschainages(m)
-               ilnk = pbran%lin(m)
-               
-               if (icrsBeg == icrsEnd) then
+               do j = 1, 3
+                  if (j==1) then
+                     chainage = pbran%gridPointschainages(m)
+                  elseif (j==2) then
+                     chainage = pbran%uPointschainages(m)
+                  elseif (j==3) then
+                     chainage = pbran%gridPointschainages(m+1)
+                  endif
+                  ilnk = pbran%lin(m)
                   
-                  ! Just one Cross-Section
-                  adm%line2cross(ilnk)%c1 = crossOrder(icrsBeg)
-                  adm%line2cross(ilnk)%c2 = crossOrder(icrsBeg)
-                  adm%line2cross(ilnk)%f  = 1.0d0
-                  adm%line2cross(ilnk)%distance  = 0d0
-                  interpolDone            = .true.
-                  
-                  elseif (chainageu <= xBeg) then
+                  if (m>1 .and. j==1) then
+                     ! Just copy data from the previous value
+                     adm%line2cross(ilnk, j)%c1 = adm%line2cross(pbran%lin(m-1), 3)%c1
+                     adm%line2cross(ilnk, j)%c2 = adm%line2cross(pbran%lin(m-1), 3)%c2
+                     adm%line2cross(ilnk, j)%f  = adm%line2cross(pbran%lin(m-1), 3)%f 
+                     adm%line2cross(ilnk, j)%distance  = adm%line2cross(pbran%lin(m-1), j)%distance
+
+                  elseif (icrsBeg == icrsEnd) then
                      
-                     ! Before First Cross-Section
-                     adm%line2cross(ilnk)%c1 = crossOrder(icrsBeg)
-                     adm%line2cross(ilnk)%c2 = crossOrder(icrsBeg)
-                     adm%line2cross(ilnk)%f  = 1.0d0
-                     adm%line2cross(ilnk)%distance  = 0d0
+                     ! Just one Cross-Section
+                     adm%line2cross(ilnk, j)%c1 = crossOrder(icrsBeg)
+                     adm%line2cross(ilnk, j)%c2 = crossOrder(icrsBeg)
+                     adm%line2cross(ilnk, j)%f  = 1.0d0
+                     adm%line2cross(ilnk, j)%distance  = 0d0
                      interpolDone            = .true.
                      
-                     elseif (chainageu >= xEnd) then
+                  elseif (chainage <= xBeg) then
                         
-                        ! After Last Cross-Section
-                        adm%line2cross(ilnk)%c1 = crossOrder(icrsEnd)
-                        adm%line2cross(ilnk)%c2 = crossOrder(icrsEnd)
-                        adm%line2cross(ilnk)%f  = 1.0d0
-                        adm%line2cross(ilnk)%distance  = 0d0
-                        interpolDone            = .true.
+                     ! Before First Cross-Section
+                     adm%line2cross(ilnk, j)%c1 = crossOrder(icrsBeg)
+                     adm%line2cross(ilnk, j)%c2 = crossOrder(icrsBeg)
+                     adm%line2cross(ilnk, j)%f  = 1.0d0
+                     adm%line2cross(ilnk, j)%distance  = 0d0
+                     interpolDone            = .true.
+                     
+                  elseif (chainage >= xEnd) then
+                     
+                     ! After Last Cross-Section
+                     adm%line2cross(ilnk, j)%c1 = crossOrder(icrsEnd)
+                     adm%line2cross(ilnk, j)%c2 = crossOrder(icrsEnd)
+                     adm%line2cross(ilnk, j)%f  = 1.0d0
+                     adm%line2cross(ilnk, j)%distance  = 0d0
+                     interpolDone            = .true.
+                     
+                  else if (ilnk <= size(adm%line2cross)) then
+                     
+                     ! Skip links not in this partition
+                     chainage1 = network%crs%cross(crossOrder(icrs1))%chainage
+                     chainage2 = network%crs%cross(crossOrder(icrs2))%chainage
+                     adm%line2cross(ilnk, 2)%distance  = chainage2 - chainage1
+                     
+                     if (.not. ((chainage1 <= chainage) .and. (chainage2 >= chainage))) then
                         
-                     else if (ilnk <= size(adm%line2cross)) then
+                        do i = icrs1, icrsEnd
+                           if (network%crs%cross(crossOrder(i))%chainage >= chainage) then
+                              chainage2 = network%crs%cross(crossOrder(i))%chainage
+                              icrs2 = i
+                              exit
+                           endif
+                        enddo
                         
-                        ! Skip links not in this partition
-                        chainage1 = network%crs%cross(crossOrder(icrs1))%chainage
-                        chainage2 = network%crs%cross(crossOrder(icrs2))%chainage
-                        adm%line2cross(ilnk)%distance  = chainage2 - chainage1
-                        
-                        if (.not. ((chainage1 <= chainageu) .and. (chainage2 >= chainageu))) then
-                           
-                           do i = icrs1, icrsEnd
-                              if (network%crs%cross(crossOrder(i))%chainage >= chainageu) then
-                                 chainage2 = network%crs%cross(crossOrder(i))%chainage
-                                 icrs2 = i
-                                 exit
-                              endif
-                           enddo
-                           
-                           do i = icrsEnd, icrsBeg, -1
-                              if (network%crs%cross(crossOrder(i))%chainage <= chainageu) then
-                                 chainage1 = network%crs%cross(crossOrder(i))%chainage
-                                 icrs1 = i
-                                 exit
-                              endif
-                           enddo
-                           
-                        endif
-                        
-                        interpolDone = .false.
+                        do i = icrsEnd, icrsBeg, -1
+                           if (network%crs%cross(crossOrder(i))%chainage <= chainage) then
+                              chainage1 = network%crs%cross(crossOrder(i))%chainage
+                              icrs1 = i
+                              exit
+                           endif
+                        enddo
                         
                      endif
-                     
+                        
+                     interpolDone = .false.
+                        
+                  endif
+                        
                      if (ilnk > 0 .and. ilnk <= size(adm%line2cross)) then
                         ! Skip links not in this partition
                         
@@ -390,30 +406,29 @@ contains
                            
                            if (.not. interpolDone) then
                               if (icrs1 == icrs2) then 
-                                 adm%line2cross(ilnk)%c1 = crossOrder(icrs1)
-                                 adm%line2cross(ilnk)%c2 = crossOrder(icrs2)
+                                 adm%line2cross(ilnk, j)%c1 = crossOrder(icrs1)
+                                 adm%line2cross(ilnk, j)%c2 = crossOrder(icrs2)
                                  f = 1.0d0
-                                 adm%line2cross(ilnk)%f = f
+                                 adm%line2cross(ilnk, 2)%f = f
                               else    
-                                 adm%line2cross(ilnk)%c1 = crossOrder(icrs1)
-                                 adm%line2cross(ilnk)%c2 = crossOrder(icrs2)
-                                 f  = (chainageu - chainage1) / (chainage2 - chainage1)
+                                 adm%line2cross(ilnk, j)%c1 = crossOrder(icrs1)
+                                 adm%line2cross(ilnk, j)%c2 = crossOrder(icrs2)
+                                 f  = (chainage - chainage1) / (chainage2 - chainage1)
                                  f = max(f, 0.0d0) 
                                  f = min(f, 1.0d0) 
-                            adm%line2cross(ilnk)%f = f
+                                 adm%line2cross(ilnk, j)%f = f
                            endif 
                         endif
                      
-                  else
-                     adm%line2cross(ilnk)%c1 = crossOrder(icrs1)
-                     adm%line2cross(ilnk)%c2 = crossOrder(icrs1)
-                     adm%line2cross(ilnk)%f  = 1.0d0
+                     else
+                        adm%line2cross(ilnk, j)%c1 = crossOrder(icrs1)
+                        adm%line2cross(ilnk, j)%c2 = crossOrder(icrs1)
+                        adm%line2cross(ilnk, j)%f  = 1.0d0
+                     endif
+                     
                   endif
-                  
-               endif
-               
+               enddo
             enddo
-            
          enddo
          call timstop(timerhandle)
          

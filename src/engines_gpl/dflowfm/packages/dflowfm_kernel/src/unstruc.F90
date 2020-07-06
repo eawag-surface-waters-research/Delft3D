@@ -38732,7 +38732,7 @@ end subroutine setbobs_fixedweirs
              if (pstru%numlinks == 1) then
                 L = abs(pstru%linknumbers(1))
                 if (L <= lnx1D) then
-                   if (network%adm%line2cross(L)%c1 < 0) then
+                   if (network%adm%line2cross(L,2)%c1 < 0) then
                       SkipDimensionChecks = .true.
                    endif
                 endif
@@ -38759,9 +38759,9 @@ end subroutine setbobs_fixedweirs
                    case (ST_GENERAL_ST)
                       firstiter = .true.
                       dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
                       dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
                       width = min(maxwidth1, maxwidth2)
                       wu(L) = width
 
@@ -38780,7 +38780,7 @@ end subroutine setbobs_fixedweirs
                          dpt = s1(k1) - bob0(1,L)
                       endif
 
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, wetdown, perimeter, width)
 
                        wetdown = max(wetdown, 0.0001d0)
                       call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
@@ -38796,10 +38796,10 @@ end subroutine setbobs_fixedweirs
                           q1(L), pstru%u1(L0), dx(L), dts)
                    case (ST_BRIDGE)
                       dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as1, perimeter, width)
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width)
                       wu(L) = as1/dpt
                       dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, as2, perimeter, width)
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width)
                    ! WU(L) is the average width at the bridge (max of up/downstream side).
                       wu(L) = max(wu(L), as2/dpt)
                       call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), pstru%u1(L0), dx(L), dts,                            &
@@ -45041,7 +45041,7 @@ end if
           if (kcu(L) == 1) then
                 ! Calculate maximal total area by using a water depth of 1000 m.
                 hyst_dummy = .false.
-                call GetCSParsTotal(network%adm%line2cross(L), network%crs%cross, 1d3, area, width, CS_TYPE_NORMAL,hyst_dummy)
+                call GetCSParsTotal(network%adm%line2cross(L,2), network%crs%cross, 1d3, area, width, CS_TYPE_NORMAL,hyst_dummy)
 
                 hdx = 0.5d0*dx(L)
                 if (k1 > ndx2d) bare(k1) = bare(k1) + hdx*width
@@ -47071,10 +47071,10 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
    cz = 0d0
 
    if (japerim == 0) then ! calculate total area and volume
-      call GetCSParsTotal(network%adm%line2cross(LL), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
+      call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       cz = 0d0
-      call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, area, perim, width, af_sub = af_sub, perim_sub = perim_sub)
+      call GetCSParsFlow(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, perim, width, af_sub = af_sub, perim_sub = perim_sub)
 
       if (calcConv ==1) then
          u1L = u1(LL)
@@ -47259,7 +47259,7 @@ endif
 
 
 if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
-   call GetCSParsTotal(network%adm%line2cross(LL), network%crs%cross, hpr, area, width, CS_TYPE_MIN)
+   call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CS_TYPE_MIN)
    return
 endif
 
