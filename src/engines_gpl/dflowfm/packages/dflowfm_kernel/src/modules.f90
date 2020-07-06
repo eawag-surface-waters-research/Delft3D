@@ -999,7 +999,7 @@ end module m_bedform
 
  !  TODO: UNST-3763: Use named parameter constant for jaintercept2D
  integer                               :: jaintercept2D        !< 1 = uniform, 2 = spatially variable
- double precision                      :: Hinterceptionlayer   !< thickness of interception layer in  (m) only if infiltrationmodel == 1
+ double precision                      :: Hinterceptionlayer   !< (DEPRECATED) thickness of interception layer in  (m) only if infiltrationmodel == 1
  double precision                      :: Conductivity         !< non dimensionless K conductivity   saturated (m/s), Q = K*A*i (m3/s)
  double precision                      :: Unsatfac             !< reduction factor for conductivity in unsaturated zone
 
