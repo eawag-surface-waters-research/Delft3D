@@ -12283,6 +12283,11 @@ subroutine unc_read_map(filename, tim, ierr)
        endif      
     endif
     
+    ! compute kbot and ktop after reading s1 from rst/map file
+    if (kmx > 0) then
+       call setkbotktop(1)
+    end if
+
     ! For 3D model
     if (kmx > 0) then
        ierr =get_var_and_shift(imapfile, 'ww1', ww1, tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
@@ -12381,6 +12386,7 @@ subroutine unc_read_map(filename, tim, ierr)
        endif
        if (allocated(tmpvar)) deallocate(tmpvar)
        allocate(tmpvar(max(1,kmx), ndxi))
+       call realloc(constituents, (/ITRAN,ndkx/), stat=ierr, keepExisting=.false., fill=0d0)
        do iconst = ITRA1,ITRAN
           i = iconst - ITRA1 + 1
           tmpstr = const_names(iconst)
@@ -12401,8 +12407,10 @@ subroutine unc_read_map(filename, tim, ierr)
                    end if
 
                    call getkbotktop(kloc, kb, kt)
-                   ! TODO: UNST-976, incorrect for Z-layers:
-                   constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
+                   call getlayerindices(kloc, nlayb, nrlay)
+                   do k = kb, kt
+                      constituents(iconst,k) = tmpvar(k-kb+nlayb,kk)
+                   end do
                 enddo
              else
                 ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
