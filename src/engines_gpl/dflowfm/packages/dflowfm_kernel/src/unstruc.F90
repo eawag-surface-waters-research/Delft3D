@@ -10794,7 +10794,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  !! @return Error status: error (/=0) or not (0)
  integer function flow_modelinit() result(iresult)                     ! initialise flowmodel
  use timers
- use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx, kfs
+ use m_flowgeom,    only: jaFlowNetChanged, ndx, lnx, kfs, ndxi
  use waq,           only: reset_waq
  use m_flow,        only: zws, zws0, kmx, jasecflow, lnkx
  use m_flowtimes
@@ -10822,6 +10822,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
  use unstruc_netcdf_map_class
  use unstruc_caching
+ use m_mormerge
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -11212,6 +11213,17 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call timstop(handle_extra(36)) ! End remainder
  call writesomeinitialoutput()
+
+ ! Initialise mormerge: parallel online mor run for multiple conditions
+ if (jased>0 .and. stm_included) then
+    if (stmpar%morpar%multi) then
+       call initmerge(iresult, ndxi, stmpar%lsedtot, "singledomain", stmpar%morpar)
+       if (iresult /= DFM_NOERR) then
+          call mess(LEVEL_FATAL, 'Mormerge initialization failed')
+          goto 1234
+       endif
+    endif
+ endif
 
  iresult = DFM_NOERR
  return
