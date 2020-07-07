@@ -3384,7 +3384,7 @@ end subroutine sethu
     ! set correct flow areas for dambreaks, using the actual flow width
     do n = 1, ndambreaksg
        do k = L1dambreaksg(n), L2dambreaksg(n)
-          L = iabs(kdambreak(3,k))
+          L = abs(kdambreak(3,k))
           au(L) = hu(L) * dambreakLinksActualLength(k)
        enddo
     enddo
