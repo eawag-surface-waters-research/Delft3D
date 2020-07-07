@@ -10690,9 +10690,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       
       if (meshgeom%dim == 1) then
          !Save meshgeom for later writing of the 1d network names
+         ! Retrieve the 1d geometry twice one time in meshgeom to process in this subroutine, one time in meshgeom1d, that can be used later during initialisation.
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, & 
                                   nodeids, nodelongnames, network1dname, mesh1dname) 
-         meshgeom1d = meshgeom 
+         ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom1d, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, & 
+                                  nodeids, nodelongnames, network1dname, mesh1dname) 
          mesh1dname = meshgeom1d%meshname
          if (nodesOnBranchVertices==1) then 
              !1d edge nodes (kn array) set above
