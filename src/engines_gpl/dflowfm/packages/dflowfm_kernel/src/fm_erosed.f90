@@ -3602,14 +3602,14 @@
       !
       ! bulk mass concentration from previous timestep
       !
-      if (kfs(k) > 0) then
+!      if (kfs(k) > 0) then
          call getkbotktop(k, kb, kt)
          do kk = kb, kt
             do ll = 1, lsed
                ctot(kk) = ctot(kk) + constituents(ISED1 - 1 +ll, kk)
             end do ! kk
          end do
-      end if
+!      end if
    end do
 
    ! calculate mean velocity in nodes
@@ -3659,7 +3659,7 @@
       enddo
       !
       do k = 1, ndx
-         if (kfs(k) == 0) cycle           ! inactive point
+!         if (kfs(k) == 0) cycle           ! inactive point
          !
          h0 = max(s1(k)-bl(k), epshs)
          chezy = sag * log( 1.0d0 + h0/max(1d-8,ee*z0rou(k)) ) / vonkar
