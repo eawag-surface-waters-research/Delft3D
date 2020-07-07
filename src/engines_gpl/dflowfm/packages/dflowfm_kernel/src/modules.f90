@@ -3414,7 +3414,7 @@ end module m_vegetation
  integer                           :: kplotordepthaveraged  = 1 !< 1 = kplot, 2 = averaged
  integer                           :: layertype         !< 1= all sigma, 2 = all z, 3 = left sigma, 4 = left z
  integer                           :: numtopsig = 0     !< number of top layers in sigma
- integer                           :: janumtopsiguniform = 1  !< specified nr of top layers in sigma is same everywhere
+ integer                           :: janumtopsiguniform = 0  !< specified nr of top layers in sigma is same everywhere
 
  double precision                  :: Tsigma = 100      !< relaxation period density controlled sigma
  integer, parameter                :: LAYTP_SIGMA     = 1
