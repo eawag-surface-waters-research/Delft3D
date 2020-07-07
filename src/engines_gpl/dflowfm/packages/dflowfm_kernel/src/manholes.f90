@@ -642,9 +642,9 @@ use m_flowgeom
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
        fusav(3,n) = fu(Lf) ; rusav(3,n) = ru(Lf) ; ausav(3,n) = au(Lf)
 
-       fu(Lf) = (1d0-gatefraction) * fu_sav + gatefraction * fu(Lf)
-       ru(Lf) = (1d0-gatefraction) * ru_sav + gatefraction * ru(Lf)
-       au(Lf) = (1d0-gatefraction) * au_sav + gatefraction * au(Lf)
+       fu(Lf) = gatefraction * fu_sav + (1d0-gatefraction) * fu(Lf)
+       ru(Lf) = gatefraction * ru_sav + (1d0-gatefraction) * ru(Lf)
+       au(Lf) = gatefraction * au_sav + (1d0-gatefraction) * au(Lf)
     end if
 
     if (au(Lf) == 0d0) then
