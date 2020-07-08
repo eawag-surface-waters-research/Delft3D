@@ -9504,47 +9504,60 @@ end subroutine getucmag
  endif
  end subroutine linkstocenterstwodoubles2
 
- subroutine linkstocentercartcomp(vnod,vlin) 
- use m_flow
- use m_netw
- use m_flowgeom
-
- implicit none
-
- double precision, intent(in)       :: vlin(lnkx)
- double precision, intent(out)      :: vnod(2,ndkx)
- integer                :: L, k1, k2, LL, Lb, Lt, kk, kb, kt, k
-
- vnod = 0d0
- if (kmx == 0) then
-    do L   = 1,lnx
-       k1  = ln  (1,L) ; k2 = ln  (2,L)
-       vnod(1,k1) = vnod(1,k1) + vlin (L)*wcx1(L)
-       vnod(1,k2) = vnod(1,k2) + vlin (L)*wcx2(L)
-       vnod(2,k1) = vnod(2,k1) + vlin (L)*wcy1(L)
-       vnod(2,k2) = vnod(2,k2) + vlin (L)*wcy2(L)
-    enddo
- else
-    do LL  = 1,lnx
-       call getLbotLtop(LL,Lb,Lt)
-       do L = Lb,Lt
-          k1  = ln  (1,L) ; k2 = ln  (2,L)
-          vnod(1,k1) = vnod(1,k1) + vlin (L)*wcx1(LL)
-          vnod(1,k2) = vnod(1,k2) + vlin (L)*wcx2(LL)
-          vnod(2,k1) = vnod(2,k1) + vlin (L)*wcy1(LL)
-          vnod(2,k2) = vnod(2,k2) + vlin (L)*wcy2(LL)
+ subroutine linkstocentercartcomp(i,vnod,vlin)
+    use m_flow
+    use m_netw
+    use m_flowgeom
+    
+    implicit none
+    
+    integer, intent(in)                :: i
+    double precision, intent(in)       :: vlin(lnkx)
+    double precision, intent(out)      :: vnod(2,max(kmx,1))
+    
+    integer                            :: L, k1, k2, k3, LL, LLL, Lb, Lt, kb, kt, k
+    
+    vnod = 0d0
+    if (kmx == 0) then
+       do L = 1, nd(i)%lnx
+          LL = iabs(L)
+          k1 = ln(1,LL); k2 = ln(2,LL)
+          if (k1==i) then
+             vnod(1,1) = vnod(1,1) + vlin(LL)*wcx1(LL)
+             vnod(2,1) = vnod(2,1) + vlin(LL)*wcy1(LL)
+          endif
+          if (k2==i) then
+             vnod(1,1) = vnod(1,1) + vlin(LL)*wcx2(LL)
+             vnod(2,1) = vnod(2,1) + vlin(LL)*wcy2(LL)
+          endif
        enddo
-    enddo
-
-    do kk = 1,ndx
-       call getkbotktop(kk,kb,kt)
-       do k = kt+1, kb+kmxn(kk)-1
-          vnod(1,k) = vnod(1,kt)
-          vnod(2,k) = vnod(2,kt)
+    
+    else
+       do L = 1, nd(i)%lnx
+          LL = iabs(nd(i)%ln(L))
+          k1  = ln(1,LL) ; k2 = ln(2,LL)
+          if (k1==i) then
+             call getLbotLtop(LL,Lb,Lt)
+             if (Lt<Lb) cycle
+             do LLL = Lb, Lt
+                k3=LLL-Lb+1
+                vnod(1,k3) = vnod(1,k3) + vlin(LLL)*wcx1(LL)
+                vnod(2,k3) = vnod(2,k3) + vlin(LLL)*wcy1(LL)
+             enddo
+          endif
+          !
+          if (k2==i) then
+             call getLbotLtop(LL,Lb,Lt)
+             if (Lt<Lb) cycle
+             do LLL = Lb, Lt
+                k3=LLL-Lb+1
+                vnod(1,k3) = vnod(1,k3) + vlin(LLL)*wcx2(LL)
+                vnod(2,k3) = vnod(2,k3) + vlin(LLL)*wcy2(LL)
+             enddo
+          endif
        enddo
-    enddo
+    endif
 
- endif
  end subroutine linkstocentercartcomp
  
  subroutine setcentertolinkorientations()
@@ -22414,7 +22427,7 @@ subroutine fill_valobs()
    implicit none
 
    integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa
-   integer :: ipoint, ival, klayt, kmx_const
+   integer :: ipoint, ival, klayt, kmx_const, kk_const
    double precision :: wavfac
    double precision, allocatable :: wa(:,:)
 
@@ -22429,8 +22442,8 @@ subroutine fill_valobs()
       else
          wavfac = sqrt(2d0)
       endif
-      allocate(wa(1:2,1:ndkx))
-      call linkstocentercartcomp(wa,ustokes)
+      if (allocated(wa)) deallocate(wa)
+      allocate(wa(1:2,1:max(kmx,1)))
    endif
 
    valobs = DMISS
@@ -22445,6 +22458,11 @@ subroutine fill_valobs()
             kb = k
             kt = k
          end if
+         
+         if (jawave>0) then
+            wa = 0d0
+            call linkstocentercartcomp(k,wa,ustokes)      ! wa now 2*1 value or 2*1 vertical slice
+         endif
 
 !        store values in valobs work array
          valobs(:,i)        = 0d0   ! should not be DMISS, as DMISS is used to mark observation stations outside subdomain in reduce_valobs
@@ -22563,8 +22581,13 @@ subroutine fill_valobs()
             endif
             
             if (jawave>0 .and. hs(k)>epshu) then
-               valobs(IPNT_UCXST+klay-1,i) = wa(1,kk)
-               valobs(IPNT_UCYST+klay-1,i) = wa(2,kk)
+               if (kmx==0) then
+                  kk_const = 1
+               else
+                  kk_const = klay
+               endif   
+               valobs(IPNT_UCXST+klay-1,i) = wa(1,kk_const)
+               valobs(IPNT_UCYST+klay-1,i) = wa(2,kk_const)
             endif
             
             if ( kmx>0 ) then
@@ -27474,7 +27497,7 @@ endif
  allocate ( rho (ndkx) , stat= ierr )
  call aerr('rho (ndkx)', ierr, ndkx ) ; rho  = rhomean
 
- if (jasal > 0 .or. jatem > 0 .or. (jased> 0 .and. stm_included) ) then
+ if (jasal > 0 .or. jatem > 0 .or. jased> 0 .or. stm_included ) then
     if (abs(jabaroctimeint) >= 2) then
        if (jacreep == 1 .or. abs(jabaroctimeint) == 3 .or. abs(jabaroctimeint) == 4) then
           if (allocated(dpbdx0) ) deallocate(dpbdx0)
