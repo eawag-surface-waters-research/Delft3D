@@ -12388,7 +12388,7 @@ subroutine unc_read_map(filename, tim, ierr)
        endif
        if (allocated(tmpvar)) deallocate(tmpvar)
        allocate(tmpvar(max(1,kmx), ndxi))
-       call realloc(constituents, (/ITRAN,ndkx/), stat=ierr, keepExisting=.false., fill=0d0)
+       constituents = 0d0
        do iconst = ITRA1,ITRAN
           i = iconst - ITRA1 + 1
           tmpstr = const_names(iconst)
