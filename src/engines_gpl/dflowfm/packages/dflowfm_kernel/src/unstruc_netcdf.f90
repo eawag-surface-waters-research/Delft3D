@@ -12170,7 +12170,7 @@ subroutine unc_read_map(filename, tim, ierr)
     ! Read bedlevels (flow elem)
     if (jaoldrstfile == 1) then
        call mess(LEVEL_INFO, 'The restart file is of an old version, therefore no bedlevel info is read')
-    else if (jarstignorebl .eq. 0) then 
+    else if (jarstignorebl .eq. 1) then 
        call mess(LEVEL_INFO, 'Ignoring bedlevel information on restart file')
     else if (jased > 0) then 
        ierr = get_var_and_shift(imapfile, 'FlowElem_bl', bl, tmpvar1, UNC_LOC_S, kmx, kstart, ndxi_own, 1, jamergedmap, &
