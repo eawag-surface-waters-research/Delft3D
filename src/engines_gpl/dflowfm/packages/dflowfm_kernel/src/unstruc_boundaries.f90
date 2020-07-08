@@ -2584,8 +2584,8 @@ end do
     hulp(8,1:ncgensg)  = 0.0 ! levelrightZbsr=0.0
     hulp(9,1:ncgensg)  = 10  ! widthrightW2=10
     hulp(10,1:ncgensg) = 0.0 ! levelrightZb2=0.0
-    hulp(11,1:ncgensg) = 11  ! gateheight=11
-    hulp(12,1:ncgensg) = 12  ! gateheightintervalcntrl=12
+    hulp(11,1:ncgensg) = 0.0d0  ! GateLowerEdgeLevel  
+    hulp(12,1:ncgensg) = 1d10  ! gateheightintervalcntrl=12
     hulp(13,1:ncgensg) = 1   ! pos_freegateflowcoeff=1
     hulp(14,1:ncgensg) = 1   ! pos_drowngateflowcoeff=1
     hulp(15,1:ncgensg) = 1   ! pos_freeweirflowcoeff=1
@@ -2635,8 +2635,8 @@ end do
          hulp(8, n) = -huge(1d0) ! levelrightZbsr=0.0
          hulp(9, n) = huge(1d0)  ! widthrightW2=10
          hulp(10,n) = -huge(1d0) ! levelrightZb2=0.0
-         hulp(11,n) = 1d10! gateheight=11
-         hulp(12,n) = 12  ! gateheightintervalcntrl=12
+         hulp(11,n) = 1d10! GateLowerEdgeLevel
+         hulp(12,n) = 1d10  ! gateheightintervalcntrl=12
          hulp(13,n) = 1   ! pos_freegateflowcoeff=1
          hulp(14,n) = 1   ! pos_drowngateflowcoeff=1
          hulp(15,n) = 1   ! pos_freeweirflowcoeff=1
