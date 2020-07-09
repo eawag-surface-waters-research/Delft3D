@@ -647,6 +647,7 @@ use m_tablematrices
 ! Local variables
 !
     integer                         :: isec, i
+    integer                         :: timeseries_index
     double precision                :: dep
     double precision                :: ys
     double precision                :: rad
@@ -684,12 +685,13 @@ use m_tablematrices
 
       ! In case of a time dependent roughness, overwrite the friction parameter
       if (fun_type(ibranch) ==R_FunctionTimeSeries) then
-         ! There is a time dependency 
-         if (rgh%timeDepValues(ibranch,2) > 0d0) then
+         ! There is a time dependency
+         timeseries_index = rgh%timeSeriesIndexes(ibranch) 
+         if (rgh%timeDepValues(timeseries_index,2) > 0d0) then
             ! The values are set 
             ! This subroutine is used for filling the YZ-cross section with new friction parameters
             ! As a result the value at the latest time instance is required
-            c_par = rgh%timeDepValues(ibranch,2)
+            c_par = rgh%timeDepValues(timeseries_index,2)
          endif
       endif
    endif
