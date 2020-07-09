@@ -9504,14 +9504,14 @@ end subroutine getucmag
  endif
  end subroutine linkstocenterstwodoubles2
 
- subroutine linkstocentercartcomp(i,vnod,vlin)
+ subroutine linkstocentercartcomp(knod,vlin,vnod)
     use m_flow
     use m_netw
     use m_flowgeom
     
     implicit none
     
-    integer, intent(in)                :: i
+    integer, intent(in)                :: knod
     double precision, intent(in)       :: vlin(lnkx)
     double precision, intent(out)      :: vnod(2,max(kmx,1))
     
@@ -9519,24 +9519,24 @@ end subroutine getucmag
     
     vnod = 0d0
     if (kmx == 0) then
-       do L = 1, nd(i)%lnx
+       do L = 1, nd(knod)%lnx
           LL = iabs(L)
           k1 = ln(1,LL); k2 = ln(2,LL)
-          if (k1==i) then
+          if (k1==knod) then
              vnod(1,1) = vnod(1,1) + vlin(LL)*wcx1(LL)
              vnod(2,1) = vnod(2,1) + vlin(LL)*wcy1(LL)
           endif
-          if (k2==i) then
+          if (k2==knod) then
              vnod(1,1) = vnod(1,1) + vlin(LL)*wcx2(LL)
              vnod(2,1) = vnod(2,1) + vlin(LL)*wcy2(LL)
           endif
        enddo
     
     else
-       do L = 1, nd(i)%lnx
-          LL = iabs(nd(i)%ln(L))
+       do L = 1, nd(knod)%lnx
+          LL = iabs(nd(knod)%ln(L))
           k1  = ln(1,LL) ; k2 = ln(2,LL)
-          if (k1==i) then
+          if (k1==knod) then
              call getLbotLtop(LL,Lb,Lt)
              if (Lt<Lb) cycle
              do LLL = Lb, Lt
@@ -9546,7 +9546,7 @@ end subroutine getucmag
              enddo
           endif
           !
-          if (k2==i) then
+          if (k2==knod) then
              call getLbotLtop(LL,Lb,Lt)
              if (Lt<Lb) cycle
              do LLL = Lb, Lt
@@ -22461,7 +22461,7 @@ subroutine fill_valobs()
          
          if (jawave>0) then
             wa = 0d0
-            call linkstocentercartcomp(k,wa,ustokes)      ! wa now 2*1 value or 2*1 vertical slice
+            call linkstocentercartcomp(k,ustokes,wa)      ! wa now 2*1 value or 2*1 vertical slice
          endif
 
 !        store values in valobs work array
