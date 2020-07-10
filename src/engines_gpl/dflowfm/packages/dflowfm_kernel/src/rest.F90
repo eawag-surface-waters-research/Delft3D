@@ -6631,6 +6631,8 @@ subroutine updateBalance()
          voltot(IDX_STOR)    = volcur(IDX_STOR) - vol1ini
       else if (ivar == IDX_VOLTOT) then
          voltot(IDX_VOLTOT)  = volcur(IDX_VOLTOT)
+      else if (ivar == IDX_ICEPT) then
+         voltot(IDX_ICEPT)  = volcur(IDX_ICEPT)
       else
          ! All other variables are simply cumlative total in time:
          voltot(ivar)  = voltot(ivar)  + cumvolcur(ivar)
