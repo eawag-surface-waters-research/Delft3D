@@ -5122,7 +5122,7 @@ end subroutine partition_make_globalnumbers
       call tpoly_to_pol(partition_pol)
       
 !     fix polygon for spheric, periodic coordinates
-      call fix_global_polygons(0,1)
+!!!      call fix_global_polygons(0,1)
       
       ierror = 0
       
