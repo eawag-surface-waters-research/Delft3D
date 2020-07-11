@@ -11300,6 +11300,7 @@ subroutine flow_sedmorinit()
     integer                                   :: kk, k, kbot, ktop, i, j, isus, ifrac, isusmud, isussand, isf, ised, Lf, npnt, j0, ierr
     integer                                   :: ibr, nbr, pointscount, k1, ltur_
     integer                                   :: npnterror=0   !< number of grid points without cross-section definition
+    integer, dimension(:), allocatable        :: kp
     type(t_branch), pointer                   :: pbr
 
 
@@ -11598,7 +11599,7 @@ subroutine flow_sedmorinit()
        botcrit = max(botcrit, 1d-4)   ! mass balance with avalanching
     endif
     
-    ! morphological polygon additions    !
+    ! morphological polygon additions    
     call realloc(kcsmor,ndx,stat=ierr,fill=0,keepExisting=.false.)
     !
     inquire (file = trim(md_morphopol), exist = ex)
@@ -11606,8 +11607,14 @@ subroutine flow_sedmorinit()
        ! do all cells
        kcsmor = 1
     else
+       if (allocated(kp)) deallocate(kp)
+       allocate(kp(1:ndx))
+       kp = 0
        ! find cells inside polygon
-       call selectelset_internal_nodes(xz, yz, kcs, ndx, kcsmor, ndx, LOC_FILE=md_morphopol, LOC_SPEC_TYPE=LOCTP_POLYGON_FILE)
+       call selectelset_internal_nodes(xz, yz, kcs, ndx, kp, pointscount, LOC_FILE=md_morphopol, LOC_SPEC_TYPE=LOCTP_POLYGON_FILE)
+       do k=1,pointscount
+          kcsmor(kp(k)) = 1
+       end do
     end if
 
 1234 return
