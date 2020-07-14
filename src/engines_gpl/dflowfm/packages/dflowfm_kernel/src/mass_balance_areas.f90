@@ -350,7 +350,7 @@
          mbafloweva(imba) = mbaflowevareduce(imba)
       enddo
 
-      call reduce_double_sum(notot * nomba, mbamassend, mbamassreduce)
+      call reduce_double_sum(nombs * nomba, mbamassend, mbamassreduce)
       do imba =1, nomba
          do imbs = 1, nombs
             mbamassend(imbs, imba) = mbamassreduce(imbs, imba)
