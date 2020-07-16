@@ -373,6 +373,7 @@ type morpar_type
     real(fp):: fpco       !  coefficient for phase llag effects
     real(fp):: factcr     !  calibration factor on Shields' critical shear stress   
     real(fp):: tmor       !  time where calculation for morphological changes start (tunit relative to ITDATE,00:00:00)
+    real(fp):: tcmp       !  time where calculation for bed composition changes start (tunit relative to ITDATE,00:00:00)
     real(fp):: thetsd     !  global dry bank erosion factor
     real(fp):: susw       !  factor for adjusting wave-related suspended sand transport (included in bed-load)
     real(fp):: sedthr     !  minimum depth for sediment calculations
@@ -417,6 +418,7 @@ type morpar_type
                            !  4: Soehngen, Kellermann, Loy (1992)
                            !  5: Wu, Wang, Jia (2000)
     integer :: itmor       !  time step where calculation for morphological changes starts
+    integer :: itcmp       !  time step where calculation for bed composition changes starts
     integer :: iopkcw
     integer :: iopsus
     integer :: islope      !  switch for bed slope effect, according
@@ -1298,6 +1300,7 @@ subroutine nullmorpar(morpar)
     !
     integer                              , pointer :: ihidexp
     integer                              , pointer :: itmor
+    integer                              , pointer :: itcmp
     integer                              , pointer :: iopkcw
     integer                              , pointer :: iopsus
     integer                              , pointer :: islope
@@ -1323,6 +1326,7 @@ subroutine nullmorpar(morpar)
     real(fp)                             , pointer :: sus
     real(fp)                             , pointer :: bed
     real(fp)                             , pointer :: tmor
+    real(fp)                             , pointer :: tcmp
     real(fp)                             , pointer :: thetsd
     real(fp)                             , pointer :: susw
     real(fp)                             , pointer :: sedthr
@@ -1399,6 +1403,7 @@ subroutine nullmorpar(morpar)
     sus                 => morpar%sus
     bed                 => morpar%bed
     tmor                => morpar%tmor
+    tcmp                => morpar%tcmp
     thetsd              => morpar%thetsd
     susw                => morpar%susw
     sedthr              => morpar%sedthr
@@ -1429,6 +1434,7 @@ subroutine nullmorpar(morpar)
     !
     ihidexp             => morpar%ihidexp
     itmor               => morpar%itmor
+    itcmp               => morpar%itcmp
     iopkcw              => morpar%iopkcw
     iopsus              => morpar%iopsus
     islope              => morpar%islope
@@ -1553,6 +1559,7 @@ subroutine nullmorpar(morpar)
     sus                = 1.0_fp
     bed                = 1.0_fp
     tmor               = 0.0_fp
+    tcmp               = 0.0_fp
     thetsd             = 0.0_fp
     susw               = 1.0_fp
     sedthr             = 0.5_fp
@@ -1587,6 +1594,7 @@ subroutine nullmorpar(morpar)
     !
     ihidexp            = 1
     itmor              = 0
+    itcmp              = 0
     iopkcw             = 1
     iopsus             = 0
     islope             = 2

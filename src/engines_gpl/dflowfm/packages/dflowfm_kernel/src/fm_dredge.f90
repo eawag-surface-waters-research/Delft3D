@@ -3766,7 +3766,9 @@ subroutine fm_dredge(error)
     !
     if (cmpupd) then 
        allocate(dz_dummy(1:ndx), stat=istat)   ! no actual bed update, unlike updmorlyr in fm_erosed.f90
-       call morstats(dbodsd)
+       if (stmpar%morpar%moroutput%morstats) then
+          call morstats(dbodsd)
+       endif   
        if (updmorlyr(stmpar%morlyr, dbodsd, dz_dummy, mtd%messages) /= 0) then
           call writemessages(mtd%messages, mdia)
           error = .true.
