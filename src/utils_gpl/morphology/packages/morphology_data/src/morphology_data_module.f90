@@ -73,71 +73,72 @@ public CHARLEN
 
 integer, parameter         :: CHARLEN = 40
       
-integer, parameter, public :: RP_TIME  =  1
-integer, parameter, public :: RP_EFUMN =  2
-integer, parameter, public :: RP_EFVMN =  3
-integer, parameter, public :: RP_EFVLM =  4
-integer, parameter, public :: RP_UCHAR =  5
-integer, parameter, public :: RP_VCHAR =  6
-integer, parameter, public :: RP_VELCH =  7
-integer, parameter, public :: RP_ZVLCH =  8
-integer, parameter, public :: RP_DEPTH =  9
-integer, parameter, public :: RP_CHEZY = 10
-integer, parameter, public :: RP_HRMS  = 11
-integer, parameter, public :: RP_TPEAK = 12
-integer, parameter, public :: RP_TETA  = 13
-integer, parameter, public :: RP_RLAMB = 14
-integer, parameter, public :: RP_UORB  = 15
-integer, parameter, public :: RP_D50   = 16
-integer, parameter, public :: RP_DSS   = 17
-integer, parameter, public :: RP_DSTAR = 18
-integer, parameter, public :: RP_D10MX = 19
-integer, parameter, public :: RP_D90MX = 20
-integer, parameter, public :: RP_MUDFR = 21
-integer, parameter, public :: RP_HIDEX = 22
-integer, parameter, public :: RP_SETVL = 23
-integer, parameter, public :: RP_RHOSL = 24
-integer, parameter, public :: RP_RHOWT = 25
-integer, parameter, public :: RP_SALIN = 26
-integer, parameter, public :: RP_TEMP  = 27
-integer, parameter, public :: RP_GRAV  = 28
-integer, parameter, public :: RP_VICML = 29
-integer, parameter, public :: RP_TAUB  = 30
-integer, parameter, public :: RP_UBED  = 31
-integer, parameter, public :: RP_VBED  = 32
-integer, parameter, public :: RP_VELBD = 33
-integer, parameter, public :: RP_ZVLBD = 34
-integer, parameter, public :: RP_VNKAR = 35
-integer, parameter, public :: RP_Z0CUR = 36
-integer, parameter, public :: RP_Z0ROU = 37
-integer, parameter, public :: RP_KTUR  = 38     ! flow induced turbulence
-integer, parameter, public :: RP_DG    = 39
-integer, parameter, public :: RP_SNDFR = 40
-integer, parameter, public :: RP_DGSD  = 41
-integer, parameter, public :: RP_UMEAN = 42
-integer, parameter, public :: RP_VMEAN = 43
-integer, parameter, public :: RP_VELMN = 44
-integer, parameter, public :: RP_USTAR = 45
+integer, parameter, public :: RP_TIME  =  1     ! time since reference date [s]
+integer, parameter, public :: RP_EFUMN =  2     ! U component of effective depth averaged velocity [m/s]
+integer, parameter, public :: RP_EFVMN =  3     ! V component of effective depth averaged velocity [m/s]
+integer, parameter, public :: RP_EFVLM =  4     ! effective depth averaged flow velocity magnitude [m/s]
+integer, parameter, public :: RP_UCHAR =  5     ! U component of characteristic flow velocity [m/s]
+integer, parameter, public :: RP_VCHAR =  6     ! V component of characteristic flow velocity [m/s]
+integer, parameter, public :: RP_VELCH =  7     ! characteristic flow velocity magnitude [m/s]
+integer, parameter, public :: RP_ZVLCH =  8     ! elevation above bed at which characteristic velocity is given [m]
+integer, parameter, public :: RP_DEPTH =  9     ! water depth [m]
+integer, parameter, public :: RP_CHEZY = 10     ! Chezy roughness [m0.5/s]
+integer, parameter, public :: RP_HRMS  = 11     ! wave height [m]
+integer, parameter, public :: RP_TPEAK = 12     ! peak wave period [s]
+integer, parameter, public :: RP_TETA  = 13     ! wave angle [deg pos counter-clockwise relative to U direction]
+integer, parameter, public :: RP_RLAMB = 14     ! wave length [m]
+integer, parameter, public :: RP_UORB  = 15     ! orbital velocity [m/s]
+integer, parameter, public :: RP_D50   = 16     ! D50 of sediment fraction [m]
+integer, parameter, public :: RP_DSS   = 17     ! effective suspended sediment diameter of sediment fraction [m]
+integer, parameter, public :: RP_DSTAR = 18     ! Dstar of sediment fraction [m]
+integer, parameter, public :: RP_D10MX = 19     ! D10 of particle size mix of the part of the bed exposed to transport [m]
+integer, parameter, public :: RP_D90MX = 20     ! D90 of particle size mix of the part of the bed exposed to transport [m]
+integer, parameter, public :: RP_MUDFR = 21     ! mud fraction of particle size mix of the part of the bed exposed to transport [-]
+integer, parameter, public :: RP_HIDEX = 22     ! hiding-exposure factor correcting the shear stress [-]
+integer, parameter, public :: RP_SETVL = 23     ! settling velocity [m/s]
+integer, parameter, public :: RP_RHOSL = 24     ! solid density of sediment [kg/m3]
+integer, parameter, public :: RP_RHOWT = 25     ! density of water [kg/m3]
+integer, parameter, public :: RP_SALIN = 26     ! salinity [ppt]
+integer, parameter, public :: RP_TEMP  = 27     ! temperature [deg C]
+integer, parameter, public :: RP_GRAV  = 28     ! gravitational acceleration [m2/s]
+integer, parameter, public :: RP_VICML = 29     ! molecular viscosity [m2/s]
+integer, parameter, public :: RP_TAUB  = 30     ! bed shear stress [N/m2]
+integer, parameter, public :: RP_UBED  = 31     ! U component of near-bed velocity [m/s]
+integer, parameter, public :: RP_VBED  = 32     ! V component of near-bed velocity [m/s]
+integer, parameter, public :: RP_VELBD = 33     ! near-bed velocity magnitude [m/s]
+integer, parameter, public :: RP_ZVLBD = 34     ! elevation above bed at which near-bed velocity is given [m]
+integer, parameter, public :: RP_VNKAR = 35     ! von Karman constant [-]
+integer, parameter, public :: RP_Z0CUR = 36     ! current related roughness height [m]
+integer, parameter, public :: RP_Z0ROU = 37     ! wave enhanced roughness height [m]
+integer, parameter, public :: RP_KTUR  = 38     ! flow induced turbulence [m2/s2]
+integer, parameter, public :: RP_DG    = 39     ! geometric mean sediment diameter of the part of the bed exposed to transport [m]
+integer, parameter, public :: RP_SNDFR = 40     ! sand fraction of particle size mix of the part of the bed exposed to transport [-]
+integer, parameter, public :: RP_DGSD  = 41     ! geometric standard deviation of particle size mix of the part of the bed exposed to transport [m]
+integer, parameter, public :: RP_UMEAN = 42     ! U component of velocity [m/s]
+integer, parameter, public :: RP_VMEAN = 43     ! V component of velocity [m/s]
+integer, parameter, public :: RP_VELMN = 44     ! velocity magnitude [m/s]
+integer, parameter, public :: RP_USTAR = 45     ! effective shear velocity [m/s]
 integer, parameter, public :: RP_KWTUR = 46     ! wave breaking induced turbulence
-integer, parameter, public :: RP_UAU   = 47     ! velocity asymmetry due to short waves, x component
-integer, parameter, public :: RP_VAU   = 48     ! same, y component
-integer, parameter, public :: RP_BLCHG = 49     ! dzb/dt, needed for dilatancy calculation in van Thiel formulation
-integer, parameter, public :: RP_D15MX = 50     ! same, d15
-integer, parameter, public :: RP_POROS = 51     ! same, porosity
-integer, parameter, public :: RP_DZDX  = 52     ! same, bottom slope x dir
-integer, parameter, public :: RP_DZDY  = 53     ! same, bottom slope y dir
-integer, parameter, public :: RP_DM    = 54     ! median sediment diameter
-integer, parameter, public :: MAX_RP   = 54
+integer, parameter, public :: RP_UAU   = 47     ! U component of velocity asymmetry due to short waves [m/s]
+integer, parameter, public :: RP_VAU   = 48     ! V component of velocity asymmetry due to short waves [m/s]
+integer, parameter, public :: RP_BLCHG = 49     ! bed level change rate (needed for dilatancy calculation in van Thiel formulation0)[m/s]
+integer, parameter, public :: RP_D15MX = 50     ! D15 of particle size mix of the part of the bed exposed to transport [m]
+integer, parameter, public :: RP_POROS = 51     ! porosity of particle size mix of the part of the bed exposed to transport [-]
+integer, parameter, public :: RP_DZDX  = 52     ! U component of bed slope [-]
+integer, parameter, public :: RP_DZDY  = 53     ! V component of bed slope [-]
+integer, parameter, public :: RP_DM    = 54     ! median sediment diameter of particle size mix of the part of the bed exposed to transport [m]
+integer, parameter, public :: MAX_RP   = 54     ! mmaximum number of real parameters
 !
-integer, parameter, public :: IP_NM    =  1
-integer, parameter, public :: IP_N     =  2
-integer, parameter, public :: IP_M     =  3
-integer, parameter, public :: IP_ISED  =  4
-integer, parameter, public :: MAX_IP   =  4
+integer, parameter, public :: IP_NM    =  1     ! local (i.e. within partition) cell index
+integer, parameter, public :: IP_N     =  2     ! local (i.e. within partition) fastest dimension index -- only for structured mesh models
+integer, parameter, public :: IP_M     =  3     ! local (i.e. within partition) slowest dimension index -- only for structured mesh models
+integer, parameter, public :: IP_ISED  =  4     ! sediment fraction number
+integer, parameter, public :: IP_NST   =  5     ! time step number -- only for fixed time step models
+integer, parameter, public :: MAX_IP   =  5     ! maximum number of integer parameters
 !
-integer, parameter, public :: SP_RUNID =  1
-integer, parameter, public :: SP_USRFL =  2
-integer, parameter, public :: MAX_SP   =  2
+integer, parameter, public :: SP_RUNID =  1     ! ID of simulation
+integer, parameter, public :: SP_USRFL =  2     ! name of user specified input file
+integer, parameter, public :: MAX_SP   =  2     ! maximum number of strings
 
 integer, parameter, public :: WS_RP_TIME  =  1
 integer, parameter, public :: WS_RP_ULOC  =  2
@@ -535,6 +536,7 @@ type sedpar_type
     type(tree_data)     , dimension(:), pointer :: sedblock => null()  !  Pointer to array of data block per fraction in .sed file (version 2)
     type(t_nodefraction), dimension(:), pointer :: nodefractions       !  Pointer to array of nodal point relations
     !
+    real(fp)      , dimension(:)    , pointer :: psnumber   !  Prandtl-Schmidt number
     real(fp)      , dimension(:)    , pointer :: rhosol     !  Soil density
     !
     real(fp)      , dimension(:,:,:), pointer :: logseddia             !  Characteristic sediment diameter table using log scale [%,log(m)]
@@ -1193,6 +1195,7 @@ subroutine nullsedpar(sedpar)
     sedpar%flspmc   = ' '
     !
     nullify(sedpar%sedblock)
+    nullify(sedpar%psnumber)
     nullify(sedpar%rhosol)
     !
     nullify(sedpar%logseddia)
@@ -1243,6 +1246,7 @@ subroutine clrsedpar(istat     ,sedpar  )
 !! executable statements -------------------------------------------------------
 !
     if (associated(sedpar%sedblock))   deallocate(sedpar%sedblock,   STAT = istat) ! the actual data tree should be deleted as part of the whole sed_ptr tree.
+    if (associated(sedpar%psnumber))   deallocate(sedpar%psnumber,   STAT = istat)
     if (associated(sedpar%rhosol))     deallocate(sedpar%rhosol,     STAT = istat)
     !
     if (associated(sedpar%logseddia))  deallocate(sedpar%logseddia,  STAT = istat)

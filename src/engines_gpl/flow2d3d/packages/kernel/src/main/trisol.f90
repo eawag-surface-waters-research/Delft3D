@@ -1935,7 +1935,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
                     & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
                     & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
-                    & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
+                    & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     , &
                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                     & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
@@ -3003,7 +3003,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                        & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
                        & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
                        & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
-                       & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
+                       & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     , &
                        & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                        & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                        & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &

@@ -73,9 +73,12 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
     integer, pointer :: kmax !  Description and declaration in esm_alloc_int.f90
     integer, pointer :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer, pointer :: lsal !  Description and declaration in dimens.igs
+    integer, pointer :: lsedtot ! Total number of sediment fractions
     integer, pointer :: ltem !  Description and declaration in dimens.igs
     integer, pointer :: ltur !  Description and declaration in esm_alloc_int.f90
     integer, pointer :: ltur2d !  Description and declaration in dimens.igs
+!
+    real(fp)         , dimension(:)      , pointer :: psnumber ! Prandtl-Schmidt number for sediment fractions
 !
 ! Global variables
 !
@@ -90,6 +93,8 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
 !
     integer :: k
     integer :: l
+    integer :: lsedmin
+    integer :: lsedmax
     integer :: m
     integer :: n
 !
@@ -117,9 +122,12 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
     kmax     => gddimens%kmax
     lstsci   => gddimens%lstsci
     lsal     => gddimens%lsal
+    lsedtot  => gddimens%lsedtot
     ltem     => gddimens%ltem
     ltur     => gddimens%ltur
     ltur2d   => gddimens%ltur2d
+    !
+    psnumber => gdp%gdsedpar%psnumber
     !
     ! Initialisation
     !
@@ -146,14 +154,21 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
     ! Prandtl/Schmidt- and Moleculair Prandtl numbers for constituents,
     ! salt and temperature
     !
+    lsedmin = max(lsal, ltem) + 1
+    lsedmax = max(lsal, ltem) + lsedtot
     do l = 1, lstsci
-       sigdif(l) = 0.7
        if (l == lsal) then
           sigmol(l) = 700.0
        elseif (l == ltem) then
           sigmol(l) = 6.7
        else ! constituents
           sigmol(l) = 1.0
+       endif
+       !
+       if (l >= lsedmin .and. l <= lsedmax) then
+           sigdif(l) = psnumber(l - lsedmin + 1)
+       else
+           sigdif(l) = 0.7
        endif
     enddo
     !

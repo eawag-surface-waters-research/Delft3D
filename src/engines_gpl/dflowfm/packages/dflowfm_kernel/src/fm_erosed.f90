@@ -1646,6 +1646,13 @@
             endif
          enddo
          !
+         ! Set Prandtl-Schmidt number for suspended fractions
+         ! viscosity/diffusivity
+         !
+         if (l <= lsed) then
+            sigdif = psnumber(l)      ! has different meaning here, not to confuse with sigdif in m_turbulence
+         endif
+         !
          if (sedtyp(l) == SEDTYP_COHESIVE) then
             !
             ! sediment type COHESIVE
@@ -1737,14 +1744,6 @@
          !
          suspfrac = sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
          !
-         ! Calculation for sand or bedload
-         !
-         ! Reset Prandtl-Schmidt number for sand fractions
-         ! viscosity/diffusivity
-         !
-         if (suspfrac) then
-            sigdif = 1.0_fp      ! has different meaning here, not to confuse with sigdif in m_turbulence
-         endif
          tsd  = -999.0_fp
          di50 = sedd50(l)
          if (di50 < 0.0_fp) then

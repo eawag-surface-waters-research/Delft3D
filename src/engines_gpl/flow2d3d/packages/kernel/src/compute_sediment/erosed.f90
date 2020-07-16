@@ -4,7 +4,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 & r0        ,u0eul     ,v0eul     ,s0        ,dps       , &
                 & z0urou    ,z0vrou    ,sour      ,sink      ,rhowat    , &
                 & ws        ,z0ucur    ,z0vcur    ,sigmol    , &
-                & taubmx    ,s1        ,uorb      ,tp        ,sigdif    , &
+                & taubmx    ,s1        ,uorb      ,tp        , &
                 & lstsci    ,thick     ,dicww     ,kcs       , &
                 & kcu       ,kcv       ,guv       ,gvu       ,sbuu      , &
                 & sbvv      ,seddif    ,hrms      ,ltur      , &
@@ -275,7 +275,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)                   :: sbvv    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                               , intent(in)  :: sig     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(lstsci)                             , intent(out) :: sigdif  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(lstsci)                                           :: sigmol  !  Description and declaration in esm_alloc_real.f90
     real(fp)                                                  , intent(in)  :: saleqs
     real(fp)                                                  , intent(in)  :: temeqs
@@ -955,6 +954,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_integers(IP_NM   ) = nm
        dll_integers(IP_N    ) = n
        dll_integers(IP_M    ) = m
+       dll_integers(IP_NST ) = nst
        !
        if (max_strings < MAX_SP) then
           write(errmsg,'(a)') 'Insufficient space to pass strings to transport routine.'
@@ -973,6 +973,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        endif
        !
        do l = 1, lsedtot
+          ll = lstart + l
           !
           ! Copy the globally defined l-dependent parameters of array par to localpar.
           ! All nm-/l-based redefinitions of these parameters are performed
@@ -1075,16 +1076,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           ! sediment type NONCOHESIVE_SUSPENDED or NONCOHESIVE_TOTALLOAD
           !
-          ll = lstart + l
           suspfrac = sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
           !
-          ! Calculation for sand or bedload
-          !
-          ! Reset Prandtl-Schmidt number for sand fractions
-          !
-          if (suspfrac) then
-             sigdif(ll) = 1.0_fp
-          endif
+          ! (Re)set of Prandtl-Schmidt number moved to TKECOF
           tsd  = -999.0_fp
           di50 = sedd50(l)
           if (di50 < 0.0_fp) then

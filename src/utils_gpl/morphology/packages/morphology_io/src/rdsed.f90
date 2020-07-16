@@ -75,6 +75,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)                           , pointer :: sc_flcf
     integer                            , pointer :: nmudfrac
     integer                            , pointer :: sc_mudfac
+    real(fp)         , dimension(:)    , pointer :: psnumber
     real(fp)         , dimension(:)    , pointer :: rhosol
     real(fp)         , dimension(:,:,:), pointer :: logseddia
     real(fp)         , dimension(:)    , pointer :: logsedsig
@@ -150,6 +151,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                     :: nm
     integer                     :: version
     integer(pntrsize), external :: open_shared_library
+    real(fp)                    :: psmud
     real(fp)                    :: rmissval
     real(fp)                    :: seddxx              ! Temporary storage for sediment diameter
     real(fp)                    :: sedsg               ! Temporary storage for geometric standard deviation
@@ -180,6 +182,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     sc_flcf              => sedpar%sc_flcf
     nmudfrac             => sedpar%nmudfrac
     sc_mudfac            => sedpar%sc_mudfac
+    psnumber             => sedpar%psnumber
     rhosol               => sedpar%rhosol
     logseddia            => sedpar%logseddia
     logsedsig            => sedpar%logsedsig
@@ -223,6 +226,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        ! allocation of namsed, rhosol and sedtyp have been allocated in count_sed routine
        !
+       if (istat==0) allocate (sedpar%psnumber  (                          lsedtot), stat = istat)
+       !
        if (istat==0) allocate (sedpar%sedblock  (                          lsedtot), stat = istat)
        if (istat==0) allocate (sedpar%nseddia   (                          lsedtot), stat = istat)
        if (istat==0) allocate (sedpar%logseddia (2, 101,                   lsedtot), stat = istat)
@@ -261,6 +266,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        ! update local pointers
        !
+       psnumber      => sedpar%psnumber
+       !
        nseddia       => sedpar%nseddia
        logseddia     => sedpar%logseddia
        logsedsig     => sedpar%logsedsig
@@ -296,6 +303,11 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     do i = 1,lsedtot
        sedpar%sedblock(i)%node_name => null()
+       if (sedtyp(i) == SEDTYP_COHESIVE) then
+           psnumber(i) = 0.7_fp
+       else
+           psnumber(i) = 1.0_fp
+       endif
     enddo
     flsdbd              = ' '
     flsmdc              = ' '
@@ -350,6 +362,14 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        csoil  = 1.0e4_fp
        call prop_get(sed_ptr, 'SedimentOverall', 'Cref', csoil)
+       !
+       psmud  = 0.7_fp
+       call prop_get(sed_ptr, 'SedimentOverall', 'PSmud', psmud)
+       do i = 1,lsed
+          if (sedtyp(i) == SEDTYP_COHESIVE) then
+              psnumber(i) = psmud
+          endif
+       enddo
        !
        iopsus = 0
        call prop_get_integer(sed_ptr, 'SedimentOverall', 'IopSus', iopsus)
@@ -986,6 +1006,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     real(fp)                          , pointer :: sc_cmf2
     real(fp)                          , pointer :: sc_flcf
     integer                           , pointer :: sc_mudfac
+    real(fp)        , dimension(:)    , pointer :: psnumber
     real(fp)        , dimension(:)    , pointer :: rhosol
     real(fp)        , dimension(:,:,:), pointer :: logseddia
     real(fp)        , dimension(:)    , pointer :: logsedsig
@@ -1042,6 +1063,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     sc_cmf2              => sedpar%sc_cmf2
     sc_flcf              => sedpar%sc_flcf
     sc_mudfac            => sedpar%sc_mudfac
+    psnumber             => sedpar%psnumber
     rhosol               => sedpar%rhosol
     logseddia            => sedpar%logseddia
     logsedsig            => sedpar%logsedsig
@@ -1166,7 +1188,9 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
            txtput1 = '  Tracer calibration factor '
            write (lundia, '(2a,e12.4)') txtput1, ':', sedtrcfac(l)
        endif
-       txtput1 = '  RHOSOL'
+       txtput1 = '  Turbulent Prandtl-Schmidt number'
+       write (lundia, '(2a,e12.4)') txtput1, ':', psnumber(l)
+       txtput1 = '  Solid density (RHOSOL)'
        write (lundia, '(2a,e12.4)') txtput1, ':', rhosol(l)
        if (flsdia /= ' ') then
           !
@@ -1494,7 +1518,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
           txtput1 = '  SedD90'
           write (lundia, '(2a,e12.4)') txtput1, ':', sedd90(l)
        endif
-       txtput1 = '  CDRYB'
+       txtput1 = '  Dry bed (bulk) density (CDRYB)'
        write (lundia, '(2a,e12.4)') txtput1, ':', cdryb(l)
        if (flsdbd(l) /= ' ') then
           if (inisedunit(l) == 'kg/m2') then
