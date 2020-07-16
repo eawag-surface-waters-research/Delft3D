@@ -262,6 +262,7 @@
 !     copy sum_dredge (remaining dredge mass) from pmsa
       size_sum_dredge = max_basin*(nim1+nim2+nim3)
       allocate( sum_dredge(size_sum_dredge) )
+      sum_dredge = 0.0
 
       do i_basin = 1,no_basin
          do ifrac_im1 = 1,nim1
@@ -401,12 +402,10 @@
       enddo
 
       !  synchronise over MPI when necessary
-      if(any(dredge_moment)) then
-         if(.not.reduce_sum_wq_processes(size_sum_dredge, sum_dredge)) then
-            write (lunrep, *) 'ERROR in dredge process while reducing water quality processes data through mpi.'
-            call srstop(1)
-         endif
-      end if
+      if(.not.reduce_sum_wq_processes(size_sum_dredge, sum_dredge)) then
+         write (lunrep, *) 'ERROR in dredge process while reducing water quality processes data through mpi.'
+         call srstop(1)
+      endif
 
       ! dump loop
 

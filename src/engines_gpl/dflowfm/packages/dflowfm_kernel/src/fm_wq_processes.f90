@@ -792,18 +792,24 @@
    use dfm_error
    use processes_input
    use m_fm_wq_processes
+   use timers
    use unstruc_files, only: resolvePath
 
    implicit none
    integer, intent (out)         :: iresult
 
    character(len=256)            :: filename, sourcemask
-   integer                       :: kb, k, klocal, ja, method, kk, kt, ktopx, lenqidnam, ipa, ifun, isfun, imba, imna
+   integer                       :: kb, k, ja, method, kk, kt, ktopx, lenqidnam, ipa, ifun, isfun, imba, imna
+   integer                       :: klocal, waqseg2D, waqseglay
    character (len=NAMTRACLEN)    :: qidnam
    character (len=20)            :: waqinput
    integer                       :: minp0, npli, inside, filetype0, iad, needextramba, needextrambar
    double precision, allocatable :: viuh(:)            ! temporary variable
    integer, external             :: findname
+
+   integer(4), save         :: ithndl = 0
+
+   if (timon) call timstrt( "dfm_waq_initexternalforcings", ithndl )
 
    iresult = DFM_NOERR
 
@@ -893,10 +899,17 @@
                if (success) then
                   do kk = 1,Ndxi
                      if (viuh(kk) .ne. dmiss) then
-                        klocal = global_to_local( viuh(kk) )
-                        if(klocal.ge.1.and.klocal.le.Ndxi) then
+                        if (jampi == 0) then
+                           waqseg2D = mod(int(viuh(kk))-1, Ndxi) + 1
+                           waqseglay = (int(viuh(kk))-1) / Ndxi + 1
+                        else
+                           waqseg2D = mod(int(viuh(kk))-1, Nglobal_s) + 1
+                           waqseglay = (int(viuh(kk))-1) / Nglobal_s + 1
+                        endif
+                        klocal = global_to_local( waqseg2D )
+                        if(klocal.ge.1.and.klocal.le.Ndxi.and.waqseglay.ge.1.and.waqseglay.le.kmx) then
                            call getkbotktop(klocal,kb,kt)
-                           painp(ipa,kk) = kb+kmxn(kk)-kbx
+                           painp(ipa,kk) = max(kb,kb+kmxn(kk)-waqseglay)-kbx + 1
                         else
                            painp(ipa,kk) = -999.0
                         endif
@@ -981,18 +994,26 @@
       rewind(mext) ! rewind ext file
    end if
 
+   if ( timon ) call timstop ( ithndl )
+   return
+
    contains
 
    !> Internal function: Translate the global segment number to the
    !! number used within the current domain
-   double precision function global_to_local( global_number )
+   integer function global_to_local( global_number )
        use m_partitioninfo, only: jampi, iglobal_s
+       use timers
 
-       double precision, intent(in) :: global_number !< Global segment number to be translated
+       integer, intent(in) :: global_number !< Global segment number to be translated
 
-       double precision, save       :: previous_global = -1
-       double precision, save       :: previous_local  = -1
-       integer                      :: i
+       integer, save       :: previous_global = -1
+       integer, save       :: previous_local  = -1
+       integer             :: i(1)
+
+       integer(4), save         :: ithndl = 0
+
+       if (timon) call timstrt( "global_to_local", ithndl )
 
        if (jampi==0) then
           global_to_local = global_number
@@ -1001,15 +1022,15 @@
           if ( global_number == previous_global ) then
               global_to_local = previous_local
           else
-              do i = 1,size(iglobal_s)
-                  if ( global_number == iglobal_s(i) ) then
-                      global_to_local = i
-                      previous_global = global_number
-                      previous_local  = i
-                  endif
-              enddo
+              i = findloc(iglobal_s, value = global_number) 
+              if ( i(1) .gt. 0 ) then
+                 global_to_local = i(1)
+                 previous_global = global_number
+                 previous_local  = i(1)
+              endif
           endif
        endif       
+       if ( timon ) call timstop ( ithndl )
    end function global_to_local
 
    end subroutine dfm_waq_initexternalforcings
