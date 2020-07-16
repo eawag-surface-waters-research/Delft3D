@@ -73,12 +73,12 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
     integer, pointer :: kmax !  Description and declaration in esm_alloc_int.f90
     integer, pointer :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer, pointer :: lsal !  Description and declaration in dimens.igs
-    integer, pointer :: lsedtot ! Total number of sediment fractions
+    integer, pointer :: lsed !  Number of suspended sediment fractions
     integer, pointer :: ltem !  Description and declaration in dimens.igs
     integer, pointer :: ltur !  Description and declaration in esm_alloc_int.f90
     integer, pointer :: ltur2d !  Description and declaration in dimens.igs
 !
-    real(fp)         , dimension(:)      , pointer :: psnumber ! Prandtl-Schmidt number for sediment fractions
+    real(fp)         , dimension(:)      , pointer :: tpsnumber ! turbulent Prandtl-Schmidt number for sediment fractions
 !
 ! Global variables
 !
@@ -122,12 +122,12 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
     kmax     => gddimens%kmax
     lstsci   => gddimens%lstsci
     lsal     => gddimens%lsal
-    lsedtot  => gddimens%lsedtot
+    lsed     => gddimens%lsed
     ltem     => gddimens%ltem
     ltur     => gddimens%ltur
     ltur2d   => gddimens%ltur2d
     !
-    psnumber => gdp%gdsedpar%psnumber
+    tpsnumber => gdp%gdsedpar%tpsnumber
     !
     ! Initialisation
     !
@@ -155,7 +155,7 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
     ! salt and temperature
     !
     lsedmin = max(lsal, ltem) + 1
-    lsedmax = max(lsal, ltem) + lsedtot
+    lsedmax = max(lsal, ltem) + lsed
     do l = 1, lstsci
        if (l == lsal) then
           sigmol(l) = 700.0
@@ -166,7 +166,7 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
        endif
        !
        if (l >= lsedmin .and. l <= lsedmax) then
-           sigdif(l) = psnumber(l - lsedmin + 1)
+           sigdif(l) = tpsnumber(l - lsedmin + 1)
        else
            sigdif(l) = 0.7
        endif

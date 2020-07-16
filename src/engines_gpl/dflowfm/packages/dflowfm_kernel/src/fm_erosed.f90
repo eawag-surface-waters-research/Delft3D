@@ -79,6 +79,7 @@
    real(fp)         , dimension(:)      , pointer :: sedtrcfac
    logical                              , pointer :: bsskin
    real(fp)         , dimension(:)      , pointer :: thcmud
+   real(fp)         , dimension(:)      , pointer :: tpsnumber
    real(fp)         , dimension(:, :)   , pointer :: dss     !  Description and declaration in esm_alloc_real.f90
 
    ! morpar
@@ -627,6 +628,7 @@
    sedtrcfac           => stmpar%sedpar%sedtrcfac
    bsskin              => stmpar%sedpar%bsskin
    thcmud              => stmpar%sedpar%thcmud
+   tpsnumber           => stmpar%sedpar%tpsnumber
    dss                 => stmpar%sedpar%dss
    ! morpar
    thresh              => stmpar%morpar%thresh
@@ -1650,7 +1652,7 @@
          ! viscosity/diffusivity
          !
          if (l <= lsed) then
-            sigdif = psnumber(l)      ! has different meaning here, not to confuse with sigdif in m_turbulence
+            sigdif = tpsnumber(l)      ! has different meaning here, not to confuse with sigdif in m_turbulence
          endif
          !
          if (sedtyp(l) == SEDTYP_COHESIVE) then

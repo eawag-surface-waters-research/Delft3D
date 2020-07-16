@@ -536,7 +536,7 @@ type sedpar_type
     type(tree_data)     , dimension(:), pointer :: sedblock => null()  !  Pointer to array of data block per fraction in .sed file (version 2)
     type(t_nodefraction), dimension(:), pointer :: nodefractions       !  Pointer to array of nodal point relations
     !
-    real(fp)      , dimension(:)    , pointer :: psnumber   !  Prandtl-Schmidt number
+    real(fp)      , dimension(:)    , pointer :: tpsnumber  !  Turbulent Prandtl-Schmidt number
     real(fp)      , dimension(:)    , pointer :: rhosol     !  Soil density
     !
     real(fp)      , dimension(:,:,:), pointer :: logseddia             !  Characteristic sediment diameter table using log scale [%,log(m)]
@@ -1195,7 +1195,7 @@ subroutine nullsedpar(sedpar)
     sedpar%flspmc   = ' '
     !
     nullify(sedpar%sedblock)
-    nullify(sedpar%psnumber)
+    nullify(sedpar%tpsnumber)
     nullify(sedpar%rhosol)
     !
     nullify(sedpar%logseddia)
@@ -1246,7 +1246,7 @@ subroutine clrsedpar(istat     ,sedpar  )
 !! executable statements -------------------------------------------------------
 !
     if (associated(sedpar%sedblock))   deallocate(sedpar%sedblock,   STAT = istat) ! the actual data tree should be deleted as part of the whole sed_ptr tree.
-    if (associated(sedpar%psnumber))   deallocate(sedpar%psnumber,   STAT = istat)
+    if (associated(sedpar%tpsnumber))  deallocate(sedpar%tpsnumber,  STAT = istat)
     if (associated(sedpar%rhosol))     deallocate(sedpar%rhosol,     STAT = istat)
     !
     if (associated(sedpar%logseddia))  deallocate(sedpar%logseddia,  STAT = istat)
