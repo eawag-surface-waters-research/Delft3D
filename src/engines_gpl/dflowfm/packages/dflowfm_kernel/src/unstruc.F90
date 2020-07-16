@@ -11294,7 +11294,6 @@ subroutine flow_sedmorinit()
 
     logical :: error, have_mudbnd, have_sandbnd, ex, success
     character(20) , dimension(:), allocatable :: nambnd        ! nambnd: needed for morphological bc
-    integer, dimension(:), allocatable        :: kp
     character     , dimension(200)            :: mes
     character(40)                             :: errstr
     type (bedbndtype), dimension(:) , pointer :: morbnd
