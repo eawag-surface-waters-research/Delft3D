@@ -136,6 +136,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 !
 ! Local variables
 !
+    logical  :: effwave ! Flag to indicate whether waves are locally active
     real(fp) :: a1      ! Help variable
     real(fp) :: a2      ! Help variable
     real(fp) :: alpha   ! Help variable
@@ -192,6 +193,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     !
     ! Compute basic parameters
     !
+    effwave = wave .and. (tper > 0.0_fp) .and. (uorb >= 1.0-6_fp)
     umod   = max( sqrt(umean*umean + vmean*vmean) , localeps )
     !
     if (sc_mudfac == SC_MUDFRAC) then
@@ -217,18 +219,16 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     phicur = atan2(vmean,umean) / degrad
     if (phicur < 0.0_fp) phicur = phicur + 360.0_fp
     !
-    if (wave) then
+    ! Determine flow regime
+    !
+    if (effwave) then
        phiwr  = (teta - phicur) * degrad
        uorbm  = max( uorb , 0.01_fp )
        aorb   = uorbm * tper / 2.0_fp / pi
        rew    = max(uorbm * aorb / vicmol, 1e3_fp) ! limit rew to avoid t1->1 and a1,a2->Inf in computation of taums 
        fws    = 0.0521_fp * rew**(-0.187_fp)
        fwr    = 1.39_fp * (aorb/z0silt)**(-0.52_fp)
-    endif
-    !
-    ! Determine flow regime
-    !
-    if (wave .and. uorb >= 1.0-6_fp) then
+       !
        if (umod >= 1.0e-6_fp) then
           !
           ! Combined flow and waves
