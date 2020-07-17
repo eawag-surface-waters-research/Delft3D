@@ -999,6 +999,26 @@
 
    contains
 
+   ! Private version of findloc - this intrinsic is new in Fortran 2008
+   ! and not supported by gfortran 4.9.1
+   function findloc( array, value )
+       integer, dimension(:), intent(in) :: array
+       integer, intent(in)               :: value
+
+       integer, dimension(1)             :: findloc
+
+       integer                           :: i
+
+       findloc = 0
+
+       do i = 1,size(array)
+           if ( array(i) == value ) then
+               findloc = i
+               exit
+           endif
+       enddo
+   end function findloc
+
    !> Internal function: Translate the global segment number to the
    !! number used within the current domain
    integer function global_to_local( global_number )
