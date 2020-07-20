@@ -1152,12 +1152,12 @@ subroutine getRoughnessForProfile(network, crs)
       pRgs => network%rgs%rough(iRough)
       if (network%rgs%version == network%rgs%roughnessFileMajorVersion) then
          frictionValue = crs%frictionValuePos(i)
-         call getFrictionParameters(pRgs,  1d0, crs%branchid, crs%chainage, crs%frictionTypePos(i), crs%frictionValuePos(i))
+         call getFrictionParameters(pRgs,  crs%branchid, crs%chainage, crs%frictionTypePos(i), crs%frictionValuePos(i))
          if (comparereal(frictionValue, crs%frictionValuePos(i)) /= 0) then
             crs%hasTimeDependentConveyance = .true.
          endif
          frictionValue = crs%frictionValueNeg(i)
-         call getFrictionParameters(pRgs, -1d0, crs%branchid, crs%chainage, crs%frictionTypeNeg(i), crs%frictionValueNeg(i))
+         call getFrictionParameters(pRgs, crs%branchid, crs%chainage, crs%frictionTypeNeg(i), crs%frictionValueNeg(i))
          if (comparereal(frictionValue, crs%frictionValueNeg(i)) /= 0) then
                crs%hasTimeDependentConveyance = .true.
          endif

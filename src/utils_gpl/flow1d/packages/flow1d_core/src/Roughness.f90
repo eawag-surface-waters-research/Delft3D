@@ -302,7 +302,7 @@ end function frictiontype_v1_to_new
    function frictionTypeIntegerToString(ifricType)
       use string_module, only:str_lower
       implicit none
-      integer,          intent(  out) :: ifricType !< Friction type integer. When string is invalid, 'unknown' is returned.
+      integer,          intent(in   ) :: ifricType !< Friction type integer. When string is invalid, 'unknown' is returned.
       character(:), allocatable :: frictionTypeIntegerToString
       
       select case (ifricType)
@@ -594,79 +594,42 @@ subroutine flengrprReal(d90, u, hrad, chezy)
    chezy = C
 end subroutine flengrprReal
 
-subroutine getFrictionParameters(rgh, direction, ibranch, chainage, c_type, c_par)
+!> Retrieve the friction parameter for given branchIndex/chainage
+subroutine getFrictionParameters(rgh, ibranch, chainage, c_type, c_par)
 
-use m_tables
-use m_tablematrices
-!!--description-----------------------------------------------------------------
-! NONE
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    !=======================================================================
-    !                       Deltares
-    !                One-Two Dimensional Modelling System
-    !                           S O B E K
-    !
-    ! Subsystem:          Flow Module
-    !
-    ! Programmer:
-    !
-    ! Function:           getFrictionValue, replacement of old FLCHZT (FLow CHeZy Friction coeff)
-    !
-    ! Module description: Chezy coefficient is computed for a certain gridpoint
-    !
-    !
-    !
-    !     update information
-    !     person                    date
-    !     Kuipers                   5-9-2001
-    !     Van Putten                11-8-2011
-    !
-    !     Use stored table counters
-    !
-    !
-    !
-    !
-    !     Declaration of Parameters:
-    !
+   use m_tables
+   use m_tablematrices
 
-    implicit none
-!
-! Global variables
-!
-    type(t_Roughness), intent(in   )   :: rgh         !< Roughness data
-    integer,           intent(in   )   :: ibranch     !< branch index
-    double precision,  intent(in   )   :: chainage    !< chainage (location on branch)
-    double precision,  intent(in   )   :: direction   !< flow direction > 0 positive direction, < 0 negative direction
-    integer,           intent(  out)   :: c_type      !< friction type
-    double precision,  intent(  out)   :: c_par       !< friction parameter value
+   implicit none
+   !
+   ! Global variables
+   !
+   type(t_Roughness), intent(in   )   :: rgh         !< Roughness data
+   integer,           intent(in   )   :: ibranch     !< branch index
+   double precision,  intent(in   )   :: chainage    !< chainage (location on branch)
+   integer,           intent(  out)   :: c_type      !< friction type
+   double precision,  intent(  out)   :: c_par       !< friction parameter value
     
-!
-!
-! Local variables
-!
-    integer                         :: isec, i
-    integer                         :: timeseries_index
-    double precision                :: dep
-    double precision                :: ys
-    double precision                :: rad
-    type(t_spatial_data), pointer   :: values
-    integer, dimension(:), pointer  :: rgh_type
-    integer, dimension(:), pointer  :: fun_type
-
-    !     Explanation:
-    !     -----------
-    !
-    !     1. Each Chezy formula, apart from Engelund bed friction, is defined
-    !        by 1 constant parameter. This constant is stored in bfricp.
-    !        An exception is the Engelund bed friction defined by 10 parameters.
-    !     2. For the Engelund bed friction the specific parameters are stored
-    !        in the array engpar.
-    !
-    !
-    !     Prevention against zero hydraulic radius and depth
-    !
+   !
+   !
+   ! Local variables
+   !
+   integer                         :: timeseries_index
+   double precision                :: ys
+   integer, dimension(:), pointer  :: rgh_type
+   integer, dimension(:), pointer  :: fun_type
+   !     Explanation:
+   !     -----------
+   !
+   !     1. Each Chezy formula, apart from Engelund bed friction, is defined
+   !        by 1 constant parameter. This constant is stored in bfricp.
+   !        An exception is the Engelund bed friction defined by 10 parameters.
+   !     2. For the Engelund bed friction the specific parameters are stored
+   !        in the array engpar.
+   !
+   !
+   !     Prevention against zero hydraulic radius and depth
+   !
    
    if (rgh%useGlobalFriction)  then
       c_par = rgh%frictionValue
