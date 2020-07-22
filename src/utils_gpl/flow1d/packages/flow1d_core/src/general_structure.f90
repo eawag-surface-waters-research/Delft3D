@@ -762,6 +762,7 @@ contains
          endif
          ds = u + v - aw/3.0D0
       endif
+      ds = min(ds, elu-zs, hd-zs)
    end subroutine flgsd3
                 
                 
