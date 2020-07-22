@@ -39066,13 +39066,20 @@ end subroutine setbobs_fixedweirs
                        & u1(L), u0(L), dx(L), dts, state)
                    case (ST_GENERAL_ST)
                       firstiter = .true.
-                      dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
-                      dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
-                      width = min(maxwidth1, maxwidth2)
-                      wu(L) = width
-
+                      ! The upstream flow area is necessary for computing the upstream velocity height
+                      ! For 1d the flow area is computed, using the upstream water depth
+                      ! For 2D the flow area is computed, using the flow width WU and the waterdepth at the upstream grid cell
+                      if (L <= lnx1D) then
+                        dpt = max(epshu, s1(k1) - bob0(1,L))
+                        call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
+                        dpt = max(epshu, s1(k2) - bob0(2,L))
+                        call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
+                        width = min(maxwidth1, maxwidth2)
+                        wu(L) = width
+                      else
+                        as1 = (s1(k1)-bl(k1))*wu(L)
+                        as2 = (s1(k2)-bl(k2))*wu(L)
+                      endif
                       call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
                       au(L) = pstru%au(L0)
                       call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
