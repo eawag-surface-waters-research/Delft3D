@@ -44082,9 +44082,13 @@ if (mext /= 0) then
               allocate( kcw(ndx) )
               kcw = 1
               ec_item = ec_undef_int
+              call setzcs()
               success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, &
                  filetype, method, operand, z=zcs, pkbot=pkbot, pktop=pktop, varname=varname, tgt_item1=ec_item)
-              success = ec_gettimespacevalue_by_itemID(ecInstancePtr, ec_item, irefdate, tzone, tunit, tstart_user, viuh)
+              success = success .and. ec_gettimespacevalue_by_itemID(ecInstancePtr, ec_item, irefdate, tzone, tunit, tstart_user, viuh)
+              if ( .not. success ) then
+                 call mess(LEVEL_ERROR, 'flow_initexternalforcings: error reading ' // trim(qid) // 'from '// trim(filename))
+              end if
               !write(*,*) 'min, max ', trim(qid), minval(viuh, mask = viuh/=dmiss), maxval(viuh)
               factor = merge(transformcoef(2), 1.0_hp, transformcoef(2) /= -999d0)
               do k = 1, Ndkx
