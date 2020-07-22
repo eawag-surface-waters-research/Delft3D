@@ -229,12 +229,10 @@ contains
          bobstru(2) = bob0(1)
       endif
       
-      flowDir = direction*flowDir
-      
       allowedflowdir = genstr%allowedflowdir
       if ((allowedflowdir == 3) .or. &
-          (flowDir == 1  .and. allowedflowDir == 2) .or. &
-          (flowDir == -1 .and. allowedflowDir == 1)) then
+          (direction*flowDir == 1  .and. allowedflowDir == 2) .or. &
+          (direction*flowDir == -1 .and. allowedflowDir == 1)) then
         fuL = 0.0d0
         ruL = 0.0d0
         auL = 0.0d0
@@ -245,7 +243,7 @@ contains
         return
       endif
 
-      call flgtar(genstr, L0, maxWidth, bobstru, flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf, cgd,   &
+      call flgtar(genstr, L0, maxWidth, bobstru, direction*flowDir, zs, wstr, w2, wsd, zb2, ds1, ds2, cgf, cgd,   &
                   cwf, cwd, mugf, lambda)
       !
       rhoast = rhoright/rholeft
@@ -1119,11 +1117,6 @@ contains
          ! gateclosedfraction will always be between 0 (= fully opened) and 1 (= fully closed)
          genstru%gateclosedfractiononlink(1) = 1d0 - genstru%gateopeningwidth_actual/genstru%ws_actual
       else
-         do L0=1,numlinks
-            Lf = iabs(links(L0))
-            genstru%widthcenteronlink(L0) = wu(Lf)
-            totalWidth = totalWidth + wu(Lf)
-         end do
 
          ! 2a: the desired crest width for this overall structure (hereafter, the open links for this genstru should add up to this width)
          !     Also: only for gates, the desired door opening width for this overall structure
