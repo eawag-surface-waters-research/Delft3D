@@ -21363,23 +21363,19 @@ subroutine unc_write_his(tim)            ! wrihis
              enddo
           end if
           if (IVAL_HWQ1 > 0) then
-             do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of tracers in valobs array (not the pointer)
+             do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of waq output in valobs array (not the pointer)
                i = j - IVAL_HWQ1 + 1
                if (i .le. noout_user + noout_statt) then
                   ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
-               else if (comparereal(tim, ti_mape, eps10) == 0) then
+               else if (comparereal(tim, ti_hise, eps10) == 0) then
                   ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1 /), count = (/ 1, ntot, 1/))
                endif
              enddo
           end if
           if (IVAL_WQB3D1 > 0) then
-             do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of tracers in valobs array (not the pointer)
+             do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of 3d waqbot output in valobs array (not the pointer)
                i = j - IVAL_WQB3D1 + 1
-               if (i .le. noout_user + noout_statt) then
-                  ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
-               else if (comparereal(tim, ti_mape, eps10) == 0) then
-                  ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + (i-1)*kmx+kk-1), start = (/ kk, 1 /), count = (/ 1, ntot, 1/))
-               endif
+               ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
              enddo
           end if
           if (IVAL_SF1 > 0) then
