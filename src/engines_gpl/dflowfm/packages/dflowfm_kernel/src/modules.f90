@@ -5486,6 +5486,7 @@ module m_fm_wq_processes
    real(hp)                                  :: waq_vol_dry_thr = 1.0d-3    !< minimum volume for processes to be active
    real(hp)                                  :: waq_dep_dry_thr = 1.0d-3    !< minimum depth for processes to be active
    integer                                   :: flux_int                    !< flux integration by WAQ (1) or by FM (2, not implemented)
+   integer                                   :: wqbot3D_output = 0          !< write 3D wqbot output
    integer                                   :: kbx                         !< pointer of first segment to D-Flow FM 3D administration
    integer                                   :: ktx                         !< pointer of last  segment to D-Flow FM 3D administration
 
@@ -5521,6 +5522,7 @@ module m_fm_wq_processes
    character(len=NAMWAQLEN), dimension(:), allocatable :: wqbotnames        !< water quality bottom variable names
    character(len=NAMWAQLEN), dimension(:), allocatable :: wqbotunits        !< water quality bottom variable units
    integer,  allocatable, dimension(:,:)     :: id_wqb                      !< wqbot id's in map-file
+   integer,  allocatable, dimension(:,:)     :: id_wqb3d                    !< 3d wqbot id's in map-file
    real(hp), allocatable, dimension(:,:)     :: wqbot                       !< water quality bottom variable values in double precission
 
    type(outputcoll)                          :: outputs                     !< output structure

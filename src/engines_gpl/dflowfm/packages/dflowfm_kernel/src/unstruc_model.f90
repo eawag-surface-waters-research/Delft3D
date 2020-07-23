@@ -188,6 +188,7 @@ implicit none
     double precision   :: md_dt_waqproc = 0d0   !< processes time step
     double precision   :: md_dt_waqbal = 0d0    !< mass balance output time step (old)
     integer            :: md_flux_int = 1       !< process fluxes integration option (1: WAQ, 2: D-Flow FM)
+    integer            :: md_wqbot3D_output = 0 !< write 3D wqbot output
 
     ! TODO: reading for trachytopes is still within rdtrt, below was added for partitioning (when no initialization)
     character(len=4)   :: md_trtrfile     = ' ' !< Variable that stores information if trachytopes are used ('Y') or not ('N')
@@ -2029,6 +2030,7 @@ subroutine readMDUFile(filename, istat)
    call prop_get_string (md_ptr, 'processes', 'StatisticsFile', md_sttfile, success)
    call prop_get_double (md_ptr, 'processes', 'ThetaVertical', md_thetav_waq, success)
    call prop_get_integer(md_ptr, 'processes', 'ProcessFluxIntegration', md_flux_int, success)
+   call prop_get_integer(md_ptr, 'processes', 'Wriwaqbot3Doutput', md_wqbot3D_output, success)
    call prop_get_double (md_ptr, 'processes', 'VolumeDryThreshold', waq_vol_dry_thr)
    call prop_get_double (md_ptr, 'processes', 'DepthDryThreshold', waq_dep_dry_thr)
 
@@ -3628,6 +3630,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
    call prop_set_double (prop_ptr, 'processes', 'DtProcesses', md_dt_waqproc, 'waq processes time step')
    call prop_set_double (prop_ptr, 'processes', 'DtMassBalance', md_dt_waqbal, 'waq mass balance output time step')
    call prop_set_integer(prop_ptr, 'processes', 'ProcessFluxIntegration', md_flux_int, 'Process fluxes integration option (1: WAQ, 2: D-Flow FM)')
+   call prop_set_integer(prop_ptr, 'processes', 'Wriwaqbot3Doutput', md_wqbot3D_output, 'Write 3D water quality bottom variables (1: yes, 0: no)')
    call prop_set_double (prop_ptr, 'processes', 'VolumeDryThreshold', waq_vol_dry_thr)
    call prop_set_double (prop_ptr, 'processes', 'DepthDryThreshold', waq_dep_dry_thr)
 

@@ -18999,6 +18999,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
     integer, allocatable, save :: id_hwqb(:)
+    integer, allocatable, save :: id_hwqb3d(:)
     integer, allocatable, save :: id_const(:), id_const_cum(:), id_voltot(:)
     double precision, allocatable, save :: valobsT(:,:)
 
@@ -19465,6 +19466,23 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_hwqb(i), '_FillValue', dmiss)
                   ierr = nf90_put_att(ihisfile, id_hwqb(i), 'long_name', wqbotnames(i))
                enddo
+               if (wqbot3D_output == 1) then
+                  call realloc(id_hwqb3d, numwqbots, keepExisting = .false.)
+                  do i=1,numwqbots
+                     tmpstr = wqbotnames(i)
+                     ! Forbidden chars in NetCDF names: space, /, and more.
+                     call replace_char(tmpstr,32,95)
+
+                     ierr = nf90_def_var(ihisfile, trim(tmpstr)//'_3D', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_hwqb3d(i))
+                     ierr = nf90_put_att(ihisfile, id_hwqb3d(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+
+                     tmpstr = wqbotunits(i)
+                     ierr = nf90_put_att(ihisfile, id_hwqb3d(i), 'units', tmpstr)
+                     ierr = nf90_put_att(ihisfile, id_hwqb3d(i), 'geometry', station_geom_container_name)
+                     ierr = nf90_put_att(ihisfile, id_hwqb3d(i), '_FillValue', dmiss)
+                     ierr = nf90_put_att(ihisfile, id_hwqb3d(i), 'long_name', trim(wqbotnames(i))//' (3D)')
+                  enddo
+               endif
             endif
 
 !          waq output
@@ -21354,6 +21372,16 @@ subroutine unc_write_his(tim)            ! wrihis
                endif
              enddo
           end if
+          if (IVAL_WQB3D1 > 0) then
+             do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of tracers in valobs array (not the pointer)
+               i = j - IVAL_WQB3D1 + 1
+               if (i .le. noout_user + noout_statt) then
+                  ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+               else if (comparereal(tim, ti_mape, eps10) == 0) then
+                  ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + (i-1)*kmx+kk-1), start = (/ kk, 1 /), count = (/ 1, ntot, 1/))
+               endif
+             enddo
+          end if
           if (IVAL_SF1 > 0) then
              call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
              do j = IVAL_SF1,IVAL_SFN
@@ -21387,9 +21415,15 @@ subroutine unc_write_his(tim)            ! wrihis
           end do
        end if
        if (IVAL_HWQ1 > 0) then
-          do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of tracers in valobs array (not the pointer)
+          do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of extra waq output in valobs array (not the pointer)
             i = j - IVAL_HWQ1 + 1
             ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+          end do
+       end if
+       if (IVAL_WQB3D1 > 0) then
+          do j = IVAL_WQB3D1,IVAL_WQB3DN   ! enumerators of waqbot variables in valobs array (not the pointer)
+            i = j - IVAL_WQB3D1 + 1
+            ierr = nf90_put_var(ihisfile, id_hwqb3d(i), valobsT(:,IPNT_WQB3D1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
           end do
        end if
        if (IVAL_SF1 > 0) then
@@ -22564,7 +22598,7 @@ subroutine fill_valobs()
          if ( IVAL_WQB1.gt.0 ) then
             do j=IVAL_WQB1,IVAL_WQBN
                ii = j-IVAL_WQB1+1
-               valobs(IPNT_WQB1+ii-1,i) = wqbot(ii,k)
+               valobs(IPNT_WQB1+ii-1,i) = wqbot(ii,kb)
             end do
          end if
 
@@ -22629,6 +22663,13 @@ subroutine fill_valobs()
                do j=IVAL_HWQ1,IVAL_HWQN
                   ii = j-IVAL_HWQ1+1
                   valobs(IPNT_HWQ1+(ii-1)*kmx_const+klay-1,i) = waqoutputs(ii,kk-kbx+1)
+               end do
+            end if
+
+            if ( IVAL_WQB3D1.gt.0 ) then
+               do j=IVAL_WQB3D1,IVAL_WQB3DN
+                  ii = j-IVAL_WQB3D1+1
+                  valobs(IPNT_WQB3D1+(ii-1)*kmx_const+klay-1,i) = wqbot(ii,kk)
                end do
             end if
 
@@ -42621,7 +42662,7 @@ end function is_1d_boundary_candidate
 
  implicit none
  character(len=256)            :: filename, sourcemask
- integer                       :: L, Lf, mout, kb, LL, Lb, Lt, ierr, k, k1, k2, ja, method, n1, n2, kbi, Le, n, j, mx, n4, kk, kt, lenqidnam
+ integer                       :: L, Lf, mout, kb, LL, Lb, Lt, ierr, k, k1, k2, ja, method, n1, n2, kbi, Le, n, j, mx, n4, kk, kt, ktmax, layer, lenqidnam
  character (len=256)           :: fnam, rec, filename0
  character (len=64)            :: varname
  character (len=NAMTRACLEN)    :: tracnam, qidnam
@@ -43849,10 +43890,32 @@ if (mext /= 0) then
 !          will only fill 2D part of viuh
            success = timespaceinitialfield(xz, yz, viuh, Ndxi, filename, filetype, method, operand, transformcoef, 2)
 
+           if (transformcoef(3).eq.DMISS) then
+              layer = -1
+           else
+              layer = min(nint(transformcoef(3)),kmx)
+           endif
+
            if (success) then
               do kk = 1,Ndxi
                  if (viuh(kk) .ne. dmiss) then
-                    wqbot(iwqbot,kk) = viuh(kk)
+                    call getkbotktopmax(kk,kb,kt,ktmax)
+                    if (layer.lt.0) then
+                       ! only set first layer above the bed
+                       wqbot(iwqbot,kb) = viuh(kk)
+                    else if (layer.gt.0) then
+                       ! set a specific layer in the same plane, counting from the deepest layer
+                       k = ktmax - kmx + layer
+                       if (k >= kb) then
+                          ! but only when not below the bed
+                          wqbot(iwqbot,k) = viuh(kk)
+                       endif
+                    else
+                       ! set uniform value for all layers
+                       do k=kb,kt
+                          wqbot(iwqbot,k) = viuh(kk)
+                       end do
+                    endif   
                  endif
               enddo
            endif

@@ -219,6 +219,7 @@ type t_unc_mapids
    integer :: id_tem1(MAX_ID_VAR)     = -1 !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_const !< Variable ID for (3, NUM_CONST) constituents (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_wqb !< Variable ID for (3, numwqbots) water quality bottom variables output (on 2D grid only)
+   integer, dimension(:,:), allocatable :: id_wqb3d !< Variable ID for (3, numwqbots) water quality bottom variables output (on 3D grid only)
    integer, dimension(:,:), allocatable :: id_waq !< Variable ID for (3, noout) waq output (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_wqst !< Variable ID for (3, noout) waq time stat output (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_wqse !< Variable ID for (3, noout) waq end stat output (on 1D, 2D, 3D grid parts resp.)
@@ -2563,7 +2564,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use network_data
     use m_sediment
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN0, constituents, itrac2const, const_names, const_units
-    use m_fm_wq_processes, only: numwqbots, wqbotnames, wqbotunits, wqbot
+    use m_fm_wq_processes, only: wqbot3D_output, numwqbots, wqbotnames, wqbotunits, wqbot
     use m_xbeach_data, only: E, thetamean, sigmwav
     use m_flowexternalforcings, only: numtracers  !, trbndnames
     use m_partitioninfo
@@ -3036,7 +3037,11 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ! Forbidden chars in NetCDF names: space, /, and more.
           call replace_char(tmpstr,32,95) 
           call replace_char(tmpstr,47,95) 
-          ierr = nf90_def_var(irstfile, trim(tmpstr), nf90_double, (/ id_flowelemdim , id_timedim /), id_rwqb(j))
+          if (wqbot3D_output == 1) then
+             ierr = nf90_def_var(irstfile, trim(tmpstr)//'_3D', nf90_double, (/ id_laydim, id_flowelemdim , id_timedim /), id_rwqb(j))
+          else
+             ierr = nf90_def_var(irstfile, trim(tmpstr), nf90_double, (/ id_flowelemdim , id_timedim /), id_rwqb(j))
+          endif
           ierr = nf90_put_att(irstfile, id_rwqb(j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
           ierr = nf90_put_att(irstfile, id_rwqb(j),  'standard_name', trim(tmpstr))
           ierr = nf90_put_att(irstfile, id_rwqb(j),  'long_name'    , trim(tmpstr))
@@ -3905,10 +3910,24 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     if (numwqbots > 0) then
        allocate(dum(ndxi))
        do j=1,numwqbots
-          do kk=1,ndxi
-             dum(kk) = wqbot(j,kk)
-          enddo
-          ierr = nf90_put_var(irstfile, id_rwqb(j), dum(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /) )
+          if (wqbot3D_output == 1) then
+!           3D
+            work1 = dmiss
+            do kk=1,ndxi
+               call getkbotktop(kk,kb,kt)
+               call getlayerindices(kk, nlayb, nrlay) 
+               do k = kb,kt
+                  work1(k-kb+nlayb,kk) = wqbot(j,k)
+               enddo
+            enddo
+            ierr = nf90_put_var(irstfile, id_rwqb(j), work1(1:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx, ndxi, 1 /))
+          else
+             do kk=1,ndxi
+                call getkbotktop(kk,kb,kt)
+                dum(kk) = wqbot(j,kb)
+             enddo
+             ierr = nf90_put_var(irstfile, id_rwqb(j), dum(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /) )
+          endif
        enddo
        if (allocated(dum)) deallocate(dum)
     end if
@@ -4776,6 +4795,17 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqb(:,j), nf90_double, UNC_LOC_S, trim(tmpstr), &
                                    '', trim(wqbotnames(j)) // ' in flow element', wqbotunits(j), jabndnd=jabndnd_)
          end do
+         if (wqbot3D_output == 1) then
+            call realloc(mapids%id_wqb3d, (/ 3, numwqbots /), keepExisting=.false., fill = 0)
+            do j=1,numwqbots
+               tmpstr = wqbotnames(j)
+               ! Forbidden chars in NetCDF names: space, /, and more.
+               call replace_char(tmpstr,32,95) 
+               call replace_char(tmpstr,47,95) 
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqb3d(:,j), nf90_double, UNC_LOC_S3D, trim(tmpstr)//'_3D', &
+                                      '', trim(wqbotnames(j)) // ' in flow element (3D)', wqbotunits(j), jabndnd=jabndnd_)  
+            end do
+         endif
       endif
 
       ! WAQ extra outputs
@@ -5735,9 +5765,20 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
     if (numwqbots > 0) then
        do j=1,numwqbots
           do k=1,ndxndxi
-             workx(k) = wqbot(j,k)
+             call getkbotktop(k,kb,kt)
+             workx(k) = wqbot(j,kb)
           end do
           ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqb(:,j), UNC_LOC_S, workx(1:ndxndxi), jabndnd=jabndnd_)
+          if (wqbot3D_output == 1) then
+!         also write 3D
+             do kk=1,ndxndxi
+                call getkbotktop(kk,kb,kt)
+                do k = kb,kt
+                   workx(k) = wqbot(j,k)
+                enddo
+             end do
+             ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqb3d(:,j), UNC_LOC_S3D, workx, jabndnd=jabndnd_)
+          end if
        end do
     end if
 
@@ -7240,6 +7281,22 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                  ierr = nf90_put_att(imapfile, id_wqb(iid,j),  'units'        , tmpstr)
                  ierr = nf90_put_att(imapfile, id_wqb(iid,j),  '_FillValue'   , dmiss)
               end do
+              if (wqbot3D_output == 1) then
+                 call realloc(id_wqb3d, (/ 3, numwqbots /), keepExisting=.false., fill = 0)
+                 do j=1,numwqbots
+                    tmpstr = wqbotnames(j)
+                    ! Forbidden chars in NetCDF names: space, /, and more.
+                    call replace_char(tmpstr,32,95) 
+                    call replace_char(tmpstr,47,95) 
+                    ierr = nf90_def_var(imapfile, trim(tmpstr)//'_3D', nf90_double, (/ id_laydim(iid), id_flowelemdim (iid), id_timedim (iid)/) , id_wqb3d(iid,j))
+                    ierr = nf90_put_att(imapfile, id_wqb3d(iid,j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                    ierr = nf90_put_att(imapfile, id_wqb3d(iid,j),  'standard_name', trim(tmpstr))
+                    ierr = nf90_put_att(imapfile, id_wqb3d(iid,j),  'long_name'    , trim(tmpstr))
+                    tmpstr = wqbotunits(j)
+                    ierr = nf90_put_att(imapfile, id_wqb3d(iid,j),  'units'        , tmpstr)
+                    ierr = nf90_put_att(imapfile, id_wqb3d(iid,j),  '_FillValue'   , dmiss)
+                 end do
+              endif
            endif
 
 !          waq output
@@ -8791,10 +8848,24 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
           allocate(dum(NdxNdxi))
           do j=1,numwqbots
              do kk=1,NdxNdxi
-                dum(kk) = wqbot(j,kk)
+                call getkbotktop(kk,kb,kt)
+                dum(kk) = wqbot(j,kb)
              end do
              ierr = nf90_put_var(imapfile, id_wqb(iid,j), dum, (/ 1, itim /), (/ NdxNdxi, 1 /) )
           end do
+          if (wqbot3D_output == 1) then
+             do j=1,numwqbots
+                do kk=1,ndxndxi
+                   work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+                   call getkbotktop(kk,kb,kt)
+                   call getlayerindices(kk, nlayb, nrlay)  
+                   do k = kb,kt
+                      work1(k-kb+nlayb, kk) = wqbot(j,k)
+                   enddo
+                end do
+                ierr = nf90_put_var(imapfile, id_wqb3d(iid,j), work1(1:kmx,1:ndxndxi), (/ 1, 1, itim /), (/ kmx, ndxndxi, 1 /))
+             end do
+          endif
           if ( allocated(dum) ) deallocate(dum)
        end if
 
@@ -12433,24 +12504,49 @@ subroutine unc_read_map(filename, tim, ierr)
 !   Read the water quality bottom variables
     if(numwqbots > 0) then
        call realloc(id_rwqb, numwqbots, keepExisting = .false., fill = 0)
-       call realloc(tmpvar, [1, ndxi], keepExisting = .false., fill = 0.0d0)
+       if (wqbot3D_output == 1) then
+          call realloc(tmpvar, [max(1,kmx), ndxi], keepExisting = .false., fill = 0.0d0)
+       else
+          call realloc(tmpvar, [1, ndxi], keepExisting = .false., fill = 0.0d0)
+       endif
        do iwqbot = 1, numwqbots
           tmpstr = wqbotnames(iwqbot)
           ! Forbidden chars in NetCDF names: space, /, and more.
           call replace_char(tmpstr,32,95) 
           call replace_char(tmpstr,47,95) 
-          ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_rwqb(iwqbot))
-          if ( ierr.eq.NF90_NOERR ) then
-!            water quality bottom variable exists in restart file
-             ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
-             do kk = 1, ndxi
-                if (jamergedmap == 1) then
-                   kloc = inode_own(kk)
-                else
-                   kloc = kk
-                end if
-                wqbot(iwqbot, kloc) = tmpvar(1,kk)
-             end do
+          if (wqbot3D_output == 1) then
+             ierr = nf90_inq_varid(imapfile, trim(tmpstr)//'_3D', id_rwqb(iwqbot))
+             if ( ierr.eq.NF90_NOERR ) then
+!            3D water quality bottom variable exists in restart file
+                ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), &
+                                    count=(/ kmx, ndxi_own, 1 /))
+                do kk = 1, ndxi_own
+                   if (jamergedmap == 1) then
+                      kloc = inode_own(kk)
+                   else
+                      kloc = kk
+                   end if
+                   call getkbotktop(kloc, kb, kt)
+                   call getlayerindices(kloc, nlayb, nrlay)
+                   do k = kb, kt
+                      wqbot(iwqbot, k) = tmpvar(k-kb+nlayb,kk)
+                   end do
+                enddo
+             endif
+          else
+             ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_rwqb(iwqbot))
+             if ( ierr.eq.NF90_NOERR ) then
+   !            water quality bottom variable exists in restart file
+                ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
+                do kk = 1, ndxi
+                   if (jamergedmap == 1) then
+                      kloc = inode_own(kk)
+                   else
+                      kloc = kk
+                   end if
+                   wqbot(iwqbot, kloc) = tmpvar(1,kk)
+                end do
+             endif
           endif
           call check_error(ierr, wqbotnames(iwqbot))
        enddo

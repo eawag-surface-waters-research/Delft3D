@@ -551,9 +551,9 @@
          do iconst=1,numconst
             mbamass(iconst,imba) = mbamass(iconst,imba) + constituents(iconst,k)*vol1(k)
          end do
-      end do
-      do iwqbot=1,numwqbots
-         mbamass(numconst+iwqbot,imba) = mbamass(numconst+iwqbot,imba) + wqbot(iwqbot,kk)*ba(kk)
+         do iwqbot=1,numwqbots
+            mbamass(numconst+iwqbot,imba) = mbamass(numconst+iwqbot,imba) + wqbot(iwqbot,k)*ba(kk)
+         end do
       end do
    end do 
    end subroutine mba_sum

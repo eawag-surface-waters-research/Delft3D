@@ -377,6 +377,12 @@ contains
          read (rec,*) transformcoef(2)
      end if
    
+     keywrd = 'LAYER'
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+         read (rec,*) transformcoef(3)
+     end if
+
      keywrd = 'IFRCTYP'
      call zoekopt(minp, rec, trim(keywrd), jaopt)
      if (jaopt == 1) then

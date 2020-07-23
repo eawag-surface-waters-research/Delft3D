@@ -107,6 +107,8 @@ implicit none
     integer                           :: IVAL_HWQN
     integer                           :: IVAL_WQB1
     integer                           :: IVAL_WQBN
+    integer                           :: IVAL_WQB3D1
+    integer                           :: IVAL_WQB3DN
     integer                           :: IVAL_SED ! HK code
     integer                           :: IVAL_SF1 ! stm code
     integer                           :: IVAL_SFN
@@ -152,7 +154,7 @@ implicit none
     integer                           :: IVAL_SOUR1    
     integer                           :: IVAL_SOURN    
     integer                           :: IVAL_SINK1    
-    integer                           :: IVAL_SINKN    
+    integer                           :: IVAL_SINKN 
     
     integer                           :: IPNT_S1            ! pointers in valobs work array
     integer                           :: IPNT_HS
@@ -183,10 +185,12 @@ implicit none
     integer                           :: IPNT_TEM1
     integer                           :: IPNT_TRA1
     integer                           :: IPNT_TRAN
-    integer                           :: IPNT_WQB1
-    integer                           :: IPNT_WQBN
     integer                           :: IPNT_HWQ1
     integer                           :: IPNT_HWQN
+    integer                           :: IPNT_WQB1
+    integer                           :: IPNT_WQBN
+    integer                           :: IPNT_WQB3D1
+    integer                           :: IPNT_WQB3DN
 !    integer                           :: IPNT_SPIR1
     integer                           :: IPNT_SF1
     integer                           :: IPNT_SFN
@@ -234,7 +238,7 @@ implicit none
     integer                           :: IPNT_SOUR1    
     integer                           :: IPNT_SOURN    
     integer                           :: IPNT_SINK1    
-    integer                           :: IPNT_SINKN    
+    integer                           :: IPNT_SINKN 
 contains
 
 !> (re)initialize valobs and set pointers for observation stations
@@ -282,7 +286,7 @@ subroutine init_valobs_pointers()
    use m_flowparameters
    use m_flow, only: iturbulencemodel, idensform, kmx
    use m_transport, only: ITRA1, ITRAN, ISED1, ISEDN
-   use m_fm_wq_processes, only: noout, numwqbots
+   use m_fm_wq_processes, only: noout, numwqbots, wqbot3D_output
    use m_sediment, only: stm_included, stmpar
    implicit none
    
@@ -321,6 +325,8 @@ subroutine init_valobs_pointers()
    IVAL_HWQN       = 0
    IVAL_WQB1       = 0
    IVAL_WQBN       = 0
+   IVAL_WQB3D1     = 0
+   IVAL_WQB3DN     = 0
    IVAL_SF1        = 0
    IVAL_SFN        = 0
    IVAL_SED        = 0
@@ -436,7 +442,7 @@ subroutine init_valobs_pointers()
       i=i+1;          IVAL_SSCX1      = i
       i=i+numfracs-1; IVAL_SSCXN      = i
       i=i+1;          IVAL_SSCY1      = i
-      i=i+numfracs-1; IVAL_SSCYN      = i
+      i=i+numfracs-1; IVAL_SSCYN      = i      
       if (jawave>0) then
          i=i+1;          IVAL_SBWX1      = i
          i=i+numfracs-1; IVAL_SBWXN      = i
@@ -447,12 +453,12 @@ subroutine init_valobs_pointers()
          i=i+1;          IVAL_SSWY1      = i   
          i=i+numfracs-1; IVAL_SSWYN      = i
       end if
-      numfracs = stmpar%lsedsus
-      i=i+1;          IVAL_SOUR1      = i
-      i=i+numfracs-1; IVAL_SOURN      = i
-      i=i+1;          IVAL_SINK1      = i
-      i=i+numfracs-1; IVAL_SINKN      = i      
-   end if
+         numfracs = stmpar%lsedsus
+         i=i+1;          IVAL_SOUR1      = i
+         i=i+numfracs-1; IVAL_SOURN      = i
+         i=i+1;          IVAL_SINK1      = i
+         i=i+numfracs-1; IVAL_SINKN      = i
+         endif
    MAXNUMVALOBS2D                       = i-i0
    
 !  3D, layer centered
@@ -481,6 +487,10 @@ subroutine init_valobs_pointers()
    if ( noout.gt.0 ) then
       i=i+1;            IVAL_HWQ1       = i
       i=i+noout-1;      IVAL_HWQN       = i  !< All waq history outputs
+   end if
+   if ( numwqbots > 0 .and. wqbot3D_output == 1 ) then
+      i=i+1;            IVAL_WQB3D1     = i
+      i=i+numwqbots-1;  IVAL_WQB3DN     = i  !< All 3D waqbot history outputs
    end if
    if ( stm_included .and. ISED1.gt.0 ) then
       i=i+1;              IVAL_SF1       = i
@@ -521,7 +531,7 @@ subroutine init_valobs_pointers()
    endif
    MAXNUMVALOBS3Dw                      = i-i0
    
-!  set pointers in valobs array   
+!  set pointers in valobs array
    IPNT_S1    = ivalpoint(IVAL_S1,    kmx)  ! kmx > 1 for non 3D quantitites?  antwoord: nee, omdat bijv. IVAL_S1 <= MAXNUMVALOBS2D
    IPNT_HS    = ivalpoint(IVAL_HS,    kmx)
    IPNT_BL    = ivalpoint(IVAL_BL,    kmx)
@@ -540,6 +550,8 @@ subroutine init_valobs_pointers()
    IPNT_TRAN  = ivalpoint(IVAL_TRAN,  kmx)
    IPNT_HWQ1  = ivalpoint(IVAL_HWQ1,  kmx)
    IPNT_HWQN  = ivalpoint(IVAL_HWQN,  kmx)
+   IPNT_WQB3D1  = ivalpoint(IVAL_WQB3D1,  kmx)
+   IPNT_WQB3DN  = ivalpoint(IVAL_WQB3DN,  kmx)
    IPNT_SF1   = ivalpoint(IVAL_SF1,   kmx)
    IPNT_SFN   = ivalpoint(IVAL_SFN,   kmx)
 !   IPNT_SPIR1 = ivalpoint(IVAL_SPIR1, kmx)

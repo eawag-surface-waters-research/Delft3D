@@ -66,6 +66,11 @@
       jawriteDetailedTimers = 1
       if (timon) call timstrt( "fm_wq_processes_ini_sub", ithndl )
 
+      if (kmx>0) then
+         wqbot3D_output = md_wqbot3D_output
+      else
+         wqbot3D_output = 0
+      end if
       ibflag = 0
 
       substance_file = md_subfile
@@ -1113,6 +1118,7 @@
 !> add waq bottom substance
    subroutine add_wqbot(wqbotnam, wqbotunit, iwqbot, janew)
       use m_flowgeom
+      use m_flow, only: Ndkx
       use m_flowexternalforcings, only: numtracers, trnames
       use m_fm_wq_processes
       use m_alloc
@@ -1142,16 +1148,13 @@
    !     add bottom substance
 
          numwqbots = numwqbots+1
-   !     realloc
-         call realloc(wqbot, [numwqbots,Ndxi], keepExisting=.true., fill=0.0d0)
-         call realloc(wqbotnames, numwqbots, keepExisting=.true., fill='')
-         call realloc(wqbotunits, numwqbots, keepExisting=.true., fill='')
          iwqbot = numwqbots
-         wqbotnames(iwqbot) = trim(wqbotnam)
+
+   !     realloc
+         call realloc(wqbotnames, numwqbots, keepExisting=.true., fill=trim(wqbotnam))
+         call realloc(wqbotunits, numwqbots, keepExisting=.true., fill=wqbotunit)
+         call realloc(wqbot, (/ numwqbots, Ndkx /), keepExisting=.true., fill=0.0d0)
       end if
-      if (wqbotunit.ne.' ') then
-         wqbotunits(iwqbot) = wqbotunit
-      endif
    end subroutine add_wqbot
 
    subroutine fm_wq_processes_step(dt,time)
@@ -1433,9 +1436,9 @@
 !     fill concentrations
       ipoiconc = arrpoi(iiconc)
       do k=kbx,ktx
-         do isys=1,nosys !notot
+         do isys=1,nosys
             iconst = isys2const(isys)
-            pmsa(ipoiconc+(k-kbx)*(notot)+isys-1) = constituents(iconst,k)
+            pmsa(ipoiconc+(k-kbx)*notot+isys-1) = constituents(iconst,k)
          end do
       end do
 
@@ -1455,16 +1458,20 @@
       end do
 
 !     fill concentrations and masses (not transported, only first time)
-      if (notot>nosys.and.first) then
+      if (first) then
          first = .false.
+         if (notot>nosys) then
          do kk=1,Ndxi
             call getkbotktopmax(kk,kb,kt,ktmax)
-            do isys=nosys+1,notot
-               iwqbot = isys2wqbot(isys)
-               pmsa(ipoiconc+(kb-kbx)*(notot)+isys-1) = wqbot(iwqbot,kk)
-               amass(isys,kb-kbx+1) = wqbot(iwqbot,kk)*ba(kk)
+            do k=kb,ktmax
+               do isys=nosys+1,notot
+                  iwqbot = isys2wqbot(isys)
+                  pmsa(ipoiconc+(k-kbx)*(notot)+isys-1) = wqbot(iwqbot,k)
+                  amass(isys,k-kbx+1) = wqbot(iwqbot,k)*ba(kk)
+               end do
             end do
          end do
+         end if
       end if
 
 !     set dry/wet indicator
@@ -1549,9 +1556,11 @@
       if (notot>nosys) then
          do kk=1,Ndxi
             call getkbotktopmax(kk,kb,kt,ktmax)
-            do isys=nosys+1,notot
-               iwqbot = isys2wqbot(isys)
-               wqbot(iwqbot,kk) = amass(isys,kb-kbx+1) / ba(kk)
+            do k=kb,kt
+               do isys=nosys+1,notot
+                  iwqbot = isys2wqbot(isys)
+                  wqbot(iwqbot,k) = amass(isys,k-kbx+1) / ba(kk)
+               end do
             end do
          end do
       end if
