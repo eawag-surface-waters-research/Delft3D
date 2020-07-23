@@ -74,6 +74,7 @@ implicit none
     integer                           :: MAXNUMVALOBS2D   ! maximum number of outputted values at observation stations
     integer                           :: MAXNUMVALOBS3D   ! maximum number of outputted values at observation stations, 3D layer centers
     integer                           :: MAXNUMVALOBS3Dw  ! maximum number of outputted values at observation stations, 3D layer interfaces (e.g. zws)
+    integer                           :: MAXNUMVALOBSLYR  ! maximum number of outputted values at observation stations, bed sediment layers (e.g. msed)
     integer                           :: IVAL_S1          ! 2D first
     integer                           :: IVAL_HS
     integer                           :: IVAL_BL
@@ -155,6 +156,25 @@ implicit none
     integer                           :: IVAL_SOURN    
     integer                           :: IVAL_SINK1    
     integer                           :: IVAL_SINKN 
+    integer                           :: IVAL_BODSED1
+    integer                           :: IVAL_BODSEDN
+    integer                           :: IVAL_DPSED
+    integer                           :: IVAL_MSED1
+    integer                           :: IVAL_MSEDN
+    integer                           :: IVAL_THLYR
+    integer                           :: IVAL_POROS
+    integer                           :: IVAL_LYRFRAC1
+    integer                           :: IVAL_LYRFRACN
+    integer                           :: IVAL_FRAC1
+    integer                           :: IVAL_FRACN
+    integer                           :: IVAL_MUDFRAC
+    integer                           :: IVAL_SANDFRAC
+    integer                           :: IVAL_FIXFAC1
+    integer                           :: IVAL_FIXFACN
+    integer                           :: IVAL_HIDEXP1
+    integer                           :: IVAL_HIDEXPN
+    integer                           :: IVAL_MFLUFF1
+    integer                           :: IVAL_MFLUFFN
     
     integer                           :: IPNT_S1            ! pointers in valobs work array
     integer                           :: IPNT_HS
@@ -239,6 +259,25 @@ implicit none
     integer                           :: IPNT_SOURN    
     integer                           :: IPNT_SINK1    
     integer                           :: IPNT_SINKN 
+    integer                           :: IPNT_BODSED1
+    integer                           :: IPNT_BODSEDN
+    integer                           :: IPNT_DPSED
+    integer                           :: IPNT_MSED1
+    integer                           :: IPNT_MSEDN
+    integer                           :: IPNT_THLYR
+    integer                           :: IPNT_POROS
+    integer                           :: IPNT_LYRFRAC1
+    integer                           :: IPNT_LYRFRACN
+    integer                           :: IPNT_FRAC1
+    integer                           :: IPNT_FRACN
+    integer                           :: IPNT_MUDFRAC
+    integer                           :: IPNT_SANDFRAC
+    integer                           :: IPNT_FIXFAC1
+    integer                           :: IPNT_FIXFACN
+    integer                           :: IPNT_HIDEXP1
+    integer                           :: IPNT_HIDEXPN
+    integer                           :: IPNT_MFLUFF1
+    integer                           :: IPNT_MFLUFFN   
 contains
 
 !> (re)initialize valobs and set pointers for observation stations
@@ -290,11 +329,12 @@ subroutine init_valobs_pointers()
    use m_sediment, only: stm_included, stmpar
    implicit none
    
-   integer             :: i, i0, numfracs
+   integer             :: i, i0, numfracs, nlyrs
    
    MAXNUMVALOBS2D  = 0
    MAXNUMVALOBS3D  = 0
    MAXNUMVALOBS3Dw = 0
+   MAXNUMVALOBSLYR = 0
    
 !  initialize
    IVAL_S1         = 0
@@ -378,6 +418,27 @@ subroutine init_valobs_pointers()
    IVAL_SINKN      = 0
    IVAL_UCXST      = 0
    IVAL_UCYST      = 0
+   IVAL_BODSED1    = 0
+   IVAL_BODSEDN    = 0
+   IVAL_DPSED      = 0
+   IVAL_MSED1      = 0
+   IVAL_MSEDN      = 0
+   IVAL_THLYR      = 0
+   IVAL_POROS      = 0
+   IVAL_LYRFRAC1   = 0
+   IVAL_LYRFRACN   = 0
+   IVAL_FRAC1      = 0
+   IVAL_FRACN      = 0
+   IVAL_MUDFRAC    = 0
+   IVAL_SANDFRAC   = 0
+   IVAL_FIXFAC1    = 0
+   IVAL_FIXFACN    = 0
+   IVAL_HIDEXP1    = 0
+   IVAL_HIDEXPN    = 0
+   IVAL_MFLUFF1    = 0
+   IVAL_MFLUFFN    = 0
+   
+   nlyrs           = 0
    
 !  2D
    i=0
@@ -435,12 +496,14 @@ subroutine init_valobs_pointers()
    end if
    if (stm_included .and. jased>0) then
       numfracs = stmpar%lsedtot
+      i=i+1;          IVAL_MUDFRAC    = i
+      i=i+1;          IVAL_SANDFRAC   = i      
       i=i+1;          IVAL_SBCX1      = i          ! should be done per fraction
       i=i+numfracs-1; IVAL_SBCXN      = i
       i=i+1;          IVAL_SBCY1      = i
       i=i+numfracs-1; IVAL_SBCYN      = i
       i=i+1;          IVAL_SSCX1      = i
-      i=i+numfracs-1; IVAL_SSCXN      = i
+      i=i+numfracs-1; IVAL_SSCXN      = i          ! on purpose lsedtot, see alloc in morphology_data_module
       i=i+1;          IVAL_SSCY1      = i
       i=i+numfracs-1; IVAL_SSCYN      = i      
       if (jawave>0) then
@@ -453,12 +516,29 @@ subroutine init_valobs_pointers()
          i=i+1;          IVAL_SSWY1      = i   
          i=i+numfracs-1; IVAL_SSWYN      = i
       end if
+      if (stmpar%morlyr%settings%iunderlyr==1) then
+         i=i+1;          IVAL_DPSED      = i      
+         i=i+1;          IVAL_BODSED1    = i
+         i=i+numfracs-1; IVAL_BODSEDN    = i
+      endif
+      i=i+1;          IVAL_FRAC1      = i
+      i=i+numfracs-1; IVAL_FRACN      = i 
+      i=i+1;          IVAL_FIXFAC1    = i
+      i=i+numfracs-1; IVAL_FIXFACN    = i 
+      i=i+1;          IVAL_HIDEXP1    = i
+      i=i+numfracs-1; IVAL_HIDEXPN    = i
+      if (stmpar%lsedsus>0) then
          numfracs = stmpar%lsedsus
          i=i+1;          IVAL_SOUR1      = i
          i=i+numfracs-1; IVAL_SOURN      = i
          i=i+1;          IVAL_SINK1      = i
          i=i+numfracs-1; IVAL_SINKN      = i
+         if (stmpar%morpar%flufflyr%iflufflyr>0) then
+            i=i+1;          IVAL_MFLUFF1    = i
+            i=i+numfracs-1; IVAL_MFLUFFN    = i 
          endif
+      endif
+   end if
    MAXNUMVALOBS2D                       = i-i0
    
 !  3D, layer centered
@@ -531,109 +611,142 @@ subroutine init_valobs_pointers()
    endif
    MAXNUMVALOBS3Dw                      = i-i0
    
-!  set pointers in valobs array
-   IPNT_S1    = ivalpoint(IVAL_S1,    kmx)  ! kmx > 1 for non 3D quantitites?  antwoord: nee, omdat bijv. IVAL_S1 <= MAXNUMVALOBS2D
-   IPNT_HS    = ivalpoint(IVAL_HS,    kmx)
-   IPNT_BL    = ivalpoint(IVAL_BL,    kmx)
-   IPNT_SMX   = ivalpoint(IVAL_SMX,   kmx)
-   IPNT_CMX   = ivalpoint(IVAL_CMX,   kmx)
-   IPNT_UCX   = ivalpoint(IVAL_UCX,   kmx)
-   IPNT_UCY   = ivalpoint(IVAL_UCY,   kmx)
-   IPNT_UCZ   = ivalpoint(IVAL_UCZ,   kmx)   
-   IPNT_UCXQ  = ivalpoint(IVAL_UCXQ,  kmx)   
-   IPNT_UCYQ  = ivalpoint(IVAL_UCYQ,  kmx)   
-   IPNT_UCXST  = ivalpoint(IVAL_UCXST,kmx)   
-   IPNT_UCYST  = ivalpoint(IVAL_UCYST,kmx)   
-   IPNT_SA1   = ivalpoint(IVAL_SA1,   kmx)
-   IPNT_TEM1  = ivalpoint(IVAL_TEM1,  kmx)
-   IPNT_TRA1  = ivalpoint(IVAL_TRA1,  kmx)
-   IPNT_TRAN  = ivalpoint(IVAL_TRAN,  kmx)
-   IPNT_HWQ1  = ivalpoint(IVAL_HWQ1,  kmx)
-   IPNT_HWQN  = ivalpoint(IVAL_HWQN,  kmx)
-   IPNT_WQB3D1  = ivalpoint(IVAL_WQB3D1,  kmx)
-   IPNT_WQB3DN  = ivalpoint(IVAL_WQB3DN,  kmx)
-   IPNT_SF1   = ivalpoint(IVAL_SF1,   kmx)
-   IPNT_SFN   = ivalpoint(IVAL_SFN,   kmx)
-!   IPNT_SPIR1 = ivalpoint(IVAL_SPIR1, kmx)
-   IPNT_SED   = ivalpoint(IVAL_SED,   kmx)
-   IPNT_WX    = ivalpoint(IVAL_WX ,   kmx)
-   IPNT_WY    = ivalpoint(IVAL_WY ,   kmx)
-   IPNT_PATM  = ivalpoint(IVAL_PATM,  kmx)
-   IPNT_WAVEH = ivalpoint(IVAL_WAVEH, kmx)
-   IPNT_WAVET = ivalpoint(IVAL_WAVET, kmx)
-   IPNT_WAVED = ivalpoint(IVAL_WAVED, kmx)
-   IPNT_WAVETAU = ivalpoint(IVAL_WAVETAU, kmx)
-   IPNT_WAVEL = ivalpoint(IVAL_WAVEL, kmx)
-   IPNT_WAVER = ivalpoint(IVAL_WAVER, kmx)
-   IPNT_WAVEU = ivalpoint(IVAL_WAVEU, kmx)
-   IPNT_ZCS   = ivalpoint(IVAL_ZCS,   kmx)
-   IPNT_ZWS   = ivalpoint(IVAL_ZWS,   kmx)
-   IPNT_ZWU   = ivalpoint(IVAL_ZWU,   kmx)
-   IPNT_TKIN  = ivalpoint(IVAL_TKIN,  kmx)
-   IPNT_TEPS  = ivalpoint(IVAL_TEPS,  kmx)
-   IPNT_VICWW = ivalpoint(IVAL_VICWW, kmx)
-   IPNT_RICH  = ivalpoint(IVAL_RICH,  kmx)
-   IPNT_RHO   = ivalpoint(IVAL_RHO,   kmx)
-   IPNT_WS1   = ivalpoint(IVAL_WS1,   kmx)
-   IPNT_WSN   = ivalpoint(IVAL_WSN,   kmx)
-   IPNT_SEDDIF1 = ivalpoint(IVAL_SEDDIF1,   kmx)
-   IPNT_SEDDIFN = ivalpoint(IVAL_SEDDIFN,   kmx)
-   IPNT_SBCX1 = ivalpoint(IVAL_SBCX1,   kmx)
-   IPNT_SBCXN = ivalpoint(IVAL_SBCXN,   kmx)
-   IPNT_SBCY1 = ivalpoint(IVAL_SBCY1,   kmx)
-   IPNT_SBCYN = ivalpoint(IVAL_SBCYN,   kmx)
-   IPNT_SSCX1 = ivalpoint(IVAL_SSCX1,   kmx)
-   IPNT_SSCXN = ivalpoint(IVAL_SSCXN,   kmx)
-   IPNT_SSCY1 = ivalpoint(IVAL_SSCY1,   kmx)
-   IPNT_SSCYN = ivalpoint(IVAL_SSCYN,   kmx)
-   IPNT_SOUR1 = ivalpoint(IVAL_SOUR1,   kmx)
-   IPNT_SOURN = ivalpoint(IVAL_SOURN,   kmx)
-   IPNT_SINK1 = ivalpoint(IVAL_SINK1,   kmx)
-   IPNT_SINKN = ivalpoint(IVAL_SINKN,   kmx)
-   if (jawave>0) then
-      IPNT_SBWX1 = ivalpoint(IVAL_SBWX1,   kmx)
-      IPNT_SBWXN = ivalpoint(IVAL_SBWXN,   kmx)
-      IPNT_SBWY1 = ivalpoint(IVAL_SBWY1,   kmx)
-      IPNT_SBWYN = ivalpoint(IVAL_SBWYN,   kmx)
-      IPNT_SSWX1 = ivalpoint(IVAL_SSWX1,   kmx)
-      IPNT_SSWXN = ivalpoint(IVAL_SSWXN,   kmx)
-      IPNT_SSWY1 = ivalpoint(IVAL_SSWY1,   kmx)
-      IPNT_SSWYN = ivalpoint(IVAL_SSWYN,   kmx)
-      IPNT_UCXST = ivalpoint(IVAL_UCXST,   kmx)
-      IPNT_UCYST = ivalpoint(IVAL_UCYST,   kmx)
+!  Morphology, bed composition layers
+   i0=i
+   if (jased>0 .and. stm_included) then 
+      numfracs=stmpar%lsedtot
+      if (stmpar%morlyr%settings%iunderlyr==2) then
+         nlyrs=stmpar%morlyr%settings%nlyr
+         i=i+1;               IVAL_POROS    = i
+         i=i+1;               IVAL_THLYR    = i
+         i=i+1;               IVAL_MSED1    = i
+         i=i+numfracs-1;      IVAL_MSEDN    = i
+         i=i+1;               IVAL_LYRFRAC1 = i
+         i=i+numfracs-1;      IVAL_LYRFRACN = i          
    endif
+   endif  
+   MAXNUMVALOBSLYR                      = i-i0
    
-   IPNT_TAIR  = ivalpoint(IVAL_TAIR,  kmx)
-   IPNT_WIND  = ivalpoint(IVAL_WIND,  kmx)
-   IPNT_RHUM  = ivalpoint(IVAL_RHUM,  kmx)
-   IPNT_CLOU  = ivalpoint(IVAL_CLOU,  kmx)
-   IPNT_QSUN  = ivalpoint(IVAL_QSUN,  kmx)
-   IPNT_QEVA  = ivalpoint(IVAL_QEVA,  kmx)
-   IPNT_QCON  = ivalpoint(IVAL_QCON,  kmx)
-   IPNT_QLON  = ivalpoint(IVAL_QLON,  kmx)
-   IPNT_QFRE  = ivalpoint(IVAL_QFRE,  kmx)
-   IPNT_QFRC  = ivalpoint(IVAL_QFRC,  kmx)
-   IPNT_QTOT  = ivalpoint(IVAL_QTOT,  kmx)
-   IPNT_RAIN  = ivalpoint(IVAL_RAIN,  kmx)
-   IPNT_INFILTCAP = ivalpoint(IVAL_INFILTCAP,  kmx)
-   IPNT_INFILTACT = ivalpoint(IVAL_INFILTACT,  kmx)
-   IPNT_WQB1  = ivalpoint(IVAL_WQB1,  kmx)
-   IPNT_WQBN  = ivalpoint(IVAL_WQBN,  kmx)
+!  set pointers in valobs array
+   IPNT_S1    = ivalpoint(IVAL_S1,    kmx, nlyrs)     ! kmx > 1 for non 3D quantitites?  antwoord: nee, omdat bijv. IVAL_S1 <= MAXNUMVALOBS2D
+   IPNT_HS    = ivalpoint(IVAL_HS,    kmx, nlyrs)
+   IPNT_BL    = ivalpoint(IVAL_BL,    kmx, nlyrs)
+   IPNT_SMX   = ivalpoint(IVAL_SMX,   kmx, nlyrs)
+   IPNT_CMX   = ivalpoint(IVAL_CMX,   kmx, nlyrs)
+   IPNT_UCX   = ivalpoint(IVAL_UCX,   kmx, nlyrs)
+   IPNT_UCY   = ivalpoint(IVAL_UCY,   kmx, nlyrs)
+   IPNT_UCZ   = ivalpoint(IVAL_UCZ,   kmx, nlyrs)   
+   IPNT_UCXQ  = ivalpoint(IVAL_UCXQ,  kmx, nlyrs)   
+   IPNT_UCYQ  = ivalpoint(IVAL_UCYQ,  kmx, nlyrs)   
+   IPNT_UCXST  = ivalpoint(IVAL_UCXST,kmx, nlyrs)   
+   IPNT_UCYST  = ivalpoint(IVAL_UCYST,kmx, nlyrs)   
+   IPNT_SA1   = ivalpoint(IVAL_SA1,   kmx, nlyrs)
+   IPNT_TEM1  = ivalpoint(IVAL_TEM1,  kmx, nlyrs)
+   IPNT_TRA1  = ivalpoint(IVAL_TRA1,  kmx, nlyrs)
+   IPNT_TRAN  = ivalpoint(IVAL_TRAN,  kmx, nlyrs)
+   IPNT_HWQ1  = ivalpoint(IVAL_HWQ1,  kmx, nlyrs)
+   IPNT_HWQN  = ivalpoint(IVAL_HWQN,  kmx, nlyrs)
+   IPNT_SF1   = ivalpoint(IVAL_SF1,   kmx, nlyrs)
+   IPNT_SFN   = ivalpoint(IVAL_SFN,   kmx, nlyrs)
+!   IPNT_SPIR1 = ivalpoint(IVAL_SPIR1, kmx)
+   IPNT_SED   = ivalpoint(IVAL_SED,   kmx, nlyrs)
+   IPNT_WX    = ivalpoint(IVAL_WX ,   kmx, nlyrs)
+   IPNT_WY    = ivalpoint(IVAL_WY ,   kmx, nlyrs)
+   IPNT_PATM  = ivalpoint(IVAL_PATM,  kmx, nlyrs)
+   IPNT_WAVEH = ivalpoint(IVAL_WAVEH, kmx, nlyrs)
+   IPNT_WAVET = ivalpoint(IVAL_WAVET, kmx, nlyrs)
+   IPNT_WAVED = ivalpoint(IVAL_WAVED, kmx, nlyrs)
+   IPNT_WAVETAU = ivalpoint(IVAL_WAVETAU, kmx, nlyrs)
+   IPNT_WAVEL = ivalpoint(IVAL_WAVEL, kmx, nlyrs)
+   IPNT_WAVER = ivalpoint(IVAL_WAVER, kmx, nlyrs)
+   IPNT_WAVEU = ivalpoint(IVAL_WAVEU, kmx, nlyrs)
+   IPNT_ZCS   = ivalpoint(IVAL_ZCS,   kmx, nlyrs)
+   IPNT_ZWS   = ivalpoint(IVAL_ZWS,   kmx, nlyrs)
+   IPNT_ZWU   = ivalpoint(IVAL_ZWU,   kmx, nlyrs)
+   IPNT_TKIN  = ivalpoint(IVAL_TKIN,  kmx, nlyrs)
+   IPNT_TEPS  = ivalpoint(IVAL_TEPS,  kmx, nlyrs)
+   IPNT_VICWW = ivalpoint(IVAL_VICWW, kmx, nlyrs)
+   IPNT_RICH  = ivalpoint(IVAL_RICH,  kmx, nlyrs)
+   IPNT_RHO   = ivalpoint(IVAL_RHO,   kmx, nlyrs)
+   IPNT_WS1   = ivalpoint(IVAL_WS1,   kmx, nlyrs)
+   IPNT_WSN   = ivalpoint(IVAL_WSN,   kmx, nlyrs)
+   IPNT_SEDDIF1 = ivalpoint(IVAL_SEDDIF1,   kmx, nlyrs)
+   IPNT_SEDDIFN = ivalpoint(IVAL_SEDDIFN,   kmx, nlyrs)
+   IPNT_SBCX1 = ivalpoint(IVAL_SBCX1,   kmx, nlyrs)
+   IPNT_SBCXN = ivalpoint(IVAL_SBCXN,   kmx, nlyrs)
+   IPNT_SBCY1 = ivalpoint(IVAL_SBCY1,   kmx, nlyrs)
+   IPNT_SBCYN = ivalpoint(IVAL_SBCYN,   kmx, nlyrs)
+   IPNT_SSCX1 = ivalpoint(IVAL_SSCX1,   kmx, nlyrs)
+   IPNT_SSCXN = ivalpoint(IVAL_SSCXN,   kmx, nlyrs)
+   IPNT_SSCY1 = ivalpoint(IVAL_SSCY1,   kmx, nlyrs)
+   IPNT_SSCYN = ivalpoint(IVAL_SSCYN,   kmx, nlyrs)
+   IPNT_SOUR1 = ivalpoint(IVAL_SOUR1,   kmx, nlyrs)
+   IPNT_SOURN = ivalpoint(IVAL_SOURN,   kmx, nlyrs)
+   IPNT_SINK1 = ivalpoint(IVAL_SINK1,   kmx, nlyrs)
+   IPNT_SINKN = ivalpoint(IVAL_SINKN,   kmx, nlyrs)
+   IPNT_SBWX1 = ivalpoint(IVAL_SBWX1,   kmx, nlyrs)
+   IPNT_SBWXN = ivalpoint(IVAL_SBWXN,   kmx, nlyrs)
+   IPNT_SBWY1 = ivalpoint(IVAL_SBWY1,   kmx, nlyrs)
+   IPNT_SBWYN = ivalpoint(IVAL_SBWYN,   kmx, nlyrs)
+   IPNT_SSWX1 = ivalpoint(IVAL_SSWX1,   kmx, nlyrs)
+   IPNT_SSWXN = ivalpoint(IVAL_SSWXN,   kmx, nlyrs)
+   IPNT_SSWY1 = ivalpoint(IVAL_SSWY1,   kmx, nlyrs)
+   IPNT_SSWYN = ivalpoint(IVAL_SSWYN,   kmx, nlyrs)
+   IPNT_UCXST = ivalpoint(IVAL_UCXST,   kmx, nlyrs)
+   IPNT_UCYST = ivalpoint(IVAL_UCYST,   kmx, nlyrs)
+   IPNT_TAIR  = ivalpoint(IVAL_TAIR,  kmx, nlyrs)
+   IPNT_WIND  = ivalpoint(IVAL_WIND,  kmx, nlyrs)
+   IPNT_RHUM  = ivalpoint(IVAL_RHUM,  kmx, nlyrs)
+   IPNT_CLOU  = ivalpoint(IVAL_CLOU,  kmx, nlyrs)
+   IPNT_QSUN  = ivalpoint(IVAL_QSUN,  kmx, nlyrs)
+   IPNT_QEVA  = ivalpoint(IVAL_QEVA,  kmx, nlyrs)
+   IPNT_QCON  = ivalpoint(IVAL_QCON,  kmx, nlyrs)
+   IPNT_QLON  = ivalpoint(IVAL_QLON,  kmx, nlyrs)
+   IPNT_QFRE  = ivalpoint(IVAL_QFRE,  kmx, nlyrs)
+   IPNT_QFRC  = ivalpoint(IVAL_QFRC,  kmx, nlyrs)
+   IPNT_QTOT  = ivalpoint(IVAL_QTOT,  kmx, nlyrs)
+   IPNT_RAIN  = ivalpoint(IVAL_RAIN,  kmx, nlyrs)
+   IPNT_INFILTCAP = ivalpoint(IVAL_INFILTCAP,  kmx, nlyrs)
+   IPNT_INFILTACT = ivalpoint(IVAL_INFILTACT,  kmx, nlyrs)
+   IPNT_WQB1  = ivalpoint(IVAL_WQB1,  kmx, nlyrs)
+   IPNT_WQBN  = ivalpoint(IVAL_WQBN,  kmx, nlyrs)
+   IPNT_SINK1    = ivalpoint(IVAL_SINK1   ,kmx, nlyrs)
+   IPNT_SINKN    = ivalpoint(IVAL_SINKN   ,kmx, nlyrs)
+   IPNT_BODSED1  = ivalpoint(IVAL_BODSED1 ,kmx, nlyrs)
+   IPNT_BODSEDN  = ivalpoint(IVAL_BODSEDN ,kmx, nlyrs)
+   IPNT_DPSED    = ivalpoint(IVAL_DPSED   ,kmx, nlyrs)
+   IPNT_MSED1    = ivalpoint(IVAL_MSED1   ,kmx, nlyrs)
+   IPNT_MSEDN    = ivalpoint(IVAL_MSEDN   ,kmx, nlyrs)
+   IPNT_THLYR    = ivalpoint(IVAL_THLYR   ,kmx, nlyrs)
+   IPNT_POROS    = ivalpoint(IVAL_POROS   ,kmx, nlyrs)
+   IPNT_LYRFRAC1 = ivalpoint(IVAL_LYRFRAC1,kmx, nlyrs)
+   IPNT_LYRFRACN = ivalpoint(IVAL_LYRFRACN,kmx, nlyrs)
+   IPNT_FRAC1    = ivalpoint(IVAL_FRAC1   ,kmx, nlyrs)
+   IPNT_FRACN    = ivalpoint(IVAL_FRACN   ,kmx, nlyrs)
+   IPNT_MUDFRAC  = ivalpoint(IVAL_MUDFRAC ,kmx, nlyrs)
+   IPNT_SANDFRAC = ivalpoint(IVAL_SANDFRAC,kmx, nlyrs)
+   IPNT_FIXFAC1  = ivalpoint(IVAL_FIXFAC1 ,kmx, nlyrs)
+   IPNT_FIXFACN  = ivalpoint(IVAL_FIXFACN ,kmx, nlyrs)
+   IPNT_HIDEXP1  = ivalpoint(IVAL_HIDEXP1 ,kmx, nlyrs)
+   IPNT_HIDEXPN  = ivalpoint(IVAL_HIDEXPN ,kmx, nlyrs)
+   IPNT_MFLUFF1  = ivalpoint(IVAL_MFLUFF1 ,kmx, nlyrs)
+   IPNT_MFLUFFN  = ivalpoint(IVAL_MFLUFFN ,kmx, nlyrs)
    
-   IPNT_NUM   = ivalpoint(0,          kmx)-1
+   IPNT_NUM      = ivalpoint(0,          kmx, nlyrs)-1
    
    return
    
 end subroutine init_valobs_pointers
 
 !> pointer of variable in valobs work array
-integer function ivalpoint(ivar, kmx)
+integer function ivalpoint(ivar, kmx, nlyrs)
    use messageHandling
    
    implicit none
    
    integer, intent(in) :: ivar   !< observation station variable number
    integer, intent(in) :: kmx    !< maximum number of layers
+   integer, intent(in)           :: nlyrs  !< maximum number of bed layers
    
    integer             :: i, istart, iend
    
@@ -665,6 +778,16 @@ integer function ivalpoint(ivar, kmx)
       if ( i.eq.ivar ) return
       ivalpoint = ivalpoint + max(kmx,1) + 1
    end do
+   
+   if (nlyrs>0) then
+   !  3D, bed sediment layers (dim(nlyrs))
+      istart = iend+1
+      iend   = iend+MAXNUMVALOBSLYR
+      do i=istart,iend
+         if ( i.eq.ivar ) return
+         ivalpoint = ivalpoint + nlyrs
+      end do
+   endif
    
    if ( ivar.ne.0 ) then
       call mess(LEVEL_ERROR, 'ivalpoint: numbering error')
