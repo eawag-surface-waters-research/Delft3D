@@ -2967,8 +2967,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set(prop_ptr, 'sediment', 'SedFile'    , trim(md_sedfile), 'Sediment characteristics file (*.sed)')
           call prop_set(prop_ptr, 'sediment', 'MorFile'    , trim(md_morfile), 'Morphology settings file (*.mor)')
           call prop_set(prop_ptr, 'sediment', 'DredgeFile'    , trim(md_dredgefile), 'Dredging/dumping settings file (*.dad)')
-          call prop_set(prop_ptr, 'sediment', 'MorphoPol', md_morphopol, 'Only apply bed updating wihtin specified polygon (*.pol)')
-          call prop_set(prop_ptr, 'sediment', 'MorCFL'    , jamorcfl, 'Use CFL-like condition for morphologic updating (0=no, 1=yes) (default yes)')
+          call prop_set(prop_ptr, 'sediment', 'MorCFL'    , jamorcfl, 'Use morphological time step restriction (0=no, 1=yes)') 
+          call prop_set(prop_ptr, 'sediment', 'DzbDtMax'    , dzbdtmax, 'Maximum allowed total bottom level change per timestep when MorCFL=1 [m]') 
+          call prop_set(prop_ptr, 'sediment', 'MorCFL'    , jamorcfl, 'Use CFL condition for morphologic updating 1=true, 0=false (default)')
           call prop_set(prop_ptr, 'sediment', 'DzbDtMax', dzbdtmax, 'Maximum bed level change (m) per time step for the case MorCFL=1 (default=0.1 m)')
        end if
        if (jased .ne. 4) then

@@ -11571,7 +11571,7 @@ subroutine flow_sedmorinit()
           write(msgbuf, *)      '                           Setting ''AverageSedmorOutputInterval'' from *.mor file to tstop-tstart = ', ti_sed, ' s.'
           call warn_flush()
        endif
-       time_sed = tstart_user + stmpar%morpar%tcmp*tfac    ! model time
+       time_sed = tstart_user + stmpar%morpar%tmor*tfac    ! model time
        ti_seds  = max(ti_seds,time_sed)
        time_sed = ti_seds
        !
@@ -18980,7 +18980,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim, &
                      id_latdim, id_lat_id, id_lat_predis_inst, id_lat_predis_ave, id_lat_realdis_inst, id_lat_realdis_ave, &
-                     id_ustx, id_usty, id_nlyrdim, id_bodsed, id_dpsed, id_msed, id_thlyr, id_poros, id_lyrfrac, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_mfluff
+                     id_ustx, id_usty
     ! ids for geometry variables, only use them once at the first time of history output
     integer :: id_statgeom_node_count,     id_statgeom_node_coordx,     id_statgeom_node_coordy,    &
                id_crsgeom_node_count,      id_crsgeom_node_coordx,      id_crsgeom_node_coordy,     &
@@ -19002,7 +19002,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, allocatable, save :: id_const(:), id_const_cum(:), id_voltot(:)
     double precision, allocatable, save :: valobsT(:,:)
 
-    integer                      :: IP, num, ntmp, n, nlyrs
+    integer                      :: IP, num, ntmp, n
 
     double precision, save       :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
     integer                      :: ntot, mobs, k, i, j, jj, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4, nNodeTot, nNodes, L0, k1, k2, nlinks
@@ -19022,7 +19022,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer                      :: jawrizw = 0
     double precision             :: w1, pumplensum, pumplenmid, pumpxmid, pumpymid
     double precision             :: rhol
-    double precision, allocatable:: toutputx(:,:), toutputy(:,:), toutput3(:,:,:)
+    double precision, allocatable:: toutputx(:,:), toutputy(:,:)
     double precision, allocatable:: toutput_cum, toutput_cur
     type(t_structure), pointer   :: pstru
     integer                      :: Tzonehrs
@@ -19538,8 +19538,8 @@ subroutine unc_write_his(tim)            ! wrihis
 
             if (stm_included .and. ISED1 > 0 .and. jahissed > 0) then
                ! New implementation, sedsus fraction is additional dimension
-               ierr = nf90_def_dim(ihisfile, 'nSedTot',    stmpar%lsedtot,              id_sedtotdim)
-               ierr = nf90_def_dim(ihisfile, 'nSedSus',    stmpar%lsedsus,              id_sedsusdim)
+               ierr = nf90_def_dim(ihisfile, 'nSedTot', stmpar%lsedtot, id_sedtotdim)
+               ierr = nf90_def_dim(ihisfile, 'nSedSus', stmpar%lsedsus, id_sedsusdim)
                !
                ierr = nf90_def_var(ihisfile, 'sedfrac_name', nf90_char, (/ id_strlendim, id_sedtotdim /), id_frac_name)
                ierr = nf90_put_att(ihisfile, id_frac_name,'long_name', 'sediment fraction identifier')
@@ -19650,111 +19650,6 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_sink, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
                   ierr = nf90_put_att(ihisfile, id_sink, 'geometry', station_geom_container_name)
                endif
-               !
-               ! Bed composition variables
-               !
-               select case (stmpar%morlyr%settings%iunderlyr)
-                  case (1)
-                     ierr = nf90_def_var(ihisfile, 'Available sediment mass in the bed', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_bodsed)
-                     ierr = nf90_put_att(ihisfile, id_bodsed, 'long_name', 'Available sediment mass in the bed')
-                     ierr = nf90_put_att(ihisfile, id_bodsed, 'units', 'kg m-2')
-                     ierr = nf90_put_att(ihisfile, id_bodsed, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_bodsed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                     ierr = nf90_put_att(ihisfile, id_bodsed, 'geometry', station_geom_container_name)
-                     !
-                     ierr = nf90_def_var(ihisfile, 'Sediment thickness in the bed', nf90_double, (/ id_statdim, id_timedim /), id_dpsed)
-                     ierr = nf90_put_att(ihisfile, id_dpsed, 'long_name', 'Sediment thickness in the bed')
-                     ierr = nf90_put_att(ihisfile, id_dpsed, 'units', 'm')
-                     ierr = nf90_put_att(ihisfile, id_dpsed, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_dpsed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                     ierr = nf90_put_att(ihisfile, id_dpsed, 'geometry', station_geom_container_name)
-                  case (2)
-                     ierr = nf90_def_dim(ihisfile, 'nBedLayers', stmpar%morlyr%settings%nlyr, id_nlyrdim)
-                     !
-                     ierr = nf90_def_var(ihisfile, 'Available sediment mass in a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim, id_sedtotdim, id_timedim /), id_msed)
-                     ierr = nf90_put_att(ihisfile, id_msed, 'long_name', 'Available sediment mass in a layer of the bed')
-                     ierr = nf90_put_att(ihisfile, id_msed, 'units', 'kg m-2')
-                     ierr = nf90_put_att(ihisfile, id_msed, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_msed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                     ierr = nf90_put_att(ihisfile, id_msed, 'geometry', station_geom_container_name)
-                     !
-                     ierr = nf90_def_var(ihisfile, 'Thickness of a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim, id_timedim /), id_thlyr)
-                     ierr = nf90_put_att(ihisfile, id_thlyr, 'long_name', 'Thickness of a layer of the bed')
-                     ierr = nf90_put_att(ihisfile, id_thlyr, 'units', 'm')
-                     ierr = nf90_put_att(ihisfile, id_thlyr, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_thlyr, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                     ierr = nf90_put_att(ihisfile, id_thlyr, 'geometry', station_geom_container_name)                     
-                     !
-                     if (stmpar%morlyr%settings%iporosity>0) then
-                        ierr = nf90_def_var(ihisfile, 'Porosity of a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim, id_timedim /), id_poros)
-                        ierr = nf90_put_att(ihisfile, id_poros, 'long_name', 'Porosity of a layer of the bed')
-                        ierr = nf90_put_att(ihisfile, id_poros, 'units', '-')
-                        ierr = nf90_put_att(ihisfile, id_poros, '_FillValue', dmiss)
-                        ierr = nf90_put_att(ihisfile, id_poros, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                        ierr = nf90_put_att(ihisfile, id_poros, 'geometry', station_geom_container_name)                        
-                     endif
-                     !
-                     ierr = nf90_def_var(ihisfile, 'Volume fraction in a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim,  id_sedtotdim, id_timedim /), id_lyrfrac)
-                     ierr = nf90_put_att(ihisfile, id_lyrfrac, 'long_name', 'Volume fraction in a layer of the bed')
-                     ierr = nf90_put_att(ihisfile, id_lyrfrac, 'units', 'm')
-                     ierr = nf90_put_att(ihisfile, id_lyrfrac, '_FillValue', dmiss)
-                     ierr = nf90_put_att(ihisfile, id_lyrfrac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                     ierr = nf90_put_att(ihisfile, id_lyrfrac, 'geometry', station_geom_container_name)
-               end select
-		         !
-		         if (stmpar%morpar%moroutput%frac) then
-                  ierr = nf90_def_var(ihisfile, 'Availability fraction in top layer', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_frac)
-                  ierr = nf90_put_att(ihisfile, id_frac, 'long_name', 'Availability fraction in top layer')
-                  ierr = nf90_put_att(ihisfile, id_frac, 'units', '-')
-                  ierr = nf90_put_att(ihisfile, id_frac, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_frac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                  ierr = nf90_put_att(ihisfile, id_frac, 'geometry', station_geom_container_name)
-               endif
-               !
-               if (stmpar%morpar%moroutput%mudfrac) then
-                  ierr = nf90_def_var(ihisfile, 'Mud fraction in top layer', nf90_double, (/ id_statdim, id_timedim /), id_mudfrac)
-                  ierr = nf90_put_att(ihisfile, id_mudfrac, 'long_name', 'Mud fraction in top layer')
-                  ierr = nf90_put_att(ihisfile, id_mudfrac, 'units', '-')
-                  ierr = nf90_put_att(ihisfile, id_mudfrac, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_mudfrac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                  ierr = nf90_put_att(ihisfile, id_mudfrac, 'geometry', station_geom_container_name)
-               endif
-               !
-               if (stmpar%morpar%moroutput%sandfrac) then
-                  ierr = nf90_def_var(ihisfile, 'Sand fraction in top layer', nf90_double, (/ id_statdim, id_timedim /), id_sandfrac)
-                  ierr = nf90_put_att(ihisfile, id_sandfrac, 'long_name', 'Sand fraction in top layer')
-                  ierr = nf90_put_att(ihisfile, id_sandfrac, 'units', '-')
-                  ierr = nf90_put_att(ihisfile, id_sandfrac, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_sandfrac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                  ierr = nf90_put_att(ihisfile, id_sandfrac, 'geometry', station_geom_container_name)
-               endif
-               !
-               if (stmpar%morpar%moroutput%fixfac) then
-                  ierr = nf90_def_var(ihisfile, 'Reduction factor due to limited sediment thickness', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_fixfac)
-                  ierr = nf90_put_att(ihisfile, id_fixfac, 'long_name', 'Reduction factor due to limited sediment thickness')
-                  ierr = nf90_put_att(ihisfile, id_fixfac, 'units', '-')
-                  ierr = nf90_put_att(ihisfile, id_fixfac, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_fixfac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                  ierr = nf90_put_att(ihisfile, id_fixfac, 'geometry', station_geom_container_name)
-               endif
-               !
-               if (stmpar%morpar%moroutput%hidexp) then
-                  ierr = nf90_def_var(ihisfile, 'Hiding and exposure factor', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_hidexp)
-                  ierr = nf90_put_att(ihisfile, id_hidexp, 'long_name', 'Hiding and exposure factor')
-                  ierr = nf90_put_att(ihisfile, id_hidexp, 'units', '-')
-                  ierr = nf90_put_att(ihisfile, id_hidexp, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_hidexp, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                  ierr = nf90_put_att(ihisfile, id_hidexp, 'geometry', station_geom_container_name)
-               endif
-               !
-               if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then 
-                  ierr = nf90_def_var(ihisfile, 'Sediment mass in fluff layer', nf90_double, (/ id_statdim, id_sedsusdim, id_timedim /), id_mfluff)
-                  ierr = nf90_put_att(ihisfile, id_mfluff, 'long_name', 'Sediment mass in fluff layer')
-                  ierr = nf90_put_att(ihisfile, id_mfluff, 'units', '-')
-                  ierr = nf90_put_att(ihisfile, id_mfluff, '_FillValue', dmiss)
-                  ierr = nf90_put_att(ihisfile, id_mfluff, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                  ierr = nf90_put_att(ihisfile, id_mfluff, 'geometry', station_geom_container_name)
-               end if
             endif
             !
             if (jased > 0 .and. .not. stm_included .and. jahissed > 0) then
@@ -21513,11 +21408,9 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_ws, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1/))
           enddo
        end if
-       !
        if (jased > 0 .and. .not. stm_included) then
           ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        end if
-       !
        if (jawave>0) then                                                                                                      
           ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
@@ -21558,7 +21451,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
     end if ! jamapheatflux > 0! jatem > 0
 
-    ! 3d layer interface quantities
+
     if (kmx > 0 ) then
        do kk = 1, kmx+1
           ierr = nf90_put_var(ihisfile,    id_zws,    valobsT(:,IPNT_ZWS+kk-1),   start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
@@ -21597,103 +21490,6 @@ subroutine unc_write_his(tim)            ! wrihis
           !
        enddo
     endif
-    !
-    ! Bed composition variables
-    if (jahissed>0 .and. jased>0 .and. stm_included) then
-       !
-       select case (stmpar%morlyr%settings%iunderlyr)
-          case (1)
-             ! dpsed
-             ierr = nf90_put_var(ihisfile, id_dpsed, valobsT(:,IPNT_DPSED),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-             ! bodsed
-             call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
-             do j = IVAL_BODSED1, IVAL_BODSEDN
-               i = j - IVAL_BODSED1 + 1
-               toutputx(:,i) = valobsT(:,IPNT_BODSED1 + i-1)
-             end do
-             ierr = nf90_put_var(ihisfile, id_bodsed, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1/))
-          case (2)
-             nlyrs = stmpar%morlyr%settings%nlyr
-             ! msed
-             call realloc(toutput3, (/nlyrs, ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
-             toutput3 = dmiss
-             do j = IVAL_MSED1,IVAL_MSEDN
-                i = j - IVAL_MSED1 + 1
-                do kk = 1,nlyrs
-                   toutput3(kk,:,i) = valobsT(:,IPNT_MSED1 + (i-1)*(nlyrs)+kk-1)
-                enddo
-             enddo
-             ierr = nf90_put_var(ihisfile, id_msed, toutput3, start = (/ 1, 1, 1, it_his /), count = (/ nlyrs, ntot, stmpar%lsedtot, 1/))
-             ! lyrfrac
-             toutput3=dmiss
-             do j = IVAL_LYRFRAC1,IVAL_LYRFRACN
-                i = j - IVAL_LYRFRAC1 + 1
-                do kk = 1,nlyrs
-                   toutput3(kk,:,i) = valobsT(:,IPNT_LYRFRAC1 + (i-1)*(nlyrs)+kk-1)
-                enddo
-             enddo
-             ierr = nf90_put_var(ihisfile, id_lyrfrac, toutput3, start = (/ 1, 1, 1, it_his /), count = (/ nlyrs, ntot, stmpar%lsedtot, 1/))
-             ! thlyr
-             call realloc(toutputx, (/nlyrs, ntot /), keepExisting=.false., fill = dmiss)
-             do kk = 1,nlyrs
-                toutputx(kk,:) = valobsT(:,IPNT_THLYR+kk-1)
-             enddo
-             ierr = nf90_put_var(ihisfile, id_thlyr, toutputx,  start = (/ 1, 1, it_his /), count = (/ nlyrs, ntot, 1 /))
-             ! poros
-             if (stmpar%morlyr%settings%iporosity>0) then
-                do kk = 1,nlyrs
-                   toutputx(kk,:) = valobsT(:,IPNT_POROS+kk-1)
-                enddo
-                ierr = nf90_put_var(ihisfile, id_poros, toutputx,  start = (/ 1, 1, it_his /), count = (/ nlyrs, ntot, 1 /))
-             endif
-       end select
-       !
-       if (stmpar%morpar%moroutput%frac) then
-          ! frac
-          call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
-          do j = IVAL_FRAC1,IVAL_FRACN
-            i = j - IVAL_FRAC1 + 1
-            toutputx(:,i) = valobsT(:,IPNT_FRAC1 + i-1)
-          enddo
-          ierr = nf90_put_var(ihisfile, id_frac, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1/))
-       endif
-       if (stmpar%morpar%moroutput%mudfrac) then
-          ! mudfrac
-          ierr = nf90_put_var(ihisfile, id_mudfrac, valobsT(:,IPNT_MUDFRAC), start = (/ 1, it_his /), count = (/ ntot, 1 /))     
-       endif
-       if (stmpar%morpar%moroutput%sandfrac) then
-          ! sandfrac
-          ierr = nf90_put_var(ihisfile, id_sandfrac, valobsT(:,IPNT_SANDFRAC), start = (/ 1, it_his /), count = (/ ntot, 1 /)) 
-       endif
-       if (stmpar%morpar%moroutput%fixfac) then
-          !fixfac
-          call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
-          do j = IVAL_FIXFAC1,IVAL_FIXFACN
-            i = j - IVAL_FIXFAC1 + 1
-            toutputx(:,i) = valobsT(:,IPNT_FIXFAC1 + i-1)
-          enddo
-          ierr = nf90_put_var(ihisfile, id_fixfac, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1/))           
-       endif
-       if (stmpar%morpar%moroutput%hidexp) then
-          ! hidexp
-          call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = dmiss)
-          do j = IVAL_HIDEXP1,IVAL_HIDEXPN
-            i = j - IVAL_HIDEXP1 + 1
-            toutputx(:,i) = valobsT(:,IPNT_HIDEXP1 + i-1)
-          enddo
-          ierr = nf90_put_var(ihisfile, id_hidexp, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1/))
-       endif
-       !
-       if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
-          call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
-          do j = IVAL_MFLUFF1,IVAL_MFLUFFN
-            i = j - IVAL_MFLUFF1 + 1
-            toutputx(:,i) = valobsT(:,IPNT_MFLUFF1 + i-1)
-          enddo
-          ierr = nf90_put_var(ihisfile, id_mfluff, toutputx, start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedsus, 1/))           
-       end if   
-    endif   
-    
     !
     ! Cross sections
     if (ncrs > 0) then
@@ -22637,17 +22433,12 @@ subroutine fill_valobs()
 
    implicit none
 
-   integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa, n
-   integer :: ipoint, ival, klayt, kmx_const, kk_const, nlyrs
+   integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa
+   integer :: ipoint, ival, klayt, kmx_const, kk_const
    double precision :: wavfac
-   double precision :: dens
    double precision, allocatable :: wa(:,:)
-   double precision, allocatable :: frac(:,:)
-   double precision, allocatable :: poros(:)
 
    kmx_const = kmx
-   nlyrs     = 0
-   
    if (jaeulervel==1 .and. jawave > 0) then
       call getucxucyeuler(ndkx, workx, worky)
    endif
@@ -22661,18 +22452,6 @@ subroutine fill_valobs()
       if (allocated(wa)) deallocate(wa)
       allocate(wa(1:2,1:max(kmx,1)))
    endif
-   !
-   if (stm_included .and. jased>0) then   
-      if (stmpar%morlyr%settings%iunderlyr==2) then
-         if (allocated(frac) ) deallocate(frac)
-         allocate( frac(stmpar%lsedtot,1:stmpar%morlyr%settings%nlyr) )
-         frac = dmiss
-         if (allocated(poros) ) deallocate(poros)
-         allocate( poros(1:stmpar%morlyr%settings%nlyr) )
-         poros=dmiss
-      endif      
-   endif   
-   
 
    valobs = DMISS
    do i = 1,numobs+nummovobs
@@ -22771,79 +22550,7 @@ subroutine fill_valobs()
                   ii = j-IVAL_SSWY1+1
                   valobs(IPNT_SSWY1+ii-1,i)=sedtra%sswy(k,ii)
                enddo
-            endif   
-            !
-            ! bed composition
-            if (stmpar%morlyr%settings%iunderlyr==1) then
-               do j = IVAL_BODSED1, IVAL_BODSEDN
-                  ii = j-IVAL_BODSED1+1
-                  valobs(IPNT_BODSED1+ii-1,i) = stmpar%morlyr%state%bodsed(ii,k)  
-               enddo 
-               valobs(IPNT_DPSED,i) = stmpar%morlyr%state%dpsed(k)    
             endif
-            !
-            if (stmpar%morlyr%settings%iunderlyr==2) then
-               nlyrs=stmpar%morlyr%settings%nlyr
-               do l = 1, stmpar%lsedtot
-                  if (stmpar%morlyr%settings%iporosity==0) then
-                     dens = stmpar%sedpar%cdryb(l)
-                  else
-                     dens = stmpar%sedpar%rhosol(l)
-                  endif
-                  do n = 1, stmpar%morlyr%settings%nlyr
-                     if (stmpar%morlyr%state%thlyr(n,k)>0.0_fp) then  ! lyrfrac
-                        frac(l, n) = stmpar%morlyr%state%msed(l, n, k)/(dens*stmpar%morlyr%state%svfrac(n, k) * &
-                                     stmpar%morlyr%state%thlyr(n, k))
-                     else
-                        frac(l, n) = 0d0
-                     endif
-                  enddo
-               enddo
-               !
-               if (stmpar%morlyr%settings%iporosity>0) then
-                  poros = 1d0-stmpar%morlyr%state%svfrac(:,k)
-               endif
-               !
-               do klay = 1, nlyrs
-                  do j=IVAL_MSED1,IVAL_MSEDN
-                     ii = j-IVAL_MSED1+1
-                     valobs(IPNT_MSED1+(ii-1)*nlyrs+klay-1,i) = stmpar%morlyr%state%msed(ii, klay, k)
-                  end do
-                  !
-                  do j=IVAL_LYRFRAC1,IVAL_LYRFRACN
-                     ii = j-IVAL_LYRFRAC1+1
-                     valobs(IPNT_LYRFRAC1+(ii-1)*nlyrs+klay-1,i) = frac(ii,klay)
-                  end do
-                  !
-                  valobs(IPNT_POROS+klay-1,i) = poros(klay) 
-                  valobs(IPNT_THLYR+klay-1,i) = stmpar%morlyr%state%thlyr(klay, k) 
-               end do
-            endif
-            !
-            do j = IVAL_FRAC1, IVAL_FRACN
-               ii = j-IVAL_FRAC1+1
-               valobs(IPNT_FRAC1+ii-1,i) = sedtra%frac(k,ii)  
-            enddo
-            valobs(IPNT_MUDFRAC,i)  = sedtra%mudfrac(k)
-            valobs(IPNT_SANDFRAC,i) = sedtra%sandfrac(k)
-            !
-            if (stmpar%morpar%flufflyr%iflufflyr>0 .and. stmpar%lsedsus>0) then
-               do j = IVAL_MFLUFF1, IVAL_MFLUFFN
-                  ii = j-IVAL_MFLUFF1+1
-                  valobs(IPNT_MFLUFF1+ii-1,i) = stmpar%morpar%flufflyr%mfluff(ii,k)  
-               enddo
-            endif
-            !
-            do j = IVAL_FIXFAC1, IVAL_FIXFACN
-               ii = j-IVAL_FIXFAC1+1
-               valobs(IPNT_FIXFAC1+ii-1,i)=sedtra%fixfac(k,ii)
-            enddo
-            !
-            do j = IVAL_HIDEXP1, IVAL_HIDEXPN
-               ii = j-IVAL_HIDEXP1+1
-               valobs(IPNT_HIDEXP1+ii-1,i)=sedtra%hidexp(k,ii)
-            enddo               
-            !
             do j = IVAL_SOUR1, IVAL_SOURN
                ii = j-IVAL_SOUR1+1
                valobs(IPNT_SOUR1+ii-1,i)=sedtra%sourse(k,ii)
@@ -22853,7 +22560,7 @@ subroutine fill_valobs()
                valobs(IPNT_SINK1+ii-1,i)=sedtra%sinkse(k,ii)
             enddo
          endif
-         !
+
          if ( IVAL_WQB1.gt.0 ) then
             do j=IVAL_WQB1,IVAL_WQBN
                ii = j-IVAL_WQB1+1
@@ -23089,8 +22796,8 @@ subroutine fill_valobs()
 
             if ( kt.lt.kb ) cycle
 
-            do ival=MAXNUMVALOBS2D+1,MAXNUMVALOBS2D+MAXNUMVALOBS3D+MAXNUMVALOBSLYR
-               ipoint = ivalpoint(ival, kmx, nlyrs)
+            do ival=MAXNUMVALOBS2D+1,MAXNUMVALOBS2D+MAXNUMVALOBS3D
+               ipoint = ivalpoint(ival, kmx)
                klayt = kt-kb+1
                do k=kt+1,kb+kmx-1
                   klay = k-kb+1

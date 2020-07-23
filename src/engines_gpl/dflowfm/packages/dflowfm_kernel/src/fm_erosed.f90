@@ -120,7 +120,6 @@
    real(fp)         , dimension(:,:)    , pointer :: mfluff
    logical                              , pointer :: bedupd
    real(fp)                             , pointer :: tmor
-   real(fp)                             , pointer :: tcmp
    integer                              , pointer :: itmor
    integer                              , pointer :: islope
    real(fp)                             , pointer :: dzmax
@@ -685,7 +684,6 @@
    thcrpa              => stmpar%morpar%thcrpa
    islope              => stmpar%morpar%islope
    tmor                => stmpar%morpar%tmor
-   tcmp                => stmpar%morpar%tcmp
    itmor               => stmpar%morpar%itmor
    bedupd              => stmpar%morpar%bedupd
    neglectentrainment  => stmpar%morpar%neglectentrainment
@@ -2711,9 +2709,18 @@
    !   endif
    !endif   
    !
-   ! if bed composition computations have started
+   ! if morphological computations have started
    !
-   if (time1 >= tstart_user + tcmp * tfac) then   ! tmor/tcmp in tunit since start of computations, time1 in seconds since reference date
+   if (time1 >= tstart_user + tmor * tfac) then   ! tmor in tunit since start of computations, time1 in seconds since reference date
+      !
+      ! Increment morphological time
+      ! Note: dtmor in seconds, morft in days!
+      !
+      morft = morft + dtmor/86400.0d0
+      if (morfac>0d0) hydrt  = hydrt + dts/86400d0
+      if (stmpar%morpar%moroutput%morstats) then
+         if (comparereal(time1,ti_seds,eps10)>=0) morstatt0 = morft
+      endif
       !
       ! Bed boundary conditions: transport condition
       !
@@ -2723,6 +2730,7 @@
             !
             ! Open boundary with transport boundary condition:
             ! Get data from table file
+            ! TO DO: flow_getexternalforcing voor morfologie
             !
             call gettabledata(bcmfile  , morbnd(jb)%ibcmt(1) , &
                & morbnd(jb)%ibcmt(2) , morbnd(jb)%ibcmt(3) , &
@@ -2738,10 +2746,10 @@
                if (jampi == 1) then
                   if (.not. (idomain(k2) == my_rank)) cycle    ! internal cells at boundary are in the same domain as the link
                endif
-               if( u1(lm) < 0.0d0 ) cycle                      
+               if( u1(lm) < 0.0d0 ) cycle                     ! to do: 3d
                call gettau(k2,taucurc,czc)
                tausum2(1) = tausum2(1) + taucurc**2            ! sum of the shear stress squared
-            enddo                                              ! the distribution of bedload is scaled with square stress
+            enddo                                         ! the distribution of bedload is scaled with square stress
             ! for avoiding instability on BC resulting from uniform bedload
             ! in combination with non-uniform cells.
             li = 0
@@ -2763,13 +2771,13 @@
                enddo
                bc_sed_distribution(li) = sbsum
             enddo
-   
+
             ! do MPI reduce step for bc_sed_distribution and tausum2
             if (jampi == 1) then
                call reduce_sum(1, tausum2)
                call reduce_sum(lsedtot, bc_sed_distribution)
             endif
-   
+
             do ib = 1, morbnd(jb)%npnt
                alfa_dist   = morbnd(jb)%alfa_dist(ib)
                alfa_mag    = morbnd(jb)%alfa_mag(ib)
@@ -2888,7 +2896,7 @@
                         Lf = iabs(LL)
                         
                         flux = fluxhortot(j,Lf)
-   
+
                         if ( LL>0 ) then  ! inward
                            sumflux = sumflux + flux
                         else                 ! outward
@@ -2912,9 +2920,11 @@
                      call getkbotktop(nm, kb, kt)
                      k = kb
                   endif
+                  !thick0 = vol0(k) * bai_mor(nm)
                   thick1 = vol1(k) * bai_mor(nm)
+                  !sedflx = sinkse(nm,l) * m_sediment_sed(l,k) * thick1
                   sedflx = sinksetot(j,nm)*bai_mor(nm)
-                  eroflx = sourse(nm,l)*thick1            ! mass conservation, different from D3D
+                  eroflx = sourse(nm,l)                       * thick1         ! mass conservation, different from D3D
                   !
                   ! Update fluff layer
                   !
@@ -2931,7 +2941,7 @@
                      LL = nd(nm)%ln(ii)
                      Lf = iabs(LL)
                      flux = e_scrn(Lf,l)*wu(Lf)
-   
+
                      if ( LL>0 ) then  ! inward
                         sumflux = sumflux + flux
                      else                 ! outward
@@ -2947,7 +2957,7 @@
                   LL = nd(nm)%ln(ii)
                   Lf = iabs(LL)
                   flux = e_sbn(Lf,l)*wu_mor(Lf)
-   
+
                   if ( LL>0 ) then     ! inward
                      sumflux = sumflux + flux
                   else                 ! outward
@@ -3086,9 +3096,9 @@
                   do L=1,nd(nm)%lnx
                      k1 = ln(1,iabs(nd(nm)%ln(L))); k2 = ln(2,iabs(nd(nm)%ln(L)))
                      Lf = iabs(nd(nm)%ln(L))
-                     ! cutcells
+                     ! DEBUG for cutcells:
                      if (wu_mor(Lf)==0d0) cycle
-                     !
+                     !\ DEBUG for cutcells
                      if (k2 == nm) then
                         knb = k1
                      else
@@ -3105,7 +3115,7 @@
             endif    ! totfixfrac > 1.0e-7
          endif       ! totdbodsd < 0.0
       enddo          ! nm
-   
+
       if ( jampi.gt.0 ) then
          call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
          !call update_ghosts(ITYPE_U, lsedtot, lnx, e_sbn, ierror)
@@ -3173,21 +3183,7 @@
          ! Apply composition boundary conditions
          !
          call bndmorlyr( lsedtot, timhr, nto, bc_mor_array, stmpar )
-      endif
-   endif       ! time1>tcmp
-   
-   if (time1 >= tstart_user + tmor*tfac) then
-      !
-      ! Increment morphological time
-      ! Note: dtmor in seconds, morft in days!
-      !
-      morft = morft + dtmor/86400.0d0
-      if (morfac>0d0) hydrt  = hydrt + dts/86400d0
-      if (stmpar%morpar%moroutput%morstats) then
-         if (comparereal(time1,ti_seds,eps10)>=0) morstatt0 = morft
-      endif
-      !
-      if (.not. cmpupd) then    ! else blchg already determined
+      else
          !
          ! Compute bed level changes without actually updating the bed composition
          !
@@ -3314,7 +3310,7 @@
       do nm = 1, ndx
          blchg(nm) = 0d0
       enddo
-   endif       ! time1<tmor
+   endif ! nst >= itmor
    !
    !if (jampi>0) then
    !   call update_ghosts(ITYPE_SALL, 1, Ndx, blchg, ierror)

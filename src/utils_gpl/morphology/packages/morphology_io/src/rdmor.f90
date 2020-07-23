@@ -87,7 +87,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     real(fp)                               , pointer :: sus
     real(fp)                               , pointer :: bed
     real(fp)                               , pointer :: tmor
-    real(fp)                               , pointer :: tcmp
     real(fp)                               , pointer :: thetsd
     real(fp)                               , pointer :: susw
     real(fp)                               , pointer :: sedthr
@@ -238,7 +237,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     sus                 => morpar%sus
     bed                 => morpar%bed
     tmor                => morpar%tmor
-    tcmp                => morpar%tcmp
     thetsd              => morpar%thetsd
     susw                => morpar%susw
     sedthr              => morpar%sedthr
@@ -394,19 +392,9 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        endif
        endif
        !
-       ! === start for calculating morphological changes (backward compatibility)
-       !
-       call prop_get(mor_ptr, 'Morphology', 'MorStt', tmor)
-       !
        ! === start for calculating morphological changes
        !
-       call prop_get(mor_ptr, 'Morphology', 'BedUpdStt', tmor)       
-       !
-       ! === start for calculating bed composition changes
-       !
-       tcmp = tmor  ! by default, composition update starts when morphological update starts
-       !
-       call prop_get(mor_ptr, 'Morphology', 'CmpUpdStt', tcmp)   
+       call prop_get(mor_ptr, 'Morphology', 'MorStt', tmor)
        !
        ! === threshold value for slowing erosion near a fixed layer (m)
        !
@@ -429,13 +417,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        ! flag for doing composition updates
        !
        call prop_get_logical(mor_ptr, 'Morphology', 'CmpUpd', cmpupd)
-       !
-       if (bedupd .and. tcmp>tmor) then
-          errmsg = 'When BedUpd = true, CmpUpdStt must be smaller than or equal to BedUpdStt (MorStt) in ' // trim(filmor)
-          call write_error(errmsg, unit=lundia)
-          error = .true.
-          return   
-       endif 
        !
        call prop_get_logical(mor_ptr, 'Morphology', 'NeglectEntrainment', neglectentrainment)
        !
@@ -913,7 +894,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                        & sedthr    ,thetsd    ,hmaxth    ,fwfac     ,epspar    , &
                        & iopkcw    ,rdc       ,rdw       )
           endif
-          tcmp=tmor          
           cmpupd = .true.
           close (ilun)
        else
@@ -1246,7 +1226,6 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     real(fp)                               , pointer :: sus
     real(fp)                               , pointer :: bed
     real(fp)                               , pointer :: tmor
-    real(fp)                               , pointer :: tcmp
     real(fp)                               , pointer :: thetsd
     real(fp)                               , pointer :: susw
     real(fp)                               , pointer :: sedthr
@@ -1340,7 +1319,6 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     sus                 => morpar%sus
     bed                 => morpar%bed
     tmor                => morpar%tmor
-    tcmp                => morpar%tcmp
     thetsd              => morpar%thetsd
     susw                => morpar%susw
     sedthr              => morpar%sedthr
@@ -1441,8 +1419,6 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     endif
     txtput1 = 'Morphological Changes Start Time ('//trim(dtunit)//')'
     write (lundia, '(2a,e20.4)') txtput1, ':', tmor
-    txtput1 = 'Composition Changes Start Time ('//trim(dtunit)//')'
-    write (lundia, '(2a,e20.4)') txtput1, ':', tcmp    
     txtput1 = 'Fixed Layer Erosion Threshold'
     write (lundia, '(2a,e20.4)') txtput1, ':', thresh
     !
