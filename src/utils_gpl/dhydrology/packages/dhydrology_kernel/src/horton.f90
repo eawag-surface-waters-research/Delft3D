@@ -67,6 +67,7 @@ module horton
       integer, parameter              :: NrSecondsPerHour = 3600
       double precision                :: RFrac
       double precision, allocatable   :: ratio(:)
+      integer                         :: i
       
       ierr = DHYD_NOERR
 
@@ -75,66 +76,71 @@ module horton
 
 
       RFRAC = TimestepSize / NrSecondsPerHour
-      DT1   = DT  + RFRAC
 
-      where(MaxInfCap <= MinInfCap)
-      !      constant infiltration capacity; infiltration state not changed
-         InfCapState = HORTON_CAPSTAT_NOCHANGE
-      else where(PreviousInfCap >= MaxInfCap)
-      !      Previous infiltration capacity is at maximum value; now decrease
-         InfCapState = HORTON_CAPSTAT_DECREASE
-         where(DT > RFRAC .and. PreviousInfCap >= MaxInfCap)
-            DT1 = RFRAC
-            DT  = 0
-         end where
-      else where(PreviousInfCap <= MinInfCap)
-      !      Previous infiltration capacity is at minimum value, now increase
-         InfCapState = HORTON_CAPSTAT_RECOVERY
-         where(DT > RFRAC .and. PreviousInfCap <= MinInfCap)
-            DT1 = RFRAC
-            DT  = 0
-         end where
-      end where
-
+      do i = 1, n
+         DT1(i)   = DT(i)  + RFRAC
+         if(MaxInfCap(i) <= MinInfCap(i)) then
+         !      constant infiltration capacity; infiltration state not changed
+            InfCapState(i) = HORTON_CAPSTAT_NOCHANGE
+         else if (PreviousInfCap(i) >= MaxInfCap(i)) then
+         !      Previous infiltration capacity is at maximum value; now decrease
+            InfCapState(i) = HORTON_CAPSTAT_DECREASE
+            if (DT(i) > RFRAC .and. PreviousInfCap(i) >= MaxInfCap(i)) then
+               DT1(i) = RFRAC
+               DT(i)  = 0
+            end if
+         else if(PreviousInfCap(i) <= MinInfCap(i)) then
+         !      Previous infiltration capacity is at minimum value, now increase
+            InfCapState(i) = HORTON_CAPSTAT_RECOVERY
+            if(DT(i) > RFRAC .and. PreviousInfCap(i) <= MinInfCap(i)) then
+               DT1(i) = RFRAC
+               DT(i)  = 0
+            end if
+         end if
+      enddo
       ! additional checks: decrease of infiltration capacity as long as there is storage and/or rain
       !                    recovery of infiltration capacity as soon as storage is empty and no rain
       ! note: not just simple  ft = fc + (f0-fc)*exp (-kt)
       !       trick required for computation of t for intermediate switch from decrease to recovery or vice versa, before reaching max. or min.
 
       Ratio = -1.
-      where(InfCapState == HORTON_CAPSTAT_DECREASE .and. InitialStorage <= 0 .and. Rainfall <= 0)
-         ! state is decrease, but no storage and no rain anymore: switch to recovery
-         InfCapState = HORTON_CAPSTAT_RECOVERY
-         Ratio = (PreviousInfCap-MaxInfcap) / (MinInfCap - MaxInfCap)
-         where(ratio > 0)
-            DT1 = -1/RecoveryRate * log(ratio)  + RFRAC
-         else where(ratio <= 0)
-            DT1 = 9999.
-         end where
-         DT  = max(0.0, DT1 - RFRAC)
-      else where (InfCapState == HORTON_CAPSTAT_RECOVERY .and. (InitialStorage > 0 .or. Rainfall > 0) )
-         ! state is recovery, but storage or rain: switch to decrease
-         InfCapState = HORTON_CAPSTAT_DECREASE
-         ratio = (PreviousInfCap-MinInfCap) / (MaxInfCap - MinInfCap)
-         where(ratio > 0)
-            DT1 = -1/DecreaseRate * log(ratio)  + RFRAC
-         else where (ratio <= 0)
-            DT1 = 9999.
-         end where
-         DT = max(0.0, DT1 - RFRAC)
-      end where
 
-      where(InfCapState == HORTON_CAPSTAT_NOCHANGE)
-      !     do nothing, unchanged
-      else where(InfCapState == HORTON_CAPSTAT_DECREASE)
-      !     infiltration capacity is decreasing
-         NewInfCap = MinInfCap + (MaxInfCap - MinInfCap) * exp(-1*DecreaseRate * DT1)
-      else where(InfCapState == HORTON_CAPSTAT_RECOVERY)
-      !     infiltration capacity is recovering
-         NewInfCap = MaxInfCap - (MaxInfCap - MinInfCap) * exp(-1*RecoveryRate * DT1)
-      end where
+      do i = 1, n
+         if(InfCapState(i) == HORTON_CAPSTAT_DECREASE .and. InitialStorage(i) <= 0 .and. Rainfall(i) <= 0) then
+            ! state is decrease, but no storage and no rain anymore: switch to recovery
+            InfCapState(i) = HORTON_CAPSTAT_RECOVERY
+            Ratio(i) = (PreviousInfCap(i)-MaxInfcap(i)) / (MinInfCap(i)- MaxInfCap(i))
+            if(ratio(i) > 0) then
+               DT1(i) = -1/RecoveryRate (i)* log(ratio(i))  + RFRAC
+            else if(ratio (i)<= 0) then
+               DT1(i) = 9999.
+            end if
+            DT(i)  = max(0.0, DT1(i) - RFRAC)
+            else if(InfCapState(i) == HORTON_CAPSTAT_RECOVERY .and. (InitialStorage(i) > 0 .or. Rainfall(i) > 0) ) then
+            ! state is recovery, but storage or rain: switch to decrease
+            InfCapState(i) = HORTON_CAPSTAT_DECREASE
+            ratio(i) = (PreviousInfCap(i)-MinInfCap(i)) / (MaxInfCap(i) - MinInfCap(i))
+            if (ratio(i) > 0d0) then
+               DT1(i) = -1/DecreaseRate(i) * log(ratio(i))  + RFRAC
+            else if (ratio (i)<= 0d0) then
+               DT1(i) = 9999.
+            end if
+            DT(i) = max(0.0, DT1(i) - RFRAC)
+         end if
+      enddo
 
-      NewInfCap = min(NewInfCap, MaxInfCap)
+      do i = 1, n
+         if (InfCapState(i) == HORTON_CAPSTAT_NOCHANGE) then
+         !     do nothing, unchanged
+         else if(InfCapState(i) == HORTON_CAPSTAT_DECREASE) then
+         !  infiltration capacity is decreasing
+            NewInfCap = MinInfCap(i) + (MaxInfCap(i) - MinInfCap(i))  * exp(-1*DecreaseRate * DT1(i))
+         else if (InfCapState(i) == HORTON_CAPSTAT_RECOVERY) then
+         !  infiltration capacity is recovering
+            NewInfCap = MaxInfCap(i) - (MaxInfCap(i) - MinInfCap(i)) * exp(-1*RecoveryRate * DT1(i))
+         end if
+      enddo
+      NewInfCap = min(NewInfCap, MaxInfCap) 
       NewInfCap = max(NewInfCap, MinInfCap)
 
       DT = DT1
