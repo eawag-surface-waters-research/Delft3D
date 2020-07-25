@@ -1,5 +1,5 @@
 subroutine tran9t(utot      ,d50       ,d90       ,chezy     ,h         , &
-                & ust       ,par       ,sbot      ,ssus      )
+                & ust       ,npar      ,par       ,sbot      ,ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -39,15 +39,17 @@ subroutine tran9t(utot      ,d50       ,d90       ,chezy     ,h         , &
 !
 ! Call variables
 !
-    real(fp), intent(in)                :: chezy
-    real(fp), intent(in)                :: d50
-    real(fp), intent(in)                :: d90
-    real(fp), intent(in)                :: h
-    real(fp)        :: sbot 
-    real(fp), intent(out)               :: ssus
-    real(fp), intent(in)                :: ust
-    real(fp), intent(in)                :: utot
-    real(fp), dimension(30), intent(in) :: par
+    integer                  , intent(in)    :: npar
+    real(fp)                 , intent(in)    :: chezy
+    real(fp)                 , intent(in)    :: d50
+    real(fp)                 , intent(in)    :: d90
+    real(fp)                 , intent(in)    :: h
+    real(fp), dimension(npar), intent(in)    :: par
+    real(fp)                 , intent(in)    :: ust
+    real(fp)                 , intent(in)    :: utot
+    !
+    real(fp)                 , intent(out)   :: sbot 
+    real(fp)                 , intent(out)   :: ssus
 !
 !
 ! Local variables

@@ -133,6 +133,7 @@
    ! trapar
    integer          , dimension(:)      , pointer :: iform
    real(fp)         , dimension(:,:)    , pointer :: par
+   integer                              , pointer :: npar
    integer                              , pointer :: max_integers
    integer                              , pointer :: max_reals
    integer                              , pointer :: max_strings
@@ -697,6 +698,7 @@
    ! trapar
    iform               => stmpar%trapar%iform
    par                 => stmpar%trapar%par
+   npar                => stmpar%trapar%npar
    max_integers        => stmpar%trapar%max_integers
    max_reals           => stmpar%trapar%max_reals
    max_strings         => stmpar%trapar%max_strings
@@ -965,7 +967,7 @@
    integer                       :: idummy = 0
    integer                       :: ierr, kk, kkk, Lf, kmxvel, kb, kt, snL, csL
    integer                       :: Ldir
-   double precision, allocatable :: dzdx(:), dzdy(:), u1ori(:), u0ori(:), vori(:), localpar(:)
+   double precision, allocatable :: dzdx(:), dzdy(:), u1ori(:), u0ori(:), vori(:)
    double precision, allocatable :: z0rouk(:), z0curk(:),taub(:), deltas(:), ua(:), va(:)
    double precision              :: dzdn, dzds
    integer                       :: mout
@@ -979,6 +981,7 @@
    double precision              :: qb1d, wb1d, sb1d
    double precision              :: sbrratio, qbrratio, Qbr1, Qbr2
    !
+   real(fp), dimension(:), allocatable :: localpar        !< local array for sediment transport parameters
    real(fp), dimension(:), allocatable :: qb_out          !< sum of outgoing discharge at 1d node
    real(fp), dimension(:), allocatable :: width_out       !< sum of outgoing main channel widths
    real(fp), dimension(:,:), allocatable :: sb_in         !< sum of incoming sediment transport at 1d node
@@ -995,7 +998,7 @@
    !
    ! Allocate memory
    allocate(dzdx(1:ndx), dzdy(1:ndx), stat=istat)
-   if (istat == 0) allocate(localpar (stmpar%trapar%npar), stat = istat)
+   if (istat == 0) allocate(localpar (npar), stat = istat)
    if (istat == 0) allocate(ua(1:ndx), va(1:ndx), stat=istat)
    if (istat == 0) allocate(z0rouk(1:ndx), z0curk(1:ndx), taub(1:ndx), deltas(1:ndx), stat=istat)
    if (istat == 0) allocate(qb_out(network%nds%Count), stat = istat)
@@ -1004,7 +1007,8 @@
    if (istat == 0) allocate(sb_dir(network%nds%Count, lsedtot, network%nds%maxnumberofconnections), stat = istat)
    if (istat == 0) allocate(branInIDLn(network%nds%Count), stat = istat)
 
-   localpar = 0d0; ua = 0d0; va = 0d0; z0rouk = 0d0; z0curk=0d0
+   localpar = 0.0_fp
+   ua = 0d0; va = 0d0; z0rouk = 0d0; z0curk=0d0
    qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = -1
    BranInIDLn = 0
 
@@ -1636,19 +1640,26 @@
       do l = 1, lsedtot
          ll = lstart + l
          !
+         ! Copy the globally defined l-dependent parameters of array par to localpar.
+         ! All nm-/l-based redefinitions of these parameters are performed
+         ! on localpar, thus ensuring that the global array par is not
+         ! messed up with specific, nm-/l-dependent data.
+         !
+         do i = 1, npar
+            j = stmpar%trapar%iparfld(i,l)
+            if (j>0) then
+                localpar(i) = stmpar%trapar%parfld(nm,j)
+            else
+                localpar(i) = par(i,l)
+            endif
+         enddo
+         !
          ! fraction specific quantities
          !
          dll_reals(RP_HIDEX)    = real(hidexp(nm,l) ,hp)
          dll_reals(RP_RHOSL)    = real(rhosol(l) ,hp)
          dll_integers(IP_ISED ) = l
          dll_strings(SP_USRFL)  = dll_usrfil(l)
-         !
-         do i = 1,stmpar%trapar%npar
-            j = stmpar%trapar%iparfld(i,l)
-            if (j>0) then
-               par(i,l) = stmpar%trapar%parfld(nm,j)
-            endif
-         enddo
          !
          ! Set Prandtl-Schmidt number for suspended fractions
          ! viscosity/diffusivity
@@ -1697,10 +1708,10 @@
             call erosilt(thicklc        ,kmaxlc       , wslc        , mdia          , &
                        & thick1         ,thick1       , fixfac(nm,l), srcmax(nm, l) , &                         ! mass conservation
                        & frac(nm,l)     ,oldmudfrac   , flmd2l      , iform(l)      , &
-                       & par(:,l)       ,max_integers , max_reals   , max_strings   , &
-                       & dll_function(l),dll_handle(l), dll_integers, dll_reals     , &
-                       & dll_strings    ,iflufflyr    , mfltot      , fracf         , &
-                       & maxslope       ,wetslope,   &
+                       & npar           ,localpar     ,max_integers , max_reals     , &
+                       & max_strings    ,dll_function(l),dll_handle(l), dll_integers, &
+                       & dll_reals      ,dll_strings  ,iflufflyr    , mfltot        , &
+                       & fracf          ,maxslope     ,wetslope     , &
                        & error          ,wstau        , sinktot     , sourse(nm,l)  , sourfluff)
             if (error) then
                write(errmsg,'(a)') 'fm_erosed::erosilt returned an error. Check your inputs.'
@@ -1805,12 +1816,12 @@
          poros = 1d0-cdryb(l)/rhosol(l)
          dll_reals(RP_POROS) = real(poros   ,hp)
          !
-         par(1,l) = ag
-         par(2,l) = rhowat(kbed) ! rhow
-         par(3,l) = rhosol(l)
-         par(4,l) = (rhosol(l)-rhowat(kbed)) / rhowat(kbed)
-         par(5,l) = 1.0E-6     ! laminar viscosity of water
-         par(6,l) = di50
+         localpar(1) = ag
+         localpar(2) = rhowat(kbed) ! rhow
+         localpar(3) = rhosol(l)
+         localpar(4) = (rhosol(l)-rhowat(kbed)) / rhowat(kbed)
+         localpar(5) = 1.0E-6     ! laminar viscosity of water
+         localpar(6) = di50
          !
          ! SWITCH 2DH/3D SIMULATIONS
          !
@@ -1854,8 +1865,9 @@
                       & dzdx(nm)        ,dzdy(nm)      ,ubot        ,tauadd    ,sus       , &
                       & bed             ,susw          ,bedw        ,espir     ,wave      , &
                       & scour           ,ubot_from_com              ,camax     ,eps       , &
-                      & iform(l)        ,par(:,l)      ,max_integers,max_reals ,max_strings, &
-                      & dll_function(l) ,dll_handle(l) ,dll_integers,dll_reals ,dll_strings, &
+                      & iform(l)        ,npar          ,localpar    ,max_integers,max_reals , &
+                      & max_strings     ,dll_function(l) ,dll_handle(l) ,dll_integers,dll_reals , &
+                      & dll_strings     , &
                       & taks            ,caks          ,taurat(nm,l),sddflc    ,rsdqlc    , &
                       & kmaxsd          ,conc2d        ,sbcx(nm,l)  ,sbcy(nm,l),sbwx(nm,l) , &
                       & sbwy(nm,l)      ,sswx(nm,l)    ,sswy(nm,l)  ,tdss      ,caks_ss3d , &
@@ -1936,8 +1948,9 @@
                       & dzdx(nm)       ,dzdy(nm)      ,ubot         ,tauadd    ,sus       , &
                       & bed            ,susw          ,bedw         ,espir     ,wave      , &
                       & scour          ,ubot_from_com ,camax        ,eps       , &
-                      & iform(l)       ,par(:,l)      ,max_integers ,max_reals ,max_strings, &
-                      & dll_function(l),dll_handle(l) ,dll_integers ,dll_reals ,dll_strings, &
+                      & iform(l)       ,npar          ,localpar      ,max_integers ,max_reals , &
+                      & max_strings    ,dll_function(l),dll_handle(l) ,dll_integers ,dll_reals , &
+                      & dll_strings    , &
                       & taks           ,caks          ,taurat(nm,l) ,sddf2d    ,rsdq2d    , &
                       & kmaxsd         ,trsedeq       ,sbcx(nm,l)   ,sbcy(nm,l),sbwx(nm,l) , &
                       & sbwy(nm,l)     ,sswx(nm,l)    ,sswy(nm,l)   ,tdss      ,caks_ss3d , &
@@ -2284,6 +2297,7 @@
    end if
 
    deallocate(dzdx, dzdy, u1ori, u0ori, vori, stat = istat)
+   if (istat == 0) deallocate(localpar, stat = istat)
    if (istat == 0) deallocate(qb_out, stat = istat)
    if (istat == 0) deallocate(width_out, stat = istat)
    if (istat == 0) deallocate(sb_in, stat = istat)
@@ -3531,6 +3545,7 @@
    integer            , dimension(:)  , pointer :: iform_settle
    real(fp)           , dimension(:,:), pointer :: par_settle
    !
+   integer                            , pointer :: npar
    integer                            , pointer :: max_integers
    integer                            , pointer :: max_reals
    integer                            , pointer :: max_strings
@@ -3584,6 +3599,7 @@
    sedd50              => stmpar%sedpar%sedd50
    sedd50fld           => stmpar%sedpar%sedd50fld
 
+   npar                => stmpar%trapar%npar
    dll_usrfil          => stmpar%trapar%dll_usrfil_settle
    dll_function        => stmpar%trapar%dll_function_settle
    dll_handle          => stmpar%trapar%dll_handle_settle
@@ -3599,9 +3615,8 @@
 
    lsed                => stmpar%lsedsus
    ws                  => mtd%ws
-   !    !
-   allocate (localpar (stmpar%trapar%npar), stat = istat)
    !
+   allocate (localpar (npar), stat = istat)
    !
    do k = 1, ndx
       !
@@ -3659,7 +3674,7 @@
 
    do ll = 1, lsed
       !
-      do i = 1,stmpar%trapar%npar
+      do i = 1, npar
          localpar(i) = par_settle(i,ll)
       enddo
       !
@@ -3762,7 +3777,7 @@
                !             !
                call eqsettle(dll_function(ll), dll_handle(ll), max_integers, max_reals, max_strings, &
                            & dll_integers, dll_reals, dll_strings, mdia, iform_settle(ll),  &
-                           & localpar, stmpar%trapar%npar, wsloc, error)
+                           & localpar, npar, wsloc, error)
                if (error) then
                   write(errmsg,'(a,a,a)') 'fm_fallve:: Error from eqsettle.'
                   call write_error(errmsg, unit=mdia)
@@ -3849,7 +3864,7 @@
             !             !
             call eqsettle(dll_function(ll), dll_handle(ll), max_integers, max_reals, max_strings, &
                         & dll_integers, dll_reals, dll_strings, mdia, iform_settle(ll),  &
-                        & localpar, stmpar%trapar%npar, wsloc, error)
+                        & localpar, npar, wsloc, error)
             if (error) then
                write(errmsg,'(a,a,a)') 'fm_fallve:: Error from eqsettle.'
                call write_error(errmsg, unit=mdia)

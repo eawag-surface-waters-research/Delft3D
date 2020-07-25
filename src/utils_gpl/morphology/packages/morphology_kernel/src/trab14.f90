@@ -1,5 +1,5 @@
-subroutine trab14(utot      ,d50       ,chezy     ,par       ,hidexp    , &
-                & sbot      ,ssus      )
+subroutine trab14(utot      ,d50       ,chezy     ,npar      ,par       , &
+                & hidexp    ,sbot      ,ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -42,13 +42,15 @@ subroutine trab14(utot      ,d50       ,chezy     ,par       ,hidexp    , &
 !
 ! Call variables
 !
-    real(fp)               , intent(in)  :: chezy  ! chezy value
-    real(fp)               , intent(in)  :: d50    ! Grain size specified as d50
-    real(fp)               , intent(in)  :: hidexp ! hiding & exposure factor
-    real(fp)               , intent(out) :: sbot   ! bed load transport
-    real(fp)               , intent(out) :: ssus   ! suspended sediment transport
-    real(fp)               , intent(in)  :: utot   ! flow velocity
-    real(fp), dimension(30), intent(in)  :: par    ! sediment parameter list
+    integer                  , intent(in)    :: npar
+    real(fp)                 , intent(in)    :: chezy  ! chezy value
+    real(fp)                 , intent(in)    :: d50    ! Grain size specified as d50
+    real(fp)                 , intent(in)    :: hidexp ! hiding & exposure factor
+    real(fp), dimension(npar), intent(in)    :: par    ! sediment parameter list
+    real(fp)                 , intent(in)    :: utot   ! flow velocity
+    !
+    real(fp)                 , intent(out)   :: sbot   ! bed load transport
+    real(fp)                 , intent(out)   :: ssus   ! suspended sediment transport
 !
 ! Local variables
 !

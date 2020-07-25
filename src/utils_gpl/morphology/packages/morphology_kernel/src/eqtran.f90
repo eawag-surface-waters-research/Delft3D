@@ -10,8 +10,9 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
                 & dzduu     ,dzdvv     ,ubot      ,tauadd    ,sus       , &
                 & bed       ,susw      ,bedw      ,espir     ,wave      , &
                 & scour     ,ubot_from_com        ,camax     ,eps       , &
-                & iform     ,par       ,numintpar ,numrealpar,numstrpar , &
-                & dllfunc   ,dllhandle ,intpar    ,realpar   ,strpar    , &
+                & iform     ,npar      ,par       ,numintpar ,numrealpar, &
+                & numstrpar ,dllfunc   ,dllhandle ,intpar    ,realpar   , &
+                & strpar    , &
 !output:
                 & aks       ,caks      ,taurat    ,seddif    ,rsedeq    , &
                 & kmaxsd    ,conc2d    ,sbcu      ,sbcv      ,sbwu      , &
@@ -69,6 +70,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     integer                             , intent(in)    :: lsecfl   !  Description and declaration in esm_alloc_int.f90
     integer                             , intent(in)    :: ltur     !  Description and declaration in esm_alloc_int.f90
     integer                             , intent(in)    :: lundia   !  Description and declaration in inout.igs
+    integer                             , intent(in)    :: npar
     integer                             , intent(in)    :: numintpar
     integer                             , intent(in)    :: numrealpar
     integer                             , intent(in)    :: numstrpar
@@ -83,7 +85,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     real(fp)                            , intent(in)    :: eps
     real(fp)                            , intent(in)    :: espir
     real(fp)                            , intent(in)    :: frac     !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(32)        , intent(inout) :: par
+    real(fp)     , dimension(npar)      , intent(inout) :: par
     real(fp)                            , intent(in)    :: rksrs    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(kmax)      , intent(in)    :: sig      !  Description and declaration in esm_alloc_real.f90
     real(fp)                            , intent(in)    :: sigmol   !  Description and declaration in esm_alloc_real.f90
@@ -302,7 +304,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Van Rijn 1993
        !
-       call tram1(numrealpar,realpar   ,wave                 ,par       , &
+       call tram1(numrealpar,realpar   ,wave      ,npar      ,par       , &
                 & kmax      ,bed       , &
                 & tauadd    ,taucr0    ,aks       ,eps       ,camax     , &
                 & frac      ,sig       ,thick     ,ws        , &
@@ -327,10 +329,10 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Van Rijn 2004
        !
-       call tram2(numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
-                & kmax      ,bed       ,dzduu     ,dzdvv     ,rksrs     , &
-                & tauadd    ,taucr0    ,aks       ,eps       ,camax     , &
-                & frac      ,sig       ,thick     ,ws        , &
+       call tram2(numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
+                & par       ,kmax      ,bed       ,dzduu     ,dzdvv     , &
+                & rksrs     ,tauadd    ,taucr0    ,aks       ,eps       , &
+                & camax     ,frac      ,sig       ,thick     ,ws        , &
                 & dicww     ,ltur      ,aks_ss3d  ,iform     , &
                 & kmaxsd    ,taurat    ,caks      ,caks_ss3d ,concin    , &
                 & seddif    ,sigmol    ,rsedeq    ,scour     ,bedw      , &
@@ -349,8 +351,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Engelund-Hansen
        !
-       call tranb1(utot      ,di50      ,chezy     ,h1        ,par        , &
-                 & sbot      ,ssus      )
+       call tranb1(utot      ,di50      ,chezy     ,h1        ,npar      , &
+                 & par       ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -358,8 +360,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Meyer-Peter-Muller
        !
-       call tranb2(utot       ,di50      ,d90       ,chezy     ,h1        , &
-                 & par        ,hidexp    ,sbot      ,ssus      )
+       call tranb2(utot      ,di50       ,d90       ,chezy     ,h1        , &
+                 & npar      ,par        ,hidexp    ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -367,8 +369,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Ackers-White
        !
-       call tranb3(utot      ,d90       ,chezy     ,h1        ,par        , &
-                 & sbot      ,ssus      )
+       call tranb3(utot      ,d90       ,chezy     ,h1        ,npar      , &
+                 & par       ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -376,8 +378,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! general relation for bed load
        !
-       call tranb4(utot      ,di50      ,chezy     ,par        ,hidexp    , &
-                 & sbot      ,ssus      )
+       call tranb4(utot      ,di50      ,chezy     ,npar      ,par        , &
+                 & hidexp    ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -385,10 +387,10 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Bijker
        !
-       call tranb5(u         ,v         ,di50      ,d90       ,chezy      , &
-                 & h1        ,hrms      ,tp        ,teta      ,par        , &
-                 & dzduu     ,dzdvv     ,sbcu      ,sbcv      ,sscu       , &
-                 & sscv      ,cesus     ,vonkar    )
+       call tranb5(u         ,v         ,di50      ,d90       ,chezy     , &
+                 & h1        ,hrms      ,tp        ,teta      ,npar      , &
+                 & par       ,dzduu     ,dzdvv     ,sbcu      ,sbcv      , &
+                 & sscu      ,sscv      ,cesus     ,vonkar    )
        !
        sbc_total = .false.
        sus_total = .false.
@@ -401,10 +403,10 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        error = .true.
        return
        !
-       !call tranb6(utot      ,u          ,v         ,chezy     ,h1        , &
-       !          & hrms      ,tp         ,teta      ,diss      ,dzduu     , &
-       !          & dzdvv     ,par        ,sbcu      ,sbcv      ,sscu      , &
-       !          & sscv      )
+       !call tranb6(utot      ,u         ,v         ,chezy     ,h1        , &
+       !          & hrms      ,tp        ,teta      ,diss      ,dzduu     , &
+       !          & dzdvv     ,npar      ,par       ,sbcu      ,sbcv      , &
+       !          & sscu      ,sscv      )
        !
        sbc_total = .false.
        sus_total = .false.
@@ -412,8 +414,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Van Rijn (1984, modified)
        !
-       call tranb7(utot      ,di50       ,d90       ,h1        ,par        , &
-                 & sbot      ,ssus       ,vonkar    ,mudfrac)
+       call tranb7(utot      ,di50       ,d90       ,h1        ,npar      , &
+                 & par       ,sbot      ,ssus       ,vonkar    ,mudfrac   )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -426,10 +428,10 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        error = .true.
        return
        !
-       !call tranb8(u         ,v         ,hrms      ,h1         ,teta      , &
-       !          & tp        ,di50      ,d90       ,diss       ,dzduu     , &
-       !          & dzdvv     ,par       ,sbcu      ,sbcv       ,sscu      , &
-       !          & sscv      )
+       !call tranb8(u         ,v         ,hrms      ,h1        ,teta      , &
+       !          & tp        ,di50      ,d90       ,diss      ,dzduu     , &
+       !          & dzdvv     ,npar      ,par       ,sbcu      ,sbcv      , &
+       !          & sscu      ,sscv      )
        !
        sbc_total = .false.
        sus_total = .false.
@@ -455,9 +457,9 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        error = .true.
        return
        !
-       !call trab10(utot      ,di50      ,chezy     ,h1         ,cosa      , &
-       !          & sina      ,dzduu     ,dzdvv     ,par        ,sbot      , &
-       !          & ssus      )
+       !call trab10(utot      ,di50      ,chezy     ,h1        ,cosa      , &
+       !          & sina      ,dzduu     ,dzdvv     ,npar      ,par       , &
+       !          & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -465,9 +467,9 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Soulsby and Van Rijn
        !
-       call trab11(u         ,v          ,hrms      ,h1        ,tp        , &
-                 & di50      ,par        ,sbcu      ,sbcv      ,sscu      , &
-                 & sscv      ,ubot       ,vonkar    ,ubot_from_com        )
+       call trab11(u         ,v         ,hrms      ,h1        ,tp        , &
+                 & di50      ,npar      ,par       ,sbcu      ,sbcv      , &
+                 & sscu      ,sscv      ,ubot      ,vonkar    ,ubot_from_com)
        !
        sbc_total = .false.
        sus_total = .false.
@@ -475,9 +477,10 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Soulsby
        !
-       call trab12(u         ,v         ,hrms       ,h1        ,tp        , &
-                 & teta      ,di50      ,par        ,sbcu      ,sbcv      , &
-                 & sscu      ,sscv      ,ubot       ,vonkar    ,ubot_from_com)
+       call trab12(u         ,v         ,hrms      ,h1        ,tp        , &
+                 & teta      ,di50      ,npar      ,par       ,sbcu      , &
+                 & sbcv      ,sscu      ,sscv      ,ubot      ,vonkar    , &
+                 & ubot_from_com)
        !
        sbc_total = .false.
        sus_total = .false.
@@ -485,8 +488,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! test transport (Wang) Fredsoe
        !
-       call tran9t(utot      ,di50       ,d90       ,chezy     ,h1        , &
-                 & ustarc    ,par        ,sbot      ,ssus      )
+       call tran9t(utot      ,di50      ,d90       ,chezy     ,h1        , &
+                 & ustarc    ,npar      ,par       ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -494,8 +497,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! generalized Ashida and Michiue
        !
-       call trab14(utot      ,di50      ,chezy     ,par        ,hidexp    , &
-                 & sbot      ,ssus      )
+       call trab14(utot      ,di50      ,chezy     ,npar      ,par        , &
+                 & hidexp    ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -503,8 +506,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Wilcock & Crowe
        !
-       call trabwc(utot      ,di50      ,taub      ,par       ,sbot      , &
-                 & ssus      ,dg        ,sandfrac  ,chezy     )
+       call trabwc(utot      ,di50      ,taub      ,npar      ,par       , &
+                 & sbot      ,ssus      ,dg        ,sandfrac  ,chezy     )
        !
        sbc_total = .true.
        sus_total = .true. 
@@ -512,8 +515,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Modified Wilcock & Crowe
        !
-       call trabwc2(utot       ,di50      ,taub       ,par       ,sbot      , &
-                  & ssus       ,dg        ,dgsd       ,chezy     )
+       call trabwc2(utot      ,di50      ,taub       ,npar      ,par       , &
+                  & sbot      ,ssus      ,dg        ,dgsd       ,chezy     )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -521,8 +524,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Gaeuman et al. (development of Wilcock & Crowe)
        !
-       call trabg(utot       ,di50      ,taub       ,par       ,sbot      , &
-                & ssus       ,dg        ,dgsd       ,chezy     )
+       call trabg(utot      ,di50      ,taub      ,npar      ,par       , &
+                & sbot      ,ssus      ,dg        ,dgsd      ,chezy     )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -531,9 +534,9 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        ! van Thiel / Van Rijn (2008)
        !
        call trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h1        ,tp        , &
-                 & di50      ,d15       ,d90       ,par       ,dzbdt     ,vicmol    ,poros     , &
-                 & chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,sscu      ,sscv     , &
-                 & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com        )
+                 & di50      ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
+                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,sscu      , &
+                 & sscv      ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
        !
        uamg = sqrt(ua*ua+va*va)
        realpar(RP_UAU) = real(ua      ,hp)  ! needed for suspended transport
@@ -546,9 +549,9 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        ! Soulsby / Van Rijn with XBeach adaptations
        !
        call trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h1        ,tp        , &
-                 & di50      ,d15       ,d90       ,par       ,dzbdt     ,vicmol    ,poros     , &
-                 & chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,sscu      ,sscv     , &
-                 & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com        )
+                 & di50      ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
+                 & poros     ,chezy     ,dzdx      ,dzdy      ,sbcu      ,sbcv      ,sscu      , &
+                 & sscv      ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
        !
        uamg = sqrt(ua*ua+va*va)
        realpar(RP_UAU) = real(ua      ,hp)  ! needed for suspended transport

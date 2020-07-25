@@ -1,5 +1,5 @@
-subroutine tranb1(utot      ,d50       ,c         ,h         ,par       , &
-                & sbot      ,ssus      )
+subroutine tranb1(utot      ,d50       ,c         ,h         ,npar       , &
+                & par       ,sbot      ,ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -40,25 +40,27 @@ subroutine tranb1(utot      ,d50       ,c         ,h         ,par       , &
 !
 ! Call variables
 !
-    real(fp)               , intent(in)  :: c       ! Description and declaration in esm_alloc_real.f90
-    real(fp)               , intent(in)  :: d50
-    real(fp)               , intent(in)  :: h
-    real(fp)               , intent(out) :: sbot
-    real(fp)               , intent(out) :: ssus
-    real(fp)               , intent(in)  :: utot
-    real(fp), dimension(30), intent(in)  :: par
+    integer                  , intent(in)  :: npar    !< length of transport parameter array
+    real(fp)                 , intent(in)  :: c       !< Chezy value
+    real(fp)                 , intent(in)  :: d50     !< mean diameter
+    real(fp)                 , intent(in)  :: h       !< water depth
+    real(fp), dimension(npar), intent(in)  :: par     !< transport parameter array
+    real(fp)                 , intent(in)  :: utot    !< velocity magnitude
+    !
+    real(fp)                 , intent(out) :: sbot    !< bed load transport
+    real(fp)                 , intent(out) :: ssus    !< suspended load transport
 !
 ! Local variables
 ! 
-    real(fp)   :: acal
+    real(fp)   :: acal    ! user-specified calibration coefficient
     real(fp)   :: ag      ! gravity acceleration
     real(fp)   :: cc
     real(fp)   :: cf
     real(fp)   :: delta   ! relative density of sediment particle
     real(fp)   :: rk
-    real(fp)   :: vster
-    real(fp)   :: suspfac
+    real(fp)   :: suspfac ! user-specified suspended sediment factor
     real(fp)   :: temp
+    real(fp)   :: ustar   ! shear velocity magnitue
 !
 !! executable statements -------------------------------------------------------
 !
@@ -80,14 +82,14 @@ subroutine tranb1(utot      ,d50       ,c         ,h         ,par       , &
        cc = c
     endif
     !
-    !     bed load
+    ! bed load
     !
     cf    = ag / cc / cc
-    vster = sqrt(cf) * utot
-    temp  = acal * 0.05_fp * utot * vster**4 / ag**2 / sqrt(cf) / delta**2 / d50
+    ustar = sqrt(cf) * utot
+    temp  = acal * 0.05_fp * utot * ustar**4 / ag**2 / sqrt(cf) / delta**2 / d50
     sbot  = (1.0_fp-suspfac) * temp
     !
     ! suspended sediment transport
     !
-    ssus = suspfac*temp
+    ssus = suspfac * temp
 end subroutine tranb1

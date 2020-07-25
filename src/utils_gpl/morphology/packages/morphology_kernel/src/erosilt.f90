@@ -1,10 +1,10 @@
 subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
                  & thick0   ,thick1    ,fixfac    ,srcmax   , &
                  & frac     ,oldmudfrac,flmd2l    ,iform    , &
-                 & par      ,numintpar ,numrealpar,numstrpar, &
-                 & dllfunc  ,dllhandle ,intpar    ,realpar  , &
-                 & strpar   ,iflufflyr ,mflufftot ,fracf    , &
-                 & maxslope ,wetslope  , &
+                 & npar     ,par       ,numintpar ,numrealpar, &
+                 & numstrpar,dllfunc  ,dllhandle ,intpar    , &
+                 & realpar  ,strpar   ,iflufflyr ,mflufftot , &
+                 & fracf    ,maxslope ,wetslope  , &
 ! output:
                  & error    ,wstau     ,sinktot   ,sourse   , &
                  & sourf    )
@@ -61,6 +61,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     integer                             , intent(in)    :: numstrpar
     integer                             , intent(in)    :: kmax
     integer                                             :: lundia   !  Description and declaration in inout.igs
+    integer                             , intent(in)    :: npar
     integer       , dimension(numintpar), intent(inout) :: intpar
     integer(pntrsize)                   , intent(in)    :: dllhandle
     !
@@ -69,7 +70,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     real(fp)                            , intent(in)    :: fracf
     real(fp)                            , intent(in)    :: maxslope
     real(fp)                            , intent(in)    :: mflufftot
-    real(fp)     , dimension(30)        , intent(inout) :: par
+    real(fp)     , dimension(npar)      , intent(inout) :: par
     real(fp)                            , intent(out)   :: sinktot
     real(fp)                            , intent(out)   :: sourf
     real(fp)                            , intent(out)   :: sourse

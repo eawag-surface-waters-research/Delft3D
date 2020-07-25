@@ -1,4 +1,4 @@
-subroutine tram1 (numrealpar,realpar   ,wave                 ,par       , &
+subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
                 & kmax      ,bed       , &
                 & tauadd    ,taucr0    ,aks       ,eps       ,camax     , &
                 & frac      ,sig       ,thick     ,ws        , &
@@ -51,42 +51,43 @@ subroutine tram1 (numrealpar,realpar   ,wave                 ,par       , &
 !
 ! Call variables
 !
-    integer                         , intent(in)   :: numrealpar
-    real(hp), dimension(numrealpar) , intent(inout):: realpar
-    !
+    logical                         , intent(in)   :: scour
     logical                         , intent(in)   :: wave
     integer                         , intent(in)   :: kmax
+    integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
+    integer                         , intent(in)   :: npar
+    integer                         , intent(in)   :: numrealpar
     real(fp)                        , intent(in)   :: bed
-    real(fp)                        , intent(in)   :: tauadd
-    real(fp)                        , intent(in)   :: taucr0
-    real(fp)                        , intent(in)   :: eps
+    real(fp)                        , intent(in)   :: bedw
     real(fp)                        , intent(in)   :: camax
+    real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: eps
     real(fp)                        , intent(in)   :: frac     !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)       , intent(in)   :: sig      !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: susw
+    real(fp)                        , intent(in)   :: tauadd
+    real(fp)                        , intent(in)   :: taucr0
     real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
     real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
-    integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
-    real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in rjdim.f90
-    logical                         , intent(in)   :: scour
-    real(fp)                        , intent(in)   :: bedw
-    real(fp)                        , intent(in)   :: susw
-    real(fp), dimension(30)         , intent(in)   :: par
+    real(fp), dimension(npar)       , intent(in)   :: par
     !
-    real(fp)                        , intent(out)  :: aks
-    real(fp), dimension(kmax)       , intent(out)  :: rsedeq   !  Description and declaration in rjdim.f90
+    real(hp), dimension(numrealpar) , intent(inout):: realpar
+    !
+    logical                         , intent(out)  :: error
     integer                         , intent(out)  :: kmaxsd
-    real(fp)                        , intent(out)  :: taurat
+    real(fp)                        , intent(out)  :: aks
     real(fp)                        , intent(out)  :: caks
-    real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(out)  :: conc2d
+    real(fp), dimension(kmax)       , intent(out)  :: rsedeq   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(out)  :: sbcu
     real(fp)                        , intent(out)  :: sbcv
     real(fp)                        , intent(out)  :: sbwu
     real(fp)                        , intent(out)  :: sbwv
+    real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(out)  :: sswu
     real(fp)                        , intent(out)  :: sswv
-    logical                         , intent(out)  :: error
-    real(fp)                        , intent(out)  :: conc2d
+    real(fp)                        , intent(out)  :: taurat
     character(*)                    , intent(out)  :: message     ! Contains error message
 !
 ! Local variables

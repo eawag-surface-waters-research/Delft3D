@@ -188,6 +188,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: rdc
     real(fp)                             , pointer :: wetslope
     integer                              , pointer :: iopkcw
+    integer                              , pointer :: npar
     integer                              , pointer :: max_integers
     integer                              , pointer :: max_reals
     integer                              , pointer :: max_strings
@@ -506,6 +507,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     rdc                 => gdp%gdmorpar%rdc
     iopkcw              => gdp%gdmorpar%iopkcw
     ubot_from_com       => gdp%gdprocs%ubot_from_com
+    npar                => gdp%gdtrapar%npar
     max_integers        => gdp%gdtrapar%max_integers
     max_reals           => gdp%gdtrapar%max_reals
     max_strings         => gdp%gdtrapar%max_strings
@@ -523,7 +525,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     mfluff              => gdp%gdmorpar%flufflyr%mfluff
     wetslope            => gdp%gdmorpar%wetslope
     !
-    allocate (localpar (gdp%gdtrapar%npar), stat = istat)
+    allocate (localpar (npar), stat = istat)
     !
     if (varyingmorfac .and. icall==1) then
        call updmorfac(gdp%gdmorpar, timhr, julday)
@@ -1001,11 +1003,14 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           ! All nm-/l-based redefinitions of these parameters are performed
           ! on localpar, thus ensuring that the global array par is not
           ! messed up with specific, nm-/l-dependent data.
-          ! The usage of localpar is introduced to speed up the calculations
-          ! significantly for certain combinations of testcase/compilers/hardware/operating systems.
           !
-          do i = 1,gdp%gdtrapar%npar
-             localpar(i) = par(i,l)
+          do i = 1, npar
+             j = gdp%gdtrapar%iparfld(i,l)
+             if (j>0) then
+                 localpar(i) = gdp%gdtrapar%parfld(nm,j)
+             else
+                 localpar(i) = par(i,l)
+             endif
           enddo
           !
           ! fraction specific quantities
@@ -1014,13 +1019,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_reals(RP_RHOSL)    = real(rhosol(l) ,hp)
           dll_integers(IP_ISED ) = l
           dll_strings(SP_USRFL)  = dll_usrfil(l)
-          !
-          do i = 1,gdp%gdtrapar%npar
-             j = gdp%gdtrapar%iparfld(i,l)
-             if (j>0) then
-                 localpar(i) = gdp%gdtrapar%parfld(nm,j)
-             endif
-          enddo
           !
           if (sedtyp(l) == SEDTYP_COHESIVE) then
              !
@@ -1059,11 +1057,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              call erosilt(thicklc     ,kmaxlc      ,wslc        ,lundia       , &
                         & thick0      ,thick1      ,fixfac(nm,l),srcmax(nm, l), &
                         & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)     , &
-                        & localpar    ,max_integers,max_reals   ,max_strings  , &
-                        & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
-                        & dll_strings ,iflufflyr ,mfltot ,fracf               , &
-                        & maxslope    ,wetslope  , &
-                        & error          ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
+                        & npar        ,localpar    ,max_integers,max_reals    , &
+                        & max_strings ,dll_function(l),dll_handle(l),dll_integers, &
+                        & dll_reals   ,dll_strings ,iflufflyr   ,mfltot       , &
+                        & fracf       ,maxslope    ,wetslope    , &
+                        & error       ,wstau(nm)   ,sinktot     ,sourse(nm,l) , &
+                        & sourfluff   )
              if (error) call d3stop(1, gdp)
              !
              if (iflufflyr>0) then
@@ -1212,8 +1211,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & dzduz     ,dzdvz     ,ubot(nm)  ,tauadd    ,sus       , &
                        & bed       ,susw      ,bedw      ,espir     ,wave      , &
                        & scour     ,ubot_from_com        ,camax     ,eps       , &
-                       & iform(l)  ,localpar  ,max_integers,max_reals,max_strings, &
-                       & dll_function(l),dll_handle(l),dll_integers,dll_reals,dll_strings, &
+                       & iform(l)  ,npar      ,localpar  ,max_integers,max_reals, &
+                       & max_strings,dll_function(l),dll_handle(l),dll_integers,dll_reals, &
+                       & dll_strings, &
                        & taks      ,caks      ,taurat(nm,l),sddflc  ,rsdqlc    , &
                        & kmaxsd    ,conc2d    ,sbcu(nm,l ),sbcv(nm,l),sbwu(nm,l), &
                        & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &
@@ -1297,8 +1297,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & dzduz     ,dzdvz     ,ubot(nm)  ,tauadd    ,sus       , &
                        & bed       ,susw      ,bedw      ,espir     ,wave      , &
                        & scour     ,ubot_from_com        ,camax     ,eps       , &
-                       & iform(l)  ,localpar  ,max_integers,max_reals,max_strings, &
-                       & dll_function(l),dll_handle(l),dll_integers,dll_reals,dll_strings, &
+                       & iform(l)  ,npar      ,localpar  ,max_integers,max_reals, &
+                       & max_strings,dll_function(l),dll_handle(l),dll_integers,dll_reals, &
+                       & dll_strings, &
                        & taks      ,caks      ,taurat(nm,l),sddf2d  ,rsdq2d    , &
                        & kmaxsd    ,trsedeq   ,sbcu(nm,l),sbcv(nm,l),sbwu(nm,l), &
                        & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &

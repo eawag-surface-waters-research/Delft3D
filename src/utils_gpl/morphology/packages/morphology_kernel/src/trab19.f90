@@ -1,7 +1,7 @@
 subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h         ,tp        , &
-                & d50       ,d15       ,d90       ,par       ,dzbdt     ,vicmol    ,poros     , &
-                & chezy     ,dzdx      ,dzdy      ,sbotx     ,sboty     ,ssusx     ,ssusy     , &
-                & ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com        )
+                & d50       ,d15       ,d90       ,npar      ,par       ,dzbdt     ,vicmol    , &
+                & poros     ,chezy     ,dzdx      ,dzdy      ,sbotx     ,sboty     ,ssusx     , &
+                & ssusy     ,ua        ,va        ,ubot      ,kwtur     ,vonkar    ,ubot_from_com )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -44,33 +44,35 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
 !
 ! Call variables
 !
-    real(fp)               , intent(in)    :: d15
-    real(fp)               , intent(in)    :: d50
-    real(fp)               , intent(in)    :: d90
-    real(fp)               , intent(in)    :: poros
-    real(fp)               , intent(in)    :: chezy
-    real(fp)                               :: h
-    real(fp)                               :: hrms
-    real(fp)                               :: tp     
-    real(fp)               , intent(in)    :: rlabda   
-    real(fp)               , intent(in)    :: teta     
-    real(fp)               , intent(in)    :: kwtur    !  Breaker induced turbulence
-    real(fp)               , intent(in)    :: dzbdt    !  Erosion/sedimentation velocity
-    real(fp)               , intent(in)    :: vicmol
-    real(fp)               , intent(in)    :: ubot   
-    real(fp)               , intent(in)    :: dzdy   
-    real(fp)               , intent(in)    :: dzdx   
-    real(fp)               , intent(in)    :: u
-    real(fp)               , intent(in)    :: v
-    real(fp), dimension(30), intent(in)    :: par
-    real(fp)               , intent(in)    :: vonkar
-    logical                , intent(in)    :: ubot_from_com
-    real(fp)               , intent(out)   :: sbotx
-    real(fp)               , intent(out)   :: sboty
-    real(fp)               , intent(out)   :: ssusx
-    real(fp)               , intent(out)   :: ssusy
-    real(fp)               , intent(out)   :: ua
-    real(fp)               , intent(out)   :: va
+    integer                  , intent(in)    :: npar
+    logical                  , intent(in)    :: ubot_from_com
+    real(fp)                 , intent(in)    :: chezy
+    real(fp)                 , intent(in)    :: d15
+    real(fp)                 , intent(in)    :: d50
+    real(fp)                 , intent(in)    :: d90
+    real(fp)                 , intent(in)    :: dzbdt    !  Erosion/sedimentation velocity
+    real(fp)                 , intent(in)    :: dzdx   
+    real(fp)                 , intent(in)    :: dzdy   
+    real(fp)                                 :: h
+    real(fp)                                 :: hrms
+    real(fp)                 , intent(in)    :: kwtur    !  Breaker induced turbulence
+    real(fp), dimension(npar), intent(in)    :: par
+    real(fp)                 , intent(in)    :: poros
+    real(fp)                 , intent(in)    :: rlabda   
+    real(fp)                 , intent(in)    :: teta     
+    real(fp)                                 :: tp     
+    real(fp)                 , intent(in)    :: ubot   
+    real(fp)                 , intent(in)    :: vicmol
+    real(fp)                 , intent(in)    :: u
+    real(fp)                 , intent(in)    :: v
+    real(fp)                 , intent(in)    :: vonkar
+    !
+    real(fp)                 , intent(out)   :: sbotx
+    real(fp)                 , intent(out)   :: sboty
+    real(fp)                 , intent(out)   :: ssusx
+    real(fp)                 , intent(out)   :: ssusy
+    real(fp)                 , intent(out)   :: ua
+    real(fp)                 , intent(out)   :: va
     !
     ! Local variables
     !

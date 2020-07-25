@@ -1,5 +1,5 @@
-subroutine trabg(utot      ,di        ,taub      ,par       ,sbot      , &
-               & ssus      ,dg        ,dgsd      ,chezy     )
+subroutine trabg(utot      ,di        ,taub      ,npar      ,par       , &
+               & sbot      ,ssus      ,dg        ,dgsd      ,chezy     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -48,15 +48,17 @@ subroutine trabg(utot      ,di        ,taub      ,par       ,sbot      , &
 !
 ! Call variables
 !
-    real(fp)               , intent(in)  :: utot   ! flow velocity
-    real(fp)               , intent(in)  :: di     ! Grain size specified as d50
-    real(fp)               , intent(in)  :: taub   ! bed shear stress [N/m2]
-    real(fp)               , intent(out) :: sbot   ! bed load transport, magnitude [m3/m/s]
-    real(fp)               , intent(out) :: ssus   ! suspended sediment transport
-    real(fp)               , intent(in)  :: dg     ! geometric mean surface grain size [m]
-    real(fp)               , intent(in)  :: dgsd   ! geometric standard deviation of particle size mix [m]
-    real(fp)               , intent(in)  :: chezy  ! local Chézy value [m1/2/s]
-    real(fp), dimension(30), intent(in)  :: par    ! sediment parameter list
+    integer                  , intent(in)    :: npar
+    real(fp)                 , intent(in)    :: chezy  ! local Chézy value [m1/2/s]
+    real(fp)                 , intent(in)    :: dg     ! geometric mean surface grain size [m]
+    real(fp)                 , intent(in)    :: dgsd   ! geometric standard deviation of particle size mix [m]
+    real(fp)                 , intent(in)    :: di     ! Grain size specified as d50
+    real(fp), dimension(npar), intent(in)    :: par    ! sediment parameter list
+    real(fp)                 , intent(in)    :: taub   ! bed shear stress [N/m2]
+    real(fp)                 , intent(in)    :: utot   ! flow velocity
+    !
+    real(fp)                 , intent(out)   :: sbot   ! bed load transport, magnitude [m3/m/s]
+    real(fp)                 , intent(out)   :: ssus   ! suspended sediment transport
 !
 ! Local variables
 !

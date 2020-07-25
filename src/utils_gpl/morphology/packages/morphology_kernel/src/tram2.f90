@@ -1,7 +1,7 @@
-subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
-                & kmax      ,bed       ,dzduu     ,dzdvv     ,rksrs     , &
-                & tauadd    ,taucr0    ,aks       ,eps       ,camax     , &
-                & frac      ,sig       ,thick     ,ws        , &
+subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
+                & par       ,kmax      ,bed       ,dzduu     ,dzdvv     , &
+                & rksrs     ,tauadd    ,taucr0    ,aks       ,eps       , &
+                & camax     ,frac      ,sig       ,thick     ,ws        , &
                 & dicww     ,ltur      ,aks_ss3d  ,iform     , &
                 & kmaxsd    ,taurat    ,caks      ,caks_ss3d ,concin    , &
                 & seddif    ,sigmol    ,rsedeq    ,scour     ,bedw      , &
@@ -52,51 +52,52 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
 !
 ! Call variables
 !
-    integer                         , intent(in)   :: numrealpar
-    real(hp), dimension(numrealpar) , intent(inout):: realpar
-    !
+    logical                         , intent(in)   :: scour
     logical                         , intent(in)   :: wave
     integer                         , intent(in)   :: i2d3d
     integer                         , intent(in)   :: iform    ! transport formula number -2 for standard Van Rijn (2007), -4 for SANTOSS extended version
     integer                         , intent(in)   :: kmax
+    integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
+    integer                         , intent(in)   :: npar
+    integer                         , intent(in)   :: numrealpar
     real(fp)                        , intent(in)   :: bed
+    real(fp)                        , intent(in)   :: bedw
+    real(fp)                        , intent(in)   :: camax
+    real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: dzduu    !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: dzdvv    !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: eps
+    real(fp)                        , intent(in)   :: frac     !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: rksrs    !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)       , intent(in)   :: sig      !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: susw
     real(fp)                        , intent(in)   :: tauadd
     real(fp)                        , intent(in)   :: taucr0
-    real(fp)                        , intent(in)   :: eps
-    real(fp)                        , intent(in)   :: camax
-    real(fp)                        , intent(in)   :: frac     !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)       , intent(in)   :: sig      !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: tetacr
     real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
     real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
-    integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
-    real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in rjdim.f90
-    logical                         , intent(in)   :: scour
-    real(fp)                        , intent(in)   :: bedw
-    real(fp)                        , intent(in)   :: susw
-    real(fp)                        , intent(in)   :: tetacr
-    real(fp), dimension(30)         , intent(inout):: par
     !
-    real(fp)                        , intent(out)  :: aks
-    real(fp), dimension(kmax)       , intent(out)  :: rsedeq   ! undefined if (i2d3d==3 .and. .not. epspar .and. caks>1e-6)
-    real(fp)                        , intent(out)  :: aks_ss3d
+    real(fp), dimension(kmax)       , intent(inout):: concin   ! if (i2d3d==2 .or. epspar) then output else input
+    real(fp), dimension(npar)       , intent(inout):: par
+    real(hp), dimension(numrealpar) , intent(inout):: realpar
+    !
+    logical                         , intent(out)  :: error
     integer                         , intent(out)  :: kmaxsd
-    real(fp)                        , intent(out)  :: taurat
+    real(fp)                        , intent(out)  :: aks
+    real(fp)                        , intent(out)  :: aks_ss3d
     real(fp)                        , intent(out)  :: caks
     real(fp)                        , intent(out)  :: caks_ss3d
     real(fp)                        , intent(out)  :: conc2d
-    real(fp), dimension(kmax)       , intent(inout):: concin   ! if (i2d3d==2 .or. epspar) then output else input
-    real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)       , intent(out)  :: rsedeq   ! undefined if (i2d3d==3 .and. .not. epspar .and. caks>1e-6)
     real(fp)                        , intent(out)  :: sbcu
     real(fp)                        , intent(out)  :: sbcv
     real(fp)                        , intent(out)  :: sbwu
     real(fp)                        , intent(out)  :: sbwv
     real(fp)                        , intent(out)  :: sswu
     real(fp)                        , intent(out)  :: sswv
-    logical                         , intent(out)  :: error
+    real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(out)  :: taurat
     character(*)                    , intent(out)  :: message     ! Contains error message
 !
 ! Local variables
@@ -392,7 +393,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
                         & dzduu     ,dzdvv     ,rhowat    ,ag        ,bedw      , &
                         & pangle    ,fpco      ,susw      ,wave      ,eps       , &
                         & subiw     ,error     ,message   )
-           par = -999.0_fp
+           !par = -999.0_fp
        elseif (iform == -4) then
            ! extended SANTOSS bed load
            call santoss(numrealpar, realpar, par, dzduu, dzdvv, i2d3d, &
@@ -400,7 +401,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
                       & error, message)
        endif
     else
-       par   = -999.0_fp
+       !par   = -999.0_fp
        error = .false.
     endif
 end subroutine tram2
