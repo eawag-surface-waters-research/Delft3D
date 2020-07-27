@@ -1453,7 +1453,7 @@ subroutine readMDUFile(filename, istat)
     !   call warn_flush()
     ! endif
     call prop_get_integer (md_ptr, 'time', 'AutoTimestepNoStruct' , ja_timestep_nostruct, success)
-    call prop_get_integer (md_ptr, 'time', 'AutoTimestepNoQin' ,    ja_timestep_noqout,    success)
+    call prop_get_integer (md_ptr, 'time', 'AutoTimestepNoQout' ,   ja_timestep_noqout,   success)
 
     call prop_get_double  (md_ptr, 'time', 'Dtfacmax',  dtfacmax)
 
