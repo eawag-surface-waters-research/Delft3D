@@ -568,9 +568,9 @@ proc readInputFile { inputfilename iflist } {
       set value   [string trim [lindex $words 1]]
       switch -- $keyword {
          "runscript" {
-		    set runscript $value
-		 }
-		 "dimrexedir" {
+            set runscript $value
+         }
+         "dimrexedir" {
             set dimrexedir $value
          }
          "dimrargs" {
