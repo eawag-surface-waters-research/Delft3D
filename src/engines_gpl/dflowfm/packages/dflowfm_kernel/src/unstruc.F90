@@ -41633,7 +41633,7 @@ if (jahisbal > 0) then
                else
                   valgategen(3,n) = valgategen(3,n) / valgategen(1,n)
                   valgategen(4,n) = valgategen(4,n) / valgategen(1,n)
-                  valgategen(5,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(5,n)/valgategen(1,n)-zcgen(3*i-2) ), 0.0d0)  ! flow trough height is always positive
+                  valgategen(5,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(5,n)/valgategen(1,n)-zcgen(3*i-2) ), 0.0d0)  ! flow through height is always positive
                endif
             endif
          enddo
@@ -42034,7 +42034,7 @@ if (jahisbal > 0) then
                   i = gate2cgen(n)
                   valgategen(3,n) = valgategen(3,n) / valgategen(1,n)
                   valgategen(4,n) = valgategen(4,n) / valgategen(1,n)
-                  valgategen(5,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(5,n)/valgategen(1,n)-zcgen(3*i-2) ), 0.0d0)  ! flow trough height is always positive
+                  valgategen(5,n) = max( min( zcgen(3*i-1)-zcgen(3*i-2), valgategen(5,n)/valgategen(1,n)-zcgen(3*i-2) ), 0.0d0)  ! flow through height is always positive
                   valgategen(7,n) = valgategen(7,n) / valgategen(6,n) !id_gategen_openw
                   valgategen(8,n) = valgategen(8,n) / valgategen(6,n) !id_gategen_edgel
                   valgategen(9,n) = valgategen(9,n) / valgategen(6,n) !id_gategen_sillh
