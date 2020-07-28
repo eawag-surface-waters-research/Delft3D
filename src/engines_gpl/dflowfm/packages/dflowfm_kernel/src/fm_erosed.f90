@@ -2418,8 +2418,8 @@
    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor, bl_ave, ndx2d
    use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
    use m_flowparameters, only: epshs, epshu, jawave, eps10, jasal, jatem
-   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, m_sediment_sed=>sed, avalflux, botcrit, kcsmor
-   use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user
+   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, m_sediment_sed=>sed, avalflux, botcrit, kcsmor, jamormergedtuser, mergebodsed
+   use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds, time_user, dt_user
    use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot, itra1, itran, numconst
    use unstruc_files, only: mdia, close_all_files
    use m_fm_erosed
@@ -2449,7 +2449,7 @@
    !!
    !! Local variables
    !!
-   logical                                     :: bedload, error
+   logical                                     :: bedload, error, jamerge
    integer                                     :: ierror
    integer                                     :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout, kk, ised, itrac
    integer                                     :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2, iL, ac1, ac2
@@ -3129,18 +3129,34 @@
       ! Modifications for running parallel conditions (mormerge)
       !
       !
-      if (stmpar%morpar%multi) then
-         !if (comparereal(time1, time_user, eps10)>= 0) then      ! JRE: this assumes a constant dt_user in all processes. dt_user could be communicated, to check with AM
+      if (stmpar%morpar%multi) then         
+         jamerge = .false.
+         if (jamormergedtuser>0) then
+            mergebodsed = mergebodsed + dbodsd
+            dbodsd = 0d0
+            if (comparereal(time1, time_user, eps10)>= 0) then
+               jamerge = .true.
+            endif   
+         else
+            mergebodsed = dbodsd
+            dbodsd = 0d0            
+            jamerge = .true.
+         endif
+
+         if (jamerge) then 
             ii = 0
             do ll = 1, lsedtot
                do nm = 1, ndxi
                   ii = ii + 1
-                  stmpar%morpar%mergebuf(ii) = real(dbodsd(ll, nm) * kcsmor(nm),hp)
+                  stmpar%morpar%mergebuf(ii) = real(mergebodsed(ll, nm) * kcsmor(nm),hp)
                enddo
             enddo
+            !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg before merge (time=', time1/dt_user, ' usertimesteps):', maxval(mergebodsed)/cdryb(1), &
+            !                                &  ' at (', xz(maxloc(dbodsd,dim=2)), ',', yz(maxloc(dbodsd,dim=2)),')'
+            !call mess(LEVEL_INFO, msg)
             call putarray (stmpar%morpar%mergehandle,dim_real,1)
             call putarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)
-            call getarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)
+            call getarray (stmpar%morpar%mergehandle,stmpar%morpar%mergebuf(1:ndxi*lsedtot),ndxi*lsedtot)          
             ii = 0
             do ll = 1, lsedtot
                do nm = 1, ndxi
@@ -3148,8 +3164,15 @@
                   dbodsd(ll, nm) = real(stmpar%morpar%mergebuf(ii),fp)
                enddo
             enddo
-         !endif
+            !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg after merge (time=', time1/dt_user, ' usertimesteps):', maxval(dbodsd)/cdryb(1), &
+            !                                &  ' at (', xz(maxloc(dbodsd,dim=2)), ',', yz(maxloc(dbodsd,dim=2)),')'  
+            !call mess(LEVEL_INFO, msg)
+            mergebodsed = 0d0 
+         endif
       else
+         !write(msg,'(i3,a,f10.5,a,f10.5,a,f10.3,a,f10.3,a)') stmpar%morpar%mergehandle, ' maxval blchg (time=', time1/dt_user, ' usertimesteps):', maxval(mergebodsed)/cdryb(1), &
+         !                                &  ' at (', xz(maxloc(dbodsd,dim=2)), ',', yz(maxloc(dbodsd,dim=2)),')'
+         !call mess(LEVEL_INFO, msg)         
          do ll = 1, lsedtot
             dbodsd(ll,:) = dbodsd(ll,:)*kcsmor
          end do

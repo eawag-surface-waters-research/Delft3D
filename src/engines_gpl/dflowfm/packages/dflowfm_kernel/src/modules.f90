@@ -846,6 +846,7 @@ module m_sediment
  double precision, allocatable     :: avalflux(:,:)
  
  integer,          allocatable     :: kcsmor(:)
+ double precision, allocatable     :: mergebodsed(:,:)
 
  integer                           :: jased         !< Include sediment, 1=Krone, 2=Soulsby van Rijn 2007, 3=Bert's morphology module
  integer                           :: jaseddenscoupling=0    !< Include sediment in rho 1 = yes , 0 = no
@@ -860,6 +861,7 @@ module m_sediment
  integer                           :: jamorcfl
  double precision                  :: dzbdtmax
  double precision                  :: botcrit       !< mass balance: minimum depth after bottom update to adapt concentrations
+ integer                           :: jamormergedtuser
  !
  !-------------------------------------------------- old sediment transport and morphology
  integer                           :: mxgrKrone     !< mx grainsize index nr that followsKrone. Rest follows v.Rijn
@@ -932,6 +934,7 @@ module m_sediment
  jamorcfl            = 1
  dzbdtmax            = 0.1d0
  botcrit             = 1d-4
+ jamormergedtuser    = 0
  end subroutine default_sediment
 
  subroutine allocgrains() ! for all fractions:

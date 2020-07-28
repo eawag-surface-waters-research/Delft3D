@@ -3714,7 +3714,7 @@ subroutine setdt()
    use m_flow,           only: kkcflmx
    use m_timer
    use unstruc_display,  only: jaGUI
-   use m_sediment,       only: jased, stm_included, stmpar, jamorcfl
+   use m_sediment,       only: jased, stm_included, stmpar, jamorcfl, jamormergedtuser
    implicit none                                                          
 
    double precision :: dtsc_loc
@@ -3796,7 +3796,7 @@ subroutine setdt()
    endif
 
    if (stm_included .and. jased>0) then
-      if (stmpar%morpar%multi) then
+      if (stmpar%morpar%multi .and. jamormergedtuser==0) then
          call putarray (stmpar%morpar%mergehandle,dim_real,1)
          call putarray (stmpar%morpar%mergehandle,dts,1)
          call getarray (stmpar%morpar%mergehandle,dts,1)
@@ -10818,7 +10818,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_fm_update_crosssections, only: fm_update_mor_width_area, fm_update_mor_width_mean_bedlevel
  use unstruc_netcdf_map_class
  use unstruc_caching
- use m_mormerge
+ !use m_mormerge
  !
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -11210,16 +11210,17 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call timstop(handle_extra(36)) ! End remainder
  call writesomeinitialoutput()
 
+ ! JRE moved to sedmorinit
  ! Initialise mormerge: parallel online mor run for multiple conditions
- if (jased>0 .and. stm_included) then
-    if (stmpar%morpar%multi) then
-       call initmerge(iresult, ndxi, stmpar%lsedtot, "singledomain", stmpar%morpar)
-       if (iresult /= DFM_NOERR) then
-          call mess(LEVEL_FATAL, 'Mormerge initialization failed')
-          goto 1234
-       endif
-    endif
- endif
+ !if (jased>0 .and. stm_included) then
+ !   if (stmpar%morpar%multi) then
+ !      call initmerge(iresult, ndxi, stmpar%lsedtot, "singledomain", stmpar%morpar)
+ !      if (iresult /= DFM_NOERR) then
+ !         call mess(LEVEL_FATAL, 'Mormerge initialization failed')
+ !         goto 1234
+ !      endif
+ !   endif
+ !endif
 
  iresult = DFM_NOERR
  return
@@ -11289,6 +11290,8 @@ subroutine flow_sedmorinit()
     use timespace_parameters, only: LOCTP_POLYGON_FILE
     use timespace, only: selectelset_internal_nodes
     use MessageHandling
+    use dfm_error
+    use m_mormerge
 
     implicit none
 
@@ -11302,6 +11305,7 @@ subroutine flow_sedmorinit()
     integer                                   :: npnterror=0   !< number of grid points without cross-section definition
     integer, dimension(:), allocatable        :: kp
     type(t_branch), pointer                   :: pbr
+    double precision                          :: dim_real
 
 
 !! executable statements -------------------------------------------------------
@@ -11616,6 +11620,25 @@ subroutine flow_sedmorinit()
           kcsmor(kp(k)) = 1
        end do
     end if
+    
+    dim_real = 1d0
+    if (stmpar%morpar%multi) then
+       !
+       ! Initialize mormerge
+       call initmerge(ierr, ndxi, stmpar%lsedtot, "singledomain", stmpar%morpar)
+       if (ierr /= DFM_NOERR) then
+          call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Mormerge initialization failed')
+          goto 1234
+       endif
+       !
+       call realloc(mergebodsed,(/stmpar%lsedtot, ndx/), stat=ierr,fill=0d0,keepExisting=.false.)
+       !
+       if (jamormergedtuser>0) then    ! safety, set equal dt_user across mormerge processes once  
+          call putarray (stmpar%morpar%mergehandle,dim_real,1)
+          call putarray (stmpar%morpar%mergehandle,dt_user,1)
+          call getarray (stmpar%morpar%mergehandle,dt_user,1)
+       endif
+    endif
 
 1234 return
 end subroutine flow_sedmorinit
