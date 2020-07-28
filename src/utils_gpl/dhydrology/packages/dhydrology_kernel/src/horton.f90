@@ -134,10 +134,10 @@ module horton
          !     do nothing, unchanged
          else if(InfCapState(i) == HORTON_CAPSTAT_DECREASE) then
          !  infiltration capacity is decreasing
-            NewInfCap = MinInfCap(i) + (MaxInfCap(i) - MinInfCap(i))  * exp(-1*DecreaseRate * DT1(i))
+            NewInfCap(i) = MinInfCap(i) + (MaxInfCap(i) - MinInfCap(i))  * exp(-1*DecreaseRate(i) * DT1(i))
          else if (InfCapState(i) == HORTON_CAPSTAT_RECOVERY) then
          !  infiltration capacity is recovering
-            NewInfCap = MaxInfCap(i) - (MaxInfCap(i) - MinInfCap(i)) * exp(-1*RecoveryRate * DT1(i))
+            NewInfCap(i) = MaxInfCap(i) - (MaxInfCap(i) - MinInfCap(i)) * exp(-1*RecoveryRate(i) * DT1(i))
          end if
       enddo
       NewInfCap = min(NewInfCap, MaxInfCap) 
