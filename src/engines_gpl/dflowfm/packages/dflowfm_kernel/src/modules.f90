@@ -130,7 +130,7 @@
  double precision                  :: Salimin = 0d0              !< limit
  double precision                  :: epshstem = 0.001d0         !< only compute heatflx + evap if depth > trsh
  double precision                  :: surftempsmofac = 0.0d0     !< surface temperature smoothing factor 0-1d0
- double precision                  :: Soiltempthick   = 0.10d0   !< if soil buffer desired make thick > 0, e.g. 0.2 m
+ double precision                  :: Soiltempthick   = 0.0d0    !< if soil buffer desired make thick > 0, e.g. 0.2 m
 
  integer                           :: Jadelvappos                !< only positive forced evaporation fluxes
 
