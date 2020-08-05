@@ -21,11 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
       
-      subroutine wq_processes_initialise ( lunlsp       , pdffil       , blmfil    , &
-                                           sttfil       , statprocesdef, outputs   , &
-                                           nomult       , imultp       , constants , &
-                                           rank         , noinfo       , nowarn    , &
-                                           ierr)
+      subroutine wq_processes_initialise ( lunlsp, pdffil, shared_dll_so, blmfil, sttfil, statprocesdef, outputs, &
+                                           nomult, imultp, constants, rank, noinfo, nowarn, ierr)
 
 !       Deltares Software Centre
 
@@ -58,6 +55,7 @@
 
       integer             , intent(in   ) :: lunlsp          !< unit number spe
       character(len=*)    , intent(inout) :: pdffil          !< filename proc_def
+      character(len=*)    , intent(inout) :: shared_dll_so      !< name of the open processes library dll/so to be loaded during runtime
       character(len=*)    , intent(inout) :: blmfil          !< filename spe
       character(len=*)    , intent(inout) :: sttfil          !< filename stt
 
@@ -77,11 +75,11 @@
       ! local declarations
       type(itempropcoll)        :: allitems        !< all items of the proces system
 
-      real, parameter           :: versip = 5.06   ! version process system
       real                      :: verspe = 1.0    ! version bloom.spe file
       integer, parameter        :: novarm = 15000  ! max number of variables overall
       integer, parameter        :: nbprm  = 1750   ! max number of processes
       integer, parameter        :: nopred = 6      ! number of pre-defined variables
+      integer                   :: open_shared_library
 
       integer                   :: noqtt           ! total number of exhanges
       integer                   :: no_ins          ! number of output items
@@ -313,6 +311,22 @@
 
          call fill_old_items(old_items)
       endif
+
+      ! open openpb dll
+
+      if (shared_dll_so.ne.' ') then
+         dll_opb = 0 ! in C this one could be 4 or 8 bytes, so make sure the last bytes are zero
+         ierr2 = open_shared_library(dll_opb, shared_dll_so)
+         if ( ierr2 .ne. 0) then
+            write(lunlsp,*) 'ERROR: opening open process library dll/so', trim(shared_dll_so)
+            write(lunlsp,*) 'dll/so handle: ', dll_opb
+            ierr = ierr + 1
+         endif
+         write(lunlsp,*) 'Succesfully loaded open process library dll/so: ', trim(shared_dll_so)
+      else
+         write(lunlsp,*) 'No open process library dll/so specified'
+      endif
+      write(lunlsp,*) ' '
 
       ! old serial definitions
       swi_nopro = .false.

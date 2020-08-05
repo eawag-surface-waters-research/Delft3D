@@ -57,7 +57,7 @@
       integer :: janew, iex, ierr
       integer :: kk, k, kb, kt, ktmax, kdum
 
-      logical :: Lsub, Leho, Lstt, Lpdf, Lblm, Lallocated
+      logical :: Lsub, Leho, Lstt, Lpdf, Lopl, Lblm, Lallocated
 
       integer(4), save         :: ithndl = 0
 
@@ -76,6 +76,7 @@
       substance_file = md_subfile
       his_output_file = md_ehofile
       proc_def_file = md_pdffile
+      proc_dllso_file = md_oplfile
       bloom_file = md_blmfile
       statistics_file = md_sttfile
 
@@ -113,14 +114,20 @@
          call mess(LEVEL_ERROR, 'No process library file specified. Use commandline argument --processlibrary "<path>/<name>"')
       endif
 
+!     check if open process dll/so file exists
+      if (proc_dllso_file.ne.' ') then
+         inquire(file=proc_dllso_file,exist=Lopl)
+         if ( .not.Lopl) then
+            call mess(LEVEL_ERROR, 'Open process library dll/so file does not exist: ', trim(proc_dllso_file))
+         end if
+      endif
+
 !     check if bloom file exists
       if (bloom_file.ne.' ') then
          inquire(file=bloom_file,exist=Lblm)
          if ( .not.Lblm) then
             call mess(LEVEL_ERROR, 'BLOOM species definition file specified, but does not exist: ', trim(bloom_file))
          end if
-      else
-         Lblm = .false.
       end if
 
 !     water column definition
@@ -658,7 +665,7 @@
       endif
 
       call mess(LEVEL_INFO, 'Initialising water quality processes.')
-      call wq_processes_initialise ( lunlsp, proc_def_file, bloom_file, statistics_file, statprocesdef, outputs, &
+      call wq_processes_initialise ( lunlsp, proc_def_file, proc_dllso_file, bloom_file, statistics_file, statprocesdef, outputs, &
                                      nomult, imultp, constants, rank, noinfo, nowarn, ierr)
       call mess(LEVEL_INFO, 'Number of warnings during initialisation of the processes : ', nowarn)
       call mess(LEVEL_INFO, 'Number of errors during initialisation of the processes   : ', ierr)
@@ -1216,7 +1223,7 @@
                                 noq2  , noq3  , noq4  , pmsa(ipoiarea), ndspn , idpnew, dispnw, ndspx , dspx  , &
                                 dsto  , nveln , ivpnw , velonw, nvelx , pmsa(ipoivelx), vsto  , mbadefdomain(kbx:ktx), &
                                 pmsa(ipoidefa), prondt, prvvar, prvtyp, vararr, varidx, arrpoi, arrknd, arrdm1, &
-                                arrdm2, novar , pmsa  , nomba , pronam, prvpnt, nodef , pmsa(ipoisurf), flux_int )
+                                arrdm2, novar , pmsa  , nomba , pronam, prvpnt, nodef , pmsa(ipoisurf), flux_int, proc_dllso_file)
 
 !     copy data from WAQ to D-FlowFM
       if ( timon ) call timstrt ( "copy_data_from_wq_processes_to_fm", ithand2 )

@@ -543,20 +543,30 @@
 
 !     assumed from dll
 
-            ierror = perf_function(dll_opb, pronam,                                          ! &
-     &                             pmsa   , flux   , ipoint , increm , noseg  ,                   ! &
-     &                             noflux , iexpnt , iknmrk , noq1   , noq2   ,                   ! &
-     &                             noq3   , noq4   )
-            if ( ierror .ne. 0 ) then
-               call getmlu(lunrep)
-               write(*,*) 'ERROR     : requested module not in process library DLL'
-               write(*,*) 'module    : ', pronam
-               write(*,*) 'dll handle: ', dll_opb
-               write(lunrep,*) 'ERROR     : requested module not in process library DLL'
-               write(lunrep,*) 'module    : ', pronam
-               write(lunrep,*) 'dll handle: ', dll_opb
+            call getmlu(lunrep)
+            if (dll_opb .ne. 0) then
+               ierror = perf_function(dll_opb, pronam, pmsa   , flux   , ipoint , increm , noseg  ,
+     &                                noflux , iexpnt, iknmrk , noq1   , noq2   , noq3   , noq4   )
+               if ( ierror .ne. 0 ) then
+                  write(*,*) ' '
+                  write(*,*) 'ERROR        : requested module not in open process library dll/so'
+                  write(*,*) 'module       : ', pronam
+                  write(*,*) 'dll/so handle: ', dll_opb
+                  write(lunrep,*) ' '
+                  write(lunrep,*) 'ERROR        : requested module not in open process library dll/so'
+                  write(lunrep,*) 'module       : ', pronam
+                  write(lunrep,*) 'dll/so handle: ', dll_opb
+                  call srstop(1)
+               endif
+            else
+               write(*,*) ' '
+               write(*,*) 'ERROR  : requested module not available, no open process library dll/so loaded'
+               write(*,*) 'module : ', pronam
+               write(lunrep,*) ' '
+               write(lunrep,*) 'ERROR  : requested module not available, no open process library dll/so loaded'
+               write(lunrep,*) 'module       : ', pronam
                call srstop(1)
-            endif
+            endif   
 
       end select
 

@@ -87,6 +87,8 @@
 
       module processes_pointers
 
+      integer(8), save           :: dll_opb         !< open proces library dll handle
+
       integer                    :: nipmsa          !< Length IPMSA
       integer                    :: nproc           !< Number of called processes
       integer                    :: noloc           !< Number of local vars in the proces subsystem

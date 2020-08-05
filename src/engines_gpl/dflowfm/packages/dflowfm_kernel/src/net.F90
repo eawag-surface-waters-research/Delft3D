@@ -34676,6 +34676,13 @@ function read_commandline() result(istat)
             md_pdffile = inarg
             call mess(LEVEL_INFO, 'Using process library file: '//trim(md_pdffile))
 
+         case ('openprocessdllso')
+!           read next argument as well for the filename:
+            k = k+1
+            call get_command_argument(k, inarg)
+            md_oplfile = inarg
+            call mess(LEVEL_INFO, 'Using open process library dll/so: '//trim(md_oplfile))
+
          case ('bloomspecies')
             k = k+1
             call get_command_argument(k, inarg)
@@ -34772,6 +34779,9 @@ end if
    write (*,*) ' '
    write (*,*) '  --processlibrary PROCESSLIBRARYFILE'
    write (*,*) '      Specify the process library file to be used for water quality processes.'
+   write (*,*) ' '
+   write (*,*) '  --openprocessdllso OPENPROCESSDLLSOFILE'
+   write (*,*) '      Specify the open process dll/so file with additional subroutines to be used for water quality processes.'
    write (*,*) ' '
    write (*,*) '  --bloomspecies BLOOMSPECIESFILE'
    write (*,*) '      Specify the BLOOM species definition file to be used for water quality processes.'

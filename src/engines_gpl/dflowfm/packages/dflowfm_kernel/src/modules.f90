@@ -5481,6 +5481,7 @@ module m_fm_wq_processes
    character(len=256)                        :: his_output_file             !< extra history output file
    character(len=256)                        :: proc_log_file               !< processes log file
    character(len=256)                        :: proc_def_file               !< processes definition file
+   character(len=256)                        :: proc_dllso_file             !< open processes dll/so file
    character(len=256)                        :: bloom_file                  !< BLOOM algae spiecies paramter file
    character(len=256)                        :: statistics_file             !< file with configuration for statistics
 

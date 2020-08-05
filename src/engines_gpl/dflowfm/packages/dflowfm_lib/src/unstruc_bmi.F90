@@ -1299,6 +1299,16 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
          enddo
       endif
       return
+   case("openprocessdllso")
+      call c_f_pointer(xptr, c_value,[MAXSTRLEN])
+      md_oplfile = " "
+      if (associated(c_value)) then
+         do i=1,MAXSTRLEN
+            if (c_value(i) == c_null_char) exit
+            md_oplfile(i:i) = c_value(i)
+         enddo
+      endif
+      return
    case("bloomspecies")
       call c_f_pointer(xptr, c_value,[MAXSTRLEN])
       md_blmfile = " "

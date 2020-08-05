@@ -42,6 +42,7 @@
 !>
 !>         Control routine of PROCES system. Process sub-system of DELWAQ waterquality modelling system.
 
+      use processes_pointers, only: dll_opb
       use timers
 
       implicit none
@@ -127,8 +128,6 @@
       INTEGER ISTEP, NOQ
       integer                    :: open_shared_library
       integer, save              :: ifirst = 1
-      integer(8), save           :: dll_opb     ! open proces library dll handle
-      character(len=256)         :: shared_dll
       logical                    :: lfound
       integer                    :: idummy
       real                       :: rdummy
@@ -153,40 +152,6 @@
       
       IF ( nproc .eq. 0 ) goto 9999
 
-      ! open openpb dll
-
-      if ( ifirst .eq. 1 ) then
-         call getmlu(lunrep)
-         call getcom ( '-openpb', 3, lfound, idummy, rdummy, shared_dll, ierr2)
-         if ( lfound ) then
-            if ( ierr2.eq. 0 ) then
-               write(lunrep,*) ' -openpb command line argument found'
-               write(lunrep,*) ' using dll : ',trim(shared_dll)
-            else
-               shared_dll = 'd3dwaq_openpb.dll'
-               write(lunrep,*) ' WARNING : -openpb command line argument without filename'
-               write(lunrep,*) ' using default dll : ',trim(shared_dll)
-            endif
-            l_stop =.true.
-         else
-            shared_dll = 'd3dwaq_openpb.dll'
-            l_stop =.false.
-            write(lunrep,*) ' using default dll : ',trim(shared_dll)
-         endif
-         dll_opb = 0 ! in C this one could be 4 or 8 bytes, so make sure the last bytes are zero
-         ierror = open_shared_library(dll_opb, shared_dll)
-         if ( ierror .ne. 0 .and. l_stop ) then
-            write(*,*) 'ERROR : opening process library DLL'
-            write(*,*) 'DLL   : ',trim(shared_dll)
-            write(*,*) 'dll handle: ', dll_opb
-            write(lunrep,*) 'ERROR : opening process library DLL'
-            write(lunrep,*) 'DLL   : ',trim(shared_dll)
-            write(lunrep,*) 'dll handle: ', dll_opb
-            call srstop(1)
-         endif
-         ifirst = 0
-      endif
-!
 !     Count calls of this module
 !
       istep = istep + 1
