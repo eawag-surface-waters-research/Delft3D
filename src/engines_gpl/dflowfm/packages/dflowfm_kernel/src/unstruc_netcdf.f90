@@ -9762,7 +9762,7 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_meanings', 'closed_link_between_2D_nodes link_between_1D_nodes link_between_2D_nodes embedded_1D2D_link 1D2D_link')
 
     if (janetcell_ /= 0 .and. nump1d2d > 0) then
-       ierr = unc_def_net_elem(inetfile, ids_netelem, id_mesh2d)
+       ierr = unc_def_net_elem(inetfile, ids_netelem, '', id_mesh2d)
     else
        ierr = nf90_put_att(inetfile, id_mesh2d, 'topology_dimension', 1)
     end if
@@ -9884,11 +9884,12 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
 end subroutine unc_write_net_filepointer
 
 !> helper function to define the net elements in an open NetCDF file
-function unc_def_net_elem(inetfile, ids, id_mesh2d) result (ierr)
+function unc_def_net_elem(inetfile, ids, prefix, id_mesh2d) result (ierr)
    use m_missing, only : dmiss, intmiss
    use m_sferic,  only : jsferic
    integer,                 intent(in   )           :: inetfile   !< file id NetCDF file
    type(t_unc_netelem_ids), intent(inout)           :: ids        !< struct holding variable ids
+   character(len=*),        intent(in   )           :: prefix     !< String prefix for the NetlinkContour variable names that will be defined.
    integer,                 intent(in   ), optional :: id_mesh2d  !< id for mesh2d (is case of UGRID-0.8)
    integer                                          :: ierr       !< function result
 
@@ -9912,9 +9913,9 @@ function unc_def_net_elem(inetfile, ids, id_mesh2d) result (ierr)
    ierr = nf90_put_att(inetfile, ids%id_netelemlink, 'long_name', 'mapping from net cell to its net links (counterclockwise)')
    ierr = nf90_put_att(inetfile, ids%id_netelemlink, 'short_name', 'netcell()%LIN')
 
-   ierr = nf90_def_var(inetfile, 'NetLinkContour_x', nf90_double, (/ ids%id_netlinkcontourptsdim, ids%id_netlinkdim /) , ids%id_netlinkcontourx)
+   ierr = nf90_def_var(inetfile, trim(prefix)//'NetLinkContour_x', nf90_double, (/ ids%id_netlinkcontourptsdim, ids%id_netlinkdim /) , ids%id_netlinkcontourx)
    if (ierr /= 0) goto 999
-   ierr = nf90_def_var(inetfile, 'NetLinkContour_y', nf90_double, (/ ids%id_netlinkcontourptsdim, ids%id_netlinkdim /) , ids%id_netlinkcontoury)
+   ierr = nf90_def_var(inetfile, trim(prefix)//'NetLinkContour_y', nf90_double, (/ ids%id_netlinkcontourptsdim, ids%id_netlinkdim /) , ids%id_netlinkcontoury)
    if (ierr /= 0) goto 999
    ierr = unc_addcoordatts(inetfile, ids%id_netlinkcontourx, ids%id_netlinkcontoury, jsferic)
    ierr = nf90_put_att(inetfile, ids%id_netlinkcontourx, 'long_name', 'list of x-contour points of momentum control volume surrounding each net/flow link')
@@ -10553,8 +10554,8 @@ subroutine unc_write_net_ugrid2(ncid, id_tsp, janetcell, jaidomain, jaiglobal_s)
 
    if (janetcell_ /= 0 .and. nump1d2d > 0) then
       ierr = nf90_def_dim(ncid, 'nNetElemMaxNode', nv,     ids_netelem%id_netelemmaxnodedim)
-      ierr = nf90_def_dim(ncid, 'nNetLinkContourPts', 4,   ids_netelem%id_netlinkcontourptsdim) ! Momentum control volume a la Perot: rectangle around xu/yu
-      ierr = unc_def_net_elem(ncid, ids_netelem)
+      ierr = nf90_def_dim(ncid, 'n'//trim(mesh2dname)//'_NetLinkContourPts', 4, ids_netelem%id_netlinkcontourptsdim) ! Momentum control volume a la Perot: rectangle around xu/yu
+      ierr = unc_def_net_elem(ncid, ids_netelem, trim(mesh2dname)//'_')
    else if (jaidomain_ /= 0 .or. jaiglobal_s_ /= 0) then
       ierr = nf90_def_dim(ncid, 'nNetElem', nump1d2d, ids_netelem%id_netelemdim)
    end if
