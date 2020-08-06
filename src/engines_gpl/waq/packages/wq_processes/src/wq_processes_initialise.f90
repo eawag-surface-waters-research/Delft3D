@@ -318,11 +318,12 @@
          dll_opb = 0 ! in C this one could be 4 or 8 bytes, so make sure the last bytes are zero
          ierr2 = open_shared_library(dll_opb, shared_dll_so)
          if ( ierr2 .ne. 0) then
-            write(lunlsp,*) 'ERROR: opening open process library dll/so', trim(shared_dll_so)
-            write(lunlsp,*) 'dll/so handle: ', dll_opb
+            write(lunlsp,*) 'ERROR: opening open process library dll/so: ', trim(shared_dll_so)
+            write(lunlsp,*) 'Try specifying the full path'
             ierr = ierr + 1
+         else
+            write(lunlsp,*) 'Succesfully loaded open process library dll/so: ', trim(shared_dll_so)
          endif
-         write(lunlsp,*) 'Succesfully loaded open process library dll/so: ', trim(shared_dll_so)
       else
          write(lunlsp,*) 'No open process library dll/so specified'
       endif
