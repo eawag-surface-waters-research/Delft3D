@@ -1183,10 +1183,11 @@ end module m_observations
 module m_monitoring_crosssections
 use m_crspath
 use m_missing
+use MessageHandling, only: IdLen
 implicit none
 
 type tcrs
-    character(len=64)             :: name          !< Name
+    character(len=IdLen)          :: name          !< Name
     integer                       :: nval          !< Nr. of different quantities monitored
     type(tcrspath)                :: path          !< Polyline+crossed flow links that defines this cross section.
     integer                       :: loc2OC = 0    !< mapping from global obs index to obs that are defined by branchID and chainage 
@@ -1538,10 +1539,10 @@ subroutine pol_to_crosssections(xpl, ypl, npl, names)
 
     double precision, intent(in) :: xpl(:), ypl(:) !< Long array with one or more polylines, separated by dmiss
     integer,          intent(in) :: npl            !< Total number of polyline points
-    character(len=*), optional, intent(in) :: names(:) ! Optional names for cross sections
+    character(len=*), optional, intent(in) :: names(:) !< Optional names for cross sections
 
     integer :: i, i1, i2, ic, numnam
-    character(len=64) :: name
+    character(len=IdLen) :: name
 
     if (present(names)) then
         numnam = size(names)
