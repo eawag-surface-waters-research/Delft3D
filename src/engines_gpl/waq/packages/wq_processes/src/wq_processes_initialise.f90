@@ -322,7 +322,7 @@
             write(lunlsp,*) 'Try specifying the full path'
             ierr = ierr + 1
          else
-            write(lunlsp,*) 'Succesfully loaded open process library dll/so: ', trim(shared_dll_so)
+            write(lunlsp,*) 'Successfully loaded open process library dll/so: ', trim(shared_dll_so)
          endif
       else
          write(lunlsp,*) 'No open process library dll/so specified'
