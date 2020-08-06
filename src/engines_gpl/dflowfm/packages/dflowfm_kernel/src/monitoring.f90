@@ -44,6 +44,7 @@ module m_observations
 use m_alloc
 use m_missing
 use m_flowexternalforcings
+use MessageHandling, only: IdLen
 
 implicit none
 
@@ -56,7 +57,7 @@ implicit none
     double precision, allocatable     :: cmxobs(:)      !< maximum 2D flow velocity of observation points, 3D: maximum over all layers and time
     integer, allocatable              :: kobs(:)        !< node nrs of ACTIVE observation points
     ! NOTE: kobs is not maintained here (so also not after deleteObservation, etc.) All done once by obs_on_flowgrid.
-    character(len=40), allocatable    :: namobs(:)      ! names of observation points
+    character(len=IdLen), allocatable :: namobs(:)      ! names of observation points
     integer, allocatable              :: locTpObs(:)    !< location type of observation points, determining to which flownodes to snap to (0=1d2d, 1=1d, 2=2d, 3=1d defined by branchID+chainage)
     integer, allocatable              :: obs2OP(:)      !< mapping from global m_observation::obs index to m_network::network%obs index (i.e., the ones defined via a *.ini file)
 
@@ -840,7 +841,7 @@ use m_GlobalParameters, only: INDTP_ALL
     logical :: isMoving_
     integer :: i, inew, isize, loctype_
 
-    character(len=40) :: name_
+    character(len=IdLen) :: name_
     name_ = ' '
 
     if (present(name)) then
@@ -1123,7 +1124,7 @@ subroutine loadObservations_from_xyn(filename)
     integer :: mobs, n, L, L2
     double precision :: xp, yp
     character (len=256) :: rec
-    character (len=40) :: nam
+    character (len=IdLen) :: nam
 
     call oldfil(mobs,filename)
 

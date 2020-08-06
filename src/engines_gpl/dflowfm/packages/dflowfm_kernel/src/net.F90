@@ -15089,13 +15089,13 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, iLocT
 
    implicit none
 
-   integer,                         intent(in)     :: N           !< number of points
-   double precision,  dimension(N), intent(in)     :: xobs, yobs  !< points coordinates
-   character(len=40), dimension(N), intent(in)     :: namobs      !< names of points
-   integer,           dimension(N), intent(inout)  :: kobs        !< associated flow nodes, if found.
-   integer,                         intent(inout)  :: jakdtree    !< use kdtree (1) or not (other)
-   integer,                         intent(in)     :: jaoutside   !< allow outside cells (for 1D) (1) or not (0)
-   integer,                         intent(in)     :: iLocTp      !< Node type, one of INDTP_1D/2D/ALL.
+   integer,                            intent(in)     :: N           !< number of points
+   double precision,     dimension(N), intent(in)     :: xobs, yobs  !< points coordinates
+   character(len=IdLen), dimension(N), intent(in)     :: namobs      !< names of points
+   integer,              dimension(N), intent(inout)  :: kobs        !< associated flow nodes, if found.
+   integer,                            intent(inout)  :: jakdtree    !< use kdtree (1) or not (other)
+   integer,                            intent(in)     :: jaoutside   !< allow outside cells (for 1D) (1) or not (0)
+   integer,                            intent(in)     :: iLocTp      !< Node type, one of INDTP_1D/2D/ALL.
    integer                                         :: ierror      !  error (1) or not (0)
    integer                                         :: i, k, k1b
    integer,           dimension(1)                 :: idum
@@ -15195,7 +15195,7 @@ subroutine find_flownode_for_obs(nstart, nend)
    integer, allocatable              :: kobs_tmp0(:), kobs_tmp1(:), kobs_tmp2(:)
    double precision, allocatable     :: xobs_tmp0(:), xobs_tmp1(:), xobs_tmp2(:)
    double precision, allocatable     :: yobs_tmp0(:), yobs_tmp1(:), yobs_tmp2(:)
-   character(len=40), allocatable    :: namobs_tmp0(:), namobs_tmp1(:), namobs_tmp2(:)
+   character(len=IdLen), allocatable :: namobs_tmp0(:), namobs_tmp1(:), namobs_tmp2(:)
    integer                           :: nloctype1D, nloctype2D, nloctypeAll
    type(t_ObservationPoint), pointer :: pOPnt
 

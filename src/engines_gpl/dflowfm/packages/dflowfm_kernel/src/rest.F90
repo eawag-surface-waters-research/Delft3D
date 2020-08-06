@@ -5621,6 +5621,7 @@ implicit none
      use m_alloc
      use m_flowgeom, only: xz, yz
      use m_GlobalParameters, only: INDTP_ALL
+     use MessageHandling, only: IdLen
      implicit none
 
      integer,                                     intent(in)  :: Nin          !< thin-dyke polyline size
@@ -5633,7 +5634,7 @@ implicit none
      integer,          dimension(:), allocatable, intent(out) :: ipoLout      !< reference to input points (>0), no flownode found (0), dim(Nout)
      integer,                                     intent(out) :: ierror       !< error (1) or not (0)
 
-     character(len=40), dimension(:), allocatable             :: namobs
+     character(len=IdLen), dimension(:), allocatable          :: namobs
 
      integer,          dimension(:), allocatable              :: kobs
 

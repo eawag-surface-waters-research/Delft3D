@@ -12858,12 +12858,13 @@ subroutine writesomeinitialoutput()
  subroutine reanumlimdt()
  use m_flowgeom
  use m_GlobalParameters, only: INDTP_ALL
+ use MessageHandling, only: IdLen
 
  use m_flow
  use m_partitioninfo
  use m_samples
  implicit none
- character(len=256)   :: name, nams
+ character(len=IdLen) :: name, nams
  logical              :: jawel
  integer              :: mlim, k, numlimdtk, kk, jakdtree=1, jaoutside=0
  double precision     :: xdum, ydum
@@ -40179,6 +40180,7 @@ end function ispumpon
  use dfm_error
  use geometry_module, only: normalin
  use m_sferic, only: jsferic, jasfer3D
+ use MessageHandling, only: IdLen
 
  implicit none
 
@@ -40186,7 +40188,7 @@ end function ispumpon
  double precision,  intent(in)  :: area
  integer,           intent(out) :: ierr
  integer   :: minp, k, kk, kb, kt, kk2, n1, n2, i, jakdtree, kdum(1)
- character (len=40) :: tmpname(1)
+ character (len=IdLen) :: tmpname(1)
 
  ierr = DFM_NOERR
 
