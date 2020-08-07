@@ -151,7 +151,7 @@ module m_1d_networkreader
    character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(in)     :: branchlongnames
    character(len=ug_idsLen), allocatable, dimension(:),intent(in)              :: nodeids
    character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(in)     :: nodelongnames
-   character(len=IdLen),allocatable, dimension(:),intent(inout)                :: gpsID
+   character(len=ug_idsLen),allocatable, dimension(:),intent(inout)            :: gpsID
    character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(inout)  :: gpsIDLongnames
    character(len=ug_idsLongNamesLen),intent(in)                                :: network1dname
    character(len=ug_idsLongNamesLen),intent(in)                                :: mesh1dname
@@ -171,8 +171,8 @@ module m_1d_networkreader
    integer, allocatable, dimension(:)               :: localSortedIndexses  
    double precision, allocatable, dimension(:)      :: localGpsX
    double precision, allocatable, dimension(:)      :: localGpsY
-   character(len=IdLen), allocatable, dimension(:)  :: localGpsID
-   character(len=IdLen), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
+   character(len=ug_idsLen), allocatable, dimension(:)  :: localGpsID
+   character(len=ug_idsLen), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
    integer                                          :: firstNode, lastNode
    double precision, parameter                      :: snapping_tolerance = 1e-10
    double precision                                 :: distance, meanLength
@@ -367,8 +367,8 @@ module m_1d_networkreader
    double precision,     allocatable, dimension(:), intent(inout) :: localGpsX
    double precision,     allocatable, dimension(:), intent(inout) :: localGpsY
    double precision,     allocatable, dimension(:), intent(inout) :: localOffsets
-   character(len=IdLen), allocatable, dimension(:), intent(inout) :: localGpsID
-   character(len=IdLen), allocatable, dimension(:), intent(in   ) :: idMeshNodesInNetworkNodes
+   character(len=*),     allocatable, dimension(:), intent(inout) :: localGpsID
+   character(len=*),     allocatable, dimension(:), intent(in   ) :: idMeshNodesInNetworkNodes
    integer,                                         intent(inout) :: gridPointsCount
    integer,                                         intent(in   ) :: ibran
    type(t_ug_meshgeom),                             intent(in   ) :: meshgeom
@@ -411,7 +411,7 @@ module m_1d_networkreader
    character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: branchlongnames
    character(len=ug_idsLen), allocatable, dimension(:)              :: nodeids
    character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: nodelongnames
-   character(len=IdLen), allocatable, dimension(:)                  :: gpsID
+   character(len=ug_idsLen), allocatable, dimension(:)              :: gpsID
    character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: gpsIDLongnames
    character(len=ug_idsLongNamesLen)                                :: network1dname
    character(len=ug_idsLongNamesLen)                                :: mesh1dname
@@ -802,16 +802,16 @@ module m_1d_networkreader
 
       type(t_branchSet), target, intent(inout)       :: brs
       type(t_nodeSet), target, intent(inout)         :: nds
-      character(len=IdLen), intent(in)               :: branchId
-      character(len=IdLen), intent(in)               :: begNodeId
-      character(len=IdLen), intent(in)               :: endNodeId
+      character(len=*), intent(in)                   :: branchId
+      character(len=*), intent(in)                   :: begNodeId
+      character(len=*), intent(in)                   :: endNodeId
       integer, intent(in)                            :: orderNumber
       
       integer, intent(in)                                          :: gridPointsCount
       double precision, dimension(gridPointsCount), intent(in)     :: gpX
       double precision, dimension(gridPointsCount), intent(in)     :: gpY
       double precision, dimension(gridPointsCount), intent(in)     :: gpchainages
-      character(len=IdLen), dimension(gridPointsCount), intent(in) :: gpID
+      character(len=*), dimension(gridPointsCount), intent(in)     :: gpID
       
       ! Local Variables
       integer                                  :: ibr
