@@ -139,7 +139,7 @@ module MessageHandling
    integer,parameter, public     :: LEVEL_FATAL = 5
    integer,parameter, public     :: LEVEL_NONE  = 6
    integer,parameter, public     :: Charln = 256
-   integer,parameter, public     :: Idlen = 256
+   integer,parameter, public     :: Idlen = 255
    integer,parameter, public     :: max_level = 5
    character(len=12), dimension(max_level), private    :: level_prefix = (/'** DEBUG  : ',  &
                                                                            '** INFO   : ',  &
