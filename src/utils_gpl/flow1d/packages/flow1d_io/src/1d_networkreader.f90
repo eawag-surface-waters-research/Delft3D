@@ -145,19 +145,19 @@ module m_1d_networkreader
    use odugrid
 
    !in variables
-   type(t_network),  intent(inout) :: network
-   type(t_ug_meshgeom), intent(in) :: meshgeom
-   character(len=ug_idsLen), allocatable, dimension(:), intent(in)             :: branchids
-   character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(in)     :: branchlongnames
-   character(len=ug_idsLen), allocatable, dimension(:),intent(in)              :: nodeids
-   character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(in)     :: nodelongnames
-   character(len=ug_idsLen),allocatable, dimension(:),intent(inout)            :: gpsID
-   character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(inout)  :: gpsIDLongnames
-   character(len=ug_idsLongNamesLen),intent(in)                                :: network1dname
-   character(len=ug_idsLongNamesLen),intent(in)                                :: mesh1dname
-   integer, intent(in)                                                         :: nodesOnBranchVertices !< Whether or not (1/0) the input meshgeom itself already contains duplicate points on each connection node between multiple branches.
-                                                                                                        !! If not (0), additional grid points will be created.
-   integer, intent(in), optional                                               :: jampi                 !! running in parallel mode (1) or not (0)
+   type(t_network),                             intent(inout) :: network
+   type(t_ug_meshgeom),                         intent(in   ) :: meshgeom
+   character(len=*), allocatable, dimension(:), intent(in   ) :: branchids
+   character(len=*), allocatable, dimension(:), intent(in   ) :: branchlongnames
+   character(len=*), allocatable, dimension(:), intent(in   ) :: nodeids
+   character(len=*), allocatable, dimension(:), intent(in   ) :: nodelongnames
+   character(len=*), allocatable, dimension(:), intent(inout) :: gpsID
+   character(len=*), allocatable, dimension(:), intent(inout) :: gpsIDLongnames
+   character(len=*),                            intent(in   ) :: network1dname
+   character(len=*),                            intent(in   ) :: mesh1dname
+   integer,                                     intent(in   ) :: nodesOnBranchVertices !< Whether or not (1/0) the input meshgeom itself already contains duplicate points on each connection node between multiple branches.
+                                                                                       !! If not (0), additional grid points will be created.
+   integer,                                     intent(in   ), optional :: jampi       !< running in parallel mode (1) or not (0)
 
    !locals
    integer, allocatable, dimension(:)               :: gpFirst
@@ -171,8 +171,8 @@ module m_1d_networkreader
    integer, allocatable, dimension(:)               :: localSortedIndexses  
    double precision, allocatable, dimension(:)      :: localGpsX
    double precision, allocatable, dimension(:)      :: localGpsY
-   character(len=ug_idsLen), allocatable, dimension(:)  :: localGpsID
-   character(len=ug_idsLen), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
+   character(len=len(gpsId)), allocatable, dimension(:)  :: localGpsID
+   character(len=len(gpsId)), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
    integer                                          :: firstNode, lastNode
    double precision, parameter                      :: snapping_tolerance = 1e-10
    double precision                                 :: distance, meanLength
