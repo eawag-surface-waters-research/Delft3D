@@ -580,7 +580,7 @@ module m_1d_networkreader
          endif
       
          nds%node(nds%Count)%id                  = nodeids(iNode)
-         nds%node(nds%Count)%name                = nodelongnames(iNode)(1:40)
+         nds%node(nds%Count)%name                = nodelongnames(iNode)
          nds%node(nds%Count)%index               = nds%count
          nds%node(nds%Count)%nodetype            = nt_NotSet
          nds%node(nds%Count)%numberOfConnections = 0
