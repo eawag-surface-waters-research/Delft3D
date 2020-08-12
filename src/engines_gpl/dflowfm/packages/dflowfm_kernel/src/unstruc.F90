@@ -20305,7 +20305,19 @@ subroutine unc_write_his(tim)            ! wrihis
             ! Define geometry related variables
             pump_geom_container_name = 'pump_geom'
             nNodeTot = 0
-            nNodeTot = get_total_number_of_geom_nodes(ST_PUMP, network%sts%numPumps)
+            if (network%sts%numPumps > 0) then ! newpump
+               nNodeTot = get_total_number_of_geom_nodes(ST_PUMP, network%sts%numPumps)
+            else ! old pump
+               do n = 1, npumpsg
+                  nlinks = L2pumpsg(n) - L1pumpsg(n) + 1
+                  if (nlinks > 0) then
+                     nNodes = nlinks + 1
+                  else if (nlinks == 0) then
+                     nNodes = 0
+                  end if
+                  nNodeTot = nNodeTot + nNodes
+               end do
+            end if
 
             ierr = sgeom_def_geometry_variables(ihisfile, pump_geom_container_name, 'pump', 'line', nNodeTot, id_pumpdim, &
                id_pumpgeom_node_count, id_pumpgeom_node_coordx, id_pumpgeom_node_coordy)
@@ -21983,20 +21995,63 @@ subroutine unc_write_his(tim)            ! wrihis
          end do
          ! write geometry variables at the first time of history output
          if (it_his == 1) then
-            j = 1
-            call realloc(node_count, network%sts%numPumps, fill = 0)
-            do i = 1, network%sts%numPumps
-               nNodes = get_number_of_geom_nodes(ST_PUMP, i)
-               node_count(i) = nNodes
+            if (network%sts%numPumps > 0) then ! new pump
+               j = 1
+               call realloc(node_count, network%sts%numPumps, fill = 0)
+               do i = 1, network%sts%numPumps
+                  nNodes = get_number_of_geom_nodes(ST_PUMP, i)
+                  node_count(i) = nNodes
 
-               if (nNodes > 0) then
-                  call get_geom_coordinates_of_structure(ST_PUMP, i, nNodes, geom_x, geom_y)
-                  ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
-                  j = j + nNodes
-               end if
-            end do
-            ierr = nf90_put_var(ihisfile, id_pumpgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numPumps /))
+                  if (nNodes > 0) then
+                     call get_geom_coordinates_of_structure(ST_PUMP, i, nNodes, geom_x, geom_y)
+                     ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                     ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                     j = j + nNodes
+                  end if
+               end do
+               ierr = nf90_put_var(ihisfile, id_pumpgeom_node_count, node_count, start = (/ 1 /), count = (/ network%sts%numPumps /))
+            else
+               j = 1
+               call realloc(node_count, npumpsg, fill = 0)
+               do i = 1, npumpsg
+                  nlinks = L2pumpsg(i) - L1pumpsg(i) + 1
+                  if (nlinks > 0) then
+                     nNodes = nlinks + 1
+                  else if (nlinks == 0) then
+                     nNodes = 0
+                  end if
+                  node_count(i) = nNodes
+
+                  if (nNodes > 0) then
+                     call realloc(geom_x, nNodes)
+                     call realloc(geom_y, nNodes)
+
+                     L0 = L1pumpsg(i)
+                     L = abs(kpump(3,L0))
+                     k1 = lncn(1,L)
+                     k2 = lncn(2,L)
+                     geom_x(1) = xk(k1)
+                     geom_x(2) = xk(k2)
+                     geom_y(1) = yk(k1)
+                     geom_y(2) = yk(k2)
+                     if (nlinks > 1) then
+                        k = 3
+                        do L0 = L1pumpsg(i)+1, L2pumpsg(i)
+                           L = abs(kpump(3,L0))
+                           k3 = lncn(2,L)
+                           geom_x(k) = xk(k3)
+                           geom_y(k) = yk(k3)
+                           k = k+1
+                        end do
+                     end if
+
+                     ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                     ierr = nf90_put_var(ihisfile, id_pumpgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                     j = j + nNodes
+                  end if
+               end do
+               ierr = nf90_put_var(ihisfile, id_pumpgeom_node_count, node_count, start = (/ 1 /), count = (/ npumpsg /))
+            end if
          end if
       end if
 
