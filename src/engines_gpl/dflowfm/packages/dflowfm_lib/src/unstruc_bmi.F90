@@ -1346,13 +1346,17 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
       do i = 1,size(TcrEro,2)
          if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
             n = stmpar%trapar%iparfld(13,i)
-            if (n > 0) then ! if spatially varying
+            if (n > 0) then                     ! if spatially varying
                stmpar%trapar%parfld(:,n) = TcrEro(:,i)
-            else ! if not spatially varying
-               ! not yet supported ... copy single value to par(13,i) ... check if data provided is spatially uniform?
+            else                                ! if not spatially varying
+               if (minval(TcrEro(:,i)) == maxval(TcrEro(:,i))) then    ! if provided data is uniform
+                  stmpar%trapar%par(13,i) = TcrEro(1,i)
+               else
+                  call mess(LEVEL_ERROR, 'TcrEro is expected to be a constant field beasd on sediment input.')
+               endif 
             endif
-         else ! Other transport formula than Parteniades-Krone
-            ! TcrEro not defined
+         else
+            call mess(LEVEL_ERROR, 'TcrEro can only be set for Parteniades-Krone transport formula.')
          endif
       enddo
       return
@@ -1366,13 +1370,17 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
       do i = 1,size(TcrSed,2)
          if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
             n = stmpar%trapar%iparfld(12,i)
-            if (n > 0) then ! if spatially varying
+            if (n > 0) then                     ! if spatially varying
                stmpar%trapar%parfld(:,n) = TcrSed(:,i)
-            else ! if not spatially varying
-               ! not yet supported ... copy single value to par(12,i) ... check if data provided is spatially uniform?
+            else                                ! if not spatially varying
+               if (minval(TcrSed(:,i)) == maxval(TcrSed(:,i))) then    ! if provided data is uniform
+                  stmpar%trapar%par(12,i) = TcrSed(1,i)
+               else
+                  call mess(LEVEL_ERROR, 'TcrSed is expected to be a constant field beasd on sediment input.')
+               endif 
             endif
-         else ! Other transport formula than Parteniades-Krone
-            ! TcrSed not defined
+         else
+            call mess(LEVEL_ERROR, 'TcrSed can only be set for Parteniades-Krone transport formula.')
          endif
       enddo
       return
@@ -1491,13 +1499,17 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
       do i = c_start(2)+1,(c_start(2)+c_count(2))
          if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
             n = stmpar%trapar%iparfld(13,i)
-            if (n > 0) then ! if spatially varying
+            if (n > 0) then                     ! if spatially varying
                stmpar%trapar%parfld(c_start(1)+1:(c_start(1)+c_count(1)),n) = TcrEro(c_start(1)+1:(c_start(1)+c_count(1)),i)
-            else ! if not spatially varying
-               ! not yet supported ... copy single value to par(13,i) ... check if data provided is spatially uniform?
+            else                                ! if not spatially varying: the user is not allowed to change it partially by a different value
+               if (minval(TcrEro(:,i)) == maxval(TcrEro(:,i))) then
+                  stmpar%trapar%par(13,i) = TcrEro(1,i)
+               else
+                  call mess(LEVEL_ERROR, 'TcrEro is expected to be a constant field beasd on sediment input.')
+               endif
             endif
-         else ! Other transport formula than Parteniades-Krone
-            ! TcrEro not defined
+         else
+            call mess(LEVEL_ERROR, 'TcrEro can only be set for Parteniades-Krone transport formula.')
          endif
       enddo
       return
@@ -1512,13 +1524,17 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
       do i = c_start(2)+1,(c_start(2)+c_count(2))
          if (stmpar%trapar%iform(i) == -3) then ! if transport formula is Parteniades-Krone
             n = stmpar%trapar%iparfld(12,i)
-            if (n > 0) then ! if spatially varying
+            if (n > 0) then                     ! if spatially varying
                stmpar%trapar%parfld(c_start(1)+1:(c_start(1)+c_count(1)),n) = TcrSed(c_start(1)+1:(c_start(1)+c_count(1)),i)
-            else ! if not spatially varying
-               ! not yet supported ... copy single value to par(12,i) ... check if data provided is spatially uniform?
+            else                                ! if not spatially varying: the user is not allowed to change it partially by a different value
+               if (minval(TcrSed(:,i)) == maxval(TcrSed(:,i))) then
+                  stmpar%trapar%par(12,i) = TcrSed(1,i)
+               else
+                  call mess(LEVEL_ERROR, 'TcrSed is expected to be a constant field beasd on sediment input.')
+               endif
             endif
-         else ! Other transport formula than Parteniades-Krone
-            ! TcrSed not defined
+         else
+            call mess(LEVEL_ERROR, 'TcrSed can only be set for Parteniades-Krone transport formula.')
          endif
       enddo
       return
