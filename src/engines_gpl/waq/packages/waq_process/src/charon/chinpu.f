@@ -89,7 +89,7 @@
 
 !     Read input file (N.B. Fixed order of input blocks!!!)
 
-      CALL START
+      CALL STARTCH
       READ (NIT,*)
       CALL ROWS (0)
       READ (NIT,*)

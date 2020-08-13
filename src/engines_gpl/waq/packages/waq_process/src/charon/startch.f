@@ -27,7 +27,7 @@
 !    Version:    6.00.00
 !    Programmer: Nicolaas M de Rooij
 !
-      subroutine start
+      subroutine startch
 !        4-69
 !        clears data arrays and sets standard values for parameters.
       include  'char1.inc'

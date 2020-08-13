@@ -2314,7 +2314,7 @@ src/engines_gpl/waq/packages/waq_process/src/charon/rows.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/simple.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/solve2.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/solvex.f -text
-src/engines_gpl/waq/packages/waq_process/src/charon/start.f -text
+src/engines_gpl/waq/packages/waq_process/src/charon/startch.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/wricha.f -text
 src/engines_gpl/waq/packages/waq_process/src/charon/xlog.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/Makefile.am -text
