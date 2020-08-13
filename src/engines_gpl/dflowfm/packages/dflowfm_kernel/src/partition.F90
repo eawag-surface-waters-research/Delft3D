@@ -6265,10 +6265,10 @@ end subroutine partition_make_globalnumbers
 
       ! Set weights, the structure cells and their connected edges get bigger weights
       val  = 1
-      vwgt = val
+      vwgt = val                    ! For load balancing, all flow nodes uniform weight
       if (nstrucells > 0) then      ! If there are structures
-         adjw  = val                ! edge weight, used to compute edge cut (see METIS manual)
-         vsize = val                ! size of vertex, used to compute total communication volume (see METIS manual)
+         adjw  = val                ! edge weight, used to minimize edge cut (see METIS manual)
+         vsize = val                ! size of vertex, used to minimize total communication volume (see METIS manual)
          val_adjw = int(Ne/Nparts)  ! edge weight of structure related edges
          val_vsize = int(Ne/Nparts) ! size of vertex of structure related cells
 
