@@ -110,7 +110,7 @@
 		<File RelativePath=".\src\charon\simple.f"/>
 		<File RelativePath=".\src\charon\solve2.f"/>
 		<File RelativePath=".\src\charon\solvex.f"/>
-		<File RelativePath=".\src\charon\start.f"/>
+		<File RelativePath=".\src\charon\startch.f"/>
 		<File RelativePath=".\src\charon\wricha.f"/>
 		<File RelativePath=".\src\charon\xlog.f"/></Filter>
 		<Filter Name="proc_preprocess">
