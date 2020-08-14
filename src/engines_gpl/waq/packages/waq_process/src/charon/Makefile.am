@@ -53,7 +53,7 @@ libcharon_la_SOURCES = arith.f \
        simple.f \
        solve2.f \
        solvex.f \
-       start.f \
+       startch.f \
        wricha.f \
        xlog.f
 
