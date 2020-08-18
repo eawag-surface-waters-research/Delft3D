@@ -1385,6 +1385,7 @@ if(q /= 0) then
     call setwavfu()
     call setwavmubnd()
  end if
+ 
  if (jawave.eq.4 .and. jajre.eq.1) then
     if (swave.eq.1 ) then
        call xbeach_waves(ierror)
@@ -1422,7 +1423,7 @@ if(q /= 0) then
  if (jased > 0 .and. stm_included) then
     if ( jatimer.eq.1 ) call starttimer(IEROSED)
     if (jawave==0) then
-       call settaubxu_nowave()  ! set taubxu for no wave conditions BEFORE erosed
+       call settaubxu_nowave()         ! set taubxu for no wave conditions BEFORE erosed
     endif
     !
     call fm_fallve()                   ! update fall velocities
@@ -13246,7 +13247,7 @@ subroutine getczz0(h0, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this ro
      z0   = h0*exp(-1d0 - vonkar*cz/sag)
  else if (ifrctyp == 2) then                         ! White Colebrook Delft3D
      z0   = min( frcn / 30d0 , h0*0.3d0)
-     sqcf = vonkar/log( h0/(ee*z0) )
+     sqcf = vonkar/log( h0/(ee*z0) )             ! true white colebrook d3d would be vonkar/log( 1d0+h0/(ee*z0) )
      cz   = sag/sqcf
  else if (ifrctyp == 3) then                         ! White Colebrook WAQUA
      hurou = max(0.5d0, h0/frcn)
@@ -14330,7 +14331,7 @@ end subroutine land_change_callback
  integer          :: ndraw
 
  integer          :: kk, k, nodval,N,L, k2
-double precision :: uu, seq(mxgr), wse(mxgr),hsk, dum, czc, taucurc,ustw2,U10,FetchL,FetchD
+ double precision :: uu, seq(mxgr), wse(mxgr),hsk, dum, czc, taucurc,ustw2,U10,FetchL,FetchD
  real(fp)       , dimension(:,:)   , pointer :: bedtmp
  integer :: istat
 
@@ -19386,11 +19387,14 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_USTY,   'units'        , 'm s-1')
                ierr = nf90_put_att(ihisfile, id_USTY, '_FillValue', dmiss)             
                
-               ierr = nf90_def_var(ihisfile, 'tauwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
-               ierr = nf90_put_att(ihisfile, id_WTAU,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               ierr = nf90_put_att(ihisfile, id_WTAU,   'standard_name', 'sea_surface_wave_bottom_shear_stress')
-               ierr = nf90_put_att(ihisfile, id_WTAU,   'long_name'    , 'Wave induced bottom shear stress')
-               ierr = nf90_put_att(ihisfile, id_WTAU,   'units'        , 'Pa')
+            endif
+            
+            if (jahistaucurrent>0) then
+               ierr = nf90_def_var(ihisfile, 'taus',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
+               ierr = nf90_put_att(ihisfile, id_WTAU, 'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WTAU, 'standard_name', 'mean_bottom_shear_stress')
+               ierr = nf90_put_att(ihisfile, id_WTAU, 'long_name'    , 'Mean bottom shear stress')
+               ierr = nf90_put_att(ihisfile, id_WTAU, 'units'        , 'Pa')
                ierr = nf90_put_att(ihisfile, id_WTAU, 'geometry', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_WTAU, '_FillValue', dmiss)
             endif
@@ -19506,7 +19510,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_hwqb3d(i), '_FillValue', dmiss)
                      ierr = nf90_put_att(ihisfile, id_hwqb3d(i), 'long_name', trim(wqbotnames(i))//' (3D)')
                   enddo
-               endif
+            endif
             endif
 
 !          waq output
@@ -19580,8 +19584,8 @@ subroutine unc_write_his(tim)            ! wrihis
 
             if (stm_included .and. ISED1 > 0 .and. jahissed > 0) then
                ! New implementation, sedsus fraction is additional dimension
-               ierr = nf90_def_dim(ihisfile, 'nSedTot',    stmpar%lsedtot,              id_sedtotdim)
-               ierr = nf90_def_dim(ihisfile, 'nSedSus',    stmpar%lsedsus,              id_sedsusdim)
+               ierr = nf90_def_dim(ihisfile, 'nSedTot', stmpar%lsedtot, id_sedtotdim)
+               ierr = nf90_def_dim(ihisfile, 'nSedSus', stmpar%lsedsus, id_sedsusdim)
                !
                ierr = nf90_def_var(ihisfile, 'sedfrac_name', nf90_char, (/ id_strlendim, id_sedtotdim /), id_frac_name)
                ierr = nf90_put_att(ihisfile, id_frac_name,'long_name', 'sediment fraction identifier')
@@ -19734,8 +19738,8 @@ subroutine unc_write_his(tim)            ! wrihis
                         ierr = nf90_put_att(ihisfile, id_poros, '_FillValue', dmiss)
                         ierr = nf90_put_att(ihisfile, id_poros, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
                         ierr = nf90_put_att(ihisfile, id_poros, 'geometry', station_geom_container_name)                        
-                     endif
-                     !
+            endif
+            !
                      ierr = nf90_def_var(ihisfile, 'Volume fraction in a layer of the bed', nf90_double, (/ id_nlyrdim, id_statdim,  id_sedtotdim, id_timedim /), id_lyrfrac)
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'long_name', 'Volume fraction in a layer of the bed')
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'units', 'm')
@@ -21443,20 +21447,7 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),            start = (/ 1 /), count = (/ ntot /))
        endif
     endif
-
-    if ( jawave.eq.4 ) then
-       ierr = nf90_put_var(ihisfile, id_R,      valobsT(:,IPNT_WAVER), start = (/ 1, it_his /), count = (/ ntot, 1 /))
-    end if
-
-    if (jawave>0) then
-       ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       ierr = nf90_put_var(ihisfile, id_WTAU,    valobsT(:,IPNT_WAVETAU), start = (/ 1, it_his /), count = (/ ntot, 1 /))
-    endif
-
+    
     if (japatm > 0) then
        ierr = nf90_put_var(ihisfile, id_varpatm, valobsT(:,IPNT_patm), start = (/ 1, it_his /), count = (/ ntot, 1 /))
     endif
@@ -21589,7 +21580,23 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        endif
      endif
+    
+    if (jahistaucurrent>0) then 
+       ierr = nf90_put_var(ihisfile, id_WTAU,    valobsT(:,IPNT_WAVETAU), start = (/ 1, it_his /), count = (/ ntot, 1 /))
+    endif
+    
+    if ( jawave.eq.4 ) then
+       ierr = nf90_put_var(ihisfile, id_R,      valobsT(:,IPNT_WAVER), start = (/ 1, it_his /), count = (/ ntot, 1 /))
+    end if
 
+    if (jawave>0) then
+       ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU),   start = (/ 1, it_his /), count = (/ ntot, 1 /))
+    endif
+     
 !    waq bottom variables are always 2D
      if (IVAL_WQB1 > 0) then
        do j = IVAL_WQB1,IVAL_WQBN   ! enumerators of tracers in valobs array (not the pointer)
@@ -22770,6 +22777,10 @@ subroutine fill_valobs()
       if (allocated(wa)) deallocate(wa)
       allocate(wa(1:2,1:max(kmx,1)))
    endif
+   
+   if (jawave<3 .and. .not. stm_included) then
+      call gettaus(1)
+   endif
    !
    if (stm_included .and. jased>0) then   
       if (stmpar%morlyr%settings%iunderlyr==2) then
@@ -22843,7 +22854,10 @@ subroutine fill_valobs()
             valobs(IPNT_WAVED,i) = 270d0-phiwav(k)  ! Direction from
             valobs(IPNT_WAVEL,i) = rlabda(k)
             valobs(IPNT_WAVEU,i) = uorb(k)
-            valobs(IPNT_WAVETAU,i) = taus(k)
+         endif
+         
+         if (jahistaucurrent>0) then
+         valobs(IPNT_WAVETAU,i) = taus(k)
          endif
 
          if (stm_included .and. jased>0) then
@@ -22954,15 +22968,15 @@ subroutine fill_valobs()
             enddo               
             !
             if (stmpar%lsedsus>0) then
-               do j = IVAL_SOUR1, IVAL_SOURN
-                  ii = j-IVAL_SOUR1+1
-                  valobs(IPNT_SOUR1+ii-1,i)=sedtra%sourse(k,ii)
-               enddo
-               do j = IVAL_SINK1, IVAL_SINKN
-                  ii = j-IVAL_SINK1+1
-                  valobs(IPNT_SINK1+ii-1,i)=sedtra%sinkse(k,ii)
-               enddo
-            endif
+            do j = IVAL_SOUR1, IVAL_SOURN
+               ii = j-IVAL_SOUR1+1
+               valobs(IPNT_SOUR1+ii-1,i)=sedtra%sourse(k,ii)
+            enddo
+            do j = IVAL_SINK1, IVAL_SINKN
+               ii = j-IVAL_SINK1+1
+               valobs(IPNT_SINK1+ii-1,i)=sedtra%sinkse(k,ii)
+            enddo
+         endif
          endif
          !
          if ( IVAL_WQB1.gt.0 ) then
@@ -28158,6 +28172,12 @@ endif
  call aerr   ('z0ucur(lnx)', ierr, lnx)
  call realloc( z0urou,lnx  , stat=ierr, keepExisting = .false., fill = 1d-10)
  call aerr   ('z0urou(lnx)', ierr, lnx)
+ call realloc( taus,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)     
+ call aerr   ('taus    (ndx)',     ierr, ndx)
+ if (jamaptaucurrent>0) then
+    call realloc(tausmax, ndx, stat=ierr, keepExisting = .false., fill = 0d0)   
+    call aerr('tausmax(ndx)', ierr, ndx) 
+ endif
 
  ! link related
  if (allocated(cfuhi))    deallocate(cfuhi)
@@ -37342,7 +37362,7 @@ bft:do ibathyfiletype=1,2
 
      else ! 2D boundary link
         if (ibedlevtyp == 1 .or. ibedlevtyp == 6) then ! Implicitly intended for: jaconveyance2D < 1
-           bob(1,L) = bl(n1)                         ! uniform bobs only for tiledepths
+           bob(1,L) = bl(n1)                           ! uniform bobs only for tiledepths
            bob(2,L) = bl(n1)
            if (stm_included) then
               bob(1,L) = max( bl(n1), bl(n2) )
@@ -39188,12 +39208,12 @@ end subroutine setbobs_fixedweirs
                       ! For 1d the flow area is computed, using the upstream water depth
                       ! For 2D the flow area is computed, using the flow width WU and the waterdepth at the upstream grid cell
                       if (L <= lnx1D) then
-                        dpt = max(epshu, s1(k1) - bob0(1,L))
-                        call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
-                        dpt = max(epshu, s1(k2) - bob0(2,L))
-                        call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
-                        width = min(maxwidth1, maxwidth2)
-                        wu(L) = width
+                      dpt = max(epshu, s1(k1) - bob0(1,L))
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
+                      dpt = max(epshu, s1(k2) - bob0(2,L))
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
+                      width = min(maxwidth1, maxwidth2)
+                      wu(L) = width
                       else
                         as1 = (s1(k1)-bl(k1))*wu(L)
                         as2 = (s1(k2)-bl(k2))*wu(L)
@@ -44280,7 +44300,7 @@ if (mext /= 0) then
                        if (k >= kb) then
                           ! but only when not below the bed
                           wqbot(iwqbot,k) = viuh(kk)
-                       endif
+                 endif
                     else
                        ! set uniform value for all layers
                        do k=kb,kt

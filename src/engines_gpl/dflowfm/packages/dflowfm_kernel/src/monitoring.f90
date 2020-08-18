@@ -463,8 +463,8 @@ subroutine init_valobs_pointers()
       i=i+1;            IVAL_WAVEL      = i
       i=i+1;            IVAL_WAVER      = i
       i=i+1;            IVAL_WAVEU      = i
-      i=i+1;            IVAL_WAVETAU    = i
    end if
+   i=i+1;            IVAL_WAVETAU    = i
    if ( jatem.gt.1 ) then
       i=i+1;            IVAL_TAIR       = i
    end if

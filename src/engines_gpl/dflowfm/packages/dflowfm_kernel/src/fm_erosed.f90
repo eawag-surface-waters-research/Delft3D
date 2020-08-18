@@ -814,7 +814,7 @@
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
    use m_flowgeom, only: ndxi, bl, kfs, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, xz, yz, xu, yu, wu, wu_mor
    use m_flow, only: s0, s1, u1, u0, v, ucx, ucy, kbot, ktop, kmx, kmxn, plotlin, sa1, tem1, zws, hs, ucxq, ucyq, layertype, &
-      iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, qa, frcu_mor
+      iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, qa, frcu_mor, taus
    use m_flowtimes, only: julrefdat, dts, time1
    use unstruc_files, only: mdia
    use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
@@ -1180,7 +1180,7 @@
       enddo
    enddo
    !
-   if (jawave>0) then                          
+   !if (jawave>0) then                          
       z0rouk = 0d0; taub = 0d0
       do L=1,lnx
          k1=ln(1,L); k2=ln(2,L)
@@ -1189,7 +1189,7 @@
          taub(k1)   = taub(k1)+wcl(1,L)*taubxu(L)
          taub(k2)   = taub(k2)+wcl(2,L)*taubxu(L)
       end do
-   endif
+   !endif
    !
    if (kmx > 0) then            ! 3D
       deltas = 0d0
@@ -1488,20 +1488,10 @@
          call compbsskin(umean, vmean, h1, wave, uorb(nm), twav(nm), &
                           & phiwav(nm), thcmud(nm), mudfrac(nm), taub(nm), &
                           & rhowat(kbed), vismol, stmpar%sedpar, afluff)
-      else
-         !
-         ! use max bed shear stress, rather than mean
-         !
-         if (jawave>0) then
-            ! from tauwave, done in call linkstocenterstwodoubles(taub,taubu)
-         else
-            ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,epshs))
-            taub(nm) = ustarc*ustarc*rhowat(kbed)
-         endif
-
       endif
       !
-      ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,epshs))
+      ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/max(z0rou,eps10))
+      !
       !if (scour) then
       !
       tauadd = 0d0
@@ -1588,7 +1578,7 @@
       dll_reals(RP_TEMP ) = real(temperature    ,hp)
       dll_reals(RP_GRAV ) = real(ag             ,hp)
       dll_reals(RP_VICML) = real(vismol         ,hp)
-      dll_reals(RP_TAUB ) = real(taub(nm)       ,hp) !      taus=taubmx incremented with tauadd
+      dll_reals(RP_TAUB ) = real(taub(nm)       ,hp) !      taus=taubmx
       dll_reals(RP_UBED ) = real(ubed           ,hp)
       dll_reals(RP_VBED ) = real(vbed           ,hp)
       dll_reals(RP_VELBD) = real(velb           ,hp)
@@ -1666,7 +1656,7 @@
          !
          if (l <= lsed) then
             sigdif = tpsnumber(l)      ! has different meaning here, not to confuse with sigdif in m_turbulence
-         endif
+            endif
          !
          if (sedtyp(l) == SEDTYP_COHESIVE) then
             !
@@ -3028,7 +3018,7 @@
          !
          ! If this is a cell in which sediment processes are active then ...
          !
-         if (kfsed(nm) /= 1 .or. hs(nm)<epshs) cycle                    ! check whether sufficient as condition
+         if (kfsed(nm) /= 1 .or. (s1(nm)-bl(nm))<epshs) cycle                    ! check whether sufficient as condition
          !
          totdbodsd = 0d0
          do l = 1, lsedtot
@@ -3214,7 +3204,7 @@
    endif       ! time1>tcmp
    
    if (time1 >= tstart_user + tmor*tfac) then
-      !
+         !
       ! Increment morphological time
       ! Note: dtmor in seconds, morft in days!
       !
@@ -3702,9 +3692,9 @@
       enddo
       !
       do k = 1, ndx
-!         if (kfs(k) == 0) cycle           ! inactive point
+         if (s1(k)-bl(k)<epshs) cycle
          !
-         h0 = max(s1(k)-bl(k), epshs)
+         h0 = s1(k)-bl(k)
          chezy = sag * log( 1.0d0 + h0/max(1d-8,ee*z0rou(k)) ) / vonkar
          !
          ! loop over the interfaces in the vertical
@@ -5105,29 +5095,44 @@
       implicit none
    
       integer            :: L , Lb, Lt
-      double precision   :: cz, z00, umod, rz, cwall
+      integer            :: k1, k2
+      double precision   :: cz, z00, cwall, rz, umod
    
    do L = 1, lnx
       call getLbotLtop(L,Lb,Lt)
       if (Lt<Lb) cycle
-      if (hu(L)>0d0) then
+      if (hu(L)>epshu) then
          if (frcu(L)>0d0) then
             call getczz0(hu(L), frcu(L), ifrcutp(L), cz, z00)
          else
             call getczz0(hu(L), frcuni, ifrctypuni, cz, z00)
          end if
          umod = sqrt(u1(Lb)*u1(Lb) + v(Lb)*v(Lb))
-         z0urou(L) = hu(L)/(ee*(exp(vonkar*cz/sag) - 1d0))   ! In getczz0: c9of1==9, en dan z0 = h0*exp(-1d0 - vonkar*cz/sag)
-                                                             ! Hier gekozen voor consistentie met D3D4 (c9of1==1)
+         z0urou(L) = hu(L)*exp(-1d0 - vonkar*cz/sag)
          if (kmx>0) then
-            rz = 1d0 + hu(Lb)/2d0/z0urou(L)     ! cell centre first bottom layer
+            rz = 1d0 + hu(Lb)/2d0/z0urou(L)                  ! cell centre first bottom layer
          else
             rz = 1d0 + hu(L)/(ee*z0urou(L))
          endif
          cz            = log(rz)/vonkar
          cwall         = 1./(cz**2)
          taubxu(L)    = rhomean*cwall*umod*umod
+      else
+         taubxu(L)    = eps10
       endif
    enddo
+   !
+   ! for output purposes
+   if (jamaptaucurrent>0) then
+      tausmax   = 0d0
+      do L=1,lnx
+         k1=ln(1,L)
+         k2=ln(2,L)
+         if (hu(L) > epshu) then
+            tausmax(k1) = tausmax(k1) + taubxu(L)*wcL(1,L)
+            tausmax(k2) = tausmax(k2) + taubxu(L)*wcL(2,L)
+         end if
+      enddo
+   endif
    
    end subroutine

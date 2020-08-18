@@ -19,9 +19,9 @@ subroutine fm_bedform()
     use m_bedform
     use m_sediment, only: sedtra, stmpar, stm_included
     use m_physcoef, only: ag, rhomean, backgroundwatertemperature
-    use m_flowgeom, only: ndxi, ndx, lnx, lnxi, kfs, ln, wcl
+    use m_flowgeom, only: ndxi, ndx, lnx, lnxi, kfs, ln, wcl, bl
     use m_flowparameters, only: epshs, jawave, epshu
-    use m_flow, only: ucx, ucy, frcu, ifrcutp, hu, hs, u1, u0
+    use m_flow, only: ucx, ucy, frcu, ifrcutp, hu, hs, u1, u0, s1
     use m_flowtimes
     use m_waves
     !
@@ -121,12 +121,12 @@ subroutine fm_bedform()
     end do
     !
     do nm = 1, ndx
-       if (kfs(nm) > 0) then
+       if ((s1(nm)-bl(nm))>epshs) then
           call getkbotktop(nm, kb, kt)
           !
           !  Initialisation of depth and velocity.
           !
-          depth = max(hs(nm), epshs)
+          depth = s1(nm)-bl(nm)
           !
           ! Calculate EQUILIBRIUM dune heights
           !
@@ -727,8 +727,8 @@ subroutine fm_calksc()
        relaxd  = exp(- dt_max / max(1.0e-20_fp, par6))
        !
        do k = 1, ndx
-          if (kfs(k)>0) then
-              depth = max(hs(k), epshs)
+          if ((s1(k)-bl(k))>epshs) then
+              depth = s1(k)-bl(k)
 !             !
 !             ! Velocity in zeta point
 !             !

@@ -4741,7 +4741,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_taus   , nf90_double, UNC_LOC_S, 'taus'  , '', 'Total bed shear stress', 'N m-2', jabndnd=jabndnd_)
 
          if (jawave>2 .or. stm_included) then
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_tausmax   , nf90_double, UNC_LOC_S, 'tausmax'  , '', 'Total maximum bed shear stress', 'N m-2')   ! max shear stress
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_tausmax   , nf90_double, UNC_LOC_S, 'tausmax'  , '', 'Total maximum bed shear stress', 'N m-2', jabndnd=jabndnd_)   ! max shear stress
          endif
       endif
 
@@ -5690,7 +5690,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    ! Tau current and Chezy
    if (jamaptaucurrent > 0 .or. jamapchezy > 0) then
-      if (jawave < 3) then   ! Else, get taus from subroutine tauwave (taus = taucur + tauwave). Bas; Mind for jawind!
+      if (jawave < 3) then     ! Else, get taus from subroutine tauwave (taus = taucur + tauwave)
          call gettaus(1)       ! Update taus and czs 
       else if (jamapchezy > 0) then    
          call gettaus(2)       ! Only update czs 
@@ -5699,7 +5699,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    if (jamaptaucurrent > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_taus, UNC_LOC_S, taus, jabndnd=jabndnd_)
       if (jawave>2 .or. stm_included) then
-        ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tausmax, UNC_LOC_S, tausmax) 
+        ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_tausmax, UNC_LOC_S, tausmax, jabndnd=jabndnd_) 
       endif
    end if    
    if (jamapchezy > 0) then
@@ -5874,8 +5874,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          call getczz0(hu(L), frcuni, ifrctypuni, ddum, z0ucur(L))
       end if
    enddo
-   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_z0c, UNC_LOC_U, z0ucur,0d0, jabndnd=jabndnd_)
-   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_z0r, UNC_LOC_U, z0urou,0d0, jabndnd=jabndnd_)    ! already available
+   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_z0c, UNC_LOC_U, z0ucur, jabndnd=jabndnd_)
+   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_z0r, UNC_LOC_U, z0urou, jabndnd=jabndnd_)    ! already available
 
    if (stmpar%lsedsus > 0) then
       if (kmx>0) then
@@ -8588,14 +8588,16 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         ierr = nf90_put_var(imapfile, id_hs(iid),  hs,   (/ 1, itim /), (/ ndxndxi, 1 /))
 
        ! Tau current 
-       if (jawave .ne. 3) then   ! Else, get taus from subroutine tauwave (taus = taucur + tauwave). Bas; Mind for jawind!
+       if (jawave<3) then        ! Else, get taus from subroutine tauwave (taus = taucur + tauwave)
            call gettaus(1)       ! Update taus and czs 
        elseif (jamapchezy > 0) then    
            call gettaus(2)       ! Only update czs 
        endif
+       !
        if (jamaptaucurrent > 0) then
            ierr = nf90_put_var(imapfile, id_taus(iid), taus,  (/ 1, itim /), (/ ndxndxi, 1 /))
-       endif    
+       endif
+       !
        if (jamapchezy > 0) then
            ierr = nf90_put_var(imapfile, id_czs(iid), czs,  (/ 1, itim /), (/ ndxndxi, 1 /))
        endif

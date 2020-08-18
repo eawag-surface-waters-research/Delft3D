@@ -1632,6 +1632,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_constituents', jahisconst, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_zcor', jahiszcor, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_lateral', jahislateral, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrihis_taucurrent', jahistaucurrent, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_evaporation', jamapevap, success)
@@ -2348,8 +2349,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Geometry
     call prop_set(prop_ptr, 'geometry', 'NetFile',          trim(md_netfile),       'Unstructured grid file *_net.nc')
-    call prop_set(prop_ptr, 'geometry', 'GridEnclosureFile',trim(md_encfile),       'Enclosure file to clip outer parts from the grid *.pol')
     call prop_set(prop_ptr, 'geometry', 'BedlevelFile',     trim(md_xybfile),       'Bedlevels points file e.g. *.xyz, only needed for bedlevtype not equal 3')
+    call prop_set(prop_ptr, 'geometry', 'GridEnclosureFile',trim(md_encfile),       'Enclosure file to clip outer parts from the grid *.pol')
     call prop_set(prop_ptr, 'geometry', 'DryPointsFile',    trim(md_dryptsfile),    'Dry points file *.xyz (third column dummy z values), or dry areas polygon file *.pol (third column 1/-1: inside/outside)')
 
     ! 1D network related input
@@ -3401,6 +3402,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jahislateral /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_lateral', jahislateral, 'Write lateral data to his file (1: yes, 0: no)' )
+    endif
+    if (writeall .or. jahistaucurrent /= 1) then
+       call prop_set(prop_ptr, 'output', 'Wrihis_taucurrent', jahistaucurrent, 'Write mean bed shear stress to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jamaps0 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, 'Write water levels for previous time step to map file (1: yes, 0: no)')

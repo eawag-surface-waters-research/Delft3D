@@ -46,8 +46,6 @@
    call aerr   ('rlabda  (ndx)',     ierr, ndx)
    call realloc( uorb,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr   ('uorb    (ndx)',     ierr, ndx)
-   call realloc( taus,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)     
-   call aerr   ('taus    (ndx)',     ierr, ndx)
    call realloc( ustk,    ndx,  stat=ierr, keepExisting = .false., fill = 0d0)     
    call aerr   ('ustk    (ndx)',     ierr, ndx)
    call realloc( ustokes, lnkx, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -98,9 +96,7 @@
    call realloc(taubxu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)   ! Always needs to be allocated, even if jawave == 0, used in gettau()
    call aerr('taubxu(lnx)', ierr, lnx)
    call realloc(taubu, lnx, stat=ierr, keepExisting = .false., fill = 0d0)   
-   call aerr('taubu(lnx)', ierr, lnx)  
-   call realloc(tausmax, ndx, stat=ierr, keepExisting = .false., fill = 0d0)   
-   call aerr('tausmax(ndx)', ierr, ndx) 
+   call aerr('taubu(lnx)', ierr, lnx) 
    call realloc(ktb, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr('ktb  (ndx)', ierr, ndx)
    call realloc(taux_cc, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
@@ -719,11 +715,9 @@
             ! magnitude of bottom friction due to waves alone
             ! and due to current alone
             !
-            tauwav = 0.5d0*rhomean*fw*ftauw*uorbu*uorbu           ! wave related bed shear stress
-            u2dh = umod                                           
+            tauwav = 0.5d0*rhomean*fw*ftauw*uorbu*uorbu           ! wave related bed shear stress                                          
             cdrag = ag/(cz**2)
-            taucur = rhoL*cdrag*u2dh**2                           ! current related bed shear stress
-
+            taucur = rhoL*cdrag*umod*umod                         ! current related bed shear stress
             !
             ! parameterized models
             !
@@ -732,14 +726,14 @@
             !
             ! bottom friction for combined waves and current
             !
-            taubxu(L) = ymxpar*(taucur + tauwav)                       ! maximum shear stress due to waves and currents, eq to taubxu in D3D
+            taubxu(L) = ymxpar*(taucur + tauwav)                        ! maximum shear stress due to waves and currents, eq to taubxu in D3D
             taubu(L)  = yparL*(taucur + tauwav)                         ! mean shear stress
             if (modind < 9) then
                !tauwci = ypar*(taucur + tauwav)
                !!
                !! primary and secondary bottom friction terms
                !!
-               !taubpu(L) = tauwci/(umod*rhomean + waveps)             ! D3D style: taubpu = (g*U)/C**2
+               !taubpu(L) = tauwci/(umod*rhomean + waveps)                    ! D3D style: taubpu = (g*U)/C**2
                !
                ! no waveps needed here: hu>0 and umod=max(umod,waveps)
                cfwavhi(L) = tauwav/ (rhomean*umod**2)*min(huvli(L),hminlwi)   ! tau = cf * rhomean * ||u|| u, and tau/(rho h) appears in (depth-averaged) momentum equation and in D3D taubpu = tau/ (rho ||u||)
@@ -767,34 +761,23 @@
                phivr      = acos((uuu*costu+vvv*sintu) / umod)
                gamma      = 0.8d0 + phivr - 0.3d0*phivr**2
                ksc        = sqrt(rksru**2 + rksmru**2)
-               uratio     = min(uwbih/(u2dh+waveps) , 5.0d0)
+               uratio     = min(uwbih/umod , 5.0d0)
                ka         = ksc * exp(gamma*uratio)
                ka         = min(ka , 10d0*ksc , 0.2d0*hu(L))
                ca         = 18d0 * log10(12d0*hu(L)/max(ka,waveps))
                cfhi_vanrijn(L) = min(huvli(L),hminlwi)*ag / ca**2         ! umod * rhomean * ag * umod / ca**2
-            endif
-
-            if (tpu > 1d-1) then              ! not needed if 2D, and 3D done in update_verticalprofiles
-               ks         = z0*33d0
-               omega      = 2d0 * pi / tpu
-               a          = uorbu / omega
-               !
-               wbl = 0.09d0 * alfaw * (ks/max(hu(L),epshu)) * (a/ks)**0.82d0
-               wbl = max(alfaw*ee*z0/hu(L) , wbl)
-               wblt(L) = min(0.5_fp, wbl)*hu(L)
-            else
-               wblt(L) = 0d0
             endif
          endif
       endif
       !
       if (modind == 0) then
          if (hu(L)>epshu) then
-            z0urou(L) = hu(L)/(ee*(exp(vonkar*cz/sag) - 1d0))
+            !z0urou(L) = hu(L)/(ee*(exp(vonkar*cz/sag) - 1d0))
+            z0urou(L) = hu(L)*exp(-1d0 - vonkar*cz/sag)            ! for compatibility with setczz0 definitions
             rz = 1d0 + hu(L)/(ee*z0urou(L))
             cf = log(rz)/vonkar
-            cwall         = 1d0/(cf**2)
-            taubxu(L)    = rhoL*cwall*umod*umod
+            cwall     = 1d0/(cf**2)
+            taubxu(L) = rhoL*cwall*umod*umod
          endif
       else
          if (hu(L) > epshu) then
@@ -816,17 +799,19 @@
    !      In Delft3D this parameter is named 'maximum bottom friction' via the taumax
    !      This is NOT the same as 'bed shear stress' which is defined in Delft3D as rhow*(taubpu*u1 + taubsu)
    !      MIND: taus computed here ~= gettaus!!
-   tausmax(:)   = 0d0
-   do L=1,LNx
-      k1=ln(1,L)
-      k2=ln(2,L)
-      if (hu(L) > epshu) then
-         tausmax(k1) = tausmax(k1) + taubxu(L)*wcL(1,L)
-         tausmax(k2) = tausmax(k2) + taubxu(L)*wcL(2,L)
-      end if
-   enddo
+   if (jamaptaucurrent>0) then
+      tausmax   = 0d0
+      do L=1,LNx
+         k1=ln(1,L)
+         k2=ln(2,L)
+         if (hu(L) > epshu) then
+            tausmax(k1) = tausmax(k1) + taubxu(L)*wcL(1,L)
+            tausmax(k2) = tausmax(k2) + taubxu(L)*wcL(2,L)
+         end if
+      enddo
+   endif
    !
-   taus(:)   = 0d0
+   taus   = 0d0    ! not in if block, used in GUI
    do L=1,LNx
       k1=ln(1,L)
       k2=ln(2,L)
@@ -894,8 +879,10 @@
 
    subroutine setmodind(rouwav, modind)
    implicit none
-   integer     :: modind
-   character*4 rouwav
+   integer, intent(out)     :: modind
+   character*4, intent(in)  :: rouwav
+   
+   modind = 0  ! safety
    if (rouwav=='FR84') then
       modind = 1
    elseif (rouwav=='MS90') then
@@ -916,8 +903,6 @@
       modind = 9
    elseif (rouwav=='RU03') then
       modind = 10
-      !else
-      !    modind = 0
    endif
    end subroutine setmodind
 

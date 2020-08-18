@@ -2789,6 +2789,7 @@ integer                            :: javau3onbnd = 0   !< vert. adv. u1 bnd Upw
  integer                           :: jahiszcor                 !< Write the vertical coordinate to his file, 0: no, 1: yes
  integer                           :: jahiswav                  !< Write wave data to his file, 0: no, 1: yes
  integer                           :: jahislateral              !< Write lateral data to his file, 0: no, 1: yes
+ integer                           :: jahistaucurrent           !< Write bed shear stress to his file, 0: no, 1: yes
 
  ! written to map file yes or no
  integer                           :: jamaps0                   !< previous step water levels to map file, 0: no, 1: yes
@@ -3222,6 +3223,7 @@ subroutine default_flowparameters()
     jahiszcor  = 1
     jahiswav = 1
     jahislateral = 1
+    jahistaucurrent = 1
 
     jamaps0 = 1
     jamaps1 = 1
