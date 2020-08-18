@@ -1352,11 +1352,11 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
                if (minval(TcrEro(:,i)) == maxval(TcrEro(:,i))) then    ! if provided data is uniform
                   stmpar%trapar%par(13,i) = TcrEro(1,i)
                else
-                  call mess(LEVEL_ERROR, 'TcrEro is expected to be a constant field beasd on sediment input.')
+                  call mess(LEVEL_ERROR, 'TcrEro isn''t defined as spatially varying, therefore set_var must be called with a constant field.')
                endif 
             endif
          else
-            call mess(LEVEL_ERROR, 'TcrEro can only be set for Parteniades-Krone transport formula.')
+            call mess(LEVEL_ERROR, 'TcrEro can only be set for fractions governed by the Parteniades-Krone transport formula.')
          endif
       enddo
       return
@@ -1376,11 +1376,11 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
                if (minval(TcrSed(:,i)) == maxval(TcrSed(:,i))) then    ! if provided data is uniform
                   stmpar%trapar%par(12,i) = TcrSed(1,i)
                else
-                  call mess(LEVEL_ERROR, 'TcrSed is expected to be a constant field beasd on sediment input.')
+                  call mess(LEVEL_ERROR, 'TcrSed isn''t defined as spatially varying, therefore set_var must be called with a constant field.')
                endif 
             endif
          else
-            call mess(LEVEL_ERROR, 'TcrSed can only be set for Parteniades-Krone transport formula.')
+            call mess(LEVEL_ERROR, 'TcrSed can only be set for fractions governed by the Parteniades-Krone transport formula.')
          endif
       enddo
       return
@@ -1502,14 +1502,10 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
             if (n > 0) then                     ! if spatially varying
                stmpar%trapar%parfld(c_start(1)+1:(c_start(1)+c_count(1)),n) = TcrEro(c_start(1)+1:(c_start(1)+c_count(1)),i)
             else                                ! if not spatially varying: the user is not allowed to change it partially by a different value
-               if (minval(TcrEro(:,i)) == maxval(TcrEro(:,i))) then
-                  stmpar%trapar%par(13,i) = TcrEro(1,i)
-               else
-                  call mess(LEVEL_ERROR, 'TcrEro is expected to be a constant field beasd on sediment input.')
-               endif
+               call mess(LEVEL_ERROR, 'TcrEro isn''t defined as spatially varying, therefore the set_var_slice call is disabled.')
             endif
          else
-            call mess(LEVEL_ERROR, 'TcrEro can only be set for Parteniades-Krone transport formula.')
+            call mess(LEVEL_ERROR, 'TcrEro can only be set for fractions governed by the Parteniades-Krone transport formula.')
          endif
       enddo
       return
@@ -1527,14 +1523,10 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
             if (n > 0) then                     ! if spatially varying
                stmpar%trapar%parfld(c_start(1)+1:(c_start(1)+c_count(1)),n) = TcrSed(c_start(1)+1:(c_start(1)+c_count(1)),i)
             else                                ! if not spatially varying: the user is not allowed to change it partially by a different value
-               if (minval(TcrSed(:,i)) == maxval(TcrSed(:,i))) then
-                  stmpar%trapar%par(12,i) = TcrSed(1,i)
-               else
-                  call mess(LEVEL_ERROR, 'TcrSed is expected to be a constant field beasd on sediment input.')
-               endif
+               call mess(LEVEL_ERROR, 'TcrSed isn''t defined as spatially varying, therefore the set_var_slice call is disabled.')
             endif
          else
-            call mess(LEVEL_ERROR, 'TcrSed can only be set for Parteniades-Krone transport formula.')
+            call mess(LEVEL_ERROR, 'TcrSed can only be set for fractions governed by the Parteniades-Krone transport formula.')
          endif
       enddo
       return
