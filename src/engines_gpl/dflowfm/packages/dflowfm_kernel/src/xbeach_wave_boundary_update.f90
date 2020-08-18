@@ -82,7 +82,8 @@ module wave_boundary_update_module
       double complex,dimension(:,:),pointer  :: CompFn     ! Fourier components of the wave trains
       character(1024)                        :: Efilename,qfilename,nhfilename
       real*8,dimension(:,:),pointer          :: zsits      ! time series of total surface elevation for nonhspectrum==1
-      real*8,dimension(:,:),pointer          :: uits       ! time series of depth-averaged horizontal velocity nonhspectrum==1
+      real*8,dimension(:,:),pointer          :: uits       ! time series of depth-averaged horizontal east velocity nonhspectrum==1 or swkhmin>0
+      real*8,dimension(:,:),pointer          :: vits       ! time series of depth-averaged horizontal north velocity nonhspectrum==1 or swkhmin>0
       real*8,dimension(:,:),pointer          :: wits       ! time series of depth-averaged vertical velocity for nonhspectrum==1  ??
    endtype waveparamsnew
    !
@@ -292,8 +293,6 @@ contains
              ! Calculate the wave energy envelope per offshore grid point and write to output file
              call generate_ebcf(ibnd,wp)
           endif ! swkhmin>0.d0
-          ! Calculate the wave energy envelope per offshore grid point and write to output file
-          call generate_ebcf(ibnd,wp)
        else
           ! Generate time series of surface elevation, horizontal velocity and vertical velocity
           call generate_swts(ibnd,wp)
@@ -2602,7 +2601,7 @@ contains
        
        call writelog('ls','(A,I0,A,I0,A)','Y-point ',iy,' of ',npb,' done.')
        
-    end do   ! 1:ny+1
+    end do   ! 1:npb
     !
 
     ! free memory
@@ -2688,6 +2687,7 @@ contains
     type(waveparamsnew),intent(inout)            :: wp
     ! internal
     integer                                      :: j,it,ik
+    real*8                                       :: U
     real*8,dimension(npb)                        :: distx,disty
 
     ! allocate memory for time series of data
@@ -2736,17 +2736,19 @@ contains
        do ik=1,wp%K
           if (wp%PRindex(ik)==1) then 
              do j=1,npb
-                wp%uits(j,it) = wp%uits(j,it) + &
-                                1.d0/hb0*wp%wgen(ik)*wp%A(j,ik)/sinh(wp%kgen(ik)*hb0) * &
-                                                   dsin( &
-                                                         +wp%wgen(ik)*wp%tin(it)&
-                                                         -wp%kgen(ik)*( dsin(wp%thetagen(ik))*disty(j) &
-                                                                       +dcos(wp%thetagen(ik))*distx(j) &
-                                                                       ) &
-                                                         +wp%phigen(ik) &
-                                                        ) * &
-                                                   1.d0/wp%kgen(ik)*sinh(wp%kgen(ik)*hb0)
-             
+                ! Depth-average velocity in wave direction:
+                U  = 1.d0/hb0*wp%wgen(ik)*wp%A(j,ik) * &
+                     dsin(wp%wgen(ik)*wp%tin(it) &
+                         -wp%kgen(ik)*( dsin(wp%thetagen(ik))*disty(j) &
+                                       +dcos(wp%thetagen(ik))*distx(j)) &
+                                       +wp%phigen(ik) &
+                         ) * &
+                     1.d0/wp%kgen(ik)
+                
+                ! Eastward component:
+                wp%uits(j,it) = wp%uits(j,it) + dcos(wp%thetagen(ik))*U
+                ! Northward component:
+                wp%vits(j,it) = wp%vits(j,it) + dsin(wp%thetagen(ik))*U
              enddo
           end if
        enddo
@@ -2756,6 +2758,7 @@ contains
     ! Apply tapering to time series
     do j=1,npb
        wp%uits(j,:)=wp%uits(j,:)*wp%taperf
+       wp%vits(j,:)=wp%vits(j,:)*wp%taperf
        wp%zsits(j,:)=wp%zsits(j,:)*wp%taperf
     enddo
   end subroutine generate_swts
