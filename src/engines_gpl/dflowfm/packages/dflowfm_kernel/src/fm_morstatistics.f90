@@ -492,7 +492,6 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    use unstruc_netcdf
    use m_flowgeom
    use m_flowparameters
-   use m_flowtimes, only: refdat, ti_sed
    use m_sediment, only: stmpar
    use morphology_data_module, only: MOR_STAT_MIN, MOR_STAT_MAX, MOR_STAT_MEAN, MOR_STAT_STD, MOR_STAT_CUM, MOR_STAT_BODS
    
@@ -520,7 +519,6 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    character(len=10)                            :: transpunit
    character(len=75)                            :: var1, var2
    character(len=150)                           :: descr1, descr2
-   character(len=125)                           :: tmpstr
    
    if (jased==0 .or. (.not. stm_included) .or. stmpar%lsedtot==0) then
       return
@@ -550,8 +548,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
       !
       ierr = nf90_def_dim(sedids%ncid, 'time', nf90_unlimited, sedids%id_tsp%id_timedim)
       call check_error(ierr, 'def time dim')
-      tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
-      ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_time, nf90_double, (/ sedids%id_tsp%id_timedim /), 'time', 'time', '', trim(tmpstr))
+      ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_time, nf90_double, (/ sedids%id_tsp%id_timedim /), 'time', 'time', '', trim(Tudunitstr))
       ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_interval, nf90_double, (/ sedids%id_tsp%id_timedim /), 'averaging interval', 'averaging interval', '', 's')
       ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_morfac, nf90_double, (/ sedids%id_tsp%id_timedim /), 'morfac', 'morphological accelaration factor', '', '-')
    

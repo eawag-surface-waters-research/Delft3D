@@ -19051,8 +19051,6 @@ subroutine unc_write_his(tim)            ! wrihis
     double precision, allocatable:: toutputx(:,:), toutputy(:,:), toutput3(:,:,:)
     double precision, allocatable:: toutput_cum, toutput_cur
     type(t_structure), pointer   :: pstru
-    integer                      :: Tzonehrs
-    character(len=1)             :: Tzonesgn
 
     if (jahiszcor > 0) then
        jawrizc = 1
@@ -21167,16 +21165,8 @@ subroutine unc_write_his(tim)            ! wrihis
            ierr = nf90_def_var(ihisfile, 'comp_time', nf90_double, id_timedim, id_comp_time)
         end if
 
-        Tzonehrs = int(TZone)
-        if (Tzone<0) then
-           Tzonesgn = '-'
-        else
-           Tzonesgn = '+'
-        end if
-        write(tmpstr,'(a,i2.2,a)') 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00 '//Tzonesgn, abs(Tzonehrs),':00' 
-
         ierr = nf90_def_var(ihisfile, 'time', nf90_double, id_timedim, id_time)
-        ierr = nf90_put_att(ihisfile, id_time,  'units'        , trim(tmpstr))
+        ierr = nf90_put_att(ihisfile, id_time,  'units'        , trim(Tudunitstr))
         ierr = nf90_put_att(ihisfile, id_time,  'standard_name', 'time')
 
         ! Size of latest timestep

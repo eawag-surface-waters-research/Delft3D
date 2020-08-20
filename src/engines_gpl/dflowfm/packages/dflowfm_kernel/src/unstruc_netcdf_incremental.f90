@@ -33,7 +33,7 @@ module unstruc_netcdf_map_class
 use precision, only : hp
 use precision_basics, only : comparereal
 use m_flow, only : s1, hs, ucmag, workx, worky, ndkx, kmx
-use m_flowtimes, only : map_classes_s1, map_classes_hs, map_classes_ucmag, map_classes_ucdir, ti_classmape, ti_classmaps, ti_classmap, refdat
+use m_flowtimes, only : map_classes_s1, map_classes_hs, map_classes_ucmag, map_classes_ucdir, ti_classmape, ti_classmaps, ti_classmap, Tudunitstr
 use m_flowgeom, only : ndx, ndxi
 use m_cell_geometry, only : ndx2d
 use unstruc_model, only : md_classmap_file
@@ -102,7 +102,7 @@ end subroutine reset_unstruc_netcdf_map_class
    integer, parameter :: jabndnd_ = 0 !< Whether to include boundary nodes (1) or not (0). Default: no.
    integer :: id_class_s1, id_class_hs, id_class_ucmag, id_class_ucdir, tl, var_ids(MAX_ID_VAR)
    integer :: id_twodim
-   character(len=:), allocatable :: errmsg, tmpstr
+   character(len=:), allocatable :: errmsg
    logical :: isLast, need_flush
    real(kind=hp), allocatable :: ucdir(:)
    real(kind=hp) :: angle
@@ -179,8 +179,7 @@ end subroutine reset_unstruc_netcdf_map_class
       call check_error(ierr, 'definition phase dimensions of classes')
 
       ! define variables:
-      tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
-      ierr = unc_def_var_nonspatial(incids%ncid, incids%id_time, nf90_double, [incids%id_tsp%id_timedim], 'time', 'time', ' ', tmpstr)
+      ierr = unc_def_var_nonspatial(incids%ncid, incids%id_time, nf90_double, [incids%id_tsp%id_timedim], 'time', 'time', ' ', trim(Tudunitstr))
       maxTimes = 1 + nint( (ti_classmape - ti_classmaps) / ti_classmap)
       chunkSizeTime = min(mapclass_chunksize_time, maxTimes)
       if (ierr == nf90_noerr) ierr = nf90_def_var_chunking(incids%ncid, incids%id_time, NF90_CHUNKED, [chunkSizeTime])

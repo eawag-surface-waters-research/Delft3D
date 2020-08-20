@@ -127,7 +127,7 @@ contains
 
 subroutine xbeach_write_stats(tim)
    use m_flowparameters, only: jawave, jaavgwavquant, eps10
-   use m_flowtimes, only: ti_wav, ti_wavs, ti_wave, tstop_user, time_wav   
+   use m_flowtimes, only: ti_wav, ti_wavs, ti_wave, tstop_user, time_wav, Tudunitstr   
    use precision_basics
    
    implicit none
@@ -207,6 +207,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    use m_flowgeom
    use m_flowtimes, only: refdat
    use m_sferic, only: pi
+   use m_flowtimes, only: Tudunitstr
    
    implicit none
    
@@ -217,7 +218,6 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    integer                                     :: ndim
    integer                                     :: itim
    integer                                     :: ierr
-   character(len=125)                          :: tmpstr
    
    double precision, allocatable, dimension(:) :: temp
    
@@ -240,8 +240,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       ! Current time t1
       ierr = nf90_def_dim(wavids%ncid, 'time', nf90_unlimited, wavids%id_tsp%id_timedim)
       call check_error(ierr, 'def time dim')
-      tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
-      ierr = unc_def_var_nonspatial(wavids%ncid, wavids%id_time, nf90_double, (/ wavids%id_tsp%id_timedim /), 'time', 'time', '', trim(tmpstr))
+      ierr = unc_def_var_nonspatial(wavids%ncid, wavids%id_time, nf90_double, (/ wavids%id_tsp%id_timedim /), 'time', 'time', '', trim(Tudunitstr))
       
       if (jaavgwriteall>0 .or. jaavgwriteH>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_H_mean, nf90_double, UNC_LOC_S, 'H_mean','mean rms wave height', 'mean rms wave height', 'm')
@@ -531,7 +530,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        ierr = nf90_def_dim(imapfile, 'time', nf90_unlimited, id_timedim)
        call check_error(ierr, 'def time dim')
        ierr = nf90_def_var(imapfile, 'time', nf90_double, id_timedim,  id_time)
-       ierr = nf90_put_att(imapfile, id_time,  'units'        , 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00')
+       ierr = nf90_put_att(imapfile, id_time,  'units'        , trim(Tudunitstr))
        ierr = nf90_put_att(imapfile, id_time,  'standard_name', 'time') 
               
        ! Shortcut 1

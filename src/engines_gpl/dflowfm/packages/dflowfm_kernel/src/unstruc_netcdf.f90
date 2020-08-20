@@ -2704,7 +2704,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     ierr = nf90_def_dim(irstfile, 'time', nf90_unlimited, id_timedim)
     call check_error(ierr, 'def time dim')
     ierr = nf90_def_var(irstfile, 'time', nf90_double, id_timedim,  id_time)
-    ierr = nf90_put_att(irstfile, id_time,  'units'        , 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00')
+    ierr = nf90_put_att(irstfile, id_time,  'units'        , trim(Tudunitstr))
     ierr = nf90_put_att(irstfile, id_time,  'standard_name', 'time')
 
     ! Definition and attributes of 3D geometry    
@@ -6917,7 +6917,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         ierr = nf90_def_dim(imapfile, 'time', nf90_unlimited, id_timedim(iid))
         call check_error(ierr, 'def time dim')
         ierr = nf90_def_var(imapfile, 'time', nf90_double, id_timedim(iid),  id_time(iid))
-        ierr = nf90_put_att(imapfile, id_time(iid),  'units'        , 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00')
+        ierr = nf90_put_att(imapfile, id_time(iid),  'units'        , trim(Tudunitstr))
         ierr = nf90_put_att(imapfile, id_time(iid),  'standard_name', 'time')
 
         ! 3D    

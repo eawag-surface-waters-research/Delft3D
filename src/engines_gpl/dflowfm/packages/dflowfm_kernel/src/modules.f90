@@ -4387,6 +4387,7 @@ end subroutine reset_flowgeom
  double precision                  :: refdate_mjd !< Reference date as modified Julian date
  integer                           :: irefdate    !< Reference date (e.g., 20090101)
  double precision                  :: Tzone       !< Data Sources in GMT are interrogated with time in minutes since refdat-Tzone*60
+ character(len=42)                 :: Tudunitstr  !< Complete UDunitstring for the time variable written as a unit attribute into various NetCDF output files
  integer, parameter                :: tunit = 1   !< Times to EC-module are in seconds
  double precision                  :: Timjan      !< time in hours of refdat relative to Januari 1 of the same year
  double precision                  :: dt_user     !< User specified time step (s) for external forcing update.
