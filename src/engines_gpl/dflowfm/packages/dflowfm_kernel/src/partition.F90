@@ -5509,8 +5509,8 @@ end subroutine partition_make_globalnumbers
          end do
 
          allocate(adjw(iadj(nump1d2d+1)-1))
-!        set weights for vertices, edges and vsize.
-         call set_weights_for_METIS(nump1d2d, Nparts, iadj(nump1d2d+1)-1, iadj, jadj,vsize, adjw, vwgt)
+!        set edge weights and vsize
+         call set_weights_for_METIS(nump1d2d, Nparts, iadj(nump1d2d+1)-1, iadj, jadj,vsize, adjw)
 
 !        make CSR arrays zero-based
          iadj = iadj-1
@@ -6236,12 +6236,12 @@ end subroutine partition_make_globalnumbers
 
 ! =================================================================================================
 ! =================================================================================================
-!> Sets weights of edges, vertices and vsize on mesh that is to be partitioned by METIS
-!! If there are structures defined by polylines, it gives special weights to structure related cells and edges.
+!> Sets weights of edges and vsize on mesh that is to be partitioned by METIS
+!! If there are structures defined by polylines, then for structure related cells and edges, it gives special values to edges weights and vertex size.
 !! The purpose is to avoid structures intercross partition boundaries.
 !! NOTE: It uses "Ne/Nparts" as the speical weights on structures, othere weight values can also be investigated.
 !! Now ONLY support structures defined by polylines. TODO: support setting special weights on structures that are defined by other ways.
-   subroutine set_weights_for_METIS(Ne, Nparts, njadj, iadj, jadj,vsize, adjw, vwgt)
+   subroutine set_weights_for_METIS(Ne, Nparts, njadj, iadj, jadj,vsize, adjw)
       use m_alloc
       implicit none
       integer,                      intent(in)    :: Ne     !< Number of vertices
@@ -6251,7 +6251,6 @@ end subroutine partition_make_globalnumbers
       integer, dimension(njadj),    intent(in)    :: jadj   !< Array for mesh structure (CSR format, see METIS manual)
       integer, dimension(njadj),    intent(inout) :: adjw   !< Edge weight
       integer, dimension(Ne),       intent(inout) :: vsize  !< Size of vertices
-      integer, dimension(Ne),       intent(inout) :: vwgt   !< Vertices weight
 
       integer              :: nstrucells         ! Number of netcells that relate to structures
       integer, allocatable :: istrucells(:)      ! Indices of netcells that relate to structures, there can be duplicated
@@ -6265,7 +6264,6 @@ end subroutine partition_make_globalnumbers
 
       ! Set weights, the structure cells and their connected edges get bigger weights
       val  = 1
-      vwgt = val                    ! For load balancing, all flow nodes uniform weight
       if (nstrucells > 0) then      ! If there are structures
          adjw  = val                ! edge weight, used to minimize edge cut (see METIS manual)
          vsize = val                ! size of vertex, used to minimize total communication volume (see METIS manual)
