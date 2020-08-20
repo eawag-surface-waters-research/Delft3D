@@ -2151,7 +2151,7 @@ integer function unc_close(ncid)
         nopen_files_ = nopen_files_ - 1
         ncid = 0
     else
-        write (msgbuf, '(a,i3,a)') 'Tried to close NetCDF id ', ncid, ', not found.'
+        write (msgbuf, '(a,I14,a)') 'Tried to close NetCDF id ', ncid, ', not found.'
         call dbg_flush()
     end if
 end function unc_close
@@ -10739,11 +10739,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    end if
    select case (crs%epsg_code)
    case (4326) ! WGS84
-      jsferic = 1
-      jsfertek = 0  ! TOT NADER ORDER UITGESTELD
+      jsferic  = 1
+      jasfer3D = 1  
    case default
-      jsferic = 0
-      jsfertek = 0
+      jsferic  = 0
+      jasfer3D = 0
    end select
 
    !
@@ -11202,11 +11202,11 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     coordsyscheck = ' '
     ierr = nf90_get_att(inetfile, id_netnodex, 'standard_name', coordsyscheck)
     if (stringsequalinsens(coordsyscheck, 'longitude')) then
-        jsferic = 1
-        jsfertek = 0  ! TOT NADER ORDER UITGESTELD
+        jsferic  = 1
+        jasfer3D = 1  
     else
-        jsferic = 0
-        jsfertek = 0
+        jsferic  = 0
+        jasfer3D = 0  
     endif
     if (jsferic == 1) then
        crs%epsg_code = 4326
@@ -13304,7 +13304,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
 
    ! re-mapping of 1d mesh coordinates for UGrid
-   double precision, allocatable                 :: x1dn(:), y1dn(:), xue(:), yue(:)
+   double precision, allocatable                 :: x1dn(:), y1dn(:), xue(:), yue(:), x1du(:), y1du(:)
    ! re-mapping of 2d mesh coordinates for UGrid
    double precision, allocatable                 :: x2dn(:), y2dn(:), z2dn(:)
    integer                                       :: netNodeReMappedIndex, nnSize
@@ -13409,6 +13409,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       call realloc(edge_nodes, (/ 2, n1dedges /), fill = -999) 
       call realloc(contacts, (/ 2, n1d2dcontacts /), fill = -999) 
       call realloc(id_tsp%edgetoln, n1dedges, keepExisting = .false., fill = 0)
+      call realloc(x1du, n1dedges)
+      call realloc(y1du, n1dedges)
       call realloc(id_tsp%contactstoln, n1d2dcontacts, keepExisting = .false., fill = 0)
       call realloc(contacttype, n1d2dcontacts, keepExisting = .false., fill = 0)
       
@@ -13425,6 +13427,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             !endif
             !mappings
             id_tsp%edgetoln(n1dedges) = L
+            x1du(n1dedges) = xu(L)
+            y1du(n1dedges) = yu(L)
          else if (kcu(L) == 3 .or. kcu(L) == 4 .or. kcu(L) == 5 .or. kcu(L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
             ! 1D2D link, find the 2D flow node and store its cell center as '1D' node coordinates
             n1d2dcontacts = n1d2dcontacts + 1
@@ -13464,7 +13468,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        writeopts=unc_writeopts)
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
-                                     edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &
+                                     edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, x1du, y1du, xz(1:1), yz(1:1), &
                                      crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs, writeopts=unc_writeopts)
          endif         
       endif
@@ -13543,8 +13547,9 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       !   endif
       !endif
 
-      deallocate(x1dn)
-      deallocate(y1dn)
+      if (allocated(x1dn)) deallocate(x1dn, y1dn)
+      if (allocated(x1du)) deallocate(x1du, y1du)
+   
       deallocate(edge_nodes)
    end if ! 1D flow grid geometry
 
