@@ -11529,8 +11529,8 @@ subroutine unc_read_map(filename, tim, ierr)
     numformat = '(I2.2)'
 
     ! Identify the type of restart file: *_rst.nc or *_map.nc
-    tok1 = index( filename, '_rst.nc', success )
-    tok2 = index( filename, '_map.nc', success )
+    tok1 = index( filename, '_rst.nc', .true. )
+    tok2 = index( filename, '_map.nc', .true. )
     
     ! Convert the refdat from the mdu to seconds w.r.t. an absolute t0
     call maketimeinverse(refdat//'000000',trefdat_mdu, iostat)
