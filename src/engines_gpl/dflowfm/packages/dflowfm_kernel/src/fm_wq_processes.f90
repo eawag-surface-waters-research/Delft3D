@@ -995,9 +995,7 @@
    endif ! read mext file
 
    if (loglevel_StdOut == LEVEL_DEBUG .and. associated(ecInstancePtr)) then
-      if (associated(ecInstancePtr)) then
-         call ecInstancePrintState(ecInstancePtr,callback_msg,LEVEL_DEBUG)
-      endif
+      call ecInstancePrintState(ecInstancePtr,callback_msg,LEVEL_DEBUG)
    endif
 
    if (.not. success) then
