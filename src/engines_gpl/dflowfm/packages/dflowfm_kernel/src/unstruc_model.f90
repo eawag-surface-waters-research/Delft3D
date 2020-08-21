@@ -733,8 +733,6 @@ subroutine readMDUFile(filename, istat)
     double precision, external     :: densfm
     double precision :: tim
     integer :: major, minor
-    integer                                             :: Tzonehrs 
-    character(len=1)                                    :: Tzonesgn 
 
     hkad = -999
     istat = 0 ! Success
@@ -1420,13 +1418,7 @@ subroutine readMDUFile(filename, istat)
         tfac = 1d0
     end select
 
-    Tzonehrs = int(TZone) 
-    if (Tzone<0) then 
-       Tzonesgn = '-' 
-    else 
-       Tzonesgn = '+' 
-    end if 
-    write(Tudunitstr,'(a,i2.2,a)') 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00 '//Tzonesgn, abs(Tzonehrs),':00'  
+    call setTUDUnitString()
 
     call prop_get_double  (md_ptr, 'time', 'DtUser', dt_user)
     if (dt_user <= 0) then

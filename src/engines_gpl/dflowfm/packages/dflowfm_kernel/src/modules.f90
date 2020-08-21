@@ -4613,6 +4613,8 @@ subroutine reset_flowtimes()
     tim1bnd      = -9d9              !< last time bnd signals were given
     tim1fld      = -9d9              !< last time bnd signals were given
 
+    call setTUDUnitString()
+
     time_map     = tstart_user       !< next time for map output
     time_wav     = tstart_user       !< same, wav
     time_sed     = tstart_user       !< same, morstats
@@ -4681,6 +4683,22 @@ subroutine reset_timers()
 
    call timstrt('All', handle_all)
 end subroutine reset_timers
+
+!> Sets the UDUnit timestring based on current model time settings.
+!! Module variable Tudunitstr can the be used in various output routines.
+subroutine setTUDUnitString()
+   integer          :: Tzonehrs 
+   character(len=1) :: Tzonesgn 
+
+   Tzonehrs = int(TZone) 
+   if (Tzone<0) then 
+      Tzonesgn = '-' 
+   else 
+      Tzonesgn = '+' 
+   end if 
+   write(Tudunitstr,'(a,i2.2,a)') 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00 '//Tzonesgn, abs(Tzonehrs),':00'  
+
+end subroutine setTUDUnitString
 
 end module m_flowtimes
 
