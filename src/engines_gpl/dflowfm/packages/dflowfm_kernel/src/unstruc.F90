@@ -12255,7 +12255,8 @@ subroutine flow_trachyupdate()
         do LF = lnx1D + 1, lnx
             if (ifrcutp(LF) /= ifrctypuni) then
                 error = .true.
-                call mess(LEVEL_ERROR, 'Only uniform background roughness definition supported in combination with Trachytopes', mdia)
+                write (msgbuf, '(a,i0,a,i0,a,i0,a)') 'Local roughness type (', ifrcutp(LF), ') must match the global UnifFrictType (', ifrctypuni, ') when used in combination with Trachytopes. (Flow link=', LF, ').'
+                call err_flush()
             end if
         end do
         do L = 1, numl
