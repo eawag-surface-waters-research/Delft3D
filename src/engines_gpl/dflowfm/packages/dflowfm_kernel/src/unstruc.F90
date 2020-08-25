@@ -25968,7 +25968,7 @@ end subroutine unc_write_shp
        xc = 0.5d0*(x1+x2)
        yc = 0.5d0*(y1+y2)
        zx = max(z1,z2)
-       CALL CLOSETO1Dnetlink(Xc,Yc,LS,XLS,YLS,dum)
+       CALL CLOSETO1Dnetlink(Xc,Yc,LS,XLS,YLS,dum, 0)
        if (Ls > 0) then
           k1 = kn(1,LS) ; k2 = kn(2,LS)
           dis11 = dbdistance(x1,y1,xk(k1), yk(k1), jsferic, jasfer3D, dmiss)
@@ -26064,7 +26064,7 @@ end subroutine unc_write_shp
     if (x1 .ne. dmiss .and. x2 .ne. dmiss) then
         xc = 0.5d0*(x1+x2)
         yc = 0.5d0*(y1+y2)
-        CALL CLOSETO1Dnetlink(Xc,Yc,LS,XLS,YLS,dum)
+        CALL CLOSETO1Dnetlink(Xc,Yc,LS,XLS,YLS,dum, 0)
         if (Ls > 0) then
             Lf = lne2ln(Ls)
             if (kcu(Lf) == 1 .or. kcu(Lf) == 5) then
@@ -26188,6 +26188,9 @@ end subroutine unc_write_shp
          call aerr('iconnsam(Nproflocs)', ierr, Nproflocs)
        end if
 
+       xlsam = 0d0
+       distsam = 1d99
+       iconnsam = 0
        if ( Lnx1D.gt.0 ) then
           do ibr = 1,mxnetbr                                    ! SET UP BRANCH DISTANCE COORDINATE
              if ( jampi.eq.0 ) then
@@ -26210,12 +26213,19 @@ end subroutine unc_write_shp
 
           DO K = 1,nproflocs                                    ! SET UP BRANCH DISTANCE COORDINATE OF SAMPLE POINTS
              if ( jampi.eq.0 ) then
-                CALL CLOSETO1Dnetlink(Xpr(K),Ypr(K),LS,XLS,YLS,dum)
+                CALL CLOSETO1Dnetlink(Xpr(K),Ypr(K),LS,XLS,YLS,dum, 1)
              else
-                CALL CLOSETO1Dnetlink(Xpr(K),Ypr(K),LS,XLS,YLS,distsam(k))
-                ibr = LC(LS)
-                iconnsam(k) = netbr(ibr)%iconn
+                CALL CLOSETO1Dnetlink(Xpr(K),Ypr(K),LS,XLS,YLS,distsam(k), 1)
+                if (LS > 0) then
+                   ibr = LC(LS)
+                   iconnsam(k) = netbr(ibr)%iconn
+                end if
              end if
+
+             if (LS == 0) then
+                cycle
+             end if
+
              NRL = NRLB(LS)
              K1  = K1BR(NRL)
              IF (K1 == KN(1,LS) )THEN                           ! K1 = FIRST IN BRANCH, K2 = SECOND
@@ -26238,10 +26248,6 @@ end subroutine unc_write_shp
 
           ENDDO
 
-       else
-          xlsam = 0d0
-          distsam = 1d99
-          iconnsam = 0
        end if
 
 ! parallel: reduce XLSAM and the connected branch numbers
