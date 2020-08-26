@@ -44268,22 +44268,36 @@ if (mext /= 0) then
               call mess(LEVEL_ERROR, 'flow_initexternalforcings: water quality bottom variable ' // trim(wqinput) // ' not found')
            end if
 
-           if ( allocated(viuh) ) deallocate(viuh)
-           allocate(viuh(Ndxi))
-
-!          copy existing tracer values (if they existed) in temp array
-           do kk=1,Ndxi
-              viuh(kk) = wqbot(iwqbot,kk)
-           end do
-
-!          will only fill 2D part of viuh
-           success = timespaceinitialfield(xz, yz, viuh, Ndxi, filename, filetype, method, operand, transformcoef, 2)
-
            if (transformcoef(3).eq.DMISS) then
               layer = -1
            else
               layer = min(nint(transformcoef(3)),kmx)
            endif
+
+           if ( allocated(viuh) ) deallocate(viuh)
+           allocate(viuh(Ndxi))
+
+!          copy existing tracer values (if they existed) in temp array
+           do kk=1,Ndxi
+              call getkbotktopmax(kk,kb,kt,ktmax)
+              if (layer.lt.0) then
+                 ! only pick first layer above the bed
+                 viuh(kk) = wqbot(iwqbot,kb)
+              else if (layer.gt.0) then
+                 ! get current data from a specific layer in the same plane, counting from the deepest layer
+                 k = ktmax - max(kmx, 1) + layer
+                 if (k >= kb) then
+                    ! but only when not below the bed
+                    viuh(kk) = wqbot(iwqbot,k)
+                 endif
+              else
+                 ! can't get uniform value for all layers, so use current data from top layer
+                 viuh(kk) = wqbot(iwqbot,kt)
+              endif   
+           end do
+
+!          will only fill 2D part of viuh
+           success = timespaceinitialfield(xz, yz, viuh, Ndxi, filename, filetype, method, operand, transformcoef, 2)
 
            if (success) then
               do kk = 1,Ndxi
@@ -44294,11 +44308,11 @@ if (mext /= 0) then
                        wqbot(iwqbot,kb) = viuh(kk)
                     else if (layer.gt.0) then
                        ! set a specific layer in the same plane, counting from the deepest layer
-                       k = ktmax - kmx + layer
+                       k = ktmax - max(kmx, 1) + layer
                        if (k >= kb) then
                           ! but only when not below the bed
                           wqbot(iwqbot,k) = viuh(kk)
-                 endif
+                       endif
                     else
                        ! set uniform value for all layers
                        do k=kb,kt
