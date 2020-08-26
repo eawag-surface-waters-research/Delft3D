@@ -12530,7 +12530,7 @@ subroutine unc_read_map(filename, tim, ierr)
           else
              ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_rwqb(iwqbot))
              if ( ierr.eq.NF90_NOERR ) then
-   !            water quality bottom variable exists in restart file
+   !            2D water quality bottom variable exists in restart file, put it in the bottom layer
                 ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
                 do kk = 1, ndxi
                    if (jamergedmap == 1) then
@@ -12538,7 +12538,8 @@ subroutine unc_read_map(filename, tim, ierr)
                    else
                       kloc = kk
                    end if
-                   wqbot(iwqbot, kloc) = tmpvar(1,kk)
+                   call getkbotktop(kloc,kb,kt)
+                   wqbot(iwqbot, kb) = tmpvar(1,kk)
                 end do
              endif
           endif
