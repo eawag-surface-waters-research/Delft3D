@@ -18282,11 +18282,9 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       call interpolateRoughnessParameters(network%rgs, times_update_roughness, tim)
    endif
 
-   call timstop(handle_extbnd)
-
    iresult = DFM_NOERR
 
-   return ! Return with success
+   goto 999 ! Return with success
 
    ! Error handling:
 888 continue
@@ -18295,8 +18293,11 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    write(msgbuf,'(a,f13.3)')  'Error while updating boundary forcing at time=', tim
    call mess(LEVEL_WARN, trim(msgbuf))
 
- end subroutine flow_setexternalforcingsonboundaries
+999 continue
+   call timstop(handle_extbnd)
+   return
 
+ end subroutine flow_setexternalforcingsonboundaries
 
  subroutine flow_settidepotential(timmin)
  use m_flow
