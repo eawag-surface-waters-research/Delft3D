@@ -29,3 +29,7 @@ SUBDIRS = \
     swan \
     md5 \
     $(MAYBE_FORTRANGIS)
+
+nobase_dist_pkgdata_DATA = \
+    esmf/lnx64/bin/libnetcdff.so.6
+
