@@ -5474,6 +5474,7 @@ end subroutine partition_make_globalnumbers
 
 !        generate adjacency structure in CSR format 
          allocate(iadj(nump1d2d+1))
+         iadj = 0
          allocate(iadj_tmp(nump1d2d+1))
 
 !        count number of connection per vertex
@@ -5495,6 +5496,7 @@ end subroutine partition_make_globalnumbers
 
 !        set connections
          allocate(jadj(iadj(nump1d2d+1)-1))
+         jadj = 0
 
          iadj_tmp = iadj
          do L=1,numL
@@ -5509,6 +5511,7 @@ end subroutine partition_make_globalnumbers
          end do
 
          allocate(adjw(iadj(nump1d2d+1)-1))
+         adjw = 0
 !        set edge weights and vsize
          call set_weights_for_METIS(nump1d2d, Nparts, iadj(nump1d2d+1)-1, iadj, jadj,vsize, adjw)
 
