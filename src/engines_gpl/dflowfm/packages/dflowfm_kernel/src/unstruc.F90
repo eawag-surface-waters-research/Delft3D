@@ -44271,7 +44271,10 @@ if (mext /= 0) then
            if (transformcoef(3).eq.DMISS) then
               layer = -1
            else
-              layer = min(nint(transformcoef(3)),kmx)
+              layer = nint(transformcoef(3))
+              if (layer.gt.max(kmx,1)) then
+                 call mess(LEVEL_ERROR, 'Specified layer for ''' // trim(qid) // ''' is higher than kmx: ', layer, kmx)
+              endif 
            endif
 
            if ( allocated(viuh) ) deallocate(viuh)
