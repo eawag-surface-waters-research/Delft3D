@@ -29,7 +29,8 @@ def platformArtifacts(platform):
             if extension == ".exp" or extension == ".lib" or extension == ".pdb" or extension == ".msm":
                 print("      To be removed: " + os.path.join(path,afile))
                 os.remove(os.path.join(path,afile))
-            if str(afile).find("libifcore.so") == 0:
+            # libifcore.so: replace by libifcoremt.so, unless its inside share
+            if (str(afile).find("libifcore.so")==0 and str(path).find("share")==-1):
                 ifcoremt_files_withpath = glob.glob(os.path.join(path, "libifcoremt*"))
                 print("      Removing: " + str(os.path.join(path,afile)))
                 os.remove(os.path.join(path,afile))
