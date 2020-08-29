@@ -72,6 +72,7 @@ module m_petsc
    Vec                                                        :: sol          ! solution vector
    Mat                                                        :: Amat         ! PETSc-type matrix (will include dry nodes, set to zero)
    KSP                                                        :: Solver       ! Solver for the equation Amat * sol = rhs
+   logical                                                    :: isKSPCreated = .false. ! A flag to determine whether KSP is created 
    
 !  preconditioner
    PC                                                         :: Preconditioner
@@ -715,7 +716,10 @@ end module m_petsc
       
 !      call writemesg('RHS and SOL vector are filled')
 
-      if (ierr == PETSC_OK) call KSPCreate(DFM_COMM_DFMWORLD, Solver, ierr)
+      if (ierr == PETSC_OK) then 
+        call KSPCreate(DFM_COMM_DFMWORLD, Solver, ierr)
+        isKSPCreated = .true.
+      endif
       if (ierr == PETSC_OK) call KSPSetOperators(Solver, Amat, Amat, ierr)
       if (ierr == PETSC_OK) then
          if ( japipe.ne.1 ) then
@@ -863,7 +867,10 @@ end module m_petsc
       use m_petsc
    implicit none
       PetscErrorCode    :: ierr = PETSC_OK
-      call KSPDestroy(Solver, ierr)
+
+      if (isKSPCreated) then
+         call KSPDestroy(Solver, ierr)
+      endif
    end subroutine killSolverPETSC
    
    
