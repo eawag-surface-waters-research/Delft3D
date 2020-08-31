@@ -263,7 +263,7 @@ contains
          qL = Au(1)*u1L
 
          call flqhgs(fu(1), ru(1), u1L, dxL, dt, structwidth, kfuL, au(1), qL, flowDir, &
-                     hu, hd, uu, zs, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
+                     hu, hd, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, ds, genstr%state(1,L0), velheight)
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
          
@@ -297,7 +297,7 @@ contains
          qL = Au(2)*u1L
 
          call flqhgs(fu(2), ru(2), u1L, dxL, dt, structwidth, kfuL, au(2), qL, flowDir, &
-                     hu, hd, uu, zgate, gatefraction*wstr, gatefraction*w2, gatefraction*wsd, zb2, ds1, ds2, dg,                &
+                     hu, hd, uu, zgate, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, 0d0, 0d0, dx_struc, ds, genstr%state(2,L0), velheight)
       endif
       
@@ -308,7 +308,7 @@ contains
          qL = Au(3)*u1L
          
          call flqhgs(fu(3), ru(3), u1L, dxL, dt, structwidth, kfuL, au(3), qL, flowDir, &
-                     hu, hd, uu, zs, (1d0-gatefraction)*wstr, (1d0-gatefraction)*w2, (1d0-gatefraction)*wsd, zb2, ds1, ds2, dg,                &
+                     hu, hd, uu, zs, (1d0-gatefraction)*wstr, w2, wsd, zb2, ds1, ds2, dg,                &
                      rhoast, cgf, cgd, cwf, cwd, mugf, lambda, Cz, dx_struc, ds, genstr%state(3,L0), velheight)
          genstr%sOnCrest(L0) = ds + crest     ! waterlevel on crest
 
