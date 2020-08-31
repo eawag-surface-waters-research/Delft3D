@@ -601,51 +601,67 @@ use m_flowgeom
                      cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
 
        DsL   = s1(k2) - s1(k1)
-       u1(Lf) = Rusav(1,n) - Fusav(1,n)*DsL ; u0(Lf) = u1(Lf) ; q1(Lf) = Ausav(1,n)*u1(Lf)
-       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,  &
+       u1(Lf) = rusav(1,n) - fusav(1,n)*DsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(1,n)*u1(Lf)
+       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, gatefraction*wstr, w2, wsd, zb2, ds1, ds2, dg,  &
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
-       fusav(1,n) = fu(Lf) ; Rusav(1,n) = ru(Lf) ; Ausav(1,n) = au(Lf)
+       fusav(1,n) = fu(Lf) ; rusav(1,n) = ru(Lf) ; ausav(1,n) = au(Lf)
+    else
+      fusav(1,n) = 0d0 
+      rusav(1,n) = 0d0 
+      ausav(1,n) = 0d0
     endif
 
     if (gatedoorheight > 0d0) then  ! now add water overflowing top of gate
        zs = gateloweredgelevel + gatedoorheight
        if (husb > zs) then          ! husb = upwind waterlevel instead of height
           dg    = 1d9               ! sky is the limit, this gate fully open
-          u1(Lf) = rusav(2,n) - Fusav(2,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = Ausav(2,n)*u1(Lf)
+          u1(Lf) = rusav(2,n) - fusav(2,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(2,n)*u1(Lf)
           call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
                         cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
           call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,  &
                         cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
           fusav(2,n) = fu(Lf) ; rusav(2,n) = ru(Lf) ; ausav(2,n) = au(Lf)
 
-          au(Lf) =  ausav(1,n)            +            ausav(2,n)
-          if (au(Lf) >0d0) then
-             fu(Lf) = (fusav(1,n)*ausav(1,n) + fusav(2,n)*ausav(2,n) ) / au(Lf)
-             ru(Lf) = (rusav(1,n)*ausav(1,n) + rusav(2,n)*ausav(2,n) ) / au(Lf)
-          end if
        else
-          fusav(2,n) = 0d0 ; rusav(2,n) = 0d0 ; ausav(2,n) = 0d0
+          fusav(2,n) = 0d0 
+          rusav(2,n) = 0d0 
+          ausav(2,n) = 0d0
        endif
+    else
+       fusav(2,n) = 0d0 
+       rusav(2,n) = 0d0 
+       ausav(2,n) = 0d0
     endif
 
-    if ( husb >= gateloweredgelevel .and. gatefraction > 0d0 .and. gatefraction < 1d0) then
+    zs                 = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
+
+    if ( husb >= zs .and. gatefraction < 1d0) then
        fu_sav = fu(Lf)
        ru_sav = ru(Lf)
        au_sav = au(Lf)
 
        zs =  min  ( bob(1,Lf), bob(2,Lf) )
        dg = huge(1d0)
-       u1(Lf) = rusav(3,n) - Fusav(3,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = Ausav(3,n)*u1(Lf)
+       u1(Lf) = rusav(3,n) - fusav(3,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = ausav(3,n)*u1(Lf)
        call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
                      cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
-       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,  &
+       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, (1d0-gatefraction)*wstr, w2, wsd, zb2, ds1, ds2, dg,  &
                      cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
        fusav(3,n) = fu(Lf) ; rusav(3,n) = ru(Lf) ; ausav(3,n) = au(Lf)
-
-       fu(Lf) = gatefraction * fu_sav + (1d0-gatefraction) * fu(Lf)
-       ru(Lf) = gatefraction * ru_sav + (1d0-gatefraction) * ru(Lf)
-       au(Lf) = gatefraction * au_sav + (1d0-gatefraction) * au(Lf)
+    else
+       fusav(3,n) = 0d0 
+       rusav(3,n) = 0d0 
+       ausav(3,n) = 0d0
     end if
+
+    au(Lf) =  ausav(1,n) + ausav(2,n) + ausav(3,n)
+    if (au(Lf) > 0d0) then
+       fu(Lf) = (fusav(1, n)*ausav(1, n) + fusav(2, n)*ausav(2, n) + fusav(3, n)*ausav(3, n))/au(Lf)
+       ru(Lf) = (rusav(1, n)*ausav(1, n) + rusav(2, n)*ausav(2, n) + rusav(3, n)*ausav(3, n))/au(Lf)
+    else
+       fu(Lf) = 0d0
+       ru(Lf) = 0d0
+    endif
 
     if (au(Lf) == 0d0) then
         hu(Lf) =  0d0
@@ -1845,8 +1861,8 @@ do ng=1,ncgensg ! Loop over general structures
       crestwidth = min(totalWidth, generalstruc(ng)%widthcenter)
 !      crestwidth = zcgen((ng-1)*3+3) ! NOTE: AvD: this now comes from scalar attribute 'widthcenter', no timeseries yet.
       ! genstru: always IOPENDIR_SYMMETRIC (TODO: UNST-1935)
-      closedGateWidthL = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
-      closedGateWidthR = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
+      closedGateWidthL = max(0d0, .5d0*(crestwidth - zcgen((ng-1)*3+3)))
+      closedGateWidthR = max(0d0, .5d0*(crestwidth - zcgen((ng-1)*3+3)))
       !closedGateWidthL = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3))) ! Default symmetric opening
       !closedGateWidthR = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
       generalstruc(ng)%gateheightonlink(1:generalstruc(ng)%numlinks) = huge(1d0) ! As a start, gate door is open everywhere. Below, we will close part of the gate doors.
@@ -1855,14 +1871,14 @@ do ng=1,ncgensg ! Loop over general structures
       ! *underneath* the two doors as well, (if lower_edge_level is still high enough above sill_level)
       crestwidth = min(totalWidth, gates(cgen2str(ng))%sill_width)
       if (gates(cgen2str(ng))%opening_direction == IOPENDIR_FROMLEFT) then
-         closedGateWidthL = max(0d0, totalWidth - zcgen((ng-1)*3+3))
+         closedGateWidthL = max(0d0, crestwidth - zcgen((ng-1)*3+3))
          closedGateWidthR = 0d0
       else if (gates(cgen2str(ng))%opening_direction == IOPENDIR_FROMRIGHT) then
          closedGateWidthL = 0d0
-         closedGateWidthR = max(0d0, totalWidth - zcgen((ng-1)*3+3))
+         closedGateWidthR = max(0d0, crestwidth - zcgen((ng-1)*3+3))
       else ! IOPENDIR_SYMMETRIC
-         closedGateWidthL = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
-         closedGateWidthR = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
+         closedGateWidthL = max(0d0, .5d0*(crestwidth - zcgen((ng-1)*3+3)))
+         closedGateWidthR = max(0d0, .5d0*(crestwidth - zcgen((ng-1)*3+3)))
       end if
       generalstruc(ng)%gateheightonlink(1:generalstruc(ng)%numlinks) = huge(1d0) ! As a start, gate door is open everywhere. Below, we will close part of the gate doors.
    end if
@@ -1882,30 +1898,15 @@ do ng=1,ncgensg ! Loop over general structures
       Lf = kcgen(3,L)
 
       if (closedWidth > 0d0) then
-         help = min (wu(Lf), closedWidth)
-         generalstruc(ng)%widthcenteronlink(L0) = wu(Lf) - help ! 0d0 if closed
+         help = min (generalstruc(ng)%widthcenteronlink(L0), closedWidth)
+         generalstruc(ng)%widthcenteronlink(L0) = generalstruc(ng)%widthcenteronlink(L0) - help ! 0d0 if closed
          closedWidth = closedWidth - help
-      else
-         generalstruc(ng)%widthcenteronlink(L0) = wu(Lf)
       end if
-
-      if ((cgen_type(ng) == ICGENTP_GATE .or. cgen_type(ng) == ICGENTP_GENSTRU) .and. closedGateWidthL > 0d0 ) then
-         !if (closedGateWidthL > .5d0*wu(Lf)) then
-         generalstruc(ng)%gateheightonlink(L0) = zcgen((ng-1)*3+2)
-         help = min (wu(Lf), closedGateWidthL)
-         closedGateWidthL = closedGateWidthL - help
-         !end if
-
-         if ( wu(Lf).gt.0d0 ) then
-            generalstruc(ng)%gateclosedfractiononlink(L0) = generalstruc(ng)%gateclosedfractiononlink(L0) + help/wu(Lf)
-         end if
-      else
-
-      end if
-
-      if (closedWidth <= 0d0 .and. closedGateWidthL <= 0d0) then
-         ! finished
-         exit
+ 
+ 
+      if (closedWidth <= 0d0) then
+          ! finished
+          exit
       endif
    enddo
 
@@ -1920,26 +1921,61 @@ do ng=1,ncgensg ! Loop over general structures
       Lf = kcgen(3,L)
 
       if (closedWidth > 0d0) then
-         help = min (wu(Lf), closedWidth)
-         generalstruc(ng)%widthcenteronlink(L0) = wu(Lf) - help ! 0d0 if closed
+         help = min (generalstruc(ng)%widthcenteronlink(L0), closedWidth)
+         generalstruc(ng)%widthcenteronlink(L0) = generalstruc(ng)%widthcenteronlink(L0) - help ! 0d0 if closed
          closedWidth = closedWidth - help
-      else
-         generalstruc(ng)%widthcenteronlink(L0) = wu(Lf)
       end if
+
+       if (closedWidth <= 0d0) then
+         ! finished
+         exit
+      endif
+   enddo
+
+   ! 2d Determine the gateclosedfractionOnlink on the left side, using the widthcenteronlink
+   do L=L1cgensg(ng),L2cgensg(ng)
+      L0 = L-L1cgensg(ng)+1
+      Lf = kcgen(3,L)
+
+      if ((cgen_type(ng) == ICGENTP_GATE .or. cgen_type(ng) == ICGENTP_GENSTRU) .and. closedGateWidthL > 0d0 ) then
+         !if (closedGateWidthL > .5d0*wu(Lf)) then
+         generalstruc(ng)%gateheightonlink(L0) = zcgen((ng-1)*3+2)
+         help = min (generalstruc(ng)%widthcenteronlink(L0), closedGateWidthL)
+         closedGateWidthL = closedGateWidthL - help
+         !end if
+
+         if ( generalstruc(ng)%widthcenteronlink(L0).gt.0d0 ) then
+            generalstruc(ng)%gateclosedfractiononlink(L0) = generalstruc(ng)%gateclosedfractiononlink(L0) + help/generalstruc(ng)%widthcenteronlink(L0)
+         end if
+      else
+
+      end if
+
+      if (closedGateWidthL <= 0d0) then
+         ! finished
+         exit
+      endif
+   enddo
+
+   ! 2e Determine the gateclosedfractionOnlink on the left side, using the widthcenteronlink
+   closedWidth = max(0d0, totalWidth - crestwidth)/2d0 ! Intentionally symmetric: if crest/sill_width < totalwidth. Only gate door motion may have a direction, was already handled above.
+   do L=L2cgensg(ng),L1cgensg(ng),-1
+      L0 = L-L1cgensg(ng)+1
+      Lf = kcgen(3,L)
 
       if ((cgen_type(ng) == ICGENTP_GATE .or. cgen_type(ng) == ICGENTP_GENSTRU) .and. closedGateWidthR > 0d0) then
          !if (closedGateWidthL > .5d0*wu(Lf)) then
          generalstruc(ng)%gateheightonlink(L0) = zcgen((ng-1)*3+2)
-         help = min (wu(Lf), closedGateWidthR)
+         help = min (generalstruc(ng)%widthcenteronlink(L0), closedGateWidthR)
          closedGateWidthR = closedGateWidthR - help
          !end if
 
-         if ( wu(Lf).gt.0d0 ) then
-            generalstruc(ng)%gateclosedfractiononlink(L0) = generalstruc(ng)%gateclosedfractiononlink(L0) + help/wu(Lf)
+         if ( generalstruc(ng)%widthcenteronlink(L0).gt.0d0 ) then
+            generalstruc(ng)%gateclosedfractiononlink(L0) = generalstruc(ng)%gateclosedfractiononlink(L0) + help/generalstruc(ng)%widthcenteronlink(L0)
          end if
       end if
 
-       if (closedWidth <= 0d0 .and. closedGateWidthR <= 0d0) then
+       if (closedGateWidthR <= 0d0) then
          ! finished
          exit
       endif
