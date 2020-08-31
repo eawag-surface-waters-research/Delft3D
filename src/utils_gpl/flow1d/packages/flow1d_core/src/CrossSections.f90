@@ -1277,6 +1277,7 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       call GetCSParsFlowCross(cross1, dpt, flowArea, wetPerimeter, flowWidth, maxFlowWidth1, af_sub_local1, perim_sub_local1)
       if (present(af_sub)   ) af_sub    = af_sub_local1
       if (present(perim_sub)) perim_sub = perim_sub_local1
+      if (present(maxFlowWidth)) maxFlowWidth= maxFlowWidth1
    else
       select case (cross1%crosstype)
          
@@ -1301,6 +1302,7 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
                      perim_sub_local1)
             if (present(af_sub)   ) af_sub    = af_sub_local1
             if (present(perim_sub)) perim_sub = perim_sub_local1
+            if (present(maxFlowWidth)) maxFlowWidth= maxFlowWidth1
             
          case default                             ! Call GetCSParsFlowCross twice and interpolate the results 
 
