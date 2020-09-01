@@ -7493,9 +7493,10 @@ subroutine find_netcells_for_structures(nstrucells, istrucells)
    integer,                        intent(inout) :: nstrucells !< Number of the netcells that are related to structures
    integer, dimension(nstrucells), intent(inout) :: istrucells !< Indices of the netcells that are related to structures
 
-   character(len=256)            :: plifile, qid, strid, str_buf
+   character(len=256)            :: plifile, qid, strid
    type(TREE_DATA), pointer      :: str_ptr
    logical                       :: success
+   character(len=:), allocatable :: str_buf
    integer,          allocatable :: istrulinks(:), ipol_tmp(:)
    double precision, allocatable :: xpl_tmp(:), ypl_tmp(:), DSL_tmp(:)
    integer                       :: i, L, k, ii, nstr, loc_spec_type, nstrulinks, &
@@ -7549,8 +7550,7 @@ subroutine find_netcells_for_structures(nstrucells, istrucells)
          cycle
       end if
 
-      str_buf = ' '
-      call prop_get_string(str_ptr, '', 'polylinefile', str_buf, success)
+      call prop_get_alloc_string(str_ptr, '', 'polylinefile', str_buf, success)
       if (success) then
          loc_spec_type = LOCTP_POLYLINE_FILE
          plifile = str_buf
