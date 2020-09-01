@@ -24360,6 +24360,8 @@ end subroutine unc_write_shp
  use unstruc_channel_flow, only : network
  use m_dad, only: dad_included
  use m_sediment, only: stm_included
+ use m_flowtimes, only: handle_extra
+ use Timers
 
  implicit none
 
@@ -24453,6 +24455,8 @@ end subroutine unc_write_shp
     if (kc(k) .ne. 0) kc(k) = 1                      ! all active grid nodes are now kc = 1 : only to cure old net files
  enddo
 
+ call timstrt('Findcells/preparecells', handle_extra(46)) ! findcells/preparecells
+
 !see if subomain numbers should be read from file
  jaidomain = 0
  jaiglobal_s = 0
@@ -24475,6 +24479,7 @@ end subroutine unc_write_shp
      call findcells(0)                               ! shortest walks in network (0 means: look for all shapes, tris, quads, pentas, hexas)
      call find1dcells()
  endif
+ call timstop(handle_extra(46)) ! findcells/preparecells
 
  if ( jaidomain.eq.1 .and. .not. allocated(idomain)) then
     call mess(LEVEL_ERROR, 'Domain numbers could not be read. Either the PartitionFile is missing in the MDU file, or the network file misses domain numbers, in subdomain number', my_rank)
@@ -24536,7 +24541,9 @@ end subroutine unc_write_shp
  ! between circumcenters is very small.
  !if (jased > 0) jarenumber = 0
  if (jarenumber == 1 .and. nump > 00 .and. (.not. ti_waq > 0d0) ) then
-     call renumberFlowNodes()
+    call timstrt('Renumber flownodes', handle_extra(47)) ! renumberFlowNodes
+    call renumberFlowNodes()
+    call timstop(handle_extra(47)) ! renumberFlowNodes
  end if
 
  do n = 1,nump
@@ -25044,7 +25051,9 @@ end subroutine unc_write_shp
     return
  end if
 
+ call timstrt('Set bedlevel from ext-file', handle_extra(48)) ! setbedlevelfromextfile
  call setbedlevelfromextfile()                     ! set bl bathymetry if specified through file, so ibedlevtype must be 1
+ call timstop(handle_extra(48)) ! setbedlevelfromextfile
 
  ! Default parameters for 1D2D links
  do L = 1,lnx1D
@@ -43089,6 +43098,9 @@ end function is_1d_boundary_candidate
  use m_sferic, only: jsferic
  use m_trachy, only: trachy_resistance
  use unstruc_inifields, only: initInitialFields
+ use m_flowtimes, only: handle_extra
+ use Timers
+
  ! use m_vegetation
 
  implicit none
@@ -43178,6 +43190,7 @@ end function is_1d_boundary_candidate
 
  ! First initialize new-style IniFieldFile quantities.
  if (len_trim(md_inifieldfile) > 0) then
+    call timstrt('Init iniFieldFile', handle_extra(49)) ! initInitialFields
     inquire (file = trim(md_inifieldfile), exist = exist)
     if (exist) then
        iresult = initInitialFields(md_inifieldfile)
@@ -43191,6 +43204,7 @@ end function is_1d_boundary_candidate
        iresult = DFM_EXTFORCERROR
        goto 888
     endif
+    call timstop(handle_extra(49)) ! initInitialFields
  end if
 
 
@@ -43840,6 +43854,7 @@ end function is_1d_boundary_candidate
 
  ! Finish with all remaining old-style ExtForceFile quantities.
 if (mext /= 0) then
+ call timstrt('Init ExtForceFile (old)', handle_extra(50)) ! extforcefile old
  ja = 1
 
  do while (ja .eq. 1)                                ! read *.ext file
@@ -44876,6 +44891,7 @@ if (mext /= 0) then
     endif
 
  enddo
+ call timstop(handle_extra(50)) ! extforcefile old
 
 
 
