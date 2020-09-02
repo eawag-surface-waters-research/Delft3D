@@ -292,6 +292,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    , &
       if (error) then
          rtcact = noRTC
          call prterr(lundia    ,'J020'    ,'SyncFlowRtc_Init'   )
+         write(lundia, '(A)') '***       The dioconfig.ini file might be missing ...'   )
       else
          rtcact = RTCmodule
       endif
