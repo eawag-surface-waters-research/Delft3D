@@ -10966,9 +10966,9 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  if (jawave > 2 .or. (jased > 0 .and. stm_included)) then
     call flow_waveinit()
  endif
- ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopes
+ ! Construct a default griddim struct for D3D subroutines, i.e. sedmor or trachytopes
  call timstrt('Flow grid           ', handle_extra(7)) ! Flow griddim
- if ( len_trim(md_foufile) > 0 .or. len_trim(md_sedfile) > 0 .or. jatrt == 1) then
+ if ( len_trim(md_sedfile) > 0 .or. jatrt == 1) then
     call D3Dflow_dimensioninit()
  endif
  call timstop(handle_extra(7)) ! End flow griddim
