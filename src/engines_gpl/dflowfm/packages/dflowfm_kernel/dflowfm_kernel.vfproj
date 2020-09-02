@@ -51,7 +51,6 @@
 		<File RelativePath="src\bedform_io.f90"/>
 		<File RelativePath=".\src\caching.f90"/>
 		<File RelativePath="src\calibration.f90"/>
-		<File RelativePath="src\d3ddimens.f90"/>
 		<File RelativePath="src\d_flooding.f90"/>
 		<File RelativePath="src\dem.f90"/>
 		<File RelativePath="src\dfm_signals.F90">

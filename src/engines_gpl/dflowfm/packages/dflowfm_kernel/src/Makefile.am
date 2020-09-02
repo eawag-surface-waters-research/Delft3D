@@ -53,7 +53,6 @@ libdflowfm_la_SOURCES=\
         dredge_data.f90 \
         hydrology_data.f90 \
         bedform_data.f90 \
-        d3ddimens.f90 \
         modules.f90 \
         dfm_signals.F90 \
         inquire_flowgeom.f90 \

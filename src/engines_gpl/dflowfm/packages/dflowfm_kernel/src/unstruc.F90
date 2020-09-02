@@ -11237,15 +11237,12 @@ end function flow_modelinit
 subroutine D3Dflow_dimensioninit()
     use m_flowgeom
     use grid_dimens_module
-    use m_d3ddimens
     use m_flow !, only: ndkx, lnkx
     implicit none
 
     integer :: L
 
-    ! Construct a default griddim struct and gd_dimens (delft3D) struct
-    call d3dgrid_dimens(gddimens, gddimens_ptr, max(ndkx,lnkx), 1, ndxi, lnxi, ndkx, lnkx) ! Here we only use ndxi, lnxi (interior). NOTE: caller to fouana will still pass entire s1 arrays etc.(1:ndx), and that only works since it is a  rank-1 array!
-
+    ! Construct a default griddim struct
     call simplegrid_dimens(griddim, ndx, 1)
     griddim%xz                   => xz
     griddim%yz                   => yz

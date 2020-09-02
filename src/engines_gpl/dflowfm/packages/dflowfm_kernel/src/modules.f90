@@ -2423,7 +2423,6 @@ end subroutine default_turbulence
 
  module m_flowparameters
  use m_sediment, only: jased
- ! use m_d3ddimens
  implicit none
 
  integer                           :: jatransportmodule = 1    !< use transport module (1) or subroutine (0), or no transport (2)
@@ -4082,7 +4081,6 @@ end module m_profiles
 
  use m_profiles
  use grid_dimens_module
- use m_d3ddimens
  use m_flowparameters, only: jawave
  use m_cell_geometry
 
@@ -4118,9 +4116,6 @@ end module m_profiles
  integer                           :: ja1D2Dinternallinktype = 1
 
  type (griddimtype)                :: griddim
- type (gd_dimens), target          :: gddimens
- type (gd_dimens), pointer         :: gddimens_ptr
-
 
  ! Flow node numbering:
  ! 1:ndx2D, ndx2D+1:ndxi, ndxi+1:ndx1Db, ndx1Db:ndx

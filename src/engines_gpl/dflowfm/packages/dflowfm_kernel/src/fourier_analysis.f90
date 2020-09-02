@@ -647,30 +647,31 @@ end subroutine getsizes
 
 !> helper routine to get the size of suma arrays
 function name_dependent_size(fourier_name) result(nmaxus)
-   use m_flowgeom, only : gddimens
+   use m_flowgeom, only : ndx, lnx ! actually from m_cell_geometry
+   use m_flow, only: ndkx, lnkx
    character(len=*), intent(in) :: fourier_name  !< name of the fourier quantity
    integer                      :: nmaxus        !< function result: size of suma array
 
    ! The name of the variable for Fourier analysis fully specified the number of elements for the fourier loop
    select case (fourier_name)
    case('s1')
-        nmaxus = gddimens%ndx
+        nmaxus = ndx
    case('ws')
-        nmaxus = gddimens%lnx
+        nmaxus = lnx
    case('u1', 'v1')
-        nmaxus = gddimens%lnkx
+        nmaxus = lnkx
    case('qxk')
-        nmaxus = gddimens%lnx
+        nmaxus = lnx
    case('ta')
-        nmaxus = gddimens%ndx
+        nmaxus = ndx
    case('ux','uy','uc')
-        nmaxus = gddimens%ndkx
+        nmaxus = ndkx
    case('uxa','uya')
-        nmaxus = gddimens%ndx
+        nmaxus = ndx
    case('r1')
-        nmaxus = gddimens%ndkx
+        nmaxus = ndkx
    case default
-        nmaxus = gddimens%nub
+        nmaxus = max(ndkx,lnkx)
    end select
 end function name_dependent_size
 
@@ -709,7 +710,6 @@ end subroutine setfouunit
    subroutine fouana( ifou, time0, rarray, bl, dtw, nfou)
    !!--declarations----------------------------------------------------------------
        use precision
-       use m_d3ddimens
        !
        implicit none
        !
@@ -1267,7 +1267,6 @@ end subroutine setfouunit
    subroutine wrfous(ifou, fileids, iloc)
    !!--declarations----------------------------------------------------------------
        use precision
-       use m_d3ddimens
        use netcdf
        use unstruc_netcdf
        !
