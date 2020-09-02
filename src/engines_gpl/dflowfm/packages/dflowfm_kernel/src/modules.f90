@@ -3870,10 +3870,6 @@ double precision, allocatable     :: fvcoro (:)  !< 3D adamsbashford u point (m/
  integer, parameter :: IDX_EVAP_ICEPT = 39
  integer, parameter :: IDX_PRECIP_GROUND = 40
 
-
-! Delft3D structure of grid dimensions
-! type(gd_dimens)     :: dimenstruct               !not used anywhere
-
 contains
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, only call reset_flow() instead.
