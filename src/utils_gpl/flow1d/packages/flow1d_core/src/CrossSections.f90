@@ -1223,6 +1223,7 @@ end subroutine findNeighbourAndAddCrossSection
 subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimeter, flowWidth, maxFlowWidth, af_sub, perim_sub)
 
    use m_GlobalParameters
+   use timers
    
    implicit none
 
@@ -1251,7 +1252,9 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
 
    double precision                      :: af_sub_local1(3), af_sub_local2(3)      
    double precision                      :: perim_sub_local1(3), perim_sub_local2(3)
+   integer, save                         :: ihandle = 0
 
+   call timstrt('GetCSParsFlowInterpolate', ihandle)
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
       flowArea = default_width* dpt
@@ -1330,6 +1333,7 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       
    endif
 
+   call timstop(ihandle)
 end subroutine GetCSParsFlowInterpolate
 
 !> Get flow area, wet perimeter and flow width at cross section location
@@ -1338,6 +1342,7 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
    use m_GlobalParameters
    use precision_basics
    use m_Roughness
+   use timers
 
    type (t_CrossSection), intent(in)          :: cross          !< cross section definition
    double precision, intent(in   )            :: dpt            !< water depth at cross section
@@ -1356,7 +1361,7 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
    double precision                  :: af_sub_local(3)      
    double precision                  :: perim_sub_local(3)      
    logical                           :: hysteresis =.true.   ! hysteresis is a dummy variable at this location, since this variable is only used for total areas
-  
+   integer, save                     :: ihandle = 0
    perim_sub_local = 0d0
    if (dpt < 0.0d0) then
       flowArea     = 0.0
@@ -1365,6 +1370,7 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       return
    endif
 
+   call timstrt('GetCSParsFlowSingle', ihandle)
    crossDef => cross%tabDef
 
    select case(cross%crosstype)
@@ -1415,12 +1421,13 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
    if (present(maxFlowWidth)) then
       maxFlowWidth = maxFlowWidth1
    endif
-   
+   call timstop(ihandle)
 end subroutine GetCSParsFlowCross
 
 !> Get total area and total width for given location and water depth
 subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
    use m_GlobalParameters
+   use timers
    
    implicit none
 
@@ -1445,7 +1452,10 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
    type (t_CrossSection), save           :: crossi         !< intermediate virtual crosssection     
    type (t_CrossSection), pointer        :: cross1         !< cross section
    type (t_CrossSection), pointer        :: cross2         !< cross section
+   integer, save                         :: ihandle   = 0
 
+   call timstrt('GetCSParsTotalInterpolate', ihandle)
+   
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
       totalArea = default_width* dpt
@@ -1502,6 +1512,8 @@ end subroutine GetCSParsTotalInterpolate
 subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
 
    use m_GlobalParameters
+   use timers
+   
    ! Global Variables
    type (t_CrossSection), intent(in) :: cross           !< cross section
    double precision, intent(in)      :: dpt             !< water depth at cross section
@@ -1523,12 +1535,14 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
    double precision                  :: wlev            !< water level at cross section
    logical                           :: getSummerDikes
    double precision                  :: af_sub(3), perim_sub(3)
+   integer, save                     :: ihandle = 0
    if (dpt < 0.0d0) then
       totalArea = 0.0d0
       totalWidth = sl
       return
    endif
 
+   call timstrt('GetCSParsTotalSingle', ihandle)
    crossDef => cross%tabdef
 
    select case(cross%crosstype)
