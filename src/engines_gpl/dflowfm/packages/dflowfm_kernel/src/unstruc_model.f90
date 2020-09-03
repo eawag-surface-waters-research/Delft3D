@@ -969,6 +969,8 @@ subroutine readMDUFile(filename, istat)
 
 ! Numerics
     call prop_get_double( md_ptr, 'numerics', 'CFLMax'          , cflmx)
+    call prop_get_double( md_ptr, 'numerics', 'EpsMaxlev'       , epsmaxlev)
+    call prop_get_double( md_ptr, 'numerics', 'EpsMaxlevm'      , epsmaxlevm)
     !call prop_get_double( md_ptr, 'numerics', 'CFLWaveFrac'     , cflw)
     call prop_get_integer(md_ptr, 'numerics', 'AdvecType'       , iadvec)
     if (Layertype > 1) then
@@ -2597,6 +2599,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Numerics
     call prop_set(prop_ptr, 'numerics', 'CFLMax',       cflmx,      'Maximum Courant number')
+    call prop_set(prop_ptr, 'numerics', 'EpsMaxlev',    epsmaxlev,  'Stop criterium for non linear iteration')
+    call prop_set(prop_ptr, 'numerics', 'EpsMaxlevm',   epsmaxlevm, 'Stop criterium for Nested Newton loop in non linear iteration')
     !call prop_set(prop_ptr, 'numerics', 'CFLWaveFrac',  cflw,       'Wave velocity fraction, total courant vel = u + cflw*wavevelocity')
     if (writeall .or.  Lincontin .ne. 0) then
        call prop_set(prop_ptr, 'numerics', 'Lincontin',    Lincontin,  'Default 0; Set to 1 for linearizing d(Hu)/dx; link to AdvecType')
