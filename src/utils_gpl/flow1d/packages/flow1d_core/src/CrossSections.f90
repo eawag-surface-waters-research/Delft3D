@@ -1254,7 +1254,6 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
    double precision                      :: perim_sub_local1(3), perim_sub_local2(3)
    integer, save                         :: ihandle = 0
 
-   call timstrt('GetCSParsFlowInterpolate', ihandle)
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
       flowArea = default_width* dpt
@@ -1270,6 +1269,8 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       endif
       return
    endif
+
+   call timstrt('GetCSParsFlowInterpolate', ihandle)
 
    cross1 => cross(line2cross%c1)
    cross2 => cross(line2cross%c2)
@@ -1454,7 +1455,6 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
    type (t_CrossSection), pointer        :: cross2         !< cross section
    integer, save                         :: ihandle   = 0
 
-   call timstrt('GetCSParsTotalInterpolate', ihandle)
    
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
@@ -1462,6 +1462,8 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
       totalWidth = default_width
       return
    endif
+
+   call timstrt('GetCSParsTotalInterpolate', ihandle)
 
    cross1 => cross(line2cross%c1)
    cross2 => cross(line2cross%c2)
@@ -1505,6 +1507,8 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
       end select
       
    endif
+   
+   call timstop(ihandle)
 
 end subroutine GetCSParsTotalInterpolate
 
@@ -1572,7 +1576,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
       end select
-
+    call timstop(ihandle)
 end subroutine GetCSParsTotalCross
 
 !> Get area, width and perimeter for a tabulated profile
