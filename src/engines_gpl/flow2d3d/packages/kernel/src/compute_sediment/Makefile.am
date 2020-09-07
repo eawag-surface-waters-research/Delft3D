@@ -40,7 +40,6 @@ libKernelComputeSediment_la_SOURCES = \
          bndmorlyr.f90 \
          bott3d.f90 \
          compthick.f90 \
-         dredgedump.f90 \
          dwnvel.f90 \
          erosed.f90 \
          red_soursin.f90 \
