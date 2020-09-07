@@ -76,7 +76,7 @@ libIOInput_la_SOURCES = \
          rdcul.f90 \
          rddept.f90 \
          rdveg3d.f90 \
-         rddredge.f90 \
+         rddredge_d3d4.f90 \
          rdfcio.f90 \
          rdfour.f90 \
          rdgrid.f90 \
