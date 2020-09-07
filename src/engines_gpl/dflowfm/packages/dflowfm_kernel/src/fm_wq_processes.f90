@@ -322,7 +322,6 @@
       integer  ( 4)            :: imultp(2,nomult)!< multiple substance administration
       type(t_dlwq_item)        :: constants       !< delwaq constants list
       integer                  :: nocons_used     !< number of constants actually used
-      integer                  :: rank            !< mpi rank (-1 is no mpi)
       integer                  :: noinfo          !< count of informative message
       integer                  :: nowarn          !< count of warnings
       integer                  :: ierr, ierr2     !< error count
@@ -659,14 +658,11 @@
 
 !     Finally, evaluate the processes using the proces library
 !     --------------------------------------------------------
-      rank = -1
-      if (jampi.eq.1) then
-         rank = my_rank
-      endif
+      bloom_output_file = defaultfilename('bloom')
 
       call mess(LEVEL_INFO, 'Initialising water quality processes.')
-      call wq_processes_initialise ( lunlsp, proc_def_file, proc_dllso_file, bloom_file, statistics_file, statprocesdef, outputs, &
-                                     nomult, imultp, constants, rank, noinfo, nowarn, ierr)
+      call wq_processes_initialise ( lunlsp, proc_def_file, proc_dllso_file, bloom_file, bloom_output_file, statistics_file, statprocesdef, outputs, &
+                                     nomult, imultp, constants, noinfo, nowarn, ierr)
       call mess(LEVEL_INFO, 'Number of warnings during initialisation of the processes : ', nowarn)
       call mess(LEVEL_INFO, 'Number of errors during initialisation of the processes   : ', ierr)
       if (ierr .ne. 0) then

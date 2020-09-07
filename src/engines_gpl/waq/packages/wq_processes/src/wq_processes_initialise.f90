@@ -21,8 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
       
-      subroutine wq_processes_initialise ( lunlsp, pdffil, shared_dll_so, blmfil, sttfil, statprocesdef, outputs, &
-                                           nomult, imultp, constants, rank, noinfo, nowarn, ierr)
+      subroutine wq_processes_initialise ( lunlsp, pdffil, shared_dll_so, blmfil, blmoutfil, sttfil, statprocesdef, outputs, &
+                                           nomult, imultp, constants, noinfo, nowarn, ierr)
 
 !       Deltares Software Centre
 
@@ -57,6 +57,7 @@
       character(len=*)    , intent(in   ) :: pdffil          !< filename proc_def
       character(len=*)    , intent(in   ) :: shared_dll_so      !< name of the open processes library dll/so to be loaded during runtime
       character(len=*)    , intent(inout) :: blmfil          !< filename spe
+      character(len=*)    , intent(in   ) :: blmoutfil       !< base name for bloom output files
       character(len=*)    , intent(in   ) :: sttfil          !< filename stt
 
       type(procespropcoll), intent(inout) :: statprocesdef   !< the statistical proces definition
@@ -67,7 +68,6 @@
       integer  ( 4)       , intent(in   ) :: nomult          !< number of multiple substances
       integer  ( 4)       , intent(in   ) :: imultp(2,nomult)!< multiple substance administration
       type(t_dlwq_item)   , intent(inout) :: constants       !< delwaq constants list
-      integer                             :: rank            !< mpi rank (-1 is no mpi)
       integer             , intent(inout) :: noinfo          !< count of informative message
       integer             , intent(inout) :: nowarn          !< count of warnings
       integer             , intent(inout) :: ierr            !< error count
@@ -610,9 +610,7 @@
                        nogrp    , grpnam, grpabr, nouttyp, outtyp, &
                        noutgrp  , outgrp)
 
-         if (rank.ge.0) then
-            write(runnam(9:13),'("_",I4.4)') rank
-         end if
+         runnam = blmoutfil
          
          ! write the bloom efficiency file
          filnam = trim(runnam)//'.frm'
