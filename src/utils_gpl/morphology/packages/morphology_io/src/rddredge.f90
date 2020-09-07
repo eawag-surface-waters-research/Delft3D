@@ -54,6 +54,7 @@ subroutine rddredge(dredgepar, dad_ptr, sedpar, lfbedfrm, morpar, lundia, julref
     use m_alloc
     use morphology_data_module, only: sedpar_type, morpar_type
     use dredge_data_module
+    use grid_dimens_module, only: griddimtype
     !
     implicit none
     !
