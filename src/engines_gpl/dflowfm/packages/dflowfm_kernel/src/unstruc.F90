@@ -11237,7 +11237,7 @@ end function flow_modelinit
 subroutine D3Dflow_dimensioninit()
     use m_flowgeom
     use grid_dimens_module
-    use m_partitioninfo, only: idomain, iglobal_s, my_rank
+    use m_partitioninfo, only: jampi, idomain, iglobal_s, my_rank
     use m_flow !, only: ndkx, lnkx
     use network_data, only: xk, yk
     ! use m_cell_geometry, ony: xz, yz, ndx
@@ -11261,20 +11261,24 @@ subroutine D3Dflow_dimensioninit()
     if (istat==0) then
        istart = 1
        do nm = 1,ndxi
-          griddim%nmglobal(nm) = iglobal_s(nm)
-          !
           nnod = size(nd(nm)%nod)
           griddim%indexnode1(nm) = istart
           griddim%ncellnodes(nm) = nnod
           istart = istart + nnod
           !
-           if (idomain(nm) == my_rank) then
-             griddim%celltype(nm)   =  1 ! Internal cells
+          if (jampi == 1) then
+             griddim%nmglobal(nm) = iglobal_s(nm)
+             if (idomain(nm) == my_rank) then
+                griddim%celltype(nm) = 1 ! Internal cells
+             else
+                griddim%celltype(nm) = -1 ! Ghost cells
+             endif
           else
-             griddim%celltype(nm)   = -1 ! Ghost cells
+             griddim%nmglobal(nm) = nm
+             griddim%celltype(nm) = 1 ! Internal cells
           endif
        enddo
-       griddim%celltype(ndxi+1:ndx) =  2 ! Boundary cells
+       griddim%celltype(ndxi+1:ndx) = 2 ! Boundary cells
     endif
     if (istat==0) allocate(griddim%cell2node(istart-1), stat=istat)
     if (istat==0) then
