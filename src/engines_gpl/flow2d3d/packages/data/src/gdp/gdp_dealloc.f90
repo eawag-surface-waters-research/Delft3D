@@ -44,6 +44,7 @@ subroutine gdp_dealloc(gdp)
     !use ec_module
     use globaldata
     use dfparall
+    use dredge_data_module, only: clrdredge
     !
     implicit none
     !

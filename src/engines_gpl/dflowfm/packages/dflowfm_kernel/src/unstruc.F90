@@ -11237,19 +11237,56 @@ end function flow_modelinit
 subroutine D3Dflow_dimensioninit()
     use m_flowgeom
     use grid_dimens_module
+    use m_partitioninfo, only: idomain, iglobal_s, my_rank
     use m_flow !, only: ndkx, lnkx
+    use network_data, only: xk, yk
+    ! use m_cell_geometry, ony: xz, yz, ndx
     implicit none
 
-    integer :: L
+    integer :: istart ! start index into cell2node array
+    integer :: istat  ! status flag
+    integer :: L      ! loop variable
+    integer :: nm     ! spatial loop variable
+    integer :: nnod   ! number of nodes per face
 
     ! Construct a default griddim struct
     call simplegrid_dimens(griddim, ndx, 1)
-    griddim%xz                   => xz
-    griddim%yz                   => yz
-    griddim%celltype(1:ndxi)     =  1 ! Internal cells
-    griddim%celltype(ndxi+1:ndx) =  2 ! Boundary cells
-    griddim%mmax                 = ndxi
-    griddim%nmmax                = ndxi
+    griddim%mmax                 = ndxi !! this should be nmax to be consistent, but mmax is also used in trachytopes ... 
+    griddim%nmmax                = ndxi !! Why not pass ndxi in simplegrid_dimens call? reduces length of celltype to ndxi is this a problem?
+    griddim%meshtype             = MESH_UNSTRUCTURED
+    griddim%parttype             = PARTITION_NONCONT
+    
+    allocate(griddim%ncellnodes(ndx), stat=istat)
+    if (istat==0) allocate(griddim%indexnode1(ndx), stat=istat)
+    if (istat==0) then
+       istart = 1
+       do nm = 1,ndxi
+          griddim%nmglobal(nm) = iglobal_s(nm)
+          !
+          nnod = size(nd(nm)%nod)
+          griddim%indexnode1(nm) = istart
+          griddim%ncellnodes(nm) = nnod
+          istart = istart + nnod
+          !
+           if (idomain(nm) == my_rank) then
+             griddim%celltype(nm)   =  1 ! Internal cells
+          else
+             griddim%celltype(nm)   = -1 ! Ghost cells
+          endif
+       enddo
+       griddim%celltype(ndxi+1:ndx) =  2 ! Boundary cells
+    endif
+    if (istat==0) allocate(griddim%cell2node(istart-1), stat=istat)
+    if (istat==0) then
+       istart = 1
+       do nm = 1,ndxi
+          nnod = size(nd(nm)%nod)
+          do L = 1,nnod
+              griddim%cell2node(istart) = nd(nm)%nod(L)
+              istart = istart + 1
+          enddo
+       enddo
+    endif
 
     ! generate table for boundary mirroring of input
     allocate(griddim%nmbnd(ndx-ndxi,2))
@@ -11257,6 +11294,11 @@ subroutine D3Dflow_dimensioninit()
        griddim%nmbnd(LN(1, L)-ndxi,1) = LN(1, L)  ! point outside net
        griddim%nmbnd(LN(1, L)-ndxi,2) = LN(2, L)  ! point inside net
     enddo
+
+    griddim%xz                   => xz
+    griddim%yz                   => yz
+    griddim%xnode                => xk
+    griddim%ynode                => yk
 
 end subroutine D3Dflow_dimensioninit
 
@@ -11643,7 +11685,8 @@ end subroutine flow_sedmorinit
 
 subroutine flow_dredgeinit()
    use m_dad
-   use m_rddredge,   only: rddredge, initdredge
+   use dredge_data_module,   only: initdredge
+   use m_fm_dredge,   only: fm_rddredge
    use unstruc_model, only: md_dredgefile
    use m_sediment, only: stm_included, jased
    use m_flowparameters, only: jatransportmodule
@@ -11662,7 +11705,7 @@ subroutine flow_dredgeinit()
    end if
 
    call initdredge(dadpar)
-   call rddredge(dadpar, md_dredgefile, error)
+   call fm_rddredge(dadpar, md_dredgefile, error)
    if (error) then
       call mess(LEVEL_FATAL, 'unstruc::flow_dredgeinit - Error in initialisation of dredging module.')
    end if
@@ -18993,7 +19036,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
-                     id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_sedtotdim, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
+                     id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_sedtotdim, id_dred_name, id_dump_name, id_frac_name, &
                      id_dambreakdim, id_dambreak_id, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
                      id_dambreak_au, id_dambreak_head, id_dambreak_cresth, id_dambreak_crestw, &
                      id_uniweirdim, id_uniweir_id, id_uniweir_dis, id_uniweir_s1up,  id_uniweir_s1dn, id_uniweir_crestl, &
@@ -21138,14 +21181,6 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_dump_dis, 'long_name', 'Cumulative dredged material for dump areas')
             ierr = nf90_put_att(ihisfile, id_dump_dis, 'units', 'm3') !totvoldump
 
-            !ierr = nf90_def_var(ihisfile, 'dred_discharge_frac',     nf90_double, (/ id_dreddim, id_sedtotdim, id_timedim /), id_dred_dis_frac)
-            !ierr = nf90_put_att(ihisfile, id_dred_dis_frac, 'long_name', 'Cumulative dredged material per fraction for dredge areas')
-            !ierr = nf90_put_att(ihisfile, id_dred_dis_frac, 'units', 'm3') !totvoldred
-
-            !ierr = nf90_def_var(ihisfile, 'dump_discharge_frac',     nf90_double, (/ id_dumpdim, id_sedtotdim, id_timedim /), id_dump_dis_frac)
-            !ierr = nf90_put_att(ihisfile, id_dump_dis_frac, 'long_name', 'Cumulative dumped material per fraction for dump areas')
-            !ierr = nf90_put_att(ihisfile, id_dump_dis_frac, 'units', 'm3') !totvoldump
-
             ierr = nf90_def_var(ihisfile, 'dred_time_frac',     nf90_double, (/ id_dreddim, id_timedim /), id_dred_tfrac)
             ierr = nf90_put_att(ihisfile, id_dred_tfrac, 'long_name', 'Time fraction spent dredging')
             ierr = nf90_put_att(ihisfile, id_dred_tfrac, 'units', '-') !ndredged
@@ -22482,12 +22517,10 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile, id_dredlink_dis, dadpar%link_sum  , start = (/ 1, 1, it_his /), count = (/ dadpar%nalink, stmpar%lsedtot, 1 /))
        ierr = nf90_put_var(ihisfile, id_dred_dis    , dadpar%totvoldred, start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
        ierr = nf90_put_var(ihisfile, id_dump_dis    , dadpar%totvoldump, start = (/ 1, it_his /), count = (/ dadpar%nadump, 1 /))
-       !ierr = nf90_put_var(ihisfile, id_dred_dis_frac    , dadpar%totvoldredfrac, start = (/ 1, 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, stmpar%lsedtot+1, 1 /))
-       !ierr = nf90_put_var(ihisfile, id_dump_dis_frac    , dadpar%totvoldumpfrac, start = (/ 1, 1, it_his /), count = (/ dadpar%nadump, stmpar%lsedtot, 1 /))
 
        cof0 = 1d0 ; if( time_his > 0d0 ) cof0 = time_his
-       ierr = nf90_put_var(ihisfile, id_dred_tfrac  , dadpar%ndredged/cof0  , start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
-       ierr = nf90_put_var(ihisfile, id_plough_tfrac, dadpar%nploughed/cof0 , start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
+       ierr = nf90_put_var(ihisfile, id_dred_tfrac  , dadpar%tim_dredged/cof0  , start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
+       ierr = nf90_put_var(ihisfile, id_plough_tfrac, dadpar%tim_ploughed/cof0 , start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
     endif
 
     do num = 1,MAX_IDX

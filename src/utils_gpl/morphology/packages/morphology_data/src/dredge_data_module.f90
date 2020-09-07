@@ -1,3 +1,4 @@
+module dredge_data_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -25,58 +26,71 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$$
+!  $HeadURL$
 !-------------------------------------------------------------------------------
-    integer, parameter :: DEPTHDEF_REFPLANE        = 1
-    integer, parameter :: DEPTHDEF_WATERLVL        = 2
-    integer, parameter :: DEPTHDEF_MAXREFWL        = 3
-    integer, parameter :: DEPTHDEF_MINREFWL        = 4
-    integer, parameter :: DEPTHDEF_MAX             = 4
+!
+! Contains parameters and types related to dredging and dumping facilities
+!
+use precision
+use handles
+
+implicit none
+
+public dredtype
+public dumptype
+!
+! Definition of depth enumeration
+!
+integer, parameter :: DEPTHDEF_REFPLANE        = 1
+integer, parameter :: DEPTHDEF_WATERLVL        = 2
+integer, parameter :: DEPTHDEF_MAXREFWL        = 3
+integer, parameter :: DEPTHDEF_MINREFWL        = 4
+integer, parameter :: DEPTHDEF_MAX             = 4
 !
 ! Dredge type enumeration
 !
-    integer, parameter :: DREDGETYPE_DREDGING      = 1
-    integer, parameter :: DREDGETYPE_SANDMINING    = 2
-    integer, parameter :: DREDGETYPE_NOURISHMENT   = 3
+integer, parameter :: DREDGETYPE_DREDGING      = 1
+integer, parameter :: DREDGETYPE_SANDMINING    = 2
+integer, parameter :: DREDGETYPE_NOURISHMENT   = 3
 !
 ! Dredge trigger type enumeration
 !
-    integer, parameter :: DREDGETRIG_POINTBYPOINT  = 1
-    integer, parameter :: DREDGETRIG_ALLBYONE      = 2
-    integer, parameter :: DREDGETRIG_ALLBYAVG      = 3
+integer, parameter :: DREDGETRIG_POINTBYPOINT  = 1
+integer, parameter :: DREDGETRIG_ALLBYONE      = 2
+integer, parameter :: DREDGETRIG_ALLBYAVG      = 3
 !
 ! Dredge distribution enumeration
 !
-    integer, parameter :: DREDGEDISTR_UNIFORM      = 1
-    integer, parameter :: DREDGEDISTR_HIGHEST      = 2
-    integer, parameter :: DREDGEDISTR_PROPORTIONAL = 3
-    integer, parameter :: DREDGEDISTR_HIGHFIRST    = 4
-    integer, parameter :: DREDGEDISTR_LOWFIRST     = 5
-    integer, parameter :: DREDGEDISTR_SHALLOWEST   = 6
-    integer, parameter :: DREDGEDISTR_SHALLOWFIRST = 7
-    integer, parameter :: DREDGEDISTR_DEEPFIRST    = 8
-    integer, parameter :: DREDGEDISTR_MAX          = 8
+integer, parameter :: DREDGEDISTR_UNIFORM      = 1
+integer, parameter :: DREDGEDISTR_HIGHEST      = 2
+integer, parameter :: DREDGEDISTR_PROPORTIONAL = 3
+integer, parameter :: DREDGEDISTR_HIGHFIRST    = 4
+integer, parameter :: DREDGEDISTR_LOWFIRST     = 5
+integer, parameter :: DREDGEDISTR_SHALLOWEST   = 6
+integer, parameter :: DREDGEDISTR_SHALLOWFIRST = 7
+integer, parameter :: DREDGEDISTR_DEEPFIRST    = 8
+integer, parameter :: DREDGEDISTR_MAX          = 8
 !
 ! Dredge to dump distribution enumeration
 !
-    integer, parameter :: DR2DUDISTR_PERCENTAGE    = 1
-    integer, parameter :: DR2DUDISTR_SEQUENTIAL    = 2
-    integer, parameter :: DR2DUDISTR_PROPORTIONAL  = 3
-    integer, parameter :: DR2DUDISTR_MAX           = 3
+integer, parameter :: DR2DUDISTR_PERCENTAGE    = 1
+integer, parameter :: DR2DUDISTR_SEQUENTIAL    = 2
+integer, parameter :: DR2DUDISTR_PROPORTIONAL  = 3
+integer, parameter :: DR2DUDISTR_MAX           = 3
 !
 ! Dump distribution enumeration
 !
-    integer, parameter :: DUMPDISTR_UNIFORM        = 1
-    integer, parameter :: DUMPDISTR_LOWEST         = 2
-    integer, parameter :: DUMPDISTR_DEEPEST        = 3
-    integer, parameter :: DUMPDISTR_PROPORTIONAL   = 4
-    integer, parameter :: DUMPDISTR_MAX            = 4 
+integer, parameter :: DUMPDISTR_UNIFORM        = 1
+integer, parameter :: DUMPDISTR_LOWEST         = 2
+integer, parameter :: DUMPDISTR_DEEPEST        = 3
+integer, parameter :: DUMPDISTR_PROPORTIONAL   = 4
+integer, parameter :: DUMPDISTR_MAX            = 4 
 !
 ! Location check whether cell is included in dredge/dump activity
 !
-    integer, parameter :: CHKLOC_ALLCORNER         = 1
-    integer, parameter :: CHKLOC_CENTRE            = 2
-    integer, parameter :: CHKLOC_ANYCORNER         = 3
+integer, parameter :: CHKLOC_ALLCORNER         = 1
+integer, parameter :: CHKLOC_CENTRE            = 2
+integer, parameter :: CHKLOC_ANYCORNER         = 3
 !
 ! collection of dredging area related parameters
 !
@@ -87,7 +101,7 @@ type dredtype
     real(fp)                                :: maxvolrate      ! maximum dredging volume rate
     real(fp)                                :: clearance       ! extra depth when dredging
     real(fp)                                :: plough_effic    ! efficiency of dune ploughing in reducing dune height
-    real(fp), dimension(2)                  :: dredgeloc       ! dredgelocation (x,y)
+    real(fp)      , dimension(2)            :: dredgeloc       ! dredgelocation (x,y)
     real(fp)                                :: totalvolsupl    ! total volume to be nourished.
     real(fp)      , dimension(:)  , pointer :: area            ! (npnt)   grid cell area at nm point (gsqs)
     real(fp)      , dimension(:)  , pointer :: hdune           ! (npnt)   dune height at nm point
@@ -184,9 +198,12 @@ type dumptype
     character( 80)                          :: name            ! name identifying dredge area
 end type dumptype
 
-type sv_dredge
+type dredge_type
     type (handletype)                       :: tseriesfile     ! table  containing dredging time-series
     !
+    real(fp)                                :: tim_accum       ! total time over which tim_dredged and tim_ploughed have been accumulated
+    real(fp)      , dimension(:)  , pointer :: tim_dredged     ! (nadred) time during which area was dredged
+    real(fp)      , dimension(:)  , pointer :: tim_ploughed    ! (nadred) time during which area was ploughed
     real(fp)      , dimension(:,:), pointer :: link_percentage ! (nalink,lsedtot) distribution of dredged material
                                                                !          from dredge to dump areas
     real(fp)      , dimension(:)  , pointer :: link_distance   ! (nalink) distance from dredge to dump area
@@ -214,12 +231,9 @@ type sv_dredge
     integer                                 :: nadump          ! number of dump areas
     integer                                 :: nasupl          ! number of nourishment areas
     integer                                 :: nalink          ! number of links
-    integer                                 :: ntimaccum       ! number of (half) timesteps over which ndredge and nplough has been accumulated
     !
     integer       , dimension(:,:), pointer :: link_def        ! (nalink,2) actual transports from dredge (1st column)
                                                                !            to dump (2nd column) areas
-    integer       , dimension(:)  , pointer :: ndredged        ! (nadred) number of (half) timesteps dredged
-    integer       , dimension(:)  , pointer :: nploughed       ! (nadred) number of (half) timesteps ploughed
     !
     logical                                 :: tsmortime       ! T: time scale of time-series is morphological time
     logical                                 :: firstdredge     ! T: first time in computational dredge routine
@@ -229,4 +243,140 @@ type sv_dredge
     character( 80), dimension(:)  , pointer :: dump_areas      ! (nadump) names identifying dump   areas
     type (dredtype), dimension(:) , pointer :: dredge_prop     ! (nadred) dredge area properties
     type (dumptype), dimension(:) , pointer :: dump_prop       ! (nadump) dump area properties
-end type sv_dredge
+end type dredge_type
+
+contains
+
+subroutine initdredge(dredgepar)
+!!--declarations----------------------------------------------------------------
+    use precision
+    !
+    implicit none
+    !
+    type(dredge_type) :: dredgepar
+    !
+    integer :: istat
+!
+!! executable statements -------------------------------------------------------
+!
+    nullify(dredgepar%link_percentage)
+    nullify(dredgepar%link_distance)
+    nullify(dredgepar%link_sum)
+    nullify(dredgepar%dzdred)
+    nullify(dredgepar%refplane)
+    nullify(dredgepar%voldred)
+    nullify(dredgepar%totvoldred)
+    nullify(dredgepar%globalareadred)
+    nullify(dredgepar%voldune)
+    nullify(dredgepar%percsupl)
+    nullify(dredgepar%totvoldump)
+    nullify(dredgepar%localareadump)
+    nullify(dredgepar%globalareadump)
+    nullify(dredgepar%globaldumpcap)
+    nullify(dredgepar%voldump)
+    !
+    dredgepar%dredge_domainnr = 0
+    dredgepar%dredge_ndomains = 0
+    dredgepar%nadred          = 0
+    dredgepar%nadump          = 0
+    dredgepar%nasupl          = 0
+    dredgepar%nalink          = 0
+    dredgepar%tim_accum       = 0.0_fp
+    !
+    nullify(dredgepar%link_def)
+    nullify(dredgepar%tim_dredged)
+    nullify(dredgepar%tim_ploughed)
+    !
+    dredgepar%tsmortime       = .false.
+    dredgepar%firstdredge     = .true.
+    !
+    nullify(dredgepar%dredge_areas)
+    nullify(dredgepar%dump_areas)
+    dredgepar%dredgefile      = ' '
+    !
+    nullify(dredgepar%dredge_prop)
+    nullify(dredgepar%dump_prop)
+end subroutine initdredge
+
+
+subroutine clrdredge(istat, dredgepar)
+!!--declarations----------------------------------------------------------------
+    use precision
+    use table_handles, only: cleartable
+    !
+    implicit none
+    !
+    type(dredge_type) :: dredgepar
+!
+! Global variables
+!
+    integer,intent(out) :: istat
+!
+! Local variables
+!
+    integer :: i
+!
+!! executable statements -------------------------------------------------------
+!
+    if (associated(dredgepar%link_percentage)) deallocate (dredgepar%link_percentage, STAT = istat)
+    if (associated(dredgepar%link_distance))   deallocate (dredgepar%link_distance  , STAT = istat)
+    if (associated(dredgepar%link_sum))        deallocate (dredgepar%link_sum       , STAT = istat)
+    if (associated(dredgepar%dzdred))          deallocate (dredgepar%dzdred         , STAT = istat)
+    if (associated(dredgepar%refplane))        deallocate (dredgepar%refplane       , STAT = istat)
+    if (associated(dredgepar%voldred))         deallocate (dredgepar%voldred        , STAT = istat)
+    if (associated(dredgepar%totvoldred))      deallocate (dredgepar%totvoldred     , STAT = istat)
+    if (associated(dredgepar%globalareadred))  deallocate (dredgepar%globalareadred , STAT = istat)
+    if (associated(dredgepar%voldune))         deallocate (dredgepar%voldune        , STAT = istat)
+    if (associated(dredgepar%percsupl))        deallocate (dredgepar%percsupl       , STAT = istat)
+    if (associated(dredgepar%totvoldump))      deallocate (dredgepar%totvoldump     , STAT = istat)
+    if (associated(dredgepar%localareadump))   deallocate (dredgepar%localareadump  , STAT = istat)
+    if (associated(dredgepar%globalareadump))  deallocate (dredgepar%globalareadump , STAT = istat)
+    if (associated(dredgepar%globaldumpcap))   deallocate (dredgepar%globaldumpcap  , STAT = istat)
+    if (associated(dredgepar%voldump))         deallocate (dredgepar%voldump        , STAT = istat)
+    !
+    if (associated(dredgepar%link_def))        deallocate (dredgepar%link_def       , STAT = istat)
+    if (associated(dredgepar%tim_dredged))     deallocate (dredgepar%tim_dredged    , STAT = istat)
+    if (associated(dredgepar%tim_ploughed))    deallocate (dredgepar%tim_ploughed   , STAT = istat)
+    !
+    if (associated(dredgepar%dredge_areas))    deallocate (dredgepar%dredge_areas   , STAT = istat)
+    if (associated(dredgepar%dump_areas))      deallocate (dredgepar%dump_areas     , STAT = istat)
+    !
+    if (associated(dredgepar%dredge_prop)) then
+       do i = 1, dredgepar%nadred
+          if (associated(dredgepar%dredge_prop(i)%nm))             deallocate (dredgepar%dredge_prop(i)%nm                  , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%nmglob))         deallocate (dredgepar%dredge_prop(i)%nmglob              , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%inm))            deallocate (dredgepar%dredge_prop(i)%inm                 , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%area))           deallocate (dredgepar%dredge_prop(i)%area                , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%hdune))          deallocate (dredgepar%dredge_prop(i)%hdune               , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%dz_dredge))      deallocate (dredgepar%dredge_prop(i)%dz_dredge           , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%dunetoplevel))   deallocate (dredgepar%dredge_prop(i)%dunetoplevel        , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%triggerlevel))   deallocate (dredgepar%dredge_prop(i)%triggerlevel        , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%bedlevel))       deallocate (dredgepar%dredge_prop(i)%bedlevel            , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%troughlevel))    deallocate (dredgepar%dredge_prop(i)%troughlevel         , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%sedimentdepth))  deallocate (dredgepar%dredge_prop(i)%sedimentdepth       , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%sortvar))        deallocate (dredgepar%dredge_prop(i)%sortvar             , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%triggered))      deallocate (dredgepar%dredge_prop(i)%triggered           , STAT = istat)
+          if (associated(dredgepar%dredge_prop(i)%reflevel))       deallocate (dredgepar%dredge_prop(i)%reflevel            , STAT = istat)
+       enddo
+       deallocate (dredgepar%dredge_prop    , STAT = istat)
+    endif
+    !
+    if (associated(dredgepar%dump_prop)) then
+       do i = 1, dredgepar%nadump
+          if (associated(dredgepar%dump_prop(i)%nm))               deallocate (dredgepar%dump_prop(i)%nm                    , STAT = istat)
+          if (associated(dredgepar%dump_prop(i)%nmglob))           deallocate (dredgepar%dump_prop(i)%nmglob                , STAT = istat)
+          if (associated(dredgepar%dump_prop(i)%inm))              deallocate (dredgepar%dump_prop(i)%inm                   , STAT = istat)
+          if (associated(dredgepar%dump_prop(i)%area))             deallocate (dredgepar%dump_prop(i)%area                  , STAT = istat)
+          if (associated(dredgepar%dump_prop(i)%hdune))            deallocate (dredgepar%dump_prop(i)%hdune                 , STAT = istat)
+          if (associated(dredgepar%dump_prop(i)%bedlevel))         deallocate (dredgepar%dump_prop(i)%bedlevel              , STAT = istat)
+          if (associated(dredgepar%dump_prop(i)%dz_dump))          deallocate (dredgepar%dump_prop(i)%dz_dump               , STAT = istat)
+          if (associated(dredgepar%dump_prop(i)%sortvar))          deallocate (dredgepar%dump_prop(i)%sortvar               , STAT = istat)
+          if (associated(dredgepar%dump_prop(i)%reflevel))         deallocate (dredgepar%dump_prop(i)%reflevel              , STAT = istat)
+       enddo
+       deallocate (dredgepar%dump_prop      , STAT = istat)
+    endif
+    !
+    call cleartable(dredgepar%tseriesfile)
+end subroutine clrdredge
+
+end module dredge_data_module

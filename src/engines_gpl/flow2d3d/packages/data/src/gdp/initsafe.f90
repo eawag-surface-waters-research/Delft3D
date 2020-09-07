@@ -39,6 +39,7 @@ subroutine initsafe(gdp)
     use message_module
     use bedcomposition_module
     use morphology_data_module
+    use dredge_data_module, only: initdredge
     !
     use globaldata
     !

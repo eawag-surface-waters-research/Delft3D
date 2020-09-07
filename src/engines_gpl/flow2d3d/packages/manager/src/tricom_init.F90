@@ -1056,9 +1056,7 @@ subroutine tricom_init(olv_handle, gdp)
        !
        ! Read dredge input and initialize related data
        !
-       call rddredge(r(xcor)   ,r(ycor)   ,r(xz)     ,r(yz)     ,r(gsqs)   , &
-                   & mmax      ,nmax      ,nmaxus    ,nmmax     ,lsedtot   , &
-                   & i(kcs)    ,gdp       )
+       call rddredge_d3d4(r(gsqs)   ,gdp       )
     endif
     if (multi) then
        !
@@ -1206,7 +1204,7 @@ subroutine tricom_init(olv_handle, gdp)
     nhystp = nxtstp(d3dflow_init, gdp)
     call timer_stop(timer_d3dflowinit, gdp)
     !
-    if (dredge) call dredge_initialize(gdp) ! Initialize dredging data across partitions
+    if (dredge) call dredge_initialize_d3d4(gdp) ! Initialize dredging data across partitions
     !
     ! related vseminit is in tricom.f90, at label 9997
     !

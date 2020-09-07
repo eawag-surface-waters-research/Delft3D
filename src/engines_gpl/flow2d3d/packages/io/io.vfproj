@@ -80,14 +80,13 @@
 		<File RelativePath="src\input\inimorlyr.f90"/>
 		<File RelativePath="src\input\morbndfill.f90"/>
 		<File RelativePath="src\input\numcmp.f90"/>
-		<File RelativePath="src\input\polygon_module.f90"/>
 		<File RelativePath="src\input\rdarray.f90"/>
 		<File RelativePath="src\input\rdbcg.f90"/>
 		<File RelativePath="src\input\rdbedformpar.f90"/>
 		<File RelativePath="src\input\rdbndd.f90"/>
 		<File RelativePath="src\input\rdcul.f90"/>
 		<File RelativePath="src\input\rddept.f90"/>
-		<File RelativePath="src\input\rddredge.f90"/>
+		<File RelativePath="src\input\rddredge_d3d4.f90"/>
 		<File RelativePath="src\input\rdfcio.f90"/>
 		<File RelativePath="src\input\rdfour.f90"/>
 		<File RelativePath="src\input\rdgrid.f90"/>

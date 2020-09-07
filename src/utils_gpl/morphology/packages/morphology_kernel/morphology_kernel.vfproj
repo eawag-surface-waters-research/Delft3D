@@ -56,6 +56,8 @@
 		<File RelativePath=".\src\compdiam.f90"/>
 		<File RelativePath=".\src\comphidexp.f90"/>
 		<File RelativePath=".\src\compsandfrac.f90"/>
+		<File RelativePath=".\src\dredge.f90"/>
+		<File RelativePath=".\src\dredge_initialize.f90"/>
 		<File RelativePath=".\src\eqsettle.f90"/>
 		<File RelativePath=".\src\eqtran.f90"/>
 		<File RelativePath=".\src\erosilt.f90"/>
@@ -78,6 +80,7 @@
 		<File RelativePath=".\src\santoss_rrr12.f90"/>
 		<File RelativePath=".\src\santoss_sfltd99.f90"/>
 		<File RelativePath=".\src\shld.f90"/>
+		<File RelativePath=".\src\sortindices.f90"/>
 		<File RelativePath=".\src\soursin_2d.f90"/>
 		<File RelativePath=".\src\soursin_3d.f90"/>
 		<File RelativePath=".\src\termfy.f90"/>

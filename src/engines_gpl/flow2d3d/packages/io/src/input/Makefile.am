@@ -42,7 +42,6 @@ libIOInput_la_SOURCES = \
          ciofil.f90 \
          ck_dpopt.f90 \
          cmpnum.f90 \
-         polygon_module.f90 \
          dimbch.f90 \
          dimbnd.f90 \
          dimbub.f90 \

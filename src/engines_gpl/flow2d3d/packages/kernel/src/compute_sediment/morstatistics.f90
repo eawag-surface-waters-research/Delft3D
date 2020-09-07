@@ -42,12 +42,10 @@ end interface morstats
 
 contains
 
-subroutine morstats_simple(gdp, dbodsd, nmlb, nmub, lsedtot)
+subroutine morstats_simple(gderosed, gdmorpar, dbodsd, nmlb, nmub, lsedtot)
     use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
 !
 ! Global variables
 !
@@ -55,20 +53,20 @@ subroutine morstats_simple(gdp, dbodsd, nmlb, nmub, lsedtot)
     integer                                , intent(in)  :: nmub
     integer                                , intent(in)  :: lsedtot
     real(fp), dimension(lsedtot, nmlb:nmub), intent(in)  :: dbodsd !  change in sediment composition, units : kg/m2
+    type (sedtra_type)                     , target      :: gderosed
+    type (morpar_type)                     , intent(in)  :: gdmorpar
 !
 ! Local variables
 !
-    type (moroutputtype)                , pointer :: moroutput  ! structure containing morphology output options
     real(fp), dimension(:,:)            , pointer :: statqnt
     integer                                       :: lsed
     integer                                       :: nm
 !
 !! executable statements -------------------------------------------------------
 !
-    moroutput => gdp%gdmorpar%moroutput
-    statqnt   => gdp%gderosed%statqnt
+    statqnt   => gderosed%statqnt
     !
-    if (moroutput%nstatqnt > 0) then
+    if (gdmorpar%moroutput%nstatqnt > 0) then
        do nm = nmlb, nmub
            do lsed = 1, lsedtot
                statqnt(nm,1+lsed) = statqnt(nm,1+lsed) + dbodsd(lsed, nm)

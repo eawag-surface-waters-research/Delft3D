@@ -49,6 +49,7 @@ module globaldata
     use message_module
     !use ec_typedefs
     use bedcomposition_module, only:bedcomp_data
+    use dredge_data_module, only: dredge_type
     use morphology_data_module, only:morpar_type, sedpar_type, moroutputtype, &
                               & mornumericstype, bedbndtype, cmpbndtype, &
                               & trapar_type, sedtra_type
@@ -113,7 +114,6 @@ module globaldata
     !
     include 'cline.igs'
     include 'culver.igs'
-    include 'dredge.igs'
     include 'f0isf1.igs'
     include 'incbc.igs'
     include 'incbcc.igs'
@@ -121,7 +121,6 @@ module globaldata
     include 'inibcc.igs'
     include 'inibct.igs'
     include 'inidis.igs'
-    include 'ipon.igs'
     include 'postpr.igs'
     include 'restart.igs'
     include 'rtc.igs'
@@ -203,7 +202,7 @@ module globaldata
        !
        type (sv_cline)    , pointer :: gdcline
        type (sv_culver)   , pointer :: gdculver
-       type (sv_dredge)   , pointer :: gddredge
+       type (dredge_type) , pointer :: gddredge
        type (trapar_type) , pointer :: gdtrapar
        type (sedtra_type) , pointer :: gderosed
        type (sv_f0isf1)   , pointer :: gdf0isf1

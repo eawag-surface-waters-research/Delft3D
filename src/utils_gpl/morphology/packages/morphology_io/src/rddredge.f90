@@ -1,6 +1,4 @@
-subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
-                  & mmax      ,nmax      ,nmaxus    ,nmmax     ,lsedtot   , &
-                  & kcs       ,gdp       )
+module m_rddredge
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -29,28 +27,37 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-!!--description-----------------------------------------------------------------
+!-------------------------------------------------------------------------------
+use m_depfil_stm
+implicit none
+
+private
+
 !
-! Reads Dredge and Dump input file.
-! Allocates related arrays.
+! functions and subroutines
 !
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
+public rddredge
+
+contains
+
+!> Reads Dredge and Dump input file.
+!! Allocates related arrays.
+subroutine rddredge(dredgepar, dad_ptr, sedpar, lfbedfrm, morpar, lundia, julrefdate, &
+                  & cell_area, griddim, domain_name, nmlb, nmub, error)
     use precision
     use mathconsts
     use properties
-    use flow_tables
+    use table_handles
     use polygon_module
+    use m_depfil_stm, only:  depfil_stm
+    use message_module
     use m_alloc
-    !
-    use globaldata
+    use morphology_data_module, only: sedpar_type, morpar_type
+    use dredge_data_module
     !
     implicit none
     !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
+    ! The following list of pointer parameters is used to point inside the data structures
     !
     type (handletype)                , pointer :: tseriesfile
     real(fp)      , dimension(:,:)   , pointer :: link_percentage
@@ -73,34 +80,36 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     integer                          , pointer :: nasupl
     integer                          , pointer :: nalink
     integer       , dimension(:,:)   , pointer :: link_def
-    integer       , dimension(:)     , pointer :: ndredged
-    integer       , dimension(:)     , pointer :: nploughed
+    real(fp)      , dimension(:)     , pointer :: tim_dredged
+    real(fp)      , dimension(:)     , pointer :: tim_ploughed
     logical                          , pointer :: tsmortime
     character(256)                   , pointer :: dredgefile
     character( 80), dimension(:)     , pointer :: dredge_areas
     character( 80), dimension(:)     , pointer :: dump_areas
     type (dredtype), dimension(:)    , pointer :: dredge_prop
     type (dumptype), dimension(:)    , pointer :: dump_prop
-    integer                          , pointer :: lundia
     character(20) , dimension(:)     , pointer :: namsed
-    real(fp)                         , pointer :: dt
-    integer                          , pointer :: julday
-    logical                          , pointer :: lfbedfrm
     logical                          , pointer :: cmpupd
+    real(fp)      , dimension(:)     , pointer :: xnode
+    real(fp)      , dimension(:)     , pointer :: xz
+    real(fp)      , dimension(:)     , pointer :: ynode
+    real(fp)      , dimension(:)     , pointer :: yz
 !
 ! Global variables
 !
-    integer                                     , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
-    integer                                     , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
-    integer                                     , intent(in)  :: nmmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                     , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
-    integer                                     , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: xcor    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: ycor    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: xz      !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: yz      !  Description and declaration in esm_alloc_real.f90
+    type(dredge_type)                 , target                :: dredgepar   ! data structure containing dredge and dump parsed settings
+    type(tree_data)                             , pointer     :: dad_ptr     ! data structure containing records of dredge and dump data file
+    type(sedpar_type)                           , intent(in)  :: sedpar      ! data structure containing sediment characteristics
+    logical                                     , intent(in)  :: lfbedfrm    ! flag indicating whether bedforms are available
+    type(morpar_type)                 , target  , intent(in)  :: morpar      ! data structure containing morphological settings
+    integer                                                   :: lundia      ! file handle of diagnostic output text file
+    integer                                     , intent(in)  :: julrefdate  ! reference date
+    type(griddimtype)                           , intent(in)  :: griddim     ! data structure containing information about the model grid
+    character(len=*)                            , intent(in)  :: domain_name ! name of current domain
+    integer                                     , intent(in)  :: nmlb        ! lower bound of the spaital index
+    integer                                     , intent(in)  :: nmub        ! upper bound of the spatial index
+    real(fp), dimension(nmlb:nmub)              , intent(in)  :: cell_area   ! cell area
+    logical                                     , intent(out) :: error       ! error return flag
 !
 ! Local variables
 !
@@ -129,13 +138,13 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     integer                                 :: j
     integer                                 :: j2
     integer                                 :: lsed
+    integer                                 :: lsedtot
     integer                                 :: n
     integer                                 :: nglob
     integer                                 :: m
     integer                                 :: mglob
     integer                                 :: nm
     integer                                 :: nmglob
-    integer                                 :: nmaxddb
     integer                                 :: nmcor
     integer                                 :: noutletlinks
     integer                                 :: npnt
@@ -167,7 +176,6 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     real(sp)                                :: versionnr
     real(sp)                                :: versionnrinput
     logical                                 :: ex
-    logical                                 :: error
     logical, external                       :: stringsequalinsens
     logical                                 :: success
     logical                                 :: unique
@@ -184,13 +192,13 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     character(80)                           :: parname
     character(80)                           :: dredgetype
     character(20)                           :: sedname
+    character(256)                          :: errmsg
     character(1024)                         :: message
     character(20)                           :: areatp
     character(256)                          :: filename
     character(256)                          :: polygonfile
     character(256)                          :: refplanefile
     character(80)                           :: stringval
-    type(tree_data), pointer                :: dad_ptr
     type(tree_data), pointer                :: dredge_area_ptr
     type(tree_data), pointer                :: dump_area_ptr
     type(tree_data), pointer                :: link_ptr
@@ -201,31 +209,35 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    tseriesfile       => gdp%gddredge%tseriesfile
-    nadred            => gdp%gddredge%nadred
-    nadump            => gdp%gddredge%nadump
-    nasupl            => gdp%gddredge%nasupl
-    nalink            => gdp%gddredge%nalink
-    tsmortime         => gdp%gddredge%tsmortime
-    dredgefile        => gdp%gddredge%dredgefile
-    lundia            => gdp%gdinout%lundia
-    namsed            => gdp%gdsedpar%namsed
-    dt                => gdp%gdexttim%dt
-    julday            => gdp%gdinttim%julday
-    lfbedfrm          => gdp%gdbedformpar%lfbedfrm
-    cmpupd            => gdp%gdmorpar%cmpupd
+    tseriesfile       => dredgepar%tseriesfile
+    nadred            => dredgepar%nadred
+    nadump            => dredgepar%nadump
+    nasupl            => dredgepar%nasupl
+    nalink            => dredgepar%nalink
+    tsmortime         => dredgepar%tsmortime
+    dredgefile        => dredgepar%dredgefile
+    namsed            => sedpar%namsed
+    cmpupd            => morpar%cmpupd
+    xnode             => griddim%xnode
+    xz                => griddim%xz
+    ynode             => griddim%ynode
+    yz                => griddim%yz
+    !
+    lsedtot = size(sedpar%rhosol,1)
+    error = .false.
     !
     if (.not.cmpupd) then
-       call prterr(lundia, 'P004', 'Dredging and dumping not supported when bed composition updating is disabled')
-       call d3stop(1, gdp)
+       errmsg = 'Dredging and dumping not supported when bed composition updating is disabled.'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     !
     rmissval       = -9.99E9_fp
-    nmaxddb        = nmax + 2*gdp%d%ddbound
     !
     versionnr      = 1.02_sp
     loctemp        = 0.0_fp
-    call tree_create_node( gdp%input_tree, 'Dredge and Dump', dad_ptr )
+    !
     call tree_put_data( dad_ptr, transfer(trim(dredgefile),node_value), 'STRING' )
     !
     ! Put dad-file in input tree
@@ -234,13 +246,14 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     if (istat /= 0) then
        select case (istat)
        case(1)
-          call prterr(lundia, 'G004', dredgefile)
+          call write_error(FILE_NOT_FOUND//trim(dredgefile), unit=lundia)
        case(3)
-          call prterr(lundia, 'G006', dredgefile)
+          call write_error(PREMATURE_EOF//trim(dredgefile), unit=lundia)
        case default
-          call prterr(lundia, 'G007', dredgefile)
+          call write_error(FILE_READ_ERROR//trim(dredgefile), unit=lundia)
        endselect
-       call d3stop(1, gdp)
+       error = .true.
+       return
     endif
     !
     ! Put polygon file in input tree
@@ -269,17 +282,20 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        if (istat /= 0) then
           select case (istat)
           case(1)
-             call prterr(lundia, 'G004', polygonfile)
+             call write_error(FILE_NOT_FOUND//trim(polygonfile), unit=lundia)
           case(3)
-             call prterr(lundia, 'G006', polygonfile)
+             call write_error(PREMATURE_EOF//trim(polygonfile), unit=lundia)
           case default
-             call prterr(lundia, 'G007', polygonfile)
+             call write_error(FILE_READ_ERROR//trim(polygonfile), unit=lundia)
           endselect
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
-     else
-       call prterr(lundia, 'P004', 'Unable to find keyword "Polygon File" in dad-file')
-       call d3stop(1, gdp)
+    else
+       errmsg = 'Unable to find keyword "PolygonFile" in *.dad file.'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     !
     ! Check version number of dredge input file
@@ -288,9 +304,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     call prop_get_real(dad_ptr, 'DredgeFileInformation', 'FileVersion', versionnrinput)
     !
     if (comparereal(versionnrinput, versionnr) == -1) then
-       write (message,'(a,f6.2,a)') 'Dredge input file must have version number ',versionnr, ' or higher'
-       call prterr(lundia, 'U021', trim(message))
-       call d3stop(1, gdp)
+       write (errmsg,'(a,f6.2,a)') 'Dredge input file must have version number ',versionnr, ' or higher.'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     !
     def_depthdef      = DEPTHDEF_REFPLANE
@@ -313,15 +330,17 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     !
     ! Allocate array for refplane
     !
-    allocate (gdp%gddredge%refplane (gdp%d%nmlb:gdp%d%nmub), stat = istat)
+    allocate (dredgepar%refplane (nmlb:nmub), stat = istat)
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
-       call d3stop(1, gdp)
+       errmsg = 'ERROR rddredge: memory alloc error'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     !
     ! update local pointers
     !
-    refplane          => gdp%gddredge%refplane
+    refplane          => dredgepar%refplane
     !
     refplane    = 0.0_fp
     refplane(1) = rmissval
@@ -334,16 +353,25 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     if (filename == ' ') filename = 'dummyname'
     inquire (file = trim(filename), exist = ex)
     if (ex) then
-       call flw_readtable(tseriesfile, trim(filename), julday,gdp)
+       call readtable(tseriesfile, trim(filename), julrefdate, errmsg)
+       if (.not. (validtable(tseriesfile))) then
+          call write_error(errmsg, unit=lundia)
+          error = .true.
+          return
+       endif
     elseif (filename /= 'dummyname') then
-       call prterr(lundia, 'U021', 'Missing time series file "'//trim(filename)//'"')
-       call d3stop(1, gdp)
+       errmsg =  'rddredge: Missing time series file "'//trim(filename)//'"'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     !
     call prop_get(dad_ptr, 'General', 'DepthDef', def_depthdef)
     if (def_depthdef < 1 .or. def_depthdef > DEPTHDEF_MAX) then
-       call prterr(lundia, 'U021', 'Invalid default depth definition')
-       call d3stop(1, gdp)
+       errmsg = 'rddredge: Invalid default depth definition'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     call prop_get_logical(dad_ptr, 'General', 'TS_MorTimeScale', tsmortime)
     call prop_get(dad_ptr, 'General', 'DredgeDepth', def_dredge_depth)
@@ -351,47 +379,59 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     call prop_get(dad_ptr, 'General', 'MaxVolRate' , def_maxvolrate)
     call prop_get_integer(dad_ptr, 'General', 'InPolygon', def_chkloc)
     if (def_chkloc < 1 .or. def_chkloc > 3) then
-       call prterr(lundia, 'U021', 'Invalid default for in polygon check')
-       call d3stop(1, gdp)
+       errmsg = 'rddredge: Invalid default for in polygon check'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     call prop_get_integer(dad_ptr, 'General', 'DredgeDistr', def_dredgedistr)
     if (def_dredgedistr < 1 .or. def_dredgedistr > DREDGEDISTR_MAX) then
-       call prterr(lundia, 'U021', 'Invalid default dredge distribution')
-       call d3stop(1, gdp)
+       errmsg = 'rddredge: Invalid default dredge distribution'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
+    !
     call prop_get_logical(dad_ptr, 'General', 'UseDunes'        , def_use_dunes)
     if (def_use_dunes .and. .not. lfbedfrm) then
-       call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
-       call d3stop(1, gdp)
+       errmsg = 'rddredge: UseDunes - Dunes can only be used when modelled.'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     call prop_get(dad_ptr, 'General', 'AlphaDuneHeight', def_alpha_dh)
     call prop_get(dad_ptr, 'General', 'PloughEfficiency', def_plough_effic)
     call prop_get_integer(dad_ptr, 'General', 'DumpDistr', def_dumpdistr)
     if (def_dumpdistr < 1 .or. def_dumpdistr > DUMPDISTR_MAX) then
-       call prterr(lundia, 'U021', 'Invalid default dump distribution')
-       call d3stop(1, gdp)
+       errmsg = 'rddredge: Invalid default dump distribution'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     call prop_get_integer(dad_ptr, 'General', 'DistrOverDump', def_dr2dudistr)
     if (def_dr2dudistr < 1 .or. def_dr2dudistr > DR2DUDISTR_MAX) then
-       call prterr(lundia, 'U021', 'Invalid default distribution over dump areas')
-       call d3stop(1, gdp)
+       errmsg = 'rddredge: Invalid default distribution over dump areas'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     !
     def_active    = 0
     def_active(1) = -999
     if (validtable(tseriesfile)) then
-       call flw_gettable(tseriesfile, 'General'    , 'active', def_active(1), &
-                       & def_active(2), def_active(3), 0, gdp)
+       call gettable(tseriesfile, 'General'    , 'active', def_active(1), &
+                       & def_active(2), def_active(3), 0, errmsg)
        if (def_active(3) > 1) then
           write(message,'(i3,3a)') def_active(3), &
                                  & ' active parameters specified in file "', &
                                  & trim(getfilename(tseriesfile)), '" instead of 1.'
-          call prterr(lundia, 'U021', message)
-          call d3stop(1, gdp)
+          call write_error(errmsg, unit=lundia)
+          error = .true.
+          return
        elseif (def_active(3) == 1) then
-          call flw_checktable(tseriesfile   , def_active(1) , &
+          call checktable(tseriesfile   , def_active(1) , &
                             & def_active(2) , def_active(3) , &
-                            & CHKTAB_LOGICAL, gdp           )
+                            & CHKTAB_LOGICAL, errmsg)
           def_active(4) = 1
        endif
     endif
@@ -412,14 +452,14 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     !
     sfound = .false.
     ex     = .false.
-    if ( associated(dad_ptr%child_nodes) ) then
+    if ( (domain_name /= '') .and. associated(dad_ptr%child_nodes) ) then
        do i = 1, size(dad_ptr%child_nodes)
           link_ptr => dad_ptr%child_nodes(i)%node_ptr
           if (tree_get_name( link_ptr ) /= 'domain') cycle
           !
           stringval = ''
           call prop_get_string(link_ptr, '*', 'Name', stringval)
-          if (stringval /= gdp%runid) cycle
+          if (stringval /= domain_name) cycle
           !
           ! First assume that 'RefPlane' contains a filename
           ! If the file does not exist, assume that 'RefPlane' contains
@@ -462,9 +502,14 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        !
        fmttmp = 'formatted'
        error  = .false.
-       call depfil(lundia    ,error     ,refplanefile,fmttmp  , &
-                 & refplane  ,1         ,1         ,gdp%griddim)
-       if (error) call d3stop(1, gdp)
+       call depfil_stm(lundia    ,error     ,refplanefile,fmttmp  , &
+                     & refplane  ,1         ,1         ,griddim)
+       if (error) then
+          errmsg = 'ERROR rddredge: Could not read refplane file.'
+          call write_error(errmsg, unit=lundia)
+          error = .true.
+          return
+       endif
     else
        if (.not. sfound) then
           !
@@ -481,9 +526,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
           !
           refplane(1) = 0.0_fp
        endif
-       do nm = 2, nmmax
-          refplane(nm) = refplane(1)
-       enddo
+       refplane(:) = refplane(1)
        write(lundia,'(a,es12.3e3)') '  Reference plane             : ', refplane(1)
     endif
     !
@@ -521,7 +564,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
              unique  = .true.
              call prop_get_string(link_ptr, '*', 'name', name)
              call register_polygon(name   , pol_ptr, nadred, totnpdr, &
-                                 & areatp , unique, gdp    )
+                                 & areatp , unique , lundia)
              if ( associated(link_ptr%child_nodes) ) then
                 areatp = 'dump'
                 unique = .false.
@@ -535,7 +578,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                    if (parname == 'dump') then
                       call prop_get_string(node_ptr, '*', 'dump', name)
                       call register_polygon(name   , pol_ptr, nadump, totnpdu, &
-                                          & areatp , unique, gdp    )
+                                          & areatp , unique , lundia)
                       nalink = nalink + 1
                    endif
                 enddo
@@ -557,7 +600,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                    if (parname == 'dump') then
                       call prop_get_string(link_ptr, '*', 'dump', name)
                       call register_polygon(name   , pol_ptr, nadump, totnpdu, &
-                                          & areatp , unique, gdp    )
+                                          & areatp , unique , lundia)
                       nalink = nalink + 1
                    endif
                 enddo
@@ -572,65 +615,67 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     !
     ! Allocate arrays used during computation
     !
-                  allocate (gdp%gddredge%link_def        (nalink               ,2        ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%ndredged        (nadred+nasupl                  ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%nploughed       (nadred+nasupl                  ), stat = istat)
+                  allocate (dredgepar%link_def        (nalink               ,2        ), stat = istat)
+    if (istat==0) allocate (dredgepar%tim_dredged     (nadred+nasupl                  ), stat = istat)
+    if (istat==0) allocate (dredgepar%tim_ploughed    (nadred+nasupl                  ), stat = istat)
     !
-    if (istat==0) allocate (gdp%gddredge%link_percentage (nalink               ,lsedtot  ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%link_distance   (nalink                         ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%link_sum        (nalink               ,lsedtot  ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%dzdred          (gdp%d%nmlb:gdp%d%nmub          ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%voldred         (nadred+nasupl        ,lsedtot+1), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%totvoldred      (nadred+nasupl                  ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%globalareadred  (nadred+nasupl                  ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%voldune         (gdp%d%nmlb:gdp%d%nmub          ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%percsupl        (nasupl               ,lsedtot  ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%totvoldump      (nadump                         ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%localareadump   (nadump                         ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%globalareadump  (nadump                         ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%globaldumpcap   (nadump                         ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%voldump         (nadump               ,lsedtot  ), stat = istat)
+    if (istat==0) allocate (dredgepar%link_percentage (nalink               ,lsedtot  ), stat = istat)
+    if (istat==0) allocate (dredgepar%link_distance   (nalink                         ), stat = istat)
+    if (istat==0) allocate (dredgepar%link_sum        (nalink               ,lsedtot  ), stat = istat)
+    if (istat==0) allocate (dredgepar%dzdred          (nmlb:nmub                      ), stat = istat)
+    if (istat==0) allocate (dredgepar%voldred         (nadred+nasupl        ,lsedtot+1), stat = istat)
+    if (istat==0) allocate (dredgepar%totvoldred      (nadred+nasupl                  ), stat = istat)
+    if (istat==0) allocate (dredgepar%globalareadred  (nadred+nasupl                  ), stat = istat)
+    if (istat==0) allocate (dredgepar%voldune         (nmlb:nmub                      ), stat = istat)
+    if (istat==0) allocate (dredgepar%percsupl        (nasupl               ,lsedtot  ), stat = istat)
+    if (istat==0) allocate (dredgepar%totvoldump      (nadump                         ), stat = istat)
+    if (istat==0) allocate (dredgepar%localareadump   (nadump                         ), stat = istat)
+    if (istat==0) allocate (dredgepar%globalareadump  (nadump                         ), stat = istat)
+    if (istat==0) allocate (dredgepar%globaldumpcap   (nadump                         ), stat = istat)
+    if (istat==0) allocate (dredgepar%voldump         (nadump               ,lsedtot  ), stat = istat)
     !
-    if (istat==0) allocate (gdp%gddredge%dredge_areas    (nadred+nasupl                  ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%dump_areas      (nadump                         ), stat = istat)
+    if (istat==0) allocate (dredgepar%dredge_areas    (nadred+nasupl                  ), stat = istat)
+    if (istat==0) allocate (dredgepar%dump_areas      (nadump                         ), stat = istat)
     !
-    if (istat==0) allocate (gdp%gddredge%dredge_prop     (nadred+nasupl                  ), stat = istat)
-    if (istat==0) allocate (gdp%gddredge%dump_prop       (nadump                         ), stat = istat)
+    if (istat==0) allocate (dredgepar%dredge_prop     (nadred+nasupl                  ), stat = istat)
+    if (istat==0) allocate (dredgepar%dump_prop       (nadump                         ), stat = istat)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
-       call d3stop(1, gdp)
+       errmsg = 'rddredge: memory alloc error'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
     endif
     !
     ! update local pointers
     !
-    link_def          => gdp%gddredge%link_def
-    ndredged          => gdp%gddredge%ndredged
-    nploughed         => gdp%gddredge%nploughed
+    link_def          => dredgepar%link_def
+    tim_dredged       => dredgepar%tim_dredged
+    tim_ploughed      => dredgepar%tim_ploughed
     !
-    link_percentage   => gdp%gddredge%link_percentage
-    link_distance     => gdp%gddredge%link_distance
-    link_sum          => gdp%gddredge%link_sum
-    dzdred            => gdp%gddredge%dzdred
-    voldred           => gdp%gddredge%voldred
-    totvoldred        => gdp%gddredge%totvoldred
-    globalareadred    => gdp%gddredge%globalareadred
-    voldune           => gdp%gddredge%voldune
-    percsupl          => gdp%gddredge%percsupl
-    totvoldump        => gdp%gddredge%totvoldump
-    localareadump     => gdp%gddredge%localareadump
-    globalareadump    => gdp%gddredge%globalareadump
-    globaldumpcap     => gdp%gddredge%globaldumpcap
-    voldump           => gdp%gddredge%voldump
+    link_percentage   => dredgepar%link_percentage
+    link_distance     => dredgepar%link_distance
+    link_sum          => dredgepar%link_sum
+    dzdred            => dredgepar%dzdred
+    voldred           => dredgepar%voldred
+    totvoldred        => dredgepar%totvoldred
+    globalareadred    => dredgepar%globalareadred
+    voldune           => dredgepar%voldune
+    percsupl          => dredgepar%percsupl
+    totvoldump        => dredgepar%totvoldump
+    localareadump     => dredgepar%localareadump
+    globalareadump    => dredgepar%globalareadump
+    globaldumpcap     => dredgepar%globaldumpcap
+    voldump           => dredgepar%voldump
     !
-    dredge_areas      => gdp%gddredge%dredge_areas
-    dump_areas        => gdp%gddredge%dump_areas
+    dredge_areas      => dredgepar%dredge_areas
+    dump_areas        => dredgepar%dump_areas
     !
-    dredge_prop       => gdp%gddredge%dredge_prop
-    dump_prop         => gdp%gddredge%dump_prop
+    dredge_prop       => dredgepar%dredge_prop
+    dump_prop         => dredgepar%dump_prop
     !
     ! Allocate arrays used for detecting dredge, dump points
     !
-                  allocate (imask(gdp%d%nmlb:gdp%d%nmub), stat = istat)
+                  allocate (imask(nmlb:nmub), stat = istat)
     !
     if (istat==0) allocate (ipdr(nadred), stat = istat)
     if (istat==0) allocate (ipdu(nadump), stat = istat)
@@ -642,15 +687,17 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     if (istat==0) allocate (ydr(totnpdr), stat = istat)
     if (istat==0) allocate (ydu(totnpdu), stat = istat)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
-       call d3stop(1, gdp)
+       errmsg = 'rddredge: memory alloc error'
+       call write_error(trim(errmsg), unit=lundia)
+       error = .true.
+       return
     endif
     !
     ! necessary initializations
     !
     link_def        = 0
-    ndredged        = 0
-    nploughed       = 0
+    tim_dredged     = 0.0_fp
+    tim_ploughed    = 0.0_fp
     !
     link_percentage = 0.0_fp
     link_distance   = 0.0_fp
@@ -771,20 +818,21 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 !
                 tmp_active = 0
                 if (validtable(tseriesfile)) then
-                   call flw_gettable(tseriesfile  , pdredge%name , 'active'     , &
-                                   & tmp_active(1), tmp_active(2), tmp_active(3), 0, gdp)
+                   call gettable(tseriesfile  , pdredge%name , 'active'     , &
+                                   & tmp_active(1), tmp_active(2), tmp_active(3), 0, errmsg)
                    if (tmp_active(3) == 0) then
                       tmp_active = def_active
                    elseif (tmp_active(3) > 1) then
                       write(message,'(i3,3a)') tmp_active(3), &
                                              & ' active parameters specified in file "', &
                                              & trim(getfilename(tseriesfile)), '" instead of 1.'
-                      call prterr(lundia, 'U021', message)
-                      call d3stop(1, gdp)
+                      call write_error(trim(message), unit=lundia)
+                      error = .true.
+                      return
                    else
-                      call flw_checktable(tseriesfile   , tmp_active(1), &
+                      call checktable(tseriesfile   , tmp_active(1), &
                                         & tmp_active(2) , tmp_active(3), &
-                                        & CHKTAB_LOGICAL, gdp          )
+                                        & CHKTAB_LOGICAL, errmsg )
                       tmp_active(4) = 1
                    endif
                    pdredge%paractive = tmp_active
@@ -797,15 +845,14 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 if (comparereal(pdredge%dredge_depth,1.0e10_fp) == 0 .and. &
                   & comparereal(pdredge%maxvolrate  ,-999.0_fp) == 0) then
                    if (parname == 'sandmining') then
-                      call prterr(lundia, 'U021', &
-                                & 'Unable to read sand mining area "'// &
-                                & trim(dredge_areas(cntssrc))//'"')
-                   else
-                      call prterr(lundia, 'U021', &
-                                & 'Unable to read dredge depth of area "'// &
-                                & trim(dredge_areas(cntssrc))//'"')
-                   endif
-                   call d3stop(1, gdp)
+                         call write_error('Unable to read sand mining area "'// &
+                                   & trim(dredge_areas(cntssrc))//'"', unit=lundia)
+                      else
+                         call write_error('Unable to read dredge depth of area "'// &
+                                   & trim(dredge_areas(cntssrc))//'"', unit=lundia)
+                      endif
+                      error = .true.
+                      return
                 elseif (comparereal(pdredge%dredge_depth,1.0e10_fp) == 0) then
                    !
                    ! Fixed rate dredging, previously known as sandmining
@@ -827,28 +874,30 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 if (.not. (comparereal(pdredge%maxvolrate,-999.0_fp) == 0)) then
                     pdredge%maxvolrate = pdredge%maxvolrate/yearsec_hp
                 endif
-!                write(lundia,'(a,f8.3)') 'maxvolrate ',pdredge%maxvolrate
-                                !
+                !
                 call prop_get(link_ptr, '*', 'DepthDef', pdredge%depthdef)
                 if (pdredge%depthdef < 1 .or. pdredge%depthdef > DEPTHDEF_MAX) then
-                   call prterr(lundia, 'U021', &
-                             & 'Invalid depth definition for dredge area "'// &
-                             & trim(dredge_areas(cntssrc))//'"')
-                   call d3stop(1, gdp)
+                   message = 'Invalid depth definition for dredge area "'// &
+                              & trim(dredge_areas(cntssrc))//'"'
+                   call write_error(trim(message), unit=lundia)
+                   error = .true.
+                   return
                 endif
                 call prop_get_integer(link_ptr, '*', 'InPolygon', pdredge%ichkloc)
                 if (pdredge%ichkloc < 1 .or. pdredge%ichkloc > 3) then
-                   call prterr(lundia, 'U021', &
-                             & 'Invalid in polygon check for dredge area "'// &
-                             & trim(dredge_areas(cntssrc))//'"')
-                   call d3stop(1, gdp)
+                   message = 'Invalid in polygon check for dredge area "'// &
+                             & trim(dredge_areas(cntssrc))//'"'
+                   call write_error(trim(message), unit=lundia)
+                   error = .true.
+                   return
                 endif
                 call prop_get_integer(link_ptr, '*', 'DredgeDistr', pdredge%dredgedistr)
                 if (pdredge%dredgedistr < 1 .or. pdredge%dredgedistr > DREDGEDISTR_MAX) then
-                   call prterr(lundia, 'U021', &
-                             & 'Invalid dredge distribution for dredge area "'// &
-                             & trim(dredge_areas(cntssrc))//'"')
-                   call d3stop(1, gdp)
+                   message =  'Invalid dredge distribution for dredge area "'// &
+                             & trim(dredge_areas(cntssrc))//'"'
+                   call write_error(trim(message), unit=lundia)
+                   error = .true.
+                   return
                 endif
                 if (pdredge%paractive(1) /= -999) then
                    write(lundia,'(a)')   '  Dredging active             : during intervals'
@@ -918,19 +967,25 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 call prop_get(link_ptr, '*', 'DredgeTrigger', pdredge%triggertype)
                 call prop_get(link_ptr, '*', 'UseDunes'     , pdredge%use_dunes)
                 if (pdredge%use_dunes .and. .not. lfbedfrm) then
-                   call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
-                   call d3stop(1, gdp)
+                   errmsg = 'rddredge - UseDunes: Dunes can only be used when modelled.'
+                   call write_error(trim(errmsg), unit=lundia)
+                   error = .true.
+                   return
                 endif
                 if (pdredge%use_dunes) then
                    call prop_get(link_ptr, '*', 'AlphaDuneHeight', pdredge%alpha_dh)
                    if ((pdredge%alpha_dh > 0.5_fp) .or. (pdredge%alpha_dh < 0.0_fp)) then
-                      call prterr(lundia, 'U021', 'AlphaDuneHeight should be a real number between 0.0 and 0.5')
-                      call d3stop(1, gdp)
+                      errmsg = 'rddredge: AlphaDuneHeight should be a real number between 0.0 and 0.5'
+                      call write_error(trim(errmsg), unit=lundia)
+                      error = .true.
+                      return
                    endif
                    call prop_get(link_ptr, '*', 'PloughEfficiency', pdredge%plough_effic)
                    if ((pdredge%plough_effic > 1.0_fp) .or. (pdredge%plough_effic < 0.0_fp)) then
-                      call prterr(lundia, 'U021', 'PloughEfficiency should be a real number between 0.0 and 1.0')
-                      call d3stop(1, gdp)
+                      errmsg = 'rddredge: PloughEfficiency should be a real number between 0.0 and 1.0'
+                      call write_error(trim(errmsg), unit=lundia)
+                      error = .true.
+                      return
                    endif
                 endif
                 !
@@ -939,7 +994,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 call tree_get_node_by_name(pol_ptr, dredge_areas(cntssrc), dredge_area_ptr )
                 areatp = 'dredge'
                 call read_polygon_data(dredge_area_ptr, icdr, ipdr(cntdred), npdr(cntdred), &
-                                     & xdr, ydr, areatp, cntdred, gdp)
+                                     & xdr, ydr, areatp, cntdred, lundia)
                 !
                 ! Each dredge area may distribute to several dump areas
                 ! The sum of all distribution percentages must be 100.0 for each dredge area
@@ -972,8 +1027,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                          cntdump = 0
                          call prop_get_integer(dump_area_ptr, '*', 'dumpid', cntdump)
                          if (cntdump < 1) then
-                            call prterr(lundia, 'U021','Invalid dump ID: '//trim(parname))
-                            call d3stop(1, gdp)
+                            errmsg = 'rddredge: Invalid dump ID: '//trim(parname)
+                            call write_error(trim(errmsg), unit=lundia)
+                            error = .true.
+                            return
                          endif
                          link_def(cntlink,1) = cntssrc
                          link_def(cntlink,2) = cntdump
@@ -993,11 +1050,13 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                          call tree_get_node_by_name(pol_ptr, dump_areas(cntdump), dump_area_ptr )
                          areatp = 'dump'
                          call read_polygon_data(dump_area_ptr, icdu, ipdu(cntdump), npdu(cntdump), &
-                                              & xdu, ydu, areatp, cntdump, gdp)
+                                              & xdu, ydu, areatp, cntdump, lundia)
                       elseif (parname == 'percentage') then
                          if (ilink == 0) then
-                            call prterr(lundia, 'U021', 'Unexpected percentage encountered')
-                            call d3stop(1, gdp)
+                            errmsg = 'rddredge: Unexpected percentage encountered'
+                            call write_error(trim(errmsg), unit=lundia)
+                            error = .true.
+                            return
                          endif
                          sedperc = 0.0_fp
                          call prop_get(node_ptr, '*', 'Percentage', sedperc)
@@ -1020,8 +1079,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                             endif
                          enddo
                          if (.not. sfound) then
-                            call prterr(lundia, 'U021', 'Unknown sediment fraction "'//trim(sedname)//'"')
-                            call d3stop(1, gdp)
+                            errmsg = 'rddredge: Unknown sediment fraction "'//trim(sedname)//'"'
+                            call write_error(trim(errmsg), unit=lundia)
+                            error = .true.
+                            return
                          endif
                       endif
                    enddo
@@ -1081,20 +1142,21 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 !
                 tmp_active = 0
                 if (validtable(tseriesfile)) then
-                   call flw_gettable(tseriesfile  , pdredge%name , 'active'     , &
-                                   & tmp_active(1), tmp_active(2), tmp_active(3), 0, gdp)
+                   call gettable(tseriesfile  , pdredge%name , 'active'     , &
+                                   & tmp_active(1), tmp_active(2), tmp_active(3), 0, errmsg)
                    if (tmp_active(3) == 0) then
                       tmp_active = def_active
                    elseif (tmp_active(3) > 1) then
                       write(message,'(i3,3a)') tmp_active(3), &
                                              & ' active parameters specified in file "', &
                                              & trim(getfilename(tseriesfile)), '" instead of 1.'
-                      call prterr(lundia, 'U021', message)
-                      call d3stop(1, gdp)
+                      call write_error(trim(message), unit=lundia)
+                      error = .true.
+                      return
                    else
-                      call flw_checktable(tseriesfile   , tmp_active(1), &
+                      call checktable(tseriesfile   , tmp_active(1), &
                                         & tmp_active(2) , tmp_active(3), &
-                                        & CHKTAB_LOGICAL, gdp          )
+                                        & CHKTAB_LOGICAL, errmsg )
                       tmp_active(4) = 1
                    endif
                    pdredge%paractive = tmp_active
@@ -1134,15 +1196,19 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                             endif
                          enddo
                          if (.not. sfound) then
-                            call prterr(lundia, 'U021', 'Unknown sediment fraction "'//trim(sedname)//'"')
-                            call d3stop(1, gdp)
+                            errmsg =  'rddredge: Unknown sediment fraction "'//trim(sedname)//'"'
+                            call write_error(trim(errmsg), unit=lundia)
+                            error = .true.
+                            return
                          endif
                       elseif (parname == 'sedpercentage') then 
                          sedperc = 0.0_fp
                          call prop_get(node_ptr,'*','SedPercentage', sedperc)
                          if (cntsedidx == 0) then
-                            call prterr(lundia, 'U021', 'SedPercentage without preceding Sediment keyword')
-                            call d3stop(1, gdp)
+                            errmsg =  'rddredge: SedPercentage without preceding Sediment keyword'
+                            call write_error(trim(errmsg), unit=lundia)
+                            error = .true.
+                            return
                          else
                             j2 = cntsedidx
                             write(lundia,'(3a,f8.3)') '  Percentage of ', trim(namsed(j2)), ': ', sedperc
@@ -1166,8 +1232,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                          cntdump = 0
                          call prop_get_integer(dump_area_ptr, '*', 'dumpid', cntdump)
                          if (cntdump < 1) then
-                            call prterr(lundia, 'U021', 'Invalid dump ID')
-                            call d3stop(1, gdp)    
+                            errmsg =  'rddredge: Invalid dump ID'
+                            call write_error(trim(errmsg), unit=lundia)
+                            error = .true.
+                            return    
                          endif
                          link_def(cntlink,1) = cntssrc
                          link_def(cntlink,2) = cntdump
@@ -1187,11 +1255,13 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                          call tree_get_node_by_name(pol_ptr, dump_areas(cntdump), dump_area_ptr )
                          areatp = 'dump'
                          call read_polygon_data(dump_area_ptr, icdu, ipdu(cntdump), npdu(cntdump), &
-                                              & xdu, ydu, areatp, cntdump, gdp)
+                                              & xdu, ydu, areatp, cntdump, lundia)
                       elseif ( parname == 'percentage') then
                          if (ilink == 0) then
-                            call prterr(lundia, 'U021', 'Unexpected percentage encountered')
-                            call d3stop(1, gdp)
+                            errmsg =  'ERROR rddredge: Unexpected percentage encountered'
+                            call write_error(trim(errmsg), unit=lundia)
+                            error = .true.
+                            return
                          endif
                          call prop_get(node_ptr, '*', 'Percentage', link_percentage(cntlink,1))
                          do lsed = 2, lsedtot
@@ -1212,9 +1282,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                       sumperc = sumperc + percsupl(cntsupl,lsed)
                    enddo
                    if (comparereal(100.0_fp,sumperc) /= 0) then
-                      write(message,'(3a)') 'Sum of sediment fractions is not 100.0 for nourishment "', dredge_areas(cntssrc),'"'
-                      call prterr(lundia, 'U021', message)
-                      call d3stop(1, gdp)
+                      errmsg = 'Sum of sediment fractions is not 100.0 for nourishment "'//trim(dredge_areas(cntssrc))//'"'
+                      call write_error(trim(errmsg), unit=lundia)
+                      error = .true.
+                      return
                    endif
                 else
                    percsupl(cntsupl,1) = 100.0_fp
@@ -1233,10 +1304,11 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 call prop_get(link_ptr, '*', 'DumpDistr'    , pdredge%dumpdistr) ! old keyword still supported
                 call prop_get(link_ptr, '*', 'DistrOverDump', pdredge%dumpdistr)
                 if (pdredge%dumpdistr<1 .or. pdredge%dumpdistr>DR2DUDISTR_MAX) then
-                   call prterr(lundia, 'U021', &
-                             & 'Invalid dump distribution for '//trim(dredgetype)//' area "'// &
-                             & trim(dredge_areas(cntssrc))//'"')
-                   call d3stop(1, gdp)
+                   errmsg =  'Invalid dump distribution for '//trim(dredgetype)//' area "'// &
+                             & trim(dredge_areas(cntssrc))//'"'
+                   call write_error(trim(errmsg), unit=lundia)
+                   error = .true.
+                   return
                 endif
                 !
                 if (ilink == 0) ilink = cntlink + 1
@@ -1251,11 +1323,12 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                      & pdredge%dumpdistr = DR2DUDISTR_SEQUENTIAL
                 else
                    if (pdredge%dumpdistr /= DR2DUDISTR_PERCENTAGE) then
-                      call prterr(lundia, 'U021', &
-                                & 'Specified percentages conflict with specified dump'// &
+                      errmsg =  'Specified percentages conflict with specified dump'// &
                                 & ' distribution for '//trim(dredgetype)//' area "'// &
-                                & trim(dredge_areas(cntssrc))//'"')
-                      call d3stop(1, gdp)
+                                & trim(dredge_areas(cntssrc))//'"'
+                      call write_error(trim(errmsg), unit=lundia)
+                      error = .true.
+                      return
                    endif
                 endif
                 !
@@ -1273,16 +1346,17 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                       sumperc = 0.0_fp
                       do j = ilink, cntlink
                          if (link_percentage(j,lsed) > 0.0_fp) then
-                            write(lundia,'(a,f6.2,a,a)') '    Dump ',link_percentage(j,lsed), &
-                                                       & '% at           : ', trim(dump_areas(link_def(j,2)))
+                            write(lundia,'(a,f6.2,2a)') '    Dump ',link_percentage(j,lsed), &
+                                                      & '% at           : ', trim(dump_areas(link_def(j,2)))
                          endif
                          sumperc = sumperc + link_percentage(j,lsed)
                       enddo
                       if (comparereal(100.0_fp,sumperc) /= 0 .and. pdredge%itype /= DREDGETYPE_SANDMINING) then
-                         write(message,'(3a)') 'Sum of dump % of '//trim(dredgetype)//' area "', &
-                                             & trim(dredge_areas(cntssrc)),'" is not equal to 100.0 '
-                         call prterr(lundia, 'U021', message)
-                         call d3stop(1, gdp)
+                         errmsg =  'Sum of dump % of '//trim(dredgetype)//' area "'// &
+                                             & trim(dredge_areas(cntssrc))//'" is not equal to 100.0 '
+                         call write_error(trim(errmsg), unit=lundia)
+                         error = .true.
+                         return
                       endif
                    enddo
                 case (DR2DUDISTR_SEQUENTIAL, DR2DUDISTR_PROPORTIONAL)
@@ -1356,9 +1430,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
              enddo
              !
              if (ia > nadump) then
-                call prterr(lundia, 'U190', &
-                          & 'Skipping data block for unknown dump area "'// &
-                          & trim(parname)//'"')
+                errmsg =  'Skipping data block for unknown dump area "'// &
+                          & trim(parname)//'"'
+                call write_error(errmsg, unit=lundia)
                 cycle
              endif
              pdump => dump_prop(ia)
@@ -1367,24 +1441,27 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
              !
              call prop_get(link_ptr, '*', 'DepthDef', pdump%depthdef)
              if (pdump%depthdef<1 .or. pdump%depthdef>DEPTHDEF_MAX) then
-                call prterr(lundia, 'U021', &
-                          & 'Invalid depth definition for dump area "'// &
-                          & trim(dump_areas(ia))//'"')
-                call d3stop(1, gdp)
+                errmsg =  'rddredge: Invalid depth definition for dump area "'// &
+                          & trim(dump_areas(ia))//'"'
+                call write_error(errmsg, unit=lundia)
+                error = .true.
+                return
              endif
              call prop_get_integer(link_ptr, '*', 'DumpDistr', pdump%dumpdistr)
              if (pdump%dumpdistr<1 .or. pdump%dumpdistr>DUMPDISTR_MAX) then
-                call prterr(lundia, 'U021', &
-                          & 'Invalid dump distribution for dump area "'// &
-                          & trim(dump_areas(ia))//'"')
-                call d3stop(1, gdp)
+                errmsg =  'rddredge: Invalid dump distribution for dump area "'// &
+                          & trim(dump_areas(ia))//'"'
+                call write_error(errmsg, unit=lundia)
+                error = .true.
+                return
              endif
              call prop_get_integer(link_ptr, '*', 'InPolygon', pdump%ichkloc)
              if (pdump%ichkloc<1 .or. pdump%ichkloc>3) then
-                call prterr(lundia, 'U021', &
-                          & 'Invalid in polygon check for dump area "'// &
-                          & trim(dump_areas(ia))//'"')
-                call d3stop(1, gdp)
+                errmsg = 'rddredge: Invalid in polygon check for dump area "'// &
+                          & trim(dump_areas(ia))//'"'
+                call write_error(errmsg, unit=lundia)
+                error = .true.
+                return
              endif
              !
              call prop_get_logical(link_ptr, '*', 'DumpWhenDry'  , pdump%dumpwhendry)
@@ -1393,8 +1470,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
              !
              call prop_get(link_ptr, '*', 'UseDunes'     , pdump%use_dunes)
              if (pdump%use_dunes .and. .not. lfbedfrm) then
-                call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
-                call d3stop(1, gdp)
+                errmsg = 'rddredge: UseDunes: Dunes can only be used when modelled.'
+                call write_error(errmsg, unit=lundia)
+                error = .true.
+                return
              endif
           case default
              !
@@ -1460,8 +1539,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
              write(message,'(5a)') 'Dump area "', trim(dump_areas(ic)), &
                                  & '" not uniquely associated with sediment source "', &
                                  & trim(dredge_areas(i)), '".'
-             call prterr(lundia, 'U021', message)
-             call d3stop(1, gdp)
+             call write_error(message, unit=lundia)
+             error = .true.
+             return
           endif
        enddo
     enddo
@@ -1528,8 +1608,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                    write(message,'(5a)') 'Dump area "', trim(dump_areas(ic)), &
                                        & '" is not last in sequence of dump areas for "', &
                                        & trim(dredge_areas(i)), '" but has unlimited dumping capacity.'
-                   call prterr(lundia, 'U021', message)
-                   call d3stop(1, gdp)
+                   call write_error(trim(message),unit=lundia)
+                   error=.true.
+                   return
                 endif
              endif
           enddo
@@ -1545,8 +1626,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 write(message,'(5a)') 'Dump area "', trim(dump_areas(ic)), &
                                     & '" in list of dump areas for "', trim(dredge_areas(i)), &
                                     & '" has unlimited dumping capacity.'
-                call prterr(lundia, 'U021', message)
-                call d3stop(1, gdp)
+                call write_error(trim(message),unit=lundia)
+                error=.true.
+                return
              endif
           enddo
           noutletlinks       = noutletlinks + 1
@@ -1560,8 +1642,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        if (pdump%dumpdistr == DUMPDISTR_PROPORTIONAL .and. .not.pdump%dumpcapaflag) then
           write(message,'(3a)') 'Dump distribution proportional for area "', &
                                & trim(dump_areas(i)), '" requires specification of MinimumDumpDepth.'
-          call prterr(lundia, 'U021', message)
-          call d3stop(1, gdp)
+          call write_error(trim(message),unit=lundia)
+          error=.true.
+          return
        endif
     enddo
     !
@@ -1571,27 +1654,28 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     if (noutletlinks > 0) then
        !
        istat = 0
-       if (istat == 0) call reallocP(gdp%gddredge%link_percentage, (/nalink+noutletlinks,lsedtot/), fill = 100.0_fp, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%link_distance, nalink+noutletlinks, fill = 0.0_fp, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%link_sum, (/nalink+noutletlinks,lsedtot/), fill = 0.0_fp, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%voldump, (/nadump+1,lsedtot/), fill = 0.0_fp, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%totvoldump, nadump+1, fill = 0.0_fp, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%localareadump, nadump+1, fill = 0.0_fp, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%globalareadump, nadump+1, fill = 0.0_fp, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%globaldumpcap, nadump+1, fill = 0.0_fp, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%link_def, (/nalink+noutletlinks,2/), fill = 0, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%dump_areas, nadump+1, fill = ' ', stat = istat)
+       if (istat == 0) call reallocP(dredgepar%link_percentage, (/nalink+noutletlinks,lsedtot/), fill = 100.0_fp, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%link_distance, nalink+noutletlinks, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%link_sum, (/nalink+noutletlinks,lsedtot/), fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%voldump, (/nadump+1,lsedtot/), fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%totvoldump, nadump+1, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%localareadump, nadump+1, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%globalareadump, nadump+1, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%globaldumpcap, nadump+1, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%link_def, (/nalink+noutletlinks,2/), fill = 0, stat = istat)
+       if (istat == 0) call reallocP(dredgepar%dump_areas, nadump+1, fill = ' ', stat = istat)
        if (istat == 0) then
-          allocate(gdp%gddredge%dump_prop(nadump+1), stat=istat)
+          allocate(dredgepar%dump_prop(nadump+1), stat=istat)
           if (istat == 0) then
-             gdp%gddredge%dump_prop(1:nadump) = dump_prop(1:nadump)
+             dredgepar%dump_prop(1:nadump) = dump_prop(1:nadump)
              deallocate(dump_prop, stat=istat)
           endif
        endif
        !
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RdDredge: memory realloc error')
-          call d3stop(1, gdp)
+          call write_error('rddredge: memory realloc error', unit=lundia)
+          error = .true.
+          return
        endif
        !
        if (istat == 0) call reallocP(ipdu, nadump+1, stat = istat, fill=0)
@@ -1599,18 +1683,18 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        !
        ! update local pointers
        !
-       link_percentage   => gdp%gddredge%link_percentage
-       link_distance     => gdp%gddredge%link_distance
-       link_sum          => gdp%gddredge%link_sum
-       voldump           => gdp%gddredge%voldump
-       totvoldump        => gdp%gddredge%totvoldump
-       localareadump     => gdp%gddredge%localareadump
-       globalareadump    => gdp%gddredge%globalareadump
-       globaldumpcap     => gdp%gddredge%globaldumpcap
-       link_def          => gdp%gddredge%link_def
-       dump_areas        => gdp%gddredge%dump_areas
-       dredge_prop       => gdp%gddredge%dredge_prop
-       dump_prop         => gdp%gddredge%dump_prop
+       link_percentage   => dredgepar%link_percentage
+       link_distance     => dredgepar%link_distance
+       link_sum          => dredgepar%link_sum
+       voldump           => dredgepar%voldump
+       totvoldump        => dredgepar%totvoldump
+       localareadump     => dredgepar%localareadump
+       globalareadump    => dredgepar%globalareadump
+       globaldumpcap     => dredgepar%globaldumpcap
+       link_def          => dredgepar%link_def
+       dump_areas        => dredgepar%dump_areas
+       dredge_prop       => dredgepar%dredge_prop
+       dump_prop         => dredgepar%dump_prop
        !
        nalink = nalink + noutletlinks
        nadump = nadump + 1
@@ -1660,35 +1744,32 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        npnt           = 0
        npnt_halo      = 0
        ia             = ipdr(cntdred)
-       do nm = 1, nmmax
-          if (gsqs(nm) > 0.0_fp .and. abs(kcs(nm))==1) then
+       do nm = nmlb, nmub
+          if (abs(griddim%celltype(nm)) /= 1) cycle ! only internal and ghost points
+          if (cell_area(nm) > 0.0_fp) then
+             istat = 0
              select case (dredge_prop(i)%ichkloc)
              case (CHKLOC_ALLCORNER)
-                nmcor = nm
-                call ipon(xdr(ia), ydr(ia), npdr(cntdred), xcor(nmcor), ycor(nmcor), istat, gdp)
-                nmcor = nm - 1
-                if (istat >= 0) call ipon(xdr(ia), ydr(ia), npdr(cntdred), xcor(nmcor), ycor(nmcor), istat, gdp)
-                nmcor = nm - nmaxddb
-                if (istat >= 0) call ipon(xdr(ia), ydr(ia), npdr(cntdred), xcor(nmcor), ycor(nmcor), istat, gdp)
-                nmcor = nm - nmaxddb-1
-                if (istat >= 0) call ipon(xdr(ia), ydr(ia), npdr(cntdred), xcor(nmcor), ycor(nmcor), istat, gdp)
+                ! check all netnodes
+                do n = griddim%indexnode1(nm), griddim%indexnode1(nm) + griddim%ncellnodes(nm) - 1
+                   nmcor = griddim%cell2node(n)
+                   if (istat >= 0) call ipon(xdr(ia), ydr(ia), npdr(cntdred), xnode(nmcor), ynode(nmcor), istat)
+                end do
              case (CHKLOC_CENTRE)
-                call ipon(xdr(ia), ydr(ia), npdr(cntdred), xz(nm), yz(nm), istat, gdp)
+                call ipon(xdr(ia), ydr(ia), npdr(cntdred), xz(nm), yz(nm), istat)
              case (CHKLOC_ANYCORNER)
-                nmcor = nm
-                call ipon(xdr(ia), ydr(ia), npdr(cntdred), xcor(nmcor), ycor(nmcor), istat, gdp)
-                nmcor = nm - 1
-                if (istat < 0) call ipon(xdr(ia), ydr(ia), npdr(cntdred), xcor(nmcor), ycor(nmcor), istat, gdp)
-                nmcor = nm - nmaxddb
-                if (istat < 0) call ipon(xdr(ia), ydr(ia), npdr(cntdred), xcor(nmcor), ycor(nmcor), istat, gdp)
-                nmcor = nm - nmaxddb - 1
-                if (istat < 0) call ipon(xdr(ia), ydr(ia), npdr(cntdred), xcor(nmcor), ycor(nmcor), istat, gdp)
+                ! check any corner
+                istat = -1
+                do n = griddim%indexnode1(nm), griddim%indexnode1(nm) + griddim%ncellnodes(nm) - 1
+                   nmcor = griddim%cell2node(n)
+                   if (istat < 0) call ipon(xdr(ia), ydr(ia), npdr(cntdred), xnode(nmcor), ynode(nmcor), istat)
+                end do
              end select
              if (istat >= 0) then
                 imask(nm) = 1
-                if (kcs(nm) == 1) then
+                if (griddim%celltype(nm) == 1) then ! internal point
                    npnt      = npnt + 1
-                else
+                else ! ghost point
                    npnt_halo = npnt_halo + 1
                 endif
              endif
@@ -1711,26 +1792,28 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        if (istat == 0) allocate (dredge_prop(i)%sortvar(npnt)         , stat = istat)
        if (istat == 0) allocate (dredge_prop(i)%triggered(npnt)       , stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
-          call d3stop(1, gdp)
+          errmsg =  'rddredge: memory alloc error'
+          call write_error(errmsg, unit=lundia)
+          error = .true.
+          return
        endif
        !
        ic = 0
-       do nm = 1, nmmax
-          if (imask(nm) > 0 .and. kcs(nm)==1) then
+       do nm = nmlb, nmub
+          ! first all internal points
+          if (imask(nm) > 0 .and. griddim%celltype(nm)==1) then
              ic                          = ic + 1
-             call nm_to_nmglob(nm, nmglob, gdp)
-             dredge_prop(i)%nmglob(ic)   = nmglob
+             dredge_prop(i)%nmglob(ic)   = griddim%nmglobal(nm)
              dredge_prop(i)%nm(ic)       = nm
-             dredge_prop(i)%area(ic)     = gsqs(nm)
-             globalareadred(i)           = globalareadred(i) + gsqs(nm)
+             dredge_prop(i)%area(ic)     = cell_area(nm)
+             globalareadred(i)           = globalareadred(i) + cell_area(nm)
           endif
        enddo
-       do nm = 1, nmmax
-          if (imask(nm) > 0 .and. kcs(nm)/=1) then
+       do nm = nmlb, nmub
+          ! then all ghost points
+          if (imask(nm) > 0 .and. griddim%celltype(nm)/=1) then
              ic                          = ic + 1
-             call nm_to_nmglob(nm, nmglob, gdp)
-             dredge_prop(i)%nmglob(ic)   = nmglob
+             dredge_prop(i)%nmglob(ic)   = griddim%nmglobal(nm)
              dredge_prop(i)%nm(ic)       = -nm
           endif
        enddo
@@ -1755,13 +1838,13 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
           loctemp = 0.0_fp
           do ic = 1, npnt
             inm     = dredge_prop(i)%nm(ic)
-            if (inm>0) loctemp = loctemp + xz(inm)    
+            if (inm>0) loctemp = loctemp + xz(inm) ! internal points only
           enddo
           dredge_prop(i)%dredgeloc(1) = loctemp/npnt
           loctemp                     = 0.0_fp
           do ic = 1, npnt
             inm     = dredge_prop(i)%nm(ic)
-            if (inm>0) loctemp = loctemp + yz(inm)    
+            if (inm>0) loctemp = loctemp + yz(inm) ! internal points only
           enddo
           dredge_prop(i)%dredgeloc(2) = loctemp / npnt
        else 
@@ -1776,35 +1859,32 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        npnt_halo      = 0
        if (npdu(i) /= 0) then
           ia = ipdu(i)
-          do nm = 1, nmmax
-             if (gsqs(nm) > 0.0_fp .and. abs(kcs(nm))==1) then
+          do nm = nmlb, nmub
+             if (abs(griddim%celltype(nm)) /= 1) cycle ! only internal and ghost points
+             if (cell_area(nm) > 0.0_fp) then
                 select case (dump_prop(i)%ichkloc)
                 case (CHKLOC_ALLCORNER)
-                   nmcor = nm
-                   call ipon(xdu(ia), ydu(ia), npdu(i), xcor(nmcor), ycor(nmcor), istat, gdp)
-                   nmcor = nm - 1
-                   if (istat >= 0) call ipon(xdu(ia), ydu(ia), npdu(i), xcor(nmcor), ycor(nmcor), istat, gdp)
-                   nmcor = nm - nmaxddb
-                   if (istat >= 0) call ipon(xdu(ia), ydu(ia), npdu(i), xcor(nmcor), ycor(nmcor), istat, gdp)
-                   nmcor = nm - nmaxddb - 1
-                   if (istat >= 0) call ipon(xdu(ia), ydu(ia), npdu(i), xcor(nmcor), ycor(nmcor), istat, gdp)
+                   ! check all netnodes
+                   istat = 0
+                   do n = griddim%indexnode1(nm), griddim%indexnode1(nm) + griddim%ncellnodes(nm) - 1
+                      nmcor = griddim%cell2node(n)
+                      if (istat >= 0) call ipon(xdu(ia), ydu(ia), npdu(i), xnode(nmcor), ynode(nmcor), istat)
+                   end do
                 case (CHKLOC_CENTRE)
-                   call ipon(xdu(ia), ydu(ia), npdu(i), xz(nm), yz(nm), istat, gdp)
+                   call ipon(xdu(ia), ydu(ia), npdu(i), xz(nm), yz(nm), istat)
                 case (CHKLOC_ANYCORNER)
-                   nmcor = nm
-                   call ipon(xdu(ia), ydu(ia), npdu(i), xcor(nmcor), ycor(nmcor), istat, gdp)
-                   nmcor = nm - 1
-                   if (istat < 0) call ipon(xdu(ia), ydu(ia), npdu(i), xcor(nmcor), ycor(nmcor), istat, gdp)
-                   nmcor = nm - nmaxddb
-                   if (istat < 0) call ipon(xdu(ia), ydu(ia), npdu(i), xcor(nmcor), ycor(nmcor), istat, gdp)
-                   nmcor = nm - nmaxddb - 1
-                   if (istat < 0) call ipon(xdu(ia), ydu(ia), npdu(i), xcor(nmcor), ycor(nmcor), istat, gdp)
+                   ! check any corner
+                   istat = -1
+                   do n = griddim%indexnode1(nm), griddim%indexnode1(nm) + griddim%ncellnodes(nm) - 1
+                      nmcor = griddim%cell2node(n)
+                      if (istat < 0) call ipon(xdu(ia), ydu(ia), npdu(i), xnode(nmcor), ynode(nmcor), istat)
+                   end do
                 end select
                 if (istat >= 0) then
                    imask(nm) = 1
-                   if (kcs(nm) == 1) then
+                   if (griddim%celltype(nm) == 1) then ! internal point
                       npnt      = npnt + 1
-                   else
+                   else ! ghost point
                       npnt_halo = npnt_halo + 1
                    endif
                 endif
@@ -1823,8 +1903,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        if (istat == 0) allocate (dump_prop(i)%dz_dump(npnt)         , stat = istat)
        if (istat == 0) allocate (dump_prop(i)%sortvar(npnt)         , stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
-          call d3stop(1, gdp)
+          errmsg =  'rddredge: memory alloc error'
+          call write_error(errmsg, unit=lundia)
+          error = .true.
+          return
        endif
        do ic = 1, npnt
           dump_prop(i)%inm(ic) = ic
@@ -1836,21 +1918,21 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        dump_prop(i)%sortvar  = -1.0E11_fp
        !
        ic = 0
-       do nm = 1, nmmax
-          if (imask(nm) > 0 .and. kcs(nm)==1) then
+       do nm = nmlb, nmub
+          ! first all internal points
+          if (imask(nm) > 0 .and. griddim%celltype(nm)==1) then
              ic                          = ic + 1
-             call nm_to_nmglob(nm, nmglob, gdp)
-             dump_prop(i)%nmglob(ic)     = nmglob
+             dump_prop(i)%nmglob(ic)     = griddim%nmglobal(nm)
              dump_prop(i)%nm(ic)         = nm
-             dump_prop(i)%area(ic)       = gsqs(nm)
-             localareadump(i)            = localareadump(i) + gsqs(nm)
+             dump_prop(i)%area(ic)       = cell_area(nm)
+             localareadump(i)            = localareadump(i) + cell_area(nm)
           endif
        enddo
-       do nm = 1, nmmax
-          if (imask(nm) > 0 .and. kcs(nm)/=1) then
+       do nm = nmlb, nmub
+          ! then all ghost points
+          if (imask(nm) > 0 .and. griddim%celltype(nm)/=1) then
              ic                          = ic + 1
-             call nm_to_nmglob(nm, nmglob, gdp)
-             dump_prop(i)%nmglob(ic)     = nmglob
+             dump_prop(i)%nmglob(ic)     = griddim%nmglobal(nm)
              dump_prop(i)%nm(ic)         = -nm
           endif
        enddo
@@ -1862,13 +1944,13 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
           loctemp = 0.0_fp
           do ic = 1, npnt
              inm     = dump_prop(i)%nm(ic)
-             if (inm>0) loctemp = loctemp + xz(inm)    
+             if (inm>0) loctemp = loctemp + xz(inm) ! internal points only
           enddo
           dump_prop(i)%dumploc(1) = loctemp / npnt
           loctemp = 0.0_fp
           do ic = 1, npnt
              inm     = dump_prop(i)%nm(ic)
-             if (inm>0) loctemp = loctemp + yz(inm)
+             if (inm>0) loctemp = loctemp + yz(inm) ! internal points only
           enddo
           dump_prop(i)%dumploc(2) = loctemp / npnt
        else 
@@ -1906,3 +1988,5 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     deallocate (imask, stat = istat)
     !
 end subroutine rddredge
+
+end module m_rddredge

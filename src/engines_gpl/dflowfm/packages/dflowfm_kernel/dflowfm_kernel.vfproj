@@ -62,8 +62,6 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath="src\dredge_data.f90"/>
-		<File RelativePath="src\dredgepolygon.f90"/>
 		<File RelativePath="src\filez.f90"/>
 		<File RelativePath=".\src\filter.F90">
 			<FileConfiguration Name="Debug|Win32">

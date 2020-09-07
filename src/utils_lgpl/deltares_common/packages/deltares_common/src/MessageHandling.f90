@@ -188,7 +188,7 @@ private
 
    integer               , parameter,              private :: maxMessages = 3000
    integer               ,                         private :: messagecount = 0 !< Number of messages currently in message buffer (queue).
-   character(len=charln) , dimension(maxMessages), private :: Messages
+   character(len=MAXSTRINGLEN) , dimension(maxMessages), private :: Messages
    integer               , dimension(maxMessages), private :: Levels
    integer               ,                         private :: ibuffertail  = 0 !< Index of newest message in message buffer.
 
@@ -370,7 +370,7 @@ recursive subroutine SetMessage(level, string)
   character(c_char)             :: c_string(MAXSTRINGLEN)
 
   integer :: levelact
-  character(len=charln)         :: msg !< message.
+  character(len=MAXSTRINGLEN)   :: msg !< message.
 
 
   levelact = max(1,min(max_level, level))

@@ -24,7 +24,8 @@ FMODULES += \
 #Sources
 libMorphologyData_la_SOURCES = \
          sediment_basics_module.f90 \
-         morphology_data_module.f90
+         morphology_data_module.f90 \
+         dredge_data_module.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

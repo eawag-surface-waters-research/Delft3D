@@ -46,6 +46,7 @@ subroutine wrimapdad(lundia    ,error     ,filename  ,irequest  , &
     use globaldata
     use dfparall, only: nproc
     use wrtarray, only: wrtarray_nm_int
+    use dredge_data_module, only: dredtype, dumptype
     !
     implicit none
     !

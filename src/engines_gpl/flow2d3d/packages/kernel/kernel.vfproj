@@ -206,12 +206,13 @@
 		<File RelativePath="src\compute_sediment\bndmorlyr.f90"/>
 		<File RelativePath="src\compute_sediment\bott3d.f90"/>
 		<File RelativePath="src\compute_sediment\compthick.f90"/>
-		<File RelativePath="src\compute_sediment\dredge.f90"/>
-		<File RelativePath="src\compute_sediment\dredgedump.f90">
+		<File RelativePath="src\compute_sediment\dredge_comm.f90"/>
+		<File RelativePath="src\compute_sediment\dredge_d3d4.f90"/>
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
+		<File RelativePath="src\compute_sediment\dredge_initialize_d3d4.f90"/>
 		<File RelativePath="src\compute_sediment\dwnvel.f90"/>
 		<File RelativePath="src\compute_sediment\erosed.f90"/>
 		<File RelativePath="src\compute_sediment\morstatistics.f90"/>
@@ -255,14 +256,12 @@
 		<File RelativePath="src\general\fouini.f90"/>
 		<File RelativePath="src\general\getcel.f90"/>
 		<File RelativePath="src\general\iniid.f90"/>
-		<File RelativePath="src\general\ipon.f90"/>
 		<File RelativePath="src\general\keyinp.f90"/>
 		<File RelativePath="src\general\modlen.f90"/>
 		<File RelativePath="src\general\n_and_m_to_nm.f90"/>
 		<File RelativePath="src\general\newlun.f90"/>
 		<File RelativePath="src\general\nm_to_diag.f90"/>
 		<File RelativePath="src\general\nm_to_n_and_m.f90"/>
-		<File RelativePath=".\src\general\nm_to_nmglob.f90"/>
 		<File RelativePath="src\general\nuliar.f90"/>
 		<File RelativePath="src\general\open_datdef.f90"/>
 		<File RelativePath="src\general\pldep.F90">
@@ -289,7 +288,6 @@
 		<File RelativePath="src\general\rmdel.f90"/>
 		<File RelativePath="src\general\search.f90"/>
 		<File RelativePath="src\general\setcurrentdatetime.f90"/>
-		<File RelativePath="src\general\sortindices.f90"/>
 		<File RelativePath="src\general\srckey.f90"/>
 		<File RelativePath="src\general\step_to_screen.f90"/>
 		<File RelativePath="src\general\timdat.f90"/>

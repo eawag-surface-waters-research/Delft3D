@@ -390,8 +390,6 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
              & i(kcu)    ,i(kcv)    ,i(kcs)    ,gdp       )
     if (error) goto 9999
     !
-    call griddims_admin( i(kcs), gdp )
-    !
     ! check important geometry parameters and
     ! redefine THICK array and initialize SIG
     !
@@ -415,6 +413,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
               & r(gvd + iofset)      ,r(gsqiu + iofset)    ,r(gsqiv + iofset)    ,i(kcu + iofset)      ,i(kcv + iofset)      , &
               & i(kcs + iofset)      ,r(guu)               ,r(gvv)               ,gdp       )
     if (error) goto 9999
+    !
+    call griddims_admin( i(kcs), r(xz), r(yz), r(xcor), r(ycor),  gdp )
     !
     ! DFUPDGEO: exchange geometrical information as computed in routine inigeo with neighbours in case of parallel runs
     !

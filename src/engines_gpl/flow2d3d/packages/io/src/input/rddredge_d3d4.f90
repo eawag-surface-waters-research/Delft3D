@@ -1,3 +1,4 @@
+subroutine rddredge_d3d4(gsqs      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -25,15 +26,38 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$$
-!-------------------------------------------------------------------------------
-    type sv_ipon
+!  $HeadURL$
+!!--description-----------------------------------------------------------------
 !
-    real(fp), dimension(:) , pointer :: x           ! (maxpolyp+1) work array with all (translated)
-                                                    ! x coordinates of the polygon points
-    real(fp), dimension(:) , pointer :: y           ! (maxpolyp+1) work array with all (translated)
-                                                    ! y coordinates of the polygon points
-    integer                          :: maxpolpoint ! maximum number of points in the polygon
-                                                    ! due to the size of allocated arrays x and y
+! Reads Dredge and Dump input file.
+! Allocates related arrays.
 !
-    end type sv_ipon
+!!--pseudo code and references--------------------------------------------------
+! NONE
+!!--declarations----------------------------------------------------------------
+    use precision
+    use properties
+    use m_rddredge, only: rddredge
+    !
+    use globaldata
+    !
+    implicit none
+    !
+    type(globdat),target :: gdp
+!
+! Global variables
+!
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
+!
+! Local variables
+!
+    type(tree_data), pointer                :: dad_ptr
+    logical                                 :: error
+!
+!! executable statements -------------------------------------------------------
+!
+    call tree_create_node( gdp%input_tree, 'Dredge and Dump', dad_ptr )
+    call rddredge(gdp%gddredge, dad_ptr, gdp%gdsedpar, gdp%gdbedformpar%lfbedfrm, &
+                & gdp%gdmorpar, gdp%gdinout%lundia, gdp%gdinttim%julday, &
+                & gsqs, gdp%griddim, gdp%runid, gdp%d%nmlb, gdp%d%nmub, error)
+end subroutine rddredge_d3d4

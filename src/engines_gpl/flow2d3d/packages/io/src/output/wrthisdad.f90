@@ -53,13 +53,13 @@ subroutine wrthisdad(lundia    ,error     ,filename  ,ithisc    , &
     real(fp)            , dimension(:)   , pointer :: totvoldred
     real(fp)            , dimension(:,:) , pointer :: voldump
     real(fp)            , dimension(:)   , pointer :: totvoldump
-    integer             , dimension(:)   , pointer :: ndredged
-    integer             , dimension(:)   , pointer :: nploughed
+    real(fp)            , dimension(:)   , pointer :: tim_dredged
+    real(fp)            , dimension(:)   , pointer :: tim_ploughed
     integer                              , pointer :: nadred
     integer                              , pointer :: nadump
     integer                              , pointer :: nasupl
     integer                              , pointer :: nalink
-    integer                              , pointer :: ntimaccum
+    real(fp)                             , pointer :: tim_accum
     character(24)                        , pointer :: date_time
     integer                              , pointer :: celidt
     type (datagroup)                     , pointer :: group
@@ -111,13 +111,13 @@ subroutine wrthisdad(lundia    ,error     ,filename  ,ithisc    , &
     totvoldred        => gdp%gddredge%totvoldred
     voldump           => gdp%gddredge%voldump
     totvoldump        => gdp%gddredge%totvoldump
-    ndredged          => gdp%gddredge%ndredged
-    nploughed         => gdp%gddredge%nploughed
+    tim_dredged       => gdp%gddredge%tim_dredged
+    tim_ploughed      => gdp%gddredge%tim_ploughed
     nadred            => gdp%gddredge%nadred
     nadump            => gdp%gddredge%nadump
     nasupl            => gdp%gddredge%nasupl
     nalink            => gdp%gddredge%nalink
-    ntimaccum         => gdp%gddredge%ntimaccum
+    tim_accum         => gdp%gddredge%tim_accum
     date_time         => gdp%gdinttim%date_time
     io_prec           => gdp%gdpostpr%io_prec
     !
@@ -187,17 +187,17 @@ subroutine wrthisdad(lundia    ,error     ,filename  ,ithisc    , &
                     & gdp, ierror, lundia, totvoldump, 'DUMP_VOLUME')
           if (ierror/= 0) goto 9999
           !
-          if (ntimaccum==0) then
-             tfrac = 1.0_fp
+          if (tim_accum > 0.0_fp) then
+             tfrac = 1.0_fp/tim_accum
           else
-             tfrac = 1.0_fp/ntimaccum
+             tfrac = 1.0_fp
           endif
           !
           ! element 'DREDGE_TFRAC'
           !
           allocate(rbuff1(nadred+nasupl), stat=istat)
           do i = 1, nadred+nasupl
-             rbuff1(i) = tfrac*ndredged(i)
+             rbuff1(i) = tfrac*tim_dredged(i)
           enddo
           call wrtvar(fds, filename, filetype, grnam, celidt, &
                     & gdp, ierror, lundia, rbuff1, 'DREDGE_TFRAC')
@@ -206,7 +206,7 @@ subroutine wrthisdad(lundia    ,error     ,filename  ,ithisc    , &
           ! element 'PLOUGH_TFRAC'
           !
           do i = 1, nadred+nasupl
-             rbuff1(i) = tfrac*nploughed(i)
+             rbuff1(i) = tfrac*tim_ploughed(i)
           enddo
           call wrtvar(fds, filename, filetype, grnam, celidt, &
                     & gdp, ierror, lundia, rbuff1, 'PLOUGH_TFRAC')
@@ -214,9 +214,9 @@ subroutine wrthisdad(lundia    ,error     ,filename  ,ithisc    , &
           if (ierror/= 0) goto 9999
        endif
        !
-       ntimaccum = 0
-       ndredged  = 0
-       nploughed = 0
+       tim_accum    = 0.0_fp
+       tim_dredged  = 0.0_fp
+       tim_ploughed = 0.0_fp
        !
     end select
     !

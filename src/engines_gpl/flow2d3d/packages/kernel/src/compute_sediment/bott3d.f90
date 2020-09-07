@@ -1192,8 +1192,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        ! Dredging and Dumping
        !
        if (dredge) then
-          call dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
-                        & gdp       )
+          call dredge_d3d4(dps, s1, timhr, nst, gdp)
        endif
     endif
     ! -----------------------------------------------------------

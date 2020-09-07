@@ -50,7 +50,6 @@ libdflowfm_la_SOURCES=\
         unstruc_messages.f90 \
         unstruc_ini.f90 \
         xbeach_typesandkinds.F90 \
-        dredge_data.f90 \
         hydrology_data.f90 \
         bedform_data.f90 \
         modules.f90 \
@@ -80,7 +79,6 @@ libdflowfm_la_SOURCES=\
         unstruc_files.f90 \
         unstruc_netcdf_incremental.f90 \
         unstruc_shapefile.F90 \
-        dredgepolygon.f90 \
         bedform_io.f90 \
         unstruc_boundaries.f90 \
         unstruc_inifields.f90 \

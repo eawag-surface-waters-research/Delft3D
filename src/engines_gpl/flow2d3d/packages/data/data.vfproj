@@ -189,7 +189,6 @@
 		<Filter Name="gdp">
 		<File RelativePath="src\gdp\clradv2d.f90"/>
 		<File RelativePath="src\gdp\clrbedformpar.f90"/>
-		<File RelativePath="src\gdp\clrdredge.f90"/>
 		<File RelativePath="src\gdp\clrflwpar.f90"/>
 		<File RelativePath="src\gdp\clrmassbal.f90"/>
 		<File RelativePath="src\gdp\clrtrachy.f90"/>
@@ -206,7 +205,6 @@
 		<File RelativePath="src\gdp\initcoup.f90"/>
 		<File RelativePath="src\gdp\initculver.f90"/>
 		<File RelativePath="src\gdp\initdischarge.f90"/>
-		<File RelativePath="src\gdp\initdredge.f90"/>
 		<File RelativePath="src\gdp\initf0isf1.f90"/>
 		<File RelativePath="src\gdp\initflwpar.f90"/>
 		<File RelativePath="src\gdp\initfmtbcc.f90"/>

@@ -37,6 +37,8 @@ libMorphologyKernel_la_SOURCES = \
          comphidexp.f90 \
          compbsskin.f90 \
          compsandfrac.f90 \
+         dredge_initialize.f90 \
+         dredge.f90 \
          eqsettle.f90 \
          eqtran.f90 \
          erosilt.f90 \
@@ -59,6 +61,7 @@ libMorphologyKernel_la_SOURCES = \
          santoss_rrr12.f90 \
          santoss_sfltd99.f90 \
          shld.f90 \
+         sortindices.f90 \
          soursin_2d.f90 \
          soursin_3d.f90 \
          termfy.f90 \

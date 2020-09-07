@@ -159,7 +159,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
        nbalpnt = 0
        name = tree_get_name(link_ptr)
        call register_polygon(name  , pol_ptr, nbalpol, nbalpnt, &
-                           & 'balance', .true., gdp)
+                           & 'balance', .true., lundia)
        maxnpnt = max(maxnpnt,nbalpnt)
     enddo
     nbalpol  = nbalpol+1 ! add one for default volume
@@ -193,7 +193,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
        !
        idx = 1
        call read_polygon_data(link_ptr, idx, firstpnt, nbalpnt, &
-                            & xdr, ydr, 'balance', i, gdp)
+                            & xdr, ydr, 'balance', i, lundia)
        !
        ! Determine internal points of polygons and assign them to this volume
        ! Note that if a cell is inside several polygons, it will be assigned to
@@ -201,7 +201,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
        !
        do nm = 1, nmmax
           if (volnr(nm)==0 .and. abs(kcs(nm)) == 1) then
-             call ipon(xdr, ydr, nbalpnt, xz(nm), yz(nm), istat, gdp)
+             call ipon(xdr, ydr, nbalpnt, xz(nm), yz(nm), istat)
              if (istat >= 0) then
                 volnr(nm) = i
              endif

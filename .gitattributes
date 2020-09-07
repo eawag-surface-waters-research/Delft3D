@@ -492,8 +492,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/calibration.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/d_flooding.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dem.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dfm_signals.F90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dredge_data.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dredgepolygon.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/filez.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/filter.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_bedform.f90 -text
@@ -788,7 +786,6 @@ src/engines_gpl/flow2d3d/packages/data/include/dddata.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/dfparall.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/dimens.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/discharge.igs -text
-src/engines_gpl/flow2d3d/packages/data/include/dredge.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/exttim.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/f0isf1.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/flow_steps_f.inc -text
@@ -810,7 +807,6 @@ src/engines_gpl/flow2d3d/packages/data/include/inout.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/inspec.inc -text
 src/engines_gpl/flow2d3d/packages/data/include/inttim.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/iofiles.igs -text
-src/engines_gpl/flow2d3d/packages/data/include/ipon.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/iwearr.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/iwepar.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/keywtd.igs -text
@@ -890,7 +886,6 @@ src/engines_gpl/flow2d3d/packages/data/src/basics/timers.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/clradv2d.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/clrbedformpar.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/gdp/clrdredge.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/clrflwpar.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/clrmassbal.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/clrtrachy.f90 -text
@@ -908,7 +903,6 @@ src/engines_gpl/flow2d3d/packages/data/src/gdp/initcline.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initcoup.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initculver.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initdischarge.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/gdp/initdredge.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initf0isf1.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initflwpar.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initfmtbcc.f90 -text
@@ -1109,14 +1103,13 @@ src/engines_gpl/flow2d3d/packages/io/src/input/inimet.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/inimorlyr.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/morbndfill.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/numcmp.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/input/polygon_module.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rdarray.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rdbcg.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rdbedformpar.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rdbndd.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rdcul.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rddept.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/input/rddredge.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/rddredge_d3d4.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rdfcio.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rdfour.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rdgrid.f90 -text
@@ -1466,8 +1459,9 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/avalan.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/bndmorlyr.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/bott3d.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compthick.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredge.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredgedump.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredge_comm.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredge_d3d4.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredge_initialize_d3d4.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dwnvel.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/erosed.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/morstatistics.f90 -text
@@ -1511,7 +1505,6 @@ src/engines_gpl/flow2d3d/packages/kernel/src/general/flwlic.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/fouini.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/getcel.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/iniid.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/general/ipon.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/isnan.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/keyinp.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/modlen.f90 -text
@@ -1519,7 +1512,6 @@ src/engines_gpl/flow2d3d/packages/kernel/src/general/n_and_m_to_nm.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/newlun.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/nm_to_diag.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/nm_to_n_and_m.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/general/nm_to_nmglob.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/nuliar.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/open_datdef.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/pldep.F90 -text
@@ -1538,7 +1530,6 @@ src/engines_gpl/flow2d3d/packages/kernel/src/general/regel.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/rmdel.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/search.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/setcurrentdatetime.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/general/sortindices.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/srckey.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/step_to_screen.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/timdat.f90 -text
@@ -16462,6 +16453,7 @@ src/utils_gpl/morphology/packages/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_data/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_data/morphology_data.vfproj -text
 src/utils_gpl/morphology/packages/morphology_data/src/Makefile.am -text
+src/utils_gpl/morphology/packages/morphology_data/src/dredge_data_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_data/src/morphology_data_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_data/src/sediment_basics_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/Makefile.am -text
@@ -16469,6 +16461,7 @@ src/utils_gpl/morphology/packages/morphology_io/morphology_io.vfproj -text
 src/utils_gpl/morphology/packages/morphology_io/src/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_io/src/depfil_stm.F90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/ini_noderel.f90 -text
+src/utils_gpl/morphology/packages/morphology_io/src/rddredge.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdmor.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdmorlyr.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdsed.f90 -text
@@ -16489,6 +16482,8 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/compbsskin.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/compdiam.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/comphidexp.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/compsandfrac.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/dredge.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/dredge_initialize.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/eqsettle.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/eqtran.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/erosilt.f90 -text
@@ -16511,6 +16506,7 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/santoss_ripple.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/santoss_rrr12.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/santoss_sfltd99.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/shld.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/sortindices.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/soursin_2d.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/soursin_3d.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/termfy.f90 -text
@@ -17099,6 +17095,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/message_module.f90 -
 src/utils_lgpl/deltares_common/packages/deltares_common/src/multi_file_io.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/nan_check_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/physicalconsts.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/polygon_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/precision.F90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_basics.F90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_sp.F90 -text

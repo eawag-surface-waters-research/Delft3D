@@ -38,6 +38,7 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
+    use polygon_module, only: ipon
     !
     use globaldata
     !
@@ -506,7 +507,7 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
                 enddo
                 do k = 2, nmax-1
                    do j = 2, mmax-1
-                      call ipon(xpol ,ypol ,np ,xz(k, j) ,yz(k, j) ,inout ,gdp)
+                      call ipon(xpol ,ypol ,np ,xz(k, j) ,yz(k, j) ,inout)
                       if (inout>=0) then
                          planttype(k, j) = vegmatch
                          nplants  (k, j) = cntplants

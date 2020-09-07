@@ -971,12 +971,12 @@ module m_sediment
 end module m_sediment
 
 module m_dad
-   use m_dredge_data
+   use dredge_data_module, only: dredge_type
 !
 ! dredging related
 !
    logical                           :: dad_included  !< Include dredging and dumping
-   type(sv_dredge), target           :: dadpar        !< Dredging related parameters
+   type(dredge_type), target         :: dadpar        !< Dredging related parameters
 
 end module m_dad
 
