@@ -207,7 +207,7 @@
 		<File RelativePath="src\compute_sediment\bott3d.f90"/>
 		<File RelativePath="src\compute_sediment\compthick.f90"/>
 		<File RelativePath="src\compute_sediment\dredge_comm.f90"/>
-		<File RelativePath="src\compute_sediment\dredge_d3d4.f90"/>
+		<File RelativePath="src\compute_sediment\dredge_d3d4.f90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
