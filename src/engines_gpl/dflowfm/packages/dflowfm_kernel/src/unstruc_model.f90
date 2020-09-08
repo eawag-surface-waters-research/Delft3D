@@ -434,7 +434,7 @@ subroutine loadModel(filename)
     use m_flow1d_reader
     use m_flowexternalforcings, only: pillar
     use m_sferic
-    use string_module, only: get_dirsep
+    ! use string_module, only: get_dirsep
     use unstruc_caching
 
     interface
@@ -993,11 +993,20 @@ subroutine readMDUFile(filename, istat)
        ja_timestep_auto = 5
     endif
     call prop_get_integer(md_ptr, 'numerics', 'TransportTimestepping' , jaLts)
+
     call prop_get_integer(md_ptr, 'numerics', 'TransportAutoTimestepdiff' , jatransportautotimestepdiff)
     if (jatransportautotimestepdiff == 3 .and. kmx > 0) then
-       call mess(LEVEL_ERROR, 'Implicit horizontaldiffusion is only implemented in 2D', 'set TransportAutoTimestepdiff = 1 or 2')
+       call mess(LEVEL_ERROR, 'Implicit horizontaldiffusion is only implemented in 2D', 'set TransportAutoTimestepdiff = 0, 1 or 2')
     endif
 
+    call prop_get_integer(md_ptr, 'numerics', 'Implicitdiffusion2D' , Implicitdiffusion2D)
+    if (Implicitdiffusion2D == 1) then 
+       if (kmx > 0) then 
+          call mess(LEVEL_ERROR, 'Implicit horizontaldiffusion is only implemented in 2D',' ')
+       else 
+          jatransportautotimestepdiff = 3
+       endif
+    endif
 
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'   , javasal)
 
@@ -1008,6 +1017,9 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'numerics', 'Cffacver'        , Cffacver)
 
     call prop_get_integer(md_ptr, 'numerics', 'Horadvtypzlayer' , jahazlayer)
+
+    call prop_get_double (md_ptr, 'numerics', 'Pure1D'          , Pure1D)
+
     call prop_get_integer(md_ptr, 'numerics', 'Zlayercenterbedvel', jaZlayercenterbedvel)
     call prop_get_integer(md_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection)
 
@@ -2633,7 +2645,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'numerics', 'TransportMethod', jatransportmodule,   'Transport method (0: Herman''s method, 1: transport module)')
     if (writeall .or. jatransportmodule == 1) then
        call prop_set(prop_ptr, 'numerics', 'TransportTimestepping', jaLts,   'Timestepping method in Transport module, 0 = global, 1 = local (default) ')
-       call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion, 3=implicit (only 2D)')
+       call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestepdiff', jatransportautotimestepdiff,   'Auto Timestepdiff in Transport, 0 : lim diff, no lim Dt_tr, 1 : no lim diff, lim Dt_tr, 2: no lim diff, no lim Dt_tr, 3=implicit (only 2D)')
+       call prop_set(prop_ptr, 'numerics', 'Implicitdiffusion2D', Implicitdiffusion2D,   '1 = Yes, 0 = No')
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
@@ -2651,6 +2664,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. (jahazlayer .ne. 0 .and. layertype .ne. 1)) then
       call prop_set(prop_ptr, 'numerics', 'Horadvtypzlayer', Jahazlayer, 'Horizontal advection treatment of z-layers (1: default, 2: sigma-like)')
     endif
+
+    if (writeall .or. Pure1D > 0) then  
+       call prop_set(prop_ptr, 'numerics', 'Pure1D'          , Pure1D, '0d0=org,1d0=pure1D')
+    endif 
+
     if (jaZerozbndinflowadvection > 0) then
        call prop_set(prop_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection, 'On waterlevel boundaries set incoming advection velocity to zero (0=no, 1=on inflow, 2=also on outflow)')
     endif
