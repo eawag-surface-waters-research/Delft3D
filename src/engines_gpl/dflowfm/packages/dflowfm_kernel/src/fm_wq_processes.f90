@@ -1238,7 +1238,7 @@
       use m_flow,           only: vol1, sa1, tem1, ucx, ucy
       use m_flowtimes,      only: irefdate, tunit
       use m_fm_wq_processes
-      use m_transport,      only: constituents
+      use m_transport,      only: constituents, itemp
       use m_sferic,         only: twopi, rd2dg
       use m_wind
       use m_meteo
@@ -1336,7 +1336,7 @@
       if ( isftem.gt.0 ) then
          ipoitem = arrpoi(iisfun) + (isftem-1)*noseg
          do k=0,ktx-kbx
-            pmsa(ipoitem + k) = tem1(k+kbx)
+            pmsa(ipoitem + k) = constituents(itemp, k+kbx) ! tem1 is not always up to date!
          end do
       end if
 
