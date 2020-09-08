@@ -12421,10 +12421,12 @@ subroutine unc_read_map(filename, tim, ierr)
           endif
        endif
     else
-       ! squ
-       ierr = get_var_and_shift(imapfile, 'squ', squ,  tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
-                                inode_own, inode_merge)
-       call check_error(ierr, 'squ')
+       if (tok1 > 0) then ! only read squ from *_rst.nc file
+          ! squ
+          ierr = get_var_and_shift(imapfile, 'squ', squ,  tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
+                                   inode_own, inode_merge)
+          call check_error(ierr, 'squ')
+       end if
     endif
     call readyy('Reading map data', 0.80d0)
 
