@@ -180,12 +180,19 @@ fi
 fortranModule=""
 case $compiler in
     gnu)
-        fortranModule="gcc/4.9.1"
+        fortranModule="gcc/9.2.0"
         ifortInit="module load $fortranModule"
         iccInit=""
         echo "Using GNU compilers in `witch gfortran`"
         ;;
     
+    intel19)
+    fortranModule="intel/19.1.1"
+    ifortInit="module load $fortranModule"
+        iccInit=""
+        echo "Using Intel 19.1.1 Fortran ($platform) compiler"
+        ;;
+
     intel18)
     fortranModule="intel/18.0.3"
     ifortInit="module load $fortranModule"
@@ -276,57 +283,59 @@ fi
 
 #===============================================================================
 # Use the correct Autotools
-
-automakeModule="automake/1.14.1"
-autoconfModule="autoconf/2.69"
-libtoolModule="libtool/2.4.3"
-
-initAutomake="module load $automakeModule"
-initAutoconf="module load $autoconfModule"
-initLibtool="module load $libtoolModule"
-eval $initAutomake
-if [ $? -ne 0 ]; then
-    echo 'ERROR: Automake initialization fails!'
-    cd $orgdir
-    exit 1
-fi
-eval $initAutoconf
-if [ $? -ne 0 ]; then
-    echo 'ERROR: Autoconf initialization fails!'
-    cd $orgdir
-    exit 1
-fi
-eval $initLibtool
-if [ $? -ne 0 ]; then
-    echo 'ERROR: Libtool initialization fails!'
-    cd $orgdir
-    exit 1
-fi
+## default available on CentOS7
+# automakeModule="automake/1.14.1"
+# autoconfModule="autoconf/2.69"
+# libtoolModule="libtool/2.4.3"
+# 
+# initAutomake="module load $automakeModule"
+# initAutoconf="module load $autoconfModule"
+# initLibtool="module load $libtoolModule"
+# eval $initAutomake
+# if [ $? -ne 0 ]; then
+#     echo 'ERROR: Automake initialization fails!'
+#     cd $orgdir
+#     exit 1
+# fi
+# eval $initAutoconf
+# if [ $? -ne 0 ]; then
+#     echo 'ERROR: Autoconf initialization fails!'
+#     cd $orgdir
+#     exit 1
+# fi
+# eval $initLibtool
+# if [ $? -ne 0 ]; then
+#     echo 'ERROR: Libtool initialization fails!'
+#     cd $orgdir
+#     exit 1
+# fi
 
 #===============================================================================
 # Additional library settings
 
 #---------------------
-# mpich2
+# mpich
 mpichModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    mpichModule="mpich2/3.1.4_gcc_4.9.1"
+    mpichModule="mpich/3.3.2_gcc9.2.0"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
-        mpichModule="mpich2/3.1.4_intel_14.0.3"
+        mpichModule="mpich/3.1.4_intel_14.0.3"
     elif [ "$compiler" = 'intel16' ]; then
-        mpichModule="mpich2/3.1.4_intel_16.0.3"
+        mpichModule="mpich/3.1.4_intel_16.0.3"
 
     elif [ "$compiler" = 'intel18' ]; then
-    mpichModule="mpich2/3.3_intel_18.0.3" 
+    mpichModule="mpich/3.3.2_intel18.0.3" 
+    elif [ "$compiler" = 'intel19' ]; then
+    mpichModule="mpich/3.3.2_intel19.1.1" 
     fi
 fi
-initMpich2="module load $mpichModule"
-eval $initMpich2
+initMpich="module load $mpichModule"
+eval $initMpich
 if [ $? -ne 0 ]; then
-    echo 'ERROR: Mpich2 initialization fails!'
+    echo 'ERROR: Mpich initialization fails!'
     cd $orgdir
     exit 1
 fi
@@ -337,7 +346,7 @@ fi
 petscModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    petscModule="petsc/3.4.0_gcc4.9.1_mpich_3.1.4"
+    petscModule="petsc/3.13.3_gcc9.2.0_mpich3.3.2"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -345,7 +354,9 @@ else
     elif [ "$compiler" = 'intel16' ]; then
     petscModule="petsc/3.4.0_intel16.0.3_mpich_3.1.4"
     elif [ "$compiler" = 'intel18' ]; then
-    petscModule="petsc/3.9.3_intel18.0.3_mpich_3.3"
+    petscModule="petsc/3.13.3_intel18.0.3_mpich3.3.2"
+    elif [ "$compiler" = 'intel19' ]; then
+    petscModule="petsc/3.13.3_intel19.1.1_mpich3.3.2"
     fi
 fi
 initPetsc="module load $petscModule"
@@ -362,7 +373,7 @@ fi
 metisModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    metisModule="metis/5.1.0_gcc4.9.1"
+    metisModule="metis/5.1.0_gcc9.2.0"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -371,6 +382,8 @@ else
         metisModule="metis/5.1.0_intel16.0.3"
     elif [ "$compiler" = 'intel18' ]; then
         metisModule="metis/5.1.0_intel18.0.3"
+    elif [ "$compiler" = 'intel19' ]; then
+        metisModule="metis/5.1.0_intel19.1.1"
     fi
 fi
 initMetis="module load $metisModule"
@@ -406,7 +419,7 @@ fi
 # netcdf
 netcdfModule=""
 if [ "$compiler" = 'gnu' ]; then
-    netcdfModule="netcdf/v4.3.2_v4.4.0_gcc_4.9.1"
+    netcdfModule="netcdf/v4.7.4_v4.5.3_gcc9.2.0"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -414,7 +427,9 @@ else
     elif [ "$compiler" = 'intel16' ]; then
     netcdfModule="netcdf/v4.6.1_v4.4.0_intel_16.0.3"
     elif [ "$compiler" = 'intel18' ]; then
-    netcdfModule="netcdf/v4.6.2_v4.4.4_intel_18.0.3"
+    netcdfModule="netcdf/v4.7.4_v4.5.3_intel18.0.3"
+    elif [ "$compiler" = 'intel19' ]; then
+    netcdfModule="netcdf/v4.7.4_v4.5.3_intel19.0.3"
     fi
 fi
 initNetcdf="module load $netcdfModule"
@@ -430,7 +445,7 @@ fi
 
 # OLD: icc c++11 features are only available if gcc is in the path. This is required by proj
 # NEW: proj only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
-projModule="gcc/4.9.2 proj/6.3.1_gcc5.3.1"
+projModule="gcc/9.2.0 proj/7.1.0_gcc9.2.0"
 
 initProj="module load $projModule"
 eval $initProj
@@ -448,11 +463,15 @@ else
 #---------------------
 # shapelib
 shapelibModule=""
-if [ "$compiler" = 'intel16' ]; then
+if [ "$compiler" = 'gnu' ]; then
+    shapelibModule="shapelib/1.5.0_gcc9.2.0"
+elif [ "$compiler" = 'intel16' ]; then
     # icc c++11 features are only available if gcc is in the path. This is required by shapelib
     shapelibModule="intel/16.0.3 gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
 elif [ "$compiler" = 'intel18' ]; then
-    shapelibModule="intel/18.0.3 gcc/4.9.2 shapelib/1.4.1_intel18.0.3"
+    shapelibModule="gcc/9.2.0 shapelib/1.5.0_intel18.0.3"
+elif [ "$compiler" = 'intel19' ]; then
+    shapelibModule="gcc/9.2.0 shapelib/1.5.0_intel19.1.1"
 fi
 shapelib="module load $shapelibModule"
 eval $shapelib
@@ -465,7 +484,7 @@ else
     SHAPELIB_CPPFLAGS=""
     SHAPELIB_LDFLAGS=""
     SHAPELIB_CONFARGS="--disable-shapelib"
-    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
+    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' || "$compiler" = 'intel19' ]]; then
 	   # NOTE: SHAPELIB_DIR was set during the execution of "module load $shapelibModule"
        SHAPELIB_CPPFLAGS=-I$SHAPELIB_DIR/include
        SHAPELIB_LDFLAGS=-L$SHAPELIB_DIR/lib
@@ -478,8 +497,8 @@ fi
 # NEW: gdal only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
 # Update June 10, 2020: GDAL is still leading to linker errors in combination with GNU. Disabled until further notice.
 gdalModule=""
-if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
-    gdalModule="gcc/4.9.2 gdal/3.0.4_gcc5.3.1"
+if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' || "$compiler" = 'intel19' ]]; then
+    gdalModule="gcc/9.2.0 gdal/3.1.2_gcc9.2.0"
 fi
 
 initgdal="module load $gdalModule"
@@ -493,7 +512,7 @@ else
     GDAL_CPPFLAGS=""
     GDAL_LDFLAGS=""
     GDAL_CONFARGS="--disable-gdal"
-    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
+    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' || "$compiler" = 'intel19' ]]; then
 	   # NOTE: GDAL_DIR was set during the execution of "module load $gdalModule"
        GDAL_CPPFLAGS=-I$GDAL_DIR/include
        GDAL_LDFLAGS=-L$GDAL_DIR/lib
@@ -508,9 +527,9 @@ echo "Loaded modules:"
 echo "module load $initModule1"
 echo "module load $initModule2"
 echo "module load $fortranModule"
-echo "module load $automakeModule"
-echo "module load $autoconfModule"
-echo "module load $libtoolModule"
+# echo "module load $automakeModule"
+# echo "module load $autoconfModule"
+# echo "module load $libtoolModule"
 echo "module load $mpichModule"
 echo "module load $petscModule"
 echo "module load $metisModule"
@@ -520,9 +539,9 @@ echo "module load $netcdfModule"
 echo
 echo "Module display of loaded modules:"
 module display $fortranModule
-module display $automakeModule
-module display $autoconfModule
-module display $libtoolModule
+# module display $automakeModule
+# module display $autoconfModule
+# module display $libtoolModule
 module display $mpichModule
 module display $petscModule
 module display $metisModule
