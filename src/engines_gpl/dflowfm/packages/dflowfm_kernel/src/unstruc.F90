@@ -297,6 +297,7 @@ end subroutine flow_run_usertimestep
 !! Should be called directly after a flow_run_usertimestep.
 subroutine flow_finalize_usertimestep(iresult)
    use m_flowtimes
+   use Timers
    use m_timer
    use m_flow
    use m_flowgeom
@@ -346,6 +347,8 @@ subroutine flow_finalize_usertimestep(iresult)
       endif
       if ( jatimer == 1 ) call starttimer(IOUTPUT)
 
+      call timstrt('Output', handle_extra(53)) ! output
+
 !       only update values at the observation stations when necessary
 !          alternative: move this to flow_externaloutput
       if (ti_his > 0) then
@@ -382,6 +385,7 @@ subroutine flow_finalize_usertimestep(iresult)
 
       call flow_externaloutput(time1)
 
+      call timstop(handle_extra(53)) ! output
       if ( jatimer == 1 ) call stoptimer(IOUTPUT)
 
    endif
@@ -1147,6 +1151,7 @@ if(q /= 0) then
  use m_flow                                          ! when entering this subroutine, s1=s0, u1=u0, etc
  use m_flowgeom
  use m_sediment, only: stm_included, stmpar
+ use Timers
  use m_flowtimes
  use m_sferic
  use m_wind
@@ -1179,6 +1184,8 @@ if(q /= 0) then
  if (wrwaqon.and.allocated(qsrcwaq)) then
     qsrcwaq0 = qsrcwaq ! store current cumulative qsrc for waq at the beginning of this time step
  end if
+
+ call timstrt('step_reduce', handle_extra(51)) ! step_reduce
 
  111 continue
 
@@ -1465,6 +1472,7 @@ if(q /= 0) then
 
  endif
 
+ call timstop(handle_extra(51)) ! step_reduce
  end subroutine step_reduce
 
  subroutine update_s_explicit()
@@ -30918,6 +30926,7 @@ subroutine transport()                           ! transport for now, advect sal
                                                   ! high order limited terms to uqcx, uqcy
  use m_flowgeom
  use m_flow
+ use Timers
  use m_flowtimes
  use m_ship
  use m_sediment
@@ -30977,6 +30986,8 @@ subroutine transport()                           ! transport for now, advect sal
  double precision, allocatable  :: skmx(:)
 
  double precision               :: valtop
+
+ call timstrt('Transport', handle_extra(52)) ! transport
 
  if ( stm_included .and. jased.ne.0 .and. jatransportmodule.eq.0 ) then
     call mess(LEVEL_FATAL, 'unstruc::transport - Please use transport module when sediment model number == 4')
@@ -32267,7 +32278,9 @@ subroutine transport()                           ! transport for now, advect sal
     endif
  endif
 
-end subroutine transport
+call timstop(handle_extra(52)) ! transport
+
+   end subroutine transport
 
 subroutine getverticallyaveraged(sal,mx)
 use m_flow
