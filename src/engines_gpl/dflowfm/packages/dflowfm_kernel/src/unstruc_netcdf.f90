@@ -15005,7 +15005,7 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
    strucVarErr = 0
 
    if (.not. network%loaded) then
-      call mess(LEVEL_WARN, 'read_structures_from_rst: the network array is not loaded, then skip reading structures. The simulation will continue but the results may not be reliable.')
+      !call mess(LEVEL_WARN, 'read_structures_from_rst: the network array is not loaded, then skip reading structures. The simulation will continue but the results may not be reliable.')
       return
    end if
 
