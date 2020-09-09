@@ -1329,7 +1329,7 @@
       if ( isfsal.gt.0 ) then
          ipoisal = arrpoi(iisfun) + (isfsal-1)*noseg
          do k=0,ktx-kbx
-            pmsa(ipoisal + k) = sa1(k+kbx)
+            pmsa(ipoisal + k) = sa1(k+kbx) ! should be changed to constituents(isalt, k+kbx) in the future
          end do
       end if
 
