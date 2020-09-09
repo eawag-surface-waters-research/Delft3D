@@ -5476,7 +5476,7 @@ end subroutine setdt
 
  endif
 
- if (kmx == 1 .and. lnx1D >0) then 
+ if (kmx == 0 .and. lnx1D >0) then
     call setucxy1D()
  endif
 
@@ -8801,24 +8801,24 @@ else if (icorio == 10) then                             ! vol2D type weigthings
 
  endif
 
- if (kmx == 0 .and. lnx1D > 0 ) then ! setuc 
+ if (kmx == 0 .and. lnx1D > 0 ) then ! setuc
     uc1D  = 0d0
 
     do n  = ndx2D+1,ndxi
        nx = nd(n)%lnx
        if (nx == 2) then
            do LL = 1,nx
-             L   = nd(n)%ln(LL) 
+             L   = nd(n)%ln(LL)
              La  = iabs(L)
              if (iabs(kcu(La)) == 1) then
                 i12 = 2 ; if (L < 0) i12 = 1
-                if (LL == 1) then 
-                    if (L  > 0) then 
-                        ip =  1  
-                    else 
-                        ip = -1 
-                    endif   
-                else 
+                if (LL == 1) then
+                    if (L  > 0) then
+                        ip =  1
+                    else
+                        ip = -1
+                    endif
+                else
                     if (ip*L > 0) then
                         ip = -ip
                     endif
@@ -8826,19 +8826,19 @@ else if (icorio == 10) then                             ! vol2D type weigthings
                 uc1D(n) = uc1D(n) + wcL(i12,La)*u1(La)*ip
               endif
           enddo
-        endif 
+        endif
     enddo
 
     do LL = lnxi+1,lnx          ! bnd
        if (kcu(LL) == -1) then  ! 1D type link
            n = Ln(1,LL) ; k2 = Ln(2,LL)
            if (uc1D(k2) .ne. 0) then
-               uc1D(n) = uc1D(k2) 
+               uc1D(n) = uc1D(k2)
            endif
        endif
     enddo
 
-    if (pure1D > 0) then 
+    if (pure1D > 0) then
        do L = 1,lnx
           if (qa(L) > 0 .and. abs(uc1D(ln(1,L))) > 0 ) then                               ! set upwind ucxu, ucyu  on links
              u1Du(L) = uc1D(ln(1,L))
@@ -8847,7 +8847,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
           endif
        enddo
     endif
-      
+
  endif
 
 end subroutine setucxucyucxuucyunew
@@ -8858,12 +8858,12 @@ use m_flowgeom
 use m_flow
 
 implicit none
-integer          :: n,LL,k2    
+integer          :: n,LL,k2
 double precision :: uxy
 
-do n = 1,ndx  
-   if (uc1D(n) .ne. 0) then  
-      uxy    = sqrt( ucx(n)*ucx(n) + ucy(n)*ucy(n) ) 
+do n = 1,ndx
+   if (uc1D(n) .ne. 0) then
+      uxy    = sqrt( ucx(n)*ucx(n) + ucy(n)*ucy(n) )
       if (uxy > 0) then
           uxy    = uc1D(n)/uxy
           ucx(n) = ucx(n)*uxy
@@ -8876,7 +8876,7 @@ do LL = lnxi+1,lnx          ! bnd
     if (kcu(LL) == -1) then  ! 1D type link
         n = Ln(1,LL) ; k2 = Ln(2,LL)
         if (uc1D(k2) .ne. 0) then
-            uxy    = sqrt( ucx(n)*ucx(n) + ucy(n)*ucy(n) ) 
+            uxy    = sqrt( ucx(n)*ucx(n) + ucy(n)*ucy(n) )
             if (uxy > 0) then
                 uxy    = uc1D(n)/uxy
                 ucx(n) = ucx(n)*uxy
@@ -8887,7 +8887,7 @@ do LL = lnxi+1,lnx          ! bnd
  enddo
 
  end subroutine setucxy1D
-   
+
 
 
 !> Computes/gets cell centered horizontal x/y velocities, either Eulerian or Lagrangian, and when requested also magnitude.
@@ -10227,10 +10227,10 @@ end subroutine getucmag
        if (nd(k12)%lnx == 2 .and. u1Du(LLLL) .ne. 0d0) then
           ucin = ucxu(LLLL)*cs + ucyu(LLLL)*sn
           ucin = sign(abs(u1Du(LLLL)), ucin) - u1(L)
-       else 
+       else
           ucin = ucxu(LLLL)*cs + ucyu(LLLL)*sn  - u1(L)
        endif
- 
+
        if (LLL > 0) then                             ! incoming link
           QucPerpure1D = QucPerpure1D - qa(LLLL)*ucin
        else
@@ -13701,7 +13701,7 @@ subroutine copynetcellstonetnodes() ! for smooth plotting only
  ndx = 0
  end subroutine copyflowcellsizetosamples
 
- subroutine copynetnodestosam(jarnod)
+ subroutine copynetnodestosam() !jarnod)
 
  use m_samples
  use m_netw
@@ -13712,15 +13712,16 @@ subroutine copynetcellstonetnodes() ! for smooth plotting only
  implicit none
  integer :: in, k, n, jarnod
  real    :: r
+ jarnod = 1
  in = -1
  k  = ns
 
  KC = 0
  do n = 1,numk
-    if (jarnod == 1) then 
+    if (jarnod == 1) then
        r = rnod(n)
     else
-       r = zk(n) 
+       r = zk(n)
     endif
 
     if (r .ne. dmiss) then
@@ -13738,10 +13739,10 @@ subroutine copynetcellstonetnodes() ! for smooth plotting only
  do n = 1,numk
     IF (KC(N) == 1) THEN
        k = k + 1
-       xs(k) = xk(n) ; ys(k) = yk(n) 
-       if (jarnod == 1) then 
+       xs(k) = xk(n) ; ys(k) = yk(n)
+       if (jarnod == 1) then
           zs(k) = rnod(n)
-       else 
+       else
           zs(k) = zk(n)
        endif
     endif
@@ -16213,7 +16214,7 @@ end if
     endif
  enddo
 
- if (pure1D > 0d0) then 
+ if (pure1D > 0d0) then
     call setiadvpure1D()
  endif
 
@@ -28088,7 +28089,7 @@ end do
  call aerr('volerror(ndkx)', ierr,   ndx)           ; volerror = 0
 
  if (lnxi > 0 .and. kmx == 0) then
-    if (allocated(uc1D)) deallocate(uc1D, u1Du) 
+    if (allocated(uc1D)) deallocate(uc1D, u1Du)
     allocate  ( uc1D(ndx) , u1Du(lnx) , stat = ierr) ! maybe optimise to 1D only but be aware of bnd's
     call aerr ('uc1D(ndx) , u1Du(lnx)', ierr , ndx+lnx)
  endif
@@ -49564,26 +49565,26 @@ endif
 
 end subroutine setfixedweirscheme3onlink
 
-subroutine setiadvpure1D() ! set 103 on default 1D links if pure1D 
+subroutine setiadvpure1D() ! set 103 on default 1D links if pure1D
 use m_flowgeom
 use m_flow
 use m_netw, only: kc
 implicit none
-integer :: L, n1, n2 
+integer :: L, n1, n2
 
 kc = 0
 do L = 1,lnx
    n1 = ln(1,L); n2 = ln(2,L)
-   if (iabs(kcu(L)) == 1) then 
+   if (iabs(kcu(L)) == 1) then
       kc(n1)  = kc(n1) + 1
       kc(n2)  = kc(n2) + 1
-   endif   
+   endif
 enddo
 
 do L = 1,lnx1D
    n1 = ln(1,L); n2 = ln(2,L)
-   if (iadv(L) == iadvec1D .or. iadv(L) == 6 .and. kc(n1) == 2 .and. kc(n2) == 2) then 
-      iadv(L) = 103  ! 103 = qucper (iadv=3)  + pure1D      
+   if (iadv(L) == iadvec1D .or. iadv(L) == 6 .and. kc(n1) == 2 .and. kc(n2) == 2) then
+      iadv(L) = 103  ! 103 = qucper (iadv=3)  + pure1D
    endif
 enddo
 
