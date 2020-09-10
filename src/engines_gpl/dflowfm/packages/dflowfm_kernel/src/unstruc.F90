@@ -13047,7 +13047,7 @@ subroutine writesomeinitialoutput()
 
     call system_clock(countstop, rate) ! Only to get the rate
 
-    open(newunit=mout, file=trim(defaultFilename('timers')), access='append', action'write')
+    open(newunit=mout, file=trim(defaultFilename('timers')), access='append', action='write')
     write(mout, '(a,i8,a,D13.6, a,D13.6)') 'Totals GetCSParsFlowCross: Calls: ', callcount(1), &
        'WC Time: ', real(wccount(1), 8 ) / real( rate, 8 )
     write(mout, '(a,i8,a,D13.6, a,D13.6)') 'Totals GetCSParsFlowTot  : Calls: ', callcount(2), &
