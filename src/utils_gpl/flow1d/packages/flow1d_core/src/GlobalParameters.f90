@@ -308,5 +308,11 @@ module m_GlobalParameters
    integer, public, parameter :: CFiState                   = 124
    integer, public, parameter :: CFiWindVelocity            = 125
    integer, public, parameter :: CFiWindDirection           = 126
+  
+   ! UNST-4317: TEMP lowlevel timers
+   integer(kind=8) :: callcount(2) = 0 ! Number of calls to timed subroutines
+   integer(kind=8) :: wccount(2)   = 0 ! wallclock processor counts for some timers (output of system_clock).
+   integer(kind=8) :: countstart, countstop ! temp variables to start/stop the system_clock stopwatch. To be stored in wccount(:).
+   integer(kind=8) :: rate ! Rate of processor clock count
    
 end module m_GlobalParameters                                 

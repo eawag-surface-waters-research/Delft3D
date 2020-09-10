@@ -12855,6 +12855,7 @@ subroutine writesomeinitialoutput()
  use m_observations, only : mxls
  use unstruc_model, only : md_subfile
  use unstruc_files, only : defaultFilename
+ use m_GlobalParameters, only: callcount, wccount, countstop, rate
 #ifdef _OPENMP
  use omp_lib
 #endif
@@ -13043,6 +13044,16 @@ subroutine writesomeinitialoutput()
 
  if (jawriteDetailedTimers > 0) then
     call timdump(trim(defaultFilename('timers')), .true.)
+
+    call system_clock(countstop, rate) ! Only to get the rate
+
+    open(newunit=mout, file=trim(defaultFilename('timers')), access='append', action'write')
+    write(mout, '(a,i8,a,D13.6, a,D13.6)') 'Totals GetCSParsFlowCross: Calls: ', callcount(1), &
+       'WC Time: ', real(wccount(1), 8 ) / real( rate, 8 )
+    write(mout, '(a,i8,a,D13.6, a,D13.6)') 'Totals GetCSParsFlowTot  : Calls: ', callcount(2), &
+       'WC Time: ', real(wccount(2), 8 ) / real( rate, 8 )
+    close(mout)
+
  end if
 
  call timstrt('All', handle_all)

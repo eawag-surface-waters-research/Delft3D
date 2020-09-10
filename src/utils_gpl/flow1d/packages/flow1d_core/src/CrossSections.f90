@@ -1371,7 +1371,8 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       return
    endif
 
-   call timstrt('GetCSParsFlowSingle', ihandle)
+!   call timstrt('GetCSParsFlowSingle', ihandle)
+   call system_clock(countstart)
    crossDef => cross%tabDef
 
    select case(cross%crosstype)
@@ -1422,7 +1423,11 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
    if (present(maxFlowWidth)) then
       maxFlowWidth = maxFlowWidth1
    endif
-   call timstop(ihandle)
+
+   call system_clock(countstop)
+   wccount(1)   = wccount(1) + countstop-countstart ! GetCSParsFlowCross
+   callcount(1) = callcount(1) + 1
+   !call timstop(ihandle)
 end subroutine GetCSParsFlowCross
 
 !> Get total area and total width for given location and water depth
@@ -1546,7 +1551,8 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
       return
    endif
 
-   call timstrt('GetCSParsTotalSingle', ihandle)
+   !call timstrt('GetCSParsTotalSingle', ihandle)
+   call system_clock(countstart)
    crossDef => cross%tabdef
 
    select case(cross%crosstype)
@@ -1575,8 +1581,12 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
-      end select
-    call timstop(ihandle)
+   end select
+ 
+   call system_clock(countstop)
+   wccount(2)   = wccount(2) + countstop-countstart ! GetCSParsTotalCross
+   callcount(2) = callcount(2) + 1
+!   call timstop(ihandle)
 end subroutine GetCSParsTotalCross
 
 !> Get area, width and perimeter for a tabulated profile
