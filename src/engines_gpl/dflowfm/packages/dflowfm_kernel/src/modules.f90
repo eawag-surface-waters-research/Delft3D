@@ -905,13 +905,7 @@ module m_sediment
  integer                           :: jgrtek = 1        !< grainsize fraction nr to plot
  integer                           :: numintverticaleinstein = 10 !< number of vertical intervals in einstein integrals
 
- double precision, allocatable     :: taucx (:)     !< cell centre tau current in x dir N/m2
- double precision, allocatable     :: taucy (:)     !< cell centre tau in y dir N/m2
- double precision, allocatable     :: tauu  (:)     !< link tau     in link dir N/m2, to cx,cy through Perot
-
-
-
- contains
+contains
 
  subroutine default_sediment()
  use m_physcoef
@@ -1191,7 +1185,7 @@ integer                           :: jatair              !< use air temperature 
 integer                           :: jarhum              !< use relative humidity yes or no
 integer                           :: jaclou              !< use cloudiness        yes or no
 integer                           :: jasol = 0           !< use 1 = use solrad, 2 = use cloudiness
-integer                           :: jalongwave = 0      !< >0 longwaveradation from file; otherwise internal formulation
+integer                           :: jalongwave = 0      !< >0 longwaveradiation from file; otherwise internal formulation
 integer                           :: jaheat_eachstep = 0 !< if 1, do it each step, else in externalforcings (default)
 integer                           :: jaQext              !< use Qin externally provided yes or no
 integer                           :: jaqin               !< use qin , sum of all in fluxes
@@ -6116,4 +6110,21 @@ contains
       call dealloc(hashlist_contactids)
    end subroutine reset_save_ugrid_state
 
-end module m_save_ugrid_state
+   end module m_save_ugrid_state
+   
+   module m_subsidence
+      logical                                              :: sdufirst
+      integer                                              :: jasubsupl
+      double precision, dimension(:), allocatable, target  :: subsupl
+      double precision, dimension(:), allocatable          :: subsupl_t0
+      double precision, dimension(:), allocatable          :: subsupl_tp
+      double precision, dimension(:), allocatable          :: subsout
+      
+   contains
+   
+      subroutine default_subsupl()
+         jasubsupl = 0
+         sdufirst = .true.
+      end subroutine
+   
+   end module m_subsidence

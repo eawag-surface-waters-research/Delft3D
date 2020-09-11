@@ -1164,7 +1164,8 @@ if(q /= 0) then
  use m_sobekdfm
  use unstruc_display
  use m_waves, only: hwav, twav, phiwav, rlabda, ustokes, vstokes, uorb, taubxu
-
+ use m_subsidence
+  
  implicit none
 
  integer :: ndraw
@@ -1457,6 +1458,13 @@ if(q /= 0) then
 
  if (jased > 0 .and. stm_included) then
     call fm_bott3d() ! bottom update
+ endif
+ 
+ if (jasubsupl>0) then
+    call apply_subsupl()
+ endif
+ 
+ if ((jased > 0 .and. stm_included).or.(jasubsupl>0)) then
     call setbobs()   ! adjust administration - This option only works for ibedlevtyp = 1, otherwise original bed level [bl] is overwritten to original value
     call volsur()                     ! update volumes 2d
     if (kmx>0) then
@@ -1702,7 +1710,7 @@ if(q /= 0) then
  integer           :: japerim
  integer           :: L, n, k1, k2, k
  double precision  :: ha, hh
- integer, save          :: handle = 0
+ integer, save    	    :: handle = 0
 
  call timstrt('Volume calculation', handle)
  japerim = 0
@@ -6056,10 +6064,6 @@ subroutine setumod(jazws0)                          ! set cell center Perot velo
  double precision, external :: nod2linx, nod2liny, lin2nodx, lin2nody, cor2linx, cor2liny
  double precision, external :: nod2wallx, nod2wally, wall2linx, wall2liny
 
- !if (jased > 0) then
- !   taucx = 0d0; taucy = 0d0
- !endif
-
  call timstrt('Umod', handle_umod)
  if(jazws0==1 .and. len_trim(md_restartfile)>0) then
    ! This is the moment after the restart file is read and before the first output of the inital info.
@@ -6643,13 +6647,6 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
           ucyq (k2) = ucyq (k2) + wcyu*hu(L)
        endif
     enddo
-
-    ! if (jased > 0 .or. ti_waq > 0) then !TODO: AvD: are we going to keep all these tau-components, or average at cell center directly?
-          !taucx(ln(1,L)) = taucx(ln(1,L)) + wcx1(L)*tauu(L)
-          !taucy(ln(1,L)) = taucy(ln(1,L)) + wcy1(L)*tauu(L)
-          !taucx(ln(2,L)) = taucx(ln(2,L)) + wcx2(L)*tauu(L)
-          !taucx(ln(2,L)) = taucx(ln(2,L)) + wcy2(L)*tauu(L)
-    ! endif
 
  else
     do LL = 1,lnx
@@ -7253,10 +7250,6 @@ end subroutine setucxucyucxuucyu
 
  double precision, external :: nod2linx, nod2liny, lin2nodx, lin2nody, cor2linx, cor2liny
  double precision, external :: nod2wallx, nod2wally, wall2linx, wall2liny
-
- !if (jased > 0) then
- !   taucx = 0d0; taucy = 0d0
- !endif
 
  call timstrt('Umod new', handle_umod)
  if(jazws0==1 .and. len_trim(md_restartfile)>0) then
@@ -13202,6 +13195,7 @@ subroutine writesomeinitialoutput()
  use  m_xbeach_avgoutput, only: default_xbeach_avgoutput
  use m_ship
  use unstruc_caching
+ use m_subsidence
  implicit none
 
     ! Only reset counters and other scalars, allocatables should be
@@ -13232,6 +13226,8 @@ subroutine writesomeinitialoutput()
     call default_heatfluxes()
 
     call default_sediment()  ! stm_included not defined yet
+    
+    call default_subsupl()
 
     call default_trachy()
 
@@ -13755,7 +13751,7 @@ subroutine copynetcellstonetnodes() ! for smooth plotting only
           zs(k) = rnod(n)
        else
           zs(k) = zk(n)
-       endif
+    endif
     endif
  enddo
  ns = k
@@ -17864,6 +17860,20 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    if (numsrc > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_discharge_salinity_temperature_sorsin, irefdate, tzone, tunit, tim)
    endif
+   
+   if (jasubsupl > 0) then
+      if (.not. sdufirst) then 
+         subsupl_tp = subsupl   
+      endif 
+      if (item_subsiduplift /= ec_undef_int) then
+         success = success .and. ec_gettimespacevalue(ecInstancePtr, 'bedrock_surface_elevation', tim)
+      endif
+      if (sdufirst) then 
+         subsupl_tp = subsupl 
+         subsupl_t0 = subsupl      
+         sdufirst = .false.
+      endif 
+   endif   
 
    call timstop(handle_ext)
 
@@ -19986,8 +19996,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
                      ierr = nf90_put_att(ihisfile, id_lyrfrac, 'geometry', station_geom_container_name)
                end select
-                 !
-                 if (stmpar%morpar%moroutput%frac) then
+		         !
+		         if (stmpar%morpar%moroutput%frac) then
                   ierr = nf90_def_var(ihisfile, 'Availability fraction in top layer', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_frac)
                   ierr = nf90_put_att(ihisfile, id_frac, 'long_name', 'Availability fraction in top layer')
                   ierr = nf90_put_att(ihisfile, id_frac, 'units', '-')
@@ -23598,8 +23608,8 @@ subroutine wrimap(tim)
        end if
 
        if (mapids%ncid/=0) then  ! reset stord ncid to zero if file not open
-          ierr = nf90_inquire(mapids%ncid, ndims)
-          if (ierr/=0) mapids%ncid = 0
+		  ierr = nf90_inquire(mapids%ncid, ndims)
+		  if (ierr/=0) mapids%ncid = 0
        end if
 
        if (mapids%ncid == 0) then
@@ -28703,15 +28713,6 @@ endif
        allocate  ( ustbc(mxn) , stat=ierr)
        call aerr ('ustbc(mxn)', ierr , mxn) ; ustbc = 0d0
     endif
-
-
-    !if ( allocated (tauu) )   deallocate (taucx,taucy,tauu)
-    !allocate ( taucx(ndx) , stat=ierr)
-    !call aerr('taucx(ndx)', ierr, ndx); taucx = 0d0
-    !allocate ( taucy(ndx) , stat=ierr)
-    !call aerr('taucy(ndx)', ierr, ndx); taucy = 0d0
-    !allocate ( tauu (lnx) , stat=ierr)
-    !call aerr('tauu (lnx)', ierr, ndx); tauu  = 0d0
 
  endif
 
@@ -39922,7 +39923,7 @@ end function ispumpon
                 Qeva_icept = -min(dti*InterceptHs(k)*bare(k), -evap(k)*bare(k))
                 InterceptHs(k) = InterceptHs(k) + Qeva_icept/bare(k)*dts
                 qoutevaicept = qoutevaicept - Qeva_icept
-             endif
+          endif
           endif
        enddo
     endif
@@ -43359,6 +43360,7 @@ end function is_1d_boundary_candidate
  use unstruc_inifields, only: initInitialFields
  use m_flowtimes, only: handle_extra
  use Timers
+ use m_subsidence
 
  ! use m_vegetation
 
@@ -44590,7 +44592,7 @@ if (mext /= 0) then
               layer = nint(transformcoef(3))
               if (layer.gt.max(kmx,1)) then
                  call mess(LEVEL_ERROR, 'Specified layer for ''' // trim(qid) // ''' is higher than kmx: ', layer, kmx)
-              endif
+           endif
            endif
 
            if ( allocated(viuh) ) deallocate(viuh)
@@ -44637,7 +44639,7 @@ if (mext /= 0) then
                        do k=kb,kt
                           wqbot(iwqbot,k) = viuh(kk)
                        end do
-                    endif
+                 endif
                  endif
               enddo
            endif
@@ -45122,6 +45124,56 @@ if (mext /= 0) then
 
         else if (qid(1:18) == 'waqsegmentfunction') then
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
+           
+        else if (qid(1:25) == 'bedrock_surface_elevation') then
+           kx=1
+           if (allocated(subsupl)) deallocate(subsupl, subsupl_t0, subsupl_tp, subsout)
+           
+           select case (ibedlevtyp)
+              case (1)
+                 allocate ( subsupl(ndx) , stat=ierr); subsupl = 0d0
+                 call aerr('subsupl(ndx)', ierr, ndx)
+                 allocate ( subsupl_t0(ndx) , stat=ierr); subsupl_t0 = 0d0
+                 call aerr('subsupl_t0(ndx)', ierr, ndx)
+                 allocate ( subsupl_tp(ndx) , stat=ierr); subsupl_tp = 0d0
+                 call aerr('subsupl_tp(ndx)', ierr, ndx)
+                 allocate ( subsout(ndx) , stat=ierr); subsout = 0d0
+                 call aerr('subsout(ndx)', ierr, ndx)
+                 success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand)
+              case (2)
+                 if (allocated(kcw)) deallocate(kcw)
+                 allocate(kcw(lnx), stat=ierr)
+                 call aerr('kcw(lnx)', ierr, lnx)
+                 kcw = 1
+                 allocate ( subsupl(lnx) , stat=ierr); subsupl = 0d0
+                 call aerr('subsupl(lnx)', ierr, lnx)
+                 allocate ( subsupl_t0(lnx) , stat=ierr); subsupl_t0 = 0d0
+                 call aerr('subsupl_t0(lnx)', ierr, lnx)
+                 allocate ( subsupl_tp(lnx) , stat=ierr); subsupl_tp = 0d0
+                 call aerr('subsupl_tp(lnx)', ierr, lnx)
+                 allocate ( subsout(lnx) , stat=ierr); subsout = 0d0
+                 call aerr('subsout(lnx)', ierr, lnx)
+                 success = ec_addtimespacerelation(qid, xu, yu, kcw, kx, filename, filetype, method, operand, varname=varname)
+            
+              case (3,4,5,6)
+                 if (allocated(kcw)) deallocate(kcw)
+                 allocate(kcw(numk), stat=ierr)
+                 call aerr('kcw(numk)', ierr, numk)
+                 kcw = 1
+                 allocate ( subsupl(numk) , stat=ierr); subsupl = 0d0
+                 call aerr('subsupl(numk)', ierr, numk)
+                 allocate ( subsupl_t0(numk) , stat=ierr); subsupl_t0 = 0d0
+                 call aerr('subsupl_t0(numk)', ierr, numk)
+                 allocate ( subsupl_tp(numk) , stat=ierr); subsupl_tp = 0d0
+                 call aerr('subsupl_tp(numk)', ierr, numk)
+                 allocate ( subsout(numk) , stat=ierr); subsout = 0d0
+                 call aerr('subsout(numk)', ierr, numk)
+                 success = ec_addtimespacerelation(qid, xk(1:numk), yk(1:numk), kcw, kx, filename, filetype, method, operand, varname=varname)
+            end select
+           
+           if (success) then
+              jasubsupl = 1
+           endif   
 
         else if (trim(qid) == "spiderweb") then
            call qnerror(' ', 'Quantity SPIDERWEB must be renamed to airpressure_windx_windy in the ext-file.', ' ')
@@ -51690,5 +51742,49 @@ end subroutine alloc_jacobi
       ustw2 = 0.5*fw*uorbu**2
    end subroutine soulsby
 
-
-
+   subroutine apply_subsupl()
+      use m_flowtimes, only: dts, dt_user
+      use m_subsidence
+      use m_flowparameters
+      use m_flowgeom
+      use m_flow
+      use network_data
+      
+      implicit none
+      
+      integer           :: k,L
+      
+      ! subsidence rate is interpolated in space and time in setexternalforcings() at tim=tstart+n*dt_user
+      ! Where the subs/uplift is applied depends on ibedlevtyp
+      ! According to setblfromextfile:
+      !
+      ! ibedlevtyp determines from which source data location the bed levels are used to derive bobs and bl.
+      ! These types need to be mapped to one of three possible primitive locations (center/edge/corner).
+      !select case (ibedlevtyp)
+      !case (1)       ! position = waterlevelpoint, cell centre
+      !   iprimpos = 2 ; mx = max(numk, ndx)
+      !case (2)       ! position = velocitypoint, cellfacemid
+      !   iprimpos = 1 ; mx = max(numk, lnx)
+      !case (3,4,5,6) ! position = netnode, cell corner
+      !   iprimpos = 3 ; mx = numk
+      !end select
+      select case (ibedlevtyp)
+         case (1)
+            do k=1,ndx
+               bl(k)=bl(k)+(subsupl(k)-subsupl_tp(k))/dt_user*dts
+               s1(k)=max(s1(k),bl(k))
+               subsout(k) = subsupl(k)-subsupl_t0(k)
+            enddo   
+         case (2)
+            do L=1,lnx
+               blu(L)=blu(L)+(subsupl(k)-subsupl_tp(k))/dt_user*dts
+               subsout(L) = subsupl(L)-subsupl_t0(L)
+            enddo   
+         case (3,4,5,6)  
+            do k=1,numk
+               zk(k)=zk(k)+(subsupl(k)-subsupl_tp(k))/dt_user*dts
+               subsout(k) = subsupl(k)-subsupl_t0(k)
+            enddo
+      end select      
+      
+   end subroutine

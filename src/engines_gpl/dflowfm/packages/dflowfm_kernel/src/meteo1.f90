@@ -6418,6 +6418,7 @@ module m_meteo
    use m_observations
    use string_module
    use m_sediment, only: stm_included, stmpar
+   use m_subsidence
    
    implicit none
    
@@ -6510,6 +6511,8 @@ module m_meteo
    integer, target :: item_nudge_tem                                         !< 3D temperature for nudging
    integer, target :: item_nudge_sal                                         !< 3D salinity for nudging
    integer, target :: item_dambreakLevelsAndWidthsFromTable                  !< Dambreak heights and widths
+   
+   integer, target :: item_subsiduplift
 
    integer, allocatable, dimension(:) :: countbndpoints(:) 
    !
@@ -6605,7 +6608,8 @@ module m_meteo
       item_dissurf                               = ec_undef_int
       item_diswcap                               = ec_undef_int
       item_ubot                                  = ec_undef_int
-      item_dambreakLevelsAndWidthsFromTable      = ec_undef_int                    
+      item_dambreakLevelsAndWidthsFromTable      = ec_undef_int 
+      item_subsiduplift                          = ec_undef_int
       !
       n_qhbnd = 0
       !
@@ -7037,6 +7041,9 @@ module m_meteo
                'friction_coefficient_WhiteColebrook', 'friction_coefficient_StricklerNikuradse', &
                'friction_coefficient_Strickler', 'friction_coefficient_deDosBijkerk')
             itemPtr1 => item_frcutim ! the same for all types (type is stored elsewhere)
+         case ('bedrock_surface_elevation')
+            itemPtr1 => item_subsiduplift
+            dataPtr1 => subsupl
          case default
             call mess(LEVEL_FATAL, 'm_meteo::fm_ext_force_name_to_ec_item: Unsupported quantity specified in ext-file (construct target field): '//qidname)
             success = .false.
@@ -7423,7 +7430,7 @@ module m_meteo
          end if
 
          ! add 3D settings if needed
-         if (ec_filetype == provFile_poly_tim .and. (target_name == 'salinitybnd' .or. target_name == 'temperaturebnd' .or. target_name == 'tracerbnd')) then   ! TODO JRE sediment    
+         if (ec_filetype == provFile_poly_tim .and. (target_name == 'salinitybnd' .or. target_name == 'temperaturebnd' .or. target_name == 'tracerbnd' .or. target_name == 'sedfracbnd')) then   ! TODO JRE sediment    
             if (success) success = ecSetElementSetMaskArray(ecInstancePtr, elementSetId, mask)
             if (success) success = ecSetElementSetNumberOfCoordinates(ecInstancePtr, elementSetId, size(x))
          end if
@@ -8115,6 +8122,17 @@ module m_meteo
             if (ec_filetype == provFile_netcdf) then
                sourceItemName = name(14:)
             end if
+         case ('bedrock_surface_elevation')
+            if (ec_filetype == provFile_arcinfo) then
+               sourceItemName = 'bedrock_surface_elevation'
+            else if (ec_filetype == provFile_curvi) then
+               sourceItemName = 'curvi_source_item_1'
+            else if (ec_filetype == provFile_uniform) then
+               sourceItemName = 'uniform_item'
+            else 
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity bedrock_surface_elevation.')
+               return
+            end if   
          case default
             fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId)
             if (fileReaderPtr%nitems>=1) then 
@@ -8310,6 +8328,9 @@ module m_meteo
       end if
       if (index(group_name, 'airpressure_windx_windy') == 1) then
          if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_apwxwy_p, irefdate, tzone, tunit, timesteps)) return
+      end if
+      if (trim(group_name) == 'bedrock_surface_elevation') then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_subsiduplift, irefdate, tzone, tunit, timesteps)) return
       end if
       success = .true.
    end function ec_gettimespacevalue_by_name

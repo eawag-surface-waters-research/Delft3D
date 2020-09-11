@@ -394,6 +394,7 @@ type t_unc_mapids
    integer :: id_frac_name              = -1
    integer :: id_sedfrac(MAX_ID_VAR)    = -1
    integer :: id_kmxsed(MAX_ID_VAR)     = -1
+   integer :: id_subsupl(MAX_ID_VAR)    = -1
    ! for urban, only for 1d now
    integer :: id_timewetground(MAX_ID_VAR) = -1 !< Variable ID for cumulative time when water is above ground level
    integer :: id_freeboard(MAX_ID_VAR)     = -1 !< Variable ID for freeboard
@@ -4474,7 +4475,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_sediment
    use m_bedform
    use m_wind
-   use m_flowparameters, only: jatrt, jamd1dfile
+   use m_flowparameters, only: jatrt, jamd1dfile, ibedlevtyp
    use m_mass_balance_areas
    use m_fm_wq_processes
    use m_xbeach_data
@@ -4489,6 +4490,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use string_module, only: replace_multiple_spaces_by_single_spaces
    use m_save_ugrid_state, only: mesh1dname
    use m_hydrology_data, only : jadhyd, ActEvap, PotEvap, interceptionmodel, DFM_HYD_NOINTERCEPT, InterceptHs
+   use m_subsidence
 
    implicit none
 
@@ -4525,7 +4527,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 !        id_rsi, id_rsiexact, id_dudx, id_dudy, id_dvdx, id_dvdy, id_dsdx, id_dsdy
 
    integer :: iid, i, j, jj, numContPts, numNodes, itim, n, LL, L, Lb, Lt, LLL, k, k1, k2, k3
-   integer :: kk, kb, kt, kkk, found
+   integer :: kk, kb, kt, kkk, found, iloc
    integer :: nlayb, nrlay
    integer :: ndxndxi ! Either ndx or ndxi, depending on whether boundary nodes also need to be written.
    integer :: iLocS ! Either UNC_LOC_S or UNC_LOC_S3D, depending on whether layers are present.
@@ -4933,6 +4935,22 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       ! Sediment transport (via morphology module)
+      if ((jamapsed > 0 .and. jased > 0 .and. stm_included).or.(jasubsupl>0)) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_mor_bl   , nf90_double, UNC_LOC_S, 'mor_bl'  , '', 'Time-varying bottom level in flow cell center', 'm', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
+      endif
+      !
+      if (jasubsupl>0) then         
+         select case (ibedlevtyp)
+            case (1)
+               iloc = UNC_LOC_S
+            case (2)
+               iloc = UNC_LOC_U
+            case (3,4,5,6)
+               iloc = UNC_LOC_CN
+         end select  
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_subsupl, nf90_double, iloc, 'subsupl'  , '', 'Cumulative subsidence/uplift', 'm', dimids = (/ -2, -1 /), jabndnd=jabndnd_)   
+      endif   
+      
       if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          ierr = nf90_def_dim(mapids%ncid, 'nSedTot', stmpar%lsedtot, mapids%id_tsp%id_sedtotdim)
          ierr = nf90_def_dim(mapids%ncid, 'nSedSus', stmpar%lsedsus, mapids%id_tsp%id_sedsusdim)
@@ -5107,8 +5125,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssxcum   , nf90_double, UNC_LOC_S, 'ssxcum'  , '', 'Time-averaged suspended load transport, x-component', transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim /), jabndnd=jabndnd_)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssycum   , nf90_double, UNC_LOC_S, 'ssycum'  , '', 'Time-averaged suspended load transport, y-component', transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim /), jabndnd=jabndnd_)
          endif
-         
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_mor_bl   , nf90_double, UNC_LOC_S, 'mor_bl'  , '', 'Time-varying bottom level in flow cell center', 'm', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
 
          select case (stmpar%morlyr%settings%iunderlyr)
             case (1)
@@ -5855,6 +5871,23 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    !
    ! Sediment transport (via morphology module)
+   !
+if ((jamapsed > 0 .and. jased > 0 .and. stm_included).or.(jasubsupl>0)) then   
+   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_mor_bl, UNC_LOC_S, bl, jabndnd=jabndnd_)
+endif   
+
+if (jasubsupl>0) then
+   select case (ibedlevtyp)
+      case (1)
+         iloc = UNC_LOC_S
+      case (2)
+         iloc = UNC_LOC_U
+      case (3,4,5,6)
+         iloc = UNC_LOC_CN
+   end select  
+   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_subsupl, iloc, subsout, jabndnd=jabndnd_)   
+endif   
+
 if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    !
    ! TODO: AvD: support kmax in put routine
@@ -5950,9 +5983,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       end do
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_sbn  , UNC_LOC_U, toutputx, jabndnd=jabndnd_)
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_sbt  , UNC_LOC_U, toutputy, jabndnd=jabndnd_)
-   endif 
-   !      
-   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_mor_bl, UNC_LOC_S, bl, jabndnd=jabndnd_) 
+   endif  
    !
    if (stmpar%morpar%moroutput%uuuvvv) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_uuu, UNC_LOC_S, sedtra%uuu, jabndnd=jabndnd_) 
