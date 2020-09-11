@@ -47862,6 +47862,7 @@ double precision :: perim                !< wet perimeter
 double precision :: profw                !< width  of profile
 double precision :: profh                !< height of profile
 double precision :: hydrad               !< hydraulic radius
+double precision :: maxFlowWidth
 
 double precision :: area2, width2, perim2, cf2, alfa ! second prof i.c. interpolation
 double precision :: area_sbk, width_sbk ! second prof i.c. interpolation
@@ -47938,7 +47939,7 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
       call GetCSParsTotal(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       cz = 0d0
-      call GetCSParsFlow(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, perim, width, af_sub = af_sub, perim_sub = perim_sub)
+      call GetCSParsFlow(network%adm%line2cross(LL, 2), network%crs%cross, hpr, area, perim, width, maxFlowWidth = maxFlowWidth, af_sub = af_sub, perim_sub = perim_sub)
 
       if (calcConv ==1) then
          u1L = u1(LL)
@@ -47973,7 +47974,7 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
       if (hpr==0d0) then
          wu(L) = 0.01d0
       else
-         wu(L) = max(0.01d0,area/hpr)
+         wu(L) = max(0.01d0,maxFlowWidth)
       endif
 
    endif
