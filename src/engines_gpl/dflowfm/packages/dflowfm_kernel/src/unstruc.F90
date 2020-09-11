@@ -51777,7 +51777,7 @@ end subroutine alloc_jacobi
             enddo   
          case (2)
             do L=1,lnx
-               blu(L)=blu(L)+(subsupl(k)-subsupl_tp(k))/dt_user*dts
+               blu(L)=blu(L)+(subsupl(L)-subsupl_tp(L))/dt_user*dts
                subsout(L) = subsupl(L)-subsupl_t0(L)
             enddo   
          case (3,4,5,6)  
