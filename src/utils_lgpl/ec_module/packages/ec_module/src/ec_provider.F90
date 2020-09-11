@@ -1017,8 +1017,15 @@ module m_ec_provider
                                                                 units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
+            else if (index(lc_filename, '.sdu') /= 0) then
+               ! ===== quantity: bedrock surface timeseries =====
+               quantityId = ecInstanceCreateQuantity(instancePtr)
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='bedrock_surface_elevation', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+                  success = .false.
+               end if                                                    
             else
-                call setECMessage('extension not recoqnized in ' // trim(fileReaderPtr%fileName))
+                call setECMessage('extension not recognized in ' // trim(fileReaderPtr%fileName))
                 success = .false.
             end if
             field0Id = ecInstanceCreateField(instancePtr)
