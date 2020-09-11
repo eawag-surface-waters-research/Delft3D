@@ -19278,6 +19278,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, allocatable, save :: id_hwqb3d(:)
     integer, allocatable, save :: id_const(:), id_const_cum(:), id_voltot(:)
     double precision, allocatable, save :: valobsT(:,:)
+    double precision, allocatable :: obstmp(:,:)
 
     integer                      :: IP, num, ntmp, n, nlyrs
 
@@ -19484,25 +19485,25 @@ subroutine unc_write_his(tim)            ! wrihis
                !ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
 
                if (iturbulencemodel >= 3 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_turkin,nf90_double, idims,3, 'tke'   , 'turbulent kinetic energy'   , 'm2 s-2',  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name)
+                  call definencvar(ihisfile,id_turkin,nf90_double, idims,3, 'tke'   , 'turbulent kinetic energy'   , 'm2 s-2',  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   jawrizw = 1
                endif
                if (iturbulencemodel > 1 .and. jahistur > 0 ) then
-                  call definencvar(ihisfile,id_vicwwu,nf90_double, idims,3, 'vicww' , 'turbulent vertical eddy viscosity'    , 'm2 s-1' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name)
+                  call definencvar(ihisfile,id_vicwwu,nf90_double, idims,3, 'vicww' , 'turbulent vertical eddy viscosity'    , 'm2 s-1' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   ierr = nf90_put_att(ihisfile, id_turkin, 'standard_name', 'specific_turbulent_kinetic_energy_of_sea_water')
                   jawrizw = 1
                endif
                if (iturbulencemodel == 3 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'eps'   , 'turbulent energy dissipation', 'm2 s-3'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name)
+                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'eps'   , 'turbulent energy dissipation', 'm2 s-3'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   ierr = nf90_put_att(ihisfile, id_tureps, 'standard_name', 'specific_turbulent_kinetic_energy_dissipation_in_sea_water')
                   jawrizw = 1
                else if (iturbulencemodel == 4 .and. jahistur > 0) then
-                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'tau'   , 'turbulent time scale', 's-1'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name)
+                  call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'tau'   , 'turbulent time scale', 's-1'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   jawrizw = 1
                endif
 
                if (jarichardsononoutput > 0) then
-                  call definencvar(ihisfile,id_rich,nf90_double, idims,3, 'rich' , 'Richardson Nr'    , '  ' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name)
+                  call definencvar(ihisfile,id_rich,nf90_double, idims,3, 'rich' , 'Richardson Nr'    , '  ' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name, fillVal = dmiss)
                   jawrizw = 1
                end if
 
@@ -20126,6 +20127,7 @@ subroutine unc_write_his(tim)            ! wrihis
                idims(3) = id_timedim
                call definencvar   (ihisfile, id_zcs, nf90_double, idims,3, 'zcoordinate_c' , 'vertical coordinate at center of flow element and layer'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_c', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_zcs, 'positive' , 'up')
+               ierr = nf90_put_att(ihisfile, id_zcs, '_FillValue' , dmiss)
             endif
             if (kmx.gt.0 .and. jawrizw == 1) then
                idims(1) = id_laydimw
@@ -20133,8 +20135,10 @@ subroutine unc_write_his(tim)            ! wrihis
                idims(3) = id_timedim
                call definencvar   (ihisfile, id_zws, nf90_double, idims,3, 'zcoordinate_w' , 'vertical coordinate at centre of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
+               ierr = nf90_put_att(ihisfile, id_zws, '_FillValue' , dmiss)
                call definencvar   (ihisfile, id_zwu, nf90_double, idims,3, 'zcoordinate_wu' , 'vertical coordinate at edge of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_wu', station_geom_container_name)
                ierr = nf90_put_att(ihisfile, id_zwu, 'positive' , 'up')
+               ierr = nf90_put_att(ihisfile, id_zwu, '_FillValue' , dmiss)
             endif
         end if
 
@@ -21705,22 +21709,45 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile,    id_varucxq, valobsT(:,IPNT_UCXQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /)) ! depth-averaged velocity
        ierr = nf90_put_var(ihisfile,    id_varucyq, valobsT(:,IPNT_UCYQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        !
+       call realloc(obsTmp, (/ kmx, ntot /), keepExisting = .false., fill = dmiss)
+
+       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCX, 0, obsTmp)
+       ierr = nf90_put_var(ihisfile, id_varucx, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+
+       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCY, 0, obsTmp)
+       ierr = nf90_put_var(ihisfile, id_varucy, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+
+       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCZ, 0, obsTmp)
+       ierr = nf90_put_var(ihisfile, id_varucz, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+
+       if (jasal > 0) then
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_SA1, 0, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_varsal, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+       end if
+
+       if (jatem > 0) then
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_TEM1, 0, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_vartem, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+       end if
+
+       if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_RHO, 0, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_varrho, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+       end if
+
+       if (jased > 0 .and. .not. stm_included) then
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_SED, 0, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_varsed, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+       end if
+
+       if (jawave>0) then
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCXST, 0, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_ustx, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCYST, 0, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_usty, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+       endif
+
        do kk = 1,kmx
-          ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          ierr = nf90_put_var(ihisfile,    id_varucz, valobsT(:,IPNT_UCZ+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          if (jasal > 0) then
-             ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1 +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          end if
-          if (jatem > 0) then
-             ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          end if
-          if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
-             ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          end if
-          if (jased > 0 .and. .not. stm_included) then
-             ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          end if
           if (IVAL_TRA1 > 0) then
              do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
                i = j - IVAL_TRA1 + 1
@@ -21751,10 +21778,6 @@ subroutine unc_write_his(tim)            ! wrihis
              enddo
              ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
           end if
-          if (jawave>0) then
-             ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-             ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          endif
        enddo
      else
 !      2D
@@ -21866,22 +21889,36 @@ subroutine unc_write_his(tim)            ! wrihis
 
     ! 3d layer interface quantities
     if (kmx > 0 ) then
+       call realloc(obstmp, (/ kmx, ntot /), keepExisting = .false., fill = dmiss)
+       call fillObsTempArray(ntot, kmx, dmiss, IPNT_ZCS, 0, obsTmp)
+       ierr = nf90_put_var(ihisfile, id_zcs, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
+
+       kmx1 = kmx + 1
+       call realloc(obstmp, (/ kmx1, ntot /), keepExisting = .false., fill = dmiss)
+       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWS, 1, obsTmp)
+       ierr = nf90_put_var(ihisfile, id_zws, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
+
+       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWU, 2, obsTmp)
+       ierr = nf90_put_var(ihisfile, id_zwu, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
+
+       if (iturbulencemodel >= 3 .and. jahistur > 0) then
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TKIN, 3, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_turkin, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
+
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TEPS, 3, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_tureps, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
+       end if
+
+       if (iturbulencemodel > 1) then
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_VICWW, 3, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_vicwwu, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
+       end if
+
+       if (idensform > 0 .and. jaRichardsononoutput > 0) then
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_RICH, 3, obsTmp)
+          ierr = nf90_put_var(ihisfile, id_rich, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
+       end if
        do kk = 1, kmx+1
-          ierr = nf90_put_var(ihisfile,    id_zws,    valobsT(:,IPNT_ZWS+kk-1),   start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-          ierr = nf90_put_var(ihisfile,    id_zwu,    valobsT(:,IPNT_ZWU+kk-1),   start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-          if (kk > 1) then
-             ierr = nf90_put_var(ihisfile, id_zcs,    valobsT(:,IPNT_ZCS+kk-2),   start = (/ kk-1,1, it_his /), count = (/ 1, ntot, 1 /))
-          endif
-          if (iturbulencemodel >= 3 .and. jahistur > 0) then
-             ierr = nf90_put_var(ihisfile, id_turkin, valobsT(:,IPNT_TKIN +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-             ierr = nf90_put_var(ihisfile, id_tureps, valobsT(:,IPNT_TEPS +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-          endif
-          if (iturbulencemodel > 1) then
-             ierr = nf90_put_var(ihisfile, id_vicwwu, valobsT(:,IPNT_VICWW+kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-          endif
-          if (idensform > 0 .and. jaRichardsononoutput > 0) then
-             ierr = nf90_put_var(ihisfile, id_rich,   valobsT(:,IPNT_RICH +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-          endif
           !
           if (IVAL_WS1 > 0) then
              call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)

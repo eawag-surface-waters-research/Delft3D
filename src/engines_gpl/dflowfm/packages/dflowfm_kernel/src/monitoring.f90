@@ -1173,6 +1173,64 @@ subroutine saveObservations(filename)
     call doclose(mobs)
 
 end subroutine saveObservations
+
+!> Fill in temperary array obsTmp for the history output for (only) 3D models
+subroutine fillObsTempArray(ntot, n, fillValue, locArray, locType, obsTmp)
+   use m_flowgeom, only: nd
+   implicit none
+   integer,                              intent(in   ) :: ntot         ! Total number of observation points
+   integer,                              intent(in   ) :: n            ! Number of layers kmx, or kmx+1
+   double precision,                     intent(in   ) :: fillValue    ! fill value of the array
+   integer,                              intent(in   ) :: locArray     ! Location in array valobs
+   integer,                              intent(in   ) :: locType      ! Location type: 0-flownode center, 1-face center, 2-wu, 3-interpolated to cell center
+   double precision, dimension(n, ntot), intent(inout) :: obsTmp       ! The temperay array to be filled in
+   integer :: i, k, kb, kt, nlayb, nrlay, nrlay1, kk, L, La, Lb, Ltx, nlaybL, nrlayLx, maxNrlay
+
+
+   obsTmp = fillValue
+   nrlay1 = 0
+   maxNrlay = 0
+
+   do i = 1,ntot
+      k = max(kobs(i),1)
+      if (kobs(i) > 0) then
+         if (locType == 0 .or. locType == 1) then
+            call getlayerindices(k, nlayb, nrlay)
+            if (locType == 1) then
+               nrlay1 = nrlay + 1
+            else
+               nrlay1 = nrlay
+            end if
+
+            do kk=1,nrlay1
+               obstmp(kk,i) = valobs(locArray+kk-1,i)
+            end do
+         else if (locType == 2) then
+            call getlink1(k,L)
+            call getlayerindicesLmax(L, nlaybL, nrlayLx)
+            do kk=1,nrlayLx+1
+               obstmp(kk,i) = valobs(locArray+kk-1,i)
+            end do
+         else
+            ! The 3D varialbes such as turkin, eps, ... were interpolated to cell center by Perot reconstrunction
+            ! in subroutine fill_valobs. For output, we go through all flow links that connected to the
+            ! obs node k, and take the maximal number of the active layers of these flow links.
+            maxNrlay = 0
+            do L = 1,nd(k)%lnx
+               La = iabs(nd(k)%ln(L))
+               call getlayerindicesLmax(La, nlaybL, nrlayLx)
+               if (nrlayLx > maxNrlay) then
+                  maxNrlay = nrlayLx
+               end if
+            end do
+            do kk=1,maxNrlay+1
+               obstmp(kk,i) = valobs(locArray+kk-1,i)
+            end do
+         end if
+      end if
+   end do
+
+end subroutine fillObsTempArray
 end module m_observations
 
 

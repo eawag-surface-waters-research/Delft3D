@@ -15733,7 +15733,7 @@ subroutine read_structure_dimensions_from_rst(ncid, filename, istrtypein, struna
 end subroutine read_structure_dimensions_from_rst
 
 !> Defines a new variable in a NetCDF dataset, also setting some frequently used attributes.
-subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord, geometry)
+subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord, geometry, fillVal)
    use netcdf
    use m_sferic
    implicit none
@@ -15748,6 +15748,7 @@ subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord, 
    character(len=*),          intent(in   ) :: unit  !< Units of the variable (udunit-compatible), used in the :units attribute.
    character(len=*),          intent(in   ) :: namecoord !< Text string the with coordinate variable names, used in the :coordinates attribute.
    character(len=*), optional,intent(in   ) :: geometry !< (optional) Variable name of a geometry variable in the same dataset, used in the :geometry attribute.
+   double precision, optional,intent(in   ) :: fillVal  !< Fill value
 
    integer                          :: ierr
    ierr = 0
@@ -15761,6 +15762,11 @@ subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord, 
    if (present(geometry)) then
       ierr = nf90_put_att(ncid, idq, 'geometry', geometry)
    end if
+   
+   if (present(fillVal)) then
+      ierr = nf90_put_att(ncid, idq, '_FillValue', fillVal)
+   end if
+
 
    end subroutine definencvar
 end module unstruc_netcdf
