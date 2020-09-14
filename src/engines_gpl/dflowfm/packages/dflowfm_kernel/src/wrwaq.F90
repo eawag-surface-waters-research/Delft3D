@@ -2530,6 +2530,10 @@ subroutine waq_wri_vel(itim, filenamevel, lunvel)
 !! executable statements -------------------------------------------------------
 !
     waqpar%vel = 0d0
+ 
+    if (.not. allocated(ucmag)) then
+        call realloc(ucmag, ndkx, keepExisting=.false.)
+    end if
 
     ! Update velocity magnitudes (only available on request)
     call getucxucyeulmag(ndkx, workx, worky, ucmag, 1, 1)
