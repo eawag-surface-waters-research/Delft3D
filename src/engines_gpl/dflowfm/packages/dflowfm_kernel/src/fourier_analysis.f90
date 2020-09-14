@@ -1164,7 +1164,7 @@ end subroutine setfouunit
         !
         ierr = unc_create(trim(FouOutputFile), 0, fileids%ncid)
         ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm)
-        call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
+        call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp)
 
         call realloc(all_unc_loc, nofou)
         !
@@ -1224,7 +1224,7 @@ end subroutine setfouunit
            !
            idvar(:,ivar) = imissval
            ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnam(ivar)), &
-                          'Fourier analysis ' // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), 0)
+                          'Fourier analysis ' // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), is_timedep = 0)
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '// namfunlong // ', ' // trim(fouvarnamlong(ivar)))
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
            ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', irefdate)
