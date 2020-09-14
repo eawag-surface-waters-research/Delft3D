@@ -1270,7 +1270,7 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       return
    endif
 
-   call timstrt('GetCSParsFlowInterpolate', ihandle)
+   !call timstrt('GetCSParsFlowInterpolate', ihandle)
 
    cross1 => cross(line2cross%c1)
    cross2 => cross(line2cross%c2)
@@ -1334,7 +1334,7 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       
    endif
 
-   call timstop(ihandle)
+   !call timstop(ihandle)
 end subroutine GetCSParsFlowInterpolate
 
 !> Get flow area, wet perimeter and flow width at cross section location
@@ -1468,7 +1468,7 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
       return
    endif
 
-   call timstrt('GetCSParsTotalInterpolate', ihandle)
+   !call timstrt('GetCSParsTotalInterpolate', ihandle)
 
    cross1 => cross(line2cross%c1)
    cross2 => cross(line2cross%c2)
@@ -1513,7 +1513,7 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
       
    endif
    
-   call timstop(ihandle)
+   !call timstop(ihandle)
 
 end subroutine GetCSParsTotalInterpolate
 
