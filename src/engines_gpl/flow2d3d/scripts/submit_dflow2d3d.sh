@@ -149,5 +149,10 @@ if $withrtc ; then
     runscript_opts="$runscript_opts --rtc"
 fi
 runscript_opts="$runscript_opts $runscript_extraopts"
+if [ $numnode == 1 ]; then
+    echo "qsub -q $queue  -N ${JOBNAME} ${RUNSCRIPT} ${runscript_opts}"
+          qsub -q $queue  -N ${JOBNAME} ${RUNSCRIPT} ${runscript_opts}
+else
     echo "qsub -q $queue -pe distrib ${numnode} -N ${JOBNAME} ${RUNSCRIPT} ${runscript_opts}"
           qsub -q $queue -pe distrib ${numnode} -N ${JOBNAME} ${RUNSCRIPT} ${runscript_opts}
+fi
