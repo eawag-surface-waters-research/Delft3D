@@ -161,7 +161,7 @@ sharedir=$D3D_HOME/share
 
     # Run
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
-export PATH=$bindir:$PATH
+export PATH=$bindir:$PATH:/usr/lib64/mpich/bin
 # export LD_PRELOAD=$libdir/libmkl_core.so
 
 # For debugging only
@@ -257,8 +257,8 @@ else
            ln -s /dev/null log$node_number.irlog
         done
 
-        echo "/opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/d_hydro $configfile"
-              /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/d_hydro $configfile
+        echo "mpiexec -np $NSLOTS $bindir/d_hydro $configfile"
+              mpiexec -np $NSLOTS $bindir/d_hydro $configfile
 
 
         rm -f log*.irlog
