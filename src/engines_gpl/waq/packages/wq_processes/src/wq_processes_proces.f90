@@ -267,8 +267,8 @@
 
 !     Now update the derivatives and the dumps of the fluxes from
 !     all processes together outside of the parallel region
-      call twopro_wqm ( nproc  , noflux , noseg  ,             &
-                        notot  , ndmps  , idt    , iflux  ,    &
+      call twopro_wqm ( nproc  , noflux , noseg  , notot  ,    &
+                        ndmps  , itime  , idt    , iflux  ,    &
                         volume , deriv  , stochi , flux   ,    &
                         prondt , ibflag , isdmp  , flxdmp , ipbloo , istep  )
 
@@ -392,8 +392,8 @@
       return
       end
 
-      subroutine twopro_wqm (nproc  , noflux , noseg  ,          &
-                             notot  , ndmps  , idt    , iflux  , &
+      subroutine twopro_wqm (nproc  , noflux , noseg  , notot  , &
+                             ndmps  , itime  , idt    , iflux  , &
                              volume , deriv  , stochi , flux   , &
                              prondt , ibflag , isdmp  , flxdmp , ipbloo , istep  )
 
@@ -409,6 +409,7 @@
       integer(4), intent(in   ) :: noseg                           ! Total number of computational volumes
       integer(4), intent(in   ) :: notot                           ! Total number of substances
       integer(4), intent(in   ) :: ndmps                           ! Total number of mass balance areas
+      integer(4), intent(in   ) :: itime
       integer(4), intent(in   ) :: idt
       integer(4), intent(in   ) :: iflux (nproc )                  ! Offset in the flux array per process
       real   (4), intent(in   ) :: volume(noseg )                  ! Computational volumes
@@ -434,6 +435,8 @@
 
       integer(4) ithndl /0/
       if ( timon ) call timstrt ( "twopro_wqm", ithndl )
+
+      call check_flux(itime, noflux, noseg, flux)
 
       do iproc = 1, nproc
          if ( iproc .eq. ipbloo ) cycle
@@ -476,3 +479,52 @@
       if (timon) call timstop( ithndl )
       return
       end
+
+      subroutine check_flux(itime, noflux, noseg, flux)
+      
+      use processes_pointers, only: flux_nancheck, fluxname, fluxprocname
+      use timers
+
+      implicit none
+
+      integer itime, noflux, noseg
+      real(4) flux(noflux, noseg)
+
+      real(4) rtime
+      integer jflux, iseg
+      integer lunlsp, nomsg
+
+      integer(4) ithndl /0/
+      
+      if (flux_nancheck.eq.0) return
+      if ( timon ) call timstrt ( "check_flux", ithndl )
+      
+      call getmlu(lunlsp)
+      
+      nomsg = 0
+      do jflux = 1, noflux
+         do iseg = 1, noseg
+            if ( isnan(flux(jflux,iseg))) then
+               nomsg = nomsg + 1
+               if (nomsg.le.100) then
+                  if (nomsg.eq.1) then
+                     rtime = itime / 86400.0
+                     write( lunlsp, '(/X,A,I10,A,F8.1,A)') 'Warning: zeroing NaN(s) found in flux array at ', itime, 's =', rtime, 'd'
+                     write( lunlsp, '(X,A)') 'Flux       Process        Segment'
+                     if (flux_nancheck.gt.0) then
+                        flux_nancheck = -flux_nancheck
+                     end if
+                  endif
+                  write( lunlsp, '(2(X,A10),I12)') fluxname(jflux), fluxprocname(jflux), iseg
+               endif
+               flux(jflux,iseg) = 0.0
+            endif
+         enddo
+      enddo
+      if (nomsg.gt.100) then
+         write( lunlsp, '(A)') 'Warning: More than 100 NaNs were set to zero! Stopped reporting.'
+      endif
+
+      if (timon) call timstop( ithndl )
+      return
+      end subroutine check_flux

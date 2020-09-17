@@ -94,6 +94,7 @@
       integer                    :: noloc           !< Number of local vars in the proces subsystem
       integer                    :: novar           !< Number of variables
       integer                    :: nflux = 0       !< total number of fluxes
+      integer                    :: flux_nancheck   !< Process fluxes NaN check (0: no check, 1: report and set to zero, 2: report and stop)
       integer                    :: nodef           !< Number of defaults in proces subsystem
       integer                    :: noutp           !< Number of files in OUTPUT system
       integer                    :: nrvart          !< Number of extra output variables
