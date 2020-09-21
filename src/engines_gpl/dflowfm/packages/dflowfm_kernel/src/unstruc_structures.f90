@@ -886,7 +886,8 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
    double precision, allocatable, intent(  out) :: x(:)        !< x-coordinates of the structure (will be reallocated when needed)
    double precision, allocatable, intent(  out) :: y(:)        !< y-coordinates of the structure (will be reallocated when needed)
 
-   integer :: istru, nLinks, L, L0, k1, k2, k3, k
+   integer :: istru, nLinks, L, L0, k1, k2, k3, k4, k
+   double precision :: dtmp
    type(t_structure), pointer    :: pstru
 
    istru = get_istru(istrtypein, i)
@@ -905,16 +906,38 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
       x(2) = xk(k2)
       y(1) = yk(k1)
       y(2) = yk(k2)
-      if (nLinks > 1) then
-         k = 3
-         do L0 = 2, nLinks
-            L = abs(pstru%linknumbers(L0))
-            k3 = lncn(2,L)
+      k = 3
+      do L0 = 2, nLinks
+         L = abs(pstru%linknumbers(L0))
+         k3 = lncn(1,L)
+         k4 = lncn(2,L)
+         if (L0 == 2) then
+            if (k1 == k3 .or. k1 == k4) then
+               dtmp = x(2)
+               x(2) = x(1)
+               x(1) = dtmp
+               dtmp = y(2)
+               y(2) = y(1)
+               y(1) = dtmp
+            endif
+         endif
+         if (k1 == k3) then
+            x(k) = xk(k4)
+            y(k) = yk(k4)
+         else if (k1 == k4) then
             x(k) = xk(k3)
             y(k) = yk(k3)
-            k = k+1
-         end do
-      end if
+         else if (k2 == k3) then
+            x(k) = xk(k4)
+            y(k) = yk(k4)
+         else if (k2 == k4) then
+            x(k) = xk(k3)
+            y(k) = yk(k3)
+         endif
+         k1 = k3
+         k2 = k4
+         k = k+1
+      end do
    end if
 end subroutine get_geom_coordinates_of_structure
 
