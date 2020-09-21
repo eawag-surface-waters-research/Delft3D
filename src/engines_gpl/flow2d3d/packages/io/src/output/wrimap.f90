@@ -331,9 +331,9 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
        !
        if (lstsci  >0) iddim_lstsci = adddim(gdp, lundia, ifile, 'LSTSCI'            , lstsci  ) ! Number of constituents
        if (ltur    >0) iddim_ltur   = adddim(gdp, lundia, ifile, 'LTUR'              , ltur    ) ! Number of turbulence quantities
-       if (nostat  >0) iddim_nostat = adddim(gdp, lundia, ifile, 'NOSTAT'            , nostatgl) ! Number of monitoring stations
+       if (nostatgl>0) iddim_nostat = adddim(gdp, lundia, ifile, 'NOSTAT'            , nostatgl) ! Number of monitoring stations
        if (nsrc    >0) iddim_nsrc   = adddim(gdp, lundia, ifile, 'NSRC'              , nsrc    ) ! Number of discharges
-       if (ntruv   >0) iddim_ntruv  = adddim(gdp, lundia, ifile, 'NTRUV'             , ntruvgl ) ! Number of monitoring cross-sections
+       if (ntruvgl >0) iddim_ntruv  = adddim(gdp, lundia, ifile, 'NTRUV'             , ntruvgl ) ! Number of monitoring cross-sections
                        iddim_norow  = adddim(gdp, lundia, ifile, 'NOROW'             , norow   ) ! Number of rows for IROCOL table 
                        iddim_noroco = adddim(gdp, lundia, ifile, 'NOROCO'            , noroco  ) ! Number of columns of IROCOL table
        if (lsed    >0) iddim_lsed   = adddim(gdp, lundia, ifile, 'LSED'              , lsed    ) ! Number of sediment constituents

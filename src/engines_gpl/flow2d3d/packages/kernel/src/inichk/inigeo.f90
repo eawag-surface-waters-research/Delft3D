@@ -538,12 +538,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     ! results in existing models.
     ! This holds for all alfas calculations in this inigeo subroutine.
     !
-    do n = 2, nmaxus - 1
+    do n = 2, nmaxus
        nd = n - 1
-       nu = n + 1
-       do m = 2, mmax - 1
+       do m = 2, mmax
           md = m - 1
-          mu = m + 1
           if (abs(kcs(n, m)) == 1) then   
              if (sferic) then
                 xndm  = xcor(nd,m)

@@ -166,21 +166,21 @@ subroutine griddims( gdp )
     allocate(griddim%indexnode1(nmlb:nmub), stat=istat)
     nm = nmlb - 1
     node1 = 1
-    do n = nlb, nub
-       do m = mlb, mub
-           nm = nm + 1
-           if (n > 1 .and. n <= nmax .and. m > 1 .and. m <= mmax) then
-              griddim%cell2node(node1  ) = nm
-              griddim%cell2node(node1+1) = nm - 1
-              griddim%cell2node(node1+2) = nm - 1 - nmaxddb
-              griddim%cell2node(node1+3) = nm - nmaxddb
-              nnodes = 4
-           else
-              nnodes = 0
-           endif
-           griddim%ncellnodes(nm) = nnodes
-           griddim%indexnode1(nm) = node1
-           node1 = node1 + nnodes
+    do m = mlb, mub
+       do n = nlb, nub
+          nm = nm + 1
+          if (n > 1 .and. m > 1) then
+             griddim%cell2node(node1  ) = nm
+             griddim%cell2node(node1+1) = nm - 1
+             griddim%cell2node(node1+2) = nm - 1 - nmaxddb
+             griddim%cell2node(node1+3) = nm - nmaxddb
+             nnodes = 4
+          else
+             nnodes = 0
+          endif
+          griddim%ncellnodes(nm) = nnodes
+          griddim%indexnode1(nm) = node1
+          node1 = node1 + nnodes
        enddo
     enddo
     !
