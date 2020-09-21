@@ -21,8 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine wq_processes_proces ( notot  , noseg  , conc   , volume , itime  , &
-                                       idt    , deriv  , ndmpar , nproc  , noflux , &
+      subroutine wq_processes_proces ( notot  , noseg  , conc   , volume , time   , &
+                                       dts    , deriv  , ndmpar , nproc  , noflux , &
                                        ipmsa  , prvnio , promnr , iflux  , increm , &
                                        flux   , flxdmp , stochi , ibflag , ipbloo , &
                                        ioffbl , amass  , nosys  , isfact , itfact , &
@@ -58,8 +58,8 @@
       integer( 4), intent(in   ) :: novar                       !<
       real   ( 4), intent(inout) :: conc  (notot,noseg)         !< Model concentrations
       real   ( 4), intent(in   ) :: volume(      noseg)         !< Segment volumes
-      integer( 4), intent(in   ) :: itime                       !< Time in system clock units
-      integer( 4), intent(in   ) :: idt                         !< Time step system clock units
+      real   ( 8), intent(in   ) :: time                        !< Time in system clock units
+      real   ( 8), intent(in   ) :: dts                         !< Time step system clock units
       real   ( 4), intent(inout) :: deriv (noseg,notot)         !< Model derivatives
       integer( 4), intent(in   ) :: ndmpar                      !< Number of dump areas
       integer( 4), intent(in   ) :: nproc                       !< Number of processes
@@ -122,8 +122,8 @@
       integer( 4)  ivar  , iarr  , iv_idx, ip_arr          !  help variables
       integer( 4)  ipndt , ndtblo                          !  help variables
       integer( 4)  nfluxp, ifracs, iproc   !  help variables
-      integer                    :: idtpro    ! fractional step idt
-      integer(4)                 :: ipp_idt    ! pointer in default array to process specific idt
+      real   ( 8)                :: dtspro    ! fractional step dts
+      integer(4)                 :: ipp_dts    ! pointer in default array to process specific dts
       integer(4)                 :: ipp_delt   ! pointer in default array to process specific delt
       INTEGER ISTEP, NOQ
       integer                    :: open_shared_library
@@ -174,12 +174,12 @@
          if ( mod(istep-1,ndtblo) .eq. 0 ) then
             flux = 0.0
 
-!           set idt and delt, bloom itself will multiply with prondt
-            idtpro     = prondt(ipbloo)*idt
-            ipp_idt    = nodef - 2*nproc + ipbloo
+!           set dts and delt, bloom itself will multiply with prondt
+            dtspro     = prondt(ipbloo)*dts
+            ipp_dts    = nodef - 2*nproc + ipbloo
             ipp_delt   = nodef -   nproc + ipbloo
-            defaul(ipp_idt)  = float(idt)
-            defaul(ipp_delt) = float(idt)/float(itfact)
+            defaul(ipp_dts)  = dts
+            defaul(ipp_delt) = dts/float(itfact)
 
             call onepro_wqp (ipbloo , ioffbl , prvnio , prvtyp , prvvar , vararr , &
                              varidx , arrknd , arrpoi , arrdm1 , arrdm2 ,          &
@@ -200,7 +200,7 @@
 
 !              For balances store FLXDMP
                if ( ibflag .gt. 0 ) then
-                  ndt = prondt(ipbloo)*real(idt)/86400.0
+                  ndt = prondt(ipbloo)*dts/86400.0
                   do iseg = 1 , noseg
                      if ( isdmp(iseg) .gt. 0 ) then
                         nflux1 = iflux (ipbloo)
@@ -232,7 +232,7 @@
 
                if (flux_int == 1) then
 !                 let WAQ integrate the process fluxes
-                  call wq_processes_integrate_fluxes ( conc   , amass  , deriv  , volume , idt     , &
+                  call wq_processes_integrate_fluxes ( conc   , amass  , deriv  , volume , dts     , &
                                                        nosys  , notot  , noseg  , surfac )
                endif
             endif
@@ -248,12 +248,12 @@
 !           Check fractional step
             if ( mod( istep-1, prondt(iproc) ) .eq. 0 ) then
 
-               ! set idt and delt for this process in the default array
-               ipp_idt    = nodef - 2*nproc + iproc
+               ! set dts and delt for this process in the default array
+               ipp_dts    = nodef - 2*nproc + iproc
                ipp_delt   = nodef -   nproc + iproc
-               IDTPRO    = PRONDT(IPROC)*IDT
-               defaul(ipp_idt)  = FLOAT(IDTPRO)
-               defaul(ipp_delt) = FLOAT(IDTPRO)/FLOAT(ITFACT)
+               dtspro    = prondt(iproc)*dts
+               defaul(ipp_dts)  = dtspro
+               defaul(ipp_delt) = dtspro/float(itfact)
 
                call onepro_wqp (iproc   , prvpnt(iproc), prvnio  , prvtyp  , prvvar  , vararr  , &
                                 varidx  , arrknd       , arrpoi  , arrdm1  , arrdm2  ,           &
@@ -268,7 +268,7 @@
 !     Now update the derivatives and the dumps of the fluxes from
 !     all processes together outside of the parallel region
       call twopro_wqm ( nproc  , noflux , noseg  , notot  ,    &
-                        ndmps  , itime  , idt    , iflux  ,    &
+                        ndmps  , time   , dts    , iflux  ,    &
                         volume , deriv  , stochi , flux   ,    &
                         prondt , ibflag , isdmp  , flxdmp , ipbloo , istep  )
 
@@ -303,11 +303,11 @@
 !                 Add effect of additional flow velocities
                   call wq_processes_integrate_velocities ( nosys    , notot    , noseg    , noq      , nveln    , &
                                                            velx     , area     , volume   , iexpnt   , iknmrk   , &
-                                                           ivpnew   , conc     , idt      , deriv  )
+                                                           ivpnew   , conc     , dts      , deriv  )
                end if
 
 !              Integration (derivs are zeroed)
-               call wq_processes_integrate_fluxes ( conc   , amass  , deriv  , volume , idt     , &
+               call wq_processes_integrate_fluxes ( conc   , amass  , deriv  , volume , dts     , &
                                                     nosys  , notot  , noseg  , surfac )
             endif
          endif
@@ -393,7 +393,7 @@
       end
 
       subroutine twopro_wqm (nproc  , noflux , noseg  , notot  , &
-                             ndmps  , itime  , idt    , iflux  , &
+                             ndmps  , time   , dts    , iflux  , &
                              volume , deriv  , stochi , flux   , &
                              prondt , ibflag , isdmp  , flxdmp , ipbloo , istep  )
 
@@ -409,8 +409,8 @@
       integer(4), intent(in   ) :: noseg                           ! Total number of computational volumes
       integer(4), intent(in   ) :: notot                           ! Total number of substances
       integer(4), intent(in   ) :: ndmps                           ! Total number of mass balance areas
-      integer(4), intent(in   ) :: itime
-      integer(4), intent(in   ) :: idt
+      real   (8), intent(in   ) :: time
+      real   (8), intent(in   ) :: dts
       integer(4), intent(in   ) :: iflux (nproc )                  ! Offset in the flux array per process
       real   (4), intent(in   ) :: volume(noseg )                  ! Computational volumes
       real   (4), intent(inout) :: deriv (noseg , notot )          ! Array with derivatives
@@ -436,7 +436,7 @@
       integer(4) ithndl /0/
       if ( timon ) call timstrt ( "twopro_wqm", ithndl )
 
-      call check_flux(itime, noflux, noseg, flux)
+      call check_flux(time, noflux, noseg, flux)
 
       do iproc = 1, nproc
          if ( iproc .eq. ipbloo ) cycle
@@ -455,7 +455,7 @@
                                         nfluxp          , flux           , noseg  , volume         , prondt(iproc))
 
 !        For the use in balances, store fluxes in 'flxdmp' using aggregation pointer 'isdmp'
-         ndt = prondt(iproc)*real(idt)/86400.0
+         ndt = prondt(iproc)*real(dts)/86400.0
          if ( ibflag .gt. 0 ) then
             do iseg = 1 , noseg
                if ( isdmp(iseg) .gt. 0 ) then
@@ -480,17 +480,17 @@
       return
       end
 
-      subroutine check_flux(itime, noflux, noseg, flux)
+      subroutine check_flux(time, noflux, noseg, flux)
       
       use processes_pointers, only: flux_nancheck, fluxname, fluxprocname
       use timers
 
       implicit none
 
-      integer itime, noflux, noseg
+      real(8) time
+      integer noflux, noseg
       real(4) flux(noflux, noseg)
 
-      real(4) rtime
       integer jflux, iseg
       integer lunlsp, nomsg
 
@@ -508,8 +508,7 @@
                nomsg = nomsg + 1
                if (nomsg.le.100) then
                   if (nomsg.eq.1) then
-                     rtime = itime / 86400.0
-                     write( lunlsp, '(/X,A,I10,A,F8.1,A)') 'Warning: zeroing NaN(s) found in flux array at ', itime, 's =', rtime, 'd'
+                     write( lunlsp, '(/X,A,I10,A,F8.1,A)') 'Warning: zeroing NaN(s) found in flux array at ', nint(time), 's =', time, 'd'
                      write( lunlsp, '(X,A)') 'Flux       Process        Segment'
                      if (flux_nancheck.gt.0) then
                         flux_nancheck = -flux_nancheck

@@ -1180,7 +1180,7 @@
       integer                      :: ipoivol, ipoisurf, ipoiarea
       integer                      :: ipoivelx, ipoidefa
 
-      integer                      :: idt, itime
+      integer                      :: itime
 
       integer                      :: ierr
 
@@ -1213,11 +1213,9 @@
       ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg
       ipoiarea = arrpoi(iiarea)
 
-      idt   = int(dt)
-      itime = int(time)
-      pmsa(ipoidefa+1) = itime
+      pmsa(ipoidefa+1) = time
 
-      call wq_processes_proces (notot , noseg , pmsa(ipoiconc), pmsa(ipoivol) , itime , idt   , deriv , ndmpar, &
+      call wq_processes_proces (notot , noseg , pmsa(ipoiconc), pmsa(ipoivol) , time  , dt    , deriv , ndmpar, &
                                 nproc , nflux , ipmsa , prvnio, promnr, iflux , increm, flux  , flxdmp, stochi, &
                                 ibflag, ipbloo, ioffbl, amass , nosys , isfact, itfact , iexpnt, iknmrk, noq1  , &
                                 noq2  , noq3  , noq4  , pmsa(ipoiarea), ndspn , idpnew, dispnw, ndspx , dspx  , &

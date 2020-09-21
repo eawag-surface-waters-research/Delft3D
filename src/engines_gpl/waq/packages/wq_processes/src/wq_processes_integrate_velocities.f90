@@ -23,7 +23,7 @@
 
       subroutine wq_processes_integrate_velocities ( nosys  , notot  , noseg  , noq    , novelo , &
                                                      velo   , area   , volume , ipoint , iknmrk , &
-                                                     ivpnt  , conc   , idt    , deriv  )
+                                                     ivpnt  , conc   , dts    , deriv  )
 
 !     Deltares Software Centre
 
@@ -58,7 +58,7 @@
       integer  ( 4), intent(in   ) :: iknmrk(noseg)        !< feature array
       integer  ( 4), intent(in   ) :: ivpnt (nosys)        !< additional velocity number per substance
       real     ( 4), intent(in   ) :: conc  (notot,noseg)  !< concentrations at previous time level
-      integer  ( 4), intent(in   ) :: idt                  !< time step in seconds
+      real     ( 8), intent(in   ) :: dts                  !< time step in seconds
       real     ( 4), intent(inout) :: deriv (noseg,notot)  !< explicit derivative in mass/m3/s
 
 !     Local variables     :
@@ -78,7 +78,7 @@
       integer(4), save :: ithndl = 0
       if (timon) call timstrt( "wq_processes_integrate_velocities", ithndl )
 
-      dt = real(idt)
+      dt = dts
 
       !     loop accross the number of exchanges
       do iq = 1 , noq
