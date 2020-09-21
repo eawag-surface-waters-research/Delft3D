@@ -918,4 +918,69 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
    end if
 end subroutine get_geom_coordinates_of_structure
 
+!> Gets geometry coordinates of a structure, aligned along structure.
+!! Geometry coordinates can be used in a polyline representation of the placement
+!! of structures on flow links.
+subroutine get_geom_coordinates_of_structure_old(i, nNodes, x, y)
+   use m_alloc
+   use m_flowexternalforcings, only: ncgensg, kcgen, L1cgensg, L2cgensg
+   use m_flowgeom, only: lncn
+   use network_data, only: xk, yk
+   implicit none
+   integer,                       intent(in   ) :: i           !< Structure index for this structure type.
+   integer,                       intent(in   ) :: nNodes      !< Number of geometry nodes in this structure.
+   double precision, allocatable, intent(  out) :: x(:)   !< x-coordinates of the structure (will be reallocated when needed)
+   double precision, allocatable, intent(  out) :: y(:)   !< y-coordinates of the structure (will be reallocated when needed)
+
+   integer :: L, L0, k1, k2, k3, k4, k
+   double precision :: dtmp
+
+   if (nNodes > 0) then
+      call realloc(x, nNodes)
+      call realloc(y, nNodes)
+
+      L0 = L1cgensg(i)
+      L = abs(kcgen(3,L0))
+      k1 = lncn(1,L)
+      k2 = lncn(2,L)
+      x(1) = xk(k1)
+      x(2) = xk(k2)
+      y(1) = yk(k1)
+      y(2) = yk(k2)
+                      
+      k = 3
+      do L0 = L1cgensg(i)+1, L2cgensg(i)
+         L = abs(kcgen(3,L0))
+         k3 = lncn(1,L)
+         k4 = lncn(2,L)
+         if (L0 == 2) then
+            if (k1 == k3 .or. k1 == k4) then
+               dtmp = x(2)
+               x(2) = x(1)
+               x(1) = dtmp
+               dtmp = y(2)
+               y(2) = y(1)
+               y(1) = dtmp
+            endif
+         endif
+         if (k1 == k3) then
+            x(k) = xk(k4)
+            y(k) = yk(k4)
+         else if (k1 == k4) then
+            x(k) = xk(k3)
+            y(k) = yk(k3)
+         else if (k2 == k3) then
+            x(k) = xk(k4)
+            y(k) = yk(k4)
+         else if (k2 == k4) then
+            x(k) = xk(k3)
+            y(k) = yk(k3)
+         endif
+         k1 = k3
+         k2 = k4
+         k = k+1
+      end do
+   end if
+end subroutine get_geom_coordinates_of_structure_old
+
 end module m_structures

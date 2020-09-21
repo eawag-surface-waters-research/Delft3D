@@ -22223,28 +22223,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      node_count(n) = nNodes
 
                      if (nNodes > 0) then
-                        call realloc(geom_x, nNodes)
-                        call realloc(geom_y, nNodes)
-
-                        L0 = L1cgensg(i)
-                        L = abs(kcgen(3,L0))
-                        k1 = lncn(1,L)
-                        k2 = lncn(2,L)
-                        geom_x(1) = xk(k1)
-                        geom_x(2) = xk(k2)
-                        geom_y(1) = yk(k1)
-                        geom_y(2) = yk(k2)
-                        if (nlinks > 1) then
-                           k = 3
-                           do L0 = L1cgensg(i)+1, L2cgensg(i)
-                              L = abs(kcgen(3,L0))
-                              k3 = lncn(2,L)
-                              geom_x(k) = xk(k3)
-                              geom_y(k) = yk(k3)
-                              k = k+1
-                           end do
-                        end if
-
+                        call get_geom_coordinates_of_structure_old(i, nNodes, geom_x, geom_y)
                         ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
                         ierr = nf90_put_var(ihisfile, id_genstrugeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                         j = j + nNodes
@@ -22532,28 +22511,7 @@ subroutine unc_write_his(tim)            ! wrihis
                node_count(n) = nNodes
 
                if (nNodes > 0) then
-                  call realloc(geom_x, nNodes)
-                  call realloc(geom_y, nNodes)
-
-                  L0 = L1cgensg(i)
-                  L = abs(kcgen(3,L0))
-                  k1 = lncn(1,L)
-                  k2 = lncn(2,L)
-                  geom_x(1) = xk(k1)
-                  geom_x(2) = xk(k2)
-                  geom_y(1) = yk(k1)
-                  geom_y(2) = yk(k2)
-                  if (nlinks > 1) then
-                     k = 3
-                     do L0 = L1cgensg(i)+1, L2cgensg(i)
-                        L = abs(kcgen(3,L0))
-                        k3 = lncn(2,L)
-                        geom_x(k) = xk(k3)
-                        geom_y(k) = yk(k3)
-                        k = k+1
-                     end do
-                  end if
-
+                  call get_geom_coordinates_of_structure_old(i, nNodes, geom_x, geom_y)
                   ierr = nf90_put_var(ihisfile, id_gategengeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
                   ierr = nf90_put_var(ihisfile, id_gategengeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                   j = j + nNodes
@@ -22598,9 +22556,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   node_count(i) = nNodes
 
                   if (nNodes > 0) then
-
                      call get_geom_coordinates_of_structure(ST_WEIR, i, nNodes, geom_x, geom_y)
-
                      ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
                      ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                      j = j + nNodes
@@ -22621,28 +22577,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   node_count(n) = nNodes
 
                   if (nNodes > 0) then
-                     call realloc(geom_x, nNodes)
-                     call realloc(geom_y, nNodes)
-
-                     L0 = L1cgensg(i)
-                     L = abs(kcgen(3,L0))
-                     k1 = lncn(1,L)
-                     k2 = lncn(2,L)
-                     geom_x(1) = xk(k1)
-                     geom_x(2) = xk(k2)
-                     geom_y(1) = yk(k1)
-                     geom_y(2) = yk(k2)
-                     if (nlinks > 1) then
-                        k = 3
-                        do L0 = L1cgensg(i)+1, L2cgensg(i)
-                           L = abs(kcgen(3,L0))
-                           k3 = lncn(2,L)
-                           geom_x(k) = xk(k3)
-                           geom_y(k) = yk(k3)
-                           k = k+1
-                        end do
-                     end if
-
+                     call get_geom_coordinates_of_structure_old(i, nNodes, geom_x, geom_y)
                      ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
                      ierr = nf90_put_var(ihisfile, id_weirgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
                      j = j + nNodes
