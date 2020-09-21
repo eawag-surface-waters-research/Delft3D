@@ -1180,8 +1180,6 @@
       integer                      :: ipoivol, ipoisurf, ipoiarea
       integer                      :: ipoivelx, ipoidefa
 
-      integer                      :: itime
-
       integer                      :: ierr
 
       integer                      :: ipvol, isys, k
