@@ -960,7 +960,7 @@
    real(fp), dimension(kmax2d)   :: concin2d
    character(256)                :: errmsg
    character(256)                :: msg
-   double precision              :: cz_dum, cc, maxdepfrac
+   double precision              :: cz_dum, zcc, maxdepfrac
    double precision              :: ML, hloc, twothird
    double precision              :: dcfin, dcf
    double precision              :: ubot
@@ -1199,14 +1199,14 @@
          deltas(k2) =  deltas(k2) + wcl(2,L)*wblt(L)
       end do
       maxdepfrac = 0.05                       !        cases where you want 2D velocity above the wbl
-      cc = 0d0
+      zcc = 0d0
 
       do kk = 1, ndx
          call getkbotktop(kk,kb,kt)
          do k = kb, kt
-            cc  = 0.5d0*(zws(k-1)+zws(k))         ! cell centre position in vertical layer admin, using depth convention
+            zcc  = 0.5d0*(zws(k-1)+zws(k))         ! cell centre position in vertical layer admin, using absolute height
             kmxvel = k
-            if (cc>=-maxdepfrac*hs(kk) .or. cc>=(bl(kk)+deltas(kk))) then
+            if (zcc>=(bl(kk)+maxdepfrac*hs(kk)) .or. zcc>=(bl(kk)+deltas(kk))) then
                exit
             endif
          enddo
@@ -1214,7 +1214,7 @@
          uuu(kk)   = ucxq(kmxvel)                  ! discharge based cell centre velocities
          vvv(kk)   = ucyq(kmxvel)
          umod(kk)  = sqrt(uuu(kk)*uuu(kk) + vvv(kk)*vvv(kk))
-         zumod(kk) = cc-bl(kk)
+         zumod(kk) = zcc-bl(kk)
       end do
 
       ! If secondary flow, then we consider the bed shear stress magnitude as computed in 3D,
@@ -1293,9 +1293,7 @@
    ! in case of multiple (non-mud) fractions, the following quantities
    ! --- that are initialized in INISED --- may be time-dependent and
    ! they must be updated here or after updating the bed levels in
-   ! BOTT3D. Since we do it here, these quantities will lag a half time
-   ! step behind on the output files. If these statements are moved to
-   ! BOTT3D, the GETFRAC call above must be shifted too.
+   ! BOTT3D. 
    !
    if (lsedtot-nmudfrac > 1) then    ! for all non-cohesive suspended fractions
       !
