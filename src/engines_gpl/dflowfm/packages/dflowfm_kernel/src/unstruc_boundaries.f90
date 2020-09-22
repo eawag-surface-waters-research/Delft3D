@@ -2690,7 +2690,15 @@ end do
             zcgen((n-1)*kx+1) = tmpval ! Constant value for always, set it now already.
             hulp(6, n)        = tmpval
          end if
-
+         
+         tmpval = dmiss
+         call prop_get(str_ptr, '', 'CrestWidth', rec, success)
+         if (success) then
+             read(rec, *, iostat = ierr) tmpval
+             zcgen((n-1)*kx+3) = tmpval ! Constant value for always, set it now already.
+             hulp(26,n) = tmpval
+         endif
+         
          tmpval = dmiss
          call prop_get(str_ptr, '', 'lat_contr_coeff', tmpval)
          ! TODO: Herman/Jaco: this is not relevant anymore, using width (gate only)??

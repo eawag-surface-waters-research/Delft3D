@@ -1848,12 +1848,18 @@ do ng=1,ncgensg ! Loop over general structures
       generalstruc(ng)%widthcenteronlink(L0) = wu(Lf)
       totalWidth = totalWidth + wu(Lf)
    end do
-
+   
    ! 2a: the desired crest width for this overall structure (hereafter, the open links for this genstru should add up to this width)
    !     Also: only for gates, the desired door opening width for this overall structure
    !           (should be smaller than crestwidth, and for this portion the open gate door is emulated by dummy very high lower edge level)
    if (cgen_type(ng) == ICGENTP_WEIR) then
-      crestwidth = zcgen((ng-1)*3+3) ! TODO: AvD: this is probably always 1d10, weir has no crest_width attribute yet.
+      crestwidth = zcgen((ng-1)*3+3)
+      if (crestwidth > totalwidth) then
+          zcgen((ng-1)*3+3) = totalwidth
+          crestwidth = totalwidth
+          write(msgbuf, '(a,a,a,es12.5,a)') 'Weir ''', trim(cgen_ids(ng)), ''', crest width (re)set to ', totalwidth, '.'
+          call warn_flush()
+      endif
       closedGateWidthL = 0d0
       closedGateWidthR = 0d0
    else if (cgen_type(ng) == ICGENTP_GENSTRU) then
