@@ -215,14 +215,7 @@ else
         echo "mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg"
               mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg
     else
-        #
-        if [ -z "$MPI_ROOT" ]
-        then
-           # Default: Parallel on Deltares cluster
-           export PATH=/opt/mpich2/1.4.1_intel14.0.3/bin:$PATH
-        else
-           export PATH=$MPI_ROOT/bin:$PATH
-        fi
+        export PATH=/usr/lib64/mpich/bin:$PATH
         #
         # Create machinefile using $PE_HOSTFILE
         if [ $NNODES -eq 1 ]; then
