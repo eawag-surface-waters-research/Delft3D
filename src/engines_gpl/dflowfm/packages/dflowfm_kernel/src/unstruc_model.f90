@@ -709,6 +709,7 @@ subroutine readMDUFile(filename, istat)
     use MessageHandling
     use system_utils, only: split_filename
     use m_commandline_option, only: iarg_usecaching
+    use m_subsidence, only: sdu_update_s1
 
 
     use m_sediment
@@ -1148,6 +1149,11 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'numerics', 'Baorgfracmin'    , Baorgfracmin)
     
     call prop_get_integer(md_ptr, 'numerics', 'LogSolverConvergence', jalogsolverconvergence)
+    call prop_get_integer(md_ptr, 'numerics', 'SubsUplUpdateS1', sdu_update_s1)
+    if (sdu_update_s1<0 .or. sdu_update_s1>1) then
+       call mess(LEVEL_WARN, 'Invalid settings specified for SubsUplUpdateS1; using 0.')
+       sdu_update_s1 = 0
+    endif
 
     ! Physics
     call prop_get_double (md_ptr, 'physics', 'UnifFrictCoef'  , frcuni)
@@ -2336,6 +2342,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_transport, only: ITRA1
     use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir, jahisorif, jahisbridge, jahisculv, jahisdambreak, jahisuniweir, jahiscmpstru
     use m_sobekdfm,              only : sbkdfm_umin, sbkdfm_umin_method, minimal_1d2d_embankment, sbkdfm_relax
+    use m_subsidence, only: sdu_update_s1
 
     integer, intent(in)  :: mout  !< File pointer where to write to.
     logical, intent(in)  :: writeall !< Write all fields, including default values
@@ -2874,6 +2881,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. baorgfracmin > 0) then
        call prop_set (prop_ptr, 'numerics', 'Baorgfracmin', Baorgfracmin, 'Cell area = max(orgcellarea*Baorgfracmin, cutcell area) ')
+    endif
+    if (writeall .or. sdu_update_s1 > 0) then
+       call prop_set (prop_ptr, 'numerics', 'SubsUplUpdateS1', sdu_update_s1, 'Update water levels (S1) due to subsidence / uplift')
     endif
 
 ! Physics

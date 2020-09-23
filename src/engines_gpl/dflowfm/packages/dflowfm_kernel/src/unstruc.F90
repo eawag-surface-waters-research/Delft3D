@@ -1466,6 +1466,9 @@ if(q /= 0) then
  
  if ((jased > 0 .and. stm_included).or.(jasubsupl>0)) then
     call setbobs()   ! adjust administration - This option only works for ibedlevtyp = 1, otherwise original bed level [bl] is overwritten to original value
+    if (jasubsupl>0) then
+       call subsupl_update_s1()
+    end if
     call volsur()                     ! update volumes 2d
     if (kmx>0) then
        call setkbotktop(0)            ! and 3D for cell volumes
@@ -17862,18 +17865,20 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    endif
    
    if (jasubsupl > 0) then
-      if (.not. sdufirst) then 
-         subsupl_tp = subsupl   
+      if (.not. sdu_first) then
+         ! preserve the previous 'bedrock_surface_elevation' for computing the subsidence/uplift rate
+         subsupl_tp = subsupl
       endif 
       if (item_subsiduplift /= ec_undef_int) then
          success = success .and. ec_gettimespacevalue(ecInstancePtr, 'bedrock_surface_elevation', tim)
       endif
-      if (sdufirst) then 
-         subsupl_tp = subsupl 
-         subsupl_t0 = subsupl      
-         sdufirst = .false.
-      endif 
-   endif   
+      if (sdu_first) then
+         ! preserve the first 'bedrock_surface_elevation' field as the initial field
+         subsupl_tp = subsupl
+         subsupl_t0 = subsupl
+         sdu_first  = .false.
+      endif
+   endif
 
    call timstop(handle_ext)
 
@@ -45099,7 +45104,7 @@ if (mext /= 0) then
            
         else if (qid(1:25) == 'bedrock_surface_elevation') then
            kx=1
-           if (allocated(subsupl)) deallocate(subsupl, subsupl_t0, subsupl_tp, subsout)
+           if (allocated(subsupl)) deallocate(subsupl, subsupl_t0, subsupl_tp, subsout, sdu_blp)
            
            select case (ibedlevtyp)
               case (1)
@@ -45112,6 +45117,7 @@ if (mext /= 0) then
                  allocate ( subsout(ndx) , stat=ierr); subsout = 0d0
                  call aerr('subsout(ndx)', ierr, ndx)
                  success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand)
+
               case (2)
                  if (allocated(kcw)) deallocate(kcw)
                  allocate(kcw(lnx), stat=ierr)
@@ -45126,8 +45132,8 @@ if (mext /= 0) then
                  allocate ( subsout(lnx) , stat=ierr); subsout = 0d0
                  call aerr('subsout(lnx)', ierr, lnx)
                  success = ec_addtimespacerelation(qid, xu, yu, kcw, kx, filename, filetype, method, operand, varname=varname)
-            
-              case (3,4,5,6)
+
+             case (3,4,5,6)
                  if (allocated(kcw)) deallocate(kcw)
                  allocate(kcw(numk), stat=ierr)
                  call aerr('kcw(numk)', ierr, numk)
@@ -45141,11 +45147,13 @@ if (mext /= 0) then
                  allocate ( subsout(numk) , stat=ierr); subsout = 0d0
                  call aerr('subsout(numk)', ierr, numk)
                  success = ec_addtimespacerelation(qid, xk(1:numk), yk(1:numk), kcw, kx, filename, filetype, method, operand, varname=varname)
-            end select
+           end select
+           allocate ( sdu_blp(ndx) , stat=ierr); sdu_blp = 0d0
+           call aerr('sdu_blp(ndx)', ierr, ndx)
            
            if (success) then
               jasubsupl = 1
-           endif   
+           endif
 
         else if (trim(qid) == "spiderweb") then
            call qnerror(' ', 'Quantity SPIDERWEB must be renamed to airpressure_windx_windy in the ext-file.', ' ')
@@ -51714,17 +51722,24 @@ end subroutine alloc_jacobi
       ustw2 = 0.5*fw*uorbu**2
    end subroutine soulsby
 
+   ! update the bed levels due to subsidence/uplift
    subroutine apply_subsupl()
       use m_flowtimes, only: dts, dt_user
-      use m_subsidence
-      use m_flowparameters
-      use m_flowgeom
-      use m_flow
-      use network_data
+      use m_subsidence, only: sdu_blp, subsupl, subsupl_tp
+      use m_flowparameters, only: ibedlevtyp
+      use m_flowgeom, only: lnx, ndx, bl, blu
+      use network_data, only: numk, zk
       
       implicit none
       
-      integer           :: k,L
+      integer           :: k !< face/cell or node index
+      integer           :: L !< link/edge index
+      
+      
+      ! copy bed level at cell centres to detect bed level changes later when updating water levels
+      do k = 1, ndx
+         sdu_blp(k) = bl(k)
+      enddo
       
       ! subsidence rate is interpolated in space and time in setexternalforcings() at tim=tstart+n*dt_user
       ! Where the subs/uplift is applied depends on ibedlevtyp
@@ -51742,21 +51757,48 @@ end subroutine alloc_jacobi
       !end select
       select case (ibedlevtyp)
          case (1)
-            do k=1,ndx
-               bl(k)=bl(k)+(subsupl(k)-subsupl_tp(k))/dt_user*dts
-               s1(k)=max(s1(k),bl(k))
-               subsout(k) = subsupl(k)-subsupl_t0(k)
-            enddo   
-         case (2)
-            do L=1,lnx
-               blu(L)=blu(L)+(subsupl(L)-subsupl_tp(L))/dt_user*dts
-               subsout(L) = subsupl(L)-subsupl_t0(L)
-            enddo   
-         case (3,4,5,6)  
-            do k=1,numk
-               zk(k)=zk(k)+(subsupl(k)-subsupl_tp(k))/dt_user*dts
-               subsout(k) = subsupl(k)-subsupl_t0(k)
+            do k = 1,ndx
+               bl(k) = bl(k) + (subsupl(k)-subsupl_tp(k))/dt_user*dts
             enddo
-      end select      
+         case (2)
+            do L = 1,lnx
+               blu(L) = blu(L) + (subsupl(L)-subsupl_tp(L))/dt_user*dts
+            enddo
+         case (3,4,5,6)
+            do k = 1,numk
+               zk(k) = zk(k) + (subsupl(k)-subsupl_tp(k))/dt_user*dts
+            enddo
+      end select
+   end subroutine apply_subsupl
+
+   ! update the water levels for the bed level change caused by subsidence/uplift
+   subroutine subsupl_update_s1()
+      use m_subsidence, only: sdu_update_s1, sdu_blp
+      use m_flowgeom, only: ndx, bl
+      use m_flow, only: s1
+      use m_flowparameters, only: epshs
+      use MessageHandling, only: mess, LEVEL_ERROR
       
-   end subroutine
+      implicit none
+      
+      integer           :: k !< face/cell index
+      
+      if (sdu_update_s1 == 1) then
+         ! update s1 in all cells
+         do k = 1,ndx
+            ! adjust water level for subsidence/uplift
+            s1(k) = s1(k) + (bl(k) - sdu_blp(k))
+         enddo
+      else
+         ! update s1 only in dry cells
+         do k = 1,ndx
+            if ( (s1(k) - sdu_blp(k)) < epshs) then
+               ! adjust water level in dry areas for subsidence/uplift
+               s1(k) = s1(k) + (bl(k) - sdu_blp(k))
+            else
+               ! avoid negative depths in case of drying due to uplift
+               s1(k) = max(s1(k), bl(k))
+            endif
+         enddo
+      endif
+   end subroutine subsupl_update_s1

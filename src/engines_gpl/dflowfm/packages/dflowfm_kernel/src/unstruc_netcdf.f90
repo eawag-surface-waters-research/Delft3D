@@ -4490,7 +4490,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use string_module, only: replace_multiple_spaces_by_single_spaces
    use m_save_ugrid_state, only: mesh1dname
    use m_hydrology_data, only : jadhyd, ActEvap, PotEvap, interceptionmodel, DFM_HYD_NOINTERCEPT, InterceptHs
-   use m_subsidence
+   use m_subsidence, only: jasubsupl, subsout, subsupl, subsupl_t0
 
    implicit none
 
@@ -5884,8 +5884,11 @@ if (jasubsupl>0) then
          iloc = UNC_LOC_U
       case (3,4,5,6)
          iloc = UNC_LOC_CN
-   end select  
-   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_subsupl, iloc, subsout, jabndnd=jabndnd_)   
+   end select
+   do k = 1, size(subsupl)
+      subsout(k) = subsupl(k) - subsupl_t0(k)
+   enddo
+   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_subsupl, iloc, subsout, jabndnd=jabndnd_)
 endif   
 
 if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
