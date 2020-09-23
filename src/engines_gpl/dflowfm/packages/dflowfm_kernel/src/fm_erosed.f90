@@ -1206,7 +1206,7 @@
          do k = kb, kt
             zcc  = 0.5d0*(zws(k-1)+zws(k))         ! cell centre position in vertical layer admin, using absolute height
             kmxvel = k
-            if (zcc>=(bl(kk)+maxdepfrac*hs(kk)) .or. zcc>=(bl(kk)+deltas(kk))) then
+            if (zcc>=(bl(kk)+maxdepfrac*hs(kk)) .or. (jawave>0 .and. zcc>=(bl(kk)+deltas(kk)))) then
                exit
             endif
          enddo
