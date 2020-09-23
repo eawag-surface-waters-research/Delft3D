@@ -55,3 +55,13 @@ libIONetcdf_la_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 
+@echo $(info COMPILE= $(COMPILE))
+@echo $(info CC= $(CC))
+@echo $(info DEFS= $(DEFS))
+@echo $(info DEFAULT_INCLUDES= $(DEFAULT_INCLUDES))
+@echo $(info INCLUDES= $(INCLUDES))
+@echo $(info AM_CPPFLAGS= $(AM_CPPFLAGS))
+@echo $(info CPPFLAGS= $(CPPFLAGS))
+@echo $(info AM_CFLAGS= $(AM_CFLAGS))
+@echo $(info CFLAGS= $(CFLAGS))
+
