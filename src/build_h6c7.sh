@@ -180,7 +180,7 @@ fi
 fortranModule=""
 case $compiler in
     gnu)
-        fortranModule="gcc/9.2.0"
+        fortranModule="gcc/7.3.0"
         ifortInit="module load $fortranModule"
         iccInit=""
         echo "Using GNU compilers in `witch gfortran`"
@@ -284,31 +284,31 @@ fi
 #===============================================================================
 # Use the correct Autotools
 ## default available on CentOS7
-# automakeModule="automake/1.14.1"
-# autoconfModule="autoconf/2.69"
-# libtoolModule="libtool/2.4.3"
+automakeModule="automake/1.16.2_gcc7.3.0"
+autoconfModule="autoconf/2.69_gcc7.3.0"
+libtoolModule="libtool/2.4.6_gcc7.3.0"
 # 
-# initAutomake="module load $automakeModule"
-# initAutoconf="module load $autoconfModule"
-# initLibtool="module load $libtoolModule"
-# eval $initAutomake
-# if [ $? -ne 0 ]; then
-#     echo 'ERROR: Automake initialization fails!'
-#     cd $orgdir
-#     exit 1
-# fi
-# eval $initAutoconf
-# if [ $? -ne 0 ]; then
-#     echo 'ERROR: Autoconf initialization fails!'
-#     cd $orgdir
-#     exit 1
-# fi
-# eval $initLibtool
-# if [ $? -ne 0 ]; then
-#     echo 'ERROR: Libtool initialization fails!'
-#     cd $orgdir
-#     exit 1
-# fi
+initAutomake="module load $automakeModule"
+initAutoconf="module load $autoconfModule"
+initLibtool="module load $libtoolModule"
+eval $initAutomake
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Automake initialization fails!'
+    cd $orgdir
+    exit 1
+fi
+eval $initAutoconf
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Autoconf initialization fails!'
+    cd $orgdir
+    exit 1
+fi
+eval $initLibtool
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Libtool initialization fails!'
+    cd $orgdir
+    exit 1
+fi
 
 #===============================================================================
 # Additional library settings
@@ -318,7 +318,7 @@ fi
 mpichModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    mpichModule="mpich/3.3.2_gcc9.2.0"
+    mpichModule="mpich/3.3.2_gcc7.3.0"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -346,7 +346,7 @@ fi
 petscModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    petscModule="petsc/3.13.3_gcc9.2.0_mpich3.3.2"
+    petscModule="petsc/3.13.3_gcc7.3.0_mpich3.3.2"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -373,7 +373,7 @@ fi
 metisModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    metisModule="metis/5.1.0_gcc9.2.0"
+    metisModule="metis/5.1.0_gcc7.3.0"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -419,7 +419,7 @@ fi
 # netcdf
 netcdfModule=""
 if [ "$compiler" = 'gnu' ]; then
-    netcdfModule="netcdf/v4.7.4_v4.5.3_gcc9.2.0"
+    netcdfModule="netcdf/v4.7.4_v4.5.3_gcc7.3.0"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -429,7 +429,7 @@ else
     elif [ "$compiler" = 'intel18' ]; then
     netcdfModule="netcdf/v4.7.4_v4.5.3_intel18.0.3"
     elif [ "$compiler" = 'intel19' ]; then
-    netcdfModule="netcdf/v4.7.4_v4.5.3_intel19.0.3"
+    netcdfModule="netcdf/v4.7.4_v4.5.3_intel19.1.1"
     fi
 fi
 initNetcdf="module load $netcdfModule"
@@ -445,7 +445,18 @@ fi
 
 # OLD: icc c++11 features are only available if gcc is in the path. This is required by proj
 # NEW: proj only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
-projModule="gcc/9.2.0 proj/7.1.0_gcc9.2.0"
+projModule="proj/7.1.0_gcc7.3.0 gcc/7.3.0"
+# projModule=""
+# if [ "$compiler" = 'gnu' ]; then
+#     projModule="proj/7.1.0_gcc7.3.0"
+# else
+#     # Intel compilers
+#     if [ "$compiler" = 'intel18' ]; then
+#     projModule="proj/7.1.0_gcc7.3.0"
+#     elif [ "$compiler" = 'intel19' ]; then
+#     projModule="proj/7.1.0_intel19.1.1"
+#     fi
+# fi
 
 initProj="module load $projModule"
 eval $initProj
@@ -464,14 +475,14 @@ else
 # shapelib
 shapelibModule=""
 if [ "$compiler" = 'gnu' ]; then
-    shapelibModule="shapelib/1.5.0_gcc9.2.0"
+    shapelibModule="shapelib/1.5.0_gcc7.3.0"
 elif [ "$compiler" = 'intel16' ]; then
     # icc c++11 features are only available if gcc is in the path. This is required by shapelib
     shapelibModule="intel/16.0.3 gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
 elif [ "$compiler" = 'intel18' ]; then
-    shapelibModule="gcc/9.2.0 shapelib/1.5.0_intel18.0.3"
+    shapelibModule="shapelib/1.5.0_intel18.0.3 gcc/7.3.0"
 elif [ "$compiler" = 'intel19' ]; then
-    shapelibModule="gcc/9.2.0 shapelib/1.5.0_intel19.1.1"
+    shapelibModule="shapelib/1.5.0_intel19.1.1"
 fi
 shapelib="module load $shapelibModule"
 eval $shapelib
@@ -498,7 +509,7 @@ fi
 # Update June 10, 2020: GDAL is still leading to linker errors in combination with GNU. Disabled until further notice.
 gdalModule=""
 if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' || "$compiler" = 'intel19' ]]; then
-    gdalModule="gcc/9.2.0 gdal/3.1.2_gcc9.2.0"
+    gdalModule="gcc/7.3.0 gdal/3.1.2_gcc7.3.0"
 fi
 
 initgdal="module load $gdalModule"
@@ -527,9 +538,9 @@ echo "Loaded modules:"
 echo "module load $initModule1"
 echo "module load $initModule2"
 echo "module load $fortranModule"
-# echo "module load $automakeModule"
-# echo "module load $autoconfModule"
-# echo "module load $libtoolModule"
+echo "module load $automakeModule"
+echo "module load $autoconfModule"
+echo "module load $libtoolModule"
 echo "module load $mpichModule"
 echo "module load $petscModule"
 echo "module load $metisModule"
@@ -539,9 +550,9 @@ echo "module load $netcdfModule"
 echo
 echo "Module display of loaded modules:"
 module display $fortranModule
-# module display $automakeModule
-# module display $autoconfModule
-# module display $libtoolModule
+module display $automakeModule
+module display $autoconfModule
+module display $libtoolModule
 module display $mpichModule
 module display $petscModule
 module display $metisModule
