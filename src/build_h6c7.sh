@@ -284,7 +284,7 @@ fi
 #===============================================================================
 # Use the correct Autotools
 ## default available on CentOS7
-automakeModule="automake/1.16.2_gcc7.3.0"
+automakeModule="automake/1.14.1_gcc7.3.0"
 autoconfModule="autoconf/2.69_gcc7.3.0"
 libtoolModule="libtool/2.4.6_gcc7.3.0"
 # 
