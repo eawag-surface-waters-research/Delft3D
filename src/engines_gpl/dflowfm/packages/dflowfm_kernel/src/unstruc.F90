@@ -8834,6 +8834,7 @@ else if (icorio == 10) then                             ! vol2D type weigthings
        endif
     enddo
 
+    u1Du  = 0d0
     if (pure1D > 0) then
        do L = 1,lnx
           if (qa(L) > 0 .and. abs(uc1D(ln(1,L))) > 0 ) then                               ! set upwind ucxu, ucyu  on links
@@ -28087,9 +28088,10 @@ end do
  call aerr('volerror(ndkx)', ierr,   ndx)           ; volerror = 0
 
  if (lnxi > 0 .and. kmx == 0) then
-    if (allocated(uc1D)) deallocate(uc1D, u1Du)
-    allocate  ( uc1D(ndx) , u1Du(lnx) , stat = ierr) ! maybe optimise to 1D only but be aware of bnd's
-    call aerr ('uc1D(ndx) , u1Du(lnx)', ierr , ndx+lnx)
+    call realloc(uc1D, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('uc1D(ndx)', ierr, ndx)
+    call realloc(u1Du, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('u1Du(lnx)', ierr, lnx)
  endif
 
  if ( allocated(dtcell) ) then
