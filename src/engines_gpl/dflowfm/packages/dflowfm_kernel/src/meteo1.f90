@@ -8079,7 +8079,17 @@ module m_meteo
          case ('humidity')
             sourceItemName = 'relative_humidity'
          case ('airtemperature')
-            sourceItemName = 'air_temperature'
+            if (ec_filetype == provFile_uniform) then
+               sourceItemId = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               if (sourceItemId == ec_undef_int) then
+                  goto 1234
+               end if
+               success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+               if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_airtemperature)
+               if (success) success = ecAddItemConnection(ecInstancePtr, item_airtemperature, connectionId)
+            else
+               sourceItemName = 'air_temperature'
+            end if
          case ('cloudiness')
             sourceItemName = 'cloudfraction'
          case ('solarradiation')
