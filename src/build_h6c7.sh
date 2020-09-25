@@ -445,7 +445,7 @@ fi
 
 # OLD: icc c++11 features are only available if gcc is in the path. This is required by proj
 # NEW: proj only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
-projModule="proj/7.1.0_gcc7.3.0 gcc/7.3.0"
+projModule="proj/7.1.0_gcc7.3.0"
 # projModule=""
 # if [ "$compiler" = 'gnu' ]; then
 #     projModule="proj/7.1.0_gcc7.3.0"
@@ -509,7 +509,7 @@ fi
 # Update June 10, 2020: GDAL is still leading to linker errors in combination with GNU. Disabled until further notice.
 gdalModule=""
 if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' || "$compiler" = 'intel19' ]]; then
-    gdalModule="gcc/7.3.0 gdal/3.1.2_gcc7.3.0"
+    gdalModule="gdal/3.1.2_gcc7.3.0"
 fi
 
 initgdal="module load $gdalModule"
