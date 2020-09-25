@@ -7,6 +7,16 @@
 # $3 - Single file with version number information version_number.ini
 # $4 - Top directory of the build tree: used to define VN_DIR
 
+#===============================================================================
+# Initialize svn
+initSvn="module load svn/1.9.12_gcc7.3.0"
+eval $initSvn
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Module svn initialization fails!'
+    cd $orgdir
+    exit 1
+fi
+
 echo Generating version number in the $1
 curdir=`pwd`
 cd $2
