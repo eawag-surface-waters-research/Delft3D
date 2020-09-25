@@ -437,6 +437,7 @@ src/build_h5.sh -text
 src/build_h6.sh -text
 src/build_h6c7.sh -text
 src/build_test.sh -text
+src/build_test_c7.sh -text
 src/build_ubuntu.16.04LT.readme -text
 src/build_ubuntu1604.sh -text
 src/buildvs15.cmd -text
