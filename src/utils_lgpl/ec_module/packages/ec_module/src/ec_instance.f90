@@ -534,7 +534,7 @@ module m_ec_instance
                if (associated(targetItemPtr%quantityPtr)) then
                   write(line,'(a,i5.5,a,i1,a)') 'Target Item ', targetItemPtr%id, ' (name='//trim(targetItemPtr%quantityPtr%name)//', vectormax=',targetItemPtr%quantityPtr%vectormax,')'
                else
-                  write(line,'(a,i5.5,a,i1,a)') 'Target Item ', targetItemPtr%id
+                  write(line,'(a,i5.5)') 'Target Item ', targetItemPtr%id
                endif
                call messenger(lvl, line)
                if (associated(targetItemPtr%elementSetPtr)) then
@@ -548,14 +548,13 @@ module m_ec_instance
                do ic=1, targetItemPtr%nConnections
                   connectionPtr => targetItemPtr%connectionsPtr(ic)%ptr
                   if (associated(connectionPtr%converterPtr)) then
-                     write(line,'(a,i5.5,a,i5.5,a,i3.3)') '   Connection ',connectionPtr%id,', Converter ',connectionPtr%converterPtr%id,', targetIndex ',connectionPtr%converterPtr%targetIndex  
+                     write(line,'(a,i5.5,a,i5.5,a,i5.4)') '   Connection ',connectionPtr%id,', Converter ',connectionPtr%converterPtr%id,', targetIndex ',connectionPtr%converterPtr%targetIndex  
                   else
-                     write(line,'(a,i5.5,a,i5.5,a,i3.3)') '   Connection ',connectionPtr%id,', Converter NONE !'
+                     write(line,'(a,i5.5,a)') '   Connection ',connectionPtr%id,', Converter NONE !'
                   end if
                   call messenger(lvl, line)
                   if (connectionPtr%nSourceItems==0) then
-                     write(line,'(a)') '   CONNECTION HAS NO SOURCE ITEMS !!!'
-                     call messenger(lvl, line)
+                     call messenger(lvl, '   CONNECTION HAS NO SOURCE ITEMS !!!')
                   end if
                   do js=1, connectionPtr%nSourceItems
                      sourceItemPtr => connectionPtr%sourceItemsPtr(js)%ptr
@@ -579,14 +578,12 @@ module m_ec_instance
                               if (associated(sourceItemPtr%QuantityPtr)) then
                               !  if (allocated(sourceItemPtr%QuantityPtr%name))  write(dev,'(a)') '            Quantity = '//trim(sourceItemPtr%QuantityPtr%name)
                                  if (len_trim(sourceItemPtr%QuantityPtr%name)>0) then
-                                    write(line,'(a)') '            Quantity = '//trim(sourceItemPtr%QuantityPtr%name)
-                                    call messenger(lvl, line)
+                                    call messenger(lvl, '            Quantity = '//trim(sourceItemPtr%QuantityPtr%name))
                                  end if
                               end if
                               if (associated(sourceItemPtr%ElementSetPtr)) then
                                  if (len_trim(sourceItemPtr%ElementSetPtr%name)>0) then
-                                    write(line,'(a)') '            Location = '//trim(sourceItemPtr%ElementSetPtr%name)
-                                    call messenger(lvl, line)
+                                    call messenger(lvl, '            Location = '//trim(sourceItemPtr%ElementSetPtr%name))
                                  end if
                               end if 
                               exit frs ! exits outer named do loop

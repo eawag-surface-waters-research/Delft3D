@@ -23353,7 +23353,7 @@ end subroutine unstruc_guimessage
       COMMON /HELPNOW/   WRDKEY,NLEVEL
       CHARACTER WRDKEY*40
 
-      REC = trim(W1) // ' ' // trim(W2) // ' ' // trim(W2)
+      REC = trim(W1) // ' ' // trim(W2) // ' ' // trim(W3)
 
       if (len_trim(W2) == 0) then
          rec2 = msgbuf
