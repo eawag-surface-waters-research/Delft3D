@@ -15899,6 +15899,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/ecoplot.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/enclosure.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/face2surf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/floodmask.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/geojson.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/golder.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/grib.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/grib/af_128.tab -text
