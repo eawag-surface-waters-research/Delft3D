@@ -432,6 +432,7 @@ src/build.sh -text
 src/build32.cmd -text
 src/build32vs15.cmd -text
 src/build_dimr.sh -text
+src/build_dimr_c7.sh -text
 src/build_gnu.sh -text
 src/build_h5.sh -text
 src/build_h6.sh -text
