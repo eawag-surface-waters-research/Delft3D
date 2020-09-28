@@ -1223,7 +1223,6 @@ end subroutine findNeighbourAndAddCrossSection
 subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimeter, flowWidth, maxFlowWidth, af_sub, perim_sub)
 
    use m_GlobalParameters
-   use timers
    
    implicit none
 
@@ -1269,8 +1268,6 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       endif
       return
    endif
-
-   !call timstrt('GetCSParsFlowInterpolate', ihandle)
 
    cross1 => cross(line2cross%c1)
    cross2 => cross(line2cross%c2)
@@ -1334,7 +1331,6 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       
    endif
 
-   !call timstop(ihandle)
 end subroutine GetCSParsFlowInterpolate
 
 !> Get flow area, wet perimeter and flow width at cross section location
@@ -1343,7 +1339,6 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
    use m_GlobalParameters
    use precision_basics
    use m_Roughness
-   use timers
 
    type (t_CrossSection), intent(in)          :: cross          !< cross section definition
    double precision, intent(in   )            :: dpt            !< water depth at cross section
@@ -1371,8 +1366,7 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       return
    endif
 
-!   call timstrt('GetCSParsFlowSingle', ihandle)
-   call system_clock(countstart)
+!   call system_clock(countstart)
    crossDef => cross%tabDef
 
    select case(cross%crosstype)
@@ -1424,16 +1418,14 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, max
       maxFlowWidth = maxFlowWidth1
    endif
 
-   call system_clock(countstop)
-   wccount(1)   = wccount(1) + countstop-countstart ! GetCSParsFlowCross
-   callcount(1) = callcount(1) + 1
-   !call timstop(ihandle)
+   !call system_clock(countstop)
+   !wccount(1)   = wccount(1) + countstop-countstart ! GetCSParsFlowCross
+   !callcount(1) = callcount(1) + 1
 end subroutine GetCSParsFlowCross
 
 !> Get total area and total width for given location and water depth
 subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
    use m_GlobalParameters
-   use timers
    
    implicit none
 
@@ -1467,8 +1459,6 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
       totalWidth = default_width
       return
    endif
-
-   !call timstrt('GetCSParsTotalInterpolate', ihandle)
 
    cross1 => cross(line2cross%c1)
    cross2 => cross(line2cross%c2)
@@ -1513,15 +1503,12 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
       
    endif
    
-   !call timstop(ihandle)
-
 end subroutine GetCSParsTotalInterpolate
 
 !> Get total area and total width for given cross section location and water depth
 subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
 
    use m_GlobalParameters
-   use timers
    
    ! Global Variables
    type (t_CrossSection), intent(in) :: cross           !< cross section
@@ -1551,8 +1538,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
       return
    endif
 
-   !call timstrt('GetCSParsTotalSingle', ihandle)
-   call system_clock(countstart)
+   !call system_clock(countstart)
    crossDef => cross%tabdef
 
    select case(cross%crosstype)
@@ -1583,10 +1569,9 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
  
-   call system_clock(countstop)
-   wccount(2)   = wccount(2) + countstop-countstart ! GetCSParsTotalCross
-   callcount(2) = callcount(2) + 1
-!   call timstop(ihandle)
+   !call system_clock(countstop)
+   !wccount(2)   = wccount(2) + countstop-countstart ! GetCSParsTotalCross
+   !callcount(2) = callcount(2) + 1
 end subroutine GetCSParsTotalCross
 
 !> Get area, width and perimeter for a tabulated profile
