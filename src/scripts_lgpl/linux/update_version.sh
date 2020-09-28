@@ -12,9 +12,9 @@
 initSvn="module load svn/1.9.12_gcc7.3.0"
 eval $initSvn
 if [ $? -ne 0 ]; then
-    echo 'ERROR: Module svn initialization fails!'
-    cd $orgdir
-    exit 1
+    echo 'WARNING: Module svn 1.9.12_gcc7.3.0 initialization fails!'
+    echo 'using svn : '
+    eval "module display svn"
 fi
 
 echo Generating version number in the $1
