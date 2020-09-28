@@ -3264,6 +3264,7 @@
             ! entries in the morbnd structure. The sum of alfa_mag(ib)**2
             ! will be equal to 1.
             !
+            icond = morbnd(jb)%icond
             if (u1(lm)<0d0) icond = 0         ! to do: 3d
             !
             select case(icond)
