@@ -1174,29 +1174,33 @@ subroutine saveObservations(filename)
 
 end subroutine saveObservations
 
-!> Fill in temperary array obsTmp for the history output for (only) 3D models
-subroutine fillObsTempArray(ntot, n, fillValue, locArray, locType, obsTmp)
+!> Fill in temporary array obsTmp for the history output for (only) 3D models
+subroutine fillObsTempArray(ntot, n, fillVal, locArray, locType, obsTmp)
    use m_flowgeom, only: nd
+   use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_WS, UNC_LOC_ITP
    implicit none
-   integer,                              intent(in   ) :: ntot         ! Total number of observation points
-   integer,                              intent(in   ) :: n            ! Number of layers kmx, or kmx+1
-   double precision,                     intent(in   ) :: fillValue    ! fill value of the array
-   integer,                              intent(in   ) :: locArray     ! Location in array valobs
-   integer,                              intent(in   ) :: locType      ! Location type: 0-flownode center, 1-face center, 2-wu, 3-interpolated to cell center
-   double precision, dimension(n, ntot), intent(inout) :: obsTmp       ! The temperay array to be filled in
+   integer,                              intent(in   ) :: ntot         !< Total number of observation points
+   integer,                              intent(in   ) :: n            !< Number of layers kmx, or kmx+1
+   double precision,                     intent(in   ) :: fillVal      !< fill value of the array
+   integer,                              intent(in   ) :: locArray     !< Location in array valobs
+   integer,                              intent(in   ) :: locType      !< Location type: UNC_LOC_S3D-cell center&layer center,
+                                                                       !! UNC_LOC_WS-face center&layer interface,
+                                                                       !! UNC_LOC_WU-velocity point&layer interface
+                                                                       !! UNC_LOC_ITP-interpolated to cell center&layer center
+   double precision, dimension(n, ntot), intent(inout) :: obsTmp       !< The temperay array to be filled in
    integer :: i, k, kb, kt, nlayb, nrlay, nrlay1, kk, L, La, Lb, Ltx, nlaybL, nrlayLx, maxNrlay
 
 
-   obsTmp = fillValue
+   obsTmp = fillVal
    nrlay1 = 0
    maxNrlay = 0
 
    do i = 1,ntot
-      k = max(kobs(i),1)
-      if (kobs(i) > 0) then
-         if (locType == 0 .or. locType == 1) then
+      k = kobs(i)
+      if (k > 0) then
+         if (locType == UNC_LOC_S3D .or. locType == UNC_LOC_WS) then
             call getlayerindices(k, nlayb, nrlay)
-            if (locType == 1) then
+            if (locType == UNC_LOC_WS) then
                nrlay1 = nrlay + 1
             else
                nrlay1 = nrlay
@@ -1205,13 +1209,13 @@ subroutine fillObsTempArray(ntot, n, fillValue, locArray, locType, obsTmp)
             do kk=1,nrlay1
                obstmp(kk,i) = valobs(locArray+kk-1,i)
             end do
-         else if (locType == 2) then
+         else if (locType == UNC_LOC_WU) then
             call getlink1(k,L)
             call getlayerindicesLmax(L, nlaybL, nrlayLx)
             do kk=1,nrlayLx+1
                obstmp(kk,i) = valobs(locArray+kk-1,i)
             end do
-         else
+         else if (locType == UNC_LOC_ITP) then
             ! The 3D varialbes such as turkin, eps, ... were interpolated to cell center by Perot reconstrunction
             ! in subroutine fill_valobs. For output, we go through all flow links that connected to the
             ! obs node k, and take the maximal number of the active layers of these flow links.

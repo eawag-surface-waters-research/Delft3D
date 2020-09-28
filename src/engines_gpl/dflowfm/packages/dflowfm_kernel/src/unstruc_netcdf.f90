@@ -87,6 +87,8 @@ integer, parameter :: UNC_LOC_S3D = 4  !< Data location: pressure point in all l
 integer, parameter :: UNC_LOC_U3D = 5  !< Data location: horizontal velocity point in all layers.
 integer, parameter :: UNC_LOC_W   = 6  !< Data location: vertical velocity point on all layer interfaces.
 integer, parameter :: UNC_LOC_WU  = 16 !< Data location: vertical viscosity point on all layer interfaces.
+integer, parameter :: UNC_LOC_WS  = 17 !< Data location: face center on all layer interfaces
+integer, parameter :: UNC_LOC_ITP = 18 !< Data location: from UNC_LOC_WU interpolated to cell center in all layers
 
 integer, parameter :: MAX_ID_VAR = 4   !< Maximum dimension for id_var arrays
 
@@ -15751,7 +15753,7 @@ subroutine definencvar(ncid, idq, itype, idims, n, name, desc, unit, namecoord, 
    character(len=*),          intent(in   ) :: unit  !< Units of the variable (udunit-compatible), used in the :units attribute.
    character(len=*),          intent(in   ) :: namecoord !< Text string the with coordinate variable names, used in the :coordinates attribute.
    character(len=*), optional,intent(in   ) :: geometry !< (optional) Variable name of a geometry variable in the same dataset, used in the :geometry attribute.
-   double precision, optional,intent(in   ) :: fillVal  !< Fill value
+   double precision, optional,intent(in   ) :: fillVal  !< Fill value that will be stored in the standard :_FillValue attribute
 
    integer                          :: ierr
    ierr = 0

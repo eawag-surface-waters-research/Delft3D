@@ -19191,6 +19191,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use unstruc_files, only: defaultFilename
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
     use unstruc_netcdf, only: ihisfile, mapids
+    use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_WS, UNC_LOC_ITP
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -21717,39 +21718,39 @@ subroutine unc_write_his(tim)            ! wrihis
        !
        call realloc(obsTmp, (/ kmx, ntot /), keepExisting = .false., fill = dmiss)
 
-       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCX, 0, obsTmp)
+       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCX, UNC_LOC_S3D, obsTmp)
        ierr = nf90_put_var(ihisfile, id_varucx, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
 
-       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCY, 0, obsTmp)
+       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCY, UNC_LOC_S3D, obsTmp)
        ierr = nf90_put_var(ihisfile, id_varucy, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
 
-       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCZ, 0, obsTmp)
+       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCZ, UNC_LOC_S3D, obsTmp)
        ierr = nf90_put_var(ihisfile, id_varucz, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
 
        if (jasal > 0) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_SA1, 0, obsTmp)
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_SA1, UNC_LOC_S3D, obsTmp)
           ierr = nf90_put_var(ihisfile, id_varsal, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
        end if
 
        if (jatem > 0) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_TEM1, 0, obsTmp)
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_TEM1, UNC_LOC_S3D, obsTmp)
           ierr = nf90_put_var(ihisfile, id_vartem, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
        end if
 
        if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_RHO, 0, obsTmp)
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_RHO, UNC_LOC_S3D, obsTmp)
           ierr = nf90_put_var(ihisfile, id_varrho, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
        end if
 
        if (jased > 0 .and. .not. stm_included) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_SED, 0, obsTmp)
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_SED, UNC_LOC_S3D, obsTmp)
           ierr = nf90_put_var(ihisfile, id_varsed, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
        end if
 
        if (jawave>0) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCXST, 0, obsTmp)
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCXST, UNC_LOC_S3D, obsTmp)
           ierr = nf90_put_var(ihisfile, id_ustx, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCYST, 0, obsTmp)
+          call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCYST, UNC_LOC_S3D, obsTmp)
           ierr = nf90_put_var(ihisfile, id_usty, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
        endif
 
@@ -21896,32 +21897,32 @@ subroutine unc_write_his(tim)            ! wrihis
     ! 3d layer interface quantities
     if (kmx > 0 ) then
        call realloc(obstmp, (/ kmx, ntot /), keepExisting = .false., fill = dmiss)
-       call fillObsTempArray(ntot, kmx, dmiss, IPNT_ZCS, 0, obsTmp)
+       call fillObsTempArray(ntot, kmx, dmiss, IPNT_ZCS, UNC_LOC_S3D, obsTmp)
        ierr = nf90_put_var(ihisfile, id_zcs, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
 
        kmx1 = kmx + 1
        call realloc(obstmp, (/ kmx1, ntot /), keepExisting = .false., fill = dmiss)
-       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWS, 1, obsTmp)
+       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWS, UNC_LOC_WS, obsTmp)
        ierr = nf90_put_var(ihisfile, id_zws, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
 
-       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWU, 2, obsTmp)
+       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWU, UNC_LOC_WU, obsTmp)
        ierr = nf90_put_var(ihisfile, id_zwu, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
 
        if (iturbulencemodel >= 3 .and. jahistur > 0) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TKIN, 3, obsTmp)
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TKIN, UNC_LOC_ITP, obsTmp)
           ierr = nf90_put_var(ihisfile, id_turkin, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
 
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TEPS, 3, obsTmp)
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TEPS, UNC_LOC_ITP, obsTmp)
           ierr = nf90_put_var(ihisfile, id_tureps, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
        end if
 
        if (iturbulencemodel > 1) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_VICWW, 3, obsTmp)
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_VICWW, UNC_LOC_ITP, obsTmp)
           ierr = nf90_put_var(ihisfile, id_vicwwu, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
        end if
 
        if (idensform > 0 .and. jaRichardsononoutput > 0) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_RICH, 3, obsTmp)
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_RICH, UNC_LOC_ITP, obsTmp)
           ierr = nf90_put_var(ihisfile, id_rich, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
        end if
        do kk = 1, kmx+1
@@ -23022,7 +23023,8 @@ subroutine fill_valobs()
          endif
 
 !        store values in valobs work array
-         valobs(:,i)        = 0d0   ! should not be DMISS, as DMISS is used to mark observation stations outside subdomain in reduce_valobs
+         valobs(:,i)        = dmiss   ! Intended to have dmiss on inactive layers for output.
+                                      ! It is taken care of in subroutine reduce_valobs for parallel computation.
          valobs(IPNT_S1,i)  = s1(k)
          if (nshiptxy > 0) then
              if ( allocated(zsp) ) then
