@@ -73,12 +73,9 @@
       real     ( 4) cfrom       ! from concentration
       real     ( 4) cto         ! to concentration
       real     ( 4) dq          ! total flux from and to
-      real     ( 4) dt          ! time step as real
 
       integer(4), save :: ithndl = 0
       if (timon) call timstrt( "wq_processes_integrate_velocities", ithndl )
-
-      dt = dts
 
       !     loop accross the number of exchanges
       do iq = 1 , noq
@@ -96,11 +93,11 @@
                   if (q .gt. 0.0 ) then
                       cfrom = conc(isys,ifrom)
                       if (cfrom.le.0.0) cycle
-                      dq = min(q*cfrom, (cfrom * vfrom)/dt)
+                      dq = min(q*cfrom, (cfrom * vfrom)/dts)
                   else
                       cto = conc(isys,ito)
                       if (cto.le.0.0) cycle
-                      dq = max(q*cto, -(cto * vto)/dt)
+                      dq = max(q*cto, -(cto * vto)/dts)
                   endif
                   deriv(ifrom,isys) = deriv(ifrom,isys) - dq/vfrom
                   deriv(ito,isys) = deriv(ito,isys) + dq/vto

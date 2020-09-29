@@ -53,21 +53,18 @@
       real                         :: v1                      !  segment volume
       real                         :: s1                      !  segment surface
       real(8)                      :: a                       !  segment mass
-      real(4)                      :: dt                      !  time step (real)
 
       integer(4), save :: ithndl = 0
       if (timon) call timstrt( "wq_processes_integrate_fluxes", ithndl )
 
       ! loop accross the number of computational elements
 
-      dt = dts
-
       do iseg=1,noseg
          ! active substances first
          v1 = volume(iseg)
          if ( v1.gt.1.0e-25 ) then
             do i=1,nosys
-               a           = amass(i,iseg) + dt*deriv(iseg,i)*v1
+               a           = amass(i,iseg) + dts*deriv(iseg,i)*v1
                amass(i,iseg) = a
                conc (i,iseg) = a / v1
                deriv(iseg,i) = 0.0
@@ -77,7 +74,7 @@
          s1 = surfac(iseg)
          if(s1.gt.0.0) then
             do i=nosys+1,notot
-               a             = amass(i,iseg) + dt*deriv(iseg,i)*v1
+               a             = amass(i,iseg) + dts*deriv(iseg,i)*v1
                amass(i,iseg) = a
                conc (i,iseg) = a / s1
                deriv(iseg,i) = 0.0
