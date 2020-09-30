@@ -2564,30 +2564,25 @@ module m_ec_provider
                coordids(idims) = fileReaderPtr%dim_varids(dimids(idims))
             enddo
 
+            fgd_id = -1
+            sgd_id = -1
             if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
                if (nod_dimid>0) then  
                   grid_type = elmSetType_samples
                else
                   grid_type = elmSetType_cartesian
                end if
-               if (x_varid>0 .and. y_varid>0) then
-                  fgd_id = x_varid
-                  sgd_id = y_varid
-               else
-                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
-                      //' requires ''projection_x_coordinate'' and ''projection_y_coordinate''.')
-                  return
-               end if
+               if (x_varid>0) fgd_id = x_varid
+               if (y_varid>0) sgd_id = y_varid
             else if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
                if (nod_dimid>0) then  
                   grid_type = elmSetType_samples
                else
                   grid_type = elmSetType_spheric
                end if
-               if (lon_varid>0 .and. lat_varid>0) then                                  ! First try absolute lon and lat ...
-                  fgd_id = lon_varid
-                  sgd_id = lat_varid
-               elseif ((grid_lon_varid>0) .and. (grid_lat_varid>0)) then                    ! ... then try relative (rotated-pole-) lon and lat
+               if (lon_varid>0) fgd_id = lon_varid
+               if (lat_varid>0) sgd_id = lat_varid
+               if ((grid_lon_varid>0) .and. (grid_lat_varid>0) .and. (fgd_id<0 .or. sgd_id<0)) then  ! ... then try relative (rotated-pole-) lon and lat
                   fgd_id = grid_lon_varid
                   sgd_id = grid_lat_varid
                   grid_mapping=''
@@ -2616,10 +2611,6 @@ module m_ec_provider
                         endif 
                      endif 
                   endif 
-               else
-                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
-                      //' either requires ''latitude'' and ''longitude'' or ''grid_latitude'' and ''grid_longitude''.')
-                  return
                end if
             end if
 
@@ -2641,20 +2632,32 @@ module m_ec_provider
                      if (varid<0) then
                         call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename) &
                                           //' coordinates variable '//trim(coord_names(2))//' referenced but not found')
-                        return
-                     end if
-                     if (strcmpi(fileReaderPtr%standard_names(varid),'projection_x_coordinate')) then
-                         fgd_id = varid
-                     else if (strcmpi(fileReaderPtr%standard_names(varid),'projection_y_coordinate')) then
-                         sgd_id = varid
-                     else if (strcmpi(fileReaderPtr%standard_names(varid),'longitude')) then
-                         fgd_id = varid
-                     else if (strcmpi(fileReaderPtr%standard_names(varid),'latitude')) then
-                         sgd_id = varid
+                     else
+                        if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
+                           if (strcmpi(fileReaderPtr%standard_names(varid),'projection_x_coordinate')) fgd_id = varid
+                           if (strcmpi(fileReaderPtr%standard_names(varid),'projection_y_coordinate')) sgd_id = varid
+                        end if
+                        if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
+                           if (strcmpi(fileReaderPtr%standard_names(varid),'longitude')) fgd_id = varid
+                           if (strcmpi(fileReaderPtr%standard_names(varid),'latitude')) sgd_id = varid
+                       end if
                      end if
                    end if
                end do
             end if    ! has non-empty coordinates attribute
+
+            if (fgd_id<0 .or. sgd_id<0) then
+               if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
+                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
+                     //' requires ''projection_x_coordinate'' and ''projection_y_coordinate''.')
+               end if
+               if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
+                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
+                     //' either requires ''latitude'' and ''longitude'' or ''grid_latitude'' and ''grid_longitude''.')
+               end if
+               return
+            end if
+                
 
             ! =========================================
             ! Create the ElementSet for this quantity
