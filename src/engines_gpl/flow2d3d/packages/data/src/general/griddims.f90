@@ -161,7 +161,7 @@ subroutine griddims( gdp )
     allocate(griddim%celltype(nmlb:nmub), stat=istat)
     griddim%celltype(:) = 1
     !
-    allocate(griddim%cell2node(nmmax*4), stat=istat)
+    allocate(griddim%cell2node((mub-mlb+1)*(nub-nlb+1)*4), stat=istat)
     allocate(griddim%ncellnodes(nmlb:nmub), stat=istat)
     allocate(griddim%indexnode1(nmlb:nmub), stat=istat)
     nm = nmlb - 1
