@@ -198,7 +198,7 @@ module m_ec_parameters
 
     ! Vertical position type
     integer, parameter :: BC_VPTYP_SINGLE      = 0   !< depth averaged
-    integer, parameter :: BC_VPTYP_PERCBED     = 1   !< precentage from bed
+    integer, parameter :: BC_VPTYP_PERCBED     = 1   !< percentage from bed
     integer, parameter :: BC_VPTYP_ZDATUM      = 2   !< z above datum
     integer, parameter :: BC_VPTYP_ZDATUM_DOWN = 3   !< z below datum
     integer, parameter :: BC_VPTYP_BEDSURF     = 4   !< bedsurface
