@@ -19191,7 +19191,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use unstruc_files, only: defaultFilename
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
     use unstruc_netcdf, only: ihisfile, mapids
-    use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_WS, UNC_LOC_ITP
+    use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W, UNC_LOC_ITP
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -21902,7 +21902,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
        kmx1 = kmx + 1
        call realloc(obstmp, (/ kmx1, ntot /), keepExisting = .false., fill = dmiss)
-       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWS, UNC_LOC_WS, obsTmp)
+       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWS, UNC_LOC_W, obsTmp)
        ierr = nf90_put_var(ihisfile, id_zws, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
 
        call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWU, UNC_LOC_WU, obsTmp)

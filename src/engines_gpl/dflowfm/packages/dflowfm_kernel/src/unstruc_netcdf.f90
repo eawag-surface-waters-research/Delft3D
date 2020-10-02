@@ -87,7 +87,6 @@ integer, parameter :: UNC_LOC_S3D = 4  !< Data location: pressure point in all l
 integer, parameter :: UNC_LOC_U3D = 5  !< Data location: horizontal velocity point in all layers.
 integer, parameter :: UNC_LOC_W   = 6  !< Data location: vertical velocity point on all layer interfaces.
 integer, parameter :: UNC_LOC_WU  = 16 !< Data location: vertical viscosity point on all layer interfaces.
-integer, parameter :: UNC_LOC_WS  = 17 !< Data location: face center on all layer interfaces
 integer, parameter :: UNC_LOC_ITP = 18 !< Data location: from UNC_LOC_WU interpolated to cell center in all layers
 
 integer, parameter :: MAX_ID_VAR = 4   !< Maximum dimension for id_var arrays
