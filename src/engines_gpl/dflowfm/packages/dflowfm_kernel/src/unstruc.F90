@@ -29534,6 +29534,7 @@ integer          :: k1, k3, kb3, Lt1, Lt2, Lt3, Ld1, Ld2, Ld3, kk1, kk2, kk3
 
     integer :: kk, k, kb, kt
 
+    if ( .not. allocated (zcs) ) call realloc(zcs, Ndkx)
     do kk=1,Ndx
        call getkbotktop(kk,kb,kt)
        do k=kb,kt
