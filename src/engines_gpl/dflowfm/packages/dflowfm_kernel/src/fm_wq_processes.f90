@@ -1164,9 +1164,7 @@
       use m_fm_wq_processes
       use m_mass_balance_areas
       use m_missing, only: dmiss
-      use unstruc_model, only: md_flux_int, md_flux_nancheck
-      use m_flowtimes, only: time_user, tstart_user
-      use unstruc_messages
+      use unstruc_model, only: md_flux_int
       use timers
 
       implicit none
@@ -1182,21 +1180,19 @@
 
       integer                      :: ierr
 
+      double precision             :: dti
+
       integer                      :: ipvol, isys, k
 
       integer(4), save :: ithand0 = 0
       integer(4), save :: ithand1 = 0
       integer(4), save :: ithand2 = 0
 
-      character(len=20), external  :: seconds_to_dhms
-
       if ( jawaqproc .eq. 0 ) then
          return
       endif
 
       if ( timon ) call timstrt ( "fm_wq_processes_step", ithand0 )
-
-      flux_nancheck = md_flux_nancheck
       flux_int = md_flux_int
 
 !     copy data from D-FlowFM to WAQ
@@ -1220,13 +1216,6 @@
                                 dsto  , nveln , ivpnw , velonw, nvelx , pmsa(ipoivelx), vsto  , mbadefdomain(kbx:ktx), &
                                 pmsa(ipoidefa), prondt, prvvar, prvtyp, vararr, varidx, arrpoi, arrknd, arrdm1, &
                                 arrdm2, novar , pmsa  , nomba , pronam, prvpnt, nodef , pmsa(ipoisurf), flux_int)
-   
-      if (flux_nancheck.lt.0) then
-         call mess(LEVEL_WARN, 'There were NaN(s) in the flux array, check the lsp-file!', seconds_to_dhms(nint(time_user-tstart_user, long)))
-         if (flux_nancheck.lt.-1) then
-            call mess(LEVEL_ERROR, 'Ending calculation because ProcessFluxNaNCheck is 2. Use 1 to zero NaN(s) and continue.')
-         endif
-      endif
 
 !     copy data from WAQ to D-FlowFM
       if ( timon ) call timstrt ( "copy_data_from_wq_processes_to_fm", ithand2 )
