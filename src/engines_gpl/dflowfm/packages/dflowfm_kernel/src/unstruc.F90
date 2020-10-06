@@ -44702,11 +44702,10 @@ if (mext /= 0) then
               call err_flush()
            endif
 
-           if (.not. allocated(kcw)) then
-              call realloc(kcw, lnx, stat=ierr, keepExisting=.false.)
-              call aerr('kcw(lnx)', ierr, lnx)
-              kcw = 1
-           endif
+           if (allocated (kcw) ) deallocate(kcw)
+           call realloc(kcw, lnx, stat=ierr, keepExisting=.false.)
+           call aerr('kcw(lnx)', ierr, lnx)
+           kcw = 1
            if (.not. allocated(wx) ) then
               allocate ( wx(lnx), stat=ierr)
               call aerr('wx(lnx)', ierr, lnx)
