@@ -2348,7 +2348,7 @@ function unc_add_gridmapping_att(ncid, id_vars, jsferic) result(ierr)
     n    = size(id_vars)
 
     do i=1,n
-        if (id_vars(i) == nf90_global) then
+        if (id_vars(i) == nf90_global .or. id_vars(i) == -1) then
             cycle ! Sometimes id_vars has value 0 (== unintended nf90_global)
         end if
 

@@ -1163,7 +1163,8 @@ end subroutine setfouunit
 
         !
         ierr = unc_create(trim(FouOutputFile), 0, fileids%ncid)
-        ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm)
+        if (ierr == NF90_NOERR) ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm)
+        if (ierr /= NF90_NOERR) goto 99
         call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp)
 
         call realloc(all_unc_loc, nofou)
@@ -1225,27 +1226,34 @@ end subroutine setfouunit
            idvar(:,ivar) = imissval
            ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnam(ivar)), &
                           'Fourier analysis ' // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), is_timedep = 0)
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '// namfunlong // ', ' // trim(fouvarnamlong(ivar)))
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', irefdate)
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '// namfunlong // ', ' // trim(fouvarnamlong(ivar)))
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', irefdate)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
 
-           ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
+           if (ierr == NF90_NOERR) ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
            select case (founam(ifou))
            case('s1','r1','u1','ux','uy','uxa','uya','uc','ta')
-              ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
            case('qxk','ws')
-              ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowLink_xu FlowLink_yu')
+              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowLink_xu FlowLink_yu')
            end select
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Number_of_cycles', fnumcy(ifou))
-           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Frequency_degrees_per_hour', freqnt)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Number_of_cycles', fnumcy(ifou))
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Frequency_degrees_per_hour', freqnt)
+
+           if (ierr /= NF90_NOERR) goto 99
            !
         enddo
         !
 
         ! END DEFINITION MODE
         ierr =  nf90_enddef(fileids%ncid)
+ 99     continue
+        if (ierr /= NF90_NOERR) then
+           msgbuf = 'Error in defining the Fourier output file: ' // nf90_strerror(ierr)
+           call err_flush()
+        end if
 
         ! START DATA MODE
         !
@@ -1261,6 +1269,10 @@ end subroutine setfouunit
         ! Close fourier output file
         !
         ierr = nf90_close(fileids%ncid)         ! ncid NOT set to zero, to avoid writing the fourier output file again.
+        if (ierr /= NF90_NOERR) then
+           msgbuf = 'Error in closing the Fourier output file: ' // nf90_strerror(ierr)
+           call err_flush()
+        end if
     end subroutine wrfou
 
 !> - writes results of fourier analysis to output
