@@ -19191,7 +19191,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use unstruc_files, only: defaultFilename
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, unc_write_flowgeom_filepointer, definencvar
     use unstruc_netcdf, only: ihisfile, mapids
-    use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W, UNC_LOC_ITP
+    use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -21909,20 +21909,20 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile, id_zwu, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
 
        if (iturbulencemodel >= 3 .and. jahistur > 0) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TKIN, UNC_LOC_ITP, obsTmp)
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TKIN, UNC_LOC_W, obsTmp)
           ierr = nf90_put_var(ihisfile, id_turkin, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
 
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TEPS, UNC_LOC_ITP, obsTmp)
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TEPS, UNC_LOC_W, obsTmp)
           ierr = nf90_put_var(ihisfile, id_tureps, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
        end if
 
        if (iturbulencemodel > 1) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_VICWW, UNC_LOC_ITP, obsTmp)
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_VICWW, UNC_LOC_W, obsTmp)
           ierr = nf90_put_var(ihisfile, id_vicwwu, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
        end if
 
        if (idensform > 0 .and. jaRichardsononoutput > 0) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_RICH, UNC_LOC_ITP, obsTmp)
+          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_RICH, UNC_LOC_W, obsTmp)
           ierr = nf90_put_var(ihisfile, id_rich, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
        end if
        do kk = 1, kmx+1

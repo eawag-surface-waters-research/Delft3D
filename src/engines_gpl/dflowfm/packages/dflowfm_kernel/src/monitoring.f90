@@ -1177,7 +1177,7 @@ end subroutine saveObservations
 !> Fill in temporary array obsTmp for the history output for (only) 3D models
 subroutine fillObsTempArray(ntot, n, fillVal, locArray, locType, obsTmp)
    use m_flowgeom, only: nd
-   use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W, UNC_LOC_ITP
+   use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
    implicit none
    integer,                              intent(in   ) :: ntot         !< Total number of observation points
    integer,                              intent(in   ) :: n            !< Number of layers kmx, or kmx+1
@@ -1186,7 +1186,6 @@ subroutine fillObsTempArray(ntot, n, fillVal, locArray, locType, obsTmp)
    integer,                              intent(in   ) :: locType      !< Location type: UNC_LOC_S3D-cell center&layer center,
                                                                        !! UNC_LOC_W-face center&layer interface,
                                                                        !! UNC_LOC_WU-velocity point&layer interface
-                                                                       !! UNC_LOC_ITP-interpolated to cell center&layer center
    double precision, dimension(n, ntot), intent(inout) :: obsTmp       !< The temperay array to be filled in
    integer :: i, k, kb, kt, nlayb, nrlay, nrlay1, kk, L, La, Lb, Ltx, nlaybL, nrlayLx, maxNrlay, minNlaybL
 
@@ -1215,26 +1214,6 @@ subroutine fillObsTempArray(ntot, n, fillVal, locArray, locType, obsTmp)
             call getlayerindicesLmax(L, nlaybL, nrlayLx)
             do kk=nlaybL,nlaybL+nrlayLx
                obstmp(kk,i) = valobs(locArray+kk-nlaybL,i)
-            end do
-         else if (locType == UNC_LOC_ITP) then
-            ! The 3D varialbes such as turkin, eps, ... were interpolated to cell center by Perot reconstrunction
-            ! in subroutine fill_valobs. For output, we go through all flow links that connected to the
-            ! obs node k, and take the maximal number of the active layers of these flow links. The bottom layer is chosen 
-            ! to be the lowest bottom layer of all these flow links.
-            maxNrlay = 0
-            minNlaybL = n
-            do L = 1,nd(k)%lnx
-               La = iabs(nd(k)%ln(L))
-               call getlayerindicesLmax(La, nlaybL, nrlayLx)
-               if (nrlayLx > maxNrlay) then
-                  maxNrlay = nrlayLx
-               end if
-               if (nlaybL < minNlaybL) then
-                  minNlaybL = nlaybL
-               end if
-            end do
-            do kk=minNlaybL,minNlaybL+maxNrlay
-               obstmp(kk,i) = valobs(locArray+kk-minNlaybL,i)
             end do
          end if
       end if
