@@ -6595,6 +6595,8 @@ src/third_party_open/doxygen/bin/doxywizard.exe -text
 src/third_party_open/doxygen/configure -text
 src/third_party_open/doxygen/doxygen_manual.chm -text
 src/third_party_open/esmf/Makefile.am -text
+src/third_party_open/esmf/lnx64/ESMF_8_0_1_CentOS7_IFORT18/bin/ESMF_RegridWeightGen -text
+src/third_party_open/esmf/lnx64/ESMF_8_0_1_CentOS7_IFORT18/doc/build.sh -text
 src/third_party_open/esmf/lnx64/Makefile.am -text
 src/third_party_open/esmf/lnx64/bin/ESMF_RegridWeightGen -text
 src/third_party_open/esmf/lnx64/bin/Makefile.am -text
