@@ -57,7 +57,7 @@ character(len=16), parameter :: UG_CONV_DELTARES = 'Deltares-0.10' !< Version of
 
 
 !! Meta data
-type, BIND(C) ::t_ug_meta
+type ::t_ug_meta
    character(len=ug_strLenMeta) :: institution
    character(len=ug_strLenMeta) :: source
    character(len=ug_strLenMeta) :: references
@@ -66,7 +66,7 @@ type, BIND(C) ::t_ug_meta
 end type t_ug_meta
 
 !! Meta data for string info 
-type, BIND(C) :: t_ug_charinfo  
+type :: t_ug_charinfo  
     character(len=ug_idsLen)            :: ids
     character(len=ug_idsLongNamesLen)   :: longnames
 end type t_ug_charinfo

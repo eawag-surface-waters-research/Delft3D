@@ -3153,10 +3153,11 @@ module m_ec_provider
             fileReaderPtr%tframe%ec_timezone = fileReaderPtr%tframe%k_timezone
             fileReaderPtr%tframe%ec_timestep_unit = fileReaderPtr%tframe%k_timestep_unit 
 
-            if(present(dtnodal) .and. dtnodal /= 0.0_hp) then
-               fileReaderPtr%tframe%dtnodal = dtnodal
-            else
-               fileReaderPtr%tframe%dtnodal = 1e+20_hp
+            fileReaderPtr%tframe%dtnodal = 1e+20_hp
+            if (present(dtnodal)) then
+               if (dtnodal /= 0.0_hp) then
+                  fileReaderPtr%tframe%dtnodal = dtnodal
+               endif
             endif
 
          else
