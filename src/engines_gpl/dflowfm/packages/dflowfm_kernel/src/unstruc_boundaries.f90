@@ -673,8 +673,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 !       realloc ketr
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
      end if
-     
-  ! DEBUG JRE sedfrac
+
   else if (qidfm(1:10) == 'sedfracbnd' .and. jased > 0) then
      
      kce = abs(kce)   ! kce=1     
@@ -701,8 +700,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         nbndsf(isf) = nbndsf(isf) + numsf
         nbndsf_all = maxval(nbndsf(1:numfracs))
      endif
-     
-  !\ JRE DEBUG sedfrac
      
   else if (qidfm == 'tangentialvelocitybnd' ) then
 
@@ -860,7 +857,6 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
          success = .true.
       end if
 
-! JRE DEBUG sedfrac
    else if ( numfracs > 0 .and. (qid(1:10) == 'sedfracbnd') .and. stm_included) then
 
       call get_sedfracname(qid, sfnam, qidnam)

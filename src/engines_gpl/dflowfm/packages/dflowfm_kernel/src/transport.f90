@@ -1478,8 +1478,8 @@ subroutine ini_transport()
                ifrac = findname(numfracs,sfnames,trim(const_names(isf+ISED1-1)))
                if ( ifrac.gt.0 ) then
                   ifrac2const(ifrac) = isf+ISED1-1
-               !else
-                  !call mess(LEVEL_ERROR, 'ini_transport(): fraction '//trim(const_names(isf+ISED1-1))//' does not have a concentration bnd assigned.')
+               else
+                  call mess(LEVEL_WARN, 'ini_transport(): fraction '//trim(const_names(isf+ISED1-1))//' has a neumann bc assigned. If that is not what was intended, check fraction name in the sedfracbnd definition.')
                end if
             end do
          end if    ! numfracs

@@ -6426,7 +6426,7 @@ module m_meteo
    character(maxMessageLen) :: message !< EC's message, to be passed to FM's log.
    !
    integer, dimension(:), allocatable, target :: item_tracerbnd              !< dim(numtracers)
-   integer, dimension(:), allocatable, target :: item_sedfracbnd             !< dim(numfracs)   ! JRE DEBUG sedfrac
+   integer, dimension(:), allocatable, target :: item_sedfracbnd             !< dim(numfracs)
    integer, dimension(:), allocatable, target :: item_waqfun                 !< dim(nofun)  
    integer, dimension(:), allocatable, target :: item_waqsfun                !< dim(nosfunext)
 
@@ -6618,7 +6618,6 @@ module m_meteo
       allocate(item_tracerbnd(numtracers))
       item_tracerbnd = ec_undef_int
       !
-      ! JRE DEBUG sedfrac bnd
       if ( allocated(item_sedfracbnd) ) deallocate(item_sedfracbnd)
       allocate(item_sedfracbnd(numfracs))
       item_sedfracbnd = ec_undef_int
@@ -6632,7 +6631,6 @@ module m_meteo
       allocate(item_waqsfun(nosfunext))
       item_waqsfun = ec_undef_int
 
-      !\ DEBUG sedfrac
    end subroutine init_variables
 
    ! ==========================================================================
@@ -7444,7 +7442,6 @@ module m_meteo
       ! Construct the target field and the target item
       ! ==============================================
       ! determine which target item (id) will be created, and which FM data array has to be used
-      ! JRE DEBUG sedfrac
       if (.not. fm_ext_force_name_to_ec_item(trname, sfname, waqinput, qidname,                                                &
                                              targetItemPtr1, targetItemPtr2, targetItemPtr3, targetItemPtr4, &
                                              dataPtr1      , dataPtr2      , dataPtr3      , dataPtr4        )) then
@@ -7738,7 +7735,7 @@ module m_meteo
          case ('velocitybnd', 'dischargebnd', 'waterlevelbnd', 'salinitybnd', 'tracerbnd',           &
                'neumannbnd', 'riemannbnd', 'absgenbnd', 'outflowbnd',                      &
                'temperaturebnd', 'sedimentbnd', 'tangentialvelocitybnd', 'uxuyadvectionvelocitybnd', & 
-               'normalvelocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    !JRE DEBUG sedfrac
+               'normalvelocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    
             if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
                  (.not. checkFileType(ec_filetype, provFile_bc, target_name))  ) then
                return
