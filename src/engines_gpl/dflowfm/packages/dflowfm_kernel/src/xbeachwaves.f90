@@ -70,6 +70,7 @@ subroutine xbeach_all_input()
    use m_samples
    use m_missing
    use m_wind, only: jawind
+   use m_waves, only: gammax
    use unstruc_model
 
    implicit none
@@ -921,7 +922,7 @@ subroutine xbeach_instationary()
    use m_partitioninfo
    use m_timer
    use m_alloc
-   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb, jauorb
+   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb, jauorb, gammax
    use m_flowtimes, only:dts
 
    implicit none
@@ -4656,7 +4657,7 @@ subroutine xbeach_stationary()
    use m_partitioninfo
    use m_timer
    use m_alloc
-   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb
+   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb, gammax
    use unstruc_display, only: jaGUI 
    
    implicit none
