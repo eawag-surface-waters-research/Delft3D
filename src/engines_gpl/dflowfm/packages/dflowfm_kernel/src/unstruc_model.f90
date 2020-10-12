@@ -1092,8 +1092,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'numerics', 'AntiCreep' , jacreep)
     call prop_get_integer(md_ptr, 'numerics', 'Orgbarockeywords' , jaorgbarockeywords)
     if (jaorgbarockeywords == 1) then
-    call prop_get_integer(md_ptr, 'numerics', 'Barocterm' , jabarocterm)
-    call prop_get_integer(md_ptr, 'numerics', 'Baroctimeint' , jabaroctimeint)
+       call prop_get_integer(md_ptr, 'numerics', 'Barocterm' , jabarocterm)
+       call prop_get_integer(md_ptr, 'numerics', 'Baroctimeint' , jabaroctimeint)
     endif
     call prop_get_integer(md_ptr, 'numerics', 'EnableJRE', jajre)
 
@@ -1114,6 +1114,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double(md_ptr, 'numerics', 'Velocitywarn', u01warn)
     call prop_get_double(md_ptr, 'numerics', 'Velmagnwarn', umagwarn)
     call prop_get_double(md_ptr, 'numerics', 'MinTimestepBreak', dtminbreak)
+    call prop_get_double(md_ptr, 'numerics', 'MaxSSC', sscmax)
     call prop_get_double(md_ptr, 'numerics', 'Epshu' , epshu)
     epshs = .2d0*epshu ! minimum waterdepth for setting cfu
 
@@ -2831,6 +2832,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     if (writeall .or. (dtminbreak > 0d0)) then
         call prop_set(prop_ptr, 'numerics', 'MinTimestepBreak', dtminbreak,  'smallest allowed timestep (in s), checked on a sliding average of several timesteps. Run will abort when violated.')
+    end if
+    
+    if ((writeall .or. (sscmax > 0d0)) .and. jased==4) then
+        call prop_set(prop_ptr, 'numerics', 'MaxSSC', sscmax, 'upper bound (in kg/m3) on SSC (<= 0: no bounds). Run will abort when violated.')
     end if
 
     call prop_set(prop_ptr, 'numerics', 'Epshu' , epshu, 'Threshold water depth for wet and dry cells')

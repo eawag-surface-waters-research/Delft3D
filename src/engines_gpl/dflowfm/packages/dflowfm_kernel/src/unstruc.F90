@@ -951,11 +951,12 @@ subroutine flow_validatestate(iresult)
  use m_flowgeom
  use m_flowparameters
  use m_flowtimes
+ use m_transport
  use dfm_error
  implicit none
  integer, intent(out) :: iresult                     ! validation result status
  double precision :: dtavgwindow
- integer :: i, q
+ integer :: i, q, k
 
  iresult = DFM_NOERR
 
@@ -1041,6 +1042,21 @@ if (dtminbreak > 0d0) then  ! smallest allowed timestep (in s), checked on a sli
       q = 1
     end if
 end if
+
+! Check on concentration values and crash
+if (sscmax>0d0) then
+   if (jased==4 .and. ISED1>0) then  ! to do: ease jased=4 req when HK arrays incorporated in constituents
+      do i=ISED1,ISEDN
+         do k=1,ndx
+            if (constituents(i,k)>sscmax) then
+               q=1
+               write (msgbuf, '(a,i5,a,i5,a,e11.4)') 'SSC above threshold: (cell index, fraction, SSC [kg/m3]) = ', k, ', ', i-ISED1+1, ', ', constituents(i,k)
+               call warn_flush()
+            endif
+         enddo
+      enddo
+   endif
+endif
 
 if(q /= 0) then
     call flow_externaloutput_direct() ! Last-minute save of emergency snapshot in map/his/rst
@@ -1163,7 +1179,7 @@ if(q /= 0) then
  use MessageHandling
  use m_sobekdfm
  use unstruc_display
- use m_waves, only: hwav, twav, phiwav, rlabda, ustokes, vstokes, uorb, taubxu
+ use m_waves
  use m_subsidence
   
  implicit none
@@ -1411,6 +1427,9 @@ if(q /= 0) then
 
   if (jawave==5) then
     if (kmx==0) then
+       do k=1,ndx
+          hwav(k) = min(hwavuni, gammax*(s1(k)-bl(k)))
+       enddo
        do L=1,lnx
           k1=ln(1,L); k2=ln(2,L)
           hh = hu(L); hw=0.5d0*(hwav(k1)+hwav(k2));tw=.5d0*(twav(k1)+twav(k2))
@@ -13468,7 +13487,7 @@ subroutine getczz0(h0, frcn, ifrctyp, cz, z0)       ! basic get z0 (m),  this ro
      z0   = h0*exp(-1d0 - vonkar*cz/sag)
  else if (ifrctyp == 2) then                         ! White Colebrook Delft3D
      z0   = min( frcn / 30d0 , h0*0.3d0)
-     sqcf = vonkar/log( h0/(ee*z0) )             ! true white colebrook d3d would be vonkar/log( 1d0+h0/(ee*z0) )
+     sqcf = vonkar/log( h0/(ee*z0) )                 ! true white colebrook d3d would be vonkar/log( 1d0+h0/(ee*z0) )
      cz   = sag/sqcf
  else if (ifrctyp == 3) then                         ! White Colebrook WAQUA
      hurou = max(0.5d0, h0/frcn)
@@ -15230,7 +15249,7 @@ else if (nodval == 27) then
     zlin = hu(L) - hu(L-1)
  else if ( linval == 47) then
     zlin = frculin(LL)
- else if (linval == 48 .and. stm_included) then
+ else if (linval == 54 .and. stm_included) then
     select case (sedparopt)
        case (1)
           dum=0d0
@@ -15324,6 +15343,7 @@ else if (nodval == 27) then
  use unstruc_channel_flow, only: network
  use m_1d_structures, only: initialize_structures_actual_params, t_structure
  use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
+ use m_waves
  implicit none
 
  ! locals
@@ -16660,6 +16680,9 @@ end if
 
  if (jawave==5) then
     if (kmx==0) then
+       do k=1,ndx
+          hwav(k) = min(hwavuni, gammax*(s1(k)-bl(k)))
+       enddo
        do L=1,lnx
           k1=ln(1,L); k2=ln(2,L)
           hh = hu(L); hw=0.5d0*(hwav(k1)+hwav(k2));tw=.5d0*(twav(k1)+twav(k2))
@@ -43883,7 +43906,6 @@ end function is_1d_boundary_candidate
 
  endif
 
- ! JRE DEBUG sedfracbnds
  if (stm_included) then
      if (nbndsf_all > 0) then
    !   deallocate
@@ -46184,7 +46206,7 @@ subroutine update_verticalprofiles()
  if (iadvec == 0) then
      javau = 0
  endif
-
+ 
  if (iturbulencemodel == 1) then                         ! 1=constant
 
 !    vicwwu = vicoww
@@ -46548,7 +46570,7 @@ subroutine update_verticalprofiles()
         if (jawave>0 .and. jawaveStokes>=1) then  ! shear based on eulerian velocity field, see turclo,note JvK, Ardhuin 2006
            dijdij(k) = ( ( u1(Lu) - u1(L) - ( ustokes(Lu) - ustokes(L) )) ** 2 + ( v(Lu) - v(L) - ( vstokes(Lu) - vstokes(L) )) ** 2 ) / dzw(k)**2
         else
-           dijdij(k) = ( ( u1(Lu) - u1(L) ) ** 2 + ( v(Lu) - v(L) ) ** 2 ) / dzw(k)**2
+        dijdij(k) = ( ( u1(Lu) - u1(L) ) ** 2 + ( v(Lu) - v(L) ) ** 2 ) / dzw(k)**2
         endif
 
         if (jarichardsononoutput > 0) then                ! save richardson nr to output
@@ -47165,7 +47187,7 @@ subroutine update_verticalprofiles()
     if (jawave>0 .and. jawaveStokes >= 1) then                                      ! ustokes correction at bed
        umod = sqrt( (u1Lb-ustokes(Lb))*(u1Lb-ustokes(Lb)) + (v(Lb)-vstokes(Lb))*(v(Lb)-vstokes(Lb)) )
     else
-        umod = sqrt( u1Lb*u1Lb + v(Lb)*v(Lb) )
+       umod = sqrt( u1Lb*u1Lb + v(Lb)*v(Lb) )
     endif
 
     if (umod == 0d0) then         ! from dry to wet

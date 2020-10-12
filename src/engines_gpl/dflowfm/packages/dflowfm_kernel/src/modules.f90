@@ -576,7 +576,7 @@ module m_xbeach_data
    double precision               :: gamma2         = -123    !  [-] End of breaking parameter in break = 4 formulation
    double precision               :: alpha          = -123    !  [-] (advanced) Wave dissipation coefficient in Roelvink formulation
    double precision               :: nroelvink      = -123    !  [-] (advanced) Power in Roelvink dissipation model
-   double precision               :: gammax         = -123    !  [-] (advanced) Maximum ratio wave height to water depth
+   double precision               :: gammaxxb         = -123    !  [-] (advanced) Maximum ratio wave height to water depth
    double precision               :: deltaH         = -123    !  [-] (advanced) Fraction of wave height to add to water depth
    double precision, allocatable  :: fw(:)                    !  [-] (advanced) Internally used bed friction factor
    double precision               :: fwcutoff       = -123    !  [-] Depth greater than which the bed friction factor is NOT applied
@@ -2655,6 +2655,7 @@ end subroutine default_turbulence
  double precision                  :: s01warn           !< warning level water level (m) between s0 in validation routine
  double precision                  :: u01warn           !< warning level velocity (m/s) between u0 in validation routine
  double precision                  :: umagwarn          !< warning level velocity (m/s) for velocity magnitude in validation routine
+ double precision                  :: sscmax            !< error level concentration (kg/m3) for velocity magnitude in validation routine
  ! See also m_flowtimes::dtminbreak
 
  ! parameters controlling flooding/drying/solving
@@ -3138,6 +3139,7 @@ subroutine default_flowparameters()
     s01warn    = 0d0
     u01warn    = 0d0
     umagwarn   = 0d0
+    sscmax     = 0d0
 
                          ! parameters controlling flooding/drying/solving
     epshu      = 1d-4    ! minimum waterdepth for setting hu>0
