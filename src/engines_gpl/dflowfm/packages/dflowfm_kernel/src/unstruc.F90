@@ -552,6 +552,7 @@ use m_timer
 use unstruc_display, only : jaGUI
 use dfm_error
 use dfm_signals
+use m_mass_balance_areas, only: jamba
 use m_partitioninfo, only: jampi, sdmn, my_rank
 use m_integralstats
 use m_fourier_analysis
@@ -567,6 +568,10 @@ character(len=255)   :: filename_fou_out
       if ( jatimer.eq.1 ) call starttimer(IFMWAQ)
       call fm_wq_processes_step(dts,time1)
       if ( jatimer.eq.1 ) call stoptimer (IFMWAQ)
+   endif
+
+   if (jamba > 0) then  ! at moment, this function is only required for the mass balance areas
+      call comp_horflowmba()
    endif
 
  call flow_f0isf1()                                  ! mass balance and vol0 = vol1
@@ -19423,7 +19428,7 @@ subroutine unc_write_his(tim)            ! wrihis
             nNodeTot = numobs+nummovobs
             ierr = sgeom_def_geometry_variables(ihisfile, station_geom_container_name, 'station', 'point', nNodeTot, id_statdim, &
                id_statgeom_node_count, id_statgeom_node_coordx, id_statgeom_node_coordy)
-
+            
             if ( jahiswatlev > 0 ) then
                ierr = nf90_def_var(ihisfile, 'waterlevel', nf90_double, (/ id_statdim, id_timedim /), id_vars)
                ierr = nf90_put_att(ihisfile, id_vars, 'standard_name', 'sea_surface_height') ! sorry for inland water people
@@ -21462,7 +21467,7 @@ subroutine unc_write_his(tim)            ! wrihis
            ierr = nf90_put_var(ihisfile, id_statid, trim(namobs(i)), (/ 1, i /)) ! Extra for OpenDA-wrapper
            ierr = nf90_put_var(ihisfile, id_statname, trim(namobs(i)), (/ 1, i /))
         end do
-
+        
         if (ncrs > 0) then
             do i=1,ncrs
                 !ierr = nf90_put_var(ihisfile, id_crsx,     crs(i)%path%xp(1:crs(i)%path%np), (/ 1, i /))

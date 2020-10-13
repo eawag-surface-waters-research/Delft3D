@@ -583,6 +583,90 @@
    end do 
    end subroutine mba_sum_area
 
+   subroutine comp_horflowmba()
+   use m_flowgeom, only: Lnx
+   use m_flow, only: Lbot, Ltop, kmx, Lnkx, q1 
+   use m_flowtimes, only: dts
+   use m_flowexternalforcings, only: numsrc, qsrc
+   use m_mass_balance_areas
+   use timers
+
+   implicit none
+
+   integer :: LL, L, Lb, Lt, k1, k2, i, n
+   integer :: iconst
+   double precision :: qsrck
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "comp_horflowmba", ithndl )
+   
+   do i=1,nombaln
+      LL = mbalnlist(i)
+      Lb = Lbot(LL)
+      Lt = Ltop(LL)
+      k1 = mbalnfromto(1,i)
+      k2 = mbalnfromto(2,i)
+      do L=Lb,Lt
+         if (q1(L).gt.0.0) then
+            mbaflowhor(2,k1,k2) = mbaflowhor(2,k1,k2) + q1(L) * dts
+            mbaflowhor(1,k2,k1) = mbaflowhor(1,k2,k1) + q1(L) * dts
+         else
+            mbaflowhor(1,k1,k2) = mbaflowhor(1,k1,k2) - q1(L) * dts
+            mbaflowhor(2,k2,k1) = mbaflowhor(2,k2,k1) - q1(L) * dts
+         endif
+      end do
+   end do
+
+   do n  = 1,numsrc
+      qsrck = qsrc(n) 
+      if (qsrck > 0) then
+         mbaflowsorsin(2,n) = mbaflowsorsin(2,n) + qsrck*dts
+      else if (qsrck < 0) then
+         mbaflowsorsin(1,n) = mbaflowsorsin(1,n) - qsrck*dts
+      endif
+   enddo
+
+   if (timon) call timstop( ithndl )
+   end subroutine comp_horflowmba
+
+   subroutine comp_horfluxmba()
+   use m_flowgeom, only: Lnx
+   use m_flow, only: Lbot, Ltop, kmx, Lnkx
+   use m_transport, only: NUMCONST, fluxhor
+   use m_flowtimes, only: dts
+   use m_mass_balance_areas
+   use timers
+
+   implicit none
+
+   integer :: LL, L, Lb, Lt, k1, k2, i
+   integer :: iconst
+
+   integer(4) ithndl /0/
+   if (timon) call timstrt ( "comp_horfluxmba", ithndl )
+
+   do iconst=1,numconst
+      do i=1,nombaln
+         LL = mbalnlist(i)
+         Lb = Lbot(LL)
+         Lt = Ltop(LL)
+         k1 = mbalnfromto(1,i)
+         k2 = mbalnfromto(2,i)
+         do L=Lb,Lt
+            if (fluxhor(iconst,L).gt.0.0) then
+               mbafluxhor(2,iconst,k1,k2) = mbafluxhor(2,iconst,k1,k2) + fluxhor(iconst,L) * dts
+               mbafluxhor(1,iconst,k2,k1) = mbafluxhor(1,iconst,k2,k1) + fluxhor(iconst,L) * dts
+            else
+               mbafluxhor(1,iconst,k1,k2) = mbafluxhor(1,iconst,k1,k2) - fluxhor(iconst,L) * dts
+               mbafluxhor(2,iconst,k2,k1) = mbafluxhor(2,iconst,k2,k1) - fluxhor(iconst,L) * dts
+            endif
+         end do
+      end do
+   end do
+
+   if (timon) call timstop( ithndl )
+   end subroutine comp_horfluxmba
+
    subroutine mba_write_bal_header(lunbal, numconst, const_names, iconst2sys, nosys, notot, isys2wqbot, syname_sub, nomba, mbaname, nflux, &
                                    totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, ipfluxsys, fluxsys)
    
@@ -640,22 +724,25 @@
       write (lunbal, '(I8,2X,A40)') imba, mbaname(imba)
    enddo
 
-   write (lunbal, '(/"Overview of constituents and substances")')
-   write (lunbal, '( "-------------------------------------------------------------")')
-   write (lunbal, '(/"Total number of FM constituents                 :",I8)') numconst
-   write (lunbal, '( "Total number of WQ substances                   :",I8)') notot
-   write (lunbal, '( "Number of active (transported) substances       :",I8)') nosys
-   write (lunbal, '( "Number of inactive (not transported) substances :",I8)') notot - nosys
-   write (lunbal, '(/"List of consituents/active WQ substances")')
-   write (lunbal, '(/" FM number   WQ number  Name")')
-   do iconst = 1, numconst
-      isys = iconst2sys(iconst)
-      if (isys.gt.0) then
-         write (lunbal, '(2x,i8,4x,i8,2x,a)') iconst, isys, const_names(iconst)
-      else
-         write (lunbal, '(2x,i8,11x,"-",2x,a)') iconst, const_names(iconst)
-      endif
-   enddo
+   if (numconst > 0) then
+      write (lunbal, '(/"Overview of constituents and substances")')
+      write (lunbal, '( "-------------------------------------------------------------")')
+      write (lunbal, '(/"Total number of FM constituents                 :",I8)') numconst
+      write (lunbal, '( "Total number of WQ substances                   :",I8)') notot
+      write (lunbal, '( "Number of active (transported) substances       :",I8)') nosys
+      write (lunbal, '( "Number of inactive (not transported) substances :",I8)') notot - nosys
+      write (lunbal, '(/"List of consituents/active WQ substances")')
+      write (lunbal, '(/" FM number   WQ number  Name")')
+      do iconst = 1, numconst
+         isys = iconst2sys(iconst)
+         if (isys.gt.0) then
+            write (lunbal, '(2x,i8,4x,i8,2x,a)') iconst, isys, const_names(iconst)
+         else
+            write (lunbal, '(2x,i8,11x,"-",2x,a)') iconst, const_names(iconst)
+         endif
+      enddo
+   endif
+   
    if(nosys .lt. notot) then
       write (lunbal, '(/"List of WQ bot variables/inactive WQ substances")')
       write (lunbal, '(/" FM number   WQ number  Name")')
@@ -664,22 +751,24 @@
       enddo
    endif
 
-   write (lunbal, '(/"Overview of fluxes")')
-   write (lunbal, '( "-------------------------------------------------------------")')
-   write (lunbal, '( "total number of substances fluxes               :",I8)') totfluxsys
-   write (lunbal, '(/"Substance      Process        Flux        Stochiometry factor")')
-   write (lunbal, '( "-------------------------------------------------------------")')
-   ifluxsys = 0
-   do isys = 1, notot
-      ipfluxsys(isys) = ifluxsys
-      if (nfluxsys(isys).gt.0) then
-         do iflux = ifluxsys + 1, ifluxsys + nfluxsys(isys)
-            jflux = fluxsys(iflux)
-            write (lunbal, '(A10,5X,A10,5X,A10,ES20.6)') syname_sub(isys), fluxprocname(jflux), fluxname(jflux), stochi(isys,jflux)
-         enddo
-         ifluxsys = ifluxsys + nfluxsys(isys)
-      endif
-   enddo
+   if (totfluxsys > 0) then
+      write (lunbal, '(/"Overview of fluxes")')
+      write (lunbal, '( "-------------------------------------------------------------")')
+      write (lunbal, '( "total number of substances fluxes               :",I8)') totfluxsys
+      write (lunbal, '(/"Substance      Process        Flux        Stochiometry factor")')
+      write (lunbal, '( "-------------------------------------------------------------")')
+      ifluxsys = 0
+      do isys = 1, notot
+         ipfluxsys(isys) = ifluxsys
+         if (nfluxsys(isys).gt.0) then
+            do iflux = ifluxsys + 1, ifluxsys + nfluxsys(isys)
+               jflux = fluxsys(iflux)
+               write (lunbal, '(A10,5X,A10,5X,A10,ES20.6)') syname_sub(isys), fluxprocname(jflux), fluxname(jflux), stochi(isys,jflux)
+            enddo
+            ifluxsys = ifluxsys + nfluxsys(isys)
+         endif
+      enddo
+   endif 
 
    return
    end subroutine mba_write_bal_header

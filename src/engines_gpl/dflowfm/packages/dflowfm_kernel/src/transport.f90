@@ -1902,14 +1902,6 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
          endif
       endif
 
-      if (jamba_src > 0) then
-         if (qsrck > 0) then
-            mbaflowsorsin(2,n) = mbaflowsorsin(2,n) + qsrck*dts
-         else if (qsrck < 0) then
-            mbaflowsorsin(1,n) = mbaflowsorsin(1,n) - qsrck*dts
-         endif
-      endif
-         
       if (kk > 0) then                     ! FROM Point
          do k = ksrc(2,n) , ksrc(3,n) 
             dvoli  = 1d0/max(vol1(k),dtol)
@@ -2931,61 +2923,6 @@ subroutine comp_horfluxtot()
 
    if (timon) call timstop( ithndl )
 end subroutine comp_horfluxtot
-
-subroutine comp_horfluxmba()
-   use m_flowgeom, only: Lnx
-   use m_flow, only: Lbot, Ltop, kmx, Lnkx, q1 
-   use m_transport, only: NUMCONST, fluxhor
-   use m_flowtimes, only: dts
-   use m_mass_balance_areas
-   use timers
-
-   implicit none
-
-   integer :: LL, L, Lb, Lt, k1, k2, i
-   integer :: iconst
-   
-   integer(4) ithndl /0/
-   if (timon) call timstrt ( "comp_horfluxmba", ithndl )
-
-   do i=1,nombaln
-      LL = mbalnlist(i)
-      Lb = Lbot(LL)
-      Lt = Ltop(LL)
-      k1 = mbalnfromto(1,i)
-      k2 = mbalnfromto(2,i)
-      do L=Lb,Lt
-         if (q1(L).gt.0.0) then
-            mbaflowhor(2,k1,k2) = mbaflowhor(2,k1,k2) + q1(L) * dts
-            mbaflowhor(1,k2,k1) = mbaflowhor(1,k2,k1) + q1(L) * dts
-         else
-            mbaflowhor(1,k1,k2) = mbaflowhor(1,k1,k2) - q1(L) * dts
-            mbaflowhor(2,k2,k1) = mbaflowhor(2,k2,k1) - q1(L) * dts
-         endif
-      end do
-   end do
-
-   do iconst=1,numconst
-      do i=1,nombaln
-         LL = mbalnlist(i)
-         Lb = Lbot(LL)
-         Lt = Ltop(LL)
-         k1 = mbalnfromto(1,i)
-         k2 = mbalnfromto(2,i)
-         do L=Lb,Lt
-            if (fluxhor(iconst,L).gt.0.0) then
-               mbafluxhor(2,iconst,k1,k2) = mbafluxhor(2,iconst,k1,k2) + fluxhor(iconst,L) * dts
-               mbafluxhor(1,iconst,k2,k1) = mbafluxhor(1,iconst,k2,k1) + fluxhor(iconst,L) * dts
-            else
-               mbafluxhor(1,iconst,k1,k2) = mbafluxhor(1,iconst,k1,k2) - fluxhor(iconst,L) * dts
-               mbafluxhor(2,iconst,k2,k1) = mbafluxhor(2,iconst,k2,k1) - fluxhor(iconst,L) * dts
-            endif
-         end do
-      end do
-   end do
-
-   if (timon) call timstop( ithndl )
-end subroutine comp_horfluxmba
 
 !subroutine update_constituents_RK3
 !   use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd  ! static mesh information
