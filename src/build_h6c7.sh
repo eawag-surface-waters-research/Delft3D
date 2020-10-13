@@ -11,12 +11,9 @@
 #   ToDo: Don't preintialize the compiler, the user should do this himself
 #   so that he's aware exactly which version he's using.  Besides, we can't
 #   keep up with every new compiler update.  This script should be ultra-low
-#   maintanence.
+#   maintenance.
 #
-#   Irv.Elshoff@Deltares.NL
-#   2 jul 12
-#
-#   Copyright (C)  Stichting Deltares, 2011-2019.
+#   Copyright (C)  Stichting Deltares, 2011-2020.
 #-------------------------------------------------------------------------------
 
 # This script must be executed in the directory where it resides
@@ -33,12 +30,15 @@ debug=0
 noMake=0
 platform='intel64'
 useSp=0
+gccVersion=7.3.0
 
 #-------------------------------------------------------------------------------
 function usage {
     echo "Usage: `basename $0` <compiler> [-debug] [-make] [-64bit] [-sp] [-configure <args>] [-?]"
     echo "Compiler is one of:"
     echo "    -gnu"
+    echo "    -gnu7"
+    echo "    -gnu9"
     echo "    -intel10"
     echo "    -intel11.0 (-intel11)"
     echo "    -intel11.1"
@@ -98,8 +98,12 @@ while [ $# -gt 0 ]; do
         -d|-debug)
             debug=1
             ;;
-        -gnu)
+        -gnu|-gnu7)
             compiler='gnu'
+            ;;
+        -gnu9)
+            compiler='gnu'
+            gccVersion=9.2.0
             ;;
         -intel10)
             compiler='intel10'
@@ -180,7 +184,7 @@ fi
 fortranModule=""
 case $compiler in
     gnu)
-        fortranModule="gcc/7.3.0"
+        fortranModule="gcc/$gccVersion"
         ifortInit="module load $fortranModule"
         iccInit=""
         echo "Using GNU compilers in `witch gfortran`"
@@ -284,9 +288,9 @@ fi
 #===============================================================================
 # Use the correct Autotools
 ## default available on CentOS7
-automakeModule="automake/1.14.1_gcc7.3.0"
-autoconfModule="autoconf/2.69_gcc7.3.0"
-libtoolModule="libtool/2.4.6_gcc7.3.0"
+automakeModule="automake/1.14.1_gcc$gccVersion"
+autoconfModule="autoconf/2.69_gcc$gccVersion"
+libtoolModule="libtool/2.4.6_gcc$gccVersion"
 # 
 initAutomake="module load $automakeModule"
 initAutoconf="module load $autoconfModule"
@@ -318,7 +322,7 @@ fi
 mpichModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    mpichModule="mpich/3.3.2_gcc7.3.0"
+    mpichModule="mpich/3.3.2_gcc$gccVersion"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -346,7 +350,7 @@ fi
 petscModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    petscModule="petsc/3.13.3_gcc7.3.0_mpich3.3.2"
+    petscModule="petsc/3.13.3_gcc${gccVersion}_mpich3.3.2"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -373,7 +377,7 @@ fi
 metisModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    metisModule="metis/5.1.0_gcc7.3.0"
+    metisModule="metis/5.1.0_gcc$gccVersion"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -419,7 +423,7 @@ fi
 # netcdf
 netcdfModule=""
 if [ "$compiler" = 'gnu' ]; then
-    netcdfModule="netcdf/v4.7.4_v4.5.3_gcc7.3.0"
+    netcdfModule="netcdf/v4.7.4_v4.5.3_gcc$gccVersion"
 else
     # Intel compilers
     if [ "$compiler" = 'intel14' ]; then
@@ -445,14 +449,14 @@ fi
 
 # OLD: icc c++11 features are only available if gcc is in the path. This is required by proj
 # NEW: proj only has C(++) parts, so no Intel Fortran compiler needed. Just use GCC here.
-projModule="proj/7.1.0_gcc7.3.0"
+projModule="proj/7.1.0_gcc$gccVersion"
 # projModule=""
 # if [ "$compiler" = 'gnu' ]; then
-#     projModule="proj/7.1.0_gcc7.3.0"
+#     projModule="proj/7.1.0_gcc$gccVersion"
 # else
 #     # Intel compilers
 #     if [ "$compiler" = 'intel18' ]; then
-#     projModule="proj/7.1.0_gcc7.3.0"
+#     projModule="proj/7.1.0_gcc$gccVersion"
 #     elif [ "$compiler" = 'intel19' ]; then
 #     projModule="proj/7.1.0_intel19.1.1"
 #     fi
@@ -475,12 +479,12 @@ else
 # shapelib
 shapelibModule=""
 if [ "$compiler" = 'gnu' ]; then
-    shapelibModule="shapelib/1.5.0_gcc7.3.0"
+    shapelibModule="shapelib/1.5.0_gcc$gccVersion"
 elif [ "$compiler" = 'intel16' ]; then
     # icc c++11 features are only available if gcc is in the path. This is required by shapelib
     shapelibModule="intel/16.0.3 gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
 elif [ "$compiler" = 'intel18' ]; then
-    shapelibModule="shapelib/1.5.0_intel18.0.3 gcc/7.3.0"
+    shapelibModule="shapelib/1.5.0_intel18.0.3 gcc/$gccVersion"
 elif [ "$compiler" = 'intel19' ]; then
     shapelibModule="shapelib/1.5.0_intel19.1.1"
 fi
@@ -509,7 +513,7 @@ fi
 # Update June 10, 2020: GDAL is still leading to linker errors in combination with GNU. Disabled until further notice.
 gdalModule=""
 if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' || "$compiler" = 'intel19' ]]; then
-    gdalModule="gdal/3.1.2_gcc7.3.0"
+    gdalModule="gdal/3.1.2_gcc$gccVersion"
 fi
 
 initgdal="module load $gdalModule"
