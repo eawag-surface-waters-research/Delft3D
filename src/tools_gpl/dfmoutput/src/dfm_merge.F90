@@ -91,7 +91,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, allocatable :: nfaceedges(:)   ! total number of edges that surround a face
    double precision, allocatable :: node_x(:), node_y(:), edge_x(:), edge_y(:) !< coordinates
    double precision              :: xx, yy
-   integer :: im,nm,topodim, ikk, ic, iii, k1c, g1, g2, nfaces, iedge, iface, tmpvarDim, jafound
+   integer :: im,nm,topodim, ikk, ic, iii, k1c, g1, g2, nfaces, iedge, iface, tmpvarDim, jafound, Lfou, jaFou
    integer :: ifacefile, ifacein, ifaceout, ifacec
    integer :: inodefile, netedgecount2
    integer :: id_nodex, id_nodey, id_edgex, id_edgey
@@ -262,9 +262,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       goto 888
    else
       if (jaugrid == 1) then
-         write (*,'(a,i0,a)') 'Info: mapmerge: all map files are of UGRID format.'
+         write (*,'(a,i0,a)') 'Info: mapmerge: all input files are of UGRID format.'
       else
-         write (*,'(a,i0,a)') 'Info: mapmerge: all map files are of old format.'
+         write (*,'(a,i0,a)') 'Info: mapmerge: all input files are of old format.'
    end if
 
       end if
@@ -285,6 +285,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       n3 = index(infiles(1)(1:nlen), '.', .true.) - 1  ! pos of '.nc'
       if (n3 < 0) then
          n3 = nlen
+      end if
+      Lfou = index(infiles(1), '_fou.nc')
+      if (Lfou > 0) then ! If they are _fou files
+         jaFou = 1
+      else
+         jaFou = 0
       end if
       Lrst_m = index(infiles(1), '_rst.nc')
       if (Lrst_m > 0) then ! If they are _rst files
@@ -1498,19 +1504,24 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    ierr = nf90_enddef(ncids(noutfile))
 
-   ! For now: do all times.
-   ntsel = nt(ifile)
-   nt(noutfile) = ntsel
-   allocate(itimsel(ntsel))
-   itimsel = (/ (it, it=1,ntsel) /)
-   allocate(times(ntsel), timestep(ntsel))
-   do it=1,ntsel
-      ierr = nf90_get_var(ncids(ifile), id_time(ifile), times(it), start = (/ itimsel(it) /)) ! count=1
-      ierr = nf90_get_var(ncids(ifile), id_timestep(ifile), timestep(it), start = (/ itimsel(it) /)) ! count=1
-   end do
+   if (jaFou == 1) then
+      ntsel = 1 ! This enables writing the merged 1D variable arrays later for the Fourier files
+   else
+      ! For now: do all times.
+      ntsel = nt(ifile)
+      nt(noutfile) = ntsel
+      allocate(itimsel(ntsel))
+      itimsel = (/ (it, it=1,ntsel) /)
+      allocate(times(ntsel), timestep(ntsel))
+      do it=1,ntsel
+         ierr = nf90_get_var(ncids(ifile), id_time(ifile), times(it), start = (/ itimsel(it) /)) ! count=1
+         ierr = nf90_get_var(ncids(ifile), id_timestep(ifile), timestep(it), start = (/ itimsel(it) /)) ! count=1
+      end do
+      
+      ierr = nf90_put_var(ncids(noutfile), id_time(noutfile), times, count = (/ ntsel /))
+      ierr = nf90_put_var(ncids(noutfile), id_timestep(noutfile), timestep, count = (/ ntsel /))
+   end if
 
-   ierr = nf90_put_var(ncids(noutfile), id_time(noutfile), times, count = (/ ntsel /))
-   ierr = nf90_put_var(ncids(noutfile), id_timestep(noutfile), timestep, count = (/ ntsel /))
 
    if (verbose_mode) then
       write (*,'(a)') '## Writing merged variables to output file...'
