@@ -21,77 +21,52 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-subroutine wq_processes_pmsa_size ( lunrep, noseg, noq, isizea)
+      subroutine wq_processes_pmsa_size ( lunrep, noseg, noq, isizea)
 
-!     Deltares Software Centre
+      use partition_arrays
+      use processes_input
+      use processes_pointers
 
-use partition_arrays
-use processes_input
-use processes_pointers
+      implicit none
 
-implicit none
+      !     Parameters          :
 
-!     Parameters          :
+      !     kind     function         name        description
 
-!     kind     function         name        description
+      integer      , intent(in   ) :: lunrep    ! logical unitnumber output file
+      integer      , intent(in   ) :: noseg     ! number of segments
+      integer      , intent(in   ) :: noq       ! number of exchanges
+      integer      , intent(inout) :: isizea    ! Required array space
 
-integer      , intent(in   ) :: lunrep    ! logical unitnumber output file
-integer      , intent(in   ) :: noseg     ! number of segments
-integer      , intent(in   ) :: noq       ! number of exchanges
-integer      , intent(inout) :: isizea    ! Required array space
+      !     Local declarations
 
-type(memory_partition)       :: part      ! Private variables for MAKPTR
+      type(memory_partition)               :: part      ! Private variables for MAKPTR
+      integer         i_rar                             ! loop counter
+      integer         nr_rar                            ! number of real arrays
+      character*20    namarr                            ! help variable for array name
+      integer         iartyp                            ! help variable for array type
+      integer         iarlen                            ! help variable for array length
+      integer         ip                                ! help variable for array pointer
+      integer         ip_rar(78)                        ! help array to fill the common block / SYSA /
+      integer         ierr                              ! error indicator
 
+      nr_rar = 78                   ! total number of arrays
+      do i_rar = 1 , nr_rar
+          arrnam(i_rar) = ' '
+          arrtyp(i_rar) = rtyp
+          arrbyt(i_rar) = 4
+          arrknd(i_rar) = 0
+          arrdm1(i_rar) = 0
+          arrdm2(i_rar) = 0
+          arrdm3(i_rar) = 0
+          arrlen(i_rar) = 0
+      enddo
 
-!     Local declarations
-
-integer         i_rar                             ! loop counter
-integer         nr_rar                            ! number of real arrays
-integer         nohor                             ! number of computational volumes in 1 layer
-integer         nsubs                             ! nr of substances for array space declaration
-logical         fluxco                            ! if .true. then flux correction
-logical         steady                            ! if .true. then steady state computation
-logical         iterat                            ! if .true. then iterative solution
-logical         delmat                            ! if .true. then direct Gauss solver
-logical         f_solv                            ! if .true. then GMRES Krilov solver
-logical         triadi                            ! if .true. then ADI like Delft3d-Flow
-logical         balans                            ! if .true. then balances to be computed
-character*20    namarr                            ! help variable for array name
-integer         iartyp                            ! help variable for array type
-integer         iarlen                            ! help variable for array length
-integer         ip                                ! help variable for array pointer
-integer         ip_rar(78)                        ! help array to fill the common block / SYSA /
-integer         noth                              ! number of available thread for parallel processing
-integer         ierr                              ! error indicator
-integer         jstart                            ! lower limit Flow arrays method 19 and 20
-integer         nmmaxj                            ! upper limit Flow arrays method 19 and 20
-
-logical            :: lfound                      ! argument was found
-character(len=256) :: adummy                      ! dummy string
-integer            :: nothreadsarg                ! optional number of threads from delwaq2 commandline arguments
-real               :: rdummy                      ! dummy real
-integer            :: ierr2                       ! error code
-
-
-!     Set defaults, no name no length
-
-nr_rar = 78                   ! total number of arrays
-do i_rar = 1 , nr_rar
-    arrnam(i_rar) = ' '
-    arrtyp(i_rar) = rtyp
-    arrbyt(i_rar) = 4
-    arrknd(i_rar) = 0
-    arrdm1(i_rar) = 0
-    arrdm2(i_rar) = 0
-    arrdm3(i_rar) = 0
-    arrlen(i_rar) = 0
-enddo
-
-arrnam(iivol ) = 'VOLUME'
-arrknd(iivol ) = 2
-arrdm1(iivol ) = 1
-arrdm2(iivol ) = noseg
-arrdm3(iivol ) = 1
+      arrnam(iivol ) = 'VOLUME'
+      arrknd(iivol ) = 2
+      arrdm1(iivol ) = 1
+      arrdm2(iivol ) = noseg
+      arrdm3(iivol ) = 1
 
       arrnam(iiarea) = 'AREA  '
       arrknd(iiarea) = 2
@@ -113,17 +88,9 @@ arrdm3(iivol ) = 1
 
       arrnam(iiconc) = 'CONC  '
       arrknd(iiconc) = 2
-      if ( steady .and. .not. iterat ) then
-         arrdm1(iiconc) = notot
-         arrdm2(iiconc) = noseg
-         arrdm3(iiconc) = 1
-         nsubs = notot
-      else
-         arrdm1(iiconc) = notot
-         arrdm2(iiconc) = noseg
-         arrdm3(iiconc) = 1
-         nsubs = nosys
-      endif
+      arrdm1(iiconc) = notot
+      arrdm2(iiconc) = noseg
+      arrdm3(iiconc) = 1
 
       arrnam(iicons) = 'CONS  '
       arrknd(iicons) = 1
