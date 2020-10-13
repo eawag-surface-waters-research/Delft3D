@@ -70,7 +70,6 @@ subroutine xbeach_all_input()
    use m_samples
    use m_missing
    use m_wind, only: jawind
-   use m_waves, only: gammax
    use unstruc_model
 
    implicit none
@@ -288,7 +287,7 @@ subroutine xbeach_all_input()
       endif
       alpha         = readkey_dbl (md_surfbeatfile,'alpha',   1.0d0,     0.5d0,     2.0d0)
       nroelvink     = readkey_dbl (md_surfbeatfile,'n',       10.0d0,     5.0d0,    20.0d0)
-      gammax        = readkey_dbl (md_surfbeatfile,'gammax',   2.d0,      .4d0,      5.d0)
+      gammaxxb      = readkey_dbl (md_surfbeatfile,'gammax',   2.d0,      .4d0,      5.d0)
       deltaH        = readkey_dbl (md_surfbeatfile,'delta',   0.0d0,     0.0d0,     1.0d0)
       wavefricfile  = readkey_name(md_surfbeatfile,'fwfile')
       wavefricval   = readkey_dbl (md_surfbeatfile,'fw',       0.d0,   0d0,      1.0d0)
@@ -922,7 +921,7 @@ subroutine xbeach_instationary()
    use m_partitioninfo
    use m_timer
    use m_alloc
-   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb, jauorb, gammax
+   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb, jauorb
    use m_flowtimes, only:dts
 
    implicit none
@@ -1037,10 +1036,10 @@ subroutine xbeach_instationary()
        H(k)=sqrt(8.d0*E(k)/rhomean/ag)
 
        do itheta=1,ntheta
-           ee1(itheta,k)=ee1(itheta,k)/max(1.d0,(H(k)/(gammax*hh(k)))**2)
+           ee1(itheta,k)=ee1(itheta,k)/max(1.d0,(H(k)/(gammaxxb*hh(k)))**2)
        enddo
 
-       H(k)=min(H(k),gammax*hh(k))
+       H(k)=min(H(k),gammaxxb*hh(k))
        E(k)=rhomean*ag*(H(k)**2)/8.d0
 
    end do
@@ -1072,7 +1071,7 @@ subroutine xbeach_instationary()
 
    if (windmodel.eq.1) then
      ! wave period depth limitation 
-      call xbeach_wave_compute_period_depth_limitation( 1.d0/8.d0*rhog*(gammax*hh**2) , Tdeplim)  
+      call xbeach_wave_compute_period_depth_limitation( 1.d0/8.d0*rhog*(gammaxxb*hh**2) , Tdeplim)  
       do itheta=1,ntheta
          tt1(itheta,:) = min(tt1(itheta,:) , Tdeplim )
       enddo
@@ -4657,7 +4656,7 @@ subroutine xbeach_stationary()
    use m_partitioninfo
    use m_timer
    use m_alloc
-   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb, gammax
+   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb
    use unstruc_display, only: jaGUI 
    
    implicit none
@@ -4711,7 +4710,7 @@ subroutine xbeach_stationary()
        if (windmodel.eq.1) then
           !ML TODO: incorporate wind source term, now only does windmodel, not jawsource
           call update_ee1rr_windmodel(dtmaximp, sigt, tt1, cgwavt, ctheta, horadvec, thetaadvec, E, H, thet, thetamean,   &
-                      sigmwav, gammax, hh, &
+                      sigmwav, gammaxxb, hh, &
                       fw, break, deltaH, waveps, cgwav, kwav, km, gamma, gamma2, nroelvink, Qb, alpha, Trep, R, cwav, D,   &
                       roller, br, &
                       urms_cc, fwcutoff, Dbottom, DDlok, wete, rrhoradvec, rrthetaadvec, jawsource, wsorE, wsorT, egradcg, mwind, &
@@ -4720,7 +4719,7 @@ subroutine xbeach_stationary()
           call xbeach_wave_compute_celerities()
        else
           call update_ee1rr(dtmaximp, sigt, cgwav, ctheta, horadvec, thetaadvec, E, H, thet, thetamean,   &
-                         sigmwav, gammax, hh, &
+                         sigmwav, gammaxxb, hh, &
                          fw, break, deltaH, waveps, kwav, km, gamma, gamma2, nroelvink, Qb, alpha, Trep, R, cwav, D,   &
                          roller, br, &
                          urms_cc, fwcutoff, Dbottom, DDlok, wete, rrhoradvec, rrthetaadvec, jawsource, mwind, &
@@ -4853,6 +4852,7 @@ subroutine xbeach_stationary()
    integer :: ierror
 
    integer, parameter                  :: MAXLNX=100
+   double precision, dimension(MAXLNX) :: wgradx, wgrady
    
    integer                             :: numbnd
    integer                             :: idum(1)
@@ -4861,13 +4861,13 @@ subroutine xbeach_stationary()
    double precision :: uin_loc, vin_loc, hum
    double precision :: factime
    double precision :: hsk
+   double precision :: ht(2)
    
    integer :: n, Lb, L, kb, ki, k1, k2, k3, k4, i, jj
    integer :: NLNX, nw
    
    ! debug
    !integer :: lunfil
-
    !\debug
    
    ierror = 1
@@ -4971,8 +4971,6 @@ subroutine xbeach_stationary()
          if (trim(absgentype)=='abs_1d') then
             ! zbndu for absgen bc is slowly varying tide+surge water level
             hsk = s1(ki) - bl(ki)
-            !hsk = zbndu(n) - bl(ki)
-            !u1(Lb) = (1d0+sqrt(ag*hs(ki))/cgwav(ki))*uin_loc - sqrt(ag/hs(ki))*(s0(ki) - zbndu(n)) + umeanrm(numbnd)
             u1(Lb) = (1d0+sqrt(ag*hsk)/cgwav(ki))*uin_loc - sqrt(ag/hsk)*(s1(ki) - zbndu(n)) + umeanrm(numbnd)
             s0(kb) = s0(ki)
             s1(kb) = s1(ki)
@@ -4982,9 +4980,173 @@ subroutine xbeach_stationary()
             !write(lunfil,"(E15.7,I5,6E15.7)") time1, nw, factime, u1(Lb), s1(kb), (1d0+sqrt(ag*hsk)/cgwav(ki))*uin_loc,  sqrt(ag/hsk)*(s1(ki)), umeanrm(numbnd) 
          endif
          
-         if (trim(absgentype)=='abs_2d') then
-            ! todo
-         endif
+         !if (trim(absgentype)=='abs_2d') then
+         !   !
+         !   ht(1)=zbndu(n)-bl(kb)
+         !   ht(2)=zbndu(n)-bl(ki)
+         !   !
+         !   do i=1,nd(ki)%lnx
+         !      L = iabs(nd(ki)%ln(i))
+         !      !
+         !      un = (u1(L)*csu(L) - v(L)*snu(L))*csu(Lb) + (u1(L)*snu(L) + v(L)*csu(L))*snu(Lb)
+         !      beta = un - 2d0*sqrt(ag*hu(L))
+         !      !
+         !      k1 = ln(1,L)
+         !      k2 = ln(2,L)
+         !      k3 = lncn(1,L)
+         !      k4 = lncn(2,L)
+         !      !
+         !      dxx = getdx(xk(k3),yk(k3),xk(k4),yk(k4))
+         !      dyy = getdy(xk(k3),yk(k3),xk(k4),yk(k4))
+         !      
+         !      if ( k1.ne.ki ) then ! 1-2-3-4 notation (inward positive)
+         !         dxx = -dxx
+         !         dyy = -dyy
+         !      end if
+         !      
+         !      !  remember weights in gradient operator for later use
+         !      wgradx(i) =  dyy
+         !      wgrady(i) = -dxx
+         !      
+         !      ux = u1(L)*csu(L) - v(L)*snu(L)
+         !      uy = u1(L)*snu(L) + v(L)*csu(L)
+         !      
+         !      dbetadx = dbetadx + beta*dyy
+         !      dbetady = dbetady - beta*dxx
+         !      
+         !      duxdx    = duxdx    +   ux*dyy
+         !      duxdy    = duxdy    -   ux*dxx
+         !      
+         !      duydx    = duydx    +   uy*dyy
+         !      duydy    = duydy    -   uy*dxx
+         !   end do
+         !   !
+         !   wgradx(1:NLNX) = wgradx(1:NLNX) * bai(ki)
+         !   wgrady(1:NLNX) = wgrady(1:NLNX) * bai(ki)
+         !   
+         !   dbetadx = dbetadx * bai(ki)
+         !   dbetady = dbetady * bai(ki)
+         !   
+         !   duxdx    = duxdx    * bai(ki)
+         !   duxdy    = duxdy    * bai(ki)
+         !   
+         !   duydx    = duydx    * bai(ki)
+         !   duydy    = duydy    * bai(ki)
+         !   
+         !   dbetadn =  csu(Lb) * dbetadx + snu(Lb) * dbetady ! 1-2 direction
+         !   dbetads = -snu(Lb) * dbetadx + csu(Lb) * dbetady ! 3-4 direction
+         !   !
+         !   dvds    = -snu(Lb) * (-snu(Lb) * duxdx   + csu(Lb) * duxdy) +  &
+         !      csu(Lb) * (-snu(Lb) * duydx   + csu(Lb) * duydy)
+         !   !
+         !   dhdn    = ( zbndu(n)-bl(ki)-(zbndu(n)-bl(kb)) ) * dxi(Lb)   ! 1-2 direction (inward positive)
+         !   !
+         !   Fn      = csu(Lb) * Fx(Lb) + snu(Lb) * Fy(Lb)   ! 1-2 direction (inward positive)
+         !   !  compute bed friction
+         !   Ftau    =  cfuhi(Lb) * sqrt(u1(Lb)**2+v(Lb)**2) * ( u1(Lb)-ustokes(Lb) )  ! formally, not exactly correct, since we also need u1L (see furu). JRE: but we can use u1rm old timelevel
+            !
+            ! to add: wind Fwind
+               
+            !         c = sqrt(ag*hu(Lb))  ! to check, only outgoing free wave?
+            !
+            !         if ( abs(hu(Lb)).lt.1d-6 ) then
+            !            goto 1234
+            !         end if
+            !
+            !         dbetadt = - (u1(Lb)-c)*dbetadn - v(Lb)*dbetads + c*dvds + ag*dhdn + Fn/(rhomean*hu(Lb)) - Ftau
+            !         beta = u1(Lb) - 2d0*sqrt(ag*hu(Lb))
+            !
+            !         !thetai = atan2(uin_loc*csu(Lb) + vin_loc * snu(Lb),-uin_loc*snu(Lb) + vin_loc * csu(Lb))
+            !         thetai = atan2(vin_loc, uin_loc)   ! atan2(y,x)
+            !
+            !         umean = 0.d0     ! only if tide specified as water level
+            !         vmean = 0.d0
+            !
+            !         betanp1   = beta + dbetadt*dts
+            !         alpha2 = -(theta0)
+            !         alphanew  = 0.d0
+            !
+            !         !dum = 0.1d0*cos(2*pi*time0/500d0)
+            !         dum = zbndu(n)
+            !
+            !         !cg0 = dsqrt(ag*max(0.5d0*(s1initial(kb)-bl(kb)+s1initial(ki)-bl(ki)),0d0))
+            !         !cg0 = dsqrt(ag*max(0.5d0*(s1initial(kb)-bl(kb)+s1initial(ki)-bl(ki)) + dum,0d0))
+            !         cg0 = dsqrt(ag*max(0.5d0*(zbndu(n)-bl(kb)+zbndu(n)-bl(ki)),0d0))    ! good version
+            !         !cg0 = dsqrt(ag*max(0.5d0*(factime*2d0*zbndu(n)-bl(kb)+(1-factime)*s1(ki)-bl(ki)),0d0))  ! JRE trial
+            !
+            !         umean = sqrt(ag/hu(Lb))*(dum-0.5d0*(s1initial(kb)+s1initial(ki)))    ! good version
+            !         !numbnd = kbndu(5,n)
+            !         !umean = factime*uave(numbnd) + (1d0-factime)*u1(Lb)                   ! JRE trial
+            !         !vmean = factime*vave(numbnd) + (1d0-factime)*v(Lb)
+            !         !
+            !         do jj=1,50
+            !
+            !            if (freewave==1) then    ! assuming incoming long wave propagates at sqrt(g*h) (free wave)
+            !               ur = dcos(alpha2)/(dcos(alpha2)+1.d0)  &
+            !                  *(betanp1-umean+2.d0*cg0 &
+            !                  -uin_loc*(dcos(thetai)-1.d0)/dcos(thetai))
+            !            else                     ! assuming incoming long wave propagates at group velocity (bound wave)
+            !               cgbound = 0.5d0*(cgwav(kb)+cgwav(ki))
+            !               dum = uin_loc*(cgbound*dcos(thetai)-cg0)/ (cgbound*dcos(thetai))
+            !               !dum = 0d0
+            !               !if ( uin_loc.ne.0d0 ) then
+            !               !   dum = uin_loc*(cgbound*dcos(thetai)-cg0)/ (cgbound*dcos(thetai))
+            !               !end if
+            !               ur = dcos(alpha2)/(dcos(alpha2)+1.d0)  &
+            !                  *(betanp1-umean+2.d0*cg0 - dum)
+            !            endif
+            !
+            !            vert = v(Lb) - vmean - vin_loc ! tangential component along cell face
+            !            !vert = 0d0
+            !            alphanew = atan2(vert,(ur+1.d-16))
+            !            if (alphanew .gt. (pi*0.5d0))  alphanew = alphanew-pi
+            !            if (alphanew .le. (-pi*0.5d0)) alphanew = alphanew+pi
+            !            if (dabs(alphanew - alpha2).lt.0.001d0) exit
+            !            alpha2 = alphanew
+            !         end do !! loopje voor hoek
+            !
+            !         if( alphanew.ne.0d0 .or. jj.gt.10) then
+            !            continue
+            !         end if
+            !
+            !         if (ARC==0) then
+            !            u1(Lb)= (order-1d0)*uin_loc    ! face normal velocity
+            !            s1(kb) = s1(ki)
+            !         else
+            !            zbndu(n) = (order-1.d0)*uin_loc + ur + umean
+            !            !u1(Lb) = (order-1.d0)*(uin_loc*csu(Lb) + vin_loc * snu(Lb)) + ur + umean
+            !
+            !            s1(kb) = s1(ki)
+            !
+            !            if ( .false.) then
+            !               !            compute gradient for linear extrapolation
+            !               dumx = 0d0
+            !               dumy = 0d0
+            !               do i=1,NLNX
+            !                  L = iabs(nd(ki)%ln(i))
+            !                  k1 = ln(1,L)
+            !                  k2 = ln(2,L)
+            !
+            !                  un = (u1(L)*csu(L) - v(L)*snu(L))*csu(Lb) + (u1(L)*snu(L) + v(L)*csu(L))*snu(Lb)
+            !                  if ( L.eq.Lb ) then
+            !                     beta = betanp1
+            !                  else
+            !                     beta = un - 2d0*sqrt(ag*hu(L))
+            !                  end if
+            !
+            !                  dumx = dumx + wgradx(i) * (0.25d0*(beta-un)**2 / ag + 0.5d0*(bl(k1)+bl(k2)))
+            !                  dumy = dumy + wgrady(i) * (0.25d0*(beta-un)**2 / ag + 0.5d0*(bl(k1)+bl(k2)))
+            !               end do
+            !
+            !
+            !               dxx = getdx(xu(Lb),yu(Lb),xz(ki),yz(ki))
+            !               dyy = getdy(xu(Lb),yu(Lb),xz(ki),yz(ki))
+            !
+            !               s1(kb) = 0.25d0*(betanp1-u1(Lb))**2 / ag + 0.5d0*(bl(kb)+bl(ki)) + dumx * dxx + dumy * dyy
+            !
+            !            end if
+            !         end if
+         !endif
          
       end if   ! riemannpuntje
    end do ! loop snelheidslinks
@@ -7306,13 +7468,6 @@ subroutine disper_approx(h,T,k,n,C,Cg,mn)
    Cg=n*C
 
 end subroutine disper_approx
-!
-!subroutine timer(t)
-!   real*8,intent(out)               :: t
-!   integer*4                        :: count,count_rate,count_max
-!   call system_clock (count,count_rate,count_max)
-!   t = dble(count)/count_rate
-!end subroutine timer
 !
 subroutine fm_surrounding_points(xn,yn,no_nodes,connected_nodes,no_connected_nodes, no_cells, kp, ierr)
    use m_flowgeom
