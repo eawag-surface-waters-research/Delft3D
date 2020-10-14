@@ -8886,7 +8886,7 @@ do n = 1,ndx
    if (uc1D(n) .ne. 0) then
       uxy    = sqrt( ucx(n)*ucx(n) + ucy(n)*ucy(n) )
       if (uxy > 0) then
-          uxy    = uc1D(n)/uxy
+          uxy    = abs(uc1D(n))/uxy
           ucx(n) = ucx(n)*uxy
           ucy(n) = ucy(n)*uxy
       endif
@@ -8899,7 +8899,7 @@ do LL = lnxi+1,lnx          ! bnd
         if (uc1D(k2) .ne. 0) then
             uxy    = sqrt( ucx(n)*ucx(n) + ucy(n)*ucy(n) )
             if (uxy > 0) then
-                uxy    = uc1D(n)/uxy
+                uxy    = abs(uc1D(n))/uxy
                 ucx(n) = ucx(n)*uxy
                 ucy(n) = ucy(n)*uxy
             endif
