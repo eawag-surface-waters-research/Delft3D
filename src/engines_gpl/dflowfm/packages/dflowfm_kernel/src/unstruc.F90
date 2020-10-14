@@ -21381,25 +21381,25 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = sgeom_def_geometry_variables(ihisfile, lat_geom_container_name, 'lateral', 'point', nNodeTot, id_latdim, &
                id_latgeom_node_count, id_latgeom_node_coordx, id_latgeom_node_coordy)
 
-            ierr = nf90_def_var(ihisfile, 'lateral_prescribed_discharge_instantaneous ', nf90_double, (/ id_latdim, id_timedim /), id_lat_predis_inst)
+            ierr = nf90_def_var(ihisfile, 'lateral_prescribed_discharge_instantaneous', nf90_double, (/ id_latdim, id_timedim /), id_lat_predis_inst)
             ierr = nf90_put_att(ihisfile, id_lat_predis_inst, 'long_name', 'Prescribed discharge through lateral at current time step (instantaneous)')
             ierr = nf90_put_att(ihisfile, id_lat_predis_inst, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_lat_predis_inst, 'coordinates', 'lateral_id')
             ierr = nf90_put_att(ihisfile, id_lat_predis_inst, 'geometry', lat_geom_container_name)
 
-            ierr = nf90_def_var(ihisfile, 'lateral_prescribed_discharge_average ', nf90_double, (/ id_latdim, id_timedim /), id_lat_predis_ave)
+            ierr = nf90_def_var(ihisfile, 'lateral_prescribed_discharge_average', nf90_double, (/ id_latdim, id_timedim /), id_lat_predis_ave)
             ierr = nf90_put_att(ihisfile, id_lat_predis_ave, 'long_name', 'Prescribed discharge through lateral, average over the last history time interval')
             ierr = nf90_put_att(ihisfile, id_lat_predis_ave, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_lat_predis_ave, 'coordinates', 'lateral_id')
             ierr = nf90_put_att(ihisfile, id_lat_predis_ave, 'geometry', lat_geom_container_name)
 
-            ierr = nf90_def_var(ihisfile, 'lateral_realized _discharge_instantaneous ', nf90_double, (/ id_latdim, id_timedim /), id_lat_realdis_inst)
+            ierr = nf90_def_var(ihisfile, 'lateral_realized_discharge_instantaneous', nf90_double, (/ id_latdim, id_timedim /), id_lat_realdis_inst)
             ierr = nf90_put_att(ihisfile, id_lat_realdis_inst, 'long_name', 'Realized discharge through lateral at current time step (instantaneous)')
             ierr = nf90_put_att(ihisfile, id_lat_realdis_inst, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_lat_realdis_inst, 'coordinates', 'lateral_id')
             ierr = nf90_put_att(ihisfile, id_lat_realdis_inst, 'geometry', lat_geom_container_name)
 
-            ierr = nf90_def_var(ihisfile, 'lateral_realized _discharge_average ', nf90_double, (/ id_latdim, id_timedim /), id_lat_realdis_ave)
+            ierr = nf90_def_var(ihisfile, 'lateral_realized_discharge_average', nf90_double, (/ id_latdim, id_timedim /), id_lat_realdis_ave)
             ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'long_name', 'Realized discharge through lateral, average over the last history time interval')
             ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'units', 'm3 s-1')
             ierr = nf90_put_att(ihisfile, id_lat_realdis_ave, 'coordinates', 'lateral_id')
