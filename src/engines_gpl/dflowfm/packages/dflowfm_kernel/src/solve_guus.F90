@@ -2419,7 +2419,6 @@ integer :: mout, n, i, jj, j, ntot
  
  subroutine testsolver(Ndx, s1, itsol, ierror)
     use m_partitioninfo
-    use m_flowparameters
     use m_reduce
     USE m_saad
     use m_flowgeom, only: kfs, dxi, Lnx
