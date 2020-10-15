@@ -70,7 +70,7 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
     real(fp)                        , intent(in)   :: taucr0
     real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
     real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
-    real(fp), dimension(npar)       , intent(in)   :: par
+    real(fp), dimension(npar)       , intent(inout):: par
     !
     real(hp), dimension(numrealpar) , intent(inout):: realpar
     !
@@ -129,6 +129,7 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
     integer  :: k
     real(fp) :: avgcu
     real(fp) :: avgu
+    real(fp) :: awb
     real(fp) :: bakdif
     real(fp) :: betam
     real(fp) :: delr
@@ -150,11 +151,14 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
     real(fp) :: tauc
     real(fp) :: tauwav
     real(fp) :: u
+    real(fp) :: uoff
+    real(fp) :: uon
     real(fp) :: ustarc
     real(fp) :: usus
     real(fp) :: utot
     real(fp) :: uwb
     real(fp) :: v
+    real(fp) :: vcr
     real(fp) :: z
     real(fp) :: zusus
     logical  :: difvr
@@ -214,7 +218,7 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
                  & tauc      ,taubcw    ,taurat    ,ta        ,caks      , &
                  & dss       ,mudfrac   ,eps       ,aksfac    ,rwave     , &
                  & camax     ,rdc       ,rdw       ,iopkcw    ,iopsus    , &
-                 & vonkar    ,wave      ,tauadd    ,betam     )
+                 & vonkar    ,wave      ,tauadd    ,betam     ,awb       )
     realpar(RP_DSS)   = real(dss    ,hp)
     !
     ! Find bottom cell for SAND sediment calculations and store for use
@@ -343,9 +347,29 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
                     & dstar     ,ws(1)     ,hrms      ,tp        ,teta      , &
                     & rlabda    ,umod      ,sbcu      ,sbcv      ,sbwu      , &
                     & sbwv      ,sswu      ,sswv      ,rhowat    ,ag        , &
-                    & wave      ,eps       ,error     ,message   )
+                    & wave      ,eps       ,uon       ,uoff      ,vcr       , &
+                    & error     ,message   )
        if (error) return
     else
        error = .false.
     endif
+
+    ! van Rijn (1993) specific output
+    par     = -999.0_fp
+    par( 1) = tauc
+    par( 2) = tauwav
+    par( 3) = taubcw
+    par( 4) = usus
+    par( 5) = zusus
+    par( 6) = dss
+    par( 7) = caks
+    par( 8) = aks
+    par( 9) = deltas
+    par(10) = epsmxc
+    par(11) = epsmax
+    par(12) = uon
+    par(13) = uoff
+    par(14) = vcr
+    par(15) = uwb
+    par(16) = awb
 end subroutine tram1

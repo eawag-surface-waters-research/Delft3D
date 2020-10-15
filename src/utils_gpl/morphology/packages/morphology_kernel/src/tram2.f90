@@ -105,6 +105,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     integer :: iopsus
     real(fp):: pangle
     real(fp):: fpco
+    real(fp):: taubcw
     integer :: subiw
     logical :: epspar
     !
@@ -140,6 +141,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     integer  :: k
     real(fp) :: avgcu
     real(fp) :: avgu
+    real(fp) :: awb
     real(fp) :: bakdif
     real(fp) :: betam
     real(fp) :: delm
@@ -148,6 +150,8 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     real(fp) :: drho
     real(fp) :: dss
     real(fp) :: dz
+    real(fp) :: epsmax
+    real(fp) :: epsmxc
     real(fp) :: fc1
     real(fp) :: fcc
     real(fp) :: ff
@@ -174,6 +178,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
     real(fp) :: uwbih
     real(fp) :: uwc
     real(fp) :: v
+    real(fp) :: vcr
     real(fp) :: z
     real(fp) :: zusus
 !
@@ -239,12 +244,13 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                  & taucr0    ,u2dhim    ,aks       ,ra        ,usus      , &
                  & zusus     ,uwb       ,muc       ,tauwav    ,ustarc    , &
                  & tauc      ,taurat    ,ta        ,caks      ,dss       , &
-                 & uwc       ,uuu       ,vvv       ,rlabda    , &
+                 & uwc       ,uuu       ,vvv       ,rlabda    ,taubcw    , &
                  & hrms      ,delw      ,uon       ,uoff      ,uwbih     , &
                  & delm      ,fc1       ,fw1       ,phicur    ,rksrs     , &
                  & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
                  & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
-                 & ag        ,wave      ,tauadd    ,gamtcr    ,betam     ) 
+                 & ag        ,wave      ,tauadd    ,gamtcr    ,betam     , &
+                 & awb       )
     realpar(RP_DSS)   = real(dss    ,hp)
     !
     ! Find bottom cell for SAND sediment calculations and store for use
@@ -277,7 +283,8 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                        & tauwav    ,tauc      ,ltur      ,delw      ,rhowat    , &
                        & uwbih     ,aks       ,caks      ,caks_ss3d ,deltas    , &
                        & aks_ss3d  ,di50      ,salinity  ,ws0       ,psi       , &
-                       & epspar    ,eps       ,vonkar    ,salmax    ,wave      )
+                       & epspar    ,eps       ,vonkar    ,salmax    ,wave      , &
+                       & epsmax    ,epsmxc    )
     else
        do k = 1, kmax
           seddif(k) = dicww(k)
@@ -392,8 +399,26 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                         & concin    ,kmax      ,deltas    ,ws(1)     ,rksrs     , &
                         & dzduu     ,dzdvv     ,rhowat    ,ag        ,bedw      , &
                         & pangle    ,fpco      ,susw      ,wave      ,eps       , &
-                        & subiw     ,error     ,message   )
-           !par = -999.0_fp
+                        & subiw     ,vcr       ,error     ,message   )
+           ! van Rijn (2004) specific output
+           par     = -999.0_fp
+           par( 1) = tauc
+           par( 2) = tauwav
+           par( 3) = taubcw
+           par( 4) = usus
+           par( 5) = zusus
+           par( 6) = dss
+           par( 7) = caks
+           par( 8) = aks
+           par( 9) = deltas
+           par(10) = epsmxc
+           par(11) = epsmax
+           par(12) = uon
+           par(13) = uoff
+           par(14) = vcr
+           par(15) = uwb
+           par(16) = awb
+           par(17) = rksrs
        elseif (iform == -4) then
            ! extended SANTOSS bed load
            call santoss(numrealpar, realpar, par, dzduu, dzdvv, i2d3d, &

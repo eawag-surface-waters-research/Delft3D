@@ -5,7 +5,7 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
                    & tauc      ,taubcw    ,taurat    ,ta        ,caks      , &
                    & dss       ,mudfrac   ,eps       ,aksfac    ,rwave     , &
                    & camax     ,rdc       ,rdw       ,iopkcw    ,iopsus    , &
-                   & vonkar    ,wave      ,tauadd    ,betam     )
+                   & vonkar    ,wave      ,tauadd    ,betam     ,awb       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -50,33 +50,34 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
 ! Call variables
 !
     real(fp), intent(out) :: aks    !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(out) :: awb
     real(fp), intent(in)  :: betam
     real(fp), intent(out) :: caks
     real(fp), intent(in)  :: d50
     real(fp), intent(in)  :: d90
-    real(fp)              :: delr
+    real(fp), intent(out) :: delr
     real(fp), intent(out) :: dss    !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: dstar
     real(fp), intent(in)  :: h1
-    real(fp)              :: muc
+    real(fp), intent(out) :: muc
     real(fp), intent(in)  :: mudfrac
     real(fp), intent(in)  :: rhowat !  Description and declaration in esm_alloc_real.f90
-    real(fp)              :: ta
-    real(fp)              :: taubcw
-    real(fp)              :: tauc
+    real(fp), intent(out) :: ta
+    real(fp), intent(out) :: taubcw
+    real(fp), intent(out) :: tauc
     real(fp), intent(in)  :: taucr
     real(fp), intent(out) :: taurat
-    real(fp)              :: tauwav
+    real(fp), intent(out) :: tauwav
     real(fp), intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: umod
     real(fp), intent(in)  :: uorb   !  Description and declaration in esm_alloc_real.f90
-    real(fp)              :: ustarc
-    real(fp)              :: usus   !  Description and declaration in esm_alloc_real.f90
-    real(fp)              :: uwb
+    real(fp), intent(out) :: ustarc
+    real(fp), intent(out) :: usus   !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(out) :: uwb
     real(fp), intent(in)  :: z0cur
     real(fp), intent(in)  :: z0rou
     real(fp), intent(in)  :: zumod
-    real(fp)              :: zusus
+    real(fp), intent(out) :: zusus
     real(fp), intent(in)  :: eps
     real(fp), intent(in)  :: aksfac
     real(fp), intent(in)  :: rwave
@@ -91,7 +92,6 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
 !
 ! Local variables
 !
-    real(fp) :: awb
     real(fp) :: delm
     real(fp) :: delw
     real(fp) :: f1c

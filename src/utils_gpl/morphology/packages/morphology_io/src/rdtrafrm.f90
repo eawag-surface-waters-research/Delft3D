@@ -1128,6 +1128,43 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(7)  = 0.0_fp
        parkeyw(8) = 'BetaM'
        pardef(8)  = 3.0_fp
+       if (present(noutpar)) then
+          noutpar = 17
+          outpar_name( 1)     = 'tauc'
+          outpar_longname( 1) = 'bed shear stress due to currents' ! kg/(m s2)
+          outpar_name( 2)     = 'tauwav'
+          outpar_longname( 2) = 'bed shear stress due to waves' ! kg/(m s2)
+          outpar_name( 3)     = 'taubcw'
+          outpar_longname( 3) = 'bed shear stress due to currents and waves' ! kg/(m s2)
+          outpar_name( 4)     = 'usus'
+          outpar_longname( 4) = 'adjusted reference velocity' ! m/s
+          outpar_name( 5)     = 'zusus'
+          outpar_longname( 5) = 'height above bed for adjusted reference velocity' ! m
+          outpar_name( 6)     = 'dss'
+          outpar_longname( 6) = 'suspended sediment diameter' ! m
+          outpar_name( 7)     = 'caks'
+          outpar_longname( 7) = 'reference concentration' ! kg/m3
+          outpar_name( 8)     = 'aks'
+          outpar_longname( 8) = 'reference height' ! m
+          outpar_name( 9)     = 'deltas'
+          outpar_longname( 9) = 'deltas' ! m
+          outpar_name(10)     = 'epsmxc'
+          outpar_longname(10) = 'epsmax due to currents' ! -
+          outpar_name(11)     = 'epsmax'
+          outpar_longname(11) = 'epsmax due to waves' ! -
+          outpar_name(12)     = 'uon'
+          outpar_longname(12) = 'onshore velocity' ! m/s
+          outpar_name(13)     = 'uoff'
+          outpar_longname(13) = 'offshore velocity' ! m/s
+          outpar_name(14)     = 'vcr'
+          outpar_longname(14) = 'critical flow velocity' ! m/s
+          outpar_name(15)     = 'uwb'
+          outpar_longname(15) = 'velocity wave boundary layer' ! m/s
+          outpar_name(16)     = 'awb'
+          outpar_longname(16) = 'horizontal excursion of orbital motion' ! m
+          outpar_name(17)     = 'rksrs'
+          outpar_longname(17) = 'ripple roughness height' ! m
+       endif
     elseif (iform == -1) then
        name       = 'Van Rijn (1993)'
        nparopt    = 8
@@ -1147,6 +1184,41 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(7)  = 0.0_fp ! false
        parkeyw(8) = 'BetaM'
        pardef(8)  = 3.0_fp
+       if (present(noutpar)) then
+          noutpar = 16
+          outpar_name( 1)     = 'tauc'
+          outpar_longname( 1) = 'bed shear stress due to currents' ! kg/(m s2)
+          outpar_name( 2)     = 'tauwav'
+          outpar_longname( 2) = 'bed shear stress due to waves' ! kg/(m s2)
+          outpar_name( 3)     = 'taubcw'
+          outpar_longname( 3) = 'bed shear stress due to currents and waves' ! kg/(m s2)
+          outpar_name( 4)     = 'usus'
+          outpar_longname( 4) = 'adjusted reference velocity' ! m/s
+          outpar_name( 5)     = 'zusus'
+          outpar_longname( 5) = 'height above bed for adjusted reference velocity' ! m
+          outpar_name( 6)     = 'dss'
+          outpar_longname( 6) = 'suspended sediment diameter' ! m
+          outpar_name( 7)     = 'caks'
+          outpar_longname( 7) = 'reference concentration' ! kg/m3
+          outpar_name( 8)     = 'aks'
+          outpar_longname( 8) = 'reference height' ! m
+          outpar_name( 9)     = 'deltas'
+          outpar_longname( 9) = 'deltas' ! m
+          outpar_name(10)     = 'epsmxc'
+          outpar_longname(10) = 'epsmax due to currents' ! -
+          outpar_name(11)     = 'epsmax'
+          outpar_longname(11) = 'epsmax due to waves' ! -
+          outpar_name(12)     = 'uon'
+          outpar_longname(12) = 'onshore velocity' ! m/s
+          outpar_name(13)     = 'uoff'
+          outpar_longname(13) = 'offshore velocity' ! m/s
+          outpar_name(14)     = 'vcr'
+          outpar_longname(14) = 'critical flow velocity' ! m/s
+          outpar_name(15)     = 'uwb'
+          outpar_longname(15) = 'velocity wave boundary layer' ! m/s
+          outpar_name(16)     = 'awb'
+          outpar_longname(16) = 'horizontal excursion of orbital motion' ! m
+       endif
     elseif (iform == 1) then
        name       = 'Engelund-Hansen (1967)'
        nparreq    = 1

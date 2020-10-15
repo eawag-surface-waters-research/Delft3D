@@ -7,7 +7,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
                    & concin    ,kmax      ,deltas    ,ws        ,rksrs     , &
                    & dzduu     ,dzdvv     ,rhowat    ,ag        ,bedw      , &
                    & pangle    ,fpco      ,susw      ,wave      ,eps       , &
-                   & subiw     ,error     ,message   )
+                   & subiw     ,vcr       ,error     ,message   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -105,6 +105,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     logical                  , intent(in)  :: wave
     real(fp)                 , intent(in)  :: eps
     integer                  , intent(in)  :: subiw
+    real(fp)                 , intent(out) :: vcr
     logical                  , intent(out) :: error
     character(*)             , intent(out) :: message  !  Contains error message
 !
@@ -159,7 +160,6 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)      :: utvec
     real(fp)      :: uut
     real(fp)      :: uvt
-    real(fp)      :: vcr
     real(fp)      :: veff
     real(fp)      :: rpower
     real(fp)      :: z
