@@ -505,6 +505,10 @@ contains
              bc%timeint = BC_TIMEINT_BTO
           case ('BLOCK-FROM')
              bc%timeint = BC_TIMEINT_BFROM
+          case ('BLOCK')
+             call setECMessage("Unknown time interpolation Block in file "//trim(bc%fname)//", block " &
+                                //trim(bc%bcname)//". Use Block-To or Block-From.")
+             return
           case default
              call setECMessage("Unknown time interpolation '"//trim(adjustl(hdrvals(ifld)%s))//           &
                                 "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
