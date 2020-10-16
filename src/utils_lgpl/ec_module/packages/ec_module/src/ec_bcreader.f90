@@ -84,6 +84,9 @@ contains
        ! Harvest the netCDF and the selected variable for metadata, using ecNetCDFGetAttrib
        ! parse them and store in the BC instance, analogous to processhdr for the ASCII BC-files
        bc%timeunit = bc%ncptr%timeunit
+       bc%quantity%missing = bc%ncptr%fillvalues(bc%ncvarndx)
+       bc%quantity%factor = bc%ncptr%scales(bc%ncvarndx)
+       bc%quantity%offset = bc%ncptr%offsets(bc%ncvarndx)
        !  Set vector of dimensions for the found variable to 1
        ! For the time being we only allow scalars to be read from netCDF variables
        ! TODO: Introduce the vector-attribute (string) similar to the bc-format, composing a vector from scalar variables
@@ -442,6 +445,8 @@ contains
                 enddo
              endif
           endif
+       case ('MISSING')
+          read(hdrvals(ifld)%s,*) bc%quantity%missing
        case ('UNIT')
           if (bc%quantity%jacolumn(iq)) then
              bc%quantity%unit = trim(hdrvals(ifld)%s)

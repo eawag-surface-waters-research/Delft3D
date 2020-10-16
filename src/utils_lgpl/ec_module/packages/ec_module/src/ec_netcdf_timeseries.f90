@@ -150,9 +150,15 @@ module m_ec_netcdf_timeseries
     allocate (ncptr%standard_names(nVars))
     allocate (ncptr%long_names(nVars))
     allocate (ncptr%variable_names(nVars))
+    allocate (ncptr%fillvalues(nVars))
+    allocate (ncptr%scales(nVars))
+    allocate (ncptr%offsets(nVars))
     ncptr%standard_names = ' '
     ncptr%long_names = ' '
     ncptr%variable_names = ' '
+    ncptr%fillvalues = -huge(hp)
+    ncptr%scales     = 1.0_hp
+    ncptr%offsets    = 0.0_hp
     allocate(var_dimids(nDims, nVars)) ! NOTE: nDims is only an upper bound here!
     allocate(var_ndims(nVars))
     var_ndims = 0
@@ -161,6 +167,13 @@ module m_ec_netcdf_timeseries
        ierr = nf90_get_att(ncptr%ncid,iVars,'standard_name',ncptr%standard_names(iVars))    ! Standard name if available
        if (ierr /= 0) ncptr%standard_names(iVars) = ncptr%variable_names(iVars)             ! Variable name as fallback for standard_name
        ierr = nf90_get_att(ncptr%ncid,iVars,'long_name',ncptr%long_names(iVars))            ! Long name for non CF names
+
+       ierr = nf90_get_att(ncptr%ncid,iVars,'_FillValue',ncptr%fillvalues(iVars))
+       if (ierr/=NF90_NOERR)   ncptr%fillvalues(iVars) = -huge(hp)
+       ierr = nf90_get_att(ncptr%ncid,iVars,'scale_factor',ncptr%scales(iVars))
+       if (ierr/=NF90_NOERR)   ncptr%scales(iVars) = 1.0_hp
+       ierr = nf90_get_att(ncptr%ncid,iVars,'add_offset',ncptr%offsets(iVars))
+       if (ierr/=NF90_NOERR)   ncptr%offsets(iVars) = 0.0_hp
        ierr = nf90_inquire_variable(ncptr%ncid,iVars,ndims=var_ndims(iVars),dimids=var_dimids(:,iVars))
 
        ! Check for important var: was it the stations?
@@ -338,9 +351,9 @@ module m_ec_netcdf_timeseries
        ierr = nf90_get_var(ncptr%ncid,q_id,ncvalue(1:1),(/l_id,timelevel/),(/1,1/))  
     else                               ! yes 3rd dimension, get a rank-1 vector, num. of layers
        ierr = nf90_get_var(ncptr%ncid,q_id,ncvalue(1:ncptr%nLayer),(/1,l_id,timelevel/),(/ncptr%nLayer,1,1/))          
-    end if
+     end if
     if (ierr/=NF90_NOERR) return 
-    ierr = nf90_get_var(ncptr%ncid,ncptr%timevarid,nctime(1:ncptr%nLayer),(/timelevel/),(/1/))    ! get one single data value 
+    ierr = nf90_get_var(ncptr%ncid,ncptr%timevarid,nctime(1:1),(/timelevel/),(/1/))    ! get one single time value 
     if (ierr/=NF90_NOERR) return 
     success = .True.
     end function ecNetCDFGetTimeseriesValue

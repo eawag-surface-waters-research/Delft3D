@@ -1545,10 +1545,11 @@ module m_ec_converter
          integer  :: kbegin, kend, kbeginL, kendL, kbeginR, kendR, idxL1, idxR1, idxL2, idxR2 !<
          logical, save :: alreadyPrinted = .false.
          real(hp) :: wwL, wwR  !<
-         real(hp), dimension(:), allocatable :: valL1, valL2, valR1, valR2, val !<
-         real(hp), dimension(:), allocatable :: sigmaL, sigmaR, sigma !<
+         real(hp), dimension(:), allocatable :: valL, valR, valL1, valL2, valR1, valR2, val !<
+         real(hp), dimension(:), allocatable :: sigmaL, sigmaR, sigma, sigmaLL, sigmaRR
          real(hp), dimension(:),     pointer :: zmin => null() !< vertical min
          real(hp), dimension(:),     pointer :: zmax => null() !< vertical max
+         real(hp) :: missing
 
          integer  :: idx              !< helper variable
          integer  :: vectormax
@@ -1580,15 +1581,11 @@ module m_ec_converter
                !endif
 
                vectormax = connection%sourceItemsPtr(1)%ptr%quantityPtr%vectorMax
-               if (allocated(valL1)) deallocate(valL1)
+               missing = connection%sourceItemsPtr(1)%ptr%quantityPtr%fillvalue
                allocate(valL1(vectormax))
-               if (allocated(valL2)) deallocate(valL2)
                allocate(valL2(vectormax))
-               if (allocated(valR1)) deallocate(valR1)
                allocate(valR1(vectormax))
-               if (allocated(valR2)) deallocate(valR2)
                allocate(valR2(vectormax))
-               if (allocated(val)) deallocate(val)
                allocate(val(vectormax))
 
                if (associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then
@@ -1610,15 +1607,19 @@ module m_ec_converter
                   maxlay_src = 1
                end if
 
+               if (allocated(valL)) deallocate(valL)
+               allocate(valL(vectormax*maxlay_src))
+               if (allocated(valR)) deallocate(valR)
+               allocate(valR(vectormax*maxlay_src))
+
                if (associated(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z) .and. &     ! source has sigma
                          associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then    ! target has sigma
-                  if (allocated(sigma)) deallocate(sigma)
                   allocate(sigma(maxlay_tgt*connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates))
                   sigma = connection%targetItemsPtr(1)%ptr%elementSetPtr%z
-                  if (allocated(sigmaL)) deallocate(sigmaL)
                   allocate(sigmaL(maxlay_src))
-                  if (allocated(sigmaR)) deallocate(sigmaR)
                   allocate(sigmaR(maxlay_src))
+                  allocate(sigmaLL(maxlay_src))
+                  allocate(sigmaRR(maxlay_src))
                end if
 
                ! zmax and zmin are absolute top and bottom at target point coordinates
@@ -1674,17 +1675,19 @@ module m_ec_converter
                                  if (.not.ecElementSetGetAbsZ (connection%sourceItemsPtr(1)%ptr%ElementSetPtr,   &
                                                                                                   kbeginL,kendL, &
                                                                                        zmin(i),zmax(i),sigmaL))  return
-                                 do maxlay_srcL=maxlay_src,1,-1
-                                    if (sigmaL(maxlay_srcL)>0.5*ec_undef_hp) exit
-                                 enddo
-                                 if (maxlay_srcL<1) then
-                                    write(errormsg,'(a,i0,a,i5.5)') "ERROR: ec_converter::ecConverterPolytim: No valid sigma (layer) associated with point ", &
-                                                                      kL," of polytim item ", connection%sourceItemsPtr(1)%ptr%id
-                                    call setECMessage(errormsg)
-                                    return
-                                 endif
-                                 do maxlay_srcR=maxlay_src,1,-1
-                                    if (sigmaR(maxlay_srcR)>0.5*ec_undef_hp) exit
+                                 ! Prepare sigmaR and valR
+                                 maxlay_srcR = 0
+                                 sigmaRR = ec_undef_hp
+                                 valR = ec_undef_hp
+                                 do k=1,maxlay_src
+                                    from = vectormax*maxlay_src*(kR-1)+vectormax*(k-1)+1
+                                    thru = vectormax*maxlay_src*(kR-1)+vectormax*(k)
+                                    ! check if all vector components are unequal missing for this layer
+                                    if (all(connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr(from:thru)/=missing) .and. (sigmaR(k)>0.5*ec_undef_hp)) then 
+                                       maxlay_srcR = maxlay_srcR + 1
+                                       valR((maxlay_srcR-1)*vectormax+1:maxlay_srcR*vectormax) = connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr(from:thru)
+                                       sigmaRR(maxlay_srcR) = sigmaR(k)
+                                    end if
                                  enddo
                                  if (maxlay_srcR<1) then
                                     write(errormsg,'(a,i0,a,i5.5)') "ERROR: ec_converter::ecConverterPolytim: No valid sigma (layer) associated with point ", &
@@ -1692,21 +1695,43 @@ module m_ec_converter
                                     call setECMessage(errormsg)
                                     return
                                  endif
-                                 !
+
+                                 ! Prepare sigmaL and valL
+                                 maxlay_srcL = 0
+                                 sigmaLL = ec_undef_hp
+                                 valL = ec_undef_hp
+                                 do k=1,maxlay_src
+                                    from = vectormax*maxlay_src*(kL-1)+vectormax*(k-1)+1
+                                    thru = vectormax*maxlay_src*(kL-1)+vectormax*(k)
+                                    ! check if all vector components are unequal missing for this layer
+                                    if (all(connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr(from:thru)/=missing) .and. (sigmaL(k)>0.5*ec_undef_hp)) then
+                                       maxlay_srcL = maxlay_srcL + 1
+                                       valL((maxlay_srcL-1)*vectormax+1:maxlay_srcL*vectormax) = connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr(from:thru)
+                                       sigmaLL(maxlay_srcL) = sigmaL(k)
+                                    end if
+                                 enddo
+                                 if (maxlay_srcL<1) then
+                                    write(errormsg,'(a,i0,a,i5.5)') "ERROR: ec_converter::ecConverterPolytim: No valid sigma (layer) associated with point ", &
+                                                                      kL," of polytim item ", connection%sourceItemsPtr(1)%ptr%id
+                                    call setECMessage(errormsg)
+                                    return
+                                 endif
+
+                                 
                                  do k=kbegin,kend
-                                    ! RL: BUG!!! z(k) not initialised if the model is not 3D !!! TO BE FIXED !!!!!!!!!!!!!!
+                                    ! RL: BUG!!! z(k) not initialised if the target side is not 3D !!! TO BE FIXED !!!!!!!!!!!!!!
                                     if ( sigma(k) < 0.5*ec_undef_hp ) cycle
 
                                     ! find vertical indices and weights for the LEFT point
-                                    call findVerticalIndexWeight(sigma(k), sigmaL, maxlay_src, maxlay_srcL, kL, wwL, idxL1, idxL2)
+                                    call findVerticalIndexWeight(sigma(k), sigmaLL, maxlay_srcL, kL, wwL, idxL1, idxL2)
                                     ! find vertical indices and weights for the RIGHT point
-                                    call findVerticalIndexWeight(sigma(k), sigmaR, maxlay_src, maxlay_srcR, kR, wwR, idxR1, idxR2)
+                                    call findVerticalIndexWeight(sigma(k), sigmaRR, maxlay_srcR, kR, wwR, idxR1, idxR2)
 
                                     ! idx are in terms of vector for a specific pli-point and layer
-                                    valL1(1:vectormax) = connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr((idxL1-1)*vectormax+1:(idxL1)*vectormax)
-                                    valL2(1:vectormax) = connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr((idxL2-1)*vectormax+1:(idxL2)*vectormax)
-                                    valR1(1:vectormax) = connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr((idxR1-1)*vectormax+1:(idxR1)*vectormax)
-                                    valR2(1:vectormax) = connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr((idxR2-1)*vectormax+1:(idxR2)*vectormax)
+                                    valL1(1:vectormax) = valL((idxL1-1)*vectormax+1:(idxL1)*vectormax)
+                                    valL2(1:vectormax) = valL((idxL2-1)*vectormax+1:(idxL2)*vectormax)
+                                    valR1(1:vectormax) = valR((idxR1-1)*vectormax+1:(idxR1)*vectormax)
+                                    valR2(1:vectormax) = valR((idxR2-1)*vectormax+1:(idxR2)*vectormax)
                                     !
                                     select case(connection%sourceItemsPtr(1)%ptr%quantityPtr%zInterpolationType)
                                        case(zinterpolate_unknown)
@@ -1771,6 +1796,7 @@ module m_ec_converter
                        return
                   end select
                end do
+
             case default
                call setECMessage("ERROR: ec_converter::ecConverterPolytim: Unsupported interpolation type requested.")
                return
@@ -1780,33 +1806,33 @@ module m_ec_converter
          if (allocated(sigmaR)) deallocate(sigmaR)
          success = .true.
       end function ecConverterPolytim
-!     maxlaysource
 
-      subroutine findVerticalIndexWeight(sigmak, sigma, maxdimlay_src, maxlay_src, kLR, ww, idx1, idx2)
+      subroutine findVerticalIndexWeight(sigmak, sigma, maxlay_src, kLR, ww, idx1, idx2)
          real(kind=hp), intent(in) :: sigmak, sigma(:)
-         integer, intent(in) :: maxdimlay_src, maxlay_src, kLR
+         integer, intent(in) :: maxlay_src, kLR
          real(kind=hp), intent(out) :: ww
          integer, intent(out) :: idx1, idx2
 
          integer :: kkl
 
-         do kkL = 0, maxlay_src-1                      ! find vertical indices
-            if (sigmak <= sigma(kkL+1)) exit
-         enddo
-
-         if (kkL==0) then                              ! only use upper of idxL1 and idxL2
-            ww = 0.5d0
-            idx2 = maxdimlay_src*(kLR-1) + kkL + 1
-            idx1 = idx2
-         elseif (kkL==maxlay_src) then                 ! only use lower of idxL1 and idxL2
-            ww = 0.5d0
-            idx1 = maxdimlay_src*(kLR-1) + kkL
-            idx2 = idx1
-         else                                          ! save to use both idxL1 AND idxL2
-            ww = (sigma(kkL+1)-sigmak) / (sigma(kkL+1)-sigma(kkL))
-            idx1 = maxdimlay_src*(kLR-1) + kkL
-!           idx2 = maxlay_src*(kLR-1) + kkL + 1
-            idx2 = idx1 + 1
+         if ((sigmak - sigma(1)) * (sigmak - sigma(maxlay_src)) >= 0) then      ! beyond the range of source levels
+            if (abs(sigmak - sigma(1)) < abs(sigmak - sigma(maxlay_src))) then  ! closer to sigma(1) (avoiding the assumption sigma(1) is the lowest)
+               idx1 = 1
+               idx2 = 1
+               ww = 0.5d0
+            else                                                                ! closer to sigma(maxlay_src)
+               idx1 = maxlay_src
+               idx2 = maxlay_src
+               ww = 0.5d0
+            endif
+         else                                                                   ! within the range of source levels
+            do idx1 = 1, maxlay_src-1                                           ! find vertical indices
+               if ((sigmak - sigma(idx1)) * (sigmak - sigma(idx1+1)) <= 0) then ! between level idx1 and idx+1
+                  idx2 = idx1 + 1
+                  ww = (sigma(idx2)-sigmak) / (sigma(idx2)-sigma(idx1))
+                  exit
+               endif
+            enddo
          endif
       end subroutine findVerticalIndexWeight
       ! =======================================================================

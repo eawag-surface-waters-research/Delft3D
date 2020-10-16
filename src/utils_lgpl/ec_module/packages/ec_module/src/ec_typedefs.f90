@@ -79,6 +79,7 @@ module m_ec_typedefs
         character(len=25)       ::  unit        !< unit specification 
         real(hp)                ::  offset = 0.d0  !< to be added to all data for this quantity
         real(hp)                ::  factor = 1.d0  !< to be multiplied with all data for this quantity
+        real(hp)                ::  missing = ec_undef_hp !< Missing value or fillValue
 !       integer, allocatable    ::  vertndx(:)  !< vertical position nr (indices into the global vertical position array)
         integer                 ::  vertndx     !< vertical position nr (indices into the global vertical position array)
         integer                 ::  vectormax   = 1   !< number of vector elements, default scalar 
@@ -107,7 +108,6 @@ module m_ec_typedefs
         real(hp), pointer                          ::  vp(:) => null()     !< vertical positions  
         integer                                    ::  numlay = 1          !< number of vertical layers 
         integer                                    ::  zInterpolationType  !< Type of vertical interpolation 
-        real(hp)                                   ::  missing             !< Missing value 
         character(len=maxFileNameLen)              ::  bcname  = ''        !< Name (identifier) for this BC block (assumed to be uniq)
         character(len=maxFileNameLen)              ::  qname   = ''        !< Quantity name with which all found quantities must identify 
         character(len=maxFileNameLen)              ::  fname   = ''        !< Filename the data originates from 
@@ -178,6 +178,9 @@ module m_ec_typedefs
         character(len=maxFileNameLen), allocatable, dimension(:)  ::  standard_names   !< list of standard names
         character(len=maxFileNameLen), allocatable, dimension(:)  ::  long_names       !< list of long names
         character(len=maxFileNameLen), allocatable, dimension(:)  ::  variable_names   !< list of variable names
+        real(hp), allocatable, dimension(:)  ::  fillvalues              !< missing/fillvalue for each variable
+        real(hp), allocatable, dimension(:)  ::  scales                  !< multiplication scale factor for each variable
+        real(hp), allocatable, dimension(:)  ::  offsets                 !< list of variable names
         integer                                      ::  nDims = 0       !< Number of dimensions 
         integer                                      ::  nTims = 0       !< Number of timeseries 
         integer                                      ::  nLayer = -1     !< Number of vertical layers, default single layer

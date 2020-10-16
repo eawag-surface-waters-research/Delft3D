@@ -152,7 +152,6 @@ module m_ec_bccollect
     integer (kind=8)    ::  fhandle
     character(:), allocatable :: rec
     integer             ::  reclen 
-    integer             ::  commentpos
     character*(1000)    ::  keyvaluestr                                    ! all key-value pairs in one header 
     integer             ::  posfs
     integer             ::  nfld
@@ -165,7 +164,7 @@ module m_ec_bccollect
     type (tEcFileReader), pointer :: fileReaderPtr
     integer             :: bcBlockId, fileReaderId
     integer             :: ifr 
-    logical             :: success, isLateral
+    logical             :: isLateral
     real(hp)            :: k_mjd                                          ! kernel reference date as Modified Julian date
 
     iostat = EC_UNKNOWN_ERROR
@@ -393,13 +392,17 @@ module m_ec_bccollect
                   return
                end select 
           case ('OFFSET')                           
-               if (iq>0) cycle 
-               read(hdrvals(ifld),*) bc%quantities(iq)%offset
+               if (iq>0) then
+                  read(hdrvals(ifld),*) bc%quantities(iq)%offset
+               endif
           case ('FACTOR')
-               if (iq>0) cycle 
-               read(hdrvals(ifld),*) bc%quantities(iq)%factor
+               if (iq>0) then
+                  read(hdrvals(ifld),*) bc%quantities(iq)%factor
+               endif
           case ('MISSING VALUE DEFINITION')
-               read(hdrvals(ifld),*) bc%missing
+               if (iq>0) then
+                  read(hdrvals(ifld),*) bc%quantities(iq)%missing
+               endif
           case ('TIME INTERPOLATION')
                select case (trim(adjustl(hdrvals(ifld))))
                   case ('LINEAR')
