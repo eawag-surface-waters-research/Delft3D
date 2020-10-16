@@ -2572,16 +2572,24 @@ module m_ec_provider
                else
                   grid_type = elmSetType_cartesian
                end if
-               if (x_varid>0) fgd_id = x_varid
-               if (y_varid>0) sgd_id = y_varid
+               if (x_varid>0) then
+                  fgd_id = x_varid
+               endif
+               if (y_varid>0) then
+                  sgd_id = y_varid
+               endif
             else if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
                if (nod_dimid>0) then  
                   grid_type = elmSetType_samples
                else
                   grid_type = elmSetType_spheric
                end if
-               if (lon_varid>0) fgd_id = lon_varid
-               if (lat_varid>0) sgd_id = lat_varid
+               if (lon_varid>0) then
+                  fgd_id = lon_varid
+               endif
+               if (lat_varid>0) then
+                  sgd_id = lat_varid
+               endif
                if ((grid_lon_varid>0) .and. (grid_lat_varid>0) .and. (fgd_id<0 .or. sgd_id<0)) then  ! ... then try relative (rotated-pole-) lon and lat
                   fgd_id = grid_lon_varid
                   sgd_id = grid_lat_varid
@@ -2623,10 +2631,8 @@ module m_ec_provider
             ierror = nf90_get_att(fileReaderPtr%fileHandle, idvar, "coordinates", coord_name)      ! get coordinates attribute
             if (len_trim(coord_name)>0) then
                if (allocated(coord_names)) deallocate(coord_names)
-               allocate(coord_names(ndims))
-               coord_names = ''
-               read(coord_name, *,iostat=istat) ( coord_names(j), j=1,ndims )
-               do j=1,ndims 
+               call strsplit(coord_name,1,coord_names,1)
+               do j=1,size(coord_names) 
                   if (len_trim(coord_names(j))>0) then
                      call ecProviderSearchStdOrVarnames(fileReaderPtr, j, varid, ncvarnames = coord_names, ignore_case = .True.)
                      if (varid<0) then
@@ -2634,12 +2640,20 @@ module m_ec_provider
                                           //' coordinates variable '//trim(coord_names(2))//' referenced but not found')
                      else
                         if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
-                           if (strcmpi(fileReaderPtr%standard_names(varid),'projection_x_coordinate')) fgd_id = varid
-                           if (strcmpi(fileReaderPtr%standard_names(varid),'projection_y_coordinate')) sgd_id = varid
+                           if (strcmpi(fileReaderPtr%standard_names(varid),'projection_x_coordinate')) then
+                              fgd_id = varid
+                           endif
+                           if (strcmpi(fileReaderPtr%standard_names(varid),'projection_y_coordinate')) then
+                              sgd_id = varid
+                           endif
                         end if
                         if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
-                           if (strcmpi(fileReaderPtr%standard_names(varid),'longitude')) fgd_id = varid
-                           if (strcmpi(fileReaderPtr%standard_names(varid),'latitude')) sgd_id = varid
+                           if (strcmpi(fileReaderPtr%standard_names(varid),'longitude')) then
+                              fgd_id = varid
+                           endif
+                           if (strcmpi(fileReaderPtr%standard_names(varid),'latitude')) then
+                              sgd_id = varid
+                           endif
                        end if
                      end if
                    end if
