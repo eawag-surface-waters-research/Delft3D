@@ -343,9 +343,9 @@ else
     if [ "$compiler" = 'intel14' ]; then
         petscModule="petsc/3.4.0_intel14.0.3_mpich_3.1.4"
     elif [ "$compiler" = 'intel16' ]; then
-    petscModule="petsc/3.4.0_intel16.0.3_mpich_3.1.4"
+        petscModule="petsc/3.4.0_intel16.0.3_mpich_3.1.4"
     elif [ "$compiler" = 'intel18' ]; then
-    petscModule="petsc/3.9.3_intel18.0.3_mpich_3.3"
+        petscModule="petsc/3.9.3_intel18.0.3_mpich_3.3_without_xhost"
     fi
 fi
 initPetsc="module load $petscModule"
