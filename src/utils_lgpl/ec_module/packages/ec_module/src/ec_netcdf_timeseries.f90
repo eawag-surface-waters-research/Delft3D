@@ -222,8 +222,7 @@ module m_ec_netcdf_timeseries
           ierr = nf90_get_var(ncptr%ncid,ncptr%layervarid,ncptr%vp,(/1/),(/ncptr%nLayer/))
           ierr = nf90_get_att(ncptr%ncid,iVars,'units',zunits)
           if (strcmpi(zunits,'m')) then
-            !if (strcmpi(positive,'up'))   ncptr%vptyp=BC_VPTYP_ZDATUM         ! z upward from datum, 
-             if (strcmpi(positive,'up'))   ncptr%vptyp=BC_VPTYP_ZBED           ! z upward from bed, 
+             if (strcmpi(positive,'up'))   ncptr%vptyp=BC_VPTYP_ZDATUM         ! z upward from datum, unmodified z-values 
              if (strcmpi(positive,'down')) ncptr%vptyp=BC_VPTYP_ZSURF          ! z downward
           else
              if (strcmpi(positive,'up'))   ncptr%vptyp=BC_VPTYP_PERCBED        ! sigma upward
