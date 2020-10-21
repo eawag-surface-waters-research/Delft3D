@@ -84,6 +84,7 @@ contains
        ! Harvest the netCDF and the selected variable for metadata, using ecNetCDFGetAttrib
        ! parse them and store in the BC instance, analogous to processhdr for the ASCII BC-files
        bc%timeunit = bc%ncptr%timeunit
+       bc%quantity%name = quantityName
        bc%quantity%missing = bc%ncptr%fillvalues(bc%ncvarndx)
        bc%quantity%factor = bc%ncptr%scales(bc%ncvarndx)
        bc%quantity%offset = bc%ncptr%offsets(bc%ncvarndx)
