@@ -40,7 +40,8 @@ libdimr_la_SOURCES = \
 dist_pkgdata_DATA = \
 	.libs/libdimr.lai 
 
-
+libdimr_la_LIBADD = \
+    $(NETCDF_LIBS) $(FCLIBS)
 
 #-------------------------------------------------------------------------------
 
