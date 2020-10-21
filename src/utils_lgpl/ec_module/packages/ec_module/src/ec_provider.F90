@@ -1853,6 +1853,13 @@ module m_ec_provider
             endif
          end do               ! loop over support points
 
+
+         if (.not.ecQuantitySet(instancePtr, quantityId, &
+                       fillvalue = bcBlockPtr%quantity%missing, &
+                       offset = bcBlockPtr%quantity%offset, &
+                       factor = bcBlockPtr%quantity%factor )) then
+            return
+         endif
          if (ecAtLeastOnePointIsCorrection) then  ! TODO: Refactor this shortcut (UNST-180).
              if (all_points_are_corr) then
                 success = .true.
