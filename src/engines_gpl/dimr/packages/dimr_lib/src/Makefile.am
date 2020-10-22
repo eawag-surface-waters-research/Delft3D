@@ -20,7 +20,7 @@ AM_CPPFLAGS = \
 
 AM_CFLAGS += -fPIC ${NETCDF_CFLAGS}
 AM_CXXFLAGS += -fPIC ${NETCDF_CFLAGS}
-
+MPILIBS += $(MPILIBS_ADDITIONAL)
 #-------------------------------------------------------------------------------
 #Sources
 libdimr_la_SOURCES = \
@@ -41,6 +41,8 @@ dist_pkgdata_DATA = \
 	.libs/libdimr.lai 
 
 libdimr_la_LIBADD = \
+    -ldl \
+    $(MPILIBS) \
     $(NETCDF_LIBS) $(FCLIBS)
 
 #-------------------------------------------------------------------------------
