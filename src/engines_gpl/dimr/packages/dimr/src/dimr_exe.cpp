@@ -102,7 +102,7 @@ memAbort (
 //  MAIN PROGRAM
 int main (int     argc,
           char *  argv [],
-          char *  envp []) {
+          char *  envp []) {	
 #if defined (MEMCHECK)
     int rc = mcheck_pedantic (& memAbort);
     printf ("DEBUG: mcheck_pedantic returns %d\n", rc);
@@ -137,6 +137,7 @@ int main (int     argc,
         doFinalize = false;
 
         DHE->lib_finalize();
+		DHE->timerFinish();
         delete DHE;
         ireturn = 0;
     }
@@ -299,6 +300,17 @@ void DimrExe::lib_finalize(void)
 {
    this->log->Write (INFO, my_rank, "    %s.Finalize()", this->library);
    (this->dllFinalize) ();
+}
+//------------------------------------------------------------------------------
+void DimrExe::timerFinish(void)
+{
+   Clock::Timestamp curtime = clock->Epoch();
+   this->timerSumStamp = curtime - this->timerStartStamp + this->timerSumStamp;
+   this->timerStartStamp = 0;
+   log->Write(FATAL, my_rank, "%s\t: %d.%d sec", "DIMR_EXE",
+	   this->timerSumStamp / 1000000,
+	   this->timerSumStamp % 1000000);
+   this->timerSumStamp = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -476,6 +488,8 @@ void DimrExe::initialize (int     argc,
     this->configfile = argv[optind];
 
     this->ready = true;
+	this->timerStartStamp = clock->Epoch();
+	this->timerSumStamp = 0;
 }
 
 

@@ -123,6 +123,8 @@ Dimr::Dimr(void) {
     // Do not remove the next two lines; they ensure that the version numbers are added to the binary
 	char * dimrlibversion = getversionidstring_dimr_lib();
 	char * dimrurl = geturlstring_dimr_lib();
+	this->timerStartStamp = clock->Epoch();
+	this->timerSumStamp = 0;
 }
 
 
@@ -1716,7 +1718,7 @@ void Dimr::timersInit (void) {
     for (int i = 0 ; i < componentsList.numComponents ; i++) {
         componentsList.components[i].timerSum   =  0;
         componentsList.components[i].timerStart =  0;
-    }
+    }	
 }
 
 
@@ -1747,6 +1749,18 @@ void Dimr::timersFinish (void) {
                           componentsList.components[i].timerSum%1000000);
         componentsList.components[i].timerSum   =  0.0;
     }
+	timerFinish();
+}
+//------------------------------------------------------------------------------
+void Dimr::timerFinish(void)
+{
+	Clock::Timestamp curtime = clock->Epoch();
+	this->timerSumStamp = curtime - this->timerStartStamp + this->timerSumStamp;
+	this->timerStartStamp = 0;
+	log->Write(FATAL, my_rank, "%s\t: %d.%d sec", "DIMR_LIB",
+		this->timerSumStamp / 1000000,
+		this->timerSumStamp % 1000000);
+	this->timerSumStamp = 0;
 }
 
 

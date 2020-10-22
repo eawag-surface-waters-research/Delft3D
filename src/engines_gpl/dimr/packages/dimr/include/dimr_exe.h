@@ -101,6 +101,7 @@ class DimrExe {
         int lib_update(void);
         void lib_update_test(void);
         void lib_finalize(void);
+		void timerFinish(void);
 
     public:
         bool       ready;          // true means constructor succeeded and DH ready to run
@@ -115,6 +116,8 @@ class DimrExe {
         char  *    configfile;     // name of configuration file
         bool       done;           // set to true when it's time to stop
         char  *    library;        // Component library name, without extension/prefix
+		Clock::Timestamp  timerStartStamp;
+		Clock::Timestamp  timerSumStamp;
 #if HAVE_CONFIG_H
     void          *    libHandle;         // (Linux) Handle to the loaded library for this component.
 #else
