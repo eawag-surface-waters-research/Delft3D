@@ -1139,11 +1139,11 @@ module m_ec_converter
          valuesT1 => null()
          targetField => null()
 
+         t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
+         t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
          if(connection%converterPtr%interpolationType == interpolate_passthrough)then
             !
             ! ===== block function (no interpolation) =====
-            t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
-            t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
             !
             valuesT0 => connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr
             valuesT1 => connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr

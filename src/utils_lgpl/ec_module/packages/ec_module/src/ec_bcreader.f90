@@ -81,9 +81,9 @@ contains
           bc%func = BC_FUNC_TIM3D
        endif
        ! TODO:
-       ! Harvest the netCDF and the selected variable for metadata, using ecNetCDFGetAttrib
-       ! parse them and store in the BC instance, analogous to processhdr for the ASCII BC-files
+       ! Support specification of the time-interpolation type in the netcdf timeseries variable as an attribute
        bc%timeunit = bc%ncptr%timeunit
+       bc%timeint = BC_TIMEINT_LIN   
        bc%quantity%name = quantityName
        bc%quantity%missing = bc%ncptr%fillvalues(bc%ncvarndx)
        bc%quantity%factor = bc%ncptr%scales(bc%ncvarndx)

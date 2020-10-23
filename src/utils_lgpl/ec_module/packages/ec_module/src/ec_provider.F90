@@ -1461,8 +1461,19 @@ module m_ec_provider
             call setECMessage("ERROR: ec_provider::ecProviderCreatet3DItems: Unknown file type.")
             return 
          end select
-         !Assign vertical interpolation type        
+
+         ! In bc-files only, time-interpolation properties for T3D data can be customized
+         if (fileReaderPtr%ofType == provFile_bc) then
+            if (.not. ecQuantitySetTimeint(instancePtr, quantityId, fileReaderPtr%bc%timeint, & 
+                                           periodic = fileReaderPtr%bc%periodic,              &
+                                           constant = (fileReaderPtr%bc%func == BC_FUNC_CONSTANT))) then
+               return
+            endif         
+         endif         
+                                           
+         ! Assign vertical interpolation type
          valueptr%quantityPtr%zInterpolationType = zInterpolationType
+
          ! Add successfully created source Items to the FileReader
          if (.not.ecFileReaderAddItem(instancePtr, fileReaderPtr%id, valueptr%id)) return 
          success = .true.
