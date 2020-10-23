@@ -19313,7 +19313,6 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, allocatable, save :: id_hwqb3d(:)
     integer, allocatable, save :: id_const(:), id_const_cum(:), id_voltot(:)
     double precision, allocatable, save :: valobsT(:,:)
-    double precision, allocatable :: obstmp(:,:)
 
     integer                      :: IP, num, ntmp, n, nlyrs
 
@@ -21743,46 +21742,23 @@ subroutine unc_write_his(tim)            ! wrihis
 !      3D
        ierr = nf90_put_var(ihisfile,    id_varucxq, valobsT(:,IPNT_UCXQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /)) ! depth-averaged velocity
        ierr = nf90_put_var(ihisfile,    id_varucyq, valobsT(:,IPNT_UCYQ),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       !
-       call realloc(obsTmp, (/ kmx, ntot /), keepExisting = .false., fill = dmiss)
-
-       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCX, UNC_LOC_S3D, obsTmp)
-       ierr = nf90_put_var(ihisfile, id_varucx, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-
-       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCY, UNC_LOC_S3D, obsTmp)
-       ierr = nf90_put_var(ihisfile, id_varucy, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-
-       call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCZ, UNC_LOC_S3D, obsTmp)
-       ierr = nf90_put_var(ihisfile, id_varucz, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-
-       if (jasal > 0) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_SA1, UNC_LOC_S3D, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_varsal, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-       end if
-
-       if (jatem > 0) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_TEM1, UNC_LOC_S3D, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_vartem, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-       end if
-
-       if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_RHO, UNC_LOC_S3D, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_varrho, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-       end if
-
-       if (jased > 0 .and. .not. stm_included) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_SED, UNC_LOC_S3D, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_varsed, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-       end if
-
-       if (jawave>0) then
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCXST, UNC_LOC_S3D, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_ustx, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-          call fillObsTempArray(ntot, kmx, dmiss, IPNT_UCYST, UNC_LOC_S3D, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_usty, obsTmp,  start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-       endif
 
        do kk = 1,kmx
+          ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_varucz, valobsT(:,IPNT_UCZ+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          if (jasal > 0) then
+             ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1 +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          end if
+          if (jatem > 0) then
+             ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          end if
+          if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
+             ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          end if
+          if (jased > 0 .and. .not. stm_included) then
+             ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          end if
           if (IVAL_TRA1 > 0) then
              do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
                i = j - IVAL_TRA1 + 1
@@ -21813,6 +21789,10 @@ subroutine unc_write_his(tim)            ! wrihis
              enddo
              ierr = nf90_put_var(ihisfile, id_sf, toutputx, start = (/ kk, 1, 1, it_his /), count = (/ 1, ntot, stmpar%lsedsus, 1/))
           end if
+          if (jawave>0) then
+             ierr = nf90_put_var(ihisfile,    id_ustx, valobsT(:,IPNT_UCXST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+             ierr = nf90_put_var(ihisfile,    id_usty, valobsT(:,IPNT_UCYST+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
+          endif
        enddo
      else
 !      2D
@@ -21924,36 +21904,22 @@ subroutine unc_write_his(tim)            ! wrihis
 
     ! 3d layer interface quantities
     if (kmx > 0 ) then
-       call realloc(obstmp, (/ kmx, ntot /), keepExisting = .false., fill = dmiss)
-       call fillObsTempArray(ntot, kmx, dmiss, IPNT_ZCS, UNC_LOC_S3D, obsTmp)
-       ierr = nf90_put_var(ihisfile, id_zcs, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx, ntot, 1 /))
-
-       kmx1 = kmx + 1
-       call realloc(obstmp, (/ kmx1, ntot /), keepExisting = .false., fill = dmiss)
-       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWS, UNC_LOC_W, obsTmp)
-       ierr = nf90_put_var(ihisfile, id_zws, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
-
-       call fillObsTempArray(ntot, kmx1, dmiss, IPNT_ZWU, UNC_LOC_WU, obsTmp)
-       ierr = nf90_put_var(ihisfile, id_zwu, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
-
-       if (iturbulencemodel >= 3 .and. jahistur > 0) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TKIN, UNC_LOC_W, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_turkin, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
-
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_TEPS, UNC_LOC_W, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_tureps, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
-       end if
-
-       if (iturbulencemodel > 1) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_VICWW, UNC_LOC_W, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_vicwwu, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
-       end if
-
-       if (idensform > 0 .and. jaRichardsononoutput > 0) then
-          call fillObsTempArray(ntot, kmx1, dmiss, IPNT_RICH, UNC_LOC_W, obsTmp)
-          ierr = nf90_put_var(ihisfile, id_rich, obstmp, start = (/ 1, 1, it_his /), count = (/ kmx1, ntot, 1 /))
-       end if
        do kk = 1, kmx+1
+          ierr = nf90_put_var(ihisfile,    id_zws,    valobsT(:,IPNT_ZWS+kk-1),   start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_zwu,    valobsT(:,IPNT_ZWU+kk-1),   start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
+          if (kk > 1) then
+             ierr = nf90_put_var(ihisfile, id_zcs,    valobsT(:,IPNT_ZCS+kk-2),   start = (/ kk-1,1, it_his /), count = (/ 1, ntot, 1 /))
+          endif
+          if (iturbulencemodel >= 3 .and. jahistur > 0) then
+             ierr = nf90_put_var(ihisfile, id_turkin, valobsT(:,IPNT_TKIN +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
+             ierr = nf90_put_var(ihisfile, id_tureps, valobsT(:,IPNT_TEPS +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
+          endif
+          if (iturbulencemodel > 1) then
+             ierr = nf90_put_var(ihisfile, id_vicwwu, valobsT(:,IPNT_VICWW+kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
+          endif
+          if (idensform > 0 .and. jaRichardsononoutput > 0) then
+             ierr = nf90_put_var(ihisfile, id_rich,   valobsT(:,IPNT_RICH +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
+          endif
           !
           if (IVAL_WS1 > 0) then
              call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
@@ -22991,7 +22957,7 @@ subroutine fill_valobs()
 
    implicit none
 
-   integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa, n
+   integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa, n, nlayb, nrlay, nlaybL, nrlayLx
    integer :: ipoint, ival, klayt, kmx_const, kk_const, nlyrs
    double precision :: wavfac
    double precision :: dens
@@ -23039,6 +23005,7 @@ subroutine fill_valobs()
 
          if ( kmx.gt.0 ) then
             call getkbotktop(k,kb,kt)
+            call getlayerindices(k, nlayb, nrlay)
             call reconstructucz(k)
          else
             kb = k
@@ -23231,7 +23198,7 @@ subroutine fill_valobs()
          endif
 
          do kk=kb,kt
-            klay = kk-kb+1
+            klay = kk-kb+nlayb
 
             if (kmx > 0) then
                valobs(IPNT_ZCS+klay-1,i) = 0.5d0*( zws(kk)+zws(kk-1) )
@@ -23341,15 +23308,17 @@ subroutine fill_valobs()
 
          if ( kmx.gt.0 ) then
             call getkbotktop(k, kb, kt)
+            call getlayerindices(k, nlayb, nrlay)
             do kk = kb-1, kt
-               klay = kk - kb + 2
+               klay = kk - kb + nlayb + 1
                valobs(IPNT_ZWS+klay-1,i) = zws(kk)
             enddo
 
             call getlink1(k,LL)
             call getLbotLtop(LL,Lb,Lt)
+            call getlayerindicesLmax(LL, nlaybL, nrlayLx)
             do L = Lb-1, Lt
-               klay = L-Lb+2
+               klay = L-Lb+nlaybL+1
                if (layertype == 2) then
                   valobs(IPNT_ZWU+klay-1,i) = min(bob(1,LL),bob(2,LL)) + hu(L)
                else
@@ -23399,6 +23368,17 @@ subroutine fill_valobs()
                   endif
                enddo
             enddo
+
+            if (iturbulencemodel.ge.2) then
+               call reorder_valobs_array(kmx+1,valobs(IPNT_VICWW:IPNT_VICWW+kmx,i), kb, kt, nlayb, dmiss)
+            endif
+            if (iturbulencemodel.ge.3) then
+               call reorder_valobs_array(kmx+1,valobs(IPNT_TKIN:IPNT_TKIN+kmx,i), kb, kt, nlayb, dmiss)
+               call reorder_valobs_array(kmx+1,valobs(IPNT_TEPS:IPNT_TEPS+kmx,i), kb, kt, nlayb, dmiss)
+            endif
+            if (idensform > 0 .and. jaRichardsononoutput > 0) then
+               call reorder_valobs_array(kmx+1,valobs(IPNT_RICH:IPNT_RICH+kmx,i), kb, kt, nlayb, dmiss)
+            endif
          endif
 
 !        Rainfall
@@ -23450,27 +23430,7 @@ subroutine fill_valobs()
       end if
    end do
 
-!  copy empty layers from top
-   if ( kmx.gt.0 ) then
-      do i = 1,numobs+nummovobs
-         k = max(kobs(i),1)
-         if ( kobs(i).gt.0 ) then  ! rely on reduce_kobs to have selected the right global flow nodes
-
-            call getkbotktop(k,kb,kt)
-
-            if ( kt.lt.kb ) cycle
-
-            do ival=MAXNUMVALOBS2D+1,MAXNUMVALOBS2D+MAXNUMVALOBS3D+MAXNUMVALOBSLYR
-               ipoint = ivalpoint(ival, kmx, nlyrs)
-               klayt = kt-kb+1
-               do k=kt+1,kb+kmx-1
-                  klay = k-kb+1
-                  valobs(ipoint+klay-1,i) = valobs(ipoint+klayt-1,i)
-               end do
-            end do
-         end if
-      end do
-   end if
+!  No need to copy empty layers from top anymore, they have been filled with dmiss
 
    if (allocated(wa)) deallocate(wa)
 

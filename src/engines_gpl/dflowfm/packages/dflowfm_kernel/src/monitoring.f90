@@ -1174,52 +1174,6 @@ subroutine saveObservations(filename)
 
 end subroutine saveObservations
 
-!> Fill in temporary array obsTmp for the history output for (only) 3D models
-subroutine fillObsTempArray(ntot, n, fillVal, locArray, locType, obsTmp)
-   use m_flowgeom, only: nd
-   use unstruc_netcdf, only: UNC_LOC_S3D, UNC_LOC_WU, UNC_LOC_W
-   implicit none
-   integer,                              intent(in   ) :: ntot         !< Total number of observation points
-   integer,                              intent(in   ) :: n            !< Number of layers kmx, or kmx+1
-   double precision,                     intent(in   ) :: fillVal      !< fill value of the array
-   integer,                              intent(in   ) :: locArray     !< Location in array valobs
-   integer,                              intent(in   ) :: locType      !< Location type: UNC_LOC_S3D-cell center&layer center,
-                                                                       !! UNC_LOC_W-face center&layer interface,
-                                                                       !! UNC_LOC_WU-velocity point&layer interface
-   double precision, dimension(n, ntot), intent(inout) :: obsTmp       !< The temperay array to be filled in
-   integer :: i, k, kb, kt, nlayb, nrlay, nrlay1, kk, L, La, Lb, Ltx, nlaybL, nrlayLx, maxNrlay, minNlaybL
-
-
-   obsTmp = fillVal
-   nrlay1 = 0
-   maxNrlay = 0
-   minNlaybL = n
-
-   do i = 1,ntot
-      k = kobs(i)
-      if (k > 0) then
-         if (locType == UNC_LOC_S3D .or. locType == UNC_LOC_W) then
-            call getlayerindices(k, nlayb, nrlay)
-            if (locType == UNC_LOC_W) then
-               nrlay1 = nrlay + 1
-            else
-               nrlay1 = nrlay
-            end if
-
-            do kk=nlayb,nlayb+nrlay1-1
-               obstmp(kk,i) = valobs(locArray+kk-nlayb,i)
-            end do
-         else if (locType == UNC_LOC_WU) then
-            call getlink1(k,L)
-            call getlayerindicesLmax(L, nlaybL, nrlayLx)
-            do kk=nlaybL,nlaybL+nrlayLx
-               obstmp(kk,i) = valobs(locArray+kk-nlaybL,i)
-            end do
-         end if
-      end if
-   end do
-
-end subroutine fillObsTempArray
 end module m_observations
 
 
