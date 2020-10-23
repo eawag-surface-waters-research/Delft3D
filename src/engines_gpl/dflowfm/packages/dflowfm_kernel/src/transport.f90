@@ -786,7 +786,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
                if (k<sedtra%kmxsed(kk,ll)) then
                   qw_loc = qw(k)     ! settling flux zero below kmxsed layer
                else
-                  qw_loc = qw(k) - mtd%ws(k,ISED1+j-1)*ba(kk)
+                  qw_loc = qw(k) - mtd%ws(k,ll)*ba(kk)
                endif
             endif
                
