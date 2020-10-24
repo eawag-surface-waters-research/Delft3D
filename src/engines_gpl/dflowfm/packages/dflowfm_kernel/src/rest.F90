@@ -7626,7 +7626,7 @@ subroutine reorder_valobs_array(n,obsArray, kb, kt, nlayb, fillValue)
    double precision, allocatable :: tmpArray(:)
    integer                       :: k, kk, klay
 
-   if (kt <= kb) then
+   if (kt < kb-1) then
       return
    end if
 

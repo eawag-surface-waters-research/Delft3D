@@ -23010,6 +23010,7 @@ subroutine fill_valobs()
          else
             kb = k
             kt = k
+            nlayb = 1
          end if
 
          if (jawave>0) then
