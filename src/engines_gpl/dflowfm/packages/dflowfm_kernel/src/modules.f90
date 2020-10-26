@@ -5536,7 +5536,6 @@ module m_fm_wq_processes
    real(sp), allocatable, dimension(:)       :: pmsa                        !< the actual data array
 
    real(sp), allocatable, dimension(:,:)     :: deriv                       !< Model derivatives in mass/m3/s (= stochi(notot ,noflux) * flux(noflux, noseg))
-   real(sp), allocatable, dimension(:,:)     :: flux                        !< Proces fluxes in mass/m3/s
 
    integer,  allocatable, dimension(:)       :: isys2const                  !< WAQ substance to D-Flow FM constituents
    integer,  allocatable, dimension(:)       :: iconst2sys                  !< D-Flow FM constituents to WAQ substance

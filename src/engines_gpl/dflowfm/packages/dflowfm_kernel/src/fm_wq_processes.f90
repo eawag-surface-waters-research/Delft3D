@@ -678,8 +678,7 @@
       call realloc(ipmsa, nipmsa, keepExisting=.false., fill=0)
       call realloc(increm,nipmsa, keepExisting=.false., fill=0)
 
-!     allocate flux and deriv arrays
-      call realloc(flux, [nflux, noseg], keepExisting=.false., fill=0.0 )       !< Proces fluxes
+!     allocate deriv and velonw arrays
       call realloc(deriv, [noseg, notot], keepExisting=.false., fill=0.0 )      !< Model derivatives (= stochi(notot ,noflux) * flux(noflux, noseg))
       call realloc(velonw, [nveln, noq3], keepExisting=.false., fill=0.0 )      !< New velocity array
 
@@ -1176,7 +1175,7 @@
       integer                      :: i, j
 
       integer                      :: ipoivol, ipoisurf, ipoiarea
-      integer                      :: ipoivelx, ipoidefa
+      integer                      :: ipoivelx, ipoidefa, ipoiflux
 
       integer                      :: ierr
 
@@ -1204,13 +1203,14 @@
       ipoivol  = arrpoi(iivol)
       ipoivelx = arrpoi(iivelx)
       ipoidefa = arrpoi(iidefa)
+      ipoiflux = arrpoi(iiflux)
       ipoisurf = arrpoi(iisfun) + (isfsurf-1)*noseg
       ipoiarea = arrpoi(iiarea)
 
       pmsa(ipoidefa+1) = time
 
       call wq_processes_proces (notot , noseg , pmsa(ipoiconc), pmsa(ipoivol) , time  , dt    , deriv , ndmpar, &
-                                nproc , nflux , ipmsa , prvnio, promnr, iflux , increm, flux  , flxdmp, stochi, &
+                                nproc , nflux , ipmsa , prvnio, promnr, iflux , increm, pmsa(ipoiflux), flxdmp, stochi, &
                                 ibflag, ipbloo, ioffbl, amass , nosys , isfact, itfact , iexpnt, iknmrk, noq1  , &
                                 noq2  , noq3  , noq4  , pmsa(ipoiarea), ndspn , idpnew, dispnw, ndspx , dspx  , &
                                 dsto  , nveln , ivpnw , velonw, nvelx , pmsa(ipoivelx), vsto  , mbadefdomain(kbx:ktx), &

@@ -127,6 +127,12 @@
       arrdm1(iidefa) = nodef
       arrdm2(iidefa) = 1
       arrdm3(iidefa) = 1
+
+      arrnam(iiflux) = 'FLUX  '
+      arrknd(iiflux) = 2
+      arrdm1(iiflux) = nflux
+      arrdm2(iiflux) = noseg
+      arrdm3(iiflux) = 1
       
       arrnam(iidspx) = 'DISPX '
       arrknd(iidspx) = 2

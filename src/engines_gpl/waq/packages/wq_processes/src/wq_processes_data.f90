@@ -161,7 +161,7 @@
 
       integer   iivol  / 1/, iiarea / 2/, iiflow / 3/, iileng / 4/, &
                 iiconc / 6/, iicons /13/, iiparm /14/, iifunc /15/, &
-                iisfun /16/, iiploc /33/, iidefa /34/, iidspx /40/, &
-                iivelx /41/, iilocx /42/
+                iisfun /16/, iiploc /33/, iidefa /34/, iiflux /35/, &
+                iidspx /40/, iivelx /41/, iilocx /42/
 
       end module
