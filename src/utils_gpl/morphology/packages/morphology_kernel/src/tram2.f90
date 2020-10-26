@@ -289,6 +289,9 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
        do k = 1, kmax
           seddif(k) = dicww(k)
        enddo
+       deltas = 0.05_fp
+       epsmax = 0.0_fp
+       epsmxc = missing_value
     endif
     !
     ! Calculate equilibrium concentration profile for sediment
@@ -401,7 +404,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,npar      , &
                         & pangle    ,fpco      ,susw      ,wave      ,eps       , &
                         & subiw     ,vcr       ,error     ,message   )
            ! van Rijn (2004) specific output
-           par     = -999.0_fp
+           par     = missing_value
            par( 1) = tauc
            par( 2) = tauwav
            par( 3) = taubcw

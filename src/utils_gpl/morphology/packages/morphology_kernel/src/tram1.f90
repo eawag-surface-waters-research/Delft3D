@@ -352,10 +352,13 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,npar      ,par       , &
        if (error) return
     else
        error = .false.
+       uon   = missing_value
+       uoff  = missing_value
+       vcr   = missing_value
     endif
 
     ! van Rijn (1993) specific output
-    par     = -999.0_fp
+    par     = missing_value
     par( 1) = tauc
     par( 2) = tauwav
     par( 3) = taubcw

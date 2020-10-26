@@ -55,7 +55,6 @@ public t_noderelation
 public t_nodefraction
 public t_nodereldata
 
-
 !
 ! public routines
 !
@@ -70,6 +69,9 @@ public allocsedtra
 public clrsedtra
 public allocfluffy
 public CHARLEN
+
+! define a missing value consistent with netCDF _fillvalue
+real(fp), parameter, public :: missing_value = 9.9692099683868690e+36_fp
 
 integer, parameter         :: CHARLEN = 40
       
