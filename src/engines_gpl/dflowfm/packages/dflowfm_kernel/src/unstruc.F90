@@ -11655,7 +11655,7 @@ subroutine flow_sedmorinit()
            pointscount = pbr%gridPointsCount
            do i = 1, pointscount
               k1 = pbr%grd(i)
-              if (gridpoint2cross(k1)%cross(1) .eq. 0) then
+              if (gridpoint2cross(k1)%cross(1) .eq. -999) then
                  npnterror = npnterror + 1
                  call mess(LEVEL_WARN , 'Grid point '//trim(pbr%gridPointIDs(i))//' has no cross section. This is a requirement for morphological updating.')
               endif
