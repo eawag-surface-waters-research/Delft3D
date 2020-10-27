@@ -730,7 +730,7 @@ src/engines_gpl/dimr/packages/dimr_lib_tests/tests/DimrTests.h -text
 src/engines_gpl/dimr/packages/dimr_testcomponent/ReadMe.txt -text
 src/engines_gpl/dimr/packages/dimr_testcomponent/dimr_testcomponent.f90 -text
 src/engines_gpl/dimr/packages/dimr_testcomponent/dimr_testcomponent.vfproj -text
-src/engines_gpl/dimr/schemas/dimr-1.0.xsd -text
+src/engines_gpl/dimr/schemas/1_0/dimr-1.0.xsd -text
 src/engines_gpl/dimr/schemas/dimr-1.1.xsd -text
 src/engines_gpl/dimr/schemas/dimr-1.2.xsd -text
 src/engines_gpl/dimr/scripts/Makefile.am -text
