@@ -915,11 +915,11 @@ end subroutine print_initree
 !!    StringIn = # AFileName # Comments are allowed behind the second "#"
 subroutine prop_get_string(tree, chapterin ,keyin, value, success)
     implicit none
-    type(tree_data), pointer        :: tree        !< The property tree
-    character(*),intent(in)         :: chapterin   !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*),intent(in)         :: keyin       !< Name of the key (case-insensitive)
-    character(*)                    :: value       !< Value of the key (not set if the key is not found, so you can set a default value)
-    logical, optional, intent (out) :: success     !< Whether successful or not (optional)
+    type(tree_data)  , pointer       :: tree        !< The property tree
+    character(*)     , intent(in)    :: chapterin   !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: keyin       !< Name of the key (case-insensitive)
+    character(*)     , intent(inout) :: value       !< Value of the key (not set if the key is not found, so you can set a default value)
+    logical, optional, intent(out)   :: success     !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -953,11 +953,11 @@ end subroutine prop_get_string
 !!    StringIn = # AFileName # Comments are allowed behind the second "#"
 subroutine prop_get_alloc_string(tree, chapterin, keyin, value, success)
     implicit none
-    type(tree_data), pointer        :: tree       !< The property tree
-    character(*),intent(in)         :: chapterin  !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*),intent(in)         :: keyin      !< Name of the key (case-insensitive)
-    character(:), allocatable       :: value      !< Value of the key (not set if the key is not found, so you can set a default value)
-    logical, optional, intent (out) :: success    !< Whether successful or not (optional)
+    type(tree_data)          , pointer       :: tree       !< The property tree
+    character(*)             , intent(in)    :: chapterin  !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)             , intent(in)    :: keyin      !< Name of the key (case-insensitive)
+    character(:), allocatable, intent(inout) :: value      !< Value of the key (not set if the key is not found, so you can set a default value)
+    logical        , optional, intent (out)  :: success    !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -1113,11 +1113,11 @@ end subroutine node_unvisit
 !!    IntegerIn = Index 8, denoting the startpoint for searches
 subroutine prop_get_integer(tree, chapter, key, value, success)
     implicit none
-    type(tree_data), pointer        :: tree    !< The property tree
-    integer     ,intent (inout)     :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*),intent (in)        :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*),intent (in)        :: key     !< Name of the key (case-insensitive)
-    logical, optional, intent (out) :: success !< Whether successful or not (optional)
+    type(tree_data)  , pointer       :: tree    !< The property tree
+    integer          , intent(inout) :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key     !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -1144,12 +1144,12 @@ end subroutine prop_get_integer
 !!    IntegersIn = (n,m): 4,5
 subroutine prop_get_integers(tree, chapter, key, value, valuelength, success)
     implicit none
-    type(tree_data), pointer           :: tree         !< The property tree
-    integer              ,intent (in)  :: valuelength  !< Size of the array value
-    integer, dimension(*),intent (out) :: value        !< Values of the key (not set if the key is not found, so you can set a default value)
-    character(*)         ,intent (in)  :: chapter      !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)         ,intent (in)  :: key          !< Name of the key (case-insensitive)
-    logical, optional    ,intent (out) :: success      !< Whether successful or not (optional)
+    type(tree_data)      , pointer       :: tree         !< The property tree
+    integer              , intent(in)    :: valuelength  !< Size of the array value
+    integer, dimension(*), intent(inout) :: value        !< Values of the key (not set if the key is not found, so you can set a default value)
+    character(*)         , intent(in)    :: chapter      !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)         , intent(in)    :: key          !< Name of the key (case-insensitive)
+    logical, optional    , intent(out)   :: success      !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -1222,11 +1222,11 @@ end subroutine prop_get_integers
 !!              RealIn = Gravity 9.8, m/s*2
 subroutine prop_get_real(tree, chapter, key, value, success)
     implicit none
-    type(tree_data), pointer    :: tree !< The property tree
-    real        ,intent (inout) :: value !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*),intent (in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*),intent (in)    :: key !< Name of the key (case-insensitive)
-    logical, optional, intent(out) :: success !< Whether successful or not (optional)
+    type(tree_data)  , pointer       :: tree !< The property tree
+    real             , intent(inout) :: value !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -1253,12 +1253,12 @@ end subroutine prop_get_real
 !!     RealsIn = (x,y): 4.5,5.9 Start point
 subroutine prop_get_reals(tree, chapter, key, value, valuelength, success)
     implicit none
-    type(tree_data), pointer         :: tree         !< The property tree
-    integer           , intent (in)  :: valuelength  !< Size of the array value
-    real, dimension(*), intent (out) :: value        !< Values of the key (not set if the key is not found, so you can set a default value)
-    character(*)      , intent (in)  :: chapter      !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)      , intent (in)  :: key          !< Name of the key (case-insensitive)
-    logical, optional , intent (out) :: success      !< Whether successful or not (optional)
+    type(tree_data)   , pointer        :: tree         !< The property tree
+    integer           , intent (in)    :: valuelength  !< Size of the array value
+    real, dimension(*), intent (inout) :: value        !< Values of the key (not set if the key is not found, so you can set a default value)
+    character(*)      , intent (in)    :: chapter      !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)      , intent (in)    :: key          !< Name of the key (case-insensitive)
+    logical, optional , intent (out)   :: success      !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -1342,11 +1342,11 @@ end subroutine prop_get_reals
 !!    RealIn = Gravity 9.8, m/s*2
 subroutine prop_get_double(tree, chapter, key, value, success)
     implicit none
-    type(tree_data), pointer       :: tree    !< The property tree
-    real(kind=dp) ,intent (inout)  :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
-    character(*)  ,intent (in)     :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)  ,intent (in)     :: key     !< Name of the key (case-insensitive)
-    logical, optional, intent(out) :: success !< Whether successful or not (optional)
+    type(tree_data)  , pointer       :: tree    !< The property tree
+    real(kind=dp)    , intent(inout) :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
+    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key     !< Name of the key (case-insensitive)
+    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -1373,12 +1373,12 @@ end subroutine prop_get_double
 !!    RealsIn = (x,y): 4.5,5.9 Start point
 subroutine prop_get_doubles(tree, chapter, key, value, valuelength, success)
     implicit none
-    type(tree_data), pointer                  :: tree        !< The property tree
-    integer                    , intent (in)  :: valuelength !< Size of the array value
-    real(kind=dp), dimension(*), intent (out) :: value       !< Values of the key (not set if the key is not found, so you can set a default value)
-    character(*)               , intent (in)  :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*)               , intent (in)  :: key         !< Name of the key (case-insensitive)
-    logical, optional          , intent (out) :: success     !< Whether successful or not (optional)
+    type(tree_data)            , pointer       :: tree        !< The property tree
+    integer                    , intent(in)    :: valuelength !< Size of the array value
+    real(kind=dp), dimension(*), intent(inout) :: value       !< Values of the key (not set if the key is not found, so you can set a default value)
+    character(*)               , intent(in)    :: chapter     !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)               , intent(in)    :: key         !< Name of the key (case-insensitive)
+    logical, optional          , intent(out)   :: success     !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -1463,11 +1463,11 @@ end subroutine prop_get_doubles
 !!    Not allowed
 subroutine prop_get_logical(tree, chapter, key, value, success)
     implicit none
-    type(tree_data), pointer        :: tree    !< The property tree
-    character(*),intent (in)        :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
-    character(*),intent (in)        :: key     !< Name of the key (case-insensitive)
-    logical     ,intent (out)       :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
-    logical, optional, intent (out) :: success !< Whether successful or not (optional)
+    type(tree_data)  , pointer       :: tree    !< The property tree
+    character(*)     , intent(in)    :: chapter !< Name of the chapter (case-insensitive) or "*" to get any key
+    character(*)     , intent(in)    :: key     !< Name of the key (case-insensitive)
+    logical          , intent(inout) :: value   !< Value of the key (not set if the key is not found, so you can set a default value)
+    logical, optional, intent(out)   :: success !< Whether successful or not (optional)
     !
     ! Local variables
     !
@@ -1876,13 +1876,13 @@ end subroutine count_occurrences
     !
     ! Parameters
     !
-    type(tree_data), pointer                          :: tree
-    character(*),intent(in)                           :: chapterin
-    character(*),intent(in)                           :: keyin
-    integer, intent(in)                               :: valuelength
-    character*(*), intent(out), dimension(:)          :: value
-    logical, intent (out)                             :: success
-    character(1), optional                            :: spChar
+    type(tree_data)            , pointer       :: tree
+    character(*)               , intent(in)    :: chapterin
+    character(*)               , intent(in)    :: keyin
+    integer                    , intent(in)    :: valuelength
+    character*(*), dimension(:), intent(inout) :: value
+    logical                    , intent(out)   :: success
+    character(1)               , optional      :: spChar
     !
     ! Local variables
     !
