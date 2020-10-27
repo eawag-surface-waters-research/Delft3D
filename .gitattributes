@@ -731,7 +731,7 @@ src/engines_gpl/dimr/packages/dimr_testcomponent/ReadMe.txt -text
 src/engines_gpl/dimr/packages/dimr_testcomponent/dimr_testcomponent.f90 -text
 src/engines_gpl/dimr/packages/dimr_testcomponent/dimr_testcomponent.vfproj -text
 src/engines_gpl/dimr/schemas/1_0/dimr.xsd -text
-src/engines_gpl/dimr/schemas/1_1/dimr-1.1.xsd -text
+src/engines_gpl/dimr/schemas/1_1/dimr.xsd -text
 src/engines_gpl/dimr/schemas/1_2/dimr.xsd -text
 src/engines_gpl/dimr/schemas/latest/dimr.xsd -text
 src/engines_gpl/dimr/scripts/Makefile.am -text
