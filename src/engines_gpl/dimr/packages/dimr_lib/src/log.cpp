@@ -117,7 +117,7 @@ void Log::SetLevel( Level level ) {
 
     char * levelString = new char[MAXSTRING];
     logLevelToString(this->level, &levelString);
-	this->Write(INFO, 0, "Log level set to %s", levelString);
+	this->Write(DEBUG, 0, "Log level set to %s", levelString);
     delete [] levelString;
 }
 
@@ -132,7 +132,7 @@ void Log::SetFeedbackLevel( Level feedbackLevel) {
 
     char * levelString = new char[MAXSTRING];
     logLevelToString(this->feedbackLevel, &levelString);
-	this->Write(INFO, 0, "feedbackLevel set to %s", levelString);
+	this->Write(DEBUG, 0, "feedbackLevel set to %s", levelString);
     delete [] levelString;
 }
 
@@ -220,13 +220,13 @@ bool Log::Write( Level level, int rank, const char *  format, ... ) {
 
 void Log::SetWriteCallBack( WriteCallback writeCallback ) {
 	this->writeCallback = writeCallback;
-	this->Write(INFO, 0, "WriteCallBack is set");
+	this->Write(DEBUG, 0, "WriteCallBack is set");
 }
 
 
 void Log::SetExternalLogger( BMILogger logger ) {
 	this->externalLogger = logger;
-	this->Write(INFO, 0, "External logger is set");
+	this->Write(DEBUG, 0, "External logger is set");
 }
 
 

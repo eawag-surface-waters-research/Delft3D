@@ -24,7 +24,7 @@ typedef int  (CDECLOPT *BMI_DIMR_SET_LOGGER)(Log *);
 
 typedef int  (CDECLOPT *BMI_INITIALIZE)     (const char *);
 typedef int  (CDECLOPT *BMI_UPDATE)         (double);
-typedef void (CDECLOPT *BMI_FINALIZE)       (void);
+typedef int  (CDECLOPT *BMI_FINALIZE)       (void);
 typedef void (CDECLOPT *BMI_GETSTARTTIME)   (double *);
 typedef void (CDECLOPT *BMI_GETENDTIME)     (double *);
 typedef void (CDECLOPT *BMI_GETTIMESTEP)    (double *);

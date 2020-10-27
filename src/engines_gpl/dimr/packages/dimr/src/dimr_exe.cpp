@@ -121,7 +121,7 @@ int main (int     argc,
         DHE->initialize(argc, argv, envp);
         if (! DHE->ready) return 1;
 
-        DHE->log->Write(FATAL, my_rank, getfullversionstring_dimr_exe());
+        DHE->log->Write(INFO, my_rank, getfullversionstring_dimr_exe());
 
         DHE->openLibrary();
         DHE->lib_initialize();
@@ -215,13 +215,13 @@ void DimrExe::lib_initialize(void)
     this->log->Write (DEBUG, my_rank, "%s.SetVar(debugLevel,%d)", this->library, this->logLevel);
     (this->dllSetVar) ("debugLevel", &(this->logLevel));
     (this->dllSetVar) ("feedbackLevel", &(this->logLevel));
-    this->log->Write (INFO, my_rank, "%s.Initialize(%s)", this->library, this->configfile);
+    this->log->Write (DEBUG, my_rank, "%s.Initialize(%s)", this->library, this->configfile);
     int result = (this->dllInitialize) (this->configfile);
     if (result != 0) 
     {
         // Error occurred, but apparently no exception has been thrown.
         // Throw one now
-        this->log->Write(INFO, my_rank, "%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
+        this->log->Write(FATAL, my_rank, "%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
         // Re-throw the exception (so it will be handled in main)
         throw Exception(true, (Exception::ErrorCode)result, "%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
     }
@@ -298,7 +298,7 @@ void DimrExe::lib_update_test(void)
 //------------------------------------------------------------------------------
 void DimrExe::lib_finalize(void)
 {
-   this->log->Write (INFO, my_rank, "    %s.Finalize()", this->library);
+   this->log->Write (DEBUG, my_rank, "    %s.Finalize()", this->library);
    (this->dllFinalize) ();
 }
 //------------------------------------------------------------------------------
@@ -307,7 +307,7 @@ void DimrExe::timerFinish(void)
    Clock::Timestamp curtime = clock->Epoch();
    this->timerSumStamp = curtime - this->timerStartStamp + this->timerSumStamp;
    this->timerStartStamp = 0;
-   log->Write(FATAL, my_rank, "%s\t: %d.%d sec", "DIMR_EXE",
+   log->Write(INFO, my_rank, "%s\t: %d.%d sec", "DIMR_EXE",
 	   this->timerSumStamp / 1000000,
 	   this->timerSumStamp % 1000000);
    this->timerSumStamp = 0;
@@ -407,7 +407,7 @@ void DimrExe::initialize (int     argc,
     this->slaveArg  = NULL;
     this->done      = false;
 
-    this->logLevel = WARNING;  // selector of debugging/trace information
+    this->logLevel = INFO;  // selector of debugging/trace information
                                         // minLog: FATAL  maxLog: ALL
     FILE *      logFile = stdout;       // log file descriptor
 
@@ -433,7 +433,7 @@ void DimrExe::initialize (int     argc,
     //
     // Process command-line arguments
     int c;
-    while ((c = getopt (argc, argv, (char *) "d:l:S:v?")) != -1) {
+    while ((c = getopt (argc, argv, (char *) "d:l:S:v:i:?")) != -1) {
         switch (c) {
             case 'd': {
                 if (sscanf (optarg, "%i", &logLevel) != 1)
@@ -504,7 +504,7 @@ DimrExe::~DimrExe (void) {
     // to do:  (void) FreeLibrary(handle);
     freeLib();
 
-    this->log->Write (INFO, my_rank, "dimr shutting down normally");
+    this->log->Write (DEBUG, my_rank, "dimr shutting down normally");
 
 #if defined(HAVE_CONFIG_H)
     free (this->exeName);
@@ -547,7 +547,7 @@ void DimrExe::openLibrary (void) {
         sprintf(this->library, "dimr_dll.dll\0");
 #endif
 
-        this->log->Write (INFO, my_rank, "Loading dimr library \"%s\"", this->library);
+        this->log->Write (DEBUG, my_rank, "Loading dimr library \"%s\"", this->library);
 
 #if defined (HAVE_CONFIG_H)
         dlerror(); /* clear error code */

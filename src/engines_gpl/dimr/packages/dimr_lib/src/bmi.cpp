@@ -132,7 +132,7 @@ extern "C" {
 			}
 
 			thisDimr->log->Write(INFO, thisDimr->my_rank, getfullversionstring_dimr_lib());
-			thisDimr->log->Write(INFO, thisDimr->my_rank, "dimr_dll:initialize(%s)", configfile);
+			thisDimr->log->Write(DEBUG, thisDimr->my_rank, "dimr_dll:initialize(%s)", configfile);
 			//
 			//
 			// Read XML configuration file into tree structure
@@ -154,7 +154,7 @@ extern "C" {
 			fclose(conf);
 			//
 			// Build controlBlock administration by scanning the XmlTree
-			thisDimr->log->Write(INFO, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
+			thisDimr->log->Write(DEBUG, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
 			thisDimr->scanConfigFile();
 			//
 			// ToDo: check whether a core dump is requested on abort; if so set global variable for Dimr_CoreDump
@@ -193,10 +193,22 @@ extern "C" {
 				}
 
 				chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
-				thisDimr->log->Write(FATAL, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
+				thisDimr->log->Write(INFO, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
 				nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->settings);
 				thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
 				thisDimr->control->subBlocks[0].unit.component->result = (thisDimr->control->subBlocks[0].unit.component->dllInitialize) (thisDimr->control->subBlocks[0].unit.component->inputFile);
+
+				if(thisDimr->control->subBlocks[0].unit.component->result != 0)
+				{
+					stringstream ss;
+					ss << thisDimr->control->subBlocks[0].unit.component->result;
+					std::string componentName = thisDimr->control->subBlocks[0].unit.component->name;
+					std::string message = "#### ERROR: dimr initialize ABORT,: " + componentName + " initialize failed, with return value " + ss.str() + " \n";
+					printf(message.c_str());
+					thisDimr->log->Write(FATAL, thisDimr->my_rank, message.c_str(), thisDimr->configfile);
+					return thisDimr->control->subBlocks[0].unit.component->result;
+				}
+				
 				thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
 				nParamsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->parameters);
 				(thisDimr->control->subBlocks[0].unit.component->dllGetStartTime) (&thisDimr->control->subBlocks[0].tStart);
@@ -208,12 +220,12 @@ extern "C" {
 		catch (Exception & ex)
 		{
 			printf("#### ERROR: dimr initialize ABORT: %s\n", ex.message);
-			thisDimr->log->Write(INFO, thisDimr->my_rank, ex.message, thisDimr->configfile);
+			thisDimr->log->Write(FATAL, thisDimr->my_rank, ex.message, thisDimr->configfile);
 			return ex.errorCode;
 		}
 		catch (...)
 		{
-			printf("#### ERROR: dimr finalize ABORT with unknown exception\n");
+			printf("#### ERROR: dimr initialize ABORT with unknown exception\n");
 			return Exception::ERR_UNKNOWN;
 		}
 		// all ok (no exceptions)
@@ -226,7 +238,7 @@ extern "C" {
 		// Return to library users informative messages when exceptions are thrown
 		try
 		{
-			thisDimr->log->Write(INFO, thisDimr->my_rank, "dimr_lib:update");
+			thisDimr->log->Write(DEBUG, thisDimr->my_rank, "dimr_lib:update");
 			// Execute update on the first controlBlock only
 			if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
 				thisDimr->runControlBlock(&(thisDimr->control->subBlocks[0]), tStep, GLOBAL_PHASE_UPDATE);
@@ -234,7 +246,7 @@ extern "C" {
 			else {
 				// Start block
 				chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
-				thisDimr->log->Write(FATAL, thisDimr->my_rank, "%s.Update(%6.1f)", thisDimr->control->subBlocks[0].unit.component->name, tStep);
+				thisDimr->log->Write(INFO, thisDimr->my_rank, "%s.Update(%6.1f)", thisDimr->control->subBlocks[0].unit.component->name, tStep);
 				thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
 				int state = (thisDimr->control->subBlocks[0].unit.component->dllUpdate) (tStep);
                 if (state != 0)
@@ -244,7 +256,7 @@ extern "C" {
                     std::string componentName = thisDimr->control->subBlocks[0].unit.component->name;
                     std::string message = "#### ERROR: dimr update ABORT,: " + componentName + " update failed, with return value " + ss.str() + " \n";
                     printf(message.c_str());
-                    thisDimr->log->Write(INFO, thisDimr->my_rank, message.c_str(), thisDimr->configfile);
+                    thisDimr->log->Write(FATAL, thisDimr->my_rank, message.c_str(), thisDimr->configfile);
                     return state;
                 }
 				thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
@@ -259,7 +271,7 @@ extern "C" {
 		}
 		catch (...)
 		{
-			printf("#### ERROR: dimr finalize ABORT with unknown exception\n");
+			printf("#### ERROR: dimr update ABORT with unknown exception\n");
 			return Exception::ERR_UNKNOWN;
 		}
 		return 0;
@@ -271,7 +283,7 @@ extern "C" {
 		// Return to library users informative messages when exceptions are thrown
 		try
 		{
-			thisDimr->log->Write(INFO, thisDimr->my_rank, "dimr_lib:finalize");
+			thisDimr->log->Write(DEBUG, thisDimr->my_rank, "dimr_lib:finalize");
 			// Execute finalize on the first controlBlock and
 			// initialize, step, finalize on all other controlBlocks
 			if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
@@ -280,9 +292,19 @@ extern "C" {
 			else {
 				// Start block
 				chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
-				thisDimr->log->Write(FATAL, thisDimr->my_rank, "%s.Finalize()", thisDimr->control->subBlocks[0].unit.component->name);
+				thisDimr->log->Write(INFO, thisDimr->my_rank, "%s.Finalize()", thisDimr->control->subBlocks[0].unit.component->name);
 				thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
-				(thisDimr->control->subBlocks[0].unit.component->dllFinalize) ();
+				int state = (thisDimr->control->subBlocks[0].unit.component->dllFinalize) ();
+				if(state != 0)
+				{
+					stringstream ss;
+					ss << state;
+					std::string componentName = thisDimr->control->subBlocks[0].unit.component->name;
+					std::string message = "#### ERROR: dimr finalize ABORT,: " + componentName + " finalize failed, with return value " + ss.str() + " \n";
+					printf(message.c_str());
+					thisDimr->log->Write(FATAL, thisDimr->my_rank, message.c_str(), thisDimr->configfile);
+					return state;
+				}
 				thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
 				fflush(stdout);
 			}
@@ -300,7 +322,7 @@ extern "C" {
 		catch (Exception & ex)
 		{
 			printf("#### ERROR: dimr finalize ABORT: %s\n", ex.message);
-			thisDimr->log->Write(INFO, thisDimr->my_rank, ex.message, thisDimr->configfile);
+			thisDimr->log->Write(FATAL, thisDimr->my_rank, ex.message, thisDimr->configfile);
 			return ex.errorCode;
 		}
 		catch (...)
@@ -314,7 +336,7 @@ extern "C" {
 	//------------------------------------------------------------------------------
 	BMI_API void get_start_time(double * tStart)
 	{
-		thisDimr->log->Write(INFO, thisDimr->my_rank, "dimr_lib:get_start_time");
+		thisDimr->log->Write(DEBUG, thisDimr->my_rank, "dimr_lib:get_start_time");
 		if (thisDimr->control->subBlocks[0].type == CT_PARALLEL)
 		{
 			*tStart = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStart;
@@ -327,7 +349,7 @@ extern "C" {
 
 	//------------------------------------------------------------------------------
 	BMI_API void get_end_time(double * tEnd) {
-		thisDimr->log->Write(INFO, thisDimr->my_rank, "dimr_lib:get_end_time");
+		thisDimr->log->Write(DEBUG, thisDimr->my_rank, "dimr_lib:get_end_time");
 		if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
 			*tEnd = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tEnd;
 		}
@@ -339,7 +361,7 @@ extern "C" {
 
 	//------------------------------------------------------------------------------
 	BMI_API void get_time_step(double * tStep) {
-		thisDimr->log->Write(INFO, thisDimr->my_rank, "dimr_lib:get_time_step");
+		thisDimr->log->Write(DEBUG, thisDimr->my_rank, "dimr_lib:get_time_step");
 		if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
 			*tStep = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStep;
 		}
@@ -351,7 +373,7 @@ extern "C" {
 
 	//------------------------------------------------------------------------------
 	BMI_API void get_current_time(double * tCur) {
-		thisDimr->log->Write(INFO, thisDimr->my_rank, "dimr_lib:get_current_time");
+		thisDimr->log->Write(DEBUG, thisDimr->my_rank, "dimr_lib:get_current_time");
 		if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
 			*tCur = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tCur;
 		}

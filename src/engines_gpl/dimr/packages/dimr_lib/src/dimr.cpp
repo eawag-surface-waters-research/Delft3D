@@ -158,7 +158,7 @@ Dimr::~Dimr (void) {
     // to do:  (void) FreeLibrary(handle);
     freeLibs();
 
-    log->Write (INFO, my_rank, "dimr shutting down normally");
+    log->Write (DEBUG, my_rank, "dimr shutting down normally");
 
 #if defined(HAVE_CONFIG_H)
     free (exeName);
@@ -240,22 +240,53 @@ void Dimr::runStartBlock (dimr_control_block * cb, double tStep, int phase) {
 
     chdir(cb->unit.component->workingDir);
     if (phase == GLOBAL_PHASE_FINISH) {
-        log->Write (FATAL, my_rank, "%s.Initialize(%s)", cb->unit.component->name, cb->unit.component->inputFile);
+        log->Write (INFO, my_rank, "%s.Initialize(%s)", cb->unit.component->name, cb->unit.component->inputFile);
         timerStart(cb->unit.component);
         cb->unit.component->result = (cb->unit.component->dllInitialize) (cb->unit.component->inputFile);
+		if (cb->unit.component->result != 0)
+		{
+			stringstream ss;
+			ss << cb->unit.component->result;
+			std::string componentName = cb->unit.component->name;
+			std::string message = "#### ERROR: dimr initialize ABORT,: " + componentName + " initialize failed, with return value " + ss.str() + " \n";
+			printf(message.c_str());
+			log->Write(FATAL, my_rank, message.c_str(), configfile);
+			throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+		}
         timerEnd(cb->unit.component);
         (cb->unit.component->dllGetStartTime) (&cb->tStart);
         (cb->unit.component->dllGetEndTime) (&cb->tEnd);
     }
     cb->tStep = tStep;
-    log->Write (FATAL, my_rank, "%s.Update(%6.1f)", cb->unit.component->name, cb->tStep);
+    log->Write (INFO, my_rank, "%s.Update(%6.1f)", cb->unit.component->name, cb->tStep);
     timerStart(cb->unit.component);
-    (cb->unit.component->dllUpdate) (cb->tStep);
+    int state = (cb->unit.component->dllUpdate) (cb->tStep);
+	if (state != 0)
+	{
+		stringstream ss, curTime;
+		ss << state;
+		curTime << *&cb->tCur;
+		std::string componentName = cb->unit.component->name;
+		std::string message = "#### ERROR: dimr update ABORT,: " + componentName + " update failed, with return value " + ss.str() + " at time : " + curTime.str() + "\n";
+		printf(message.c_str());
+		log->Write(FATAL, my_rank, message.c_str(), configfile);
+		throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+	}
     timerEnd(cb->unit.component);
     if (phase == GLOBAL_PHASE_FINISH) {
-        log->Write (FATAL, my_rank, "%s.Finalize()", cb->unit.component->name);
+        log->Write (INFO, my_rank, "%s.Finalize()", cb->unit.component->name);
         timerStart(cb->unit.component);
-        (cb->unit.component->dllFinalize) ();
+        int state = (cb->unit.component->dllFinalize) ();
+		if (state != 0)
+		{
+			stringstream ss;
+			ss << state;
+			std::string componentName = cb->unit.component->name;
+			std::string message = "#### ERROR: dimr finalize ABORT,: " + componentName + " finalize failed, with return value " + ss.str() + " \n";
+			printf(message.c_str());
+			log->Write(FATAL, my_rank, message.c_str(), configfile);
+			throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+		}
         timerEnd(cb->unit.component);
     }
     fflush(stdout);
@@ -319,9 +350,19 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
     }
     if (masterComponent->onThisRank) {
         chdir(masterComponent->workingDir);
-        log->Write (FATAL, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
+        log->Write (INFO, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
         timerStart(masterComponent);
         masterComponent->result = (masterComponent->dllInitialize) (masterComponent->inputFile);
+		if (masterComponent->result != 0)
+		{
+			stringstream ss;
+			ss << masterComponent->result;
+			std::string componentName = masterComponent->name;
+			std::string message = "#### ERROR: dimr initialize ABORT,: " + componentName + " initialize failed, with return value " + ss.str() + " \n";
+			printf(message.c_str());
+			log->Write(FATAL, my_rank, message.c_str(), configfile);
+			throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+		}
         timerEnd(masterComponent);
         (masterComponent->dllGetStartTime) (&cb->subBlocks[cb->masterSubBlockId].tStart);
         (masterComponent->dllGetEndTime) (&cb->subBlocks[cb->masterSubBlockId].tEnd);
@@ -355,6 +396,17 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         log->Write (FATAL, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
                         timerStart(thisComponent);
                         thisComponent->result = (thisComponent->dllInitialize) (thisComponent->inputFile);
+						if (thisComponent->result != 0)
+						{
+							stringstream ss;
+							ss << thisComponent->result;
+							std::string componentName = thisComponent->name;
+							std::string message = "#### ERROR: dimr initialize ABORT,: " + componentName + " initialize failed, with return value " + ss.str() + " \n";
+							printf(message.c_str());
+							log->Write(FATAL, my_rank, message.c_str(), configfile);
+
+							throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+						}
                         timerEnd(thisComponent);
                     }
                 }
@@ -704,9 +756,21 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
             if (i == cb->masterSubBlockId) {
                 // masterComponent
                 chdir(masterComponent->unit.component->workingDir);
-                log->Write (FATAL, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, masterComponent->unit.component->name, tStep);
+                log->Write (INFO, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, masterComponent->unit.component->name, tStep);
                 timerStart(masterComponent->unit.component);
-                (masterComponent->unit.component->dllUpdate) (tStep);
+                int state = (masterComponent->unit.component->dllUpdate) (tStep);
+				if (state != 0)
+				{
+					stringstream ss, curTime;
+					ss << state;
+					curTime << *currentTime;
+					std::string componentName = cb->unit.component->name;
+					std::string message = "#### ERROR: dimr update ABORT,: " + componentName + " update failed, with return value " + ss.str() + " at time : " + curTime.str() + "\n";
+					printf(message.c_str());
+					log->Write(FATAL, my_rank, message.c_str(), configfile);
+
+					throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+				}
                 timerEnd(masterComponent->unit.component);
                 *currentTime = *currentTime + tStep;
             } else {
@@ -739,14 +803,18 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             }
                             // Update
                             chdir(thisComponent->workingDir);
-                            log->Write (FATAL, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
+                            log->Write (INFO, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
                             timerStart(thisComponent);
                             int state = (thisComponent->dllUpdate) (tUpdate);
                             if (state != 0)
                             {
-                                stringstream ss;
+                                stringstream ss, ss_nr;
                                 ss << *currentTime;
-                                string message = "Could not update the component " + std::string(thisComponent->name) + " at time " + ss.str() + "\n";
+                                ss_nr << state;
+                                string message = "Could not update the component " + std::string(thisComponent->name) + " at time " + ss.str() + " because of errnr : " + ss_nr.str() + "\n";
+								printf(message.c_str());
+								log->Write(FATAL, my_rank, message.c_str(), configfile);
+
                                 throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
                             }
                             timerEnd(thisComponent);
@@ -1027,9 +1095,20 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                 continue;
             }
             chdir(cb->subBlocks[i].unit.component->workingDir);
-            log->Write (FATAL, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
+            log->Write (INFO, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
             timerStart(cb->subBlocks[i].unit.component);
-            (cb->subBlocks[i].unit.component->dllFinalize) ();
+            int state = (cb->subBlocks[i].unit.component->dllFinalize) ();
+			if (state != 0)
+			{
+				stringstream ss;
+				ss << state;
+				std::string componentName = cb->subBlocks[i].unit.component->name;
+				std::string message = "#### ERROR: dimr finalize ABORT,: " + componentName + " finalize failed, with return value " + ss.str() + " \n";
+				printf(message.c_str());
+				log->Write(FATAL, my_rank, message.c_str(), configfile);
+
+				throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+			}
             timerEnd(cb->subBlocks[i].unit.component);
 
             if (use_mpi && cb->subBlocks[i].unit.component->mpiComm != NULL) {
@@ -1049,7 +1128,18 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                     chdir(cb->subBlocks[i].subBlocks[j].unit.component->workingDir);
                     log->Write (FATAL, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
                     timerStart(cb->subBlocks[i].subBlocks[j].unit.component);
-                    (cb->subBlocks[i].subBlocks[j].unit.component->dllFinalize) ();
+                    int state = (cb->subBlocks[i].subBlocks[j].unit.component->dllFinalize) ();
+					if (state != 0)
+					{
+						stringstream ss;
+						ss << state;
+						std::string componentName = cb->subBlocks[i].unit.component->name;
+						std::string message = "#### ERROR: dimr finalize ABORT,: " + componentName + " finalize failed, with return value " + ss.str() + " \n";
+						printf(message.c_str());
+						log->Write(FATAL, my_rank, message.c_str(), configfile);
+
+						throw Exception(true, Exception::ERR_UNKNOWN, message.c_str());
+					}
                     timerEnd(cb->subBlocks[i].subBlocks[j].unit.component);
                     }
 				else { //coupler
@@ -1623,7 +1713,7 @@ void Dimr::connectLibs (void) {
         delete [] lib;
     }
     if (my_rank == 0) {
-        printComponentVersionStrings(FATAL);            // List component version to log 
+        printComponentVersionStrings(INFO);            // List component version to log 
     }
 }
 
@@ -1741,7 +1831,7 @@ void Dimr::timerEnd (dimr_component * thisComponent) {
 
 //------------------------------------------------------------------------------
 void Dimr::timersFinish (void) {
-    log->Write (FATAL, my_rank, "TIMER INFO:\n");
+    log->Write (INFO, my_rank, "TIMER INFO:\n");
     for (int i = 0 ; i < componentsList.numComponents ; i++) {
         componentsList.components[i].timerStart = 0;
         log->Write (FATAL, my_rank, "%s\t: %d.%d sec", componentsList.components[i].name, 
@@ -1757,7 +1847,7 @@ void Dimr::timerFinish(void)
 	Clock::Timestamp curtime = clock->Epoch();
 	this->timerSumStamp = curtime - this->timerStartStamp + this->timerSumStamp;
 	this->timerStartStamp = 0;
-	log->Write(FATAL, my_rank, "%s\t: %d.%d sec", "DIMR_LIB",
+	log->Write(INFO, my_rank, "%s\t: %d.%d sec", "DIMR_LIB",
 		this->timerSumStamp / 1000000,
 		this->timerSumStamp % 1000000);
 	this->timerSumStamp = 0;

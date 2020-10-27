@@ -60,7 +60,7 @@ class Log {
 	
 
 public:
-	Log( FILE * output, Clock * clock, Level level = FATAL, Level feedbackLevel = FATAL );
+	Log( FILE * output, Clock * clock, Level level = INFO, Level feedbackLevel = INFO );
 
 	~Log( void );
 
