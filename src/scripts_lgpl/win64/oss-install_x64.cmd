@@ -362,11 +362,13 @@ rem ================
     set dest_bin="!dest_main!\x64\dimr\bin"
     set dest_menu="!dest_main!\x64\menu\bin"
     set dest_scripts="!dest_main!\x64\dimr\scripts"
+	set dest_schemas="!dest_main!\x64\dimr\schema"
     set dest_share="!dest_main!\x64\share\bin"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_menu!
     call :makeDir !dest_scripts!
+    call :makeDir !dest_schemas!
     call :makeDir !dest_share!
 
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe             !dest_bin!
@@ -375,6 +377,7 @@ rem ================
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl     !dest_menu!
 
     call :copyFile "engines_gpl\dimr\scripts\generic\win64\*.*"     !dest_scripts!
+    call :copyFile "engines_gpl\dimr\schemas\*.*"     				!dest_schemas!
 
 goto :endproc
 
