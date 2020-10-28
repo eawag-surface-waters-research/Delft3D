@@ -49,5 +49,17 @@ nobase_dist_pkgdata_DATA = \
     esmf/lnx64/bin/libnetcdff.so.6 \
     esmf/lnx64/bin/librt.so.1 \
     esmf/lnx64/bin/libsvml.so \
-    esmf/lnx64/bin/libz.so.1
+    esmf/lnx64/bin/libz.so.1 \
+    esmf/lnx64/bin_COS7/libcilkrts.so.5 \
+    esmf/lnx64/bin_COS7/libesmf.so \
+    esmf/lnx64/bin_COS7/libifcoremt.so.5 \
+    esmf/lnx64/bin_COS7/libifport.so.5 \
+    esmf/lnx64/bin_COS7/libimf.so \
+    esmf/lnx64/bin_COS7/libintlc.so.5 \
+    esmf/lnx64/bin_COS7/libiomp5.so \
+    esmf/lnx64/bin_COS7/libirc.so \
+    esmf/lnx64/bin_COS7/libirng.so \
+    esmf/lnx64/bin_COS7/libnetcdf.so.7 \
+    esmf/lnx64/bin_COS7/libnetcdff.so.6 \
+    esmf/lnx64/bin_COS7/libsvml.so
 

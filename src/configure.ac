@@ -711,7 +711,6 @@ third_party/interacter_stub/Makefile
 third_party/interacter_stub/src/Makefile
 third_party/Makefile
 third_party_open/esmf/lnx64/bin/Makefile
-third_party_open/esmf/lnx64/bin_COS7/Makefile
 third_party_open/esmf/lnx64/Makefile
 third_party_open/esmf/lnx64/scripts/Makefile
 third_party_open/esmf/Makefile
