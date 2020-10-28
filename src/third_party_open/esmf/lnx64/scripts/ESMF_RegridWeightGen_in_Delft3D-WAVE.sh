@@ -54,8 +54,18 @@ scriptdir=`dirname $scriptdirname`
 D3D_HOME=$scriptdir/..
 regridexec=$D3D_HOME/bin/ESMF_RegridWeightGen
 # ESMF_regrid is build with old compilers etc.
-# share/esmf optionally contains some library-versions especially for running this version of ESMF_regrid
-export LD_LIBRARY_PATH=$D3D_HOME/share/delft3d/esmf/lnx64/bin:$D3D_HOME/lib:$LD_LIBRARY_PATH 
+# share/esmf optionally contains some library-versions especially for running this version of ESMF_regrid,
+# both for RedHat 6.* and 7.*
+
+grepOS=`cat /etc/redhat-release | grep -i "release 6"`
+if [ "$grepOS" != "" ]; then
+  echo "RH 6: Using RH 6 libraries" >>esmf_sh.log
+  export LD_LIBRARY_PATH=$D3D_HOME/share/delft3d/esmf/lnx64/bin:$D3D_HOME/lib:$LD_LIBRARY_PATH 
+else
+  echo "using RH 7 libraries" >>esmf_sh.log
+  export LD_LIBRARY_PATH=$D3D_HOME/share/delft3d/esmf/lnx64/bin_COS7:$D3D_HOME/lib:$LD_LIBRARY_PATH 
+fi
+
 
 echo Executing batchscript "ESMF_RegridWeightGen_in_Delft3D-WAVE.sh" for Delft3D-WAVE >>esmf_sh.log
 echo This script is located in directory $scriptdir >>esmf_sh.log
