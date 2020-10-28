@@ -6628,6 +6628,8 @@ src/third_party_open/esmf/lnx64/bin/libsvml.so -text
 src/third_party_open/esmf/lnx64/bin/libz.so.1 -text
 src/third_party_open/esmf/lnx64/bin_COS7/libcilkrts.so.5 -text svneol=unset#application/x-sharedlib
 src/third_party_open/esmf/lnx64/bin_COS7/libesmf.so -text svneol=unset#application/x-sharedlib
+src/third_party_open/esmf/lnx64/bin_COS7/libhdf5.so.200 -text
+src/third_party_open/esmf/lnx64/bin_COS7/libhdf5_hl.so.200 -text
 src/third_party_open/esmf/lnx64/bin_COS7/libifcoremt.so.5 -text svneol=unset#application/x-sharedlib
 src/third_party_open/esmf/lnx64/bin_COS7/libifport.so.5 -text svneol=unset#application/x-sharedlib
 src/third_party_open/esmf/lnx64/bin_COS7/libimf.so -text svneol=unset#application/x-sharedlib
@@ -6635,6 +6637,7 @@ src/third_party_open/esmf/lnx64/bin_COS7/libintlc.so.5 -text svneol=unset#applic
 src/third_party_open/esmf/lnx64/bin_COS7/libiomp5.so -text svneol=unset#application/x-sharedlib
 src/third_party_open/esmf/lnx64/bin_COS7/libirc.so -text svneol=unset#application/x-sharedlib
 src/third_party_open/esmf/lnx64/bin_COS7/libirng.so -text svneol=unset#application/x-sharedlib
+src/third_party_open/esmf/lnx64/bin_COS7/libnetcdf.so.18 -text
 src/third_party_open/esmf/lnx64/bin_COS7/libnetcdf.so.7 -text svneol=unset#application/x-sharedlib
 src/third_party_open/esmf/lnx64/bin_COS7/libnetcdff.so.6 -text svneol=unset#application/x-sharedlib
 src/third_party_open/esmf/lnx64/bin_COS7/libsvml.so -text svneol=unset#application/x-sharedlib
