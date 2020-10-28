@@ -166,6 +166,29 @@ rem =============================================================
 goto :endproc
 
 rem =============================================================
+rem === copyFolderContent takes two arguments: the name of    ===
+rem === the folder to copy the content to the destiny         ===
+rem === directory                                             ===
+rem ===                                                       ===
+rem === NOTE: errors will be reported and the script will     ===
+rem === with an error code after executing the rest of its    ===
+rem === statements                                            ===
+rem =============================================================
+:copyFolderContent
+    set folderName=%~1
+    set dest=%~2
+    rem
+    rem "echo f |" is (only) needed when dest does not exist
+    rem and does not harm in other cases
+    rem
+    echo f | xcopy "%folderName%" "%dest%" /s /e /h /f /y /i
+    if NOT !ErrorLevel! EQU 0 (
+        echo ERROR: while copying "!folderName!" to "!dest!"
+    )
+    call :handle_error
+goto :endproc
+
+rem =============================================================
 rem === copyNetcdf copy the appropriate netcdf.dll            ===
 rem =============================================================
 :copyNetcdf
@@ -377,7 +400,7 @@ rem ================
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl     !dest_menu!
 
     call :copyFile "engines_gpl\dimr\scripts\generic\win64\*.*"     !dest_scripts!
-    call :copyFile "engines_gpl\dimr\schemas\*.*"     				!dest_schemas!
+    call :copyFolderContent "engines_gpl\dimr\schemas"     				!dest_schemas!
 
 goto :endproc
 
