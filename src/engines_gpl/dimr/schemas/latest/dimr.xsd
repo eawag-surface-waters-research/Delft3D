@@ -305,6 +305,9 @@
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="dimrGlobalSettingsXML">
+		<xs:annotation>
+			<xs:documentation>Contains the possible keys to set for global settings in a dimrConfig</xs:documentation>
+		</xs:annotation>
 		<xs:all>
 			<xs:element name="logger_ncFormat" default="4" minOccurs="0" maxOccurs="1">
 				<xs:annotation>
