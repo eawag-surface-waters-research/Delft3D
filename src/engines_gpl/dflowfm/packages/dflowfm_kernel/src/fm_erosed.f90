@@ -2318,7 +2318,9 @@
    double precision                                      :: sutot1, sutot2
 
    integer                                               :: k1, k2, Lf, l, lnxlnxi
+   logical                                               :: upwindbedload
 
+   upwindbedload = stmpar%morpar%mornum%upwindbedload
    !if ( laterallyaveragedbedload ) then
    !   call mess(LEVEL_ERROR, 'upwbed: laterally averaged bedload not supported')
    !end if
@@ -2329,7 +2331,7 @@
       lnxlnxi = lnxi
    end if
 
-   !  internal flowlinks
+   ! internal flowlinks (and boundary flowlinks if jabndtreatment==0 -- default)
    do Lf=1,Lnxlnxi
       !     check if flowlink is active and if it connects two active sediment flownodes
       if ( hu(Lf)>epshu ) then
@@ -2340,20 +2342,22 @@
          do l=1,lsedtot
             if (stmpar%sedpar%sedtyp(l) == SEDTYP_COHESIVE) cycle   ! conform with d3d
             !
-            !           project the fluxes in flowlink direction
+            ! project the fluxes in flowlink direction
             sutot1 =  csu(Lf)*sxtot(k1,l) + snu(Lf)*sytot(k1,l)
             sutot2 =  csu(Lf)*sxtot(k2,l) + snu(Lf)*sytot(k2,l)
-
-            !           upwind approximation
-            if ( sutot1>0d0 .and. sutot2>0d0 ) then
-               e_sn(Lf,l) =  csu(Lf)*sx(k1,l) + snu(Lf)*sy(k1,l)
-               !e_st(Lf,l) = -snu(Lf)*sx(k1,l) + csu(Lf)*sy(k1,l)
-            else if ( sutot1<0d0 .and. sutot2<0d0 ) then
-               e_sn(Lf,l) =  csu(Lf)*sx(k2,l) + snu(Lf)*sy(k2,l)
-               !e_st(Lf,l) = -snu(Lf)*sx(k2,l) + csu(Lf)*sy(k2,l)
+            
+            if (upwindbedload) then
+                ! upwind approximation
+                if ( sutot1>0d0 .and. sutot2>0d0 ) then
+                   e_sn(Lf,l) =  csu(Lf)*sx(k1,l) + snu(Lf)*sy(k1,l)
+                else if ( sutot1<0d0 .and. sutot2<0d0 ) then
+                   e_sn(Lf,l) =  csu(Lf)*sx(k2,l) + snu(Lf)*sy(k2,l)
+                else
+                   e_sn(Lf,l) =  csu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + snu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
+                end if
             else
-               e_sn(Lf,l) =  csu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + snu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
-               !e_st(Lf,l) = -snu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + csu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
+                ! central approximation
+                e_sn(Lf,l) =  csu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + snu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
             end if
             e_st(Lf,l) = -snu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + csu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
          end do
@@ -2366,16 +2370,16 @@
    end do
 
    if (jabndtreatment==1) then
-      ! boundary flowlinks
+      ! boundary flowlinks processed separately
       do Lf=Lnxi+1,Lnx
          if ( hu(Lf)>epshu .and. u1(Lf)<=0d0) then
-            !           find left and right neighboring flownodes
+            ! find left and right neighboring flownodes
             k1 = ln(1,Lf)  ! boundary node
             k2 = ln(2,Lf)  ! internal node
 
             do l=1,lsedtot
-               e_sn(Lf,l) =  csu(Lf)*sx(k2,l) + snu(Lf)*sy(k2,l)
-               e_st(Lf,l) = -snu(Lf)*sx(k2,l) + csu(Lf)*sy(k2,l)
+                   e_sn(Lf,l) =  csu(Lf)*sx(k2,l) + snu(Lf)*sy(k2,l)
+                   e_st(Lf,l) = -snu(Lf)*sx(k2,l) + csu(Lf)*sy(k2,l)
             end do
          end if
       end do
@@ -4852,7 +4856,7 @@
    logical, pointer :: maximumwaterdepth
 
    maximumwaterdepth => stmpar%morpar%mornum%maximumwaterdepth
-
+   
    ucxq_mor = 0d0 ; ucyq_mor = 0d0; hs_mor = 0d0
 
    if( .not. maximumwaterdepth ) then
