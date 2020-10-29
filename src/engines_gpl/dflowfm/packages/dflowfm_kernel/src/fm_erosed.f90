@@ -40,6 +40,10 @@
 
    implicit none
 
+   integer, dimension(:),                 pointer :: link1 => NULL()
+   integer, dimension(:),                 pointer :: link1sign => NULL()
+   logical                                        :: link1_initialized = .false.
+
    real(fp), dimension(:),                pointer :: rhowat
    real(fp), dimension(:,:),              pointer :: seddif
    real(fp), dimension(:,:),              pointer :: sed
@@ -1051,6 +1055,7 @@
    end if
    !   Calculate cell centre velocities ucxq, ucyq
    call setucxucyucxuucyu()
+   call init_1dinfo()
    call setucxqucyq()
    !
    if (.not. (jawave==4 .or. jawave==3)) then
@@ -2308,6 +2313,7 @@
    use unstruc_messages
    use m_sediment, only: stmpar, jabndtreatment  ! debug
    use sediment_basics_module
+   use m_fm_erosed, only: link1, link1sign
    implicit none
 
    integer,                                  intent(in)  :: lsedtot        !< number of sediment fractions
@@ -2318,9 +2324,11 @@
    double precision                                      :: sutot1, sutot2
 
    integer                                               :: k1, k2, Lf, l, lnxlnxi
+   logical                                               :: pure1d_mor
    logical                                               :: upwindbedload
 
    upwindbedload = stmpar%morpar%mornum%upwindbedload
+   pure1d_mor = stmpar%morpar%mornum%pure1d
    !if ( laterallyaveragedbedload ) then
    !   call mess(LEVEL_ERROR, 'upwbed: laterally averaged bedload not supported')
    !end if
@@ -2341,25 +2349,54 @@
 
          do l=1,lsedtot
             if (stmpar%sedpar%sedtyp(l) == SEDTYP_COHESIVE) cycle   ! conform with d3d
-            !
-            ! project the fluxes in flowlink direction
-            sutot1 =  csu(Lf)*sxtot(k1,l) + snu(Lf)*sytot(k1,l)
-            sutot2 =  csu(Lf)*sxtot(k2,l) + snu(Lf)*sytot(k2,l)
             
-            if (upwindbedload) then
-                ! upwind approximation
-                if ( sutot1>0d0 .and. sutot2>0d0 ) then
-                   e_sn(Lf,l) =  csu(Lf)*sx(k1,l) + snu(Lf)*sy(k1,l)
-                else if ( sutot1<0d0 .and. sutot2<0d0 ) then
-                   e_sn(Lf,l) =  csu(Lf)*sx(k2,l) + snu(Lf)*sy(k2,l)
-                else
-                   e_sn(Lf,l) =  csu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + snu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
-                end if
+            if (pure1d_mor .and. abs(kfs(Lf)) == 1) then
+               ! on 1D links use the x-component which is the full vector
+               if (link1(k1) == Lf) then
+                   sutot1 =  sxtot(k1,l)
+               else
+                   sutot1 = link1sign(k1) * sxtot(k1,l)
+               endif
+               if (link1(k2) == Lf) then
+                   sutot2 =  sxtot(k2,l)
+               else
+                   sutot2 = link1sign(k2) * sxtot(k2,l)
+               endif
+               
+               if (upwindbedload) then
+                   ! upwind approximation
+                   if ( sutot1>0d0 .and. sutot2>0d0 ) then
+                      e_sn(Lf,l) =  sx(k1,l)
+                   else if ( sutot1<0d0 .and. sutot2<0d0 ) then
+                      e_sn(Lf,l) =  sx(k2,l)
+                   else
+                      e_sn(Lf,l) =  0.5d0*(sx(k1,l)+sx(k2,l))
+                   end if
+               else
+                   ! central approximation
+                   e_sn(Lf,l) =  0.5d0*(sx(k1,l)+sx(k2,l))
+               end if
+               e_st(Lf,l) = 0d0
             else
-                ! central approximation
-                e_sn(Lf,l) =  csu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + snu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
+               ! project the fluxes in flowlink direction
+               sutot1 =  csu(Lf)*sxtot(k1,l) + snu(Lf)*sytot(k1,l)
+               sutot2 =  csu(Lf)*sxtot(k2,l) + snu(Lf)*sytot(k2,l)
+               
+               if (upwindbedload) then
+                   ! upwind approximation
+                   if ( sutot1>0d0 .and. sutot2>0d0 ) then
+                      e_sn(Lf,l) =  csu(Lf)*sx(k1,l) + snu(Lf)*sy(k1,l)
+                   else if ( sutot1<0d0 .and. sutot2<0d0 ) then
+                      e_sn(Lf,l) =  csu(Lf)*sx(k2,l) + snu(Lf)*sy(k2,l)
+                   else
+                      e_sn(Lf,l) =  csu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + snu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
+                   end if
+               else
+                   ! central approximation
+                   e_sn(Lf,l) =  csu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + snu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
+               end if
+               e_st(Lf,l) = -snu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + csu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
             end if
-            e_st(Lf,l) = -snu(Lf)*0.5d0*(sx(k1,l)+sx(k2,l)) + csu(Lf)*0.5d0*(sy(k1,l)+sy(k2,l))
          end do
       else
          do l=1,lsedtot
@@ -2378,8 +2415,17 @@
             k2 = ln(2,Lf)  ! internal node
 
             do l=1,lsedtot
+               if (pure1d_mor .and. kfs(Lf) == -1) then
+                   if (link1(k2) == Lf) then
+                       e_sn(Lf,l) = sx(k2,l)
+                   else
+                       e_sn(Lf,l) = link1sign(k2) * sx(k2,l) ! TODO: check
+                   endif
+                   e_st(Lf,l) = 0d0
+               else
                    e_sn(Lf,l) =  csu(Lf)*sx(k2,l) + snu(Lf)*sy(k2,l)
                    e_st(Lf,l) = -snu(Lf)*sx(k2,l) + csu(Lf)*sy(k2,l)
+               end if
             end do
          end if
       end do
@@ -4842,21 +4888,133 @@
 
    end subroutine
 
+   subroutine init_1dinfo()
+   use m_flowgeom, only: lnx1D, ln, ndx
+   use m_sediment, only: stmpar
+   use m_fm_erosed, only: link1, link1sign, link1_initialized
+   
+   integer :: k1
+   integer :: k2
+   integer :: L
+   
+   if (.not. stmpar%morpar%mornum%pure1d) return
+   if (link1_initialized) return
+   
+   ! if (isassociated(link1)) deallocate(link1, link1sign) ! if link1 were associated then link1_initailized is true and this statement isn't reached
+   allocate(link1(ndx), link1sign(ndx))
+   
+   ! we define the node as the begin/end point of the first link connected to it
+   link1(:) = 0
+   link1sign(:) = 0
+   do L = 1,lnx1D
+       k1 = ln(1,L)
+       k2 = ln(2,L)
+       if (link1(k1) == 0) then
+           link1(k1) = L
+           link1sign(k1) = -1
+       endif
+       if (link1(k2) == 0) then
+           link1(k2) = L
+           link1sign(k2) = 1
+       endif
+   enddo
+   link1_initialized = .true.
+   end subroutine init_1dinfo
+
+
    subroutine setucxqucyq()
-   use m_fm_erosed, only: ucxq_mor, ucyq_mor, hs_mor
-   use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl, ndxi
-   use m_flow, only: hs, hu, u1, ucxq, ucyq, zws, kmx, kmxL
+   use m_fm_erosed, only: ucxq_mor, ucyq_mor, hs_mor, link1, link1sign
+   use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl, ndxi, lnx1D, kcs
+   use m_flow, only: hs, hu, u1, ucxq, ucyq, zws, kmx, kmxL, au, q1
    use m_flowparameters ,only: jacstbnd, epshs, eps10
    use m_sediment, only: stmpar
    use m_turbulence, only:ln0
+   use m_CrossSections, only: GetCSParsFlow
+   use unstruc_channel_flow, only: network
 
    implicit none
    integer          :: L, LL, k, k1, k2, Lt, Lb, kk, kb, kt
    double precision :: wcxu, wcyu, cs, sn, uin, huL
    logical, pointer :: maximumwaterdepth
+   double precision, dimension(:), allocatable :: area
+   integer                                     :: qsign
+   double precision :: area_L
+   double precision :: width_L
+   double precision :: perim_L
+   integer          :: nstruc
 
    maximumwaterdepth => stmpar%morpar%mornum%maximumwaterdepth
    
+   allocate(area(ndx))
+   
+   do k = 1,ndx
+       hs_mor(k) = hs(k)
+       if (kcs(k) == 1) then
+           ucxq_mor(k) = 0d0
+           ucyq_mor(k) = 0d0
+           area(k)= 0d0
+       else
+           ucxq_mor(k) = ucxq(k)
+           ucyq_mor(k) = ucyq(k)
+       endif
+   enddo
+   
+   ! we define the node as the begin/end point of the first link connected to it
+   if (stmpar%morpar%mornum%pure1d) then
+   do L = 1,lnx1D
+       k1 = ln(1,L)
+       k2 = ln(2,L)
+       nstruc = network%adm%lin2str(L)
+       if (kcs(k1) == 1) then ! link pointing away from the node
+           if (link1(k1) == L) then
+               qsign = 1
+           else
+               qsign = link1sign(k1)
+           endif
+           ! call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)
+           ucxq_mor(k1) = ucxq_mor(k1) + qsign * q1(L)
+           if (.true.) then !nstruc > 0) then
+              ! link has structure
+              ! see getprof_1D: if this is not a boundary link, we can use L to index line2cross.
+              call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, hs(k1), area_L, perim_L, width_L)
+           else
+              ! no structure on link
+              area_L = au(L)
+           endif
+           area(k1)     = area(k1) + area_L
+       endif
+       if (kcs(k2) == 1) then ! link pointing towards the node
+           if (link1(k2) == L) then
+               qsign = 1
+           else
+               qsign = -link1sign(k2)
+           endif
+           ucxq_mor(k2) = ucxq_mor(k2) + qsign * q1(L)
+           if (.true.) then !nstruc > 0) then ! link has structure?
+              ! link has structure
+              ! see getprof_1D: if this is not a boundary link, we can use L to index line2cross.
+              call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, hs(k2), area_L, perim_L, width_L)
+           else
+              ! no structure on link
+              area_L = au(L)
+           endif
+           area(k2)     = area(k2) + area_L
+       endif
+   enddo
+   
+   do k = 1,ndx
+       if (kcs(k) == 1) then
+           ucxq_mor(k) = ucxq_mor(k)/area(k)
+           ucyq_mor(k) = 0d0
+       else
+           ucxq_mor(k) = ucxq(k)
+           ucyq_mor(k) = ucyq(k)
+       endif
+   enddo
+   
+   deallocate(area)
+
+   else
    ucxq_mor = 0d0 ; ucyq_mor = 0d0; hs_mor = 0d0
 
    if( .not. maximumwaterdepth ) then
@@ -4990,6 +5148,7 @@
          enddo
         endif
       enddo
+   endif
    endif
    end subroutine setucxqucyq
 

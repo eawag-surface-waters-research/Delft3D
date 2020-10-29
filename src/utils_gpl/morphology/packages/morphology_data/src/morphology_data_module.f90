@@ -264,6 +264,7 @@ end type moroutputtype
 ! sediment transport and morphology numerical settings
 !
 type mornumericstype
+    logical :: pure1d                   ! temporary switch for 1D treatment in FM
     logical :: upwindbedload            ! switch for upwind bedload in UPWBED
     logical :: laterallyaveragedbedload ! bedload transport laterally averaged in UPWBED
     logical :: maximumwaterdepth        ! water depth at zeta point in DWNVEL given by
@@ -1454,6 +1455,7 @@ subroutine nullmorpar(morpar)
     !
     call initmoroutput(morpar%moroutput)
     !
+    morpar%mornum%pure1d                   = .false.
     morpar%mornum%upwindbedload            = .true.
     morpar%mornum%laterallyaveragedbedload = .false.
     morpar%mornum%maximumwaterdepth        = .false.
