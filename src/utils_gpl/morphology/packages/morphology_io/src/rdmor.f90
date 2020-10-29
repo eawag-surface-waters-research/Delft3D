@@ -39,20 +39,21 @@ public echomor
 
 contains
 
+!> Reads attribute file for 3D morphology computation
 subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                & lsed      ,nmaxus    ,nto       ,lfbedfrm  , &
                & nambnd    ,julday    ,mor_ptr   ,sedpar    ,morpar    , &
                & fwfac     ,morlyr    ,griddim)
-!!--description-----------------------------------------------------------------
-!
-! Reads attribute file for 3D morphology computation
-!
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
     use table_handles
     use bedcomposition_module
-    use morphology_data_module
+    use morphology_data_module, only: moroutputtype, mornumericstype, &
+      & bedbndtype, sedpar_type, morpar_type, initmoroutput, &
+      & FLUX_LIMITER_MINMOD, FLUX_LIMITER_MC, FLUX_LIMITER_NONE, &
+      & MOR_STAT_TIME, MOR_STAT_BODS, MOR_STAT_MIN, MOR_STAT_MAX, &
+      & MOR_STAT_MEAN, MOR_STAT_STD, MOR_STAT_CUM
     use grid_dimens_module, only: griddimtype
     use sediment_basics_module
     use string_module
@@ -190,6 +191,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     real(fp)                   , dimension(:) , allocatable           :: rfield
     logical                                                           :: ex       ! Logical flag for file existence
     logical                                                           :: found
+    logical                                                           :: ldef
     character(10)                                                     :: versionstring
     character(20)                                                     :: fluxlimstring
     character(80)                                                     :: bndname
@@ -710,10 +712,14 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                mornum%fluxlim = FLUX_LIMITER_MC  
            case default 
                mornum%fluxlim = FLUX_LIMITER_NONE  
-       end select
+           end select
        !
        ! Output options
        !
+       call prop_get_logical(mor_ptr, 'Output', 'OutDefault', ldef, success = found)
+       if (found) then
+           call initmoroutput(moroutput, ldef)
+       endif
        call prop_get_logical(mor_ptr, 'Output', 'VelocAtZeta', moroutput%uuuvvv)
        call prop_get_logical(mor_ptr, 'Output', 'VelocMagAtZeta', moroutput%umod)
        call prop_get_logical(mor_ptr, 'Output', 'VelocZAtZeta', moroutput%zumod)
@@ -1022,14 +1028,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
 end subroutine rdmor
 
 
+!> Reads morphology input version 0 (or no version number found)
 subroutine rdmor0(ilun      ,morfac    ,tmor      ,thresh    ,morupd    , &
                 & eqmbc     ,densin    ,aksfac    ,rwave     ,rouse     , &
                 & alfabs    ,alfabn    ,sus       ,bed       ,susw      , &
                 & bedw      ,sedthr    ,thetsd    ,hmaxth    ,fwfac     )
-!!--description-----------------------------------------------------------------
-!
-! Reads morphology input version 0 (or no version number found)
-!
 !!--declarations----------------------------------------------------------------
     use precision
     implicit none
@@ -1102,17 +1105,14 @@ subroutine rdmor0(ilun      ,morfac    ,tmor      ,thresh    ,morupd    , &
 end subroutine rdmor0
 
 
+!> Read  morphology input version 1
+!! The first line in the file must be:
+!! * version 1
 subroutine rdmor1(ilun      ,morfac    ,tmor      ,thresh    ,morupd    , &
                 & eqmbc     ,densin    ,aksfac    ,rwave     ,alfabs    , &
                 & alfabn    ,sus       ,bed       ,susw      ,bedw      , &
                 & sedthr    ,thetsd    ,hmaxth    ,fwfac     ,epspar    , &
                 & iopkcw    ,rdc       ,rdw       )
-!!--description-----------------------------------------------------------------
-!
-! Read  morphology input version 1
-! The first line in the file must be:
-! * version 1
-!
 !!--declarations----------------------------------------------------------------
     use precision
     implicit none
@@ -1203,12 +1203,9 @@ subroutine rdmor1(ilun      ,morfac    ,tmor      ,thresh    ,morupd    , &
 end subroutine rdmor1
 
 
+!> Report morphology settings to diag file
 subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
                  & nambnd    ,sedpar    ,morpar    ,dtunit    )
-!!--description-----------------------------------------------------------------
-!
-! Report morphology settings to diag file
-!
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
@@ -1869,11 +1866,9 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     call echoflufflyr(lundia    ,error    ,morpar%flufflyr)
 end subroutine echomor
 
+
+!> Read fluff layer parameters from an input file
 subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,sedpar ,griddim )
-!!--description-----------------------------------------------------------------
-!
-! Read fluff layer parameters from an input file
-!
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
@@ -2120,11 +2115,9 @@ subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,
     endif                                                                                                                                                         
 end subroutine rdflufflyr
 
+
+!> Report fluff layer settings to diag file
 subroutine echoflufflyr(lundia    ,error    ,flufflyr)
-!!--description-----------------------------------------------------------------
-!
-! Report fluff layer settings to diag file
-!
 !!--declarations----------------------------------------------------------------
     use precision
     use morphology_data_module

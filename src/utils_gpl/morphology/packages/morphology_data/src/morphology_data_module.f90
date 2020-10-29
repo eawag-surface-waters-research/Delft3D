@@ -68,13 +68,13 @@ public nullsedtra
 public allocsedtra
 public clrsedtra
 public allocfluffy
-public CHARLEN
+public initmoroutput
 
 ! define a missing value consistent with netCDF _fillvalue
 real(fp), parameter, public :: missing_value = 9.9692099683868690e+36_fp
 
-integer, parameter         :: CHARLEN = 40
-      
+integer, parameter, public :: CHARLEN = 40
+
 integer, parameter, public :: RP_TIME  =  1     ! time since reference date [s]
 integer, parameter, public :: RP_EFUMN =  2     ! U component of effective depth averaged velocity [m/s]
 integer, parameter, public :: RP_EFVMN =  3     ! V component of effective depth averaged velocity [m/s]
@@ -729,15 +729,10 @@ type sedtra_type
 end type sedtra_type
 
 contains
-!
-!
-!
-!============================================================================== 
+
+
+!> Nullify/initialize a sedtra_type data structure.
 subroutine nullsedtra(sedtra)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Nullify/initialize a sedtra_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     use precision
     !
@@ -831,15 +826,10 @@ subroutine nullsedtra(sedtra)
     !
     nullify(sedtra%statqnt)
 end subroutine nullsedtra
-!
-!
-!
-!============================================================================== 
+
+
+!> Allocate the arrays of sedtra_type data structure.
 subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx, nstatqnt, iopt)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Allocate the arrays of sedtra_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     use precision
     !
@@ -1051,15 +1041,10 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
         endif
     enddo
 end subroutine allocsedtra
-!
-!
-!
-!============================================================================== 
+
+
+!> Clear the arrays of sedtra_type data structure.
 subroutine clrsedtra(istat, sedtra)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Clear the arrays of sedtra_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     use precision
     !
@@ -1154,15 +1139,10 @@ subroutine clrsedtra(istat, sedtra)
     !
     if (associated(sedtra%statqnt ))   deallocate(sedtra%statqnt , STAT = istat)
 end subroutine clrsedtra
-!
-!
-!
-!============================================================================== 
+
+
+!> Nullify/initialize a sedpar_type data structure.
 subroutine nullsedpar(sedpar)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Nullify/initialize a sedpar_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     use precision
     !
@@ -1230,15 +1210,10 @@ subroutine nullsedpar(sedpar)
     nullify(sedpar%flsdbd)
     nullify(sedpar%flstcg)
 end subroutine nullsedpar
-!
-!
-!
-!========
+
+
+!> Clean up a sedpar_type data structure.
 subroutine clrsedpar(istat     ,sedpar  )
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Clean up a sedpar_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     implicit none
     !
@@ -1280,15 +1255,10 @@ subroutine clrsedpar(istat     ,sedpar  )
     if (associated(sedpar%flsdbd))     deallocate(sedpar%flsdbd,     STAT = istat)
     if (associated(sedpar%flstcg))     deallocate(sedpar%flstcg,     STAT = istat)
 end subroutine clrsedpar
-!
-!
-!
-!============================================================================== 
+
+
+!> Nullify/initialize a morpar_type data structure.
 subroutine nullmorpar(morpar)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Nullify/initialize a morpar_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     use precision
     !
@@ -1482,55 +1452,7 @@ subroutine nullmorpar(morpar)
     eulerisoglm         => morpar%eulerisoglm
     glmisoeuler         => morpar%glmisoeuler
     !
-    morpar%moroutput%transptype  = 2
-    !
-    morpar%moroutput%statflg(:,:) = 0
-    morpar%moroutput%nstatqnt     = 0
-    morpar%moroutput%weightflg    = 1
-    morpar%moroutput%avgintv      = -999d0
-    morpar%moroutput%morstats     = .false.
-    !
-    morpar%moroutput%aks           = .false.
-    morpar%moroutput%cumavg        = .false.
-    morpar%moroutput%dg            = .false.
-    morpar%moroutput%dgsd          = .false.
-    morpar%moroutput%dm            = .false.
-    morpar%moroutput%dmsedcum      = .false.
-    morpar%moroutput%dpbedlyr      = .true.
-    morpar%moroutput%dzduuvv       = .false.
-    morpar%moroutput%fixfac        = .false.
-    morpar%moroutput%hidexp        = .false.
-    morpar%moroutput%frac          = .false.
-    morpar%moroutput%lyrfrac       = .true.
-    morpar%moroutput%msed          = .true.
-    morpar%moroutput%mudfrac       = .false.
-    morpar%moroutput%percentiles   = .false.
-    morpar%moroutput%poros         = .true.
-    morpar%moroutput%rca           = .true.
-    morpar%moroutput%rsedeq        = .true.
-    morpar%moroutput%sandfrac      = .false.
-    morpar%moroutput%sedparout     = .false.
-    morpar%moroutput%sbuuvv        = .true.
-    morpar%moroutput%sbcuv         = .false.
-    morpar%moroutput%sscuv         = .false.
-    morpar%moroutput%sbcuuvv       = .false.
-    morpar%moroutput%ssuuvv        = .true.
-    morpar%moroutput%sbwuv         = .false.
-    morpar%moroutput%sbwuuvv       = .false.
-    morpar%moroutput%sswuv         = .false.
-    morpar%moroutput%sswuuvv       = .false.
-    morpar%moroutput%suvcor        = .false.
-    morpar%moroutput%sourcesink    = .false.
-    morpar%moroutput%taurat        = .false.
-    morpar%moroutput%umod          = .false.
-    morpar%moroutput%ustar         = .false.
-    morpar%moroutput%uuuvvv        = .false.
-    morpar%moroutput%ws            = .true.
-    morpar%moroutput%zumod         = .false.
-    morpar%moroutput%rawtransports = .false.
-    morpar%moroutput%blave         = .false.
-    morpar%moroutput%bamor         = .false.
-    morpar%moroutput%wumor         = .false.
+    call initmoroutput(morpar%moroutput)
     !
     morpar%mornum%upwindbedload            = .true.
     morpar%mornum%laterallyaveragedbedload = .false.
@@ -1567,7 +1489,7 @@ subroutine nullmorpar(morpar)
     sedthr             = 0.5_fp
     hmaxth             = 1.0_fp
     bedw               = 1.0_fp
-    factcr             = 1.0_fp    
+    factcr             = 1.0_fp
     factsd             = 1.0_fp
     rdw                = 0.02_fp
     rdc                = 0.01_fp
@@ -1629,15 +1551,80 @@ subroutine nullmorpar(morpar)
     !
     call initfluffy(morpar%flufflyr)
 end subroutine nullmorpar
-!
-!
-!
-!============================================================================== 
+
+
+!> Give the morphological output flags their default value
+subroutine initmoroutput(moroutput, def)
+    type(moroutputtype), intent(inout) :: moroutput !< data structure containing all morphology output flags
+    logical  , optional, intent(in)    :: def       !< optional default value for morphology output flags
+    !
+    logical :: yes ! value assigned to output flags that are .true. by default
+    logical :: no  ! value assigned to output flags that are .false. by default
+    !
+    if (present(def)) then
+        ! if default value is  specified, use it for all flags
+        yes = def
+        no  = def
+    else
+        ! if default value is not specified, use .true. and .false.
+        yes = .true.
+        no  = .false.
+    endif
+    !
+    moroutput%transptype  = 2
+    !
+    moroutput%statflg(:,:) = 0
+    moroutput%nstatqnt     = 0
+    moroutput%weightflg    = 1
+    moroutput%avgintv      = -999d0
+    moroutput%morstats     = .false.
+    !
+    moroutput%aks           = no
+    moroutput%cumavg        = no
+    moroutput%dg            = no
+    moroutput%dgsd          = no
+    moroutput%dm            = no
+    moroutput%dmsedcum      = no
+    moroutput%dpbedlyr      = yes
+    moroutput%dzduuvv       = no
+    moroutput%fixfac        = no
+    moroutput%hidexp        = no
+    moroutput%frac          = no
+    moroutput%lyrfrac       = yes
+    moroutput%msed          = yes
+    moroutput%mudfrac       = no
+    moroutput%percentiles   = no
+    moroutput%poros         = yes
+    moroutput%rca           = yes
+    moroutput%rsedeq        = yes
+    moroutput%sandfrac      = no
+    moroutput%sedparout     = no
+    moroutput%sbuuvv        = yes
+    moroutput%sbcuv         = no
+    moroutput%sscuv         = no
+    moroutput%sbcuuvv       = no
+    moroutput%ssuuvv        = yes
+    moroutput%sbwuv         = no
+    moroutput%sbwuuvv       = no
+    moroutput%sswuv         = no
+    moroutput%sswuuvv       = no
+    moroutput%suvcor        = no
+    moroutput%sourcesink    = no
+    moroutput%taurat        = no
+    moroutput%umod          = no
+    moroutput%ustar         = no
+    moroutput%uuuvvv        = no
+    moroutput%ws            = yes
+    moroutput%zumod         = no
+    moroutput%rawtransports = no
+    moroutput%blave         = no
+    moroutput%bamor         = no
+    moroutput%wumor         = no
+end subroutine initmoroutput
+
+
+!> Initialize a fluff layer data structure
 subroutine initfluffy(flufflyr)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Initialize a fluff layer data structure.
-!
 !!--declarations----------------------------------------------------------------
     implicit none
     !
@@ -1665,15 +1652,10 @@ subroutine initfluffy(flufflyr)
     flufflyr%bfluff1_fil = ' '
     flufflyr%depfac_fil  = ' '
 end subroutine initfluffy
-!
-!
-!
-!============================================================================== 
+
+
+!> Allocate a fluff layer data structure.
 function allocfluffy(flufflyr, lsed, nmlb, nmub) result(istat)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Allocate a fluff layer data structure.
-!
 !!--declarations----------------------------------------------------------------
     implicit none
     !
@@ -1704,15 +1686,10 @@ function allocfluffy(flufflyr, lsed, nmlb, nmub) result(istat)
        if (istat==0) allocate(flufflyr%depfac(lsed,nmlb:nmub), STAT = istat)
     endselect
 end function allocfluffy
-!
-!
-!
-!============================================================================== 
+
+
+!> Clean up a fluff layer data structure.
 subroutine clrfluffy(istat, flufflyr)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Clean up a fluff layer data structure.
-!
 !!--declarations----------------------------------------------------------------
     implicit none
     !
@@ -1737,15 +1714,10 @@ subroutine clrfluffy(istat, flufflyr)
     if (associated(flufflyr%sourf))       deallocate(flufflyr%sourf,       STAT = istat)
     if (associated(flufflyr%mflfil))      deallocate(flufflyr%mflfil,      STAT = istat)
 end subroutine clrfluffy
-!
-!
-!
-!============================================================================== 
+
+
+!> Clean up a morpar_type data structure.
 subroutine clrmorpar(istat, morpar)
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Clean up a morpar_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     use table_handles
     !
@@ -1789,15 +1761,10 @@ subroutine clrmorpar(istat, morpar)
     endif
     !
 end subroutine clrmorpar
-!
-!
-!
-!============================================================================== 
+
+
+!> Nullify/initialize a trapar_type data structure.
 subroutine nulltrapar(trapar  )
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Nullify/initialize a trapar_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     use precision
     !
@@ -1844,15 +1811,10 @@ subroutine nulltrapar(trapar  )
     nullify(trapar%iparfld)
     nullify(trapar%parfld)
 end subroutine nulltrapar
-!
-!
-!
-!============================================================================== 
+
+
+!> Clean up a trapar_type data structure.
 subroutine clrtrapar(istat     ,trapar  )
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Clean up a trapar_type data structure.
-!
 !!--declarations----------------------------------------------------------------
     use precision
     !
