@@ -27899,7 +27899,7 @@ end do
               enddo
 
               dzb = dzm
-              do k  = mx - kuni, 1, -1
+              do k  = mx - kuni - 1, 1, -1   ! Carefull attention by Julien, kuni minus one
                  dzb = dzb*sigmagrowthfactor
                  zslay(k,j) = zslay(k+1,j) - dzb
               enddo
