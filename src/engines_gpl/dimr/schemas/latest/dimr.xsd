@@ -289,7 +289,7 @@
 					<xs:documentation>Involved couplers</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="global_settings" type="dimr:dimrGlobalSettingsXML" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="global_settings" type="dimr:dimrGlobalSettingsXML" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="dimrGlobalSettingsXML">
