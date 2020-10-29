@@ -30,7 +30,7 @@
 						</xs:enumeration>
 						<xs:enumeration value="1.3">
 							<xs:annotation>
-								<xs:documentation>Added more settings/parameters. Optional global_settings element in dimrConfig with optional logger_ncFormat key (DELFT3D-36568). Optional include element with mandatory href attribute (DELFT3D-37391). Removed sequence check of elements in complex element dimrComponent as we do not care about the sequence but the elements only (DELFT3D-37607). Fully backwards compatible with previous versions</xs:documentation>
+								<xs:documentation>Added more settings/parameters. Optional global_settings element in dimrConfig with optional logger_ncFormat key (DELFT3D-36568). Optional include element with mandatory href attribute (DELFT3D-37391). Removed sequence check of elements in complex element dimrComponent as we do not care about the sequence but the elements only (DELFT3D-37607). Added optional element mpiCommunicator in the control element for parallel (UNST-3299). Fully backwards compatible with previous versions</xs:documentation>
 							</xs:annotation>
 						</xs:enumeration>
 					</xs:restriction>
@@ -200,6 +200,20 @@
 				<xs:annotation>
 					<xs:documentation>Value definition of a variable that is provided to the BMI model AFTER initialize is called</xs:documentation>
 				</xs:annotation>
+			</xs:element>
+			<xs:element name="mpiCommunicator" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The MPI communicator value</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="DFM_COMM_DFMWORLD">
+							<xs:annotation>
+								<xs:documentation>The MPI communicator (FORTRAN handle).</xs:documentation>
+							</xs:annotation>
+						</xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
 			</xs:element>
 		</xs:all>
 		<xs:attribute name="name" type="xs:string" use="required">
