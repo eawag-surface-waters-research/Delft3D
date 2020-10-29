@@ -11531,9 +11531,12 @@ subroutine flow_sedmorinit()
     character(40)                             :: errstr
     type (bedbndtype), dimension(:) , pointer :: morbnd
     integer                                   :: kk, k, kbot, ktop, i, j, isus, ifrac, isusmud, isussand, isf, ised, Lf, npnt, j0, ierr
+    integer                                   :: ic !< cross section index
+    integer                                   :: icd !< cross section definition index
     integer                                   :: ibr, nbr, pointscount, k1, ltur_
     integer                                   :: npnterror=0   !< number of grid points without cross-section definition
     integer, dimension(:), allocatable        :: kp
+    integer, dimension(:), allocatable        :: crossdef_used !< count number of times a cross section definition is used
     type(t_branch), pointer                   :: pbr
     double precision                          :: dim_real
 
@@ -11650,21 +11653,46 @@ subroutine flow_sedmorinit()
 
     nbr = network%brs%count
     if ( jased.eq.4 .and. nbr > 0) then
+       allocate(crossdef_used(network%csdefinitions%count))
+       crossdef_used = 0
        do ibr = 1, nbr
            pbr => network%brs%branch(ibr)
            pointscount = pbr%gridPointsCount
            do i = 1, pointscount
               k1 = pbr%grd(i)
-              if (gridpoint2cross(k1)%cross(1) .eq. -999) then
-                 npnterror = npnterror + 1
-                 call mess(LEVEL_WARN , 'Grid point '//trim(pbr%gridPointIDs(i))//' has no cross section. This is a requirement for morphological updating.')
-              endif
+              do j = 1, gridpoint2cross(k1)%num_cross_sections
+                 ic = gridpoint2cross(k1)%cross(j)
+                 if (ic == -999) then
+                    if (j == 1) then
+                       npnterror = npnterror + 1
+                       if (npnterror == 1) then
+                           call mess(LEVEL_WARN , 'Before switching on morphological updating, please fix the following issues:')
+                       endif
+                       call mess(LEVEL_WARN , '- Grid point '//trim(pbr%gridPointIDs(i))//' should get a cross section.')
+                    endif
+                    cycle
+                 endif
+                 icd = network%crs%cross(ic)%itabdef
+                 crossdef_used(icd) = crossdef_used(icd) + 1
+              enddo
            enddo
        enddo
+       !
+       do icd = 1, network%csdefinitions%count
+          if (crossdef_used(icd) > 1) then
+             npnterror = npnterror + 1
+             if (npnterror == 1) then
+                 call mess(LEVEL_WARN , 'Before switching on morphological updating, please fix the following issues:')
+             endif
+             call mess(LEVEL_WARN , '- Cross section definition '//trim(network%csdefinitions%cs(icd)%id)//' shouldn''t be used at multiple locations.')
+          endif
+       enddo
+       deallocate(crossdef_used)
+       !
        write(errstr,'(I0)') npnterror
        if (stmpar%morpar%bedupd) then
           if( npnterror > 0 ) then
-             call mess(LEVEL_FATAL, 'A cross section is needed at every grid point for morphological updating. '//trim(errstr)//' grid points detected without cross section. Please adjust the input.')
+             call mess(LEVEL_FATAL, 'A unique cross section definition is needed at every grid point for morphological updating. '//trim(errstr)//' grid points detected without such definition. Please adjust the input.')
              return
           endif
        endif
@@ -21747,18 +21775,18 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile,    id_varucx, valobsT(:,IPNT_UCX+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_varucy, valobsT(:,IPNT_UCY+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_varucz, valobsT(:,IPNT_UCZ+kk-1),  start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          if (jasal > 0) then
+       if (jasal > 0) then
              ierr = nf90_put_var(ihisfile, id_varsal, valobsT(:,IPNT_SA1 +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          end if
-          if (jatem > 0) then
+       end if
+       if (jatem > 0) then
              ierr = nf90_put_var(ihisfile, id_vartem, valobsT(:,IPNT_TEM1+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          end if
-          if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
+       end if
+       if (jasal > 0 .or. jatem > 0 .or. jased > 0) then
              ierr = nf90_put_var(ihisfile, id_varrho, valobsT(:,IPNT_RHO +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          end if
-          if (jased > 0 .and. .not. stm_included) then
+       end if
+       if (jased > 0 .and. .not. stm_included) then
              ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED +kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1 /))
-          end if
+       end if
           if (IVAL_TRA1 > 0) then
              do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
                i = j - IVAL_TRA1 + 1
@@ -21910,16 +21938,16 @@ subroutine unc_write_his(tim)            ! wrihis
           if (kk > 1) then
              ierr = nf90_put_var(ihisfile, id_zcs,    valobsT(:,IPNT_ZCS+kk-2),   start = (/ kk-1,1, it_his /), count = (/ 1, ntot, 1 /))
           endif
-          if (iturbulencemodel >= 3 .and. jahistur > 0) then
+       if (iturbulencemodel >= 3 .and. jahistur > 0) then
              ierr = nf90_put_var(ihisfile, id_turkin, valobsT(:,IPNT_TKIN +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
              ierr = nf90_put_var(ihisfile, id_tureps, valobsT(:,IPNT_TEPS +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-          endif
-          if (iturbulencemodel > 1) then
+       end if
+       if (iturbulencemodel > 1) then
              ierr = nf90_put_var(ihisfile, id_vicwwu, valobsT(:,IPNT_VICWW+kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-          endif
-          if (idensform > 0 .and. jaRichardsononoutput > 0) then
+       end if
+       if (idensform > 0 .and. jaRichardsononoutput > 0) then
              ierr = nf90_put_var(ihisfile, id_rich,   valobsT(:,IPNT_RICH +kk-1), start = (/ kk,  1, it_his /), count = (/ 1, ntot, 1 /))
-          endif
+       end if
           !
           if (IVAL_WS1 > 0) then
              call realloc(toutputx, (/ntot, stmpar%lsedsus /), keepExisting=.false., fill = dmiss)
@@ -23372,7 +23400,7 @@ subroutine fill_valobs()
 
             if (iturbulencemodel.ge.2) then
                call reorder_valobs_array(kmx+1,valobs(IPNT_VICWW:IPNT_VICWW+kmx,i), kb, kt, nlayb, dmiss)
-            endif
+         endif
             if (iturbulencemodel.ge.3) then
                call reorder_valobs_array(kmx+1,valobs(IPNT_TKIN:IPNT_TKIN+kmx,i), kb, kt, nlayb, dmiss)
                call reorder_valobs_array(kmx+1,valobs(IPNT_TEPS:IPNT_TEPS+kmx,i), kb, kt, nlayb, dmiss)
