@@ -1,77 +1,611 @@
 \documentclass[signature]{deltares_manual}
-\usepackage{listings}
-\usepackage[titletoc]{appendix}
-%-----------------------------------------------
-\lstset{ %
-  basicstyle=\footnotesize,        % the size of the fonts that are used for the code listings
+\svnid{$Id: DIMR-Manual.tex 48961 2016-12-09 10:52:28Z peele_rh $}
+\usepackage{booktabs}
+\usepackage {color}
+\definecolor {gray}     {rgb} { 0.4, 0.4, 0.4 }
+\definecolor {darkblue} {rgb} { 0.0, 0.0, 0.6 }
+\definecolor {cyan}     {rgb} { 0.0, 0.6, 0.6 }
+\definecolor {orange}   {rgb} { 1.0, 0.5, 0.0 }
+\definecolor {brown}    {rgb} { 0.6, 0.3, 0}
+\usepackage {listings}
+
+\lstdefinelanguage {XML} {
+	escapechar=\%,
+	identifierstyle=\color{brown},
+	stringstyle=\color{blue},
+	morestring=[b]",
+	morecomment=[s]{<?}{?>},
+	morecomment=[s][\color{green}]{<!--}{-->},
+	keywordstyle=\color{red},
+	morekeywords={
+		designation,
+		icaoCode,
+		ilsFreq,
+		ilsID,
+		name,
+		partition,
+		pathname,
+		range,
+		schemaLocation,
+		state,
+		tora,
+		towerFreq,
+		trueBRG,
+		type,
+		units,
+		value,
+		version,
+		xmlns,
+		xsi
+	} % list your attributes here
 }
+
+\lstset {
+	language=XML,
+	basicstyle=\ttfamily\footnotesize,
+	columns=fullflexible,
+	showstringspaces=false,
+	commentstyle=\color{gray}\upshape
+}
+
+%------------------------------------------------------------------------------
+\graphicspath{{../common/}}
+\usepackage[final]{pdfpages}
+%------------------------------------------------------------------------------
+\hypersetup
+{
+	pdfauthor   = {Deltares},
+	pdftitle    = {DIMR},
+	pdfkeywords = {Deltares User Manual DIMR},
+	pdfcreator  = {LaTeX hyperref},
+	pdfproducer = {ps2pdf}
+}
+%------------------------------------------------------------------------------
+
+\renewcommand\BackgroundPicPart{
+	\put(0,0){
+		\parbox[b][\paperheight]{\paperwidth}{%
+			\vspace{8\baselineskip}
+			\hspace{44mm} % 20mm wegens leftmarginskip + 24 mm ~ 1 inch
+			\includegraphics[width=\paperwidth, height=\paperheight, keepaspectratio]{../common/pictures/deltares_delft3d_part.png}%
+			\vfill
+		}
+	}
+}
+\renewcommand\BackgroundPicChapter{
+	\put(0,0){
+		\parbox[b][\paperheight]{\paperwidth}{%
+			\vspace{4\baselineskip}
+			\hspace{220mm}
+			\includegraphics[width=15mm]{../common/cover/d-hydro_ribbon_page_manual.pdf}%
+			\vfill
+		}
+	}
+}
+
+\newcommand\T{\rule{0pt}{2.6ex}}       % Top T
+\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % Bottom T
+
+\usepackage[titletoc]{appendix}
+% D-Waves
+\newcommand{\dwaves}{D-Waves\xspace}
+\newcommand{\swan}{SWAN\xspace}
+% D-WAQ
+\newcommand{\dwaqfull}{\textrm{D-Water~Quality}\xspace}
+\newcommand{\dwaq}{\dwaqfull}
+% Flow modules
+\newcommand{\dflowfmfull}{\textrm{D-Flow~Flexible~Mesh}\xspace}
+\newcommand{\dflowfm}{\textrm{D-Flow~FM}\xspace}
+\newcommand{\dflowoned}{D-Flow\,1D\xspace}
+% D-RR
+\newcommand{\drainfallrunoff}{\textrm{D-Rainfall~Runoff}\xspace}
+\newcommand{\drrfull}{\drainfallrunoff}
+\newcommand{\drr}{D-RR\xspace}
+% D-RTC
+\newcommand{\drtcfull}{D-Real~Time~Control\xspace}
+\newcommand{\drtc}{D-RTC\xspace}
+\newcommand{\rtctools}{\textrm{RTC-Tools}\xspace}
+\newcommand{\fbctools}{\textrm{FBC-Tools}\xspace}
+
+
+
+\newcommand{\dimr}{\textrm{DIMR}\xspace}
+\newcommand{\dimrfull}{\textrm{Deltares Integrated Model Runner}\xspace}
+\newcommand{\ProgramName}{\dimrfull (\dimr)\xspace}
+
+%-----------------------------------------------
+%\lstset{ %
+%	basicstyle=\footnotesize,        % the size of the fonts that are used for the code listings
+%}
 
 \begin{document}
 \pagestyle{empty}
+\includepdf[pages=1,offset=72 -70]{../common/cover/deltaressystems-cover-dimr-um.pdf} % links-rechts past precies
 \cleardoublepage
 %
-\newcommand{\ProgramName}{DIMR\xspace}
-
 \title{\ProgramName}
 \subtitle{Manual}
 \manualtype{User manual}
-\projectnumber{}
+\projectnumber{DC DSC - Testbank Activiteiten, DIMR improvements, ts 182}
 \client{Deltares}
-\reference{I1000447-015-DIMR-002}
+\reference{I1000511-009}
 \classification{-}
 
-\date{PROJECT_DATE}
+\date{2020-10-30}
 \version{1.0}
 
-\keywords{software}
+\keywords{software \dimrfull \dimr}
 
-\references{Refer to \autoref{chapterLiterature}}
+\references{Refer to \autoref{chap:literature}}
 
-\summary{}
+\summary{\dimr is a small program to run combinations of simulation cores, components, ensuring that data is exchanged at the right timing.}
 
 \versioni{1.0}
-\datei{PROJECT_DATE}
-\authori{}
-\revieweri{}
-\approvali{}
-
-\status{draft}
-
-
-%\deltarestitle
-
-
+\datei{2020-10-30}
+\authori{Adri Mourits,\newline Ralph Peelen}
+\revieweri{Luca Carniato,\newline Stef Hummel,\newline Arjen Markus}
+\approvali{Arthur Baart,\newline Jan Mooiman}
+\status{Concept}
+\deltarestitle
 %------------------------------------------------------------------------------
 \chapter{Introduction} 
-\label{chapterIntroduction}
+\label{chap:introduction}
+This User Manual concerns the module \ProgramName.
 
-\section{Over dit document} \label{sec:PurposeAndScope}
+\dimr is a small program to run combinations of simulation cores, components, ensuring that data is exchanged at the right timing. In a \dimr configuration file, the user can describe how the components should be combined and what data has to be exchanged.
+
+
+\section{About this document} \label{sec:PurposeAndScope}
+To make this manual more accessible we will briefly describe the contents of each chapter.
+
+\Autoref{chap:usage}: \nameref{chap:usage} describes the basics on \dimr usage.
+
+\Autoref{chap:tutorials}: \nameref{chap:tutorials} describes .
 
 \section{Versions}
 \label{sec:Versions}
-This is the draft version of this document.
 
-%------------------------------------------------------------------------------
-\chapter{Installation}
-\label{sec:Installation}
+This is the draft version of this document.
+\section{Manual version and revisions}
+This manual applies to:
+\begin{itemize}
+	\item \dimr version 1.0-1.3
+\end{itemize}
+
+\section{Changes with respect to previous versions}
+\label{sec:Changlist}
+This is the first edition.
 
 %------------------------------------------------------------------------------
 \chapter{Usage}
-\label{sec:usage}
+\label{chap:usage}
+\section{Basic functionality}
+\label{sec:DIMR_basic_functionality}
+
+\subsection{Introduction} 
+\label{subsec:functionalintroduction}
+\dimr stands for \dimrfull. The module is dedicated to deploy modules that simulate physical phenomena, such as hydraulics or waves, and the exchange of data between them.
+
+\subsection{Running a computation} 
+\label{subsec:DIMRRun}
+The following recipe can be used for both Windows and Linux computations (modifications for Linux are in notes below the recipe):
+\begin{itemize}
+	\item Locate the file \file{run\_dimr.bat} on your system. It is in your installation folder and then the path \file{$\backslash$plugins$\backslash$DeltaShell.Dimr$\backslash$kernels$\backslash$x64$\backslash$scripts}. (One directory up is a set of folders, one for each component.)
+	\item Open a console/command box in the directory where you placed your exported model. The \dimr configuration file should be in this directory, see figure \autoref{fig:dimrconsole}
+	\item Execute \file{run\_dimr.bat} in this location
+\end{itemize}
+\Note Note the quotes around \file{run\_dimr.bat} and its path; this is necessary when the path contains white spaces.
+
+\Note When the \dimr configuration file has another name than \file{dimr\_config.xml}, then this name must be given as argument of \file{run\_dimr.bat}. A "usage" text is shown on errors and when adding argument "--help" to \file{run\_dimr.bat}.
+
+\Note When a kernel runs in parallel using MPI, the script \file{run\_dimr\_parallel.bat} should be used instead of \file{run\_dimr.bat}; it is located in the same directory.
+
+\Note On Linux, the recipe is identical. The name of the Linux run script is \file{run\_dimr.sh}, located in directory \file{lnx64$\backslash$bin}. A submit-script is needed when using a computation cluster with a queueing tool and when doing parallel computations. A script, named \file{submit\_dimr.sh} is available for the Deltares cluster; this script can be used, after modification, for clusters outside Deltares.
+
+\Note On Linux, when copying the binaries manually to another location, you have to execute the script \file{bin$\backslash$libtool\_install.sh} after the copy action.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=15cm] {pictures/dimrconsole.png}
+	\caption{Console example for running DIMR} 
+	\label{fig:dimrconsole}
+\end{figure}
+
+\subsection{Time management}
+\label{subsec:timemanagement}
+Time is essential and each component is free to handle time in its own way. Some components have \textit{Boundary Conditions} which are specified in a particular calendar, for example the \textit{Julian} calendar. Other components do not use a specific point of time.
+
+Currently \dimr supports the following \textit{Integrated models}:
+\begin{itemize}
+	\item Stand alone execution of each individual component \dflowoned, \dflowfm, \dwaq and \dwaves
+	\item \dflowoned and \drr: Both components must have the same start-date. Both models will start at time equals zero.
+	\item \dflowoned and \drtc: The reference-dates of both components must be equal. The \drtc timestep must match the timestep as specified in the \dimr configuration file, since \drtc will perform exactly one (privately defined) timestep on each call.
+%	\item \dflowoned and \dflowfm, using \onedtwod: See \Autoref{chap:Iterative_coupling}. This is on flooding events, where 	no astronomical \textit{Boundary Conditions} and tide generated forces are supported. Reference-dates are equal to start-dates. Both components start at time equals	 zero.
+%	\item \dflowoned, \dflowfm (using \onedtwod) and \drtc: See items above.
+	\item \dflowoned and \dwaq: First execute \dflowoned, then \dwaq. This is possible using one \dimr configuration file.
+	\item \dflowfm and \drtc: See the combination of \dflowoned and \drtc above.
+	\item \dflowfm and \dwaves: The reference-date of both components must be equal. Both models start at time equals zero.
+	\item \dflowfm , \dwaves and \drtc: See items above.
+	\item \dflowfm and \dwaq: First execute \dflowfm, then \dwaq. This is possible using one \dimr configuration file.
+\end{itemize}
+
+\section{Technical Information} \label{chap:DIMR_technical}
+
+\subsection{Introduction} 
+\label{subsec:TechnicalIntroduction}
+\autoref{subsec:BMI} describes the BMI interface. \autoref{subsec:DIMRConfig} to \autoref{subsec:exchange} describe the \dimr configuration file.
+
+\subsection{BMI interface} 
+\label{subsec:BMI}
+The communcation between \dimr and the components is according to the BMI-interface (\url{https://csdms.colorado.edu/wiki/BMI_Description}). All child calculation components in \dimr (\dflowoned, \dflowfm, \dwaves, etc.) are BMI-compliant. The basic BMI-interface implements:
+\begin{itemize}
+	\item initialize
+	\item update (perform one timestep, or more - upto the simulation timespan)
+	\item finalize
+	\item get (data)
+	\item set (data)
+\end{itemize}
+
+\Note \dimr itself is also BMI-compliant; The \dimr executable uses the BMI-interface in the communication with \dimr library.
+
+\subsection{The \dimr configuration file} \label{subsec:DIMRConfig}
+The \dimr input file is in XML format. \autoref{sec:DIMR_config_XML} contains an example.
+
+\subsection{The \dimr schema file} 
+\label{subsec:DIMRxsd}
+The \dimr input file is in XML format it can be validated agains an XML schema. \autoref{sec:DIMR_config_XSD} contains an example.
+
+\subsection{Sequential and parallel simulations} 
+\label{subsec:SecPrl}
+\dimr enables sequential and parallel simulations in three ways:
+\begin{itemize}
+	\item \textbf{Sequential simulations}: Component 1 is executed for its full simulation period, output is produced, then component 2 is executed, optionally using the output produced by simulation component 1. Component 2 can not influence component 1. This is normally the configuration when doing a \dflowfm calculation followed by a \dwaq calculation.
+	%, as follows:
+	%\begin{itemize}
+	%	\item initialize componentA
+	%	\item initialize componentB
+	%	\item run update (simulation timespan)
+	%	\item finalize componentA
+	%	\item coupler_componentA_2_componentB
+	%	\item update (simulation timespan)
+	%	\item finalize componentB
+	%\end{itemize}
+	%Sequential deployment is suitable in cases where no feedback is required (from componentB back to componentA).
+	
+	\item \textbf{Parallel simulation}: Components 1 and 2 are both started, component 1 simulates a time period, exchanges data with component 2, component 2 is executed and exchanges data with component 1. This is repeated until the full simulation period is handled. This is normally the configuration when doing a \dflowfm simulation containing a structure being controlled based on hydrodynamic results, for example the water level at a certain location. Also the parallel simulation of \dflowfm with \dwaves uses this configuration. A combination of \dflowfm, \drtc and \dwaves, with different communication frequencies is possible. In \autoref{sec:DIMR_config_XML}: \nameref{sec:DIMR_config_XML}, an example is given for the parallel simulation of \dflowfm with \drtc. Mark the following lines:
+	\begin{itemize}
+		\item \textit{<parallel>} Parallel simulation
+		\item \textit{\quad<start name="dflowfm" />} Start the "master" component
+		\item \textit{\quad<startGroup>} Start a "slave" component
+		\item \textit{\qquad<start name="Real-Time Control" />}
+	\end{itemize}
+	\Note Inside a parallel simulation, exactly one component must act as the "master" simulation. All other components must be defined using the \textit{<startGroup>} block. Normally, the flow component is the "master" simulation. \\
+	\Note The order of appearance in the \textit{<control>} block defines the order of execution during an "update" event.
+	\item \textbf{Parallel simulation using a parallel component}: In the examples above, \dflowfm itself can run in parallel, using several partitions to do the flow simulation, exchanging data directly via MPI. In the example in \autoref{sec:DIMR_config_XML}: \nameref{sec:DIMR_config_XML}, the line \textit{<process>0 1 2</process>} indicates that in a multi processor computation, this component should run in the first three processes. Also the following "magic" line must be added: \textit{<mpiCommunicator>DFM\_COMM\_DFMWORLD</mpiCommunicator>}
+\end{itemize}
+
+\subsection{Data exchange} 
+\label{subsec:exchange}
+When \dimr has to take care of data-exchange, it must be specified in the config file using a \textit{<coupler>} block. Each coupler has a unique name and can optionally be used more than once in the \textit{<control>} block. Currently, only scalar quantities can be exchanged by \dimr. In the example in \autoref{sec:DIMR_config_XML}: \nameref{sec:DIMR_config_XML}, two couplers are used; their definitions (source/target components, source/target itemNames) are at the end of the example.
+
+\section{\dimr configuration file (XML-format)}
+\label{sec:DIMR_config_XML}
+
+\subsection{Protected file extensions}
+In \autoref{tab:ProtectedFileExtensions} a listing of the protected file extension is given, these file extensions are used by the calculation components of \dimr to detect which importer should be used for importing the model.
+\begin{longtable}{p{20mm}|p{20mm}}
+	\caption{Protected file name and extensions\label{tab:ProtectedFileExtensions}}      
+	\\  \hline
+	\T \textbf{File or \newline Extension} & \textbf{Importer}  \B\\ \hline
+	\T $\ast$.mdu & \dflowfm \\
+	$\ast$.md1d & \dflowoned \\
+	settings.json & \drtc \B \\
+	\hline   
+\end{longtable}
+
+\begin{Remark}
+	\item If the name of the input file for \drtc is not given, the assumptions is made that the input xml-files are located at the sub-directory: \dir{./rtc/$\ast$.xml}
+\end{Remark}
+
+\subsection{Example \dimr configuration file}
+
+\begin{lstlisting}
+	<?xml version="1.0" encoding="ISO-8859-1"?>
+	<dimrConfig xsi:schemaLocation="http://schemas.deltares.nl/dimr http://content.oss.deltares.nl/schemas/latest/dimr.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.deltares.nl/dimr">
+		<documentation>
+			<fileVersion>1.03</fileVersion>
+			<createdBy>Deltares, Coupling team</createdBy>
+			<creationDate>2015-05-20T07:56:32+01</creationDate>
+		</documentation>
+		<control>
+			<parallel>
+				<startGroup>
+					<time>0.0 60.0 99999999.0</time>
+					<coupler name="flow2rtc"/>
+					<start name="myNameRTC"/>
+					<coupler name="rtc2flow"/>
+				</startGroup>
+				<start name="myNameDFlowFM"/>
+			</parallel>
+		</control>
+		<component name="myNameDFlowFM">
+			<library>dflowfm</library>
+			<process>0 1 2</process>
+			<mpiCommunicator>DFM_COMM_DFMWORLD</mpiCommunicator>
+			<workingDir>fm</workingDir>
+			<inputFile>weirtimeseries.mdu</inputFile>
+			<setting key="verbose" value="DEBUG"/> <!-- Set level to many messages before initialize -->
+			<setting key="bloomspecies" value="/opt/delft3dfm_latest/lnx64/share/delft3d/bloom.spe"/>
+			<setting key="processlibrary" value="../../substances/proc_def.dat"/>
+			<parameter key="verbose" value="FATAL"/> <!-- Set level to less messages before update -->			
+		</component>
+		<component name="myNameRTC">
+			<library>RTCTools_BMI</library>
+			<process>0</process>
+			<workingDir>rtc</workingDir>
+			<!-- component specific -->
+			<inputFile>settings.json</inputFile>
+		</component>
+		<coupler name="flow2rtc">
+			<sourceComponent>myNameDFlowFM</sourceComponent>
+			<targetComponent>myNameRTC</targetComponent>
+			<item>
+				<sourceName>observations/Upstream/water_level</sourceName>
+				<targetName>input_ObservationPoint01_water_level</targetName>
+			</item>
+		</coupler>
+		<coupler name="rtc2flow">
+			<sourceComponent>myNameRTC</sourceComponent>
+			<targetComponent>myNameDFlowFM</targetComponent>
+			<item>
+				<sourceName>output_weir_crest_level</sourceName>
+				<targetName>weirs/weir01/crest_level</targetName>
+			</item>
+		</coupler>
+	</dimrConfig>
+\end{lstlisting}
+%------------------------------------------------------------------------------
+\section{\dimr schema file (XSD-format)}
+\label{sec:DIMR_config_XSD}
+
+\subsection{Introduction} 
+\label{subsec:xsdintroduction}
+XSD (XML Schema Definition) specifies how to formally describe the elements in an Extensible Markup Language (XML) document. This description can be used to verify that each item of content in a document adheres to the description of the element in which the content is to be placed.
+
+XSD can also be used for generating XML documents that can be treated as programming objects. In addition, a variety of XML processing tools can also generate human readable documentation, which makes it easier to understand complex XML documents.
+
+In general, a schema is an abstract representation of an object's characteristics and relationship to other objects. An XML schema represents the interrelationship between the attributes and elements of an XML object (for example, a document or a portion of a document). The process of creating a schema for a document involves analyzing its structure and defining each structural element encountered. For example, a schema for a document describing a website would define a website element, a webpage element, and other elements that describe possible content divisions within any page on that site. Just as in XML and HTML, elements are defined within a set of tags.
+
+We have defined the dimr.xsd to validate our generated \dimr config xml files before parsing the xml in the \dimr executable and running it via the \dimr library with the \dimr computational cores (\dflowfm, \dflowoned, \drr, etc).
+
+\autoref{subsec:dimrConfigxsd} describes the definition of the  main element of the \dimr configuration xml. 
+\autoref{subsec:dimrRequiredxsd} describes the definition of the  required elements of the \dimr configuration xml. 
+\autoref{subsec:dimrOptionalxsd} describes the definition of the  required elements of the \dimr configuration xml.
+\subsection{dimrConfig}
+\label{subsec:dimrConfigxsd}
+This is our main element for the \dimr xml configuration.
+
+\Note Please note it validates the xml sequantial.
+
+It need an element to provide information about the \dimr configuration, an element to control the flow between the computational cores and an element to define the computational cores as components.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p1.png}
+	\caption{Configuration for DIMR} 
+	\label{fig:dimrConfig}
+\end{figure}
+
+\subsection{Required elements}
+\label{subsec:dimrRequiredxsd}
+The three 'required' elements (besides the obvious documentation element) for a \dimr configuration are:
+\begin{itemize}
+	\item control
+	\item component
+	\item coupler
+\end{itemize}
+\subsubsection{Documentation}
+Although this is mandatory for the dimrConfig section is is not realy well set up. It is meant too check if the generated \dimr config xml can be validated agaist the xsd. It also has other informative elements but they are not really relevant to the configuration
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p44.png}
+	\caption{Documentation} 
+	\label{fig:dimrDocumentation}
+\end{figure}
+\begin{lstlisting}
+ 	<?xml version="1.0" encoding="ISO-8859-1"?>
+ 	<dimrConfig xsi:schemaLocation="http://schemas.deltares.nl/dimr http://content.oss.deltares.nl/schemas/latest/dimr.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.deltares.nl/dimr">
+ 		<documentation>
+ 			<fileVersion>1.03</fileVersion>
+		 	<createdBy>Deltares, Coupling team</createdBy>
+	 		<creationDate>2015-05-20T07:56:32+01</creationDate>
+ 		</documentation>
+	 	...
+ 	</dimrConfig>
+\end{lstlisting}
+ 
+\subsubsection{Control}
+
+\Note The order of appearance in the \textit{<control>} block defines the order of execution during an "update" event.
+
+Control flow specification for the DIMR-execution. Executed sequentially, except for components in a "parallel" element
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p11.png}
+	\caption{Control flow} 
+	\label{fig:dimrControl}
+\end{figure}
+
+If running sequentially we need to specify the computational core component in the \textbf{start} element with an attribute \textbf{name}
+
+We can specify a control flow that has to be executed in parallel
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p12.png}
+	\caption{Control flow parallel} 
+	\label{fig:dimrControlParallel}
+\end{figure}
+
+You can see we need to set a start group of components and couplers to be executed according to the frequency in the "time" element. The element \textbf{start} can be found here again but also the reference coupler connecting the computational core components. For coupler see \autoref{subsubsec:coupler}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p33.png}
+	\caption{Control flow parallel, Start group} 
+	\label{fig:dimrControlParallelStartGroup}
+\end{figure}
+
+\begin{lstlisting}
+	<?xml version="1.0" encoding="ISO-8859-1"?>
+	<dimrConfig xsi:schemaLocation="http://schemas.deltares.nl/dimr http://content.oss.deltares.nl/schemas/latest/dimr.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.deltares.nl/dimr">
+		...
+		<control>
+			<parallel>
+				<startGroup>
+					<time>0.0 60.0 99999999.0</time>
+					<coupler name="flow2rtc"/>
+					<start name="myNameRTC"/>
+					<coupler name="rtc2flow"/>
+				</startGroup>
+				<start name="myNameDFlowFM"/>
+			</parallel>
+		</control>
+		...
+	</dimrConfig>
+\end{lstlisting}
+
+\subsubsection{Component}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p3.png}
+	\caption{Configuration for \dimr computational core component} 
+	\label{fig:dimrComponent}
+\end{figure}
+\subsubsection{Computational core component settings and paramters}
+\label{subsubsec:ccc_setting_parameter}
+\Note Please note setting and parameter can be used 0 - multiple times with a key / value structure
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p7.png}
+	\caption{Setting to be set to calculation core component before bmi model initialize is called} 
+	\label{fig:dimrComponentSetting}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p9.png}
+	\caption{Parameter to be set to calculation core component after bmi model initialize is called} 
+	\label{fig:dimrComponentParameter}
+\end{figure}
+
+\begin{lstlisting}
+	<?xml version="1.0" encoding="ISO-8859-1"?>
+	<dimrConfig xsi:schemaLocation="http://schemas.deltares.nl/dimr http://content.oss.deltares.nl/schemas/dimr-1.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.deltares.nl/dimr">
+		..
+		<component name="myNameDFlowFM">
+			<library>dflowfm</library>
+			<process>0 1 2</process>
+			<mpiCommunicator>DFM_COMM_DFMWORLD</mpiCommunicator>
+			<workingDir>fm</workingDir>
+			<inputFile>weirtimeseries.mdu</inputFile>
+			<setting key="verbose" value="DEBUG"/> <!-- Set level to many messages -->
+			<setting key="bloomspecies" value="/opt/delft3dfm_latest/lnx64/share/delft3d/bloom.spe"/>
+			<setting key="processlibrary" value="../../substances/proc_def.dat"/>
+			<parameter key="verbose" value="FATAL"/> <!-- Set level to less messages -->
+		</component>
+	..
+	</dimrConfig>
+\end{lstlisting}
+
+\subsubsection{Coupler}
+\label{subsubsec:coupler}
+The last required element is \textbf{coupler}. This is only required if you are running an integrated model with more than one computational core component. This element specifies the coupling action to be performed between two BMI-compliant model computation core components
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p17.png}
+	\caption{coupler} 
+	\label{fig:dimrCoupler}
+\end{figure}
+\begin{lstlisting}
+	<?xml version="1.0" encoding="ISO-8859-1"?>
+	<dimrConfig xsi:schemaLocation="http://schemas.deltares.nl/dimr http://content.oss.deltares.nl/schemas/latest/dimr.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.deltares.nl/dimr">
+		...
+		<coupler name="rtc2flow">
+		<sourceComponent>myNameRTC</sourceComponent>
+		<targetComponent>myNameDFlowFM</targetComponent>
+			<item>
+				<sourceName>output_weir_crest_level</sourceName>
+				<targetName>weirs/weir01/crest_level</targetName>
+			</item>
+		</coupler>
+	</dimrConfig>
+\end{lstlisting}
+
+\subsection{Optional elements}
+\label{subsec:dimrOptionalxsd}
+All the following sections are in principle optional elements for a \dimr configuration:
+\subsubsection{dimrConfig - waitFile} 
+File path to wait for before the initialization process starts (useful for attaching to process when debugging)
+\subsubsection{dimrConfig - coupler} 
+As described in section \autoref{subsubsec:coupler} this is only required if you need to calculate a model in parallel with more than one computational core components. 
+\subsubsection{dimrConfig - global\_settings} 
+This optional element contains settings to be used by the \dimr executable or \dimr libary it self. It is not for the computational core components.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p26.png}
+	\caption{Global \dimr settings} 
+	\label{fig:dimrGlobalSettings}
+\end{figure}
+\subsubsection{dimrComponent - Setting / Parameter} 
+see section \autoref{subsubsec:ccc_setting_parameter}
+\begin{longtable}{|p{\textwidth/6-2mm-12pt}|p{\textwidth/2-2mm-12pt}|} 
+\caption{Difference Setting and Parameter for Computational Core component} \\% 
+\bottomline 
+Setting & key / value to be set to calculation core component before bmi model initialize is called  \\ 
+\midline 
+Parameter & key / value to be set to calculation core component after bmi model initialize is called \\ 
+\bottomline 
+\end{longtable} 
+
+\subsubsection{dimrComponent - process} 
+Number of subprocesses in the model component instance (0 if there is no parallel computation)
+
+\subsubsection{dimrComponent - mpiCommunicator} 
+The MPI communicator value (can only be )
+
+\subsubsection{dimrCoupler - logger} 
+Logger for logging the values that get exchanged in this coupler.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.45\textwidth] {pictures/dimr_diagrams/dimr_p29.png}
+	\caption{Log exchanged values in this coupler between the computational core components} 
+	\label{fig:dimrCouplerLogger}
+\end{figure}
+
 
 %------------------------------------------------------------------------------
 \chapter{Tutorials}
-\label{sec:Tutorials}
+\label{chap:tutorials}
 
 
 %------------------------------------------------------------------------------
-\chapter{Literature}  \label{chapterLiterature}
+\chapter{Literature}  
+\label{chap:literature}
 
 \bibliography{../DIMR_references/DIMR_references}
 
 
+%-------------------------------------------------------------------------------
+\cleardoublepage
+%
+\newpage
 \pagestyle{empty}
 \mbox{}
+\includepdf[pages=2,offset=-72 -70]{cover/deltaressystems-cover-dimr-trm.pdf} % links-rechts past precies
 
 %------------------------------------------------------------------------------
 \end{document}

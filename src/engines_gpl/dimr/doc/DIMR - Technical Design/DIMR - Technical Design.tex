@@ -1,49 +1,152 @@
-\documentclass[signature]{deltares_report}
-\usepackage{listings}
-\usepackage[titletoc]{appendix}
-%-----------------------------------------------
-\lstset{ %
-  basicstyle=\footnotesize,        % the size of the fonts that are used for the code listings
+\documentclass[signature]{deltares_manual}
+\svnid{$Id: DIMR-TechnicalDesign.tex 48961 2016-12-09 10:52:28Z peele_rh $}
+\usepackage{booktabs}
+\usepackage {color}
+\definecolor {gray}     {rgb} { 0.4, 0.4, 0.4 }
+\definecolor {darkblue} {rgb} { 0.0, 0.0, 0.6 }
+\definecolor {cyan}     {rgb} { 0.0, 0.6, 0.6 }
+\definecolor {orange}   {rgb} { 1.0, 0.5, 0.0 }
+\definecolor {brown}    {rgb} { 0.6, 0.3, 0}
+\usepackage {listings}
+
+\lstdefinelanguage {XML} {
+	escapechar=\%,
+	identifierstyle=\color{brown},
+	stringstyle=\color{blue},
+	morestring=[b]",
+	morecomment=[s]{<?}{?>},
+	morecomment=[s][\color{green}]{<!--}{-->},
+	keywordstyle=\color{red},
+	morekeywords={
+		designation,
+		icaoCode,
+		ilsFreq,
+		ilsID,
+		name,
+		partition,
+		pathname,
+		range,
+		schemaLocation,
+		state,
+		tora,
+		towerFreq,
+		trueBRG,
+		type,
+		units,
+		value,
+		version,
+		xmlns,
+		xsi
+	} % list your attributes here
 }
 
-\definecolor{Gray}{gray}{0.9}
-
-\begin{document}
-\pagestyle{empty}
-\cleardoublepage
-%
-
-\newcommand{\ProgramName}{PROJECT_NAME\xspace}
-
-\title{\ProgramName}
-\subtitle{Technical Design}
-\projectnumber{PROJECT_NUMBER}
-\client{Deltares}
-\reference{PROJECT_NUMBER-PROJECT_NAME-003}
-\classification{-}
-
-\date{PROJECT_DATE}
-\version{1.0}
-
-\keywords{software}
-
-\references{Refer to \autoref{chapterLiterature}}
-
-\summary{}
-
-\versioni{1.0}
-\datei{PROJECT_DATE}
-\authori{Carles Salvador Soriano Perez}
-\revieweri{}
-\approvali{}
-
-\status{draft}
-\disclaimer{}
-
-%\deltarestitle
-
+\lstset {
+	language=XML,
+	basicstyle=\ttfamily\footnotesize,
+	columns=fullflexible,
+	showstringspaces=false,
+	commentstyle=\color{gray}\upshape
+}
 
 %------------------------------------------------------------------------------
+\graphicspath{{../common/}}
+\usepackage[final]{pdfpages}
+%------------------------------------------------------------------------------
+\hypersetup
+{
+	pdfauthor   = {Deltares},
+	pdftitle    = {DIMR},
+	pdfkeywords = {Deltares Technical Design DIMR},
+	pdfcreator  = {LaTeX hyperref},
+	pdfproducer = {ps2pdf}
+}
+%------------------------------------------------------------------------------
+
+\renewcommand\BackgroundPicPart{
+	\put(0,0){
+		\parbox[b][\paperheight]{\paperwidth}{%
+			\vspace{8\baselineskip}
+			\hspace{44mm} % 20mm wegens leftmarginskip + 24 mm ~ 1 inch
+			\includegraphics[width=\paperwidth, height=\paperheight, keepaspectratio]{../common/pictures/deltares_delft3d_part.png}%
+			\vfill
+		}
+	}
+}
+\renewcommand\BackgroundPicChapter{
+	\put(0,0){
+		\parbox[b][\paperheight]{\paperwidth}{%
+			\vspace{4\baselineskip}
+			\hspace{220mm}
+			\includegraphics[width=15mm]{../common/cover/d-hydro_ribbon_page_manual.pdf}%
+			\vfill
+		}
+	}
+}
+
+\newcommand\T{\rule{0pt}{2.6ex}}       % Top T
+\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % Bottom T
+
+\usepackage[titletoc]{appendix}
+% D-Waves
+\newcommand{\dwaves}{D-Waves\xspace}
+\newcommand{\swan}{SWAN\xspace}
+% D-WAQ
+\newcommand{\dwaqfull}{\textrm{D-Water~Quality}\xspace}
+\newcommand{\dwaq}{\dwaqfull}
+% Flow modules
+\newcommand{\dflowfmfull}{\textrm{D-Flow~Flexible~Mesh}\xspace}
+\newcommand{\dflowfm}{\textrm{D-Flow~FM}\xspace}
+\newcommand{\dflowoned}{D-Flow\,1D\xspace}
+% D-RR
+\newcommand{\drainfallrunoff}{\textrm{D-Rainfall~Runoff}\xspace}
+\newcommand{\drrfull}{\drainfallrunoff}
+\newcommand{\drr}{D-RR\xspace}
+% D-RTC
+\newcommand{\drtcfull}{D-Real~Time~Control\xspace}
+\newcommand{\drtc}{D-RTC\xspace}
+\newcommand{\rtctools}{\textrm{RTC-Tools}\xspace}
+\newcommand{\fbctools}{\textrm{FBC-Tools}\xspace}
+
+
+
+\newcommand{\dimr}{\textrm{DIMR}\xspace}
+\newcommand{\dimrfull}{\textrm{Deltares Integrated Model Runner}\xspace}
+\newcommand{\ProgramName}{\dimrfull (\dimr)\xspace}
+
+%-----------------------------------------------
+%\lstset{ %
+%	basicstyle=\footnotesize,        % the size of the fonts that are used for the code listings
+%}
+
+\begin{document}
+	\pagestyle{empty}
+	\includepdf[pages=1,offset=72 -70]{../common/cover/deltaressystems-cover-dimr-um.pdf} % links-rechts past precies
+	\cleardoublepage
+	%
+	\title{\ProgramName}
+	\subtitle{Technical Design}
+	\manualtype{}
+	\projectnumber{DC DSC - Testbank Activiteiten, DIMR improvements, ts 182}
+	\client{Deltares}
+	\reference{I1000511-009}
+	\classification{-}
+	
+	\date{2020-10-30}
+	\version{1.0}
+	
+	\keywords{software \dimrfull \dimr}
+	
+	\references{Refer to \autoref{chap:literature}}
+	
+	\summary{\dimr is a small program to run combinations of simulation cores, components, ensuring that data is exchanged at the right timing.}
+	
+	\versioni{1.0}
+	\datei{2020-10-30}
+	\authori{Adri Mourits,\newline Ralph Peelen}
+	\revieweri{Luca Carniato,\newline Stef Hummel,\newline Arjen Markus}
+	\approvali{Arthur Baart,\newline Jan Mooiman}
+	\status{Concept}
+	\deltarestitle%------------------------------------------------------------------------------
 \chapter{Introduction} 
 \label{chapterIntroduction}
 

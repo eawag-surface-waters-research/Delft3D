@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>7</zoom_level>
+  <element>
+    <id>UMLSequenceAllInOne</id>
+    <coordinates>
+      <x>175</x>
+      <y>0</y>
+      <w>1001</w>
+      <h>1309</h>
+    </coordinates>
+    <panel_attributes>obj=Integrated model~a
+obj=Lifeline Iterative1D2dCoupler~b
+obj=Lifeline DFlow1d~c
+obj=Lifeline DFlowFM~d
+
+a-&gt;&gt;&gt;b : Oninitialize(); on=b
+b-&gt;&gt;&gt;c : ModelInitialize()
+b-&gt;&gt;&gt;c : ModelInitialize()
+off=b
+
+on=b
+a-&gt;&gt;&gt;b : OnExecute()
+
+b-&gt;b + : newTime += userTimeStep
+on=b
+off=b
+
+b-&gt;&gt;&gt;c : InitializeUserTimeStep()
+b-&gt;&gt;&gt;d : InitializeUserTimeStep()
+
+combinedFragment=loop~loop1 a d; b: currentTime &lt; newTime
+b-&gt;&gt;&gt;c : InitializeComputationalTimeStep();on=c
+c-&gt;b : Timestep1D;off=c
+b-&gt;&gt;&gt;d : InitializeComputationalTimeStep();on=d
+d-&gt;b : Timestep1D;off=d
+c-&gt;d : Timestep1D
+combinedFragment=loop~loop2 a d; b: not converged
+b-&gt;&gt;&gt;c
+b-&gt;b + :timeStep = min (timeStep1D, timeStep2D)
+on=b
+off=b;
+
+b-&gt;&gt;&gt;c : GetVar(water_level)
+b-&gt;&gt;&gt;d : SetVar(water_level)
+b-&gt;&gt;&gt;d : RunComputaionalTimeStep(); on=d
+d-&gt;d + : compute 1d2d coefficients
+on=d
+off=d
+
+d-&gt;b : success, timeStep2D;off=d
+
+b-&gt;&gt;&gt;d : GetVar(qzeta1d2d)
+b-&gt;&gt;&gt;d : GetVar(qlat1d2d)
+b-&gt;&gt;&gt;c : SetVar(qzeta1d2d)
+b-&gt;&gt;&gt;c : SetVar(qlat1d2d)
+b-&gt;&gt;&gt;c : RunComputaionalTimeStep(); on=c
+c-&gt;b : success, timeStep1D;off=c
+
+b-&gt;b + :Check convergence
+on=b
+off=b;
+
+--=loop2
+b-&gt;b + :CurrentTime += timeStep
+on=b
+off=b;
+b-&gt;&gt;&gt;c : FinalizeComputationalTimeStep()
+b-&gt;&gt;&gt;d : FinalizeComputationalTimeStep()
+
+--=loop1
+b-&gt;&gt;&gt;c : FinalizeUserTimeStep()
+b-&gt;&gt;&gt;d : FinalizeUserTimeStep()
+
+
+off=b;</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
