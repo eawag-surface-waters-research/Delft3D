@@ -1,30 +1,30 @@
 mkdir "BuildLogs"
 
-cd "DIMR - Functional Design"
+cd "DIMR-FunctionalDesign"
 call buildDoc.bat
 cd ..
 
-cd "DIMR - Manual"
+cd "DIMR-Manual"
 call buildDoc.bat
 cd ..
 
-cd "DIMR - Technical Design"
+cd "DIMR-TechnicalDesign"
 call buildDoc.bat
 cd ..
 
-cd "DIMR - Technical Documentation"
+cd "DIMR-TechnicalDocumentation"
 call buildDoc.bat
 cd ..
 
-cd "DIMR - Technical Design"
+cd "DIMR-TechnicalDesign"
 call buildDoc.bat
 cd ..
 
-cd "DIMR - Test Plan"
+cd "DIMR-TestPlan"
 call buildDoc.bat
 cd ..
 
-cd "DIMR - Test Report"
+cd "DIMR-TestReport"
 call buildDoc.bat
 cd ..
 

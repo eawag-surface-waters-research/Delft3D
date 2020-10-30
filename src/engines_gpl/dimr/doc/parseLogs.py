@@ -4,12 +4,12 @@ logDirectory = r"./BuildLogs"
 pdfDirectory = r"."
 
 pdfFiles = os.listdir(pdfDirectory)
-expectedDocuments = ["DIMR - Functional Design.pdf",
-					 "DIMR - Manual.pdf",
-					 "DIMR - Technical Design.pdf",
-					 "DIMR - Technical Documentation.pdf",
-					 "DIMR - Test Plan.pdf",
-					 "DIMR - Test Report.pdf"]
+expectedDocuments = ["DIMR-FunctionalDesign.pdf",
+					 "DIMR-Manual.pdf",
+					 "DIMR-TechnicalDesign.pdf",
+					 "DIMR-TechnicalDocumentation.pdf",
+					 "DIMR-TestPlan.pdf",
+					 "DIMR-TestReport.pdf"]
 
 print "##teamcity[testStarted name='PDF Generated']"
 for doc in expectedDocuments:
