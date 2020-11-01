@@ -11675,12 +11675,18 @@ subroutine flow_sedmorinit()
                  cycle
               endif
               icd = network%crs%cross(ic)%itabdef
-              crossdef_used(icd) = crossdef_used(icd) + 1
+              if (crossdef_used(icd) == 0) then
+                  ! first occurence
+                  crossdef_used(icd) = k1
+              elseif (crossdef_used(icd) /= k1) then
+                  ! multiple occurences by the same node are accepted (may occur at connection nodes)
+                  crossdef_used(icd) = -abs(crossdef_used(icd))
+              endif
            enddo
        enddo
        !
        do icd = 1, network%csdefinitions%count
-          if (crossdef_used(icd) > 1) then
+          if (crossdef_used(icd) < 0) then
              npnterror = npnterror + 1
              if (npnterror == 1) then
                  call mess(LEVEL_WARN , 'Before switching on morphological updating, please fix the following issues:')
