@@ -11528,6 +11528,7 @@ subroutine flow_sedmorinit()
     logical :: error, have_mudbnd, have_sandbnd, ex, success
     character(20) , dimension(:), allocatable :: nambnd        ! nambnd: needed for morphological bc
     character     , dimension(200)            :: mes
+    character(12)                             :: chstr !< temporary string representation for chainage
     character(40)                             :: errstr
     type (bedbndtype), dimension(:) , pointer :: morbnd
     integer                                   :: kk, k, kbot, ktop, i, j, isus, ifrac, isusmud, isussand, isf, ised, Lf, npnt, j0, ierr
@@ -11536,7 +11537,8 @@ subroutine flow_sedmorinit()
     integer                                   :: ibr, nbr, pointscount, k1, ltur_
     integer                                   :: npnterror=0   !< number of grid points without cross-section definition
     integer, dimension(:), allocatable        :: kp
-    integer, dimension(:), allocatable        :: crossdef_used !< count number of times a cross section definition is used
+    integer, dimension(:), allocatable        :: crossdef_used  !< count number of times a cross section definition is used
+    integer, dimension(:), allocatable        :: node_processed !< flag (connection) nodes processed while checking cross sections
     type(t_branch), pointer                   :: pbr
     double precision                          :: dim_real
 
@@ -11653,28 +11655,27 @@ subroutine flow_sedmorinit()
 
     nbr = network%brs%count
     if ( jased.eq.4 .and. nbr > 0) then
-       allocate(crossdef_used(network%csdefinitions%count))
-       crossdef_used = 0
+       allocate(crossdef_used(network%csdefinitions%count), node_processed(ndx))
+       crossdef_used(:) = 0
+       node_processed(:) = 0
        do ibr = 1, nbr
            pbr => network%brs%branch(ibr)
            pointscount = pbr%gridPointsCount
            do i = 1, pointscount
               k1 = pbr%grd(i)
-              do j = 1, gridpoint2cross(k1)%num_cross_sections
-                 ic = gridpoint2cross(k1)%cross(j)
-                 if (ic == -999) then
-                    if (j == 1) then
-                       npnterror = npnterror + 1
-                       if (npnterror == 1) then
-                           call mess(LEVEL_WARN , 'Before switching on morphological updating, please fix the following issues:')
-                       endif
-                       call mess(LEVEL_WARN , '- Grid point '//trim(pbr%gridPointIDs(i))//' should get a cross section.')
-                    endif
-                    cycle
+              node_processed(k1) = node_processed(k1) + 1
+              j = node_processed(k1)
+              ic = gridpoint2cross(k1)%cross(j)
+              if (ic == -999) then
+                 npnterror = npnterror + 1
+                 if (npnterror == 1) then
+                     call mess(LEVEL_WARN , 'Before switching on morphological updating, please fix the following issues:')
                  endif
-                 icd = network%crs%cross(ic)%itabdef
-                 crossdef_used(icd) = crossdef_used(icd) + 1
-              enddo
+                 call mess(LEVEL_WARN , '- Grid point '//trim(pbr%gridPointIDs(i))//' should get a cross section on branch '//trim(pbr%id)//'.')
+                 cycle
+              endif
+              icd = network%crs%cross(ic)%itabdef
+              crossdef_used(icd) = crossdef_used(icd) + 1
            enddo
        enddo
        !
@@ -11685,14 +11686,30 @@ subroutine flow_sedmorinit()
                  call mess(LEVEL_WARN , 'Before switching on morphological updating, please fix the following issues:')
              endif
              call mess(LEVEL_WARN , '- Cross section definition '//trim(network%csdefinitions%cs(icd)%id)//' shouldn''t be used at multiple locations.')
+             node_processed(:) = 0
+             do ibr = 1, nbr
+                 pbr => network%brs%branch(ibr)
+                 pointscount = pbr%gridPointsCount
+                 do i = 1, pointscount
+                     k1 = pbr%grd(i)
+                     node_processed(k1) = node_processed(k1) + 1
+                     j = node_processed(k1)
+                     ic = gridpoint2cross(k1)%cross(j)
+                     if (ic == -999) cycle
+                     if (network%crs%cross(ic)%itabdef == icd) then
+                         write(chstr,'(F12.3)') network%crs%cross(ic)%chainage
+                         call mess(LEVEL_WARN , '  It is used for grid point '//trim(pbr%gridPointIDs(i))//' via cross section '//trim(network%crs%cross(ic)%csid)//' on branch '//trim(pbr%id)//' at chainage '//trim(adjustl(chstr))//' m.')
+                     endif
+                 enddo
+             enddo
           endif
        enddo
-       deallocate(crossdef_used)
+       deallocate(crossdef_used, node_processed)
        !
        write(errstr,'(I0)') npnterror
        if (stmpar%morpar%bedupd) then
           if( npnterror > 0 ) then
-             call mess(LEVEL_FATAL, 'A unique cross section definition is needed at every grid point for morphological updating. '//trim(errstr)//' grid points detected without such definition. Please adjust the input.')
+             call mess(LEVEL_FATAL, 'A unique cross section definition is needed at every grid point for morphological updating. '//trim(errstr)//' errors detected. Please adjust the input.')
              return
           endif
        endif
