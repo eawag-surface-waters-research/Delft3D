@@ -2599,7 +2599,7 @@ end subroutine default_turbulence
  logical                           :: drop1D            !< Apply losses for all 1d links,
  double precision                  :: drop3D            !< Apply losses in or 3D if downwind z below bob + 2/3 hu
  double precision                  :: zwsbtol = 0d0     !< zws(kb0) = bl - zwsbtol
- integer                           :: keepzlayeringatbed=1 !< only for z layers zws(kb0) = zslay instead of bl
+ integer                           :: keepzlayeringatbed=2 !< only for z layers zws(kb0) = zslay instead of bl
 
  double precision                  :: cflmx             !< max Courant nr ()
  double precision                  :: cflw              !< wave velocity fraction, total courant vel = u + cflw*wavevelocity
