@@ -551,8 +551,8 @@ module m_ec_filereader_read
                item2%sourceT0FieldPtr%arr1dPtr(i*n_cols) = item2%sourceT0FieldPtr%arr1dPtr(1+(i-1)*n_cols)
                item3%sourceT0FieldPtr%arr1dPtr(i*n_cols) = item3%sourceT0FieldPtr%arr1dPtr(1+(i-1)*n_cols)
             end do
-            ! Compensate for unit of pressure (mbar versus Pa)
-            if (trim(item3%quantityPtr%units) == 'mbar') then
+            ! Compensate for unit of pressure (mbar (= hpa) versus Pa)
+            if ((index(item3%quantityPtr%units,'mbar') == 1) .or. (index(item3%quantityPtr%units,'hPa') == 1)) then
                do i=1, size(item3%sourceT0FieldPtr%arr1dPtr)
                   item3%sourceT0FieldPtr%arr1dPtr(i) = item3%sourceT0FieldPtr%arr1dPtr(i)*100.0_hp
                end do
@@ -651,8 +651,8 @@ module m_ec_filereader_read
                item2%sourceT1FieldPtr%arr1dPtr(i*n_cols) = item2%sourceT1FieldPtr%arr1dPtr(1+(i-1)*n_cols)
                item3%sourceT1FieldPtr%arr1dPtr(i*n_cols) = item3%sourceT1FieldPtr%arr1dPtr(1+(i-1)*n_cols)
             end do
-            ! Compensate for unit of pressure (mbar versus Pa)
-            if (trim(item3%quantityPtr%units) == 'mbar') then
+            ! Compensate for unit of pressure (mbar, hPa versus Pa)
+            if ((index(item3%quantityPtr%units,'mbar') == 1) .or. (index(item3%quantityPtr%units,'hPa') == 1)) then
                do i=1, size(item3%sourceT1FieldPtr%arr1dPtr)
                   item3%sourceT1FieldPtr%arr1dPtr(i) = item3%sourceT1FieldPtr%arr1dPtr(i)*100.0_hp
                end do
@@ -1309,9 +1309,9 @@ module m_ec_filereader_read
          indxComment = index(rec, '#')
          if (indx /= 0) then
             if (indxComment /= 0) then
-               answer = rec(indx+1:indxComment - 1)
+               answer = adjustl(rec(indx+1:indxComment - 1))
             else
-               answer = rec(indx+1:)
+               answer = adjustl(rec(indx+1:))
             endif
          else
             call setECMessage("ERROR: ec_filereader_read::ecSpiderwebAndCurviFindInFile: Failed to read an existing line.")
