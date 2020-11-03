@@ -21,7 +21,7 @@ subroutine fm_bedform()
     use m_physcoef, only: ag, rhomean, backgroundwatertemperature
     use m_flowgeom, only: ndxi, ndx, lnx, lnxi, kfs, ln, wcl, bl
     use m_flowparameters, only: epshs, jawave, epshu
-    use m_flow, only: ucx, ucy, frcu, ifrcutp, hu, hs, u1, u0, s1
+    use m_flow, only: ucx, ucy, frcu, ifrcutp, hu, hs, u1, u0, s1, ucx_mor, ucy_mor
     use m_flowtimes
     use m_waves
     !
@@ -76,7 +76,7 @@ subroutine fm_bedform()
     real(fp) :: relden
     real(fp) :: vicmol
     double precision, allocatable     :: czn(:), czu(:)
-    double precision, allocatable     :: u1ori(:), u0ori(:)
+    double precision, allocatable     :: u1eul(:)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -101,16 +101,15 @@ subroutine fm_bedform()
     vicmol = (4.0e-5)/(20.0+backgroundwatertemperature) ! molecular viscosity according to Van Rijn 2004
     if (.not. allocated(czn)) then
        allocate(czn(1:ndx), czu(1:lnx) , stat = ierr)
-       allocate(u1ori(1:ndx), stat = ierr)
+       allocate(u1eul(1:ndx), stat = ierr)
     end if
-    czn = 0d0; czu = 0d0;
+    czn = 0d0; czu = 0d0; u1eul = 0d0
     !
     if (jawave > 0) then
-       u1ori = u1
-       u1 = u1-ustokes        ! now eulerian
+       u1eul = u1 - ustokes   
+       call setucxucy_mor (u1eul)
     end if
     !
-    call setucxucyucxuucyu()
     do L = 1, lnx
        k1=ln(1,L);k2=ln(2,L)
        if (frcu(L)>0) then
@@ -134,7 +133,7 @@ subroutine fm_bedform()
              !
              ! JRE: Not depth-avg, but bottom vel in 3D
              !
-             umodb   = sqrt(ucx(kb)**2 + ucy(kb)**2)
+             umodb   = sqrt(ucx_mor(kb)**2 + ucy_mor(kb)**2)
              u2dhb   = umodb
              !
              ! Get d50 and d90 if defined.
@@ -245,11 +244,7 @@ subroutine fm_bedform()
           duneheightequi(nm) = duneheight(nm)
        endif
     enddo
-    if (jawave .gt. 0) then
-       u1 = u1ori
-       call setucxucyucxuucyu()
-    end if
-    deallocate (czu, czn, u1ori)
+
 end subroutine fm_bedform
 
 subroutine fm_calbf()
@@ -601,7 +596,7 @@ subroutine fm_calksc()
     use m_sferic,               only: pi
     use m_physcoef,             only: ag, frcuni, ifrctypuni
     use m_flowtimes,            only: dts, dt_max
-    use m_flow,                 only: kmx, s1, u1, u0, hs, z0urou, ucx, ucy, frcu, ifrcutp, hu
+    use m_flow,                 only: kmx, s1, u1, u0, hs, z0urou, ucx, ucy, frcu, ifrcutp, hu, ucx_mor, ucy_mor
     use m_flowgeom,             only: ndx, kfs, bl, ndxi, lnx, wcl, ln
     use m_flowparameters,       only: v2dwbl, jatrt, epshs, jawave
     use m_sediment
@@ -643,7 +638,7 @@ subroutine fm_calksc()
     real(fp)                                       :: relaxr, relaxmr, relaxd
     real(fp)                                       :: hh, arg, uw, rr, umax, t1, uu, a11, raih, rmax, uon, uoff, uwbih, depth, umod, u2dh
     real(fp)                                       :: d50l, d90l, fch2, fcoarse, uwc, psi, rksr0, rksmr0, rksd0, cz_dum, z00
-    double precision, dimension(:), allocatable    :: u1ori
+    double precision, dimension(:), allocatable    :: u1eul
     double precision, dimension(:), allocatable    :: z0rou
 
 !
@@ -676,15 +671,17 @@ subroutine fm_calksc()
     !   rttdef                  => trachy_fl%rttdef
     !end if
     !
-    allocate(u1ori(1:lnx), stat=ierr)
-    allocate(z0rou(1:ndx), stat=ierr)
-    u1ori = u1; z0rou = 0d0
+    if (.not. allocated(z0rou)) then
+       allocate(u1eul(1:lnx), stat=ierr)
+       allocate(z0rou(1:ndx), stat=ierr)
+    endif
+    z0rou = 0d0; u1eul = 0d0
     !
     ! Calculate Eulerian velocities at old time level
     if (jawave>0) then
-       u1 = u0 - ustokes
+       u1eul = u0 - ustokes
+       call setucxucy_mor (u1eul)
     endif
-    call setucxucyucxuucyu()
     !
     if (jawave<3) then  ! current related, potentially including trachy
        do L=1, lnx
@@ -756,7 +753,7 @@ subroutine fm_calksc()
              ! Depth-average velocity (similar as in TAUBOT)
              ! JRE: to do, 3D, see calksc.f90
              !
-             umod   = sqrt(ucx(kmaxx)**2 + ucy(kmaxx)**2)
+             umod   = sqrt(ucx_mor(kmaxx)**2 + ucy_mor(kmaxx)**2)
              !
              if (kmx==0) then
                 u2dh = umod
@@ -952,9 +949,6 @@ subroutine fm_calksc()
     end select
     
 1234 continue
-   u1 = u1ori
-   call setucxucyucxuucyu()
-   deallocate(u1ori, z0rou, stat=ierr)
 
 end subroutine fm_calksc
 

@@ -594,7 +594,7 @@
    subroutine inipointers_erosed()
    use m_fm_erosed
    use m_flowgeom, only: ndx, lnx
-   use m_flow, only: ndkx
+   use m_flow, only: ndkx, ucx_mor, ucy_mor
    implicit none
    integer :: ierr
 
@@ -781,6 +781,8 @@
 
    allocate(ucxq_mor(1:ndkx), ucyq_mor(1:ndkx), hs_mor(1:ndkx), stat=ierr)   ! JRE TODO
    ucxq_mor = 0d0; ucyq_mor = 0d0; hs_mor = 0d0
+   allocate(ucx_mor(1:ndkx), ucy_mor(1:ndkx), stat=ierr)
+   ucx_mor = 0d0; ucy_mor = 0d0
    allocate(q_zeta(2,lnx), stat=ierr)
    q_zeta = 0d0
 
@@ -818,7 +820,7 @@
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
    use m_flowgeom, only: ndxi, bl, kfs, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, xz, yz, xu, yu, wu, wu_mor
    use m_flow, only: s0, s1, u1, u0, v, ucx, ucy, kbot, ktop, kmx, kmxn, plotlin, sa1, tem1, zws, hs, ucxq, ucyq, layertype, &
-      iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, qa, frcu_mor, taus
+      iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, qa, frcu_mor, taus, ucx_mor, ucy_mor
    use m_flowtimes, only: julrefdat, dts, time1
    use unstruc_files, only: mdia
    use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
@@ -971,7 +973,7 @@
    integer                       :: idummy = 0
    integer                       :: ierr, kk, kkk, Lf, kmxvel, kb, kt, snL, csL
    integer                       :: Ldir
-   double precision, allocatable :: dzdx(:), dzdy(:), u1ori(:), u0ori(:), vori(:)
+   double precision, allocatable :: dzdx(:), dzdy(:), u1_tmp(:), ucxq_tmp(:), ucyq_tmp(:)
    double precision, allocatable :: z0rouk(:), z0curk(:),taub(:), deltas(:), ua(:), va(:)
    double precision              :: dzdn, dzds
    integer                       :: mout
@@ -1016,7 +1018,7 @@
    qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = -1
    BranInIDLn = 0
 
-   if ((istat == 0) .and. (.not. allocated(u1ori))) allocate(u1ori(1:lnx), u0ori(1:lnx), vori(1:lnx), stat=ierr)
+   if ((istat == 0) .and. (.not. allocated(u1_tmp))) allocate(u1_tmp(1:lnx), ucxq_tmp(1:ndx), ucyq_tmp(1:ndx), stat=ierr)
 
    if (istat /= 0) then
       error = .true.
@@ -1033,31 +1035,25 @@
       call updmorfac(stmpar%morpar, time1/3600.0_fp, julrefdat)
    endif
    !
-   ! Back up velocities before contributions ua, stokes drift
-   !
-   u1ori = u1; u0ori = u0; vori = v
-   !
    ! Reset some arrays before next iteration
    spirintnm = 0.0_fp
    ust2 = 0.0_fp
    !
    ! Use Eulerian velocities if jatranspvel > 0
    !
-   u1 = u1*u_to_umain
-   u0 = u0*u_to_umain
+   u1_tmp = u1 * u_to_umain
 
    if (jatranspvel > 0 .and. jawave > 0) then
-      !
-      u1 = u1 - ustokes
-      u0 = u0 - ustokes
-      v  = v  - vstokes
-      !
+      u1_tmp = u1 - ustokes
    end if
    !   Calculate cell centre velocities ucxq, ucyq
-   call setucxucyucxuucyu()
+   call setucxucy_mor (u1_tmp)
+   ucxq_tmp = ucxq_mor
+   ucyq_tmp = ucyq_mor
    call init_1dinfo()
-   call setucxqucyq()
+   call setucxqucyq_mor(u1_tmp, ucxq_tmp, ucyq_tmp)
    !
+ 
    if (.not. (jawave==4 .or. jawave==3)) then
       ktb=0d0     ! no roller turbulence
    else
@@ -1216,8 +1212,8 @@
             endif
          enddo
 
-         uuu(kk)   = ucxq(kmxvel)                  ! discharge based cell centre velocities
-         vvv(kk)   = ucyq(kmxvel)
+         uuu(kk)   = ucxq_tmp(kmxvel)                  ! discharge based cell centre velocities
+         vvv(kk)   = ucyq_tmp(kmxvel)
          umod(kk)  = sqrt(uuu(kk)*uuu(kk) + vvv(kk)*vvv(kk))
          zumod(kk) = zcc-bl(kk)
       end do
@@ -1444,12 +1440,12 @@
       !
       ! Compute depth-averaged velocity components at cell centre, discharge based cc velocities
       !
-      umean = ucxq(nm)      ! ok, calculated in getucxucyandsoon
-      vmean = ucyq(nm)
+      umean = ucxq_tmp(nm)      ! ok, calculated in getucxucyandsoon
+      vmean = ucyq_tmp(nm)
       velm = sqrt(umean**2+vmean**2)
       !
-      ubed = ucxq(kbed)
-      vbed = ucyq(kbed)
+      ubed = ucxq_tmp(kbed)
+      vbed = ucyq_tmp(kbed)
       velb = sqrt(ubed**2 + vbed**2)
       if (kmaxlc>1) then               ! 3D only
          zvelb = 0.5_fp*thicklc(kmaxlc)*h1
@@ -2284,12 +2280,8 @@
       sourse=0d0
    endif
    !
-   if (jatranspvel > 0 .or. jawave>0) then
-      u1 = u1ori; u0 = u0ori; v=vori
-      call setucxucyucxuucyu()
-   end if
 
-   deallocate(dzdx, dzdy, u1ori, u0ori, vori, stat = istat)
+   deallocate(dzdx, dzdy, stat = istat)
    if (istat == 0) deallocate(localpar, stat = istat)
    if (istat == 0) deallocate(qb_out, stat = istat)
    if (istat == 0) deallocate(width_out, stat = istat)
@@ -3695,7 +3687,7 @@
    end do
 
    ! calculate mean velocity in nodes
-   call setucxucyucxuucyu()
+!   call setucxucyucxuucyu()
 
    if (kmx>0) then                       ! 3D
       um = 0d0; vm = 0d0
@@ -4922,10 +4914,10 @@
    end subroutine init_1dinfo
 
 
-   subroutine setucxqucyq()
+   subroutine setucxqucyq_mor (u1, ucxq, ucyq)
    use m_fm_erosed, only: ucxq_mor, ucyq_mor, hs_mor, link1, link1sign
    use m_flowgeom, only: ndx, lnx, lnxi, ln, nd, wcx1, wcx2, wcy1, wcy2, csu, snu, bl, ndxi, lnx1D, kcs
-   use m_flow, only: hs, hu, u1, ucxq, ucyq, zws, kmx, kmxL, au, q1
+   use m_flow, only: hs, hu, zws, kmx, kmxL, au, q1, ucx_mor, ucy_mor
    use m_flowparameters ,only: jacstbnd, epshs, eps10
    use m_sediment, only: stmpar
    use m_turbulence, only:ln0
@@ -4933,6 +4925,9 @@
    use unstruc_channel_flow, only: network
 
    implicit none
+   double precision, dimension(lnx), intent(in ) :: u1
+   double precision, dimension(ndx), intent(in ) :: ucxq
+   double precision, dimension(ndx), intent(in ) :: ucyq
    integer          :: L, LL, k, k1, k2, Lt, Lb, kk, kb, kt
    double precision :: wcxu, wcyu, cs, sn, uin, huL
    logical, pointer :: maximumwaterdepth
@@ -5150,7 +5145,444 @@
       enddo
    endif
    endif
-   end subroutine setucxqucyq
+   end subroutine setucxqucyq_mor
+   
+   ! =================================================================================================
+   ! =================================================================================================
+   subroutine setucxucy_mor (u1_loc)
+   use m_flowgeom
+   use m_flow
+   use m_fm_erosed, only: ucxq_mor, ucyq_mor
+   use m_sobekdfm
+   use m_sediment, only: jased, stm_included
+   use m_missing
+   use m_flowparameters, only: jabarrieradvection
+   use m_sferic
+   implicit none
+   double precision, dimension(lnx), intent(in ) :: u1_loc
+   
+   integer          :: L, KK, k1, k2, k, nw, Lb, Lt, LL, nn, n, kt,kb, kbk, k2k
+   integer          :: itpbn, newucxq=0
+   double precision :: uu, vv, uucx, uucy, wcxu, wcyu, cs, sn, adx, ac1, ac2, wuw, hdx, hul, dzz, uin, duxdn, duydn
+   double precision :: dischcorrection
+   double precision :: uinx, uiny
+
+   double precision, external :: nod2linx, nod2liny
+   double precision, external :: lin2nodx, lin2nody
+
+   ucxq_mor = 0d0 ; ucyq_mor = 0d0           ! zero arrays
+   ucx_mor  = 0d0 ; ucy_mor  = 0d0
+
+   if (kmx < 1) then                                   ! original 2D coding
+      do L = 1,lnx1D
+         if (u1_loc(L) .ne. 0d0 .and. kcu(L) .ne. 3) then  ! link flows ; in 2D, the loop is split to save kcu check in 2D
+            k1 = ln(1,L) ; k2 = ln(2,L)
+            wcxu          = wcx1(L)*u1_loc(L)
+            ucx_mor  (k1) = ucx_mor  (k1) + wcxu
+            ucxq_mor (k1) = ucxq_mor (k1) + wcxu*hu(L)
+            wcyu          = wcy1(L) * u1_loc(L)
+            ucy_mor  (k1) = ucy_mor  (k1) + wcyu
+            ucyq_mor (k1) = ucyq_mor (k1) + wcyu*hu(L)
+            wcxu          = wcx2(L) * u1_loc(L)
+            ucx_mor  (k2) = ucx_mor  (k2) + wcxu
+            ucxq_mor (k2) = ucxq_mor (k2) + wcxu*hu(L)
+            wcyu          = wcy2(L) * u1_loc(L)
+            ucy_mor  (k2) = ucy_mor  (k2) + wcyu
+            ucyq_mor (k2) = ucyq_mor (k2) + wcyu*hu(L)
+         endif
+      enddo
+      do L = lnx1D + 1,lnx
+         if (jabarrieradvection == 3) then
+            if (struclink(L) == 1) cycle
+         endif
+         if (u1_loc(L) .ne. 0d0) then                      ! link flows
+            k1 = ln(1,L) ; k2 = ln(2,L)
+            wcxu          = wcx1(L)*u1_loc(L)
+            ucx_mor  (k1) = ucx_mor  (k1) + wcxu
+            ucxq_mor (k1) = ucxq_mor (k1) + wcxu*hu(L)
+            wcyu          = wcy1(L) * u1_loc(L)
+            ucy_mor  (k1) = ucy_mor  (k1) + wcyu
+            ucyq_mor (k1) = ucyq_mor (k1) + wcyu*hu(L)
+            wcxu          = wcx2(L) * u1_loc(L)
+            ucx_mor  (k2) = ucx_mor  (k2) + wcxu
+            ucxq_mor (k2) = ucxq_mor (k2) + wcxu*hu(L)
+            wcyu          = wcy2(L) * u1_loc(L)
+            ucy_mor  (k2) = ucy_mor  (k2) + wcyu
+            ucyq_mor (k2) = ucyq_mor (k2) + wcyu*hu(L)
+         endif
+      enddo
+   else
+      do LL = 1,lnx
+         Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
+         do L = Lb, Lt
+            if (u1_loc(L) .ne. 0d0) then                         ! link flows
+               k1 = ln0(1,L)                                 ! use ln0 in reconstruction and in computing ucxu, use ln when fluxing
+               k2 = ln0(2,L)
+               huL = hu(L)
+               if (L>Lbot(LL)) then
+                  huL   = huL - hu(L-1)
+               endif
+               ucx_mor (k1) = ucx_mor (k1) + wcx1(LL) * u1_loc(L)
+               ucxq_mor(k1) = ucxq_mor(k1) + wcx1(LL) * u1_loc(L) * huL
+               ucy_mor (k1) = ucy_mor (k1) + wcy1(LL) * u1_loc(L)
+               ucyq_mor(k1) = ucyq_mor(k1) + wcy1(LL) * u1_loc(L) * huL
+               ucx_mor (k2) = ucx_mor (k2) + wcx2(LL) * u1_loc(L)
+               ucxq_mor(k2) = ucxq_mor(k2) + wcx2(LL) * u1_loc(L) * huL
+               ucy_mor (k2) = ucy_mor (k2) + wcy2(LL) * u1_loc(L)
+               ucyq_mor(k2) = ucyq_mor(k2) + wcy2(LL) * u1_loc(L) * huL
+            endif
+         enddo
+         if (jazlayercenterbedvel == 1) then ! copy bed velocity down
+            do k1 = kbot(ln0(1,LL)), ln0(1,Lb) - 1
+               ucx_mor(k1) = ucx_mor(k1) + wcx1(LL) * u1_loc(Lb)
+               ucy_mor(k1) = ucy_mor(k1) + wcy1(LL) * u1_loc(Lb)
+            enddo
+            do k2 = kbot(ln0(2,LL)), ln0(2,Lb) - 1
+               ucx_mor(k2) = ucx_mor(k2) + wcx2(LL) * u1_loc(Lb)
+               ucy_mor(k2) = ucy_mor(k2) + wcy2(LL) * u1_loc(Lb)
+            enddo
+         endif
+      enddo
+   endif
+
+   if (kmx < 1) then ! original 2D coding
+      !$OMP PARALLEL DO           &
+      !$OMP PRIVATE(k)
+      do k = 1,ndxi
+         if (hs(k) > 0d0)  then
+            ucxq_mor(k) = ucxq_mor(k)/hs(k)
+            ucyq_mor(k) = ucyq_mor(k)/hs(k)
+            if (iperot == 2) then
+               ucx_mor (k) = ucxq_mor(k)
+               ucy_mor (k) = ucyq_mor(k)
+            endif
+         endif
+      enddo
+      !$OMP END PARALLEL DO
+   else
+      do nn = 1,ndxi
+         if (hs(nn) > 0d0)  then
+            kb = kbot(nn)
+            kt = ktop(nn)
+            ucxq_mor(nn) = sum(ucxq_mor(kb:kt)) / hs(nn) ! Depth-averaged cell center velocity in 3D, based on ucxq
+            ucyq_mor(nn) = sum(ucyq_mor(kb:kt)) / hs(nn)
+            do k = kb,kt
+               dzz = zws(k) - zws(k-1)
+               if (dzz > 0d0) then
+                  ucxq_mor(k) = ucxq_mor(k)/dzz
+                  ucyq_mor(k) = ucyq_mor(k)/dzz
+               endif
+               if (iperot == 2) then
+                  ucx_mor(k) = ucxq_mor(k)
+                  ucy_mor(k) = ucyq_mor(k)
+               endif
+            enddo
+         endif
+      enddo
+   endif
+
+   do n  = 1, nbndz                                     ! waterlevel boundaries
+      kb = kbndz(1,n)
+      k2 = kbndz(2,n)
+      LL = kbndz(3,n)
+      itpbn = kbndz(4,n)
+      cs = csu(LL) ; sn = snu(LL)
+      if (kmx == 0) then
+         if (hs(kb) > epshs)  then
+            if ( jacstbnd.eq.0 .and. itpbn.ne.2 ) then    ! Neumann: always
+               if (jasfer3D == 1) then
+                  uin          = nod2linx(LL,2,ucx_mor(k2),ucy_mor(k2))*cs + nod2liny(LL,2,ucx_mor(k2),ucy_mor(k2))*sn
+                  ucx_mor(kb)  = uin*lin2nodx(LL,1,cs,sn)
+                  ucy_mor(kb)  = uin*lin2nody(LL,1,cs,sn)
+                  uin          = nod2linx(LL,2,ucxq_mor(k2),ucyq_mor(k2))*cs + nod2liny(LL,2,ucxq_mor(k2),ucyq_mor(k2))*sn
+                  ucxq_mor(kb) = uin*lin2nodx(LL,1,cs,sn)
+                  ucyq_mor(kb) = uin*lin2nody(LL,1,cs,sn)
+               else
+                  uin          = ucx_mor(k2)*cs + ucy_mor(k2)*sn
+                  ucx_mor(kb)  = uin*cs
+                  ucy_mor(kb)  = uin*sn
+                  uin          = ucxq_mor(k2)*cs + ucyq_mor(k2)*sn
+                  ucxq_mor(kb) = uin*cs
+                  ucyq_mor(kb) = uin*sn
+               end if
+            else
+               if (jasfer3D == 1) then
+                  uinx         = nod2linx(LL,2,ucx_mor(k2),ucy_mor(k2))
+                  uiny         = nod2liny(LL,2,ucx_mor(k2),ucy_mor(k2))
+                  ucx_mor(kb)  = lin2nodx(LL,1,uinx,uiny)
+                  ucy_mor(kb)  = lin2nody(LL,1,uinx,uiny)
+                  uinx         = nod2linx(LL,2,ucxq_mor(k2),ucyq_mor(k2))
+                  uiny         = nod2liny(LL,2,ucxq_mor(k2),ucyq_mor(k2))
+                  ucxq_mor(kb) = lin2nodx(LL,1,uinx,uiny)
+                  ucyq_mor(kb) = lin2nody(LL,1,uinx,uiny)
+               else
+                  ucx_mor(kb)  = ucx_mor(k2)
+                  ucy_mor(kb)  = ucy_mor(k2)
+                  ucxq_mor(kb) = ucxq_mor(k2)
+                  ucyq_mor(kb) = ucyq_mor(k2)
+               endif
+            endif
+            if (jased > 0 .and. stm_included) then
+               dischcorrection = hs(k2) / hs(kb)
+               !ucx_mor(kb)  = ucx_mor(kb)  * dischcorrection
+               !ucy_mor(kb)  = ucy_mor(kb)  * dischcorrection
+               ucxq_mor(kb) = ucxq_mor(kb) * dischcorrection
+               ucyq_mor(kb) = ucyq_mor(kb) * dischcorrection
+            endif
+         endif
+      else
+         call getLbotLtop(LL,Lb,Lt)
+         do L = Lb, Lt
+            kbk = ln(1,L) ; k2k = ln(2,L)
+            if ( jacstbnd.eq.0 .and. itpbn.ne.2 ) then
+               if (jasfer3D == 1) then
+                  uin = nod2linx(LL,2,ucx_mor(k2k),ucy_mor(k2k))*cs + nod2liny(LL,2,ucx_mor(k2k),ucy_mor(k2k))*sn
+                  ucx_mor(kbk)  = uin*lin2nodx(LL,1,cs,sn)
+                  ucy_mor(kbk)  = uin*lin2nody(LL,1,cs,sn)
+                  !uin = nod2linx(LL,2,ucxq_mor(k2k),ucyq_mor(k2k))*cs + nod2liny(LL,2,ucxq_mor(k2k),ucyq_mor(k2k))*sn
+                  ucxq_mor(kbk) = uin*lin2nodx(LL,1,cs,sn)
+                  ucyq_mor(kbk) = uin*lin2nody(LL,1,cs,sn)
+               else
+                  uin = ucx_mor(k2k)*cs + ucy_mor(k2k)*sn
+                  ucx_mor(kbk) = uin*cs
+                  ucy_mor(kbk) = uin*sn
+                  ucxq_mor(kbk) = uin*cs ; ucyq_mor(kbk) = uin*sn
+               end if
+            else
+               if (jasfer3D == 1) then
+                  uinx          = nod2linx(LL,2,ucx_mor(k2k),ucy_mor(k2k))
+                  uiny          = nod2liny(LL,2,ucx_mor(k2k),ucy_mor(k2k))
+                  ucx_mor(kbk)  = lin2nodx(LL,1,uinx,uiny)
+                  ucy_mor(kbk)  = lin2nody(LL,1,uinx,uiny)
+                  uinx          = nod2linx(LL,2,ucxq_mor(k2k),ucyq_mor(k2k))
+                  uiny          = nod2liny(LL,2,ucxq_mor(k2k),ucyq_mor(k2k))
+                  ucxq_mor(kbk) = lin2nodx(LL,1,uinx,uiny)
+                  ucyq_mor(kbk) = lin2nody(LL,1,uinx,uiny)
+               else
+                  ucx_mor(kbk)  = ucx_mor(k2k)
+                  ucy_mor(kbk)  = ucy_mor(k2k)
+                  ucxq_mor(kbk) = ucxq_mor(k2k)
+                  ucyq_mor(kbk) = ucyq_mor(k2k)
+               endif
+            endif
+            !if (jased > 0 .and. stm_included) then   ! similar as 2D, JRE to check
+            !   dischcorrection = hs(k2) / hs(kb)
+            !   !ucx_mor(kb)  = ucx_mor(kb)  * dischcorrection
+            !   !ucy_mor(kb)  = ucy_mor(kb)  * dischcorrection
+            !   ucxq_mor(kbk) = ucxq_mor(kbk) * dischcorrection
+            !   ucyq_mor(kbk) = ucyq_mor(kbk) * dischcorrection
+            !endif
+         enddo
+      endif
+   enddo
+
+   if (jaZerozbndinflowadvection == 1) then
+      do n  = 1, nbndz                                      ! on waterlevel boundaries put inflow advection velocity to 0
+         LL = kbndz(3,n)
+         do L  = Lbot(LL), Ltop(LL)
+            k1 = ln(1,L)
+            if (u1_loc(LL) > 0) then
+               ucx_mor(k1) = 0d0 ; ucy_mor(k1) = 0d0
+            endif
+         enddo
+      enddo
+   else if (jaZerozbndinflowadvection == 2) then
+      do n  = 1, nbndz                                      ! on waterlevel boundaries put all advection velocity to 0
+         LL = kbndz(3,n)
+         do L  = Lbot(LL), Ltop(LL)
+            k1 = ln(1,L)
+            ucx_mor(k1) = 0d0 ; ucy_mor(k1) = 0d0
+         enddo
+      enddo
+   endif
+
+   do n  = 1,nbndu                                      ! velocity boundaries
+      kb = kbndu(1,n)
+      k2 = kbndu(2,n)
+      LL = kbndu(3,n)
+      cs = csu(LL) ; sn = snu(LL)
+      if (kmx == 0) then
+         if (hs(kb) > epshs)  then
+            if ( jacstbnd.eq.0 ) then
+               if (jasfer3D == 1) then
+                  uin          = nod2linx(LL,2,ucx_mor(k2),ucy_mor(k2))*cs + nod2liny(LL,2,ucx_mor(k2),ucy_mor(k2))*sn
+                  ucx_mor(kb)  = uin*lin2nodx(LL,1,cs,sn)
+                  ucy_mor(kb)  = uin*lin2nody(LL,1,cs,sn)
+                  uin          = nod2linx(LL,2,ucxq_mor(k2),ucyq_mor(k2))*cs + nod2liny(LL,2,ucxq_mor(k2),ucyq_mor(k2))*sn
+                  ucxq_mor(kb) = uin*lin2nodx(LL,1,cs,sn)
+                  ucyq_mor(kb) = uin*lin2nody(LL,1,cs,sn)
+               else
+                  uin          = ucx_mor(k2)*cs + ucy_mor(k2)*sn
+                  ucx_mor(kb)  = uin*cs
+                  ucy_mor(kb)  = uin*sn
+                  uin          = ucxq_mor(k2)*cs + ucyq_mor(k2)*sn
+                  ucxq_mor(kb) = uin*cs
+                  ucyq_mor(kb) = uin*sn
+               endif
+            else
+               if (jasfer3D == 1) then
+                  uinx         = nod2linx(LL,2,ucx_mor(k2),ucy_mor(k2))
+                  uiny         = nod2liny(LL,2,ucx_mor(k2),ucy_mor(k2))
+                  ucx_mor(kb)  = lin2nodx(LL,1,uinx,uiny)
+                  ucy_mor(kb)  = lin2nody(LL,1,uinx,uiny)
+                  uinx         = nod2linx(LL,2,ucxq_mor(k2),ucyq_mor(k2))
+                  uiny         = nod2liny(LL,2,ucxq_mor(k2),ucyq_mor(k2))
+                  ucxq_mor(kb) = lin2nodx(LL,1,uinx,uiny)
+                  ucyq_mor(kb) = lin2nody(LL,1,uinx,uiny)
+               else
+                  ucx_mor(kb)  = ucx_mor(k2)
+                  ucy_mor(kb)  = ucy_mor(k2)
+                  ucxq_mor(kb) = ucxq_mor(k2)
+                  ucyq_mor(kb) = ucyq_mor(k2)
+               end if
+            endif
+            if (jased > 0 .and. stm_included) then
+               dischcorrection = hs(k2) / hs(kb)
+               !ucx_mor(kb)  = ucx_mor(kb)  * dischcorrection
+               !ucy_mor(kb)  = ucy_mor(kb)  * dischcorrection
+               ucxq_mor(kb) = ucxq_mor(kb) * dischcorrection
+               ucyq_mor(kb) = ucyq_mor(kb) * dischcorrection
+            endif
+         endif
+      else
+         do k = 1, kmxL(LL)
+            kbk = kbot(kb) - 1 + min(k,kmxn(kb))
+            k2k = kbot(k2) - 1 + min(k,kmxn(k2))
+            if ( jacstbnd.eq.0 ) then
+               if (jasfer3D == 1) then
+                  uin     = nod2linx(LL,2,ucx_mor(k2k),ucy_mor(k2k))*cs + nod2liny(LL,2,ucx_mor(k2k),ucy_mor(k2k))*sn
+                  ucx_mor(kbk)  = uin*lin2nodx(LL,1,cs,sn)
+                  ucy_mor(kbk)  = uin*lin2nody(LL,1,cs,sn)
+                  ucxq_mor(kbk) = uin*lin2nodx(LL,1,cs,sn)
+                  ucyq_mor(kbk) = uin*lin2nody(LL,1,cs,sn)
+               else
+                  uin = ucx_mor(k2k)*cs + ucy_mor(k2k)*sn
+                  ucx_mor(kbk)  = uin*cs
+                  ucy_mor(kbk)  = uin*sn
+                  ucxq_mor(kbk) = uin*cs
+                  ucyq_mor(kbk) = uin*sn
+               end if
+            else
+               if (jasfer3D == 1) then
+                  uinx          = nod2linx(LL,2,ucx_mor(k2k),ucy_mor(k2k))
+                  uiny          = nod2liny(LL,2,ucx_mor(k2k),ucy_mor(k2k))
+                  ucx_mor(kbk)  = lin2nodx(LL,1,uinx,uiny)
+                  ucy_mor(kbk)  = lin2nody(LL,1,uinx,uiny)
+                  uinx          = nod2linx(LL,2,ucxq_mor(k2k),ucyq_mor(k2k))
+                  uiny          = nod2liny(LL,2,ucxq_mor(k2k),ucyq_mor(k2k))
+                  ucxq_mor(kbk) = lin2nodx(LL,1,uinx,uiny)
+                  ucyq_mor(kbk) = lin2nody(LL,1,uinx,uiny)
+               else
+                  ucx_mor(kbk)  = ucx_mor(k2k)
+                  ucy_mor(kbk)  = ucy_mor(k2k)
+                  ucxq_mor(kbk) = ucxq_mor(k2k)
+                  ucyq_mor(kbk) = ucyq_mor(k2k)
+               endif
+            endif
+         enddo
+      endif
+   enddo
+
+   do n  = 1, nbndt                               ! tangential velocity boundaries, override other types
+      kb = kbndt(1,n)
+      k2 = kbndt(2,n)
+      LL = kbndt(3,n)
+      cs = csu(LL) ; sn = snu(LL)
+      call getLbotLtop(LL,Lb,Lt)
+      do L = Lb, Lt
+         kbk  = ln(1,L)
+         kk   = kmxd*(n-1)+L-Lb+1
+         uu   = u0(L) ; vv = zbndt(kk) ! v(L)
+         uucx = uu*cs - vv*sn
+         uucy = uu*sn + vv*cs
+         if (jasfer3D == 1) then
+            ucx_mor(kbk)  = lin2nodx(LL,1,uucx,uucy)
+            ucy_mor(kbk)  = lin2nody(LL,1,uucx,uucy)
+            ucxq_mor(kbk) = ucx_mor(kbk)
+            ucyq_mor(kbk) = ucy_mor(kbk)
+         else
+            ucx_mor(kbk)  = uucx
+            ucy_mor(kbk)  = uucy
+            ucxq_mor(kbk) = ucx_mor(kbk)
+            ucyq_mor(kbk) = ucy_mor(kbk)
+         end if
+      enddo
+   enddo
+
+   if (zbnduxyval .ne. dmiss) then
+      zbnduxy(1) = zbnduxyval
+   endif
+
+   do n  = 1, nbnduxy        ! do3d                     ! uxuy velocity boundaries, override other types
+      kb = kbnduxy(1,n)
+      LL = kbnduxy(3,n)
+      call getLbotLtop(LL,Lb,Lt)
+      do L = Lb, Lt
+         kbk = ln(1,L)
+         kk  = kmxd*(n-1)+L-Lb+1
+         if (jasfer3D == 1) then
+            ucx_mor(kbk)  = lin2nodx(LL,1,zbnduxy(2*kk-1),zbnduxy(2*kk))
+            ucy_mor(kbk)  = lin2nody(LL,1,zbnduxy(2*kk-1),zbnduxy(2*kk))
+            ucxq_mor(kbk) = ucx_mor(kbk)
+            ucyq_mor(kbk) = ucy_mor(kbk)
+         else
+            ucx_mor(kbk)  = zbnduxy(2*kk-1)
+            ucy_mor(kbk)  = zbnduxy(2*kk)
+            ucxq_mor(kbk) = ucx_mor(kbk)
+            ucyq_mor(kbk) = ucy_mor(kbk)
+         endif
+      enddo
+   enddo
+
+   do n  = 1, nbndn                                     ! normal velocity boundaries, override other types
+      kb = kbndn(1,n)
+      k2 = kbndn(2,n)
+      LL = kbndn(3,n)
+      cs = csu(LL) ; sn = snu(LL)
+      call getLbotLtop(LL,Lb,Lt)
+      do L = Lb, Lt
+         kbk  = ln(1,L)
+         kk   = kmxd*(n-1)+L-Lb+1
+         uu   = zbndn(kk) ; vv = 0d0
+         uucx = uu*cs - vv*sn                   !
+         uucy = uu*sn + vv*cs
+         if (jasfer3D == 1) then
+            ucx_mor(kbk)  = lin2nodx(LL,1,uucx,uucy)
+            ucy_mor(kbk)  = lin2nody(LL,1,uucx,uucy)
+            ucxq_mor(kbk) = ucx_mor(kbk)
+            ucyq_mor(kbk) = ucy_mor(kbk)
+         else
+            ucx_mor(kbk)  = uucx
+            ucy_mor(kbk)  = uucy
+            ucxq_mor(kbk) = ucx_mor(kbk)
+            ucyq_mor(kbk) = ucy_mor(kbk)
+         endif
+      enddo
+   enddo
+
+   do n = 1,nbnd1d2d
+      kb      = kbnd1d2d(1,n)
+      k2      = kbnd1d2d(2,n)
+      LL      = kbnd1d2d(3,n)
+      if (kmx == 0) then     ! 2D
+         if (jasfer3D == 1) then
+            uinx = nod2linx(LL,2,ucx_mor(k2),ucy_mor(k2))
+            uiny = nod2liny(LL,2,ucx_mor(k2),ucy_mor(k2))
+            ucx_mor(kb)  = lin2nodx(LL,1,uinx,uiny)
+            ucy_mor(kb)  = lin2nody(LL,1,uinx,uiny)
+            ucxq_mor(kb) = ucx_mor(kb)
+            ucyq_mor(kb) = ucy_mor(kb)
+         else
+            ucx_mor(kb)  = ucx_mor(k2)
+            ucy_mor(kb)  = ucy_mor(k2)
+            ucxq_mor(kb) = ucx_mor(kb)
+            ucyq_mor(kb) = ucy_mor(kb)
+         endif
+      else     ! 3D
+      endif
+   end do
+
+   end subroutine setucxucy_mor
 
    ! =================================================================================================
    ! =================================================================================================

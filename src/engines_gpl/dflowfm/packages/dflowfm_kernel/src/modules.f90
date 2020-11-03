@@ -3556,6 +3556,8 @@ end module m_vegetation
  double precision, allocatable         :: worky (:)   !< Work array
  double precision, allocatable         :: work0 (:,:) !< Work array
  double precision, allocatable         :: work1 (:,:) !< Work array
+ double precision, allocatable, target :: ucx_mor (:) !< [m/s] cell center velocity for sedmor, global x-dir (m/s) {"location": "face", "shape": ["ndkx"]}
+ double precision, allocatable, target :: ucy_mor (:) !< [m/s] cell center velocity for sedmor, global y-dir (m/s) {"location": "face", "shape": ["ndkx"]}
 
 
  double precision, allocatable         :: dsadx   (:)   !< cell center sa gradient, (ppt/m)
