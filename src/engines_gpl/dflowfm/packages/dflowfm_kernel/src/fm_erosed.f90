@@ -1045,9 +1045,13 @@
 
    if (jatranspvel > 0 .and. jawave > 0) then
       u1_tmp = u1 - ustokes
-   end if
+      call setucxucy_mor (u1_tmp)
+   else
    !   Calculate cell centre velocities ucxq, ucyq
-   call setucxucy_mor (u1_tmp)
+      if (maxval(u_to_umain) /= 1d0 .or. minval(u_to_umain) /= 1d0) then
+         call setucxucy_mor (u1_tmp)
+      endif
+   endif
    ucxq_tmp = ucxq_mor
    ucyq_tmp = ucyq_mor
    call init_1dinfo()
@@ -3573,7 +3577,7 @@
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol
    use m_flowtimes, only: time1
    use m_flowgeom, only: ndx, ln, kfs,bl, wcl, lnx
-   use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1,z0urou,ifrcutp,hu,frcu
+   use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1,z0urou,ifrcutp,hu,frcu,ucx_mor,ucy_mor
    use m_flowparameters, only: jasal, jatem, jawave, epshs
    use m_transport, only: constituents, ised1
    use m_turbulence, only:turkinepsws, rho
@@ -3763,8 +3767,8 @@
                !
                rhoint = (tka*rho(kk+1) + tkb*rho(kk)) / tkt
                !
-               u = (tka*ucx(kk+1)+tkb*ucx(kk)) / tkt   ! x component
-               v = (tka*ucy(kk+1)+tkb*ucy(kk)) / tkt   ! y component
+               u = (tka*ucx_mor(kk+1)+tkb*ucx_mor(kk)) / tkt   ! x component
+               v = (tka*ucy_mor(kk+1)+tkb*ucy_mor(kk)) / tkt   ! y component
                w = (tka*ucz(kk+1)+tkb*ucz(kk)) / tkt   ! z component
 
                if (iturbulencemodel == 3) then     ! k-eps
@@ -3859,8 +3863,8 @@
             !
             rhoint = rhomean   ! JRE to do: depends on idensform
             !
-            u       = ucx(k)   ! x component
-            v       = ucy(k)   ! y component
+            u       = ucx_mor(k)   ! x component
+            v       = ucy_mor(k)   ! y component
             w       = -999d0   ! z component
             tur_k   = -999d0
             tur_eps = -999d0
