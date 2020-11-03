@@ -39545,7 +39545,7 @@ end subroutine setbobs_fixedweirs
                       call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
                       dpt = max(epshu, s1(k2) - bob0(2,L))
                       call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
-                      width = min(maxwidth1, maxwidth2)
+                      width = max(maxwidth1, maxwidth2)
                       wu(L) = width
                       else
                         as1 = (s1(k1)-bl(k1))*wu(L)
