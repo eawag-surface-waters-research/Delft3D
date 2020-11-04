@@ -57,13 +57,18 @@ regridexec=$D3D_HOME/bin/ESMF_RegridWeightGen
 # share/esmf optionally contains some library-versions especially for running this version of ESMF_regrid,
 # both for RedHat 6.* and 7.*
 
-grepOS=`cat /etc/redhat-release | grep -i "release 6"`
-if [ "$grepOS" != "" ]; then
-  echo "RH 6: Using RH 6 libraries" >>esmf_sh.log
-  export LD_LIBRARY_PATH=$D3D_HOME/share/delft3d/esmf/lnx64/bin:$D3D_HOME/lib:$LD_LIBRARY_PATH 
+if [ -f "/etc/redhat-release" ]; then
+  grepOS=`cat /etc/redhat-release | grep -i "release 6"`
+  if [ "$grepOS" != "" ]; then
+    echo "RH 6: Using RH 6 libraries" >>esmf_sh.log
+    export LD_LIBRARY_PATH=$D3D_HOME/share/delft3d/esmf/lnx64/bin:$D3D_HOME/lib:$LD_LIBRARY_PATH 
+  else
+    echo "using RH 7 libraries" >>esmf_sh.log
+    export LD_LIBRARY_PATH=$D3D_HOME/share/delft3d/esmf/lnx64/bin_COS7:$D3D_HOME/lib:$LD_LIBRARY_PATH 
+  fi
 else
-  echo "using RH 7 libraries" >>esmf_sh.log
-  export LD_LIBRARY_PATH=$D3D_HOME/share/delft3d/esmf/lnx64/bin_COS7:$D3D_HOME/lib:$LD_LIBRARY_PATH 
+  echo "ERROR: ESMF_RegridWeightGen_in_Delft3D-WAVE.sh only implemented for CentOS 6 and 7."
+  exit
 fi
 
 
