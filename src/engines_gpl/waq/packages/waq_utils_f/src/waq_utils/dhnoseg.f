@@ -51,3 +51,37 @@
 
       return
       end
+
+      subroutine store_noseg_nolay( nosegfm, kmx )
+!
+!     Deltares
+!
+!     created             : nov 20 by arjen markus
+!
+!     function            : store noseg and nolay in /sysn/ common , system characteristics
+!                           used in the D-Flow FM context
+!
+!     logical unitnumbers : -
+!
+!     subroutines called  : -
+!
+!     parameters          : -
+!
+!     name     kind     length     funct.  description
+!     ----     -----    ------     ------- -----------
+!     nosegfm  integer        1     input   number of water segments (!)
+!     kmx      integer        1     input   number of layers
+!
+!     declarations
+!
+      integer       pnoseg
+!
+!     common  /  sysn   /   system characteristics
+!
+      include 'sysn.inc'
+
+      noseg = nosegfm
+      nolay = max( 1, kmx ) ! kmx may be zero, indicating a "true" 2D model
+
+      return
+      end
