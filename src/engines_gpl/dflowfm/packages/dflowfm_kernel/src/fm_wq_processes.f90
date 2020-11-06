@@ -201,7 +201,11 @@
               wqmydomain(k-kbx+1) = idomain(kk).eq.my_rank
            enddo
         enddo
-      endif
+     endif
+
+!    store the number of segments and number of layers for access
+!    in the processes library
+     call store_noseg_nolay( noseg, kmx )
 
 ! ======================
 ! Start initialising WAQ
@@ -554,7 +558,7 @@
             call mess(LEVEL_INFO, '''rain'' is the sub-file but ''rain'' is not in the hydrodynamic model.')
          endif
       end if
-      
+
 !     data only needed for vtrans
       call zoekns(cvtrans,nocons,coname_sub,20,icon)
       if (icon>0) then
@@ -578,8 +582,8 @@
             isffmkbot = nosfun
             call realloc(sfunname, nosfun, keepExisting=.true., fill='FMkBot')
             call mess(LEVEL_INFO, 'Found process ''vtrans'', added ''VertDisper'', ''FMLayer'', ''FMkTop'' and ''FMkBot''')
-         end if         
-      end if         
+         end if
+      end if
       call mess(LEVEL_INFO, '--------------------------------------------------------------------------')
 
       noconm = nocons + 1000
@@ -1049,14 +1053,14 @@
           if ( global_number == previous_global ) then
               global_to_local = previous_local
           else
-              i = findloc(iglobal_s, value = global_number) 
+              i = findloc(iglobal_s, value = global_number)
               if ( i(1) .gt. 0 ) then
                  global_to_local = i(1)
                  previous_global = global_number
                  previous_local  = i(1)
               endif
           endif
-       endif       
+       endif
        if ( timon ) call timstop ( ithndl )
    end function global_to_local
 
@@ -1401,7 +1405,7 @@
             pmsa(ipoirain + kb-kbx : ipoirain + ktmax-kbx) = rain(kk)/24.0d0 ! rain: mm/day => mm/h
          end do
       end if
-         
+
       if ( isfvertdisper.gt.0 ) then
          ipoivertdisper = arrpoi(iisfun) + (isfvertdisper-1)*noseg
          do kk=1,Ndxi
@@ -1421,10 +1425,10 @@
                ipoileng = ipoileng + 1
             end do
          end do
-         
+
       end if
 
-!     determine dry/wet cells 
+!     determine dry/wet cells
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
          do k=kb,ktmax
@@ -1614,9 +1618,9 @@
 
    use m_fm_wq_processes
    use m_partitioninfo
-   
+
    implicit none
-   
+
    integer :: iseg
    if(jampi.eq.1) then
       if(iseg.gt.0.and.iseg.le.noseg) then
@@ -1627,13 +1631,13 @@
    else
       wq_processes_mydomain = .true.
    endif
-   
+
    end function wq_processes_mydomain
 
    logical function reduce_sum_wq_processes(size_wq_processes_data, wq_processes_data)
-   
+
    use m_partitioninfo
-   
+
    implicit none
 
    integer             :: size_wq_processes_data
@@ -1647,15 +1651,15 @@
       call reduce_double_sum(size_wq_processes_data, mpi_wq_processes_data, mpi_wq_processes_data_reduce)
       wq_processes_data = sngl(mpi_wq_processes_data_reduce)
    end if
-   
+
    reduce_sum_wq_processes = .true.
 
    end function reduce_sum_wq_processes
-   
+
    logical function reduce_int_max_wq_processes(wq_processes_data)
-   
+
    use m_partitioninfo
-   
+
    implicit none
 
    integer             :: wq_processes_data
@@ -1663,7 +1667,7 @@
    if (jampi==1) then
       call reduce_int1_max(wq_processes_data)
    end if
-   
+
    reduce_int_max_wq_processes = .true.
 
    end function reduce_int_max_wq_processes
@@ -1683,4 +1687,4 @@
 
       return
    end subroutine default_fm_wq_processes
-   
+
