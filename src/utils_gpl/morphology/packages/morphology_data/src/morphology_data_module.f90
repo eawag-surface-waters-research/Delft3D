@@ -243,6 +243,7 @@ type moroutputtype
     logical :: sbwuv
     logical :: sbwuuvv
     logical :: sedparout
+    logical :: seddif
     logical :: ssuuvv
     logical :: sswuv
     logical :: sswuuvv
@@ -1601,6 +1602,7 @@ subroutine initmoroutput(moroutput, def)
     moroutput%rsedeq        = yes
     moroutput%sandfrac      = no
     moroutput%sedparout     = no
+    moroutput%seddif        = no
     moroutput%sbuuvv        = yes
     moroutput%sbcuv         = no
     moroutput%sscuv         = no

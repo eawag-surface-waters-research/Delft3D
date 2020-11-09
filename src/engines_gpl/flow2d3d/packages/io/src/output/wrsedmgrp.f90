@@ -59,6 +59,7 @@ subroutine wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
     integer(pntrsize)               , pointer :: sbvv
     integer(pntrsize)               , pointer :: ws
     integer(pntrsize)               , pointer :: dps
+    integer(pntrsize)               , pointer :: seddif
     logical                         , pointer :: lfbedfrmout
     integer                         , pointer :: celidt
     type (datagroup)                , pointer :: group4
@@ -118,6 +119,7 @@ subroutine wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
     sbvv           => gdp%gdr_i_ch%sbvv
     ws             => gdp%gdr_i_ch%ws
     dps            => gdp%gdr_i_ch%dps
+    seddif         => gdp%gdr_i_ch%seddif
     io_prec        => gdp%gdpostpr%io_prec
     !
     filetype = getfiletype(gdp, FILOUT_MAP)
@@ -173,7 +175,7 @@ subroutine wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
     !
     call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
               & lsed      ,lsedtot   ,irequest  ,fds       ,grnam5    , &
-              & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    , &
+              & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    ,r(seddif) , &
               & filename  ,gdp       ,filetype  , &
               & mf        ,ml        ,nf        ,nl        , &
               & iarrc     ,kfsmin    ,kfsmax    )

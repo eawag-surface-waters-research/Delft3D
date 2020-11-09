@@ -1,6 +1,6 @@
 subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                 & lsed      ,lsedtot   ,irequest  ,fds       ,grpnam    , &
-                & sbuu      ,sbvv      ,ws        ,dps       , & 
+                & sbuu      ,sbvv      ,ws        ,dps       ,seddif    , & 
                 & filename  ,gdp       ,filetype  , &
                 & mf        ,ml        ,nf        ,nl        , &
                 & iarrc     ,kfsmin    ,kfsmax    )
@@ -130,6 +130,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, lsed), intent(in)  :: ws      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, lsed), intent(in)  :: seddif  !  Description and declaration in esm_alloc_real.f90
     integer                                                                    , intent(in)  :: fds    
 
     integer                                                                    , intent(in)  :: filetype
@@ -323,6 +324,9 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SBVV', ' ', io_prec         , 3, dimids=(/iddim_nc, iddim_m , iddim_lsedtot/), longname='Bed-load transport v-direction (v point)', unit=transpunit, acl='v')
        endif
        if (lsed > 0) then
+          if (moroutput%seddif) then
+             call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SEDDIF', ' ', io_prec      , 4, dimids=(/iddim_n , iddim_m, iddim_kmaxout, iddim_lsed/), longname='Vertical sediment diffusion (zeta point)', unit='m2/s', acl='z')
+          endif
           if (moroutput%ssuuvv) then
              call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SSUU', ' ', io_prec      , 3, dimids=(/iddim_n , iddim_mc, iddim_lsed/), longname='Suspended-load transport u-direction (u point)', unit=transpunit, acl='u')
              call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SSVV', ' ', io_prec      , 3, dimids=(/iddim_nc, iddim_m , iddim_lsed/), longname='Suspended-load transport v-direction (v point)', unit=transpunit, acl='v')
@@ -901,6 +905,17 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                         & nf, nl, mf, ml, iarrc, gdp, lsedtot, &
                         & ierror, lundia, rbuff3, 'SBVV')
           deallocate(rbuff3)
+          if (ierror /= 0) goto 9999
+       endif
+       !
+       if (lsed > 0 .and. moroutput%seddif) then
+          !
+          ! element 'SEDDIF'
+          !
+          call wrtarray_nmkl(fds, filename, filetype, grpnam, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 0, kmax, lsed, ierror, lundia, seddif, 'SEDDIF', &
+                        & smlay, kmaxout, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
