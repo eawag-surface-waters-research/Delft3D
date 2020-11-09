@@ -2346,7 +2346,7 @@
          do l=1,lsedtot
             if (stmpar%sedpar%sedtyp(l) == SEDTYP_COHESIVE) cycle   ! conform with d3d
             
-            if (pure1d_mor .and. abs(kfs(Lf)) == 1) then
+            if (pure1d_mor .and. abs(kcu(Lf)) == 1) then
                ! on 1D links use the x-component which is the full vector
                if (link1(k1) == Lf) then
                    sutot1 =  sxtot(k1,l)
