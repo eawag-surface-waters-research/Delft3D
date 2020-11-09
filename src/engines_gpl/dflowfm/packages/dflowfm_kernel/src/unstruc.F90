@@ -355,7 +355,8 @@ subroutine flow_finalize_usertimestep(iresult)
          if (comparereal(time1, time_his, eps10)>=0) then
             call updateValuesOnObservationStations()
             if (jampi == 1) then
-               call  updateValuesOnCrossSections_mpi(time1)
+               call updateValuesOnCrossSections_mpi(time1)
+               call updateValuesOnRunupGauges_mpi()
                call reduce_particles()
             endif
             if (jahisbal > 0) then ! Update WaterBalances etc.
@@ -598,6 +599,7 @@ character(len=255)   :: filename_fou_out
   end if
 
   call updateValuesOnCrossSections(time1)             ! Compute sum values across cross sections.
+  call updateValuesOnRunupGauges()             
  if (jampi == 0 .or. (jampi == 1 .and. my_rank==0)) then
     if (numsrc > 0) then
        call updateValuesonSourceSinks(time1)         ! Compute discharge and volume on sources and sinks
@@ -633,7 +635,7 @@ character(len=255)   :: filename_fou_out
  end if
 
  call timstop(handle_steps)
- iresult = dfm_check_signals()                   ! Abort when Ctrl-C was pressed
+ iresult = dfm_check_signals()                      ! Abort when Ctrl-C was pressed
  if (iresult /= DFM_NOERR) goto 888
 
  if (validateon) then
@@ -18952,6 +18954,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
  use unstruc_channel_flow, only : network
  use m_oned_functions, only: updateFreeboard, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat, updateS1Gradient
  use m_structures, only: structure_parameters_rst
+ use m_monitoring_runupgauges
 #ifdef _OPENMP
  use omp_lib
 #endif
@@ -18973,6 +18976,10 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
          if ( jampi.eq.0 .or. ( jampi.eq.1 .and. my_rank.eq.0 ) ) then
             call unc_write_his(tim)   ! wrihis
          endif
+         if (nrug>0) then
+            ! needs to be done at exactly ti_his, but over all domains, so cannot go in wrihis 
+            call clearRunupGauges()      
+         end if   
          if (comparereal(time_his, ti_hise, eps10) == 0) then
             time_his = tstop_user + 1
          else
@@ -19267,6 +19274,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use network_data, only: xk, yk
     use m_observations
     use m_monitoring_crosssections
+    use m_monitoring_runupgauges
     use m_missing
     use netcdf
     use unstruc_files, only: defaultFilename
@@ -19344,7 +19352,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim, &
                      id_latdim, id_lat_id, id_lat_predis_inst, id_lat_predis_ave, id_lat_realdis_inst, id_lat_realdis_ave, &
-                     id_ustx, id_usty, id_nlyrdim, id_bodsed, id_dpsed, id_msed, id_thlyr, id_poros, id_lyrfrac, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_mfluff
+                     id_ustx, id_usty, id_nlyrdim, id_bodsed, id_dpsed, id_msed, id_thlyr, id_poros, id_lyrfrac, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_mfluff, &
+                     id_rugdim, id_rugx, id_rugy, id_rugid, id_rugname, id_varruh
     ! ids for geometry variables, only use them once at the first time of history output
     integer :: id_statgeom_node_count,     id_statgeom_node_coordx,     id_statgeom_node_coordy,    &
                id_crsgeom_node_count,      id_crsgeom_node_coordx,      id_crsgeom_node_coordy,     &
@@ -19358,8 +19367,9 @@ subroutine unc_write_his(tim)            ! wrihis
                id_bridgegeom_node_count,   id_bridgegeom_node_coordx,   id_bridgegeom_node_coordy,  &
                id_srcgeom_node_count,      id_srcgeom_node_coordx,      id_srcgeom_node_coordy,     &
                id_latgeom_node_count,      id_latgeom_node_coordx,      id_latgeom_node_coordy
+       
     double precision, allocatable :: geom_x(:), geom_y(:)
-    integer, allocatable :: node_count(:)
+    integer, allocatable          :: node_count(:)
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
     integer, allocatable, save :: id_hwqb(:)
@@ -19374,7 +19384,7 @@ subroutine unc_write_his(tim)            ! wrihis
     character(len=255)           :: station_geom_container_name, crs_geom_container_name, weir_geom_container_name, orif_geom_container_name, &
                                     genstru_geom_container_name, uniweir_geom_container_name, culvert_geom_container_name, &
                                     gategen_geom_container_name, pump_geom_container_name, bridge_geom_container_name, src_geom_container_name, &
-                                    lat_geom_container_name
+                                    lat_geom_container_name, rug_geom_container_name
     logical                      :: jawel
     double precision             :: xp, yp, qsum, vals, valx, valy, valwx, valwy, valpatm, wind, cof0, tmpx, tmpy
 
@@ -19387,7 +19397,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer                      :: jawrizw = 0
     double precision             :: w1, pumplensum, pumplenmid, pumpxmid, pumpymid
     double precision             :: rhol
-    double precision, allocatable:: toutputx(:,:), toutputy(:,:), toutput3(:,:,:)
+    double precision, allocatable:: toutput1(:), toutputx(:,:), toutputy(:,:), toutput3(:,:,:)
     double precision, allocatable:: toutput_cum, toutput_cur
     type(t_structure), pointer   :: pstru
 
@@ -19414,7 +19424,7 @@ subroutine unc_write_his(tim)            ! wrihis
     end if
 
     ! When no crs/obs present, return immediately.
-    if (numobs+nummovobs <= 0 .and. ncrs <= 0 .and. jahisbal <= 0 .and. jahiscgen <= 0) then
+    if (numobs+nummovobs <= 0 .and. ncrs <= 0 .and. jahisbal <= 0 .and. jahiscgen <= 0 .and. nrug <= 0) then
         if (ihisfile == 0) then
             call mess(LEVEL_WARN, 'No observations nor cross sections defined. Will not produce a history file.')
         end if
@@ -20357,6 +20367,32 @@ subroutine unc_write_his(tim)            ! wrihis
 
             endif
         end if
+        
+        ! runup gauges
+        if (nrug > 0) then
+           ierr = nf90_def_dim(ihisfile, 'runupgauges', nrug, id_rugdim)
+           
+           ierr = nf90_def_var(ihisfile, 'rug_x_coordinate', nf90_double, (/ id_rugdim, id_timedim /), id_rugx)
+           ierr = nf90_def_var(ihisfile, 'rug_y_coordinate', nf90_double, (/ id_rugdim, id_timedim /), id_rugy)
+            
+            ierr = unc_addcoordatts(ihisfile, id_rugx, id_rugy, jsferic)
+            ierr = nf90_put_att(ihisfile, id_rugx, 'long_name', 'time-varying x-coordinate of shoreline position')
+            ierr = nf90_put_att(ihisfile, id_rugy, 'long_name', 'time-varying y-coordinate of shoreline position')
+
+            ierr = nf90_def_var(ihisfile, 'rug_id', nf90_char,   (/ id_strlendim, id_rugdim /), id_rugid)
+            ierr = nf90_put_att(ihisfile, id_rugid,  'long_name'    , 'runup gauge identifier') ! REF
+
+            ierr = nf90_def_var(ihisfile, 'rug_name', nf90_char,   (/ id_strlendim, id_rugdim /), id_rugname)
+            ierr = nf90_put_att(ihisfile, id_rugname,  'cf_role', 'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_rugname,  'long_name'    , 'runup gauge name') ! REF
+            
+            ierr = nf90_def_var(ihisfile, 'runup_height', nf90_double, (/ id_rugdim, id_timedim /), id_varruh)
+            ierr = nf90_put_att(ihisfile, id_varruh, 'standard_name', 'runup_height') 
+            ierr = nf90_put_att(ihisfile, id_varruh, 'long_name', 'runup height')
+            ierr = nf90_put_att(ihisfile, id_varruh, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_varruh, 'coordinates', 'rug_x_coordinate rug_y_coordinate rug_name')
+            ierr = nf90_put_att(ihisfile, id_varruh, '_FillValue', dmiss)
+        endif   
 
         if (jahissourcesink > 0 .and. numsrc > 0) then
            ierr = nf90_def_dim(ihisfile, 'source_sink', numsrc, id_srcdim)
@@ -21565,6 +21601,13 @@ subroutine unc_write_his(tim)            ! wrihis
             end do
             ierr = nf90_put_var(ihisfile, id_crsgeom_node_count, node_count, start = (/ 1 /), count = (/ ncrs /))
         end if
+        
+        if (nrug>0) then
+            do i=1,nrug
+                ierr = nf90_put_var(ihisfile, id_rugname,  trim(rug(i)%name), (/ 1, i /))
+                ierr = nf90_put_var(ihisfile, id_rugid,    trim(rug(i)%name), (/ 1, i /))
+            end do   
+        endif   
 
         if (jahiscgen > 0 .and. ntmp > 0) then
             do i=1,ntmp
@@ -22143,6 +22186,22 @@ subroutine unc_write_his(tim)            ! wrihis
           endif
        end do
     end if
+    
+    ! runup gauges
+    if (nrug>0) then
+       call realloc(geom_x,   nrug, fill=dmiss)
+       call realloc(geom_y,   nrug, fill=dmiss)
+       call realloc(toutput1, nrug, fill=dmiss)
+       do i=1,nrug
+          geom_x(i)   = rug(i)%maxx
+          geom_y(i)   = rug(i)%maxy
+          toutput1(i) = rug(i)%maxruh
+       end do
+       ierr = nf90_put_var(ihisfile, id_rugx,   geom_x(:),   start = (/ 1, it_his /), count = (/ nrug, 1 /))
+       ierr = nf90_put_var(ihisfile, id_rugy,   geom_y(:),   start = (/ 1, it_his /), count = (/ nrug, 1 /))
+       ierr = nf90_put_var(ihisfile, id_varruh, toutput1(:), start = (/ 1, it_his /), count = (/ nrug, 1 /))  
+    endif            
+    
 
     if (jahissourcesink > 0 .and. numsrc > 0) then
       if (tim == tstart_user) then
@@ -27105,10 +27164,11 @@ subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefi
  use m_structures
  implicit none
     call crosssections_on_flowgeom()
+    call runupgauges_on_flowgeom()
 
     call obs_on_flowgeom(0)
 
-!   for the following, it is assumed that the moving obsrevation stations have been initialized (in flow_initexternalforcings)
+!   for the following, it is assumed that the moving observation stations have been initialized (in flow_initexternalforcings)
     call init_valobs()   ! (re)initialize work array and set pointers for observation stations
 
     call updateValuesOnObservationStations() ! and fill first value
@@ -51591,7 +51651,7 @@ end subroutine alloc_jacobi
       do m = 1,size(pillar)
         call pol_to_flowlinks(pillar(m)%xcor, pillar(m)%ycor, pillar(m)%xcor*0d0, pillar(m)%np, nPath, Path)
         do n = 1,nPath
-          call crspath_on_flowgeom(Path(n),0,0,1,idum, 0)
+          call crspath_on_flowgeom(Path(n),0,0,1,idum,0,1)
           do L = 1,Path(n)%lnx
             Lf = Path(n)%ln(L)
             La = iabs(Lf)

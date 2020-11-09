@@ -1655,15 +1655,16 @@ end subroutine increaseCRSPaths
 !! in the path structure. Any existing link info is preserved!
 !! This routine can be used with 'network geometry' (e.g. for thin dams)
 !! and 'flow geometry' (e.g. for cross sections and fixed weirs).
-subroutine crspath_on_singlelink(path, linknr, xk3, yk3, xk4, yk4, xza, yza, xzb, yzb)
+subroutine crspath_on_singlelink(path, linknr, xk3, yk3, xk4, yk4, xza, yza, xzb, yzb, zork)
 
    use geometry_module, only: crossinbox
    use m_sferic, only: jsferic
    use m_missing, only : dmiss
    implicit none
 
-   type(tcrspath),   intent(inout) :: path   !< Path that is checked for link crossing, will be updated with link info.
+   type(tcrspath),   intent(inout)  :: path   !< Path that is checked for link crossing, will be updated with link info.
     integer,          intent(in)    :: linknr !< Number of link that is being checked, will be stored in path%ln
+    integer,          intent(in)    :: zork   !< Crossing checked using xz or xk
     double precision, intent(in)    :: xk3, yk3, xk4, yk4 !< Net node coordinates of this link (or fictious coords for a 1D link)
     double precision, intent(in)    :: xza, yza, xzb, yzb !< cell circum. coordinates of this link.
 
@@ -1673,7 +1674,11 @@ subroutine crspath_on_singlelink(path, linknr, xk3, yk3, xk4, yk4, xza, yza, xzb
 !   Check whether flow link intersects with a polyline segment of this cross section path.
     do ip=1,path%np-1
         crp = 0d0
-        CALL CROSSinbox(path%XP(ip), path%YP(ip), path%XP(ip+1), path%YP(ip+1), xza, yza, xzb, yzb, jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
+        if (zork==1) then
+           CALL CROSSinbox(path%XP(ip), path%YP(ip), path%XP(ip+1), path%YP(ip+1), xza, yza, xzb, yzb, jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
+        else
+           CALL CROSSinbox(path%XP(ip), path%YP(ip), path%XP(ip+1), path%YP(ip+1), xk3, yk3, xk4, yk4, jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
+        endif   
         if (jacros == 1) then
             if (SM == 1d0) then
                if (crp > 0d0) then

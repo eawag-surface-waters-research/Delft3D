@@ -4238,6 +4238,38 @@ end subroutine partition_make_globalnumbers
       return
    end subroutine reduce_crs
    
+!> Reduce runup for each runup gauge across all MPI partitions.
+!> Returns max across domains (1,:), and domain number of max (2,:)   
+   subroutine reduce_rug(resu,nrug)
+#ifdef HAVE_MPI
+      use mpi
+#endif
+      implicit none
+      
+      integer,                             intent(in)    :: nrug                !< number of gauges
+      double precision, dimension(2,nrug), intent(inout) :: resu                !< runup data
+      double precision, dimension(:,:),    allocatable   :: resu_all
+      
+      integer                                            :: ierror
+      
+#ifdef HAVE_MPI
+!     allocate
+      allocate(resu_all(2,nrug))
+      resu_all = 0d0
+      
+      call mpi_allreduce(resu,resu_all,nrug,mpi_2double_precision,mpi_maxloc,DFM_COMM_DFMWORLD,ierror)
+      if (ierror .ne. 0) then
+         goto 1234
+      endif   
+      resu = resu_all
+      
+!     deallocate
+1234 continue      
+      if ( allocated(resu_all) ) deallocate(resu_all)
+#endif
+      return
+   end subroutine reduce_rug   
+   
    
 !> exclude water-level ghostnodes from solution vector via kfs
    subroutine partition_setkfs()

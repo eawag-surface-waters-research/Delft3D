@@ -256,6 +256,7 @@ end subroutine api_loadmodel
     call timstrt('Update various', inner_timerhandle)
     
     call updateValuesOnCrossSections(time1)             ! Initial statistics, copied from flow_usertimestep
+    call updateValuesOnRunupGauges()             
     if (jahisbal > 0) then                              ! Update WaterBalances etc.
       call updateBalance() 
    endif
@@ -267,7 +268,8 @@ end subroutine api_loadmodel
 
    if (jampi == 1) then
       call updateValuesOnCrossSections_mpi(time1)
-       call reduce_particles()
+      call updateValuesOnRunupGauges_mpi()
+      call reduce_particles()
    endif
    call timstop(inner_timerhandle)
     

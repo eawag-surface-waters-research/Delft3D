@@ -153,6 +153,7 @@ implicit none
 
     character(len=1024):: md_obsfile       = ' ' !< File containing observation points  (e.g., *_obs.xyn, *_obs.ini)
     character(len=255) :: md_crsfile       = ' ' !< File containing cross sections (e.g., *_crs.pli, observation cross section *_crs.ini)
+    character(len=255) :: md_rugfile       = ' ' !< File containing runup gauges (e.g., *_rug.pli)
     character(len=255) :: md_foufile       = ' ' !< File containing fourier modes to be analyzed
 
     character(len=255) :: md_hisfile       = ' ' !< Output history file for monitoring  (e.g., *_his.nc)
@@ -338,6 +339,7 @@ use unstruc_channel_flow
 
     md_obsfile = ' '
     md_crsfile = ' '
+    md_rugfile = ' '
     md_foufile = ' '
     md_hisfile = ' '
     md_mapfile = ' '
@@ -417,6 +419,7 @@ subroutine loadModel(filename)
     use m_netw
     use m_observations
     use m_monitoring_crosssections
+    use m_monitoring_runupgauges
     use m_thindams
     use m_flow, only: isimplefixedweirs, kmx
     use m_manholes
@@ -644,6 +647,15 @@ subroutine loadModel(filename)
       enddo
       deallocate(fnames)
    end if
+   ! Load runup gauge polygons from file
+   if (len_trim(md_rugfile) > 0) then
+      call strsplit(md_rugfile,1,fnames,1)
+      call loadRunupGauges(fnames(1),0)
+      do ifil=2,size(fnames)
+         call loadRunupGauges(fnames(ifil), 1)     
+      enddo   
+      deallocate(fnames)
+   endif   
    call timstop(timerHandle)
 
     ! Load manholes from file.
@@ -1568,6 +1580,7 @@ subroutine readMDUFile(filename, istat)
     ! [output] OutputDir was read earlier already.
     call prop_get_string(md_ptr, 'output', 'ObsFile', md_obsfile, success)
     call prop_get_string(md_ptr, 'output', 'CrsFile', md_crsfile, success)
+    call prop_get_string(md_ptr, 'output', 'RugFile', md_rugfile, success)
     call prop_get_string(md_ptr, 'output', 'FouFile', md_foufile, success)
     call prop_get_integer(md_ptr, 'output', 'FouUpdateStep', md_fou_step, success)
 
@@ -3254,6 +3267,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set(prop_ptr, 'output', 'ObsFile',     trim(md_obsfile), 'Points file *.xyn with observation stations with rows x, y, station name')
     call prop_set(prop_ptr, 'output', 'CrsFile',     trim(md_crsfile), 'Polyline file *_crs.pli defining observation cross sections')
+    call prop_set(prop_ptr, 'output', 'RugFile',     trim(md_rugfile), 'Polyline file *_rug.pli defining runup gauges')
     call prop_set(prop_ptr, 'output', 'FouFile',     trim(md_foufile), 'Fourier analysis input file *.fou')
     call prop_set(prop_ptr, 'output', 'FouUpdateStep', md_fou_step,    'Fourier update step type: 0=every user time step, 1=every computational timestep.')
 

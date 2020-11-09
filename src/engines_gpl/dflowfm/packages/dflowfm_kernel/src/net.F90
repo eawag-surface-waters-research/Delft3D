@@ -14366,9 +14366,9 @@ subroutine crosssections_on_flowgeom()
         if (crs(ic)%loc2OC == 0) then
           if ( .not. success ) then
              if ( jakdtree.eq.0 ) then
-                call crspath_on_flowgeom(crs(ic)%path,0,0,1,idum, 0)
+                call crspath_on_flowgeom(crs(ic)%path,0,0,1,idum, 0,1)
              else
-                call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 0)
+                call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 0,1)
              end if
           end if
         else  ! snap to only 1d flow link
@@ -14382,7 +14382,7 @@ subroutine crosssections_on_flowgeom()
              else if (ierror == DFM_NOERR) then
                 numlist(ic) = 1
                 linklist(1,ic) = linknr
-                call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 1)
+                call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 1,1)
              else
                 call SetMessage(LEVEL_ERROR, 'Error occurs when snapping Observation cross section '''//trim(crs(ic)%name)//''' to a 1D flow link.')
              end if
@@ -14411,10 +14411,178 @@ subroutine crosssections_on_flowgeom()
    return
 end subroutine crosssections_on_flowgeom
 
+subroutine runupgauges_on_flowgeom()
+    use m_monitoring_runupgauges
+    use m_flowgeom, only: Lnx, lne2ln
+    use m_missing
+    use kdtree2Factory
+    use unstruc_messages
+    use dfm_error
+    use m_inquire_flowgeom
+    use m_partitioninfo, only: jampi
+    use m_alloc
+    implicit none
+
+    integer                                       :: ic, icmod
+
+    double precision, dimension(:),   allocatable :: xx, yy
+    double precision, dimension(:),   allocatable :: dSL
+    integer,          dimension(:),   allocatable :: iLink, ipol, istartcrs, numlist
+    integer,          dimension(:,:), allocatable :: linklist
+    integer,          dimension(:),   allocatable :: idum
+
+    integer                                       :: i, num, numcrossedlinks, ierror
+    integer                                       :: istart, iend
+
+    integer                                       :: jakdtree=1
+    double precision                              :: t0, t1
+    character(len=128)                            :: mesg
+    integer                                       :: linknr, ii
+    logical                                       :: success
+
+
+    if ( nrug.lt.1 ) return
+
+    numcrossedlinks = 0
+
+!   allocate
+    allocate(istartcrs(nrug+1))
+    istartcrs = 1
+
+    allocate(idum(1))
+    idum = 0
+
+    if ( jakdtree.eq.1 ) then
+        call klok(t0)
+
+        ! to do: chaching
+        !call copyCachedCrossSections( iLink, ipol, success )
+
+        !if ( success ) then
+        !    numcrossedlinks = size(iLink)
+        !    ierror          = 0
+        !else
+            num = 0
+!           determine polyline size
+            do ic=1,nrug
+               num = num+rug(ic)%path%np+1 ! add space for missing value
+               istartcrs(ic+1) = num+1
+            end do
+
+!           allocate
+            allocate(xx(num), yy(num))
+
+!           determine paths to single polyline map
+            num = 0
+            do ic=1,nrug
+               do i=1,rug(ic)%path%np
+                  num = num+1
+                  xx(num) = rug(ic)%path%xp(i)
+                  yy(num) = rug(ic)%path%yp(i)
+               end do
+!              add missing value
+               num = num+1
+               xx(num) = DMISS
+               yy(num) = DMISS
+            end do
+
+!           allocate
+            allocate(iLink(Lnx))
+            iLink = 0
+            allocate(ipol(Lnx))
+            ipol = 0
+            allocate(dSL(Lnx))
+            dSL = 0d0
+            ! use itype 3, as we want crossing the edge, not the connection between adjoint cells 
+            call find_crossed_links_kdtree2(treeglob,num,xx,yy,3,Lnx,1,numcrossedlinks, iLink, ipol, dSL, ierror)
+
+            !call saveLinklist( numcrossedlinks, iLink, ipol )   to do caching
+        !endif
+
+        if ( ierror.eq.0 .and. numcrossedlinks.gt.0 ) then
+
+!          determine crossed links per cross-section
+           allocate(numlist(nrug))
+           numlist = 0
+           allocate(linklist(numcrossedlinks,nrug))
+           linklist = 0
+
+           do i=1,numcrossedlinks
+              do ic=1,nrug
+                 istart  = istartcrs(ic)
+                 iend    = istartcrs(ic+1)-1
+                 if ( ipol(i).ge.istart .and. ipol(i).le.iend ) then
+                    numlist(ic) = numlist(ic)+1
+                    linklist(numlist(ic),ic) = iabs(lne2ln(iLink(i)))
+                 end if
+              end do
+           end do
+
+        else
+!          disable kdtree
+           jakdtree = 0
+
+!          deallocate
+           if ( allocated(iLink) ) deallocate(iLink)
+           if ( allocated(ipol)  ) deallocate(ipol)
+           if ( allocated(dSL)   ) deallocate(dSL)
+        end if
+
+!       deallocate
+        if ( allocated(istartcrs) ) deallocate(istartcrs)
+        if ( allocated(xx)        ) deallocate(xx,yy)
+
+        call klok(t1)
+        write(mesg,"('runup gauges with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
+        call mess(LEVEL_INFO, trim(mesg))
+    end if
+
+    icMOD = MAX(1,nrug/100)
+
+    call realloc(numlist, nrug, keepExisting = .true., fill = 0) ! In case pli-based cross sections have not allocated this yet.
+    call realloc(linklist, (/ max(numcrossedlinks, 1), nrug /), keepExisting = .true., fill = 0)  ! In addition to pli-based cross sections (if any), also support 1D branchid-based cross sections.
+
+    ! todo: caching
+    !call copyCachedCrossSections( iLink, ipol, success )
+
+    CALL READYY('Enabling runup gauges on grid', 0d0)
+    do ic=1,nrug
+        if (mod(ic,icMOD) == 0) then
+            CALL READYY('Enabling runup gauges on grid', dble(ic)/dble(nrug))
+        end if
+        !
+        !if ( .not. success ) then   to do: caching
+           if ( jakdtree.eq.0 ) then
+              call crspath_on_flowgeom(rug(ic)%path,0,0,1,idum, 0, 2)
+           else
+              call crspath_on_flowgeom(rug(ic)%path,0,1,numlist(ic),linklist(1,ic), 0, 2)
+           end if
+        !end if
+    end do
+
+    CALL READYY('Enabling runup gauges on grid', -1d0)
+
+1234 continue
+
+!   deallocate
+    if ( jakdtree.eq.1 ) then
+       if ( allocated(iLink)    ) deallocate(iLink)
+       if ( allocated(iPol)     ) deallocate(iPol)
+       if ( allocated(dSL)      ) deallocate(dSL)
+       if ( allocated(numlist)  ) deallocate(numlist)
+       if ( allocated(linklist) ) deallocate(linklist)
+    endif
+
+    if ( allocated(idum)     ) deallocate(idum)
+
+   return
+end subroutine runupgauges_on_flowgeom   
+   
+   
 
 !> Put the polyline thin dams on the network links.
 !! All crossed net links are set to kn(3,L) = 0, such that flow_geominit
-!! does not even create a flow link across is.
+!! does not even create a flow link across it.
 subroutine thindams_on_netgeom()
     use m_thindams
     use network_data
@@ -14493,7 +14661,7 @@ subroutine thindams_on_netgeom()
                 ic = idum(iPol(iL))
                 call get_link_neighboringcellcoords(L,isactive,xza,yza,xzb,yzb)
                 if ( isactive.eq.1 ) then
-                   call crspath_on_singlelink(thd(ic), L, xk(kn(1,L)), yk(kn(1,L)), xk(kn(2,L)), yk(kn(2,L)), xza, yza, xzb, yzb)
+                   call crspath_on_singlelink(thd(ic), L, xk(kn(1,L)), yk(kn(1,L)), xk(kn(2,L)), yk(kn(2,L)), xza, yza, xzb, yzb, 1)
                    do L=1,thd(ic)%lnx
                       LL = abs(thd(ic)%ln(L))
                       if (LL > 0 .and. LL <= numl) then
@@ -14553,7 +14721,7 @@ subroutine fixedweirs_on_flowgeom()
     idum = 0
 
     do ic=1,nfxw
-        call crspath_on_flowgeom(fxw(ic),1,0,1,idum, 0)
+        call crspath_on_flowgeom(fxw(ic),1,0,1,idum, 0, 1)
     end do
 end subroutine fixedweirs_on_flowgeom
 
@@ -14566,7 +14734,7 @@ end subroutine fixedweirs_on_flowgeom
 !! coordinates in xk,yk.
 !!
 !! \see crspath_on_netgeom, crosssections_on_flowgeom, fixedweirs_on_flowgeom
-subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist, jaloc3)
+subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist, jaloc3, zork)
     use m_crspath
     use m_flowgeom
     use network_data
@@ -14585,6 +14753,7 @@ subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist, 
     integer,                      intent(in)    :: numlinks      !< number of links in list
     integer, dimension(numlinks), intent(in)    :: linklist      !< list of flowlinks crossed by path
     integer,                      intent(in   ) :: jaloc3        !< If it has locationtype==3, then jaloc3>0, for Crs defined by branchID and chainage
+    integer,                      intent(in)    :: zork          !< xk, yk for crossing or xz, yz
 
     integer                       :: i, iend, iLf, L, Lf, n1, n2, kint
 
@@ -14655,7 +14824,7 @@ subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist, 
            path%lnx = 1
            path%ln(1) = Lf
         else
-           call crspath_on_singlelink(path, Lf, x1, y1, x2, y2, xz(n1), yz(n1), xz(n2), yz(n2))
+           call crspath_on_singlelink(path, Lf, x1, y1, x2, y2, xz(n1), yz(n1), xz(n2), yz(n2), zork)
         end if
    enddo
 
@@ -14715,7 +14884,7 @@ subroutine crspath_on_netgeom(path)
            call get_link_neighboringcellcoords(L, isactive, xza, yza, xzb, yzb)
            if ( isactive.ne.1 ) cycle
 
-           call crspath_on_singlelink(path, L, xk(kn(1,L)), yk(kn(1,L)), xk(kn(2,L)), yk(kn(2,L)), xza, yza, xzb, yzb)
+           call crspath_on_singlelink(path, L, xk(kn(1,L)), yk(kn(1,L)), xk(kn(2,L)), yk(kn(2,L)), xza, yza, xzb, yzb, 1)
        enddo
    end subroutine crspath_on_netgeom
 
@@ -14740,10 +14909,10 @@ subroutine crspath_on_netgeom(path)
             xza = xk(n1) ; yza = yk(n1)
             xzb = xk(n2) ; yzb = yk(n2)
         else
-            n1 = lne(1,L); n2 =               lne(2,L)
+            n1 = lne(1,L); n2 = lne(2,L)
             if (lnn(L) < 2 .or. n1 <= 0 .or. n2 <= 0 .or. n1 > nump .or. n2 > nump) then
-           isactive = 0
-           return
+               isactive = 0
+               return
             end if
             xza = xz(n1) ; yza = yz(n1)
             xzb = xz(n2) ; yzb = yz(n2)
@@ -15013,6 +15182,123 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
    sumvalcumQ_mpi= 0d0
 
 end subroutine updateValuesOnCrossSections_mpi
+
+!< update runup values per dts   
+subroutine updateValuesOnRunupGauges()
+    use m_monitoring_runupgauges
+    use m_missing
+    use m_flow, only: s1, hu, hs
+    use m_cell_geometry, only: xz, yz
+    use m_flowgeom, only: ln, acl, xu, yu, bl
+    use m_flowparameters, only: epshs, epshu
+
+    implicit none
+
+    integer                                       :: irug
+    integer                                       :: k1, k2, k
+    integer                                       :: L, il
+    double precision                              :: maxx, maxy, maxz, maxk
+
+!   update runup on gauge locations
+    hs = max(s1-bl,0d0)
+    do irug = 1, nrug
+       maxz = -huge(0d0)
+       maxx = dmiss
+       maxy = dmiss
+       maxk = 0
+       ! determine runup value
+       if (rug(irug)%path%lnx==0) cycle
+       do il = 1, rug(irug)%path%lnx
+          L = abs(rug(irug)%path%ln(il))
+
+          k1 = ln(1,L); k2 = ln(2,L)
+
+          if (hs(k1)>epshu .and. hs(k2)<epshu) then
+             if (s1(k1)>=maxz) then
+                maxz = s1(k1)
+                maxx = xz(k1)
+                maxy = yz(k1)
+             endif
+          elseif (hs(k2)>epshu .and. hs(k1)<epshu) then
+             if (s1(k2)>=maxz) then
+                maxz = s1(k2)
+                maxx = xz(k2)
+                maxy = yz(k2)
+             endif
+          endif
+       enddo
+       if (rug(irug)%maxruh<=maxz) then
+          rug(irug)%maxruh = maxz     ! collected at dts, written at dt_user (or longer). Reset after writing
+          rug(irug)%maxx   = maxx
+          rug(irug)%maxy   = maxy
+       endif   
+    enddo   
+
+end subroutine updateValuesOnRunupGauges
+
+!< Reduce runup values over domains   
+subroutine updateValuesOnRunupGauges_mpi()
+   use m_monitoring_runupgauges
+   use m_partitioninfo
+   use m_timer
+   use mpi
+   
+   implicit none
+   
+   integer                                        :: irug, ierror
+   double precision, allocatable, dimension(:,:)  :: ruh
+   double precision, allocatable, dimension(:,:)  :: xy, xy_red
+   
+   if (.not. (allocated(ruh))) then
+      allocate(ruh(2,nrug))   
+      allocate(xy(2,nrug))   
+      allocate(xy_red(2,nrug))   
+   endif
+   
+   ruh    = 0d0 ! safety
+   xy     = 0d0
+   xy_red = 0d0
+   
+   do irug = 1, nrug
+      ruh(1,irug) = rug(irug)%maxruh   
+   enddo   
+   ruh(2,:) = my_rank
+   
+   ! Obtain value of maximum runup across domains, and domainnr of max value
+   if ( jatimer.eq.1 ) call starttimer(IOUTPUTMPI)
+   call reduce_rug(ruh, nrug)
+   if ( jatimer.eq.1 ) call stoptimer(IOUTPUTMPI)
+
+   ! Reduce ruh and retrieve coordinates of maximum ruh
+   do irug = 1, nrug
+      rug(irug)%maxruh = ruh(1,irug)
+      if (int(ruh(2,irug))==my_rank) then
+         xy(1,irug) = rug(irug)%maxx   
+         xy(2,irug) = rug(irug)%maxy   
+      endif
+   enddo   
+   
+   ! Reduction of the sum of the coordinates, Could be mpi_reduce(rank=0)
+   if ( jatimer.eq.1 ) call starttimer(IOUTPUTMPI)
+   call mpi_allreduce(xy,xy_red,2*nrug,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD,ierror)
+   if ( jatimer.eq.1 ) call stoptimer(IOUTPUTMPI)
+   if (ierror .ne. 0) then
+      goto 1234
+   endif   
+   
+   do irug = 1, nrug
+      rug(irug)%maxx = xy_red(1,irug)
+      rug(irug)%maxy = xy_red(2,irug)
+   enddo 
+ 
+   
+1234 continue
+   deallocate(xy_red)
+   deallocate(xy)
+   deallocate(ruh)
+   
+end subroutine updateValuesOnRunupGauges_mpi   
+   
 
 subroutine obs_on_flowgeom(iobstype)
 
