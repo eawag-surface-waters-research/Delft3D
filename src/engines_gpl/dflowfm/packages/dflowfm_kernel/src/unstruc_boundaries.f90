@@ -2692,7 +2692,6 @@ end do
          if (success) then
              read(rec, *, iostat = ierr) tmpval
              zcgen((n-1)*kx+3) = tmpval ! Constant value for always, set it now already.
-             hulp(26,n) = tmpval
          endif
          
          tmpval = dmiss
