@@ -3307,6 +3307,8 @@ subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jaconti
       jacontiguous = 1
    endif
 
+   call cosphiunetcheck(1)
+
    call partition_METIS_to_idomain(npart, jacontiguous, md_pmethod)
 
    ndomains = npart

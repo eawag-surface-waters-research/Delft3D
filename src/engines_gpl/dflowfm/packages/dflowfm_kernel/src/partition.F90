@@ -5626,9 +5626,11 @@ end subroutine partition_make_globalnumbers
       
 !     reenable polygons
       NPL = NPL_save
-   
+
       call delete_dry_points_and_areas()
-      
+
+      call cosphiunetcheck(1)
+
       if ( NPL.gt.1 ) then ! use the polygons
          call generate_partitioning_from_pol()
       else  ! use metis

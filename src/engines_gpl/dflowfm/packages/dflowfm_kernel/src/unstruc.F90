@@ -12740,7 +12740,7 @@ subroutine cosphiunetcheck(jausererror)
  use m_partitioninfo
  use m_plotdots
 
- IMPLICIT NONE
+ implicit none
  integer, intent(in) :: jausererror !< Whether or not (1/0) to topup a error message when bad ortho occurs.
  double precision, external :: cosphiunet
  double precision :: csph
@@ -12758,7 +12758,7 @@ subroutine cosphiunetcheck(jausererror)
     return
  end if
 
- if ( jampi.eq.0 ) then
+ if ( jampi == 0 ) then
     do L = numl1D+1,numl
        csph = cosphiunet(L)
        if (csph /= dmiss .and. abs(csph) > cosphiutrsh) then
@@ -12770,6 +12770,7 @@ subroutine cosphiunetcheck(jausererror)
  else
 
  !  do not check orthogonality in parallel runs (findcells may have created non-existing cells in ghost area)
+ !  the check is done during partitioning
 
  end if
 
@@ -12781,14 +12782,14 @@ subroutine cosphiunetcheck(jausererror)
      end do
 
      if (jausererror == 1) then
-        if ( jagui.eq.1 ) then
+        if ( jagui == 1 ) then
             call qnerror('network is not orthogonal','increase cosphiu trsh in network params if you want to create flow model anyway ', ' ')
         else
             call mess(LEVEL_ERROR, 'network is not orthogonal')
-        end if ! if ( jagui.eq.1 ) then
+        end if
      end if
      NDRAW(2)=5 !< Automatically set 'Display > Network + crossing/quality checks'
-     call resetflow() ; return
+     call resetflow()
  end if
 
 end subroutine cosphiunetcheck

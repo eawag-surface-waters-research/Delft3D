@@ -34567,6 +34567,8 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
 
    if ( nump1d2d.lt.1 ) return
 
+   call cosphiunetcheck(1)
+
    if ( md_Ndomains.gt.0 ) then ! use METIS
       call partition_METIS_to_idomain(md_Ndomains, md_jacontiguous, md_pmethod)
 !     generate partitioning polygons
