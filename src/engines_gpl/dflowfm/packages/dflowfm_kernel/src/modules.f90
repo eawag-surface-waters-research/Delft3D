@@ -446,12 +446,14 @@ module m_xbeach_data
    double precision, allocatable              :: urms_cc(:)      !< orbital velocity, in cell centre, uorb from xbeach, equal to uorb in orbvel and trab11, trab12 in D3D
    double precision, allocatable              :: ust(:)          !< Stokes drift east
    double precision, allocatable              :: vst(:)          !< Stokes drift north
-   double precision, allocatable              :: xbdsdx(:)         !< water level gradient
-   double precision, allocatable              :: xbdsdy(:)         !< water level gradient
-   double precision, allocatable              :: xbducxdx(:)       !< velocity gradients
-   double precision, allocatable              :: xbducydx(:)       !<
-   double precision, allocatable              :: xbducxdy(:)       !<
-   double precision, allocatable              :: xbducydy(:)       !<
+   double precision, allocatable              :: xbdsdx(:)       !< water level gradient
+   double precision, allocatable              :: xbdsdy(:)       !< water level gradient
+   double precision, allocatable              :: xbducxdx(:)     !< velocity gradients
+   double precision, allocatable              :: xbducydx(:)     !<
+   double precision, allocatable              :: xbducxdy(:)     !<
+   double precision, allocatable              :: xbducydy(:)     !<
+   double precision, allocatable              :: dbetadx(:)      !<
+   double precision, allocatable              :: dbetady(:)      !<
 
    double precision, allocatable              :: thetamean(:)    !< mean wave angle
    double precision, allocatable              :: Qb(:)           !< Wave breaking proportion

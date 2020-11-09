@@ -258,24 +258,32 @@
       !call aerr('kturb  (ndx)', ierr, ndx)
       call realloc(Tbore, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('Tbore  (ndx)', ierr, ndx)
-      call realloc(xbducxdx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('xbducxdx  (ndx)', ierr, ndx)
-      call realloc(xbducydx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('xbducydx  (ndx)', ierr, ndx)
-      call realloc(xbducxdy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('xbducxdy  (ndx)', ierr, ndx)
-      call realloc(xbducydy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('xbducydy  (ndx)', ierr, ndx)
+      if (wci>0d0 .or. trim(absgentype)=='abs_2d') then
+         call realloc(xbducxdx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('xbducxdx  (ndx)', ierr, ndx)
+         call realloc(xbducydx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('xbducydx  (ndx)', ierr, ndx)
+         call realloc(xbducxdy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('xbducxdy  (ndx)', ierr, ndx)
+         call realloc(xbducydy, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('xbducydy  (ndx)', ierr, ndx)
+      endif
+      if (trim(absgentype)=='abs_2d') then
+         call realloc(dbetadx, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('dbetadx  (ndx)', ierr, ndx)
+         call realloc(dbetady, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('dbetady  (ndx)', ierr, ndx)         
+      endif
       call realloc(hdisp, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
       call aerr('hdisp  (ndx)', ierr, ndx)     
       
       if (windmodel .eq. 0) then
-      call realloc(L1, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('L1  (ndx)', ierr, ndx)
-      call realloc(Ltemp, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('Ltemp  (ndx)', ierr, ndx)
-      call realloc(L0, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
-      call aerr('L0  (ndx)', ierr, ndx)
+         call realloc(L1, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('L1  (ndx)', ierr, ndx)
+         call realloc(Ltemp, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('Ltemp  (ndx)', ierr, ndx)
+         call realloc(L0, ndx, stat=ierr, keepExisting = .false., fill = 0d0)
+         call aerr('L0  (ndx)', ierr, ndx)
          !call realloc(khdisp, ndx, stat=ierr, keepExisting = .false., fill = 0d0)   ML: unused
          !call aerr('khdisp  (ndx)', ierr, ndx)
       endif
@@ -704,7 +712,7 @@
             !
             ! wave friction factor and drag coefficient
             !
-            astar  = tpu*uorbu/z0
+            astar  = tpu*uorbu/max(z0,eps10)
 
             if (astar>astarc) then
                fw = 0.00251d0*exp(14.1d0/(astar**0.19))

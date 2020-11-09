@@ -1312,7 +1312,7 @@ subroutine readMDUFile(filename, istat)
          call prop_get_doubles(md_ptr, 'sediment', 'Ws'              ,  Ws,        MxgrKrone)
          call prop_get_doubles(md_ptr, 'sediment', 'Erosionpar'      , erosionpar, MxgrKrone)
          call prop_get_doubles(md_ptr, 'sediment', 'Taucre'          ,    Ustcre2, MxgrKrone)
-         Ustcre2 = Ustcre2/rhomean      ! ust = tau/rho
+         Ustcre2 = Ustcre2/rhomean      ! ust2 = tau/rho
       endif
 
       call prop_get_doubles(md_ptr, 'sediment', 'InitialSedimentConcentration', sedini, mxgr)
@@ -1943,7 +1943,7 @@ subroutine readMDUFile(filename, istat)
        end if
        call getOutputTimeArrays(ti_wav_array, ti_wavs, ti_wav, ti_wave, success)
 
-       if (ti_wav > (tstop_user-tstart_user)) then
+       if (jaavgwavquant>0 .and. ti_wav > (tstop_user-tstart_user)) then
           ti_wav = tstop_user-tstart_user
           call mess(LEVEL_WARN, '''AvgWaveOutputInterval'' is larger than output duration in the simulation.')
           write(msgbuf, *)     'Setting ''AvgWaveOutputInterval'' to tstop-tstart = ', ti_wav, ' s'

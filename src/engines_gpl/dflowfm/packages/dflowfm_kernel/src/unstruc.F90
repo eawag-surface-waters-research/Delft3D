@@ -1429,7 +1429,9 @@ if(q /= 0) then
           end if
        endif
     endif
-    call xbeach_mombalance()
+    if (jamombal==1) then
+       call xbeach_mombalance()
+    endif
  end if
 
   if (jawave==5) then
@@ -3793,7 +3795,6 @@ subroutine setdt()
    endif
 
    if ( jawave.eq.4 .and. swave.eq.1 ) then
-      call xbeach_absgen_maxtimestep()
       if (.not.(trim(instat)=='stat' .or. trim(instat)=='stat_table')) then
          call xbeach_wave_maxtimestep()
       endif
