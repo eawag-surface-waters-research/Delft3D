@@ -2411,7 +2411,7 @@
             k2 = ln(2,Lf)  ! internal node
 
             do l=1,lsedtot
-               if (pure1d_mor .and. kfs(Lf) == -1) then
+               if (pure1d_mor .and. kcu(Lf) == -1) then
                    if (link1(k2) == Lf) then
                        e_sn(Lf,l) = sx(k2,l)
                    else
