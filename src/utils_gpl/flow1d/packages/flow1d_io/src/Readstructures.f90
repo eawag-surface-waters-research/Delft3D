@@ -72,7 +72,7 @@ module m_readstructures
    
    ! Structure file current version: 1.00
    integer, parameter :: StructureFileMajorVersion = 2
-   integer, parameter :: StructureFileMinorVersion = 0
+   integer, parameter :: StructureFileMinorVersion = 1
    
    ! History structure file versions:
 
@@ -82,6 +82,7 @@ module m_readstructures
    !                    * culverts: lossCoeffCount -> numLossCoeff
    !                    * universal weir: levelsCount -> numLevels
    ! 2.00 (2019-07-22): Consistent renaming,
+   ! 2.01 (2020-10-20): Added new type=longCulvert.
    
 
    contains
@@ -317,8 +318,12 @@ module m_readstructures
                ! Compound structures have been cycled above already.
                continue
             case default
-               call setmessage(LEVEL_ERROR,  'Structure type: '//trim(typestr)//' not supported, see '//trim(pstru%id))
-               success = .false.
+               if (strcmpi(typestr, 'longCulvert')) then
+                  cycle ! NOTE: UNST-4328: reading of culverts done in kernel.
+               else 
+                  call setmessage(LEVEL_ERROR,  'Structure type: '//trim(typestr)//' not supported, see '//trim(pstru%id))
+                  success = .false.
+               end if
             end select
             
             if (success) then

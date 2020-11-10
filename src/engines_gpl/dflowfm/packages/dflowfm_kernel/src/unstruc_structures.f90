@@ -1006,4 +1006,78 @@ subroutine get_geom_coordinates_of_structure_old(i, nNodes, x, y)
    end if
 end subroutine get_geom_coordinates_of_structure_old
 
+
+!> Loads the long culverts from a structures.ini file and
+!! creates extra netnodes+links for them.
+subroutine loadLongCulvertsAsNetwork(structurefile, ierr)
+!use network_data
+use dfm_error
+use gridoperations, only: make1D2DLongCulverts
+use string_module, only: strcmpi
+use m_polygon
+use m_missing
+implicit none
+
+character(len=*), intent(in   ) :: structurefile !< File name of the structure.ini file.
+integer,          intent(  out) :: ierr          !< Result status, DFM_NOERR in case of success.
+
+type(tree_data), pointer :: strs_ptr
+type(tree_data), pointer :: str_ptr
+character(len=IdLen) :: typestr
+character(len=IdLen) :: st_id
+integer :: readerr, nstr, i, numcoords
+logical :: success
+
+   ierr = DFM_NOERR
+
+   xpl = dmiss
+   ypl = dmiss
+   zpl = dmiss
+   npl = 0
+
+   ! Temporarily put structures.ini file into a property tree
+   call tree_create(trim(structurefile), strs_ptr)
+   call prop_inifile(structurefile, strs_ptr, readerr)
+
+!  check if file was successfully opened
+   if ( readerr /= 0 ) then
+      ierr = DFM_WRONGINPUT
+      call mess(LEVEL_ERROR, 'Error opening file ''', trim(structurefile), ''' for loading the long culverts.')
+   endif
+
+   nstr = tree_num_nodes(strs_ptr)
+
+   do i=1,nstr
+      str_ptr => strs_ptr%child_nodes(i)%node_ptr
+
+      success = .true.
+   
+      if (.not. strcmpi(tree_get_name(str_ptr), 'Structure')) then
+         ! Only read [Structure] blocks, skip any other (e.g., [General]).
+         cycle
+      end if
+
+      typestr = ' '
+      call prop_get_string(str_ptr, '', 'type',         typestr, success)
+      if (.not. success .or. .not. strcmpi(typestr, 'LongCulvert')) then
+         cycle
+      end if
+
+      call prop_get(str_ptr, '', 'numCoordinates', numcoords, success)
+      if (success) then
+         call increasepol(numcoords, 0)
+         call prop_get(str_ptr, '', 'xCoordinates', xpl(npl+1:), numcoords, success)
+         call prop_get(str_ptr, '', 'yCoordinates', ypl(npl+1:), numcoords, success)
+         call prop_get(str_ptr, '', 'zCoordinates', zpl(npl+1:), numcoords, success)
+         npl = npl+numcoords+1 ! TODO: UNST-4328: success1 checking done later in readStructureFile().
+      end if
+
+   end do
+   call make1D2DLongCulverts(xpl, ypl, zpl, npl)
+
+
+
+end subroutine loadLongCulvertsAsNetwork
+
+
 end module m_structures

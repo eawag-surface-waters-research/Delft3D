@@ -439,6 +439,7 @@ subroutine loadModel(filename)
     use m_sferic
     ! use string_module, only: get_dirsep
     use unstruc_caching
+    use m_structures, only: loadLongCulvertsAsNetwork
 
     interface
        subroutine realan(mlan, antot)
@@ -547,6 +548,9 @@ subroutine loadModel(filename)
       call SetMessage(LEVEL_INFO, 'Reading Structures ...')
       call readStructures(network, md_1dfiles%structures)
       call SetMessage(LEVEL_INFO, 'Reading Structures Done')
+
+      call loadLongCulvertsAsNetwork(md_1dfiles%structures, istat)
+    
    endif
    call timstop(timerHandle)
 
