@@ -1,7 +1,7 @@
    !LC TO DO: PASS CALL-BACK  FUNCTION FOR INTERACTER MESSAGES
    module gridoperations
 
-   use MessageHandling, only: msgbox, mess, LEVEL_ERROR
+   use MessageHandling, only: msgbox, mess, LEVEL_ERROR, LEVEL_WARN
    use meshdata, only: t_ug_meshgeom
    implicit none
 
@@ -9,6 +9,7 @@
    public :: make1D2Dinternalnetlinks
    public :: make1D2Droofgutterpipes
    public :: make1D2Dstreetinletpipes
+   public :: make1D2DLongCulverts
    public :: ggeo_make1D2DRiverLinks
    public :: ggeo_make1D2Dembeddedlinks
    public :: ggeo_convert
@@ -2991,6 +2992,93 @@
    ierr = 0
    
    end subroutine make1D2Dstreetinletpipes
+
+   
+   !> Generates 1D netlinks and 1D2D connections for a (multiple) new long culvert(s).
+   !! The new net links get added to the active network_data.
+   !! The culvert(s) must be specified by a polyline with x/y/z coordinates.
+   !! In case of multiple culverts, the coordinate arrays must have missing value
+   !! (dmiss) separators between each polyline.
+   subroutine make1D2DLongCulverts(xplCulv, yplCulv, zplCulv, nplCulv)
+   use m_missing
+   use m_polygon
+   use geometry_module
+   use m_alloc
+   use network_data
+   use m_cell_geometry
+   use m_samples
+
+   implicit none
+   
+   double precision, intent(in   ) :: xplCulv(:) !< x-coordinates of the polyline of one or more culverts.
+   double precision, intent(in   ) :: yplCulv(:) !< y-coordinates of the polyline of one or more culverts.
+   double precision, intent(in   ) :: zplCulv(:) !< z-coordinates of the polyline of one or more culverts.
+   integer,          intent(in   ) :: nplCulv    !< Number of points in the culvert polyline.
+   
+   integer :: j, jpoint, jstart, jend, k1, k2, L, ipoly
+   double precision :: x1, y1, z1, x2, y2, z2
+
+   ipoly  = 0
+   jpoint = 1
+   do while (jpoint < nplCulv)
+
+      ! Find next start and end point in pli set:
+      call get_startend(nplCulv-jpoint+1, xplCulv(jpoint:nplCulv), yplCulv(jpoint:nplCulv), jstart, jend, dmiss)
+      jstart = jstart+jpoint-1
+      jend   = jend  +jpoint-1
+
+      if (jstart >= jend) then
+         call mess(LEVEL_WARN, 'generateLongCulverts: No valid start+end point found in polyline.')
+         !goto 888
+      end if
+
+      ipoly = ipoly+1
+
+      ! Starting point:
+      x1 = xplCulv(jstart)
+      y1 = yplCulv(jstart)
+      z1 = zplCulv(jstart)
+      call setnewpoint(x1, y1, z1, k1)
+      zk(k1) = z1
+
+      do j=jstart+1,jend
+         x2 = xplCulv(j)
+         y2 = yplCulv(j)
+         z2 = zplCulv(j)
+         call setnewpoint(x2, y2, z2, k2)
+         zk(k2) = z2
+
+         if (j == jstart+1 .or. j == jend) then
+            kn3typ = 5 ! 1D2D netlink type for entry-side and exit-side.
+         else
+            kn3typ = 1 ! purely 1D netlink type for inner pipe pieces (if any).
+         end if
+         call connectdbn(k1,k2,L)
+         k1 = k2
+      end do
+
+      !           advance pointer
+      jpoint = jend+2
+   end do
+
+   
+   ! NOTE: here we do not explicitly check whether end points lie inside
+   ! 2D grid cells, for performance reasons.
+
+   ! TODO: UNST-4334: Detect whether link is already there
+        !xc = 0.5d0*(x1+x2)
+        !yc = 0.5d0*(y1+y2)
+        !CALL CLOSETO1Dnetlink(Xc,Yc,LS,XLS,YLS,dum, 0)
+        !if (Ls > 0) then
+   
+   ! Successful exit
+   return
+
+888 continue
+   ! Something went wrong.
+
+   end subroutine make1D2DLongCulverts
+
 
    !> make dual cell polygon around netnode k
    subroutine make_dual_cell(k, N, rcel, xx, yy, num, Wu1Duni)
