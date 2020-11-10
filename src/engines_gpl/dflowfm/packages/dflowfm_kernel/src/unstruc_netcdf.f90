@@ -10647,6 +10647,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    use m_alloc
    use gridoperations
    use m_partitioninfo, only : jampi
+   use m_flowparameters, only : jarstignorebl
 
    use unstruc_channel_flow
    use m_cross_helper
@@ -12891,29 +12892,31 @@ subroutine unc_read_map(filename, tim, ierr)
        ndx1d = ndxi - ndx2d
        if (ndx1d > 0 .and. stm_included) then
           if (stmpar%morpar%bedupd) then
-             ierr = nf90_inq_dimid (imapfile, trim(mesh1dname)//'_crs_maxdim', id_jmax)
-             if (ierr == 0) ierr = nf90_inquire_dimension(imapfile, id_jmax, len =jmax)
-             ierr = nf90_inq_dimid (imapfile, trim(mesh1dname)//'_ncrs', id_ncrs)
-             if (ierr == 0) ierr = nf90_inquire_dimension(imapfile, id_ncrs, len =nCrs)
-             if (allocated(work1d_z)) deallocate (work1d_z, work1d_n)
-             allocate (work1d_z(1:jmax,1:nCrs), work1d_n(1:jmax,1:nCrs))
-             ierr = nf90_inq_varid(imapfile, trim(mesh1dname)//'_mor_crs_z', id_flowelemcrsz)
-             ierr = nf90_get_var(imapfile, id_flowelemcrsz, work1d_z(1:jmax,1:nCrs), start = (/ 1, 1/), count = (/jmax, nCrs/))
-             do i = 1,nCrs
-                do j = 1,network%crs%cross(i)%tabdef%levelscount
-                   network%crs%cross(i)%tabdef%height(j)    = work1d_z(j,i)
-                enddo
-                network%crs%cross(i)%bedlevel = work1d_z(1,i)
-             enddo
-             ierr = nf90_inq_varid(imapfile, trim(mesh1dname)//'_mor_crs_n', id_flowelemcrsn)
-             if (ierr == 0) ierr = nf90_get_var(imapfile, id_flowelemcrsn, work1d_n(1:jmax,1:nCrs), start = (/ 1, 1/), count = (/jmax, nCrs/))
-             if (ierr == 0) then
+             if (jarstignorebl == 0) then 
+                ierr = nf90_inq_dimid (imapfile, trim(mesh1dname)//'_crs_maxdim', id_jmax)
+                if (ierr == 0) ierr = nf90_inquire_dimension(imapfile, id_jmax, len =jmax)
+                ierr = nf90_inq_dimid (imapfile, trim(mesh1dname)//'_ncrs', id_ncrs)
+                if (ierr == 0) ierr = nf90_inquire_dimension(imapfile, id_ncrs, len =nCrs)
+                if (allocated(work1d_z)) deallocate (work1d_z, work1d_n)
+                allocate (work1d_z(1:jmax,1:nCrs), work1d_n(1:jmax,1:nCrs))
+                ierr = nf90_inq_varid(imapfile, trim(mesh1dname)//'_mor_crs_z', id_flowelemcrsz)
+                ierr = nf90_get_var(imapfile, id_flowelemcrsz, work1d_z(1:jmax,1:nCrs), start = (/ 1, 1/), count = (/jmax, nCrs/))
                 do i = 1,nCrs
                    do j = 1,network%crs%cross(i)%tabdef%levelscount
-                      network%crs%cross(i)%tabdef%flowwidth(j) = work1d_n(j,i)
+                      network%crs%cross(i)%tabdef%height(j)    = work1d_z(j,i)
                    enddo
+                   network%crs%cross(i)%bedlevel = work1d_z(1,i)
                 enddo
-             endif
+                ierr = nf90_inq_varid(imapfile, trim(mesh1dname)//'_mor_crs_n', id_flowelemcrsn)
+                if (ierr == 0) ierr = nf90_get_var(imapfile, id_flowelemcrsn, work1d_n(1:jmax,1:nCrs), start = (/ 1, 1/), count = (/jmax, nCrs/))
+                if (ierr == 0) then
+                   do i = 1,nCrs
+                      do j = 1,network%crs%cross(i)%tabdef%levelscount
+                         network%crs%cross(i)%tabdef%flowwidth(j) = work1d_n(j,i)
+                      enddo
+                   enddo
+                endif
+             endif   
           endif
        endif
     end if
