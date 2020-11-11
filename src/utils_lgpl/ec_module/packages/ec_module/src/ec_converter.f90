@@ -1141,20 +1141,20 @@ module m_ec_converter
 
          t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
          t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
-         if(connection%converterPtr%interpolationType == interpolate_passthrough)then
+         valuesT0 => connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr
+         valuesT1 => connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr
+         n_data = connection%sourceItemsPtr(1)%ptr%quantityPtr%vectorMax
+         if (associated(connection%targetItemsPtr(1)%ptr%ElementSetPtr%z)) then
+            maxlay = size(connection%targetItemsPtr(1)%ptr%ElementSetPtr%z) / size(connection%targetItemsPtr(1)%ptr%ElementSetPtr%x)
+         else
+            maxlay = 1
+         endif
+         allocate(valuesT(maxlay*n_data), stat=istat)
+         valuesT=ec_undef_hp
+         if (connection%converterPtr%interpolationType == interpolate_passthrough)then
             !
-            ! ===== block function (no interpolation) =====
+            ! ===== block function (no interpolation in time) =====
             !
-            valuesT0 => connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr
-            valuesT1 => connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr
-            n_data = connection%sourceItemsPtr(1)%ptr%quantityPtr%vectorMax
-            if (associated(connection%targetItemsPtr(1)%ptr%ElementSetPtr%z)) then
-               maxlay = size(connection%targetItemsPtr(1)%ptr%ElementSetPtr%z) / size(connection%targetItemsPtr(1)%ptr%ElementSetPtr%x)
-            else
-               maxlay = 1
-            endif
-            allocate(valuesT(maxlay*n_data), stat=istat)
-            valuesT=ec_undef_hp
             if(timesteps.lt.t1) then
                ! use valuesT0 when timesteps is less than t1
                do i=1, size(valuesT0,dim=1)
@@ -1169,24 +1169,12 @@ module m_ec_converter
             !
          else
             !
-            ! ===== interpolation =====
-            ! linear interpolation in time, or block(to:from)
-            valuesT0 => connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr
-            valuesT1 => connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr
-            n_data = connection%sourceItemsPtr(1)%ptr%quantityPtr%vectorMax
-            if (associated(connection%targetItemsPtr(1)%ptr%ElementSetPtr%z)) then
-               maxlay = size(connection%targetItemsPtr(1)%ptr%ElementSetPtr%z) / size(connection%targetItemsPtr(1)%ptr%ElementSetPtr%x)
-            else
-               maxlay = 1
-            endif
-            allocate(valuesT(maxlay*n_data), stat=istat)
-            valuesT=ec_undef_hp
+            ! ===== interpolation in time =====
+            !
             if (.not.connection%sourceItemsPtr(1)%ptr%quantityptr%constant) then
                select case(connection%sourceItemsPtr(1)%ptr%quantityptr%timeint)
                case (timeint_lin, timeint_lin_extrapol, timeint_rainfall)
                   ! linear interpolation in time
-                  t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
-                  t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
                   call time_weight_factors(a0, a1, timesteps, t0, t1,  &
                                            timeint = connection%sourceItemsPtr(1)%ptr%quantityptr%timeint)
                case (timeint_bto)
