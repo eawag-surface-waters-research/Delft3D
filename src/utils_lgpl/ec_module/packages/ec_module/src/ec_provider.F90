@@ -2076,7 +2076,7 @@ module m_ec_provider
             ! Initialize the new Converter.
             if (.not. (ecConverterSetType(instancePtr, subconverterId, convType_uniform) .and. &
                        ecConverterSetOperand(instancePtr, subconverterId, operand_replace_element) .and. &
-                       ecConverterSetInterpolation(instancePtr, subconverterId, interpolate_time) .and. &
+                       ecConverterSetInterpolation(instancePtr, subconverterId, interpolate_timespace) .and. &
                        ecConverterSetElement(instancePtr, subconverterId, targetIndex))) return
             ! Construct a new Connection.
             connectionId = ecInstanceCreateConnection(instancePtr)
