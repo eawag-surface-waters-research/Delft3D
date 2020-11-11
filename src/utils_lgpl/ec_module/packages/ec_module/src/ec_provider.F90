@@ -1511,7 +1511,7 @@ module m_ec_provider
          integer,  dimension(:), allocatable :: itemIDList
          integer                             :: vectormax
 
-         logical                             :: is_tim, is_cmp, is_tim3d
+         integer                             :: signaltype
          logical                             :: has_label
          integer                             :: lblstart
          type(tEcFileReader), pointer        :: fileReaderPtr2
@@ -1611,9 +1611,6 @@ module m_ec_provider
          n_signals = 0 ! Record whether at least one child provider is created for this polytim.
 
          do i=1, n_points
-            is_tim = .false.
-            is_cmp = .false.
-            is_tim3d = .false.
             ! plipoint labels read from the third column in the pli-file. Currently this goes wrong if in the test third-column labels are not unique 
             if (len_trim(plipointlbls(i))==0) then 
                write(plipointlbl,'(a,i4.4)') fileReaderPtr%fileName(1:L)//'_',i
@@ -1632,7 +1629,7 @@ module m_ec_provider
                fileReaderPtr2%vectormax = fileReaderPtr%vectormax ! TODO copy timeframe
                if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_uniform, filename, fileReaderPtr%tframe%k_refdate,       &
                                      fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit))) return
-               is_tim = .true.
+               signaltype = BC_FUNC_TSERIES
             else 
                filename = trim(plipointlbl)//'.cmp'
                inquire (file = trim(filename), exist = exists)
@@ -1644,7 +1641,7 @@ module m_ec_provider
                   if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_fourier, filename, fileReaderPtr%tframe%k_refdate,       &
                                      fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit, dtnodal=fileReaderPtr%tframe%dtnodal))) return
 
-                  is_cmp = .true.
+                  signaltype = BC_FUNC_HARMONIC
                else 
                   filename = trim(plipointlbl)//'.t3d'
                   inquire (file = trim(filename), exist = exists)
@@ -1656,7 +1653,7 @@ module m_ec_provider
                      if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_t3D, filename, fileReaderPtr%tframe%k_refdate,       &
                                      fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit))) return
 
-                     is_tim3d = .true.
+                     signaltype = BC_FUNC_TIM3D
                   else                           ! No file with data for this point 
                      if (has_label) then    ! Report explicitly labelled point without data 
                         call setECMessage("No .tim, .cmp or .t3d file found for labelled point '" &
@@ -1666,9 +1663,7 @@ module m_ec_provider
                   endif    ! tim3d-file ? 
                endif       ! cmp file ? 
             endif          ! tim-file ?
-            !if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, 'uniform_item',      &
-            !                                                id, itemId, i, n_signals, maxlay, itemIDList)) then
-            if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, id, itemId, i,            &
+            if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, signaltype, id, itemId, i,            &
                                                         n_signals, maxlay, itemIDList)) then
                ! No sub-FileReader made.
                mask(i) = 0
@@ -1721,7 +1716,6 @@ module m_ec_provider
          type(tEcItem), pointer              :: sourceItem
          integer,  dimension(:), allocatable :: itemIDList
          integer                             :: vectormax
-         logical                             :: is_tim, is_cmp, is_tim3d
          type(tEcBCBlock), pointer           :: bcBlockPtr
          logical                             :: all_points_are_corr
          logical                             :: has_label
@@ -1815,9 +1809,6 @@ module m_ec_provider
          call str_upper(quantityname)
          n_signals = 0
          do i=1, n_points
-            is_tim = .false.
-            is_cmp = .false.
-            is_tim3d = .false.
             ! Process a *.tim file.
             bcBlockId = ecInstanceCreateBCBlock(InstancePtr) 
             bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
@@ -1852,11 +1843,7 @@ module m_ec_provider
             else
                all_points_are_corr = .false.
             endif
-            is_tim = (bcBlockPtr%func == BC_FUNC_TSERIES) .or. (bcBlockPtr%func == BC_FUNC_CONSTANT)
-            is_cmp = ((bcBlockPtr%func == BC_FUNC_HARMONIC) .or. (bcBlockPtr%func == BC_FUNC_ASTRO))
-            is_tim3d = (bcBlockPtr%func == BC_FUNC_TIM3D)
-
-            if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, id, itemId, i,        &
+            if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, bcBlockPtr%func, id, itemId, i,        &
                                                      n_signals, maxlay, itemIDList, qname=quantityname)) then
                !
                ! No sub-FileReader made.
@@ -1978,7 +1965,7 @@ module m_ec_provider
 
 !==============================================================================================================
       
-      function ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, fileReaderId, targetItemId, targetIndex, n_signals, maxlay, itemIDList, qname) result(itemFound)
+      function ecProviderConnectSourceItemsToTargets(instancePtr, signaltype, fileReaderId, targetItemId, targetIndex, n_signals, maxlay, itemIDList, qname) result(itemFound)
          logical :: itemFound
          type(tEcInstance),   pointer              :: instancePtr   !< intent(in)
          integer :: fileReaderId ! file reader id
@@ -1986,14 +1973,15 @@ module m_ec_provider
          integer :: targetIndex ! index in target item's values
          integer :: n_signals, maxlay ! INOUT
          integer,  dimension(:) :: itemIDList  ! INOUT
-         logical ::	is_tim, is_cmp, is_tim3d
+         integer :: signaltype
          integer :: subconverterId, magnitude, j, connectionId, nr_fourier_items, anItemId
          type(tEcItem), pointer :: itemt3D
          character(len=*), optional :: qname
          
          itemFound = .false.
 
-         if (is_tim) then
+         select case (signaltype)
+         case (BC_FUNC_TSERIES, BC_FUNC_CONSTANT)
             ! Construct a new Converter.
             subconverterId = ecInstanceCreateConverter(instancePtr)
             ! Determine the source Items.
@@ -2025,8 +2013,7 @@ module m_ec_provider
             if (.not. ecItemAddConnection(instancePtr, targetItemId, connectionId)) return
             n_signals = n_signals + 1
             itemFound = .true.
-         end if
-         if (is_cmp) then
+         case (BC_FUNC_HARMONIC, BC_FUNC_ASTRO)
             ! Construct a new Converter.
             subconverterId = ecInstanceCreateConverter(instancePtr)
             ! Determine the source Items.
@@ -2048,8 +2035,7 @@ module m_ec_provider
             if (.not. ecItemAddConnection(instancePtr, targetItemId, connectionId)) return
             n_signals = n_signals + 1
             itemFound = .true.
-         end if
-         if (is_tim3d) then
+         case (BC_FUNC_TIM3D)
             ! Construct a new Converter.
             subconverterId = ecInstanceCreateConverter(instancePtr)
 
@@ -2087,7 +2073,7 @@ module m_ec_provider
             if (.not. ecItemAddConnection(instancePtr, targetItemId, connectionId)) return
             n_signals = n_signals + 1
             itemFound = .true.
-         endif
+         end select
          
       end function ecProviderConnectSourceItemsToTargets
      ! itemIDList
