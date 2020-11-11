@@ -13317,7 +13317,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 !   type(t_crs) :: pj
 
    integer :: ierr
-   integer :: i, numContPts, numNodes, n, ndxndxi, ndx1d, numl2d, L
+   integer :: i, numContPts, numNodes, n, ndxndxi, ndx1d, numl2d, L, k1, L1
    integer :: id_flowelemcontourptsdim, id_flowelemcontourx, id_flowelemcontoury
    integer :: jaInDefine
 
@@ -13335,6 +13335,12 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 
    ! re-mapping of 1d mesh coordinates for UGrid
    double precision, allocatable                 :: x1dn(:), y1dn(:), xue(:), yue(:), x1du(:), y1du(:)
+   integer,                            allocatable, target :: nodebranchidx_remap(:)
+   double precision,                   allocatable, target :: nodeoffsets_remap(:)
+   integer,                            allocatable, target :: edgebranchidx_remap(:)
+   double precision,                   allocatable, target :: edgeoffsets_remap(:)
+   character(len=ug_idsLen),           allocatable :: nodeids_remap(:)
+   character(len=ug_idsLongNamesLen),  allocatable :: nodelongnames_remap(:)
    ! re-mapping of 2d mesh coordinates for UGrid
    double precision, allocatable                 :: x2dn(:), y2dn(:), z2dn(:)
    integer                                       :: netNodeReMappedIndex, nnSize
@@ -13407,6 +13413,10 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       ! First store pure 1D nodes (in flow node order), start counting at 1.call realloc(x1dn, ndx1d)
       call realloc(x1dn, ndx1d)
       call realloc(y1dn, ndx1d)
+      call realloc(nodebranchidx_remap, ndx1d)
+      call realloc(nodeoffsets_remap, ndx1d)
+      call realloc(nodeids_remap, ndx1d)
+      call realloc(nodelongnames_remap, ndx1d)
       ! Temporary UGRID fix
       !if(numMesh1dBeforeMerging>0) then
       !   do n =1,ndx1d
@@ -13419,6 +13429,20 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
          do n=1,ndx1d
             x1dn(n) = xz(ndx2d+n)
             y1dn(n) = yz(ndx2d+n)
+            
+            ! Also store the original mesh1d/network variables in the new flowgeom order for ndx1d nodes:
+            k1 = nodePermutation(nd(ndx2d+n)%nod(1)) ! This is the node index from *before* setnodadm(),
+                                                      ! i.e., as was read from input *_net.nc file.
+            if (k1 > 0) then
+               nodebranchidx_remap(n) = meshgeom1d%nodebranchidx(k1) 
+               nodeoffsets_remap(n)   = meshgeom1d%nodeoffsets(k1)   
+               nodeids_remap(n)       = nodeids(k1)       
+               nodelongnames_remap(n) = nodelongnames(k1) 
+            else
+               continue
+            end if
+
+            
          enddo
       !endif
 
@@ -13441,6 +13465,9 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       call realloc(id_tsp%edgetoln, n1dedges, keepExisting = .false., fill = 0)
       call realloc(x1du, n1dedges)
       call realloc(y1du, n1dedges)
+      call realloc(edgebranchidx_remap, n1dedges)
+      call realloc(edgeoffsets_remap, n1dedges)
+
       call realloc(id_tsp%contactstoln, n1d2dcontacts, keepExisting = .false., fill = 0)
       call realloc(contacttype, n1d2dcontacts, keepExisting = .false., fill = 0)
 
@@ -13459,6 +13486,15 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             id_tsp%edgetoln(n1dedges) = L
             x1du(n1dedges) = xu(L)
             y1du(n1dedges) = yu(L)
+            L1 = Lperm(ln2lne(L)) ! This is the edge index from *before* setnodadm(),
+                                  ! i.e., as was read from input *_net.nc file.
+            if (L1 > 0) then
+               edgebranchidx_remap(n1dedges) = meshgeom1d%edgebranchidx(L1) 
+               edgeoffsets_remap(n1dedges)   = meshgeom1d%edgeoffsets(L1)   
+            else
+               continue
+            end if
+
          else if (kcu(L) == 3 .or. kcu(L) == 4 .or. kcu(L) == 5 .or. kcu(L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
             ! 1D2D link, find the 2D flow node and store its cell center as '1D' node coordinates
             n1d2dcontacts = n1d2dcontacts + 1
@@ -13494,7 +13530,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, &
                                        meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                        meshgeom1d%nbranchorder, &
-                                       nodeids, nodelongnames, meshgeom1d%nodebranchidx, meshgeom1d%nodeoffsets, meshgeom1d%edgebranchidx, meshgeom1d%edgeoffsets,&
+                                       nodeids_remap, nodelongnames_remap, nodebranchidx_remap, nodeoffsets_remap, edgebranchidx_remap, edgeoffsets_remap,&
                                        writeopts=unc_writeopts)
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
