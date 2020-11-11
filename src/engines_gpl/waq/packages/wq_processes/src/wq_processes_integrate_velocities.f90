@@ -53,26 +53,26 @@
       integer  ( 4), intent(in   ) :: novelo               !< number additional velocities
       real     ( 4), intent(in   ) :: velo  (novelo,noq)   !< array with additional velocities
       real     ( 4), intent(in   ) :: area  (noq)          !< exchange areas in m2
-      real     ( 4), intent(in   ) :: volume(noseg)        !< volumes in m3
+      real     ( 8), intent(in   ) :: volume(noseg)        !< volumes in m3
       integer  ( 4), intent(in   ) :: ipoint(  4   ,noq)   !< from, to, from-1, to+1 volume numbers
       integer  ( 4), intent(in   ) :: iknmrk(noseg)        !< feature array
       integer  ( 4), intent(in   ) :: ivpnt (nosys)        !< additional velocity number per substance
       real     ( 4), intent(in   ) :: conc  (notot,noseg)  !< concentrations at previous time level
       real     ( 8), intent(in   ) :: dts                  !< time step in seconds
-      real     ( 4), intent(inout) :: deriv (noseg,notot)  !< explicit derivative in mass/m3/s
+      real     ( 8), intent(inout) :: deriv (noseg,notot)  !< explicit derivative in mass/m3/s
 
 !     Local variables     :
 
       integer  ( 4) iq          ! loop counter exchanges
       integer  ( 4) isys        ! loop counter substance
       integer  ( 4) ifrom, ito  ! from and to volume numbers
-      real     ( 4) a           ! this area
-      real     ( 4) vfrom       ! from volume
-      real     ( 4) vto         ! to volume
-      real     ( 4) q           ! flow for this exchange
-      real     ( 4) cfrom       ! from concentration
-      real     ( 4) cto         ! to concentration
-      real     ( 4) dq          ! total flux from and to
+      real     ( 8) a           ! this area
+      real     ( 8) vfrom       ! from volume
+      real     ( 8) vto         ! to volume
+      real     ( 8) q           ! flow for this exchange
+      real     ( 8) cfrom       ! from concentration
+      real     ( 8) cto         ! to concentration
+      real     ( 8) dq          ! total flux from and to
 
       integer(4), save :: ithndl = 0
       if (timon) call timstrt( "wq_processes_integrate_velocities", ithndl )

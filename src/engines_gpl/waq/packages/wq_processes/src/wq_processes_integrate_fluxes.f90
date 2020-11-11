@@ -41,8 +41,8 @@
       integer   (4), intent(in   ) :: noseg                   !< number of computational volumes
       real      (4), intent(inout) :: conc  (notot ,noseg)    !< concentrations per substance per volume
       real      (8), intent(inout) :: amass (notot ,noseg)    !< masses per substance per volume
-      real      (4), intent(inout) :: deriv (noseg, notot)    !< derivatives per substance per volume
-      real      (4), intent(inout) :: volume(noseg )          !< volumes of the segments
+      real      (8), intent(inout) :: deriv (noseg, notot)    !< derivatives per substance per volume
+      real      (8), intent(inout) :: volume(noseg )          !< volumes of the segments
       real      (8), intent(in   ) :: dts                     !< integration time step size
       real      (4), intent(in   ) :: surfac(noseg)           !< horizontal surface
 
@@ -50,8 +50,8 @@
 
       integer                      :: iseg                    !  segment loop counter
       integer                      :: i                       !  substance loop counter
-      real                         :: v1                      !  segment volume
-      real                         :: s1                      !  segment surface
+      real(8)                      :: v1                      !  segment volume
+      real(8)                      :: s1                      !  segment surface
       real(8)                      :: a                       !  segment mass
 
       integer(4), save :: ithndl = 0
@@ -62,7 +62,7 @@
       do iseg=1,noseg
          ! active substances first
          v1 = volume(iseg)
-         if ( v1.gt.1.0e-25 ) then
+         if ( v1.gt.1.0d-25 ) then
             do i=1,nosys
                a           = amass(i,iseg) + dts*deriv(iseg,i)*v1
                amass(i,iseg) = a
@@ -72,7 +72,7 @@
          endif
          ! then the inactive substances
          s1 = surfac(iseg)
-         if(s1.gt.0.0) then
+         if(s1.gt.0.0d0) then
             do i=nosys+1,notot
                a             = amass(i,iseg) + dts*deriv(iseg,i)*v1
                amass(i,iseg) = a
