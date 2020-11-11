@@ -15389,11 +15389,11 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
                end do
             end if
 
-            ! read weir_ru
+            ! read weirgen_ru
             call realloc(tmpvar3d, (/nfuru,numlinks,nStru/), stat=ierr, keepExisting=.false.)
-            ierr = nf90_inq_varid(ncid, 'weir_ru', id_weirgen_ru)
+            ierr = nf90_inq_varid(ncid, 'weirgen_ru', id_weirgen_ru)
             ierr = nf90_get_var(ncid, id_weirgen_ru, tmpvar3d, start=(/1, 1, 1, it_read/), count=(/nfuru, numlinks, nStru, 1/))
-            call check_error(ierr, '"weir_ru", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            call check_error(ierr, '"weirgen_ru", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
             if (ierr == 0) then
                do i = 1, nStru
                   istru = network%sts%weirIndices(i)
@@ -15418,11 +15418,11 @@ subroutine read_structures_from_rst(ncid, filename, it_read)
             end if
 
             ! The following variables are only for the output at the initial time in history file
-            ! read weirgen_structure_state
+            ! read weirgen_state
             call realloc(tmpvar3di, (/nfuru,numlinks,nStru/), stat=ierr, keepExisting=.false.)
-            ierr = nf90_inq_varid(ncid, 'weirgen_structure_state', id_weirgen_state)
+            ierr = nf90_inq_varid(ncid, 'weirgen_state', id_weirgen_state)
             ierr = nf90_get_var(ncid, id_weirgen_state, tmpvar3di, start=(/1, 1, 1, it_read/), count=(/nfuru, numlinks, nStru, 1/))
-            call check_error(ierr, '"weirgen_structure_state", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
+            call check_error(ierr, '"weirgen_state", The simulation will continue but the results may not be reliable.', LEVEL_WARN)
             if (ierr == 0) then
                do i = 1, nStru
                   istru = network%sts%weirIndices(i)
