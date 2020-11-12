@@ -1,4 +1,4 @@
-!----- AGPL --------------------------------------------------------------------
+!----lAGPL --------------------------------------------------------------------
 !
 !  Copyright (C)  Stichting Deltares, 2017-2020.!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
@@ -549,7 +549,8 @@ subroutine loadModel(filename)
       call readStructures(network, md_1dfiles%structures)
       call SetMessage(LEVEL_INFO, 'Reading Structures Done')
 
-      call loadLongCulvertsAsNetwork(md_1dfiles%structures, istat)
+      ! UNST-4327: temporarily disabled, until multiple structure files are supported.
+      ! call loadLongCulvertsAsNetwork(md_1dfiles%structures, istat)
     
    endif
    call timstop(timerHandle)
