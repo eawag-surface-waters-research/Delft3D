@@ -57,10 +57,10 @@
       integer( 4), intent(in   ) :: nodef                       !< Number of values in the deafult array
       integer( 4), intent(in   ) :: novar                       !<
       real   ( 4), intent(inout) :: conc  (notot,noseg)         !< Model concentrations
-      real   ( 8), intent(in   ) :: volume(      noseg)         !< Segment volumes
+      real   ( 4), intent(in   ) :: volume(      noseg)         !< Segment volumes
       real   ( 8), intent(in   ) :: time                        !< Time in system clock units
       real   ( 8), intent(in   ) :: dts                         !< Time step system clock units
-      real   ( 8), intent(inout) :: deriv (noseg,notot)         !< Model derivatives
+      real   ( 4), intent(inout) :: deriv (noseg,notot)         !< Model derivatives
       integer( 4), intent(in   ) :: ndmpar                      !< Number of dump areas
       integer( 4), intent(in   ) :: nproc                       !< Number of processes
       integer( 4), intent(in   ) :: noflux                      !< Number of fluxes
@@ -138,9 +138,9 @@
       integer(4)                 :: iseg                            ! Loop counter over segments
       integer(4)                 :: nflux1                          ! Help variable for fluxes
       integer(4)                 :: ips                             ! Help variable for dump segments
-      real(8)                    :: vol                             ! Help variable volume
-      real(8)                    :: ndt                             ! Help variable time step multiplier
-      real(8)                    :: atfac                           ! Help variable
+      real                       :: vol                             ! Help variable volume
+      real                       :: ndt                             ! Help variable time step multiplier
+      real                       :: atfac                           ! Help variable
       
       save    istep
       data    istep  / 0 /
@@ -221,11 +221,11 @@
             endif
 
             if ( istep .eq. 1 ) then
-               deriv(:,:) = 0.0d0
-               if ( ibflag .gt. 0 ) flxdmp = 0.0d0
+               deriv(:,:) = 0.0
+               if ( ibflag .gt. 0 ) flxdmp = 0.0
             else
 !              Scale fluxes and update "processes" accumulation arrays
-               atfac = 1.0/real(itfact,8)
+               atfac = 1.0/real(itfact)
                do iseg = 1 , noseg
                   deriv (iseg,:) = deriv(iseg,:) * atfac
                enddo
@@ -287,12 +287,12 @@
          ! no fluxes at first step of fractional step
 
          if ( istep .eq. 1 ) then
-            deriv(:,:) = 0.0d0
-            if ( ibflag .gt. 0 ) flxdmp = 0.0d0
+            deriv(:,:) = 0.0
+            if ( ibflag .gt. 0 ) flxdmp = 0.0
          else 
 
 !           Scale fluxes and update "processes" accumulation arrays
-            atfac = 1.0/real(itfact,8)
+            atfac = 1.0/real(itfact)
             do iseg = 1 , noseg
                deriv (iseg,:) = deriv(iseg,:) * atfac
             enddo
@@ -411,8 +411,8 @@
       integer(4), intent(in   ) :: ndmps                           ! Total number of mass balance areas
       real   (8), intent(in   ) :: dts
       integer(4), intent(in   ) :: iflux (nproc )                  ! Offset in the flux array per process
-      real   (8), intent(in   ) :: volume(noseg )                  ! Computational volumes
-      real   (8), intent(inout) :: deriv (noseg , notot )          ! Array with derivatives
+      real   (4), intent(in   ) :: volume(noseg )                  ! Computational volumes
+      real   (4), intent(inout) :: deriv (noseg , notot )          ! Array with derivatives
       real   (4), intent(in   ) :: stochi(notot , noflux )         ! Stoichiometric factors per flux
       real   (4), intent(in   ) :: flux  (noflux, noseg )          ! Process fluxes
       integer(4), intent(in   ) :: prondt(nproc )                  ! Time step size of the process
@@ -429,8 +429,8 @@
       integer(4)                :: nflux1                          ! Help variable for fluxes
       integer(4)                :: ips                             ! Help variable for dump segments
       integer(4)                :: nfluxp                          ! Number of fluxes in this process
-      real(8)                   :: vol                             ! Help variable volume
-      real(8)                   :: ndt                             ! Help variable time step multiplier
+      real                      :: vol                             ! Help variable volume
+      real                      :: ndt                             ! Help variable time step multiplier
 
       integer(4) ithndl /0/
       if ( timon ) call timstrt ( "twopro_wqm", ithndl )

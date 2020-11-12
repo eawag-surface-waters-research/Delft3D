@@ -683,7 +683,7 @@
       call realloc(increm,nipmsa, keepExisting=.false., fill=0)
 
 !     allocate deriv and velonw arrays
-      call realloc(deriv, [noseg, notot], keepExisting=.false., fill=0.0d0 )      !< Model derivatives (= stochi(notot ,noflux) * flux(noflux, noseg))
+      call realloc(deriv, [noseg, notot], keepExisting=.false., fill=0.0 )      !< Model derivatives (= stochi(notot ,noflux) * flux(noflux, noseg))
       call realloc(velonw, [nveln, noq3], keepExisting=.false., fill=0.0 )      !< New velocity array
 
 !     Determine size of a array from process system and noseg/noq3, and allocate it
@@ -1168,7 +1168,6 @@
       use m_mass_balance_areas
       use m_missing, only: dmiss
       use unstruc_model, only: md_flux_int
-      use m_flow, only: vol1
       use timers
 
       implicit none
@@ -1214,7 +1213,7 @@
 
       pmsa(ipoidefa+1) = time
 
-      call wq_processes_proces (notot , noseg , pmsa(ipoiconc), vol1(kbx:ktx-kbx), time  , dt    , deriv , ndmpar, &
+      call wq_processes_proces (notot , noseg , pmsa(ipoiconc), pmsa(ipoivol) , time  , dt    , deriv , ndmpar, &
                                 nproc , nflux , ipmsa , prvnio, promnr, iflux , increm, pmsa(ipoiflux), flxdmp, stochi, &
                                 ibflag, ipbloo, ioffbl, amass , nosys , isfact, itfact , iexpnt, iknmrk, noq1  , &
                                 noq2  , noq3  , noq4  , pmsa(ipoiarea), ndspn , idpnew, dispnw, ndspx , dspx  , &
