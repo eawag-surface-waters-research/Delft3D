@@ -39346,39 +39346,20 @@ end subroutine setbobs_fixedweirs
  use m_waves, only: ypar, cfwavhi, hminlw, cfhi_vanrijn, uorb
  use m_sediment
  use unstruc_channel_flow
- use m_cross_helper
- use m_1d_structures
- use m_general_structure
- use m_weir
- use m_orifice
  use m_sferic
- use m_culvert
- use m_Universal_Weir
- use m_bridge
  use m_trachy, only: trachy_resistance
- use m_oned_functions
- use m_compound
  use unstruc_model, only: md_restartfile
 
  implicit none
 
- integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns, nstrucsg, L0
- integer          :: kfu, istru, direction, i
- integer          :: state
- integer          :: mdown
- integer          :: ncompound
+ integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns
 
  double precision :: bui, cu, du, du0, gdxi, ds, riep, as, gdxids
  double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
  double precision :: qk0, qk1, dzb, hdzb, z00  !
  double precision :: as1, as2, qtotal, width, st2, cmustr, wetdown, dpt
- double precision :: maxwidth1, maxwidth2
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
  double precision :: hminlwi,fsqrtt,uorbL
- double precision :: perimeter, conv, czdum
- logical          :: firstiter
- type(t_structure), pointer :: pstru
- type(t_compound), pointer :: pcompound
 
  integer          :: np, L1     ! pumpstuff
  double precision :: ap, qp, vp ! pumpstuff
@@ -39565,135 +39546,8 @@ end subroutine setbobs_fixedweirs
     enddo
     end if
 
-    nstrucsg = network%sts%count
-    do istru = 1, nstrucsg
-       pstru => network%sts%struct(istru)
-       if (pstru%type == ST_PUMP) then
-          call computePump_all_links(pstru)
-       else
-          if (network%sts%struct(istru)%type == ST_GENERAL_ST )then
-             SkipDimensionChecks = .false.
-             if (pstru%numlinks == 1) then
-                L = abs(pstru%linknumbers(1))
-                if (L <= lnx1D) then
-                   if (network%adm%line2cross(L,2)%c1 < 0) then
-                      SkipDimensionChecks = .true.
-                   endif
-                endif
-             endif
-             call update_widths(pstru%generalst, pstru%numlinks, pstru%linknumbers, wu, SkipDimensionChecks)
-          endif
-
-          do L0 = 1, pstru%numlinks
-             L = iabs(pstru%linknumbers(L0))
-             direction = sign(1, pstru%linknumbers(L0))
-             if (hu(l) > 0) then
-                k1 = ln(1,L)
-                k2 = ln(2,L)
-
-               select case(network%sts%struct(istru)%type)
-               case (ST_WEIR)
-                     ! Note: computeweir is not suitable for use in a compound structure
-                      call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
-                   case (ST_ORIFICE)
-                     ! Note: ComputeOrifice is not suitable for use in a compound structure
-                      call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
-                       & u1(L), u0(L), dx(L), dts, state)
-                   case (ST_GENERAL_ST)
-                      firstiter = .true.
-                      ! The upstream flow area is necessary for computing the upstream velocity height
-                      ! For 1d the flow area is computed, using the upstream water depth
-                      ! For 2D the flow area is computed, using the flow width WU and the waterdepth at the upstream grid cell
-                      if (L <= lnx1D) then
-                      dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
-                      dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
-                      width = max(maxwidth1, maxwidth2)
-                      wu(L) = width
-                      else
-                        as1 = (s1(k1)-bl(k1))*wu(L)
-                        as2 = (s1(k2)-bl(k2))*wu(L)
-                      endif
-                      call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
-                      au(L) = pstru%au(L0)
-                      call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
-                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, SkipDimensionChecks)
-                   case (ST_DAMBREAK)
-                      continue
-                   case (ST_CULVERT)
-                      if (s1(k1) > s1(k2)) then
-                         mdown = k2
-                         dpt = s1(k2) - bob0(2,L)
-                      else
-                         mdown = k1
-                         dpt = s1(k1) - bob0(1,L)
-                      endif
-
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, wetdown, perimeter, width)
-
-                       wetdown = max(wetdown, 0.0001d0)
-                      call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
-                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, bob0(:,L), wetdown, .true.)
-                      bl(k1) = min(bl(k1), bob0(1,L))
-                      bl(k2) = min(bl(k2), bob0(2,L))
-
-                   case (ST_UNI_WEIR)
-                      fu(L) = pstru%fu(L0)
-                      ru(L) = pstru%ru(L0)
-                      au(L) = pstru%au(L0)
-                      call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, bob0(:,L), kfu, s1(k1), s1(k2), &
-                          q1(L), pstru%u1(L0), dx(L), dts)
-                   case (ST_BRIDGE)
-                      dpt = max(epshu, s1(k1) - bob0(1,L))
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width)
-                      wu(L) = as1/dpt
-                      dpt = max(epshu, s1(k2) - bob0(2,L))
-                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width)
-                   ! WU(L) is the average width at the bridge (max of up/downstream side).
-                      wu(L) = max(wu(L), as2/dpt)
-                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), pstru%u1(L0), dx(L), dts,                            &
-                               as1, as2, bob0(:,L))
-                   case default
-                      write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
-                      call err_flush()
-                   end select
-
-                ! store computed fu, ru and au in structure object. In case this structure
-                ! is a part of a compound structure this data will be used in computeCompound
-             else
-                fu(L) = 0d0
-                ru(L) = 0d0
-                au(L) = 0d0
-                if (pstru%type == ST_GENERAL_ST) then
-                   pstru%generalst%fu(:,L0) = 0d0
-                   pstru%generalst%ru(:,L0) = 0d0
-                   pstru%generalst%au(:,L0) = 0d0
-                   pstru%generalst%state(:,L0) = 0
-                else if (pstru%type == ST_CULVERT) then
-                   pstru%culvert%state = 0
-                endif
-             endif
-             call set_fu_ru_structure(pstru, L0, fu(L), ru(L), au(L))
-             call check_for_changes_on_structures(LEVEL_WARN, pstru, bob0(:,L))
-          enddo
-       endif
-
-    enddo
-
-    ! Compute FU, RA and AU for compound structures
-    ncompound = network%cmps%Count
-    do i = 1, ncompound
-       pcompound => network%cmps%compound(i)
-       do L0 = 1, pcompound%numlinks
-          L = abs(pcompound%linknumbers(L0))
-          if (hu(l) > 0) then
-             call computeCompound(pcompound, network%sts%struct, L0, u0(L), teta(L), fu(L), ru(L), au(L))
-          end if
-       enddo
-    enddo
-
+    call furu_structures()    
+    
  endif
 
  if (kmx > 0) then
@@ -39830,6 +39684,186 @@ end subroutine setbobs_fixedweirs
 
  end subroutine furu
 
+ subroutine furu_structures()
+ use m_flow
+ use m_flowgeom
+ use m_flowtimes 
+ use m_general_structure
+ use m_1d_structures
+ use m_compound
+ use m_Universal_Weir
+ use m_cross_helper
+ use m_weir
+ use m_orifice
+ use m_culvert
+ use m_bridge
+ use m_oned_functions
+ use unstruc_channel_flow
+
+
+ implicit none
+
+ integer :: direction
+ integer :: istru
+ integer :: i
+ integer :: k1 
+ integer :: k2
+ integer :: kfu
+ integer :: L
+ integer :: L0
+ integer :: mdown
+ integer :: nstrucsg
+ integer :: state
+ integer :: ncompound
+
+ double precision :: as1 
+ double precision :: as2 
+ double precision :: cmustr
+ double precision :: Cz
+ double precision :: dpt
+ double precision :: maxwidth1
+ double precision :: maxwidth2
+ double precision :: perimeter
+ double precision :: wetdown
+ double precision :: width 
+ 
+ logical          :: firstiter
+ logical          :: SkipDimensionChecks
+ 
+ type(t_structure), pointer :: pstru
+ type(t_compound), pointer :: pcompound
+
+    nstrucsg = network%sts%count
+    do istru = 1, nstrucsg
+       pstru => network%sts%struct(istru)
+       if (pstru%type == ST_PUMP) then
+          call computePump_all_links(pstru)
+       else
+          if (network%sts%struct(istru)%type == ST_GENERAL_ST )then
+             SkipDimensionChecks = .false.
+             if (pstru%numlinks == 1) then
+                L = abs(pstru%linknumbers(1))
+                if (L <= lnx1D) then
+                   if (network%adm%line2cross(L,2)%c1 < 0) then
+                      SkipDimensionChecks = .true.
+                   endif
+                endif
+             endif
+             call update_widths(pstru%generalst, pstru%numlinks, pstru%linknumbers, wu, SkipDimensionChecks)
+          endif
+
+          do L0 = 1, pstru%numlinks
+             L = iabs(pstru%linknumbers(L0))
+             direction = sign(1, pstru%linknumbers(L0))
+             if (hu(l) > 0) then
+                k1 = ln(1,L)
+                k2 = ln(2,L)
+
+               select case(network%sts%struct(istru)%type)
+               case (ST_WEIR)
+                     ! Note: computeweir is not suitable for use in a compound structure
+                      call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
+                                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, state)
+                   case (ST_ORIFICE)
+                     ! Note: ComputeOrifice is not suitable for use in a compound structure
+                      call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
+                       & u1(L), u0(L), dx(L), dts, state)
+                   case (ST_GENERAL_ST)
+                      firstiter = .true.
+                      ! The upstream flow area is necessary for computing the upstream velocity height
+                      ! For 1d the flow area is computed, using the upstream water depth
+                      ! For 2D the flow area is computed, using the flow width WU and the waterdepth at the upstream grid cell
+                      if (L <= lnx1D) then
+                      dpt = max(epshu, s1(k1) - bob0(1,L))
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width, maxFlowWidth = maxwidth1)
+                      dpt = max(epshu, s1(k2) - bob0(2,L))
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width, maxFlowWidth = maxwidth2)
+                      width = max(maxwidth1, maxwidth2)
+                      wu(L) = width
+                      else
+                        as1 = (s1(k1)-bl(k1))*wu(L)
+                        as2 = (s1(k2)-bl(k2))*wu(L)
+                      endif
+                      call getcz(hu(L), frcu(L), ifrcutp(L), Cz, L)
+                      au(L) = pstru%au(L0)
+                      call computeGeneralStructure(pstru%generalst, direction, L0, wu(L), bob0(:,L), fu(L), ru(L), &
+                          au(L), as1, as2, width, kfu, s1(k1), s1(k2), q1(L), Cz, dx(L), dts, SkipDimensionChecks)
+                   case (ST_DAMBREAK)
+                      continue
+                   case (ST_CULVERT)
+                      if (s1(k1) > s1(k2)) then
+                         mdown = k2
+                         dpt = s1(k2) - bob0(2,L)
+                      else
+                         mdown = k1
+                         dpt = s1(k1) - bob0(1,L)
+                      endif
+
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, wetdown, perimeter, width)
+
+                       wetdown = max(wetdown, 0.0001d0)
+                      call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
+                          q1(L), q1(L), pstru%u1(L0), pstru%u0(L0), dx(L), dts, bob0(:,L), wetdown, .true.)
+                      bl(k1) = min(bl(k1), bob0(1,L))
+                      bl(k2) = min(bl(k2), bob0(2,L))
+
+                   case (ST_UNI_WEIR)
+                      fu(L) = pstru%fu(L0)
+                      ru(L) = pstru%ru(L0)
+                      au(L) = pstru%au(L0)
+                      call computeUniversalWeir(pstru%uniweir,  fu(L), ru(L), au(L), width, bob0(:,L), kfu, s1(k1), s1(k2), &
+                          q1(L), pstru%u1(L0), dx(L), dts)
+                   case (ST_BRIDGE)
+                      dpt = max(epshu, s1(k1) - bob0(1,L))
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as1, perimeter, width)
+                      wu(L) = as1/dpt
+                      dpt = max(epshu, s1(k2) - bob0(2,L))
+                      call GetCSParsFlow(network%adm%line2cross(L, 2), network%crs%cross, dpt, as2, perimeter, width)
+                   ! WU(L) is the average width at the bridge (max of up/downstream side).
+                      wu(L) = max(wu(L), as2/dpt)
+                      call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), pstru%u1(L0), dx(L), dts,                            &
+                               as1, as2, bob0(:,L))
+                   case default
+                      write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
+                      call err_flush()
+                   end select
+
+                ! store computed fu, ru and au in structure object. In case this structure
+                ! is a part of a compound structure this data will be used in computeCompound
+             else
+                fu(L) = 0d0
+                ru(L) = 0d0
+                au(L) = 0d0
+                if (pstru%type == ST_GENERAL_ST) then
+                   pstru%generalst%fu(:,L0) = 0d0
+                   pstru%generalst%ru(:,L0) = 0d0
+                   pstru%generalst%au(:,L0) = 0d0
+                   pstru%generalst%state(:,L0) = 0
+                else if (pstru%type == ST_CULVERT) then
+                   pstru%culvert%state = 0
+                endif
+             endif
+             call set_fu_ru_structure(pstru, L0, fu(L), ru(L), au(L))
+             call check_for_changes_on_structures(LEVEL_WARN, pstru, bob0(:,L))
+          enddo
+       endif
+
+    enddo
+
+    ! Compute FU, RA and AU for compound structures
+    ncompound = network%cmps%Count
+    do i = 1, ncompound
+       pcompound => network%cmps%compound(i)
+       do L0 = 1, pcompound%numlinks
+          L = abs(pcompound%linknumbers(L0))
+          if (hu(l) > 0) then
+             call computeCompound(pcompound, network%sts%struct, L0, u0(L), teta(L), fu(L), ru(L), au(L))
+          end if
+       enddo
+    enddo
+
+ end subroutine furu_structures
+ 
  integer function ispumpon(n,s1k)
  use m_flowexternalforcings
  use m_missing
