@@ -28628,6 +28628,9 @@ endif
     if (allocated (czs) ) deallocate(czs)
     allocate ( czs(ndx)    , stat=ierr)
     call aerr('czs(ndx)'   , ierr, ndx)   ; czs   = 0
+    if (allocated (czu) ) deallocate(czu)
+    allocate ( czu(lnx)    , stat=ierr)
+    call aerr('czu(lnx)'   , ierr, lnx)   ; czu   = 0
  endif
 
  if (jarhoxu > 0 .or. jased > 0) then

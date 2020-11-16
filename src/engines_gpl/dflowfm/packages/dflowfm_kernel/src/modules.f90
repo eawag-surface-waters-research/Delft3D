@@ -3677,6 +3677,7 @@ end module m_vegetation
  double precision, allocatable     :: cftrtfac(:) !< array for optional multiplication factor for trachytopes's returned roughness values
  integer                           :: jacftrtfac  !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's Chezy roughness values.
  double precision, allocatable     :: czs(:)      !< array for chezy friction at cell centers {"location": "face", "shape": ["ndxi"]}
+ double precision, allocatable     :: czu(:)      !< array for chezy friction at flow links {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: frculin(:)  !< friction coefficient set by initial fields ( todo mag later ook single real worden)
  integer,          allocatable     :: ifrcutp(:)  !< friction coefficient type   initial fields ( todo mag later ook single real worden)
  double precision, allocatable     :: Cdwusp(:)   !< Wind friction coefficient at u point set by initial fields ( todo mag later ook single real worden)

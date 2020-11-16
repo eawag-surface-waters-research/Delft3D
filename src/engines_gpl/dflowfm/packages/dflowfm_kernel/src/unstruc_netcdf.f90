@@ -229,6 +229,7 @@ type t_unc_mapids
    integer :: id_cfcl(MAX_ID_VAR)        = -1 !< Variable ID for netlink data of calibration factor for friction
    integer :: id_cftrt(MAX_ID_VAR)       = -1 !< Variable ID for netlink data of friction from trachytopes
    integer :: id_czs(MAX_ID_VAR)         = -1 !< Variable ID for flow node data of chezy roughness
+   integer :: id_czu(MAX_ID_VAR)         = -1 !< Variable ID for flow node data of chezy roughness on flow links
    integer :: id_qsun(MAX_ID_VAR)        = -1 !< Variable ID for
    integer :: id_qeva(MAX_ID_VAR)        = -1 !< Variable ID for
    integer :: id_qcon(MAX_ID_VAR)        = -1 !< Variable ID for
@@ -4742,6 +4743,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       if (jamapchezy > 0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czs , nf90_double, UNC_LOC_S, 'czs'  , '', 'Chezy roughness', 'm0.5s-1', jabndnd=jabndnd_)
             ! WO: m0.5s-1 does not follow standard ? (which accepts only integral powers?)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czu , nf90_double, UNC_LOC_U, 'czu'  , '', 'Chezy roughness on flow links', 'm0.5s-1', jabndnd=jabndnd_)
       endif
 
 
@@ -5702,6 +5704,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       else if (jamapchezy > 0) then
          call gettaus(2)       ! Only update czs
       end if
+      do LL = 1,lnx
+         if (frcu(LL) > 0d0) then
+            call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)  ! in gettaus czu is calculated but not stored
+         endif
+      enddo
    end if
    if (jamaptaucurrent > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_taus, UNC_LOC_S, taus, jabndnd=jabndnd_)
@@ -5711,6 +5718,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    end if
    if (jamapchezy > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czs , UNC_LOC_S, czs, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_czu , UNC_LOC_U, czu, jabndnd=jabndnd_)
    end if
 
    ! Salinity
@@ -6849,7 +6857,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     id_bodsed, id_dpsed, id_msed, id_lyrfrac, id_thlyr, id_poros, id_nlyrdim, &
     id_sedtotdim, id_sedsusdim, id_rho, id_viu, id_diu, id_q1, id_spircrv, id_spirint, &
     id_q1main, &
-    id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_ucxa, id_ucya, id_unorm, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, id_cfcl, id_cftrt, id_czs, &
+    id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_ucxa, id_ucya, id_unorm, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, id_cfcl, id_cftrt, id_czs, id_czu, &
     id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
     id_wind, id_patm, id_tair, id_rhum, id_clou, id_E, id_R, id_H, id_D, id_DR, id_urms, id_thetamean, &
     id_cwav, id_cgwav, id_sigmwav, id_SwE, id_SwT, &
@@ -8040,6 +8048,11 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                ierr = nf90_put_att(imapfile, id_czs(iid),'long_name'    , 'Chezy roughness')
                ierr = nf90_put_att(imapfile, id_czs(iid),'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
                ierr = nf90_put_att(imapfile, id_czs(iid),'units'        , 'm0.5s-1')                ! WO: does not follow standard ? (which accepts only integral powers?)
+               ! Chezy data on flow-links
+               ierr = nf90_def_var(imapfile, 'czu' , nf90_double, (/ id_flowlinkdim(iid), id_timedim(iid) /) , id_czu(iid))
+               ierr = nf90_put_att(imapfile, id_czu(iid),'long_name'    , 'Chezy roughness on flow links')
+               ierr = nf90_put_att(imapfile, id_czu(iid),'coordinates'  , 'FlowLink_xu FlowLink_yu')
+               ierr = nf90_put_att(imapfile, id_czu(iid),'units'        , 'm0.5s-1')
            endif
 
            ! 1D2D boundaries
@@ -8613,10 +8626,17 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
         ierr = nf90_put_var(imapfile, id_hs(iid),  hs,   (/ 1, itim /), (/ ndxndxi, 1 /))
 
        ! Tau current
-       if (jawave<3) then        ! Else, get taus from subroutine tauwave (taus = taucur + tauwave)
-           call gettaus(1)       ! Update taus and czs
-       elseif (jamapchezy > 0) then
-           call gettaus(2)       ! Only update czs
+       if (jamaptaucurrent > 0 .or. jamapchezy > 0) then
+          if (jawave<3) then        ! Else, get taus from subroutine tauwave (taus = taucur + tauwave)
+             call gettaus(1)       ! Update taus and czs
+          elseif (jamapchezy > 0) then
+             call gettaus(2)       ! Only update czs
+          endif
+          do LL = 1,lnx
+             if (frcu(LL) > 0d0) then
+                call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)
+             endif
+          enddo
        endif
        !
        if (jamaptaucurrent > 0) then
@@ -8625,6 +8645,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        !
        if (jamapchezy > 0) then
            ierr = nf90_put_var(imapfile, id_czs(iid), czs,  (/ 1, itim /), (/ ndxndxi, 1 /))
+           ierr = nf90_put_var(imapfile, id_czu(iid), czu,  (/ 1, itim /), (/ lnx, 1 /))
        endif
 
        ! Velocities
