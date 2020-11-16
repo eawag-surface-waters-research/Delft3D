@@ -32,8 +32,8 @@ module m_structures
 ! $HeadURL$
 
 use properties
-use m_GlobalParameters
 use unstruc_channel_flow, only: network
+use MessageHandling
 implicit none
 
 type(tree_data), pointer, public :: strs_ptr !< A property list with all input structure specifications of the current model. Not the actual structure set.
@@ -165,6 +165,28 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (5,:) compound structure head
                                                               !<                      (6,:) compound structure flow area
                                                               !<                      (7,:) compound structure velocity
+
+ !> Type definition for longculvert data.
+ type, public :: t_longculvert      
+    character(len=IdLen)                           :: id
+    integer                                        :: numlinks                   !< Number of links of the long culvert
+    integer, dimension(:), allocatable             :: netlinks                   !< Net link numbers of the long culvert
+    integer, dimension(:), allocatable             :: flowlinks                  !< Flow link numbers of the long culvert
+    integer                                        :: ifrctyp                    !< Friction type 
+    integer                                        :: allowed_flowdir            !< Allowed flowdir: 
+                                                                                 !< 0 all directions
+                                                                                 !< 1 only positive flow
+                                                                                 !< 2 only negative flow
+                                                                                 !< 3 no flow allowed 
+    double precision                               :: friction_value             !< Friction value
+    double precision, dimension(:), allocatable    :: bl                         !< Bed level
+    double precision                               :: width                      !< Width of the rectangular culvert
+    double precision                               :: height                     !< Height of the rectangular culvert
+    double precision                               :: relative_valve_opening     !< Relative valve opening: 0 = fully closed, 1 = fully open
+ end type                              
+type(t_longculvert), dimension(:), allocatable     :: longculverts               !< Array containing long culvert data (size = nlongculvertsg)              
+integer                                            :: nlongculvertsg             !< Number of longculverts               
+
  integer                           :: NUMVALS_PUMP = 12       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
  integer                           :: NUMVALS_CDAM = 4        !< Number of variables for controble dam
@@ -330,6 +352,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    use m_flowgeom, only: wu, ln, teta, bl
    use m_1d_structures, only: get_discharge_under_compound_struc
    use m_General_Structure
+   use m_GlobalParameters
    implicit none
    double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
                                                                 !< (1) total width
@@ -457,6 +480,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
    use m_partitioninfo, only: jampi
    use m_1d_structures
    use m_General_Structure, only: t_GeneralStructure
+   use m_GlobalParameters
    implicit none
    double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valpump(:)):
                                                                 !< (1) total width (unchanged)
@@ -618,6 +642,7 @@ double precision function get_force_difference(istru, L)
    use m_flowgeom, only: ln
    use m_flow, only: s1
    use m_1d_structures, only: get_crest_level
+   use m_GlobalParameters
    implicit none   
    integer, intent(in   )   :: istru !< structure index
    integer, intent(in   )   :: L     !< current link L
@@ -772,6 +797,8 @@ end subroutine structure_parameters_rst
 !> Get the maximal number of links of all general structures/weir/orifice, when given the type and the total number of the structure
 integer function get_max_numLinks(istrtypein, nstru)
    use m_1d_structures
+   use m_GlobalParameters
+
    implicit none
    integer, intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                          !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
@@ -796,6 +823,7 @@ end function get_max_numLinks
 !!> Gets istru when given a structure type and structure index
 integer function get_istru(istrtypein, i)
    use m_1d_structures
+   use m_GlobalParameters
    implicit none
    integer, intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                          !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
@@ -1016,6 +1044,9 @@ use gridoperations, only: make1D2DLongCulverts
 use string_module, only: strcmpi
 use m_polygon
 use m_missing
+use m_Roughness
+use m_readstructures
+use messagehandling
 implicit none
 
 character(len=*), intent(in   ) :: structurefile !< File name of the structure.ini file.
@@ -1025,8 +1056,11 @@ type(tree_data), pointer :: strs_ptr
 type(tree_data), pointer :: str_ptr
 character(len=IdLen) :: typestr
 character(len=IdLen) :: st_id
+character(len=IdLen) :: txt
 integer :: readerr, nstr, i, numcoords
+integer, allocatable, dimension(:)    :: links
 logical :: success
+integer :: istart
 
    ierr = DFM_NOERR
 
@@ -1047,6 +1081,8 @@ logical :: success
 
    nstr = tree_num_nodes(strs_ptr)
 
+   nlongculvertsg = 0
+   allocate(longculverts(nstr))
    do i=1,nstr
       str_ptr => strs_ptr%child_nodes(i)%node_ptr
 
@@ -1063,20 +1099,70 @@ logical :: success
          cycle
       end if
 
-      call prop_get(str_ptr, '', 'numCoordinates', numcoords, success)
+      call prop_get(str_ptr, '',  'id', st_id, success)
+      if (success) call prop_get(str_ptr, '', 'numCoordinates', numcoords, success)
       if (success) then
+         nlongculvertsg = nlongculvertsg + 1
+         longculverts(nlongculvertsg)%id = st_id
+         longculverts(nlongculvertsg)%numlinks = numcoords-1
+         allocate(longculverts(nlongculvertsg)%netlinks(numcoords-1))
+         allocate(longculverts(nlongculvertsg)%flowlinks(numcoords-1))
+         longculverts(nlongculvertsg)%flowlinks = -999
+         allocate(longculverts(nlongculvertsg)%bl(numcoords))
          call increasepol(numcoords, 0)
          call prop_get(str_ptr, '', 'xCoordinates', xpl(npl+1:), numcoords, success)
+         if (.not. success) then
+            call SetMessage(LEVEL_ERROR, 'xCoordinates not found for long culvert: '// st_id )
+         endif
          call prop_get(str_ptr, '', 'yCoordinates', ypl(npl+1:), numcoords, success)
+         if (.not. success) then
+            call SetMessage(LEVEL_ERROR, 'yCoordinates not found for long culvert: '// st_id )
+         endif
          call prop_get(str_ptr, '', 'zCoordinates', zpl(npl+1:), numcoords, success)
+         if (.not. success) then
+            call SetMessage(LEVEL_ERROR, 'zCoordinates not found for long culvert: '// st_id )
+         endif
+         longculverts(nlongculvertsg)%bl = zpl(npl+1:npl+numcoords)
          npl = npl+numcoords+1 ! TODO: UNST-4328: success1 checking done later in readStructureFile().
+         
+         call prop_get(str_ptr, '', 'allowedFlowdir', txt, success)
+         if (.not. success) then
+            TXT = 'both'
+         endif
+         longculverts(nlongculvertsg)%allowed_flowdir = allowedFlowDirToInt(txt)
+         
+         call prop_get(str_ptr, '', 'width', longculverts(nlongculvertsg)%width, success)
+         if (.not. success) then
+            call SetMessage(LEVEL_ERROR, 'width not found for long culvert: '// st_id )
+         endif
+         call prop_get(str_ptr, '', 'height', longculverts(nlongculvertsg)%height, success)
+         if (.not. success) then
+            call SetMessage(LEVEL_ERROR, 'height not found for long culvert: '// st_id )
+         endif
+         call prop_get(str_ptr, '', 'frictionType', typestr, success)
+         if (.not. success) then
+            call SetMessage(LEVEL_ERROR, 'frictionType not found for long culvert: '// st_id )
+         endif
+         call frictionTypeStringToInteger(typestr, longculverts(nlongculvertsg)%ifrctyp)
+
+         call prop_get(str_ptr, '', 'frictionValue', longculverts(nlongculvertsg)%friction_value, success)
+         if (.not. success) then
+            call SetMessage(LEVEL_ERROR, 'frictionValue not found for long culvert: '// st_id )
+         endif
+         call prop_get(str_ptr, '', 'valveRelativeOpening', longculverts(nlongculvertsg)%relative_valve_opening, success)
+      else 
+         call SetMessage(LEVEL_ERROR, 'numCoordinates not found for long culvert '//st_id)
       end if
 
+   
    end do
-   call make1D2DLongCulverts(xpl, ypl, zpl, npl)
-
-
-
+   allocate(links(npl))
+   call make1D2DLongCulverts(xpl, ypl, zpl, npl, links)
+   istart = 1
+   do i = 1, nlongculvertsg
+      longculverts(i)%netlinks = links(istart:istart+longculverts(i)%numlinks-1)
+      istart = istart+longculverts(i)%numlinks+2
+   enddo
 end subroutine loadLongCulvertsAsNetwork
 
 

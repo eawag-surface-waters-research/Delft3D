@@ -2999,7 +2999,7 @@
    !! The culvert(s) must be specified by a polyline with x/y/z coordinates.
    !! In case of multiple culverts, the coordinate arrays must have missing value
    !! (dmiss) separators between each polyline.
-   subroutine make1D2DLongCulverts(xplCulv, yplCulv, zplCulv, nplCulv)
+   subroutine make1D2DLongCulverts(xplCulv, yplCulv, zplCulv, nplCulv, linksCulv)
    use m_missing
    use m_polygon
    use geometry_module
@@ -3014,6 +3014,7 @@
    double precision, intent(in   ) :: yplCulv(:) !< y-coordinates of the polyline of one or more culverts.
    double precision, intent(in   ) :: zplCulv(:) !< z-coordinates of the polyline of one or more culverts.
    integer,          intent(in   ) :: nplCulv    !< Number of points in the culvert polyline.
+   integer,          intent(  out) :: linksCulv(:) !< netlinks of one or more culverts.
    
    integer :: j, jpoint, jstart, jend, k1, k2, L, ipoly
    double precision :: x1, y1, z1, x2, y2, z2
@@ -3053,7 +3054,7 @@
          else
             kn3typ = 1 ! purely 1D netlink type for inner pipe pieces (if any).
          end if
-         call connectdbn(k1,k2,L)
+         call connectdbn(k1,k2,linksCulv(j-1))
          k1 = k2
       end do
 
