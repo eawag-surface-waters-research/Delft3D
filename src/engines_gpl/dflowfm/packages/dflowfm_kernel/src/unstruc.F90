@@ -48086,7 +48086,7 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
             cfuhi(L)       = ag/(conv/area)**2
             frcu(L)        = cz
             frcu_mor(L)    = cz_sub(1)
-            call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
+            call getCrossDischarge(perim_sub, af_sub, cz_sub, q1(L), q_sub)
             q1_main(L) = q_sub(1)
          else
             u_to_umain(L) = 1d0
