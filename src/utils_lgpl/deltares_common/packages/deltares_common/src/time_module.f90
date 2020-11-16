@@ -853,25 +853,31 @@ module time_module
       end function mjd2datetime
 
       !> split a string in date and time part
-      subroutine split_date_time(string, date, time)
+      function split_date_time(string, date, time) result(success)
          character(len=*), intent(in)  :: string  !< input string like 1950-01-01 00:00:00; with or without time
+                                                  !<                or 1950-01-01t00:00:00 as in ISO_8601, after converting to lower case
          character(len=*), intent(out) :: date    !< output date, in this case 1950-01-01
          character(len=*), intent(out) :: time    !< output time, in this case 00:00:00
+         logical                       :: success !< function result
 
          character(len=:), allocatable :: date_time
          integer                       :: ipos
 
          date_time = trim(adjustl(string))
-         ipos      = index(date_time, ' ')
+         ipos      = max(index(date_time, ' '), index(date_time, 't'))
 
          if (ipos > 0) then
             date = date_time(1:ipos-1)
             time = adjustl(date_time(ipos+1:))
-         else
+         else if (len(date_time) == 10) then
             date = date_time
             time = ' '
+         else ! format not recoqnized
+            success = .false.
+            return
          endif
-      end subroutine split_date_time
+         success = .true.
+      end function split_date_time
 
       DOUBLE PRECISION FUNCTION JULIAN ( IDATE , ITIME )
 !***********************************************************************
