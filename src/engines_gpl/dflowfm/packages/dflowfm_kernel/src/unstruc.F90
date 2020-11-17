@@ -15406,6 +15406,8 @@ else if (nodval == 27) then
  use m_1d_structures, only: initialize_structures_actual_params, t_structure
  use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
  use m_waves
+ use m_structures
+
  implicit none
 
  ! locals
@@ -16391,6 +16393,7 @@ end if
     end do
  end if
 
+ call setFrictionForLongculverts()
  call setupwslopes()                                   ! set upwind slope pointers and weightfactors
 
  if (iuvfield > 0) call setvelocityfield()           ! only when testing
@@ -24685,6 +24688,7 @@ end subroutine unc_write_shp
  use m_sediment, only: stm_included
  use m_flowtimes, only: handle_extra
  use Timers
+ use m_structures
 
  implicit none
 
@@ -37479,6 +37483,7 @@ bft:do ibathyfiletype=1,2
  use m_sediment
  use m_oned_functions
  use unstruc_channel_flow
+ use m_structures
  !\ DEBUG
  use m_missing
 
@@ -37773,6 +37778,7 @@ bft:do ibathyfiletype=1,2
  enddo
 
  call duikerstoprofs()
+ call longculvertsToProfs()
 
  if (blmeanbelow .ne. -999d0) then
     do n = 1,ndx2D

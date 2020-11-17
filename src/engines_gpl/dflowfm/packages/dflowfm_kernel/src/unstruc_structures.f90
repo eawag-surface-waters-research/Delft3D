@@ -1165,5 +1165,64 @@ integer :: istart
    enddo
 end subroutine loadLongCulvertsAsNetwork
 
+!> * Sets netlink numbers and flowlink numbers.\n
+!> * Fills for the corresponding flow links the bedlevels, bobs and prof1d data.
+subroutine longculvertsToProfs()
+   use network_data
+   use m_flowgeom
+
+   integer :: Lnet, Lf, i, ilongc, k1, k2
+
+   do ilongc = 1, nlongculvertsg
+      do i = 1, longculverts(ilongc)%numlinks
+         if (longculverts(nlongculvertsg)%flowlinks(i) < 0) then
+            ! netlinks and flow links are not set correctly
+            do Lnet = 1, numl
+               if (longculverts(ilongc)%netlinks(i) == lperm(Lnet)) then
+                  longculverts(ilongc)%netlinks(i) = Lnet
+                  longculverts(ilongc)%flowlinks(i) = lne2ln(Lnet)
+                  exit
+               endif
+            enddo
+         endif
+      enddo
+   enddo
+
+   do ilongc = 1, nlongculvertsg
+      do i = 1, longculverts(ilongc)%numlinks
+         Lf = longculverts(ilongc)%flowlinks(i)
+         k1 = ln(1,Lf)
+         k2 = ln(2,Lf)
+         bob(1, Lf) = longculverts(ilongc)%bl(i)
+         bob(2, Lf) = longculverts(ilongc)%bl(i+1)
+         bl(k1) = min(bl(k1), bob(1,Lf))
+         bl(k2) = min(bl(k2), bob(2,Lf))
+         
+         wu(Lf) = longculverts(ilongc)%width
+         prof1D(1,Lf)  = wu(Lf)
+         prof1D(2,Lf)  = longculverts(ilongc)%height
+         prof1D(3,Lf)  =  2                                      ! for now, simple rectan
+      enddo
+   enddo
+
+   end subroutine longculvertsToProfs
+
+   !> Fill frcu and icrctyp for the corresponding flow link numbers of the long culverts
+   subroutine setFrictionForLongculverts()
+      use m_flow
+      implicit none
+
+      integer :: LL, ilongc, Lf
+
+      do ilongc = 1, nlongculvertsg
+         do LL = 1, longculverts(ilongc)%numlinks
+            Lf = longculverts(ilongc)%flowlinks(LL)
+            ifrcutp(Lf) = longculverts(ilongc)%ifrctyp
+            frcu(Lf) = longculverts(ilongc)%friction_value
+         enddo
+      enddo
+
+         
+   end subroutine setFrictionForLongculverts
 
 end module m_structures
