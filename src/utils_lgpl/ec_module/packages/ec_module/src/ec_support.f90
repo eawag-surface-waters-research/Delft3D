@@ -837,7 +837,7 @@ end subroutine ecInstanceListSourceItems
          character(3000) :: message
          !
          if (ierror /= nf90_noerr) then
-            write (message,'(a)') 'NetCDF error message : '//trim(nf90_strerror(ierror))
+            write (message,'(a,i0,a)') 'NetCDF error message : [',ierror,'] '//trim(nf90_strerror(ierror))
             call setECMessage(message)
             if (present(filename)) then
                write (message,'(a)') 'NetCDF file : "'//trim(filename)
