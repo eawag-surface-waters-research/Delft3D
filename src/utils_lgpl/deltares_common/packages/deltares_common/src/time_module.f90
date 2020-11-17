@@ -852,26 +852,58 @@ module time_module
          success = 1
       end function mjd2datetime
 
-      !> split a string in date and time part
-      function split_date_time(string, date, time) result(success)
-         character(len=*), intent(in)  :: string  !< input string like 1950-01-01 00:00:00; with or without time
-                                                  !<                or 1950-01-01t00:00:00 as in ISO_8601, after converting to lower case
-         character(len=*), intent(out) :: date    !< output date, in this case 1950-01-01
+      !> split a string in date, time and time zone part
+      function split_date_time(string, date, time, tz) result(success)
+         character(len=*), intent(in)  :: string  !< input string like 2020-01-01 00:00:00; with or without time
+                                                  !<                or 2020-01-01t00:00:00 as in ISO_8601, after converting to lower case
+                                                  !< input string may contains a time zone indication
+         character(len=*), intent(out) :: date    !< output date, in this case 2020-01-01
          character(len=*), intent(out) :: time    !< output time, in this case 00:00:00
+         character(len=*), intent(out) :: tz      !< optional output time zone indication
          logical                       :: success !< function result
 
          character(len=:), allocatable :: date_time
-         integer                       :: ipos
+         integer                       :: ipos, i, iposTZ, ipos2
+         character, parameter          :: splitters1(3) = (/ ' ', 't', 'T' /)
+         character, parameter          :: splitters2(4) = (/ '+', '-', 'z', 'Z' /)
+         character                     :: splitter
+         integer  , parameter          :: size_date = len('2020-01-01')
+         integer  , parameter          :: size_time = len('00:00:00')
 
          date_time = trim(adjustl(string))
-         ipos      = max(index(date_time, ' '), index(date_time, 't'))
+
+         ! search for the character splitting the date and the time
+         ipos = 0
+         do i = 1, size(splitters1)
+            ipos = max(ipos, index(date_time, splitters1(i)))
+         end do
+
+         ! search for time zone indication
+         iposTZ = 0
+         do i = 1, size(splitters2)
+            splitter = splitters2(i)
+            ipos2 = index(date_time, splitter, back=.true.)
+            if (ipos2 > size_date + size_time + 1) then           ! the minus can be part of the date
+               iposTZ = max(iposTZ, ipos2)
+            else if (ipos2 > 0 .and. splitter /= '-') then
+               success = .false.
+               return
+            end if
+         end do
 
          if (ipos > 0) then
             date = date_time(1:ipos-1)
-            time = adjustl(date_time(ipos+1:))
-         else if (len(date_time) == 10) then
+            if (iposTZ > 0) then
+               time = adjustl(date_time(ipos+1:iposTZ-1))
+               tz = date_time(iposTZ:)
+            else
+               time = adjustl(date_time(ipos+1:))
+               tz   = ' '
+            endif
+         else if (len(date_time) == size_date) then
             date = date_time
             time = ' '
+            tz   = ' '
          else ! format not recoqnized
             success = .false.
             return

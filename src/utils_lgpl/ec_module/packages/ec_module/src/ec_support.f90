@@ -858,6 +858,7 @@ end subroutine ecInstanceListSourceItems
       !> Extracts time unit and reference date from a standard time string.
       !! ASCII example: "TIME = 0 hours since 2006-01-01 00:00:00 +00:00"
       !! NetCDF example: "minutes since 1970-01-01 00:00:00.0 +0000"
+      !! also ISO_8601 is supported: 2020-11-16T07:47:33Z
       function ecSupportTimestringToUnitAndRefdate(rec, unit, ref_date, tzone) result(success)
          !
          logical                                :: success       !< function status
@@ -867,15 +868,12 @@ end subroutine ecInstanceListSourceItems
          real(kind=hp), optional, intent(out)   :: tzone         !< time zone
          !
          integer                       :: i        !< helper index for location of 'since'
-         integer                       :: j        !< helper index for location of '+/-' in time zone
-         integer                       :: jplus    !< helper index for location of '+' in time zone
-         integer                       :: jmin     !< helper index for location of '-' in time zone
          integer                       :: jcomment !< helper index for location of '#'
-         integer                       :: minsize  !< helper index for time zone
          real(kind=hp)                 :: temp     !< helper variable
          logical                       :: ok       !< check of refdate is found
          character(len=20)             :: date     !< parts of string for date
          character(len=20)             :: time     !< parts of string for time
+         character(len=20)             :: tz       !< parts of string for time zone
          character(len=:), allocatable :: string   !< unit string without comments and in lowercase
          !
          success = .false.
@@ -909,7 +907,7 @@ end subroutine ecInstanceListSourceItems
          end if
          ! Determine the reference date.
          i = index(string, 'since') + 6
-         ok = split_date_time(string(i:), date, time)
+         ok = split_date_time(string(i:), date, time, tz)
          if (.not. ok) then
             call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: splitting of date and time fails. Date time = ", string(i:))
             return
@@ -942,12 +940,8 @@ end subroutine ecInstanceListSourceItems
 
          ! Determine the timezone
          if (present(tzone)) then
-             minsize = i + 18   ! +/- is to be found after date and time (note that date has '-')
-             jplus = index(string, '+', back=.true.)
-             jmin  = index(string, '-', back=.true.)
-             j     = max(jplus, jmin)
-             if (j > minsize) then
-                 success = parseTimezone(string(j:), tzone)
+             if (tz /= ' ') then
+                 success = parseTimezone(tz, tzone)
              else
                  tzone = 0.0_hp
                  success = .true.
@@ -1027,7 +1021,7 @@ end subroutine ecInstanceListSourceItems
       ! =======================================================================
 
       !> Extracts time zone from a standard time string.
-      !! examples: "+01:00", "+0200", "-01:00", "-0200", "+5:30"
+      !! examples: "+01:00", "+0200", "-01:00", "-0200", "+5:30", "Z"
       function parseTimezone(string, tzone) result(success)
          logical                              :: success         !< function status
          character(len=*),        intent(in)  :: string          !< units string
@@ -1042,31 +1036,34 @@ end subroutine ecInstanceListSourceItems
          character(len=2) :: cmin        !< minutes part of time zone, as character string
          character(len=3) :: chour       !< hours part of time zone, as character string
 
-         tzone = 0.0_hp
+         if (string == 'z' .or. string == 'Z') then
+            tzone = 0.0_hp
+            ierr = 0
+         else
+            jcolon = index(string, ':')
 
-         jcolon = index(string, ':')
-
-         if (jcolon == 0) then
-            posNulChar = index(string, char(0))
-            if (posNulChar > 0) then
-               jend = posNulChar-1
+            if (jcolon == 0) then
+               posNulChar = index(string, char(0))
+               if (posNulChar > 0) then
+                  jend = posNulChar-1
+               else
+                  jend = len_trim(string)
+               endif
+               cmin = string(jend-1:)
+               chour = string(:jend-2)
             else
-               jend = len_trim(string)
-            endif
-            cmin = string(jend-1:)
-            chour = string(:jend-2)
-         else
-            cmin = string(jcolon+1:)
-            chour = string(:jcolon-1)
-         end if
+               cmin = string(jcolon+1:)
+               chour = string(:jcolon-1)
+            end if
 
-         read(chour, *, iostat=ierr) hour
-         if (ierr == 0) read(cmin, *, iostat=ierr) min
-         if (string(1:1) == '-') then
-            tzone = hour - min / 60.0_hp
-         else
-            tzone = hour + min / 60.0_hp
-         endif
+            read(chour, *, iostat=ierr) hour
+            if (ierr == 0) read(cmin, *, iostat=ierr) min
+            if (string(1:1) == '-') then
+               tzone = hour - min / 60.0_hp
+            else
+               tzone = hour + min / 60.0_hp
+            end if
+         end if
 
          success = (ierr == 0)
          if (.not. success) call setECMessage("ec_support::parseTimezone: error parsing time zone " // trim(string))
