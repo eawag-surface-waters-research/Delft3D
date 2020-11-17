@@ -3357,6 +3357,8 @@ subroutine write_partition_pol(c_netfile_in, c_netfile_out, c_polfile) bind(C, n
       call findcells(0)
    end if
 
+   call cosphiunetcheck(1)
+
    polfile = char_array_to_string(c_polfile, strlen(c_polfile))
 
    call newfil(minp, polfile)
