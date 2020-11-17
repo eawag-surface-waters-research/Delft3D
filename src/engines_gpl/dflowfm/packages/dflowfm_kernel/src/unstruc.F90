@@ -19302,6 +19302,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use simple_geometry, only: sgeom_def_geometry_variables
     use m_1d_structures
     use m_structures
+    use m_GlobalParameters
 
     implicit none
 
@@ -41910,6 +41911,7 @@ if (jahisbal > 0) then
       use unstruc_channel_flow, only: network
       use m_1d_structures
       use m_compound
+      use m_GlobalParameters
       implicit none
       integer                       :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd, istru, nlinks
       double precision              :: dir

@@ -59,6 +59,7 @@ module m_readstructures
    public write_structure_cache
    public readPump
    public readDambreak
+   public allowedFlowDirtoInt
 
    !> The file version number of the structure file format: d.dd, [config_major].[config_minor], e.g., 1.03
    !!

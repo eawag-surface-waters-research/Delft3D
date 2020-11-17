@@ -2580,7 +2580,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_save_ugrid_state, only: mesh1dname
     use m_structures
     use m_1d_structures
-
+    use m_GlobalParameters
+    
     integer,           intent(in) :: irstfile
     real(kind=hp),     intent(in) :: tim
 
