@@ -837,12 +837,16 @@ end subroutine ecInstanceListSourceItems
          character(3000) :: message
          !
          if (ierror /= nf90_noerr) then
-            if (present(description) .and. present(filename)) then
-               write (message,'(6a)') trim(description), '. NetCDF file : "', trim(filename), '". Error message:', nf90_strerror(ierror)
-            else
-               write (message,'(2a)') 'NetCDF error : ', nf90_strerror(ierror)
-            endif
+            write (message,'(a)') 'NetCDF error message : '//trim(nf90_strerror(ierror))
             call setECMessage(message)
+            if (present(filename)) then
+               write (message,'(a)') 'NetCDF file : "'//trim(filename)
+               call setECMessage(message)
+            endif
+            if (present(description))  then
+               write (message,'(a)') trim(description)
+               call setECMessage(message)
+            endif
             success = .false.
          else
             success = .true.

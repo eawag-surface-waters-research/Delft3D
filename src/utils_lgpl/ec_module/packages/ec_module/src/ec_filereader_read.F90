@@ -821,7 +821,11 @@ module m_ec_filereader_read
                   if ( issparse == 1 ) then
                      call read_data_sparse(fileReaderPtr%fileHandle, varid, n_cols, n_rows, item%elementSetPtr%n_layers, &
                                            timesndx, fileReaderPtr%relndx, ia, ja, Ndatasize, fieldPtr%arr1dPtr, ierror)
-                     valid_field = .true.
+                     if (ecSupportNetcdfCheckError(ierror, 'Error reading quantity '//trim(item%quantityptr%name)//' from sparse data. ', fileReaderPtr%filename)) then
+                         valid_field = .true.
+                     else
+                         return
+                     endif
                   else
                      if (item%elementSetPtr%n_layers == 0) then 
                         if (item%elementSetPtr%ofType == elmSetType_samples) then

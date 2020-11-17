@@ -382,6 +382,9 @@ module m_ec_filereader
                case default
                   do i=1, fileReaderPtr%nItems
                      success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx)
+                     if (.not.success) then
+                         return
+                     end if                     
                   end do
                   if (itemPtr%sourceT1FieldPtr%timesndx < 0) then
                      t0t1 = 1
