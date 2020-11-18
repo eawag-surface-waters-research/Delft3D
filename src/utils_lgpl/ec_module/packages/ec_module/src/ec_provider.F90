@@ -95,13 +95,30 @@ module m_ec_provider
          character(len=*), optional, intent(in) :: funtype   !< matching function in the BC-block header
          !
          integer                    :: istat
+         integer                    :: forcingfiletype
          integer                    :: bcBlockId
          type (tEcBCBlock), pointer :: bcBlockPtr
+         logical                    :: file_exists
          success = .False.
+
+         inquire(FILE=forcingfile, EXIST=file_exists)
+         if (.not.file_exists) then
+           call setECMessage("Forcing file ("//trim(forcingfile)//") not found.")
+           return
+         endif
+         if (index(trim(forcingfile)//'|','.bc|')>0) then                               ! ASCII: bc-format  : detection is extension-based
+            forcingfiletype = BC_FTYPE_ASCII
+         else if (index(trim(forcingfile)//'|','.nc|')>0) then                          ! NETCDF: nc-format 
+            forcingfiletype = BC_FTYPE_NETCDF
+         else
+           call setECMessage("Forcing file ("//trim(forcingfile)//") should either have extension .nc (netcdf timeseries file) or .bc (ascii BC-file).")
+           return
+         endif 
+         
          bcBlockId = ecInstanceCreateBCBlock(instancePtr)
          bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
          if (.not. ecProviderInitializeBCBlock(instancePtr, bcBlockId,  &
-                         k_refdat, k_tzone, k_tsunit, fileReaderId, forcingfile, quantity, location, istat, funtype=funtype)) then
+                         k_refdat, k_tzone, k_tsunit, fileReaderId, forcingfile, forcingfiletype, quantity, location, istat, funtype=funtype)) then
                ! TODO: handle exception 
                return
             continue
@@ -113,7 +130,7 @@ module m_ec_provider
       
       !> Initialize a new BCBlock item, which in turn constructs and initializes a filereader 
 
-      function ecProviderInitializeBCBlock(instancePtr, bcBlockId, k_refdat, k_tzone, k_tsunit, fileReaderId, fileName, quantityName, &
+      function ecProviderInitializeBCBlock(instancePtr, bcBlockId, k_refdat, k_tzone, k_tsunit, fileReaderId, fileName, fileType, quantityName, &
                                            plilabel, istat, dtnodal, funtype) result(success)
       use m_ec_netcdf_timeseries
       use m_ec_alloc
@@ -126,6 +143,7 @@ module m_ec_provider
          integer,                intent(in)  :: k_tsunit     !< kernel timestep unit (1=sec, 2=min, 3=hour)
          integer,                intent(out) :: fileReaderId !< unique fileReader id
          character(*),           intent(in)  :: fileName     !< relative path of data file
+         integer,                intent(in)  :: fileType     !< type of the BC-file (ascii=bc, netcdf=nc)
          character(*),           intent(in)  :: quantityName !< name of quantity, needed for structured input files (NetCDF and BC)
          character(*),           intent(in)  :: plilabel     !< identify a (set of) pli-points
          real(hp), optional,     intent(in)  :: dtnodal      !< Nodal factors in astronomical bc update interval
@@ -145,8 +163,9 @@ module m_ec_provider
          bcBlockPtr => ecSupportFindBCBlock(instancePtr, bcBlockId)
          if (.not.associated(bcBlockPtr)) return
              
-         if (index(trim(fileName)//'|','.bc|')>0) then                               ! ASCII: bc-format  : detection is extension-based
-!           bcFilePtr => ecSupportFindBCFileByFilename(instancePtr, fileName)       ! was this BC-file already opened?
+         bcBlockPtr%ftype = fileType
+         select case (bcBlockPtr%ftype)
+         case (BC_FTYPE_ASCII)
             bcBlockPtr%bcFilePtr => ecSupportFindBCFileByFilename(instancePtr, fileName)! was this BC-file already opened?
             if (.not.associated(bcBlockPtr%bcFilePtr)) then                                    ! if not, create anew
             ! ensure capacity
@@ -161,8 +180,7 @@ module m_ec_provider
                bcBlockPtr%bcFilePtr%bcfilename = fileName
                instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcBlockPtr%bcFilePtr
             endif
-            bcBlockPtr%ftype=BC_FTYPE_ASCII
-         else if (index(trim(fileName)//'|','.nc|')>0) then                          ! NETCDF: nc-format 
+         case (BC_FTYPE_NETCDF)
             !if (index(plilabel,'_')<=0) then 
             !   return                                                              ! If this was not pli-label  bla_0001 then its is a qhbnd
             !endif                                                                  ! not supported in combination with netcdf-files 
@@ -184,10 +202,7 @@ module m_ec_provider
                bcBlockPtr%vp => bcBlockPtr%ncptr%vp
                bcBlockPtr%numlay = bcBlockPtr%ncptr%nLayer
             endif
-         else
-           call setECMessage("Forcing file ("//trim(fileName)//") should either have extension .nc (netcdf timeseries file) or .bc (ascii BC-file).")
-           return
-         endif 
+         end select
          
          if (.not.ecBCInit (instancePtr, filename, quantityName, plilabel, bcBlockPtr, iostat, funtype=funtype)) return
 
@@ -1720,6 +1735,8 @@ module m_ec_provider
          logical                             :: all_points_are_corr
          logical                             :: has_label
          integer                             :: lblstart
+         integer                             :: bctfiletype
+         logical                             :: file_exists
          !
 
 !        initialization
@@ -1800,6 +1817,21 @@ module m_ec_provider
 
          itemPT => ecSupportFindItem(instancePtr, itemId)
 
+         inquire(FILE=bctfilename, EXIST=file_exists)
+         if (.not.file_exists) then
+           call setECMessage("Forcing file ("//trim(bctfilename)//") not found.")
+           return
+         endif
+         if (index(trim(bctfilename)//'|','.bc|')>0) then   ! ASCII: bc-format  : detection is extension-based
+            bctfiletype = BC_FTYPE_ASCII
+         else if (index(trim(bctfilename)//'|','.nc|')>0) then ! NETCDF: nc-format 
+            bctfiletype = BC_FTYPE_NETCDF
+         else
+           call setECMessage("Forcing file ("//trim(bctfilename)//") should either have extension .nc (netcdf timeseries file) or .bc (ascii BC-file).")
+           return
+         endif 
+         
+
          all_points_are_corr       = .true.
          ! Init BCBlock for (global) qh-bound 
          bcBlockId = ecInstanceCreateBCBlock(InstancePtr)
@@ -1824,7 +1856,7 @@ module m_ec_provider
             endif
             
             if (.not. ecProviderInitializeBCBlock(InstancePtr, bcBlockId, fileReaderPtr%tframe%k_refdate, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
-                                  id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal)) then
+                                  id, bctfilename, bctfiletype, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal)) then
                !call setECMessage("WARNING: ec_provider::ecProviderPolyTimItems: Error initializing EC Block.")
                mask(i) = 0
                mask(i) = 0
