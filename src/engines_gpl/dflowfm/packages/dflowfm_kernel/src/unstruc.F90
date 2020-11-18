@@ -48004,7 +48004,7 @@ double precision :: q_sub(3)             ! discharge per segment
 integer          :: LL, ka, kb, itp, ifrctyp, ibndsect
 integer          :: k1, k2
 integer          :: jacustombnd1d
-double precision :: u1L, q1L, s1L, dpt, factor
+double precision :: u1L, q1L, s1L, dpt, factor, maxflowwidth
 type(t_CrossSection), pointer :: cross1, cross2
 
 LL = L
