@@ -229,7 +229,7 @@ type t_unc_mapids
    integer :: id_cfcl(MAX_ID_VAR)        = -1 !< Variable ID for netlink data of calibration factor for friction
    integer :: id_cftrt(MAX_ID_VAR)       = -1 !< Variable ID for netlink data of friction from trachytopes
    integer :: id_czs(MAX_ID_VAR)         = -1 !< Variable ID for flow node data of chezy roughness
-   integer :: id_czu(MAX_ID_VAR)         = -1 !< Variable ID for flow node data of chezy roughness on flow links
+   integer :: id_czu(MAX_ID_VAR)         = -1 !< Variable ID for flow link data of chezy roughness
    integer :: id_qsun(MAX_ID_VAR)        = -1 !< Variable ID for
    integer :: id_qeva(MAX_ID_VAR)        = -1 !< Variable ID for
    integer :: id_qcon(MAX_ID_VAR)        = -1 !< Variable ID for
@@ -4740,9 +4740,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          endif
       endif
 
-      ! Chezy data on flow-nodes
+      ! Chezy data on flow nodes and flow links
       if (jamapchezy > 0) then
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czs , nf90_double, UNC_LOC_S, 'czs'  , '', 'Chezy roughness', 'm0.5s-1', jabndnd=jabndnd_)
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czs , nf90_double, UNC_LOC_S, 'czs'  , '', 'Chezy roughness in flow element center', 'm0.5s-1', jabndnd=jabndnd_)
             ! WO: m0.5s-1 does not follow standard ? (which accepts only integral powers?)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_czu , nf90_double, UNC_LOC_U, 'czu'  , '', 'Chezy roughness on flow links', 'm0.5s-1', jabndnd=jabndnd_)
       endif
