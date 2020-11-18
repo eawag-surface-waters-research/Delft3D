@@ -1802,12 +1802,11 @@ module m_ec_provider
 
          all_points_are_corr       = .true.
          ! Init BCBlock for (global) qh-bound 
-         n_signals = 0                                   ! Record whether at least one child provider is created for this polytim.
          bcBlockId = ecInstanceCreateBCBlock(InstancePtr)
          bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
          plipointlbl = polyline_name
          call str_upper(quantityname)
-         n_signals = 0
+         n_signals = 0                                   ! Record whether at least one child provider is created for this polytim.
          do i=1, n_points
             ! Process a *.tim file.
             bcBlockId = ecInstanceCreateBCBlock(InstancePtr) 
@@ -1851,6 +1850,12 @@ module m_ec_provider
             endif
          end do               ! loop over support points
 
+         if (n_signals <= 0) then
+            call setECMessage("    for polyline "//trim(polyline_name)//" and quantity "//trim(quantityname)//".")
+            call setECMessage("No signals for polyline file "//trim(fileReaderPtr%filename)//" found in "//trim(bctfilename))
+            success = .false.
+            return
+         end if
 
          if (.not.ecQuantitySet(instancePtr, quantityId, &
                        fillvalue = bcBlockPtr%quantity%missing, &
@@ -1866,13 +1871,6 @@ module m_ec_provider
              endif
              return
          endif
-
-         if (n_signals <= 0) then
-            call setECMessage("    for polyline "//trim(polyline_name)//" and quantity "//trim(quantityname)//".")
-            call setECMessage("No signals for polyline file "//trim(fileReaderPtr%filename)//" found in "//trim(bctfilename))
-            success = .false.
-            return
-         end if
 
          ! itemID refers to the source item (providing to the polytim item) for the last support point we came across in the above loop.
          if (.not. ecProvider3DVectmax(instancePtr, itemPT, mask ,maxlay, n_points, itemIDList)) return 
