@@ -439,7 +439,7 @@ subroutine loadModel(filename)
     use m_sferic
     ! use string_module, only: get_dirsep
     use unstruc_caching
-    use m_structures, only: loadLongCulvertsAsNetwork
+    use m_longculverts
 
     interface
        subroutine realan(mlan, antot)

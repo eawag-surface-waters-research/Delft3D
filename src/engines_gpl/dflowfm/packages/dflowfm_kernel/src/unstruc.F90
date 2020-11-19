@@ -3416,6 +3416,8 @@ end subroutine sethu
  use unstruc_model
  use m_partitioninfo
  use m_timer
+ use m_longculverts
+
  implicit none
 
  integer                                           :: n, nq, L, k1, k2, nlowest
@@ -3640,6 +3642,8 @@ end subroutine sethu
     call reduce_at_all()
     if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
  end if
+
+ call reduceFlowAreaAtLongculverts()
 
  do nq = 1,nqbnd
     at = at_all(nq)
@@ -15407,6 +15411,7 @@ else if (nodval == 27) then
  use m_oned_functions, only: updateFreeboard, set_max_volume_for_1d_nodes, updateDepthOnGround, updateVolOnGround, updateTotalInflow1d2d, updateTotalInflowLat
  use m_waves
  use m_structures
+ use m_longculverts
 
  implicit none
 
@@ -16346,7 +16351,9 @@ end if
        ! deallocate(zk)
     endif
  endif
-
+ 
+ call setFrictionForLongculverts()
+ 
  do L = 1,lnx
     if (frcu(L) == dmiss) then
        if (L <= lnx1D) then
@@ -16393,7 +16400,6 @@ end if
     end do
  end if
 
- call setFrictionForLongculverts()
  call setupwslopes()                                   ! set upwind slope pointers and weightfactors
 
  if (iuvfield > 0) call setvelocityfield()           ! only when testing
@@ -37484,6 +37490,7 @@ bft:do ibathyfiletype=1,2
  use m_oned_functions
  use unstruc_channel_flow
  use m_structures
+ use m_longculverts
  !\ DEBUG
  use m_missing
 

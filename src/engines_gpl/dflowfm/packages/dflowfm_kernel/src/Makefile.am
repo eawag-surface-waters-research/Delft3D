@@ -60,6 +60,7 @@ libdflowfm_la_SOURCES=\
         hydrology.f90 \
         d_flooding.f90 \
         unstruc_structures.f90 \
+        m_longculverts.f90 \
         unstruc_netcdf.f90 \
         network.f90 \
         monitoring.f90 \

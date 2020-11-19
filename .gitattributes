@@ -510,6 +510,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/hydrology_data.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/inquire_flowgeom.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/io_openfoam.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/m_filter.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/m_longculverts.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/manholes.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/mass_balance_areas.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/meteo1.f90 -text
