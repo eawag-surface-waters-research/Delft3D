@@ -4839,51 +4839,6 @@
 
    end subroutine
 
-
-
-   subroutine reconstructsedadvvel()
-   use m_flowgeom
-   use m_transport
-   use m_sediment
-
-   implicit none
-
-   integer               :: L, LL, k1, k2, LLL
-
-   ucxsed = 0d0; ucysed=0d0
-   qcxsed = 0d0; qcysed=0d0
-   xsedflux=0d0; ysedflux=0d0
-   do L = 1, lnx
-      k1 = ln(1,L); k2 = ln(2,L)
-      if (u1sed(L) .ne. 0d0) then
-         ucxsed(k1) = ucxsed(k1) + wcx1(L)*u1sed(L)
-         ucxsed(k2) = ucxsed(k2) + wcx2(L)*u1sed(L)
-         ucysed(k1) = ucysed(k1) + wcy1(L)*u1sed(L)
-         ucysed(k2) = ucysed(k2) + wcy2(L)*u1sed(L)
-      end if
-
-      if (q1sed(L) .ne. 0d0) then
-         qcxsed(k1) = qcxsed(k1) + wcx1(L)*q1sed(L)
-         qcxsed(k2) = qcxsed(k2) + wcx2(L)*q1sed(L)
-         qcysed(k1) = qcysed(k1) + wcy1(L)*q1sed(L)
-         qcysed(k2) = qcysed(k2) + wcy2(L)*q1sed(L)
-      end if
-      !
-      !
-      do LL = 1, stmpar%lsedsus
-         LLL = ISED1-1+LL
-         if (fluxhortot(LLL,L) .ne. 0d0) then
-            xsedflux(LLL,k1) = xsedflux(LLL,k1) + wcx1(L)*fluxhortot(LLL,L)
-            xsedflux(LLL,k2) = xsedflux(LLL,k2) + wcx2(L)*fluxhortot(LLL,L)
-            ysedflux(LLL,k1) = ysedflux(LLL,k1) + wcy1(L)*fluxhortot(LLL,L)
-            ysedflux(LLL,k2) = ysedflux(LLL,k2) + wcy2(L)*fluxhortot(LLL,L)
-         end if
-      end do
-
-   end do
-
-   end subroutine
-
    subroutine init_1dinfo()
    use m_flowgeom, only: lnx1D, ln, ndx
    use m_sediment, only: stmpar
