@@ -1614,6 +1614,11 @@ subroutine alloc_transport(Keepexisting)
    call realloc(jaupdatehorflux, Lnx, keepExisting=.false., fill=1)
    call realloc(dtmax,       Ndx, keepExisting=.false., fill=0d0)
    
+   if (stm_included) then
+      call realloc(u1sed, Lnkx, keepExisting=.false., fill=0d0)
+      call realloc(q1sed, Lnkx, keepExisting=.false., fill=0d0)
+   endif
+   
    if ( jalimitdtdiff.eq.1 ) then
       call realloc(sumdifflim, Ndkx, keepExisting=.false., fill = 0d0)
    end if

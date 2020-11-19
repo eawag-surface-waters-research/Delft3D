@@ -5472,16 +5472,8 @@ module m_transport
 
    double precision :: dsum
 
-   ! DEBUG
    double precision, dimension(:),   allocatable :: u1sed
    double precision, dimension(:),   allocatable :: q1sed
-   double precision, dimension(:),   allocatable :: ucxsed
-   double precision, dimension(:),   allocatable :: ucysed
-   double precision, dimension(:),   allocatable :: qcxsed
-   double precision, dimension(:),   allocatable :: qcysed
-   double precision, dimension(:,:),   allocatable :: xsedflux
-   double precision, dimension(:,:),   allocatable :: ysedflux
-   !\ DEBUG
 end module m_transport
 
 module m_fm_wq_processes

@@ -333,14 +333,6 @@ type t_unc_mapids
    !integer :: id_flowelemglobalnr(MAX_ID_VAR) = -1 ! global flow element numbering
 
    integer :: id_zb(MAX_ID_VAR)     = -1 !< Variable ID for bed elevation
-   integer :: id_u1s(MAX_ID_VAR)    = -1 !< sediment advection velocities in trsnaport module; DEBUG
-   integer :: id_q1s(MAX_ID_VAR)    = -1
-   integer :: id_ucxs(MAX_ID_VAR)   = -1 !< cell centre advection vel
-   integer :: id_ucys(MAX_ID_VAR)   = -1
-   integer :: id_qcxs(MAX_ID_VAR)   = -1 !< cell centre adv discharge
-   integer :: id_qcys(MAX_ID_VAR)   = -1
-   integer, dimension(:,:), allocatable :: id_xsedflux
-   integer, dimension(:,:), allocatable :: id_ysedflux
    !
    integer :: id_spircrv(MAX_ID_VAR)    = -1 !< Variable ID for flow streamline curvature
    integer :: id_spirint(MAX_ID_VAR)    = -1 !< Variable ID for spiral intensity
@@ -4481,7 +4473,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_mass_balance_areas
    use m_fm_wq_processes
    use m_xbeach_data
-   use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const, u1sed, q1sed, ucxsed, ucysed, qcxsed, qcysed, xsedflux, ysedflux
+   use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const
    use m_particles, only: japart, jatracer, part_iconst
    use m_alloc
    use m_waves
