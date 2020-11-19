@@ -1675,6 +1675,7 @@ module m_ec_provider
                                        //  trim(plipointlbl)//"' (required).")
                         return
                      endif ! labelled point ? 
+                     signaltype = -1
                   endif    ! tim3d-file ? 
                endif       ! cmp file ? 
             endif          ! tim-file ?
