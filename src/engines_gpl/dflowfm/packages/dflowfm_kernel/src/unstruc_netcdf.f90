@@ -4576,13 +4576,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    call realloc(mapids%id_const, (/ MAX_ID_VAR, NUMCONST/), keepExisting=.false.)
 
-   ! DEBUG
-   if (jasedtranspveldebug>0) then
-      call realloc(mapids%id_xsedflux, (/ MAX_ID_VAR, NUMCONST/), keepExisting=.false., fill = -1)
-      call realloc(mapids%id_ysedflux, (/ MAX_ID_VAR, NUMCONST/), keepExisting=.false., fill = -1)
-   end if
-   !\ DEBUG
-
    ! Use nr of dimensions in netCDF file a quick check whether vardefs were written
    ! before in previous calls.
    ndim = 0
@@ -5020,34 +5013,14 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          endif
 
          ! roughness heights for current and current and wave related roughness
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_z0c   , nf90_double, UNC_LOC_U, 'z0ucur'  , '', 'Current related roughness'        , 'm', dimids = (/ -2,  -1 /), jabndnd=jabndnd_)
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_z0r   , nf90_double, UNC_LOC_U, 'z0urou'  , '', 'Current-wave related roughness'   , 'm', dimids = (/ -2,  -1 /), jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_z0c   , nf90_double, UNC_LOC_U, 'z0ucur'  , '', 'Current related roughness height'        , 'm', dimids = (/ -2,  -1 /), jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_z0r   , nf90_double, UNC_LOC_U, 'z0urou'  , '', 'Current-wave related roughness height'   , 'm', dimids = (/ -2,  -1 /), jabndnd=jabndnd_)
 
          ! default sediment transport output (suspended and bedload) on flow links
          if (stmpar%lsedsus > 0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssn   , nf90_double, UNC_LOC_U, 'ssn'  , '', 'Suspended load transport, n-component'   , transpunit, dimids = (/ -2, mapids%id_tsp%id_sedsusdim, -1 /), jabndnd=jabndnd_)
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sst   , nf90_double, UNC_LOC_U, 'sst'  , '', 'Suspended load transport, t-component'   , transpunit, dimids = (/ -2, mapids%id_tsp%id_sedsusdim, -1 /), jabndnd=jabndnd_)
 
-            ! DEBUG: get transport velocities and discharges from transport module on output file
-            if (jasedtranspveldebug>0) then
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_u1s   , nf90_double, UNC_LOC_U, 'u1sed', '', 'Sed adv velocity,  n-component'          , 'm s-1',    dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_q1s   , nf90_double, UNC_LOC_U, 'q1sed', '', 'Sed adv discharge, n-component'          , 'm3 s-1',   dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ucxs  , nf90_double, UNC_LOC_S, 'ucxs' , 'sed_adv_x_velocity',  'Flow element center velocity vector for sed adv, x-component', 'm s-1',    dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ucys  , nf90_double, UNC_LOC_S, 'ucys' , 'sed_adv_y_velocity',  'Flow element center velocity vector for sed adv, y-component', 'm s-1',    dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_qcxs  , nf90_double, UNC_LOC_S, 'qcxs' , 'sed_adv_x_discharge',  'Flow element center discharge vector for sed adv, x-component', 'm3 s-1',    dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_qcys  , nf90_double, UNC_LOC_S, 'qcys' , 'sed_adv_y_discharge',  'Flow element center discharge vector for sed adv, y-component', 'm3 s-1',    dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-               if (stmpar%lsedsus .gt. 0) then
-                  do j = ISED1, ISEDN
-                     tmpstr = const_names(j)
-                     ! Forbidden chars in NetCDF names: space, /, and more.
-                     call replace_char(tmpstr,32,95)
-                     call replace_char(tmpstr,47,95)
-                     ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_xsedflux(:,j)  , nf90_double, UNC_LOC_S, trim(tmpstr)//'xsedflux', '', trim(tmpstr) // ' sed flux, x-component', '', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-                     ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ysedflux(:,j)  , nf90_double, UNC_LOC_S, trim(tmpstr)//'ysedflux', '', trim(tmpstr) // ' sed flux, y-component', '', dimids = (/ -2, -1 /), jabndnd=jabndnd_)
-                  end do
-               end if
-            !\ DEBUG
-            end if
          endif
 
          if (stmpar%lsedtot > 0) then
@@ -5951,32 +5924,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          toutputx(:,l) = sedtra%e_ssn(:,l)/rhol
          toutputy(:,l) = sedtra%e_sst(:,l)/rhol
       end do
-       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ssn  , UNC_LOC_U, toutputx, jabndnd=jabndnd_)
-       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_sst  , UNC_LOC_U, toutputy, jabndnd=jabndnd_)
-
-       ! DEBUG
-       if (jasedtranspveldebug>0) then
-          ierr = nf90_put_var(mapids%ncid, mapids%id_u1s(2), u1sed(lnx1d+1:lnx), start = (/ 1, itim /), count = (/ lnx-lnx1d, 1 /))
-          ierr = nf90_put_var(mapids%ncid, mapids%id_q1s(2), q1sed(lnx1d+1:lnx), start = (/ 1, itim /), count = (/ lnx-lnx1d, 1 /))
-          call reconstructsedadvvel()
-          ierr = nf90_put_var(mapids%ncid, mapids%id_ucxs(2), ucxsed(1:ndxndxi), start = (/ 1, itim /), count = (/ ndxndxi, 1 /))
-          ierr = nf90_put_var(mapids%ncid, mapids%id_ucys(2), ucysed(1:ndxndxi), start = (/ 1, itim /), count = (/ ndxndxi, 1 /))
-          ierr = nf90_put_var(mapids%ncid, mapids%id_qcxs(2), qcxsed(1:ndxndxi), start = (/ 1, itim /), count = (/ ndxndxi, 1 /))
-          ierr = nf90_put_var(mapids%ncid, mapids%id_qcys(2), qcysed(1:ndxndxi), start = (/ 1, itim /), count = (/ ndxndxi, 1 /))
-          if (stmpar%lsedsus .gt. 0) then
-             do j = ISED1, ISEDN
-                do kk=1,NdxNdxi
-                   workx(kk) = xsedflux(j,kk)
-                end do
-                ierr = nf90_put_var(mapids%ncid, mapids%id_xsedflux(2,j), workx(1:NdxNdxi), start = (/ 1, itim /), count = (/ NdxNdxi, 1 /))
-                do kk=1,NdxNdxi
-                   workx(kk) = ysedflux(j,kk)
-                end do
-                ierr = nf90_put_var(mapids%ncid, mapids%id_ysedflux(2,j), workx(1:NdxNdxi), start = (/ 1, itim /), count = (/ NdxNdxi, 1 /))
-             end do
-          end if
-          ! /DEBUG
-       end if
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ssn  , UNC_LOC_U, toutputx, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_sst  , UNC_LOC_U, toutputy, jabndnd=jabndnd_)
    endif
    if (stmpar%lsedtot > 0) then
       call realloc(toutputx, (/lnx, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)

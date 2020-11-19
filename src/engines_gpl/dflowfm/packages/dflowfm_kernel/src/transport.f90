@@ -247,7 +247,7 @@ subroutine update_constituents(jarhoonly)
       endif
       call extract_constituents()
    endif
-
+   
    ierror = 0
 1234 continue
 
@@ -1572,7 +1572,7 @@ subroutine alloc_transport(Keepexisting)
    use m_alloc
    use m_meteo, only: numtracers, numfracs
    use m_flowexternalforcings, only: numsrc, qcsrc, vcsrc, wstracers
-   use m_sediment, only: stm_included, jasedtranspveldebug
+   use m_sediment, only: stm_included
    implicit none
    
    logical, intent(in) :: KeepExisting    !< keep existing data (true) or not (false)
@@ -1621,21 +1621,7 @@ subroutine alloc_transport(Keepexisting)
    
    call realloc(jaupdateconst, NUMCONST, keepExisting=.false., fill=1)
    if ( stm_included ) then
-      call realloc(noupdateconst, NUMCONST, keepExisting=.false., fill=0)
-      
-      !IF (jasedtranspveldebug>0) then
-         ! DEBUG
-         call realloc(u1sed, Lnkx, keepExisting=.false., fill=0d0)
-         call realloc(q1sed, Lnkx, keepExisting=.false., fill=0d0)
-         call realloc(ucxsed, ndx, keepExisting=.false., fill=0d0)
-         call realloc(ucysed, ndx, keepExisting=.false., fill=0d0)
-         call realloc(qcxsed, ndx, keepExisting=.false., fill=0d0)
-         call realloc(qcysed, ndx, keepExisting=.false., fill=0d0)
-         call realloc(xsedflux,(/NUMCONST, ndx/), keepExisting=.false., fill=0d0)
-         call realloc(ysedflux,(/NUMCONST, ndx/), keepExisting=.false., fill=0d0)
-         ! \DEBUG
-      !end if
-      
+      call realloc(noupdateconst, NUMCONST, keepExisting=.false., fill=0)      
    end if
    
 !  work arrays

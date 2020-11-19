@@ -859,7 +859,6 @@ module m_sediment
  integer                           :: sedparopt=1   !< for interactor plotting
  integer                           :: numoptsed
  integer                           :: jaBndTreatment
- integer                           :: jasedtranspveldebug
  integer                           :: jamorcfl
  double precision                  :: dzbdtmax
  double precision                  :: botcrit       !< mass balance: minimum depth after bottom update to adapt concentrations
@@ -926,7 +925,6 @@ contains
  alfasus             = 1d0
  jamorf              = 0
  jaBndTreatment      = 0
- jasedtranspveldebug = 0
  jamorcfl            = 1
  dzbdtmax            = 0.1d0
  botcrit             = 1d-4
