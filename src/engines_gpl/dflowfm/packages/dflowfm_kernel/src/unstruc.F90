@@ -25088,8 +25088,9 @@ end subroutine unc_write_shp
  call aerr( 'wu1D2D(lnx1D)', ierr, lnx1D )
  allocate (  hh1D2D(lnx1D) , stat=ierr )
  call aerr( 'hh1D2D(lnx1D)', ierr, lnx1D )
- allocate (  kcu  (  lnx) , stat=ierr ); kcu = 0
+ allocate (  kcu  (  lnx) , stat=ierr )
  call aerr( 'kcu  (  lnx)', ierr, lnx )
+ kcu = 0
  allocate (  csu  (  lnx) , stat=ierr )
  call aerr( 'csu  (  lnx)', ierr, lnx )
  allocate (  snu  (  lnx) , stat=ierr )
@@ -25098,24 +25099,29 @@ end subroutine unc_write_shp
  call aerr( 'acl  (  lnx)', ierr, lnx )
  allocate (  acn  (2,lnx) , stat=ierr ) ! will be deallocated after cornerweights
  call aerr( 'acn  (2,lnx)', ierr, lnx )
- allocate (  iadv   (lnx) , stat= ierr); iadv = 0
+ allocate (  iadv   (lnx) , stat= ierr)
  call aerr( 'iadv   (lnx)', ierr, lnx )
- allocate (  teta   (lnx) , stat= ierr); teta = 0
+ iadv = 0
+ allocate (  teta   (lnx) , stat= ierr)
  call aerr( 'teta   (lnx)', ierr, lnx )
- allocate (  ibot   (lnx) , stat= ierr); ibot = 0
+ teta = 0
+ allocate (  ibot   (lnx) , stat= ierr)
  call aerr( 'ibot   (lnx)', ierr, lnx )
+ ibot = 0
 
  if (allocated(xu) ) deallocate(xu,yu,blu)
  allocate ( xu(lnx), yu(lnx) , blu(lnx) ,  stat = ierr)
- call aerr('xu(lnx), yu(lnx) , blu(lnx)',  ierr, 3*lnx) ; blu = dmiss
-
+ call aerr('xu(lnx), yu(lnx) , blu(lnx)',  ierr, 3*lnx)
+ blu = dmiss
 
  if (allocated (ln2lne) ) deallocate ( ln2lne, lne2ln )
  nex = max(lnx,numl)
  allocate (  ln2lne (nex) , stat=ierr ) ! local array
- call aerr( 'ln2lne (nex)', ierr, nex ); ln2lne = 0
+ call aerr( 'ln2lne (nex)', ierr, nex )
+ ln2lne = 0
  allocate (  lne2ln (nex) , stat=ierr ) ! local array
- call aerr( 'lne2ln (nex)', ierr, nex ); lne2ln = 0
+ call aerr( 'lne2ln (nex)', ierr, nex )
+ lne2ln = 0
 
  call readyy ('geominit',0.86d0)
  Lf = 0
