@@ -10,7 +10,7 @@
     <description>This is a package containing a managed dll wrapping around the native dll of io_netcdf. This native dll is a library containing functionality to read and write ugrid files.</description>
     <copyright>Deltares</copyright>
     <dependencies>
-      <dependency id="ProtoBufRemote" version="1.0.8"/>
+      <dependency id="ProtoBufRemote" version="1.0.11"/>
     </dependencies>
     <tags>native</tags>
   </metadata>
