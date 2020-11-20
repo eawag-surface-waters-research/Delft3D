@@ -1883,19 +1883,16 @@ module m_ec_provider
             endif
          end do               ! loop over support points
 
-         if (n_signals <= 0) then
-            call setECMessage("    for polyline "//trim(polyline_name)//" and quantity "//trim(quantityname)//".")
-            call setECMessage("No signals for polyline file "//trim(fileReaderPtr%filename)//" found in "//trim(bctfilename))
-            success = .false.
-            return
-         end if
 
-         if (.not.ecQuantitySet(instancePtr, quantityId, &
-                       fillvalue = bcBlockPtr%quantity%missing, &
-                       offset = bcBlockPtr%quantity%offset, &
-                       factor = bcBlockPtr%quantity%factor )) then
-            return
+         if (n_signals >  0) then
+            if (.not.ecQuantitySet(instancePtr, quantityId, &
+                          fillvalue = bcBlockPtr%quantity%missing, &
+                          offset = bcBlockPtr%quantity%offset, &
+                          factor = bcBlockPtr%quantity%factor )) then
+               return
+            endif
          endif
+
          if (ecAtLeastOnePointIsCorrection) then  ! TODO: Refactor this shortcut (UNST-180).
              if (all_points_are_corr) then
                 success = .true.
@@ -1904,6 +1901,13 @@ module m_ec_provider
              endif
              return
          endif
+
+         if (n_signals <= 0) then
+            call setECMessage("    for polyline "//trim(polyline_name)//" and quantity "//trim(quantityname)//".")
+            call setECMessage("No signals for polyline file "//trim(fileReaderPtr%filename)//" found in "//trim(bctfilename))
+            success = .false.
+            return
+         end if
 
          ! itemID refers to the source item (providing to the polytim item) for the last support point we came across in the above loop.
          if (.not. ecProvider3DVectmax(instancePtr, itemPT, mask ,maxlay, n_points, itemIDList)) return 
