@@ -13298,10 +13298,10 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 
    ! re-mapping of 1d mesh coordinates for UGrid
    double precision, allocatable                 :: x1dn(:), y1dn(:), xue(:), yue(:), x1du(:), y1du(:)
-   integer,                            allocatable, target :: nodebranchidx_remap(:)
-   double precision,                   allocatable, target :: nodeoffsets_remap(:)
-   integer,                            allocatable, target :: edgebranchidx_remap(:)
-   double precision,                   allocatable, target :: edgeoffsets_remap(:)
+   integer,                            pointer   :: nodebranchidx_remap(:)
+   double precision,                   pointer   :: nodeoffsets_remap(:)
+   integer,                            pointer   :: edgebranchidx_remap(:)
+   double precision,                   pointer   :: edgeoffsets_remap(:)
    character(len=ug_idsLen),           allocatable :: nodeids_remap(:)
    character(len=ug_idsLongNamesLen),  allocatable :: nodelongnames_remap(:)
    ! re-mapping of 2d mesh coordinates for UGrid
@@ -13377,8 +13377,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       call realloc(x1dn, ndx1d)
       call realloc(y1dn, ndx1d)
       if (associated(meshgeom1d%ngeopointx)) then ! Indicates that no Deltares-0.10 network topology/branchids have been read.
-         call realloc(nodebranchidx_remap, ndx1d)
-         call realloc(nodeoffsets_remap, ndx1d)
+         call reallocP(nodebranchidx_remap, ndx1d)
+         call reallocP(nodeoffsets_remap, ndx1d)
          call realloc(nodeids_remap, ndx1d)
          call realloc(nodelongnames_remap, ndx1d)
       end if
@@ -13432,8 +13432,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       call realloc(x1du, n1dedges)
       call realloc(y1du, n1dedges)
       if (associated(meshgeom1d%ngeopointx)) then ! Indicates that no Deltares-0.10 network topology/branchids have been read.
-         call realloc(edgebranchidx_remap, n1dedges)
-         call realloc(edgeoffsets_remap, n1dedges)
+         call reallocP(edgebranchidx_remap, n1dedges)
+         call reallocP(edgeoffsets_remap, n1dedges)
       end if
 
 
