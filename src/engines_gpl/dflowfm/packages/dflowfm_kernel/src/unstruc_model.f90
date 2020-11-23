@@ -557,6 +557,8 @@ subroutine loadModel(filename)
          call loadLongCulvertsAsNetwork(fnames(ifil), 1, istat)
       end do
       deallocate(fnames)
+
+      call finalizeLongCulvertsInNetwork()
    endif
    call timstop(timerHandle)
 
