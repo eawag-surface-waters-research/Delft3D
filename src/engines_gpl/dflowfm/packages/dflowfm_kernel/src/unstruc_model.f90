@@ -451,6 +451,7 @@ subroutine loadModel(filename)
     character(*), intent(inout)  :: filename !< Name of file to be read (in current directory or with full path).
 
     character(len=200), dimension(:), allocatable       :: fnames
+    character(len=1024) :: fnamesstring
     double precision, dimension(2) :: tempbob
 
     logical                   :: found_1d_network
@@ -549,9 +550,13 @@ subroutine loadModel(filename)
       call readStructures(network, md_1dfiles%structures)
       call SetMessage(LEVEL_INFO, 'Reading Structures Done')
 
-      ! UNST-4327: temporarily disabled, until multiple structure files are supported.
-      ! call loadLongCulvertsAsNetwork(md_1dfiles%structures, istat)
-    
+      fnamesstring = md_1dfiles%structures
+      call strsplit(fnamesstring,1,fnames,1)
+      call loadLongCulvertsAsNetwork(fnames(1), 0, istat)
+      do ifil=2,size(fnames)
+         call loadLongCulvertsAsNetwork(fnames(ifil), 1, istat)
+      end do
+      deallocate(fnames)
    endif
    call timstop(timerHandle)
 

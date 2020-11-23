@@ -1,6 +1,14 @@
 module m_longculverts
    use MessageHandling
 
+   private
+   public realloc
+
+   public loadLongCulvertsAsNetwork
+   public LongCulvertsToProfs
+   public setFrictionForLongculverts
+   public reduceFlowAreaAtLongculverts
+
    !> Type definition for longculvert data.
    type, public :: t_longculvert      
       character(len=IdLen)                           :: id
@@ -21,11 +29,16 @@ module m_longculverts
    end type                              
    type(t_longculvert), dimension(:), allocatable     :: longculverts               !< Array containing long culvert data (size = nlongculvertsg)              
    integer                                            :: nlongculvertsg             !< Number of longculverts               
-   
+
+   interface realloc
+      module procedure reallocLongCulverts
+   end interface
+
+
 contains
    !> Loads the long culverts from a structures.ini file and
    !! creates extra netnodes+links for them.
-   subroutine loadLongCulvertsAsNetwork(structurefile, ierr)
+   subroutine loadLongCulvertsAsNetwork(structurefile, jaKeepExisting, ierr)
        !use network_data
        use dfm_error
        use gridoperations, only: make1D2DLongCulverts
@@ -39,8 +52,9 @@ contains
 
        implicit none
 
-       character(len=*),      intent(in   ) :: structurefile !< File name of the structure.ini file.
-       integer,               intent(  out) :: ierr          !< Result status, DFM_NOERR in case of success.
+       character(len=*),      intent(in   ) :: structurefile  !< File name of the structure.ini file.
+       integer,               intent(in   ) :: jaKeepExisting !< Whether or not (1/0) to keep the existing already read long culverts. 
+       integer,               intent(  out) :: ierr           !< Result status, DFM_NOERR in case of success.
 
        type(tree_data), pointer :: strs_ptr
        type(tree_data), pointer :: str_ptr
@@ -51,13 +65,25 @@ contains
        integer, allocatable, dimension(:)    :: links
        logical :: success
        integer :: istart
+       integer :: nlongculvertsg0
 
        ierr = DFM_NOERR
-              xpl = dmiss
+
+       nlongculvertsg0 = nlongculvertsg ! Remember any old longculvert count
+
+       if (jaKeepExisting == 0) then
+          nlongculvertsg = 0
+          if (allocated(longculverts)) then
+             deallocate(longculverts)
+          end if
+       end if
+
+       xpl = dmiss
        ypl = dmiss
        zpl = dmiss
        npl = 0
-              ! Temporarily put structures.ini file into a property tree
+
+       ! Temporarily put structures.ini file into a property tree
        call tree_create(trim(structurefile), strs_ptr)
        call prop_inifile(structurefile, strs_ptr, readerr)
    ! check if file was successfully opened
@@ -65,9 +91,9 @@ contains
           ierr = DFM_WRONGINPUT
           call mess(LEVEL_ERROR, 'Error opening file ''', trim(structurefile), ''' for loading the long culverts.')
        endif
-              nstr = tree_num_nodes(strs_ptr)
-              nlongculvertsg = 0
-       allocate(longculverts(nstr))
+
+       nstr = tree_num_nodes(strs_ptr)
+       call realloc(longculverts, nlongculvertsg + nstr)
        do i=1,nstr
           str_ptr => strs_ptr%child_nodes(i)%node_ptr
        
@@ -144,11 +170,15 @@ contains
        end do
        allocate(links(npl))
        call make1D2DLongCulverts(xpl, ypl, zpl, npl, links)
+       
        istart = 1
-       do i = 1, nlongculvertsg
+       do i = nlongculvertsg0+1, nlongculvertsg
           longculverts(i)%netlinks = links(istart:istart+longculverts(i)%numlinks-1)
           istart = istart+longculverts(i)%numlinks+2
        enddo
+
+       call tree_destroy(strs_ptr)
+
    end subroutine loadLongCulvertsAsNetwork
 
    !> * Sets netlink numbers and flowlink numbers.\n
