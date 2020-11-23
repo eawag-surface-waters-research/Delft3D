@@ -225,7 +225,8 @@ module network_data
   integer                          :: keepcircumcenters = 0    !< keep circumcenter (1) or not (0)
 
 !  netlink permutation by setnodadm
-   integer, dimension(:), allocatable :: Lperm  !< permuation of netlinks by setnodadm, dim(numL)
+   integer, dimension(:), allocatable :: Lperm    !< permuation of netlinks by setnodadm, dim(numL): from current to old link numbers
+   integer, dimension(:), allocatable :: Lperminv !< Inverse permutation of netlinks by setnodadm, dim(numl): from old to current link numbers
 !  netnode permutation by setnodadm
    integer, dimension(:), allocatable :: nodePermutation   !< permutation of netnodes by setnodadm, dim(numk)
 

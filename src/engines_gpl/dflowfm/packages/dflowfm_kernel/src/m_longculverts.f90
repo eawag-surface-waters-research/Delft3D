@@ -5,6 +5,7 @@ module m_longculverts
    public realloc
 
    public loadLongCulvertsAsNetwork
+   public finalizeLongCulvertsInNetwork
    public LongCulvertsToProfs
    public setFrictionForLongculverts
    public reduceFlowAreaAtLongculverts
@@ -181,6 +182,29 @@ contains
 
    end subroutine loadLongCulvertsAsNetwork
 
+   
+   !> Finalizes some necessary network administration after all long culverts have been read.
+   !! Actual reading is done in other subroutine loadLongCulvertsAsNetwork().
+   subroutine finalizeLongCulvertsInNetwork()
+      use network_data
+
+      integer :: Lnet, i, ilongc
+
+      ! NOTE: IF setnodadm() is again called after this subroutine has completed, with more netlink permutations,
+      !! Then the longculvert()%netlinks array is incorrect. This can be fixed if we change our approach
+      !! to always using closeto1dnetlink() calls in the longCulvertsToProfs() subroutine, instead. For now, we are safe, though.
+
+      call setnodadm(0)
+      ! Netlink numbers have probably been permuted by setnodadm, so also update netlinks.
+      do ilongc = 1, nlongculvertsg
+         do i = 1, longculverts(ilongc)%numlinks
+            ! Netlink numbers have probably been permuted after the initial long culvert reading, so also update netlinks.
+            Lnet = Lperminv(longculverts(ilongc)%netlinks(i))
+            longculverts(ilongc)%netlinks(i) = Lnet
+         enddo
+      enddo
+   end subroutine finalizeLongCulvertsInNetwork
+
 
    !> Reallocates a given longculvert array to larger size.
    !! Any existing longculvert data is copied into the new array.
@@ -234,14 +258,11 @@ contains
       do ilongc = 1, nlongculvertsg
          do i = 1, longculverts(ilongc)%numlinks
             if (longculverts(nlongculvertsg)%flowlinks(i) < 0) then
-               ! netlinks and flow links are not set correctly
-               do Lnet = 1, numl
-                  if (longculverts(ilongc)%netlinks(i) == lperm(Lnet)) then
-                     longculverts(ilongc)%netlinks(i) = Lnet
-                     longculverts(ilongc)%flowlinks(i) = lne2ln(Lnet)
-                     exit
-                  endif
-               enddo
+               ! Flow links have not yet been initialized, this is the first call.
+               ! Netlink numbers have probably been permuted after the initial long culvert reading, so also update netlinks.
+               Lnet = Lperminv(longculverts(ilongc)%netlinks(i))
+               longculverts(ilongc)%netlinks(i) = Lnet
+               longculverts(ilongc)%flowlinks(i) = lne2ln(Lnet)
             endif
          enddo
       enddo

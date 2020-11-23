@@ -676,6 +676,7 @@
    if ( japermout.eq.1 ) then
       ! allocate permutation array
       call realloc(Lperm, numL, keepExisting=.false., fill=0)
+      call realloc(Lperminv, numL, keepExisting=.false., fill=0)
       do L=1,numL
          Lperm(L) = L
       end do
@@ -783,9 +784,11 @@
       !     copy 1D and flip 2D values from the temp. to the permutation array
       do L=1,L1
          Lperm(L) = Lperm_new(L)
+         Lperminv(Lperm(L)) = L
       end do
       do L=1,L2
          Lperm(L1+L) = Lperm_new(numL-L+1)
+         Lperminv(Lperm(L1+L)) = L1+L
       end do
    end if
 
