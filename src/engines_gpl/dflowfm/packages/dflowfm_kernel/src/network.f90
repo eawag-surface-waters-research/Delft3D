@@ -120,24 +120,17 @@ subroutine setnodadm(jacrosscheck_)
    integer, intent(in   ) :: jacrosscheck_ !< Whether or not to remove any crossing netlinks.
    
    integer :: L, LL, Lnew
-   integer, allocatable :: Lperminv(:)
 
 
    call setnodadm_grd_op(10+jacrosscheck_)
 
    ! Update netlink numbers for all 1d2d contacts, after netlinks may have been permuted:
    if (contactnlinks > 0) then
-      allocate(Lperminv(numl))
-      do L=1,numl1d
-         Lperminv(Lperm(L)) = L ! inverse mapping old netlink nrs -> new netlink nrs
-      end do
-
       do LL=1,contactnlinks
          L = contactnetlinks(LL)
          Lnew = Lperminv(L)
          contactnetlinks(LL) = Lnew
       end do
-      deallocate(Lperminv)
    end if
 
    if (lc(1) /=0) then
