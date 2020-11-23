@@ -29,7 +29,8 @@
 !> This module instantiates FileReaders and their source Items, just as a GUI/framework instantiates kernels and their target Items.
 !! @author adri.mourits@deltares.nl
 !! @author stef.hummel@deltares.nl
-!! @author edwin.bos@deltares.nl
+!! @author robert.leander@deltares.nl
+!! @author edwin.spee@deltares.nl
 module m_ec_provider
    use m_ec_typedefs
    use m_ec_parameters
@@ -1516,9 +1517,9 @@ module m_ec_provider
          character(len=maxFileNameLen), &
          &   dimension(:), allocatable       :: plipointlbls  !< user-specified name for all pli-point in bct context 
          character(len=maxFileNameLen)       :: polyline_name !< polyline name read from pli-file 
-         logical                             :: exists   !< helper boolian, indicating file existence
+         logical                             :: exists   !< helper boolean, indicating file existence
          integer                             :: id       !< dummy, catches ids which are not used
-         integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId
+         integer                             :: quantityId, elementSetId, fieldId, itemId
          integer                             :: maxLay
          type(tEcItem), pointer              :: itemPT
          type(tEcItem), pointer              :: itemt3D
@@ -1725,7 +1726,7 @@ module m_ec_provider
          character(len=:), allocatable       :: polyline_name !< polyline name read from pli-file
          character(len=4)                    :: cnum     !< temp integer converted to a string
          integer                             :: id       !< dummy, catches ids which are not used
-         integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId, BCBlockID
+         integer                             :: quantityId, elementSetId, fieldId, itemId, BCBlockID
          integer                             :: maxLay
          type(tEcItem), pointer              :: itemPT
          type(tEcItem), pointer              :: itemt3D
@@ -1752,7 +1753,7 @@ module m_ec_provider
          do
             call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (istat /= 0) then
-               call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItems: Unexpected end of file.")
+               call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItemsBC: Unexpected end of file.")
                return
             end if
             if (rec(1:1) /= '*') exit
@@ -1762,23 +1763,21 @@ module m_ec_provider
          ! Read the number of support points.
          read(fileReaderPtr%fileHandle, *, iostat = istat) n_points
          if (istat /= 0) then
-            call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItems: Unable to read the number of points.")
+            call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItemsBC: Unable to read the number of points.")
             return
          end if
          ! Sanity check
          if (n_points < 2) then
-            call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItems: Less then two support points found.")
+            call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItemsBC: Less then two support points found.")
             return
          end if
          ! Read the support point coordinate pairs.
-         allocate(xs(n_points))
-         allocate(ys(n_points))
-         
-         allocate(mask(n_points))
+         allocate(xs(n_points), ys(n_points), mask(n_points), itemIDList(n_points), plipointlbls(n_points), stat=istat)
+         if (istat /= 0) then
+            call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItemsBC: allocation error. N_points = ", n_points)
+         end if
          mask = 1
-         allocate(itemIDList(n_points))
          itemIDList = ec_undef_int
-         allocate(plipointlbls(n_points))
          do i=1, n_points
             call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (index(rec,'!')>0) rec = rec(1:index(rec,'!')-1)          ! trim commented  (!)
@@ -1855,18 +1854,17 @@ module m_ec_provider
                plipointlbl = trim(plipointlbls(i)%s)
                has_label = .True.
             endif
-            
+
             if (.not. ecProviderInitializeBCBlock(InstancePtr, bcBlockId, fileReaderPtr%tframe%k_refdate, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
                                   id, bctfilename, bctfiletype, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal)) then
-               !call setECMessage("WARNING: ec_provider::ecProviderPolyTimItems: Error initializing EC Block.")
-               mask(i) = 0
-               mask(i) = 0
                if (has_label) then               ! for explicitly labelled pli-points, require data 
                   call setECMessage("BC-File "//trim(bctfilename)//" contains no data for labelled point '" &
                                               //trim(plipointlbl)//"' and quantity '"//trim(quantityname)//"' (required).")
                   return
-               endif 
-               cycle
+               else
+                  mask(i) = 0
+                  cycle
+               endif
             endif
             if (bcBlockPtr%func == BC_FUNC_HARMOCORR .or. bcBlockPtr%func == BC_FUNC_ASTROCORR) then
                ecAtLeastOnePointIsCorrection = .true. ! TODO: Refactor this shortcut (UNST-180).
@@ -2397,7 +2395,6 @@ module m_ec_provider
          integer                                                 :: field0Id              !< helper variable 
          integer                                                 :: field1Id              !< helper variable 
          integer                                                 :: itemId                !< helper variable 
-         integer                                                 :: istat                 !< helper variable 
          type(tEcItem),              pointer                     :: itemPtr               !< Item containing quantity
          logical                                                 :: dummy                 !< temp
          character(len=50)                                       :: attstr 
@@ -3191,8 +3188,6 @@ module m_ec_provider
          real(hp),            intent(in) :: k_timezone       !< Kernel's timezone.
          integer,             intent(in) :: k_timestep_unit  !< Kernel's time step unit (1=seconds, 2=minutes, 3=hours)
          real(hp), optional,  intent(in) :: dtnodal          !< Nodal factors update interval
-         real(hp) :: defTimeZone
-         character(len=12) :: date  ! date in error message
          !
          success = .false.
          !
