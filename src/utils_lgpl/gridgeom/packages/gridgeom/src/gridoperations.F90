@@ -3017,7 +3017,7 @@
    double precision, intent(in   ) :: yplCulv(:) !< y-coordinates of the polyline of one or more culverts.
    double precision, intent(in   ) :: zplCulv(:) !< z-coordinates of the polyline of one or more culverts.
    integer,          intent(in   ) :: nplCulv    !< Number of points in the culvert polyline.
-   integer,          intent(  out) :: linksCulv(:) !< netlinks of one or more culverts.
+   integer,          intent(  out) :: linksCulv(:) !< Resulting netlink numbers of one or more culverts.
    
    integer :: j, jpoint, jstart, jend, k1, k2, L, ipoly
    double precision :: x1, y1, z1, x2, y2, z2

@@ -1,3 +1,6 @@
+!> Module for long culvert data in a dflowfm model.
+!! Long culverts are read from the structures.ini file(s), and converted into
+!! new netlinks and prof1D definitions.
 module m_longculverts
    use MessageHandling
 
@@ -23,12 +26,12 @@ module m_longculverts
                                                                                    !< 2 only negative flow
                                                                                    !< 3 no flow allowed 
       double precision                               :: friction_value             !< Friction value
-      double precision, dimension(:), allocatable    :: bl                         !< Bed level
+      double precision, dimension(:), allocatable    :: bl                         !< Bed level on numlinks+1 points
       double precision                               :: width                      !< Width of the rectangular culvert
       double precision                               :: height                     !< Height of the rectangular culvert
       double precision                               :: valve_relative_opening     !< Relative valve opening: 0 = fully closed, 1 = fully open
    end type                              
-   type(t_longculvert), dimension(:), allocatable     :: longculverts               !< Array containing long culvert data (size = nlongculvertsg)              
+   type(t_longculvert), dimension(:), allocatable     :: longculverts               !< Array containing long culvert data (size >= nlongculvertsg)              
    integer                                            :: nlongculvertsg             !< Number of longculverts               
 
    interface realloc
@@ -247,7 +250,8 @@ contains
    end subroutine reallocLongCulverts
 
 
-   !> * Sets netlink numbers and flowlink numbers.\n
+   !> Initializes the cross section administration for long culverts in prof1d and other relevant flow geometry arrays.
+   !! * Sets netlink numbers and flowlink numbers.
    !> * Fills for the corresponding flow links the bedlevels, bobs and prof1d data.
    subroutine longculvertsToProfs()
       use network_data
@@ -259,9 +263,8 @@ contains
          do i = 1, longculverts(ilongc)%numlinks
             if (longculverts(nlongculvertsg)%flowlinks(i) < 0) then
                ! Flow links have not yet been initialized, this is the first call.
-               ! Netlink numbers have probably been permuted after the initial long culvert reading, so also update netlinks.
-               Lnet = Lperminv(longculverts(ilongc)%netlinks(i))
-               longculverts(ilongc)%netlinks(i) = Lnet
+               ! Netlink numbers have been set correctly in finalizeLongCulvertsInNetwork() already.
+               Lnet = longculverts(ilongc)%netlinks(i)
                longculverts(ilongc)%flowlinks(i) = lne2ln(Lnet)
             endif
          enddo
