@@ -181,6 +181,48 @@ contains
 
    end subroutine loadLongCulvertsAsNetwork
 
+
+   !> Reallocates a given longculvert array to larger size.
+   !! Any existing longculvert data is copied into the new array.
+   subroutine reallocLongCulverts(lcs, newsize)
+      ! Modules
+
+      implicit none
+
+      ! Input/output parameters
+      type(t_longculvert), allocatable, intent(inout) :: lcs(:)  !< The existing longculvert array.
+      integer,                          intent(in   ) :: newsize !< The desired new size.
+
+      ! Local variables
+      type(t_longculvert), allocatable :: oldlcs(:)
+      integer :: oldsize, i
+
+      ! Program code
+
+      if (allocated(lcs)) then
+         oldsize = size(lcs)
+      else
+         oldsize = 0
+      end if
+
+      if (newsize > oldsize) then
+         allocate(oldlcs(oldsize))
+         do i=1,oldsize
+            oldlcs(i) = lcs(i)
+         end do
+
+         if (allocated(lcs)) then
+            deallocate(lcs)
+         end if
+         allocate(lcs(newsize))
+         do i=1,oldsize
+            lcs(i) = oldlcs(i)
+         end do
+      endif
+
+   end subroutine reallocLongCulverts
+
+
    !> * Sets netlink numbers and flowlink numbers.\n
    !> * Fills for the corresponding flow links the bedlevels, bobs and prof1d data.
    subroutine longculvertsToProfs()
