@@ -266,7 +266,7 @@ extern "C" {
 		catch (Exception & ex)
 		{
 			printf("#### ERROR: dimr update ABORT: %s\n", ex.message);
-			thisDimr->log->Write(INFO, thisDimr->my_rank, ex.message, thisDimr->configfile);
+			thisDimr->log->Write(FATAL, thisDimr->my_rank, ex.message, thisDimr->configfile);
 			return ex.errorCode;
 		}
 		catch (...)

@@ -393,7 +393,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         }
 
                         chdir(thisComponent->workingDir);
-                        log->Write (FATAL, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
+                        log->Write (INFO, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
                         timerStart(thisComponent);
                         thisComponent->result = (thisComponent->dllInitialize) (thisComponent->inputFile);
 						if (thisComponent->result != 0)
@@ -1126,7 +1126,7 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                         continue;
                     }
                     chdir(cb->subBlocks[i].subBlocks[j].unit.component->workingDir);
-                    log->Write (FATAL, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
+                    log->Write (INFO, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
                     timerStart(cb->subBlocks[i].subBlocks[j].unit.component);
                     int state = (cb->subBlocks[i].subBlocks[j].unit.component->dllFinalize) ();
 					if (state != 0)
@@ -1834,7 +1834,7 @@ void Dimr::timersFinish (void) {
     log->Write (INFO, my_rank, "TIMER INFO:\n");
     for (int i = 0 ; i < componentsList.numComponents ; i++) {
         componentsList.components[i].timerStart = 0;
-        log->Write (FATAL, my_rank, "%s\t: %d.%d sec", componentsList.components[i].name, 
+        log->Write (INFO, my_rank, "%s\t: %d.%d sec", componentsList.components[i].name, 
                           componentsList.components[i].timerSum/1000000,
                           componentsList.components[i].timerSum%1000000);
         componentsList.components[i].timerSum   =  0.0;
