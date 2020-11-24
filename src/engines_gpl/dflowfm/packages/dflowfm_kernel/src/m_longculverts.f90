@@ -53,6 +53,7 @@ contains
        use m_readstructures
        use messageHandling
        use properties
+       use unstruc_channel_flow
 
        implicit none
 
@@ -165,7 +166,11 @@ contains
                 endif
              endif
           
-             call prop_get(str_ptr, '', 'valveRelativeOpening', longculverts(nlongculvertsg)%valve_relative_opening, success)
+             call get_value_or_addto_forcinglist(str_ptr, 'valveRelativeOpening', longculverts(nlongculvertsg)%valve_relative_opening, st_id, &
+                                    ST_LONGCULVERT,network%forcinglist, success)
+             if (.not. success) then
+                call SetMessage(LEVEL_ERROR, 'frictionValue not found for long culvert: '// st_id )
+             endif
           else 
              call SetMessage(LEVEL_ERROR, 'numCoordinates not found for long culvert '//st_id)
           end if

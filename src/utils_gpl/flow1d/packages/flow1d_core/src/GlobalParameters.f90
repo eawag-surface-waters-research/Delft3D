@@ -154,7 +154,9 @@ module m_GlobalParameters
    integer, public, parameter              :: ST_CULVERT    =  9
    integer, public, parameter              :: ST_BRIDGE     = 10
    integer, public, parameter              :: ST_COMPOUND   = 11
-   integer, public, parameter              :: ST_MAX_TYPE   = 11 !< Max id of structure types. The preceding ids must be lower than this.
+   integer, public, parameter              :: ST_LONGCULVERT = 12
+
+   integer, public, parameter              :: ST_MAX_TYPE   = 12 !< Max id of structure types. The preceding ids must be lower than this.
 
    ! Flow geometry / computational grid
    integer, public, parameter              :: INDTP_1D      = 1  !< Type code for flow nodes that are 1D
