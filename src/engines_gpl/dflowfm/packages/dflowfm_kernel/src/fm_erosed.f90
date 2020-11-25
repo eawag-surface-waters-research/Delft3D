@@ -2223,6 +2223,8 @@
    !
    ! Summation of current-related and wave-related transports on links
    !
+   e_sbn = 0d0
+   e_sbt = 0d0
    do l = 1,lsedtot
       if (sedtyp(l)/=SEDTYP_COHESIVE) then
          do nm = 1, lnx
