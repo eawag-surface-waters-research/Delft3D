@@ -3440,6 +3440,7 @@ end subroutine sethu
           au(L) = hu(L) * dambreakLinksActualLength(k)
        enddo
     enddo
+    call reduceFlowAreaAtLongculverts()
 
  endif
 
@@ -3642,8 +3643,6 @@ end subroutine sethu
     call reduce_at_all()
     if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
  end if
-
- call reduceFlowAreaAtLongculverts()
 
  do nq = 1,nqbnd
     at = at_all(nq)

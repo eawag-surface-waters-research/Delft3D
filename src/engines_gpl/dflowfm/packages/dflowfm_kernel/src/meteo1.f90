@@ -6462,6 +6462,7 @@ module m_meteo
    integer, target :: item_general_structure_gateLowerEdgeLevel              !< Unique Item id of the structure file's 'general structure gateLowerEdgeLevel' quantity
    integer, target :: item_general_structure_crestWidth                      !< Unique Item id of the structure file's 'general structure crestWidth' quantity
    integer, target :: item_general_structure_gateOpeningWidth                !< Unique Item id of the structure file's 'general structure gateOpeningWidth' quantity
+   integer, target :: item_longculvert_valve_relative_opening                !< Unique Item id of the structure file's 'longculvert valveRelativeOpening' quantity
    
    integer, target :: item_frcutim                                           !< Unique Item id of the friction file's 'friction_coefficient_*' quantity
    integer, target :: item_valve1D                                           !< Unique Item id of the ext-file's 'valve1D' quantxy' quantity
@@ -6905,7 +6906,8 @@ module m_meteo
          case ('general_structure_gateOpeningWidth')   ! flow1d general structure
             itemPtr1 => item_general_structure_gateOpeningWidth
             !dataPtr1  => null() ! flow1d structure has its own data structure
-
+         case ('longculvert_valveRelativeOpening')
+            itemPtr1 => item_longculvert_valve_relative_opening
          case ('valve1D')
             itemPtr1 => item_valve1D
          case ('damlevel')

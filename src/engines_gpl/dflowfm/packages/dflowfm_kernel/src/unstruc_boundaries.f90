@@ -2334,7 +2334,7 @@ do i=1,nstr
       istrtmp = hashsearch(network%sts%hashlist_structure, strid) ! Assumes unique names across all structure types.
       if (istrtmp == -1) then
          ! Not in sts, and also no polylinefile: error
-         if (.not. strcmpi(strtype, 'compound') ) then
+         if (.not. strcmpi(strtype, 'compound') .and. .not. strcmpi(strtype, 'longculvert')) then
             write(msgbuf, '(a,a,a)') 'Required field ''polylinefile'' missing in '//trim(strtype)//' ''', trim(strid), '''.'
             call warn_flush()
          else

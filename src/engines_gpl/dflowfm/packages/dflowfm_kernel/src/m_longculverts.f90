@@ -323,7 +323,7 @@ contains
       integer i, L
 
       do i = 1, nlongculvertsg
-         L = longculverts(i)%flowlinks(L)
+         L = longculverts(i)%flowlinks(i)
          au(L) = longculverts(i)%valve_relative_opening * au(L)
       enddo
 
