@@ -5669,12 +5669,12 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          call gettaus(1)       ! Update taus and czs
       else if (jamapchezy > 0) then
          call gettaus(2)       ! Only update czs
+         do LL = 1,lnx
+            if (frcu(LL) > 0d0) then
+               call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)  ! in gettaus czu is calculated but not stored
+            endif
+         enddo
       end if
-      do LL = 1,lnx
-         if (frcu(LL) > 0d0) then
-            call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)  ! in gettaus czu is calculated but not stored
-         endif
-      enddo
    end if
    if (jamaptaucurrent > 0) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_taus, UNC_LOC_S, taus, jabndnd=jabndnd_)
