@@ -380,7 +380,8 @@ contains
       wstr = min(maxWidth, genstr%widthcenteronlink(L0))
       
       if (genstr%numlinks == 1) then
-         ! ws_actual is determined in update_widths (including restrictions 0 < ws < maxwidth)
+         ! ws_actual is determined in update_widths restrictions 0 < ws < maxwidth)
+         genstr%ws_actual =  min(maxWidth, genstr%ws)
          wstr =genstr%ws_actual
 
          ! all other width parameters must always be <= maxWidth, but >= ws
