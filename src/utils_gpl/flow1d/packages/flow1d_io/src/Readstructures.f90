@@ -1692,7 +1692,7 @@ module m_readstructures
       generalst%zd2                = 0d0
       call prop_get_double(md_ptr, '', 'downstream2Level',  generalst%zd2, success1)
 
-      generalst%gateLowerEdgeLevel = 11d0
+      generalst%gateLowerEdgeLevel = 1d10
       call get_value_or_addto_forcinglist(md_ptr, 'gateLowerEdgeLevel', generalst%gateLowerEdgeLevel, st_id, ST_GENERAL_ST, forcinglist, success1)
       generalst%crestlength        = 0d0
       call prop_get_double(md_ptr, '', 'crestLength',   generalst%crestlength)
