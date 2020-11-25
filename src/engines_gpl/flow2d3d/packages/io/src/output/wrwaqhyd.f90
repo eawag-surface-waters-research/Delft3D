@@ -128,7 +128,7 @@
       write ( lunout1 , '(a      )' ) 'task      full-coupling'
       write ( lunout2 , '(a      )' ) 'task      full-coupling'
       if (zmodel) then
-         write ( lunout1 , '(a, f15.6, f15.6)' ) 'geometry  curvilinear-grid  z-layers', zbot, ztop
+         write ( lunout1 , '(a      )' ) 'geometry  curvilinear-grid  z-layers'
          write ( lunout2 , '(a      )' ) 'geometry  unstructured  z-layers'
       else
          write ( lunout1 , '(a      )' ) 'geometry  curvilinear-grid'
@@ -315,7 +315,9 @@
       write ( lunout2 , '(a,a    )' ) 'attributes-file          ',trim(filstring)
 
       if (zmodel) then
+         write ( lunout1 , '(a, f15.6 )' ) 'z-layers-ztop ', ztop
          write ( lunout2 , '(a, f15.6 )' ) 'z-layers-ztop ', ztop
+         write ( lunout1 , '(a, f15.6 )' ) 'z-layers-zbot ', zbot
          write ( lunout2 , '(a, f15.6 )' ) 'z-layers-zbot ', zbot
       endif
 
