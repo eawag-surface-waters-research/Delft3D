@@ -100,6 +100,7 @@ while [ $# -gt 0 ]; do
             ;;
         -gnu|-gnu7)
             compiler='gnu'
+            gccVersion=7.3.0
             ;;
         -gnu9)
             compiler='gnu'
