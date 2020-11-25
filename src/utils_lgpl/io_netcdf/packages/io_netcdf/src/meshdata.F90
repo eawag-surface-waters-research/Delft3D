@@ -38,9 +38,9 @@ use iso_c_binding
 implicit none
 
 integer, parameter :: ug_strLenMeta      = 100
-integer, parameter :: ug_idsLen          = 40
-integer, parameter :: ug_idsLongNamesLen = 80
-integer, parameter :: ug_nameLen         = 255
+integer, parameter :: ug_idsLen          = 256
+integer, parameter :: ug_idsLongNamesLen = 256
+integer, parameter :: ug_nameLen         = 256
 
 !> Structure for storing an entire mesh geometry (topology and coordinates and more).
 !> This is general data structures shared also by gridgeom
