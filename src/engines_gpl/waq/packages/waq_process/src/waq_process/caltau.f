@@ -136,10 +136,14 @@
 !     Calculate Chezy 3D
       IF (IKMRK2.EQ.3) THEN
 ! we are doing a bottom cell --> it must be 3d
-         CHZ3D = KARMC1 *   LOG( 1 + ( ( 0.5 * DEPTH )
-     +                  / (TOTDEP * EXP(-1.*(1+(KARMC2 * CHZ))))
+         IF ( TOTDEP > 0.0 ) THEN
+            CHZ3D = KARMC1 *   LOG( 1 + ( ( 0.5 * DEPTH )
+     +                     / (TOTDEP * EXP(-1.*(1+(KARMC2 * CHZ))))
      +                       )     )
-         CHZ3D=MAX(1.0,CHZ3D)
+            CHZ3D=MAX(1.0,CHZ3D)
+         ELSE
+            CHZ3D = 1.0
+         ENDIF
       ELSE
          CHZ3D = CHZ
       ENDIF
