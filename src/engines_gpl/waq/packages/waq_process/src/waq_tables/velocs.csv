@@ -273,3 +273,9 @@ veloit,velosu,velosc
 "VxSedOMP  ","OMP-par   ",   1.00000
 "VxUpwOMP  ","OMP       ",   1.00000
 "VxDownOMP ","OMP       ",   1.00000
+"VxSedVir1 ","Virus1    ",   1.00000
+"VxSedVir1 ","Virus1-par",   1.00000
+"VxSedVir2 ","Virus2    ",   1.00000
+"VxSedVir2 ","Virus2-par",   1.00000
+"VxSedVir3 ","Virus3    ",   1.00000
+"VxSedVir3 ","Virus3-par",   1.00000

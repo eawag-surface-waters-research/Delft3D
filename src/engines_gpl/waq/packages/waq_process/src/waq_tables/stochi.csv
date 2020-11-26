@@ -2779,3 +2779,42 @@ stocfl,stocsu,stocsc
 "dDecaydTR3","dTR3      ",  -1.00000
 "dDecaydTR4","dTR4      ",  -1.00000
 "dDecaydTR5","dTR5      ",  -1.00000
+"dMrtVir1  ","Virus1    ",  -1.00000
+"dMrtVir2  ","Virus2    ",  -1.00000
+"dMrtVir3  ","Virus3    ",  -1.00000
+"dSorpVir1 ","Virus1-dis",  -1.00000
+"dSorpVir1 ","Virus1-par",   1.00000
+"dSorpVir2 ","Virus2-dis",  -1.00000
+"dSorpVir2 ","Virus2-par",   1.00000
+"dSorpVir3 ","Virus3-dis",  -1.00000
+"dSorpVir3 ","Virus3-par",   1.00000
+"dSorpVi1S1","Vir1S1-Dis",  -1.00000
+"dSorpVi1S1","Vir1S1-Par",   1.00000
+"dSorpVi2S1","Vir2S1-Dis",  -1.00000
+"dSorpVi2S1","Vir2S1-Par",   1.00000
+"dSorpVi3S1","Vir3S1-Dis",  -1.00000
+"dSorpVi3S1","Vir3S1-Par",   1.00000
+"dSedVir1  ","Virus1    ",  -1.00000
+"dSedVir1  ","Virus1-par",  -1.00000
+"dSedVir1  ","Virus1S1  ",   1.00000
+"dSedVir1  ","Vir1S1-par",   1.00000
+"dSedVir1S2","Virus1    ",  -1.00000
+"dSedVir1S2","Virus1-par",  -1.00000
+"dSedVir1S2","Vir1S2    ",   1.00000
+"dSedVir1S2","Vir1S2-par",   1.00000
+"dSedVir2  ","Virus2    ",  -1.00000
+"dSedVir2  ","Virus2-par",  -1.00000
+"dSedVir2  ","Virus2S1  ",   1.00000
+"dSedVir2  ","Vir2S2-par",   1.00000
+"dSedVir2S2","Virus2    ",  -1.00000
+"dSedVir2S2","Virus2-par",  -1.00000
+"dSedVir2S2","Vir2S2    ",   1.00000
+"dSedVir2S2","Vir2S2-par",   1.00000
+"dSedVir3  ","Virus3    ",  -1.00000
+"dSedVir3  ","Virus3-par",  -1.00000
+"dSedVir3  ","Virus3S1  ",   1.00000
+"dSedVir3  ","Vir3S2-par",   1.00000
+"dSedVir3S2","Virus3    ",  -1.00000
+"dSedVir3S2","Virus3-par",  -1.00000
+"dSedVir3S2","Vir3S2    ",   1.00000
+"dSedVir3S2","Vir2S2-par",   1.00000

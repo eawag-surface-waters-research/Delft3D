@@ -10527,15 +10527,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB01availN","PO4       ",  11,"Y","x",1
 "VB01availN","SO4       ",  12,"N","x",1
 "VB01availN","SUD       ",  13,"N","x",1
+"VB01availN","SWRootVB01",  14,"Y","x",1
+"VB01availN","VmaxVB01  ",  15,"Y","x",1
+"VB01availN","KmVB01    ",  16,"Y","x",1
+"VB01availN","ViniVB01  ",  17,"Y","x",1
+"VB01availN","Poros     ",  18,"Y","x",1
 "VBStatus01","SwEmersion",   1,"Y","x",1
-"VBStatus01","VBType01  ",   2,"Y","x",1
-"VBStatus01","nsfVB01   ",   3,"Y","x",1
-"VBStatus01","CrnsfVB01 ",   4,"Y","x",1
-"VBStatus01","Initnsfd  ",   5,"Y","x",1
-"VBStatus01","SwNutVB01 ",   6,"Y","x",1
-"VBStatus01","nsnlVB01  ",   7,"Y","x",1
-"VBStatus01","CrnsnlVB01",   8,"Y","x",1
-"VBStatus01","DELT      ",   9,"N","x",1
+"VBStatus01","SwVegMod  ",   2,"Y","x",1
+"VBStatus01","VBType01  ",   3,"Y","x",1
+"VBStatus01","nsfVB     ",   4,"Y","x",1
+"VBStatus01","CrnsfVB01 ",   5,"Y","x",1
+"VBStatus01","Initnsfd  ",   6,"Y","x",1
+"VBStatus01","CrdepVB01 ",   7,"Y","x",1
+"VBStatus01","nscdVB01  ",   8,"Y","x",1
+"VBStatus01","InnscdVB01",   9,"Y","x",1
+"VBStatus01","DELT      ",  10,"N","x",1
+"VBStatus01","TotalDepth",  11,"N","x",1
 "VBGrowth01","VB01      ",   1,"N","x",1
 "VBGrowth01","maxVB01   ",   2,"Y","x",1
 "VBGrowth01","minVB01   ",   3,"Y","x",1
@@ -10580,6 +10587,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth01","SWVB01Dec ",  42,"Y","x",1
 "VBGrowth01","IniAgeVB01",  43,"Y","x",1
 "VBGrowth01","IniVB01dec",  44,"Y","x",1
+"VBGrowth01","SwVegMod  ",  45,"Y","x",1
+"VBGrowth01","Rc0GWV01  ",  46,"Y","x",1
+"VBGrowth01","TcGWV01   ",  47,"Y","x",1
+"VBGrowth01","AcGWV01   ",  48,"Y","x",1
+"VBGrowth01","MinRWV01  ",  49,"Y","x",1
+"VBGrowth01","TBmWV01   ",  50,"Y","x",1
+"VBGrowth01","TempAir   ",  51,"Y","x",1
+"VBGrowth01","MinVB     ",  52,"Y","x",1
 "VBMort01  ","VB01      ",   1,"N"," ",1
 "VBMort01  ","F1VB01    ",   2,"Y","x",1
 "VBMort01  ","F2VB01    ",   3,"Y","x",1
@@ -10611,6 +10626,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort01  ","Depth     ",  29,"N","x",1
 "VBMort01  ","RcMrtVB01 ",  30,"Y","x",1
 "VBMort01  ","SWVB01Dec ",  31,"Y","x",1
+"VBMort01  ","SwVegMod  ",  32,"Y","x",1
+"VBMort01  ","Rc0MSWV01 ",  33,"Y","x",1
+"VBMort01  ","TcMSWV01  ",  34,"Y","x",1
+"VBMort01  ","RcMGRWV01 ",  35,"Y","x",1
+"VBMort01  ","AcMWV01   ",  36,"Y","x",1
+"VBMort01  ","MinRWV01  ",  37,"Y","x",1
+"VBMort01  ","MaxRWV01  ",  38,"Y","x",1
+"VBMort01  ","TBmWV01   ",  39,"Y","x",1
+"VBMort01  ","TempAir   ",  40,"Y","x",1
+"VBMort01  ","MinVB     ",  41,"Y","x",1
 "VB01_Mrt3W","Depth     ",   1,"N","x",1
 "VB01_Mrt3W","TotalDepth",   2,"N","x",1
 "VB01_Mrt3W","LocSedDept",   3,"N","x",1
@@ -10717,15 +10742,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB02availN","PO4       ",  11,"Y","x",1
 "VB02availN","SO4       ",  12,"N","x",1
 "VB02availN","SUD       ",  13,"N","x",1
+"VB02availN","SWRootVB02",  14,"Y","x",1
+"VB02availN","VmaxVB02  ",  15,"Y","x",1
+"VB02availN","KmVB02    ",  16,"Y","x",1
+"VB02availN","ViniVB02  ",  17,"Y","x",1
+"VB02availN","Poros     ",  18,"Y","x",1
 "VBStatus02","SwEmersion",   1,"Y","x",1
-"VBStatus02","VBType02  ",   2,"Y","x",1
-"VBStatus02","nsfVB02   ",   3,"Y","x",1
-"VBStatus02","CrnsfVB02 ",   4,"Y","x",1
-"VBStatus02","Initnsfd  ",   5,"Y","x",1
-"VBStatus02","SwNutVB02 ",   6,"Y","x",1
-"VBStatus02","nsnlVB02  ",   7,"Y","x",1
-"VBStatus02","CrnsnlVB02",   8,"Y","x",1
-"VBStatus02","DELT      ",   9,"N","x",1
+"VBStatus02","SwVegMod  ",   2,"Y","x",1
+"VBStatus02","VBType02  ",   3,"Y","x",1
+"VBStatus02","nsfVB     ",   4,"Y","x",1
+"VBStatus02","CrnsfVB02 ",   5,"Y","x",1
+"VBStatus02","Initnsfd  ",   6,"Y","x",1
+"VBStatus02","CrdepVB02 ",   7,"Y","x",1
+"VBStatus02","nscdVB02  ",   8,"Y","x",1
+"VBStatus02","InnscdVB02",   9,"Y","x",1
+"VBStatus02","DELT      ",  10,"N","x",1
+"VBStatus02","TotalDepth",  11,"N","x",1
 "VBGrowth02","VB02      ",   1,"N","x",1
 "VBGrowth02","maxVB02   ",   2,"Y","x",1
 "VBGrowth02","minVB02   ",   3,"Y","x",1
@@ -10770,6 +10802,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth02","SWVB02Dec ",  42,"Y","x",1
 "VBGrowth02","IniAgeVB02",  43,"Y","x",1
 "VBGrowth02","IniVB02dec",  44,"Y","x",1
+"VBGrowth02","SwVegMod  ",  45,"Y","x",1
+"VBGrowth02","Rc0GWV02  ",  46,"Y","x",1
+"VBGrowth02","TcGWV02   ",  47,"Y","x",1
+"VBGrowth02","AcGWV02   ",  48,"Y","x",1
+"VBGrowth02","MinRWV02  ",  49,"Y","x",1
+"VBGrowth02","TBmWV02   ",  50,"Y","x",1
+"VBGrowth02","TempAir   ",  51,"Y","x",1
+"VBGrowth02","MinVB     ",  52,"Y","x",1
 "VBMort02  ","VB02      ",   1,"N"," ",1
 "VBMort02  ","F1VB02    ",   2,"Y","x",1
 "VBMort02  ","F2VB02    ",   3,"Y","x",1
@@ -10801,6 +10841,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort02  ","Depth     ",  29,"N","x",1
 "VBMort02  ","RcMrtVB02 ",  30,"Y","x",1
 "VBMort02  ","SWVB02Dec ",  31,"Y","x",1
+"VBMort02  ","SwVegMod  ",  32,"Y","x",1
+"VBMort02  ","Rc0MSWV02 ",  33,"Y","x",1
+"VBMort02  ","TcMSWV02  ",  34,"Y","x",1
+"VBMort02  ","RcMGRWV02 ",  35,"Y","x",1
+"VBMort02  ","AcMWV02   ",  36,"Y","x",1
+"VBMort02  ","MinRWV02  ",  37,"Y","x",1
+"VBMort02  ","MaxRWV02  ",  38,"Y","x",1
+"VBMort02  ","TBmWV02   ",  39,"Y","x",1
+"VBMort02  ","TempAir   ",  40,"Y","x",1
+"VBMort02  ","MinVB     ",  41,"Y","x",1
 "VB02_Mrt3W","Depth     ",   1,"N","x",1
 "VB02_Mrt3W","TotalDepth",   2,"N","x",1
 "VB02_Mrt3W","LocSedDept",   3,"N","x",1
@@ -10907,15 +10957,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB03availN","PO4       ",  11,"Y","x",1
 "VB03availN","SO4       ",  12,"N","x",1
 "VB03availN","SUD       ",  13,"N","x",1
+"VB03availN","SWRootVB03",  14,"Y","x",1
+"VB03availN","VmaxVB03  ",  15,"Y","x",1
+"VB03availN","KmVB03    ",  16,"Y","x",1
+"VB03availN","ViniVB03  ",  17,"Y","x",1
+"VB03availN","Poros     ",  18,"Y","x",1
 "VBStatus03","SwEmersion",   1,"Y","x",1
-"VBStatus03","VBType03  ",   2,"Y","x",1
-"VBStatus03","nsfVB03   ",   3,"Y","x",1
-"VBStatus03","CrnsfVB03 ",   4,"Y","x",1
-"VBStatus03","Initnsfd  ",   5,"Y","x",1
-"VBStatus03","SwNutVB03 ",   6,"Y","x",1
-"VBStatus03","nsnlVB03  ",   7,"Y","x",1
-"VBStatus03","CrnsnlVB03",   8,"Y","x",1
-"VBStatus03","DELT      ",   9,"N","x",1
+"VBStatus03","SwVegMod  ",   2,"Y","x",1
+"VBStatus03","VBType03  ",   3,"Y","x",1
+"VBStatus03","nsfVB     ",   4,"Y","x",1
+"VBStatus03","CrnsfVB03 ",   5,"Y","x",1
+"VBStatus03","Initnsfd  ",   6,"Y","x",1
+"VBStatus03","CrdepVB03 ",   7,"Y","x",1
+"VBStatus03","nscdVB03  ",   8,"Y","x",1
+"VBStatus03","InnscdVB03",   9,"Y","x",1
+"VBStatus03","DELT      ",  10,"N","x",1
+"VBStatus03","TotalDepth",  11,"N","x",1
 "VBGrowth03","VB03      ",   1,"N","x",1
 "VBGrowth03","maxVB03   ",   2,"Y","x",1
 "VBGrowth03","minVB03   ",   3,"Y","x",1
@@ -10960,6 +11017,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth03","SWVB03Dec ",  42,"Y","x",1
 "VBGrowth03","IniAgeVB03",  43,"Y","x",1
 "VBGrowth03","IniVB03dec",  44,"Y","x",1
+"VBGrowth03","SwVegMod  ",  45,"Y","x",1
+"VBGrowth03","Rc0GWV03  ",  46,"Y","x",1
+"VBGrowth03","TcGWV03   ",  47,"Y","x",1
+"VBGrowth03","AcGWV03   ",  48,"Y","x",1
+"VBGrowth03","MinRWV03  ",  49,"Y","x",1
+"VBGrowth03","TBmWV03   ",  50,"Y","x",1
+"VBGrowth03","TempAir   ",  51,"Y","x",1
+"VBGrowth03","MinVB     ",  52,"Y","x",1
 "VBMort03  ","VB03      ",   1,"N"," ",1
 "VBMort03  ","F1VB03    ",   2,"Y","x",1
 "VBMort03  ","F2VB03    ",   3,"Y","x",1
@@ -10991,6 +11056,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort03  ","Depth     ",  29,"N","x",1
 "VBMort03  ","RcMrtVB03 ",  30,"Y","x",1
 "VBMort03  ","SWVB03Dec ",  31,"Y","x",1
+"VBMort03  ","SwVegMod  ",  32,"Y","x",1
+"VBMort03  ","Rc0MSWV03 ",  33,"Y","x",1
+"VBMort03  ","TcMSWV03  ",  34,"Y","x",1
+"VBMort03  ","RcMGRWV03 ",  35,"Y","x",1
+"VBMort03  ","AcMWV03   ",  36,"Y","x",1
+"VBMort03  ","MinRWV03  ",  37,"Y","x",1
+"VBMort03  ","MaxRWV03  ",  38,"Y","x",1
+"VBMort03  ","TBmWV03   ",  39,"Y","x",1
+"VBMort03  ","TempAir   ",  40,"Y","x",1
+"VBMort03  ","MinVB     ",  41,"Y","x",1
 "VB03_Mrt3W","Depth     ",   1,"N","x",1
 "VB03_Mrt3W","TotalDepth",   2,"N","x",1
 "VB03_Mrt3W","LocSedDept",   3,"N","x",1
@@ -11097,15 +11172,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB04availN","PO4       ",  11,"Y","x",1
 "VB04availN","SO4       ",  12,"N","x",1
 "VB04availN","SUD       ",  13,"N","x",1
+"VB04availN","SWRootVB04",  14,"Y","x",1
+"VB04availN","VmaxVB04  ",  15,"Y","x",1
+"VB04availN","KmVB04    ",  16,"Y","x",1
+"VB04availN","ViniVB04  ",  17,"Y","x",1
+"VB04availN","Poros     ",  18,"Y","x",1
 "VBStatus04","SwEmersion",   1,"Y","x",1
-"VBStatus04","VBType04  ",   2,"Y","x",1
-"VBStatus04","nsfVB04   ",   3,"Y","x",1
-"VBStatus04","CrnsfVB04 ",   4,"Y","x",1
-"VBStatus04","Initnsfd  ",   5,"Y","x",1
-"VBStatus04","SwNutVB04 ",   6,"Y","x",1
-"VBStatus04","nsnlVB04  ",   7,"Y","x",1
-"VBStatus04","CrnsnlVB04",   8,"Y","x",1
-"VBStatus04","DELT      ",   9,"N","x",1
+"VBStatus04","SwVegMod  ",   2,"Y","x",1
+"VBStatus04","VBType04  ",   3,"Y","x",1
+"VBStatus04","nsfVB     ",   4,"Y","x",1
+"VBStatus04","CrnsfVB04 ",   5,"Y","x",1
+"VBStatus04","Initnsfd  ",   6,"Y","x",1
+"VBStatus04","CrdepVB04 ",   7,"Y","x",1
+"VBStatus04","nscdVB04  ",   8,"Y","x",1
+"VBStatus04","InnscdVB04",   9,"Y","x",1
+"VBStatus04","DELT      ",  10,"N","x",1
+"VBStatus04","TotalDepth",  11,"N","x",1
 "VBGrowth04","VB04      ",   1,"N","x",1
 "VBGrowth04","maxVB04   ",   2,"Y","x",1
 "VBGrowth04","minVB04   ",   3,"Y","x",1
@@ -11150,6 +11232,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth04","SWVB04Dec ",  42,"Y","x",1
 "VBGrowth04","IniAgeVB04",  43,"Y","x",1
 "VBGrowth04","IniVB04dec",  44,"Y","x",1
+"VBGrowth04","SwVegMod  ",  45,"Y","x",1
+"VBGrowth04","Rc0GWV04  ",  46,"Y","x",1
+"VBGrowth04","TcGWV04   ",  47,"Y","x",1
+"VBGrowth04","AcGWV04   ",  48,"Y","x",1
+"VBGrowth04","MinRWV04  ",  49,"Y","x",1
+"VBGrowth04","TBmWV04   ",  50,"Y","x",1
+"VBGrowth04","TempAir   ",  51,"Y","x",1
+"VBGrowth04","MinVB     ",  52,"Y","x",1
 "VBMort04  ","VB04      ",   1,"N"," ",1
 "VBMort04  ","F1VB04    ",   2,"Y","x",1
 "VBMort04  ","F2VB04    ",   3,"Y","x",1
@@ -11181,6 +11271,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort04  ","Depth     ",  29,"N","x",1
 "VBMort04  ","RcMrtVB04 ",  30,"Y","x",1
 "VBMort04  ","SWVB04Dec ",  31,"Y","x",1
+"VBMort04  ","SwVegMod  ",  32,"Y","x",1
+"VBMort04  ","Rc0MSWV04 ",  33,"Y","x",1
+"VBMort04  ","TcMSWV04  ",  34,"Y","x",1
+"VBMort04  ","RcMGRWV04 ",  35,"Y","x",1
+"VBMort04  ","AcMWV04   ",  36,"Y","x",1
+"VBMort04  ","MinRWV04  ",  37,"Y","x",1
+"VBMort04  ","MaxRWV04  ",  38,"Y","x",1
+"VBMort04  ","TBmWV04   ",  39,"Y","x",1
+"VBMort04  ","TempAir   ",  40,"Y","x",1
+"VBMort04  ","MinVB     ",  41,"Y","x",1
 "VB04_Mrt3W","Depth     ",   1,"N","x",1
 "VB04_Mrt3W","TotalDepth",   2,"N","x",1
 "VB04_Mrt3W","LocSedDept",   3,"N","x",1
@@ -11287,15 +11387,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB05availN","PO4       ",  11,"Y","x",1
 "VB05availN","SO4       ",  12,"N","x",1
 "VB05availN","SUD       ",  13,"N","x",1
+"VB05availN","SWRootVB05",  14,"Y","x",1
+"VB05availN","VmaxVB05  ",  15,"Y","x",1
+"VB05availN","KmVB05    ",  16,"Y","x",1
+"VB05availN","ViniVB05  ",  17,"Y","x",1
+"VB05availN","Poros     ",  18,"Y","x",1
 "VBStatus05","SwEmersion",   1,"Y","x",1
-"VBStatus05","VBType05  ",   2,"Y","x",1
-"VBStatus05","nsfVB05   ",   3,"Y","x",1
-"VBStatus05","CrnsfVB05 ",   4,"Y","x",1
-"VBStatus05","Initnsfd  ",   5,"Y","x",1
-"VBStatus05","SwNutVB05 ",   6,"Y","x",1
-"VBStatus05","nsnlVB05  ",   7,"Y","x",1
-"VBStatus05","CrnsnlVB05",   8,"Y","x",1
-"VBStatus05","DELT      ",   9,"N","x",1
+"VBStatus05","SwVegMod  ",   2,"Y","x",1
+"VBStatus05","VBType05  ",   3,"Y","x",1
+"VBStatus05","nsfVB     ",   4,"Y","x",1
+"VBStatus05","CrnsfVB05 ",   5,"Y","x",1
+"VBStatus05","Initnsfd  ",   6,"Y","x",1
+"VBStatus05","CrdepVB05 ",   7,"Y","x",1
+"VBStatus05","nscdVB05  ",   8,"Y","x",1
+"VBStatus05","InnscdVB05",   9,"Y","x",1
+"VBStatus05","DELT      ",  10,"N","x",1
+"VBStatus05","TotalDepth",  11,"N","x",1
 "VBGrowth05","VB05      ",   1,"N","x",1
 "VBGrowth05","maxVB05   ",   2,"Y","x",1
 "VBGrowth05","minVB05   ",   3,"Y","x",1
@@ -11340,6 +11447,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth05","SWVB05Dec ",  42,"Y","x",1
 "VBGrowth05","IniAgeVB05",  43,"Y","x",1
 "VBGrowth05","IniVB05dec",  44,"Y","x",1
+"VBGrowth05","SwVegMod  ",  45,"Y","x",1
+"VBGrowth05","Rc0GWV05  ",  46,"Y","x",1
+"VBGrowth05","TcGWV05   ",  47,"Y","x",1
+"VBGrowth05","AcGWV05   ",  48,"Y","x",1
+"VBGrowth05","MinRWV05  ",  49,"Y","x",1
+"VBGrowth05","TBmWV05   ",  50,"Y","x",1
+"VBGrowth05","TempAir   ",  51,"Y","x",1
+"VBGrowth05","MinVB     ",  52,"Y","x",1
 "VBMort05  ","VB05      ",   1,"N"," ",1
 "VBMort05  ","F1VB05    ",   2,"Y","x",1
 "VBMort05  ","F2VB05    ",   3,"Y","x",1
@@ -11371,6 +11486,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort05  ","Depth     ",  29,"N","x",1
 "VBMort05  ","RcMrtVB05 ",  30,"Y","x",1
 "VBMort05  ","SWVB05Dec ",  31,"Y","x",1
+"VBMort05  ","SwVegMod  ",  32,"Y","x",1
+"VBMort05  ","Rc0MSWV05 ",  33,"Y","x",1
+"VBMort05  ","TcMSWV05  ",  34,"Y","x",1
+"VBMort05  ","RcMGRWV05 ",  35,"Y","x",1
+"VBMort05  ","AcMWV05   ",  36,"Y","x",1
+"VBMort05  ","MinRWV05  ",  37,"Y","x",1
+"VBMort05  ","MaxRWV05  ",  38,"Y","x",1
+"VBMort05  ","TBmWV05   ",  39,"Y","x",1
+"VBMort05  ","TempAir   ",  40,"Y","x",1
+"VBMort05  ","MinVB     ",  41,"Y","x",1
 "VB05_Mrt3W","Depth     ",   1,"N","x",1
 "VB05_Mrt3W","TotalDepth",   2,"N","x",1
 "VB05_Mrt3W","LocSedDept",   3,"N","x",1
@@ -11477,15 +11602,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB06availN","PO4       ",  11,"Y","x",1
 "VB06availN","SO4       ",  12,"N","x",1
 "VB06availN","SUD       ",  13,"N","x",1
+"VB06availN","SWRootVB06",  14,"Y","x",1
+"VB06availN","VmaxVB06  ",  15,"Y","x",1
+"VB06availN","KmVB06    ",  16,"Y","x",1
+"VB06availN","ViniVB06  ",  17,"Y","x",1
+"VB06availN","Poros     ",  18,"Y","x",1
 "VBStatus06","SwEmersion",   1,"Y","x",1
-"VBStatus06","VBType06  ",   2,"Y","x",1
-"VBStatus06","nsfVB06   ",   3,"Y","x",1
-"VBStatus06","CrnsfVB06 ",   4,"Y","x",1
-"VBStatus06","Initnsfd  ",   5,"Y","x",1
-"VBStatus06","SwNutVB06 ",   6,"Y","x",1
-"VBStatus06","nsnlVB06  ",   7,"Y","x",1
-"VBStatus06","CrnsnlVB06",   8,"Y","x",1
-"VBStatus06","DELT      ",   9,"N","x",1
+"VBStatus06","SwVegMod  ",   2,"Y","x",1
+"VBStatus06","VBType06  ",   3,"Y","x",1
+"VBStatus06","nsfVB     ",   4,"Y","x",1
+"VBStatus06","CrnsfVB06 ",   5,"Y","x",1
+"VBStatus06","Initnsfd  ",   6,"Y","x",1
+"VBStatus06","CrdepVB06 ",   7,"Y","x",1
+"VBStatus06","nscdVB06  ",   8,"Y","x",1
+"VBStatus06","InnscdVB06",   9,"Y","x",1
+"VBStatus06","DELT      ",  10,"N","x",1
+"VBStatus06","TotalDepth",  11,"N","x",1
 "VBGrowth06","VB06      ",   1,"N","x",1
 "VBGrowth06","maxVB06   ",   2,"Y","x",1
 "VBGrowth06","minVB06   ",   3,"Y","x",1
@@ -11530,6 +11662,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth06","SWVB06Dec ",  42,"Y","x",1
 "VBGrowth06","IniAgeVB06",  43,"Y","x",1
 "VBGrowth06","IniVB06dec",  44,"Y","x",1
+"VBGrowth06","SwVegMod  ",  45,"Y","x",1
+"VBGrowth06","Rc0GWV06  ",  46,"Y","x",1
+"VBGrowth06","TcGWV06   ",  47,"Y","x",1
+"VBGrowth06","AcGWV06   ",  48,"Y","x",1
+"VBGrowth06","MinRWV06  ",  49,"Y","x",1
+"VBGrowth06","TBmWV06   ",  50,"Y","x",1
+"VBGrowth06","TempAir   ",  51,"Y","x",1
+"VBGrowth06","MinVB     ",  52,"Y","x",1
 "VBMort06  ","VB06      ",   1,"N"," ",1
 "VBMort06  ","F1VB06    ",   2,"Y","x",1
 "VBMort06  ","F2VB06    ",   3,"Y","x",1
@@ -11561,6 +11701,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort06  ","Depth     ",  29,"N","x",1
 "VBMort06  ","RcMrtVB06 ",  30,"Y","x",1
 "VBMort06  ","SWVB06Dec ",  31,"Y","x",1
+"VBMort06  ","SwVegMod  ",  32,"Y","x",1
+"VBMort06  ","Rc0MSWV06 ",  33,"Y","x",1
+"VBMort06  ","TcMSWV06  ",  34,"Y","x",1
+"VBMort06  ","RcMGRWV06 ",  35,"Y","x",1
+"VBMort06  ","AcMWV06   ",  36,"Y","x",1
+"VBMort06  ","MinRWV06  ",  37,"Y","x",1
+"VBMort06  ","MaxRWV06  ",  38,"Y","x",1
+"VBMort06  ","TBmWV06   ",  39,"Y","x",1
+"VBMort06  ","TempAir   ",  40,"Y","x",1
+"VBMort06  ","MinVB     ",  41,"Y","x",1
 "VB06_Mrt3W","Depth     ",   1,"N","x",1
 "VB06_Mrt3W","TotalDepth",   2,"N","x",1
 "VB06_Mrt3W","LocSedDept",   3,"N","x",1
@@ -11667,15 +11817,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB07availN","PO4       ",  11,"Y","x",1
 "VB07availN","SO4       ",  12,"N","x",1
 "VB07availN","SUD       ",  13,"N","x",1
+"VB07availN","SWRootVB07",  14,"Y","x",1
+"VB07availN","VmaxVB07  ",  15,"Y","x",1
+"VB07availN","KmVB07    ",  16,"Y","x",1
+"VB07availN","ViniVB07  ",  17,"Y","x",1
+"VB07availN","Poros     ",  18,"Y","x",1
 "VBStatus07","SwEmersion",   1,"Y","x",1
-"VBStatus07","VBType07  ",   2,"Y","x",1
-"VBStatus07","nsfVB07   ",   3,"Y","x",1
-"VBStatus07","CrnsfVB07 ",   4,"Y","x",1
-"VBStatus07","Initnsfd  ",   5,"Y","x",1
-"VBStatus07","SwNutVB07 ",   6,"Y","x",1
-"VBStatus07","nsnlVB07  ",   7,"Y","x",1
-"VBStatus07","CrnsnlVB07",   8,"Y","x",1
-"VBStatus07","DELT      ",   9,"N","x",1
+"VBStatus07","SwVegMod  ",   2,"Y","x",1
+"VBStatus07","VBType07  ",   3,"Y","x",1
+"VBStatus07","nsfVB     ",   4,"Y","x",1
+"VBStatus07","CrnsfVB07 ",   5,"Y","x",1
+"VBStatus07","Initnsfd  ",   6,"Y","x",1
+"VBStatus07","CrdepVB07 ",   7,"Y","x",1
+"VBStatus07","nscdVB07  ",   8,"Y","x",1
+"VBStatus07","InnscdVB07",   9,"Y","x",1
+"VBStatus07","DELT      ",  10,"N","x",1
+"VBStatus07","TotalDepth",  11,"N","x",1
 "VBGrowth07","VB07      ",   1,"N","x",1
 "VBGrowth07","maxVB07   ",   2,"Y","x",1
 "VBGrowth07","minVB07   ",   3,"Y","x",1
@@ -11720,6 +11877,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth07","SWVB07Dec ",  42,"Y","x",1
 "VBGrowth07","IniAgeVB07",  43,"Y","x",1
 "VBGrowth07","IniVB07dec",  44,"Y","x",1
+"VBGrowth07","SwVegMod  ",  45,"Y","x",1
+"VBGrowth07","Rc0GWV07  ",  46,"Y","x",1
+"VBGrowth07","TcGWV07   ",  47,"Y","x",1
+"VBGrowth07","AcGWV07   ",  48,"Y","x",1
+"VBGrowth07","MinRWV07  ",  49,"Y","x",1
+"VBGrowth07","TBmWV07   ",  50,"Y","x",1
+"VBGrowth07","TempAir   ",  51,"Y","x",1
+"VBGrowth07","MinVB     ",  52,"Y","x",1
 "VBMort07  ","VB07      ",   1,"N"," ",1
 "VBMort07  ","F1VB07    ",   2,"Y","x",1
 "VBMort07  ","F2VB07    ",   3,"Y","x",1
@@ -11751,6 +11916,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort07  ","Depth     ",  29,"N","x",1
 "VBMort07  ","RcMrtVB07 ",  30,"Y","x",1
 "VBMort07  ","SWVB07Dec ",  31,"Y","x",1
+"VBMort07  ","SwVegMod  ",  32,"Y","x",1
+"VBMort07  ","Rc0MSWV07 ",  33,"Y","x",1
+"VBMort07  ","TcMSWV07  ",  34,"Y","x",1
+"VBMort07  ","RcMGRWV07 ",  35,"Y","x",1
+"VBMort07  ","AcMWV07   ",  36,"Y","x",1
+"VBMort07  ","MinRWV07  ",  37,"Y","x",1
+"VBMort07  ","MaxRWV07  ",  38,"Y","x",1
+"VBMort07  ","TBmWV07   ",  39,"Y","x",1
+"VBMort07  ","TempAir   ",  40,"Y","x",1
+"VBMort07  ","MinVB     ",  41,"Y","x",1
 "VB07_Mrt3W","Depth     ",   1,"N","x",1
 "VB07_Mrt3W","TotalDepth",   2,"N","x",1
 "VB07_Mrt3W","LocSedDept",   3,"N","x",1
@@ -11857,15 +12032,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB08availN","PO4       ",  11,"Y","x",1
 "VB08availN","SO4       ",  12,"N","x",1
 "VB08availN","SUD       ",  13,"N","x",1
+"VB08availN","SWRootVB08",  14,"Y","x",1
+"VB08availN","VmaxVB08  ",  15,"Y","x",1
+"VB08availN","KmVB08    ",  16,"Y","x",1
+"VB08availN","ViniVB08  ",  17,"Y","x",1
+"VB08availN","Poros     ",  18,"Y","x",1
 "VBStatus08","SwEmersion",   1,"Y","x",1
-"VBStatus08","VBType08  ",   2,"Y","x",1
-"VBStatus08","nsfVB08   ",   3,"Y","x",1
-"VBStatus08","CrnsfVB08 ",   4,"Y","x",1
-"VBStatus08","Initnsfd  ",   5,"Y","x",1
-"VBStatus08","SwNutVB08 ",   6,"Y","x",1
-"VBStatus08","nsnlVB08  ",   7,"Y","x",1
-"VBStatus08","CrnsnlVB08",   8,"Y","x",1
-"VBStatus08","DELT      ",   9,"N","x",1
+"VBStatus08","SwVegMod  ",   2,"Y","x",1
+"VBStatus08","VBType08  ",   3,"Y","x",1
+"VBStatus08","nsfVB     ",   4,"Y","x",1
+"VBStatus08","CrnsfVB08 ",   5,"Y","x",1
+"VBStatus08","Initnsfd  ",   6,"Y","x",1
+"VBStatus08","CrdepVB08 ",   7,"Y","x",1
+"VBStatus08","nscdVB08  ",   8,"Y","x",1
+"VBStatus08","InnscdVB08",   9,"Y","x",1
+"VBStatus08","DELT      ",  10,"N","x",1
+"VBStatus08","TotalDepth",  11,"N","x",1
 "VBGrowth08","VB08      ",   1,"N","x",1
 "VBGrowth08","maxVB08   ",   2,"Y","x",1
 "VBGrowth08","minVB08   ",   3,"Y","x",1
@@ -11910,6 +12092,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth08","SWVB08Dec ",  42,"Y","x",1
 "VBGrowth08","IniAgeVB08",  43,"Y","x",1
 "VBGrowth08","IniVB08dec",  44,"Y","x",1
+"VBGrowth08","SwVegMod  ",  45,"Y","x",1
+"VBGrowth08","Rc0GWV08  ",  46,"Y","x",1
+"VBGrowth08","TcGWV08   ",  47,"Y","x",1
+"VBGrowth08","AcGWV08   ",  48,"Y","x",1
+"VBGrowth08","MinRWV08  ",  49,"Y","x",1
+"VBGrowth08","TBmWV08   ",  50,"Y","x",1
+"VBGrowth08","TempAir   ",  51,"Y","x",1
+"VBGrowth08","MinVB     ",  52,"Y","x",1
 "VBMort08  ","VB08      ",   1,"N"," ",1
 "VBMort08  ","F1VB08    ",   2,"Y","x",1
 "VBMort08  ","F2VB08    ",   3,"Y","x",1
@@ -11941,6 +12131,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort08  ","Depth     ",  29,"N","x",1
 "VBMort08  ","RcMrtVB08 ",  30,"Y","x",1
 "VBMort08  ","SWVB08Dec ",  31,"Y","x",1
+"VBMort08  ","SwVegMod  ",  32,"Y","x",1
+"VBMort08  ","Rc0MSWV08 ",  33,"Y","x",1
+"VBMort08  ","TcMSWV08  ",  34,"Y","x",1
+"VBMort08  ","RcMGRWV08 ",  35,"Y","x",1
+"VBMort08  ","AcMWV08   ",  36,"Y","x",1
+"VBMort08  ","MinRWV08  ",  37,"Y","x",1
+"VBMort08  ","MaxRWV08  ",  38,"Y","x",1
+"VBMort08  ","TBmWV08   ",  39,"Y","x",1
+"VBMort08  ","TempAir   ",  40,"Y","x",1
+"VBMort08  ","MinVB     ",  41,"Y","x",1
 "VB08_Mrt3W","Depth     ",   1,"N","x",1
 "VB08_Mrt3W","TotalDepth",   2,"N","x",1
 "VB08_Mrt3W","LocSedDept",   3,"N","x",1
@@ -12047,15 +12247,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VB09availN","PO4       ",  11,"Y","x",1
 "VB09availN","SO4       ",  12,"N","x",1
 "VB09availN","SUD       ",  13,"N","x",1
+"VB09availN","SWRootVB09",  14,"Y","x",1
+"VB09availN","VmaxVB09  ",  15,"Y","x",1
+"VB09availN","KmVB09    ",  16,"Y","x",1
+"VB09availN","ViniVB09  ",  17,"Y","x",1
+"VB09availN","Poros     ",  18,"Y","x",1
 "VBStatus09","SwEmersion",   1,"Y","x",1
-"VBStatus09","VBType09  ",   2,"Y","x",1
-"VBStatus09","nsfVB09   ",   3,"Y","x",1
-"VBStatus09","CrnsfVB09 ",   4,"Y","x",1
-"VBStatus09","Initnsfd  ",   5,"Y","x",1
-"VBStatus09","SwNutVB09 ",   6,"Y","x",1
-"VBStatus09","nsnlVB09  ",   7,"Y","x",1
-"VBStatus09","CrnsnlVB09",   8,"Y","x",1
-"VBStatus09","DELT      ",   9,"N","x",1
+"VBStatus09","SwVegMod  ",   2,"Y","x",1
+"VBStatus09","VBType09  ",   3,"Y","x",1
+"VBStatus09","nsfVB     ",   4,"Y","x",1
+"VBStatus09","CrnsfVB09 ",   5,"Y","x",1
+"VBStatus09","Initnsfd  ",   6,"Y","x",1
+"VBStatus09","CrdepVB09 ",   7,"Y","x",1
+"VBStatus09","nscdVB09  ",   8,"Y","x",1
+"VBStatus09","InnscdVB09",   9,"Y","x",1
+"VBStatus09","DELT      ",  10,"N","x",1
+"VBStatus09","TotalDepth",  11,"N","x",1
 "VBGrowth09","VB09      ",   1,"N","x",1
 "VBGrowth09","maxVB09   ",   2,"Y","x",1
 "VBGrowth09","minVB09   ",   3,"Y","x",1
@@ -12100,6 +12307,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBGrowth09","SWVB09Dec ",  42,"Y","x",1
 "VBGrowth09","IniAgeVB09",  43,"Y","x",1
 "VBGrowth09","IniVB09dec",  44,"Y","x",1
+"VBGrowth09","SwVegMod  ",  45,"Y","x",1
+"VBGrowth09","Rc0GWV09  ",  46,"Y","x",1
+"VBGrowth09","TcGWV09   ",  47,"Y","x",1
+"VBGrowth09","AcGWV09   ",  48,"Y","x",1
+"VBGrowth09","MinRWV09  ",  49,"Y","x",1
+"VBGrowth09","TBmWV09   ",  50,"Y","x",1
+"VBGrowth09","TempAir   ",  51,"Y","x",1
+"VBGrowth09","MinVB     ",  52,"Y","x",1
 "VBMort09  ","VB09      ",   1,"N"," ",1
 "VBMort09  ","F1VB09    ",   2,"Y","x",1
 "VBMort09  ","F2VB09    ",   3,"Y","x",1
@@ -12131,6 +12346,16 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "VBMort09  ","Depth     ",  29,"N","x",1
 "VBMort09  ","RcMrtVB09 ",  30,"Y","x",1
 "VBMort09  ","SWVB09Dec ",  31,"Y","x",1
+"VBMort09  ","SwVegMod  ",  32,"Y","x",1
+"VBMort09  ","Rc0MSWV09 ",  33,"Y","x",1
+"VBMort09  ","TcMSWV09  ",  34,"Y","x",1
+"VBMort09  ","RcMGRWV09 ",  35,"Y","x",1
+"VBMort09  ","AcMWV09   ",  36,"Y","x",1
+"VBMort09  ","MinRWV09  ",  37,"Y","x",1
+"VBMort09  ","MaxRWV09  ",  38,"Y","x",1
+"VBMort09  ","TBmWV09   ",  39,"Y","x",1
+"VBMort09  ","TempAir   ",  40,"Y","x",1
+"VBMort09  ","MinVB     ",  41,"Y","x",1
 "VB09_Mrt3W","Depth     ",   1,"N","x",1
 "VB09_Mrt3W","TotalDepth",   2,"N","x",1
 "VB09_Mrt3W","LocSedDept",   3,"N","x",1
@@ -14916,3 +15141,333 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "TEO       ","KO_Tend   ",  19,"Y","x",1
 "TEO       ","KO_Tmin   ",  20,"Y","x",1
 "TEO       ","KO_dTmax  ",  21,"Y","x",1
+"Virus1Mrt ","Virus1    ",   1,"N","x",1
+"Virus1Mrt ","RcMrtVir1 ",   2,"Y","x",1
+"Virus1Mrt ","TcMrtVir1 ",   3,"Y","x",1
+"Virus1Mrt ","Temp      ",   4,"Y","x",1
+"Virus1Mrt ","CTMrtVir1 ",   5,"Y","x",1
+"Virus1Mrt ","Cl        ",   6,"Y","x",1
+"Virus1Mrt ","RadDay    ",   7,"N","x",1
+"Virus1Mrt ","CFRADVir1 ",   8,"Y","x",1
+"Virus1Mrt ","ExtVl     ",   9,"N","x",1
+"Virus1Mrt ","Depth     ",  10,"N","x",1
+"Virus1Mrt ","SpMrtVir1 ",  11,"Y","x",1
+"Virus2Mrt ","Virus2    ",   1,"N","x",1
+"Virus2Mrt ","RcMrtVir2 ",   2,"Y","x",1
+"Virus2Mrt ","TcMrtVir2 ",   3,"Y","x",1
+"Virus2Mrt ","Temp      ",   4,"Y","x",1
+"Virus2Mrt ","CTMrtVir2 ",   5,"Y","x",1
+"Virus2Mrt ","Cl        ",   6,"Y","x",1
+"Virus2Mrt ","RadDay    ",   7,"N","x",1
+"Virus2Mrt ","CFRADVir2 ",   8,"Y","x",1
+"Virus2Mrt ","ExtVl     ",   9,"N","x",1
+"Virus2Mrt ","Depth     ",  10,"N","x",1
+"Virus2Mrt ","SpMrtVir2 ",  11,"Y","x",1
+"Virus3Mrt ","Virus3    ",   1,"N","x",1
+"Virus3Mrt ","RcMrtVir3 ",   2,"Y","x",1
+"Virus3Mrt ","TcMrtVir3 ",   3,"Y","x",1
+"Virus3Mrt ","Temp      ",   4,"Y","x",1
+"Virus3Mrt ","CTMrtVir3 ",   5,"Y","x",1
+"Virus3Mrt ","Cl        ",   6,"Y","x",1
+"Virus3Mrt ","RadDay    ",   7,"N","x",1
+"Virus3Mrt ","CFRADVir3 ",   8,"Y","x",1
+"Virus3Mrt ","ExtVl     ",   9,"N","x",1
+"Virus3Mrt ","Depth     ",  10,"N","x",1
+"Virus3Mrt ","SpMrtVir3 ",  11,"Y","x",1
+"Vir1S1Mrt ","Virus1S1  ",   1,"N","x",1
+"Vir1S1Mrt ","RcMrtVir1 ",   2,"Y","x",1
+"Vir1S1Mrt ","TcMrtVir1 ",   3,"Y","x",1
+"Vir1S1Mrt ","Temp      ",   4,"Y","x",1
+"Vir1S1Mrt ","CTMrtVir1 ",   5,"Y","x",1
+"Vir1S1Mrt ","Cl        ",   6,"Y","x",1
+"Vir1S1Mrt ","RadDay    ",   7,"N","x",1
+"Vir1S1Mrt ","CFRADVir1 ",   8,"Y","x",1
+"Vir1S1Mrt ","ExtVl     ",   9,"N","x",1
+"Vir1S1Mrt ","Depth     ",  10,"N","x",1
+"Vir1S1Mrt ","SpMrtVir1 ",  11,"Y","x",1
+"Vir2S1Mrt ","Virus2S1  ",   1,"N","x",1
+"Vir2S1Mrt ","RcMrtVir2 ",   2,"Y","x",1
+"Vir2S1Mrt ","TcMrtVir2 ",   3,"Y","x",1
+"Vir2S1Mrt ","Temp      ",   4,"Y","x",1
+"Vir2S1Mrt ","CTMrtVir2 ",   5,"Y","x",1
+"Vir2S1Mrt ","Cl        ",   6,"Y","x",1
+"Vir2S1Mrt ","RadDay    ",   7,"N","x",1
+"Vir2S1Mrt ","CFRADVir2 ",   8,"Y","x",1
+"Vir2S1Mrt ","ExtVl     ",   9,"N","x",1
+"Vir2S1Mrt ","Depth     ",  10,"N","x",1
+"Vir2S1Mrt ","SpMrtVir2 ",  11,"Y","x",1
+"Vir3S1Mrt ","Virus3S1  ",   1,"N","x",1
+"Vir3S1Mrt ","RcMrtVir3 ",   2,"Y","x",1
+"Vir3S1Mrt ","TcMrtVir3 ",   3,"Y","x",1
+"Vir3S1Mrt ","Temp      ",   4,"Y","x",1
+"Vir3S1Mrt ","CTMrtVir3 ",   5,"Y","x",1
+"Vir3S1Mrt ","Cl        ",   6,"Y","x",1
+"Vir3S1Mrt ","RadDay    ",   7,"N","x",1
+"Vir3S1Mrt ","CFRADVir3 ",   8,"Y","x",1
+"Vir3S1Mrt ","ExtVl     ",   9,"N","x",1
+"Vir3S1Mrt ","Depth     ",  10,"N","x",1
+"Vir3S1Mrt ","SpMrtVir3 ",  11,"Y","x",1
+"PartWKVir1","Virus1    ",   1,"M","x",1
+"PartWKVir1","Virus1-dis",   2,"M"," ",1
+"PartWKVir1","Virus1-par",   3,"M"," ",1
+"PartWKVir1","IM1       ",   4,"Y","x",1
+"PartWKVir1","IM2       ",   5,"Y","x",1
+"PartWKVir1","IM3       ",   6,"Y","x",1
+"PartWKVir1","DOC       ",   7,"Y","x",1
+"PartWKVir1","XDOCVirus1",   8,"Y","x",1
+"PartWKVir1","POCnoa    ",   9,"Y","x",1
+"PartWKVir1","Phyt      ",  10,"Y","x",1
+"PartWKVir1","KdVir1IM1 ",  11,"Y"," ",1
+"PartWKVir1","KdVir1IM2 ",  12,"Y"," ",1
+"PartWKVir1","KdVir1IM3 ",  13,"Y"," ",1
+"PartWKVir1","KdVir1poc ",  14,"Y","x",1
+"PartWKVir1","KdVir1phy ",  15,"Y","x",1
+"PartWKVir1","Poros     ",  16,"Y","x",1
+"PartWKVir1","dummy     ",  17,"Y"," ",1
+"PartWKVir1","dummy     ",  18,"Y"," ",1
+"PartWKVir1","SS        ",  19,"N","x",1
+"PartWKVir1","HLTAdsVir1",  20,"Y","x",1
+"PartWKVir1","HLTDesVir1",  21,"Y","x",1
+"PartWKVir1","DELT      ",  22,"N","x",1
+"PartWKVir1","SWWaterKCh",  23,"Y","x",1
+"PartWKVir1","dummy     ",  24,"Y"," ",1
+"PartWKVir1","dummy     ",  25,"Y"," ",1
+"PartWKVir1","dummy     ",  26,"Y"," ",1
+"PartWKVir1","dummy     ",  27,"Y"," ",1
+"PartWKVir1","dummy     ",  28,"Y"," ",1
+"PartWKVir1","dummy     ",  29,"Y"," ",1
+"PartWKVir1","SwSedNo   ",  30,"Y"," ",1
+"PartWKVir1","VirGroup  ",  31,"Y"," ",1
+"PartWKVir1","Volume    ",  32,"N","x",1
+"PartWKVir2","Virus2    ",   1,"M","x",1
+"PartWKVir2","Virus2-dis",   2,"M"," ",1
+"PartWKVir2","Virus2-par",   3,"M"," ",1
+"PartWKVir2","IM1       ",   4,"Y","x",1
+"PartWKVir2","IM2       ",   5,"Y","x",1
+"PartWKVir2","IM3       ",   6,"Y","x",1
+"PartWKVir2","DOC       ",   7,"Y","x",1
+"PartWKVir2","XDOCVirus2",   8,"Y","x",1
+"PartWKVir2","POCnoa    ",   9,"Y","x",1
+"PartWKVir2","Phyt      ",  10,"Y","x",1
+"PartWKVir2","KdVir2IM1 ",  11,"Y"," ",1
+"PartWKVir2","KdVir2IM2 ",  12,"Y"," ",1
+"PartWKVir2","KdVir2IM3 ",  13,"Y"," ",1
+"PartWKVir2","KdVir2poc ",  14,"Y","x",1
+"PartWKVir2","KdVir2phy ",  15,"Y","x",1
+"PartWKVir2","Poros     ",  16,"Y","x",1
+"PartWKVir2","dummy     ",  17,"Y"," ",1
+"PartWKVir2","dummy     ",  18,"Y"," ",1
+"PartWKVir2","SS        ",  19,"N","x",1
+"PartWKVir2","HLTAdsVir2",  20,"Y","x",1
+"PartWKVir2","HLTDesVir2",  21,"Y","x",1
+"PartWKVir2","DELT      ",  22,"N","x",1
+"PartWKVir2","SWWaterKCh",  23,"Y","x",1
+"PartWKVir2","dummy     ",  24,"Y"," ",1
+"PartWKVir2","dummy     ",  25,"Y"," ",1
+"PartWKVir2","dummy     ",  26,"Y"," ",1
+"PartWKVir2","dummy     ",  27,"Y"," ",1
+"PartWKVir2","dummy     ",  28,"Y"," ",1
+"PartWKVir2","dummy     ",  29,"Y"," ",1
+"PartWKVir2","SwSedNo   ",  30,"Y"," ",1
+"PartWKVir2","VirGroup  ",  31,"Y"," ",1
+"PartWKVir2","Volume    ",  32,"N","x",1
+"PartWKVir3","Virus3    ",   1,"M","x",1
+"PartWKVir3","Virus3-dis",   2,"M"," ",1
+"PartWKVir3","Virus3-par",   3,"M"," ",1
+"PartWKVir3","IM1       ",   4,"Y","x",1
+"PartWKVir3","IM2       ",   5,"Y","x",1
+"PartWKVir3","IM3       ",   6,"Y","x",1
+"PartWKVir3","DOC       ",   7,"Y","x",1
+"PartWKVir3","XDOCVirus3",   8,"Y","x",1
+"PartWKVir3","POCnoa    ",   9,"Y","x",1
+"PartWKVir3","Phyt      ",  10,"Y","x",1
+"PartWKVir3","KdVir3IM1 ",  11,"Y"," ",1
+"PartWKVir3","KdVir3IM2 ",  12,"Y"," ",1
+"PartWKVir3","KdVir3IM3 ",  13,"Y"," ",1
+"PartWKVir3","KdVir3poc ",  14,"Y","x",1
+"PartWKVir3","KdVir3phy ",  15,"Y","x",1
+"PartWKVir3","Poros     ",  16,"Y","x",1
+"PartWKVir3","dummy     ",  17,"Y"," ",1
+"PartWKVir3","dummy     ",  18,"Y"," ",1
+"PartWKVir3","SS        ",  19,"N","x",1
+"PartWKVir3","HLTAdsVir3",  20,"Y","x",1
+"PartWKVir3","HLTDesVir3",  21,"Y","x",1
+"PartWKVir3","DELT      ",  22,"N","x",1
+"PartWKVir3","SWWaterKCh",  23,"Y","x",1
+"PartWKVir3","dummy     ",  24,"Y"," ",1
+"PartWKVir3","dummy     ",  25,"Y"," ",1
+"PartWKVir3","dummy     ",  26,"Y"," ",1
+"PartWKVir3","dummy     ",  27,"Y"," ",1
+"PartWKVir3","dummy     ",  28,"Y"," ",1
+"PartWKVir3","dummy     ",  29,"Y"," ",1
+"PartWKVir3","SwSedNo   ",  30,"Y"," ",1
+"PartWKVir3","VirGroup  ",  31,"Y"," ",1
+"PartWKVir3","Volume    ",  32,"N","x",1
+"PartS1Vir1","Virus1S1  ",   1,"M","x",1
+"PartS1Vir1","Vir11S1D  ",   2,"M"," ",1
+"PartS1Vir1","Vir11S1P  ",   3,"M"," ",1
+"PartS1Vir1","IM1S1     ",   4,"Y","x",1
+"PartS1Vir1","IM2S1     ",   5,"Y","x",1
+"PartS1Vir1","IM3S1     ",   6,"Y","x",1
+"PartS1Vir1","DOCS1     ",   7,"Y","x",1
+"PartS1Vir1","XDOCVirus1",   8,"Y","x",1
+"PartS1Vir1","POCS1     ",   9,"Y","x",1
+"PartS1Vir1","PHYTS1    ",  10,"Y","x",1
+"PartS1Vir1","KdVi1IM1S1",  11,"Y"," ",1
+"PartS1Vir1","KdVi1IM2S1",  12,"Y"," ",1
+"PartS1Vir1","KdVi1IM3S1",  13,"Y"," ",1
+"PartS1Vir1","KdVi1pocS1",  14,"Y","x",1
+"PartS1Vir1","KdVi1phyS1",  15,"Y","x",1
+"PartS1Vir1","PORS1     ",  16,"Y","x",1
+"PartS1Vir1","ActThS1   ",  17,"Y","x",1
+"PartS1Vir1","Surf      ",  18,"Y","x",1
+"PartS1Vir1","DMS1      ",  19,"Y","x",1
+"PartS1Vir1","HLTAdsVir1",  20,"Y","x",1
+"PartS1Vir1","HLTDesVir1",  21,"Y","x",1
+"PartS1Vir1","DELT      ",  22,"N","x",1
+"PartS1Vir1","SWPoreChS1",  23,"Y","x",1
+"PartS1Vir1","dummy     ",  24,"Y"," ",1
+"PartS1Vir1","dummy     ",  25,"Y"," ",1
+"PartS1Vir1","dummy     ",  26,"Y"," ",1
+"PartS1Vir1","dummy     ",  27,"Y"," ",1
+"PartS1Vir1","dummy     ",  28,"Y"," ",1
+"PartS1Vir1","dummy     ",  29,"Y"," ",1
+"PartS1Vir1","SwSedYes  ",  30,"Y"," ",1
+"PartS1Vir1","VirGroup  ",  31,"Y"," ",1
+"PartS1Vir1","Volume    ",  32,"N","x",1
+"PartS1Vir2","Virus2S1  ",   1,"M","x",1
+"PartS1Vir2","Vir21S1D  ",   2,"M"," ",1
+"PartS1Vir2","Vir21S1P  ",   3,"M"," ",1
+"PartS1Vir2","IM1S1     ",   4,"Y","x",1
+"PartS1Vir2","IM2S1     ",   5,"Y","x",1
+"PartS1Vir2","IM3S1     ",   6,"Y","x",1
+"PartS1Vir2","DOCS1     ",   7,"Y","x",1
+"PartS1Vir2","XDOCVirus2",   8,"Y","x",1
+"PartS1Vir2","POCS1     ",   9,"Y","x",1
+"PartS1Vir2","PHYTS1    ",  10,"Y","x",1
+"PartS1Vir2","KdVi2IM1S1",  11,"Y"," ",1
+"PartS1Vir2","KdVi2IM2S1",  12,"Y"," ",1
+"PartS1Vir2","KdVi2IM3S1",  13,"Y"," ",1
+"PartS1Vir2","KdVi2pocS1",  14,"Y","x",1
+"PartS1Vir2","KdVi2phyS1",  15,"Y","x",1
+"PartS1Vir2","PORS1     ",  16,"Y","x",1
+"PartS1Vir2","ActThS1   ",  17,"Y","x",1
+"PartS1Vir2","Surf      ",  18,"Y","x",1
+"PartS1Vir2","DMS1      ",  19,"Y","x",1
+"PartS1Vir2","HLTAdsVir2",  20,"Y","x",1
+"PartS1Vir2","HLTDesVir2",  21,"Y","x",1
+"PartS1Vir2","DELT      ",  22,"N","x",1
+"PartS1Vir2","SWPoreChS1",  23,"Y","x",1
+"PartS1Vir2","dummy     ",  24,"Y"," ",1
+"PartS1Vir2","dummy     ",  25,"Y"," ",1
+"PartS1Vir2","dummy     ",  26,"Y"," ",1
+"PartS1Vir2","dummy     ",  27,"Y"," ",1
+"PartS1Vir2","dummy     ",  28,"Y"," ",1
+"PartS1Vir2","dummy     ",  29,"Y"," ",1
+"PartS1Vir2","SwSedYes  ",  30,"Y"," ",1
+"PartS1Vir2","VirGroup  ",  31,"Y"," ",1
+"PartS1Vir2","Volume    ",  32,"N","x",1
+"PartS1Vir3","Virus3S1  ",   1,"M","x",1
+"PartS1Vir3","Vir31S1D  ",   2,"M"," ",1
+"PartS1Vir3","Vir31S1P  ",   3,"M"," ",1
+"PartS1Vir3","IM1S1     ",   4,"Y","x",1
+"PartS1Vir3","IM2S1     ",   5,"Y","x",1
+"PartS1Vir3","IM3S1     ",   6,"Y","x",1
+"PartS1Vir3","DOCS1     ",   7,"Y","x",1
+"PartS1Vir3","XDOCVirus3",   8,"Y","x",1
+"PartS1Vir3","POCS1     ",   9,"Y","x",1
+"PartS1Vir3","PHYTS1    ",  10,"Y","x",1
+"PartS1Vir3","KdVi3IM1S1",  11,"Y"," ",1
+"PartS1Vir3","KdVi3IM2S1",  12,"Y"," ",1
+"PartS1Vir3","KdVi3IM3S1",  13,"Y"," ",1
+"PartS1Vir3","KdVi3pocS1",  14,"Y","x",1
+"PartS1Vir3","KdVi3phyS1",  15,"Y","x",1
+"PartS1Vir3","PORS1     ",  16,"Y","x",1
+"PartS1Vir3","ActThS1   ",  17,"Y","x",1
+"PartS1Vir3","Surf      ",  18,"Y","x",1
+"PartS1Vir3","DMS1      ",  19,"Y","x",1
+"PartS1Vir3","HLTAdsVir3",  20,"Y","x",1
+"PartS1Vir3","HLTDesVir3",  21,"Y","x",1
+"PartS1Vir3","DELT      ",  22,"N","x",1
+"PartS1Vir3","SWPoreChS1",  23,"Y","x",1
+"PartS1Vir3","dummy     ",  24,"Y"," ",1
+"PartS1Vir3","dummy     ",  25,"Y"," ",1
+"PartS1Vir3","dummy     ",  26,"Y"," ",1
+"PartS1Vir3","dummy     ",  27,"Y"," ",1
+"PartS1Vir3","dummy     ",  28,"Y"," ",1
+"PartS1Vir3","dummy     ",  29,"Y"," ",1
+"PartS1Vir3","SwSedYes  ",  30,"Y"," ",1
+"PartS1Vir3","VirGroup  ",  31,"Y"," ",1
+"PartS1Vir3","Volume    ",  32,"N","x",1
+"Sed_Virus1","fSedIM1   ",   1,"N","x",1
+"Sed_Virus1","fSedIM2   ",   2,"Y","x",1
+"Sed_Virus1","fSedIM3   ",   3,"Y","x",1
+"Sed_Virus1","fSedIM1S2 ",   4,"Y"," ",1
+"Sed_Virus1","fSedIM2S2 ",   5,"Y"," ",1
+"Sed_Virus1","fSedIM3S2 ",   6,"Y"," ",1
+"Sed_Virus1","fSedPOCnoa",   7,"Y","x",1
+"Sed_Virus1","fSedPHYT  ",   8,"Y","x",1
+"Sed_Virus1","QVir1IM1  ",   9,"N","x",1
+"Sed_Virus1","QVir1IM2  ",  10,"Y","x",1
+"Sed_Virus1","QVir1IM3  ",  11,"Y","x",1
+"Sed_Virus1","QVir1POC  ",  12,"Y","x",1
+"Sed_Virus1","QVir1PHYT ",  13,"Y","x",1
+"Sed_Virus1","Depth     ",  14,"N","x",1
+"Sed_Virus1","FrVir1IM1 ",  15,"Y","x",1
+"Sed_Virus1","FrVir1IM2 ",  16,"Y","x",1
+"Sed_Virus1","FrVir1IM3 ",  17,"Y","x",1
+"Sed_Virus1","FrVir1POC ",  18,"Y","x",1
+"Sed_Virus1","FrVir1PHYT",  19,"Y","x",1
+"Sed_Virus1","VxSedIM1  ",  20,"N","x",0
+"Sed_Virus1","VxSedIM2  ",  21,"Y","x",0
+"Sed_Virus1","VxSedIM3  ",  22,"Y","x",0
+"Sed_Virus1","VxSedPOCna",  23,"Y","x",0
+"Sed_Virus1","VxSedPhyt ",  24,"Y","x",0
+"Sed_Virus2","fSedIM1   ",   1,"N","x",1
+"Sed_Virus2","fSedIM2   ",   2,"Y","x",1
+"Sed_Virus2","fSedIM3   ",   3,"Y","x",1
+"Sed_Virus2","fSedIM1S2 ",   4,"Y"," ",1
+"Sed_Virus2","fSedIM2S2 ",   5,"Y"," ",1
+"Sed_Virus2","fSedIM3S2 ",   6,"Y"," ",1
+"Sed_Virus2","fSedPOCnoa",   7,"Y","x",1
+"Sed_Virus2","fSedPHYT  ",   8,"Y","x",1
+"Sed_Virus2","QVir2IM1  ",   9,"N","x",1
+"Sed_Virus2","QVir2IM2  ",  10,"Y","x",1
+"Sed_Virus2","QVir2IM3  ",  11,"Y","x",1
+"Sed_Virus2","QVir2POC  ",  12,"Y","x",1
+"Sed_Virus2","QVir2PHYT ",  13,"Y","x",1
+"Sed_Virus2","Depth     ",  14,"N","x",1
+"Sed_Virus2","FrVir2IM1 ",  15,"Y","x",1
+"Sed_Virus2","FrVir2IM2 ",  16,"Y","x",1
+"Sed_Virus2","FrVir2IM3 ",  17,"Y","x",1
+"Sed_Virus2","FrVir2POC ",  18,"Y","x",1
+"Sed_Virus2","FrVir2PHYT",  19,"Y","x",1
+"Sed_Virus2","VxSedIM1  ",  20,"N","x",0
+"Sed_Virus2","VxSedIM2  ",  21,"Y","x",0
+"Sed_Virus2","VxSedIM3  ",  22,"Y","x",0
+"Sed_Virus2","VxSedPOCna",  23,"Y","x",0
+"Sed_Virus2","VxSedPhyt ",  24,"Y","x",0
+"Sed_Virus3","fSedIM1   ",   1,"N","x",1
+"Sed_Virus3","fSedIM2   ",   2,"Y","x",1
+"Sed_Virus3","fSedIM3   ",   3,"Y","x",1
+"Sed_Virus3","fSedIM1S2 ",   4,"Y"," ",1
+"Sed_Virus3","fSedIM2S2 ",   5,"Y"," ",1
+"Sed_Virus3","fSedIM3S2 ",   6,"Y"," ",1
+"Sed_Virus3","fSedPOCnoa",   7,"Y","x",1
+"Sed_Virus3","fSedPHYT  ",   8,"Y","x",1
+"Sed_Virus3","QVir3IM1  ",   9,"N","x",1
+"Sed_Virus3","QVir3IM2  ",  10,"Y","x",1
+"Sed_Virus3","QVir3IM3  ",  11,"Y","x",1
+"Sed_Virus3","QVir3POC  ",  12,"Y","x",1
+"Sed_Virus3","QVir3PHYT ",  13,"Y","x",1
+"Sed_Virus3","Depth     ",  14,"N","x",1
+"Sed_Virus3","FrVir3IM1 ",  15,"Y","x",1
+"Sed_Virus3","FrVir3IM2 ",  16,"Y","x",1
+"Sed_Virus3","FrVir3IM3 ",  17,"Y","x",1
+"Sed_Virus3","FrVir3POC ",  18,"Y","x",1
+"Sed_Virus3","FrVir3PHYT",  19,"Y","x",1
+"Sed_Virus3","VxSedIM1  ",  20,"N","x",0
+"Sed_Virus3","VxSedIM2  ",  21,"Y","x",0
+"Sed_Virus3","VxSedIM3  ",  22,"Y","x",0
+"Sed_Virus3","VxSedPOCna",  23,"Y","x",0
+"Sed_Virus3","VxSedPhyt ",  24,"Y","x",0
