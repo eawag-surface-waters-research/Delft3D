@@ -572,11 +572,6 @@
       !!!!!!!!!! give it another try with nearest neighbour opr inverse distance.
       if (intri == 0 .and. R2search > 0d0) then
 
-         if (jsferic /= 0) then
-!           this part is probably not prepared for spherical coordinates (and "jspheric" isn't put to "0" temporarily either)
-            call mess(LEVEL_ERROR, 'triintfast: smallest distance search not prepared for spherical coordinates, see UNST-1720')
-         endif
-
          if (RD == dmiss) then
             if( jakdtree2 == 1 ) then
                call make_queryvector_kdtree(sampletree, xp, yp, jsferic)
@@ -597,7 +592,11 @@
                         z(i,n) = zs(i,k1)
                         exit
                      endif
-                     dist2 = ( xp - xs(k1) )**2 +  ( yp - ys(k1) )**2
+                     if (jsferic /= 0) then
+                        dist2 = dbdistance( xp, yp, xs(k1), ys(k1), jsferic, jasfer3D, dmiss ) ** 2
+                     else
+                        dist2 = ( xp - xs(k1) )**2 +  ( yp - ys(k1) )**2
+                     endif
                      cof1 = cof1 + zs(i,k1) / dist2
                      cof2 = cof2 + 1d0 / dist2
                   enddo
@@ -617,7 +616,11 @@
                         z(i,n) = zs(i,k)
                         exit
                      endif
-                     dist2 = ( xp - xs(k) )**2 +  ( yp - ys(k) )**2
+                     if (jsferic /= 0) then
+                        dist2 = dbdistance( xp, yp, xs(k), ys(k), jsferic, jasfer3D, dmiss ) ** 2
+                     else
+                        dist2 = ( xp - xs(k) )**2 +  ( yp - ys(k) )**2
+                     endif
                      cof1 = cof1 + zs(i,k) / dist2
                      cof2 = cof2 + 1d0 / dist2
                   enddo
