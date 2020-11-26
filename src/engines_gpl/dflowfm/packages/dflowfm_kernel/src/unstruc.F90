@@ -17587,6 +17587,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    use m_flowexternalforcings
    use m_partitioninfo
    use time_class
+   use m_longculverts
    use unstruc_messages
 
    implicit none
@@ -17927,6 +17928,11 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_gateLowerEdgeLevel, irefdate, tzone, tunit, tim)
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_crestWidth, irefdate, tzone, tunit, tim)
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_gateOpeningWidth, irefdate, tzone, tunit, tim)
+   endif
+
+   ! TODO: JN: gettimespace voor longcylvertsg
+   if (nlongculvertsg> 0) then
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_longculvert_valve_relative_opening, irefdate, tzone, tunit, tim)
    endif
 
    !   !$OMP SECTION

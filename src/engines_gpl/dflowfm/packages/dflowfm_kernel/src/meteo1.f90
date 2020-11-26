@@ -6569,6 +6569,7 @@ module m_meteo
       item_general_structure_gateLowerEdgeLevel  = ec_undef_int
       item_general_structure_crestWidth          = ec_undef_int
       item_general_structure_gateOpeningWidth    = ec_undef_int
+      item_longculvert_valve_relative_opening    = ec_undef_int
       item_frcutim                               = ec_undef_int
       item_valve1D                               = ec_undef_int    
       item_lateraldischarge                      = ec_undef_int
