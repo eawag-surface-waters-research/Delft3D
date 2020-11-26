@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2020.
+!!  Copyright (C)  Stichting Deltares, 2012-2014.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -33,8 +33,8 @@
 !
       real(4) pmsa(*)     !I/O Process Manager System Array, window of routine to process library
       real(4) fl(*)       ! O  Array of fluxes made by this process in mass/volume/time
-      integer ipoint( 67) ! I  Array of pointers in pmsa to get and store the data
-      integer increm( 67) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
+      integer ipoint( 79) ! I  Array of pointers in pmsa to get and store the data
+      integer increm( 79) ! I  Increments in ipoint for segment loop, 0=constant, 1=spatially varying
       integer noseg       ! I  Number of computational elements in the whole model schematisation
       integer noflux      ! I  Number of fluxes, increment in the fl array
       integer iexpnt(4,*) ! I  From, To, From-1 and To+1 segment numbers of the exchange surfaces
@@ -43,7 +43,7 @@
       integer noq2        ! I  Nr of exchanges in 2nd direction, noq1+noq2 gives hor. dir. reg. grid
       integer noq3        ! I  Nr of exchanges in 3rd direction, vertical direction, pos. downward
       integer noq4        ! I  Nr of exchanges in the bottom (bottom layers, specialist use only)
-      integer ipnt( 67)   !    Local work array for the pointering
+      integer ipnt( 79)   !    Local work array for the pointering
       integer iseg        !    Local loop counter for computational element loop
 !
 !*******************************************************************************
@@ -80,6 +80,20 @@
       real(4) FfrootPOC2  ! I  fraction of biomass root to POC2                   (-)
       real(4) DELT        ! I  timestep for processes                             (d)
       real(4) Depth       ! I  depth of computational cell                        (m)
+
+      real(4) SwWV        ! I  use wetland vegetation model (0=no,1=yes)          (-)
+      real(4) Rc0MSWV     ! I  senescence mortality rate for VB01 at 20 oC        (1/d)
+      real(4) TcMSWV      ! I  temperature coefficient of WV mort. for VB01       (-)
+      real(4) RcMGRWV     ! I  grazing mortality pressure for VB01                (g/m2/d)
+      real(4) AcMWV       ! I  acceleration factor for senescence mort VB0#       (-)
+      real(4) MinRWV      ! I  maximum biomass ratio for VB0#                     (-)
+      real(4) MaxRWV      ! I  maximum biomass ratio for VB0#                     (-)
+      real(4) TBmWV       ! I  target total biomass for VB01                      (tC/ha)
+      real(4) TempAir     ! I  Air temperature                                    (oC)
+      real(4) minVB       ! I  minimum biomass for all vegetation                 (gC/m2)
+
+      real(4) fMrtVB      ! O Total mortality flux for VB0                        (gC/m2/d)
+
       real(4) fMC2VB01P1  ! O  mortality foliage VB01 to POC1                     (gC/m2/d)
       real(4) fMC2VB01P2  ! O  mortality foliage VB01 to POC2                     (gC/m2/d)
       real(4) fMC2VB01P3  ! O  mortality foliage VB01 to POC3                     (gC/m2/d)
@@ -111,20 +125,34 @@
       real(4) dMrtC2VB01  ! F  mortality foliage VB01                             (gC/m3/d)
       real(4) dMrtC5VB01  ! F  mortality fineroot VB01                            (gC/m3/d)
 
+
+      real(4) dMrtN1VB01  ! F  mortality stem VB01                                (gN/m3/d)
+      real(4) dMrtN3VB01  ! F  mortality branch VB01                              (gN/m3/d)
+      real(4) dMrtN4VB01  ! F  mortality root VB01                                (gN/m3/d)
+      real(4) dMrtP1VB01  ! F  mortality stem VB01                                (gP/m3/d)
+      real(4) dMrtP3VB01  ! F  mortality branch VB01                              (gP/m3/d)
+      real(4) dMrtP4VB01  ! F  mortality root VB01                                (gP/m3/d)
+      real(4) dMrtS1VB01  ! F  mortality stem VB01                                (gS/m3/d)
+      real(4) dMrtS3VB01  ! F  mortality branch VB01                              (gS/m3/d)
+      real(4) dMrtS4VB01  ! F  mortality root VB01                                (gS/m3/d)
+
       real(4) fMrtC1VB01  ! O  mortality stem VB01                                (gC/m3/d)
       real(4) fMrtC3VB01  ! O  mortality branch VB01                              (gC/m3/d)
       real(4) fMrtC4VB01  ! O  mortality root VB01                                (gC/m3/d)
-      real(4) fMrtN1VB01
-      real(4) fMrtN3VB01
-      real(4) fMrtN4VB01
-      real(4) fMrtP1VB01
-      real(4) fMrtP3VB01
-      real(4) fMrtP4VB01
-      real(4) fMrtS1VB01
-      real(4) fMrtS3VB01
-      real(4) fMrtS4VB01
+      real(4) fMrtN1VB01  ! O  mortality stem VB01                                (gN/m3/d)
+      real(4) fMrtN3VB01  ! O  mortality branch VB01                              (gN/m3/d)
+      real(4) fMrtN4VB01  ! O  mortality root VB01                                (gN/m3/d)
+      real(4) fMrtP1VB01  ! O  mortality stem VB01                                (gP/m3/d)
+      real(4) fMrtP3VB01  ! O  mortality branch VB01                              (gP/m3/d)
+      real(4) fMrtP4VB01  ! O  mortality root VB01                                (gP/m3/d)
+      real(4) fMrtS1VB01  ! O  mortality stem VB01                                (gS/m3/d)
+      real(4) fMrtS3VB01  ! O  mortality branch VB01                              (gS/m3/d)
+      real(4) fMrtS4VB01  ! O  mortality root VB01                                (gS/m3/d)
 
-      real(4) rcdec       !    decay rate for vegetation mortality
+      real(4) rcdec       ! I  decay rate for vegetation mortality
+
+      real(4) rcdecact    ! O  actual decay rate for vegetation mortality
+      real(4) fMrt        ! O  total decay for vegetation mortality
 
       integer IdMrtC1VB01 !    Pointer to the mortality stem VB01
       integer IdMrtC3VB01 !    Pointer to the mortality branch VB01
@@ -142,8 +170,15 @@
       integer IdMrtS1VB01 !    Pointer to the mortality stem VB01
       integer IdMrtS3VB01 !    Pointer to the mortality branch VB01
       integer IdMrtS4VB01 !    Pointer to the mortality root VB01
+      integer             :: ikmrk1         ! first feature
       integer             :: ikmrk2         ! second feature
-      integer             :: ikmrk3         ! third feature
+
+! Local variables
+      integer nrofinputs  !    Number of inputs
+      real(4) Temp20      !    Air temperature minus 20                              (oC)
+      real(4) TempCof     !    Temperature coefficient
+      real(4) rVB1        !    Ratio between current biomass and target biomass       (-)
+      real(4) maxfMrtVB   !    Maximum biomass flux                              (g/m2/d)
 !
 !*******************************************************************************
 !
@@ -168,9 +203,9 @@
       do  iseg = 1 , noseg
 
 !        lowest water and 2d segments only
+         call dhkmrk(1,iknmrk(iseg),ikmrk1)
          call dhkmrk(2,iknmrk(iseg),ikmrk2)
-         call dhkmrk(3,iknmrk(iseg),ikmrk3)
-         if (ikmrk3.eq.1 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+         if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 !
          VB1        = pmsa( ipnt(  1) )
          F1VB01     = pmsa( ipnt(  2) )
@@ -203,12 +238,53 @@
          Depth      = pmsa( ipnt( 29) )
          rcdec      = pmsa( ipnt( 30) )
          SWDying    = pmsa( ipnt( 31) )
+         SwWV       = pmsa( ipnt( 32) )
+         Rc0MSWV    = pmsa( ipnt( 33) )
+         TcMSWV     = pmsa( ipnt( 34) )
+         RcMGRWV    = pmsa( ipnt( 35) )
+         AcMWV      = pmsa( ipnt( 36) )
+         MinRWV     = pmsa( ipnt( 37) )
+         MaxRWV     = pmsa( ipnt( 38) )
+         TBmWV      = pmsa( ipnt( 39) )
+         TempAir    = pmsa( ipnt( 40) )
+         MinVB      = pmsa( ipnt( 41) )
+         nrofinputs = 41
 !
 !
 !   *****     Insert your code here  *****
 !
-!        check if vegetation cohort is dead or still dying off
-         if ( ( NINT (SwVB01Mrt) .eq. 1) .or. ( NINT (SwDying) .eq. 1) ) then
+         if ( ( NINT (SwVB01Mrt) .eq. 1) .or. ( NINT (SwDying) .eq. 1)) then
+!           inundation mortality
+            rcdecact = rcdec
+         else
+!           no inundation mortality
+            rcdecact = 0.0
+         endif
+
+         if (NINT(SwWV) .eq. 1) then
+!           if wetland vegetation model, also turnover due to senescence mortality and grazing
+!           Ratio of current biomass to attainable biomass
+            rVB1 = VB1 / ((TBmWV + tiny(TBmWV)) * 100.0)
+            TEMP20 = TempAir - 20.0
+            TempCof = TcMSWV ** TEMP20
+
+            If (rVB1 .gt. MaxRWV) then
+!              Add accelarated senescence mortality with biomass above target biomass
+               rcdecact = rcdecact + AcMWV * Rc0MSWV * TempCof
+            else
+!              Add normal senescence mortality
+               rcdecact = rcdecact + Rc0MSWV * TempCof
+            end if
+            maxfMrtVB = MAX (0.0, (VB1 - MinVB) / DELT )
+            fMrtVB = MIN(rcdecact * VB1 + RcMGRWV, maxfMrtVB)
+         else
+            fMrtVB = rcdecact * VB1
+         end if
+
+
+
+!        check if vegetation cohort is dead or still dying off or we use the Wetland Vegetation option
+         if ( ( ( NINT (SwVB01Mrt) .eq. 1) .or. ( NINT (SwDying) .eq. 1) .or. (NINT(SwWV) .eq. 1) ) .and. (fMrtVB .gt. 0.0) ) then
 
 !           calculate 2D fluxes of vegetation compartments
 !           seems redundant to split C-flux by veg. compartment
@@ -219,28 +295,28 @@
 
 !           C-flux for stem, branch and root
 
-            dMrtC1VB01 = rcdec * VB1 * F1VB01 / DEPTH
-            dMrtC3VB01 = rcdec * VB1 * F3VB01 / DEPTH
-            dMrtC4VB01 = rcdec * VB1 * F4VB01 / DEPTH
+            dMrtC1VB01 = fMrtVB * F1VB01 / DEPTH
+            dMrtC3VB01 = fMrtVB * F3VB01 / DEPTH
+            dMrtC4VB01 = fMrtVB * F4VB01 / DEPTH
 !           C-flux foliage and fine roots
-            dMrtC2VB01 = rcdec * VB1 * F2VB01 / DEPTH
-            dMrtC5VB01 = rcdec * VB1 * F5VB01 / DEPTH
+            dMrtC2VB01 = fMrtVB * F2VB01 / DEPTH
+            dMrtC5VB01 = fMrtVB * F5VB01 / DEPTH
 
 !           C-outputs for stem, branch and root
 
-            fMrtC1VB01 = rcdec *VB1 * F1VB01
-            fMrtC3VB01 = rcdec *VB1 * F3VB01
-            fMrtC4VB01 = rcdec *VB1 * F4VB01
+            fMrtC1VB01 = fMrtVB * F1VB01
+            fMrtC3VB01 = fMrtVB * F3VB01
+            fMrtC4VB01 = fMrtVB * F4VB01
 
 !           C-Outputs for prod of POC1-3 fractions from foliage/fineroots 3D
 
-            fMC2VB01P1 = rcdec *VB1 * F2VB01 * FfolPOC1
-            fMC2VB01P2 = rcdec *VB1 * F2VB01 * FfolPOC2
-            fMC2VB01P3 = rcdec *VB1 * F2VB01 * (1 - FfolPOC1 -FfolPOC2)
+            fMC2VB01P1 = fMrtVB * F2VB01 * FfolPOC1
+            fMC2VB01P2 = fMrtVB * F2VB01 * FfolPOC2
+            fMC2VB01P3 = fMrtVB * F2VB01 * (1 - FfolPOC1 -FfolPOC2)
 !           output-flux for fineroots ->POC1-3
-            fMC5VB01P1 = rcdec *VB1 * F5VB01 * FfrootPOC1
-            fMC5VB01P2 = rcdec *VB1 * F5VB01 * FfrootPOC2
-            fMC5VB01P3 = rcdec *VB1 * F5VB01 * (1 - FfrootPOC1 -FfrootPOC2)
+            fMC5VB01P1 = fMrtVB * F5VB01 * FfrootPOC1
+            fMC5VB01P2 = fMrtVB * F5VB01 * FfrootPOC2
+            fMC5VB01P3 = fMrtVB * F5VB01 * (1 - FfrootPOC1 -FfrootPOC2)
 
 !           NPS-Fluxes for nutrients of stem, branch and roots: 2D -> POX5
             fMrtN1VB01 = fMrtC1VB01 / CNf1VB01
@@ -349,42 +425,45 @@
 !        fl  ( IdMrtS1VB01 ) = dMrtS1VB01
 !        fl  ( IdMrtS3VB01 ) = dMrtS3VB01
 !        fl  ( IdMrtS4VB01 ) = dMrtS4VB01
-         pmsa( ipnt( 32)   ) = fMC2VB01P1
-         pmsa( ipnt( 33)   ) = fMC2VB01P2
-         pmsa( ipnt( 34)   ) = fMC2VB01P3
-         pmsa( ipnt( 35)   ) = fMN2VB01P1
-         pmsa( ipnt( 36)   ) = fMN2VB01P2
-         pmsa( ipnt( 37)   ) = fMN2VB01P3
-         pmsa( ipnt( 38)   ) = fMP2VB01P1
-         pmsa( ipnt( 39)   ) = fMP2VB01P2
-         pmsa( ipnt( 40)   ) = fMP2VB01P3
-         pmsa( ipnt( 41)   ) = fMS2VB01P1
-         pmsa( ipnt( 42)   ) = fMS2VB01P2
-         pmsa( ipnt( 43)   ) = fMS2VB01P3
-         pmsa( ipnt( 44)   ) = fMC5VB01P1
-         pmsa( ipnt( 45)   ) = fMC5VB01P2
-         pmsa( ipnt( 46)   ) = fMC5VB01P3
-         pmsa( ipnt( 47)   ) = fMN5VB01P1
-         pmsa( ipnt( 48)   ) = fMN5VB01P2
-         pmsa( ipnt( 49)   ) = fMN5VB01P3
-         pmsa( ipnt( 50)   ) = fMP5VB01P1
-         pmsa( ipnt( 51)   ) = fMP5VB01P2
-         pmsa( ipnt( 52)   ) = fMP5VB01P3
-         pmsa( ipnt( 53)   ) = fMS5VB01P1
-         pmsa( ipnt( 54)   ) = fMS5VB01P2
-         pmsa( ipnt( 55)   ) = fMS5VB01P3
-         pmsa( ipnt( 56)   ) = fMrtC1VB01
-         pmsa( ipnt( 57)   ) = fMrtC3VB01
-         pmsa( ipnt( 58)   ) = fMrtC4VB01
-         pmsa( ipnt( 59)   ) = fMrtN1VB01
-         pmsa( ipnt( 60)   ) = fMrtN3VB01
-         pmsa( ipnt( 61)   ) = fMrtN4VB01
-         pmsa( ipnt( 62)   ) = fMrtP1VB01
-         pmsa( ipnt( 63)   ) = fMrtP3VB01
-         pmsa( ipnt( 64)   ) = fMrtP4VB01
-         pmsa( ipnt( 65)   ) = fMrtS1VB01
-         pmsa( ipnt( 66)   ) = fMrtS3VB01
-         pmsa( ipnt( 67)   ) = fMrtS4VB01
+         pmsa( ipnt( nrofinputs + 1)   ) = rcdecact
+         pmsa( ipnt( nrofinputs + 2)   ) = fMrtVB
+         pmsa( ipnt( nrofinputs + 3)   ) = fMC2VB01P1
+         pmsa( ipnt( nrofinputs + 4)   ) = fMC2VB01P2
+         pmsa( ipnt( nrofinputs + 5)   ) = fMC2VB01P3
+         pmsa( ipnt( nrofinputs + 6)   ) = fMN2VB01P1
+         pmsa( ipnt( nrofinputs + 7)   ) = fMN2VB01P2
+         pmsa( ipnt( nrofinputs + 8)   ) = fMN2VB01P3
+         pmsa( ipnt( nrofinputs + 9)   ) = fMP2VB01P1
+         pmsa( ipnt( nrofinputs + 10)  ) = fMP2VB01P2
+         pmsa( ipnt( nrofinputs + 11)  ) = fMP2VB01P3
+         pmsa( ipnt( nrofinputs + 12)   ) = fMS2VB01P1
+         pmsa( ipnt( nrofinputs + 13)   ) = fMS2VB01P2
+         pmsa( ipnt( nrofinputs + 14)   ) = fMS2VB01P3
+         pmsa( ipnt( nrofinputs + 15)   ) = fMC5VB01P1
+         pmsa( ipnt( nrofinputs + 16)   ) = fMC5VB01P2
+         pmsa( ipnt( nrofinputs + 17)   ) = fMC5VB01P3
+         pmsa( ipnt( nrofinputs + 18)   ) = fMN5VB01P1
+         pmsa( ipnt( nrofinputs + 19)   ) = fMN5VB01P2
+         pmsa( ipnt( nrofinputs + 20)   ) = fMN5VB01P3
+         pmsa( ipnt( nrofinputs + 21)   ) = fMP5VB01P1
+         pmsa( ipnt( nrofinputs + 22)   ) = fMP5VB01P2
+         pmsa( ipnt( nrofinputs + 23)   ) = fMP5VB01P3
+         pmsa( ipnt( nrofinputs + 24)   ) = fMS5VB01P1
+         pmsa( ipnt( nrofinputs + 25)   ) = fMS5VB01P2
+         pmsa( ipnt( nrofinputs + 26)   ) = fMS5VB01P3
+         pmsa( ipnt( nrofinputs + 27)   ) = fMrtC1VB01
+         pmsa( ipnt( nrofinputs + 28)   ) = fMrtC3VB01
+         pmsa( ipnt( nrofinputs + 29)   ) = fMrtC4VB01
+         pmsa( ipnt( nrofinputs + 30)   ) = fMrtN1VB01
+         pmsa( ipnt( nrofinputs + 31)   ) = fMrtN3VB01
+         pmsa( ipnt( nrofinputs + 32)   ) = fMrtN4VB01
+         pmsa( ipnt( nrofinputs + 33)   ) = fMrtP1VB01
+         pmsa( ipnt( nrofinputs + 34)   ) = fMrtP3VB01
+         pmsa( ipnt( nrofinputs + 35)   ) = fMrtP4VB01
+         pmsa( ipnt( nrofinputs + 36)   ) = fMrtS1VB01
+         pmsa( ipnt( nrofinputs + 37)   ) = fMrtS3VB01
+         pmsa( ipnt( nrofinputs + 38)   ) = fMrtS4VB01
+
 !
 
 !        bottom and 2d segments only

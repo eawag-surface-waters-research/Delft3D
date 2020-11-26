@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2020.
+!!  Copyright (C)  Stichting Deltares, 2012-2014.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -72,6 +72,7 @@
       real(4) CSf3VB      ! I  carbon-sulphur ratio in branch VB01                (gC/gS)
       real(4) CSf4VB      ! I  carbon-sulphur ratio in root VB01                  (gC/gS)
       real(4) CSf5VB      ! I  carbon-sulphur ratio in fineroot                   (gC/gS)
+
       real(4) fNVB01up    ! O  uptake roots VB01                                  (gN/m2/d)
       real(4) fPVB01up    ! O  uptake roots VB01                                  (gP/m2/d)
       real(4) fSVB01up    ! O  uptake roots VB01                                  (gS/m2/d)
@@ -107,13 +108,14 @@
          CSf3VB   = pmsa( ipnt( 20) )
          CSf4VB   = pmsa( ipnt( 21) )
          CSf5VB   = pmsa( ipnt( 22) )
+
 !
 !   *****     Insert your code here  *****
+!
 !
          fNVB01up  = 0.0
          fPVB01up  = 0.0
          fSVB01up  = 0.0
-
 
          if ( Nint(SwVBGro) .eq. 1) then
 

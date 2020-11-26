@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2020.
+!!  Copyright (C)  Stichting Deltares, 2012-2014.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -82,9 +82,13 @@
       integer iseg        !    local loop counter for computational element loop
       real(4) z2          !    height bottom segment from bottom              (m)
       real(4) z1          !    height top segment from bottom                 (m)
-      integer ikmrk3
+      integer ikmrk1
+      integer ikmrk2
       real(4) zm          !    watersurface to top macropyte                  (-)
       real(4) frlay       !    fraction witin layer                           (-)
+      integer iq          !    loop counter
+      integer ifrom       !    from segment
+      integer ito         !    from segment
       integer iflux       !    index in the fl array
       real(4) pnvbxxup   !    2d uptake percentage n pool 1 and 2             (-)
       real(4) ppvbxxup   !    2d uptake percentage p pool 1 and 2             (-)
@@ -113,8 +117,8 @@
          fl_fs1vbxxupy =  0.0
          fl_fs2vbxxupy =  0.0
 
-         call dhkmrk(3,iknmrk(iseg),ikmrk3)
-         if (ikmrk3.eq.1 .or. ikmrk3 .eq. 3) then
+         call dhkmrk(1,iknmrk(iseg),ikmrk1)
+!         if (ikmrk1.eq.1 .or. ikmrk1 .eq. 3) then !=> NO TESTING ON IKMRK1, PROCESS IS ALLWAYS ON!
 
             ibotseg     = NINT(pmsa(ipnt(4)))
             inicovvbxx  = pmsa(ipoint( 13)+(ibotseg-1)*increm( 13)) / 100.
@@ -165,7 +169,7 @@
 !                 ps5vbxxup=0.0
                endif
 
-               if ( ikmrk3.eq.1 .and. hmax .gt. 0.0 ) then
+               if ( ikmrk1.eq.1 .and. hmax .gt. 0.0 ) then
 
                   ! active water segment
 
@@ -195,7 +199,7 @@
                      fS2vbxxupy = pSvbxxup*sud*depth/delt
                   endif
 
-               elseif (ikmrk3.eq.3 .and. hmax .lt. 0.0) then
+               elseif (ikmrk1.eq.3 .and. hmax .lt. 0.0) then
 
                   ! delwaq-g segment, distribution over the bottom segments
 
@@ -235,7 +239,7 @@
 
             endif
 
-         endif
+!!         endif
 
          pmsa(ipnt(20)) =  fn1vbxxupy
          pmsa(ipnt(21)) =  fn2vbxxupy
