@@ -87,8 +87,8 @@
         ICHZTP  = NINT(PMSA(IP5 ))
 
         IF (ICHZTP.EQ.1) THEN
-!       Shear stress by flow according to White/Colebrook
-         CHZ = 18. * LOG10 ( 12.* TOTDEP / ROUGH  )
+!       Shear stress by flow according to White/Colebrook - protect against very small depth
+         CHZ = 18. * LOG10 ( 12.* (TOTDEP+ROUGH) / ROUGH  )
         ELSE IF (ICHZTP.EQ.2) THEN
 !       Chezy according to Manning
          CHZ = ( TOTDEP ** ONESIX) / MANCOF
