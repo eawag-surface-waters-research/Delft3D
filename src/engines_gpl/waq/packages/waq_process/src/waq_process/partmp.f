@@ -221,6 +221,7 @@
 !     2 = CR
 !     3 = VA, AS
 !     4 = OMP's
+!     5 = viruses (simple partitioning)
 !
       IGROUP = NINT(PMSA(IP31))
 !
@@ -419,11 +420,13 @@
 !
 !     OXIC (ISWOX = 1) PARTITIONING FOR GENERAL METALS (GROUP 1)
 !     OR CR (GROUP 2) OR VA/AS (GROUP 3) or OMP's (GROUP 4)
+!     OR viruses (group 5)
 !
       IF ( ( ISWOX.EQ.1 .AND. IGROUP .EQ. 1 ) .OR.
      J                        IGROUP .EQ. 2   .OR.
      J                        IGROUP .EQ. 3   .OR.
-     J                        IGROUP .EQ. 4         ) THEN
+     J                        IGROUP .EQ. 4   .OR.
+     J                        IGROUP .EQ. 5         ) THEN
         FPREC = 0.0
 
 !          inorganic matter 1
@@ -786,11 +789,12 @@
         WRITE(LUNREP,*) 'Invalid option for partitioning!'
         WRITE(LUNREP,*) 'SwOXIC= ',ISWOX,' 1- oxic, 0 - anoxic'
         WRITE(LUNREP,*)
-     &    'Group = ',IGROUP,' 1- General, 2-Cr, 3-As/Va, 4-OMP'
+     &    'Group = ',IGROUP,' 1- General, 2-Cr, 3-As/Va, 4-OMP, 5-virus'
 
         WRITE(*,*) 'Invalid option for partitioning!'
         WRITE(*,*) 'SwOXIC= ',ISWOX,' 1- oxic, 0 - anoxic'
-        WRITE(*,*) 'Group = ',IGROUP,' 1- General, 2-Cr, 3-As/Va, 4-OMP'
+        WRITE(*,*) 'Group = ',IGROUP,' 1- General, 2-Cr, 3-As/Va, 4-OMP,
+     & 5-virus'
         CALL SRSTOP(1)
       ENDIF
 !
