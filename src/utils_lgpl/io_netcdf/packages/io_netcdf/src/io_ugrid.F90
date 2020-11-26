@@ -4553,7 +4553,9 @@ function ug_read_1d_network_nodes(ncid, netids, nodesX, nodesY, nodeids, nodelon
    double precision,intent(out)             :: nodesX(:), nodesY(:) 
    character(len=*),optional,intent(out)    :: nodeids(:), nodelongnames(:)
    integer                                  :: ierr
+   character(len=40), allocatable           :: tmpStr(:)
  
+   allocate(tmpStr(size(nodeids)))
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodex), nodesX)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'Could not read 1D network node x-coordinates. Check any previous warnings.')
@@ -4564,15 +4566,18 @@ function ug_read_1d_network_nodes(ncid, netids, nodesX, nodesY, nodeids, nodelon
        Call SetMessage(Level_Fatal, 'Could not read 1D network node y-coordinates. Check any previous warnings.')
    end if 
    
-   if(present(nodeids)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodids), nodeids)
+   if(present(nodeids)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodids), tmpStr)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'Could not read 1D network node ids. Check any previous warnings.')
    end if 
+   nodeids = tmpStr
    
-   if(present(nodelongnames)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodlongnames), nodelongnames)
+   if(present(nodelongnames)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodlongnames), tmpStr)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'Could not read 1D network node longnames. Check any previous warnings.')
-   end if 
+   end if
+   nodelongnames = tmpStr
+   deallocate(tmpStr)
 
 end function ug_read_1d_network_nodes
 
@@ -4586,6 +4591,7 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    character(len=*),intent(out), optional     :: nbranchid(:),nbranchlongnames(:)
    integer                                    :: ierr, n, k, bid, nmeshpoints, nbranches, varStartIndex
    integer,allocatable                        :: sourcestargets(:,:)
+   character(len=40), allocatable             :: tmpStr(:)
 
    nbranches = size(sourceNodeId)
    allocate(sourcestargets(2, nbranches))
@@ -4616,27 +4622,31 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchlengths), branchlengths)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'Could not read the 1D network branch lengths. Check any previous warnings.')
-   end if 
-   
+   end if
+
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrypoints)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'Could not read the 1D network branches geometry points. Check any previous warnings.')
-   end if 
-   
+   end if
+
    if (present(nbranchid).and.present(nbranchlongnames)) then
-      ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchids), nbranchid)
+      allocate(tmpStr(size(nbranchid)))
+      ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchids), tmpStr)
       if(ierr /= UG_NOERR) then 
          Call SetMessage(Level_Fatal, 'Could not read the 1D network branch ids. Check any previous warnings.')
-      end if 
-   
-      ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchlongnames), nbranchlongnames)
+      end if
+      nbranchid = tmpStr
+
+      ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchlongnames), tmpStr)
       if(ierr /= UG_NOERR) then 
          Call SetMessage(Level_Fatal, 'Could not read the 1D network branch longnames. Check any previous warnings.')
-      end if 
+      end if
+      nbranchlongnames = tmpStr
+      deallocate(tmpStr)
    endif
-   
+
    end function ug_get_1d_network_branches
-   
+
 !> This function writes the branch order array
    function ug_get_1d_network_branchorder(ncid, netids, branchorder) result(ierr)
 
