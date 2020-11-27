@@ -4566,17 +4566,22 @@ function ug_read_1d_network_nodes(ncid, netids, nodesX, nodesY, nodeids, nodelon
        Call SetMessage(Level_Fatal, 'Could not read 1D network node y-coordinates. Check any previous warnings.')
    end if 
    
-   if(present(nodeids)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodids), tmpStr)
-   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'Could not read 1D network node ids. Check any previous warnings.')
-   end if 
-   nodeids = tmpStr
-   
-   if(present(nodelongnames)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodlongnames), tmpStr)
-   if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'Could not read 1D network node longnames. Check any previous warnings.')
+   if(present(nodeids)) then
+      ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodids), tmpStr)
+      if(ierr /= UG_NOERR) then 
+         Call SetMessage(Level_Fatal, 'Could not read 1D network node ids. Check any previous warnings.')
+      end if
+      nodeids = tmpStr
    end if
-   nodelongnames = tmpStr
+   
+   if(present(nodelongnames)) then
+      ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodlongnames), tmpStr)
+      if(ierr /= UG_NOERR) then 
+         Call SetMessage(Level_Fatal, 'Could not read 1D network node longnames. Check any previous warnings.')
+      end if
+      nodelongnames = tmpStr
+   end if
+
    deallocate(tmpStr)
 
 end function ug_read_1d_network_nodes
