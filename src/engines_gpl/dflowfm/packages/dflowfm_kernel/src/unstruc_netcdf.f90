@@ -2648,7 +2648,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     double precision, dimension(:,:,:), allocatable :: work3d
     integer,          dimension(:,:,:), allocatable :: work3di
     type(t_structure), pointer                    :: pstru
-    integer                                       :: strlen_netcdf  ! string length definition for (station) names on history file
 
 
     ! Grid and flow geometry
@@ -2657,8 +2656,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     ! ierr = nf90_inq_dimid(irstfile, 'nFlowElem', id_flowelemdim)
     ! ierr = nf90_inq_dimid(irstfile, 'nFlowLink', id_flowlinkdim)
 
-    strlen_netcdf = idlen  !< Max string length of Ids.
-    
     numformat = '(I2.2)'
     if (lnx > 0) then
        ierr = nf90_def_dim(irstfile, 'nFlowLink', lnx, id_flowlinkdim)
@@ -3005,7 +3002,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        endif
        do i=ITRA1,ITRAN
           j = i-ITRA1+1
-          tmpstr = const_names(i)(1:strlen_netcdf)
+          tmpstr = const_names(i)
           ! Forbidden chars in NetCDF names: space, /, and more.
           call replace_char(tmpstr,32,95)
           call replace_char(tmpstr,47,95)
@@ -3031,7 +3028,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     if(numwqbots > 0) then
        call realloc(id_rwqb, numwqbots, keepExisting = .false., fill = 0)
        do j=1,numwqbots
-          tmpstr = wqbotnames(j)(1:strlen_netcdf)
+          tmpstr = wqbotnames(j)
           ! Forbidden chars in NetCDF names: space, /, and more.
           call replace_char(tmpstr,32,95)
           call replace_char(tmpstr,47,95)
@@ -3081,7 +3078,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           endif
           do i=ISED1,ISEDN
              j = i-ISED1+1
-             tmpstr = const_names(i)(1:strlen_netcdf)
+             tmpstr = const_names(i)
              ! Forbidden chars in NetCDF names: space, /, and more.
              call replace_char(tmpstr,32,95)
              call replace_char(tmpstr,47,95)
@@ -3122,11 +3119,11 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
             enddo
             ierr = nf90_def_dim(irstfile, trim(mesh1dname)//'_crs_maxdim', jmax,    id_jmax)
             ierr = nf90_def_dim(irstfile, trim(mesh1dname)//'_ncrs',      nCrs,   id_ncrs)
-            ierr = nf90_def_dim(irstfile, 'nStringlen', strlen_netcdf, id_strlendim)
+            ierr = nf90_def_dim(irstfile, 'nStringlen', 100, id_strlendim)
             ierr = nf90_def_var(irstfile, trim(mesh1dname)//'_mor_crs_z', nf90_double, (/ id_jmax, id_ncrs, id_timedim /), id_flowelemcrsz)
             ierr = nf90_put_att(irstfile, id_flowelemcrsz, 'long_name','cross-section points level')
             ierr = nf90_put_att(irstfile, id_flowelemcrsz, 'unit', 'm')
-            ierr = nf90_def_var(irstfile, trim(mesh1dname(1:strlen_netcdf-13))//'_mor_crs_name', nf90_char, (/ id_strlendim, id_nCrs /), id_morCrsName)  ! _mor_crs_name is 13 charaters long
+            ierr = nf90_def_var(irstfile, trim(mesh1dname)//'_mor_crs_name', nf90_char, (/ id_strlendim, id_nCrs /), id_morCrsName)
             ierr = nf90_put_att(irstfile, id_morCrsName, 'long_name','name of cross-section')
          endif
       endif
@@ -3524,7 +3521,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     if (ndx1d > 0 .and. stm_included) then
        if (stmpar%morpar%bedupd) then
           do i = 1,nCrs
-             ierr = nf90_put_var(irstfile, id_morCrsName,trim(network%crs%cross(i)%CSID(1:strlen_netcdf)),(/ 1, i /),(/ len(trim(network%crs%cross(i)%CSID(1:strlen_netcdf))), 1 /))  ! only write once
+             ierr = nf90_put_var(irstfile, id_morCrsName,trim(network%crs%cross(i)%CSID),(/ 1, i /),(/ len(trim(network%crs%cross(i)%CSID)), 1 /))  ! only write once
           enddo
        endif
     endif
@@ -4535,12 +4532,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    type(t_CSType), pointer                       :: pCS
    type(t_CSType), pointer, dimension(:)         :: pCSs
    integer                                       :: ndx1d
-   integer                                       :: strlen_netcdf  ! string length definition for (station) names on history file
    integer, save                                 :: jmax, nCrs
    double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
    double precision, dimension(:,:,:), allocatable :: work3d
 
-   
    if (ndxi <= 0) then
       call mess(LEVEL_WARN, 'No flow elements in model, will not write flow geometry.')
       return
@@ -4570,7 +4565,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       iLocU = UNC_LOC_U
    end if
 
-   strlen_netcdf = idlen
 
    call realloc(mapids%id_const, (/ MAX_ID_VAR, NUMCONST/), keepExisting=.false.)
 
@@ -4949,7 +4943,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = nf90_def_dim(mapids%ncid, 'nSedTot', stmpar%lsedtot, mapids%id_tsp%id_sedtotdim)
          ierr = nf90_def_dim(mapids%ncid, 'nSedSus', stmpar%lsedsus, mapids%id_tsp%id_sedsusdim)
          ierr = nf90_def_dim(mapids%ncid, 'nBedLayers', stmpar%morlyr%settings%nlyr, mapids%id_tsp%id_nlyrdim)
-         ierr = nf90_def_dim(mapids%ncid, 'nStringlen', strlen_netcdf, mapids%id_tsp%id_strlendim)
+         ierr = nf90_def_dim(mapids%ncid, 'nStringlen', 100, mapids%id_tsp%id_strlendim)
          !
          if (.not. stmpar%morpar%moroutput%cumavg) then   ! only one average transport value at end of model run
             ierr = unc_def_var_nonspatial(mapids%ncid, mapids%id_sedavgtim, nf90_double, (/  1  /), 'sedAvgTim', '', 'Time interval over which cumulative transports are calculated', 's')
@@ -5176,7 +5170,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_mor_crs_n', nf90_double, (/ mapids%id_tsp%id_jmax, mapids%id_tsp%id_nCrs, mapids%id_tsp%id_timedim /), mapids%id_tsp%id_flowelemcrsn(1))
                ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), 'long_name','time-varying cross-section points half width')
                ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_flowelemcrsn(1), 'unit', 'm')
-               ierr = nf90_def_var(mapids%ncid, trim(mesh1dname(1:strlen_netcdf-13))//'_mor_crs_name', nf90_char, (/ mapids%id_tsp%id_strlendim, mapids%id_tsp%id_nCrs /), mapids%id_tsp%id_morCrsName)
+               ierr = nf90_def_var(mapids%ncid, trim(mesh1dname)//'_mor_crs_name', nf90_char, (/ mapids%id_tsp%id_strlendim, mapids%id_tsp%id_nCrs /), mapids%id_tsp%id_morCrsName)
                ierr = nf90_put_att(mapids%ncid, mapids%id_tsp%id_morCrsName, 'long_name','name of cross-section')
             endif
             if (stmpar%morpar%moroutput%blave) then
@@ -5455,7 +5449,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       if (ndx1d > 0 .and. stm_included) then
          if (stmpar%morpar%bedupd) then
             do i = 1,nCrs
-               ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_morCrsName,trim(network%crs%cross(i)%CSID(1:strlen_netcdf)),(/ 1, i /),(/ len(trim(network%crs%cross(i)%CSID(1:strlen_netcdf))), 1 /))  ! only write once
+               ierr = nf90_put_var(mapids%ncid, mapids%id_tsp%id_morCrsName,trim(network%crs%cross(i)%CSID),(/ 1, i /),(/ len(trim(network%crs%cross(i)%CSID)), 1 /))  ! only write once
             enddo
          endif
       endif
@@ -14178,7 +14172,7 @@ end subroutine check_error
 !    ierr = nf90_def_dim(inetfile, 'nElem', nump, id_elemdim)
 !    ierr = nf90_def_dim(inetfile, 'nNode', numk, id_nodedim)
 !    ierr = nf90_def_dim(inetfile, 'nConnect', 7, id_connectdim)
-!!    ierr = nf90_def_dim(inetfile, 'id_len', strlen_netcdf, id_strlendim)
+!!    ierr = nf90_def_dim(inetfile, 'id_len', 40, id_strlendim)
 !!    ierr = nf90_def_dim(inetfile, 'time', nf90_unlimited, id_timedim)
 !
 !    ierr = nf90_def_var(inetfile, 'grid1', nf90_int, (/ id_connectdim, id_elemdim /), id_grid1topo)
