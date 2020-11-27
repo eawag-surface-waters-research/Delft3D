@@ -864,7 +864,7 @@ module time_module
 
          character(len=:), allocatable :: date_time
          integer                       :: ipos, i, iposTZ, ipos2
-         character, parameter          :: splitters1(3) = (/ ' ', 't', 'T' /)
+         character, parameter          :: splitters1(3) = (/ 't', 'T', ' ' /)
          character, parameter          :: splitters2(4) = (/ '+', '-', 'z', 'Z' /)
          character                     :: splitter
          integer  , parameter          :: size_date = len('2020-01-01')
@@ -876,6 +876,7 @@ module time_module
          ipos = 0
          do i = 1, size(splitters1)
             ipos = max(ipos, index(date_time, splitters1(i)))
+            if (ipos > 0) exit
          end do
 
          ! search for time zone indication
@@ -900,6 +901,10 @@ module time_module
                time = adjustl(date_time(ipos+1:))
                tz   = ' '
             endif
+            if (len_trim(time) > size_time) then
+               success = .false.
+               return
+            end if
          else if (len(date_time) == size_date) then
             date = date_time
             time = ' '

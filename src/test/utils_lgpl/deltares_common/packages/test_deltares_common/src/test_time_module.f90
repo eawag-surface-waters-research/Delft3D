@@ -34,7 +34,7 @@ module test_time_module
    !!--pseudo code and references--------------------------------------------------
    ! NONE
    !!--declarations----------------------------------------------------------------
-   use precision_basics, only : hp, comparereal
+   use precision_basics, only : hp
    use time_module
    use ftnunit
    implicit none
@@ -50,8 +50,11 @@ module test_time_module
       subroutine tests_time_module
          call test( testconversion1,  'Test CalendarYearMonthDayToJulianDateNumber' )
          call test( testconversion2,  'Test julian' )
+         call test( test_split_date_time, 'Test split_date_time' )
+         call test( test_split_date_time_invalid, 'Test split_date_time with invalid input')
       end subroutine tests_time_module
 
+      !> test CalendarYearMonthDayToJulianDateNumber
       subroutine testConversion1()
 
          integer :: jdn1, jdn2, jdn3, jdn4, yyyymmdd, yyyymmdd2, istat
@@ -86,6 +89,7 @@ module test_time_module
 
       end subroutine testConversion1
 
+      !> test julian
       subroutine testConversion2()
 
          real(kind=hp) :: jdn1, jdn2, jdn3, jdn4
@@ -101,5 +105,52 @@ module test_time_module
          call assert_comparable(jdn4, 51910.0_hp, tol, 'error for 1-1-2001')
 
       end subroutine testConversion2
+
+      !> test split_date_time with valid input
+      subroutine test_split_date_time
+         character(len=10) :: date, time, tz
+         character(len=26) :: date_time
+         logical           :: success
+         character(len=26), parameter :: date_times (9) = (/ &
+            "2010-04-04 00:07:02       ", &
+            "2011-05-05T01:08:03       ", &
+            "2012-06-06 02:09:04 +02:00", &
+            "2013-07-07T03:10:05 +01:00", &
+            "2014-08-08 04:11:06 -01:00", &
+            "2015-09-09T05:12:07 -02:00", &
+            "2016-10-10 06:13:08Z      ", &
+            "2017-11-11T07:14:09Z      ", &
+            "2018-12-12                " /)
+         integer :: i
+
+         do i = 1, size(date_times)
+            date_time = date_times(i)
+            success = split_date_time(date_time, date, time, tz)
+            call assert_true(success, 'success for ' // date_time)
+            call assert_equal(date, date_time(1:10), 'diff. in date for ' // date_time)
+            call assert_equal(time, date_time(12:19), 'diff. in time for ' // date_time)
+            call assert_equal(tz, adjustl(date_time(20:)), 'diff. in time zone for ' // date_time)
+         end do
+
+      end subroutine test_split_date_time
+
+      !> test split_date_time with invalid input
+      subroutine test_split_date_time_invalid
+         character(len=16) :: date, time, tz
+         character(len=26) :: date_time
+         logical           :: success
+         character(len=26), parameter :: date_times (3) = (/ &
+            "2010-04                   ", &  ! date to short
+            "2011-05-05Q01:08:03       ", &  ! Q as separator
+            "2012-06-06 02:09:04  02:00" /)  ! no sign in time zone
+         integer :: i
+
+         do i = 1, size(date_times)
+            date_time = date_times(i)
+            success = split_date_time(date_time, date, time, tz)
+            call assert_false(success, 'unexpected success for ' // date_time)
+         end do
+
+      end subroutine test_split_date_time_invalid
 
 end module test_time_module
