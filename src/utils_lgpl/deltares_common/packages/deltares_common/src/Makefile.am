@@ -45,7 +45,6 @@ libDeltaresCommon_la_SOURCES = \
 	distance.f90 \
 	time_module.f90 \
 	time_class.f90 \
-	time_module_tests.f90 \
 	handles.f90 \
 	tables.f90 \
 	table_handles.f90 \

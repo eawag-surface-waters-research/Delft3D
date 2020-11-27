@@ -32,6 +32,7 @@ program test_deltares_common
     use test_string_module
     use test_properties
     use test_geometry_module
+    use test_time_module
 
     implicit none
 
@@ -48,6 +49,7 @@ program test_deltares_common
     call tests_bilin5
     call tests_distance
     call tests_string_module
+    call tests_time_module
     !
     ! The following test crashes on Linux. Only green tests should be added.
     call tests_properties

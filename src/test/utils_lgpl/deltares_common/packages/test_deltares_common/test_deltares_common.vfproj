@@ -57,5 +57,6 @@
 		<File RelativePath=".\src\test_precision_basics.f90"/>
 		<File RelativePath=".\src\test_properties.f90"/>
 		<File RelativePath=".\src\test_sorting_algorithms.f90"/>
-		<File RelativePath=".\src\test_string_module.f90"/></Filter></Files>
+		<File RelativePath=".\src\test_string_module.f90"/>
+		<File RelativePath=".\src\test_time_module.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

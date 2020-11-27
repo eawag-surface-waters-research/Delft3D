@@ -1,4 +1,4 @@
-module time_module_tests
+module test_time_module
    !----- LGPL --------------------------------------------------------------------
    !                                                                               
    !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -29,124 +29,77 @@ module time_module_tests
    !  $HeadURL$
    !!--description-----------------------------------------------------------------
    !
-   !    Function: - Tests for various time processing routines
+   !    Function: - Tests for various time and date processing routines
    !
    !!--pseudo code and references--------------------------------------------------
    ! NONE
    !!--declarations----------------------------------------------------------------
    use precision_basics, only : hp, comparereal
    use time_module
+   use ftnunit
    implicit none
 
    private
 
-   public :: testconversion1, testconversion2
+   real(kind=hp), parameter :: tol = 1d-9
+
+   public :: tests_time_module
 
    contains
 
-      subroutine testConversion1(success, errMessage)
-         logical,          intent(out) :: success
-         character(len=*), intent(out) :: errMessage
+      subroutine tests_time_module
+         call test( testconversion1,  'Test CalendarYearMonthDayToJulianDateNumber' )
+         call test( testconversion2,  'Test julian' )
+      end subroutine tests_time_module
+
+      subroutine testConversion1()
 
          integer :: jdn1, jdn2, jdn3, jdn4, yyyymmdd, yyyymmdd2, istat
          real(kind=hp) :: mjd, mjd2
-
-         success = .false.
 
          jdn1 = CalendarYearMonthDayToJulianDateNumber(1, 1, 1)
          jdn2 = CalendarYearMonthDayToJulianDateNumber(1582, 10, 4)
          jdn3 = CalendarYearMonthDayToJulianDateNumber(1582, 10, 15)
          jdn4 = CalendarYearMonthDayToJulianDateNumber(2001, 1, 1)
 
-         if (jdn1 /= 1721424) then
-            errMessage = 'error for 1-1-1'
-            return
-         endif
-         if (jdn2 /= 2299160) then
-            errMessage = 'error for 4-10-1582'
-            return
-         endif
-         if (jdn3 /= 2299161) then
-            errMessage = 'error for 15-10-1582'
-            return
-         endif
-         if (jdn4 /= 2451911) then
-            errMessage = 'error for 1-1-2001'
-            return
-         endif
+         call assert_equal(jdn1, 1721424, 'error for 1-1-1')
+         call assert_equal(jdn2, 2299160, 'error for 4-10-1582')
+         call assert_equal(jdn3, 2299161, 'error for 15-10-1582')
+         call assert_equal(jdn4, 2451911, 'error for 1-1-2001')
 
-         mjd = 55833.5
+         mjd = 55833.5_hp
          istat = mjd2date(mjd, yyyymmdd)
          mjd2 = date2mjd(yyyymmdd)
-         if (mjd /= mjd2) then
-            errMessage = 'error for mjd=55833.5'
-            return
-         endif
+         call assert_comparable (mjd, mjd2, tol, 'error for mjd=55833.5')
 
          yyyymmdd = 15821015
          mjd = date2mjd(yyyymmdd)
          istat = mjd2date(mjd, yyyymmdd2)
-         if (yyyymmdd /= yyyymmdd2) then
-            errMessage = 'error for yyyymmdd = 15821015'
-            return
-         endif
+         call assert_equal (yyyymmdd, yyyymmdd2, 'error for yyyymmdd = 15821015')
 
          yyyymmdd = 15821004
          mjd2 = date2mjd(yyyymmdd)
          istat = mjd2date(mjd2, yyyymmdd2)
-         if (istat == 0) then
-            errMessage = 'mjd2date failed for yyyymmdd = 15821004'
-            return
-         endif
-         if (yyyymmdd /= yyyymmdd2) then
-            errMessage = 'error for yyyymmdd = 15821004'
-            return
-         endif
-         if (abs(mjd - mjd2 - 1d0) > 1d-4) then
-            errMessage = 'error for jump 15821004 -> 15821015'
-            return
-         endif
-
-         errMessage = ' '
-         success = .true.
+         call assert_equal (istat, 1, 'mjd2date failed for yyyymmdd = 15821004')
+         call assert_equal (yyyymmdd, yyyymmdd2, 'error for yyyymmdd = 15821004')
+         call assert_false (abs(mjd - mjd2 - 1d0) > 1d-4, 'error for jump 15821004 -> 15821015')
 
       end subroutine testConversion1
 
-      subroutine testConversion2(success, errMessage)
-         logical,          intent(out) :: success
-         character(len=*), intent(out) :: errMessage
+      subroutine testConversion2()
 
-         integer :: yyyymmdd, yyyymmdd2, istat
-         integer :: iyear , imonth, iday, ihour, imin, isec
-         real(kind=hp) :: jdn1, jdn2, jdn3, jdn4, djul, dsec
-         real(kind=hp), parameter :: tol = 1d-9
-
-         success = .false.
+         real(kind=hp) :: jdn1, jdn2, jdn3, jdn4
 
          jdn1 = julian(00010101, 0)
          jdn2 = julian(15821004, 0)
          jdn3 = julian(15821015, 0)
          jdn4 = julian(20010101, 0)
 
-         if (comparereal(jdn1, -678577.0_hp, tol) /= 0) then
-            errMessage = 'error for 1-1-1'
-            return
-         endif
-         if (comparereal(jdn2, -100841.0_hp, tol) /= 0) then
-            errMessage = 'error for 4-10-1582'
-            return
-         endif
-         if (comparereal(jdn3, -100840.0_hp, tol) /= 0) then
-            errMessage = 'error for 15-10-1582'
-            return
-         endif
-         if (comparereal(jdn4, 51910.0_hp, tol) /= 0) then
-            errMessage = 'error for 1-1-2001'
-            return
-         endif
-
-         success = .true.
+         call assert_comparable(jdn1, -678577.0_hp, tol, 'error for 1-1-1')
+         call assert_comparable(jdn2, -100841.0_hp, tol, 'error for 4-10-1582')
+         call assert_comparable(jdn3, -100840.0_hp, tol, 'error for 15-10-1582')
+         call assert_comparable(jdn4, 51910.0_hp, tol, 'error for 1-1-2001')
 
       end subroutine testConversion2
 
-end module time_module_tests
+end module test_time_module

@@ -19,6 +19,7 @@ test_deltares_common_SOURCES = \
 	test_properties.f90 \
 	test_sorting_algorithms.f90 \
 	test_string_module.f90 \
+	test_time_module.f90 \
 	test_deltares_common.f90
 
 #-------------------------------------------------------------------------------

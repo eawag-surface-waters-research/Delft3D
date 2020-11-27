@@ -3085,6 +3085,7 @@ src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_preci
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_properties.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_sorting_algorithms.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_string_module.f90 -text
+src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_time_module.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/no-chapters.ini -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/simple-file.ini -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/test_fileversion.ini -text
@@ -17204,7 +17205,6 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/table_handles.f90 -t
 src/utils_lgpl/deltares_common/packages/deltares_common/src/tables.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/time_class.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/time_module.f90 -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/time_module_tests.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/timers.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/tree_struct.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/util.f90 -text
