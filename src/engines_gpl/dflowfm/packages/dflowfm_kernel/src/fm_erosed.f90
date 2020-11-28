@@ -287,7 +287,7 @@
                !
                iref = cdef%levelscount
                do i = 2, cdef%levelscount - 1
-                  if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm)
+                  if ( comparereal(cdef%flowWidth(i+1), cdef%plains(1)) == 1 ) then ! or cdef%height(i)>s1(nm)
                      iref = i
                      exit
                   endif
@@ -557,7 +557,7 @@
                !
                iref = cdef%levelscount
                do i = 2, cdef%levelscount - 1
-                  if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm)
+                  if ( comparereal(cdef%flowWidth(i+1), cdef%plains(1)) == 1 ) then ! or cdef%height(i)>s1(nm)
                      iref = i
                      exit
                   endif
