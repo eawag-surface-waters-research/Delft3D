@@ -21571,15 +21571,15 @@ subroutine unc_write_his(tim)            ! wrihis
         do i=1,numobs+nummovobs
 !           ierr = nf90_put_var(ihisfile, id_statx,    xobs(i),         (/ i /))
 !           ierr = nf90_put_var(ihisfile, id_staty,    yobs(i),         (/ i /))
-           ierr = nf90_put_var(ihisfile, id_statid, mytrim(namobs(i), strlen_netcdf), (/ 1, i /)) ! Extra for OpenDA-wrapper
-           ierr = nf90_put_var(ihisfile, id_statname, mytrim(namobs(i), strlen_netcdf), (/ 1, i /))
+           ierr = nf90_put_var(ihisfile, id_statid, trim(namobs(i)(1:strlen_netcdf)), (/ 1, i /)) ! Extra for OpenDA-wrapper
+           ierr = nf90_put_var(ihisfile, id_statname, trim(namobs(i)(1:strlen_netcdf)), (/ 1, i /))
         end do
         
         if (ncrs > 0) then
             do i=1,ncrs
                 !ierr = nf90_put_var(ihisfile, id_crsx,     crs(i)%path%xp(1:crs(i)%path%np), (/ 1, i /))
                 !ierr = nf90_put_var(ihisfile, id_crsy,     crs(i)%path%yp(1:crs(i)%path%np), (/ 1, i /))
-                ierr = nf90_put_var(ihisfile, id_crsname,  mytrim(crs(i)%name, strlen_netcdf),      (/ 1, i /))
+                ierr = nf90_put_var(ihisfile, id_crsname,  trim(crs(i)%name(1:strlen_netcdf)),      (/ 1, i /))
             end do
             ! write geometry variables at the first time of history output
             j = 1
@@ -21623,8 +21623,8 @@ subroutine unc_write_his(tim)            ! wrihis
         
         if (nrug>0) then
             do i=1,nrug
-                ierr = nf90_put_var(ihisfile, id_rugname,  mytrim(rug(i)%name, strlen_netcdf), (/ 1, i /))
-                ierr = nf90_put_var(ihisfile, id_rugid,    mytrim(rug(i)%name, strlen_netcdf), (/ 1, i /))
+                ierr = nf90_put_var(ihisfile, id_rugname,  trim(rug(i)%name(1:strlen_netcdf)), (/ 1, i /))
+                ierr = nf90_put_var(ihisfile, id_rugid,    trim(rug(i)%name(1:strlen_netcdf)), (/ 1, i /))
             end do   
         endif   
 
@@ -21635,60 +21635,60 @@ subroutine unc_write_his(tim)            ! wrihis
                else
                   if (network%sts%numGeneralStructures > 0) then
                      istru = network%sts%generalStructureIndices(i)
-                     ierr = nf90_put_var(ihisfile, id_genstru_id, mytrim(network%sts%struct(istru)%id, strlen_netcdf),  (/ 1, i /))
+                     ierr = nf90_put_var(ihisfile, id_genstru_id,  trim(network%sts%struct(istru)%id(1:strlen_netcdf)),  (/ 1, i /))
                      cycle
                   else
                      igen = genstru2cgen(i)
                   end if
                end if
 
-               ierr = nf90_put_var(ihisfile, id_genstru_id,  mytrim(cgen_ids(igen), strlen_netcdf), (/ 1, i /))
+               ierr = nf90_put_var(ihisfile, id_genstru_id,  trim(cgen_ids(igen)(1:strlen_netcdf)), (/ 1, i /))
             end do
         end if
 
         if (jahisorif > 0 .and. network%sts%numOrifices > 0) then
            do i = 1, network%sts%numOrifices
               istru = network%sts%orificeIndices(i)
-              ierr = nf90_put_var(ihisfile, id_orifgen_id, mytrim(network%sts%struct(istru)%id, strlen_netcdf),  (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_orifgen_id,  trim(network%sts%struct(istru)%id(1:strlen_netcdf)),  (/ 1, i /))
            end do
         end if
 
         if (jahisbridge > 0 .and. network%sts%numBridges > 0) then
            do i = 1, network%sts%numBridges
               istru = network%sts%bridgeIndices(i)
-              ierr = nf90_put_var(ihisfile, id_bridge_id,  mytrim(network%sts%struct(istru)%id, strlen_netcdf),  (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_bridge_id,  trim(network%sts%struct(istru)%id(1:strlen_netcdf)),  (/ 1, i /))
            end do
         end if
 
         if (jahisculv > 0 .and. network%sts%numCulverts > 0) then
            do i = 1, network%sts%numCulverts
               istru = network%sts%culvertIndices(i)
-              ierr = nf90_put_var(ihisfile, id_culvert_id, mytrim(network%sts%struct(istru)%id, strlen_netcdf),  (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_culvert_id,  trim(network%sts%struct(istru)%id(1:strlen_netcdf)),  (/ 1, i /))
            end do
         end if
 
         if (jahisuniweir > 0 .and. network%sts%numuniweirs > 0) then
            do i = 1, network%sts%numuniweirs
               istru = network%sts%uniweirIndices(i)
-              ierr = nf90_put_var(ihisfile, id_uniweir_id,  mytrim(network%sts%struct(istru)%id, strlen_netcdf),  (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_uniweir_id,  trim(network%sts%struct(istru)%id(1:strlen_netcdf)),  (/ 1, i /))
            end do
         end if
 
         if (jahiscmpstru > 0 .and. network%cmps%count > 0) then
            do i = 1, network%cmps%count
-              ierr = nf90_put_var(ihisfile, id_cmpstru_id,  mytrim(network%cmps%compound(i)%id, strlen_netcdf),  (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_cmpstru_id,  trim(network%cmps%compound(i)%id(1:strlen_netcdf)),  (/ 1, i /))
            end do
         end if
 
         if (jahislateral > 0 .and. numlatsg > 0) then
            do i = 1, numlatsg
-              ierr = nf90_put_var(ihisfile, id_lat_id,  mytrim(lat_ids(i), strlen_netcdf), (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_lat_id,  trim(lat_ids(i)(1:strlen_netcdf)), (/ 1, i /))
            end do
         end if
 
         if (jahispump > 0 .and. npumpsg > 0) then
             do i=1,npumpsg
-               ierr = nf90_put_var(ihisfile, id_pump_id,  mytrim(pump_ids(i), strlen_netcdf),      (/ 1, i /))
+               ierr = nf90_put_var(ihisfile, id_pump_id,  trim(pump_ids(i)(1:strlen_netcdf)),      (/ 1, i /))
 
                ! NOTE: the code below is now only active for pumps (DELFT3D-36341). Should be
                ! generalized for all structure locations that are polyline based.
@@ -21736,43 +21736,43 @@ subroutine unc_write_his(tim)            ! wrihis
         end if
         if (jahisgate > 0 .and. ngatesg > 0) then
             do i=1,ngatesg
-               ierr = nf90_put_var(ihisfile, id_gatename,  mytrim(gate_ids(i), strlen_netcdf),      (/ 1, i /))
+               ierr = nf90_put_var(ihisfile, id_gatename,  trim(gate_ids(i)(1:strlen_netcdf)),      (/ 1, i /))
             end do
         end if
         if (jahisgate > 0 .and. ngategen > 0) then
            do i=1,ngategen
               igen = gate2cgen(i)
-              ierr = nf90_put_var(ihisfile, id_gategenname,  mytrim(cgen_ids(igen), strlen_netcdf),      (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_gategenname,  trim(cgen_ids(igen)(1:strlen_netcdf)),      (/ 1, i /))
            end do
         end if
         if (jahiscdam > 0 .and. ncdamsg > 0) then
             do i=1,ncdamsg
-               ierr = nf90_put_var(ihisfile, id_cdamname,  mytrim(cdam_ids(i), strlen_netcdf),      (/ 1, i /))
+               ierr = nf90_put_var(ihisfile, id_cdamname,  trim(cdam_ids(i)(1:strlen_netcdf)),      (/ 1, i /))
             end do
         end if
         if (jahisweir > 0 .and. nweirgen > 0 ) then
            if (allocated(weir2cgen)) then
               do i=1,nweirgen
                  igen = weir2cgen(i)
-                 ierr = nf90_put_var(ihisfile, id_weirgen_id,  mytrim(cgen_ids(igen), strlen_netcdf),      (/ 1, i /))
+                 ierr = nf90_put_var(ihisfile, id_weirgen_id,  trim(cgen_ids(igen)(1:strlen_netcdf)),      (/ 1, i /))
               end do
            else if (network%sts%numWeirs > 0) then
               do i=1,nweirgen
                  istru = network%sts%weirIndices(i)
-                 ierr = nf90_put_var(ihisfile, id_weirgen_id,  mytrim(network%sts%struct(istru)%id, strlen_netcdf),      (/ 1, i /))
+                 ierr = nf90_put_var(ihisfile, id_weirgen_id,  trim(network%sts%struct(istru)%id(1:strlen_netcdf)),      (/ 1, i /))
               end do
            end if
         end if
 
         if (jahisdambreak > 0 .and. ndambreak > 0) then
             do i = 1,ndambreaksg
-               ierr = nf90_put_var(ihisfile, id_dambreak_id, mytrim(dambreak_ids(i), strlen_netcdf),(/ 1, i /))
+               ierr = nf90_put_var(ihisfile, id_dambreak_id, trim(dambreak_ids(i)(1:strlen_netcdf)),(/ 1, i /))
             end do
         end if
 
         if (jased>0 .and. stm_included .and. jahissed>0) then
            do i=1,stmpar%lsedtot
-              ierr = nf90_put_var(ihisfile, id_frac_name, mytrim(stmpar%sedpar%namsed(i), strlen_netcdf), (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_frac_name, trim(stmpar%sedpar%namsed(i)(1:strlen_netcdf)), (/ 1, i /))
            enddo
         end if
 
@@ -21784,11 +21784,11 @@ subroutine unc_write_his(tim)            ! wrihis
            !ierr = nf90_put_var(ihisfile, id_frac_name, 'subsoil sediment', (/ 1, stmpar%lsedtot+1 /))        ! rest category
            !
            do i=1,(dadpar%nadred+dadpar%nasupl)
-              ierr = nf90_put_var(ihisfile, id_dred_name, mytrim(dadpar%dredge_areas(i), strlen_netcdf), (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_dred_name, trim(dadpar%dredge_areas(i)(1:strlen_netcdf)), (/ 1, i /))
            enddo
            !
            do i=1,dadpar%nadump
-              ierr = nf90_put_var(ihisfile, id_dump_name, mytrim(dadpar%dump_areas(i), strlen_netcdf), (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_dump_name, trim(dadpar%dump_areas(i)(1:strlen_netcdf)), (/ 1, i /))
            enddo
         endif
     endif
@@ -22897,13 +22897,7 @@ subroutine unc_write_his(tim)            ! wrihis
     end if
 
     ierr = nf90_sync(ihisfile) ! Flush file
-   contains
-   function mytrim(string, length) result(trimmed)
-      character(len=*), intent(in) :: string
-      integer,          intent(in) :: length
-      character(len=length)        :: trimmed
-      trimmed = string
-   end function mytrim
+
 end subroutine unc_write_his
 
 !> write particles header to netcdf file
