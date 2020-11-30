@@ -22,7 +22,6 @@
     use m_ec_provider
     use properties
     use string_module
-    use time_module_tests
     use time_class
     use m_ec_unit_tests
     use tree_data_types
@@ -885,24 +884,6 @@ contains
        character(len=100) :: testname
        character(len=300) :: errMessage
        logical            :: success
-
-       testname = 'time_module_unittests_1'
-       call TCMessage(testname,'','testStarted')
-       call testConversion1(success, errMessage)
-       if (success) then
-         call TCMessage(testname,'Comparison passed','testFinished')
-       else
-         call TCMessage(testname, errMessage, 'testFinished')
-       endif
-
-       testname = 'time_module_unittests_2'
-       call TCMessage(testname,'','testStarted')
-       call testConversion2(success, errMessage)
-       if (success) then
-         call TCMessage(testname,'Comparison passed','testFinished')
-       else
-         call TCMessage(testname, errMessage, 'testFinished')
-       endif
 
        testname = 'ec_support_unittests'
        call TCMessage(testname,'','testStarted')
