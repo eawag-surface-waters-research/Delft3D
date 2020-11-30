@@ -108,7 +108,7 @@ module test_time_module
 
       !> test split_date_time with valid input
       subroutine test_split_date_time
-         character(len=10) :: date, time, tz
+         character(len=16) :: date, time, tz
          character(len=26) :: date_time
          logical           :: success
          character(len=26), parameter :: date_times (9) = (/ &
@@ -131,6 +131,13 @@ module test_time_module
             call assert_equal(time, date_time(12:19), 'diff. in time for ' // date_time)
             call assert_equal(tz, adjustl(date_time(20:)), 'diff. in time zone for ' // date_time)
          end do
+
+         date_time = "2014-08-08 04:11:06.123"  ! longer time: has a fractial number of seconds
+         success = split_date_time(date_time, date, time, tz)
+         call assert_true(success, 'success for ' // date_time)
+         call assert_equal(date, date_time(1:10), 'diff. in date for ' // date_time)
+         call assert_equal(time, date_time(12:), 'diff. in time for ' // date_time)
+         call assert_equal(tz, ' ', 'diff. in time zone for ' // date_time)
 
       end subroutine test_split_date_time
 

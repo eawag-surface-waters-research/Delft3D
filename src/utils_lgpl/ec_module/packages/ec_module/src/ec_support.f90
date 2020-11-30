@@ -907,13 +907,13 @@ end subroutine ecInstanceListSourceItems
          end if
          ! Determine the reference date.
          i = index(string, 'since') + 6
-         ok = split_date_time(string(i:), date, time, tz)
-         if (.not. ok) then
-            call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: splitting of date and time fails. Date time = ", string(i:))
-            return
-         end if
-
          if (i /= 6) then
+            ok = split_date_time(string(i:), date, time, tz)
+            if (.not. ok) then
+               call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: splitting of date and time fails. Date time = ", string(i:))
+               return
+            end if
+
             ! Date
             if (ymd2reduced_jul(date, ref_date)) then
                ! Time
@@ -932,6 +932,7 @@ end subroutine ecInstanceListSourceItems
             endif
          else
             ok = ecSupportTimestringArcInfo(string, ref_date)
+            tz = ' '
          endif
          if (.not. ok) then
             call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since.")

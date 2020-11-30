@@ -902,7 +902,7 @@ module time_module
                tz   = ' '
             endif
             if (len_trim(time) > size_time) then
-               success = .false.
+               success = index(time, '.') > 0 ! allow longer time string if it includes a dot
                return
             end if
          else if (len(date_time) == size_date) then
