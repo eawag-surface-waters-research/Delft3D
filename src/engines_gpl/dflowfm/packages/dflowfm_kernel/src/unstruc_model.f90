@@ -1646,6 +1646,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_damBreak', jahisdambreak,  success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_uniWeir', jahisuniweir,  success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_compound', jahiscmpstru,  success)
+    call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_longculvert', jahislongculv,  success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_turbulence', jahistur, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_wind', jahiswind, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_rain', jahisrain, success)
@@ -2363,7 +2364,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_fm_wq_processes
     use m_trachy
     use m_transport, only: ITRA1
-    use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir, jahisorif, jahisbridge, jahisculv, jahisdambreak, jahisuniweir, jahiscmpstru
+    use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir, jahisorif, jahisbridge, jahisculv, jahisdambreak, jahisuniweir, jahiscmpstru, jahislongculv
     use m_sobekdfm,              only : sbkdfm_umin, sbkdfm_umin_method, minimal_1d2d_embankment, sbkdfm_relax
     use m_subsidence, only: sdu_update_s1
 
@@ -3412,6 +3413,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jahiscmpstru /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_structure_compound', jahiscmpstru, 'Write compound structure parameters to his file (1: yes, 0: no)' )
+    endif
+    if (writeall .or. jahislongculv /= 1) then
+       call prop_set(prop_ptr, 'output', 'Wrihis_structure_longculvert', jahislongculv, 'Write long culvert parameters to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahistur /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_turbulence', jahistur, 'Write k, eps and vicww to his file (1: yes, 0: no)' )

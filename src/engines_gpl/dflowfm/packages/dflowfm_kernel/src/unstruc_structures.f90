@@ -165,6 +165,15 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (5,:) compound structure head
                                                               !<                      (6,:) compound structure flow area
                                                               !<                      (7,:) compound structure velocity
+ double precision, dimension(:,:), allocatable :: vallongculvert!< Array for long culvert, (1,:) flow link width, used for averaging.
+                                                              !<                      (2,:) discharge through long culvert
+                                                              !<                      (3,:) long culvert water level up
+                                                              !<                      (4,:) long culvert water level down
+                                                              !<                      (5,:) long culvert structure head
+                                                              !<                      (6,:) long culvert flow area
+                                                              !<                      (7,:) long culvert velocity
+                                                              !<                      (8,:) long culvert relative valve opening
+                                                              !<                      (9,:) TODO: UNST-4644:long culvert counters of partitions for parallel
 
  integer                           :: NUMVALS_PUMP = 12       !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
@@ -179,6 +188,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_CULVERT = 11    !< Number of variables for culvert
  integer                           :: NUMVALS_UNIWEIR = 8     !< Number of variables for univeral weir
  integer                           :: NUMVALS_CMPSTRU = 7     !< Number of variables for compound structure
+ integer                           :: NUMVALS_LONGCULVERT = 8 !< Number of variables for long culvert, TODO:UNST-4644: for parallel, the value should be 9
  
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
  integer                           :: jahispump               !< Write pump      parameters to his file, 0: n0, 1: yes
@@ -191,6 +201,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: jahisculv               !< Write culvert   parameters to his file, 0: no, 1: yes
  integer                           :: jahisuniweir            !< Write univeral weir parameters to his file, 0: no, 1: yes
  integer                           :: jahiscmpstru            !< Write compound structure parameters to his file, 0: no, 1: yes
+ integer                           :: jahislongculv           !< Write long culverts parameters to his file, 0: no, 1:yes
  
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
@@ -219,6 +230,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       !                        NUMVALS_GATEGEN, NUMVALS_WEIRGEN, NUMVALS_GENSTRU
       use m_alloc
       use m_flowtimes, only: ti_rst
+      use m_longculverts, only: nlongculvertsg
       implicit none
 
       if( jahispump > 0 .and. npumpsg > 0) then
@@ -285,6 +297,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
          if( allocated( valcmpstru ) ) deallocate( valcmpstru )
          allocate( valcmpstru(NUMVALS_CMPSTRU,network%cmps%count) ) ; valcmpstru = 0d0
       endif
+      if( jahislongculv > 0 .and. nlongculvertsg > 0) then
+         if( allocated( vallongculvert) ) deallocate( vallongculvert )
+         allocate( vallongculvert(NUMVALS_LONGCULVERT,nlongculvertsg) ) ; vallongculvert = 0d0
+      endif
 
 ! TIDAL TURBINES: Insert init_turbines here
 
@@ -312,6 +328,7 @@ call reset_structures()
    jahisdambreak = 1
    jahisuniweir = 1
    jahiscmpstru = 1
+   jahislongculv = 1
 
 end subroutine default_structures
 
@@ -363,7 +380,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    double precision,               intent(in   ) :: dir         !< Direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
    integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                                                 !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
-   integer,                        intent(in   ) :: istru       !< Structure index in network%sts set.
+   integer,                        intent(in   ) :: istru       !< Structure index in network%sts set or in longculverts.
    integer,                        intent(in   ) :: L0          !< Local flow link index in the struct%linknumbers array.
 
    integer :: ku, kd, k1, k2
@@ -490,7 +507,7 @@ subroutine average_valstruct(valstruct, istrtypein, istru, nlinks, icount)
                                                                 !< (icount) counters of partitions for parallel
    integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                                                 !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
-   integer,                        intent(in   ) :: istru       !< Structure index in network%sts set.
+   integer,                        intent(in   ) :: istru       !< Structure index in network%sts set or in longculverts
    integer,                        intent(in   ) :: nlinks      !< Number of flow links for this structure (on the current partition)
    integer,                        intent(in   ) :: icount      !< Index of the counter element in valstruct array,
                                                                 !! it is the last element of the array.
@@ -831,6 +848,8 @@ end function get_istru
 !! of a structure on flow links.
 integer function get_number_of_geom_nodes(istrtypein, i)
    use m_1d_structures
+   use m_longculverts
+   use m_GlobalParameters, only: ST_LONGCULVERT
    implicit none
    integer, intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                          !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
@@ -839,19 +858,22 @@ integer function get_number_of_geom_nodes(istrtypein, i)
    integer :: istru, nLinks
    type(t_structure), pointer    :: pstru
 
+   if (istrtypein == ST_LONGCULVERT) then
+      get_number_of_geom_nodes = longculverts(i)%numlinks+1
+   else
+      istru = get_istru(istrtypein, i)
 
-   istru = get_istru(istrtypein, i)
-
-   pstru => network%sts%struct(istru)
-   nLinks = pstru%numlinks
-   if (nLinks > 0) then
-      ! "2D" representation: nLinks+1 polyline points.
-      ! TODO: for multiple 1D links in a single structure, we could consider
-      !       a multi-part polyline. That would mean: get_number_of_geom_nodes = 2*nLinks
-      get_number_of_geom_nodes = nLinks + 1
-   else if (nLinks == 0) then
-      ! When no links: empty geometry.
-      get_number_of_geom_nodes = 0
+      pstru => network%sts%struct(istru)
+      nLinks = pstru%numlinks
+      if (nLinks > 0) then
+         ! "2D" representation: nLinks+1 polyline points.
+         ! TODO: for multiple 1D links in a single structure, we could consider
+         !       a multi-part polyline. That would mean: get_number_of_geom_nodes = 2*nLinks
+         get_number_of_geom_nodes = nLinks + 1
+      else if (nLinks == 0) then
+         ! When no links: empty geometry.
+         get_number_of_geom_nodes = 0
+      end if
    end if
 
 end function get_number_of_geom_nodes
@@ -885,6 +907,8 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
    use m_alloc
    use m_flowgeom, only: lncn
    use network_data, only: xk, yk
+   use m_longculverts
+   use m_GlobalParameters, only: ST_LONGCULVERT
    implicit none
    integer,                       intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                                                !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
@@ -897,15 +921,25 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
    double precision :: dtmp
    type(t_structure), pointer    :: pstru
 
-   istru = get_istru(istrtypein, i)
-   pstru => network%sts%struct(istru)
-   nLinks = pstru%numlinks
+   if (istrtypein == ST_LONGCULVERT) then
+      nLinks = longculverts(i)%numlinks
+   else
+      istru = get_istru(istrtypein, i)
+      pstru => network%sts%struct(istru)
+      nLinks = pstru%numlinks
+   end if
+
 
    if (nNodes > 0) then
       call realloc(x, nNodes, keepExisting = .false.)
       call realloc(y, nNodes, keepExisting = .false.)
 
-      L = abs(pstru%linknumbers(1))
+      if (istrtypein == ST_LONGCULVERT) then
+         L = longculverts(i)%flowlinks(1)
+      else
+         L = abs(pstru%linknumbers(1))
+      end if
+
       k1 = lncn(1,L)
       k2 = lncn(2,L)
 
@@ -915,7 +949,11 @@ subroutine get_geom_coordinates_of_structure(istrtypein, i, nNodes, x, y)
       y(2) = yk(k2)
       k = 3
       do L0 = 2, nLinks
-         L = abs(pstru%linknumbers(L0))
+         if (istrtypein == ST_LONGCULVERT) then
+            L = longculverts(i)%flowlinks(L0)
+         else
+            L = abs(pstru%linknumbers(L0))
+         end if
          k3 = lncn(1,L)
          k4 = lncn(2,L)
          if (L0 == 2) then

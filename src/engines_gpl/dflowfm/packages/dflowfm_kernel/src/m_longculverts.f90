@@ -31,7 +31,7 @@ module m_longculverts
       double precision                               :: height                     !< Height of the rectangular culvert
       double precision                               :: valve_relative_opening     !< Relative valve opening: 0 = fully closed, 1 = fully open
    end type                              
-   type(t_longculvert), dimension(:), allocatable     :: longculverts               !< Array containing long culvert data (size >= nlongculvertsg)              
+   type(t_longculvert), dimension(:), allocatable, public     :: longculverts               !< Array containing long culvert data (size >= nlongculvertsg)              
    integer, public                                    :: nlongculvertsg             !< Number of longculverts               
 
    interface realloc

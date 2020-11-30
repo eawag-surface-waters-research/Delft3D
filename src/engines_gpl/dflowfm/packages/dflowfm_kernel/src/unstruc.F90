@@ -19317,6 +19317,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_1d_structures
     use m_structures
     use m_GlobalParameters
+    use m_longculverts
 
     implicit none
 
@@ -19366,24 +19367,26 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_dambreak_breach_width_time_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
                      id_cmpstrudim, id_cmpstru_id, id_cmpstru_dis, id_cmpstru_s1up,  id_cmpstru_s1dn, &
                      id_cmpstru_vel, id_cmpstru_au, id_cmpstru_head, &
+                     id_longculvertdim, id_longculvert_id, id_longculvert_dis, id_longculvert_s1up,  id_longculvert_s1dn, id_longculvert_vel, id_longculvert_au,  id_longculvert_head, id_longculvert_valveopen,&
                      id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy, &
                      id_varucxq, id_varucyq, id_sf, id_ws, id_seddif, id_sink, id_sour, id_sedsusdim, &
                      id_latdim, id_lat_id, id_lat_predis_inst, id_lat_predis_ave, id_lat_realdis_inst, id_lat_realdis_ave, &
                      id_ustx, id_usty, id_nlyrdim, id_bodsed, id_dpsed, id_msed, id_thlyr, id_poros, id_lyrfrac, id_frac, id_mudfrac, id_sandfrac, id_fixfac, id_hidexp, id_mfluff, &
                      id_rugdim, id_rugx, id_rugy, id_rugid, id_rugname, id_varruh
     ! ids for geometry variables, only use them once at the first time of history output
-    integer :: id_statgeom_node_count,     id_statgeom_node_coordx,     id_statgeom_node_coordy,    &
-               id_crsgeom_node_count,      id_crsgeom_node_coordx,      id_crsgeom_node_coordy,     &
-               id_weirgeom_node_count,     id_weirgeom_node_coordx,     id_weirgeom_node_coordy,    &
-               id_orifgeom_node_count,     id_orifgeom_node_coordx,     id_orifgeom_node_coordy,    &
-               id_genstrugeom_node_count,  id_genstrugeom_node_coordx,  id_genstrugeom_node_coordy, &
-               id_uniweirgeom_node_count,  id_uniweirgeom_node_coordx,  id_uniweirgeom_node_coordy, &
-               id_culvertgeom_node_count,  id_culvertgeom_node_coordx,  id_culvertgeom_node_coordy, &
-               id_gategengeom_node_count,  id_gategengeom_node_coordx,  id_gategengeom_node_coordy, &
-               id_pumpgeom_node_count,     id_pumpgeom_node_coordx,     id_pumpgeom_node_coordy,    &
-               id_bridgegeom_node_count,   id_bridgegeom_node_coordx,   id_bridgegeom_node_coordy,  &
-               id_srcgeom_node_count,      id_srcgeom_node_coordx,      id_srcgeom_node_coordy,     &
-               id_latgeom_node_count,      id_latgeom_node_coordx,      id_latgeom_node_coordy
+    integer :: id_statgeom_node_count,        id_statgeom_node_coordx,        id_statgeom_node_coordy,    &
+               id_crsgeom_node_count,         id_crsgeom_node_coordx,         id_crsgeom_node_coordy,     &
+               id_weirgeom_node_count,        id_weirgeom_node_coordx,        id_weirgeom_node_coordy,    &
+               id_orifgeom_node_count,        id_orifgeom_node_coordx,        id_orifgeom_node_coordy,    &
+               id_genstrugeom_node_count,     id_genstrugeom_node_coordx,     id_genstrugeom_node_coordy, &
+               id_uniweirgeom_node_count,     id_uniweirgeom_node_coordx,     id_uniweirgeom_node_coordy, &
+               id_culvertgeom_node_count,     id_culvertgeom_node_coordx,     id_culvertgeom_node_coordy, &
+               id_gategengeom_node_count,     id_gategengeom_node_coordx,     id_gategengeom_node_coordy, &
+               id_pumpgeom_node_count,        id_pumpgeom_node_coordx,        id_pumpgeom_node_coordy,    &
+               id_bridgegeom_node_count,      id_bridgegeom_node_coordx,      id_bridgegeom_node_coordy,  &
+               id_srcgeom_node_count,         id_srcgeom_node_coordx,         id_srcgeom_node_coordy,     &
+               id_latgeom_node_count,         id_latgeom_node_coordx,         id_latgeom_node_coordy,     &
+               id_longculvertgeom_node_count, id_longculvertgeom_node_coordx, id_longculvertgeom_node_coordy
        
     double precision, allocatable :: geom_x(:), geom_y(:)
     integer, allocatable          :: node_count(:)
@@ -19399,7 +19402,7 @@ subroutine unc_write_his(tim)            ! wrihis
     double precision, save       :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
     integer                      :: ntot, mobs, k, i, j, jj, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4, nNodeTot, nNodes, L0, k1, k2, nlinks
     character(len=255)           :: station_geom_container_name, crs_geom_container_name, weir_geom_container_name, orif_geom_container_name, &
-                                    genstru_geom_container_name, uniweir_geom_container_name, culvert_geom_container_name, &
+                                    genstru_geom_container_name, uniweir_geom_container_name, culvert_geom_container_name, longculvert_geom_container_name, &
                                     gategen_geom_container_name, pump_geom_container_name, bridge_geom_container_name, src_geom_container_name, &
                                     lat_geom_container_name, rug_geom_container_name
     logical                      :: jawel
@@ -21475,6 +21478,66 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_cmpstru_vel, 'coordinates', 'cmpstru_id')
         endif
 
+        ! Long culvert
+        if(jahislongculv > 0 .and. nlongculvertsg > 0) then
+            ierr = nf90_def_dim(ihisfile, 'longculvert', nlongculvertsg, id_longculvertdim)
+            ierr = nf90_def_var(ihisfile, 'longculvert_id',  nf90_char,   (/ id_strlendim, id_longculvertdim /), id_longculvert_id)
+            ierr = nf90_put_att(ihisfile, id_longculvert_id,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_longculvert_id,  'long_name', 'Id of long culvert')
+
+            ! Define geometry related variables
+            longculvert_geom_container_name = 'longculvert_geom'
+            nNodeTot = 0
+            nNodeTot = get_total_number_of_geom_nodes(ST_LONGCULVERT, nlongculvertsg)
+
+            ierr = sgeom_def_geometry_variables(ihisfile, longculvert_geom_container_name, 'longculvert', 'line', nNodeTot, id_longculvertdim, &
+               id_longculvertgeom_node_count, id_longculvertgeom_node_coordx, id_longculvertgeom_node_coordy)
+
+            ierr = nf90_def_var(ihisfile, 'longculvert_discharge', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_dis)
+            ierr = nf90_put_att(ihisfile, id_longculvert_dis, 'long_name', 'Discharge through long culvert')
+            ierr = nf90_put_att(ihisfile, id_longculvert_dis, 'units', 'm3 s-1')
+            ierr = nf90_put_att(ihisfile, id_longculvert_dis, 'coordinates', 'longculvert_id')
+            ierr = nf90_put_att(ihisfile, id_longculvert_dis, 'geometry', longculvert_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'longculvert_s1up', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_s1up)
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1up, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1up, 'long_name', 'Water level upstream of long culvert')
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1up, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1up, 'coordinates', 'longculvert_id')
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1up, 'geometry', longculvert_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'longculvert_s1dn', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_s1dn)
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1dn, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1dn, 'long_name', 'Water level downstream of long culvert')
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1dn, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1dn, 'coordinates', 'longculvert_id')
+            ierr = nf90_put_att(ihisfile, id_longculvert_s1dn, 'geometry', longculvert_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'longculvert_head', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_head)
+            ierr = nf90_put_att(ihisfile, id_longculvert_head, 'long_name', 'Head difference across long culvert')
+            ierr = nf90_put_att(ihisfile, id_longculvert_head, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_longculvert_head, 'coordinates', 'longculvert_id')
+            ierr = nf90_put_att(ihisfile, id_longculvert_head, 'geometry', longculvert_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'longculvert_flow_area', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_au)
+            ierr = nf90_put_att(ihisfile, id_longculvert_au, 'long_name', 'Flow area in long culvert')
+            ierr = nf90_put_att(ihisfile, id_longculvert_au, 'units', 'm2')
+            ierr = nf90_put_att(ihisfile, id_longculvert_au, 'coordinates', 'longculvert_id')
+            ierr = nf90_put_att(ihisfile, id_longculvert_au, 'geometry', longculvert_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'longculvert_velocity', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_vel)
+            ierr = nf90_put_att(ihisfile, id_longculvert_vel, 'long_name', 'Velocity in long culvert')
+            ierr = nf90_put_att(ihisfile, id_longculvert_vel, 'units', 'm s-1')
+            ierr = nf90_put_att(ihisfile, id_longculvert_vel, 'coordinates', 'longculvert_id')
+            ierr = nf90_put_att(ihisfile, id_longculvert_vel, 'geometry', longculvert_geom_container_name)
+
+            ierr = nf90_def_var(ihisfile, 'longculvert_relative_valve_opening', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_valveopen)
+            ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'long_name', 'Relative valve opening height in long culvert')
+            ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'units', '1')
+            ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'coordinates', 'longculvert_id')
+            ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'geometry', longculvert_geom_container_name)
+        endif
+
         ! Lateral
         if(jahislateral > 0 .and. numlatsg > 0) then
             ierr = nf90_def_dim(ihisfile, 'lateral', numlatsg, id_latdim)
@@ -21768,6 +21831,12 @@ subroutine unc_write_his(tim)            ! wrihis
             do i = 1,ndambreaksg
                ierr = nf90_put_var(ihisfile, id_dambreak_id, trim(dambreak_ids(i)(1:strlen_netcdf)),(/ 1, i /))
             end do
+        end if
+
+        if (jahislongculv > 0 .and. nlongculvertsg > 0) then
+           do i = 1, nlongculvertsg
+              ierr = nf90_put_var(ihisfile, id_longculvert_id,  trim(longculverts(i)%id),  (/ 1, i /))
+           end do
         end if
 
         if (jased>0 .and. stm_included .and. jahissed>0) then
@@ -22579,6 +22648,35 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_cmpstru_au,             valcmpstru(6,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_cmpstru_vel,            valcmpstru(7,i), (/ i, it_his /))
          enddo
+      end if
+
+      if (jahislongculv > 0 .and. nlongculvertsg > 0) then
+         do i=1,nlongculvertsg
+            ierr = nf90_put_var(ihisfile, id_longculvert_dis,       vallongculvert(2,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_s1up,      vallongculvert(3,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_s1dn,      vallongculvert(4,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_head,      vallongculvert(5,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_au,        vallongculvert(6,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_vel,       vallongculvert(7,i),      (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_longculvert_valveopen, vallongculvert(8,i),      (/ i, it_his /))
+         enddo
+         ! write geometry variables at the first time of history output
+         if (it_his == 1) then
+            j = 1
+            call realloc(node_count, nlongculvertsg, fill = 0)
+            do i = 1, nlongculvertsg
+               nNodes = get_number_of_geom_nodes(ST_LONGCULVERT, i)
+               node_count(i) = nNodes
+
+               if (nNodes > 0) then
+                  call get_geom_coordinates_of_structure(ST_LONGCULVERT, i, nNodes, geom_x, geom_y)
+                  ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_coordx, geom_x(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_coordy, geom_y(1:nNodes), start = (/ j /), count = (/ nNodes /))
+                  j = j + nNodes
+               end if
+            end do
+            ierr = nf90_put_var(ihisfile, id_longculvertgeom_node_count, node_count, start = (/ 1 /), count = (/ nlongculvertsg /))
+         end if
       end if
 
       if (jahislateral > 0 .and. numlatsg > 0) then
@@ -41938,6 +42036,7 @@ if (jahisbal > 0) then
       use m_1d_structures
       use m_compound
       use m_GlobalParameters
+      use m_longculverts, only: nlongculvertsg, longculverts
       implicit none
       integer                       :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd, istru, nlinks
       double precision              :: dir
@@ -42451,6 +42550,31 @@ if (jahisbal > 0) then
          end if
       end if
       !
+      ! === Long culvert
+      !
+      if (allocated(vallongculvert)) then
+         do n = 1, nlongculvertsg
+            vallongculvert(1:NUMVALS_LONGCULVERT,n) = 0d0
+            Lf = longculverts(n)%flowlinks(1) ! We use the 1st link as a representative flow link
+            La = abs( Lf )
+            if( jampi > 0 ) then ! TODO: UNST-4644
+               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+               if ( jaghost.eq.1 ) cycle
+            endif
+            dir = sign(1d0,dble(Lf))
+
+            call fill_valstruct_perlink(vallongculvert(:,n), La, dir, ST_LONGCULVERT, n, 0)
+            call average_valstruct(vallongculvert(:,n), ST_LONGCULVERT, n, 0, 0)
+
+            if (vallongculvert(1,n) == 0) then
+               vallongculvert(8:NUMVALS_LONGCULVERT,n) = dmiss
+            else
+               vallongculvert(8,n) = longculverts(n)%valve_relative_opening
+            end if
+         enddo
+      end if
+
+      !
       ! === Reduction of structur parameters for parallel
       !
       if( jampi > 0 .and. ti_his > 0 ) then
@@ -42489,6 +42613,7 @@ if (jahisbal > 0) then
             call fill_reduce_buffer( valdambreak, ndambreaksg*NUMVALS_DAMBREAK )
             n = 1
          endif
+         ! TODO: UNST-4644, add for long culvert
          if( n == 1 ) then
             call reduce_crs(reducebuf,nreducebuf,1)
             !call reduce_struc(reducebuf,nreducebuf)
@@ -42639,6 +42764,7 @@ if (jahisbal > 0) then
          if( ndambreaksg > 0 .and. allocated(valdambreak) ) then
             call subsitute_reduce_buffer( valdambreak, ndambreaksg*NUMVALS_DAMBREAK )
          endif
+         ! TODO: UNST-4644, add for long culvert
       endif
 
       !update timeprev
