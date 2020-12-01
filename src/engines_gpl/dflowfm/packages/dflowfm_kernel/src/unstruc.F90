@@ -21841,7 +21841,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
         if (jased>0 .and. stm_included .and. jahissed>0) then
            do i=1,stmpar%lsedtot
-              ierr = nf90_put_var(ihisfile, id_frac_name, trim(stmpar%sedpar%namsed(i)(1:strlen_netcdf)), (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_frac_name, trimexact(stmpar%sedpar%namsed(i), strlen_netcdf), (/ 1, i /))
            enddo
         end if
 
