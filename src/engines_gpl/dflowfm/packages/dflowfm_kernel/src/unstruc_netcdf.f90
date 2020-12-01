@@ -8572,13 +8572,16 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
 
         ierr = nf90_put_var(imapfile, id_hs(iid),  hs,   (/ 1, itim /), (/ ndxndxi, 1 /))
 
-       ! Tau current
+       ! Tau current and chezy roughness
        if (jamaptaucurrent > 0 .or. jamapchezy > 0) then
-          if (jawave<3) then        ! Else, get taus from subroutine tauwave (taus = taucur + tauwave)
+          if (jawave<3) then       ! Else, get taus from subroutine tauwave (taus = taucur + tauwave)
              call gettaus(1)       ! Update taus and czs
           elseif (jamapchezy > 0) then
              call gettaus(2)       ! Only update czs
           endif
+       endif
+       !
+       if (jamapchezy > 0) then
           do LL = 1,lnx
              if (frcu(LL) > 0d0) then
                 call getcz (hu(LL), frcu(LL), ifrcutp(LL), czu(LL), LL)
