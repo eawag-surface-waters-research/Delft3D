@@ -49,6 +49,7 @@ module string_module
    public :: str_toupper
    public :: str_upper
    public :: strcmpi
+   public :: trimexact
    public :: remove_leading_spaces
    public :: remove_all_spaces
    public :: replace_multiple_spaces_by_single_spaces
@@ -446,6 +447,16 @@ module string_module
       end subroutine remove_leading_spaces
 
 
+      !> Trims input string to a given length, filling with spaces at the end when necessary.
+      !!
+      !! When input string is longer than length, result is identical to normal string.
+      !! When input string is shorter than length, result is filled with spaces on the right.
+      function trimexact(string, length) result(trimmed)
+         character(len=*), intent(in) :: string  !< Input string.
+         integer,          intent(in) :: length  !< Exact length for the returned string.
+         character(len=length)        :: trimmed !< Resulting string.
+         trimmed = string
+      end function trimexact
 
       ! ------------------------------------------------------------------------------
       !   Function:   strcmpi
