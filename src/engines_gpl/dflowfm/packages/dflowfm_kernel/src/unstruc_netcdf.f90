@@ -653,7 +653,7 @@ integer :: ndxndxi
 
    select case (iloc)
    case(UNC_LOC_CN) ! Corner point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
       if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! Not implemented corner location for 1D grids yet
@@ -668,7 +668,7 @@ integer :: ndxndxi
       end if
 
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then
          cell_measures = 'area: '//trim(mesh1dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer
@@ -720,7 +720,7 @@ integer :: ndxndxi
       end if
 
    case(UNC_LOC_S3D) ! Pressure point location in all layers.
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
       if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then
          if (jamapvol1 > 0) then
@@ -778,7 +778,7 @@ integer :: ndxndxi
       end if
 
    case(UNC_LOC_W) ! Vertical velocity point location on all layer interfaces.
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
       if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
          cell_measures = 'area: '//trim(mesh1dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer ! TODO: AvD: UNST-1100: or do we need to use a1 here??
@@ -1074,7 +1074,7 @@ integer :: jabndnd_, ndxndxi
 
    select case (iloc)
    case(UNC_LOC_CN) ! Corner point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! TODO: AvD putting data on 1D corners not implemented yet.
@@ -1086,7 +1086,7 @@ integer :: jabndnd_, ndxndxi
       end if
 
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then
          ! temporary UGRID fix
@@ -1203,7 +1203,7 @@ integer :: jabndnd_, ndxndxi
       end do
 
       ! Write work array.
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
       if (id_var(1) > 0 .and. ndx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), workS3D(1:kmx, ndx2d+1:ndxndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, ndx1d, 1 /))
@@ -1271,7 +1271,7 @@ integer :: jabndnd_, ndxndxi
       end do
 
       ! Write work array.
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
       if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
          ierr = nf90_put_var(ncid, id_var(1), workW(0:kmx, ndx2d+1:ndxndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, ndx1d, 1 /))
@@ -1370,7 +1370,7 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
 
    select case (iloc)
    case(UNC_LOC_CN) ! Corner point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! TODO: AvD putting data on 1D corners not implemented yet.
@@ -1382,7 +1382,7 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       end if
 
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then
          ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxndxi), start = (/ 1, id_tsp%idx_curtime /))
@@ -1655,7 +1655,7 @@ integer ::jabndnd_, ndxndxi
    select case (iloc)
 
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       tstart = id_tsp%idx_curtime - tl + t1
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then
@@ -1723,7 +1723,7 @@ integer :: jabndnd_, ndxndxi
 
    select case (iloc)
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then
          select case (ilocdim)
@@ -1879,7 +1879,7 @@ integer :: jabndnd_, ndxndxi
 
    select case (iloc)
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then
          select case (ilocdim)
@@ -4554,7 +4554,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ndxndxi   = ndxi
    end if
 
-   ndx1d = ndxndxi - ndx2d
+   ndx1d = ndxi - ndx2d
 
    ! Prepare the U/S location for either 2D or 3D for subsequent def_var and put_var sequences.
    if (kmx > 0) then ! If layers present.
@@ -13378,7 +13378,7 @@ j = convert_meshgeom_to_cptr(meshgeom1d, c_meshgeom1d, c_meshgeomdim1d)
    !   ndx1d=numMesh1dBeforeMerging
    !else
       ! 1D flow grid geometry + 1D2D connections
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
    !endif
 
    n1d2dcontacts = 0
@@ -13520,7 +13520,7 @@ j = convert_meshgeom_to_cptr(meshgeom1d, c_meshgeom1d, c_meshgeomdim1d)
       endif
 
       ! Determine max nr of vertices and contour points
-      ndx1d = ndxndxi - ndx2d
+      ndx1d = ndxi - ndx2d
       numNodes   = ndx1d
       numContPts = 0
       do i=1,ndx1d
