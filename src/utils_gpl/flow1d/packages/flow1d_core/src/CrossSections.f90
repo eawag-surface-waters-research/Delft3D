@@ -1257,6 +1257,7 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       ! no cross section defined on branch, use default definition
       flowArea = default_width* dpt
       flowWidth = default_width
+      if (present(maxFlowWidth)) maxFlowWidth= flowWidth
       wetPerimeter = default_width + 2d0*dpt
       if (present(af_sub)) then
          af_sub = 0d0

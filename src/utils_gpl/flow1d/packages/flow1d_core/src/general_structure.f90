@@ -121,7 +121,7 @@ contains
       type(t_GeneralStructure), pointer, intent(inout) :: genstr               !< Derived type containing general structure information.
       integer,                           intent(in   ) :: direction            !< Orientation of flow link w.r.t. the structure. (1d0 for same direction, -1d0 for reverse.)
       integer,                           intent(in   ) :: L0                   !< Local link index.
-      double precision,                  intent(in   ) :: maxWidth             !< Maximal width of the structure. Normally the the width of the flow link.
+      double precision,                  intent(inout) :: maxWidth             !< Maximal width of the structure. Normally the the width of the flow link.
       double precision,                  intent(in   ) :: bob0(2)              !< Bed level of channel upstream and downstream of the structure.
       double precision,                  intent(  out) :: fuL                  !< fu component of momentum equation.
       double precision,                  intent(  out) :: ruL                  !< Right hand side component of momentum equation.
@@ -199,6 +199,7 @@ contains
          crest   = max(bob0(1), bob0(2), genstr%zs)
       else
          crest = genstr%zs
+         maxwidth = genstr%ws
       endif
       
       gle = max(crest, genstr%gateLowerEdgeLevel)
