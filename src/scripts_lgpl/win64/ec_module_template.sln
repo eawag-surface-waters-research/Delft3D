@@ -152,7 +152,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "netcdf4", "third_party_open
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "netcdff", "third_party_open\netcdf\netcdff.vfproj", "{C29AA190-5BE8-4674-AA8A-E858964D3C08}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "ec_module_test", "utils_lgpl\ec_module\packages\ec_module_test\ec_module_test.vfproj", "{0E8CD687-644C-4127-9F8C-8B0AB3B65D31}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "ec_module_test", "test\utils_lgpl\ec_module\packages\ec_module_test\ec_module_test.vfproj", "{0E8CD687-644C-4127-9F8C-8B0AB3B65D31}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A5638E14-9D2D-49ED-ACA3-A73833756311} = {A5638E14-9D2D-49ED-ACA3-A73833756311}
 		{D343152C-DE4D-43BA-B40F-DCE169B95416} = {D343152C-DE4D-43BA-B40F-DCE169B95416}

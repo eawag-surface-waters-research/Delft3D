@@ -8,7 +8,7 @@ include $(top_srcdir)/common.am
 include_HEADERS=
 
 INCLUDES = \
-	-I$(builddir)/../../ec_module/src \
+	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src \
 	-I$(top_builddir)/third_party_open/kdtree2/src-f90 \
