@@ -14954,6 +14954,7 @@ implicit none
        if( stmpar%lsedsus > 0 ) then
           numvals = numvals + 1
        endif
+       numvals = numvals + stmpar%lsedtot
     endif
 
     if (.not. allocated(sumvalcum_timescale)) then
@@ -15074,6 +15075,10 @@ subroutine sumvalueOnCrossSections(resu, numvals)
                     resu(IP,icrs) = resu(IP,icrs) + sedtra%e_ssn(L,lsed) * wu(L) * dble(sign(1, Lf))
                  enddo
               endif
+              do lsed = 1,stmpar%lsedtot    ! Making bedload on crosssections per fraction
+                 IP = IP + 1
+                 resu(IP,icrs) = resu(IP,icrs) + sedtra%e_sbn(L,lsed) * wu_mor(L) * dble(sign(1, Lf))
+              enddo
            endif
        end do
     end do   ! do icrs=1,ncrs

@@ -1265,6 +1265,7 @@ implicit none
        if( stmpar%lsedsus > 0 ) then
           maxnval = maxnval + 1
        endif
+       maxnval = maxnval + stmpar%lsedtot
     endif
     
     

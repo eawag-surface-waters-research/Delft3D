@@ -19395,6 +19395,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, allocatable, save :: id_hwqb(:)
     integer, allocatable, save :: id_hwqb3d(:)
     integer, allocatable, save :: id_const(:), id_const_cum(:), id_voltot(:)
+    integer, allocatable, save :: id_sedbtransfrac(:)
     double precision, allocatable, save :: valobsT(:,:)
 
     integer                      :: IP, num, ntmp, n, nlyrs
@@ -19421,6 +19422,7 @@ subroutine unc_write_his(tim)            ! wrihis
     double precision, allocatable:: toutput1(:), toutputx(:,:), toutputy(:,:), toutput3(:,:,:)
     double precision, allocatable:: toutput_cum, toutput_cur
     type(t_structure), pointer   :: pstru
+    integer                      :: lsed
 
     if (jahiszcor > 0) then
        jawrizc = 1
@@ -20386,6 +20388,17 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_sedstrans, 'coordinates', 'cross_section_name')
                   ierr = nf90_put_att(ihisfile, id_sedstrans, 'geometry', crs_geom_container_name)
                endif
+               if (.not. allocated(id_sedbtransfrac)) then
+                  allocate(id_sedbtransfrac(stmpar%lsedtot))
+                  id_sedbtransfrac = 0
+               endif
+               do lsed = 1,stmpar%lsedtot    ! Making bedload on crosssections per fraction
+                  ierr = nf90_def_var(ihisfile, 'cross_section_bedload_sediment_transport_'//trim(stmpar%sedpar%namsed(lsed)), nf90_double, (/ id_crsdim, id_timedim /), id_sedbtransfrac(lsed))
+                  ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'long_name', 'cumulative bed load sediment transport per fraction')
+                  ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'units', 'kg')
+                  ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'coordinates', 'cross_section_name')
+                  ierr = nf90_put_att(ihisfile, id_sedbtransfrac(lsed), 'geometry', crs_geom_container_name)
+               enddo
 
             endif
         end if
@@ -22271,6 +22284,10 @@ subroutine unc_write_his(tim)            ! wrihis
                 IP = IP + 1
                 ierr = nf90_put_var(ihisfile, id_sedstrans, crs(i)%sumvalcum(IP), (/ i, it_his /))
              endif
+             do lsed = 1,stmpar%lsedtot    ! Making bedload on crosssections per fraction
+                IP = IP + 1
+                ierr = nf90_put_var(ihisfile, id_sedbtransfrac(lsed), crs(i)%sumvalcum(IP), (/ i, it_his /))
+             enddo
           endif
        end do
     end if
