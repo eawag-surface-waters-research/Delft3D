@@ -45,6 +45,7 @@ module m_fourier_analysis
     use m_flow, only : kmx
     use m_alloc
     use m_flowtimes, only : dt_user, irefdate, Tzone
+    use m_sferic, only: jsferic
     implicit none
 
     !> struct to enable different sizes of suma and sumb
@@ -84,6 +85,7 @@ module m_fourier_analysis
                                                                                !! E  : Max Energy head requested instead of fourier analysis
        character(len=16), dimension(:)    , pointer :: founam        => null() !< Names of variables for fourier analysis
        character(len=50), dimension(:)    , pointer :: fouvarnam     => null() !< Names of variables for fourier analysis as written to NetCDF file
+       character(len=50), dimension(:)    , pointer :: fouvarnamstd  => null() !< Standard name of variables for fourier analysis as written to NetCDF file
        character(len=50), dimension(:)    , pointer :: fouvarnamlong => null() !< Part of the long names of variables for fourier analysis as written to NetCDF file
        character(len=50), dimension(:)    , pointer :: fouvarunit    => null() !< Unit of variables for fourier analysis as written to NetCDF file
     end type gd_fourier
@@ -176,6 +178,7 @@ module m_fourier_analysis
        if (istat == 0) call reallocp (gdfourier%fouelp, nofou, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%founam, nofou, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%fouvarnam     , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
+       if (istat == 0) call reallocp (gdfourier%fouvarnamstd  , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%fouvarnamlong , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
        if (istat == 0) call reallocp (gdfourier%fouvarunit    , gdfourier%nofouvar, stat = istat, keepExisting = .false.)
 
@@ -196,6 +199,7 @@ module m_fourier_analysis
           !
           gdfourier%founam        = ' '
           gdfourier%fouvarnam     = ' '
+          gdfourier%fouvarnamstd  = ' '
           gdfourier%fouvarnamlong = ' '
           gdfourier%fouvarunit    = ' '
           !
@@ -244,6 +248,7 @@ module m_fourier_analysis
        character(len=1) , dimension(:)     , pointer :: fouelp
        character(len=16), dimension(:)     , pointer :: founam
        character(len=50), dimension(:)     , pointer :: fouvarnam
+       character(len=50), dimension(:)     , pointer :: fouvarnamstd
        character(len=50), dimension(:)     , pointer :: fouvarnamlong
        character(len=50), dimension(:)     , pointer :: fouvarunit
 
@@ -285,6 +290,7 @@ module m_fourier_analysis
        fouelp        => gdfourier%fouelp
        founam        => gdfourier%founam
        fouvarnam     => gdfourier%fouvarnam
+       fouvarnamstd  => gdfourier%fouvarnamstd
        fouvarnamlong => gdfourier%fouvarnamlong
        fouvarunit    => gdfourier%fouvarunit
        fousma        => gdfourier%fousma
@@ -534,11 +540,13 @@ module m_fourier_analysis
              fouvarnam(ivar) = "fourier" // cref // "_max"
              fouvarnamlong(ivar) = "maximum value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+             call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
              if (founam(ifou) == 's1') then
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_max_depth"
                 fouvarnamlong(ivar) = "maximum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+                call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
              endif
              if (foumask(ifou) == 1) then
                 fouvarnam    (ivar) = trim(fouvarnam    (ivar)) // "_inidryonly"
@@ -558,23 +566,27 @@ module m_fourier_analysis
              fouvarnam(ivar) = "fourier" // cref // "_min"
              fouvarnamlong(ivar) = "minimum value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+             call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
              if (founam(ifou) == 's1') then
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_min_depth"
                 fouvarnamlong(ivar) = "minimum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+                call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
              endif
           case ('a')
              ivar = ivar + 1
              fouvarnam(ivar) = "fourier" // cref // "_avg"
              fouvarnamlong(ivar) = "average value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+             call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
           case default
              if (fnumcy(ifou)==0) then          ! zero fourier mode without further notice means 'MEAN'
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_mean"
                 fouvarnamlong(ivar) = "average value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+                call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
              else                               ! non-zero fourier mode
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_amp"
@@ -658,7 +670,7 @@ function name_dependent_size(fourier_name) result(nmaxus)
         nmaxus = ndx
    case('ws')
         nmaxus = lnx
-   case('u1', 'v1')
+   case('u1')
         nmaxus = lnkx
    case('qxk')
         nmaxus = lnx
@@ -688,7 +700,7 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
     select case (founam)
     case ('s1')
        fouvarunit = 'm'
-    case ('ws', 'u1', 'v1', 'ux', 'uy', 'uc', 'uxa', 'uya')
+    case ('ws', 'u1', 'ux', 'uy', 'uc', 'uxa', 'uya')
        fouvarunit = 'm/s'
     case ('ta')
        fouvarunit = 'N m-2'
@@ -704,6 +716,31 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
        fouvarunit = ' '
     end select
 end subroutine setfouunit
+
+subroutine setfoustandardname(founam, foustdname)
+    !
+    ! parameters
+    character(*), intent(in)  :: founam
+    character(*), intent(out) :: foustdname
+    !
+    ! body
+    select case (founam)
+    case ('s1')
+       foustdname = 'sea_surface_height'
+    case ('ws')
+       foustdname = 'wind_speed'
+    case ('uc')
+       foustdname = 'sea_water_speed'
+    case ('uxa','ux')
+       foustdname = merge('sea_water_x_velocity       ',    & 
+                          'eastward_sea_water_velocity', jsferic==0)
+    case ('uya','uy')
+       foustdname = merge('sea_water_y_velocity        ',   &   
+                          'northward_sea_water_velocity', jsferic==0)
+    case default
+       foustdname = ' '
+    end select
+end subroutine setfoustandardname
 
 !> performs fourier analysis i.e. computes suma and sumb
 !! - calculates MAX or MIN value
@@ -1122,6 +1159,7 @@ end subroutine setfouunit
         character(len=1) , dimension(:)  , pointer :: fouelp
         character(len=16), dimension(:)  , pointer :: founam
         character(len=50), dimension(:)  , pointer :: fouvarnam
+        character(len=50), dimension(:)  , pointer :: fouvarnamstd
         character(len=50), dimension(:)  , pointer :: fouvarnamlong
         character(len=50), dimension(:)  , pointer :: fouvarunit
         integer          , dimension(:,:), pointer :: fouref
@@ -1154,6 +1192,7 @@ end subroutine setfouunit
         fouelp        => gdfourier%fouelp
         founam        => gdfourier%founam
         fouvarnam     => gdfourier%fouvarnam
+        fouvarnamstd  => gdfourier%fouvarnamstd
         fouvarnamlong => gdfourier%fouvarnamlong
         fouvarunit    => gdfourier%fouvarunit
         fouref        => gdfourier%fouref
