@@ -13271,7 +13271,6 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    use unstruc_channel_flow, only: network
    use m_flowparameters, only: jamd1dfile
    use m_oned_functions, only: gridpoint2cross
-use meshdata
    implicit none
 
    integer, intent(in)                     :: ncid
@@ -13315,15 +13314,12 @@ use meshdata
    ! re-mapping of 2d mesh coordinates for UGrid
    double precision, allocatable                 :: x2dn(:), y2dn(:), z2dn(:)
    integer                                       :: netNodeReMappedIndex, nnSize
-   type(c_t_ug_meshgeom) :: c_meshgeom1d
-   type(c_t_ug_meshgeomdim) :: c_meshgeomdim1d
 
    jaInDefine    = 0
    n1d2dcontacts = 0
    n1dedges      = 0
    start_index   = 1
-    !  type(t_ug_meshgeom), intent(in)         :: meshgeom
-j = convert_meshgeom_to_cptr(meshgeom1d, c_meshgeom1d, c_meshgeomdim1d)
+
    if (ndxi <= 0) then
       call mess(LEVEL_WARN, 'No flow elements in model, will not write flow geometry.')
       return
