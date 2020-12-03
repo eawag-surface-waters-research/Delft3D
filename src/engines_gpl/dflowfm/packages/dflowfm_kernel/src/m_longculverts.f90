@@ -52,13 +52,13 @@ module m_longculverts
       integer                                        :: numlinks                   !< Number of links of the long culvert
       integer, dimension(:), allocatable             :: netlinks                   !< Net link numbers of the long culvert
       integer, dimension(:), allocatable             :: flowlinks                  !< Flow link numbers of the long culvert
-      integer                                        :: ifrctyp         = imiss    !< Friction type 
+      integer                                        :: ifrctyp         = -999     !< Friction type 
       integer                                        :: allowed_flowdir            !< Allowed flowdir: 
                                                                                    !< 0 all directions
                                                                                    !< 1 only positive flow
                                                                                    !< 2 only negative flow
                                                                                    !< 3 no flow allowed 
-      double precision                               :: friction_value  = dmiss    !< Friction value
+      double precision                               :: friction_value  = -999d0   !< Friction value
       double precision, dimension(:), allocatable    :: bl                         !< Bed level on numlinks+1 points
       double precision                               :: width                      !< Width of the rectangular culvert
       double precision                               :: height                     !< Height of the rectangular culvert
