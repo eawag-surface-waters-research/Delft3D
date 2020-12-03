@@ -217,10 +217,10 @@ contains
                 longculverts(nlongculvertsg)%ifrctyp = -999
              else
                 call frictionTypeStringToInteger(typestr, longculverts(nlongculvertsg)%ifrctyp)
-                call prop_get(str_ptr, '', 'frictionValue', longculverts(nlongculvertsg)%friction_value, success)
-                if (.not. success) then
-                   call SetMessage(LEVEL_ERROR, 'frictionValue not found for long culvert: '// st_id )
-                endif
+             endif
+             call prop_get(str_ptr, '', 'frictionValue', longculverts(nlongculvertsg)%friction_value, success)
+             if (.not. success) then
+                call SetMessage(LEVEL_ERROR, 'frictionValue not found for long culvert: '// st_id )
              endif
           
              call get_value_or_addto_forcinglist(str_ptr, 'valveRelativeOpening', longculverts(nlongculvertsg)%valve_relative_opening, st_id, &
