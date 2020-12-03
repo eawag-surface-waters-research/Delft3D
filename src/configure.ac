@@ -874,8 +874,6 @@ utils_lgpl/ec_module/packages/ec_module/Makefile
 utils_lgpl/ec_module/packages/ec_module/src/ectest/Makefile
 utils_lgpl/ec_module/packages/ec_module/src/Makefile
 utils_lgpl/ec_module/packages/ec_module/src/meteo/Makefile
-utils_lgpl/ec_module/packages/ec_module_test/Makefile
-utils_lgpl/ec_module/packages/ec_module_test/src/Makefile
 utils_lgpl/ec_module/packages/Makefile
 utils_lgpl/esmfsm/include/Makefile
 utils_lgpl/esmfsm/Makefile
