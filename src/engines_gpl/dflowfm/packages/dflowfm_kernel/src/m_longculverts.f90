@@ -3,6 +3,7 @@
 !! new netlinks and prof1D definitions.
 module m_longculverts
    use MessageHandling
+   use m_missing
 
    private
    public realloc
@@ -19,13 +20,13 @@ module m_longculverts
       integer                                        :: numlinks                   !< Number of links of the long culvert
       integer, dimension(:), allocatable             :: netlinks                   !< Net link numbers of the long culvert
       integer, dimension(:), allocatable             :: flowlinks                  !< Flow link numbers of the long culvert
-      integer                                        :: ifrctyp                    !< Friction type 
+      integer                                        :: ifrctyp         = imiss    !< Friction type 
       integer                                        :: allowed_flowdir            !< Allowed flowdir: 
                                                                                    !< 0 all directions
                                                                                    !< 1 only positive flow
                                                                                    !< 2 only negative flow
                                                                                    !< 3 no flow allowed 
-      double precision                               :: friction_value             !< Friction value
+      double precision                               :: friction_value  = dmiss    !< Friction value
       double precision, dimension(:), allocatable    :: bl                         !< Bed level on numlinks+1 points
       double precision                               :: width                      !< Width of the rectangular culvert
       double precision                               :: height                     !< Height of the rectangular culvert
@@ -303,9 +304,11 @@ contains
 
       do ilongc = 1, nlongculvertsg
          do LL = 1, longculverts(ilongc)%numlinks
-            Lf = longculverts(ilongc)%flowlinks(LL)
+            Lf = abs(longculverts(ilongc)%flowlinks(LL))
             if (longculverts(ilongc)%ifrctyp > 0) then
                ifrcutp(Lf) = longculverts(ilongc)%ifrctyp
+            end if
+            if (longculverts(ilongc)%friction_value > 0) then
                frcu(Lf) = longculverts(ilongc)%friction_value
             endif
          enddo
