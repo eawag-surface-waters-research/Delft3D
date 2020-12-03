@@ -13274,6 +13274,7 @@ subroutine writesomeinitialoutput()
  use m_hydrology_data
  use m_kml_parameters
  use m_structures
+ use m_longculverts, only: default_longculverts
  use m_heatfluxes
  use m_ec_interpolationsettings
  use unstruc_channel_flow
@@ -13333,6 +13334,8 @@ subroutine writesomeinitialoutput()
 
     call default_structures()
 
+    call default_longculverts()
+
     call default_flowtimes()
 
     call default_flowparameters()
@@ -13373,6 +13376,7 @@ subroutine writesomeinitialoutput()
  use m_hydrology_data
  use m_sobekdfm
  use m_save_ugrid_state, only: reset_save_ugrid_state
+ use m_longculverts, only: reset_longculverts
  implicit none
 
     ! Only reset counters and other scalars, allocatables should be
@@ -13388,6 +13392,8 @@ subroutine writesomeinitialoutput()
     call reset_flowgeom()
 
     call reset_flowexternalforcings()
+
+    call reset_longculverts()
 
     call reset_flowtimes()
 

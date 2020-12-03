@@ -40,6 +40,8 @@ module m_longculverts
    private
    public realloc
 
+   public default_longculverts
+   public reset_longculverts
    public loadLongCulvertsAsNetwork
    public finalizeLongCulvertsInNetwork
    public LongCulvertsToProfs
@@ -73,6 +75,28 @@ module m_longculverts
 
 
 contains
+
+   !> Sets ALL (scalar) variables in this module to their default values.
+   !! For a reinit prior to flow computation, call reset_longculverts() instead.
+   subroutine default_longculverts()
+      if (allocated(longculverts)) then
+         deallocate(longculverts)
+      end if
+
+      nlongculvertsg = 0             !< Number of longculverts               
+
+      ! Remaining of variables is handled in reset_longculverts()
+      call reset_longculverts()
+   end subroutine default_longculverts
+
+
+   !> Resets only long culverts variables intended for a restart of flow simulation.
+   !! Upon loading of new model/MDU, use default_longculverts() instead.
+   subroutine reset_longculverts()
+      ! NOT: intentionally not resetting nlongculvertsg counter here, because that is part of model loading.
+   end subroutine reset_longculverts
+
+
    !> Loads the long culverts from a structures.ini file and
    !! creates extra netnodes+links for them.
    subroutine loadLongCulvertsAsNetwork(structurefile, jaKeepExisting, ierr)
