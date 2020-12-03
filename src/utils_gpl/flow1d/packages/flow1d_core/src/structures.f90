@@ -729,7 +729,7 @@ end subroutine deallocstructure
          case (ST_BRIDGE)
             strng = 'bridge'
          case (ST_LONGCULVERT)
-            strng = 'longculvert'
+            strng = 'longCulvert'
          case default
             strng = 'unknown'
       end select

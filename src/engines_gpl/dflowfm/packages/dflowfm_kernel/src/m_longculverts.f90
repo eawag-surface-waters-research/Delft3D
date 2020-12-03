@@ -111,7 +111,7 @@ contains
        
           typestr = ' '
           call prop_get_string(str_ptr, '', 'type',         typestr, success)
-          if (.not. success .or. .not. strcmpi(typestr, 'LongCulvert')) then
+          if (.not. success .or. .not. strcmpi(typestr, 'longCulvert')) then
              cycle
           end if
        

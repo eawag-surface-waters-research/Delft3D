@@ -6907,7 +6907,7 @@ module m_meteo
          case ('general_structure_gateOpeningWidth')   ! flow1d general structure
             itemPtr1 => item_general_structure_gateOpeningWidth
             !dataPtr1  => null() ! flow1d structure has its own data structure
-         case ('longculvert_valveRelativeOpening')
+         case ('longCulvert_valveRelativeOpening')
             itemPtr1 => item_longculvert_valve_relative_opening
          case ('valve1D')
             itemPtr1 => item_valve1D

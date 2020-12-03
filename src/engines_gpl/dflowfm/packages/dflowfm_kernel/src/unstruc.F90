@@ -17930,8 +17930,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_general_structure_gateOpeningWidth, irefdate, tzone, tunit, tim)
    endif
 
-   ! TODO: JN: gettimespace voor longcylvertsg
-   if (nlongculvertsg> 0) then
+   if (nlongculvertsg > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_longculvert_valve_relative_opening, irefdate, tzone, tunit, tim)
    endif
 
@@ -39965,6 +39964,9 @@ end subroutine setbobs_fixedweirs
                       wu(L) = max(wu(L), as2/dpt)
                       call ComputeBridge(pstru%bridge, fu(L), ru(L), au(L), wu(L), kfu, s1(k1), s1(k2), pstru%u1(L0), dx(L), dts,                            &
                                as1, as2, bob0(:,L))
+                   case (ST_LONGCULVERT)
+                      ! NOTE: UNST-4328: long culverts are no actual structures, but rather just normal 1D flow links, no furu-step needed here.
+                      continue
                    case default
                       write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%type
                       call err_flush()
