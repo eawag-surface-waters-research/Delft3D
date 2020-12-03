@@ -169,7 +169,7 @@ contains
              call get_value_or_addto_forcinglist(str_ptr, 'valveRelativeOpening', longculverts(nlongculvertsg)%valve_relative_opening, st_id, &
                                     ST_LONGCULVERT,network%forcinglist, success)
              if (.not. success) then
-                call SetMessage(LEVEL_ERROR, 'frictionValue not found for long culvert: '// st_id )
+                call SetMessage(LEVEL_ERROR, 'valveRelativeOpening not found for long culvert: '// st_id )
              endif
           else 
              call SetMessage(LEVEL_ERROR, 'numCoordinates not found for long culvert '//st_id)
