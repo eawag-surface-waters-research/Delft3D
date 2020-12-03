@@ -706,6 +706,10 @@ test/utils_lgpl/deltares_common/Makefile
 test/utils_lgpl/deltares_common/packages/Makefile
 test/utils_lgpl/deltares_common/packages/test_deltares_common/Makefile
 test/utils_lgpl/deltares_common/packages/test_deltares_common/src/Makefile
+test/utils_lgpl/ec_module/Makefile
+test/utils_lgpl/ec_module/packages/Makefile
+test/utils_lgpl/ec_module/packages/ec_module_test/Makefile
+test/utils_lgpl/ec_module/packages/ec_module_test/src/Makefile
 test/utils_lgpl/Makefile
 third_party/interacter_stub/Makefile
 third_party/interacter_stub/src/Makefile
