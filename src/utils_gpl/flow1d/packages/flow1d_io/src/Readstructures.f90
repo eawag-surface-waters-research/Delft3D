@@ -1794,8 +1794,10 @@ module m_readstructures
       
    end function  openingDirectionToInt
    
+   !> Gives the integer parameter constant for an 'allowedFlowDir' string value.
+   !! An unknown/invalid value defaults to 0 (both).
    integer function allowedFlowDirToInt(flowdirString)
-      character(len=*), intent(inout) :: flowdirString
+      character(len=*), intent(inout) :: flowdirString !< String value of the allowedFlowDir parameter.
    
       call str_lower(flowdirString)
       select case(flowdirString)
@@ -1816,8 +1818,8 @@ module m_readstructures
 
    !> Gives the string value for an 'allowedFlowDir' integer value.
    function allowedFlowDirToString(flowDirInt)
-      integer,          intent(in   ) :: flowDirInt
-      character(len=:), allocatable   :: allowedFlowDirToString
+      integer,          intent(in   ) :: flowDirInt             !< Input integer value of the allowedFlowDir parameter.
+      character(len=:), allocatable   :: allowedFlowDirToString !< String value for the given allowedFlowDir integer value.
 
       select case (flowDirInt)
       case (0)
