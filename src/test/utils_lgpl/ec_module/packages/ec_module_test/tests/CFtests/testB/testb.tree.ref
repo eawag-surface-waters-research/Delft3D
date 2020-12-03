@@ -2,7 +2,7 @@
 EC MODULE ITEMS:
 Target Item 00029 (name=WATER_DISCHARGE_interpolated, vectormax=1)
 Element Set 00015
-   Connection 00033
+   Connection 00033, Converter 00032, targetIndex  0001
       Source Item 00018 (name=WATER_DISCHARGE, vectormax=1)
          File Reader 00004(filename=BoundaryConditions.bc)
             BCBlock 00003

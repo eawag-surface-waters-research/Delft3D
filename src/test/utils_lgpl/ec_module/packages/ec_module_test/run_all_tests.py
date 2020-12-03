@@ -31,7 +31,8 @@ executable = ""
 if os.name == 'posix':
     executable = "../src/ec_module_test"
 if os.name == 'nt':
-    executable = "../x64/"+configuration+"/ec_module_test.exe"
+    sys.path += ["../x64/share/bin"]
+    executable = "../x64/test/utils_lgpl/ec_module/packages/ec_module_test/x64/Release/ec_module_test.exe"
 
 if (executable == ""):
     sys.stderr.write("Invalid OS = "+os.name)

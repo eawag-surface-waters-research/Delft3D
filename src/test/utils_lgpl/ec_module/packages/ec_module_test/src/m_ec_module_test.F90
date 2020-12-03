@@ -177,7 +177,7 @@ contains
        if (tst%useBcBlockApproach) then
            ntgt = 2                            ! In this case, always two items: one source item (2) and one target item (1, time interpolated)
            call realloc(itemIDs,ntgt)
-           itemIDs = ec_undef_int              ! initialize itemID's, assume we are not usng existing targets
+           itemIDs = ec_undef_int              ! initialize itemID's, assume we are not using existing targets
            ! parse block headers in bc-file
            bc_count = ecCollectBCBlocks(ecInstancePtr, tst%inFilename, iostat)
            if (bc_count /= 0 .and. iostat /= 0)then ! boundaries/laterals found, but error in reading them
