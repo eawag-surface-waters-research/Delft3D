@@ -299,7 +299,7 @@ contains
 
       do ilongc = 1, nlongculvertsg
          do i = 1, longculverts(ilongc)%numlinks
-            if (longculverts(nlongculvertsg)%flowlinks(i) < 0) then
+            if (longculverts(ilongc)%flowlinks(i) < 0) then
                ! Flow links have not yet been initialized, this is the first call.
                ! Netlink numbers have been set correctly in finalizeLongCulvertsInNetwork() already.
                Lnet = longculverts(ilongc)%netlinks(i)
