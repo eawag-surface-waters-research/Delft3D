@@ -172,7 +172,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (5,:) long culvert structure head
                                                               !<                      (6,:) long culvert flow area
                                                               !<                      (7,:) long culvert velocity
-                                                              !<                      (8,:) long culvert relative valve opening
+                                                              !<                      (8,:) long culvert valve relative opening
                                                               !<                      (9,:) TODO: UNST-4644:long culvert counters of partitions for parallel
 
  integer                           :: NUMVALS_PUMP = 12       !< Number of variables for pump

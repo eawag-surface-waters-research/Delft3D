@@ -21549,7 +21549,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_longculvert_vel, 'coordinates', 'longculvert_id')
             ierr = nf90_put_att(ihisfile, id_longculvert_vel, 'geometry', longculvert_geom_container_name)
 
-            ierr = nf90_def_var(ihisfile, 'longculvert_relative_valve_opening', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_valveopen)
+            ierr = nf90_def_var(ihisfile, 'longculvert_valve_relative_opening', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_valveopen)
             ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'long_name', 'Relative valve opening height in long culvert')
             ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'units', '1')
             ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'coordinates', 'longculvert_id')
@@ -21853,7 +21853,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
         if (jahislongculv > 0 .and. nlongculvertsg > 0) then
            do i = 1, nlongculvertsg
-              ierr = nf90_put_var(ihisfile, id_longculvert_id,  trim(longculverts(i)%id),  (/ 1, i /))
+              ierr = nf90_put_var(ihisfile, id_longculvert_id,  trimexact(longculverts(i)%id, strlen_netcdf),  (/ 1, i /))
            end do
         end if
 
