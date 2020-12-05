@@ -38,6 +38,9 @@ if (executable == ""):
     sys.stderr.write("Invalid OS = "+os.name)
     sys.exit()
 
+if len(sys.argv)>1:
+    executable = sys.argv[1]
+
 abs_exec = os.path.abspath(executable)
 args = ["-v", "-c"] 
 
