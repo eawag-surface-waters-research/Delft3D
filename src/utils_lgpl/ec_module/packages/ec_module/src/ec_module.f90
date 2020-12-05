@@ -381,7 +381,7 @@ module m_ec_module
       !>      the array of SOURCE QUANTITY NAMES to be sought in the FileReader
       function ecModuleAddTimeSpaceRelation(instancePtr, name, x, y, vectormax, filename, filetype, &
                                             method, operand, tgt_refdate, tgt_tzone, tgt_tunit, &
-                                            jsferic, missing_value, qnames, itemIDs, &
+                                            jsferic, missing_value, itemIDs, &
                                             mask, xyen, z, pzmin, pzmax, pkbot, pktop, &
                                             targetIndex, forcingfile, srcmaskfile, dtnodal) &
                                             result (success)
@@ -404,7 +404,6 @@ module m_ec_module
          real(kind=hp),                            intent(in)    :: tgt_tzone
          integer,                                  intent(in)    :: tgt_tunit
          real(kind=hp),                            intent(in)    :: missing_value
-         character(len=*), dimension(:),           intent(in)    :: qnames       !< list of quantity names 
          integer, dimension(:),                    intent(inout) :: itemIDs      !<  Connection available outside to which one can connect target items
    
          integer,  dimension(:), optional,         intent(in)    :: mask         !< Array of masking values for the target ElementSet.
