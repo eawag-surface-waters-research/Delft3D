@@ -42586,8 +42586,8 @@ if (jahisbal > 0) then
                call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
                if ( jaghost.eq.1 ) cycle
             endif
-
-            call fill_valstruct_perlink(vallongculvert(:,n), La, 0d0, ST_LONGCULVERT, n, 0)
+            dir = sign(1d0,dble(Lf))
+            call fill_valstruct_perlink(vallongculvert(:,n), La, dir, ST_LONGCULVERT, n, 0)
             call average_valstruct(vallongculvert(:,n), ST_LONGCULVERT, n, 0, 0)
          enddo
       end if

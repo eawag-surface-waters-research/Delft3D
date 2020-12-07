@@ -378,7 +378,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
                                                                 !< (24) velocity over gate
                                                                 !< (25) velocity under gate
    integer,                        intent(in   ) :: L           !< Flow link number.
-   double precision,               intent(in   ) :: dir         !< Direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite). Not used for long culvert.
+   double precision,               intent(in   ) :: dir         !< Direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
    integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                                                 !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
    integer,                        intent(in   ) :: istru       !< Structure index in network%sts set or in longculverts.
