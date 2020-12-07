@@ -349,6 +349,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    use m_1d_structures, only: get_discharge_under_compound_struc
    use m_General_Structure
    use m_GlobalParameters
+   use m_longculverts
    implicit none
    double precision, dimension(:), intent(inout) :: valstruct   !< Output values on structure (e.g. valweirgen(:)):
                                                                 !< (1) total width
@@ -358,7 +359,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
                                                                 !< (5) structure head
                                                                 !< (6) flow area
                                                                 !< (7) velocity
-                                                                !< (8) water level on crest
+                                                                !< (8) water level on crest, or valve relative opening if type is long culvert
                                                                 !< (9) crest level
                                                                 !< (10) crest width
                                                                 !< (11) state
@@ -377,7 +378,7 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
                                                                 !< (24) velocity over gate
                                                                 !< (25) velocity under gate
    integer,                        intent(in   ) :: L           !< Flow link number.
-   double precision,               intent(in   ) :: dir         !< Direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite).
+   double precision,               intent(in   ) :: dir         !< Direction of flow link w.r.t. structure orientation (1.0 for same direction, -1.0 for opposite). Not used for long culvert.
    integer,                        intent(in   ) :: istrtypein  !< The type of the structure. May differ from the struct%type, for example:
                                                                 !< an orifice should be called with istrtypein = ST_ORIFICE, whereas its struct(istru)%type = ST_GENERAL_ST.
    integer,                        intent(in   ) :: istru       !< Structure index in network%sts set or in longculverts.
@@ -387,12 +388,17 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
    type(t_GeneralStructure), pointer :: genstr
    double precision :: qcmp
 
-   if (dir > 0) then
-      ku = ln(1,L)
-      kd = ln(2,L)
+   if (istrtypein == ST_LONGCULVERT) then
+      ku = longculverts(istru)%flownode_up
+      kd = longculverts(istru)%flownode_dn
    else
-      ku = ln(2,L)
-      kd = ln(1,L)
+      if (dir > 0) then
+         ku = ln(1,L)
+         kd = ln(2,L)
+      else
+         ku = ln(2,L)
+         kd = ln(1,L)
+      end if
    end if
 
    ! 1. Generic values that apply to all structure types
@@ -461,6 +467,11 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
       valstruct(8)  = valstruct(8) + bl(ku)*wu(L)
       valstruct(9)  = valstruct(9) + bl(kd)*wu(L)
       valstruct(10) = valstruct(10) + network%sts%struct(istru)%bridge%bedLevel_actual*wu(L)
+   end if
+
+   ! 4. More specific value that applies to long culvert
+   if (istrtypein == ST_LONGCULVERT) then
+      valstruct(8) = longculverts(istru)%valve_relative_opening
    end if
 
 end subroutine fill_valstruct_perlink

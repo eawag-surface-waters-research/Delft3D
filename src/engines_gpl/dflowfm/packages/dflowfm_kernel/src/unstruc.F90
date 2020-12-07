@@ -21550,7 +21550,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_longculvert_vel, 'geometry', longculvert_geom_container_name)
 
             ierr = nf90_def_var(ihisfile, 'longculvert_valve_relative_opening', nf90_double, (/ id_longculvertdim, id_timedim /), id_longculvert_valveopen)
-            ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'long_name', 'Relative valve opening height in long culvert')
+            ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'long_name', 'Valve relative opening in long culvert')
             ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'units', '1')
             ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'coordinates', 'longculvert_id')
             ierr = nf90_put_att(ihisfile, id_longculvert_valveopen, 'geometry', longculvert_geom_container_name)
@@ -42586,16 +42586,9 @@ if (jahisbal > 0) then
                call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
                if ( jaghost.eq.1 ) cycle
             endif
-            dir = sign(1d0,dble(Lf))
 
-            call fill_valstruct_perlink(vallongculvert(:,n), La, dir, ST_LONGCULVERT, n, 0)
+            call fill_valstruct_perlink(vallongculvert(:,n), La, 0d0, ST_LONGCULVERT, n, 0)
             call average_valstruct(vallongculvert(:,n), ST_LONGCULVERT, n, 0, 0)
-
-            if (vallongculvert(1,n) == 0) then
-               vallongculvert(8:NUMVALS_LONGCULVERT,n) = dmiss
-            else
-               vallongculvert(8,n) = longculverts(n)%valve_relative_opening
-            end if
          enddo
       end if
 

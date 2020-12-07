@@ -65,6 +65,8 @@ module m_longculverts
       double precision                               :: width                      !< Width of the rectangular culvert
       double precision                               :: height                     !< Height of the rectangular culvert
       double precision                               :: valve_relative_opening     !< Relative valve opening: 0 = fully closed, 1 = fully open
+      integer                                        :: flownode_up     = 0        !< Flow node index at upstream
+      integer                                        :: flownode_dn     = 0        !< Flow node index at downstream
    end type                              
    type(t_longculvert), dimension(:), allocatable, public     :: longculverts               !< Array containing long culvert data (size >= nlongculvertsg)              
    integer, public                                    :: nlongculvertsg             !< Number of longculverts               
@@ -330,6 +332,20 @@ contains
                longculverts(ilongc)%flowlinks(i) = lne2ln(Lnet)
             endif
          enddo
+         ! Set upstream flow node
+         Lf = longculverts(ilongc)%flowlinks(1)
+         if (ln(1,Lf) <= ndx2d) then
+            longculverts(ilongc)%flownode_up = ln(1,Lf)
+         else
+            longculverts(ilongc)%flownode_up = ln(2,Lf)
+         end if
+         ! Set downstream flow node
+         Lf = longculverts(ilongc)%flowlinks(longculverts(ilongc)%numlinks)
+         if (ln(2,Lf) <= ndx2d) then
+            longculverts(ilongc)%flownode_dn = ln(2,Lf)
+         else
+            longculverts(ilongc)%flownode_dn = ln(1,Lf)
+         end if
       enddo
    
       do ilongc = 1, nlongculvertsg
