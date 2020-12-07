@@ -3274,6 +3274,8 @@ src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f05_boundary
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f05_boundary_conditions/c140_waterlevel_bc_julian/tfl.ext -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f05_boundary_conditions/c140_waterlevel_bc_julian/tfl_01.bc -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f05_boundary_conditions/c140_waterlevel_bc_julian/tfl_01.pli -text
+src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c063_rain/e02_f06_c063.ref -text
+src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c063_rain/e02_f06_c063_rain.tree.ref -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c063_rain/rainschematic.ext -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c063_rain/rainschematic.mdu -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c063_rain/rainschematic.tim -text
