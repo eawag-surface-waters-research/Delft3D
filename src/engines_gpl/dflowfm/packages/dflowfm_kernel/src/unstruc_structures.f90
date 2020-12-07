@@ -439,13 +439,13 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
 
    ! 2. More specific valus that apply to certain structure types only
 
-   ! General structure-based structures with a crest.
+   ! 2a. General structure-based structures with a crest.
    if (any(istrtypein == (/ ST_GENERAL_ST, ST_WEIR, ST_ORIFICE /))) then ! TODO: ST_GATE
       valstruct(8)  = valstruct(8) + network%sts%struct(istru)%generalst%sOnCrest(L0)*wu(L)
       valstruct(12) = valstruct(12) + get_force_difference(istru, L0)*wu(L)
    end if
    
-   ! General structure-based structures with a (gate) door.
+   ! 2b. General structure-based structures with a (gate) door.
    if (any(istrtypein == (/ ST_GENERAL_ST /))) then ! TODO: ST_GATE
       k1 = ln(1,L)
       k2 = ln(2,L)
@@ -462,14 +462,14 @@ subroutine fill_valstruct_perlink(valstruct, L, dir, istrtypein, istru, L0)
       end if
    end if
    
-   ! 3. More specific values that apply to bridge
+   ! 2c. More specific values that apply to bridge
    if (istrtypein == ST_BRIDGE) then
       valstruct(8)  = valstruct(8) + bl(ku)*wu(L)
       valstruct(9)  = valstruct(9) + bl(kd)*wu(L)
       valstruct(10) = valstruct(10) + network%sts%struct(istru)%bridge%bedLevel_actual*wu(L)
    end if
 
-   ! 4. More specific value that applies to long culvert
+   ! 2d. More specific value that applies to long culvert
    if (istrtypein == ST_LONGCULVERT) then
       valstruct(8) = longculverts(istru)%valve_relative_opening
    end if
