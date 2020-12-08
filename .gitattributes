@@ -3130,7 +3130,7 @@ src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/CFtests/testF/testF.
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/CFtests/testF/testf.tree.ref -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/CFtests/testG/BoundaryConditions.bc -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/CFtests/testG/test.cfg -text
-src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/CFtests/testG/testg.ref -text
+src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/CFtests/testG/testG.ref -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/CFtests/testG/testg.tree.ref -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/CFtests/test_specs.xlsx -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/c001_general/ectests.ipynb -text
