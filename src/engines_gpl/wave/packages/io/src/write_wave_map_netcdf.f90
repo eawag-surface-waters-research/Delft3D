@@ -1,4 +1,4 @@
-subroutine write_wave_map_netcdf (sg, sof, n_swan_grids, wavedata, casl, singleprecision)
+subroutine write_wave_map_netcdf (sg, sof, n_swan_grids, wavedata, casl, prevtime, singleprecision)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2020.                                
@@ -45,6 +45,7 @@ subroutine write_wave_map_netcdf (sg, sof, n_swan_grids, wavedata, casl, singlep
     type (grid)               :: sg           ! swan grid
     type (output_fields)      :: sof          ! output fields defined on swan grid
     type (wave_data_type)     :: wavedata
+    logical                   :: prevtime     ! true: the time to be written is the "previous time"
     logical                   :: singleprecision
 !
 ! Local variables
@@ -94,6 +95,7 @@ subroutine write_wave_map_netcdf (sg, sof, n_swan_grids, wavedata, casl, singlep
     integer                                     :: year
     integer                                     :: month
     integer                                     :: day
+    integer       , dimension(1)                :: idummy ! Help array to read/write Nefis files 
     integer, external                           :: nc_def_var
     real(hp)                                    :: dearthrad
     character(100)                              :: string
@@ -285,7 +287,13 @@ subroutine write_wave_map_netcdf (sg, sof, n_swan_grids, wavedata, casl, singlep
     !
     ! put vars (time dependent)
     !
-    ierror = nf90_put_var(idfile, idvar_time   , wavedata%time%timsec, start=(/ wavedata%output%count /)); call nc_check_err(ierror, "put_var time", filename)
+    if (prevtime) then
+       idummy(1) = wavedata%time%calctimtscale_prev
+    else
+       idummy(1) = wavedata%time%calctimtscale
+    endif
+
+    ierror = nf90_put_var(idfile, idvar_time   , idummy(1)     , start=(/ wavedata%output%count /)); call nc_check_err(ierror, "put_var time", filename)
     ierror = nf90_put_var(idfile, idvar_hsign  , sof%hs        , start=(/ 1, 1, wavedata%output%count /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var hsign", filename)
     ierror = nf90_put_var(idfile, idvar_dir    , sof%dir       , start=(/ 1, 1, wavedata%output%count /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var dir    ", filename)
     ierror = nf90_put_var(idfile, idvar_pdir   , sof%pdir      , start=(/ 1, 1, wavedata%output%count /), count = (/ sof%mmax, sof%nmax, 1 /)); call nc_check_err(ierror, "put_var pdir   ", filename)

@@ -352,7 +352,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
                if (swan_run%swmapwritenetcdf) then
                   write(*,'(a,i10,a,f10.3)') '  Write WAVE NetCDF map file, nest ',i_swan,' time ',wavedata%time%timmin
                   call write_wave_map_netcdf (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
-                                     & wavedata, swan_run%casl, swan_run%netcdf_sp)
+                                     & wavedata, swan_run%casl, DataFromPreviousTimestep, swan_run%netcdf_sp)
                endif
                call setoutputcount(wavedata%output, wavedata%output%count + 1)
             endif
@@ -388,7 +388,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
             if (swan_run%swmapwritenetcdf) then
                write(*,'(a,i10,a,f10.3)') '  Write WAVE NetCDF map file, nest ',i_swan,' time ',wavedata%time%timmin
                call write_wave_map_netcdf (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
-                                  & wavedata, swan_run%casl, swan_run%netcdf_sp)
+                                  & wavedata, swan_run%casl,DataFromPreviousTimestep, swan_run%netcdf_sp)
             endif
          endif
          if (swan_run%output_points .and. swan_run%output_table) then
