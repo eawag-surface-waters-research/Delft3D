@@ -1,4 +1,4 @@
- [e02_f06_c063_rain]
+ [e02_f06_c069_rain_bc]
  QuantityName      = rainfall
  TestPathName      = .
  InputFileName     = rainschematic.tim

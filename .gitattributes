@@ -3283,7 +3283,7 @@ src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c069_rain_bc/my_forcing.bc -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c069_rain_bc/rainschematic.ext -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c069_rain_bc/rainschematic.mdu -text
-src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c069_rain_bc/test.cfg -text
+src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f06_external_forcing/c069_rain_bc/test.c0fg -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f11_wind/c010_spatially_varying_wind/bounds.pol -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f11_wind/c010_spatially_varying_wind/dimr.xml -text
 src/test/utils_lgpl/ec_module/packages/ec_module_test/tests/FMtests/f11_wind/c010_spatially_varying_wind/e02_f11_c010.ref -text
