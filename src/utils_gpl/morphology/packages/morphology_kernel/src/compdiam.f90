@@ -211,7 +211,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
           i        = 1
           fracreq  = xx(1)
           !
-          outerfracloop: do while (fracreq >= fraccum)
+          outerfracloop: do while (fracreq > fraccum)
              !
              ! Find the smallest diameter not yet considered and calculate
              ! the density (cdf) in the considered range.
