@@ -29,7 +29,7 @@ configuration = "Release"
 executable = ""
 
 if os.name == 'posix':
-    executable = "../src/ec_module_test"
+    executable = "../lnx64/bin/ec_module_test"
 if os.name == 'nt':
     sys.path += ["../x64/share/bin"]
     executable = "../x64/test/utils_lgpl/ec_module/packages/ec_module_test/x64/Release/ec_module_test.exe"
