@@ -1702,6 +1702,7 @@ subroutine xbeach_instationary()
    double precision, allocatable, save                   :: dist(:), factor(:)
 
    double precision                                      :: E0
+   double precision                                      :: bl1, bl2
    double precision, dimension(nbndw)                    :: qxbc,qybc
    double precision, dimension(nbndw, ntheta)            :: eeout
 
@@ -2015,7 +2016,8 @@ subroutine xbeach_instationary()
                min(time0/taper,1.d0)
             if (nbndu .gt. 0) then
                Lb = kbndw2kbndu(L)
-               ht = max(zbndu(Lb) - max(bob(1,Lb),bob(2,Lb)), epshu)   ! mean depth, not instantaneous
+               bl1 = bl(kb); bl2 = bl(ki); 
+               ht = max(zbndu(Lb) - 0.5d0*(bl1+bl2), epshu)   ! mean depth, not instantaneous
                em = (sum(0.5d0*e01))*dtheta *min(time0/taper,1.d0)
                ei =  sum(zbndw(:,L), dim=1)*dtheta
                bi(L) = -(2d0*cgwav(kb)/cwav(kb)-0.5d0)*(em-ei)/(cgwav(kb)**2-ag*ht)/rhomean
@@ -2056,7 +2058,8 @@ subroutine xbeach_instationary()
             
             if (nbndu .gt. 0) then
                Lb = kbndw2kbndu(L)
-               ht = max(zbndu(Lb) - min(bob(1,Lb),bob(2,Lb)), epshu)   ! mean depth, not instantaneous
+               bl1 = bl(kb); bl2 = bl(ki); 
+               ht = max(zbndu(Lb) - 0.5d0*(bl1+bl2), epshu)   ! mean depth, not instantaneous
                em = Emean*min(time0/taper,1.d0)
                ei = sum(zbndw(:,L), dim=1)*dtheta
                bi(L) = -(2.0*cgwav(kb)/cwav(kb)-0.5d0)*(em-ei)/(cgwav(kb)**2-ag*ht)/rhomean
@@ -2099,7 +2102,8 @@ subroutine xbeach_instationary()
             zbndw(:,L)=e01*E1/max(Emean,0.000001d0)*min(time0/taper,1.d0)
             if (nbndu .gt. 0) then
                Lb = kbndw2kbndu(L)
-               ht = max(zbndu(Lb) - min(bob(1,Lb),bob(2,Lb)), epshu)   ! mean depth, not instantaneous
+               bl1 = bl(kb); bl2 = bl(ki); 
+               ht = max(zbndu(Lb) - 0.5d0*(bl1+bl2), epshu)   ! mean depth, not instantaneous
                if (freewave == 1) then
                   uin(kbndw2kbndu(L)) = sqrt(ag/ht)*bi(L)
                   vin(kbndw2kbndu(L)) = 0d0                      ! for completeness
