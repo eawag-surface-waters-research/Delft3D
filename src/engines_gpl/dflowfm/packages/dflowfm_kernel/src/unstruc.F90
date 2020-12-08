@@ -42580,15 +42580,17 @@ if (jahisbal > 0) then
       if (allocated(vallongculvert)) then
          do n = 1, nlongculvertsg
             vallongculvert(1:NUMVALS_LONGCULVERT,n) = 0d0
-            Lf = longculverts(n)%flowlinks(1) ! We use the 1st link as a representative flow link
-            La = abs( Lf )
-            if( jampi > 0 ) then ! TODO: UNST-4644
-               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
-               if ( jaghost.eq.1 ) cycle
-            endif
-            dir = sign(1d0,dble(Lf))
-            call fill_valstruct_perlink(vallongculvert(:,n), La, dir, ST_LONGCULVERT, n, 0)
-            call average_valstruct(vallongculvert(:,n), ST_LONGCULVERT, n, 0, 0)
+            if (longculverts(n)%numlinks > 0) then
+               Lf = longculverts(n)%flowlinks(1) ! We use the 1st link as a representative flow link
+               La = abs( Lf )
+               if( jampi > 0 ) then ! TODO: UNST-4644
+                  call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+                  if ( jaghost.eq.1 ) cycle
+               endif
+               dir = sign(1d0,dble(Lf))
+               call fill_valstruct_perlink(vallongculvert(:,n), La, dir, ST_LONGCULVERT, n, 0)
+               call average_valstruct(vallongculvert(:,n), ST_LONGCULVERT, n, 0, 0)
+            end if
          enddo
       end if
 
