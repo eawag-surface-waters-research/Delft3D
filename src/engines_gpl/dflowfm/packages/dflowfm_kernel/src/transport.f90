@@ -1283,7 +1283,7 @@ double precision function dlimiter(d1,d2,limtyp)
 !      dlimiter = dble(min(limtyp,1)) * (r + abs(r) ) / (1 + abs(r) )
 !   else
 !!     Monotinized Central
-      dlimiter = dble(min(limtyp,1)) * max(0d0, min(TWO*r,TWO,0.5d0*(1d0+r)) ) 
+      dlimiter = max(0d0, min(TWO*r,TWO,0.5d0*(1d0+r)) ) 
 !   end if
    
 end function dlimiter
