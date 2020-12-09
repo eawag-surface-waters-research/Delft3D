@@ -1935,7 +1935,7 @@ end module m_crspath
  type(bndtype),    allocatable, target  :: bndtr(:)
  double precision, allocatable          :: wstracers(:) !< tracer fall velocity pos is downward (m/s)
  double precision, allocatable          :: decaytimetracers(:) !< tracer decaytimes (s)
- integer                                :: jadecaytracers      !< 0 = no, 1 =yes
+ integer                                :: jadecaytracers = 0     !< 0 = no, 1 =yes
 
  ! JRE sedfracbnds
  integer,          allocatable          :: nbndsf(:)         !< sedfrac   boundary points dimension

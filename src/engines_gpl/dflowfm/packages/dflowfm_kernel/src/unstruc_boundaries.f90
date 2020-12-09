@@ -3813,7 +3813,7 @@ subroutine add_bndtracer(tracnam, tracunit, itrac, janew)
       if ( transformcoef(4).ne.DMISS ) then
          wstracers(numtracers) = transformcoef(4)
       endif
-      if ( transformcoef(5).ne.DMISS ) then
+      if ( transformcoef(5) /= dmiss .and. transformcoef(5) /= 0d0 ) then
           jadecaytracers = 1
           decaytimetracers(numtracers) = transformcoef(5)
       endif

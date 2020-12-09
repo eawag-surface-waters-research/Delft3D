@@ -273,13 +273,13 @@ integer :: i, k
 integer(4) ithndl /0/
 if (timon) call timstrt ( "decaytracers", ithndl )
 
-do k = 1,ndkx
-   do i=ITRA1,ITRAN
-      decaytime = decaytimetracers(i - itra1 + 1)
-      if (decaytime > 0) then 
+do i=ITRA1,ITRAN
+   decaytime = decaytimetracers(i - itra1 + 1)
+   if (decaytime > 0d0) then 
+      do k = 1,ndkx
           constituents (i,k) = constituents(i,k) / (1d0 + dts/decaytime)
-      endif 
-   enddo  
+      enddo  
+   endif 
 enddo
 
 if (timon) call timstop( ithndl )
@@ -399,8 +399,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
    integer                                                   :: k1, k2, LL, L, Lb, Lt, laydif, jaL, jaR
    integer                                                   :: kk1L, kk2L, kk1R, kk2R, k1L, k2L, k1R, k2R, is, ku
                                                              
-   double precision, external                                :: dlimiter, dlimitercentral
-   double precision, external                                :: dlimiter_nonequi
+   double precision                                          :: dlimiter, dlimitercentral
+   double precision                                          :: dlimiter_nonequi
 
    integer(4) ithndl /0/
    if (timon) call timstrt ( "comp_fluxhor3D", ithndl )
@@ -730,7 +730,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    integer                                                   :: kk, k, kb, kt, kL, kR, kLL, kRR
    integer                                                   :: j, ll
                                                             
-   double precision, external                                :: dlimiter
+   double precision                                          :: dlimiter
                                                             
    double precision, parameter                               :: DTOL = 1d-8
 
