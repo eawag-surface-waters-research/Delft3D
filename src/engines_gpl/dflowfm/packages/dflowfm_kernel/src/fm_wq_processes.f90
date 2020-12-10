@@ -1580,7 +1580,6 @@
             copyoutput = .true.
          endif
       endif
-      copyoutput = .true.
 
       if (copyoutput) then
          waqoutputs=dmiss
