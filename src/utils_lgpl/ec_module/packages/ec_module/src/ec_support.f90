@@ -916,7 +916,9 @@ end subroutine ecInstanceListSourceItems
             ! Date
             if (ymd2reduced_jul(date, ref_date)) then
                ! Time
-               ref_date = ref_date + parse_time(time, ok)
+               if ( time /= ' ') then
+                  ref_date = ref_date + parse_time(time, ok)
+               end if
             else
                ref_date = -999.0_hp
                ok = .false.
