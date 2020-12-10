@@ -49,6 +49,7 @@ module time_module
    public :: mjd2date
    public :: datetime_to_string
    public :: parse_ud_timeunit
+   public :: parse_time
    public :: split_date_time
    public :: CalendarYearMonthDayToJulianDateNumber
    public :: julian, gregor, offset_reduced_jd
@@ -222,7 +223,7 @@ module time_module
 
          read(date, fmt, iostat=ierr) year, month, day
 
-         success = (ierr == 0)
+         success = (ierr == 0 .and. month <= 12)
          if (success) then
             reduced_jul_date = julian(year*10000 + month * 100 + day, 0)
          endif
@@ -855,17 +856,17 @@ module time_module
       !> split a string in date, time and time zone part
       function split_date_time(string, date, time, tz) result(success)
          character(len=*), intent(in)  :: string  !< input string like 2020-01-01 00:00:00; with or without time
-                                                  !<                or 2020-01-01t00:00:00 as in ISO_8601, after converting to lower case
+                                                  !<                or 2020-01-01T00:00:00 as in ISO_8601
                                                   !< input string may contains a time zone indication
          character(len=*), intent(out) :: date    !< output date, in this case 2020-01-01
          character(len=*), intent(out) :: time    !< output time, in this case 00:00:00
-         character(len=*), intent(out) :: tz      !< optional output time zone indication
+         character(len=*), intent(out) :: tz      !< output time zone indication
          logical                       :: success !< function result
 
          character(len=:), allocatable :: date_time
          integer                       :: ipos, i, iposTZ, ipos2
-         character, parameter          :: splitters1(3) = (/ 't', 'T', ' ' /)
-         character, parameter          :: splitters2(4) = (/ '+', '-', 'z', 'Z' /)
+         character, parameter          :: splitters1(2) = (/ 'T', ' ' /)
+         character, parameter          :: splitters2(3) = (/ '+', '-', 'Z' /)
          character                     :: splitter
          integer  , parameter          :: size_date = len('2020-01-01')
          integer  , parameter          :: size_time = len('00:00:00')
@@ -915,6 +916,41 @@ module time_module
          endif
          success = .true.
       end function split_date_time
+
+      !> parse a time string of the form "23:59:59.123" or "23:59:59" and return it as fraction of a day
+      function parse_time(time, ok) result (fraction)
+         character(len=*), intent(in)  :: time      !< input time string
+         logical         , intent(out) :: ok        !< success flag
+         real(kind=hp)                 :: fraction  !< function result
+
+         integer                       :: i
+         real(kind=hp)                 :: temp
+         integer                       :: ipos1, ipos2
+         integer, parameter            :: nParts = 3
+
+         real(kind=hp), parameter      :: invalidValues(nParts) = (/ 24.01_hp, 60.01_hp, 61.1_hp /) ! accept leap second
+         real(kind=hp), parameter      :: scaleValues(nParts) = (/ 1.0_hp / 24.0_hp , &
+                                                                   1.0_hp / 24.0_hp / 60.0_hp  , &
+                                                                   1.0_hp / 24.0_hp / 3600.0_hp /)
+
+         fraction = 0.0_hp
+         if (len_trim(time) >= 8) then
+            do i = 1, nParts
+               ipos1 = 3*i-2
+               ipos2 = 3*i-1
+               if (i == nParts) ipos2 = len(time)
+               read(time(ipos1 : ipos2), *) temp
+               if (temp >= invalidValues(i)) then
+                  ok = .false.
+                  exit
+               end if
+               fraction = fraction + temp * scaleValues(i)
+               ok = (i == nParts)
+            end do
+         else
+            ok = .false.
+         end if
+      end function parse_time
 
       DOUBLE PRECISION FUNCTION JULIAN ( IDATE , ITIME )
 !***********************************************************************

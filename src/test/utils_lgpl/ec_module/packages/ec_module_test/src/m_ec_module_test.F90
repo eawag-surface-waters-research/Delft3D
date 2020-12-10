@@ -891,8 +891,36 @@ contains
        if (success) then
          call TCMessage(testname,'Comparison passed','testFinished')
        else
-         call TCMessage(testname, errMessage, 'testFinished')
+         call TCMessage(testname, errMessage, 'testFailed')
        endif
+
+       testname = 'ec_support_NetCDF_time_string_conversion'
+       call TCMessage(testname,'','testStarted')
+       call TestTimestringToUnitAndRefdate1(success, errMessage)
+       if (success) then
+         call TCMessage(testname,'Comparison passed','testFinished')
+       else
+         call TCMessage(testname, errMessage, 'testFailed')
+       endif
+
+       testname = 'ec_support_ArcInfo_time_string_conversion'
+       call TCMessage(testname,'','testStarted')
+       call TestTimestringToUnitAndRefdate2(success, errMessage)
+       if (success) then
+         call TCMessage(testname,'Comparison passed','testFinished')
+       else
+         call TCMessage(testname, errMessage, 'testFailed')
+       endif
+
+       testname = 'ec_support_time_string_error_handling'
+       call TCMessage(testname,'','testStarted')
+       call TestTimestringToUnitAndRefdate3(success, errMessage)
+       if (success) then
+         call TCMessage(testname,'Comparison passed','testFinished')
+       else
+         call TCMessage(testname, errMessage, 'testFailed')
+       endif
+
     end subroutine do_test_internal
 
     subroutine tEcTestDef_destroy(tst)

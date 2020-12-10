@@ -869,7 +869,6 @@ end subroutine ecInstanceListSourceItems
          !
          integer                       :: i        !< helper index for location of 'since'
          integer                       :: jcomment !< helper index for location of '#'
-         real(kind=hp)                 :: temp     !< helper variable
          logical                       :: ok       !< check of refdate is found
          character(len=20)             :: date     !< parts of string for date
          character(len=20)             :: time     !< parts of string for time
@@ -908,7 +907,7 @@ end subroutine ecInstanceListSourceItems
          ! Determine the reference date.
          i = index(string, 'since') + 6
          if (i /= 6) then
-            ok = split_date_time(string(i:), date, time, tz)
+            ok = split_date_time(str_toupper(string(i:)), date, time, tz)
             if (.not. ok) then
                call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: splitting of date and time fails. Date time = ", string(i:))
                return
@@ -917,25 +916,21 @@ end subroutine ecInstanceListSourceItems
             ! Date
             if (ymd2reduced_jul(date, ref_date)) then
                ! Time
-               if(len_trim(time)>=8) then
-                  read(time(1 : 2), *) temp
-                  ref_date = ref_date + temp / 24.0_hp
-                  read(time(4 : 5), *) temp
-                  ref_date = ref_date + temp / 24.0_hp / 60.0_hp
-                  read(time(7 : 8), *) temp
-                  ref_date = ref_date + temp / 24.0_hp / 60.0_hp / 60.0_hp
-               end if
-               ok = .true.
+               ref_date = ref_date + parse_time(time, ok)
             else
                ref_date = -999.0_hp
                ok = .false.
             endif
-         else
-            ok = ecSupportTimestringArcInfo(string, ref_date)
+         else if (ecSupportTimestringArcInfo(string, ref_date)) then
+            ok = .true.
             tz = ' '
-         endif
+         else
+            call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since and not an ArcInfo format.")
+            return
+         end if
+
          if (.not. ok) then
-            call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since.")
+            call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to parse date time in: ", rec)
             return
          end if
 
@@ -954,7 +949,8 @@ end subroutine ecInstanceListSourceItems
       end function ecSupportTimestringToUnitAndRefdate
 
       !> Extracts time unit and reference date from a time string in Arc Info format.
-      !! example: ... TIME (HRS)     18.0 20000101 18
+      !! example: ... time (hrs)     18.0 20000101 18
+      !! string must be in lower case
       function ecSupportTimestringArcInfo(rec, ref_date, time_steps) result (success)
          character(len=*)       , intent(in)  :: rec        !< input string
          real(kind=hp), optional, intent(out) :: ref_date   !< reference date found
@@ -962,9 +958,9 @@ end subroutine ecInstanceListSourceItems
          logical                              :: success    !< function result
 
          integer       :: yyyymmdd    !< reference date as Gregorian yyyymmdd
-         integer       :: posHrs      !< position in a string of '(HRS)', 'hrs', 'hours'
-         integer       :: posNumbers  !< first position of the numbers in a string (actually, the first space after '(HRS)')
-         integer       :: posTime     !< position in a string of 'TIME' or 'time'
+         integer       :: posHrs      !< position in a string of 'hrs', 'hours'
+         integer       :: posNumbers  !< first position of the numbers in a string (actually, the first space after '(hrs)')
+         integer       :: posTime     !< position in a string of 'time'
          integer       :: ierr        !< error code
          integer       :: i           !< loop counter
          real(kind=hp) :: time        !< time found
@@ -973,10 +969,10 @@ end subroutine ecInstanceListSourceItems
          success = .false.
          posNumbers = 0
 
-         posTime = max(index(rec, 'TIME'), index(rec, 'time'))
+         posTime = index(rec, 'time')
 
          if (posTime > 0) then
-            posHrs = max(index(rec, '(HRS)'), index(rec, 'hrs'), index(rec, 'hours'))
+            posHrs = max(index(rec, 'hrs'), index(rec, 'hours'))
             do i = posHrs+3, len_trim(rec)
                if (rec(i:i) == ' ') then
                   posNumbers = i
@@ -1037,7 +1033,7 @@ end subroutine ecInstanceListSourceItems
          character(len=2) :: cmin        !< minutes part of time zone, as character string
          character(len=3) :: chour       !< hours part of time zone, as character string
 
-         if (string == 'z' .or. string == 'Z') then
+         if (string == 'Z') then
             tzone = 0.0_hp
             ierr = 0
          else
