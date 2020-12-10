@@ -1527,6 +1527,7 @@
       use m_transport,      only: constituents
       use unstruc_messages
       use precision_basics
+      use timers
 
       implicit none
 
@@ -1542,7 +1543,12 @@
       integer          :: kk, k, kb, kt, ktmax
       logical          :: copyoutput
 
+      integer(4), save :: ithand1 = 0
+      integer(4), save :: ithand2 = 0
+      integer(4), save :: ithand3 = 0
+
 !     fill concentrations (transported)
+      if ( timon ) call timstrt ( "copy_const", ithand1 )
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
          do k=kb,kt
@@ -1554,22 +1560,13 @@
             end if
          end do
       end do
+      if ( timon ) call timstop ( ithand1 )
 
-!     fill concentrations (not transported)
-      if (notot>nosys) then
-         do kk=1,Ndxi
-            call getkbotktopmax(kk,kb,kt,ktmax)
-            do k=kb,kt
-               do isys=nosys+1,notot
-                  iwqbot = isys2wqbot(isys)
-                  wqbot(iwqbot,k) = amass(isys,k-kbx+1) / ba(kk)
-               end do
-            end do
-         end do
-      end if
-
-! Ouputs to waq outputs array (only when outputs will be written within the next timestep)
+! Ouputs to waq outputs array (only when his or map outputs will be written within the next timestep, and during first timestep)
       copyoutput = .false.
+      if (comparereal(tim, tstart_user, eps10) == 0) then
+         copyoutput = .true.
+      endif
       if (ti_his > 0) then
          if (comparereal(tim+dt-2.0_hp*eps10, time_his, eps10)>= 0) then
             copyoutput = .true.
@@ -1582,6 +1579,8 @@
       endif
 
       if (copyoutput) then
+!        copy additional output
+         if ( timon ) call timstrt ( "copy_output", ithand2 )
          waqoutputs=dmiss
          noout = outputs%cursize
          do j = 1, noout
@@ -1603,13 +1602,38 @@
                   ip = ip_arr + (iv_idx-1)*idim1
                   incr = 1
                endif
-                  do i = 1, noseg
-                      waqoutputs(j,i) = pmsa(ip)
-                      ip = ip + incr
-                  enddo
-               endif
+               do i = 1, noseg
+                  waqoutputs(j,i) = pmsa(ip)
+                  ip = ip + incr
+               enddo
+            endif
          enddo
+         if ( timon ) call timstop ( ithand2 )
       endif
+
+! Copy wqbot data (when his or map, but also rst outputs will be written within the next timestep, and during first timestep)
+      if (ti_rst > 0) then
+        if (comparereal(tim+dt-2.0_hp*eps10, time_rst, eps10) >= 0) then
+            copyoutput = .true.
+         endif
+      endif
+
+      if (copyoutput) then
+!        copy concentrations (not transported)
+         if ( timon ) call timstrt ( "copy_wqbot", ithand3 )
+         if (notot>nosys) then
+            do kk=1,Ndxi
+               call getkbotktopmax(kk,kb,kt,ktmax)
+               do k=kb,kt
+                  do isys=nosys+1,notot
+                     iwqbot = isys2wqbot(isys)
+                     wqbot(iwqbot,k) = amass(isys,k-kbx+1) / ba(kk)
+                  end do
+               end do
+            end do
+         end if
+         if ( timon ) call timstop ( ithand3 )
+      end if
       return
    end subroutine copy_data_from_wq_processes_to_fm
 
