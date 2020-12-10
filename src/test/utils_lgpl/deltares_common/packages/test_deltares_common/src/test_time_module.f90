@@ -148,7 +148,7 @@ module test_time_module
          logical           :: success
          character(len=26), parameter :: date_times (3) = (/ &
             "2010-04                   ", &  ! date to short
-            "2011-05-05Q01:08:03       ", &  ! Q as separator
+            "2011-05-05t01:08:03       ", &  ! t as separator (must be upper case)
             "2012-06-06 02:09:04  02:00" /)  ! no sign in time zone
          integer :: i
 

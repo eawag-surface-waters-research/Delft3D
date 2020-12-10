@@ -923,10 +923,11 @@ module time_module
          logical         , intent(out) :: ok        !< success flag
          real(kind=hp)                 :: fraction  !< function result
 
-         integer                       :: i
+         integer                       :: i, first
          real(kind=hp)                 :: temp
          integer                       :: ipos1, ipos2
          integer, parameter            :: nParts = 3
+         character(len=16)             :: time_copy
 
          real(kind=hp), parameter      :: invalidValues(nParts) = (/ 24.01_hp, 60.01_hp, 61.1_hp /) ! accept leap second
          real(kind=hp), parameter      :: scaleValues(nParts) = (/ 1.0_hp / 24.0_hp , &
@@ -934,12 +935,19 @@ module time_module
                                                                    1.0_hp / 24.0_hp / 3600.0_hp /)
 
          fraction = 0.0_hp
-         if (len_trim(time) >= 8) then
+         first = index(time, ':')
+         if (first == 2)  then
+            time_copy = '0' // time
+         else
+            time_copy = time
+         end if
+
+         if (len_trim(time_copy) >= 8) then
             do i = 1, nParts
                ipos1 = 3*i-2
                ipos2 = 3*i-1
-               if (i == nParts) ipos2 = len(time)
-               read(time(ipos1 : ipos2), *) temp
+               if (i == nParts) ipos2 = len(time_copy)
+               read(time_copy(ipos1 : ipos2), *) temp
                if (temp >= invalidValues(i)) then
                   ok = .false.
                   exit

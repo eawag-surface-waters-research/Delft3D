@@ -105,8 +105,9 @@ module m_ec_unit_tests
       character(len=*), parameter :: str2 = "minutes since 1970-01-01 00:00:00.0 +0100"
       character(len=*), parameter :: str3 = "seconds since 2020-11-16T07:47:33Z"
       character(len=*), parameter :: str4 = "seconds since 2020-11-16" ! no time
+      character(len=*), parameter :: str5 = "minutes since 1970-01-01 0:00:00.0 +0100" ! hours in 1 digit
 
-      logical :: successArr(4)
+      logical :: successArr(5)
       integer :: unit
       real(kind=hp) :: ref_date, tzone
 
@@ -129,6 +130,11 @@ module m_ec_unit_tests
       successArr(4) = (successArr(4) .and. unit == ec_second)
       successArr(4) = (successArr(4) .and. comparereal(ref_date, 59169.0d0, 1d-10) == 0)
       successArr(4) = (successArr(4) .and. comparereal(tzone, 0d0, 1d-10) == 0)
+
+      successArr(5) = ecSupportTimestringToUnitAndRefdate(str5, unit, ref_date, tzone)
+      successArr(5) = (successArr(5) .and. unit == ec_minute)
+      successArr(5) = (successArr(5) .and. comparereal(ref_date, 40587.0d0, 1d-10) == 0)
+      successArr(5) = (successArr(5) .and. comparereal(tzone, 1.0d0, 1d-10) == 0)
 
       success = all(successArr)
       errMessage = ' '
