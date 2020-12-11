@@ -104,7 +104,7 @@ module m_ec_unit_tests
       character(len=*), parameter :: str1 = "TIME = 0 hours since 2006-01-01 00:00:00 -01:00"
       character(len=*), parameter :: str2 = "minutes since 1970-01-01 00:00:00.0 +0100"
       character(len=*), parameter :: str3 = "seconds since 2020-11-16T07:47:33Z"
-      character(len=*), parameter :: str4 = "seconds since 2020-11-16" ! no time
+      character(len=*), parameter :: str4 = "seconds since 2020-11-16"                 ! no time
       character(len=*), parameter :: str5 = "minutes since 1970-01-01 0:00:00.0 +0100" ! hours in 1 digit
 
       logical :: successArr(5)

@@ -923,40 +923,55 @@ module time_module
          logical         , intent(out) :: ok        !< success flag
          real(kind=hp)                 :: fraction  !< function result
 
-         integer                       :: i, first
+         integer                       :: i, ierr
          real(kind=hp)                 :: temp
          integer                       :: ipos1, ipos2
          integer, parameter            :: nParts = 3
-         character(len=16)             :: time_copy
 
+         character(len=16)             :: times(nParts)
          real(kind=hp), parameter      :: invalidValues(nParts) = (/ 24.01_hp, 60.01_hp, 61.1_hp /) ! accept leap second
          real(kind=hp), parameter      :: scaleValues(nParts) = (/ 1.0_hp / 24.0_hp , &
                                                                    1.0_hp / 24.0_hp / 60.0_hp  , &
                                                                    1.0_hp / 24.0_hp / 3600.0_hp /)
 
-         fraction = 0.0_hp
-         first = index(time, ':')
-         if (first == 2)  then
-            time_copy = '0' // time
-         else
-            time_copy = time
-         end if
+         ok = .false.
 
-         if (len_trim(time_copy) >= 8) then
+         ! just simple assume "HH:MM:SS" / "HH:MM:SS.XX"
+         if (len(time) >= 8) then
+            fraction = 0.0_hp
             do i = 1, nParts
                ipos1 = 3*i-2
                ipos2 = 3*i-1
-               if (i == nParts) ipos2 = len(time_copy)
-               read(time_copy(ipos1 : ipos2), *) temp
-               if (temp >= invalidValues(i)) then
-                  ok = .false.
-                  exit
+               if (i == nParts) ipos2 = len(time)
+               read(time(ipos1 : ipos2), *, iostat=ierr) temp
+               if (ierr /= 0 .or. temp >= invalidValues(i)) then
+                  exit ! goto more general reading
                end if
                fraction = fraction + temp * scaleValues(i)
                ok = (i == nParts)
             end do
-         else
-            ok = .false.
+         end if
+
+         if (.not. ok) then
+            ! more general: accept leading spaces and hour in 1 or 2 digits
+            fraction = 0.0_hp
+            ipos1 = index(time, ':')
+            ipos2 = index(time, ':', back=.true.)
+            if (ipos2 == ipos1 .or. ipos2 < 1) then
+               continue ! did not find 2 different ':' splitters
+            else
+               times(1) = adjustl(time(:ipos1-1))
+               times(2) = time(ipos1+1:ipos2-1)
+               times(3) = time(ipos2+1:)
+               do i = 1, nParts
+                  read(times(i), *, iostat=ierr) temp
+                  if (ierr /= 0 .or. temp >= invalidValues(i)) then
+                     exit
+                  end if
+                  fraction = fraction + temp * scaleValues(i)
+                  ok = (i == nParts)
+               end do
+            end if
          end if
       end function parse_time
 

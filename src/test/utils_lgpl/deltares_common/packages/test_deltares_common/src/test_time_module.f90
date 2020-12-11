@@ -52,6 +52,8 @@ module test_time_module
          call test( testconversion2,  'Test julian' )
          call test( test_split_date_time, 'Test split_date_time' )
          call test( test_split_date_time_invalid, 'Test split_date_time with invalid input')
+         call test( test_parse_time_valid, 'Test parse_time with valid input')
+         call test( test_parse_time_invalid, 'Test parse_time with invalid input')
       end subroutine tests_time_module
 
       !> test CalendarYearMonthDayToJulianDateNumber
@@ -159,5 +161,42 @@ module test_time_module
          end do
 
       end subroutine test_split_date_time_invalid
+
+      !> test parse time with valid input
+      subroutine test_parse_time_valid
+         character(len=16), parameter :: times(4) = (/ &
+            "01:02:03        ", &
+            "04:05:06.7      ", &
+            "07:47:33        ", &
+            "8:10:20.3       " /)    ! one digit for hour (is allowed)
+         real(kind=hp), parameter :: fraction_expected(4) = (/ 0.0430902777778_hp, 0.170216435185_hp, 0.3246875_hp, 0.340512731481_hp /)
+         integer                  :: i
+         logical                  :: ok
+         real(kind=hp)            :: fraction
+
+         do i = 1, size(times)
+            fraction = parse_time(times(i), ok)
+            call assert_true( ok, "unexpected success status (must succeed)")
+            call assert_comparable(fraction, fraction_expected(i), tol, "difference in fraction")
+         end do
+      end subroutine test_parse_time_valid
+
+      !> test parse time
+      !! both valid and invalid input
+      subroutine test_parse_time_invalid
+         character(len=16), parameter :: times(4) = (/ &
+            "                ", &    ! no time at all
+            "25:00:00        ", &    ! invalid hh
+            "23:65:28        ", &    ! invalid mm
+            "12:00:99        " /)    ! invalid ss
+         integer                  :: i
+         logical                  :: ok
+         real(kind=hp)            :: fraction
+
+         do i = 1, size(times)
+            fraction = parse_time(times(i), ok)
+            call assert_false( ok, "unexpected success status (must fail)")
+         end do
+      end subroutine test_parse_time_invalid
 
 end module test_time_module
