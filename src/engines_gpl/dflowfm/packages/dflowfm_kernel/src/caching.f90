@@ -43,6 +43,7 @@ module unstruc_caching
     !use m_crspath, only: tcrspath
     use md5_checksum
     use m_alloc
+    use m_longculverts, only: t_longculvert, longculverts
 
     implicit none
 
@@ -51,7 +52,7 @@ module unstruc_caching
     character(len=20), dimension(10), private :: section = ['OBSERVATIONS        ', &
                                                             'FIXED WEIRS         ', &
                                                             'CROSS_SECTIONS      ', &
-                                                            '12345678901234567890', &
+                                                            'LONG_CULVERTS       ', &
                                                             '12345678901234567890', &
                                                             '12345678901234567890', &
                                                             '12345678901234567890', &
@@ -61,6 +62,7 @@ module unstruc_caching
     integer, parameter, private :: key_obs = 1
     integer, parameter, private :: key_fixed_weirs = 2
     integer, parameter, private :: key_cross_sections = 3
+    integer, parameter, private :: key_long_culverts = 4
 
     double precision, dimension(:), allocatable, private :: cache_xobs
     double precision, dimension(:), allocatable, private :: cache_yobs
@@ -74,7 +76,8 @@ module unstruc_caching
     integer, dimension(:), allocatable, private          :: cache_linklist
     integer, dimension(:), allocatable, private          :: cache_ipol
 
-    type(tcrs), dimension(:), allocatable               :: cache_cross_sections
+    type(tcrs), dimension(:), allocatable                :: cache_cross_sections
+    type(t_longculvert), dimension(:), allocatable       :: cache_longculverts
 
 
     character(len=30), parameter, private :: version_string = "D-Flow FM, cache file, 1.0"
@@ -99,6 +102,8 @@ subroutine default_caching()
    if (allocated(cache_ipol_fixed))  deallocate(cache_ipol_fixed)
    if (allocated(cache_linklist))    deallocate(cache_linklist)
    if (allocated(cache_ipol))        deallocate(cache_ipol)
+
+   if (allocated(cache_longculverts))   deallocate(cache_longculverts)
 
    if (allocated(cache_cross_sections)) call deallocCrossSections(cache_cross_sections)
 
@@ -259,6 +264,24 @@ subroutine loadCachingFile( basename, netfile, usecaching )
     endif
 
     !
+    ! Load the information on the long culverts:
+    ! Copy all information when successful
+    !
+    read( lun, iostat = ierr ) key, number
+
+    if ( ierr /= 0 .or. key /= section(key_long_culverts) ) then
+        close( lun )
+        return
+    endif
+
+    allocate( cache_longculverts(number) )
+    call loadCachedLongCulverts( lun, cache_longculverts, ierr )
+    if ( ierr /= 0 ) then
+        close( lun )
+        return
+    endif
+
+    !
     ! All cached values were loaded, so all is well
     !
     close( lun )
@@ -320,6 +343,38 @@ subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
         endif
     enddo
 end subroutine loadCachedSections
+
+!> Load cached long culverts from a caching file.
+subroutine loadCachedLongCulverts( lun, longculverts, ierr )
+    integer,                           intent(in   ) :: lun          !< LU-number of the caching file
+    type(t_longculvert), dimension(:), intent(  out) :: longculverts !< Array of long culverts to be filled
+    integer,                           intent(  out) :: ierr         !< Error code
+
+    integer                                 :: i, np, node_up, node_down
+
+    do i = 1,size(longculverts)
+        read( lun, iostat = ierr ) np, node_up, node_down
+
+        longculverts(i)%numlinks    = np
+        longculverts(i)%flownode_up = node_up
+        longculverts(i)%flownode_dn = node_down
+        allocate( longculverts(i)%xcoords(np+1), &
+                  longculverts(i)%ycoords(np+1), &
+                  longculverts(i)%netlinks(np),  &
+                  longculverts(i)%flowlinks(np) )
+
+        if ( np > 0 ) then
+            read( lun, iostat = ierr ) longculverts(i)%xcoords,  &
+                                       longculverts(i)%ycoords,  &
+                                       longculverts(i)%netlinks, &
+                                       longculverts(i)%flowlinks
+        endif
+        if ( ierr /= 0 ) then
+            close( lun )
+            exit
+        endif
+    enddo
+end subroutine loadCachedLongCulverts
 
 !> Save the link list of crossed flow links for later storage in the caching file.
 subroutine saveLinklist( length, linklist, ipol )
@@ -387,6 +442,12 @@ subroutine storeCachingFile( basename, usecaching )
     call storeSections( lun, crs, cache_linklist, cache_ipol )
 
     !
+    ! Store the data for the long culverts
+    !
+    write( lun ) section(key_long_culverts), size(longculverts)
+    call storeLongCulverts( lun, longculverts )
+
+    !
     ! We are done, so close the file
     !
     close( lun )
@@ -426,6 +487,26 @@ subroutine storeSections( lun, sections, linklist, ipol )
         endif
     enddo
 end subroutine storeSections
+
+!> Store long culverts to a caching file.
+subroutine storeLongCulverts( lun, longculverts )
+    integer,                           intent(in   ) :: lun          !< LU-number of the caching file
+    type(t_longculvert), dimension(:), intent(in   ) :: longculverts !< Array of long culverts to be filled
+
+    integer                                 :: i, np, nlink
+    logical                                 :: okay
+
+    do i = 1,size(longculverts)
+        write( lun ) longculverts(i)%numlinks, longculverts(i)%flownode_up, longculverts(i)%flownode_dn
+
+        if ( longculverts(i)%numlinks > 0 ) then
+            write( lun ) longculverts(i)%xcoords,  &
+                         longculverts(i)%ycoords,  &
+                         longculverts(i)%netlinks, &
+                         longculverts(i)%flowlinks
+        endif
+    enddo
+end subroutine storeLongCulverts
 
 !> Copy the cached network information for observation points.
 subroutine copyCachedObservations( success )
@@ -541,6 +622,40 @@ subroutine copyCachedFixedWeirs( npl, xpl, ypl, number_links, iLink, iPol, dSL, 
         endif
     endif
 end subroutine copyCachedFixedWeirs
+
+!> Copy the cached information on long culverts
+subroutine copyCachedLongCulverts( longculverts, success )
+    type(t_longculvert), dimension(:), intent(inout) :: longculverts !< Array of long culverts to be filled, partly already filled
+    logical,                           intent(  out) :: success      !< The cached information was compatible if true
+
+    integer                                          :: i
+
+    success = .false.
+    if ( cache_success ) then
+        if ( size(cache_longculverts) == size(longculverts) ) then
+            success = .true.
+            do i = 1,size(longculverts)
+                if ( cache_longculverts(i)%numlinks > 0 .and. longculverts(i)%numlinks > 0 ) then
+                    if ( any( cache_longculverts(i)%xcoords /= longculverts(i)%xcoords ) .or. &
+                         any( cache_longculverts(i)%ycoords /= longculverts(i)%ycoords ) ) then
+                        success = .false.
+                    endif
+                endif
+            enddo
+        endif
+
+        if ( success ) then
+            do i = 1,size(longculverts)
+                longculverts(i)%flownode_up = cache_longculverts(i)%flownode_up
+                longculverts(i)%flownode_dn = cache_longculverts(i)%flownode_dn
+                if ( cache_longculverts(i)%numlinks > 0 ) then
+                    longculverts(i)%netlinks  = cache_longculverts(i)%netlinks
+                    longculverts(i)%flowlinks = cache_longculverts(i)%flowlinks
+                endif
+            enddo
+        endif
+    endif
+end subroutine copyCachedLongCulverts
 
 !> cacheFixedWeirs:
 !>     The arrays for fixed weirs are partly local - they do not reside in a

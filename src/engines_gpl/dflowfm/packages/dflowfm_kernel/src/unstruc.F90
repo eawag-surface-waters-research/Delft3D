@@ -599,7 +599,7 @@ character(len=255)   :: filename_fou_out
   end if
 
   call updateValuesOnCrossSections(time1)             ! Compute sum values across cross sections.
-  call updateValuesOnRunupGauges()             
+  call updateValuesOnRunupGauges()
  if (jampi == 0 .or. (jampi == 1 .and. my_rank==0)) then
     if (numsrc > 0) then
        call updateValuesonSourceSinks(time1)         ! Compute discharge and volume on sources and sinks
@@ -1188,7 +1188,7 @@ if(q /= 0) then
  use unstruc_display
  use m_waves
  use m_subsidence
-  
+
  implicit none
 
  integer :: ndraw
@@ -1489,11 +1489,11 @@ if(q /= 0) then
  if (jased > 0 .and. stm_included) then
     call fm_bott3d() ! bottom update
  endif
- 
+
  if (jasubsupl>0) then
     call apply_subsupl()
  endif
- 
+
  if ((jased > 0 .and. stm_included).or.(jasubsupl>0)) then
     call setbobs()   ! adjust administration - This option only works for ibedlevtyp = 1, otherwise original bed level [bl] is overwritten to original value
     if (jasubsupl>0) then
@@ -13315,7 +13315,7 @@ subroutine writesomeinitialoutput()
     call default_heatfluxes()
 
     call default_sediment()  ! stm_included not defined yet
-    
+
     call default_subsupl()
 
     call default_trachy()
@@ -16356,9 +16356,9 @@ end if
        ! deallocate(zk)
     endif
  endif
- 
+
  call setFrictionForLongculverts()
- 
+
  do L = 1,lnx
     if (frcu(L) == dmiss) then
        if (L <= lnx1D) then
@@ -17968,12 +17968,12 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    if (numsrc > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_discharge_salinity_temperature_sorsin, irefdate, tzone, tunit, tim)
    endif
-   
+
    if (jasubsupl > 0) then
       if (.not. sdu_first) then
          ! preserve the previous 'bedrock_surface_elevation' for computing the subsidence/uplift rate
          subsupl_tp = subsupl
-      endif 
+      endif
       if (item_subsiduplift /= ec_undef_int) then
          success = success .and. ec_gettimespacevalue(ecInstancePtr, 'bedrock_surface_elevation', tim)
       endif
@@ -18998,9 +18998,9 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
             call unc_write_his(tim)   ! wrihis
          endif
          if (nrug>0) then
-            ! needs to be done at exactly ti_his, but over all domains, so cannot go in wrihis 
-            call clearRunupGauges()      
-         end if   
+            ! needs to be done at exactly ti_his, but over all domains, so cannot go in wrihis
+            call clearRunupGauges()
+         end if
          if (comparereal(time_his, ti_hise, eps10) == 0) then
             time_his = tstop_user + 1
          else
@@ -19392,7 +19392,7 @@ subroutine unc_write_his(tim)            ! wrihis
                id_srcgeom_node_count,         id_srcgeom_node_coordx,         id_srcgeom_node_coordy,     &
                id_latgeom_node_count,         id_latgeom_node_coordx,         id_latgeom_node_coordy,     &
                id_longculvertgeom_node_count, id_longculvertgeom_node_coordx, id_longculvertgeom_node_coordy
-       
+
     double precision, allocatable :: geom_x(:), geom_y(:)
     integer, allocatable          :: node_count(:)
     integer, allocatable, save :: id_tra(:)
@@ -19519,7 +19519,7 @@ subroutine unc_write_his(tim)            ! wrihis
             nNodeTot = numobs+nummovobs
             ierr = sgeom_def_geometry_variables(ihisfile, station_geom_container_name, 'station', 'point', nNodeTot, id_statdim, &
                id_statgeom_node_count, id_statgeom_node_coordx, id_statgeom_node_coordy)
-            
+
             if ( jahiswatlev > 0 ) then
                ierr = nf90_def_var(ihisfile, 'waterlevel', nf90_double, (/ id_statdim, id_timedim /), id_vars)
                ierr = nf90_put_att(ihisfile, id_vars, 'standard_name', 'sea_surface_height') ! sorry for inland water people
@@ -20407,14 +20407,14 @@ subroutine unc_write_his(tim)            ! wrihis
 
             endif
         end if
-        
+
         ! runup gauges
         if (nrug > 0) then
            ierr = nf90_def_dim(ihisfile, 'runupgauges', nrug, id_rugdim)
-           
+
            ierr = nf90_def_var(ihisfile, 'rug_x_coordinate', nf90_double, (/ id_rugdim, id_timedim /), id_rugx)
            ierr = nf90_def_var(ihisfile, 'rug_y_coordinate', nf90_double, (/ id_rugdim, id_timedim /), id_rugy)
-            
+
             ierr = unc_addcoordatts(ihisfile, id_rugx, id_rugy, jsferic)
             ierr = nf90_put_att(ihisfile, id_rugx, 'long_name', 'time-varying x-coordinate of shoreline position')
             ierr = nf90_put_att(ihisfile, id_rugy, 'long_name', 'time-varying y-coordinate of shoreline position')
@@ -20425,14 +20425,14 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_var(ihisfile, 'rug_name', nf90_char,   (/ id_strlendim, id_rugdim /), id_rugname)
             ierr = nf90_put_att(ihisfile, id_rugname,  'cf_role', 'timeseries_id')
             ierr = nf90_put_att(ihisfile, id_rugname,  'long_name'    , 'runup gauge name') ! REF
-            
+
             ierr = nf90_def_var(ihisfile, 'runup_height', nf90_double, (/ id_rugdim, id_timedim /), id_varruh)
-            ierr = nf90_put_att(ihisfile, id_varruh, 'standard_name', 'runup_height') 
+            ierr = nf90_put_att(ihisfile, id_varruh, 'standard_name', 'runup_height')
             ierr = nf90_put_att(ihisfile, id_varruh, 'long_name', 'runup height')
             ierr = nf90_put_att(ihisfile, id_varruh, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_varruh, 'coordinates', 'rug_x_coordinate rug_y_coordinate rug_name')
             ierr = nf90_put_att(ihisfile, id_varruh, '_FillValue', dmiss)
-        endif   
+        endif
 
         if (jahissourcesink > 0 .and. numsrc > 0) then
            ierr = nf90_def_dim(ihisfile, 'source_sink', numsrc, id_srcdim)
@@ -21655,7 +21655,7 @@ subroutine unc_write_his(tim)            ! wrihis
            ierr = nf90_put_var(ihisfile, id_statid, trimexact(namobs(i), strlen_netcdf), (/ 1, i /)) ! Extra for OpenDA-wrapper
            ierr = nf90_put_var(ihisfile, id_statname, trimexact(namobs(i), strlen_netcdf), (/ 1, i /))
         end do
-        
+
         if (ncrs > 0) then
             do i=1,ncrs
                 !ierr = nf90_put_var(ihisfile, id_crsx,     crs(i)%path%xp(1:crs(i)%path%np), (/ 1, i /))
@@ -21701,13 +21701,13 @@ subroutine unc_write_his(tim)            ! wrihis
             end do
             ierr = nf90_put_var(ihisfile, id_crsgeom_node_count, node_count, start = (/ 1 /), count = (/ ncrs /))
         end if
-        
+
         if (nrug>0) then
             do i=1,nrug
                 ierr = nf90_put_var(ihisfile, id_rugname,  trimexact(rug(i)%name, strlen_netcdf), (/ 1, i /))
                 ierr = nf90_put_var(ihisfile, id_rugid,    trimexact(rug(i)%name, strlen_netcdf), (/ 1, i /))
-            end do   
-        endif   
+            end do
+        endif
 
         if (jahiscgen > 0 .and. ntmp > 0) then
             do i=1,ntmp
@@ -22296,7 +22296,7 @@ subroutine unc_write_his(tim)            ! wrihis
           endif
        end do
     end if
-    
+
     ! runup gauges
     if (nrug>0) then
        call realloc(geom_x,   nrug, fill=dmiss)
@@ -22309,9 +22309,9 @@ subroutine unc_write_his(tim)            ! wrihis
        end do
        ierr = nf90_put_var(ihisfile, id_rugx,   geom_x(:),   start = (/ 1, it_his /), count = (/ nrug, 1 /))
        ierr = nf90_put_var(ihisfile, id_rugy,   geom_y(:),   start = (/ 1, it_his /), count = (/ nrug, 1 /))
-       ierr = nf90_put_var(ihisfile, id_varruh, toutput1(:), start = (/ 1, it_his /), count = (/ nrug, 1 /))  
-    endif            
-    
+       ierr = nf90_put_var(ihisfile, id_varruh, toutput1(:), start = (/ 1, it_his /), count = (/ nrug, 1 /))
+    endif
+
 
     if (jahissourcesink > 0 .and. numsrc > 0) then
       if (tim == tstart_user) then
@@ -37624,6 +37624,7 @@ bft:do ibathyfiletype=1,2
  use unstruc_channel_flow
  use m_structures
  use m_longculverts
+ use unstruc_caching, only: cacheRetrieved, copyCachedLongCulverts
  !\ DEBUG
  use m_missing
 
@@ -37918,7 +37919,13 @@ bft:do ibathyfiletype=1,2
  enddo
 
  call duikerstoprofs()
- call longculvertsToProfs()
+
+ if ( cacheRetrieved() ) then
+    call copyCachedLongCulverts( longculverts, success )
+ else
+    success = .false.
+ endif
+ call longculvertsToProfs( skiplinks = success )
 
  if (blmeanbelow .ne. -999d0) then
     do n = 1,ndx2D
@@ -39693,8 +39700,8 @@ end subroutine setbobs_fixedweirs
     enddo
     end if
 
-    call furu_structures()    
-    
+    call furu_structures()
+
  endif
 
  if (kmx > 0) then
@@ -39834,7 +39841,7 @@ end subroutine setbobs_fixedweirs
  subroutine furu_structures()
  use m_flow
  use m_flowgeom
- use m_flowtimes 
+ use m_flowtimes
  use m_general_structure
  use m_1d_structures
  use m_compound
@@ -39853,7 +39860,7 @@ end subroutine setbobs_fixedweirs
  integer :: direction
  integer :: istru
  integer :: i
- integer :: k1 
+ integer :: k1
  integer :: k2
  integer :: kfu
  integer :: L
@@ -39863,8 +39870,8 @@ end subroutine setbobs_fixedweirs
  integer :: state
  integer :: ncompound
 
- double precision :: as1 
- double precision :: as2 
+ double precision :: as1
+ double precision :: as2
  double precision :: cmustr
  double precision :: Cz
  double precision :: dpt
@@ -39872,11 +39879,11 @@ end subroutine setbobs_fixedweirs
  double precision :: maxwidth2
  double precision :: perimeter
  double precision :: wetdown
- double precision :: width 
- 
+ double precision :: width
+
  logical          :: firstiter
  logical          :: SkipDimensionChecks
- 
+
  type(t_structure), pointer :: pstru
  type(t_compound), pointer :: pcompound
 
@@ -40013,7 +40020,7 @@ end subroutine setbobs_fixedweirs
     enddo
 
  end subroutine furu_structures
- 
+
  integer function ispumpon(n,s1k)
  use m_flowexternalforcings
  use m_missing
@@ -45419,11 +45426,11 @@ if (mext /= 0) then
 
         else if (qid(1:18) == 'waqsegmentfunction') then
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
-           
+
         else if (qid(1:25) == 'bedrock_surface_elevation') then
            kx=1
            if (allocated(subsupl)) deallocate(subsupl, subsupl_t0, subsupl_tp, subsout, sdu_blp)
-           
+
            select case (ibedlevtyp)
               case (1)
                  allocate ( subsupl(ndx) , stat=ierr); subsupl = 0d0
@@ -45468,7 +45475,7 @@ if (mext /= 0) then
            end select
            allocate ( sdu_blp(ndx) , stat=ierr); sdu_blp = 0d0
            call aerr('sdu_blp(ndx)', ierr, ndx)
-           
+
            if (success) then
               jasubsupl = 1
            endif
@@ -46498,7 +46505,7 @@ subroutine update_verticalprofiles()
  if (iadvec == 0) then
      javau = 0
  endif
- 
+
  if (iturbulencemodel == 1) then                         ! 1=constant
 
 !    vicwwu = vicoww
@@ -48269,7 +48276,7 @@ else if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d cha
       endif
 
       wu(L) = max(0.01d0, maxflowwidth)
-      
+
    endif
    ! finished for 1d network from flow1d
    return
@@ -52043,18 +52050,18 @@ end subroutine alloc_jacobi
       use m_flowparameters, only: ibedlevtyp
       use m_flowgeom, only: lnx, ndx, bl, blu
       use network_data, only: numk, zk
-      
+
       implicit none
-      
+
       integer           :: k !< face/cell or node index
       integer           :: L !< link/edge index
-      
-      
+
+
       ! copy bed level at cell centres to detect bed level changes later when updating water levels
       do k = 1, ndx
          sdu_blp(k) = bl(k)
       enddo
-      
+
       ! subsidence rate is interpolated in space and time in setexternalforcings() at tim=tstart+n*dt_user
       ! Where the subs/uplift is applied depends on ibedlevtyp
       ! According to setblfromextfile:
@@ -52092,11 +52099,11 @@ end subroutine alloc_jacobi
       use m_flow, only: s1
       use m_flowparameters, only: epshs
       use MessageHandling, only: mess, LEVEL_ERROR
-      
+
       implicit none
-      
+
       integer           :: k !< face/cell index
-      
+
       if (sdu_update_s1 == 1) then
          ! update s1 in all cells
          do k = 1,ndx
