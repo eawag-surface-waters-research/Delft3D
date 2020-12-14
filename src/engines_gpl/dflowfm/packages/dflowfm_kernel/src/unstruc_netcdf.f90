@@ -9755,9 +9755,9 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
 
     ierr = nf90_def_var(inetfile, 'NetLinkType', nf90_int, ids_netelem%id_netlinkdim, id_netlinktype)
     ierr = nf90_put_att(inetfile, id_netlinktype, 'long_name',     'type of netlink')
-    ierr = nf90_put_att(inetfile, id_netlinktype, 'valid_range',   (/ 0, 4 /))
-    ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_values',   (/ 0, 1, 2, 3, 4 /))
-    ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_meanings', 'closed_link_between_2D_nodes link_between_1D_nodes link_between_2D_nodes embedded_1D2D_link 1D2D_link')
+    ierr = nf90_put_att(inetfile, id_netlinktype, 'valid_range',   (/ 0, 7 /))
+    ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_values',   (/ 0, 1, 2, 3, 4, 5, 7 /))
+    ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_meanings', 'closed_link_between_2D_nodes link_between_1D_nodes link_between_2D_nodes embedded_1D2D_link longitudinal_1D2D_link vertically_stacked_1D2D_link roof_gutter_1D2D_link')
 
     if (janetcell_ /= 0 .and. nump1d2d > 0) then
        ierr = unc_def_net_elem(inetfile, ids_netelem, '', id_mesh2d)
