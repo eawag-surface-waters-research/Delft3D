@@ -402,6 +402,8 @@ type t_unc_mapids
    integer :: id_blave(MAX_ID_VAR)      = -1 !< Variable ID for main channel averaged bed level
    integer :: id_bamor(MAX_ID_VAR)      = -1 !< Variable ID for main channel cell area
    integer :: id_wumor(MAX_ID_VAR)      = -1 !< Variable ID for main channel width at flow link
+   integer :: id_flowelemzcc(MAX_ID_VAR)= -1 !< Variable ID for time dependent layer centre height
+   integer :: id_flowelemzw(MAX_ID_VAR) = -1 !< Variable ID for time dependent layer interface height
    !
    ! Other
    !
@@ -4593,6 +4595,12 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_numlimdt   , nf90_double, UNC_LOC_S, 'Numlimdt'  , '', 'Number of times flow element was Courant limiting', '1', cell_method = 'point', jabndnd=jabndnd_)
       endif
 
+      ! Time dependent grid layers
+      if (kmx > 0 .and. jafullgridoutput == 1) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzcc, nf90_double, UNC_LOC_S3D, 'flowelem_zcc', '', 'flow element center z'               , 'm' , jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzw , nf90_double, UNC_LOC_W  , 'flowelem_zw' , '', 'flow element z at vertical interface', 'm' , jabndnd=jabndnd_)
+      endif
+
       ! Water levels
       if (jamaps1 > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs, nf90_double, UNC_LOC_S, 'waterdepth', 'sea_floor_depth_below_sea_surface', 'Water depth at pressure points', 'm', jabndnd=jabndnd_)
@@ -5473,6 +5481,19 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_numlimdt, UNC_LOC_S, numlimdtdbl, jabndnd=jabndnd_)
       deallocate(numlimdtdbl)
    end if
+
+   ! Time dependent grid layers
+   if (kmx > 0 .and. jafullgridoutput == 1) then
+      call realloc(work1d, ndkx, keepExisting = .false.)
+      do kk = 1,ndx
+         call getkbotktop(kk,kb,kt)
+         do k = kb,kt
+            work1d(k) = (zws(k) + zws(k-1)) * 0.5d0
+         enddo
+      end do
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzcc, UNC_LOC_S3D, work1d, jabndnd=jabndnd_)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzw , UNC_LOC_W  , zws   , jabndnd=jabndnd_)
+   endif
 
    ! Water level
    if (jamaps1 == 1) then
