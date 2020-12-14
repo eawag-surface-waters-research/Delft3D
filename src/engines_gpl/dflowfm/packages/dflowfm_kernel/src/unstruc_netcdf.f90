@@ -1101,7 +1101,7 @@ integer :: jabndnd_, ndxndxi
          !   enddo
          !   ierr = nf90_put_var(ncid, id_var(1), mappedValues, start = (/ 1, id_tsp%idx_curtime /))
          !else
-            ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxndxi), start = (/ 1, id_tsp%idx_curtime /))
+            ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndx1d), start = (/ 1, id_tsp%idx_curtime /))
          !end if
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
@@ -1387,7 +1387,7 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxndxi), start = (/ 1, id_tsp%idx_curtime /))
+         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndx1d), start = (/ 1, id_tsp%idx_curtime /))
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (id_var(2) > 0 .and. ndx2d > 0) then
@@ -1661,7 +1661,7 @@ integer ::jabndnd_, ndxndxi
       tstart = id_tsp%idx_curtime - tl + t1
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (id_var(1) > 0 .and. ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxndxi, t1:tl), start = (/ 1, tstart /))
+         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndx1d, t1:tl), start = (/ 1, tstart /))
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (id_var(2) > 0 .and. ndx2d > 0) then
@@ -1730,13 +1730,13 @@ integer :: jabndnd_, ndxndxi
       if (id_var(1) > 0 .and. ndx1d > 0) then
          select case (ilocdim)
          case(1)
-            allocate(work(ndxndxi-ndx2d,size(values,2)))
-            work = values(ndx2d+1:ndxndxi,:)
+            allocate(work(ndx1d-ndx2d,size(values,2)))
+            work = values(ndx2d+1:ndx1d,:)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          case(2)
-            allocate(work(size(values,1),ndxndxi-ndx2d))
-            work = values(:,ndx2d+1:ndxndxi)
+            allocate(work(size(values,1),ndx1d-ndx2d))
+            work = values(:,ndx2d+1:ndx1d)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          end select
@@ -1886,18 +1886,18 @@ integer :: jabndnd_, ndxndxi
       if (id_var(1) > 0 .and. ndx1d > 0) then
          select case (ilocdim)
          case(1)
-            allocate(work(ndxndxi-ndx2d,size(values,2),size(values,3)))
-            work = values(ndx2d+1:ndxndxi,:,:)
+            allocate(work(ndx1d-ndx2d,size(values,2),size(values,3)))
+            work = values(ndx2d+1:ndx1d,:,:)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          case(2)
-            allocate(work(size(values,1),ndxndxi-ndx2d,size(values,3)))
-            work = values(:,ndx2d+1:ndxndxi,:)
+            allocate(work(size(values,1),ndx1d-ndx2d,size(values,3)))
+            work = values(:,ndx2d+1:ndx1d,:)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          case(3)
-            allocate(work(size(values,1),size(values,2),ndxndxi-ndx2d))
-            work = values(:,:,ndx2d+1:ndxndxi)
+            allocate(work(size(values,1),size(values,2),ndx1d-ndx2d))
+            work = values(:,:,ndx2d+1:ndx1d)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          end select
