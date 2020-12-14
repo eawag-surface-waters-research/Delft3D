@@ -1611,9 +1611,14 @@
          if ( timon ) call timstop ( ithand2 )
       endif
 
-! Copy wqbot data (when his or map, but also rst outputs will be written within the next timestep, and during first timestep)
+! Copy wqbot data (when his or map, but also when rst or mba outputs will be written within the next timestep, and during first timestep)
       if (ti_rst > 0) then
         if (comparereal(tim+dt-2.0_hp*eps10, time_rst, eps10) >= 0) then
+            copyoutput = .true.
+         endif
+      endif
+      if (ti_mba > 0) then
+        if (comparereal(tim+dt-2.0_hp*eps10, time_mba, eps10) >= 0) then
             copyoutput = .true.
          endif
       endif
