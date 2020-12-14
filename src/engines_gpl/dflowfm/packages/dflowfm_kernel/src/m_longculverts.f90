@@ -176,10 +176,15 @@ contains
              cycle
           end if
 
+          nlongculvertsg = nlongculvertsg + 1
+ 
           call prop_get(str_ptr, '',  'id', st_id, success)
+          if (.not. success) then
+             write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ' from '''//trim(structurefile)//''', id is missing.'
+             call err_flush()
+          endif
           if (success) call prop_get(str_ptr, '', 'numCoordinates', numcoords, success)
           if (success) then
-             nlongculvertsg = nlongculvertsg + 1
              longculverts(nlongculvertsg)%id = st_id
              longculverts(nlongculvertsg)%numlinks = numcoords-1
              allocate(longculverts(nlongculvertsg)%netlinks(numcoords-1))
@@ -239,8 +244,11 @@ contains
           else
              call SetMessage(LEVEL_ERROR, 'numCoordinates not found for long culvert '//st_id)
           end if
-
-
+       
+          if (.not. success) then
+             ! Some error during reading: decrement counter to ignore this long culvert.
+             nlongculvertsg = nlongculvertsg - 1
+          end if
        end do
        allocate(links(npl))
        call make1D2DLongCulverts(xpl, ypl, zpl, npl, links)
@@ -428,4 +436,3 @@ contains
    end subroutine reduceFlowAreaAtLongculverts
 
 end module m_longculverts
-
