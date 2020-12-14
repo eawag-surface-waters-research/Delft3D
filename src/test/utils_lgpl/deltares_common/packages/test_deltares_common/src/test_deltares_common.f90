@@ -51,7 +51,6 @@ program test_deltares_common
     call tests_string_module
     call tests_time_module
     !
-    ! The following test crashes on Linux. Only green tests should be added.
     call tests_properties
     call tests_geometry_module
 

@@ -26,6 +26,7 @@ module m_ec_unit_tests
 
    character(len=:), allocatable :: dumpedString  !< the last dumped error message
    integer                       :: lastLevel     !< the type of the last dumped error message
+   real(kind=hp)   , parameter   :: tol = 1d-10   !< tolerance for comparing doubles
 
    contains
 
@@ -106,35 +107,41 @@ module m_ec_unit_tests
       character(len=*), parameter :: str3 = "seconds since 2020-11-16T07:47:33Z"
       character(len=*), parameter :: str4 = "seconds since 2020-11-16"                 ! no time
       character(len=*), parameter :: str5 = "minutes since 1970-01-01 0:00:00.0 +0100" ! hours in 1 digit
+      character(len=*), parameter :: str6 = "seconds since 20201116T074733Z"           ! no '-' and no ':' (allowed in ISO 8601)
 
-      logical :: successArr(5)
+      logical :: successArr(6)
       integer :: unit
       real(kind=hp) :: ref_date, tzone
 
       successArr(1) = ecSupportTimestringToUnitAndRefdate(str1, unit, ref_date, tzone)
       successArr(1) = (successArr(1) .and. unit == ec_hour)
-      successArr(1) = (successArr(1) .and. comparereal(ref_date, 53736.0d0, 1d-10) == 0)
-      successArr(1) = (successArr(1) .and. comparereal(tzone, -1.0d0, 1d-10) == 0)
+      successArr(1) = (successArr(1) .and. comparereal(ref_date, 53736.0d0, tol) == 0)
+      successArr(1) = (successArr(1) .and. comparereal(tzone, -1.0d0, tol) == 0)
 
       successArr(2) = ecSupportTimestringToUnitAndRefdate(str2, unit, ref_date, tzone)
       successArr(2) = (successArr(2) .and. unit == ec_minute)
-      successArr(2) = (successArr(2) .and. comparereal(ref_date, 40587.0d0, 1d-10) == 0)
-      successArr(2) = (successArr(2) .and. comparereal(tzone, 1.0d0, 1d-10) == 0)
+      successArr(2) = (successArr(2) .and. comparereal(ref_date, 40587.0d0, tol) == 0)
+      successArr(2) = (successArr(2) .and. comparereal(tzone, 1.0d0, tol) == 0)
 
       successArr(3) = ecSupportTimestringToUnitAndRefdate(str3, unit, ref_date, tzone)
       successArr(3) = (successArr(3) .and. unit == ec_second)
-      successArr(3) = (successArr(3) .and. comparereal(ref_date, 59169.3246875d0, 1d-10) == 0)
-      successArr(3) = (successArr(3) .and. comparereal(tzone, 0d0, 1d-10) == 0)
+      successArr(3) = (successArr(3) .and. comparereal(ref_date, 59169.3246875d0, tol) == 0)
+      successArr(3) = (successArr(3) .and. comparereal(tzone, 0d0, tol) == 0)
 
       successArr(4) = ecSupportTimestringToUnitAndRefdate(str4, unit, ref_date, tzone)
       successArr(4) = (successArr(4) .and. unit == ec_second)
-      successArr(4) = (successArr(4) .and. comparereal(ref_date, 59169.0d0, 1d-10) == 0)
-      successArr(4) = (successArr(4) .and. comparereal(tzone, 0d0, 1d-10) == 0)
+      successArr(4) = (successArr(4) .and. comparereal(ref_date, 59169.0d0, tol) == 0)
+      successArr(4) = (successArr(4) .and. comparereal(tzone, 0d0, tol) == 0)
 
       successArr(5) = ecSupportTimestringToUnitAndRefdate(str5, unit, ref_date, tzone)
       successArr(5) = (successArr(5) .and. unit == ec_minute)
-      successArr(5) = (successArr(5) .and. comparereal(ref_date, 40587.0d0, 1d-10) == 0)
-      successArr(5) = (successArr(5) .and. comparereal(tzone, 1.0d0, 1d-10) == 0)
+      successArr(5) = (successArr(5) .and. comparereal(ref_date, 40587.0d0, tol) == 0)
+      successArr(5) = (successArr(5) .and. comparereal(tzone, 1.0d0, tol) == 0)
+
+      successArr(6) = ecSupportTimestringToUnitAndRefdate(str6, unit, ref_date, tzone)
+      successArr(6) = (successArr(6) .and. unit == ec_second)
+      successArr(6) = (successArr(6) .and. comparereal(ref_date, 59169.3246875d0, tol) == 0)
+      successArr(6) = (successArr(6) .and. comparereal(tzone, 0d0, tol) == 0)
 
       success = all(successArr)
       errMessage = ' '
@@ -155,18 +162,18 @@ module m_ec_unit_tests
 
       successArr(1) = ecSupportTimestringToUnitAndRefdate(str1, unit, ref_date, tzone)
       successArr(1) = (successArr(1) .and. unit == ec_hour)
-      successArr(1) = (successArr(1) .and. comparereal(ref_date, 51544.75d0, 1d-10) == 0)
-      successArr(1) = (successArr(1) .and. comparereal(tzone, 0d0, 1d-10) == 0)
+      successArr(1) = (successArr(1) .and. comparereal(ref_date, 51544.75d0, tol) == 0)
+      successArr(1) = (successArr(1) .and. comparereal(tzone, 0d0, tol) == 0)
 
       successArr(2) = ecSupportTimestringToUnitAndRefdate(str2, unit, ref_date, tzone)
       successArr(2) = (successArr(2) .and. unit == ec_hour)
-      successArr(2) = (successArr(2) .and. comparereal(ref_date, 51544.75d0, 1d-10) == 0)
-      successArr(2) = (successArr(2) .and. comparereal(tzone, 0d0, 1d-10) == 0)
+      successArr(2) = (successArr(2) .and. comparereal(ref_date, 51544.75d0, tol) == 0)
+      successArr(2) = (successArr(2) .and. comparereal(tzone, 0d0, tol) == 0)
 
       successArr(3) = ecSupportTimestringToUnitAndRefdate(str3, unit, ref_date, tzone)
       successArr(3) = (successArr(3) .and. unit == ec_hour)
-      successArr(3) = (successArr(3) .and. comparereal(ref_date, 51544.75d0, 1d-10) == 0)
-      successArr(3) = (successArr(3) .and. comparereal(tzone, 0d0, 1d-10) == 0)
+      successArr(3) = (successArr(3) .and. comparereal(ref_date, 51544.75d0, tol) == 0)
+      successArr(3) = (successArr(3) .and. comparereal(tzone, 0d0, tol) == 0)
 
       success = all(successArr)
       errMessage = ' '

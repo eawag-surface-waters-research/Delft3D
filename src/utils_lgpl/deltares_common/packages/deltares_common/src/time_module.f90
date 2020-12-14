@@ -864,7 +864,7 @@ module time_module
          logical                       :: success !< function result
 
          character(len=:), allocatable :: date_time
-         integer                       :: ipos, i, iposTZ, ipos2
+         integer                       :: ipos, i, iposTZ, ipos2, correct_short_date_time
          character, parameter          :: splitters1(2) = (/ 'T', ' ' /)
          character, parameter          :: splitters2(3) = (/ '+', '-', 'Z' /)
          character                     :: splitter
@@ -880,12 +880,19 @@ module time_module
             if (ipos > 0) exit
          end do
 
+         if (ipos == 9) then
+            ! no splitters in date and time
+            correct_short_date_time = 2
+         else
+            correct_short_date_time = 0
+         end if
+
          ! search for time zone indication
          iposTZ = 0
          do i = 1, size(splitters2)
             splitter = splitters2(i)
             ipos2 = index(date_time, splitter, back=.true.)
-            if (ipos2 > size_date + size_time + 1) then           ! the minus can be part of the date
+            if (ipos2 > size_date + size_time + 1 - 2*correct_short_date_time) then           ! the minus can be part of the date
                iposTZ = max(iposTZ, ipos2)
             else if (ipos2 > 0 .and. splitter /= '-') then
                success = .false.
@@ -902,11 +909,11 @@ module time_module
                time = adjustl(date_time(ipos+1:))
                tz   = ' '
             endif
-            if (len_trim(time) > size_time) then
+            if (len_trim(time) > size_time - correct_short_date_time) then
                success = index(time, '.') > 0 ! allow longer time string if it includes a dot
                return
             end if
-         else if (len(date_time) == size_date) then
+         else if (len(date_time) == size_date - correct_short_date_time) then
             date = date_time
             time = ' '
             tz   = ' '
@@ -925,7 +932,7 @@ module time_module
 
          integer                       :: i, ierr
          real(kind=hp)                 :: temp
-         integer                       :: ipos1, ipos2
+         integer                       :: ipos1, ipos2, ipos
          integer, parameter            :: nParts = 3
 
          character(len=16)             :: times(nParts)
@@ -937,7 +944,8 @@ module time_module
          ok = .false.
 
          ! just simple assume "HH:MM:SS" / "HH:MM:SS.XX"
-         if (len(time) >= 8) then
+         ipos = index(time, '.')
+         if ((len_trim(time) == 8 .and. ipos < 1) .or. ipos == 9) then
             fraction = 0.0_hp
             do i = 1, nParts
                ipos1 = 3*i-2
@@ -957,12 +965,19 @@ module time_module
             fraction = 0.0_hp
             ipos1 = index(time, ':')
             ipos2 = index(time, ':', back=.true.)
-            if (ipos2 == ipos1 .or. ipos2 < 1) then
-               continue ! did not find 2 different ':' splitters
+            if (ipos2 == ipos1 .and. ipos2 > 0) then
+               continue ! found one ':' splitter
             else
-               times(1) = adjustl(time(:ipos1-1))
-               times(2) = time(ipos1+1:ipos2-1)
-               times(3) = time(ipos2+1:)
+               if (ipos2 == ipos1 .and. ipos2 < 1) then
+                  ! found no splitters
+                  times(1) = time(1:2)
+                  times(2) = time(3:4)
+                  times(3) = time(5:)
+               else
+                  times(1) = adjustl(time(:ipos1-1))
+                  times(2) = time(ipos1+1:ipos2-1)
+                  times(3) = time(ipos2+1:)
+               end if
                do i = 1, nParts
                   read(times(i), *, iostat=ierr) temp
                   if (ierr /= 0 .or. temp >= invalidValues(i)) then

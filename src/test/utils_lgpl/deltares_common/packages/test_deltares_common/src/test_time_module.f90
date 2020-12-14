@@ -164,17 +164,23 @@ module test_time_module
 
       !> test parse time with valid input
       subroutine test_parse_time_valid
-         character(len=16), parameter :: times(4) = (/ &
+         integer, parameter           :: nr_cases = 7
+         character(len=16), parameter :: times(nr_cases) = (/ &
             "01:02:03        ", &
             "04:05:06.7      ", &
             "07:47:33        ", &
-            "8:10:20.3       " /)    ! one digit for hour (is allowed)
-         real(kind=hp), parameter :: fraction_expected(4) = (/ 0.0430902777778_hp, 0.170216435185_hp, 0.3246875_hp, 0.340512731481_hp /)
+            "8:10:20.3       ", &    ! one digit for hour and with fractional seconds (is allowed)
+            "8:10:20         ", &    ! one digit for hour (is allowed)
+            "123456          ", &    ! no splitters
+            "014554.44       "/)     ! no splitter, but with fractional seconds
+         real(kind=hp), parameter :: fraction_expected(nr_cases) = (/ 0.0430902777778_hp, 0.170216435185_hp, 0.3246875_hp, &
+                                                                      0.340512731481_hp, 0.340509259259_hp, 0.524259259259_hp, &
+                                                                      0.073546759259_hp /)
          integer                  :: i
          logical                  :: ok
          real(kind=hp)            :: fraction
 
-         do i = 1, size(times)
+         do i = 1, nr_cases
             fraction = parse_time(times(i), ok)
             call assert_true( ok, "unexpected success status (must succeed)")
             call assert_comparable(fraction, fraction_expected(i), tol, "difference in fraction")
