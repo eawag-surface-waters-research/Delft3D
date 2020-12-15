@@ -288,9 +288,9 @@ subroutine write_wave_map_netcdf (sg, sof, n_swan_grids, wavedata, casl, prevtim
     ! put vars (time dependent)
     !
     if (prevtime) then
-       idummy(1) = wavedata%time%calctimtscale_prev
+       idummy(1) = wavedata%time%calctimtscale_prev * wavedata%time%tscale
     else
-       idummy(1) = wavedata%time%calctimtscale
+       idummy(1) = wavedata%time%calctimtscale * wavedata%time%tscale
     endif
 
     ierror = nf90_put_var(idfile, idvar_time   , idummy(1)     , start=(/ wavedata%output%count /)); call nc_check_err(ierror, "put_var time", filename)
