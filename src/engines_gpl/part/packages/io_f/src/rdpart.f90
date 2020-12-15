@@ -787,8 +787,8 @@
                   close (lunfil)
                   if ( nrowsscreens .gt. 0) then
 !     allocate memory for the dispersant polygons, and read them into memory
-                     call alloc ( "xpoltmp", xpolscreens, nrowsscreens )
-                     call alloc ( "ypoltmp", ypolscreens, nrowsscreens )
+                     call alloc ( "xpolscreens", xpolscreens, nrowsscreens )
+                     call alloc ( "ypolscreens", ypolscreens, nrowsscreens )
                      xpolscreens = 999.999
                      ypolscreens = 999.999
                      call polpart(fiscreens, nrowsscreens, xpolscreens, ypolscreens, nrowstmp, lun2)
@@ -1126,10 +1126,13 @@
             endif
          endif
 
-         if ( ndisapp .gt. 0 .and. nrowsmax .gt. 0) then
-!     allocate memory for the dispersant polygons, and read them into memory
+!     allocate memory for the polygons, and read them into memory
+         if (nrowsmax .gt. 0) then
             call alloc ( "xpoltmp", xpoltmp, nrowsmax )
             call alloc ( "ypoltmp", ypoltmp, nrowsmax )
+         endif
+         if ( ndisapp .gt. 0) then
+!     allocate memory for the dispersant polygons, and read them into memory
             call alloc ( "xpoldis", xpoldis, nrowsmax, ndisapp )
             call alloc ( "ypoldis", ypoldis, nrowsmax, ndisapp )
             call alloc ( "nrowsdis", nrowsdis, ndisapp )
@@ -1584,6 +1587,7 @@
       if (nodac .gt. 0 .and. nrowsmax .gt. 0) then
          call alloc ( "xpoltmp", xpoltmp, nrowsmax )
          call alloc ( "ypoltmp", ypoltmp, nrowsmax )
+         nodac = 0
 !        allocate memory for the waste polygons, and read them into memory
          call alloc ( "xpolwaste", xpolwaste, nrowsmax, nodac )
          call alloc ( "ypolwaste", ypolwaste, nrowsmax, nodac )
