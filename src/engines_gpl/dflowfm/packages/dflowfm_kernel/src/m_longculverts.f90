@@ -36,6 +36,7 @@
 module m_longculverts
    use MessageHandling
    use m_missing
+   use iso_c_binding
 
    private
    public realloc
@@ -47,6 +48,7 @@ module m_longculverts
    public LongCulvertsToProfs
    public setFrictionForLongculverts
    public reduceFlowAreaAtLongculverts
+   public get_valve_relative_opening_c_loc
 
    !> Type definition for longculvert data.
    type, public :: t_longculvert
@@ -435,4 +437,14 @@ contains
 
    end subroutine reduceFlowAreaAtLongculverts
 
+   !> Gets the pointer of the valve opening height for a given culvert structure.
+   !! If the type of the given structure is not culvert, then it gets a null pointer
+   !! This pointer points directly to the %culvert%valveOpening.
+   type(c_ptr) function get_valve_relative_opening_c_loc(lculv)
+      type(t_longculvert), intent(in) :: lculv
+
+      get_valve_relative_opening_c_loc = c_loc(lculv%valve_relative_opening)
+
+   end function get_valve_relative_opening_c_loc
+   
 end module m_longculverts

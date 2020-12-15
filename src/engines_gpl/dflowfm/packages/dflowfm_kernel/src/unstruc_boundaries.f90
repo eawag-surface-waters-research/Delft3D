@@ -3584,6 +3584,7 @@ subroutine getStructureIndex(strtypename, strname, index, is_in_network)
    use m_flowexternalforcings
    use m_hash_search, only: hashsearch
    use unstruc_channel_flow, only: network
+   use m_longculverts
    
    implicit none
    character(len=*), intent(in   ) :: strtypename   !< the type of the structure: 'pumps', 'weirs', 'gates', ...
@@ -3636,7 +3637,14 @@ subroutine getStructureIndex(strtypename, strname, index, is_in_network)
             end if
          end if
       end do
-   else
+   else if (trim(strtypename) == 'longculverts') then
+      do i=1,nlongculvertsg
+         if (trim(longculverts(i)%id) == trim(strname)) then
+            index = i
+            exit
+         end if
+      end do
+   else  ! generalstructure-based types
       select case(strtypename)
       case('weirs')
          cgen_mapping => weir2cgen

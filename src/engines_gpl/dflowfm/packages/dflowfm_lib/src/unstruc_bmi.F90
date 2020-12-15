@@ -57,6 +57,7 @@ module bmi
   use unstruc_model
   use m_fm_erosed, only: taucr, tetacr
   use m_heatfluxes, only: Qsunmap
+  use m_longculverts
 
   implicit none
 
@@ -1853,6 +1854,20 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
             end if
             return
          end select
+
+      ! LONGCULVERTS
+      case("longculverts")
+         call getStructureIndex('longculverts', item_name, item_index, is_in_network)
+         if (item_index <= 0) then
+            return
+         endif
+      
+         select case(field_name)
+         case("valveRelativeOpening")
+            x = get_valve_relative_opening_c_loc(longculverts(item_index))  
+            return
+         end select
+
    ! SOURCE-SINKS
    case("sourcesinks")
       call getStructureIndex('sourcesinks', item_name, item_index, is_in_network)
