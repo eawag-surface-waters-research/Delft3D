@@ -11539,7 +11539,7 @@ subroutine unc_read_map(filename, tim, ierr)
 
     type(t_CSType), pointer                       :: pCS
     type(t_CSType), pointer, dimension(:)         :: pCSs
-    integer                                       :: n, jmax, ndx1d, nCrs
+    integer                                       :: n, jmax, ndx1d, nCrs, redo
     double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
 
     ierr = DFM_GENERICERROR
@@ -11680,6 +11680,7 @@ subroutine unc_read_map(filename, tim, ierr)
     call realloc(inode_merge,  1, keepExisting=.false., fill = -999)
     call realloc(ilink_merge,  1, keepExisting=.false., fill = -999)
 
+    redo_merged_same: do redo = 1, 2
     if (jamergedmap == 1) then
        ! If rst file is a merged-map or merged-rst file, read only a domain's own flow nodes and links.
        if (jamergedmap_same == 1) then  ! If the partitions of the model are the same with the rst file
@@ -12040,6 +12041,10 @@ subroutine unc_read_map(filename, tim, ierr)
 
     if (jamergedmap_same == 1) then
       if (ndxi_read /= ndxi_own .or. lnx_read /= lnx_own) then
+         if (jampi > 0 .and. jamergedmap == 1) then
+            jamergedmap_same = 0
+            cycle redo_merged_same
+         end if
          tmpstr = ''
          if (jampi == 1) then
             write (tmpstr, '(a,i0,a)') 'my_rank=', my_rank, ': '
@@ -12055,6 +12060,10 @@ subroutine unc_read_map(filename, tim, ierr)
       end if
       if (nbnd_read > 0 .and. jaoldrstfile == 0) then
          if ((jampi==0 .and. nbnd_read .ne. ndx-ndxi) .or. (jampi>0 .and. nbnd_read .ne. ndxbnd_own)) then
+            if (jampi > 0 .and. jamergedmap == 1) then
+               jamergedmap_same = 0
+               cycle redo_merged_same
+            end if
             tmpstr = ''
             write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#boundary points in file: ', nbnd_read, ', #boundary points in model: ', &
                    ndx-ndxi, '.'
@@ -12114,6 +12123,8 @@ subroutine unc_read_map(filename, tim, ierr)
          end if
       end if
     endif
+    exit redo_merged_same
+    enddo redo_merged_same
     call readyy('Reading map data',0.05d0)
 
     ! Choose latest timestep
