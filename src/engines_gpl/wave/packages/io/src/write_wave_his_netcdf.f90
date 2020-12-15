@@ -365,7 +365,7 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
     !
     ! put vars (time dependent)
     !
-    ierror = nf90_put_var(idfile, idvar_time   , wavedata%time%timsec, start=(/ hisoutputcount /)); call nc_check_err(ierror, "put_var time", filename)
+    ierror = nf90_put_var(idfile, idvar_time   , wavedata%time%calctimtscale * wavedata%time%tscale, start=(/ hisoutputcount /)); call nc_check_err(ierror, "put_var time", filename)
     do istat=1,nstat
        ierror = nf90_put_var(idfile, idvar_depth , rval(istat,COL_DEPTH ), start=(/ istat, hisoutputcount /)); call nc_check_err(ierror, "put_var Depth  ", filename)
        ierror = nf90_put_var(idfile, idvar_hsig  , rval(istat,COL_HSIG  ), start=(/ istat, hisoutputcount /)); call nc_check_err(ierror, "put_var Hsig   ", filename)
