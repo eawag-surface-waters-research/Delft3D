@@ -1587,7 +1587,6 @@
       if (nodac .gt. 0 .and. nrowsmax .gt. 0) then
          call alloc ( "xpoltmp", xpoltmp, nrowsmax )
          call alloc ( "ypoltmp", ypoltmp, nrowsmax )
-         nodac = 0
 !        allocate memory for the waste polygons, and read them into memory
          call alloc ( "xpolwaste", xpolwaste, nrowsmax, nodac )
          call alloc ( "ypolwaste", ypolwaste, nrowsmax, nodac )
