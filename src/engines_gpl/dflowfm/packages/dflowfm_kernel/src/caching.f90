@@ -493,8 +493,7 @@ subroutine storeLongCulverts( lun, longculverts )
     integer,                           intent(in   ) :: lun          !< LU-number of the caching file
     type(t_longculvert), dimension(:), intent(in   ) :: longculverts !< Array of long culverts to be filled
 
-    integer                                 :: i, np, nlink
-    logical                                 :: okay
+    integer                                          :: i
 
     do i = 1,size(longculverts)
         write( lun ) longculverts(i)%numlinks, longculverts(i)%flownode_up, longculverts(i)%flownode_dn
