@@ -11899,13 +11899,13 @@ subroutine unc_read_map(filename, tim, ierr)
              ierr = nf90_inq_dimid(imapfile, 'nFlowElemBnd', id_bnddim)
              if (ierr == 0) then
                  jaoldrstfile = 0
-             call check_error(ierr, 'nFlowElemBnd')
-             ierr = nf90_inquire_dimension(imapfile, id_bnddim, len=ndxbnd_merge)
-             call check_error(ierr, 'Flow Elem bnd count')
-             ierr = nf90_inq_varid(imapfile, 'FlowElem_xbnd', id_xbnd)
-             call check_error(ierr, 'x-coordinate of boundary points')
-             ierr = nf90_inq_varid(imapfile, 'FlowElem_ybnd', id_ybnd)
-             call check_error(ierr, 'y-coordinate of boundary points')
+                 call check_error(ierr, 'nFlowElemBnd')
+                 ierr = nf90_inquire_dimension(imapfile, id_bnddim, len=ndxbnd_merge)
+                 call check_error(ierr, 'Flow Elem bnd count')
+                 ierr = nf90_inq_varid(imapfile, 'FlowElem_xbnd', id_xbnd)
+                 call check_error(ierr, 'x-coordinate of boundary points')
+                 ierr = nf90_inq_varid(imapfile, 'FlowElem_ybnd', id_ybnd)
+                 call check_error(ierr, 'y-coordinate of boundary points')
              else
                 jaoldrstfile = 1
                 ierr = 0
@@ -11917,17 +11917,20 @@ subroutine unc_read_map(filename, tim, ierr)
              allocate(xmc(ndxi_merge))
              allocate(ymc(ndxi_merge))
              ierr = nf90_get_var(imapfile, id_xzw, xmc)
+             call check_error(ierr, 'xmc')
              ierr = nf90_get_var(imapfile, id_yzw, ymc)
+             call check_error(ierr, 'ymc')
              if (ndxbnd_own >0 .and. jaoldrstfile == 0) then
                 allocate(xbnd_read(ndxbnd_merge))
                 allocate(ybnd_read(ndxbnd_merge))
                 ierr = nf90_get_var(imapfile, id_xbnd, xbnd_read)
+                call check_error(ierr, 'xbnd_read')
                 ierr = nf90_get_var(imapfile, id_ybnd, ybnd_read)
+                call check_error(ierr, 'ybnd_read')
              endif
           end if
 
           if (nerr_ > 0) goto 999
-
 
           call realloc(inode_merge2own, ndxi_merge, keepExisting=.false., fill=-999)
           call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_own, inode_own, inode_merge, 1, 1, inode_merge2own)
@@ -11949,13 +11952,18 @@ subroutine unc_read_map(filename, tim, ierr)
                            //' therefore some links may not be found',' ',' ')
           end if
           ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+          call check_error(ierr, 'FlowLink_xu')
           ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-          if (nerr_ > 0) goto 999
+          call check_error(ierr, 'FlowLink_yu')
 
           allocate(xuu(lnx_merge))
           allocate(yuu(lnx_merge))
           ierr = nf90_get_var(imapfile, id_xu, xuu)
+          call check_error(ierr, 'xuu')
           ierr = nf90_get_var(imapfile, id_yu, yuu)
+          call check_error(ierr, 'yuu')
+
+          if (nerr_ > 0) goto 999
 
           call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0, 1)
 
@@ -14796,7 +14804,9 @@ subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_mer
 
            if ( jaerror2sam.eq.1 ) then
    !          add to samples
-              call mess(LEVEL_INFO, 'copying unfound flownodes/links to samples')
+              if (NS < 5) then
+                 call mess(LEVEL_INFO, 'copying unfound flownodes/links to samples')
+              end if
               call INCREASESAM(NS+1)
               NS=NS+1
               xs(Ns) = x_tmp(kk)
