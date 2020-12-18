@@ -874,9 +874,8 @@ module time_module
          date_time = trim(adjustl(string))
 
          ! search for the character splitting the date and the time
-         ipos = 0
          do i = 1, size(splitters1)
-            ipos = max(ipos, index(date_time, splitters1(i)))
+            ipos = index(date_time, splitters1(i))
             if (ipos > 0) exit
          end do
 

@@ -190,11 +190,16 @@ module test_time_module
       !> test parse time
       !! both valid and invalid input
       subroutine test_parse_time_invalid
-         character(len=16), parameter :: times(4) = (/ &
-            "                ", &    ! no time at all
-            "25:00:00        ", &    ! invalid hh
-            "23:65:28        ", &    ! invalid mm
-            "12:00:99        " /)    ! invalid ss
+         character(len=20), parameter :: times(9) = (/ &
+            "                    ", &    ! no time at all
+            "25:00:00            ", &    ! invalid hh
+            "23:65:28            ", &    ! invalid mm
+            "12:00:99            ", &    ! invalid ss
+            "12:22:206577.31415  ", &    ! invalid ss combined with fractional seconds
+            "250000              ", &    ! invalid hh, without ':'
+            "236528              ", &    ! invalid mm, without ':'
+            "120099              ", &    ! invalid ss, without ':'
+            "1222206577.31415    " /)    ! invalid ss, without ':', combined with fractional seconds
          integer                  :: i
          logical                  :: ok
          real(kind=hp)            :: fraction
