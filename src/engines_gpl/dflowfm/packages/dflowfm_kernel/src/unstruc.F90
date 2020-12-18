@@ -7344,7 +7344,7 @@ end subroutine setucxucyucxuucyu
        hmin = min( hs(n1), hs(n2) )
 
        call getLbotLtop(LL,Lb,Lt)
-       cs = csu(LL)  ; sn = snu(LL) ; v(LL) = 0d0
+       cs = csu(LL)  ; sn = snu(LL)
 
        if (icorio > 0 .and. jsferic > 0) then
            if (icorio >= 4 .and. icorio <= 6) then
