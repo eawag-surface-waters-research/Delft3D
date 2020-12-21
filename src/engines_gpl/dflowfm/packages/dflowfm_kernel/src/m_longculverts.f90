@@ -441,7 +441,7 @@ contains
    !! If the type of the given structure is not culvert, then it gets a null pointer
    !! This pointer points directly to the %culvert%valveOpening.
    type(c_ptr) function get_valve_relative_opening_c_loc(lculv)
-      type(t_longculvert), intent(in) :: lculv
+      type(t_longculvert), intent(in), target :: lculv
 
       get_valve_relative_opening_c_loc = c_loc(lculv%valve_relative_opening)
 
