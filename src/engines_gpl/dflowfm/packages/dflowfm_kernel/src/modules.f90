@@ -197,8 +197,8 @@ alph0                       = 0.698d0       ! =Eckart density parameters
 idensform                   = 2             !< 0 = no, 1 = Eckart, 2 = UNESCO
 limiterhordif               = 2             !< 0=No, 1=Horizontal gradient densitylimiter, 2=Finite volume
 
-Stanton                     = -1            !< coeff for convective  heat flux, if negative , take wind Cd
-Dalton                      = -1            !< coeff for evaporative heat flux, if negative , take wind Cd
+Stanton                     = 0.0013        !< coeff for convective  heat flux, if negative , take wind Cd
+Dalton                      = 0.0013        !< coeff for evaporative heat flux, if negative , take wind Cd
 
 Jadelvappos                 = 1             !< only positive forced evaporation fluxes
 
