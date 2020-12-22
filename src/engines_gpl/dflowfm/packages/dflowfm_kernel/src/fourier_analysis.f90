@@ -539,14 +539,16 @@ module m_fourier_analysis
              ivar = ivar + 1
              fouvarnam(ivar) = "fourier" // cref // "_max"
              fouvarnamlong(ivar) = "maximum value"
-             call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+             if (index('ux|uy|uxa|uya',trim(founam(ifou)))==0) then
+                call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+             endif
              call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
              if (founam(ifou) == 's1') then
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_max_depth"
                 fouvarnamlong(ivar) = "maximum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
-                call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
+                fouvarnamstd(ivar) = "sea_floor_depth_below_sea_surface"
              endif
              if (foumask(ifou) == 1) then
                 fouvarnam    (ivar) = trim(fouvarnam    (ivar)) // "_inidryonly"
@@ -566,13 +568,15 @@ module m_fourier_analysis
              fouvarnam(ivar) = "fourier" // cref // "_min"
              fouvarnamlong(ivar) = "minimum value"
              call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
-             call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
+             if (index('ux|uy|uxa|uya',trim(founam(ifou)))==0) then
+                call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
+             endif
              if (founam(ifou) == 's1') then
                 ivar = ivar + 1
                 fouvarnam(ivar) = "fourier" // cref // "_min_depth"
                 fouvarnamlong(ivar) = "minimum depth value"
                 call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
-                call setfoustandardname(founam(ifou), fouvarnamstd(ivar))
+                fouvarnamstd(ivar) = "sea_floor_depth_below_sea_surface"
              endif
           case ('a')
              ivar = ivar + 1
@@ -701,7 +705,7 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
     case ('s1')
        fouvarunit = 'm'
     case ('ws', 'u1', 'ux', 'uy', 'uc', 'uxa', 'uya')
-       fouvarunit = 'm/s'
+       fouvarunit = 'm s-1'
     case ('ta')
        fouvarunit = 'N m-2'
     case ('r1')
@@ -710,7 +714,7 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
        elseif (fconno == lsal) then
           fouvarunit = 'ppt'
        else
-          fouvarunit = 'kg/m3'
+          fouvarunit = 'kg m-3'
        endif
     case default
        fouvarunit = ' '
@@ -1267,19 +1271,19 @@ end subroutine setfoustandardname
                           'Fourier analysis ' // namfunlong // ', ' // trim(fouvarnamlong(ivar)), fouvarunit(ivar), is_timedep = 0)
            if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '// namfunlong // ', ' // trim(fouvarnamlong(ivar)))
            if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
-           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', irefdate)
-           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
-           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'reference_date_in_yyyymmdd', irefdate)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
 
            if (ierr == NF90_NOERR) ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
            select case (founam(ifou))
            case('s1','r1','u1','ux','uy','uxa','uya','uc','ta')
-              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'mesh2d_face_x mesh2d_face_y')
            case('qxk','ws')
-              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowLink_xu FlowLink_yu')
+              if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'mesh2d_edge_x mesh2d_edge_y')
            end select
-           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Number_of_cycles', fnumcy(ifou))
-           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Frequency_degrees_per_hour', freqnt)
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'number_of_cycles', fnumcy(ifou))
+           if (ierr == NF90_NOERR) ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'frequency_degrees_per_hour', freqnt)
 
            if (ierr /= NF90_NOERR) goto 99
            !
