@@ -299,6 +299,12 @@ subroutine loadCachedSections( lun, linklist, ipol, sections, ierr )
 
     integer                                 :: i, np, nlink
     logical                                 :: okay
+    
+    ! If there is nothing to be cached, do not even try to read (D3DFMIQ-2193)
+    if ( size(linklist) == 0 ) then
+        ierr = 0
+        return
+    endif
 
     read( lun, iostat = ierr ) linklist
     if ( ierr /= 0 ) then
