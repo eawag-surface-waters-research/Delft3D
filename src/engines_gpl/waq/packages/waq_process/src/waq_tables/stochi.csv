@@ -2782,6 +2782,9 @@ stocfl,stocsu,stocsc
 "dMrtVir1  ","Virus1    ",  -1.00000
 "dMrtVir2  ","Virus2    ",  -1.00000
 "dMrtVir3  ","Virus3    ",  -1.00000
+"dMrtVi1S1 ","Virus1S1  ",  -1.00000
+"dMrtVi2S1 ","Virus2S1  ",  -1.00000
+"dMrtVi3S1 ","Virus3S1  ",  -1.00000
 "dSorpVir1 ","Virus1-dis",  -1.00000
 "dSorpVir1 ","Virus1-par",   1.00000
 "dSorpVir2 ","Virus2-dis",  -1.00000
@@ -2818,3 +2821,15 @@ stocfl,stocsu,stocsc
 "dSedVir3S2","Virus3-par",  -1.00000
 "dSedVir3S2","Vir3S2    ",   1.00000
 "dSedVir3S2","Vir2S2-par",   1.00000
+"dSedCH4   ","CH4       ",   1.00000
+"dSedDOC   ","DOC       ",   1.00000
+"dSedDON   ","DON       ",   1.00000
+"dSedDOP   ","DOP       ",   1.00000
+"dSedDOS   ","DOS       ",   1.00000
+"dSedNH4   ","NH4       ",   1.00000
+"dSedNO3   ","NO3       ",   1.00000
+"dSedOXY   ","OXY       ",   1.00000
+"dSedPO4   ","PO4       ",   1.00000
+"dSedSi    ","Si        ",   1.00000
+"dSedSO4   ","SO4       ",   1.00000
+"dSedSUD   ","SUD       ",   1.00000

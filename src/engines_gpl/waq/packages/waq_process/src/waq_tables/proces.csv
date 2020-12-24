@@ -707,3 +707,5 @@ procid,procco,procfo,procnm
 "Sed_Virus1",123,"SEDHM     ","Sedimentation Virus 1                             "
 "Sed_Virus2",123,"SEDHM     ","Sedimentation Virus 2                             "
 "Sed_Virus3",123,"SEDHM     ","Sedimentation Virus 3                             "
+"DELWAQG   ",123,"DLWQG2    ","Detailed sediment biochemistry                    "
+"DELWAQGbal",123,"SEDBAL    ","DELWAQ-G Mass balances output per column          "

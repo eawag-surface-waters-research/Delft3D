@@ -4094,12 +4094,12 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Virus2Mrt ","MrtRaVir2 ",   2,"x",1
 "Virus3Mrt ","MrtToVir3 ",   1,"x",1
 "Virus3Mrt ","MrtRaVir3 ",   2,"x",1
-"Vir1S1Mrt ","MrtToVir1 ",   1,"x",1
-"Vir1S1Mrt ","MrtRaVir1 ",   2,"x",1
-"Vir2S1Mrt ","MrtToVir2 ",   1,"x",1
-"Vir2S1Mrt ","MrtRaVir2 ",   2,"x",1
-"Vir3S1Mrt ","MrtToVir3 ",   1,"x",1
-"Vir3S1Mrt ","MrtRaVir3 ",   2,"x",1
+"Vir1S1Mrt ","MrtToVi1S1",   1,"x",1
+"Vir1S1Mrt ","MrtRaVi1S1",   2,"x",1
+"Vir2S1Mrt ","MrtToVi2S1",   1,"x",1
+"Vir2S1Mrt ","MrtRaVi2S1",   2,"x",1
+"Vir3S1Mrt ","MrtToVi3S1",   1,"x",1
+"Vir3S1Mrt ","MrtRaVi3S1",   2,"x",1
 "PartWKVir1","FrVir1Dis ",   1,"x",1
 "PartWKVir1","FrVir1DOC ",   2,"x",1
 "PartWKVir1","FrVir1IM1 ",   3," ",1
@@ -4217,3 +4217,128 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Sed_Virus3","fSedVir3S1",   1,"x",1
 "Sed_Virus3","fSedVir3S2",   2," ",1
 "Sed_Virus3","VxSedVir3 ",   3,"x",0
+"DELWAQG   ","S1_CH4    ",   1," ",1
+"DELWAQG   ","S1_DOC    ",   2," ",1
+"DELWAQG   ","S1_DON    ",   3," ",1
+"DELWAQG   ","S1_DOP    ",   4," ",1
+"DELWAQG   ","S1_DOS    ",   5," ",1
+"DELWAQG   ","S1_NH4    ",   6," ",1
+"DELWAQG   ","S1_NO3    ",   7," ",1
+"DELWAQG   ","S1_OXY    ",   8," ",1
+"DELWAQG   ","S1_PO4    ",   9," ",1
+"DELWAQG   ","S1_Si     ",  10," ",1
+"DELWAQG   ","S1_SO4    ",  11," ",1
+"DELWAQG   ","S1_SUD    ",  12," ",1
+"DELWAQG   ","S1_AAP    ",  13," ",1
+"DELWAQG   ","S1_APATP  ",  14," ",1
+"DELWAQG   ","S1_FeIIIpa",  15," ",1
+"DELWAQG   ","S1_Opal   ",  16," ",1
+"DELWAQG   ","S1_POC1   ",  17," ",1
+"DELWAQG   ","S1_POC2   ",  18," ",1
+"DELWAQG   ","S1_POC3   ",  19," ",1
+"DELWAQG   ","S1_POC4   ",  20," ",1
+"DELWAQG   ","S1_PON1   ",  21," ",1
+"DELWAQG   ","S1_PON2   ",  22," ",1
+"DELWAQG   ","S1_PON3   ",  23," ",1
+"DELWAQG   ","S1_PON4   ",  24," ",1
+"DELWAQG   ","S1_POP1   ",  25," ",1
+"DELWAQG   ","S1_POP2   ",  26," ",1
+"DELWAQG   ","S1_POP3   ",  27," ",1
+"DELWAQG   ","S1_POP4   ",  28," ",1
+"DELWAQG   ","S1_POS1   ",  29," ",1
+"DELWAQG   ","S1_POS2   ",  30," ",1
+"DELWAQG   ","S1_POS3   ",  31," ",1
+"DELWAQG   ","S1_POS4   ",  32," ",1
+"DELWAQG   ","S1_SUP    ",  33," ",1
+"DELWAQG   ","S1_VIVP   ",  34," ",1
+"DELWAQG   ","SF_dAdsPO4",  35," ",1
+"DELWAQG   ","SF_dNitrif",  36," ",1
+"DELWAQG   ","SF_dCPPOC1",  37," ",1
+"DELWAQG   ","SF_dCPPON1",  38," ",1
+"DELWAQG   ","SF_dCPPOP1",  39," ",1
+"DELWAQG   ","SF_dCPPOS1",  40," ",1
+"DELWAQG   ","SF_dCDPOC1",  41," ",1
+"DELWAQG   ","SF_dCDPON1",  42," ",1
+"DELWAQG   ","SF_dCDPOP1",  43," ",1
+"DELWAQG   ","SF_dCDPOS1",  44," ",1
+"DELWAQG   ","SF_dMPOC1 ",  45," ",1
+"DELWAQG   ","SF_dMPON1 ",  46," ",1
+"DELWAQG   ","SF_dMPOP1 ",  47," ",1
+"DELWAQG   ","SF_dMPOS1 ",  48," ",1
+"DELWAQG   ","SF_dCPPOC2",  49," ",1
+"DELWAQG   ","SF_dCPPON2",  50," ",1
+"DELWAQG   ","SF_dCPPOP2",  51," ",1
+"DELWAQG   ","SF_dCPPOS2",  52," ",1
+"DELWAQG   ","SF_dCDPOC2",  53," ",1
+"DELWAQG   ","SF_dCDPON2",  54," ",1
+"DELWAQG   ","SF_dCDPOP2",  55," ",1
+"DELWAQG   ","SF_dCDPOS2",  56," ",1
+"DELWAQG   ","SF_dMPOC2 ",  57," ",1
+"DELWAQG   ","SF_dMPON2 ",  58," ",1
+"DELWAQG   ","SF_dMPOP2 ",  59," ",1
+"DELWAQG   ","SF_dMPOS2 ",  60," ",1
+"DELWAQG   ","SF_dCPPOC3",  61," ",1
+"DELWAQG   ","SF_dCPPON3",  62," ",1
+"DELWAQG   ","SF_dCPPOP3",  63," ",1
+"DELWAQG   ","SF_dCPPOS3",  64," ",1
+"DELWAQG   ","SF_dCDPOC3",  65," ",1
+"DELWAQG   ","SF_dCDPON3",  66," ",1
+"DELWAQG   ","SF_dCDPOP3",  67," ",1
+"DELWAQG   ","SF_dCDPOS3",  68," ",1
+"DELWAQG   ","SF_dMPOC3 ",  69," ",1
+"DELWAQG   ","SF_dMPON3 ",  70," ",1
+"DELWAQG   ","SF_dMPOP3 ",  71," ",1
+"DELWAQG   ","SF_dMPOS3 ",  72," ",1
+"DELWAQG   ","SF_dCPPOC4",  73," ",1
+"DELWAQG   ","SF_dCPPON4",  74," ",1
+"DELWAQG   ","SF_dCPPOP4",  75," ",1
+"DELWAQG   ","SF_dCPPOS4",  76," ",1
+"DELWAQG   ","SF_dCDPOC4",  77," ",1
+"DELWAQG   ","SF_dCDPON4",  78," ",1
+"DELWAQG   ","SF_dCDPOP4",  79," ",1
+"DELWAQG   ","SF_dCDPOS4",  80," ",1
+"DELWAQG   ","SF_dMPOC4 ",  81," ",1
+"DELWAQG   ","SF_dMPON4 ",  82," ",1
+"DELWAQG   ","SF_dMPOP4 ",  83," ",1
+"DELWAQG   ","SF_dMPOS4 ",  84," ",1
+"DELWAQG   ","SF_dCXDOC ",  85," ",1
+"DELWAQG   ","SF_dCXDON ",  86," ",1
+"DELWAQG   ","SF_dCXDOP ",  87," ",1
+"DELWAQG   ","SF_dCXDOS ",  88," ",1
+"DELWAQG   ","SF_dCYDOC ",  89," ",1
+"DELWAQG   ","SF_dCYDON ",  90," ",1
+"DELWAQG   ","SF_dCYDOP ",  91," ",1
+"DELWAQG   ","SF_dCYDOS ",  92," ",1
+"DELWAQG   ","SF_dMDOC  ",  93," ",1
+"DELWAQG   ","SF_dMDON  ",  94," ",1
+"DELWAQG   ","SF_dMDOP  ",  95," ",1
+"DELWAQG   ","SF_dMDOS  ",  96," ",1
+"DELWAQG   ","SF_dPrcPO4",  97," ",1
+"DELWAQG   ","SF_dDisPO4",  98," ",1
+"DELWAQG   ","SF_dDisSi ",  99," ",1
+"DELWAQG   ","SF_dOxCon ", 100," ",1
+"DELWAQG   ","SF_dNiDen ", 101," ",1
+"DELWAQG   ","SF_dFeRed ", 102," ",1
+"DELWAQG   ","SF_dSuRed ", 103," ",1
+"DELWAQG   ","SF_dMetCH4", 104," ",1
+"DELWAQG   ","SF_dMetCO2", 105," ",1
+"DELWAQG   ","SF_dMetEbl", 106," ",1
+"DELWAQG   ","SF_dSUDox ", 107," ",1
+"DELWAQG   ","SF_dSUDprc", 108," ",1
+"DELWAQG   ","SF_dSUDdis", 109," ",1
+"DELWAQG   ","SF_dMetoxD", 110," ",1
+"DELWAQG   ","SF_dMetoxS", 111," ",1
+"DELWAQG   ","SF_dPrcAPP", 112," ",1
+"DELWAQG   ","SF_dDisAPP", 113," ",1
+"DELWAQG   ","fSedCH4   ", 114," ",1
+"DELWAQG   ","fSedDOC   ", 115," ",1
+"DELWAQG   ","fSedDON   ", 116," ",1
+"DELWAQG   ","fSedDOP   ", 117," ",1
+"DELWAQG   ","fSedDOS   ", 118," ",1
+"DELWAQG   ","fSedNH4   ", 119," ",1
+"DELWAQG   ","fSedNO3   ", 120," ",1
+"DELWAQG   ","fSedOXY   ", 121," ",1
+"DELWAQG   ","fSedPO4   ", 122," ",1
+"DELWAQG   ","fSedSi    ", 123," ",1
+"DELWAQG   ","fSedSO4   ", 124," ",1
+"DELWAQG   ","fSedSUD   ", 125," ",1
