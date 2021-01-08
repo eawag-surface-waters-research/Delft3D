@@ -10758,7 +10758,6 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    select case (crs%epsg_code)
    case (4326) ! WGS84
       jsferic  = 1
-      jasfer3D = 1
    case default
       jsferic  = 0
       jasfer3D = 0
@@ -11221,7 +11220,6 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     ierr = nf90_get_att(inetfile, id_netnodex, 'standard_name', coordsyscheck)
     if (stringsequalinsens(coordsyscheck, 'longitude')) then
         jsferic  = 1
-        jasfer3D = 1
     else
         jsferic  = 0
         jasfer3D = 0

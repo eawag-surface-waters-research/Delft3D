@@ -104,6 +104,12 @@
    double precision                  :: csphi             ! cosphi of latest requested
 
    double precision, parameter       :: dtol_pole = 1d-4   ! pole tolerance in degrees
+
+   contains
+
+   subroutine default_sferic()
+      jasfer3D = 1
+   end subroutine default_sferic
    end module m_sferic
 
    module m_polygon

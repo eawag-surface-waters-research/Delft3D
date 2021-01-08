@@ -13285,6 +13285,7 @@ subroutine writesomeinitialoutput()
  use m_ship
  use unstruc_caching
  use m_subsidence
+ use m_sferic, only : default_sferic
  implicit none
 
     ! Only reset counters and other scalars, allocatables should be
@@ -13301,6 +13302,8 @@ subroutine writesomeinitialoutput()
     call default_kml_parameters()
 
     call default_physcoef()
+
+    call default_sferic()
 
     call default_grw()
 
@@ -27813,7 +27816,7 @@ end do
  use m_sferic
  use m_physcoef
  implicit none
- double precision :: sidereal, st2
+ double precision :: sidereal
  pi       = acos(-1d0)
  twopi    = 2d0*pi
  dg2rd    = pi/180d0
