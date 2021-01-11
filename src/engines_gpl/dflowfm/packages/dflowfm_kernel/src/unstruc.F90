@@ -322,8 +322,8 @@ subroutine flow_finalize_usertimestep(iresult)
          if ( jatimer == 1 ) call starttimer(IFMWAQ)
          call fm_wq_processes_step(ti_waqproc, time_user)
          if ( jatimer == 1 ) call stoptimer (IFMWAQ)
-         tem_dif = time_user/ti_waqproc
-         time_waqproc = (floor(tem_dif + 0.001d0)+1)*ti_waqproc
+         tem_dif = (time_user - tstart_user)/ti_waqproc
+         time_waqproc = tstart_user + (floor(tem_dif + 0.001d0)+1)*ti_waqproc
      endif
    endif
 
@@ -332,11 +332,8 @@ subroutine flow_finalize_usertimestep(iresult)
      if (comparereal(time_user, time_mba, eps10) == 0) then
          call mba_update(time0)
          tem_dif = time_user/ti_mba
-         if (ti_waqproc > 0d0) then
-            time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_mba, floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc)
-         else
-            time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_mba, tstop_user)
-         endif
+         tem_dif = (time_user - tstart_user)/ti_mba
+         time_mba = min(tstart_user + (floor(tem_dif + 0.001d0)+1)*ti_mba, tstop_user)
      endif
    endif
 
