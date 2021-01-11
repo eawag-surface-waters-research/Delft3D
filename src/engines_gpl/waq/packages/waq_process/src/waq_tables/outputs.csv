@@ -4342,3 +4342,123 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DELWAQG   ","fSedSi    ", 123," ",1
 "DELWAQG   ","fSedSO4   ", 124," ",1
 "DELWAQG   ","fSedSUD   ", 125," ",1
+"MPBNUT    ","NH4S1     ",   1,"x",1
+"MPBNUT    ","NO3S1     ",   2,"x",1
+"MPBNUT    ","PO4S1     ",   3,"x",1
+"MPBNUT    ","SiS1      ",   4,"x",1
+"MPB1Temp  ","MPB1ftmp  ",   1,"x",1
+"MPB1Temp  ","WSMPB1ftmp",   2," ",1
+"MPB2Temp  ","MPB2ftmp  ",   1,"x",1
+"MPB2Temp  ","WSMPB2ftmp",   2," ",1
+"MPB1LLim  ","MPB1flt   ",   1,"x",1
+"MPB1LLim  ","MPB1fltS1 ",   2,"x",1
+"MPB1LLim  ","MPB1WS01  ",   3," ",1
+"MPB1LLim  ","MPB1WS02  ",   4," ",1
+"MPB1LLim  ","MPB1WS03  ",   5," ",1
+"MPB1LLim  ","MPB1WS04  ",   6," ",1
+"MPB2LLim  ","MPB2flt   ",   1,"x",1
+"MPB2LLim  ","MPB2fltS1 ",   2,"x",1
+"MPB2LLim  ","MPB2WS01  ",   3," ",1
+"MPB2LLim  ","MPB2WS02  ",   4," ",1
+"MPB2LLim  ","MPB2WS03  ",   5," ",1
+"MPB2LLim  ","MPB2WS04  ",   6," ",1
+"MPB1NLim  ","MPB1fam   ",   1,"x",1
+"MPB1NLim  ","MPB1fni   ",   2,"x",1
+"MPB1NLim  ","MPB1fpho  ",   3,"x",1
+"MPB1NLim  ","MPB1fsi   ",   4,"x",1
+"MPB1NLim  ","MPB1fnut  ",   5,"x",1
+"MPB1NLim  ","MPB1famS1 ",   6,"x",1
+"MPB1NLim  ","MPB1fniS1 ",   7,"x",1
+"MPB1NLim  ","MPB1fphoS1",   8,"x",1
+"MPB1NLim  ","MPB1fsiS1 ",   9,"x",1
+"MPB1NLim  ","MPB1fnutS1",  10,"x",1
+"MPB2NLim  ","MPB2fam   ",   1,"x",1
+"MPB2NLim  ","MPB2fni   ",   2,"x",1
+"MPB2NLim  ","MPB2fpho  ",   3,"x",1
+"MPB2NLim  ","MPB2fsi   ",   4,"x",1
+"MPB2NLim  ","MPB2fnut  ",   5,"x",1
+"MPB2NLim  ","MPB2famS1 ",   6,"x",1
+"MPB2NLim  ","MPB2fniS1 ",   7,"x",1
+"MPB2NLim  ","MPB2fphoS1",   8,"x",1
+"MPB2NLim  ","MPB2fsiS1 ",   9,"x",1
+"MPB2NLim  ","MPB2fnutS1",  10,"x",1
+"MPBenthos ","MPB1M2    ",   1,"x",1
+"MPBenthos ","MPB2M2    ",   2,"x",1
+"MPBenthos ","MPB1S1M3  ",   3,"x",1
+"MPBenthos ","MPB2S1M3  ",   4,"x",1
+"MPBenthos ","MPB1FMC   ",   5,"x",1
+"MPBenthos ","MPB2FMC   ",   6,"x",1
+"MPBenthos ","MPB1FMN   ",   7,"x",1
+"MPBenthos ","MPB2FMN   ",   8,"x",1
+"MPBenthos ","MPB1FMP   ",   9,"x",1
+"MPBenthos ","MPB2FMP   ",  10,"x",1
+"MPBenthos ","MPB1FMS   ",  11,"x",1
+"MPBenthos ","MPB2FMS   ",  12,"x",1
+"MPBenthos ","MPB1FMCS1 ",  13,"x",1
+"MPBenthos ","MPB2FMCS1 ",  14,"x",1
+"MPBenthos ","MPB1FMNS1 ",  15,"x",1
+"MPBenthos ","MPB2FMNS1 ",  16,"x",1
+"MPBenthos ","MPB1FMPS1 ",  17,"x",1
+"MPBenthos ","MPB2FMPS1 ",  18,"x",1
+"MPBenthos ","MPB1FMSS1 ",  19,"x",1
+"MPBenthos ","MPB2FMSS1 ",  20,"x",1
+"MPBenthos ","FMPB1NH4UP",  21,"x",1
+"MPBenthos ","FMPB2NH4UP",  22,"x",1
+"MPBenthos ","FMPB1NO3UP",  23,"x",1
+"MPBenthos ","FMPB2NO3UP",  24,"x",1
+"MPBenthos ","FMPB1PO4UP",  25,"x",1
+"MPBenthos ","FMPB2PO4UP",  26,"x",1
+"MPBenthos ","FMPB1SIUP ",  27,"x",1
+"MPBenthos ","FMPB2SIUP ",  28,"x",1
+"MPBenthos ","FMPB1EXC  ",  29,"x",1
+"MPBenthos ","FMPB2EXC  ",  30,"x",1
+"MPBenthos ","FMPB1FGP  ",  31,"x",1
+"MPBenthos ","FMPB2FGP  ",  32,"x",1
+"MPBenthos ","FMPB1MOR  ",  33,"x",1
+"MPBenthos ","FMPB2MOR  ",  34,"x",1
+"MPBenthos ","FMPB1POC1 ",  35,"x",1
+"MPBenthos ","FMPB2POC1 ",  36,"x",1
+"MPBenthos ","FMPB1PON1 ",  37,"x",1
+"MPBenthos ","FMPB2PON1 ",  38,"x",1
+"MPBenthos ","FMPB1POP1 ",  39,"x",1
+"MPBenthos ","FMPB2POP1 ",  40,"x",1
+"MPBenthos ","FMPB1OPAL ",  41,"x",1
+"MPBenthos ","FMPB2OPAL ",  42,"x",1
+"MPBenthos ","FMPB1OXY  ",  43,"x",1
+"MPBenthos ","FMPB2OXY  ",  44,"x",1
+"MPBenthos ","FMPB1RES  ",  45,"x",1
+"MPBenthos ","FMPB2RES  ",  46,"x",1
+"MPBenthos ","FMPB1FGPM2",  47,"x",1
+"MPBenthos ","FMPB2FGPM2",  48,"x",1
+"MPBenthos ","FMPB1FGPD ",  49,"x",1
+"MPBenthos ","FMPB2FGPD ",  50,"x",1
+"MPBenthos ","FMPB1NH4S1",  51,"x",1
+"MPBenthos ","FMPB2NH4S1",  52,"x",1
+"MPBenthos ","FMPB1NO3S1",  53,"x",1
+"MPBenthos ","FMPB2NO3S1",  54,"x",1
+"MPBenthos ","FMPB1PO4S1",  55,"x",1
+"MPBenthos ","FMPB2PO4S1",  56,"x",1
+"MPBenthos ","FMPB1SIS1 ",  57,"x",1
+"MPBenthos ","FMPB2SIS1 ",  58,"x",1
+"MPBenthos ","FMPB1EXCS1",  59,"x",1
+"MPBenthos ","FMPB2EXCS1",  60,"x",1
+"MPBenthos ","FMPB1FGPS1",  61,"x",1
+"MPBenthos ","FMPB2FGPS1",  62,"x",1
+"MPBenthos ","FMPB1MORS1",  63,"x",1
+"MPBenthos ","FMPB2MORS1",  64,"x",1
+"MPBenthos ","FMPB1POC1S",  65,"x",1
+"MPBenthos ","FMPB2POC1S",  66,"x",1
+"MPBenthos ","FMPB1PON1S",  67,"x",1
+"MPBenthos ","FMPB2PON1S",  68,"x",1
+"MPBenthos ","FMPB1POP1S",  69,"x",1
+"MPBenthos ","FMPB2POP1S",  70,"x",1
+"MPBenthos ","FMPB1OPALS",  71,"x",1
+"MPBenthos ","FMPB2OPALS",  72,"x",1
+"MPBenthos ","FMPB1OXYS1",  73,"x",1
+"MPBenthos ","FMPB2OXYS1",  74,"x",1
+"MPBenthos ","FMPB1RESS1",  75,"x",1
+"MPBenthos ","FMPB2RESS1",  76,"x",1
+"MPBenthos ","FMPB1GPS1M",  77,"x",1
+"MPBenthos ","FMPB2GPS1M",  78,"x",1
+"MPBenthos ","FMPB1GPS1D",  79,"x",1
+"MPBenthos ","FMPB2GPS1D",  80,"x",1

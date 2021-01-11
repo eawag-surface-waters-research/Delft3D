@@ -826,6 +826,10 @@ stocfl,stocsu,stocsc
 "dSedAlgN  ","DetNS1    ",   1.00000
 "dSedAlgP  ","DetPS1    ",   1.00000
 "dSedAlgSi ","DetSiS1   ",   1.00000
+"dSedMPB1  ","MPB1peli  ",  -1.00000
+"dSedMPB1  ","MPB1peliS1",   1.00000
+"dSedMPB2  ","MPB2psam  ",  -1.00000
+"dSedMPB2  ","MPB2psamS1",   1.00000
 "dSedOpal  ","Opal      ",  -1.00000
 "dSedOpal  ","DetSiS1   ",   1.00000
 "dSedPOC1  ","POC1      ",  -1.00000
@@ -2833,3 +2837,30 @@ stocfl,stocsu,stocsc
 "dSedSi    ","Si        ",   1.00000
 "dSedSO4   ","SO4       ",   1.00000
 "dSedSUD   ","SUD       ",   1.00000
+"dMPB1Fgp  ","MPB1peli  ",   1.00000
+"dMPB2Fgp  ","MPB2psam  ",   1.00000
+"dMPB1Res  ","MPB1peli  ",  -1.00000
+"dMPB2Res  ","MPB2psam  ",  -1.00000
+"dMPB1Mor  ","MPB1peli  ",  -1.00000
+"dMPB2Mor  ","MPB2psam  ",  -1.00000
+"dMPBOxy   ","Oxy       ",   2.67000
+"dMPBCO2up ","TIC       ",  -1.00000
+"dMPBCO2up ","CO2       ",  -3.67000
+"dMPBNO3up ","NO3       ",  -1.00000
+"dMPBNH4up ","NH4       ",  -1.00000
+"dMPBPO4up ","PO4       ",  -1.00000
+"dMPBSiup  ","Si        ",  -1.00000
+"dMPBPOC1  ","POC1      ",   1.00000
+"dMPBPON1  ","PON1      ",   1.00000
+"dMPBPOP1  ","POP1      ",   1.00000
+"dMPBOpal  ","Opal      ",   1.00000
+"dMPB1FgpS1","MPB1peliS1",   1.00000
+"dMPB2FgpS1","MPB2psamS1",   1.00000
+"dMPB1ResS1","MPB1peliS1",  -1.00000
+"dMPB2ResS1","MPB2psamS1",  -1.00000
+"dMPB1MorS1","MPB1peliS1",  -1.00000
+"dMPB2MorS1","MPB2psamS1",  -1.00000
+"dMPBDetCS ","DetCS1    ",   1.00000
+"dMPBDetNS ","DetNS1    ",   1.00000
+"dMPBDetPS ","DetPS1    ",   1.00000
+"dMPBDetSS ","DetSiS1   ",   1.00000

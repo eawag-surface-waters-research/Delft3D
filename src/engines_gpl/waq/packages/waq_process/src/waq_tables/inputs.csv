@@ -538,8 +538,12 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "ExtPhDVL  ","Volume    ",   3,"N","x",1
 "ExtPhDVL  ","ExtVlGreen",   4,"Y","x",1
 "ExtPhDVL  ","ExtVlDiat ",   5,"Y","x",1
-"ExtPhDVL  ","Green     ",   6,"N","x",1
-"ExtPhDVL  ","Diat      ",   7,"Y","x",1
+"ExtPhDVL  ","ExtVlMPB1 ",   6,"Y","x",1
+"ExtPhDVL  ","ExtVlMPB2 ",   7,"Y","x",1
+"ExtPhDVL  ","Green     ",   8,"N","x",1
+"ExtPhDVL  ","Diat      ",   9,"Y","x",1
+"ExtPhDVL  ","MPB1peli  ",  10,"Y","x",1
+"ExtPhDVL  ","MPB2psam  ",  11,"Y","x",1
 "EXTINABUVP","BLComment ",   1,"Y"," ",1
 "EXTINABUVP","ExtUVAlg  ",   2,"Y","x",1
 "EXTINABUVP","BLOOMALG  ",   3,"N","x",1
@@ -673,8 +677,12 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "ExtPhDUV  ","Volume    ",   3,"N","x",1
 "ExtPhDUV  ","ExtUVGreen",   4,"Y","x",1
 "ExtPhDUV  ","ExtUVDiat ",   5,"Y","x",1
-"ExtPhDUV  ","Green     ",   6,"N","x",1
-"ExtPhDUV  ","Diat      ",   7,"Y","x",1
+"ExtPhDUV  ","ExtUVMPB1 ",   6,"Y","x",1
+"ExtPhDUV  ","ExtUVMPB2 ",   7,"Y","x",1
+"ExtPhDUV  ","Green     ",   8,"N","x",1
+"ExtPhDUV  ","Diat      ",   9,"Y","x",1
+"ExtPhDUV  ","MPB1peli  ",  10,"Y","x",1
+"ExtPhDUV  ","MPB2psam  ",  11,"Y","x",1
 "ExtMacroVl","nMacrophyt",   1,"Y"," ",1
 "ExtMacroVl","SW_fixin_n",   2,"Y"," ",1
 "ExtMacroVl","Volume    ",   3,"N","x",1
@@ -2181,16 +2189,28 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Phy_dyn   ","NAlgDynamo",   1,"Y","x",1
 "Phy_dyn   ","Diat      ",   2,"Y","x",1
 "Phy_dyn   ","Green     ",   3,"Y","x",1
-"Phy_dyn   ","NCRatDiat ",   4,"Y","x",1
-"Phy_dyn   ","NCRatGreen",   5,"Y","x",1
-"Phy_dyn   ","PCRatDiat ",   6,"Y","x",1
-"Phy_dyn   ","PCRatGreen",   7,"Y","x",1
-"Phy_dyn   ","SCRatDiat ",   8,"Y","x",1
-"Phy_dyn   ","SCRatGreen",   9,"Y","x",1
-"Phy_dyn   ","DMCFDiat  ",  10,"Y","x",1
-"Phy_dyn   ","DMCFGreen ",  11,"Y","x",1
-"Phy_dyn   ","Ditochl   ",  12,"Y","x",1
-"Phy_dyn   ","Grtochl   ",  13,"Y","x",1
+"Phy_dyn   ","MPB1peli  ",   4,"Y","x",1
+"Phy_dyn   ","MPB2psam  ",   5,"Y","x",1
+"Phy_dyn   ","NCRatDiat ",   6,"Y","x",1
+"Phy_dyn   ","NCRatGreen",   7,"Y","x",1
+"Phy_dyn   ","MPB1NCrat ",   8,"Y","x",1
+"Phy_dyn   ","MPB2NCrat ",   9,"Y","x",1
+"Phy_dyn   ","PCRatDiat ",  10,"Y","x",1
+"Phy_dyn   ","PCRatGreen",  11,"Y","x",1
+"Phy_dyn   ","MPB1PCrat ",  12,"Y","x",1
+"Phy_dyn   ","MPB2PCrat ",  13,"Y","x",1
+"Phy_dyn   ","SCRatDiat ",  14,"Y","x",1
+"Phy_dyn   ","SCRatGreen",  15,"Y","x",1
+"Phy_dyn   ","MPB1SiCrat",  16,"Y","x",1
+"Phy_dyn   ","MPB2SiCrat",  17,"Y","x",1
+"Phy_dyn   ","DMCFDiat  ",  18,"Y","x",1
+"Phy_dyn   ","DMCFGreen ",  19,"Y","x",1
+"Phy_dyn   ","DmCfMPB1  ",  20,"Y","x",1
+"Phy_dyn   ","DmCfMPB2  ",  21,"Y","x",1
+"Phy_dyn   ","Ditochl   ",  22,"Y","x",1
+"Phy_dyn   ","Grtochl   ",  23,"Y","x",1
+"Phy_dyn   ","MPB1ToChl ",  24,"Y","x",1
+"Phy_dyn   ","MPB2ToChl ",  25,"Y","x",1
 "S1_Comp   ","IM1S1     ",   1,"Y","x",1
 "S1_Comp   ","IM2S1     ",   2,"Y","x",1
 "S1_Comp   ","IM3S1     ",   3,"Y","x",1
@@ -4313,18 +4333,30 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SedPhDyn  ","Depth     ",   2,"N","x",1
 "SedPhDyn  ","fSedGreen ",   3,"Y","x",1
 "SedPhDyn  ","fSedDiat  ",   4,"Y","x",1
-"SedPhDyn  ","DMCFGreen ",   5,"Y","x",1
-"SedPhDyn  ","DMCFDiat  ",   6,"Y","x",1
-"SedPhDyn  ","NCRatGreen",   7,"Y","x",1
-"SedPhDyn  ","NCRatDiat ",   8,"Y","x",1
-"SedPhDyn  ","PCRatGreen",   9,"Y","x",1
-"SedPhDyn  ","PCRatDiat ",  10,"Y","x",1
-"SedPhDyn  ","SCRatGreen",  11,"Y","x",1
-"SedPhDyn  ","SCRatDiat ",  12,"Y","x",1
-"SedPhDyn  ","Green     ",  13,"Y","x",1
-"SedPhDyn  ","Diat      ",  14,"Y","x",1
-"SedPhDyn  ","VxSedGreen",  15,"Y","x",0
-"SedPhDyn  ","VxSedDiat ",  16,"Y","x",0
+"SedPhDyn  ","fSedMPB1  ",   5,"Y","x",1
+"SedPhDyn  ","fSedMPB2  ",   6,"Y","x",1
+"SedPhDyn  ","DMCFGreen ",   7,"Y","x",1
+"SedPhDyn  ","DMCFDiat  ",   8,"Y","x",1
+"SedPhDyn  ","DmCfMPB1  ",   9,"Y","x",1
+"SedPhDyn  ","DmCfMPB2  ",  10,"Y","x",1
+"SedPhDyn  ","NCRatGreen",  11,"Y","x",1
+"SedPhDyn  ","NCRatDiat ",  12,"Y","x",1
+"SedPhDyn  ","MPB1NCrat ",  13,"Y","x",1
+"SedPhDyn  ","MPB2NCrat ",  14,"Y","x",1
+"SedPhDyn  ","PCRatGreen",  15,"Y","x",1
+"SedPhDyn  ","PCRatDiat ",  16,"Y","x",1
+"SedPhDyn  ","MPB1PCrat ",  17,"Y","x",1
+"SedPhDyn  ","MPB2PCrat ",  18,"Y","x",1
+"SedPhDyn  ","SCRatGreen",  19,"Y","x",1
+"SedPhDyn  ","SCRatDiat ",  20,"Y","x",1
+"SedPhDyn  ","MPB1SiCrat",  21,"Y","x",1
+"SedPhDyn  ","MPB2SiCrat",  22,"Y","x",1
+"SedPhDyn  ","Green     ",  23,"Y","x",1
+"SedPhDyn  ","Diat      ",  24,"Y","x",1
+"SedPhDyn  ","MPB1SiCrat",  25,"Y","x",1
+"SedPhDyn  ","MPB2SiCrat",  26,"Y","x",1
+"SedPhDyn  ","VxSedGreen",  27,"Y","x",0
+"SedPhDyn  ","VxSedDiat ",  28,"Y","x",0
 "Sed_MPB1  ","MPB1peli  ",   1,"N","x",1
 "Sed_MPB1  ","ZSedMPB1  ",   2,"Y","x",1
 "Sed_MPB1  ","VSedMPB1  ",   3,"Y","x",1
@@ -15934,3 +15966,189 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DELWAQGbal","SF_dMetoxS", 148,"N"," ",1
 "DELWAQGbal","SF_dPrcAPP", 149,"N"," ",1
 "DELWAQGbal","SF_dDisAPP", 150,"N"," ",1
+"MPBNUT    ","Nutlen    ",   1,"Y","x",1
+"MPBNUT    ","DIF       ",   2,"Y","x",1
+"MPBNUT    ","dMinDetNS1",   3,"Y"," ",1
+"MPBNUT    ","dSWMinDNS1",   4,"Y"," ",1
+"MPBNUT    ","dGEMSEDNH4",   5,"Y"," ",1
+"MPBNUT    ","dGEMSEDNO3",   6,"Y"," ",1
+"MPBNUT    ","dMinDetPS1",   7,"Y"," ",1
+"MPBNUT    ","dSWMinDPS1",   8,"Y"," ",1
+"MPBNUT    ","dGEMSEDPO4",   9,"Y"," ",1
+"MPBNUT    ","dMinDetSiS",  10,"Y"," ",1
+"MPBNUT    ","dSWMinDSS1",  11,"Y"," ",1
+"MPBNUT    ","NH4       ",  12,"N","x",1
+"MPBNUT    ","NO3       ",  13,"N","x",1
+"MPBNUT    ","PO4       ",  14,"N","x",1
+"MPBNUT    ","Si        ",  15,"Y","x",1
+"MPBNUT    ","TcNit     ",  16,"Y","x",1
+"MPBNUT    ","FrNO3     ",  17,"Y","x",1
+"MPBNUT    ","Temp      ",  18,"Y","x",1
+"MPBNUT    ","Depth     ",  19,"N"," ",1
+"MPBNUT    ","Surf      ",  20,"Y"," ",1
+"MPB1Temp  ","Temp      ",   1,"Y","x",1
+"MPB1Temp  ","MPB1ktgp  ",   2,"Y","x",1
+"MPB1Temp  ","ITIME     ",   3,"N"," ",1
+"MPB1Temp  ","IDT       ",   4,"N"," ",1
+"MPB1Temp  ","ITSTRT    ",   5,"N"," ",1
+"MPB1Temp  ","AuxSys    ",   6,"Y"," ",1
+"MPB1Temp  ","MPB1ftmp  ",   7,"N"," ",1
+"MPB1Temp  ","WSMPB1ftmp",   8,"N"," ",1
+"MPB2Temp  ","Temp      ",   1,"Y","x",1
+"MPB2Temp  ","MPB2ktgp  ",   2,"Y","x",1
+"MPB2Temp  ","ITIME     ",   3,"N"," ",1
+"MPB2Temp  ","IDT       ",   4,"N"," ",1
+"MPB2Temp  ","ITSTRT    ",   5,"N"," ",1
+"MPB2Temp  ","AuxSys    ",   6,"Y"," ",1
+"MPB2Temp  ","MPB2ftmp  ",   7,"N"," ",1
+"MPB2Temp  ","WSMPB2ftmp",   8,"N"," ",1
+"MPB1LLim  ","DayRadSurf",   1,"N","x",1
+"MPB1LLim  ","RadDay    ",   2,"N","x",1
+"MPB1LLim  ","ExtVl     ",   3,"N","x",1
+"MPB1LLim  ","a_enh     ",   4,"Y","x",1
+"MPB1LLim  ","fPAR      ",   5,"Y","x",1
+"MPB1LLim  ","MPB1Pmax20",   6,"Y","x",1
+"MPB1LLim  ","MPB1alpha ",   7,"Y","x",1
+"MPB1LLim  ","SwEmersion",   8,"Y","x",1
+"MPB1LLim  ","MPB1migrd1",   9,"Y","x",1
+"MPB1LLim  ","MPB1migrd2",  10,"Y","x",1
+"MPB1LLim  ","Depth     ",  11,"N","x",1
+"MPB1LLim  ","LocSedDept",  12,"N","x",1
+"MPB1LLim  ","Nr_dz     ",  13,"Y"," ",1
+"MPB1LLim  ","ITIME     ",  14,"N"," ",1
+"MPB1LLim  ","IDT       ",  15,"N"," ",1
+"MPB1LLim  ","ITSTRT    ",  16,"N"," ",1
+"MPB1LLim  ","AuxSys    ",  17,"Y"," ",1
+"MPB1LLim  ","SwMPBGEM  ",  18,"Y","x",1
+"MPB1LLim  ","RadBotDay ",  19,"N","x",1
+"MPB1LLim  ","ExtVlSed  ",  20,"Y","x",1
+"MPB1LLim  ","ZSED      ",  21,"Y","x",1
+"MPB1LLim  ","MPB1WS01  ",  22,"N"," ",1
+"MPB1LLim  ","MPB1WS02  ",  23,"N"," ",1
+"MPB1LLim  ","MPB1WS03  ",  24,"N"," ",1
+"MPB1LLim  ","MPB1WS04  ",  25,"N"," ",1
+"MPB2LLim  ","DayRadSurf",   1,"N","x",1
+"MPB2LLim  ","RadDay    ",   2,"N","x",1
+"MPB2LLim  ","ExtVl     ",   3,"N","x",1
+"MPB2LLim  ","a_enh     ",   4,"Y","x",1
+"MPB2LLim  ","fPAR      ",   5,"Y","x",1
+"MPB2LLim  ","MPB2Pmax20",   6,"Y","x",1
+"MPB2LLim  ","MPB2alpha ",   7,"Y","x",1
+"MPB2LLim  ","SwEmersion",   8,"Y","x",1
+"MPB2LLim  ","MPB2migrd1",   9,"Y","x",1
+"MPB2LLim  ","MPB2migrd2",  10,"Y","x",1
+"MPB2LLim  ","Depth     ",  11,"N","x",1
+"MPB2LLim  ","LocSedDept",  12,"N","x",1
+"MPB2LLim  ","Nr_dz     ",  13,"Y"," ",1
+"MPB2LLim  ","ITIME     ",  14,"N"," ",1
+"MPB2LLim  ","IDT       ",  15,"N"," ",1
+"MPB2LLim  ","ITSTRT    ",  16,"N"," ",1
+"MPB2LLim  ","AuxSys    ",  17,"Y"," ",1
+"MPB2LLim  ","SwMPBGEM  ",  18,"Y","x",1
+"MPB2LLim  ","RadBotDay ",  19,"N","x",1
+"MPB2LLim  ","ExtVlSed  ",  20,"Y","x",1
+"MPB2LLim  ","ZSED      ",  21,"Y","x",1
+"MPB2LLim  ","MPB2WS01  ",  22,"N"," ",1
+"MPB2LLim  ","MPB2WS02  ",  23,"N"," ",1
+"MPB2LLim  ","MPB2WS03  ",  24,"N"," ",1
+"MPB2LLim  ","MPB2WS04  ",  25,"N"," ",1
+"MPB1NLim  ","NH4       ",   1,"Y","x",1
+"MPB1NLim  ","NO3       ",   2,"Y","x",1
+"MPB1NLim  ","PO4       ",   3,"Y","x",1
+"MPB1NLim  ","Si        ",   4,"Y","x",1
+"MPB1NLim  ","MPB1Kam   ",   5,"Y","x",1
+"MPB1NLim  ","MPB1Kni   ",   6,"Y","x",1
+"MPB1NLim  ","MPB1Kpho  ",   7,"Y","x",1
+"MPB1NLim  ","MPB1Ksi   ",   8,"Y","x",1
+"MPB1NLim  ","SwMPBGEM  ",   9,"Y","x",1
+"MPB1NLim  ","NH4S1     ",  10,"Y","x",1
+"MPB1NLim  ","NO3S1     ",  11,"Y","x",1
+"MPB1NLim  ","PO4S1     ",  12,"Y","x",1
+"MPB1NLim  ","SiS1      ",  13,"Y","x",1
+"MPB2NLim  ","NH4       ",   1,"Y","x",1
+"MPB2NLim  ","NO3       ",   2,"Y","x",1
+"MPB2NLim  ","PO4       ",   3,"Y","x",1
+"MPB2NLim  ","Si        ",   4,"Y","x",1
+"MPB2NLim  ","MPB2Kam   ",   5,"Y","x",1
+"MPB2NLim  ","MPB2Kni   ",   6,"Y","x",1
+"MPB2NLim  ","MPB2Kpho  ",   7,"Y","x",1
+"MPB2NLim  ","MPB2Ksi   ",   8,"Y","x",1
+"MPB2NLim  ","SwMPBGEM  ",   9,"Y","x",1
+"MPB2NLim  ","NH4S1     ",  10,"Y","x",1
+"MPB2NLim  ","NO3S1     ",  11,"Y","x",1
+"MPB2NLim  ","PO4S1     ",  12,"Y","x",1
+"MPB2NLim  ","SiS1      ",  13,"Y","x",1
+"MPBenthos ","Temp      ",   1,"Y","x",1
+"MPBenthos ","MPB1peli  ",   2,"Y","x",1
+"MPBenthos ","MPB2psam  ",   3,"Y","x",1
+"MPBenthos ","MPB1peliS1",   4,"Y","x",1
+"MPBenthos ","MPB2psamS1",   5,"Y","x",1
+"MPBenthos ","MPB1Pmax20",   6,"Y","x",1
+"MPBenthos ","MPB2Pmax20",   7,"Y","x",1
+"MPBenthos ","MPB1flt   ",   8,"N","x",1
+"MPBenthos ","MPB2flt   ",   9,"N","x",1
+"MPBenthos ","MPB1ftmp  ",  10,"N","x",1
+"MPBenthos ","MPB2ftmp  ",  11,"N","x",1
+"MPBenthos ","MPB1fnut  ",  12,"N","x",1
+"MPBenthos ","MPB2fnut  ",  13,"N","x",1
+"MPBenthos ","MPB1r_pr  ",  14,"Y","x",1
+"MPBenthos ","MPB2r_pr  ",  15,"Y","x",1
+"MPBenthos ","MPB1r_mt20",  16,"Y","x",1
+"MPBenthos ","MPB2r_mt20",  17,"Y","x",1
+"MPBenthos ","MPB1rt    ",  18,"Y","x",1
+"MPBenthos ","MPB2rt    ",  19,"Y","x",1
+"MPBenthos ","MPB1b_ex  ",  20,"Y","x",1
+"MPBenthos ","MPB2b_ex  ",  21,"Y","x",1
+"MPBenthos ","MPB1m1_20 ",  22,"Y","x",1
+"MPBenthos ","MPB2m1_20 ",  23,"Y","x",1
+"MPBenthos ","MPB1m2_20 ",  24,"Y","x",1
+"MPBenthos ","MPB2m2_20 ",  25,"Y","x",1
+"MPBenthos ","MPB1mt    ",  26,"Y","x",1
+"MPBenthos ","MPB2mt    ",  27,"Y","x",1
+"MPBenthos ","MPB1NCrat ",  28,"Y","x",1
+"MPBenthos ","MPB2NCrat ",  29,"Y","x",1
+"MPBenthos ","MPB1PCrat ",  30,"Y","x",1
+"MPBenthos ","MPB2PCrat ",  31,"Y","x",1
+"MPBenthos ","MPB1SiCrat",  32,"Y","x",1
+"MPBenthos ","MPB2SiCrat",  33,"Y","x",1
+"MPBenthos ","MPB1fam   ",  34,"N","x",1
+"MPBenthos ","MPB2fam   ",  35,"N","x",1
+"MPBenthos ","MPB1fni   ",  36,"N","x",1
+"MPBenthos ","MPB2fni   ",  37,"N","x",1
+"MPBenthos ","MPB1Tresh ",  38,"Y","x",1
+"MPBenthos ","MPB2Tresh ",  39,"Y","x",1
+"MPBenthos ","SwMPBGEM  ",  40,"Y","x",1
+"MPBenthos ","MPB1fltS1 ",  41,"N","x",1
+"MPBenthos ","MPB2fltS1 ",  42,"N","x",1
+"MPBenthos ","MPB1ftmpS1",  43,"N","x",1
+"MPBenthos ","MPB2ftmpS1",  44,"N","x",1
+"MPBenthos ","MPB1fnutS1",  45,"N","x",1
+"MPBenthos ","MPB2fnutS1",  46,"N","x",1
+"MPBenthos ","MPB1famS1 ",  47,"N","x",1
+"MPBenthos ","MPB2famS1 ",  48,"N","x",1
+"MPBenthos ","MPB1fniS1 ",  49,"N","x",1
+"MPBenthos ","MPB2fniS1 ",  50,"N","x",1
+"MPBenthos ","NH4       ",  51,"Y","x",1
+"MPBenthos ","NO3       ",  52,"Y","x",1
+"MPBenthos ","PO4       ",  53,"Y","x",1
+"MPBenthos ","Si        ",  54,"Y","x",1
+"MPBenthos ","ZSED      ",  55,"Y","x",1
+"MPBenthos ","Surf      ",  56,"Y","x",1
+"MPBenthos ","Depth     ",  57,"N","x",1
+"MPBenthos ","DELT      ",  58,"N","x",1
+"MPBenthos ","dMinDetNS1",  59,"Y","x",1
+"MPBenthos ","dSWMinDNS1",  60,"Y","x",1
+"MPBenthos ","dGEMSEDNH4",  61,"Y","x",1
+"MPBenthos ","dGEMSEDNO3",  62,"Y","x",1
+"MPBenthos ","dMinDetPS1",  63,"Y","x",1
+"MPBenthos ","dSWMinDPS1",  64,"Y","x",1
+"MPBenthos ","dGEMSEDPO4",  65,"Y","x",1
+"MPBenthos ","dMinDetSiS",  66,"Y","x",1
+"MPBenthos ","dSWMinDSS1",  67,"Y","x",1
+"MPBenthos ","MPB1Ccap  ",  68,"Y","x",1
+"MPBenthos ","MPB2Ccap  ",  69,"Y","x",1
+"MPBenthos ","LocSedDept",  70,"N","x",1
+"MPBenthos ","OXY       ",  71,"Y","x",1
+"MPBenthos ","MPBOXYCRIT",  72,"Y","x",1
+"MPBenthos ","MPB1mO_20 ",  73,"Y","x",1
+"MPBenthos ","MPB2mO_20 ",  74,"Y","x",1
