@@ -1149,7 +1149,10 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'jaupwindsrc', jaupwindsrc)
 
-    call prop_get_integer(md_ptr, 'numerics', 'jasfer3D', jasfer3D); if ( jasfer3D.eq.1 ) jalimnor = 1
+    call prop_get_integer(md_ptr, 'numerics', 'jasfer3D', jasfer3D, success)
+    if ( success .and. jasfer3D == 1 ) then
+       jalimnor = 1
+    end if
 
     call prop_get_integer(md_ptr, 'numerics', 'BarrierAdvection', jabarrieradvection);
 
