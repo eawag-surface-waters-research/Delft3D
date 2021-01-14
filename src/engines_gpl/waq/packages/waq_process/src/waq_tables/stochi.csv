@@ -972,25 +972,25 @@ stocfl,stocsu,stocsc
 "dResS2DiDP","POP1      ",   1.00000
 "dResS2DiDS","OPAL      ",   1.00000
 "dResS1MPB1","MPB1peli  ",   1.00000
-"dResS1MPB1","MPB1S1    ",  -1.00000
-"dResS2MPB1","MPB1S2    ",  -1.00000
+"dResS1MPB1","MPB1peliS1",  -1.00000
+"dResS2MPB1","MPB1peliS2",  -1.00000
 "dResS2MPB1","MPB1peli  ",   1.00000
-"dBurS1MPB1","MPB1S1    ",  -1.00000
-"dBurS1MPB1","MPB1S2    ",   1.00000
-"dBurS2MPB1","MPB1S2    ",  -1.00000
-"dDigS1MPB1","MPB1S1    ",   1.00000
-"dDigS1MPB1","MPB1S2    ",  -1.00000
-"dDigS2MPB1","MPB1S2    ",   1.00000
+"dBurS1MPB1","MPB1peliS1",  -1.00000
+"dBurS1MPB1","MPB1peliS2",   1.00000
+"dBurS2MPB1","MPB1peliS2",  -1.00000
+"dDigS1MPB1","MPB1peliS1",   1.00000
+"dDigS1MPB1","MPB1peliS2",  -1.00000
+"dDigS2MPB1","MPB1peliS2",   1.00000
 "dResS1MPB2","MPB2psam  ",   1.00000
-"dResS1MPB2","MPB2S1    ",  -1.00000
-"dResS2MPB2","MPB2S2    ",  -1.00000
+"dResS1MPB2","MPB2psamS1",  -1.00000
+"dResS2MPB2","MPB2psamS2",  -1.00000
 "dResS2MPB2","MPB2psam  ",   1.00000
-"dBurS1MPB2","MPB2S1    ",  -1.00000
-"dBurS1MPB2","MPB2S2    ",   1.00000
-"dBurS2MPB2","MPB2S2    ",  -1.00000
-"dDigS1MPB2","MPB2S1    ",   1.00000
-"dDigS1MPB2","MPB2S2    ",  -1.00000
-"dDigS2MPB2","MPB2S2    ",   1.00000
+"dBurS1MPB2","MPB2psamS1",  -1.00000
+"dBurS1MPB2","MPB2psamS2",   1.00000
+"dBurS2MPB2","MPB2psamS2",  -1.00000
+"dDigS1MPB2","MPB2psamS1",   1.00000
+"dDigS1MPB2","MPB2psamS2",  -1.00000
+"dDigS2MPB2","MPB2psamS2",   1.00000
 "dResS1IM1 ","IM1       ",   1.00000
 "dResS1IM1 ","IM1S1     ",  -1.00000
 "dResS2IM1 ","IM1S2     ",  -1.00000

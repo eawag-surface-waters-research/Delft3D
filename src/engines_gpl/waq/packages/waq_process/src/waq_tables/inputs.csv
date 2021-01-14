@@ -4329,34 +4329,22 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SedPhBlo  ","VxSedAlg28", 210,"Y","x",0
 "SedPhBlo  ","VxSedAlg29", 211,"Y","x",0
 "SedPhBlo  ","VxSedAlg30", 212,"Y","x",0
-"SedPhDyn  ","NAlgDynamo",   1,"Y","x",1
+"SedPhDyn  ","NAlgDynSed",   1,"Y","x",1
 "SedPhDyn  ","Depth     ",   2,"N","x",1
 "SedPhDyn  ","fSedGreen ",   3,"Y","x",1
 "SedPhDyn  ","fSedDiat  ",   4,"Y","x",1
-"SedPhDyn  ","fSedMPB1  ",   5,"Y","x",1
-"SedPhDyn  ","fSedMPB2  ",   6,"Y","x",1
-"SedPhDyn  ","DMCFGreen ",   7,"Y","x",1
-"SedPhDyn  ","DMCFDiat  ",   8,"Y","x",1
-"SedPhDyn  ","DmCfMPB1  ",   9,"Y","x",1
-"SedPhDyn  ","DmCfMPB2  ",  10,"Y","x",1
-"SedPhDyn  ","NCRatGreen",  11,"Y","x",1
-"SedPhDyn  ","NCRatDiat ",  12,"Y","x",1
-"SedPhDyn  ","MPB1NCrat ",  13,"Y","x",1
-"SedPhDyn  ","MPB2NCrat ",  14,"Y","x",1
-"SedPhDyn  ","PCRatGreen",  15,"Y","x",1
-"SedPhDyn  ","PCRatDiat ",  16,"Y","x",1
-"SedPhDyn  ","MPB1PCrat ",  17,"Y","x",1
-"SedPhDyn  ","MPB2PCrat ",  18,"Y","x",1
-"SedPhDyn  ","SCRatGreen",  19,"Y","x",1
-"SedPhDyn  ","SCRatDiat ",  20,"Y","x",1
-"SedPhDyn  ","MPB1SiCrat",  21,"Y","x",1
-"SedPhDyn  ","MPB2SiCrat",  22,"Y","x",1
-"SedPhDyn  ","Green     ",  23,"Y","x",1
-"SedPhDyn  ","Diat      ",  24,"Y","x",1
-"SedPhDyn  ","MPB1SiCrat",  25,"Y","x",1
-"SedPhDyn  ","MPB2SiCrat",  26,"Y","x",1
-"SedPhDyn  ","VxSedGreen",  27,"Y","x",0
-"SedPhDyn  ","VxSedDiat ",  28,"Y","x",0
+"SedPhDyn  ","DMCFGreen ",   5,"Y","x",1
+"SedPhDyn  ","DMCFDiat  ",   6,"Y","x",1
+"SedPhDyn  ","NCRatGreen",   7,"Y","x",1
+"SedPhDyn  ","NCRatDiat ",   8,"Y","x",1
+"SedPhDyn  ","PCRatGreen",   9,"Y","x",1
+"SedPhDyn  ","PCRatDiat ",  10,"Y","x",1
+"SedPhDyn  ","SCRatGreen",  11,"Y","x",1
+"SedPhDyn  ","SCRatDiat ",  12,"Y","x",1
+"SedPhDyn  ","Green     ",  13,"Y","x",1
+"SedPhDyn  ","Diat      ",  14,"Y","x",1
+"SedPhDyn  ","VxSedGreen",  15,"Y","x",0
+"SedPhDyn  ","VxSedDiat ",  16,"Y","x",0
 "Sed_MPB1  ","MPB1peli  ",   1,"N","x",1
 "Sed_MPB1  ","ZSedMPB1  ",   2,"Y","x",1
 "Sed_MPB1  ","VSedMPB1  ",   3,"Y","x",1
