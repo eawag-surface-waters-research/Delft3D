@@ -487,7 +487,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
        ! When order_tra points to tra_orgline, both partition-related and re-ordering-related stuff are taken care of
        !
        order_tra => gdp%gdstations%tra_orgline
-    else
+    elseif (mergemap) then ! sequential run
        nostatto = nostat
        nostatgl = nostat
        ntruvto  = ntruv
@@ -548,7 +548,6 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
        ! time independent data
        !
        if (first) then
-          write(lundia,*) 'Before WRIMAP: ',nostat, nostatto, nostatgl, parll
           call wrimap(lundia    ,error     ,filename  ,selmap    ,simdat    , &
                     & itdate    ,tzone     ,tunit     ,dt        ,mmax      , &
                     & kmax      ,lmax      ,lstsci    ,ltur      ,nmaxus    , &

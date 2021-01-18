@@ -29,6 +29,7 @@ subroutine dredge_d3d4(dps, s1, timhr, nst, gdp)
 !  $HeadURL$
 !!--declarations----------------------------------------------------------------
     use precision
+    use dfparall, only: parll, nproc
     use m_dredge, only: dredge
     use dredge_comm, only: dredgecommunicate
     use dredge_data_module, only: dredge_type
@@ -50,7 +51,6 @@ subroutine dredge_d3d4(dps, s1, timhr, nst, gdp)
     type (morpar_type)        , pointer :: gdmorpar
     type (message_stack)      , pointer :: messages
     real(fp)                  , pointer :: hdt
-    integer                   , pointer :: numdomains
     integer                   , pointer :: lundia
     integer                   , pointer :: julday
     integer                   , pointer :: nmlb
@@ -76,6 +76,7 @@ subroutine dredge_d3d4(dps, s1, timhr, nst, gdp)
     logical                                  :: spinup
     real(fp), dimension(:), allocatable      :: dz_dummy
     integer                                  :: istat
+    integer                                  :: ndomains ! number of DD domains or MPI partitions
 !
 !! executable statements -------------------------------------------------------
 !
@@ -87,7 +88,6 @@ subroutine dredge_d3d4(dps, s1, timhr, nst, gdp)
     messages            => gdp%messages
     
     hdt                 => gdp%gdnumeco%hdt
-    numdomains          => gdp%gdprognm%numdomains
     lundia              => gdp%gdinout%lundia
     julday              => gdp%gdinttim%julday
     nmlb                => gdp%d%nmlb
@@ -101,9 +101,14 @@ subroutine dredge_d3d4(dps, s1, timhr, nst, gdp)
 
     morhr = real(gdmorpar%morft * 24.0_hp, fp)
     spinup = nst < gdmorpar%itmor
+    if (parll) then
+        ndomains = nproc
+    else
+        ndomains = gdp%gdprognm%numdomains
+    endif
     call dredge(nmmax, lsedtot, spinup, cdryb, dps, -1.0_fp, &
               & dbodsd, kfsed, s1, timhr, morhr, gddredge, error, &
-              & dredgecommunicate, gdbedformpar%duneheight, gdmorpar, hdt, numdomains, lundia, &
+              & dredgecommunicate, gdbedformpar%duneheight, gdmorpar, hdt, ndomains, lundia, &
               & julday, nmlb, nmub, gderosed, gdmorlyr, messages)
     !
     ! Update sediment administration for dumping only
