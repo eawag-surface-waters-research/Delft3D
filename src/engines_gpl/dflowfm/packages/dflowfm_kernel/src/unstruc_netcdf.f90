@@ -11096,6 +11096,8 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     use m_missing
     use dfm_error
     use gridoperations
+    use md5_checksum
+    use unstruc_messages
 
     character(len=*), intent(in)     :: filename  !< Name of NetCDF file.
     integer,          intent(inout)  :: numk_keep !< Number of netnodes to keep in existing net.
@@ -11120,6 +11122,9 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
 
     integer :: ja, L
     double precision :: zk_fillvalue
+    character(len=14) :: checksum
+    character(len=28) :: checksum_hex
+    logical :: success
 
     call readyy('Reading net data',0d0)
 
@@ -11264,6 +11269,19 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
 
     ierr = unc_close(inetfile)
     call readyy('Reading net data',-1d0)
+
+    if (loglevel_StdOut <= LEVEL_DEBUG) then
+       allocate(kn1read(3*(numl_keep+numl_read)))
+       do l = 1, numl_keep+numl_read
+          kn1read(3*l-2) = KN(1,L)
+          kn1read(3*l-1) = KN(2,L)
+          kn1read(3*l  ) = KN(3,L)
+       end do
+       call md5intarr(kn1read, checksum, success)
+       call checksum2hex(checksum, checksum_hex)
+       call mess(LEVEL_DEBUG, 'MD5 checksum KN = '//  checksum_hex)
+       deallocate(kn1read)
+    end if
 
 end subroutine unc_read_net
 
