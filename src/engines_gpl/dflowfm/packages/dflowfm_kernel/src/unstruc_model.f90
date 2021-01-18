@@ -771,6 +771,7 @@ subroutine readMDUFile(filename, istat)
     if ( readerr.ne.0 ) then
        istat = -1
        call mess(LEVEL_ERROR, 'Error opening file ', trim(filename), '.')
+       return
     endif
 
 !    call prop_inifile(filename , md_ptr, readerr, japreproc=.true.)     ! with preprocessing

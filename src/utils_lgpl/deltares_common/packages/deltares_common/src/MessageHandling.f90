@@ -512,8 +512,10 @@ subroutine message1string(level, w1)
     character(MAXSTRINGLEN)                 :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1:), '(a)') w1(:l1)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    endif
 
     call setMessage(level, rec)
 end subroutine message1string
@@ -526,10 +528,16 @@ subroutine message2string(level, w1, w2)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    l2 = max(1, len_trim(w2))
-    write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(a)') w2(:l2)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
+    l2 = len_trim(w2)
+    if (l2 > 0) then
+        write (rec(2 + l1:), '(a)') w2(:l2)
+    endif
 
     call SetMessage(level, rec)
 end subroutine message2string
@@ -542,12 +550,22 @@ subroutine message3string(level, w1, w2, w3)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    l2 = max(1, len_trim(w2))
-    l3 = max(1, len_trim(w3))
-    write (rec(1:), '(a)') w1(1:l1)
-    write (rec(2 + l1:), '(a)') w2(1:l2)
-    write (rec(3 + l1 + l2:), '(a)') w3(1:l3)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
+    l2 = len_trim(w2)
+    if (l2 > 0) then
+        write (rec(2 + l1:), '(a)') w2(:l2)
+    else
+        l2 = 1
+    endif
+    l3 = len_trim(w3)
+    if (l3 > 0) then
+        write (rec(3 + l1 + l2:), '(a)') w3(:l3)
+    endif
 
     call SetMessage(level, rec)
  end subroutine message3string
@@ -560,14 +578,28 @@ subroutine message4string(level, w1, w2, w3, w4)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    l2 = max(1, len_trim(w2))
-    l3 = max(1, len_trim(w3))
-    l4 = max(1, len_trim(w4))
-    write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(a)') w2(:l2)
-    write (rec(3 + l1 + l2:), '(a)') w3(:l3)
-    write (rec(4 + l1 + l2 + l3:), '(a)') w4(:l4)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
+    l2 = len_trim(w2)
+    if (l2 > 0) then
+        write (rec(2 + l1:), '(a)') w2(:l2)
+    else
+        l2 = 1
+    endif
+    l3 = len_trim(w3)
+    if (l3 > 0) then
+        write (rec(3 + l1 + l2:), '(a)') w3(:l3)
+    else
+        l3 = 1
+    endif
+    l4 = len_trim(w4)
+    if (l4 > 0) then
+        write (rec(4 + l1 + l2 + l3:), '(a)') w4(:l4)
+    endif
 
     call SetMessage(level, rec)
 end subroutine message4string
@@ -583,10 +615,18 @@ subroutine message2char1real(level, w1, w2, r3)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    l2 = max(1, len_trim(w2))
-    write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(a)') w2(:l2)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
+    l2 = len_trim(w2)
+    if (l2 > 0) then
+        write (rec(2 + l1:), '(a)') w2(:l2)
+    else
+        l2 = 1
+    endif
     write (rec(3 + l1 + l2:), '(f14.6)') r3
 
     call SetMessage(level, rec)
@@ -602,10 +642,18 @@ subroutine message2char2real(level, w1, w2, r3, r4)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    l2 = max(1, len_trim(w2))
-    write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(a)') w2(:l2)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
+    l2 = len_trim(w2)
+    if (l2 > 0) then
+        write (rec(2 + l1:), '(a)') w2(:l2)
+    else
+        l2 = 1
+    endif
     write (rec(3 + l1 + l2:), '(2f14.6)') r3, r4
 
     call SetMessage(level, rec)
@@ -621,8 +669,12 @@ subroutine message1char1real(level, w1, r2)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1:), '(a)') w1(:l1)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
     write (rec(2 + l1:), '(F14.6)') r2
 
     call SetMessage(level, rec)
@@ -637,8 +689,12 @@ subroutine message1char1double(level, w1, d2)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1:), '(a)') w1(:l1)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
     write (rec(2 + l1:), '(F14.6)') d2
 
     call SetMessage(level, rec)
@@ -665,8 +721,12 @@ subroutine message1char1int(level, w1, i2)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1:), '(a)') w1(:l1)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
     write (rec(2 + l1:), '(I14)') i2
 
     call SetMessage(level, rec)
@@ -682,8 +742,12 @@ subroutine message1char2int(level, w1, i2, i3)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1:), '(a)') w1(:l1)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
     write (rec(2 + l1:), '(2I14)') i2, i3
 
     call SetMessage(level, rec)
@@ -700,10 +764,11 @@ subroutine message2int1char(level, i1, i2, w3)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l3 = max(1, len_trim(w3))
     write (rec( 1:28), '(2I14)') i1, i2
-    write (rec(30:)  , '(a)'   ) w3(:l3)
-
+    l3 = len_trim(w3)
+    if (l3 > 0) then
+        write (rec(30:), '(a)') w3(:l3)
+    endif
 
     call SetMessage(level, rec)
 
@@ -718,8 +783,12 @@ subroutine message1char3int(level, w1, i2, i3, i4)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1:), '(a)') w1(:l1)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
     write (rec(2 + l1:), '(3I14)') i2, i3, i4
 
     call SetMessage(level, rec)
@@ -735,8 +804,12 @@ subroutine message1char2real(level, w1, r2, r3)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1:), '(a)') w1(:l1)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
     write (rec(2 + l1:), '(2F14.6)') r2, r3
 
     call SetMessage(level, rec)
@@ -752,8 +825,12 @@ subroutine message1char1int1double(level, w1, i2, d3)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1:), '(a)') w1(:l1)
+    l1 = len_trim(w1)
+    if (l1 > 0) then
+        write (rec(1:), '(a)') w1(:l1)
+    else
+        l1 = 1
+    endif
     write (rec(2 + l1:), '(i14)') i2
     write (rec(16 + l1:), '(F14.6)') d3
 
@@ -770,10 +847,12 @@ subroutine message1double1int1char(level, d1, i2, w3)
     character(MAXSTRINGLEN) :: rec
 
     rec = ' '
-    l3 = max(1, len_trim(w3))
     write (rec(1 :16), '(F16.6)') d1
     write (rec(18:31), '(i14)'  ) i2
-    write (rec(33:  ), '(a)'    ) w3(:l3)
+    l3 = len_trim(w3)
+    if (l3 > 0) then
+        write (rec(33:), '(a)') w3(:l3)
+    endif
 
     call SetMessage(level, rec)
 end subroutine message1double1int1char
