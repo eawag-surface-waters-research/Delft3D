@@ -1459,7 +1459,7 @@ if(q /= 0) then
        call settaubxu_nowave()         ! set taubxu for no wave conditions BEFORE erosed
     endif
     !
-    call setucxucyucxuucyu()
+!    call setucxucyucxuucyu()
     call setucxucy_mor (u1)
     call fm_fallve()                   ! update fall velocities
     call fm_erosed()                   ! source/sink, bedload/total load
