@@ -587,8 +587,9 @@
    use m_flowgeom, only: Lnx
    use m_flow, only: Lbot, Ltop, kmx, Lnkx, q1 
    use m_flowtimes, only: dts
-   use m_flowexternalforcings, only: numsrc, qsrc
+   use m_flowexternalforcings, only: numsrc, ksrc, qsrc
    use m_mass_balance_areas
+   use m_partitioninfo, only: jampi, idomain, my_rank
    use timers
 
    implicit none
@@ -618,6 +619,18 @@
    end do
 
    do n  = 1,numsrc
+      k1 = ksrc(1,n)                   ! 2D pressure cell nr FROM
+      k2 = ksrc(4,n)                   ! 2D pressure cell nr TO
+      if(k1<=0 .and. k2<=0) cycle
+      if (jampi.eq.1) then
+         if(k1 > 0) then
+            if ( idomain(k1) /= my_rank ) cycle
+         else
+            if(k2 > 0) then
+               if ( idomain(k2) /= my_rank ) cycle
+            endif
+         endif
+      endif
       qsrck = qsrc(n) 
       if (qsrck > 0) then
          mbaflowsorsin(2,n) = mbaflowsorsin(2,n) + qsrck*dts
