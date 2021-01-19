@@ -157,7 +157,7 @@
 !
 !     Local declarations
 !
-      INTEGER, PARAMETER ::   LUNIN  =   914
+      INTEGER            ::   LUNIN
       INTEGER, PARAMETER ::   IPAGE  =    64
       INTEGER, PARAMETER ::   NLUN   =    50
       INTEGER, PARAMETER ::   LCHMAX =   255
@@ -284,7 +284,7 @@
             else
                inifil = 'delwaq.ini'
             endif
-            open(lunin,file=inifil,status='old',err=123)
+            open(newunit=lunin,file=inifil,status='old',err=123)
             write(lun(19),*) ' Using options from ini file : ',trim(inifil)
             call gkwini(lunin,'SimulationOptions','OnLineWQ',c2)
             if ( c2 .eq. '-1' ) then

@@ -58,7 +58,7 @@
 
 !     kind           function         name        description
 
-      integer      , intent(in   ) :: lun       !< unit number of file to be opened
+      integer      , intent(inout) :: lun       !< unit number of file to be opened
       character*(*), intent(in   ) :: finam     !< name of the file to be opened
       integer      , intent(in   ) :: nropen    !< Delwaq number of the file to be opened
       integer      , intent(in   ) :: opmode    !< Indicator how file must be opened
@@ -79,7 +79,7 @@
                case ( 1 )
                   open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace' )
                case ( 2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old' )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'old' )
                case ( 3 )
                   open ( lun, file = finam, err = 910, form='unformatted', access='stream' )
                   close( lun, status = 'delete', err = 910 )
@@ -332,8 +332,8 @@
          case ( 19 )                          !     DELWAQ2 monitoring file (.mon)
             select case ( opmode )
                case ( 1 )
-                  call dhdelf ( finam, ierr2 )
-                  open ( lun, file = finam, err = 910 )
+                  !call dhdelf ( finam, ierr2 )
+                  open ( newunit=lun, file = finam, err = 910 )
                case default
                   ierr = 3
             end select
@@ -341,8 +341,8 @@
          case ( 20 )                          !     dump file
             select case ( opmode )
                case ( 1 )
-                  call dhdelf ( finam, ierr2 )
-                  open ( lun, file = finam, err = 910 )
+                  !call dhdelf ( finam, ierr2 )
+                  open ( newunit=lun, file = finam, err = 910 )
                case default
                   ierr = 3
             end select
@@ -350,8 +350,8 @@
          case ( 21 )                          !     history file
             select case ( opmode )
                case ( 1 )
-                  call dhdelf ( finam, ierr2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
+                  !call dhdelf ( finam, ierr2 )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
                case default
                   ierr = 3
             end select
@@ -359,8 +359,8 @@
          case ( 22 )                          !     map file
             select case ( opmode )
                case ( 1 )
-                  call dhdelf ( finam, ierr2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
+                  !call dhdelf ( finam, ierr2 )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
                case default
                   ierr = 3
             end select
@@ -368,8 +368,8 @@
          case ( 23 )                          !     restart file
             select case ( opmode )
                case ( 1 )
-                  call dhdelf ( finam, ierr2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
+                  !call dhdelf ( finam, ierr2 )
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream', status = 'replace'  )
                case default
                   ierr = 3
             end select
@@ -496,8 +496,8 @@
          case ( 37 )                          !     bal file
             select case ( opmode )
                case ( 1 )
-                  call dhdelf(finam,ierr2)
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' )
+                  !call dhdelf(finam,ierr2)
+                  open ( newunit=lun, file = finam, err = 910, form='unformatted', access='stream' )
                case default
                   ierr = 3
             end select

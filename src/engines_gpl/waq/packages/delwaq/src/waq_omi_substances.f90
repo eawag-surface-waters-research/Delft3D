@@ -51,6 +51,7 @@ module waq_omi_substances
     public :: readSubstancesFile   ! Public for testing purposes
     public :: writeItems           ! Public for testing purposes
     public :: openSubstancesReport ! Public for testing purposes
+    public :: testSetLunumbers     ! Public for testing purposes
 
     integer, parameter    :: type_substance = 1
     integer, parameter    :: type_inactive  = 2
@@ -70,16 +71,23 @@ module waq_omi_substances
 
     type(itemInfo), dimension(:), allocatable :: item
 
-    integer, private :: lunlst = 0
+    integer, private :: lunlst = 0, lunsub, lunpar
 
 contains
+
+!> Set LU-numbers, specifically for test purposes
+subroutine testSetLunumbers( testsub, testpar )
+    integer, intent(in) :: testsub, testpar
+
+    lunsub = testsub
+    lunpar = testpar
+end subroutine testSetLunumbers
 
 !> Open a file for reporting what substances were read
 subroutine openSubstancesReport
 
     if ( lunlst == 0 ) then
-        lunlst = 2
-        open( lunlst, file = 'waq_omi.report' )
+        open( newunit=lunlst, file = 'waq_omi.report' )
     endif
 
 end subroutine openSubstancesReport
@@ -98,14 +106,14 @@ subroutine loadSubstancesFile( substances_file, parameters_file, success )
 
     call openSubstancesReport
 
-    open( 10, file = substances_file, status = 'old', iostat = ierr )
+    open( newunit = lunsub, file = substances_file, status = 'old', iostat = ierr )
 
     if ( ierr /= 0 ) then
         write( lunlst, '(2a)' ) 'Error opening substances file: ', trim(substances_file)
         return
     endif
 
-    open( 11, file = parameters_file, status = 'old', iostat = ierr )
+    open( newunit = lunpar, file = parameters_file, status = 'old', iostat = ierr )
 
     if ( ierr /= 0 ) then
         write( lunlst, '(2a)' ) 'Error opening parameters file: ', trim(parameters_file)
@@ -158,7 +166,7 @@ subroutine readParametersFile( success )
 readLoop: &
     do
         prev_string = string
-        read( 11, '(a)', iostat = ierr ) string
+        read( lunpar, '(a)', iostat = ierr ) string
         lineno = lineno + 1
 
         if ( ierr < 0 ) then
@@ -281,7 +289,7 @@ subroutine readSubstancesFile( success )
 readLoop: &
     do
         prev_string = string
-        read( 10, '(a)', iostat = ierr ) string
+        read( lunsub, '(a)', iostat = ierr ) string
         lineno = lineno + 1
 
         if ( ierr < 0 ) then

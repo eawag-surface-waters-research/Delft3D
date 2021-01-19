@@ -48,10 +48,11 @@ contains
 !     are indeed run
 !
 subroutine prepare_tests
+    integer :: lunrun
 
-    open( 10, file = 'ftnunit.run' )
-    write( 10, '(a)' ) 'ALL'
-    close( 10 )
+    open( newunit = lunrun, file = 'ftnunit.run' )
+    write( lunrun, '(a)' ) 'ALL'
+    close( lunrun )
 
 end subroutine prepare_tests
 

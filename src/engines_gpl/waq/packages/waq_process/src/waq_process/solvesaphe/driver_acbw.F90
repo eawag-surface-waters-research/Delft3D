@@ -87,7 +87,7 @@ REAL                                :: z_cputime_start, z_cputime_end
 
 INTEGER                             :: ji, ji_alk, ji_dic
 
-INTEGER, PARAMETER :: jp_resunit = 1
+INTEGER :: jp_resunit
 
 
 ! Random time series data
@@ -360,7 +360,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwgen_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwgen_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -427,7 +427,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwgenrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=UNIT=jp_resunit, FILE='acbwgenrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_acbwgen(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -485,7 +485,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwicacfp_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwicacfp_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -552,7 +552,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwicacfprand_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwicacfprand_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_acbwicacfp(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -611,7 +611,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwbacastow_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwbacastow_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -678,7 +678,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwbacastowrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwbacastowrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_acbwbacastow(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -734,7 +734,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwpoly_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwpoly_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -802,7 +802,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwpolyrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwpolyrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_acbwpoly(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -859,7 +859,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwfast_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwfast_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -933,7 +933,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbwfastrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbwfastrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_acbwfast(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)

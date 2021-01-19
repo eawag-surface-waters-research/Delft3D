@@ -87,7 +87,7 @@ REAL                                :: z_cputime_start, z_cputime_end
 
 INTEGER                             :: ji, ji_alk, ji_dic
 
-INTEGER, PARAMETER :: jp_resunit = 1
+INTEGER :: jp_resunit
 
 
 ! Random time series data
@@ -346,7 +346,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbgen_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbgen_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -413,7 +413,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbgenrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbgenrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_acbgen(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -469,7 +469,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbpoly_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbpoly_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -537,7 +537,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbpolyrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbpolyrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_acbpoly(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -594,7 +594,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbfast_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbfast_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -668,7 +668,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='acbfastrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='acbfastrand_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_acbfast(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)

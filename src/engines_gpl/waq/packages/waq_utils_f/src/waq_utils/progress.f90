@@ -75,8 +75,8 @@ subroutine write_progress( progress )
     call cpu_time( secsnow )
 
     if ( secsnow-progress%secsprev .gt. 0.10 .or. progress%istep >= progress%nstep ) then
-        call get_lunumber( lun )
-        open( lun, file = progress%filename )
+        !call get_lunumber( lun )
+        open( newunit = lun, file = progress%filename )
         write( lun, * ) 1.0, progress%nstep, progress%istep, 1, 1, 0.0
         close( lun )
         progress%secsprev = secsnow

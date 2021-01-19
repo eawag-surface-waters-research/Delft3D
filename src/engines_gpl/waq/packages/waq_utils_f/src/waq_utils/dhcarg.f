@@ -55,27 +55,17 @@
 
           INQUIRE( FILE = 'delwaq.options', EXIST = EXISTS )
           IF ( EXISTS ) THEN
-              LUN = -1
-              DO I = 1,100
-                  INQUIRE( UNIT = I, OPENED = OPENED )
-                  IF ( .NOT. OPENED ) THEN
-                      LUN = I
+              OPEN( NEWUNIT = LUN, FILE = 'delwaq.options' )
+              DO
+                  READ( LUN, '(A)', IOSTAT = IERR ) LINE
+                  IF ( IERR .NE. 0 ) THEN
                       EXIT
                   ENDIF
+                  IF ( LINE .NE. ' ' ) THEN
+                      DHCARG = DHCARG + 1
+                  ENDIF
               ENDDO
-              IF ( LUN .GT. 0 ) THEN
-                  OPEN( LUN, FILE = 'delwaq.options' )
-                  DO
-                      READ( LUN, '(A)', IOSTAT = IERR ) LINE
-                      IF ( IERR .NE. 0 ) THEN
-                          EXIT
-                      ENDIF
-                      IF ( LINE .NE. ' ' ) THEN
-                          DHCARG = DHCARG + 1
-                      ENDIF
-                  ENDDO
-                  CLOSE( LUN )
-              ENDIF
+              CLOSE( LUN )
           ENDIF
       ENDIF
 !

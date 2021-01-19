@@ -58,7 +58,7 @@ program delwaq_test_dimr
          use iso_c_binding, only: c_double
          real(c_double), intent(out) :: t
       end subroutine get_start_time
-  
+
       subroutine get_end_time(t) bind(C, name="get_end_time")
          use iso_c_binding, only: c_double
          real(c_double), intent(out) :: t
@@ -83,15 +83,15 @@ program delwaq_test_dimr
    character(len=1023)     :: resfile
    integer                :: itimestamp
    real(kind=kind(1.0d0)) :: startTime, stopTime, currentTime
-   integer                :: i ,status, found
+   integer                :: i ,status, found, lunlog
    logical                :: log = .false.
 
-   if (log) open(10, file='dimr_test.log',status='replace')
-    
+   if (log) open(newunit=lunlog, file='dimr_test.log',status='replace')
+
    version_string = ' '
    call get_version_string(version_string)
-   if (log) write(10,'(A)') 'dll version string:'
-   if (log) write(10,'(A200)') trim(version_string)
+   if (log) write(lunlog,'(A)') 'dll version string:'
+   if (log) write(lunlog,'(A200)') trim(version_string)
 
    key = '-waq'
    value = ' '
@@ -104,39 +104,39 @@ program delwaq_test_dimr
    runid = ' '
    call get_command_argument(1,runid,status)
    if ( runid == ' ' ) then
-      if (log) write(10,'(A)') 'Please specify the run-ID!'
+      if (log) write(lunlog,'(A)') 'Please specify the run-ID!'
       stop
    endif
-   if (log) write(10,'(A)') 'run id:'
-   if (log) write(10,'(A200)') trim(runid)
+   if (log) write(lunlog,'(A)') 'run id:'
+   if (log) write(lunlog,'(A200)') trim(runid)
 
    dummy = initialize(runid)
 
    call get_start_time(startTime)
-   if (log) write(10,'(A)') 'run id:'
-   if (log) write(10,'(A)') runid
+   if (log) write(lunlog,'(A)') 'run id:'
+   if (log) write(lunlog,'(A)') runid
 
    call get_end_time(stopTime)
-   if (log) write(10,'(A)') 'run id:'
-   if (log) write(10,'(A)') runid
-    
+   if (log) write(lunlog,'(A)') 'run id:'
+   if (log) write(lunlog,'(A)') runid
+
    call get_current_time(currentTime)
-   if (log) write(10,'(A)') 'currentTime:'
-   if (log) write(10,'(E17.6)') currentTime
+   if (log) write(lunlog,'(A)') 'currentTime:'
+   if (log) write(lunlog,'(E17.6)') currentTime
 
    dummy = update(stopTime-startTime)
    call get_current_time(currentTime)
-   if (log) write(10,'(A)') 'currentTime:'
-   if (log) write(10,'(E17.6)') currentTime
+   if (log) write(lunlog,'(A)') 'currentTime:'
+   if (log) write(lunlog,'(E17.6)') currentTime
 
 !    dummy = update((stopTime-startTime)/2.0)
 !    call get_current_time(currentTime)
-!    if (log) write(10,'(A)') 'currentTime:'
-!    if (log) write(10,'(E17.6)') currentTime
+!    if (log) write(lunlog,'(A)') 'currentTime:'
+!    if (log) write(lunlog,'(E17.6)') currentTime
 !    dummy = update((stopTime-startTime)/2.0)
 !    call get_current_time(currentTime)
-!    if (log) write(10,'(A)') 'currentTime:'
-!    if (log) write(10,'(E17.6)') currentTime
+!    if (log) write(lunlog,'(A)') 'currentTime:'
+!    if (log) write(lunlog,'(E17.6)') currentTime
 
    dummy = finalize()
 

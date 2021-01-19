@@ -353,6 +353,7 @@ function WQParReadConfig(wqParComm, configFileName, curDomName) result(success)
     integer                   :: nodomain     ! number of domains
     integer                   :: iostat_config! iostat configuration file
     integer                   :: lunrep       ! unit number report file
+    integer                   :: luncnf       ! unit number configuration file
     ! locals
     character(Len=WQParMaxLen):: neighborName ! name of neighbor domain
     character(Len=WQParMaxLen), allocatable :: domainname(:) ! domain names
@@ -371,19 +372,19 @@ function WQParReadConfig(wqParComm, configFileName, curDomName) result(success)
     success = .false.
     call getmlu(lunrep)
 !   open(432,file=configFileName,shared,iostat=iostat_config)
-    open(432,file=configFileName,iostat=iostat_config)
+    open(newunit=luncnf,file=configFileName,iostat=iostat_config)
     if ( iostat_config .eq. 0 ) then
-        read(432,*,iostat=iostat_config) nodomain
+        read(luncnf,*,iostat=iostat_config) nodomain
         write(lunrep,*) ' number of domains:',nodomain
         allocate (domainname(nodomain))
         do idomain = 1 , nodomain
             if ( iostat_config .eq. 0 ) then
-                read(432,'(A)',iostat=iostat_config) domainname(idomain)
+                read(luncnf,'(A)',iostat=iostat_config) domainname(idomain)
                 write(lunrep,*) ' domain number:',idomain,' name:',domainname(idomain)
             endif
         enddo
     endif
-    close(432)
+    close(luncnf)
     if ( iostat_config .eq. 0 ) then
        do idomain = 1, nodomain
 

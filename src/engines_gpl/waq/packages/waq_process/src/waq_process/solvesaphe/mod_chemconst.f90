@@ -67,7 +67,7 @@ REAL(KIND=wp), PARAMETER, PRIVATE :: t_k_zerodegc = real(CtoKelvin, wp) ! Handbo
 ! Chemical constants' products: for usage by users of the module
 ! --------------------------------------------------------------
 
-! For each acid system A, 
+! For each acid system A,
 ! - api1_aaa <-- K_A1
 ! - api2_aaa <-- K_A1*K_A2
 ! - api3_aaa <-- K_A1*K_A2*K_A3
@@ -943,7 +943,7 @@ REAL(KIND=wp) :: zln_kp1_p0, zln_kp1_pp
 
 zln_kp1_p0 =      115.54_wp - 4576.752_wp/t_k - 18.453_wp*LOG(t_k)     &
              + ( 0.69171_wp -  106.736_wp/t_k)* SQRT(s)               &
-             + (-0.01844_wp -  0.65643_wp/t_k)*s 
+             + (-0.01844_wp -  0.65643_wp/t_k)*s
 
 
 ! Pressure correction
@@ -1163,7 +1163,7 @@ zionst       = A_IONSTRENGTH_SALIN(s)/zcvt_to_kgsw  ! mol/kg-H2O !!
 zln_ksi1_p0  =     117.40_wp -  8904.2_wp/t_k - 19.334_wp * LOG(t_k)    &
                + ( 3.5913_wp -  458.79_wp/t_k) * SQRT(zionst)           &
                + (-1.5998_wp +  188.74_wp/t_k) * zionst                 &
-               + (0.07871_wp - 12.1652_wp/t_k) * zionst*zionst 
+               + (0.07871_wp - 12.1652_wp/t_k) * zionst*zionst
 
 
 ! Pressure correction : currently none
@@ -1314,7 +1314,7 @@ REAL(KIND=wp) :: zln_knh4_p0, zln_knh4_pp
 
 zln_knh4_p0  =    -0.25444_wp -  6285.33_wp/t_k + 0.0001635_wp*t_k             &
                + ( 0.46532_wp - 123.7184_wp/t_k) * SQRT(s)                     &
-               + (-0.01992_wp +  3.17556_wp/t_k) * s   
+               + (-0.01992_wp +  3.17556_wp/t_k) * s
 
 
 ! Pressure correction
@@ -1460,7 +1460,7 @@ REAL(KIND=wp) :: zln_bhf_p0, zln_khf_pp
 ! ---------------------
 
 zcvt_to_kgsw    = ACVT_KGH2O_O_KGSW(s)
-zionst          = A_IONSTRENGTH_SALIN(s)/zcvt_to_kgsw 
+zionst          = A_IONSTRENGTH_SALIN(s)/zcvt_to_kgsw
 
 zln_bhf_p0      = -1590.2_wp/t_k + 12.641_wp - 1.525_wp*SQRT(zionst)
 
@@ -2245,10 +2245,10 @@ REAL(KIND=wp) :: zkw
 REAL(KIND=wp) :: zknh4
 REAL(KIND=wp) :: zkh2s
 
-INTEGER, PARAMETER :: logunit = 1
+INTEGER :: logunit
 
 
-OPEN(logunit,FILE='checkconst.log')
+OPEN(newunit=logunit,FILE='checkconst.log')
 
 WRITE(logunit,*) 'Checking constant values generated from MOD_CHEMCONST'
 WRITE(logunit,*)
@@ -2268,7 +2268,7 @@ t_k   = 298.15_wp
 
 
 zkc0 = AK_CARB_0_WEIS74(t_k, s)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_0 -- Weiss (1974)'
 WRITE(logunit,*) '==================='
 WRITE(logunit,*)
@@ -2276,12 +2276,12 @@ WRITE(logunit,*) '   K_0            :', zkc0
 WRITE(logunit,*) '   ln(K_0)        :', LOG(zkc0)
 WRITE(logunit,*) '   pK_0           :', -LOG10(zkc0)
 WRITE(logunit,'("  * ln(K_0)        :", F8.4, " (-3.5617)")') LOG(zkc0)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkhso4 = AK_HSO4_DICK90(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_HSO4 -- Dickson (1990) -- pH_free'
 WRITE(logunit,*) '==================================='
 WRITE(logunit,*)
@@ -2289,12 +2289,12 @@ WRITE(logunit,*) '   K_HSO4         :', zkhso4
 WRITE(logunit,*) '   ln(K_HSO4)     :', LOG(zkhso4)
 WRITE(logunit,*) '   pK_HSO4        :', -LOG10(zkhso4)
 WRITE(logunit,'("  * ln(K_HSO4)     :", F6.2, " (-2.30)")') LOG(zkhso4)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkb = AK_BORA_DICK90(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_b -- Dickson (1990) -- pH_tot'
 WRITE(logunit,*) '==============================='
 WRITE(logunit,*)
@@ -2302,14 +2302,14 @@ WRITE(logunit,*) '   K_b            :', zkb
 WRITE(logunit,*) '   ln(K_b)        :', LOG(zkb)
 WRITE(logunit,*) '   pK_b           :', -LOG10(zkb)
 WRITE(logunit,'("  * ln(K_b)        :", F9.4, " (-19.7964)")') LOG(zkb)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 
 
 zkc1 = AK_CARB_1_LUEK00(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_1 -- Luecker et al (2000) -- pH_tot'
 WRITE(logunit,*) '====================================='
 WRITE(logunit,*)
@@ -2317,12 +2317,12 @@ WRITE(logunit,*) '   K_1            :', zkc1
 WRITE(logunit,*) '   ln(K_1)        :', LOG(zkc1)
 WRITE(logunit,*) '   pK_1           :', -LOG10(zkc1)
 WRITE(logunit,'("  * log10(K_1)     :", F8.4, " (-5.8472)")') LOG10(zkc1)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkc2 = AK_CARB_2_LUEK00(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_2 -- Luecker et al (2000) -- pH_tot'
 WRITE(logunit,*) '====================================='
 WRITE(logunit,*)
@@ -2330,14 +2330,14 @@ WRITE(logunit,*) '   K_2            :', zkc2
 WRITE(logunit,*) '   ln(K_2)        :', LOG(zkc2)
 WRITE(logunit,*) '   pK_2           :', -LOG10(zkc2)
 WRITE(logunit,'("  * log10(K_2)     :", F8.4, " (-8.9660)")') LOG10(zkc2)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 
 
 zkc1 = AK_CARB_1_ROYE93(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_1 -- Roy et al (1993) -- pH_tot'
 WRITE(logunit,*) '================================='
 WRITE(logunit,*)
@@ -2345,12 +2345,12 @@ WRITE(logunit,*) '   K_1            :', zkc1
 WRITE(logunit,*) '   ln(K_1)        :', LOG(zkc1)
 WRITE(logunit,*) '   pK_1           :', -LOG10(zkc1)
 WRITE(logunit,'("  % ln(K_1)        :", F9.4, " (-13.4847)")') LOG(zkc1)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkc2 = AK_CARB_2_ROYE93(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_2 -- Roy et al (1993) -- pH_tot'
 WRITE(logunit,*) '================================='
 WRITE(logunit,*)
@@ -2358,14 +2358,14 @@ WRITE(logunit,*) '   K_2            :', zkc2
 WRITE(logunit,*) '   ln(K_2)        :', LOG(zkc2)
 WRITE(logunit,*) '   pK_2           :', -LOG10(zkc2)
 WRITE(logunit,'("  % ln(K_2)        :", F9.4, " (-20.5504)")') LOG(zkc2)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 
 
 zkhf = AK_HF_PEFR87(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_HF -- Perez and Fraga (1987) -- pH_tot'
 WRITE(logunit,*) '========================================'
 WRITE(logunit,*)
@@ -2373,12 +2373,12 @@ WRITE(logunit,*) '   K_HF           :', zkhf
 WRITE(logunit,*) '   ln(K_HF)       :', LOG(zkhf)
 WRITE(logunit,*) '   pK_HF          :', -LOG10(zkhf)
 WRITE(logunit,'("  * ln(K_HF)       :", F6.2, " (-6.09)")') LOG(zkhf)
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkp1 = AK_PHOS_1_MILL95(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_P1 -- Millero (1995) -- pH_SWS'
 WRITE(logunit,*) '================================'
 WRITE(logunit,*)
@@ -2386,12 +2386,12 @@ WRITE(logunit,*) '   K_P1           :', zkp1
 WRITE(logunit,*) '   ln(K_P1)       :', LOG(zkp1)
 WRITE(logunit,*) '   pK_1           :', -LOG10(zkp1)
 WRITE(logunit,'("  * ln(K_P1)-0.015 :", F6.2, " (-3.71)")') LOG(zkp1)-0.015_wp
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkp2 = AK_PHOS_2_MILL95(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_P2 -- Millero (1995) -- pH_SWS'
 WRITE(logunit,*) '================================'
 WRITE(logunit,*)
@@ -2399,12 +2399,12 @@ WRITE(logunit,*) '   K_2            :', zkp2
 WRITE(logunit,*) '   ln(K_P2)       :', LOG(zkp2)
 WRITE(logunit,*) '   pK_2           :', -LOG10(zkp2)
 WRITE(logunit,'("  * ln(K_P2)-0.015 :", F8.3, " (-13.727)")') LOG(zkp2)-0.015_wp
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkp3 = AK_PHOS_3_MILL95(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_P3 -- Millero (1995) -- pH_SWS'
 WRITE(logunit,*) '================================'
 WRITE(logunit,*)
@@ -2412,12 +2412,12 @@ WRITE(logunit,*) '   K_P3           :', zkp3
 WRITE(logunit,*) '   ln(K_P3)       :', LOG(zkp3)
 WRITE(logunit,*) '   pK_P3          :', -LOG10(zkp3)
 WRITE(logunit,'("  * ln(K_P3)-0.015 :", F7.2, " (-20.24)")') LOG(zkp3)-0.015_wp
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zksi1 = AK_SILI_1_MILL95(t_k, s)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_Si1 -- Millero (1995) -- pH_SWS'
 WRITE(logunit,*) '================================='
 WRITE(logunit,*)
@@ -2425,12 +2425,12 @@ WRITE(logunit,*) '   K_Si1          :', zksi1
 WRITE(logunit,*) '   ln(K_Si1)      :', LOG(zksi1)
 WRITE(logunit,*) '   pK_Si1         :', -LOG10(zksi1)
 WRITE(logunit,'("  * ln(K_Si1)-0.015:", F7.2, " (-21.61)")') LOG(zksi1)-0.015_wp
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkw = AK_W_MILL95(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_w -- Millero (1995) -- pH_SWS'
 WRITE(logunit,*) '==============================='
 WRITE(logunit,*)
@@ -2438,12 +2438,12 @@ WRITE(logunit,*) '   K_w            :', zkw
 WRITE(logunit,*) '   ln(K_w)        :', LOG(zkw)
 WRITE(logunit,*) '   pK_w           :', -LOG10(zkw)
 WRITE(logunit,'("  * ln(K_w)-0.015  :", F8.3, " (-30.434)")') LOG(zkw)-0.015_wp
-WRITE(logunit,*) 
+WRITE(logunit,*)
 
 
 zkh2s = AK_H2S_1_MILL95(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_H2S -- Millero (1995) -- pH_SWS'
 WRITE(logunit,*) '================================='
 WRITE(logunit,*)
@@ -2456,7 +2456,7 @@ WRITE(logunit,*)
 
 zknh4 = AK_AMMO_1_YAMI95(t_k, s, p_bar)
 
-WRITE(logunit,*) 
+WRITE(logunit,*)
 WRITE(logunit,*) 'K_NH4 -- Yao and Millero (1995) -- pH_SWS'
 WRITE(logunit,*) '========================================='
 WRITE(logunit,*)

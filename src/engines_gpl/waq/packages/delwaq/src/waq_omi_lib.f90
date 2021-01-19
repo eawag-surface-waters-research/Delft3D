@@ -102,14 +102,14 @@ subroutine write_array_const( name, suffix, value, size )
     real               :: value                        !< Constant value to be written
     integer            :: size                         !< Number of times the value must be repeated
 
-    integer            :: i
+    integer            :: i, lunwrk
     integer            :: time_dummy
 
     time_dummy = 0
 
-    open( 10, file = trim(name) // '-' // trim(suffix) // '.wrk', form = 'unformatted',access='stream' )
-    write( 10 ) time_dummy, (value, i = 1,size )
-    close( 10 )
+    open( newunit = lunwrk, file = trim(name) // '-' // trim(suffix) // '.wrk', form = 'unformatted',access='stream' )
+    write( lunwrk ) time_dummy, (value, i = 1,size )
+    close( lunwrk )
 
 end subroutine write_array_const
 
@@ -152,7 +152,7 @@ logical function GetWQDimensions(notot, noseg)
 
     notot = size_dlwq_state%notot
     noseg = size_dlwq_state%noseg
-    
+
     GetWQDimensions = .true.
 
 end function GetWQDimensions
@@ -688,6 +688,7 @@ logical function DefineWQSchematisation(number_segments, pointer_table, number_e
     integer                              :: number_layers
     integer                              :: number_segments_per_layer
     integer                              :: i, j
+    integer                              :: lunwrk
 
     number_layers = 1
     if (number_exchanges(3) > 0) then
@@ -700,9 +701,9 @@ logical function DefineWQSchematisation(number_segments, pointer_table, number_e
        endif
     endif
 
-    open( 10, file = trim(runid) // '-to_from.wrk', form = 'unformatted',access='stream' )
-    write( 10 ) pointer_table(:,1:sum(number_exchanges))
-    close( 10 )
+    open( newunit = lunwrk, file = trim(runid) // '-to_from.wrk', form = 'unformatted',access='stream' )
+    write( lunwrk ) pointer_table(:,1:sum(number_exchanges))
+    close( lunwrk )
 
     noseg  = number_segments
     noq    = sum(number_exchanges)
@@ -786,12 +787,13 @@ logical function DefineWQDispersion(dispc, length)
     real, dimension(2,noq)              :: length
 
     integer                             :: time_dummy
+    integer                             :: lunwrk
 
     time_dummy = 0
 
-    open( 10, file = trim(runid) // '-lengthes.wrk', form = 'unformatted',access='stream' )
-    write( 10 ) time_dummy, length
-    close( 10 )
+    open( newunit = lunwrk, file = trim(runid) // '-lengthes.wrk', form = 'unformatted',access='stream' )
+    write( lunwrk ) time_dummy, length
+    close( lunwrk )
 
     disp = dispc
 
@@ -1225,13 +1227,14 @@ logical function SetInitialVolume( volume )
     real, dimension(noseg), intent(in) :: volume
 
     integer                            :: time_dummy
+    integer                            :: lunwrk
 
     SetInitialVolume = .false.
 
     time_dummy = 0
-    open( 10, file = trim(runid) // '-volumes.wrk' , form = 'unformatted',access='stream', err=911 )
-    write( 10 ) time_dummy, volume(1:noseg)
-    close( 10 )
+    open( newunit = lunwrk, file = trim(runid) // '-volumes.wrk' , form = 'unformatted',access='stream', err=911 )
+    write( lunwrk ) time_dummy, volume(1:noseg)
+    close( lunwrk )
 
     SetInitialVolume = .true.
     return
@@ -1546,7 +1549,7 @@ integer function ModelPerformTimeStep ()
     ModelPerformTimeStep = 0
 
 end function ModelPerformTimeStep
-    
+
 ! WriteRestartFileDefaultName --
 !     Write a restart file in .map format using default filename with current status of the model
 !
@@ -1555,7 +1558,7 @@ integer function WriteRestartFileDefaultName ()
     !DEC$ ATTRIBUTES DECORATE, ALIAS : 'WRITERESTARTFILEDEFAULTNAME' :: WriteRestartFileDefaultName
 
     use delwaq2_global_data
-    
+
     implicit none
 
     character (len=255) lcharmap
@@ -1577,7 +1580,7 @@ integer function WriteRestartFileDefaultName ()
       WriteRestartFileDefaultName = WriteRestartFile ( lcharmap )
     end if
 end function
-    
+
 ! WriteRestartFile --
 !     Write a restart file in .map format with current status of the model
 !
@@ -1632,7 +1635,7 @@ integer function ModelInitialize ()
     include 'sysa_ff.inc'
 
     type(t_dlwq_item)               :: constants    !< delwaq constants list
-    integer                         :: lunrep
+    integer                         :: lunrep, lunwrk
     integer                         :: ierr
 
     !
@@ -1659,8 +1662,8 @@ integer function ModelInitialize ()
     ! Make sure the harmonic work file exists
     !
 
-    open( lun(3), file = lchar(3), form = 'unformatted',access='stream' )
-    close( lun(3) )
+    open( newunit = lunwrk, file = lchar(3), form = 'unformatted',access='stream' )
+    close( lunwrk )
 
     nolun  = 45      ! nolun has been declared in sysn_ff.inc
     !
@@ -1696,9 +1699,9 @@ integer function ModelInitialize ()
     call write_array_2d( argv(2), 'initials', substance_conc )
     if ( nopa > 0 ) then
         call write_array_2d( argv(2), 'params'  , procparam_param_value )
-        open( lun(3), file = lchar(41) )
-        write( lun(3), '(i5,a1,a256)' ) 0,' ',trim(argv(2)) // '-params.wrk'
-        close( lun(3) )
+        open( newunit=lunwrk, file = lchar(41) )
+        write( lunwrk, '(i5,a1,a256)' ) 0,' ',trim(argv(2)) // '-params.wrk'
+        close( lunwrk )
     endif
 
    !
@@ -1754,6 +1757,7 @@ subroutine write_delwaq03( name )
     real,             dimension(:), pointer :: rbuf  => null()
     integer,          dimension(:), pointer :: ibuf  => null()
     character(len=1), dimension(:), pointer :: chbuf => null()
+    integer                                 :: lunwrk
 
     equivalence       ( in(1)  , noseg ) , ( ii(1), itstrt  ) ! equivalence output array with common block
 
@@ -1765,15 +1769,15 @@ subroutine write_delwaq03( name )
 
     call space( lunrep, .false., rbuf, ibuf, chbuf, imaxa, imaxi, imaxc )
 
-    open( 10, file = trim(name) // '-delwaq03.wrk', form = 'unformatted',access='stream' )
-    write( 10 ) in
-    write( 10 ) ii
-    write( 10 ) imaxa, imaxi, imaxc
+    open( newunit = lunwrk, file = trim(name) // '-delwaq03.wrk', form = 'unformatted',access='stream' )
+    write( lunwrk ) in
+    write( lunwrk ) ii
+    write( lunwrk ) imaxa, imaxi, imaxc
 
-    write( 10 ) lun(1:nolun)
-    write( 10 ) lchar(1:nolun)
-    write( 10 ) filtype(1:nolun)
-    close( 10 )
+    write( lunwrk ) lun(1:nolun)
+    write( lunwrk ) lchar(1:nolun)
+    write( lunwrk ) filtype(1:nolun)
+    close( lunwrk )
 
     if ( associated(rbuf)  ) deallocate( rbuf )
     if ( associated(ibuf)  ) deallocate( ibuf )
@@ -1801,6 +1805,7 @@ subroutine write_delwaq04( name )
     integer :: load_kind
     integer :: iseg
     integer :: error
+    integer :: lunwrk
 
     type(GridPointer) :: aGrid
 
@@ -1813,19 +1818,19 @@ subroutine write_delwaq04( name )
                       'T0: ', ref_year, '.', ref_month,  '.', ref_day,    ' ', &
                               ref_hour, ':', ref_minute, ':', ref_second, '  (scu=       1s)'
 
-    open( 10, file = trim(name) // '-delwaq04.wrk', form = 'unformatted',access='stream' )
-    write( 10 ) title
+    open( newunit = lunwrk, file = trim(name) // '-delwaq04.wrk', form = 'unformatted',access='stream' )
+    write( lunwrk ) title
 
-    write( 10 ) substance_name
+    write( lunwrk ) substance_name
 
-    !write( 10 ) ( monitor_cell(i), monitor_name(i), i = 1,nodump ) ! Classic form
-    write( 10 ) ( monitor_name(i), i = 1,ndmpar )
-    write( 10 ) ( monitor_cell(i), i = 1,ndmpar )
-    !write( 10 ) transect_name ! Not yet
+    !write( lunwrk ) ( monitor_cell(i), monitor_name(i), i = 1,nodump ) ! Classic form
+    write( lunwrk ) ( monitor_name(i), i = 1,ndmpar )
+    write( lunwrk ) ( monitor_cell(i), i = 1,ndmpar )
+    !write( lunwrk ) transect_name ! Not yet
 
     ! Grid definitions - base grid only
     iref = 1
-    write( 10 ) noseg, iref, ( i, i = 1,noseg )
+    write( lunwrk ) noseg, iref, ( i, i = 1,noseg )
 
     !
     ! Copied from grid.f
@@ -1851,24 +1856,24 @@ subroutine write_delwaq04( name )
     ! Now the rest ...
     !
     idummy = 1
-    write( 10 ) (idummy, i = 1,notot) ! SYSGRD in SETPRG
-    write( 10 ) (idummy, i = 1,notot) ! SYSNDT in SETPRG
+    write( lunwrk ) (idummy, i = 1,notot) ! SYSGRD in SETPRG
+    write( lunwrk ) (idummy, i = 1,notot) ! SYSNDT in SETPRG
 
-    write( 10 ) iknmrk
+    write( lunwrk ) iknmrk
 
-    if ( nodisp > 0 ) write( 10 ) diname
-    if ( novelo > 0 ) write( 10 ) vename
+    if ( nodisp > 0 ) write( lunwrk ) diname
+    if ( novelo > 0 ) write( lunwrk ) vename
 
     if ( allocated( idpnt_array ) ) deallocate( idpnt_array )
     allocate( idpnt_array(1:nosys), ivpnt_array(1:nosys) )
     idpnt_array = 0   ! For the moment
     ivpnt_array = 0
-    write( 10 ) idpnt_array
-    write( 10 ) ivpnt_array
+    write( lunwrk ) idpnt_array
+    write( lunwrk ) ivpnt_array
 
     if ( nobnd > 0 ) then
-        write( 10 ) ibpnt_array(2,:)
-        write( 10 ) ibpnt_array(3,:)
+        write( lunwrk ) ibpnt_array(2,:)
+        write( lunwrk ) ibpnt_array(3,:)
     endif
 
     ! Monitoring points, not monitoring areas
@@ -1876,29 +1881,29 @@ subroutine write_delwaq04( name )
     call write_delwaq04_monitoring
 
     idummy = 0
-    write( 10 ) idummy, (disp(i)  ,i=1,3)
-    write( 10 ) idummy, (aleng(i) ,i=1,3)
+    write( lunwrk ) idummy, (disp(i)  ,i=1,3)
+    write( lunwrk ) idummy, (aleng(i) ,i=1,3)
 
     if ( nobnd > 0 ) then
-        write( 10 ) (boundary_id(i), boundary_name(i) ,i=1,nobnd )
-        write( 10 ) boundary_type
-!!      write( 10 ) inwtyp(...)
-        write( 10 ) (/ (i ,i=1,nobnd) /)  ! Type
-        write( 10 ) ibpnt_array(1,:)      ! Time lag
+        write( lunwrk ) (boundary_id(i), boundary_name(i) ,i=1,nobnd )
+        write( lunwrk ) boundary_type
+!!      write( lunwrk ) inwtyp(...)
+        write( lunwrk ) (/ (i ,i=1,nobnd) /)  ! Type
+        write( lunwrk ) ibpnt_array(1,:)      ! Time lag
     endif
 
     if ( nowst > 0 ) then
         ! TODO:
         ! Allow the waste load kind to be set
         load_kind = 0
-        write( 10 ) (load_cell(i), load_kind, load_type(i), load_name(i) ,i=1,nowst)
-        write( 10 ) load_type_def
-!!      write( 10 ) inwtyp(...)
-        write( 10 ) (1 ,i=1,nowst )
+        write( lunwrk ) (load_cell(i), load_kind, load_type(i), load_name(i) ,i=1,nowst)
+        write( lunwrk ) load_type_def
+!!      write( lunwrk ) inwtyp(...)
+        write( lunwrk ) (1 ,i=1,nowst )
     endif
 
-    write( 10 ) procparam_const
-    write( 10 ) procparam_param ! No separate function/segment function
+    write( lunwrk ) procparam_const
+    write( lunwrk ) procparam_param ! No separate function/segment function
 
     ! Time function information
 
@@ -1907,10 +1912,10 @@ subroutine write_delwaq04( name )
     allocate( nrftot(1:noitem), nrharm(1:noitem) )
     nrftot = 0
     nrharm = 0
-    write( 10 ) nrftot
-    write( 10 ) nrharm
+    write( lunwrk ) nrftot
+    write( lunwrk ) nrharm
 
-    close( 10 )
+    close( lunwrk )
 
 
 end subroutine write_delwaq04
@@ -1960,31 +1965,32 @@ subroutine handle_output_requests( name )
 
     integer          :: i
     integer          :: k
+    integer          :: luninp
 
-    open( 10, file = trim(name) // '.inp' )
+    open( newunit = luninp, file = trim(name) // '.inp' )
 
-    write( 10, '(a)' ) '1 ; output information in this file'
+    write( luninp, '(a)' ) '1 ; output information in this file'
     do k = 1,4
-        write( 10, '(a)' ) '2 ; all substances and extra output'
-        write( 10, '(i5,a)' ) size(output_param), ' ; number of extra variables'
+        write( luninp, '(a)' ) '2 ; all substances and extra output'
+        write( luninp, '(i5,a)' ) size(output_param), ' ; number of extra variables'
         do i = 1,size(output_param)
             if ( k.eq.1 .or. k.eq.3 ) then
-                write( 10, '(a,1x,a)' ) output_param(i), ''' '''
+                write( luninp, '(a,1x,a)' ) output_param(i), ''' '''
             else
-                write( 10, '(a,1x,a)' ) output_param(i)
+                write( luninp, '(a,1x,a)' ) output_param(i)
             endif
         enddo
     enddo
 
-    write( 10, '(a)' ) ' 1 ; binary history file on'
-    write( 10, '(a)' ) ' 1 ; binary map     file on'
-    write( 10, '(a)' ) ' 1 ; nefis  history file on'
-    write( 10, '(a)' ) ' 1 ; nefis  map     file on'
+    write( luninp, '(a)' ) ' 1 ; binary history file on'
+    write( luninp, '(a)' ) ' 1 ; binary map     file on'
+    write( luninp, '(a)' ) ' 1 ; nefis  history file on'
+    write( luninp, '(a)' ) ' 1 ; nefis  map     file on'
 
-    write( 10, '(a)' ) ' #9 ; delimiter for the ninth block'
-    write( 10, '(a)' ) ' #10 ; delimiter for the tenth block'
+    write( luninp, '(a)' ) ' #9 ; delimiter for the ninth block'
+    write( luninp, '(a)' ) ' #10 ; delimiter for the tenth block'
 
-    close( 10 )
+    close( luninp )
 
 end subroutine handle_output_requests
 
@@ -2111,12 +2117,13 @@ subroutine write_array_2d( name, suffix, array )
     real, dimension(:,:) :: array
 
     integer :: time_dummy
+    integer :: lunwrk
 
     time_dummy = 0
 
-    open( 10, file = trim(name) // '-' // trim(suffix) // '.wrk', form = 'unformatted',access='stream' )
-    write( 10 ) time_dummy, array
-    close( 10 )
+    open( newunit = lunwrk, file = trim(name) // '-' // trim(suffix) // '.wrk', form = 'unformatted',access='stream' )
+    write( lunwrk ) time_dummy, array
+    close( lunwrk )
 
 end subroutine write_array_2d
 

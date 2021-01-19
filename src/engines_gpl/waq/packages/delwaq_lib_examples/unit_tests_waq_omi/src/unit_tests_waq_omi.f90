@@ -233,10 +233,11 @@ subroutine test_parse_parameters_file
     use waq_omi_substances
 
     integer :: ierr
+    integer :: luninp, lunrep
     logical :: success
 
-    open( 11, file = '../datafiles/test_comp_params.inp', status = 'old', iostat = ierr )
-    open( 12, file = 'test_comp_params.report' )
+    open( newunit = luninp, file = '../datafiles/test_comp_params.inp', status = 'old', iostat = ierr )
+    open( newunit = lunrep, file = 'test_comp_params.report' )
 
     call assert_equal( ierr, 0, "Parameters file should have been successfully opened" )
 
@@ -245,10 +246,10 @@ subroutine test_parse_parameters_file
 
     call assert_true( success, "Parameters file should have been successfully read" )
 
-    call writeItems( 12 )
+    call writeItems( lunrep )
 
-    close( 12 )
-    close( 11 )
+    close( lunrep )
+    close( luninp )
 
     call assert_files_comparable( 'test_comp_params.report', '../datafiles/test_comp_params.report', &
          'Reported parameters are correct', 1.0e-7 )
@@ -261,15 +262,17 @@ subroutine test_parse_substances_file
     use waq_omi_substances
 
     integer :: ierr
+    integer :: lunsub, lunpar, lunrep
     logical :: success
 
-    open( 10, file = '../datafiles/test_substances.inp', status = 'old', iostat = ierr )
-    open( 11, file = '../datafiles/test_comp_params.inp', status = 'old', iostat = ierr )
-    open( 12, file = 'test_substances.report' )
+    open( lunsub, file = '../datafiles/test_substances.inp', status = 'old', iostat = ierr )
+    open( lunpar, file = '../datafiles/test_comp_params.inp', status = 'old', iostat = ierr )
+    open( lunrep, file = 'test_substances.report' )
 
     call assert_equal( ierr, 0, "Substances file should have been successfully opened" )
 
     call openSubstancesReport
+    call testSetLunumbers( lunsub, lunpar )
 
     success = .true.
     call readParametersFile( success )
@@ -277,11 +280,11 @@ subroutine test_parse_substances_file
 
     call assert_true( success, "Substances file should have been successfully read" )
 
-    call writeItems( 12 )
+    call writeItems( lunrep )
 
-    close( 12 )
-    close( 11 )
-    close( 10 )
+    close( lunrep )
+    close( lunpar )
+    close( lunsub )
 
     call assert_files_comparable( 'test_substances.report', '../datafiles/test_substances.report', &
          'Reported substances are correct', 1.0e-7 )
@@ -398,10 +401,11 @@ contains
 !!     This routine merely takes care that the unit tests
 !!     are indeed run
 subroutine prepareTests
+    integer :: lunrun
 
-    open( 10, file = 'ftnunit.run' )
-    write( 10, '(a)' ) 'ALL'
-    close( 10 )
+    open( newunit = lunrun, file = 'ftnunit.run' )
+    write( lunrun, '(a)' ) 'ALL'
+    close( lunrun )
 
 end subroutine prepareTests
 

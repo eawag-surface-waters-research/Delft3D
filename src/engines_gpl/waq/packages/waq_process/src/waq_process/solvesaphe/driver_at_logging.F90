@@ -102,7 +102,7 @@ REAL                                :: z_cputime_start, z_cputime_end
 
 INTEGER :: ji, ji_alk, ji_dic
 
-INTEGER, PARAMETER :: jp_resunit = 1
+INTEGER :: jp_resunit
 
  CHARACTER(LEN=3)  :: cf_1st = '1st'
 
@@ -400,7 +400,7 @@ SELECT CASE(jp_lognth) ! from mod_phsolvers_logging
       PRINT*
       PRINT*, 'Tracking iteration number ', jp_lognth
    CASE(3)
-      cf_1st = '3rd' 
+      cf_1st = '3rd'
       PRINT*
       PRINT*, 'Tracking iteration number ', jp_lognth
    CASE DEFAULT
@@ -467,7 +467,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='atgen_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='atgen_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -565,7 +565,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='atgenrand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='atgenrand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_atgen(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -665,7 +665,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='icacfp_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='icacfp_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -760,7 +760,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='icacfprand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='icacfprand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_icacfp(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -822,7 +822,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='bacastow_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='bacastow_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -915,7 +915,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='bacastowrand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='bacastowrand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_bacastow(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -983,7 +983,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='atsec_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='atsec_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -1078,7 +1078,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='atsecrand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='atsecrand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_atsec(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)
@@ -1182,7 +1182,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='ocmip_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='ocmip_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) z_dictot_min
@@ -1276,7 +1276,7 @@ ENDDO
 
 
 #if defined(CREATEFILES)
- OPEN(UNIT=jp_resunit, FILE='ocmiprand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
+ OPEN(NEWUNIT=jp_resunit, FILE='ocmiprand'//cf_1st//'_'//cp_fileid//'.res',FORM='UNFORMATTED')
 
  WRITE(UNIT=jp_resunit) jp_ndic, jp_nalk
  WRITE(UNIT=jp_resunit) ((jniter_div_ocmip(ji_dic,ji_alk),ji_dic=1,jp_ndic),ji_alk=1,jp_nalk)

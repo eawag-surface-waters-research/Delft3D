@@ -113,6 +113,7 @@
 
       logical                  :: first = .true.    ! initialisation indicator
       integer                  :: lunrep            ! logical unit of report file
+      integer                  :: lunscr            ! logical unit of screen file
       logical                  :: l_exi             ! file exists or not
       integer                  :: noscrn            ! number of bubble screens
       integer                  :: iscrn             ! loop counter screens
@@ -133,16 +134,16 @@
          noscrn = 0
          inquire (file='screen.dat',exist=l_exi)
          if ( l_exi ) then
-            open  ( 83 , file='screen.dat' )        !  read file with
-            read  ( 83 , * ) noscrn                 !  screen-names
+            open  ( newunit = lunscr , file='screen.dat' )        !  read file with
+            read  ( lunscr , * ) noscrn                 !  screen-names
             write ( lunrep , * ) 'Number of screens:', noscrn
             if ( noscrn .gt. 0 ) then               !  may be more names
                allocate ( scrnam(noscrn) )          !  than existing in the
                do iscrn = 1, noscrn                 !  problem
-                  read  ( 83 , * ) scrnam(iscrn)
+                  read  ( lunscr , * ) scrnam(iscrn)
                   write ( lunrep , * ) 'Screen:',iscrn,' is called: ',scrnam(iscrn)
                enddo
-               close ( 83 )
+               close ( lunscr )
                allocate ( scrloc( nowst  ) )        !  pointer from waste to screen
                allocate ( scrwtd( noscrn, notot ) )
                allocate ( scrwdf( noscrn ) )
@@ -248,6 +249,7 @@
 
       integer, save       :: ifirst = 1                       ! initialisation indicator
       integer             :: lunrep                           ! report file
+      integer             :: luninout                         ! inlet/outlet file
       logical             :: l_exi                            ! file exists or not
       integer             :: ncomb                            ! number of possible inlet outlet combinations
       integer             :: ninout                           ! actual number of inlet outlet combinations
@@ -285,10 +287,10 @@
          inquire (file='inloutl.dat',exist=l_exi)
          if ( l_exi ) then
             write(lunrep,2004)
-            open ( 83 , file='inloutl.dat' )
+            open ( newunit = luninout , file='inloutl.dat' )
             ncomb = 0
             do
-               read ( 83 , '(2a20)' , iostat = ierr ) c_in,c_out
+               read ( luninout , '(2a20)' , iostat = ierr ) c_in,c_out
                if ( ierr /= 0 ) then
                    exit
                endif
@@ -298,14 +300,14 @@
 
             allocate( namin(ncomb), namout(ncomb), iwin(ncomb), iwout(ncomb) )
 
-            rewind( 83 )
+            rewind( luninout )
 
             do i = 1,ncomb
-               read ( 83 , '(2a20)' ) c_in,c_out
+               read ( luninout , '(2a20)' ) c_in,c_out
                namin(i) = c_in
                namout(i) = c_out
             enddo
-            close ( 83 )
+            close ( luninout )
          else
 
             ! construct the default list of combination INLETxx/OUTLETxx
@@ -496,7 +498,8 @@
       integer                             :: i
       integer                             :: id
       integer                             :: ierr
-      integer                             :: lunrep
+      integer                             :: lunrep, lunlga
+      integer, save                       :: lunwlk
       integer                             :: ix, iy, iz, jz, offset
       integer                             :: mmax, nmax, noq1, noq2, noq3
       logical                             :: l_exi
@@ -513,27 +516,27 @@
             write(lunrep,2000)
             write(lunrep,2001)
 
-            open( 84 , file='walking.dat' )
-            read( 84, * ) nowalk
+            open( newunit=lunwlk , file='walking.dat' )
+            read( lunwlk, * ) nowalk
             if ( nowalk > 0 ) then
-               open( 85 , file='walking.lga', access = 'stream', status = 'old' )
-               read( 85 ) mmax, nmax, nosegl, nolay, noq1, noq2, noq3
+               open( newunit=lunlga , file='walking.lga', access = 'stream', status = 'old' )
+               read( lunlga ) mmax, nmax, nosegl, nolay, noq1, noq2, noq3
 
                ! check if the grids match
 
                if ( mod(noseg, nosegl) /= 0 ) then
                    write(lunrep,2002) noseg, nosegl
                    nowalk = 0
-                   close( 85 )
-                   close( 84 )
+                   close( lunlga )
+                   close( lunwlk )
                    return
                endif
 
                call dhnolay( nolay )
 
                allocate( lgrid(mmax,nmax) )
-               read( 85 ) lgrid
-               close( 85 )
+               read( lunlga ) lgrid
+               close( lunlga )
             endif
          else
             write(lunrep,2005)
@@ -542,7 +545,7 @@
 
          offset = 0
          do i = 1,nowalk
-            read( 84, *, iostat = ierr ) id, ix, iy, iz
+            read( lunwlk, *, iostat = ierr ) id, ix, iy, iz
             if ( id > 0 .and. id+offset <= nowst ) then
                if ( iz > 0 ) then
                   newsegment = lgrid(ix,iy) + nosegl * (iz-1)
@@ -557,9 +560,9 @@
             endif
             write(lunrep,*) id, ix, iy, iz
          enddo
-         call reposition_file
+         call reposition_file( lunwlk )
 
-         call determine_times( nowalk, next_time_in_file, period, timestep )
+         call determine_times( lunwlk, nowalk, next_time_in_file, period, timestep )
          time_offset  = 0
 
          write( lunrep,2006)
@@ -577,7 +580,7 @@
          if ( next_time_in_file <= itime ) then
             offset = 0
             do i = 1,nowalk
-               read( 84, *, iostat = ierr ) id, ix, iy, iz
+               read( lunwlk, *, iostat = ierr ) id, ix, iy, iz
                if ( id > 0 .and. id+offset <= nowst ) then
                   if ( iz > 0 ) then
                      newsegment = lgrid(ix,iy) + nosegl * (iz-1)
@@ -593,9 +596,9 @@
                write(lunrep,*) id, ix, iy, iz
             enddo
 
-            read( 84, *, iostat = ierr ) next_time_in_file
+            read( lunwlk, *, iostat = ierr ) next_time_in_file
             if ( ierr /= 0 ) then
-               call reposition_file
+               call reposition_file( lunwlk )
                time_offset = time_offset + period
             endif
 
@@ -621,37 +624,37 @@
 
       contains
 
-      subroutine determine_times( nowalk, start_time, period, timestep )
+      subroutine determine_times( lunwlk, nowalk, start_time, period, timestep )
       !
       ! Scan the file to determine the start time and the period
       ! Then reposition the pointer
       !
-      integer :: nowalk, start_time, period, timestep
+      integer :: lunwlk, nowalk, start_time, period, timestep
 
       integer :: i, next_time, dummy
       integer :: ierr
 
-      read( 84, * ) start_time
+      read( lunwlk, * ) start_time
 
       ! Skip the second block
       do i = 1,nowalk
-         read( 84, * ) dummy, dummy, dummy, dummy
+         read( lunwlk, * ) dummy, dummy, dummy, dummy
       enddo
 
-      read( 84, * ) next_time
+      read( lunwlk, * ) next_time
       timestep = next_time - start_time
 
       ! Read until the end of the file
       do
          do i = 1,nowalk
-            read( 84, *, iostat = ierr ) dummy, dummy, dummy, dummy
+            read( lunwlk, *, iostat = ierr ) dummy, dummy, dummy, dummy
             if ( ierr /= 0 ) then
                write( lunrep, 2004 ) next_time
                call srstop(1)
             endif
          enddo
 
-         read( 84, *, iostat = ierr ) next_time
+         read( lunwlk, *, iostat = ierr ) next_time
          if ( ierr /= 0 ) then
             exit
          endif
@@ -660,23 +663,25 @@
       period = next_time + timestep - start_time
 
       ! Reposition the file
-      call reposition_file
+      call reposition_file( lunwlk )
 
  2004 format ('   Unexpected end of file with walking discharges at tim
      &e = ',i10)
       end subroutine determine_times
 
-      subroutine reposition_file
+      subroutine reposition_file( lunwlk )
+
+      integer, intent(in) :: lunwlk
 
       integer :: i, dummy, nolines
 
-      rewind( 84 )
-      read( 84, * ) nolines
+      rewind( lunwlk )
+      read( lunwlk, * ) nolines
       do i = 1,nolines
-         read( 84, * ) dummy, dummy, dummy
+         read( lunwlk, * ) dummy, dummy, dummy
       enddo
 
-      read( 84, * ) dummy ! The first time - we already know that!
+      read( lunwlk, * ) dummy ! The first time - we already know that!
 
       end subroutine reposition_file
 

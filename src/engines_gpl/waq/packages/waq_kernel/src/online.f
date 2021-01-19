@@ -571,7 +571,6 @@
       save    filnam
       data    first   /.true./
       data    rewine  /.true./
-      data    io_rtc /1234/
       data    moname /'Interface from Delwaq to RTC',
      j                'Concentrations for current time step',
      j                ' ',
@@ -599,7 +598,7 @@
           else
              inifil = 'delwaq.ini'
           endif
-          open(io_rtc,file=inifil,status='old',err=123)
+          open(newunit=io_rtc,file=inifil,status='old',err=123)
           call gkwini(io_rtc,'SimulationOptions',
      j                       'FilenameRTCOutput',filnam)
           close (io_rtc)

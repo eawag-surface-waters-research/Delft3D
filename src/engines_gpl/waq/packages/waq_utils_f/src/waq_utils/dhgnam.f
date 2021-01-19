@@ -15,7 +15,7 @@
 !!  contact: delft3d.support@deltares.nl
 !!  Stichting Deltares
 !!  P.O. Box 177
-!!  2600 MH Delft, The Netherlands
+!!  2OUTPUT_UNIT00 MH Delft, The Netherlands
 !!
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
@@ -40,6 +40,8 @@
 !     CHECK   CHAR*(*)   *         IN      if not empty then check existance of file with this extension
 !                                          when name is enterd interactive from keyboard
 !
+      USE ISO_FORTRAN_ENV, ONLY: INPUT_UNIT, OUTPUT_UNIT
+
       CHARACTER*(*) NAME
       CHARACTER*(*) CHECK
 !
@@ -51,6 +53,7 @@
       CHARACTER*3   ANSWER
       LOGICAL       EXI  ,LFOUND
       CHARACTER*1   CRJV  , CJVB  , CDUMMY
+      INTEGER       LUNAM
       CRJV = '/'
       CJVB = '\\'
 !
@@ -89,10 +92,10 @@
          IF ( FILRUN .NE. ' ' ) THEN
             INQUIRE ( FILE = FILRUN , EXIST = EXI )
             IF ( EXI ) THEN
-               OPEN(9,FILE=FILRUN)
-               READ(9,'(A)',IOSTAT=IOERR) NAME
+               OPEN(NEWUNIT=LUNAM,FILE=FILRUN)
+               READ(LUNAM,'(A)',IOSTAT=IOERR) NAME
                IF ( IOERR .NE. 0 ) NAME = ' '
-               CLOSE(9)
+               CLOSE(LUNAM)
             ENDIF
          ENDIF
       ENDIF
@@ -100,9 +103,9 @@
 !     Get filename filename from keyboard
 !
       IF ( NAME .EQ. ' ' .OR. NAME(1:1) .EQ. '-' ) THEN
-         WRITE (  6  ,  *  ) ' Name of the model files ? '
-         WRITE (  6  ,  *  ) ' DELWAQ will provide the extensions. '
-         READ  (  5  , '(A)' )   NAME
+         WRITE (  OUTPUT_UNIT  ,  *  ) ' Name of the model files ? '
+         WRITE (  OUTPUT_UNIT  ,  *  ) ' DELWAQ will provide the extensions. '
+         READ  (  INPUT_UNIT  , '(A)' )   NAME
 !
 !        remove quotes if they are the first and the last
 !
@@ -122,7 +125,7 @@
 !        If empty string then stop
 !
          IF ( NAME .EQ. ' ' ) THEN
-            WRITE (  6  ,  *  ) ' ERROR no filename entered!'
+            WRITE (  OUTPUT_UNIT  ,  *  ) ' ERROR no filename entered!'
             CALL SRSTOP(1)
          ENDIF
 !
@@ -135,11 +138,11 @@
             INQUIRE ( FILE = CHECK2 , EXIST = EXI )
 !
             IF ( EXI ) THEN
-               WRITE ( 6 , * ) ' File:',CHECK2(1:INDX+3),
+               WRITE ( OUTPUT_UNIT , * ) ' File:',CHECK2(1:INDX+3),
      +                         ' already exist.'
-               WRITE ( 6 , * ) ' Do you want it to be replaced ? '
-               WRITE ( 6 , * ) ' Answer yes or no ? '
-               READ  ( 5 , '(A3)' ) ANSWER
+               WRITE ( OUTPUT_UNIT , * ) ' Do you want it to be replaced ? '
+               WRITE ( OUTPUT_UNIT , * ) ' Answer yes or no ? '
+               READ  ( INPUT_UNIT , '(A3)' ) ANSWER
                IF ( ANSWER(1:1) .EQ. 'N' .OR.  ANSWER(1:1) .EQ. 'n' )
      *              CALL SRSTOP ( 1 )
             ENDIF

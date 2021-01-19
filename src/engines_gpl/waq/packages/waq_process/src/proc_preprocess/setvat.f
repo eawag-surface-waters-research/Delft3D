@@ -25,8 +25,8 @@
      +                    NOSYS , NOTOT , NODISP, NOVELO, NODEF ,
      +                    NOLOC , NDSPX , NVELX , NLOCX , NFLUX ,
      +                    NOPRED, NOVAR , VARARR, VARIDX, VARTDA,
-     +                    VARDAG, VARTAG, VARAGG, NOGRID, CONAME, 
-     +                    PANAME, FUNAME, SFNAME, DENAME, SYNAME, 
+     +                    VARDAG, VARTAG, VARAGG, NOGRID, CONAME,
+     +                    PANAME, FUNAME, SFNAME, DENAME, SYNAME,
      +                    LOCNAM, VARNAM)
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -66,9 +66,10 @@
       CHARACTER*20 CONAME(*)     , PANAME(*)     ,
      +             FUNAME(*)     , SFNAME(*)     ,
      +             SYNAME(*)     , LOCNAM(*)     ,
-     +             DENAME(*) 
+     +             DENAME(*)
       CHARACTER*79 LINE, NAME
       LOGICAL      LEXI
+      INTEGER      LUN
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "setvat", ithndl )
 !
@@ -447,8 +448,8 @@
       NOVAT = 0
       INQUIRE ( FILE='aggrlist.dat' , EXIST = LEXI )
       IF ( LEXI ) THEN
-         OPEN(67, FILE='aggrlist.dat')
-    5    CONTINUE
+         OPEN(NEWUNIT=LUN, FILE='aggrlist.dat')
+         DO
             NOVAT = NOVAT + 1
             IF ( NOVAT .GT. MAXLOC ) THEN
                LINE = 'ERROR : local dimension overflow in SETVAT'
@@ -456,12 +457,14 @@
                WRITE(*,*) LINE
                CALL SRSTOP(1)
             ENDIF
-            READ(67,*,END=10) VATNAM(NOVAT),VATTAG(NOVAT),VATNAG(NOVAT),
-     +                                      VATTDA(NOVAT),VATNDA(NOVAT)
-            GOTO 5
-   10    CONTINUE
+            READ(LUN,*,IOSTAT=IERR) VATNAM(NOVAT),VATTAG(NOVAT),VATNAG(NOVAT),
+     +                              VATTDA(NOVAT),VATNDA(NOVAT)
+            IF ( IERR /=0 ) THEN
+               EXIT
+            ENDIF
+         ENDDO
          NOVAT = NOVAT - 1
-         CLOSE (67)
+         CLOSE (LUN)
       ENDIF
 !
 !     Check if there are overrulings

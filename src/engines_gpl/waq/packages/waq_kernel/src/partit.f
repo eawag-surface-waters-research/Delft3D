@@ -214,7 +214,6 @@
 !     write partitioning to output-file for visualisation by user
 !
       if (mypart.eq.1 .and. npart.gt.1) then
-         lunout = 8
          is_ok  = .false.
   10     if (.not.is_ok) then
             inquire(unit=lunout, opened=lopen)
@@ -228,7 +227,7 @@
          endif
 
          write(lunrep,*) 'opening unit=',lunout,' for partition output-file'
-         open(lunout, file='test-partit.map', form='unformatted',access='stream')
+         open(newunit=lunout, file='test-partit.map', form='unformatted',access='stream')
          dscrp_file(1)='test map-file for parallel WAQ'
          dscrp_file(2)='sample partitioning of Hong-Kong grid'
          dscrp_file(3)='created by program map_file'

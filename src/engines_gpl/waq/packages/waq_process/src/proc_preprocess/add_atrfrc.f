@@ -53,8 +53,7 @@
 
       call getcom ( '-sfrac', 3    , lfound, idummy, rdummy, patrfil, ierr)
       if ( lfound ) then
-         lun_patr = 171
-         open(lun_patr,file=patrfil)
+         open(newunit=lun_patr,file=patrfil)
 
          ! loop over the processes
 

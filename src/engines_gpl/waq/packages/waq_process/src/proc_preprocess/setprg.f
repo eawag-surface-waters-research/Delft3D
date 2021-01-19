@@ -69,6 +69,8 @@
       logical                   :: lexi
       logical                   :: l_exchange      ! in or output on exchanges
       integer, allocatable      :: isysto(:)       ! temp, copy of the substances in the fluxstochi
+      integer                   :: lun
+      integer                   :: ierr
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "setprg", ithndl )
 
@@ -85,17 +87,19 @@
       monoag(6) = 'STAPRC'
       monoag(7) = 'STAQTL'
       nmnoag = 7
-      
+
       inquire ( file='procnoag.dat' , exist = lexi )
       if ( lexi ) then
-         open(67, file='procnoag.dat')
-    5    continue
+         open(newunit=lun, file='procnoag.dat')
+         do
             nmnoag = nmnoag + 1
-            read(67,*,end=10) monoag(nmnoag)
-            goto 5
-   10    continue
+            read(lun,*,iostat = ierr) monoag(nmnoag)
+            if ( ierr /= 0 ) then
+               exit
+            endif
+         enddo
          nmnoag = nmnoag - 1
-         close (67)
+         close (lun)
       endif
 
       ! first step, processes with fluxes set to the grid set for the

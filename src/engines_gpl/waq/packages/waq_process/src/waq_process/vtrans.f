@@ -161,8 +161,7 @@
             endif
             if ( l_initial ) then
                write(lunrep,*) 'vtrans using initial condition from file:',trim(file_initial)
-               call dhnlun(200,ilun)
-               open(ilun,file=file_initial,form='unformatted',access='stream')
+               open(newunit=ilun,file=file_initial,form='unformatted',access='stream')
                read(ilun) nosegi, nolayi
                read(ilun) timtot
                read(ilun) concv
@@ -231,7 +230,7 @@
          in11 = increm(11)
          in12 = increm(12)
          in13 = increm(13)
-         ip9  = ipoint(9) + noq12*in9 
+         ip9  = ipoint(9) + noq12*in9
          ip10 = ipoint(10)+ noq12*in10
          ip11 = ipoint(11)+ noq12*in11
          ip12 = ipoint(12)+ noq12*in12
@@ -266,7 +265,7 @@
                   concv(isub,ito)   = concv(isub,ito) + e*rhs
                enddo
             endif
-            ip9  = ip9  + in9 
+            ip9  = ip9  + in9
             ip10 = ip10 + in10
             ip11 = ip11 + in11
             ip12 = ip12 + in12
@@ -343,8 +342,7 @@
 
       if ( l_restart ) then
          if ( dhltim(itime,idt) ) then
-            call dhnlun(200,ilun)
-            open(ilun,file=file_restart,form='unformatted',access='stream')
+            open(newunit=ilun,file=file_restart,form='unformatted',access='stream')
             write(ilun) noseg, nolay
             write(ilun) timtot
             write(ilun) concv

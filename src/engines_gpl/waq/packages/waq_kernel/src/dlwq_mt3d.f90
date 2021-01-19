@@ -105,8 +105,7 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
          write(lunrep,'(2a)') ' configuration filename : ', trim(mt3d_config)
          inquire(file = mt3d_config, exist = mt3d_active )
          if ( mt3d_active ) then
-            call dhnlun(200,luninp)
-            open(luninp,file=mt3d_config)
+            open(newunit=luninp,file=mt3d_config)
             group = 'SOBEK-WAQ / MT3D'
             call gkwini(luninp,group,'mt3dflagfile',mt3dflagfile)
             write(lunrep,'(2a)') ' mt3dflagfile : ', trim(mt3dflagfile)
@@ -144,10 +143,10 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
 
             if ( .not. mt3d_online ) then
                if ( delwaq_to_mt3d ) then
-                  open(lundwqcomm,file=dwqcommfile)
+                  open(newunit=lundwqcomm,file=dwqcommfile)
                endif
                if ( mt3d_to_delwaq ) then
-                  open(lunmt3dcomm,file=mt3dcommfile,status="old")
+                  open(newunit=lunmt3dcomm,file=mt3dcommfile,status="old")
                endif
             endif
 
@@ -344,8 +343,7 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
 
          if ( delwaq_to_mt3d ) then
             if ( mt3d_online ) then
-               call dhnlun(200,lundwqcomm)
-               open(lundwqcomm,file=dwqcommfile)
+               open(newunit=lundwqcomm,file=dwqcommfile)
             endif
             write(lundwqcomm,*) rdt_mt3d
             do i_gsl = 1, no_gsl
@@ -355,8 +353,7 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
             enddo
             if ( mt3d_online ) then
                close(lundwqcomm)
-               call dhnlun(200,lundwqflag)
-               open(lundwqflag,file=dwqflagfile)
+               open(newunit=lundwqflag,file=dwqflagfile)
                close(lundwqflag)
             endif
          endif
@@ -384,8 +381,7 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
                do
                   inquire(file=mt3dflagfile,exist=l_exist)
                   if(l_exist)then
-                      call dhnlun(200,lunmt3dcomm)
-                      open(lunmt3dcomm,file=mt3dcommfile,status="old",err=1)
+                      open(newunit=lunmt3dcomm,file=mt3dcommfile,status="old",err=1)
    1                  exit
                   endif
                   itel = itel + 1
@@ -407,11 +403,10 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
 
             if ( mt3d_online ) then
                close(lunmt3dcomm,status='delete')
-               call dhnlun(200,lunmt3dflag)
-               open(lunmt3dflag,file=mt3dflagfile,status="old",err=11)
+               open(newunit=lunmt3dflag,file=mt3dflagfile,status="old",err=11)
   11           close(lunmt3dflag,status="delete")
             endif
-  
+
          endif
 
          itstop_mt3d = itime + idt_mt3d

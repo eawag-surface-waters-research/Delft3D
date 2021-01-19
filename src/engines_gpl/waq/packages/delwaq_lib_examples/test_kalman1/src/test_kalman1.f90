@@ -102,8 +102,7 @@ program test_kalman0
 !   output files
     do run = 1, nmodes
         write(fnaam(run),'(A8,I4.4,A4)') 'uitvoer_',run,'.txt'
-        runlun(run) = 300 + run
-        open(runlun(run), file=fnaam(run))
+        open(newunit=runlun(run), file=fnaam(run))
     enddo
 
 !==========================================================
