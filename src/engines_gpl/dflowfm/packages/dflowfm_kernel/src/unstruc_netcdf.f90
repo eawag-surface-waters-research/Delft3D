@@ -4597,8 +4597,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       ! Time dependent grid layers
       if (kmx > 0 .and. jafullgridoutput == 1) then
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzcc, nf90_double, UNC_LOC_S3D, 'flowelem_zcc', '', 'flow element center z'               , 'm' , jabndnd=jabndnd_)
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzw , nf90_double, UNC_LOC_W  , 'flowelem_zw' , '', 'flow element z at vertical interface', 'm' , jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzcc, nf90_double, UNC_LOC_S3D, 'flowelem_zcc', 'altitude', 'Vertical coordinate of layer centres at pressure points'   , 'm' , jabndnd=jabndnd_)
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_flowelemzw , nf90_double, UNC_LOC_W  , 'flowelem_zw' , 'altitude', 'Vertical coordinate of layer interfaces at pressure points', 'm' , jabndnd=jabndnd_)
       endif
 
       ! Water levels
