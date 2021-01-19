@@ -1101,7 +1101,7 @@ integer :: jabndnd_, ndxndxi
          !   enddo
          !   ierr = nf90_put_var(ncid, id_var(1), mappedValues, start = (/ 1, id_tsp%idx_curtime /))
          !else
-            ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndx1d), start = (/ 1, id_tsp%idx_curtime /))
+            ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
          !end if
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
