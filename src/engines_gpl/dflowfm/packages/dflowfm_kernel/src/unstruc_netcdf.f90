@@ -385,6 +385,7 @@ type t_unc_mapids
    integer :: id_morfac                 = -1
    integer :: id_sedavgtim              = -1
    integer :: id_frac_name              = -1
+   integer :: id_susfrac_name           = -1
    integer :: id_sedfrac(MAX_ID_VAR)    = -1
    integer :: id_kmxsed(MAX_ID_VAR)     = -1
    integer :: id_subsupl(MAX_ID_VAR)    = -1
@@ -4973,6 +4974,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_nonspatial(mapids%ncid, mapids%id_morft, nf90_double,  (/ mapids%id_tsp%id_timedim /), 'morft',  '', 'Current morphological time', 's')
          !
          ierr = unc_def_var_nonspatial(mapids%ncid, mapids%id_frac_name, nf90_char,  (/ mapids%id_tsp%id_strlendim, mapids%id_tsp%id_sedtotdim /), 'sedfrac_name', '', 'Sediment fraction name', '-')
+         if (stmpar%lsedsus > 0) then
+            ierr = unc_def_var_nonspatial(mapids%ncid, mapids%id_susfrac_name, nf90_char,  (/ mapids%id_tsp%id_strlendim, mapids%id_tsp%id_sedsusdim /), 'sussedfrac_name', '', 'Suspended sediment fraction name', '-')
+         endif
          !
          select case(stmpar%morpar%moroutput%transptype)
             case (0)
@@ -5461,6 +5465,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          do j=1,stmpar%lsedtot
             ierr = nf90_put_var(mapids%ncid,mapids%id_frac_name,trim(stmpar%sedpar%namsed(j)),(/ 1, j /),(/ len(trim(stmpar%sedpar%namsed(j))), 1 /))  ! only write once
          enddo
+         if (stmpar%lsedsus > 0) then
+            do j=1,stmpar%lsedsus
+               ierr = nf90_put_var(mapids%ncid,mapids%id_susfrac_name,trim(stmpar%sedpar%namsed(j)),(/ 1, j /),(/ len(trim(stmpar%sedpar%namsed(j))), 1 /))  ! only write once
+            enddo
+         endif
       endif
       !
       ! 1D cross sections
