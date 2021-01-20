@@ -542,7 +542,8 @@ integer                         :: ierr          !< Result status, DFM_NOERR if 
 ! TODO: AvD: inject vectormax dim here AND timedim!!
 character(len=10) :: cell_method_   !< cell_method for this variable (one of 'mean', 'point', see CF for details).
 character(len=50) :: cell_measures !< cell_measures for this variable (e.g. 'area: mesh2d_ba', see CF for details).
-integer :: ndx1d, numl2d
+integer                         :: ndx1d         !< Number of 1D nodes.
+integer :: numl2d
 
 integer, parameter :: maxrank = 5
 integer :: idims(maxrank) !< The (max maxrank) dimensions for this variable, pattern: (id_vectormaxdim, id_spacedim, id_timedim). For time-independent scalar data it is filled as: (<empty>, <empty>, id_spacedim)
@@ -554,8 +555,8 @@ integer :: is_timedep_
 integer :: is_layerdep_
 integer :: ndims, i
 integer :: which_meshdim_
-integer :: jabndnd_
-integer :: ndxndxi
+integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
 
    ierr = DFM_NOERR
 
@@ -653,9 +654,10 @@ integer :: ndxndxi
       ndxndxi   = ndxi
    end if
 
+   ndx1d = ndxi - ndx2d
+
    select case (iloc)
    case(UNC_LOC_CN) ! Corner point location
-      ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
       if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! Not implemented corner location for 1D grids yet
@@ -670,7 +672,6 @@ integer :: ndxndxi
       end if
 
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then
          cell_measures = 'area: '//trim(mesh1dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer
@@ -722,7 +723,6 @@ integer :: ndxndxi
       end if
 
    case(UNC_LOC_S3D) ! Pressure point location in all layers.
-      ndx1d = ndxi - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
       if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then
          if (jamapvol1 > 0) then
@@ -780,7 +780,6 @@ integer :: ndxndxi
       end if
 
    case(UNC_LOC_W) ! Vertical velocity point location on all layer interfaces.
-      ndx1d = ndxi - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
       if (iand(which_meshdim_, 1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
          cell_measures = 'area: '//trim(mesh1dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer ! TODO: AvD: UNST-1100: or do we need to use a1 here??
@@ -985,7 +984,7 @@ double precision, optional          :: default_value
 integer, optional, intent(in) :: jabndnd
 
 double precision, dimension(:), allocatable   :: values
-integer :: jabndnd_
+integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
 
    if (present(jabndnd)) then
       jabndnd_ = jabndnd
@@ -1015,7 +1014,7 @@ double precision, optional              :: default_value
 integer, optional,          intent(in)  :: jabndnd
 
    double precision, dimension(:), allocatable   :: values
-   integer :: jabndnd_
+   integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
 
    if (present(jabndnd)) then
       jabndnd_ = jabndnd
@@ -1053,13 +1052,16 @@ integer,          optional, intent(in)  :: jabndnd
 
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 
-integer :: ndx1d, lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
+integer                         :: n1d_write     !< Number of 1D nodes to write.
+integer :: lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
 !TODO remove save and deallocate?
 double precision, allocatable, save :: workL(:)
 double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), workWU(:,:)
 ! temporary UGRID fix
 double precision, allocatable :: mappedValues(:)
-integer :: jabndnd_, ndxndxi
+integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+integer                         :: ndxndxi       !< Last 2/3D node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
+integer                         :: last_1d       !< Last 1D node to be saved. Equals ndx1db when boundary nodes are written, or ndxi otherwise.
 
    ierr = DFM_NOERR
 
@@ -1070,15 +1072,16 @@ integer :: jabndnd_, ndxndxi
    endif
    if (jabndnd_ == 1) then
       ndxndxi   = ndx
+      last_1d = ndx1db
    else
       ndxndxi   = ndxi
+      last_1d = ndxi
    end if
 
    select case (iloc)
    case(UNC_LOC_CN) ! Corner point location
-      ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
-      if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
+      if (id_var(1) > 0 .and. ndxi > ndx2d) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! TODO: AvD putting data on 1D corners not implemented yet.
          goto 888
       end if
@@ -1088,21 +1091,10 @@ integer :: jabndnd_, ndxndxi
       end if
 
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (id_var(1) > 0 .and. ndx1d > 0) then
-         ! temporary UGRID fix
-         !if(numMesh1dBeforeMerging>0) then
-         !   if(allocated(mappedValues)) deallocate(mappedValues)
-         !   allocate(mappedValues(numMesh1dBeforeMerging))
-         !   do i =1, numMesh1dBeforeMerging
-         !      !mappedValues(i)=values(ndx2d+mesh1dUnmergedToMerged(i))
-         !      mappedValues(i)=values(ndx2d)
-         !   enddo
-         !   ierr = nf90_put_var(ncid, id_var(1), mappedValues, start = (/ 1, id_tsp%idx_curtime /))
-         !else
-            ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
-         !end if
+      if (id_var(1) > 0 .and. n1d_write > 0) then
+         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:last_1d), start = (/ 1, id_tsp%idx_curtime /))
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (id_var(2) > 0 .and. ndx2d > 0) then
@@ -1205,10 +1197,10 @@ integer :: jabndnd_, ndxndxi
       end do
 
       ! Write work array.
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
-      if (id_var(1) > 0 .and. ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_var(1), workS3D(1:kmx, ndx2d+1:ndxndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, ndx1d, 1 /))
+      if (id_var(1) > 0 .and. n1d_write > 0) then
+         ierr = nf90_put_var(ncid, id_var(1), workS3D(1:kmx, ndx2d+1:last_1d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, n1d_write, 1 /))
       end if
       ! Internal 3d flownodes. Horizontal position: faces in 2d mesh. Vertical position: layer centers.
       if (id_var(2) > 0 .and. ndx2d > 0) then
@@ -1273,10 +1265,10 @@ integer :: jabndnd_, ndxndxi
       end do
 
       ! Write work array.
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
-      if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
-         ierr = nf90_put_var(ncid, id_var(1), workW(0:kmx, ndx2d+1:ndxndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, ndx1d, 1 /))
+      if (id_var(1) > 0 .and. n1d_write > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
+         ierr = nf90_put_var(ncid, id_var(1), workW(0:kmx, ndx2d+1:last_1d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, n1d_write, 1 /))
       end if
       ! Internal 3d vertical flowlinks. Horizontal position: faces in 2d mesh. Vertical position: layer interfaces.
       if (id_var(2) > 0 .and. ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
@@ -1350,9 +1342,12 @@ integer(kind=1), optional,  intent(in)  :: default_value !< Optional default val
 integer, optional,          intent(in)  :: jabndnd
 
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
-integer :: jabndnd_, ndxndxi
+integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+integer                         :: ndxndxi       !< Last 2d/3d node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
+integer                         :: last_1d       !< Last 1d node to be saved. Equals ndx1db when boundary nodes are written, or ndxi otherwise.
 
-integer :: ndx1d, lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
+integer                         :: n1d_write     !< Number of 1D nodes to write.
+integer :: lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
 !TODO remove save and deallocate?
 double precision, allocatable, save :: workL(:)
 double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), workWU(:,:)
@@ -1366,15 +1361,16 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
    endif
    if (jabndnd_ == 1) then
       ndxndxi   = ndx
+      last_1d   = ndx1db
    else
       ndxndxi   = ndxi
+      last_1d   = ndxi
    end if
 
    select case (iloc)
    case(UNC_LOC_CN) ! Corner point location
-      ndx1d = ndxi - ndx2d
       ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
-      if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
+      if (id_var(1) > 0 .and. ndxi > ndx2d) then ! If there are 1d flownodes, then there are 1d netnodes.
          ierr = UG_NOTIMPLEMENTED ! TODO: AvD putting data on 1D corners not implemented yet.
          goto 888
       end if
@@ -1384,10 +1380,10 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       end if
 
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (id_var(1) > 0 .and. ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndx1d), start = (/ 1, id_tsp%idx_curtime /))
+      if (id_var(1) > 0 .and. n1d_write > 0) then
+         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:last_1d), start = (/ 1, id_tsp%idx_curtime /))
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (id_var(2) > 0 .and. ndx2d > 0) then
@@ -1490,10 +1486,10 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       end do
 
       ! Write work array.
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
-      if (id_var(1) > 0 .and. ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_var(1), workS3D(1:kmx, ndx2d+1:ndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, ndx1d, 1 /))
+      if (id_var(1) > 0 .and. n1d_write > 0) then
+         ierr = nf90_put_var(ncid, id_var(1), workS3D(1:kmx, ndx2d+1:last_1d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx, n1d_write, 1 /))
       end if
       ! Internal 3d flownodes. Horizontal position: faces in 2d mesh. Vertical position: layer centers.
       if (id_var(2) > 0 .and. ndx2d > 0) then
@@ -1558,10 +1554,10 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       end do
 
       ! Write work array.
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
-      if (id_var(1) > 0 .and. ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
-         ierr = nf90_put_var(ncid, id_var(1), workW(0:kmx, ndx2d+1:ndxi), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, ndx1d, 1 /))
+      if (id_var(1) > 0 .and. n1d_write > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
+         ierr = nf90_put_var(ncid, id_var(1), workW(0:kmx, ndx2d+1:last_1d), start = (/ 1, 1, id_tsp%idx_curtime /), count = (/ kmx+1, n1d_write, 1 /))
       end if
       ! Internal 3d vertical flowlinks. Horizontal position: faces in 2d mesh. Vertical position: layer interfaces.
       if (id_var(2) > 0 .and. ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
@@ -1638,8 +1634,10 @@ integer, optional,          intent(in)  :: jabndnd
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 
 integer                         :: tstart        !< time index of t1
-integer                         :: ndx1d         !< number of 1d node links
-integer ::jabndnd_, ndxndxi
+integer                         :: n1d_write     !< Number of 1D nodes to write.
+integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
+integer                         :: last_1d       !< Last 1d node to be saved. Equals ndx1db when boundary nodes are written, or ndxi otherwise.
 
    ierr = DFM_NOERR
 
@@ -1650,18 +1648,20 @@ integer ::jabndnd_, ndxndxi
    endif
    if (jabndnd_ == 1) then
       ndxndxi   = ndx
+      last_1d   = ndx1db
    else
       ndxndxi   = ndxi
+      last_1d   = ndxi
    end if
 
    select case (iloc)
 
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       tstart = id_tsp%idx_curtime - tl + t1
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (id_var(1) > 0 .and. ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndx1d, t1:tl), start = (/ 1, tstart /))
+      if (id_var(1) > 0 .and. n1d_write > 0) then
+         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:last_1d, t1:tl), start = (/ 1, tstart /))
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (id_var(2) > 0 .and. ndx2d > 0) then
@@ -1698,12 +1698,15 @@ integer, optional,          intent(in)  :: jabndnd
 
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 
-integer :: ndx1d, lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
+integer                         :: n1d_write     !< Number of 1D nodes to write.
+integer :: lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
 integer               :: ilocdim
 integer               :: lndim
 integer, dimension(3) :: dimids_var
 double precision, allocatable :: work(:,:)
-integer :: jabndnd_, ndxndxi
+integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
+integer                         :: last_1d       !< Last 1d node to be saved. Equals ndx1db when boundary nodes are written, or ndxi otherwise.
 
    ierr = DFM_NOERR
    if (present(locdim)) then
@@ -1719,24 +1722,26 @@ integer :: jabndnd_, ndxndxi
    endif
    if (jabndnd_ == 1) then
       ndxndxi   = ndx
+      last_1d   = ndx1db
    else
       ndxndxi   = ndxi
+      last_1d   = ndxi
    end if
 
    select case (iloc)
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (id_var(1) > 0 .and. ndx1d > 0) then
+      if (id_var(1) > 0 .and. n1d_write > 0) then
          select case (ilocdim)
          case(1)
-            allocate(work(ndx1d-ndx2d,size(values,2)))
-            work = values(ndx2d+1:ndx1d,:)
+            allocate(work(n1d_write,size(values,2)))
+            work = values(ndx2d+1:last_1d,:)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          case(2)
-            allocate(work(size(values,1),ndx1d-ndx2d))
-            work = values(:,ndx2d+1:ndx1d)
+            allocate(work(size(values,1),n1d_write))
+            work = values(:,ndx2d+1:last_1d)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          end select
@@ -1854,12 +1859,15 @@ integer, optional,          intent(in)  :: jabndnd
 
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 
-integer :: ndx1d, lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
+integer                         :: n1d_write     !< Number of 1D nodes to write.
+integer :: lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
 integer               :: ilocdim
 integer               :: lndim1, lndim2
 integer, dimension(4) :: dimids_var
 double precision, allocatable :: work(:,:,:)
-integer :: jabndnd_, ndxndxi
+integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
+integer                         :: last_1d       !< Last 1d node to be saved. Equals ndx1db when boundary nodes are written, or ndxi otherwise.
 
    ierr = DFM_NOERR
    if (present(locdim)) then
@@ -1875,29 +1883,31 @@ integer :: jabndnd_, ndxndxi
    endif
    if (jabndnd_ == 1) then
       ndxndxi   = ndx
+      last_1d   = ndx1db
    else
       ndxndxi   = ndxi
+      last_1d   = ndxi
    end if
 
    select case (iloc)
    case(UNC_LOC_S) ! Pressure point location
-      ndx1d = ndxi - ndx2d
+      n1d_write = last_1d - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
-      if (id_var(1) > 0 .and. ndx1d > 0) then
+      if (id_var(1) > 0 .and. n1d_write > 0) then
          select case (ilocdim)
          case(1)
-            allocate(work(ndx1d-ndx2d,size(values,2),size(values,3)))
-            work = values(ndx2d+1:ndx1d,:,:)
+            allocate(work(n1d_write,size(values,2),size(values,3)))
+            work = values(ndx2d+1:last_1d,:,:)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          case(2)
-            allocate(work(size(values,1),ndx1d-ndx2d,size(values,3)))
-            work = values(:,ndx2d+1:ndx1d,:)
+            allocate(work(size(values,1),n1d_write,size(values,3)))
+            work = values(:,ndx2d+1:last_1d,:)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          case(3)
-            allocate(work(size(values,1),size(values,2),ndx1d-ndx2d))
-            work = values(:,:,ndx2d+1:ndx1d)
+            allocate(work(size(values,1),size(values,2),n1d_write))
+            work = values(:,:,ndx2d+1:last_1d)
             ierr = nf90_put_var(ncid, id_var(1), work, start = (/ 1, 1, 1, id_tsp%idx_curtime /))
             deallocate(work)
          end select
@@ -4494,7 +4504,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    real(kind=hp),      intent(in)    :: tim
    integer, optional,  intent(in)    :: jabndnd !< Whether to include boundary nodes (1) or not (0). Default: no.
 
-   integer                       :: jabndnd_
+   integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+   integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
 
    integer                       :: idims(2)
 
@@ -4525,7 +4536,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    integer :: iid, i, j, jj, numContPts, numNodes, itim, n, LL, L, Lb, Lt, LLL, k, k1, k2, k3
    integer :: kk, kb, kt, kkk, found, iloc
    integer :: nlayb, nrlay
-   integer :: ndxndxi ! Either ndx or ndxi, depending on whether boundary nodes also need to be written.
    integer :: iLocS ! Either UNC_LOC_S or UNC_LOC_S3D, depending on whether layers are present.
    integer :: iLocU ! Either UNC_LOC_U or UNC_LOC_U3D, depending on whether layers are present.
    double precision, dimension(:), allocatable :: windx, windy, toutput, rks, tetatemp, wa
@@ -13333,7 +13343,11 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    type(t_unc_timespace_id), intent(inout) :: id_tsp   !< Set of time and space related variable id's
    integer, optional, intent(in) :: jabndnd !< Whether to include boundary nodes (1) or not (0). Default: no.
 
-   integer                       :: jabndnd_
+   integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+   integer                         :: ndxndxi       !< Last 2/3D node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
+   integer                         :: last_1d       !< Last 1D node to be saved. Equals ndx1db when boundary nodes are written, or ndxi otherwise.
+   integer                         :: n1d_write     !< Number of 1D nodes to write.
+   integer                         :: ndx1d         !< Number of internal 1D nodes.
 
    integer :: nn
    integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:), contacts(:,:)
@@ -13343,7 +13357,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 !   type(t_crs) :: pj
 
    integer :: ierr
-   integer :: i, numContPts, numNodes, n, ndxndxi, ndx1d, numl2d, L, k1, L1
+   integer :: i, numContPts, numNodes, n, numl2d, L, k1, L1
+   integer                         :: Li            !< Index of 1D link (can be internal or boundary)
    integer :: id_flowelemcontourptsdim, id_flowelemcontourx, id_flowelemcontoury
    integer :: jaInDefine
 
@@ -13390,8 +13405,10 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    ! Include boundary cells in output (ndx) or not (ndxi)
    if (jabndnd_ == 1) then
       ndxndxi   = ndx
+      last_1d   = ndx1db
    else
       ndxndxi   = ndxi
+      last_1d   = ndxi
    end if
 
    ! Put dataset in define mode (possibly again) to add dimensions and variables.
@@ -13425,55 +13442,38 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       end if
    end if
 
-   ! Temporary UGRID fix
-   !if(numMesh1dBeforeMerging>0) then
-   !   ndx1d=numMesh1dBeforeMerging
-   !else
-      ! 1D flow grid geometry + 1D2D connections
-      ndx1d = ndxi - ndx2d
-   !endif
+   n1d_write = last_1d - ndx2d
+   ndx1d = ndxi - ndx2d
 
    n1d2dcontacts = 0
    if (ndx1d > 0) then
 
       ! First store pure 1D nodes (in flow node order), start counting at 1.call realloc(x1dn, ndx1d)
-      call realloc(x1dn, ndx1d)
-      call realloc(y1dn, ndx1d)
+      call realloc(x1dn, n1d_write)
+      call realloc(y1dn, n1d_write)
       if (associated(meshgeom1d%ngeopointx)) then ! Indicates that no Deltares-0.10 network topology/branchids have been read.
-         call reallocP(nodebranchidx_remap, ndx1d)
-         call reallocP(nodeoffsets_remap, ndx1d)
-         call realloc(nodeids_remap, ndx1d)
-         call realloc(nodelongnames_remap, ndx1d)
+         call reallocP(nodebranchidx_remap, n1d_write)
+         call reallocP(nodeoffsets_remap, n1d_write)
+         call realloc(nodeids_remap, n1d_write)
+         call realloc(nodelongnames_remap, n1d_write)
       end if
 
-      ! Temporary UGRID fix
-      !if(numMesh1dBeforeMerging>0) then
-      !   do n =1,ndx1d
-      !      !x1dn(n)=xz(ndx2d+mesh1dUnmergedToMerged(n))
-      !      !y1dn(n)=xz(ndx2d+mesh1dUnmergedToMerged(n))
-      !      x1dn(n)=xz(ndx2d+n)
-      !      y1dn(n)=xz(ndx2d+n)
-      !   enddo
-      !else
-         do n=1,ndx1d
-            x1dn(n) = xz(ndx2d+n)
-            y1dn(n) = yz(ndx2d+n)
-            
+      do n=1,n1d_write
+         x1dn(n) = xz(ndx2d+n)
+         y1dn(n) = yz(ndx2d+n)
+         
+         if (n <= ndx1d) then ! exclude boundary nodes
             ! Also store the original mesh1d/network variables in the new flowgeom order for ndx1d nodes:
             k1 = nodePermutation(nd(ndx2d+n)%nod(1)) ! This is the node index from *before* setnodadm(),
-                                                      ! i.e., as was read from input *_net.nc file.
+                                                     ! i.e., as was read from input *_net.nc file.
             if (k1 > 0 .and. associated(meshgeom1d%ngeopointx)) then ! Indicates that no Deltares-0.10 network topology/branchids have been read.
                nodebranchidx_remap(n) = meshgeom1d%nodebranchidx(k1) 
                nodeoffsets_remap(n)   = meshgeom1d%nodeoffsets(k1)   
                nodeids_remap(n)       = nodeids(k1)       
                nodelongnames_remap(n) = nodelongnames(k1) 
-            else
-               continue
-            end if
-
-            
-         enddo
-      !endif
+            endif
+         endif
+      enddo
 
       !count 1d mesh edges and 1d2d contacts
       n1dedges = 0
@@ -13487,6 +13487,10 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             continue
          endif
       enddo
+      if (jabndnd_ == 1) then
+          ! when writing boundary points, include the boundary links as well
+          n1dedges = n1dedges + (lnx1db - lnxi)
+      endif
 
       !allocate mesh edges and 1d2d contacts
       call realloc(edge_nodes, (/ 2, n1dedges /), fill = -999)
@@ -13506,14 +13510,17 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       !assign values to mesh edges 1d2d contacts
       n1dedges = 0
       n1d2dcontacts = 0
-      do L=1,lnx1d
-         if (kcu(L) == 1) then
+      do Li = 1,lnx1d + (lnx1db-lnxi) ! optionally include the boundary links?
+         if (Li <= lnx1d) then
+            L = Li
+         elseif (n1d_write == ndx1d) then ! when writing only internal nodes, skip boundary links
+            exit
+         else
+            L = lnxi + (Li - lnx1d)
+         endif
+         if (abs(kcu(L)) == 1) then ! internal 1D edges and open boundary links
             n1dedges = n1dedges + 1
-            !if (allocated(mesh1dMergedToUnMerged)) then
-            !    edge_nodes(1:2,n1dedges) = mesh1dMergedToUnMerged(ln(1:2,L) - ndx2d) !only 1d edge nodes
-            !else
-                edge_nodes(1:2,n1dedges) = ln(1:2,L) - ndx2d !only 1d edge nodes
-            !endif
+            edge_nodes(1:2,n1dedges) = ln(1:2,L) - ndx2d !only 1d edge nodes
             !mappings
             id_tsp%edgetoln(n1dedges) = L
             x1du(n1dedges) = xu(L)
@@ -13533,18 +13540,10 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             id_tsp%contactstoln(n1d2dcontacts) = L
             contacttype(n1d2dcontacts) = kcu(L)
             if (ln(1,L) > ndx2d) then  ! First point of 1D link is 1D cell
-               !if (allocated(mesh1dMergedToUnMerged)) then ! mesh1dMergedToUnMerged is allocated only for UGrid file format (where merging might be necessary)
-               !   contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(1,L) - ndx2d)
-               !else
-                  contacts(1,n1d2dcontacts) = ln(1,L) - ndx2d
-               !endif
+               contacts(1,n1d2dcontacts) = ln(1,L) - ndx2d
                contacts(2,n1d2dcontacts) = ln(2,L)   ! In m_flowgeom: 1D nodenr = ndx2d+n, in UGrid 1D flowgeom: local 1D nodenr = n.
             else                       ! Second point of 1D link is 1D cell
-               !if (allocated(mesh1dMergedToUnMerged)) then
-               !   contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(2,L) - ndx2d)
-               !else
-                  contacts(1,n1d2dcontacts) = ln(2,L) - ndx2d
-               !endif
+               contacts(1,n1d2dcontacts) = ln(2,L) - ndx2d
                contacts(2,n1d2dcontacts) = ln(1,L)         !2d
             end if
          else
@@ -13555,7 +13554,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       !define 1dmesh
       if (n1dedges.gt.0) then
          if (associated(meshgeom1d%ngeopointx)) then
-         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
+         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, n1d_write, n1dedges, 0, 0, &
                                        edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &
                                        crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs, &
                                        id_tsp%network1d, network1dname, meshgeom1d%nnodex, meshgeom1d%nnodey, nnodeids, nnodelongnames, &
@@ -13565,23 +13564,22 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        nodeids_remap, nodelongnames_remap, nodebranchidx_remap, nodeoffsets_remap, edgebranchidx_remap, edgeoffsets_remap,&
                                        writeopts=unc_writeopts)
          else
-         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
+         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, n1d_write, n1dedges, 0, 0, &
                                      edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, x1du, y1du, xz(1:1), yz(1:1), &
                                      crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs, writeopts=unc_writeopts)
          endif
       endif
 
       ! Determine max nr of vertices and contour points
-      ndx1d = ndxi - ndx2d
-      numNodes   = ndx1d
+      numNodes   = n1d_write
       numContPts = 0
-      do i=1,ndx1d
+      do i=1,ndx1d ! exclude boundary nodes
          numNodes   = max(numNodes,   size(nd(ndx2d + i)%nod))
          numContPts = max(numContPts, size(nd(ndx2d + i)%x))
       end do
 
       if( allocated(work2) ) deallocate( work2 )
-      allocate( work2(numContPts,ndx1d) ) ; work2 = dmiss
+      allocate( work2(numContPts,n1d_write) ) ; work2 = dmiss
 
       ierr = nf90_def_dim(ncid, 'n'//trim(mesh1dname)//'_FlowElemContourPts', numContPts,    id_flowelemcontourptsdim)
 
@@ -13600,21 +13598,21 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 
       ierr = nf90_enddef(ncid)
 
-      do i=1,ndx1d
+      do i=1,n1d_write
          nn = size(nd(ndx2d + i)%x)
          do n = 1,nn
             work2(n,i)=nd(ndx2d + i)%x(n)
          enddo
       enddo
-      ierr = nf90_put_var(ncid, id_flowelemcontourx, work2(1:numContPts,1:ndx1d), (/ 1, 1 /), (/ numContPts, ndx1d /) )
+      ierr = nf90_put_var(ncid, id_flowelemcontourx, work2(1:numContPts,1:n1d_write), (/ 1, 1 /), (/ numContPts, n1d_write /) )
 
-      do i=1,ndx1d
+      do i=1,n1d_write
          nn = size(nd(ndx2d + i)%x)
          do n = 1,nn
             work2(n,i)=nd(ndx2d + i)%y(n)
          enddo
       enddo
-      ierr = nf90_put_var(ncid, id_flowelemcontoury, work2(1:numContPts,1:ndx1d), (/ 1, 1 /), (/ numContPts, ndx1d /) )
+      ierr = nf90_put_var(ncid, id_flowelemcontoury, work2(1:numContPts,1:n1d_write), (/ 1, 1 /), (/ numContPts, n1d_write /) )
       ierr = nf90_redef(ncid)
 
       deallocate( work2 )
@@ -13767,8 +13765,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    ! -- Start data writing (time-independent data) ------------
    ! Flow cell cc coordinates (only 1D + internal 2D)
    if (ndx1d > 0) then
-      ierr = nf90_put_var(ncid, id_tsp%id_flowelemba(1), ba(ndx2d+1:ndx2d+ndx1d)) ! TODO: AvD: handle 1D/2D boundaries
-      ierr = nf90_put_var(ncid, id_tsp%id_flowelembl(1), bl(ndx2d+1:ndx2d+ndx1d)) ! TODO: AvD: handle 1D/2D boundaries
+      ierr = nf90_put_var(ncid, id_tsp%id_flowelemba(1), ba(ndx2d+1:last_1d)) ! TODO: AvD: handle 1D/2D boundaries
+      ierr = nf90_put_var(ncid, id_tsp%id_flowelembl(1), bl(ndx2d+1:last_1d)) ! TODO: AvD: handle 1D/2D boundaries
       ! TODO: AvD: UNST-1318: handle 1d zk as well
    end if
    if (ndx2d > 0) then
@@ -13823,14 +13821,14 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    if ( jampi.eq.1 ) then
       ! FlowElemDomain
       if (ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(1), idomain(ndx2d+1:ndx2d+ndx1d))
+         ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(1), idomain(ndx2d+1:last_1d))
       end if
       if (ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_tsp%id_flowelemdomain(2), idomain(1:ndx2d))
       endif
       ! FlowElemGlobalNr
       if (ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_tsp%id_flowelemglobalnr(1), iglobal_s(ndx2d+1:ndx2d+ndx1d))
+         ierr = nf90_put_var(ncid, id_tsp%id_flowelemglobalnr(1), iglobal_s(ndx2d+1:last_1d))
       end if
       if (ndx2d > 0) then
          ierr = nf90_put_var(ncid, id_tsp%id_flowelemglobalnr(2), iglobal_s(1:ndx2d))
@@ -13862,7 +13860,8 @@ subroutine unc_write_flowgeom_filepointer(igeomfile, jabndnd)
     integer, intent(in) :: igeomfile
     integer, optional, intent(in) :: jabndnd !< Whether to include boundary nodes (1) or not (0). Default: no.
 
-    integer                       :: jabndnd_
+    integer                         :: jabndnd_      !< Flag specifying whether boundary nodes are to be written.
+    integer                         :: ndxndxi       !< Last node to be saved. Equals ndx when boundary nodes are written, or ndxi otherwise.
 
     integer, allocatable :: kn3(:), ibndlink(:)
 
@@ -13883,7 +13882,7 @@ subroutine unc_write_flowgeom_filepointer(igeomfile, jabndnd)
         id_flowelemdomain, id_flowlinkdomain, &
         id_flowelemglobalnr
 
-    integer :: i, numContPts, numNodes, n, ndxndxi, nn, L
+    integer :: i, numContPts, numNodes, n, nn, L
     integer :: jaInDefine
     integer :: jaghost, idmn
     integer, dimension(:), allocatable :: lne1write
