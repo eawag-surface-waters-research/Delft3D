@@ -1,6 +1,6 @@
 !----- LGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2011-2020.
+!  Copyright (C)  Stichting Deltares, 2011-2021.
 !
 !  This library is free software; you can redistribute it and/or
 !  modify it under the terms of the GNU Lesser General Public
@@ -23,11 +23,9 @@
 !  are registered trademarks of Stichting Deltares, and remain the property of
 !  Stichting Deltares. All rights reserved.
 !
-!-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-!!--description-----------------------------------------------------------------
-!   basic interpolation routines
+!  This module contains basic interpolation routines
 !
    !Global modules
    module m_ec_triangle           ! original name : m_triangle

@@ -1,7 +1,7 @@
 subroutine dhkmrk ( iknmrk , kenmrk , knmrki )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2012-2020.                                
+!  Copyright (C)  Stichting Deltares, 2012-2021.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
