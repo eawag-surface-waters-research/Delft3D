@@ -758,6 +758,7 @@ subroutine readMDUFile(filename, istat)
     double precision, external     :: densfm
     double precision :: tim
     integer :: major, minor
+    external :: unstruc_errorhandler
 
     hkad = -999
     istat = 0 ! Success
@@ -770,6 +771,7 @@ subroutine readMDUFile(filename, istat)
 !   check if file was successfully opened
     if ( readerr.ne.0 ) then
        istat = -1
+       call set_mh_callback(unstruc_errorhandler)
        call mess(LEVEL_ERROR, 'Error opening file ', trim(filename), '.')
        return
     endif
