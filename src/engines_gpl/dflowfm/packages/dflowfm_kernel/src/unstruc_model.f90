@@ -3770,7 +3770,7 @@ subroutine switch_dia_file()
 implicit none
 integer                      :: L1, L2, mdia2, mdia, ierr
 character(len=256)           :: rec
-
+logical                      :: line_copied
 external :: getmdia, setmdia
 
     call makedir(getoutputdir()) ! No problem if it exists already.
@@ -3778,6 +3778,7 @@ external :: getmdia, setmdia
 !   SPvdP : check status of file, mostly copied from inidia
     open (newunit=MDIA2, FILE = trim(getoutputdir())//trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
 
+    line_copied = .false.
     if ( ierr.eq.0 ) then
 
        call getmdia(mdia)
@@ -3787,6 +3788,7 @@ external :: getmdia, setmdia
 
 10        read (mdia, '(a)', end = 20) rec
           write(mdia2,'(a)') trim(rec)
+          line_copied = .true.
           goto 10
 
 20        continue
@@ -3798,7 +3800,7 @@ external :: getmdia, setmdia
        call setmdia(mdia)
        call initMessaging(mdia)
 
-       WRITE(MDIA,*) 'Until here copy of previous diagnostic file'
+       if (line_copied) WRITE(MDIA,*) 'Until here copy of previous diagnostic file'
     end if
 
 end subroutine switch_dia_file
