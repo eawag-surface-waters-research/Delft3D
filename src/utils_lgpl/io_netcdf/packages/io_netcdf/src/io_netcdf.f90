@@ -445,7 +445,7 @@ function ionc_get_ncid(ioncid, ncid) result(ierr)
 
    ierr = IONC_NOERR
 
-   if (ioncid > 0 .or. ioncid <= ndatasets) then
+   if (ioncid > 0 .and. ioncid <= ndatasets) then
       ncid = datasets(ioncid)%ncid
    else
       ierr = IONC_EBADID

@@ -247,6 +247,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ierri = nf90_inquire(ncids(ii), formatNum=formatCode)
       isNetCDF4 = (isNetCDF4 .or. formatCode == nf90_format_netcdf4 .or. formatCode == nf90_format_netcdf4_classic)
    end do
+   if (any(ncids(1:nfiles) == -1)) then
+      goto 888
+   end if
 
    ! check if all the map files are the same format
    jaugrid = jaugridi(1)
